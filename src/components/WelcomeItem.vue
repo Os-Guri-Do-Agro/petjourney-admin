@@ -60,20 +60,22 @@ h3 {
 
   .item:before {
     content: ' ';
-    border-left: 1px solid var(--color-border);
     position: absolute;
     left: 0;
     bottom: calc(50% + 25px);
+    width: 1px;
     height: calc(50% - 25px);
+    background: var(--color-border);
   }
 
   .item:after {
     content: ' ';
-    border-left: 1px solid var(--color-border);
     position: absolute;
     left: 0;
     top: calc(50% + 25px);
+    width: 1px;
     height: calc(50% - 25px);
+    background: var(--color-border);
   }
 
   .item:first-of-type:before {
