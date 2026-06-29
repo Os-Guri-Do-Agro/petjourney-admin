@@ -8,7 +8,7 @@ import AuthButton from '@/components/auth/AuthButton.vue'
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import { login } from '@/service/auth/auth-service'
-import { Colors } from '@/theme/colors'
+import { currentColors } from '@/theme/color-mode'
 
 const email = ref('')
 const password = ref('')
@@ -21,18 +21,22 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 
-const loginStyle = {
-  '--auth-icon': Colors.auth.soft,
-  '--auth-text': Colors.auth.text,
-  '--auth-link': Colors.auth.sageStrong,
-  '--auth-sage-tint': Colors.auth.sageTint,
-  '--auth-muted': Colors.auth.muted,
-  '--auth-sage': Colors.vet.primary,
-  '--auth-white': Colors.auth.white,
-  '--auth-line': Colors.auth.line,
-  '--auth-divider': Colors.auth.divider,
-  '--auth-shadow-rgb': Colors.auth.shadowRgb,
-}
+const loginStyle = computed(() => {
+  const colors = currentColors.value
+
+  return {
+    '--auth-icon': colors.auth.soft,
+    '--auth-text': colors.auth.text,
+    '--auth-link': colors.auth.sageStrong,
+    '--auth-sage-tint': colors.auth.sageTint,
+    '--auth-muted': colors.auth.muted,
+    '--auth-sage': colors.vet.primary,
+    '--auth-white': colors.auth.white,
+    '--auth-line': colors.auth.line,
+    '--auth-divider': colors.auth.divider,
+    '--auth-shadow-rgb': colors.auth.shadowRgb,
+  }
+})
 
 function getSafeRedirectPath() {
   const redirect = route.query.redirect
@@ -292,7 +296,6 @@ async function handleLogin() {
   background: var(--auth-white);
   color: var(--auth-muted);
   font-weight: 800;
-  box-shadow: 0 10px 24px rgb(var(--auth-shadow-rgb) / 0.035);
   cursor: pointer;
 }
 

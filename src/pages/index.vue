@@ -18,7 +18,7 @@
 
       <div class="grid gap-4">
         <RouterLink
-          class="rounded-3xl border border-[#B8CDC9]/70 bg-white p-6 shadow-[0_18px_42px_rgba(29,53,87,0.08)] transition hover:-translate-y-0.5 hover:border-[#84A59D]"
+          class="rounded-3xl border border-[#B8CDC9]/70 bg-white p-6 transition hover:-translate-y-0.5 hover:border-[#84A59D]"
           to="/veterinario"
         >
           <p class="text-sm font-semibold uppercase tracking-[0.2em] text-[#84A59D]">Dashboard</p>

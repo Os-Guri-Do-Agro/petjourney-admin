@@ -1,4 +1,4 @@
-export const Colors = {
+export const LightColors = {
   primary: '#1D3557',
   secondary: '#FFEDD8',
   red: '#F28482',
@@ -78,4 +78,92 @@ export const Colors = {
   },
 } as const
 
-export type ColorPalette = typeof Colors
+export const DarkColors = {
+  primary: '#DDEBE7',
+  secondary: '#22342E',
+  red: '#F2A09E',
+  danger: '#FF6B6B',
+  success: '#7CC7BC',
+  white: '#0F1714',
+  purple: '#CFC7FF',
+  gray: '#243530',
+  orange: '#E7A07F',
+  pink: '#EFB8CC',
+  brown: '#8C7B70',
+  green: '#84C1B4',
+  internacao: '#9FAEC9',
+  text: {
+    primary: '#F2F8F5',
+    secondary: '#B9C9C3',
+    muted: '#90A29B',
+    inverse: '#0F1714',
+    inverse85: '#0F1714D9',
+    inverse20: '#0F171433',
+  },
+  bg: {
+    light: '#16231F',
+    card: '#1A2924',
+    screen: '#0B1210',
+  },
+  border: {
+    light: '#2B423A',
+    default: '#38524A',
+    subtle: '#20322D',
+  },
+  tutor: {
+    primary: '#8AB6D6',
+    secondary: '#A8CDE3',
+  },
+  vet: {
+    primary: '#84C1B4',
+    secondary: '#244139',
+  },
+  auth: {
+    sageStrong: '#B6DCD3',
+    sageTint: '#20352F',
+    text: '#F2F8F5',
+    muted: '#B2C4BD',
+    soft: '#8A9E96',
+    divider: '#39564D',
+    line: '#263A33',
+    appBg: '#0B1210',
+    white: '#121D19',
+    shadowRgb: '0 0 0',
+  },
+  dashboard: {
+    bg: '#0B1210',
+    surface: '#121D19',
+    surfaceSoft: '#182822',
+    line: '#263A33',
+    lineSoft: '#1E302A',
+    text: '#F2F8F5',
+    muted: '#B2C4BD',
+    faint: '#8A9E96',
+    navIcon: '#A0B3AD',
+    primaryDeep: '#4E8E80',
+    primaryStrong: '#BFE3DB',
+    successText: '#A8DEC9',
+    successBg: '#17372C',
+    warm: '#E38E78',
+    warmText: '#F2AE9B',
+    warmBg: '#3A211C',
+    warmSoft: '#211A17',
+    warmLine: '#59342D',
+    amber: '#D9AD62',
+    amberText: '#F0C77D',
+    amberBg: '#372A16',
+    amberSoft: '#252014',
+    mutedPillBg: '#21332D',
+    mutedPillText: '#B9C9C3',
+  },
+} as const
+
+export const ThemeColors = {
+  light: LightColors,
+  dark: DarkColors,
+} as const
+
+export const Colors = LightColors
+
+export type ThemeMode = keyof typeof ThemeColors
+export type ColorPalette = typeof LightColors

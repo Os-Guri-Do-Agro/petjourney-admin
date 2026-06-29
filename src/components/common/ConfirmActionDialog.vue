@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import { computed } from 'vue'
+
+import { currentColors } from '@/theme/color-mode'
 
 const visible = defineModel<boolean>('visible', { default: false })
 
@@ -28,6 +31,19 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
+const dialogStyle = computed(() => {
+  const colors = currentColors.value
+
+  return {
+    '--confirm-bg': colors.auth.white,
+    '--confirm-border': colors.auth.line,
+    '--confirm-text': colors.auth.text,
+    '--confirm-muted': colors.auth.muted,
+    '--confirm-danger': colors.red,
+    '--confirm-danger-bg': colors.dashboard.warmBg,
+  }
+})
+
 function handleCancel() {
   visible.value = false
   emit('cancel')
@@ -42,7 +58,7 @@ function handleConfirm() {
 <template>
   <Dialog v-model:visible="visible" modal :draggable="false" class="confirm-action-dialog">
     <template #container>
-      <section class="confirm-dialog">
+      <section class="confirm-dialog" :style="dialogStyle">
         <span class="confirm-dialog__icon">
           <i :class="icon" aria-hidden="true" />
         </span>
@@ -65,10 +81,9 @@ function handleConfirm() {
 .confirm-dialog {
   width: min(26rem, calc(100vw - 2rem));
   padding: 1.5rem;
-  border: 1px solid #edf0f4;
+  border: 1px solid var(--confirm-border);
   border-radius: 1.35rem;
-  background: #fff;
-  box-shadow: 0 24px 70px rgb(29 53 87 / 0.18);
+  background: var(--confirm-bg);
 }
 
 .confirm-dialog__icon {
@@ -77,8 +92,8 @@ function handleConfirm() {
   height: 3rem;
   place-items: center;
   border-radius: 1rem;
-  background: #fff4f4;
-  color: #f28482;
+  background: var(--confirm-danger-bg);
+  color: var(--confirm-danger);
 }
 
 .confirm-dialog__icon .pi {
@@ -91,14 +106,14 @@ function handleConfirm() {
 
 .confirm-dialog__content h2 {
   margin: 0;
-  color: #1d3557;
+  color: var(--confirm-text);
   font-size: 1.25rem;
   letter-spacing: -0.03em;
 }
 
 .confirm-dialog__content p {
   margin: 0.5rem 0 0;
-  color: #5b6b8c;
+  color: var(--confirm-muted);
   line-height: 1.6;
 }
 

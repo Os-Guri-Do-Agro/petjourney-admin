@@ -8,9 +8,9 @@ import { authSessionVersion, isAuthenticated } from '@/service/auth/auth-session
 const route = useRoute()
 const publicRoutes = new Set(['/auth/login', '/auth/register', '/auth/forgot-password'])
 const shouldUseShell = computed(() => {
-  authSessionVersion.value
+  const hasSessionVersion = authSessionVersion.value >= 0
 
-  return isAuthenticated() && !publicRoutes.has(route.path)
+  return hasSessionVersion && isAuthenticated() && !publicRoutes.has(route.path)
 })
 </script>
 

@@ -2,7 +2,7 @@
 import { computed, useSlots } from 'vue'
 import InputText from 'primevue/inputtext'
 
-import { Colors } from '@/theme/colors'
+import { currentColors } from '@/theme/color-mode'
 
 defineOptions({
   inheritAttrs: false,
@@ -34,20 +34,23 @@ const hasLabel = computed(() => Boolean(props.label))
 const hasLeadingSlot = computed(() => Boolean(slots.leading))
 const hasTrailingSlot = computed(() => Boolean(slots.trailing))
 
-const cursorColor = encodeURIComponent(Colors.primary)
+const fieldStyle = computed(() => {
+  const colors = currentColors.value
+  const cursorColor = encodeURIComponent(colors.primary)
 
-const fieldStyle = {
-  '--auth-primary': Colors.auth.text,
-  '--auth-muted': Colors.auth.muted,
-  '--auth-soft': Colors.auth.soft,
-  '--auth-border': Colors.auth.line,
-  '--auth-white': Colors.auth.white,
-  '--auth-shadow-rgb': Colors.auth.shadowRgb,
-  '--auth-focus': Colors.vet.primary,
-  '--auth-focus-ring': Colors.vet.secondary,
-  '--auth-danger': Colors.red,
-  '--auth-text-cursor': `url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2724%27 viewBox=%270 0 16 24%27%3E%3Cpath d=%27M6 2h4v2H9v16h1v2H6v-2h1V4H6V2Z%27 fill=%27${cursorColor}%27/%3E%3C/svg%3E") 8 12, text`,
-}
+  return {
+    '--auth-primary': colors.auth.text,
+    '--auth-muted': colors.auth.muted,
+    '--auth-soft': colors.auth.soft,
+    '--auth-border': colors.auth.line,
+    '--auth-white': colors.auth.white,
+    '--auth-shadow-rgb': colors.auth.shadowRgb,
+    '--auth-focus': colors.vet.primary,
+    '--auth-focus-ring': colors.vet.secondary,
+    '--auth-danger': colors.red,
+    '--auth-text-cursor': `url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2724%27 viewBox=%270 0 16 24%27%3E%3Cpath d=%27M6 2h4v2H9v16h1v2H6v-2h1V4H6V2Z%27 fill=%27${cursorColor}%27/%3E%3C/svg%3E") 8 12, text`,
+  }
+})
 
 </script>
 
@@ -117,11 +120,10 @@ const fieldStyle = {
   cursor: var(--auth-text-cursor);
   font-size: 0.9375rem;
   line-height: 1.5rem;
-  box-shadow: 0 10px 24px rgb(var(--auth-shadow-rgb) / 0.035);
   outline: none;
   transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+    background 160ms ease,
+    border-color 160ms ease;
 }
 
 .auth-text-field__input--with-leading {
@@ -163,9 +165,7 @@ const fieldStyle = {
 .auth-text-field__input:focus,
 .auth-text-field__input:focus-visible {
   border-color: var(--auth-focus);
-  box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--auth-focus-ring) 38%, transparent),
-    0 10px 24px rgb(var(--auth-shadow-rgb) / 0.08);
+  background: color-mix(in srgb, var(--auth-focus-ring) 14%, var(--auth-white));
 }
 
 .auth-text-field__hint {

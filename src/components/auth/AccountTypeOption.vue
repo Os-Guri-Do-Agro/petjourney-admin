@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
-import { Colors } from '@/theme/colors'
+import { currentColors } from '@/theme/color-mode'
 
 const props = withDefaults(
   defineProps<{
@@ -16,13 +16,17 @@ const props = withDefaults(
   },
 )
 
-const optionStyle = computed(() => ({
-  '--option-primary': props.tone === 'vet' ? Colors.vet.primary : Colors.tutor.primary,
-  '--option-secondary': props.tone === 'vet' ? Colors.vet.secondary : Colors.tutor.secondary,
-  '--option-text': Colors.primary,
-  '--option-muted': Colors.internacao,
-  '--option-white': Colors.auth.white,
-}))
+const optionStyle = computed(() => {
+  const colors = currentColors.value
+
+  return {
+    '--option-primary': props.tone === 'vet' ? colors.vet.primary : colors.tutor.primary,
+    '--option-secondary': props.tone === 'vet' ? colors.vet.secondary : colors.tutor.secondary,
+    '--option-text': colors.auth.text,
+    '--option-muted': colors.auth.muted,
+    '--option-white': colors.auth.white,
+  }
+})
 </script>
 
 <template>
@@ -54,7 +58,6 @@ const optionStyle = computed(() => ({
 
 .account-type-option:hover {
   border-color: var(--option-primary);
-  box-shadow: 0 18px 38px color-mix(in srgb, var(--option-text) 12%, transparent);
 }
 
 .account-type-option__icon {

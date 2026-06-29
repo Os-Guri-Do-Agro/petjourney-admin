@@ -8,6 +8,7 @@ import ToastService from 'primevue/toastservice'
 
 import App from './App.vue'
 import router from './router'
+import './theme/color-mode'
 import { PetJourneyPreset } from './theme/primevue'
 
 const app = createApp(App)

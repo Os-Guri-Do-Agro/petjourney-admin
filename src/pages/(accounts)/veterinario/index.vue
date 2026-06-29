@@ -1,49 +1,54 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 
 import { getAuthUser } from '@/service/auth/auth-session'
-import { Colors } from '@/theme/colors'
+import { currentColors } from '@/theme/color-mode'
 
 type AppointmentPriority = 'high' | 'attention' | 'normal'
 
 const user = computed(() => getAuthUser())
 const firstName = computed(() => user.value?.nome?.split(' ')[0] ?? 'veterinário')
 
-const pageStyle = {
-  '--brand-navy': Colors.primary,
-  '--brand-cream': Colors.secondary,
-  '--white-warm': Colors.white,
-  '--profile-primary': Colors.vet.primary,
-  '--profile-secondary': Colors.vet.secondary,
-  '--clinical-muted': Colors.internacao,
-  '--soft-border': Colors.brown,
-  '--attention': Colors.orange,
-  '--danger-soft': Colors.red,
-  '--success-soft': Colors.success,
-  '--dashboard-bg': Colors.dashboard.bg,
-  '--dashboard-card': Colors.dashboard.surface,
-  '--dashboard-surface': Colors.dashboard.surfaceSoft,
-  '--dashboard-line': Colors.dashboard.line,
-  '--dashboard-line-soft': Colors.dashboard.lineSoft,
-  '--dashboard-text': Colors.dashboard.text,
-  '--dashboard-muted': Colors.dashboard.muted,
-  '--dashboard-faint': Colors.dashboard.faint,
-  '--dashboard-primary': Colors.vet.primary,
-  '--dashboard-primary-soft': Colors.vet.secondary,
-  '--dashboard-primary-strong': Colors.dashboard.primaryStrong,
-  '--dashboard-primary-deep': Colors.dashboard.primaryDeep,
-  '--dashboard-success-bg': Colors.dashboard.successBg,
-  '--dashboard-success-text': Colors.dashboard.successText,
-  '--dashboard-warm': Colors.dashboard.warm,
-  '--dashboard-warm-bg': Colors.dashboard.warmBg,
-  '--dashboard-warm-soft': Colors.dashboard.warmSoft,
-  '--dashboard-warm-line': Colors.dashboard.warmLine,
-  '--dashboard-warm-text': Colors.dashboard.warmText,
-  '--dashboard-amber': Colors.dashboard.amber,
-  '--dashboard-amber-bg': Colors.dashboard.amberBg,
-  '--dashboard-amber-text': Colors.dashboard.amberText,
-  '--dashboard-shadow-rgb': Colors.auth.shadowRgb,
-}
+const pageStyle = computed(() => {
+  const colors = currentColors.value
+
+  return {
+    '--brand-navy': colors.primary,
+    '--brand-cream': colors.secondary,
+    '--white-warm': colors.white,
+    '--profile-primary': colors.vet.primary,
+    '--profile-secondary': colors.vet.secondary,
+    '--clinical-muted': colors.internacao,
+    '--soft-border': colors.brown,
+    '--attention': colors.orange,
+    '--danger-soft': colors.red,
+    '--success-soft': colors.success,
+    '--dashboard-bg': colors.dashboard.bg,
+    '--dashboard-card': colors.dashboard.surface,
+    '--dashboard-surface': colors.dashboard.surfaceSoft,
+    '--dashboard-line': colors.dashboard.line,
+    '--dashboard-line-soft': colors.dashboard.lineSoft,
+    '--dashboard-text': colors.dashboard.text,
+    '--dashboard-muted': colors.dashboard.muted,
+    '--dashboard-faint': colors.dashboard.faint,
+    '--dashboard-primary': colors.vet.primary,
+    '--dashboard-primary-soft': colors.vet.secondary,
+    '--dashboard-primary-strong': colors.dashboard.primaryStrong,
+    '--dashboard-primary-deep': colors.dashboard.primaryDeep,
+    '--dashboard-success-bg': colors.dashboard.successBg,
+    '--dashboard-success-text': colors.dashboard.successText,
+    '--dashboard-warm': colors.dashboard.warm,
+    '--dashboard-warm-bg': colors.dashboard.warmBg,
+    '--dashboard-warm-soft': colors.dashboard.warmSoft,
+    '--dashboard-warm-line': colors.dashboard.warmLine,
+    '--dashboard-warm-text': colors.dashboard.warmText,
+    '--dashboard-amber': colors.dashboard.amber,
+    '--dashboard-amber-bg': colors.dashboard.amberBg,
+    '--dashboard-amber-text': colors.dashboard.amberText,
+    '--dashboard-shadow-rgb': colors.auth.shadowRgb,
+  }
+})
 
 const metrics = [
   {
@@ -214,7 +219,6 @@ function getMetricIcon(tone: string) {
       </div>
 
       <article class="next-card" aria-label="Próximo atendimento">
-        <div class="next-card__glow" />
         <div class="next-card__header">
           <span>Próximo atendimento</span>
           <strong>em 18 min</strong>
@@ -253,10 +257,10 @@ function getMetricIcon(tone: string) {
             <span class="dashboard-kicker">Agenda</span>
             <h2>Atendimentos de hoje</h2>
           </div>
-          <button class="dashboard-button dashboard-button--ghost dashboard-button--sm" type="button">
+          <RouterLink class="dashboard-button dashboard-button--ghost dashboard-button--sm" to="/veterinario/agenda">
             <i class="pi pi-calendar" aria-hidden="true" />
             Ver calendário
-          </button>
+          </RouterLink>
         </div>
 
         <div class="appointment-list">
@@ -540,7 +544,6 @@ function getMetricIcon(tone: string) {
   border: 1px solid #edf0f4;
   border-radius: 1rem;
   background: #fff;
-  box-shadow: 0 10px 28px rgb(29 53 87 / 0.04);
 }
 
 .topbar__brand {
@@ -598,7 +601,6 @@ function getMetricIcon(tone: string) {
 .primary-action {
   background: var(--profile-primary);
   color: white;
-  box-shadow: 0 14px 28px color-mix(in srgb, var(--profile-primary) 30%, transparent);
 }
 
 .secondary-action,
@@ -633,7 +635,6 @@ function getMetricIcon(tone: string) {
 .metric-card {
   border: 1px solid #edf0f4;
   background: #fff;
-  box-shadow: 0 10px 28px rgb(29 53 87 / 0.04);
 }
 
 .dashboard-intro {
@@ -1109,16 +1110,24 @@ function getMetricIcon(tone: string) {
   border-radius: 0.78rem;
   font-size: 0.84rem;
   font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
   cursor: pointer;
   transition:
     background 160ms ease,
     border-color 160ms ease,
-    box-shadow 160ms ease,
     transform 160ms ease;
 }
 
 .dashboard-button:hover {
   transform: translateY(-1px);
+}
+
+.dashboard-button .pi {
+  display: block;
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  line-height: 1;
 }
 
 .dashboard-button--primary {
@@ -1128,7 +1137,7 @@ function getMetricIcon(tone: string) {
     var(--dashboard-primary-strong)
   );
   color: var(--dashboard-card);
-  box-shadow: 0 14px 28px color-mix(in srgb, var(--dashboard-primary) 26%, transparent);
+  font-weight: 600;
 }
 
 .dashboard-button--ghost {
@@ -1155,16 +1164,6 @@ function getMetricIcon(tone: string) {
     var(--dashboard-primary-deep)
   );
   color: var(--dashboard-card);
-}
-
-.next-card__glow {
-  position: absolute;
-  top: -4.5rem;
-  right: -3.5rem;
-  width: 11.25rem;
-  height: 11.25rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--dashboard-card) 8%, transparent);
 }
 
 .next-card__header,
@@ -1240,6 +1239,7 @@ function getMetricIcon(tone: string) {
   margin-top: 1rem;
   background: var(--dashboard-card);
   color: var(--dashboard-primary-deep);
+  line-height: 1;
 }
 
 .dashboard-metrics {
@@ -1253,7 +1253,6 @@ function getMetricIcon(tone: string) {
 .dashboard-panel {
   border: 1px solid var(--dashboard-line);
   background: var(--dashboard-card);
-  box-shadow: 0 10px 28px rgb(var(--dashboard-shadow-rgb) / 0.035);
 }
 
 .metric-tile {
@@ -1312,6 +1311,8 @@ function getMetricIcon(tone: string) {
 
 .metric-tile small {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-top: 0.7rem;
   padding: 0.3rem 0.58rem;
   border-radius: 999px;
@@ -1319,6 +1320,7 @@ function getMetricIcon(tone: string) {
   color: var(--dashboard-success-text);
   font-size: 0.7rem;
   font-weight: 600;
+  line-height: 1;
 }
 
 .metric-tile[data-tone='attention'] small,
@@ -1364,13 +1366,14 @@ function getMetricIcon(tone: string) {
 
 .appointment-row {
   display: grid;
-  grid-template-columns: 5.1rem auto minmax(0, 1fr) 7.2rem;
-  gap: 1rem;
+  grid-template-columns: 5.6rem 2.3rem minmax(0, 1fr) 7.8rem;
+  column-gap: 1rem;
+  row-gap: 0.75rem;
   align-items: center;
   padding: 0.95rem 1rem;
   border: 1px solid var(--dashboard-line);
   border-radius: 0.95rem;
-  background: var(--dashboard-card);
+  background: var(--dashboard-surface);
 }
 
 .appointment-row--high {
@@ -1393,7 +1396,8 @@ function getMetricIcon(tone: string) {
 
 .appointment-row__time {
   display: grid;
-  gap: 0.24rem;
+  gap: 0.3rem;
+  align-content: center;
 }
 
 .appointment-row__time strong {
@@ -1413,19 +1417,19 @@ function getMetricIcon(tone: string) {
 
 .appointment-row__title,
 .risk-row__title {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.42rem;
+  display: grid;
+  gap: 0.18rem;
 }
 
 .appointment-row__title strong,
 .risk-row__title strong {
+  display: block;
   line-height: 1.2;
 }
 
 .appointment-row__title small,
 .risk-row__title small {
+  display: block;
   line-height: 1.25;
 }
 
@@ -1437,7 +1441,8 @@ function getMetricIcon(tone: string) {
 .appointment-row__meta {
   display: grid;
   justify-items: end;
-  gap: 0.34rem;
+  gap: 0.4rem;
+  align-content: center;
   text-align: right;
 }
 
@@ -1474,6 +1479,7 @@ function getMetricIcon(tone: string) {
   color: var(--dashboard-success-text);
   font-size: 0.68rem;
   font-weight: 600;
+  line-height: 1;
 }
 
 .dashboard-pill[data-tone='high'] {
@@ -1490,14 +1496,14 @@ function getMetricIcon(tone: string) {
   padding: 0.95rem;
   border: 1px solid var(--dashboard-line);
   border-radius: 0.95rem;
-  background: var(--dashboard-card);
+  background: var(--dashboard-surface);
 }
 
 .risk-row__header {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.85rem;
-  align-items: center;
+  align-items: start;
 }
 
 .risk-row p {
@@ -1538,7 +1544,7 @@ function getMetricIcon(tone: string) {
   }
 
   .appointment-row {
-    grid-template-columns: 5.1rem auto minmax(0, 1fr);
+    grid-template-columns: 5.6rem 2.3rem minmax(0, 1fr);
   }
 
   .appointment-row__meta {

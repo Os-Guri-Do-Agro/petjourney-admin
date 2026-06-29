@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
-import { Colors } from '@/theme/colors'
+import { currentColors } from '@/theme/color-mode'
 
 const props = withDefaults(
   defineProps<{
@@ -38,13 +38,17 @@ const buttonClasses = computed(() => [
   },
 ])
 
-const buttonStyle = {
-  '--auth-primary': Colors.vet.primary,
-  '--auth-primary-muted': Colors.auth.sageStrong,
-  '--auth-secondary': Colors.vet.secondary,
-  '--auth-white': Colors.auth.white,
-  '--auth-border': Colors.auth.line,
-}
+const buttonStyle = computed(() => {
+  const colors = currentColors.value
+
+  return {
+    '--auth-primary': colors.vet.primary,
+    '--auth-primary-muted': colors.auth.sageStrong,
+    '--auth-secondary': colors.vet.secondary,
+    '--auth-white': colors.auth.white,
+    '--auth-border': colors.auth.line,
+  }
+})
 </script>
 
 <template>
@@ -71,7 +75,6 @@ const buttonStyle = {
 .auth-button--primary {
   background: var(--auth-primary);
   color: var(--auth-white);
-  box-shadow: 0 16px 30px color-mix(in srgb, var(--auth-primary) 24%, transparent);
 }
 
 .auth-button--primary:hover {
@@ -86,7 +89,7 @@ const buttonStyle = {
 .auth-button--secondary:hover,
 .auth-button--ghost:hover {
   border-color: var(--auth-primary);
-  background: color-mix(in srgb, var(--auth-secondary) 40%, white);
+  background: color-mix(in srgb, var(--auth-secondary) 40%, var(--auth-white));
   color: var(--auth-primary);
 }
 

@@ -22,6 +22,14 @@ export default defineConfigWithVueTs(
   vueTsConfigs.recommended,
 
   {
+    name: 'app/file-route-pages',
+    files: ['src/pages/**/*.vue'],
+    rules: {
+      'vue/multi-word-component-names': 'off',
+    },
+  },
+
+  {
     ...pluginVitest.configs.recommended,
     files: ['src/**/__tests__/*'],
   },

@@ -1,21 +1,22 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
-import { computed, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
-import logoMarkUrl from '/pata-clara.png'
 import logoHeaderUrl from '@/assets/Logos/logo-clara-em-row.png'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import { clearAuthSession, getAuthUser } from '@/service/auth/auth-session'
-import { Colors } from '@/theme/colors'
+import { currentColors, isDarkMode, toggleColorMode } from '@/theme/color-mode'
 
 const router = useRouter()
+const route = useRoute()
 const drawerOpen = ref(true)
 const userMenuOpen = ref(false)
 const logoutConfirmVisible = ref(false)
 const activeSectionId = ref('workspace')
 const searchQuery = ref('')
 const user = computed(() => getAuthUser())
+const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
 
 type NavigationItem = {
   label: string
@@ -30,26 +31,34 @@ type NavigationSection = {
   items: NavigationItem[]
 }
 
-const shellStyle = {
-  '--brand-navy': Colors.auth.text,
-  '--profile-primary': Colors.vet.primary,
-  '--profile-secondary': Colors.vet.secondary,
-  '--clinical-muted': Colors.auth.muted,
-  '--danger-soft': Colors.red,
-  '--shell-bg': Colors.auth.appBg,
-  '--shell-surface': Colors.auth.white,
-  '--shell-surface-soft': Colors.auth.sageTint,
-  '--shell-line': Colors.auth.line,
-  '--shell-text': Colors.auth.text,
-  '--shell-muted': Colors.auth.muted,
-  '--shell-soft': Colors.auth.soft,
-  '--shell-brand': Colors.vet.primary,
-  '--shell-accent': Colors.vet.primary,
-  '--shell-accent-strong': Colors.auth.sageStrong,
-  '--shell-accent-soft': Colors.vet.secondary,
-  '--shell-cream': Colors.secondary,
-  '--shell-shadow-rgb': Colors.auth.shadowRgb,
-}
+const shellStyle = computed(() => {
+  const colors = currentColors.value
+  const isDark = isDarkMode.value
+
+  return {
+    '--brand-navy': colors.auth.text,
+    '--profile-primary': colors.vet.primary,
+    '--profile-secondary': colors.vet.secondary,
+    '--clinical-muted': colors.auth.muted,
+    '--danger-soft': colors.red,
+    '--shell-bg': colors.auth.appBg,
+    '--shell-surface': colors.auth.white,
+    '--shell-surface-soft': colors.auth.sageTint,
+    '--shell-line': colors.auth.line,
+    '--shell-text': colors.auth.text,
+    '--shell-muted': colors.auth.muted,
+    '--shell-soft': colors.auth.soft,
+    '--shell-brand': isDark ? colors.bg.card : colors.vet.primary,
+    '--shell-on-brand': isDark ? colors.text.primary : colors.auth.white,
+    '--shell-on-brand-muted': isDark ? colors.auth.soft : '#ffffffC2',
+    '--shell-rail-active-bg': isDark ? colors.auth.sageTint : colors.auth.white,
+    '--shell-accent': colors.vet.primary,
+    '--shell-accent-strong': colors.auth.sageStrong,
+    '--shell-accent-soft': colors.vet.secondary,
+    '--shell-cream': colors.secondary,
+    '--shell-shadow-rgb': colors.auth.shadowRgb,
+  }
+})
 
 const navigationSections: NavigationSection[] = [
   {
@@ -58,7 +67,7 @@ const navigationSections: NavigationSection[] = [
     icon: 'pi pi-th-large',
     items: [
       { label: 'Dashboard', to: '/veterinario', icon: 'pi pi-home' },
-      { label: 'Agenda', to: '/veterinario#agenda', icon: 'pi pi-calendar' },
+      { label: 'Agenda', to: '/veterinario/agenda', icon: 'pi pi-calendar' },
       { label: 'Atividades', to: '/veterinario#atividades', icon: 'pi pi-list' },
     ],
   },
@@ -67,8 +76,8 @@ const navigationSections: NavigationSection[] = [
     label: 'Pets',
     icon: 'pi pi-heart',
     items: [
-      { label: 'Pacientes', to: '/veterinario#pacientes', icon: 'pi pi-users' },
-      { label: 'Prontuários', to: '/veterinario#agenda', icon: 'pi pi-file-edit' },
+      { label: 'Pacientes', to: '/veterinario/pacientes', icon: 'pi pi-users' },
+      { label: 'Prontuários', to: '/veterinario/prontuarios', icon: 'pi pi-file-edit' },
       { label: 'Compartilhamentos', to: '/veterinario#pacientes', icon: 'pi pi-share-alt' },
     ],
   },
@@ -117,6 +126,29 @@ function handleSectionChange(sectionId: string) {
   activeSectionId.value = sectionId
   drawerOpen.value = true
 }
+
+watch(
+  () => route.path,
+  (path) => {
+    if (path.startsWith('/veterinario/pacientes') || path.startsWith('/veterinario/prontuarios')) {
+      activeSectionId.value = 'patients'
+      return
+    }
+
+    if (path.startsWith('/settings')) {
+      activeSectionId.value = 'partner'
+      return
+    }
+
+    if (path.startsWith('/perfil')) {
+      activeSectionId.value = 'account'
+      return
+    }
+
+    activeSectionId.value = 'workspace'
+  },
+  { immediate: true },
+)
 
 function requestLogout() {
   userMenuOpen.value = false
@@ -211,6 +243,20 @@ async function handleLogout() {
           <input id="header-search" v-model="searchQuery" type="search" placeholder="Pesquisar" />
         </label>
 
+        <button
+          class="theme-switch"
+          type="button"
+          :aria-label="isDarkMode ? 'Ativar tema claro' : 'Ativar tema escuro'"
+          :title="isDarkMode ? 'Tema claro' : 'Tema escuro'"
+          :aria-pressed="isDarkMode"
+          @click="toggleColorMode"
+        >
+          <span class="theme-switch__track">
+            <i :class="isDarkMode ? 'pi pi-moon' : 'pi pi-sun'" aria-hidden="true" />
+          </span>
+          <span class="theme-switch__label">{{ isDarkMode ? 'Dark' : 'Light' }}</span>
+        </button>
+
         <div class="user-menu">
           <button
             class="user-menu__trigger"
@@ -303,7 +349,7 @@ async function handleLogout() {
   margin-bottom: 0.7rem;
   place-items: center;
   border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--shell-surface) 16%, transparent);
+  background: color-mix(in srgb, var(--shell-on-brand) 12%, transparent);
 }
 
 .rail-brand img {
@@ -320,18 +366,19 @@ async function handleLogout() {
   border: 0;
   border-radius: 0.85rem;
   background: transparent;
-  color: color-mix(in srgb, var(--shell-surface) 76%, transparent);
+  color: var(--shell-on-brand-muted);
   cursor: pointer;
 }
 
 .rail-button:hover {
-  background: color-mix(in srgb, var(--shell-surface) 14%, transparent);
-  color: var(--shell-surface);
+  background: color-mix(in srgb, var(--shell-on-brand) 10%, transparent);
+  color: var(--shell-on-brand);
 }
 
 .rail-button--active {
-  background: var(--shell-surface);
+  background: var(--shell-rail-active-bg);
   color: var(--shell-accent-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 24%, transparent);
 }
 
 .rail-bottom-actions {
@@ -347,7 +394,7 @@ async function handleLogout() {
 
 .rail-button--danger:hover {
   background: color-mix(in srgb, var(--danger-soft) 18%, transparent);
-  color: var(--shell-surface);
+  color: var(--shell-on-brand);
 }
 
 .navigator-panel {
@@ -449,6 +496,7 @@ async function handleLogout() {
   padding: 0 1.25rem;
   background: var(--shell-surface);
   box-shadow: 0 1px 0 var(--shell-line);
+  backdrop-filter: blur(14px);
   transition: left 180ms ease;
 }
 
@@ -470,6 +518,7 @@ async function handleLogout() {
   border-radius: 0.85rem;
   background: var(--shell-surface) !important;
   color: var(--shell-text) !important;
+  line-height: 1 !important;
 }
 
 .header-search {
@@ -484,6 +533,14 @@ async function handleLogout() {
   border-radius: 0.85rem;
   background: var(--shell-surface);
   color: var(--shell-soft);
+  line-height: 1;
+}
+
+.header-search .pi {
+  display: block;
+  flex: 0 0 auto;
+  font-size: 0.86rem;
+  line-height: 1;
 }
 
 .header-search input {
@@ -495,11 +552,51 @@ async function handleLogout() {
   font: inherit;
   font-size: 0.84rem;
   font-weight: 500;
+  line-height: 1;
   outline: none;
 }
 
 .header-search input::placeholder {
   color: var(--shell-soft);
+}
+
+.theme-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.45rem;
+  padding: 0 0.78rem 0 0.28rem;
+  border: 1px solid var(--shell-line);
+  border-radius: 999px;
+  background: var(--shell-surface);
+  color: var(--shell-text);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.theme-switch:hover {
+  background: var(--shell-surface-soft);
+}
+
+.theme-switch__track {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--shell-accent) 22%, var(--shell-surface));
+  color: var(--shell-accent-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 18%, transparent);
+}
+
+.theme-switch__track i {
+  font-size: 0.86rem;
+}
+
+.theme-switch__label {
+  line-height: 1;
 }
 
 .header-context {
@@ -537,6 +634,7 @@ async function handleLogout() {
   border-radius: 999px;
   background: var(--shell-surface);
   color: var(--shell-text);
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -577,7 +675,6 @@ async function handleLogout() {
   border: 1px solid var(--shell-line);
   border-radius: 1rem;
   background: var(--shell-surface);
-  box-shadow: 0 18px 45px rgb(var(--shell-shadow-rgb) / 0.12);
 }
 
 .user-menu__dropdown a,
@@ -616,7 +713,6 @@ async function handleLogout() {
 
   .app-navigator {
     width: min(var(--navigator-width), 88vw);
-    box-shadow: 0 24px 60px rgb(var(--shell-shadow-rgb) / 0.18);
   }
 
   .app-content,
@@ -626,7 +722,8 @@ async function handleLogout() {
 
   .user-menu__identity,
   .header-context,
-  .header-search input {
+  .header-search input,
+  .theme-switch__label {
     display: none;
   }
 

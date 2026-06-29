@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import logoUrl from '/pata-clara.png'
+import { computed } from 'vue'
+
 import logoSemPata from '@/assets/Logos/logo-clara-em-row.png'
 import bgLoginUrl from '@/assets/login/bg-login.jpg'
-import { Colors } from '@/theme/colors'
+import { currentColors, isDarkMode } from '@/theme/color-mode'
 
 defineProps<{
   eyebrow?: string
@@ -10,19 +11,25 @@ defineProps<{
   description: string
 }>()
 
-const authLayoutStyle = {
-  '--auth-primary': Colors.vet.primary,
-  '--auth-sage': Colors.vet.primary,
-  '--auth-sage-strong': Colors.auth.sageStrong,
-  '--auth-sage-soft': Colors.vet.secondary,
-  '--auth-sage-tint': Colors.auth.sageTint,
-  '--auth-text': Colors.auth.text,
-  '--auth-muted': Colors.auth.muted,
-  '--auth-soft': Colors.auth.soft,
-  '--auth-line': Colors.auth.line,
-  '--auth-app-bg': Colors.auth.appBg,
-  '--auth-white': Colors.auth.white,
-}
+const logoUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
+
+const authLayoutStyle = computed(() => {
+  const colors = currentColors.value
+
+  return {
+    '--auth-primary': colors.vet.primary,
+    '--auth-sage': colors.vet.primary,
+    '--auth-sage-strong': colors.auth.sageStrong,
+    '--auth-sage-soft': colors.vet.secondary,
+    '--auth-sage-tint': colors.auth.sageTint,
+    '--auth-text': colors.auth.text,
+    '--auth-muted': colors.auth.muted,
+    '--auth-soft': colors.auth.soft,
+    '--auth-line': colors.auth.line,
+    '--auth-app-bg': colors.auth.appBg,
+    '--auth-white': colors.auth.white,
+  }
+})
 </script>
 
 <template>
@@ -52,8 +59,6 @@ const authLayoutStyle = {
       <aside class="auth-visual-panel">
         <img class="auth-visual-panel__image" :src="bgLoginUrl" alt="" />
         <div class="auth-visual-panel__overlay" />
-        <div class="auth-visual-blob auth-visual-blob--top" />
-        <div class="auth-visual-blob auth-visual-blob--bottom" />
         <div class="auth-visual-ring" />
         <svg class="auth-visual-paw auth-visual-paw--top" viewBox="0 0 24 24" aria-hidden="true">
           <ellipse cx="6.5" cy="10" rx="2.1" ry="2.7" />
@@ -213,32 +218,11 @@ const authLayoutStyle = {
   );
 }
 
-.auth-visual-blob,
 .auth-visual-ring,
 .auth-visual-paw {
   position: absolute;
   z-index: 1;
   pointer-events: none;
-}
-
-.auth-visual-blob {
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--auth-white) 7%, transparent);
-}
-
-.auth-visual-blob--top {
-  top: -8rem;
-  right: -6rem;
-  width: clamp(20rem, 36vw, 32rem);
-  height: clamp(20rem, 36vw, 32rem);
-}
-
-.auth-visual-blob--bottom {
-  bottom: -10rem;
-  left: -6rem;
-  width: clamp(16rem, 28vw, 24rem);
-  height: clamp(16rem, 28vw, 24rem);
-  background: color-mix(in srgb, var(--auth-white) 5.5%, transparent);
 }
 
 .auth-visual-ring {
