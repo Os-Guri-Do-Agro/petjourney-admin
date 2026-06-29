@@ -68,7 +68,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       { label: 'Dashboard', to: '/veterinario', icon: 'pi pi-home' },
       { label: 'Agenda', to: '/veterinario/agenda', icon: 'pi pi-calendar' },
-      { label: 'Atividades', to: '/veterinario#atividades', icon: 'pi pi-list' },
+      { label: 'Atividades', to: '/veterinario/atividades', icon: 'pi pi-list' },
     ],
   },
   {
@@ -78,17 +78,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       { label: 'Pacientes', to: '/veterinario/pacientes', icon: 'pi pi-users' },
       { label: 'Prontuários', to: '/veterinario/prontuarios', icon: 'pi pi-file-edit' },
-      { label: 'Compartilhamentos', to: '/veterinario#pacientes', icon: 'pi pi-share-alt' },
-    ],
-  },
-  {
-    id: 'partner',
-    label: 'Parceiro',
-    icon: 'pi pi-briefcase',
-    items: [
-      { label: 'Empresa', to: '/settings', icon: 'pi pi-building' },
-      { label: 'Equipe', to: '/settings', icon: 'pi pi-id-card' },
-      { label: 'Integrações', to: '/settings', icon: 'pi pi-link' },
+      { label: 'Compartilhamentos', to: '/veterinario/compartilhamentos', icon: 'pi pi-share-alt' },
     ],
   },
   {
@@ -97,7 +87,7 @@ const navigationSections: NavigationSection[] = [
     icon: 'pi pi-user',
     items: [
       { label: 'Perfil', to: '/perfil', icon: 'pi pi-user' },
-      { label: 'Configurações', to: '/settings', icon: 'pi pi-cog' },
+      { label: 'Configurações', to: '/settings#seguranca', icon: 'pi pi-cog' },
     ],
   },
 ]
@@ -106,6 +96,32 @@ const fallbackSection = navigationSections[0] as NavigationSection
 const activeSection = computed<NavigationSection>(
   () => navigationSections.find((section) => section.id === activeSectionId.value) ?? fallbackSection,
 )
+const activePageLabel = computed(() => {
+  const currentPath = route.path
+  const currentHash = route.hash
+
+  for (const section of navigationSections) {
+    const matchedItem = section.items.find((item) => {
+      const [itemPath, itemHash = ''] = item.to.split('#')
+
+      if (itemHash) {
+        return itemPath === currentPath && `#${itemHash}` === currentHash
+      }
+
+      return itemPath === currentPath
+    })
+
+    if (matchedItem) {
+      return matchedItem.label
+    }
+  }
+
+  if (currentPath.startsWith('/settings')) {
+    return 'Settings'
+  }
+
+  return activeSection.value.label
+})
 
 const initials = computed(() => {
   const name = user.value?.nome ?? 'Vet'
@@ -130,13 +146,17 @@ function handleSectionChange(sectionId: string) {
 watch(
   () => route.path,
   (path) => {
-    if (path.startsWith('/veterinario/pacientes') || path.startsWith('/veterinario/prontuarios')) {
+    if (
+      path.startsWith('/veterinario/pacientes') ||
+      path.startsWith('/veterinario/prontuarios') ||
+      path.startsWith('/veterinario/compartilhamentos')
+    ) {
       activeSectionId.value = 'patients'
       return
     }
 
     if (path.startsWith('/settings')) {
-      activeSectionId.value = 'partner'
+      activeSectionId.value = 'account'
       return
     }
 
@@ -233,7 +253,7 @@ async function handleLogout() {
 
         <div class="header-context">
           <span>Painel parceiro</span>
-          <strong>{{ activeSection.label }}</strong>
+          <strong>{{ activePageLabel }}</strong>
         </div>
       </div>
 
@@ -325,7 +345,9 @@ async function handleLogout() {
   width: var(--navigator-width);
   grid-template-columns: 4.25rem minmax(0, 1fr);
   background: var(--shell-surface);
-  box-shadow: 1px 0 0 var(--shell-line);
+  box-shadow:
+    1px 0 0 var(--shell-line),
+    16px 0 40px rgb(var(--shell-shadow-rgb) / 0.05);
   transition: transform 180ms ease;
 }
 
@@ -337,19 +359,23 @@ async function handleLogout() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.85rem 0.55rem;
-  background: var(--shell-brand);
+  gap: 0.5rem;
+  padding: 0.9rem 0.55rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--shell-brand) 92%, white) 0%, var(--shell-brand) 48%),
+    var(--shell-brand);
 }
 
 .rail-brand {
   display: grid;
-  width: 2.5rem;
-  height: 2.5rem;
-  margin-bottom: 0.7rem;
+  width: 2.65rem;
+  height: 2.65rem;
+  margin-bottom: 0.9rem;
   place-items: center;
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--shell-on-brand) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--shell-on-brand) 18%, transparent);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--shell-on-brand) 16%, transparent);
+  box-shadow: 0 10px 24px rgb(var(--shell-shadow-rgb) / 0.08);
 }
 
 .rail-brand img {
@@ -359,26 +385,50 @@ async function handleLogout() {
 }
 
 .rail-button {
+  position: relative;
   display: grid;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.55rem;
+  height: 2.55rem;
   place-items: center;
   border: 0;
-  border-radius: 0.85rem;
+  border-radius: 0.82rem;
   background: transparent;
   color: var(--shell-on-brand-muted);
   cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.rail-button i {
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .rail-button:hover {
   background: color-mix(in srgb, var(--shell-on-brand) 10%, transparent);
   color: var(--shell-on-brand);
+  transform: translateY(-1px);
 }
 
 .rail-button--active {
   background: var(--shell-rail-active-bg);
   color: var(--shell-accent-strong);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 24%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 24%, transparent),
+    0 10px 20px rgb(var(--shell-shadow-rgb) / 0.08);
+}
+
+.rail-button--active::after {
+  position: absolute;
+  right: -0.5rem;
+  width: 0.24rem;
+  height: 1.45rem;
+  border-radius: 999px;
+  background: var(--shell-on-brand);
+  content: '';
 }
 
 .rail-bottom-actions {
@@ -401,12 +451,22 @@ async function handleLogout() {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  padding: 0.95rem 0.85rem;
+  padding: 1.05rem 0.95rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--shell-surface-soft) 22%, transparent), transparent 10rem),
+    var(--shell-surface);
+}
+
+.navigator-logo {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  text-decoration: none;
 }
 
 .navigator-logo img {
   display: block;
-  width: 9.25rem;
+  width: 9.45rem;
   max-height: 2.75rem;
   object-fit: contain;
 }
@@ -414,8 +474,9 @@ async function handleLogout() {
 .navigator-section-heading {
   display: grid;
   gap: 0.18rem;
-  margin-top: 1.35rem;
-  margin-bottom: 0.65rem;
+  margin-top: 1.45rem;
+  margin-bottom: 0.75rem;
+  padding: 0 0.2rem;
 }
 
 .navigator-section-heading span,
@@ -429,48 +490,58 @@ async function handleLogout() {
 
 .navigator-section-heading strong {
   color: var(--shell-text);
-  font-size: 0.98rem;
-  font-weight: 600;
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
 }
 
 .page-nav {
   display: grid;
-  gap: 0.28rem;
+  gap: 0.36rem;
 }
 
 .page-nav__link {
+  position: relative;
   display: flex;
-  min-height: 2.34rem;
+  min-height: 2.55rem;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.58rem;
-  padding: 0 0.62rem;
-  border-radius: 0.72rem;
+  gap: 0.68rem;
+  padding: 0 0.72rem;
+  border: 1px solid transparent;
+  border-radius: 0.82rem;
   color: var(--shell-muted);
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 0.84rem;
+  font-weight: 650;
   text-decoration: none;
   transition:
     background 160ms ease,
+    border-color 160ms ease,
     color 160ms ease,
     transform 160ms ease;
 }
 
 .page-nav__link i {
   display: grid;
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 1.72rem;
+  height: 1.72rem;
+  flex: 0 0 auto;
   place-items: center;
-  border-radius: 0.55rem;
-  background: color-mix(in srgb, var(--shell-accent-soft) 16%, var(--shell-surface));
+  border-radius: 0.62rem;
+  background: color-mix(in srgb, var(--shell-accent-soft) 18%, var(--shell-surface));
   color: var(--shell-soft);
-  font-size: 0.76rem;
+  font-size: 0.78rem;
 }
 
 .page-nav__link:hover,
 .page-nav__link.router-link-active {
-  background: color-mix(in srgb, var(--shell-accent-soft) 28%, var(--shell-surface));
+  border-color: color-mix(in srgb, var(--shell-accent) 18%, var(--shell-line));
+  background: color-mix(in srgb, var(--shell-accent-soft) 30%, var(--shell-surface));
   color: var(--shell-accent-strong);
+}
+
+.page-nav__link.router-link-active {
+  box-shadow: 0 10px 24px rgb(var(--shell-shadow-rgb) / 0.06);
 }
 
 .page-nav__link:hover {
@@ -515,7 +586,7 @@ async function handleLogout() {
   width: 2.5rem;
   height: 2.5rem;
   border: 1px solid var(--shell-line);
-  border-radius: 0.85rem;
+  border-radius: 0.72rem;
   background: var(--shell-surface) !important;
   color: var(--shell-text) !important;
   line-height: 1 !important;
@@ -530,7 +601,7 @@ async function handleLogout() {
   gap: 0.55rem;
   padding: 0 0.8rem;
   border: 1px solid var(--shell-line);
-  border-radius: 0.85rem;
+  border-radius: 0.72rem;
   background: var(--shell-surface);
   color: var(--shell-soft);
   line-height: 1;
@@ -567,7 +638,7 @@ async function handleLogout() {
   min-height: 2.45rem;
   padding: 0 0.78rem 0 0.28rem;
   border: 1px solid var(--shell-line);
-  border-radius: 999px;
+  border-radius: 0.72rem;
   background: var(--shell-surface);
   color: var(--shell-text);
   font: inherit;
@@ -585,7 +656,7 @@ async function handleLogout() {
   width: 2rem;
   height: 2rem;
   place-items: center;
-  border-radius: 999px;
+  border-radius: 0.58rem;
   background: color-mix(in srgb, var(--shell-accent) 22%, var(--shell-surface));
   color: var(--shell-accent-strong);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 18%, transparent);
@@ -631,7 +702,7 @@ async function handleLogout() {
   min-height: 2.65rem;
   padding: 0.25rem 0.45rem 0.25rem 0.3rem;
   border: 1px solid var(--shell-line);
-  border-radius: 999px;
+  border-radius: 0.78rem;
   background: var(--shell-surface);
   color: var(--shell-text);
   line-height: 1;
@@ -643,7 +714,7 @@ async function handleLogout() {
   width: 2.1rem;
   height: 2.1rem;
   place-items: center;
-  border-radius: 999px;
+  border-radius: 0.62rem;
   background: color-mix(in srgb, var(--shell-accent) 18%, var(--shell-surface));
   color: var(--shell-accent-strong);
   font-size: 0.78rem;

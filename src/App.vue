@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Toast from 'primevue/toast'
 import { computed } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 
@@ -15,6 +16,8 @@ const shouldUseShell = computed(() => {
 </script>
 
 <template>
+  <Toast />
+
   <AppShell v-if="shouldUseShell">
     <RouterView />
   </AppShell>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Select from 'primevue/select'
+import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
 
 import { currentColors } from '@/theme/color-mode'
@@ -43,12 +44,12 @@ type SelectInstance = {
   overlayVisible?: boolean
 }
 
+const toast = useToast()
 const pageState = ref<PatientState>('ready')
 const searchQuery = ref('')
 const selectedFilter = ref<PatientFilter>('todos')
 const selectedSegment = ref<SegmentFilter>('todos')
 const selectedSort = ref<SortMode>('retorno')
-const successMessage = ref('')
 const segmentSelectRef = ref<SelectInstance | null>(null)
 const sortSelectRef = ref<SelectInstance | null>(null)
 
@@ -199,17 +200,32 @@ const sortOptions: SortOption[] = [
   { value: 'risco', label: 'Ordenar por risco', detail: 'Alta atenção no topo', icon: 'pi pi-shield' },
 ]
 
-const filterSelectPt = {
-  overlay: {
-    class: 'patients-select-overlay',
-  },
-  list: {
-    class: 'patients-select-list',
-  },
-  option: {
-    class: 'patients-select-option',
-  },
-}
+const filterSelectPt = computed(() => {
+  const colors = currentColors.value
+
+  return {
+    overlay: {
+      class: 'patients-select-overlay',
+      style: {
+        '--pj-select-card': colors.dashboard.surface,
+        '--pj-select-line': colors.dashboard.line,
+        '--pj-select-text': colors.dashboard.text,
+        '--pj-select-muted': colors.dashboard.muted,
+        '--pj-select-faint': colors.dashboard.faint,
+        '--pj-select-primary': colors.vet.primary,
+        '--pj-select-primary-soft': colors.vet.secondary,
+        '--pj-select-primary-strong': colors.dashboard.primaryStrong,
+        '--pj-select-shadow-rgb': colors.auth.shadowRgb,
+      },
+    },
+    list: {
+      class: 'patients-select-list',
+    },
+    option: {
+      class: 'patients-select-option',
+    },
+  }
+})
 
 const riskLabel: Record<PatientRisk, string> = {
   high: 'Risco alto',
@@ -367,7 +383,12 @@ function retryPatients() {
 }
 
 function registerNewPatient() {
-  successMessage.value = 'Fluxo de novo paciente preparado para integração com cadastro.'
+  toast.add({
+    severity: 'success',
+    summary: 'Novo paciente',
+    detail: 'Fluxo de novo paciente preparado para integração com cadastro.',
+    life: 3000,
+  })
 }
 </script>
 
@@ -419,7 +440,7 @@ function registerNewPatient() {
             :options="segmentOptions"
             option-label="label"
             option-value="value"
-            append-to="self"
+            append-to="body"
             aria-label="Filtrar por segmento de atendimento"
             class="patients-filter-select w-full"
             :pt="filterSelectPt"
@@ -454,7 +475,7 @@ function registerNewPatient() {
             :options="sortOptions"
             option-label="label"
             option-value="value"
-            append-to="self"
+            append-to="body"
             aria-label="Ordenação de pacientes"
             class="patients-filter-select w-full"
             :pt="filterSelectPt"
@@ -482,11 +503,6 @@ function registerNewPatient() {
         </div>
       </div>
     </section>
-
-    <div v-if="successMessage" class="patients-feedback" role="status">
-      <i class="pi pi-check-circle" aria-hidden="true" />
-      {{ successMessage }}
-    </div>
 
     <section v-if="pageState === 'loading'" class="patients-state" role="status">
       <span class="state-spinner" aria-hidden="true" />
@@ -764,50 +780,48 @@ function registerNewPatient() {
   color: var(--patients-faint);
 }
 
-.select-control :deep(.patients-select-overlay) {
-  right: 0 !important;
-  left: auto !important;
+:global(.patients-select-overlay) {
   overflow: hidden;
   width: min(23rem, calc(100vw - 2rem));
   max-width: min(23rem, calc(100vw - 2rem));
   margin-top: 0.45rem;
-  border: 1px solid var(--patients-line);
+  border: 1px solid var(--pj-select-line);
   border-radius: 0.9rem;
-  background: var(--patients-card);
-  color: var(--patients-text);
-  box-shadow: 0 18px 42px rgb(var(--patients-shadow-rgb) / 0.16);
+  background: var(--pj-select-card);
+  color: var(--pj-select-text);
+  box-shadow: 0 18px 42px rgb(var(--pj-select-shadow-rgb) / 0.16);
 }
 
-.select-control :deep(.patients-select-list) {
+:global(.patients-select-list) {
   padding: 0.35rem;
-  background: var(--patients-card);
+  background: var(--pj-select-card);
 }
 
-.select-control :deep(.patients-select-option) {
+:global(.patients-select-option) {
   min-height: 2.65rem;
   max-width: 100%;
   border-radius: 0.72rem;
   background: transparent;
-  color: var(--patients-text);
+  color: var(--pj-select-text);
 }
 
-.select-control :deep(.patients-select-option:hover),
-.select-control :deep(.patients-select-option.p-focus),
-.select-control :deep(.patients-select-option.p-select-option-selected) {
-  background: color-mix(in srgb, var(--patients-primary) 22%, var(--patients-card)) !important;
-  color: var(--patients-text);
+:global(.patients-select-option:hover),
+:global(.patients-select-option.p-focus),
+:global(.patients-select-option.p-select-option-selected) {
+  background: color-mix(in srgb, var(--pj-select-primary) 22%, var(--pj-select-card)) !important;
+  color: var(--pj-select-text);
 }
 
-.select-control :deep(.patients-select-option:hover .filter-select-option__line strong),
-.select-control :deep(.patients-select-option.p-focus .filter-select-option__line strong),
-.select-control :deep(.patients-select-option.p-select-option-selected .filter-select-option__line strong) {
-  color: var(--patients-text) !important;
+:global(.patients-select-option:hover) .filter-select-option__line strong,
+:global(.patients-select-option.p-focus) .filter-select-option__line strong,
+:global(.patients-select-option.p-select-option-selected) .filter-select-option__line strong {
+  color: var(--pj-select-text) !important;
 }
 
-.select-control :deep(.patients-select-option:hover .filter-select-option__line small),
-.select-control :deep(.patients-select-option.p-focus .filter-select-option__line small),
-.select-control :deep(.patients-select-option.p-select-option-selected .filter-select-option__line small) {
-  color: var(--patients-muted) !important;
+:global(.patients-select-option:hover) .filter-select-option__line small,
+:global(.patients-select-option.p-focus) .filter-select-option__line small,
+:global(.patients-select-option.p-select-option-selected) .filter-select-option__line small {
+  color: var(--pj-select-muted) !important;
 }
 
 .filter-select-value {
@@ -846,8 +860,8 @@ function registerNewPatient() {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 0.7rem;
-  background: color-mix(in srgb, var(--patients-primary-soft) 26%, var(--patients-card));
-  color: var(--patients-primary-strong);
+  background: color-mix(in srgb, var(--pj-select-primary-soft, var(--patients-primary-soft)) 26%, var(--pj-select-card, var(--patients-card)));
+  color: var(--pj-select-primary-strong, var(--patients-primary-strong));
 }
 
 .filter-select-option__icon i {
@@ -860,7 +874,7 @@ function registerNewPatient() {
   width: 0;
   min-width: 0;
   overflow: hidden;
-  color: var(--patients-text);
+  color: var(--pj-select-text, var(--patients-text));
   font-size: 0.84rem;
   font-weight: 500;
   line-height: 1.2;
@@ -869,14 +883,14 @@ function registerNewPatient() {
 }
 
 .filter-select-option__line strong {
-  color: var(--patients-text);
+  color: var(--pj-select-text, var(--patients-text));
   font-size: 0.84rem;
   font-weight: 600;
   line-height: 1.15;
 }
 
 .filter-select-option__line small {
-  color: var(--patients-faint);
+  color: var(--pj-select-faint, var(--patients-faint));
   font-size: 0.72rem;
   font-weight: 500;
   line-height: 1.2;
@@ -884,21 +898,7 @@ function registerNewPatient() {
 
 .filter-select-option__line small::before {
   content: ' - ';
-  color: var(--patients-faint);
-}
-
-.patients-feedback {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-top: 1rem;
-  padding: 0.76rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--patients-primary) 30%, var(--patients-line));
-  border-radius: 0.9rem;
-  background: var(--patients-success-bg);
-  color: var(--patients-success-text);
-  font-size: 0.82rem;
-  font-weight: 600;
+  color: var(--pj-select-faint, var(--patients-faint));
 }
 
 .patients-grid {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
 
 import { currentColors } from '@/theme/color-mode'
@@ -6,7 +7,7 @@ import { currentColors } from '@/theme/color-mode'
 type RecordRisk = 'critical' | 'attention' | 'stable'
 type PageState = 'loading' | 'ready' | 'error'
 type QueueFilter = 'todos' | 'criticos' | 'pendencias' | 'compartilhados'
-type RecordTab = 'resumo' | 'linha-tempo' | 'consultas' | 'vacinas' | 'documentos'
+type RecordTab = 'resumo' | 'clinico' | 'soap' | 'historico' | 'arquivos'
 
 type TimelineEntry = {
   date: string
@@ -50,12 +51,12 @@ type ClinicalRecord = {
   tutorDiary: Array<{ date: string; note: string }>
 }
 
+const toast = useToast()
 const pageState = ref<PageState>('ready')
 const searchQuery = ref('')
 const selectedFilter = ref<QueueFilter>('todos')
 const selectedRecordId = ref('luna')
 const selectedTab = ref<RecordTab>('resumo')
-const successMessage = ref('')
 
 const pageStyle = computed(() => {
   const colors = currentColors.value
@@ -283,11 +284,11 @@ const filters: Array<{ value: QueueFilter; label: string }> = [
 ]
 
 const tabs: Array<{ value: RecordTab; label: string; icon: string }> = [
-  { value: 'resumo', label: 'Resumo', icon: 'pi pi-heart' },
-  { value: 'linha-tempo', label: 'Linha do tempo', icon: 'pi pi-history' },
-  { value: 'consultas', label: 'Consultas', icon: 'pi pi-file-edit' },
-  { value: 'vacinas', label: 'Vacinas', icon: 'pi pi-shield' },
-  { value: 'documentos', label: 'Documentos', icon: 'pi pi-paperclip' },
+  { value: 'resumo', label: 'Visão geral', icon: 'pi pi-id-card' },
+  { value: 'clinico', label: 'Clínico', icon: 'pi pi-heart' },
+  { value: 'soap', label: 'SOAP', icon: 'pi pi-file-edit' },
+  { value: 'historico', label: 'Histórico', icon: 'pi pi-history' },
+  { value: 'arquivos', label: 'Arquivos', icon: 'pi pi-paperclip' },
 ]
 
 const riskLabel: Record<RecordRisk, string> = {
@@ -327,6 +328,8 @@ const selectedRecord = computed(
     visibleRecords.value[0] ??
     null,
 )
+
+const hasQueueFilters = computed(() => Boolean(searchQuery.value.trim()) || selectedFilter.value !== 'todos')
 
 function getInitials(name: string) {
   return name
@@ -376,7 +379,12 @@ function startSoapRecord() {
     return
   }
 
-  successMessage.value = `Registro SOAP de ${selectedRecord.value.pet} preparado para integração.`
+  toast.add({
+    severity: 'success',
+    summary: 'SOAP preparado',
+    detail: `Registro SOAP de ${selectedRecord.value.pet} preparado para integração.`,
+    life: 3000,
+  })
 }
 
 function createClinicalTask() {
@@ -384,62 +392,17 @@ function createClinicalTask() {
     return
   }
 
-  successMessage.value = `Atividade clínica criada para ${selectedRecord.value.pet}.`
+  toast.add({
+    severity: 'success',
+    summary: 'Atividade criada',
+    detail: `Atividade clínica criada para ${selectedRecord.value.pet}.`,
+    life: 3000,
+  })
 }
 </script>
 
 <template>
   <main class="records-page" :style="pageStyle">
-    <section class="records-hero">
-      <div class="records-hero__copy">
-        <span class="records-kicker">Prontuário clínico</span>
-        <h1>Prontuários</h1>
-        <p>
-          Acesse o histórico autorizado do pet, veja riscos antes da linha do tempo e registre a conduta em modelo SOAP.
-        </p>
-      </div>
-
-      <div class="records-actions">
-        <label class="records-search" for="records-search">
-          <i class="pi pi-search" aria-hidden="true" />
-          <input id="records-search" v-model="searchQuery" type="search" placeholder="Buscar pet, tutor ou alerta..." />
-        </label>
-
-        <button class="records-button records-button--primary" type="button" @click="startSoapRecord">
-          <i class="pi pi-plus" aria-hidden="true" />
-          Novo SOAP
-        </button>
-      </div>
-    </section>
-
-    <section class="records-summary" aria-label="Resumo de prontuários">
-      <article class="summary-card">
-        <span>Prontuários</span>
-        <strong>{{ summary.total }}</strong>
-        <small>Com acesso autorizado</small>
-      </article>
-      <article class="summary-card" data-tone="danger">
-        <span>Críticos</span>
-        <strong>{{ summary.critical }}</strong>
-        <small>Alergia ou risco alto</small>
-      </article>
-      <article class="summary-card" data-tone="attention">
-        <span>Pendências</span>
-        <strong>{{ summary.pending }}</strong>
-        <small>Revisão ou retorno</small>
-      </article>
-      <article class="summary-card" data-tone="shared">
-        <span>Compartilhados</span>
-        <strong>{{ summary.shared }}</strong>
-        <small>Escopo temporário</small>
-      </article>
-    </section>
-
-    <div v-if="successMessage" class="records-feedback" role="status">
-      <i class="pi pi-check-circle" aria-hidden="true" />
-      {{ successMessage }}
-    </div>
-
     <section v-if="pageState === 'loading'" class="records-state" role="status">
       <span class="state-spinner" aria-hidden="true" />
       <strong>Carregando prontuários</strong>
@@ -470,6 +433,16 @@ function createClinicalTask() {
           <strong>{{ visibleRecords.length }}</strong>
         </div>
 
+        <label class="queue-search" for="records-queue-search">
+          <i class="pi pi-search" aria-hidden="true" />
+          <input
+            id="records-queue-search"
+            v-model="searchQuery"
+            type="search"
+            placeholder="Filtrar pet, tutor ou alerta"
+          />
+        </label>
+
         <div class="filter-group" aria-label="Filtros de prontuários">
           <button
             v-for="filter in filters"
@@ -484,6 +457,10 @@ function createClinicalTask() {
           </button>
         </div>
 
+        <button v-if="hasQueueFilters" class="queue-clear" type="button" @click="clearFilters">
+          Limpar busca e filtros
+        </button>
+
         <div class="record-list">
           <button
             v-for="record in visibleRecords"
@@ -491,15 +468,23 @@ function createClinicalTask() {
             class="record-card"
             :class="{ 'record-card--active': selectedRecord?.id === record.id }"
             type="button"
+            :aria-current="selectedRecord?.id === record.id ? 'true' : undefined"
             @click="selectRecord(record)"
           >
             <span class="pet-avatar" :data-tone="record.risk">{{ getInitials(record.pet) }}</span>
             <span class="record-card__body">
-              <strong>{{ record.pet }}</strong>
+              <span class="record-card__title">
+                <strong>{{ record.pet }}</strong>
+                <span class="risk-pill" :data-tone="record.risk">{{ riskLabel[record.risk] }}</span>
+              </span>
               <small>{{ record.species }} - {{ record.breed }} - {{ record.tutor }}</small>
               <span class="record-card__alert">{{ record.mainAlert }}</span>
+              <span class="record-card__meta">
+                <span>{{ record.lastVisit }}</span>
+                <span>{{ record.pendingTasks.length }} pend.</span>
+                <span>{{ record.status }}</span>
+              </span>
             </span>
-            <span class="risk-pill" :data-tone="record.risk">{{ riskLabel[record.risk] }}</span>
           </button>
         </div>
       </aside>
@@ -525,39 +510,6 @@ function createClinicalTask() {
           </div>
         </header>
 
-        <dl class="patient-facts" aria-label="Dados principais do paciente">
-          <div>
-            <dt>Tutor</dt>
-            <dd>{{ selectedRecord.tutor }}</dd>
-          </div>
-          <div>
-            <dt>Última visita</dt>
-            <dd>{{ selectedRecord.lastVisit }}</dd>
-          </div>
-          <div>
-            <dt>Status clínico</dt>
-            <dd>{{ selectedRecord.status }}</dd>
-          </div>
-        </dl>
-
-        <section class="record-context-grid">
-          <article class="critical-alert" :data-tone="selectedRecord.risk">
-            <i class="pi pi-exclamation-triangle" aria-hidden="true" />
-            <div>
-              <strong>Antes de prescrever</strong>
-              <p>{{ selectedRecord.mainAlert }}</p>
-            </div>
-          </article>
-
-          <article class="access-card">
-            <i class="pi pi-lock" aria-hidden="true" />
-            <div>
-              <strong>{{ selectedRecord.authorization }}</strong>
-              <p>{{ selectedRecord.sharedScope }}</p>
-            </div>
-          </article>
-        </section>
-
         <nav class="record-tabs" aria-label="Abas do prontuário">
           <button
             v-for="tab in tabs"
@@ -573,6 +525,57 @@ function createClinicalTask() {
         </nav>
 
         <section v-if="selectedTab === 'resumo'" class="tab-panel">
+          <dl class="patient-facts" aria-label="Dados principais do paciente">
+            <div>
+              <dt>Tutor</dt>
+              <dd>{{ selectedRecord.tutor }}</dd>
+            </div>
+            <div>
+              <dt>Última visita</dt>
+              <dd>{{ selectedRecord.lastVisit }}</dd>
+            </div>
+            <div>
+              <dt>Status clínico</dt>
+              <dd>{{ selectedRecord.status }}</dd>
+            </div>
+          </dl>
+
+          <section class="record-context-grid">
+            <article class="critical-alert" :data-tone="selectedRecord.risk">
+              <i class="pi pi-exclamation-triangle" aria-hidden="true" />
+              <div>
+                <strong>Antes de prescrever</strong>
+                <p>{{ selectedRecord.mainAlert }}</p>
+              </div>
+            </article>
+
+            <article class="access-card">
+              <i class="pi pi-lock" aria-hidden="true" />
+              <div>
+                <strong>{{ selectedRecord.authorization }}</strong>
+                <p>{{ selectedRecord.sharedScope }}</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="overview-grid">
+            <article class="clinical-card clinical-card--wide">
+              <span class="records-kicker">Próxima ação</span>
+              <h3>{{ selectedRecord.nextAction }}</h3>
+              <ul class="task-list">
+                <li v-for="task in selectedRecord.pendingTasks" :key="task">{{ task }}</li>
+              </ul>
+            </article>
+
+            <article class="clinical-card">
+              <span class="records-kicker">Último SOAP</span>
+              <h3>{{ selectedRecord.lastSoap.date }}</h3>
+              <p>{{ selectedRecord.lastSoap.assessment }}</p>
+            </article>
+          </section>
+        </section>
+
+        <section v-else-if="selectedTab === 'clinico'" class="tab-panel">
           <div class="clinical-grid">
             <article class="clinical-card">
               <span class="records-kicker">Alergias</span>
@@ -606,16 +609,10 @@ function createClinicalTask() {
                 </span>
               </div>
             </article>
-
-            <article class="clinical-card">
-              <span class="records-kicker">Próxima ação</span>
-              <h3>{{ selectedRecord.nextAction }}</h3>
-              <ul class="task-list">
-                <li v-for="task in selectedRecord.pendingTasks" :key="task">{{ task }}</li>
-              </ul>
-            </article>
           </div>
+        </section>
 
+        <section v-else-if="selectedTab === 'soap'" class="tab-panel">
           <section class="soap-card">
             <div class="soap-card__header">
               <div>
@@ -651,23 +648,18 @@ function createClinicalTask() {
           </section>
         </section>
 
-        <section v-else-if="selectedTab === 'linha-tempo'" class="tab-panel timeline-panel">
-          <article v-for="entry in selectedRecord.timeline" :key="`${entry.date}-${entry.title}`" class="timeline-row">
-            <span class="timeline-dot" :data-tone="entry.tone" />
-            <div>
-              <span>{{ entry.date }}</span>
-              <strong>{{ entry.title }}</strong>
-              <p>{{ entry.detail }}</p>
-            </div>
-          </article>
-        </section>
+        <section v-else-if="selectedTab === 'historico'" class="tab-panel history-layout">
+          <section class="timeline-panel">
+            <article v-for="entry in selectedRecord.timeline" :key="`${entry.date}-${entry.title}`" class="timeline-row">
+              <span class="timeline-dot" :data-tone="entry.tone" />
+              <div>
+                <span>{{ entry.date }}</span>
+                <strong>{{ entry.title }}</strong>
+                <p>{{ entry.detail }}</p>
+              </div>
+            </article>
+          </section>
 
-        <section v-else-if="selectedTab === 'consultas'" class="tab-panel split-panel">
-          <article class="clinical-card clinical-card--wide">
-            <span class="records-kicker">Última consulta</span>
-            <h3>{{ selectedRecord.lastVisit }}</h3>
-            <p>{{ selectedRecord.lastSoap.assessment }}</p>
-          </article>
           <article class="clinical-card clinical-card--wide">
             <span class="records-kicker">Diário do tutor</span>
             <h3>Sinais recentes compartilhados</h3>
@@ -680,7 +672,7 @@ function createClinicalTask() {
           </article>
         </section>
 
-        <section v-else-if="selectedTab === 'vacinas'" class="tab-panel split-panel">
+        <section v-else class="tab-panel split-panel">
           <article v-for="vaccine in selectedRecord.vaccines" :key="vaccine.name" class="data-row">
             <span class="data-row__icon">
               <i class="pi pi-shield" aria-hidden="true" />
@@ -703,9 +695,7 @@ function createClinicalTask() {
               <small>{{ weightEntry.date }} - {{ weightEntry.note }}</small>
             </div>
           </article>
-        </section>
 
-        <section v-else class="tab-panel split-panel">
           <article v-for="document in selectedRecord.documents" :key="document.name" class="data-row">
             <span class="data-row__icon">
               <i class="pi pi-paperclip" aria-hidden="true" />
@@ -730,13 +720,6 @@ function createClinicalTask() {
   color: var(--records-text);
 }
 
-.records-hero {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.25rem;
-}
-
 .records-kicker {
   display: block;
   color: var(--records-faint);
@@ -746,24 +729,6 @@ function createClinicalTask() {
   text-transform: uppercase;
 }
 
-.records-hero h1 {
-  margin: 0.35rem 0 0;
-  color: var(--records-text);
-  font-size: clamp(1.9rem, 3vw, 2.5rem);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.06em;
-}
-
-.records-hero p {
-  max-width: 45rem;
-  margin: 0.68rem 0 0;
-  color: var(--records-muted);
-  font-size: 0.94rem;
-  line-height: 1.55;
-}
-
-.records-actions,
 .filter-group,
 .record-detail__actions,
 .record-tabs,
@@ -771,43 +736,6 @@ function createClinicalTask() {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
-}
-
-.records-actions {
-  align-items: center;
-  justify-content: flex-end;
-  min-width: min(100%, 34rem);
-}
-
-.records-search {
-  display: inline-flex;
-  width: min(22rem, 34vw);
-  min-width: 16rem;
-  height: 3rem;
-  align-items: center;
-  gap: 0.72rem;
-  padding: 0 1rem;
-  border: 1px solid var(--records-line);
-  border-radius: 0.98rem;
-  background: var(--records-card);
-  color: var(--records-faint);
-  box-shadow: 0 10px 30px rgb(var(--records-shadow-rgb) / 0.04);
-}
-
-.records-search input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  background: transparent;
-  color: var(--records-text);
-  font: inherit;
-  font-size: 0.86rem;
-  font-weight: 600;
-  outline: none;
-}
-
-.records-search input::placeholder {
-  color: var(--records-faint);
 }
 
 .records-button,
@@ -857,14 +785,6 @@ function createClinicalTask() {
   color: var(--records-muted);
 }
 
-.records-summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 1.35rem;
-}
-
-.summary-card,
 .records-list-panel,
 .record-detail,
 .clinical-card,
@@ -874,29 +794,6 @@ function createClinicalTask() {
   background: var(--records-card);
 }
 
-.summary-card {
-  display: grid;
-  gap: 0.42rem;
-  min-height: 7rem;
-  padding: 1rem;
-  border-radius: 1.05rem;
-}
-
-.summary-card span {
-  color: var(--records-muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.summary-card strong {
-  color: var(--records-text);
-  font-size: 2rem;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.055em;
-}
-
-.summary-card small,
 .risk-pill,
 .clinical-tag {
   display: inline-flex;
@@ -907,45 +804,6 @@ function createClinicalTask() {
   font-size: 0.7rem;
   font-weight: 700;
   line-height: 1;
-}
-
-.summary-card small {
-  padding: 0.3rem 0.58rem;
-  background: var(--records-success-bg);
-  color: var(--records-success-text);
-}
-
-.summary-card[data-tone='danger'] small,
-.summary-card[data-tone='danger'] strong {
-  color: var(--records-warm-text);
-}
-
-.summary-card[data-tone='danger'] small {
-  background: var(--records-warm-bg);
-}
-
-.summary-card[data-tone='attention'] small {
-  background: var(--records-amber-bg);
-  color: var(--records-amber-text);
-}
-
-.summary-card[data-tone='shared'] small {
-  background: color-mix(in srgb, var(--records-tutor) 14%, var(--records-card));
-  color: var(--records-tutor);
-}
-
-.records-feedback {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-top: 1rem;
-  padding: 0.76rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--records-primary) 30%, var(--records-line));
-  border-radius: 0.9rem;
-  background: var(--records-success-bg);
-  color: var(--records-success-text);
-  font-size: 0.82rem;
-  font-weight: 600;
 }
 
 .records-workspace {
@@ -1220,6 +1078,14 @@ function createClinicalTask() {
   gap: 0.9rem;
 }
 
+.overview-grid,
+.history-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+}
+
 .clinical-card,
 .soap-card {
   padding: 1rem;
@@ -1479,53 +1345,6 @@ function createClinicalTask() {
   padding: 1.25rem 1.4rem 1.7rem;
 }
 
-.records-hero {
-  align-items: center;
-  padding: 1.15rem;
-  border: 1px solid var(--records-line);
-  border-radius: 1.2rem;
-  background: var(--records-card);
-}
-
-.records-hero p {
-  max-width: 38rem;
-  margin-top: 0.5rem;
-}
-
-.records-summary {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.9rem;
-}
-
-.summary-card {
-  min-height: auto;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.3rem 0.75rem;
-  padding: 0.82rem 0.9rem;
-  border-radius: 0.95rem;
-}
-
-.summary-card span,
-.summary-card small {
-  grid-column: 1;
-}
-
-.summary-card strong {
-  grid-row: 1 / span 2;
-  grid-column: 2;
-  font-size: 1.7rem;
-}
-
-.summary-card small {
-  padding: 0;
-  background: transparent !important;
-  color: var(--records-faint) !important;
-  font-size: 0.68rem;
-  font-weight: 600;
-}
-
 .records-workspace {
   grid-template-columns: 20.5rem minmax(0, 1fr);
   gap: 1rem;
@@ -1564,6 +1383,39 @@ function createClinicalTask() {
   font-size: 0.86rem;
 }
 
+.queue-search {
+  display: flex;
+  height: 2.45rem;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0 0.72rem;
+  border: 1px solid var(--records-line);
+  border-radius: 0.8rem;
+  background: var(--records-surface);
+  color: var(--records-faint);
+}
+
+.queue-search:focus-within {
+  border-color: color-mix(in srgb, var(--records-primary) 38%, var(--records-line));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--records-primary) 12%, transparent);
+}
+
+.queue-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--records-text);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.queue-search input::placeholder {
+  color: var(--records-faint);
+}
+
 .filter-group {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1578,22 +1430,58 @@ function createClinicalTask() {
   font-size: 0.74rem;
 }
 
+.queue-clear {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 1.9rem;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--records-primary-strong);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.queue-clear:hover {
+  color: var(--records-primary-deep);
+}
+
 .record-list {
   gap: 0.5rem;
+  max-height: calc(100vh - 24.5rem);
+  min-height: 13rem;
+  overflow: auto;
+  padding-right: 0.15rem;
 }
 
 .record-card {
   grid-template-columns: 2.35rem minmax(0, 1fr);
   gap: 0.65rem;
-  padding: 0.76rem;
+  padding: 0.72rem;
   border-radius: 0.9rem;
   background: var(--records-card);
 }
 
-.record-card > .risk-pill {
-  grid-column: 2;
-  justify-self: start;
-  margin-top: 0.12rem;
+.record-card:focus-visible {
+  border-color: var(--records-primary);
+  outline: 2px solid color-mix(in srgb, var(--records-primary) 28%, transparent);
+  outline-offset: 2px;
+}
+
+.record-card--active {
+  background: color-mix(in srgb, var(--records-primary-soft) 30%, var(--records-card));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--records-primary) 34%, transparent);
+}
+
+.record-card__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
 .record-card__body strong {
@@ -1607,6 +1495,26 @@ function createClinicalTask() {
 .record-card__alert {
   -webkit-line-clamp: 1;
   font-size: 0.72rem;
+}
+
+.record-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.32rem;
+  margin-top: 0.08rem;
+}
+
+.record-card__meta span {
+  display: inline-flex;
+  min-height: 1.35rem;
+  align-items: center;
+  padding: 0 0.42rem;
+  border-radius: 999px;
+  background: var(--records-surface);
+  color: var(--records-faint);
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .pet-avatar {
@@ -1797,14 +1705,14 @@ function createClinicalTask() {
 }
 
 @media (max-width: 1180px) {
-  .records-hero,
   .record-detail__header {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .records-summary,
   .clinical-grid,
+  .overview-grid,
+  .history-layout,
   .split-panel,
   .record-context-grid,
   .soap-grid {
@@ -1825,14 +1733,13 @@ function createClinicalTask() {
     padding: 1rem;
   }
 
-  .records-actions,
-  .records-search,
   .records-button--primary {
     width: 100%;
   }
 
-  .records-summary,
   .clinical-grid,
+  .overview-grid,
+  .history-layout,
   .soap-grid,
   .split-panel,
   .patient-facts,
@@ -1842,7 +1749,6 @@ function createClinicalTask() {
     grid-template-columns: 1fr;
   }
 
-  .records-hero,
   .record-detail__header {
     padding: 1rem;
   }

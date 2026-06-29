@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -81,8 +80,6 @@ async function handleLogin() {
 </script>
 
 <template>
-  <Toast />
-
   <AuthLayout
     description="Entre para acompanhar a agenda, os prontuários e o cuidado dos seus pacientes."
     title="Bem-vindo de volta"

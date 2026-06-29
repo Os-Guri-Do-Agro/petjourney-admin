@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
 
 import { currentColors } from '@/theme/color-mode'
@@ -32,12 +33,12 @@ type Appointment = {
   nextAction: string
 }
 
+const toast = useToast()
 const selectedMode = ref<ViewMode>('semana')
 const selectedStatus = ref<AppointmentStatus | 'todos'>('todos')
 const agendaState = ref<AgendaState>('ready')
 const selectedAppointmentId = ref<string | null>(null)
 const detailsModalOpen = ref(false)
-const successMessage = ref('')
 
 const pageStyle = computed(() => {
   const colors = currentColors.value
@@ -422,16 +423,6 @@ const selectedAppointment = computed(
   () => appointments.value.find((appointment) => appointment.id === selectedAppointmentId.value) ?? null,
 )
 
-const summary = computed(() => ({
-  total: filteredAppointments.value.length,
-  pending: filteredAppointments.value.filter((appointment) => appointment.status === 'pendente').length,
-  high: filteredAppointments.value.filter((appointment) => appointment.priority === 'high').length,
-  next:
-    filteredAppointments.value.find((appointment) => appointment.status === 'em-sala') ??
-    filteredAppointments.value.find((appointment) => appointment.status === 'confirmado') ??
-    null,
-}))
-
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -471,11 +462,25 @@ function setAppointmentStatus(status: AppointmentStatus) {
   }
 
   selectedAppointment.value.status = status
-  successMessage.value = `Atendimento de ${selectedAppointment.value.pet} atualizado para ${statusLabel[status]}.`
+  toast.add({
+    severity: 'success',
+    summary: 'Atendimento atualizado',
+    detail: `Atendimento de ${selectedAppointment.value.pet} atualizado para ${statusLabel[status]}.`,
+    life: 3000,
+  })
 }
 
 function clearFilters() {
   selectedStatus.value = 'todos'
+}
+
+function createAppointment() {
+  toast.add({
+    severity: 'info',
+    summary: 'Novo atendimento',
+    detail: 'Fluxo preparado para abrir o cadastro de atendimento.',
+    life: 3000,
+  })
 }
 
 function retryAgenda() {
@@ -489,53 +494,19 @@ function retryAgenda() {
 
 <template>
   <main id="agenda" class="agenda-page" :style="pageStyle">
-    <section class="agenda-hero">
-      <div class="agenda-hero__copy">
-        <span class="agenda-kicker">Agenda clínica</span>
-        <h1>Agenda do veterinário</h1>
-        <p>
-          Organize atendimentos, salas e profissionais da semana. Clique em qualquer card do calendário para abrir
-          dados clínicos, tutor, autorização compartilhada e ações rápidas.
-        </p>
-      </div>
-
-      <div class="agenda-hero__actions">
-        <button class="agenda-button agenda-button--primary" type="button">
-          <i class="pi pi-plus" aria-hidden="true" />
-          Novo atendimento
-        </button>
-        <button class="agenda-button agenda-button--ghost" type="button" @click="retryAgenda">
-          <i class="pi pi-refresh" aria-hidden="true" />
-          Recarregar
-        </button>
-      </div>
-    </section>
-
-    <section class="agenda-summary" aria-label="Resumo da agenda">
-      <article class="summary-card">
-        <span>Atendimentos</span>
-        <strong>{{ summary.total }}</strong>
-        <small>Semana atual</small>
-      </article>
-      <article class="summary-card" data-tone="attention">
-        <span>Pendentes</span>
-        <strong>{{ summary.pending }}</strong>
-        <small>Confirmação ou preparo</small>
-      </article>
-      <article class="summary-card" data-tone="danger">
-        <span>Alta atenção</span>
-        <strong>{{ summary.high }}</strong>
-        <small>Alertas clínicos</small>
-      </article>
-      <article class="summary-card summary-card--wide">
-        <span>Próximo foco</span>
-        <strong>{{ summary.next?.time ?? '--:--' }}</strong>
-        <small>{{ summary.next ? `${summary.next.pet} - ${typeLabel[summary.next.type]}` : 'Sem próximo atendimento' }}</small>
-      </article>
-    </section>
-
     <section class="agenda-workspace">
       <aside class="agenda-sidebar" aria-label="Filtros da agenda">
+        <section class="agenda-actions-panel" aria-label="Ações da agenda">
+          <button class="agenda-button agenda-button--primary" type="button" @click="createAppointment">
+            <i class="pi pi-plus" aria-hidden="true" />
+            Novo atendimento
+          </button>
+          <button class="agenda-button agenda-button--ghost" type="button" @click="retryAgenda">
+            <i class="pi pi-refresh" aria-hidden="true" />
+            Recarregar
+          </button>
+        </section>
+
         <div class="side-card">
           <div class="side-card__header">
             <strong>Junho 2026</strong>
@@ -596,11 +567,6 @@ function retryAgenda() {
           </button>
         </div>
 
-        <div v-if="successMessage" class="feedback-card" role="status">
-          <i class="pi pi-check-circle" aria-hidden="true" />
-          {{ successMessage }}
-        </div>
-
         <div v-if="agendaState === 'loading'" class="agenda-state" role="status">
           <span class="state-spinner" aria-hidden="true" />
           <strong>Carregando agenda</strong>
@@ -635,9 +601,6 @@ function retryAgenda() {
             </div>
 
             <div class="calendar-body">
-              <div v-for="day in days" :key="`column-${day.date}`" class="calendar-column" />
-              <span v-for="line in 8" :key="`line-${line}`" class="calendar-line" />
-
               <button
                 v-for="appointment in filteredAppointments"
                 :key="appointment.id"
@@ -765,13 +728,6 @@ function retryAgenda() {
   color: var(--agenda-text);
 }
 
-.agenda-hero {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.25rem;
-}
-
 .agenda-kicker {
   display: block;
   color: var(--agenda-faint);
@@ -781,24 +737,6 @@ function retryAgenda() {
   text-transform: uppercase;
 }
 
-.agenda-hero h1 {
-  margin: 0.35rem 0 0;
-  color: var(--agenda-text);
-  font-size: clamp(1.8rem, 2.8vw, 2.45rem);
-  font-weight: 600;
-  line-height: 1.02;
-  letter-spacing: -0.06em;
-}
-
-.agenda-hero p {
-  max-width: 44rem;
-  margin: 0.68rem 0 0;
-  color: var(--agenda-muted);
-  font-size: 0.94rem;
-  line-height: 1.55;
-}
-
-.agenda-hero__actions,
 .toolbar-actions,
 .status-filters,
 .details-actions {
@@ -850,14 +788,6 @@ function retryAgenda() {
   color: var(--agenda-text);
 }
 
-.agenda-summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 1.35rem;
-}
-
-.summary-card,
 .side-card,
 .calendar-panel,
 .details-dialog {
@@ -865,64 +795,41 @@ function retryAgenda() {
   background: var(--agenda-card);
 }
 
-.summary-card {
-  display: grid;
-  gap: 0.42rem;
-  min-height: 7rem;
-  padding: 1rem;
-  border-radius: 1.05rem;
-}
-
-.summary-card span {
-  color: var(--agenda-muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.summary-card strong {
-  color: var(--agenda-text);
-  font-size: 2rem;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.055em;
-}
-
-.summary-card small {
-  width: fit-content;
-  padding: 0.3rem 0.58rem;
-  border-radius: 999px;
-  background: var(--agenda-success-bg);
-  color: var(--agenda-success-text);
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.summary-card[data-tone='attention'] small {
-  background: var(--agenda-amber-bg);
-  color: var(--agenda-amber-text);
-}
-
-.summary-card[data-tone='danger'] small {
-  background: var(--agenda-warm-bg);
-  color: var(--agenda-warm-text);
-}
-
 .agenda-workspace {
   display: grid;
   grid-template-columns: 14rem minmax(0, 1fr);
   gap: 1.2rem;
   align-items: start;
-  margin-top: 1.35rem;
+}
+
+.agenda-actions-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.agenda-actions-panel .agenda-button {
+  width: 100%;
 }
 
 .agenda-sidebar {
-  display: grid;
-  gap: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--agenda-line);
+  border-radius: 1.25rem;
+  background: var(--agenda-card);
 }
 
 .side-card {
-  padding: 0.95rem;
-  border-radius: 1rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .side-card strong {
@@ -1018,20 +925,6 @@ function retryAgenda() {
   margin-top: 0.85rem;
 }
 
-.feedback-card {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-top: 0.85rem;
-  padding: 0.76rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--agenda-primary) 30%, var(--agenda-line));
-  border-radius: 0.9rem;
-  background: var(--agenda-success-bg);
-  color: var(--agenda-success-text);
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
 .agenda-state {
   display: grid;
   justify-items: center;
@@ -1111,7 +1004,10 @@ function retryAgenda() {
   min-height: 3.5rem;
   place-items: center;
   background: var(--agenda-card);
-  box-shadow: 1px 0 0 var(--agenda-line);
+}
+
+.calendar-day + .calendar-day {
+  border-left: 1px solid color-mix(in srgb, var(--agenda-line-soft) 58%, transparent);
 }
 
 .calendar-day span {
@@ -1140,28 +1036,37 @@ function retryAgenda() {
 .calendar-body {
   position: relative;
   display: grid;
+  --calendar-quarter-height: 1.0625rem;
+  --calendar-hour-height: 4.25rem;
   min-height: 34rem;
   grid-template-columns: repeat(6, minmax(6rem, 1fr));
-  grid-template-rows: repeat(32, 1.0625rem);
+  grid-template-rows: repeat(32, var(--calendar-quarter-height));
   border: 1px solid var(--agenda-line);
   border-radius: 0 0 1rem 1rem;
-  background: var(--agenda-card);
+  background:
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc((100% / 6) - 1px),
+      color-mix(in srgb, var(--agenda-line-soft) 58%, transparent) calc((100% / 6) - 1px),
+      color-mix(in srgb, var(--agenda-line-soft) 58%, transparent) calc(100% / 6)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--calendar-hour-height) - 1px),
+      var(--agenda-line) calc(var(--calendar-hour-height) - 1px),
+      var(--agenda-line) var(--calendar-hour-height)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--calendar-quarter-height) - 1px),
+      var(--agenda-line-soft) calc(var(--calendar-quarter-height) - 1px),
+      var(--agenda-line-soft) var(--calendar-quarter-height)
+    ),
+    var(--agenda-card);
   overflow: hidden;
-}
-
-.calendar-column {
-  grid-row: 1 / -1;
-  border-right: 1px solid var(--agenda-line-soft);
-}
-
-.calendar-line {
-  grid-column: 1 / -1;
-  height: 1px;
-  background: var(--agenda-line-soft);
-}
-
-.calendar-line:nth-of-type(8n + 1) {
-  background: var(--agenda-line);
 }
 
 .appointment-card {
@@ -1439,14 +1344,9 @@ function retryAgenda() {
 }
 
 @media (max-width: 1040px) {
-  .agenda-hero,
   .calendar-toolbar {
     align-items: stretch;
     flex-direction: column;
-  }
-
-  .agenda-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .agenda-workspace {
@@ -1463,7 +1363,6 @@ function retryAgenda() {
     padding: 1rem;
   }
 
-  .agenda-summary,
   .agenda-sidebar {
     grid-template-columns: 1fr;
   }
