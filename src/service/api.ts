@@ -2,6 +2,22 @@ import { clearAuthSession, getAccessToken } from './auth/auth-session'
 
 const API_URL = import.meta.env.VITE_API_URL ?? import.meta.env.PUBLIC_API_URL ?? ''
 
+export class ApiError extends Error {
+  readonly statusCode: number
+  readonly error?: string
+
+  constructor(message: string, statusCode: number, error?: string) {
+    super(message)
+    this.name = 'ApiError'
+    this.statusCode = statusCode
+    this.error = error
+  }
+}
+
+export function getApiUrl() {
+  return API_URL
+}
+
 export async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const token = getAccessToken()
   const headers = new Headers(options?.headers)
@@ -20,13 +36,17 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
   })
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null)
+    const errorBody = await response.json().catch(() => null)
 
     if (response.status === 401) {
       clearAuthSession()
     }
 
-    throw new Error(error?.message || `Erro ${response.status}`)
+    throw new ApiError(
+      errorBody?.message || `Erro ${response.status}`,
+      response.status,
+      errorBody?.error,
+    )
   }
 
   return response.json()

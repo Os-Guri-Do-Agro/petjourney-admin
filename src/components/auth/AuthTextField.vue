@@ -20,6 +20,7 @@ const props = withDefaults(
     autocomplete?: string
     required?: boolean
     hint?: string
+    error?: string
   }>(),
   {
     type: 'text',
@@ -27,6 +28,7 @@ const props = withDefaults(
     autocomplete: undefined,
     required: false,
     hint: '',
+    error: '',
   },
 )
 
@@ -74,6 +76,7 @@ const fieldStyle = computed(() => {
         :class="{
           'auth-text-field__input--with-leading': hasLeadingSlot,
           'auth-text-field__input--with-trailing': hasTrailingSlot,
+          'auth-text-field__input--invalid': Boolean(error),
         }"
         :autocomplete="autocomplete"
         :placeholder="placeholder"
@@ -86,7 +89,11 @@ const fieldStyle = computed(() => {
       </span>
     </span>
 
-    <span v-if="hint" class="auth-text-field__hint block text-xs leading-5">
+    <span v-if="error" class="auth-text-field__error block text-xs leading-5">
+      {{ error }}
+    </span>
+
+    <span v-else-if="hint" class="auth-text-field__hint block text-xs leading-5">
       {{ hint }}
     </span>
   </label>
@@ -168,7 +175,16 @@ const fieldStyle = computed(() => {
   background: color-mix(in srgb, var(--auth-focus-ring) 14%, var(--auth-white));
 }
 
+.auth-text-field__input--invalid {
+  border-color: var(--auth-danger);
+}
+
 .auth-text-field__hint {
   color: var(--auth-muted);
+}
+
+.auth-text-field__error {
+  color: var(--auth-danger);
+  font-weight: 600;
 }
 </style>

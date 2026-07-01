@@ -161,7 +161,7 @@ async function handleLogin() {
 
     <p class="login-support">
       Novo por aqui?
-      <RouterLink to="/auth/register">Fale com o suporte</RouterLink>
+      <RouterLink to="/auth/register">Criar conta</RouterLink>
     </p>
   </AuthLayout>
 </template>

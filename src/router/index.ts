@@ -28,7 +28,7 @@ router.beforeEach((to) => {
   const hasActiveSession = isAuthenticated()
   const isPublicRoute = publicRoutes.has(to.path)
 
-  if (to.path === '/tutor') {
+  if (to.path === '/' || to.path === '/tutor') {
     return hasActiveSession
       ? vetDashboardPath
       : {
