@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
-import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
+import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import ProgramNavCards, { type ProgramNavItem } from '@/components/parceiro/ProgramNavCards.vue'
 import PortalCredenciamentoPanel from '@/components/parceiro/panels/PortalCredenciamentoPanel.vue'
 import PortalModoPanel from '@/components/parceiro/panels/PortalModoPanel.vue'
 import PortalVisaoPanel from '@/components/parceiro/panels/PortalVisaoPanel.vue'
@@ -16,28 +16,39 @@ type ProgramasTab = (typeof PROGRAMAS_TABS)[number]
 const { store, bootstrapping, ensureContext } = useParceiroPortal()
 const { activeTab, setTab } = usePartnerTabs(PROGRAMAS_TABS, 'visao')
 
-const tabs = [
+const navItems = computed<ProgramNavItem[]>(() => [
   {
     id: 'visao',
     label: 'Visão geral',
-    description: 'Resumo da parceria, métricas e status.',
+    description: 'Resumo da parceria e próximos passos',
+    icon: 'pi pi-th-large',
+    tone: 'primary',
   },
   {
     id: 'credenciamento',
     label: 'Credenciamento',
-    description: 'Situação da empresa e liberação para operar.',
+    description: 'Auditoria da empresa e liberação para operar',
+    icon: 'pi pi-shield',
+    tone: 'success',
+    status: store.dashboard?.parceiro.statusAuditoria,
   },
   {
     id: 'afiliado',
     label: 'Afiliado',
-    description: 'Comissões por indicação e acesso ao financeiro.',
+    description: 'Comissão por indicação e carteira PIX',
+    icon: 'pi pi-wallet',
+    tone: 'amber',
+    status: store.status?.statusAfiliado,
   },
   {
     id: 'participativo',
     label: 'Participativo',
-    description: 'Selo e benefícios de comunidade (sem carteira).',
+    description: 'Selo e benefícios de comunidade',
+    icon: 'pi pi-star',
+    tone: 'warm',
+    status: store.status?.statusParticipativo,
   },
-]
+])
 
 const loadError = computed(() =>
   store.loadState === 'error' ? store.errorMessage : '',
@@ -58,11 +69,39 @@ onMounted(() => {
   >
     <PartnerOperabilityBanner />
 
-    <PartnerSectionTabs :tabs="tabs" :active-tab="activeTab" @select="setTab($event as ProgramasTab)" />
+    <ProgramNavCards
+      :items="navItems"
+      :active-id="activeTab"
+      @select="setTab($event as ProgramasTab)"
+    />
 
-    <PortalVisaoPanel v-if="activeTab === 'visao'" />
-    <PortalCredenciamentoPanel v-else-if="activeTab === 'credenciamento'" />
-    <PortalModoPanel v-else-if="activeTab === 'afiliado'" modo="afiliado" />
-    <PortalModoPanel v-else modo="participativo" />
+    <Transition name="programas-fade" mode="out-in">
+      <PortalVisaoPanel v-if="activeTab === 'visao'" key="visao" />
+      <PortalCredenciamentoPanel
+        v-else-if="activeTab === 'credenciamento'"
+        key="credenciamento"
+      />
+      <PortalModoPanel
+        v-else-if="activeTab === 'afiliado'"
+        key="afiliado"
+        modo="afiliado"
+      />
+      <PortalModoPanel v-else key="participativo" modo="participativo" />
+    </Transition>
   </PartnerPageFrame>
 </template>
+
+<style scoped>
+.programas-fade-enter-active,
+.programas-fade-leave-active {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.programas-fade-enter-from,
+.programas-fade-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+</style>

@@ -65,13 +65,8 @@ const shellStyle = computed(() => {
     '--shell-accent-soft': colors.vet.secondary,
     '--shell-cream': colors.secondary,
     '--shell-shadow-rgb': colors.auth.shadowRgb,
-    '--rail-logout-bg': isDark
-      ? color-mix(in srgb, colors.red 42%, colors.bg.card)
-      : color-mix(in srgb, colors.red 48%, colors.auth.white),
-    '--rail-logout-bg-hover': isDark
-      ? color-mix(in srgb, colors.red 58%, colors.bg.card)
-      : color-mix(in srgb, colors.red 62%, colors.auth.white),
-    '--rail-logout-border': color-mix(in srgb, colors.red 70%, transparent),
+    '--rail-logout-red': colors.red,
+    '--rail-logout-mix-base': isDark ? colors.bg.card : colors.auth.white,
     '--rail-logout-icon': colors.auth.white,
   }
 })
@@ -424,20 +419,16 @@ onMounted(() => {
 }
 
 .rail-button--danger {
-  background: var(--rail-logout-bg);
-  color: var(--rail-logout-icon);
-  box-shadow:
-    inset 0 0 0 1px var(--rail-logout-border),
-    0 8px 20px rgb(var(--shell-shadow-rgb) / 0.14);
+  background: color-mix(in srgb, var(--rail-logout-red) 18%, transparent);
+  color: color-mix(in srgb, var(--rail-logout-red) 90%, var(--rail-logout-icon));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail-logout-red) 32%, transparent);
 }
 
 .rail-button--danger:hover {
-  background: var(--rail-logout-bg-hover);
+  background: color-mix(in srgb, var(--rail-logout-red) 28%, transparent);
   color: var(--rail-logout-icon);
   transform: translateY(-1px);
-  box-shadow:
-    inset 0 0 0 1px var(--rail-logout-border),
-    0 10px 24px rgb(var(--shell-shadow-rgb) / 0.18);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail-logout-red) 55%, transparent);
 }
 
 .navigator-panel {
