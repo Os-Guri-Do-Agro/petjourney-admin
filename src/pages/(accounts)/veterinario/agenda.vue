@@ -2,6 +2,7 @@
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
 
+import ClinicalHomeOverview from '@/components/home/ClinicalHomeOverview.vue'
 import { currentColors } from '@/theme/color-mode'
 
 type AppointmentStatus = 'confirmado' | 'pendente' | 'em-sala' | 'concluido' | 'cancelado'
@@ -494,6 +495,8 @@ function retryAgenda() {
 
 <template>
   <main id="agenda" class="agenda-page" :style="pageStyle">
+    <ClinicalHomeOverview class="agenda-overview" />
+
     <section class="agenda-workspace">
       <aside class="agenda-sidebar" aria-label="Filtros da agenda">
         <section class="agenda-actions-panel" aria-label="Ações da agenda">
@@ -726,6 +729,10 @@ function retryAgenda() {
   padding: 1.45rem 1.6rem 2rem;
   background: var(--agenda-bg);
   color: var(--agenda-text);
+}
+
+.agenda-overview {
+  margin-bottom: 1rem;
 }
 
 .agenda-kicker {

@@ -1,0 +1,62 @@
+<script setup lang="ts">
+import { computed, onMounted } from 'vue'
+
+import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
+import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
+import PortalCuponsPanel from '@/components/parceiro/panels/PortalCuponsPanel.vue'
+import PortalIndicacaoPanel from '@/components/parceiro/panels/PortalIndicacaoPanel.vue'
+import PortalResgatesPanel from '@/components/parceiro/panels/PortalResgatesPanel.vue'
+import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { usePartnerTabs } from '@/composables/usePartnerTabs'
+
+const DIVULGACAO_TABS = ['indicacao', 'cupons', 'resgates'] as const
+type DivulgacaoTab = (typeof DIVULGACAO_TABS)[number]
+
+const { store, bootstrapping, ensureContext } = useParceiroPortal()
+const { activeTab, setTab } = usePartnerTabs(DIVULGACAO_TABS, 'indicacao')
+
+const tabs = [
+  {
+    id: 'indicacao',
+    label: 'Indicação',
+    description: 'Código, link e QR para atrair novos assinantes.',
+  },
+  {
+    id: 'cupons',
+    label: 'Cupons',
+    description: 'Descontos da sua empresa — não geram comissão.',
+  },
+  {
+    id: 'resgates',
+    label: 'Resgates',
+    description: 'Histórico de uso dos cupons (sem dados de tutores).',
+  },
+]
+
+const loadError = computed(() =>
+  store.loadState === 'error' ? store.errorMessage : '',
+)
+
+onMounted(() => {
+  void ensureContext()
+})
+</script>
+
+<template>
+  <PartnerPageFrame
+    subtitle="Portal"
+    title="Divulgação"
+    :loading="bootstrapping || store.loadState === 'loading'"
+    :error="loadError"
+    @retry="ensureContext(true)"
+  >
+    <PartnerOperabilityBanner />
+
+    <PartnerSectionTabs :tabs="tabs" :active-tab="activeTab" @select="setTab($event as DivulgacaoTab)" />
+
+    <PortalIndicacaoPanel v-if="activeTab === 'indicacao'" />
+    <PortalCuponsPanel v-else-if="activeTab === 'cupons'" />
+    <PortalResgatesPanel v-else />
+  </PartnerPageFrame>
+</template>

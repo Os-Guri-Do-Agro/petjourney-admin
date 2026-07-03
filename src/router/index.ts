@@ -1,27 +1,58 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 import { isAuthenticated } from '@/service/auth/auth-session'
 
+import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
+
 import { routes } from './file-routes'
+
+const partnerLegacyRedirects: RouteRecordRaw[] = [
+  { path: '/inicio', redirect: () => getDefaultLandingPath() },
+  { path: '/parceiro', redirect: '/parceiro/programas' },
+  { path: '/veterinario', redirect: '/veterinario/agenda' },
+  {
+    path: '/parceiro/status',
+    redirect: { path: '/parceiro/programas', query: { aba: 'credenciamento' } },
+  },
+  {
+    path: '/parceiro/indicacao',
+    redirect: { path: '/parceiro/divulgacao', query: { aba: 'indicacao' } },
+  },
+  {
+    path: '/parceiro/cupons',
+    redirect: { path: '/parceiro/divulgacao', query: { aba: 'cupons' } },
+  },
+  {
+    path: '/parceiro/resgates',
+    redirect: { path: '/parceiro/divulgacao', query: { aba: 'resgates' } },
+  },
+  {
+    path: '/parceiro/carteira/extrato',
+    redirect: { path: '/parceiro/carteira', query: { aba: 'extrato' } },
+  },
+  {
+    path: '/parceiro/carteira/saques',
+    redirect: { path: '/parceiro/carteira', query: { aba: 'saques' } },
+  },
+]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
+  routes: [...partnerLegacyRedirects, ...routes],
 })
 
 const publicRoutes = new Set(['/auth/login', '/auth/register', '/auth/forgot-password'])
-const vetDashboardPath = '/veterinario'
 
 function getSafeRedirectPath(redirect: unknown) {
   if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')) {
-    if (redirect === '/tutor') {
-      return vetDashboardPath
+    if (redirect === '/tutor' || redirect === '/inicio' || redirect === '/parceiro' || redirect === '/veterinario') {
+      return getDefaultLandingPath()
     }
 
     return redirect
   }
 
-  return vetDashboardPath
+  return getDefaultLandingPath()
 }
 
 router.beforeEach((to) => {
@@ -30,11 +61,11 @@ router.beforeEach((to) => {
 
   if (to.path === '/' || to.path === '/tutor') {
     return hasActiveSession
-      ? vetDashboardPath
+      ? getDefaultLandingPath()
       : {
           path: '/auth/login',
           query: {
-            redirect: vetDashboardPath,
+            redirect: getDefaultLandingPath(),
           },
         }
   }
@@ -49,7 +80,7 @@ router.beforeEach((to) => {
   }
 
   if (hasActiveSession && isPublicRoute) {
-    return to.path === '/auth/login' ? getSafeRedirectPath(to.query.redirect) : vetDashboardPath
+    return to.path === '/auth/login' ? getSafeRedirectPath(to.query.redirect) : getDefaultLandingPath()
   }
 
   return true

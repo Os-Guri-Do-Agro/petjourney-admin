@@ -8,6 +8,7 @@ import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import { login } from '@/service/auth/auth-service'
 import { currentColors } from '@/theme/color-mode'
+import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 const email = ref('')
 const password = ref('')
@@ -41,10 +42,12 @@ function getSafeRedirectPath() {
   const redirect = route.query.redirect
 
   if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')) {
-    return redirect === '/tutor' ? '/veterinario' : redirect
+    return redirect === '/tutor' || redirect === '/inicio' || redirect === '/parceiro' || redirect === '/veterinario'
+      ? getDefaultLandingPath()
+      : redirect
   }
 
-  return '/veterinario'
+  return getDefaultLandingPath()
 }
 
 async function handleLogin() {

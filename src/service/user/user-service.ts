@@ -1,11 +1,6 @@
 import { ApiError, apiFetch, getApiUrl } from '../api'
+import type { ApiEnvelope } from '../api-envelope'
 import { type AuthTokens, setAuthSession } from '../auth/auth-session'
-
-type ApiEnvelope<T> = {
-  statusCode: number
-  message: string
-  data: T
-}
 
 export type VeterinarioSignupPayload = {
   email: string

@@ -11,6 +11,7 @@ import RegisterStepIndicator from '@/components/auth/RegisterStepIndicator.vue'
 import { checkEmailAvailability, registerVeterinarian } from '@/service/user/user-service'
 import { currentColors } from '@/theme/color-mode'
 import { isPasswordValid } from '@/utils/validation/password'
+import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 const STEP_LABELS = ['Identidade', 'Profissional', 'Conta']
 const TOTAL_STEPS = STEP_LABELS.length
@@ -296,7 +297,7 @@ async function handleSubmit() {
       life: 4000,
     })
 
-    await router.replace('/veterinario')
+    await router.replace(getDefaultLandingPath())
   } catch (error) {
     globalError.value =
       error instanceof Error ? error.message : 'Não foi possível concluir o cadastro.'

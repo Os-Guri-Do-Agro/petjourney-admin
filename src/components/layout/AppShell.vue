@@ -1,28 +1,36 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import logoHeaderUrl from '@/assets/Logos/logo-clara-em-row.png'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
+import {
+  navItemMatches,
+  resolveActiveSectionId,
+  resolvePageLabel,
+  useAppNavigation,
+  type AppNavigationItem,
+} from '@/composables/useAppNavigation'
 import { clearAuthSession, getAuthUser } from '@/service/auth/auth-session'
+import { useParceiroStore } from '@/stores/parceiro'
 import { currentColors, isDarkMode, toggleColorMode } from '@/theme/color-mode'
+import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 const router = useRouter()
 const route = useRoute()
 const drawerOpen = ref(true)
 const userMenuOpen = ref(false)
 const logoutConfirmVisible = ref(false)
-const activeSectionId = ref('workspace')
+const parceiroStore = useParceiroStore()
+const { navigationSections, hasClinicalProfile } = useAppNavigation()
+const activeSectionId = ref('portal')
+const defaultLandingPath = computed(() => getDefaultLandingPath())
 const searchQuery = ref('')
 const user = computed(() => getAuthUser())
 const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
 
-type NavigationItem = {
-  label: string
-  to: string
-  icon: string
-}
+type NavigationItem = AppNavigationItem
 
 type NavigationSection = {
   id: string
@@ -57,71 +65,60 @@ const shellStyle = computed(() => {
     '--shell-accent-soft': colors.vet.secondary,
     '--shell-cream': colors.secondary,
     '--shell-shadow-rgb': colors.auth.shadowRgb,
+    '--rail-logout-bg': isDark
+      ? color-mix(in srgb, colors.red 42%, colors.bg.card)
+      : color-mix(in srgb, colors.red 48%, colors.auth.white),
+    '--rail-logout-bg-hover': isDark
+      ? color-mix(in srgb, colors.red 58%, colors.bg.card)
+      : color-mix(in srgb, colors.red 62%, colors.auth.white),
+    '--rail-logout-border': color-mix(in srgb, colors.red 70%, transparent),
+    '--rail-logout-icon': colors.auth.white,
   }
 })
 
-const navigationSections: NavigationSection[] = [
-  {
-    id: 'workspace',
-    label: 'Operação',
-    icon: 'pi pi-th-large',
-    items: [
-      { label: 'Dashboard', to: '/veterinario', icon: 'pi pi-home' },
-      { label: 'Agenda', to: '/veterinario/agenda', icon: 'pi pi-calendar' },
-      { label: 'Atividades', to: '/veterinario/atividades', icon: 'pi pi-list' },
-    ],
-  },
-  {
-    id: 'patients',
-    label: 'Pets',
-    icon: 'pi pi-heart',
-    items: [
-      { label: 'Pacientes', to: '/veterinario/pacientes', icon: 'pi pi-users' },
-      { label: 'Prontuários', to: '/veterinario/prontuarios', icon: 'pi pi-file-edit' },
-      { label: 'Compartilhamentos', to: '/veterinario/compartilhamentos', icon: 'pi pi-share-alt' },
-    ],
-  },
-  {
-    id: 'account',
-    label: 'Conta',
-    icon: 'pi pi-user',
-    items: [
-      { label: 'Perfil', to: '/perfil', icon: 'pi pi-user' },
-      { label: 'Configurações', to: '/settings#seguranca', icon: 'pi pi-cog' },
-    ],
-  },
-]
-
-const fallbackSection = navigationSections[0] as NavigationSection
+const fallbackSection = computed(() => navigationSections.value[0] as NavigationSection)
 const activeSection = computed<NavigationSection>(
-  () => navigationSections.find((section) => section.id === activeSectionId.value) ?? fallbackSection,
+  () =>
+    navigationSections.value.find((section) => section.id === activeSectionId.value) ??
+    fallbackSection.value,
 )
-const activePageLabel = computed(() => {
-  const currentPath = route.path
-  const currentHash = route.hash
 
-  for (const section of navigationSections) {
-    const matchedItem = section.items.find((item) => {
-      const [itemPath, itemHash = ''] = item.to.split('#')
+function isNavItemActive(item: NavigationItem) {
+  const [itemPath = '', itemHash = ''] = item.to.split('#')
 
-      if (itemHash) {
-        return itemPath === currentPath && `#${itemHash}` === currentHash
-      }
-
-      return itemPath === currentPath
-    })
-
-    if (matchedItem) {
-      return matchedItem.label
-    }
+  if (itemHash) {
+    return itemPath === route.path && `#${itemHash}` === route.hash
   }
 
-  if (currentPath.startsWith('/settings')) {
-    return 'Settings'
+  return navItemMatches(itemPath, route.path)
+}
+
+const activePageLabel = computed(() =>
+  resolvePageLabel(route.path, route.hash, navigationSections.value),
+)
+
+const activeSectionLabel = computed(() => activeSection.value.label)
+
+function handleSectionChange(sectionId: string) {
+  const section =
+    navigationSections.value.find((entry) => entry.id === sectionId) ?? fallbackSection.value
+  const target = section.items[0]?.to
+
+  activeSectionId.value = sectionId
+  drawerOpen.value = true
+
+  if (!target) {
+    return
   }
 
-  return activeSection.value.label
-})
+  const [targetPath = '', targetHash = ''] = target.split('#')
+  const samePath = targetPath === route.path
+  const sameHash = targetHash ? `#${targetHash}` === route.hash : true
+
+  if (!samePath || !sameHash) {
+    void router.push(target)
+  }
+}
 
 const initials = computed(() => {
   const name = user.value?.nome ?? 'Vet'
@@ -138,34 +135,10 @@ const shellClasses = computed(() => ({
   'app-shell--navigator-hidden': !drawerOpen.value,
 }))
 
-function handleSectionChange(sectionId: string) {
-  activeSectionId.value = sectionId
-  drawerOpen.value = true
-}
-
 watch(
   () => route.path,
   (path) => {
-    if (
-      path.startsWith('/veterinario/pacientes') ||
-      path.startsWith('/veterinario/prontuarios') ||
-      path.startsWith('/veterinario/compartilhamentos')
-    ) {
-      activeSectionId.value = 'patients'
-      return
-    }
-
-    if (path.startsWith('/settings')) {
-      activeSectionId.value = 'account'
-      return
-    }
-
-    if (path.startsWith('/perfil')) {
-      activeSectionId.value = 'account'
-      return
-    }
-
-    activeSectionId.value = 'workspace'
+    activeSectionId.value = resolveActiveSectionId(path, hasClinicalProfile.value)
   },
   { immediate: true },
 )
@@ -176,17 +149,22 @@ function requestLogout() {
 }
 
 async function handleLogout() {
+  parceiroStore.reset()
   clearAuthSession()
   userMenuOpen.value = false
   await router.replace('/auth/login')
 }
+
+onMounted(() => {
+  void parceiroStore.bootstrap().catch(() => undefined)
+})
 </script>
 
 <template>
   <div class="app-shell" :class="shellClasses" :style="shellStyle">
     <aside class="app-navigator" :aria-hidden="!drawerOpen">
       <nav class="section-rail" aria-label="Seções do painel">
-        <RouterLink class="rail-brand" to="/veterinario" aria-label="PetJourney">
+        <RouterLink class="rail-brand" :to="defaultLandingPath" aria-label="PetJourney">
           <img :src="logoMarkUrl" alt="" />
         </RouterLink>
 
@@ -204,38 +182,41 @@ async function handleLogout() {
         </button>
 
         <div class="rail-bottom-actions">
-          <RouterLink class="rail-button" to="/settings" aria-label="Configurações" title="Configurações">
-            <i class="pi pi-cog" aria-hidden="true" />
-          </RouterLink>
-
-          <button class="rail-button rail-button--danger" type="button" aria-label="Logout" title="Logout" @click="requestLogout">
+          <button
+            class="rail-button rail-button--danger"
+            type="button"
+            aria-label="Sair"
+            title="Sair"
+            @click="requestLogout"
+          >
             <i class="pi pi-sign-out" aria-hidden="true" />
           </button>
         </div>
       </nav>
 
       <section class="navigator-panel">
-        <RouterLink class="navigator-logo" to="/veterinario">
+        <RouterLink class="navigator-logo" :to="defaultLandingPath">
           <img :src="logoHeaderUrl" alt="PetJourney" />
         </RouterLink>
 
         <div class="navigator-section-heading">
-          <span>Visão rápida</span>
+          <span>Menu</span>
           <strong>{{ activeSection.label }}</strong>
         </div>
 
-        <nav class="page-nav" aria-label="Páginas da seção ativa">
+        <nav class="page-nav" :aria-label="`Páginas de ${activeSection.label}`">
           <RouterLink
             v-for="item in activeSection.items"
             :key="item.label"
             class="page-nav__link"
+            :class="{ 'router-link-active': isNavItemActive(item) }"
             :to="item.to"
+            active-class=""
           >
             <i :class="item.icon" aria-hidden="true" />
             <span>{{ item.label }}</span>
           </RouterLink>
         </nav>
-
       </section>
     </aside>
 
@@ -252,7 +233,7 @@ async function handleLogout() {
         />
 
         <div class="header-context">
-          <span>Painel parceiro</span>
+          <span>{{ activeSectionLabel }}</span>
           <strong>{{ activePageLabel }}</strong>
         </div>
       </div>
@@ -362,7 +343,11 @@ async function handleLogout() {
   gap: 0.5rem;
   padding: 0.9rem 0.55rem;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--shell-brand) 92%, white) 0%, var(--shell-brand) 48%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--shell-brand) 92%, white) 0%,
+      var(--shell-brand) 48%
+    ),
     var(--shell-brand);
 }
 
@@ -439,12 +424,20 @@ async function handleLogout() {
 }
 
 .rail-button--danger {
-  color: color-mix(in srgb, var(--danger-soft) 82%, var(--shell-surface));
+  background: var(--rail-logout-bg);
+  color: var(--rail-logout-icon);
+  box-shadow:
+    inset 0 0 0 1px var(--rail-logout-border),
+    0 8px 20px rgb(var(--shell-shadow-rgb) / 0.14);
 }
 
 .rail-button--danger:hover {
-  background: color-mix(in srgb, var(--danger-soft) 18%, transparent);
-  color: var(--shell-on-brand);
+  background: var(--rail-logout-bg-hover);
+  color: var(--rail-logout-icon);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 1px var(--rail-logout-border),
+    0 10px 24px rgb(var(--shell-shadow-rgb) / 0.18);
 }
 
 .navigator-panel {
@@ -453,7 +446,11 @@ async function handleLogout() {
   flex-direction: column;
   padding: 1.05rem 0.95rem;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--shell-surface-soft) 22%, transparent), transparent 10rem),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--shell-surface-soft) 22%, transparent),
+      transparent 10rem
+    ),
     var(--shell-surface);
 }
 

@@ -10,7 +10,9 @@ export type AuthUser = {
   email: string
   nome: string
   tutorId?: string
+  tutorActive?: boolean
   veterinarioId?: string
+  isSystemAdmin?: boolean
   iat: number
   exp: number
 }
@@ -85,7 +87,17 @@ export function clearAuthSession() {
   notifyAuthSessionChange()
 }
 
-export function setAuthSession(tokens: AuthTokens, rememberAccess = true) {
+type SetAuthSessionOptions = {
+  rememberAccess?: boolean
+  requireVeterinario?: boolean
+}
+
+export function setAuthSession(
+  tokens: AuthTokens,
+  rememberAccess = true,
+  options: SetAuthSessionOptions = {},
+) {
+  const requireVeterinario = options.requireVeterinario ?? false
   const payload = decodeJwtPayload<AuthUser>(tokens.access_token)
 
   if (!payload || isExpired(payload)) {
@@ -93,7 +105,7 @@ export function setAuthSession(tokens: AuthTokens, rememberAccess = true) {
     throw new Error('Token de autenticação inválido ou expirado.')
   }
 
-  if (!payload.veterinarioId) {
+  if (requireVeterinario && !payload.veterinarioId) {
     clearAuthSession()
     throw new Error('Esta conta ainda não possui perfil veterinário habilitado.')
   }
@@ -103,7 +115,11 @@ export function setAuthSession(tokens: AuthTokens, rememberAccess = true) {
   const storage = rememberAccess ? window.localStorage : window.sessionStorage
   storage.setItem(ACCESS_TOKEN_KEY, tokens.access_token)
   storage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token)
-  storage.setItem(VETERINARIO_ID_KEY, payload.veterinarioId)
+
+  if (payload.veterinarioId) {
+    storage.setItem(VETERINARIO_ID_KEY, payload.veterinarioId)
+  }
+
   notifyAuthSessionChange()
 }
 
@@ -157,5 +173,13 @@ export function getAuthUser() {
 }
 
 export function isAuthenticated() {
-  return Boolean(getAccessToken() && getVeterinarioId())
+  return Boolean(getAccessToken())
+}
+
+export function hasVeterinarioProfile() {
+  return Boolean(getVeterinarioId())
+}
+
+export function isSystemAdmin() {
+  return Boolean(getAuthUser()?.isSystemAdmin)
 }

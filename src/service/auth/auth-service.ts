@@ -22,7 +22,7 @@ export async function login(data: LoginCredentials, options?: LoginOptions) {
     body: JSON.stringify(data),
   })
 
-  setAuthSession(res.data, options?.rememberAccess)
+  setAuthSession(res.data, options?.rememberAccess ?? true, { requireVeterinario: true })
 
   return res
 }
