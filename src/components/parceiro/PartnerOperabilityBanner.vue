@@ -17,7 +17,7 @@ const { store } = useParceiroPortal()
           Motivo: {{ store.status.motivoAuditoria }}
         </template>
       </p>
-      <RouterLink to="/parceiro/programas?aba=credenciamento">Acompanhar credenciamento</RouterLink>
+      <RouterLink to="/parceiro/programas#credenciamento">Acompanhar credenciamento</RouterLink>
     </div>
   </aside>
 </template>
@@ -48,4 +48,4 @@ const { store } = useParceiroPortal()
   font-weight: 700;
 }
 </style>
-
+

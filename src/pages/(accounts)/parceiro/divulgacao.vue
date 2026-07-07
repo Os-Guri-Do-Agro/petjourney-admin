@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
+import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
-import PortalCuponsPanel from '@/components/parceiro/panels/PortalCuponsPanel.vue'
-import PortalIndicacaoPanel from '@/components/parceiro/panels/PortalIndicacaoPanel.vue'
-import PortalResgatesPanel from '@/components/parceiro/panels/PortalResgatesPanel.vue'
+import PortalDivulgacaoPanel from '@/components/parceiro/panels/PortalDivulgacaoPanel.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
 
@@ -20,17 +18,17 @@ const tabs = [
   {
     id: 'indicacao',
     label: 'Indicação',
-    description: 'Código, link e QR para atrair novos assinantes.',
+    description: 'Código, link e QR para atrair assinantes.',
   },
   {
     id: 'cupons',
     label: 'Cupons',
-    description: 'Descontos da sua empresa — não geram comissão.',
+    description: 'Descontos da empresa — não geram comissão.',
   },
   {
     id: 'resgates',
     label: 'Resgates',
-    description: 'Histórico de uso dos cupons (sem dados de tutores).',
+    description: 'Histórico de uso dos cupons.',
   },
 ]
 
@@ -47,16 +45,18 @@ onMounted(() => {
   <PartnerPageFrame
     subtitle="Portal"
     title="Divulgação"
-    :loading="bootstrapping || store.loadState === 'loading'"
+    :loading="bootstrapping || (store.loadState === 'loading' && !store.dashboard)"
     :error="loadError"
     @retry="ensureContext(true)"
   >
     <PartnerOperabilityBanner />
 
-    <PartnerSectionTabs :tabs="tabs" :active-tab="activeTab" @select="setTab($event as DivulgacaoTab)" />
+    <PartnerSectionTabs
+      :tabs="tabs"
+      :active-tab="activeTab"
+      @select="setTab($event as DivulgacaoTab)"
+    />
 
-    <PortalIndicacaoPanel v-if="activeTab === 'indicacao'" />
-    <PortalCuponsPanel v-else-if="activeTab === 'cupons'" />
-    <PortalResgatesPanel v-else />
+    <PortalDivulgacaoPanel :section="activeTab" />
   </PartnerPageFrame>
 </template>

@@ -7,12 +7,11 @@ import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 import { routes } from './file-routes'
 
 const partnerLegacyRedirects: RouteRecordRaw[] = [
-  { path: '/inicio', redirect: () => getDefaultLandingPath() },
-  { path: '/parceiro', redirect: '/parceiro/programas' },
-  { path: '/veterinario', redirect: '/veterinario/agenda' },
+  { path: '/parceiro', redirect: '/inicio' },
+  { path: '/veterinario', redirect: '/inicio' },
   {
     path: '/parceiro/status',
-    redirect: { path: '/parceiro/programas', query: { aba: 'credenciamento' } },
+    redirect: { path: '/parceiro/programas', hash: '#credenciamento' },
   },
   {
     path: '/parceiro/indicacao',

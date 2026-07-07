@@ -1,77 +1,98 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
-import { computed, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, ref, useAttrs } from 'vue'
 
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
-import { ApiError } from '@/service/api'
 import { solicitarModo } from '@/service/parceiro/parceiro-portal-service'
-import type { ModoParticipacao, StatusModoParceiro } from '@/service/parceiro/types'
+import type { ModoParticipacao } from '@/service/parceiro/types'
+import {
+  canSolicitarModo,
+  getModoCardCopy,
+  resolveModoCta,
+  resolveSolicitarModoError,
+} from '@/utils/parceiro/modo-participacao'
 
-const props = defineProps<{
-  modo: ModoParticipacao
-}>()
+const props = withDefaults(
+  defineProps<{
+    modo: ModoParticipacao
+    embedded?: boolean
+  }>(),
+  { embedded: false },
+)
 
 const toast = useToast()
+const attrs = useAttrs()
 const { store, parceiroQuery } = useParceiroPortal()
 const submitting = ref(false)
 
 const panelId = computed(() => `partner-panel-${props.modo}`)
 
-const config = computed(() => {
-  if (props.modo === 'afiliado') {
-    return {
-      title: 'Programa Afiliado',
-      description:
-        'Receba comissão quando suas indicações viram assinantes pagantes. Libera carteira, extrato e saque via PIX.',
-      status: store.status?.statusAfiliado ?? 'NAO_SOLICITADO',
-      ctaCarteira: true,
-      ctaDivulgacao: true,
-    }
+const rootId = computed(() => {
+  if (props.embedded) {
+    return typeof attrs.id === 'string' ? attrs.id : undefined
   }
 
-  return {
-    title: 'Programa Participativo',
-    description:
-      'Selo e benefícios de comunidade PetJourney. Não envolve carteira — perks e collabs são operados fora do sistema.',
-    status: store.status?.statusParticipativo ?? 'NAO_SOLICITADO',
-    ctaCarteira: false,
-    ctaDivulgacao: false,
-  }
+  return panelId.value
 })
 
-function canSolicitar(status: StatusModoParceiro) {
-  return ['NAO_SOLICITADO', 'REJEITADO', 'SUSPENSO'].includes(status)
-}
+const cardCopy = computed(() => getModoCardCopy(props.modo))
+
+const modoStatus = computed(() => {
+  if (props.modo === 'afiliado') {
+    return store.status?.statusAfiliado ?? 'NAO_SOLICITADO'
+  }
+
+  return store.status?.statusParticipativo ?? 'NAO_SOLICITADO'
+})
+
+const cta = computed(() => resolveModoCta(modoStatus.value, props.modo, store.isDono))
+
+const showSolicitarButton = computed(
+  () => cta.value.type === 'solicitar' || cta.value.type === 'solicitar-novamente',
+)
+
+const solicitarLabel = computed(() => {
+  if (cta.value.type === 'solicitar' || cta.value.type === 'solicitar-novamente') {
+    return cta.value.label
+  }
+
+  return ''
+})
 
 async function handleSolicitar() {
-  if (!store.isDono || !store.podeOperar || !canSolicitar(config.value.status)) {
+  if (!store.isDono) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Ação indisponível',
+      detail: 'Apenas o dono da empresa pode solicitar programas.',
+      life: 4000,
+    })
+    return
+  }
+
+  if (!store.podeOperar || !canSolicitarModo(modoStatus.value)) {
     return
   }
 
   submitting.value = true
 
   try {
-    await solicitarModo(props.modo, parceiroQuery())
-    await store.refreshStatus()
+    const result = await solicitarModo(props.modo, parceiroQuery())
+    store.patchModoStatus(result.modo, result.status)
     toast.add({
       severity: 'success',
       summary: 'Solicitação enviada',
       detail: 'Aguarde a análise do time PetJourney.',
       life: 4000,
     })
+    void store.refreshStatus()
   } catch (err) {
     toast.add({
       severity: 'error',
-      summary: 'Erro',
-      detail:
-        err instanceof ApiError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : 'Não foi possível solicitar.',
+      summary: 'Erro ao solicitar',
+      detail: resolveSolicitarModoError(err),
       life: 5000,
     })
   } finally {
@@ -81,42 +102,41 @@ async function handleSolicitar() {
 </script>
 
 <template>
-  <article :id="panelId" class="modo-panel" role="tabpanel" :aria-labelledby="`partner-tab-${modo}`">
+  <article
+    :id="rootId"
+    class="modo-panel"
+    :class="{ 'modo-panel--embedded': embedded }"
+    :role="embedded ? undefined : 'tabpanel'"
+    :aria-labelledby="embedded ? undefined : `partner-tab-${modo}`"
+  >
     <p v-if="!store.podeOperar" class="modo-panel__alert">
-      Credenciamento pendente. Solicitações de programa ficam bloqueadas até aprovação.
+      Seu cadastro ainda está em análise. Solicitações de programa ficam bloqueadas até aprovação.
     </p>
 
     <div class="modo-panel__card">
       <div class="modo-panel__head">
-        <h3>{{ config.title }}</h3>
-        <PartnerStatusBadge :status="config.status" />
+        <h3>{{ cardCopy.title }}</h3>
+        <PartnerStatusBadge :status="modoStatus" />
       </div>
-      <p>{{ config.description }}</p>
+      <p>{{ cardCopy.description }}</p>
 
       <div class="modo-panel__actions">
         <Button
-          v-if="store.isDono && canSolicitar(config.status)"
-          label="Solicitar participação"
+          v-if="showSolicitarButton"
+          :label="solicitarLabel"
           :loading="submitting"
           :disabled="!store.podeOperar"
           @click="handleSolicitar"
         />
-        <span v-else-if="config.status === 'SOLICITADO'" class="modo-panel__waiting">
-          Em análise pelo PetJourney
-        </span>
         <Button
-          v-else-if="config.ctaCarteira && config.status === 'ATIVO'"
+          v-else-if="cta.type === 'carteira'"
           as="router-link"
-          label="Abrir financeiro"
-          to="/parceiro/carteira"
+          :label="cta.label"
+          :to="cta.to"
         />
-        <RouterLink
-          v-if="config.ctaDivulgacao && config.status !== 'ATIVO'"
-          class="modo-panel__link"
-          to="/parceiro/divulgacao"
-        >
-          Divulgar código enquanto aguarda
-        </RouterLink>
+        <span v-else-if="cta.type === 'aguardando'" class="modo-panel__waiting">
+          {{ cta.label }}
+        </span>
       </div>
     </div>
 
@@ -130,6 +150,10 @@ async function handleSolicitar() {
 .modo-panel {
   display: grid;
   gap: 0.75rem;
+}
+
+.modo-panel--embedded .modo-panel__card {
+  height: 100%;
 }
 
 .modo-panel__alert {
@@ -179,13 +203,6 @@ async function handleSolicitar() {
   color: var(--partner-muted);
   font-size: 0.84rem;
   font-weight: 600;
-}
-
-.modo-panel__link {
-  color: var(--partner-primary-strong);
-  font-size: 0.88rem;
-  font-weight: 600;
-  text-decoration: none;
 }
 
 .modo-panel__hint {

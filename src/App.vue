@@ -8,10 +8,20 @@ import { authSessionVersion, isAuthenticated } from '@/service/auth/auth-session
 
 const route = useRoute()
 const publicRoutes = new Set(['/auth/login', '/auth/register', '/auth/forgot-password'])
+
+function isNotFoundRoute() {
+  return route.matched.some((record) => record.path.includes('(.*)*'))
+}
+
 const shouldUseShell = computed(() => {
   const hasSessionVersion = authSessionVersion.value >= 0
 
-  return hasSessionVersion && isAuthenticated() && !publicRoutes.has(route.path)
+  return (
+    hasSessionVersion &&
+    isAuthenticated() &&
+    !publicRoutes.has(route.path) &&
+    !isNotFoundRoute()
+  )
 })
 </script>
 

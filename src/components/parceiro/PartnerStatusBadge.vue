@@ -68,7 +68,7 @@ const label = computed(() => {
     SUSPENSO: 'Suspenso',
     NAO_SOLICITADO: 'Não ativo',
     SOLICITADO: 'Em análise',
-    ATIVO: 'Ativo',
+    ATIVO: 'Ativo ✓',
   }
 
   return labels[props.status] ?? props.status

@@ -6,7 +6,13 @@ import {
   getPortalDashboard,
   getPortalStatus,
 } from '@/service/parceiro/parceiro-portal-service'
-import type { PapelParceiro, PortalDashboard, PortalStatus } from '@/service/parceiro/types'
+import type {
+  ModoParticipacao,
+  PapelParceiro,
+  PortalDashboard,
+  PortalStatus,
+  StatusModoParceiro,
+} from '@/service/parceiro/types'
 
 const PARCEIRO_ID_STORAGE_KEY = 'petjourney-parceiro-id'
 
@@ -93,6 +99,17 @@ export const useParceiroStore = defineStore('parceiro', () => {
     status.value = statusData
   }
 
+  function patchModoStatus(modo: ModoParticipacao, modoStatus: StatusModoParceiro) {
+    if (!status.value) {
+      return
+    }
+
+    status.value =
+      modo === 'afiliado'
+        ? { ...status.value, statusAfiliado: modoStatus }
+        : { ...status.value, statusParticipativo: modoStatus }
+  }
+
   function reset() {
     dashboard.value = null
     status.value = null
@@ -117,6 +134,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     setParceiroId,
     bootstrap,
     refreshStatus,
+    patchModoStatus,
     reset,
   }
 })

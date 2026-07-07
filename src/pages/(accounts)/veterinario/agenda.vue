@@ -495,7 +495,7 @@ function retryAgenda() {
 
 <template>
   <main id="agenda" class="agenda-page" :style="pageStyle">
-    <ClinicalHomeOverview class="agenda-overview" />
+    <ClinicalHomeOverview class="agenda-overview" layout="strip" />
 
     <section class="agenda-workspace">
       <aside class="agenda-sidebar" aria-label="Filtros da agenda">
@@ -732,7 +732,7 @@ function retryAgenda() {
 }
 
 .agenda-overview {
-  margin-bottom: 1rem;
+  margin-bottom: 0.65rem;
 }
 
 .agenda-kicker {

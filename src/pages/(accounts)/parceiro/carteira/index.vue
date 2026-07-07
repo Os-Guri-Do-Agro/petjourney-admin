@@ -45,7 +45,7 @@ const showAfiliadoGate = computed(
 )
 
 function goToProgramas() {
-  void router.replace({ path: '/parceiro/programas', query: { aba: 'afiliado' } })
+  void router.replace({ path: '/parceiro/programas', hash: '#programas' })
 }
 
 onMounted(() => {
@@ -63,8 +63,11 @@ onMounted(() => {
   >
     <article v-if="showAfiliadoGate" class="carteira-gate">
       <h3>Programa afiliado necessário</h3>
-      <p>Ative o programa afiliado para acessar saldo, extrato e saques de comissão.</p>
-      <Button label="Ver programa afiliado" @click="goToProgramas" />
+      <p>
+        A carteira, extrato e saques só ficam disponíveis com o programa afiliado ativo. Solicite a
+        participação na tela de programas.
+      </p>
+      <Button label="Solicitar programa afiliado" @click="goToProgramas" />
     </article>
 
     <template v-else>

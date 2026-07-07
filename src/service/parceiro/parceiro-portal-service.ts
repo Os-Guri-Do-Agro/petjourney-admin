@@ -48,6 +48,9 @@ export function getPortalStatus(params?: ParceiroQuery) {
   )
 }
 
+/** Alias alinhado à spec (Parte 5). */
+export const getStatus = getPortalStatus
+
 export function getPortalIndicacao(params?: ParceiroQuery) {
   return unwrap(
     apiFetch<ApiEnvelope<PortalIndicacao>>(`/parceiro/portal/indicacao${buildParceiroQuery(params)}`),

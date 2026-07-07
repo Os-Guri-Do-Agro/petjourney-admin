@@ -6,11 +6,17 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import logoHeaderUrl from '@/assets/Logos/logo-clara-em-row.png'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import {
+  filterNavigationGroups,
+  getSectionLandingPath,
+  isHomeMenuContext,
   navItemMatches,
+  parseNavTarget,
   resolveActiveSectionId,
   resolvePageLabel,
+  stripHomeMenuContext,
   useAppNavigation,
   type AppNavigationItem,
+  type AppNavigationSection,
 } from '@/composables/useAppNavigation'
 import { clearAuthSession, getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
@@ -24,20 +30,16 @@ const userMenuOpen = ref(false)
 const logoutConfirmVisible = ref(false)
 const parceiroStore = useParceiroStore()
 const { navigationSections, hasClinicalProfile } = useAppNavigation()
-const activeSectionId = ref('portal')
+const activeSectionId = ref('home')
 const defaultLandingPath = computed(() => getDefaultLandingPath())
 const searchQuery = ref('')
+const panelFilterQuery = ref('')
 const user = computed(() => getAuthUser())
 const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
 
 type NavigationItem = AppNavigationItem
 
-type NavigationSection = {
-  id: string
-  label: string
-  icon: string
-  items: NavigationItem[]
-}
+type NavigationSection = AppNavigationSection
 
 const shellStyle = computed(() => {
   const colors = currentColors.value
@@ -79,14 +81,38 @@ const activeSection = computed<NavigationSection>(
 )
 
 function isNavItemActive(item: NavigationItem) {
-  const [itemPath = '', itemHash = ''] = item.to.split('#')
+  const { path: itemPath, hash: itemHash } = parseNavTarget(item.to)
 
-  if (itemHash) {
-    return itemPath === route.path && `#${itemHash}` === route.hash
+  const hashOk = itemHash ? itemHash === route.hash : true
+  const pathOk = navItemMatches(itemPath, route.path)
+
+  if (!pathOk || !hashOk) {
+    return false
   }
 
-  return navItemMatches(itemPath, route.path)
+  if (activeSectionId.value === 'home' && itemPath !== '/inicio') {
+    return isHomeMenuContext(route.query)
+  }
+
+  if (activeSectionId.value !== 'home' && isHomeMenuContext(route.query)) {
+    return false
+  }
+
+  return true
 }
+
+const filteredNavigationGroups = computed(() => {
+  if (!activeSection.value.groups?.length) {
+    return []
+  }
+
+  return filterNavigationGroups(activeSection.value.groups, panelFilterQuery.value)
+})
+
+const hasPanelFilter = computed(() => Boolean(activeSection.value.groups?.length))
+const panelFilterHasNoResults = computed(
+  () => hasPanelFilter.value && panelFilterQuery.value.trim().length > 0 && filteredNavigationGroups.value.length === 0,
+)
 
 const activePageLabel = computed(() =>
   resolvePageLabel(route.path, route.hash, navigationSections.value),
@@ -97,20 +123,29 @@ const activeSectionLabel = computed(() => activeSection.value.label)
 function handleSectionChange(sectionId: string) {
   const section =
     navigationSections.value.find((entry) => entry.id === sectionId) ?? fallbackSection.value
-  const target = section.items[0]?.to
+  let target = getSectionLandingPath(section)
 
   activeSectionId.value = sectionId
   drawerOpen.value = true
+  panelFilterQuery.value = ''
 
   if (!target) {
     return
   }
 
-  const [targetPath = '', targetHash = ''] = target.split('#')
-  const samePath = targetPath === route.path
-  const sameHash = targetHash ? `#${targetHash}` === route.hash : true
+  if (sectionId !== 'home') {
+    target = stripHomeMenuContext(target)
+  }
 
-  if (!samePath || !sameHash) {
+  const { path: targetPath, hash: targetHash } = parseNavTarget(target)
+  const samePath = targetPath === route.path
+  const sameHash = targetHash ? targetHash === route.hash : true
+  const sameHomeContext =
+    sectionId === 'home'
+      ? isHomeMenuContext(route.query) || targetPath === '/inicio'
+      : !isHomeMenuContext(route.query)
+
+  if (!samePath || !sameHash || !sameHomeContext) {
     void router.push(target)
   }
 }
@@ -131,9 +166,13 @@ const shellClasses = computed(() => ({
 }))
 
 watch(
-  () => route.path,
-  (path) => {
-    activeSectionId.value = resolveActiveSectionId(path, hasClinicalProfile.value)
+  () => [route.path, route.query.menu] as const,
+  () => {
+    activeSectionId.value = resolveActiveSectionId(
+      route.path,
+      hasClinicalProfile.value,
+      route.query,
+    )
   },
   { immediate: true },
 )
@@ -173,7 +212,9 @@ onMounted(() => {
           :title="section.label"
           @click="handleSectionChange(section.id)"
         >
-          <i :class="section.icon" aria-hidden="true" />
+          <span class="rail-button__icon" aria-hidden="true">
+            <i :class="section.icon" />
+          </span>
         </button>
 
         <div class="rail-bottom-actions">
@@ -184,7 +225,9 @@ onMounted(() => {
             title="Sair"
             @click="requestLogout"
           >
-            <i class="pi pi-sign-out" aria-hidden="true" />
+            <span class="rail-button__icon" aria-hidden="true">
+              <i class="pi pi-sign-out" />
+            </span>
           </button>
         </div>
       </nav>
@@ -197,20 +240,63 @@ onMounted(() => {
         <div class="navigator-section-heading">
           <span>Menu</span>
           <strong>{{ activeSection.label }}</strong>
+          <small v-if="activeSection.panelSubtitle">{{ activeSection.panelSubtitle }}</small>
         </div>
 
+        <label v-if="hasPanelFilter" class="page-nav__filter" for="panel-nav-filter">
+          <i class="pi pi-search" aria-hidden="true" />
+          <input
+            id="panel-nav-filter"
+            v-model="panelFilterQuery"
+            type="search"
+            placeholder="Filtrar telas..."
+            autocomplete="off"
+          />
+        </label>
+
         <nav class="page-nav" :aria-label="`Páginas de ${activeSection.label}`">
-          <RouterLink
-            v-for="item in activeSection.items"
-            :key="item.label"
-            class="page-nav__link"
-            :class="{ 'router-link-active': isNavItemActive(item) }"
-            :to="item.to"
-            active-class=""
-          >
-            <i :class="item.icon" aria-hidden="true" />
-            <span>{{ item.label }}</span>
-          </RouterLink>
+          <template v-if="activeSection.groups?.length">
+            <p v-if="panelFilterHasNoResults" class="page-nav__empty">
+              Nenhuma tela encontrada para “{{ panelFilterQuery.trim() }}”.
+            </p>
+
+            <div
+              v-for="group in filteredNavigationGroups"
+              :key="group.id"
+              class="page-nav__group"
+            >
+              <p class="page-nav__group-label">{{ group.label }}</p>
+              <RouterLink
+                v-for="item in group.items"
+                :key="`${group.id}-${item.to}`"
+                class="page-nav__link"
+                :class="{ 'router-link-active': isNavItemActive(item) }"
+                :to="item.to"
+                active-class=""
+              >
+                <span class="page-nav__icon" aria-hidden="true">
+                  <i :class="item.icon" />
+                </span>
+                <span>{{ item.label }}</span>
+              </RouterLink>
+            </div>
+          </template>
+
+          <template v-else>
+            <RouterLink
+              v-for="item in activeSection.items"
+              :key="item.label"
+              class="page-nav__link"
+              :class="{ 'router-link-active': isNavItemActive(item) }"
+              :to="item.to"
+              active-class=""
+            >
+              <span class="page-nav__icon" aria-hidden="true">
+                <i :class="item.icon" />
+              </span>
+              <span>{{ item.label }}</span>
+            </RouterLink>
+          </template>
         </nav>
       </section>
     </aside>
@@ -319,6 +405,7 @@ onMounted(() => {
   inset: 0 auto 0 0;
   display: grid;
   width: var(--navigator-width);
+  height: 100vh;
   grid-template-columns: 4.25rem minmax(0, 1fr);
   background: var(--shell-surface);
   box-shadow:
@@ -335,45 +422,57 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.9rem 0.55rem;
+  gap: 0.4rem;
+  padding: 1rem 0.55rem 0.85rem;
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--shell-brand) 92%, white) 0%,
-      var(--shell-brand) 48%
+      color-mix(in srgb, var(--shell-brand) 88%, white) 0%,
+      var(--shell-brand) 42%,
+      color-mix(in srgb, var(--shell-brand) 94%, black) 100%
     ),
     var(--shell-brand);
 }
 
 .rail-brand {
   display: grid;
-  width: 2.65rem;
-  height: 2.65rem;
-  margin-bottom: 0.9rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 1rem;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--shell-on-brand) 18%, transparent);
-  border-radius: 0.9rem;
-  background: color-mix(in srgb, var(--shell-on-brand) 16%, transparent);
-  box-shadow: 0 10px 24px rgb(var(--shell-shadow-rgb) / 0.08);
+  border: 1px solid color-mix(in srgb, var(--shell-on-brand) 22%, transparent);
+  border-radius: 0.95rem;
+  background: color-mix(in srgb, var(--shell-on-brand) 14%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--shell-on-brand) 18%, transparent),
+    0 12px 24px rgb(var(--shell-shadow-rgb) / 0.1);
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.rail-brand:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--shell-on-brand) 20%, transparent);
 }
 
 .rail-brand img {
-  width: 1.45rem;
-  height: 1.45rem;
+  width: 1.5rem;
+  height: 1.5rem;
   object-fit: contain;
+  filter: drop-shadow(0 1px 1px rgb(var(--shell-shadow-rgb) / 0.12));
 }
 
 .rail-button {
   position: relative;
   display: grid;
-  width: 2.55rem;
-  height: 2.55rem;
+  width: 2.75rem;
+  height: 2.75rem;
   place-items: center;
   border: 0;
-  border-radius: 0.82rem;
+  border-radius: 0.92rem;
   background: transparent;
-  color: var(--shell-on-brand-muted);
+  color: color-mix(in srgb, var(--shell-on-brand) 72%, transparent);
   cursor: pointer;
   transition:
     background 160ms ease,
@@ -382,13 +481,20 @@ onMounted(() => {
     box-shadow 160ms ease;
 }
 
-.rail-button i {
-  font-size: 1rem;
+.rail-button__icon {
+  display: grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  place-items: center;
+}
+
+.rail-button__icon i {
+  font-size: 1.08rem;
   line-height: 1;
 }
 
-.rail-button:hover {
-  background: color-mix(in srgb, var(--shell-on-brand) 10%, transparent);
+.rail-button:hover:not(.rail-button--danger) {
+  background: color-mix(in srgb, var(--shell-on-brand) 12%, transparent);
   color: var(--shell-on-brand);
   transform: translateY(-1px);
 }
@@ -397,44 +503,63 @@ onMounted(() => {
   background: var(--shell-rail-active-bg);
   color: var(--shell-accent-strong);
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 24%, transparent),
-    0 10px 20px rgb(var(--shell-shadow-rgb) / 0.08);
+    inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 20%, transparent),
+    0 12px 22px rgb(var(--shell-shadow-rgb) / 0.12);
+}
+
+.rail-button--active .rail-button__icon i {
+  color: var(--shell-accent-strong);
 }
 
 .rail-button--active::after {
   position: absolute;
-  right: -0.5rem;
-  width: 0.24rem;
-  height: 1.45rem;
+  right: -0.48rem;
+  width: 0.28rem;
+  height: 1.55rem;
   border-radius: 999px;
   background: var(--shell-on-brand);
   content: '';
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--shell-on-brand) 30%, transparent);
 }
 
 .rail-bottom-actions {
   display: grid;
   gap: 0.45rem;
   margin-top: auto;
-  padding-top: 0.75rem;
+  padding-top: 0.85rem;
+}
+
+.rail-bottom-actions::before {
+  width: 1.65rem;
+  height: 1px;
+  margin: 0 auto 0.35rem;
+  background: color-mix(in srgb, var(--shell-on-brand) 24%, transparent);
+  content: '';
 }
 
 .rail-button--danger {
-  background: color-mix(in srgb, var(--rail-logout-red) 18%, transparent);
-  color: color-mix(in srgb, var(--rail-logout-red) 90%, var(--rail-logout-icon));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail-logout-red) 32%, transparent);
+  background: color-mix(in srgb, var(--rail-logout-red) 16%, transparent);
+  color: color-mix(in srgb, var(--rail-logout-red) 88%, var(--rail-logout-icon));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail-logout-red) 28%, transparent);
+}
+
+.rail-button--danger .rail-button__icon i {
+  font-size: 1rem;
 }
 
 .rail-button--danger:hover {
-  background: color-mix(in srgb, var(--rail-logout-red) 28%, transparent);
+  background: color-mix(in srgb, var(--rail-logout-red) 26%, transparent);
   color: var(--rail-logout-icon);
   transform: translateY(-1px);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail-logout-red) 55%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail-logout-red) 48%, transparent);
 }
 
 .navigator-panel {
   display: flex;
   min-width: 0;
+  min-height: 0;
   flex-direction: column;
+  overflow: hidden;
   padding: 1.05rem 0.95rem;
   background:
     linear-gradient(
@@ -483,9 +608,84 @@ onMounted(() => {
   letter-spacing: -0.025em;
 }
 
+.navigator-section-heading small {
+  color: var(--shell-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
 .page-nav {
   display: grid;
-  gap: 0.36rem;
+  gap: 0.75rem;
+  overflow: auto;
+  padding-right: 0.1rem;
+}
+
+.page-nav__filter {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.15rem;
+  padding: 0 0.2rem;
+  border: 1px solid var(--shell-line);
+  border-radius: 0.75rem;
+  background: var(--shell-surface);
+  color: var(--shell-soft);
+}
+
+.page-nav__filter:focus-within {
+  border-color: color-mix(in srgb, var(--shell-accent) 28%, var(--shell-line));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--shell-accent) 12%, transparent);
+}
+
+.page-nav__filter i {
+  margin-left: 0.65rem;
+  font-size: 0.82rem;
+}
+
+.page-nav__filter input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.55rem 0.65rem 0.55rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--shell-text);
+  font: inherit;
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.page-nav__filter input::placeholder {
+  color: var(--shell-soft);
+}
+
+.page-nav__empty {
+  margin: 0;
+  padding: 0.75rem 0.55rem;
+  color: var(--shell-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.page-nav__group {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.page-nav__group + .page-nav__group {
+  padding-top: 0.55rem;
+  border-top: 1px solid color-mix(in srgb, var(--shell-line) 80%, transparent);
+}
+
+.page-nav__group-label {
+  margin: 0 0 0.15rem;
+  padding: 0 0.2rem;
+  color: var(--shell-soft);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .page-nav__link {
@@ -509,16 +709,24 @@ onMounted(() => {
     transform 160ms ease;
 }
 
-.page-nav__link i {
+.page-nav__icon {
   display: grid;
-  width: 1.72rem;
-  height: 1.72rem;
+  width: 1.85rem;
+  height: 1.85rem;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 0.62rem;
-  background: color-mix(in srgb, var(--shell-accent-soft) 18%, var(--shell-surface));
+  border-radius: 0.68rem;
+  background: color-mix(in srgb, var(--shell-accent-soft) 16%, var(--shell-surface));
   color: var(--shell-soft);
-  font-size: 0.78rem;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.page-nav__icon i {
+  font-size: 0.82rem;
+  line-height: 1;
 }
 
 .page-nav__link:hover,
@@ -536,10 +744,11 @@ onMounted(() => {
   transform: translateX(1px);
 }
 
-.page-nav__link:hover i,
-.page-nav__link.router-link-active i {
-  background: color-mix(in srgb, var(--shell-accent) 16%, var(--shell-surface));
+.page-nav__link:hover .page-nav__icon,
+.page-nav__link.router-link-active .page-nav__icon {
+  background: color-mix(in srgb, var(--shell-accent) 18%, var(--shell-surface));
   color: var(--shell-accent-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 12%, transparent);
 }
 
 .app-header {
