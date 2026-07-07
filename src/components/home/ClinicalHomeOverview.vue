@@ -153,6 +153,23 @@ const ringCircumference = 2 * Math.PI * 46
 
 const ringOffset = computed(() => ringCircumference * (1 - completionRate.value / 100))
 
+const operationTotal = computed(() =>
+  operationSegments.value.reduce((sum, item) => sum + item.value, 0),
+)
+
+const drawerPassThrough = computed(() => ({
+  root: {
+    class: 'clinical-metrics-drawer',
+    style: sectionStyle.value,
+  },
+  content: {
+    class: 'clinical-metrics-drawer__content',
+  },
+  header: {
+    class: 'clinical-metrics-drawer__header-shell',
+  },
+}))
+
 const operationSegments = computed(() => {
   const atendidos = atendidosMetric.value?.value ?? 0
   const pendencias = metrics.find((metric) => metric.id === 'pendencias')?.value ?? 0
@@ -408,8 +425,8 @@ function formatMetricValue(value: number) {
       v-if="props.layout === 'strip'"
       v-model:visible="metricsDrawerOpen"
       position="right"
-      block-scroll
-      class="clinical-metrics-drawer"
+      :block-scroll="false"
+      :pt="drawerPassThrough"
     >
       <template #header>
         <div class="metrics-drawer__header">
@@ -421,11 +438,11 @@ function formatMetricValue(value: number) {
         </div>
       </template>
 
-      <div class="metrics-drawer__body">
+      <div class="metrics-drawer__body" :style="sectionStyle">
         <div class="metrics-drawer__summary">
           <article class="metrics-drawer__ring-card">
             <div
-              class="completion-ring completion-ring--compact"
+              class="completion-ring completion-ring--drawer"
               role="img"
               :aria-label="`${completionRate}% das consultas concluídas`"
             >
@@ -445,7 +462,7 @@ function formatMetricValue(value: number) {
                 <span>concluído</span>
               </div>
             </div>
-            <p>
+            <p class="metrics-drawer__ring-caption">
               {{ atendidosMetric?.value ?? 0 }} de {{ consultasMetric?.value ?? 0 }} consultas atendidas
             </p>
           </article>
@@ -453,19 +470,19 @@ function formatMetricValue(value: number) {
           <article class="metrics-drawer__stack-card">
             <div class="metrics-drawer__stack-head">
               <h3>Operação do dia</h3>
-              <span>{{ operationSegments.reduce((sum, item) => sum + item.value, 0) }} itens</span>
+              <span>{{ operationTotal }} itens</span>
             </div>
-            <div class="clinical-progress-card__stack" role="presentation">
+            <div class="metrics-drawer__stack-track" role="presentation">
               <div
                 v-for="segment in operationSegments"
                 :key="segment.id"
-                class="clinical-progress-card__segment"
+                class="metrics-drawer__stack-segment"
                 :data-tone="segment.tone"
                 :style="{ width: `${segment.percent}%` }"
                 :title="`${segment.label}: ${segment.value}`"
               />
             </div>
-            <ul class="clinical-progress-card__legend clinical-progress-card__legend--compact">
+            <ul class="metrics-drawer__legend">
               <li
                 v-for="segment in operationSegments"
                 :key="`${segment.id}-drawer`"
@@ -473,27 +490,30 @@ function formatMetricValue(value: number) {
               >
                 <span>{{ segment.label }}</span>
                 <strong>{{ segment.value }}</strong>
+                <em>{{ segment.percent }}%</em>
               </li>
             </ul>
           </article>
         </div>
 
         <article class="metrics-drawer__chart-card">
-          <div class="clinical-chart-card__head">
+          <div class="metrics-drawer__chart-head">
             <div>
               <h3>Volume por horário</h3>
               <p>Distribuição das consultas de hoje</p>
             </div>
+            <span class="metrics-drawer__chart-peak">Pico 10h</span>
           </div>
-          <div class="hourly-chart hourly-chart--compact" role="img" aria-label="Volume por horário">
-            <div v-for="slot in hourlyVolume" :key="slot.hour" class="hourly-chart__column">
-              <div class="hourly-chart__bar-wrap">
+          <div class="metrics-drawer__bars" role="img" aria-label="Volume por horário">
+            <div v-for="slot in hourlyVolume" :key="slot.hour" class="metrics-drawer__bar-col">
+              <span class="metrics-drawer__bar-value">{{ slot.value }}</span>
+              <div class="metrics-drawer__bar-shell">
                 <span
-                  class="hourly-chart__bar"
+                  class="metrics-drawer__bar-fill"
                   :style="{ height: `${(slot.value / maxHourlyValue) * 100}%` }"
                 />
               </div>
-              <span class="hourly-chart__label">{{ slot.hour }}</span>
+              <span class="metrics-drawer__bar-label">{{ slot.hour }}</span>
             </div>
           </div>
         </article>
@@ -520,12 +540,12 @@ function formatMetricValue(value: number) {
 
             <p class="metric-panel__detail">{{ metric.detail }}</p>
 
-            <div v-if="metric.progress != null" class="metric-panel__progress">
+            <div v-if="metric.progress != null" class="metric-panel__progress metric-panel__progress--drawer">
               <div class="metric-panel__progress-meta">
                 <span>{{ metric.progressLabel }}</span>
                 <span>{{ metric.progress }}%</span>
               </div>
-              <div class="metric-panel__progress-track" role="presentation">
+              <div class="metric-panel__progress-track metric-panel__progress-track--drawer" role="presentation">
                 <span :style="{ width: `${metric.progress}%` }" />
               </div>
             </div>
@@ -533,28 +553,6 @@ function formatMetricValue(value: number) {
             <p class="metric-panel__insight">{{ metric.insight }}</p>
           </article>
         </div>
-
-        <section class="metrics-drawer__shortcuts" aria-labelledby="metrics-shortcuts-title">
-          <h3 id="metrics-shortcuts-title">Acesso rápido</h3>
-          <div class="metrics-drawer__links">
-            <RouterLink
-              v-for="item in shortcuts"
-              :key="item.to"
-              class="clinical-shortcut clinical-shortcut--drawer"
-              :to="item.to"
-              @click="metricsDrawerOpen = false"
-            >
-              <span class="clinical-shortcut__icon" aria-hidden="true">
-                <i :class="item.icon" />
-              </span>
-              <span class="clinical-shortcut__copy">
-                <strong>{{ item.label }}</strong>
-                <small>{{ item.description }}</small>
-              </span>
-              <i class="pi pi-arrow-right clinical-shortcut__arrow" aria-hidden="true" />
-            </RouterLink>
-          </div>
-        </section>
       </div>
     </Drawer>
   </section>
@@ -1200,39 +1198,41 @@ function formatMetricValue(value: number) {
 .metrics-drawer__body {
   display: grid;
   gap: 0.9rem;
+  padding: 0 1rem;
 }
 
 .metrics-drawer__summary {
   display: grid;
-  gap: 0.65rem;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 0.75rem;
+  grid-template-columns: 1fr;
 }
 
 .metrics-drawer__ring-card,
 .metrics-drawer__stack-card,
 .metrics-drawer__chart-card {
-  padding: 0.85rem 0.9rem;
+  padding: 1rem;
   border: 1px solid var(--dash-line);
-  border-radius: 0.9rem;
+  border-radius: 0.95rem;
   background: var(--dash-surface);
+  box-shadow: 0 12px 28px rgb(var(--dash-shadow-rgb) / 0.05);
 }
 
 .metrics-drawer__ring-card {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.55rem;
   justify-items: center;
   text-align: center;
 }
 
-.metrics-drawer__ring-card p {
+.metrics-drawer__ring-caption {
   margin: 0;
   color: var(--dash-muted);
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   line-height: 1.4;
 }
 
-.completion-ring--compact {
-  width: min(100%, 6.5rem);
+.completion-ring--drawer {
+  width: min(100%, 7.5rem);
 }
 
 .metrics-drawer__stack-head {
@@ -1240,12 +1240,12 @@ function formatMetricValue(value: number) {
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.7rem;
 }
 
 .metrics-drawer__stack-head h3 {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: 0.88rem;
   font-weight: 700;
 }
 
@@ -1255,37 +1255,174 @@ function formatMetricValue(value: number) {
   font-weight: 600;
 }
 
-.clinical-progress-card__legend--compact {
-  margin-top: 0.55rem;
-  gap: 0.45rem 0.75rem;
+.metrics-drawer__stack-track {
+  display: flex;
+  height: 0.7rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--dash-line) 80%, transparent);
+}
+
+.metrics-drawer__stack-segment {
+  min-width: 0.45rem;
+  transition: width 280ms ease;
+}
+
+.metrics-drawer__stack-segment[data-tone='success'] {
+  background: var(--dash-success-text);
+}
+
+.metrics-drawer__stack-segment[data-tone='attention'] {
+  background: var(--dash-amber-text);
+}
+
+.metrics-drawer__stack-segment[data-tone='danger'] {
+  background: var(--dash-warm-text);
+}
+
+.metrics-drawer__legend {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metrics-drawer__legend li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--dash-muted);
+  font-size: 0.78rem;
+}
+
+.metrics-drawer__legend li::before {
+  content: '';
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--dash-primary);
+}
+
+.metrics-drawer__legend li[data-tone='success']::before {
+  background: var(--dash-success-text);
+}
+
+.metrics-drawer__legend li[data-tone='attention']::before {
+  background: var(--dash-amber-text);
+}
+
+.metrics-drawer__legend li[data-tone='danger']::before {
+  background: var(--dash-warm-text);
+}
+
+.metrics-drawer__legend strong {
+  color: var(--dash-text);
+  font-size: 0.82rem;
+}
+
+.metrics-drawer__legend em {
+  color: var(--dash-faint);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.metrics-drawer__chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.metrics-drawer__chart-head h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.metrics-drawer__chart-head p {
+  margin: 0.18rem 0 0;
+  color: var(--dash-muted);
+  font-size: 0.76rem;
+}
+
+.metrics-drawer__chart-peak {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dash-primary-soft) 28%, var(--dash-card));
+  color: var(--dash-primary-strong);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.metrics-drawer__bars {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0.4rem;
+  align-items: end;
+  min-height: 9rem;
+}
+
+.metrics-drawer__bar-col {
+  display: grid;
+  gap: 0.35rem;
+  align-content: end;
+  height: 100%;
+}
+
+.metrics-drawer__bar-value {
+  color: var(--dash-faint);
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.metrics-drawer__bar-shell {
+  display: flex;
+  align-items: flex-end;
+  height: 6.25rem;
+  padding: 0 0.12rem;
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--dash-line) 62%, transparent);
+}
+
+.metrics-drawer__bar-fill {
+  display: block;
+  width: 100%;
+  min-height: 0.5rem;
+  border-radius: 0.45rem 0.45rem 0.15rem 0.15rem;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--dash-primary) 88%, white),
+    var(--dash-primary-strong)
+  );
+  box-shadow: 0 8px 18px rgb(var(--dash-shadow-rgb) / 0.08);
+  transition: height 280ms ease;
+}
+
+.metrics-drawer__bar-label {
+  color: var(--dash-muted);
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.metric-panel__progress-track--drawer {
+  height: 0.5rem;
 }
 
 .hourly-chart--compact {
   min-height: 7.5rem;
 }
 
-.hourly-chart--compact .hourly-chart__bar-wrap {
-  height: 5.5rem;
-}
-
 .metrics-drawer__metrics {
   display: grid;
   gap: 0.65rem;
-}
-
-.metrics-drawer__shortcuts h3 {
-  margin: 0 0 0.55rem;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
-.metrics-drawer__links {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.clinical-shortcut--drawer {
-  grid-template-columns: auto 1fr auto;
 }
 
 .clinical-shortcuts-card__links {
@@ -1395,16 +1532,40 @@ function formatMetricValue(value: number) {
 </style>
 
 <style>
+html {
+  scrollbar-gutter: stable;
+}
+
 .clinical-metrics-drawer {
-  width: min(26rem, calc(100vw - 1.25rem)) !important;
+  width: min(28rem, calc(100vw - 1.25rem)) !important;
+  color: var(--dash-text);
+  background: var(--dash-card) !important;
+  border-left: 1px solid var(--dash-line) !important;
+  box-shadow: -18px 0 48px rgb(var(--dash-shadow-rgb) / 0.12) !important;
 }
 
 .clinical-metrics-drawer .p-drawer-header {
   align-items: flex-start;
   padding: 1rem 1rem 0.35rem;
+  border-bottom: 1px solid var(--dash-line);
+  background: var(--dash-card);
 }
 
 .clinical-metrics-drawer .p-drawer-content {
-  padding: 0.35rem 1rem 1.1rem;
+  padding: 0.35rem 0 1.1rem;
+  background: var(--dash-card);
+}
+
+.clinical-metrics-drawer .completion-ring__track {
+  fill: none;
+  stroke: var(--dash-line);
+  stroke-width: 10;
+}
+
+.clinical-metrics-drawer .completion-ring__value {
+  fill: none;
+  stroke: var(--dash-success-text);
+  stroke-width: 10;
+  stroke-linecap: round;
 }
 </style>
