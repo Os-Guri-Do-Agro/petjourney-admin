@@ -2,6 +2,7 @@
 import Button from 'primevue/button'
 import { onMounted, ref } from 'vue'
 
+import PartnerPanelLoading from '@/components/parceiro/PartnerPanelLoading.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { ApiError } from '@/service/api'
 import { getCarteiraExtrato } from '@/service/parceiro/parceiro-portal-service'
@@ -64,10 +65,11 @@ onMounted(() => {
 
 <template>
   <div id="partner-panel-extrato" class="portal-panel" role="tabpanel" aria-labelledby="partner-tab-extrato">
-    <div v-if="loading" class="portal-panel__state" role="status">
-      <i class="pi pi-spin pi-spinner" aria-hidden="true" />
-      <span>Carregando extrato...</span>
-    </div>
+    <PartnerPanelLoading
+      v-if="loading"
+      title="Carregando extrato..."
+      description="Buscando créditos de comissão e débitos recentes."
+    />
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>

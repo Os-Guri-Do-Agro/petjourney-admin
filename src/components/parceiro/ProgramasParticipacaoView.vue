@@ -8,12 +8,16 @@ import { currentColors } from '@/theme/color-mode'
 
 const { store } = useParceiroPortal()
 
+const isLoading = computed(
+  () => store.loadState === 'loading' || store.loadState === 'idle',
+)
+
 const viewStyle = computed(() => {
   const colors = currentColors.value
 
   return {
-    '--prog-bg': colors.dashboard.bg,
     '--prog-card': colors.dashboard.surface,
+    '--prog-surface': colors.dashboard.surfaceSoft,
     '--prog-line': colors.dashboard.line,
     '--prog-line-soft': colors.dashboard.lineSoft,
     '--prog-text': colors.dashboard.text,
@@ -35,65 +39,92 @@ const activationSteps = [
     id: 'solicitar',
     number: '1',
     title: 'Solicitar',
-    description: 'O dono pede a ativação',
+    description: 'O dono pede a ativação do programa.',
   },
   {
     id: 'analise',
     number: '2',
     title: 'Em análise',
-    description: 'Equipe PetJourney revisa',
+    description: 'A equipe PetJourney revisa o pedido.',
   },
   {
     id: 'ativo',
     number: '3',
     title: 'Ativo',
-    description: 'Benefícios liberados',
+    description: 'Benefícios liberados para a empresa.',
   },
 ] as const
 </script>
 
 <template>
   <div class="programas-view" :style="viewStyle">
-    <p class="programas-view__intro">
-      Programas opcionais e independentes para ganhar mais benefícios na rede PetJourney. Cada
-      solicitação passa por aprovação do time.
-    </p>
+    <section class="prog-zone" aria-labelledby="prog-cards-title">
+      <header class="prog-zone__head">
+        <div class="prog-zone__title-row">
+          <p class="prog-zone__index">01</p>
+          <h2 id="prog-cards-title">Programas disponíveis</h2>
+        </div>
+        <p>Solicite afiliado e/ou participativo conforme o modelo da sua empresa.</p>
+      </header>
 
-    <div id="programas" class="programas-view__grid">
-      <ProgramaParticipacaoCard modo="afiliado" />
-      <ProgramaParticipacaoCard modo="participativo" />
-    </div>
+      <div
+        id="programas"
+        class="programas-view__grid"
+        :aria-busy="isLoading || undefined"
+        :aria-label="isLoading ? 'Carregando programas' : undefined"
+        :role="isLoading ? 'status' : undefined"
+      >
+        <ProgramaParticipacaoCard modo="afiliado" :skeleton="isLoading" />
+        <ProgramaParticipacaoCard modo="participativo" :skeleton="isLoading" />
+      </div>
+    </section>
 
-    <section class="activation-panel" aria-labelledby="activation-title">
-      <h2 id="activation-title">Como funciona a ativação</h2>
+    <section class="prog-zone" aria-labelledby="activation-title">
+      <header class="prog-zone__head">
+        <div class="prog-zone__title-row">
+          <p class="prog-zone__index">02</p>
+          <h2 id="activation-title">Como funciona a ativação</h2>
+        </div>
+        <p>Fluxo simples, com análise do time PetJourney.</p>
+      </header>
 
-      <ol class="activation-panel__steps">
-        <li
-          v-for="step in activationSteps"
-          :key="step.id"
-          class="activation-step"
-          :data-step="step.id"
-        >
-          <span class="activation-step__number">{{ step.number }}</span>
-          <div>
-            <strong>{{ step.title }}</strong>
-            <small>{{ step.description }}</small>
-          </div>
-        </li>
-      </ol>
+      <div class="activation-panel">
+        <ol class="activation-panel__steps">
+          <li
+            v-for="step in activationSteps"
+            :key="step.id"
+            class="activation-step"
+            :data-step="step.id"
+          >
+            <span class="activation-step__number">{{ step.number }}</span>
+            <div>
+              <strong>{{ step.title }}</strong>
+              <small>{{ step.description }}</small>
+            </div>
+          </li>
+        </ol>
 
-      <p class="activation-panel__note">
-        Somente o dono da conta pode solicitar a ativação. Operadores acompanham o status, mas não
-        enviam pedidos.
-      </p>
+        <p class="activation-panel__note">
+          Somente o dono da conta pode solicitar a ativação. Operadores acompanham o status, mas não
+          enviam pedidos.
+        </p>
+      </div>
     </section>
 
     <section
-      v-if="!store.podeOperar"
-      class="programas-view__cred"
-      aria-label="Credenciamento"
+      v-if="!store.podeOperar || isLoading"
+      class="prog-zone programas-view__cred"
+      aria-labelledby="cred-zone-title"
     >
-      <PortalCredenciamentoSection />
+      <header class="prog-zone__head">
+        <div class="prog-zone__title-row">
+          <p class="prog-zone__index">03</p>
+          <h2 id="cred-zone-title">Credenciamento</h2>
+        </div>
+        <p>Status da auditoria necessária para liberar solicitações.</p>
+      </header>
+
+      <PortalCredenciamentoSection :skeleton="isLoading" />
     </section>
   </div>
 </template>
@@ -101,68 +132,106 @@ const activationSteps = [
 <style scoped>
 .programas-view {
   display: grid;
-  gap: 1.25rem;
+  gap: 1.65rem;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
-.programas-view__intro {
+.prog-zone {
+  display: grid;
+  gap: 0.9rem;
+  width: 100%;
+}
+
+.prog-zone__head {
+  display: grid;
+  gap: 0.28rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--prog-line) 85%, transparent);
+}
+
+.prog-zone__title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.prog-zone__index {
   margin: 0;
-  max-width: 42rem;
+  color: var(--prog-faint);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.prog-zone__head h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--prog-text);
+}
+
+.prog-zone__head > p {
+  margin: 0;
   color: var(--prog-muted);
-  font-size: 0.92rem;
-  line-height: 1.55;
+  font-size: 0.82rem;
+  line-height: 1.4;
 }
 
 .programas-view__grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.9rem;
+  width: 100%;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
   scroll-margin-top: 5rem;
 }
 
 .activation-panel {
   display: grid;
-  gap: 0;
+  gap: 1rem;
   width: 100%;
-  padding: 1.35rem 1.5rem 1.25rem;
+  padding: 1.25rem 1.3rem 1.2rem;
   border: 1px solid var(--prog-line);
-  border-radius: 1rem;
+  border-radius: 1.2rem;
   background: var(--prog-card);
-  text-align: center;
-}
-
-.activation-panel h2 {
-  width: 100%;
-  margin: 0 0 1.15rem;
-  font-size: 0.98rem;
-  font-weight: 700;
+  box-shadow: 0 12px 28px rgb(var(--prog-shadow-rgb) / 0.04);
 }
 
 .activation-panel__steps {
   display: grid;
   width: 100%;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
   margin: 0;
   padding: 0;
+  overflow: hidden;
   list-style: none;
 }
 
 .activation-step {
   position: relative;
   display: grid;
-  gap: 0.55rem;
-  justify-items: center;
-  padding: 0 0.75rem;
-  text-align: center;
+  gap: 0.65rem;
+  justify-items: start;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--prog-line);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--prog-surface) 75%, var(--prog-card));
 }
 
 .activation-step:not(:last-child)::after {
   content: '';
   position: absolute;
-  top: 1.1rem;
-  left: calc(50% + 1.1rem);
-  width: calc(100% - 2.2rem);
-  border-top: 1px dashed var(--prog-line-soft);
+  top: 2rem;
+  right: 0;
+  width: 0.75rem;
+  transform: translateX(50%);
+  border-top: 1px dashed color-mix(in srgb, var(--prog-line) 90%, transparent);
   pointer-events: none;
+  z-index: 1;
 }
 
 .activation-step__number {
@@ -204,10 +273,7 @@ const activationSteps = [
 }
 
 .activation-panel__note {
-  width: 100%;
-  margin: 1.1rem 0 0;
-  padding-top: 0.95rem;
-  border-top: 1px solid var(--prog-line-soft);
+  margin: 0;
   color: var(--prog-faint);
   font-size: 0.8rem;
   line-height: 1.45;
@@ -224,7 +290,6 @@ const activationSteps = [
 
   .activation-panel__steps {
     grid-template-columns: 1fr;
-    gap: 1rem;
   }
 
   .activation-step:not(:last-child)::after {

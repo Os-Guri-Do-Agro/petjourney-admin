@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatCentavosToBrl, parseBrlToCentavos } from '@/utils/format/money'
+import { formatCentavosToBrl, maskBrlCurrencyInput, parseBrlToCentavos } from '@/utils/format/money'
 
 describe('money', () => {
   it('formata centavos em BRL', () => {
@@ -14,5 +14,13 @@ describe('money', () => {
 
   it('retorna null para valor inválido', () => {
     expect(parseBrlToCentavos('abc')).toBeNull()
+  })
+
+  it('mascara digitação em BRL', () => {
+    expect(maskBrlCurrencyInput('')).toBe('')
+    expect(maskBrlCurrencyInput('5')).toBe('0,05')
+    expect(maskBrlCurrencyInput('5000')).toBe('50,00')
+    expect(maskBrlCurrencyInput('123456')).toBe('1.234,56')
+    expect(maskBrlCurrencyInput('abc12x34')).toBe('12,34')
   })
 })

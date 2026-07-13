@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import HomeNavigationShortcuts from '@/components/home/HomeNavigationShortcuts.vue'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
@@ -8,25 +8,46 @@ import PortalParceiroDashboard from '@/components/parceiro/PortalParceiroDashboa
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { currentColors } from '@/theme/color-mode'
 
-const { store, bootstrapping, ensureContext } = useParceiroPortal()
+const { store, ensureContext } = useParceiroPortal()
+
+const now = ref(new Date())
+let clockId: ReturnType<typeof setInterval> | undefined
 
 const greetingTitle = computed(() => `Olá, ${store.parceiroNome}`)
+
+const todayLabel = computed(() =>
+  now.value.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }),
+)
 
 const pageAtmosphere = computed(() => {
   const colors = currentColors.value
 
   return {
-    '--inicio-bloom': colorMixSafe(colors.vet.primary, colors.dashboard.bg),
-    '--inicio-bloom-soft': colors.vet.secondary,
+    '--inicio-card': colors.dashboard.surface,
+    '--inicio-line': colors.dashboard.line,
+    '--inicio-muted': colors.dashboard.muted,
+    '--inicio-faint': colors.dashboard.faint,
+    '--inicio-text': colors.dashboard.text,
+    '--inicio-bloom': `color-mix(in srgb, ${colors.vet.primary} 16%, ${colors.dashboard.bg})`,
+    '--inicio-shadow-rgb': colors.auth.shadowRgb,
   }
 })
 
-function colorMixSafe(primary: string, bg: string) {
-  return `color-mix(in srgb, ${primary} 18%, ${bg})`
-}
-
 onMounted(() => {
   void ensureContext()
+  clockId = setInterval(() => {
+    now.value = new Date()
+  }, 60_000)
+})
+
+onUnmounted(() => {
+  if (clockId) {
+    clearInterval(clockId)
+  }
 })
 </script>
 
@@ -34,54 +55,97 @@ onMounted(() => {
   <PartnerPageFrame
     subtitle="Visão geral"
     :title="greetingTitle"
-    :loading="bootstrapping || (store.loadState === 'loading' && !store.dashboard)"
+    :loading="false"
     :error="store.loadState === 'error' ? store.errorMessage : ''"
     @retry="ensureContext(true)"
   >
+    <template #actions>
+      <time class="inicio-date" :style="pageAtmosphere" :datetime="now.toISOString()">
+        {{ todayLabel }}
+      </time>
+    </template>
+
     <div class="inicio-shell" :style="pageAtmosphere">
       <div class="inicio-shell__bloom" aria-hidden="true" />
+
       <PartnerOperabilityBanner />
-      <PortalParceiroDashboard />
-      <HomeNavigationShortcuts class="inicio-shortcuts" />
+
+      <p class="inicio-lede">
+        Cupons, indicação e comissão da parceria — organizados para você agir rápido.
+      </p>
+
+      <div class="inicio-layout">
+        <PortalParceiroDashboard />
+        <HomeNavigationShortcuts />
+      </div>
     </div>
   </PartnerPageFrame>
 </template>
 
 <style scoped>
+.inicio-date {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.2rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--inicio-line, transparent);
+  border-radius: 999px;
+  background: var(--inicio-card, transparent);
+  color: var(--inicio-muted, inherit);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-transform: capitalize;
+  box-shadow: 0 8px 18px rgb(var(--inicio-shadow-rgb, 40 51 47) / 0.04);
+}
+
 .inicio-shell {
+  --inicio-gap: 1.65rem;
   position: relative;
   display: grid;
-  gap: 1.45rem;
+  gap: var(--inicio-gap);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   isolation: isolate;
 }
 
 .inicio-shell__bloom {
   position: absolute;
-  top: -4rem;
-  right: -2rem;
+  top: -3.5rem;
+  right: 0;
   z-index: -1;
-  width: min(28rem, 70vw);
-  height: 16rem;
+  width: min(26rem, 100%);
+  height: 14rem;
   border-radius: 999px;
-  background:
-    radial-gradient(
-      circle at 40% 40%,
-      var(--inicio-bloom) 0%,
-      transparent 68%
-    );
-  opacity: 0.9;
+  background: radial-gradient(circle at 40% 40%, var(--inicio-bloom) 0%, transparent 70%);
+  opacity: 0.85;
   pointer-events: none;
-  filter: blur(8px);
+  filter: blur(10px);
 }
 
-.inicio-shortcuts {
-  margin-top: 0.15rem;
-  padding-top: 0.35rem;
+.inicio-lede {
+  margin: -0.35rem 0 0;
+  color: var(--inicio-muted);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.inicio-layout {
+  display: grid;
+  gap: var(--inicio-gap);
+  width: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .inicio-shell__bloom {
     filter: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .inicio-shell {
+    --inicio-gap: 1.35rem;
   }
 }
 </style>

@@ -15,7 +15,7 @@ const CARTEIRA_TABS = ['visao', 'extrato', 'saques'] as const
 type CarteiraTab = (typeof CARTEIRA_TABS)[number]
 
 const router = useRouter()
-const { store, bootstrapping, ensureContext } = useParceiroPortal()
+const { store, ensureContext } = useParceiroPortal()
 const { activeTab, setTab } = usePartnerTabs(CARTEIRA_TABS, 'visao')
 
 const tabs = [
@@ -41,7 +41,7 @@ const loadError = computed(() =>
 )
 
 const showAfiliadoGate = computed(
-  () => !bootstrapping.value && store.loadState === 'ready' && !store.statusAfiliadoAtivo,
+  () => store.loadState === 'ready' && !store.statusAfiliadoAtivo,
 )
 
 function goToProgramas() {
@@ -57,7 +57,7 @@ onMounted(() => {
   <PartnerPageFrame
     subtitle="Portal"
     title="Financeiro"
-    :loading="bootstrapping || store.loadState === 'loading'"
+    :loading="false"
     :error="loadError"
     @retry="ensureContext(true)"
   >

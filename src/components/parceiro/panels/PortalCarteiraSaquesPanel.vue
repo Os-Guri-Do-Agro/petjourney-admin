@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import PartnerPanelLoading from '@/components/parceiro/PartnerPanelLoading.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { ApiError } from '@/service/api'
@@ -56,10 +57,11 @@ onMounted(() => {
 
 <template>
   <div id="partner-panel-saques" class="portal-panel" role="tabpanel" aria-labelledby="partner-tab-saques">
-    <div v-if="loading" class="portal-panel__state" role="status">
-      <i class="pi pi-spin pi-spinner" aria-hidden="true" />
-      <span>Carregando saques...</span>
-    </div>
+    <PartnerPanelLoading
+      v-if="loading"
+      title="Carregando saques..."
+      description="Buscando solicitações e status de pagamento."
+    />
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>
@@ -150,7 +152,7 @@ onMounted(() => {
 .saque-row p {
   margin: 0.15rem 0 0;
   color: var(--partner-muted);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
 }
 
 .saque-row__fail {

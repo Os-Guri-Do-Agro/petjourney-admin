@@ -19,15 +19,15 @@ const partnerLegacyRedirects: RouteRecordRaw[] = [
   },
   {
     path: '/parceiro/indicacao',
-    redirect: { path: '/parceiro/divulgacao', query: { aba: 'indicacao' } },
+    redirect: { path: '/parceiro/divulgacao', hash: '#indicacao' },
   },
   {
     path: '/parceiro/cupons',
-    redirect: { path: '/parceiro/divulgacao', query: { aba: 'cupons' } },
+    redirect: { path: '/parceiro/divulgacao', hash: '#cupons' },
   },
   {
     path: '/parceiro/resgates',
-    redirect: { path: '/parceiro/divulgacao', query: { aba: 'resgates' } },
+    redirect: { path: '/parceiro/divulgacao', hash: '#resgates' },
   },
   {
     path: '/parceiro/carteira/extrato',

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { currentColors } from '@/theme/color-mode'
+import { currentColors, isDarkMode } from '@/theme/color-mode'
 
 export type PartnerTabItem = {
   id: string
@@ -27,6 +27,8 @@ const tabStyle = computed(() => {
     '--tab-text': colors.dashboard.text,
     '--tab-active': colors.vet.primary,
     '--tab-active-soft': colors.vet.secondary,
+    '--tab-active-strong': colors.dashboard.primaryStrong,
+    '--tab-on-active': isDarkMode.value ? colors.text.primary : colors.auth.white,
     '--tab-faint': colors.dashboard.faint,
   }
 })
@@ -93,9 +95,14 @@ const activeDescription = computed(
 }
 
 .partner-tabs__button--active {
-  border-color: color-mix(in srgb, var(--tab-active) 25%, var(--tab-line));
-  background: var(--tab-active-soft);
-  color: var(--tab-active);
+  border-color: color-mix(in srgb, var(--tab-active-strong) 35%, transparent);
+  background: var(--tab-active);
+  color: var(--tab-on-active);
+}
+
+.partner-tabs__button--active:hover {
+  color: var(--tab-on-active);
+  background: var(--tab-active-strong);
 }
 
 .partner-tabs__description {

@@ -1,36 +1,40 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
+import { computed, onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import {
   getCarteira,
   getPortalIndicacao,
 } from '@/service/parceiro/parceiro-portal-service'
 import type { Carteira, PortalIndicacao } from '@/service/parceiro/types'
 import { formatCentavosToBrl } from '@/utils/format/money'
-import { currentColors, isDarkMode } from '@/theme/color-mode'
+import { currentColors } from '@/theme/color-mode'
 
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
+const { focusSurfaceStyle } = usePartnerFocusSurface()
 
 const indicacao = ref<PortalIndicacao | null>(null)
 const carteira = ref<Carteira | null>(null)
-const loadingHighlights = ref(false)
+const loadingHighlights = ref(true)
 const error = ref('')
-const now = ref(new Date())
-let clockId: ReturnType<typeof setInterval> | undefined
+
+const isLoading = computed(
+  () => loadingHighlights.value || store.loadState === 'loading' || store.loadState === 'idle',
+)
 
 const dashStyle = computed(() => {
   const colors = currentColors.value
+  const focus = focusSurfaceStyle.value
 
   return {
-    '--dash-bg': colors.dashboard.bg,
     '--dash-card': colors.dashboard.surface,
     '--dash-surface': colors.dashboard.surfaceSoft,
     '--dash-line': colors.dashboard.line,
-    '--dash-line-soft': colors.dashboard.lineSoft,
     '--dash-text': colors.dashboard.text,
     '--dash-muted': colors.dashboard.muted,
     '--dash-faint': colors.dashboard.faint,
@@ -38,18 +42,13 @@ const dashStyle = computed(() => {
     '--dash-primary-soft': colors.vet.secondary,
     '--dash-primary-strong': colors.dashboard.primaryStrong,
     '--dash-primary-deep': colors.dashboard.primaryDeep,
-    '--dash-commission-from': isDarkMode.value
-      ? colors.dashboard.primaryDeep
-      : colors.auth.sageStrong,
-    '--dash-commission-to': isDarkMode.value ? colors.vet.secondary : colors.dashboard.primaryDeep,
-    '--dash-commission-glow-rgb': isDarkMode.value ? '242 248 245' : '255 255 255',
-    '--dash-success-bg': colors.dashboard.successBg,
+    '--dash-commission-from': focus['--pf-from'],
+    '--dash-commission-to': focus['--pf-to'],
+    '--dash-commission-glow-rgb': focus['--pf-glow-rgb'],
     '--dash-success-text': colors.dashboard.successText,
-    '--dash-on-primary': isDarkMode.value ? colors.text.primary : colors.auth.white,
-    '--dash-commission-cta-bg': isDarkMode.value ? colors.text.primary : colors.auth.white,
-    '--dash-commission-cta-text': isDarkMode.value
-      ? colors.dashboard.primaryDeep
-      : colors.dashboard.primaryStrong,
+    '--dash-on-primary': focus['--pf-on'],
+    '--dash-commission-cta-bg': focus['--pf-cta-bg'],
+    '--dash-commission-cta-text': focus['--pf-cta-text'],
     '--dash-shadow-rgb': colors.auth.shadowRgb,
     '--dash-amber-bg': colors.dashboard.amberBg,
     '--dash-amber-text': colors.dashboard.amberText,
@@ -57,14 +56,6 @@ const dashStyle = computed(() => {
 })
 
 const totais = computed(() => store.dashboard?.totais)
-
-const todayLabel = computed(() =>
-  now.value.toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  }),
-)
 
 const metrics = computed(() => [
   {
@@ -102,7 +93,6 @@ const saldoTotalLabel = computed(() =>
 )
 
 const showCommissionCard = computed(() => store.statusAfiliadoAtivo)
-
 const codigoIndicacao = computed(() => indicacao.value?.codigoIndicacao ?? '')
 
 async function loadDashboardData() {
@@ -153,71 +143,86 @@ async function copyCodigo() {
 
 onMounted(() => {
   void loadDashboardData()
-  clockId = setInterval(() => {
-    now.value = new Date()
-  }, 60_000)
-})
-
-onUnmounted(() => {
-  if (clockId) {
-    clearInterval(clockId)
-  }
 })
 </script>
 
 <template>
   <div class="partner-dash" :style="dashStyle">
-    <header class="partner-dash__intro">
-      <p class="partner-dash__date">{{ todayLabel }}</p>
-      <p class="partner-dash__lede">
-        Acompanhe cupons, indicações e comissões da rede PetJourney em um só lugar.
-      </p>
-    </header>
-
     <div v-if="error" class="partner-dash__state partner-dash__state--error" role="alert">
       <p>{{ error }}</p>
       <button type="button" @click="loadDashboardData">Tentar novamente</button>
     </div>
 
     <template v-else>
-      <section class="partner-dash__band" aria-labelledby="dash-pulse-title">
-        <div class="partner-dash__band-head">
-          <h2 id="dash-pulse-title">Pulso da rede</h2>
-          <p>Indicadores da operação com cupons e resgates.</p>
-        </div>
+      <section class="dash-zone" aria-labelledby="dash-focus-title">
+        <header class="dash-zone__head">
+          <div>
+            <p class="dash-zone__index">01</p>
+            <h2 id="dash-focus-title">Foco agora</h2>
+          </div>
+          <p>Comissão e indicação — o que move a parceria hoje.</p>
+        </header>
 
-        <div class="partner-dash__metrics">
-          <article
-            v-for="(metric, index) in metrics"
-            :key="metric.id"
-            class="metric-card"
-            :class="`metric-card--${metric.tone}`"
-            :style="{ '--metric-delay': `${index * 40}ms` }"
-          >
-            <div class="metric-card__head">
-              <span>{{ metric.label }}</span>
-              <span class="metric-card__icon" aria-hidden="true">
-                <i :class="metric.icon" />
-              </span>
+        <div
+          v-if="isLoading"
+          class="dash-focus"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+          aria-label="Carregando comissão e indicação"
+        >
+          <article class="commission-card commission-card--skeleton" aria-hidden="true">
+            <div class="commission-card__glow" />
+            <div class="commission-card__top">
+              <Skeleton width="11rem" height="0.7rem" border-radius="4px" />
+              <Skeleton width="4.5rem" height="1.45rem" border-radius="999px" />
             </div>
-            <strong class="metric-card__value">{{ metric.value }}</strong>
-            <p v-if="metric.hint" class="metric-card__hint">{{ metric.hint }}</p>
+            <div class="commission-card__amount">
+              <Skeleton width="9.5rem" height="2.15rem" border-radius="8px" />
+              <Skeleton width="5.5rem" height="0.9rem" border-radius="4px" />
+            </div>
+            <div class="commission-card__meta">
+              <Skeleton width="100%" height="0.85rem" border-radius="4px" />
+              <Skeleton width="72%" height="0.85rem" border-radius="4px" />
+            </div>
+            <Skeleton
+              class="commission-card__cta commission-card__cta--skeleton"
+              width="8.5rem"
+              height="2.65rem"
+              border-radius="0.85rem"
+            />
+          </article>
+
+          <article class="referral-card referral-card--skeleton" aria-hidden="true">
+            <Skeleton
+              class="referral-card__eyebrow referral-card__eyebrow--skeleton"
+              width="9rem"
+              height="0.7rem"
+              border-radius="4px"
+            />
+            <div class="referral-card__code-row">
+              <Skeleton
+                class="referral-card__code referral-card__code--skeleton"
+                width="8.5rem"
+                height="2.5rem"
+                border-radius="0.75rem"
+              />
+              <Skeleton width="2.5rem" height="2.5rem" border-radius="0.75rem" />
+            </div>
+            <div class="referral-card__meta">
+              <Skeleton width="100%" height="0.85rem" border-radius="4px" />
+              <Skeleton width="78%" height="0.85rem" border-radius="4px" />
+            </div>
+            <Skeleton
+              class="referral-card__cta referral-card__cta--skeleton"
+              width="100%"
+              height="2.65rem"
+              border-radius="0.85rem"
+            />
           </article>
         </div>
-      </section>
 
-      <section class="partner-dash__band" aria-labelledby="dash-focus-title">
-        <div class="partner-dash__band-head">
-          <h2 id="dash-focus-title">Foco agora</h2>
-          <p>Comissão e indicação — as ações que movem a parceria.</p>
-        </div>
-
-        <div v-if="loadingHighlights" class="partner-dash__state" role="status">
-          <i class="pi pi-spin pi-spinner" aria-hidden="true" />
-          <span>Carregando comissão e indicação...</span>
-        </div>
-
-        <div v-else class="partner-dash__highlights">
+        <div v-else class="dash-focus">
           <article v-if="showCommissionCard" class="commission-card">
             <div class="commission-card__glow" aria-hidden="true" />
             <div class="commission-card__top">
@@ -243,9 +248,7 @@ onUnmounted(() => {
           <article v-else class="commission-card commission-card--muted">
             <div class="commission-card__top">
               <p class="commission-card__eyebrow">Comissão</p>
-              <span class="commission-card__badge commission-card__badge--muted">
-                Não ativo
-              </span>
+              <span class="commission-card__badge commission-card__badge--muted">Não ativo</span>
             </div>
             <div class="commission-card__amount">
               <strong>Programa afiliado</strong>
@@ -263,11 +266,9 @@ onUnmounted(() => {
           </article>
 
           <article class="referral-card">
-            <p class="referral-card__eyebrow">Seu código de indicação</p>
+            <p class="referral-card__eyebrow">Código de indicação</p>
             <div class="referral-card__code-row">
-              <strong class="referral-card__code">
-                {{ codigoIndicacao || '—' }}
-              </strong>
+              <strong class="referral-card__code">{{ codigoIndicacao || '—' }}</strong>
               <button
                 v-if="codigoIndicacao"
                 class="referral-card__copy"
@@ -288,6 +289,63 @@ onUnmounted(() => {
           </article>
         </div>
       </section>
+
+      <section class="dash-zone" aria-labelledby="dash-pulse-title">
+        <header class="dash-zone__head">
+          <div>
+            <p class="dash-zone__index">02</p>
+            <h2 id="dash-pulse-title">Pulso da rede</h2>
+          </div>
+          <p>Indicadores de cupons e resgates.</p>
+        </header>
+
+        <div
+          v-if="isLoading"
+          class="dash-metrics"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+          aria-label="Carregando indicadores"
+        >
+          <article
+            v-for="metric in metrics"
+            :key="`skeleton-${metric.id}`"
+            class="metric-card metric-card--skeleton"
+            :class="`metric-card--${metric.tone}`"
+            aria-hidden="true"
+          >
+            <div class="metric-card__head">
+              <Skeleton width="6.5rem" height="0.75rem" border-radius="4px" />
+              <Skeleton width="1.85rem" height="1.85rem" border-radius="0.65rem" />
+            </div>
+            <Skeleton
+              class="metric-card__value metric-card__value--skeleton"
+              width="3.25rem"
+              height="2rem"
+              border-radius="6px"
+            />
+            <Skeleton width="7rem" height="0.7rem" border-radius="4px" />
+          </article>
+        </div>
+
+        <div v-else class="dash-metrics">
+          <article
+            v-for="metric in metrics"
+            :key="metric.id"
+            class="metric-card"
+            :class="`metric-card--${metric.tone}`"
+          >
+            <div class="metric-card__head">
+              <span>{{ metric.label }}</span>
+              <span class="metric-card__icon" aria-hidden="true">
+                <i :class="metric.icon" />
+              </span>
+            </div>
+            <strong class="metric-card__value">{{ metric.value }}</strong>
+            <p class="metric-card__hint">{{ metric.hint }}</p>
+          </article>
+        </div>
+      </section>
     </template>
   </div>
 </template>
@@ -295,48 +353,50 @@ onUnmounted(() => {
 <style scoped>
 .partner-dash {
   display: grid;
-  gap: 1.55rem;
+  gap: 1.65rem;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
-.partner-dash__intro {
+.dash-zone {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.9rem;
 }
 
-.partner-dash__date {
+.dash-zone__head {
+  display: grid;
+  gap: 0.28rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--dash-line) 85%, transparent);
+}
+
+.dash-zone__head > div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.dash-zone__index {
   margin: 0;
   color: var(--dash-faint);
-  font-size: 0.78rem;
-  font-weight: 650;
-  letter-spacing: 0.02em;
-  text-transform: capitalize;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
 }
 
-.partner-dash__lede {
+.dash-zone__head h2 {
   margin: 0;
-  max-width: 38rem;
-  color: var(--dash-muted);
-  font-size: 0.95rem;
-  line-height: 1.55;
-}
-
-.partner-dash__band {
-  display: grid;
-  gap: 0.85rem;
-}
-
-.partner-dash__band-head h2 {
-  margin: 0;
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--dash-text);
 }
 
-.partner-dash__band-head p {
-  margin: 0.2rem 0 0;
+.dash-zone__head > p {
+  margin: 0;
   color: var(--dash-muted);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   line-height: 1.4;
 }
 
@@ -344,9 +404,9 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 1.25rem;
+  padding: 1.2rem 1.25rem;
   border: 1px solid var(--dash-line);
-  border-radius: 1.15rem;
+  border-radius: 1.1rem;
   background: var(--dash-card);
   color: var(--dash-muted);
 }
@@ -370,102 +430,81 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.partner-dash__metrics {
+.commission-card--skeleton .commission-card__meta,
+.referral-card--skeleton .referral-card__meta {
   display: grid;
-  gap: 0.85rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  max-width: 30rem;
 }
 
-.metric-card {
-  position: relative;
-  display: grid;
-  gap: 0.4rem;
-  padding: 1.1rem 1.15rem 1.05rem;
-  border: 1px solid var(--dash-line);
-  border-radius: 1.15rem;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--metric-accent, var(--dash-primary)) 8%, var(--dash-card)) 0%,
-      var(--dash-card) 52%
-    );
-  box-shadow: 0 14px 30px rgb(var(--dash-shadow-rgb) / 0.045);
-  overflow: hidden;
-  animation: dash-rise 420ms ease both;
-  animation-delay: var(--metric-delay, 0ms);
-  transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+.commission-card__cta--skeleton,
+.referral-card__cta--skeleton {
+  display: block;
+  margin-top: auto;
+  pointer-events: none;
 }
 
-.metric-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--metric-accent, var(--dash-primary)) 28%, var(--dash-line));
-  box-shadow: 0 18px 34px rgb(var(--dash-shadow-rgb) / 0.07);
+.referral-card__eyebrow--skeleton {
+  display: block;
 }
 
-.metric-card--sage {
-  --metric-accent: var(--dash-primary);
+.referral-card__code--skeleton {
+  display: block;
+  min-height: 2.5rem;
+  padding: 0;
+  background: transparent;
 }
 
-.metric-card--success {
-  --metric-accent: var(--dash-success-text);
+.metric-card--skeleton {
+  pointer-events: none;
 }
 
-.metric-card--deep {
-  --metric-accent: var(--dash-primary-deep);
+.metric-card--skeleton:hover {
+  transform: none;
+  border-color: var(--dash-line);
+  box-shadow: 0 12px 26px rgb(var(--dash-shadow-rgb) / 0.04);
 }
 
-.metric-card__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  color: var(--dash-muted);
-  font-size: 0.8rem;
-  font-weight: 650;
+.metric-card__value--skeleton {
+  display: block;
 }
 
-.metric-card__icon {
-  display: grid;
-  width: 2.15rem;
-  height: 2.15rem;
-  place-items: center;
-  border-radius: 0.7rem;
-  background: color-mix(in srgb, var(--metric-accent, var(--dash-primary)) 16%, var(--dash-card));
-  color: var(--metric-accent, var(--dash-primary-strong));
-  font-size: 0.88rem;
+.commission-card--skeleton :deep(.p-skeleton) {
+  --p-skeleton-background: color-mix(in srgb, white 30%, transparent);
+  --p-skeleton-animation-background: color-mix(in srgb, white 14%, transparent);
 }
 
-.metric-card__value {
-  font-size: clamp(1.75rem, 2.8vw, 2.15rem);
-  line-height: 1.05;
-  letter-spacing: -0.04em;
-  font-weight: 750;
+.referral-card--skeleton :deep(.p-skeleton),
+.metric-card--skeleton :deep(.p-skeleton) {
+  --p-skeleton-background: color-mix(in srgb, var(--dash-primary-soft) 42%, var(--dash-card));
+  --p-skeleton-animation-background: color-mix(
+    in srgb,
+    var(--dash-primary-soft) 18%,
+    transparent
+  );
 }
 
-.metric-card__hint {
-  margin: 0;
-  color: var(--dash-faint);
-  font-size: 0.76rem;
-}
-
-.partner-dash__highlights {
+.dash-focus {
   display: grid;
   gap: 0.9rem;
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  width: 100%;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.commission-card,
+.referral-card {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+  min-height: 100%;
+  padding: 1.25rem 1.3rem 1.3rem;
+  border-radius: 1.2rem;
 }
 
 .commission-card {
   position: relative;
-  display: grid;
-  gap: 0.7rem;
-  align-content: start;
   overflow: hidden;
-  min-height: 100%;
-  padding: 1.3rem 1.35rem 1.35rem;
-  border-radius: 1.25rem;
   border: 0;
   background:
     radial-gradient(
@@ -475,10 +514,8 @@ onUnmounted(() => {
       transparent 64%
     ),
     linear-gradient(152deg, var(--dash-commission-from), var(--dash-commission-to));
-  box-shadow: 0 20px 42px rgb(var(--dash-shadow-rgb) / 0.12);
+  box-shadow: 0 18px 40px rgb(var(--dash-shadow-rgb) / 0.11);
   color: var(--dash-on-primary);
-  animation: dash-rise 480ms ease both;
-  animation-delay: 80ms;
 }
 
 .commission-card--muted {
@@ -489,19 +526,21 @@ onUnmounted(() => {
       var(--dash-card) 55%
     );
   border: 1px solid var(--dash-line);
-  box-shadow: 0 14px 30px rgb(var(--dash-shadow-rgb) / 0.05);
+  box-shadow: 0 12px 28px rgb(var(--dash-shadow-rgb) / 0.045);
   color: var(--dash-text);
 }
 
 .commission-card__glow {
   position: absolute;
   top: -4rem;
-  right: -2.5rem;
+  right: 0;
   width: 11rem;
+  max-width: 55%;
   height: 11rem;
   border-radius: 999px;
   background: rgb(var(--dash-commission-glow-rgb) / 0.14);
   pointer-events: none;
+  transform: translateX(30%);
 }
 
 .commission-card__top {
@@ -511,16 +550,21 @@ onUnmounted(() => {
   gap: 0.75rem;
 }
 
-.commission-card__eyebrow {
+.commission-card__eyebrow,
+.referral-card__eyebrow {
   margin: 0;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.11em;
   text-transform: uppercase;
+}
+
+.commission-card__eyebrow {
   opacity: 0.9;
 }
 
-.commission-card--muted .commission-card__eyebrow {
+.commission-card--muted .commission-card__eyebrow,
+.referral-card__eyebrow {
   color: var(--dash-faint);
   opacity: 1;
 }
@@ -550,13 +594,13 @@ onUnmounted(() => {
 }
 
 .commission-card__amount strong {
-  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-size: clamp(1.7rem, 2.8vw, 2.15rem);
   letter-spacing: -0.04em;
   font-weight: 750;
 }
 
 .commission-card__amount span {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   opacity: 0.88;
 }
 
@@ -565,38 +609,49 @@ onUnmounted(() => {
   color: var(--dash-muted);
 }
 
-.commission-card__meta {
+.commission-card__meta,
+.referral-card__meta {
   margin: 0;
-  max-width: 30rem;
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   line-height: 1.5;
+}
+
+.commission-card__meta {
+  max-width: 30rem;
   opacity: 0.92;
 }
 
-.commission-card--muted .commission-card__meta {
+.commission-card--muted .commission-card__meta,
+.referral-card__meta {
   color: var(--dash-muted);
   opacity: 1;
 }
 
-.commission-card__cta {
+.commission-card__cta,
+.referral-card__cta {
   display: inline-flex;
-  width: fit-content;
   align-items: center;
   gap: 0.45rem;
-  margin-top: 0.35rem;
+  margin-top: auto;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    transform 150ms ease,
+    filter 150ms ease,
+    background 150ms ease;
+}
+
+.commission-card__cta {
+  width: fit-content;
   padding: 0.62rem 1rem;
   border-radius: 0.8rem;
   background: var(--dash-commission-cta-bg);
   color: var(--dash-commission-cta-text);
   font-size: 0.86rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition:
-    transform 150ms ease,
-    filter 150ms ease;
 }
 
-.commission-card__cta i {
+.commission-card__cta i,
+.referral-card__cta i {
   transition: transform 150ms ease;
 }
 
@@ -608,7 +663,9 @@ onUnmounted(() => {
 }
 
 .commission-card__cta:hover i,
-.commission-card__cta:focus-visible i {
+.commission-card__cta:focus-visible i,
+.referral-card__cta:hover i,
+.referral-card__cta:focus-visible i {
   transform: translateX(2px);
 }
 
@@ -620,30 +677,14 @@ onUnmounted(() => {
 }
 
 .referral-card {
-  display: grid;
-  gap: 0.65rem;
-  align-content: start;
-  padding: 1.3rem 1.25rem 1.25rem;
   border: 1px solid var(--dash-line);
-  border-radius: 1.25rem;
   background:
     linear-gradient(
       165deg,
       color-mix(in srgb, var(--dash-surface) 90%, var(--dash-card)),
       var(--dash-card)
     );
-  box-shadow: 0 14px 30px rgb(var(--dash-shadow-rgb) / 0.045);
-  animation: dash-rise 480ms ease both;
-  animation-delay: 120ms;
-}
-
-.referral-card__eyebrow {
-  margin: 0;
-  color: var(--dash-faint);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
+  box-shadow: 0 12px 28px rgb(var(--dash-shadow-rgb) / 0.045);
 }
 
 .referral-card__code-row {
@@ -660,7 +701,7 @@ onUnmounted(() => {
   border-radius: 0.75rem;
   background: color-mix(in srgb, var(--dash-primary-soft) 28%, var(--dash-card));
   color: var(--dash-primary-strong);
-  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  font-size: clamp(1.15rem, 1.8vw, 1.4rem);
   letter-spacing: 0.08em;
   font-weight: 750;
 }
@@ -689,35 +730,14 @@ onUnmounted(() => {
   outline: none;
 }
 
-.referral-card__meta {
-  margin: 0;
-  color: var(--dash-muted);
-  font-size: 0.84rem;
-  line-height: 1.5;
-}
-
 .referral-card__cta {
-  display: inline-flex;
   width: 100%;
-  align-items: center;
   justify-content: center;
-  gap: 0.45rem;
   min-height: 2.65rem;
-  margin-top: 0.25rem;
-  border: 1px solid transparent;
   border-radius: 0.85rem;
   background: color-mix(in srgb, var(--dash-primary) 14%, var(--dash-card));
   color: var(--dash-primary-strong);
   font-size: 0.86rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition:
-    background 140ms ease,
-    transform 140ms ease;
-}
-
-.referral-card__cta i {
-  transition: transform 140ms ease;
 }
 
 .referral-card__cta:hover,
@@ -727,30 +747,87 @@ onUnmounted(() => {
   transform: translateY(-1px);
 }
 
-.referral-card__cta:hover i,
-.referral-card__cta:focus-visible i {
-  transform: translateX(2px);
+.dash-metrics {
+  display: grid;
+  gap: 0.85rem;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-@keyframes dash-rise {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
+.metric-card {
+  display: grid;
+  gap: 0.35rem;
+  min-height: 8.2rem;
+  padding: 1.05rem 1.1rem;
+  border: 1px solid var(--dash-line);
+  border-radius: 1.1rem;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--metric-accent, var(--dash-primary)) 8%, var(--dash-card)) 0%,
+      var(--dash-card) 55%
+    );
+  box-shadow: 0 12px 26px rgb(var(--dash-shadow-rgb) / 0.04);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--metric-accent, var(--dash-primary)) 28%, var(--dash-line));
+  box-shadow: 0 16px 30px rgb(var(--dash-shadow-rgb) / 0.065);
+}
+
+.metric-card--sage {
+  --metric-accent: var(--dash-primary);
+}
+
+.metric-card--success {
+  --metric-accent: var(--dash-success-text);
+}
+
+.metric-card--deep {
+  --metric-accent: var(--dash-primary-deep);
+}
+
+.metric-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--dash-muted);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.metric-card__icon {
+  display: grid;
+  width: 2.1rem;
+  height: 2.1rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--metric-accent, var(--dash-primary)) 16%, var(--dash-card));
+  color: var(--metric-accent, var(--dash-primary-strong));
+  font-size: 0.86rem;
+}
+
+.metric-card__value {
+  margin-top: 0.2rem;
+  font-size: clamp(1.65rem, 2.5vw, 2rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-weight: 750;
+}
+
+.metric-card__hint {
+  margin: 0;
+  color: var(--dash-faint);
+  font-size: 0.76rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .metric-card,
-  .commission-card,
-  .referral-card {
-    animation: none;
-  }
-
   .metric-card:hover,
   .commission-card__cta:hover,
   .referral-card__cta:hover {
@@ -759,8 +836,8 @@ onUnmounted(() => {
 }
 
 @media (max-width: 900px) {
-  .partner-dash__metrics,
-  .partner-dash__highlights {
+  .dash-focus,
+  .dash-metrics {
     grid-template-columns: 1fr;
   }
 }

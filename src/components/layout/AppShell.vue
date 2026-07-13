@@ -397,6 +397,8 @@ onMounted(() => {
   --navigator-width: 19.5rem;
   --header-height: 4.25rem;
   min-height: 100vh;
+  max-width: 100%;
+  overflow-x: clip;
   background: var(--shell-bg);
   color: var(--shell-text);
 }
@@ -881,8 +883,10 @@ onMounted(() => {
 
 .app-content {
   min-height: 100vh;
+  max-width: 100%;
   padding-top: var(--header-height);
   padding-left: var(--navigator-width);
+  overflow-x: clip;
   transition: padding-left 180ms ease;
 }
 

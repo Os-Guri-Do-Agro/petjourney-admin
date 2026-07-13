@@ -104,7 +104,9 @@ const pageStyle = computed(() => {
 <style scoped>
 .partner-page {
   min-height: calc(100vh - 4.25rem);
+  max-width: 100%;
   padding: 1.5rem 1.35rem 2rem;
+  overflow-x: clip;
   background: var(--partner-bg);
   color: var(--partner-text);
 }

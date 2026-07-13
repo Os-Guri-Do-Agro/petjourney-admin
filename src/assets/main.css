@@ -1,6 +1,15 @@
 @import 'primeicons/primeicons.css';
 @import 'tailwindcss';
 
+html {
+  overflow-x: clip;
+}
+
+body,
+#app {
+  max-width: 100%;
+  overflow-x: clip;
+}
 :root {
   --pj-toast-card: #ffffff;
   --pj-toast-surface: #f8faf9;
