@@ -2,7 +2,8 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-import logoSemPata from '@/assets/Logos/logo-clara-em-row.png'
+import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
+import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
 import AuthButton from '@/components/auth/AuthButton.vue'
 import { isAuthenticated } from '@/service/auth/auth-session'
 import { currentColors, isDarkMode } from '@/theme/color-mode'
@@ -11,6 +12,7 @@ import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 const router = useRouter()
 
 const logoIconUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
+const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
 
 const homePath = computed(() =>
   isAuthenticated() ? getDefaultLandingPath() : '/auth/login',

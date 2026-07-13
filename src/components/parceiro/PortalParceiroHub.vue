@@ -108,7 +108,7 @@ onMounted(() => {
       <section class="hub-section" aria-labelledby="hub-areas-title">
         <header class="hub-section__head">
           <h3 id="hub-areas-title">Próximos passos</h3>
-          <p>Divulgação, financeiro e equipe ficam em telas dedicadas para facilitar o foco.</p>
+          <p>Divulgação e financeiro ficam em telas dedicadas para facilitar o foco.</p>
         </header>
         <PortalAreaNav />
       </section>

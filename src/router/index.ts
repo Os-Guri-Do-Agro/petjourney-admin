@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
+import { EQUIPE_MENU_ENABLED } from '@/composables/useAppNavigation'
 import { isAuthenticated } from '@/service/auth/auth-session'
 
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
@@ -9,6 +10,9 @@ import { routes } from './file-routes'
 const partnerLegacyRedirects: RouteRecordRaw[] = [
   { path: '/parceiro', redirect: '/inicio' },
   { path: '/veterinario', redirect: '/inicio' },
+  ...(EQUIPE_MENU_ENABLED
+    ? []
+    : [{ path: '/parceiro/equipe', redirect: '/inicio' } satisfies RouteRecordRaw]),
   {
     path: '/parceiro/status',
     redirect: { path: '/parceiro/programas', hash: '#credenciamento' },

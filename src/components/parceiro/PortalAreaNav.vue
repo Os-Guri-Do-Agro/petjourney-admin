@@ -32,17 +32,10 @@ const areas = computed(() => {
       label: 'Divulgação',
       description: 'Código de indicação, cupons e resgates.',
     },
-    {
-      id: 'equipe',
-      to: '/parceiro/equipe',
-      icon: 'pi pi-users',
-      label: 'Equipe',
-      description: 'Convites e papéis dos membros.',
-    },
   ]
 
   if (store.statusAfiliadoAtivo) {
-    items.splice(1, 0, {
+    items.push({
       id: 'financeiro',
       to: '/parceiro/carteira',
       icon: 'pi pi-wallet',

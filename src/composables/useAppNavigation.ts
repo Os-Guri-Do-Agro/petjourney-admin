@@ -24,6 +24,16 @@ export type AppNavigationSection = {
   panelSubtitle?: string
 }
 
+/**
+ * Menu clínico desligado no go-live: as telas estavam com dados mocados.
+ * Implementações em `src/_mocks/`; stubs em `/veterinario/*` sem dados fictícios.
+ * Reative quando a API clínica estiver integrada.
+ */
+export const CLINICAL_MENU_ENABLED = false
+
+/** Equipe oculta no go-live até a operação do time estar pronta no portal. */
+export const EQUIPE_MENU_ENABLED = false
+
 const accountItems: AppNavigationItem[] = [
   { label: 'Perfil', to: '/perfil', icon: 'pi pi-user' },
   { label: 'Configurações', to: '/settings#seguranca', icon: 'pi pi-cog' },
@@ -123,7 +133,9 @@ function flattenSectionItems(section: AppNavigationSection) {
 export function useAppNavigation() {
   const parceiroStore = useParceiroStore()
 
-  const hasClinicalProfile = computed(() => hasVeterinarioProfile())
+  const hasClinicalProfile = computed(
+    () => CLINICAL_MENU_ENABLED && hasVeterinarioProfile(),
+  )
 
   const portalItems = computed<AppNavigationItem[]>(() => {
     const items: AppNavigationItem[] = [
@@ -135,7 +147,9 @@ export function useAppNavigation() {
       items.push({ label: 'Financeiro', to: '/parceiro/carteira', icon: 'pi pi-wallet' })
     }
 
-    items.push({ label: 'Equipe', to: '/parceiro/equipe', icon: 'pi pi-users' })
+    if (EQUIPE_MENU_ENABLED) {
+      items.push({ label: 'Equipe', to: '/parceiro/equipe', icon: 'pi pi-users' })
+    }
 
     return items
   })
@@ -169,6 +183,19 @@ export function useAppNavigation() {
 
     return groups
   })
+
+  /** Atalhos da visão geral: mesmas seções do menu Início, sem o link para si mesma. */
+  const homeShortcutGroups = computed<AppNavigationGroup[]>(() =>
+    homeGroups.value
+      .filter((group) => group.id !== 'overview')
+      .map((group) => ({
+        ...group,
+        items: group.items.map((item) => ({
+          ...item,
+          to: stripHomeMenuContext(item.to),
+        })),
+      })),
+  )
 
   const navigationSections = computed<AppNavigationSection[]>(() => {
     const sections: AppNavigationSection[] = [
@@ -218,6 +245,7 @@ export function useAppNavigation() {
   return {
     navigationSections,
     hasClinicalProfile,
+    homeShortcutGroups,
   }
 }
 

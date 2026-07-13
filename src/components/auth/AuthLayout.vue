@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import logoSemPata from '@/assets/Logos/logo-clara-em-row.png'
+import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
+import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
 import bgLoginUrl from '@/assets/login/bg-login.jpg'
 import { currentColors, isDarkMode } from '@/theme/color-mode'
 
@@ -12,6 +13,7 @@ defineProps<{
 }>()
 
 const logoUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
+const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
 
 const authLayoutStyle = computed(() => {
   const colors = currentColors.value

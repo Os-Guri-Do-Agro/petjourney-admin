@@ -94,7 +94,7 @@ async function handleLogin() {
         autocomplete="email"
         :disabled="loading"
         label="E-mail"
-        placeholder="dra.marina@petjourney.vet"
+        placeholder="seuemail@empresa.com"
         required
         type="email"
       >

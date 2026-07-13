@@ -3,7 +3,8 @@ import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
-import logoHeaderUrl from '@/assets/Logos/logo-clara-em-row.png'
+import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
+import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import {
   filterNavigationGroups,
@@ -36,6 +37,7 @@ const searchQuery = ref('')
 const panelFilterQuery = ref('')
 const user = computed(() => getAuthUser())
 const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
+const logoHeaderUrl = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
 
 type NavigationItem = AppNavigationItem
 

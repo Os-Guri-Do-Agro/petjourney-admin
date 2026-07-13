@@ -1,3 +1,7 @@
+<!--
+  ARQUIVO MOCADO — fora do app de produção.
+  Ver src/_mocks/README.md
+-->
 <script setup lang="ts">
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'

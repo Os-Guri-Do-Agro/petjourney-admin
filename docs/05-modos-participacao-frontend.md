@@ -154,14 +154,14 @@ As rotas de carteira/saque (Parte 4: `GET /parceiro/portal/carteira`, `/carteira
 ---
 
 ## 6. Checklist de integração (frontend)
-- [ ] Service: `getStatus()` → `GET /parceiro/portal/status`; `solicitarModo(modo)` → `POST .../modos/:modo/solicitar`.
-- [ ] Mandar `?parceiroId` quando o usuário tem 2+ parceiros (senão 400).
-- [ ] Tela de Programas: 2 cards lendo `statusAfiliado`/`statusParticipativo`; CTA por status (tabela 5.1).
-- [ ] Botões de ação só pra **DONO** (esconder pra OPERADOR).
-- [ ] Bloquear "Solicitar" se `podeOperar=false`; tratar 409 (`Parceiro nao operavel` / `Modo ja solicitado ou ativo`).
-- [ ] Aba **Carteira** só visível com `statusAfiliado === 'ATIVO'` (senão 409).
-- [ ] CMS: fila por `statusAfiliado/Participativo === 'SOLICITADO'` via `GET /parceiro`; aprovar/rejeitar/suspender (motivo min 3).
-- [ ] Atualizar UI após cada ação (refetch status / lista).
+- [x] Service: `getStatus()` → `GET /parceiro/portal/status`; `solicitarModo(modo)` → `POST .../modos/:modo/solicitar`.
+- [x] Mandar `?parceiroId` quando o usuário tem 2+ parceiros (senão 400).
+- [x] Tela de Programas: 2 cards lendo `statusAfiliado`/`statusParticipativo`; CTA por status (tabela 5.1).
+- [x] Botões de ação só pra **DONO** (esconder pra OPERADOR).
+- [x] Bloquear "Solicitar" se `podeOperar=false`; tratar 409 (`Parceiro nao operavel` / `Modo ja solicitado ou ativo`).
+- [x] Aba **Carteira** só visível com `statusAfiliado === 'ATIVO'` (senão 409).
+- [ ] CMS: fila por `statusAfiliado/Participativo === 'SOLICITADO'` via `GET /parceiro`; aprovar/rejeitar/suspender (motivo min 3). **Fora deste repositório** (projeto CMS / `isSystemAdmin` — ver `docs/PORTAL_PARCEIRO.md`).
+- [x] Atualizar UI após cada ação (refetch status / lista).
 
 ---
 

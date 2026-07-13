@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ProgramasParticipacaoView from '@/components/parceiro/ProgramasParticipacaoView.vue'
+import { EQUIPE_MENU_ENABLED } from '@/composables/useAppNavigation'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 
 const LEGACY_ABA_REDIRECTS: Record<string, { path: string; hash?: string; aba?: string }> = {
@@ -16,7 +17,7 @@ const LEGACY_ABA_REDIRECTS: Record<string, { path: string; hash?: string; aba?: 
   indicacao: { path: '/parceiro/divulgacao', aba: 'indicacao' },
   cupons: { path: '/parceiro/divulgacao', aba: 'cupons' },
   resgates: { path: '/parceiro/divulgacao', aba: 'resgates' },
-  equipe: { path: '/parceiro/equipe' },
+  equipe: { path: EQUIPE_MENU_ENABLED ? '/parceiro/equipe' : '/inicio' },
 }
 
 const { store, bootstrapping, ensureContext } = useParceiroPortal()
