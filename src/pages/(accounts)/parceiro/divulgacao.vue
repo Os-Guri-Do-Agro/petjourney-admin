@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
@@ -14,6 +15,7 @@ const ABA_TO_HASH: Record<string, string> = {
   resgates: '#resgates',
 }
 
+const { t } = useI18n()
 const { store, ensureContext } = useParceiroPortal()
 const route = useRoute()
 const router = useRouter()
@@ -75,8 +77,8 @@ watch(
 
 <template>
   <PartnerPageFrame
-    subtitle="Portal"
-    title="Divulgação"
+    :subtitle="t('divulgacao.subtitle')"
+    :title="t('divulgacao.title')"
     :loading="false"
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
@@ -86,7 +88,7 @@ watch(
       <PartnerOperabilityBanner />
 
       <p class="divulgacao-page__lede">
-        Indicação, cupons e resgates da parceria — tudo em um só lugar para divulgar com clareza.
+        {{ t('divulgacao.lede') }}
       </p>
 
       <PortalDivulgacaoPanel />

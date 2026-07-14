@@ -3,21 +3,23 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
+import { ApiError } from '@/service/api'
 import { validarCupom } from '@/service/parceiro/parceiro-portal-service'
 import type { ValidarCupomResultado } from '@/service/parceiro/types'
 import { currentColors, isDarkMode } from '@/theme/color-mode'
 import {
   isCodigoResgateFormatoValido,
   normalizarCodigoResgate,
-  resolveValidarCupomError,
   type ValidarCupomErrorView,
 } from '@/utils/parceiro/cupom-resgate'
 
+const { t } = useI18n()
 const { visible, close, markSuccess, canOpen } = useCupomResgateModal()
 const { store, parceiroQuery } = useParceiroPortal()
 const { focusSurfaceStyle } = usePartnerFocusSurface()
@@ -119,21 +121,75 @@ function startAnother() {
   resetForm()
 }
 
+function resolveErrorView(error: unknown): ValidarCupomErrorView {
+  if (!(error instanceof ApiError)) {
+    const message =
+      error instanceof Error ? error.message : t('shell.cupom.errors.generic.message')
+
+    return {
+      title: t('shell.cupom.errors.generic.title'),
+      message,
+      suggestCheckHistorico: true,
+    }
+  }
+
+  if (error.statusCode === 404) {
+    return {
+      title: t('shell.cupom.errors.invalid.title'),
+      message: t('shell.cupom.errors.invalid.message'),
+    }
+  }
+
+  if (error.statusCode === 410) {
+    return {
+      title: t('shell.cupom.errors.expired.title'),
+      message: t('shell.cupom.errors.expired.message'),
+    }
+  }
+
+  if (error.statusCode === 409) {
+    return {
+      title: t('shell.cupom.errors.conflict.title'),
+      message: error.message,
+      suggestCheckHistorico: true,
+    }
+  }
+
+  if (error.statusCode === 403) {
+    return {
+      title: t('shell.cupom.errors.forbidden.title'),
+      message: t('shell.cupom.errors.forbidden.message'),
+    }
+  }
+
+  if (error.statusCode === 400) {
+    return {
+      title: t('shell.cupom.errors.noBusiness.title'),
+      message: error.message || t('shell.cupom.errors.noBusiness.message'),
+    }
+  }
+
+  return {
+    title: t('shell.cupom.errors.generic.title'),
+    message: error.message || t('shell.cupom.errors.generic.messageShort'),
+    suggestCheckHistorico: true,
+  }
+}
+
 async function handleValidar() {
   const codigo = codigoNormalizado.value
 
   if (!store.podeOperar) {
     errorView.value = {
-      title: 'Parceiro sem operação',
-      message: 'Aguarde a aprovação do credenciamento para validar cupons.',
+      title: t('shell.cupom.errors.noOp.title'),
+      message: t('shell.cupom.errors.noOp.message'),
     }
     step.value = 'error'
     return
   }
 
   if (!isCodigoResgateFormatoValido(codigo)) {
-    formatHint.value =
-      'Use 6 a 32 caracteres (A–Z e 2–9). Sem 0, 1 ou espaços. Confira o código no app do cliente.'
+    formatHint.value = t('shell.cupom.formatHint')
     return
   }
 
@@ -151,7 +207,7 @@ async function handleValidar() {
     step.value = 'success'
     markSuccess()
   } catch (err) {
-    errorView.value = resolveValidarCupomError(err)
+    errorView.value = resolveErrorView(err)
     step.value = 'error'
   } finally {
     submitting.value = false
@@ -179,29 +235,31 @@ async function handleValidar() {
             <button
               class="vc-close"
               type="button"
-              aria-label="Fechar"
+              :aria-label="t('shell.cupom.close')"
               :disabled="submitting"
               @click="closeCallback"
             >
               <i class="pi pi-times" aria-hidden="true" />
             </button>
           </div>
-          <p class="vc-hero__eyebrow">Balcão · resgate rápido</p>
-          <h2 id="validar-cupom-title">Validar cupom</h2>
+          <p class="vc-hero__eyebrow">{{ t('shell.cupom.eyebrow') }}</p>
+          <h2 id="validar-cupom-title">{{ t('shell.cupom.title') }}</h2>
           <p class="vc-hero__lede">
-            Digite o código do app do tutor e confirme o desconto na hora.
+            {{ t('shell.cupom.lede') }}
           </p>
         </header>
 
         <div class="vc-shell__body" aria-labelledby="validar-cupom-title">
           <template v-if="step === 'input'">
             <p v-if="!store.podeOperar" class="vc-banner vc-banner--warn" role="status">
-              Este parceiro ainda não pode operar. A validação fica disponível após a aprovação.
+              {{ t('shell.cupom.blockedBanner') }}
             </p>
 
             <div class="vc-stage" :data-tone="lengthTone">
               <div class="vc-field__head">
-                <label class="vc-label" for="cupom-resgate-codigo">Código de resgate</label>
+                <label class="vc-label" for="cupom-resgate-codigo">{{
+                  t('shell.cupom.codeLabel')
+                }}</label>
                 <span class="vc-counter" :data-tone="lengthTone">{{ codigoLength }}/32</span>
               </div>
 
@@ -212,7 +270,7 @@ async function handleValidar() {
                 maxlength="32"
                 autocomplete="off"
                 spellcheck="false"
-                placeholder="ABCDEF2345"
+                :placeholder="t('shell.cupom.codePlaceholder')"
                 :disabled="submitting || !store.podeOperar"
                 aria-describedby="cupom-resgate-hint"
                 autofocus
@@ -221,8 +279,7 @@ async function handleValidar() {
               />
 
               <p id="cupom-resgate-hint" class="vc-hint">
-                Válido por cerca de 5 minutos · uso único · espaços e minúsculas são ajustados
-                automaticamente
+                {{ t('shell.cupom.hint') }}
               </p>
               <p v-if="formatHint" class="vc-error" role="alert">{{ formatHint }}</p>
             </div>
@@ -233,29 +290,29 @@ async function handleValidar() {
               <span class="vc-result__badge" aria-hidden="true">
                 <i class="pi pi-check" />
               </span>
-              <p class="vc-result__eyebrow">Resgate confirmado</p>
-              <h3>Cupom válido</h3>
+              <p class="vc-result__eyebrow">{{ t('shell.cupom.successEyebrow') }}</p>
+              <h3>{{ t('shell.cupom.successTitle') }}</h3>
               <p class="vc-result__discount">
                 <span class="vc-result__discount-value">{{ resultado.cupom.descontoPercentual }}%</span>
-                <span class="vc-result__discount-label">de desconto</span>
+                <span class="vc-result__discount-label">{{ t('shell.cupom.discountLabel') }}</span>
               </p>
 
               <div class="vc-result__card">
                 <div>
-                  <span class="vc-result__k">Campanha</span>
+                  <span class="vc-result__k">{{ t('shell.cupom.meta.campaign') }}</span>
                   <strong>{{ resultado.cupom.titulo }}</strong>
                 </div>
                 <div>
-                  <span class="vc-result__k">Código</span>
+                  <span class="vc-result__k">{{ t('shell.cupom.meta.code') }}</span>
                   <strong>{{ resultado.cupom.codigo }}</strong>
                 </div>
                 <div v-if="resultado.tutorPrimeiroNome">
-                  <span class="vc-result__k">Cliente</span>
+                  <span class="vc-result__k">{{ t('shell.cupom.meta.customer') }}</span>
                   <strong>{{ resultado.tutorPrimeiroNome }}</strong>
                 </div>
                 <div>
-                  <span class="vc-result__k">Canal</span>
-                  <strong>Código manual</strong>
+                  <span class="vc-result__k">{{ t('shell.cupom.meta.channel') }}</span>
+                  <strong>{{ t('shell.cupom.meta.channelManual') }}</strong>
                 </div>
               </div>
             </div>
@@ -266,15 +323,15 @@ async function handleValidar() {
               <span class="vc-result__badge" aria-hidden="true">
                 <i class="pi pi-exclamation-circle" />
               </span>
-              <p class="vc-result__eyebrow">Não validado</p>
+              <p class="vc-result__eyebrow">{{ t('shell.cupom.errorEyebrow') }}</p>
               <h3>{{ errorView.title }}</h3>
               <p class="vc-result__message">{{ errorView.message }}</p>
               <p v-if="errorView.suggestCheckHistorico" class="vc-result__hint">
-                Se a rede falhou no meio do envio, confira em
+                {{ t('shell.cupom.networkHintBefore') }}
                 <RouterLink to="/parceiro/divulgacao#resgates" @click="closeDialog">
-                  Resgates
+                  {{ t('shell.cupom.networkHintLink') }}
                 </RouterLink>
-                antes de tentar de novo — um POST bem-sucedido já consome o código.
+                {{ t('shell.cupom.networkHintAfter') }}
               </p>
             </div>
           </template>
@@ -283,7 +340,7 @@ async function handleValidar() {
         <footer class="vc-shell__footer">
           <template v-if="step === 'input'">
             <Button
-              label="Cancelar"
+              :label="t('common.cancel')"
               severity="secondary"
               text
               type="button"
@@ -292,7 +349,7 @@ async function handleValidar() {
             />
             <Button
               class="vc-cta"
-              label="Validar código"
+              :label="t('shell.cupom.submit')"
               icon="pi pi-check"
               type="button"
               size="large"
@@ -304,7 +361,7 @@ async function handleValidar() {
 
           <template v-else-if="step === 'success'">
             <Button
-              label="Validar outro"
+              :label="t('shell.cupom.validateAnother')"
               severity="secondary"
               text
               type="button"
@@ -312,7 +369,7 @@ async function handleValidar() {
             />
             <Button
               class="vc-cta"
-              label="OK, aplicar desconto"
+              :label="t('shell.cupom.applyOk')"
               icon="pi pi-check"
               type="button"
               size="large"
@@ -321,10 +378,16 @@ async function handleValidar() {
           </template>
 
           <template v-else>
-            <Button label="Fechar" severity="secondary" text type="button" @click="closeDialog" />
+            <Button
+              :label="t('shell.cupom.close')"
+              severity="secondary"
+              text
+              type="button"
+              @click="closeDialog"
+            />
             <Button
               class="vc-cta"
-              label="Tentar de novo"
+              :label="t('common.tryAgain')"
               icon="pi pi-refresh"
               type="button"
               size="large"

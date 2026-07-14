@@ -2,12 +2,14 @@
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import { useParceiroStore } from '@/stores/parceiro'
 
+const { t } = useI18n()
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
@@ -39,8 +41,8 @@ async function handleSelect() {
   } catch (err) {
     toast.add({
       severity: 'error',
-      summary: 'Não foi possível acessar',
-      detail: err instanceof Error ? err.message : 'Verifique o identificador.',
+      summary: t('parceiro.selecionar.toast.error'),
+      detail: err instanceof Error ? err.message : t('parceiro.selecionar.toast.errorDetail'),
       life: 5000,
     })
   } finally {
@@ -51,23 +53,23 @@ async function handleSelect() {
 
 <template>
   <PartnerPageFrame
-    subtitle="Multi-empresa"
-    title="Selecionar parceiro"
+    :subtitle="t('parceiro.selecionar.subtitle')"
+    :title="t('parceiro.selecionar.title')"
     :loading="loading"
   >
     <article class="select-card">
       <p>
-        Sua conta participa de mais de uma empresa parceira. Informe qual deseja operar agora.
+        {{ t('parceiro.selecionar.body') }}
       </p>
       <AuthTextField
         id="parceiro-id"
         v-model="parceiroIdInput"
         :disabled="loading"
-        hint="O identificador é fornecido pelo administrador ou aparece no convite."
-        label="ID do parceiro"
-        placeholder="cuid-do-parceiro"
+        :hint="t('parceiro.selecionar.idHint')"
+        :label="t('parceiro.selecionar.idLabel')"
+        :placeholder="t('parceiro.selecionar.idPlaceholder')"
       />
-      <Button label="Continuar" :loading="loading" @click="handleSelect" />
+      <Button :label="t('parceiro.selecionar.continue')" :loading="loading" @click="handleSelect" />
     </article>
   </PartnerPageFrame>
 </template>

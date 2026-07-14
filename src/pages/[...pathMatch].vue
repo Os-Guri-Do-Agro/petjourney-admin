@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
@@ -9,6 +10,7 @@ import { isAuthenticated } from '@/service/auth/auth-session'
 import { currentColors, isDarkMode } from '@/theme/color-mode'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
+const { t } = useI18n()
 const router = useRouter()
 
 const logoIconUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
@@ -55,25 +57,28 @@ function goBack() {
         <div class="not-found__logo-badge" aria-hidden="true">
           <img :src="logoIconUrl" alt="" />
         </div>
-        <img class="not-found__logo-wordmark" :src="logoSemPata" alt="PetJourney" />
+        <img
+          class="not-found__logo-wordmark"
+          :src="logoSemPata"
+          :alt="t('errors.notFound.brandAlt')"
+        />
       </header>
 
       <p class="not-found__code" aria-hidden="true">404</p>
 
       <div class="not-found__copy">
-        <h1>Página não encontrada</h1>
+        <h1>{{ t('errors.notFound.title') }}</h1>
         <p>
-          O endereço que você acessou não existe ou foi movido. Verifique o link ou volte para a
-          área principal do painel.
+          {{ t('errors.notFound.body') }}
         </p>
       </div>
 
       <div class="not-found__actions">
         <AuthButton :to="homePath" full-width>
-          Ir para o início
+          {{ t('errors.notFound.goHome') }}
         </AuthButton>
         <AuthButton full-width variant="secondary" @click="goBack">
-          Voltar
+          {{ t('errors.notFound.back') }}
         </AuthButton>
       </div>
     </section>

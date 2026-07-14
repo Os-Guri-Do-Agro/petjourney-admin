@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
@@ -14,27 +15,32 @@ import { usePartnerTabs } from '@/composables/usePartnerTabs'
 const CARTEIRA_TABS = ['visao', 'extrato', 'saques'] as const
 type CarteiraTab = (typeof CARTEIRA_TABS)[number]
 
+const { t } = useI18n()
 const router = useRouter()
 const { store, ensureContext } = useParceiroPortal()
 const { activeTab, setTab } = usePartnerTabs(CARTEIRA_TABS, 'visao')
 
-const tabs = [
+const tabs = computed(() => [
   {
     id: 'visao',
-    label: 'Visão geral',
-    description: 'Saldos, chave PIX e solicitação de saque.',
+    label: t('carteira.tabs.visao.label'),
+    description: t('carteira.tabs.visao.description'),
   },
   {
     id: 'extrato',
-    label: 'Extrato',
-    description: 'Movimentações de comissão e débitos.',
+    label: t('carteira.tabs.extrato.label'),
+    description: t('carteira.tabs.extrato.description'),
   },
   {
     id: 'saques',
-    label: 'Saques',
-    description: 'Status das solicitações de pagamento.',
+    label: t('carteira.tabs.saques.label'),
+    description: t('carteira.tabs.saques.description'),
   },
-]
+])
+
+const tabsAriaLabel = computed(() =>
+  t('carteira.tabs.ariaLabel', { labels: tabs.value.map((tab) => tab.label).join(', ') }),
+)
 
 const loadError = computed(() =>
   store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
@@ -55,24 +61,26 @@ onMounted(() => {
 
 <template>
   <PartnerPageFrame
-    subtitle="Portal"
-    title="Financeiro"
+    :subtitle="t('carteira.subtitle')"
+    :title="t('carteira.title')"
     :loading="false"
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
     @retry="ensureContext(true)"
   >
     <article v-if="showAfiliadoGate" class="carteira-gate">
-      <h3>Programa afiliado necessário</h3>
-      <p>
-        A carteira, extrato e saques só ficam disponíveis com o programa afiliado ativo. Solicite a
-        participação na tela de programas.
-      </p>
-      <Button label="Solicitar programa afiliado" @click="goToProgramas" />
+      <h3>{{ t('carteira.gate.title') }}</h3>
+      <p>{{ t('carteira.gate.body') }}</p>
+      <Button :label="t('carteira.gate.cta')" @click="goToProgramas" />
     </article>
 
     <template v-else>
-      <PartnerSectionTabs :tabs="tabs" :active-tab="activeTab" @select="setTab($event as CarteiraTab)" />
+      <PartnerSectionTabs
+        :tabs="tabs"
+        :active-tab="activeTab"
+        :aria-label="tabsAriaLabel"
+        @select="setTab($event as CarteiraTab)"
+      />
 
       <PortalCarteiraVisaoPanel v-if="activeTab === 'visao'" @needs-programas="goToProgramas" />
       <PortalCarteiraExtratoPanel v-else-if="activeTab === 'extrato'" @needs-programas="goToProgramas" />

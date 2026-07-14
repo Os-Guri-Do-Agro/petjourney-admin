@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import {
@@ -8,6 +9,7 @@ import {
 } from '@/composables/useAppNavigation'
 import { currentColors } from '@/theme/color-mode'
 
+const { t } = useI18n()
 const filterQuery = ref('')
 const { homeShortcutGroups } = useAppNavigation()
 
@@ -48,10 +50,12 @@ const totalShortcuts = computed(() =>
     <header class="home-shortcuts__head">
       <div class="home-shortcuts__title-row">
         <p class="home-shortcuts__index">03</p>
-        <h2 id="home-shortcuts-title">Atalhos</h2>
-        <span class="home-shortcuts__count">{{ totalShortcuts }} disponíveis</span>
+        <h2 id="home-shortcuts-title">{{ t('inicio.shortcuts.title') }}</h2>
+        <span class="home-shortcuts__count">{{
+          t('inicio.shortcuts.countAvailable', { n: totalShortcuts })
+        }}</span>
       </div>
-      <p>Filtre pelo nome da tela ou da seção.</p>
+      <p>{{ t('inicio.shortcuts.lede') }}</p>
     </header>
 
     <div class="home-shortcuts__panel">
@@ -61,14 +65,14 @@ const totalShortcuts = computed(() =>
           id="home-shortcuts-filter"
           v-model="filterQuery"
           type="search"
-          placeholder="Filtrar por tela ou seção..."
+          :placeholder="t('inicio.shortcuts.filterPlaceholder')"
           autocomplete="off"
         />
         <button
           v-if="hasActiveFilter"
           class="home-shortcuts__clear"
           type="button"
-          aria-label="Limpar filtro"
+          :aria-label="t('inicio.shortcuts.clearFilterAria')"
           @click="filterQuery = ''"
         >
           <i class="pi pi-times" aria-hidden="true" />
@@ -76,7 +80,7 @@ const totalShortcuts = computed(() =>
       </label>
 
       <p v-if="showEmptyFilter" class="home-shortcuts__empty" role="status">
-        Nenhuma tela encontrada para “{{ filterQuery.trim() }}”.
+        {{ t('inicio.shortcuts.emptyFilter', { q: filterQuery.trim() }) }}
       </p>
 
       <div v-else class="home-shortcuts__groups">

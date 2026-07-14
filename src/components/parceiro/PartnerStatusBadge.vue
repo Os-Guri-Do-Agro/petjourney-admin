@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import type { StatusAuditoriaParceiro, StatusModoParceiro } from '@/service/parceiro/types'
 import { currentColors } from '@/theme/color-mode'
@@ -7,6 +8,8 @@ import { currentColors } from '@/theme/color-mode'
 const props = defineProps<{
   status: StatusAuditoriaParceiro | StatusModoParceiro
 }>()
+
+const { t, te } = useI18n()
 
 const badgeStyle = computed(() => {
   const colors = currentColors.value
@@ -61,17 +64,8 @@ const badgeStyle = computed(() => {
 })
 
 const label = computed(() => {
-  const labels: Record<string, string> = {
-    PENDENTE: 'Em análise',
-    APROVADO: 'Aprovado',
-    REJEITADO: 'Recusado',
-    SUSPENSO: 'Suspenso',
-    NAO_SOLICITADO: 'Não ativo',
-    SOLICITADO: 'Em análise',
-    ATIVO: 'Ativo ✓',
-  }
-
-  return labels[props.status] ?? props.status
+  const key = `statusBadge.${props.status}`
+  return te(key) ? t(key) : props.status
 })
 </script>
 

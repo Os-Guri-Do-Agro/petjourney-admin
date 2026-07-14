@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 
+const { t } = useI18n()
 const { store } = useParceiroPortal()
 </script>
 
@@ -10,14 +12,16 @@ const { store } = useParceiroPortal()
   <aside v-if="store.loadState === 'ready' && !store.podeOperar" class="operability-banner" role="status">
     <i class="pi pi-lock" aria-hidden="true" />
     <div>
-      <strong>Cadastro em análise</strong>
+      <strong>{{ t('frame.operability.title') }}</strong>
       <p>
-        Ações do portal ficam bloqueadas até o credenciamento ser aprovado.
+        {{ t('frame.operability.body') }}
         <template v-if="store.status?.motivoAuditoria">
-          Motivo: {{ store.status.motivoAuditoria }}
+          {{ t('frame.operability.reasonPrefix') }} {{ store.status.motivoAuditoria }}
         </template>
       </p>
-      <RouterLink to="/parceiro/programas#credenciamento">Acompanhar credenciamento</RouterLink>
+      <RouterLink to="/parceiro/programas#credenciamento">{{
+        t('frame.operability.link')
+      }}</RouterLink>
     </div>
   </aside>
 </template>

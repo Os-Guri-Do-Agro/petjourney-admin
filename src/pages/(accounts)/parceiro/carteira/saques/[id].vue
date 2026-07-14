@@ -2,15 +2,18 @@
 import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { getSaqueDetalhe } from '@/service/parceiro/parceiro-portal-service'
 import type { SaqueDetalhe } from '@/service/parceiro/types'
 import { formatCentavosToBrl } from '@/utils/format/money'
 
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { ensureContext, parceiroQuery } = useParceiroPortal()
@@ -31,9 +34,13 @@ const saqueId = computed(() => {
   return typeof id === 'string' ? id : ''
 })
 
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString(INTL_LOCALE[locale.value as Locale])
+}
+
 async function loadDetalhe() {
   if (!saqueId.value) {
-    error.value = 'Identificador do saque inválido.'
+    error.value = t('carteira.detail.errorInvalidId')
     loading.value = false
     return
   }
@@ -45,7 +52,7 @@ async function loadDetalhe() {
     await ensureContext()
     saque.value = await getSaqueDetalhe(saqueId.value, parceiroQuery())
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Erro ao carregar saque.'
+    error.value = err instanceof Error ? err.message : t('carteira.detail.errorLoad')
   } finally {
     loading.value = false
   }
@@ -62,14 +69,19 @@ onMounted(() => {
 
 <template>
   <PartnerPageFrame
-    subtitle="Financeiro"
-    title="Detalhe do saque"
+    :subtitle="t('carteira.detail.subtitle')"
+    :title="t('carteira.detail.title')"
     :loading="false"
     :error="error"
     @retry="loadDetalhe"
   >
     <template #actions>
-      <Button icon="pi pi-arrow-left" label="Voltar" severity="secondary" @click="goBack" />
+      <Button
+        icon="pi pi-arrow-left"
+        :label="t('carteira.detail.back')"
+        severity="secondary"
+        @click="goBack"
+      />
     </template>
 
     <article
@@ -78,7 +90,7 @@ onMounted(() => {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label="Carregando detalhe do saque"
+      :aria-label="t('carteira.detail.loadingAria')"
     >
       <div class="saque-detail__head">
         <div class="saque-detail__head-copy">
@@ -104,7 +116,7 @@ onMounted(() => {
     <article v-else-if="saque" class="saque-detail">
       <div class="saque-detail__head">
         <div>
-          <span class="saque-detail__label">Valor solicitado</span>
+          <span class="saque-detail__label">{{ t('carteira.detail.valorLabel') }}</span>
           <strong class="saque-detail__value">{{ formatCentavosToBrl(saque.valorCentavos) }}</strong>
         </div>
         <PartnerStatusBadge :status="statusMap[saque.status]" />
@@ -112,30 +124,29 @@ onMounted(() => {
 
       <dl class="saque-detail__meta">
         <div>
-          <dt>Solicitado em</dt>
-          <dd>{{ new Date(saque.createdAt).toLocaleString('pt-BR') }}</dd>
+          <dt>{{ t('carteira.detail.requestedAt') }}</dt>
+          <dd>{{ formatDateTime(saque.createdAt) }}</dd>
         </div>
         <div v-if="saque.liquidadoEm">
-          <dt>Liquidado em</dt>
-          <dd>{{ new Date(saque.liquidadoEm).toLocaleString('pt-BR') }}</dd>
+          <dt>{{ t('carteira.detail.liquidatedAt') }}</dt>
+          <dd>{{ formatDateTime(saque.liquidadoEm) }}</dd>
         </div>
         <div>
-          <dt>Chave PIX (snapshot)</dt>
+          <dt>{{ t('carteira.detail.pixSnapshot') }}</dt>
           <dd>{{ saque.chavePixSnapshot }}</dd>
         </div>
         <div v-if="saque.motivoFalha">
-          <dt>Motivo da falha</dt>
+          <dt>{{ t('carteira.detail.failReason') }}</dt>
           <dd class="saque-detail__fail">{{ saque.motivoFalha }}</dd>
         </div>
         <div v-if="saque.comprovante">
-          <dt>Comprovante</dt>
+          <dt>{{ t('carteira.detail.receipt') }}</dt>
           <dd>{{ saque.comprovante }}</dd>
         </div>
       </dl>
 
       <p v-if="saque.status === 'PENDENTE'" class="saque-detail__hint">
-        Pagamentos são liquidados manualmente pelo PetJourney. Ciclo orientativo: corte dia 27,
-        pagamento até dia 5.
+        {{ t('carteira.detail.pendingHint') }}
       </p>
     </article>
   </PartnerPageFrame>

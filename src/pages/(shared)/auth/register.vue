@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import AuthButton from '@/components/auth/AuthButton.vue'
@@ -13,8 +14,14 @@ import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { isPasswordValid } from '@/utils/validation/password'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
-const STEP_LABELS = ['Identidade', 'Profissional', 'Conta']
-const TOTAL_STEPS = STEP_LABELS.length
+const { t } = useI18n()
+
+const STEP_LABELS = computed(() => [
+  t('auth.register.stepLabels.identity'),
+  t('auth.register.stepLabels.professional'),
+  t('auth.register.stepLabels.account'),
+])
+const TOTAL_STEPS = 3
 
 const router = useRouter()
 const toast = useToast()
@@ -56,21 +63,21 @@ const stepMeta = computed(() => {
   switch (currentStep.value) {
     case 1:
       return {
-        eyebrow: 'Etapa 1 de 3',
-        title: 'Identidade',
-        description: 'Informe nome e e-mail para criar sua conta veterinária.',
+        eyebrow: t('auth.register.step1.eyebrow'),
+        title: t('auth.register.step1.title'),
+        description: t('auth.register.step1.description'),
       }
     case 2:
       return {
-        eyebrow: 'Etapa 2 de 3',
-        title: 'Dados profissionais',
-        description: 'Registre suas informações clínicas para o painel.',
+        eyebrow: t('auth.register.step2.eyebrow'),
+        title: t('auth.register.step2.title'),
+        description: t('auth.register.step2.description'),
       }
     default:
       return {
-        eyebrow: 'Etapa 3 de 3',
-        title: 'Segurança da conta',
-        description: 'Defina uma senha forte e aceite os termos de uso.',
+        eyebrow: t('auth.register.step3.eyebrow'),
+        title: t('auth.register.step3.title'),
+        description: t('auth.register.step3.description'),
       }
   }
 })
@@ -101,7 +108,7 @@ async function handleEmailBlur() {
   }
 
   if (!isValidEmail(normalizedEmail)) {
-    emailError.value = 'Informe um e-mail válido.'
+    emailError.value = t('auth.register.errors.emailInvalid')
     return
   }
 
@@ -112,11 +119,11 @@ async function handleEmailBlur() {
     emailAvailable.value = result.available
 
     if (!result.available) {
-      emailError.value = 'E-mail já cadastrado.'
+      emailError.value = t('auth.register.errors.emailTaken')
     }
   } catch (error) {
     emailError.value =
-      error instanceof Error ? error.message : 'Não foi possível verificar o e-mail.'
+      error instanceof Error ? error.message : t('auth.register.errors.emailCheckFailed')
   } finally {
     emailChecking.value = false
   }
@@ -129,17 +136,17 @@ function validateStep1() {
   const normalizedEmail = email.value.trim()
 
   if (normalizedName.length < 3) {
-    nomeError.value = 'Informe pelo menos 3 caracteres.'
+    nomeError.value = t('auth.register.errors.nameMin')
   }
 
   if (!normalizedEmail) {
-    emailError.value = 'E-mail é obrigatório.'
+    emailError.value = t('auth.register.errors.emailRequired')
   } else if (!isValidEmail(normalizedEmail)) {
-    emailError.value = 'Informe um e-mail válido.'
+    emailError.value = t('auth.register.errors.emailInvalid')
   } else if (emailAvailable.value === false) {
-    emailError.value = 'E-mail já cadastrado.'
+    emailError.value = t('auth.register.errors.emailTaken')
   } else if (emailAvailable.value === null && !emailChecking.value) {
-    emailError.value = 'Verifique a disponibilidade do e-mail antes de continuar.'
+    emailError.value = t('auth.register.errors.emailVerifyFirst')
   }
 
   return !nomeError.value && !emailError.value
@@ -149,11 +156,11 @@ function validateStep2() {
   resetFieldErrors()
 
   if (!crmv.value.trim()) {
-    crmvError.value = 'CRMV é obrigatório.'
+    crmvError.value = t('auth.register.errors.crmvRequired')
   }
 
   if (!especialidade.value.trim()) {
-    especialidadeError.value = 'Informe sua especialidade principal.'
+    especialidadeError.value = t('auth.register.errors.specialtyRequired')
   }
 
   return !crmvError.value && !especialidadeError.value
@@ -163,17 +170,17 @@ function validateStep3() {
   resetFieldErrors()
 
   if (!isPasswordValid(senha.value)) {
-    senhaError.value = 'A senha não atende todos os requisitos.'
+    senhaError.value = t('auth.register.errors.passwordRequirements')
   }
 
   if (!confirmarSenha.value) {
-    confirmarSenhaError.value = 'Confirme sua senha.'
+    confirmarSenhaError.value = t('auth.register.errors.confirmRequired')
   } else if (confirmarSenha.value !== senha.value) {
-    confirmarSenhaError.value = 'As senhas não coincidem.'
+    confirmarSenhaError.value = t('auth.register.errors.confirmMismatch')
   }
 
   if (!acceptedTerms.value) {
-    termsError.value = 'É necessário aceitar os termos para continuar.'
+    termsError.value = t('auth.register.errors.termsRequired')
   }
 
   return !senhaError.value && !confirmarSenhaError.value && !termsError.value
@@ -257,19 +264,19 @@ async function handleSubmit() {
 
     toast.add({
       severity: 'success',
-      summary: 'Conta criada',
-      detail: 'Bem-vindo ao painel veterinário PetJourney.',
+      summary: t('auth.register.toast.success.summary'),
+      detail: t('auth.register.toast.success.detail'),
       life: 4000,
     })
 
     await router.replace(getDefaultLandingPath())
   } catch (error) {
     globalError.value =
-      error instanceof Error ? error.message : 'Não foi possível concluir o cadastro.'
+      error instanceof Error ? error.message : t('auth.register.errors.submitFailed')
 
     toast.add({
       severity: 'error',
-      summary: 'Erro no cadastro',
+      summary: t('auth.register.toast.error.summary'),
       detail: globalError.value,
       life: 6000,
     })
@@ -300,8 +307,8 @@ async function handleSubmit() {
             autocomplete="name"
             :disabled="isBusy"
             :error="nomeError"
-            label="Nome completo"
-            placeholder="Dra. Maria Silva"
+            :label="t('auth.register.name.label')"
+            :placeholder="t('auth.register.name.placeholder')"
             required
           />
 
@@ -311,17 +318,19 @@ async function handleSubmit() {
             autocomplete="email"
             :disabled="isBusy"
             :error="emailError"
-            hint="Usaremos este e-mail para login e comunicações importantes."
-            label="E-mail"
-            placeholder="dra.maria@clinica.com"
+            :hint="t('auth.register.email.hint')"
+            :label="t('auth.register.email.label')"
+            :placeholder="t('auth.register.email.placeholder')"
             required
             type="email"
             @blur="handleEmailBlur"
           />
 
-          <p v-if="emailChecking" class="register-form__status">Verificando disponibilidade do e-mail...</p>
+          <p v-if="emailChecking" class="register-form__status">
+            {{ t('auth.register.email.checking') }}
+          </p>
           <p v-else-if="emailAvailable" class="register-form__status register-form__status--success">
-            E-mail disponível.
+            {{ t('auth.register.email.available') }}
           </p>
         </section>
 
@@ -331,14 +340,14 @@ async function handleSubmit() {
             v-model="crmv"
             :disabled="isBusy"
             :error="crmvError"
-            label="CRMV"
-            placeholder="CRMV-SP 12345"
+            :label="t('auth.register.crmv.label')"
+            :placeholder="t('auth.register.crmv.placeholder')"
             required
           />
 
           <label class="register-textarea-field" for="register-especialidade">
             <span class="register-textarea-field__label">
-              Especialidade
+              {{ t('auth.register.specialty.label') }}
               <span class="register-textarea-field__required">*</span>
             </span>
             <textarea
@@ -347,7 +356,7 @@ async function handleSubmit() {
               class="register-textarea-field__input"
               :class="{ 'register-textarea-field__input--invalid': Boolean(especialidadeError) }"
               :disabled="isBusy"
-              placeholder="Clínica Geral, Dermatologia..."
+              :placeholder="t('auth.register.specialty.placeholder')"
               rows="3"
             />
             <span v-if="especialidadeError" class="register-textarea-field__error">
@@ -363,14 +372,18 @@ async function handleSubmit() {
             autocomplete="new-password"
             :disabled="isBusy"
             :error="senhaError"
-            label="Senha"
-            placeholder="Crie uma senha segura"
+            :label="t('auth.register.password.label')"
+            :placeholder="t('auth.register.password.placeholder')"
             required
             :type="passwordInputType"
           >
             <template #trailing>
               <button
-                :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
+                :aria-label="
+                  showPassword
+                    ? t('auth.register.password.hide')
+                    : t('auth.register.password.show')
+                "
                 class="register-password-toggle"
                 :disabled="isBusy"
                 type="button"
@@ -389,14 +402,18 @@ async function handleSubmit() {
             autocomplete="new-password"
             :disabled="isBusy"
             :error="confirmarSenhaError"
-            label="Confirmar senha"
-            placeholder="Repita a senha"
+            :label="t('auth.register.confirmPassword.label')"
+            :placeholder="t('auth.register.confirmPassword.placeholder')"
             required
             :type="confirmPasswordInputType"
           >
             <template #trailing>
               <button
-                :aria-label="showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'"
+                :aria-label="
+                  showConfirmPassword
+                    ? t('auth.register.password.hide')
+                    : t('auth.register.password.show')
+                "
                 class="register-password-toggle"
                 :disabled="isBusy"
                 type="button"
@@ -416,7 +433,7 @@ async function handleSubmit() {
               <i class="pi pi-check" />
             </span>
             <span class="register-terms__copy">
-              Li e aceito os termos de uso e a política de privacidade do PetJourney.
+              {{ t('auth.register.terms.copy') }}
               <a
                 class="register-terms__details"
                 href="https://www.petjourney.health/termos"
@@ -424,7 +441,7 @@ async function handleSubmit() {
                 rel="noopener noreferrer"
                 @click.stop
               >
-                detalhes
+                {{ t('auth.register.terms.details') }}
               </a>
             </span>
           </label>
@@ -436,7 +453,7 @@ async function handleSubmit() {
               <i class="pi pi-check" />
             </span>
             <span class="register-terms__copy">
-              Manter conectado neste computador após o cadastro
+              {{ t('auth.register.remember') }}
             </span>
           </label>
         </section>
@@ -453,7 +470,7 @@ async function handleSubmit() {
             :loading="loading"
             type="submit"
           >
-            {{ loading ? 'Validando...' : 'Continuar' }}
+            {{ loading ? t('auth.register.validating') : t('auth.register.continue') }}
           </AuthButton>
 
           <AuthButton
@@ -463,7 +480,7 @@ async function handleSubmit() {
             :loading="submitting"
             type="submit"
           >
-            {{ submitting ? 'Criando conta...' : 'Criar conta' }}
+            {{ submitting ? t('auth.register.creating') : t('auth.register.createAccount') }}
           </AuthButton>
 
           <AuthButton
@@ -474,15 +491,15 @@ async function handleSubmit() {
             variant="secondary"
             @click="goToPreviousStep"
           >
-            Voltar
+            {{ t('auth.register.back') }}
           </AuthButton>
         </div>
       </form>
     </div>
 
     <p class="register-support">
-      Já possui conta?
-      <RouterLink to="/auth/login">Entrar agora</RouterLink>
+      {{ t('auth.register.support.prompt') }}
+      <RouterLink to="/auth/login">{{ t('auth.register.support.login') }}</RouterLink>
     </p>
   </AuthLayout>
 </template>

@@ -1,0 +1,1082 @@
+{
+  "languageSwitcher": {
+    "label": "Idioma",
+    "pt": "PT",
+    "en": "EN",
+    "en-GB": "UK",
+    "es": "ES"
+  },
+  "auth": {
+    "layout": {
+      "kicker": "Painel parceiro",
+      "title": "Mais clientes. Mais alcance. Mais retorno para a sua marca.",
+      "description": "O portal PetJourney conecta sua empresa à rede de tutores: divulgue ofertas, indique com facilidade e acompanhe o crescimento em um só lugar.",
+      "benefits": {
+        "programs": "Programas feitos para parceiros que querem crescer",
+        "outreach": "Divulgação com cupons e indicação que convertem",
+        "results": "Resultados e ganhos acompanhados em tempo real"
+      }
+    },
+    "login": {
+      "title": "Bem-vindo de volta",
+      "description": "Acesse o portal e impulsione sua parceria com indicação, cupons e resultados.",
+      "email": {
+        "label": "E-mail",
+        "placeholder": "seuemail{'@'}empresa.com"
+      },
+      "password": {
+        "label": "Senha",
+        "placeholder": "Digite sua senha",
+        "forgot": "Esqueceu a senha?",
+        "show": "Mostrar senha",
+        "hide": "Ocultar senha"
+      },
+      "remember": "Manter conectado neste computador",
+      "submit": "Entrar no painel",
+      "submitting": "Entrando...",
+      "support": {
+        "prompt": "Novo por aqui?",
+        "createAccount": "Criar conta"
+      },
+      "reactivate": {
+        "title": "Perfil inativo",
+        "copyBoth": "Esta conta tem perfis inativos. Reative o perfil veterinário para entrar no painel.",
+        "copyVet": "Seu perfil veterinário está inativo. Reative para continuar no painel.",
+        "copyGeneric": "Há um perfil inativo nesta conta. Reative para continuar.",
+        "loading": "Reativando…",
+        "vet": "Reativar perfil veterinário",
+        "tutor": "Reativar perfil tutor",
+        "otherAccount": "Usar outra conta"
+      },
+      "toast": {
+        "vetRequired": {
+          "summary": "Perfil veterinário necessário",
+          "detail": "Esta conta ainda não possui perfil veterinário habilitado para o painel."
+        },
+        "loginError": {
+          "summary": "Erro ao entrar",
+          "fallback": "Não foi possível entrar. Tente novamente."
+        },
+        "stillInactive": {
+          "summary": "Perfil ainda inativo",
+          "detail": "A reativação foi pedida, mas o token ainda indica perfil inativo. Tente de novo."
+        },
+        "reactivated": {
+          "summary": "Perfil reativado",
+          "detail": "Bem-vindo de volta ao painel."
+        },
+        "reactivateError": {
+          "summary": "Não foi possível reativar",
+          "fallback": "Tente novamente em instantes."
+        }
+      }
+    },
+    "register": {
+      "stepLabels": {
+        "identity": "Identidade",
+        "professional": "Profissional",
+        "account": "Conta"
+      },
+      "step1": {
+        "eyebrow": "Etapa 1 de 3",
+        "title": "Identidade",
+        "description": "Informe nome e e-mail para criar sua conta veterinária."
+      },
+      "step2": {
+        "eyebrow": "Etapa 2 de 3",
+        "title": "Dados profissionais",
+        "description": "Registre suas informações clínicas para o painel."
+      },
+      "step3": {
+        "eyebrow": "Etapa 3 de 3",
+        "title": "Segurança da conta",
+        "description": "Defina uma senha forte e aceite os termos de uso."
+      },
+      "name": {
+        "label": "Nome completo",
+        "placeholder": "Dra. Maria Silva"
+      },
+      "email": {
+        "label": "E-mail",
+        "placeholder": "dra.maria{'@'}clinica.com",
+        "hint": "Usaremos este e-mail para login e comunicações importantes.",
+        "checking": "Verificando disponibilidade do e-mail...",
+        "available": "E-mail disponível."
+      },
+      "crmv": {
+        "label": "CRMV",
+        "placeholder": "CRMV-SP 12345"
+      },
+      "specialty": {
+        "label": "Especialidade",
+        "placeholder": "Clínica Geral, Dermatologia..."
+      },
+      "password": {
+        "label": "Senha",
+        "placeholder": "Crie uma senha segura",
+        "show": "Mostrar senha",
+        "hide": "Ocultar senha"
+      },
+      "confirmPassword": {
+        "label": "Confirmar senha",
+        "placeholder": "Repita a senha"
+      },
+      "terms": {
+        "copy": "Li e aceito os termos de uso e a política de privacidade do PetJourney.",
+        "details": "detalhes"
+      },
+      "remember": "Manter conectado neste computador após o cadastro",
+      "continue": "Continuar",
+      "validating": "Validando...",
+      "createAccount": "Criar conta",
+      "creating": "Criando conta...",
+      "back": "Voltar",
+      "support": {
+        "prompt": "Já possui conta?",
+        "login": "Entrar agora"
+      },
+      "errors": {
+        "nameMin": "Informe pelo menos 3 caracteres.",
+        "emailRequired": "E-mail é obrigatório.",
+        "emailInvalid": "Informe um e-mail válido.",
+        "emailTaken": "E-mail já cadastrado.",
+        "emailCheckFailed": "Não foi possível verificar o e-mail.",
+        "emailVerifyFirst": "Verifique a disponibilidade do e-mail antes de continuar.",
+        "crmvRequired": "CRMV é obrigatório.",
+        "specialtyRequired": "Informe sua especialidade principal.",
+        "passwordRequirements": "A senha não atende todos os requisitos.",
+        "confirmRequired": "Confirme sua senha.",
+        "confirmMismatch": "As senhas não coincidem.",
+        "termsRequired": "É necessário aceitar os termos para continuar.",
+        "submitFailed": "Não foi possível concluir o cadastro."
+      },
+      "toast": {
+        "success": {
+          "summary": "Conta criada",
+          "detail": "Bem-vindo ao painel veterinário PetJourney."
+        },
+        "error": {
+          "summary": "Erro no cadastro"
+        }
+      }
+    },
+    "forgot": {
+      "step1": {
+        "eyebrow": "Recuperação",
+        "title": "Redefinir senha",
+        "description": "Informe o e-mail cadastrado para receber um código de 6 dígitos."
+      },
+      "step2": {
+        "eyebrow": "Nova senha",
+        "title": "Crie uma senha forte",
+        "description": "Defina a nova senha da conta. Depois volte ao login para entrar."
+      },
+      "email": {
+        "label": "E-mail",
+        "placeholder": "seuemail{'@'}clinica.com",
+        "hint": "Por segurança, a resposta é a mesma mesmo se o e-mail não existir."
+      },
+      "submit": "Enviar código",
+      "sending": "Enviando…",
+      "backToLogin": "Voltar para login",
+      "requestNewCode": "Pedir código de novo",
+      "password": {
+        "label": "Nova senha",
+        "placeholder": "Crie uma senha segura",
+        "show": "Mostrar senha",
+        "hide": "Ocultar senha"
+      },
+      "confirm": {
+        "label": "Confirmar senha",
+        "placeholder": "Repita a nova senha"
+      },
+      "reset": "Redefinir senha",
+      "resetting": "Redefinindo…",
+      "pin": {
+        "eyebrow": "Quase lá",
+        "title": "Digite o código",
+        "lede": "Enviamos um código de 6 dígitos se houver uma conta neste e-mail. Confira a caixa de entrada e o spam.",
+        "label": "Código de verificação",
+        "hint": "Cole o código completo ou digite um dígito por caixa.",
+        "digitAria": "Dígito {n} de 6",
+        "placeholder": "000000",
+        "verify": "Continuar",
+        "verifying": "Verificando…"
+      },
+      "errors": {
+        "emailRequired": "E-mail é obrigatório.",
+        "emailInvalid": "Informe um e-mail válido.",
+        "pinLength": "Informe os 6 dígitos do código.",
+        "pinInvalid": "Código inválido. Confira e tente de novo.",
+        "passwordRequirements": "A senha não atende todos os requisitos.",
+        "confirmRequired": "Confirme a nova senha.",
+        "mismatch": "As senhas não coincidem.",
+        "throttle": "Muitas tentativas. Aguarde alguns minutos e tente de novo.",
+        "generic": "Não foi possível concluir. Tente novamente."
+      },
+      "toasts": {
+        "sendError": {
+          "summary": "Não foi possível enviar"
+        },
+        "tokenMissing": {
+          "summary": "Código expirado",
+          "detail": "Peça um novo código e tente novamente."
+        },
+        "success": {
+          "summary": "Senha redefinida",
+          "detail": "Entre com o e-mail e a nova senha."
+        },
+        "resetError": {
+          "summary": "Não foi possível redefinir"
+        }
+      }
+    },
+    "passwordRequirements": {
+      "minLength": "Mínimo de 6 caracteres",
+      "hasNumber": "Pelo menos 1 número",
+      "hasUppercase": "Pelo menos 1 letra maiúscula",
+      "hasSpecialChar": "Pelo menos 1 caractere especial"
+    }
+  },
+  "common": {
+    "confirmTitle": "Confirmar ação",
+    "confirmMessage": "Tem certeza que deseja continuar?",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "loading": "Carregando...",
+    "emptyTitle": "Nada por aqui ainda",
+    "retry": "Tentar novamente",
+    "tryAgain": "Tentar de novo",
+    "back": "Voltar",
+    "save": "Salvar",
+    "continue": "Continuar",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "send": "Enviar",
+    "sending": "Enviando...",
+    "signIn": "Entrar",
+    "createAccount": "Criar conta",
+    "forgotPassword": "Esqueci minha senha",
+    "signOut": "Sair",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "nav": {
+    "sections": {
+      "home": "Início",
+      "portal": "Portal",
+      "account": "Conta",
+      "homeSubtitle": "Conteúdo geral"
+    },
+    "groups": {
+      "overview": "Painel",
+      "portal": "Portal",
+      "account": "Conta"
+    },
+    "items": {
+      "overview": "Visão geral",
+      "programas": "Programas",
+      "divulgacao": "Divulgação",
+      "financeiro": "Financeiro",
+      "settings": "Configurações"
+    },
+    "pageLabels": {
+      "overview": "Visão geral",
+      "saqueDetail": "Detalhe do saque",
+      "financeiro": "Financeiro",
+      "programas": "Programas de participação",
+      "divulgacao": "Divulgação",
+      "convite": "Aceitar convite",
+      "selecionar": "Selecionar parceiro",
+      "portal": "Portal",
+      "settings": "Configurações",
+      "fallback": "Painel"
+    }
+  },
+  "shell": {
+    "logout": "Sair",
+    "menuHeading": "Menu",
+    "filterPlaceholder": "Filtrar telas...",
+    "filterEmpty": "Nenhuma tela encontrada para “{q}”.",
+    "brand": {
+      "badge": "Painel parceiro"
+    },
+    "drawer": {
+      "close": "Fechar navegador",
+      "open": "Abrir navegador"
+    },
+    "aria": {
+      "sections": "Seções do painel",
+      "brand": "PetJourney",
+      "brandHome": "PetJourney — início",
+      "pagesOf": "Páginas de {label}"
+    },
+    "theme": {
+      "activateLight": "Ativar tema claro",
+      "activateDark": "Ativar tema escuro",
+      "lightTitle": "Tema claro",
+      "darkTitle": "Tema escuro",
+      "lightLabel": "Light",
+      "darkLabel": "Dark"
+    },
+    "user": {
+      "fallbackName": "Veterinário",
+      "role": "Conta parceiro",
+      "perfil": "Perfil",
+      "settings": "Configurações",
+      "logout": "Logout"
+    },
+    "logoutConfirm": {
+      "title": "Sair da conta?",
+      "message": "Você será desconectado deste painel. Para acessar novamente, será necessário fazer login.",
+      "cancel": "Continuar no painel"
+    },
+    "cupom": {
+      "cta": "Validar cupom",
+      "disabledTitle": "Disponível apenas para parceiros com operação liberada",
+      "disabledAria": "Validar cupom indisponível: conta sem acesso de parceiro",
+      "close": "Fechar",
+      "eyebrow": "Balcão · resgate rápido",
+      "title": "Validar cupom",
+      "lede": "Digite o código do app do tutor e confirme o desconto na hora.",
+      "blockedBanner": "Este parceiro ainda não pode operar. A validação fica disponível após a aprovação.",
+      "codeLabel": "Código de resgate",
+      "codePlaceholder": "ABCDEF2345",
+      "hint": "Válido por cerca de 5 minutos · uso único · espaços e minúsculas são ajustados automaticamente",
+      "formatHint": "Use 6 a 32 caracteres (A–Z e 2–9). Sem 0, 1 ou espaços. Confira o código no app do cliente.",
+      "successEyebrow": "Resgate confirmado",
+      "successTitle": "Cupom válido",
+      "discountLabel": "de desconto",
+      "submit": "Validar código",
+      "validateAnother": "Validar outro",
+      "applyOk": "OK, aplicar desconto",
+      "networkHintBefore": "Se a rede falhou no meio do envio, confira em",
+      "networkHintLink": "Resgates",
+      "networkHintAfter": "antes de tentar de novo — um POST bem-sucedido já consome o código.",
+      "meta": {
+        "campaign": "Campanha",
+        "code": "Código",
+        "customer": "Cliente",
+        "channel": "Canal",
+        "channelManual": "Código manual"
+      },
+      "errorEyebrow": "Não validado",
+      "errors": {
+        "noOp": {
+          "title": "Parceiro sem operação",
+          "message": "Aguarde a aprovação do credenciamento para validar cupons."
+        },
+        "generic": {
+          "title": "Falha na validação",
+          "message": "Não foi possível validar o código. Tente de novo.",
+          "messageShort": "Não foi possível validar o código."
+        },
+        "invalid": {
+          "title": "Código inválido",
+          "message": "Código inválido. Confira com o cliente."
+        },
+        "expired": {
+          "title": "Código expirado",
+          "message": "Código expirado. Peça pro cliente gerar um novo no app (leva 2 toques)."
+        },
+        "conflict": {
+          "title": "Não foi possível validar"
+        },
+        "forbidden": {
+          "title": "Sem acesso",
+          "message": "Sem acesso a este cupom. Verifique o cadastro e a aprovação do parceiro."
+        },
+        "noBusiness": {
+          "title": "Negócio não selecionado",
+          "message": "Selecione a empresa parceira e tente validar de novo."
+        }
+      }
+    }
+  },
+  "frame": {
+    "loading": "Carregando...",
+    "emptyDefault": "Nada por aqui ainda",
+    "error": {
+      "title": "Não foi possível carregar",
+      "retry": "Tentar novamente"
+    },
+    "tabs": {
+      "aria": "Abas: {labels}"
+    },
+    "noAccess": {
+      "title": "Portal do parceiro ainda não liberado",
+      "body": "Sua conta ainda não está vinculada a uma empresa parceira operável. Solicite afiliado e/ou participativo em Programas — o time PetJourney analisa e libera o acesso.",
+      "hint": "Se você já pediu, aguarde a análise ou verifique novamente em instantes. Também é possível um admin vincular sua conta manualmente.",
+      "ctaPrograms": "Solicitar programas",
+      "ctaSettings": "Ir para configurações",
+      "retry": "Verificar novamente",
+      "contactLabel": "Dúvidas:"
+    },
+    "operability": {
+      "title": "Cadastro em análise",
+      "body": "Ações do portal ficam bloqueadas até o credenciamento ser aprovado.",
+      "reasonPrefix": "Motivo:",
+      "link": "Acompanhar credenciamento"
+    }
+  },
+  "statusBadge": {
+    "PENDENTE": "Em análise",
+    "SOLICITADO": "Em análise",
+    "APROVADO": "Aprovado",
+    "REJEITADO": "Recusado",
+    "SUSPENSO": "Suspenso",
+    "NAO_SOLICITADO": "Não ativo",
+    "ATIVO": "Ativo ✓"
+  },
+  "errors": {
+    "notFound": {
+      "brandAlt": "PetJourney",
+      "title": "Página não encontrada",
+      "body": "O endereço que você acessou não existe ou foi movido. Verifique o link ou volte para a área principal do painel.",
+      "goHome": "Ir para o início",
+      "back": "Voltar"
+    }
+  },
+  "inicio": {
+    "subtitle": "Visão geral",
+    "greeting": {
+      "hello": "Olá",
+      "helloName": "Olá, {name}"
+    },
+    "lede": "Cupons, indicação e comissão da parceria — organizados para você agir rápido.",
+    "dash": {
+      "errorLoad": "Não foi possível carregar o painel.",
+      "retry": "Tentar novamente",
+      "focus": {
+        "title": "Foco agora",
+        "lede": "Comissão e indicação — o que move a parceria hoje.",
+        "loadingAria": "Carregando comissão e indicação"
+      },
+      "commission": {
+        "eyebrowActive": "Comissão · Afiliado ativo",
+        "badge": "Carteira",
+        "sacavelNow": "sacável agora",
+        "metaHold": "Saldo total de {valor} — parte em janela de segurança de 14 dias.",
+        "openWallet": "Abrir carteira",
+        "eyebrowMuted": "Comissão",
+        "badgeMuted": "Não ativo",
+        "inactiveTitle": "Programa afiliado",
+        "inactiveMeta": "Ative o programa afiliado para acompanhar saldo, extrato e saques via PIX.",
+        "seePrograms": "Ver programas"
+      },
+      "referral": {
+        "eyebrow": "Código de indicação",
+        "copyAria": "Copiar código de indicação",
+        "meta": "Compartilhe e ganhe comissão por cada tutor que assinar.",
+        "cta": "Ver indicação",
+        "toastCopied": "Código copiado",
+        "toastCopyFail": "Não foi possível copiar",
+        "toastCopyFailDetail": "Copie o código manualmente."
+      },
+      "pulse": {
+        "title": "Pulso da rede",
+        "lede": "Indicadores de cupons e resgates.",
+        "loadingAria": "Carregando indicadores"
+      },
+      "metrics": {
+        "cuponsAtivos": "Cupons ativos",
+        "cuponsHint": "Prontos para resgate",
+        "resgatesTotal": "Resgates (total)",
+        "resgatesTotalHint": "Desde o início",
+        "resgates30d": "Resgates (30 dias)",
+        "resgates30dHint": "Último mês"
+      }
+    },
+    "shortcuts": {
+      "title": "Atalhos",
+      "countAvailable": "{n} disponíveis",
+      "lede": "Filtre pelo nome da tela ou da seção.",
+      "filterPlaceholder": "Filtrar por tela ou seção...",
+      "clearFilterAria": "Limpar filtro",
+      "emptyFilter": "Nenhuma tela encontrada para “{q}”."
+    }
+  },
+  "programas": {
+    "subtitle": "Portal",
+    "title": "Programas de participação",
+    "entry": {
+      "title": "Solicite sua entrada nos programas",
+      "body": "Você ainda não tem vínculo ativo com uma empresa parceira. Envie a solicitação de afiliado e/ou participativo — a equipe PetJourney analisa e libera o portal."
+    },
+    "lede": "Escolha os programas da rede PetJourney. Cada um é independente e passa por análise do time.",
+    "available": {
+      "title": "Programas disponíveis",
+      "lede": "Solicite afiliado e/ou participativo conforme o modelo da sua empresa.",
+      "loadingAria": "Carregando programas"
+    },
+    "activation": {
+      "title": "Como funciona a ativação",
+      "lede": "Fluxo simples, com análise do time PetJourney.",
+      "step1": {
+        "title": "Solicitar",
+        "desc": "O dono pede a ativação do programa."
+      },
+      "step2": {
+        "title": "Em análise",
+        "desc": "A equipe PetJourney revisa o pedido."
+      },
+      "step3": {
+        "title": "Ativo",
+        "desc": "Benefícios liberados para a empresa."
+      },
+      "noteNoAccess": "Solicite afiliado e/ou participativo abaixo. O time PetJourney analisa o pedido e libera o portal.",
+      "noteWithAccess": "Somente o dono da conta pode solicitar a ativação. Operadores acompanham o status, mas não enviam pedidos."
+    },
+    "cred": {
+      "zoneTitle": "Credenciamento",
+      "sectionTitle": "Credenciamento",
+      "zoneLede": "Status da auditoria necessária para liberar solicitações.",
+      "sectionLede": "Situação da auditoria e liberação para operar no portal.",
+      "loadingAria": "Carregando credenciamento",
+      "errorLoad": "Erro ao carregar credenciamento.",
+      "retry": "Tentar novamente",
+      "rowAuditoria": "Auditoria da empresa",
+      "rowOperacao": "Operação liberada",
+      "yes": "Sim",
+      "no": "Não",
+      "motivoTitle": "Motivo informado",
+      "lastUpdate": "Última atualização: {data}",
+      "blockedHint": "Solicitações de programas ficam bloqueadas até a aprovação do credenciamento."
+    },
+    "card": {
+      "afiliado": {
+        "title": "Programa de Afiliados",
+        "subtitle": "Transparência e comissões",
+        "description": "Receba comissão por cada indicação que vira assinante. Acesse sua carteira, acompanhe saldo e saque via PIX.",
+        "feature1": "Comissão por indicação convertida",
+        "feature2": "Extrato e saldo em tempo real",
+        "feature3": "Saque via PIX"
+      },
+      "participativo": {
+        "title": "Programa Participativo",
+        "subtitle": "Comunidade e perks",
+        "description": "Faça parte da comunidade PetJourney: perks exclusivos e collabs.",
+        "soon": "(Em breve.)",
+        "feature1": "Selo de parceiro participativo",
+        "feature2": "Perks e benefícios exclusivos",
+        "feature3": "Convites para collabs da rede"
+      },
+      "status": {
+        "naoSolicitado": "Não ativo",
+        "solicitado": "Em análise",
+        "ativo": "Ativo",
+        "rejeitado": "Recusado",
+        "suspenso": "Suspenso"
+      },
+      "info": {
+        "saldo": "Saldo disponível",
+        "ativoDesde": "Ativo desde",
+        "pending": "Sua solicitação foi enviada e está aguardando análise da equipe PetJourney.",
+        "rejected": "A solicitação foi recusada. Você pode enviar um novo pedido quando fizer sentido.",
+        "suspended": "O programa foi suspenso. Solicite novamente após alinhar com o time PetJourney."
+      },
+      "cta": {
+        "solicitar": "Solicitar",
+        "solicitarNovamente": "Solicitar de novo",
+        "aguardando": "Aguardando análise",
+        "carteira": "Ir para a Carteira"
+      },
+      "activeNoteParticipativo": "Programa ativo. Benefícios operacionais são comunicados pela equipe PetJourney.",
+      "toast": {
+        "actionUnavailable": "Ação indisponível",
+        "ownerOnly": "Apenas o dono da empresa pode solicitar programas.",
+        "sent": "Solicitação enviada",
+        "sentDetail": "Aguarde a análise do time PetJourney.",
+        "error": "Erro ao solicitar"
+      },
+      "error": {
+        "generic": "Não foi possível solicitar.",
+        "forbidden": "Sem permissão para solicitar. Confirme o vínculo da conta ou peça ao dono da empresa.",
+        "afiliadoNaoAtivo": "Ative o programa afiliado para acessar a carteira.",
+        "notOperable": "Seu cadastro ainda está em análise.",
+        "alreadyRequested": "Este programa já foi solicitado ou está ativo."
+      }
+    }
+  },
+  "divulgacao": {
+    "subtitle": "Portal",
+    "title": "Divulgação",
+    "lede": "Indicação, cupons e resgates da parceria — tudo em um só lugar para divulgar com clareza.",
+    "errorLoad": "Erro ao carregar divulgação.",
+    "retry": "Tentar novamente",
+    "indicacao": {
+      "title": "Indicação",
+      "lede": "Código, link e QR Code para atrair assinantes vinculados à empresa.",
+      "loadingAria": "Carregando kit de indicação"
+    },
+    "shareKit": {
+      "eyebrow": "Kit de indicação",
+      "title": "Compartilhe e vincule assinantes",
+      "unavailable": "Indisponível",
+      "codeLabel": "Código",
+      "copyCodeAria": "Copiar código",
+      "linkName": "Link",
+      "linkLabel": "Link pronto",
+      "copyLink": "Copiar link",
+      "qrAlt": "QR Code de indicação",
+      "qrCaption": "Escaneie no celular",
+      "hint": "Comissão na carteira exige programa afiliado ativo. Cupons de desconto não geram comissão."
+    },
+    "metrics": {
+      "aria": "Métricas de divulgação",
+      "cuponsAtivos": "Cupons ativos",
+      "resgatesTotais": "Resgates totais",
+      "ultimos30d": "Últimos 30 dias"
+    },
+    "toast": {
+      "copied": "Copiado",
+      "copiedDetail": "{label} copiado.",
+      "copyFail": "Não foi possível copiar",
+      "error": "Erro",
+      "moreCuponsFail": "Não foi possível carregar mais cupons.",
+      "moreResgatesFail": "Não foi possível carregar mais resgates."
+    },
+    "lists": {
+      "title": "Cupons e resgates",
+      "lede": "Descontos da empresa e histórico de uso — lado a lado.",
+      "loadingAria": "Carregando cupons e resgates"
+    },
+    "cupons": {
+      "title": "Cupons",
+      "lede": "Descontos para tutores — não geram comissão.",
+      "empty": "Nenhum cupom no momento.",
+      "usos": "{n} usos",
+      "loadMore": "Mais cupons"
+    },
+    "resgates": {
+      "title": "Resgates",
+      "lede": "Sem dados pessoais dos tutores.",
+      "empty": "Nenhum resgate ainda.",
+      "canalQr": "Via QR Code",
+      "canalManual": "Código manual",
+      "loadMore": "Mais resgates"
+    }
+  },
+  "carteira": {
+    "subtitle": "Portal",
+    "title": "Financeiro",
+    "tabs": {
+      "ariaLabel": "Abas: {labels}",
+      "visao": {
+        "label": "Visão geral",
+        "description": "Saldos, chave PIX e solicitação de saque."
+      },
+      "extrato": {
+        "label": "Extrato",
+        "description": "Movimentações de comissão e débitos."
+      },
+      "saques": {
+        "label": "Saques",
+        "description": "Status das solicitações de pagamento."
+      }
+    },
+    "gate": {
+      "title": "Programa afiliado necessário",
+      "body": "A carteira, extrato e saques só ficam disponíveis com o programa afiliado ativo. Solicite a participação na tela de programas.",
+      "cta": "Solicitar programa afiliado"
+    },
+    "visao": {
+      "loadingAria": "Carregando carteira",
+      "errorLoad": "Erro ao carregar carteira.",
+      "retry": "Tentar novamente",
+      "saldoSacavel": "Saldo sacável",
+      "saldoSacavelHint": "Disponível para saque via PIX",
+      "saldoTotal": "Saldo total",
+      "totalSacado": "Total sacado",
+      "alertBlocked": "Saques temporariamente bloqueados (revisão antifraude ou saldo negativo).",
+      "alertHold": "Saldo em período de hold (14 dias por crédito). O valor ainda não está disponível para saque.",
+      "alertComissaoDisabled": "Comissões por indicação estão temporariamente desativadas no ambiente — a carteira pode permanecer zerada mesmo com indicações ativas. Isso não é um erro do seu cadastro.",
+      "pix": {
+        "title": "Chave PIX",
+        "label": "Chave PIX",
+        "hint": "Necessária para solicitar saques.",
+        "placeholder": "email{'@'}empresa.com ou CNPJ",
+        "save": "Salvar chave"
+      },
+      "saque": {
+        "title": "Solicitar saque",
+        "submit": "Solicitar saque",
+        "hint": "Mínimo {valor}. Ciclo: corte dia 27, pagamento até dia 5.",
+        "valorLabel": "Valor (R$)",
+        "valorPlaceholder": "0,00",
+        "currency": "R$"
+      }
+    },
+    "help": {
+      "title": "Como funciona a carteira",
+      "lede": "Detalhes úteis antes de cadastrar PIX ou pedir saque.",
+      "contactEmail": "E-mail",
+      "contactWhatsapp": "WhatsApp",
+      "comissao": {
+        "title": "Como entra saldo",
+        "body": "Indicações que viram assinantes geram comissão na carteira, quando o programa afiliado está ativo."
+      },
+      "saldos": {
+        "title": "Saldo total e sacável",
+        "body": "O total acumula créditos; o sacável libera após a janela de segurança de 14 dias por crédito."
+      },
+      "pix": {
+        "title": "PIX obrigatório",
+        "body": "Cadastre a chave PIX da empresa antes de pedir saque. Só o dono da conta altera PIX e solicita saque."
+      },
+      "ciclo": {
+        "title": "Ciclo de pagamento",
+        "body": "Saque mínimo de R$ 50,00. Corte no dia 27 e liquidação orientativa até o dia 5 — acompanhe na aba Saques."
+      },
+      "footerPrefix": "Dúvidas?",
+      "footerOrWhatsapp": "ou WhatsApp"
+    },
+    "toast": {
+      "pixSaved": "Chave PIX salva",
+      "pixSaveError": "Erro ao salvar PIX",
+      "tryAgain": "Tente novamente.",
+      "invalidValue": "Valor inválido",
+      "minWithdraw": "O saque mínimo é R$ 50,00.",
+      "insufficient": "Saldo insuficiente",
+      "maxWithdraw": "O máximo sacável agora é {valor}.",
+      "pixRequired": "PIX obrigatório",
+      "pixRequiredDetail": "Cadastre uma chave PIX antes de solicitar saque.",
+      "withdrawRequested": "Saque solicitado",
+      "withdrawRequestedDetail": "Acompanhe na aba Saques.",
+      "withdrawError": "Erro no saque"
+    },
+    "extrato": {
+      "loadingTitle": "Carregando extrato...",
+      "loadingDesc": "Buscando créditos de comissão e débitos recentes.",
+      "errorLoad": "Erro ao carregar extrato.",
+      "retry": "Tentar novamente",
+      "emptyTitle": "Nenhuma movimentação",
+      "emptyBody": "Créditos de comissão e débitos de saque aparecem aqui.",
+      "loadMore": "Carregar mais"
+    },
+    "saques": {
+      "loadingTitle": "Carregando saques...",
+      "loadingDesc": "Buscando solicitações e status de pagamento.",
+      "errorLoad": "Erro ao carregar saques.",
+      "retry": "Tentar novamente",
+      "emptyTitle": "Nenhum saque solicitado",
+      "emptyBody": "Solicite um saque na aba Visão geral quando tiver saldo sacável.",
+      "requestedAt": "Solicitado em {data}"
+    },
+    "detail": {
+      "subtitle": "Financeiro",
+      "title": "Detalhe do saque",
+      "back": "Voltar",
+      "loadingAria": "Carregando detalhe do saque",
+      "errorInvalidId": "Identificador do saque inválido.",
+      "errorLoad": "Erro ao carregar saque.",
+      "valorLabel": "Valor solicitado",
+      "requestedAt": "Solicitado em",
+      "liquidatedAt": "Liquidado em",
+      "pixSnapshot": "Chave PIX (snapshot)",
+      "failReason": "Motivo da falha",
+      "receipt": "Comprovante",
+      "pendingHint": "Pagamentos são liquidados manualmente pelo PetJourney. Ciclo orientativo: corte dia 27, pagamento até dia 5."
+    }
+  },
+  "parceiro": {
+    "store": {
+      "errorNeedsSelection": "Selecione qual empresa parceira você deseja operar. Informe o identificador do parceiro.",
+      "errorNoAccess": "Sua conta não possui acesso ao portal do parceiro.",
+      "errorGeneric": "Não foi possível carregar o contexto do parceiro."
+    },
+    "selecionar": {
+      "subtitle": "Multi-empresa",
+      "title": "Selecionar parceiro",
+      "body": "Sua conta participa de mais de uma empresa parceira. Informe qual deseja operar agora.",
+      "idLabel": "ID do parceiro",
+      "idHint": "O identificador é fornecido pelo administrador ou aparece no convite.",
+      "idPlaceholder": "cuid-do-parceiro",
+      "continue": "Continuar",
+      "toast": {
+        "error": "Não foi possível acessar",
+        "errorDetail": "Verifique o identificador."
+      }
+    },
+    "convite": {
+      "subtitle": "Equipe",
+      "title": "Aceitar convite",
+      "body": "Você foi convidado para integrar a equipe de uma empresa parceira PetJourney. Informe o identificador recebido no e-mail ou abra o link completo do convite.",
+      "idLabel": "ID do parceiro",
+      "idHint": "Obrigatório — vem no link como ?parceiroId=...",
+      "idPlaceholder": "cuid-da-empresa",
+      "accept": "Aceitar convite",
+      "footnote": "Após aceitar, você passa a operar no portal com o papel definido pelo dono da empresa.",
+      "toast": {
+        "warnTitle": "Informe a empresa",
+        "warnDetail": "O link de convite deve incluir o identificador do parceiro.",
+        "success": "Convite aceito",
+        "successDetail": "Você já pode acessar o portal da empresa.",
+        "error": "Não foi possível aceitar",
+        "errorDetail": "Verifique o link ou tente novamente."
+      }
+    }
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Conta",
+    "tabs": {
+      "perfil": {
+        "label": "Perfil",
+        "description": "Nome, contatos, documento e dados profissionais."
+      },
+      "seguranca": {
+        "label": "Segurança",
+        "description": "Troca de senha da conta autenticada."
+      },
+      "conta": {
+        "label": "Conta",
+        "description": "Sessão, desativação de perfil e preferências futuras."
+      }
+    },
+    "perfil": {
+      "fallbackName": "Usuário",
+      "photoHint": "Clique na foto para escolher uma nova imagem.",
+      "aria": {
+        "changePhoto": "Alterar foto de perfil",
+        "uploadingPhoto": "Enviando foto…",
+        "roles": "Papéis da conta"
+      },
+      "roles": {
+        "veterinario": "Veterinário",
+        "donoParceiro": "Dono do parceiro",
+        "operadorParceiro": "Operador parceiro",
+        "admin": "Admin"
+      },
+      "partnerContext": {
+        "papelDono": "DONO",
+        "papelOperador": "OPERADOR",
+        "template": "{parceiroNome} · {papel}"
+      },
+      "sections": {
+        "identidade": "Identidade",
+        "contato": "Contato",
+        "documento": "Documento",
+        "vet": "Perfil veterinário"
+      },
+      "fields": {
+        "nome": {
+          "label": "Nome completo",
+          "placeholder": "Seu nome"
+        },
+        "email": {
+          "label": "E-mail",
+          "hint": "Vinculado à autenticação — somente leitura."
+        },
+        "telefone": {
+          "label": "Telefone",
+          "placeholder": "(11) 98888-7777"
+        },
+        "whatsapp": {
+          "label": "WhatsApp",
+          "placeholder": "(11) 98888-7777"
+        },
+        "cpf": {
+          "label": "CPF",
+          "placeholder": "000.000.000-00",
+          "hintLocked": "Já cadastrado — não pode ser alterado.",
+          "hintOptional": "Opcional. Depois de salvo, fica bloqueado."
+        },
+        "crmv": {
+          "label": "CRMV",
+          "placeholder": "CRMV-SP 12345"
+        },
+        "especialidade": {
+          "label": "Especialidade",
+          "placeholder": "Clínica geral"
+        }
+      },
+      "actions": {
+        "save": "Salvar perfil",
+        "retry": "Tentar novamente"
+      },
+      "errors": {
+        "nomeMin": "Informe pelo menos 3 caracteres.",
+        "telefone": "Informe um telefone válido com DDD.",
+        "whatsapp": "Informe um WhatsApp válido com DDD.",
+        "cpf": "CPF inválido.",
+        "crmvRequired": "CRMV é obrigatório para o perfil veterinário.",
+        "especialidadeRequired": "Informe a especialidade.",
+        "sessionUnavailable": "Sessão indisponível. Faça login novamente.",
+        "loadFailed": "Não foi possível carregar o perfil.",
+        "loadTitle": "Não foi possível carregar"
+      },
+      "photo": {
+        "errors": {
+          "invalidType": "Use uma imagem JPEG, PNG, WEBP ou GIF.",
+          "maxSize": "A imagem deve ter no máximo 5 MB."
+        }
+      },
+      "toasts": {
+        "partial": {
+          "summary": "Perfil parcial",
+          "detail": "Não encontramos o perfil completo na API. Você pode editar e salvar o que estiver disponível."
+        },
+        "saved": {
+          "summary": "Perfil atualizado",
+          "detail": "Seus dados foram salvos com sucesso."
+        },
+        "saveError": {
+          "summary": "Não foi possível salvar",
+          "detailFallback": "Tente novamente em instantes."
+        },
+        "invalidFile": {
+          "summary": "Arquivo inválido"
+        },
+        "photoOk": {
+          "summary": "Foto atualizada",
+          "detail": "A nova foto já está no seu perfil."
+        },
+        "photoError": {
+          "summary": "Não foi possível enviar a foto",
+          "detailFallback": "Tente novamente em instantes."
+        }
+      }
+    },
+    "seguranca": {
+      "aside": {
+        "title": "Troca de senha",
+        "body": "A sessão atual permanece ativa após a alteração. Use uma senha forte e exclusiva desta conta.",
+        "bullets": {
+          "minLength": "Mínimo de 6 caracteres",
+          "complexity": "Número, maiúscula e caractere especial",
+          "reuse": "Não reutilize senhas de outros sistemas"
+        }
+      },
+      "fields": {
+        "current": {
+          "label": "Senha atual",
+          "placeholder": "Digite a senha atual"
+        },
+        "new": {
+          "label": "Nova senha",
+          "placeholder": "Crie uma senha forte"
+        },
+        "confirm": {
+          "label": "Confirmar nova senha",
+          "placeholder": "Repita a nova senha"
+        }
+      },
+      "aria": {
+        "showPassword": "Mostrar senha",
+        "hidePassword": "Ocultar senha"
+      },
+      "actions": {
+        "change": "Alterar senha"
+      },
+      "errors": {
+        "currentRequired": "Informe a senha atual.",
+        "newInvalid": "A nova senha não atende todos os requisitos.",
+        "confirmRequired": "Confirme a nova senha.",
+        "mismatch": "As senhas não coincidem."
+      },
+      "toasts": {
+        "success": {
+          "summary": "Senha alterada",
+          "detail": "Use a nova senha no próximo acesso."
+        },
+        "error": {
+          "summary": "Não foi possível alterar a senha",
+          "detailFallback": "Verifique a senha atual e tente de novo."
+        }
+      }
+    },
+    "conta": {
+      "session": {
+        "eyebrow": "Sessão neste dispositivo",
+        "fallbackName": "Usuário"
+      },
+      "aria": {
+        "roles": "Papéis"
+      },
+      "roles": {
+        "veterinario": "Veterinário",
+        "dono": "Dono",
+        "operador": "Operador",
+        "admin": "Admin"
+      },
+      "partnerContext": {
+        "papelDono": "DONO",
+        "papelOperador": "OPERADOR"
+      },
+      "actions": {
+        "logout": "Sair da conta"
+      },
+      "device": {
+        "title": "Dispositivo",
+        "subtitle": "Encerrar só remove o acesso neste computador.",
+        "body": "O token fica limpo neste browser. Seus dados e o perfil na nuvem continuam intactos."
+      },
+      "prefs": {
+        "title": "Idioma",
+        "subtitle": "Escolha o idioma da interface deste painel.",
+        "body": "A preferência fica salva neste dispositivo e vale para as próximas visitas."
+      },
+      "risk": {
+        "eyebrow": "Zona sensível",
+        "title": "Desativar perfil",
+        "lede": "Pausa reversível do perfil — diferente de sair do dispositivo ou excluir a conta.",
+        "actions": {
+          "deactivate": "Desativar perfil"
+        },
+        "points": {
+          "soft": {
+            "title": "Reversível",
+            "text": "Os dados da conta permanecem. Você reativa no próximo login."
+          },
+          "scope": {
+            "title": "Só o perfil",
+            "text": "Não apaga clínica, parceiro nem histórico — só pausa o perfil ativo."
+          },
+          "notDelete": {
+            "title": "Não é exclusão",
+            "text": "Encerramento permanente (LGPD) é outro fluxo e não aparece aqui."
+          }
+        }
+      },
+      "inactivate": {
+        "dialog": {
+          "title": "Desativar perfil",
+          "lede": "Escolha o motivo da pausa. Depois confirmaremos e encerraremos esta sessão."
+        },
+        "loading": "Carregando motivos…",
+        "fields": {
+          "reason": {
+            "label": "Motivo",
+            "placeholder": "Selecione um motivo"
+          },
+          "custom": {
+            "label": "Conte mais (obrigatório)",
+            "placeholder": "Descreva o motivo"
+          }
+        },
+        "actions": {
+          "cancel": "Cancelar",
+          "confirm": "Confirmar desativação"
+        },
+        "errors": {
+          "noReasons": "Nenhum motivo disponível no momento. Tente novamente mais tarde.",
+          "loadReasons": "Não foi possível carregar os motivos.",
+          "reasonRequired": "Selecione um motivo para continuar.",
+          "customMin": "Descreva o motivo com pelo menos 3 caracteres.",
+          "failedFallback": "Não foi possível desativar o perfil."
+        },
+        "toasts": {
+          "success": {
+            "summary": "Perfil desativado",
+            "detail": "Sua sessão foi encerrada. Você pode reativar o perfil no próximo login."
+          },
+          "error": {
+            "summary": "Falha ao desativar"
+          }
+        }
+      }
+    }
+  }
+}

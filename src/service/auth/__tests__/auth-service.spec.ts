@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveLoginProfileFlags } from '@/service/auth/auth-service'
+import { extractResetToken, resolveLoginProfileFlags } from '@/service/auth/auth-service'
 
 describe('resolveLoginProfileFlags', () => {
   it('lê tutorInactive do body de login', () => {
@@ -42,5 +42,17 @@ describe('resolveLoginProfileFlags', () => {
         veterinarioInactive: false,
       },
     )
+  })
+})
+
+describe('extractResetToken', () => {
+  it('lê reset_token do data', () => {
+    expect(extractResetToken({ reset_token: 'jwt-reset' })).toBe('jwt-reset')
+  })
+
+  it('rejeita ausência ou valor inválido', () => {
+    expect(() => extractResetToken({})).toThrow(/inválida/i)
+    expect(() => extractResetToken({ reset_token: '' })).toThrow(/inválida/i)
+    expect(() => extractResetToken(null)).toThrow(/inválida/i)
   })
 })

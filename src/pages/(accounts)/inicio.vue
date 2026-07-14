@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import HomeNavigationShortcuts from '@/components/home/HomeNavigationShortcuts.vue'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PortalParceiroDashboard from '@/components/parceiro/PortalParceiroDashboard.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { getAuthUser } from '@/service/auth/auth-session'
 import { currentColors } from '@/theme/color-mode'
 
+const { t, locale } = useI18n()
 const { store, ensureContext } = useParceiroPortal()
 
 const now = ref(new Date())
@@ -17,10 +20,10 @@ let clockId: ReturnType<typeof setInterval> | undefined
 const greetingTitle = computed(() => {
   if (store.semAcessoParceiro) {
     const nome = getAuthUser()?.nome?.trim()
-    return nome ? `Olá, ${nome}` : 'Olá'
+    return nome ? t('inicio.greeting.helloName', { name: nome }) : t('inicio.greeting.hello')
   }
 
-  return `Olá, ${store.parceiroNome}`
+  return t('inicio.greeting.helloName', { name: store.parceiroNome })
 })
 
 const loadError = computed(() =>
@@ -28,7 +31,7 @@ const loadError = computed(() =>
 )
 
 const todayLabel = computed(() =>
-  now.value.toLocaleDateString('pt-BR', {
+  now.value.toLocaleDateString(INTL_LOCALE[locale.value as Locale], {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -64,7 +67,7 @@ onUnmounted(() => {
 
 <template>
   <PartnerPageFrame
-    subtitle="Visão geral"
+    :subtitle="t('inicio.subtitle')"
     :title="greetingTitle"
     :loading="false"
     :error="loadError"
@@ -81,7 +84,7 @@ onUnmounted(() => {
       <PartnerOperabilityBanner />
 
       <p class="inicio-lede">
-        Cupons, indicação e comissão da parceria — organizados para você agir rápido.
+        {{ t('inicio.lede') }}
       </p>
 
       <div class="inicio-layout">

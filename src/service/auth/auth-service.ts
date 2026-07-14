@@ -122,6 +122,51 @@ export async function changePasswordAuthenticated(payload: ChangePasswordAuthent
   })
 }
 
+/** Público — anti-enumeração: API responde 200 mesmo se o e-mail não existir. */
+export async function recoveryPassword(email: string) {
+  return apiFetch<ApiEnvelope<unknown>>('/auth/recovery-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
+}
+
+export function extractResetToken(data: unknown): string {
+  const record = asRecord(data)
+
+  if (!record || typeof record.reset_token !== 'string' || !record.reset_token.trim()) {
+    throw new Error('Resposta de verificação inválida.')
+  }
+
+  return record.reset_token
+}
+
+/** Público — valida PIN e devolve JWT de reset (~10 min). */
+export async function verifyRecoveryPin(payload: { email: string; pin: string }) {
+  const res = await apiFetch<ApiEnvelope<unknown>>('/auth/verify-recovery-pin', {
+    method: 'POST',
+    body: JSON.stringify({
+      email: payload.email,
+      pin: payload.pin,
+    }),
+  })
+
+  return extractResetToken(res.data)
+}
+
+/** Público — redefine senha com o `reset_token` da verificação. Sem auto-login. */
+export async function resetPasswordWithToken(payload: {
+  reset_token: string
+  newPassword: string
+}) {
+  return apiFetch<ApiEnvelope<unknown>>('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({
+      reset_token: payload.reset_token,
+      newPassword: payload.newPassword,
+    }),
+  })
+}
+
 /**
  * Renova access/refresh tokens. Single-flight para evitar corrida pós-reativação.
  */

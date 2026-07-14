@@ -3,11 +3,13 @@ import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import PartnerFocusCard from '@/components/parceiro/PartnerFocusCard.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
   getPortalCupons,
   getPortalIndicacao,
@@ -16,6 +18,7 @@ import {
 import type { CupomParceiro, PortalIndicacao, ResgateParceiro } from '@/service/parceiro/types'
 import { currentColors } from '@/theme/color-mode'
 
+const { t, locale } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 const { lastSuccessAt } = useCupomResgateModal()
@@ -61,21 +64,21 @@ const metrics = computed(() => {
   return [
     {
       id: 'cupons',
-      label: 'Cupons ativos',
+      label: t('divulgacao.metrics.cuponsAtivos'),
       value: totais?.cuponsAtivos ?? cupons.value.filter((c) => c.ativo).length,
       icon: 'pi pi-ticket',
       tone: 'primary' as const,
     },
     {
       id: 'total',
-      label: 'Resgates totais',
+      label: t('divulgacao.metrics.resgatesTotais'),
       value: totais?.resgatesTotal ?? resgates.value.length,
       icon: 'pi pi-check-circle',
       tone: 'success' as const,
     },
     {
       id: 'recentes',
-      label: 'Últimos 30 dias',
+      label: t('divulgacao.metrics.ultimos30d'),
       value: totais?.resgatesUltimos30d ?? 0,
       icon: 'pi pi-chart-line',
       tone: 'amber' as const,
@@ -86,9 +89,14 @@ const metrics = computed(() => {
 async function copyToClipboard(value: string, label: string) {
   try {
     await navigator.clipboard.writeText(value)
-    toast.add({ severity: 'success', summary: 'Copiado', detail: `${label} copiado.`, life: 2500 })
+    toast.add({
+      severity: 'success',
+      summary: t('divulgacao.toast.copied'),
+      detail: t('divulgacao.toast.copiedDetail', { label }),
+      life: 2500,
+    })
   } catch {
-    toast.add({ severity: 'warn', summary: 'Não foi possível copiar', life: 3000 })
+    toast.add({ severity: 'warn', summary: t('divulgacao.toast.copyFail'), life: 3000 })
   }
 }
 
@@ -112,7 +120,7 @@ async function loadAll() {
     resgates.value = resgatesPage.data
     resgatesCursor.value = resgatesPage.meta.proximoCursor ?? null
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Erro ao carregar divulgação.'
+    error.value = err instanceof Error ? err.message : t('divulgacao.errorLoad')
   } finally {
     loading.value = false
   }
@@ -136,8 +144,8 @@ async function loadMoreCupons() {
   } catch (err) {
     toast.add({
       severity: 'error',
-      summary: 'Erro',
-      detail: err instanceof Error ? err.message : 'Não foi possível carregar mais cupons.',
+      summary: t('divulgacao.toast.error'),
+      detail: err instanceof Error ? err.message : t('divulgacao.toast.moreCuponsFail'),
       life: 4000,
     })
   } finally {
@@ -163,8 +171,8 @@ async function loadMoreResgates() {
   } catch (err) {
     toast.add({
       severity: 'error',
-      summary: 'Erro',
-      detail: err instanceof Error ? err.message : 'Não foi possível carregar mais resgates.',
+      summary: t('divulgacao.toast.error'),
+      detail: err instanceof Error ? err.message : t('divulgacao.toast.moreResgatesFail'),
       life: 4000,
     })
   } finally {
@@ -177,7 +185,7 @@ function formatCategoria(value: string) {
 }
 
 function formatResgateDate(value: string) {
-  return new Date(value).toLocaleString('pt-BR', {
+  return new Date(value).toLocaleString(INTL_LOCALE[locale.value as Locale], {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
@@ -204,7 +212,7 @@ watch(lastSuccessAt, (at) => {
     <div v-if="error" class="divulgacao__error" role="alert">
       <i class="pi pi-exclamation-circle" aria-hidden="true" />
       <p>{{ error }}</p>
-      <Button label="Tentar novamente" severity="secondary" size="small" @click="loadAll" />
+      <Button :label="t('divulgacao.retry')" severity="secondary" size="small" @click="loadAll" />
     </div>
 
     <template v-else-if="loading">
@@ -212,9 +220,9 @@ watch(lastSuccessAt, (at) => {
         <header class="div-zone__head">
           <div class="div-zone__title-row">
             <p class="div-zone__index">01</p>
-            <h2 id="div-indicacao-title">Indicação</h2>
+            <h2 id="div-indicacao-title">{{ t('divulgacao.indicacao.title') }}</h2>
           </div>
-          <p>Código, link e QR para atrair assinantes vinculados à empresa.</p>
+          <p>{{ t('divulgacao.indicacao.lede') }}</p>
         </header>
 
         <div
@@ -222,7 +230,7 @@ watch(lastSuccessAt, (at) => {
           role="status"
           aria-live="polite"
           aria-busy="true"
-          aria-label="Carregando kit de indicação"
+          :aria-label="t('divulgacao.indicacao.loadingAria')"
         >
           <PartnerFocusCard class="share-kit share-kit--skeleton" aria-hidden="true">
             <header class="share-kit__head">
@@ -286,9 +294,9 @@ watch(lastSuccessAt, (at) => {
         <header class="div-zone__head">
           <div class="div-zone__title-row">
             <p class="div-zone__index">02</p>
-            <h2 id="div-movimentacao-title">Cupons e resgates</h2>
+            <h2 id="div-movimentacao-title">{{ t('divulgacao.lists.title') }}</h2>
           </div>
-          <p>Descontos da empresa e histórico de uso — lado a lado.</p>
+          <p>{{ t('divulgacao.lists.lede') }}</p>
         </header>
 
         <div
@@ -296,7 +304,7 @@ watch(lastSuccessAt, (at) => {
           role="status"
           aria-live="polite"
           aria-busy="true"
-          aria-label="Carregando cupons e resgates"
+          :aria-label="t('divulgacao.lists.loadingAria')"
         >
           <section class="list-panel list-panel--skeleton" aria-hidden="true">
             <header class="list-panel__head">
@@ -361,19 +369,21 @@ watch(lastSuccessAt, (at) => {
         <header class="div-zone__head">
           <div class="div-zone__title-row">
             <p class="div-zone__index">01</p>
-            <h2 id="div-indicacao-title">Indicação</h2>
+            <h2 id="div-indicacao-title">{{ t('divulgacao.indicacao.title') }}</h2>
           </div>
-          <p>Código, link e QR para atrair assinantes vinculados à empresa.</p>
+          <p>{{ t('divulgacao.indicacao.lede') }}</p>
         </header>
 
         <div class="divulgacao__top">
           <PartnerFocusCard class="share-kit" :muted="!indicacao.podeIndicar">
             <header class="share-kit__head">
               <div>
-                <p class="share-kit__eyebrow">Kit de indicação</p>
-                <h3>Compartilhe e vincule assinantes</h3>
+                <p class="share-kit__eyebrow">{{ t('divulgacao.shareKit.eyebrow') }}</p>
+                <h3>{{ t('divulgacao.shareKit.title') }}</h3>
               </div>
-              <span v-if="!indicacao.podeIndicar" class="share-kit__pill">Indisponível</span>
+              <span v-if="!indicacao.podeIndicar" class="share-kit__pill">{{
+                t('divulgacao.shareKit.unavailable')
+              }}</span>
             </header>
 
             <p v-if="indicacao.aviso" class="share-kit__aviso">{{ indicacao.aviso }}</p>
@@ -381,15 +391,17 @@ watch(lastSuccessAt, (at) => {
             <div class="share-kit__stage">
               <div class="share-kit__main">
                 <div class="share-kit__code-block">
-                  <span class="share-kit__label">Código</span>
+                  <span class="share-kit__label">{{ t('divulgacao.shareKit.codeLabel') }}</span>
                   <div class="share-kit__code-row">
                     <strong class="share-kit__code">{{ indicacao.codigoIndicacao }}</strong>
                     <button
                       type="button"
                       class="share-kit__icon-btn"
-                      aria-label="Copiar código"
+                      :aria-label="t('divulgacao.shareKit.copyCodeAria')"
                       :disabled="!indicacao.podeIndicar"
-                      @click="copyToClipboard(indicacao.codigoIndicacao, 'Código')"
+                      @click="
+                        copyToClipboard(indicacao.codigoIndicacao, t('divulgacao.shareKit.codeLabel'))
+                      "
                     >
                       <i class="pi pi-copy" aria-hidden="true" />
                     </button>
@@ -397,35 +409,34 @@ watch(lastSuccessAt, (at) => {
                 </div>
 
                 <div class="share-kit__link">
-                  <span class="share-kit__label">Link pronto</span>
+                  <span class="share-kit__label">{{ t('divulgacao.shareKit.linkLabel') }}</span>
                   <div class="share-kit__link-field">
                     <code>{{ indicacao.link }}</code>
                     <button
                       type="button"
                       class="share-kit__copy-cta"
                       :disabled="!indicacao.podeIndicar"
-                      @click="copyToClipboard(indicacao.link, 'Link')"
+                      @click="copyToClipboard(indicacao.link, t('divulgacao.shareKit.linkName'))"
                     >
                       <i class="pi pi-link" aria-hidden="true" />
-                      Copiar link
+                      {{ t('divulgacao.shareKit.copyLink') }}
                     </button>
                   </div>
                 </div>
               </div>
 
               <figure v-if="indicacao.qrCodeDataUrl" class="share-kit__qr">
-                <img :src="indicacao.qrCodeDataUrl" alt="QR Code de indicação" />
-                <figcaption>Escaneie no celular</figcaption>
+                <img :src="indicacao.qrCodeDataUrl" :alt="t('divulgacao.shareKit.qrAlt')" />
+                <figcaption>{{ t('divulgacao.shareKit.qrCaption') }}</figcaption>
               </figure>
             </div>
 
             <p class="share-kit__hint">
-              Comissão na carteira exige programa afiliado ativo. Cupons de desconto não geram
-              comissão.
+              {{ t('divulgacao.shareKit.hint') }}
             </p>
           </PartnerFocusCard>
 
-          <aside class="metrics-strip" aria-label="Métricas de divulgação">
+          <aside class="metrics-strip" :aria-label="t('divulgacao.metrics.aria')">
             <article
               v-for="metric in metrics"
               :key="metric.id"
@@ -448,24 +459,24 @@ watch(lastSuccessAt, (at) => {
         <header class="div-zone__head">
           <div class="div-zone__title-row">
             <p class="div-zone__index">02</p>
-            <h2 id="div-movimentacao-title">Cupons e resgates</h2>
+            <h2 id="div-movimentacao-title">{{ t('divulgacao.lists.title') }}</h2>
           </div>
-          <p>Descontos da empresa e histórico de uso — lado a lado.</p>
+          <p>{{ t('divulgacao.lists.lede') }}</p>
         </header>
 
         <div class="divulgacao__lists">
           <section id="cupons" class="list-panel" aria-labelledby="divulgacao-cupons-title">
             <header class="list-panel__head">
               <div>
-                <h3 id="divulgacao-cupons-title">Cupons</h3>
-                <p>Descontos para tutores — não geram comissão.</p>
+                <h3 id="divulgacao-cupons-title">{{ t('divulgacao.cupons.title') }}</h3>
+                <p>{{ t('divulgacao.cupons.lede') }}</p>
               </div>
               <span class="list-panel__count">{{ cupons.length }}</span>
             </header>
 
             <div v-if="cupons.length === 0" class="list-panel__empty">
               <i class="pi pi-ticket" aria-hidden="true" />
-              <span>Nenhum cupom no momento.</span>
+              <span>{{ t('divulgacao.cupons.empty') }}</span>
             </div>
 
             <ul v-else class="list-panel__items">
@@ -476,7 +487,7 @@ watch(lastSuccessAt, (at) => {
                 </div>
                 <div class="cupom-row__meta">
                   <span class="cupom-row__discount">{{ cupom.descontoPercentual }}%</span>
-                  <span>{{ cupom.totalResgates }} usos</span>
+                  <span>{{ t('divulgacao.cupons.usos', { n: cupom.totalResgates }) }}</span>
                   <PartnerStatusBadge :status="cupom.ativo ? 'ATIVO' : 'SUSPENSO'" />
                 </div>
               </li>
@@ -485,7 +496,7 @@ watch(lastSuccessAt, (at) => {
             <Button
               v-if="cuponsCursor"
               class="list-panel__more"
-              label="Mais cupons"
+              :label="t('divulgacao.cupons.loadMore')"
               size="small"
               severity="secondary"
               :loading="loadingCuponsMore"
@@ -496,22 +507,26 @@ watch(lastSuccessAt, (at) => {
           <section id="resgates" class="list-panel" aria-labelledby="divulgacao-resgates-title">
             <header class="list-panel__head">
               <div>
-                <h3 id="divulgacao-resgates-title">Resgates</h3>
-                <p>Sem dados pessoais dos tutores.</p>
+                <h3 id="divulgacao-resgates-title">{{ t('divulgacao.resgates.title') }}</h3>
+                <p>{{ t('divulgacao.resgates.lede') }}</p>
               </div>
               <span class="list-panel__count">{{ resgates.length }}</span>
             </header>
 
             <div v-if="resgates.length === 0" class="list-panel__empty">
               <i class="pi pi-chart-line" aria-hidden="true" />
-              <span>Nenhum resgate ainda.</span>
+              <span>{{ t('divulgacao.resgates.empty') }}</span>
             </div>
 
             <ul v-else class="list-panel__items">
               <li v-for="resgate in resgates" :key="resgate.resgateId" class="resgate-row">
                 <div class="resgate-row__main">
                   <strong>{{ resgate.cupomCodigo }}</strong>
-                  <span>{{ resgate.canal === 'QR' ? 'Via QR Code' : 'Código manual' }}</span>
+                  <span>{{
+                    resgate.canal === 'QR'
+                      ? t('divulgacao.resgates.canalQr')
+                      : t('divulgacao.resgates.canalManual')
+                  }}</span>
                 </div>
                 <div class="resgate-row__meta">
                   <span v-if="resgate.descontoPercentualSnapshot != null">
@@ -525,7 +540,7 @@ watch(lastSuccessAt, (at) => {
             <Button
               v-if="resgatesCursor"
               class="list-panel__more"
-              label="Mais resgates"
+              :label="t('divulgacao.resgates.loadMore')"
               size="small"
               severity="secondary"
               :loading="loadingResgatesMore"

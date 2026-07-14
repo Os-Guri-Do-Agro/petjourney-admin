@@ -3,6 +3,7 @@ import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PartnerFocusCard from '@/components/parceiro/PartnerFocusCard.vue'
@@ -25,6 +26,7 @@ type PageState = 'loading' | 'ready' | 'error'
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024
 const ACCEPTED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
+const { t } = useI18n()
 const toast = useToast()
 const { store, ensureContext } = useParceiroPortal()
 const usuarioPerfilStore = useUsuarioPerfilStore()
@@ -83,15 +85,19 @@ const roleChips = computed(() => {
   const chips: string[] = []
 
   if (sessionUser.value?.veterinarioId) {
-    chips.push('Veterinário')
+    chips.push(t('settings.perfil.roles.veterinario'))
   }
 
   if (store.loadState === 'ready' && store.parceiroNome) {
-    chips.push(store.isDono ? 'Dono do parceiro' : 'Operador parceiro')
+    chips.push(
+      store.isDono
+        ? t('settings.perfil.roles.donoParceiro')
+        : t('settings.perfil.roles.operadorParceiro'),
+    )
   }
 
   if (sessionUser.value?.isSystemAdmin) {
-    chips.push('Admin')
+    chips.push(t('settings.perfil.roles.admin'))
   }
 
   return chips
@@ -102,8 +108,14 @@ const partnerContextLabel = computed(() => {
     return ''
   }
 
-  const papel = store.isDono ? 'DONO' : store.papel ?? 'OPERADOR'
-  return `${store.parceiroNome} · ${papel}`
+  const papel = store.isDono
+    ? t('settings.perfil.partnerContext.papelDono')
+    : t('settings.perfil.partnerContext.papelOperador')
+
+  return t('settings.perfil.partnerContext.template', {
+    parceiroNome: store.parceiroNome,
+    papel,
+  })
 })
 
 const photoBusy = computed(() => uploadingPhoto.value || savingProfile.value)
@@ -168,33 +180,33 @@ function validateProfileForm() {
   clearProfileErrors()
 
   if (nome.value.trim().length < 3) {
-    nomeError.value = 'Informe pelo menos 3 caracteres.'
+    nomeError.value = t('settings.perfil.errors.nomeMin')
   }
 
   const phoneDigits = stripPhone(telefone.value)
   if (phoneDigits && phoneDigits.length < 10) {
-    telefoneError.value = 'Informe um telefone válido com DDD.'
+    telefoneError.value = t('settings.perfil.errors.telefone')
   }
 
   const whatsDigits = stripPhone(telefoneWhatsApp.value)
   if (whatsDigits && whatsDigits.length < 10) {
-    telefoneWhatsAppError.value = 'Informe um WhatsApp válido com DDD.'
+    telefoneWhatsAppError.value = t('settings.perfil.errors.whatsapp')
   }
 
   if (!cpfLocked.value) {
     const cpfDigits = stripCpf(cpf.value)
     if (cpfDigits && !isValidCpf(cpfDigits)) {
-      cpfError.value = 'CPF inválido.'
+      cpfError.value = t('settings.perfil.errors.cpf')
     }
   }
 
   if (showVetSection.value) {
     if (!crmv.value.trim()) {
-      crmvError.value = 'CRMV é obrigatório para o perfil veterinário.'
+      crmvError.value = t('settings.perfil.errors.crmvRequired')
     }
 
     if (!especialidade.value.trim()) {
-      especialidadeError.value = 'Informe a especialidade.'
+      especialidadeError.value = t('settings.perfil.errors.especialidadeRequired')
     }
   }
 
@@ -256,7 +268,7 @@ async function loadProfile() {
 
   if (!user?.userId) {
     pageState.value = 'error'
-    loadError.value = 'Sessão indisponível. Faça login novamente.'
+    loadError.value = t('settings.perfil.errors.sessionUnavailable')
     return
   }
 
@@ -281,9 +293,8 @@ async function loadProfile() {
       pageState.value = 'ready'
       toast.add({
         severity: 'warn',
-        summary: 'Perfil parcial',
-        detail:
-          'Não encontramos o perfil completo na API. Você pode editar e salvar o que estiver disponível.',
+        summary: t('settings.perfil.toasts.partial.summary'),
+        detail: t('settings.perfil.toasts.partial.detail'),
         life: 5000,
       })
       return
@@ -291,7 +302,7 @@ async function loadProfile() {
 
     pageState.value = 'error'
     loadError.value =
-      error instanceof Error ? error.message : 'Não foi possível carregar o perfil.'
+      error instanceof Error ? error.message : t('settings.perfil.errors.loadFailed')
   }
 }
 
@@ -313,15 +324,18 @@ async function handleSaveProfile() {
     })
     toast.add({
       severity: 'success',
-      summary: 'Perfil atualizado',
-      detail: 'Seus dados foram salvos com sucesso.',
+      summary: t('settings.perfil.toasts.saved.summary'),
+      detail: t('settings.perfil.toasts.saved.detail'),
       life: 3500,
     })
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'Não foi possível salvar',
-      detail: error instanceof Error ? error.message : 'Tente novamente em instantes.',
+      summary: t('settings.perfil.toasts.saveError.summary'),
+      detail:
+        error instanceof Error
+          ? error.message
+          : t('settings.perfil.toasts.saveError.detailFallback'),
       life: 5000,
     })
   } finally {
@@ -339,11 +353,11 @@ function openPhotoPicker() {
 
 function validatePhotoFile(file: File) {
   if (!ACCEPTED_PHOTO_TYPES.includes(file.type)) {
-    return 'Use uma imagem JPEG, PNG, WEBP ou GIF.'
+    return t('settings.perfil.photo.errors.invalidType')
   }
 
   if (file.size > MAX_PHOTO_BYTES) {
-    return 'A imagem deve ter no máximo 5 MB.'
+    return t('settings.perfil.photo.errors.maxSize')
   }
 
   return ''
@@ -362,7 +376,7 @@ async function onPhotoSelected(event: Event) {
   if (validationError) {
     toast.add({
       severity: 'warn',
-      summary: 'Arquivo inválido',
+      summary: t('settings.perfil.toasts.invalidFile.summary'),
       detail: validationError,
       life: 4000,
     })
@@ -393,15 +407,18 @@ async function onPhotoSelected(event: Event) {
 
     toast.add({
       severity: 'success',
-      summary: 'Foto atualizada',
-      detail: 'A nova foto já está no seu perfil.',
+      summary: t('settings.perfil.toasts.photoOk.summary'),
+      detail: t('settings.perfil.toasts.photoOk.detail'),
       life: 3500,
     })
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'Não foi possível enviar a foto',
-      detail: error instanceof Error ? error.message : 'Tente novamente em instantes.',
+      summary: t('settings.perfil.toasts.photoError.summary'),
+      detail:
+        error instanceof Error
+          ? error.message
+          : t('settings.perfil.toasts.photoError.detailFallback'),
       life: 5000,
     })
   } finally {
@@ -435,10 +452,14 @@ onMounted(() => {
   <div v-else-if="pageState === 'error'" class="settings-perfil__error" role="alert">
     <i class="pi pi-exclamation-circle" aria-hidden="true" />
     <div>
-      <strong>Não foi possível carregar</strong>
+      <strong>{{ t('settings.perfil.errors.loadTitle') }}</strong>
       <p>{{ loadError }}</p>
     </div>
-    <Button label="Tentar novamente" severity="secondary" @click="loadProfile" />
+    <Button
+      :label="t('settings.perfil.actions.retry')"
+      severity="secondary"
+      @click="loadProfile"
+    />
   </div>
 
   <div v-else-if="sessionUser" class="settings-perfil">
@@ -449,7 +470,11 @@ onMounted(() => {
           class="settings-perfil__avatar"
           :class="{ 'settings-perfil__avatar--busy': uploadingPhoto }"
           :disabled="photoBusy"
-          :aria-label="uploadingPhoto ? 'Enviando foto…' : 'Alterar foto de perfil'"
+          :aria-label="
+            uploadingPhoto
+              ? t('settings.perfil.aria.uploadingPhoto')
+              : t('settings.perfil.aria.changePhoto')
+          "
           @click="openPhotoPicker"
         >
           <span class="settings-perfil__avatar-media">
@@ -483,16 +508,20 @@ onMounted(() => {
         />
 
         <div class="settings-perfil__identity">
-          <h2>{{ nome.trim() || sessionUser.nome || 'Usuário' }}</h2>
+          <h2>{{ nome.trim() || sessionUser.nome || t('settings.perfil.fallbackName') }}</h2>
           <p>{{ sessionUser.email }}</p>
-          <p class="settings-perfil__photo-hint">Clique na foto para escolher uma nova imagem.</p>
+          <p class="settings-perfil__photo-hint">{{ t('settings.perfil.photoHint') }}</p>
           <p v-if="partnerContextLabel" class="settings-perfil__meta">
             <i class="pi pi-building" aria-hidden="true" />
             {{ partnerContextLabel }}
           </p>
         </div>
 
-        <ul v-if="roleChips.length" class="settings-perfil__roles" aria-label="Papéis da conta">
+        <ul
+          v-if="roleChips.length"
+          class="settings-perfil__roles"
+          :aria-label="t('settings.perfil.aria.roles')"
+        >
           <li v-for="chip in roleChips" :key="chip">{{ chip }}</li>
         </ul>
       </div>
@@ -501,14 +530,14 @@ onMounted(() => {
     <form class="settings-perfil__panel" @submit.prevent="handleSaveProfile">
       <div class="settings-perfil__groups">
         <fieldset class="settings-perfil__group">
-          <legend>Identidade</legend>
+          <legend>{{ t('settings.perfil.sections.identidade') }}</legend>
           <div class="settings-perfil__fields">
             <AuthTextField
               id="settings-perfil-nome"
               v-model="nome"
               autocomplete="name"
-              label="Nome completo"
-              placeholder="Seu nome"
+              :label="t('settings.perfil.fields.nome.label')"
+              :placeholder="t('settings.perfil.fields.nome.placeholder')"
               required
               :disabled="savingProfile"
               :error="nomeError"
@@ -517,23 +546,23 @@ onMounted(() => {
               id="settings-perfil-email"
               :model-value="sessionUser.email"
               autocomplete="email"
-              label="E-mail"
-              hint="Vinculado à autenticação — somente leitura."
+              :label="t('settings.perfil.fields.email.label')"
+              :hint="t('settings.perfil.fields.email.hint')"
               disabled
             />
           </div>
         </fieldset>
 
         <fieldset class="settings-perfil__group">
-          <legend>Contato</legend>
+          <legend>{{ t('settings.perfil.sections.contato') }}</legend>
           <div class="settings-perfil__fields settings-perfil__fields--2">
             <AuthTextField
               id="settings-perfil-telefone"
               :model-value="telefone"
               autocomplete="tel"
               inputmode="tel"
-              label="Telefone"
-              placeholder="(11) 98888-7777"
+              :label="t('settings.perfil.fields.telefone.label')"
+              :placeholder="t('settings.perfil.fields.telefone.placeholder')"
               :disabled="savingProfile"
               :error="telefoneError"
               @update:model-value="onTelefoneInput"
@@ -543,8 +572,8 @@ onMounted(() => {
               :model-value="telefoneWhatsApp"
               autocomplete="tel"
               inputmode="tel"
-              label="WhatsApp"
-              placeholder="(11) 98888-7777"
+              :label="t('settings.perfil.fields.whatsapp.label')"
+              :placeholder="t('settings.perfil.fields.whatsapp.placeholder')"
               :disabled="savingProfile"
               :error="telefoneWhatsAppError"
               @update:model-value="onWhatsAppInput"
@@ -553,19 +582,19 @@ onMounted(() => {
         </fieldset>
 
         <fieldset class="settings-perfil__group">
-          <legend>Documento</legend>
+          <legend>{{ t('settings.perfil.sections.documento') }}</legend>
           <div class="settings-perfil__fields">
             <AuthTextField
               id="settings-perfil-cpf"
               :model-value="cpf"
               inputmode="numeric"
-              label="CPF"
-              placeholder="000.000.000-00"
+              :label="t('settings.perfil.fields.cpf.label')"
+              :placeholder="t('settings.perfil.fields.cpf.placeholder')"
               :disabled="savingProfile || cpfLocked"
               :hint="
                 cpfLocked
-                  ? 'Já cadastrado — não pode ser alterado.'
-                  : 'Opcional. Depois de salvo, fica bloqueado.'
+                  ? t('settings.perfil.fields.cpf.hintLocked')
+                  : t('settings.perfil.fields.cpf.hintOptional')
               "
               :error="cpfError"
               @update:model-value="onCpfInput"
@@ -574,13 +603,13 @@ onMounted(() => {
         </fieldset>
 
         <fieldset v-if="showVetSection" class="settings-perfil__group">
-          <legend>Perfil veterinário</legend>
+          <legend>{{ t('settings.perfil.sections.vet') }}</legend>
           <div class="settings-perfil__fields settings-perfil__fields--2">
             <AuthTextField
               id="settings-perfil-crmv"
               v-model="crmv"
-              label="CRMV"
-              placeholder="CRMV-SP 12345"
+              :label="t('settings.perfil.fields.crmv.label')"
+              :placeholder="t('settings.perfil.fields.crmv.placeholder')"
               required
               :disabled="savingProfile"
               :error="crmvError"
@@ -588,8 +617,8 @@ onMounted(() => {
             <AuthTextField
               id="settings-perfil-especialidade"
               v-model="especialidade"
-              label="Especialidade"
-              placeholder="Clínica geral"
+              :label="t('settings.perfil.fields.especialidade.label')"
+              :placeholder="t('settings.perfil.fields.especialidade.placeholder')"
               required
               :disabled="savingProfile"
               :error="especialidadeError"
@@ -601,7 +630,7 @@ onMounted(() => {
       <footer class="settings-perfil__foot">
         <Button
           type="submit"
-          label="Salvar perfil"
+          :label="t('settings.perfil.actions.save')"
           icon="pi pi-check"
           :loading="savingProfile"
           :disabled="uploadingPhoto"

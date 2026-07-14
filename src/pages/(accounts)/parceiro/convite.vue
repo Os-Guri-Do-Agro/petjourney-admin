@@ -2,6 +2,7 @@
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
@@ -10,6 +11,7 @@ import { aceitarConviteEquipe } from '@/service/parceiro/parceiro-portal-service
 import { useParceiroStore } from '@/stores/parceiro'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
+const { t } = useI18n()
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
@@ -29,8 +31,8 @@ async function handleAccept() {
   if (!parceiroId) {
     toast.add({
       severity: 'warn',
-      summary: 'Informe a empresa',
-      detail: 'O link de convite deve incluir o identificador do parceiro.',
+      summary: t('parceiro.convite.toast.warnTitle'),
+      detail: t('parceiro.convite.toast.warnDetail'),
       life: 4000,
     })
     return
@@ -44,8 +46,8 @@ async function handleAccept() {
     accepted.value = true
     toast.add({
       severity: 'success',
-      summary: 'Convite aceito',
-      detail: 'Você já pode acessar o portal da empresa.',
+      summary: t('parceiro.convite.toast.success'),
+      detail: t('parceiro.convite.toast.successDetail'),
       life: 4000,
     })
     await store.bootstrap(true)
@@ -53,8 +55,8 @@ async function handleAccept() {
   } catch (err) {
     toast.add({
       severity: 'error',
-      summary: 'Não foi possível aceitar',
-      detail: err instanceof Error ? err.message : 'Verifique o link ou tente novamente.',
+      summary: t('parceiro.convite.toast.error'),
+      detail: err instanceof Error ? err.message : t('parceiro.convite.toast.errorDetail'),
       life: 5000,
     })
   } finally {
@@ -71,29 +73,32 @@ onMounted(() => {
 
 <template>
   <PartnerPageFrame
-    subtitle="Equipe"
-    title="Aceitar convite"
+    :subtitle="t('parceiro.convite.subtitle')"
+    :title="t('parceiro.convite.title')"
     :loading="accepting && !accepted"
   >
     <article class="convite-card">
       <p>
-        Você foi convidado para integrar a equipe de uma empresa parceira PetJourney.
-        Informe o identificador recebido no e-mail ou abra o link completo do convite.
+        {{ t('parceiro.convite.body') }}
       </p>
 
       <AuthTextField
         id="convite-parceiro-id"
         v-model="parceiroIdInput"
         :disabled="accepting"
-        hint="Obrigatório — vem no link como ?parceiroId=..."
-        label="ID do parceiro"
-        placeholder="cuid-da-empresa"
+        :hint="t('parceiro.convite.idHint')"
+        :label="t('parceiro.convite.idLabel')"
+        :placeholder="t('parceiro.convite.idPlaceholder')"
       />
 
-      <Button label="Aceitar convite" :loading="accepting" @click="handleAccept" />
+      <Button
+        :label="t('parceiro.convite.accept')"
+        :loading="accepting"
+        @click="handleAccept"
+      />
 
       <p class="convite-card__footnote">
-        Após aceitar, você passa a operar no portal com o papel definido pelo dono da empresa.
+        {{ t('parceiro.convite.footnote') }}
       </p>
     </article>
   </PartnerPageFrame>
@@ -120,4 +125,3 @@ onMounted(() => {
   font-size: 0.82rem !important;
 }
 </style>
-

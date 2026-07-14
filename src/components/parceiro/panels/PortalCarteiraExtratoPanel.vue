@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import PartnerPanelLoading from '@/components/parceiro/PartnerPanelLoading.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
 import { getCarteiraExtrato } from '@/service/parceiro/parceiro-portal-service'
 import type { TransacaoCarteira } from '@/service/parceiro/types'
@@ -13,12 +15,17 @@ const emit = defineEmits<{
   needsProgramas: []
 }>()
 
+const { t, locale } = useI18n()
 const { ensureContext, parceiroQuery, store } = useParceiroPortal()
 const items = ref<TransacaoCarteira[]>([])
 const nextCursor = ref<string | null>(null)
 const loading = ref(true)
 const loadingMore = ref(false)
 const error = ref('')
+
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString(INTL_LOCALE[locale.value as Locale])
+}
 
 async function loadExtrato(cursor?: string) {
   if (cursor) {
@@ -51,7 +58,7 @@ async function loadExtrato(cursor?: string) {
       return
     }
 
-    error.value = err instanceof Error ? err.message : 'Erro ao carregar extrato.'
+    error.value = err instanceof Error ? err.message : t('carteira.extrato.errorLoad')
   } finally {
     loading.value = false
     loadingMore.value = false
@@ -67,19 +74,19 @@ onMounted(() => {
   <div id="partner-panel-extrato" class="portal-panel" role="tabpanel" aria-labelledby="partner-tab-extrato">
     <PartnerPanelLoading
       v-if="loading"
-      title="Carregando extrato..."
-      description="Buscando créditos de comissão e débitos recentes."
+      :title="t('carteira.extrato.loadingTitle')"
+      :description="t('carteira.extrato.loadingDesc')"
     />
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadExtrato()">Tentar novamente</button>
+      <button type="button" @click="loadExtrato()">{{ t('carteira.extrato.retry') }}</button>
     </div>
 
     <div v-else-if="items.length === 0" class="portal-panel__empty">
       <i class="pi pi-list" aria-hidden="true" />
-      <strong>Nenhuma movimentação</strong>
-      <p>Créditos de comissão e débitos de saque aparecem aqui.</p>
+      <strong>{{ t('carteira.extrato.emptyTitle') }}</strong>
+      <p>{{ t('carteira.extrato.emptyBody') }}</p>
     </div>
 
     <template v-else>
@@ -96,7 +103,7 @@ onMounted(() => {
             <strong :class="{ 'is-negative': item.valorCentavos < 0 }">
               {{ formatCentavosToBrl(item.valorCentavos) }}
             </strong>
-            <time>{{ new Date(item.createdAt).toLocaleString('pt-BR') }}</time>
+            <time>{{ formatDateTime(item.createdAt) }}</time>
           </div>
         </article>
       </div>
@@ -104,7 +111,7 @@ onMounted(() => {
       <Button
         v-if="nextCursor"
         class="mt-2"
-        label="Carregar mais"
+        :label="t('carteira.extrato.loadMore')"
         :loading="loadingMore"
         severity="secondary"
         @click="loadExtrato(nextCursor ?? undefined)"

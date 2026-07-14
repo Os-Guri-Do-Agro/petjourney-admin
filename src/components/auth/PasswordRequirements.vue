@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { currentColors } from '@/theme/color-mode'
 import {
@@ -11,14 +12,23 @@ const props = defineProps<{
   password: string
 }>()
 
+const { t } = useI18n()
+
 const requirements = computed(() => getPasswordRequirements(props.password))
 
-const items: Array<{ key: PasswordRequirementKey; label: string }> = [
-  { key: 'minLength', label: 'Mínimo de 6 caracteres' },
-  { key: 'hasNumber', label: 'Pelo menos 1 número' },
-  { key: 'hasUppercase', label: 'Pelo menos 1 letra maiúscula' },
-  { key: 'hasSpecialChar', label: 'Pelo menos 1 caractere especial' },
-]
+const items = computed(() => {
+  const labels: Record<PasswordRequirementKey, string> = {
+    minLength: t('auth.passwordRequirements.minLength'),
+    hasNumber: t('auth.passwordRequirements.hasNumber'),
+    hasUppercase: t('auth.passwordRequirements.hasUppercase'),
+    hasSpecialChar: t('auth.passwordRequirements.hasSpecialChar'),
+  }
+
+  return (Object.keys(labels) as PasswordRequirementKey[]).map((key) => ({
+    key,
+    label: labels[key],
+  }))
+})
 
 const listStyle = computed(() => {
   const colors = currentColors.value

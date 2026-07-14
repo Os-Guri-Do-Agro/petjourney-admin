@@ -36,7 +36,7 @@
 | pt | en (US) | es (LatAm, usted) | Obs. |
 |---|---|---|---|
 | pet | pet | mascota | "pet" é aceito em en-US e mais quente que "animal". |
-| tutor | pet parent | dueño / tutor | en: "pet parent" (tom da marca); evitar "owner" frio. es: "dueño". |
+| tutor | pet parent | tutor / tutora | en: "pet parent" (tom da marca); evitar "owner" frio. es: preferir "tutor" (revisão 2026-06-10), não "dueño". |
 | veterinário | veterinarian / vet | veterinario | "vet" em contextos informais/curtos. |
 | clínica (veterinária) | (veterinary) clinic | clínica (veterinaria) | |
 | prontuário | health record | historial clínico | |
@@ -93,6 +93,51 @@
 ## 6. Convenções técnicas
 
 - **Datas/números:** usar `useFormatter`/`Intl` com o locale ativo (não strings fixas), exceto datas legais hardcoded (traduzir o mês manualmente).
-- **Pluralização:** ICU `{count, plural, one {…} other {…}}` — pt/es têm `one/other`; en idem. Atenção a gênero no es (registrada/registradas).
+- **Pluralização:** ICU `{count, plural, one {…} other {…}}` — pt/es têm `one/other`; en idem. Atenção a gênero no es (registrada/registradas). No admin Vue, preferir a sintaxe de plural do `vue-i18n` quando ICU puro não estiver disponível.
 - **Interpolação:** `{name}`, `{email}` — preservar exatamente o nome da variável em todos os idiomas.
-- **Rich text:** tags inline via `t.rich` (`<strong>`, `<br/>`).
+- **Rich text:** tags inline via `t.rich` / componentes Vue equivalentes (`<strong>`, `<br/>`).
+
+---
+
+## 7. Glossário do portal parceiro (Admin)
+
+> Termos específicos do painel `petjourney-admin`. Aplicar junto com §3.
+
+| pt | en (US) | en-GB | es (usted) | Obs. |
+|---|---|---|---|---|
+| parceiro | partner | partner | socio / partner | Em UI curta: "Partner" / "Socio". |
+| afiliado / afiliação | affiliate / affiliation | affiliate / affiliation | afiliado / afiliación | |
+| credenciamento | onboarding / credentialing | onboarding / credentialing | acreditación / credenciamento | Preferir "onboarding" em en quando for o fluxo de cadastro. |
+| indicação | referral | referral | referidos / indicación | "Referral" é o termo de produto em en. |
+| comissão | commission | commission | comisión | |
+| carteira | wallet | wallet | billetera / cartera | No menu: "Finance" (en) espelha o label PT "Financeiro". |
+| financeiro | finance | finance | finanzas | Label de nav. |
+| saque | withdrawal / payout | withdrawal / payout | retiro / pago | "Payout" em contextos de lista/extrato. |
+| extrato | statement / history | statement / history | extracto / historial | |
+| cupom | coupon / promo code | coupon / promo code | cupón / código | |
+| divulgação | promotion / outreach | promotion / outreach | divulgación | Página `/parceiro/divulgacao`. |
+| programas (de participação) | participation programs | participation programmes | programas de participación | en-GB: programmes. |
+| modo de participação | participation mode | participation mode | modo de participación | |
+| validar cupom | validate coupon | validate coupon | validar cupón | |
+| equipe | team | team | equipo | Inativo no go-live; manter glossário para quando reativar. |
+| configurações | settings | settings | configuración | |
+| entrar / login | sign in / log in | sign in / log in | iniciar sesión | Botão: "Sign in" / "Iniciar sesión". |
+| sair | sign out / log out | sign out / log out | cerrar sesión | |
+| senha | password | password | contraseña | |
+| e-mail | email | email | correo electrónico / email | "email" aceito em es em UI curta. |
+
+### CTAs comuns do admin (`common`)
+
+| pt | en (US) | en-GB | es (usted) |
+|---|---|---|---|
+| Entrar | Sign in | Sign in | Iniciar sesión |
+| Criar conta | Create account | Create account | Crear cuenta |
+| Esqueci minha senha | Forgot password | Forgotten password | Olvidé mi contraseña |
+| Salvar | Save | Save | Guardar |
+| Cancelar | Cancel | Cancel | Cancelar |
+| Confirmar | Confirm | Confirm | Confirmar |
+| Continuar | Continue | Continue | Continuar |
+| Carregando… | Loading… | Loading… | Cargando… |
+| Tentar novamente | Try again | Try again | Intentar de nuevo |
+| Copiar | Copy | Copy | Copiar |
+| Copiado | Copied | Copied | Copiado |

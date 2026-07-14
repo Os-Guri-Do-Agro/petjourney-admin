@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { currentColors, isDarkMode } from '@/theme/color-mode'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     title: string
     subtitle?: string
@@ -25,7 +26,7 @@ withDefaults(
     error: '',
     noPartnerAccess: false,
     empty: false,
-    emptyTitle: 'Nada por aqui ainda',
+    emptyTitle: '',
     emptyDescription: '',
     emptyActionLabel: '',
   },
@@ -36,7 +37,11 @@ const emit = defineEmits<{
   emptyAction: []
 }>()
 
+const { t } = useI18n()
 const showClinicalCta = computed(() => hasVeterinarioProfile())
+const resolvedEmptyTitle = computed(
+  () => props.emptyTitle || t('frame.emptyDefault'),
+)
 
 const pageStyle = computed(() => {
   const colors = currentColors.value
@@ -79,7 +84,7 @@ const pageStyle = computed(() => {
 
     <div v-if="loading" class="partner-page__state" role="status" aria-live="polite">
       <i class="pi pi-spin pi-spinner" aria-hidden="true" />
-      <span>Carregando...</span>
+      <span>{{ t('frame.loading') }}</span>
     </div>
 
     <div
@@ -89,33 +94,35 @@ const pageStyle = computed(() => {
     >
       <i class="pi pi-building" aria-hidden="true" />
       <div>
-        <strong>Portal do parceiro ainda não liberado</strong>
+        <strong>{{ t('frame.noAccess.title') }}</strong>
         <p>
-          Sua conta ainda não está vinculada a uma empresa parceira operável. Solicite afiliado
-          e/ou participativo em Programas — o time PetJourney analisa e libera o acesso.
+          {{ t('frame.noAccess.body') }}
         </p>
         <p class="partner-page__hint">
-          Se você já pediu, aguarde a análise ou verifique novamente em instantes. Também é possível
-          um admin vincular sua conta manualmente.
+          {{ t('frame.noAccess.hint') }}
         </p>
       </div>
 
       <div class="partner-page__cta-row">
         <RouterLink class="partner-page__cta partner-page__cta--primary" to="/parceiro/programas">
-          Solicitar programas
+          {{ t('frame.noAccess.ctaPrograms') }}
         </RouterLink>
         <RouterLink
           v-if="showClinicalCta"
           class="partner-page__cta partner-page__cta--ghost"
           to="/settings?aba=perfil"
         >
-          Ir para configurações
+          {{ t('frame.noAccess.ctaSettings') }}
         </RouterLink>
-        <Button label="Verificar novamente" severity="secondary" @click="emit('retry')" />
+        <Button
+          :label="t('frame.noAccess.retry')"
+          severity="secondary"
+          @click="emit('retry')"
+        />
       </div>
 
       <p class="partner-page__contact">
-        Dúvidas:
+        {{ t('frame.noAccess.contactLabel') }}
         <a href="mailto:atendimento@petjourney.health">atendimento@petjourney.health</a>
       </p>
     </div>
@@ -123,16 +130,16 @@ const pageStyle = computed(() => {
     <div v-else-if="error" class="partner-page__state partner-page__state--error" role="alert">
       <i class="pi pi-exclamation-circle" aria-hidden="true" />
       <div>
-        <strong>Não foi possível carregar</strong>
+        <strong>{{ t('frame.error.title') }}</strong>
         <p>{{ error }}</p>
       </div>
-      <Button label="Tentar novamente" severity="secondary" @click="emit('retry')" />
+      <Button :label="t('frame.error.retry')" severity="secondary" @click="emit('retry')" />
     </div>
 
     <div v-else-if="empty" class="partner-page__state partner-page__state--empty">
       <i class="pi pi-inbox" aria-hidden="true" />
       <div>
-        <strong>{{ emptyTitle }}</strong>
+        <strong>{{ resolvedEmptyTitle }}</strong>
         <p v-if="emptyDescription">{{ emptyDescription }}</p>
       </div>
       <Button

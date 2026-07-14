@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
+import i18n from '@/i18n'
 import { ApiError } from '@/service/api'
 import {
   getPortalDashboard,
@@ -80,14 +81,15 @@ export const useParceiroStore = defineStore('parceiro', () => {
     } catch (error) {
       if (error instanceof ApiError && error.statusCode === 400) {
         needsParceiroSelection.value = true
-        errorMessage.value =
-          'Selecione qual empresa parceira você deseja operar. Informe o identificador do parceiro.'
+        errorMessage.value = String(i18n.global.t('parceiro.store.errorNeedsSelection'))
       } else if (error instanceof ApiError && error.statusCode === 403) {
         semAcessoParceiro.value = true
-        errorMessage.value = 'Sua conta não possui acesso ao portal do parceiro.'
+        errorMessage.value = String(i18n.global.t('parceiro.store.errorNoAccess'))
       } else {
         errorMessage.value =
-          error instanceof Error ? error.message : 'Não foi possível carregar o contexto do parceiro.'
+          error instanceof Error
+            ? error.message
+            : String(i18n.global.t('parceiro.store.errorGeneric'))
       }
 
       loadState.value = 'error'

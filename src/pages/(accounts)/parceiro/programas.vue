@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
@@ -8,6 +9,8 @@ import ProgramasParticipacaoView from '@/components/parceiro/ProgramasParticipac
 import { EQUIPE_MENU_ENABLED } from '@/composables/useAppNavigation'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { currentColors } from '@/theme/color-mode'
+
+const { t } = useI18n()
 
 const LEGACY_ABA_REDIRECTS: Record<string, { path: string; hash?: string; aba?: string }> = {
   visao: { path: '/parceiro/programas' },
@@ -84,8 +87,8 @@ watch(
 
 <template>
   <PartnerPageFrame
-    subtitle="Portal"
-    title="Programas de participação"
+    :subtitle="t('programas.subtitle')"
+    :title="t('programas.title')"
     :loading="false"
     :error="store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : ''"
     @retry="ensureContext(true)"
@@ -100,16 +103,15 @@ watch(
       >
         <i class="pi pi-send" aria-hidden="true" />
         <div>
-          <strong>Solicite sua entrada nos programas</strong>
+          <strong>{{ t('programas.entry.title') }}</strong>
           <p>
-            Você ainda não tem vínculo ativo com uma empresa parceira. Envie a solicitação de
-            afiliado e/ou participativo — a equipe PetJourney analisa e libera o portal.
+            {{ t('programas.entry.body') }}
           </p>
         </div>
       </aside>
 
       <p v-else class="programas-page__lede">
-        Escolha os programas da rede PetJourney. Cada um é independente e passa por análise do time.
+        {{ t('programas.lede') }}
       </p>
 
       <ProgramasParticipacaoView />

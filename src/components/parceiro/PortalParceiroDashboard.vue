@@ -2,6 +2,7 @@
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -15,6 +16,7 @@ import type { Carteira, PortalIndicacao } from '@/service/parceiro/types'
 import { formatCentavosToBrl } from '@/utils/format/money'
 import { currentColors } from '@/theme/color-mode'
 
+const { t } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 const { lastSuccessAt } = useCupomResgateModal()
@@ -62,25 +64,25 @@ const totais = computed(() => store.dashboard?.totais)
 const metrics = computed(() => [
   {
     id: 'cupons',
-    label: 'Cupons ativos',
+    label: t('inicio.dash.metrics.cuponsAtivos'),
     value: totais.value?.cuponsAtivos ?? 0,
-    hint: 'Prontos para resgate',
+    hint: t('inicio.dash.metrics.cuponsHint'),
     icon: 'pi pi-ticket',
     tone: 'sage' as const,
   },
   {
     id: 'resgates-total',
-    label: 'Resgates (total)',
+    label: t('inicio.dash.metrics.resgatesTotal'),
     value: totais.value?.resgatesTotal ?? 0,
-    hint: 'Desde o início',
+    hint: t('inicio.dash.metrics.resgatesTotalHint'),
     icon: 'pi pi-check-circle',
     tone: 'success' as const,
   },
   {
     id: 'resgates-30d',
-    label: 'Resgates (30 dias)',
+    label: t('inicio.dash.metrics.resgates30d'),
     value: totais.value?.resgatesUltimos30d ?? 0,
-    hint: 'Último mês',
+    hint: t('inicio.dash.metrics.resgates30dHint'),
     icon: 'pi pi-chart-line',
     tone: 'deep' as const,
   },
@@ -114,7 +116,7 @@ async function loadDashboardData() {
     indicacao.value = indicacaoData
     carteira.value = carteiraData
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Não foi possível carregar o painel.'
+    error.value = err instanceof Error ? err.message : t('inicio.dash.errorLoad')
   } finally {
     loadingHighlights.value = false
   }
@@ -129,15 +131,15 @@ async function copyCodigo() {
     await navigator.clipboard.writeText(codigoIndicacao.value)
     toast.add({
       severity: 'success',
-      summary: 'Código copiado',
+      summary: t('inicio.dash.referral.toastCopied'),
       detail: codigoIndicacao.value,
       life: 2500,
     })
   } catch {
     toast.add({
       severity: 'warn',
-      summary: 'Não foi possível copiar',
-      detail: 'Copie o código manualmente.',
+      summary: t('inicio.dash.referral.toastCopyFail'),
+      detail: t('inicio.dash.referral.toastCopyFailDetail'),
       life: 3500,
     })
   }
@@ -160,7 +162,7 @@ watch(lastSuccessAt, (at) => {
   <div class="partner-dash" :style="dashStyle">
     <div v-if="error" class="partner-dash__state partner-dash__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadDashboardData">Tentar novamente</button>
+      <button type="button" @click="loadDashboardData">{{ t('inicio.dash.retry') }}</button>
     </div>
 
     <template v-else>
@@ -168,9 +170,9 @@ watch(lastSuccessAt, (at) => {
         <header class="dash-zone__head">
           <div>
             <p class="dash-zone__index">01</p>
-            <h2 id="dash-focus-title">Foco agora</h2>
+            <h2 id="dash-focus-title">{{ t('inicio.dash.focus.title') }}</h2>
           </div>
-          <p>Comissão e indicação — o que move a parceria hoje.</p>
+          <p>{{ t('inicio.dash.focus.lede') }}</p>
         </header>
 
         <div
@@ -179,7 +181,7 @@ watch(lastSuccessAt, (at) => {
           role="status"
           aria-live="polite"
           aria-busy="true"
-          aria-label="Carregando comissão e indicação"
+          :aria-label="t('inicio.dash.focus.loadingAria')"
         >
           <article class="commission-card commission-card--skeleton" aria-hidden="true">
             <div class="commission-card__glow" />
@@ -236,64 +238,66 @@ watch(lastSuccessAt, (at) => {
           <article v-if="showCommissionCard" class="commission-card">
             <div class="commission-card__glow" aria-hidden="true" />
             <div class="commission-card__top">
-              <p class="commission-card__eyebrow">Comissão · Afiliado ativo</p>
+              <p class="commission-card__eyebrow">{{ t('inicio.dash.commission.eyebrowActive') }}</p>
               <span class="commission-card__badge">
                 <i class="pi pi-wallet" aria-hidden="true" />
-                Carteira
+                {{ t('inicio.dash.commission.badge') }}
               </span>
             </div>
             <div class="commission-card__amount">
               <strong>{{ saldoSacavelLabel }}</strong>
-              <span>sacável agora</span>
+              <span>{{ t('inicio.dash.commission.sacavelNow') }}</span>
             </div>
             <p class="commission-card__meta">
-              Saldo total de {{ saldoTotalLabel }} — parte em janela de segurança de 14 dias.
+              {{ t('inicio.dash.commission.metaHold', { valor: saldoTotalLabel }) }}
             </p>
             <RouterLink class="commission-card__cta" to="/parceiro/carteira">
-              Abrir carteira
+              {{ t('inicio.dash.commission.openWallet') }}
               <i class="pi pi-arrow-right" aria-hidden="true" />
             </RouterLink>
           </article>
 
           <article v-else class="commission-card commission-card--muted">
             <div class="commission-card__top">
-              <p class="commission-card__eyebrow">Comissão</p>
-              <span class="commission-card__badge commission-card__badge--muted">Não ativo</span>
+              <p class="commission-card__eyebrow">{{ t('inicio.dash.commission.eyebrowMuted') }}</p>
+              <span class="commission-card__badge commission-card__badge--muted">{{
+                t('inicio.dash.commission.badgeMuted')
+              }}</span>
             </div>
             <div class="commission-card__amount">
-              <strong>Programa afiliado</strong>
+              <strong>{{ t('inicio.dash.commission.inactiveTitle') }}</strong>
             </div>
             <p class="commission-card__meta">
-              Ative o programa afiliado para acompanhar saldo, extrato e saques via PIX.
+              {{ t('inicio.dash.commission.inactiveMeta') }}
             </p>
             <RouterLink
               class="commission-card__cta commission-card__cta--ghost"
               to="/parceiro/programas"
             >
-              Ver programas
+              {{ t('inicio.dash.commission.seePrograms') }}
               <i class="pi pi-arrow-right" aria-hidden="true" />
             </RouterLink>
           </article>
 
           <article class="referral-card">
-            <p class="referral-card__eyebrow">Código de indicação</p>
+            <p class="referral-card__eyebrow">{{ t('inicio.dash.referral.eyebrow') }}</p>
             <div class="referral-card__code-row">
               <strong class="referral-card__code">{{ codigoIndicacao || '—' }}</strong>
               <button
                 v-if="codigoIndicacao"
                 class="referral-card__copy"
                 type="button"
-                aria-label="Copiar código de indicação"
+                :aria-label="t('inicio.dash.referral.copyAria')"
                 @click="copyCodigo"
               >
                 <i class="pi pi-copy" aria-hidden="true" />
               </button>
             </div>
             <p class="referral-card__meta">
-              Compartilhe e ganhe comissão por cada tutor que assinar.
+              {{ t('inicio.dash.referral.meta') }}
             </p>
             <RouterLink class="referral-card__cta" to="/parceiro/divulgacao">
-              Ver indicação
+              {{ t('inicio.dash.referral.cta') }}
               <i class="pi pi-arrow-right" aria-hidden="true" />
             </RouterLink>
           </article>
@@ -304,9 +308,9 @@ watch(lastSuccessAt, (at) => {
         <header class="dash-zone__head">
           <div>
             <p class="dash-zone__index">02</p>
-            <h2 id="dash-pulse-title">Pulso da rede</h2>
+            <h2 id="dash-pulse-title">{{ t('inicio.dash.pulse.title') }}</h2>
           </div>
-          <p>Indicadores de cupons e resgates.</p>
+          <p>{{ t('inicio.dash.pulse.lede') }}</p>
         </header>
 
         <div
@@ -315,7 +319,7 @@ watch(lastSuccessAt, (at) => {
           role="status"
           aria-live="polite"
           aria-busy="true"
-          aria-label="Carregando indicadores"
+          :aria-label="t('inicio.dash.pulse.loadingAria')"
         >
           <article
             v-for="metric in metrics"

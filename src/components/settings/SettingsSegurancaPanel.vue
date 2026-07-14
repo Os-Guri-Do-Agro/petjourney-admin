@@ -2,12 +2,14 @@
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PasswordRequirements from '@/components/auth/PasswordRequirements.vue'
 import { changePasswordAuthenticated } from '@/service/auth/auth-service'
 import { isPasswordValid } from '@/utils/validation/password'
 
+const { t } = useI18n()
 const toast = useToast()
 
 const savingPassword = ref(false)
@@ -32,17 +34,17 @@ function validatePasswordForm() {
   clearPasswordErrors()
 
   if (!senhaAtual.value) {
-    senhaAtualError.value = 'Informe a senha atual.'
+    senhaAtualError.value = t('settings.seguranca.errors.currentRequired')
   }
 
   if (!isPasswordValid(novaSenha.value)) {
-    novaSenhaError.value = 'A nova senha não atende todos os requisitos.'
+    novaSenhaError.value = t('settings.seguranca.errors.newInvalid')
   }
 
   if (!confirmarSenha.value) {
-    confirmarSenhaError.value = 'Confirme a nova senha.'
+    confirmarSenhaError.value = t('settings.seguranca.errors.confirmRequired')
   } else if (confirmarSenha.value !== novaSenha.value) {
-    confirmarSenhaError.value = 'As senhas não coincidem.'
+    confirmarSenhaError.value = t('settings.seguranca.errors.mismatch')
   }
 
   return !senhaAtualError.value && !novaSenhaError.value && !confirmarSenhaError.value
@@ -66,15 +68,18 @@ async function handleChangePassword() {
     clearPasswordErrors()
     toast.add({
       severity: 'success',
-      summary: 'Senha alterada',
-      detail: 'Use a nova senha no próximo acesso.',
+      summary: t('settings.seguranca.toasts.success.summary'),
+      detail: t('settings.seguranca.toasts.success.detail'),
       life: 4000,
     })
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'Não foi possível alterar a senha',
-      detail: error instanceof Error ? error.message : 'Verifique a senha atual e tente de novo.',
+      summary: t('settings.seguranca.toasts.error.summary'),
+      detail:
+        error instanceof Error
+          ? error.message
+          : t('settings.seguranca.toasts.error.detailFallback'),
       life: 5000,
     })
   } finally {
@@ -86,15 +91,14 @@ async function handleChangePassword() {
 <template>
   <div class="settings-seguranca">
     <aside class="settings-seguranca__aside">
-      <h3>Troca de senha</h3>
+      <h3>{{ t('settings.seguranca.aside.title') }}</h3>
       <p>
-        A sessão atual permanece ativa após a alteração. Use uma senha forte e exclusiva desta
-        conta.
+        {{ t('settings.seguranca.aside.body') }}
       </p>
       <ul>
-        <li>Mínimo de 6 caracteres</li>
-        <li>Número, maiúscula e caractere especial</li>
-        <li>Não reutilize senhas de outros sistemas</li>
+        <li>{{ t('settings.seguranca.aside.bullets.minLength') }}</li>
+        <li>{{ t('settings.seguranca.aside.bullets.complexity') }}</li>
+        <li>{{ t('settings.seguranca.aside.bullets.reuse') }}</li>
       </ul>
     </aside>
 
@@ -103,8 +107,8 @@ async function handleChangePassword() {
         id="settings-senha-atual"
         v-model="senhaAtual"
         autocomplete="current-password"
-        label="Senha atual"
-        placeholder="Digite a senha atual"
+        :label="t('settings.seguranca.fields.current.label')"
+        :placeholder="t('settings.seguranca.fields.current.placeholder')"
         :type="showCurrentPassword ? 'text' : 'password'"
         :disabled="savingPassword"
         :error="senhaAtualError"
@@ -113,7 +117,11 @@ async function handleChangePassword() {
           <button
             type="button"
             class="settings-seguranca__eye"
-            :aria-label="showCurrentPassword ? 'Ocultar senha' : 'Mostrar senha'"
+            :aria-label="
+              showCurrentPassword
+                ? t('settings.seguranca.aria.hidePassword')
+                : t('settings.seguranca.aria.showPassword')
+            "
             @click="showCurrentPassword = !showCurrentPassword"
           >
             <i :class="showCurrentPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" aria-hidden="true" />
@@ -125,8 +133,8 @@ async function handleChangePassword() {
         id="settings-nova-senha"
         v-model="novaSenha"
         autocomplete="new-password"
-        label="Nova senha"
-        placeholder="Crie uma senha forte"
+        :label="t('settings.seguranca.fields.new.label')"
+        :placeholder="t('settings.seguranca.fields.new.placeholder')"
         :type="showNewPassword ? 'text' : 'password'"
         :disabled="savingPassword"
         :error="novaSenhaError"
@@ -135,7 +143,11 @@ async function handleChangePassword() {
           <button
             type="button"
             class="settings-seguranca__eye"
-            :aria-label="showNewPassword ? 'Ocultar senha' : 'Mostrar senha'"
+            :aria-label="
+              showNewPassword
+                ? t('settings.seguranca.aria.hidePassword')
+                : t('settings.seguranca.aria.showPassword')
+            "
             @click="showNewPassword = !showNewPassword"
           >
             <i :class="showNewPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" aria-hidden="true" />
@@ -149,8 +161,8 @@ async function handleChangePassword() {
         id="settings-confirmar-senha"
         v-model="confirmarSenha"
         autocomplete="new-password"
-        label="Confirmar nova senha"
-        placeholder="Repita a nova senha"
+        :label="t('settings.seguranca.fields.confirm.label')"
+        :placeholder="t('settings.seguranca.fields.confirm.placeholder')"
         :type="showConfirmPassword ? 'text' : 'password'"
         :disabled="savingPassword"
         :error="confirmarSenhaError"
@@ -159,7 +171,11 @@ async function handleChangePassword() {
           <button
             type="button"
             class="settings-seguranca__eye"
-            :aria-label="showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'"
+            :aria-label="
+              showConfirmPassword
+                ? t('settings.seguranca.aria.hidePassword')
+                : t('settings.seguranca.aria.showPassword')
+            "
             @click="showConfirmPassword = !showConfirmPassword"
           >
             <i :class="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" aria-hidden="true" />
@@ -170,7 +186,7 @@ async function handleChangePassword() {
       <footer class="settings-seguranca__foot">
         <Button
           type="submit"
-          label="Alterar senha"
+          :label="t('settings.seguranca.actions.change')"
           icon="pi pi-lock"
           :loading="savingPassword"
         />

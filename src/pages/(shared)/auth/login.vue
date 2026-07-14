@@ -2,6 +2,7 @@
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import AuthButton from '@/components/auth/AuthButton.vue'
@@ -21,6 +22,8 @@ import {
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
+
+const { t } = useI18n()
 
 const email = ref('')
 const password = ref('')
@@ -43,14 +46,14 @@ const showReactivatePanel = computed(() => pendingReactivate.value.length > 0)
 
 const reactivateCopy = computed(() => {
   if (pendingReactivate.value.includes('veterinario') && pendingReactivate.value.includes('tutor')) {
-    return 'Esta conta tem perfis inativos. Reative o perfil veterinário para entrar no painel.'
+    return t('auth.login.reactivate.copyBoth')
   }
 
   if (pendingReactivate.value.includes('veterinario')) {
-    return 'Seu perfil veterinário está inativo. Reative para continuar no painel.'
+    return t('auth.login.reactivate.copyVet')
   }
 
-  return 'Há um perfil inativo nesta conta. Reative para continuar.'
+  return t('auth.login.reactivate.copyGeneric')
 })
 
 function getSafeRedirectPath() {
@@ -91,8 +94,8 @@ async function enterPanelAfterAuth() {
     usuarioPerfilStore.clear()
     toast.add({
       severity: 'warn',
-      summary: 'Perfil veterinário necessário',
-      detail: 'Esta conta ainda não possui perfil veterinário habilitado para o painel.',
+      summary: t('auth.login.toast.vetRequired.summary'),
+      detail: t('auth.login.toast.vetRequired.detail'),
       life: 5000,
     })
     return
@@ -132,8 +135,8 @@ async function handleLogin() {
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'Erro ao entrar',
-      detail: error instanceof Error ? error.message : 'Não foi possível entrar. Tente novamente.',
+      summary: t('auth.login.toast.loginError.summary'),
+      detail: error instanceof Error ? error.message : t('auth.login.toast.loginError.fallback'),
       life: 5000,
     })
   } finally {
@@ -160,8 +163,8 @@ async function handleReactivate(profile: ReactivateProfile = 'veterinario') {
     if (stillInactive) {
       toast.add({
         severity: 'warn',
-        summary: 'Perfil ainda inativo',
-        detail: 'A reativação foi pedida, mas o token ainda indica perfil inativo. Tente de novo.',
+        summary: t('auth.login.toast.stillInactive.summary'),
+        detail: t('auth.login.toast.stillInactive.detail'),
         life: 5000,
       })
       return
@@ -173,8 +176,8 @@ async function handleReactivate(profile: ReactivateProfile = 'veterinario') {
       pendingReactivate.value = []
       toast.add({
         severity: 'success',
-        summary: 'Perfil reativado',
-        detail: 'Bem-vindo de volta ao painel.',
+        summary: t('auth.login.toast.reactivated.summary'),
+        detail: t('auth.login.toast.reactivated.detail'),
         life: 3500,
       })
       await enterPanelAfterAuth()
@@ -187,8 +190,9 @@ async function handleReactivate(profile: ReactivateProfile = 'veterinario') {
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'Não foi possível reativar',
-      detail: error instanceof Error ? error.message : 'Tente novamente em instantes.',
+      summary: t('auth.login.toast.reactivateError.summary'),
+      detail:
+        error instanceof Error ? error.message : t('auth.login.toast.reactivateError.fallback'),
       life: 5000,
     })
   } finally {
@@ -205,14 +209,14 @@ function cancelReactivate() {
 
 <template>
   <AuthLayout
-    description="Acesse o portal e impulsione sua parceria com indicação, cupons e resultados."
-    title="Bem-vindo de volta"
+    :description="t('auth.login.description')"
+    :title="t('auth.login.title')"
   >
     <div v-if="showReactivatePanel" class="login-reactivate" :style="loginStyle" role="status">
       <div class="login-reactivate__icon" aria-hidden="true">
         <i class="pi pi-user-minus" />
       </div>
-      <h2>Perfil inativo</h2>
+      <h2>{{ t('auth.login.reactivate.title') }}</h2>
       <p>{{ reactivateCopy }}</p>
 
       <div class="login-reactivate__actions">
@@ -223,7 +227,11 @@ function cancelReactivate() {
           type="button"
           @click="handleReactivate('veterinario')"
         >
-          {{ reactivating ? 'Reativando…' : 'Reativar perfil veterinário' }}
+          {{
+            reactivating
+              ? t('auth.login.reactivate.loading')
+              : t('auth.login.reactivate.vet')
+          }}
         </AuthButton>
 
         <AuthButton
@@ -233,11 +241,15 @@ function cancelReactivate() {
           type="button"
           @click="handleReactivate('tutor')"
         >
-          {{ reactivating ? 'Reativando…' : 'Reativar perfil tutor' }}
+          {{
+            reactivating
+              ? t('auth.login.reactivate.loading')
+              : t('auth.login.reactivate.tutor')
+          }}
         </AuthButton>
 
         <Button
-          label="Usar outra conta"
+          :label="t('auth.login.reactivate.otherAccount')"
           severity="secondary"
           outlined
           type="button"
@@ -253,8 +265,8 @@ function cancelReactivate() {
         v-model="email"
         autocomplete="email"
         :disabled="loading"
-        label="E-mail"
-        placeholder="seuemail@empresa.com"
+        :label="t('auth.login.email.label')"
+        :placeholder="t('auth.login.email.placeholder')"
         required
         type="email"
       >
@@ -265,9 +277,9 @@ function cancelReactivate() {
 
       <div class="login-password-group">
         <div class="login-password-group__header">
-          <span>Senha</span>
+          <span>{{ t('auth.login.password.label') }}</span>
           <RouterLink class="login-inline-link" to="/auth/forgot-password">
-            Esqueceu a senha?
+            {{ t('auth.login.password.forgot') }}
           </RouterLink>
         </div>
 
@@ -277,7 +289,7 @@ function cancelReactivate() {
           autocomplete="current-password"
           :disabled="loading"
           label=""
-          placeholder="Digite sua senha"
+          :placeholder="t('auth.login.password.placeholder')"
           required
           :type="passwordInputType"
         >
@@ -287,7 +299,9 @@ function cancelReactivate() {
 
           <template #trailing>
             <button
-              :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
+              :aria-label="
+                showPassword ? t('auth.login.password.hide') : t('auth.login.password.show')
+              "
               class="login-password-toggle"
               :disabled="loading"
               type="button"
@@ -304,11 +318,11 @@ function cancelReactivate() {
         <span>
           <i class="pi pi-check" aria-hidden="true" />
         </span>
-        Manter conectado neste computador
+        {{ t('auth.login.remember') }}
       </label>
 
       <AuthButton :loading="loading" full-width type="submit">
-        {{ loading ? 'Entrando...' : 'Entrar no painel' }}
+        {{ loading ? t('auth.login.submitting') : t('auth.login.submit') }}
         <i v-if="!loading" class="pi pi-arrow-right ml-2" aria-hidden="true" />
       </AuthButton>
 
@@ -325,8 +339,8 @@ function cancelReactivate() {
     </form>
 
     <p v-if="!showReactivatePanel" class="login-support">
-      Novo por aqui?
-      <RouterLink to="/auth/register">Criar conta</RouterLink>
+      {{ t('auth.login.support.prompt') }}
+      <RouterLink to="/auth/register">{{ t('auth.login.support.createAccount') }}</RouterLink>
     </p>
   </AuthLayout>
 </template>

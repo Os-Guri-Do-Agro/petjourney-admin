@@ -1,0 +1,1082 @@
+{
+  "languageSwitcher": {
+    "label": "Language",
+    "pt": "PT",
+    "en": "EN",
+    "en-GB": "UK",
+    "es": "ES"
+  },
+  "auth": {
+    "layout": {
+      "kicker": "Partner portal",
+      "title": "More customers. More reach. More returns for your brand.",
+      "description": "The PetJourney portal connects your business to pet parents: promote offers, refer with ease, and track growth in one place.",
+      "benefits": {
+        "programs": "Programs built for partners who want to grow",
+        "outreach": "Outreach with coupons and referrals that convert",
+        "results": "Results and earnings tracked in real time"
+      }
+    },
+    "login": {
+      "title": "Welcome back",
+      "description": "Sign in to the portal and boost your partnership with referrals, coupons, and results.",
+      "email": {
+        "label": "Email",
+        "placeholder": "you{'@'}company.com"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Enter your password",
+        "forgot": "Forgot password?",
+        "show": "Show password",
+        "hide": "Hide password"
+      },
+      "remember": "Stay signed in on this computer",
+      "submit": "Sign in to the portal",
+      "submitting": "Signing in...",
+      "support": {
+        "prompt": "New here?",
+        "createAccount": "Create account"
+      },
+      "reactivate": {
+        "title": "Inactive profile",
+        "copyBoth": "This account has inactive profiles. Reactivate the veterinarian profile to enter the portal.",
+        "copyVet": "Your veterinarian profile is inactive. Reactivate it to continue in the portal.",
+        "copyGeneric": "There is an inactive profile on this account. Reactivate it to continue.",
+        "loading": "Reactivating…",
+        "vet": "Reactivate veterinarian profile",
+        "tutor": "Reactivate pet parent profile",
+        "otherAccount": "Use another account"
+      },
+      "toast": {
+        "vetRequired": {
+          "summary": "Veterinarian profile required",
+          "detail": "This account does not yet have a veterinarian profile enabled for the portal."
+        },
+        "loginError": {
+          "summary": "Sign-in error",
+          "fallback": "Could not sign in. Please try again."
+        },
+        "stillInactive": {
+          "summary": "Profile still inactive",
+          "detail": "Reactivation was requested, but the token still shows an inactive profile. Try again."
+        },
+        "reactivated": {
+          "summary": "Profile reactivated",
+          "detail": "Welcome back to the portal."
+        },
+        "reactivateError": {
+          "summary": "Could not reactivate",
+          "fallback": "Please try again in a moment."
+        }
+      }
+    },
+    "register": {
+      "stepLabels": {
+        "identity": "Identity",
+        "professional": "Professional",
+        "account": "Account"
+      },
+      "step1": {
+        "eyebrow": "Step 1 of 3",
+        "title": "Identity",
+        "description": "Enter your name and email to create your veterinarian account."
+      },
+      "step2": {
+        "eyebrow": "Step 2 of 3",
+        "title": "Professional details",
+        "description": "Add your clinical information for the portal."
+      },
+      "step3": {
+        "eyebrow": "Step 3 of 3",
+        "title": "Account security",
+        "description": "Set a strong password and accept the terms of use."
+      },
+      "name": {
+        "label": "Full name",
+        "placeholder": "Dr. Maria Silva"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "maria{'@'}clinic.com",
+        "hint": "We'll use this email for sign-in and important messages.",
+        "checking": "Checking email availability...",
+        "available": "Email is available."
+      },
+      "crmv": {
+        "label": "CRMV",
+        "placeholder": "CRMV-SP 12345"
+      },
+      "specialty": {
+        "label": "Specialty",
+        "placeholder": "General Practice, Dermatology..."
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Create a secure password",
+        "show": "Show password",
+        "hide": "Hide password"
+      },
+      "confirmPassword": {
+        "label": "Confirm password",
+        "placeholder": "Repeat your password"
+      },
+      "terms": {
+        "copy": "I have read and accept the PetJourney terms of use and privacy policy.",
+        "details": "details"
+      },
+      "remember": "Stay signed in on this computer after sign-up",
+      "continue": "Continue",
+      "validating": "Validating...",
+      "createAccount": "Create account",
+      "creating": "Creating account...",
+      "back": "Back",
+      "support": {
+        "prompt": "Already have an account?",
+        "login": "Sign in now"
+      },
+      "errors": {
+        "nameMin": "Enter at least 3 characters.",
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Enter a valid email.",
+        "emailTaken": "Email is already registered.",
+        "emailCheckFailed": "Could not verify the email.",
+        "emailVerifyFirst": "Check email availability before continuing.",
+        "crmvRequired": "CRMV is required.",
+        "specialtyRequired": "Enter your primary specialty.",
+        "passwordRequirements": "The password does not meet all requirements.",
+        "confirmRequired": "Confirm your password.",
+        "confirmMismatch": "Passwords do not match.",
+        "termsRequired": "You must accept the terms to continue.",
+        "submitFailed": "Could not complete registration."
+      },
+      "toast": {
+        "success": {
+          "summary": "Account created",
+          "detail": "Welcome to the PetJourney veterinarian portal."
+        },
+        "error": {
+          "summary": "Registration error"
+        }
+      }
+    },
+    "forgot": {
+      "step1": {
+        "eyebrow": "Recovery",
+        "title": "Reset password",
+        "description": "Enter your registered email to receive a 6-digit code."
+      },
+      "step2": {
+        "eyebrow": "New password",
+        "title": "Create a strong password",
+        "description": "Set a new password for your account. Then return to sign in."
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "you{'@'}clinic.com",
+        "hint": "For security, the response is the same even if the email does not exist."
+      },
+      "submit": "Send code",
+      "sending": "Sending…",
+      "backToLogin": "Back to sign in",
+      "requestNewCode": "Request a new code",
+      "password": {
+        "label": "New password",
+        "placeholder": "Create a strong password",
+        "show": "Show password",
+        "hide": "Hide password"
+      },
+      "confirm": {
+        "label": "Confirm password",
+        "placeholder": "Repeat the new password"
+      },
+      "reset": "Reset password",
+      "resetting": "Resetting…",
+      "pin": {
+        "eyebrow": "Almost there",
+        "title": "Enter the code",
+        "lede": "We sent a 6-digit code if an account exists for this email. Check your inbox and spam folder.",
+        "label": "Verification code",
+        "hint": "Paste the full code or type one digit per box.",
+        "digitAria": "Digit {n} of 6",
+        "placeholder": "000000",
+        "verify": "Continue",
+        "verifying": "Verifying…"
+      },
+      "errors": {
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Enter a valid email.",
+        "pinLength": "Enter the 6-digit code.",
+        "pinInvalid": "Invalid code. Check it and try again.",
+        "passwordRequirements": "The password does not meet all requirements.",
+        "confirmRequired": "Confirm the new password.",
+        "mismatch": "Passwords do not match.",
+        "throttle": "Too many attempts. Wait a few minutes and try again.",
+        "generic": "Something went wrong. Please try again."
+      },
+      "toasts": {
+        "sendError": {
+          "summary": "Could not send code"
+        },
+        "tokenMissing": {
+          "summary": "Code expired",
+          "detail": "Request a new code and try again."
+        },
+        "success": {
+          "summary": "Password updated",
+          "detail": "Sign in with your email and new password."
+        },
+        "resetError": {
+          "summary": "Could not reset password"
+        }
+      }
+    },
+    "passwordRequirements": {
+      "minLength": "At least 6 characters",
+      "hasNumber": "At least 1 number",
+      "hasUppercase": "At least 1 uppercase letter",
+      "hasSpecialChar": "At least 1 special character"
+    }
+  },
+  "common": {
+    "confirmTitle": "Confirm action",
+    "confirmMessage": "Are you sure you want to continue?",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading...",
+    "emptyTitle": "Nothing here yet",
+    "retry": "Try again",
+    "tryAgain": "Try again",
+    "back": "Back",
+    "save": "Save",
+    "continue": "Continue",
+    "copy": "Copy",
+    "copied": "Copied",
+    "send": "Send",
+    "sending": "Sending...",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "forgotPassword": "Forgot password",
+    "signOut": "Sign out",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "sections": {
+      "home": "Home",
+      "portal": "Portal",
+      "account": "Account",
+      "homeSubtitle": "General content"
+    },
+    "groups": {
+      "overview": "Dashboard",
+      "portal": "Portal",
+      "account": "Account"
+    },
+    "items": {
+      "overview": "Overview",
+      "programas": "Programs",
+      "divulgacao": "Promotion",
+      "financeiro": "Finance",
+      "settings": "Settings"
+    },
+    "pageLabels": {
+      "overview": "Overview",
+      "saqueDetail": "Payout detail",
+      "financeiro": "Finance",
+      "programas": "Participation programs",
+      "divulgacao": "Promotion",
+      "convite": "Accept invite",
+      "selecionar": "Select partner",
+      "portal": "Portal",
+      "settings": "Settings",
+      "fallback": "Dashboard"
+    }
+  },
+  "shell": {
+    "logout": "Sign out",
+    "menuHeading": "Menu",
+    "filterPlaceholder": "Filter screens...",
+    "filterEmpty": "No screens found for “{q}”.",
+    "brand": {
+      "badge": "Partner portal"
+    },
+    "drawer": {
+      "close": "Close navigator",
+      "open": "Open navigator"
+    },
+    "aria": {
+      "sections": "Portal sections",
+      "brand": "PetJourney",
+      "brandHome": "PetJourney — home",
+      "pagesOf": "Pages in {label}"
+    },
+    "theme": {
+      "activateLight": "Switch to light theme",
+      "activateDark": "Switch to dark theme",
+      "lightTitle": "Light theme",
+      "darkTitle": "Dark theme",
+      "lightLabel": "Light",
+      "darkLabel": "Dark"
+    },
+    "user": {
+      "fallbackName": "Veterinarian",
+      "role": "Partner account",
+      "perfil": "Profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "logoutConfirm": {
+      "title": "Sign out?",
+      "message": "You will be signed out of this portal. You will need to sign in again to get back in.",
+      "cancel": "Stay in the portal"
+    },
+    "cupom": {
+      "cta": "Validate coupon",
+      "disabledTitle": "Available only for partners with operations enabled",
+      "disabledAria": "Validate coupon unavailable: account has no partner access",
+      "close": "Close",
+      "eyebrow": "Counter · quick redemption",
+      "title": "Validate coupon",
+      "lede": "Enter the code from the pet parent app and confirm the discount right away.",
+      "blockedBanner": "This partner cannot operate yet. Validation becomes available after approval.",
+      "codeLabel": "Redemption code",
+      "codePlaceholder": "ABCDEF2345",
+      "hint": "Valid for about 5 minutes · single use · spaces and lowercase are adjusted automatically",
+      "formatHint": "Use 6 to 32 characters (A–Z and 2–9). No 0, 1, or spaces. Check the code in the customer app.",
+      "successEyebrow": "Redemption confirmed",
+      "successTitle": "Valid coupon",
+      "discountLabel": "off",
+      "submit": "Validate code",
+      "validateAnother": "Validate another",
+      "applyOk": "OK, apply discount",
+      "networkHintBefore": "If the network failed mid-request, check",
+      "networkHintLink": "Redemptions",
+      "networkHintAfter": "before trying again — a successful POST already consumes the code.",
+      "meta": {
+        "campaign": "Campaign",
+        "code": "Code",
+        "customer": "Customer",
+        "channel": "Channel",
+        "channelManual": "Manual code"
+      },
+      "errorEyebrow": "Not validated",
+      "errors": {
+        "noOp": {
+          "title": "Partner not operable",
+          "message": "Wait for credentialing approval before validating coupons."
+        },
+        "generic": {
+          "title": "Validation failed",
+          "message": "Could not validate the code. Try again.",
+          "messageShort": "Could not validate the code."
+        },
+        "invalid": {
+          "title": "Invalid code",
+          "message": "Invalid code. Check with the customer."
+        },
+        "expired": {
+          "title": "Expired code",
+          "message": "Expired code. Ask the customer to generate a new one in the app (2 taps)."
+        },
+        "conflict": {
+          "title": "Could not validate"
+        },
+        "forbidden": {
+          "title": "No access",
+          "message": "No access to this coupon. Check registration and partner approval."
+        },
+        "noBusiness": {
+          "title": "Business not selected",
+          "message": "Select the partner company and try validating again."
+        }
+      }
+    }
+  },
+  "frame": {
+    "loading": "Loading...",
+    "emptyDefault": "Nothing here yet",
+    "error": {
+      "title": "Could not load",
+      "retry": "Try again"
+    },
+    "tabs": {
+      "aria": "Tabs: {labels}"
+    },
+    "noAccess": {
+      "title": "Partner portal not enabled yet",
+      "body": "Your account is not yet linked to an operable partner company. Request affiliate and/or participatory programs — the PetJourney team reviews and unlocks access.",
+      "hint": "If you already requested, wait for review or check again shortly. An admin can also link your account manually.",
+      "ctaPrograms": "Request programs",
+      "ctaSettings": "Go to settings",
+      "retry": "Check again",
+      "contactLabel": "Questions:"
+    },
+    "operability": {
+      "title": "Registration under review",
+      "body": "Portal actions stay blocked until credentialing is approved.",
+      "reasonPrefix": "Reason:",
+      "link": "Track credentialing"
+    }
+  },
+  "statusBadge": {
+    "PENDENTE": "Under review",
+    "SOLICITADO": "Under review",
+    "APROVADO": "Approved",
+    "REJEITADO": "Declined",
+    "SUSPENSO": "Suspended",
+    "NAO_SOLICITADO": "Not active",
+    "ATIVO": "Active ✓"
+  },
+  "errors": {
+    "notFound": {
+      "brandAlt": "PetJourney",
+      "title": "Page not found",
+      "body": "The address you opened does not exist or was moved. Check the link or return to the main portal area.",
+      "goHome": "Go to home",
+      "back": "Back"
+    }
+  },
+  "inicio": {
+    "subtitle": "Overview",
+    "greeting": {
+      "hello": "Hello",
+      "helloName": "Hello, {name}"
+    },
+    "lede": "Coupons, referrals, and partnership commission — organized so you can act fast.",
+    "dash": {
+      "errorLoad": "Could not load the dashboard.",
+      "retry": "Try again",
+      "focus": {
+        "title": "Focus now",
+        "lede": "Commission and referrals — what drives the partnership today.",
+        "loadingAria": "Loading commission and referrals"
+      },
+      "commission": {
+        "eyebrowActive": "Commission · Affiliate active",
+        "badge": "Wallet",
+        "sacavelNow": "available to withdraw now",
+        "metaHold": "Total balance of {valor} — part in a 14-day security window.",
+        "openWallet": "Open wallet",
+        "eyebrowMuted": "Commission",
+        "badgeMuted": "Not active",
+        "inactiveTitle": "Affiliate program",
+        "inactiveMeta": "Activate the affiliate program to track balance, statement, and PIX payouts.",
+        "seePrograms": "View programs"
+      },
+      "referral": {
+        "eyebrow": "Referral code",
+        "copyAria": "Copy referral code",
+        "meta": "Share and earn commission for each pet parent who subscribes.",
+        "cta": "View referral",
+        "toastCopied": "Code copied",
+        "toastCopyFail": "Could not copy",
+        "toastCopyFailDetail": "Copy the code manually."
+      },
+      "pulse": {
+        "title": "Network pulse",
+        "lede": "Coupon and redemption indicators.",
+        "loadingAria": "Loading indicators"
+      },
+      "metrics": {
+        "cuponsAtivos": "Active coupons",
+        "cuponsHint": "Ready to redeem",
+        "resgatesTotal": "Redemptions (total)",
+        "resgatesTotalHint": "Since the start",
+        "resgates30d": "Redemptions (30 days)",
+        "resgates30dHint": "Last month"
+      }
+    },
+    "shortcuts": {
+      "title": "Shortcuts",
+      "countAvailable": "{n} available",
+      "lede": "Filter by screen or section name.",
+      "filterPlaceholder": "Filter by screen or section...",
+      "clearFilterAria": "Clear filter",
+      "emptyFilter": "No screens found for “{q}”."
+    }
+  },
+  "programas": {
+    "subtitle": "Portal",
+    "title": "Participation programs",
+    "entry": {
+      "title": "Request access to the programs",
+      "body": "You do not yet have an active link to a partner company. Submit an affiliate and/or participatory request — the PetJourney team reviews and unlocks the portal."
+    },
+    "lede": "Choose programs from the PetJourney network. Each one is independent and goes through team review.",
+    "available": {
+      "title": "Available programs",
+      "lede": "Request affiliate and/or participatory based on your company model.",
+      "loadingAria": "Loading programs"
+    },
+    "activation": {
+      "title": "How activation works",
+      "lede": "A simple flow, with PetJourney team review.",
+      "step1": {
+        "title": "Request",
+        "desc": "The owner requests program activation."
+      },
+      "step2": {
+        "title": "Under review",
+        "desc": "The PetJourney team reviews the request."
+      },
+      "step3": {
+        "title": "Active",
+        "desc": "Benefits unlocked for the company."
+      },
+      "noteNoAccess": "Request affiliate and/or participatory below. The PetJourney team reviews the request and unlocks the portal.",
+      "noteWithAccess": "Only the account owner can request activation. Operators track status but cannot submit requests."
+    },
+    "cred": {
+      "zoneTitle": "Credentialing",
+      "sectionTitle": "Credentialing",
+      "zoneLede": "Audit status required to unlock requests.",
+      "sectionLede": "Audit status and clearance to operate in the portal.",
+      "loadingAria": "Loading credentialing",
+      "errorLoad": "Error loading credentialing.",
+      "retry": "Try again",
+      "rowAuditoria": "Company audit",
+      "rowOperacao": "Operations enabled",
+      "yes": "Yes",
+      "no": "No",
+      "motivoTitle": "Stated reason",
+      "lastUpdate": "Last update: {data}",
+      "blockedHint": "Programs requests stay blocked until credentialing is approved."
+    },
+    "card": {
+      "afiliado": {
+        "title": "Affiliate Program",
+        "subtitle": "Transparency and commissions",
+        "description": "Earn commission for each referral that becomes a subscriber. Access your wallet, track balance, and withdraw via PIX.",
+        "feature1": "Commission per converted referral",
+        "feature2": "Statement and balance in real time",
+        "feature3": "PIX payout"
+      },
+      "participativo": {
+        "title": "Participatory Program",
+        "subtitle": "Community and perks",
+        "description": "Join the PetJourney community: exclusive perks and collabs.",
+        "soon": "(Coming soon.)",
+        "feature1": "Participatory partner badge",
+        "feature2": "Exclusive perks and benefits",
+        "feature3": "Invites to network collabs"
+      },
+      "status": {
+        "naoSolicitado": "Not active",
+        "solicitado": "Under review",
+        "ativo": "Active",
+        "rejeitado": "Declined",
+        "suspenso": "Suspended"
+      },
+      "info": {
+        "saldo": "Available balance",
+        "ativoDesde": "Active since",
+        "pending": "Your request was submitted and is awaiting PetJourney team review.",
+        "rejected": "The request was declined. You can submit a new one when it makes sense.",
+        "suspended": "The program was suspended. Request again after aligning with the PetJourney team."
+      },
+      "cta": {
+        "solicitar": "Request",
+        "solicitarNovamente": "Request again",
+        "aguardando": "Awaiting review",
+        "carteira": "Go to Wallet"
+      },
+      "activeNoteParticipativo": "Program active. Operational benefits are communicated by the PetJourney team.",
+      "toast": {
+        "actionUnavailable": "Action unavailable",
+        "ownerOnly": "Only the company owner can request programs.",
+        "sent": "Request submitted",
+        "sentDetail": "Wait for PetJourney team review.",
+        "error": "Request error"
+      },
+      "error": {
+        "generic": "Could not submit the request.",
+        "forbidden": "No permission to request. Confirm the account link or ask the company owner.",
+        "afiliadoNaoAtivo": "Activate the affiliate program to access the wallet.",
+        "notOperable": "Your registration is still under review.",
+        "alreadyRequested": "This program was already requested or is active."
+      }
+    }
+  },
+  "divulgacao": {
+    "subtitle": "Portal",
+    "title": "Promotion",
+    "lede": "Partnership referrals, coupons, and redemptions — all in one place to promote with clarity.",
+    "errorLoad": "Error loading promotion.",
+    "retry": "Try again",
+    "indicacao": {
+      "title": "Referral",
+      "lede": "Code, link, and QR Code to attract subscribers linked to the company.",
+      "loadingAria": "Loading referral kit"
+    },
+    "shareKit": {
+      "eyebrow": "Referral kit",
+      "title": "Share and link subscribers",
+      "unavailable": "Unavailable",
+      "codeLabel": "Code",
+      "copyCodeAria": "Copy code",
+      "linkName": "Link",
+      "linkLabel": "Ready link",
+      "copyLink": "Copy link",
+      "qrAlt": "Referral QR Code",
+      "qrCaption": "Scan on mobile",
+      "hint": "Wallet commission requires an active affiliate program. Discount coupons do not generate commission."
+    },
+    "metrics": {
+      "aria": "Promotion metrics",
+      "cuponsAtivos": "Active coupons",
+      "resgatesTotais": "Total redemptions",
+      "ultimos30d": "Last 30 days"
+    },
+    "toast": {
+      "copied": "Copied",
+      "copiedDetail": "{label} copied.",
+      "copyFail": "Could not copy",
+      "error": "Error",
+      "moreCuponsFail": "Could not load more coupons.",
+      "moreResgatesFail": "Could not load more redemptions."
+    },
+    "lists": {
+      "title": "Coupons and redemptions",
+      "lede": "Company discounts and usage history — side by side.",
+      "loadingAria": "Loading coupons and redemptions"
+    },
+    "cupons": {
+      "title": "Coupons",
+      "lede": "Discounts for pet parents — they do not generate commission.",
+      "empty": "No coupons right now.",
+      "usos": "{n} uses",
+      "loadMore": "More coupons"
+    },
+    "resgates": {
+      "title": "Redemptions",
+      "lede": "No personal data from pet parents.",
+      "empty": "No redemptions yet.",
+      "canalQr": "Via QR Code",
+      "canalManual": "Manual code",
+      "loadMore": "More redemptions"
+    }
+  },
+  "carteira": {
+    "subtitle": "Portal",
+    "title": "Finance",
+    "tabs": {
+      "ariaLabel": "Tabs: {labels}",
+      "visao": {
+        "label": "Overview",
+        "description": "Balances, PIX key, and withdrawal request."
+      },
+      "extrato": {
+        "label": "Statement",
+        "description": "Commission credits and debits."
+      },
+      "saques": {
+        "label": "Payouts",
+        "description": "Payment request status."
+      }
+    },
+    "gate": {
+      "title": "Affiliate program required",
+      "body": "Wallet, statement, and payouts are only available with an active affiliate program. Request participation on the programs screen.",
+      "cta": "Request affiliate program"
+    },
+    "visao": {
+      "loadingAria": "Loading wallet",
+      "errorLoad": "Error loading wallet.",
+      "retry": "Try again",
+      "saldoSacavel": "Withdrawable balance",
+      "saldoSacavelHint": "Available for PIX payout",
+      "saldoTotal": "Total balance",
+      "totalSacado": "Total withdrawn",
+      "alertBlocked": "Payouts temporarily blocked (anti-fraud review or negative balance).",
+      "alertHold": "Balance in hold period (14 days per credit). The amount is not yet available to withdraw.",
+      "alertComissaoDisabled": "Referral commissions are temporarily disabled in this environment — the wallet may stay at zero even with active referrals. This is not an error in your registration.",
+      "pix": {
+        "title": "PIX key",
+        "label": "PIX key",
+        "hint": "Required to request payouts.",
+        "placeholder": "email{'@'}company.com or CNPJ",
+        "save": "Save key"
+      },
+      "saque": {
+        "title": "Request payout",
+        "submit": "Request payout",
+        "hint": "Minimum {valor}. Cycle: cut-off on the 27th, payment by the 5th.",
+        "valorLabel": "Amount (R$)",
+        "valorPlaceholder": "0.00",
+        "currency": "R$"
+      }
+    },
+    "help": {
+      "title": "How the wallet works",
+      "lede": "Useful details before adding PIX or requesting a payout.",
+      "contactEmail": "Email",
+      "contactWhatsapp": "WhatsApp",
+      "comissao": {
+        "title": "How balance arrives",
+        "body": "Referrals that become subscribers generate wallet commission when the affiliate program is active."
+      },
+      "saldos": {
+        "title": "Total and withdrawable balance",
+        "body": "Total accumulates credits; withdrawable unlocks after the 14-day security window per credit."
+      },
+      "pix": {
+        "title": "PIX required",
+        "body": "Register the company PIX key before requesting a payout. Only the account owner can change PIX and request payouts."
+      },
+      "ciclo": {
+        "title": "Payment cycle",
+        "body": "Minimum payout of R$ 50.00. Cut-off on the 27th and indicative settlement by the 5th — track on the Payouts tab."
+      },
+      "footerPrefix": "Questions?",
+      "footerOrWhatsapp": "or WhatsApp"
+    },
+    "toast": {
+      "pixSaved": "PIX key saved",
+      "pixSaveError": "Error saving PIX",
+      "tryAgain": "Please try again.",
+      "invalidValue": "Invalid amount",
+      "minWithdraw": "The minimum payout is R$ 50.00.",
+      "insufficient": "Insufficient balance",
+      "maxWithdraw": "The maximum withdrawable now is {valor}.",
+      "pixRequired": "PIX required",
+      "pixRequiredDetail": "Register a PIX key before requesting a payout.",
+      "withdrawRequested": "Payout requested",
+      "withdrawRequestedDetail": "Track it on the Payouts tab.",
+      "withdrawError": "Payout error"
+    },
+    "extrato": {
+      "loadingTitle": "Loading statement...",
+      "loadingDesc": "Fetching recent commission credits and debits.",
+      "errorLoad": "Error loading statement.",
+      "retry": "Try again",
+      "emptyTitle": "No movements",
+      "emptyBody": "Commission credits and payout debits appear here.",
+      "loadMore": "Load more"
+    },
+    "saques": {
+      "loadingTitle": "Loading payouts...",
+      "loadingDesc": "Fetching requests and payment status.",
+      "errorLoad": "Error loading payouts.",
+      "retry": "Try again",
+      "emptyTitle": "No payouts requested",
+      "emptyBody": "Request a payout on the Overview tab when you have withdrawable balance.",
+      "requestedAt": "Requested on {data}"
+    },
+    "detail": {
+      "subtitle": "Finance",
+      "title": "Payout detail",
+      "back": "Back",
+      "loadingAria": "Loading payout detail",
+      "errorInvalidId": "Invalid payout identifier.",
+      "errorLoad": "Error loading payout.",
+      "valorLabel": "Requested amount",
+      "requestedAt": "Requested on",
+      "liquidatedAt": "Settled on",
+      "pixSnapshot": "PIX key (snapshot)",
+      "failReason": "Failure reason",
+      "receipt": "Receipt",
+      "pendingHint": "Payments are settled manually by PetJourney. Indicative cycle: cut-off on the 27th, payment by the 5th."
+    }
+  },
+  "parceiro": {
+    "store": {
+      "errorNeedsSelection": "Select which partner company you want to operate. Enter the partner identifier.",
+      "errorNoAccess": "Your account does not have access to the partner portal.",
+      "errorGeneric": "Could not load partner context."
+    },
+    "selecionar": {
+      "subtitle": "Multi-company",
+      "title": "Select partner",
+      "body": "Your account belongs to more than one partner company. Enter which one you want to operate now.",
+      "idLabel": "Partner ID",
+      "idHint": "The identifier is provided by an administrator or appears in the invite.",
+      "idPlaceholder": "partner-cuid",
+      "continue": "Continue",
+      "toast": {
+        "error": "Could not access",
+        "errorDetail": "Check the identifier."
+      }
+    },
+    "convite": {
+      "subtitle": "Team",
+      "title": "Accept invite",
+      "body": "You were invited to join a PetJourney partner company team. Enter the identifier from the email or open the full invite link.",
+      "idLabel": "Partner ID",
+      "idHint": "Required — comes in the link as ?parceiroId=...",
+      "idPlaceholder": "company-cuid",
+      "accept": "Accept invite",
+      "footnote": "After accepting, you operate in the portal with the role defined by the company owner.",
+      "toast": {
+        "warnTitle": "Enter the company",
+        "warnDetail": "The invite link must include the partner identifier.",
+        "success": "Invite accepted",
+        "successDetail": "You can now access the company portal.",
+        "error": "Could not accept",
+        "errorDetail": "Check the link or try again."
+      }
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Account",
+    "tabs": {
+      "perfil": {
+        "label": "Profile",
+        "description": "Name, contacts, document, and professional details."
+      },
+      "seguranca": {
+        "label": "Security",
+        "description": "Password change for the signed-in account."
+      },
+      "conta": {
+        "label": "Account",
+        "description": "Session, profile deactivation, and future preferences."
+      }
+    },
+    "perfil": {
+      "fallbackName": "User",
+      "photoHint": "Click the photo to choose a new image.",
+      "aria": {
+        "changePhoto": "Change profile photo",
+        "uploadingPhoto": "Uploading photo…",
+        "roles": "Account roles"
+      },
+      "roles": {
+        "veterinario": "Veterinarian",
+        "donoParceiro": "Partner owner",
+        "operadorParceiro": "Partner operator",
+        "admin": "Admin"
+      },
+      "partnerContext": {
+        "papelDono": "OWNER",
+        "papelOperador": "OPERATOR",
+        "template": "{parceiroNome} · {papel}"
+      },
+      "sections": {
+        "identidade": "Identity",
+        "contato": "Contact",
+        "documento": "Document",
+        "vet": "Veterinarian profile"
+      },
+      "fields": {
+        "nome": {
+          "label": "Full name",
+          "placeholder": "Your name"
+        },
+        "email": {
+          "label": "Email",
+          "hint": "Linked to authentication — read only."
+        },
+        "telefone": {
+          "label": "Phone",
+          "placeholder": "(11) 98888-7777"
+        },
+        "whatsapp": {
+          "label": "WhatsApp",
+          "placeholder": "(11) 98888-7777"
+        },
+        "cpf": {
+          "label": "CPF",
+          "placeholder": "000.000.000-00",
+          "hintLocked": "Already registered — cannot be changed.",
+          "hintOptional": "Optional. Once saved, it is locked."
+        },
+        "crmv": {
+          "label": "CRMV",
+          "placeholder": "CRMV-SP 12345"
+        },
+        "especialidade": {
+          "label": "Specialty",
+          "placeholder": "General practice"
+        }
+      },
+      "actions": {
+        "save": "Save profile",
+        "retry": "Try again"
+      },
+      "errors": {
+        "nomeMin": "Enter at least 3 characters.",
+        "telefone": "Enter a valid phone number with area code.",
+        "whatsapp": "Enter a valid WhatsApp number with area code.",
+        "cpf": "Invalid CPF.",
+        "crmvRequired": "CRMV is required for the veterinarian profile.",
+        "especialidadeRequired": "Enter the specialty.",
+        "sessionUnavailable": "Session unavailable. Sign in again.",
+        "loadFailed": "Could not load the profile.",
+        "loadTitle": "Could not load"
+      },
+      "photo": {
+        "errors": {
+          "invalidType": "Use a JPEG, PNG, WEBP, or GIF image.",
+          "maxSize": "The image must be at most 5 MB."
+        }
+      },
+      "toasts": {
+        "partial": {
+          "summary": "Partial profile",
+          "detail": "We could not find the full profile in the API. You can edit and save what is available."
+        },
+        "saved": {
+          "summary": "Profile updated",
+          "detail": "Your details were saved successfully."
+        },
+        "saveError": {
+          "summary": "Could not save",
+          "detailFallback": "Please try again in a moment."
+        },
+        "invalidFile": {
+          "summary": "Invalid file"
+        },
+        "photoOk": {
+          "summary": "Photo updated",
+          "detail": "The new photo is already on your profile."
+        },
+        "photoError": {
+          "summary": "Could not upload the photo",
+          "detailFallback": "Please try again in a moment."
+        }
+      }
+    },
+    "seguranca": {
+      "aside": {
+        "title": "Change password",
+        "body": "The current session stays active after the change. Use a strong password unique to this account.",
+        "bullets": {
+          "minLength": "At least 6 characters",
+          "complexity": "Number, uppercase, and special character",
+          "reuse": "Do not reuse passwords from other systems"
+        }
+      },
+      "fields": {
+        "current": {
+          "label": "Current password",
+          "placeholder": "Enter current password"
+        },
+        "new": {
+          "label": "New password",
+          "placeholder": "Create a strong password"
+        },
+        "confirm": {
+          "label": "Confirm new password",
+          "placeholder": "Repeat the new password"
+        }
+      },
+      "aria": {
+        "showPassword": "Show password",
+        "hidePassword": "Hide password"
+      },
+      "actions": {
+        "change": "Change password"
+      },
+      "errors": {
+        "currentRequired": "Enter the current password.",
+        "newInvalid": "The new password does not meet all requirements.",
+        "confirmRequired": "Confirm the new password.",
+        "mismatch": "Passwords do not match."
+      },
+      "toasts": {
+        "success": {
+          "summary": "Password changed",
+          "detail": "Use the new password on your next sign-in."
+        },
+        "error": {
+          "summary": "Could not change the password",
+          "detailFallback": "Check the current password and try again."
+        }
+      }
+    },
+    "conta": {
+      "session": {
+        "eyebrow": "Session on this device",
+        "fallbackName": "User"
+      },
+      "aria": {
+        "roles": "Roles"
+      },
+      "roles": {
+        "veterinario": "Veterinarian",
+        "dono": "Owner",
+        "operador": "Operator",
+        "admin": "Admin"
+      },
+      "partnerContext": {
+        "papelDono": "OWNER",
+        "papelOperador": "OPERATOR"
+      },
+      "actions": {
+        "logout": "Sign out of account"
+      },
+      "device": {
+        "title": "Device",
+        "subtitle": "Signing out only removes access on this computer.",
+        "body": "The token is cleared in this browser. Your data and cloud profile stay intact."
+      },
+      "prefs": {
+        "title": "Language",
+        "subtitle": "Choose the interface language for this panel.",
+        "body": "Your preference is saved on this device and applies to future visits."
+      },
+      "risk": {
+        "eyebrow": "Sensitive zone",
+        "title": "Deactivate profile",
+        "lede": "A reversible profile pause — different from signing out of the device or deleting the account.",
+        "actions": {
+          "deactivate": "Deactivate profile"
+        },
+        "points": {
+          "soft": {
+            "title": "Reversible",
+            "text": "Account data remains. You reactivate on the next sign-in."
+          },
+          "scope": {
+            "title": "Profile only",
+            "text": "Does not delete clinic, partner, or history — only pauses the active profile."
+          },
+          "notDelete": {
+            "title": "Not deletion",
+            "text": "Permanent closure (LGPD) is a different flow and does not appear here."
+          }
+        }
+      },
+      "inactivate": {
+        "dialog": {
+          "title": "Deactivate profile",
+          "lede": "Choose the reason for the pause. We will then confirm and end this session."
+        },
+        "loading": "Loading reasons…",
+        "fields": {
+          "reason": {
+            "label": "Reason",
+            "placeholder": "Select a reason"
+          },
+          "custom": {
+            "label": "Tell us more (required)",
+            "placeholder": "Describe the reason"
+          }
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm deactivation"
+        },
+        "errors": {
+          "noReasons": "No reasons available right now. Try again later.",
+          "loadReasons": "Could not load the reasons.",
+          "reasonRequired": "Select a reason to continue.",
+          "customMin": "Describe the reason with at least 3 characters.",
+          "failedFallback": "Could not deactivate the profile."
+        },
+        "toasts": {
+          "success": {
+            "summary": "Profile deactivated",
+            "detail": "Your session was ended. You can reactivate the profile on the next sign-in."
+          },
+          "error": {
+            "summary": "Deactivation failed"
+          }
+        }
+      }
+    }
+  }
+}

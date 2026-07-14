@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import Skeleton from 'primevue/skeleton'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { getPortalStatus } from '@/service/parceiro/parceiro-portal-service'
 import type { PortalStatus } from '@/service/parceiro/types'
 
@@ -16,6 +18,7 @@ withDefaults(
   },
 )
 
+const { t, locale } = useI18n()
 const { ensureContext, parceiroQuery } = useParceiroPortal()
 const status = ref<PortalStatus | null>(null)
 const loading = ref(true)
@@ -29,11 +32,19 @@ async function loadStatus() {
     await ensureContext()
     status.value = await getPortalStatus(parceiroQuery())
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Erro ao carregar credenciamento.'
+    error.value = err instanceof Error ? err.message : t('programas.cred.errorLoad')
   } finally {
     loading.value = false
   }
 }
+
+const auditadoEmLabel = computed(() => {
+  if (!status.value?.auditadoEm) {
+    return ''
+  }
+
+  return new Date(status.value.auditadoEm).toLocaleString(INTL_LOCALE[locale.value as Locale])
+})
 
 onMounted(() => {
   void loadStatus()
@@ -43,8 +54,8 @@ onMounted(() => {
 <template>
   <section id="credenciamento" class="cred-section" aria-labelledby="cred-section-title">
     <header class="cred-section__head">
-      <h3 id="cred-section-title">Credenciamento</h3>
-      <p>Situação da auditoria e liberação para operar no portal.</p>
+      <h3 id="cred-section-title">{{ t('programas.cred.sectionTitle') }}</h3>
+      <p>{{ t('programas.cred.sectionLede') }}</p>
     </header>
 
     <article
@@ -53,7 +64,7 @@ onMounted(() => {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label="Carregando credenciamento"
+      :aria-label="t('programas.cred.loadingAria')"
     >
       <div class="cred-card__row">
         <Skeleton width="9rem" height="0.85rem" border-radius="4px" />
@@ -74,27 +85,27 @@ onMounted(() => {
 
     <div v-else-if="error" class="cred-section__state cred-section__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadStatus">Tentar novamente</button>
+      <button type="button" @click="loadStatus">{{ t('programas.cred.retry') }}</button>
     </div>
 
     <article v-else-if="status" class="cred-card">
       <div class="cred-card__row">
-        <span>Auditoria da empresa</span>
+        <span>{{ t('programas.cred.rowAuditoria') }}</span>
         <PartnerStatusBadge :status="status.statusAuditoria" />
       </div>
       <div class="cred-card__row">
-        <span>Operação liberada</span>
-        <strong>{{ status.podeOperar ? 'Sim' : 'Não' }}</strong>
+        <span>{{ t('programas.cred.rowOperacao') }}</span>
+        <strong>{{ status.podeOperar ? t('programas.cred.yes') : t('programas.cred.no') }}</strong>
       </div>
       <div v-if="status.motivoAuditoria" class="cred-card__note">
-        <strong>Motivo informado</strong>
+        <strong>{{ t('programas.cred.motivoTitle') }}</strong>
         <p>{{ status.motivoAuditoria }}</p>
       </div>
       <p v-if="status.auditadoEm" class="cred-card__meta">
-        Última atualização: {{ new Date(status.auditadoEm).toLocaleString('pt-BR') }}
+        {{ t('programas.cred.lastUpdate', { data: auditadoEmLabel }) }}
       </p>
       <p v-if="!status.podeOperar" class="cred-card__hint">
-        Solicitações de programas ficam bloqueadas até a aprovação do credenciamento.
+        {{ t('programas.cred.blockedHint') }}
       </p>
     </article>
   </section>

@@ -1,5 +1,7 @@
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+import i18n from '@/i18n'
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
 
@@ -33,10 +35,6 @@ export const CLINICAL_MENU_ENABLED = false
 
 /** Equipe oculta no go-live até a operação do time estar pronta no portal. */
 export const EQUIPE_MENU_ENABLED = false
-
-const accountItems: AppNavigationItem[] = [
-  { label: 'Configurações', to: '/settings', icon: 'pi pi-cog' },
-]
 
 const clinicalItems: AppNavigationItem[] = [
   { label: 'Agenda', to: '/veterinario/agenda', icon: 'pi pi-calendar' },
@@ -130,20 +128,31 @@ function flattenSectionItems(section: AppNavigationSection) {
 }
 
 export function useAppNavigation() {
+  const { t, locale } = useI18n()
   const parceiroStore = useParceiroStore()
 
   const hasClinicalProfile = computed(
     () => CLINICAL_MENU_ENABLED && hasVeterinarioProfile(),
   )
 
+  const accountItems = computed<AppNavigationItem[]>(() => {
+    void locale.value
+    return [{ label: t('nav.items.settings'), to: '/settings', icon: 'pi pi-cog' }]
+  })
+
   const portalItems = computed<AppNavigationItem[]>(() => {
+    void locale.value
     const items: AppNavigationItem[] = [
-      { label: 'Programas', to: '/parceiro/programas', icon: 'pi pi-th-large' },
-      { label: 'Divulgação', to: '/parceiro/divulgacao', icon: 'pi pi-share-alt' },
+      { label: t('nav.items.programas'), to: '/parceiro/programas', icon: 'pi pi-th-large' },
+      { label: t('nav.items.divulgacao'), to: '/parceiro/divulgacao', icon: 'pi pi-share-alt' },
     ]
 
     if (parceiroStore.statusAfiliadoAtivo) {
-      items.push({ label: 'Financeiro', to: '/parceiro/carteira', icon: 'pi pi-wallet' })
+      items.push({
+        label: t('nav.items.financeiro'),
+        to: '/parceiro/carteira',
+        icon: 'pi pi-wallet',
+      })
     }
 
     if (EQUIPE_MENU_ENABLED) {
@@ -154,15 +163,16 @@ export function useAppNavigation() {
   })
 
   const homeGroups = computed<AppNavigationGroup[]>(() => {
+    void locale.value
     const groups: AppNavigationGroup[] = [
       {
         id: 'overview',
-        label: 'Painel',
-        items: [{ label: 'Visão geral', to: '/inicio', icon: 'pi pi-home' }],
+        label: t('nav.groups.overview'),
+        items: [{ label: t('nav.items.overview'), to: '/inicio', icon: 'pi pi-home' }],
       },
       {
         id: 'portal',
-        label: 'Portal',
+        label: t('nav.groups.portal'),
         items: mapHomeMenuItems(portalItems.value),
       },
     ]
@@ -176,8 +186,8 @@ export function useAppNavigation() {
 
     groups.push({
       id: 'account',
-      label: 'Conta',
-      items: mapHomeMenuItems(accountItems),
+      label: t('nav.groups.account'),
+      items: mapHomeMenuItems(accountItems.value),
     })
 
     return groups
@@ -197,18 +207,19 @@ export function useAppNavigation() {
   )
 
   const navigationSections = computed<AppNavigationSection[]>(() => {
+    void locale.value
     const sections: AppNavigationSection[] = [
       {
         id: 'home',
-        label: 'Início',
+        label: t('nav.sections.home'),
         icon: 'pi pi-home',
         items: [],
         groups: homeGroups.value,
-        panelSubtitle: 'Conteúdo geral',
+        panelSubtitle: t('nav.sections.homeSubtitle'),
       },
       {
         id: 'portal',
-        label: 'Portal',
+        label: t('nav.sections.portal'),
         icon: 'pi pi-briefcase',
         items: portalItems.value,
       },
@@ -233,9 +244,9 @@ export function useAppNavigation() {
 
     sections.push({
       id: 'account',
-      label: 'Conta',
+      label: t('nav.sections.account'),
       icon: 'pi pi-user',
-      items: accountItems,
+      items: accountItems.value,
     })
 
     return sections
@@ -293,18 +304,20 @@ export function resolveActiveSectionId(
 }
 
 export function resolvePageLabel(path: string, hash: string, sections: AppNavigationSection[]) {
+  const t = i18n.global.t.bind(i18n.global)
+
   if (path === '/inicio') {
-    return 'Visão geral'
+    return t('nav.pageLabels.overview')
   }
 
   const partnerLabels = [
-    { prefix: '/parceiro/carteira/saques', label: 'Detalhe do saque' },
-    { prefix: '/parceiro/carteira', label: 'Financeiro' },
-    { prefix: '/parceiro/programas', label: 'Programas de participação' },
-    { prefix: '/parceiro/divulgacao', label: 'Divulgação' },
+    { prefix: '/parceiro/carteira/saques', label: t('nav.pageLabels.saqueDetail') },
+    { prefix: '/parceiro/carteira', label: t('nav.pageLabels.financeiro') },
+    { prefix: '/parceiro/programas', label: t('nav.pageLabels.programas') },
+    { prefix: '/parceiro/divulgacao', label: t('nav.pageLabels.divulgacao') },
     { prefix: '/parceiro/equipe', label: 'Equipe' },
-    { prefix: '/parceiro/convite', label: 'Aceitar convite' },
-    { prefix: '/parceiro/selecionar', label: 'Selecionar parceiro' },
+    { prefix: '/parceiro/convite', label: t('nav.pageLabels.convite') },
+    { prefix: '/parceiro/selecionar', label: t('nav.pageLabels.selecionar') },
   ] as const
 
   for (const item of partnerLabels) {
@@ -314,7 +327,7 @@ export function resolvePageLabel(path: string, hash: string, sections: AppNaviga
   }
 
   if (path.startsWith('/parceiro')) {
-    return 'Portal'
+    return t('nav.pageLabels.portal')
   }
 
   for (const section of sections) {
@@ -334,10 +347,10 @@ export function resolvePageLabel(path: string, hash: string, sections: AppNaviga
   }
 
   if (path.startsWith('/settings')) {
-    return 'Configurações'
+    return t('nav.pageLabels.settings')
   }
 
-  return 'Painel'
+  return t('nav.pageLabels.fallback')
 }
 
 export function filterNavigationGroups(

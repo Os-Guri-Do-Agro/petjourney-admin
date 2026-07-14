@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { currentColors, isDarkMode } from '@/theme/color-mode'
 
@@ -12,11 +13,14 @@ export type PartnerTabItem = {
 const props = defineProps<{
   tabs: PartnerTabItem[]
   activeTab: string
+  ariaLabel?: string
 }>()
 
 const emit = defineEmits<{
   select: [tabId: string]
 }>()
+
+const { t } = useI18n()
 
 const tabStyle = computed(() => {
   const colors = currentColors.value
@@ -36,11 +40,17 @@ const tabStyle = computed(() => {
 const activeDescription = computed(
   () => props.tabs.find((tab) => tab.id === props.activeTab)?.description ?? '',
 )
+
+const resolvedAriaLabel = computed(
+  () =>
+    props.ariaLabel ??
+    t('frame.tabs.aria', { labels: props.tabs.map((tab) => tab.label).join(', ') }),
+)
 </script>
 
 <template>
   <div class="partner-tabs" :style="tabStyle">
-    <div class="partner-tabs__list" role="tablist" :aria-label="`Abas: ${tabs.map((t) => t.label).join(', ')}`">
+    <div class="partner-tabs__list" role="tablist" :aria-label="resolvedAriaLabel">
       <button
         v-for="tab in tabs"
         :id="`partner-tab-${tab.id}`"

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import ProgramaParticipacaoCard from '@/components/parceiro/ProgramaParticipacaoCard.vue'
 import PortalCredenciamentoSection from '@/components/parceiro/sections/PortalCredenciamentoSection.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { currentColors } from '@/theme/color-mode'
 
+const { t } = useI18n()
 const { store } = useParceiroPortal()
 
 const isLoading = computed(
@@ -34,26 +36,26 @@ const viewStyle = computed(() => {
   }
 })
 
-const activationSteps = [
+const activationSteps = computed(() => [
   {
     id: 'solicitar',
     number: '1',
-    title: 'Solicitar',
-    description: 'O dono pede a ativação do programa.',
+    title: t('programas.activation.step1.title'),
+    description: t('programas.activation.step1.desc'),
   },
   {
     id: 'analise',
     number: '2',
-    title: 'Em análise',
-    description: 'A equipe PetJourney revisa o pedido.',
+    title: t('programas.activation.step2.title'),
+    description: t('programas.activation.step2.desc'),
   },
   {
     id: 'ativo',
     number: '3',
-    title: 'Ativo',
-    description: 'Benefícios liberados para a empresa.',
+    title: t('programas.activation.step3.title'),
+    description: t('programas.activation.step3.desc'),
   },
-] as const
+])
 </script>
 
 <template>
@@ -62,16 +64,16 @@ const activationSteps = [
       <header class="prog-zone__head">
         <div class="prog-zone__title-row">
           <p class="prog-zone__index">01</p>
-          <h2 id="prog-cards-title">Programas disponíveis</h2>
+          <h2 id="prog-cards-title">{{ t('programas.available.title') }}</h2>
         </div>
-        <p>Solicite afiliado e/ou participativo conforme o modelo da sua empresa.</p>
+        <p>{{ t('programas.available.lede') }}</p>
       </header>
 
       <div
         id="programas"
         class="programas-view__grid"
         :aria-busy="isLoading || undefined"
-        :aria-label="isLoading ? 'Carregando programas' : undefined"
+        :aria-label="isLoading ? t('programas.available.loadingAria') : undefined"
         :role="isLoading ? 'status' : undefined"
       >
         <ProgramaParticipacaoCard modo="afiliado" :skeleton="isLoading" />
@@ -83,9 +85,9 @@ const activationSteps = [
       <header class="prog-zone__head">
         <div class="prog-zone__title-row">
           <p class="prog-zone__index">02</p>
-          <h2 id="activation-title">Como funciona a ativação</h2>
+          <h2 id="activation-title">{{ t('programas.activation.title') }}</h2>
         </div>
-        <p>Fluxo simples, com análise do time PetJourney.</p>
+        <p>{{ t('programas.activation.lede') }}</p>
       </header>
 
       <div class="activation-panel">
@@ -106,12 +108,10 @@ const activationSteps = [
 
         <p class="activation-panel__note">
           <template v-if="store.semAcessoParceiro">
-            Solicite afiliado e/ou participativo abaixo. O time PetJourney analisa o pedido e libera
-            o portal.
+            {{ t('programas.activation.noteNoAccess') }}
           </template>
           <template v-else>
-            Somente o dono da conta pode solicitar a ativação. Operadores acompanham o status, mas
-            não enviam pedidos.
+            {{ t('programas.activation.noteWithAccess') }}
           </template>
         </p>
       </div>
@@ -125,9 +125,9 @@ const activationSteps = [
       <header class="prog-zone__head">
         <div class="prog-zone__title-row">
           <p class="prog-zone__index">03</p>
-          <h2 id="cred-zone-title">Credenciamento</h2>
+          <h2 id="cred-zone-title">{{ t('programas.cred.zoneTitle') }}</h2>
         </div>
-        <p>Status da auditoria necessária para liberar solicitações.</p>
+        <p>{{ t('programas.cred.zoneLede') }}</p>
       </header>
 
       <PortalCredenciamentoSection :skeleton="isLoading" />

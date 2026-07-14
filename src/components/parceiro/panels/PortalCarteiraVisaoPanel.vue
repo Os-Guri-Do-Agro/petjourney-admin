@@ -3,6 +3,7 @@ import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PartnerFocusCard from '@/components/parceiro/PartnerFocusCard.vue'
@@ -24,6 +25,7 @@ const emit = defineEmits<{
   needsProgramas: []
 }>()
 
+const { t } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 
@@ -42,35 +44,32 @@ const CONTACT_EMAIL = 'atendimento@petjourney.health'
 const CONTACT_WHATSAPP_DISPLAY = '55 67 9883-7848'
 const CONTACT_WHATSAPP_HREF = 'https://wa.me/556798837848'
 
-const helpItems = [
+const helpItems = computed(() => [
   {
     id: 'comissao',
     icon: 'pi pi-share-alt',
-    title: 'Como entra saldo',
-    description:
-      'Indicações que viram assinantes geram comissão na carteira, quando o programa afiliado está ativo.',
+    title: t('carteira.help.comissao.title'),
+    description: t('carteira.help.comissao.body'),
   },
   {
     id: 'saldos',
     icon: 'pi pi-wallet',
-    title: 'Saldo total e sacável',
-    description:
-      'O total acumula créditos; o sacável libera após a janela de segurança de 14 dias por crédito.',
+    title: t('carteira.help.saldos.title'),
+    description: t('carteira.help.saldos.body'),
   },
   {
     id: 'pix',
     icon: 'pi pi-qrcode',
-    title: 'PIX obrigatório',
-    description: 'Cadastre a chave PIX da empresa antes de pedir saque. Só o dono da conta altera PIX e solicita saque.',
+    title: t('carteira.help.pix.title'),
+    description: t('carteira.help.pix.body'),
   },
   {
     id: 'ciclo',
     icon: 'pi pi-calendar',
-    title: 'Ciclo de pagamento',
-    description:
-      'Saque mínimo de R$ 50,00. Corte no dia 27 e liquidação orientativa até o dia 5 — acompanhe na aba Saques.',
+    title: t('carteira.help.ciclo.title'),
+    description: t('carteira.help.ciclo.body'),
   },
-] as const
+])
 
 const canRequestWithdraw = computed(() => {
   if (!carteira.value || !store.isDono) {
@@ -115,7 +114,7 @@ async function loadCarteira() {
       return
     }
 
-    error.value = err instanceof Error ? err.message : 'Erro ao carregar carteira.'
+    error.value = err instanceof Error ? err.message : t('carteira.visao.errorLoad')
   } finally {
     loading.value = false
   }
@@ -130,13 +129,13 @@ async function savePix() {
 
   try {
     await updateCarteiraPix(chavePix.value.trim(), parceiroQuery())
-    toast.add({ severity: 'success', summary: 'Chave PIX salva', life: 3000 })
+    toast.add({ severity: 'success', summary: t('carteira.toast.pixSaved'), life: 3000 })
     await loadCarteira()
   } catch (err) {
     toast.add({
       severity: 'error',
-      summary: 'Erro ao salvar PIX',
-      detail: err instanceof Error ? err.message : 'Tente novamente.',
+      summary: t('carteira.toast.pixSaveError'),
+      detail: err instanceof Error ? err.message : t('carteira.toast.tryAgain'),
       life: 5000,
     })
   } finally {
@@ -150,8 +149,8 @@ async function requestWithdraw() {
   if (centavos == null || centavos < minSaqueCentavos) {
     toast.add({
       severity: 'warn',
-      summary: 'Valor inválido',
-      detail: 'O saque mínimo é R$ 50,00.',
+      summary: t('carteira.toast.invalidValue'),
+      detail: t('carteira.toast.minWithdraw'),
       life: 4000,
     })
     return
@@ -160,8 +159,10 @@ async function requestWithdraw() {
   if (carteira.value && centavos > carteira.value.saldoSacavelCentavos) {
     toast.add({
       severity: 'warn',
-      summary: 'Saldo insuficiente',
-      detail: `O máximo sacável agora é ${formatCentavosToBrl(carteira.value.saldoSacavelCentavos)}.`,
+      summary: t('carteira.toast.insufficient'),
+      detail: t('carteira.toast.maxWithdraw', {
+        valor: formatCentavosToBrl(carteira.value.saldoSacavelCentavos),
+      }),
       life: 4000,
     })
     return
@@ -170,8 +171,8 @@ async function requestWithdraw() {
   if (!carteira.value?.chavePix) {
     toast.add({
       severity: 'warn',
-      summary: 'PIX obrigatório',
-      detail: 'Cadastre uma chave PIX antes de solicitar saque.',
+      summary: t('carteira.toast.pixRequired'),
+      detail: t('carteira.toast.pixRequiredDetail'),
       life: 4000,
     })
     return
@@ -183,8 +184,8 @@ async function requestWithdraw() {
     await solicitarSaque(centavos, parceiroQuery())
     toast.add({
       severity: 'success',
-      summary: 'Saque solicitado',
-      detail: 'Acompanhe na aba Saques.',
+      summary: t('carteira.toast.withdrawRequested'),
+      detail: t('carteira.toast.withdrawRequestedDetail'),
       life: 4000,
     })
     valorSaque.value = ''
@@ -192,8 +193,8 @@ async function requestWithdraw() {
   } catch (err) {
     toast.add({
       severity: 'error',
-      summary: 'Erro no saque',
-      detail: err instanceof Error ? err.message : 'Tente novamente.',
+      summary: t('carteira.toast.withdrawError'),
+      detail: err instanceof Error ? err.message : t('carteira.toast.tryAgain'),
       life: 5000,
     })
   } finally {
@@ -214,7 +215,7 @@ onMounted(() => {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label="Carregando carteira"
+      :aria-label="t('carteira.visao.loadingAria')"
     >
       <section class="carteira-metrics" aria-hidden="true">
         <PartnerFocusCard class="metric metric--focus metric--skeleton">
@@ -268,53 +269,52 @@ onMounted(() => {
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadCarteira">Tentar novamente</button>
+      <button type="button" @click="loadCarteira">{{ t('carteira.visao.retry') }}</button>
     </div>
 
     <template v-else-if="carteira">
       <section class="carteira-metrics">
         <PartnerFocusCard class="metric metric--focus">
-          <span>Saldo sacável</span>
+          <span>{{ t('carteira.visao.saldoSacavel') }}</span>
           <strong>{{ formatCentavosToBrl(carteira.saldoSacavelCentavos) }}</strong>
-          <small>Disponível para saque via PIX</small>
+          <small>{{ t('carteira.visao.saldoSacavelHint') }}</small>
         </PartnerFocusCard>
         <article class="metric">
-          <span>Saldo total</span>
+          <span>{{ t('carteira.visao.saldoTotal') }}</span>
           <strong>{{ formatCentavosToBrl(carteira.saldoTotalCentavos) }}</strong>
         </article>
         <article class="metric">
-          <span>Total sacado</span>
+          <span>{{ t('carteira.visao.totalSacado') }}</span>
           <strong>{{ formatCentavosToBrl(carteira.totalSacadoCentavos) }}</strong>
         </article>
       </section>
 
       <p v-if="carteira.bloqueadoParaSaque" class="carteira-alert">
-        Saques temporariamente bloqueados (revisão antifraude ou saldo negativo).
+        {{ t('carteira.visao.alertBlocked') }}
       </p>
 
       <p v-else-if="carteira.saldoSacavelCentavos === 0 && carteira.saldoTotalCentavos > 0" class="carteira-alert">
-        Saldo em período de hold (14 dias por crédito). O valor ainda não está disponível para saque.
+        {{ t('carteira.visao.alertHold') }}
       </p>
 
       <p v-if="showComissaoDisabledNotice" class="carteira-alert">
-        Comissões por indicação estão temporariamente desativadas no ambiente — a carteira pode
-        permanecer zerada mesmo com indicações ativas. Isso não é um erro do seu cadastro.
+        {{ t('carteira.visao.alertComissaoDisabled') }}
       </p>
 
       <div class="carteira-actions">
         <section class="carteira-panel">
-          <h3>Chave PIX</h3>
+          <h3>{{ t('carteira.visao.pix.title') }}</h3>
           <div class="carteira-form">
             <AuthTextField
               id="chave-pix"
               v-model="chavePix"
               :disabled="!store.isDono || savingPix"
-              hint="Necessária para solicitar saques."
-              label="Chave PIX"
-              placeholder="email@empresa.com ou CNPJ"
+              :hint="t('carteira.visao.pix.hint')"
+              :label="t('carteira.visao.pix.label')"
+              :placeholder="t('carteira.visao.pix.placeholder')"
             />
             <Button
-              label="Salvar chave"
+              :label="t('carteira.visao.pix.save')"
               :disabled="!store.isDono"
               :loading="savingPix"
               @click="savePix"
@@ -323,10 +323,9 @@ onMounted(() => {
         </section>
 
         <section class="carteira-panel">
-          <h3>Solicitar saque</h3>
+          <h3>{{ t('carteira.visao.saque.title') }}</h3>
           <p class="carteira-hint">
-            Mínimo {{ formatCentavosToBrl(minSaqueCentavos) }}. Ciclo: corte dia 27, pagamento até
-            dia 5.
+            {{ t('carteira.visao.saque.hint', { valor: formatCentavosToBrl(minSaqueCentavos) }) }}
           </p>
           <div class="carteira-form">
             <AuthTextField
@@ -335,16 +334,16 @@ onMounted(() => {
               :disabled="!store.isDono || requestingSaque || carteira.bloqueadoParaSaque"
               inputmode="numeric"
               autocomplete="off"
-              label="Valor (R$)"
-              placeholder="0,00"
+              :label="t('carteira.visao.saque.valorLabel')"
+              :placeholder="t('carteira.visao.saque.valorPlaceholder')"
               @update:model-value="onValorSaqueInput"
             >
               <template #leading>
-                <span class="carteira-currency">R$</span>
+                <span class="carteira-currency">{{ t('carteira.visao.saque.currency') }}</span>
               </template>
             </AuthTextField>
             <Button
-              label="Solicitar saque"
+              :label="t('carteira.visao.saque.submit')"
               :disabled="!canRequestWithdraw"
               :loading="requestingSaque"
               @click="requestWithdraw"
@@ -356,8 +355,8 @@ onMounted(() => {
       <section class="carteira-help" aria-labelledby="carteira-help-title">
         <header class="carteira-help__head">
           <div>
-            <h3 id="carteira-help-title">Como funciona a carteira</h3>
-            <p>Detalhes úteis antes de cadastrar PIX ou pedir saque.</p>
+            <h3 id="carteira-help-title">{{ t('carteira.help.title') }}</h3>
+            <p>{{ t('carteira.help.lede') }}</p>
           </div>
           <div class="carteira-help__contacts">
             <a
@@ -365,7 +364,7 @@ onMounted(() => {
               :href="`mailto:${CONTACT_EMAIL}`"
             >
               <i class="pi pi-envelope" aria-hidden="true" />
-              E-mail
+              {{ t('carteira.help.contactEmail') }}
             </a>
             <a
               class="carteira-help__contact carteira-help__contact--whatsapp"
@@ -374,7 +373,7 @@ onMounted(() => {
               rel="noopener noreferrer"
             >
               <i class="pi pi-whatsapp" aria-hidden="true" />
-              WhatsApp
+              {{ t('carteira.help.contactWhatsapp') }}
             </a>
           </div>
         </header>
@@ -392,9 +391,9 @@ onMounted(() => {
         </ul>
 
         <p class="carteira-help__footer">
-          Dúvidas?
+          {{ t('carteira.help.footerPrefix') }}
           <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a>
-          ou WhatsApp
+          {{ t('carteira.help.footerOrWhatsapp') }}
           <a :href="CONTACT_WHATSAPP_HREF" target="_blank" rel="noopener noreferrer">
             {{ CONTACT_WHATSAPP_DISPLAY }}
           </a>

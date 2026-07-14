@@ -2,9 +2,12 @@
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+import { ApiError } from '@/service/api'
 import { getCarteira, solicitarModo } from '@/service/parceiro/parceiro-portal-service'
 import type { ModoParticipacao, StatusModoParceiro } from '@/service/parceiro/types'
 import { formatCentavosToBrl } from '@/utils/format/money'
@@ -13,7 +16,6 @@ import {
   canSolicitarModo,
   getModoCardCopy,
   resolveModoCta,
-  resolveSolicitarModoError,
 } from '@/utils/parceiro/modo-participacao'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import { currentColors } from '@/theme/color-mode'
@@ -28,6 +30,7 @@ const props = withDefaults(
   },
 )
 
+const { t, locale } = useI18n()
 const toast = useToast()
 const { store, parceiroQuery } = useParceiroPortal()
 const { focusSurfaceStyle } = usePartnerFocusSurface()
@@ -68,7 +71,19 @@ const cardStyle = computed(() => {
   }
 })
 
-const meta = computed(() => getModoCardCopy(props.modo))
+const meta = computed(() => {
+  const copy = getModoCardCopy(props.modo)
+  const ns = `programas.card.${props.modo}` as const
+
+  return {
+    icon: copy.icon,
+    tone: copy.tone,
+    title: t(`${ns}.title`),
+    subtitle: t(`${ns}.subtitle`),
+    description: t(`${ns}.description`),
+    features: [t(`${ns}.feature1`), t(`${ns}.feature2`), t(`${ns}.feature3`)],
+  }
+})
 
 const modoStatus = computed<StatusModoParceiro>(() => {
   if (props.modo === 'afiliado') {
@@ -95,24 +110,42 @@ const showSolicitarButton = computed(
   () => cta.value.type === 'solicitar' || cta.value.type === 'solicitar-novamente',
 )
 
-const solicitarLabel = computed(() => {
-  if (cta.value.type === 'solicitar' || cta.value.type === 'solicitar-novamente') {
-    return cta.value.label
+const ctaLabel = computed(() => {
+  switch (cta.value.type) {
+    case 'solicitar':
+      return t('programas.card.cta.solicitar')
+    case 'solicitar-novamente':
+      return t('programas.card.cta.solicitarNovamente')
+    case 'aguardando':
+      return t('programas.card.cta.aguardando')
+    case 'carteira':
+      return t('programas.card.cta.carteira')
+    default:
+      return ''
   }
-
-  return ''
 })
 
+const STATUS_I18N_KEYS: Record<StatusModoParceiro, string> = {
+  NAO_SOLICITADO: 'naoSolicitado',
+  SOLICITADO: 'solicitado',
+  ATIVO: 'ativo',
+  REJEITADO: 'rejeitado',
+  SUSPENSO: 'suspenso',
+}
+
 const badge = computed(() => {
-  const labels: Record<StatusModoParceiro, { label: string; icon: string }> = {
-    NAO_SOLICITADO: { label: 'Não ativo', icon: 'pi pi-minus-circle' },
-    SOLICITADO: { label: 'Em análise', icon: 'pi pi-clock' },
-    ATIVO: { label: 'Ativo', icon: 'pi pi-check' },
-    REJEITADO: { label: 'Recusado', icon: 'pi pi-times' },
-    SUSPENSO: { label: 'Suspenso', icon: 'pi pi-ban' },
+  const icons: Record<StatusModoParceiro, string> = {
+    NAO_SOLICITADO: 'pi pi-minus-circle',
+    SOLICITADO: 'pi pi-clock',
+    ATIVO: 'pi pi-check',
+    REJEITADO: 'pi pi-times',
+    SUSPENSO: 'pi pi-ban',
   }
 
-  return labels[modoStatus.value]
+  return {
+    label: t(`programas.card.status.${STATUS_I18N_KEYS[modoStatus.value]}`),
+    icon: icons[modoStatus.value],
+  }
 })
 
 const ativoDesdeLabel = computed(() => {
@@ -122,7 +155,7 @@ const ativoDesdeLabel = computed(() => {
     return null
   }
 
-  return new Date(raw).toLocaleDateString('pt-BR', {
+  return new Date(raw).toLocaleDateString(INTL_LOCALE[locale.value as Locale], {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -136,6 +169,36 @@ const saldoLabel = computed(() => {
 
   return formatCentavosToBrl(saldoSacavelCentavos.value)
 })
+
+function resolveSolicitarErrorMessage(error: unknown) {
+  if (!(error instanceof ApiError)) {
+    return error instanceof Error ? error.message : t('programas.card.error.generic')
+  }
+
+  if (error.statusCode === 403) {
+    return t('programas.card.error.forbidden')
+  }
+
+  if (error.statusCode === 409) {
+    const hint = `${error.message} ${error.error ?? ''}`.toLowerCase()
+
+    if (hint.includes('afiliado_nao_ativo')) {
+      return t('programas.card.error.afiliadoNaoAtivo')
+    }
+
+    if (hint.includes('operavel') || hint.includes('operável')) {
+      return t('programas.card.error.notOperable')
+    }
+
+    if (hint.includes('solicitado') || hint.includes('ativo')) {
+      return t('programas.card.error.alreadyRequested')
+    }
+
+    return error.message
+  }
+
+  return error.message
+}
 
 async function loadCarteiraResumo() {
   if (props.modo !== 'afiliado' || modoStatus.value !== 'ATIVO') {
@@ -155,8 +218,8 @@ async function handleSolicitar() {
   if (!canManageSolicitacao.value) {
     toast.add({
       severity: 'warn',
-      summary: 'Ação indisponível',
-      detail: 'Apenas o dono da empresa pode solicitar programas.',
+      summary: t('programas.card.toast.actionUnavailable'),
+      detail: t('programas.card.toast.ownerOnly'),
       life: 4000,
     })
     return
@@ -173,8 +236,8 @@ async function handleSolicitar() {
     store.patchModoStatus(result.modo, result.status)
     toast.add({
       severity: 'success',
-      summary: 'Solicitação enviada',
-      detail: 'Aguarde a análise do time PetJourney.',
+      summary: t('programas.card.toast.sent'),
+      detail: t('programas.card.toast.sentDetail'),
       life: 4000,
     })
 
@@ -190,8 +253,8 @@ async function handleSolicitar() {
   } catch (err) {
     toast.add({
       severity: 'error',
-      summary: 'Erro ao solicitar',
-      detail: resolveSolicitarModoError(err),
+      summary: t('programas.card.toast.error'),
+      detail: resolveSolicitarErrorMessage(err),
       life: 5000,
     })
   } finally {
@@ -280,7 +343,9 @@ watch(modoStatus, () => {
 
     <p class="programa-card__description">
       {{ meta.description }}
-      <span v-if="modo === 'participativo'" class="programa-card__soon">(Em breve.)</span>
+      <span v-if="modo === 'participativo'" class="programa-card__soon">{{
+        t('programas.card.participativo.soon')
+      }}</span>
     </p>
 
     <ul class="programa-card__features">
@@ -295,11 +360,11 @@ watch(modoStatus, () => {
       class="programa-card__info programa-card__info--success"
     >
       <div>
-        <span>Saldo disponível</span>
+        <span>{{ t('programas.card.info.saldo') }}</span>
         <strong>{{ saldoLabel }}</strong>
       </div>
       <div v-if="ativoDesdeLabel">
-        <span>Ativo desde</span>
+        <span>{{ t('programas.card.info.ativoDesde') }}</span>
         <strong>{{ ativoDesdeLabel }}</strong>
       </div>
     </div>
@@ -309,7 +374,7 @@ watch(modoStatus, () => {
       class="programa-card__info programa-card__info--pending"
     >
       <i class="pi pi-clock" aria-hidden="true" />
-      <p>Sua solicitação foi enviada e está aguardando análise da equipe PetJourney.</p>
+      <p>{{ t('programas.card.info.pending') }}</p>
     </div>
 
     <div
@@ -320,8 +385,8 @@ watch(modoStatus, () => {
       <p>
         {{
           modoStatus === 'REJEITADO'
-            ? 'A solicitação foi recusada. Você pode enviar um novo pedido quando fizer sentido.'
-            : 'O programa foi suspenso. Solicite novamente após alinhar com o time PetJourney.'
+            ? t('programas.card.info.rejected')
+            : t('programas.card.info.suspended')
         }}
       </p>
     </div>
@@ -335,7 +400,7 @@ watch(modoStatus, () => {
         @click="handleSolicitar"
       >
         <i v-if="submitting" class="pi pi-spin pi-spinner" aria-hidden="true" />
-        <span>{{ solicitarLabel }}</span>
+        <span>{{ ctaLabel }}</span>
       </button>
 
       <RouterLink
@@ -343,7 +408,7 @@ watch(modoStatus, () => {
         class="programa-card__button programa-card__button--primary"
         :to="cta.to"
       >
-        <span>{{ cta.label }}</span>
+        <span>{{ ctaLabel }}</span>
         <i class="pi pi-arrow-right" aria-hidden="true" />
       </RouterLink>
 
@@ -353,14 +418,14 @@ watch(modoStatus, () => {
         type="button"
         disabled
       >
-        {{ cta.label }}
+        {{ ctaLabel }}
       </button>
 
       <p
         v-else-if="modoStatus === 'ATIVO' && modo === 'participativo'"
         class="programa-card__active-note"
       >
-        Programa ativo. Benefícios operacionais são comunicados pela equipe PetJourney.
+        {{ t('programas.card.activeNoteParticipativo') }}
       </p>
     </div>
   </article>

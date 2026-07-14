@@ -5,8 +5,10 @@ import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import { ApiError } from '@/service/api'
 import { authSessionVersion, clearAuthSession, getAuthUser } from '@/service/auth/auth-session'
 import {
@@ -18,6 +20,7 @@ import { useParceiroStore } from '@/stores/parceiro'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { currentColors } from '@/theme/color-mode'
 
+const { t } = useI18n()
 const router = useRouter()
 const store = useParceiroStore()
 const usuarioPerfilStore = useUsuarioPerfilStore()
@@ -38,7 +41,10 @@ const sessionUser = computed(() => {
 })
 
 const displayName = computed(
-  () => usuarioPerfilStore.displayName || sessionUser.value?.nome?.trim() || 'Usuário',
+  () =>
+    usuarioPerfilStore.displayName ||
+    sessionUser.value?.nome?.trim() ||
+    t('settings.conta.session.fallbackName'),
 )
 
 const initials = computed(() => usuarioPerfilStore.initials)
@@ -54,20 +60,22 @@ const partnerLabel = computed(() => {
     return ''
   }
 
-  const papel = store.isDono ? 'DONO' : store.papel ?? 'OPERADOR'
+  const papel = store.isDono
+    ? t('settings.conta.partnerContext.papelDono')
+    : t('settings.conta.partnerContext.papelOperador')
   return `${store.parceiroNome} · ${papel}`
 })
 
 const roleHints = computed(() => {
   const hints: string[] = []
   if (sessionUser.value?.veterinarioId) {
-    hints.push('Veterinário')
+    hints.push(t('settings.conta.roles.veterinario'))
   }
   if (store.loadState === 'ready' && store.parceiroNome) {
-    hints.push(store.isDono ? 'Dono' : 'Operador')
+    hints.push(store.isDono ? t('settings.conta.roles.dono') : t('settings.conta.roles.operador'))
   }
   if (sessionUser.value?.isSystemAdmin) {
-    hints.push('Admin')
+    hints.push(t('settings.conta.roles.admin'))
   }
   return hints
 })
@@ -93,26 +101,26 @@ const dialogStyle = computed(() => {
   }
 })
 
-const deactivatePoints = [
+const deactivatePoints = computed(() => [
   {
     id: 'soft',
     icon: 'pi pi-replay',
-    title: 'Reversível',
-    text: 'Os dados da conta permanecem. Você reativa no próximo login.',
+    title: t('settings.conta.risk.points.soft.title'),
+    text: t('settings.conta.risk.points.soft.text'),
   },
   {
     id: 'scope',
     icon: 'pi pi-shield',
-    title: 'Só o perfil',
-    text: 'Não apaga clínica, parceiro nem histórico — só pausa o perfil ativo.',
+    title: t('settings.conta.risk.points.scope.title'),
+    text: t('settings.conta.risk.points.scope.text'),
   },
   {
     id: 'not-delete',
     icon: 'pi pi-ban',
-    title: 'Não é exclusão',
-    text: 'Encerramento permanente (LGPD) é outro fluxo e não aparece aqui.',
+    title: t('settings.conta.risk.points.notDelete.title'),
+    text: t('settings.conta.risk.points.notDelete.text'),
   },
-] as const
+])
 
 function handleLogout() {
   store.reset()
@@ -137,11 +145,13 @@ async function openInactivateDialog() {
   try {
     reasons.value = await getUsersMeInactiveReasons()
     if (reasons.value.length === 0) {
-      reasonsError.value = 'Nenhum motivo disponível no momento. Tente novamente mais tarde.'
+      reasonsError.value = t('settings.conta.inactivate.errors.noReasons')
     }
   } catch (error) {
     reasonsError.value =
-      error instanceof Error ? error.message : 'Não foi possível carregar os motivos.'
+      error instanceof Error
+        ? error.message
+        : t('settings.conta.inactivate.errors.loadReasons')
   } finally {
     loadingReasons.value = false
   }
@@ -160,12 +170,12 @@ function validateInactivate() {
   customReasonError.value = ''
 
   if (!selectedReasonId.value) {
-    reasonsError.value = 'Selecione um motivo para continuar.'
+    reasonsError.value = t('settings.conta.inactivate.errors.reasonRequired')
     return false
   }
 
   if (showCustomReason.value && customReason.value.trim().length < 3) {
-    customReasonError.value = 'Descreva o motivo com pelo menos 3 caracteres.'
+    customReasonError.value = t('settings.conta.inactivate.errors.customMin')
     return false
   }
 
@@ -190,8 +200,8 @@ async function handleInactivate() {
     dialogVisible.value = false
     toast.add({
       severity: 'success',
-      summary: 'Perfil desativado',
-      detail: 'Sua sessão foi encerrada. Você pode reativar o perfil no próximo login.',
+      summary: t('settings.conta.inactivate.toasts.success.summary'),
+      detail: t('settings.conta.inactivate.toasts.success.detail'),
       life: 5000,
     })
     await router.replace('/auth/login')
@@ -201,11 +211,11 @@ async function handleInactivate() {
         ? error.message
         : error instanceof Error
           ? error.message
-          : 'Não foi possível desativar o perfil.'
+          : t('settings.conta.inactivate.errors.failedFallback')
 
     toast.add({
       severity: 'error',
-      summary: 'Falha ao desativar',
+      summary: t('settings.conta.inactivate.toasts.error.summary'),
       detail,
       life: 5000,
     })
@@ -231,7 +241,7 @@ watch(showCustomReason, (allowed) => {
           <template v-else>{{ initials }}</template>
         </span>
         <div class="conta-session__copy">
-          <p class="conta-session__eyebrow">Sessão neste dispositivo</p>
+          <p class="conta-session__eyebrow">{{ t('settings.conta.session.eyebrow') }}</p>
           <h2 id="conta-session-title">{{ displayName }}</h2>
           <p class="conta-session__email">{{ sessionEmail }}</p>
           <p v-if="partnerLabel" class="conta-session__meta">
@@ -242,12 +252,16 @@ watch(showCustomReason, (allowed) => {
       </div>
 
       <div class="conta-session__aside">
-        <ul v-if="roleHints.length" class="conta-session__roles" aria-label="Papéis">
+        <ul
+          v-if="roleHints.length"
+          class="conta-session__roles"
+          :aria-label="t('settings.conta.aria.roles')"
+        >
           <li v-for="role in roleHints" :key="role">{{ role }}</li>
         </ul>
         <Button
           class="conta-session__logout"
-          label="Sair da conta"
+          :label="t('settings.conta.actions.logout')"
           severity="danger"
           outlined
           type="button"
@@ -264,40 +278,41 @@ watch(showCustomReason, (allowed) => {
             <i class="pi pi-desktop" />
           </span>
           <div>
-            <h3>Dispositivo</h3>
-            <p>Encerrar só remove o acesso neste computador.</p>
+            <h3>{{ t('settings.conta.device.title') }}</h3>
+            <p>{{ t('settings.conta.device.subtitle') }}</p>
           </div>
         </header>
         <p class="conta-panel__body">
-          O token fica limpo neste browser. Seus dados e o perfil na nuvem continuam intactos.
+          {{ t('settings.conta.device.body') }}
         </p>
       </article>
 
-      <article class="conta-panel conta-panel--muted">
+      <article class="conta-panel">
         <header class="conta-panel__head">
-          <span class="conta-panel__icon conta-panel__icon--muted" aria-hidden="true">
-            <i class="pi pi-sliders-h" />
+          <span class="conta-panel__icon" aria-hidden="true">
+            <i class="pi pi-language" />
           </span>
           <div>
-            <h3>Preferências avançadas</h3>
-            <p>Empresa, equipe e integrações.</p>
+            <h3>{{ t('settings.conta.prefs.title') }}</h3>
+            <p>{{ t('settings.conta.prefs.subtitle') }}</p>
           </div>
         </header>
         <p class="conta-panel__body">
-          Ainda não liberadas neste go-live. Quando chegarem, entram nesta seção.
+          {{ t('settings.conta.prefs.body') }}
         </p>
+        <LanguageSwitcher variant="settings" />
       </article>
     </div>
 
     <section class="conta-risk" aria-labelledby="conta-risk-title">
       <header class="conta-risk__head">
         <div>
-          <p class="conta-risk__eyebrow">Zona sensível</p>
-          <h3 id="conta-risk-title">Desativar perfil</h3>
-          <p>Pausa reversível do perfil — diferente de sair do dispositivo ou excluir a conta.</p>
+          <p class="conta-risk__eyebrow">{{ t('settings.conta.risk.eyebrow') }}</p>
+          <h3 id="conta-risk-title">{{ t('settings.conta.risk.title') }}</h3>
+          <p>{{ t('settings.conta.risk.lede') }}</p>
         </div>
         <Button
-          label="Desativar perfil"
+          :label="t('settings.conta.risk.actions.deactivate')"
           severity="danger"
           type="button"
           icon="pi pi-user-minus"
@@ -326,28 +341,30 @@ watch(showCustomReason, (allowed) => {
     :dismissable-mask="!submitting"
     :closable="!submitting"
     class="inativ-dialog"
-    header="Desativar perfil"
+    :header="t('settings.conta.inactivate.dialog.title')"
     @hide="closeInactivateDialog"
   >
     <div class="inativ-dialog__body" :style="dialogStyle">
       <p class="inativ-dialog__lede">
-        Escolha o motivo da pausa. Depois confirmaremos e encerraremos esta sessão.
+        {{ t('settings.conta.inactivate.dialog.lede') }}
       </p>
 
       <div v-if="loadingReasons" class="inativ-dialog__loading" role="status">
         <i class="pi pi-spin pi-spinner" aria-hidden="true" />
-        Carregando motivos…
+        {{ t('settings.conta.inactivate.loading') }}
       </div>
 
       <template v-else>
-        <label class="inativ-dialog__label" for="inativ-motivo">Motivo</label>
+        <label class="inativ-dialog__label" for="inativ-motivo">{{
+          t('settings.conta.inactivate.fields.reason.label')
+        }}</label>
         <Select
           id="inativ-motivo"
           v-model="selectedReasonId"
           :options="reasons"
           option-label="label"
           option-value="id"
-          placeholder="Selecione um motivo"
+          :placeholder="t('settings.conta.inactivate.fields.reason.placeholder')"
           class="inativ-dialog__select"
           :disabled="submitting || reasons.length === 0"
         />
@@ -357,14 +374,16 @@ watch(showCustomReason, (allowed) => {
         <p v-if="reasonsError" class="inativ-dialog__error" role="alert">{{ reasonsError }}</p>
 
         <div v-if="showCustomReason" class="inativ-dialog__custom">
-          <label class="inativ-dialog__label" for="inativ-custom">Conte mais (obrigatório)</label>
+          <label class="inativ-dialog__label" for="inativ-custom">{{
+            t('settings.conta.inactivate.fields.custom.label')
+          }}</label>
           <Textarea
             id="inativ-custom"
             v-model="customReason"
             rows="3"
             auto-resize
             class="inativ-dialog__textarea"
-            placeholder="Descreva o motivo"
+            :placeholder="t('settings.conta.inactivate.fields.custom.placeholder')"
             :disabled="submitting"
           />
           <p v-if="customReasonError" class="inativ-dialog__error" role="alert">
@@ -376,7 +395,7 @@ watch(showCustomReason, (allowed) => {
 
     <template #footer>
       <Button
-        label="Cancelar"
+        :label="t('settings.conta.inactivate.actions.cancel')"
         severity="secondary"
         text
         type="button"
@@ -384,7 +403,7 @@ watch(showCustomReason, (allowed) => {
         @click="closeInactivateDialog"
       />
       <Button
-        label="Confirmar desativação"
+        :label="t('settings.conta.inactivate.actions.confirm')"
         severity="danger"
         type="button"
         icon="pi pi-user-minus"
@@ -593,6 +612,10 @@ watch(showCustomReason, (allowed) => {
   color: var(--partner-muted);
   font-size: 0.88rem;
   line-height: 1.5;
+}
+
+.conta-panel :deep(.language-switcher) {
+  margin-top: 0.85rem;
 }
 
 .conta-risk {

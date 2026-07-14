@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
 import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
 import {
   filterNavigationGroups,
@@ -30,6 +32,7 @@ import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 /** Alinhado a `.theme-switch__thumb { transition: transform 240ms }` */
 const THEME_SWITCH_DURATION_MS = 240
 
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const drawerOpen = ref(true)
@@ -196,7 +199,10 @@ function handleSectionChange(sectionId: string) {
 const initials = computed(() => usuarioPerfilStore.initials)
 
 const headerDisplayName = computed(
-  () => usuarioPerfilStore.displayName || authUser.value?.nome || 'Veterinário',
+  () =>
+    usuarioPerfilStore.displayName ||
+    authUser.value?.nome ||
+    t('shell.user.fallbackName'),
 )
 
 const headerAvatarUrl = computed(() => usuarioPerfilStore.avatarUrl)
@@ -244,8 +250,12 @@ onUnmounted(() => {
 <template>
   <div class="app-shell" :class="shellClasses" :style="shellStyle">
     <aside class="app-navigator" :aria-hidden="!drawerOpen">
-      <nav class="section-rail" aria-label="Seções do painel">
-        <RouterLink class="rail-brand" :to="defaultLandingPath" aria-label="PetJourney">
+      <nav class="section-rail" :aria-label="t('shell.aria.sections')">
+        <RouterLink
+          class="rail-brand"
+          :to="defaultLandingPath"
+          :aria-label="t('shell.aria.brand')"
+        >
           <img :src="logoMarkUrl" alt="" />
         </RouterLink>
 
@@ -268,8 +278,8 @@ onUnmounted(() => {
           <button
             class="rail-button rail-button--danger"
             type="button"
-            aria-label="Sair"
-            title="Sair"
+            :aria-label="t('shell.logout')"
+            :title="t('shell.logout')"
             @click="requestLogout"
           >
             <span class="rail-button__icon" aria-hidden="true">
@@ -284,17 +294,17 @@ onUnmounted(() => {
           <RouterLink
             class="navigator-brand__link"
             :to="defaultLandingPath"
-            aria-label="PetJourney — início"
+            :aria-label="t('shell.aria.brandHome')"
           >
             <span class="navigator-brand__meta">
               <img class="navigator-brand__wordmark" :src="logoHeaderUrl" alt="" />
-              <small>Painel parceiro</small>
+              <small>{{ t('shell.brand.badge') }}</small>
             </span>
           </RouterLink>
         </header>
 
         <div class="navigator-section-heading">
-          <span>Menu</span>
+          <span>{{ t('shell.menuHeading') }}</span>
           <strong>{{ activeSection.label }}</strong>
           <small v-if="activeSection.panelSubtitle">{{ activeSection.panelSubtitle }}</small>
         </div>
@@ -305,15 +315,18 @@ onUnmounted(() => {
             id="panel-nav-filter"
             v-model="panelFilterQuery"
             type="search"
-            placeholder="Filtrar telas..."
+            :placeholder="t('shell.filterPlaceholder')"
             autocomplete="off"
           />
         </label>
 
-        <nav class="page-nav" :aria-label="`Páginas de ${activeSection.label}`">
+        <nav
+          class="page-nav"
+          :aria-label="t('shell.aria.pagesOf', { label: activeSection.label })"
+        >
           <template v-if="activeSection.groups?.length">
             <p v-if="panelFilterHasNoResults" class="page-nav__empty">
-              Nenhuma tela encontrada para “{{ panelFilterQuery.trim() }}”.
+              {{ t('shell.filterEmpty', { q: panelFilterQuery.trim() }) }}
             </p>
 
             <div
@@ -364,7 +377,7 @@ onUnmounted(() => {
           severity="secondary"
           text
           type="button"
-          :aria-label="drawerOpen ? 'Fechar navegador' : 'Abrir navegador'"
+          :aria-label="drawerOpen ? t('shell.drawer.close') : t('shell.drawer.open')"
           icon="pi pi-bars"
           @click="drawerOpen = !drawerOpen"
         />
@@ -388,29 +401,27 @@ onUnmounted(() => {
           type="button"
           :disabled="!canOpenCupomResgate"
           :title="
-            canOpenCupomResgate
-              ? 'Validar cupom'
-              : 'Disponível apenas para parceiros com operação liberada'
+            canOpenCupomResgate ? t('shell.cupom.cta') : t('shell.cupom.disabledTitle')
           "
           :aria-label="
-            canOpenCupomResgate
-              ? 'Validar cupom'
-              : 'Validar cupom indisponível: conta sem acesso de parceiro'
+            canOpenCupomResgate ? t('shell.cupom.cta') : t('shell.cupom.disabledAria')
           "
           @click="openCupomResgate"
         >
           <span class="header-resgate__icon" aria-hidden="true">
             <i class="pi pi-ticket" />
           </span>
-          <span class="header-resgate__label">Validar cupom</span>
+          <span class="header-resgate__label">{{ t('shell.cupom.cta') }}</span>
         </button>
 
         <button
           class="theme-switch"
           :class="{ 'theme-switch--dark': themeSwitchDark }"
           type="button"
-          :aria-label="themeSwitchDark ? 'Ativar tema claro' : 'Ativar tema escuro'"
-          :title="themeSwitchDark ? 'Tema claro' : 'Tema escuro'"
+          :aria-label="
+            themeSwitchDark ? t('shell.theme.activateLight') : t('shell.theme.activateDark')
+          "
+          :title="themeSwitchDark ? t('shell.theme.lightTitle') : t('shell.theme.darkTitle')"
           :aria-pressed="themeSwitchDark"
           :aria-busy="themeTogglePending || undefined"
           @click="handleThemeToggle"
@@ -420,8 +431,12 @@ onUnmounted(() => {
               <i class="pi pi-sun theme-switch__icon theme-switch__icon--sun" />
               <i class="pi pi-moon theme-switch__icon theme-switch__icon--moon" />
             </span>
-            <span class="theme-switch__label theme-switch__label--light">Light</span>
-            <span class="theme-switch__label theme-switch__label--dark">Dark</span>
+            <span class="theme-switch__label theme-switch__label--light">{{
+              t('shell.theme.lightLabel')
+            }}</span>
+            <span class="theme-switch__label theme-switch__label--dark">{{
+              t('shell.theme.darkLabel')
+            }}</span>
           </span>
         </button>
 
@@ -439,7 +454,7 @@ onUnmounted(() => {
             </span>
             <span class="user-menu__identity">
               <strong>{{ headerDisplayName }}</strong>
-              <small>Conta parceiro</small>
+              <small>{{ t('shell.user.role') }}</small>
             </span>
             <i class="pi pi-angle-down" aria-hidden="true" />
           </button>
@@ -447,15 +462,19 @@ onUnmounted(() => {
           <div v-if="userMenuOpen" class="user-menu__dropdown" role="menu">
             <RouterLink role="menuitem" to="/settings?aba=perfil" @click="userMenuOpen = false">
               <i class="pi pi-user" aria-hidden="true" />
-              Perfil
+              {{ t('shell.user.perfil') }}
             </RouterLink>
             <RouterLink role="menuitem" to="/settings" @click="userMenuOpen = false">
               <i class="pi pi-cog" aria-hidden="true" />
-              Configurações
+              {{ t('shell.user.settings') }}
             </RouterLink>
+            <div class="user-menu__locale" role="none">
+              <span class="user-menu__locale-label">{{ t('languageSwitcher.label') }}</span>
+              <LanguageSwitcher variant="menu" />
+            </div>
             <Button type="button" role="menuitem" text severity="danger" @click="requestLogout">
               <i class="pi pi-sign-out" aria-hidden="true" />
-              Logout
+              {{ t('shell.user.logout') }}
             </Button>
           </div>
         </div>
@@ -468,11 +487,11 @@ onUnmounted(() => {
 
     <ConfirmActionDialog
       v-model:visible="logoutConfirmVisible"
-      title="Sair da conta?"
-      message="Você será desconectado deste painel. Para acessar novamente, será necessário fazer login."
+      :title="t('shell.logoutConfirm.title')"
+      :message="t('shell.logoutConfirm.message')"
       icon="pi pi-sign-out"
-      confirm-label="Sair"
-      cancel-label="Continuar no painel"
+      :confirm-label="t('shell.logout')"
+      :cancel-label="t('shell.logoutConfirm.cancel')"
       severity="danger"
       @confirm="handleLogout"
     />
@@ -1255,6 +1274,23 @@ onUnmounted(() => {
 .user-menu__dropdown a:hover,
 .user-menu__dropdown button:hover {
   background: var(--shell-surface-soft);
+}
+
+.user-menu__locale {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.35rem 0.2rem 0.55rem;
+  border-block: 1px solid var(--shell-line);
+  margin-block: 0.2rem;
+}
+
+.user-menu__locale-label {
+  padding: 0 0.55rem;
+  color: var(--shell-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .user-menu__dropdown button {

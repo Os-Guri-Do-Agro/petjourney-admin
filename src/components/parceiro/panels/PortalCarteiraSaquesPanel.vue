@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import PartnerPanelLoading from '@/components/parceiro/PartnerPanelLoading.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
 import { getSaques } from '@/service/parceiro/parceiro-portal-service'
 import type { SaqueResumo } from '@/service/parceiro/types'
@@ -14,6 +16,7 @@ const emit = defineEmits<{
   needsProgramas: []
 }>()
 
+const { t, locale } = useI18n()
 const { ensureContext, parceiroQuery, store } = useParceiroPortal()
 const saques = ref<SaqueResumo[]>([])
 const loading = ref(true)
@@ -24,6 +27,10 @@ const statusMap = {
   PAGO: 'ATIVO',
   FALHA: 'REJEITADO',
 } as const
+
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString(INTL_LOCALE[locale.value as Locale])
+}
 
 async function loadSaques() {
   loading.value = true
@@ -44,7 +51,7 @@ async function loadSaques() {
       return
     }
 
-    error.value = err instanceof Error ? err.message : 'Erro ao carregar saques.'
+    error.value = err instanceof Error ? err.message : t('carteira.saques.errorLoad')
   } finally {
     loading.value = false
   }
@@ -59,19 +66,19 @@ onMounted(() => {
   <div id="partner-panel-saques" class="portal-panel" role="tabpanel" aria-labelledby="partner-tab-saques">
     <PartnerPanelLoading
       v-if="loading"
-      title="Carregando saques..."
-      description="Buscando solicitações e status de pagamento."
+      :title="t('carteira.saques.loadingTitle')"
+      :description="t('carteira.saques.loadingDesc')"
     />
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadSaques">Tentar novamente</button>
+      <button type="button" @click="loadSaques">{{ t('carteira.saques.retry') }}</button>
     </div>
 
     <div v-else-if="saques.length === 0" class="portal-panel__empty">
       <i class="pi pi-wallet" aria-hidden="true" />
-      <strong>Nenhum saque solicitado</strong>
-      <p>Solicite um saque na aba Visão geral quando tiver saldo sacável.</p>
+      <strong>{{ t('carteira.saques.emptyTitle') }}</strong>
+      <p>{{ t('carteira.saques.emptyBody') }}</p>
     </div>
 
     <div v-else class="saques-list">
@@ -83,7 +90,7 @@ onMounted(() => {
       >
         <div>
           <strong>{{ formatCentavosToBrl(saque.valorCentavos) }}</strong>
-          <p>Solicitado em {{ new Date(saque.createdAt).toLocaleString('pt-BR') }}</p>
+          <p>{{ t('carteira.saques.requestedAt', { data: formatDateTime(saque.createdAt) }) }}</p>
           <p v-if="saque.motivoFalha" class="saque-row__fail">{{ saque.motivoFalha }}</p>
         </div>
         <PartnerStatusBadge :status="statusMap[saque.status]" />

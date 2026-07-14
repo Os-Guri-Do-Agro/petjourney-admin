@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
 import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
 import bgLoginUrl from '@/assets/login/bg-login.jpg'
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { isDarkMode } from '@/theme/color-mode'
 
@@ -12,6 +14,8 @@ defineProps<{
   title: string
   description: string
 }>()
+
+const { t } = useI18n()
 
 const logoUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
 const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
@@ -22,13 +26,18 @@ const authLayoutStyle = useAuthThemeVars()
   <main class="auth-page" :style="authLayoutStyle">
     <section class="auth-shell">
       <div class="auth-form-panel">
+        <div class="auth-form-panel__locale auth-form-panel__locale--mobile">
+          <LanguageSwitcher variant="auth" tone="surface" />
+        </div>
         <div class="auth-form-panel__inner">
-          <div class="flex gap-3 w-full mb-10">
-            <div class="bg-color-icon p-3 bg-red-500 w-[50px] h-auto rounded-2xl flex">
-              <img :src="logoUrl" alt="PetJourney" />
-            </div>
-            <div class="w-[150px] flex items-center">
-              <img :src="logoSemPata" alt="Logo PetJourney" />
+          <div class="auth-brand-row">
+            <div class="flex gap-3 w-full">
+              <div class="bg-color-icon p-3 bg-red-500 w-[50px] h-auto rounded-2xl flex">
+                <img :src="logoUrl" alt="PetJourney" />
+              </div>
+              <div class="w-[150px] flex items-center">
+                <img :src="logoSemPata" alt="Logo PetJourney" />
+              </div>
             </div>
           </div>
 
@@ -66,30 +75,30 @@ const authLayoutStyle = useAuthThemeVars()
         </svg>
 
         <div class="auth-visual-panel__content">
-          <span class="auth-visual-kicker">Painel parceiro</span>
+          <div class="auth-visual-panel__top">
+            <span class="auth-visual-kicker">{{ t('auth.layout.kicker') }}</span>
+            <LanguageSwitcher variant="auth" tone="brand" />
+          </div>
 
           <div class="auth-visual-panel__center">
             <div>
-              <h2>Mais clientes. Mais alcance. Mais retorno para a sua marca.</h2>
-              <p>
-                O portal PetJourney conecta sua empresa à rede de tutores: divulgue ofertas,
-                indique com facilidade e acompanhe o crescimento em um só lugar.
-              </p>
+              <h2>{{ t('auth.layout.title') }}</h2>
+              <p>{{ t('auth.layout.description') }}</p>
             </div>
 
             <slot name="aside">
               <ul class="auth-benefits">
                 <li>
                   <i class="pi pi-check" aria-hidden="true" />
-                  Programas feitos para parceiros que querem crescer
+                  {{ t('auth.layout.benefits.programs') }}
                 </li>
                 <li>
                   <i class="pi pi-check" aria-hidden="true" />
-                  Divulgação com cupons e indicação que convertem
+                  {{ t('auth.layout.benefits.outreach') }}
                 </li>
                 <li>
                   <i class="pi pi-check" aria-hidden="true" />
-                  Resultados e ganhos acompanhados em tempo real
+                  {{ t('auth.layout.benefits.results') }}
                 </li>
               </ul>
             </slot>
@@ -122,6 +131,7 @@ const authLayoutStyle = useAuthThemeVars()
 }
 
 .auth-form-panel {
+  position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -130,9 +140,31 @@ const authLayoutStyle = useAuthThemeVars()
   padding: clamp(2.5rem, 5vw, 4.5rem);
 }
 
+.auth-form-panel__locale--mobile {
+  display: none;
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 2;
+}
+
+.auth-visual-panel__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .auth-form-panel__inner {
   width: min(100%, 32rem);
   justify-content: space-between;
+}
+
+.auth-brand-row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 2.5rem;
 }
 
 .auth-brand {
@@ -316,6 +348,10 @@ const authLayoutStyle = useAuthThemeVars()
 
   .auth-form-panel {
     max-width: none;
+  }
+
+  .auth-form-panel__locale--mobile {
+    display: block;
   }
 
   .auth-visual-panel {

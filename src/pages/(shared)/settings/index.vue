@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
@@ -19,27 +20,28 @@ const HASH_TO_TAB: Record<string, SettingsTab> = {
   conta: 'conta',
 }
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { activeTab, setTab } = usePartnerTabs(SETTINGS_TABS, 'perfil')
 
-const tabs = [
+const tabs = computed(() => [
   {
     id: 'perfil',
-    label: 'Perfil',
-    description: 'Nome, contatos, documento e dados profissionais.',
+    label: t('settings.tabs.perfil.label'),
+    description: t('settings.tabs.perfil.description'),
   },
   {
     id: 'seguranca',
-    label: 'Segurança',
-    description: 'Troca de senha da conta autenticada.',
+    label: t('settings.tabs.seguranca.label'),
+    description: t('settings.tabs.seguranca.description'),
   },
   {
     id: 'conta',
-    label: 'Conta',
-    description: 'Sessão, desativação de perfil e preferências futuras.',
+    label: t('settings.tabs.conta.label'),
+    description: t('settings.tabs.conta.description'),
   },
-]
+])
 
 async function resolveLegacyHash() {
   const hashId = route.hash.replace('#', '').trim().toLowerCase()
@@ -77,7 +79,11 @@ watch(
 </script>
 
 <template>
-  <PartnerPageFrame subtitle="Conta" title="Configurações" :loading="false">
+  <PartnerPageFrame
+    :subtitle="t('settings.subtitle')"
+    :title="t('settings.title')"
+    :loading="false"
+  >
     <PartnerSectionTabs
       :tabs="tabs"
       :active-tab="activeTab"
