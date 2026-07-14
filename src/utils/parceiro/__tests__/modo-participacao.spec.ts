@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { ApiError } from '@/service/api'
 
 import {
+  canManageSolicitacaoModo,
   canSolicitarModo,
   getModoCardCopy,
   isAfiliadoNaoAtivoError,
@@ -17,6 +18,12 @@ describe('modo-participacao', () => {
     expect(canSolicitarModo('SUSPENSO')).toBe(true)
     expect(canSolicitarModo('SOLICITADO')).toBe(false)
     expect(canSolicitarModo('ATIVO')).toBe(false)
+  })
+
+  it('permite solicitar sem membership ou como dono', () => {
+    expect(canManageSolicitacaoModo(true, false)).toBe(true)
+    expect(canManageSolicitacaoModo(false, true)).toBe(true)
+    expect(canManageSolicitacaoModo(false, false)).toBe(false)
   })
 
   it('usa a cópia sugerida da spec para cada modo', () => {
@@ -47,9 +54,9 @@ describe('modo-participacao', () => {
   })
 
   it('mapeia erros de solicitação da API', () => {
-    expect(
-      resolveSolicitarModoError(new ApiError('Forbidden', 403)),
-    ).toBe('Apenas o dono da empresa pode solicitar programas.')
+    expect(resolveSolicitarModoError(new ApiError('Forbidden', 403))).toBe(
+      'Sem permissão para solicitar. Confirme o vínculo da conta ou peça ao dono da empresa.',
+    )
 
     expect(
       resolveSolicitarModoError(new ApiError('Parceiro nao operavel', 409)),

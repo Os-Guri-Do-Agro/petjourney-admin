@@ -191,7 +191,11 @@ export function solicitarModo(modo: ModoParticipacao, params?: ParceiroQuery) {
   return unwrap(
     apiFetch<ApiEnvelope<{ modo: ModoParticipacao; status: 'SOLICITADO' }>>(
       `/parceiro/portal/modos/${modo}/solicitar${buildParceiroQuery(params)}`,
-      { method: 'POST' },
+      {
+        method: 'POST',
+        // Nest rejeita POST com Content-Type JSON e body ausente; `{}` é o body vazio válido.
+        body: JSON.stringify({}),
+      },
     ),
   )
 }

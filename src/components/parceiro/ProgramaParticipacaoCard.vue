@@ -9,6 +9,7 @@ import { getCarteira, solicitarModo } from '@/service/parceiro/parceiro-portal-s
 import type { ModoParticipacao, StatusModoParceiro } from '@/service/parceiro/types'
 import { formatCentavosToBrl } from '@/utils/format/money'
 import {
+  canManageSolicitacaoModo,
   canSolicitarModo,
   getModoCardCopy,
   resolveModoCta,
@@ -77,7 +78,18 @@ const modoStatus = computed<StatusModoParceiro>(() => {
   return store.status?.statusParticipativo ?? 'NAO_SOLICITADO'
 })
 
-const cta = computed(() => resolveModoCta(modoStatus.value, props.modo, store.isDono))
+const canManageSolicitacao = computed(() =>
+  canManageSolicitacaoModo(store.isDono, store.semAcessoParceiro),
+)
+
+/** Membership em análise bloqueia; sem vínculo ainda, o pedido é a entrada. */
+const solicitarBloqueadoPorAuditoria = computed(
+  () => !store.semAcessoParceiro && !store.podeOperar,
+)
+
+const cta = computed(() =>
+  resolveModoCta(modoStatus.value, props.modo, canManageSolicitacao.value),
+)
 
 const showSolicitarButton = computed(
   () => cta.value.type === 'solicitar' || cta.value.type === 'solicitar-novamente',
@@ -140,7 +152,7 @@ async function loadCarteiraResumo() {
 }
 
 async function handleSolicitar() {
-  if (!store.isDono) {
+  if (!canManageSolicitacao.value) {
     toast.add({
       severity: 'warn',
       summary: 'Ação indisponível',
@@ -150,7 +162,7 @@ async function handleSolicitar() {
     return
   }
 
-  if (!store.podeOperar || !canSolicitarModo(modoStatus.value)) {
+  if (solicitarBloqueadoPorAuditoria.value || !canSolicitarModo(modoStatus.value)) {
     return
   }
 
@@ -165,7 +177,16 @@ async function handleSolicitar() {
       detail: 'Aguarde a análise do time PetJourney.',
       life: 4000,
     })
-    void store.refreshStatus()
+
+    try {
+      await store.bootstrap(true)
+    } catch {
+      try {
+        await store.refreshStatus()
+      } catch {
+        /* status pode permanecer local após patch */
+      }
+    }
   } catch (err) {
     toast.add({
       severity: 'error',
@@ -310,7 +331,7 @@ watch(modoStatus, () => {
         v-if="showSolicitarButton"
         class="programa-card__button programa-card__button--primary"
         type="button"
-        :disabled="!store.podeOperar || submitting"
+        :disabled="solicitarBloqueadoPorAuditoria || submitting"
         @click="handleSolicitar"
       >
         <i v-if="submitting" class="pi pi-spin pi-spinner" aria-hidden="true" />

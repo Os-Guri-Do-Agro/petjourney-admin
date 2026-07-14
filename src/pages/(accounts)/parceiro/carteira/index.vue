@@ -37,7 +37,7 @@ const tabs = [
 ]
 
 const loadError = computed(() =>
-  store.loadState === 'error' ? store.errorMessage : '',
+  store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
 )
 
 const showAfiliadoGate = computed(
@@ -59,6 +59,7 @@ onMounted(() => {
     title="Financeiro"
     :loading="false"
     :error="loadError"
+    :no-partner-access="store.semAcessoParceiro"
     @retry="ensureContext(true)"
   >
     <article v-if="showAfiliadoGate" class="carteira-gate">

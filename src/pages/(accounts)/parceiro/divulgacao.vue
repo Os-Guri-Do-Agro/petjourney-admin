@@ -19,7 +19,7 @@ const route = useRoute()
 const router = useRouter()
 
 const loadError = computed(() =>
-  store.loadState === 'error' ? store.errorMessage : '',
+  store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
 )
 
 const pageAtmosphere = computed(() => {
@@ -79,6 +79,7 @@ watch(
     title="Divulgação"
     :loading="false"
     :error="loadError"
+    :no-partner-access="store.semAcessoParceiro"
     @retry="ensureContext(true)"
   >
     <div class="divulgacao-page" :style="pageAtmosphere">

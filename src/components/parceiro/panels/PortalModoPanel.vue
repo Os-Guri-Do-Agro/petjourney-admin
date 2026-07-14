@@ -8,6 +8,7 @@ import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { solicitarModo } from '@/service/parceiro/parceiro-portal-service'
 import type { ModoParticipacao } from '@/service/parceiro/types'
 import {
+  canManageSolicitacaoModo,
   canSolicitarModo,
   getModoCardCopy,
   resolveModoCta,
@@ -47,7 +48,17 @@ const modoStatus = computed(() => {
   return store.status?.statusParticipativo ?? 'NAO_SOLICITADO'
 })
 
-const cta = computed(() => resolveModoCta(modoStatus.value, props.modo, store.isDono))
+const canManageSolicitacao = computed(() =>
+  canManageSolicitacaoModo(store.isDono, store.semAcessoParceiro),
+)
+
+const solicitarBloqueadoPorAuditoria = computed(
+  () => !store.semAcessoParceiro && !store.podeOperar,
+)
+
+const cta = computed(() =>
+  resolveModoCta(modoStatus.value, props.modo, canManageSolicitacao.value),
+)
 
 const showSolicitarButton = computed(
   () => cta.value.type === 'solicitar' || cta.value.type === 'solicitar-novamente',
@@ -62,7 +73,7 @@ const solicitarLabel = computed(() => {
 })
 
 async function handleSolicitar() {
-  if (!store.isDono) {
+  if (!canManageSolicitacao.value) {
     toast.add({
       severity: 'warn',
       summary: 'Ação indisponível',
@@ -72,7 +83,7 @@ async function handleSolicitar() {
     return
   }
 
-  if (!store.podeOperar || !canSolicitarModo(modoStatus.value)) {
+  if (solicitarBloqueadoPorAuditoria.value || !canSolicitarModo(modoStatus.value)) {
     return
   }
 
@@ -87,7 +98,16 @@ async function handleSolicitar() {
       detail: 'Aguarde a análise do time PetJourney.',
       life: 4000,
     })
-    void store.refreshStatus()
+
+    try {
+      await store.bootstrap(true)
+    } catch {
+      try {
+        await store.refreshStatus()
+      } catch {
+        /* status pode permanecer local após patch */
+      }
+    }
   } catch (err) {
     toast.add({
       severity: 'error',
@@ -109,7 +129,7 @@ async function handleSolicitar() {
     :role="embedded ? undefined : 'tabpanel'"
     :aria-labelledby="embedded ? undefined : `partner-tab-${modo}`"
   >
-    <p v-if="!store.podeOperar" class="modo-panel__alert">
+    <p v-if="solicitarBloqueadoPorAuditoria" class="modo-panel__alert">
       Seu cadastro ainda está em análise. Solicitações de programa ficam bloqueadas até aprovação.
     </p>
 
@@ -125,7 +145,7 @@ async function handleSolicitar() {
           v-if="showSolicitarButton"
           :label="solicitarLabel"
           :loading="submitting"
-          :disabled="!store.podeOperar"
+          :disabled="solicitarBloqueadoPorAuditoria"
           @click="handleSolicitar"
         />
         <Button
@@ -140,7 +160,7 @@ async function handleSolicitar() {
       </div>
     </div>
 
-    <p v-if="!store.isDono" class="modo-panel__hint">
+    <p v-if="!canManageSolicitacao" class="modo-panel__hint">
       Apenas donos podem solicitar programas. Você pode acompanhar o status aqui.
     </p>
   </article>

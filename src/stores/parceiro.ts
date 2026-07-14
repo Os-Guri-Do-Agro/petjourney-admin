@@ -25,6 +25,8 @@ export const useParceiroStore = defineStore('parceiro', () => {
   const loadState = ref<LoadState>('idle')
   const errorMessage = ref('')
   const needsParceiroSelection = ref(false)
+  /** Conta autenticada sem membership em nenhum Parceiro (API 403). */
+  const semAcessoParceiro = ref(false)
 
   const papel = computed<PapelParceiro | null>(() => dashboard.value?.papel ?? null)
   const isDono = computed(() => papel.value === 'DONO')
@@ -62,6 +64,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     loadState.value = 'loading'
     errorMessage.value = ''
     needsParceiroSelection.value = false
+    semAcessoParceiro.value = false
 
     try {
       const query = parceiroId.value ? { parceiroId: parceiroId.value } : undefined
@@ -80,6 +83,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
         errorMessage.value =
           'Selecione qual empresa parceira você deseja operar. Informe o identificador do parceiro.'
       } else if (error instanceof ApiError && error.statusCode === 403) {
+        semAcessoParceiro.value = true
         errorMessage.value = 'Sua conta não possui acesso ao portal do parceiro.'
       } else {
         errorMessage.value =
@@ -101,6 +105,12 @@ export const useParceiroStore = defineStore('parceiro', () => {
 
   function patchModoStatus(modo: ModoParticipacao, modoStatus: StatusModoParceiro) {
     if (!status.value) {
+      status.value = {
+        statusAuditoria: 'PENDENTE',
+        statusAfiliado: modo === 'afiliado' ? modoStatus : 'NAO_SOLICITADO',
+        statusParticipativo: modo === 'participativo' ? modoStatus : 'NAO_SOLICITADO',
+        podeOperar: false,
+      }
       return
     }
 
@@ -116,6 +126,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     loadState.value = 'idle'
     errorMessage.value = ''
     needsParceiroSelection.value = false
+    semAcessoParceiro.value = false
     setParceiroId(null)
   }
 
@@ -126,6 +137,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     loadState,
     errorMessage,
     needsParceiroSelection,
+    semAcessoParceiro,
     papel,
     isDono,
     podeOperar,

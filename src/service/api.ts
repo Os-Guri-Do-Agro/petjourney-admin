@@ -21,8 +21,10 @@ export function getApiUrl() {
 export async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const token = getAccessToken()
   const headers = new Headers(options?.headers)
+  const hasBody = options?.body != null && options.body !== ''
 
-  if (!headers.has('Content-Type') && !(options?.body instanceof FormData)) {
+  // Evita Nest 400: Content-Type application/json com body ausente.
+  if (hasBody && !headers.has('Content-Type') && !(options?.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json')
   }
 

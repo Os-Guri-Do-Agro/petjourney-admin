@@ -26,7 +26,7 @@ const shouldUseShell = computed(() => {
 </script>
 
 <template>
-  <Toast />
+  <Toast position="top-right" />
 
   <AppShell v-if="shouldUseShell">
     <RouterView />

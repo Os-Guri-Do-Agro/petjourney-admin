@@ -105,14 +105,20 @@ const activationSteps = [
         </ol>
 
         <p class="activation-panel__note">
-          Somente o dono da conta pode solicitar a ativação. Operadores acompanham o status, mas não
-          enviam pedidos.
+          <template v-if="store.semAcessoParceiro">
+            Solicite afiliado e/ou participativo abaixo. O time PetJourney analisa o pedido e libera
+            o portal.
+          </template>
+          <template v-else>
+            Somente o dono da conta pode solicitar a ativação. Operadores acompanham o status, mas
+            não enviam pedidos.
+          </template>
         </p>
       </div>
     </section>
 
     <section
-      v-if="!store.podeOperar || isLoading"
+      v-if="!store.semAcessoParceiro && (!store.podeOperar || isLoading)"
       class="prog-zone programas-view__cred"
       aria-labelledby="cred-zone-title"
     >

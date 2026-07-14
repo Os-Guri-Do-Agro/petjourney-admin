@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
@@ -27,6 +27,9 @@ import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { currentColors, isDarkMode, toggleColorMode } from '@/theme/color-mode'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
+/** Alinhado a `.theme-switch__thumb { transition: transform 240ms }` */
+const THEME_SWITCH_DURATION_MS = 240
+
 const router = useRouter()
 const route = useRoute()
 const drawerOpen = ref(true)
@@ -34,10 +37,43 @@ const userMenuOpen = ref(false)
 const logoutConfirmVisible = ref(false)
 const parceiroStore = useParceiroStore()
 const usuarioPerfilStore = useUsuarioPerfilStore()
-const { open: openCupomResgate } = useCupomResgateModal()
+const { open: openCupomResgate, canOpen: canOpenCupomResgate } = useCupomResgateModal()
 const { navigationSections, hasClinicalProfile } = useAppNavigation()
 const activeSectionId = ref('home')
 const defaultLandingPath = computed(() => getDefaultLandingPath())
+const themeSwitchDark = ref(isDarkMode.value)
+const themeTogglePending = ref(false)
+let themeToggleTimer: ReturnType<typeof setTimeout> | undefined
+
+watch(isDarkMode, (dark) => {
+  if (!themeTogglePending.value) {
+    themeSwitchDark.value = dark
+  }
+})
+
+function prefersReducedMotion() {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+function handleThemeToggle() {
+  if (themeTogglePending.value) {
+    return
+  }
+
+  themeSwitchDark.value = !themeSwitchDark.value
+
+  if (prefersReducedMotion()) {
+    toggleColorMode()
+    return
+  }
+
+  themeTogglePending.value = true
+  window.clearTimeout(themeToggleTimer)
+  themeToggleTimer = window.setTimeout(() => {
+    toggleColorMode()
+    themeTogglePending.value = false
+  }, THEME_SWITCH_DURATION_MS)
+}
 // const searchQuery = ref('') // busca do header (temporariamente desligada)
 const panelFilterQuery = ref('')
 const authUser = computed(() => getAuthUser())
@@ -199,6 +235,10 @@ onMounted(() => {
   usuarioPerfilStore.syncFromAuth()
   void parceiroStore.bootstrap().catch(() => undefined)
 })
+
+onUnmounted(() => {
+  window.clearTimeout(themeToggleTimer)
+})
 </script>
 
 <template>
@@ -240,9 +280,18 @@ onMounted(() => {
       </nav>
 
       <section class="navigator-panel">
-        <RouterLink class="navigator-logo" :to="defaultLandingPath">
-          <img :src="logoHeaderUrl" alt="PetJourney" />
-        </RouterLink>
+        <header class="navigator-brand">
+          <RouterLink
+            class="navigator-brand__link"
+            :to="defaultLandingPath"
+            aria-label="PetJourney — início"
+          >
+            <span class="navigator-brand__meta">
+              <img class="navigator-brand__wordmark" :src="logoHeaderUrl" alt="" />
+              <small>Painel parceiro</small>
+            </span>
+          </RouterLink>
+        </header>
 
         <div class="navigator-section-heading">
           <span>Menu</span>
@@ -337,8 +386,17 @@ onMounted(() => {
         <button
           class="header-resgate"
           type="button"
-          title="Validar cupom"
-          aria-label="Validar cupom"
+          :disabled="!canOpenCupomResgate"
+          :title="
+            canOpenCupomResgate
+              ? 'Validar cupom'
+              : 'Disponível apenas para parceiros com operação liberada'
+          "
+          :aria-label="
+            canOpenCupomResgate
+              ? 'Validar cupom'
+              : 'Validar cupom indisponível: conta sem acesso de parceiro'
+          "
           @click="openCupomResgate"
         >
           <span class="header-resgate__icon" aria-hidden="true">
@@ -349,12 +407,13 @@ onMounted(() => {
 
         <button
           class="theme-switch"
-          :class="{ 'theme-switch--dark': isDarkMode }"
+          :class="{ 'theme-switch--dark': themeSwitchDark }"
           type="button"
-          :aria-label="isDarkMode ? 'Ativar tema claro' : 'Ativar tema escuro'"
-          :title="isDarkMode ? 'Tema claro' : 'Tema escuro'"
-          :aria-pressed="isDarkMode"
-          @click="toggleColorMode"
+          :aria-label="themeSwitchDark ? 'Ativar tema claro' : 'Ativar tema escuro'"
+          :title="themeSwitchDark ? 'Tema claro' : 'Tema escuro'"
+          :aria-pressed="themeSwitchDark"
+          :aria-busy="themeTogglePending || undefined"
+          @click="handleThemeToggle"
         >
           <span class="theme-switch__rail">
             <span class="theme-switch__thumb" aria-hidden="true">
@@ -604,24 +663,73 @@ onMounted(() => {
     var(--shell-surface);
 }
 
-.navigator-logo {
-  display: inline-flex;
-  width: fit-content;
-  align-items: center;
-  text-decoration: none;
+.navigator-brand {
+  flex-shrink: 0;
+  padding: 0.15rem;
+  border: 1px solid color-mix(in srgb, var(--shell-line) 92%, transparent);
+  border-radius: 1.05rem;
+  background:
+    radial-gradient(
+      130% 160% at 0% 0%,
+      color-mix(in srgb, var(--shell-accent) 18%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--shell-surface-soft) 88%, var(--shell-surface)),
+      var(--shell-surface)
+    );
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 55%, transparent);
 }
 
-.navigator-logo img {
+.navigator-brand__link {
   display: block;
-  width: 9.45rem;
-  max-height: 2.75rem;
+  min-width: 0;
+  padding: 0.85rem 0.9rem;
+  border-radius: 0.9rem;
+  text-decoration: none;
+  text-align: center;
+  transition: background 140ms ease;
+}
+
+.navigator-brand__link:hover {
+  background: color-mix(in srgb, var(--shell-accent) 8%, transparent);
+}
+
+.navigator-brand__link:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--shell-accent) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.navigator-brand__meta {
+  display: grid;
+  gap: 0.28rem;
+  justify-items: center;
+  min-width: 0;
+}
+
+.navigator-brand__wordmark {
+  display: block;
+  width: min(100%, 9.5rem);
+  max-height: 1.75rem;
+  margin-inline: auto;
   object-fit: contain;
+  object-position: center;
+}
+
+.navigator-brand__meta small {
+  color: var(--shell-soft);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .navigator-section-heading {
   display: grid;
   gap: 0.18rem;
-  margin-top: 1.45rem;
+  margin-top: 1.15rem;
   margin-bottom: 0.75rem;
   padding: 0 0.2rem;
 }
@@ -881,9 +989,14 @@ onMounted(() => {
     border-color 160ms ease;
 }
 
-.header-resgate:hover {
+.header-resgate:hover:not(:disabled) {
   background: var(--shell-surface-soft);
   border-color: color-mix(in srgb, var(--shell-accent) 28%, var(--shell-line));
+}
+
+.header-resgate:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .header-resgate__icon {
@@ -945,7 +1058,7 @@ onMounted(() => {
   color: var(--shell-accent-strong);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 18%, transparent);
   transform: translateX(0);
-  transition: transform 520ms var(--theme-ease);
+  transition: transform 240ms var(--theme-ease);
   will-change: transform;
 }
 
@@ -957,8 +1070,8 @@ onMounted(() => {
   grid-area: 1 / 1;
   font-size: 0.86rem;
   transition:
-    opacity 380ms var(--theme-ease),
-    transform 520ms var(--theme-ease);
+    opacity 180ms var(--theme-ease),
+    transform 240ms var(--theme-ease);
 }
 
 .theme-switch__icon--sun {
@@ -990,8 +1103,8 @@ onMounted(() => {
   place-items: center;
   line-height: 1;
   transition:
-    opacity 420ms var(--theme-ease),
-    transform 520ms var(--theme-ease);
+    opacity 200ms var(--theme-ease),
+    transform 240ms var(--theme-ease);
 }
 
 .theme-switch__label--light {

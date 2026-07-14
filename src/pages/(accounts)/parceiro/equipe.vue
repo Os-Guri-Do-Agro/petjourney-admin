@@ -9,7 +9,7 @@ import { useParceiroPortal } from '@/composables/useParceiroPortal'
 const { store, bootstrapping, ensureContext } = useParceiroPortal()
 
 const loadError = computed(() =>
-  store.loadState === 'error' ? store.errorMessage : '',
+  store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
 )
 
 onMounted(() => {
@@ -23,6 +23,7 @@ onMounted(() => {
     title="Equipe"
     :loading="bootstrapping || (store.loadState === 'loading' && !store.dashboard)"
     :error="loadError"
+    :no-partner-access="store.semAcessoParceiro"
     @retry="ensureContext(true)"
   >
     <PartnerOperabilityBanner />

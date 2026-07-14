@@ -205,7 +205,7 @@ function cancelReactivate() {
 
 <template>
   <AuthLayout
-    description="Entre para acompanhar a agenda, os prontuários e o cuidado dos seus pacientes."
+    description="Acesse o portal e impulsione sua parceria com indicação, cupons e resultados."
     title="Bem-vindo de volta"
   >
     <div v-if="showReactivatePanel" class="login-reactivate" :style="loginStyle" role="status">

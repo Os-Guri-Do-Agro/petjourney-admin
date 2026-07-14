@@ -87,13 +87,28 @@ watch(
     subtitle="Portal"
     title="Programas de participação"
     :loading="false"
-    :error="store.loadState === 'error' ? store.errorMessage : ''"
+    :error="store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : ''"
     @retry="ensureContext(true)"
   >
     <div class="programas-page" :style="pageAtmosphere">
       <PartnerOperabilityBanner />
 
-      <p class="programas-page__lede">
+      <aside
+        v-if="store.semAcessoParceiro"
+        class="programas-page__entry"
+        role="status"
+      >
+        <i class="pi pi-send" aria-hidden="true" />
+        <div>
+          <strong>Solicite sua entrada nos programas</strong>
+          <p>
+            Você ainda não tem vínculo ativo com uma empresa parceira. Envie a solicitação de
+            afiliado e/ou participativo — a equipe PetJourney analisa e libera o portal.
+          </p>
+        </div>
+      </aside>
+
+      <p v-else class="programas-page__lede">
         Escolha os programas da rede PetJourney. Cada um é independente e passa por análise do time.
       </p>
 
@@ -116,6 +131,36 @@ watch(
   margin: -0.35rem 0 0;
   color: var(--prog-page-muted);
   font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.programas-page__entry {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--prog-page-muted) 28%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--prog-page-muted) 8%, transparent);
+}
+
+.programas-page__entry i {
+  margin-top: 0.15rem;
+  font-size: 1.15rem;
+  color: var(--prog-page-muted);
+}
+
+.programas-page__entry strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.98rem;
+}
+
+.programas-page__entry p {
+  margin: 0;
+  color: var(--prog-page-muted);
+  font-size: 0.88rem;
   line-height: 1.5;
 }
 

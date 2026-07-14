@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 
-import { currentColors } from '@/theme/color-mode'
+import { hasVeterinarioProfile } from '@/service/auth/auth-session'
+import { currentColors, isDarkMode } from '@/theme/color-mode'
 
 withDefaults(
   defineProps<{
@@ -10,6 +12,8 @@ withDefaults(
     subtitle?: string
     loading?: boolean
     error?: string
+    /** Conta sem membership de Parceiro (API 403). */
+    noPartnerAccess?: boolean
     empty?: boolean
     emptyTitle?: string
     emptyDescription?: string
@@ -19,6 +23,7 @@ withDefaults(
     subtitle: '',
     loading: false,
     error: '',
+    noPartnerAccess: false,
     empty: false,
     emptyTitle: 'Nada por aqui ainda',
     emptyDescription: '',
@@ -31,8 +36,11 @@ const emit = defineEmits<{
   emptyAction: []
 }>()
 
+const showClinicalCta = computed(() => hasVeterinarioProfile())
+
 const pageStyle = computed(() => {
   const colors = currentColors.value
+  const dark = isDarkMode.value
 
   return {
     '--partner-bg': colors.dashboard.bg,
@@ -45,6 +53,7 @@ const pageStyle = computed(() => {
     '--partner-primary': colors.vet.primary,
     '--partner-primary-soft': colors.vet.secondary,
     '--partner-primary-strong': colors.dashboard.primaryStrong,
+    '--partner-on-primary': dark ? colors.dashboard.bg : colors.auth.white,
     '--partner-warm-bg': colors.dashboard.warmBg,
     '--partner-warm-text': colors.dashboard.warmText,
     '--partner-success-bg': colors.dashboard.successBg,
@@ -63,7 +72,7 @@ const pageStyle = computed(() => {
         <p v-if="subtitle" class="partner-page__subtitle">{{ subtitle }}</p>
         <h1 class="partner-page__title">{{ title }}</h1>
       </div>
-      <div v-if="$slots.actions" class="partner-page__actions">
+      <div v-if="$slots.actions && !noPartnerAccess" class="partner-page__actions">
         <slot name="actions" />
       </div>
     </header>
@@ -71,6 +80,44 @@ const pageStyle = computed(() => {
     <div v-if="loading" class="partner-page__state" role="status" aria-live="polite">
       <i class="pi pi-spin pi-spinner" aria-hidden="true" />
       <span>Carregando...</span>
+    </div>
+
+    <div
+      v-else-if="noPartnerAccess"
+      class="partner-page__state partner-page__state--blocked"
+      role="status"
+    >
+      <i class="pi pi-building" aria-hidden="true" />
+      <div>
+        <strong>Portal do parceiro ainda não liberado</strong>
+        <p>
+          Sua conta ainda não está vinculada a uma empresa parceira operável. Solicite afiliado
+          e/ou participativo em Programas — o time PetJourney analisa e libera o acesso.
+        </p>
+        <p class="partner-page__hint">
+          Se você já pediu, aguarde a análise ou verifique novamente em instantes. Também é possível
+          um admin vincular sua conta manualmente.
+        </p>
+      </div>
+
+      <div class="partner-page__cta-row">
+        <RouterLink class="partner-page__cta partner-page__cta--primary" to="/parceiro/programas">
+          Solicitar programas
+        </RouterLink>
+        <RouterLink
+          v-if="showClinicalCta"
+          class="partner-page__cta partner-page__cta--ghost"
+          to="/settings?aba=perfil"
+        >
+          Ir para configurações
+        </RouterLink>
+        <Button label="Verificar novamente" severity="secondary" @click="emit('retry')" />
+      </div>
+
+      <p class="partner-page__contact">
+        Dúvidas:
+        <a href="mailto:atendimento@petjourney.health">atendimento@petjourney.health</a>
+      </p>
     </div>
 
     <div v-else-if="error" class="partner-page__state partner-page__state--error" role="alert">
@@ -150,6 +197,8 @@ const pageStyle = computed(() => {
   display: grid;
   gap: 0.85rem;
   justify-items: center;
+  max-width: 40rem;
+  margin-inline: auto;
   padding: 3rem 1.5rem;
   border: 1px solid var(--partner-line);
   border-radius: 1.1rem;
@@ -166,15 +215,69 @@ const pageStyle = computed(() => {
   color: var(--partner-warm-text);
 }
 
+.partner-page__state--blocked i {
+  color: var(--partner-primary-strong);
+}
+
 .partner-page__state strong {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
+  font-size: 1.1rem;
 }
 
 .partner-page__state p {
   margin: 0;
   color: var(--partner-muted);
   font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.partner-page__hint {
+  margin-top: 0.65rem !important;
+  font-size: 0.86rem !important;
+}
+
+.partner-page__cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.partner-page__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.6rem;
+  padding: 0 1.1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.partner-page__cta--primary {
+  background: var(--partner-primary);
+  color: var(--partner-on-primary);
+}
+
+.partner-page__cta--ghost {
+  border: 1px solid var(--partner-line);
+  background: transparent;
+  color: var(--partner-text);
+}
+
+.partner-page__contact {
+  margin-top: 0.25rem !important;
+  font-size: 0.82rem !important;
+}
+
+.partner-page__contact a {
+  color: var(--partner-primary-strong);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 @media (max-width: 720px) {
@@ -184,6 +287,16 @@ const pageStyle = computed(() => {
 
   .partner-page__header {
     flex-direction: column;
+  }
+
+  .partner-page__cta-row {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .partner-page__cta-row :deep(.p-button),
+  .partner-page__cta {
+    width: 100%;
   }
 }
 </style>

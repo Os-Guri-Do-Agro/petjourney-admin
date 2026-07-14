@@ -70,10 +70,10 @@ const authLayoutStyle = useAuthThemeVars()
 
           <div class="auth-visual-panel__center">
             <div>
-              <h2>Cuidado clínico organizado, do agendamento à alta.</h2>
+              <h2>Mais clientes. Mais alcance. Mais retorno para a sua marca.</h2>
               <p>
-                Agenda, prontuários e acompanhamento de risco em um só lugar para uma rotina mais
-                leve e segura.
+                O portal PetJourney conecta sua empresa à rede de tutores: divulgue ofertas,
+                indique com facilidade e acompanhe o crescimento em um só lugar.
               </p>
             </div>
 
@@ -81,15 +81,15 @@ const authLayoutStyle = useAuthThemeVars()
               <ul class="auth-benefits">
                 <li>
                   <i class="pi pi-check" aria-hidden="true" />
-                  Agenda inteligente por sala e profissional
+                  Programas feitos para parceiros que querem crescer
                 </li>
                 <li>
                   <i class="pi pi-check" aria-hidden="true" />
-                  Prontuário completo e histórico clínico
+                  Divulgação com cupons e indicação que convertem
                 </li>
                 <li>
                   <i class="pi pi-check" aria-hidden="true" />
-                  Alertas de risco, alergia e retorno
+                  Resultados e ganhos acompanhados em tempo real
                 </li>
               </ul>
             </slot>

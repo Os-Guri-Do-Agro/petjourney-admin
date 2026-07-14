@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import { computed, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import PortalAreaNav from '@/components/parceiro/PortalAreaNav.vue'
 import PortalCredenciamentoSection from '@/components/parceiro/sections/PortalCredenciamentoSection.vue'
 import PortalModoPanel from '@/components/parceiro/panels/PortalModoPanel.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { currentColors } from '@/theme/color-mode'
 
 const { store, ensureContext } = useParceiroPortal()
@@ -32,7 +34,9 @@ const hubStyle = computed(() => {
 })
 
 const isLoading = computed(() => store.loadState === 'loading' && !store.dashboard)
-const isError = computed(() => store.loadState === 'error')
+const isBlocked = computed(() => store.semAcessoParceiro)
+const isError = computed(() => store.loadState === 'error' && !store.semAcessoParceiro)
+const showClinicalCta = computed(() => hasVeterinarioProfile())
 
 const initials = computed(() => {
   const nome = store.parceiroNome || 'Parceiro'
@@ -59,6 +63,28 @@ onMounted(() => {
       <div class="hub__skel hub__skel--hero" />
       <div class="hub__skel hub__skel--block" />
       <div class="hub__skel hub__skel--block" />
+    </div>
+
+    <div v-else-if="isBlocked" class="hub__error hub__error--blocked" role="status">
+      <i class="pi pi-building" aria-hidden="true" />
+      <div>
+        <strong>Portal do parceiro ainda não liberado</strong>
+        <p>
+          Solicite afiliado e/ou participativo em Programas. O time PetJourney analisa o pedido e
+          libera o portal — ou um admin pode vincular sua conta.
+        </p>
+      </div>
+      <div class="hub__cta-row">
+        <RouterLink class="hub__cta" to="/parceiro/programas">Solicitar programas</RouterLink>
+        <RouterLink
+          v-if="showClinicalCta"
+          class="hub__cta hub__cta--ghost"
+          to="/settings?aba=perfil"
+        >
+          Ir para configurações
+        </RouterLink>
+        <Button label="Verificar novamente" severity="secondary" @click="ensureContext(true)" />
+      </div>
     </div>
 
     <div v-else-if="isError" class="hub__error" role="alert">
@@ -169,10 +195,47 @@ onMounted(() => {
   text-align: center;
 }
 
+.hub__error--blocked {
+  background: var(--hub-card);
+  color: var(--hub-text);
+}
+
+.hub__error--blocked > i {
+  color: var(--hub-primary-strong);
+  font-size: 1.4rem;
+}
+
 .hub__error p {
   margin: 0.15rem 0 0;
   color: var(--hub-muted);
   font-size: 0.9rem;
+}
+
+.hub__cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.hub__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0 1rem;
+  border-radius: 0.7rem;
+  background: var(--hub-primary);
+  color: var(--hub-card);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.hub__cta--ghost {
+  border: 1px solid var(--hub-line);
+  background: transparent;
+  color: var(--hub-text);
 }
 
 .hub__hero {

@@ -59,12 +59,17 @@ export function getModoCardCopy(modo: ModoParticipacao): ModoCardCopy {
   }
 }
 
+/** DONO com membership, ou usuário ainda sem vínculo tentando entrar no programa. */
+export function canManageSolicitacaoModo(isDono: boolean, semAcessoParceiro: boolean) {
+  return isDono || semAcessoParceiro
+}
+
 export function resolveModoCta(
   status: StatusModoParceiro,
   modo: ModoParticipacao,
-  isDono: boolean,
+  canManageSolicitacao: boolean,
 ): ModoCta {
-  if (!isDono) {
+  if (!canManageSolicitacao) {
     return { type: 'none' }
   }
 
@@ -93,7 +98,7 @@ export function resolveSolicitarModoError(error: unknown) {
   }
 
   if (error.statusCode === 403) {
-    return 'Apenas o dono da empresa pode solicitar programas.'
+    return 'Sem permissão para solicitar. Confirme o vínculo da conta ou peça ao dono da empresa.'
   }
 
   if (error.statusCode === 409) {

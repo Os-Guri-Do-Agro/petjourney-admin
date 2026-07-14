@@ -7,9 +7,10 @@ import { RouterLink } from 'vue-router'
 
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import { validarCupom } from '@/service/parceiro/parceiro-portal-service'
 import type { ValidarCupomResultado } from '@/service/parceiro/types'
-import { currentColors } from '@/theme/color-mode'
+import { currentColors, isDarkMode } from '@/theme/color-mode'
 import {
   isCodigoResgateFormatoValido,
   normalizarCodigoResgate,
@@ -17,8 +18,9 @@ import {
   type ValidarCupomErrorView,
 } from '@/utils/parceiro/cupom-resgate'
 
-const { visible, close, markSuccess } = useCupomResgateModal()
+const { visible, close, markSuccess, canOpen } = useCupomResgateModal()
 const { store, parceiroQuery } = useParceiroPortal()
+const { focusSurfaceStyle } = usePartnerFocusSurface()
 
 type Step = 'input' | 'success' | 'error'
 
@@ -31,9 +33,11 @@ const resultado = ref<ValidarCupomResultado | null>(null)
 
 const dialogStyle = computed(() => {
   const colors = currentColors.value
+  const dark = isDarkMode.value
 
   return {
-    '--vc-bg': colors.auth.white,
+    ...focusSurfaceStyle.value,
+    '--vc-bg': colors.dashboard.surface,
     '--vc-text': colors.dashboard.text,
     '--vc-muted': colors.dashboard.muted,
     '--vc-faint': colors.dashboard.faint,
@@ -47,6 +51,7 @@ const dialogStyle = computed(() => {
     '--vc-warm-bg': colors.dashboard.warmBg,
     '--vc-warm-text': colors.dashboard.warmText,
     '--vc-shadow-rgb': colors.auth.shadowRgb,
+    '--vc-on-cta': dark ? colors.dashboard.bg : colors.auth.white,
   }
 })
 
@@ -87,6 +92,12 @@ function resetForm() {
 
 watch(visible, () => {
   resetForm()
+})
+
+watch(canOpen, (ok) => {
+  if (!ok && visible.value) {
+    close()
+  }
 })
 
 function onCodigoModel(value: string | undefined) {
@@ -159,58 +170,39 @@ async function handleValidar() {
   >
     <template #container="{ closeCallback }">
       <div class="vc-shell" :style="dialogStyle" role="document">
-        <header class="vc-shell__header">
-          <div class="vc-brand">
-            <span class="vc-brand__icon" aria-hidden="true">
+        <header class="vc-hero">
+          <div class="vc-hero__glow" aria-hidden="true" />
+          <div class="vc-hero__top">
+            <span class="vc-hero__icon" aria-hidden="true">
               <i class="pi pi-ticket" />
             </span>
-            <div class="vc-brand__copy">
-              <p class="vc-brand__eyebrow">Atendimento no balcão</p>
-              <h2 id="validar-cupom-title">Validar cupom</h2>
-              <p class="vc-brand__lede">
-                Peça o código no app do tutor e aplique o desconto na hora.
-              </p>
-            </div>
+            <button
+              class="vc-close"
+              type="button"
+              aria-label="Fechar"
+              :disabled="submitting"
+              @click="closeCallback"
+            >
+              <i class="pi pi-times" aria-hidden="true" />
+            </button>
           </div>
-
-          <button
-            class="vc-close"
-            type="button"
-            aria-label="Fechar"
-            :disabled="submitting"
-            @click="closeCallback"
-          >
-            <i class="pi pi-times" aria-hidden="true" />
-          </button>
+          <p class="vc-hero__eyebrow">Balcão · resgate rápido</p>
+          <h2 id="validar-cupom-title">Validar cupom</h2>
+          <p class="vc-hero__lede">
+            Digite o código do app do tutor e confirme o desconto na hora.
+          </p>
         </header>
 
         <div class="vc-shell__body" aria-labelledby="validar-cupom-title">
           <template v-if="step === 'input'">
-            <ol class="vc-steps" aria-label="Como validar">
-              <li>
-                <span>1</span>
-                Cliente abre o cupom no app e toca em usar
-              </li>
-              <li>
-                <span>2</span>
-                Você digita o código abaixo
-              </li>
-              <li>
-                <span>3</span>
-                Confirma o desconto na tela de sucesso
-              </li>
-            </ol>
-
             <p v-if="!store.podeOperar" class="vc-banner vc-banner--warn" role="status">
               Este parceiro ainda não pode operar. A validação fica disponível após a aprovação.
             </p>
 
-            <div class="vc-field">
+            <div class="vc-stage" :data-tone="lengthTone">
               <div class="vc-field__head">
                 <label class="vc-label" for="cupom-resgate-codigo">Código de resgate</label>
-                <span class="vc-counter" :data-tone="lengthTone">
-                  {{ codigoLength }}/32
-                </span>
+                <span class="vc-counter" :data-tone="lengthTone">{{ codigoLength }}/32</span>
               </div>
 
               <InputText
@@ -229,8 +221,8 @@ async function handleValidar() {
               />
 
               <p id="cupom-resgate-hint" class="vc-hint">
-                O código vale cerca de 5 minutos e é de uso único. Digite como aparece no app —
-                espaços e minúsculas são corrigidos automaticamente.
+                Válido por cerca de 5 minutos · uso único · espaços e minúsculas são ajustados
+                automaticamente
               </p>
               <p v-if="formatHint" class="vc-error" role="alert">{{ formatHint }}</p>
             </div>
@@ -244,8 +236,8 @@ async function handleValidar() {
               <p class="vc-result__eyebrow">Resgate confirmado</p>
               <h3>Cupom válido</h3>
               <p class="vc-result__discount">
-                {{ resultado.cupom.descontoPercentual }}%
-                <span>de desconto</span>
+                <span class="vc-result__discount-value">{{ resultado.cupom.descontoPercentual }}%</span>
+                <span class="vc-result__discount-label">de desconto</span>
               </p>
 
               <div class="vc-result__card">
@@ -299,6 +291,7 @@ async function handleValidar() {
               @click="closeDialog"
             />
             <Button
+              class="vc-cta"
               label="Validar código"
               icon="pi pi-check"
               type="button"
@@ -318,6 +311,7 @@ async function handleValidar() {
               @click="startAnother"
             />
             <Button
+              class="vc-cta"
               label="OK, aplicar desconto"
               icon="pi pi-check"
               type="button"
@@ -329,6 +323,7 @@ async function handleValidar() {
           <template v-else>
             <Button label="Fechar" severity="secondary" text type="button" @click="closeDialog" />
             <Button
+              class="vc-cta"
               label="Tentar de novo"
               icon="pi pi-refresh"
               type="button"
@@ -346,96 +341,107 @@ async function handleValidar() {
 .vc-shell {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  width: min(42rem, calc(100vw - 1.25rem));
-  max-height: min(92vh, 44rem);
+  width: min(40rem, calc(100vw - 1.5rem));
+  max-height: min(92vh, 52rem);
   overflow: hidden;
-  border-radius: 1.45rem;
+  border: 1px solid color-mix(in srgb, var(--vc-line) 88%, transparent);
+  border-radius: 1.55rem;
   background: var(--vc-bg);
-  box-shadow: 0 28px 80px rgb(var(--vc-shadow-rgb) / 0.22);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, white 45%, transparent) inset,
+    0 28px 70px rgb(var(--vc-shadow-rgb) / 0.24);
   color: var(--vc-text);
 }
 
-.vc-shell__header {
+.vc-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 1.55rem 1.65rem 1.7rem;
+  background: linear-gradient(152deg, var(--pf-from), var(--pf-to));
+  color: var(--pf-on);
+}
+
+.vc-hero__glow {
+  position: absolute;
+  top: -3.5rem;
+  right: -2rem;
+  width: 11rem;
+  height: 11rem;
+  border-radius: 999px;
+  background: rgb(var(--pf-glow-rgb) / 0.16);
+  pointer-events: none;
+}
+
+.vc-hero__top {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1.45rem 1.45rem 1.15rem;
-  border-bottom: 1px solid var(--vc-line);
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--vc-primary-soft) 28%, var(--vc-bg)) 0%,
-      var(--vc-bg) 100%
-    );
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
-.vc-brand {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  min-width: 0;
-}
-
-.vc-brand__icon {
+.vc-hero__icon {
   display: grid;
-  flex-shrink: 0;
   width: 3.15rem;
   height: 3.15rem;
   place-items: center;
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--vc-primary) 20%, var(--vc-bg));
-  color: var(--vc-primary-strong);
+  border-radius: 0.95rem;
+  background: var(--pf-chip);
+  color: var(--pf-on);
   font-size: 1.25rem;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vc-primary) 18%, transparent);
+  box-shadow: inset 0 0 0 1px var(--pf-line);
 }
 
-.vc-brand__copy {
-  display: grid;
-  gap: 0.2rem;
-  min-width: 0;
+.vc-hero__eyebrow,
+.vc-hero h2,
+.vc-hero__lede {
+  position: relative;
+  z-index: 1;
 }
 
-.vc-brand__eyebrow {
-  margin: 0;
-  color: var(--vc-faint);
+.vc-hero__eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--pf-on-soft);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.vc-brand__copy h2 {
+.vc-hero h2 {
   margin: 0;
-  font-size: 1.45rem;
+  font-size: clamp(1.65rem, 2.4vw, 1.95rem);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
   line-height: 1.15;
 }
 
-.vc-brand__lede {
-  margin: 0.15rem 0 0;
-  color: var(--vc-muted);
-  font-size: 0.92rem;
-  line-height: 1.45;
+.vc-hero__lede {
+  margin: 0.5rem 0 0;
+  max-width: 32rem;
+  color: var(--pf-on-soft);
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .vc-close {
   display: grid;
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 2.25rem;
+  height: 2.25rem;
   flex-shrink: 0;
   place-items: center;
-  border: 1px solid var(--vc-line);
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--vc-surface) 70%, var(--vc-bg));
-  color: var(--vc-muted);
+  border: 1px solid var(--pf-line);
+  border-radius: 0.7rem;
+  background: var(--pf-field);
+  color: var(--pf-on);
   cursor: pointer;
+  transition: background 140ms ease;
 }
 
 .vc-close:hover {
-  color: var(--vc-text);
-  background: var(--vc-surface);
+  background: var(--pf-chip);
 }
 
 .vc-close:disabled {
@@ -445,45 +451,42 @@ async function handleValidar() {
 
 .vc-shell__body {
   overflow: auto;
-  padding: 1.35rem 1.45rem 1.1rem;
+  padding: 1.55rem 1.65rem 1.25rem;
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      color-mix(in srgb, var(--vc-primary-soft) 18%, transparent),
+      transparent 58%
+    ),
+    var(--vc-bg);
 }
 
-.vc-steps {
+.vc-stage {
   display: grid;
-  gap: 0.55rem;
-  margin: 0 0 1.25rem;
-  padding: 0.95rem 1rem;
-  list-style: none;
-  border: 1px solid var(--vc-line);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--vc-surface) 78%, var(--vc-bg));
+  gap: 0.85rem;
+  padding: 1.35rem 1.25rem 1.4rem;
+  border: 1px solid color-mix(in srgb, var(--vc-primary) 22%, var(--vc-line));
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--vc-primary-soft) 22%, var(--vc-bg)) 0%,
+      color-mix(in srgb, var(--vc-surface) 55%, var(--vc-bg)) 100%
+    );
+  box-shadow: 0 14px 28px rgb(var(--vc-shadow-rgb) / 0.06);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.vc-steps li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.7rem;
-  color: var(--vc-muted);
-  font-size: 0.88rem;
-  line-height: 1.4;
+.vc-stage[data-tone='ok'] {
+  border-color: color-mix(in srgb, var(--vc-success-text) 35%, var(--vc-line));
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--vc-success-text) 12%, transparent);
 }
 
-.vc-steps span {
-  display: grid;
-  width: 1.45rem;
-  height: 1.45rem;
-  flex-shrink: 0;
-  place-items: center;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--vc-primary) 18%, var(--vc-bg));
-  color: var(--vc-primary-strong);
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
-.vc-field {
-  display: grid;
-  gap: 0.65rem;
+.vc-stage[data-tone='warn'],
+.vc-stage[data-tone='short'] {
+  border-color: color-mix(in srgb, var(--vc-warm-text) 32%, var(--vc-line));
 }
 
 .vc-field__head {
@@ -495,15 +498,15 @@ async function handleValidar() {
 
 .vc-label {
   color: var(--vc-faint);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .vc-counter {
   color: var(--vc-faint);
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -519,20 +522,57 @@ async function handleValidar() {
 
 .vc-input {
   width: 100%;
-  min-height: 3.55rem;
+  min-height: 4.5rem;
+  border-radius: 1rem !important;
+  border-color: var(--vc-line) !important;
+  background: var(--vc-surface) !important;
+  color: var(--vc-text) !important;
+  caret-color: var(--vc-primary-strong);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: clamp(1.25rem, 2.4vw, 1.65rem);
+  font-size: clamp(1.4rem, 3.2vw, 1.85rem);
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.22em;
   text-align: center;
   text-transform: uppercase;
+  box-shadow: 0 1px 0 color-mix(in srgb, white 12%, transparent) inset;
+}
+
+.vc-input::placeholder {
+  color: var(--vc-faint) !important;
+  letter-spacing: 0.22em;
+  opacity: 0.85;
+}
+
+.vc-stage :deep(.p-inputtext.vc-input),
+.vc-stage :deep(input.vc-input) {
+  background: var(--vc-surface) !important;
+  color: var(--vc-text) !important;
+  caret-color: var(--vc-primary-strong);
+}
+
+.vc-stage :deep(.p-inputtext.vc-input::placeholder),
+.vc-stage :deep(input.vc-input::placeholder) {
+  color: var(--vc-faint) !important;
+}
+
+.vc-input:focus,
+.vc-input:focus-visible,
+.vc-stage :deep(.p-inputtext.vc-input:focus),
+.vc-stage :deep(.p-inputtext.vc-input:focus-visible) {
+  outline: none;
+  border-color: color-mix(in srgb, var(--vc-primary) 55%, var(--vc-line)) !important;
+  color: var(--vc-text) !important;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--vc-primary) 28%, transparent),
+    0 1px 0 color-mix(in srgb, white 12%, transparent) inset;
 }
 
 .vc-hint {
   margin: 0;
   color: var(--vc-muted);
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   line-height: 1.5;
+  text-align: center;
 }
 
 .vc-error {
@@ -541,7 +581,7 @@ async function handleValidar() {
   border-radius: 0.8rem;
   background: var(--vc-warm-bg);
   color: var(--vc-warm-text);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   line-height: 1.4;
 }
 
@@ -549,7 +589,7 @@ async function handleValidar() {
   margin: 0 0 1rem;
   padding: 0.85rem 1rem;
   border-radius: 0.9rem;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.45;
 }
 
@@ -560,25 +600,26 @@ async function handleValidar() {
 
 .vc-result {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.35rem;
   justify-items: center;
-  padding: 0.5rem 0.25rem 0.15rem;
+  padding: 0.35rem 0.15rem 0.1rem;
   text-align: center;
 }
 
 .vc-result__badge {
   display: grid;
-  width: 3.6rem;
-  height: 3.6rem;
+  width: 3.5rem;
+  height: 3.5rem;
   place-items: center;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.35rem;
   border-radius: 999px;
-  font-size: 1.4rem;
+  font-size: 1.35rem;
 }
 
 .vc-result--success .vc-result__badge {
   background: var(--vc-success-bg);
   color: var(--vc-success-text);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--vc-success-text) 18%, transparent);
 }
 
 .vc-result--fail .vc-result__badge {
@@ -589,7 +630,7 @@ async function handleValidar() {
 .vc-result__eyebrow {
   margin: 0;
   color: var(--vc-faint);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -597,27 +638,33 @@ async function handleValidar() {
 
 .vc-result h3 {
   margin: 0;
-  font-size: 1.55rem;
+  font-size: 1.45rem;
   font-weight: 700;
   letter-spacing: -0.03em;
 }
 
 .vc-result__discount {
   display: grid;
-  gap: 0.1rem;
-  margin: 0.35rem 0 0.55rem;
-  color: var(--vc-primary-strong);
-  font-size: clamp(2.4rem, 6vw, 3.2rem);
+  gap: 0.15rem;
+  margin: 0.45rem 0 0.35rem;
+  padding: 0.95rem 1.2rem;
+  border-radius: 1.05rem;
+  background: linear-gradient(152deg, var(--pf-from), var(--pf-to));
+  color: var(--pf-on);
+  box-shadow: 0 14px 30px rgb(var(--pf-shadow-rgb) / 0.14);
+}
+
+.vc-result__discount-value {
+  font-size: clamp(2.3rem, 8vw, 3rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
 }
 
-.vc-result__discount span {
-  color: var(--vc-muted);
-  font-size: 0.95rem;
+.vc-result__discount-label {
+  color: var(--pf-on-soft);
+  font-size: 0.88rem;
   font-weight: 600;
-  letter-spacing: 0;
 }
 
 .vc-result__card {
@@ -625,11 +672,11 @@ async function handleValidar() {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
   width: 100%;
-  margin-top: 0.55rem;
+  margin-top: 0.65rem;
   padding: 1rem;
   border: 1px solid var(--vc-line);
   border-radius: 1.05rem;
-  background: color-mix(in srgb, var(--vc-surface) 80%, var(--vc-bg));
+  background: color-mix(in srgb, var(--vc-surface) 70%, var(--vc-bg));
   text-align: left;
 }
 
@@ -641,7 +688,7 @@ async function handleValidar() {
 
 .vc-result__k {
   color: var(--vc-faint);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -649,23 +696,23 @@ async function handleValidar() {
 
 .vc-result__card strong {
   overflow-wrap: anywhere;
-  font-size: 0.98rem;
+  font-size: 0.94rem;
   font-weight: 700;
 }
 
 .vc-result__message {
   margin: 0.25rem 0 0;
-  max-width: 34rem;
+  max-width: 22rem;
   color: var(--vc-muted);
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
 }
 
 .vc-result__hint {
   margin: 0.55rem 0 0;
-  max-width: 34rem;
+  max-width: 22rem;
   color: var(--vc-muted);
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   line-height: 1.45;
 }
 
@@ -681,22 +728,37 @@ async function handleValidar() {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.65rem;
-  padding: 1rem 1.45rem 1.35rem;
+  padding: 1.15rem 1.65rem 1.45rem;
   border-top: 1px solid var(--vc-line);
-  background: color-mix(in srgb, var(--vc-surface) 55%, var(--vc-bg));
+  background: color-mix(in srgb, var(--vc-surface) 60%, var(--vc-bg));
+}
+
+.vc-shell__footer :deep(.vc-cta.p-button) {
+  background: var(--vc-primary);
+  border-color: transparent;
+  color: var(--vc-on-cta);
+  font-weight: 700;
+}
+
+.vc-shell__footer :deep(.vc-cta.p-button:not(:disabled):hover) {
+  filter: brightness(1.04);
+}
+
+.vc-shell__footer :deep(.vc-cta.p-button:disabled) {
+  opacity: 0.48;
 }
 
 @media (max-width: 560px) {
   .vc-shell {
-    width: min(100vw - 0.75rem, 42rem);
-    border-radius: 1.15rem;
+    width: min(100vw - 0.75rem, 40rem);
+    border-radius: 1.25rem;
   }
 
-  .vc-shell__header,
+  .vc-hero,
   .vc-shell__body,
   .vc-shell__footer {
-    padding-left: 1.05rem;
-    padding-right: 1.05rem;
+    padding-left: 1.15rem;
+    padding-right: 1.15rem;
   }
 
   .vc-result__card {

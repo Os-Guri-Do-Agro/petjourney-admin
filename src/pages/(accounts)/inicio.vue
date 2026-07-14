@@ -6,6 +6,7 @@ import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBa
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PortalParceiroDashboard from '@/components/parceiro/PortalParceiroDashboard.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { getAuthUser } from '@/service/auth/auth-session'
 import { currentColors } from '@/theme/color-mode'
 
 const { store, ensureContext } = useParceiroPortal()
@@ -13,7 +14,18 @@ const { store, ensureContext } = useParceiroPortal()
 const now = ref(new Date())
 let clockId: ReturnType<typeof setInterval> | undefined
 
-const greetingTitle = computed(() => `Olá, ${store.parceiroNome}`)
+const greetingTitle = computed(() => {
+  if (store.semAcessoParceiro) {
+    const nome = getAuthUser()?.nome?.trim()
+    return nome ? `Olá, ${nome}` : 'Olá'
+  }
+
+  return `Olá, ${store.parceiroNome}`
+})
+
+const loadError = computed(() =>
+  store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
+)
 
 const todayLabel = computed(() =>
   now.value.toLocaleDateString('pt-BR', {
@@ -55,7 +67,8 @@ onUnmounted(() => {
     subtitle="Visão geral"
     :title="greetingTitle"
     :loading="false"
-    :error="store.loadState === 'error' ? store.errorMessage : ''"
+    :error="loadError"
+    :no-partner-access="store.semAcessoParceiro"
     @retry="ensureContext(true)"
   >
     <template #actions>
