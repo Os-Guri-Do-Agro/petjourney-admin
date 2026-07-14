@@ -35,7 +35,7 @@ const usuarioPerfilStore = useUsuarioPerfilStore()
 const { navigationSections, hasClinicalProfile } = useAppNavigation()
 const activeSectionId = ref('home')
 const defaultLandingPath = computed(() => getDefaultLandingPath())
-const searchQuery = ref('')
+// const searchQuery = ref('') // busca do header (temporariamente desligada)
 const panelFilterQuery = ref('')
 const authUser = computed(() => getAuthUser())
 const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
@@ -324,23 +324,30 @@ onMounted(() => {
       </div>
 
       <div class="app-header__right">
+        <!-- Busca global: ocultada temporariamente
         <label class="header-search" for="header-search">
           <i class="pi pi-search" aria-hidden="true" />
           <input id="header-search" v-model="searchQuery" type="search" placeholder="Pesquisar" />
         </label>
+        -->
 
         <button
           class="theme-switch"
+          :class="{ 'theme-switch--dark': isDarkMode }"
           type="button"
           :aria-label="isDarkMode ? 'Ativar tema claro' : 'Ativar tema escuro'"
           :title="isDarkMode ? 'Tema claro' : 'Tema escuro'"
           :aria-pressed="isDarkMode"
           @click="toggleColorMode"
         >
-          <span class="theme-switch__track">
-            <i :class="isDarkMode ? 'pi pi-moon' : 'pi pi-sun'" aria-hidden="true" />
+          <span class="theme-switch__rail">
+            <span class="theme-switch__thumb" aria-hidden="true">
+              <i class="pi pi-sun theme-switch__icon theme-switch__icon--sun" />
+              <i class="pi pi-moon theme-switch__icon theme-switch__icon--moon" />
+            </span>
+            <span class="theme-switch__label theme-switch__label--light">Light</span>
+            <span class="theme-switch__label theme-switch__label--dark">Dark</span>
           </span>
-          <span class="theme-switch__label">{{ isDarkMode ? 'Dark' : 'Light' }}</span>
         </button>
 
         <div class="user-menu">
@@ -840,9 +847,8 @@ onMounted(() => {
 .theme-switch {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
   min-height: 2.45rem;
-  padding: 0 0.78rem 0 0.28rem;
+  padding: 0.22rem;
   border: 1px solid var(--shell-line);
   border-radius: 0.72rem;
   background: var(--shell-surface);
@@ -857,23 +863,115 @@ onMounted(() => {
   background: var(--shell-surface-soft);
 }
 
-.theme-switch__track {
+.theme-switch__rail {
+  --theme-thumb: 2rem;
+  --theme-rail-w: 5.5rem;
+  --theme-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  width: var(--theme-rail-w);
+  height: var(--theme-thumb);
+}
+
+.theme-switch__thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: var(--theme-thumb);
+  height: var(--theme-thumb);
   place-items: center;
   border-radius: 0.58rem;
   background: color-mix(in srgb, var(--shell-accent) 22%, var(--shell-surface));
   color: var(--shell-accent-strong);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 18%, transparent);
+  transform: translateX(0);
+  transition: transform 520ms var(--theme-ease);
+  will-change: transform;
 }
 
-.theme-switch__track i {
+.theme-switch--dark .theme-switch__thumb {
+  transform: translateX(calc(var(--theme-rail-w) - var(--theme-thumb)));
+}
+
+.theme-switch__icon {
+  grid-area: 1 / 1;
   font-size: 0.86rem;
+  transition:
+    opacity 380ms var(--theme-ease),
+    transform 520ms var(--theme-ease);
+}
+
+.theme-switch__icon--sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.theme-switch__icon--moon {
+  opacity: 0;
+  transform: rotate(-14deg) scale(0.88);
+}
+
+.theme-switch--dark .theme-switch__icon--sun {
+  opacity: 0;
+  transform: rotate(14deg) scale(0.88);
+}
+
+.theme-switch--dark .theme-switch__icon--moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 .theme-switch__label {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
   line-height: 1;
+  transition:
+    opacity 420ms var(--theme-ease),
+    transform 520ms var(--theme-ease);
+}
+
+.theme-switch__label--light {
+  left: var(--theme-thumb);
+  right: 0;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.theme-switch__label--dark {
+  left: 0;
+  right: var(--theme-thumb);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(0.2rem);
+}
+
+.theme-switch--dark .theme-switch__label--light {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-0.2rem);
+}
+
+.theme-switch--dark .theme-switch__label--dark {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-switch__thumb,
+  .theme-switch__icon,
+  .theme-switch__label {
+    transition: none;
+  }
+
+  .theme-switch__thumb {
+    will-change: auto;
+  }
 }
 
 .header-context {
@@ -1011,6 +1109,10 @@ onMounted(() => {
   .header-search input,
   .theme-switch__label {
     display: none;
+  }
+
+  .theme-switch__rail {
+    --theme-rail-w: 3.85rem;
   }
 
   .header-search {
