@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -6,7 +7,18 @@ import { useRoute, useRouter } from 'vue-router'
 import AuthButton from '@/components/auth/AuthButton.vue'
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
-import { login } from '@/service/auth/auth-service'
+import { login, refreshAuthSession } from '@/service/auth/auth-service'
+import {
+  clearAuthSession,
+  getAuthUser,
+  getVeterinarioId,
+  hasVeterinarioProfile,
+} from '@/service/auth/auth-session'
+import {
+  postUsersMeReactivate,
+  type ReactivateProfile,
+} from '@/service/user/inativacao-service'
+import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { currentColors } from '@/theme/color-mode'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
@@ -14,12 +26,17 @@ const email = ref('')
 const password = ref('')
 const rememberAccess = ref(true)
 const loading = ref(false)
+const reactivating = ref(false)
 const showPassword = ref(false)
 const passwordInputType = computed(() => (showPassword.value ? 'text' : 'password'))
+
+/** Perfis inativos detectados no login — aguardam CTA de reativação. */
+const pendingReactivate = ref<ReactivateProfile[]>([])
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+const usuarioPerfilStore = useUsuarioPerfilStore()
 
 const loginStyle = computed(() => {
   const colors = currentColors.value
@@ -35,14 +52,33 @@ const loginStyle = computed(() => {
     '--auth-line': colors.auth.line,
     '--auth-divider': colors.auth.divider,
     '--auth-shadow-rgb': colors.auth.shadowRgb,
+    '--auth-reactivate-bg': colors.auth.sageTint,
+    '--auth-reactivate-icon': colors.auth.sageStrong,
   }
+})
+
+const showReactivatePanel = computed(() => pendingReactivate.value.length > 0)
+
+const reactivateCopy = computed(() => {
+  if (pendingReactivate.value.includes('veterinario') && pendingReactivate.value.includes('tutor')) {
+    return 'Esta conta tem perfis inativos. Reative o perfil veterinário para entrar no painel.'
+  }
+
+  if (pendingReactivate.value.includes('veterinario')) {
+    return 'Seu perfil veterinário está inativo. Reative para continuar no painel.'
+  }
+
+  return 'Há um perfil inativo nesta conta. Reative para continuar.'
 })
 
 function getSafeRedirectPath() {
   const redirect = route.query.redirect
 
   if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')) {
-    return redirect === '/tutor' || redirect === '/inicio' || redirect === '/parceiro' || redirect === '/veterinario'
+    return redirect === '/tutor' ||
+      redirect === '/inicio' ||
+      redirect === '/parceiro' ||
+      redirect === '/veterinario'
       ? getDefaultLandingPath()
       : redirect
   }
@@ -50,15 +86,50 @@ function getSafeRedirectPath() {
   return getDefaultLandingPath()
 }
 
+function collectInactiveProfiles(flags: {
+  tutorInactive: boolean
+  veterinarioInactive: boolean
+}) {
+  const profiles: ReactivateProfile[] = []
+
+  if (flags.veterinarioInactive) {
+    profiles.push('veterinario')
+  }
+
+  if (flags.tutorInactive) {
+    profiles.push('tutor')
+  }
+
+  return profiles
+}
+
+async function enterPanelAfterAuth() {
+  if (!hasVeterinarioProfile()) {
+    clearAuthSession()
+    usuarioPerfilStore.clear()
+    toast.add({
+      severity: 'warn',
+      summary: 'Perfil veterinário necessário',
+      detail: 'Esta conta ainda não possui perfil veterinário habilitado para o painel.',
+      life: 5000,
+    })
+    return
+  }
+
+  usuarioPerfilStore.syncFromAuth()
+  await router.replace(getSafeRedirectPath())
+}
+
 async function handleLogin() {
-  if (loading.value) {
+  if (loading.value || reactivating.value) {
     return
   }
 
   loading.value = true
+  pendingReactivate.value = []
 
   try {
-    await login(
+    const result = await login(
       {
         email: email.value.trim(),
         senha: password.value,
@@ -68,7 +139,14 @@ async function handleLogin() {
       },
     )
 
-    await router.replace(getSafeRedirectPath())
+    const inactive = collectInactiveProfiles(result)
+
+    if (inactive.length > 0) {
+      pendingReactivate.value = inactive
+      return
+    }
+
+    await enterPanelAfterAuth()
   } catch (error) {
     toast.add({
       severity: 'error',
@@ -80,6 +158,67 @@ async function handleLogin() {
     loading.value = false
   }
 }
+
+async function handleReactivate(profile: ReactivateProfile = 'veterinario') {
+  if (reactivating.value) {
+    return
+  }
+
+  reactivating.value = true
+
+  try {
+    await postUsersMeReactivate({ profile })
+    await refreshAuthSession(rememberAccess.value)
+
+    const user = getAuthUser()
+    const stillInactive =
+      (profile === 'veterinario' && user?.veterinarioActive === false) ||
+      (profile === 'tutor' && user?.tutorActive === false)
+
+    if (stillInactive) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Perfil ainda inativo',
+        detail: 'A reativação foi pedida, mas o token ainda indica perfil inativo. Tente de novo.',
+        life: 5000,
+      })
+      return
+    }
+
+    pendingReactivate.value = pendingReactivate.value.filter((item) => item !== profile)
+
+    if (profile === 'veterinario' || getVeterinarioId()) {
+      pendingReactivate.value = []
+      toast.add({
+        severity: 'success',
+        summary: 'Perfil reativado',
+        detail: 'Bem-vindo de volta ao painel.',
+        life: 3500,
+      })
+      await enterPanelAfterAuth()
+      return
+    }
+
+    if (pendingReactivate.value.length === 0) {
+      await enterPanelAfterAuth()
+    }
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Não foi possível reativar',
+      detail: error instanceof Error ? error.message : 'Tente novamente em instantes.',
+      life: 5000,
+    })
+  } finally {
+    reactivating.value = false
+  }
+}
+
+function cancelReactivate() {
+  clearAuthSession()
+  usuarioPerfilStore.clear()
+  pendingReactivate.value = []
+}
 </script>
 
 <template>
@@ -87,7 +226,46 @@ async function handleLogin() {
     description="Entre para acompanhar a agenda, os prontuários e o cuidado dos seus pacientes."
     title="Bem-vindo de volta"
   >
-    <form class="login-form" :style="loginStyle" @submit.prevent="handleLogin">
+    <div v-if="showReactivatePanel" class="login-reactivate" :style="loginStyle" role="status">
+      <div class="login-reactivate__icon" aria-hidden="true">
+        <i class="pi pi-user-minus" />
+      </div>
+      <h2>Perfil inativo</h2>
+      <p>{{ reactivateCopy }}</p>
+
+      <div class="login-reactivate__actions">
+        <AuthButton
+          v-if="pendingReactivate.includes('veterinario')"
+          :loading="reactivating"
+          full-width
+          type="button"
+          @click="handleReactivate('veterinario')"
+        >
+          {{ reactivating ? 'Reativando…' : 'Reativar perfil veterinário' }}
+        </AuthButton>
+
+        <AuthButton
+          v-if="pendingReactivate.includes('tutor') && !pendingReactivate.includes('veterinario')"
+          :loading="reactivating"
+          full-width
+          type="button"
+          @click="handleReactivate('tutor')"
+        >
+          {{ reactivating ? 'Reativando…' : 'Reativar perfil tutor' }}
+        </AuthButton>
+
+        <Button
+          label="Usar outra conta"
+          severity="secondary"
+          outlined
+          type="button"
+          :disabled="reactivating"
+          @click="cancelReactivate"
+        />
+      </div>
+    </div>
+
+    <form v-else class="login-form" :style="loginStyle" @submit.prevent="handleLogin">
       <AuthTextField
         id="email"
         v-model="email"
@@ -162,7 +340,7 @@ async function handleLogin() {
       </button>
     </form>
 
-    <p class="login-support">
+    <p v-if="!showReactivatePanel" class="login-support">
       Novo por aqui?
       <RouterLink to="/auth/register">Criar conta</RouterLink>
     </p>
@@ -303,5 +481,47 @@ async function handleLogin() {
   margin: 2rem 0 0;
   color: var(--auth-icon);
   font-size: 0.875rem;
+}
+
+.login-reactivate {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--auth-sage) 28%, var(--auth-line));
+  border-radius: 1.1rem;
+  background: color-mix(in srgb, var(--auth-reactivate-bg) 72%, var(--auth-white));
+  box-shadow: 0 10px 24px rgb(var(--auth-shadow-rgb) / 0.06);
+}
+
+.login-reactivate__icon {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--auth-sage) 18%, var(--auth-white));
+  color: var(--auth-reactivate-icon);
+  font-size: 1.15rem;
+}
+
+.login-reactivate h2 {
+  margin: 0;
+  color: var(--auth-text);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.login-reactivate p {
+  margin: 0;
+  color: var(--auth-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.login-reactivate__actions {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
 }
 </style>

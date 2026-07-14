@@ -14,10 +14,7 @@ const sampleGroups: AppNavigationGroup[] = [
   {
     id: 'account',
     label: 'Conta',
-    items: [
-      { label: 'Perfil', to: '/perfil', icon: 'pi pi-user' },
-      { label: 'Configurações', to: '/settings', icon: 'pi pi-cog' },
-    ],
+    items: [{ label: 'Configurações', to: '/settings', icon: 'pi pi-cog' }],
   },
 ]
 
@@ -41,10 +38,7 @@ describe('filterNavigationGroups', () => {
       {
         id: 'account',
         label: 'Conta',
-        items: [
-          { label: 'Perfil', to: '/perfil', icon: 'pi pi-user' },
-          { label: 'Configurações', to: '/settings', icon: 'pi pi-cog' },
-        ],
+        items: [{ label: 'Configurações', to: '/settings', icon: 'pi pi-cog' }],
       },
     ])
   })

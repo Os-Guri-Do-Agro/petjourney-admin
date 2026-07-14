@@ -424,10 +424,6 @@ watch(modoStatus, () => {
   color: var(--pf-on);
 }
 
-.programa-card--focus .programa-card__features i {
-  color: var(--pf-on);
-}
-
 .programa-card--focus .programa-card__badge {
   background: var(--pf-chip);
   color: var(--pf-on);
@@ -558,12 +554,16 @@ watch(modoStatus, () => {
   font-size: 0.84rem;
 }
 
-.programa-card--afiliado .programa-card__features i {
+.programa-card--afiliado:not(.programa-card--focus) .programa-card__features i {
   color: var(--prog-success-text);
 }
 
 .programa-card--participativo .programa-card__features i {
   color: var(--prog-amber-text);
+}
+
+.programa-card--focus .programa-card__features i {
+  color: var(--pf-on);
 }
 
 .programa-card__info {

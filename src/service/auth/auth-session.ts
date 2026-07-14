@@ -12,6 +12,7 @@ export type AuthUser = {
   tutorId?: string
   tutorActive?: boolean
   veterinarioId?: string
+  veterinarioActive?: boolean
   isSystemAdmin?: boolean
   iat: number
   exp: number

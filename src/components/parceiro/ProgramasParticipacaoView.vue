@@ -201,13 +201,16 @@ const activationSteps = [
 }
 
 .activation-panel__steps {
+  --activation-gap: 1.5rem;
+  --activation-number-size: 2.2rem;
+  --activation-pad-y: 1rem;
+
   display: grid;
   width: 100%;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: var(--activation-gap);
   margin: 0;
   padding: 0;
-  overflow: hidden;
   list-style: none;
 }
 
@@ -216,7 +219,7 @@ const activationSteps = [
   display: grid;
   gap: 0.65rem;
   justify-items: start;
-  padding: 1rem 1.05rem;
+  padding: var(--activation-pad-y) 1.05rem;
   border: 1px solid var(--prog-line);
   border-radius: 1rem;
   background: color-mix(in srgb, var(--prog-surface) 75%, var(--prog-card));
@@ -225,19 +228,20 @@ const activationSteps = [
 .activation-step:not(:last-child)::after {
   content: '';
   position: absolute;
-  top: 2rem;
-  right: 0;
-  width: 0.75rem;
-  transform: translateX(50%);
-  border-top: 1px dashed color-mix(in srgb, var(--prog-line) 90%, transparent);
+  top: calc(var(--activation-pad-y) + (var(--activation-number-size) / 2));
+  left: 100%;
+  width: var(--activation-gap);
+  height: 0;
+  border-top: 2px dashed color-mix(in srgb, var(--prog-primary) 45%, var(--prog-line));
+  transform: translateY(-50%);
   pointer-events: none;
   z-index: 1;
 }
 
 .activation-step__number {
   display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: var(--activation-number-size);
+  height: var(--activation-number-size);
   place-items: center;
   border: 1px solid var(--prog-line);
   border-radius: 999px;

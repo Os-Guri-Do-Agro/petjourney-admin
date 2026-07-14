@@ -32,7 +32,6 @@ const pageAtmosphere = computed(() => {
     '--inicio-muted': colors.dashboard.muted,
     '--inicio-faint': colors.dashboard.faint,
     '--inicio-text': colors.dashboard.text,
-    '--inicio-bloom': `color-mix(in srgb, ${colors.vet.primary} 16%, ${colors.dashboard.bg})`,
     '--inicio-shadow-rgb': colors.auth.shadowRgb,
   }
 })
@@ -66,8 +65,6 @@ onUnmounted(() => {
     </template>
 
     <div class="inicio-shell" :style="pageAtmosphere">
-      <div class="inicio-shell__bloom" aria-hidden="true" />
-
       <PartnerOperabilityBanner />
 
       <p class="inicio-lede">
@@ -101,27 +98,11 @@ onUnmounted(() => {
 
 .inicio-shell {
   --inicio-gap: 1.65rem;
-  position: relative;
   display: grid;
   gap: var(--inicio-gap);
   width: 100%;
   max-width: 100%;
   overflow-x: clip;
-  isolation: isolate;
-}
-
-.inicio-shell__bloom {
-  position: absolute;
-  top: -3.5rem;
-  right: 0;
-  z-index: -1;
-  width: min(26rem, 100%);
-  height: 14rem;
-  border-radius: 999px;
-  background: radial-gradient(circle at 40% 40%, var(--inicio-bloom) 0%, transparent 70%);
-  opacity: 0.85;
-  pointer-events: none;
-  filter: blur(10px);
 }
 
 .inicio-lede {
@@ -135,12 +116,6 @@ onUnmounted(() => {
   display: grid;
   gap: var(--inicio-gap);
   width: 100%;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .inicio-shell__bloom {
-    filter: none;
-  }
 }
 
 @media (max-width: 720px) {

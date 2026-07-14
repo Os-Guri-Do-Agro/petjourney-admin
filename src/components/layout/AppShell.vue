@@ -21,6 +21,7 @@ import {
 } from '@/composables/useAppNavigation'
 import { clearAuthSession, getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
+import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { currentColors, isDarkMode, toggleColorMode } from '@/theme/color-mode'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
@@ -30,12 +31,13 @@ const drawerOpen = ref(true)
 const userMenuOpen = ref(false)
 const logoutConfirmVisible = ref(false)
 const parceiroStore = useParceiroStore()
+const usuarioPerfilStore = useUsuarioPerfilStore()
 const { navigationSections, hasClinicalProfile } = useAppNavigation()
 const activeSectionId = ref('home')
 const defaultLandingPath = computed(() => getDefaultLandingPath())
 const searchQuery = ref('')
 const panelFilterQuery = ref('')
-const user = computed(() => getAuthUser())
+const authUser = computed(() => getAuthUser())
 const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
 const logoHeaderUrl = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
 
@@ -152,16 +154,13 @@ function handleSectionChange(sectionId: string) {
   }
 }
 
-const initials = computed(() => {
-  const name = user.value?.nome ?? 'Vet'
+const initials = computed(() => usuarioPerfilStore.initials)
 
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-})
+const headerDisplayName = computed(
+  () => usuarioPerfilStore.displayName || authUser.value?.nome || 'Veterinário',
+)
+
+const headerAvatarUrl = computed(() => usuarioPerfilStore.avatarUrl)
 
 const shellClasses = computed(() => ({
   'app-shell--navigator-hidden': !drawerOpen.value,
@@ -186,12 +185,15 @@ function requestLogout() {
 
 async function handleLogout() {
   parceiroStore.reset()
+  usuarioPerfilStore.clear()
   clearAuthSession()
   userMenuOpen.value = false
   await router.replace('/auth/login')
 }
 
 onMounted(() => {
+  usuarioPerfilStore.hydrate()
+  usuarioPerfilStore.syncFromAuth()
   void parceiroStore.bootstrap().catch(() => undefined)
 })
 </script>
@@ -349,16 +351,19 @@ onMounted(() => {
             aria-haspopup="menu"
             @click="userMenuOpen = !userMenuOpen"
           >
-            <span class="user-avatar">{{ initials }}</span>
+            <span class="user-avatar">
+              <img v-if="headerAvatarUrl" :src="headerAvatarUrl" alt="" />
+              <template v-else>{{ initials }}</template>
+            </span>
             <span class="user-menu__identity">
-              <strong>{{ user?.nome ?? 'Veterinário' }}</strong>
+              <strong>{{ headerDisplayName }}</strong>
               <small>Conta parceiro</small>
             </span>
             <i class="pi pi-angle-down" aria-hidden="true" />
           </button>
 
           <div v-if="userMenuOpen" class="user-menu__dropdown" role="menu">
-            <RouterLink role="menuitem" to="/perfil" @click="userMenuOpen = false">
+            <RouterLink role="menuitem" to="/settings?aba=perfil" @click="userMenuOpen = false">
               <i class="pi pi-user" aria-hidden="true" />
               Perfil
             </RouterLink>
@@ -917,11 +922,18 @@ onMounted(() => {
   width: 2.1rem;
   height: 2.1rem;
   place-items: center;
+  overflow: hidden;
   border-radius: 0.62rem;
   background: color-mix(in srgb, var(--shell-accent) 18%, var(--shell-surface));
   color: var(--shell-accent-strong);
   font-size: 0.78rem;
   font-weight: 600;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .user-menu__identity {

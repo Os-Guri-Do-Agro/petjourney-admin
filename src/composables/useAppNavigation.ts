@@ -35,8 +35,7 @@ export const CLINICAL_MENU_ENABLED = false
 export const EQUIPE_MENU_ENABLED = false
 
 const accountItems: AppNavigationItem[] = [
-  { label: 'Perfil', to: '/perfil', icon: 'pi pi-user' },
-  { label: 'Configurações', to: '/settings#seguranca', icon: 'pi pi-cog' },
+  { label: 'Configurações', to: '/settings', icon: 'pi pi-cog' },
 ]
 
 const clinicalItems: AppNavigationItem[] = [

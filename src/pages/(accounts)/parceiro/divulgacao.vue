@@ -27,7 +27,6 @@ const pageAtmosphere = computed(() => {
 
   return {
     '--div-page-muted': colors.dashboard.muted,
-    '--div-page-bloom': `color-mix(in srgb, ${colors.vet.primary} 16%, ${colors.dashboard.bg})`,
   }
 })
 
@@ -83,8 +82,6 @@ watch(
     @retry="ensureContext(true)"
   >
     <div class="divulgacao-page" :style="pageAtmosphere">
-      <div class="divulgacao-page__bloom" aria-hidden="true" />
-
       <PartnerOperabilityBanner />
 
       <p class="divulgacao-page__lede">
@@ -99,27 +96,11 @@ watch(
 <style scoped>
 .divulgacao-page {
   --divulgacao-gap: 1.65rem;
-  position: relative;
   display: grid;
   gap: var(--divulgacao-gap);
   width: 100%;
   max-width: 100%;
   overflow-x: clip;
-  isolation: isolate;
-}
-
-.divulgacao-page__bloom {
-  position: absolute;
-  top: -3.5rem;
-  right: 0;
-  z-index: -1;
-  width: min(26rem, 100%);
-  height: 14rem;
-  border-radius: 999px;
-  background: radial-gradient(circle at 40% 40%, var(--div-page-bloom) 0%, transparent 70%);
-  opacity: 0.85;
-  pointer-events: none;
-  filter: blur(10px);
 }
 
 .divulgacao-page__lede {
@@ -133,12 +114,6 @@ watch(
 :deep(#cupons),
 :deep(#resgates) {
   scroll-margin-top: 5rem;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .divulgacao-page__bloom {
-    filter: none;
-  }
 }
 
 @media (max-width: 720px) {

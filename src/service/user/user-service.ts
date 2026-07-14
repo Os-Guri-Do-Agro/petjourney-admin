@@ -17,6 +17,92 @@ export type VeterinarioSignupPayload = {
   }
 }
 
+export type VeterinarioPerfil = {
+  id?: string
+  crmv?: string | null
+  especialidade?: string | null
+  foto?: string | null
+}
+
+export type UsuarioProfile = {
+  id: string
+  email: string
+  nome: string
+  telefone?: string | null
+  telefoneWhatsApp?: string | null
+  cpf?: string | null
+  ativo?: boolean
+  veterinarioPerfil?: VeterinarioPerfil | null
+}
+
+export type UpdateUsuarioPayload = {
+  nome?: string
+  telefone?: string
+  telefoneWhatsApp?: string
+  cpf?: string
+  veterinario?: {
+    foto?: string
+    crmv?: string
+    especialidade?: string
+  }
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  return value as Record<string, unknown>
+}
+
+function asOptionalString(value: unknown) {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
+function normalizeVeterinarioPerfil(raw: unknown): VeterinarioPerfil | null {
+  const record = asRecord(raw)
+
+  if (!record) {
+    return null
+  }
+
+  return {
+    id: asOptionalString(record.id) ?? undefined,
+    crmv: asOptionalString(record.crmv),
+    especialidade: asOptionalString(record.especialidade),
+    foto: asOptionalString(record.foto),
+  }
+}
+
+/** Normaliza envelope/allInformations para um shape estável na UI. */
+export function normalizeUsuarioProfile(raw: unknown, fallbackId: string): UsuarioProfile {
+  const root = asRecord(raw) ?? {}
+  const nestedUsuario = asRecord(root.usuario) ?? asRecord(root.user)
+  const source = nestedUsuario ?? root
+
+  const veterinarioPerfil =
+    normalizeVeterinarioPerfil(source.veterinarioPerfil) ??
+    normalizeVeterinarioPerfil(source.veterinario) ??
+    normalizeVeterinarioPerfil(root.veterinarioPerfil) ??
+    normalizeVeterinarioPerfil(root.veterinario)
+
+  return {
+    id: asOptionalString(source.id) ?? asOptionalString(root.id) ?? fallbackId,
+    email: asOptionalString(source.email) ?? '',
+    nome: asOptionalString(source.nome) ?? '',
+    telefone: asOptionalString(source.telefone),
+    telefoneWhatsApp: asOptionalString(source.telefoneWhatsApp),
+    cpf: asOptionalString(source.cpf),
+    ativo: typeof source.ativo === 'boolean' ? source.ativo : undefined,
+    veterinarioPerfil,
+  }
+}
+
 type AvailabilityField = 'email' | 'cpf'
 
 type AvailabilityResult = {
@@ -69,4 +155,18 @@ export async function registerVeterinarian(
   setAuthSession(response.data, options?.rememberAccess ?? true)
 
   return response
+}
+
+export async function getUsuarioAllInformations(userId: string) {
+  const response = await apiFetch<ApiEnvelope<unknown>>(`/usuario/allInformations/${userId}`)
+  return normalizeUsuarioProfile(response.data, userId)
+}
+
+export async function updateUsuario(userId: string, payload: UpdateUsuarioPayload) {
+  const response = await apiFetch<ApiEnvelope<unknown>>(`/usuario/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+
+  return normalizeUsuarioProfile(response.data, userId)
 }
