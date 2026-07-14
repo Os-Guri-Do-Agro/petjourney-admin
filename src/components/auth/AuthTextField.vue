@@ -2,6 +2,7 @@
 import { computed, useSlots } from 'vue'
 import InputText from 'primevue/inputtext'
 
+import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { currentColors } from '@/theme/color-mode'
 
 defineOptions({
@@ -35,25 +36,17 @@ const props = withDefaults(
 const hasLabel = computed(() => Boolean(props.label))
 const hasLeadingSlot = computed(() => Boolean(slots.leading))
 const hasTrailingSlot = computed(() => Boolean(slots.trailing))
+const authTheme = useAuthThemeVars()
 
 const fieldStyle = computed(() => {
   const colors = currentColors.value
-  const cursorColor = encodeURIComponent(colors.primary)
+  const cursorColor = encodeURIComponent(colors.vet.primary)
 
   return {
-    '--auth-primary': colors.auth.text,
-    '--auth-muted': colors.auth.muted,
-    '--auth-soft': colors.auth.soft,
-    '--auth-border': colors.auth.line,
-    '--auth-white': colors.auth.white,
-    '--auth-shadow-rgb': colors.auth.shadowRgb,
-    '--auth-focus': colors.vet.primary,
-    '--auth-focus-ring': colors.vet.secondary,
-    '--auth-danger': colors.red,
+    ...authTheme.value,
     '--auth-text-cursor': `url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2724%27 viewBox=%270 0 16 24%27%3E%3Cpath d=%27M6 2h4v2H9v16h1v2H6v-2h1V4H6V2Z%27 fill=%27${cursorColor}%27/%3E%3C/svg%3E") 8 12, text`,
   }
 })
-
 </script>
 
 <template>
@@ -101,7 +94,7 @@ const fieldStyle = computed(() => {
 
 <style scoped>
 .auth-text-field__label {
-  color: var(--auth-primary);
+  color: var(--auth-text);
   font-size: 0.8125rem;
   font-weight: 700;
 }
@@ -121,9 +114,9 @@ const fieldStyle = computed(() => {
   padding: 0 1rem;
   border: 1px solid var(--auth-border);
   border-radius: 0.875rem;
-  background: var(--auth-white);
-  caret-color: var(--auth-primary);
-  color: var(--auth-primary);
+  background: var(--auth-field-bg);
+  caret-color: var(--auth-focus);
+  color: var(--auth-text);
   cursor: var(--auth-text-cursor);
   font-size: 0.9375rem;
   line-height: 1.5rem;
@@ -164,15 +157,15 @@ const fieldStyle = computed(() => {
 }
 
 .auth-text-field__input:focus {
-  caret-color: var(--auth-primary);
-  color: var(--auth-primary);
+  caret-color: var(--auth-focus);
+  color: var(--auth-text);
   cursor: var(--auth-text-cursor);
 }
 
 .auth-text-field__input:focus,
 .auth-text-field__input:focus-visible {
   border-color: var(--auth-focus);
-  background: color-mix(in srgb, var(--auth-focus-ring) 14%, var(--auth-white));
+  background: color-mix(in srgb, var(--auth-focus-ring) 16%, var(--auth-field-bg));
 }
 
 .auth-text-field__input--invalid {

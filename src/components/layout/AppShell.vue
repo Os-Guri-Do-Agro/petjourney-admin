@@ -6,6 +6,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
 import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
+import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
 import {
   filterNavigationGroups,
   getSectionLandingPath,
@@ -19,6 +20,7 @@ import {
   type AppNavigationItem,
   type AppNavigationSection,
 } from '@/composables/useAppNavigation'
+import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { clearAuthSession, getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
@@ -32,6 +34,7 @@ const userMenuOpen = ref(false)
 const logoutConfirmVisible = ref(false)
 const parceiroStore = useParceiroStore()
 const usuarioPerfilStore = useUsuarioPerfilStore()
+const { open: openCupomResgate } = useCupomResgateModal()
 const { navigationSections, hasClinicalProfile } = useAppNavigation()
 const activeSectionId = ref('home')
 const defaultLandingPath = computed(() => getDefaultLandingPath())
@@ -332,6 +335,19 @@ onMounted(() => {
         -->
 
         <button
+          class="header-resgate"
+          type="button"
+          title="Validar cupom"
+          aria-label="Validar cupom"
+          @click="openCupomResgate"
+        >
+          <span class="header-resgate__icon" aria-hidden="true">
+            <i class="pi pi-ticket" />
+          </span>
+          <span class="header-resgate__label">Validar cupom</span>
+        </button>
+
+        <button
           class="theme-switch"
           :class="{ 'theme-switch--dark': isDarkMode }"
           type="button"
@@ -401,6 +417,8 @@ onMounted(() => {
       severity="danger"
       @confirm="handleLogout"
     />
+
+    <ValidarCupomDialog />
   </div>
 </template>
 
@@ -844,6 +862,47 @@ onMounted(() => {
   color: var(--shell-soft);
 }
 
+.header-resgate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.45rem;
+  padding: 0.22rem 0.78rem 0.22rem 0.28rem;
+  border: 1px solid var(--shell-line);
+  border-radius: 0.72rem;
+  background: var(--shell-surface);
+  color: var(--shell-text);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.header-resgate:hover {
+  background: var(--shell-surface-soft);
+  border-color: color-mix(in srgb, var(--shell-accent) 28%, var(--shell-line));
+}
+
+.header-resgate__icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 0.58rem;
+  background: color-mix(in srgb, var(--shell-accent) 22%, var(--shell-surface));
+  color: var(--shell-accent-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 18%, transparent);
+  font-size: 0.86rem;
+}
+
+.header-resgate__label {
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .theme-switch {
   display: inline-flex;
   align-items: center;
@@ -1107,12 +1166,17 @@ onMounted(() => {
   .user-menu__identity,
   .header-context,
   .header-search input,
-  .theme-switch__label {
+  .theme-switch__label,
+  .header-resgate__label {
     display: none;
   }
 
   .theme-switch__rail {
     --theme-rail-w: 3.85rem;
+  }
+
+  .header-resgate {
+    padding: 0.22rem;
   }
 
   .header-search {

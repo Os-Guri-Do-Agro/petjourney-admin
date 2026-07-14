@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
-import { currentColors } from '@/theme/color-mode'
+import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 
 const props = withDefaults(
   defineProps<{
@@ -38,17 +38,7 @@ const buttonClasses = computed(() => [
   },
 ])
 
-const buttonStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--auth-primary': colors.vet.primary,
-    '--auth-primary-muted': colors.auth.sageStrong,
-    '--auth-secondary': colors.vet.secondary,
-    '--auth-white': colors.auth.white,
-    '--auth-border': colors.auth.line,
-  }
-})
+const buttonStyle = useAuthThemeVars()
 </script>
 
 <template>
@@ -64,33 +54,34 @@ const buttonStyle = computed(() => {
 
 <style scoped>
 .auth-button {
-  color: var(--auth-primary);
+  color: var(--auth-sage);
   cursor: pointer;
 }
 
 .auth-button:focus {
-  --tw-ring-color: color-mix(in srgb, var(--auth-secondary) 70%, transparent);
+  --tw-ring-color: color-mix(in srgb, var(--auth-sage-soft) 70%, transparent);
 }
 
 .auth-button--primary {
-  background: var(--auth-primary);
-  color: var(--auth-white);
+  background: var(--auth-cta-bg);
+  color: var(--auth-cta-text);
 }
 
 .auth-button--primary:hover {
-  background: var(--auth-primary-muted);
+  background: var(--auth-cta-bg-hover);
 }
 
 .auth-button--secondary {
-  background: var(--auth-white);
-  border-color: var(--auth-border);
+  background: var(--auth-field-bg);
+  border-color: var(--auth-line);
+  color: var(--auth-text);
 }
 
 .auth-button--secondary:hover,
 .auth-button--ghost:hover {
-  border-color: var(--auth-primary);
-  background: color-mix(in srgb, var(--auth-secondary) 40%, var(--auth-white));
-  color: var(--auth-primary);
+  border-color: var(--auth-sage);
+  background: color-mix(in srgb, var(--auth-sage-soft) 40%, var(--auth-field-bg));
+  color: var(--auth-link);
 }
 
 .auth-button__spinner {

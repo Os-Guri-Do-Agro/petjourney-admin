@@ -12,6 +12,8 @@ import type {
   SaqueDetalhe,
   SaqueResumo,
   TransacaoCarteira,
+  ValidarCupomPayload,
+  ValidarCupomResultado,
 } from './types'
 
 type ParceiroQuery = {
@@ -101,6 +103,19 @@ export function getPortalResgates(params?: ParceiroQuery & { cursor?: string; li
   return unwrap(
     apiFetch<ApiEnvelope<CursorPage<ResgateParceiro>>>(
       `/parceiro/portal/resgates${query ? `?${query}` : ''}`,
+    ),
+  )
+}
+
+/** Efetiva o resgate no balcão. Um POST de sucesso = um resgate consumido. */
+export function validarCupom(payload: ValidarCupomPayload, params?: ParceiroQuery) {
+  return unwrap(
+    apiFetch<ApiEnvelope<ValidarCupomResultado>>(
+      `/parceiro/portal/cupons/validar${buildParceiroQuery(params)}`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
     ),
   )
 }

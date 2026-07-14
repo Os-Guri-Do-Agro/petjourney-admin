@@ -4,7 +4,8 @@ import { computed } from 'vue'
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
 import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
 import bgLoginUrl from '@/assets/login/bg-login.jpg'
-import { currentColors, isDarkMode } from '@/theme/color-mode'
+import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
+import { isDarkMode } from '@/theme/color-mode'
 
 defineProps<{
   eyebrow?: string
@@ -14,24 +15,7 @@ defineProps<{
 
 const logoUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
 const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
-
-const authLayoutStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--auth-primary': colors.vet.primary,
-    '--auth-sage': colors.vet.primary,
-    '--auth-sage-strong': colors.auth.sageStrong,
-    '--auth-sage-soft': colors.vet.secondary,
-    '--auth-sage-tint': colors.auth.sageTint,
-    '--auth-text': colors.auth.text,
-    '--auth-muted': colors.auth.muted,
-    '--auth-soft': colors.auth.soft,
-    '--auth-line': colors.auth.line,
-    '--auth-app-bg': colors.auth.appBg,
-    '--auth-white': colors.auth.white,
-  }
-})
+const authLayoutStyle = useAuthThemeVars()
 </script>
 
 <template>
@@ -119,7 +103,7 @@ const authLayoutStyle = computed(() => {
 <style scoped>
 .auth-page {
   min-height: 100vh;
-  background: var(--auth-white);
+  background: var(--auth-page-bg);
   color: var(--auth-text);
   font-family: 'DM Sans', Inter, system-ui, sans-serif;
 }
@@ -134,7 +118,7 @@ const authLayoutStyle = computed(() => {
   display: grid;
   grid-template-columns: minmax(32rem, 0.9fr) minmax(0, 1.1fr);
   overflow: hidden;
-  background: var(--auth-white);
+  background: var(--auth-page-bg);
 }
 
 .auth-form-panel {
@@ -195,7 +179,7 @@ const authLayoutStyle = computed(() => {
   position: relative;
   min-height: 100%;
   overflow: hidden;
-  background: var(--auth-sage);
+  background: var(--auth-visual-to);
 }
 
 .auth-visual-panel__image,
@@ -208,15 +192,15 @@ const authLayoutStyle = computed(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.24;
+  opacity: 0.22;
   filter: saturate(0.75);
 }
 
 .auth-visual-panel__overlay {
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--auth-sage-strong) 78%, var(--auth-text)),
-    color-mix(in srgb, var(--auth-sage) 86%, var(--auth-text))
+    color-mix(in srgb, var(--auth-visual-from) 88%, var(--auth-page-bg)),
+    color-mix(in srgb, var(--auth-visual-to) 82%, var(--auth-page-bg))
   );
 }
 
@@ -232,14 +216,14 @@ const authLayoutStyle = computed(() => {
   left: 8%;
   width: clamp(9rem, 14vw, 13rem);
   height: clamp(9rem, 14vw, 13rem);
-  border: 1.5px solid color-mix(in srgb, var(--auth-white) 14%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--auth-on-brand) 18%, transparent);
   border-radius: 999px;
 }
 
 .auth-visual-paw {
   width: 2.2rem;
   height: 2.2rem;
-  fill: color-mix(in srgb, var(--auth-white) 15%, transparent);
+  fill: color-mix(in srgb, var(--auth-on-brand) 18%, transparent);
 }
 
 .auth-visual-paw--top {
@@ -263,7 +247,7 @@ const authLayoutStyle = computed(() => {
   justify-content: flex-start;
   gap: clamp(2rem, 4vw, 3.5rem);
   padding: clamp(2.5rem, 5vw, 4.2rem);
-  color: var(--auth-white);
+  color: var(--auth-on-brand);
 }
 
 .auth-visual-panel__center {
@@ -273,7 +257,7 @@ const authLayoutStyle = computed(() => {
 }
 
 .auth-visual-kicker {
-  color: color-mix(in srgb, var(--auth-white) 68%, transparent);
+  color: color-mix(in srgb, var(--auth-on-brand) 88%, transparent);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -292,7 +276,7 @@ const authLayoutStyle = computed(() => {
 .auth-visual-panel p {
   max-width: 31rem;
   margin: 1rem 0 0;
-  color: color-mix(in srgb, var(--auth-white) 82%, transparent);
+  color: color-mix(in srgb, var(--auth-on-brand) 92%, transparent);
   font-size: 1rem;
   line-height: 1.65;
 }
@@ -309,7 +293,7 @@ const authLayoutStyle = computed(() => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: color-mix(in srgb, var(--auth-white) 90%, transparent);
+  color: var(--auth-on-brand);
   font-weight: 700;
 }
 
@@ -320,8 +304,8 @@ const authLayoutStyle = computed(() => {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--auth-white) 16%, transparent);
-  color: var(--auth-white);
+  background: color-mix(in srgb, var(--auth-on-brand) 18%, transparent);
+  color: var(--auth-on-brand);
   font-size: 0.78rem;
 }
 
@@ -341,7 +325,7 @@ const authLayoutStyle = computed(() => {
 
 @media (max-width: 560px) {
   .auth-page {
-    background: var(--auth-white);
+    background: var(--auth-page-bg);
   }
 
   .auth-shell {

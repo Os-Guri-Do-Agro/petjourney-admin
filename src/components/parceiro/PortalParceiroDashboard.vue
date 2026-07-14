@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import {
   getCarteira,
@@ -16,6 +17,7 @@ import { currentColors } from '@/theme/color-mode'
 
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
+const { lastSuccessAt } = useCupomResgateModal()
 const { focusSurfaceStyle } = usePartnerFocusSurface()
 
 const indicacao = ref<PortalIndicacao | null>(null)
@@ -143,6 +145,14 @@ async function copyCodigo() {
 
 onMounted(() => {
   void loadDashboardData()
+})
+
+watch(lastSuccessAt, (at) => {
+  if (!at) {
+    return
+  }
+
+  void store.bootstrap(true).catch(() => undefined)
 })
 </script>
 

@@ -2,10 +2,11 @@
 import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 import PartnerFocusCard from '@/components/parceiro/PartnerFocusCard.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
+import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   getPortalCupons,
@@ -17,6 +18,7 @@ import { currentColors } from '@/theme/color-mode'
 
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
+const { lastSuccessAt } = useCupomResgateModal()
 
 const indicacao = ref<PortalIndicacao | null>(null)
 const cupons = ref<CupomParceiro[]>([])
@@ -185,6 +187,15 @@ function formatResgateDate(value: string) {
 
 onMounted(() => {
   void loadAll()
+})
+
+watch(lastSuccessAt, (at) => {
+  if (!at) {
+    return
+  }
+
+  void loadAll()
+  void store.bootstrap(true).catch(() => undefined)
 })
 </script>
 

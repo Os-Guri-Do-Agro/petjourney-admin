@@ -19,7 +19,7 @@ import {
   type ReactivateProfile,
 } from '@/service/user/inativacao-service'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
-import { currentColors } from '@/theme/color-mode'
+import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 const email = ref('')
@@ -37,25 +37,7 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const usuarioPerfilStore = useUsuarioPerfilStore()
-
-const loginStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--auth-icon': colors.auth.soft,
-    '--auth-text': colors.auth.text,
-    '--auth-link': colors.auth.sageStrong,
-    '--auth-sage-tint': colors.auth.sageTint,
-    '--auth-muted': colors.auth.muted,
-    '--auth-sage': colors.vet.primary,
-    '--auth-white': colors.auth.white,
-    '--auth-line': colors.auth.line,
-    '--auth-divider': colors.auth.divider,
-    '--auth-shadow-rgb': colors.auth.shadowRgb,
-    '--auth-reactivate-bg': colors.auth.sageTint,
-    '--auth-reactivate-icon': colors.auth.sageStrong,
-  }
-})
+const loginStyle = useAuthThemeVars()
 
 const showReactivatePanel = computed(() => pendingReactivate.value.length > 0)
 
@@ -330,6 +312,7 @@ function cancelReactivate() {
         <i v-if="!loading" class="pi pi-arrow-right ml-2" aria-hidden="true" />
       </AuthButton>
 
+      <!-- Conta da clínica: ocultado por enquanto
       <div class="login-divider">
         <span>ou</span>
       </div>
@@ -338,6 +321,7 @@ function cancelReactivate() {
         <i class="pi pi-building" aria-hidden="true" />
         Acessar com conta da clínica
       </button>
+      -->
     </form>
 
     <p v-if="!showReactivatePanel" class="login-support">
@@ -354,7 +338,7 @@ function cancelReactivate() {
 }
 
 .login-field-icon {
-  color: var(--auth-icon);
+  color: var(--auth-soft);
   font-size: 1rem;
 }
 
@@ -388,7 +372,7 @@ function cancelReactivate() {
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--auth-icon);
+  color: var(--auth-soft);
   cursor: pointer;
   transition:
     background 160ms ease,
@@ -432,7 +416,7 @@ function cancelReactivate() {
   place-items: center;
   border-radius: 0.3rem;
   background: var(--auth-sage);
-  color: var(--auth-white);
+  color: var(--auth-cta-text);
 }
 
 .login-remember span .pi {
@@ -442,7 +426,7 @@ function cancelReactivate() {
 
 .login-remember input:not(:checked) + span {
   border: 1px solid var(--auth-line);
-  background: var(--auth-white);
+  background: var(--auth-field-bg);
   color: transparent;
 }
 
@@ -469,17 +453,17 @@ function cancelReactivate() {
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  border: 1px solid var(--auth-line);
+  border: 1px solid var(--auth-border);
   border-radius: 0.875rem;
-  background: var(--auth-white);
-  color: var(--auth-muted);
+  background: var(--auth-field-bg);
+  color: var(--auth-text);
   font-weight: 800;
   cursor: pointer;
 }
 
 .login-support {
   margin: 2rem 0 0;
-  color: var(--auth-icon);
+  color: var(--auth-soft);
   font-size: 0.875rem;
 }
 
@@ -489,7 +473,7 @@ function cancelReactivate() {
   padding: 1.15rem 1.2rem 1.25rem;
   border: 1px solid color-mix(in srgb, var(--auth-sage) 28%, var(--auth-line));
   border-radius: 1.1rem;
-  background: color-mix(in srgb, var(--auth-reactivate-bg) 72%, var(--auth-white));
+  background: color-mix(in srgb, var(--auth-sage-tint) 72%, var(--auth-field-bg));
   box-shadow: 0 10px 24px rgb(var(--auth-shadow-rgb) / 0.06);
 }
 
@@ -499,8 +483,8 @@ function cancelReactivate() {
   height: 2.6rem;
   place-items: center;
   border-radius: 0.9rem;
-  background: color-mix(in srgb, var(--auth-sage) 18%, var(--auth-white));
-  color: var(--auth-reactivate-icon);
+  background: color-mix(in srgb, var(--auth-sage) 18%, var(--auth-field-bg));
+  color: var(--auth-sage-strong);
   font-size: 1.15rem;
 }
 

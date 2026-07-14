@@ -9,7 +9,7 @@ import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PasswordRequirements from '@/components/auth/PasswordRequirements.vue'
 import RegisterStepIndicator from '@/components/auth/RegisterStepIndicator.vue'
 import { checkEmailAvailability, registerVeterinarian } from '@/service/user/user-service'
-import { currentColors } from '@/theme/color-mode'
+import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { isPasswordValid } from '@/utils/validation/password'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
@@ -31,7 +31,6 @@ const nome = ref('')
 const email = ref('')
 const crmv = ref('')
 const especialidade = ref('')
-const fotoUrl = ref('')
 const senha = ref('')
 const confirmarSenha = ref('')
 
@@ -39,7 +38,6 @@ const nomeError = ref('')
 const emailError = ref('')
 const crmvError = ref('')
 const especialidadeError = ref('')
-const fotoUrlError = ref('')
 const senhaError = ref('')
 const confirmarSenhaError = ref('')
 const termsError = ref('')
@@ -52,21 +50,7 @@ const passwordInputType = computed(() => (showPassword.value ? 'text' : 'passwor
 const confirmPasswordInputType = computed(() => (showConfirmPassword.value ? 'text' : 'password'))
 const isBusy = computed(() => loading.value || submitting.value)
 
-const registerStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--auth-primary': colors.auth.text,
-    '--auth-muted': colors.auth.muted,
-    '--auth-soft': colors.auth.soft,
-    '--auth-line': colors.auth.line,
-    '--auth-sage': colors.vet.primary,
-    '--auth-sage-tint': colors.auth.sageTint,
-    '--auth-white': colors.auth.white,
-    '--auth-danger': colors.red,
-    '--auth-link': colors.auth.sageStrong,
-  }
-})
+const registerStyle = useAuthThemeVars()
 
 const stepMeta = computed(() => {
   switch (currentStep.value) {
@@ -96,7 +80,6 @@ function resetFieldErrors() {
   emailError.value = ''
   crmvError.value = ''
   especialidadeError.value = ''
-  fotoUrlError.value = ''
   senhaError.value = ''
   confirmarSenhaError.value = ''
   termsError.value = ''
@@ -105,15 +88,6 @@ function resetFieldErrors() {
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-}
-
-function isValidUrl(value: string) {
-  try {
-    const parsed = new URL(value)
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
-  } catch {
-    return false
-  }
 }
 
 async function handleEmailBlur() {
@@ -182,13 +156,7 @@ function validateStep2() {
     especialidadeError.value = 'Informe sua especialidade principal.'
   }
 
-  const trimmedFoto = fotoUrl.value.trim()
-
-  if (trimmedFoto && !isValidUrl(trimmedFoto)) {
-    fotoUrlError.value = 'Informe uma URL válida (http ou https).'
-  }
-
-  return !crmvError.value && !especialidadeError.value && !fotoUrlError.value
+  return !crmvError.value && !especialidadeError.value
 }
 
 function validateStep3() {
@@ -258,8 +226,6 @@ function goToPreviousStep() {
 }
 
 function buildPayload() {
-  const trimmedFoto = fotoUrl.value.trim()
-
   return {
     email: email.value.trim(),
     nome: nome.value.trim(),
@@ -268,7 +234,6 @@ function buildPayload() {
     veterinario: {
       crmv: crmv.value.trim(),
       especialidade: especialidade.value.trim(),
-      ...(trimmedFoto ? { foto: trimmedFoto } : {}),
     },
   }
 }
@@ -389,17 +354,6 @@ async function handleSubmit() {
               {{ especialidadeError }}
             </span>
           </label>
-
-          <AuthTextField
-            id="register-foto"
-            v-model="fotoUrl"
-            :disabled="isBusy"
-            :error="fotoUrlError"
-            hint="Opcional. Cole a URL da foto; o upload direto será integrado em breve."
-            label="URL da foto de perfil"
-            placeholder="https://..."
-            type="url"
-          />
         </section>
 
         <section v-else class="register-form__step">
@@ -458,19 +412,32 @@ async function handleSubmit() {
 
           <label class="register-terms">
             <input v-model="acceptedTerms" :disabled="isBusy" type="checkbox" />
-            <span>
-              <i class="pi pi-check" aria-hidden="true" />
+            <span class="register-terms__box" aria-hidden="true">
+              <i class="pi pi-check" />
             </span>
-            Li e aceito os termos de uso e a política de privacidade do PetJourney.
+            <span class="register-terms__copy">
+              Li e aceito os termos de uso e a política de privacidade do PetJourney.
+              <a
+                class="register-terms__details"
+                href="https://www.petjourney.health/termos"
+                target="_blank"
+                rel="noopener noreferrer"
+                @click.stop
+              >
+                detalhes
+              </a>
+            </span>
           </label>
           <p v-if="termsError" class="register-form__inline-error">{{ termsError }}</p>
 
           <label class="register-terms">
             <input v-model="rememberAccess" :disabled="isBusy" type="checkbox" />
-            <span>
-              <i class="pi pi-check" aria-hidden="true" />
+            <span class="register-terms__box" aria-hidden="true">
+              <i class="pi pi-check" />
             </span>
-            Manter conectado neste computador após o cadastro
+            <span class="register-terms__copy">
+              Manter conectado neste computador após o cadastro
+            </span>
           </label>
         </section>
 
@@ -479,17 +446,6 @@ async function handleSubmit() {
         </p>
 
         <div class="register-form__actions">
-          <AuthButton
-            v-if="currentStep > 1"
-            :disabled="isBusy"
-            full-width
-            type="button"
-            variant="secondary"
-            @click="goToPreviousStep"
-          >
-            Voltar
-          </AuthButton>
-
           <AuthButton
             v-if="currentStep < 3"
             :disabled="isBusy"
@@ -508,6 +464,17 @@ async function handleSubmit() {
             type="submit"
           >
             {{ submitting ? 'Criando conta...' : 'Criar conta' }}
+          </AuthButton>
+
+          <AuthButton
+            v-if="currentStep > 1"
+            :disabled="isBusy"
+            full-width
+            type="button"
+            variant="secondary"
+            @click="goToPreviousStep"
+          >
+            Voltar
           </AuthButton>
         </div>
       </form>
@@ -565,7 +532,7 @@ async function handleSubmit() {
 }
 
 .register-textarea-field__label {
-  color: var(--auth-primary);
+  color: var(--auth-text);
   font-size: 0.8125rem;
   font-weight: 700;
 }
@@ -580,8 +547,8 @@ async function handleSubmit() {
   padding: 0.85rem 1rem;
   border: 1px solid var(--auth-line);
   border-radius: 0.875rem;
-  background: var(--auth-white);
-  color: var(--auth-primary);
+  background: var(--auth-field-bg);
+  color: var(--auth-text);
   font: inherit;
   line-height: 1.5;
   outline: none;
@@ -590,7 +557,7 @@ async function handleSubmit() {
 
 .register-textarea-field__input:focus {
   border-color: var(--auth-sage);
-  background: color-mix(in srgb, var(--auth-sage-tint) 35%, var(--auth-white));
+  background: color-mix(in srgb, var(--auth-sage-tint) 35%, var(--auth-field-bg));
 }
 
 .register-textarea-field__input--invalid {
@@ -638,7 +605,7 @@ async function handleSubmit() {
   pointer-events: none;
 }
 
-.register-terms span {
+.register-terms__box {
   display: grid;
   width: 1rem;
   height: 1rem;
@@ -647,18 +614,34 @@ async function handleSubmit() {
   place-items: center;
   border-radius: 0.3rem;
   background: var(--auth-sage);
-  color: var(--auth-white);
+  color: var(--auth-cta-text);
 }
 
-.register-terms span .pi {
+.register-terms__box .pi {
   font-size: 0.58rem;
   font-weight: 700;
 }
 
-.register-terms input:not(:checked) + span {
+.register-terms input:not(:checked) + .register-terms__box {
   border: 1px solid var(--auth-line);
-  background: var(--auth-white);
+  background: var(--auth-field-bg);
   color: transparent;
+}
+
+.register-terms__copy {
+  min-width: 0;
+  color: var(--auth-muted);
+}
+
+.register-terms__details {
+  color: var(--auth-link);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.register-terms__details:hover {
+  color: var(--auth-sage-strong);
 }
 
 .register-support {

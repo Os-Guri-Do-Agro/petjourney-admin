@@ -80,6 +80,25 @@ export type ResgateParceiro = {
   resgatadoEm: string
 }
 
+/** Resultado de `POST /parceiro/portal/cupons/validar` (resgate já efetivado). */
+export type ValidarCupomResultado = {
+  valido: true
+  resgateId: string
+  canal: CanalResgate
+  cupom: {
+    id: string
+    codigo: string
+    titulo: string
+    descontoPercentual: number
+  }
+  tutorPrimeiroNome: string | null
+}
+
+export type ValidarCupomPayload = {
+  codigo: string
+  canal: CanalResgate
+}
+
 export type Carteira = {
   saldoTotalCentavos: number
   saldoSacavelCentavos: number
