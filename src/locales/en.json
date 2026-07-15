@@ -753,7 +753,9 @@
       "retry": "Try again",
       "emptyTitle": "No movements",
       "emptyBody": "Commission credits and payout debits appear here.",
-      "loadMore": "Load more"
+      "loadMore": "Load more",
+      "today": "Today",
+      "yesterday": "Yesterday"
     },
     "saques": {
       "loadingTitle": "Loading payouts...",
@@ -774,7 +776,12 @@
       "valorLabel": "Requested amount",
       "requestedAt": "Requested on",
       "liquidatedAt": "Settled on",
+      "timelineLabel": "Timeline",
+      "awaitingLiquidation": "Awaiting settlement",
+      "awaitingLiquidationHint": "Payment has not been confirmed yet.",
       "pixSnapshot": "PIX key (snapshot)",
+      "pixCopied": "PIX key copied.",
+      "pixCopyError": "Could not copy the PIX key.",
       "failReason": "Failure reason",
       "receipt": "Receipt",
       "pendingHint": "Payments are settled manually by PetJourney. Indicative cycle: cut-off on the 27th, payment by the 5th."

@@ -753,7 +753,9 @@
       "retry": "Intentar de nuevo",
       "emptyTitle": "Sin movimientos",
       "emptyBody": "Los créditos de comisión y los débitos de retiro aparecen aquí.",
-      "loadMore": "Cargar más"
+      "loadMore": "Cargar más",
+      "today": "Hoy",
+      "yesterday": "Ayer"
     },
     "saques": {
       "loadingTitle": "Cargando retiros...",
@@ -774,7 +776,12 @@
       "valorLabel": "Valor solicitado",
       "requestedAt": "Solicitado el",
       "liquidatedAt": "Liquidado el",
+      "timelineLabel": "Línea de tiempo",
+      "awaitingLiquidation": "Pendiente de liquidación",
+      "awaitingLiquidationHint": "El pago aún no ha sido confirmado.",
       "pixSnapshot": "Clave PIX (snapshot)",
+      "pixCopied": "Clave PIX copiada.",
+      "pixCopyError": "No fue posible copiar la clave PIX.",
       "failReason": "Motivo del fallo",
       "receipt": "Comprobante",
       "pendingHint": "Los pagos los liquida manualmente PetJourney. Ciclo orientativo: corte día 27, pago hasta el día 5."
