@@ -49,10 +49,6 @@
         "otherAccount": "Usar outra conta"
       },
       "toast": {
-        "vetRequired": {
-          "summary": "Perfil veterinário necessário",
-          "detail": "Esta conta ainda não possui perfil veterinário habilitado para o painel."
-        },
         "loginError": {
           "summary": "Erro ao entrar",
           "fallback": "Não foi possível entrar. Tente novamente."
@@ -74,21 +70,14 @@
     "register": {
       "stepLabels": {
         "identity": "Identidade",
-        "professional": "Profissional",
         "account": "Conta"
       },
+      "stepOf": "Etapa {current} de {total}",
       "step1": {
-        "eyebrow": "Etapa 1 de 3",
         "title": "Identidade",
-        "description": "Informe nome e e-mail para criar sua conta veterinária."
-      },
-      "step2": {
-        "eyebrow": "Etapa 2 de 3",
-        "title": "Dados profissionais",
-        "description": "Registre suas informações clínicas para o painel."
+        "description": "Informe nome e e-mail para criar sua conta de parceiro."
       },
       "step3": {
-        "eyebrow": "Etapa 3 de 3",
         "title": "Segurança da conta",
         "description": "Defina uma senha forte e aceite os termos de uso."
       },
@@ -102,14 +91,6 @@
         "hint": "Usaremos este e-mail para login e comunicações importantes.",
         "checking": "Verificando disponibilidade do e-mail...",
         "available": "E-mail disponível."
-      },
-      "crmv": {
-        "label": "CRMV",
-        "placeholder": "CRMV-SP 12345"
-      },
-      "specialty": {
-        "label": "Especialidade",
-        "placeholder": "Clínica Geral, Dermatologia..."
       },
       "password": {
         "label": "Senha",
@@ -142,8 +123,6 @@
         "emailTaken": "E-mail já cadastrado.",
         "emailCheckFailed": "Não foi possível verificar o e-mail.",
         "emailVerifyFirst": "Verifique a disponibilidade do e-mail antes de continuar.",
-        "crmvRequired": "CRMV é obrigatório.",
-        "specialtyRequired": "Informe sua especialidade principal.",
         "passwordRequirements": "A senha não atende todos os requisitos.",
         "confirmRequired": "Confirme sua senha.",
         "confirmMismatch": "As senhas não coincidem.",
@@ -153,7 +132,7 @@
       "toast": {
         "success": {
           "summary": "Conta criada",
-          "detail": "Bem-vindo ao painel veterinário PetJourney."
+          "detail": "Bem-vindo! Agora cadastre sua empresa para começar."
         },
         "error": {
           "summary": "Erro no cadastro"
@@ -610,9 +589,6 @@
       "cnpjPlaceholder": "Somente números",
       "telefone": "Telefone comercial",
       "telefonePlaceholder": "(11) 99999-8888",
-      "crmv": "CRMV",
-      "crmvPlaceholder": "CRMV-SP 12345",
-      "crmvHint": "Opcional, mesmo para clínicas veterinárias.",
       "onlyNameRequired": "Apenas o nome é obrigatório. Os demais dados podem ser completados depois."
     },
     "wizard": {
@@ -1058,7 +1034,8 @@
         "identidade": "Identidade",
         "contato": "Contato",
         "documento": "Documento",
-        "vet": "Perfil veterinário"
+        "vet": "Perfil veterinário",
+        "vetOptionalHint": "Opcional. Preencha CRMV e especialidade apenas se você atua como veterinário."
       },
       "fields": {
         "nome": {
@@ -1190,7 +1167,8 @@
     "conta": {
       "session": {
         "eyebrow": "Sessão neste dispositivo",
-        "fallbackName": "Usuário"
+        "fallbackName": "Usuário",
+        "logoutHint": "Sair só remove o acesso neste computador; seus dados na nuvem continuam intactos."
       },
       "aria": {
         "roles": "Papéis"
@@ -1207,11 +1185,6 @@
       },
       "actions": {
         "logout": "Sair da conta"
-      },
-      "device": {
-        "title": "Dispositivo",
-        "subtitle": "Encerrar só remove o acesso neste computador.",
-        "body": "O token fica limpo neste browser. Seus dados e o perfil na nuvem continuam intactos."
       },
       "prefs": {
         "title": "Idioma",

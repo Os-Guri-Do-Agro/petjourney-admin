@@ -49,10 +49,6 @@
         "otherAccount": "Usar otra cuenta"
       },
       "toast": {
-        "vetRequired": {
-          "summary": "Perfil veterinario necesario",
-          "detail": "Esta cuenta aún no tiene un perfil veterinario habilitado para el portal."
-        },
         "loginError": {
           "summary": "Error al iniciar sesión",
           "fallback": "No fue posible iniciar sesión. Inténtelo de nuevo."
@@ -74,21 +70,14 @@
     "register": {
       "stepLabels": {
         "identity": "Identidad",
-        "professional": "Profesional",
         "account": "Cuenta"
       },
+      "stepOf": "Paso {current} de {total}",
       "step1": {
-        "eyebrow": "Paso 1 de 3",
         "title": "Identidad",
-        "description": "Indique su nombre y correo para crear su cuenta veterinaria."
-      },
-      "step2": {
-        "eyebrow": "Paso 2 de 3",
-        "title": "Datos profesionales",
-        "description": "Registre su información clínica para el portal."
+        "description": "Indique su nombre y correo para crear su cuenta de socio."
       },
       "step3": {
-        "eyebrow": "Paso 3 de 3",
         "title": "Seguridad de la cuenta",
         "description": "Defina una contraseña segura y acepte los términos de uso."
       },
@@ -102,14 +91,6 @@
         "hint": "Usaremos este correo para iniciar sesión y comunicaciones importantes.",
         "checking": "Verificando disponibilidad del correo...",
         "available": "Correo disponible."
-      },
-      "crmv": {
-        "label": "CRMV",
-        "placeholder": "CRMV-SP 12345"
-      },
-      "specialty": {
-        "label": "Especialidad",
-        "placeholder": "Clínica General, Dermatología..."
       },
       "password": {
         "label": "Contraseña",
@@ -142,8 +123,6 @@
         "emailTaken": "El correo ya está registrado.",
         "emailCheckFailed": "No fue posible verificar el correo.",
         "emailVerifyFirst": "Verifique la disponibilidad del correo antes de continuar.",
-        "crmvRequired": "El CRMV es obligatorio.",
-        "specialtyRequired": "Indique su especialidad principal.",
         "passwordRequirements": "La contraseña no cumple todos los requisitos.",
         "confirmRequired": "Confirme su contraseña.",
         "confirmMismatch": "Las contraseñas no coinciden.",
@@ -153,7 +132,7 @@
       "toast": {
         "success": {
           "summary": "Cuenta creada",
-          "detail": "Bienvenido al portal veterinario PetJourney."
+          "detail": "¡Bienvenido! Ahora registre su negocio para empezar."
         },
         "error": {
           "summary": "Error en el registro"
@@ -610,9 +589,6 @@
       "cnpjPlaceholder": "Solo números",
       "telefone": "Teléfono comercial",
       "telefonePlaceholder": "(11) 99999-8888",
-      "crmv": "CRMV",
-      "crmvPlaceholder": "CRMV-SP 12345",
-      "crmvHint": "Opcional, incluso para clínicas veterinarias.",
       "onlyNameRequired": "Solo el nombre es obligatorio. Los demás datos pueden completarse después."
     },
     "wizard": {
@@ -1058,7 +1034,8 @@
         "identidade": "Identidad",
         "contato": "Contacto",
         "documento": "Documento",
-        "vet": "Perfil veterinario"
+        "vet": "Perfil veterinario",
+        "vetOptionalHint": "Opcional. Complete CRMV y especialidad solo si actúa como veterinario."
       },
       "fields": {
         "nome": {
@@ -1190,7 +1167,8 @@
     "conta": {
       "session": {
         "eyebrow": "Sesión en este dispositivo",
-        "fallbackName": "Usuario"
+        "fallbackName": "Usuario",
+        "logoutHint": "Cerrar sesión solo quita el acceso en esta computadora; sus datos en la nube siguen intactos."
       },
       "aria": {
         "roles": "Roles"
@@ -1207,11 +1185,6 @@
       },
       "actions": {
         "logout": "Cerrar sesión de la cuenta"
-      },
-      "device": {
-        "title": "Dispositivo",
-        "subtitle": "Cerrar sesión solo quita el acceso en esta computadora.",
-        "body": "El token se limpia en este navegador. Sus datos y el perfil en la nube siguen intactos."
       },
       "prefs": {
         "title": "Idioma",

@@ -49,10 +49,6 @@
         "otherAccount": "Use another account"
       },
       "toast": {
-        "vetRequired": {
-          "summary": "Veterinarian profile required",
-          "detail": "This account does not yet have a veterinarian profile enabled for the portal."
-        },
         "loginError": {
           "summary": "Sign-in error",
           "fallback": "Could not sign in. Please try again."
@@ -74,21 +70,14 @@
     "register": {
       "stepLabels": {
         "identity": "Identity",
-        "professional": "Professional",
         "account": "Account"
       },
+      "stepOf": "Step {current} of {total}",
       "step1": {
-        "eyebrow": "Step 1 of 3",
         "title": "Identity",
-        "description": "Enter your name and email to create your veterinarian account."
-      },
-      "step2": {
-        "eyebrow": "Step 2 of 3",
-        "title": "Professional details",
-        "description": "Add your clinical information for the portal."
+        "description": "Enter your name and email to create your partner account."
       },
       "step3": {
-        "eyebrow": "Step 3 of 3",
         "title": "Account security",
         "description": "Set a strong password and accept the terms of use."
       },
@@ -102,14 +91,6 @@
         "hint": "We'll use this email for sign-in and important messages.",
         "checking": "Checking email availability...",
         "available": "Email is available."
-      },
-      "crmv": {
-        "label": "CRMV",
-        "placeholder": "CRMV-SP 12345"
-      },
-      "specialty": {
-        "label": "Specialty",
-        "placeholder": "General Practice, Dermatology..."
       },
       "password": {
         "label": "Password",
@@ -142,8 +123,6 @@
         "emailTaken": "Email is already registered.",
         "emailCheckFailed": "Could not verify the email.",
         "emailVerifyFirst": "Check email availability before continuing.",
-        "crmvRequired": "CRMV is required.",
-        "specialtyRequired": "Enter your primary specialty.",
         "passwordRequirements": "The password does not meet all requirements.",
         "confirmRequired": "Confirm your password.",
         "confirmMismatch": "Passwords do not match.",
@@ -153,7 +132,7 @@
       "toast": {
         "success": {
           "summary": "Account created",
-          "detail": "Welcome to the PetJourney veterinarian portal."
+          "detail": "Welcome! Now register your business to get started."
         },
         "error": {
           "summary": "Registration error"
@@ -610,9 +589,6 @@
       "cnpjPlaceholder": "Numbers only",
       "telefone": "Business phone",
       "telefonePlaceholder": "(11) 99999-8888",
-      "crmv": "CRMV",
-      "crmvPlaceholder": "CRMV-SP 12345",
-      "crmvHint": "Optional, even for veterinary clinics.",
       "onlyNameRequired": "Only the name is required. The other details can be completed later."
     },
     "wizard": {
@@ -1058,7 +1034,8 @@
         "identidade": "Identity",
         "contato": "Contact",
         "documento": "Document",
-        "vet": "Veterinarian profile"
+        "vet": "Veterinarian profile",
+        "vetOptionalHint": "Optional. Fill in CRMV and specialty only if you practise as a veterinarian."
       },
       "fields": {
         "nome": {
@@ -1190,7 +1167,8 @@
     "conta": {
       "session": {
         "eyebrow": "Session on this device",
-        "fallbackName": "User"
+        "fallbackName": "User",
+        "logoutHint": "Signing out only removes access on this computer; your cloud data stays intact."
       },
       "aria": {
         "roles": "Roles"
@@ -1207,11 +1185,6 @@
       },
       "actions": {
         "logout": "Sign out of account"
-      },
-      "device": {
-        "title": "Device",
-        "subtitle": "Signing out only removes access on this computer.",
-        "body": "The token is cleared in this browser. Your data and cloud profile stay intact."
       },
       "prefs": {
         "title": "Language",

@@ -60,9 +60,14 @@ const sessionUser = computed(() => {
 
 const cpfLocked = computed(() => Boolean(profile.value?.cpf?.trim()))
 
-const showVetSection = computed(
+const hasVetPerfil = computed(
   () => Boolean(sessionUser.value?.veterinarioId) || Boolean(profile.value?.veterinarioPerfil),
 )
+
+/** CRMV/especialidade são opcionais no produto: preencher um exige o par (cria o perfil clínico). */
+const vetFieldsFilled = computed(() => Boolean(crmv.value.trim() || especialidade.value.trim()))
+
+const vetFieldsRequired = computed(() => hasVetPerfil.value || vetFieldsFilled.value)
 
 const initials = computed(() => {
   const source = nome.value.trim() || sessionUser.value?.nome || sessionUser.value?.email || '?'
@@ -200,7 +205,7 @@ function validateProfileForm() {
     }
   }
 
-  if (showVetSection.value) {
+  if (vetFieldsRequired.value) {
     if (!crmv.value.trim()) {
       crmvError.value = t('settings.perfil.errors.crmvRequired')
     }
@@ -240,7 +245,7 @@ function buildUpdatePayload(extraFoto?: string): UpdateUsuarioPayload {
 
   const trimmedFoto = (extraFoto ?? fotoUrl.value).trim()
 
-  if (showVetSection.value || (trimmedFoto && sessionUser.value?.veterinarioId)) {
+  if (hasVetPerfil.value || vetFieldsFilled.value || (trimmedFoto && sessionUser.value?.veterinarioId)) {
     payload.veterinario = {}
 
     const crmvValue = crmv.value.trim() || profile.value?.veterinarioPerfil?.crmv || ''
@@ -602,15 +607,18 @@ onMounted(() => {
           </div>
         </fieldset>
 
-        <fieldset v-if="showVetSection" class="settings-perfil__group">
+        <fieldset class="settings-perfil__group">
           <legend>{{ t('settings.perfil.sections.vet') }}</legend>
+          <p v-if="!hasVetPerfil" class="settings-perfil__group-hint">
+            {{ t('settings.perfil.sections.vetOptionalHint') }}
+          </p>
           <div class="settings-perfil__fields settings-perfil__fields--2">
             <AuthTextField
               id="settings-perfil-crmv"
               v-model="crmv"
               :label="t('settings.perfil.fields.crmv.label')"
               :placeholder="t('settings.perfil.fields.crmv.placeholder')"
-              required
+              :required="vetFieldsRequired"
               :disabled="savingProfile"
               :error="crmvError"
             />
@@ -619,7 +627,7 @@ onMounted(() => {
               v-model="especialidade"
               :label="t('settings.perfil.fields.especialidade.label')"
               :placeholder="t('settings.perfil.fields.especialidade.placeholder')"
-              required
+              :required="vetFieldsRequired"
               :disabled="savingProfile"
               :error="especialidadeError"
             />
@@ -837,6 +845,13 @@ onMounted(() => {
 
 .settings-perfil__group legend + * {
   clear: both;
+}
+
+.settings-perfil__group-hint {
+  margin: 0;
+  color: var(--partner-muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
 }
 
 .settings-perfil__fields {

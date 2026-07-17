@@ -102,10 +102,7 @@ export async function login(data: LoginCredentials, options?: LoginOptions): Pro
   const userFromToken = decodeJwtPayload<AuthUser>(tokens.access_token)
   const flags = resolveLoginProfileFlags(res.data, userFromToken)
 
-  // Perfil inativo ainda autentica; não exigir veterinarioId até reativar.
-  setAuthSession(tokens, rememberAccess, {
-    requireVeterinario: !flags.veterinarioInactive,
-  })
+  setAuthSession(tokens, rememberAccess)
 
   return {
     tokens,
@@ -189,7 +186,7 @@ export async function refreshAuthSession(rememberAccess = preferLocalStorageForR
     })
 
     const tokens = extractAuthTokens(res.data)
-    setAuthSession(tokens, rememberAccess, { requireVeterinario: false })
+    setAuthSession(tokens, rememberAccess)
     return tokens
   })()
 

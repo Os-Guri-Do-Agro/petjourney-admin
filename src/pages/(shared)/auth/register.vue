@@ -9,19 +9,23 @@ import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PasswordRequirements from '@/components/auth/PasswordRequirements.vue'
 import RegisterStepIndicator from '@/components/auth/RegisterStepIndicator.vue'
-import { checkEmailAvailability, registerVeterinarian } from '@/service/user/user-service'
+import { checkEmailAvailability, registerUsuario } from '@/service/user/user-service'
 import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { isPasswordValid } from '@/utils/validation/password'
-import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
+
+/**
+ * Cadastro único de parceiro: conta mínima (nome/email/senha), sem perfil clínico.
+ * Vet no produto É um parceiro (multi-perfil.md, D6); CRMV/especialidade são
+ * opcionais e entram depois em Configurações > Perfil ou no cadastro da empresa.
+ */
+const TOTAL_STEPS = 2
 
 const { t } = useI18n()
 
 const STEP_LABELS = computed(() => [
   t('auth.register.stepLabels.identity'),
-  t('auth.register.stepLabels.professional'),
   t('auth.register.stepLabels.account'),
 ])
-const TOTAL_STEPS = 3
 
 const router = useRouter()
 const toast = useToast()
@@ -36,15 +40,11 @@ const rememberAccess = ref(true)
 
 const nome = ref('')
 const email = ref('')
-const crmv = ref('')
-const especialidade = ref('')
 const senha = ref('')
 const confirmarSenha = ref('')
 
 const nomeError = ref('')
 const emailError = ref('')
-const crmvError = ref('')
-const especialidadeError = ref('')
 const senhaError = ref('')
 const confirmarSenhaError = ref('')
 const termsError = ref('')
@@ -60,33 +60,29 @@ const isBusy = computed(() => loading.value || submitting.value)
 const registerStyle = useAuthThemeVars()
 
 const stepMeta = computed(() => {
-  switch (currentStep.value) {
-    case 1:
-      return {
-        eyebrow: t('auth.register.step1.eyebrow'),
-        title: t('auth.register.step1.title'),
-        description: t('auth.register.step1.description'),
-      }
-    case 2:
-      return {
-        eyebrow: t('auth.register.step2.eyebrow'),
-        title: t('auth.register.step2.title'),
-        description: t('auth.register.step2.description'),
-      }
-    default:
-      return {
-        eyebrow: t('auth.register.step3.eyebrow'),
-        title: t('auth.register.step3.title'),
-        description: t('auth.register.step3.description'),
-      }
+  const eyebrow = t('auth.register.stepOf', {
+    current: currentStep.value,
+    total: TOTAL_STEPS,
+  })
+
+  if (currentStep.value === 1) {
+    return {
+      eyebrow,
+      title: t('auth.register.step1.title'),
+      description: t('auth.register.step1.description'),
+    }
+  }
+
+  return {
+    eyebrow,
+    title: t('auth.register.step3.title'),
+    description: t('auth.register.step3.description'),
   }
 })
 
 function resetFieldErrors() {
   nomeError.value = ''
   emailError.value = ''
-  crmvError.value = ''
-  especialidadeError.value = ''
   senhaError.value = ''
   confirmarSenhaError.value = ''
   termsError.value = ''
@@ -155,20 +151,6 @@ function validateStep1() {
 function validateStep2() {
   resetFieldErrors()
 
-  if (!crmv.value.trim()) {
-    crmvError.value = t('auth.register.errors.crmvRequired')
-  }
-
-  if (!especialidade.value.trim()) {
-    especialidadeError.value = t('auth.register.errors.specialtyRequired')
-  }
-
-  return !crmvError.value && !especialidadeError.value
-}
-
-function validateStep3() {
-  resetFieldErrors()
-
   if (!isPasswordValid(senha.value)) {
     senhaError.value = t('auth.register.errors.passwordRequirements')
   }
@@ -200,26 +182,18 @@ async function goToNextStep() {
     return
   }
 
-  if (currentStep.value === 1) {
-    loading.value = true
+  loading.value = true
 
-    try {
-      const isEmailReady = await ensureEmailAvailability()
+  try {
+    const isEmailReady = await ensureEmailAvailability()
 
-      if (!validateStep1() || !isEmailReady) {
-        return
-      }
-
-      currentStep.value = 2
-    } finally {
-      loading.value = false
+    if (!validateStep1() || !isEmailReady) {
+      return
     }
 
-    return
-  }
-
-  if (currentStep.value === 2 && validateStep2()) {
-    currentStep.value = 3
+    currentStep.value = 2
+  } finally {
+    loading.value = false
   }
 }
 
@@ -229,20 +203,7 @@ function goToPreviousStep() {
   }
 
   resetFieldErrors()
-  currentStep.value -= 1
-}
-
-function buildPayload() {
-  return {
-    email: email.value.trim(),
-    nome: nome.value.trim(),
-    senha: senha.value,
-    ativo: true as const,
-    veterinario: {
-      crmv: crmv.value.trim(),
-      especialidade: especialidade.value.trim(),
-    },
-  }
+  currentStep.value = 1
 }
 
 async function handleSubmit() {
@@ -250,7 +211,7 @@ async function handleSubmit() {
     return
   }
 
-  if (!validateStep3()) {
+  if (!validateStep2()) {
     return
   }
 
@@ -258,9 +219,15 @@ async function handleSubmit() {
   globalError.value = ''
 
   try {
-    await registerVeterinarian(buildPayload(), {
-      rememberAccess: rememberAccess.value,
-    })
+    await registerUsuario(
+      {
+        email: email.value.trim(),
+        nome: nome.value.trim(),
+        senha: senha.value,
+        ativo: true,
+      },
+      { rememberAccess: rememberAccess.value },
+    )
 
     toast.add({
       severity: 'success',
@@ -269,7 +236,8 @@ async function handleSubmit() {
       life: 4000,
     })
 
-    await router.replace(getDefaultLandingPath())
+    /* Todo cadastro novo entra no funil de credenciamento da empresa. */
+    await router.replace('/settings?aba=empresa')
   } catch (error) {
     globalError.value =
       error instanceof Error ? error.message : t('auth.register.errors.submitFailed')
@@ -299,7 +267,10 @@ async function handleSubmit() {
         :total-steps="TOTAL_STEPS"
       />
 
-      <form class="register-form" @submit.prevent="currentStep === 3 ? handleSubmit() : goToNextStep()">
+      <form
+        class="register-form"
+        @submit.prevent="currentStep === 2 ? handleSubmit() : goToNextStep()"
+      >
         <section v-if="currentStep === 1" class="register-form__step">
           <AuthTextField
             id="register-name"
@@ -332,37 +303,6 @@ async function handleSubmit() {
           <p v-else-if="emailAvailable" class="register-form__status register-form__status--success">
             {{ t('auth.register.email.available') }}
           </p>
-        </section>
-
-        <section v-else-if="currentStep === 2" class="register-form__step">
-          <AuthTextField
-            id="register-crmv"
-            v-model="crmv"
-            :disabled="isBusy"
-            :error="crmvError"
-            :label="t('auth.register.crmv.label')"
-            :placeholder="t('auth.register.crmv.placeholder')"
-            required
-          />
-
-          <label class="register-textarea-field" for="register-especialidade">
-            <span class="register-textarea-field__label">
-              {{ t('auth.register.specialty.label') }}
-              <span class="register-textarea-field__required">*</span>
-            </span>
-            <textarea
-              id="register-especialidade"
-              v-model="especialidade"
-              class="register-textarea-field__input"
-              :class="{ 'register-textarea-field__input--invalid': Boolean(especialidadeError) }"
-              :disabled="isBusy"
-              :placeholder="t('auth.register.specialty.placeholder')"
-              rows="3"
-            />
-            <span v-if="especialidadeError" class="register-textarea-field__error">
-              {{ especialidadeError }}
-            </span>
-          </label>
         </section>
 
         <section v-else class="register-form__step">
@@ -464,7 +404,7 @@ async function handleSubmit() {
 
         <div class="register-form__actions">
           <AuthButton
-            v-if="currentStep < 3"
+            v-if="currentStep === 1"
             :disabled="isBusy"
             full-width
             :loading="loading"
@@ -541,50 +481,6 @@ async function handleSubmit() {
 .register-form__actions {
   display: grid;
   gap: 0.75rem;
-}
-
-.register-textarea-field {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.register-textarea-field__label {
-  color: var(--auth-text);
-  font-size: 0.8125rem;
-  font-weight: 700;
-}
-
-.register-textarea-field__required {
-  color: var(--auth-danger);
-}
-
-.register-textarea-field__input {
-  width: 100%;
-  min-height: 6.5rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--auth-line);
-  border-radius: 0.875rem;
-  background: var(--auth-field-bg);
-  color: var(--auth-text);
-  font: inherit;
-  line-height: 1.5;
-  outline: none;
-  resize: vertical;
-}
-
-.register-textarea-field__input:focus {
-  border-color: var(--auth-sage);
-  background: color-mix(in srgb, var(--auth-sage-tint) 35%, var(--auth-field-bg));
-}
-
-.register-textarea-field__input--invalid {
-  border-color: var(--auth-danger);
-}
-
-.register-textarea-field__error {
-  color: var(--auth-danger);
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
 .register-password-toggle {

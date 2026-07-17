@@ -268,26 +268,12 @@ watch(showCustomReason, (allowed) => {
           icon="pi pi-sign-out"
           @click="handleLogout"
         />
+        <p class="conta-session__hint">{{ t('settings.conta.session.logoutHint') }}</p>
       </div>
     </section>
 
-    <div class="conta-split">
-      <article class="conta-panel">
-        <header class="conta-panel__head">
-          <span class="conta-panel__icon" aria-hidden="true">
-            <i class="pi pi-desktop" />
-          </span>
-          <div>
-            <h3>{{ t('settings.conta.device.title') }}</h3>
-            <p>{{ t('settings.conta.device.subtitle') }}</p>
-          </div>
-        </header>
-        <p class="conta-panel__body">
-          {{ t('settings.conta.device.body') }}
-        </p>
-      </article>
-
-      <article class="conta-panel">
+    <article class="conta-panel conta-panel--prefs">
+      <div class="conta-panel__copy">
         <header class="conta-panel__head">
           <span class="conta-panel__icon" aria-hidden="true">
             <i class="pi pi-language" />
@@ -300,9 +286,9 @@ watch(showCustomReason, (allowed) => {
         <p class="conta-panel__body">
           {{ t('settings.conta.prefs.body') }}
         </p>
-        <LanguageSwitcher variant="settings" />
-      </article>
-    </div>
+      </div>
+      <LanguageSwitcher variant="settings" />
+    </article>
 
     <section class="conta-risk" aria-labelledby="conta-risk-title">
       <header class="conta-risk__head">
@@ -514,6 +500,15 @@ watch(showCustomReason, (allowed) => {
   gap: 0.65rem;
 }
 
+.conta-session__hint {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--partner-faint);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  text-align: right;
+}
+
 .conta-session__logout :deep(.p-button),
 :deep(button.conta-session__logout) {
   border-width: 1.5px;
@@ -550,12 +545,6 @@ watch(showCustomReason, (allowed) => {
   font-weight: 700;
 }
 
-.conta-split {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-}
-
 .conta-panel {
   display: grid;
   gap: 0.7rem;
@@ -565,8 +554,19 @@ watch(showCustomReason, (allowed) => {
   background: var(--partner-card);
 }
 
-.conta-panel--muted {
-  background: color-mix(in srgb, var(--partner-surface) 60%, var(--partner-card));
+.conta-panel--prefs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem 1.5rem;
+}
+
+.conta-panel__copy {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+  max-width: 34rem;
 }
 
 .conta-panel__head {
@@ -585,11 +585,6 @@ watch(showCustomReason, (allowed) => {
   background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
   color: var(--partner-primary-strong);
   font-size: 0.95rem;
-}
-
-.conta-panel__icon--muted {
-  background: color-mix(in srgb, var(--partner-muted) 14%, transparent);
-  color: var(--partner-muted);
 }
 
 .conta-panel__head h3 {
@@ -614,8 +609,8 @@ watch(showCustomReason, (allowed) => {
   line-height: 1.5;
 }
 
-.conta-panel :deep(.language-switcher) {
-  margin-top: 0.85rem;
+.conta-panel--prefs :deep(.language-switcher) {
+  flex-shrink: 0;
 }
 
 .conta-risk {
@@ -772,13 +767,17 @@ watch(showCustomReason, (allowed) => {
 }
 
 @media (max-width: 720px) {
-  .conta-split {
-    grid-template-columns: 1fr;
-  }
-
   .conta-session__aside {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .conta-session__hint {
+    text-align: left;
+  }
+
+  .conta-panel--prefs :deep(.language-switcher) {
+    width: 100%;
   }
 
   .conta-risk__head {

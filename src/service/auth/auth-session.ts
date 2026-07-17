@@ -14,6 +14,9 @@ export type AuthUser = {
   veterinarioId?: string
   veterinarioActive?: boolean
   isSystemAdmin?: boolean
+  /** Claims informativos do multi-perfil (ausentes em login normal e tokens antigos). Nunca use para permissão. */
+  perfilAtivo?: 'TUTOR' | 'PARCEIRO'
+  parceiroAtivoId?: string
   iat: number
   exp: number
 }
@@ -88,27 +91,13 @@ export function clearAuthSession() {
   notifyAuthSessionChange()
 }
 
-type SetAuthSessionOptions = {
-  rememberAccess?: boolean
-  requireVeterinario?: boolean
-}
-
-export function setAuthSession(
-  tokens: AuthTokens,
-  rememberAccess = true,
-  options: SetAuthSessionOptions = {},
-) {
-  const requireVeterinario = options.requireVeterinario ?? false
+/** Conta sem perfil veterinário (prestador/parceiro) também entra no painel (Parte 9). */
+export function setAuthSession(tokens: AuthTokens, rememberAccess = true) {
   const payload = decodeJwtPayload<AuthUser>(tokens.access_token)
 
   if (!payload || isExpired(payload)) {
     clearAuthSession()
     throw new Error('Token de autenticação inválido ou expirado.')
-  }
-
-  if (requireVeterinario && !payload.veterinarioId) {
-    clearAuthSession()
-    throw new Error('Esta conta ainda não possui perfil veterinário habilitado.')
   }
 
   clearAuthSession()
@@ -119,6 +108,34 @@ export function setAuthSession(
 
   if (payload.veterinarioId) {
     storage.setItem(VETERINARIO_ID_KEY, payload.veterinarioId)
+  }
+
+  notifyAuthSessionChange()
+}
+
+/**
+ * Cadastro logado (ex.: POST /parceiro/portal/cadastro) devolve só um access_token
+ * novo com claims frescos. Troca o access no storage atual e preserva o refresh.
+ */
+export function updateAccessToken(accessToken: string) {
+  const payload = decodeJwtPayload<AuthUser>(accessToken)
+
+  if (!payload || isExpired(payload)) {
+    return
+  }
+
+  const storages = getAvailableStorages()
+  const currentStorage =
+    storages.find((storage) => storage.getItem(ACCESS_TOKEN_KEY)) ?? storages[1] ?? storages[0]
+
+  if (!currentStorage) {
+    return
+  }
+
+  currentStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+
+  if (payload.veterinarioId) {
+    currentStorage.setItem(VETERINARIO_ID_KEY, payload.veterinarioId)
   }
 
   notifyAuthSessionChange()

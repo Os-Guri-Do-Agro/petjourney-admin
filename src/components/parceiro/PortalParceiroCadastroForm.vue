@@ -47,8 +47,9 @@ const form = reactive({
   categoria: null as CategoriaParceiro | null,
   cnpj: '',
   telefoneComercial: '',
-  crmv: '',
-  /* Sem campo visível: preservado do GET para a re-submissão não apagar o logo (semântica replace). */
+  /* Sem campos visíveis: preservados do GET para a re-submissão não apagar (semântica replace).
+     CRMV é gerenciado só no Perfil do usuário; o backend copia do veterinarioPerfil se ausente. */
+  crmv: null as string | null,
   logoUrl: null as string | null,
 })
 
@@ -66,7 +67,7 @@ function applyInitial(initial: ParceiroCadastro | null) {
   form.categoria = initial?.categoria ?? null
   form.cnpj = initial?.cnpj ?? ''
   form.telefoneComercial = initial?.telefoneComercial ?? ''
-  form.crmv = initial?.crmv ?? ''
+  form.crmv = initial?.crmv ?? null
   form.logoUrl = initial?.logoUrl ?? null
   nomeError.value = ''
 }
@@ -94,7 +95,7 @@ function handleSubmit() {
     categoria: form.categoria,
     cnpj: form.cnpj.trim() || null,
     telefoneComercial: form.telefoneComercial.trim() || null,
-    crmv: form.crmv.trim() || null,
+    crmv: form.crmv,
     logoUrl: form.logoUrl,
   })
 }
@@ -154,16 +155,6 @@ function handleSubmit() {
         inputmode="tel"
         autocomplete="tel"
       />
-    </div>
-
-    <div class="cad-form__field">
-      <label for="cad-crmv">{{ t('parceiroCadastro.form.crmv') }}</label>
-      <InputText
-        id="cad-crmv"
-        v-model="form.crmv"
-        :placeholder="t('parceiroCadastro.form.crmvPlaceholder')"
-      />
-      <small class="cad-form__hint">{{ t('parceiroCadastro.form.crmvHint') }}</small>
     </div>
 
     <p class="cad-form__legend">{{ t('parceiroCadastro.form.onlyNameRequired') }}</p>

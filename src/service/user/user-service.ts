@@ -2,7 +2,11 @@ import { ApiError, apiFetch, getApiUrl } from '../api'
 import type { ApiEnvelope } from '../api-envelope'
 import { type AuthTokens, setAuthSession } from '../auth/auth-session'
 
-export type VeterinarioSignupPayload = {
+/**
+ * Signup mínimo (sem `tutor` e sem `veterinario`): toda conta nova deste painel
+ * é parceiro; CRMV/especialidade são opcionais e entram depois pelo Perfil.
+ */
+export type UsuarioSignupPayload = {
   email: string
   nome: string
   senha: string
@@ -10,11 +14,6 @@ export type VeterinarioSignupPayload = {
   telefone?: string
   telefoneWhatsApp?: string
   cpf?: string
-  veterinario: {
-    crmv: string
-    especialidade: string
-    foto?: string
-  }
 }
 
 export type VeterinarioPerfil = {
@@ -143,8 +142,8 @@ type RegisterOptions = {
   rememberAccess?: boolean
 }
 
-export async function registerVeterinarian(
-  payload: VeterinarioSignupPayload,
+export async function registerUsuario(
+  payload: UsuarioSignupPayload,
   options?: RegisterOptions,
 ) {
   const response = await apiFetch<ApiEnvelope<AuthTokens>>('/usuario', {

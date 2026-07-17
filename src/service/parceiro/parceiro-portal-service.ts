@@ -1,5 +1,6 @@
 import { apiFetch } from '../api'
 import type { ApiEnvelope, CursorPage, ExtratoPage } from '../api-envelope'
+import { updateAccessToken } from '../auth/auth-session'
 import type {
   Carteira,
   CupomParceiro,
@@ -73,17 +74,29 @@ export async function getPortalStatus(params?: ParceiroQuery) {
 /** Alias alinhado à spec (Parte 5). */
 export const getStatus = getPortalStatus
 
+type CadastroParceiroResult = {
+  parceiroId: string
+  statusAuditoria: 'PENDENTE'
+  /** Multi-perfil: token fresco com perfilAtivo/parceiroAtivoId; ausente em backend antigo. */
+  access_token?: string
+}
+
 /** Auto-cadastro (Parte 9). Também reenvia um cadastro REJEITADO (semântica replace: mande o form completo). */
-export function cadastrarParceiro(payload: ParceiroCadastroPayload) {
-  return unwrap(
-    apiFetch<ApiEnvelope<{ parceiroId: string; statusAuditoria: 'PENDENTE' }>>(
-      '/parceiro/portal/cadastro',
-      {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      },
-    ),
+export async function cadastrarParceiro(payload: ParceiroCadastroPayload) {
+  const data = await unwrap(
+    apiFetch<ApiEnvelope<CadastroParceiroResult>>('/parceiro/portal/cadastro', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   )
+
+  /* Troca imediata do access_token (o refresh do device não muda): as próximas
+     chamadas do portal já saem com o claim do parceiro recém-criado, sem relogin. */
+  if (data.access_token) {
+    updateAccessToken(data.access_token)
+  }
+
+  return data
 }
 
 export function getParceiroCadastro(params?: ParceiroQuery) {

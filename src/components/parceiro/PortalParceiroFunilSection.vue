@@ -104,7 +104,10 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 
   try {
     if (isResubmit) {
-      await cadastrarParceiro(payload)
+      const resultado = await cadastrarParceiro(payload)
+      /* O service já trocou o access_token (claim do parceiro novo); fixar o id no
+         store garante o alvo certo também em conta com mais de uma membership. */
+      store.setParceiroId(resultado.parceiroId)
       toast.add({
         severity: 'success',
         summary: t('parceiroCadastro.toast.enviado'),
