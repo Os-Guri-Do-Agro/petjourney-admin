@@ -278,6 +278,7 @@
       "overview": "Visão geral",
       "programas": "Programas",
       "divulgacao": "Divulgação",
+      "atendimentos": "Atendimentos",
       "financeiro": "Financeiro",
       "settings": "Configurações"
     },
@@ -287,6 +288,7 @@
       "financeiro": "Financeiro",
       "programas": "Programas de participação",
       "divulgacao": "Divulgação",
+      "atendimentos": "Atendimentos",
       "convite": "Aceitar convite",
       "selecionar": "Selecionar parceiro",
       "portal": "Portal",
@@ -406,9 +408,9 @@
     },
     "noAccess": {
       "title": "Portal do parceiro ainda não liberado",
-      "body": "Sua conta ainda não está vinculada a uma empresa parceira operável. Solicite afiliado e/ou participativo em Programas — o time PetJourney analisa e libera o acesso.",
-      "hint": "Se você já pediu, aguarde a análise ou verifique novamente em instantes. Também é possível um admin vincular sua conta manualmente.",
-      "ctaPrograms": "Solicitar programas",
+      "body": "Sua conta ainda não está vinculada a uma empresa parceira. Cadastre sua empresa em Configurações, na aba Empresa: o cadastro nasce em análise e a equipe PetJourney aprova.",
+      "hint": "Se você já enviou o cadastro, aguarde a análise ou verifique novamente em instantes. Também é possível aceitar um convite de equipe.",
+      "ctaPrograms": "Cadastrar minha empresa",
       "ctaSettings": "Ir para configurações",
       "retry": "Verificar novamente",
       "contactLabel": "Dúvidas:"
@@ -500,10 +502,7 @@
   "programas": {
     "subtitle": "Portal",
     "title": "Programas de participação",
-    "entry": {
-      "title": "Solicite sua entrada nos programas",
-      "body": "Você ainda não tem vínculo ativo com uma empresa parceira. Envie a solicitação de afiliado e/ou participativo — a equipe PetJourney analisa e libera o portal."
-    },
+    "ledeNoAccess": "Cadastre sua empresa parceira para entrar na rede PetJourney. Use o botão Credenciamento acima para abrir o cadastro.",
     "lede": "Escolha os programas da rede PetJourney. Cada um é independente e passa por análise do time.",
     "available": {
       "title": "Programas disponíveis",
@@ -525,24 +524,11 @@
         "title": "Ativo",
         "desc": "Benefícios liberados para a empresa."
       },
-      "noteNoAccess": "Solicite afiliado e/ou participativo abaixo. O time PetJourney analisa o pedido e libera o portal.",
+      "noteNoAccess": "Cadastre sua empresa em Configurações, na aba Empresa. Com o credenciamento aprovado, o dono solicita os programas por aqui.",
       "noteWithAccess": "Somente o dono da conta pode solicitar a ativação. Operadores acompanham o status, mas não enviam pedidos."
     },
     "cred": {
-      "zoneTitle": "Credenciamento",
-      "sectionTitle": "Credenciamento",
-      "zoneLede": "Status da auditoria necessária para liberar solicitações.",
-      "sectionLede": "Situação da auditoria e liberação para operar no portal.",
-      "loadingAria": "Carregando credenciamento",
-      "errorLoad": "Erro ao carregar credenciamento.",
-      "retry": "Tentar novamente",
-      "rowAuditoria": "Auditoria da empresa",
-      "rowOperacao": "Operação liberada",
-      "yes": "Sim",
-      "no": "Não",
-      "motivoTitle": "Motivo informado",
-      "lastUpdate": "Última atualização: {data}",
-      "blockedHint": "Solicitações de programas ficam bloqueadas até a aprovação do credenciamento."
+      "zoneTitle": "Credenciamento"
     },
     "card": {
       "afiliado": {
@@ -573,8 +559,11 @@
         "saldo": "Saldo disponível",
         "ativoDesde": "Ativo desde",
         "pending": "Sua solicitação foi enviada e está aguardando análise da equipe PetJourney.",
-        "rejected": "A solicitação foi recusada. Você pode enviar um novo pedido quando fizer sentido.",
-        "suspended": "O programa foi suspenso. Solicite novamente após alinhar com o time PetJourney."
+        "rejected": "A solicitação foi recusada. Você pode corrigir e enviar um novo pedido.",
+        "suspended": "O programa está suspenso. Somente o suporte PetJourney pode reativar.",
+        "motivoLabel": "Motivo:",
+        "decididoEm": "Decidido em {data}",
+        "contactSupport": "Falar com o suporte"
       },
       "cta": {
         "solicitar": "Solicitar",
@@ -595,8 +584,208 @@
         "forbidden": "Sem permissão para solicitar. Confirme o vínculo da conta ou peça ao dono da empresa.",
         "afiliadoNaoAtivo": "Ative o programa afiliado para acessar a carteira.",
         "notOperable": "Seu cadastro ainda está em análise.",
-        "alreadyRequested": "Este programa já foi solicitado ou está ativo."
+        "alreadyRequested": "Este programa já foi solicitado ou está ativo.",
+        "modoSuspenso": "Este programa está suspenso para a sua empresa. Fale com o suporte para reativar."
       }
+    }
+  },
+  "parceiroCadastro": {
+    "motivoLabel": "Motivo informado",
+    "categorias": {
+      "CLINICA_VETERINARIA": "Clínica veterinária",
+      "PET_SHOP": "Pet shop",
+      "BANHO_TOSA": "Banho e tosa",
+      "ADESTRAMENTO": "Adestramento",
+      "HOTEL_CRECHE": "Hotel e creche",
+      "FARMACIA": "Farmácia",
+      "OUTRO": "Outro"
+    },
+    "form": {
+      "nome": "Nome da empresa",
+      "nomePlaceholder": "Pet Shop do Bairro",
+      "nomeRequired": "Informe o nome da empresa.",
+      "categoria": "Categoria",
+      "categoriaPlaceholder": "Selecione a categoria",
+      "cnpj": "CNPJ",
+      "cnpjPlaceholder": "Somente números",
+      "telefone": "Telefone comercial",
+      "telefonePlaceholder": "(11) 99999-8888",
+      "crmv": "CRMV",
+      "crmvPlaceholder": "CRMV-SP 12345",
+      "crmvHint": "Opcional, mesmo para clínicas veterinárias.",
+      "onlyNameRequired": "Apenas o nome é obrigatório. Os demais dados podem ser completados depois."
+    },
+    "wizard": {
+      "title": "Cadastre sua empresa parceira",
+      "lede": "O cadastro nasce em análise e a equipe PetJourney avalia. Você recebe o resultado por e-mail.",
+      "step1Title": "Cadastrar",
+      "step1Desc": "Envie os dados básicos da empresa.",
+      "step2Title": "Em análise",
+      "step2Desc": "A equipe PetJourney revisa o cadastro.",
+      "step3Title": "Aprovado",
+      "step3Desc": "Complete os dados e solicite os programas.",
+      "submit": "Enviar cadastro"
+    },
+    "pendente": {
+      "title": "Cadastro em análise",
+      "body": "Você recebe um e-mail com o resultado. Enquanto isso, pode revisar os dados enviados."
+    },
+    "rejeitado": {
+      "title": "Cadastro recusado",
+      "body": "Corrija os dados abaixo e reenvie. O cadastro volta para análise.",
+      "resubmit": "Corrigir e reenviar",
+      "operadorHint": "Apenas o dono da empresa pode corrigir e reenviar o cadastro."
+    },
+    "suspenso": {
+      "title": "Cadastro suspenso",
+      "body": "A operação está travada. Somente o suporte PetJourney pode reativar.",
+      "contact": "Falar com o suporte"
+    },
+    "aprovado": {
+      "title": "Empresa credenciada",
+      "body": "Sua empresa está aprovada para operar no portal.",
+      "desde": "Última atualização: {data}.",
+      "incomplete": "Complete categoria e telefone para finalizar o cadastro."
+    },
+    "editar": {
+      "title": "Editar cadastro",
+      "lede": "Ajuste os dados da empresa. As alterações são salvas imediatamente.",
+      "submit": "Salvar alterações"
+    },
+    "toast": {
+      "enviado": "Cadastro enviado",
+      "enviadoDetail": "Agora é com a equipe PetJourney. Você recebe o resultado por e-mail.",
+      "salvo": "Cadastro atualizado"
+    },
+    "errors": {
+      "generic": "Não foi possível enviar o cadastro.",
+      "jaExiste": "Sua conta já tem um cadastro de parceiro em análise ou aprovado.",
+      "suspenso": "O cadastro está suspenso. Fale com o suporte para reativar.",
+      "nomeEmUso": "Este nome já está registrado por outra empresa.",
+      "cnpjEmUso": "Este CNPJ já está registrado por outra empresa."
+    }
+  },
+  "atendimentos": {
+    "subtitle": "Portal",
+    "title": "Atendimentos",
+    "lede": "Compartilhamentos de pets vinculados à sua empresa: snapshot, histórico e anotações autenticadas.",
+    "tabs": {
+      "ativos": {
+        "label": "Ativos",
+        "description": "Acessos vigentes, com snapshot e anotações."
+      },
+      "historico": {
+        "label": "Histórico",
+        "description": "Acessos expirados ou revogados, apenas com as anotações da sua empresa."
+      }
+    },
+    "list": {
+      "loadingTitle": "Carregando atendimentos",
+      "loadingDesc": "Buscando os compartilhamentos vinculados à empresa.",
+      "errorLoad": "Erro ao carregar atendimentos.",
+      "emptyAtivosTitle": "Nenhum acesso ativo",
+      "emptyAtivosBody": "Peça o código de 6 dígitos ao tutor e vincule para ver os dados do pet por aqui.",
+      "emptyHistoricoTitle": "Sem histórico ainda",
+      "emptyHistoricoBody": "Acessos encerrados aparecem aqui com as anotações da sua empresa.",
+      "anotacoes": "{n} anotações",
+      "loadMore": "Carregar mais"
+    },
+    "servico": {
+      "BANHO": "Banho",
+      "TOSA": "Tosa",
+      "CONSULTA": "Consulta",
+      "EXAME": "Exame",
+      "HOTEL": "Hotel",
+      "OUTRO": "Outro"
+    },
+    "expira": {
+      "expirado": "Expirado",
+      "dias": "expira em {d}d {h}h",
+      "horas": "expira em {h}h {m}min",
+      "minutos": "expira em {m}min"
+    },
+    "vincular": {
+      "cta": "Vincular código",
+      "bloqueado": "Disponível após a aprovação do cadastro.",
+      "title": "Vincular código do tutor",
+      "lede": "Digite o código de 6 dígitos que o tutor gerou no app. O acesso passa a aparecer na sua lista.",
+      "codigoLabel": "Código",
+      "codigoPlaceholder": "123456",
+      "hint": "Espaços e hífens são ignorados.",
+      "submit": "Vincular",
+      "aguarde": "Aguarde {s}s",
+      "codigoInvalidoFormato": "O código tem 6 dígitos numéricos.",
+      "naoEncontrado": "Código inválido ou expirado. Confira com o tutor.",
+      "outraEmpresa": "Este acesso já está vinculado a outra empresa.",
+      "naoOperacional": "Seu cadastro de parceiro ainda não está aprovado para operar.",
+      "throttle": "Muitas tentativas. Aguarde um minuto e tente de novo.",
+      "erroGenerico": "Não foi possível vincular o código."
+    },
+    "detalhe": {
+      "subtitle": "Atendimento",
+      "title": "Detalhe do atendimento",
+      "loadingAria": "Carregando detalhe do atendimento",
+      "errorLoad": "Erro ao carregar o atendimento.",
+      "mensagemTutor": "Mensagem do tutor",
+      "back": "Voltar",
+      "tabs": {
+        "resumo": {
+          "label": "Resumo do pet",
+          "description": "Mensagem do tutor e snapshot autorizado no momento do compartilhamento."
+        },
+        "anotacoes": {
+          "label": "Anotações",
+          "description": "Registros autenticados da sua empresa neste atendimento."
+        }
+      }
+    },
+    "pet": {
+      "castrado": "Castrado",
+      "naoCastrado": "Não castrado"
+    },
+    "encerrado": {
+      "title": "Acesso encerrado",
+      "expirado": "O compartilhamento expirou. O snapshot clínico não fica disponível; restam as anotações da sua empresa.",
+      "revogado": "O tutor revogou o acesso. O snapshot clínico não fica disponível; restam as anotações da sua empresa."
+    },
+    "snapshot": {
+      "peso": "Peso",
+      "alergias": "Alergias",
+      "vacinas": "Vacinas",
+      "medicamentos": "Medicamentos",
+      "comportamento": "Comportamento",
+      "diagnosticos": "Diagnósticos",
+      "observacoes": "Observações do tutor"
+    },
+    "anotacoes": {
+      "title": "Anotações",
+      "empty": "Nenhuma anotação ainda."
+    },
+    "anotacao": {
+      "title": "Nova anotação",
+      "servico": "Serviço realizado",
+      "servicoPlaceholder": "Banho e tosa",
+      "texto": "Anotação",
+      "textoPlaceholder": "Como foi o atendimento, observações para o tutor...",
+      "profissional": "Profissional (opcional)",
+      "profissionalPlaceholder": "Se vazio, usamos o nome da sua conta",
+      "anexos": "Anexos (até {n})",
+      "adicionarAnexo": "Adicionar anexo",
+      "anexoHint": "JPG, PNG, WebP, HEIC ou PDF, até 10 MB cada.",
+      "tipoDocumento": "Tipo do documento",
+      "semClassificacao": "Sem classificação",
+      "removerAnexo": "Remover anexo",
+      "camposObrigatorios": "Preencha o serviço realizado e o texto da anotação.",
+      "maxAnexos": "No máximo {n} anexos por anotação.",
+      "tipoInvalido": "Arquivo não aceito: {nome}.",
+      "tamanhoInvalido": "Arquivo acima de 10 MB: {nome}.",
+      "encerrado": "Este acesso foi encerrado; não é possível anotar.",
+      "criada": "Anotação registrada",
+      "erro": "Não foi possível registrar a anotação."
+    },
+    "anexo": {
+      "indisponivel": "Arquivo indisponível",
+      "indisponivelDetail": "O arquivo não está mais disponível (pode ter sido removido após a revogação)."
     }
   },
   "divulgacao": {
@@ -832,6 +1021,10 @@
       "perfil": {
         "label": "Perfil",
         "description": "Nome, contatos, documento e dados profissionais."
+      },
+      "empresa": {
+        "label": "Empresa",
+        "description": "Credenciamento e dados da empresa parceira."
       },
       "seguranca": {
         "label": "Segurança",

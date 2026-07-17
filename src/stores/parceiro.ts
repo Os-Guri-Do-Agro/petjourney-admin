@@ -9,6 +9,7 @@ import {
 } from '@/service/parceiro/parceiro-portal-service'
 import type {
   ModoParticipacao,
+  ModoStatusBloco,
   PapelParceiro,
   PortalDashboard,
   PortalStatus,
@@ -32,8 +33,16 @@ export const useParceiroStore = defineStore('parceiro', () => {
   const papel = computed<PapelParceiro | null>(() => dashboard.value?.papel ?? null)
   const isDono = computed(() => papel.value === 'DONO')
   const podeOperar = computed(() => status.value?.podeOperar ?? false)
-  const statusAfiliadoAtivo = computed(() => status.value?.statusAfiliado === 'ATIVO')
+  const statusAfiliadoAtivo = computed(() => status.value?.afiliado.status === 'ATIVO')
   const parceiroNome = computed(() => dashboard.value?.parceiro.nome ?? 'Parceiro')
+
+  function modoBloco(modo: ModoParticipacao): ModoStatusBloco {
+    const bloco = modo === 'afiliado' ? status.value?.afiliado : status.value?.participativo
+
+    return (
+      bloco ?? { status: 'NAO_SOLICITADO', motivo: null, decididoEm: null, podeSolicitar: false }
+    )
+  }
 
   function readStoredParceiroId() {
     if (typeof window === 'undefined') {
@@ -106,20 +115,36 @@ export const useParceiroStore = defineStore('parceiro', () => {
   }
 
   function patchModoStatus(modo: ModoParticipacao, modoStatus: StatusModoParceiro) {
+    /** Patch otimista: motivo antigo some e a re-solicitação fecha até o refresh trazer a verdade. */
+    const patchedBloco: ModoStatusBloco = {
+      status: modoStatus,
+      motivo: null,
+      decididoEm: null,
+      podeSolicitar: false,
+    }
+    const idleBloco: ModoStatusBloco = {
+      status: 'NAO_SOLICITADO',
+      motivo: null,
+      decididoEm: null,
+      podeSolicitar: true,
+    }
+
     if (!status.value) {
       status.value = {
         statusAuditoria: 'PENDENTE',
+        podeOperar: false,
+        afiliado: modo === 'afiliado' ? patchedBloco : idleBloco,
+        participativo: modo === 'participativo' ? patchedBloco : idleBloco,
         statusAfiliado: modo === 'afiliado' ? modoStatus : 'NAO_SOLICITADO',
         statusParticipativo: modo === 'participativo' ? modoStatus : 'NAO_SOLICITADO',
-        podeOperar: false,
       }
       return
     }
 
     status.value =
       modo === 'afiliado'
-        ? { ...status.value, statusAfiliado: modoStatus }
-        : { ...status.value, statusParticipativo: modoStatus }
+        ? { ...status.value, afiliado: patchedBloco, statusAfiliado: modoStatus }
+        : { ...status.value, participativo: patchedBloco, statusParticipativo: modoStatus }
   }
 
   function reset() {
@@ -145,6 +170,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     podeOperar,
     statusAfiliadoAtivo,
     parceiroNome,
+    modoBloco,
     setParceiroId,
     bootstrap,
     refreshStatus,

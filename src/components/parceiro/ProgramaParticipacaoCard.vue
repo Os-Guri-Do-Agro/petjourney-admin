@@ -7,15 +7,14 @@ import { RouterLink } from 'vue-router'
 
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
-import { ApiError } from '@/service/api'
 import { getCarteira, solicitarModo } from '@/service/parceiro/parceiro-portal-service'
 import type { ModoParticipacao, StatusModoParceiro } from '@/service/parceiro/types'
 import { formatCentavosToBrl } from '@/utils/format/money'
 import {
   canManageSolicitacaoModo,
-  canSolicitarModo,
   getModoCardCopy,
   resolveModoCta,
+  resolveSolicitarModoError,
 } from '@/utils/parceiro/modo-participacao'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import { currentColors } from '@/theme/color-mode'
@@ -85,25 +84,15 @@ const meta = computed(() => {
   }
 })
 
-const modoStatus = computed<StatusModoParceiro>(() => {
-  if (props.modo === 'afiliado') {
-    return store.status?.statusAfiliado ?? 'NAO_SOLICITADO'
-  }
-
-  return store.status?.statusParticipativo ?? 'NAO_SOLICITADO'
-})
+const modoBloco = computed(() => store.modoBloco(props.modo))
+const modoStatus = computed<StatusModoParceiro>(() => modoBloco.value.status)
 
 const canManageSolicitacao = computed(() =>
   canManageSolicitacaoModo(store.isDono, store.semAcessoParceiro),
 )
 
-/** Membership em análise bloqueia; sem vínculo ainda, o pedido é a entrada. */
-const solicitarBloqueadoPorAuditoria = computed(
-  () => !store.semAcessoParceiro && !store.podeOperar,
-)
-
 const cta = computed(() =>
-  resolveModoCta(modoStatus.value, props.modo, canManageSolicitacao.value),
+  resolveModoCta(modoBloco.value, props.modo, canManageSolicitacao.value),
 )
 
 const showSolicitarButton = computed(
@@ -170,35 +159,19 @@ const saldoLabel = computed(() => {
   return formatCentavosToBrl(saldoSacavelCentavos.value)
 })
 
-function resolveSolicitarErrorMessage(error: unknown) {
-  if (!(error instanceof ApiError)) {
-    return error instanceof Error ? error.message : t('programas.card.error.generic')
+const decididoEmLabel = computed(() => {
+  const raw = modoBloco.value.decididoEm
+
+  if (!raw) {
+    return null
   }
 
-  if (error.statusCode === 403) {
-    return t('programas.card.error.forbidden')
-  }
-
-  if (error.statusCode === 409) {
-    const hint = `${error.message} ${error.error ?? ''}`.toLowerCase()
-
-    if (hint.includes('afiliado_nao_ativo')) {
-      return t('programas.card.error.afiliadoNaoAtivo')
-    }
-
-    if (hint.includes('operavel') || hint.includes('operável')) {
-      return t('programas.card.error.notOperable')
-    }
-
-    if (hint.includes('solicitado') || hint.includes('ativo')) {
-      return t('programas.card.error.alreadyRequested')
-    }
-
-    return error.message
-  }
-
-  return error.message
-}
+  return new Date(raw).toLocaleDateString(INTL_LOCALE[locale.value as Locale], {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+})
 
 async function loadCarteiraResumo() {
   if (props.modo !== 'afiliado' || modoStatus.value !== 'ATIVO') {
@@ -225,7 +198,7 @@ async function handleSolicitar() {
     return
   }
 
-  if (solicitarBloqueadoPorAuditoria.value || !canSolicitarModo(modoStatus.value)) {
+  if (!modoBloco.value.podeSolicitar) {
     return
   }
 
@@ -254,7 +227,7 @@ async function handleSolicitar() {
     toast.add({
       severity: 'error',
       summary: t('programas.card.toast.error'),
-      detail: resolveSolicitarErrorMessage(err),
+      detail: resolveSolicitarModoError(err),
       life: 5000,
     })
   } finally {
@@ -382,13 +355,28 @@ watch(modoStatus, () => {
       class="programa-card__info programa-card__info--warning"
     >
       <i class="pi pi-info-circle" aria-hidden="true" />
-      <p>
-        {{
-          modoStatus === 'REJEITADO'
-            ? t('programas.card.info.rejected')
-            : t('programas.card.info.suspended')
-        }}
-      </p>
+      <div class="programa-card__decision">
+        <p>
+          {{
+            modoStatus === 'REJEITADO'
+              ? t('programas.card.info.rejected')
+              : t('programas.card.info.suspended')
+          }}
+        </p>
+        <p v-if="modoBloco.motivo" class="programa-card__motivo">
+          <strong>{{ t('programas.card.info.motivoLabel') }}</strong> {{ modoBloco.motivo }}
+        </p>
+        <p v-if="decididoEmLabel" class="programa-card__decidido">
+          {{ t('programas.card.info.decididoEm', { data: decididoEmLabel }) }}
+        </p>
+        <a
+          v-if="modoStatus === 'SUSPENSO'"
+          class="programa-card__support"
+          href="mailto:atendimento@petjourney.health"
+        >
+          {{ t('programas.card.info.contactSupport') }}
+        </a>
+      </div>
     </div>
 
     <div class="programa-card__action">
@@ -396,7 +384,7 @@ watch(modoStatus, () => {
         v-if="showSolicitarButton"
         class="programa-card__button programa-card__button--primary"
         type="button"
-        :disabled="solicitarBloqueadoPorAuditoria || submitting"
+        :disabled="submitting"
         @click="handleSolicitar"
       >
         <i v-if="submitting" class="pi pi-spin pi-spinner" aria-hidden="true" />
@@ -697,6 +685,29 @@ watch(modoStatus, () => {
   margin: 0;
   font-size: 0.82rem;
   line-height: 1.45;
+}
+
+.programa-card__decision {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.programa-card__motivo strong {
+  font-weight: 700;
+}
+
+.programa-card__decidido {
+  opacity: 0.85;
+  font-size: 0.76rem !important;
+}
+
+.programa-card__support {
+  justify-self: start;
+  color: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .programa-card__action {

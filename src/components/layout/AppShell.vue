@@ -239,6 +239,7 @@ async function handleLogout() {
 onMounted(() => {
   usuarioPerfilStore.hydrate()
   usuarioPerfilStore.syncFromAuth()
+  void usuarioPerfilStore.ensureFotoCarregada()
   void parceiroStore.bootstrap().catch(() => undefined)
 })
 
@@ -503,7 +504,7 @@ onUnmounted(() => {
 <style scoped>
 .app-shell {
   --navigator-width: 19.5rem;
-  --header-height: 4.25rem;
+  --header-height: var(--pj-shell-header-height, 4.25rem);
   min-height: 100vh;
   max-width: 100%;
   overflow-x: clip;
@@ -1180,8 +1181,12 @@ onUnmounted(() => {
   max-width: 100%;
   padding-top: var(--header-height);
   padding-left: var(--navigator-width);
+  /* Painéis laterais não-modais empurram o conteúdo (var setada por useSidePanelOffset) */
+  padding-right: var(--pj-side-panel-offset, 0px);
   overflow-x: clip;
-  transition: padding-left 180ms ease;
+  transition:
+    padding-left 180ms ease,
+    padding-right 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .app-shell--navigator-hidden .app-content {
@@ -1310,6 +1315,8 @@ onUnmounted(() => {
   .app-content,
   .app-shell--navigator-hidden .app-content {
     padding-left: 0;
+    /* Em telas estreitas o painel lateral sobrepõe em vez de empurrar */
+    padding-right: 0;
   }
 
   .user-menu__identity,

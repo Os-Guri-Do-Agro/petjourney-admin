@@ -324,9 +324,6 @@ onMounted(() => {
 
         <section class="carteira-panel">
           <h3>{{ t('carteira.visao.saque.title') }}</h3>
-          <p class="carteira-hint">
-            {{ t('carteira.visao.saque.hint', { valor: formatCentavosToBrl(minSaqueCentavos) }) }}
-          </p>
           <div class="carteira-form">
             <AuthTextField
               id="valor-saque"
@@ -342,6 +339,9 @@ onMounted(() => {
                 <span class="carteira-currency">{{ t('carteira.visao.saque.currency') }}</span>
               </template>
             </AuthTextField>
+            <p class="carteira-hint">
+              {{ t('carteira.visao.saque.hint', { valor: formatCentavosToBrl(minSaqueCentavos) }) }}
+            </p>
             <Button
               :label="t('carteira.visao.saque.submit')"
               :disabled="!canRequestWithdraw"

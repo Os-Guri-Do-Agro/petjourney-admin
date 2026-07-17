@@ -19,7 +19,7 @@ const { store } = useParceiroPortal()
           {{ t('frame.operability.reasonPrefix') }} {{ store.status.motivoAuditoria }}
         </template>
       </p>
-      <RouterLink to="/parceiro/programas#credenciamento">{{
+      <RouterLink to="/settings?aba=empresa">{{
         t('frame.operability.link')
       }}</RouterLink>
     </div>

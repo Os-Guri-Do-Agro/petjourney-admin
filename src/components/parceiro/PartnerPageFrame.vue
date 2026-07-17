@@ -104,7 +104,10 @@ const pageStyle = computed(() => {
       </div>
 
       <div class="partner-page__cta-row">
-        <RouterLink class="partner-page__cta partner-page__cta--primary" to="/parceiro/programas">
+        <RouterLink
+          class="partner-page__cta partner-page__cta--primary"
+          to="/settings?aba=empresa"
+        >
           {{ t('frame.noAccess.ctaPrograms') }}
         </RouterLink>
         <RouterLink

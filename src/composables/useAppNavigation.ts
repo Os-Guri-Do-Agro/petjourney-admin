@@ -145,6 +145,11 @@ export function useAppNavigation() {
     const items: AppNavigationItem[] = [
       { label: t('nav.items.programas'), to: '/parceiro/programas', icon: 'pi pi-th-large' },
       { label: t('nav.items.divulgacao'), to: '/parceiro/divulgacao', icon: 'pi pi-share-alt' },
+      {
+        label: t('nav.items.atendimentos'),
+        to: '/parceiro/atendimentos',
+        icon: 'pi pi-clipboard',
+      },
     ]
 
     if (parceiroStore.statusAfiliadoAtivo) {
@@ -315,6 +320,7 @@ export function resolvePageLabel(path: string, hash: string, sections: AppNaviga
     { prefix: '/parceiro/carteira', label: t('nav.pageLabels.financeiro') },
     { prefix: '/parceiro/programas', label: t('nav.pageLabels.programas') },
     { prefix: '/parceiro/divulgacao', label: t('nav.pageLabels.divulgacao') },
+    { prefix: '/parceiro/atendimentos', label: t('nav.pageLabels.atendimentos') },
     { prefix: '/parceiro/equipe', label: 'Equipe' },
     { prefix: '/parceiro/convite', label: t('nav.pageLabels.convite') },
     { prefix: '/parceiro/selecionar', label: t('nav.pageLabels.selecionar') },

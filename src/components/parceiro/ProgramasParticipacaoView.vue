@@ -3,7 +3,6 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ProgramaParticipacaoCard from '@/components/parceiro/ProgramaParticipacaoCard.vue'
-import PortalCredenciamentoSection from '@/components/parceiro/sections/PortalCredenciamentoSection.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { currentColors } from '@/theme/color-mode'
 
@@ -115,22 +114,6 @@ const activationSteps = computed(() => [
           </template>
         </p>
       </div>
-    </section>
-
-    <section
-      v-if="!store.semAcessoParceiro && (!store.podeOperar || isLoading)"
-      class="prog-zone programas-view__cred"
-      aria-labelledby="cred-zone-title"
-    >
-      <header class="prog-zone__head">
-        <div class="prog-zone__title-row">
-          <p class="prog-zone__index">03</p>
-          <h2 id="cred-zone-title">{{ t('programas.cred.zoneTitle') }}</h2>
-        </div>
-        <p>{{ t('programas.cred.zoneLede') }}</p>
-      </header>
-
-      <PortalCredenciamentoSection :skeleton="isLoading" />
     </section>
   </div>
 </template>
@@ -287,10 +270,6 @@ const activationSteps = computed(() => [
   color: var(--prog-faint);
   font-size: 0.8rem;
   line-height: 1.45;
-}
-
-.programas-view__cred {
-  scroll-margin-top: 5rem;
 }
 
 @media (max-width: 900px) {

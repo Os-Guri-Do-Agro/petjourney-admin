@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 import { getAuthUser, getAccessToken } from '@/service/auth/auth-session'
+import { getUsuarioAllInformations } from '@/service/user/user-service'
 
 const STORAGE_KEY = 'petjourney-usuario-perfil'
 
@@ -75,6 +76,8 @@ export const useUsuarioPerfilStore = defineStore('usuarioPerfil', () => {
   const nome = ref('')
   const email = ref('')
   const fotoUrl = ref('')
+  /** Evita refetch da foto na mesma sessão SPA (inclusive quando o usuário não tem foto). */
+  const fotoBuscadaPara = ref<string | null>(null)
 
   const displayName = computed(() => nome.value.trim() || 'Veterinário')
 
@@ -200,11 +203,32 @@ export const useUsuarioPerfilStore = defineStore('usuarioPerfil', () => {
     persist()
   }
 
+  /** Completa o snapshot com a foto do perfil quando ela ainda não está local (ex.: primeiro login). */
+  async function ensureFotoCarregada() {
+    if (!userId.value || fotoUrl.value || fotoBuscadaPara.value === userId.value) {
+      return
+    }
+
+    fotoBuscadaPara.value = userId.value
+
+    try {
+      const data = await getUsuarioAllInformations(userId.value)
+      applyProfile({
+        nome: data.nome || undefined,
+        email: data.email || undefined,
+        fotoUrl: data.veterinarioPerfil?.foto ?? '',
+      })
+    } catch {
+      /* Sem perfil ou falha de rede: o header segue com as iniciais. */
+    }
+  }
+
   function clear() {
     userId.value = null
     nome.value = ''
     email.value = ''
     fotoUrl.value = ''
+    fotoBuscadaPara.value = null
     clearBothStorages()
   }
 
@@ -220,6 +244,7 @@ export const useUsuarioPerfilStore = defineStore('usuarioPerfil', () => {
     persist,
     applyProfile,
     syncFromAuth,
+    ensureFotoCarregada,
     clear,
   }
 })

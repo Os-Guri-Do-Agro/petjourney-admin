@@ -3,7 +3,8 @@ import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
-import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
+import Button from 'primevue/button'
+
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ProgramasParticipacaoView from '@/components/parceiro/ProgramasParticipacaoView.vue'
 import { EQUIPE_MENU_ENABLED } from '@/composables/useAppNavigation'
@@ -14,7 +15,7 @@ const { t } = useI18n()
 
 const LEGACY_ABA_REDIRECTS: Record<string, { path: string; hash?: string; aba?: string }> = {
   visao: { path: '/parceiro/programas' },
-  credenciamento: { path: '/parceiro/programas', hash: '#credenciamento' },
+  credenciamento: { path: '/settings', aba: 'empresa' },
   afiliado: { path: '/parceiro/programas', hash: '#programas' },
   participativo: { path: '/parceiro/programas', hash: '#programas' },
   divulgacao: { path: '/parceiro/divulgacao' },
@@ -93,25 +94,18 @@ watch(
     :error="store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : ''"
     @retry="ensureContext(true)"
   >
+    <template #actions>
+      <Button
+        :label="t('programas.cred.zoneTitle')"
+        icon="pi pi-id-card"
+        severity="secondary"
+        @click="router.push('/settings?aba=empresa')"
+      />
+    </template>
+
     <div class="programas-page" :style="pageAtmosphere">
-      <PartnerOperabilityBanner />
-
-      <aside
-        v-if="store.semAcessoParceiro"
-        class="programas-page__entry"
-        role="status"
-      >
-        <i class="pi pi-send" aria-hidden="true" />
-        <div>
-          <strong>{{ t('programas.entry.title') }}</strong>
-          <p>
-            {{ t('programas.entry.body') }}
-          </p>
-        </div>
-      </aside>
-
-      <p v-else class="programas-page__lede">
-        {{ t('programas.lede') }}
+      <p class="programas-page__lede">
+        {{ store.semAcessoParceiro ? t('programas.ledeNoAccess') : t('programas.lede') }}
       </p>
 
       <ProgramasParticipacaoView />
@@ -136,37 +130,6 @@ watch(
   line-height: 1.5;
 }
 
-.programas-page__entry {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.85rem;
-  align-items: start;
-  padding: 1rem 1.1rem;
-  border: 1px solid color-mix(in srgb, var(--prog-page-muted) 28%, transparent);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--prog-page-muted) 8%, transparent);
-}
-
-.programas-page__entry i {
-  margin-top: 0.15rem;
-  font-size: 1.15rem;
-  color: var(--prog-page-muted);
-}
-
-.programas-page__entry strong {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.98rem;
-}
-
-.programas-page__entry p {
-  margin: 0;
-  color: var(--prog-page-muted);
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-
-:deep(#credenciamento),
 :deep(#programas) {
   scroll-margin-top: 5rem;
 }

@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
+import i18n from '@/i18n'
 import { ApiError } from '@/service/api'
 
 import {
@@ -7,22 +8,32 @@ import {
   canSolicitarModo,
   getModoCardCopy,
   isAfiliadoNaoAtivoError,
+  resolveCadastroErrorView,
   resolveModoCta,
   resolveSolicitarModoError,
 } from '@/utils/parceiro/modo-participacao'
 
+function bloco(status: Parameters<typeof canSolicitarModo>[0], podeSolicitar: boolean) {
+  return { status, podeSolicitar }
+}
+
 describe('modo-participacao', () => {
-  it('identifica status que permitem solicitar', () => {
+  beforeAll(() => {
+    i18n.global.locale.value = 'pt'
+  })
+
+  it('identifica status que permitem solicitar (Parte 9: SUSPENSO não re-solicita)', () => {
     expect(canSolicitarModo('NAO_SOLICITADO')).toBe(true)
     expect(canSolicitarModo('REJEITADO')).toBe(true)
-    expect(canSolicitarModo('SUSPENSO')).toBe(true)
+    expect(canSolicitarModo('SUSPENSO')).toBe(false)
     expect(canSolicitarModo('SOLICITADO')).toBe(false)
     expect(canSolicitarModo('ATIVO')).toBe(false)
   })
 
-  it('permite solicitar sem membership ou como dono', () => {
+  it('só o dono com membership solicita (sem vínculo, o caminho é o cadastro)', () => {
     expect(canManageSolicitacaoModo(true, false)).toBe(true)
-    expect(canManageSolicitacaoModo(false, true)).toBe(true)
+    expect(canManageSolicitacaoModo(false, true)).toBe(false)
+    expect(canManageSolicitacaoModo(true, true)).toBe(false)
     expect(canManageSolicitacaoModo(false, false)).toBe(false)
   })
 
@@ -31,46 +42,75 @@ describe('modo-participacao', () => {
     expect(getModoCardCopy('participativo').description).toContain('comunidade PetJourney')
   })
 
-  it('resolve CTA conforme status e papel', () => {
-    expect(resolveModoCta('NAO_SOLICITADO', 'afiliado', true)).toEqual({
+  it('resolve CTA pelo podeSolicitar do backend', () => {
+    expect(resolveModoCta(bloco('NAO_SOLICITADO', true), 'afiliado', true)).toEqual({
       type: 'solicitar',
       label: 'Solicitar',
     })
-    expect(resolveModoCta('REJEITADO', 'participativo', true)).toEqual({
+    expect(resolveModoCta(bloco('REJEITADO', true), 'participativo', true)).toEqual({
       type: 'solicitar-novamente',
       label: 'Solicitar de novo',
     })
-    expect(resolveModoCta('SOLICITADO', 'afiliado', true)).toEqual({
+    expect(resolveModoCta(bloco('SOLICITADO', false), 'afiliado', true)).toEqual({
       type: 'aguardando',
       label: 'Aguardando análise',
     })
-    expect(resolveModoCta('ATIVO', 'afiliado', true)).toEqual({
+    expect(resolveModoCta(bloco('ATIVO', false), 'afiliado', true)).toEqual({
       type: 'carteira',
       label: 'Ir para a Carteira',
       to: '/parceiro/carteira',
     })
-    expect(resolveModoCta('ATIVO', 'participativo', true)).toEqual({ type: 'none' })
-    expect(resolveModoCta('NAO_SOLICITADO', 'afiliado', false)).toEqual({ type: 'none' })
+    expect(resolveModoCta(bloco('ATIVO', false), 'participativo', true)).toEqual({ type: 'none' })
+    expect(resolveModoCta(bloco('SUSPENSO', false), 'afiliado', true)).toEqual({ type: 'none' })
+    expect(resolveModoCta(bloco('NAO_SOLICITADO', true), 'afiliado', false)).toEqual({
+      type: 'none',
+    })
   })
 
-  it('mapeia erros de solicitação da API', () => {
+  it('roteia erros de solicitação pelo reason estável', () => {
+    expect(
+      resolveSolicitarModoError(
+        new ApiError('Conflito', 409, undefined, 'PARCEIRO_MODO_JA_SOLICITADO'),
+      ),
+    ).toBe('Este programa já foi solicitado ou está ativo.')
+
+    expect(
+      resolveSolicitarModoError(
+        new ApiError('Conflito', 409, undefined, 'PARCEIRO_MODO_SUSPENSO'),
+      ),
+    ).toContain('suspenso')
+  })
+
+  it('mantém fallback para erros antigos sem reason', () => {
     expect(resolveSolicitarModoError(new ApiError('Forbidden', 403))).toBe(
       'Sem permissão para solicitar. Confirme o vínculo da conta ou peça ao dono da empresa.',
     )
 
+    expect(resolveSolicitarModoError(new ApiError('Parceiro nao operavel', 409))).toBe(
+      'Seu cadastro ainda está em análise.',
+    )
+  })
+
+  it('roteia erros do cadastro pelo reason e aponta o campo', () => {
     expect(
-      resolveSolicitarModoError(new ApiError('Parceiro nao operavel', 409)),
-    ).toBe('Seu cadastro ainda está em análise.')
+      resolveCadastroErrorView(
+        new ApiError('Conflito', 409, undefined, 'PARCEIRO_CADASTRO_NOME_EM_USO'),
+      ).field,
+    ).toBe('nome')
 
     expect(
-      resolveSolicitarModoError(new ApiError('Modo ja solicitado ou ativo', 409)),
-    ).toBe('Este programa já foi solicitado ou está ativo.')
+      resolveCadastroErrorView(
+        new ApiError('Conflito', 409, undefined, 'PARCEIRO_CADASTRO_CNPJ_EM_USO'),
+      ).field,
+    ).toBe('cnpj')
+
+    const desconhecido = resolveCadastroErrorView(new ApiError('Mensagem do backend', 409))
+    expect(desconhecido.message).toBe('Mensagem do backend')
+    expect(desconhecido.field).toBeUndefined()
   })
 
   it('detecta erro AFILIADO_NAO_ATIVO da carteira', () => {
-    expect(
-      isAfiliadoNaoAtivoError(new ApiError('Conflito', 409, 'AFILIADO_NAO_ATIVO')),
-    ).toBe(true)
+    expect(isAfiliadoNaoAtivoError(new ApiError('Conflito', 409, 'AFILIADO_NAO_ATIVO'))).toBe(true)
     expect(isAfiliadoNaoAtivoError(new ApiError('Outro', 409))).toBe(false)
   })
 })

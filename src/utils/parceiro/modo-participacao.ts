@@ -1,5 +1,10 @@
+import i18n from '@/i18n'
 import { ApiError } from '@/service/api'
-import type { ModoParticipacao, StatusModoParceiro } from '@/service/parceiro/types'
+import type {
+  ModoParticipacao,
+  ModoStatusBloco,
+  StatusModoParceiro,
+} from '@/service/parceiro/types'
 
 export type ModoCardCopy = {
   title: string
@@ -17,11 +22,8 @@ export type ModoCta =
   | { type: 'carteira'; label: 'Ir para a Carteira'; to: '/parceiro/carteira' }
   | { type: 'none' }
 
-const SOLICITAR_STATUSES: StatusModoParceiro[] = [
-  'NAO_SOLICITADO',
-  'REJEITADO',
-  'SUSPENSO',
-]
+/** Parte 9: SUSPENSO não pode re-solicitar (só o suporte reativa). */
+const SOLICITAR_STATUSES: StatusModoParceiro[] = ['NAO_SOLICITADO', 'REJEITADO']
 
 export function canSolicitarModo(status: StatusModoParceiro) {
   return SOLICITAR_STATUSES.includes(status)
@@ -59,13 +61,14 @@ export function getModoCardCopy(modo: ModoParticipacao): ModoCardCopy {
   }
 }
 
-/** DONO com membership, ou usuário ainda sem vínculo tentando entrar no programa. */
+/** Solicitar modo exige parceiro existente e papel DONO (sem vínculo, o caminho é o cadastro). */
 export function canManageSolicitacaoModo(isDono: boolean, semAcessoParceiro: boolean) {
-  return isDono || semAcessoParceiro
+  return isDono && !semAcessoParceiro
 }
 
+/** Regra de ouro (Parte 9): o botão de solicitar renderiza SE `podeSolicitar === true`, e mais nada. */
 export function resolveModoCta(
-  status: StatusModoParceiro,
+  bloco: Pick<ModoStatusBloco, 'status' | 'podeSolicitar'>,
   modo: ModoParticipacao,
   canManageSolicitacao: boolean,
 ): ModoCta {
@@ -73,19 +76,17 @@ export function resolveModoCta(
     return { type: 'none' }
   }
 
-  if (status === 'NAO_SOLICITADO') {
-    return { type: 'solicitar', label: 'Solicitar' }
+  if (bloco.podeSolicitar) {
+    return bloco.status === 'REJEITADO'
+      ? { type: 'solicitar-novamente', label: 'Solicitar de novo' }
+      : { type: 'solicitar', label: 'Solicitar' }
   }
 
-  if (status === 'REJEITADO' || status === 'SUSPENSO') {
-    return { type: 'solicitar-novamente', label: 'Solicitar de novo' }
-  }
-
-  if (status === 'SOLICITADO') {
+  if (bloco.status === 'SOLICITADO') {
     return { type: 'aguardando', label: 'Aguardando análise' }
   }
 
-  if (status === 'ATIVO' && modo === 'afiliado') {
+  if (bloco.status === 'ATIVO' && modo === 'afiliado') {
     return { type: 'carteira', label: 'Ir para a Carteira', to: '/parceiro/carteira' }
   }
 
@@ -93,33 +94,67 @@ export function resolveModoCta(
 }
 
 export function resolveSolicitarModoError(error: unknown) {
+  const t = i18n.global.t.bind(i18n.global)
+
   if (!(error instanceof ApiError)) {
-    return error instanceof Error ? error.message : 'Não foi possível solicitar.'
+    return error instanceof Error ? error.message : String(t('programas.card.error.generic'))
+  }
+
+  if (error.reason === 'PARCEIRO_MODO_JA_SOLICITADO') {
+    return String(t('programas.card.error.alreadyRequested'))
+  }
+
+  if (error.reason === 'PARCEIRO_MODO_SUSPENSO') {
+    return String(t('programas.card.error.modoSuspenso'))
   }
 
   if (error.statusCode === 403) {
-    return 'Sem permissão para solicitar. Confirme o vínculo da conta ou peça ao dono da empresa.'
+    return String(t('programas.card.error.forbidden'))
   }
 
   if (error.statusCode === 409) {
     const hint = `${error.message} ${error.error ?? ''}`.toLowerCase()
 
     if (hint.includes('afiliado_nao_ativo')) {
-      return 'Ative o programa afiliado para acessar a carteira.'
+      return String(t('programas.card.error.afiliadoNaoAtivo'))
     }
 
     if (hint.includes('operavel') || hint.includes('operável')) {
-      return 'Seu cadastro ainda está em análise.'
-    }
-
-    if (hint.includes('solicitado') || hint.includes('ativo')) {
-      return 'Este programa já foi solicitado ou está ativo.'
+      return String(t('programas.card.error.notOperable'))
     }
 
     return error.message
   }
 
   return error.message
+}
+
+/** Erros do funil de cadastro (Parte 9), roteados pelo `reason` estável. */
+export function resolveCadastroErrorView(error: unknown): {
+  message: string
+  field?: 'nome' | 'cnpj'
+} {
+  const t = i18n.global.t.bind(i18n.global)
+
+  if (!(error instanceof ApiError)) {
+    return {
+      message:
+        error instanceof Error ? error.message : String(t('parceiroCadastro.errors.generic')),
+    }
+  }
+
+  switch (error.reason) {
+    case 'PARCEIRO_CADASTRO_JA_EXISTE':
+      return { message: String(t('parceiroCadastro.errors.jaExiste')) }
+    case 'PARCEIRO_CADASTRO_SUSPENSO':
+      return { message: String(t('parceiroCadastro.errors.suspenso')) }
+    case 'PARCEIRO_CADASTRO_NOME_EM_USO':
+      return { message: String(t('parceiroCadastro.errors.nomeEmUso')), field: 'nome' }
+    case 'PARCEIRO_CADASTRO_CNPJ_EM_USO':
+      return { message: String(t('parceiroCadastro.errors.cnpjEmUso')), field: 'cnpj' }
+    default:
+      return { message: error.message }
+  }
 }
 
 export function isAfiliadoNaoAtivoError(error: unknown) {

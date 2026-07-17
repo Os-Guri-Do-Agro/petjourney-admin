@@ -11,6 +11,7 @@ body,
   overflow-x: clip;
 }
 :root {
+  --pj-shell-header-height: 4.25rem;
   --pj-toast-card: #ffffff;
   --pj-toast-surface: #f2f7f5;
   --pj-toast-line: #d9e6e1;

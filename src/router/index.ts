@@ -15,7 +15,7 @@ const partnerLegacyRedirects: RouteRecordRaw[] = [
     : [{ path: '/parceiro/equipe', redirect: '/inicio' } satisfies RouteRecordRaw]),
   {
     path: '/parceiro/status',
-    redirect: { path: '/parceiro/programas', hash: '#credenciamento' },
+    redirect: { path: '/settings', query: { aba: 'empresa' } },
   },
   {
     path: '/parceiro/indicacao',

@@ -4,13 +4,17 @@ import type {
   Carteira,
   CupomParceiro,
   ModoParticipacao,
+  ModoStatusBloco,
   PapelParceiro,
+  ParceiroCadastro,
+  ParceiroCadastroPayload,
   PortalDashboard,
   PortalIndicacao,
   PortalStatus,
   ResgateParceiro,
   SaqueDetalhe,
   SaqueResumo,
+  StatusModoParceiro,
   TransacaoCarteira,
   ValidarCupomPayload,
   ValidarCupomResultado,
@@ -44,14 +48,67 @@ export function getPortalDashboard(params?: ParceiroQuery) {
   )
 }
 
-export function getPortalStatus(params?: ParceiroQuery) {
-  return unwrap(
+/** Fallback para backend sem os blocos da Parte 9 (deriva do campo legado). */
+function deriveModoBloco(status: StatusModoParceiro): ModoStatusBloco {
+  return {
+    status,
+    motivo: null,
+    decididoEm: null,
+    podeSolicitar: status === 'NAO_SOLICITADO' || status === 'REJEITADO',
+  }
+}
+
+export async function getPortalStatus(params?: ParceiroQuery) {
+  const raw = await unwrap(
     apiFetch<ApiEnvelope<PortalStatus>>(`/parceiro/portal/status${buildParceiroQuery(params)}`),
   )
+
+  return {
+    ...raw,
+    afiliado: raw.afiliado ?? deriveModoBloco(raw.statusAfiliado),
+    participativo: raw.participativo ?? deriveModoBloco(raw.statusParticipativo),
+  } satisfies PortalStatus
 }
 
 /** Alias alinhado à spec (Parte 5). */
 export const getStatus = getPortalStatus
+
+/** Auto-cadastro (Parte 9). Também reenvia um cadastro REJEITADO (semântica replace: mande o form completo). */
+export function cadastrarParceiro(payload: ParceiroCadastroPayload) {
+  return unwrap(
+    apiFetch<ApiEnvelope<{ parceiroId: string; statusAuditoria: 'PENDENTE' }>>(
+      '/parceiro/portal/cadastro',
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+    ),
+  )
+}
+
+export function getParceiroCadastro(params?: ParceiroQuery) {
+  return unwrap(
+    apiFetch<ApiEnvelope<ParceiroCadastro>>(
+      `/parceiro/portal/cadastro${buildParceiroQuery(params)}`,
+    ),
+  )
+}
+
+/** Edição parcial (PENDENTE/APROVADO). Em REJEITADO o reenvio é `cadastrarParceiro`. */
+export function atualizarParceiroCadastro(
+  payload: Partial<ParceiroCadastroPayload>,
+  params?: ParceiroQuery,
+) {
+  return unwrap(
+    apiFetch<ApiEnvelope<ParceiroCadastro>>(
+      `/parceiro/portal/cadastro${buildParceiroQuery(params)}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      },
+    ),
+  )
+}
 
 export function getPortalIndicacao(params?: ParceiroQuery) {
   return unwrap(

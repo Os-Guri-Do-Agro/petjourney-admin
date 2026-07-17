@@ -9,6 +9,7 @@ import { useI18n } from 'vue-i18n'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
+import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { getSaqueDetalhe } from '@/service/parceiro/parceiro-portal-service'
 import type { SaqueDetalhe } from '@/service/parceiro/types'
@@ -20,6 +21,8 @@ const props = defineProps<{
 }>()
 
 const visible = defineModel<boolean>('visible', { default: false })
+
+useSidePanelOffset(visible, '26.5rem')
 
 const { t, locale } = useI18n()
 const toast = useToast()
@@ -65,7 +68,6 @@ const drawerPt = computed(() => ({
   root: { class: 'saque-drawer' },
   header: { class: 'saque-drawer__header-shell' },
   content: { class: 'saque-drawer__content-shell' },
-  mask: { class: 'saque-drawer__mask' },
 }))
 
 function formatDateTime(value: string) {
@@ -139,9 +141,9 @@ watch(
   <Drawer
     v-model:visible="visible"
     position="right"
-    :modal="true"
-    :dismissable="true"
-    :block-scroll="true"
+    :modal="false"
+    :dismissable="false"
+    :block-scroll="false"
     class="saque-drawer"
     :pt="drawerPt"
     :style="drawerStyle"
@@ -512,11 +514,14 @@ watch(
 </style>
 
 <style>
-.saque-drawer.p-drawer {
+.saque-drawer.p-drawer.p-component {
   width: min(100vw, 26.5rem);
+  height: calc(100% - var(--pj-shell-header-height, 4.25rem));
+  margin-top: var(--pj-shell-header-height, 4.25rem);
+  align-self: flex-start;
   border-left: 1px solid color-mix(in srgb, var(--sd-line, #eaf0ee) 90%, transparent);
   background: var(--sd-bg, #fff);
-  box-shadow: -18px 0 48px rgb(15 23 20 / 0.14);
+  box-shadow: none;
 }
 
 .saque-drawer .p-drawer-header,
@@ -531,8 +536,4 @@ watch(
   padding: 1.15rem 1.25rem 1.4rem;
 }
 
-.saque-drawer__mask.p-drawer-mask {
-  backdrop-filter: blur(5px);
-  background: color-mix(in srgb, #15201c 38%, transparent);
-}
 </style>

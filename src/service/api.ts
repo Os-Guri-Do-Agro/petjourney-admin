@@ -5,12 +5,15 @@ const API_URL = import.meta.env.VITE_API_URL ?? import.meta.env.PUBLIC_API_URL ?
 export class ApiError extends Error {
   readonly statusCode: number
   readonly error?: string
+  /** Código estável de erro do funil de parceiro (Parte 9). Roteie UX por ele, nunca pela message. */
+  readonly reason?: string
 
-  constructor(message: string, statusCode: number, error?: string) {
+  constructor(message: string, statusCode: number, error?: string, reason?: string) {
     super(message)
     this.name = 'ApiError'
     this.statusCode = statusCode
     this.error = error
+    this.reason = reason
   }
 }
 
@@ -48,6 +51,7 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
       errorBody?.message || `Erro ${response.status}`,
       response.status,
       errorBody?.error,
+      typeof errorBody?.reason === 'string' ? errorBody.reason : undefined,
     )
   }
 
