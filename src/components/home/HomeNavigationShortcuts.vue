@@ -6,12 +6,24 @@ import { RouterLink } from 'vue-router'
 import {
   filterNavigationGroups,
   useAppNavigation,
+  type AppNavigationItem,
 } from '@/composables/useAppNavigation'
+import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { currentColors } from '@/theme/color-mode'
 
 const { t } = useI18n()
 const filterQuery = ref('')
 const { homeShortcutGroups } = useAppNavigation()
+const { open: openCupomComingSoon } = useCupomComingSoon()
+
+function handleShortcutClick(event: Event, item: AppNavigationItem) {
+  if (!item.comingSoon) {
+    return
+  }
+
+  event.preventDefault()
+  openCupomComingSoon()
+}
 
 const styleVars = computed(() => {
   const colors = currentColors.value
@@ -91,16 +103,27 @@ const totalShortcuts = computed(() =>
               v-for="item in group.items"
               :key="`${group.id}-${item.to}`"
               class="shortcut-card"
+              :class="{
+                'shortcut-card--soon': item.comingSoon,
+                'shortcut-card--locked': item.locked,
+              }"
               :to="item.to"
+              @click="handleShortcutClick($event, item)"
             >
               <span class="shortcut-card__icon" aria-hidden="true">
                 <i :class="item.icon" />
               </span>
               <span class="shortcut-card__body">
                 <strong>{{ item.label }}</strong>
-                <small>{{ group.label }}</small>
+                <small v-if="item.comingSoon">{{ t('comingSoon.cupom.badge') }}</small>
+                <small v-else-if="item.locked">{{ t('frame.suspended.title') }}</small>
+                <small v-else>{{ group.label }}</small>
               </span>
-              <i class="pi pi-arrow-right shortcut-card__arrow" aria-hidden="true" />
+              <i
+                class="shortcut-card__arrow"
+                :class="item.locked ? 'pi pi-lock' : 'pi pi-arrow-right'"
+                aria-hidden="true"
+              />
             </RouterLink>
           </div>
         </div>
@@ -288,6 +311,15 @@ const totalShortcuts = computed(() =>
   background: color-mix(in srgb, var(--shortcuts-primary-soft) 20%, var(--shortcuts-card));
   outline: none;
   transform: translateY(-1px);
+}
+
+.shortcut-card--locked {
+  opacity: 0.78;
+}
+
+.shortcut-card--locked:hover,
+.shortcut-card--locked:focus-visible {
+  transform: none;
 }
 
 .shortcut-card:hover .shortcut-card__arrow,

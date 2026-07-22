@@ -66,6 +66,7 @@ onMounted(() => {
     :loading="false"
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
+    block-when-suspended
     @retry="ensureContext(true)"
   >
     <article v-if="showAfiliadoGate" class="carteira-gate">

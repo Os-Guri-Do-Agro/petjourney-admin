@@ -6,6 +6,18 @@
     "en-GB": "UK",
     "es": "ES"
   },
+  "comingSoon": {
+    "cupom": {
+      "badge": "Em breve",
+      "navHint": "Cupons e divulgação em desenvolvimento",
+      "title": "Cupons chegando com tudo",
+      "lede": "Em breve você valida resgates no balcão, acompanha campanhas e vê cada conversão acontecer — tudo no mesmo painel.",
+      "body": "Estamos polindo os últimos detalhes para o lançamento. Fica de olho: quando abrir, sua operação de divulgação ganha outro ritmo.",
+      "cta": "Animado! Voltar ao painel",
+      "sectionCta": "Quero saber mais",
+      "closeAria": "Fechar aviso"
+    }
+  },
   "auth": {
     "layout": {
       "kicker": "Painel parceiro",
@@ -395,10 +407,28 @@
       "contactLabel": "Dúvidas:"
     },
     "operability": {
-      "title": "Cadastro em análise",
-      "body": "Ações do portal ficam bloqueadas até o credenciamento ser aprovado.",
-      "reasonPrefix": "Motivo:",
-      "link": "Acompanhar credenciamento"
+      "pending": {
+        "title": "Cadastro em análise",
+        "body": "Ações do portal ficam bloqueadas até o credenciamento ser aprovado.",
+        "link": "Acompanhar credenciamento"
+      },
+      "rejected": {
+        "title": "Cadastro recusado",
+        "body": "Corrija os dados da empresa e reenvie para voltar à análise.",
+        "link": "Revisar cadastro"
+      },
+      "reasonPrefix": "Motivo:"
+    },
+    "suspended": {
+      "title": "Cadastro suspenso",
+      "body": "O acesso ao portal do parceiro está bloqueado. Somente o suporte PetJourney pode reativar a operação.",
+      "channelsLede": "Fale com a gente por um destes canais:",
+      "channels": {
+        "whatsapp": "WhatsApp",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "email": "E-mail"
+      }
     }
   },
   "statusBadge": {
@@ -786,7 +816,40 @@
       "copyLink": "Copiar link",
       "qrAlt": "QR Code de indicação",
       "qrCaption": "Escaneie no celular",
+      "qrExport": "Exportar QR",
+      "qrExportOk": "QR exportado",
+      "qrExportOkDetail": "A imagem foi salva na pasta de downloads.",
+      "qrExportSavedDetail": "A imagem foi salva no local que você escolheu.",
+      "qrExportOpened": "QR aberto",
+      "qrExportOpenedDetail": "Não foi possível baixar direto — a imagem abriu em uma nova aba para você salvar.",
+      "qrExportFail": "Não foi possível exportar",
+      "qrExportFailDetail": "O navegador bloqueou a nova aba. Permita pop-ups neste site e tente de novo.",
       "hint": "Comissão na carteira exige programa afiliado ativo. Cupons de desconto não geram comissão."
+    },
+    "howItWorks": {
+      "eyebrow": "O motor do crescimento",
+      "title": "Indique. Vincule. Cresça.",
+      "lede": "Cada conversa no balcão pode virar um assinante PetJourney ligado à sua empresa. Sem funil complicado: você compartilha, o tutor entra, e o vínculo fica com você.",
+      "steps": {
+        "share": {
+          "title": "Compartilhe o kit",
+          "body": "Use o código, o link pronto ou o QR no balcão, no WhatsApp, no Instagram ou no material impresso da loja."
+        },
+        "signup": {
+          "title": "O tutor se cadastra",
+          "body": "Quem abre o seu link cria a conta no PetJourney já a partir da sua indicação — simples e rastreável."
+        },
+        "link": {
+          "title": "A assinatura fica sua",
+          "body": "Quando o tutor assina, a indicação permanece vinculada à empresa. É relacionamento que continua trabalhando por você."
+        },
+        "earn": {
+          "title": "Comissão na carteira",
+          "body": "Com o programa afiliado ativo, as conversões elegíveis geram comissão para acompanhar e sacar no portal."
+        }
+      },
+      "promise": "Menos esforço de divulgação. Mais assinantes entrando pela sua porta.",
+      "note": "Importante: cupom de desconto não gera comissão. Comissão exige afiliado ativo — solicite em Programas, se ainda não estiver."
     },
     "metrics": {
       "aria": "Métricas de divulgação",

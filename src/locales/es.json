@@ -6,6 +6,18 @@
     "en-GB": "UK",
     "es": "ES"
   },
+  "comingSoon": {
+    "cupom": {
+      "badge": "Próximamente",
+      "navHint": "Cupones y divulgación en desarrollo",
+      "title": "Los cupones ya casi llegan",
+      "lede": "Muy pronto validarás canjes en el mostrador, seguirás campañas y verás cada conversión — todo en el mismo panel.",
+      "body": "Estamos puliendo los últimos detalles para el lanzamiento. Mantente atento: cuando abra, tu operación de divulgación gana otro ritmo.",
+      "cta": "¡Genial! Volver al panel",
+      "sectionCta": "Quiero saber más",
+      "closeAria": "Cerrar aviso"
+    }
+  },
   "auth": {
     "layout": {
       "kicker": "Portal de socios",
@@ -395,10 +407,28 @@
       "contactLabel": "Consultas:"
     },
     "operability": {
-      "title": "Registro en análisis",
-      "body": "Las acciones del portal quedan bloqueadas hasta que se apruebe el acreditamiento.",
-      "reasonPrefix": "Motivo:",
-      "link": "Seguir acreditamiento"
+      "pending": {
+        "title": "Registro en análisis",
+        "body": "Las acciones del portal quedan bloqueadas hasta que se apruebe el acreditamiento.",
+        "link": "Seguir acreditamiento"
+      },
+      "rejected": {
+        "title": "Registro rechazado",
+        "body": "Corrija los datos de la empresa y reenvíe para volver al análisis.",
+        "link": "Revisar registro"
+      },
+      "reasonPrefix": "Motivo:"
+    },
+    "suspended": {
+      "title": "Registro suspendido",
+      "body": "El acceso al portal del socio está bloqueado. Solo el soporte PetJourney puede reactivar la operación.",
+      "channelsLede": "Contáctenos por uno de estos canales:",
+      "channels": {
+        "whatsapp": "WhatsApp",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "email": "Correo"
+      }
     }
   },
   "statusBadge": {
@@ -786,7 +816,40 @@
       "copyLink": "Copiar enlace",
       "qrAlt": "QR Code de referidos",
       "qrCaption": "Escanee en el celular",
+      "qrExport": "Exportar QR",
+      "qrExportOk": "QR exportado",
+      "qrExportOkDetail": "La imagen se guardó en la carpeta de descargas.",
+      "qrExportSavedDetail": "La imagen se guardó en la ubicación que eligió.",
+      "qrExportOpened": "QR abierto",
+      "qrExportOpenedDetail": "No fue posible descargar directo — la imagen se abrió en una pestaña nueva para que la guarde.",
+      "qrExportFail": "No fue posible exportar",
+      "qrExportFailDetail": "El navegador bloqueó la nueva pestaña. Permita ventanas emergentes en este sitio e inténtelo de nuevo.",
       "hint": "La comisión en la billetera exige el programa afiliado activo. Los cupones de descuento no generan comisión."
+    },
+    "howItWorks": {
+      "eyebrow": "El motor del crecimiento",
+      "title": "Indica. Vincula. Crece.",
+      "lede": "Cada conversación en el mostrador puede convertirse en un suscriptor PetJourney ligado a tu empresa. Sin embudo complicado: tú compartes, el tutor entra y el vínculo se queda contigo.",
+      "steps": {
+        "share": {
+          "title": "Comparte el kit",
+          "body": "Usa el código, el enlace listo o el QR en el mostrador, WhatsApp, Instagram o el material impreso de la tienda."
+        },
+        "signup": {
+          "title": "El tutor se registra",
+          "body": "Quien abre tu enlace crea la cuenta en PetJourney a partir de tu indicación — simple y rastreable."
+        },
+        "link": {
+          "title": "La suscripción queda tuya",
+          "body": "Cuando el tutor se suscribe, la indicación permanece vinculada a la empresa. Relación que sigue trabajando por ti."
+        },
+        "earn": {
+          "title": "Comisión en la billetera",
+          "body": "Con el programa afiliado activo, las conversiones elegibles generan comisión para seguir y retirar en el portal."
+        }
+      },
+      "promise": "Menos esfuerzo de divulgación. Más suscriptores entrando por tu puerta.",
+      "note": "Importante: el cupón de descuento no genera comisión. La comisión exige afiliado activo — solicítalo en Programas si aún no lo tienes."
     },
     "metrics": {
       "aria": "Métricas de divulgación",

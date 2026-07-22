@@ -218,6 +218,68 @@ function handleSubmit() {
   gap: 0.6rem;
 }
 
+.cad-form__field :deep(.p-inputtext),
+.cad-form__field :deep(.p-select) {
+  width: 100%;
+  min-height: 2.85rem;
+  border: 1px solid var(--partner-line);
+  border-radius: 0.8rem;
+  background: var(--partner-surface);
+  color: var(--partner-text);
+  box-shadow: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.cad-form__field :deep(.p-inputtext) {
+  padding: 0.7rem 0.85rem;
+  caret-color: var(--partner-primary-strong);
+}
+
+.cad-form__field :deep(.p-inputtext::placeholder) {
+  color: var(--partner-faint);
+  opacity: 1;
+}
+
+.cad-form__field :deep(.p-select-label) {
+  color: var(--partner-text);
+}
+
+.cad-form__field :deep(.p-select-label.p-placeholder) {
+  color: var(--partner-faint);
+}
+
+.cad-form__field :deep(.p-select-dropdown),
+.cad-form__field :deep(.p-select-clear-icon) {
+  color: var(--partner-muted);
+}
+
+.cad-form__field :deep(.p-inputtext:hover),
+.cad-form__field :deep(.p-select:not(.p-disabled):hover) {
+  border-color: color-mix(in srgb, var(--partner-primary) 40%, var(--partner-line));
+  background: var(--partner-surface);
+}
+
+.cad-form__field :deep(.p-inputtext:focus),
+.cad-form__field :deep(.p-inputtext:focus-visible),
+.cad-form__field :deep(.p-select.p-focus),
+.cad-form__field :deep(.p-select:not(.p-disabled).p-focus) {
+  outline: none;
+  border-color: var(--partner-primary);
+  background: var(--partner-surface);
+  color: var(--partner-text);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-primary) 22%, transparent);
+}
+
+.cad-form__field :deep(.p-inputtext.p-invalid),
+.cad-form__field :deep(.p-inputtext.p-invalid:focus),
+.cad-form__field :deep(.p-inputtext.p-invalid:focus-visible) {
+  border-color: var(--partner-warm-text);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-warm-text) 18%, transparent);
+}
+
 @media (max-width: 720px) {
   .cad-form {
     grid-template-columns: 1fr;

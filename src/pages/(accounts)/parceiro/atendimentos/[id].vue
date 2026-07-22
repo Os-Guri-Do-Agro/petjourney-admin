@@ -360,6 +360,7 @@ onMounted(() => {
     :loading="loading"
     :error="error"
     :no-partner-access="store.semAcessoParceiro"
+    block-when-suspended
     @retry="loadDetalhe"
   >
     <template #actions>

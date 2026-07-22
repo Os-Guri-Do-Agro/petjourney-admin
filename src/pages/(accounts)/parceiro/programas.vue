@@ -92,6 +92,7 @@ watch(
     :title="t('programas.title')"
     :loading="false"
     :error="store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : ''"
+    block-when-suspended
     @retry="ensureContext(true)"
   >
     <template #actions>

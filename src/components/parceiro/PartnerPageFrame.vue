@@ -5,7 +5,10 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
-import { currentColors, isDarkMode } from '@/theme/color-mode'
+import { useParceiroStore } from '@/stores/parceiro'
+import { LightColors } from '@/theme/colors'
+import { currentColors } from '@/theme/color-mode'
+import { SUPPORT_CONTACTS } from '@/utils/parceiro/support-contacts'
 
 const props = withDefaults(
   defineProps<{
@@ -15,6 +18,11 @@ const props = withDefaults(
     error?: string
     /** Conta sem membership de Parceiro (API 403). */
     noPartnerAccess?: boolean
+    /**
+     * Quando true, cadastro SUSPENSO substitui o conteúdo pelo gate de contato.
+     * Use só em telas operacionais do portal — não em Configurações/Clínica.
+     */
+    blockWhenSuspended?: boolean
     empty?: boolean
     emptyTitle?: string
     emptyDescription?: string
@@ -25,6 +33,7 @@ const props = withDefaults(
     loading: false,
     error: '',
     noPartnerAccess: false,
+    blockWhenSuspended: false,
     empty: false,
     emptyTitle: '',
     emptyDescription: '',
@@ -38,14 +47,62 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const parceiroStore = useParceiroStore()
 const showClinicalCta = computed(() => hasVeterinarioProfile())
 const resolvedEmptyTitle = computed(
   () => props.emptyTitle || t('frame.emptyDefault'),
 )
 
+/** Cadastro SUSPENSO: bloqueia só telas operacionais do portal. */
+const showSuspended = computed(
+  () =>
+    props.blockWhenSuspended &&
+    !props.noPartnerAccess &&
+    !props.loading &&
+    !props.error &&
+    parceiroStore.loadState === 'ready' &&
+    parceiroStore.cadastroSuspenso,
+)
+
+const suspendedReason = computed(() => parceiroStore.status?.motivoAuditoria?.trim() || '')
+
+const supportChannels = [
+  {
+    id: 'whatsapp',
+    href: SUPPORT_CONTACTS.whatsappHref,
+    icon: 'pi pi-whatsapp',
+    labelKey: 'frame.suspended.channels.whatsapp',
+    value: SUPPORT_CONTACTS.whatsappDisplay,
+    external: true,
+  },
+  {
+    id: 'instagram',
+    href: SUPPORT_CONTACTS.instagramHref,
+    icon: 'pi pi-instagram',
+    labelKey: 'frame.suspended.channels.instagram',
+    value: SUPPORT_CONTACTS.instagramHandle,
+    external: true,
+  },
+  {
+    id: 'facebook',
+    href: SUPPORT_CONTACTS.facebookHref,
+    icon: 'pi pi-facebook',
+    labelKey: 'frame.suspended.channels.facebook',
+    value: SUPPORT_CONTACTS.facebookHandle,
+    external: true,
+  },
+  {
+    id: 'email',
+    href: `mailto:${SUPPORT_CONTACTS.email}`,
+    icon: 'pi pi-envelope',
+    labelKey: 'frame.suspended.channels.email',
+    value: SUPPORT_CONTACTS.email,
+    external: false,
+  },
+] as const
+
 const pageStyle = computed(() => {
   const colors = currentColors.value
-  const dark = isDarkMode.value
 
   return {
     '--partner-bg': colors.dashboard.bg,
@@ -58,7 +115,8 @@ const pageStyle = computed(() => {
     '--partner-primary': colors.vet.primary,
     '--partner-primary-soft': colors.vet.secondary,
     '--partner-primary-strong': colors.dashboard.primaryStrong,
-    '--partner-on-primary': dark ? colors.dashboard.bg : colors.auth.white,
+    /** Sempre branco real — `auth.white` no dark é superfície escura. */
+    '--partner-on-primary': LightColors.auth.white,
     '--partner-warm-bg': colors.dashboard.warmBg,
     '--partner-warm-text': colors.dashboard.warmText,
     '--partner-success-bg': colors.dashboard.successBg,
@@ -77,7 +135,10 @@ const pageStyle = computed(() => {
         <p v-if="subtitle" class="partner-page__subtitle">{{ subtitle }}</p>
         <h1 class="partner-page__title">{{ title }}</h1>
       </div>
-      <div v-if="$slots.actions && !noPartnerAccess" class="partner-page__actions">
+      <div
+        v-if="$slots.actions && !noPartnerAccess && !showSuspended"
+        class="partner-page__actions"
+      >
         <slot name="actions" />
       </div>
     </header>
@@ -137,6 +198,44 @@ const pageStyle = computed(() => {
         <p>{{ error }}</p>
       </div>
       <Button :label="t('frame.error.retry')" severity="secondary" @click="emit('retry')" />
+    </div>
+
+    <div
+      v-else-if="showSuspended"
+      class="partner-page__state partner-page__state--suspended"
+      role="alert"
+    >
+      <i class="pi pi-ban" aria-hidden="true" />
+      <div>
+        <strong>{{ t('frame.suspended.title') }}</strong>
+        <p>{{ t('frame.suspended.body') }}</p>
+        <p v-if="suspendedReason" class="partner-page__hint">
+          {{ t('frame.operability.reasonPrefix') }} {{ suspendedReason }}
+        </p>
+      </div>
+
+      <div class="partner-page__support">
+        <p class="partner-page__support-lede">{{ t('frame.suspended.channelsLede') }}</p>
+        <ul class="partner-page__channels">
+          <li v-for="channel in supportChannels" :key="channel.id">
+            <a
+              class="partner-page__channel"
+              :href="channel.href"
+              :target="channel.external ? '_blank' : undefined"
+              :rel="channel.external ? 'noopener noreferrer' : undefined"
+            >
+              <span class="partner-page__channel-icon" aria-hidden="true">
+                <i :class="channel.icon" />
+              </span>
+              <span class="partner-page__channel-copy">
+                <strong>{{ t(channel.labelKey) }}</strong>
+                <small>{{ channel.value }}</small>
+              </span>
+              <i class="pi pi-external-link partner-page__channel-arrow" aria-hidden="true" />
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <div v-else-if="empty" class="partner-page__state partner-page__state--empty">
@@ -227,6 +326,132 @@ const pageStyle = computed(() => {
 
 .partner-page__state--blocked i {
   color: var(--partner-primary-strong);
+}
+
+.partner-page__state--suspended {
+  border-color: color-mix(in srgb, var(--partner-warm-text) 28%, var(--partner-line));
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--partner-warm-bg) 70%, var(--partner-card)) 0%,
+      var(--partner-card) 55%
+    );
+}
+
+.partner-page__state--suspended > i {
+  color: var(--partner-warm-text);
+}
+
+.partner-page__support {
+  display: grid;
+  gap: 0.75rem;
+  width: min(100%, 42rem);
+  margin-top: 0.25rem;
+  text-align: left;
+}
+
+.partner-page__support-lede {
+  margin: 0 !important;
+  color: var(--partner-muted);
+  font-size: 0.84rem !important;
+  font-weight: 650;
+  text-align: center;
+}
+
+.partner-page__channels {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.partner-page__channel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  min-height: 100%;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--partner-line) 90%, transparent);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--partner-surface) 55%, var(--partner-card));
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.partner-page__channel:hover,
+.partner-page__channel:focus-visible {
+  border-color: color-mix(in srgb, var(--partner-primary) 32%, var(--partner-line));
+  background: color-mix(in srgb, var(--partner-primary-soft) 28%, var(--partner-card));
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.partner-page__channel-icon {
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
+  color: var(--partner-primary-strong);
+  font-size: 0.95rem;
+}
+
+.partner-page__channel-copy {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.partner-page__channel-copy strong {
+  margin: 0 !important;
+  font-size: 0.86rem !important;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+.partner-page__channel-copy small {
+  color: var(--partner-muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.partner-page__channel-arrow {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .partner-page__channels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .partner-page__channels {
+    grid-template-columns: 1fr;
+  }
+
+  .partner-page__channel-arrow {
+    display: block;
+    flex: 0 0 auto;
+    margin-left: auto;
+    color: var(--partner-faint);
+    font-size: 0.75rem;
+  }
+
+  .partner-page__channel:hover .partner-page__channel-arrow,
+  .partner-page__channel:focus-visible .partner-page__channel-arrow {
+    color: var(--partner-primary-strong);
+  }
 }
 
 .partner-page__state strong {

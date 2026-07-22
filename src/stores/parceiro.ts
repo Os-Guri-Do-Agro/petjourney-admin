@@ -33,6 +33,9 @@ export const useParceiroStore = defineStore('parceiro', () => {
   const papel = computed<PapelParceiro | null>(() => dashboard.value?.papel ?? null)
   const isDono = computed(() => papel.value === 'DONO')
   const podeOperar = computed(() => status.value?.podeOperar ?? false)
+  const statusAuditoria = computed(() => status.value?.statusAuditoria ?? null)
+  /** Cadastro suspenso pelo admin: portal parceiro fica totalmente inacessível. */
+  const cadastroSuspenso = computed(() => statusAuditoria.value === 'SUSPENSO')
   const statusAfiliadoAtivo = computed(() => status.value?.afiliado.status === 'ATIVO')
   const parceiroNome = computed(() => dashboard.value?.parceiro.nome ?? 'Parceiro')
 
@@ -168,6 +171,8 @@ export const useParceiroStore = defineStore('parceiro', () => {
     papel,
     isDono,
     podeOperar,
+    statusAuditoria,
+    cadastroSuspenso,
     statusAfiliadoAtivo,
     parceiroNome,
     modoBloco,

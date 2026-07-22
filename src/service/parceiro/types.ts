@@ -105,7 +105,10 @@ export type ParceiroCadastro = {
 export type PortalIndicacao = {
   codigoIndicacao: string
   link: string
-  qrCodeDataUrl: string | null
+  /** Identificador do QR no serviço de imagem. */
+  qrCode: string | null
+  /** URL da imagem PNG/JPG do QR para exibir e exportar. */
+  qrImageUrl: string | null
   podeIndicar: boolean
   aviso?: string
 }

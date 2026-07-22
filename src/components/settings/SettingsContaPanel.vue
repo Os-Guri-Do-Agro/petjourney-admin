@@ -281,11 +281,9 @@ watch(showCustomReason, (allowed) => {
           <div>
             <h3>{{ t('settings.conta.prefs.title') }}</h3>
             <p>{{ t('settings.conta.prefs.subtitle') }}</p>
+            <p class="conta-panel__body">{{ t('settings.conta.prefs.body') }}</p>
           </div>
         </header>
-        <p class="conta-panel__body">
-          {{ t('settings.conta.prefs.body') }}
-        </p>
       </div>
       <LanguageSwitcher variant="settings" />
     </article>
@@ -559,14 +557,12 @@ watch(showCustomReason, (allowed) => {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.9rem 1.5rem;
+  gap: 0.85rem 1.25rem;
 }
 
 .conta-panel__copy {
-  display: grid;
-  gap: 0.55rem;
   min-width: 0;
-  max-width: 34rem;
+  flex: 1 1 14rem;
 }
 
 .conta-panel__head {
@@ -603,14 +599,27 @@ watch(showCustomReason, (allowed) => {
 }
 
 .conta-panel__body {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.88rem;
-  line-height: 1.5;
+  margin: 0.35rem 0 0;
+  color: var(--partner-faint);
+  font-size: 0.78rem;
+  line-height: 1.4;
 }
 
 .conta-panel--prefs :deep(.language-switcher) {
   flex-shrink: 0;
+  margin-left: auto;
+}
+
+@media (max-width: 560px) {
+  .conta-panel--prefs :deep(.language-switcher) {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .conta-panel--prefs :deep(.language-switcher__trigger) {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 .conta-risk {
@@ -774,10 +783,6 @@ watch(showCustomReason, (allowed) => {
 
   .conta-session__hint {
     text-align: left;
-  }
-
-  .conta-panel--prefs :deep(.language-switcher) {
-    width: 100%;
   }
 
   .conta-risk__head {

@@ -6,6 +6,18 @@
     "en-GB": "UK",
     "es": "ES"
   },
+  "comingSoon": {
+    "cupom": {
+      "badge": "Coming soon",
+      "navHint": "Coupons and promotion are in development",
+      "title": "Coupons are almost here",
+      "lede": "Soon you’ll validate redemptions at the counter, track campaigns, and watch every conversion land — all in one place.",
+      "body": "We’re polishing the last details before launch. Stay tuned: when it opens, your promotion workflow gets a whole new pace.",
+      "cta": "Excited! Back to the dashboard",
+      "sectionCta": "Tell me more",
+      "closeAria": "Close notice"
+    }
+  },
   "auth": {
     "layout": {
       "kicker": "Partner portal",
@@ -395,10 +407,28 @@
       "contactLabel": "Questions:"
     },
     "operability": {
-      "title": "Registration under review",
-      "body": "Portal actions stay blocked until credentialing is approved.",
-      "reasonPrefix": "Reason:",
-      "link": "Track credentialing"
+      "pending": {
+        "title": "Registration under review",
+        "body": "Portal actions stay blocked until credentialing is approved.",
+        "link": "Track credentialing"
+      },
+      "rejected": {
+        "title": "Registration declined",
+        "body": "Fix the company details and resubmit to return to review.",
+        "link": "Review registration"
+      },
+      "reasonPrefix": "Reason:"
+    },
+    "suspended": {
+      "title": "Registration suspended",
+      "body": "Access to the partner portal is blocked. Only PetJourney support can reactivate operations.",
+      "channelsLede": "Reach us through one of these channels:",
+      "channels": {
+        "whatsapp": "WhatsApp",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "email": "Email"
+      }
     }
   },
   "statusBadge": {
@@ -786,7 +816,40 @@
       "copyLink": "Copy link",
       "qrAlt": "Referral QR Code",
       "qrCaption": "Scan on mobile",
+      "qrExport": "Export QR",
+      "qrExportOk": "QR exported",
+      "qrExportOkDetail": "The image was saved to your downloads folder.",
+      "qrExportSavedDetail": "The image was saved to the location you chose.",
+      "qrExportOpened": "QR opened",
+      "qrExportOpenedDetail": "Direct download wasn’t possible — the image opened in a new tab so you can save it.",
+      "qrExportFail": "Could not export",
+      "qrExportFailDetail": "The browser blocked the new tab. Allow pop-ups for this site and try again.",
       "hint": "Wallet commission requires an active affiliate programme. Discount coupons do not generate commission."
+    },
+    "howItWorks": {
+      "eyebrow": "Your growth engine",
+      "title": "Share. Link. Grow.",
+      "lede": "Every counter conversation can become a PetJourney subscriber tied to your business. No complex funnel: you share, the pet parent joins, and the link stays yours.",
+      "steps": {
+        "share": {
+          "title": "Share your kit",
+          "body": "Use the code, ready-made link, or QR at the counter, on WhatsApp, Instagram, or your printed materials."
+        },
+        "signup": {
+          "title": "They sign up",
+          "body": "Anyone who opens your link creates a PetJourney account from your referral — simple and trackable."
+        },
+        "link": {
+          "title": "The subscription stays yours",
+          "body": "When they subscribe, the referral stays linked to your business. Relationship that keeps working for you."
+        },
+        "earn": {
+          "title": "Commission in your wallet",
+          "body": "With an active affiliate programme, eligible conversions generate commission you can track and withdraw in the portal."
+        }
+      },
+      "promise": "Less promotion effort. More subscribers walking through your door.",
+      "note": "Important: discount coupons do not generate commission. Commission needs an active affiliate — request it in Programmes if you haven’t yet."
     },
     "metrics": {
       "aria": "Promotion metrics",

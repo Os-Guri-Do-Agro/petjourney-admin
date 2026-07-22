@@ -6,6 +6,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
 import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
+import ComingSoonFeatureDialog from '@/components/common/ComingSoonFeatureDialog.vue'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
@@ -22,10 +23,13 @@ import {
   type AppNavigationItem,
   type AppNavigationSection,
 } from '@/composables/useAppNavigation'
+import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
+import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
 import { clearAuthSession, getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
+import { LightColors } from '@/theme/colors'
 import { currentColors, isDarkMode, toggleColorMode } from '@/theme/color-mode'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
@@ -41,7 +45,12 @@ const logoutConfirmVisible = ref(false)
 const parceiroStore = useParceiroStore()
 const usuarioPerfilStore = useUsuarioPerfilStore()
 const { open: openCupomResgate, canOpen: canOpenCupomResgate } = useCupomResgateModal()
+const {
+  visible: cupomComingSoonVisible,
+  open: openCupomComingSoon,
+} = useCupomComingSoon()
 const { navigationSections, hasClinicalProfile } = useAppNavigation()
+const cupomFeatureEnabled = CUPOM_FEATURE_ENABLED
 const activeSectionId = ref('home')
 const defaultLandingPath = computed(() => getDefaultLandingPath())
 const themeSwitchDark = ref(isDarkMode.value)
@@ -105,17 +114,18 @@ const shellStyle = computed(() => {
     '--shell-muted': colors.auth.muted,
     '--shell-soft': colors.auth.soft,
     '--shell-brand': isDark ? colors.bg.card : colors.vet.primary,
-    '--shell-on-brand': isDark ? colors.text.primary : colors.auth.white,
+    '--shell-on-brand': isDark ? colors.text.primary : LightColors.auth.white,
     '--shell-on-brand-muted': isDark ? colors.auth.soft : '#ffffffC2',
-    '--shell-rail-active-bg': isDark ? colors.auth.sageTint : colors.auth.white,
+    '--shell-rail-active-bg': isDark ? colors.auth.sageTint : LightColors.auth.white,
     '--shell-accent': colors.vet.primary,
     '--shell-accent-strong': colors.auth.sageStrong,
     '--shell-accent-soft': colors.vet.secondary,
     '--shell-cream': colors.secondary,
     '--shell-shadow-rgb': colors.auth.shadowRgb,
     '--rail-logout-red': colors.red,
-    '--rail-logout-mix-base': isDark ? colors.bg.card : colors.auth.white,
-    '--rail-logout-icon': colors.auth.white,
+    '--rail-logout-mix-base': isDark ? colors.bg.card : LightColors.auth.white,
+    /** Branco real — `auth.white` no dark é superfície escura. */
+    '--rail-logout-icon': LightColors.auth.white,
   }
 })
 
@@ -226,6 +236,24 @@ watch(
 function requestLogout() {
   userMenuOpen.value = false
   logoutConfirmVisible.value = true
+}
+
+function handleNavItemClick(event: Event, item: NavigationItem) {
+  if (!item.comingSoon) {
+    return
+  }
+
+  event.preventDefault()
+  openCupomComingSoon()
+}
+
+function handleHeaderCupomClick() {
+  if (!cupomFeatureEnabled) {
+    openCupomComingSoon()
+    return
+  }
+
+  openCupomResgate()
 }
 
 async function handleLogout() {
@@ -340,14 +368,30 @@ onUnmounted(() => {
                 v-for="item in group.items"
                 :key="`${group.id}-${item.to}`"
                 class="page-nav__link"
-                :class="{ 'router-link-active': isNavItemActive(item) }"
+                :class="{
+                  'router-link-active': isNavItemActive(item),
+                  'page-nav__link--soon': item.comingSoon,
+                  'page-nav__link--locked': item.locked,
+                }"
                 :to="item.to"
                 active-class=""
+                @click="handleNavItemClick($event, item)"
               >
                 <span class="page-nav__icon" aria-hidden="true">
                   <i :class="item.icon" />
                 </span>
-                <span>{{ item.label }}</span>
+                <span class="page-nav__label">{{ item.label }}</span>
+                <span v-if="item.comingSoon" class="page-nav__soon">{{
+                  t('comingSoon.cupom.badge')
+                }}</span>
+                <span
+                  v-else-if="item.locked"
+                  class="page-nav__lock"
+                  :title="t('frame.suspended.title')"
+                  aria-hidden="true"
+                >
+                  <i class="pi pi-lock" />
+                </span>
               </RouterLink>
             </div>
           </template>
@@ -357,14 +401,30 @@ onUnmounted(() => {
               v-for="item in activeSection.items"
               :key="item.label"
               class="page-nav__link"
-              :class="{ 'router-link-active': isNavItemActive(item) }"
+              :class="{
+                'router-link-active': isNavItemActive(item),
+                'page-nav__link--soon': item.comingSoon,
+                'page-nav__link--locked': item.locked,
+              }"
               :to="item.to"
               active-class=""
+              @click="handleNavItemClick($event, item)"
             >
               <span class="page-nav__icon" aria-hidden="true">
                 <i :class="item.icon" />
               </span>
-              <span>{{ item.label }}</span>
+              <span class="page-nav__label">{{ item.label }}</span>
+              <span v-if="item.comingSoon" class="page-nav__soon">{{
+                t('comingSoon.cupom.badge')
+              }}</span>
+              <span
+                v-else-if="item.locked"
+                class="page-nav__lock"
+                :title="t('frame.suspended.title')"
+                aria-hidden="true"
+              >
+                <i class="pi pi-lock" />
+              </span>
             </RouterLink>
           </template>
         </nav>
@@ -400,19 +460,30 @@ onUnmounted(() => {
         <button
           class="header-resgate"
           type="button"
-          :disabled="!canOpenCupomResgate"
+          :disabled="cupomFeatureEnabled && !canOpenCupomResgate"
           :title="
-            canOpenCupomResgate ? t('shell.cupom.cta') : t('shell.cupom.disabledTitle')
+            !cupomFeatureEnabled
+              ? t('comingSoon.cupom.navHint')
+              : canOpenCupomResgate
+                ? t('shell.cupom.cta')
+                : t('shell.cupom.disabledTitle')
           "
           :aria-label="
-            canOpenCupomResgate ? t('shell.cupom.cta') : t('shell.cupom.disabledAria')
+            !cupomFeatureEnabled
+              ? t('comingSoon.cupom.navHint')
+              : canOpenCupomResgate
+                ? t('shell.cupom.cta')
+                : t('shell.cupom.disabledAria')
           "
-          @click="openCupomResgate"
+          @click="handleHeaderCupomClick"
         >
           <span class="header-resgate__icon" aria-hidden="true">
             <i class="pi pi-ticket" />
           </span>
           <span class="header-resgate__label">{{ t('shell.cupom.cta') }}</span>
+          <span v-if="!cupomFeatureEnabled" class="header-resgate__soon">{{
+            t('comingSoon.cupom.badge')
+          }}</span>
         </button>
 
         <button
@@ -497,7 +568,8 @@ onUnmounted(() => {
       @confirm="handleLogout"
     />
 
-    <ValidarCupomDialog />
+    <ValidarCupomDialog v-if="cupomFeatureEnabled" />
+    <ComingSoonFeatureDialog v-model:visible="cupomComingSoonVisible" />
   </div>
 </template>
 
@@ -856,7 +928,7 @@ onUnmounted(() => {
   min-height: 2.55rem;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.68rem;
+  gap: 0.55rem;
   padding: 0 0.72rem;
   border: 1px solid transparent;
   border-radius: 0.82rem;
@@ -869,6 +941,47 @@ onUnmounted(() => {
     border-color 160ms ease,
     color 160ms ease,
     transform 160ms ease;
+}
+
+.page-nav__label {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.page-nav__soon {
+  flex-shrink: 0;
+  padding: 0.12rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--shell-accent) 16%, transparent);
+  color: var(--shell-accent-strong);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.page-nav__lock {
+  display: grid;
+  flex-shrink: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--shell-muted) 14%, transparent);
+  color: var(--shell-muted);
+  font-size: 0.68rem;
+}
+
+.page-nav__link--locked {
+  opacity: 0.78;
+}
+
+.page-nav__link--soon:hover,
+.page-nav__link--soon:focus-visible {
+  border-color: color-mix(in srgb, var(--shell-accent) 18%, var(--shell-line));
+  background: color-mix(in srgb, var(--shell-accent-soft) 30%, var(--shell-surface));
+  color: var(--shell-accent-strong);
 }
 
 .page-nav__icon {
@@ -1034,6 +1147,19 @@ onUnmounted(() => {
 .header-resgate__label {
   line-height: 1;
   white-space: nowrap;
+}
+
+.header-resgate__soon {
+  margin-left: 0.15rem;
+  padding: 0.12rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--shell-accent) 18%, transparent);
+  color: var(--shell-accent-strong);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
 }
 
 .theme-switch {
@@ -1257,8 +1383,8 @@ onUnmounted(() => {
   background: var(--shell-surface);
 }
 
-.user-menu__dropdown a,
-.user-menu__dropdown button {
+.user-menu__dropdown > a,
+.user-menu__dropdown > .p-button {
   display: flex;
   align-items: center;
   gap: 0.65rem;
@@ -1276,8 +1402,8 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.user-menu__dropdown a:hover,
-.user-menu__dropdown button:hover {
+.user-menu__dropdown > a:hover,
+.user-menu__dropdown > .p-button:hover {
   background: var(--shell-surface-soft);
 }
 
@@ -1298,7 +1424,7 @@ onUnmounted(() => {
   text-transform: uppercase;
 }
 
-.user-menu__dropdown button {
+.user-menu__dropdown > .p-button {
   color: color-mix(in srgb, var(--danger-soft) 80%, var(--shell-text));
 }
 

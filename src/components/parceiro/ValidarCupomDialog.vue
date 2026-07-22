@@ -12,7 +12,8 @@ import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import { ApiError } from '@/service/api'
 import { validarCupom } from '@/service/parceiro/parceiro-portal-service'
 import type { ValidarCupomResultado } from '@/service/parceiro/types'
-import { currentColors, isDarkMode } from '@/theme/color-mode'
+import { LightColors } from '@/theme/colors'
+import { currentColors } from '@/theme/color-mode'
 import {
   isCodigoResgateFormatoValido,
   normalizarCodigoResgate,
@@ -35,7 +36,6 @@ const resultado = ref<ValidarCupomResultado | null>(null)
 
 const dialogStyle = computed(() => {
   const colors = currentColors.value
-  const dark = isDarkMode.value
 
   return {
     ...focusSurfaceStyle.value,
@@ -53,7 +53,8 @@ const dialogStyle = computed(() => {
     '--vc-warm-bg': colors.dashboard.warmBg,
     '--vc-warm-text': colors.dashboard.warmText,
     '--vc-shadow-rgb': colors.auth.shadowRgb,
-    '--vc-on-cta': dark ? colors.dashboard.bg : colors.auth.white,
+    /** Sempre branco real — `auth.white` no dark é superfície escura. */
+    '--vc-on-cta': LightColors.auth.white,
   }
 })
 

@@ -13,7 +13,8 @@ import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { getSaqueDetalhe } from '@/service/parceiro/parceiro-portal-service'
 import type { SaqueDetalhe } from '@/service/parceiro/types'
-import { currentColors, isDarkMode } from '@/theme/color-mode'
+import { LightColors } from '@/theme/colors'
+import { currentColors } from '@/theme/color-mode'
 import { formatCentavosToBrl } from '@/utils/format/money'
 
 const props = defineProps<{
@@ -42,7 +43,6 @@ const statusMap = {
 
 const drawerStyle = computed(() => {
   const colors = currentColors.value
-  const dark = isDarkMode.value
 
   return {
     ...focusSurfaceStyle.value,
@@ -60,7 +60,8 @@ const drawerStyle = computed(() => {
     '--sd-success-bg': colors.dashboard.successBg,
     '--sd-success-text': colors.dashboard.successText,
     '--sd-shadow-rgb': colors.auth.shadowRgb,
-    '--sd-on-cta': dark ? colors.dashboard.bg : colors.auth.white,
+    /** Sempre branco real — `auth.white` no dark é superfície escura. */
+    '--sd-on-cta': LightColors.auth.white,
   }
 })
 
