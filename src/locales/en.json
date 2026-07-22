@@ -455,22 +455,22 @@
       "hello": "Hello",
       "helloName": "Hello, {name}"
     },
-    "lede": "Coupons, referrals, and partnership commission — organized so you can act fast.",
+    "lede": "Coupons, referrals, and partnership participation — organized so you can act fast.",
     "dash": {
       "errorLoad": "Could not load the dashboard.",
       "retry": "Try again",
       "focus": {
         "title": "Focus now",
-        "lede": "Commission and referrals — what drives the partnership today.",
-        "loadingAria": "Loading commission and referrals"
+        "lede": "Participation and referrals — what drives the partnership today.",
+        "loadingAria": "Loading participation and referrals"
       },
       "commission": {
-        "eyebrowActive": "Commission · Affiliate active",
+        "eyebrowActive": "Participation · Affiliate active",
         "badge": "Wallet",
         "sacavelNow": "available to withdraw now",
         "metaHold": "Total balance of {valor} — part in a 14-day security window.",
         "openWallet": "Open wallet",
-        "eyebrowMuted": "Commission",
+        "eyebrowMuted": "Participation",
         "badgeMuted": "Not active",
         "inactiveTitle": "Affiliate program",
         "inactiveMeta": "Activate the affiliate program to track balance, statement, and PIX payouts.",
@@ -479,7 +479,7 @@
       "referral": {
         "eyebrow": "Referral code",
         "copyAria": "Copy referral code",
-        "meta": "Share and earn commission for each pet parent who subscribes.",
+        "meta": "Share and earn participation for each pet parent who subscribes.",
         "cta": "View referral",
         "toastCopied": "Code copied",
         "toastCopyFail": "Could not copy",
@@ -542,9 +542,9 @@
     "card": {
       "afiliado": {
         "title": "Affiliate Program",
-        "subtitle": "Transparency and commissions",
-        "description": "Earn commission for each referral that becomes a subscriber. Access your wallet, track balance, and withdraw via PIX.",
-        "feature1": "Commission per converted referral",
+        "subtitle": "Transparency and participation",
+        "description": "Earn participation for each referral that becomes a subscriber. Access your wallet, track balance, and withdraw via PIX.",
+        "feature1": "Participation per converted referral",
         "feature2": "Statement and balance in real time",
         "feature3": "PIX payout"
       },
@@ -661,7 +661,8 @@
     "toast": {
       "enviado": "Registration submitted",
       "enviadoDetail": "Now it is with the PetJourney team. You get the result by email.",
-      "salvo": "Registration updated"
+      "salvo": "Registration updated",
+      "salvoDetail": "Your company changes have been saved."
     },
     "errors": {
       "generic": "Could not submit the registration.",
@@ -733,6 +734,7 @@
       "loadingAria": "Loading appointment detail",
       "errorLoad": "Error loading the appointment.",
       "mensagemTutor": "Tutor's message",
+      "metaAria": "Service and share expiry",
       "back": "Back",
       "tabs": {
         "resumo": {
@@ -761,14 +763,25 @@
       "medicamentos": "Medications",
       "comportamento": "Behavior",
       "diagnosticos": "Diagnoses",
-      "observacoes": "Tutor's remarks"
+      "observacoes": "Tutor's remarks",
+      "clinicalTitle": "Shared clinical data",
+      "clinicalLede": "Snapshot authorized by the pet parent — expand each list as needed.",
+      "sectionsCount": "{n} sections",
+      "itemsCount": "{n} items"
     },
     "anotacoes": {
-      "title": "Notes",
-      "empty": "No notes yet."
+      "title": "Notes history",
+      "lede": "Your company's records for this appointment — newest first.",
+      "count": "{n} records",
+      "empty": "No notes yet.",
+      "emptyHint": "Use the form beside this list to record what was done.",
+      "emptyHintClosed": "While access was active, the team could add notes here.",
+      "anexosLabel": "Attachments",
+      "abrirAnexo": "Open attachment"
     },
     "anotacao": {
       "title": "New note",
+      "lede": "Record the service and what the tutor needs to know. Attachments stay linked to this appointment.",
       "servico": "Service performed",
       "servicoPlaceholder": "Bath and grooming",
       "texto": "Note",
@@ -779,8 +792,10 @@
       "adicionarAnexo": "Add attachment",
       "anexoHint": "JPG, PNG, WebP, HEIC, or PDF, up to 10 MB each.",
       "tipoDocumento": "Document type",
+      "tipoDocumentoPlaceholder": "Select type (optional)",
       "semClassificacao": "Unclassified",
       "removerAnexo": "Remove attachment",
+      "enviar": "Save note",
       "camposObrigatorios": "Fill in the service performed and the note text.",
       "maxAnexos": "At most {n} attachments per note.",
       "tipoInvalido": "File not accepted: {nome}.",
@@ -824,7 +839,7 @@
       "qrExportOpenedDetail": "Direct download wasn’t possible — the image opened in a new tab so you can save it.",
       "qrExportFail": "Could not export",
       "qrExportFailDetail": "The browser blocked the new tab. Allow pop-ups for this site and try again.",
-      "hint": "Wallet commission requires an active affiliate program. Discount coupons do not generate commission."
+      "hint": "Wallet participation requires an active affiliate program. Discount coupons do not generate participation."
     },
     "howItWorks": {
       "eyebrow": "Your growth engine",
@@ -844,12 +859,12 @@
           "body": "When they subscribe, the referral stays linked to your business. Relationship that keeps working for you."
         },
         "earn": {
-          "title": "Commission in your wallet",
-          "body": "With an active affiliate program, eligible conversions generate commission you can track and withdraw in the portal."
+          "title": "Participation in your wallet",
+          "body": "With an active affiliate program, eligible conversions generate participation you can track and withdraw in the portal."
         }
       },
       "promise": "Less promotion effort. More subscribers walking through your door.",
-      "note": "Important: discount coupons do not generate commission. Commission needs an active affiliate — request it in Programs if you haven’t yet."
+      "note": "Important: discount coupons do not generate participation. Participation needs an active affiliate — request it in Programs if you haven’t yet."
     },
     "metrics": {
       "aria": "Promotion metrics",
@@ -861,6 +876,7 @@
       "copied": "Copied",
       "copiedDetail": "{label} copied.",
       "copyFail": "Could not copy",
+      "copyFailDetail": "Copy the content manually and try again.",
       "error": "Error",
       "moreCuponsFail": "Could not load more coupons.",
       "moreResgatesFail": "Could not load more redemptions."
@@ -872,7 +888,7 @@
     },
     "cupons": {
       "title": "Coupons",
-      "lede": "Discounts for pet parents — they do not generate commission.",
+      "lede": "Discounts for pet parents — they do not generate participation.",
       "empty": "No coupons right now.",
       "usos": "{n} uses",
       "loadMore": "More coupons"
@@ -897,7 +913,7 @@
       },
       "extrato": {
         "label": "Statement",
-        "description": "Commission credits and debits."
+        "description": "Participation credits and debits."
       },
       "saques": {
         "label": "Payouts",
@@ -919,7 +935,7 @@
       "totalSacado": "Total withdrawn",
       "alertBlocked": "Payouts temporarily blocked (anti-fraud review or negative balance).",
       "alertHold": "Balance in hold period (14 days per credit). The amount is not yet available to withdraw.",
-      "alertComissaoDisabled": "Referral commissions are temporarily disabled in this environment — the wallet may stay at zero even with active referrals. This is not an error in your registration.",
+      "alertComissaoDisabled": "Referral participation rewards are temporarily disabled in this environment — the wallet may stay at zero even with active referrals. This is not an error in your registration.",
       "pix": {
         "title": "PIX key",
         "label": "PIX key",
@@ -943,7 +959,7 @@
       "contactWhatsapp": "WhatsApp",
       "comissao": {
         "title": "How balance arrives",
-        "body": "Referrals that become subscribers generate wallet commission when the affiliate program is active."
+        "body": "Referrals that become subscribers generate wallet participation when the affiliate program is active."
       },
       "saldos": {
         "title": "Total and withdrawable balance",
@@ -962,6 +978,7 @@
     },
     "toast": {
       "pixSaved": "PIX key saved",
+      "pixSavedDetail": "Your wallet can use this key for the next payouts.",
       "pixSaveError": "Error saving PIX",
       "tryAgain": "Please try again.",
       "invalidValue": "Invalid amount",
@@ -972,15 +989,16 @@
       "pixRequiredDetail": "Register a PIX key before requesting a payout.",
       "withdrawRequested": "Payout requested",
       "withdrawRequestedDetail": "Track it on the Payouts tab.",
-      "withdrawError": "Payout error"
+      "withdrawError": "Payout error",
+      "withdrawErrorDetail": "Could not complete the payout request."
     },
     "extrato": {
       "loadingTitle": "Loading statement...",
-      "loadingDesc": "Fetching recent commission credits and debits.",
+      "loadingDesc": "Fetching recent participation credits and debits.",
       "errorLoad": "Error loading statement.",
       "retry": "Try again",
       "emptyTitle": "No movements",
-      "emptyBody": "Commission credits and payout debits appear here.",
+      "emptyBody": "Participation credits and payout debits appear here.",
       "loadMore": "Load more",
       "today": "Today",
       "yesterday": "Yesterday"

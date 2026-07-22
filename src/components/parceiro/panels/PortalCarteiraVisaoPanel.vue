@@ -129,7 +129,12 @@ async function savePix() {
 
   try {
     await updateCarteiraPix(chavePix.value.trim(), parceiroQuery())
-    toast.add({ severity: 'success', summary: t('carteira.toast.pixSaved'), life: 3000 })
+    toast.add({
+      severity: 'success',
+      summary: t('carteira.toast.pixSaved'),
+      detail: t('carteira.toast.pixSavedDetail'),
+      life: 3000,
+    })
     await loadCarteira()
   } catch (err) {
     toast.add({
@@ -194,7 +199,8 @@ async function requestWithdraw() {
     toast.add({
       severity: 'error',
       summary: t('carteira.toast.withdrawError'),
-      detail: err instanceof Error ? err.message : t('carteira.toast.tryAgain'),
+      detail:
+        err instanceof Error ? err.message : t('carteira.toast.withdrawErrorDetail'),
       life: 5000,
     })
   } finally {
@@ -513,9 +519,10 @@ onMounted(() => {
 .carteira-alert {
   margin-bottom: 0.75rem;
   padding: 0.8rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
   border-radius: 0.8rem;
-  background: var(--partner-warm-bg);
-  color: var(--partner-warm-text);
+  background: var(--partner-surface);
+  color: var(--partner-text);
 }
 
 .carteira-panel {

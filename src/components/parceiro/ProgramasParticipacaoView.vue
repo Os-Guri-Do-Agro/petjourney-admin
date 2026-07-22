@@ -241,9 +241,9 @@ const activationSteps = computed(() => [
 }
 
 .activation-step[data-step='analise'] .activation-step__number {
-  border-color: color-mix(in srgb, var(--prog-amber-text) 35%, var(--prog-line));
-  background: var(--prog-amber-bg);
-  color: var(--prog-amber-text);
+  border-color: color-mix(in srgb, var(--prog-primary) 35%, var(--prog-line));
+  background: color-mix(in srgb, var(--prog-primary-soft) 35%, var(--prog-card));
+  color: var(--prog-primary-strong);
 }
 
 .activation-step[data-step='ativo'] .activation-step__number {

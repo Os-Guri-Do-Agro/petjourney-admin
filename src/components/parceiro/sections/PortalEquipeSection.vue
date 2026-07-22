@@ -70,7 +70,12 @@ async function handleRemoveMember() {
 
   try {
     await removerMembroEquipe(removeUserId.value.trim(), parceiroQuery())
-    toast.add({ severity: 'success', summary: 'Membro removido', life: 3000 })
+    toast.add({
+      severity: 'success',
+      summary: 'Membro removido',
+      detail: 'O acesso à empresa foi revogado.',
+      life: 3000,
+    })
     removeUserId.value = ''
     removeConfirmVisible.value = false
   } catch (err) {

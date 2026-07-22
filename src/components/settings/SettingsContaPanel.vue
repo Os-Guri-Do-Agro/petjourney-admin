@@ -511,7 +511,7 @@ watch(showCustomReason, (allowed) => {
 :deep(button.conta-session__logout) {
   border-width: 1.5px;
   border-color: var(--partner-warm-text);
-  background: color-mix(in srgb, var(--partner-warm-bg) 70%, var(--partner-card));
+  background: var(--partner-card);
   color: var(--partner-warm-text);
   font-weight: 700;
 }
@@ -520,7 +520,7 @@ watch(showCustomReason, (allowed) => {
 .conta-session__logout :deep(.p-button:focus-visible),
 :deep(button.conta-session__logout:hover),
 :deep(button.conta-session__logout:focus-visible) {
-  background: var(--partner-warm-bg);
+  background: color-mix(in srgb, var(--partner-warm-text) 10%, var(--partner-card));
   border-color: var(--partner-warm-text);
   color: var(--partner-warm-text);
 }
@@ -628,12 +628,7 @@ watch(showCustomReason, (allowed) => {
   padding: 1.25rem 1.35rem 1.3rem;
   border: 1px solid color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
   border-radius: 1.15rem;
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--partner-warm-bg) 55%, var(--partner-card)),
-      var(--partner-card) 70%
-    );
+  background: var(--partner-card);
 }
 
 .conta-risk__head {
@@ -695,7 +690,7 @@ watch(showCustomReason, (allowed) => {
   height: 2rem;
   place-items: center;
   border-radius: 0.65rem;
-  background: color-mix(in srgb, var(--partner-warm-bg) 80%, transparent);
+  background: color-mix(in srgb, var(--partner-warm-text) 12%, var(--partner-card));
   color: var(--partner-warm-text);
   font-size: 0.85rem;
 }

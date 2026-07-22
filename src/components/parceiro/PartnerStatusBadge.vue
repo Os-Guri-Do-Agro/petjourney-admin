@@ -32,24 +32,24 @@ const badgeStyle = computed(() => {
       border: colors.dashboard.line,
     },
     PENDENTE: {
-      bg: colors.dashboard.amberBg,
-      text: colors.dashboard.amberText,
+      bg: colors.dashboard.surfaceSoft,
+      text: colors.dashboard.primaryStrong,
       border: colors.dashboard.line,
     },
     SOLICITADO: {
-      bg: colors.dashboard.amberBg,
-      text: colors.dashboard.amberText,
+      bg: colors.dashboard.surfaceSoft,
+      text: colors.dashboard.primaryStrong,
       border: colors.dashboard.line,
     },
     REJEITADO: {
-      bg: colors.dashboard.warmBg,
+      bg: colors.dashboard.surfaceSoft,
       text: colors.dashboard.warmText,
-      border: colors.dashboard.warmLine,
+      border: colors.dashboard.line,
     },
     SUSPENSO: {
-      bg: colors.dashboard.warmBg,
+      bg: colors.dashboard.surfaceSoft,
       text: colors.dashboard.warmText,
-      border: colors.dashboard.warmLine,
+      border: colors.dashboard.line,
     },
     NAO_SOLICITADO: defaultTone,
   }

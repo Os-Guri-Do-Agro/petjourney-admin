@@ -455,22 +455,22 @@
       "hello": "Olá",
       "helloName": "Olá, {name}"
     },
-    "lede": "Cupons, indicação e comissão da parceria — organizados para você agir rápido.",
+    "lede": "Cupons, indicação e participação da parceria — organizados para você agir rápido.",
     "dash": {
       "errorLoad": "Não foi possível carregar o painel.",
       "retry": "Tentar novamente",
       "focus": {
         "title": "Foco agora",
-        "lede": "Comissão e indicação — o que move a parceria hoje.",
-        "loadingAria": "Carregando comissão e indicação"
+        "lede": "Participação e indicação — o que move a parceria hoje.",
+        "loadingAria": "Carregando participação e indicação"
       },
       "commission": {
-        "eyebrowActive": "Comissão · Afiliado ativo",
+        "eyebrowActive": "Participação · Afiliado ativo",
         "badge": "Carteira",
         "sacavelNow": "sacável agora",
         "metaHold": "Saldo total de {valor} — parte em janela de segurança de 14 dias.",
         "openWallet": "Abrir carteira",
-        "eyebrowMuted": "Comissão",
+        "eyebrowMuted": "Participação",
         "badgeMuted": "Não ativo",
         "inactiveTitle": "Programa afiliado",
         "inactiveMeta": "Ative o programa afiliado para acompanhar saldo, extrato e saques via PIX.",
@@ -479,7 +479,7 @@
       "referral": {
         "eyebrow": "Código de indicação",
         "copyAria": "Copiar código de indicação",
-        "meta": "Compartilhe e ganhe comissão por cada tutor que assinar.",
+        "meta": "Compartilhe e ganhe participação por cada tutor que assinar.",
         "cta": "Ver indicação",
         "toastCopied": "Código copiado",
         "toastCopyFail": "Não foi possível copiar",
@@ -542,9 +542,9 @@
     "card": {
       "afiliado": {
         "title": "Programa de Afiliados",
-        "subtitle": "Transparência e comissões",
-        "description": "Receba comissão por cada indicação que vira assinante. Acesse sua carteira, acompanhe saldo e saque via PIX.",
-        "feature1": "Comissão por indicação convertida",
+        "subtitle": "Transparência e participação",
+        "description": "Receba participação por cada indicação que vira assinante. Acesse sua carteira, acompanhe saldo e saque via PIX.",
+        "feature1": "Participação por indicação convertida",
         "feature2": "Extrato e saldo em tempo real",
         "feature3": "Saque via PIX"
       },
@@ -661,7 +661,8 @@
     "toast": {
       "enviado": "Cadastro enviado",
       "enviadoDetail": "Agora é com a equipe PetJourney. Você recebe o resultado por e-mail.",
-      "salvo": "Cadastro atualizado"
+      "salvo": "Cadastro atualizado",
+      "salvoDetail": "As alterações da empresa foram registradas."
     },
     "errors": {
       "generic": "Não foi possível enviar o cadastro.",
@@ -733,6 +734,7 @@
       "loadingAria": "Carregando detalhe do atendimento",
       "errorLoad": "Erro ao carregar o atendimento.",
       "mensagemTutor": "Mensagem do tutor",
+      "metaAria": "Serviço e validade do compartilhamento",
       "back": "Voltar",
       "tabs": {
         "resumo": {
@@ -761,14 +763,25 @@
       "medicamentos": "Medicamentos",
       "comportamento": "Comportamento",
       "diagnosticos": "Diagnósticos",
-      "observacoes": "Observações do tutor"
+      "observacoes": "Observações do tutor",
+      "clinicalTitle": "Dados clínicos compartilhados",
+      "clinicalLede": "Snapshot autorizado pelo tutor — toque para expandir cada lista.",
+      "sectionsCount": "{n} seções",
+      "itemsCount": "{n} itens"
     },
     "anotacoes": {
-      "title": "Anotações",
-      "empty": "Nenhuma anotação ainda."
+      "title": "Histórico de anotações",
+      "lede": "Registros da sua empresa neste atendimento — do mais recente ao mais antigo.",
+      "count": "{n} registros",
+      "empty": "Nenhuma anotação ainda.",
+      "emptyHint": "Use o formulário ao lado para registrar o que foi feito no atendimento.",
+      "emptyHintClosed": "Quando o acesso estava ativo, a equipe podia registrar anotações aqui.",
+      "anexosLabel": "Anexos",
+      "abrirAnexo": "Abrir anexo"
     },
     "anotacao": {
       "title": "Nova anotação",
+      "lede": "Registre o serviço e o que o tutor precisa saber. Anexos ficam vinculados a este atendimento.",
       "servico": "Serviço realizado",
       "servicoPlaceholder": "Banho e tosa",
       "texto": "Anotação",
@@ -779,8 +792,10 @@
       "adicionarAnexo": "Adicionar anexo",
       "anexoHint": "JPG, PNG, WebP, HEIC ou PDF, até 10 MB cada.",
       "tipoDocumento": "Tipo do documento",
+      "tipoDocumentoPlaceholder": "Selecione o tipo (opcional)",
       "semClassificacao": "Sem classificação",
       "removerAnexo": "Remover anexo",
+      "enviar": "Registrar anotação",
       "camposObrigatorios": "Preencha o serviço realizado e o texto da anotação.",
       "maxAnexos": "No máximo {n} anexos por anotação.",
       "tipoInvalido": "Arquivo não aceito: {nome}.",
@@ -824,7 +839,7 @@
       "qrExportOpenedDetail": "Não foi possível baixar direto — a imagem abriu em uma nova aba para você salvar.",
       "qrExportFail": "Não foi possível exportar",
       "qrExportFailDetail": "O navegador bloqueou a nova aba. Permita pop-ups neste site e tente de novo.",
-      "hint": "Comissão na carteira exige programa afiliado ativo. Cupons de desconto não geram comissão."
+      "hint": "Participação na carteira exige programa afiliado ativo. Cupons de desconto não geram participação."
     },
     "howItWorks": {
       "eyebrow": "O motor do crescimento",
@@ -844,12 +859,12 @@
           "body": "Quando o tutor assina, a indicação permanece vinculada à empresa. É relacionamento que continua trabalhando por você."
         },
         "earn": {
-          "title": "Comissão na carteira",
-          "body": "Com o programa afiliado ativo, as conversões elegíveis geram comissão para acompanhar e sacar no portal."
+          "title": "Participação na carteira",
+          "body": "Com o programa afiliado ativo, as conversões elegíveis geram participação para acompanhar e sacar no portal."
         }
       },
       "promise": "Menos esforço de divulgação. Mais assinantes entrando pela sua porta.",
-      "note": "Importante: cupom de desconto não gera comissão. Comissão exige afiliado ativo — solicite em Programas, se ainda não estiver."
+      "note": "Importante: cupom de desconto não gera participação. Participação exige afiliado ativo — solicite em Programas, se ainda não estiver."
     },
     "metrics": {
       "aria": "Métricas de divulgação",
@@ -861,6 +876,7 @@
       "copied": "Copiado",
       "copiedDetail": "{label} copiado.",
       "copyFail": "Não foi possível copiar",
+      "copyFailDetail": "Copie o conteúdo manualmente e tente de novo.",
       "error": "Erro",
       "moreCuponsFail": "Não foi possível carregar mais cupons.",
       "moreResgatesFail": "Não foi possível carregar mais resgates."
@@ -872,7 +888,7 @@
     },
     "cupons": {
       "title": "Cupons",
-      "lede": "Descontos para tutores — não geram comissão.",
+      "lede": "Descontos para tutores — não geram participação.",
       "empty": "Nenhum cupom no momento.",
       "usos": "{n} usos",
       "loadMore": "Mais cupons"
@@ -897,7 +913,7 @@
       },
       "extrato": {
         "label": "Extrato",
-        "description": "Movimentações de comissão e débitos."
+        "description": "Movimentações de participação e débitos."
       },
       "saques": {
         "label": "Saques",
@@ -919,7 +935,7 @@
       "totalSacado": "Total sacado",
       "alertBlocked": "Saques temporariamente bloqueados (revisão antifraude ou saldo negativo).",
       "alertHold": "Saldo em período de hold (14 dias por crédito). O valor ainda não está disponível para saque.",
-      "alertComissaoDisabled": "Comissões por indicação estão temporariamente desativadas no ambiente — a carteira pode permanecer zerada mesmo com indicações ativas. Isso não é um erro do seu cadastro.",
+      "alertComissaoDisabled": "A participação por indicação está temporariamente desativada no ambiente — a carteira pode permanecer zerada mesmo com indicações ativas. Isso não é um erro do seu cadastro.",
       "pix": {
         "title": "Chave PIX",
         "label": "Chave PIX",
@@ -943,7 +959,7 @@
       "contactWhatsapp": "WhatsApp",
       "comissao": {
         "title": "Como entra saldo",
-        "body": "Indicações que viram assinantes geram comissão na carteira, quando o programa afiliado está ativo."
+        "body": "Indicações que viram assinantes geram participação na carteira, quando o programa afiliado está ativo."
       },
       "saldos": {
         "title": "Saldo total e sacável",
@@ -962,6 +978,7 @@
     },
     "toast": {
       "pixSaved": "Chave PIX salva",
+      "pixSavedDetail": "A carteira já pode usar esta chave nos próximos saques.",
       "pixSaveError": "Erro ao salvar PIX",
       "tryAgain": "Tente novamente.",
       "invalidValue": "Valor inválido",
@@ -972,15 +989,16 @@
       "pixRequiredDetail": "Cadastre uma chave PIX antes de solicitar saque.",
       "withdrawRequested": "Saque solicitado",
       "withdrawRequestedDetail": "Acompanhe na aba Saques.",
-      "withdrawError": "Erro no saque"
+      "withdrawError": "Erro no saque",
+      "withdrawErrorDetail": "Não foi possível concluir o pedido de saque."
     },
     "extrato": {
       "loadingTitle": "Carregando extrato...",
-      "loadingDesc": "Buscando créditos de comissão e débitos recentes.",
+      "loadingDesc": "Buscando créditos de participação e débitos recentes.",
       "errorLoad": "Erro ao carregar extrato.",
       "retry": "Tentar novamente",
       "emptyTitle": "Nenhuma movimentação",
-      "emptyBody": "Créditos de comissão e débitos de saque aparecem aqui.",
+      "emptyBody": "Créditos de participação e débitos de saque aparecem aqui.",
       "loadMore": "Carregar mais",
       "today": "Hoje",
       "yesterday": "Ontem"

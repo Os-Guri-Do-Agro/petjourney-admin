@@ -44,7 +44,7 @@ onMounted(() => {
   padding: 1.1rem 1.2rem;
   border: 1px solid color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
   border-radius: 1.1rem;
-  background: color-mix(in srgb, var(--partner-warm-bg) 60%, var(--partner-card));
+  background: var(--partner-card);
 }
 
 .empresa-panel__error i {

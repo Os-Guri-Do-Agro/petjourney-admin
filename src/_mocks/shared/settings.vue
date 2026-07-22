@@ -583,7 +583,6 @@ function retrySettings() {
           ? `${memberPendingRemoval.name} perderá acesso às áreas permitidas da clínica. Essa ação poderá ser integrada com permissões reais depois.`
           : 'Esse usuário perderá acesso às áreas permitidas da clínica.'
       "
-      icon="pi pi-user-minus"
       confirm-label="Remover usuário"
       cancel-label="Cancelar"
       severity="danger"

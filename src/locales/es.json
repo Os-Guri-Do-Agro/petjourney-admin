@@ -455,22 +455,22 @@
       "hello": "Hola",
       "helloName": "Hola, {name}"
     },
-    "lede": "Cupones, referidos y comisión de la alianza — organizados para que usted actúe rápido.",
+    "lede": "Cupones, referidos y participación de la alianza — organizados para que usted actúe rápido.",
     "dash": {
       "errorLoad": "No fue posible cargar el panel.",
       "retry": "Intentar de nuevo",
       "focus": {
         "title": "Enfoque ahora",
-        "lede": "Comisión y referidos — lo que mueve la alianza hoy.",
-        "loadingAria": "Cargando comisión y referidos"
+        "lede": "Participación y referidos — lo que mueve la alianza hoy.",
+        "loadingAria": "Cargando participación y referidos"
       },
       "commission": {
-        "eyebrowActive": "Comisión · Afiliado activo",
+        "eyebrowActive": "Participación · Afiliado activo",
         "badge": "Billetera",
         "sacavelNow": "disponible para retiro ahora",
         "metaHold": "Saldo total de {valor} — parte en ventana de seguridad de 14 días.",
         "openWallet": "Abrir billetera",
-        "eyebrowMuted": "Comisión",
+        "eyebrowMuted": "Participación",
         "badgeMuted": "No activo",
         "inactiveTitle": "Programa afiliado",
         "inactiveMeta": "Active el programa afiliado para seguir saldo, extracto y retiros vía PIX.",
@@ -479,7 +479,7 @@
       "referral": {
         "eyebrow": "Código de referidos",
         "copyAria": "Copiar código de referidos",
-        "meta": "Comparta y gane comisión por cada tutor que se suscriba.",
+        "meta": "Comparta y gane participación por cada tutor que se suscriba.",
         "cta": "Ver referidos",
         "toastCopied": "Código copiado",
         "toastCopyFail": "No fue posible copiar",
@@ -542,9 +542,9 @@
     "card": {
       "afiliado": {
         "title": "Programa de Afiliados",
-        "subtitle": "Transparencia y comisiones",
-        "description": "Reciba comisión por cada referido que se convierte en suscriptor. Acceda a su billetera, siga el saldo y retire vía PIX.",
-        "feature1": "Comisión por referido convertido",
+        "subtitle": "Transparencia y participación",
+        "description": "Reciba participación por cada referido que se convierte en suscriptor. Acceda a su billetera, siga el saldo y retire vía PIX.",
+        "feature1": "Participación por referido convertido",
         "feature2": "Extracto y saldo en tiempo real",
         "feature3": "Retiro vía PIX"
       },
@@ -661,7 +661,8 @@
     "toast": {
       "enviado": "Registro enviado",
       "enviadoDetail": "Ahora es con el equipo PetJourney. Usted recibe el resultado por correo.",
-      "salvo": "Registro actualizado"
+      "salvo": "Registro actualizado",
+      "salvoDetail": "Los cambios de la empresa quedaron registrados."
     },
     "errors": {
       "generic": "No fue posible enviar el registro.",
@@ -733,6 +734,7 @@
       "loadingAria": "Cargando detalle de la atención",
       "errorLoad": "Error al cargar la atención.",
       "mensagemTutor": "Mensaje del tutor",
+      "metaAria": "Servicio y vigencia del acceso",
       "back": "Volver",
       "tabs": {
         "resumo": {
@@ -761,14 +763,25 @@
       "medicamentos": "Medicamentos",
       "comportamento": "Comportamiento",
       "diagnosticos": "Diagnósticos",
-      "observacoes": "Observaciones del tutor"
+      "observacoes": "Observaciones del tutor",
+      "clinicalTitle": "Datos clínicos compartidos",
+      "clinicalLede": "Snapshot autorizado por el tutor — toque para expandir cada lista.",
+      "sectionsCount": "{n} secciones",
+      "itemsCount": "{n} ítems"
     },
     "anotacoes": {
-      "title": "Notas",
-      "empty": "Ninguna nota todavía."
+      "title": "Historial de notas",
+      "lede": "Registros de su empresa en esta atención — de la más reciente a la más antigua.",
+      "count": "{n} registros",
+      "empty": "Ninguna nota todavía.",
+      "emptyHint": "Use el formulario al lado para registrar lo realizado.",
+      "emptyHintClosed": "Mientras el acceso estaba activo, el equipo podía anotar aquí.",
+      "anexosLabel": "Adjuntos",
+      "abrirAnexo": "Abrir adjunto"
     },
     "anotacao": {
       "title": "Nueva nota",
+      "lede": "Registre el servicio y lo que el tutor necesita saber. Los adjuntos quedan vinculados a esta atención.",
       "servico": "Servicio realizado",
       "servicoPlaceholder": "Baño y peluquería",
       "texto": "Nota",
@@ -779,8 +792,10 @@
       "adicionarAnexo": "Agregar adjunto",
       "anexoHint": "JPG, PNG, WebP, HEIC o PDF, hasta 10 MB cada uno.",
       "tipoDocumento": "Tipo de documento",
+      "tipoDocumentoPlaceholder": "Seleccione el tipo (opcional)",
       "semClassificacao": "Sin clasificación",
       "removerAnexo": "Quitar adjunto",
+      "enviar": "Registrar nota",
       "camposObrigatorios": "Complete el servicio realizado y el texto de la nota.",
       "maxAnexos": "Máximo {n} adjuntos por nota.",
       "tipoInvalido": "Archivo no aceptado: {nome}.",
@@ -824,7 +839,7 @@
       "qrExportOpenedDetail": "No fue posible descargar directo — la imagen se abrió en una pestaña nueva para que la guarde.",
       "qrExportFail": "No fue posible exportar",
       "qrExportFailDetail": "El navegador bloqueó la nueva pestaña. Permita ventanas emergentes en este sitio e inténtelo de nuevo.",
-      "hint": "La comisión en la billetera exige el programa afiliado activo. Los cupones de descuento no generan comisión."
+      "hint": "La participación en la billetera exige el programa afiliado activo. Los cupones de descuento no generan participación."
     },
     "howItWorks": {
       "eyebrow": "El motor del crecimiento",
@@ -844,12 +859,12 @@
           "body": "Cuando el tutor se suscribe, la indicación permanece vinculada a la empresa. Relación que sigue trabajando por ti."
         },
         "earn": {
-          "title": "Comisión en la billetera",
-          "body": "Con el programa afiliado activo, las conversiones elegibles generan comisión para seguir y retirar en el portal."
+          "title": "Participación en la billetera",
+          "body": "Con el programa afiliado activo, las conversiones elegibles generan participación para seguir y retirar en el portal."
         }
       },
       "promise": "Menos esfuerzo de divulgación. Más suscriptores entrando por tu puerta.",
-      "note": "Importante: el cupón de descuento no genera comisión. La comisión exige afiliado activo — solicítalo en Programas si aún no lo tienes."
+      "note": "Importante: el cupón de descuento no genera participación. La participación exige afiliado activo — solicítalo en Programas si aún no lo tienes."
     },
     "metrics": {
       "aria": "Métricas de divulgación",
@@ -861,6 +876,7 @@
       "copied": "Copiado",
       "copiedDetail": "{label} copiado.",
       "copyFail": "No fue posible copiar",
+      "copyFailDetail": "Copie el contenido manualmente e inténtelo de nuevo.",
       "error": "Error",
       "moreCuponsFail": "No fue posible cargar más cupones.",
       "moreResgatesFail": "No fue posible cargar más rescates."
@@ -872,7 +888,7 @@
     },
     "cupons": {
       "title": "Cupones",
-      "lede": "Descuentos para tutores — no generan comisión.",
+      "lede": "Descuentos para tutores — no generan participación.",
       "empty": "Ningún cupón por el momento.",
       "usos": "{n} usos",
       "loadMore": "Más cupones"
@@ -897,7 +913,7 @@
       },
       "extrato": {
         "label": "Extracto",
-        "description": "Movimientos de comisión y débitos."
+        "description": "Movimientos de participación y débitos."
       },
       "saques": {
         "label": "Retiros",
@@ -919,7 +935,7 @@
       "totalSacado": "Total retirado",
       "alertBlocked": "Retiros temporalmente bloqueados (revisión antifraude o saldo negativo).",
       "alertHold": "Saldo en período de hold (14 días por crédito). El valor aún no está disponible para retiro.",
-      "alertComissaoDisabled": "Las comisiones por referidos están temporalmente desactivadas en el entorno — la billetera puede permanecer en cero incluso con referidos activos. Esto no es un error de su registro.",
+      "alertComissaoDisabled": "La participación por referidos está temporalmente desactivada en el entorno — la billetera puede permanecer en cero incluso con referidos activos. Esto no es un error de su registro.",
       "pix": {
         "title": "Clave PIX",
         "label": "Clave PIX",
@@ -943,7 +959,7 @@
       "contactWhatsapp": "WhatsApp",
       "comissao": {
         "title": "Cómo entra el saldo",
-        "body": "Los referidos que se convierten en suscriptores generan comisión en la billetera cuando el programa afiliado está activo."
+        "body": "Los referidos que se convierten en suscriptores generan participación en la billetera cuando el programa afiliado está activo."
       },
       "saldos": {
         "title": "Saldo total y retirable",
@@ -962,6 +978,7 @@
     },
     "toast": {
       "pixSaved": "Clave PIX guardada",
+      "pixSavedDetail": "La billetera ya puede usar esta clave en los próximos retiros.",
       "pixSaveError": "Error al guardar PIX",
       "tryAgain": "Inténtelo de nuevo.",
       "invalidValue": "Valor inválido",
@@ -972,15 +989,16 @@
       "pixRequiredDetail": "Registre una clave PIX antes de solicitar el retiro.",
       "withdrawRequested": "Retiro solicitado",
       "withdrawRequestedDetail": "Sígalo en la pestaña Retiros.",
-      "withdrawError": "Error en el retiro"
+      "withdrawError": "Error en el retiro",
+      "withdrawErrorDetail": "No fue posible completar la solicitud de retiro."
     },
     "extrato": {
       "loadingTitle": "Cargando extracto...",
-      "loadingDesc": "Buscando créditos de comisión y débitos recientes.",
+      "loadingDesc": "Buscando créditos de participación y débitos recientes.",
       "errorLoad": "Error al cargar el extracto.",
       "retry": "Intentar de nuevo",
       "emptyTitle": "Sin movimientos",
-      "emptyBody": "Los créditos de comisión y los débitos de retiro aparecen aquí.",
+      "emptyBody": "Los créditos de participación y los débitos de retiro aparecen aquí.",
       "loadMore": "Cargar más",
       "today": "Hoy",
       "yesterday": "Ayer"

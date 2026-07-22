@@ -52,21 +52,25 @@ const copyKey = computed(() => {
   display: flex;
   gap: 0.75rem;
   padding: 0.9rem 1rem;
-  border: 1px solid var(--partner-line);
+  border: 1px solid color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
   border-radius: 0.9rem;
-  background: var(--partner-amber-bg);
-  color: var(--partner-amber-text);
+  background: var(--partner-card);
+  color: var(--partner-text);
   font-size: 0.88rem;
-}
-
-.operability-banner[data-tone='rejected'] {
-  background: var(--partner-warm-bg);
-  color: var(--partner-warm-text);
 }
 
 .operability-banner i {
   margin-top: 0.15rem;
+  color: var(--partner-primary-strong);
   font-size: 1.1rem;
+}
+
+.operability-banner[data-tone='rejected'] {
+  border-color: color-mix(in srgb, var(--partner-warm-text) 24%, var(--partner-line));
+}
+
+.operability-banner[data-tone='rejected'] i {
+  color: var(--partner-warm-text);
 }
 
 .operability-banner p {

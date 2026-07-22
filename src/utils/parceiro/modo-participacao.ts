@@ -33,11 +33,11 @@ export function getModoCardCopy(modo: ModoParticipacao): ModoCardCopy {
   if (modo === 'afiliado') {
     return {
       title: 'Programa de Afiliados',
-      subtitle: 'Transparência e comissões',
+      subtitle: 'Transparência e participação',
       description:
-        'Receba comissão por cada indicação que vira assinante. Acesse sua carteira, acompanhe saldo e saque via PIX.',
+        'Receba participação por cada indicação que vira assinante. Acesse sua carteira, acompanhe saldo e saque via PIX.',
       features: [
-        'Comissão por indicação convertida',
+        'Participação por indicação convertida',
         'Extrato e saldo em tempo real',
         'Saque via PIX',
       ],

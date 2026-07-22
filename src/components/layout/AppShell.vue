@@ -120,7 +120,7 @@ const shellStyle = computed(() => {
     '--shell-accent': colors.vet.primary,
     '--shell-accent-strong': colors.auth.sageStrong,
     '--shell-accent-soft': colors.vet.secondary,
-    '--shell-cream': colors.secondary,
+    '--shell-cream': colors.auth.sageTint,
     '--shell-shadow-rgb': colors.auth.shadowRgb,
     '--rail-logout-red': colors.red,
     '--rail-logout-mix-base': isDark ? colors.bg.card : LightColors.auth.white,
@@ -561,7 +561,6 @@ onUnmounted(() => {
       v-model:visible="logoutConfirmVisible"
       :title="t('shell.logoutConfirm.title')"
       :message="t('shell.logoutConfirm.message')"
-      icon="pi pi-sign-out"
       :confirm-label="t('shell.logout')"
       :cancel-label="t('shell.logoutConfirm.cancel')"
       severity="danger"

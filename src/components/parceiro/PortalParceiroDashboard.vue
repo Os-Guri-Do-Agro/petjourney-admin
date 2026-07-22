@@ -609,8 +609,8 @@ watch(lastSuccessAt, (at) => {
 }
 
 .commission-card__badge--muted {
-  background: var(--dash-amber-bg);
-  color: var(--dash-amber-text);
+  background: color-mix(in srgb, var(--dash-primary-soft) 28%, var(--dash-card));
+  color: var(--dash-muted);
 }
 
 .commission-card__amount {

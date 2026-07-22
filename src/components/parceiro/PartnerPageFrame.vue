@@ -329,13 +329,8 @@ const pageStyle = computed(() => {
 }
 
 .partner-page__state--suspended {
-  border-color: color-mix(in srgb, var(--partner-warm-text) 28%, var(--partner-line));
-  background:
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--partner-warm-bg) 70%, var(--partner-card)) 0%,
-      var(--partner-card) 55%
-    );
+  border-color: color-mix(in srgb, var(--partner-warm-text) 24%, var(--partner-line));
+  background: var(--partner-card);
 }
 
 .partner-page__state--suspended > i {

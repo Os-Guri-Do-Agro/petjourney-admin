@@ -642,8 +642,9 @@ async function handleValidar() {
 .vc-error {
   margin: 0;
   padding: 0.7rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--vc-warm-text) 22%, var(--vc-line));
   border-radius: 0.8rem;
-  background: var(--vc-warm-bg);
+  background: var(--vc-surface);
   color: var(--vc-warm-text);
   font-size: 0.86rem;
   line-height: 1.4;
@@ -658,8 +659,9 @@ async function handleValidar() {
 }
 
 .vc-banner--warn {
-  background: var(--vc-warm-bg);
-  color: var(--vc-warm-text);
+  border: 1px solid color-mix(in srgb, var(--vc-warm-text) 22%, var(--vc-line));
+  background: var(--vc-surface);
+  color: var(--vc-text);
 }
 
 .vc-result {
@@ -687,7 +689,7 @@ async function handleValidar() {
 }
 
 .vc-result--fail .vc-result__badge {
-  background: var(--vc-warm-bg);
+  background: color-mix(in srgb, var(--vc-warm-text) 14%, var(--vc-bg));
   color: var(--vc-warm-text);
 }
 

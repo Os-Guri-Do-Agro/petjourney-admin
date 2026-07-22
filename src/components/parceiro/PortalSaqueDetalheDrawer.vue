@@ -306,7 +306,7 @@ watch(
   padding: 1rem;
   border: 1px solid color-mix(in srgb, var(--sd-warm-text) 22%, var(--sd-line));
   border-radius: 1rem;
-  background: color-mix(in srgb, var(--sd-warm-bg) 70%, var(--sd-bg));
+  background: var(--sd-bg);
 }
 
 .saque-drawer__error-icon {
@@ -347,12 +347,7 @@ watch(
 
 .saque-drawer__hero[data-status='FALHA'] {
   border-color: color-mix(in srgb, var(--sd-warm-text) 28%, var(--sd-line));
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--sd-warm-bg) 75%, var(--sd-bg)),
-      var(--sd-bg) 68%
-    );
+  background: var(--sd-bg);
 }
 
 .saque-drawer__hero[data-status='PAGO'] {
@@ -470,8 +465,8 @@ watch(
   padding: 0.95rem 1rem;
   border: 1px solid color-mix(in srgb, var(--sd-warm-text) 24%, var(--sd-line));
   border-radius: 0.95rem;
-  background: color-mix(in srgb, var(--sd-warm-bg) 72%, var(--sd-bg));
-  color: var(--sd-warm-text);
+  background: var(--sd-bg);
+  color: var(--sd-text);
 }
 
 .saque-drawer__alert strong {

@@ -120,6 +120,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
       toast.add({
         severity: 'success',
         summary: t('parceiroCadastro.toast.salvo'),
+        detail: t('parceiroCadastro.toast.salvoDetail'),
         life: 4000,
       })
     }
@@ -404,13 +405,8 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 }
 
 .funil__card[data-tone='pending'] {
-  border-color: color-mix(in srgb, var(--partner-amber-text) 22%, var(--partner-line));
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--partner-amber-bg) 40%, var(--partner-card)),
-      var(--partner-card) 55%
-    );
+  border-color: color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
+  background: var(--partner-card);
 }
 
 .funil__card[data-tone='success'] {
@@ -458,13 +454,8 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 }
 
 .funil__card[data-tone='warm'] {
-  border-color: color-mix(in srgb, var(--partner-warm-text) 25%, var(--partner-line));
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--partner-warm-bg) 38%, var(--partner-card)),
-      var(--partner-card) 55%
-    );
+  border-color: color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
+  background: var(--partner-card);
 }
 
 .funil__head {
@@ -509,12 +500,12 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 }
 
 .funil__icon--pending {
-  background: var(--partner-amber-bg);
-  color: var(--partner-amber-text);
+  background: color-mix(in srgb, var(--partner-primary) 16%, var(--partner-card));
+  color: var(--partner-primary-strong);
 }
 
 .funil__icon--warm {
-  background: var(--partner-warm-bg);
+  background: color-mix(in srgb, var(--partner-warm-text) 12%, var(--partner-card));
   color: var(--partner-warm-text);
 }
 
@@ -562,14 +553,16 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 
 .funil__motivo {
   padding: 0.85rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
   border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--partner-warm-bg) 70%, var(--partner-card));
-  color: var(--partner-warm-text);
+  background: var(--partner-surface);
+  color: var(--partner-text);
 }
 
 .funil__motivo strong {
   display: block;
   margin-bottom: 0.25rem;
+  color: var(--partner-warm-text);
   font-size: 0.8rem;
 }
 
@@ -582,8 +575,9 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 .funil__submit-error {
   margin: 0;
   padding: 0.75rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--partner-warm-text) 24%, var(--partner-line));
   border-radius: 0.8rem;
-  background: var(--partner-warm-bg);
+  background: var(--partner-surface);
   color: var(--partner-warm-text);
   font-size: 0.85rem;
 }

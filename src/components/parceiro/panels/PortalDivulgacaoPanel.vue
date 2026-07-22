@@ -111,7 +111,7 @@ const metrics = computed(() => {
       label: t('divulgacao.metrics.ultimos30d'),
       value: totais?.resgatesUltimos30d ?? 0,
       icon: 'pi pi-chart-line',
-      tone: 'amber' as const,
+      tone: 'primary' as const,
     },
   ]
 })
@@ -126,7 +126,12 @@ async function copyToClipboard(value: string, label: string) {
       life: 2500,
     })
   } catch {
-    toast.add({ severity: 'warn', summary: t('divulgacao.toast.copyFail'), life: 3000 })
+    toast.add({
+      severity: 'warn',
+      summary: t('divulgacao.toast.copyFail'),
+      detail: t('divulgacao.toast.copyFailDetail'),
+      life: 3000,
+    })
   }
 }
 
@@ -932,10 +937,10 @@ watch(lastSuccessAt, (at) => {
   justify-items: start;
   gap: 0.65rem;
   padding: 1.1rem 1.2rem;
-  border: 1px solid color-mix(in srgb, var(--div-warm-text) 35%, var(--div-line));
+  border: 1px solid color-mix(in srgb, var(--div-warm-text) 24%, var(--div-line));
   border-radius: 1.1rem;
-  background: var(--div-warm-bg);
-  color: var(--div-warm-text);
+  background: var(--div-card);
+  color: var(--div-text);
 }
 
 .divulgacao__error p {
@@ -999,8 +1004,8 @@ watch(lastSuccessAt, (at) => {
 .share-kit__pill {
   padding: 0.28rem 0.62rem;
   border-radius: 999px;
-  background: var(--div-amber-bg);
-  color: var(--div-amber-text);
+  background: color-mix(in srgb, var(--div-primary-soft) 32%, var(--div-card));
+  color: var(--div-primary-strong);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -1011,9 +1016,10 @@ watch(lastSuccessAt, (at) => {
 .share-kit__aviso {
   margin: 0;
   padding: 0.7rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--div-primary) 22%, var(--div-line));
   border-radius: 0.85rem;
-  background: var(--div-amber-bg);
-  color: var(--div-amber-text);
+  background: color-mix(in srgb, var(--div-primary-soft) 18%, var(--div-card));
+  color: var(--div-text);
   font-size: 0.84rem;
   line-height: 1.4;
 }

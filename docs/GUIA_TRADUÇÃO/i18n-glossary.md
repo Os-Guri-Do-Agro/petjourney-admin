@@ -109,7 +109,7 @@
 | afiliado / afiliação | affiliate / affiliation | affiliate / affiliation | afiliado / afiliación | |
 | credenciamento | onboarding / credentialing | onboarding / credentialing | acreditación / credenciamento | Preferir "onboarding" em en quando for o fluxo de cadastro. |
 | indicação | referral | referral | referidos / indicación | "Referral" é o termo de produto em en. |
-| comissão | commission | commission | comisión | |
+| participação (recompensa/afiliado) | participation | participation | participación | Em UI do portal, preferir “participação” a “comissão/commission/comisión”. Keys/API internas podem ainda usar `comissao`. |
 | carteira | wallet | wallet | billetera / cartera | No menu: "Finance" (en) espelha o label PT "Financeiro". |
 | financeiro | finance | finance | finanzas | Label de nav. |
 | saque | withdrawal / payout | withdrawal / payout | retiro / pago | "Payout" em contextos de lista/extrato. |
