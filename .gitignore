@@ -35,7 +35,10 @@ coverage
 
 .eslintcache
 
+# Regras de agentes de IA (locais, não versionadas)
 .cursor/rules/
+.claude/
+CLAUDE.md
 
 # Cypress
 /cypress/videos/
