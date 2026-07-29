@@ -8,9 +8,12 @@ const faviconByMode: Record<ThemeMode, string> = {
   dark: '/pata-escura.png',
 }
 
-function getInitialColorMode(): ThemeMode {
+export const DEFAULT_COLOR_MODE: ThemeMode = 'light'
+
+/** Claro é o padrão do painel: só a escolha explícita do usuário muda o modo. */
+export function getInitialColorMode(): ThemeMode {
   if (typeof window === 'undefined') {
-    return 'light'
+    return DEFAULT_COLOR_MODE
   }
 
   const storedMode = window.localStorage.getItem(COLOR_MODE_STORAGE_KEY)
@@ -19,7 +22,7 @@ function getInitialColorMode(): ThemeMode {
     return storedMode
   }
 
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  return DEFAULT_COLOR_MODE
 }
 
 export const colorMode = ref<ThemeMode>(getInitialColorMode())
