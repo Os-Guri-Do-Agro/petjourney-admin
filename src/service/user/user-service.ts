@@ -1,4 +1,6 @@
-import { ApiError, apiFetch, getApiUrl } from '../api'
+import i18n from '@/i18n'
+
+import { ApiError, apiFetch, requireApiUrl } from '../api'
 import type { ApiEnvelope } from '../api-envelope'
 import { type AuthTokens, setAuthSession } from '../auth/auth-session'
 
@@ -111,7 +113,7 @@ type AvailabilityResult = {
 
 async function checkAvailability(field: AvailabilityField, value: string): Promise<AvailabilityResult> {
   const query = new URLSearchParams({ [field]: value })
-  const response = await fetch(`${getApiUrl()}/usuario/verificar?${query.toString()}`)
+  const response = await fetch(`${requireApiUrl()}/usuario/verificar?${query.toString()}`)
 
   if (response.status === 409) {
     return { available: false, field }
@@ -124,7 +126,7 @@ async function checkAvailability(field: AvailabilityField, value: string): Promi
   const errorBody = await response.json().catch(() => null)
 
   throw new ApiError(
-    errorBody?.message || `Erro ${response.status}`,
+    errorBody?.message || String(i18n.global.t('errors.api.genericStatus', { status: response.status })),
     response.status,
     errorBody?.error,
   )

@@ -66,7 +66,8 @@ export const PetJourneyPreset = definePreset(Aura, {
       dark: {
         primary: {
           color: DarkColors.vet.primary,
-          contrastColor: DarkColors.text.inverse,
+          /** Texto sobre botão sálvia: branco no dark (não tinta escura). */
+          contrastColor: LightColors.auth.white,
           hoverColor: DarkColors.auth.sageStrong,
           activeColor: DarkColors.dashboard.primaryDeep,
         },
@@ -76,19 +77,23 @@ export const PetJourneyPreset = definePreset(Aura, {
           color: DarkColors.text.primary,
           focusColor: DarkColors.text.primary,
         },
+        /**
+         * No dark do Aura a escala surface sobe do mais escuro (0) ao mais claro (950).
+         * 900/950 precisam ser texto claro — senão InputText/Select ficam ilegíveis.
+         */
         surface: {
-          0: DarkColors.auth.white,
+          0: DarkColors.dashboard.surface,
           50: DarkColors.bg.screen,
           100: DarkColors.bg.light,
           200: DarkColors.bg.card,
-          300: DarkColors.border.light,
-          400: DarkColors.border.default,
-          500: DarkColors.text.muted,
-          600: DarkColors.text.secondary,
-          700: DarkColors.dashboard.primaryDeep,
-          800: DarkColors.vet.primary,
-          900: '#2A3F39',
-          950: '#1A2824',
+          300: DarkColors.border.subtle,
+          400: DarkColors.border.light,
+          500: DarkColors.border.default,
+          600: DarkColors.dashboard.faint,
+          700: DarkColors.dashboard.muted,
+          800: DarkColors.text.secondary,
+          900: DarkColors.text.primary,
+          950: DarkColors.text.primary,
         },
         text: {
           color: DarkColors.text.primary,
@@ -97,9 +102,9 @@ export const PetJourneyPreset = definePreset(Aura, {
           hoverMutedColor: DarkColors.text.primary,
         },
         content: {
-          background: DarkColors.auth.white,
+          background: DarkColors.dashboard.surface,
           hoverBackground: DarkColors.auth.sageTint,
-          borderColor: 'color-mix(in srgb, #FAF9F6 20%, transparent)',
+          borderColor: DarkColors.dashboard.line,
           color: DarkColors.text.primary,
           hoverColor: DarkColors.vet.primary,
         },

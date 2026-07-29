@@ -82,6 +82,7 @@ watch(
     :loading="false"
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
+    block-when-suspended
     @retry="ensureContext(true)"
   >
     <div class="divulgacao-page" :style="pageAtmosphere">

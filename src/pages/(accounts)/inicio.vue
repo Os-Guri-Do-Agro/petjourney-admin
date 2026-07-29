@@ -72,6 +72,7 @@ onUnmounted(() => {
     :loading="false"
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
+    block-when-suspended
     @retry="ensureContext(true)"
   >
     <template #actions>

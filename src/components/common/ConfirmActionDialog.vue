@@ -12,7 +12,6 @@ const props = withDefaults(
   defineProps<{
     title?: string
     message?: string
-    icon?: string
     confirmLabel?: string
     cancelLabel?: string
     severity?: 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast'
@@ -20,7 +19,6 @@ const props = withDefaults(
   {
     title: 'Confirmar ação',
     message: 'Tem certeza que deseja continuar?',
-    icon: 'pi pi-exclamation-triangle',
     confirmLabel: 'Confirmar',
     cancelLabel: 'Cancelar',
     severity: 'danger',
@@ -39,14 +37,8 @@ const dialogStyle = computed(() => {
     '--confirm-bg': colors.auth.white,
     '--confirm-text': colors.auth.text,
     '--confirm-muted': colors.auth.muted,
-    '--confirm-danger': colors.red,
-    '--confirm-danger-bg': colors.dashboard.warmBg,
     '--confirm-shadow-rgb': colors.auth.shadowRgb,
   }
-})
-
-const confirmIcon = computed(() => {
-  return props.icon
 })
 
 function handleCancel() {
@@ -65,12 +57,7 @@ function handleConfirm() {
     <template #container>
       <Card class="confirm-dialog" :style="dialogStyle">
         <template #title>
-          <div class="confirm-dialog__header">
-            <span class="confirm-dialog__icon">
-              <i :class="confirmIcon" aria-hidden="true" />
-            </span>
-            <span>{{ props.title }}</span>
-          </div>
+          <h2 class="confirm-dialog__title">{{ props.title }}</h2>
         </template>
 
         <template #content>
@@ -141,35 +128,20 @@ function handleConfirm() {
   padding: 0;
 }
 
-.confirm-dialog__header {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
+.confirm-dialog__title {
+  margin: 0;
   color: var(--confirm-text);
-  font-size: 1.18rem;
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.03em;
-}
-
-.confirm-dialog__icon {
-  display: grid;
-  width: 2.6rem;
-  height: 2.6rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.92rem;
-  background: var(--confirm-danger-bg);
-  color: var(--confirm-danger);
-}
-
-.confirm-dialog__icon .pi {
-  font-size: 1.25rem;
+  line-height: 1.3;
 }
 
 .confirm-dialog__message {
   margin: 0;
   color: var(--confirm-muted);
-  line-height: 1.6;
+  font-size: 0.92rem;
+  line-height: 1.55;
 }
 
 .confirm-dialog__actions {

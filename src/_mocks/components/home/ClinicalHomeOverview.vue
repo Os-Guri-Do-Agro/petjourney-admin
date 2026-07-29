@@ -678,11 +678,13 @@ function formatMetricValue(value: number) {
 }
 
 .clinical-chip[data-tone='attention'] {
-  background: color-mix(in srgb, var(--dash-amber-bg) 50%, var(--dash-card));
+  border-color: color-mix(in srgb, var(--dash-amber-text) 28%, var(--dash-line));
+  background: var(--dash-card);
 }
 
 .clinical-chip[data-tone='danger'] {
-  background: color-mix(in srgb, var(--dash-warm-bg) 50%, var(--dash-card));
+  border-color: color-mix(in srgb, var(--dash-warm-text) 28%, var(--dash-line));
+  background: var(--dash-card);
 }
 
 .clinical-strip__cta {
@@ -746,11 +748,13 @@ function formatMetricValue(value: number) {
 }
 
 .clinical-kpi[data-tone='attention'] {
-  background: color-mix(in srgb, var(--dash-amber-bg) 42%, var(--dash-card));
+  border-color: color-mix(in srgb, var(--dash-amber-text) 26%, var(--dash-line));
+  background: var(--dash-surface);
 }
 
 .clinical-kpi[data-tone='danger'] {
-  background: color-mix(in srgb, var(--dash-warm-bg) 42%, var(--dash-card));
+  border-color: color-mix(in srgb, var(--dash-warm-text) 26%, var(--dash-line));
+  background: var(--dash-surface);
 }
 
 .clinical-kpi__head {
@@ -1044,11 +1048,13 @@ function formatMetricValue(value: number) {
 }
 
 .metric-panel[data-tone='attention'] {
-  background: color-mix(in srgb, var(--dash-amber-bg) 45%, var(--dash-card));
+  border-color: color-mix(in srgb, var(--dash-amber-text) 26%, var(--dash-line));
+  background: var(--dash-card);
 }
 
 .metric-panel[data-tone='danger'] {
-  background: color-mix(in srgb, var(--dash-warm-bg) 45%, var(--dash-card));
+  border-color: color-mix(in srgb, var(--dash-warm-text) 26%, var(--dash-line));
+  background: var(--dash-card);
 }
 
 .metric-panel__head {

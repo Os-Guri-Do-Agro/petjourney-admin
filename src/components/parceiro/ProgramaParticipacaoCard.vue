@@ -551,8 +551,8 @@ watch(modoStatus, () => {
 }
 
 .programa-card--participativo .programa-card__icon {
-  background: color-mix(in srgb, var(--prog-amber-text) 14%, var(--prog-card));
-  color: var(--prog-amber-text);
+  background: color-mix(in srgb, var(--prog-primary) 16%, var(--prog-card));
+  color: var(--prog-primary-strong);
 }
 
 .programa-card__identity h3 {
@@ -585,13 +585,13 @@ watch(modoStatus, () => {
 }
 
 .programa-card[data-status='SOLICITADO'] .programa-card__badge {
-  background: var(--prog-amber-bg);
-  color: var(--prog-amber-text);
+  background: color-mix(in srgb, var(--prog-primary-soft) 32%, var(--prog-card));
+  color: var(--prog-primary-strong);
 }
 
 .programa-card[data-status='REJEITADO'] .programa-card__badge,
 .programa-card[data-status='SUSPENSO'] .programa-card__badge {
-  background: var(--prog-warm-bg);
+  background: color-mix(in srgb, var(--prog-warm-text) 12%, var(--prog-card));
   color: var(--prog-warm-text);
 }
 
@@ -608,7 +608,7 @@ watch(modoStatus, () => {
 }
 
 .programa-card__soon {
-  color: var(--prog-amber-text);
+  color: var(--prog-muted);
   font-weight: 600;
 }
 
@@ -633,7 +633,7 @@ watch(modoStatus, () => {
 }
 
 .programa-card--participativo .programa-card__features i {
-  color: var(--prog-amber-text);
+  color: var(--prog-primary-strong);
 }
 
 .programa-card--focus .programa-card__features i {
@@ -672,13 +672,15 @@ watch(modoStatus, () => {
 }
 
 .programa-card__info--pending {
-  background: color-mix(in srgb, var(--prog-amber-bg) 65%, var(--prog-card));
-  color: var(--prog-amber-text);
+  border: 1px solid color-mix(in srgb, var(--prog-primary) 22%, var(--prog-line));
+  background: var(--prog-surface);
+  color: var(--prog-text);
 }
 
 .programa-card__info--warning {
-  background: color-mix(in srgb, var(--prog-warm-bg) 65%, var(--prog-card));
-  color: var(--prog-warm-text);
+  border: 1px solid color-mix(in srgb, var(--prog-warm-text) 22%, var(--prog-line));
+  background: var(--prog-surface);
+  color: var(--prog-text);
 }
 
 .programa-card__info p {
@@ -768,8 +770,8 @@ watch(modoStatus, () => {
 }
 
 .programa-card__button--waiting {
-  background: color-mix(in srgb, var(--prog-amber-bg) 80%, var(--prog-card));
-  color: var(--prog-amber-text);
+  background: color-mix(in srgb, var(--prog-primary-soft) 28%, var(--prog-card));
+  color: var(--prog-muted);
   cursor: default;
 }
 

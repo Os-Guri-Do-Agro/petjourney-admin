@@ -9,6 +9,10 @@ export type AppNavigationItem = {
   label: string
   to: string
   icon: string
+  /** Item visível, mas bloqueado com teaser (ex.: cupom em desenvolvimento). */
+  comingSoon?: boolean
+  /** Cadastro suspenso: item visível com cadeado; a tela destino mostra o gate. */
+  locked?: boolean
 }
 
 export type AppNavigationGroup = {
@@ -162,6 +166,10 @@ export function useAppNavigation() {
 
     if (EQUIPE_MENU_ENABLED) {
       items.push({ label: 'Equipe', to: '/parceiro/equipe', icon: 'pi pi-users' })
+    }
+
+    if (parceiroStore.cadastroSuspenso) {
+      return items.map((item) => ({ ...item, locked: true }))
     }
 
     return items

@@ -5,10 +5,13 @@ import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import IndicacaoQrBlock from '@/components/parceiro/IndicacaoQrBlock.vue'
 import PartnerFocusCard from '@/components/parceiro/PartnerFocusCard.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
+import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
   getPortalCupons,
@@ -16,12 +19,38 @@ import {
   getPortalResgates,
 } from '@/service/parceiro/parceiro-portal-service'
 import type { CupomParceiro, PortalIndicacao, ResgateParceiro } from '@/service/parceiro/types'
+import { LightColors } from '@/theme/colors'
 import { currentColors } from '@/theme/color-mode'
 
 const { t, locale } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 const { lastSuccessAt } = useCupomResgateModal()
+const { open: openCupomComingSoon } = useCupomComingSoon()
+const cupomFeatureEnabled = CUPOM_FEATURE_ENABLED
+
+const indicacaoSteps = computed(() => [
+  {
+    icon: 'pi pi-share-alt',
+    title: t('divulgacao.howItWorks.steps.share.title'),
+    body: t('divulgacao.howItWorks.steps.share.body'),
+  },
+  {
+    icon: 'pi pi-user-plus',
+    title: t('divulgacao.howItWorks.steps.signup.title'),
+    body: t('divulgacao.howItWorks.steps.signup.body'),
+  },
+  {
+    icon: 'pi pi-link',
+    title: t('divulgacao.howItWorks.steps.link.title'),
+    body: t('divulgacao.howItWorks.steps.link.body'),
+  },
+  {
+    icon: 'pi pi-wallet',
+    title: t('divulgacao.howItWorks.steps.earn.title'),
+    body: t('divulgacao.howItWorks.steps.earn.body'),
+  },
+])
 
 const indicacao = ref<PortalIndicacao | null>(null)
 const cupons = ref<CupomParceiro[]>([])
@@ -55,6 +84,7 @@ const panelStyle = computed(() => {
     '--div-warm-bg': colors.dashboard.warmBg,
     '--div-warm-text': colors.dashboard.warmText,
     '--div-shadow-rgb': colors.auth.shadowRgb,
+    '--div-on-primary': LightColors.auth.white,
   }
 })
 
@@ -81,7 +111,7 @@ const metrics = computed(() => {
       label: t('divulgacao.metrics.ultimos30d'),
       value: totais?.resgatesUltimos30d ?? 0,
       icon: 'pi pi-chart-line',
-      tone: 'amber' as const,
+      tone: 'primary' as const,
     },
   ]
 })
@@ -96,7 +126,12 @@ async function copyToClipboard(value: string, label: string) {
       life: 2500,
     })
   } catch {
-    toast.add({ severity: 'warn', summary: t('divulgacao.toast.copyFail'), life: 3000 })
+    toast.add({
+      severity: 'warn',
+      summary: t('divulgacao.toast.copyFail'),
+      detail: t('divulgacao.toast.copyFailDetail'),
+      life: 3000,
+    })
   }
 }
 
@@ -107,6 +142,15 @@ async function loadAll() {
   try {
     await ensureContext()
     const query = parceiroQuery()
+
+    if (!CUPOM_FEATURE_ENABLED) {
+      indicacao.value = await getPortalIndicacao(query)
+      cupons.value = []
+      cuponsCursor.value = null
+      resgates.value = []
+      resgatesCursor.value = null
+      return
+    }
 
     const [indicacaoData, cuponsPage, resgatesPage] = await Promise.all([
       getPortalIndicacao(query),
@@ -226,13 +270,17 @@ watch(lastSuccessAt, (at) => {
         </header>
 
         <div
-          class="divulgacao__top"
+          class="divulgacao__board"
+          :class="{
+            'divulgacao__board--with-metrics': cupomFeatureEnabled,
+            'divulgacao__board--with-soon': !cupomFeatureEnabled,
+          }"
           role="status"
           aria-live="polite"
           aria-busy="true"
           :aria-label="t('divulgacao.indicacao.loadingAria')"
         >
-          <PartnerFocusCard class="share-kit share-kit--skeleton" aria-hidden="true">
+          <PartnerFocusCard class="share-kit share-kit--compact share-kit--skeleton" aria-hidden="true">
             <header class="share-kit__head">
               <div class="share-kit__head-copy">
                 <Skeleton width="7.5rem" height="0.7rem" border-radius="4px" />
@@ -273,7 +321,7 @@ watch(lastSuccessAt, (at) => {
             </div>
           </PartnerFocusCard>
 
-          <aside class="metrics-strip" aria-hidden="true">
+          <aside v-if="cupomFeatureEnabled" class="metrics-strip" aria-hidden="true">
             <article
               v-for="metric in metrics"
               :key="`skel-${metric.id}`"
@@ -290,7 +338,11 @@ watch(lastSuccessAt, (at) => {
         </div>
       </section>
 
-      <section class="div-zone" aria-labelledby="div-movimentacao-title">
+      <section
+        v-if="cupomFeatureEnabled"
+        class="div-zone"
+        aria-labelledby="div-movimentacao-title"
+      >
         <header class="div-zone__head">
           <div class="div-zone__title-row">
             <p class="div-zone__index">02</p>
@@ -374,8 +426,14 @@ watch(lastSuccessAt, (at) => {
           <p>{{ t('divulgacao.indicacao.lede') }}</p>
         </header>
 
-        <div class="divulgacao__top">
-          <PartnerFocusCard class="share-kit" :muted="!indicacao.podeIndicar">
+        <div
+          class="divulgacao__board"
+          :class="{
+            'divulgacao__board--with-metrics': cupomFeatureEnabled,
+            'divulgacao__board--with-soon': !cupomFeatureEnabled,
+          }"
+        >
+          <PartnerFocusCard class="share-kit share-kit--compact" :muted="!indicacao.podeIndicar">
             <header class="share-kit__head">
               <div>
                 <p class="share-kit__eyebrow">{{ t('divulgacao.shareKit.eyebrow') }}</p>
@@ -388,7 +446,10 @@ watch(lastSuccessAt, (at) => {
 
             <p v-if="indicacao.aviso" class="share-kit__aviso">{{ indicacao.aviso }}</p>
 
-            <div class="share-kit__stage">
+            <div
+              class="share-kit__stage"
+              :class="{ 'share-kit__stage--with-qr': Boolean(indicacao.qrImageUrl) }"
+            >
               <div class="share-kit__main">
                 <div class="share-kit__code-block">
                   <span class="share-kit__label">{{ t('divulgacao.shareKit.codeLabel') }}</span>
@@ -423,20 +484,28 @@ watch(lastSuccessAt, (at) => {
                     </button>
                   </div>
                 </div>
+
+                <p class="share-kit__hint">
+                  {{ t('divulgacao.shareKit.hint') }}
+                </p>
               </div>
 
-              <figure v-if="indicacao.qrCodeDataUrl" class="share-kit__qr">
-                <img :src="indicacao.qrCodeDataUrl" :alt="t('divulgacao.shareKit.qrAlt')" />
-                <figcaption>{{ t('divulgacao.shareKit.qrCaption') }}</figcaption>
-              </figure>
+              <IndicacaoQrBlock
+                v-if="indicacao.qrImageUrl"
+                class="share-kit__qr"
+                :image-url="indicacao.qrImageUrl"
+                :code="indicacao.codigoIndicacao"
+                :disabled="!indicacao.podeIndicar"
+                size="sm"
+              />
             </div>
-
-            <p class="share-kit__hint">
-              {{ t('divulgacao.shareKit.hint') }}
-            </p>
           </PartnerFocusCard>
 
-          <aside class="metrics-strip" :aria-label="t('divulgacao.metrics.aria')">
+          <aside
+            v-if="cupomFeatureEnabled"
+            class="metrics-strip"
+            :aria-label="t('divulgacao.metrics.aria')"
+          >
             <article
               v-for="metric in metrics"
               :key="metric.id"
@@ -452,10 +521,73 @@ watch(lastSuccessAt, (at) => {
               </div>
             </article>
           </aside>
+
+          <aside
+            v-else
+            id="cupons"
+            class="cupom-soon"
+            aria-labelledby="div-cupom-soon-title"
+          >
+            <div id="resgates" class="cupom-soon__anchor">
+              <span class="cupom-soon__badge">{{ t('comingSoon.cupom.badge') }}</span>
+              <span class="cupom-soon__icon" aria-hidden="true">
+                <i class="pi pi-ticket" />
+              </span>
+              <h2 id="div-cupom-soon-title">{{ t('comingSoon.cupom.title') }}</h2>
+              <p class="cupom-soon__lede">{{ t('comingSoon.cupom.lede') }}</p>
+              <Button
+                type="button"
+                :label="t('comingSoon.cupom.sectionCta')"
+                @click="openCupomComingSoon"
+              />
+            </div>
+          </aside>
         </div>
       </section>
 
-      <section class="div-zone" aria-labelledby="div-movimentacao-title">
+      <section
+        id="como-funciona"
+        class="div-zone"
+        aria-labelledby="div-how-title"
+      >
+        <article class="indicacao-pitch">
+          <header class="indicacao-pitch__hero">
+            <p class="indicacao-pitch__eyebrow">{{ t('divulgacao.howItWorks.eyebrow') }}</p>
+            <h2 id="div-how-title">{{ t('divulgacao.howItWorks.title') }}</h2>
+            <p class="indicacao-pitch__lede">{{ t('divulgacao.howItWorks.lede') }}</p>
+          </header>
+
+          <ol class="indicacao-pitch__steps">
+            <li
+              v-for="(step, index) in indicacaoSteps"
+              :key="step.title"
+              class="indicacao-pitch__step"
+            >
+              <span class="indicacao-pitch__index" aria-hidden="true">{{
+                String(index + 1).padStart(2, '0')
+              }}</span>
+              <span class="indicacao-pitch__icon" aria-hidden="true">
+                <i :class="step.icon" />
+              </span>
+              <div>
+                <h3>{{ step.title }}</h3>
+                <p>{{ step.body }}</p>
+              </div>
+            </li>
+          </ol>
+
+          <div class="indicacao-pitch__close">
+            <p class="indicacao-pitch__promise">{{ t('divulgacao.howItWorks.promise') }}</p>
+            <p class="indicacao-pitch__note">{{ t('divulgacao.howItWorks.note') }}</p>
+          </div>
+        </article>
+      </section>
+
+      <section
+        v-if="cupomFeatureEnabled"
+        class="div-zone"
+        aria-labelledby="div-movimentacao-title"
+      >
         <header class="div-zone__head">
           <div class="div-zone__title-row">
             <p class="div-zone__index">02</p>
@@ -604,6 +736,135 @@ watch(lastSuccessAt, (at) => {
   line-height: 1.4;
 }
 
+.indicacao-pitch {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.35rem 1.4rem 1.4rem;
+  border: 1px solid color-mix(in srgb, var(--div-primary) 18%, var(--div-line));
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--div-primary-soft) 42%, var(--div-card)) 0%,
+      var(--div-card) 48%
+    );
+  box-shadow: 0 14px 34px rgb(var(--div-shadow-rgb) / 0.05);
+}
+
+.indicacao-pitch__hero {
+  display: grid;
+  gap: 0.45rem;
+  max-width: 42rem;
+}
+
+.indicacao-pitch__eyebrow {
+  margin: 0;
+  color: var(--div-primary-strong);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.indicacao-pitch__hero h2 {
+  margin: 0;
+  color: var(--div-text);
+  font-size: clamp(1.45rem, 2.4vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.indicacao-pitch__lede {
+  margin: 0;
+  color: var(--div-muted);
+  font-size: 0.98rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.indicacao-pitch__steps {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.indicacao-pitch__step {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+  min-height: 100%;
+  padding: 0.95rem 0.95rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--div-line) 90%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--div-surface) 70%, var(--div-card));
+}
+
+.indicacao-pitch__index {
+  color: var(--div-faint);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.indicacao-pitch__icon {
+  display: grid;
+  width: 2.45rem;
+  height: 2.45rem;
+  place-items: center;
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--div-primary) 18%, transparent);
+  color: var(--div-primary-strong);
+  font-size: 0.95rem;
+}
+
+.indicacao-pitch__step h3 {
+  margin: 0 0 0.28rem;
+  color: var(--div-text);
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.indicacao-pitch__step p {
+  margin: 0;
+  color: var(--div-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.indicacao-pitch__close {
+  display: grid;
+  gap: 0.4rem;
+  padding-top: 0.15rem;
+  border-top: 1px solid color-mix(in srgb, var(--div-line) 85%, transparent);
+}
+
+.indicacao-pitch__promise {
+  margin: 0;
+  color: var(--div-text);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.indicacao-pitch__note {
+  margin: 0;
+  color: var(--div-faint);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 1100px) {
+  .indicacao-pitch__steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .share-kit--skeleton,
 .list-panel--skeleton,
 .metrics-strip__item--skeleton {
@@ -676,10 +937,10 @@ watch(lastSuccessAt, (at) => {
   justify-items: start;
   gap: 0.65rem;
   padding: 1.1rem 1.2rem;
-  border: 1px solid color-mix(in srgb, var(--div-warm-text) 35%, var(--div-line));
+  border: 1px solid color-mix(in srgb, var(--div-warm-text) 24%, var(--div-line));
   border-radius: 1.1rem;
-  background: var(--div-warm-bg);
-  color: var(--div-warm-text);
+  background: var(--div-card);
+  color: var(--div-text);
 }
 
 .divulgacao__error p {
@@ -687,12 +948,34 @@ watch(lastSuccessAt, (at) => {
   font-size: 0.9rem;
 }
 
-.divulgacao__top {
+.divulgacao__board {
   display: grid;
   gap: 0.9rem;
   width: 100%;
-  grid-template-columns: minmax(0, 1.45fr) minmax(14rem, 0.7fr);
   align-items: stretch;
+}
+
+.divulgacao__board--with-metrics {
+  grid-template-columns: minmax(0, 1.45fr) minmax(13.5rem, 0.7fr);
+}
+
+.divulgacao__board--with-soon {
+  grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 0.8fr);
+}
+
+.share-kit--compact {
+  gap: 0.85rem;
+  padding: 1.05rem 1.15rem 1.05rem;
+}
+
+.share-kit--compact :deep(.partner-focus),
+.share-kit.share-kit--compact {
+  gap: 0.85rem;
+}
+
+.share-kit--compact.partner-focus {
+  gap: 0.85rem;
+  padding: 1.05rem 1.15rem;
 }
 
 .share-kit__head {
@@ -721,8 +1004,8 @@ watch(lastSuccessAt, (at) => {
 .share-kit__pill {
   padding: 0.28rem 0.62rem;
   border-radius: 999px;
-  background: var(--div-amber-bg);
-  color: var(--div-amber-text);
+  background: color-mix(in srgb, var(--div-primary-soft) 32%, var(--div-card));
+  color: var(--div-primary-strong);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -733,25 +1016,64 @@ watch(lastSuccessAt, (at) => {
 .share-kit__aviso {
   margin: 0;
   padding: 0.7rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--div-primary) 22%, var(--div-line));
   border-radius: 0.85rem;
-  background: var(--div-amber-bg);
-  color: var(--div-amber-text);
+  background: color-mix(in srgb, var(--div-primary-soft) 18%, var(--div-card));
+  color: var(--div-text);
   font-size: 0.84rem;
   line-height: 1.4;
 }
 
 .share-kit__stage {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.85rem;
   align-items: stretch;
 }
 
+.share-kit__stage--with-qr {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
 .share-kit__main {
-  display: grid;
-  gap: 0.95rem;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   min-width: 0;
+}
+
+.share-kit__qr {
+  align-self: stretch;
+  min-height: 100%;
+}
+
+.share-kit--compact .share-kit__head h3 {
+  font-size: 1.02rem;
+}
+
+.share-kit--compact .share-kit__code {
+  min-height: 2.45rem;
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+}
+
+.share-kit--compact .share-kit__icon-btn {
+  width: 2.45rem;
+  height: 2.45rem;
+}
+
+.share-kit--compact .share-kit__link-field {
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+  padding: 0.4rem;
+}
+
+.share-kit--compact .share-kit__copy-cta {
+  width: 100%;
+  min-height: 2.25rem;
+}
+
+.share-kit--compact .share-kit__hint {
+  padding-top: 0.65rem;
+  font-size: 0.76rem;
 }
 
 .share-kit__label {
@@ -867,37 +1189,10 @@ watch(lastSuccessAt, (at) => {
   cursor: not-allowed;
 }
 
-.share-kit__qr {
-  display: grid;
-  gap: 0.45rem;
-  justify-items: center;
-  align-content: center;
-  margin: 0;
-  padding: 0.85rem 0.9rem 0.75rem;
-  border: 1px solid var(--pf-line, var(--div-line-soft));
-  border-radius: 1.05rem;
-  background: var(--pf-chip, var(--div-card));
-}
-
-.share-kit__qr img {
-  width: 7rem;
-  height: 7rem;
-  border-radius: 0.7rem;
-  background: #fff;
-  padding: 0.35rem;
-  box-sizing: border-box;
-}
-
-.share-kit__qr figcaption {
-  color: var(--pf-on-soft, var(--div-muted));
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
 .share-kit__hint {
   margin: 0;
-  padding-top: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.85rem;
   border-top: 1px solid var(--pf-line, color-mix(in srgb, var(--div-line) 80%, transparent));
   color: var(--pf-on-soft, var(--div-muted));
   font-size: 0.8rem;
@@ -1128,10 +1423,6 @@ watch(lastSuccessAt, (at) => {
 }
 
 @media (max-width: 980px) {
-  .divulgacao__top {
-    grid-template-columns: 1fr;
-  }
-
   .metrics-strip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1141,17 +1432,111 @@ watch(lastSuccessAt, (at) => {
   }
 }
 
+.cupom-soon {
+  display: flex;
+  min-height: 100%;
+  padding: 1.1rem 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--div-primary) 22%, var(--div-line));
+  border-radius: 1.2rem;
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--div-primary-soft) 34%, var(--div-card)) 0%,
+      var(--div-card) 55%
+    );
+  box-shadow: 0 12px 28px rgb(var(--div-shadow-rgb) / 0.05);
+}
+
+.cupom-soon__anchor {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.cupom-soon__badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.45rem;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--div-primary) 18%, transparent);
+  color: var(--div-primary-strong);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cupom-soon__icon {
+  display: grid;
+  width: 2.55rem;
+  height: 2.55rem;
+  place-items: center;
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--div-primary) 18%, var(--div-surface));
+  color: var(--div-primary-strong);
+  font-size: 1rem;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--div-primary) 16%, transparent);
+}
+
+.cupom-soon__anchor h2 {
+  margin: 0;
+  color: var(--div-text);
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.cupom-soon__lede {
+  margin: 0;
+  color: var(--div-muted);
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.cupom-soon :deep(.p-button) {
+  width: 100%;
+  margin-top: auto;
+  justify-content: center;
+  border: 0;
+  background: var(--div-primary);
+  color: var(--div-on-primary);
+  font-weight: 700;
+}
+
+.cupom-soon :deep(.p-button:not(:disabled):hover) {
+  filter: brightness(1.04);
+}
+
+@media (max-width: 960px) {
+  .divulgacao__board--with-soon,
+  .divulgacao__board--with-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 720px) {
   .divulgacao__lists,
   .metrics-strip {
     grid-template-columns: 1fr;
   }
 
-  .share-kit__stage {
+  .indicacao-pitch__steps {
+    grid-template-columns: 1fr;
+  }
+
+  .share-kit__stage,
+  .share-kit__stage--with-qr {
     grid-template-columns: 1fr;
   }
 
   .share-kit__qr {
+    width: min(100%, 12.5rem);
     justify-self: start;
   }
 

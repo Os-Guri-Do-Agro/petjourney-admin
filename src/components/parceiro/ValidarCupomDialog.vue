@@ -12,7 +12,8 @@ import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import { ApiError } from '@/service/api'
 import { validarCupom } from '@/service/parceiro/parceiro-portal-service'
 import type { ValidarCupomResultado } from '@/service/parceiro/types'
-import { currentColors, isDarkMode } from '@/theme/color-mode'
+import { LightColors } from '@/theme/colors'
+import { currentColors } from '@/theme/color-mode'
 import {
   isCodigoResgateFormatoValido,
   normalizarCodigoResgate,
@@ -35,7 +36,6 @@ const resultado = ref<ValidarCupomResultado | null>(null)
 
 const dialogStyle = computed(() => {
   const colors = currentColors.value
-  const dark = isDarkMode.value
 
   return {
     ...focusSurfaceStyle.value,
@@ -53,7 +53,8 @@ const dialogStyle = computed(() => {
     '--vc-warm-bg': colors.dashboard.warmBg,
     '--vc-warm-text': colors.dashboard.warmText,
     '--vc-shadow-rgb': colors.auth.shadowRgb,
-    '--vc-on-cta': dark ? colors.dashboard.bg : colors.auth.white,
+    /** Sempre branco real — `auth.white` no dark é superfície escura. */
+    '--vc-on-cta': LightColors.auth.white,
   }
 })
 
@@ -641,8 +642,9 @@ async function handleValidar() {
 .vc-error {
   margin: 0;
   padding: 0.7rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--vc-warm-text) 22%, var(--vc-line));
   border-radius: 0.8rem;
-  background: var(--vc-warm-bg);
+  background: var(--vc-surface);
   color: var(--vc-warm-text);
   font-size: 0.86rem;
   line-height: 1.4;
@@ -657,8 +659,9 @@ async function handleValidar() {
 }
 
 .vc-banner--warn {
-  background: var(--vc-warm-bg);
-  color: var(--vc-warm-text);
+  border: 1px solid color-mix(in srgb, var(--vc-warm-text) 22%, var(--vc-line));
+  background: var(--vc-surface);
+  color: var(--vc-text);
 }
 
 .vc-result {
@@ -686,7 +689,7 @@ async function handleValidar() {
 }
 
 .vc-result--fail .vc-result__badge {
-  background: var(--vc-warm-bg);
+  background: color-mix(in srgb, var(--vc-warm-text) 14%, var(--vc-bg));
   color: var(--vc-warm-text);
 }
 

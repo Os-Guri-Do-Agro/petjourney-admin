@@ -5,6 +5,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import IndicacaoQrBlock from '@/components/parceiro/IndicacaoQrBlock.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
@@ -98,6 +99,8 @@ const saldoTotalLabel = computed(() =>
 
 const showCommissionCard = computed(() => store.statusAfiliadoAtivo)
 const codigoIndicacao = computed(() => indicacao.value?.codigoIndicacao ?? '')
+const qrImageUrl = computed(() => indicacao.value?.qrImageUrl ?? '')
+const podeIndicar = computed(() => Boolean(indicacao.value?.podeIndicar))
 
 async function loadDashboardData() {
   error.value = ''
@@ -279,27 +282,37 @@ watch(lastSuccessAt, (at) => {
             </RouterLink>
           </article>
 
-          <article class="referral-card">
-            <p class="referral-card__eyebrow">{{ t('inicio.dash.referral.eyebrow') }}</p>
-            <div class="referral-card__code-row">
-              <strong class="referral-card__code">{{ codigoIndicacao || '—' }}</strong>
-              <button
-                v-if="codigoIndicacao"
-                class="referral-card__copy"
-                type="button"
-                :aria-label="t('inicio.dash.referral.copyAria')"
-                @click="copyCodigo"
-              >
-                <i class="pi pi-copy" aria-hidden="true" />
-              </button>
+          <article class="referral-card" :class="{ 'referral-card--with-qr': Boolean(qrImageUrl) }">
+            <div class="referral-card__main">
+              <p class="referral-card__eyebrow">{{ t('inicio.dash.referral.eyebrow') }}</p>
+              <div class="referral-card__code-row">
+                <strong class="referral-card__code">{{ codigoIndicacao || '—' }}</strong>
+                <button
+                  v-if="codigoIndicacao"
+                  class="referral-card__copy"
+                  type="button"
+                  :aria-label="t('inicio.dash.referral.copyAria')"
+                  @click="copyCodigo"
+                >
+                  <i class="pi pi-copy" aria-hidden="true" />
+                </button>
+              </div>
+              <p class="referral-card__meta">
+                {{ t('inicio.dash.referral.meta') }}
+              </p>
+              <RouterLink class="referral-card__cta" to="/parceiro/divulgacao">
+                {{ t('inicio.dash.referral.cta') }}
+                <i class="pi pi-arrow-right" aria-hidden="true" />
+              </RouterLink>
             </div>
-            <p class="referral-card__meta">
-              {{ t('inicio.dash.referral.meta') }}
-            </p>
-            <RouterLink class="referral-card__cta" to="/parceiro/divulgacao">
-              {{ t('inicio.dash.referral.cta') }}
-              <i class="pi pi-arrow-right" aria-hidden="true" />
-            </RouterLink>
+            <IndicacaoQrBlock
+              v-if="qrImageUrl"
+              class="referral-card__qr"
+              :image-url="qrImageUrl"
+              :code="codigoIndicacao"
+              :disabled="!podeIndicar"
+              size="sm"
+            />
           </article>
         </div>
       </section>
@@ -596,8 +609,8 @@ watch(lastSuccessAt, (at) => {
 }
 
 .commission-card__badge--muted {
-  background: var(--dash-amber-bg);
-  color: var(--dash-amber-text);
+  background: color-mix(in srgb, var(--dash-primary-soft) 28%, var(--dash-card));
+  color: var(--dash-muted);
 }
 
 .commission-card__amount {
@@ -691,6 +704,8 @@ watch(lastSuccessAt, (at) => {
 }
 
 .referral-card {
+  display: grid;
+  gap: 1rem;
   border: 1px solid var(--dash-line);
   background:
     linear-gradient(
@@ -699,6 +714,18 @@ watch(lastSuccessAt, (at) => {
       var(--dash-card)
     );
   box-shadow: 0 12px 28px rgb(var(--dash-shadow-rgb) / 0.045);
+}
+
+.referral-card--with-qr {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+}
+
+.referral-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-width: 0;
 }
 
 .referral-card__code-row {
@@ -744,10 +771,14 @@ watch(lastSuccessAt, (at) => {
   outline: none;
 }
 
+.referral-card .referral-card__meta {
+  max-width: 18rem;
+}
+
 .referral-card__cta {
   width: 100%;
   justify-content: center;
-  min-height: 2.65rem;
+  min-height: 2.55rem;
   border-radius: 0.85rem;
   background: color-mix(in srgb, var(--dash-primary) 14%, var(--dash-card));
   color: var(--dash-primary-strong);
@@ -759,6 +790,10 @@ watch(lastSuccessAt, (at) => {
   background: color-mix(in srgb, var(--dash-primary) 22%, var(--dash-card));
   outline: none;
   transform: translateY(-1px);
+}
+
+.referral-card__qr {
+  align-self: stretch;
 }
 
 .dash-metrics {
@@ -853,6 +888,15 @@ watch(lastSuccessAt, (at) => {
   .dash-focus,
   .dash-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .referral-card--with-qr {
+    grid-template-columns: 1fr;
+  }
+
+  .referral-card__qr {
+    width: min(100%, 12.5rem);
+    justify-self: start;
   }
 }
 </style>

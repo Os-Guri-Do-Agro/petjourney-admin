@@ -15,6 +15,7 @@ import {
 } from '@/service/parceiro/parceiro-portal-service'
 import type { ParceiroCadastro, ParceiroCadastroPayload } from '@/service/parceiro/types'
 import { resolveCadastroErrorView } from '@/utils/parceiro/modo-participacao'
+import { SUPPORT_CONTACTS } from '@/utils/parceiro/support-contacts'
 
 const { t, locale } = useI18n()
 const toast = useToast()
@@ -119,6 +120,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
       toast.add({
         severity: 'success',
         summary: t('parceiroCadastro.toast.salvo'),
+        detail: t('parceiroCadastro.toast.salvoDetail'),
         life: 4000,
       })
     }
@@ -252,10 +254,57 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
         <p>{{ motivoAuditoria }}</p>
       </div>
 
-      <a class="funil__support" href="mailto:atendimento@petjourney.health">
-        <i class="pi pi-envelope" aria-hidden="true" />
-        {{ t('parceiroCadastro.suspenso.contact') }}
-      </a>
+      <p class="funil__support-lede">{{ t('frame.suspended.channelsLede') }}</p>
+      <ul class="funil__channels">
+        <li>
+          <a
+            :href="SUPPORT_CONTACTS.whatsappHref"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="pi pi-whatsapp" aria-hidden="true" />
+            <span>
+              <strong>{{ t('frame.suspended.channels.whatsapp') }}</strong>
+              <small>{{ SUPPORT_CONTACTS.whatsappDisplay }}</small>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a
+            :href="SUPPORT_CONTACTS.instagramHref"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="pi pi-instagram" aria-hidden="true" />
+            <span>
+              <strong>{{ t('frame.suspended.channels.instagram') }}</strong>
+              <small>{{ SUPPORT_CONTACTS.instagramHandle }}</small>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a
+            :href="SUPPORT_CONTACTS.facebookHref"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="pi pi-facebook" aria-hidden="true" />
+            <span>
+              <strong>{{ t('frame.suspended.channels.facebook') }}</strong>
+              <small>{{ SUPPORT_CONTACTS.facebookHandle }}</small>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a :href="`mailto:${SUPPORT_CONTACTS.email}`">
+            <i class="pi pi-envelope" aria-hidden="true" />
+            <span>
+              <strong>{{ t('frame.suspended.channels.email') }}</strong>
+              <small>{{ SUPPORT_CONTACTS.email }}</small>
+            </span>
+          </a>
+        </li>
+      </ul>
     </article>
 
     <!-- APROVADO: linha compacta de status -->
@@ -356,13 +405,8 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 }
 
 .funil__card[data-tone='pending'] {
-  border-color: color-mix(in srgb, var(--partner-amber-text) 22%, var(--partner-line));
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--partner-amber-bg) 40%, var(--partner-card)),
-      var(--partner-card) 55%
-    );
+  border-color: color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
+  background: var(--partner-card);
 }
 
 .funil__card[data-tone='success'] {
@@ -410,13 +454,8 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 }
 
 .funil__card[data-tone='warm'] {
-  border-color: color-mix(in srgb, var(--partner-warm-text) 25%, var(--partner-line));
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--partner-warm-bg) 38%, var(--partner-card)),
-      var(--partner-card) 55%
-    );
+  border-color: color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
+  background: var(--partner-card);
 }
 
 .funil__head {
@@ -461,12 +500,12 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 }
 
 .funil__icon--pending {
-  background: var(--partner-amber-bg);
-  color: var(--partner-amber-text);
+  background: color-mix(in srgb, var(--partner-primary) 16%, var(--partner-card));
+  color: var(--partner-primary-strong);
 }
 
 .funil__icon--warm {
-  background: var(--partner-warm-bg);
+  background: color-mix(in srgb, var(--partner-warm-text) 12%, var(--partner-card));
   color: var(--partner-warm-text);
 }
 
@@ -514,14 +553,16 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 
 .funil__motivo {
   padding: 0.85rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
   border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--partner-warm-bg) 70%, var(--partner-card));
-  color: var(--partner-warm-text);
+  background: var(--partner-surface);
+  color: var(--partner-text);
 }
 
 .funil__motivo strong {
   display: block;
   margin-bottom: 0.25rem;
+  color: var(--partner-warm-text);
   font-size: 0.8rem;
 }
 
@@ -534,8 +575,9 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 .funil__submit-error {
   margin: 0;
   padding: 0.75rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--partner-warm-text) 24%, var(--partner-line));
   border-radius: 0.8rem;
-  background: var(--partner-warm-bg);
+  background: var(--partner-surface);
   color: var(--partner-warm-text);
   font-size: 0.85rem;
 }
@@ -555,24 +597,60 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
   font-size: 0.85rem;
 }
 
-.funil__support {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  justify-self: start;
-  min-height: 2.5rem;
-  padding: 0 1rem;
+.funil__support-lede {
+  margin: 0;
+  color: var(--partner-muted);
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.funil__channels {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.funil__channels a {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  min-height: 100%;
+  padding: 0.7rem 0.75rem;
   border: 1px solid var(--partner-line);
   border-radius: 0.75rem;
   color: var(--partner-text);
-  font-size: 0.86rem;
-  font-weight: 700;
   text-decoration: none;
 }
 
-.funil__support:hover,
-.funil__support:focus-visible {
+.funil__channels a:hover,
+.funil__channels a:focus-visible {
   border-color: var(--partner-primary-strong);
+  outline: none;
+}
+
+.funil__channels a > i {
+  color: var(--partner-primary-strong);
+  font-size: 1rem;
+}
+
+.funil__channels span {
+  display: grid;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.funil__channels strong {
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.funil__channels small {
+  color: var(--partner-muted);
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
 }
 
 .funil__form-loading {
@@ -580,8 +658,18 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
   gap: 0.6rem;
 }
 
+@media (max-width: 960px) {
+  .funil__channels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 720px) {
   .funil__steps {
+    grid-template-columns: 1fr;
+  }
+
+  .funil__channels {
     grid-template-columns: 1fr;
   }
 

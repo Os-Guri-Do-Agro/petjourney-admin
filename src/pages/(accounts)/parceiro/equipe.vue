@@ -24,6 +24,7 @@ onMounted(() => {
     :loading="bootstrapping || (store.loadState === 'loading' && !store.dashboard)"
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
+    block-when-suspended
     @retry="ensureContext(true)"
   >
     <PartnerOperabilityBanner />
