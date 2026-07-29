@@ -441,6 +441,11 @@
     "ATIVO": "Active ✓"
   },
   "errors": {
+    "api": {
+      "missingBaseUrl": "This build of the portal has no server address configured. Please contact the technical team.",
+      "invalidResponse": "The server replied in an unexpected format. Please try again in a moment.",
+      "genericStatus": "Error {status}"
+    },
     "notFound": {
       "brandAlt": "PetJourney",
       "title": "Page not found",

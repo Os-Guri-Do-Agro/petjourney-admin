@@ -441,6 +441,11 @@
     "ATIVO": "Activo ✓"
   },
   "errors": {
+    "api": {
+      "missingBaseUrl": "Esta versión del panel no tiene configurada la dirección del servidor. Avise al equipo técnico.",
+      "invalidResponse": "El servidor respondió en un formato inesperado. Vuelva a intentarlo en unos instantes.",
+      "genericStatus": "Error {status}"
+    },
     "notFound": {
       "brandAlt": "PetJourney",
       "title": "Página no encontrada",
