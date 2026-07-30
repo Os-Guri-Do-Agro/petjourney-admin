@@ -292,12 +292,15 @@
     "menuHeading": "Menú",
     "filterPlaceholder": "Filtrar pantallas...",
     "filterEmpty": "No se encontró ninguna pantalla para “{q}”.",
+    "filterClear": "Limpiar filtro",
     "brand": {
       "badge": "Portal de socios"
     },
     "drawer": {
       "close": "Cerrar navegador",
-      "open": "Abrir navegador"
+      "open": "Abrir navegador",
+      "collapse": "Contraer menú",
+      "expand": "Expandir menú"
     },
     "aria": {
       "sections": "Secciones del panel",
@@ -772,7 +775,10 @@
       "clinicalTitle": "Datos clínicos compartidos",
       "clinicalLede": "Snapshot autorizado por el tutor — toque para expandir cada lista.",
       "sectionsCount": "{n} secciones",
-      "itemsCount": "{n} ítems"
+      "itemsCount": "{n} ítems",
+      "emptyTitle": "Nada compartido en este acceso",
+      "emptyBody": "El tutor autorizó la atención, pero no incluyó ningún dato clínico de {pet}. Lo que registre en las notas igual le llega.",
+      "emptyCta": "Ir a las notas"
     },
     "anotacoes": {
       "title": "Historial de notas",
@@ -807,7 +813,95 @@
       "tamanhoInvalido": "Archivo de más de 10 MB: {nome}.",
       "encerrado": "Este acceso fue cerrado; ya no es posible anotar.",
       "criada": "Nota registrada",
-      "erro": "No fue posible registrar la nota."
+      "erro": "No fue posible registrar la nota.",
+      "textoLongo": "Algún texto supera el límite aceptado. Acórtelo e intente de nuevo."
+    },
+    "estruturada": {
+      "title": {
+        "CONSULTA": "Detalles de la consulta",
+        "EXAME": "Detalles del examen",
+        "BANHO": "Detalles del baño",
+        "TOSA": "Detalles de la peluquería",
+        "HOTEL": "Detalles de la estadía"
+      },
+      "lede": {
+        "CONSULTA": "Todo opcional. Lo que complete aquí, el tutor lo lleva al historial clínico de la mascota con un toque.",
+        "EXAME": "Todo opcional. Completado, el informe entra en el historial clínico como examen y no como texto suelto.",
+        "BANHO": "Todo opcional. Ayuda al tutor a seguir la piel, el pelaje y el comportamiento de la mascota.",
+        "TOSA": "Todo opcional. Ayuda al tutor a seguir la piel, el pelaje y el comportamiento de la mascota.",
+        "HOTEL": "Todo opcional. Registre el período y cómo pasó la estadía la mascota."
+      },
+      "campos": {
+        "motivo": "Motivo de la atención",
+        "diagnostico": "Diagnóstico",
+        "pesoKg": "Peso medido",
+        "tipoExame": "Tipo de examen",
+        "laudoTexto": "Resultado / informe",
+        "dataResultado": "Fecha del resultado",
+        "produtos": "Productos usados",
+        "condicaoPele": "Condición de piel y pelaje",
+        "comportamento": "Comportamiento",
+        "dataEntrada": "Entrada",
+        "dataSaida": "Salida",
+        "alimentacao": "Alimentación",
+        "intercorrencias": "Incidencias"
+      },
+      "placeholders": {
+        "motivo": "Vómitos desde hace 2 días",
+        "diagnostico": "Lo que concluyó en la atención",
+        "pesoKg": "12,4",
+        "tipoExame": "Ecografía abdominal",
+        "laudoTexto": "Hallazgos y conclusión del examen",
+        "produtos": "Champú neutro, acondicionador",
+        "condicaoPele": "Cómo estaban la piel y el pelaje",
+        "comportamento": "Cómo reaccionó la mascota durante el servicio",
+        "comportamentoHotel": "Cómo se comportó la mascota durante la estadía",
+        "alimentacao": "Comió bien, alimento enviado por el tutor",
+        "intercorrencias": "Algo fuera de lo previsto en el período"
+      },
+      "prescricao": {
+        "title": "Prescripción",
+        "add": "Agregar medicamento",
+        "remove": "Quitar medicamento {n}",
+        "empty": "Ningún medicamento prescrito.",
+        "item": "Medicamento {n}",
+        "nome": "Medicamento",
+        "nomePlaceholder": "Omeprazol",
+        "dose": "Dosis",
+        "unidade": "Unidad",
+        "frequencia": "Frecuencia",
+        "frequenciaPlaceholder": "1 vez al día",
+        "frequenciaHint": "Sin frecuencia, el tutor no puede convertir el ítem en medicamento de la mascota.",
+        "duracaoDias": "Duración (días)",
+        "instrucoes": "Instrucciones",
+        "instrucoesPlaceholder": "Dar junto con la comida"
+      },
+      "exames": {
+        "title": "Exámenes solicitados",
+        "add": "Agregar examen",
+        "remove": "Quitar examen {n}",
+        "empty": "Ningún examen solicitado.",
+        "item": "Examen {n}",
+        "nome": "Examen",
+        "nomePlaceholder": "Hemograma",
+        "observacao": "Observación",
+        "observacaoPlaceholder": "En ayunas"
+      },
+      "erros": {
+        "formulario": "Revise los campos destacados.",
+        "obrigatorio": "Complete este campo o quite el ítem.",
+        "maxLength": "Máximo {max} caracteres.",
+        "pesoFaixa": "El peso debe estar entre {min} y {max} kg.",
+        "duracaoFaixa": "La duración debe estar entre {min} y {max} días.",
+        "maxItens": "Máximo {max} ítems.",
+        "dataInvalida": "Fecha inválida.",
+        "intervaloData": "La salida no puede ser anterior a la entrada."
+      },
+      "view": {
+        "title": "Datos estructurados de la nota",
+        "duracao": "{n} día | {n} días",
+        "semFrequencia": "Sin frecuencia: no se convierte en medicamento de la mascota."
+      }
     },
     "anexo": {
       "indisponivel": "Archivo no disponible",
