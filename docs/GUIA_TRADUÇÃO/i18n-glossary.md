@@ -36,7 +36,7 @@
 | pt | en (US) | es (LatAm, usted) | Obs. |
 |---|---|---|---|
 | pet | pet | mascota | "pet" é aceito em en-US e mais quente que "animal". |
-| tutor | pet parent | tutor / tutora | en: "pet parent" (tom da marca); evitar "owner" frio. es: preferir "tutor" (revisão 2026-06-10), não "dueño". |
+| **responsável** | pet parent | tutor / tutora | **pt: "tutor" está proibido por exigência legal (2026-07-30) — use "responsável".** Quando "responsável" sozinho ficar vago, ancore no contexto ("responsáveis por pets", "responsável pelo pet"). en: "pet parent" (tom da marca); evitar "owner" frio. es: segue "tutor" (revisão 2026-06-10), não "dueño" — pendente de decisão jurídica para LatAm. |
 | veterinário | veterinarian / vet | veterinario | "vet" em contextos informais/curtos. |
 | clínica (veterinária) | (veterinary) clinic | clínica (veterinaria) | |
 | prontuário | health record | historial clínico | |

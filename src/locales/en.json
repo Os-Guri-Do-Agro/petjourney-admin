@@ -292,12 +292,15 @@
     "menuHeading": "Menu",
     "filterPlaceholder": "Filter screens...",
     "filterEmpty": "No screens found for “{q}”.",
+    "filterClear": "Clear filter",
     "brand": {
       "badge": "Partner portal"
     },
     "drawer": {
       "close": "Close navigator",
-      "open": "Open navigator"
+      "open": "Open navigator",
+      "collapse": "Collapse menu",
+      "expand": "Expand menu"
     },
     "aria": {
       "sections": "Portal sections",
@@ -696,7 +699,7 @@
       "loadingDesc": "Fetching the shares linked to the company.",
       "errorLoad": "Error loading appointments.",
       "emptyAtivosTitle": "No active access",
-      "emptyAtivosBody": "Ask the tutor for the 6-digit code and link it to see the pet's data here.",
+      "emptyAtivosBody": "Ask the pet parent for the 6-digit code and link it to see the pet's data here.",
       "emptyHistoricoTitle": "No history yet",
       "emptyHistoricoBody": "Closed accesses show up here with your company's notes.",
       "anotacoes": "{n} notes",
@@ -719,15 +722,15 @@
     "vincular": {
       "cta": "Link code",
       "bloqueado": "Available after registration approval.",
-      "title": "Link the tutor's code",
-      "lede": "Enter the 6-digit code the tutor generated in the app. The access will show up in your list.",
+      "title": "Link the pet parent's code",
+      "lede": "Enter the 6-digit code the pet parent generated in the app. The access will show up in your list.",
       "codigoLabel": "Code",
       "codigoPlaceholder": "123456",
       "hint": "Spaces and hyphens are ignored.",
       "submit": "Link",
       "aguarde": "Wait {s}s",
       "codigoInvalidoFormato": "The code has 6 numeric digits.",
-      "naoEncontrado": "Invalid or expired code. Check with the tutor.",
+      "naoEncontrado": "Invalid or expired code. Check with the pet parent.",
       "outraEmpresa": "This access is already linked to another company.",
       "naoOperacional": "Your partner registration is not yet approved to operate.",
       "throttle": "Too many attempts. Wait a minute and try again.",
@@ -738,13 +741,13 @@
       "title": "Appointment detail",
       "loadingAria": "Loading appointment detail",
       "errorLoad": "Error loading the appointment.",
-      "mensagemTutor": "Tutor's message",
+      "mensagemTutor": "Pet parent's message",
       "metaAria": "Service and share expiry",
       "back": "Back",
       "tabs": {
         "resumo": {
           "label": "Pet summary",
-          "description": "Tutor's message and the snapshot authorized at share time."
+          "description": "Pet parent's message and the snapshot authorized at share time."
         },
         "anotacoes": {
           "label": "Notes",
@@ -759,7 +762,7 @@
     "encerrado": {
       "title": "Access closed",
       "expirado": "The share expired. The clinical snapshot is no longer available; your company's notes remain.",
-      "revogado": "The tutor revoked the access. The clinical snapshot is no longer available; your company's notes remain."
+      "revogado": "The pet parent revoked the access. The clinical snapshot is no longer available; your company's notes remain."
     },
     "snapshot": {
       "peso": "Weight",
@@ -768,11 +771,14 @@
       "medicamentos": "Medications",
       "comportamento": "Behavior",
       "diagnosticos": "Diagnoses",
-      "observacoes": "Tutor's remarks",
+      "observacoes": "Pet parent's remarks",
       "clinicalTitle": "Shared clinical data",
       "clinicalLede": "Snapshot authorized by the pet parent — expand each list as needed.",
       "sectionsCount": "{n} sections",
-      "itemsCount": "{n} items"
+      "itemsCount": "{n} items",
+      "emptyTitle": "Nothing shared in this access",
+      "emptyBody": "The pet parent granted the visit but did not include any clinical data for {pet}. Whatever you record in the notes still reaches them.",
+      "emptyCta": "Go to notes"
     },
     "anotacoes": {
       "title": "Notes history",
@@ -786,11 +792,11 @@
     },
     "anotacao": {
       "title": "New note",
-      "lede": "Record the service and what the tutor needs to know. Attachments stay linked to this appointment.",
+      "lede": "Record the service and what the pet parent needs to know. Attachments stay linked to this appointment.",
       "servico": "Service performed",
       "servicoPlaceholder": "Bath and grooming",
       "texto": "Note",
-      "textoPlaceholder": "How the visit went, remarks for the tutor...",
+      "textoPlaceholder": "How the visit went, remarks for the pet parent...",
       "profissional": "Professional (optional)",
       "profissionalPlaceholder": "If empty, we use your account name",
       "anexos": "Attachments (up to {n})",
@@ -807,7 +813,95 @@
       "tamanhoInvalido": "File over 10 MB: {nome}.",
       "encerrado": "This access was closed; notes are no longer allowed.",
       "criada": "Note recorded",
-      "erro": "Could not record the note."
+      "erro": "Could not record the note.",
+      "textoLongo": "Some text is over the accepted limit. Shorten it and try again."
+    },
+    "estruturada": {
+      "title": {
+        "CONSULTA": "Consultation details",
+        "EXAME": "Exam details",
+        "BANHO": "Bath details",
+        "TOSA": "Grooming details",
+        "HOTEL": "Stay details"
+      },
+      "lede": {
+        "CONSULTA": "All optional. Whatever you fill in here, the pet parent can add to the pet's health record in one tap.",
+        "EXAME": "All optional. Filled in, the report enters the health record as an exam instead of loose text.",
+        "BANHO": "All optional. Helps the pet parent follow the pet's skin, coat, and behavior.",
+        "TOSA": "All optional. Helps the pet parent follow the pet's skin, coat, and behavior.",
+        "HOTEL": "All optional. Record the period and how the pet handled the stay."
+      },
+      "campos": {
+        "motivo": "Reason for the visit",
+        "diagnostico": "Diagnosis",
+        "pesoKg": "Measured weight",
+        "tipoExame": "Exam type",
+        "laudoTexto": "Result / report",
+        "dataResultado": "Result date",
+        "produtos": "Products used",
+        "condicaoPele": "Skin and coat condition",
+        "comportamento": "Behavior",
+        "dataEntrada": "Check-in",
+        "dataSaida": "Check-out",
+        "alimentacao": "Feeding",
+        "intercorrencias": "Incidents"
+      },
+      "placeholders": {
+        "motivo": "Vomiting for 2 days",
+        "diagnostico": "What you concluded during the visit",
+        "pesoKg": "12.4",
+        "tipoExame": "Abdominal ultrasound",
+        "laudoTexto": "Findings and conclusion of the exam",
+        "produtos": "Neutral shampoo, conditioner",
+        "condicaoPele": "How the skin and coat looked",
+        "comportamento": "How the pet reacted during the service",
+        "comportamentoHotel": "How the pet behaved during the stay",
+        "alimentacao": "Ate well, food sent by the pet parent",
+        "intercorrencias": "Anything unexpected during the period"
+      },
+      "prescricao": {
+        "title": "Prescription",
+        "add": "Add medication",
+        "remove": "Remove medication {n}",
+        "empty": "No medication prescribed.",
+        "item": "Medication {n}",
+        "nome": "Medication",
+        "nomePlaceholder": "Omeprazole",
+        "dose": "Dose",
+        "unidade": "Unit",
+        "frequencia": "Frequency",
+        "frequenciaPlaceholder": "Once a day",
+        "frequenciaHint": "Without a frequency, the pet parent cannot turn this item into a pet medication.",
+        "duracaoDias": "Duration (days)",
+        "instrucoes": "Instructions",
+        "instrucoesPlaceholder": "Give with food"
+      },
+      "exames": {
+        "title": "Requested exams",
+        "add": "Add exam",
+        "remove": "Remove exam {n}",
+        "empty": "No exam requested.",
+        "item": "Exam {n}",
+        "nome": "Exam",
+        "nomePlaceholder": "Blood count",
+        "observacao": "Remark",
+        "observacaoPlaceholder": "Fasting"
+      },
+      "erros": {
+        "formulario": "Review the highlighted fields.",
+        "obrigatorio": "Fill in this field or remove the item.",
+        "maxLength": "At most {max} characters.",
+        "pesoFaixa": "Weight must be between {min} and {max} kg.",
+        "duracaoFaixa": "Duration must be between {min} and {max} days.",
+        "maxItens": "At most {max} items.",
+        "dataInvalida": "Invalid date.",
+        "intervaloData": "Check-out cannot be before check-in."
+      },
+      "view": {
+        "title": "Structured note data",
+        "duracao": "{n} day | {n} days",
+        "semFrequencia": "No frequency: it will not become a pet medication."
+      }
     },
     "anexo": {
       "indisponivel": "File unavailable",

@@ -35,11 +35,17 @@ import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 /** Alinhado a `.theme-switch__thumb { transition: transform 240ms }` */
 const THEME_SWITCH_DURATION_MS = 240
+/** Preferência de layout (não é sessão): recolhido deixa só o rail de seções. */
+const NAVIGATOR_COLLAPSED_STORAGE_KEY = 'petjourney-navigator-collapsed'
+/** Espelha o breakpoint de `@media (max-width: 900px)` do estilo abaixo. */
+const COMPACT_VIEWPORT_QUERY = '(max-width: 900px)'
 
 const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
-const drawerOpen = ref(true)
+const railCollapsed = ref(readCollapsedPreference())
+const compactViewport = ref(matchesCompactViewport())
+const compactDrawerOpen = ref(false)
 const userMenuOpen = ref(false)
 const logoutConfirmVisible = ref(false)
 const parceiroStore = useParceiroStore()
@@ -56,12 +62,73 @@ const defaultLandingPath = computed(() => getDefaultLandingPath())
 const themeSwitchDark = ref(isDarkMode.value)
 const themeTogglePending = ref(false)
 let themeToggleTimer: ReturnType<typeof setTimeout> | undefined
+let compactQuery: MediaQueryList | undefined
 
 watch(isDarkMode, (dark) => {
   if (!themeTogglePending.value) {
     themeSwitchDark.value = dark
   }
 })
+
+function matchesCompactViewport() {
+  return typeof window !== 'undefined' && window.matchMedia(COMPACT_VIEWPORT_QUERY).matches
+}
+
+function readCollapsedPreference() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  return window.localStorage.getItem(NAVIGATOR_COLLAPSED_STORAGE_KEY) === 'true'
+}
+
+/** No desktop o rail permanece navegável; só a lista de páginas recolhe. */
+const drawerOpen = computed(() =>
+  compactViewport.value ? compactDrawerOpen.value : !railCollapsed.value,
+)
+const navigatorHidden = computed(() => compactViewport.value && !compactDrawerOpen.value)
+const panelHidden = computed(() => !compactViewport.value && railCollapsed.value)
+
+function setRailCollapsed(collapsed: boolean) {
+  railCollapsed.value = collapsed
+
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(NAVIGATOR_COLLAPSED_STORAGE_KEY, String(collapsed))
+  }
+}
+
+function toggleNavigator() {
+  if (compactViewport.value) {
+    compactDrawerOpen.value = !compactDrawerOpen.value
+    return
+  }
+
+  setRailCollapsed(!railCollapsed.value)
+}
+
+function closeCompactDrawer() {
+  if (compactViewport.value) {
+    compactDrawerOpen.value = false
+  }
+}
+
+function handleViewportChange(event: MediaQueryListEvent) {
+  compactViewport.value = event.matches
+
+  if (!event.matches) {
+    compactDrawerOpen.value = false
+  }
+}
+
+function handleShellKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Escape') {
+    return
+  }
+
+  if (compactViewport.value && compactDrawerOpen.value) {
+    compactDrawerOpen.value = false
+  }
+}
 
 function prefersReducedMotion() {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -182,8 +249,11 @@ function handleSectionChange(sectionId: string) {
   let target = getSectionLandingPath(section)
 
   activeSectionId.value = sectionId
-  drawerOpen.value = true
   panelFilterQuery.value = ''
+
+  if (!compactViewport.value) {
+    setRailCollapsed(false)
+  }
 
   if (!target) {
     return
@@ -218,7 +288,9 @@ const headerDisplayName = computed(
 const headerAvatarUrl = computed(() => usuarioPerfilStore.avatarUrl)
 
 const shellClasses = computed(() => ({
-  'app-shell--navigator-hidden': !drawerOpen.value,
+  'app-shell--rail-only': panelHidden.value,
+  'app-shell--navigator-hidden': navigatorHidden.value,
+  'app-shell--navigator-overlay': compactViewport.value && compactDrawerOpen.value,
 }))
 
 watch(
@@ -240,6 +312,7 @@ function requestLogout() {
 
 function handleNavItemClick(event: Event, item: NavigationItem) {
   if (!item.comingSoon) {
+    closeCompactDrawer()
     return
   }
 
@@ -265,6 +338,11 @@ async function handleLogout() {
 }
 
 onMounted(() => {
+  compactQuery = window.matchMedia(COMPACT_VIEWPORT_QUERY)
+  compactViewport.value = compactQuery.matches
+  compactQuery.addEventListener('change', handleViewportChange)
+  window.addEventListener('keydown', handleShellKeydown)
+
   usuarioPerfilStore.hydrate()
   usuarioPerfilStore.syncFromAuth()
   void usuarioPerfilStore.ensureFotoCarregada()
@@ -273,17 +351,28 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.clearTimeout(themeToggleTimer)
+  compactQuery?.removeEventListener('change', handleViewportChange)
+  window.removeEventListener('keydown', handleShellKeydown)
 })
 </script>
 
 <template>
   <div class="app-shell" :class="shellClasses" :style="shellStyle">
-    <aside class="app-navigator" :aria-hidden="!drawerOpen">
+    <button
+      v-if="compactViewport && compactDrawerOpen"
+      class="navigator-scrim"
+      type="button"
+      :aria-label="t('shell.drawer.close')"
+      @click="closeCompactDrawer"
+    />
+
+    <aside class="app-navigator" :inert="navigatorHidden || undefined">
       <nav class="section-rail" :aria-label="t('shell.aria.sections')">
         <RouterLink
           class="rail-brand"
           :to="defaultLandingPath"
           :aria-label="t('shell.aria.brand')"
+          @click="closeCompactDrawer"
         >
           <img :src="logoMarkUrl" alt="" />
         </RouterLink>
@@ -294,41 +383,50 @@ onUnmounted(() => {
           class="rail-button"
           :class="{ 'rail-button--active': activeSectionId === section.id }"
           type="button"
-          :aria-label="section.label"
+          :aria-current="activeSectionId === section.id ? 'true' : undefined"
           :title="section.label"
           @click="handleSectionChange(section.id)"
         >
           <span class="rail-button__icon" aria-hidden="true">
             <i :class="section.icon" />
           </span>
+          <span class="rail-button__label">{{ section.label }}</span>
         </button>
 
         <div class="rail-bottom-actions">
           <button
-            class="rail-button rail-button--danger"
+            class="rail-action rail-action--collapse"
+            type="button"
+            :aria-label="railCollapsed ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
+            :title="railCollapsed ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
+            :aria-expanded="!railCollapsed"
+            @click="toggleNavigator"
+          >
+            <i class="pi pi-angle-double-left" aria-hidden="true" />
+          </button>
+
+          <button
+            class="rail-action rail-action--danger"
             type="button"
             :aria-label="t('shell.logout')"
             :title="t('shell.logout')"
             @click="requestLogout"
           >
-            <span class="rail-button__icon" aria-hidden="true">
-              <i class="pi pi-sign-out" />
-            </span>
+            <i class="pi pi-sign-out" aria-hidden="true" />
           </button>
         </div>
       </nav>
 
-      <section class="navigator-panel">
+      <section class="navigator-panel" :inert="panelHidden || undefined">
         <header class="navigator-brand">
           <RouterLink
             class="navigator-brand__link"
             :to="defaultLandingPath"
             :aria-label="t('shell.aria.brandHome')"
+            @click="closeCompactDrawer"
           >
-            <span class="navigator-brand__meta">
-              <img class="navigator-brand__wordmark" :src="logoHeaderUrl" alt="" />
-              <small>{{ t('shell.brand.badge') }}</small>
-            </span>
+            <img class="navigator-brand__wordmark" :src="logoHeaderUrl" alt="" />
+            <small>{{ t('shell.brand.badge') }}</small>
           </RouterLink>
         </header>
 
@@ -338,16 +436,28 @@ onUnmounted(() => {
           <small v-if="activeSection.panelSubtitle">{{ activeSection.panelSubtitle }}</small>
         </div>
 
-        <label v-if="hasPanelFilter" class="page-nav__filter" for="panel-nav-filter">
-          <i class="pi pi-search" aria-hidden="true" />
-          <input
-            id="panel-nav-filter"
-            v-model="panelFilterQuery"
-            type="search"
-            :placeholder="t('shell.filterPlaceholder')"
-            autocomplete="off"
-          />
-        </label>
+        <div v-if="hasPanelFilter" class="page-nav__filter">
+          <label class="page-nav__filter-field" for="panel-nav-filter">
+            <i class="pi pi-search" aria-hidden="true" />
+            <input
+              id="panel-nav-filter"
+              v-model="panelFilterQuery"
+              type="search"
+              :placeholder="t('shell.filterPlaceholder')"
+              autocomplete="off"
+            />
+          </label>
+          <button
+            v-if="panelFilterQuery"
+            class="page-nav__filter-clear"
+            type="button"
+            :aria-label="t('shell.filterClear')"
+            :title="t('shell.filterClear')"
+            @click="panelFilterQuery = ''"
+          >
+            <i class="pi pi-times" aria-hidden="true" />
+          </button>
+        </div>
 
         <nav
           class="page-nav"
@@ -373,6 +483,7 @@ onUnmounted(() => {
                   'page-nav__link--soon': item.comingSoon,
                   'page-nav__link--locked': item.locked,
                 }"
+                :aria-current="isNavItemActive(item) ? 'page' : undefined"
                 :to="item.to"
                 active-class=""
                 @click="handleNavItemClick($event, item)"
@@ -406,6 +517,7 @@ onUnmounted(() => {
                 'page-nav__link--soon': item.comingSoon,
                 'page-nav__link--locked': item.locked,
               }"
+              :aria-current="isNavItemActive(item) ? 'page' : undefined"
               :to="item.to"
               active-class=""
               @click="handleNavItemClick($event, item)"
@@ -438,9 +550,18 @@ onUnmounted(() => {
           severity="secondary"
           text
           type="button"
-          :aria-label="drawerOpen ? t('shell.drawer.close') : t('shell.drawer.open')"
+          :aria-label="
+            compactViewport
+              ? drawerOpen
+                ? t('shell.drawer.close')
+                : t('shell.drawer.open')
+              : drawerOpen
+                ? t('shell.drawer.collapse')
+                : t('shell.drawer.expand')
+          "
+          :aria-expanded="drawerOpen"
           icon="pi pi-bars"
-          @click="drawerOpen = !drawerOpen"
+          @click="toggleNavigator"
         />
 
         <div class="header-context">
@@ -575,12 +696,33 @@ onUnmounted(() => {
 <style scoped>
 .app-shell {
   --navigator-width: 19.5rem;
+  --navigator-rail: 4.6rem;
+  --navigator-offset: var(--navigator-width);
+  --navigator-ease: cubic-bezier(0.32, 0.72, 0, 1);
   --header-height: var(--pj-shell-header-height, 4.25rem);
   min-height: 100vh;
   max-width: 100%;
   overflow-x: clip;
   background: var(--shell-bg);
   color: var(--shell-text);
+}
+
+/** Recolhido no desktop: o rail continua visível e navegável. */
+.app-shell--rail-only {
+  --navigator-offset: var(--navigator-rail);
+}
+
+.app-shell--navigator-hidden {
+  --navigator-offset: 0rem;
+}
+
+.navigator-scrim {
+  position: fixed;
+  z-index: 45;
+  inset: 0;
+  border: 0;
+  background: rgb(var(--shell-shadow-rgb) / 0.42);
+  cursor: pointer;
 }
 
 .app-navigator {
@@ -590,196 +732,217 @@ onUnmounted(() => {
   display: grid;
   width: var(--navigator-width);
   height: 100vh;
-  grid-template-columns: 4.25rem minmax(0, 1fr);
+  grid-template-columns: var(--navigator-rail) calc(var(--navigator-width) - var(--navigator-rail));
+  overflow: hidden;
+  border-right: 1px solid var(--shell-line);
   background: var(--shell-surface);
-  box-shadow:
-    1px 0 0 var(--shell-line),
-    16px 0 40px rgb(var(--shell-shadow-rgb) / 0.05);
-  transition: transform 180ms ease;
+  transition:
+    width 220ms var(--navigator-ease),
+    transform 220ms var(--navigator-ease);
+}
+
+.app-shell--rail-only .app-navigator {
+  width: var(--navigator-rail);
 }
 
 .app-shell--navigator-hidden .app-navigator {
   transform: translateX(-100%);
 }
 
+.app-shell--navigator-overlay .app-navigator {
+  box-shadow: 18px 0 48px rgb(var(--shell-shadow-rgb) / 0.22);
+}
+
 .section-rail {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 1rem 0.55rem 0.85rem;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--shell-brand) 88%, white) 0%,
-      var(--shell-brand) 42%,
-      color-mix(in srgb, var(--shell-brand) 94%, black) 100%
-    ),
-    var(--shell-brand);
+  align-items: stretch;
+  gap: 0.2rem;
+  padding: 0.9rem 0.42rem 0.7rem;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--shell-brand) 94%, white),
+    var(--shell-brand)
+  );
 }
 
 .rail-brand {
   display: grid;
-  width: 2.75rem;
-  height: 2.75rem;
-  margin-bottom: 1rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin: 0 auto 0.9rem;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--shell-on-brand) 22%, transparent);
-  border-radius: 0.95rem;
-  background: color-mix(in srgb, var(--shell-on-brand) 14%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--shell-on-brand) 18%, transparent),
-    0 12px 24px rgb(var(--shell-shadow-rgb) / 0.1);
-  transition:
-    transform 160ms ease,
-    background 160ms ease;
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--shell-on-brand) 12%, transparent);
+  transition: background 160ms ease;
 }
 
 .rail-brand:hover {
-  transform: translateY(-1px);
   background: color-mix(in srgb, var(--shell-on-brand) 20%, transparent);
 }
 
 .rail-brand img {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.45rem;
+  height: 1.45rem;
   object-fit: contain;
-  filter: drop-shadow(0 1px 1px rgb(var(--shell-shadow-rgb) / 0.12));
 }
 
 .rail-button {
   position: relative;
   display: grid;
-  width: 2.75rem;
-  height: 2.75rem;
-  place-items: center;
+  width: 100%;
+  gap: 0.2rem;
+  justify-items: center;
+  padding: 0.5rem 0.15rem 0.42rem;
   border: 0;
-  border-radius: 0.92rem;
+  border-radius: 0.85rem;
   background: transparent;
-  color: color-mix(in srgb, var(--shell-on-brand) 72%, transparent);
+  color: color-mix(in srgb, var(--shell-on-brand) 74%, transparent);
   cursor: pointer;
   transition:
     background 160ms ease,
-    color 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease;
+    color 160ms ease;
 }
 
 .rail-button__icon {
   display: grid;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 1.5rem;
+  height: 1.5rem;
   place-items: center;
 }
 
 .rail-button__icon i {
-  font-size: 1.08rem;
+  font-size: 1.06rem;
   line-height: 1;
 }
 
-.rail-button:hover:not(.rail-button--danger) {
+.rail-button__label {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rail-button:hover {
   background: color-mix(in srgb, var(--shell-on-brand) 12%, transparent);
   color: var(--shell-on-brand);
-  transform: translateY(-1px);
 }
 
-.rail-button--active {
+.rail-button--active,
+.rail-button--active:hover {
   background: var(--shell-rail-active-bg);
-  color: var(--shell-accent-strong);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 20%, transparent),
-    0 12px 22px rgb(var(--shell-shadow-rgb) / 0.12);
+  /* Sobre o pill claro o sage puro fica fraco no texto de 0.58rem. */
+  color: color-mix(in srgb, var(--shell-accent-strong) 55%, var(--shell-text));
 }
 
-.rail-button--active .rail-button__icon i {
-  color: var(--shell-accent-strong);
-}
-
-.rail-button--active::after {
+/** Marca a seção ativa também para quem não distingue a cor do pill. */
+.rail-button--active::before {
   position: absolute;
-  right: -0.48rem;
-  width: 0.28rem;
-  height: 1.55rem;
-  border-radius: 999px;
+  top: 50%;
+  left: -0.42rem;
+  width: 0.22rem;
+  height: 1.5rem;
+  border-radius: 0 999px 999px 0;
   background: var(--shell-on-brand);
   content: '';
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--shell-on-brand) 30%, transparent);
+  transform: translateY(-50%);
 }
 
 .rail-bottom-actions {
   display: grid;
-  gap: 0.45rem;
+  justify-items: center;
+  gap: 0.3rem;
   margin-top: auto;
-  padding-top: 0.85rem;
+  padding-top: 0.7rem;
 }
 
 .rail-bottom-actions::before {
   width: 1.65rem;
   height: 1px;
   margin: 0 auto 0.35rem;
-  background: color-mix(in srgb, var(--shell-on-brand) 24%, transparent);
+  background: color-mix(in srgb, var(--shell-on-brand) 22%, transparent);
   content: '';
 }
 
-.rail-button--danger {
+.rail-action {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  border: 0;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--shell-on-brand) 10%, transparent);
+  color: color-mix(in srgb, var(--shell-on-brand) 78%, transparent);
+  cursor: pointer;
+  font-size: 0.92rem;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.rail-action:hover {
+  background: color-mix(in srgb, var(--shell-on-brand) 18%, transparent);
+  color: var(--shell-on-brand);
+}
+
+.rail-action--collapse i {
+  transition: transform 220ms var(--navigator-ease);
+}
+
+.app-shell--rail-only .rail-action--collapse i {
+  transform: rotate(180deg);
+}
+
+.rail-action--danger {
   background: color-mix(in srgb, var(--rail-logout-red) 16%, transparent);
   color: color-mix(in srgb, var(--rail-logout-red) 88%, var(--rail-logout-icon));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail-logout-red) 28%, transparent);
 }
 
-.rail-button--danger .rail-button__icon i {
-  font-size: 1rem;
-}
-
-.rail-button--danger:hover {
-  background: color-mix(in srgb, var(--rail-logout-red) 26%, transparent);
+.rail-action--danger:hover {
+  background: color-mix(in srgb, var(--rail-logout-red) 30%, transparent);
   color: var(--rail-logout-icon);
-  transform: translateY(-1px);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail-logout-red) 48%, transparent);
+}
+
+.rail-brand:focus-visible,
+.rail-button:focus-visible,
+.rail-action:focus-visible {
+  outline: 2px solid var(--shell-on-brand);
+  outline-offset: 2px;
 }
 
 .navigator-panel {
   display: flex;
-  min-width: 0;
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  padding: 1.05rem 0.95rem;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--shell-surface-soft) 22%, transparent),
-      transparent 10rem
-    ),
-    var(--shell-surface);
+  padding: 1rem 0.9rem 0.35rem;
+  background: var(--shell-surface);
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+
+.app-shell--rail-only .navigator-panel {
+  opacity: 0;
 }
 
 .navigator-brand {
   flex-shrink: 0;
-  padding: 0.15rem;
-  border: 1px solid color-mix(in srgb, var(--shell-line) 92%, transparent);
-  border-radius: 1.05rem;
-  background:
-    radial-gradient(
-      130% 160% at 0% 0%,
-      color-mix(in srgb, var(--shell-accent) 18%, transparent),
-      transparent 58%
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--shell-surface-soft) 88%, var(--shell-surface)),
-      var(--shell-surface)
-    );
-  box-shadow: inset 0 1px 0 color-mix(in srgb, white 55%, transparent);
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--shell-line);
 }
 
 .navigator-brand__link {
-  display: block;
+  display: grid;
   min-width: 0;
-  padding: 0.85rem 0.9rem;
-  border-radius: 0.9rem;
+  gap: 0.3rem;
+  justify-items: start;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.8rem;
   text-decoration: none;
-  text-align: center;
   transition: background 140ms ease;
 }
 
@@ -792,37 +955,28 @@ onUnmounted(() => {
   outline-offset: 2px;
 }
 
-.navigator-brand__meta {
-  display: grid;
-  gap: 0.28rem;
-  justify-items: center;
-  min-width: 0;
-}
-
 .navigator-brand__wordmark {
   display: block;
-  width: min(100%, 9.5rem);
-  max-height: 1.75rem;
-  margin-inline: auto;
+  width: min(100%, 9.25rem);
+  max-height: 1.7rem;
   object-fit: contain;
-  object-position: center;
+  object-position: left center;
 }
 
-.navigator-brand__meta small {
+.navigator-brand__link small {
   color: var(--shell-soft);
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.12em;
-  text-align: center;
   text-transform: uppercase;
 }
 
 .navigator-section-heading {
   display: grid;
-  gap: 0.18rem;
-  margin-top: 1.15rem;
-  margin-bottom: 0.75rem;
-  padding: 0 0.2rem;
+  gap: 0.16rem;
+  margin-top: 0.95rem;
+  margin-bottom: 0.7rem;
+  padding: 0 0.25rem;
 }
 
 .navigator-section-heading span,
@@ -850,37 +1004,60 @@ onUnmounted(() => {
 
 .page-nav {
   display: grid;
-  gap: 0.75rem;
-  overflow: auto;
-  padding-right: 0.1rem;
+  min-height: 0;
+  flex: 1 1 auto;
+  align-content: start;
+  gap: 0.7rem;
+  overflow-y: auto;
+  padding: 0.1rem 0.25rem 1rem 0;
+  scrollbar-color: color-mix(in srgb, var(--shell-muted) 32%, transparent) transparent;
+  scrollbar-width: thin;
+}
+
+.page-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.page-nav::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--shell-muted) 28%, transparent);
 }
 
 .page-nav__filter {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  margin-bottom: 0.15rem;
-  padding: 0 0.2rem;
+  gap: 0.15rem;
+  margin-bottom: 0.2rem;
+  padding-right: 0.25rem;
   border: 1px solid var(--shell-line);
   border-radius: 0.75rem;
-  background: var(--shell-surface);
+  background: var(--shell-surface-soft);
   color: var(--shell-soft);
 }
 
 .page-nav__filter:focus-within {
-  border-color: color-mix(in srgb, var(--shell-accent) 28%, var(--shell-line));
+  border-color: color-mix(in srgb, var(--shell-accent) 32%, var(--shell-line));
+  background: var(--shell-surface);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--shell-accent) 12%, transparent);
 }
 
-.page-nav__filter i {
+.page-nav__filter-field {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.page-nav__filter-field i {
   margin-left: 0.65rem;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
 }
 
 .page-nav__filter input {
   width: 100%;
   min-width: 0;
-  padding: 0.55rem 0.65rem 0.55rem 0;
+  padding: 0.55rem 0.35rem 0.55rem 0;
   border: 0;
   background: transparent;
   color: var(--shell-text);
@@ -889,8 +1066,36 @@ onUnmounted(() => {
   outline: none;
 }
 
+.page-nav__filter input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
 .page-nav__filter input::placeholder {
   color: var(--shell-soft);
+}
+
+.page-nav__filter-clear {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--shell-muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+}
+
+.page-nav__filter-clear:hover {
+  background: color-mix(in srgb, var(--shell-muted) 16%, transparent);
+  color: var(--shell-text);
+}
+
+.page-nav__filter-clear:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--shell-accent) 55%, transparent);
+  outline-offset: 1px;
 }
 
 .page-nav__empty {
@@ -903,17 +1108,16 @@ onUnmounted(() => {
 
 .page-nav__group {
   display: grid;
-  gap: 0.32rem;
+  gap: 0.22rem;
 }
 
 .page-nav__group + .page-nav__group {
-  padding-top: 0.55rem;
-  border-top: 1px solid color-mix(in srgb, var(--shell-line) 80%, transparent);
+  margin-top: 0.35rem;
 }
 
 .page-nav__group-label {
-  margin: 0 0 0.15rem;
-  padding: 0 0.2rem;
+  margin: 0 0 0.2rem;
+  padding: 0 0.3rem;
   color: var(--shell-soft);
   font-size: 0.64rem;
   font-weight: 700;
@@ -938,8 +1142,7 @@ onUnmounted(() => {
   transition:
     background 160ms ease,
     border-color 160ms ease,
-    color 160ms ease,
-    transform 160ms ease;
+    color 160ms ease;
 }
 
 .page-nav__label {
@@ -1003,26 +1206,42 @@ onUnmounted(() => {
   line-height: 1;
 }
 
-.page-nav__link:hover,
-.page-nav__link.router-link-active {
-  border-color: color-mix(in srgb, var(--shell-accent) 18%, var(--shell-line));
-  background: color-mix(in srgb, var(--shell-accent-soft) 30%, var(--shell-surface));
-  color: var(--shell-accent-strong);
-}
-
-.page-nav__link.router-link-active {
-  box-shadow: 0 10px 24px rgb(var(--shell-shadow-rgb) / 0.06);
-}
-
+/** Hover é convite; ativo é estado — pesos visuais distintos de propósito. */
 .page-nav__link:hover {
-  transform: translateX(1px);
+  background: color-mix(in srgb, var(--shell-accent) 7%, var(--shell-surface));
+  color: var(--shell-text);
 }
 
-.page-nav__link:hover .page-nav__icon,
-.page-nav__link.router-link-active .page-nav__icon {
-  background: color-mix(in srgb, var(--shell-accent) 18%, var(--shell-surface));
+.page-nav__link:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--shell-accent) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.page-nav__link.router-link-active {
+  border-color: color-mix(in srgb, var(--shell-accent) 24%, transparent);
+  background: color-mix(in srgb, var(--shell-accent-soft) 34%, var(--shell-surface));
   color: var(--shell-accent-strong);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 12%, transparent);
+  font-weight: 750;
+}
+
+.page-nav__link.router-link-active::after {
+  width: 0.35rem;
+  height: 0.35rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--shell-accent-strong);
+  content: '';
+}
+
+.page-nav__link:hover .page-nav__icon {
+  background: color-mix(in srgb, var(--shell-accent) 12%, var(--shell-surface));
+  color: var(--shell-accent-strong);
+}
+
+.page-nav__link.router-link-active .page-nav__icon {
+  background: color-mix(in srgb, var(--shell-accent) 22%, var(--shell-surface));
+  color: var(--shell-accent-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 16%, transparent);
 }
 
 .app-header {
@@ -1030,7 +1249,7 @@ onUnmounted(() => {
   z-index: 40;
   top: 0;
   right: 0;
-  left: var(--navigator-width);
+  left: var(--navigator-offset);
   display: flex;
   height: var(--header-height);
   align-items: center;
@@ -1039,11 +1258,7 @@ onUnmounted(() => {
   background: var(--shell-surface);
   box-shadow: 0 1px 0 var(--shell-line);
   backdrop-filter: blur(14px);
-  transition: left 180ms ease;
-}
-
-.app-shell--navigator-hidden .app-header {
-  left: 0;
+  transition: left 220ms var(--navigator-ease);
 }
 
 .app-header__left,
@@ -1280,6 +1495,11 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .app-navigator,
+  .app-header,
+  .app-content,
+  .navigator-panel,
+  .rail-action--collapse i,
   .theme-switch__thumb,
   .theme-switch__icon,
   .theme-switch__label {
@@ -1305,17 +1525,13 @@ onUnmounted(() => {
   min-height: 100vh;
   max-width: 100%;
   padding-top: var(--header-height);
-  padding-left: var(--navigator-width);
+  padding-left: var(--navigator-offset);
   /* Painéis laterais não-modais empurram o conteúdo (var setada por useSidePanelOffset) */
   padding-right: var(--pj-side-panel-offset, 0px);
   overflow-x: clip;
   transition:
-    padding-left 180ms ease,
+    padding-left 220ms var(--navigator-ease),
     padding-right 0.5s cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-.app-shell--navigator-hidden .app-content {
-  padding-left: 0;
 }
 
 .user-menu {
@@ -1428,18 +1644,26 @@ onUnmounted(() => {
 }
 
 @media (max-width: 900px) {
-  .app-header,
-  .app-shell--navigator-hidden .app-header {
-    left: 0;
+  /* Em tela estreita o navegador sobrepõe: nunca empurra o conteúdo. */
+  .app-shell {
+    --navigator-offset: 0rem;
   }
 
-  .app-navigator {
+  .app-navigator,
+  .app-shell--rail-only .app-navigator {
     width: min(var(--navigator-width), 88vw);
+    grid-template-columns: var(--navigator-rail) minmax(0, 1fr);
   }
 
-  .app-content,
-  .app-shell--navigator-hidden .app-content {
-    padding-left: 0;
+  .app-shell--rail-only .navigator-panel {
+    opacity: 1;
+  }
+
+  .rail-action--collapse {
+    display: none;
+  }
+
+  .app-content {
     /* Em telas estreitas o painel lateral sobrepõe em vez de empurrar */
     padding-right: 0;
   }

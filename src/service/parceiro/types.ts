@@ -203,7 +203,7 @@ export type ItemSnapshot = {
   destaque?: boolean
 }
 
-/** Snapshot congelado na criação, já filtrado pelas categorias que o tutor escolheu.
+/** Snapshot congelado na criação, já filtrado pelas categorias que o responsável escolheu.
  *  Campo ausente = categoria não compartilhada (não renderizar a seção). */
 export type SnapshotPetCompartilhado = {
   pesoKg?: number | null
@@ -225,7 +225,44 @@ export type AnexoAnotacao = {
   documentoId: string | null
 }
 
-export type Anotacao = {
+export type AnotacaoPrescricaoItem = {
+  id: string
+  nome: string
+  dose: string | null
+  unidade: string | null
+  /** Sem frequência o responsável não consegue derivar Medicamento do pet na importação. */
+  frequencia: string | null
+  duracaoDias: number | null
+  instrucoes: string | null
+}
+
+export type AnotacaoExameSolicitado = {
+  id: string
+  nome: string
+  observacao: string | null
+}
+
+/** Bloco estruturado da anotação. Sempre presente na leitura: anotação antiga vem
+ *  com todos os escalares `null` e as listas vazias, sem branch por versão. */
+export type AnotacaoEstruturada = {
+  motivo: string | null
+  diagnostico: string | null
+  pesoKg: number | null
+  tipoExame: string | null
+  laudoTexto: string | null
+  dataResultado: string | null
+  produtos: string | null
+  condicaoPele: string | null
+  comportamento: string | null
+  dataEntrada: string | null
+  dataSaida: string | null
+  alimentacao: string | null
+  intercorrencias: string | null
+  prescricaoItens: AnotacaoPrescricaoItem[]
+  examesSolicitados: AnotacaoExameSolicitado[]
+}
+
+export type Anotacao = AnotacaoEstruturada & {
   id: string
   empresaNome: string
   profissionalNome: string | null
@@ -261,7 +298,7 @@ export type CompartilhamentoDetalhe = {
   petCastrado?: boolean | null
   tipoServico: TipoServicoPrestador
   servicoOutroLabel: string | null
-  /** Texto livre que o tutor digitou ao criar. */
+  /** Texto livre que o responsável digitou ao criar. */
   empresaNome: string | null
   mensagemTutor?: string | null
   categorias?: string[]
@@ -275,10 +312,47 @@ export type CompartilhamentoDetalhe = {
   anotacoes: Anotacao[]
 }
 
+export type AnotacaoPrescricaoItemInput = {
+  nome: string
+  dose?: string
+  unidade?: string
+  frequencia?: string
+  duracaoDias?: number
+  instrucoes?: string
+}
+
+export type AnotacaoExameSolicitadoInput = {
+  nome: string
+  observacao?: string
+}
+
+/** Campos estruturados prontos para o multipart. Só entram as chaves preenchidas
+ *  e aceitas pelo `tipoServico` do acesso — campo no tipo errado é 400. */
+export type AnotacaoEstruturadaInput = {
+  motivo?: string
+  diagnostico?: string
+  pesoKg?: number
+  tipoExame?: string
+  laudoTexto?: string
+  dataResultado?: string
+  produtos?: string
+  condicaoPele?: string
+  comportamento?: string
+  dataEntrada?: string
+  dataSaida?: string
+  alimentacao?: string
+  intercorrencias?: string
+  prescricaoItens?: AnotacaoPrescricaoItemInput[]
+  examesSolicitados?: AnotacaoExameSolicitadoInput[]
+}
+
 export type NovaAnotacaoPayload = {
   servicoRealizado: string
   texto: string
   profissionalNome?: string
+  /** Tipo do acesso: decide quais campos estruturados podem ser enviados. */
+  tipoServico: TipoServicoPrestador
+  estruturado?: AnotacaoEstruturadaInput
   anexos?: File[]
   /** Mesmo length de `anexos`; `null` = sem classificação. */
   tiposDocumento?: (TipoDocumentoAnexo | null)[]

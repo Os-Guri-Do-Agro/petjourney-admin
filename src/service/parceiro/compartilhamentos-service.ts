@@ -1,3 +1,5 @@
+import { CAMPOS_LISTA, filtrarEstruturadoPorTipo } from '@/utils/parceiro/anotacao-estruturada'
+
 import { apiFetch } from '../api'
 import type { ApiEnvelope, CursorPage } from '../api-envelope'
 import type {
@@ -83,6 +85,33 @@ export function getCompartilhamentoDetalhe(id: string, params?: ParceiroQuery) {
   )
 }
 
+/**
+ * Campos estruturados no multipart: escalares como texto simples, as duas listas
+ * como **JSON string**. Lista mandada em campos repetidos (`prescricaoItens[0][nome]`)
+ * ou como objeto falha em SILÊNCIO — o backend responde 201 e grava a anotação sem
+ * a prescrição. Por isso a serialização é `JSON.stringify` e mora só aqui.
+ */
+function appendEstruturado(form: FormData, payload: NovaAnotacaoPayload) {
+  const estruturado = filtrarEstruturadoPorTipo(payload.tipoServico, payload.estruturado)
+
+  if (!estruturado) {
+    return
+  }
+
+  for (const [campo, valor] of Object.entries(estruturado)) {
+    if (valor == null) {
+      continue
+    }
+
+    if ((CAMPOS_LISTA as readonly string[]).includes(campo)) {
+      form.set(campo, JSON.stringify(valor))
+      continue
+    }
+
+    form.set(campo, String(valor))
+  }
+}
+
 /** Anotação autenticada. `empresaNome` sai do cadastro do parceiro (não enviar). */
 export function criarAnotacao(id: string, payload: NovaAnotacaoPayload, params?: ParceiroQuery) {
   const form = new FormData()
@@ -92,6 +121,8 @@ export function criarAnotacao(id: string, payload: NovaAnotacaoPayload, params?:
   if (payload.profissionalNome?.trim()) {
     form.set('profissionalNome', payload.profissionalNome.trim())
   }
+
+  appendEstruturado(form, payload)
 
   if (payload.anexos?.length) {
     for (const file of payload.anexos) {

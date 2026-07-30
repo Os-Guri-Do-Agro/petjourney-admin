@@ -22,7 +22,7 @@
     "layout": {
       "kicker": "Painel parceiro",
       "title": "Mais clientes. Mais alcance. Mais retorno para a sua marca.",
-      "description": "O portal PetJourney conecta sua empresa à rede de tutores: divulgue ofertas, indique com facilidade e acompanhe o crescimento em um só lugar.",
+      "description": "O portal PetJourney conecta sua empresa à rede de responsáveis por pets: divulgue ofertas, indique com facilidade e acompanhe o crescimento em um só lugar.",
       "benefits": {
         "programs": "Programas feitos para parceiros que querem crescer",
         "outreach": "Divulgação com cupons e indicação que convertem",
@@ -57,7 +57,7 @@
         "copyGeneric": "Há um perfil inativo nesta conta. Reative para continuar.",
         "loading": "Reativando…",
         "vet": "Reativar perfil veterinário",
-        "tutor": "Reativar perfil tutor",
+        "tutor": "Reativar perfil de responsável",
         "otherAccount": "Usar outra conta"
       },
       "toast": {
@@ -292,12 +292,15 @@
     "menuHeading": "Menu",
     "filterPlaceholder": "Filtrar telas...",
     "filterEmpty": "Nenhuma tela encontrada para “{q}”.",
+    "filterClear": "Limpar filtro",
     "brand": {
       "badge": "Painel parceiro"
     },
     "drawer": {
       "close": "Fechar navegador",
-      "open": "Abrir navegador"
+      "open": "Abrir navegador",
+      "collapse": "Recolher menu",
+      "expand": "Expandir menu"
     },
     "aria": {
       "sections": "Seções do painel",
@@ -332,7 +335,7 @@
       "close": "Fechar",
       "eyebrow": "Balcão · resgate rápido",
       "title": "Validar cupom",
-      "lede": "Digite o código do app do tutor e confirme o desconto na hora.",
+      "lede": "Digite o código que o responsável mostra no app e confirme o desconto na hora.",
       "blockedBanner": "Este parceiro ainda não pode operar. A validação fica disponível após a aprovação.",
       "codeLabel": "Código de resgate",
       "codePlaceholder": "ABCDEF2345",
@@ -484,7 +487,7 @@
       "referral": {
         "eyebrow": "Código de indicação",
         "copyAria": "Copiar código de indicação",
-        "meta": "Compartilhe e ganhe participação por cada tutor que assinar.",
+        "meta": "Compartilhe e ganhe participação por cada responsável que assinar.",
         "cta": "Ver indicação",
         "toastCopied": "Código copiado",
         "toastCopyFail": "Não foi possível copiar",
@@ -696,7 +699,7 @@
       "loadingDesc": "Buscando os compartilhamentos vinculados à empresa.",
       "errorLoad": "Erro ao carregar atendimentos.",
       "emptyAtivosTitle": "Nenhum acesso ativo",
-      "emptyAtivosBody": "Peça o código de 6 dígitos ao tutor e vincule para ver os dados do pet por aqui.",
+      "emptyAtivosBody": "Peça o código de 6 dígitos ao responsável e vincule para ver os dados do pet por aqui.",
       "emptyHistoricoTitle": "Sem histórico ainda",
       "emptyHistoricoBody": "Acessos encerrados aparecem aqui com as anotações da sua empresa.",
       "anotacoes": "{n} anotações",
@@ -719,15 +722,15 @@
     "vincular": {
       "cta": "Vincular código",
       "bloqueado": "Disponível após a aprovação do cadastro.",
-      "title": "Vincular código do tutor",
-      "lede": "Digite o código de 6 dígitos que o tutor gerou no app. O acesso passa a aparecer na sua lista.",
+      "title": "Vincular código do responsável",
+      "lede": "Digite o código de 6 dígitos que o responsável gerou no app. O acesso passa a aparecer na sua lista.",
       "codigoLabel": "Código",
       "codigoPlaceholder": "123456",
       "hint": "Espaços e hífens são ignorados.",
       "submit": "Vincular",
       "aguarde": "Aguarde {s}s",
       "codigoInvalidoFormato": "O código tem 6 dígitos numéricos.",
-      "naoEncontrado": "Código inválido ou expirado. Confira com o tutor.",
+      "naoEncontrado": "Código inválido ou expirado. Confira com o responsável.",
       "outraEmpresa": "Este acesso já está vinculado a outra empresa.",
       "naoOperacional": "Seu cadastro de parceiro ainda não está aprovado para operar.",
       "throttle": "Muitas tentativas. Aguarde um minuto e tente de novo.",
@@ -738,13 +741,13 @@
       "title": "Detalhe do atendimento",
       "loadingAria": "Carregando detalhe do atendimento",
       "errorLoad": "Erro ao carregar o atendimento.",
-      "mensagemTutor": "Mensagem do tutor",
+      "mensagemTutor": "Mensagem do responsável",
       "metaAria": "Serviço e validade do compartilhamento",
       "back": "Voltar",
       "tabs": {
         "resumo": {
           "label": "Resumo do pet",
-          "description": "Mensagem do tutor e snapshot autorizado no momento do compartilhamento."
+          "description": "Mensagem do responsável e snapshot autorizado no momento do compartilhamento."
         },
         "anotacoes": {
           "label": "Anotações",
@@ -759,7 +762,7 @@
     "encerrado": {
       "title": "Acesso encerrado",
       "expirado": "O compartilhamento expirou. O snapshot clínico não fica disponível; restam as anotações da sua empresa.",
-      "revogado": "O tutor revogou o acesso. O snapshot clínico não fica disponível; restam as anotações da sua empresa."
+      "revogado": "O responsável revogou o acesso. O snapshot clínico não fica disponível; restam as anotações da sua empresa."
     },
     "snapshot": {
       "peso": "Peso",
@@ -768,11 +771,14 @@
       "medicamentos": "Medicamentos",
       "comportamento": "Comportamento",
       "diagnosticos": "Diagnósticos",
-      "observacoes": "Observações do tutor",
+      "observacoes": "Observações do responsável",
       "clinicalTitle": "Dados clínicos compartilhados",
-      "clinicalLede": "Snapshot autorizado pelo tutor — toque para expandir cada lista.",
+      "clinicalLede": "Snapshot autorizado pelo responsável — toque para expandir cada lista.",
       "sectionsCount": "{n} seções",
-      "itemsCount": "{n} itens"
+      "itemsCount": "{n} itens",
+      "emptyTitle": "Nada compartilhado neste acesso",
+      "emptyBody": "O responsável liberou o atendimento, mas não incluiu nenhum dado clínico de {pet}. Mesmo assim, tudo que você registrar nas anotações chega até ele.",
+      "emptyCta": "Ir para anotações"
     },
     "anotacoes": {
       "title": "Histórico de anotações",
@@ -786,11 +792,11 @@
     },
     "anotacao": {
       "title": "Nova anotação",
-      "lede": "Registre o serviço e o que o tutor precisa saber. Anexos ficam vinculados a este atendimento.",
+      "lede": "Registre o serviço e o que o responsável precisa saber. Anexos ficam vinculados a este atendimento.",
       "servico": "Serviço realizado",
       "servicoPlaceholder": "Banho e tosa",
       "texto": "Anotação",
-      "textoPlaceholder": "Como foi o atendimento, observações para o tutor...",
+      "textoPlaceholder": "Como foi o atendimento, observações para o responsável...",
       "profissional": "Profissional (opcional)",
       "profissionalPlaceholder": "Se vazio, usamos o nome da sua conta",
       "anexos": "Anexos (até {n})",
@@ -807,7 +813,95 @@
       "tamanhoInvalido": "Arquivo acima de 10 MB: {nome}.",
       "encerrado": "Este acesso foi encerrado; não é possível anotar.",
       "criada": "Anotação registrada",
-      "erro": "Não foi possível registrar a anotação."
+      "erro": "Não foi possível registrar a anotação.",
+      "textoLongo": "Algum texto passou do limite aceito. Encurte e tente de novo."
+    },
+    "estruturada": {
+      "title": {
+        "CONSULTA": "Detalhes da consulta",
+        "EXAME": "Detalhes do exame",
+        "BANHO": "Detalhes do banho",
+        "TOSA": "Detalhes da tosa",
+        "HOTEL": "Detalhes da hospedagem"
+      },
+      "lede": {
+        "CONSULTA": "Tudo opcional. O que você preencher aqui o responsável leva para o prontuário do pet com um toque.",
+        "EXAME": "Tudo opcional. Preenchido, o laudo entra no prontuário como exame, não como texto solto.",
+        "BANHO": "Tudo opcional. Ajuda o responsável a acompanhar pele, pelo e comportamento do pet.",
+        "TOSA": "Tudo opcional. Ajuda o responsável a acompanhar pele, pelo e comportamento do pet.",
+        "HOTEL": "Tudo opcional. Registre o período e como o pet passou a estadia."
+      },
+      "campos": {
+        "motivo": "Motivo do atendimento",
+        "diagnostico": "Diagnóstico",
+        "pesoKg": "Peso aferido",
+        "tipoExame": "Tipo de exame",
+        "laudoTexto": "Resultado / laudo",
+        "dataResultado": "Data do resultado",
+        "produtos": "Produtos usados",
+        "condicaoPele": "Condição de pele e pelo",
+        "comportamento": "Comportamento",
+        "dataEntrada": "Entrada",
+        "dataSaida": "Saída",
+        "alimentacao": "Alimentação",
+        "intercorrencias": "Intercorrências"
+      },
+      "placeholders": {
+        "motivo": "Vômito há 2 dias",
+        "diagnostico": "O que você concluiu no atendimento",
+        "pesoKg": "12,4",
+        "tipoExame": "Ultrassom abdominal",
+        "laudoTexto": "Achados e conclusão do exame",
+        "produtos": "Shampoo neutro, condicionador",
+        "condicaoPele": "Como estavam a pele e o pelo",
+        "comportamento": "Como o pet reagiu durante o serviço",
+        "comportamentoHotel": "Como o pet se comportou durante a estadia",
+        "alimentacao": "Comeu bem, ração trazida pelo responsável",
+        "intercorrencias": "Algo fora do previsto no período"
+      },
+      "prescricao": {
+        "title": "Prescrição",
+        "add": "Adicionar medicamento",
+        "remove": "Remover medicamento {n}",
+        "empty": "Nenhum medicamento prescrito.",
+        "item": "Medicamento {n}",
+        "nome": "Medicamento",
+        "nomePlaceholder": "Omeprazol",
+        "dose": "Dose",
+        "unidade": "Unidade",
+        "frequencia": "Frequência",
+        "frequenciaPlaceholder": "1x ao dia",
+        "frequenciaHint": "Sem frequência, o responsável não consegue transformar o item em medicamento do pet.",
+        "duracaoDias": "Duração (dias)",
+        "instrucoes": "Instruções",
+        "instrucoesPlaceholder": "Dar junto com a comida"
+      },
+      "exames": {
+        "title": "Exames solicitados",
+        "add": "Adicionar exame",
+        "remove": "Remover exame {n}",
+        "empty": "Nenhum exame solicitado.",
+        "item": "Exame {n}",
+        "nome": "Exame",
+        "nomePlaceholder": "Hemograma",
+        "observacao": "Observação",
+        "observacaoPlaceholder": "Em jejum"
+      },
+      "erros": {
+        "formulario": "Revise os campos destacados.",
+        "obrigatorio": "Preencha este campo ou remova o item.",
+        "maxLength": "Máximo de {max} caracteres.",
+        "pesoFaixa": "O peso precisa ficar entre {min} e {max} kg.",
+        "duracaoFaixa": "A duração precisa ficar entre {min} e {max} dias.",
+        "maxItens": "No máximo {max} itens.",
+        "dataInvalida": "Data inválida.",
+        "intervaloData": "A saída não pode ser antes da entrada."
+      },
+      "view": {
+        "title": "Dados estruturados da anotação",
+        "duracao": "{n} dia | {n} dias",
+        "semFrequencia": "Sem frequência: não vira medicamento do pet."
+      }
     },
     "anexo": {
       "indisponivel": "Arquivo indisponível",
@@ -849,19 +943,19 @@
     "howItWorks": {
       "eyebrow": "O motor do crescimento",
       "title": "Indique. Vincule. Cresça.",
-      "lede": "Cada conversa no balcão pode virar um assinante PetJourney ligado à sua empresa. Sem funil complicado: você compartilha, o tutor entra, e o vínculo fica com você.",
+      "lede": "Cada conversa no balcão pode virar um assinante PetJourney ligado à sua empresa. Sem funil complicado: você compartilha, o responsável entra, e o vínculo fica com você.",
       "steps": {
         "share": {
           "title": "Compartilhe o kit",
           "body": "Use o código, o link pronto ou o QR no balcão, no WhatsApp, no Instagram ou no material impresso da loja."
         },
         "signup": {
-          "title": "O tutor se cadastra",
+          "title": "O responsável se cadastra",
           "body": "Quem abre o seu link cria a conta no PetJourney já a partir da sua indicação — simples e rastreável."
         },
         "link": {
           "title": "A assinatura fica sua",
-          "body": "Quando o tutor assina, a indicação permanece vinculada à empresa. É relacionamento que continua trabalhando por você."
+          "body": "Quando o responsável assina, a indicação permanece vinculada à empresa. É relacionamento que continua trabalhando por você."
         },
         "earn": {
           "title": "Participação na carteira",
@@ -893,14 +987,14 @@
     },
     "cupons": {
       "title": "Cupons",
-      "lede": "Descontos para tutores — não geram participação.",
+      "lede": "Descontos para os responsáveis pelos pets — não geram participação.",
       "empty": "Nenhum cupom no momento.",
       "usos": "{n} usos",
       "loadMore": "Mais cupons"
     },
     "resgates": {
       "title": "Resgates",
-      "lede": "Sem dados pessoais dos tutores.",
+      "lede": "Sem dados pessoais dos responsáveis.",
       "empty": "Nenhum resgate ainda.",
       "canalQr": "Via QR Code",
       "canalManual": "Código manual",

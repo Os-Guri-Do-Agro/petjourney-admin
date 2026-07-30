@@ -8,6 +8,8 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
+import AnotacaoEstruturadaFields from '@/components/parceiro/AnotacaoEstruturadaFields.vue'
+import AnotacaoEstruturadaView from '@/components/parceiro/AnotacaoEstruturadaView.vue'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
@@ -26,6 +28,13 @@ import type {
   StatusCompartilhamento,
   TipoDocumentoAnexo,
 } from '@/service/parceiro/types'
+import {
+  criarAnotacaoEstruturadaForm,
+  LIMITES_CAMPOS_LIVRES,
+  montarAnotacaoEstruturada,
+  tipoAceitaEstruturado,
+  validarAnotacaoEstruturada,
+} from '@/utils/parceiro/anotacao-estruturada'
 
 const DETALHE_TABS = ['resumo', 'anotacoes'] as const
 type DetalheTab = (typeof DETALHE_TABS)[number]
@@ -63,6 +72,8 @@ const anotacaoForm = reactive({
   texto: '',
   profissionalNome: '',
 })
+const estruturadaForm = ref(criarAnotacaoEstruturadaForm())
+const estruturadaErros = ref<Record<string, string>>({})
 const anexosForm = ref<AnexoForm[]>([])
 const formError = ref('')
 const submittingAnotacao = ref(false)
@@ -74,6 +85,11 @@ const compartilhamentoId = computed(() =>
 )
 
 const isAtivo = computed(() => detalhe.value?.status === 'ATIVO')
+
+/** OUTRO segue só com o formulário livre; os demais tipos ganham campos próprios. */
+const temCamposEstruturados = computed(() =>
+  detalhe.value ? tipoAceitaEstruturado(detalhe.value.tipoServico) : false,
+)
 
 const anotacoesOrdenadas = computed(() =>
   [...(detalhe.value?.anotacoes ?? [])].sort(
@@ -131,9 +147,11 @@ const showObservacoesTutor = computed(() => {
     return false
   }
 
-  return observacoesTutor.value.localeCompare(mensagemTutor.value, undefined, {
-    sensitivity: 'accent',
-  }) !== 0
+  return (
+    observacoesTutor.value.localeCompare(mensagemTutor.value, undefined, {
+      sensitivity: 'accent',
+    }) !== 0
+  )
 })
 
 type SnapshotListSection = {
@@ -174,6 +192,19 @@ const snapshotListSections = computed<SnapshotListSection[]>(() => {
     }))
     .filter((section) => section.items.length > 0)
 })
+
+/**
+ * Snapshot é filtrado pelas categorias que o responsável marcou: ele pode liberar o
+ * acesso sem nenhuma. Também cobre `snapshot: null`, que antes caía no `v-else`
+ * e renderizava o painel de anotações sob a aba "Resumo do pet".
+ */
+const resumoVazio = computed(
+  () =>
+    !mensagemTutor.value &&
+    !showObservacoesTutor.value &&
+    detalhe.value?.snapshot?.pesoKg == null &&
+    snapshotListSections.value.length === 0,
+)
 
 /** Seções abertas: alergias sempre; demais só se a lista for curta. */
 const openSections = ref<Record<string, boolean>>({})
@@ -253,6 +284,8 @@ function resetAnotacaoForm() {
   anotacaoForm.servicoRealizado = ''
   anotacaoForm.texto = ''
   anotacaoForm.profissionalNome = ''
+  estruturadaForm.value = criarAnotacaoEstruturadaForm()
+  estruturadaErros.value = {}
   anexosForm.value = []
   formError.value = ''
 
@@ -318,6 +351,25 @@ function removeAnexo(index: number) {
   anexosForm.value.splice(index, 1)
 }
 
+/** Erros dos campos estruturados, já traduzidos e indexados pelo id do campo. */
+function validarEstruturada() {
+  if (!detalhe.value || !temCamposEstruturados.value) {
+    estruturadaErros.value = {}
+    return true
+  }
+
+  const erros = validarAnotacaoEstruturada(detalhe.value.tipoServico, estruturadaForm.value)
+
+  estruturadaErros.value = Object.fromEntries(
+    erros.map((erro) => [
+      erro.id,
+      t(`atendimentos.estruturada.erros.${erro.chave}`, { ...erro.params }),
+    ]),
+  )
+
+  return erros.length === 0
+}
+
 async function submitAnotacao() {
   if (!detalhe.value) {
     return
@@ -331,6 +383,22 @@ async function submitAnotacao() {
     return
   }
 
+  // Tetos que o backend passou a impor nos campos livres: barrar aqui evita perder
+  // a anotação inteira num 400 depois que o prestador já escreveu tudo.
+  if (
+    servico.length > LIMITES_CAMPOS_LIVRES.servicoRealizado ||
+    texto.length > LIMITES_CAMPOS_LIVRES.texto ||
+    anotacaoForm.profissionalNome.trim().length > LIMITES_CAMPOS_LIVRES.profissionalNome
+  ) {
+    formError.value = t('atendimentos.anotacao.textoLongo')
+    return
+  }
+
+  if (!validarEstruturada()) {
+    formError.value = t('atendimentos.estruturada.erros.formulario')
+    return
+  }
+
   submittingAnotacao.value = true
   formError.value = ''
 
@@ -341,6 +409,9 @@ async function submitAnotacao() {
         servicoRealizado: servico,
         texto,
         profissionalNome: anotacaoForm.profissionalNome.trim() || undefined,
+        tipoServico: detalhe.value.tipoServico,
+        estruturado:
+          montarAnotacaoEstruturada(detalhe.value.tipoServico, estruturadaForm.value) ?? undefined,
         anexos: anexosForm.value.map((a) => a.file),
         tiposDocumento: anexosForm.value.map((a) => a.tipoDocumento),
       },
@@ -452,7 +523,12 @@ onMounted(() => {
             <p class="atd-hero__subtitle">
               {{ detalhe.especieLabel }}
               <template v-if="isAtivo && detalhe.petCastrado != null">
-                · {{ detalhe.petCastrado ? t('atendimentos.pet.castrado') : t('atendimentos.pet.naoCastrado') }}
+                ·
+                {{
+                  detalhe.petCastrado
+                    ? t('atendimentos.pet.castrado')
+                    : t('atendimentos.pet.naoCastrado')
+                }}
               </template>
             </p>
 
@@ -493,8 +569,24 @@ onMounted(() => {
       />
 
       <!-- Aba: resumo do pet -->
-      <div v-if="displayTab === 'resumo' && detalhe.snapshot" class="atd-panel atd-resumo" role="tabpanel">
-        <div class="atd-resumo__context">
+      <div v-if="displayTab === 'resumo'" class="atd-panel atd-resumo" role="tabpanel">
+        <!-- Responsável pode liberar o acesso sem marcar nenhuma categoria: a aba existe
+             e não tem o que mostrar. Explica o porquê e empurra para a ação útil. -->
+        <section v-if="resumoVazio" class="atd-empty">
+          <span class="atd-empty__icon" aria-hidden="true">
+            <i class="pi pi-lock-open" />
+          </span>
+          <strong>{{ t('atendimentos.snapshot.emptyTitle') }}</strong>
+          <p>{{ t('atendimentos.snapshot.emptyBody', { pet: detalhe.petNome }) }}</p>
+          <Button
+            :label="t('atendimentos.snapshot.emptyCta')"
+            icon="pi pi-pencil"
+            size="small"
+            @click="setTab('anotacoes')"
+          />
+        </section>
+
+        <div v-if="!resumoVazio" class="atd-resumo__context">
           <section v-if="mensagemTutor" class="atd-callout">
             <header class="atd-callout__head">
               <span class="atd-callout__icon" aria-hidden="true">
@@ -506,7 +598,7 @@ onMounted(() => {
           </section>
 
           <section
-            v-if="detalhe.snapshot.pesoKg != null"
+            v-if="detalhe.snapshot?.pesoKg != null"
             class="atd-fact"
             :aria-label="t('atendimentos.snapshot.peso')"
           >
@@ -608,7 +700,13 @@ onMounted(() => {
 
       <!-- Aba: anotações -->
       <div v-else class="atd-panel atd-notes" role="tabpanel">
-        <div class="atd-notes__layout" :class="{ 'atd-notes__layout--with-form': isAtivo }">
+        <div
+          class="atd-notes__layout"
+          :class="{
+            'atd-notes__layout--with-form': isAtivo,
+            'atd-notes__layout--structured': isAtivo && temCamposEstruturados,
+          }"
+        >
           <section class="atd-notes__feed" aria-labelledby="atd-notes-title">
             <header class="atd-notes__head">
               <div>
@@ -620,8 +718,8 @@ onMounted(() => {
               }}</span>
             </header>
 
-            <div v-if="anotacoesOrdenadas.length === 0" class="atd-notes__empty">
-              <span class="atd-notes__empty-icon" aria-hidden="true">
+            <div v-if="anotacoesOrdenadas.length === 0" class="atd-empty">
+              <span class="atd-empty__icon" aria-hidden="true">
                 <i class="pi pi-pencil" />
               </span>
               <strong>{{ t('atendimentos.anotacoes.empty') }}</strong>
@@ -635,7 +733,11 @@ onMounted(() => {
             </div>
 
             <ol v-else class="atd-timeline">
-              <li v-for="anotacao in anotacoesOrdenadas" :key="anotacao.id" class="atd-timeline__item">
+              <li
+                v-for="anotacao in anotacoesOrdenadas"
+                :key="anotacao.id"
+                class="atd-timeline__item"
+              >
                 <span class="atd-timeline__rail" aria-hidden="true">
                   <span class="atd-timeline__dot" />
                 </span>
@@ -660,6 +762,8 @@ onMounted(() => {
                   </header>
 
                   <p class="atd-note__body">{{ anotacao.texto }}</p>
+
+                  <AnotacaoEstruturadaView :anotacao="anotacao" />
 
                   <div v-if="anotacao.anexos.length" class="atd-note__files">
                     <p class="atd-note__files-label">
@@ -722,6 +826,7 @@ onMounted(() => {
                 <InputText
                   id="anot-servico"
                   v-model="anotacaoForm.servicoRealizado"
+                  :maxlength="LIMITES_CAMPOS_LIVRES.servicoRealizado"
                   :placeholder="t('atendimentos.anotacao.servicoPlaceholder')"
                 />
               </div>
@@ -733,15 +838,25 @@ onMounted(() => {
                   v-model="anotacaoForm.texto"
                   rows="5"
                   auto-resize
+                  :maxlength="LIMITES_CAMPOS_LIVRES.texto"
                   :placeholder="t('atendimentos.anotacao.textoPlaceholder')"
                 />
               </div>
+
+              <AnotacaoEstruturadaFields
+                v-if="temCamposEstruturados && detalhe"
+                v-model="estruturadaForm"
+                :tipo-servico="detalhe.tipoServico"
+                :erros="estruturadaErros"
+                :disabled="submittingAnotacao"
+              />
 
               <div class="atd-field">
                 <label for="anot-profissional">{{ t('atendimentos.anotacao.profissional') }}</label>
                 <InputText
                   id="anot-profissional"
                   v-model="anotacaoForm.profissionalNome"
+                  :maxlength="LIMITES_CAMPOS_LIVRES.profissionalNome"
                   :placeholder="t('atendimentos.anotacao.profissionalPlaceholder')"
                 />
               </div>
@@ -825,12 +940,11 @@ onMounted(() => {
   padding: 1.1rem 1.2rem;
   border: 1px solid color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
   border-radius: 1.1rem;
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--partner-primary-soft) 35%, var(--partner-card)),
-      var(--partner-card) 62%
-    );
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--partner-primary-soft) 35%, var(--partner-card)),
+    var(--partner-card) 62%
+  );
 }
 
 .atd-hero[data-status='EXPIRADO'],
@@ -983,12 +1097,11 @@ onMounted(() => {
   padding: 0.95rem 1.05rem;
   border: 1px solid color-mix(in srgb, var(--partner-primary) 18%, var(--partner-line));
   border-radius: 1rem;
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--partner-primary-soft) 28%, var(--partner-card)),
-      var(--partner-card) 70%
-    );
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--partner-primary-soft) 28%, var(--partner-card)),
+    var(--partner-card) 70%
+  );
 }
 
 .atd-callout--soft {
@@ -1338,6 +1451,17 @@ onMounted(() => {
   grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.85fr);
 }
 
+/* Prescrição e exames solicitados não cabem numa coluna de 18rem. */
+.atd-notes__layout--structured {
+  grid-template-columns: minmax(0, 1fr) minmax(23rem, 1fr);
+}
+
+/* Formulário por tipo passa da altura da viewport: preso no topo, o botão de
+   registrar ficaria fora da tela. Aqui ele rola junto com a página. */
+.atd-notes__layout--structured .atd-composer {
+  position: static;
+}
+
 .atd-notes__feed,
 .atd-composer {
   min-width: 0;
@@ -1381,7 +1505,8 @@ onMounted(() => {
   font-weight: 750;
 }
 
-.atd-notes__empty {
+/* Vazio da página: serve tanto a aba de resumo quanto o feed de anotações. */
+.atd-empty {
   display: grid;
   justify-items: center;
   gap: 0.4rem;
@@ -1392,7 +1517,7 @@ onMounted(() => {
   text-align: center;
 }
 
-.atd-notes__empty-icon {
+.atd-empty__icon {
   display: grid;
   width: 2.6rem;
   height: 2.6rem;
@@ -1404,17 +1529,21 @@ onMounted(() => {
   font-size: 1.05rem;
 }
 
-.atd-notes__empty strong {
+.atd-empty strong {
   color: var(--partner-text);
   font-size: 0.95rem;
 }
 
-.atd-notes__empty p {
+.atd-empty p {
   margin: 0;
-  max-width: 22rem;
+  max-width: 26rem;
   color: var(--partner-muted);
   font-size: 0.84rem;
   line-height: 1.45;
+}
+
+.atd-empty :deep(.p-button) {
+  margin-top: 0.55rem;
 }
 
 .atd-timeline {
@@ -1476,12 +1605,11 @@ onMounted(() => {
   padding: 1rem 1.05rem 1.05rem;
   border: 1px solid var(--partner-line);
   border-radius: 1.05rem;
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--partner-primary-soft) 18%, var(--partner-card)),
-      var(--partner-card) 42%
-    );
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--partner-primary-soft) 18%, var(--partner-card)),
+    var(--partner-card) 42%
+  );
   box-shadow: 0 10px 22px rgb(var(--partner-shadow-rgb) / 0.04);
 }
 
@@ -1661,12 +1789,11 @@ onMounted(() => {
   padding: 1.1rem 1.1rem 1.15rem;
   border: 1px solid color-mix(in srgb, var(--partner-primary) 20%, var(--partner-line));
   border-radius: 1.15rem;
-  background:
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--partner-primary-soft) 32%, var(--partner-card)),
-      var(--partner-card) 48%
-    );
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--partner-primary-soft) 32%, var(--partner-card)),
+    var(--partner-card) 48%
+  );
   box-shadow: 0 14px 28px rgb(var(--partner-shadow-rgb) / 0.05);
 }
 
@@ -1854,6 +1981,12 @@ onMounted(() => {
   color: var(--partner-faint);
   font-size: 0.72rem;
   line-height: 1.4;
+}
+
+@media (max-width: 1180px) {
+  .atd-notes__layout--structured {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 960px) {
