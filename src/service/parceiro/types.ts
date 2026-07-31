@@ -102,15 +102,44 @@ export type ParceiroCadastro = {
   motivoAuditoria: string | null
 }
 
+/**
+ * `GET /parceiro/portal/indicacao`.
+ *
+ * Gate de 2026-07-29: parceiro não operável (pendente/rejeitado/suspenso/inativo)
+ * recebe **tudo `null`** com `podeIndicar: false` e um `aviso` por status. Não
+ * existe código nem QR antes da aprovação, então os quatro campos são nuláveis
+ * e a tela mostra estado de espera com o `aviso` como veio, sem copy própria.
+ */
 export type PortalIndicacao = {
-  codigoIndicacao: string
-  link: string
+  codigoIndicacao: string | null
+  link: string | null
   /** Identificador do QR no serviço de imagem. */
   qrCode: string | null
   /** URL da imagem PNG/JPG do QR para exibir e exportar. */
   qrImageUrl: string | null
   podeIndicar: boolean
   aviso?: string
+}
+
+/** Um dia da série de leituras do QR. `day` é `YYYY-MM-DD`. */
+export type IndicacaoScanPorDia = {
+  day: string
+  count: number
+}
+
+/** Leitura recente. Sem IP por LGPD: o backend não envia. */
+export type IndicacaoScanRecente = {
+  at: string
+  userAgent: string | null
+}
+
+/** `GET /parceiro/portal/indicacao/metricas`. 409 = parceiro não operável;
+ *  503 (`QR_INDISPONIVEL`) = serviço de QR fora do ar. */
+export type IndicacaoMetricas = {
+  qrCode: string
+  scanCount: number
+  byDay: IndicacaoScanPorDia[]
+  recent: IndicacaoScanRecente[]
 }
 
 export type CupomParceiro = {
@@ -188,7 +217,33 @@ export type SaqueDetalhe = SaqueResumo & {
 
 export type StatusCompartilhamento = 'ATIVO' | 'EXPIRADO' | 'REVOGADO'
 
+/** `ENCERRADO` é virtual: agrupa EXPIRADO + REVOGADO num cursor só, no servidor. */
+export type StatusFiltroCompartilhamento = StatusCompartilhamento | 'ENCERRADO'
+
+export type EspeciePet = 'CACHORRO' | 'GATO' | 'AVE' | 'ROEDOR' | 'COELHO' | 'PEIXE' | 'REPTIL'
+
+export type OrdenacaoPacientes = 'recentes' | 'nome' | 'expiraEm'
+
 export type TipoServicoPrestador = 'BANHO' | 'TOSA' | 'CONSULTA' | 'EXAME' | 'HOTEL' | 'OUTRO'
+
+/** Filtros de `GET /parceiro/portal/compartilhamentos`. Busca alcança só o nome
+ *  do pet: a listagem não expõe dado do responsável. */
+export type CompartilhamentosQuery = {
+  status?: StatusFiltroCompartilhamento
+  q?: string
+  especie?: EspeciePet | null
+  tipoServico?: TipoServicoPrestador | null
+  ordenarPor?: OrdenacaoPacientes
+  /** ISO 8601, inclusivo, sobre `vinculadoEm`. */
+  vinculadoDe?: string
+  vinculadoAte?: string
+  cursor?: string
+  limit?: number
+}
+
+/** Teto do backend (`MAX_BUSCA_PACIENTES`); acima disso a request volta 400.
+ *  O `limit` da mesma rota é `@Min(1) @Max(50)`. */
+export const MAX_BUSCA_PACIENTES = 80
 
 export type TipoDocumentoAnexo =
   | 'Receita Medica'

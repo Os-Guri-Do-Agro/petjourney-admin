@@ -24,6 +24,10 @@
 ## 2. Termos que NÃO se traduzem
 
 - **Marca/nomes próprios:** PetJourney, nomes da equipe (Watson, Lily, etc.).
+  **Gênero da marca em pt: feminino.** `a PetJourney`, `da`, `na`, `pela` — nunca `o/do/no/pelo
+  PetJourney`. Artigo masculino só quando concorda com um substantivo masculino que a marca
+  qualifica (`o portal PetJourney`, `o time PetJourney`), porque aí o artigo é do substantivo.
+  Em `es`, a forma em uso é sem artigo (`de PetJourney`, `en PetJourney`).
 - **Lojas/plataformas:** App Store, Google Play, WhatsApp, Instagram, Facebook, LinkedIn.
 - **Siglas legais:** LGPD, HIPAA, GDPR, ANPD, QR code.
 - **Nomes de produtos/remédios em mocks:** Bravecto, V10, etc. (dados sintéticos do `IPhoneMockup`).

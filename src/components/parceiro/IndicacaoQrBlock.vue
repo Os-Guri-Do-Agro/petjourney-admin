@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { LightColors } from '@/theme/colors'
@@ -30,6 +30,22 @@ const { t } = useI18n()
 const toast = useToast()
 const exporting = ref(false)
 const imgRef = ref<HTMLImageElement | null>(null)
+
+/**
+ * A URL do QR pode existir e mesmo assim não carregar: o backend cacheia
+ * `qrImageUrl` e tem circuit breaker, então segue devolvendo o endereço mesmo
+ * com o serviço de imagem fora. Sem isto, a tela mostra um quadrado branco mudo
+ * e um botão de exportar que baixaria o mesmo erro.
+ */
+const imagemFalhou = ref(false)
+
+// Trocar de parceiro (ou o backend religar o QR) merece nova tentativa.
+watch(
+  () => props.imageUrl,
+  () => {
+    imagemFalhou.value = false
+  },
+)
 
 const blockStyle = computed(() => {
   const colors = currentColors.value
@@ -150,8 +166,9 @@ async function exportQr() {
     :class="[`indicacao-qr--${props.size}`, { 'indicacao-qr--disabled': props.disabled }]"
     :style="blockStyle"
   >
-    <div class="indicacao-qr__frame">
+    <div class="indicacao-qr__frame" :class="{ 'indicacao-qr__frame--falhou': imagemFalhou }">
       <img
+        v-show="!imagemFalhou"
         ref="imgRef"
         :src="props.imageUrl"
         :alt="t('divulgacao.shareKit.qrAlt')"
@@ -159,10 +176,21 @@ async function exportQr() {
         loading="lazy"
         decoding="async"
         referrerpolicy="no-referrer"
+        @error="imagemFalhou = true"
+        @load="imagemFalhou = false"
       />
+      <span v-if="imagemFalhou" class="indicacao-qr__fallback" aria-hidden="true">
+        <i class="pi pi-image" />
+      </span>
     </div>
-    <figcaption>{{ t('divulgacao.shareKit.qrCaption') }}</figcaption>
+    <figcaption>
+      {{
+        imagemFalhou ? t('divulgacao.shareKit.qrIndisponivel') : t('divulgacao.shareKit.qrCaption')
+      }}
+    </figcaption>
+    <!-- Exportar baixa a mesma URL que acabou de falhar: some em vez de prometer. -->
     <Button
+      v-if="!imagemFalhou"
       type="button"
       class="indicacao-qr__export"
       size="small"
@@ -179,36 +207,61 @@ async function exportQr() {
 <style scoped>
 .indicacao-qr {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.7rem;
   justify-items: center;
   align-content: center;
   height: 100%;
+  /* Os dois donos deste bloco usam coluna `auto`, que cresce com o conteúdo.
+     Sem teto, a legenda longa do estado indisponível esticava o QR e espremia
+     o texto ao lado até virar uma coluna de duas palavras. */
+  max-width: 14rem;
   margin: 0;
-  padding: 0.9rem;
+  padding: 1.1rem;
   border: 1px solid var(--iqr-line);
   border-radius: 1.1rem;
-  background:
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--iqr-primary-soft) 28%, var(--iqr-surface)) 0%,
-      var(--iqr-surface) 60%
-    );
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--iqr-primary-soft) 28%, var(--iqr-surface)) 0%,
+    var(--iqr-surface) 60%
+  );
   box-sizing: border-box;
 }
 
 .indicacao-qr__frame {
   display: grid;
   place-items: center;
-  padding: 0.45rem;
-  border-radius: 0.85rem;
+  padding: 0.6rem;
+  border-radius: 0.95rem;
   background: var(--iqr-img-bg);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--iqr-text) 8%, transparent);
 }
 
+/* Serviço de imagem fora: o quadro vira placeholder tracejado, não caixa branca. */
+.indicacao-qr__frame--falhou {
+  border: 1px dashed color-mix(in srgb, var(--iqr-text) 22%, transparent);
+  background: color-mix(in srgb, var(--iqr-surface) 70%, var(--iqr-card));
+  box-shadow: none;
+}
+
+.indicacao-qr__fallback {
+  display: grid;
+  width: 10rem;
+  height: 10rem;
+  place-items: center;
+  color: var(--iqr-muted);
+  font-size: 1.9rem;
+}
+
+.indicacao-qr--sm .indicacao-qr__fallback {
+  width: 6.5rem;
+  height: 6.5rem;
+}
+
+/* `md` é o QR da Divulgação: ali ele é o convite à ação, não um selo de canto. */
 .indicacao-qr__img {
   display: block;
-  width: 7.75rem;
-  height: 7.75rem;
+  width: 10rem;
+  height: 10rem;
   object-fit: contain;
 }
 
@@ -217,20 +270,29 @@ async function exportQr() {
   height: 6.5rem;
 }
 
+/* `sm` é o selo do dashboard: some no canto do card, sem roubar a leitura. */
 .indicacao-qr--sm {
   min-width: 9.75rem;
+  max-width: 11.5rem;
   padding: 0.75rem;
   gap: 0.45rem;
 }
 
+.indicacao-qr--sm .indicacao-qr__frame {
+  padding: 0.45rem;
+  border-radius: 0.85rem;
+}
+
 .indicacao-qr figcaption {
   margin: 0;
+  max-width: 100%;
   color: var(--iqr-muted);
   font-size: 0.7rem;
   font-weight: 650;
   letter-spacing: 0.02em;
   text-align: center;
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .indicacao-qr :deep(.indicacao-qr__export.p-button) {

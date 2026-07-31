@@ -94,7 +94,7 @@ async function handleRemoveMember() {
 <template>
   <div class="equipe">
     <p class="equipe__intro">
-      Papel atual: <strong>{{ store.papel ?? '—' }}</strong>.
+      Papel atual: <strong>{{ store.papel ?? '-' }}</strong>.
       Apenas donos convidam ou removem membros.
     </p>
 

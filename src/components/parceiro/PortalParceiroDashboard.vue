@@ -9,10 +9,8 @@ import IndicacaoQrBlock from '@/components/parceiro/IndicacaoQrBlock.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
-import {
-  getCarteira,
-  getPortalIndicacao,
-} from '@/service/parceiro/parceiro-portal-service'
+import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
+import { getCarteira, getPortalIndicacao } from '@/service/parceiro/parceiro-portal-service'
 import type { Carteira, PortalIndicacao } from '@/service/parceiro/types'
 import { formatCentavosToBrl } from '@/utils/format/money'
 import { currentColors } from '@/theme/color-mode'
@@ -62,6 +60,13 @@ const dashStyle = computed(() => {
 
 const totais = computed(() => store.dashboard?.totais)
 
+/**
+ * As três métricas do pulso são todas de cupom e resgate. Com a feature desligada
+ * elas só mostravam zero para algo que ainda não existe, então a seção inteira sai
+ * (mesmo critério já aplicado em Divulgação).
+ */
+const cupomFeatureEnabled = CUPOM_FEATURE_ENABLED
+
 const metrics = computed(() => [
   {
     id: 'cupons',
@@ -90,17 +95,19 @@ const metrics = computed(() => [
 ])
 
 const saldoSacavelLabel = computed(() =>
-  carteira.value != null ? formatCentavosToBrl(carteira.value.saldoSacavelCentavos) : '—',
+  carteira.value != null ? formatCentavosToBrl(carteira.value.saldoSacavelCentavos) : '-',
 )
 
 const saldoTotalLabel = computed(() =>
-  carteira.value != null ? formatCentavosToBrl(carteira.value.saldoTotalCentavos) : '—',
+  carteira.value != null ? formatCentavosToBrl(carteira.value.saldoTotalCentavos) : '-',
 )
 
 const showCommissionCard = computed(() => store.statusAfiliadoAtivo)
 const codigoIndicacao = computed(() => indicacao.value?.codigoIndicacao ?? '')
 const qrImageUrl = computed(() => indicacao.value?.qrImageUrl ?? '')
 const podeIndicar = computed(() => Boolean(indicacao.value?.podeIndicar))
+/** Texto por status vindo do backend; a tela não escreve copy própria. */
+const avisoIndicacao = computed(() => indicacao.value?.aviso ?? '')
 
 async function loadDashboardData() {
   error.value = ''
@@ -241,7 +248,9 @@ watch(lastSuccessAt, (at) => {
           <article v-if="showCommissionCard" class="commission-card">
             <div class="commission-card__glow" aria-hidden="true" />
             <div class="commission-card__top">
-              <p class="commission-card__eyebrow">{{ t('inicio.dash.commission.eyebrowActive') }}</p>
+              <p class="commission-card__eyebrow">
+                {{ t('inicio.dash.commission.eyebrowActive') }}
+              </p>
               <span class="commission-card__badge">
                 <i class="pi pi-wallet" aria-hidden="true" />
                 {{ t('inicio.dash.commission.badge') }}
@@ -285,39 +294,54 @@ watch(lastSuccessAt, (at) => {
           <article class="referral-card" :class="{ 'referral-card--with-qr': Boolean(qrImageUrl) }">
             <div class="referral-card__main">
               <p class="referral-card__eyebrow">{{ t('inicio.dash.referral.eyebrow') }}</p>
-              <div class="referral-card__code-row">
-                <strong class="referral-card__code">{{ codigoIndicacao || '—' }}</strong>
-                <button
-                  v-if="codigoIndicacao"
-                  class="referral-card__copy"
-                  type="button"
-                  :aria-label="t('inicio.dash.referral.copyAria')"
-                  @click="copyCodigo"
-                >
-                  <i class="pi pi-copy" aria-hidden="true" />
-                </button>
-              </div>
-              <p class="referral-card__meta">
-                {{ t('inicio.dash.referral.meta') }}
-              </p>
-              <RouterLink class="referral-card__cta" to="/parceiro/divulgacao">
-                {{ t('inicio.dash.referral.cta') }}
-                <i class="pi pi-arrow-right" aria-hidden="true" />
-              </RouterLink>
+
+              <!-- Gate 2026-07-29: sem aprovação não há código nem QR. Mostrar o
+                   aviso do backend em vez de um traço que parece código vazio. -->
+              <template v-if="!podeIndicar">
+                <p class="referral-card__espera">
+                  <i class="pi pi-hourglass" aria-hidden="true" />
+                  <span>{{ avisoIndicacao || t('inicio.dash.referral.esperaFallback') }}</span>
+                </p>
+                <RouterLink class="referral-card__cta" to="/parceiro/programas">
+                  {{ t('inicio.dash.referral.verCadastro') }}
+                  <i class="pi pi-arrow-right" aria-hidden="true" />
+                </RouterLink>
+              </template>
+
+              <template v-else>
+                <div class="referral-card__code-row">
+                  <strong class="referral-card__code">{{ codigoIndicacao }}</strong>
+                  <button
+                    v-if="codigoIndicacao"
+                    class="referral-card__copy"
+                    type="button"
+                    :aria-label="t('inicio.dash.referral.copyAria')"
+                    @click="copyCodigo"
+                  >
+                    <i class="pi pi-copy" aria-hidden="true" />
+                  </button>
+                </div>
+                <p class="referral-card__meta">
+                  {{ t('inicio.dash.referral.meta') }}
+                </p>
+                <RouterLink class="referral-card__cta" to="/parceiro/divulgacao">
+                  {{ t('inicio.dash.referral.cta') }}
+                  <i class="pi pi-arrow-right" aria-hidden="true" />
+                </RouterLink>
+              </template>
             </div>
             <IndicacaoQrBlock
-              v-if="qrImageUrl"
+              v-if="qrImageUrl && podeIndicar"
               class="referral-card__qr"
               :image-url="qrImageUrl"
               :code="codigoIndicacao"
-              :disabled="!podeIndicar"
               size="sm"
             />
           </article>
         </div>
       </section>
 
-      <section class="dash-zone" aria-labelledby="dash-pulse-title">
+      <section v-if="cupomFeatureEnabled" class="dash-zone" aria-labelledby="dash-pulse-title">
         <header class="dash-zone__head">
           <div>
             <p class="dash-zone__index">02</p>
@@ -504,11 +528,7 @@ watch(lastSuccessAt, (at) => {
 .referral-card--skeleton :deep(.p-skeleton),
 .metric-card--skeleton :deep(.p-skeleton) {
   --p-skeleton-background: color-mix(in srgb, var(--dash-primary-soft) 42%, var(--dash-card));
-  --p-skeleton-animation-background: color-mix(
-    in srgb,
-    var(--dash-primary-soft) 18%,
-    transparent
-  );
+  --p-skeleton-animation-background: color-mix(in srgb, var(--dash-primary-soft) 18%, transparent);
 }
 
 .dash-focus {
@@ -546,12 +566,11 @@ watch(lastSuccessAt, (at) => {
 }
 
 .commission-card--muted {
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--dash-primary-soft) 28%, var(--dash-card)),
-      var(--dash-card) 55%
-    );
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--dash-primary-soft) 28%, var(--dash-card)),
+    var(--dash-card) 55%
+  );
   border: 1px solid var(--dash-line);
   box-shadow: 0 12px 28px rgb(var(--dash-shadow-rgb) / 0.045);
   color: var(--dash-text);
@@ -643,6 +662,27 @@ watch(lastSuccessAt, (at) => {
   line-height: 1.5;
 }
 
+/* Espera de aprovação: o aviso do backend ocupa o lugar do código. */
+.referral-card__espera {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--dash-surface) 70%, var(--dash-card));
+  color: var(--dash-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.referral-card__espera i {
+  margin-top: 0.15rem;
+  color: var(--dash-primary-strong);
+  font-size: 0.85rem;
+}
+
 .commission-card__meta {
   max-width: 30rem;
   opacity: 0.92;
@@ -707,12 +747,11 @@ watch(lastSuccessAt, (at) => {
   display: grid;
   gap: 1rem;
   border: 1px solid var(--dash-line);
-  background:
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--dash-surface) 90%, var(--dash-card)),
-      var(--dash-card)
-    );
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--dash-surface) 90%, var(--dash-card)),
+    var(--dash-card)
+  );
   box-shadow: 0 12px 28px rgb(var(--dash-shadow-rgb) / 0.045);
 }
 
@@ -810,12 +849,11 @@ watch(lastSuccessAt, (at) => {
   padding: 1.05rem 1.1rem;
   border: 1px solid var(--dash-line);
   border-radius: 1.1rem;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--metric-accent, var(--dash-primary)) 8%, var(--dash-card)) 0%,
-      var(--dash-card) 55%
-    );
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--metric-accent, var(--dash-primary)) 8%, var(--dash-card)) 0%,
+    var(--dash-card) 55%
+  );
   box-shadow: 0 12px 26px rgb(var(--dash-shadow-rgb) / 0.04);
   transition:
     transform 160ms ease,

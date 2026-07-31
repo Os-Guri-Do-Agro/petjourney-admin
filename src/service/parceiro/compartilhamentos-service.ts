@@ -6,8 +6,8 @@ import type {
   Anotacao,
   CompartilhamentoDetalhe,
   CompartilhamentoResumo,
+  CompartilhamentosQuery,
   NovaAnotacaoPayload,
-  StatusCompartilhamento,
 } from './types'
 
 type ParceiroQuery = {
@@ -58,18 +58,23 @@ export function vincularCompartilhamento(codigo: string, params?: ParceiroQuery)
   )
 }
 
-export function getCompartilhamentos(
-  params?: ParceiroQuery & {
-    status?: StatusCompartilhamento
-    cursor?: string
-    limit?: number
-  },
-) {
+/**
+ * Listagem paginada por cursor (keyset), com filtros resolvidos no servidor.
+ * `status: 'ENCERRADO'` agrupa EXPIRADO + REVOGADO num cursor só — não paginar
+ * os dois separadamente e juntar no cliente, que fura a ordem entre páginas.
+ */
+export function getCompartilhamentos(params?: ParceiroQuery & CompartilhamentosQuery) {
   return unwrap(
     apiFetch<ApiEnvelope<CursorPage<CompartilhamentoResumo>>>(
       `${BASE}${buildQuery({
         parceiroId: params?.parceiroId,
         status: params?.status,
+        q: params?.q,
+        especie: params?.especie,
+        tipoServico: params?.tipoServico,
+        ordenarPor: params?.ordenarPor,
+        vinculadoDe: params?.vinculadoDe,
+        vinculadoAte: params?.vinculadoAte,
         cursor: params?.cursor,
         limit: params?.limit,
       })}`,

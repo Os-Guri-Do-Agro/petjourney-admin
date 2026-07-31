@@ -11,7 +11,7 @@
       "badge": "Próximamente",
       "navHint": "Cupones y divulgación en desarrollo",
       "title": "Los cupones ya casi llegan",
-      "lede": "Muy pronto validarás canjes en el mostrador, seguirás campañas y verás cada conversión — todo en el mismo panel.",
+      "lede": "Muy pronto validarás canjes en el mostrador, seguirás campañas y verás cada conversión, todo en el mismo panel.",
       "body": "Estamos puliendo los últimos detalles para el lanzamiento. Mantente atento: cuando abra, tu operación de divulgación gana otro ritmo.",
       "cta": "¡Genial! Volver al panel",
       "sectionCta": "Quiero saber más",
@@ -25,13 +25,13 @@
       "description": "El portal PetJourney conecta su empresa a la red de tutores: divulgue ofertas, refiera con facilidad y haga el seguimiento del crecimiento en un solo lugar.",
       "benefits": {
         "programs": "Programas hechos para socios que quieren crecer",
-        "outreach": "Divulgación con cupones e indicación que convierten",
+        "outreach": "Divulgación e indicación que convierten en suscriptores",
         "results": "Resultados y ganancias seguidos en tiempo real"
       }
     },
     "login": {
       "title": "Bienvenido de nuevo",
-      "description": "Acceda al portal e impulse su alianza con referidos, cupones y resultados.",
+      "description": "Acceda al portal e impulse su alianza con indicación y resultados.",
       "email": {
         "label": "Correo electrónico",
         "placeholder": "sucorreo{'@'}empresa.com"
@@ -85,6 +85,7 @@
         "account": "Cuenta"
       },
       "stepOf": "Paso {current} de {total}",
+      "stepsAria": "Pasos del registro",
       "step1": {
         "title": "Identidad",
         "description": "Indique su nombre y correo para crear su cuenta de socio."
@@ -305,7 +306,7 @@
     "aria": {
       "sections": "Secciones del panel",
       "brand": "PetJourney",
-      "brandHome": "PetJourney — inicio",
+      "brandHome": "Inicio de PetJourney",
       "pagesOf": "Páginas de {label}"
     },
     "theme": {
@@ -340,7 +341,7 @@
       "codeLabel": "Código de rescate",
       "codePlaceholder": "ABCDEF2345",
       "hint": "Válido por unos 5 minutos · uso único · los espacios y minúsculas se ajustan automáticamente",
-      "formatHint": "Use de 6 a 32 caracteres (A–Z y 2–9). Sin 0, 1 ni espacios. Verifique el código en la app del cliente.",
+      "formatHint": "Use de 6 a 32 caracteres (A-Z y 2-9). Sin 0, 1 ni espacios. Verifique el código en la app del cliente.",
       "successEyebrow": "Rescate confirmado",
       "successTitle": "Cupón válido",
       "discountLabel": "de descuento",
@@ -349,7 +350,7 @@
       "applyOk": "OK, aplicar descuento",
       "networkHintBefore": "Si la red falló a mitad del envío, revise en",
       "networkHintLink": "Rescates",
-      "networkHintAfter": "antes de intentar de nuevo — un POST exitoso ya consume el código.",
+      "networkHintAfter": "antes de intentar de nuevo: un POST exitoso ya consume el código.",
       "meta": {
         "campaign": "Campaña",
         "code": "Código",
@@ -463,20 +464,20 @@
       "hello": "Hola",
       "helloName": "Hola, {name}"
     },
-    "lede": "Cupones, referidos y participación de la alianza — organizados para que usted actúe rápido.",
+    "lede": "Indicación y participación de la alianza, organizadas para actuar rápido.",
     "dash": {
       "errorLoad": "No fue posible cargar el panel.",
       "retry": "Intentar de nuevo",
       "focus": {
         "title": "Enfoque ahora",
-        "lede": "Participación y referidos — lo que mueve la alianza hoy.",
+        "lede": "Participación y referidos: lo que mueve la alianza hoy.",
         "loadingAria": "Cargando participación y referidos"
       },
       "commission": {
         "eyebrowActive": "Participación · Afiliado activo",
         "badge": "Billetera",
         "sacavelNow": "disponible para retiro ahora",
-        "metaHold": "Saldo total de {valor} — parte en ventana de seguridad de 14 días.",
+        "metaHold": "Saldo total de {valor}, con parte en ventana de seguridad de 14 días.",
         "openWallet": "Abrir billetera",
         "eyebrowMuted": "Participación",
         "badgeMuted": "No activo",
@@ -491,7 +492,9 @@
         "cta": "Ver referidos",
         "toastCopied": "Código copiado",
         "toastCopyFail": "No fue posible copiar",
-        "toastCopyFailDetail": "Copie el código manualmente."
+        "toastCopyFailDetail": "Copie el código manualmente.",
+        "esperaFallback": "Su código de indicación se crea apenas su registro sea aprobado.",
+        "verCadastro": "Ver mi registro"
       },
       "pulse": {
         "title": "Pulso de la red",
@@ -550,20 +553,20 @@
     "card": {
       "afiliado": {
         "title": "Programa de Afiliados",
-        "subtitle": "Transparencia y participación",
-        "description": "Reciba participación por cada referido que se convierte en suscriptor. Acceda a su billetera, siga el saldo y retire vía PIX.",
-        "feature1": "Participación por referido convertido",
-        "feature2": "Extracto y saldo en tiempo real",
-        "feature3": "Retiro vía PIX"
+        "subtitle": "Participación recurrente",
+        "description": "Reciba 5% de participación por cada suscripción nacida de su indicación, mes a mes, por hasta 18 meses. Siga el saldo en la billetera y retire vía PIX.",
+        "feature1": "5% por suscripción, en cada renovación pagada",
+        "feature2": "Ventana de 18 meses por tutor referido",
+        "feature3": "Retiro vía PIX desde R$ 50,00"
       },
       "participativo": {
         "title": "Programa Participativo",
-        "subtitle": "Comunidad y perks",
-        "description": "Forme parte de la comunidad PetJourney: perks exclusivos y collabs.",
+        "subtitle": "Contenido y visibilidad",
+        "description": "Participe de la producción de contenido de PetJourney. Ofrecemos visibilidad y autoridad para su marca dentro de la plataforma y en las redes sociales.",
         "soon": "(Próximamente.)",
-        "feature1": "Sello de socio participativo",
-        "feature2": "Perks y beneficios exclusivos",
-        "feature3": "Invitaciones a collabs de la red"
+        "feature1": "Sello de socio participativo en su perfil",
+        "feature2": "Visibilidad de la marca dentro de la plataforma",
+        "feature3": "Presencia en las redes sociales de PetJourney"
       },
       "status": {
         "naoSolicitado": "No activo",
@@ -588,7 +591,7 @@
         "aguardando": "En espera de análisis",
         "carteira": "Ir a la Billetera"
       },
-      "activeNoteParticipativo": "Programa activo. Los beneficios operativos los comunica el equipo PetJourney.",
+      "activeNoteParticipativo": "Programa activo. El equipo PetJourney se comunica al teléfono del registro para acordar las acciones de contenido.",
       "toast": {
         "actionUnavailable": "Acción no disponible",
         "ownerOnly": "Solo el dueño de la empresa puede solicitar programas.",
@@ -624,10 +627,14 @@
       "categoria": "Categoría",
       "categoriaPlaceholder": "Seleccione la categoría",
       "cnpj": "CNPJ",
-      "cnpjPlaceholder": "Solo números",
+      "cnpjPlaceholder": "00.000.000/0000-00",
       "telefone": "Teléfono comercial",
       "telefonePlaceholder": "(11) 99999-8888",
-      "onlyNameRequired": "Solo el nombre es obligatorio. Los demás datos pueden completarse después."
+      "cnpjRequired": "Informe el CNPJ de la empresa.",
+      "cnpjInvalid": "CNPJ inválido. Verifique los números.",
+      "telefoneRequired": "Informe un teléfono de contacto.",
+      "telefoneInvalid": "Teléfono inválido. Use código de área y número.",
+      "requiredLegend": "Nombre, CNPJ y teléfono son obligatorios: con ellos el equipo analiza el registro y se comunica con usted."
     },
     "wizard": {
       "title": "Registre su empresa socia",
@@ -703,7 +710,9 @@
       "emptyHistoricoTitle": "Sin historial todavía",
       "emptyHistoricoBody": "Los accesos cerrados aparecen aquí con las notas de su empresa.",
       "anotacoes": "{n} notas",
-      "loadMore": "Cargar más"
+      "loadMore": "Cargar más",
+      "emptyFiltroTitle": "Sin resultados para estos filtros",
+      "emptyFiltroBody": "Ajuste la búsqueda o el período. La búsqueda alcanza solo el nombre de la mascota."
     },
     "servico": {
       "BANHO": "Baño",
@@ -712,6 +721,32 @@
       "EXAME": "Examen",
       "HOTEL": "Hotel",
       "OUTRO": "Otro"
+    },
+    "especie": {
+      "CACHORRO": "Perro",
+      "GATO": "Gato",
+      "AVE": "Ave",
+      "ROEDOR": "Roedor",
+      "COELHO": "Conejo",
+      "PEIXE": "Pez",
+      "REPTIL": "Reptil"
+    },
+    "filtros": {
+      "aria": "Filtros de la lista de atenciones",
+      "q": "Buscar por nombre de la mascota",
+      "qPlaceholder": "Ej.: Marsh",
+      "especie": "Especie",
+      "tipoServico": "Tipo de servicio",
+      "ordenarPor": "Ordenar por",
+      "ordem": {
+        "recentes": "Más recientes",
+        "nome": "Nombre de la mascota",
+        "expiraEm": "Vencimiento"
+      },
+      "periodo": "Período",
+      "vinculadoDe": "Vinculado desde",
+      "vinculadoAte": "Vinculado hasta",
+      "limpar": "Limpiar filtros"
     },
     "expira": {
       "expirado": "Vencido",
@@ -773,7 +808,7 @@
       "diagnosticos": "Diagnósticos",
       "observacoes": "Observaciones del tutor",
       "clinicalTitle": "Datos clínicos compartidos",
-      "clinicalLede": "Snapshot autorizado por el tutor — toque para expandir cada lista.",
+      "clinicalLede": "Snapshot autorizado por el tutor. Toque para expandir cada lista.",
       "sectionsCount": "{n} secciones",
       "itemsCount": "{n} ítems",
       "emptyTitle": "Nada compartido en este acceso",
@@ -782,7 +817,7 @@
     },
     "anotacoes": {
       "title": "Historial de notas",
-      "lede": "Registros de su empresa en esta atención — de la más reciente a la más antigua.",
+      "lede": "Registros de su empresa en esta atención, de la más reciente a la más antigua.",
       "count": "{n} registros",
       "empty": "Ninguna nota todavía.",
       "emptyHint": "Use el formulario al lado para registrar lo realizado.",
@@ -911,7 +946,7 @@
   "divulgacao": {
     "subtitle": "Portal",
     "title": "Divulgación",
-    "lede": "Referidos, cupones y rescates de la alianza — todo en un solo lugar para divulgar con claridad.",
+    "lede": "Indicación y participación de la alianza, todo en un solo lugar para divulgar con claridad.",
     "errorLoad": "Error al cargar la divulgación.",
     "retry": "Intentar de nuevo",
     "indicacao": {
@@ -930,15 +965,17 @@
       "copyLink": "Copiar enlace",
       "qrAlt": "QR Code de referidos",
       "qrCaption": "Escanee en el celular",
+      "qrIndisponivel": "QR no disponible ahora. Use el código o el enlace.",
       "qrExport": "Exportar QR",
       "qrExportOk": "QR exportado",
       "qrExportOkDetail": "La imagen se guardó en la carpeta de descargas.",
       "qrExportSavedDetail": "La imagen se guardó en la ubicación que eligió.",
       "qrExportOpened": "QR abierto",
-      "qrExportOpenedDetail": "No fue posible descargar directo — la imagen se abrió en una pestaña nueva para que la guarde.",
+      "qrExportOpenedDetail": "No fue posible descargar directo. La imagen se abrió en una pestaña nueva para que la guarde.",
       "qrExportFail": "No fue posible exportar",
       "qrExportFailDetail": "El navegador bloqueó la nueva pestaña. Permita ventanas emergentes en este sitio e inténtelo de nuevo.",
-      "hint": "La participación en la billetera exige el programa afiliado activo. Los cupones de descuento no generan participación."
+      "hint": "La participación en la billetera exige el programa afiliado activo.",
+      "esperaHint": "Mientras tanto, use el portal para seguir su registro. El código y el QR se crean apenas sea aprobado."
     },
     "howItWorks": {
       "eyebrow": "El motor del crecimiento",
@@ -951,7 +988,7 @@
         },
         "signup": {
           "title": "El tutor se registra",
-          "body": "Quien abre tu enlace crea la cuenta en PetJourney a partir de tu indicación — simple y rastreable."
+          "body": "Quien abre su enlace crea la cuenta en PetJourney a partir de su indicación, de forma simple y rastreable."
         },
         "link": {
           "title": "La suscripción queda tuya",
@@ -959,11 +996,11 @@
         },
         "earn": {
           "title": "Participación en la billetera",
-          "body": "Con el programa afiliado activo, las conversiones elegibles generan participación para seguir y retirar en el portal."
+          "body": "Con el programa afiliado activo, cada suscripción elegible genera participación para seguir y retirar en el portal."
         }
       },
       "promise": "Menos esfuerzo de divulgación. Más suscriptores entrando por tu puerta.",
-      "note": "Importante: el cupón de descuento no genera participación. La participación exige afiliado activo — solicítalo en Programas si aún no lo tienes."
+      "note": "La participación exige el programa afiliado activo. Solicítelo en Programas si aún no lo tiene."
     },
     "metrics": {
       "aria": "Métricas de divulgación",
@@ -982,12 +1019,12 @@
     },
     "lists": {
       "title": "Cupones y rescates",
-      "lede": "Descuentos de la empresa e historial de uso — lado a lado.",
+      "lede": "Descuentos de la empresa e historial de uso, lado a lado.",
       "loadingAria": "Cargando cupones y rescates"
     },
     "cupons": {
       "title": "Cupones",
-      "lede": "Descuentos para tutores — no generan participación.",
+      "lede": "Descuentos para tutores. No generan participación.",
       "empty": "Ningún cupón por el momento.",
       "usos": "{n} usos",
       "loadMore": "Más cupones"
@@ -999,6 +1036,64 @@
       "canalQr": "Vía QR Code",
       "canalManual": "Código manual",
       "loadMore": "Más rescates"
+    },
+    "terms": {
+      "title": "Las reglas de la participación",
+      "lede": "Números cerrados, sin letra chica. Así llega la participación hasta usted.",
+      "highlights": {
+        "percent": {
+          "value": "5%",
+          "caption": "de cada suscripción referida"
+        },
+        "recurring": {
+          "value": "Todos los meses",
+          "caption": "en cada renovación pagada"
+        },
+        "window": {
+          "value": "18 meses",
+          "caption": "por tutor referido"
+        }
+      },
+      "toggleShow": "Ver las reglas completas",
+      "toggleHide": "Ocultar las reglas completas",
+      "percent": {
+        "title": "5% de cada suscripción",
+        "body": "Usted recibe el 5% del valor del plan suscrito por quien entró por su indicación."
+      },
+      "recurring": {
+        "title": "Todos los meses, no solo el primero",
+        "body": "La participación se acredita en cada renovación pagada, mes a mes, mientras el tutor mantenga la suscripción activa."
+      },
+      "window": {
+        "title": "Por hasta 18 meses",
+        "body": "La cuenta empieza en la primera suscripción pagada del tutor referido y vale por 18 meses. Después la suscripción continúa, pero ya no genera nueva participación."
+      },
+      "hold": {
+        "title": "Liberación en 14 días",
+        "body": "Cada crédito espera 14 días antes de convertirse en saldo retirable. Es la ventana de reembolso de la compra."
+      },
+      "payout": {
+        "title": "Retiro desde R$ 50,00",
+        "body": "Con saldo retirable por encima del mínimo, solicite el retiro en la Billetera y recíbalo en la clave PIX registrada."
+      },
+      "requirement": {
+        "title": "Vale desde la activación",
+        "body": "Solo entran las suscripciones pagadas después de que su programa afiliado fue aprobado. Una indicación anterior a la activación no genera participación."
+      }
+    },
+    "metricas": {
+      "title": "Lecturas de su QR",
+      "lede": "Cuántas personas escanearon su QR de indicación y cuándo.",
+      "leituras": "{n} lectura | {n} lecturas",
+      "chartAria": "Lecturas por día",
+      "barraAria": "{dia}: {n} lecturas",
+      "recentes": "Lecturas recientes",
+      "vazio": "Ninguna lectura todavía. Difunda el QR en el mostrador y en las redes para empezar a medir.",
+      "erro": {
+        "naoOperavel": "Las métricas quedan disponibles apenas su registro sea aprobado.",
+        "indisponivel": "Métricas no disponibles en este momento. Intente de nuevo en unos instantes.",
+        "erro": "No fue posible cargar las lecturas."
+      }
     }
   },
   "carteira": {
@@ -1034,7 +1129,7 @@
       "totalSacado": "Total retirado",
       "alertBlocked": "Retiros temporalmente bloqueados (revisión antifraude o saldo negativo).",
       "alertHold": "Saldo en período de hold (14 días por crédito). El valor aún no está disponible para retiro.",
-      "alertComissaoDisabled": "La participación por referidos está temporalmente desactivada en el entorno — la billetera puede permanecer en cero incluso con referidos activos. Esto no es un error de su registro.",
+      "alertComissaoDisabled": "La participación por referidos está temporalmente desactivada en el entorno. La billetera puede permanecer en cero incluso con referidos activos, y eso no es un error de su registro.",
       "pix": {
         "title": "Clave PIX",
         "label": "Clave PIX",
@@ -1070,7 +1165,7 @@
       },
       "ciclo": {
         "title": "Ciclo de pago",
-        "body": "Retiro mínimo de R$ 50,00. Corte el día 27 y liquidación orientativa hasta el día 5 — sígalo en la pestaña Retiros."
+        "body": "Retiro mínimo de R$ 50,00. Corte el día 27 y liquidación orientativa hasta el día 5. Sígalo en la pestaña Retiros."
       },
       "footerPrefix": "¿Dudas?",
       "footerOrWhatsapp": "o WhatsApp"
@@ -1156,7 +1251,7 @@
       "title": "Aceptar invitación",
       "body": "Fue invitado a integrar el equipo de una empresa socia PetJourney. Indique el identificador recibido en el correo o abra el enlace completo de la invitación.",
       "idLabel": "ID del socio",
-      "idHint": "Obligatorio — viene en el enlace como ?parceiroId=...",
+      "idHint": "Obligatorio. Viene en el enlace como ?parceiroId=...",
       "idPlaceholder": "cuid-de-la-empresa",
       "accept": "Aceptar invitación",
       "footnote": "Después de aceptar, opera en el portal con el rol definido por el dueño de la empresa.",
@@ -1224,7 +1319,7 @@
         },
         "email": {
           "label": "Correo electrónico",
-          "hint": "Vinculado a la autenticación — solo lectura."
+          "hint": "Vinculado a la autenticación, solo lectura."
         },
         "telefone": {
           "label": "Teléfono",
@@ -1237,7 +1332,7 @@
         "cpf": {
           "label": "CPF",
           "placeholder": "000.000.000-00",
-          "hintLocked": "Ya registrado — no puede modificarse.",
+          "hintLocked": "Ya registrado, no puede modificarse.",
           "hintOptional": "Opcional. Después de guardar, queda bloqueado."
         },
         "crmv": {
@@ -1374,7 +1469,7 @@
       "risk": {
         "eyebrow": "Zona sensible",
         "title": "Desactivar perfil",
-        "lede": "Pausa reversible del perfil — distinta de cerrar sesión en el dispositivo o eliminar la cuenta.",
+        "lede": "Pausa reversible del perfil, distinta de cerrar sesión en el dispositivo o eliminar la cuenta.",
         "actions": {
           "deactivate": "Desactivar perfil"
         },
@@ -1385,7 +1480,7 @@
           },
           "scope": {
             "title": "Solo el perfil",
-            "text": "No borra clínica, socio ni historial — solo pausa el perfil activo."
+            "text": "No borra clínica, socio ni historial: solo pausa el perfil activo."
           },
           "notDelete": {
             "title": "No es eliminación",

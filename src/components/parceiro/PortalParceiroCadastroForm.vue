@@ -10,6 +10,8 @@ import type {
   ParceiroCadastro,
   ParceiroCadastroPayload,
 } from '@/service/parceiro/types'
+import { formatPhone, stripPhone } from '@/utils/format/phone'
+import { formatCnpj, isValidCnpj, stripCnpj } from '@/utils/validation/cnpj'
 
 const props = withDefaults(
   defineProps<{
@@ -53,7 +55,14 @@ const form = reactive({
   logoUrl: null as string | null,
 })
 
+/**
+ * CNPJ e telefone passaram a ser obrigatórios: sem eles o time não consegue
+ * aprovar o credenciamento no CMS nem entrar em contato com a empresa. Cadastro
+ * antigo, salvo antes desta regra, cai aqui na primeira edição e precisa completar.
+ */
 const nomeError = ref('')
+const cnpjError = ref('')
+const telefoneError = ref('')
 
 const categoriaOptions = computed(() =>
   CATEGORIAS.map((value) => ({
@@ -65,11 +74,24 @@ const categoriaOptions = computed(() =>
 function applyInitial(initial: ParceiroCadastro | null) {
   form.nome = initial?.nome ?? ''
   form.categoria = initial?.categoria ?? null
-  form.cnpj = initial?.cnpj ?? ''
-  form.telefoneComercial = initial?.telefoneComercial ?? ''
+  // O backend guarda CNPJ canônico (só dígitos): mascara na entrada para exibir.
+  form.cnpj = formatCnpj(initial?.cnpj ?? '')
+  form.telefoneComercial = formatPhone(initial?.telefoneComercial ?? '')
   form.crmv = initial?.crmv ?? null
   form.logoUrl = initial?.logoUrl ?? null
   nomeError.value = ''
+  cnpjError.value = ''
+  telefoneError.value = ''
+}
+
+function onCnpjInput() {
+  form.cnpj = formatCnpj(form.cnpj)
+  cnpjError.value = ''
+}
+
+function onTelefoneInput() {
+  form.telefoneComercial = formatPhone(form.telefoneComercial)
+  telefoneError.value = ''
 }
 
 watch(
@@ -82,19 +104,38 @@ watch(
 
 function handleSubmit() {
   const nome = form.nome.trim()
+  const cnpjDigitos = stripCnpj(form.cnpj)
+  const telefoneDigitos = stripPhone(form.telefoneComercial)
 
-  if (!nome) {
-    nomeError.value = t('parceiroCadastro.form.nomeRequired')
-    return
+  nomeError.value = !nome ? t('parceiroCadastro.form.nomeRequired') : ''
+
+  if (!cnpjDigitos) {
+    cnpjError.value = t('parceiroCadastro.form.cnpjRequired')
+  } else if (!isValidCnpj(cnpjDigitos)) {
+    cnpjError.value = t('parceiroCadastro.form.cnpjInvalid')
+  } else {
+    cnpjError.value = ''
   }
 
-  nomeError.value = ''
+  // Fixo (10) ou celular (11). Menos que isso não é telefone de contato.
+  if (!telefoneDigitos) {
+    telefoneError.value = t('parceiroCadastro.form.telefoneRequired')
+  } else if (telefoneDigitos.length < 10 || telefoneDigitos.length > 11) {
+    telefoneError.value = t('parceiroCadastro.form.telefoneInvalid')
+  } else {
+    telefoneError.value = ''
+  }
+
+  if (nomeError.value || cnpjError.value || telefoneError.value) {
+    return
+  }
 
   emit('submit', {
     nome,
     categoria: form.categoria,
-    cnpj: form.cnpj.trim() || null,
-    telefoneComercial: form.telefoneComercial.trim() || null,
+    // CNPJ canônico: o backend normaliza para dígitos e a coluna é `@unique`.
+    cnpj: cnpjDigitos,
+    telefoneComercial: formatPhone(telefoneDigitos),
     crmv: form.crmv,
     logoUrl: form.logoUrl,
   })
@@ -136,28 +177,47 @@ function handleSubmit() {
     </div>
 
     <div class="cad-form__field">
-      <label for="cad-cnpj">{{ t('parceiroCadastro.form.cnpj') }}</label>
+      <label for="cad-cnpj">
+        {{ t('parceiroCadastro.form.cnpj') }}
+        <span class="cad-form__required" aria-hidden="true">*</span>
+      </label>
       <InputText
         id="cad-cnpj"
         v-model="form.cnpj"
         :placeholder="t('parceiroCadastro.form.cnpjPlaceholder')"
-        :invalid="errorField === 'cnpj'"
+        :invalid="Boolean(cnpjError) || errorField === 'cnpj'"
+        :aria-describedby="cnpjError ? 'cad-cnpj-error' : undefined"
         inputmode="numeric"
+        maxlength="18"
+        @input="onCnpjInput"
       />
+      <small v-if="cnpjError" id="cad-cnpj-error" class="cad-form__error" role="alert">
+        {{ cnpjError }}
+      </small>
     </div>
 
     <div class="cad-form__field">
-      <label for="cad-telefone">{{ t('parceiroCadastro.form.telefone') }}</label>
+      <label for="cad-telefone">
+        {{ t('parceiroCadastro.form.telefone') }}
+        <span class="cad-form__required" aria-hidden="true">*</span>
+      </label>
       <InputText
         id="cad-telefone"
         v-model="form.telefoneComercial"
         :placeholder="t('parceiroCadastro.form.telefonePlaceholder')"
+        :invalid="Boolean(telefoneError)"
+        :aria-describedby="telefoneError ? 'cad-telefone-error' : undefined"
         inputmode="tel"
         autocomplete="tel"
+        maxlength="15"
+        @input="onTelefoneInput"
       />
+      <small v-if="telefoneError" id="cad-telefone-error" class="cad-form__error" role="alert">
+        {{ telefoneError }}
+      </small>
     </div>
 
-    <p class="cad-form__legend">{{ t('parceiroCadastro.form.onlyNameRequired') }}</p>
+    <p class="cad-form__legend">{{ t('parceiroCadastro.form.requiredLegend') }}</p>
 
     <div class="cad-form__actions">
       <Button type="submit" :label="submitLabel" :loading="submitting" />

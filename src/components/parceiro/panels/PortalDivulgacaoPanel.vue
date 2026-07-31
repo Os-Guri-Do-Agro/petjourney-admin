@@ -5,10 +5,12 @@ import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import IndicacaoMetricasCard from '@/components/parceiro/IndicacaoMetricasCard.vue'
 import IndicacaoQrBlock from '@/components/parceiro/IndicacaoQrBlock.vue'
 import PartnerFocusCard from '@/components/parceiro/PartnerFocusCard.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
-import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
+// Volta junto com o teaser de cupom comentado no template.
+// import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
@@ -16,9 +18,16 @@ import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
   getPortalCupons,
   getPortalIndicacao,
+  getPortalIndicacaoMetricas,
   getPortalResgates,
 } from '@/service/parceiro/parceiro-portal-service'
-import type { CupomParceiro, PortalIndicacao, ResgateParceiro } from '@/service/parceiro/types'
+import type {
+  CupomParceiro,
+  IndicacaoMetricas,
+  PortalIndicacao,
+  ResgateParceiro,
+} from '@/service/parceiro/types'
+import { resolveMetricasErro, type MetricasEstadoErro } from '@/utils/parceiro/indicacao-metricas'
 import { LightColors } from '@/theme/colors'
 import { currentColors } from '@/theme/color-mode'
 
@@ -26,7 +35,7 @@ const { t, locale } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 const { lastSuccessAt } = useCupomResgateModal()
-const { open: openCupomComingSoon } = useCupomComingSoon()
+// const { open: openCupomComingSoon } = useCupomComingSoon()
 const cupomFeatureEnabled = CUPOM_FEATURE_ENABLED
 
 const indicacaoSteps = computed(() => [
@@ -52,7 +61,50 @@ const indicacaoSteps = computed(() => [
   },
 ])
 
+/**
+ * Termos concretos da participação, do jeito que o backend calcula
+ * (`comissao.config.ts`): 5% do plano, a cada renovação paga, janela de 18 meses
+ * desde a primeira assinatura paga do indicado, hold de 14 dias e saque mínimo
+ * de R$ 50.
+ *
+ * Divulgação em dois níveis: os três números que definem o ganho ficam sempre à
+ * vista; o detalhe completo (incluindo hold, saque e a condição de ativação) abre
+ * sob demanda. Abrir tudo de uma vez virava parede de texto no meio da tela.
+ */
+const TERM_IDS = ['percent', 'recurring', 'window', 'hold', 'payout', 'requirement'] as const
+
+const termsOpen = ref(false)
+
+const indicacaoHighlights = computed(() =>
+  (['percent', 'recurring', 'window'] as const).map((id) => ({
+    id,
+    value: t(`divulgacao.terms.highlights.${id}.value`),
+    caption: t(`divulgacao.terms.highlights.${id}.caption`),
+  })),
+)
+
+const indicacaoTerms = computed(() =>
+  TERM_IDS.map((id) => ({
+    id,
+    title: t(`divulgacao.terms.${id}.title`),
+    body: t(`divulgacao.terms.${id}.body`),
+  })),
+)
+
 const indicacao = ref<PortalIndicacao | null>(null)
+
+/**
+ * Só existem quando `podeIndicar`; antes da aprovação a API devolve `null` e a
+ * tela nem chega a renderizar este bloco. O `?? ''` evita espalhar narrowing
+ * pelo template.
+ */
+const codigoIndicacao = computed(() => indicacao.value?.codigoIndicacao ?? '')
+const linkIndicacao = computed(() => indicacao.value?.link ?? '')
+
+const metricas = ref<IndicacaoMetricas | null>(null)
+const metricasLoading = ref(false)
+const metricasErro = ref<MetricasEstadoErro | null>(null)
+
 const cupons = ref<CupomParceiro[]>([])
 const resgates = ref<ResgateParceiro[]>([])
 const cuponsCursor = ref<string | null>(null)
@@ -135,6 +187,31 @@ async function copyToClipboard(value: string, label: string) {
   }
 }
 
+/**
+ * Métricas rodam fora do `loadAll`: 409 (não aprovado) e 503 (QR fora) são
+ * estados do card, não erro da tela, e não podem derrubar o painel. Sem
+ * `podeIndicar` nem chamamos — o 409 seria garantido.
+ */
+async function loadMetricas() {
+  if (!indicacao.value?.podeIndicar) {
+    metricas.value = null
+    metricasErro.value = null
+    return
+  }
+
+  metricasLoading.value = true
+  metricasErro.value = null
+
+  try {
+    metricas.value = await getPortalIndicacaoMetricas(parceiroQuery())
+  } catch (err) {
+    metricas.value = null
+    metricasErro.value = resolveMetricasErro(err)
+  } finally {
+    metricasLoading.value = false
+  }
+}
+
 async function loadAll() {
   loading.value = true
   error.value = ''
@@ -149,6 +226,7 @@ async function loadAll() {
       cuponsCursor.value = null
       resgates.value = []
       resgatesCursor.value = null
+      void loadMetricas()
       return
     }
 
@@ -163,6 +241,7 @@ async function loadAll() {
     cuponsCursor.value = cuponsPage.meta.proximoCursor ?? null
     resgates.value = resgatesPage.data
     resgatesCursor.value = resgatesPage.meta.proximoCursor ?? null
+    void loadMetricas()
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('divulgacao.errorLoad')
   } finally {
@@ -280,7 +359,10 @@ watch(lastSuccessAt, (at) => {
           aria-busy="true"
           :aria-label="t('divulgacao.indicacao.loadingAria')"
         >
-          <PartnerFocusCard class="share-kit share-kit--compact share-kit--skeleton" aria-hidden="true">
+          <PartnerFocusCard
+            class="share-kit share-kit--compact share-kit--skeleton"
+            aria-hidden="true"
+          >
             <header class="share-kit__head">
               <div class="share-kit__head-copy">
                 <Skeleton width="7.5rem" height="0.7rem" border-radius="4px" />
@@ -338,11 +420,7 @@ watch(lastSuccessAt, (at) => {
         </div>
       </section>
 
-      <section
-        v-if="cupomFeatureEnabled"
-        class="div-zone"
-        aria-labelledby="div-movimentacao-title"
-      >
+      <section v-if="cupomFeatureEnabled" class="div-zone" aria-labelledby="div-movimentacao-title">
         <header class="div-zone__head">
           <div class="div-zone__title-row">
             <p class="div-zone__index">02</p>
@@ -444,9 +522,19 @@ watch(lastSuccessAt, (at) => {
               }}</span>
             </header>
 
-            <p v-if="indicacao.aviso" class="share-kit__aviso">{{ indicacao.aviso }}</p>
+            <!-- Gate 2026-07-29: sem aprovação não existe código, link nem QR (a
+                 API devolve tudo null). Estado de espera com o `aviso` do backend,
+                 que já é específico por status; nada de copy própria aqui. -->
+            <div v-if="!indicacao.podeIndicar" class="share-kit__espera">
+              <span class="share-kit__espera-icon" aria-hidden="true">
+                <i class="pi pi-hourglass" />
+              </span>
+              <p v-if="indicacao.aviso" class="share-kit__espera-aviso">{{ indicacao.aviso }}</p>
+              <p class="share-kit__espera-hint">{{ t('divulgacao.shareKit.esperaHint') }}</p>
+            </div>
 
             <div
+              v-else
               class="share-kit__stage"
               :class="{ 'share-kit__stage--with-qr': Boolean(indicacao.qrImageUrl) }"
             >
@@ -454,15 +542,13 @@ watch(lastSuccessAt, (at) => {
                 <div class="share-kit__code-block">
                   <span class="share-kit__label">{{ t('divulgacao.shareKit.codeLabel') }}</span>
                   <div class="share-kit__code-row">
-                    <strong class="share-kit__code">{{ indicacao.codigoIndicacao }}</strong>
+                    <strong class="share-kit__code">{{ codigoIndicacao }}</strong>
                     <button
                       type="button"
                       class="share-kit__icon-btn"
                       :aria-label="t('divulgacao.shareKit.copyCodeAria')"
                       :disabled="!indicacao.podeIndicar"
-                      @click="
-                        copyToClipboard(indicacao.codigoIndicacao, t('divulgacao.shareKit.codeLabel'))
-                      "
+                      @click="copyToClipboard(codigoIndicacao, t('divulgacao.shareKit.codeLabel'))"
                     >
                       <i class="pi pi-copy" aria-hidden="true" />
                     </button>
@@ -472,12 +558,12 @@ watch(lastSuccessAt, (at) => {
                 <div class="share-kit__link">
                   <span class="share-kit__label">{{ t('divulgacao.shareKit.linkLabel') }}</span>
                   <div class="share-kit__link-field">
-                    <code>{{ indicacao.link }}</code>
+                    <code>{{ linkIndicacao }}</code>
                     <button
                       type="button"
                       class="share-kit__copy-cta"
                       :disabled="!indicacao.podeIndicar"
-                      @click="copyToClipboard(indicacao.link, t('divulgacao.shareKit.linkName'))"
+                      @click="copyToClipboard(linkIndicacao, t('divulgacao.shareKit.linkName'))"
                     >
                       <i class="pi pi-link" aria-hidden="true" />
                       {{ t('divulgacao.shareKit.copyLink') }}
@@ -494,12 +580,22 @@ watch(lastSuccessAt, (at) => {
                 v-if="indicacao.qrImageUrl"
                 class="share-kit__qr"
                 :image-url="indicacao.qrImageUrl"
-                :code="indicacao.codigoIndicacao"
+                :code="codigoIndicacao"
                 :disabled="!indicacao.podeIndicar"
-                size="sm"
+                size="md"
               />
             </div>
           </PartnerFocusCard>
+
+          <!-- Leituras do QR: só faz sentido quando existe QR para ler. -->
+          <IndicacaoMetricasCard
+            v-if="indicacao.podeIndicar"
+            class="divulgacao__metricas"
+            :metricas="metricas"
+            :loading="metricasLoading"
+            :erro="metricasErro"
+            @retry="loadMetricas"
+          />
 
           <aside
             v-if="cupomFeatureEnabled"
@@ -522,12 +618,17 @@ watch(lastSuccessAt, (at) => {
             </article>
           </aside>
 
-          <aside
-            v-else
-            id="cupons"
-            class="cupom-soon"
-            aria-labelledby="div-cupom-soon-title"
-          >
+          <!--
+            Teaser de cupom removido da Divulgação (pedido de 2026-07-31): a
+            feature não sai agora e o card prometia o que não existe.
+
+            Para restaurar, descomente este bloco E o `useCupomComingSoon` no
+            script; o CSS (`.cupom-soon*`) foi mantido de propósito.
+            Enquanto estiver fora, `#cupons` e `#resgates` não existem com a flag
+            de cupom desligada: os redirects legados de `?aba=` caem no topo da
+            tela em vez de rolar para a seção.
+
+          <aside v-else id="cupons" class="cupom-soon" aria-labelledby="div-cupom-soon-title">
             <div id="resgates" class="cupom-soon__anchor">
               <span class="cupom-soon__badge">{{ t('comingSoon.cupom.badge') }}</span>
               <span class="cupom-soon__icon" aria-hidden="true">
@@ -542,14 +643,11 @@ watch(lastSuccessAt, (at) => {
               />
             </div>
           </aside>
+          -->
         </div>
       </section>
 
-      <section
-        id="como-funciona"
-        class="div-zone"
-        aria-labelledby="div-how-title"
-      >
+      <section id="como-funciona" class="div-zone" aria-labelledby="div-how-title">
         <article class="indicacao-pitch">
           <header class="indicacao-pitch__hero">
             <p class="indicacao-pitch__eyebrow">{{ t('divulgacao.howItWorks.eyebrow') }}</p>
@@ -576,6 +674,45 @@ watch(lastSuccessAt, (at) => {
             </li>
           </ol>
 
+          <section class="indicacao-terms" aria-labelledby="div-terms-title">
+            <header class="indicacao-terms__head">
+              <h3 id="div-terms-title">{{ t('divulgacao.terms.title') }}</h3>
+              <p>{{ t('divulgacao.terms.lede') }}</p>
+            </header>
+
+            <ul class="indicacao-terms__highlights">
+              <li v-for="item in indicacaoHighlights" :key="item.id">
+                <strong>{{ item.value }}</strong>
+                <span>{{ item.caption }}</span>
+              </li>
+            </ul>
+
+            <button
+              type="button"
+              class="indicacao-terms__toggle"
+              :aria-expanded="termsOpen"
+              aria-controls="div-terms-full"
+              @click="termsOpen = !termsOpen"
+            >
+              <span>{{
+                termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')
+              }}</span>
+              <i
+                class="pi"
+                :class="termsOpen ? 'pi-chevron-up' : 'pi-chevron-down'"
+                aria-hidden="true"
+              />
+            </button>
+
+            <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
+            <dl v-show="termsOpen" id="div-terms-full" class="indicacao-terms__grid">
+              <div v-for="term in indicacaoTerms" :key="term.id" class="indicacao-terms__item">
+                <dt>{{ term.title }}</dt>
+                <dd>{{ term.body }}</dd>
+              </div>
+            </dl>
+          </section>
+
           <div class="indicacao-pitch__close">
             <p class="indicacao-pitch__promise">{{ t('divulgacao.howItWorks.promise') }}</p>
             <p class="indicacao-pitch__note">{{ t('divulgacao.howItWorks.note') }}</p>
@@ -583,11 +720,7 @@ watch(lastSuccessAt, (at) => {
         </article>
       </section>
 
-      <section
-        v-if="cupomFeatureEnabled"
-        class="div-zone"
-        aria-labelledby="div-movimentacao-title"
-      >
+      <section v-if="cupomFeatureEnabled" class="div-zone" aria-labelledby="div-movimentacao-title">
         <header class="div-zone__head">
           <div class="div-zone__title-row">
             <p class="div-zone__index">02</p>
@@ -742,12 +875,11 @@ watch(lastSuccessAt, (at) => {
   padding: 1.35rem 1.4rem 1.4rem;
   border: 1px solid color-mix(in srgb, var(--div-primary) 18%, var(--div-line));
   border-radius: 1.25rem;
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--div-primary-soft) 42%, var(--div-card)) 0%,
-      var(--div-card) 48%
-    );
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--div-primary-soft) 42%, var(--div-card)) 0%,
+    var(--div-card) 48%
+  );
   box-shadow: 0 14px 34px rgb(var(--div-shadow-rgb) / 0.05);
 }
 
@@ -835,6 +967,132 @@ watch(lastSuccessAt, (at) => {
   color: var(--div-muted);
   font-size: 0.82rem;
   line-height: 1.45;
+}
+
+.indicacao-terms {
+  display: grid;
+  gap: 0.65rem;
+  justify-items: stretch;
+  padding-top: 0.9rem;
+  border-top: 1px solid color-mix(in srgb, var(--div-line) 85%, transparent);
+}
+
+.indicacao-terms__head h3 {
+  margin: 0;
+  color: var(--div-text);
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+.indicacao-terms__head p {
+  margin: 0.2rem 0 0;
+  color: var(--div-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+/* Nível 1: os três números que definem o ganho. Hierarquia por tamanho do valor,
+   não por cor decorativa. */
+.indicacao-terms__highlights {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.indicacao-terms__highlights li {
+  display: grid;
+  gap: 0.1rem;
+  align-content: start;
+  min-width: 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--div-primary) 22%, var(--div-line));
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--div-primary-soft) 22%, var(--div-card));
+}
+
+.indicacao-terms__highlights strong {
+  color: var(--div-primary-strong);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.indicacao-terms__highlights span {
+  color: var(--div-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.indicacao-terms__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-self: start;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--div-primary-strong);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.indicacao-terms__toggle:hover {
+  border-color: color-mix(in srgb, var(--div-primary) 28%, var(--div-line));
+  background: color-mix(in srgb, var(--div-primary-soft) 26%, transparent);
+}
+
+.indicacao-terms__toggle:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--div-primary) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.indicacao-terms__toggle i {
+  font-size: 0.7rem;
+}
+
+/* Nível 2: o detalhe completo, incluindo o que não cabe no resumo. */
+.indicacao-terms__grid {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  margin: 0;
+}
+
+.indicacao-terms__item {
+  display: grid;
+  gap: 0.2rem;
+  align-content: start;
+  min-width: 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--div-line) 90%, transparent);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--div-surface) 70%, var(--div-card));
+}
+
+.indicacao-terms__item dt {
+  color: var(--div-text);
+  font-size: 0.86rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.indicacao-terms__item dd {
+  margin: 0;
+  color: var(--div-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
 }
 
 .indicacao-pitch__close {
@@ -925,11 +1183,7 @@ watch(lastSuccessAt, (at) => {
 .list-panel--skeleton :deep(.p-skeleton),
 .metrics-strip__item--skeleton :deep(.p-skeleton) {
   --p-skeleton-background: color-mix(in srgb, var(--div-primary-soft) 42%, var(--div-card));
-  --p-skeleton-animation-background: color-mix(
-    in srgb,
-    var(--div-primary-soft) 18%,
-    transparent
-  );
+  --p-skeleton-animation-background: color-mix(in srgb, var(--div-primary-soft) 18%, transparent);
 }
 
 .divulgacao__error {
@@ -961,6 +1215,49 @@ watch(lastSuccessAt, (at) => {
 
 .divulgacao__board--with-soon {
   grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 0.8fr);
+}
+
+/* Estado de espera: substitui código, link e QR enquanto o cadastro não é
+   aprovado. O texto é o `aviso` do backend, que já varia por status.
+   Só aparece com o card em `muted`, que usa `color: inherit` e fundo claro:
+   por isso os tokens são os do painel, e não `--pf-on` (branco). */
+.share-kit__espera {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1.15rem;
+  border: 1px dashed color-mix(in srgb, var(--div-primary) 30%, var(--div-line));
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--div-surface) 60%, var(--div-card));
+  text-align: center;
+}
+
+.share-kit__espera-icon {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--div-primary) 16%, transparent);
+  color: var(--div-primary-strong);
+  font-size: 1.1rem;
+}
+
+.share-kit__espera-aviso {
+  margin: 0;
+  max-width: 30rem;
+  color: var(--div-text);
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.share-kit__espera-hint {
+  margin: 0;
+  max-width: 30rem;
+  color: var(--div-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
 
 .share-kit--compact {
@@ -1011,17 +1308,6 @@ watch(lastSuccessAt, (at) => {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
-}
-
-.share-kit__aviso {
-  margin: 0;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--div-primary) 22%, var(--div-line));
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--div-primary-soft) 18%, var(--div-card));
-  color: var(--div-text);
-  font-size: 0.84rem;
-  line-height: 1.4;
 }
 
 .share-kit__stage {
@@ -1432,18 +1718,21 @@ watch(lastSuccessAt, (at) => {
   }
 }
 
+/* As métricas passaram a ocupar a coluna 2 ao lado do kit (é a leitura do mesmo
+   QR que está à esquerda), então o teaser de cupom desce para uma faixa inteira.
+   Sem isto sobraria um buraco na coluna 2 da segunda linha. */
 .cupom-soon {
+  grid-column: 1 / -1;
   display: flex;
   min-height: 100%;
   padding: 1.1rem 1.15rem;
   border: 1px solid color-mix(in srgb, var(--div-primary) 22%, var(--div-line));
   border-radius: 1.2rem;
-  background:
-    linear-gradient(
-      155deg,
-      color-mix(in srgb, var(--div-primary-soft) 34%, var(--div-card)) 0%,
-      var(--div-card) 55%
-    );
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--div-primary-soft) 34%, var(--div-card)) 0%,
+    var(--div-card) 55%
+  );
   box-shadow: 0 12px 28px rgb(var(--div-shadow-rgb) / 0.05);
 }
 

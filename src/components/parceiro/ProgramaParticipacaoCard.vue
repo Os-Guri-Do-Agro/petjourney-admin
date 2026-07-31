@@ -153,7 +153,7 @@ const ativoDesdeLabel = computed(() => {
 
 const saldoLabel = computed(() => {
   if (saldoSacavelCentavos.value == null) {
-    return '—'
+    return '-'
   }
 
   return formatCentavosToBrl(saldoSacavelCentavos.value)
