@@ -4,6 +4,7 @@ import { updateAccessToken } from '../auth/auth-session'
 import type {
   Carteira,
   CupomParceiro,
+  IndicacaoMetricas,
   ModoParticipacao,
   ModoStatusBloco,
   PapelParceiro,
@@ -45,7 +46,9 @@ async function unwrap<T>(promise: Promise<ApiEnvelope<T>>) {
 
 export function getPortalDashboard(params?: ParceiroQuery) {
   return unwrap(
-    apiFetch<ApiEnvelope<PortalDashboard>>(`/parceiro/portal/dashboard${buildParceiroQuery(params)}`),
+    apiFetch<ApiEnvelope<PortalDashboard>>(
+      `/parceiro/portal/dashboard${buildParceiroQuery(params)}`,
+    ),
   )
 }
 
@@ -125,7 +128,22 @@ export function atualizarParceiroCadastro(
 
 export function getPortalIndicacao(params?: ParceiroQuery) {
   return unwrap(
-    apiFetch<ApiEnvelope<PortalIndicacao>>(`/parceiro/portal/indicacao${buildParceiroQuery(params)}`),
+    apiFetch<ApiEnvelope<PortalIndicacao>>(
+      `/parceiro/portal/indicacao${buildParceiroQuery(params)}`,
+    ),
+  )
+}
+
+/**
+ * Métricas de leitura do QR de indicação. Erros esperados, tratados na tela:
+ * `409` parceiro ainda não operável e `503` (`QR_INDISPONIVEL`) serviço de QR
+ * fora. Nenhum dos dois deve derrubar o restante do painel.
+ */
+export function getPortalIndicacaoMetricas(params?: ParceiroQuery) {
+  return unwrap(
+    apiFetch<ApiEnvelope<IndicacaoMetricas>>(
+      `/parceiro/portal/indicacao/metricas${buildParceiroQuery(params)}`,
+    ),
   )
 }
 
@@ -196,9 +214,7 @@ export function getCarteira(params?: ParceiroQuery) {
   )
 }
 
-export function getCarteiraExtrato(
-  params?: ParceiroQuery & { cursor?: string; limit?: number },
-) {
+export function getCarteiraExtrato(params?: ParceiroQuery & { cursor?: string; limit?: number }) {
   const search = new URLSearchParams()
 
   if (params?.parceiroId) {
@@ -275,13 +291,17 @@ export function convidarMembroEquipe(
   params?: ParceiroQuery,
 ) {
   return unwrap(
-    apiFetch<ApiEnvelope<{ parceiroId: string; usuarioId: string; papel: PapelParceiro; status: 'PENDENTE' }>>(
-      `/parceiro/portal/equipe/convites${buildParceiroQuery(params)}`,
-      {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      },
-    ),
+    apiFetch<
+      ApiEnvelope<{
+        parceiroId: string
+        usuarioId: string
+        papel: PapelParceiro
+        status: 'PENDENTE'
+      }>
+    >(`/parceiro/portal/equipe/convites${buildParceiroQuery(params)}`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   )
 }
 
@@ -295,8 +315,7 @@ export function aceitarConviteEquipe(parceiroId: string) {
 }
 
 export function removerMembroEquipe(usuarioId: string, params?: ParceiroQuery) {
-  return apiFetch<void>(
-    `/parceiro/portal/equipe/${usuarioId}${buildParceiroQuery(params)}`,
-    { method: 'DELETE' },
-  )
+  return apiFetch<void>(`/parceiro/portal/equipe/${usuarioId}${buildParceiroQuery(params)}`, {
+    method: 'DELETE',
+  })
 }

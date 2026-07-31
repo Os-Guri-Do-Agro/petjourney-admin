@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
-import { computed, onMounted, ref, watch } from 'vue'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -14,16 +16,33 @@ import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { getCompartilhamentos } from '@/service/parceiro/compartilhamentos-service'
-import type {
-  CompartilhamentoDetalhe,
-  CompartilhamentoResumo,
-  StatusCompartilhamento,
+import {
+  MAX_BUSCA_PACIENTES,
+  type CompartilhamentoDetalhe,
+  type CompartilhamentoResumo,
+  type EspeciePet,
+  type OrdenacaoPacientes,
+  type StatusCompartilhamento,
+  type TipoServicoPrestador,
 } from '@/service/parceiro/types'
 
 const ATENDIMENTO_TABS = ['ativos', 'historico'] as const
 type AtendimentoTab = (typeof ATENDIMENTO_TABS)[number]
 
 const PAGE_SIZE = 20
+/** Espera entre teclas antes de ir à rede: a busca dispara a cada digitação. */
+const BUSCA_DEBOUNCE_MS = 350
+
+const ESPECIES: EspeciePet[] = ['CACHORRO', 'GATO', 'AVE', 'ROEDOR', 'COELHO', 'PEIXE', 'REPTIL']
+const TIPOS_SERVICO: TipoServicoPrestador[] = [
+  'BANHO',
+  'TOSA',
+  'CONSULTA',
+  'EXAME',
+  'HOTEL',
+  'OUTRO',
+]
+const ORDENACOES: OrdenacaoPacientes[] = ['recentes', 'nome', 'expiraEm']
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -32,13 +51,49 @@ const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 const { activeTab, setTab } = usePartnerTabs(ATENDIMENTO_TABS, 'ativos')
 
 const items = ref<CompartilhamentoResumo[]>([])
-/** Histórico pagina EXPIRADO e REVOGADO em fontes separadas (cursor próprio). */
-const cursors = ref<Partial<Record<StatusCompartilhamento, string | null>>>({})
+/** Cursor único: o servidor resolve status, filtros e ordem numa consulta só. */
+const cursor = ref<string | null>(null)
 const loading = ref(true)
 const loadingMore = ref(false)
 const error = ref('')
 
 const vincularVisible = ref(false)
+
+const filtros = reactive({
+  q: '',
+  especie: null as EspeciePet | null,
+  tipoServico: null as TipoServicoPrestador | null,
+  ordenarPor: 'recentes' as OrdenacaoPacientes,
+  vinculadoDe: '',
+  vinculadoAte: '',
+})
+
+const temFiltroAtivo = computed(
+  () =>
+    Boolean(filtros.q.trim()) ||
+    filtros.especie != null ||
+    filtros.tipoServico != null ||
+    filtros.ordenarPor !== 'recentes' ||
+    Boolean(filtros.vinculadoDe) ||
+    Boolean(filtros.vinculadoAte),
+)
+
+const especieOptions = computed(() =>
+  ESPECIES.map((value) => ({ value, label: t(`atendimentos.especie.${value}`) })),
+)
+
+const tipoServicoOptions = computed(() =>
+  TIPOS_SERVICO.map((value) => ({ value, label: t(`atendimentos.servico.${value}`) })),
+)
+
+const ordenacaoOptions = computed(() =>
+  ORDENACOES.map((value) => ({ value, label: t(`atendimentos.filtros.ordem.${value}`) })),
+)
+
+const ordenacaoLabel = computed(() => t(`atendimentos.filtros.ordem.${filtros.ordenarPor}`))
+
+/** O grupo de datas é um filtro só; o leitor de tela anuncia assim. */
+const periodoAriaLabel = computed(() => t('atendimentos.filtros.periodo'))
 
 const tabs = computed(() => [
   {
@@ -57,88 +112,127 @@ const tabsAriaLabel = computed(() =>
   t('frame.tabs.aria', { labels: tabs.value.map((tab) => tab.label).join(', ') }),
 )
 
-const hasMore = computed(() => Object.values(cursors.value).some((cursor) => cursor != null))
+const hasMore = computed(() => cursor.value != null)
 
 const loadError = computed(() =>
   store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
 )
 
-function sortByCriadoEm(list: CompartilhamentoResumo[]) {
-  return [...list].sort(
-    (a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime(),
-  )
+/**
+ * Digitar rápido dispara várias buscas; a resposta lenta de uma tecla antiga pode
+ * chegar depois da nova e sobrescrever a lista. Só a requisição mais recente
+ * escreve no estado.
+ */
+let requestId = 0
+
+/** `YYYY-MM-DD` do input vira ISO no fuso local; vazio some da query. */
+function dataFiltro(valor: string) {
+  if (!valor.trim()) {
+    return undefined
+  }
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(valor.trim())
+
+  if (!match) {
+    return undefined
+  }
+
+  const data = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+
+  return Number.isNaN(data.getTime()) ? undefined : data.toISOString()
 }
 
-async function fetchPage(status: StatusCompartilhamento, cursor?: string) {
-  const page = await getCompartilhamentos({
+function queryAtual(cursorAtual?: string) {
+  return {
     ...parceiroQuery(),
-    status,
-    cursor,
+    // O histórico usa o status virtual: um cursor só para expirados e revogados.
+    status: activeTab.value === 'ativos' ? ('ATIVO' as const) : ('ENCERRADO' as const),
+    q: filtros.q.trim() || undefined,
+    especie: filtros.especie ?? undefined,
+    tipoServico: filtros.tipoServico ?? undefined,
+    ordenarPor: filtros.ordenarPor,
+    vinculadoDe: dataFiltro(filtros.vinculadoDe),
+    vinculadoAte: dataFiltro(filtros.vinculadoAte),
+    cursor: cursorAtual,
     limit: PAGE_SIZE,
-  })
-
-  return page
+  }
 }
 
 async function loadFirstPage() {
+  const id = ++requestId
+
   loading.value = true
   error.value = ''
-  items.value = []
-  cursors.value = {}
 
   try {
     await ensureContext()
+    const page = await getCompartilhamentos(queryAtual())
 
-    if (activeTab.value === 'ativos') {
-      const page = await fetchPage('ATIVO')
-      items.value = page.data
-      cursors.value = { ATIVO: page.meta.proximoCursor ?? null }
-    } else {
-      const [expirados, revogados] = await Promise.all([
-        fetchPage('EXPIRADO'),
-        fetchPage('REVOGADO'),
-      ])
-      items.value = sortByCriadoEm([...expirados.data, ...revogados.data])
-      cursors.value = {
-        EXPIRADO: expirados.meta.proximoCursor ?? null,
-        REVOGADO: revogados.meta.proximoCursor ?? null,
-      }
+    if (id !== requestId) {
+      return
     }
+
+    items.value = page.data
+    cursor.value = page.meta.proximoCursor ?? null
   } catch (err) {
+    if (id !== requestId) {
+      return
+    }
+
+    items.value = []
+    cursor.value = null
     error.value = err instanceof Error ? err.message : t('atendimentos.list.errorLoad')
   } finally {
-    loading.value = false
+    if (id === requestId) {
+      loading.value = false
+    }
   }
 }
 
 async function loadMore() {
-  if (loadingMore.value || !hasMore.value) {
+  if (loadingMore.value || cursor.value == null) {
     return
   }
 
+  const id = requestId
   loadingMore.value = true
 
   try {
-    const pending = Object.entries(cursors.value).filter(([, cursor]) => cursor != null) as Array<
-      [StatusCompartilhamento, string]
-    >
+    const page = await getCompartilhamentos(queryAtual(cursor.value))
 
-    const pages = await Promise.all(pending.map(([status, cursor]) => fetchPage(status, cursor)))
-
-    const novos = pages.flatMap((page) => page.data)
-    items.value = sortByCriadoEm([...items.value, ...novos])
-
-    for (const [index, [status]] of pending.entries()) {
-      cursors.value = {
-        ...cursors.value,
-        [status]: pages[index]?.meta.proximoCursor ?? null,
-      }
+    // Filtro trocado no meio do carregamento: a página velha não entra na lista.
+    if (id !== requestId) {
+      return
     }
+
+    // A ordem vem do servidor (`ordenarPor`): concatenar, nunca reordenar aqui.
+    items.value = [...items.value, ...page.data]
+    cursor.value = page.meta.proximoCursor ?? null
   } catch (err) {
-    error.value = err instanceof Error ? err.message : t('atendimentos.list.errorLoad')
+    if (id === requestId) {
+      error.value = err instanceof Error ? err.message : t('atendimentos.list.errorLoad')
+    }
   } finally {
     loadingMore.value = false
   }
+}
+
+let debounceTimer: ReturnType<typeof setTimeout> | undefined
+
+function agendarBusca() {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    void loadFirstPage()
+  }, BUSCA_DEBOUNCE_MS)
+}
+
+function limparFiltros() {
+  filtros.q = ''
+  filtros.especie = null
+  filtros.tipoServico = null
+  filtros.ordenarPor = 'recentes'
+  filtros.vinculadoDe = ''
+  filtros.vinculadoAte = ''
 }
 
 function servicoLabel(item: CompartilhamentoResumo) {
@@ -197,6 +291,27 @@ watch(activeTab, () => {
   void loadFirstPage()
 })
 
+/** Busca é debounced; os demais filtros são discretos e vão direto. */
+watch(() => filtros.q, agendarBusca)
+
+watch(
+  () => [
+    filtros.especie,
+    filtros.tipoServico,
+    filtros.ordenarPor,
+    filtros.vinculadoDe,
+    filtros.vinculadoAte,
+  ],
+  () => {
+    clearTimeout(debounceTimer)
+    void loadFirstPage()
+  },
+)
+
+onUnmounted(() => {
+  clearTimeout(debounceTimer)
+})
+
 onMounted(() => {
   // Deep link legado: ?atendimento=:id virou rota própria de detalhe.
   const deepLink = route.query.atendimento
@@ -241,6 +356,117 @@ onMounted(() => {
       @select="setTab($event as AtendimentoTab)"
     />
 
+    <!-- Rótulos existem para leitor de tela, mas ficam ocultos: cinco textos
+         empilhados sobre controles pequenos viram ruído. Cada controle carrega o
+         próprio nome no placeholder. -->
+    <section class="atend-filtros" :aria-label="t('atendimentos.filtros.aria')">
+      <div class="atend-filtros__topo">
+        <label class="atend-filtros__sr" for="atend-q">{{ t('atendimentos.filtros.q') }}</label>
+        <span class="atend-filtros__search">
+          <i class="pi pi-search" aria-hidden="true" />
+          <InputText
+            id="atend-q"
+            v-model="filtros.q"
+            :maxlength="MAX_BUSCA_PACIENTES"
+            :placeholder="t('atendimentos.filtros.qPlaceholder')"
+            autocomplete="off"
+          />
+        </span>
+
+        <Button
+          v-if="temFiltroAtivo"
+          class="atend-filtros__limpar"
+          :label="t('atendimentos.filtros.limpar')"
+          icon="pi pi-filter-slash"
+          severity="secondary"
+          text
+          size="small"
+          @click="limparFiltros"
+        />
+      </div>
+
+      <div class="atend-filtros__controles">
+        <label class="atend-filtros__sr" for="atend-especie">
+          {{ t('atendimentos.filtros.especie') }}
+        </label>
+        <Select
+          id="atend-especie"
+          v-model="filtros.especie"
+          class="atend-filtros__select"
+          :options="especieOptions"
+          option-label="label"
+          option-value="value"
+          :placeholder="t('atendimentos.filtros.especie')"
+          show-clear
+          size="small"
+        />
+
+        <label class="atend-filtros__sr" for="atend-tipo">
+          {{ t('atendimentos.filtros.tipoServico') }}
+        </label>
+        <Select
+          id="atend-tipo"
+          v-model="filtros.tipoServico"
+          class="atend-filtros__select"
+          :options="tipoServicoOptions"
+          option-label="label"
+          option-value="value"
+          :placeholder="t('atendimentos.filtros.tipoServico')"
+          show-clear
+          size="small"
+        />
+
+        <label class="atend-filtros__sr" for="atend-ordem">
+          {{ t('atendimentos.filtros.ordenarPor') }}
+        </label>
+        <Select
+          id="atend-ordem"
+          v-model="filtros.ordenarPor"
+          class="atend-filtros__select"
+          :options="ordenacaoOptions"
+          option-label="label"
+          option-value="value"
+          size="small"
+        >
+          <!-- Ordenação sempre tem valor, então o placeholder nunca aparece:
+               o ícone é o que diz que aquele controle é a ordem da lista. -->
+          <template #value>
+            <span class="atend-filtros__ordem">
+              <i class="pi pi-sort-alt" aria-hidden="true" />
+              {{ ordenacaoLabel }}
+            </span>
+          </template>
+        </Select>
+
+        <div class="atend-filtros__periodo" role="group" :aria-label="periodoAriaLabel">
+          <span class="atend-filtros__periodo-label" aria-hidden="true">
+            {{ t('atendimentos.filtros.periodo') }}
+          </span>
+          <label class="atend-filtros__sr" for="atend-de">
+            {{ t('atendimentos.filtros.vinculadoDe') }}
+          </label>
+          <input
+            id="atend-de"
+            v-model="filtros.vinculadoDe"
+            class="atend-filtros__date"
+            type="date"
+            :max="filtros.vinculadoAte || undefined"
+          />
+          <i class="pi pi-arrow-right atend-filtros__periodo-sep" aria-hidden="true" />
+          <label class="atend-filtros__sr" for="atend-ate">
+            {{ t('atendimentos.filtros.vinculadoAte') }}
+          </label>
+          <input
+            id="atend-ate"
+            v-model="filtros.vinculadoAte"
+            class="atend-filtros__date"
+            type="date"
+            :min="filtros.vinculadoDe || undefined"
+          />
+        </div>
+      </div>
+    </section>
+
     <div class="atend-panel" role="tabpanel">
       <PartnerPanelLoading
         v-if="loading"
@@ -251,6 +477,20 @@ onMounted(() => {
       <div v-else-if="error" class="atend-state atend-state--error" role="alert">
         <p>{{ error }}</p>
         <Button :label="t('common.retry')" severity="secondary" @click="loadFirstPage" />
+      </div>
+
+      <!-- Vazio por filtro é outro problema do usuário: a saída é limpar o filtro,
+           não vincular um código novo. -->
+      <div v-else-if="items.length === 0 && temFiltroAtivo" class="atend-state atend-state--empty">
+        <i class="pi pi-filter-slash" aria-hidden="true" />
+        <strong>{{ t('atendimentos.list.emptyFiltroTitle') }}</strong>
+        <p>{{ t('atendimentos.list.emptyFiltroBody') }}</p>
+        <Button
+          :label="t('atendimentos.filtros.limpar')"
+          icon="pi pi-filter-slash"
+          severity="secondary"
+          @click="limparFiltros"
+        />
       </div>
 
       <div v-else-if="items.length === 0" class="atend-state atend-state--empty">
@@ -341,6 +581,171 @@ onMounted(() => {
   color: var(--partner-muted);
   font-size: 0.94rem;
   line-height: 1.5;
+}
+
+/* Superfície mais discreta que os cards da lista: a barra é ferramenta, não
+   conteúdo, e não deve competir com as linhas de atendimento. */
+.atend-filtros {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--partner-line) 88%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--partner-surface) 78%, var(--partner-card));
+}
+
+.atend-filtros__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Linha 1: a busca manda, e cresce até empurrar o botão para a direita. */
+.atend-filtros__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.atend-filtros__search {
+  position: relative;
+  display: block;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.atend-filtros__search i {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  color: var(--partner-faint);
+  font-size: 0.82rem;
+  pointer-events: none;
+}
+
+.atend-filtros__search :deep(.p-inputtext) {
+  width: 100%;
+  padding-left: 2.1rem;
+  border-radius: 0.7rem;
+  background: var(--partner-card);
+}
+
+.atend-filtros__limpar {
+  flex: 0 0 auto;
+}
+
+/* Linha 2: controles compactos que quebram sozinhos, sem grid rígido. */
+.atend-filtros__controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.atend-filtros__select {
+  flex: 0 1 auto;
+  min-width: 8.5rem;
+}
+
+.atend-filtros__select :deep(.p-select) {
+  width: 100%;
+  border-radius: 0.7rem;
+  background: var(--partner-card);
+}
+
+.atend-filtros__select :deep(.p-select-label) {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.atend-filtros__select :deep(.p-select-label.p-placeholder) {
+  color: var(--partner-muted);
+  font-weight: 500;
+}
+
+.atend-filtros__ordem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.atend-filtros__ordem i {
+  color: var(--partner-primary-strong);
+  font-size: 0.75rem;
+}
+
+/* Período é um filtro só: as duas datas vivem dentro da mesma cápsula. */
+.atend-filtros__periodo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.2rem 0.55rem 0.2rem 0.7rem;
+  border: 1px solid var(--partner-line);
+  border-radius: 0.7rem;
+  background: var(--partner-card);
+}
+
+.atend-filtros__periodo-label {
+  color: var(--partner-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.atend-filtros__periodo-sep {
+  color: var(--partner-faint);
+  font-size: 0.68rem;
+}
+
+.atend-filtros__date {
+  min-width: 0;
+  width: 8.2rem;
+  padding: 0.32rem 0.4rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--partner-text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.atend-filtros__date:hover {
+  background: color-mix(in srgb, var(--partner-primary) 8%, transparent);
+}
+
+.atend-filtros__date:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--partner-primary) 45%, transparent);
+  outline-offset: 1px;
+}
+
+/* Sem isto o ícone nativo do seletor de data some no modo escuro. */
+.atend-filtros__date::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(var(--atend-picker-invert, 0));
+  opacity: 0.6;
+}
+
+:global(.app-dark) .atend-filtros__date::-webkit-calendar-picker-indicator {
+  --atend-picker-invert: 1;
+}
+
+@media (max-width: 640px) {
+  .atend-filtros__select,
+  .atend-filtros__periodo {
+    flex: 1 1 100%;
+  }
+
+  .atend-filtros__date {
+    flex: 1 1 0;
+    width: auto;
+  }
 }
 
 .atend-panel {

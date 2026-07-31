@@ -265,6 +265,7 @@ async function handleSubmit() {
         :current-step="currentStep"
         :labels="STEP_LABELS"
         :total-steps="TOTAL_STEPS"
+        :list-label="t('auth.register.stepsAria')"
       />
 
       <form

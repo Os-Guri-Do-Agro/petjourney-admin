@@ -11,7 +11,7 @@
       "badge": "Coming soon",
       "navHint": "Coupons and promotion are in development",
       "title": "Coupons are almost here",
-      "lede": "Soon you’ll validate redemptions at the counter, track campaigns, and watch every conversion land — all in one place.",
+      "lede": "Soon you’ll validate redemptions at the counter, track campaigns, and watch every conversion land, all in one place.",
       "body": "We’re polishing the last details before launch. Stay tuned: when it opens, your promotion workflow gets a whole new pace.",
       "cta": "Excited! Back to the dashboard",
       "sectionCta": "Tell me more",
@@ -25,13 +25,13 @@
       "description": "The PetJourney portal connects your business to pet parents: promote offers, refer with ease, and track growth in one place.",
       "benefits": {
         "programs": "Programmes built for partners who want to grow",
-        "outreach": "Outreach with coupons and referrals that convert",
+        "outreach": "Outreach and referrals that convert into subscribers",
         "results": "Results and earnings tracked in real time"
       }
     },
     "login": {
       "title": "Welcome back",
-      "description": "Sign in to the portal and boost your partnership with referrals, coupons, and results.",
+      "description": "Sign in to the portal and boost your partnership with referrals and results.",
       "email": {
         "label": "Email",
         "placeholder": "you{'@'}company.com"
@@ -85,6 +85,7 @@
         "account": "Account"
       },
       "stepOf": "Step {current} of {total}",
+      "stepsAria": "Registration steps",
       "step1": {
         "title": "Identity",
         "description": "Enter your name and email to create your partner account."
@@ -305,7 +306,7 @@
     "aria": {
       "sections": "Portal sections",
       "brand": "PetJourney",
-      "brandHome": "PetJourney — home",
+      "brandHome": "PetJourney home",
       "pagesOf": "Pages in {label}"
     },
     "theme": {
@@ -340,7 +341,7 @@
       "codeLabel": "Redemption code",
       "codePlaceholder": "ABCDEF2345",
       "hint": "Valid for about 5 minutes · single use · spaces and lowercase are adjusted automatically",
-      "formatHint": "Use 6 to 32 characters (A–Z and 2–9). No 0, 1, or spaces. Check the code in the customer app.",
+      "formatHint": "Use 6 to 32 characters (A-Z and 2-9). No 0, 1, or spaces. Check the code in the customer app.",
       "successEyebrow": "Redemption confirmed",
       "successTitle": "Valid coupon",
       "discountLabel": "off",
@@ -349,7 +350,7 @@
       "applyOk": "OK, apply discount",
       "networkHintBefore": "If the network failed mid-request, check",
       "networkHintLink": "Redemptions",
-      "networkHintAfter": "before trying again — a successful POST already consumes the code.",
+      "networkHintAfter": "before trying again: a successful POST already consumes the code.",
       "meta": {
         "campaign": "Campaign",
         "code": "Code",
@@ -463,20 +464,20 @@
       "hello": "Hello",
       "helloName": "Hello, {name}"
     },
-    "lede": "Coupons, referrals, and partnership participation — organised so you can act fast.",
+    "lede": "Referrals and partnership participation, organised so you can act fast.",
     "dash": {
       "errorLoad": "Could not load the dashboard.",
       "retry": "Try again",
       "focus": {
         "title": "Focus now",
-        "lede": "Participation and referrals — what drives the partnership today.",
+        "lede": "Participation and referrals: what drives the partnership today.",
         "loadingAria": "Loading participation and referrals"
       },
       "commission": {
         "eyebrowActive": "Participation · Affiliate active",
         "badge": "Wallet",
         "sacavelNow": "available to withdraw now",
-        "metaHold": "Total balance of {valor} — part in a 14-day security window.",
+        "metaHold": "Total balance of {valor}, with part in a 14-day security window.",
         "openWallet": "Open wallet",
         "eyebrowMuted": "Participation",
         "badgeMuted": "Not active",
@@ -491,7 +492,9 @@
         "cta": "View referral",
         "toastCopied": "Code copied",
         "toastCopyFail": "Could not copy",
-        "toastCopyFailDetail": "Copy the code manually."
+        "toastCopyFailDetail": "Copy the code manually.",
+        "esperaFallback": "Your referral code is created as soon as your registration is approved.",
+        "verCadastro": "View my registration"
       },
       "pulse": {
         "title": "Network pulse",
@@ -550,20 +553,20 @@
     "card": {
       "afiliado": {
         "title": "Affiliate Programme",
-        "subtitle": "Transparency and participation",
-        "description": "Earn participation for each referral that becomes a subscriber. Access your wallet, track balance, and withdraw via PIX.",
-        "feature1": "Participation per converted referral",
-        "feature2": "Statement and balance in real time",
-        "feature3": "PIX payout"
+        "subtitle": "Recurring participation",
+        "description": "Earn 5% participation on every subscription born from your referral, month after month, for up to 18 months. Track the balance in your wallet and withdraw via PIX.",
+        "feature1": "5% per subscription, on every paid renewal",
+        "feature2": "18-month window per referred pet parent",
+        "feature3": "PIX payout from R$ 50.00"
       },
       "participativo": {
         "title": "Participatory Programme",
-        "subtitle": "Community and perks",
-        "description": "Join the PetJourney community: exclusive perks and collabs.",
+        "subtitle": "Content and visibility",
+        "description": "Take part in PetJourney content production. We offer visibility and authority for your brand inside the platform and on social media.",
         "soon": "(Coming soon.)",
-        "feature1": "Participatory partner badge",
-        "feature2": "Exclusive perks and benefits",
-        "feature3": "Invites to network collabs"
+        "feature1": "Participatory partner badge on your profile",
+        "feature2": "Brand visibility inside the platform",
+        "feature3": "Presence on PetJourney social media"
       },
       "status": {
         "naoSolicitado": "Not active",
@@ -588,7 +591,7 @@
         "aguardando": "Awaiting review",
         "carteira": "Go to Wallet"
       },
-      "activeNoteParticipativo": "Programme active. Operational benefits are communicated by the PetJourney team.",
+      "activeNoteParticipativo": "Programme active. The PetJourney team will call the phone number on your registration to arrange the content work.",
       "toast": {
         "actionUnavailable": "Action unavailable",
         "ownerOnly": "Only the company owner can request programmes.",
@@ -624,10 +627,14 @@
       "categoria": "Category",
       "categoriaPlaceholder": "Select a category",
       "cnpj": "CNPJ",
-      "cnpjPlaceholder": "Numbers only",
+      "cnpjPlaceholder": "00.000.000/0000-00",
       "telefone": "Business phone",
       "telefonePlaceholder": "(11) 99999-8888",
-      "onlyNameRequired": "Only the name is required. The other details can be completed later."
+      "cnpjRequired": "Enter the company CNPJ.",
+      "cnpjInvalid": "Invalid CNPJ. Check the numbers.",
+      "telefoneRequired": "Enter a contact phone number.",
+      "telefoneInvalid": "Invalid phone. Include dialling code and number.",
+      "requiredLegend": "Name, CNPJ, and phone are required: the team uses them to review your registration and reach you."
     },
     "wizard": {
       "title": "Register your partner company",
@@ -703,7 +710,9 @@
       "emptyHistoricoTitle": "No history yet",
       "emptyHistoricoBody": "Closed accesses show up here with your company's notes.",
       "anotacoes": "{n} notes",
-      "loadMore": "Load more"
+      "loadMore": "Load more",
+      "emptyFiltroTitle": "No results for these filters",
+      "emptyFiltroBody": "Adjust the search or the period. The search only covers the pet name."
     },
     "servico": {
       "BANHO": "Bath",
@@ -712,6 +721,32 @@
       "EXAME": "Exam",
       "HOTEL": "Hotel",
       "OUTRO": "Other"
+    },
+    "especie": {
+      "CACHORRO": "Dog",
+      "GATO": "Cat",
+      "AVE": "Bird",
+      "ROEDOR": "Rodent",
+      "COELHO": "Rabbit",
+      "PEIXE": "Fish",
+      "REPTIL": "Reptile"
+    },
+    "filtros": {
+      "aria": "Appointment list filters",
+      "q": "Search by pet name",
+      "qPlaceholder": "e.g. Marsh",
+      "especie": "Species",
+      "tipoServico": "Service type",
+      "ordenarPor": "Sort by",
+      "ordem": {
+        "recentes": "Most recent",
+        "nome": "Pet name",
+        "expiraEm": "Expiry"
+      },
+      "periodo": "Period",
+      "vinculadoDe": "Linked from",
+      "vinculadoAte": "Linked until",
+      "limpar": "Clear filters"
     },
     "expira": {
       "expirado": "Expired",
@@ -773,7 +808,7 @@
       "diagnosticos": "Diagnoses",
       "observacoes": "Pet parent's remarks",
       "clinicalTitle": "Shared clinical data",
-      "clinicalLede": "Snapshot authorised by the pet parent — expand each list as needed.",
+      "clinicalLede": "Snapshot authorised by the pet parent. Expand each list as needed.",
       "sectionsCount": "{n} sections",
       "itemsCount": "{n} items",
       "emptyTitle": "Nothing shared in this access",
@@ -782,7 +817,7 @@
     },
     "anotacoes": {
       "title": "Notes history",
-      "lede": "Your company's records for this appointment — newest first.",
+      "lede": "Your company's records for this appointment, newest first.",
       "count": "{n} records",
       "empty": "No notes yet.",
       "emptyHint": "Use the form beside this list to record what was done.",
@@ -911,7 +946,7 @@
   "divulgacao": {
     "subtitle": "Portal",
     "title": "Promotion",
-    "lede": "Partnership referrals, coupons, and redemptions — all in one place to promote with clarity.",
+    "lede": "Referrals and partnership participation, all in one place to promote with clarity.",
     "errorLoad": "Error loading promotion.",
     "retry": "Try again",
     "indicacao": {
@@ -930,15 +965,17 @@
       "copyLink": "Copy link",
       "qrAlt": "Referral QR Code",
       "qrCaption": "Scan on mobile",
+      "qrIndisponivel": "QR unavailable right now. Use the code or the link.",
       "qrExport": "Export QR",
       "qrExportOk": "QR exported",
       "qrExportOkDetail": "The image was saved to your downloads folder.",
       "qrExportSavedDetail": "The image was saved to the location you chose.",
       "qrExportOpened": "QR opened",
-      "qrExportOpenedDetail": "Direct download wasn’t possible — the image opened in a new tab so you can save it.",
+      "qrExportOpenedDetail": "Direct download wasn’t possible. The image opened in a new tab so you can save it.",
       "qrExportFail": "Could not export",
       "qrExportFailDetail": "The browser blocked the new tab. Allow pop-ups for this site and try again.",
-      "hint": "Wallet participation requires an active affiliate programme. Discount coupons do not generate participation."
+      "hint": "Participation in the wallet requires an active affiliate programme.",
+      "esperaHint": "Meanwhile, use the portal to follow your registration. The code and the QR are created as soon as it is approved."
     },
     "howItWorks": {
       "eyebrow": "Your growth engine",
@@ -951,7 +988,7 @@
         },
         "signup": {
           "title": "They sign up",
-          "body": "Anyone who opens your link creates a PetJourney account from your referral — simple and trackable."
+          "body": "Anyone who opens your link creates a PetJourney account from your referral, simply and trackably."
         },
         "link": {
           "title": "The subscription stays yours",
@@ -959,11 +996,11 @@
         },
         "earn": {
           "title": "Participation in your wallet",
-          "body": "With an active affiliate programme, eligible conversions generate participation you can track and withdraw in the portal."
+          "body": "With an active affiliate programme, every eligible subscription generates participation you can track and withdraw in the portal."
         }
       },
       "promise": "Less promotion effort. More subscribers walking through your door.",
-      "note": "Important: discount coupons do not generate participation. Participation needs an active affiliate — request it in Programmes if you haven’t yet."
+      "note": "Participation requires an active affiliate programme. Request it in Programmes if you have not yet."
     },
     "metrics": {
       "aria": "Promotion metrics",
@@ -982,12 +1019,12 @@
     },
     "lists": {
       "title": "Coupons and redemptions",
-      "lede": "Company discounts and usage history — side by side.",
+      "lede": "Company discounts and usage history, side by side.",
       "loadingAria": "Loading coupons and redemptions"
     },
     "cupons": {
       "title": "Coupons",
-      "lede": "Discounts for pet parents — they do not generate participation.",
+      "lede": "Discounts for pet parents. They do not generate participation.",
       "empty": "No coupons right now.",
       "usos": "{n} uses",
       "loadMore": "More coupons"
@@ -999,6 +1036,64 @@
       "canalQr": "Via QR Code",
       "canalManual": "Manual code",
       "loadMore": "More redemptions"
+    },
+    "terms": {
+      "title": "The participation rules",
+      "lede": "Fixed numbers, no fine print. This is how participation reaches you.",
+      "highlights": {
+        "percent": {
+          "value": "5%",
+          "caption": "of every referred subscription"
+        },
+        "recurring": {
+          "value": "Every month",
+          "caption": "on each paid renewal"
+        },
+        "window": {
+          "value": "18 months",
+          "caption": "per referred pet parent"
+        }
+      },
+      "toggleShow": "See the full rules",
+      "toggleHide": "Hide the full rules",
+      "percent": {
+        "title": "5% of every subscription",
+        "body": "You receive 5% of the plan value subscribed by anyone who joined through your referral."
+      },
+      "recurring": {
+        "title": "Every month, not just the first",
+        "body": "Participation is credited on each paid renewal, month after month, while the pet parent keeps the subscription active."
+      },
+      "window": {
+        "title": "For up to 18 months",
+        "body": "The count starts at the referred pet parent's first paid subscription and runs for 18 months. After that the subscription continues, but it no longer generates new participation."
+      },
+      "hold": {
+        "title": "Released after 14 days",
+        "body": "Each credit waits 14 days before it becomes withdrawable balance. That is the refund window of the purchase."
+      },
+      "payout": {
+        "title": "Withdraw from R$ 50.00",
+        "body": "Once your withdrawable balance passes the minimum, request the payout in the Wallet and receive it on your registered PIX key."
+      },
+      "requirement": {
+        "title": "Valid from activation",
+        "body": "Only subscriptions paid after your affiliate programme was approved count. A referral made before activation generates no participation."
+      }
+    },
+    "metricas": {
+      "title": "Your QR scans",
+      "lede": "How many people scanned your referral QR, and when.",
+      "leituras": "{n} scan | {n} scans",
+      "chartAria": "Scans per day",
+      "barraAria": "{dia}: {n} scans",
+      "recentes": "Recent scans",
+      "vazio": "No scans yet. Share the QR at the counter and on social media to start measuring.",
+      "erro": {
+        "naoOperavel": "Metrics become available as soon as your registration is approved.",
+        "indisponivel": "Metrics unavailable right now. Try again in a moment.",
+        "erro": "Could not load the scans."
+      }
     }
   },
   "carteira": {
@@ -1034,7 +1129,7 @@
       "totalSacado": "Total withdrawn",
       "alertBlocked": "Payouts temporarily blocked (anti-fraud review or negative balance).",
       "alertHold": "Balance in hold period (14 days per credit). The amount is not yet available to withdraw.",
-      "alertComissaoDisabled": "Referral participation rewards are temporarily disabled in this environment — the wallet may stay at zero even with active referrals. This is not an error in your registration.",
+      "alertComissaoDisabled": "Referral participation rewards are temporarily disabled in this environment. The wallet may stay at zero even with active referrals, and that is not an error in your registration.",
       "pix": {
         "title": "PIX key",
         "label": "PIX key",
@@ -1070,7 +1165,7 @@
       },
       "ciclo": {
         "title": "Payment cycle",
-        "body": "Minimum payout of R$ 50.00. Cut-off on the 27th and indicative settlement by the 5th — track on the Payouts tab."
+        "body": "Minimum payout of R$ 50.00. Cut-off on the 27th and indicative settlement by the 5th. Track it on the Payouts tab."
       },
       "footerPrefix": "Questions?",
       "footerOrWhatsapp": "or WhatsApp"
@@ -1156,7 +1251,7 @@
       "title": "Accept invite",
       "body": "You were invited to join a PetJourney partner company team. Enter the identifier from the email or open the full invite link.",
       "idLabel": "Partner ID",
-      "idHint": "Required — comes in the link as ?parceiroId=...",
+      "idHint": "Required. Comes in the link as ?parceiroId=...",
       "idPlaceholder": "company-cuid",
       "accept": "Accept invite",
       "footnote": "After accepting, you operate in the portal with the role defined by the company owner.",
@@ -1224,7 +1319,7 @@
         },
         "email": {
           "label": "Email",
-          "hint": "Linked to authentication — read only."
+          "hint": "Linked to authentication, read only."
         },
         "telefone": {
           "label": "Phone",
@@ -1237,7 +1332,7 @@
         "cpf": {
           "label": "CPF",
           "placeholder": "000.000.000-00",
-          "hintLocked": "Already registered — cannot be changed.",
+          "hintLocked": "Already registered, cannot be changed.",
           "hintOptional": "Optional. Once saved, it is locked."
         },
         "crmv": {
@@ -1374,7 +1469,7 @@
       "risk": {
         "eyebrow": "Sensitive zone",
         "title": "Deactivate profile",
-        "lede": "A reversible profile pause — different from signing out of the device or deleting the account.",
+        "lede": "A reversible profile pause, different from signing out of the device or deleting the account.",
         "actions": {
           "deactivate": "Deactivate profile"
         },
@@ -1385,7 +1480,7 @@
           },
           "scope": {
             "title": "Profile only",
-            "text": "Does not delete clinic, partner, or history — only pauses the active profile."
+            "text": "Does not delete clinic, partner, or history: it only pauses the active profile."
           },
           "notDelete": {
             "title": "Not deletion",
