@@ -12,6 +12,7 @@ import PartnerPanelLoading from '@/components/parceiro/PartnerPanelLoading.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import VincularCodigoDialog from '@/components/parceiro/VincularCodigoDialog.vue'
+import { useAgora } from '@/composables/useAgora'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -25,6 +26,7 @@ import {
   type StatusCompartilhamento,
   type TipoServicoPrestador,
 } from '@/service/parceiro/types'
+import { calcularTempoRestante } from '@/utils/format/expiracao'
 
 const ATENDIMENTO_TABS = ['ativos', 'historico'] as const
 type AtendimentoTab = (typeof ATENDIMENTO_TABS)[number]
@@ -49,6 +51,7 @@ const route = useRoute()
 const router = useRouter()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 const { activeTab, setTab } = usePartnerTabs(ATENDIMENTO_TABS, 'ativos')
+const agora = useAgora()
 
 const items = ref<CompartilhamentoResumo[]>([])
 /** Cursor único: o servidor resolve status, filtros e ordem numa consulta só. */
@@ -254,25 +257,18 @@ function expiraLabel(item: CompartilhamentoResumo) {
     return new Date(item.expiraEm).toLocaleDateString(INTL_LOCALE[locale.value as Locale])
   }
 
-  const diffMs = new Date(item.expiraEm).getTime() - Date.now()
+  const restante = calcularTempoRestante(item.expiraEm, agora.value)
 
-  if (Number.isNaN(diffMs) || diffMs <= 0) {
-    return t('atendimentos.expira.expirado')
+  switch (restante.estado) {
+    case 'dias':
+      return t('atendimentos.expira.dias', { d: restante.dias, h: restante.horas })
+    case 'horas':
+      return t('atendimentos.expira.horas', { h: restante.horas, m: restante.minutos })
+    case 'minutos':
+      return t('atendimentos.expira.minutos', { m: restante.minutos })
+    default:
+      return t('atendimentos.expira.expirado')
   }
-
-  const totalMinutes = Math.floor(diffMs / 60_000)
-  const days = Math.floor(totalMinutes / 1440)
-  const hours = Math.floor((totalMinutes % 1440) / 60)
-
-  if (days > 0) {
-    return t('atendimentos.expira.dias', { d: days, h: hours })
-  }
-
-  if (hours > 0) {
-    return t('atendimentos.expira.horas', { h: hours, m: totalMinutes % 60 })
-  }
-
-  return t('atendimentos.expira.minutos', { m: Math.max(totalMinutes % 60, 1) })
 }
 
 function statusBadge(status: StatusCompartilhamento) {

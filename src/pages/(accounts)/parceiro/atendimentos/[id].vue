@@ -13,6 +13,7 @@ import AnotacaoEstruturadaView from '@/components/parceiro/AnotacaoEstruturadaVi
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
+import { useAgora } from '@/composables/useAgora'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -28,6 +29,7 @@ import type {
   StatusCompartilhamento,
   TipoDocumentoAnexo,
 } from '@/service/parceiro/types'
+import { calcularTempoRestante } from '@/utils/format/expiracao'
 import {
   criarAnotacaoEstruturadaForm,
   LIMITES_CAMPOS_LIVRES,
@@ -45,6 +47,7 @@ const router = useRouter()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 const { activeTab, setTab } = usePartnerTabs(DETALHE_TABS, 'resumo')
+const agora = useAgora()
 
 const detalhe = ref<CompartilhamentoDetalhe | null>(null)
 const loading = ref(true)
@@ -137,6 +140,9 @@ function normalizeTutorText(value: string | null | undefined) {
 
 const mensagemTutor = computed(() => normalizeTutorText(detalhe.value?.mensagemTutor))
 
+/** Peso é identidade do pet, não lista clínica: fica no cabeçalho, junto de espécie e serviço. */
+const pesoKg = computed(() => detalhe.value?.snapshot?.pesoKg ?? null)
+
 const observacoesTutor = computed(() =>
   normalizeTutorText(detalhe.value?.snapshot?.observacoesTutor),
 )
@@ -197,13 +203,11 @@ const snapshotListSections = computed<SnapshotListSection[]>(() => {
  * Snapshot é filtrado pelas categorias que o responsável marcou: ele pode liberar o
  * acesso sem nenhuma. Também cobre `snapshot: null`, que antes caía no `v-else`
  * e renderizava o painel de anotações sob a aba "Resumo do pet".
+ * Peso não conta aqui: ele é exibido no cabeçalho, fora da aba.
  */
 const resumoVazio = computed(
   () =>
-    !mensagemTutor.value &&
-    !showObservacoesTutor.value &&
-    detalhe.value?.snapshot?.pesoKg == null &&
-    snapshotListSections.value.length === 0,
+    !mensagemTutor.value && !showObservacoesTutor.value && snapshotListSections.value.length === 0,
 )
 
 /** Seções abertas: alergias sempre; demais só se a lista for curta. */
@@ -258,26 +262,18 @@ function formatDateTime(value: string) {
 }
 
 function expiraLabel(value: string) {
-  const diffMs = new Date(value).getTime() - Date.now()
+  const restante = calcularTempoRestante(value, agora.value)
 
-  if (Number.isNaN(diffMs) || diffMs <= 0) {
-    return t('atendimentos.expira.expirado')
+  switch (restante.estado) {
+    case 'dias':
+      return t('atendimentos.expira.dias', { d: restante.dias, h: restante.horas })
+    case 'horas':
+      return t('atendimentos.expira.horas', { h: restante.horas, m: restante.minutos })
+    case 'minutos':
+      return t('atendimentos.expira.minutos', { m: restante.minutos })
+    default:
+      return t('atendimentos.expira.expirado')
   }
-
-  const totalMinutes = Math.floor(diffMs / 60_000)
-  const days = Math.floor(totalMinutes / 1440)
-  const hours = Math.floor((totalMinutes % 1440) / 60)
-  const minutes = totalMinutes % 60
-
-  if (days > 0) {
-    return t('atendimentos.expira.dias', { d: days, h: hours })
-  }
-
-  if (hours > 0) {
-    return t('atendimentos.expira.horas', { h: hours, m: minutes })
-  }
-
-  return t('atendimentos.expira.minutos', { m: Math.max(minutes, 1) })
 }
 
 function resetAnotacaoForm() {
@@ -549,6 +545,13 @@ onMounted(() => {
             </div>
           </div>
         </div>
+
+        <dl v-if="pesoKg != null" class="atd-hero__facts">
+          <div class="atd-hero__fact">
+            <dt>{{ t('atendimentos.snapshot.peso') }}</dt>
+            <dd>{{ pesoKg }} kg</dd>
+          </div>
+        </dl>
       </section>
 
       <!-- Encerrado -->
@@ -591,7 +594,7 @@ onMounted(() => {
           />
         </section>
 
-        <div v-if="!resumoVazio" class="atd-resumo__context">
+        <div v-if="mensagemTutor || showObservacoesTutor" class="atd-resumo__context">
           <section v-if="mensagemTutor" class="atd-callout">
             <header class="atd-callout__head">
               <span class="atd-callout__icon" aria-hidden="true">
@@ -600,20 +603,6 @@ onMounted(() => {
               <h3>{{ t('atendimentos.detalhe.mensagemTutor') }}</h3>
             </header>
             <p>{{ mensagemTutor }}</p>
-          </section>
-
-          <section
-            v-if="detalhe.snapshot?.pesoKg != null"
-            class="atd-fact"
-            :aria-label="t('atendimentos.snapshot.peso')"
-          >
-            <span class="atd-fact__icon" aria-hidden="true">
-              <i class="pi pi-chart-line" />
-            </span>
-            <div>
-              <small>{{ t('atendimentos.snapshot.peso') }}</small>
-              <strong>{{ detalhe.snapshot.pesoKg }} kg</strong>
-            </div>
           </section>
 
           <section v-if="showObservacoesTutor" class="atd-callout atd-callout--soft">
@@ -681,12 +670,7 @@ onMounted(() => {
                 class="atd-fold__body"
               >
                 <div class="atd-fold__scroll" tabindex="0">
-                  <ul
-                    class="atd-items"
-                    :class="{
-                      'atd-items--grid': section.items.length > 3 && section.tone !== 'warm',
-                    }"
-                  >
+                  <ul class="atd-items">
                     <li
                       v-for="(item, index) in section.items"
                       :key="`${section.id}-${index}`"
@@ -942,6 +926,11 @@ onMounted(() => {
 
 <style scoped>
 .atd-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem 1.5rem;
   padding: 1.1rem 1.2rem;
   border: 1px solid color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
   border-radius: 1.1rem;
@@ -960,14 +949,15 @@ onMounted(() => {
 
 .atd-hero__pet {
   display: flex;
+  flex: 1 1 22rem;
   align-items: flex-start;
   gap: 0.95rem;
   min-width: 0;
 }
 
 .atd-hero__foto {
-  width: 4rem;
-  height: 4rem;
+  width: 4.35rem;
+  height: 4.35rem;
   flex: 0 0 auto;
   border-radius: 1.1rem;
   object-fit: cover;
@@ -997,7 +987,7 @@ onMounted(() => {
 
 .atd-hero__title-row strong {
   color: var(--partner-text);
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -1046,6 +1036,38 @@ onMounted(() => {
   color: var(--partner-amber-text);
 }
 
+.atd-hero__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.atd-hero__fact {
+  min-width: 7.5rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--partner-line);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--partner-card) 82%, transparent);
+}
+
+.atd-hero__fact dt {
+  color: var(--partner-faint);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.atd-hero__fact dd {
+  margin: 0.1rem 0 0;
+  color: var(--partner-text);
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
 .atd-closed {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -1084,15 +1106,12 @@ onMounted(() => {
   gap: 1.15rem;
 }
 
+/* Um recado só ocupa a linha inteira; recado + observações dividem a largura. */
 .atd-resumo__context {
   display: grid;
   gap: 0.75rem;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
   align-items: start;
-}
-
-.atd-resumo__context:not(:has(.atd-fact)) {
-  grid-template-columns: minmax(0, 1fr);
 }
 
 .atd-callout {
@@ -1110,7 +1129,6 @@ onMounted(() => {
 }
 
 .atd-callout--soft {
-  grid-column: 1 / -1;
   border-color: var(--partner-line);
   background: var(--partner-card);
 }
@@ -1146,45 +1164,6 @@ onMounted(() => {
   font-weight: 500;
   line-height: 1.55;
   white-space: pre-line;
-}
-
-.atd-fact {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  min-width: 9.5rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 1rem;
-  background: var(--partner-card);
-}
-
-.atd-fact__icon {
-  display: grid;
-  width: 2.35rem;
-  height: 2.35rem;
-  place-items: center;
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
-  color: var(--partner-primary-strong);
-}
-
-.atd-fact small {
-  display: block;
-  color: var(--partner-faint);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.atd-fact strong {
-  display: block;
-  margin-top: 0.15rem;
-  color: var(--partner-text);
-  font-size: 1.2rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
 }
 
 .atd-clinical {
@@ -1229,9 +1208,22 @@ onMounted(() => {
   font-weight: 750;
 }
 
+/* Cinco listas empilhadas viravam uma página só de rolagem: em telas largas elas
+   dividem a largura, e a lista crítica (alergias) fica sozinha na primeira linha. */
 .atd-folds {
   display: grid;
   gap: 0.55rem;
+  align-items: start;
+}
+
+@media (min-width: 1100px) {
+  .atd-folds {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .atd-fold[data-tone='warm'] {
+    grid-column: 1 / -1;
+  }
 }
 
 .atd-fold {
@@ -1365,13 +1357,15 @@ onMounted(() => {
 .atd-items {
   display: grid;
   gap: 0.4rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.atd-items--grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+/* Alergia tem texto mais longo e ocupa a linha inteira: menos colunas, mais leitura. */
+.atd-fold[data-tone='warm'] .atd-items {
+  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
 }
 
 .atd-items li {
@@ -1417,32 +1411,6 @@ onMounted(() => {
 .atd-item--destaque .atd-item__meta {
   background: color-mix(in srgb, var(--partner-warm-text) 14%, transparent);
   color: var(--partner-warm-text);
-}
-
-.atd-card {
-  display: grid;
-  gap: 0.6rem;
-  grid-template-columns: minmax(0, 1fr);
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 1rem;
-  background: var(--partner-card);
-}
-
-.atd-card h3 {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin: 0;
-  color: var(--partner-text);
-  font-size: 0.84rem;
-  font-weight: 750;
-  letter-spacing: 0.02em;
-}
-
-.atd-card h3 i {
-  color: var(--partner-primary-strong);
-  font-size: 0.82rem;
 }
 
 .atd-notes__layout {
@@ -1995,14 +1963,8 @@ onMounted(() => {
 }
 
 @media (max-width: 960px) {
-  .atd-resumo__context,
-  .atd-notes__layout--with-form,
-  .atd-items--grid {
+  .atd-notes__layout--with-form {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .atd-fact {
-    min-width: 0;
   }
 
   .atd-composer {
@@ -2013,6 +1975,14 @@ onMounted(() => {
   .atd-notes__layout--with-form {
     display: flex;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .atd-hero__facts,
+  .atd-hero__fact {
+    flex: 1 1 auto;
+    width: 100%;
   }
 }
 </style>

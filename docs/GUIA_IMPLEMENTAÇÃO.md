@@ -87,10 +87,10 @@ O navy deve aparecer como apoio institucional: logotipo, títulos especiais, rod
 
 | Uso                    | Cor           | Hex       |
 | ---------------------- | ------------- | --------- |
-| Primária veterinária   | Vet primary   | `#84A59D` |
+| Primária veterinária   | Vet primary   | `#84C1B4` |
 | Secundária veterinária | Vet secondary | `#B8CDC9` |
 
-Essa dupla é a base do admin. Use `#84A59D` para ações principais, itens ativos, foco de navegação, gráficos principais e elementos de destaque. Use `#B8CDC9` para fundos suaves, gradientes, áreas de apoio e estados selecionados leves.
+Essa dupla é a base do admin. Use `#84C1B4` para ações principais, itens ativos, foco de navegação, gráficos principais e elementos de destaque. Use `#B8CDC9` para fundos suaves, gradientes, áreas de apoio e estados selecionados leves.
 
 ### Perfil tutor
 
@@ -106,7 +106,7 @@ No admin veterinário, azul deve ser reservado para contexto de tutor, não para
 | Uso                         | Cor        | Hex       |
 | --------------------------- | ---------- | --------- |
 | Sucesso / resolvido         | Success    | `#A8DADC` |
-| Sucesso forte / saúde       | Green      | `#84A59D` |
+| Sucesso forte / saúde       | Green      | `#84C1B4` |
 | Atenção / pendência         | Orange     | `#FFB7A1` |
 | Perigo / crítico            | Danger     | `#ff4444` |
 | Vermelho suave              | Red        | `#F28482` |
@@ -119,7 +119,7 @@ Regras de uso:
 
 - Não inventar novos tons no primeiro ciclo.
 - Não criar modo escuro.
-- Não usar gradientes coloridos fora da combinação veterinária `#84A59D` → `#B8CDC9`.
+- Não usar gradientes coloridos fora da combinação veterinária `#84C1B4` → `#B8CDC9`.
 - Usar vermelho apenas para risco real, erro, alergia grave, diagnóstico crítico ou exclusão.
 - Usar laranja para atenção, retorno pendente, vacina próxima, exame para revisar ou tarefa atrasada.
 - Usar roxo para informação, comportamento, atividade e comunicação.
@@ -634,7 +634,7 @@ Regras importantes:
 
 ## 11. Checklist Visual
 
-- [ ] O verde `#84A59D` é a cor principal do admin.
+- [ ] O verde `#84C1B4` é a cor principal do admin.
 - [ ] O verde claro `#B8CDC9` aparece como apoio, não como texto principal.
 - [ ] O navy `#1D3557` é institucional, não a cor dominante.
 - [ ] Azul tutor só aparece quando o assunto é tutor.
@@ -682,6 +682,6 @@ Para manter a primeira entrega focada:
 
 ## 14. Resumo Executivo
 
-O web admin veterinário deve começar como painel de rotina clínica: dashboard, agenda, pacientes, prontuário, atendimento SOAP e atividades. A identidade deve ser verde-veterinário, clara, premium e consistente com o PetJourney. A paleta não deve ser reinterpretada: `#84A59D` é a cor principal, `#B8CDC9` é apoio, `#1D3557` é marca institucional, azul é contexto de tutor, laranja é atenção e vermelho é risco real.
+O web admin veterinário deve começar como painel de rotina clínica: dashboard, agenda, pacientes, prontuário, atendimento SOAP e atividades. A identidade deve ser verde-veterinário, clara, premium e consistente com o PetJourney. A paleta não deve ser reinterpretada: `#84C1B4` é a cor principal, `#B8CDC9` é apoio, `#1D3557` é marca institucional, azul é contexto de tutor, laranja é atenção e vermelho é risco real.
 
 A implementação deve priorizar leitura rápida, segurança clínica e ação direta. O veterinário precisa entender em segundos quem atende agora, quais pets exigem atenção, quais pendências existem e qual é o histórico relevante antes de registrar a conduta.

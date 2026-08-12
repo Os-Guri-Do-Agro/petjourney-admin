@@ -40,7 +40,7 @@ body,
   --pj-toast-shadow-rgb: 0 0 0;
   --pj-toast-success: #a8dec9;
   --pj-toast-success-soft: #1a3a2f;
-  --pj-toast-success-strong: #84a59d;
+  --pj-toast-success-strong: #84c1b4;
   --pj-toast-info: #8ab6d6;
   --pj-toast-info-soft: #162b35;
   --pj-toast-warn: #f0c77d;
@@ -162,4 +162,3 @@ body,
 .app-dark .p-toast .p-toast-detail {
   color: var(--pj-toast-muted) !important;
 }
-

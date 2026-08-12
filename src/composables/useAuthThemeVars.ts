@@ -4,8 +4,7 @@ import { currentColors, isDarkMode } from '@/theme/color-mode'
 
 /**
  * Tokens de auth alinhados ao dashboard.
- * No dark: formulário com tipografia clara e painel visual em sálvia profunda
- * (não o sage claro de accent, que apaga texto branco).
+ * No dark: formulário com tipografia clara sobre a arte escura de fundo.
  */
 export function useAuthThemeVars() {
   return computed((): CSSProperties => {
@@ -35,10 +34,6 @@ export function useAuthThemeVars() {
 
       // Tinta clara sobre marca (painel / ícones em chip sálvia)
       '--auth-on-brand': dark ? colors.text.primary : colors.auth.white,
-
-      // Painel visual: sálvia profunda no dark para contraste com texto claro
-      '--auth-visual-from': dark ? colors.dashboard.primaryDeep : colors.auth.sageStrong,
-      '--auth-visual-to': dark ? colors.bg.card : colors.vet.primary,
 
       // CTA principal: no dark, superfície clara + tinta escura (como focus cards)
       '--auth-cta-bg': dark ? colors.text.primary : colors.vet.primary,

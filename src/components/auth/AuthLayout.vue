@@ -4,7 +4,8 @@ import { useI18n } from 'vue-i18n'
 
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
 import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
-import bgLoginUrl from '@/assets/login/bg-login.jpg'
+import bgDarkUrl from '@/assets/login/login-dark-bg.jpg'
+import bgLightUrl from '@/assets/login/login-ligth-bg.jpg'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { isDarkMode } from '@/theme/color-mode'
@@ -20,10 +21,18 @@ const { t } = useI18n()
 const logoUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
 const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
 const authLayoutStyle = useAuthThemeVars()
+
+/**
+ * A arte de fundo já traz a diagonal verde e a pata: a página inteira é a imagem,
+ * o formulário fica sobre a área lisa e o texto sobre o verde.
+ */
+const authArtStyle = computed(() => ({
+  '--auth-art': `url(${isDarkMode.value ? bgDarkUrl : bgLightUrl})`,
+}))
 </script>
 
 <template>
-  <main class="auth-page" :style="authLayoutStyle">
+  <main class="auth-page" :style="[authLayoutStyle, authArtStyle]">
     <section class="auth-shell">
       <div class="auth-form-panel">
         <div class="auth-form-panel__locale auth-form-panel__locale--mobile">
@@ -52,31 +61,8 @@ const authLayoutStyle = useAuthThemeVars()
       </div>
 
       <aside class="auth-visual-panel">
-        <img class="auth-visual-panel__image" :src="bgLoginUrl" alt="" />
-        <div class="auth-visual-panel__overlay" />
-        <div class="auth-visual-ring" />
-        <svg class="auth-visual-paw auth-visual-paw--top" viewBox="0 0 24 24" aria-hidden="true">
-          <ellipse cx="6.5" cy="10" rx="2.1" ry="2.7" />
-          <ellipse cx="11" cy="7.4" rx="2.2" ry="2.9" />
-          <ellipse cx="16" cy="8.6" rx="2.1" ry="2.7" />
-          <ellipse cx="19.4" cy="12.6" rx="1.7" ry="2.2" />
-          <path
-            d="M11.7 11.4c-2.8 0-5.1 2.3-5.1 4.9 0 2 1.7 3.1 3.6 2.6 1-.26 2-.26 3 0 1.9.5 3.6-.6 3.6-2.6 0-2.6-2.3-4.9-5.1-4.9z"
-          />
-        </svg>
-        <svg class="auth-visual-paw auth-visual-paw--middle" viewBox="0 0 24 24" aria-hidden="true">
-          <ellipse cx="6.5" cy="10" rx="2.1" ry="2.7" />
-          <ellipse cx="11" cy="7.4" rx="2.2" ry="2.9" />
-          <ellipse cx="16" cy="8.6" rx="2.1" ry="2.7" />
-          <ellipse cx="19.4" cy="12.6" rx="1.7" ry="2.2" />
-          <path
-            d="M11.7 11.4c-2.8 0-5.1 2.3-5.1 4.9 0 2 1.7 3.1 3.6 2.6 1-.26 2-.26 3 0 1.9.5 3.6-.6 3.6-2.6 0-2.6-2.3-4.9-5.1-4.9z"
-          />
-        </svg>
-
         <div class="auth-visual-panel__content">
           <div class="auth-visual-panel__top">
-            <span class="auth-visual-kicker">{{ t('auth.layout.kicker') }}</span>
             <LanguageSwitcher variant="auth" tone="brand" />
           </div>
 
@@ -112,7 +98,13 @@ const authLayoutStyle = useAuthThemeVars()
 <style scoped>
 .auth-page {
   min-height: 100vh;
-  background: var(--auth-page-bg);
+  background-color: var(--auth-page-bg);
+  background-image: var(--auth-art);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  /* Preso à viewport: em página alta (cadastro) a arte não estica nem some ao rolar. */
+  background-attachment: fixed;
   color: var(--auth-text);
   font-family: 'DM Sans', Inter, system-ui, sans-serif;
 }
@@ -121,23 +113,26 @@ const authLayoutStyle = useAuthThemeVars()
   background: var(--auth-sage);
 }
 
+/* A coluna da direita fica dentro da faixa verde da arte em qualquer proporção de tela. */
 .auth-shell {
   width: 100%;
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(32rem, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(19rem, 0.62fr);
   overflow: hidden;
-  background: var(--auth-page-bg);
 }
 
+/* Centrado na vertical, encostado à esquerda: em tela larga o formulário não
+   caminha para a diagonal da arte. */
 .auth-form-panel {
   position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: clamp(2.5rem, 5vw, 4.5rem);
+  padding-inline-start: clamp(2.5rem, 11vw, 12rem);
 }
 
 .auth-form-panel__locale--mobile {
@@ -151,8 +146,7 @@ const authLayoutStyle = useAuthThemeVars()
 .auth-visual-panel__top {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: flex-end;
 }
 
 .auth-form-panel__inner {
@@ -165,17 +159,6 @@ const authLayoutStyle = useAuthThemeVars()
   align-items: flex-start;
   width: 100%;
   margin-bottom: 2.5rem;
-}
-
-.auth-brand {
-  margin-bottom: 2.25rem;
-}
-
-.auth-brand img {
-  display: block;
-  width: 11.25rem;
-  max-height: 3rem;
-  object-fit: contain;
 }
 
 .auth-heading {
@@ -210,112 +193,45 @@ const authLayoutStyle = useAuthThemeVars()
 .auth-visual-panel {
   position: relative;
   min-height: 100%;
-  overflow: hidden;
-  background: var(--auth-visual-to);
-}
-
-.auth-visual-panel__image,
-.auth-visual-panel__overlay {
-  position: absolute;
-  inset: 0;
-}
-
-.auth-visual-panel__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.22;
-  filter: saturate(0.75);
-}
-
-.auth-visual-panel__overlay {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--auth-visual-from) 88%, var(--auth-page-bg)),
-    color-mix(in srgb, var(--auth-visual-to) 82%, var(--auth-page-bg))
-  );
-}
-
-.auth-visual-ring,
-.auth-visual-paw {
-  position: absolute;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.auth-visual-ring {
-  top: 17%;
-  left: 8%;
-  width: clamp(9rem, 14vw, 13rem);
-  height: clamp(9rem, 14vw, 13rem);
-  border: 1.5px solid color-mix(in srgb, var(--auth-on-brand) 18%, transparent);
-  border-radius: 999px;
-}
-
-.auth-visual-paw {
-  width: 2.2rem;
-  height: 2.2rem;
-  fill: color-mix(in srgb, var(--auth-on-brand) 18%, transparent);
-}
-
-.auth-visual-paw--top {
-  top: 13%;
-  right: 19%;
-  transform: rotate(18deg);
-}
-
-.auth-visual-paw--middle {
-  right: 14%;
-  bottom: 32%;
-  transform: rotate(-16deg);
 }
 
 .auth-visual-panel__content {
-  position: relative;
-  z-index: 1;
-  min-height: 100%;
   display: flex;
+  min-height: 100%;
   flex-direction: column;
   justify-content: flex-start;
-  gap: clamp(2rem, 4vw, 3.5rem);
-  padding: clamp(2.5rem, 5vw, 4.2rem);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  padding: clamp(2rem, 4vw, 3.25rem) clamp(1.5rem, 3vw, 3rem) clamp(2rem, 4vw, 3.25rem) 0;
   color: var(--auth-on-brand);
 }
 
+/* No terço superior da arte: centrado no eixo, o texto desce até a pata. */
 .auth-visual-panel__center {
   display: grid;
-  gap: clamp(2rem, 4vw, 3.5rem);
-  margin-block: auto;
-}
-
-.auth-visual-kicker {
-  color: color-mix(in srgb, var(--auth-on-brand) 88%, transparent);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  margin-top: clamp(1rem, 8vh, 6rem);
+  margin-bottom: auto;
 }
 
 .auth-visual-panel h2 {
-  max-width: 29rem;
   margin: 0;
-  font-size: clamp(2.1rem, 4vw, 3.15rem);
+  font-size: clamp(1.9rem, 2.6vw, 2.75rem);
   font-weight: 650;
-  line-height: 1.06;
-  letter-spacing: -0.055em;
+  line-height: 1.08;
+  letter-spacing: -0.05em;
 }
 
+/* Sobre o verde da arte o texto já é limítrofe: branco cheio, sem transparência. */
 .auth-visual-panel p {
-  max-width: 31rem;
   margin: 1rem 0 0;
-  color: color-mix(in srgb, var(--auth-on-brand) 92%, transparent);
-  font-size: 1rem;
-  line-height: 1.65;
+  color: var(--auth-on-brand);
+  font-size: 0.98rem;
+  line-height: 1.6;
 }
 
 .auth-benefits {
   display: grid;
-  gap: 0.95rem;
+  gap: 0.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -324,30 +240,38 @@ const authLayoutStyle = useAuthThemeVars()
 .auth-benefits li {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.7rem;
   color: var(--auth-on-brand);
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 650;
 }
 
 .auth-benefits .pi {
   display: grid;
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 1.4rem;
+  height: 1.4rem;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--auth-on-brand) 18%, transparent);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--auth-on-brand) 16%, transparent);
   color: var(--auth-on-brand);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
 }
 
+/* Sem a coluna verde, a arte cortaria a diagonal no meio do formulário: fica só o fundo liso. */
 @media (max-width: 980px) {
+  .auth-page {
+    background-image: none;
+  }
+
   .auth-shell {
     grid-template-columns: 1fr;
   }
 
   .auth-form-panel {
     max-width: none;
+    align-items: center;
+    padding-inline-start: clamp(1.5rem, 5vw, 4.5rem);
   }
 
   .auth-form-panel__locale--mobile {
@@ -356,16 +280,6 @@ const authLayoutStyle = useAuthThemeVars()
 
   .auth-visual-panel {
     display: none;
-  }
-}
-
-@media (max-width: 560px) {
-  .auth-page {
-    background: var(--auth-page-bg);
-  }
-
-  .auth-shell {
-    min-height: 100vh;
   }
 }
 </style>

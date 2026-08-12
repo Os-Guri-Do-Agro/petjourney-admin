@@ -10,7 +10,7 @@ export const LightColors = {
   orange: '#FFB7A1',
   pink: '#FAD2E1',
   brown: '#D5BDAF',
-  green: '#84A59D',
+  green: '#84C1B4',
   internacao: '#5B6B8C',
   text: {
     primary: '#1a1a1a',
@@ -35,8 +35,11 @@ export const LightColors = {
     secondary: '#6BA3C3',
   },
   vet: {
-    primary: '#84A59D',
-    secondary: '#B8CDC9',
+    primary: '#84C1B4',
+    secondary: '#84C1B4',
+    /** Teal da marca escurecido (mesmo matiz/saturação de `primary`) para superfície de foco com texto claro. */
+    focusFrom: '#3C7B6D',
+    focusTo: '#2E6156',
   },
   auth: {
     sageStrong: '#6E9189',
@@ -117,6 +120,8 @@ export const DarkColors = {
   vet: {
     primary: '#84C1B4',
     secondary: '#244139',
+    focusFrom: '#2F6D5F',
+    focusTo: '#1F433A',
   },
   auth: {
     sageStrong: '#B6DCD3',
