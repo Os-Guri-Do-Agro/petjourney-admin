@@ -310,6 +310,11 @@ async function loadDetalhe() {
     await ensureContext()
     detalhe.value = await getCompartilhamentoDetalhe(id, parceiroQuery())
   } catch (err) {
+    /** 403 aqui pode ser o parceiro excluído no meio da sessão: a tela de saída assume. */
+    if (await store.revalidarAcesso(err)) {
+      return
+    }
+
     error.value = err instanceof Error ? err.message : t('atendimentos.detalhe.errorLoad')
   } finally {
     loading.value = false

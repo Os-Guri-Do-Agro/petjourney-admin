@@ -192,6 +192,11 @@ async function loadSaques() {
       return
     }
 
+    /** 403 aqui pode ser o parceiro excluído no meio da sessão: a tela de saída assume. */
+    if (await store.revalidarAcesso(err)) {
+      return
+    }
+
     error.value = err instanceof Error ? err.message : t('carteira.saques.errorLoad')
   } finally {
     loading.value = false

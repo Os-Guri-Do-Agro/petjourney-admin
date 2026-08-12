@@ -34,10 +34,10 @@ describe('saveImageBlob', () => {
   })
 
   it('grava no handle escolhido', async () => {
-    const write = vi.fn()
-    const close = vi.fn()
+    const write = vi.fn<() => void>()
+    const close = vi.fn<() => void>()
     const handle = {
-      createWritable: vi.fn().mockResolvedValue({ write, close }),
+      createWritable: vi.fn<() => Promise<unknown>>().mockResolvedValue({ write, close }),
     } as unknown as FileSystemFileHandle
 
     await expect(saveImageBlob(new Blob(['qr']), 'qr.png', handle)).resolves.toBe('saved')
@@ -53,8 +53,8 @@ describe('downloadImageFromUrl', () => {
   })
 
   it('baixa o arquivo quando o fetch retorna blob (modo legacy)', async () => {
-    const click = vi.fn()
-    const remove = vi.fn()
+    const click = vi.fn<() => void>()
+    const remove = vi.fn<() => void>()
     const appendChild = vi.spyOn(document.body, 'appendChild').mockImplementation((node) => node)
     const createElement = vi.spyOn(document, 'createElement').mockReturnValue({
       href: '',
@@ -72,12 +72,12 @@ describe('downloadImageFromUrl', () => {
       }),
     )
     vi.stubGlobal('URL', {
-      createObjectURL: vi.fn(() => 'blob:qr'),
-      revokeObjectURL: vi.fn(),
+      createObjectURL: vi.fn<() => string>(() => 'blob:qr'),
+      revokeObjectURL: vi.fn<() => void>(),
     })
     vi.stubGlobal('showSaveFilePicker', undefined)
 
-    const fallbackWindow = { closed: false, close: vi.fn(), location: { href: '' } }
+    const fallbackWindow = { closed: false, close: vi.fn<() => void>(), location: { href: '' } }
 
     await expect(
       downloadImageFromUrl('https://example.com/qr.png', 'petjourney-qr-ABC.png', {
@@ -98,7 +98,7 @@ describe('downloadImageFromUrl', () => {
 
     const fallbackWindow = {
       closed: false,
-      close: vi.fn(),
+      close: vi.fn<() => void>(),
       location: { href: '' },
     }
 
@@ -114,7 +114,7 @@ describe('downloadImageFromUrl', () => {
   })
 
   it('abre nova aba quando o fetch falha e não há janela reservada', async () => {
-    const open = vi.fn().mockReturnValue({})
+    const open = vi.fn<() => unknown>().mockReturnValue({})
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('cors')))
     vi.stubGlobal('open', open)
 

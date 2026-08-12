@@ -322,6 +322,7 @@
       "role": "Conta parceiro",
       "perfil": "Perfil",
       "settings": "Configurações",
+      "trocarEmpresa": "Trocar de empresa",
       "logout": "Logout"
     },
     "logoutConfirm": {
@@ -409,6 +410,13 @@
       "ctaSettings": "Ir para configurações",
       "retry": "Verificar novamente",
       "contactLabel": "Dúvidas:"
+    },
+    "accessRevoked": {
+      "title": "Seu acesso ao portal foi encerrado",
+      "body": "Este cadastro de parceiro não está mais ativo, então as áreas do portal ficaram indisponíveis para esta conta.",
+      "hint": "Se você acha que houve um engano, fale com a gente. Também é possível cadastrar uma nova empresa em Configurações, na aba Empresa.",
+      "ctaSupport": "Falar com o suporte",
+      "ctaNewCompany": "Cadastrar nova empresa"
     },
     "operability": {
       "pending": {
@@ -1231,19 +1239,27 @@
     "store": {
       "errorNeedsSelection": "Selecione qual empresa parceira você deseja operar. Informe o identificador do parceiro.",
       "errorNoAccess": "Sua conta não possui acesso ao portal do parceiro.",
+      "errorAccessRevoked": "Seu acesso ao portal do parceiro foi encerrado.",
       "errorGeneric": "Não foi possível carregar o contexto do parceiro."
     },
     "selecionar": {
       "subtitle": "Multi-empresa",
       "title": "Selecionar parceiro",
-      "body": "Sua conta participa de mais de uma empresa parceira. Informe qual deseja operar agora.",
-      "idLabel": "ID do parceiro",
-      "idHint": "O identificador é fornecido pelo administrador ou aparece no convite.",
-      "idPlaceholder": "cuid-do-parceiro",
-      "continue": "Continuar",
+      "body": "Sua conta participa de mais de uma empresa parceira. Escolha qual você quer operar agora.",
+      "roleDono": "Seu negócio",
+      "roleOperador": "Equipe",
+      "current": "Em uso",
+      "errorLoad": "Não foi possível carregar suas empresas.",
+      "emptyTitle": "Nenhuma empresa vinculada",
+      "emptyBody": "Sua conta ainda não participa de nenhuma empresa parceira.",
+      "newTitle": "Cadastrar outra empresa",
+      "newBody": "Você pode cadastrar seu negócio e acompanhar a análise por aqui.",
+      "newCta": "Cadastrar empresa",
       "toast": {
         "error": "Não foi possível acessar",
-        "errorDetail": "Verifique o identificador."
+        "errorDetail": "Tente de novo em instantes.",
+        "stale": "Esta empresa não está mais disponível",
+        "staleDetail": "Atualizamos a lista com o que a sua conta acessa agora."
       }
     },
     "convite": {

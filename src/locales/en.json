@@ -322,6 +322,7 @@
       "role": "Partner account",
       "perfil": "Profile",
       "settings": "Settings",
+      "trocarEmpresa": "Switch company",
       "logout": "Logout"
     },
     "logoutConfirm": {
@@ -409,6 +410,13 @@
       "ctaSettings": "Go to settings",
       "retry": "Check again",
       "contactLabel": "Questions:"
+    },
+    "accessRevoked": {
+      "title": "Your portal access has ended",
+      "body": "This partner registration is no longer active, so the portal areas are unavailable for this account.",
+      "hint": "If you think this is a mistake, talk to us. You can also register a new company in Settings, under the Company tab.",
+      "ctaSupport": "Talk to support",
+      "ctaNewCompany": "Register a new company"
     },
     "operability": {
       "pending": {
@@ -1231,19 +1239,27 @@
     "store": {
       "errorNeedsSelection": "Select which partner company you want to operate. Enter the partner identifier.",
       "errorNoAccess": "Your account does not have access to the partner portal.",
+      "errorAccessRevoked": "Your access to the partner portal has ended.",
       "errorGeneric": "Could not load partner context."
     },
     "selecionar": {
       "subtitle": "Multi-company",
       "title": "Select partner",
-      "body": "Your account belongs to more than one partner company. Enter which one you want to operate now.",
-      "idLabel": "Partner ID",
-      "idHint": "The identifier is provided by an administrator or appears in the invite.",
-      "idPlaceholder": "partner-cuid",
-      "continue": "Continue",
+      "body": "Your account belongs to more than one partner company. Choose which one you want to operate now.",
+      "roleDono": "Your business",
+      "roleOperador": "Team",
+      "current": "In use",
+      "errorLoad": "We could not load your companies.",
+      "emptyTitle": "No linked company",
+      "emptyBody": "Your account is not part of any partner company yet.",
+      "newTitle": "Register another company",
+      "newBody": "You can register your business and follow the review here.",
+      "newCta": "Register company",
       "toast": {
         "error": "Could not access",
-        "errorDetail": "Check the identifier."
+        "errorDetail": "Try again shortly.",
+        "stale": "This company is no longer available",
+        "staleDetail": "We refreshed the list with what your account can access now."
       }
     },
     "convite": {

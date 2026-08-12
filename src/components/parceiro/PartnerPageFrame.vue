@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import { useLogout } from '@/composables/useLogout'
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
 import { LightColors } from '@/theme/colors'
@@ -48,10 +49,17 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const parceiroStore = useParceiroStore()
+const { logout } = useLogout()
 const showClinicalCta = computed(() => hasVeterinarioProfile())
 const resolvedEmptyTitle = computed(
   () => props.emptyTitle || t('frame.emptyDefault'),
 )
+
+/**
+ * O acesso existia e caiu (parceiro excluído pelo admin). Mesma porta fechada do `noPartnerAccess`,
+ * composição diferente: aqui não se promete liberação, se oferece saída e contato.
+ */
+const showAccessRevoked = computed(() => props.noPartnerAccess && parceiroStore.acessoEncerrado)
 
 /** Cadastro SUSPENSO: bloqueia só telas operacionais do portal. */
 const showSuspended = computed(
@@ -146,6 +154,39 @@ const pageStyle = computed(() => {
     <div v-if="loading" class="partner-page__state" role="status" aria-live="polite">
       <i class="pi pi-spin pi-spinner" aria-hidden="true" />
       <span>{{ t('frame.loading') }}</span>
+    </div>
+
+    <div
+      v-else-if="showAccessRevoked"
+      class="partner-page__state partner-page__state--revoked"
+      role="status"
+    >
+      <i class="pi pi-lock" aria-hidden="true" />
+      <div>
+        <strong>{{ t('frame.accessRevoked.title') }}</strong>
+        <p>{{ t('frame.accessRevoked.body') }}</p>
+        <p class="partner-page__hint">{{ t('frame.accessRevoked.hint') }}</p>
+      </div>
+
+      <div class="partner-page__cta-row">
+        <a
+          class="partner-page__cta partner-page__cta--primary"
+          :href="SUPPORT_CONTACTS.whatsappHref"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {{ t('frame.accessRevoked.ctaSupport') }}
+        </a>
+        <RouterLink class="partner-page__cta partner-page__cta--ghost" to="/settings?aba=empresa">
+          {{ t('frame.accessRevoked.ctaNewCompany') }}
+        </RouterLink>
+        <Button :label="t('shell.logout')" severity="secondary" @click="logout" />
+      </div>
+
+      <p class="partner-page__contact">
+        {{ t('frame.noAccess.contactLabel') }}
+        <a :href="`mailto:${SUPPORT_CONTACTS.email}`">{{ SUPPORT_CONTACTS.email }}</a>
+      </p>
     </div>
 
     <div
@@ -326,6 +367,16 @@ const pageStyle = computed(() => {
 
 .partner-page__state--blocked i {
   color: var(--partner-primary-strong);
+}
+
+/** Estado terminal: sem alarme de risco, só a porta fechada. */
+.partner-page__state--revoked {
+  border-color: color-mix(in srgb, var(--partner-muted) 22%, var(--partner-line));
+  background: color-mix(in srgb, var(--partner-surface) 45%, var(--partner-card));
+}
+
+.partner-page__state--revoked > i {
+  color: var(--partner-muted);
 }
 
 .partner-page__state--suspended {

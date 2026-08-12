@@ -243,6 +243,11 @@ async function loadAll() {
     resgatesCursor.value = resgatesPage.meta.proximoCursor ?? null
     void loadMetricas()
   } catch (err) {
+    /** 403 aqui pode ser o parceiro excluído no meio da sessão: a tela de saída assume. */
+    if (await store.revalidarAcesso(err)) {
+      return
+    }
+
     error.value = err instanceof Error ? err.message : t('divulgacao.errorLoad')
   } finally {
     loading.value = false

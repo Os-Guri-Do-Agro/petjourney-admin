@@ -1,5 +1,6 @@
 import { apiFetch } from '../api'
 import type { ApiEnvelope } from '../api-envelope'
+import type { PapelParceiro, StatusAuditoriaParceiro } from '../parceiro/types'
 import {
   type AuthTokens,
   type AuthUser,
@@ -34,6 +35,24 @@ export type LoginResult = LoginProfileFlags & {
 export type ChangePasswordAuthenticatedPayload = {
   oldPassword: string
   newPassword: string
+}
+
+export type PerfilParceiro = {
+  parceiroId: string
+  nome: string
+  papel: PapelParceiro
+  status: StatusAuditoriaParceiro
+}
+
+/**
+ * Perfis da conta. O payload traz também `veterinario`, espelho de legado dormente que
+ * a UI ignora sempre (vet do produto é Parceiro com categoria `CLINICA_VETERINARIA`).
+ * Por isso o campo não é tipado aqui.
+ */
+export type PerfisConta = {
+  usuarioId: string
+  tutor: { id: string; ativo: boolean } | null
+  parceiros: PerfilParceiro[]
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -162,6 +181,30 @@ export async function resetPasswordWithToken(payload: {
       newPassword: payload.newPassword,
     }),
   })
+}
+
+/** Perfis da conta logada: fonte do seletor de empresa do portal. */
+export async function getPerfis() {
+  const res = await apiFetch<ApiEnvelope<PerfisConta>>('/auth/perfis')
+
+  return res.data
+}
+
+/**
+ * Troca o perfil ativo e grava o **par** novo de tokens. O portal só troca para PARCEIRO:
+ * `TUTOR` não tem tela aqui e `VETERINARIO` é legado que o front nunca envia.
+ * O `parceiroId` vai sempre — com uma membership só o backend auto-resolve.
+ */
+export async function trocarParaParceiro(parceiroId: string) {
+  const res = await apiFetch<ApiEnvelope<unknown>>('/auth/trocar-perfil', {
+    method: 'POST',
+    body: JSON.stringify({ perfil: 'PARCEIRO', parceiroId }),
+  })
+
+  const tokens = extractAuthTokens(res.data)
+  setAuthSession(tokens, preferLocalStorageForRefresh())
+
+  return tokens
 }
 
 /**

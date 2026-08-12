@@ -25,8 +25,9 @@ import {
 } from '@/composables/useAppNavigation'
 import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
+import { useLogout } from '@/composables/useLogout'
 import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
-import { clearAuthSession, getAuthUser } from '@/service/auth/auth-session'
+import { getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { LightColors } from '@/theme/colors'
@@ -56,6 +57,7 @@ const {
   open: openCupomComingSoon,
 } = useCupomComingSoon()
 const { navigationSections, hasClinicalProfile } = useAppNavigation()
+const { logout } = useLogout()
 const cupomFeatureEnabled = CUPOM_FEATURE_ENABLED
 const activeSectionId = ref('home')
 const defaultLandingPath = computed(() => getDefaultLandingPath())
@@ -330,11 +332,8 @@ function handleHeaderCupomClick() {
 }
 
 async function handleLogout() {
-  parceiroStore.reset()
-  usuarioPerfilStore.clear()
-  clearAuthSession()
   userMenuOpen.value = false
-  await router.replace('/auth/login')
+  await logout()
 }
 
 onMounted(() => {
@@ -660,6 +659,14 @@ onUnmounted(() => {
             <RouterLink role="menuitem" to="/settings" @click="userMenuOpen = false">
               <i class="pi pi-cog" aria-hidden="true" />
               {{ t('shell.user.settings') }}
+            </RouterLink>
+            <RouterLink
+              role="menuitem"
+              to="/parceiro/selecionar"
+              @click="userMenuOpen = false"
+            >
+              <i class="pi pi-building" aria-hidden="true" />
+              {{ t('shell.user.trocarEmpresa') }}
             </RouterLink>
             <div class="user-menu__locale" role="none">
               <span class="user-menu__locale-label">{{ t('languageSwitcher.label') }}</span>

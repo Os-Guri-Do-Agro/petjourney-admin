@@ -1,0 +1,415 @@
+# Spec: Parte 14 - Suporte Administrativo do Acesso Temporario
+
+**Status:** In Review
+**Autor:** Nicolas (via /spec-driven com Claude)
+**Criado em:** 2026-08-05
+**Ultima atualizacao:** 2026-08-05
+**Versao:** 0.1
+**Epico:** [acesso-compartilhamento-e-parcerias](../../../../epicos/acesso-compartilhamento-e-parcerias.md)
+**Depende de:** [01-compartilhamento-prestador.md](01-compartilhamento-prestador.md) (em prod)
+**Habilita:** [11-13-prontuario-acesso-temporario-cms.md](11-13-prontuario-acesso-temporario-cms.md)
+**Relacionadas:** [11-prontuario-no-acesso-temporario.md](11-prontuario-no-acesso-temporario.md)
+
+---
+
+## Visao Geral
+
+Dar ao suporte a superficie administrativa do acesso temporario: **achar** um acesso sem saber o id, **revogar com motivo registrado** e protocolo, e **provar quem abriu qual arquivo**. No mesmo movimento, fechar o acesso irrestrito que o admin tem hoje ao prontuario compartilhado atraves das rotas do tutor.
+
+Shippable sozinha: nao depende das Partes 11 a 13 e melhora o que ja esta em producao. Com a Parte 11 no ar, ganha os campos de documento e diario.
+
+---
+
+## Motivacao / Contexto de Negocio
+
+O acesso temporario esta em producao desde a Parte 1 e nao tem **nenhuma** superficie de suporte. Quando o tutor liga dizendo "mandei pro numero errado", o atendimento nao tem por onde comecar: nao existe busca por codigo, por e-mail do tutor nem por nome do pet.
+
+Com a Parte 11, o link passa a carregar exame e receita. O custo de um acesso entregue ao contato errado deixa de ser "o vet viu as vacinas" e passa a ser "um estranho tem um PDF com o nome completo, o CPF e o endereco do tutor, por ate 30 dias". Tempo de resposta a incidente vira parte do produto.
+
+Custo de nao fazer: o unico caminho pratico continua sendo pedir ao tutor que revogue pelo app dele. Tutor sem o celular na mao, com o app desinstalado ou com a conta em recuperacao fica sem saida, e o suporte assiste.
+
+---
+
+## Research Findings (ancoras verificadas em 2026-08-05)
+
+**Stack:** NestJS 11 (Fastify) + Prisma 7 + Postgres 16. Sem dependencia nova.
+
+### O admin ja pode agir, mas nao pode achar
+
+`assertCompartilhamentoPrestadorOwnership(id, userId, isAdmin)` **retorna imediatamente quando `isAdmin`**, sem checar dono ([ownership.service.ts:471-482](../../../../../../src/auth/services/ownership.service.ts#L471-L482)). O controller do tutor resolve `isAdmin` por `req.user.isSystemAdmin === true` ([compartilhamento-prestador-tutor.controller.ts:36-38](../../../../../../src/compartilhamento-prestador/compartilhamento-prestador-tutor.controller.ts#L36-L38)).
+
+Consequencia: **um admin ja revoga qualquer acesso hoje**, chamando `DELETE tutor/compartilhamentos-prestador/:id`. O gap real nao e poder agir, e **descobrir o id**: `listarDoTutor` filtra por `criadoPorUsuarioId: userId` e nao tem ramo admin ([compartilhamento-prestador.service.ts:99-101](../../../../../../src/compartilhamento-prestador/compartilhamento-prestador.service.ts#L99-L101)). Sem busca, a capacidade existe e e inalcancavel.
+
+### Achado de seguranca: o admin ja tem chave-mestra do prontuario
+
+Pelo mesmo caminho, o admin recebe **tudo**. `mapTutor` devolve `codigo`, `link` publico, `mensagemTutor` e o `snapshot` clinico inteiro ([compartilhamento-prestador.service.ts:562-576](../../../../../../src/compartilhamento-prestador/compartilhamento-prestador.service.ts#L562-L576)), e `revogar` termina retornando `detalheDoTutor(...)` ([:266](../../../../../../src/compartilhamento-prestador/compartilhamento-prestador.service.ts#L266)). Ou seja, **revogar ja entrega o prontuario ao admin**. A rota de anexo (`GET :id/anexos/:anexoId/url`) tambem passa por `isAdmin` e devolve URL assinada.
+
+Isso e comportamento de producao, nao introduzido por esta leva, e nao tem tela: hoje exige `curl` com token de admin. E exatamente a "segunda porta" que a decisao do CMS (metadado sim, conteudo clinico nao) existe para fechar. **Fechar a porta na tela e deixar a API aberta seria teatro.** Ver D14.2.
+
+### Padroes a reusar
+
+| Peca | Estado | Ancora |
+|---|---|---|
+| Guard admin | `@UseGuards(JwtAuthGuard, SystemAdminGuard)` no controller inteiro | [parceiro.controller.ts:16-20](../../../../../../src/cupom/parceiro.controller.ts#L16-L20) |
+| Protocolo de acao admin | `ProtocoloService.emitir(tx, {...})` dentro de transacao, devolve `{ codigo }` | [protocolo.service.ts:40](../../../../../../src/common/protocolo/protocolo.service.ts#L40) |
+| Trilha polimorfica | `ProtocoloAdmin` com `entidade` String livre, "pra estender sem migration" | [schema.prisma:2442-2445](../../../../../../prisma/schema.prisma#L2442-L2445) |
+| Prefixo por acao | `PREFIXO_POR_ACAO` e `Record` completo: valor novo no enum quebra o build ate ganhar prefixo | [protocolo.constants.ts:10-15](../../../../../../src/common/protocolo/protocolo.constants.ts#L10-L15) |
+| Paginacao admin | page-based com `meta: { total, page, limit, totalPages }` | `ParceiroService.findAllPaginated` |
+| Lazy expire | `expirarVencidos(id?)` antes de toda leitura | [compartilhamento-prestador.service.ts:445-454](../../../../../../src/compartilhamento-prestador/compartilhamento-prestador.service.ts#L445-L454) |
+| Revogacao e expurgo | `revogar` ja apaga anexo nao salvo do bucket privado | [:243-267](../../../../../../src/compartilhamento-prestador/compartilhamento-prestador.service.ts#L243-L267) |
+
+**Breaking Changes:** uma, deliberada e restrita a admin. Ver D14.2 e a secao propria.
+
+---
+
+## Decisoes desta parte
+
+### D14.1 - Superficie admin propria, nunca a rota do tutor com flag
+As rotas admin vivem em `admin/compartilhamentos`, com controller e mapper proprios. O admin deixa de operar por dentro das rotas do tutor.
+
+**Motivo:** as duas superficies tem contratos opostos. O tutor e dono do dado e recebe tudo; o admin e terceiro e recebe metadado. Enquanto o mesmo handler serve os dois, qualquer campo novo no payload do tutor vaza para o admin por default, e a regra de privacidade depende de ninguem esquecer. Separar torna o vazamento um ato deliberado, e nao um descuido.
+
+### D14.2 - `isAdmin` deixa de dar leitura de conteudo nas rotas do tutor
+Nas rotas de leitura do modulo (`GET :id`, `GET`, `GET :id/anexos/:anexoId/url`, e o retorno de `DELETE :id`), o atalho de admin deixa de valer: quem nao e o dono recebe 403, admin ou nao. A capacidade administrativa passa a existir **so** em `admin/compartilhamentos`, com o payload reduzido.
+
+**Motivo:** hoje qualquer conta com `isSystemAdmin` le o prontuario compartilhado de qualquer pet, com URL assinada de anexo inclusa. Isso e chave-mestra sobre dado de saude, sem trilha e sem tela. O consentimento do tutor nomeou um prestador, um prazo e um conjunto de categorias; o admin nunca esteve nesse contrato.
+
+**Alternativa rejeitada:** manter o atalho e apenas nao construir tela. E o estado atual, e ele confunde "nao ha interface" com "nao ha acesso". Um token de admin e `curl` bastam.
+
+**Nao afeta a acao:** revogar continua sendo poder do admin, agora pela rota propria, com motivo obrigatorio e protocolo.
+
+### D14.3 - Trilha de abertura de arquivo e persistida, nao so logada
+Cada geracao de URL assinada grava uma linha em `AberturaArquivoCompartilhado`. O log em Pino continua, para operacao.
+
+**Motivo:** a Parte 11 ofereceu "log estruturado" como mitigacao do risco Alto de PII. Log nao responde pedido de titular: some na rotacao, nao pagina, nao filtra por acesso e o suporte nao tem acesso a ele. Trilha consultavel e o que transforma a mitigacao em algo exercivel.
+
+**Escopo:** grava-se **quem pediu a URL**, nao "quem viu o arquivo". A distincao e honesta e precisa aparecer na copy do CMS: uma URL assinada gerada pode nao ter sido aberta, e o download pode ser repassado. A trilha prova solicitacao, nao leitura.
+
+### D14.4 - Revogacao administrativa exige motivo e emite protocolo
+Reusa `ProtocoloService`, com `entidade = "CompartilhamentoPrestador"` e acao nova `REVOGACAO_COMPARTILHAMENTO` (prefixo `RVG`).
+
+**Motivo:** e acao de terceiro sobre dado alheio. Sem motivo registrado nao ha como auditar depois se o suporte agiu a pedido do titular ou por conta propria. O `ProtocoloAdmin` ja e polimorfico por design, entao nao ha modelo novo, so um valor de enum.
+
+> **Nota:** o enum se chama `TipoAcaoAdminParceiro` e a acao nao e sobre parceiro. O nome fica apertado. Renomear e mexer em enum Postgres com valores em uso e nao paga o custo agora; fica registrado como divida de nomenclatura.
+
+### D14.5 - O tutor e avisado quando o suporte revoga
+E-mail ao tutor com o protocolo e o motivo resumido.
+
+**Motivo:** o acesso e dele. Descobrir por acaso que alguem encerrou algo seu e pior do que o incidente que motivou a revogacao. O protocolo da ao tutor o que citar se quiser contestar.
+
+---
+
+## Modelo de Dados
+
+```prisma
+/// Trilha de solicitacao de URL assinada de arquivo de um acesso temporario.
+/// Prova QUEM PEDIU o arquivo e QUANDO (D14.3). Nao prova leitura.
+/// Spec: docs/specs/2026/q2/q2-3/acesso-compartilhamento-e-parcerias/14-suporte-admin-acesso-temporario.md
+model AberturaArquivoCompartilhado {
+  id                 String                    @id @default(cuid())
+  compartilhamentoId String
+  compartilhamento   CompartilhamentoPrestador @relation(fields: [compartilhamentoId], references: [id], onDelete: Cascade)
+  /// Sem FK: o arquivo do cofre e apagado no encerramento (Parte 11 T9) e a
+  /// trilha precisa sobreviver a ele. Nome denormalizado pelo mesmo motivo.
+  arquivoId          String
+  arquivoNome        String
+  origem             OrigemArquivoCompartilhado
+  /// publico | tutor | parceiro
+  canal              CanalAberturaArquivo
+  /// Preenchidos so no canal autenticado.
+  parceiroId         String?
+  usuarioId          String?
+  /// NUNCA gravar IP ou user-agent: o canal publico e anonimo por design e
+  /// coletar identificador de quem o tutor escolheu confiar amplia o dado
+  /// pessoal em vez de proteger. Ver Riscos.
+  abertoEm           DateTime                  @default(now())
+
+  @@index([compartilhamentoId, abertoEm])
+  @@index([abertoEm])
+}
+
+enum CanalAberturaArquivo {
+  PUBLICO
+  TUTOR
+  PARCEIRO
+}
+```
+
+Enum de acao administrativa:
+
+```prisma
+enum TipoAcaoAdminParceiro {
+  CREDITO_PARCEIRO
+  EXCLUSAO_PARCEIRO
+  REVISAO_ANTIFRAUDE
+  FALHA_SAQUE
+  /// Revogacao de acesso temporario pelo suporte. Prefixo RVG. (Parte 14)
+  REVOGACAO_COMPARTILHAMENTO
+}
+```
+
+> Adicionar o valor faz `PREFIXO_POR_ACAO` (um `Record` completo) parar de compilar ate ganhar `REVOGACAO_COMPARTILHAMENTO: 'RVG'`. Comportamento desejado: protocolo sem prefixo seria codigo malformado em producao.
+
+Colunas novas em `CompartilhamentoPrestador`:
+
+```prisma
+  /// Preenchidos quando a revogacao partiu do suporte, nao do tutor.
+  revogadoPorAdminId    String?
+  motivoRevogacaoAdmin  String?
+  protocoloRevogacao    String?
+  aberturas             AberturaArquivoCompartilhado[]
+```
+
+---
+
+## Contrato de API
+
+Todas sob `admin/compartilhamentos`, com `@UseGuards(JwtAuthGuard, SystemAdminGuard)` no controller inteiro.
+
+### `GET admin/compartilhamentos`
+
+Query: `page`, `limit`, `codigo`, `tutorEmail`, `petNome`, `empresaNome`, `status`, `temDocumentos`, `temDiario`, `from`, `to`.
+
+Item da lista (mapper **proprio**, nunca `mapTutor`):
+
+```jsonc
+{
+  "id": "ckx...", "codigo": "482913", "status": "ATIVO",
+  "petNome": "Lili",
+  "tutor": { "id": "u1", "nome": "Ana", "email": "ana@x.com" },
+  "empresaNome": "CenterVet", "tipoServico": "CONSULTA",
+  "categorias": ["ALERGIAS", "DIARIO", "DOCUMENTOS"],
+  "totalDocumentos": 2, "totalArquivos": 5, "totalAberturas": 3,
+  "parceiroVinculado": { "id": "p1", "nome": "CenterVet" },
+  "criadoEm": "...", "expiraEm": "...", "revogadoEm": null
+}
+```
+
+### `GET admin/compartilhamentos/:id`
+
+O da lista, mais `documentos[]` (nome, tipo, dataEmissao, totalArquivos), `diario` (totalEntradas, de, ate), `snapshotAtualizadoEm`, `revogadoPor`, `motivoRevogacaoAdmin`, `protocoloRevogacao`.
+
+### `GET admin/compartilhamentos/:id/aberturas`
+
+Paginado, ordenado por `abertoEm desc`: `abertoEm`, `arquivoNome`, `origem`, `canal`, `parceiro`, `usuario`.
+
+### `DELETE admin/compartilhamentos/:id`
+
+Body `{ "motivo": "string (min 10, max 500)" }`. Resposta `{ "id", "revogadoEm", "protocolo" }`.
+
+### `GET admin/compartilhamentos/metricas`
+
+Query `from`/`to`. Contadores de adocao e de revogacoes administrativas.
+
+**Nenhuma rota admin devolve** `snapshot`, `ficha`, `mensagemTutor`, `motivoVisita`, `link`, `caminhoArquivo` nem `signedUrl`. Nao existe rota admin de abrir arquivo.
+
+---
+
+## Regras de Negocio
+
+1. Toda rota exige `isSystemAdmin`. Sem a flag, 403.
+2. Toda leitura roda `expirarVencidos()` antes, como o resto do modulo.
+3. `codigo` na busca casa **exato**: e identificador, e `contains` sobre 6 digitos devolveria ruido. Os demais campos textuais usam `contains` case-insensitive.
+4. Revogar exige `status = ATIVO`; encerrado devolve 409 `COMPARTILHAMENTO_JA_ENCERRADO`.
+5. Motivo obrigatorio, de 10 a 500 caracteres. O motivo vive no `ProtocoloAdmin` e na coluna do compartilhamento, e **nunca** entra em log.
+6. Revogacao administrativa faz o mesmo que a do tutor (status, `revogadoEm`, expurgo dos binarios), mais protocolo, mais colunas de autoria, mais e-mail ao tutor (D14.5). O e-mail e best-effort: falha de SendGrid nao desfaz a revogacao.
+7. A trilha grava **antes** de devolver a URL assinada. Falha de gravacao **nao** bloqueia a leitura: o produto nao para porque a auditoria falhou, mas o erro sobe como log de nivel error.
+8. Retencao da trilha: **24 meses**, com expurgo agendado. Trilha de auditoria sem prazo vira passivo de LGPD.
+9. Nenhuma resposta admin inclui conteudo clinico (contrato travado por teste, AC9).
+
+---
+
+## Breaking Changes
+
+**Uma, deliberada (D14.2).** Contas com `isSystemAdmin` perdem a leitura de conteudo pelas rotas do tutor do modulo `compartilhamento-prestador`.
+
+- **Quem depende:** nenhum cliente conhecido. O app do tutor autentica como tutor; o CMS nao consome este modulo hoje; a landing usa o canal publico. O uso admin existente e manual (`curl`), nao automatizado.
+- **Verificacao obrigatoria antes de aplicar:** audit grep por chamadas as rotas `tutor/compartilhamentos-prestador` nos repos `petjourney-cms`, `petjourney-web` e `petjourney-app`, registrando o resultado na Task T7. Havendo consumidor, ele migra para `admin/compartilhamentos` antes.
+- **Sinal de vazamento retroativo:** vale checar nos logs se alguma conta admin chamou essas rotas nos ultimos 90 dias. Se sim, e incidente a tratar, nao so migracao.
+
+---
+
+## Riscos e Mitigacoes
+
+| Nivel | Risco | Mitigacao |
+|---|---|---|
+| **Alto** | **A propria tela de suporte vira o vazamento.** Superficie que busca por e-mail e nome expoe a base inteira a qualquer conta de backoffice comprometida. | Payload sem conteudo clinico (D14.1) e sem rota de abrir arquivo; `SystemAdminGuard` no controller inteiro; teste de contrato (AC9) falhando se qualquer campo clinico aparecer; revogacao com motivo e protocolo, deixando rastro de quem agiu. |
+| **Alto** | **Fechar a tela e deixar a API aberta.** Sem D14.2, o admin continua lendo tudo por `tutor/compartilhamentos-prestador/:id`, e a decisao de privacidade do CMS vira decorativa. | D14.2 no mesmo deploy da superficie nova, com teste explicito de que admin nao-dono recebe 403 nas rotas do tutor (AC10 e AC11). |
+| **Medio** | **A trilha vira o proximo vazamento.** Tabela que liga pessoa, arquivo e horario e dado sensivel por si. | Sem IP e sem user-agent (comentado no schema); so ids e o nome ja denormalizado do arquivo; retencao de 24 meses com expurgo; leitura so por admin. |
+| **Medio** | **Escrita na leitura.** Gravar trilha em toda geracao de URL acrescenta uma escrita no caminho quente do canal publico, que ja e rate-limited e sem auth. | Insert unico, sem transacao, sem bloquear a resposta em caso de erro (Regra 7); indice por `(compartilhamentoId, abertoEm)`; se virar gargalo, vira fila, registrado como follow-up e nao antecipado. |
+| **Medio** | **Suporte revoga acesso legitimo** por leitura errada do chamado. | Motivo obrigatorio, e-mail ao tutor com protocolo (D14.5), e a metrica de revogacoes administrativas no dashboard tratada como sinal de incidente, nao de produtividade. |
+| **Baixo** | Divergencia entre o mapper admin e o do tutor conforme campos novos entram. | Mapper admin construido por **lista explicita de campos**, nunca por spread do registro. Campo novo so aparece se alguem escrever a linha. |
+
+---
+
+## Requisitos Nao-Funcionais
+
+- **Seguranca:** `SystemAdminGuard` no controller inteiro; nenhuma rota admin gera URL assinada; nenhuma resposta admin carrega conteudo clinico.
+- **Privacidade e LGPD:** trilha sem IP e sem user-agent; retencao de 24 meses; motivo de revogacao fora dos logs; e-mail ao titular quando o suporte age.
+- **Performance:** busca paginada com teto de 100 por pagina; insert da trilha fora do caminho critico de erro.
+- **Observabilidade:** ver secao propria.
+- **Internacionalizacao:** o e-mail ao tutor segue o locale dele, com en-GB explicito.
+
+---
+
+## User Stories
+
+- Como **suporte**, quero achar o acesso pelo codigo que o tutor me passou, para agir sem pedir print.
+- Como **suporte**, quero revogar um acesso com motivo, para o tutor ter um protocolo e a acao ficar auditavel.
+- Como **tutor**, quero saber quem pediu meu exame e quando, para decidir se preciso escalar.
+- Como **encarregado de dados**, quero que a trilha tenha prazo, para nao acumular passivo.
+- Como **tutor**, quero ser avisado quando o suporte encerra um acesso meu, para nao descobrir por acaso.
+
+---
+
+## Acceptance Criteria
+
+### Comportamentais
+
+- [ ] **AC1 Given** um admin busca `codigo=482913` **Then** recebe o acesso correspondente com `totalDocumentos`, `totalArquivos` e `totalAberturas`.
+- [ ] **AC2 Given** um codigo parcial `4829` **Then** a busca por codigo nao casa (match exato, Regra 3).
+- [ ] **AC3 Given** um usuario sem `isSystemAdmin` **When** chama qualquer rota admin **Then** 403.
+- [ ] **AC4 Given** filtro `temDocumentos=true` **Then** so voltam acessos com `DOCUMENTOS` em `categorias`.
+- [ ] **AC5 Given** um acesso ATIVO **When** o admin revoga com motivo valido **Then** status vira `REVOGADO`, existe `ProtocoloAdmin` com `entidade = "CompartilhamentoPrestador"` e o `motivo` gravado, a resposta traz o protocolo e o link publico para de abrir.
+- [ ] **AC6 Given** motivo com 9 caracteres **Then** 400 e nada e alterado.
+- [ ] **AC7 Given** um acesso ja REVOGADO **When** o admin revoga **Then** 409 e nenhum protocolo novo e emitido.
+- [ ] **AC8 Given** uma revogacao administrativa **Then** o tutor recebe e-mail com o protocolo, e falha no envio nao desfaz a revogacao.
+- [ ] **AC9 Given** qualquer resposta de qualquer rota admin **Then** o corpo nao contem `snapshot`, `ficha`, `mensagemTutor`, `motivoVisita`, `link`, `caminhoArquivo` nem `signedUrl`.
+- [ ] **AC10 Given** um admin que nao e dono **When** chama `GET tutor/compartilhamentos-prestador/:id` **Then** 403 (D14.2).
+- [ ] **AC11 Given** um admin que nao e dono **When** chama `GET tutor/compartilhamentos-prestador/:id/anexos/:anexoId/url` **Then** 403 e nenhuma URL assinada e gerada.
+- [ ] **AC12 Given** o proprio tutor **Then** todas as rotas do tutor continuam funcionando exatamente como hoje.
+- [ ] **AC13 Given** o prestador abre um arquivo pelo canal publico **Then** existe uma linha na trilha com `canal = PUBLICO`, sem `parceiroId` e sem `usuarioId`.
+- [ ] **AC14 Given** o parceiro logado abre um arquivo **Then** a linha traz `canal = PARCEIRO` com `parceiroId` e `usuarioId`.
+- [ ] **AC15 Given** a gravacao da trilha falha **When** o prestador pede a URL **Then** ele recebe a URL normalmente e um log de nivel error e emitido.
+- [ ] **AC16 Given** um acesso com 3 aberturas **Then** `GET :id/aberturas` devolve 3 linhas ordenadas por `abertoEm desc`.
+- [ ] **AC17 Given** um acesso sem abertura **Then** a rota devolve lista vazia com 200, nunca 404.
+- [ ] **AC18 Given** o arquivo foi expurgado no encerramento **Then** a trilha continua legivel, com `arquivoNome` preservado.
+
+### Observaveis
+
+- [ ] **AC19** Nenhuma linha da trilha contem IP ou user-agent.
+- [ ] **AC20** `PREFIXO_POR_ACAO` tem `REVOGACAO_COMPARTILHAMENTO: 'RVG'` e o build quebra sem ele.
+- [ ] **AC21** O mapper admin e construido por lista explicita de campos, sem spread do registro do Prisma.
+- [ ] **AC22** Nenhuma mensagem de erro ou de e-mail contem em-dash, nos 4 locales.
+
+---
+
+## Estrategia de Testes
+
+### Unitarios
+
+- Mapper admin: nao vaza campo clinico nem com registro completo do Prisma na entrada.
+- Validacao do motivo: 9, 10, 500 e 501 caracteres.
+- Busca: codigo exato contra parcial; `contains` case-insensitive nos textuais; filtros combinados.
+- Resolucao de canal da trilha nos tres casos.
+
+### Integracao (Postgres real, sem mock de banco)
+
+- Revogacao administrativa completa: status, colunas de autoria, `ProtocoloAdmin`, expurgo dos binarios, e-mail disparado.
+- Corrida: dois admins revogam o mesmo acesso; o segundo recebe 409 e nao emite protocolo.
+- Trilha nos tres canais, com o acesso depois encerrado, confirmando AC18.
+- **Regressao de autorizacao (D14.2):** matriz dono contra admin-nao-dono contra terceiro, nas 4 rotas de leitura do tutor.
+- Contrato: varredura das respostas admin procurando as chaves proibidas (AC9).
+
+### Manuais
+
+- Criar acesso no app, achar no CMS pelo e-mail do tutor, revogar com motivo, confirmar que o link publico morreu, que o tutor recebeu e-mail e que a trilha mostra a abertura anterior.
+
+### Regressao
+
+- Suite do modulo `compartilhamento-prestador` inteira verde.
+- Fluxo do tutor inalterado ponta a ponta (AC12).
+
+---
+
+## Arquivos Impactados
+
+| Arquivo | Acao | Descricao |
+|---|---|---|
+| `prisma/schema.prisma` | Modificar | `AberturaArquivoCompartilhado`, `CanalAberturaArquivo`, valor de enum, 3 colunas e relacao |
+| `prisma/migrations/<ts>_acao_revogacao_compartilhamento/` | Criar | Somente `ALTER TYPE ... ADD VALUE` (isolada) |
+| `prisma/migrations/<ts>_trilha_abertura_arquivo/` | Criar | Tabela, enum de canal, colunas, indices |
+| `src/common/protocolo/protocolo.constants.ts` | Modificar | Prefixo `RVG` e `ENTIDADE_COMPARTILHAMENTO` |
+| `src/compartilhamento-prestador/compartilhamento-prestador-admin.controller.ts` | Criar | 5 rotas com `SystemAdminGuard` |
+| `src/compartilhamento-prestador/compartilhamento-prestador-admin.service.ts` | Criar | Busca, detalhe, revogacao, trilha, metricas |
+| `src/compartilhamento-prestador/helpers/map-admin.helper.ts` | Criar | Mapper por lista explicita de campos |
+| `src/compartilhamento-prestador/dto/query-admin-compartilhamento.dto.ts` | Criar | Filtros e paginacao |
+| `src/compartilhamento-prestador/dto/revogar-admin.dto.ts` | Criar | Motivo com 10 a 500 |
+| `src/compartilhamento-prestador/compartilhamento-prestador.service.ts` | Modificar | Registrar trilha nas 3 rotas de URL; remover atalho de admin nas leituras (D14.2) |
+| `src/compartilhamento-prestador/compartilhamento-prestador-tutor.controller.ts` | Modificar | D14.2 |
+| `src/auth/services/ownership.service.ts` | Modificar | Variante sem atalho de admin para as leituras do modulo, sem tocar os outros 14 metodos |
+| `src/sendgrid-mail/` | Modificar | Template de acesso revogado pelo suporte, 4 locales |
+| `src/compartilhamento-prestador/compartilhamento-prestador.module.ts` | Modificar | Registrar controller e service novos |
+| `docs/CHANGELOG.md` | Modificar | Entry |
+
+---
+
+## Tasks Tecnicas
+
+- [ ] **T1** Schema e migrations: enum isolado primeiro, depois tabela e colunas. `prisma migrate status` antes e depois.
+- [ ] **T2** Prefixo `RVG` e `ENTIDADE_COMPARTILHAMENTO` nas constantes. *(depende de: T1)*
+- [ ] **T3** Registrar trilha nas 3 rotas de URL assinada, sem bloquear a resposta em erro. *(depende de: T1)*
+- [ ] **T4** `map-admin.helper.ts` por lista explicita, com teste anti-vazamento. *(independente)*
+- [ ] **T5** Service admin: busca paginada, detalhe, trilha paginada, metricas. *(depende de: T4)*
+- [ ] **T6** Revogacao administrativa com protocolo, colunas de autoria e e-mail. *(depende de: T2, T5)*
+- [ ] **T7** **D14.2 com audit grep primeiro:** varrer `petjourney-cms`, `petjourney-web` e `petjourney-app` por chamadas as rotas do tutor deste modulo e **registrar o resultado nesta task**; so entao remover o atalho de admin nas leituras. *(depende de: T5)*
+- [ ] **T8** Controller admin com `SystemAdminGuard` e Swagger. *(depende de: T5, T6)*
+- [ ] **T9** Job de expurgo da trilha aos 24 meses. *(depende de: T1)*
+- [ ] **T10** Testes conforme a Estrategia, incluindo a matriz de autorizacao. *(depende de: T7, T8)*
+- [ ] **T11** `security-auditor` no diff completo. *(depende de: T10)*
+- [ ] **T12** CHANGELOG, README da pasta e remissao na spec do CMS. *(depende de: T10)*
+
+---
+
+## Plano de Rollout
+
+- [ ] Migrations em dev contra Postgres real; suite verde.
+- [ ] Deploy com as rotas admin (aditivas) **e** a D14.2 no mesmo release: liberar a tela antes de fechar a API deixaria as duas portas abertas ao mesmo tempo.
+- [ ] Validar em dev com token de admin: busca, revogacao, trilha, e confirmar 403 nas rotas do tutor.
+- [ ] Liberar a secao no CMS so depois do backend em prod.
+
+## Plano de Rollback
+
+- **Codigo:** reverter e redeploy. As rotas admin somem; o atalho de `isAdmin` nas rotas do tutor volta a valer, o que restaura o comportamento atual, inclusive o acesso amplo. Aceitavel como estado transitorio, **nao** como destino.
+- **Migration de tabela:** `AberturaArquivoCompartilhado` e aditiva; reverter o codigo a deixa orfa e inofensiva.
+- **Migration de enum:** Postgres nao remove valor de enum. `REVOGACAO_COMPARTILHAMENTO` fica no tipo. Rollback real e parar de emitir; protocolos ja emitidos sao historico e **nao** devem ser apagados.
+- **Colunas de autoria:** nullable e aditivas.
+
+---
+
+## Observabilidade
+
+- **Log:** `[Compartilhamento] REVOGACAO_ADMIN comp=<id> admin=<userId> protocolo=<codigo>`. **Sem o motivo** (Regra 5).
+- **Log:** `TRILHA_ABERTURA_FALHOU comp=<id> arquivo=<id>` em nivel error (AC15).
+- **Metrica:** revogacoes administrativas por periodo; acessos criados por categoria; percentual de acessos com ao menos uma abertura.
+- **Alerta:** revogacoes administrativas acima do baseline em 24h, que e sinal de incidente em curso.
+
+---
+
+## Definition of Done
+
+- [ ] Todos os AC verificados um a um
+- [ ] Teste de contrato anti-vazamento (AC9) e matriz de autorizacao (AC10 a AC12) passando
+- [ ] Audit grep da T7 registrado com o resultado, nos 3 repos
+- [ ] `security-auditor` rodado (a parte cria rota admin sobre dado de qualquer tutor e muda regra de autorizacao)
+- [ ] `npx tsc --noEmit` e `npm run lint` limpos
+- [ ] `/code-review` rodado e findings de correcao resolvidos
+- [ ] `/verify`: revogacao administrativa exercitada ponta a ponta, com o link publico morrendo e o e-mail chegando
+- [ ] `prisma migrate status` limpo em dev e prod
+- [ ] Nota da Parte 11 sobre trilha persistida consistente com o que foi implementado
+- [ ] Spec do CMS atualizada: secao 6 passa a apontar para esta parte
+- [ ] Spec com status `Concluido` + data + Change Log
+- [ ] `/spec-sync` rodado
+
+## Perguntas em Aberto
+
+- [ ] **1** Retencao de 24 meses para a trilha: o juridico confirma? Responsavel: Nicolas.
+- [ ] **2** D14.2 remove o atalho de admin nas **leituras**. Deve remover tambem em `PATCH :id/anotacoes/lidas` e `POST .../salvar-documento`? Sao escritas no prontuario do tutor que o admin nao deveria fazer em nome dele. Proposta: remover tambem. Responsavel: Nicolas.
+- [ ] **3** Botao de panico (revogar todos os acessos ativos de um pet de uma vez) entra aqui ou vira parte propria? Proposta: parte propria, so se aparecer o caso real. Responsavel: Nicolas.
+- [ ] **4** A trilha deve ficar visivel para o **tutor** no app, e nao so para o admin? Aumenta confianca e tambem ansiedade. Ver pergunta 2 da spec do app. Responsavel: Nicolas.
+
+## Change Log
+
+| Data | Versao | Mudanca | Autor |
+|---|---|---|---|
+| 2026-08-05 | 0.1 | Criacao, com o achado de que `isAdmin` ja da leitura ampla hoje | Nicolas via Claude |

@@ -322,6 +322,7 @@
       "role": "Cuenta de socio",
       "perfil": "Perfil",
       "settings": "Configuración",
+      "trocarEmpresa": "Cambiar de empresa",
       "logout": "Logout"
     },
     "logoutConfirm": {
@@ -409,6 +410,13 @@
       "ctaSettings": "Ir a configuración",
       "retry": "Verificar de nuevo",
       "contactLabel": "Consultas:"
+    },
+    "accessRevoked": {
+      "title": "Su acceso al portal ha finalizado",
+      "body": "Este registro de socio ya no está activo, por lo que las áreas del portal quedaron no disponibles para esta cuenta.",
+      "hint": "Si cree que hubo un error, hable con nosotros. También puede registrar una nueva empresa en Configuración, en la pestaña Empresa.",
+      "ctaSupport": "Hablar con soporte",
+      "ctaNewCompany": "Registrar nueva empresa"
     },
     "operability": {
       "pending": {
@@ -1231,19 +1239,27 @@
     "store": {
       "errorNeedsSelection": "Seleccione qué empresa socia desea operar. Indique el identificador del socio.",
       "errorNoAccess": "Su cuenta no tiene acceso al portal del socio.",
+      "errorAccessRevoked": "Su acceso al portal del socio ha finalizado.",
       "errorGeneric": "No fue posible cargar el contexto del socio."
     },
     "selecionar": {
       "subtitle": "Multiempresa",
       "title": "Seleccionar socio",
-      "body": "Su cuenta participa en más de una empresa socia. Indique cuál desea operar ahora.",
-      "idLabel": "ID del socio",
-      "idHint": "El identificador lo proporciona el administrador o aparece en la invitación.",
-      "idPlaceholder": "cuid-del-socio",
-      "continue": "Continuar",
+      "body": "Su cuenta participa en más de una empresa socia. Elija cuál desea operar ahora.",
+      "roleDono": "Su negocio",
+      "roleOperador": "Equipo",
+      "current": "En uso",
+      "errorLoad": "No fue posible cargar sus empresas.",
+      "emptyTitle": "Ninguna empresa vinculada",
+      "emptyBody": "Su cuenta todavía no participa en ninguna empresa socia.",
+      "newTitle": "Registrar otra empresa",
+      "newBody": "Puede registrar su negocio y seguir el análisis por aquí.",
+      "newCta": "Registrar empresa",
       "toast": {
         "error": "No fue posible acceder",
-        "errorDetail": "Verifique el identificador."
+        "errorDetail": "Inténtelo de nuevo en unos instantes.",
+        "stale": "Esta empresa ya no está disponible",
+        "staleDetail": "Actualizamos la lista con lo que su cuenta puede acceder ahora."
       }
     },
     "convite": {

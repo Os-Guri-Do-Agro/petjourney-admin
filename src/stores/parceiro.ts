@@ -15,6 +15,7 @@ import type {
   PortalStatus,
   StatusModoParceiro,
 } from '@/service/parceiro/types'
+import { decidirAcessoPortal } from '@/utils/parceiro/acesso-portal'
 
 const PARCEIRO_ID_STORAGE_KEY = 'petjourney-parceiro-id'
 
@@ -27,8 +28,10 @@ export const useParceiroStore = defineStore('parceiro', () => {
   const loadState = ref<LoadState>('idle')
   const errorMessage = ref('')
   const needsParceiroSelection = ref(false)
-  /** Conta autenticada sem membership em nenhum Parceiro (API 403). */
+  /** Conta autenticada sem acesso a nenhum Parceiro (API 403). */
   const semAcessoParceiro = ref(false)
+  /** O acesso existia nesta sessão e caiu: parceiro excluído pelo admin enquanto o portal estava aberto. */
+  const acessoEncerrado = ref(false)
 
   const papel = computed<PapelParceiro | null>(() => dashboard.value?.papel ?? null)
   const isDono = computed(() => papel.value === 'DONO')
@@ -78,9 +81,16 @@ export const useParceiroStore = defineStore('parceiro', () => {
     errorMessage.value = ''
     needsParceiroSelection.value = false
     semAcessoParceiro.value = false
+    acessoEncerrado.value = false
+
+    await carregarContexto(parceiroId.value, false)
+  }
+
+  async function carregarContexto(idAlvo: string | null, jaRetentou: boolean): Promise<void> {
+    const tinhaContexto = dashboard.value != null
 
     try {
-      const query = parceiroId.value ? { parceiroId: parceiroId.value } : undefined
+      const query = idAlvo ? { parceiroId: idAlvo } : undefined
       const [dashboardData, statusData] = await Promise.all([
         getPortalDashboard(query),
         getPortalStatus(query),
@@ -91,12 +101,34 @@ export const useParceiroStore = defineStore('parceiro', () => {
       setParceiroId(dashboardData.parceiro.id)
       loadState.value = 'ready'
     } catch (error) {
-      if (error instanceof ApiError && error.statusCode === 400) {
+      const decisao = decidirAcessoPortal(error, {
+        parceiroIdEnviado: idAlvo,
+        tinhaContexto,
+        jaRetentou,
+      })
+
+      /** O id guardado morreu com a exclusão; a API reresolve o parceiro ativo sozinha. */
+      if (decisao === 'retentar-sem-parceiro') {
+        setParceiroId(null)
+        return carregarContexto(null, true)
+      }
+
+      if (decisao === 'selecionar-parceiro') {
         needsParceiroSelection.value = true
         errorMessage.value = String(i18n.global.t('parceiro.store.errorNeedsSelection'))
-      } else if (error instanceof ApiError && error.statusCode === 403) {
+      } else if (decisao === 'acesso-encerrado' || decisao === 'sem-acesso') {
         semAcessoParceiro.value = true
-        errorMessage.value = String(i18n.global.t('parceiro.store.errorNoAccess'))
+        acessoEncerrado.value = decisao === 'acesso-encerrado'
+        dashboard.value = null
+        status.value = null
+        setParceiroId(null)
+        errorMessage.value = String(
+          i18n.global.t(
+            acessoEncerrado.value
+              ? 'parceiro.store.errorAccessRevoked'
+              : 'parceiro.store.errorNoAccess',
+          ),
+        )
       } else {
         errorMessage.value =
           error instanceof Error
@@ -106,6 +138,24 @@ export const useParceiroStore = defineStore('parceiro', () => {
 
       loadState.value = 'error'
       throw error
+    }
+  }
+
+  /**
+   * 403 num painel é ambíguo: pode ser OPERADOR sem permissão de DONO ou o parceiro excluído.
+   * Só o contexto decide, então revalidamos. Retorna true quando o acesso caiu de vez e a
+   * tela de saída assume — aí o painel não deve mostrar erro nenhum.
+   */
+  async function revalidarAcesso(error: unknown): Promise<boolean> {
+    if (!(error instanceof ApiError) || error.statusCode !== 403) {
+      return false
+    }
+
+    try {
+      await bootstrap(true)
+      return false
+    } catch {
+      return semAcessoParceiro.value
     }
   }
 
@@ -157,6 +207,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     errorMessage.value = ''
     needsParceiroSelection.value = false
     semAcessoParceiro.value = false
+    acessoEncerrado.value = false
     setParceiroId(null)
   }
 
@@ -168,6 +219,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     errorMessage,
     needsParceiroSelection,
     semAcessoParceiro,
+    acessoEncerrado,
     papel,
     isDono,
     podeOperar,
@@ -178,6 +230,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     modoBloco,
     setParceiroId,
     bootstrap,
+    revalidarAcesso,
     refreshStatus,
     patchModoStatus,
     reset,
