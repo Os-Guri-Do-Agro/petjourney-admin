@@ -205,10 +205,12 @@ const authArtStyle = computed(() => ({
   color: var(--auth-on-brand);
 }
 
-/* No terço superior da arte: centrado no eixo, o texto desce até a pata. */
+/* No terço superior da arte: centrado no eixo, o texto desce até a pata.
+   Medida curta de propósito — linha longa em tela larga cansa e desalinha o bloco. */
 .auth-visual-panel__center {
   display: grid;
   gap: clamp(1.5rem, 3vw, 2.5rem);
+  max-width: 30rem;
   margin-top: clamp(1rem, 8vh, 6rem);
   margin-bottom: auto;
 }
@@ -219,6 +221,8 @@ const authArtStyle = computed(() => ({
   font-weight: 650;
   line-height: 1.08;
   letter-spacing: -0.05em;
+  /* Distribui as linhas do título em vez de deixar uma órfã curta no fim. */
+  text-wrap: balance;
 }
 
 /* Sobre o verde da arte o texto já é limítrofe: branco cheio, sem transparência. */

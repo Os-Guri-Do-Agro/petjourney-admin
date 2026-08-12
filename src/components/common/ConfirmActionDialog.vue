@@ -37,6 +37,7 @@ const dialogStyle = computed(() => {
     '--confirm-bg': colors.auth.white,
     '--confirm-text': colors.auth.text,
     '--confirm-muted': colors.auth.muted,
+    '--confirm-line': colors.dashboard.line,
     '--confirm-shadow-rgb': colors.auth.shadowRgb,
   }
 })
@@ -67,6 +68,7 @@ function handleConfirm() {
         <template #footer>
           <div class="confirm-dialog__actions">
             <Button
+              class="confirm-dialog__cancel"
               :label="props.cancelLabel"
               severity="secondary"
               text
@@ -87,10 +89,11 @@ function handleConfirm() {
 </template>
 
 <style scoped>
+/* Fio de contorno próprio: sobre o scrim escuro o card precisa de aresta definida. */
 .confirm-dialog,
 .confirm-dialog.p-card {
   width: min(26rem, calc(100vw - 2rem));
-  border: 0 !important;
+  border: 1px solid var(--confirm-line) !important;
   border-radius: 1.35rem;
   background: var(--confirm-bg);
   box-shadow: 0 24px 70px rgb(var(--confirm-shadow-rgb) / 0.18);
@@ -102,16 +105,7 @@ function handleConfirm() {
 .confirm-dialog:focus-visible,
 .confirm-dialog.p-card:focus,
 .confirm-dialog.p-card:focus-visible {
-  border: 0 !important;
   outline: 0 !important;
-}
-
-.confirm-action-dialog :deep(.p-dialog),
-.confirm-action-dialog :deep(.p-dialog-content),
-.confirm-action-dialog :deep(.p-dialog-header) {
-  border: 0 !important;
-  outline: 0 !important;
-  box-shadow: none;
 }
 
 .confirm-dialog :deep(.p-card-body) {
@@ -148,5 +142,32 @@ function handleConfirm() {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+}
+</style>
+
+<!-- Sem scoped de propósito: o Dialog é teleportado para o body e o atributo de escopo
+     não alcança a raiz `.p-dialog`. As classes abaixo são exclusivas deste componente. -->
+<style>
+/* O `#container` substitui o corpo do diálogo, mas a raiz do PrimeVue continua com
+   fundo, borda e raio próprios — a borda quadrada vazava nos cantos do card. */
+.confirm-action-dialog.p-dialog,
+.confirm-action-dialog .p-dialog {
+  border: 0;
+  border-radius: 1.35rem;
+  background: transparent;
+  box-shadow: none;
+  outline: 0;
+}
+
+/* Ação secundária do Aura no dark cai para um cinza quase ilegível. */
+.confirm-action-dialog .confirm-dialog__cancel {
+  color: var(--confirm-text);
+  font-weight: 650;
+}
+
+.confirm-action-dialog .confirm-dialog__cancel:hover,
+.confirm-action-dialog .confirm-dialog__cancel:focus-visible {
+  background: color-mix(in srgb, var(--confirm-text) 10%, transparent);
+  color: var(--confirm-text);
 }
 </style>
