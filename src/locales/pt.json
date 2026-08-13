@@ -21,10 +21,10 @@
   "auth": {
     "layout": {
       "title": "Mais clientes. Mais alcance. Mais retorno para a sua marca.",
-      "description": "O portal PetJourney conecta sua empresa à rede de responsáveis por pets: divulgue ofertas, indique com facilidade e acompanhe o crescimento em um só lugar.",
+      "description": "O portal PetJourney conecta sua empresa à rede de responsáveis por pets: indique com facilidade e acompanhe o crescimento em um só lugar.",
       "benefits": {
         "programs": "Programas feitos para parceiros que querem crescer",
-        "outreach": "Divulgação e indicação que convertem em assinantes",
+        "indicacao": "Código, link e QR Code prontos para indicar",
         "results": "Resultados e ganhos acompanhados em tempo real"
       }
     },
@@ -821,6 +821,17 @@
       "emptyTitle": "Nada compartilhado neste acesso",
       "emptyBody": "O responsável liberou o atendimento, mas não incluiu nenhum dado clínico de {pet}. Mesmo assim, tudo que você registrar nas anotações chega até ele.",
       "emptyCta": "Ir para anotações"
+    },
+    "documentos": {
+      "title": "Documentos compartilhados",
+      "lede": "Arquivos que o responsável liberou para este atendimento. O link de leitura expira em poucos minutos.",
+      "count": "{n} documentos",
+      "abrir": "Abrir",
+      "baixar": "Baixar",
+      "arquivoN": "Arquivo {n}",
+      "emissao": "Emitido em {data}",
+      "expiracao": "Válido até {data}",
+      "semArquivo": "Sem arquivo disponível"
     },
     "anotacoes": {
       "title": "Histórico de anotações",

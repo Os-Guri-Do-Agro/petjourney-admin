@@ -158,3 +158,18 @@ export function getAnexoSignedUrl(id: string, anexoId: string, params?: Parceiro
     ),
   )
 }
+
+/**
+ * Signed URL de um arquivo do prontuário compartilhado (documentos do snapshot).
+ * Rota separada da de anexo de anotação: o anexo é da própria empresa e sobrevive
+ * ao encerramento, o cofre do prontuário é expurgado ao expirar/revogar — aqui a
+ * API responde 409 assim que o acesso deixa de estar ATIVO.
+ * Uma URL por clique: pedir em lote transformaria o acesso em coleta de tudo.
+ */
+export function getArquivoSignedUrl(id: string, arquivoId: string, params?: ParceiroQuery) {
+  return unwrap(
+    apiFetch<ApiEnvelope<{ signedUrl: string; expiresIn: number }>>(
+      `${BASE}/${id}/arquivos/${arquivoId}/url${buildQuery({ parceiroId: params?.parceiroId })}`,
+    ),
+  )
+}

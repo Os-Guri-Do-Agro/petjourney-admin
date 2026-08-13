@@ -21,10 +21,10 @@
   "auth": {
     "layout": {
       "title": "More customers. More reach. More returns for your brand.",
-      "description": "The PetJourney portal connects your business to pet parents: promote offers, refer with ease, and track growth in one place.",
+      "description": "The PetJourney portal connects your business to pet parents: refer with ease and track growth in one place.",
       "benefits": {
         "programs": "Programs built for partners who want to grow",
-        "outreach": "Outreach and referrals that convert into subscribers",
+        "indicacao": "Code, link, and QR Code ready to share",
         "results": "Results and earnings tracked in real time"
       }
     },
@@ -821,6 +821,17 @@
       "emptyTitle": "Nothing shared in this access",
       "emptyBody": "The pet parent granted the visit but did not include any clinical data for {pet}. Whatever you record in the notes still reaches them.",
       "emptyCta": "Go to notes"
+    },
+    "documentos": {
+      "title": "Shared documents",
+      "lede": "Files the pet parent released for this visit. The read link expires within minutes.",
+      "count": "{n} documents",
+      "abrir": "Open",
+      "baixar": "Download",
+      "arquivoN": "File {n}",
+      "emissao": "Issued on {data}",
+      "expiracao": "Valid until {data}",
+      "semArquivo": "No file available"
     },
     "anotacoes": {
       "title": "Notes history",

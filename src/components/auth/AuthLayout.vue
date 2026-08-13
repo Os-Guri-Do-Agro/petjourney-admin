@@ -80,7 +80,7 @@ const authArtStyle = computed(() => ({
                 </li>
                 <li>
                   <i class="pi pi-check" aria-hidden="true" />
-                  {{ t('auth.layout.benefits.outreach') }}
+                  {{ t('auth.layout.benefits.indicacao') }}
                 </li>
                 <li>
                   <i class="pi pi-check" aria-hidden="true" />
