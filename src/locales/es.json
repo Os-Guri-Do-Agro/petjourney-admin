@@ -21,10 +21,10 @@
   "auth": {
     "layout": {
       "title": "Más clientes. Más alcance. Más retorno para su marca.",
-      "description": "El portal PetJourney conecta su empresa a la red de tutores: divulgue ofertas, refiera con facilidad y haga el seguimiento del crecimiento en un solo lugar.",
+      "description": "El portal PetJourney conecta su empresa a la red de tutores: refiera con facilidad y haga el seguimiento del crecimiento en un solo lugar.",
       "benefits": {
         "programs": "Programas hechos para socios que quieren crecer",
-        "outreach": "Divulgación e indicación que convierten en suscriptores",
+        "indicacao": "Código, enlace y QR Code listos para compartir",
         "results": "Resultados y ganancias seguidos en tiempo real"
       }
     },
@@ -821,6 +821,17 @@
       "emptyTitle": "Nada compartido en este acceso",
       "emptyBody": "El tutor autorizó la atención, pero no incluyó ningún dato clínico de {pet}. Lo que registre en las notas igual le llega.",
       "emptyCta": "Ir a las notas"
+    },
+    "documentos": {
+      "title": "Documentos compartidos",
+      "lede": "Archivos que el tutor liberó para esta atención. El enlace de lectura vence en pocos minutos.",
+      "count": "{n} documentos",
+      "abrir": "Abrir",
+      "baixar": "Descargar",
+      "arquivoN": "Archivo {n}",
+      "emissao": "Emitido el {data}",
+      "expiracao": "Válido hasta {data}",
+      "semArquivo": "Sin archivo disponible"
     },
     "anotacoes": {
       "title": "Historial de notas",

@@ -258,6 +258,18 @@ export type ItemSnapshot = {
   destaque?: boolean
 }
 
+/** Documento que o responsável liberou item a item. `arquivoIds` são ids do cofre
+ *  do acesso — nunca URL: cada abertura pede uma signed URL nova. */
+export type DocumentoCompartilhado = {
+  /** Id do documento de origem no prontuário. Rastro, não endereço de leitura. */
+  origemId: string
+  nome: string
+  tipo: string
+  dataEmissao?: string | null
+  dataExpiracao?: string | null
+  arquivoIds: string[]
+}
+
 /** Snapshot congelado na criação, já filtrado pelas categorias que o responsável escolheu.
  *  Campo ausente = categoria não compartilhada (não renderizar a seção). */
 export type SnapshotPetCompartilhado = {
@@ -268,6 +280,8 @@ export type SnapshotPetCompartilhado = {
   comportamento?: ItemSnapshot[]
   diagnosticos?: ItemSnapshot[]
   observacoesTutor?: string | null
+  /** Vazio quando a categoria DOCUMENTOS não foi liberada. */
+  documentos?: DocumentoCompartilhado[]
 }
 
 export type AnexoAnotacao = {

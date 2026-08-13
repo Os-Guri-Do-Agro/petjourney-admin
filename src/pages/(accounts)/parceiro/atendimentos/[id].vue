@@ -21,6 +21,7 @@ import { ApiError } from '@/service/api'
 import {
   criarAnotacao,
   getAnexoSignedUrl,
+  getArquivoSignedUrl,
   getCompartilhamentoDetalhe,
 } from '@/service/parceiro/compartilhamentos-service'
 import type {
@@ -81,6 +82,8 @@ const anexosForm = ref<AnexoForm[]>([])
 const formError = ref('')
 const submittingAnotacao = ref(false)
 const abrindoAnexoId = ref<string | null>(null)
+/** Chave `acao:arquivoId`: abrir e baixar o mesmo arquivo não podem girar juntos. */
+const arquivoOcupado = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 
 const compartilhamentoId = computed(() =>
@@ -200,6 +203,23 @@ const snapshotListSections = computed<SnapshotListSection[]>(() => {
 })
 
 /**
+ * Documentos do prontuário liberados item a item. O snapshot traz só ids do cofre
+ * (`arquivoIds`), nunca URL: cada abrir/baixar pede uma signed URL nova.
+ */
+const documentos = computed(() => {
+  const lista = detalhe.value?.snapshot?.documentos ?? []
+
+  return lista.map((doc, index) => ({
+    key: doc.origemId || `${doc.nome}-${index}`,
+    nome: doc.nome,
+    tipo: doc.tipo,
+    emissao: doc.dataEmissao ? formatDate(doc.dataEmissao) : null,
+    expiracao: doc.dataExpiracao ? formatDate(doc.dataExpiracao) : null,
+    arquivos: doc.arquivoIds.map((id) => ({ id, nome: doc.nome })),
+  }))
+})
+
+/**
  * Snapshot é filtrado pelas categorias que o responsável marcou: ele pode liberar o
  * acesso sem nenhuma. Também cobre `snapshot: null`, que antes caía no `v-else`
  * e renderizava o painel de anotações sob a aba "Resumo do pet".
@@ -207,7 +227,10 @@ const snapshotListSections = computed<SnapshotListSection[]>(() => {
  */
 const resumoVazio = computed(
   () =>
-    !mensagemTutor.value && !showObservacoesTutor.value && snapshotListSections.value.length === 0,
+    !mensagemTutor.value &&
+    !showObservacoesTutor.value &&
+    snapshotListSections.value.length === 0 &&
+    documentos.value.length === 0,
 )
 
 /** Seções abertas: alergias sempre; demais só se a lista for curta. */
@@ -258,6 +281,12 @@ function formatDateTime(value: string) {
   return new Date(value).toLocaleString(INTL_LOCALE[locale.value as Locale], {
     dateStyle: 'medium',
     timeStyle: 'short',
+  })
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString(INTL_LOCALE[locale.value as Locale], {
+    dateStyle: 'medium',
   })
 }
 
@@ -460,6 +489,64 @@ async function abrirAnexo(anexoId: string) {
   } finally {
     abrindoAnexoId.value = null
   }
+}
+
+/**
+ * O `download` do `<a>` é ignorado em URL de outra origem (o arquivo vem do storage),
+ * então quem manda o navegador salvar é o `?download=` da signed URL — o storage
+ * responde com `Content-Disposition: attachment` e o nome real do documento.
+ */
+function urlDeDownload(signedUrl: string, nome: string) {
+  const url = new URL(signedUrl)
+  url.searchParams.set('download', nome)
+
+  return url.toString()
+}
+
+async function comArquivoUrl(
+  acao: 'abrir' | 'baixar',
+  arquivoId: string,
+  usar: (signedUrl: string) => void,
+) {
+  const chave = `${acao}:${arquivoId}`
+
+  if (!detalhe.value || arquivoOcupado.value) {
+    return
+  }
+
+  arquivoOcupado.value = chave
+
+  try {
+    const { signedUrl } = await getArquivoSignedUrl(detalhe.value.id, arquivoId, parceiroQuery())
+    usar(signedUrl)
+  } catch {
+    toast.add({
+      severity: 'warn',
+      summary: t('atendimentos.anexo.indisponivel'),
+      detail: t('atendimentos.anexo.indisponivelDetail'),
+      life: 4500,
+    })
+  } finally {
+    arquivoOcupado.value = null
+  }
+}
+
+function abrirArquivo(arquivoId: string) {
+  return comArquivoUrl('abrir', arquivoId, (signedUrl) => {
+    window.open(signedUrl, '_blank', 'noopener')
+  })
+}
+
+function baixarArquivo(arquivoId: string, nome: string) {
+  return comArquivoUrl('baixar', arquivoId, (signedUrl) => {
+    const link = document.createElement('a')
+    link.href = urlDeDownload(signedUrl, nome)
+    link.download = nome
+    link.rel = 'noopener'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  })
 }
 
 function formatBytes(bytes: number) {
@@ -684,6 +771,71 @@ onMounted(() => {
               </div>
             </section>
           </div>
+        </section>
+
+        <!-- Documentos liberados item a item: o snapshot traz ids do cofre, a URL
+             de leitura nasce no clique e vale por poucos minutos. -->
+        <section v-if="documentos.length" class="atd-docs" aria-labelledby="atd-docs-title">
+          <header class="atd-docs__head">
+            <div>
+              <h2 id="atd-docs-title">{{ t('atendimentos.documentos.title') }}</h2>
+              <p>{{ t('atendimentos.documentos.lede') }}</p>
+            </div>
+            <span class="atd-docs__count">{{
+              t('atendimentos.documentos.count', { n: documentos.length })
+            }}</span>
+          </header>
+
+          <ul class="atd-docs__list">
+            <li v-for="doc in documentos" :key="doc.key" class="atd-doc">
+              <span class="atd-doc__icon" aria-hidden="true">
+                <i class="pi pi-file" />
+              </span>
+
+              <div class="atd-doc__copy">
+                <strong :title="doc.nome">{{ doc.nome }}</strong>
+                <small class="atd-doc__meta">
+                  <span class="atd-doc__tipo">{{ doc.tipo }}</span>
+                  <template v-if="doc.emissao">
+                    {{ t('atendimentos.documentos.emissao', { data: doc.emissao }) }}
+                  </template>
+                  <template v-if="doc.expiracao">
+                    {{ t('atendimentos.documentos.expiracao', { data: doc.expiracao }) }}
+                  </template>
+                </small>
+              </div>
+
+              <p v-if="!doc.arquivos.length" class="atd-doc__empty">
+                {{ t('atendimentos.documentos.semArquivo') }}
+              </p>
+
+              <ul v-else class="atd-doc__files">
+                <li v-for="(arquivo, index) in doc.arquivos" :key="arquivo.id">
+                  <span v-if="doc.arquivos.length > 1" class="atd-doc__file-label">
+                    {{ t('atendimentos.documentos.arquivoN', { n: index + 1 }) }}
+                  </span>
+                  <Button
+                    :label="t('atendimentos.documentos.abrir')"
+                    icon="pi pi-external-link"
+                    severity="secondary"
+                    outlined
+                    size="small"
+                    :loading="arquivoOcupado === `abrir:${arquivo.id}`"
+                    :aria-label="`${t('atendimentos.documentos.abrir')}: ${doc.nome}`"
+                    @click="abrirArquivo(arquivo.id)"
+                  />
+                  <Button
+                    :label="t('atendimentos.documentos.baixar')"
+                    icon="pi pi-download"
+                    size="small"
+                    :loading="arquivoOcupado === `baixar:${arquivo.id}`"
+                    :aria-label="`${t('atendimentos.documentos.baixar')}: ${doc.nome}`"
+                    @click="baixarArquivo(arquivo.id, arquivo.nome)"
+                  />
+                </li>
+              </ul>
+            </li>
+          </ul>
         </section>
       </div>
 
@@ -1411,6 +1563,143 @@ onMounted(() => {
 .atd-item--destaque .atd-item__meta {
   background: color-mix(in srgb, var(--partner-warm-text) 14%, transparent);
   color: var(--partner-warm-text);
+}
+
+.atd-docs {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.atd-docs__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--partner-line) 85%, transparent);
+}
+
+.atd-docs__head h2 {
+  margin: 0;
+  color: var(--partner-text);
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.atd-docs__head p {
+  margin: 0.2rem 0 0;
+  color: var(--partner-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.atd-docs__count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.7rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--partner-primary) 14%, transparent);
+  color: var(--partner-primary-strong);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.atd-docs__list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.atd-doc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--partner-line);
+  border-radius: 0.95rem;
+  background: var(--partner-card);
+}
+
+.atd-doc__icon {
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
+  color: var(--partner-primary-strong);
+  font-size: 0.9rem;
+}
+
+.atd-doc__copy {
+  display: grid;
+  gap: 0.15rem;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.atd-doc__copy strong {
+  overflow: hidden;
+  color: var(--partner-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.atd-doc__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
+  color: var(--partner-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.atd-doc__tipo {
+  display: inline-flex;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--partner-primary) 12%, transparent);
+  color: var(--partner-primary-strong);
+}
+
+.atd-doc__empty {
+  margin: 0;
+  color: var(--partner-faint);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.atd-doc__files {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0 0 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.atd-doc__files li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.atd-doc__file-label {
+  margin-right: 0.15rem;
+  color: var(--partner-faint);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .atd-notes__layout {
