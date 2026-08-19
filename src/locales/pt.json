@@ -428,7 +428,12 @@
         "body": "Corrija os dados da empresa e reenvie para voltar à análise.",
         "link": "Revisar cadastro"
       },
-      "reasonPrefix": "Motivo:"
+      "reasonPrefix": "Motivo:",
+      "suspendedReadOnly": {
+        "title": "Cadastro suspenso",
+        "body": "A leitura dos atendimentos continua liberada, porque o acesso foi autorizado pelo responsável. Vincular novos códigos e registrar anotações ficam bloqueados até a suspensão ser resolvida.",
+        "link": "Falar com o suporte"
+      }
     },
     "suspended": {
       "title": "Cadastro suspenso",
@@ -656,13 +661,17 @@
     },
     "pendente": {
       "title": "Cadastro em análise",
-      "body": "Você recebe um e-mail com o resultado. Enquanto isso, pode revisar os dados enviados."
+      "body": "Você recebe um e-mail com o resultado. Enquanto isso, pode revisar os dados enviados.",
+      "analiseLabel": "Em análise agora",
+      "itemCadastro": "Cadastro do negócio",
+      "analiseHint": "Tudo é decidido na mesma revisão. Você não precisa pedir nada de novo."
     },
     "rejeitado": {
       "title": "Cadastro recusado",
       "body": "Corrija os dados abaixo e reenvie. O cadastro volta para análise.",
       "resubmit": "Corrigir e reenviar",
-      "operadorHint": "Apenas o dono da empresa pode corrigir e reenviar o cadastro."
+      "operadorHint": "Apenas o dono da empresa pode corrigir e reenviar o cadastro.",
+      "programasHint": "Confira também a aba de programas: a recusa cancelou os pedidos que estavam abertos, então marque de novo o que você quer ativar."
     },
     "suspenso": {
       "title": "Cadastro suspenso",
@@ -684,7 +693,8 @@
       "enviado": "Cadastro enviado",
       "enviadoDetail": "Agora é com a equipe PetJourney. Você recebe o resultado por e-mail.",
       "salvo": "Cadastro atualizado",
-      "salvoDetail": "As alterações da empresa foram registradas."
+      "salvoDetail": "As alterações da empresa foram registradas.",
+      "enviadoComProgramas": "Cadastro e {programas} foram para análise. O resultado chega por e-mail."
     },
     "errors": {
       "generic": "Não foi possível enviar o cadastro.",
@@ -692,6 +702,52 @@
       "suspenso": "O cadastro está suspenso. Fale com o suporte para reativar.",
       "nomeEmUso": "Este nome já está registrado por outra empresa.",
       "cnpjEmUso": "Este CNPJ já está registrado por outra empresa."
+    },
+    "tabs": {
+      "aria": "Seções do cadastro",
+      "dados": "Dados da empresa",
+      "programas": "Programas"
+    },
+    "resumo": {
+      "label": "Vai para análise:",
+      "cadastro": "Cadastro da empresa",
+      "edit": "Escolher programas"
+    },
+    "programas": {
+      "title": "O que você quer ativar",
+      "lede": "Marque agora e a equipe PetJourney decide tudo de uma vez, junto com o credenciamento. Sem isso, cada programa vira um pedido novo depois, com nova espera.",
+      "counter": "nenhum marcado | 1 marcado | {count} marcados",
+      "selected": "Vai no cadastro",
+      "notSelected": "Não vai agora",
+      "cancelWarning": "Desmarcado: o pedido atual será cancelado.",
+      "lockedAtivo": "Já ativo",
+      "lockedSuspenso": "Suspenso",
+      "lockedHint": "Este programa não é alterado por aqui.",
+      "note": "Os dois são opcionais e não travam o credenciamento. Dá para pedir depois, na tela de Programas.",
+      "how": {
+        "step1Title": "Você marca",
+        "step1Desc": "A escolha vai junto do cadastro, numa submissão só.",
+        "step2Title": "A equipe analisa",
+        "step2Desc": "Credenciamento e programas são decididos na mesma revisão.",
+        "step3Title": "Liberado",
+        "step3Desc": "Aprovou, os recursos do programa aparecem no portal."
+      },
+      "afiliado": {
+        "name": "Programa Afiliado",
+        "tagline": "Participação por indicação",
+        "description": "Cada responsável que assina pela sua indicação gera participação para você. O acompanhamento é seu, dentro do portal.",
+        "feature1": "Participação por indicação que vira assinatura",
+        "feature2": "Carteira com saldo e extrato em tempo real",
+        "feature3": "Saque via PIX quando quiser"
+      },
+      "participativo": {
+        "name": "Programa Participativo",
+        "tagline": "Visibilidade na rede",
+        "description": "Sua empresa aparece na rede credenciada PetJourney e oferece vantagens para os responsáveis que já usam o app.",
+        "feature1": "Presença na rede credenciada do app",
+        "feature2": "Cupons e vantagens para atrair novos clientes",
+        "feature3": "Selo de parceiro e convites para ações da rede"
+      }
     }
   },
   "atendimentos": {
@@ -719,7 +775,10 @@
       "anotacoes": "{n} anotações",
       "loadMore": "Carregar mais",
       "emptyFiltroTitle": "Nenhum resultado para esses filtros",
-      "emptyFiltroBody": "Ajuste a busca ou o período. A busca alcança só o nome do pet."
+      "emptyFiltroBody": "Ajuste a busca ou o período. A busca alcança só o nome do pet.",
+      "documentos": "{n} documentos",
+      "diario": "Diário",
+      "resumoAtualizado": "Resumo atualizado em {data}"
     },
     "servico": {
       "BANHO": "Banho",
@@ -753,7 +812,8 @@
       "periodo": "Período",
       "vinculadoDe": "Vinculado de",
       "vinculadoAte": "Vinculado até",
-      "limpar": "Limpar filtros"
+      "limpar": "Limpar filtros",
+      "comProntuario": "Com prontuário"
     },
     "expira": {
       "expirado": "Expirado",
@@ -766,9 +826,10 @@
       "bloqueado": "Disponível após a aprovação do cadastro.",
       "title": "Vincular código do responsável",
       "lede": "Digite o código de 6 dígitos que o responsável gerou no app. O acesso passa a aparecer na sua lista.",
-      "codigoLabel": "Código",
-      "codigoPlaceholder": "123456",
-      "hint": "Espaços e hífens são ignorados.",
+      "eyebrow": "Portal do parceiro",
+      "codigoLabel": "Código de acesso",
+      "digitoAria": "Dígito {n} de 6",
+      "hint": "O código é gerado pelo responsável no app PetJourney.",
       "submit": "Vincular",
       "aguarde": "Aguarde {s}s",
       "codigoInvalidoFormato": "O código tem 6 dígitos numéricos.",
@@ -818,6 +879,22 @@
       "clinicalLede": "Snapshot autorizado pelo responsável. Toque para expandir cada lista.",
       "sectionsCount": "{n} seções",
       "itemsCount": "{n} itens",
+      "semItens": "Sem itens",
+      "carimbo": "Resumo gerado em {data}",
+      "carimboAtualizado": "Resumo atualizado pelo responsável em {data}",
+      "vazio": {
+        "generico": "Nada a mostrar nesta seção neste acesso.",
+        "diarioFiltrado": "Acompanhamento sem anormalidade registrada na janela compartilhada.",
+        "semRegistro": {
+          "alergias": "O responsável não registrou alergias para este pet.",
+          "vacinas": "O responsável não registrou vacinas para este pet.",
+          "medicamentos": "O responsável não registrou medicamentos para este pet.",
+          "comportamento": "O responsável não registrou comportamento para este pet.",
+          "diagnosticos": "O responsável não registrou diagnósticos para este pet.",
+          "diario": "O responsável não registrou entradas de diário para este pet.",
+          "documentos": "O responsável não anexou documentos ao prontuário deste pet."
+        }
+      },
       "emptyTitle": "Nada compartilhado neste acesso",
       "emptyBody": "O responsável liberou o atendimento, mas não incluiu nenhum dado clínico de {pet}. Mesmo assim, tudo que você registrar nas anotações chega até ele.",
       "emptyCta": "Ir para anotações"
@@ -832,6 +909,24 @@
       "emissao": "Emitido em {data}",
       "expiracao": "Válido até {data}",
       "semArquivo": "Sem arquivo disponível"
+    },
+    "diario": {
+      "title": "Diário do pet",
+      "lede": "Dias com anormalidade registrada dentro da janela que o responsável liberou.",
+      "count": "{n} registros",
+      "fotos": "{n} fotos",
+      "abrirFoto": "Foto {n}",
+      "campos": {
+        "vitalidade": "Vitalidade",
+        "alimentacao": "Alimentação",
+        "hidratacao": "Hidratação",
+        "fezes": "Fezes",
+        "urina": "Urina",
+        "cicloCio": "Ciclo de cio",
+        "remedios": "Remédios",
+        "observacoes": "Observações",
+        "nota": "Nota do responsável"
+      }
     },
     "anotacoes": {
       "title": "Histórico de anotações",
@@ -867,7 +962,11 @@
       "encerrado": "Este acesso foi encerrado; não é possível anotar.",
       "criada": "Anotação registrada",
       "erro": "Não foi possível registrar a anotação.",
-      "textoLongo": "Algum texto passou do limite aceito. Encurte e tente de novo."
+      "textoLongo": "Algum texto passou do limite aceito. Encurte e tente de novo.",
+      "somenteLeitura": {
+        "title": "Registro bloqueado",
+        "body": "Você pode ler o prontuário deste atendimento, mas não registrar o retorno enquanto o cadastro estiver suspenso."
+      }
     },
     "estruturada": {
       "title": {
@@ -958,7 +1057,9 @@
     },
     "anexo": {
       "indisponivel": "Arquivo indisponível",
-      "indisponivelDetail": "O arquivo não está mais disponível (pode ter sido removido após a revogação)."
+      "indisponivelDetail": "O arquivo não está mais disponível (pode ter sido removido após a revogação).",
+      "acessoEncerrado": "Acesso encerrado",
+      "acessoEncerradoDetail": "O responsável encerrou este acesso, então o prontuário não está mais disponível. Atualizamos a tela."
     }
   },
   "divulgacao": {

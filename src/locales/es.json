@@ -428,7 +428,12 @@
         "body": "Corrija los datos de la empresa y reenvíe para volver al análisis.",
         "link": "Revisar registro"
       },
-      "reasonPrefix": "Motivo:"
+      "reasonPrefix": "Motivo:",
+      "suspendedReadOnly": {
+        "title": "Registro suspendido",
+        "body": "La lectura de las atenciones sigue disponible, porque el acceso fue autorizado por el responsable. Vincular nuevos códigos y registrar anotaciones quedan bloqueados hasta resolver la suspensión.",
+        "link": "Hablar con soporte"
+      }
     },
     "suspended": {
       "title": "Registro suspendido",
@@ -656,13 +661,17 @@
     },
     "pendente": {
       "title": "Registro en análisis",
-      "body": "Recibirá un correo con el resultado. Mientras tanto, puede revisar los datos enviados."
+      "body": "Recibirá un correo con el resultado. Mientras tanto, puede revisar los datos enviados.",
+      "analiseLabel": "En análisis ahora",
+      "itemCadastro": "Registro del negocio",
+      "analiseHint": "Todo se decide en la misma revisión. No necesita pedir nada de nuevo."
     },
     "rejeitado": {
       "title": "Registro rechazado",
       "body": "Corrija los datos abajo y reenvíe. El registro vuelve al análisis.",
       "resubmit": "Corregir y reenviar",
-      "operadorHint": "Solo el dueño de la empresa puede corregir y reenviar el registro."
+      "operadorHint": "Solo el dueño de la empresa puede corregir y reenviar el registro.",
+      "programasHint": "Revise también la pestaña de programas: el rechazo canceló los pedidos abiertos, entonces marque de nuevo lo que quiere activar."
     },
     "suspenso": {
       "title": "Registro suspendido",
@@ -684,7 +693,8 @@
       "enviado": "Registro enviado",
       "enviadoDetail": "Ahora es con el equipo PetJourney. Usted recibe el resultado por correo.",
       "salvo": "Registro actualizado",
-      "salvoDetail": "Los cambios de la empresa quedaron registrados."
+      "salvoDetail": "Los cambios de la empresa quedaron registrados.",
+      "enviadoComProgramas": "Registro y {programas} fueron al análisis. El resultado llega por correo."
     },
     "errors": {
       "generic": "No fue posible enviar el registro.",
@@ -692,6 +702,52 @@
       "suspenso": "El registro está suspendido. Hable con soporte para reactivarlo.",
       "nomeEmUso": "Este nombre ya está registrado por otra empresa.",
       "cnpjEmUso": "Este CNPJ ya está registrado por otra empresa."
+    },
+    "tabs": {
+      "aria": "Secciones del registro",
+      "dados": "Datos de la empresa",
+      "programas": "Programas"
+    },
+    "resumo": {
+      "label": "Va al análisis:",
+      "cadastro": "Registro de la empresa",
+      "edit": "Elegir programas"
+    },
+    "programas": {
+      "title": "Qué quiere activar",
+      "lede": "Márquelos ahora y el equipo PetJourney decide todo de una vez, junto con la acreditación. Sin eso, cada programa se vuelve un pedido nuevo después, con nueva espera.",
+      "counter": "ninguno marcado | 1 marcado | {count} marcados",
+      "selected": "Va en el registro",
+      "notSelected": "No va ahora",
+      "cancelWarning": "Desmarcado: el pedido actual será cancelado.",
+      "lockedAtivo": "Ya activo",
+      "lockedSuspenso": "Suspendido",
+      "lockedHint": "Este programa no se cambia por aquí.",
+      "note": "Los dos son opcionales y no traban la acreditación. Puede pedirlos después, en la pantalla de Programas.",
+      "how": {
+        "step1Title": "Usted marca",
+        "step1Desc": "La elección va junto al registro, en un solo envío.",
+        "step2Title": "El equipo analiza",
+        "step2Desc": "Acreditación y programas se deciden en la misma revisión.",
+        "step3Title": "Liberado",
+        "step3Desc": "Al aprobar, los recursos del programa aparecen en el portal."
+      },
+      "afiliado": {
+        "name": "Programa de Afiliados",
+        "tagline": "Participación por indicación",
+        "description": "Cada tutor que se suscribe por su indicación genera participación para usted, con seguimiento propio dentro del portal.",
+        "feature1": "Participación por indicación que se vuelve suscripción",
+        "feature2": "Billetera con saldo y extracto en tiempo real",
+        "feature3": "Retiro vía PIX cuando quiera"
+      },
+      "participativo": {
+        "name": "Programa Participativo",
+        "tagline": "Visibilidad en la red",
+        "description": "Su empresa aparece en la red acreditada PetJourney y ofrece ventajas a los tutores que ya usan la app.",
+        "feature1": "Presencia en la red acreditada de la app",
+        "feature2": "Cupones y ventajas para atraer nuevos clientes",
+        "feature3": "Sello de socio e invitaciones a acciones de la red"
+      }
     }
   },
   "atendimentos": {
@@ -719,7 +775,10 @@
       "anotacoes": "{n} notas",
       "loadMore": "Cargar más",
       "emptyFiltroTitle": "Sin resultados para estos filtros",
-      "emptyFiltroBody": "Ajuste la búsqueda o el período. La búsqueda alcanza solo el nombre de la mascota."
+      "emptyFiltroBody": "Ajuste la búsqueda o el período. La búsqueda alcanza solo el nombre de la mascota.",
+      "documentos": "{n} documentos",
+      "diario": "Diario",
+      "resumoAtualizado": "Resumen actualizado el {data}"
     },
     "servico": {
       "BANHO": "Baño",
@@ -753,7 +812,8 @@
       "periodo": "Período",
       "vinculadoDe": "Vinculado desde",
       "vinculadoAte": "Vinculado hasta",
-      "limpar": "Limpiar filtros"
+      "limpar": "Limpiar filtros",
+      "comProntuario": "Con historial"
     },
     "expira": {
       "expirado": "Vencido",
@@ -766,9 +826,10 @@
       "bloqueado": "Disponible después de la aprobación del registro.",
       "title": "Vincular código del tutor",
       "lede": "Ingrese el código de 6 dígitos que el tutor generó en la app. El acceso pasa a aparecer en su lista.",
-      "codigoLabel": "Código",
-      "codigoPlaceholder": "123456",
-      "hint": "Espacios y guiones se ignoran.",
+      "eyebrow": "Portal del socio",
+      "codigoLabel": "Código de acceso",
+      "digitoAria": "Dígito {n} de 6",
+      "hint": "El código lo genera el tutor en la app PetJourney.",
       "submit": "Vincular",
       "aguarde": "Espere {s}s",
       "codigoInvalidoFormato": "El código tiene 6 dígitos numéricos.",
@@ -818,6 +879,22 @@
       "clinicalLede": "Snapshot autorizado por el tutor. Toque para expandir cada lista.",
       "sectionsCount": "{n} secciones",
       "itemsCount": "{n} ítems",
+      "semItens": "Sin ítems",
+      "carimbo": "Resumen generado el {data}",
+      "carimboAtualizado": "Resumen actualizado por el tutor el {data}",
+      "vazio": {
+        "generico": "Nada para mostrar en esta sección en este acceso.",
+        "diarioFiltrado": "Seguimiento sin anormalidad registrada en la ventana compartida.",
+        "semRegistro": {
+          "alergias": "El tutor no registró alergias para esta mascota.",
+          "vacinas": "El tutor no registró vacunas para esta mascota.",
+          "medicamentos": "El tutor no registró medicamentos para esta mascota.",
+          "comportamento": "El tutor no registró comportamiento para esta mascota.",
+          "diagnosticos": "El tutor no registró diagnósticos para esta mascota.",
+          "diario": "El tutor no registró entradas de diario para esta mascota.",
+          "documentos": "El tutor no adjuntó documentos al historial de esta mascota."
+        }
+      },
       "emptyTitle": "Nada compartido en este acceso",
       "emptyBody": "El tutor autorizó la atención, pero no incluyó ningún dato clínico de {pet}. Lo que registre en las notas igual le llega.",
       "emptyCta": "Ir a las notas"
@@ -832,6 +909,24 @@
       "emissao": "Emitido el {data}",
       "expiracao": "Válido hasta {data}",
       "semArquivo": "Sin archivo disponible"
+    },
+    "diario": {
+      "title": "Diario de la mascota",
+      "lede": "Días con anormalidad registrada dentro de la ventana que el tutor liberó.",
+      "count": "{n} registros",
+      "fotos": "{n} fotos",
+      "abrirFoto": "Foto {n}",
+      "campos": {
+        "vitalidade": "Vitalidad",
+        "alimentacao": "Alimentación",
+        "hidratacao": "Hidratación",
+        "fezes": "Heces",
+        "urina": "Orina",
+        "cicloCio": "Ciclo de celo",
+        "remedios": "Medicamentos",
+        "observacoes": "Observaciones",
+        "nota": "Nota del tutor"
+      }
     },
     "anotacoes": {
       "title": "Historial de notas",
@@ -867,7 +962,11 @@
       "encerrado": "Este acceso fue cerrado; ya no es posible anotar.",
       "criada": "Nota registrada",
       "erro": "No fue posible registrar la nota.",
-      "textoLongo": "Algún texto supera el límite aceptado. Acórtelo e intente de nuevo."
+      "textoLongo": "Algún texto supera el límite aceptado. Acórtelo e intente de nuevo.",
+      "somenteLeitura": {
+        "title": "Registro bloqueado",
+        "body": "Puede leer el historial de esta atención, pero no registrar su devolución mientras el registro esté suspendido."
+      }
     },
     "estruturada": {
       "title": {
@@ -958,7 +1057,9 @@
     },
     "anexo": {
       "indisponivel": "Archivo no disponible",
-      "indisponivelDetail": "El archivo ya no está disponible (puede haberse eliminado tras la revocación)."
+      "indisponivelDetail": "El archivo ya no está disponible (puede haberse eliminado tras la revocación).",
+      "acessoEncerrado": "Acceso finalizado",
+      "acessoEncerradoDetail": "El responsable finalizó este acceso, por lo que el historial ya no está disponible. Actualizamos la pantalla."
     }
   },
   "divulgacao": {

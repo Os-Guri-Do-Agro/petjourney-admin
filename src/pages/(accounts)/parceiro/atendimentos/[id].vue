@@ -10,6 +10,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import AnotacaoEstruturadaFields from '@/components/parceiro/AnotacaoEstruturadaFields.vue'
 import AnotacaoEstruturadaView from '@/components/parceiro/AnotacaoEstruturadaView.vue'
+import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
@@ -25,12 +26,13 @@ import {
   getCompartilhamentoDetalhe,
 } from '@/service/parceiro/compartilhamentos-service'
 import type {
+  BlocoSnapshot,
   CompartilhamentoDetalhe,
-  ItemSnapshot,
   StatusCompartilhamento,
   TipoDocumentoAnexo,
 } from '@/service/parceiro/types'
 import { calcularTempoRestante } from '@/utils/format/expiracao'
+import { classificarFalhaArquivo } from '@/utils/parceiro/arquivo-compartilhado'
 import {
   criarAnotacaoEstruturadaForm,
   LIMITES_CAMPOS_LIVRES,
@@ -38,6 +40,17 @@ import {
   tipoAceitaEstruturado,
   validarAnotacaoEstruturada,
 } from '@/utils/parceiro/anotacao-estruturada'
+import type {
+  BlocoLista,
+  FonteSnapshot,
+  MotivoVazioRender,
+} from '@/utils/parceiro/snapshot-compartilhado'
+import {
+  carimboDoResumo,
+  estadoDoBloco,
+  montarBlocosLista,
+  rotuloItem,
+} from '@/utils/parceiro/snapshot-compartilhado'
 
 const DETALHE_TABS = ['resumo', 'anotacoes'] as const
 type DetalheTab = (typeof DETALHE_TABS)[number]
@@ -91,6 +104,16 @@ const compartilhamentoId = computed(() =>
 )
 
 const isAtivo = computed(() => detalhe.value?.status === 'ATIVO')
+
+/**
+ * Anotar é mutação, e mutação é gated por auditoria (seção 4). Leitura não: o
+ * acesso continua valendo porque quem o consentiu foi o responsável, e o
+ * cadastro do parceiro ter caído em análise não desfaz esse consentimento.
+ */
+const podeAnotar = computed(() => isAtivo.value && store.podeOperar)
+
+/** Acesso vivo, mas o cadastro perdeu a operabilidade: só leitura. */
+const somenteLeitura = computed(() => isAtivo.value && !store.podeOperar)
 
 /** OUTRO segue só com o formulário livre; os demais tipos ganham campos próprios. */
 const temCamposEstruturados = computed(() =>
@@ -163,44 +186,48 @@ const showObservacoesTutor = computed(() => {
   )
 })
 
-type SnapshotListSection = {
-  id: string
-  title: string
-  icon: string
-  tone: 'warm' | 'default'
-  items: ItemSnapshot[]
+const APARENCIA_BLOCO: Record<BlocoLista, { icon: string; tone: 'warm' | 'default' }> = {
+  alergias: { icon: 'pi pi-exclamation-triangle', tone: 'warm' },
+  vacinas: { icon: 'pi pi-shield', tone: 'default' },
+  medicamentos: { icon: 'pi pi-inbox', tone: 'default' },
+  comportamento: { icon: 'pi pi-eye', tone: 'default' },
+  diagnosticos: { icon: 'pi pi-file-edit', tone: 'default' },
 }
 
-const snapshotListSections = computed<SnapshotListSection[]>(() => {
-  const snapshot = detalhe.value?.snapshot
+/** Entrada das regras da Parte 15: status manda tanto quanto o snapshot. */
+const fonteSnapshot = computed<FonteSnapshot>(() => ({
+  status: detalhe.value?.status ?? 'EXPIRADO',
+  categorias: detalhe.value?.categorias,
+  snapshot: detalhe.value?.snapshot,
+}))
 
-  if (!snapshot) {
-    return []
+/** Traduz a chave de motivo que o núcleo devolveu. Genérico não afirma ausência de registro. */
+function textoMotivo(bloco: BlocoSnapshot, motivo: MotivoVazioRender) {
+  if (motivo === 'FILTRADO_JANELA') {
+    return t('atendimentos.snapshot.vazio.diarioFiltrado')
   }
 
-  const defs: Array<{
-    id: keyof typeof snapshot & string
-    key: string
-    icon: string
-    tone: 'warm' | 'default'
-  }> = [
-    { id: 'alergias', key: 'alergias', icon: 'pi pi-exclamation-triangle', tone: 'warm' },
-    { id: 'vacinas', key: 'vacinas', icon: 'pi pi-shield', tone: 'default' },
-    { id: 'medicamentos', key: 'medicamentos', icon: 'pi pi-inbox', tone: 'default' },
-    { id: 'comportamento', key: 'comportamento', icon: 'pi pi-eye', tone: 'default' },
-    { id: 'diagnosticos', key: 'diagnosticos', icon: 'pi pi-file-edit', tone: 'default' },
-  ]
+  if (motivo === 'SEM_REGISTRO') {
+    return t(`atendimentos.snapshot.vazio.semRegistro.${bloco}`)
+  }
 
-  return defs
-    .map((def) => ({
-      id: def.id,
-      title: t(`atendimentos.snapshot.${def.key}`),
-      icon: def.icon,
-      tone: def.tone,
-      items: (snapshot[def.id] as ItemSnapshot[] | undefined) ?? [],
-    }))
-    .filter((section) => section.items.length > 0)
-})
+  return t('atendimentos.snapshot.vazio.generico')
+}
+
+/** Categoria compartilhada com bloco vazio continua rendendo seção — com o motivo. */
+const snapshotListSections = computed(() =>
+  montarBlocosLista(fonteSnapshot.value).map((bloco) => ({
+    id: bloco.id,
+    title: t(`atendimentos.snapshot.${bloco.id}`),
+    icon: APARENCIA_BLOCO[bloco.id].icon,
+    tone: APARENCIA_BLOCO[bloco.id].tone,
+    items: bloco.items.map((item) => ({
+      ...rotuloItem(item),
+      destaque: item.destaque,
+    })),
+    vazioTexto: bloco.motivo ? textoMotivo(bloco.id, bloco.motivo) : '',
+  })),
+)
 
 /**
  * Documentos do prontuário liberados item a item. O snapshot traz só ids do cofre
@@ -219,6 +246,77 @@ const documentos = computed(() => {
   }))
 })
 
+const documentosEstado = computed(() =>
+  estadoDoBloco(fonteSnapshot.value, 'documentos', documentos.value.length),
+)
+
+const documentosVazioTexto = computed(() =>
+  documentosEstado.value === 'OCULTO' || documentosEstado.value === 'CONTEUDO'
+    ? ''
+    : textoMotivo('documentos', documentosEstado.value),
+)
+
+/** Um dia do diário com anormalidade. Labels já chegam localizados do backend. */
+const diario = computed(() => {
+  const entradas = detalhe.value?.snapshot?.diario ?? []
+
+  return entradas.map((entrada, index) => {
+    const campos = (
+      [
+        ['vitalidade', entrada.vitalidade],
+        ['alimentacao', entrada.alimentacao],
+        ['hidratacao', entrada.hidratacao],
+        ['fezes', entrada.fezes],
+        ['urina', entrada.urina],
+        ['cicloCio', entrada.cicloCio],
+      ] as const
+    )
+      .filter(([, valor]) => Boolean(valor?.trim()))
+      .map(([chave, valor]) => ({
+        chave,
+        label: t(`atendimentos.diario.campos.${chave}`),
+        valor: valor as string,
+      }))
+
+    const textos = (
+      [
+        ['remedios', entrada.remedios],
+        ['observacoes', entrada.observacoes],
+        ['nota', entrada.nota],
+      ] as const
+    )
+      .filter(([, valor]) => Boolean(valor?.trim()))
+      .map(([chave, valor]) => ({
+        chave,
+        label: t(`atendimentos.diario.campos.${chave}`),
+        valor: (valor as string).trim(),
+      }))
+
+    return {
+      key: `${entrada.data}-${index}`,
+      data: formatDate(entrada.data),
+      sintomas: [...entrada.sintomas, ...(entrada.sintomasOutros ? [entrada.sintomasOutros] : [])],
+      doencas: [...entrada.doencas, ...(entrada.doencasOutras ? [entrada.doencasOutras] : [])],
+      campos,
+      textos,
+      fotoIds: entrada.fotoIds ?? [],
+    }
+  })
+})
+
+const diarioEstado = computed(() =>
+  estadoDoBloco(fonteSnapshot.value, 'diario', diario.value.length),
+)
+
+const diarioVazioTexto = computed(() =>
+  diarioEstado.value === 'OCULTO' || diarioEstado.value === 'CONTEUDO'
+    ? ''
+    : textoMotivo('diario', diarioEstado.value),
+)
+
+/** `snapshotAtualizadoEm` quando o responsável mexeu depois de entregar; senão `criadoEm`. */
+const carimbo = computed(() => (detalhe.value ? carimboDoResumo(detalhe.value) : null))
+
 /**
  * Snapshot é filtrado pelas categorias que o responsável marcou: ele pode liberar o
  * acesso sem nenhuma. Também cobre `snapshot: null`, que antes caía no `v-else`
@@ -230,7 +328,8 @@ const resumoVazio = computed(
     !mensagemTutor.value &&
     !showObservacoesTutor.value &&
     snapshotListSections.value.length === 0 &&
-    documentos.value.length === 0,
+    documentosEstado.value === 'OCULTO' &&
+    diarioEstado.value === 'OCULTO',
 )
 
 /** Seções abertas: alergias sempre; demais só se a lista for curta. */
@@ -519,7 +618,23 @@ async function comArquivoUrl(
   try {
     const { signedUrl } = await getArquivoSignedUrl(detalhe.value.id, arquivoId, parceiroQuery())
     usar(signedUrl)
-  } catch {
+  } catch (err) {
+    /**
+     * 409 = o acesso caiu entre o load e o clique. Avisar e deixar a tela como
+     * estava mentiria: o prontuário inteiro já não existe mais, não só este
+     * arquivo. Recarregar traz o detalhe enxuto e o cabeçalho de encerrado.
+     */
+    if (classificarFalhaArquivo(err) === 'ACESSO_ENCERRADO') {
+      toast.add({
+        severity: 'warn',
+        summary: t('atendimentos.anexo.acessoEncerrado'),
+        detail: t('atendimentos.anexo.acessoEncerradoDetail'),
+        life: 6000,
+      })
+      await loadDetalhe()
+      return
+    }
+
     toast.add({
       severity: 'warn',
       summary: t('atendimentos.anexo.indisponivel'),
@@ -576,7 +691,6 @@ onMounted(() => {
     :loading="loading"
     :error="error"
     :no-partner-access="store.semAcessoParceiro"
-    block-when-suspended
     @retry="loadDetalhe"
   >
     <template #actions>
@@ -587,6 +701,11 @@ onMounted(() => {
         @click="voltar"
       />
     </template>
+
+    <!-- Leitura do prontuário não é gated por auditoria (seção 4): o acesso foi
+         consentido pelo responsável, não pelo status do cadastro. Suspenso lê
+         tudo e perde só a anotação, que é mutação. -->
+    <PartnerOperabilityBanner cover-suspended />
 
     <template v-if="detalhe">
       <!-- Identidade do pet -->
@@ -665,6 +784,24 @@ onMounted(() => {
 
       <!-- Aba: resumo do pet -->
       <div v-if="displayTab === 'resumo'" class="atd-panel atd-resumo" role="tabpanel">
+        <!-- Em atendimento com estadia o quadro muda no meio: saber que o responsável
+             mexeu no resumo depois de entregar é o que avisa que a leitura de ontem
+             pode não valer mais. -->
+        <p
+          v-if="carimbo"
+          class="atd-stamp"
+          :data-atualizado="carimbo.atualizado ? 'true' : 'false'"
+        >
+          <i :class="carimbo.atualizado ? 'pi pi-history' : 'pi pi-clock'" aria-hidden="true" />
+          <span>{{
+            carimbo.atualizado
+              ? t('atendimentos.snapshot.carimboAtualizado', {
+                  data: formatDateTime(carimbo.data),
+                })
+              : t('atendimentos.snapshot.carimbo', { data: formatDateTime(carimbo.data) })
+          }}</span>
+        </p>
+
         <!-- Responsável pode liberar o acesso sem marcar nenhuma categoria: a aba existe
              e não tem o que mostrar. Explica o porquê e empurra para a ação útil. -->
         <section v-if="resumoVazio" class="atd-empty">
@@ -740,7 +877,9 @@ onMounted(() => {
                   <span class="atd-fold__copy">
                     <strong>{{ section.title }}</strong>
                     <small>{{
-                      t('atendimentos.snapshot.itemsCount', { n: section.items.length })
+                      section.items.length
+                        ? t('atendimentos.snapshot.itemsCount', { n: section.items.length })
+                        : t('atendimentos.snapshot.semItens')
                     }}</small>
                   </span>
                   <i
@@ -756,7 +895,11 @@ onMounted(() => {
                 :id="`atd-fold-${section.id}`"
                 class="atd-fold__body"
               >
-                <div class="atd-fold__scroll" tabindex="0">
+                <p v-if="!section.items.length" class="atd-fold__vazio">
+                  {{ section.vazioTexto }}
+                </p>
+
+                <div v-else class="atd-fold__scroll" tabindex="0">
                   <ul class="atd-items">
                     <li
                       v-for="(item, index) in section.items"
@@ -775,18 +918,24 @@ onMounted(() => {
 
         <!-- Documentos liberados item a item: o snapshot traz ids do cofre, a URL
              de leitura nasce no clique e vale por poucos minutos. -->
-        <section v-if="documentos.length" class="atd-docs" aria-labelledby="atd-docs-title">
+        <section
+          v-if="documentosEstado !== 'OCULTO'"
+          class="atd-docs"
+          aria-labelledby="atd-docs-title"
+        >
           <header class="atd-docs__head">
             <div>
               <h2 id="atd-docs-title">{{ t('atendimentos.documentos.title') }}</h2>
               <p>{{ t('atendimentos.documentos.lede') }}</p>
             </div>
-            <span class="atd-docs__count">{{
+            <span v-if="documentos.length" class="atd-docs__count">{{
               t('atendimentos.documentos.count', { n: documentos.length })
             }}</span>
           </header>
 
-          <ul class="atd-docs__list">
+          <p v-if="documentosVazioTexto" class="atd-bloco-vazio">{{ documentosVazioTexto }}</p>
+
+          <ul v-else class="atd-docs__list">
             <li v-for="doc in documentos" :key="doc.key" class="atd-doc">
               <span class="atd-doc__icon" aria-hidden="true">
                 <i class="pi pi-file" />
@@ -837,6 +986,84 @@ onMounted(() => {
             </li>
           </ul>
         </section>
+
+        <!-- Diário: só entram os dias com anormalidade registrada, dentro da janela
+             que o responsável liberou. Enum já chega traduzido do backend. -->
+        <section
+          v-if="diarioEstado !== 'OCULTO'"
+          class="atd-diario"
+          aria-labelledby="atd-diario-title"
+        >
+          <header class="atd-docs__head">
+            <div>
+              <h2 id="atd-diario-title">{{ t('atendimentos.diario.title') }}</h2>
+              <p>{{ t('atendimentos.diario.lede') }}</p>
+            </div>
+            <span v-if="diario.length" class="atd-docs__count">{{
+              t('atendimentos.diario.count', { n: diario.length })
+            }}</span>
+          </header>
+
+          <p v-if="diarioVazioTexto" class="atd-bloco-vazio">{{ diarioVazioTexto }}</p>
+
+          <ul v-else class="atd-diario__list">
+            <li v-for="entrada in diario" :key="entrada.key" class="atd-diario__entry">
+              <header class="atd-diario__head">
+                <i class="pi pi-calendar" aria-hidden="true" />
+                <strong>{{ entrada.data }}</strong>
+              </header>
+
+              <div
+                v-if="entrada.sintomas.length || entrada.doencas.length"
+                class="atd-diario__tags"
+              >
+                <span
+                  v-for="(sintoma, index) in entrada.sintomas"
+                  :key="`s-${index}`"
+                  class="atd-diario__tag atd-diario__tag--sintoma"
+                >
+                  {{ sintoma }}
+                </span>
+                <span
+                  v-for="(doenca, index) in entrada.doencas"
+                  :key="`d-${index}`"
+                  class="atd-diario__tag atd-diario__tag--doenca"
+                >
+                  {{ doenca }}
+                </span>
+              </div>
+
+              <dl v-if="entrada.campos.length" class="atd-diario__grid">
+                <div v-for="campo in entrada.campos" :key="campo.chave">
+                  <dt>{{ campo.label }}</dt>
+                  <dd>{{ campo.valor }}</dd>
+                </div>
+              </dl>
+
+              <div v-for="texto in entrada.textos" :key="texto.chave" class="atd-diario__text">
+                <span>{{ texto.label }}</span>
+                <p>{{ texto.valor }}</p>
+              </div>
+
+              <div v-if="entrada.fotoIds.length" class="atd-diario__fotos">
+                <span class="atd-diario__fotos-label">
+                  {{ t('atendimentos.diario.fotos', { n: entrada.fotoIds.length }) }}
+                </span>
+                <Button
+                  v-for="(fotoId, index) in entrada.fotoIds"
+                  :key="fotoId"
+                  :label="t('atendimentos.diario.abrirFoto', { n: index + 1 })"
+                  icon="pi pi-image"
+                  severity="secondary"
+                  outlined
+                  size="small"
+                  :loading="arquivoOcupado === `abrir:${fotoId}`"
+                  @click="abrirArquivo(fotoId)"
+                />
+              </div>
+            </li>
+          </ul>
+        </section>
       </div>
 
       <!-- Aba: anotações -->
@@ -844,8 +1071,8 @@ onMounted(() => {
         <div
           class="atd-notes__layout"
           :class="{
-            'atd-notes__layout--with-form': isAtivo,
-            'atd-notes__layout--structured': isAtivo && temCamposEstruturados,
+            'atd-notes__layout--with-form': podeAnotar,
+            'atd-notes__layout--structured': podeAnotar && temCamposEstruturados,
           }"
         >
           <section class="atd-notes__feed" aria-labelledby="atd-notes-title">
@@ -948,7 +1175,15 @@ onMounted(() => {
             </ol>
           </section>
 
-          <aside v-if="isAtivo" class="atd-composer" aria-labelledby="atd-composer-title">
+          <aside v-if="somenteLeitura" class="atd-readonly" role="status">
+            <i class="pi pi-eye" aria-hidden="true" />
+            <div>
+              <strong>{{ t('atendimentos.anotacao.somenteLeitura.title') }}</strong>
+              <p>{{ t('atendimentos.anotacao.somenteLeitura.body') }}</p>
+            </div>
+          </aside>
+
+          <aside v-if="podeAnotar" class="atd-composer" aria-labelledby="atd-composer-title">
             <header class="atd-composer__head">
               <span class="atd-composer__badge" aria-hidden="true">
                 <i class="pi pi-plus" />
@@ -1565,7 +1800,51 @@ onMounted(() => {
   color: var(--partner-warm-text);
 }
 
-.atd-docs {
+.atd-stamp {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--partner-line);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--partner-surface) 70%, var(--partner-card));
+  color: var(--partner-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.atd-stamp i {
+  color: var(--partner-faint);
+  font-size: 0.75rem;
+}
+
+/* Resumo mexido depois da entrega: o que o parceiro leu antes pode estar velho. */
+.atd-stamp[data-atualizado='true'] {
+  border-color: color-mix(in srgb, var(--partner-amber-text) 30%, var(--partner-line));
+  background: color-mix(in srgb, var(--partner-amber-bg) 60%, var(--partner-card));
+  color: var(--partner-amber-text);
+}
+
+.atd-stamp[data-atualizado='true'] i {
+  color: inherit;
+}
+
+/* Bloco de categoria compartilhada que veio vazio: a frase é o conteúdo. */
+.atd-bloco-vazio,
+.atd-fold__vazio {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px dashed color-mix(in srgb, var(--partner-line) 92%, transparent);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--partner-surface) 55%, transparent);
+  color: var(--partner-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.atd-docs,
+.atd-diario {
   display: grid;
   gap: 0.75rem;
 }
@@ -1697,6 +1976,116 @@ onMounted(() => {
 
 .atd-doc__file-label {
   margin-right: 0.15rem;
+  color: var(--partner-faint);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.atd-diario__list {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.atd-diario__entry {
+  display: grid;
+  gap: 0.55rem;
+  align-content: start;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--partner-line);
+  border-radius: 0.95rem;
+  background: var(--partner-card);
+}
+
+.atd-diario__head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--partner-text);
+  font-size: 0.86rem;
+}
+
+.atd-diario__head i {
+  color: var(--partner-primary-strong);
+  font-size: 0.8rem;
+}
+
+.atd-diario__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.atd-diario__tag {
+  display: inline-flex;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 650;
+}
+
+.atd-diario__tag--sintoma {
+  background: color-mix(in srgb, var(--partner-warm-bg) 65%, var(--partner-card));
+  color: var(--partner-warm-text);
+}
+
+.atd-diario__tag--doenca {
+  background: color-mix(in srgb, var(--partner-amber-bg) 70%, var(--partner-card));
+  color: var(--partner-amber-text);
+}
+
+.atd-diario__grid {
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  margin: 0;
+}
+
+.atd-diario__grid dt {
+  color: var(--partner-faint);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.atd-diario__grid dd {
+  margin: 0.1rem 0 0;
+  color: var(--partner-text);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.atd-diario__text span {
+  display: block;
+  color: var(--partner-faint);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.atd-diario__text p {
+  margin: 0.15rem 0 0;
+  color: var(--partner-text);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.atd-diario__fotos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding-top: 0.15rem;
+  border-top: 1px solid color-mix(in srgb, var(--partner-line) 88%, transparent);
+}
+
+.atd-diario__fotos-label {
   color: var(--partner-faint);
   font-size: 0.72rem;
   font-weight: 700;
@@ -2041,6 +2430,35 @@ onMounted(() => {
 .atd-note__file-go {
   color: var(--partner-faint);
   font-size: 0.72rem;
+}
+
+/* Mesma coluna do composer, tom neutro: é aviso de escopo, não de erro. */
+.atd-readonly {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--partner-line);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--partner-surface) 55%, var(--partner-card));
+}
+
+.atd-readonly i {
+  margin-top: 0.1rem;
+  color: var(--partner-muted);
+}
+
+.atd-readonly strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.92rem;
+}
+
+.atd-readonly p {
+  margin: 0;
+  color: var(--partner-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
 }
 
 .atd-composer {

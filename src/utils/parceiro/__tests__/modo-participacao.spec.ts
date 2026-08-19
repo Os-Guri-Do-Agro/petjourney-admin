@@ -8,8 +8,11 @@ import {
   canSolicitarModo,
   getModoCardCopy,
   isAfiliadoNaoAtivoError,
+  isProgramaEditavelNoCadastro,
+  programasEmAnalise,
   resolveCadastroErrorView,
   resolveModoCta,
+  resolveProgramasIniciais,
   resolveSolicitarModoError,
 } from '@/utils/parceiro/modo-participacao'
 
@@ -75,9 +78,7 @@ describe('modo-participacao', () => {
     ).toBe('Este programa já foi solicitado ou está ativo.')
 
     expect(
-      resolveSolicitarModoError(
-        new ApiError('Conflito', 409, undefined, 'PARCEIRO_MODO_SUSPENSO'),
-      ),
+      resolveSolicitarModoError(new ApiError('Conflito', 409, undefined, 'PARCEIRO_MODO_SUSPENSO')),
     ).toContain('suspenso')
   })
 
@@ -112,5 +113,52 @@ describe('modo-participacao', () => {
   it('detecta erro AFILIADO_NAO_ATIVO da carteira', () => {
     expect(isAfiliadoNaoAtivoError(new ApiError('Conflito', 409, 'AFILIADO_NAO_ATIVO'))).toBe(true)
     expect(isAfiliadoNaoAtivoError(new ApiError('Outro', 409))).toBe(false)
+  })
+
+  it('primeiro cadastro nasce com afiliado marcado e participativo desmarcado', () => {
+    expect(resolveProgramasIniciais(null)).toEqual(['afiliado'])
+    expect(resolveProgramasIniciais()).toEqual(['afiliado'])
+  })
+
+  it('reenvio pós-recusa volta ao default, porque a recusa apagou a intenção', () => {
+    const blocos = {
+      afiliado: { status: 'NAO_SOLICITADO' as const },
+      participativo: { status: 'NAO_SOLICITADO' as const },
+    }
+
+    expect(resolveProgramasIniciais(blocos)).toEqual(['afiliado'])
+  })
+
+  it('mantém marcado o que já está solicitado, inclusive o participativo', () => {
+    expect(
+      resolveProgramasIniciais({
+        afiliado: { status: 'NAO_SOLICITADO' },
+        participativo: { status: 'SOLICITADO' },
+      }),
+    ).toEqual(['afiliado', 'participativo'])
+  })
+
+  it('programa já decidido fica fora da submissão (ATIVO e SUSPENSO não se mexem)', () => {
+    expect(
+      resolveProgramasIniciais({
+        afiliado: { status: 'ATIVO' },
+        participativo: { status: 'SUSPENSO' },
+      }),
+    ).toEqual([])
+
+    expect(isProgramaEditavelNoCadastro('ATIVO')).toBe(false)
+    expect(isProgramaEditavelNoCadastro('SUSPENSO')).toBe(false)
+    expect(isProgramaEditavelNoCadastro('REJEITADO')).toBe(true)
+  })
+
+  it('lista para a tela de espera só o que está aguardando decisão', () => {
+    expect(
+      programasEmAnalise({
+        afiliado: { status: 'SOLICITADO' },
+        participativo: { status: 'ATIVO' },
+      }),
+    ).toEqual(['afiliado'])
+
+    expect(programasEmAnalise(null)).toEqual([])
   })
 })

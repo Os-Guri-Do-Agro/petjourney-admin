@@ -9,6 +9,7 @@ import type {
   ModoStatusBloco,
   PapelParceiro,
   ParceiroCadastro,
+  ParceiroCadastroPatchPayload,
   ParceiroCadastroPayload,
   PortalDashboard,
   PortalIndicacao,
@@ -52,13 +53,37 @@ export function getPortalDashboard(params?: ParceiroQuery) {
   )
 }
 
+const STATUS_MODO_CONHECIDOS: StatusModoParceiro[] = [
+  'NAO_SOLICITADO',
+  'SOLICITADO',
+  'ATIVO',
+  'REJEITADO',
+  'SUSPENSO',
+]
+
+/**
+ * Status novo no backend antes de a build sair cai em `NAO_SOLICITADO`, mas **sem**
+ * mexer no `podeSolicitar`: quem decide se o botão aparece é o backend. Recalcular
+ * aqui é o que geraria pedido duplicado para quem já pediu num estado que a tela
+ * ainda não conhece.
+ */
+export function normalizarStatusModo(status: StatusModoParceiro): StatusModoParceiro {
+  return STATUS_MODO_CONHECIDOS.includes(status) ? status : 'NAO_SOLICITADO'
+}
+
+function normalizarModoBloco(bloco: ModoStatusBloco): ModoStatusBloco {
+  return { ...bloco, status: normalizarStatusModo(bloco.status) }
+}
+
 /** Fallback para backend sem os blocos da Parte 9 (deriva do campo legado). */
 function deriveModoBloco(status: StatusModoParceiro): ModoStatusBloco {
+  const normalizado = normalizarStatusModo(status)
+
   return {
-    status,
+    status: normalizado,
     motivo: null,
     decididoEm: null,
-    podeSolicitar: status === 'NAO_SOLICITADO' || status === 'REJEITADO',
+    podeSolicitar: normalizado === 'NAO_SOLICITADO' || normalizado === 'REJEITADO',
   }
 }
 
@@ -69,8 +94,12 @@ export async function getPortalStatus(params?: ParceiroQuery) {
 
   return {
     ...raw,
-    afiliado: raw.afiliado ?? deriveModoBloco(raw.statusAfiliado),
-    participativo: raw.participativo ?? deriveModoBloco(raw.statusParticipativo),
+    afiliado: raw.afiliado
+      ? normalizarModoBloco(raw.afiliado)
+      : deriveModoBloco(raw.statusAfiliado),
+    participativo: raw.participativo
+      ? normalizarModoBloco(raw.participativo)
+      : deriveModoBloco(raw.statusParticipativo),
   } satisfies PortalStatus
 }
 
@@ -80,6 +109,11 @@ export const getStatus = getPortalStatus
 type CadastroParceiroResult = {
   parceiroId: string
   statusAuditoria: 'PENDENTE'
+  /**
+   * Fonte de verdade do que ficou pedido: renderize a confirmação a partir daqui,
+   * nunca do body enviado. Ausente em backend anterior aos programas no cadastro.
+   */
+  programasSolicitados?: ModoParticipacao[]
   /** Multi-perfil: token fresco com perfilAtivo/parceiroAtivoId; ausente em backend antigo. */
   access_token?: string
 }
@@ -110,9 +144,12 @@ export function getParceiroCadastro(params?: ParceiroQuery) {
   )
 }
 
-/** Edição parcial (PENDENTE/APROVADO). Em REJEITADO o reenvio é `cadastrarParceiro`. */
+/**
+ * Edição parcial (PENDENTE/APROVADO). Em REJEITADO o reenvio é `cadastrarParceiro`.
+ * `programas` não entra aqui de propósito: o PATCH devolve 400 com o campo.
+ */
 export function atualizarParceiroCadastro(
-  payload: Partial<ParceiroCadastroPayload>,
+  payload: ParceiroCadastroPatchPayload,
   params?: ParceiroQuery,
 ) {
   return unwrap(

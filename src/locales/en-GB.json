@@ -428,7 +428,12 @@
         "body": "Fix the company details and resubmit to return to review.",
         "link": "Review registration"
       },
-      "reasonPrefix": "Reason:"
+      "reasonPrefix": "Reason:",
+      "suspendedReadOnly": {
+        "title": "Registration suspended",
+        "body": "Reading appointments stays available, because the pet parent authorised this access. Linking new codes and recording notes are blocked until the suspension is resolved.",
+        "link": "Talk to support"
+      }
     },
     "suspended": {
       "title": "Registration suspended",
@@ -656,13 +661,17 @@
     },
     "pendente": {
       "title": "Registration under review",
-      "body": "You will get an email with the result. Meanwhile, you can review the submitted details."
+      "body": "You will get an email with the result. Meanwhile, you can review the submitted details.",
+      "analiseLabel": "Under review right now",
+      "itemCadastro": "Business registration",
+      "analiseHint": "Everything is decided in the same review. You do not need to request anything again."
     },
     "rejeitado": {
       "title": "Registration declined",
       "body": "Fix the details below and resubmit. The registration goes back to review.",
       "resubmit": "Fix and resubmit",
-      "operadorHint": "Only the company owner can fix and resubmit the registration."
+      "operadorHint": "Only the company owner can fix and resubmit the registration.",
+      "programasHint": "Check the programmes tab as well: the rejection cancelled the open requests, so select again what you want to enable."
     },
     "suspenso": {
       "title": "Registration suspended",
@@ -684,7 +693,8 @@
       "enviado": "Registration submitted",
       "enviadoDetail": "Now it is with the PetJourney team. You get the result by email.",
       "salvo": "Registration updated",
-      "salvoDetail": "Your company changes have been saved."
+      "salvoDetail": "Your company changes have been saved.",
+      "enviadoComProgramas": "Registration and {programas} went to review. The result arrives by email."
     },
     "errors": {
       "generic": "Could not submit the registration.",
@@ -692,6 +702,52 @@
       "suspenso": "The registration is suspended. Contact support to reactivate it.",
       "nomeEmUso": "This name is already registered by another company.",
       "cnpjEmUso": "This CNPJ is already registered by another company."
+    },
+    "tabs": {
+      "aria": "Registration sections",
+      "dados": "Company details",
+      "programas": "Programmes"
+    },
+    "resumo": {
+      "label": "Going to review:",
+      "cadastro": "Company registration",
+      "edit": "Choose programmes"
+    },
+    "programas": {
+      "title": "What do you want to enable",
+      "lede": "Pick them now and the PetJourney team decides everything at once, together with the credentialing. Otherwise each programme becomes a new request later, with a new wait.",
+      "counter": "none selected | 1 selected | {count} selected",
+      "selected": "Included",
+      "notSelected": "Not included",
+      "cancelWarning": "Unselected: the current request will be cancelled.",
+      "lockedAtivo": "Already active",
+      "lockedSuspenso": "Suspended",
+      "lockedHint": "This programme is not changed here.",
+      "note": "Both are optional and never block the credentialing. You can request them later on the Programmes screen.",
+      "how": {
+        "step1Title": "You choose",
+        "step1Desc": "Your choice goes with the registration, in a single submission.",
+        "step2Title": "The team reviews",
+        "step2Desc": "Credentialing and programmes are decided in the same review.",
+        "step3Title": "Released",
+        "step3Desc": "Once approved, the programme features show up in the portal."
+      },
+      "afiliado": {
+        "name": "Affiliate Programme",
+        "tagline": "Share per referral",
+        "description": "Every pet parent who subscribes through your referral generates a share for you, tracked by you inside the portal.",
+        "feature1": "Share for every referral that becomes a subscription",
+        "feature2": "Wallet with real time balance and statement",
+        "feature3": "PIX withdrawal whenever you want"
+      },
+      "participativo": {
+        "name": "Participatory Programme",
+        "tagline": "Visibility across the network",
+        "description": "Your business shows up in the PetJourney partner network and offers perks to the pet parents already using the app.",
+        "feature1": "Presence in the app partner network",
+        "feature2": "Coupons and perks to attract new customers",
+        "feature3": "Partner badge and invitations to network campaigns"
+      }
     }
   },
   "atendimentos": {
@@ -719,7 +775,10 @@
       "anotacoes": "{n} notes",
       "loadMore": "Load more",
       "emptyFiltroTitle": "No results for these filters",
-      "emptyFiltroBody": "Adjust the search or the period. The search only covers the pet name."
+      "emptyFiltroBody": "Adjust the search or the period. The search only covers the pet name.",
+      "documentos": "{n} documents",
+      "diario": "Diary",
+      "resumoAtualizado": "Summary updated on {data}"
     },
     "servico": {
       "BANHO": "Bath",
@@ -753,7 +812,8 @@
       "periodo": "Period",
       "vinculadoDe": "Linked from",
       "vinculadoAte": "Linked until",
-      "limpar": "Clear filters"
+      "limpar": "Clear filters",
+      "comProntuario": "With records"
     },
     "expira": {
       "expirado": "Expired",
@@ -766,9 +826,10 @@
       "bloqueado": "Available after registration approval.",
       "title": "Link the pet parent's code",
       "lede": "Enter the 6-digit code the pet parent generated in the app. The access will show up in your list.",
-      "codigoLabel": "Code",
-      "codigoPlaceholder": "123456",
-      "hint": "Spaces and hyphens are ignored.",
+      "eyebrow": "Partner portal",
+      "codigoLabel": "Access code",
+      "digitoAria": "Digit {n} of 6",
+      "hint": "The code is generated by the pet parent in the PetJourney app.",
       "submit": "Link",
       "aguarde": "Wait {s}s",
       "codigoInvalidoFormato": "The code has 6 numeric digits.",
@@ -818,6 +879,22 @@
       "clinicalLede": "Snapshot authorised by the pet parent. Expand each list as needed.",
       "sectionsCount": "{n} sections",
       "itemsCount": "{n} items",
+      "semItens": "No items",
+      "carimbo": "Summary generated on {data}",
+      "carimboAtualizado": "Summary updated by the pet parent on {data}",
+      "vazio": {
+        "generico": "Nothing to show in this section for this access.",
+        "diarioFiltrado": "Monitoring with no abnormality recorded in the shared window.",
+        "semRegistro": {
+          "alergias": "The pet parent has not recorded any allergies for this pet.",
+          "vacinas": "The pet parent has not recorded any vaccines for this pet.",
+          "medicamentos": "The pet parent has not recorded any medications for this pet.",
+          "comportamento": "The pet parent has not recorded any behaviour notes for this pet.",
+          "diagnosticos": "The pet parent has not recorded any diagnoses for this pet.",
+          "diario": "The pet parent has not recorded any diary entries for this pet.",
+          "documentos": "The pet parent has not attached any documents to this pet's records."
+        }
+      },
       "emptyTitle": "Nothing shared in this access",
       "emptyBody": "The pet parent granted the visit but did not include any clinical data for {pet}. Whatever you record in the notes still reaches them.",
       "emptyCta": "Go to notes"
@@ -832,6 +909,24 @@
       "emissao": "Issued on {data}",
       "expiracao": "Valid until {data}",
       "semArquivo": "No file available"
+    },
+    "diario": {
+      "title": "Pet diary",
+      "lede": "Days with an abnormality recorded inside the window the pet parent released.",
+      "count": "{n} entries",
+      "fotos": "{n} photos",
+      "abrirFoto": "Photo {n}",
+      "campos": {
+        "vitalidade": "Energy",
+        "alimentacao": "Eating",
+        "hidratacao": "Drinking",
+        "fezes": "Stool",
+        "urina": "Urine",
+        "cicloCio": "Season cycle",
+        "remedios": "Medicines",
+        "observacoes": "Remarks",
+        "nota": "Pet parent's note"
+      }
     },
     "anotacoes": {
       "title": "Notes history",
@@ -867,7 +962,11 @@
       "encerrado": "This access was closed; notes are no longer allowed.",
       "criada": "Note recorded",
       "erro": "Could not record the note.",
-      "textoLongo": "Some text is over the accepted limit. Shorten it and try again."
+      "textoLongo": "Some text is over the accepted limit. Shorten it and try again.",
+      "somenteLeitura": {
+        "title": "Recording blocked",
+        "body": "You can read this appointment record, but you cannot record your notes while the registration is suspended."
+      }
     },
     "estruturada": {
       "title": {
@@ -958,7 +1057,9 @@
     },
     "anexo": {
       "indisponivel": "File unavailable",
-      "indisponivelDetail": "The file is no longer available (it may have been removed after revocation)."
+      "indisponivelDetail": "The file is no longer available (it may have been removed after revocation).",
+      "acessoEncerrado": "Access ended",
+      "acessoEncerradoDetail": "The pet parent ended this access, so the record is no longer available. We refreshed the screen."
     }
   },
   "divulgacao": {

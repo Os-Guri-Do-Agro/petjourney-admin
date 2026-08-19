@@ -6,13 +6,29 @@ import { RouterLink } from 'vue-router'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import type { StatusAuditoriaParceiro } from '@/service/parceiro/types'
 
+const props = withDefaults(
+  defineProps<{
+    /**
+     * Cobre também o cadastro SUSPENSO, com a copy de leitura liberada.
+     * Use nas telas onde a leitura NÃO é gated por auditoria (atendimentos:
+     * seção 4 da spec das Partes 11 a 13). Nas demais, o SUSPENSO continua no
+     * gate de página cheia do `PartnerPageFrame` e este banner não o duplica.
+     */
+    coverSuspended?: boolean
+  }>(),
+  { coverSuspended: false },
+)
+
 const { t } = useI18n()
 const { store } = useParceiroPortal()
 
-/** SUSPENSO usa o gate de página cheia — este banner cobre só análise/recusa. */
 const visible = computed(() => {
-  if (store.loadState !== 'ready' || store.podeOperar || store.cadastroSuspenso) {
+  if (store.loadState !== 'ready' || store.podeOperar) {
     return false
+  }
+
+  if (store.cadastroSuspenso) {
+    return props.coverSuspended
   }
 
   const status = store.statusAuditoria
@@ -21,6 +37,11 @@ const visible = computed(() => {
 
 const copyKey = computed(() => {
   const status = store.statusAuditoria as StatusAuditoriaParceiro | null
+
+  if (status === 'SUSPENSO') {
+    return 'suspendedReadOnly'
+  }
+
   return status === 'REJEITADO' ? 'rejected' : 'pending'
 })
 </script>
@@ -65,11 +86,13 @@ const copyKey = computed(() => {
   font-size: 1.1rem;
 }
 
-.operability-banner[data-tone='rejected'] {
+.operability-banner[data-tone='rejected'],
+.operability-banner[data-tone='suspendedReadOnly'] {
   border-color: color-mix(in srgb, var(--partner-warm-text) 24%, var(--partner-line));
 }
 
-.operability-banner[data-tone='rejected'] i {
+.operability-banner[data-tone='rejected'] i,
+.operability-banner[data-tone='suspendedReadOnly'] i {
   color: var(--partner-warm-text);
 }
 
