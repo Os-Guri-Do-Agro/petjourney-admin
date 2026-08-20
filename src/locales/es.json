@@ -505,8 +505,8 @@
         "toastCopied": "Código copiado",
         "toastCopyFail": "No fue posible copiar",
         "toastCopyFailDetail": "Copie el código manualmente.",
-        "esperaFallback": "Su código de indicación se crea apenas su registro sea aprobado.",
-        "verCadastro": "Ver mi registro"
+        "esperaFallback": "Su código de indicación queda disponible con el Programa de Afiliados activo.",
+        "esperaCta": "Ver programas"
       },
       "pulse": {
         "title": "Pulso de la red",
@@ -1094,7 +1094,8 @@
       "qrExportFail": "No fue posible exportar",
       "qrExportFailDetail": "El navegador bloqueó la nueva pestaña. Permita ventanas emergentes en este sitio e inténtelo de nuevo.",
       "hint": "La participación en la billetera exige el programa afiliado activo.",
-      "esperaHint": "Mientras tanto, use el portal para seguir su registro. El código y el QR se crean apenas sea aprobado."
+      "esperaHint": "El código, el enlace y el QR forman parte del Programa de Afiliados: se liberan junto con la Cartera, cuando el programa esté activo.",
+      "esperaCta": "Ver programas"
     },
     "howItWorks": {
       "eyebrow": "El motor del crecimiento",

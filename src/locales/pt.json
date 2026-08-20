@@ -505,8 +505,8 @@
         "toastCopied": "Código copiado",
         "toastCopyFail": "Não foi possível copiar",
         "toastCopyFailDetail": "Copie o código manualmente.",
-        "esperaFallback": "Seu código de indicação é criado assim que o cadastro for aprovado.",
-        "verCadastro": "Ver meu cadastro"
+        "esperaFallback": "Seu código de indicação fica disponível com o Programa de Afiliados ativo.",
+        "esperaCta": "Ver programas"
       },
       "pulse": {
         "title": "Pulso da rede",
@@ -1094,7 +1094,8 @@
       "qrExportFail": "Não foi possível exportar",
       "qrExportFailDetail": "O navegador bloqueou a nova aba. Permita pop-ups neste site e tente de novo.",
       "hint": "A participação na carteira exige o programa afiliado ativo.",
-      "esperaHint": "Enquanto isso, use o portal para acompanhar o cadastro. O código e o QR são criados assim que a aprovação sai."
+      "esperaHint": "O código, o link e o QR fazem parte do Programa de Afiliados: são liberados junto com a Carteira, assim que o programa estiver ativo.",
+      "esperaCta": "Ver programas"
     },
     "howItWorks": {
       "eyebrow": "O motor do crescimento",

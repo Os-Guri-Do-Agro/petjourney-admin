@@ -117,10 +117,12 @@ export type ParceiroCadastro = {
 /**
  * `GET /parceiro/portal/indicacao`.
  *
- * Gate de 2026-07-29: parceiro não operável (pendente/rejeitado/suspenso/inativo)
- * recebe **tudo `null`** com `podeIndicar: false` e um `aviso` por status. Não
- * existe código nem QR antes da aprovação, então os quatro campos são nuláveis
- * e a tela mostra estado de espera com o `aviso` como veio, sem copy própria.
+ * Gate composto: parceiro não operável (pendente/rejeitado/suspenso/inativo,
+ * 2026-07-29) **ou** sem Programa de Afiliados ATIVO (2026-08-19) recebe **tudo
+ * `null`** com `podeIndicar: false` e um `aviso` por status. Indicar é o
+ * instrumento do programa e segue a mesma máquina da Carteira, então os quatro
+ * campos são nuláveis e a tela mostra estado de espera com o `aviso` como veio,
+ * sem copy própria.
  */
 export type PortalIndicacao = {
   codigoIndicacao: string | null

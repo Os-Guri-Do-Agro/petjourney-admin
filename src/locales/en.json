@@ -505,8 +505,8 @@
         "toastCopied": "Code copied",
         "toastCopyFail": "Could not copy",
         "toastCopyFailDetail": "Copy the code manually.",
-        "esperaFallback": "Your referral code is created as soon as your registration is approved.",
-        "verCadastro": "View my registration"
+        "esperaFallback": "Your referral code becomes available once the Affiliate Program is active.",
+        "esperaCta": "View programs"
       },
       "pulse": {
         "title": "Network pulse",
@@ -1094,7 +1094,8 @@
       "qrExportFail": "Could not export",
       "qrExportFailDetail": "The browser blocked the new tab. Allow pop-ups for this site and try again.",
       "hint": "Participation in the wallet requires an active affiliate program.",
-      "esperaHint": "Meanwhile, use the portal to follow your registration. The code and the QR are created as soon as it is approved."
+      "esperaHint": "The code, the link and the QR are part of the Affiliate Program: they unlock together with the Wallet, once the program is active.",
+      "esperaCta": "View programs"
     },
     "howItWorks": {
       "eyebrow": "Your growth engine",

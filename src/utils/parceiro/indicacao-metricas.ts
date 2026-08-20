@@ -4,7 +4,8 @@ import type { IndicacaoScanPorDia } from '@/service/parceiro/types'
 /**
  * Métricas de leitura do QR de indicação (`GET /parceiro/portal/indicacao/metricas`).
  * Dois erros são esperados e não são falha da tela:
- *  - `409` parceiro ainda não operável (o gate de 2026-07-29 vale aqui também);
+ *  - `409` parceiro ainda não operável ou sem afiliado ATIVO (o gate composto de
+ *    `indicacao` vale aqui também);
  *  - `503` `QR_INDISPONIVEL`, serviço de QR fora do ar.
  * Qualquer outro vira erro genérico com retry.
  */
