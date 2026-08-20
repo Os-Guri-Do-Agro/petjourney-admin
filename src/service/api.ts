@@ -1,4 +1,5 @@
 import i18n from '@/i18n'
+import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
 
 import { clearAuthSession, getAccessToken } from './auth/auth-session'
 
@@ -41,6 +42,17 @@ export function requireApiUrl() {
   return API_URL
 }
 
+/**
+ * Locale da sessão na tag BCP 47 que o backend normaliza (`pt` → `pt-BR`, `es` → `es-419`).
+ * O `@Locale()` do Nest lê `Accept-Language` em toda rota de conteúdo localizado; sem o
+ * header, o portal recebia tudo em pt-BR mesmo com a sessão em outro idioma.
+ */
+function acceptLanguage() {
+  const atual = i18n.global.locale.value
+
+  return INTL_LOCALE[isLocale(atual) ? atual : DEFAULT_LOCALE]
+}
+
 function isJsonResponse(response: Response) {
   return (response.headers.get('content-type') ?? '').toLowerCase().includes('json')
 }
@@ -65,6 +77,11 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
 
   if (token) {
     headers.set('Authorization', `Bearer ${token}`)
+  }
+
+  // Chamador que já definiu o header manda o dele.
+  if (!headers.has('Accept-Language')) {
+    headers.set('Accept-Language', acceptLanguage())
   }
 
   const response = await fetch(`${requireApiUrl()}${endpoint}`, {

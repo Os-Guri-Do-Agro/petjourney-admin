@@ -13,8 +13,12 @@ import {
   cadastrarParceiro,
   getParceiroCadastro,
 } from '@/service/parceiro/parceiro-portal-service'
-import type { ParceiroCadastro, ParceiroCadastroPayload } from '@/service/parceiro/types'
-import { resolveCadastroErrorView } from '@/utils/parceiro/modo-participacao'
+import type {
+  ModoParticipacao,
+  ParceiroCadastro,
+  ParceiroCadastroPayload,
+} from '@/service/parceiro/types'
+import { programasEmAnalise, resolveCadastroErrorView } from '@/utils/parceiro/modo-participacao'
 import { SUPPORT_CONTACTS } from '@/utils/parceiro/support-contacts'
 
 const { t, locale } = useI18n()
@@ -66,6 +70,32 @@ const cadastroIncompleto = computed(
 /** REJEITADO reenvia pelo POST (replace); PENDENTE/APROVADO editam pelo PATCH. */
 const formIsResubmit = computed(() => state.value === 'sem-parceiro' || state.value === 'REJEITADO')
 
+/** Só o POST aceita `programas`; no PATCH o campo devolve 400. */
+const programasBlocos = computed(() =>
+  store.status
+    ? { afiliado: store.status.afiliado, participativo: store.status.participativo }
+    : null,
+)
+
+/** A tela de espera lista o que está em análise: o cadastro e cada programa pedido junto. */
+const itensEmAnalise = computed(() => [
+  { id: 'cadastro', label: t('parceiroCadastro.pendente.itemCadastro') },
+  ...programasEmAnalise(store.status).map((modo) => ({
+    id: modo,
+    label: t(`parceiroCadastro.programas.${modo}.name`),
+  })),
+])
+
+function programasToastDetail(programas: ModoParticipacao[] | undefined) {
+  if (!programas?.length) {
+    return t('parceiroCadastro.toast.enviadoDetail')
+  }
+
+  return t('parceiroCadastro.toast.enviadoComProgramas', {
+    programas: programas.map((modo) => t(`parceiroCadastro.programas.${modo}.name`)).join(', '),
+  })
+}
+
 /** PENDENTE/APROVADO: formulário sempre aberto com os dados, como no painel de Perfil. */
 const showInlineEdit = computed(
   () => canEditCadastro.value && (state.value === 'PENDENTE' || state.value === 'APROVADO'),
@@ -112,8 +142,10 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
       toast.add({
         severity: 'success',
         summary: t('parceiroCadastro.toast.enviado'),
-        detail: t('parceiroCadastro.toast.enviadoDetail'),
-        life: 5000,
+        /* A confirmação sai de `programasSolicitados`, não do que foi marcado: é o
+           backend que diz o que ficou de fato como pedido. */
+        detail: programasToastDetail(resultado.programasSolicitados),
+        life: 6000,
       })
     } else {
       cadastro.value = await atualizarParceiroCadastro(payload, parceiroQuery())
@@ -181,6 +213,8 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
         :submit-label="t('parceiroCadastro.wizard.submit')"
         :submitting="submitting"
         :error-field="errorField"
+        show-programas
+        :programas-blocos="programasBlocos"
         @submit="handleSubmit"
       />
     </article>
@@ -198,6 +232,17 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
         <PartnerStatusBadge status="PENDENTE" />
       </header>
 
+      <!-- O parceiro precisa ver aqui que os programas foram junto e não ficaram para trás. -->
+      <div class="funil__analise">
+        <span class="funil__analise-label">{{ t('parceiroCadastro.pendente.analiseLabel') }}</span>
+        <ul class="funil__analise-list">
+          <li v-for="item in itensEmAnalise" :key="item.id">
+            <i class="pi pi-hourglass" aria-hidden="true" />
+            <span>{{ item.label }}</span>
+          </li>
+        </ul>
+        <p class="funil__analise-hint">{{ t('parceiroCadastro.pendente.analiseHint') }}</p>
+      </div>
     </article>
 
     <!-- REJEITADO: motivo + corrigir e reenviar (POST) -->
@@ -219,6 +264,10 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
       </div>
 
       <template v-if="canEditCadastro">
+        <p class="funil__hint funil__hint--note">
+          <i class="pi pi-info-circle" aria-hidden="true" />
+          {{ t('parceiroCadastro.rejeitado.programasHint') }}
+        </p>
         <p v-if="submitError" class="funil__submit-error" role="alert">{{ submitError }}</p>
         <div v-if="loadingCadastro" class="funil__form-loading" aria-hidden="true">
           <Skeleton width="100%" height="2.4rem" border-radius="10px" />
@@ -230,6 +279,8 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
           :submit-label="t('parceiroCadastro.rejeitado.resubmit')"
           :submitting="submitting"
           :error-field="errorField"
+          show-programas
+          :programas-blocos="programasBlocos"
           @submit="handleSubmit"
         />
       </template>
@@ -257,11 +308,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
       <p class="funil__support-lede">{{ t('frame.suspended.channelsLede') }}</p>
       <ul class="funil__channels">
         <li>
-          <a
-            :href="SUPPORT_CONTACTS.whatsappHref"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a :href="SUPPORT_CONTACTS.whatsappHref" target="_blank" rel="noopener noreferrer">
             <i class="pi pi-whatsapp" aria-hidden="true" />
             <span>
               <strong>{{ t('frame.suspended.channels.whatsapp') }}</strong>
@@ -270,11 +317,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
           </a>
         </li>
         <li>
-          <a
-            :href="SUPPORT_CONTACTS.instagramHref"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a :href="SUPPORT_CONTACTS.instagramHref" target="_blank" rel="noopener noreferrer">
             <i class="pi pi-instagram" aria-hidden="true" />
             <span>
               <strong>{{ t('frame.suspended.channels.instagram') }}</strong>
@@ -283,11 +326,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
           </a>
         </li>
         <li>
-          <a
-            :href="SUPPORT_CONTACTS.facebookHref"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a :href="SUPPORT_CONTACTS.facebookHref" target="_blank" rel="noopener noreferrer">
             <i class="pi pi-facebook" aria-hidden="true" />
             <span>
               <strong>{{ t('frame.suspended.channels.facebook') }}</strong>
@@ -331,7 +370,11 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
     </article>
 
     <!-- PENDENTE/APROVADO (dono): dados sempre visíveis para edição, como no Perfil -->
-    <article v-if="showInlineEdit" class="funil__card funil__edit" aria-labelledby="funil-edit-title">
+    <article
+      v-if="showInlineEdit"
+      class="funil__card funil__edit"
+      aria-labelledby="funil-edit-title"
+    >
       <header class="funil__edit-head">
         <h3 id="funil-edit-title">{{ t('parceiroCadastro.editar.title') }}</h3>
         <p>{{ t('parceiroCadastro.editar.lede') }}</p>
@@ -411,12 +454,11 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 
 .funil__card[data-tone='success'] {
   border-color: color-mix(in srgb, var(--partner-success-text) 20%, var(--partner-line));
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--partner-success-bg) 40%, var(--partner-card)),
-      var(--partner-card) 55%
-    );
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--partner-success-bg) 40%, var(--partner-card)),
+    var(--partner-card) 55%
+  );
 }
 
 .funil__card--compact {
@@ -595,6 +637,71 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
   margin: 0;
   color: var(--partner-muted);
   font-size: 0.85rem;
+}
+
+.funil__hint--note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--partner-primary-soft) 12%, var(--partner-card));
+  line-height: 1.45;
+}
+
+.funil__hint--note i {
+  margin-top: 0.12rem;
+  color: var(--partner-primary-strong);
+}
+
+.funil__analise {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--partner-primary) 20%, var(--partner-line));
+  border-radius: 0.95rem;
+  background: color-mix(in srgb, var(--partner-surface) 70%, var(--partner-card));
+}
+
+.funil__analise-label {
+  color: var(--partner-text);
+  font-size: 0.8rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
+.funil__analise-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.funil__analise-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--partner-line) 75%, transparent);
+  border-radius: 0.7rem;
+  background: var(--partner-card);
+  color: var(--partner-text);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.funil__analise-list i {
+  color: var(--partner-primary-strong);
+  font-size: 0.8rem;
+}
+
+.funil__analise-hint {
+  margin: 0;
+  color: var(--partner-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
 }
 
 .funil__support-lede {

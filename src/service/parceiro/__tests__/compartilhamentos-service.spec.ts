@@ -173,3 +173,82 @@ describe('criarAnotacao — multipart estruturado', () => {
     expect(JSON.parse(String(form.get('tiposDocumento')))).toEqual(['Ultrassom'])
   })
 })
+
+describe('getCompartilhamentos — filtro de prontuário', () => {
+  function urlChamada(fetchMock: ReturnType<typeof mockFetch>) {
+    return String(fetchMock.mock.calls[0]?.[0])
+  }
+
+  it('manda comProntuario=true quando o filtro está ligado', async () => {
+    const { getCompartilhamentos } = await loadService()
+    const fetchMock = mockFetch()
+
+    await getCompartilhamentos({ comProntuario: true })
+
+    expect(urlChamada(fetchMock)).toContain('comProntuario=true')
+  })
+
+  /**
+   * O backend recebe query string: "false" é truthy antes do @Transform, então
+   * mandar o filtro desligado o ligaria. Desligado é ausente.
+   */
+  it('omite o parâmetro quando o filtro está desligado', async () => {
+    const { getCompartilhamentos } = await loadService()
+    const fetchMock = mockFetch()
+
+    await getCompartilhamentos({ comProntuario: false, status: 'ATIVO' })
+
+    const url = urlChamada(fetchMock)
+
+    expect(url).not.toContain('comProntuario')
+    expect(url).toContain('status=ATIVO')
+  })
+
+  it('omite o parâmetro quando nenhum filtro foi passado', async () => {
+    const { getCompartilhamentos } = await loadService()
+    const fetchMock = mockFetch()
+
+    await getCompartilhamentos()
+
+    expect(urlChamada(fetchMock)).not.toContain('comProntuario')
+  })
+})
+
+/**
+ * AC-P2 e AC-P4 (Parte 15): o snapshot chega traduzido no locale da request, então
+ * a tela só mostra "Liver disease" se o idioma da sessão viajar no `Accept-Language`.
+ * Trocar o idioma do portal tem que mudar o header sem regerar o acesso.
+ */
+describe('locale da sessão no detalhe do acesso', () => {
+  function headerIdioma(fetchMock: ReturnType<typeof mockFetch>) {
+    return new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get('Accept-Language')
+  }
+
+  it('manda o locale da sessão na chamada do detalhe', async () => {
+    const [{ getCompartilhamentoDetalhe }, { default: i18n }] = await Promise.all([
+      loadService(),
+      import('@/i18n'),
+    ])
+    const fetchMock = mockFetch()
+
+    i18n.global.locale.value = 'en-GB'
+    await getCompartilhamentoDetalhe('c1')
+
+    expect(headerIdioma(fetchMock)).toBe('en-GB')
+  })
+
+  it('acompanha a troca de idioma do portal', async () => {
+    const [{ getCompartilhamentoDetalhe }, { default: i18n }] = await Promise.all([
+      loadService(),
+      import('@/i18n'),
+    ])
+    const fetchMock = mockFetch()
+
+    i18n.global.locale.value = 'es'
+    await getCompartilhamentoDetalhe('c1')
+
+    expect(headerIdioma(fetchMock)).toBe('es')
+
+    i18n.global.locale.value = 'pt'
+  })
+})

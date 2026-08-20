@@ -73,6 +73,10 @@ export function getCompartilhamentos(params?: ParceiroQuery & CompartilhamentosQ
         especie: params?.especie,
         tipoServico: params?.tipoServico,
         ordenarPor: params?.ordenarPor,
+        // Só quando ligado: `comProntuario=false` na URL chega como a string
+        // "false" no backend, que é truthy antes do @Transform e ligaria o
+        // filtro justamente ao desligá-lo. Omitir é o desligado.
+        comProntuario: params?.comProntuario ? 'true' : undefined,
         vinculadoDe: params?.vinculadoDe,
         vinculadoAte: params?.vinculadoAte,
         cursor: params?.cursor,

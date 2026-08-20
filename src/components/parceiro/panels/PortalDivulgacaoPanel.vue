@@ -4,6 +4,7 @@ import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
 import IndicacaoMetricasCard from '@/components/parceiro/IndicacaoMetricasCard.vue'
 import IndicacaoQrBlock from '@/components/parceiro/IndicacaoQrBlock.vue'
@@ -30,6 +31,9 @@ import type {
 import { resolveMetricasErro, type MetricasEstadoErro } from '@/utils/parceiro/indicacao-metricas'
 import { LightColors } from '@/theme/colors'
 import { currentColors } from '@/theme/color-mode'
+
+/** Mesmo destino do gate da Carteira (`goToProgramas`): a âncora abre a lista. */
+const PROGRAMAS_ROUTE = { path: '/parceiro/programas', hash: '#programas' } as const
 
 const { t, locale } = useI18n()
 const toast = useToast()
@@ -94,9 +98,9 @@ const indicacaoTerms = computed(() =>
 const indicacao = ref<PortalIndicacao | null>(null)
 
 /**
- * Só existem quando `podeIndicar`; antes da aprovação a API devolve `null` e a
- * tela nem chega a renderizar este bloco. O `?? ''` evita espalhar narrowing
- * pelo template.
+ * Só existem quando `podeIndicar` (cadastro aprovado E afiliado ATIVO); fora
+ * disso a API devolve `null` e a tela nem chega a renderizar este bloco. O
+ * `?? ''` evita espalhar narrowing pelo template.
  */
 const codigoIndicacao = computed(() => indicacao.value?.codigoIndicacao ?? '')
 const linkIndicacao = computed(() => indicacao.value?.link ?? '')
@@ -188,9 +192,9 @@ async function copyToClipboard(value: string, label: string) {
 }
 
 /**
- * Métricas rodam fora do `loadAll`: 409 (não aprovado) e 503 (QR fora) são
- * estados do card, não erro da tela, e não podem derrubar o painel. Sem
- * `podeIndicar` nem chamamos — o 409 seria garantido.
+ * Métricas rodam fora do `loadAll`: 409 (cadastro não aprovado ou afiliado não
+ * ativo) e 503 (QR fora) são estados do card, não erro da tela, e não podem
+ * derrubar o painel. Sem `podeIndicar` nem chamamos — o 409 seria garantido.
  */
 async function loadMetricas() {
   if (!indicacao.value?.podeIndicar) {
@@ -527,15 +531,22 @@ watch(lastSuccessAt, (at) => {
               }}</span>
             </header>
 
-            <!-- Gate 2026-07-29: sem aprovação não existe código, link nem QR (a
-                 API devolve tudo null). Estado de espera com o `aviso` do backend,
-                 que já é específico por status; nada de copy própria aqui. -->
+            <!-- Gate do kit: sem cadastro aprovado (2026-07-29) OU sem Programa de
+                 Afiliados ativo (2026-08-19) não existe código, link nem QR — a API
+                 devolve tudo null. Estado de espera com o `aviso` do backend, que
+                 já é específico por status; nada de copy própria aqui. A saída é
+                 sempre Programas: é de lá que sai tanto o reenvio do cadastro
+                 quanto a solicitação do programa. -->
             <div v-if="!indicacao.podeIndicar" class="share-kit__espera">
               <span class="share-kit__espera-icon" aria-hidden="true">
                 <i class="pi pi-hourglass" />
               </span>
               <p v-if="indicacao.aviso" class="share-kit__espera-aviso">{{ indicacao.aviso }}</p>
               <p class="share-kit__espera-hint">{{ t('divulgacao.shareKit.esperaHint') }}</p>
+              <RouterLink class="share-kit__espera-cta" :to="PROGRAMAS_ROUTE">
+                {{ t('divulgacao.shareKit.esperaCta') }}
+                <i class="pi pi-arrow-right" aria-hidden="true" />
+              </RouterLink>
             </div>
 
             <div
@@ -1263,6 +1274,30 @@ watch(lastSuccessAt, (at) => {
   color: var(--div-muted);
   font-size: 0.8rem;
   line-height: 1.45;
+}
+
+.share-kit__espera-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+  padding: 0.6rem 1.05rem;
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--div-primary) 14%, var(--div-card));
+  color: var(--div-primary-strong);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.share-kit__espera-cta:hover,
+.share-kit__espera-cta:focus-visible {
+  background: color-mix(in srgb, var(--div-primary) 22%, var(--div-card));
+  outline: none;
+  transform: translateY(-1px);
 }
 
 .share-kit--compact {

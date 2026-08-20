@@ -80,6 +80,10 @@ export type PortalStatus = {
   statusParticipativo: StatusModoParceiro
 }
 
+/**
+ * Body do `POST /parceiro/portal/cadastro`. **Semântica replace**: campo opcional
+ * ausente vira nulo, então o reenvio manda o formulário inteiro, não um delta.
+ */
 export type ParceiroCadastroPayload = {
   nome: string
   categoria?: CategoriaParceiro | null
@@ -87,7 +91,15 @@ export type ParceiroCadastroPayload = {
   telefoneComercial?: string | null
   crmv?: string | null
   logoUrl?: string | null
+  /**
+   * Programas declarados junto do credenciamento, para o admin decidir tudo de uma vez.
+   * Omitir (ou `[]` no reenvio) significa nenhum programa e cancela o que estava só pedido.
+   */
+  programas?: ModoParticipacao[]
 }
+
+/** O PATCH é parcial de verdade e **não aceita `programas`** (400): programa muda por POST ou pela rota de solicitar. */
+export type ParceiroCadastroPatchPayload = Partial<Omit<ParceiroCadastroPayload, 'programas'>>
 
 export type ParceiroCadastro = {
   parceiroId: string
@@ -105,10 +117,12 @@ export type ParceiroCadastro = {
 /**
  * `GET /parceiro/portal/indicacao`.
  *
- * Gate de 2026-07-29: parceiro não operável (pendente/rejeitado/suspenso/inativo)
- * recebe **tudo `null`** com `podeIndicar: false` e um `aviso` por status. Não
- * existe código nem QR antes da aprovação, então os quatro campos são nuláveis
- * e a tela mostra estado de espera com o `aviso` como veio, sem copy própria.
+ * Gate composto: parceiro não operável (pendente/rejeitado/suspenso/inativo,
+ * 2026-07-29) **ou** sem Programa de Afiliados ATIVO (2026-08-19) recebe **tudo
+ * `null`** com `podeIndicar: false` e um `aviso` por status. Indicar é o
+ * instrumento do programa e segue a mesma máquina da Carteira, então os quatro
+ * campos são nuláveis e a tela mostra estado de espera com o `aviso` como veio,
+ * sem copy própria.
  */
 export type PortalIndicacao = {
   codigoIndicacao: string | null
@@ -234,6 +248,8 @@ export type CompartilhamentosQuery = {
   especie?: EspeciePet | null
   tipoServico?: TipoServicoPrestador | null
   ordenarPor?: OrdenacaoPacientes
+  /** Só acessos com prontuário junto (DIARIO ou DOCUMENTOS consentidos). */
+  comProntuario?: boolean
   /** ISO 8601, inclusivo, sobre `vinculadoEm`. */
   vinculadoDe?: string
   vinculadoAte?: string
@@ -252,11 +268,53 @@ export type TipoDocumentoAnexo =
   | 'Ultrassom'
   | 'Outro'
 
+/**
+ * Parte 15: `titulo` e `detalhe` chegam **traduzidos in-place** no locale da request
+ * (diagnósticos e comportamento no título, categoria de alergia no detalhe). Não existe
+ * campo de label separado: quem manda o `Accept-Language` certo já recebe o texto pronto.
+ * Em alergia o `titulo` é o gatilho escrito pelo responsável e nunca é traduzido.
+ */
 export type ItemSnapshot = {
   titulo: string
   detalhe?: string
   destaque?: boolean
 }
+
+/** Entrada de diário com anormalidade registrada. Labels já chegam localizados:
+ *  o portal nunca recebe enum cru aqui. */
+export type EntradaDiarioCompartilhada = {
+  data: string
+  sintomas: string[]
+  doencas: string[]
+  sintomasOutros?: string | null
+  doencasOutras?: string | null
+  vitalidade?: string | null
+  alimentacao?: string | null
+  hidratacao?: string | null
+  fezes?: string | null
+  urina?: string | null
+  cicloCio?: string | null
+  observacoes?: string | null
+  remedios?: string | null
+  /** Só com opt-in do responsável: é caixa de texto que ele escreve para si. */
+  nota?: string | null
+  /** Ids de arquivo do cofre, como em `DocumentoCompartilhado.arquivoIds`. */
+  fotoIds?: string[]
+}
+
+/** Parte 15: por que um bloco de categoria compartilhada veio vazio. */
+export type MotivoBlocoVazio = 'SEM_REGISTRO' | 'FILTRADO_JANELA'
+
+export type BlocoSnapshot =
+  | 'alergias'
+  | 'vacinas'
+  | 'medicamentos'
+  | 'comportamento'
+  | 'diagnosticos'
+  | 'diario'
+  | 'documentos'
+
+export type MotivosSnapshot = Partial<Record<BlocoSnapshot, MotivoBlocoVazio>>
 
 /** Documento que o responsável liberou item a item. `arquivoIds` são ids do cofre
  *  do acesso — nunca URL: cada abertura pede uma signed URL nova. */
@@ -280,8 +338,12 @@ export type SnapshotPetCompartilhado = {
   comportamento?: ItemSnapshot[]
   diagnosticos?: ItemSnapshot[]
   observacoesTutor?: string | null
+  /** Vazio quando a categoria DIARIO não foi liberada. */
+  diario?: EntradaDiarioCompartilhada[]
   /** Vazio quando a categoria DOCUMENTOS não foi liberada. */
   documentos?: DocumentoCompartilhado[]
+  /** Parte 15. Ausente = acesso anterior ao contrato: não inferir motivo. */
+  motivos?: MotivosSnapshot
 }
 
 export type AnexoAnotacao = {
@@ -355,6 +417,15 @@ export type CompartilhamentoResumo = {
   vinculadoEm: string
   criadoEm: string
   totalAnotacoes: number
+  /** Quantos documentos o responsável liberou item a item. `0` = nenhum. */
+  totalDocumentos: number
+  /**
+   * Há diário no acesso. Booleano, e não contagem: a quantidade de entradas só
+   * existe dentro do snapshot, que a listagem não carrega de propósito.
+   */
+  temDiario: boolean
+  /** Resumo regerado depois da entrega. `null` = ainda vale o carimbo de `criadoEm`. */
+  snapshotAtualizadoEm: string | null
 }
 
 export type CompartilhamentoDetalhe = {
@@ -376,6 +447,9 @@ export type CompartilhamentoDetalhe = {
   revogadoEm?: string | null
   vinculadoEm: string
   status: StatusCompartilhamento
+  /** Parte 15: quando o responsável mexeu no resumo depois de entregar.
+   *  `null`/ausente = o resumo é o da criação, vale `criadoEm`. */
+  snapshotAtualizadoEm?: string | null
   /** null quando EXPIRADO/REVOGADO: o dado clínico morre com o acesso. */
   snapshot: SnapshotPetCompartilhado | null
   anotacoes: Anotacao[]

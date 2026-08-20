@@ -295,15 +295,19 @@ watch(lastSuccessAt, (at) => {
             <div class="referral-card__main">
               <p class="referral-card__eyebrow">{{ t('inicio.dash.referral.eyebrow') }}</p>
 
-              <!-- Gate 2026-07-29: sem aprovação não há código nem QR. Mostrar o
+              <!-- Gate: sem cadastro aprovado (2026-07-29) ou sem Programa de
+                   Afiliados ativo (2026-08-19) não há código nem QR. Mostrar o
                    aviso do backend em vez de um traço que parece código vazio. -->
               <template v-if="!podeIndicar">
                 <p class="referral-card__espera">
                   <i class="pi pi-hourglass" aria-hidden="true" />
                   <span>{{ avisoIndicacao || t('inicio.dash.referral.esperaFallback') }}</span>
                 </p>
-                <RouterLink class="referral-card__cta" to="/parceiro/programas">
-                  {{ t('inicio.dash.referral.verCadastro') }}
+                <RouterLink
+                  class="referral-card__cta"
+                  :to="{ path: '/parceiro/programas', hash: '#programas' }"
+                >
+                  {{ t('inicio.dash.referral.esperaCta') }}
                   <i class="pi pi-arrow-right" aria-hidden="true" />
                 </RouterLink>
               </template>

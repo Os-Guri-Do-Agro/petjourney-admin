@@ -26,7 +26,9 @@ import {
   type StatusCompartilhamento,
   type TipoServicoPrestador,
 } from '@/service/parceiro/types'
+import { currentColors } from '@/theme/color-mode'
 import { calcularTempoRestante } from '@/utils/format/expiracao'
+import { carimboDoResumo } from '@/utils/parceiro/snapshot-compartilhado'
 
 const ATENDIMENTO_TABS = ['ativos', 'historico'] as const
 type AtendimentoTab = (typeof ATENDIMENTO_TABS)[number]
@@ -67,6 +69,7 @@ const filtros = reactive({
   especie: null as EspeciePet | null,
   tipoServico: null as TipoServicoPrestador | null,
   ordenarPor: 'recentes' as OrdenacaoPacientes,
+  comProntuario: false,
   vinculadoDe: '',
   vinculadoAte: '',
 })
@@ -77,9 +80,24 @@ const temFiltroAtivo = computed(
     filtros.especie != null ||
     filtros.tipoServico != null ||
     filtros.ordenarPor !== 'recentes' ||
+    filtros.comProntuario ||
     Boolean(filtros.vinculadoDe) ||
     Boolean(filtros.vinculadoAte),
 )
+
+/**
+ * Data do resumo quando o responsável o regerou depois de entregar o acesso.
+ * String vazia quando o resumo ainda é o da criação: aí não há o que avisar.
+ */
+function resumoAtualizado(item: CompartilhamentoResumo) {
+  const carimbo = carimboDoResumo(item)
+
+  if (!carimbo.atualizado) {
+    return ''
+  }
+
+  return new Date(carimbo.data).toLocaleDateString(INTL_LOCALE[locale.value as Locale])
+}
 
 const especieOptions = computed(() =>
   ESPECIES.map((value) => ({ value, label: t(`atendimentos.especie.${value}`) })),
@@ -97,6 +115,30 @@ const ordenacaoLabel = computed(() => t(`atendimentos.filtros.ordem.${filtros.or
 
 /** O grupo de datas é um filtro só; o leitor de tela anuncia assim. */
 const periodoAriaLabel = computed(() => t('atendimentos.filtros.periodo'))
+
+/**
+ * A lista do Select é teleportada para fora da `.partner-page`, então não herda os
+ * tokens `--partner-*`: eles vão junto no `pt`. Sem isso o painel cai no fundo claro
+ * que o preset do PrimeVue usa para superfície de formulário no dark.
+ */
+const selectPt = computed(() => {
+  const colors = currentColors.value
+
+  return {
+    overlay: {
+      class: 'atend-filtros__overlay',
+      style: {
+        '--atend-ov-bg': colors.dashboard.surface,
+        '--atend-ov-line': colors.dashboard.line,
+        '--atend-ov-text': colors.dashboard.text,
+        '--atend-ov-muted': colors.dashboard.muted,
+        '--atend-ov-hover': colors.dashboard.surfaceSoft,
+        '--atend-ov-selected-bg': colors.dashboard.successBg,
+        '--atend-ov-selected-text': colors.dashboard.successText,
+      },
+    },
+  }
+})
 
 const tabs = computed(() => [
   {
@@ -154,6 +196,7 @@ function queryAtual(cursorAtual?: string) {
     especie: filtros.especie ?? undefined,
     tipoServico: filtros.tipoServico ?? undefined,
     ordenarPor: filtros.ordenarPor,
+    comProntuario: filtros.comProntuario || undefined,
     vinculadoDe: dataFiltro(filtros.vinculadoDe),
     vinculadoAte: dataFiltro(filtros.vinculadoAte),
     cursor: cursorAtual,
@@ -240,6 +283,7 @@ function limparFiltros() {
   filtros.especie = null
   filtros.tipoServico = null
   filtros.ordenarPor = 'recentes'
+  filtros.comProntuario = false
   filtros.vinculadoDe = ''
   filtros.vinculadoAte = ''
 }
@@ -301,6 +345,7 @@ watch(
     filtros.especie,
     filtros.tipoServico,
     filtros.ordenarPor,
+    filtros.comProntuario,
     filtros.vinculadoDe,
     filtros.vinculadoAte,
   ],
@@ -334,7 +379,6 @@ onMounted(() => {
     :loading="false"
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
-    block-when-suspended
     @retry="ensureContext(true)"
   >
     <template #actions>
@@ -347,7 +391,10 @@ onMounted(() => {
       />
     </template>
 
-    <PartnerOperabilityBanner />
+    <!-- Leitura não é gated por auditoria (seção 4): suspenso lê a lista e o
+         prontuário, e perde só o claim e a anotação. O banner explica no lugar
+         do gate de página cheia. -->
+    <PartnerOperabilityBanner cover-suspended />
 
     <p class="atend-lede">{{ t('atendimentos.lede') }}</p>
 
@@ -401,6 +448,7 @@ onMounted(() => {
           :placeholder="t('atendimentos.filtros.especie')"
           show-clear
           size="small"
+          :pt="selectPt"
         />
 
         <label class="atend-filtros__sr" for="atend-tipo">
@@ -416,6 +464,7 @@ onMounted(() => {
           :placeholder="t('atendimentos.filtros.tipoServico')"
           show-clear
           size="small"
+          :pt="selectPt"
         />
 
         <label class="atend-filtros__sr" for="atend-ordem">
@@ -429,6 +478,7 @@ onMounted(() => {
           option-label="label"
           option-value="value"
           size="small"
+          :pt="selectPt"
         >
           <!-- Ordenação sempre tem valor, então o placeholder nunca aparece:
                o ícone é o que diz que aquele controle é a ordem da lista. -->
@@ -439,6 +489,20 @@ onMounted(() => {
             </span>
           </template>
         </Select>
+
+        <!-- Filtro binário: acesso com prontuário pede leitura antes do
+             atendimento, acesso só de identidade não. `aria-pressed` porque é
+             um estado que fica ligado, não uma ação que dispara e passa. -->
+        <button
+          type="button"
+          class="atend-filtros__toggle"
+          :class="{ 'atend-filtros__toggle--on': filtros.comProntuario }"
+          :aria-pressed="filtros.comProntuario"
+          @click="filtros.comProntuario = !filtros.comProntuario"
+        >
+          <i class="pi pi-folder-open" aria-hidden="true" />
+          {{ t('atendimentos.filtros.comProntuario') }}
+        </button>
 
         <div class="atend-filtros__periodo" role="group" :aria-label="periodoAriaLabel">
           <span class="atend-filtros__periodo-label" aria-hidden="true">
@@ -556,6 +620,21 @@ onMounted(() => {
                 <i class="pi pi-comment" aria-hidden="true" />
                 {{ t('atendimentos.list.anotacoes', { n: item.totalAnotacoes }) }}
               </span>
+              <!-- Prontuário junto: decide a ordem de leitura antes de abrir. -->
+              <span v-if="item.totalDocumentos" class="atend-row__prontuario">
+                <i class="pi pi-file" aria-hidden="true" />
+                {{ t('atendimentos.list.documentos', { n: item.totalDocumentos }) }}
+              </span>
+              <span v-if="item.temDiario" class="atend-row__prontuario">
+                <i class="pi pi-book" aria-hidden="true" />
+                {{ t('atendimentos.list.diario') }}
+              </span>
+              <!-- O responsável mexeu depois de entregar: o que foi lido ontem
+                   pode não valer mais, e em estadia isso muda a conduta. -->
+              <span v-if="resumoAtualizado(item)" class="atend-row__atualizado">
+                <i class="pi pi-refresh" aria-hidden="true" />
+                {{ t('atendimentos.list.resumoAtualizado', { data: resumoAtualizado(item) }) }}
+              </span>
             </div>
 
             <PartnerStatusBadge :status="statusBadge(item.status)" />
@@ -633,8 +712,22 @@ onMounted(() => {
 .atend-filtros__search :deep(.p-inputtext) {
   width: 100%;
   padding-left: 2.1rem;
+  border: 1px solid var(--partner-line);
   border-radius: 0.7rem;
   background: var(--partner-card);
+  /* O preset pinta o texto do campo com a cor de superfície: no dark isso some
+     dentro do próprio fundo. */
+  color: var(--partner-text);
+}
+
+.atend-filtros__search :deep(.p-inputtext::placeholder) {
+  color: var(--partner-faint);
+  opacity: 1;
+}
+
+.atend-filtros__search :deep(.p-inputtext:focus) {
+  border-color: var(--partner-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-primary) 20%, transparent);
 }
 
 .atend-filtros__limpar {
@@ -649,18 +742,67 @@ onMounted(() => {
   gap: 0.45rem;
 }
 
+/* A classe cai na raiz do próprio Select (`.p-select`), então o fundo vem daqui —
+   com `:deep(.p-select)` a regra nunca casaria e o campo herdaria a superfície de
+   formulário do preset, que é clara mesmo no dark. */
 .atend-filtros__select {
   flex: 0 1 auto;
+  width: auto;
   min-width: 8.5rem;
-}
-
-.atend-filtros__select :deep(.p-select) {
-  width: 100%;
+  border: 1px solid var(--partner-line);
   border-radius: 0.7rem;
   background: var(--partner-card);
+  color: var(--partner-text);
+}
+
+.atend-filtros__select:not(.p-disabled):hover {
+  border-color: color-mix(in srgb, var(--partner-primary) 40%, var(--partner-line));
+}
+
+/* Mesma altura e raio dos selects do lado: é mais um filtro na fileira. */
+.atend-filtros__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 1 auto;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--partner-line);
+  border-radius: 0.7rem;
+  background: var(--partner-card);
+  color: var(--partner-muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 650;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.atend-filtros__toggle:hover {
+  border-color: color-mix(in srgb, var(--partner-primary) 40%, var(--partner-line));
+}
+
+.atend-filtros__toggle:focus-visible {
+  border-color: var(--partner-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-primary) 20%, transparent);
+}
+
+.atend-filtros__toggle--on {
+  border-color: var(--partner-primary);
+  background: color-mix(in srgb, var(--partner-primary-soft) 45%, var(--partner-card));
+  color: var(--partner-primary-strong);
+}
+
+.atend-filtros__select:not(.p-disabled).p-focus {
+  border-color: var(--partner-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-primary) 20%, transparent);
 }
 
 .atend-filtros__select :deep(.p-select-label) {
+  color: var(--partner-text);
   font-size: 0.82rem;
   font-weight: 600;
 }
@@ -668,6 +810,11 @@ onMounted(() => {
 .atend-filtros__select :deep(.p-select-label.p-placeholder) {
   color: var(--partner-muted);
   font-weight: 500;
+}
+
+.atend-filtros__select :deep(.p-select-dropdown),
+.atend-filtros__select :deep(.p-select-clear-icon) {
+  color: var(--partner-muted);
 }
 
 .atend-filtros__ordem {
@@ -727,15 +874,11 @@ onMounted(() => {
   outline-offset: 1px;
 }
 
-/* Sem isto o ícone nativo do seletor de data some no modo escuro. */
+/* O ícone já vem claro no dark pelo `color-scheme` que o color-mode aplica na raiz:
+   inverter aqui o pintava de escuro sobre fundo escuro. */
 .atend-filtros__date::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  filter: invert(var(--atend-picker-invert, 0));
   opacity: 0.6;
-}
-
-:global(.app-dark) .atend-filtros__date::-webkit-calendar-picker-indicator {
-  --atend-picker-invert: 1;
 }
 
 @media (max-width: 640px) {
@@ -880,12 +1023,26 @@ onMounted(() => {
 }
 
 .atend-row__expira,
-.atend-row__anotacoes {
+.atend-row__anotacoes,
+.atend-row__prontuario,
+.atend-row__atualizado {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   color: var(--partner-muted);
   font-size: 0.78rem;
+}
+
+/* Indicador de conteúdo: informa, não alarma. */
+.atend-row__prontuario {
+  color: var(--partner-primary-strong);
+  font-weight: 650;
+}
+
+/* O resumo mudou depois da entrega: precisa saltar mais que os demais. */
+.atend-row__atualizado {
+  color: var(--partner-warm-text);
+  font-weight: 650;
 }
 
 .atend-row__expira {
@@ -926,5 +1083,33 @@ onMounted(() => {
     grid-area: badge;
     justify-self: end;
   }
+}
+</style>
+
+<style>
+/* Painel teleportado: os tokens chegam pelo `pt` (inline) e cascateiam daqui. */
+.atend-filtros__overlay.p-select-overlay {
+  border: 1px solid var(--atend-ov-line);
+  background: var(--atend-ov-bg);
+  color: var(--atend-ov-text);
+}
+
+.atend-filtros__overlay .p-select-option {
+  color: var(--atend-ov-text);
+}
+
+.atend-filtros__overlay .p-select-option:not(.p-disabled):hover,
+.atend-filtros__overlay .p-select-option.p-focus:not(.p-select-option-selected) {
+  background: var(--atend-ov-hover);
+  color: var(--atend-ov-text);
+}
+
+.atend-filtros__overlay .p-select-option.p-select-option-selected {
+  background: var(--atend-ov-selected-bg);
+  color: var(--atend-ov-selected-text);
+}
+
+.atend-filtros__overlay .p-select-empty-message {
+  color: var(--atend-ov-muted);
 }
 </style>

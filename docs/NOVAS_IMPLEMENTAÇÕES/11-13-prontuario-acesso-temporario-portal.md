@@ -1,6 +1,6 @@
 # Spec Portal: Partes 11 a 13 - Prontuario no Acesso Temporario (parceiro logado)
 
-**Status:** Draft (depende do backend das Partes 11 a 13, hoje In Review)
+**Status:** Implementada em 2026-08-14, menos o que depende da Parte 12 (ficha de encaminhamento), que nao existe no backend. Ver secao 6.1
 **Autor:** Nicolas (via /spec-driven com Claude)
 **Criado em:** 2026-08-05
 **Plataforma alvo:** **Portal do parceiro** (repo proprio, `web.petjourney.health`). Nao existe tutor nesta superficie.
@@ -104,6 +104,43 @@ Isso e comportamento aceito e registrado na Parte 8, nao um bug a corrigir no fr
 - [ ] Typecheck e lint limpos no repo do portal
 - [ ] Ancoras de codigo desta spec preenchidas por quem implementar (ver aviso do topo)
 
+---
+
+## 6.1 Ancoras de codigo (preenchido na implementacao, 2026-08-14)
+
+| O que | Onde |
+|---|---|
+| Rota de arquivo do prontuario | `src/service/parceiro/compartilhamentos-service.ts` (`getArquivoSignedUrl`) |
+| Uma URL por clique, nada cacheado | `src/pages/(accounts)/parceiro/atendimentos/[id].vue` (`comArquivoUrl`) |
+| 409 vira acesso encerrado e recarrega a tela | `src/utils/parceiro/arquivo-compartilhado.ts` + o mesmo `comArquivoUrl` |
+| Blocos do snapshot, diario e documentos | `src/utils/parceiro/snapshot-compartilhado.ts` |
+| Indicadores e filtro da lista | `src/pages/(accounts)/parceiro/atendimentos/index.vue` |
+| Leitura nao gated, anotacao gated | `PartnerOperabilityBanner.vue` (`cover-suspended`) + `podeAnotar` no detalhe |
+| Backend da lista | `petjourney-api`: `compartilhamento-prestador-parceiro.service.ts` (`listar`) e `dto/query-compartilhamento-parceiro.dto.ts` |
+
+### Estado dos AC
+
+Fechados: **AC2, AC4, AC5, AC6, AC7, AC8, AC10, AC11, AC12**.
+
+Abertos, todos pelo mesmo motivo: **a Parte 12 nao existe no backend**. Nao ha `ficha`
+no schema, no service nem no controller, entao nao ha o que renderizar.
+
+- **AC1** fecha para diario e documentos; a comparacao campo a campo com a pagina
+  publica so termina quando a ficha existir nos dois canais.
+- **AC3** (motivo da visita na lista) depende da ficha.
+- **AC9** (motivo e evidencias visiveis enquanto escreve) depende da ficha. O
+  composer ja e coluna lateral fixa, entao sobra encaixar o conteudo quando ele existir.
+
+### Desvio consciente do contrato da secao 3.1
+
+A lista devolve **`temDiario: boolean`**, nao a contagem de entradas de diario que a
+spec pede. A quantidade so existe dentro do snapshot, e a listagem nao carrega
+snapshot de proposito (D8.2/D8.5): conta-la custaria carregar o JSON clinico de cada
+linha da pagina. Para triagem, saber QUE ha diario ja decide a ordem de leitura.
+Contagem exata pede uma coluna denormalizada, com migration e backfill.
+
+`totalDocumentos` e contagem de verdade, vinda de `documentoIds`.
+
 ## 7. Perguntas em Aberto
 
 - [ ] **1** A aba `veterinario` no `petjourney-app` e o portal web convivem, ou uma esta sendo descontinuada? Se convivem, esta spec vale para as duas e a lista precisa dos indicadores nos dois lugares. Responsavel: Nicolas.
@@ -114,3 +151,4 @@ Isso e comportamento aceito e registrado na Parte 8, nao um bug a corrigir no fr
 | Data | Versao | Mudanca | Autor |
 |---|---|---|---|
 | 2026-08-05 | 0.1 | Criacao | Nicolas via Claude |
+| 2026-08-14 | 0.2 | Implementacao no portal e na lista do backend. Ancoras preenchidas, AC pendentes isolados na Parte 12 | Claude |

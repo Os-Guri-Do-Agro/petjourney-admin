@@ -25,6 +25,59 @@ export type ModoCta =
 /** Parte 9: SUSPENSO não pode re-solicitar (só o suporte reativa). */
 const SOLICITAR_STATUSES: StatusModoParceiro[] = ['NAO_SOLICITADO', 'REJEITADO']
 
+export const MODOS_PARTICIPACAO: ModoParticipacao[] = ['afiliado', 'participativo']
+
+/**
+ * Default do formulário de cadastro, também no reenvio pós-recusa: a recusa devolve
+ * os programas só pedidos para `NAO_SOLICITADO` e o backend esquece a intenção, então
+ * partir do status atual renderizaria tudo desmarcado e jogaria o parceiro de volta
+ * no funil antigo sem ele perceber.
+ */
+export const PROGRAMAS_PADRAO_CADASTRO: ModoParticipacao[] = ['afiliado']
+
+/** Programa já decidido não é mexido pelo formulário: só o que está pedido ou livre entra na submissão. */
+export function isProgramaEditavelNoCadastro(status: StatusModoParceiro) {
+  return status === 'NAO_SOLICITADO' || status === 'SOLICITADO' || status === 'REJEITADO'
+}
+
+/**
+ * Seleção inicial do formulário de cadastro/reenvio. Sem status (primeiro cadastro)
+ * vale o default; com status, o que já está `SOLICITADO` continua marcado e o que
+ * está `ATIVO`/`SUSPENSO` fica fora, porque o POST não deve mexer nele.
+ */
+export function resolveProgramasIniciais(
+  blocos?: Partial<Record<ModoParticipacao, Pick<ModoStatusBloco, 'status'>>> | null,
+): ModoParticipacao[] {
+  if (!blocos) {
+    return [...PROGRAMAS_PADRAO_CADASTRO]
+  }
+
+  return MODOS_PARTICIPACAO.filter((modo) => {
+    const status = blocos[modo]?.status
+
+    if (status === 'SOLICITADO') {
+      return true
+    }
+
+    if (status && !isProgramaEditavelNoCadastro(status)) {
+      return false
+    }
+
+    return PROGRAMAS_PADRAO_CADASTRO.includes(modo)
+  })
+}
+
+/** Programas que o admin ainda vai decidir, para a tela de espera listar o que foi pedido. */
+export function programasEmAnalise(
+  blocos?: Partial<Record<ModoParticipacao, Pick<ModoStatusBloco, 'status'>>> | null,
+): ModoParticipacao[] {
+  if (!blocos) {
+    return []
+  }
+
+  return MODOS_PARTICIPACAO.filter((modo) => blocos[modo]?.status === 'SOLICITADO')
+}
+
 export function canSolicitarModo(status: StatusModoParceiro) {
   return SOLICITAR_STATUSES.includes(status)
 }
@@ -49,8 +102,7 @@ export function getModoCardCopy(modo: ModoParticipacao): ModoCardCopy {
   return {
     title: 'Programa Participativo',
     subtitle: 'Comunidade e perks',
-    description:
-      'Faça parte da comunidade PetJourney: perks exclusivos e collabs.',
+    description: 'Faça parte da comunidade PetJourney: perks exclusivos e collabs.',
     features: [
       'Selo de parceiro participativo',
       'Perks e benefícios exclusivos',
