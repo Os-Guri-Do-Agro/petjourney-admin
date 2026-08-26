@@ -130,13 +130,13 @@ const anotacoesOrdenadas = computed(() =>
 const tabs = computed(() => {
   const resumo = {
     id: 'resumo',
-    label: t('atendimentos.detalhe.tabs.resumo.label'),
-    description: t('atendimentos.detalhe.tabs.resumo.description'),
+    label: t('acessos.detalhe.tabs.resumo.label'),
+    description: t('acessos.detalhe.tabs.resumo.description'),
   }
   const anotacoes = {
     id: 'anotacoes',
-    label: `${t('atendimentos.detalhe.tabs.anotacoes.label')} (${anotacoesOrdenadas.value.length})`,
-    description: t('atendimentos.detalhe.tabs.anotacoes.description'),
+    label: `${t('acessos.detalhe.tabs.anotacoes.label')} (${anotacoesOrdenadas.value.length})`,
+    description: t('acessos.detalhe.tabs.anotacoes.description'),
   }
 
   return isAtivo.value ? [resumo, anotacoes] : [anotacoes]
@@ -157,7 +157,7 @@ const servicoLabel = computed(() => {
     return detalhe.value.servicoOutroLabel
   }
 
-  return t(`atendimentos.servico.${detalhe.value.tipoServico}`)
+  return t(`acessos.servico.${detalhe.value.tipoServico}`)
 })
 
 function normalizeTutorText(value: string | null | undefined) {
@@ -204,21 +204,21 @@ const fonteSnapshot = computed<FonteSnapshot>(() => ({
 /** Traduz a chave de motivo que o núcleo devolveu. Genérico não afirma ausência de registro. */
 function textoMotivo(bloco: BlocoSnapshot, motivo: MotivoVazioRender) {
   if (motivo === 'FILTRADO_JANELA') {
-    return t('atendimentos.snapshot.vazio.diarioFiltrado')
+    return t('acessos.snapshot.vazio.diarioFiltrado')
   }
 
   if (motivo === 'SEM_REGISTRO') {
-    return t(`atendimentos.snapshot.vazio.semRegistro.${bloco}`)
+    return t(`acessos.snapshot.vazio.semRegistro.${bloco}`)
   }
 
-  return t('atendimentos.snapshot.vazio.generico')
+  return t('acessos.snapshot.vazio.generico')
 }
 
 /** Categoria compartilhada com bloco vazio continua rendendo seção — com o motivo. */
 const snapshotListSections = computed(() =>
   montarBlocosLista(fonteSnapshot.value).map((bloco) => ({
     id: bloco.id,
-    title: t(`atendimentos.snapshot.${bloco.id}`),
+    title: t(`acessos.snapshot.${bloco.id}`),
     icon: APARENCIA_BLOCO[bloco.id].icon,
     tone: APARENCIA_BLOCO[bloco.id].tone,
     items: bloco.items.map((item) => ({
@@ -274,7 +274,7 @@ const diario = computed(() => {
       .filter(([, valor]) => Boolean(valor?.trim()))
       .map(([chave, valor]) => ({
         chave,
-        label: t(`atendimentos.diario.campos.${chave}`),
+        label: t(`acessos.diario.campos.${chave}`),
         valor: valor as string,
       }))
 
@@ -288,7 +288,7 @@ const diario = computed(() => {
       .filter(([, valor]) => Boolean(valor?.trim()))
       .map(([chave, valor]) => ({
         chave,
-        label: t(`atendimentos.diario.campos.${chave}`),
+        label: t(`acessos.diario.campos.${chave}`),
         valor: (valor as string).trim(),
       }))
 
@@ -394,13 +394,13 @@ function expiraLabel(value: string) {
 
   switch (restante.estado) {
     case 'dias':
-      return t('atendimentos.expira.dias', { d: restante.dias, h: restante.horas })
+      return t('acessos.expira.dias', { d: restante.dias, h: restante.horas })
     case 'horas':
-      return t('atendimentos.expira.horas', { h: restante.horas, m: restante.minutos })
+      return t('acessos.expira.horas', { h: restante.horas, m: restante.minutos })
     case 'minutos':
-      return t('atendimentos.expira.minutos', { m: restante.minutos })
+      return t('acessos.expira.minutos', { m: restante.minutos })
     default:
-      return t('atendimentos.expira.expirado')
+      return t('acessos.expira.expirado')
   }
 }
 
@@ -422,7 +422,7 @@ async function loadDetalhe() {
   const id = compartilhamentoId.value
 
   if (!id) {
-    void router.replace('/parceiro/atendimentos')
+    void router.replace('/parceiro/acessos')
     return
   }
 
@@ -439,14 +439,14 @@ async function loadDetalhe() {
       return
     }
 
-    error.value = err instanceof Error ? err.message : t('atendimentos.detalhe.errorLoad')
+    error.value = err instanceof Error ? err.message : t('acessos.detalhe.errorLoad')
   } finally {
     loading.value = false
   }
 }
 
 function voltar() {
-  void router.push('/parceiro/atendimentos')
+  void router.push('/parceiro/acessos')
 }
 
 function onAnexosSelected(event: Event) {
@@ -456,17 +456,17 @@ function onAnexosSelected(event: Event) {
 
   for (const file of files) {
     if (anexosForm.value.length >= MAX_ANEXOS) {
-      formError.value = t('atendimentos.anotacao.maxAnexos', { n: MAX_ANEXOS })
+      formError.value = t('acessos.anotacao.maxAnexos', { n: MAX_ANEXOS })
       break
     }
 
     if (!MIMES_ACEITOS.includes(file.type)) {
-      formError.value = t('atendimentos.anotacao.tipoInvalido', { nome: file.name })
+      formError.value = t('acessos.anotacao.tipoInvalido', { nome: file.name })
       continue
     }
 
     if (file.size > MAX_ANEXO_BYTES) {
-      formError.value = t('atendimentos.anotacao.tamanhoInvalido', { nome: file.name })
+      formError.value = t('acessos.anotacao.tamanhoInvalido', { nome: file.name })
       continue
     }
 
@@ -492,7 +492,7 @@ function validarEstruturada() {
   estruturadaErros.value = Object.fromEntries(
     erros.map((erro) => [
       erro.id,
-      t(`atendimentos.estruturada.erros.${erro.chave}`, { ...erro.params }),
+      t(`acessos.estruturada.erros.${erro.chave}`, { ...erro.params }),
     ]),
   )
 
@@ -508,7 +508,7 @@ async function submitAnotacao() {
   const texto = anotacaoForm.texto.trim()
 
   if (!servico || !texto) {
-    formError.value = t('atendimentos.anotacao.camposObrigatorios')
+    formError.value = t('acessos.anotacao.camposObrigatorios')
     return
   }
 
@@ -519,12 +519,12 @@ async function submitAnotacao() {
     texto.length > LIMITES_CAMPOS_LIVRES.texto ||
     anotacaoForm.profissionalNome.trim().length > LIMITES_CAMPOS_LIVRES.profissionalNome
   ) {
-    formError.value = t('atendimentos.anotacao.textoLongo')
+    formError.value = t('acessos.anotacao.textoLongo')
     return
   }
 
   if (!validarEstruturada()) {
-    formError.value = t('atendimentos.estruturada.erros.formulario')
+    formError.value = t('acessos.estruturada.erros.formulario')
     return
   }
 
@@ -554,14 +554,14 @@ async function submitAnotacao() {
     resetAnotacaoForm()
     toast.add({
       severity: 'success',
-      summary: t('atendimentos.anotacao.criada'),
+      summary: t('acessos.anotacao.criada'),
       life: 3500,
     })
   } catch (err) {
     if (err instanceof ApiError && err.statusCode === 409) {
-      formError.value = t('atendimentos.anotacao.encerrado')
+      formError.value = t('acessos.anotacao.encerrado')
     } else {
-      formError.value = err instanceof Error ? err.message : t('atendimentos.anotacao.erro')
+      formError.value = err instanceof Error ? err.message : t('acessos.anotacao.erro')
     }
   } finally {
     submittingAnotacao.value = false
@@ -581,8 +581,8 @@ async function abrirAnexo(anexoId: string) {
   } catch {
     toast.add({
       severity: 'warn',
-      summary: t('atendimentos.anexo.indisponivel'),
-      detail: t('atendimentos.anexo.indisponivelDetail'),
+      summary: t('acessos.anexo.indisponivel'),
+      detail: t('acessos.anexo.indisponivelDetail'),
       life: 4500,
     })
   } finally {
@@ -627,8 +627,8 @@ async function comArquivoUrl(
     if (classificarFalhaArquivo(err) === 'ACESSO_ENCERRADO') {
       toast.add({
         severity: 'warn',
-        summary: t('atendimentos.anexo.acessoEncerrado'),
-        detail: t('atendimentos.anexo.acessoEncerradoDetail'),
+        summary: t('acessos.anexo.acessoEncerrado'),
+        detail: t('acessos.anexo.acessoEncerradoDetail'),
         life: 6000,
       })
       await loadDetalhe()
@@ -637,8 +637,8 @@ async function comArquivoUrl(
 
     toast.add({
       severity: 'warn',
-      summary: t('atendimentos.anexo.indisponivel'),
-      detail: t('atendimentos.anexo.indisponivelDetail'),
+      summary: t('acessos.anexo.indisponivel'),
+      detail: t('acessos.anexo.indisponivelDetail'),
       life: 4500,
     })
   } finally {
@@ -686,8 +686,8 @@ onMounted(() => {
 
 <template>
   <PartnerPageFrame
-    :subtitle="t('atendimentos.detalhe.subtitle')"
-    :title="detalhe?.petNome ?? t('atendimentos.detalhe.title')"
+    :subtitle="t('acessos.detalhe.subtitle')"
+    :title="detalhe?.petNome ?? t('acessos.detalhe.title')"
     :loading="loading"
     :error="error"
     :no-partner-access="store.semAcessoParceiro"
@@ -695,7 +695,7 @@ onMounted(() => {
   >
     <template #actions>
       <Button
-        :label="t('atendimentos.detalhe.back')"
+        :label="t('acessos.detalhe.back')"
         icon="pi pi-arrow-left"
         severity="secondary"
         @click="voltar"
@@ -733,13 +733,13 @@ onMounted(() => {
                 ·
                 {{
                   detalhe.petCastrado
-                    ? t('atendimentos.pet.castrado')
-                    : t('atendimentos.pet.naoCastrado')
+                    ? t('acessos.pet.castrado')
+                    : t('acessos.pet.naoCastrado')
                 }}
               </template>
             </p>
 
-            <div class="atd-hero__tags" :aria-label="t('atendimentos.detalhe.metaAria')">
+            <div class="atd-hero__tags" :aria-label="t('acessos.detalhe.metaAria')">
               <span class="atd-hero__tag atd-hero__tag--service">
                 <i class="pi pi-briefcase" aria-hidden="true" />
                 {{ servicoLabel }}
@@ -754,7 +754,7 @@ onMounted(() => {
 
         <dl v-if="pesoKg != null" class="atd-hero__facts">
           <div class="atd-hero__fact">
-            <dt>{{ t('atendimentos.snapshot.peso') }}</dt>
+            <dt>{{ t('acessos.snapshot.peso') }}</dt>
             <dd>{{ pesoKg }} kg</dd>
           </div>
         </dl>
@@ -764,12 +764,12 @@ onMounted(() => {
       <section v-if="!isAtivo" class="atd-closed" role="status">
         <i class="pi pi-lock" aria-hidden="true" />
         <div>
-          <strong>{{ t('atendimentos.encerrado.title') }}</strong>
+          <strong>{{ t('acessos.encerrado.title') }}</strong>
           <p>
             {{
               detalhe.status === 'REVOGADO'
-                ? t('atendimentos.encerrado.revogado')
-                : t('atendimentos.encerrado.expirado')
+                ? t('acessos.encerrado.revogado')
+                : t('acessos.encerrado.expirado')
             }}
           </p>
         </div>
@@ -795,10 +795,10 @@ onMounted(() => {
           <i :class="carimbo.atualizado ? 'pi pi-history' : 'pi pi-clock'" aria-hidden="true" />
           <span>{{
             carimbo.atualizado
-              ? t('atendimentos.snapshot.carimboAtualizado', {
+              ? t('acessos.snapshot.carimboAtualizado', {
                   data: formatDateTime(carimbo.data),
                 })
-              : t('atendimentos.snapshot.carimbo', { data: formatDateTime(carimbo.data) })
+              : t('acessos.snapshot.carimbo', { data: formatDateTime(carimbo.data) })
           }}</span>
         </p>
 
@@ -808,10 +808,10 @@ onMounted(() => {
           <span class="atd-empty__icon" aria-hidden="true">
             <i class="pi pi-lock-open" />
           </span>
-          <strong>{{ t('atendimentos.snapshot.emptyTitle') }}</strong>
-          <p>{{ t('atendimentos.snapshot.emptyBody', { pet: detalhe.petNome }) }}</p>
+          <strong>{{ t('acessos.snapshot.emptyTitle') }}</strong>
+          <p>{{ t('acessos.snapshot.emptyBody', { pet: detalhe.petNome }) }}</p>
           <Button
-            :label="t('atendimentos.snapshot.emptyCta')"
+            :label="t('acessos.snapshot.emptyCta')"
             icon="pi pi-pencil"
             size="small"
             @click="setTab('anotacoes')"
@@ -824,7 +824,7 @@ onMounted(() => {
               <span class="atd-callout__icon" aria-hidden="true">
                 <i class="pi pi-comment" />
               </span>
-              <h3>{{ t('atendimentos.detalhe.mensagemTutor') }}</h3>
+              <h3>{{ t('acessos.detalhe.mensagemTutor') }}</h3>
             </header>
             <p>{{ mensagemTutor }}</p>
           </section>
@@ -834,7 +834,7 @@ onMounted(() => {
               <span class="atd-callout__icon" aria-hidden="true">
                 <i class="pi pi-info-circle" />
               </span>
-              <h3>{{ t('atendimentos.snapshot.observacoes') }}</h3>
+              <h3>{{ t('acessos.snapshot.observacoes') }}</h3>
             </header>
             <p>{{ observacoesTutor }}</p>
           </section>
@@ -847,11 +847,11 @@ onMounted(() => {
         >
           <header class="atd-clinical__head">
             <div>
-              <h2 id="atd-clinical-title">{{ t('atendimentos.snapshot.clinicalTitle') }}</h2>
-              <p>{{ t('atendimentos.snapshot.clinicalLede') }}</p>
+              <h2 id="atd-clinical-title">{{ t('acessos.snapshot.clinicalTitle') }}</h2>
+              <p>{{ t('acessos.snapshot.clinicalLede') }}</p>
             </div>
             <span class="atd-clinical__count">{{
-              t('atendimentos.snapshot.sectionsCount', { n: snapshotListSections.length })
+              t('acessos.snapshot.sectionsCount', { n: snapshotListSections.length })
             }}</span>
           </header>
 
@@ -878,8 +878,8 @@ onMounted(() => {
                     <strong>{{ section.title }}</strong>
                     <small>{{
                       section.items.length
-                        ? t('atendimentos.snapshot.itemsCount', { n: section.items.length })
-                        : t('atendimentos.snapshot.semItens')
+                        ? t('acessos.snapshot.itemsCount', { n: section.items.length })
+                        : t('acessos.snapshot.semItens')
                     }}</small>
                   </span>
                   <i
@@ -925,11 +925,11 @@ onMounted(() => {
         >
           <header class="atd-docs__head">
             <div>
-              <h2 id="atd-docs-title">{{ t('atendimentos.documentos.title') }}</h2>
-              <p>{{ t('atendimentos.documentos.lede') }}</p>
+              <h2 id="atd-docs-title">{{ t('acessos.documentos.title') }}</h2>
+              <p>{{ t('acessos.documentos.lede') }}</p>
             </div>
             <span v-if="documentos.length" class="atd-docs__count">{{
-              t('atendimentos.documentos.count', { n: documentos.length })
+              t('acessos.documentos.count', { n: documentos.length })
             }}</span>
           </header>
 
@@ -946,39 +946,39 @@ onMounted(() => {
                 <small class="atd-doc__meta">
                   <span class="atd-doc__tipo">{{ doc.tipo }}</span>
                   <template v-if="doc.emissao">
-                    {{ t('atendimentos.documentos.emissao', { data: doc.emissao }) }}
+                    {{ t('acessos.documentos.emissao', { data: doc.emissao }) }}
                   </template>
                   <template v-if="doc.expiracao">
-                    {{ t('atendimentos.documentos.expiracao', { data: doc.expiracao }) }}
+                    {{ t('acessos.documentos.expiracao', { data: doc.expiracao }) }}
                   </template>
                 </small>
               </div>
 
               <p v-if="!doc.arquivos.length" class="atd-doc__empty">
-                {{ t('atendimentos.documentos.semArquivo') }}
+                {{ t('acessos.documentos.semArquivo') }}
               </p>
 
               <ul v-else class="atd-doc__files">
                 <li v-for="(arquivo, index) in doc.arquivos" :key="arquivo.id">
                   <span v-if="doc.arquivos.length > 1" class="atd-doc__file-label">
-                    {{ t('atendimentos.documentos.arquivoN', { n: index + 1 }) }}
+                    {{ t('acessos.documentos.arquivoN', { n: index + 1 }) }}
                   </span>
                   <Button
-                    :label="t('atendimentos.documentos.abrir')"
+                    :label="t('acessos.documentos.abrir')"
                     icon="pi pi-external-link"
                     severity="secondary"
                     outlined
                     size="small"
                     :loading="arquivoOcupado === `abrir:${arquivo.id}`"
-                    :aria-label="`${t('atendimentos.documentos.abrir')}: ${doc.nome}`"
+                    :aria-label="`${t('acessos.documentos.abrir')}: ${doc.nome}`"
                     @click="abrirArquivo(arquivo.id)"
                   />
                   <Button
-                    :label="t('atendimentos.documentos.baixar')"
+                    :label="t('acessos.documentos.baixar')"
                     icon="pi pi-download"
                     size="small"
                     :loading="arquivoOcupado === `baixar:${arquivo.id}`"
-                    :aria-label="`${t('atendimentos.documentos.baixar')}: ${doc.nome}`"
+                    :aria-label="`${t('acessos.documentos.baixar')}: ${doc.nome}`"
                     @click="baixarArquivo(arquivo.id, arquivo.nome)"
                   />
                 </li>
@@ -996,11 +996,11 @@ onMounted(() => {
         >
           <header class="atd-docs__head">
             <div>
-              <h2 id="atd-diario-title">{{ t('atendimentos.diario.title') }}</h2>
-              <p>{{ t('atendimentos.diario.lede') }}</p>
+              <h2 id="atd-diario-title">{{ t('acessos.diario.title') }}</h2>
+              <p>{{ t('acessos.diario.lede') }}</p>
             </div>
             <span v-if="diario.length" class="atd-docs__count">{{
-              t('atendimentos.diario.count', { n: diario.length })
+              t('acessos.diario.count', { n: diario.length })
             }}</span>
           </header>
 
@@ -1047,12 +1047,12 @@ onMounted(() => {
 
               <div v-if="entrada.fotoIds.length" class="atd-diario__fotos">
                 <span class="atd-diario__fotos-label">
-                  {{ t('atendimentos.diario.fotos', { n: entrada.fotoIds.length }) }}
+                  {{ t('acessos.diario.fotos', { n: entrada.fotoIds.length }) }}
                 </span>
                 <Button
                   v-for="(fotoId, index) in entrada.fotoIds"
                   :key="fotoId"
-                  :label="t('atendimentos.diario.abrirFoto', { n: index + 1 })"
+                  :label="t('acessos.diario.abrirFoto', { n: index + 1 })"
                   icon="pi pi-image"
                   severity="secondary"
                   outlined
@@ -1078,11 +1078,11 @@ onMounted(() => {
           <section class="atd-notes__feed" aria-labelledby="atd-notes-title">
             <header class="atd-notes__head">
               <div>
-                <h2 id="atd-notes-title">{{ t('atendimentos.anotacoes.title') }}</h2>
-                <p>{{ t('atendimentos.anotacoes.lede') }}</p>
+                <h2 id="atd-notes-title">{{ t('acessos.anotacoes.title') }}</h2>
+                <p>{{ t('acessos.anotacoes.lede') }}</p>
               </div>
               <span v-if="anotacoesOrdenadas.length" class="atd-notes__count">{{
-                t('atendimentos.anotacoes.count', { n: anotacoesOrdenadas.length })
+                t('acessos.anotacoes.count', { n: anotacoesOrdenadas.length })
               }}</span>
             </header>
 
@@ -1090,12 +1090,12 @@ onMounted(() => {
               <span class="atd-empty__icon" aria-hidden="true">
                 <i class="pi pi-pencil" />
               </span>
-              <strong>{{ t('atendimentos.anotacoes.empty') }}</strong>
+              <strong>{{ t('acessos.anotacoes.empty') }}</strong>
               <p>
                 {{
                   isAtivo
-                    ? t('atendimentos.anotacoes.emptyHint')
-                    : t('atendimentos.anotacoes.emptyHintClosed')
+                    ? t('acessos.anotacoes.emptyHint')
+                    : t('acessos.anotacoes.emptyHintClosed')
                 }}
               </p>
             </div>
@@ -1135,7 +1135,7 @@ onMounted(() => {
 
                   <div v-if="anotacao.anexos.length" class="atd-note__files">
                     <p class="atd-note__files-label">
-                      {{ t('atendimentos.anotacoes.anexosLabel') }}
+                      {{ t('acessos.anotacoes.anexosLabel') }}
                       <span>{{ anotacao.anexos.length }}</span>
                     </p>
                     <ul class="atd-note__attachments">
@@ -1144,7 +1144,7 @@ onMounted(() => {
                           type="button"
                           class="atd-note__file"
                           :disabled="abrindoAnexoId === anexo.id"
-                          :aria-label="`${t('atendimentos.anotacoes.abrirAnexo')}: ${anexo.nome}`"
+                          :aria-label="`${t('acessos.anotacoes.abrirAnexo')}: ${anexo.nome}`"
                           @click="abrirAnexo(anexo.id)"
                         >
                           <span class="atd-note__file-icon" aria-hidden="true">
@@ -1178,8 +1178,8 @@ onMounted(() => {
           <aside v-if="somenteLeitura" class="atd-readonly" role="status">
             <i class="pi pi-eye" aria-hidden="true" />
             <div>
-              <strong>{{ t('atendimentos.anotacao.somenteLeitura.title') }}</strong>
-              <p>{{ t('atendimentos.anotacao.somenteLeitura.body') }}</p>
+              <strong>{{ t('acessos.anotacao.somenteLeitura.title') }}</strong>
+              <p>{{ t('acessos.anotacao.somenteLeitura.body') }}</p>
             </div>
           </aside>
 
@@ -1189,8 +1189,8 @@ onMounted(() => {
                 <i class="pi pi-plus" />
               </span>
               <div>
-                <h3 id="atd-composer-title">{{ t('atendimentos.anotacao.title') }}</h3>
-                <p>{{ t('atendimentos.anotacao.lede') }}</p>
+                <h3 id="atd-composer-title">{{ t('acessos.anotacao.title') }}</h3>
+                <p>{{ t('acessos.anotacao.lede') }}</p>
               </div>
             </header>
 
@@ -1198,24 +1198,24 @@ onMounted(() => {
 
             <div class="atd-composer__fields">
               <div class="atd-field">
-                <label for="anot-servico">{{ t('atendimentos.anotacao.servico') }}</label>
+                <label for="anot-servico">{{ t('acessos.anotacao.servico') }}</label>
                 <InputText
                   id="anot-servico"
                   v-model="anotacaoForm.servicoRealizado"
                   :maxlength="LIMITES_CAMPOS_LIVRES.servicoRealizado"
-                  :placeholder="t('atendimentos.anotacao.servicoPlaceholder')"
+                  :placeholder="t('acessos.anotacao.servicoPlaceholder')"
                 />
               </div>
 
               <div class="atd-field">
-                <label for="anot-texto">{{ t('atendimentos.anotacao.texto') }}</label>
+                <label for="anot-texto">{{ t('acessos.anotacao.texto') }}</label>
                 <Textarea
                   id="anot-texto"
                   v-model="anotacaoForm.texto"
                   rows="5"
                   auto-resize
                   :maxlength="LIMITES_CAMPOS_LIVRES.texto"
-                  :placeholder="t('atendimentos.anotacao.textoPlaceholder')"
+                  :placeholder="t('acessos.anotacao.textoPlaceholder')"
                 />
               </div>
 
@@ -1228,18 +1228,18 @@ onMounted(() => {
               />
 
               <div class="atd-field">
-                <label for="anot-profissional">{{ t('atendimentos.anotacao.profissional') }}</label>
+                <label for="anot-profissional">{{ t('acessos.anotacao.profissional') }}</label>
                 <InputText
                   id="anot-profissional"
                   v-model="anotacaoForm.profissionalNome"
                   :maxlength="LIMITES_CAMPOS_LIVRES.profissionalNome"
-                  :placeholder="t('atendimentos.anotacao.profissionalPlaceholder')"
+                  :placeholder="t('acessos.anotacao.profissionalPlaceholder')"
                 />
               </div>
 
               <div class="atd-field atd-field--files">
                 <span class="atd-field__label">
-                  {{ t('atendimentos.anotacao.anexos', { n: MAX_ANEXOS }) }}
+                  {{ t('acessos.anotacao.anexos', { n: MAX_ANEXOS }) }}
                 </span>
 
                 <ul v-if="anexosForm.length" class="atd-anexo-list">
@@ -1255,14 +1255,14 @@ onMounted(() => {
                         severity="secondary"
                         text
                         rounded
-                        :aria-label="t('atendimentos.anotacao.removerAnexo')"
+                        :aria-label="t('acessos.anotacao.removerAnexo')"
                         @click="removeAnexo(index)"
                       />
                     </div>
 
                     <div class="atd-anexo-list__type">
                       <label :for="`anexo-tipo-${index}`">{{
-                        t('atendimentos.anotacao.tipoDocumento')
+                        t('acessos.anotacao.tipoDocumento')
                       }}</label>
                       <Select
                         :id="`anexo-tipo-${index}`"
@@ -1271,7 +1271,7 @@ onMounted(() => {
                         :options="tiposDocumentoOptions"
                         option-label="label"
                         option-value="value"
-                        :placeholder="t('atendimentos.anotacao.tipoDocumentoPlaceholder')"
+                        :placeholder="t('acessos.anotacao.tipoDocumentoPlaceholder')"
                         show-clear
                         size="small"
                       />
@@ -1288,17 +1288,17 @@ onMounted(() => {
                     @change="onAnexosSelected"
                   />
                   <i class="pi pi-paperclip" aria-hidden="true" />
-                  {{ t('atendimentos.anotacao.adicionarAnexo') }}
+                  {{ t('acessos.anotacao.adicionarAnexo') }}
                 </label>
                 <small class="atd-file-hint">
-                  {{ t('atendimentos.anotacao.anexoHint') }}
+                  {{ t('acessos.anotacao.anexoHint') }}
                 </small>
               </div>
             </div>
 
             <footer class="atd-composer__footer">
               <Button
-                :label="t('atendimentos.anotacao.enviar')"
+                :label="t('acessos.anotacao.enviar')"
                 icon="pi pi-check"
                 :loading="submittingAnotacao"
                 @click="submitAnotacao"

@@ -5,13 +5,14 @@ import { useRoute, useRouter } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
+import SettingsAparenciaPanel from '@/components/settings/SettingsAparenciaPanel.vue'
 import SettingsContaPanel from '@/components/settings/SettingsContaPanel.vue'
 import SettingsEmpresaPanel from '@/components/settings/SettingsEmpresaPanel.vue'
 import SettingsPerfilPanel from '@/components/settings/SettingsPerfilPanel.vue'
 import SettingsSegurancaPanel from '@/components/settings/SettingsSegurancaPanel.vue'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
 
-const SETTINGS_TABS = ['perfil', 'empresa', 'seguranca', 'conta'] as const
+const SETTINGS_TABS = ['perfil', 'empresa', 'seguranca', 'aparencia', 'conta'] as const
 type SettingsTab = (typeof SETTINGS_TABS)[number]
 
 const HASH_TO_TAB: Record<string, SettingsTab> = {
@@ -20,6 +21,8 @@ const HASH_TO_TAB: Record<string, SettingsTab> = {
   credenciamento: 'empresa',
   seguranca: 'seguranca',
   segurança: 'seguranca',
+  aparencia: 'aparencia',
+  aparência: 'aparencia',
   conta: 'conta',
 }
 
@@ -43,6 +46,11 @@ const tabs = computed(() => [
     id: 'seguranca',
     label: t('settings.tabs.seguranca.label'),
     description: t('settings.tabs.seguranca.description'),
+  },
+  {
+    id: 'aparencia',
+    label: t('settings.tabs.aparencia.label'),
+    description: t('settings.tabs.aparencia.description'),
   },
   {
     id: 'conta',
@@ -101,6 +109,7 @@ watch(
     <SettingsPerfilPanel v-if="activeTab === 'perfil'" />
     <SettingsEmpresaPanel v-else-if="activeTab === 'empresa'" />
     <SettingsSegurancaPanel v-else-if="activeTab === 'seguranca'" />
+    <SettingsAparenciaPanel v-else-if="activeTab === 'aparencia'" />
     <SettingsContaPanel v-else />
   </PartnerPageFrame>
 </template>

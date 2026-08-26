@@ -74,7 +74,7 @@ curl -X DELETE "$API/parceiro/<parceiroId>" \
 - [ ] Nenhum redirect automático para o login, e nenhum loop.
 - [ ] **Sair** limpa a sessão e leva ao login; voltar no histórico não devolve o portal.
 
-Repita entrando por `/parceiro/divulgacao`, `/parceiro/programas`, `/parceiro/atendimentos` e
+Repita entrando por `/parceiro/divulgacao`, `/parceiro/programas`, `/parceiro/acessos` e
 `/parceiro/carteira?aba=extrato`: todas devem cair na mesma tela.
 
 ### 3.2 Login novo depois da exclusão (spec §2.3)

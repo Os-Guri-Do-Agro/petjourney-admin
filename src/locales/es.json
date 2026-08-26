@@ -255,21 +255,19 @@
   },
   "nav": {
     "sections": {
-      "home": "Inicio",
-      "portal": "Portal",
-      "account": "Cuenta",
-      "homeSubtitle": "Contenido general"
-    },
-    "groups": {
-      "overview": "Panel",
       "portal": "Portal",
       "account": "Cuenta"
+    },
+    "groups": {
+      "portal": "Portal",
+      "account": "Cuenta",
+      "pets": "Mascotas"
     },
     "items": {
       "overview": "Vista general",
       "programas": "Programas",
       "divulgacao": "Divulgación",
-      "atendimentos": "Atenciones",
+      "acessos": "Accesos",
       "financeiro": "Finanzas",
       "settings": "Configuración"
     },
@@ -279,7 +277,7 @@
       "financeiro": "Finanzas",
       "programas": "Programas de participación",
       "divulgacao": "Divulgación",
-      "atendimentos": "Atenciones",
+      "acessos": "Accesos",
       "convite": "Aceptar invitación",
       "selecionar": "Seleccionar socio",
       "portal": "Portal",
@@ -289,7 +287,7 @@
   },
   "shell": {
     "logout": "Cerrar sesión",
-    "menuHeading": "Menú",
+    "telasNaSecao": "una pantalla | {contagem} pantallas",
     "filterPlaceholder": "Filtrar pantallas...",
     "filterEmpty": "No se encontró ninguna pantalla para “{q}”.",
     "filterClear": "Limpiar filtro",
@@ -750,9 +748,9 @@
       }
     }
   },
-  "atendimentos": {
+  "acessos": {
     "subtitle": "Portal",
-    "title": "Atenciones",
+    "title": "Accesos",
     "lede": "Compartidos de mascotas vinculados a su empresa: snapshot, historial y notas autenticadas.",
     "tabs": {
       "ativos": {
@@ -1409,10 +1407,54 @@
         "label": "Seguridad",
         "description": "Cambio de contraseña de la cuenta autenticada."
       },
+      "aparencia": {
+        "label": "Apariencia",
+        "description": "Tema, formato del menú lateral y densidad de las listas."
+      },
       "conta": {
         "label": "Cuenta",
         "description": "Sesión, desactivación de perfil y preferencias futuras."
       }
+    },
+    "aparencia": {
+      "tema": {
+        "titulo": "Tema",
+        "descricao": "Vale para este navegador. La opción sigue disponible arriba en la pantalla.",
+        "claro": {
+          "label": "Claro",
+          "hint": "Fondo claro, el estándar del panel."
+        },
+        "escuro": {
+          "label": "Oscuro",
+          "hint": "Fondo oscuro, para ambientes con poca luz."
+        }
+      },
+      "menu": {
+        "titulo": "Menú lateral",
+        "descricao": "Cómo se organizan las pantallas del panel en el lateral.",
+        "secoes": {
+          "label": "Secciones",
+          "hint": "Barra de iconos a la izquierda y, al lado, solo las pantallas de la sección abierta."
+        },
+        "lista": {
+          "label": "Lista única",
+          "hint": "Una sola columna, con todas las secciones abiertas a la vez."
+        }
+      },
+      "densidade": {
+        "titulo": "Densidad",
+        "descricao": "Altura de las filas del menú.",
+        "confortavel": {
+          "label": "Cómoda",
+          "hint": "Más espacio entre los elementos."
+        },
+        "compacta": {
+          "label": "Compacta",
+          "hint": "Más pantallas visibles sin desplazarse."
+        }
+      },
+      "nota": "Las preferencias quedan en este navegador y valen en el próximo acceso.",
+      "aplicada": "en uso"
     },
     "perfil": {
       "fallbackName": "Usuario",
@@ -1653,6 +1695,839 @@
           }
         }
       }
+    }
+  },
+  "clinico": {
+    "modulo": "Clínica",
+    "formato": {
+      "minutos": "{valor} min",
+      "horas": "{valor} h",
+      "horasMinutos": "{horas} h {minutos} min",
+      "agora": "ahora",
+      "haTempo": "hace {valor}",
+      "emTempo": "en {valor}",
+      "anos": "{valor} años",
+      "meses": "{valor} meses",
+      "anosMeses": "{anos}a {meses}m",
+      "semvalor": "—",
+      "dias": "{valor} día | {valor} días",
+      "idadeDesconhecida": "edad no informada"
+    },
+    "sexo": {
+      "macho": "Macho",
+      "femea": "Hembra"
+    },
+    "especie": {
+      "canina": "Canina",
+      "felina": "Felina",
+      "ave": "Ave",
+      "roedor": "Roedor",
+      "reptil": "Reptil",
+      "equina": "Equina"
+    },
+    "status": {
+      "agendado": "Agendado",
+      "confirmado": "Confirmado",
+      "aguardando": "En espera",
+      "em-atendimento": "En consulta",
+      "finalizado": "Finalizado",
+      "falta": "Ausencia",
+      "cancelado": "Cancelado"
+    },
+    "origem": {
+      "recepcao": "Recepción",
+      "app": "Aplicación",
+      "telefone": "Teléfono",
+      "encaixe": "Sobrecupo",
+      "retorno": "Control",
+      "fila": "Lista de espera"
+    },
+    "bloqueio": {
+      "almoco": "Almuerzo",
+      "reuniao": "Reunión",
+      "ferias": "Vacaciones",
+      "manutencao": "Mantenimiento",
+      "bloqueio-pessoal": "Bloqueo personal",
+      "feriado": "Feriado"
+    },
+    "cancelamento": {
+      "responsavel-desmarcou": "El tutor canceló",
+      "clinica-remarcou": "La clínica reprogramó",
+      "paciente-indisponivel": "Paciente no disponible",
+      "duplicado": "Cita duplicada",
+      "outro": "Otro motivo"
+    },
+    "alertas": {
+      "alergia": "Alergia",
+      "agressivo": "Manejo con sujeción",
+      "cronico": "Condición crónica",
+      "imunossuprimido": "Inmunodeprimido",
+      "gestante": "Gestante",
+      "inadimplente": "Pendiente de pago"
+    },
+    "severidade": {
+      "info": "Información",
+      "atencao": "Atención",
+      "risco": "Riesgo"
+    },
+    "conflitos": {
+      "professional-overlap": "Se superpone con {paciente}, de las {hora} — {minutos} min en común.",
+      "room-overlap": "La sala {sala} ya está ocupada por {paciente} en ese horario.",
+      "pet-double-book": "{paciente} ya tiene una cita a las {hora}.",
+      "block-invasion": "Invade un bloqueo de {motivo} por {minutos} min.",
+      "outside-hours": "Fuera del horario, que va de {abre} a {fecha}.",
+      "lunch-overlap": "Atraviesa el almuerzo por {minutos} min.",
+      "holiday-closed": "La clínica está cerrada: {feriado}.",
+      "over-capacity": "La carga del día sube a {minutos} min, sobre los {capacidade} min habituales.",
+      "type-room-mismatch": "La sala {sala} no es la indicada para {tipo}."
+    },
+    "paciente": {
+      "responsavel": "Tutor",
+      "castrado": "Castrado",
+      "inteiro": "Entero",
+      "semPeso": "Peso no registrado",
+      "verHistorico": "Ver historial",
+      "abrirProntuario": "Abrir historia clínica",
+      "novo": {
+        "atalho": "Registrar nuevo paciente",
+        "titulo": "Nuevo paciente",
+        "ajuda": "Solo lo esencial para agendar. Nacimiento y peso pueden quedar para la consulta.",
+        "nome": "Nombre del paciente",
+        "raca": "Raza",
+        "sexo": "Sexo",
+        "nascimento": "Nacimiento (opcional)",
+        "peso": "Peso (opcional)",
+        "castrado": "Castrado",
+        "responsavelNovo": "Registrar nuevo responsable",
+        "buscarResponsavel": "Buscar responsable",
+        "nomeResponsavel": "Nombre del responsable",
+        "telefone": "Teléfono",
+        "documento": "Documento (opcional)",
+        "email": "Correo (opcional)",
+        "salvar": "Registrar y usar",
+        "erro": "No se pudo registrar el paciente."
+      }
+    },
+    "tabela": {
+      "carregando": "Cargando…",
+      "vazio": "Nada por aquí",
+      "tentarDeNovo": "Reintentar"
+    },
+    "erros": {
+      "catalogos": "No se pudieron cargar los datos de la clínica.",
+      "agenda": "No se pudo cargar la agenda.",
+      "mutacao": "El cambio no se guardó. Inténtalo de nuevo.",
+      "prontuario": "No se pudo cargar la historia clínica.",
+      "fila": "No se pudo cargar la lista de espera."
+    },
+    "densidade": {
+      "titulo": "Densidad",
+      "compacta": "Compacta",
+      "media": "Media",
+      "confortavel": "Cómoda"
+    },
+    "zoom": {
+      "titulo": "Zoom de la grilla",
+      "reduzido": "Reducido",
+      "medio": "Medio",
+      "ampliado": "Ampliado"
+    },
+    "agenda": {
+      "titulo": "Agenda",
+      "subtitulo": "Clínica",
+      "hoje": "Hoy",
+      "diaAnterior": "Día anterior",
+      "proximoDia": "Día siguiente",
+      "visaoDia": "Día",
+      "visaoSemana": "Semana",
+      "agruparPorProfissional": "Por profesional",
+      "agruparPorSala": "Por sala",
+      "novoAtendimento": "Nueva cita",
+      "encaixar": "Sobrecupo",
+      "bloquear": "Bloquear horario",
+      "ocultarCancelados": "Ocultar canceladas",
+      "filtros": "Filtros",
+      "limparFiltros": "Limpiar filtros",
+      "vazioTitulo": "Ninguna cita este día",
+      "vazioDescricao": "Agenda la primera cita o vuelve a un día con agenda.",
+      "fechadaTitulo": "Clínica cerrada",
+      "fechadaDescricao": "Es {feriado}. Aún se puede agendar, con confirmación.",
+      "linhaDoAgora": "Ahora",
+      "encaixeMarca": "Sobrecupo",
+      "duasSalas": "Ocupa dos salas",
+      "ocupacao": "{minutos} min ocupados",
+      "conflitosNoCard": "{contagem} aviso | {contagem} avisos",
+      "semSala": "Sin sala definida",
+      "colunaVazia": "Sin citas",
+      "arrastarDica": "Arrastra para reprogramar. Shift + flechas mueven de 15 en 15 minutos.",
+      "desfazer": "Deshacer",
+      "desfeito": {
+        "mover": "Cita reprogramada.",
+        "cancelar": "Cita cancelada.",
+        "falta": "Ausencia registrada.",
+        "criar": "Cita creada.",
+        "status": "Estado actualizado."
+      },
+      "mover": {
+        "titulo": "Confirmar reprogramación",
+        "de": "De",
+        "para": "A",
+        "profissional": "Profesional",
+        "mensagem": "Mensaje que se envía al tutor",
+        "mensagemPadrao": "¡Hola! La cita de {paciente} se reprogramó para el {data}, a las {hora}. Cualquier cosa, responde por aquí.",
+        "confirmar": "Reprogramar",
+        "confirmarComAviso": "Reprogramar de todos modos",
+        "cancelar": "Dejar como está"
+      },
+      "encaixeDialogo": {
+        "titulo": "Agregar sobrecupo",
+        "descricao": "El sobrecupo entra fuera de la grilla y queda marcado como tal.",
+        "confirmar": "Agregar de todos modos"
+      },
+      "fechadaDialogo": {
+        "titulo": "Agendar en día cerrado",
+        "descricao": "La clínica está cerrada el {feriado}. Confirma dos veces para que nadie agende sin darse cuenta.",
+        "primeiroPasso": "Entiendo que la clínica está cerrada",
+        "confirmar": "Agendar de todos modos"
+      },
+      "cancelarDialogo": {
+        "titulo": "Cancelar cita",
+        "motivo": "Motivo",
+        "descricao": "El horario vuelve a quedar libre, pero la tarjeta sigue visible en el día.",
+        "confirmar": "Cancelar cita"
+      },
+      "bloqueioDialogo": {
+        "titulo": "Bloquear horario",
+        "motivo": "Motivo",
+        "detalhe": "Detalle",
+        "profissional": "Profesional",
+        "todosOsProfissionais": "Todo el equipo",
+        "sala": "Sala",
+        "qualquerSala": "Cualquier sala",
+        "inicio": "Inicio",
+        "fim": "Fin",
+        "repetir": "Repetir cada semana",
+        "confirmar": "Bloquear"
+      },
+      "semana": {
+        "titulo": "Semana",
+        "carga": "Carga",
+        "agendados": "{contagem} agendada | {contagem} agendadas",
+        "faltas": "{contagem} ausencia | {contagem} ausencias",
+        "encaixes": "{contagem} sobrecupo | {contagem} sobrecupos",
+        "ocupacao": "{valor} de ocupación",
+        "melhoresAlternativas": "Mejores horarios",
+        "semAlternativa": "Ningún horario libre en los próximos días."
+      },
+      "exibicao": "Visualización",
+      "maisAcoes": "Más acciones",
+      "criar": {
+        "titulo": "Nueva atención",
+        "tituloEncaixe": "Agregar sobreturno",
+        "encaixe": "Sobreturno",
+        "paciente": "Paciente",
+        "buscarPaciente": "Buscar paciente",
+        "escolhaPaciente": "Elija el paciente",
+        "tipo": "Tipo de atención",
+        "hora": "Inicio",
+        "sala": "Sala",
+        "semSala": "Sin sala definida",
+        "agendar": "Agendar",
+        "agendarMesmoAssim": "Agendar de todos modos",
+        "alternativas": "Horarios libres en este día"
+      },
+      "bloqueio": {
+        "titulo": "Bloquear horario",
+        "motivo": "Motivo",
+        "ate": "Fin",
+        "janelaInvalida": "El fin debe ser posterior al inicio.",
+        "clinicaInteira": "Clínica entera",
+        "semSala": "Ninguna sala específica",
+        "detalhe": "Detalle",
+        "repetir": "Repetir cada semana",
+        "diasDaSemana": "Días de la semana",
+        "salvar": "Bloquear"
+      }
+    },
+    "meuDia": {
+      "titulo": "Hoy en la clínica",
+      "subtitulo": "Clínica",
+      "agora": "Ahora",
+      "aSeguir": "A continuación",
+      "semAtendimentoAgora": "Nada en consulta en este momento.",
+      "semProximo": "Nada más agendado para hoy.",
+      "esperando": "Ya llegaron",
+      "esperandoVazio": "Nadie esperando en recepción.",
+      "esperaDe": "esperando {valor}",
+      "alertasDoDia": "Alertas que cambian la conducta hoy",
+      "alertasVazio": "Ningún alerta clínico entre los pacientes de hoy.",
+      "retornosSemHorario": "Controles sin horario asignado",
+      "retornosVazio": "Ningún control pendiente.",
+      "marcarRetorno": "Agendar control",
+      "irParaAgenda": "Ver agenda completa",
+      "iniciarAtendimento": "Iniciar consulta",
+      "continuar": "Continuar"
+    },
+    "resumo": {
+      "titulo": "Resumen de la clínica",
+      "subtitulo": "Clínica",
+      "intervalo": "{inicio} a {fim}",
+      "semMovimento": "Ninguna atención en este período.",
+      "semDados": "Sin datos en el período.",
+      "semProntuario": "Ninguna historia clínica cerrada en el período.",
+      "periodo": {
+        "rotulo": "Período",
+        "hoje": "Hoy",
+        "semana": "Esta semana",
+        "semana-passada": "Semana pasada",
+        "trinta-dias": "30 días"
+      },
+      "filtro": {
+        "todosProfissionais": "Todos los profesionales",
+        "todosTipos": "Todos los tipos"
+      },
+      "indicador": {
+        "atendidos": "Atenciones concluidas",
+        "horas": "{valor} h de atención",
+        "comparecimento": "Asistencia",
+        "faltasNoPeriodo": "ninguna ausencia | {contagem} ausencia | {contagem} ausencias",
+        "ocupacao": "Ocupación media",
+        "ocupacaoDetalhe": "Promedio de los días en que la clínica abrió",
+        "novos": "Pacientes nuevos",
+        "encaixes": "ningún sobreturno | {contagem} sobreturno | {contagem} sobreturnos"
+      },
+      "grafico": {
+        "porDia": "Movimiento por día",
+        "porDiaAjuda": "Las columnas suman las atenciones; la línea marca la ocupación de la agenda.",
+        "porTipo": "Por tipo de atención",
+        "porProfissional": "Por profesional",
+        "horarios": "Horarios de mayor movimiento",
+        "horariosAjuda": "Cuántas atenciones empiezan en cada franja horaria.",
+        "diagnosticos": "Diagnósticos más frecuentes"
+      },
+      "legenda": {
+        "finalizados": "Concluidas",
+        "previstos": "Previstas",
+        "faltas": "Ausencias",
+        "ocupacao": "Ocupación"
+      }
+    },
+    "bulario": {
+      "titulo": "Vademécum",
+      "subtitulo": "Clínica",
+      "buscaPlaceholder": "Buscar por fármaco, principio activo o indicación",
+      "semResultado": "Ningún medicamento con esos filtros.",
+      "escolha": "Elija un medicamento en la lista.",
+      "semPaciente": "Salir del paciente",
+      "temAviso": "Tiene aviso para este paciente",
+      "controlado": "Controlado",
+      "escolherTitulo": "Elegir en el vademécum",
+      "usar": "Usar en la prescripción",
+      "usarMesmoAssim": "Prescribir de todos modos",
+      "proibidoRodape": "Contraindicado para la especie de este paciente.",
+      "avisosDoPaciente": "Atención para {nome}",
+      "doseTitulo": "Dosis por especie",
+      "doseEspecie": "Especie",
+      "doseFaixa": "Rango usual",
+      "doseIntervalo": "Intervalo",
+      "doseDuracao": "Duración usual",
+      "doseProibida": "Contraindicado en esta especie",
+      "destePaciente": "de este paciente",
+      "cadaHoras": "cada {horas} h",
+      "vias": "Vías",
+      "indicacoes": "Indicaciones",
+      "contraindicacoes": "Contraindicaciones",
+      "efeitosAdversos": "Efectos adversos",
+      "interacoes": "Interacciones",
+      "isencao": "Contenido de apoyo a la decisión. No sustituye el prospecto del fabricante ni la evaluación del responsable técnico.",
+      "filtro": {
+        "classe": "Clase",
+        "especie": "Especie",
+        "controle": "Control"
+      },
+      "classe": {
+        "antibiotico": "Antibiótico",
+        "anti-inflamatorio": "Antiinflamatorio",
+        "analgesico": "Analgésico",
+        "corticoide": "Corticoide",
+        "antiemetico": "Antiemético",
+        "gastroprotetor": "Gastroprotector",
+        "antiparasitario": "Antiparasitario",
+        "sedativo": "Sedante",
+        "cardiologico": "Cardiológico",
+        "dermatologico": "Dermatológico"
+      },
+      "aviso": {
+        "especie-proibida": "Contraindicado en esta especie. {detalhe}",
+        "sem-dose-da-especie": "Sin dosis específica para esta especie en el vademécum.",
+        "alergia": "Alergia registrada: {detalhe}"
+      },
+      "cuidado": {
+        "gestante": "Paciente gestante — este principio activo exige cautela.",
+        "lactante": "Paciente lactante — este principio activo exige cautela.",
+        "filhote": "Paciente cachorro — este principio activo exige cautela.",
+        "idoso": "Paciente geriátrico — este principio activo exige cautela.",
+        "renal": "Condición renal registrada: {detalhe}",
+        "hepatico": "Condición hepática registrada: {detalhe}",
+        "cardiaco": "Condición cardíaca registrada: {detalhe}",
+        "gastrico": "Condición gástrica registrada: {detalhe}"
+      }
+    },
+    "documentos": {
+      "titulo": "Documentos de la atención",
+      "ajuda": "Cada documento sale en hoja A4, lista para imprimir o guardar en PDF.",
+      "emitir": "Guardar en PDF",
+      "notaImpressao": "La ventana de impresión abre con la hoja; elija \"Guardar como PDF\" en el destino para enviar al responsable.",
+      "data": "Fecha",
+      "passoComReceita": "Revisar y emitir receta, certificado o historia clínica",
+      "passoSemReceita": "Revisar y emitir certificado o historia clínica",
+      "cartao": {
+        "receituarioControle": "Sale en hoja separada y por duplicado",
+        "semPrescricao": "Sin medicamento prescrito en esta consulta",
+        "prontuario": {
+          "titulo": "Historia clínica completa",
+          "descricao": "Anamnesis, examen físico, diagnóstico y tratamiento."
+        },
+        "receituario": {
+          "titulo": "Receta",
+          "descricao": "Medicamentos con posología detallada y cantidad a dispensar."
+        },
+        "atestado-saude": {
+          "titulo": "Certificado de salud",
+          "descricao": "Declara el examen del animal y el hallazgo registrado."
+        },
+        "atestado-comparecimento": {
+          "titulo": "Certificado de asistencia",
+          "descricao": "Justifica la ausencia del responsable durante la atención."
+        }
+      },
+      "receita": {
+        "titulo": "Receta veterinaria",
+        "tituloControle": "Receta de control especial",
+        "semPrescricao": "Ningún medicamento prescrito en esta atención.",
+        "usoRotulo": "Uso:",
+        "quantidadeTotal": "Cantidad a dispensar: {valor} {unidade}",
+        "via": {
+          "primeira": "1.ª copia — retención de la farmacia",
+          "segunda": "2.ª copia — orientación al responsable"
+        },
+        "avisoControle": "Receta de control especial por duplicado, según la normativa vigente.",
+        "comprador": "Identificación del comprador",
+        "fornecedor": "Identificación del proveedor",
+        "nome": "Nombre",
+        "documentoIdentidade": "Documento de identidad",
+        "endereco": "Dirección",
+        "telefone": "Teléfono",
+        "dataDispensacao": "Fecha de dispensación",
+        "assinaturaFarmaceutico": "Firma del farmacéutico"
+      },
+      "atestado": {
+        "finalidade": "Finalidad:",
+        "rodape": "Documento emitido a pedido del responsable, para los fines que sean necesarios.",
+        "saude": {
+          "titulo": "Certificado de salud",
+          "corpoComDiagnostico": "Certifico, para los fines pertinentes, que examiné el {data} al animal {paciente}, arriba identificado, habiendo constatado: {diagnostico}.",
+          "corpoSemAchado": "Certifico, para los fines pertinentes, que examiné el {data} al animal {paciente}, arriba identificado, sin constatar alteraciones clínicas en el examen realizado.",
+          "recomendacoes": "Recomendaciones:"
+        },
+        "comparecimento": {
+          "titulo": "Certificado de asistencia",
+          "corpo": "Certifico, para los fines pertinentes, que {responsavel} estuvo en esta clínica el día {data}, de {entrada} a {saida}, acompañando al animal {paciente} durante la atención veterinaria."
+        }
+      }
+    },
+    "fila": {
+      "titulo": "Lista de espera",
+      "subtitulo": "Clínica",
+      "vazioTitulo": "Lista vacía",
+      "vazioDescricao": "Cuando falte horario, agrega al paciente aquí en vez de improvisar.",
+      "adicionar": "Agregar a la lista",
+      "prioridade": {
+        "normal": "Normal",
+        "preferencial": "Preferente",
+        "urgente": "Urgente"
+      },
+      "situacao": {
+        "aguardando": "En espera",
+        "ofertado": "Cupo ofrecido",
+        "aceito": "Aceptó",
+        "expirado": "Oferta vencida",
+        "removido": "Removido"
+      },
+      "janelas": "Disponibilidad",
+      "esperaDesde": "En la lista {valor}",
+      "ofertaExpiraEm": "Vence {valor}",
+      "ofertarVaga": "Ofrecer cupo",
+      "aceitar": "Registrar aceptación",
+      "recusar": "Registrar rechazo",
+      "remover": "Quitar de la lista",
+      "vagaAberta": {
+        "titulo": "Se acaba de liberar un cupo",
+        "descricao": "{hora} con {profissional} quedó libre. Estos pacientes caben en esa ventana.",
+        "oferecer": "Ofrecer a {paciente}",
+        "ninguem": "Nadie en la lista cabe en esta ventana.",
+        "depois": "Ahora no"
+      },
+      "colunaSituacao": "Estado"
+    },
+    "faltas": {
+      "titulo": "Ausencias",
+      "subtitulo": "Clínica",
+      "vazioTitulo": "Ninguna ausencia registrada",
+      "vazioDescricao": "Buena señal: nadie faltó en el período.",
+      "colunaPaciente": "Paciente",
+      "colunaResponsavel": "Tutor",
+      "colunaFaltas": "Ausencias",
+      "colunaMinutos": "Agenda perdida",
+      "colunaUltima": "Última",
+      "reincidente": "Reincidente",
+      "totalMinutos": "{valor} de agenda perdida en el período",
+      "politica": {
+        "titulo": "Política de reincidencia",
+        "descricao": "A partir de {limite} ausencias el sistema sugiere pedir confirmación antes de reservar el horario. Es una sugerencia: decide la clínica, caso a caso.",
+        "ativar": "Sugerir confirmación para reincidentes",
+        "ativo": "Sugerencia activa",
+        "inativo": "Sugerencia desactivada"
+      },
+      "filtro": {
+        "reincidentes": "Reincidentes",
+        "todas": "Todas"
+      },
+      "resumo": {
+        "total": "Ausencias del período",
+        "pacientes": "{contagem} paciente | {contagem} pacientes",
+        "agenda": "Agenda perdida",
+        "reincidentes": "Reincidentes",
+        "limite": "a partir de {limite} ausencias"
+      }
+    },
+    "prontuario": {
+      "titulo": "Historia clínica",
+      "subtitulo": "Clínica",
+      "vazioTitulo": "Ninguna historia todavía",
+      "vazioDescricao": "Las historias aparecen aquí a medida que las consultas se finalizan.",
+      "rascunho": "Borrador",
+      "finalizado": "Finalizada",
+      "salvandoAgora": "Guardando…",
+      "salvoEm": "Guardado {valor}",
+      "rascunhoLocal": "Borrador guardado en este navegador",
+      "restaurarRascunho": "Restaurar borrador",
+      "descartarRascunho": "Descartar",
+      "naoAferido": "no medido",
+      "marcarNaoAferido": "Marcar como no medido",
+      "referencia": "referencia",
+      "semReferencia": "sin rango de referencia",
+      "faixa": {
+        "abaixo": "bajo",
+        "dentro": "en rango",
+        "acima": "alto",
+        "sem-referencia": "sin rango",
+        "nao-aferido": "no medido"
+      },
+      "somenteLeitura": "En edición por {dispositivo}, desde {desde}. Estás viendo en modo lectura.",
+      "assumirEdicao": "Tomar la edición",
+      "assumirDialogo": {
+        "titulo": "Tomar la edición",
+        "descricao": "Otro dispositivo tiene esta historia abierta. Al tomarla, pasa a lectura y comparas campo a campo lo que cambió.",
+        "confirmar": "Tomar de todos modos"
+      },
+      "comparar": "Comparar versiones",
+      "campo": "Campo",
+      "versaoAtual": "En esta pantalla",
+      "versaoServidor": "En el servidor",
+      "anamnese": {
+        "titulo": "Anamnesis",
+        "descricao": "Qué trajo al paciente y qué observó el tutor.",
+        "queixaPrincipal": "Motivo de consulta",
+        "historia": "Historia clínica",
+        "duracaoSintomas": "Desde cuándo",
+        "apetite": "Apetito",
+        "hidratacao": "Hidratación",
+        "evacuacao": "Defecación",
+        "miccao": "Micción",
+        "ambiente": "Ambiente",
+        "vacinacao": "Vacunación al día",
+        "vermifugacao": "Desparasitación al día",
+        "opcoes": {
+          "normal": "Normal",
+          "aumentado": "Aumentado",
+          "reduzido": "Reducido",
+          "ausente": "Ausente",
+          "leve": "Deshidratación leve",
+          "moderada": "Deshidratación moderada",
+          "grave": "Deshidratación grave",
+          "diarreia": "Diarrea",
+          "constipacao": "Estreñimiento",
+          "aumentada": "Aumentada",
+          "reduzida": "Reducida",
+          "disuria": "Disuria",
+          "domiciliar": "Domiciliario",
+          "externo": "Acceso a la calle",
+          "misto": "Mixto",
+          "sim": "Sí",
+          "nao": "No"
+        },
+        "sinaisGerais": "Signos generales",
+        "prevencao": "Prevención"
+      },
+      "exameFisico": {
+        "titulo": "Examen físico",
+        "descricao": "Los valores se comparan con el rango de la especie a cada tecla.",
+        "vitais": "Signos vitales",
+        "sistemas": "Sistemas",
+        "observacao": "Observaciones del examen",
+        "peso": "Peso",
+        "temperatura": "Temperatura",
+        "frequenciaCardiaca": "Frecuencia cardíaca",
+        "frequenciaRespiratoria": "Frecuencia respiratoria",
+        "tempoPreenchimentoCapilar": "TLC",
+        "escoreCorporal": "Condición corporal",
+        "pressaoSistolica": "Presión sistólica",
+        "sistema": {
+          "cardiovascular": "Cardiovascular",
+          "respiratorio": "Respiratorio",
+          "digestorio": "Digestivo",
+          "urinario": "Urinario",
+          "tegumentar": "Tegumentario",
+          "locomotor": "Locomotor",
+          "neurologico": "Neurológico",
+          "linfonodos": "Ganglios linfáticos"
+        },
+        "achado": {
+          "normal": "Sin alteraciones",
+          "alterado": "Alterado",
+          "nao-avaliado": "No evaluado"
+        },
+        "notaAlterado": "Qué está alterado"
+      },
+      "diagnostico": {
+        "titulo": "Diagnóstico",
+        "descricao": "Busca por código o por descripción.",
+        "buscar": "Buscar diagnóstico",
+        "adicionar": "Agregar",
+        "remover": "Quitar",
+        "vazio": "Ningún diagnóstico registrado.",
+        "tipo": {
+          "presuntivo": "Presuntivo",
+          "definitivo": "Definitivo",
+          "diferencial": "Diferencial"
+        }
+      },
+      "conduta": {
+        "titulo": "Plan",
+        "descricao": "Indicaciones, receta y lo que queda acordado para después.",
+        "orientacoes": "Indicaciones al tutor",
+        "exames": "Exámenes solicitados",
+        "prescricoes": "Receta",
+        "adicionarPrescricao": "Agregar medicamento",
+        "semPrescricao": "Ningún medicamento recetado.",
+        "medicamento": "Medicamento",
+        "via": "Vía",
+        "dosePorKg": "Dosis (mg/kg)",
+        "frequencia": "Frecuencia (h)",
+        "duracao": "Duración (días)",
+        "observacao": "Observación",
+        "resumoDose": "{quantidade} {unidade} ({mg} mg) cada {frequencia} h por {duracao} días — {total} administraciones.",
+        "semPeso": "Sin el peso del paciente no se calcula la dosis.",
+        "avisoDose": {
+          "abaixo-da-usual": "Por debajo de la dosis habitual ({min}–{max} mg/kg).",
+          "acima-da-usual": "Por encima de la dosis habitual ({min}–{max} mg/kg).",
+          "peso-ausente": "Registra el peso en el examen físico para calcular la dosis."
+        },
+        "alergiaTitulo": "Alergia registrada a {principio}",
+        "alergiaDescricao": "La historia de este paciente registra alergia a {principio}. La receta sigue siendo posible, con confirmación explícita.",
+        "alergiaConfirmar": "Confirmo y quiero recetar igual",
+        "retorno": "Control",
+        "retornoEmDias": "Volver en (días)",
+        "retornoTipo": "Tipo de control",
+        "retornoAgendar": "Agendar",
+        "retornoAgendado": "Control agendado para el {data}, a las {hora}.",
+        "retornoPendente": "Control indicado, sin horario asignado.",
+        "unidade": {
+          "ml": "mL",
+          "comprimido": "comprimido | comprimidos"
+        },
+        "via_": {
+          "oral": "Oral",
+          "subcutanea": "Subcutánea",
+          "intramuscular": "Intramuscular",
+          "intravenosa": "Intravenosa",
+          "topica": "Tópica",
+          "otologica": "Ótica"
+        }
+      },
+      "timeline": {
+        "titulo": "Historial",
+        "vazio": "Este paciente aún no tiene historial registrado.",
+        "consultaAnterior": "Consulta anterior",
+        "doseAnterior": "{mg} mg cada {frequencia} h durante {duracao} días",
+        "verConsultaAnterior": "Ver la consulta anterior",
+        "kind": {
+          "consulta": "Consulta",
+          "vacina": "Vacunación",
+          "exame": "Examen",
+          "cirurgia": "Cirugía",
+          "prescricao": "Receta",
+          "falta": "Ausencia",
+          "observacao": "Observación"
+        },
+        "mostrar": "Historial",
+        "ocultar": "Ocultar historial"
+      },
+      "finalizar": "Finalizar consulta",
+      "finalizarDialogo": {
+        "titulo": "Finalizar consulta",
+        "descricao": "Una vez finalizada, la historia deja de aceptar edición directa.",
+        "pendencias": "Todavía falta: {itens}",
+        "confirmar": "Finalizar de todos modos"
+      },
+      "passos": {
+        "vitaisAferidos": "{preenchidos} de {total} medidos",
+        "prescricoes": "{contagem} en la receta",
+        "sistemasAlterados": "{contagem} alterado | {contagem} alterados"
+      },
+      "naoMedir": "no medir",
+      "filtro": {
+        "situacao": "Estado",
+        "profissional": "Profesional"
+      },
+      "buscar": "Buscar por paciente o diagnóstico",
+      "imprimir": "Guardar en PDF",
+      "impressao": {
+        "titulo": "Historia clínica",
+        "dica": "Abre la impresión del navegador — elige \"Guardar como PDF\" en el destino.",
+        "paciente": "Paciente",
+        "documento": "Documento",
+        "valor": "Valor",
+        "semRegistro": "Sin registro de signos vitales en esta consulta.",
+        "emitidoEm": "Emitido el {data}",
+        "dataAtendimento": "Fecha de la consulta",
+        "naoRegistrado": "Sin registro."
+      },
+      "resumo": {
+        "titulo": "Resumen",
+        "descricao": "Revise lo registrado antes de emitir los documentos.",
+        "vazio": "No registrado",
+        "achados": "Hallazgos",
+        "alergiaPendente": "Prescripción de {medicamento} en conflicto con alergia registrada, sin aceptación."
+      }
+    },
+    "pacientes": {
+      "titulo": "Pacientes",
+      "subtitulo": "Clínica",
+      "buscar": "Buscar por paciente, tutor o teléfono",
+      "vazioTitulo": "Ningún paciente encontrado",
+      "vazioDescricao": "Ajusta la búsqueda o registra al paciente en recepción.",
+      "colunaPaciente": "Paciente",
+      "colunaResponsavel": "Tutor",
+      "colunaUltimo": "Última consulta",
+      "colunaProximo": "Próxima",
+      "colunaAlertas": "Alertas",
+      "colunaAtendimento": "Atención",
+      "semRegistro": "sin registro",
+      "filtro": {
+        "especie": "Especie",
+        "comAlerta": "Con alerta",
+        "semAlerta": "Sin alerta",
+        "agenda": "Agenda",
+        "comProximo": "Con cita agendada",
+        "semProximo": "Sin cita agendada"
+      }
+    },
+    "atendimentos": {
+      "titulo": "Atenciones",
+      "subtitulo": "Clínica"
+    },
+    "atividades": {
+      "titulo": "Actividades",
+      "subtitulo": "Clínica",
+      "vazioTitulo": "Nada pendiente",
+      "vazioDescricao": "Las historias en borrador y los controles sin horario aparecen aquí.",
+      "rascunhos": "Historias en borrador",
+      "retornos": "Controles sin horario",
+      "ofertasDaFila": "Ofertas de la lista esperando respuesta"
+    },
+    "atalhos": {
+      "titulo": "Atajos de teclado",
+      "abrir": "Ver atajos",
+      "fechar": "Cerrar",
+      "dica": "Presiona ? para ver los atajos",
+      "grupo": {
+        "navegacao": "Navegación",
+        "acoes": "Acciones",
+        "prontuario": "Historia clínica"
+      },
+      "diaAnterior": "Día anterior",
+      "proximoDia": "Día siguiente",
+      "semanaAnterior": "Semana anterior",
+      "proximaSemana": "Semana siguiente",
+      "hoje": "Ir a hoy",
+      "visao": "Alternar día y semana",
+      "novo": "Nueva cita",
+      "bloquear": "Bloquear horario",
+      "encaixar": "Sobrecupo",
+      "buscar": "Buscar paciente",
+      "densidade": "Alternar densidad",
+      "fechar_": "Cerrar el panel abierto",
+      "mover": "Mover la cita enfocada 15 min",
+      "selecionar": "Abrir la cita enfocada",
+      "proximoCampo": "Campo siguiente",
+      "comandoBarra": "Comandos en el campo de observación"
+    },
+    "comandos": {
+      "titulo": "Comandos",
+      "dica": "Escribe / para insertar un texto listo",
+      "naoAferido": "no medido",
+      "semAlteracoes": "sin alteraciones",
+      "retorno": "control en",
+      "jejum": "ayuno de",
+      "vazio": "Ningún comando con ese nombre."
+    },
+    "painel": {
+      "titulo": "Panel de desarrollo",
+      "abrir": "Panel de desarrollo",
+      "descricao": "Solo fuera de producción. Controla la capa simulada sin recargar la página.",
+      "latencia": "Latencia (ms)",
+      "erro": "Error por operación",
+      "operacao": "Operación",
+      "taxa": "Tasa",
+      "offline": "Tirar todo (offline)",
+      "relogio": "Desplazar el reloj (h)",
+      "recriar": "Recrear datos",
+      "semente": "Semilla",
+      "casos": "Casos difíciles",
+      "irPara": "Ir",
+      "segundoDispositivo": "Simular segundo dispositivo",
+      "resumo": "{atendimentos} citas en el día ancla ({ancora})"
+    },
+    "design": {
+      "titulo": "Referencia del módulo clínico",
+      "subtitulo": "Diseño",
+      "descricao": "Los cinco componentes base en los cuatro estados, con densidad en vivo. Es la regla del módulo: el componente que no pasa aquí no entra en la agenda ni en la historia clínica.",
+      "estados": "Cuatro estados",
+      "estado": {
+        "carregando": "Cargando",
+        "erro": "Error",
+        "vazio": "Vacío",
+        "pronto": "Con datos"
+      },
+      "nomesExtremos": "Nombres extremos",
+      "nomesExtremosDescricao": "Nombre de dos letras, nombre larguísimo y acentuación densa, lado a lado. Si el encabezado se rompe, se rompe aquí primero.",
+      "cansaco": "Fatiga en 200 filas",
+      "cansacoDescricao": "Doscientas filas seguidas en la densidad elegida. Sirve para juzgar si la tabla cansa antes del fin de la jornada.",
+      "escalaDeCinza": "Ver en escala de grises",
+      "escalaDeCinzaDescricao": "Ninguna información puede perderse sin el color. Cada estado tiene ícono, etiqueta o forma además del matiz.",
+      "tokens": "Tokens",
+      "feedback": "Comentarios de quien opera una clínica",
+      "feedbackVazio": "Todavía sin revisión registrada. Anota aquí lo que señaló el equipo clínico, con fecha y nombre.",
+      "larguras": "Revisa en 1280, 1024 y 768"
+    },
+    "comum": {
+      "verTodos": "Ver todos ({contagem})",
+      "filtros": "Filtros",
+      "resultados": "{contagem} resultado | {contagem} resultados",
+      "semResultado": "Ningún resultado para esta búsqueda.",
+      "cancelar": "Cancelar"
     }
   }
 }

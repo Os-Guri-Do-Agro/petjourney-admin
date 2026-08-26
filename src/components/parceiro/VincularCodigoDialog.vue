@@ -107,7 +107,7 @@ function onCodigoModel(value: string | undefined) {
 async function handleVincular() {
   if (!canSubmit.value) {
     if (!isCodigoVinculoValido(codigo.value)) {
-      errorMessage.value = t('atendimentos.vincular.codigoInvalidoFormato')
+      errorMessage.value = t('acessos.vincular.codigoInvalidoFormato')
     }
     return
   }
@@ -122,22 +122,22 @@ async function handleVincular() {
   } catch (err) {
     if (err instanceof ApiError) {
       if (err.statusCode === 429) {
-        errorMessage.value = t('atendimentos.vincular.throttle')
+        errorMessage.value = t('acessos.vincular.throttle')
         startThrottle()
       } else if (err.statusCode === 404) {
-        errorMessage.value = t('atendimentos.vincular.naoEncontrado')
+        errorMessage.value = t('acessos.vincular.naoEncontrado')
       } else if (err.statusCode === 409) {
-        errorMessage.value = t('atendimentos.vincular.outraEmpresa')
+        errorMessage.value = t('acessos.vincular.outraEmpresa')
       } else if (err.statusCode === 403) {
-        errorMessage.value = t('atendimentos.vincular.naoOperacional')
+        errorMessage.value = t('acessos.vincular.naoOperacional')
       } else if (err.statusCode === 400) {
-        errorMessage.value = t('atendimentos.vincular.codigoInvalidoFormato')
+        errorMessage.value = t('acessos.vincular.codigoInvalidoFormato')
       } else {
         errorMessage.value = err.message
       }
     } else {
       errorMessage.value =
-        err instanceof Error ? err.message : t('atendimentos.vincular.erroGenerico')
+        err instanceof Error ? err.message : t('acessos.vincular.erroGenerico')
     }
   } finally {
     submitting.value = false
@@ -175,14 +175,14 @@ async function handleVincular() {
           <i class="pi pi-key" />
         </div>
 
-        <p class="vincular-dialog__eyebrow">{{ t('atendimentos.vincular.eyebrow') }}</p>
+        <p class="vincular-dialog__eyebrow">{{ t('acessos.vincular.eyebrow') }}</p>
         <h2 id="vinculo-title" class="vincular-dialog__title">
-          {{ t('atendimentos.vincular.title') }}
+          {{ t('acessos.vincular.title') }}
         </h2>
-        <p class="vincular-dialog__lede">{{ t('atendimentos.vincular.lede') }}</p>
+        <p class="vincular-dialog__lede">{{ t('acessos.vincular.lede') }}</p>
 
         <div class="vincular-dialog__field">
-          <label id="vinculo-codigo-label">{{ t('atendimentos.vincular.codigoLabel') }}</label>
+          <label id="vinculo-codigo-label">{{ t('acessos.vincular.codigoLabel') }}</label>
 
           <div
             ref="otpWrapper"
@@ -209,7 +209,7 @@ async function handleVincular() {
                   class="vincular-dialog__digit"
                   :class="{ 'vincular-dialog__digit--invalid': Boolean(errorMessage) }"
                   :disabled="submitting"
-                  :aria-label="t('atendimentos.vincular.digitoAria', { n: index })"
+                  :aria-label="t('acessos.vincular.digitoAria', { n: index })"
                   v-on="events"
                 />
                 <span
@@ -223,7 +223,7 @@ async function handleVincular() {
           </div>
 
           <small id="vinculo-codigo-hint" class="vincular-dialog__hint">
-            {{ t('atendimentos.vincular.hint') }}
+            {{ t('acessos.vincular.hint') }}
           </small>
           <small
             v-if="errorMessage"
@@ -238,8 +238,8 @@ async function handleVincular() {
         <Button
           :label="
             throttledSeconds > 0
-              ? t('atendimentos.vincular.aguarde', { s: throttledSeconds })
-              : t('atendimentos.vincular.submit')
+              ? t('acessos.vincular.aguarde', { s: throttledSeconds })
+              : t('acessos.vincular.submit')
           "
           :loading="submitting"
           :disabled="!canSubmit"

@@ -170,11 +170,11 @@ Registradas nas specs escritas no período, cada uma com responsável definido. 
 
 | Entrega | Onde |
 |---|---|
-| Documentos e diário no detalhe | `src/pages/(accounts)/parceiro/atendimentos/[id].vue` |
+| Documentos e diário no detalhe | `src/pages/(accounts)/parceiro/acessos/[id].vue` |
 | Regras de bloco vazio, motivo e carimbo | `src/utils/parceiro/snapshot-compartilhado.ts` |
 | Acesso encerrado no clique do arquivo (409) | `src/utils/parceiro/arquivo-compartilhado.ts` |
 | URL assinada por clique | `src/service/parceiro/compartilhamentos-service.ts` (`getArquivoSignedUrl`) |
-| Indicadores e filtro da lista | `src/pages/(accounts)/parceiro/atendimentos/index.vue` |
+| Indicadores e filtro da lista | `src/pages/(accounts)/parceiro/acessos/index.vue` |
 | Idioma da sessão em toda chamada | `src/service/api.ts` |
 | Escolha de programas no cadastro | `src/components/parceiro/PortalParceiroProgramasPicker.vue`, `src/utils/parceiro/modo-participacao.ts` |
 | Leitura liberada com cadastro suspenso | `src/components/parceiro/PartnerOperabilityBanner.vue` (`cover-suspended`) |

@@ -100,21 +100,21 @@ function resumoAtualizado(item: CompartilhamentoResumo) {
 }
 
 const especieOptions = computed(() =>
-  ESPECIES.map((value) => ({ value, label: t(`atendimentos.especie.${value}`) })),
+  ESPECIES.map((value) => ({ value, label: t(`acessos.especie.${value}`) })),
 )
 
 const tipoServicoOptions = computed(() =>
-  TIPOS_SERVICO.map((value) => ({ value, label: t(`atendimentos.servico.${value}`) })),
+  TIPOS_SERVICO.map((value) => ({ value, label: t(`acessos.servico.${value}`) })),
 )
 
 const ordenacaoOptions = computed(() =>
-  ORDENACOES.map((value) => ({ value, label: t(`atendimentos.filtros.ordem.${value}`) })),
+  ORDENACOES.map((value) => ({ value, label: t(`acessos.filtros.ordem.${value}`) })),
 )
 
-const ordenacaoLabel = computed(() => t(`atendimentos.filtros.ordem.${filtros.ordenarPor}`))
+const ordenacaoLabel = computed(() => t(`acessos.filtros.ordem.${filtros.ordenarPor}`))
 
 /** O grupo de datas é um filtro só; o leitor de tela anuncia assim. */
-const periodoAriaLabel = computed(() => t('atendimentos.filtros.periodo'))
+const periodoAriaLabel = computed(() => t('acessos.filtros.periodo'))
 
 /**
  * A lista do Select é teleportada para fora da `.partner-page`, então não herda os
@@ -143,13 +143,13 @@ const selectPt = computed(() => {
 const tabs = computed(() => [
   {
     id: 'ativos',
-    label: t('atendimentos.tabs.ativos.label'),
-    description: t('atendimentos.tabs.ativos.description'),
+    label: t('acessos.tabs.ativos.label'),
+    description: t('acessos.tabs.ativos.description'),
   },
   {
     id: 'historico',
-    label: t('atendimentos.tabs.historico.label'),
-    description: t('atendimentos.tabs.historico.description'),
+    label: t('acessos.tabs.historico.label'),
+    description: t('acessos.tabs.historico.description'),
   },
 ])
 
@@ -233,7 +233,7 @@ async function loadFirstPage() {
       return
     }
 
-    error.value = err instanceof Error ? err.message : t('atendimentos.list.errorLoad')
+    error.value = err instanceof Error ? err.message : t('acessos.list.errorLoad')
   } finally {
     if (id === requestId) {
       loading.value = false
@@ -262,7 +262,7 @@ async function loadMore() {
     cursor.value = page.meta.proximoCursor ?? null
   } catch (err) {
     if (id === requestId) {
-      error.value = err instanceof Error ? err.message : t('atendimentos.list.errorLoad')
+      error.value = err instanceof Error ? err.message : t('acessos.list.errorLoad')
     }
   } finally {
     loadingMore.value = false
@@ -293,7 +293,7 @@ function servicoLabel(item: CompartilhamentoResumo) {
     return item.servicoOutroLabel
   }
 
-  return t(`atendimentos.servico.${item.tipoServico}`)
+  return t(`acessos.servico.${item.tipoServico}`)
 }
 
 function expiraLabel(item: CompartilhamentoResumo) {
@@ -305,13 +305,13 @@ function expiraLabel(item: CompartilhamentoResumo) {
 
   switch (restante.estado) {
     case 'dias':
-      return t('atendimentos.expira.dias', { d: restante.dias, h: restante.horas })
+      return t('acessos.expira.dias', { d: restante.dias, h: restante.horas })
     case 'horas':
-      return t('atendimentos.expira.horas', { h: restante.horas, m: restante.minutos })
+      return t('acessos.expira.horas', { h: restante.horas, m: restante.minutos })
     case 'minutos':
-      return t('atendimentos.expira.minutos', { m: restante.minutos })
+      return t('acessos.expira.minutos', { m: restante.minutos })
     default:
-      return t('atendimentos.expira.expirado')
+      return t('acessos.expira.expirado')
   }
 }
 
@@ -326,11 +326,11 @@ function statusBadge(status: StatusCompartilhamento) {
 }
 
 function openDetalhe(id: string) {
-  void router.push(`/parceiro/atendimentos/${id}`)
+  void router.push(`/parceiro/acessos/${id}`)
 }
 
 function onVinculado(detalhe: CompartilhamentoDetalhe) {
-  void router.push(`/parceiro/atendimentos/${detalhe.id}`)
+  void router.push(`/parceiro/acessos/${detalhe.id}`)
 }
 
 watch(activeTab, () => {
@@ -364,7 +364,7 @@ onMounted(() => {
   const deepLink = route.query.atendimento
 
   if (typeof deepLink === 'string' && deepLink) {
-    void router.replace(`/parceiro/atendimentos/${deepLink}`)
+    void router.replace(`/parceiro/acessos/${deepLink}`)
     return
   }
 
@@ -374,8 +374,8 @@ onMounted(() => {
 
 <template>
   <PartnerPageFrame
-    :subtitle="t('atendimentos.subtitle')"
-    :title="t('atendimentos.title')"
+    :subtitle="t('acessos.subtitle')"
+    :title="t('acessos.title')"
     :loading="false"
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
@@ -383,10 +383,10 @@ onMounted(() => {
   >
     <template #actions>
       <Button
-        :label="t('atendimentos.vincular.cta')"
+        :label="t('acessos.vincular.cta')"
         icon="pi pi-link"
         :disabled="!store.podeOperar"
-        :title="!store.podeOperar ? t('atendimentos.vincular.bloqueado') : undefined"
+        :title="!store.podeOperar ? t('acessos.vincular.bloqueado') : undefined"
         @click="vincularVisible = true"
       />
     </template>
@@ -396,7 +396,7 @@ onMounted(() => {
          do gate de página cheia. -->
     <PartnerOperabilityBanner cover-suspended />
 
-    <p class="atend-lede">{{ t('atendimentos.lede') }}</p>
+    <p class="atend-lede">{{ t('acessos.lede') }}</p>
 
     <PartnerSectionTabs
       :tabs="tabs"
@@ -408,16 +408,16 @@ onMounted(() => {
     <!-- Rótulos existem para leitor de tela, mas ficam ocultos: cinco textos
          empilhados sobre controles pequenos viram ruído. Cada controle carrega o
          próprio nome no placeholder. -->
-    <section class="atend-filtros" :aria-label="t('atendimentos.filtros.aria')">
+    <section class="atend-filtros" :aria-label="t('acessos.filtros.aria')">
       <div class="atend-filtros__topo">
-        <label class="atend-filtros__sr" for="atend-q">{{ t('atendimentos.filtros.q') }}</label>
+        <label class="atend-filtros__sr" for="atend-q">{{ t('acessos.filtros.q') }}</label>
         <span class="atend-filtros__search">
           <i class="pi pi-search" aria-hidden="true" />
           <InputText
             id="atend-q"
             v-model="filtros.q"
             :maxlength="MAX_BUSCA_PACIENTES"
-            :placeholder="t('atendimentos.filtros.qPlaceholder')"
+            :placeholder="t('acessos.filtros.qPlaceholder')"
             autocomplete="off"
           />
         </span>
@@ -425,7 +425,7 @@ onMounted(() => {
         <Button
           v-if="temFiltroAtivo"
           class="atend-filtros__limpar"
-          :label="t('atendimentos.filtros.limpar')"
+          :label="t('acessos.filtros.limpar')"
           icon="pi pi-filter-slash"
           severity="secondary"
           text
@@ -436,7 +436,7 @@ onMounted(() => {
 
       <div class="atend-filtros__controles">
         <label class="atend-filtros__sr" for="atend-especie">
-          {{ t('atendimentos.filtros.especie') }}
+          {{ t('acessos.filtros.especie') }}
         </label>
         <Select
           id="atend-especie"
@@ -445,14 +445,14 @@ onMounted(() => {
           :options="especieOptions"
           option-label="label"
           option-value="value"
-          :placeholder="t('atendimentos.filtros.especie')"
+          :placeholder="t('acessos.filtros.especie')"
           show-clear
           size="small"
           :pt="selectPt"
         />
 
         <label class="atend-filtros__sr" for="atend-tipo">
-          {{ t('atendimentos.filtros.tipoServico') }}
+          {{ t('acessos.filtros.tipoServico') }}
         </label>
         <Select
           id="atend-tipo"
@@ -461,14 +461,14 @@ onMounted(() => {
           :options="tipoServicoOptions"
           option-label="label"
           option-value="value"
-          :placeholder="t('atendimentos.filtros.tipoServico')"
+          :placeholder="t('acessos.filtros.tipoServico')"
           show-clear
           size="small"
           :pt="selectPt"
         />
 
         <label class="atend-filtros__sr" for="atend-ordem">
-          {{ t('atendimentos.filtros.ordenarPor') }}
+          {{ t('acessos.filtros.ordenarPor') }}
         </label>
         <Select
           id="atend-ordem"
@@ -501,15 +501,15 @@ onMounted(() => {
           @click="filtros.comProntuario = !filtros.comProntuario"
         >
           <i class="pi pi-folder-open" aria-hidden="true" />
-          {{ t('atendimentos.filtros.comProntuario') }}
+          {{ t('acessos.filtros.comProntuario') }}
         </button>
 
         <div class="atend-filtros__periodo" role="group" :aria-label="periodoAriaLabel">
           <span class="atend-filtros__periodo-label" aria-hidden="true">
-            {{ t('atendimentos.filtros.periodo') }}
+            {{ t('acessos.filtros.periodo') }}
           </span>
           <label class="atend-filtros__sr" for="atend-de">
-            {{ t('atendimentos.filtros.vinculadoDe') }}
+            {{ t('acessos.filtros.vinculadoDe') }}
           </label>
           <input
             id="atend-de"
@@ -520,7 +520,7 @@ onMounted(() => {
           />
           <i class="pi pi-arrow-right atend-filtros__periodo-sep" aria-hidden="true" />
           <label class="atend-filtros__sr" for="atend-ate">
-            {{ t('atendimentos.filtros.vinculadoAte') }}
+            {{ t('acessos.filtros.vinculadoAte') }}
           </label>
           <input
             id="atend-ate"
@@ -536,8 +536,8 @@ onMounted(() => {
     <div class="atend-panel" role="tabpanel">
       <PartnerPanelLoading
         v-if="loading"
-        :title="t('atendimentos.list.loadingTitle')"
-        :description="t('atendimentos.list.loadingDesc')"
+        :title="t('acessos.list.loadingTitle')"
+        :description="t('acessos.list.loadingDesc')"
       />
 
       <div v-else-if="error" class="atend-state atend-state--error" role="alert">
@@ -549,10 +549,10 @@ onMounted(() => {
            não vincular um código novo. -->
       <div v-else-if="items.length === 0 && temFiltroAtivo" class="atend-state atend-state--empty">
         <i class="pi pi-filter-slash" aria-hidden="true" />
-        <strong>{{ t('atendimentos.list.emptyFiltroTitle') }}</strong>
-        <p>{{ t('atendimentos.list.emptyFiltroBody') }}</p>
+        <strong>{{ t('acessos.list.emptyFiltroTitle') }}</strong>
+        <p>{{ t('acessos.list.emptyFiltroBody') }}</p>
         <Button
-          :label="t('atendimentos.filtros.limpar')"
+          :label="t('acessos.filtros.limpar')"
           icon="pi pi-filter-slash"
           severity="secondary"
           @click="limparFiltros"
@@ -564,20 +564,20 @@ onMounted(() => {
         <strong>
           {{
             activeTab === 'ativos'
-              ? t('atendimentos.list.emptyAtivosTitle')
-              : t('atendimentos.list.emptyHistoricoTitle')
+              ? t('acessos.list.emptyAtivosTitle')
+              : t('acessos.list.emptyHistoricoTitle')
           }}
         </strong>
         <p>
           {{
             activeTab === 'ativos'
-              ? t('atendimentos.list.emptyAtivosBody')
-              : t('atendimentos.list.emptyHistoricoBody')
+              ? t('acessos.list.emptyAtivosBody')
+              : t('acessos.list.emptyHistoricoBody')
           }}
         </p>
         <Button
           v-if="activeTab === 'ativos' && store.podeOperar"
-          :label="t('atendimentos.vincular.cta')"
+          :label="t('acessos.vincular.cta')"
           icon="pi pi-link"
           @click="vincularVisible = true"
         />
@@ -618,22 +618,22 @@ onMounted(() => {
               </span>
               <span class="atend-row__anotacoes">
                 <i class="pi pi-comment" aria-hidden="true" />
-                {{ t('atendimentos.list.anotacoes', { n: item.totalAnotacoes }) }}
+                {{ t('acessos.list.anotacoes', { n: item.totalAnotacoes }) }}
               </span>
               <!-- Prontuário junto: decide a ordem de leitura antes de abrir. -->
               <span v-if="item.totalDocumentos" class="atend-row__prontuario">
                 <i class="pi pi-file" aria-hidden="true" />
-                {{ t('atendimentos.list.documentos', { n: item.totalDocumentos }) }}
+                {{ t('acessos.list.documentos', { n: item.totalDocumentos }) }}
               </span>
               <span v-if="item.temDiario" class="atend-row__prontuario">
                 <i class="pi pi-book" aria-hidden="true" />
-                {{ t('atendimentos.list.diario') }}
+                {{ t('acessos.list.diario') }}
               </span>
               <!-- O responsável mexeu depois de entregar: o que foi lido ontem
                    pode não valer mais, e em estadia isso muda a conduta. -->
               <span v-if="resumoAtualizado(item)" class="atend-row__atualizado">
                 <i class="pi pi-refresh" aria-hidden="true" />
-                {{ t('atendimentos.list.resumoAtualizado', { data: resumoAtualizado(item) }) }}
+                {{ t('acessos.list.resumoAtualizado', { data: resumoAtualizado(item) }) }}
               </span>
             </div>
 
@@ -643,7 +643,7 @@ onMounted(() => {
 
         <div v-if="hasMore" class="atend-more">
           <Button
-            :label="t('atendimentos.list.loadMore')"
+            :label="t('acessos.list.loadMore')"
             severity="secondary"
             :loading="loadingMore"
             @click="loadMore"

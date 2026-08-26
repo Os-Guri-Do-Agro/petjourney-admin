@@ -111,10 +111,10 @@ Isso e comportamento aceito e registrado na Parte 8, nao um bug a corrigir no fr
 | O que | Onde |
 |---|---|
 | Rota de arquivo do prontuario | `src/service/parceiro/compartilhamentos-service.ts` (`getArquivoSignedUrl`) |
-| Uma URL por clique, nada cacheado | `src/pages/(accounts)/parceiro/atendimentos/[id].vue` (`comArquivoUrl`) |
+| Uma URL por clique, nada cacheado | `src/pages/(accounts)/parceiro/acessos/[id].vue` (`comArquivoUrl`) |
 | 409 vira acesso encerrado e recarrega a tela | `src/utils/parceiro/arquivo-compartilhado.ts` + o mesmo `comArquivoUrl` |
 | Blocos do snapshot, diario e documentos | `src/utils/parceiro/snapshot-compartilhado.ts` |
-| Indicadores e filtro da lista | `src/pages/(accounts)/parceiro/atendimentos/index.vue` |
+| Indicadores e filtro da lista | `src/pages/(accounts)/parceiro/acessos/index.vue` |
 | Leitura nao gated, anotacao gated | `PartnerOperabilityBanner.vue` (`cover-suspended`) + `podeAnotar` no detalhe |
 | Backend da lista | `petjourney-api`: `compartilhamento-prestador-parceiro.service.ts` (`listar`) e `dto/query-compartilhamento-parceiro.dto.ts` |
 

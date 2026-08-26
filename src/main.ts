@@ -1,4 +1,5 @@
 import './assets/main.css'
+import './features/clinico/theme/clinic-tokens.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

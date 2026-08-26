@@ -26,37 +26,45 @@ export type AppNavigationSection = {
   label: string
   icon: string
   items: AppNavigationItem[]
-  groups?: AppNavigationGroup[]
-  panelSubtitle?: string
 }
 
 /**
- * Menu clínico desligado no go-live: as telas estavam com dados mocados.
- * Implementações em `src/_mocks/`; stubs em `/veterinario/*` sem dados fictícios.
- * Reative quando a API clínica estiver integrada.
+ * Menu clínico. Ligado com a entrada do módulo `src/features/clinico`, que substituiu os
+ * stubs de `/veterinario/*` por telas com camada de dados própria.
+ *
+ * A camada é mocada e determinística (`features/clinico/data`), com a mesma forma da API
+ * futura — nenhum dado fictício vaza para fora do módulo.
  */
-export const CLINICAL_MENU_ENABLED = false
+export const CLINICAL_MENU_ENABLED = true
 
 /** Equipe oculta no go-live até a operação do time estar pronta no portal. */
 export const EQUIPE_MENU_ENABLED = false
 
-const clinicalItems: AppNavigationItem[] = [
-  { label: 'Agenda', to: '/veterinario/agenda', icon: 'pi pi-calendar' },
-  { label: 'Atividades', to: '/veterinario/atividades', icon: 'pi pi-list' },
-]
+/**
+ * Seção de destino quando a rota atual não pertence a nenhuma — hoje só a visão geral.
+ *
+ * O menu tinha uma seção "Início" cujo painel repetia **todas** as outras: doze links existiam
+ * em dois lugares, e o trilho prometia seções que a primeira seção desfazia. A visão geral virou
+ * um link direto no topo do trilho; o inventário completo de telas vive na própria página
+ * `/inicio`, que existe para isso.
+ */
+export const OVERVIEW_SECTION_ID = 'overview'
 
-const patientItems: AppNavigationItem[] = [
-  { label: 'Pacientes', to: '/veterinario/pacientes', icon: 'pi pi-users' },
-  { label: 'Prontuários', to: '/veterinario/prontuarios', icon: 'pi pi-file-edit' },
-  {
-    label: 'Compartilhamentos',
-    to: '/veterinario/compartilhamentos',
-    icon: 'pi pi-share-alt',
-  },
-]
+/** Rotas do módulo clínico. Os rótulos vêm dos catálogos; nada fixo em português aqui. */
+const CLINICAL_ROUTES = [
+  { key: 'clinico.meuDia.titulo', to: '/veterinario/meu-dia', icon: 'pi pi-sun' },
+  { key: 'clinico.resumo.titulo', to: '/veterinario/resumo', icon: 'pi pi-chart-bar' },
+  { key: 'clinico.agenda.titulo', to: '/veterinario/agenda', icon: 'pi pi-calendar' },
+  { key: 'clinico.atendimentos.titulo', to: '/veterinario/atendimentos', icon: 'pi pi-file-edit' },
+  { key: 'clinico.fila.titulo', to: '/veterinario/fila', icon: 'pi pi-hourglass' },
+  { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'pi pi-user-minus' },
+  { key: 'clinico.atividades.titulo', to: '/veterinario/atividades', icon: 'pi pi-list' },
+] as const
 
-export const HOME_MENU_QUERY_KEY = 'menu'
-export const HOME_MENU_QUERY_VALUE = 'inicio'
+const PATIENT_ROUTES = [
+  { key: 'clinico.pacientes.titulo', to: '/veterinario/pacientes', icon: 'pi pi-users' },
+  { key: 'clinico.bulario.titulo', to: '/veterinario/bulario', icon: 'pi pi-book' },
+] as const
 
 export function parseNavTarget(to: string) {
   const hashIndex = to.indexOf('#')
@@ -66,69 +74,6 @@ export function parseNavTarget(to: string) {
   const path = queryIndex >= 0 ? pathAndQuery.slice(0, queryIndex) : pathAndQuery
 
   return { path, hash }
-}
-
-export function isHomeMenuContext(query: Record<string, unknown>) {
-  const value = query[HOME_MENU_QUERY_KEY]
-
-  if (value === HOME_MENU_QUERY_VALUE) {
-    return true
-  }
-
-  return Array.isArray(value) && value.includes(HOME_MENU_QUERY_VALUE)
-}
-
-export function withHomeMenuContext(routePath: string) {
-  if (routePath === '/inicio') {
-    return routePath
-  }
-
-  const { path, hash } = parseNavTarget(routePath)
-  const queryIndex = routePath.indexOf('?')
-  const pathAndQuery = hash ? routePath.slice(0, routePath.indexOf('#')) : routePath
-  const existingQuery =
-    queryIndex >= 0
-      ? pathAndQuery.slice(pathAndQuery.indexOf('?') + 1)
-      : ''
-
-  const params = new URLSearchParams(existingQuery)
-  params.set(HOME_MENU_QUERY_KEY, HOME_MENU_QUERY_VALUE)
-
-  const query = params.toString()
-
-  return `${path}?${query}${hash}`
-}
-
-export function stripHomeMenuContext(routePath: string) {
-  const { path, hash } = parseNavTarget(routePath)
-  const pathAndQuery = hash ? routePath.slice(0, routePath.indexOf('#')) : routePath
-  const queryIndex = pathAndQuery.indexOf('?')
-
-  if (queryIndex < 0) {
-    return `${path}${hash}`
-  }
-
-  const params = new URLSearchParams(pathAndQuery.slice(queryIndex + 1))
-  params.delete(HOME_MENU_QUERY_KEY)
-
-  const query = params.toString()
-
-  return `${path}${query ? `?${query}` : ''}${hash}`
-}
-
-function mapHomeMenuItems(items: AppNavigationItem[]) {
-  return items.map((item) => ({
-    ...item,
-    to: withHomeMenuContext(item.to),
-  }))
-}
-
-function flattenSectionItems(section: AppNavigationSection) {
-  if (section.groups?.length) {
-    return section.groups.flatMap((group) => group.items)
-  }
-
-  return section.items
 }
 
 export function useAppNavigation() {
@@ -144,14 +89,37 @@ export function useAppNavigation() {
     return [{ label: t('nav.items.settings'), to: '/settings', icon: 'pi pi-cog' }]
   })
 
+  const clinicalItems = computed<AppNavigationItem[]>(() => {
+    void locale.value
+
+    return CLINICAL_ROUTES.map((rota) => ({
+      label: t(rota.key),
+      to: rota.to,
+      icon: rota.icon,
+    }))
+  })
+
+  const patientItems = computed<AppNavigationItem[]>(() => {
+    void locale.value
+
+    return [
+      ...PATIENT_ROUTES.map((rota) => ({ label: t(rota.key), to: rota.to, icon: rota.icon })),
+      {
+        label: 'Compartilhamentos',
+        to: '/veterinario/compartilhamentos',
+        icon: 'pi pi-share-alt',
+      },
+    ]
+  })
+
   const portalItems = computed<AppNavigationItem[]>(() => {
     void locale.value
     const items: AppNavigationItem[] = [
       { label: t('nav.items.programas'), to: '/parceiro/programas', icon: 'pi pi-th-large' },
       { label: t('nav.items.divulgacao'), to: '/parceiro/divulgacao', icon: 'pi pi-share-alt' },
       {
-        label: t('nav.items.atendimentos'),
-        to: '/parceiro/atendimentos',
+        label: t('nav.items.acessos'),
+        to: '/parceiro/acessos',
         icon: 'pi pi-clipboard',
       },
     ]
@@ -175,61 +143,15 @@ export function useAppNavigation() {
     return items
   })
 
-  const homeGroups = computed<AppNavigationGroup[]>(() => {
+  /** A visão geral não é seção: é um destino só, e aparece como link no topo do trilho. */
+  const overviewItem = computed<AppNavigationItem>(() => {
     void locale.value
-    const groups: AppNavigationGroup[] = [
-      {
-        id: 'overview',
-        label: t('nav.groups.overview'),
-        items: [{ label: t('nav.items.overview'), to: '/inicio', icon: 'pi pi-home' }],
-      },
-      {
-        id: 'portal',
-        label: t('nav.groups.portal'),
-        items: mapHomeMenuItems(portalItems.value),
-      },
-    ]
-
-    if (hasClinicalProfile.value) {
-      groups.push(
-        { id: 'clinical', label: 'Clínica', items: mapHomeMenuItems(clinicalItems) },
-        { id: 'patients', label: 'Pets', items: mapHomeMenuItems(patientItems) },
-      )
-    }
-
-    groups.push({
-      id: 'account',
-      label: t('nav.groups.account'),
-      items: mapHomeMenuItems(accountItems.value),
-    })
-
-    return groups
+    return { label: t('nav.items.overview'), to: '/inicio', icon: 'pi pi-home' }
   })
-
-  /** Atalhos da visão geral: mesmas seções do menu Início, sem o link para si mesma. */
-  const homeShortcutGroups = computed<AppNavigationGroup[]>(() =>
-    homeGroups.value
-      .filter((group) => group.id !== 'overview')
-      .map((group) => ({
-        ...group,
-        items: group.items.map((item) => ({
-          ...item,
-          to: stripHomeMenuContext(item.to),
-        })),
-      })),
-  )
 
   const navigationSections = computed<AppNavigationSection[]>(() => {
     void locale.value
     const sections: AppNavigationSection[] = [
-      {
-        id: 'home',
-        label: t('nav.sections.home'),
-        icon: 'pi pi-home',
-        items: [],
-        groups: homeGroups.value,
-        panelSubtitle: t('nav.sections.homeSubtitle'),
-      },
       {
         id: 'portal',
         label: t('nav.sections.portal'),
@@ -242,15 +164,15 @@ export function useAppNavigation() {
       sections.push(
         {
           id: 'clinical',
-          label: 'Clínica',
+          label: t('clinico.modulo'),
           icon: 'pi pi-calendar',
-          items: clinicalItems,
+          items: clinicalItems.value,
         },
         {
           id: 'patients',
-          label: 'Pets',
+          label: t('nav.groups.pets'),
           icon: 'pi pi-heart',
-          items: patientItems,
+          items: patientItems.value,
         },
       )
     }
@@ -265,8 +187,24 @@ export function useAppNavigation() {
     return sections
   })
 
+  /**
+   * As mesmas seções em forma de lista, para o modo "lista única" do menu e para os atalhos da
+   * visão geral. Uma origem só: seção nova aparece nos dois lugares sem ninguém lembrar disso.
+   */
+  const navigationGroups = computed<AppNavigationGroup[]>(() =>
+    navigationSections.value.map((section) => ({
+      id: section.id,
+      label: section.label,
+      items: section.items,
+    })),
+  )
+
+  const homeShortcutGroups = navigationGroups
+
   return {
     navigationSections,
+    navigationGroups,
+    overviewItem,
     hasClinicalProfile,
     homeShortcutGroups,
   }
@@ -276,26 +214,25 @@ export function navItemMatches(itemPath: string, currentPath: string) {
   return currentPath === itemPath || currentPath.startsWith(`${itemPath}/`)
 }
 
-export function resolveActiveSectionId(
-  path: string,
-  hasClinical: boolean,
-  query: Record<string, unknown> = {},
-) {
-  if (isHomeMenuContext(query)) {
-    return 'home'
-  }
-
+export function resolveActiveSectionId(path: string, hasClinical: boolean) {
   if (path === '/inicio') {
-    return 'home'
+    return OVERVIEW_SECTION_ID
   }
 
   if (path.startsWith('/parceiro')) {
     return 'portal'
   }
 
+  /*
+   * As rotas de "Pets" precisam estar listadas aqui uma a uma.
+   *
+   * Tudo em `/veterinario` que não caia neste teste vira "Clínica" no último `if`, e o bulário
+   * — que mora na seção Pets — marcava "Clínica" no trilho enquanto o painel mostrava Pets.
+   */
   if (
     path.startsWith('/veterinario/pacientes') ||
-    path.startsWith('/veterinario/prontuarios') ||
+    path.startsWith('/veterinario/paciente/') ||
+    path.startsWith('/veterinario/bulario') ||
     path.startsWith('/veterinario/compartilhamentos')
   ) {
     return 'patients'
@@ -309,11 +246,7 @@ export function resolveActiveSectionId(
     return 'clinical'
   }
 
-  if (path === '/parceiro/selecionar') {
-    return 'portal'
-  }
-
-  return 'home'
+  return 'portal'
 }
 
 export function resolvePageLabel(path: string, hash: string, sections: AppNavigationSection[]) {
@@ -328,7 +261,7 @@ export function resolvePageLabel(path: string, hash: string, sections: AppNaviga
     { prefix: '/parceiro/carteira', label: t('nav.pageLabels.financeiro') },
     { prefix: '/parceiro/programas', label: t('nav.pageLabels.programas') },
     { prefix: '/parceiro/divulgacao', label: t('nav.pageLabels.divulgacao') },
-    { prefix: '/parceiro/atendimentos', label: t('nav.pageLabels.atendimentos') },
+    { prefix: '/parceiro/acessos', label: t('nav.pageLabels.acessos') },
     { prefix: '/parceiro/equipe', label: 'Equipe' },
     { prefix: '/parceiro/convite', label: t('nav.pageLabels.convite') },
     { prefix: '/parceiro/selecionar', label: t('nav.pageLabels.selecionar') },
@@ -344,8 +277,13 @@ export function resolvePageLabel(path: string, hash: string, sections: AppNaviga
     return t('nav.pageLabels.portal')
   }
 
+  /* O atendimento não é item de menu — sem esta linha o cabeçalho dizia 'Painel' no prontuário. */
+  if (path.startsWith('/veterinario/atendimento')) {
+    return t('clinico.prontuario.titulo')
+  }
+
   for (const section of sections) {
-    const matchedItem = flattenSectionItems(section).find((item) => {
+    const matchedItem = section.items.find((item) => {
       const { path: itemPath, hash: itemHash } = parseNavTarget(item.to)
 
       if (itemHash) {
@@ -390,10 +328,5 @@ export function filterNavigationGroups(
 }
 
 export function getSectionLandingPath(section: AppNavigationSection) {
-  const groupedItem = section.groups?.[0]?.items[0]
-  if (groupedItem) {
-    return groupedItem.to
-  }
-
   return section.items[0]?.to
 }
