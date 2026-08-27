@@ -8,6 +8,7 @@ import Button from 'primevue/button'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ProgramasParticipacaoView from '@/components/parceiro/ProgramasParticipacaoView.vue'
 import { EQUIPE_MENU_ENABLED } from '@/composables/useAppNavigation'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { currentColors } from '@/theme/color-mode'
 
@@ -94,6 +95,7 @@ watch(
     :error="store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : ''"
     :no-partner-access="store.acessoEncerrado"
     block-when-suspended
+    guidance
     @retry="ensureContext(true)"
   >
     <template #actions>
@@ -106,7 +108,11 @@ watch(
     </template>
 
     <div class="programas-page" :style="pageAtmosphere">
-      <p class="programas-page__lede">
+      <!--
+        Sem acesso de parceiro o texto **não** é apoio: é a instrução de como conseguir acesso,
+        e a tela não tem nada além dele. Só a versão de quem já é parceiro entra na preferência.
+      -->
+      <p v-if="store.semAcessoParceiro || isGuidanceVisible" class="programas-page__lede">
         {{ store.semAcessoParceiro ? t('programas.ledeNoAccess') : t('programas.lede') }}
       </p>
 

@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PortalDivulgacaoPanel from '@/components/parceiro/panels/PortalDivulgacaoPanel.vue'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { currentColors } from '@/theme/color-mode'
 
@@ -83,12 +84,13 @@ watch(
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
     block-when-suspended
+    guidance
     @retry="ensureContext(true)"
   >
     <div class="divulgacao-page" :style="pageAtmosphere">
       <PartnerOperabilityBanner />
 
-      <p class="divulgacao-page__lede">
+      <p v-if="isGuidanceVisible" class="divulgacao-page__lede">
         {{ t('divulgacao.lede') }}
       </p>
 

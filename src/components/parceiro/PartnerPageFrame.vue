@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
@@ -28,6 +29,14 @@ const props = withDefaults(
     emptyTitle?: string
     emptyDescription?: string
     emptyActionLabel?: string
+    /**
+     * A tela tem texto de apoio escondido atrás da preferência de explicações.
+     *
+     * Só quem declara isso ganha o botão no cabeçalho. Um botão de "mostrar explicações" numa
+     * tela sem explicação a mostrar não faz nada — e um controle que não faz nada ensina a
+     * ignorar o controle.
+     */
+    guidance?: boolean
   }>(),
   {
     subtitle: '',
@@ -36,6 +45,7 @@ const props = withDefaults(
     noPartnerAccess: false,
     blockWhenSuspended: false,
     empty: false,
+    guidance: false,
     emptyTitle: '',
     emptyDescription: '',
     emptyActionLabel: '',
@@ -51,9 +61,7 @@ const { t } = useI18n()
 const parceiroStore = useParceiroStore()
 const { logout } = useLogout()
 const showClinicalCta = computed(() => hasVeterinarioProfile())
-const resolvedEmptyTitle = computed(
-  () => props.emptyTitle || t('frame.emptyDefault'),
-)
+const resolvedEmptyTitle = computed(() => props.emptyTitle || t('frame.emptyDefault'))
 
 /**
  * O acesso existia e caiu (parceiro excluído pelo admin). Mesma porta fechada do `noPartnerAccess`,
@@ -144,9 +152,27 @@ const pageStyle = computed(() => {
         <h1 class="partner-page__title">{{ title }}</h1>
       </div>
       <div
-        v-if="$slots.actions && !noPartnerAccess && !showSuspended"
+        v-if="(guidance || $slots.actions) && !noPartnerAccess && !showSuspended"
         class="partner-page__actions"
       >
+        <!--
+          O botão vem antes das ações da tela de propósito: ele é o mesmo em todas as páginas e
+          fica sempre no mesmo lugar, encostado no título. Ação de tela muda de página para
+          página; controle de leitura, não.
+        -->
+        <button
+          v-if="guidance"
+          class="partner-page__guidance"
+          :class="{ 'partner-page__guidance--ativo': isGuidanceVisible }"
+          type="button"
+          :aria-pressed="isGuidanceVisible"
+          :title="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
+          @click="toggleGuidance"
+        >
+          <i class="pi pi-info-circle" aria-hidden="true" />
+          <span>{{ isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show') }}</span>
+        </button>
+
         <slot name="actions" />
       </div>
     </header>
@@ -206,10 +232,7 @@ const pageStyle = computed(() => {
       </div>
 
       <div class="partner-page__cta-row">
-        <RouterLink
-          class="partner-page__cta partner-page__cta--primary"
-          to="/settings?aba=empresa"
-        >
+        <RouterLink class="partner-page__cta partner-page__cta--primary" to="/settings?aba=empresa">
           {{ t('frame.noAccess.ctaPrograms') }}
         </RouterLink>
         <RouterLink
@@ -219,11 +242,7 @@ const pageStyle = computed(() => {
         >
           {{ t('frame.noAccess.ctaSettings') }}
         </RouterLink>
-        <Button
-          :label="t('frame.noAccess.retry')"
-          severity="secondary"
-          @click="emit('retry')"
-        />
+        <Button :label="t('frame.noAccess.retry')" severity="secondary" @click="emit('retry')" />
       </div>
 
       <p class="partner-page__contact">
@@ -285,11 +304,7 @@ const pageStyle = computed(() => {
         <strong>{{ resolvedEmptyTitle }}</strong>
         <p v-if="emptyDescription">{{ emptyDescription }}</p>
       </div>
-      <Button
-        v-if="emptyActionLabel"
-        :label="emptyActionLabel"
-        @click="emit('emptyAction')"
-      />
+      <Button v-if="emptyActionLabel" :label="emptyActionLabel" @click="emit('emptyAction')" />
     </div>
 
     <div v-else class="partner-page__body">
@@ -335,7 +350,45 @@ const pageStyle = computed(() => {
 .partner-page__actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
+}
+
+.partner-page__guidance {
+  display: inline-flex;
+  min-height: 2.2rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--partner-line, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--partner-faint, inherit);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 650;
+}
+
+.partner-page__guidance:hover {
+  background: var(--partner-card, transparent);
+  color: var(--partner-muted, inherit);
+}
+
+.partner-page__guidance--ativo {
+  background: var(--partner-card, transparent);
+  color: var(--partner-text, inherit);
+}
+
+/* No estreito sobra o ícone: o rótulo empurraria as ações da tela para outra linha. */
+@media (max-width: 720px) {
+  .partner-page__guidance {
+    padding-inline: 0.55rem;
+  }
+
+  .partner-page__guidance span {
+    display: none;
+  }
 }
 
 .partner-page__body {

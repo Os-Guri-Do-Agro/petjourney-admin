@@ -8,6 +8,7 @@ import { RouterLink } from 'vue-router'
 import IndicacaoQrBlock from '@/components/parceiro/IndicacaoQrBlock.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
 import { getCarteira, getPortalIndicacao } from '@/service/parceiro/parceiro-portal-service'
@@ -178,11 +179,8 @@ watch(lastSuccessAt, (at) => {
     <template v-else>
       <section class="dash-zone" aria-labelledby="dash-focus-title">
         <header class="dash-zone__head">
-          <div>
-            <p class="dash-zone__index">01</p>
-            <h2 id="dash-focus-title">{{ t('inicio.dash.focus.title') }}</h2>
-          </div>
-          <p>{{ t('inicio.dash.focus.lede') }}</p>
+          <h2 id="dash-focus-title">{{ t('inicio.dash.focus.title') }}</h2>
+          <p v-if="isGuidanceVisible">{{ t('inicio.dash.focus.lede') }}</p>
         </header>
 
         <div
@@ -347,11 +345,8 @@ watch(lastSuccessAt, (at) => {
 
       <section v-if="cupomFeatureEnabled" class="dash-zone" aria-labelledby="dash-pulse-title">
         <header class="dash-zone__head">
-          <div>
-            <p class="dash-zone__index">02</p>
-            <h2 id="dash-pulse-title">{{ t('inicio.dash.pulse.title') }}</h2>
-          </div>
-          <p>{{ t('inicio.dash.pulse.lede') }}</p>
+          <h2 id="dash-pulse-title">{{ t('inicio.dash.pulse.title') }}</h2>
+          <p v-if="isGuidanceVisible">{{ t('inicio.dash.pulse.lede') }}</p>
         </header>
 
         <div
@@ -424,20 +419,6 @@ watch(lastSuccessAt, (at) => {
   gap: 0.28rem;
   padding-bottom: 0.55rem;
   border-bottom: 1px solid color-mix(in srgb, var(--dash-line) 85%, transparent);
-}
-
-.dash-zone__head > div {
-  display: flex;
-  align-items: baseline;
-  gap: 0.55rem;
-}
-
-.dash-zone__index {
-  margin: 0;
-  color: var(--dash-faint);
-  font-size: 0.72rem;
-  font-weight: 750;
-  letter-spacing: 0.08em;
 }
 
 .dash-zone__head h2 {

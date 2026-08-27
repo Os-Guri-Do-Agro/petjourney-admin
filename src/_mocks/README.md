@@ -24,12 +24,21 @@ servem de referência: eram arrays estáticos dentro do próprio componente.
 | `veterinario/atividades.vue` | `pages/(accounts)/veterinario/atividades.vue` |
 | `veterinario/pacientes.vue` | `pages/(accounts)/veterinario/pacientes.vue` |
 | `veterinario/atendimentos.vue` | `pages/(accounts)/veterinario/atendimentos.vue` + `features/clinico/components/prontuario/` |
-| `veterinario/compartilhamentos.vue` | ainda stub — ver nota abaixo |
+| `veterinario/compartilhamentos.vue` | `pages/(accounts)/parceiro/acessos/` — ver nota abaixo |
 | `components/home/ClinicalHomeOverview.vue` | substituído por `pages/(accounts)/veterinario/meu-dia.vue` |
 
-**Compartilhamentos** continua como stub de produção (`ClinicalFeaturePlaceholder`): é outra
-feature, com contrato próprio em `docs/NOVAS_IMPLEMENTAÇÕES/11-13-prontuario-acesso-temporario-portal.md`,
-e não faz parte do módulo clínico.
+**Compartilhamentos** não é do módulo clínico e nunca foi: é o acesso temporário que o
+responsável concede ao prestador, com contrato próprio em
+`docs/NOVAS_IMPLEMENTAÇÕES/11-13-prontuario-acesso-temporario-portal.md`. A tela existe e
+funciona em **`/parceiro/acessos`**, entregue em 2026-08-14.
+
+A entrada em `/veterinario/compartilhamentos` era uma segunda porta para o mesmo cômodo, criada
+na fase de mock antes de a de portal ficar pronta, e nunca passou de um cartão de
+"indisponível". Saiu do menu Pets; a rota redireciona para `/parceiro/acessos`.
+
+O que o mock desenhava e a tela entregue **não** cobre, se algum dia virar spec: o detalhamento
+do escopo consentido categoria a categoria, a trilha de auditoria de acessos, "marcar como
+revisado" antes da consulta e o pedido de renovação ao responsável.
 
 ## O que continua aqui
 

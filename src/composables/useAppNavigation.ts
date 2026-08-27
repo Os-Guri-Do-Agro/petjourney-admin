@@ -102,14 +102,7 @@ export function useAppNavigation() {
   const patientItems = computed<AppNavigationItem[]>(() => {
     void locale.value
 
-    return [
-      ...PATIENT_ROUTES.map((rota) => ({ label: t(rota.key), to: rota.to, icon: rota.icon })),
-      {
-        label: 'Compartilhamentos',
-        to: '/veterinario/compartilhamentos',
-        icon: 'pi pi-share-alt',
-      },
-    ]
+    return PATIENT_ROUTES.map((rota) => ({ label: t(rota.key), to: rota.to, icon: rota.icon }))
   })
 
   const portalItems = computed<AppNavigationItem[]>(() => {
@@ -232,8 +225,7 @@ export function resolveActiveSectionId(path: string, hasClinical: boolean) {
   if (
     path.startsWith('/veterinario/pacientes') ||
     path.startsWith('/veterinario/paciente/') ||
-    path.startsWith('/veterinario/bulario') ||
-    path.startsWith('/veterinario/compartilhamentos')
+    path.startsWith('/veterinario/bulario')
   ) {
     return 'patients'
   }

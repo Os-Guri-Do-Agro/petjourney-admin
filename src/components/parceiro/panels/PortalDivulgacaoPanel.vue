@@ -13,6 +13,7 @@ import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 // Volta junto com o teaser de cupom comentado no template.
 // import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -350,11 +351,8 @@ watch(lastSuccessAt, (at) => {
     <template v-else-if="loading">
       <section class="div-zone" aria-labelledby="div-indicacao-title">
         <header class="div-zone__head">
-          <div class="div-zone__title-row">
-            <p class="div-zone__index">01</p>
-            <h2 id="div-indicacao-title">{{ t('divulgacao.indicacao.title') }}</h2>
-          </div>
-          <p>{{ t('divulgacao.indicacao.lede') }}</p>
+          <h2 id="div-indicacao-title">{{ t('divulgacao.indicacao.title') }}</h2>
+          <p v-if="isGuidanceVisible">{{ t('divulgacao.indicacao.lede') }}</p>
         </header>
 
         <div
@@ -431,11 +429,8 @@ watch(lastSuccessAt, (at) => {
 
       <section v-if="cupomFeatureEnabled" class="div-zone" aria-labelledby="div-movimentacao-title">
         <header class="div-zone__head">
-          <div class="div-zone__title-row">
-            <p class="div-zone__index">02</p>
-            <h2 id="div-movimentacao-title">{{ t('divulgacao.lists.title') }}</h2>
-          </div>
-          <p>{{ t('divulgacao.lists.lede') }}</p>
+          <h2 id="div-movimentacao-title">{{ t('divulgacao.lists.title') }}</h2>
+          <p v-if="isGuidanceVisible">{{ t('divulgacao.lists.lede') }}</p>
         </header>
 
         <div
@@ -506,11 +501,8 @@ watch(lastSuccessAt, (at) => {
     <template v-else-if="indicacao">
       <section id="indicacao" class="div-zone" aria-labelledby="div-indicacao-title">
         <header class="div-zone__head">
-          <div class="div-zone__title-row">
-            <p class="div-zone__index">01</p>
-            <h2 id="div-indicacao-title">{{ t('divulgacao.indicacao.title') }}</h2>
-          </div>
-          <p>{{ t('divulgacao.indicacao.lede') }}</p>
+          <h2 id="div-indicacao-title">{{ t('divulgacao.indicacao.title') }}</h2>
+          <p v-if="isGuidanceVisible">{{ t('divulgacao.indicacao.lede') }}</p>
         </header>
 
         <div
@@ -738,11 +730,8 @@ watch(lastSuccessAt, (at) => {
 
       <section v-if="cupomFeatureEnabled" class="div-zone" aria-labelledby="div-movimentacao-title">
         <header class="div-zone__head">
-          <div class="div-zone__title-row">
-            <p class="div-zone__index">02</p>
-            <h2 id="div-movimentacao-title">{{ t('divulgacao.lists.title') }}</h2>
-          </div>
-          <p>{{ t('divulgacao.lists.lede') }}</p>
+          <h2 id="div-movimentacao-title">{{ t('divulgacao.lists.title') }}</h2>
+          <p v-if="isGuidanceVisible">{{ t('divulgacao.lists.lede') }}</p>
         </header>
 
         <div class="divulgacao__lists">
@@ -750,7 +739,7 @@ watch(lastSuccessAt, (at) => {
             <header class="list-panel__head">
               <div>
                 <h3 id="divulgacao-cupons-title">{{ t('divulgacao.cupons.title') }}</h3>
-                <p>{{ t('divulgacao.cupons.lede') }}</p>
+                <p v-if="isGuidanceVisible">{{ t('divulgacao.cupons.lede') }}</p>
               </div>
               <span class="list-panel__count">{{ cupons.length }}</span>
             </header>
@@ -789,7 +778,7 @@ watch(lastSuccessAt, (at) => {
             <header class="list-panel__head">
               <div>
                 <h3 id="divulgacao-resgates-title">{{ t('divulgacao.resgates.title') }}</h3>
-                <p>{{ t('divulgacao.resgates.lede') }}</p>
+                <p v-if="isGuidanceVisible">{{ t('divulgacao.resgates.lede') }}</p>
               </div>
               <span class="list-panel__count">{{ resgates.length }}</span>
             </header>
@@ -854,20 +843,6 @@ watch(lastSuccessAt, (at) => {
   gap: 0.28rem;
   padding-bottom: 0.55rem;
   border-bottom: 1px solid color-mix(in srgb, var(--div-line) 85%, transparent);
-}
-
-.div-zone__title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0.55rem;
-}
-
-.div-zone__index {
-  margin: 0;
-  color: var(--div-faint);
-  font-size: 0.72rem;
-  font-weight: 750;
-  letter-spacing: 0.08em;
 }
 
 .div-zone__head h2 {
