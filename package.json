@@ -19,6 +19,7 @@
   "dependencies": {
     "@primeuix/themes": "^2.0.3",
     "@tailwindcss/vite": "^4.3.1",
+    "apexcharts": "^7.0.0",
     "country-flag-icons": "^1.6.20",
     "pinia": "^3.0.4",
     "primeicons": "^7.0.0",
@@ -26,7 +27,8 @@
     "tailwindcss": "^4.3.1",
     "vue": "^3.5.38",
     "vue-i18n": "^11.4.6",
-    "vue-router": "^5.1.0"
+    "vue-router": "^5.1.0",
+    "vue3-apexcharts": "^1.11.1"
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.4",

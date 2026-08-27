@@ -15,6 +15,8 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
+import i18n from '@/i18n'
+
 import {
   EncounterLockedError,
   encounterRepository,
@@ -46,9 +48,24 @@ function identificarDispositivo(): EncounterLock {
     }
   }
 
+  /*
+   * O rótulo é o que o outro dispositivo lê na tarja de somente leitura ("em edição por …"),
+   * então precisa falar a língua de quem lê. Fora de componente, o `t` vem da instância global
+   * — mesmo caminho já usado pelas stores e serviços da casa.
+   *
+   * A tradução acontece uma vez, na abertura da sessão: `navigator.platform` devolve algo como
+   * "Win32" e só o texto de reserva é traduzível. Trocar de idioma no meio não reescreve o
+   * rótulo, e não deveria — a essa altura ele já viajou dentro do lock para o outro
+   * dispositivo, que é quem vai exibi-lo.
+   */
+  const { t } = i18n.global
+
   return {
     deviceId: id || 'dev-servidor',
-    deviceLabel: typeof navigator === 'undefined' ? 'Servidor' : navigator.platform || 'Navegador',
+    deviceLabel:
+      typeof navigator === 'undefined'
+        ? String(t('clinico.prontuario.dispositivo.servidor'))
+        : navigator.platform || String(t('clinico.prontuario.dispositivo.navegador')),
     desde: clinicClock.nowIso(),
   }
 }
@@ -329,7 +346,7 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
       lock: simulandoSegundoDispositivo.value
         ? {
             deviceId: 'outro-dispositivo',
-            deviceLabel: 'Recepção · Chrome',
+            deviceLabel: String(i18n.global.t('clinico.prontuario.dispositivo.simulado')),
             desde: clinicClock.nowIso(),
           }
         : null,

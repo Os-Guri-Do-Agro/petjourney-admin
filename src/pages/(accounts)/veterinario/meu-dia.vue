@@ -305,7 +305,7 @@ onMounted(carregar)
                   <strong>{{ clinico.pet(item.encounter.petId)?.nome }}</strong>
                   <small>
                     {{
-                      item.encounter.diagnosticos[0]?.descricao ||
+                      clinico.diagnosticoPrincipal(item.encounter) ||
                       item.encounter.anamnese.queixaPrincipal
                     }}
                     ·

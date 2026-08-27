@@ -20,7 +20,7 @@ import { useI18n } from 'vue-i18n'
 import DocumentoFolha from './DocumentoFolha.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { Encounter, Pet, Tutor } from '../../data/types'
-import { clinicClock } from '../../stores/clinico'
+import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{
   encounter: Encounter
@@ -30,6 +30,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const clinico = useClinicoStore()
 const formato = useClinicFormat()
 
 const dataDoDocumento = computed(() =>
@@ -48,7 +49,7 @@ const titulo = computed(() => t(`clinico.documentos.atestado.${props.tipo}.titul
 const diagnosticos = computed(() =>
   props.encounter.diagnosticos
     .filter((item) => item.kind !== 'diferencial')
-    .map((item) => item.descricao)
+    .map((item) => clinico.descricaoDoDiagnostico(item))
     .filter(Boolean),
 )
 

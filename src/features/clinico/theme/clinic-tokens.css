@@ -37,6 +37,22 @@
   --clinic-accent-soft: #dcebe7;
   --clinic-on-accent: #ffffff;
 
+  /* ------------------------------------------------- degraus do mapa de calor
+   *
+   * Quatro passos fechados, não um gradiente: entre 3 e 4 atendimentos, degrau contínuo vira
+   * ruído de cor. Os valores são a mistura do acento com a superfície já resolvida — 22%, 45%,
+   * 68% e 100% —, escritos em hexadecimal porque quem os lê é o ApexCharts, via
+   * `getComputedStyle`, e propriedade personalizada não resolve `color-mix()` na leitura.
+   *
+   * A tinta de cada degrau vem de token existente: `text` no 1 e no 2, `heat-ink` no 3,
+   * `surface` no 4. Escurecer o degrau 3 até o branco fechar 4,5:1 fecharia junto a distância
+   * para o 4, e um mapa de quatro degraus com dois iguais deixa de ser mapa.
+   */
+  --clinic-heat-1: #e4f1ef;
+  --clinic-heat-2: #c8e3dd;
+  --clinic-heat-3: #819a93;
+  --clinic-heat-4: #456a60;
+
   /* -------------------------------------------------- significado clínico (só risco) */
   --clinic-risk-text: #a2503a;
   --clinic-risk-bg: #fbeee8;
@@ -154,6 +170,11 @@
   --clinic-heat-ink: #0f1a16;
   --clinic-accent-soft: #244139;
   --clinic-on-accent: #0f1714;
+
+  --clinic-heat-1: #2b413b;
+  --clinic-heat-2: #45675f;
+  --clinic-heat-3: #88a49d;
+  --clinic-heat-4: #bfe3db;
 
   --clinic-risk-text: #f2ae9b;
   --clinic-risk-bg: #3a211c;
@@ -608,4 +629,70 @@
  */
 .clinic-acoes {
   display: contents;
+}
+
+/* -------------------------------------------------------------------- ApexCharts
+
+ O Apex injeta a própria folha de estilo no `<head>` e pinta a dica com um branco fixo e um
+ cinza fixo. É a mesma armadilha do campo e do overlay do PrimeVue, agora em SVG: no modo
+ escuro o cartão da dica nasce claro por cima de um gráfico escuro.
+
+ As regras vivem aqui, e não no `<style scoped>` de cada gráfico, por dois motivos. A dica é
+ criada pela biblioteca depois da montagem, então não recebe o atributo de escopo do Vue; e os
+ três gráficos do resumo precisariam repetir o mesmo bloco.
+
+ Cor, tipografia e sombra saem dos tokens do módulo — o tema `light`/`dark` que a configuração
+ do gráfico manda serve só para o Apex escolher o arranjo, não a tinta.
+*/
+.clinic-scope .apexcharts-canvas {
+  font-family: var(--clinic-font-sans);
+}
+
+.clinic-scope .apexcharts-tooltip.apexcharts-theme-light,
+.clinic-scope .apexcharts-tooltip.apexcharts-theme-dark {
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-float);
+  color: var(--clinic-text);
+  font-family: var(--clinic-font-sans);
+}
+
+.clinic-scope .apexcharts-tooltip .apexcharts-tooltip-title {
+  margin-bottom: 0.3rem;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--clinic-line);
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-text);
+  font-family: var(--clinic-font-sans);
+  font-size: var(--clinic-font-label);
+  font-weight: 750;
+}
+
+.clinic-scope .apexcharts-tooltip .apexcharts-tooltip-text-y-label {
+  color: var(--clinic-muted);
+}
+
+.clinic-scope .apexcharts-tooltip .apexcharts-tooltip-text-y-value,
+.clinic-scope .apexcharts-tooltip .apexcharts-tooltip-text-z-value {
+  color: var(--clinic-text);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+/** Número dentro do gráfico é valor clínico: mesma regra de tabular do resto do módulo. */
+.clinic-scope .apexcharts-datalabel,
+.clinic-scope .apexcharts-datalabel-value,
+.clinic-scope .apexcharts-yaxis-label,
+.clinic-scope .apexcharts-xaxis-label {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Foco visível na navegação por teclado do gráfico. O Apex move o foco entre pontos com as
+ * setas; sem contorno, quem anda por teclado não sabe onde está.
+ */
+.clinic-scope .apexcharts-canvas :focus-visible {
+  outline: 2px solid var(--clinic-accent-deep);
+  outline-offset: 1px;
 }

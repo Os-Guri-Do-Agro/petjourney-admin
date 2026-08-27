@@ -115,7 +115,7 @@ onMounted(carregar)
               <span class="item__corpo">
                 <strong>{{ clinico.pet(item.encounter.petId)?.nome }}</strong>
                 <small>
-                  {{ item.encounter.diagnosticos[0]?.descricao || '—' }} ·
+                  {{ clinico.diagnosticoPrincipal(item.encounter) || '—' }} ·
                   {{
                     t('clinico.formato.haTempo', {
                       valor: t('clinico.formato.dias', { valor: item.diasDeAtraso }, item.diasDeAtraso),

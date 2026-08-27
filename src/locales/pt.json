@@ -2009,7 +2009,8 @@
         "finalizados": "Concluídos",
         "previstos": "Previstos",
         "faltas": "Faltas",
-        "ocupacao": "Ocupação"
+        "ocupacao": "Ocupação",
+        "fechado": "Fechado"
       }
     },
     "bulario": {
@@ -2233,6 +2234,11 @@
       },
       "comparar": "Comparar versões",
       "campo": "Campo",
+      "dispositivo": {
+        "navegador": "Navegador",
+        "servidor": "Servidor",
+        "simulado": "Recepção · Chrome"
+      },
       "versaoAtual": "Nesta tela",
       "versaoServidor": "No servidor",
       "anamnese": {
@@ -2241,6 +2247,7 @@
         "queixaPrincipal": "Queixa principal",
         "historia": "História clínica",
         "duracaoSintomas": "Há quanto tempo",
+        "duracaoExemplo": "3 dias",
         "apetite": "Apetite",
         "hidratacao": "Hidratação",
         "evacuacao": "Evacuação",
@@ -2384,7 +2391,8 @@
       "passos": {
         "vitaisAferidos": "{preenchidos} de {total} aferidos",
         "prescricoes": "{contagem} na prescrição",
-        "sistemasAlterados": "{contagem} alterado | {contagem} alterados"
+        "sistemasAlterados": "{contagem} alterado | {contagem} alterados",
+        "aria": "Etapas do atendimento"
       },
       "naoMedir": "não medir",
       "filtro": {
@@ -2529,5 +2537,42 @@
       "semResultado": "Nenhum resultado para esta busca.",
       "cancelar": "Cancelar"
     }
+  },
+  "cronometro": {
+    "titulo": "Cronômetro de atendimento",
+    "iniciar": "Iniciar",
+    "ariaIniciar": "Iniciar o cronômetro do atendimento",
+    "ariaAbrir": "Cronômetro em {tempo} — {estado}. Abrir o painel.",
+    "abrirPainel": "Abrir o painel do cronômetro",
+    "pausar": "Pausar",
+    "retomar": "Retomar",
+    "encerrar": "Encerrar",
+    "descartar": "Descartar",
+    "pausado": "Pausado",
+    "semSessao": "Nenhum atendimento cronometrado",
+    "semPaciente": "Sem atendimento vinculado",
+    "estado": {
+      "dentro": "Dentro do bloco",
+      "no-limite": "Fim do bloco chegando",
+      "excedido": "Bloco estourado"
+    },
+    "unidades": "{contagem} unidade | {contagem} unidades",
+    "decorrido": "Decorrido",
+    "cobravel": "Faturável",
+    "minutos": "{valor} min",
+    "proximaUnidade": "próxima unidade em {valor}",
+    "excedente": "{valor} além do bloco",
+    "esquecidaTitulo": "Cronômetro correndo há muito tempo",
+    "esquecidaDescricao": "Este relógio corre há mais de quatro horas. Se ficou aberto por engano, descarte: encerrar registraria o tempo como atendido.",
+    "hoje": "Hoje",
+    "hojeResumo": "{contagem} atendimento | {contagem} atendimentos",
+    "totalDecorrido": "Em atendimento",
+    "totalCobravel": "Total faturável",
+    "ultimaHa": "última há {valor}",
+    "semHistorico": "Nenhum atendimento encerrado hoje.",
+    "limparHistorico": "Limpar o dia",
+    "bloco": "Bloco da consulta",
+    "incremento": "Incremento de cobrança",
+    "comoFunciona": "O tempo é arredondado para cima até a próxima unidade. O decorrido real fica sempre à vista, ao lado."
   }
 }

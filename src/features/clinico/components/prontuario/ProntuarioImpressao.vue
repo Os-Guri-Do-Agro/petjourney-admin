@@ -318,7 +318,7 @@ function nomeDoExame(id: string) {
 
       <ul v-if="encounter.diagnosticos.length > 0" class="itens">
         <li v-for="diagnostico in encounter.diagnosticos" :key="diagnostico.id">
-          <strong>{{ diagnostico.codigo }}</strong> {{ diagnostico.descricao }} —
+          <strong>{{ diagnostico.codigo }}</strong> {{ clinico.descricaoDoDiagnostico(diagnostico) }} —
           {{ t(`clinico.prontuario.diagnostico.tipo.${diagnostico.kind}`) }}
         </li>
       </ul>

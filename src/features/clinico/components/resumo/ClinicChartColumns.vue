@@ -1,341 +1,316 @@
 <script setup lang="ts">
 /**
- * Colunas empilhadas por dia, com a linha de ocupação por cima.
+ * Colunas empilhadas por dia, com a linha de ocupação por cima — desenhadas com ApexCharts.
  *
- * **As barras são CSS; só a linha é SVG.** A primeira versão desenhava tudo em SVG com
- * `preserveAspectRatio="none"` e o desenho esticava na horizontal: os pontos da linha viravam
- * elipses achatadas e qualquer texto dentro do gráfico deformava junto. Retângulo empilhado e
- * alinhado a um rótulo é exatamente o que o layout do navegador faz melhor do que um viewBox.
- * Sobra para o SVG o que ele faz bem — a poligonal —, e ali o traço é protegido por
- * `vector-effect: non-scaling-stroke`.
+ * A versão anterior era CSS puro e SVG na mão. Funcionava, mas parava onde um painel começa a
+ * ser útil: não tinha dica ao passar o mouse, não dava para isolar uma série clicando na
+ * legenda e o eixo de ocupação não existia — a linha flutuava sem escala ao lado.
  *
- * Duas decisões que valem comentário:
+ * Quatro decisões que sobreviveram à troca de biblioteca, porque são de leitura e não de
+ * desenho:
  *
  * - **Cada coluna mostra o próprio total.** Barra sem número obriga a medir com o olho contra a
- *   grade, e em impressão preto e branco some.
- * - **A ocupação é linha, não barra.** É uma taxa, não uma contagem: na mesma escala, "80%"
- *   competiria visualmente com "8 atendimentos".
+ *   grade, e em impressão preto e branco some. Aqui isso é
+ *   `plotOptions.bar.dataLabels.total`, que roda mesmo com `dataLabels.enabled: false` — os
+ *   rótulos por segmento ficariam ilegíveis numa faixa de dois atendimentos.
+ * - **A ocupação é linha em eixo próprio, não barra.** É uma taxa, não uma contagem: na mesma
+ *   escala, "80%" competiria visualmente com "8 atendimentos". O eixo da direita vai de 0 a
+ *   100% e diz isso em voz alta.
+ * - **A linha quebra no dia fechado.** O valor vai como `null`, não como zero: unir a linha por
+ *   cima de um feriado desenharia movimento onde a clínica estava de portas fechadas, e um zero
+ *   afundaria a média visual do período.
+ * - **Traço reto, nunca suavizado.** Curva entre dois dias inventa um caminho que ninguém
+ *   mediu.
+ *
+ * O dia fechado é marcado três vezes de propósito — fundo rebaixado na coluna, rótulo mais
+ * apagado no eixo e a palavra na dica — porque nenhuma das três sozinha sobrevive a impressão
+ * em escala de cinza.
  */
+import type { ApexAxisChartSeries, ApexOptions, ApexYAxis } from 'apexcharts'
 import { computed } from 'vue'
+import VueApexCharts from './apex'
 
+import { useClinicFormat } from '../../composables/useClinicFormat'
+import { useClinicChartTheme } from '../../composables/useClinicChartTheme'
 import type { PontoDoDia } from '../../domain/resumo'
 
 const props = withDefaults(
   defineProps<{
     pontos: PontoDoDia[]
-    /** Rótulo curto de cada coluna, na mesma ordem dos pontos. */
+    /** Rótulo curto de cada coluna, na mesma ordem dos pontos. Vazio esconde o rótulo. */
     rotulos: string[]
-    legenda: { finalizados: string; previstos: string; faltas: string; ocupacao: string }
+    legenda: {
+      finalizados: string
+      previstos: string
+      faltas: string
+      ocupacao: string
+      fechado: string
+    }
     /** Dia em destaque — normalmente hoje. */
     destaque?: string
+    /** Texto da marca sobre o dia em destaque. Vazio desenha só a linha. */
+    rotuloDestaque?: string
     mostrarOcupacao?: boolean
   }>(),
-  { destaque: '', mostrarOcupacao: true },
+  { destaque: '', rotuloDestaque: '', mostrarOcupacao: true },
 )
 
+const tema = useClinicChartTheme()
+const formato = useClinicFormat()
+
+const ALTURA = 300
+
+/**
+ * Teto do eixo de contagem.
+ *
+ * Mínimo de 4 e sempre par: um dia com um atendimento não deve virar uma coluna de altura
+ * inteira, e escala ímpar espalha os tiques em números quebrados.
+ */
 const maximo = computed(() => {
   const maior = props.pontos.reduce(
     (topo, ponto) => Math.max(topo, ponto.finalizados + ponto.previstos + ponto.faltas),
     0,
   )
 
-  /** Teto mínimo de 4: um dia com um atendimento não deve virar uma coluna de altura inteira. */
   return Math.max(4, Math.ceil(maior / 2) * 2)
 })
 
-type Coluna = {
-  data: string
-  rotulo: string
-  total: number
-  fechado: boolean
-  destacada: boolean
-  ocupacao: number
-  segmentos: { classe: string; altura: string; valor: number }[]
-}
+/**
+ * A categoria é a data ISO, não o rótulo curto.
+ *
+ * Em trinta dias o rótulo se repete ("seg" quatro vezes) e às vezes é vazio; a anotação do dia
+ * de hoje e o texto da dica precisam de uma chave que case com um dia só. O que a pessoa lê no
+ * eixo continua vindo de `rotulos`, pelo formatador.
+ */
+const categorias = computed(() => props.pontos.map((ponto) => ponto.data))
 
-const colunas = computed<Coluna[]>(() =>
-  props.pontos.map((ponto, indice) => ({
-    data: ponto.data,
-    rotulo: props.rotulos[indice] ?? '',
-    total: ponto.finalizados + ponto.previstos + ponto.faltas,
-    fechado: ponto.fechado,
-    destacada: ponto.data === props.destaque,
-    ocupacao: Math.min(1, ponto.ocupacao),
-    segmentos: (
-      [
-        ['finalizados', ponto.finalizados],
-        ['previstos', ponto.previstos],
-        ['faltas', ponto.faltas],
-      ] as const
-    )
-      .filter(([, valor]) => valor > 0)
-      .map(([classe, valor]) => ({
-        classe,
-        valor,
-        altura: `${(valor / maximo.value) * 100}%`,
-      })),
-  })),
+const rotuloPorData = computed(
+  () => new Map(props.pontos.map((ponto, indice) => [ponto.data, props.rotulos[indice] ?? ''])),
 )
 
-/**
- * Poligonal da ocupação, em coordenadas de 0–100 nos dois eixos.
- *
- * Quebra nos dias fechados: unir a linha por cima de um feriado desenharia movimento onde a
- * clínica estava de portas fechadas.
- */
-const trilhas = computed(() => {
-  const total = Math.max(1, colunas.value.length)
-  const grupos: string[] = []
-  let atual: string[] = []
+const pontoPorData = computed(() => new Map(props.pontos.map((ponto) => [ponto.data, ponto])))
 
-  colunas.value.forEach((coluna, indice) => {
-    if (coluna.fechado) {
-      if (atual.length > 1) {
-        grupos.push(atual.join(' '))
-      }
+const series = computed<ApexAxisChartSeries>(() => {
+  const contagens: ApexAxisChartSeries = [
+    {
+      name: props.legenda.finalizados,
+      type: 'column',
+      data: props.pontos.map((ponto) => ponto.finalizados),
+    },
+    {
+      name: props.legenda.previstos,
+      type: 'column',
+      data: props.pontos.map((ponto) => ponto.previstos),
+    },
+    {
+      name: props.legenda.faltas,
+      type: 'column',
+      data: props.pontos.map((ponto) => ponto.faltas),
+    },
+  ]
 
-      atual = []
-      return
-    }
-
-    const x = ((indice + 0.5) / total) * 100
-    const y = 100 - coluna.ocupacao * 100
-
-    atual.push(`${x},${y}`)
-  })
-
-  if (atual.length > 1) {
-    grupos.push(atual.join(' '))
+  if (!props.mostrarOcupacao) {
+    return contagens
   }
 
-  return grupos
+  return [
+    ...contagens,
+    {
+      name: props.legenda.ocupacao,
+      type: 'line',
+      data: props.pontos.map((ponto) =>
+        ponto.fechado ? null : Math.round(Math.min(1, ponto.ocupacao) * 100),
+      ),
+    },
+  ]
+})
+
+const opcoes = computed<ApexOptions>(() => {
+  const cor = tema.cor.value
+  const contagem: ApexYAxis = {
+    seriesName: props.legenda.finalizados,
+    min: 0,
+    max: maximo.value,
+    tickAmount: Math.min(4, maximo.value),
+    forceNiceScale: false,
+    labels: {
+      style: tema.rotuloDeEixo.value,
+      formatter: (valor: number) => String(Math.round(valor)),
+    },
+  }
+
+  const eixos: ApexYAxis[] = [
+    contagem,
+    { ...contagem, show: false },
+    { ...contagem, show: false },
+  ]
+
+  if (props.mostrarOcupacao) {
+    eixos.push({
+      seriesName: props.legenda.ocupacao,
+      opposite: true,
+      min: 0,
+      max: 100,
+      tickAmount: 4,
+      forceNiceScale: false,
+      labels: {
+        style: { ...tema.rotuloDeEixo.value, colors: cor['attention-text'] },
+        formatter: (valor: number) => `${Math.round(valor)}%`,
+      },
+    })
+  }
+
+  return {
+    chart: { ...tema.grafico.value, type: 'line', height: ALTURA, stacked: true },
+    colors: [cor['accent-strong'], cor.accent, cor['risk-text'], cor['attention-text']],
+    grid: tema.grade.value,
+    legend: tema.legenda.value,
+    states: tema.estados.value,
+    stroke: {
+      /* Zero nas colunas: contorno em barra empilhada vira uma linha entre dois segmentos. */
+      width: props.mostrarOcupacao ? [0, 0, 0, 2.5] : [0, 0, 0],
+      curve: 'straight',
+      lineCap: 'round',
+    },
+    fill: { opacity: 1 },
+    markers: {
+      size: props.mostrarOcupacao ? [0, 0, 0, 4] : [0, 0, 0],
+      strokeColors: cor.surface,
+      strokeWidth: 2,
+      hover: { sizeOffset: 2 },
+    },
+    dataLabels: { enabled: false },
+    plotOptions: {
+      bar: {
+        columnWidth: props.pontos.length > 12 ? '76%' : '52%',
+        borderRadius: 4,
+        borderRadiusApplication: 'end',
+        colors: {
+          /*
+           * Fundo do dia fechado. Vem daqui e não de uma anotação porque a barra de fundo do
+           * Apex já tem a largura e o arredondamento da coluna — uma faixa desenhada por cima
+           * teria que redescobrir os dois a cada redimensionamento.
+           */
+          backgroundBarColors: props.pontos.map((ponto) =>
+            ponto.fechado ? cor['surface-sunken'] : 'transparent',
+          ),
+          backgroundBarOpacity: 1,
+          backgroundBarRadius: 4,
+        },
+        dataLabels: {
+          total: {
+            enabled: true,
+            offsetY: -4,
+            formatter: (valor?: string) => (Number(valor) > 0 ? String(valor) : ''),
+            style: {
+              color: cor.muted,
+              fontFamily: tema.fonte.value.familia,
+              fontSize: tema.fonte.value.rotulo,
+              fontWeight: 800,
+            },
+          },
+        },
+      },
+    },
+    xaxis: {
+      type: 'category',
+      categories: categorias.value,
+      tickPlacement: 'on',
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      labels: {
+        /* Os rótulos já chegam rareados pela página; deixar o Apex esconder de novo abriria buracos. */
+        hideOverlappingLabels: false,
+        showDuplicates: true,
+        trim: false,
+        rotate: 0,
+        style: {
+          fontFamily: tema.fonte.value.familia,
+          fontSize: tema.fonte.value.rotulo,
+          fontWeight: 700,
+          colors: props.pontos.map((ponto) => {
+            if (ponto.data === props.destaque) {
+              return cor['accent-strong']
+            }
+
+            return ponto.fechado ? cor.faint : cor.muted
+          }),
+        },
+        formatter: (valor: string | number) => rotuloPorData.value.get(String(valor)) ?? '',
+      },
+      crosshairs: { show: true, stroke: { color: cor['line-strong'], width: 1, dashArray: 3 } },
+      tooltip: { enabled: false },
+    },
+    yaxis: eixos,
+    annotations: {
+      xaxis:
+        props.destaque && pontoPorData.value.has(props.destaque)
+          ? [
+              {
+                x: props.destaque,
+                strokeDashArray: 0,
+                borderColor: cor.accent,
+                label: props.rotuloDestaque
+                  ? {
+                      text: props.rotuloDestaque,
+                      borderColor: 'transparent',
+                      position: 'top',
+                      offsetY: -6,
+                      style: {
+                        background: cor['accent-tint'],
+                        color: cor['accent-strong'],
+                        fontFamily: tema.fonte.value.familia,
+                        fontSize: tema.fonte.value.rotulo,
+                        fontWeight: 750,
+                        padding: { left: 6, right: 6, top: 2, bottom: 2 },
+                      },
+                    }
+                  : undefined,
+              },
+            ]
+          : [],
+    },
+    tooltip: {
+      ...tema.dica.value,
+      shared: true,
+      intersect: false,
+      hideEmptySeries: false,
+      x: {
+        formatter: (valor: string | number) => {
+          const data = String(valor)
+          const ponto = pontoPorData.value.get(data)
+          const titulo = formato.dataLonga(data)
+
+          return ponto?.fechado ? `${titulo} · ${props.legenda.fechado}` : titulo
+        },
+      },
+      y: props.mostrarOcupacao
+        ? [
+            { formatter: (valor: number) => String(valor ?? 0) },
+            { formatter: (valor: number) => String(valor ?? 0) },
+            { formatter: (valor: number) => String(valor ?? 0) },
+            { formatter: (valor: number) => (valor === null ? '—' : `${valor}%`) },
+          ]
+        : { formatter: (valor: number) => String(valor ?? 0) },
+    },
+  }
 })
 </script>
 
 <template>
   <figure class="colunas">
-    <div class="colunas__area">
-      <!--
-        A poligonal fica atrás dos marcadores, sobre a mesma caixa das barras. Só ela mora no
-        SVG; tudo que precisa manter proporção está em CSS.
-      -->
-      <svg
-        v-if="mostrarOcupacao"
-        class="colunas__linha-area"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <polyline
-          v-for="(trilha, indice) in trilhas"
-          :key="indice"
-          class="colunas__linha"
-          :points="trilha"
-        />
-      </svg>
-
-      <div
-        v-for="coluna in colunas"
-        :key="coluna.data"
-        class="coluna"
-        :class="{ 'coluna--destacada': coluna.destacada, 'coluna--fechada': coluna.fechado }"
-      >
-        <span class="coluna__total clinic-value">{{ coluna.total || '' }}</span>
-
-        <span class="coluna__pilha">
-          <span
-            v-for="segmento in coluna.segmentos"
-            :key="segmento.classe"
-            class="coluna__segmento"
-            :class="`coluna__segmento--${segmento.classe}`"
-            :style="{ height: segmento.altura }"
-          />
-
-          <span
-            v-if="mostrarOcupacao && !coluna.fechado"
-            class="coluna__marca"
-            :style="{ bottom: `${coluna.ocupacao * 100}%` }"
-          />
-        </span>
-
-        <span class="coluna__rotulo">{{ coluna.rotulo }}</span>
-      </div>
-    </div>
-
-    <figcaption class="colunas__legenda">
-      <span class="colunas__chave colunas__chave--finalizados">{{ legenda.finalizados }}</span>
-      <span class="colunas__chave colunas__chave--previstos">{{ legenda.previstos }}</span>
-      <span class="colunas__chave colunas__chave--faltas">{{ legenda.faltas }}</span>
-      <span v-if="mostrarOcupacao" class="colunas__chave colunas__chave--ocupacao">
-        {{ legenda.ocupacao }}
-      </span>
-    </figcaption>
+    <VueApexCharts
+      type="line"
+      :height="ALTURA"
+      :options="opcoes"
+      :series="series"
+      width="100%"
+    />
   </figure>
 </template>
 
 <style scoped>
 .colunas {
-  --altura-pilha: 9rem;
-
-  display: grid;
   margin: 0;
-  gap: 0.6rem;
-}
-
-.colunas__area {
-  position: relative;
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-}
-
-/*
- * A caixa da poligonal cobre exatamente a faixa das barras, sem o total nem o rótulo.
- *
- * A largura é explícita porque SVG é elemento substituído: posicionado com `left: 0` e
- * `right: 0` e `width: auto`, ele assume a largura intrínseca em vez de esticar, e a linha
- * inteira nascia comprimida dentro da primeira coluna.
- */
-.colunas__linha-area {
-  position: absolute;
-  top: 1.15rem;
-  left: 0;
-  z-index: 1;
-  width: 100%;
-  height: var(--altura-pilha);
-  overflow: visible;
-  pointer-events: none;
-}
-
-.colunas__linha {
-  fill: none;
-  stroke: var(--clinic-attention-text);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.75;
-  vector-effect: non-scaling-stroke;
-}
-
-.coluna {
-  display: grid;
-  min-width: 0;
-  gap: 0.3rem;
-  grid-template-rows: 1.15rem var(--altura-pilha) auto;
-  justify-items: center;
-  text-align: center;
-}
-
-.coluna--destacada {
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
-}
-
-.coluna__total {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 800;
-  line-height: 1.15rem;
-}
-
-.coluna__pilha {
-  position: relative;
-  display: flex;
-  width: min(2.6rem, 60%);
-  height: 100%;
-  flex-direction: column-reverse;
-  border-radius: 0.3rem;
-  background: linear-gradient(var(--clinic-line-soft), var(--clinic-line-soft)) bottom / 100% 1px
-    no-repeat;
-}
-
-.coluna--fechada .coluna__pilha {
-  background: repeating-linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--clinic-muted) 8%, transparent) 0 4px,
-    transparent 4px 8px
-  );
-}
-
-.coluna__segmento:first-child {
-  border-radius: 0.3rem 0.3rem 0 0;
-}
-
-.coluna__segmento--finalizados {
-  background: var(--clinic-accent-strong);
-}
-
-.coluna__segmento--previstos {
-  background: var(--clinic-accent);
-}
-
-.coluna__segmento--faltas {
-  background: var(--clinic-risk-text);
-}
-
-/** Marcador da ocupação: fica redondo porque é CSS, não SVG esticado. */
-.coluna__marca {
-  position: absolute;
-  z-index: 2;
-  left: 50%;
-  width: 0.5rem;
-  height: 0.5rem;
-  border: 2px solid var(--clinic-attention-text);
-  border-radius: 999px;
-  background: var(--clinic-surface);
-  transform: translate(-50%, 50%);
-}
-
-.coluna__rotulo {
-  overflow: hidden;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.coluna--destacada .coluna__rotulo {
-  color: var(--clinic-accent-strong);
-}
-
-.colunas__legenda {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.85rem;
-}
-
-.colunas__chave {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
-}
-
-.colunas__chave::before {
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 0.2rem;
-  content: '';
-}
-
-.colunas__chave--finalizados::before {
-  background: var(--clinic-accent-strong);
-}
-
-.colunas__chave--previstos::before {
-  background: var(--clinic-accent);
-}
-
-.colunas__chave--faltas::before {
-  background: var(--clinic-risk-text);
-}
-
-.colunas__chave--ocupacao::before {
-  width: 0.85rem;
-  height: 0.16rem;
-  border-radius: 999px;
-  background: var(--clinic-attention-text);
 }
 </style>

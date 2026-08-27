@@ -2009,7 +2009,8 @@
         "finalizados": "Completed",
         "previstos": "Upcoming",
         "faltas": "No-shows",
-        "ocupacao": "Occupancy"
+        "ocupacao": "Occupancy",
+        "fechado": "Closed"
       }
     },
     "bulario": {
@@ -2233,6 +2234,11 @@
       },
       "comparar": "Compare versions",
       "campo": "Field",
+      "dispositivo": {
+        "navegador": "Browser",
+        "servidor": "Server",
+        "simulado": "Front desk · Chrome"
+      },
       "versaoAtual": "On this screen",
       "versaoServidor": "On the server",
       "anamnese": {
@@ -2241,6 +2247,7 @@
         "queixaPrincipal": "Chief complaint",
         "historia": "Clinical history",
         "duracaoSintomas": "How long",
+        "duracaoExemplo": "3 days",
         "apetite": "Appetite",
         "hidratacao": "Hydration",
         "evacuacao": "Defecation",
@@ -2384,7 +2391,8 @@
       "passos": {
         "vitaisAferidos": "{preenchidos} of {total} measured",
         "prescricoes": "{contagem} prescribed",
-        "sistemasAlterados": "{contagem} abnormal | {contagem} abnormal"
+        "sistemasAlterados": "{contagem} abnormal | {contagem} abnormal",
+        "aria": "Consultation steps"
       },
       "naoMedir": "skip",
       "filtro": {
@@ -2529,5 +2537,42 @@
       "semResultado": "No results for this search.",
       "cancelar": "Cancel"
     }
+  },
+  "cronometro": {
+    "titulo": "Consultation timer",
+    "iniciar": "Start",
+    "ariaIniciar": "Start the consultation timer",
+    "ariaAbrir": "Timer at {tempo} — {estado}. Open the panel.",
+    "abrirPainel": "Open the timer panel",
+    "pausar": "Pause",
+    "retomar": "Resume",
+    "encerrar": "Stop",
+    "descartar": "Discard",
+    "pausado": "Paused",
+    "semSessao": "No consultation is being timed",
+    "semPaciente": "No consultation linked",
+    "estado": {
+      "dentro": "Within the block",
+      "no-limite": "Block about to end",
+      "excedido": "Block exceeded"
+    },
+    "unidades": "{contagem} unit | {contagem} units",
+    "decorrido": "Elapsed",
+    "cobravel": "Billable",
+    "minutos": "{valor} min",
+    "proximaUnidade": "next unit in {valor}",
+    "excedente": "{valor} past the block",
+    "esquecidaTitulo": "This timer has been running for a long time",
+    "esquecidaDescricao": "It has been running for over four hours. If it was left open by mistake, discard it: stopping would record the time as worked.",
+    "hoje": "Today",
+    "hojeResumo": "{contagem} consultation | {contagem} consultations",
+    "totalDecorrido": "In consultation",
+    "totalCobravel": "Billable total",
+    "ultimaHa": "last one {valor} ago",
+    "semHistorico": "No consultation closed today.",
+    "limparHistorico": "Clear the day",
+    "bloco": "Consultation block",
+    "incremento": "Billing increment",
+    "comoFunciona": "Time is rounded up to the next unit. The real elapsed time always stays visible next to it."
   }
 }

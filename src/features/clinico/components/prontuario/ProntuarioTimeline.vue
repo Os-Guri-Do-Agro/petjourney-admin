@@ -78,7 +78,7 @@ const prescricoesAnteriores = computed(() =>
       </header>
 
       <p class="anterior__queixa">
-        {{ anterior.diagnosticos[0]?.descricao || anterior.anamnese.queixaPrincipal || '—' }}
+        {{ clinico.diagnosticoPrincipal(anterior) || anterior.anamnese.queixaPrincipal || '—' }}
       </p>
 
       <p v-if="anterior.conduta.orientacoes" class="anterior__texto">

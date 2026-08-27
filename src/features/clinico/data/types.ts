@@ -504,6 +504,19 @@ export type Medication = {
   id: string
   nome: string
   principioAtivo: string
+  /**
+   * Grafias do princípio ativo em todos os idiomas do catálogo — *Amoxicilina*,
+   * *Amoxicillin*.
+   *
+   * Existe por causa da alergia: ela é registrada como **texto livre** no alerta do paciente
+   * ("Alergia a amoxicilina"), e o cruzamento com a prescrição é por palavra. Com o bulário
+   * traduzido, comparar só com `principioAtivo` faria o aviso desaparecer assim que a tela
+   * mudasse de idioma — o alerta continua em português, o princípio ativo não. É o tipo de
+   * silêncio que só aparece depois de a receita sair impressa.
+   *
+   * Preenchido pela camada de tradução; ausente significa "só a grafia de `principioAtivo`".
+   */
+  sinonimosDoPrincipio?: string[]
   /** mg/mL para líquidos, mg por comprimido para sólidos. */
   concentracao: number
   unidadeApresentacao: 'ml' | 'comprimido'

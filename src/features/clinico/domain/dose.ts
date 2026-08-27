@@ -14,7 +14,7 @@ import type {
   PetSpecies,
   Prescription,
 } from '../data/types'
-import { doseDaEspecie, especieProibida } from './bulario'
+import { alergiaAoPrincipio, doseDaEspecie, especieProibida } from './bulario'
 
 export type DoseInput = {
   medicamento: Medication
@@ -110,15 +110,7 @@ export function faixaDeReferencia(medicamento: Medication, especie: PetSpecies |
  * exige é confirmação explícita, não proibição.
  */
 export function alergiaConflitante(pet: Pet, medicamento: Medication): PetAlert | null {
-  const alvo = medicamento.principioAtivo.trim().toLowerCase()
-
-  return (
-    pet.alertas.find(
-      (alerta) =>
-        alerta.kind === 'alergia' &&
-        alerta.detalhe.trim().toLowerCase().includes(alvo),
-    ) ?? null
-  )
+  return alergiaAoPrincipio(pet, medicamento)
 }
 
 export function prescricaoPendenteDeConfirmacao(

@@ -14,11 +14,16 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
+import i18n from '@/i18n'
+import type { Locale } from '@/i18n/locales'
+
 import { CLINIC_UTC_OFFSET } from '../data/fixtures'
+import { TEXTO_DO_CATALOGO } from '../data/fixtures/catalog-text'
 import { catalogRepository, type CatalogosClinicos } from '../data/repositories'
 import type {
   AppointmentType,
   Clinic,
+  Diagnosis,
   DiagnosisCatalogItem,
   ExamCatalogItem,
   Medication,
@@ -31,6 +36,11 @@ import type {
   VitalKey,
 } from '../data/types'
 import { patientRepository } from '../data/repositories'
+import {
+  traduzirDiagnosticos,
+  traduzirExames,
+  traduzirMedicamentos,
+} from '../domain/catalog-i18n'
 import { createClinicClock } from '../domain/clinic-time'
 import { encontrarFaixa } from '../domain/ranges'
 
@@ -44,10 +54,30 @@ export const useClinicoStore = defineStore('clinico', () => {
   const profissionais = ref<Professional[]>([])
   const salas = ref<Room[]>([])
   const tipos = ref<AppointmentType[]>([])
-  const medicamentos = ref<Medication[]>([])
-  const diagnosticos = ref<DiagnosisCatalogItem[]>([])
-  const exames = ref<ExamCatalogItem[]>([])
+  /*
+   * Bulário, diagnósticos e exames guardam o **português** e são traduzidos na leitura.
+   *
+   * A tradução mora aqui, e não em cada tela, porque o nome de um exame aparece em cinco
+   * lugares — conduta, resumo, impressão, documento e painel — e traduzir na tela significa
+   * cinco chances de esquecer um. Sendo computado, o catálogo inteiro também reage à troca de
+   * idioma sem recarregar nada.
+   */
+  const medicamentosBase = ref<Medication[]>([])
+  const diagnosticosBase = ref<DiagnosisCatalogItem[]>([])
+  const examesBase = ref<ExamCatalogItem[]>([])
   const faixas = ref<ReferenceRange[]>([])
+
+  const textoDoCatalogo = computed(
+    () => TEXTO_DO_CATALOGO[i18n.global.locale.value as Locale],
+  )
+
+  const medicamentos = computed(() =>
+    traduzirMedicamentos(medicamentosBase.value, textoDoCatalogo.value),
+  )
+  const diagnosticos = computed(() =>
+    traduzirDiagnosticos(diagnosticosBase.value, textoDoCatalogo.value),
+  )
+  const exames = computed(() => traduzirExames(examesBase.value, textoDoCatalogo.value))
   const pets = ref<Pet[]>([])
   const tutores = ref<Tutor[]>([])
 
@@ -71,15 +101,18 @@ export const useClinicoStore = defineStore('clinico', () => {
   const medicamentosPorId = computed(
     () => new Map(medicamentos.value.map((medicamento) => [medicamento.id, medicamento])),
   )
+  const diagnosticosPorCodigo = computed(
+    () => new Map(diagnosticos.value.map((item) => [item.codigo, item.descricao])),
+  )
 
   function aplicar(catalogos: CatalogosClinicos) {
     clinic.value = catalogos.clinic
     profissionais.value = catalogos.profissionais
     salas.value = catalogos.salas
     tipos.value = catalogos.tipos
-    medicamentos.value = catalogos.medicamentos
-    diagnosticos.value = catalogos.diagnosticos
-    exames.value = catalogos.exames
+    medicamentosBase.value = catalogos.medicamentos
+    diagnosticosBase.value = catalogos.diagnosticos
+    examesBase.value = catalogos.exames
     faixas.value = catalogos.faixas
   }
 
@@ -134,6 +167,30 @@ export const useClinicoStore = defineStore('clinico', () => {
     return medicamentosPorId.value.get(medicationId) ?? null
   }
 
+  /**
+   * Descrição do diagnóstico de um prontuário, no idioma da tela.
+   *
+   * O registro guarda o código **e** a descrição do momento em que foi lançado — é assim que um
+   * diagnóstico permanece legível mesmo se o catálogo mudar depois. Só que uma descrição
+   * congelada em português continuaria em português numa tela em inglês; por isso o catálogo
+   * tem precedência, e o texto gravado fica de reserva para o código que o catálogo não conhece
+   * (importado de outro sistema, digitado à mão, aposentado desde então).
+   */
+  function descricaoDoDiagnostico(diagnostico: { codigo: string; descricao: string }): string {
+    return diagnosticosPorCodigo.value.get(diagnostico.codigo) ?? diagnostico.descricao
+  }
+
+  /**
+   * Diagnóstico principal de um atendimento — o primeiro da lista, que é a ordem em que o
+   * profissional os lançou. Vazio quando não há nenhum; quem chama decide o que mostrar no
+   * lugar (a queixa principal, em geral).
+   */
+  function diagnosticoPrincipal(atendimento: { diagnosticos: Diagnosis[] }): string {
+    const principal = atendimento.diagnosticos[0]
+
+    return principal ? descricaoDoDiagnostico(principal) : ''
+  }
+
   function faixaDe(vital: VitalKey, especie: PetSpecies): ReferenceRange | null {
     return encontrarFaixa(faixas.value, vital, especie)
   }
@@ -174,6 +231,8 @@ export const useClinicoStore = defineStore('clinico', () => {
     sala,
     tipo,
     medicamento,
+    descricaoDoDiagnostico,
+    diagnosticoPrincipal,
     faixaDe,
     corDaColuna,
     $resetModulo,

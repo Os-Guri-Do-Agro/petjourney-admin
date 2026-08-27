@@ -9,6 +9,7 @@
  */
 
 import type { Encounter, Medication, Pet } from '../data/types'
+import { alergiaAoPrincipio } from './bulario'
 import { medicaoPreenchida } from './ranges'
 
 export type EtapaId = 'anamnese' | 'exame' | 'diagnostico' | 'conduta' | 'resumo'
@@ -125,11 +126,7 @@ export function alergiaNaoConfirmada(
       return false
     }
 
-    const alvo = medicamento.principioAtivo.trim().toLowerCase()
-
-    return pet.alertas.some(
-      (alerta) => alerta.kind === 'alergia' && alerta.detalhe.trim().toLowerCase().includes(alvo),
-    )
+    return Boolean(alergiaAoPrincipio(pet, medicamento))
   })
 }
 

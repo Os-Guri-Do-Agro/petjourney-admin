@@ -55,7 +55,7 @@ function atendeBusca(encounter: Encounter) {
 
   const paciente = clinico.pet(encounter.petId)?.nome ?? ''
   const diagnosticos = encounter.diagnosticos
-    .map((item) => `${item.codigo} ${item.descricao}`)
+    .map((item) => `${item.codigo} ${clinico.descricaoDoDiagnostico(item)}`)
     .join(' ')
 
   return (
@@ -202,7 +202,7 @@ onMounted(carregar)
 
         <template #celula-diagnostico="{ linha }">
           <span class="prontuarios__diagnostico">
-            {{ linha.diagnosticos[0]?.descricao || linha.anamnese.queixaPrincipal || '—' }}
+            {{ clinico.diagnosticoPrincipal(linha) || linha.anamnese.queixaPrincipal || '—' }}
           </span>
           <span v-if="linha.diagnosticos.length > 1" class="prontuarios__meta">
             +{{ linha.diagnosticos.length - 1 }}

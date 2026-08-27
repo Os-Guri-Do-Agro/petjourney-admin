@@ -85,7 +85,7 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
     <ul v-if="valor.length > 0" class="lista">
       <li v-for="diagnostico in valor" :key="diagnostico.id" class="lista__item">
         <span class="codigo codigo--forte">{{ diagnostico.codigo }}</span>
-        <span class="lista__descricao">{{ diagnostico.descricao }}</span>
+        <span class="lista__descricao">{{ clinico.descricaoDoDiagnostico(diagnostico) }}</span>
 
         <Select
           :model-value="diagnostico.kind"

@@ -45,12 +45,14 @@ import {
 } from '@/features/clinico/domain/encounter-progress'
 import { useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useProntuarioStore } from '@/features/clinico/stores/prontuario'
+import { useCronometroStore } from '@/features/cronometro/stores/cronometro'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const clinico = useClinicoStore()
 const prontuario = useProntuarioStore()
+const cronometro = useCronometroStore()
 const formato = useClinicFormat()
 
 const assumirAberto = ref(false)
@@ -137,7 +139,7 @@ const passos = computed<PassoProntuario[]>(() => {
       id: 'diagnostico',
       rotulo: t('clinico.prontuario.diagnostico.titulo'),
       estado: diagnostico?.estado ?? 'vazio',
-      resumo: atual.diagnosticos.map((item) => item.descricao).join(' · '),
+      resumo: atual.diagnosticos.map((item) => clinico.descricaoDoDiagnostico(item)).join(' · '),
     },
     {
       id: 'conduta',
@@ -299,12 +301,35 @@ function agendarRetorno() {
 onMounted(carregar)
 watch(idDaRota, carregar)
 
+/**
+ * Oferece este atendimento ao cronômetro do cabeçalho.
+ *
+ * Quem publica o contexto é a página, e não o cabeçalho: assim o cabeçalho — que vive no pacote
+ * inicial da aplicação — não precisa importar o módulo clínico só para saber o nome do paciente.
+ * A dependência aponta para a store genérica, que não conhece nenhum dos dois.
+ *
+ * O contexto é oferta, não comando: quem decide começar a contar é a pessoa. Um relógio que
+ * dispara sozinho ao abrir o prontuário mede a tela aberta, não o atendimento — e num modelo em
+ * que o tempo vira dinheiro, medir a coisa errada é o defeito grave.
+ */
+watch(
+  [() => encounter.value?.id, () => prontuario.pet?.nome],
+  ([id, nome]) => {
+    cronometro.definirContexto(id ? { encounterId: id, rotulo: nome ?? '' } : null)
+  },
+  { immediate: true },
+)
+
 onBeforeRouteLeave(async () => {
+  cronometro.definirContexto(null)
   await prontuario.descarregar()
   prontuario.$limpar()
 })
 
-onBeforeUnmount(() => void prontuario.descarregar())
+onBeforeUnmount(() => {
+  cronometro.definirContexto(null)
+  void prontuario.descarregar()
+})
 </script>
 
 <template>

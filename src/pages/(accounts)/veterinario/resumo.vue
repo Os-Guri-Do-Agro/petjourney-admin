@@ -92,6 +92,7 @@ const resumo = computed(() =>
     clinic: clinicaOuVazia.value,
     profissionais: clinico.profissionais,
     tipos: clinico.tipos,
+    diagnosticos: clinico.diagnosticos,
     filtro: filtro.value,
     ancora: hoje.value,
     clock: clinicClock,
@@ -276,11 +277,13 @@ function trocarPeriodo(periodo: PeriodoId) {
             :pontos="resumo.porDia"
             :rotulos="rotulosDosDias"
             :destaque="hoje"
+            :rotulo-destaque="t('clinico.resumo.periodo.hoje')"
             :legenda="{
               finalizados: t('clinico.resumo.legenda.finalizados'),
               previstos: t('clinico.resumo.legenda.previstos'),
               faltas: t('clinico.resumo.legenda.faltas'),
               ocupacao: t('clinico.resumo.legenda.ocupacao'),
+              fechado: t('clinico.resumo.legenda.fechado'),
             }"
           />
         </section>

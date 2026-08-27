@@ -14,6 +14,7 @@
  * leva à seguinte sem tocar no mouse.
  */
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import type { EstadoDaEtapa } from '../../domain/encounter-progress'
 import type { PassoProntuario } from './step-types'
@@ -24,6 +25,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ ir: [id: string] }>()
+
+const { t } = useI18n()
 
 const ICONE: Record<EstadoDaEtapa, string> = {
   vazio: 'pi pi-circle',
@@ -36,7 +39,7 @@ const indiceAtivo = computed(() => props.passos.findIndex((passo) => passo.id ==
 </script>
 
 <template>
-  <nav class="passos" aria-label="Etapas do atendimento">
+  <nav class="passos" :aria-label="t('clinico.prontuario.passos.aria')">
     <ol class="passos__lista">
       <li v-for="(passo, indice) in passos" :key="passo.id" class="passos__item">
         <button

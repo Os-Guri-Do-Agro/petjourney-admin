@@ -121,7 +121,7 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
             :id="id"
             :model-value="valor.duracaoSintomas"
             :disabled="somenteLeitura"
-            placeholder="3 dias"
+            :placeholder="t('clinico.prontuario.anamnese.duracaoExemplo')"
             fluid
             @update:model-value="definir('duracaoSintomas', $event ?? '')"
           />

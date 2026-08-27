@@ -21,6 +21,7 @@ import type {
   MedicationCaution,
   MedicationDose,
   Pet,
+  PetAlert,
   PetSpecies,
 } from '../data/types'
 
@@ -118,6 +119,29 @@ function alertaCasaComCuidado(texto: string, cuidado: MedicationCaution): boolea
 }
 
 /**
+ * Alergia registrada ao princípio ativo deste medicamento.
+ *
+ * O encontro é por texto, como o dos cuidados, e pela mesma razão: o alerta é escrito à mão
+ * pela clínica. A diferença é que aqui a lista de termos vem do próprio medicamento — todas as
+ * grafias do princípio ativo, em todos os idiomas do catálogo. Comparar só com a grafia da tela
+ * faria o aviso sumir ao trocar de idioma, e o aviso que some é pior que o aviso que não
+ * existe: quem já viu a tela avisar uma vez confia que ela avisa sempre.
+ */
+export function alergiaAoPrincipio(pet: Pet, medicamento: Medication): PetAlert | null {
+  const termos = [medicamento.principioAtivo, ...(medicamento.sinonimosDoPrincipio ?? [])]
+    .map((termo) => termo.trim().toLowerCase())
+    .filter(Boolean)
+
+  return (
+    pet.alertas.find(
+      (alerta) =>
+        alerta.kind === 'alergia' &&
+        termos.some((termo) => alerta.detalhe.trim().toLowerCase().includes(termo)),
+    ) ?? null
+  )
+}
+
+/**
  * Todos os avisos que a tela precisa mostrar para este par medicamento × paciente.
  *
  * A ordem é de gravidade: espécie proibida primeiro, alergia depois, cuidados por último.
@@ -144,10 +168,7 @@ export function avisosDoMedicamento(
     avisos.push({ kind: 'sem-dose-da-especie', cuidado: null, detalhe: '' })
   }
 
-  const principio = medicamento.principioAtivo.trim().toLowerCase()
-  const alergia = pet.alertas.find(
-    (alerta) => alerta.kind === 'alergia' && alerta.detalhe.toLowerCase().includes(principio),
-  )
+  const alergia = alergiaAoPrincipio(pet, medicamento)
 
   if (alergia) {
     avisos.push({ kind: 'alergia', cuidado: null, detalhe: alergia.detalhe })

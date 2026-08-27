@@ -5,8 +5,10 @@
 
 import { describe, expect, it } from 'vitest'
 
+import { TEXTO_DO_CATALOGO } from '../../data/fixtures/catalog-text'
 import { medicationsFixture } from '../../data/fixtures/medications'
 import type { Medication, Pet, PetAlert } from '../../data/types'
+import { traduzirMedicamentos } from '../catalog-i18n'
 import {
   avisosDoMedicamento,
   doseDaEspecie,
@@ -126,6 +128,41 @@ describe('avisos do paciente', () => {
     const avisos = avisosDoMedicamento(
       medicamento('med-dipirona'),
       pet({ alertas: [alerta({ kind: 'alergia', detalhe: 'Dipirona' })] }),
+      HOJE,
+    )
+
+    expect(avisos.some((aviso) => aviso.kind === 'alergia')).toBe(true)
+  })
+
+  /**
+   * O alerta fica no idioma em que foi escrito; o bulário, no idioma da tela. Com o catálogo em
+   * inglês, "Dipirona" no alerta precisa continuar casando com *Metamizole* — senão o aviso
+   * mais importante da tela desaparece justamente ao trocar de idioma.
+   */
+  it('casa alergia escrita em português com o bulário traduzido', () => {
+    const [emIngles] = traduzirMedicamentos(
+      [medicamento('med-dipirona')],
+      TEXTO_DO_CATALOGO.en,
+    )
+
+    expect(emIngles?.principioAtivo).toBe('Metamizole')
+
+    const avisos = avisosDoMedicamento(
+      emIngles!,
+      pet({ alertas: [alerta({ kind: 'alergia', detalhe: 'Alergia a dipirona' })] }),
+      HOJE,
+    )
+
+    expect(avisos.some((aviso) => aviso.kind === 'alergia')).toBe(true)
+  })
+
+  /** E o inverso: alerta escrito em inglês, tela em português. */
+  it('casa alergia escrita em inglês com o bulário em português', () => {
+    const [emPortugues] = traduzirMedicamentos([medicamento('med-dipirona')], undefined)
+
+    const avisos = avisosDoMedicamento(
+      emPortugues!,
+      pet({ alertas: [alerta({ kind: 'alergia', detalhe: 'Allergy to metamizole' })] }),
       HOJE,
     )
 

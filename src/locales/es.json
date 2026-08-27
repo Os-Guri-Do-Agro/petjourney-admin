@@ -2009,7 +2009,8 @@
         "finalizados": "Concluidas",
         "previstos": "Previstas",
         "faltas": "Ausencias",
-        "ocupacao": "Ocupación"
+        "ocupacao": "Ocupación",
+        "fechado": "Cerrado"
       }
     },
     "bulario": {
@@ -2233,6 +2234,11 @@
       },
       "comparar": "Comparar versiones",
       "campo": "Campo",
+      "dispositivo": {
+        "navegador": "Navegador",
+        "servidor": "Servidor",
+        "simulado": "Recepción · Chrome"
+      },
       "versaoAtual": "En esta pantalla",
       "versaoServidor": "En el servidor",
       "anamnese": {
@@ -2241,6 +2247,7 @@
         "queixaPrincipal": "Motivo de consulta",
         "historia": "Historia clínica",
         "duracaoSintomas": "Desde cuándo",
+        "duracaoExemplo": "3 días",
         "apetite": "Apetito",
         "hidratacao": "Hidratación",
         "evacuacao": "Defecación",
@@ -2384,7 +2391,8 @@
       "passos": {
         "vitaisAferidos": "{preenchidos} de {total} medidos",
         "prescricoes": "{contagem} en la receta",
-        "sistemasAlterados": "{contagem} alterado | {contagem} alterados"
+        "sistemasAlterados": "{contagem} alterado | {contagem} alterados",
+        "aria": "Pasos de la consulta"
       },
       "naoMedir": "no medir",
       "filtro": {
@@ -2529,5 +2537,42 @@
       "semResultado": "Ningún resultado para esta búsqueda.",
       "cancelar": "Cancelar"
     }
+  },
+  "cronometro": {
+    "titulo": "Cronómetro de consulta",
+    "iniciar": "Iniciar",
+    "ariaIniciar": "Iniciar el cronómetro de la consulta",
+    "ariaAbrir": "Cronómetro en {tempo} — {estado}. Abrir el panel.",
+    "abrirPainel": "Abrir el panel del cronómetro",
+    "pausar": "Pausar",
+    "retomar": "Reanudar",
+    "encerrar": "Finalizar",
+    "descartar": "Descartar",
+    "pausado": "En pausa",
+    "semSessao": "Ninguna consulta cronometrada",
+    "semPaciente": "Sin consulta vinculada",
+    "estado": {
+      "dentro": "Dentro del bloque",
+      "no-limite": "El bloque está por terminar",
+      "excedido": "Bloque superado"
+    },
+    "unidades": "{contagem} unidad | {contagem} unidades",
+    "decorrido": "Transcurrido",
+    "cobravel": "Facturable",
+    "minutos": "{valor} min",
+    "proximaUnidade": "próxima unidad en {valor}",
+    "excedente": "{valor} más allá del bloque",
+    "esquecidaTitulo": "El cronómetro lleva mucho tiempo corriendo",
+    "esquecidaDescricao": "Lleva más de cuatro horas corriendo. Si quedó abierto por error, descártalo: finalizar registraría el tiempo como atendido.",
+    "hoje": "Hoy",
+    "hojeResumo": "{contagem} consulta | {contagem} consultas",
+    "totalDecorrido": "En consulta",
+    "totalCobravel": "Total facturable",
+    "ultimaHa": "la última hace {valor}",
+    "semHistorico": "Ninguna consulta finalizada hoy.",
+    "limparHistorico": "Limpiar el día",
+    "bloco": "Bloque de la consulta",
+    "incremento": "Incremento de facturación",
+    "comoFunciona": "El tiempo se redondea hacia arriba hasta la siguiente unidad. El transcurrido real queda siempre a la vista, al lado."
   }
 }

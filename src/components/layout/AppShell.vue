@@ -27,6 +27,7 @@ import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { isCompactDensity, isListNavigator } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
+import CronometroConsulta from '@/features/cronometro/components/CronometroConsulta.vue'
 import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
 import { getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
@@ -698,6 +699,12 @@ onUnmounted(() => {
       </div>
 
       <div class="app-header__right">
+        <!--
+          O cronômetro só existe para quem atende: é tempo clínico faturável, não um relógio de
+          ponto. Num perfil sem agenda ele seria um botão que não mede nada.
+        -->
+        <CronometroConsulta v-if="hasClinicalProfile" />
+
         <!-- Busca global: ocultada temporariamente
         <label class="header-search" for="header-search">
           <i class="pi pi-search" aria-hidden="true" />

@@ -186,7 +186,7 @@ const dataDoAtendimento = computed(() =>
         <span v-if="encounter.diagnosticos.length > 0">
           <span v-for="(item, indice) in encounter.diagnosticos" :key="item.codigo">
             <template v-if="indice > 0"> · </template>
-            {{ item.descricao }}
+            {{ clinico.descricaoDoDiagnostico(item) }}
             <small>({{ t(`clinico.prontuario.diagnostico.tipo.${item.kind}`) }})</small>
           </span>
         </span>

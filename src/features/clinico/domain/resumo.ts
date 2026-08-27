@@ -16,6 +16,7 @@ import type {
   Appointment,
   AppointmentType,
   Clinic,
+  DiagnosisCatalogItem,
   Encounter,
   ISODate,
   Professional,
@@ -144,6 +145,13 @@ export type EntradaDoResumo = {
   clinic: Clinic
   profissionais: Professional[]
   tipos: AppointmentType[]
+  /**
+   * Catálogo de diagnósticos, para dar nome ao ranking no idioma da tela.
+   *
+   * Opcional: o prontuário guarda a descrição junto do código, então o ranking sabe se
+   * nomear mesmo sem catálogo — só fica no idioma em que cada diagnóstico foi lançado.
+   */
+  diagnosticos?: DiagnosisCatalogItem[]
   filtro: ResumoFiltro
   ancora: ISODate
   clock: ClinicClock
@@ -174,6 +182,7 @@ function incrementar(mapa: Map<string, number>, chave: string) {
 
 export function resumirClinica(entrada: EntradaDoResumo): ResumoDaClinica {
   const { appointments, encounters, clinic, profissionais, tipos, filtro, ancora, clock } = entrada
+  const catalogoDeDiagnosticos = entrada.diagnosticos ?? []
 
   const intervalo = intervaloDoPeriodo(filtro.periodo, ancora)
   const dias = diasDoIntervalo(intervalo)
@@ -270,7 +279,16 @@ export function resumirClinica(entrada: EntradaDoResumo): ResumoDaClinica {
     return { weekday: weekday ?? 0, hora: hora ?? 0, valor }
   })
 
+  /*
+   * O ranking conta por **código**, não pela descrição.
+   *
+   * A descrição gravada no prontuário é a do momento em que o diagnóstico foi lançado: mudou o
+   * catálogo, mudou o idioma da tela em que alguém lançou, e a mesma doença passa a ocupar duas
+   * linhas do ranking. O código é o que não muda. A descrição continua guardada aqui só para
+   * nomear o código que o catálogo não conhece mais.
+   */
   const diagnosticosContagem = new Map<string, number>()
+  const descricaoGravada = new Map<string, string>()
 
   for (const encounter of encounters) {
     const data = clock.dateOf(encounter.finalizadoEm ?? encounter.abertoEm)
@@ -286,16 +304,18 @@ export function resumirClinica(entrada: EntradaDoResumo): ResumoDaClinica {
     const principal = encounter.diagnosticos[0]
 
     if (principal) {
-      diagnosticosContagem.set(
-        principal.descricao,
-        (diagnosticosContagem.get(principal.descricao) ?? 0) + 1,
-      )
+      incrementar(diagnosticosContagem, principal.codigo)
+      descricaoGravada.set(principal.codigo, principal.descricao)
     }
   }
 
   const nomeDoTipo = (id: string) => tipos.find((tipo) => tipo.id === id)?.nome ?? id
   const nomeDoProfissional = (id: string) =>
     profissionais.find((item) => item.id === id)?.nome ?? id
+  const nomeDoDiagnostico = (codigo: string) =>
+    catalogoDeDiagnosticos.find((item) => item.codigo === codigo)?.descricao ??
+    descricaoGravada.get(codigo) ??
+    codigo
 
   return {
     intervalo,
@@ -318,7 +338,7 @@ export function resumirClinica(entrada: EntradaDoResumo): ResumoDaClinica {
     porProfissional: fatiar(porProfissionalContagem, nomeDoProfissional),
     porOrigem: fatiar(porOrigemContagem, (id) => id),
     porHora,
-    diagnosticos: fatiar(diagnosticosContagem, (id) => id, 6),
+    diagnosticos: fatiar(diagnosticosContagem, nomeDoDiagnostico, 6),
     picoDaHora: porHora.reduce((maior, celula) => Math.max(maior, celula.valor), 0),
   }
 }
