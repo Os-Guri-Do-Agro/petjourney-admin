@@ -10,6 +10,15 @@ import { routes } from './file-routes'
 const partnerLegacyRedirects: RouteRecordRaw[] = [
   { path: '/parceiro', redirect: '/inicio' },
   { path: '/veterinario', redirect: '/inicio' },
+  /*
+   * Compartilhamentos do menu Pets era uma segunda porta para o mesmo cômodo.
+   *
+   * O acesso temporário que o responsável concede ao prestador tem uma tela só, e ela existe:
+   * `/parceiro/acessos`. A entrada em `/veterinario` nasceu na fase de mock do módulo clínico,
+   * antes de a de portal ser entregue, e nunca passou de um cartão de "indisponível".
+   * Redireciona em vez de sumir porque quem tem o link salvo merece cair na tela que funciona.
+   */
+  { path: '/veterinario/compartilhamentos', redirect: '/parceiro/acessos' },
   ...(EQUIPE_MENU_ENABLED
     ? []
     : [{ path: '/parceiro/equipe', redirect: '/inicio' } satisfies RouteRecordRaw]),
