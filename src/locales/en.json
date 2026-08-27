@@ -255,21 +255,19 @@
   },
   "nav": {
     "sections": {
-      "home": "Home",
-      "portal": "Portal",
-      "account": "Account",
-      "homeSubtitle": "General content"
-    },
-    "groups": {
-      "overview": "Dashboard",
       "portal": "Portal",
       "account": "Account"
+    },
+    "groups": {
+      "portal": "Portal",
+      "account": "Account",
+      "pets": "Pets"
     },
     "items": {
       "overview": "Overview",
       "programas": "Programs",
       "divulgacao": "Promotion",
-      "atendimentos": "Appointments",
+      "acessos": "Access",
       "financeiro": "Finance",
       "settings": "Settings"
     },
@@ -279,7 +277,7 @@
       "financeiro": "Finance",
       "programas": "Participation programs",
       "divulgacao": "Promotion",
-      "atendimentos": "Appointments",
+      "acessos": "Access",
       "convite": "Accept invite",
       "selecionar": "Select partner",
       "portal": "Portal",
@@ -289,7 +287,7 @@
   },
   "shell": {
     "logout": "Sign out",
-    "menuHeading": "Menu",
+    "telasNaSecao": "one screen | {contagem} screens",
     "filterPlaceholder": "Filter screens...",
     "filterEmpty": "No screens found for “{q}”.",
     "filterClear": "Clear filter",
@@ -750,9 +748,9 @@
       }
     }
   },
-  "atendimentos": {
+  "acessos": {
     "subtitle": "Portal",
-    "title": "Appointments",
+    "title": "Access",
     "lede": "Pet shares linked to your company: snapshot, history, and authenticated notes.",
     "tabs": {
       "ativos": {
@@ -1409,10 +1407,54 @@
         "label": "Security",
         "description": "Password change for the signed-in account."
       },
+      "aparencia": {
+        "label": "Appearance",
+        "description": "Theme, sidebar layout and list density."
+      },
       "conta": {
         "label": "Account",
         "description": "Session, profile deactivation, and future preferences."
       }
+    },
+    "aparencia": {
+      "tema": {
+        "titulo": "Theme",
+        "descricao": "Applies to this browser. The choice stays available at the top of the screen.",
+        "claro": {
+          "label": "Light",
+          "hint": "Light background, the panel default."
+        },
+        "escuro": {
+          "label": "Dark",
+          "hint": "Dark background, for low-light rooms."
+        }
+      },
+      "menu": {
+        "titulo": "Sidebar",
+        "descricao": "How the panel screens are arranged on the side.",
+        "secoes": {
+          "label": "Sections",
+          "hint": "Icon rail on the left and, next to it, only the open section’s screens."
+        },
+        "lista": {
+          "label": "Single list",
+          "hint": "One column, with every section open at once."
+        }
+      },
+      "densidade": {
+        "titulo": "Density",
+        "descricao": "Height of the menu rows.",
+        "confortavel": {
+          "label": "Comfortable",
+          "hint": "More room between items."
+        },
+        "compacta": {
+          "label": "Compact",
+          "hint": "More screens visible without scrolling."
+        }
+      },
+      "nota": "Preferences stay in this browser and apply on your next visit.",
+      "aplicada": "in use"
     },
     "perfil": {
       "fallbackName": "User",
@@ -1654,5 +1696,883 @@
         }
       }
     }
+  },
+  "clinico": {
+    "modulo": "Clinic",
+    "formato": {
+      "minutos": "{valor} min",
+      "horas": "{valor} h",
+      "horasMinutos": "{horas} h {minutos} min",
+      "agora": "now",
+      "haTempo": "{valor} ago",
+      "emTempo": "in {valor}",
+      "anos": "{valor} years",
+      "meses": "{valor} months",
+      "anosMeses": "{anos}y {meses}m",
+      "semvalor": "—",
+      "dias": "{valor} day | {valor} days",
+      "idadeDesconhecida": "age unknown"
+    },
+    "sexo": {
+      "macho": "Male",
+      "femea": "Female"
+    },
+    "especie": {
+      "canina": "Canine",
+      "felina": "Feline",
+      "ave": "Bird",
+      "roedor": "Rodent",
+      "reptil": "Reptile",
+      "equina": "Equine"
+    },
+    "status": {
+      "agendado": "Scheduled",
+      "confirmado": "Confirmed",
+      "aguardando": "Waiting",
+      "em-atendimento": "In consult",
+      "finalizado": "Completed",
+      "falta": "No-show",
+      "cancelado": "Canceled"
+    },
+    "origem": {
+      "recepcao": "Front desk",
+      "app": "App",
+      "telefone": "Phone",
+      "encaixe": "Squeeze-in",
+      "retorno": "Follow-up",
+      "fila": "Waitlist"
+    },
+    "bloqueio": {
+      "almoco": "Lunch",
+      "reuniao": "Meeting",
+      "ferias": "Time off",
+      "manutencao": "Maintenance",
+      "bloqueio-pessoal": "Personal block",
+      "feriado": "Holiday"
+    },
+    "cancelamento": {
+      "responsavel-desmarcou": "Pet parent canceled",
+      "clinica-remarcou": "Clinic rescheduled",
+      "paciente-indisponivel": "Patient unavailable",
+      "duplicado": "Duplicate booking",
+      "outro": "Other reason"
+    },
+    "alertas": {
+      "alergia": "Allergy",
+      "agressivo": "Handle with restraint",
+      "cronico": "Chronic condition",
+      "imunossuprimido": "Immunosuppressed",
+      "gestante": "Pregnant",
+      "inadimplente": "Outstanding balance"
+    },
+    "severidade": {
+      "info": "Info",
+      "atencao": "Caution",
+      "risco": "Risk"
+    },
+    "conflitos": {
+      "professional-overlap": "Overlaps {paciente}, from {hora} — {minutos} min in common.",
+      "room-overlap": "Room {sala} is already taken by {paciente} at that time.",
+      "pet-double-book": "{paciente} already has an appointment at {hora}.",
+      "block-invasion": "Runs into a {motivo} block for {minutos} min.",
+      "outside-hours": "Outside opening hours, which run {abre} to {fecha}.",
+      "lunch-overlap": "Crosses the lunch break by {minutos} min.",
+      "holiday-closed": "The clinic is closed: {feriado}.",
+      "over-capacity": "The day's load rises to {minutos} min, above the usual {capacidade} min.",
+      "type-room-mismatch": "Room {sala} is not the right one for {tipo}."
+    },
+    "paciente": {
+      "responsavel": "Pet parent",
+      "castrado": "Neutered",
+      "inteiro": "Intact",
+      "semPeso": "Weight not recorded",
+      "verHistorico": "View history",
+      "abrirProntuario": "Open record",
+      "novo": {
+        "atalho": "Register new patient",
+        "titulo": "New patient",
+        "ajuda": "Only what booking needs. Birth date and weight can wait for the visit.",
+        "nome": "Patient name",
+        "raca": "Breed",
+        "sexo": "Sex",
+        "nascimento": "Birth date (optional)",
+        "peso": "Weight (optional)",
+        "castrado": "Neutered",
+        "responsavelNovo": "Register new owner",
+        "buscarResponsavel": "Search owner",
+        "nomeResponsavel": "Owner name",
+        "telefone": "Phone",
+        "documento": "Document (optional)",
+        "email": "Email (optional)",
+        "salvar": "Register and use",
+        "erro": "The patient could not be registered."
+      }
+    },
+    "tabela": {
+      "carregando": "Loading…",
+      "vazio": "Nothing here",
+      "tentarDeNovo": "Try again"
+    },
+    "erros": {
+      "catalogos": "We couldn't load the clinic data.",
+      "agenda": "We couldn't load the schedule.",
+      "mutacao": "The change wasn't saved. Try again.",
+      "prontuario": "We couldn't load the record.",
+      "fila": "We couldn't load the waitlist."
+    },
+    "densidade": {
+      "titulo": "Density",
+      "compacta": "Compact",
+      "media": "Medium",
+      "confortavel": "Comfortable"
+    },
+    "zoom": {
+      "titulo": "Grid zoom",
+      "reduzido": "Small",
+      "medio": "Medium",
+      "ampliado": "Large"
+    },
+    "agenda": {
+      "titulo": "Schedule",
+      "subtitulo": "Clinic",
+      "hoje": "Today",
+      "diaAnterior": "Previous day",
+      "proximoDia": "Next day",
+      "visaoDia": "Day",
+      "visaoSemana": "Week",
+      "agruparPorProfissional": "By clinician",
+      "agruparPorSala": "By room",
+      "novoAtendimento": "New appointment",
+      "encaixar": "Squeeze in",
+      "bloquear": "Block time",
+      "ocultarCancelados": "Hide canceled",
+      "filtros": "Filters",
+      "limparFiltros": "Clear filters",
+      "vazioTitulo": "No appointments on this day",
+      "vazioDescricao": "Book the first appointment or go back to a day with a schedule.",
+      "fechadaTitulo": "Clinic closed",
+      "fechadaDescricao": "It's {feriado}. You can still book, with confirmation.",
+      "linhaDoAgora": "Now",
+      "encaixeMarca": "Squeeze-in",
+      "duasSalas": "Uses two rooms",
+      "ocupacao": "{minutos} min booked",
+      "conflitosNoCard": "{contagem} warning | {contagem} warnings",
+      "semSala": "No room set",
+      "colunaVazia": "No appointments",
+      "arrastarDica": "Drag to reschedule. Shift + arrows move in 15-minute steps.",
+      "desfazer": "Undo",
+      "desfeito": {
+        "mover": "Appointment rescheduled.",
+        "cancelar": "Appointment canceled.",
+        "falta": "No-show recorded.",
+        "criar": "Appointment created.",
+        "status": "Status updated."
+      },
+      "mover": {
+        "titulo": "Confirm reschedule",
+        "de": "From",
+        "para": "To",
+        "profissional": "Clinician",
+        "mensagem": "Message sent to the pet parent",
+        "mensagemPadrao": "Hi! {paciente}'s appointment has been moved to {data} at {hora}. Just reply here if anything comes up.",
+        "confirmar": "Reschedule",
+        "confirmarComAviso": "Reschedule anyway",
+        "cancelar": "Leave as is"
+      },
+      "encaixeDialogo": {
+        "titulo": "Squeeze in appointment",
+        "descricao": "A squeeze-in sits outside the grid and is marked as such.",
+        "confirmar": "Squeeze in anyway"
+      },
+      "fechadaDialogo": {
+        "titulo": "Book on a closed day",
+        "descricao": "The clinic is closed on {feriado}. Confirm twice so nobody books without noticing.",
+        "primeiroPasso": "I understand the clinic is closed",
+        "confirmar": "Book anyway"
+      },
+      "cancelarDialogo": {
+        "titulo": "Cancel appointment",
+        "motivo": "Reason",
+        "descricao": "The slot frees up, but the card stays visible on the day.",
+        "confirmar": "Cancel appointment"
+      },
+      "bloqueioDialogo": {
+        "titulo": "Block time",
+        "motivo": "Reason",
+        "detalhe": "Detail",
+        "profissional": "Clinician",
+        "todosOsProfissionais": "Whole team",
+        "sala": "Room",
+        "qualquerSala": "Any room",
+        "inicio": "Start",
+        "fim": "End",
+        "repetir": "Repeat weekly",
+        "confirmar": "Block"
+      },
+      "semana": {
+        "titulo": "Week",
+        "carga": "Load",
+        "agendados": "{contagem} booked | {contagem} booked",
+        "faltas": "{contagem} no-show | {contagem} no-shows",
+        "encaixes": "{contagem} squeeze-in | {contagem} squeeze-ins",
+        "ocupacao": "{valor} booked",
+        "melhoresAlternativas": "Best times",
+        "semAlternativa": "No free slots in the coming days."
+      },
+      "exibicao": "Display",
+      "maisAcoes": "More actions",
+      "criar": {
+        "titulo": "New visit",
+        "tituloEncaixe": "Fit in a visit",
+        "encaixe": "Walk-in",
+        "paciente": "Patient",
+        "buscarPaciente": "Search patient",
+        "escolhaPaciente": "Pick the patient",
+        "tipo": "Visit type",
+        "hora": "Start",
+        "sala": "Room",
+        "semSala": "No room set",
+        "agendar": "Schedule",
+        "agendarMesmoAssim": "Schedule anyway",
+        "alternativas": "Free slots on this day"
+      },
+      "bloqueio": {
+        "titulo": "Block time",
+        "motivo": "Reason",
+        "ate": "End",
+        "janelaInvalida": "The end must come after the start.",
+        "clinicaInteira": "Whole clinic",
+        "semSala": "No specific room",
+        "detalhe": "Detail",
+        "repetir": "Repeat weekly",
+        "diasDaSemana": "Days of the week",
+        "salvar": "Block"
+      }
+    },
+    "meuDia": {
+      "titulo": "Today at the clinic",
+      "subtitulo": "Clinic",
+      "agora": "Now",
+      "aSeguir": "Up next",
+      "semAtendimentoAgora": "Nothing in consult right now.",
+      "semProximo": "Nothing else booked for today.",
+      "esperando": "Already here",
+      "esperandoVazio": "Nobody waiting at the front desk.",
+      "esperaDe": "waiting {valor}",
+      "alertasDoDia": "Alerts that change today's care",
+      "alertasVazio": "No clinical alerts among today's patients.",
+      "retornosSemHorario": "Follow-ups with no slot booked",
+      "retornosVazio": "No follow-ups pending.",
+      "marcarRetorno": "Book follow-up",
+      "irParaAgenda": "See full schedule",
+      "iniciarAtendimento": "Start consult",
+      "continuar": "Continue"
+    },
+    "resumo": {
+      "titulo": "Clinic summary",
+      "subtitulo": "Clinic",
+      "intervalo": "{inicio} to {fim}",
+      "semMovimento": "No visits in this period.",
+      "semDados": "No data for this period.",
+      "semProntuario": "No records completed in this period.",
+      "periodo": {
+        "rotulo": "Period",
+        "hoje": "Today",
+        "semana": "This week",
+        "semana-passada": "Last week",
+        "trinta-dias": "30 days"
+      },
+      "filtro": {
+        "todosProfissionais": "All professionals",
+        "todosTipos": "All types"
+      },
+      "indicador": {
+        "atendidos": "Completed visits",
+        "horas": "{valor} h of care",
+        "comparecimento": "Attendance",
+        "faltasNoPeriodo": "no no-shows | {contagem} no-show | {contagem} no-shows",
+        "ocupacao": "Average occupancy",
+        "ocupacaoDetalhe": "Average across days the clinic was open",
+        "novos": "New patients",
+        "encaixes": "no walk-ins | {contagem} walk-in | {contagem} walk-ins"
+      },
+      "grafico": {
+        "porDia": "Daily activity",
+        "porDiaAjuda": "Columns add up the visits; the line tracks schedule occupancy.",
+        "porTipo": "By visit type",
+        "porProfissional": "By professional",
+        "horarios": "Busiest hours",
+        "horariosAjuda": "How many visits start in each hour slot.",
+        "diagnosticos": "Most frequent diagnoses"
+      },
+      "legenda": {
+        "finalizados": "Completed",
+        "previstos": "Upcoming",
+        "faltas": "No-shows",
+        "ocupacao": "Occupancy",
+        "fechado": "Closed"
+      }
+    },
+    "bulario": {
+      "titulo": "Drug formulary",
+      "subtitulo": "Clinic",
+      "buscaPlaceholder": "Search by drug, active ingredient or indication",
+      "semResultado": "No medication matches these filters.",
+      "escolha": "Pick a medication from the list.",
+      "semPaciente": "Leave patient",
+      "temAviso": "Has a warning for this patient",
+      "controlado": "Controlled",
+      "escolherTitulo": "Pick from the formulary",
+      "usar": "Use in prescription",
+      "usarMesmoAssim": "Prescribe anyway",
+      "proibidoRodape": "Contraindicated for the species of this patient.",
+      "avisosDoPaciente": "Watch out for {nome}",
+      "doseTitulo": "Dose by species",
+      "doseEspecie": "Species",
+      "doseFaixa": "Usual range",
+      "doseIntervalo": "Interval",
+      "doseDuracao": "Usual duration",
+      "doseProibida": "Contraindicated in this species",
+      "destePaciente": "this patient",
+      "cadaHoras": "every {horas} h",
+      "vias": "Routes",
+      "indicacoes": "Indications",
+      "contraindicacoes": "Contraindications",
+      "efeitosAdversos": "Adverse effects",
+      "interacoes": "Interactions",
+      "isencao": "Decision-support content. It does not replace the manufacturer leaflet or the judgement of the responsible veterinarian.",
+      "filtro": {
+        "classe": "Class",
+        "especie": "Species",
+        "controle": "Control"
+      },
+      "classe": {
+        "antibiotico": "Antibiotic",
+        "anti-inflamatorio": "Anti-inflammatory",
+        "analgesico": "Analgesic",
+        "corticoide": "Corticosteroid",
+        "antiemetico": "Antiemetic",
+        "gastroprotetor": "Gastroprotectant",
+        "antiparasitario": "Antiparasitic",
+        "sedativo": "Sedative",
+        "cardiologico": "Cardiac",
+        "dermatologico": "Dermatological"
+      },
+      "aviso": {
+        "especie-proibida": "Contraindicated in this species. {detalhe}",
+        "sem-dose-da-especie": "No species-specific dose in the formulary.",
+        "alergia": "Recorded allergy: {detalhe}"
+      },
+      "cuidado": {
+        "gestante": "Pregnant patient — this active ingredient needs caution.",
+        "lactante": "Nursing patient — this active ingredient needs caution.",
+        "filhote": "Young patient — this active ingredient needs caution.",
+        "idoso": "Senior patient — this active ingredient needs caution.",
+        "renal": "Recorded kidney condition: {detalhe}",
+        "hepatico": "Recorded liver condition: {detalhe}",
+        "cardiaco": "Recorded heart condition: {detalhe}",
+        "gastrico": "Recorded gastric condition: {detalhe}"
+      }
+    },
+    "documentos": {
+      "titulo": "Visit documents",
+      "ajuda": "Each document prints as an A4 sheet, ready to print or save as PDF.",
+      "emitir": "Save as PDF",
+      "notaImpressao": "The print dialog opens with the sheet; pick \"Save as PDF\" as the destination to send it to the owner.",
+      "data": "Date",
+      "passoComReceita": "Review and issue prescription, certificate or record",
+      "passoSemReceita": "Review and issue certificate or record",
+      "cartao": {
+        "receituarioControle": "Printed on a separate sheet, in duplicate",
+        "semPrescricao": "No medication prescribed in this visit",
+        "prontuario": {
+          "titulo": "Full medical record",
+          "descricao": "History, physical exam, diagnosis and care plan."
+        },
+        "receituario": {
+          "titulo": "Prescription",
+          "descricao": "Medications with spelled-out dosing and the amount to dispense."
+        },
+        "atestado-saude": {
+          "titulo": "Health certificate",
+          "descricao": "States that the animal was examined and what was found."
+        },
+        "atestado-comparecimento": {
+          "titulo": "Attendance certificate",
+          "descricao": "Justifies the owner absence during the visit."
+        }
+      },
+      "receita": {
+        "titulo": "Veterinary prescription",
+        "tituloControle": "Controlled-substance prescription",
+        "semPrescricao": "No medication prescribed in this visit.",
+        "usoRotulo": "Use:",
+        "quantidadeTotal": "Amount to dispense: {valor} {unidade}",
+        "via": {
+          "primeira": "Copy 1 — retained by the pharmacy",
+          "segunda": "Copy 2 — owner instructions"
+        },
+        "avisoControle": "Controlled-substance prescription in duplicate, per applicable regulation.",
+        "comprador": "Buyer identification",
+        "fornecedor": "Supplier identification",
+        "nome": "Name",
+        "documentoIdentidade": "Identity document",
+        "endereco": "Address",
+        "telefone": "Phone",
+        "dataDispensacao": "Dispensing date",
+        "assinaturaFarmaceutico": "Pharmacist signature"
+      },
+      "atestado": {
+        "finalidade": "Purpose:",
+        "rodape": "Issued at the owner request, for whatever purposes may be needed.",
+        "saude": {
+          "titulo": "Health certificate",
+          "corpoComDiagnostico": "I certify that on {data} I examined the animal {paciente}, identified above, and found: {diagnostico}.",
+          "corpoSemAchado": "I certify that on {data} I examined the animal {paciente}, identified above, and found no clinical abnormality in the examination performed.",
+          "recomendacoes": "Recommendations:"
+        },
+        "comparecimento": {
+          "titulo": "Attendance certificate",
+          "corpo": "I certify that {responsavel} was at this clinic on {data}, from {entrada} to {saida}, accompanying the animal {paciente} during veterinary care."
+        }
+      }
+    },
+    "fila": {
+      "titulo": "Waitlist",
+      "subtitulo": "Clinic",
+      "vazioTitulo": "Waitlist empty",
+      "vazioDescricao": "When no slot fits, add the patient here instead of improvising.",
+      "adicionar": "Add to waitlist",
+      "prioridade": {
+        "normal": "Normal",
+        "preferencial": "Priority",
+        "urgente": "Urgent"
+      },
+      "situacao": {
+        "aguardando": "Waiting",
+        "ofertado": "Slot offered",
+        "aceito": "Accepted",
+        "expirado": "Offer expired",
+        "removido": "Removed"
+      },
+      "janelas": "Availability",
+      "esperaDesde": "On the list {valor}",
+      "ofertaExpiraEm": "Expires {valor}",
+      "ofertarVaga": "Offer slot",
+      "aceitar": "Record acceptance",
+      "recusar": "Record decline",
+      "remover": "Remove from list",
+      "vagaAberta": {
+        "titulo": "A slot just opened",
+        "descricao": "{hora} with {profissional} is free. These patients fit that window.",
+        "oferecer": "Offer to {paciente}",
+        "ninguem": "Nobody on the list fits this window.",
+        "depois": "Not now"
+      },
+      "colunaSituacao": "Status"
+    },
+    "faltas": {
+      "titulo": "No-shows",
+      "subtitulo": "Clinic",
+      "vazioTitulo": "No no-shows recorded",
+      "vazioDescricao": "Good sign: nobody missed an appointment in the period.",
+      "colunaPaciente": "Patient",
+      "colunaResponsavel": "Pet parent",
+      "colunaFaltas": "No-shows",
+      "colunaMinutos": "Idle schedule",
+      "colunaUltima": "Last",
+      "reincidente": "Repeat",
+      "totalMinutos": "{valor} of idle schedule in the period",
+      "politica": {
+        "titulo": "Repeat no-show policy",
+        "descricao": "From {limite} no-shows the system suggests asking for confirmation before holding the slot. It is a suggestion: the clinic decides, case by case.",
+        "ativar": "Suggest confirmation for repeat no-shows",
+        "ativo": "Suggestion on",
+        "inativo": "Suggestion off"
+      },
+      "filtro": {
+        "reincidentes": "Repeat",
+        "todas": "All"
+      },
+      "resumo": {
+        "total": "No-shows in the period",
+        "pacientes": "{contagem} patient | {contagem} patients",
+        "agenda": "Idle schedule",
+        "reincidentes": "Repeat no-shows",
+        "limite": "from {limite} no-shows"
+      }
+    },
+    "prontuario": {
+      "titulo": "Medical record",
+      "subtitulo": "Clinic",
+      "vazioTitulo": "No records yet",
+      "vazioDescricao": "Records show up here as appointments are completed.",
+      "rascunho": "Draft",
+      "finalizado": "Completed",
+      "salvandoAgora": "Saving…",
+      "salvoEm": "Saved {valor}",
+      "rascunhoLocal": "Draft kept in this browser",
+      "restaurarRascunho": "Restore draft",
+      "descartarRascunho": "Discard",
+      "naoAferido": "not measured",
+      "marcarNaoAferido": "Mark as not measured",
+      "referencia": "reference",
+      "semReferencia": "no reference range",
+      "faixa": {
+        "abaixo": "below",
+        "dentro": "in range",
+        "acima": "above",
+        "sem-referencia": "no range",
+        "nao-aferido": "not measured"
+      },
+      "somenteLeitura": "Being edited on {dispositivo} since {desde}. You are in read-only.",
+      "assumirEdicao": "Take over editing",
+      "assumirDialogo": {
+        "titulo": "Take over editing",
+        "descricao": "Another device has this record open. Taking over puts it in read-only and lets you compare field by field.",
+        "confirmar": "Take over anyway"
+      },
+      "comparar": "Compare versions",
+      "campo": "Field",
+      "dispositivo": {
+        "navegador": "Browser",
+        "servidor": "Server",
+        "simulado": "Front desk · Chrome"
+      },
+      "versaoAtual": "On this screen",
+      "versaoServidor": "On the server",
+      "anamnese": {
+        "titulo": "History",
+        "descricao": "What brought the patient in and what the pet parent noticed.",
+        "queixaPrincipal": "Chief complaint",
+        "historia": "Clinical history",
+        "duracaoSintomas": "How long",
+        "duracaoExemplo": "3 days",
+        "apetite": "Appetite",
+        "hidratacao": "Hydration",
+        "evacuacao": "Defecation",
+        "miccao": "Urination",
+        "ambiente": "Environment",
+        "vacinacao": "Vaccination up to date",
+        "vermifugacao": "Deworming up to date",
+        "opcoes": {
+          "normal": "Normal",
+          "aumentado": "Increased",
+          "reduzido": "Reduced",
+          "ausente": "Absent",
+          "leve": "Mild dehydration",
+          "moderada": "Moderate dehydration",
+          "grave": "Severe dehydration",
+          "diarreia": "Diarrhea",
+          "constipacao": "Constipation",
+          "aumentada": "Increased",
+          "reduzida": "Reduced",
+          "disuria": "Dysuria",
+          "domiciliar": "Indoors",
+          "externo": "Outdoor access",
+          "misto": "Mixed",
+          "sim": "Yes",
+          "nao": "No"
+        },
+        "sinaisGerais": "General signs",
+        "prevencao": "Preventive care"
+      },
+      "exameFisico": {
+        "titulo": "Physical exam",
+        "descricao": "Values are checked against the species range as you type.",
+        "vitais": "Vitals",
+        "sistemas": "Systems",
+        "observacao": "Exam notes",
+        "peso": "Weight",
+        "temperatura": "Temperature",
+        "frequenciaCardiaca": "Heart rate",
+        "frequenciaRespiratoria": "Respiratory rate",
+        "tempoPreenchimentoCapilar": "CRT",
+        "escoreCorporal": "Body condition",
+        "pressaoSistolica": "Systolic pressure",
+        "sistema": {
+          "cardiovascular": "Cardiovascular",
+          "respiratorio": "Respiratory",
+          "digestorio": "Digestive",
+          "urinario": "Urinary",
+          "tegumentar": "Integumentary",
+          "locomotor": "Musculoskeletal",
+          "neurologico": "Neurological",
+          "linfonodos": "Lymph nodes"
+        },
+        "achado": {
+          "normal": "No abnormalities",
+          "alterado": "Abnormal",
+          "nao-avaliado": "Not assessed"
+        },
+        "notaAlterado": "What is abnormal"
+      },
+      "diagnostico": {
+        "titulo": "Diagnosis",
+        "descricao": "Search by code or description.",
+        "buscar": "Search diagnosis",
+        "adicionar": "Add",
+        "remover": "Remove",
+        "vazio": "No diagnosis recorded.",
+        "tipo": {
+          "presuntivo": "Presumptive",
+          "definitivo": "Definitive",
+          "diferencial": "Differential"
+        }
+      },
+      "conduta": {
+        "titulo": "Care plan",
+        "descricao": "Guidance, prescription and what is agreed for later.",
+        "orientacoes": "Guidance for the pet parent",
+        "exames": "Tests ordered",
+        "prescricoes": "Prescription",
+        "adicionarPrescricao": "Add medication",
+        "semPrescricao": "No medication prescribed.",
+        "medicamento": "Medication",
+        "via": "Route",
+        "dosePorKg": "Dose (mg/kg)",
+        "frequencia": "Frequency (h)",
+        "duracao": "Duration (days)",
+        "observacao": "Note",
+        "resumoDose": "{quantidade} {unidade} ({mg} mg) every {frequencia} h for {duracao} days — {total} doses.",
+        "semPeso": "Without the patient's weight the dose is not calculated.",
+        "avisoDose": {
+          "abaixo-da-usual": "Below the usual dose ({min}–{max} mg/kg).",
+          "acima-da-usual": "Above the usual dose ({min}–{max} mg/kg).",
+          "peso-ausente": "Record the weight in the physical exam to calculate the dose."
+        },
+        "alergiaTitulo": "Recorded allergy to {principio}",
+        "alergiaDescricao": "This patient's record lists an allergy to {principio}. Prescribing is still possible, with explicit confirmation.",
+        "alergiaConfirmar": "I confirm and want to prescribe anyway",
+        "retorno": "Follow-up",
+        "retornoEmDias": "Return in (days)",
+        "retornoTipo": "Follow-up type",
+        "retornoAgendar": "Book on the schedule",
+        "retornoAgendado": "Follow-up booked for {data} at {hora}.",
+        "retornoPendente": "Follow-up indicated, no slot booked.",
+        "unidade": {
+          "ml": "mL",
+          "comprimido": "tablet | tablets"
+        },
+        "via_": {
+          "oral": "Oral",
+          "subcutanea": "Subcutaneous",
+          "intramuscular": "Intramuscular",
+          "intravenosa": "Intravenous",
+          "topica": "Topical",
+          "otologica": "Otic"
+        }
+      },
+      "timeline": {
+        "titulo": "History",
+        "vazio": "This patient has no recorded history yet.",
+        "consultaAnterior": "Previous consult",
+        "doseAnterior": "{mg} mg every {frequencia} h for {duracao} days",
+        "verConsultaAnterior": "View the previous consult",
+        "kind": {
+          "consulta": "Consult",
+          "vacina": "Vaccination",
+          "exame": "Test",
+          "cirurgia": "Surgery",
+          "prescricao": "Prescription",
+          "falta": "No-show",
+          "observacao": "Note"
+        },
+        "mostrar": "History",
+        "ocultar": "Hide history"
+      },
+      "finalizar": "Complete appointment",
+      "finalizarDialogo": {
+        "titulo": "Complete appointment",
+        "descricao": "Once completed, the record no longer accepts direct editing.",
+        "pendencias": "Still missing: {itens}",
+        "confirmar": "Complete anyway"
+      },
+      "passos": {
+        "vitaisAferidos": "{preenchidos} of {total} measured",
+        "prescricoes": "{contagem} prescribed",
+        "sistemasAlterados": "{contagem} abnormal | {contagem} abnormal",
+        "aria": "Consultation steps"
+      },
+      "naoMedir": "skip",
+      "filtro": {
+        "situacao": "Status",
+        "profissional": "Clinician"
+      },
+      "buscar": "Search by patient or diagnosis",
+      "imprimir": "Save as PDF",
+      "impressao": {
+        "titulo": "Clinical record",
+        "dica": "Opens the browser print dialog — choose \"Save as PDF\" as the destination.",
+        "paciente": "Patient",
+        "documento": "ID",
+        "valor": "Value",
+        "semRegistro": "No vital signs recorded in this visit.",
+        "emitidoEm": "Issued on {data}",
+        "dataAtendimento": "Visit date",
+        "naoRegistrado": "Not recorded."
+      },
+      "resumo": {
+        "titulo": "Summary",
+        "descricao": "Check what was recorded before issuing the documents.",
+        "vazio": "Not recorded",
+        "achados": "Findings",
+        "alergiaPendente": "Prescription of {medicamento} conflicts with a recorded allergy and was not accepted."
+      }
+    },
+    "pacientes": {
+      "titulo": "Patients",
+      "subtitulo": "Clinic",
+      "buscar": "Search by patient, pet parent or phone",
+      "vazioTitulo": "No patient found",
+      "vazioDescricao": "Adjust the search or register the patient at the front desk.",
+      "colunaPaciente": "Patient",
+      "colunaResponsavel": "Pet parent",
+      "colunaUltimo": "Last visit",
+      "colunaProximo": "Next",
+      "colunaAlertas": "Alerts",
+      "colunaAtendimento": "Visit",
+      "semRegistro": "no record",
+      "filtro": {
+        "especie": "Species",
+        "comAlerta": "With alert",
+        "semAlerta": "No alert",
+        "agenda": "Schedule",
+        "comProximo": "Has an appointment",
+        "semProximo": "No appointment"
+      }
+    },
+    "atendimentos": {
+      "titulo": "Visits",
+      "subtitulo": "Clinic"
+    },
+    "atividades": {
+      "titulo": "Activities",
+      "subtitulo": "Clinic",
+      "vazioTitulo": "Nothing pending",
+      "vazioDescricao": "Draft records and follow-ups without a slot show up here.",
+      "rascunhos": "Draft records",
+      "retornos": "Follow-ups without a slot",
+      "ofertasDaFila": "Waitlist offers awaiting a reply"
+    },
+    "atalhos": {
+      "titulo": "Keyboard shortcuts",
+      "abrir": "View shortcuts",
+      "fechar": "Close",
+      "dica": "Press ? for shortcuts",
+      "grupo": {
+        "navegacao": "Navigation",
+        "acoes": "Actions",
+        "prontuario": "Record"
+      },
+      "diaAnterior": "Previous day",
+      "proximoDia": "Next day",
+      "semanaAnterior": "Previous week",
+      "proximaSemana": "Next week",
+      "hoje": "Go to today",
+      "visao": "Toggle day and week",
+      "novo": "New appointment",
+      "bloquear": "Block time",
+      "encaixar": "Squeeze in",
+      "buscar": "Find patient",
+      "densidade": "Toggle density",
+      "fechar_": "Close the open panel",
+      "mover": "Move the focused appointment by 15 min",
+      "selecionar": "Open the focused appointment",
+      "proximoCampo": "Next field",
+      "comandoBarra": "Commands in the notes field"
+    },
+    "comandos": {
+      "titulo": "Commands",
+      "dica": "Type / to insert a ready-made snippet",
+      "naoAferido": "not measured",
+      "semAlteracoes": "no abnormalities",
+      "retorno": "follow-up in",
+      "jejum": "fasting for",
+      "vazio": "No command by that name."
+    },
+    "painel": {
+      "titulo": "Development panel",
+      "abrir": "Development panel",
+      "descricao": "Non-production only. Drives the mock layer without reloading the page.",
+      "latencia": "Latency (ms)",
+      "erro": "Error per operation",
+      "operacao": "Operation",
+      "taxa": "Rate",
+      "offline": "Take everything down (offline)",
+      "relogio": "Shift the clock (h)",
+      "recriar": "Rebuild data",
+      "semente": "Seed",
+      "casos": "Hard cases",
+      "irPara": "Go",
+      "segundoDispositivo": "Simulate a second device",
+      "resumo": "{atendimentos} appointments on the anchor day ({ancora})"
+    },
+    "design": {
+      "titulo": "Clinical module reference",
+      "subtitulo": "Design",
+      "descricao": "The five base components in the four states, with live density. This is the module ruler: a component that fails here does not reach the schedule or the record.",
+      "estados": "Four states",
+      "estado": {
+        "carregando": "Loading",
+        "erro": "Error",
+        "vazio": "Empty",
+        "pronto": "With data"
+      },
+      "nomesExtremos": "Extreme names",
+      "nomesExtremosDescricao": "A two-letter name, a very long name and dense accents, side by side. If the header breaks, it breaks here first.",
+      "cansaco": "Fatigue over 200 rows",
+      "cansacoDescricao": "Two hundred rows in the chosen density. Enough to judge whether the table tires you out before the shift ends.",
+      "escalaDeCinza": "View in grayscale",
+      "escalaDeCinzaDescricao": "No information may be lost without color. Every state carries an icon, a label or a shape beyond the hue.",
+      "tokens": "Tokens",
+      "feedback": "Feedback from someone who runs a clinic",
+      "feedbackVazio": "No review recorded yet. Note here what the clinical team pointed out, with date and name.",
+      "larguras": "Check at 1280, 1024 and 768"
+    },
+    "comum": {
+      "verTodos": "See all ({contagem})",
+      "filtros": "Filters",
+      "resultados": "{contagem} result | {contagem} results",
+      "semResultado": "No results for this search.",
+      "cancelar": "Cancel"
+    }
+  },
+  "cronometro": {
+    "titulo": "Consultation timer",
+    "iniciar": "Start",
+    "ariaIniciar": "Start the consultation timer",
+    "ariaAbrir": "Timer at {tempo} — {estado}. Open the panel.",
+    "abrirPainel": "Open the timer panel",
+    "pausar": "Pause",
+    "retomar": "Resume",
+    "encerrar": "Stop",
+    "descartar": "Discard",
+    "pausado": "Paused",
+    "semSessao": "No consultation is being timed",
+    "semPaciente": "No consultation linked",
+    "estado": {
+      "dentro": "Within the block",
+      "no-limite": "Block about to end",
+      "excedido": "Block exceeded"
+    },
+    "unidades": "{contagem} unit | {contagem} units",
+    "decorrido": "Elapsed",
+    "cobravel": "Billable",
+    "minutos": "{valor} min",
+    "proximaUnidade": "next unit in {valor}",
+    "excedente": "{valor} past the block",
+    "esquecidaTitulo": "This timer has been running for a long time",
+    "esquecidaDescricao": "It has been running for over four hours. If it was left open by mistake, discard it: stopping would record the time as worked.",
+    "hoje": "Today",
+    "hojeResumo": "{contagem} consultation | {contagem} consultations",
+    "totalDecorrido": "In consultation",
+    "totalCobravel": "Billable total",
+    "ultimaHa": "last one {valor} ago",
+    "semHistorico": "No consultation closed today.",
+    "limparHistorico": "Clear the day",
+    "bloco": "Consultation block",
+    "incremento": "Billing increment",
+    "comoFunciona": "Time is rounded up to the next unit. The real elapsed time always stays visible next to it."
   }
 }

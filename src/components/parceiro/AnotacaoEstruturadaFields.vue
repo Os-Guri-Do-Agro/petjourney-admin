@@ -91,15 +91,15 @@ function removeExame(indice: number) {
         <i class="pi pi-list-check" />
       </span>
       <div>
-        <h4 id="est-title">{{ t(`atendimentos.estruturada.title.${tipoServico}`) }}</h4>
-        <p>{{ t(`atendimentos.estruturada.lede.${tipoServico}`) }}</p>
+        <h4 id="est-title">{{ t(`acessos.estruturada.title.${tipoServico}`) }}</h4>
+        <p>{{ t(`acessos.estruturada.lede.${tipoServico}`) }}</p>
       </div>
     </header>
 
     <!-- CONSULTA -->
     <template v-if="isConsulta">
       <div class="est__field">
-        <label for="est-motivo">{{ t('atendimentos.estruturada.campos.motivo') }}</label>
+        <label for="est-motivo">{{ t('acessos.estruturada.campos.motivo') }}</label>
         <InputText
           id="est-motivo"
           v-model="form.motivo"
@@ -107,7 +107,7 @@ function removeExame(indice: number) {
           :maxlength="LIMITES_ESCALARES.motivo"
           :invalid="Boolean(erroDe('motivo'))"
           :aria-describedby="describedBy('motivo')"
-          :placeholder="t('atendimentos.estruturada.placeholders.motivo')"
+          :placeholder="t('acessos.estruturada.placeholders.motivo')"
         />
         <small v-if="erroDe('motivo')" id="est-erro-motivo" class="est__error" role="alert">
           {{ erroDe('motivo') }}
@@ -115,7 +115,7 @@ function removeExame(indice: number) {
       </div>
 
       <div class="est__field">
-        <label for="est-diagnostico">{{ t('atendimentos.estruturada.campos.diagnostico') }}</label>
+        <label for="est-diagnostico">{{ t('acessos.estruturada.campos.diagnostico') }}</label>
         <Textarea
           id="est-diagnostico"
           v-model="form.diagnostico"
@@ -125,7 +125,7 @@ function removeExame(indice: number) {
           :maxlength="LIMITES_ESCALARES.diagnostico"
           :invalid="Boolean(erroDe('diagnostico'))"
           :aria-describedby="describedBy('diagnostico')"
-          :placeholder="t('atendimentos.estruturada.placeholders.diagnostico')"
+          :placeholder="t('acessos.estruturada.placeholders.diagnostico')"
         />
         <small
           v-if="erroDe('diagnostico')"
@@ -138,7 +138,7 @@ function removeExame(indice: number) {
       </div>
 
       <div class="est__field est__field--narrow">
-        <label for="est-pesoKg">{{ t('atendimentos.estruturada.campos.pesoKg') }}</label>
+        <label for="est-pesoKg">{{ t('acessos.estruturada.campos.pesoKg') }}</label>
         <InputNumber
           v-model="form.pesoKg"
           input-id="est-pesoKg"
@@ -151,7 +151,7 @@ function removeExame(indice: number) {
           suffix=" kg"
           :invalid="Boolean(erroDe('pesoKg'))"
           :aria-describedby="describedBy('pesoKg')"
-          :placeholder="t('atendimentos.estruturada.placeholders.pesoKg')"
+          :placeholder="t('acessos.estruturada.placeholders.pesoKg')"
         />
         <small v-if="erroDe('pesoKg')" id="est-erro-pesoKg" class="est__error" role="alert">
           {{ erroDe('pesoKg') }}
@@ -162,13 +162,13 @@ function removeExame(indice: number) {
       <div class="est__list">
         <div class="est__list-head">
           <span class="est__list-title">
-            {{ t('atendimentos.estruturada.prescricao.title') }}
+            {{ t('acessos.estruturada.prescricao.title') }}
             <small v-if="form.prescricaoItens.length">
               {{ form.prescricaoItens.length }}/{{ MAX_ITENS_LISTA }}
             </small>
           </span>
           <Button
-            :label="t('atendimentos.estruturada.prescricao.add')"
+            :label="t('acessos.estruturada.prescricao.add')"
             icon="pi pi-plus"
             size="small"
             severity="secondary"
@@ -179,14 +179,14 @@ function removeExame(indice: number) {
         </div>
 
         <p v-if="!form.prescricaoItens.length" class="est__list-empty">
-          {{ t('atendimentos.estruturada.prescricao.empty') }}
+          {{ t('acessos.estruturada.prescricao.empty') }}
         </p>
 
         <ul v-else class="est__items">
           <li v-for="(item, index) in form.prescricaoItens" :key="`presc-${index}`">
             <div class="est__item-head">
               <span class="est__item-index">
-                {{ t('atendimentos.estruturada.prescricao.item', { n: index + 1 }) }}
+                {{ t('acessos.estruturada.prescricao.item', { n: index + 1 }) }}
               </span>
               <Button
                 icon="pi pi-times"
@@ -195,14 +195,14 @@ function removeExame(indice: number) {
                 rounded
                 size="small"
                 :disabled="disabled"
-                :aria-label="t('atendimentos.estruturada.prescricao.remove', { n: index + 1 })"
+                :aria-label="t('acessos.estruturada.prescricao.remove', { n: index + 1 })"
                 @click="removePrescricao(index)"
               />
             </div>
 
             <div class="est__field">
               <label :for="`est-presc-nome-${index}`">
-                {{ t('atendimentos.estruturada.prescricao.nome') }}
+                {{ t('acessos.estruturada.prescricao.nome') }}
               </label>
               <InputText
                 :id="`est-presc-nome-${index}`"
@@ -212,7 +212,7 @@ function removeExame(indice: number) {
                 :maxlength="LIMITES_PRESCRICAO.nome"
                 :invalid="Boolean(erroDe(`prescricaoItens.${index}.nome`))"
                 :aria-describedby="describedBy(`prescricaoItens.${index}.nome`)"
-                :placeholder="t('atendimentos.estruturada.prescricao.nomePlaceholder')"
+                :placeholder="t('acessos.estruturada.prescricao.nomePlaceholder')"
               />
               <small
                 v-if="erroDe(`prescricaoItens.${index}.nome`)"
@@ -227,7 +227,7 @@ function removeExame(indice: number) {
             <div class="est__row">
               <div class="est__field">
                 <label :for="`est-presc-dose-${index}`">
-                  {{ t('atendimentos.estruturada.prescricao.dose') }}
+                  {{ t('acessos.estruturada.prescricao.dose') }}
                 </label>
                 <InputText
                   :id="`est-presc-dose-${index}`"
@@ -241,7 +241,7 @@ function removeExame(indice: number) {
 
               <div class="est__field">
                 <label :for="`est-presc-unidade-${index}`">
-                  {{ t('atendimentos.estruturada.prescricao.unidade') }}
+                  {{ t('acessos.estruturada.prescricao.unidade') }}
                 </label>
                 <InputText
                   :id="`est-presc-unidade-${index}`"
@@ -257,7 +257,7 @@ function removeExame(indice: number) {
             <div class="est__row">
               <div class="est__field">
                 <label :for="`est-presc-freq-${index}`">
-                  {{ t('atendimentos.estruturada.prescricao.frequencia') }}
+                  {{ t('acessos.estruturada.prescricao.frequencia') }}
                 </label>
                 <InputText
                   :id="`est-presc-freq-${index}`"
@@ -268,16 +268,16 @@ function removeExame(indice: number) {
                   :aria-describedby="
                     describedBy(`prescricaoItens.${index}.frequencia`, `est-freq-hint-${index}`)
                   "
-                  :placeholder="t('atendimentos.estruturada.prescricao.frequenciaPlaceholder')"
+                  :placeholder="t('acessos.estruturada.prescricao.frequenciaPlaceholder')"
                 />
                 <small :id="`est-freq-hint-${index}`" class="est__hint">
-                  {{ t('atendimentos.estruturada.prescricao.frequenciaHint') }}
+                  {{ t('acessos.estruturada.prescricao.frequenciaHint') }}
                 </small>
               </div>
 
               <div class="est__field">
                 <label :for="`est-presc-duracao-${index}`">
-                  {{ t('atendimentos.estruturada.prescricao.duracaoDias') }}
+                  {{ t('acessos.estruturada.prescricao.duracaoDias') }}
                 </label>
                 <InputNumber
                   v-model="item.duracaoDias"
@@ -304,7 +304,7 @@ function removeExame(indice: number) {
 
             <div class="est__field">
               <label :for="`est-presc-instr-${index}`">
-                {{ t('atendimentos.estruturada.prescricao.instrucoes') }}
+                {{ t('acessos.estruturada.prescricao.instrucoes') }}
               </label>
               <Textarea
                 :id="`est-presc-instr-${index}`"
@@ -313,7 +313,7 @@ function removeExame(indice: number) {
                 auto-resize
                 :disabled="disabled"
                 :maxlength="LIMITES_PRESCRICAO.instrucoes"
-                :placeholder="t('atendimentos.estruturada.prescricao.instrucoesPlaceholder')"
+                :placeholder="t('acessos.estruturada.prescricao.instrucoesPlaceholder')"
               />
             </div>
           </li>
@@ -328,13 +328,13 @@ function removeExame(indice: number) {
       <div class="est__list">
         <div class="est__list-head">
           <span class="est__list-title">
-            {{ t('atendimentos.estruturada.exames.title') }}
+            {{ t('acessos.estruturada.exames.title') }}
             <small v-if="form.examesSolicitados.length">
               {{ form.examesSolicitados.length }}/{{ MAX_ITENS_LISTA }}
             </small>
           </span>
           <Button
-            :label="t('atendimentos.estruturada.exames.add')"
+            :label="t('acessos.estruturada.exames.add')"
             icon="pi pi-plus"
             size="small"
             severity="secondary"
@@ -345,14 +345,14 @@ function removeExame(indice: number) {
         </div>
 
         <p v-if="!form.examesSolicitados.length" class="est__list-empty">
-          {{ t('atendimentos.estruturada.exames.empty') }}
+          {{ t('acessos.estruturada.exames.empty') }}
         </p>
 
         <ul v-else class="est__items">
           <li v-for="(item, index) in form.examesSolicitados" :key="`exame-${index}`">
             <div class="est__item-head">
               <span class="est__item-index">
-                {{ t('atendimentos.estruturada.exames.item', { n: index + 1 }) }}
+                {{ t('acessos.estruturada.exames.item', { n: index + 1 }) }}
               </span>
               <Button
                 icon="pi pi-times"
@@ -361,14 +361,14 @@ function removeExame(indice: number) {
                 rounded
                 size="small"
                 :disabled="disabled"
-                :aria-label="t('atendimentos.estruturada.exames.remove', { n: index + 1 })"
+                :aria-label="t('acessos.estruturada.exames.remove', { n: index + 1 })"
                 @click="removeExame(index)"
               />
             </div>
 
             <div class="est__field">
               <label :for="`est-exame-nome-${index}`">
-                {{ t('atendimentos.estruturada.exames.nome') }}
+                {{ t('acessos.estruturada.exames.nome') }}
               </label>
               <InputText
                 :id="`est-exame-nome-${index}`"
@@ -378,7 +378,7 @@ function removeExame(indice: number) {
                 :maxlength="LIMITES_EXAME_SOLICITADO.nome"
                 :invalid="Boolean(erroDe(`examesSolicitados.${index}.nome`))"
                 :aria-describedby="describedBy(`examesSolicitados.${index}.nome`)"
-                :placeholder="t('atendimentos.estruturada.exames.nomePlaceholder')"
+                :placeholder="t('acessos.estruturada.exames.nomePlaceholder')"
               />
               <small
                 v-if="erroDe(`examesSolicitados.${index}.nome`)"
@@ -392,7 +392,7 @@ function removeExame(indice: number) {
 
             <div class="est__field">
               <label :for="`est-exame-obs-${index}`">
-                {{ t('atendimentos.estruturada.exames.observacao') }}
+                {{ t('acessos.estruturada.exames.observacao') }}
               </label>
               <InputText
                 :id="`est-exame-obs-${index}`"
@@ -400,7 +400,7 @@ function removeExame(indice: number) {
                 size="small"
                 :disabled="disabled"
                 :maxlength="LIMITES_EXAME_SOLICITADO.observacao"
-                :placeholder="t('atendimentos.estruturada.exames.observacaoPlaceholder')"
+                :placeholder="t('acessos.estruturada.exames.observacaoPlaceholder')"
               />
             </div>
           </li>
@@ -415,7 +415,7 @@ function removeExame(indice: number) {
     <!-- EXAME -->
     <template v-else-if="isExame">
       <div class="est__field">
-        <label for="est-tipoExame">{{ t('atendimentos.estruturada.campos.tipoExame') }}</label>
+        <label for="est-tipoExame">{{ t('acessos.estruturada.campos.tipoExame') }}</label>
         <InputText
           id="est-tipoExame"
           v-model="form.tipoExame"
@@ -423,7 +423,7 @@ function removeExame(indice: number) {
           :maxlength="LIMITES_ESCALARES.tipoExame"
           :invalid="Boolean(erroDe('tipoExame'))"
           :aria-describedby="describedBy('tipoExame')"
-          :placeholder="t('atendimentos.estruturada.placeholders.tipoExame')"
+          :placeholder="t('acessos.estruturada.placeholders.tipoExame')"
         />
         <small v-if="erroDe('tipoExame')" id="est-erro-tipoExame" class="est__error" role="alert">
           {{ erroDe('tipoExame') }}
@@ -431,7 +431,7 @@ function removeExame(indice: number) {
       </div>
 
       <div class="est__field">
-        <label for="est-laudoTexto">{{ t('atendimentos.estruturada.campos.laudoTexto') }}</label>
+        <label for="est-laudoTexto">{{ t('acessos.estruturada.campos.laudoTexto') }}</label>
         <Textarea
           id="est-laudoTexto"
           v-model="form.laudoTexto"
@@ -441,7 +441,7 @@ function removeExame(indice: number) {
           :maxlength="LIMITES_ESCALARES.laudoTexto"
           :invalid="Boolean(erroDe('laudoTexto'))"
           :aria-describedby="describedBy('laudoTexto')"
-          :placeholder="t('atendimentos.estruturada.placeholders.laudoTexto')"
+          :placeholder="t('acessos.estruturada.placeholders.laudoTexto')"
         />
         <small v-if="erroDe('laudoTexto')" id="est-erro-laudoTexto" class="est__error" role="alert">
           {{ erroDe('laudoTexto') }}
@@ -450,7 +450,7 @@ function removeExame(indice: number) {
 
       <div class="est__field est__field--narrow">
         <label for="est-dataResultado">
-          {{ t('atendimentos.estruturada.campos.dataResultado') }}
+          {{ t('acessos.estruturada.campos.dataResultado') }}
         </label>
         <input
           id="est-dataResultado"
@@ -475,7 +475,7 @@ function removeExame(indice: number) {
     <!-- BANHO / TOSA -->
     <template v-else-if="isEstetica">
       <div class="est__field">
-        <label for="est-produtos">{{ t('atendimentos.estruturada.campos.produtos') }}</label>
+        <label for="est-produtos">{{ t('acessos.estruturada.campos.produtos') }}</label>
         <Textarea
           id="est-produtos"
           v-model="form.produtos"
@@ -485,7 +485,7 @@ function removeExame(indice: number) {
           :maxlength="LIMITES_ESCALARES.produtos"
           :invalid="Boolean(erroDe('produtos'))"
           :aria-describedby="describedBy('produtos')"
-          :placeholder="t('atendimentos.estruturada.placeholders.produtos')"
+          :placeholder="t('acessos.estruturada.placeholders.produtos')"
         />
         <small v-if="erroDe('produtos')" id="est-erro-produtos" class="est__error" role="alert">
           {{ erroDe('produtos') }}
@@ -494,7 +494,7 @@ function removeExame(indice: number) {
 
       <div class="est__field">
         <label for="est-condicaoPele">
-          {{ t('atendimentos.estruturada.campos.condicaoPele') }}
+          {{ t('acessos.estruturada.campos.condicaoPele') }}
         </label>
         <Textarea
           id="est-condicaoPele"
@@ -505,7 +505,7 @@ function removeExame(indice: number) {
           :maxlength="LIMITES_ESCALARES.condicaoPele"
           :invalid="Boolean(erroDe('condicaoPele'))"
           :aria-describedby="describedBy('condicaoPele')"
-          :placeholder="t('atendimentos.estruturada.placeholders.condicaoPele')"
+          :placeholder="t('acessos.estruturada.placeholders.condicaoPele')"
         />
         <small
           v-if="erroDe('condicaoPele')"
@@ -519,7 +519,7 @@ function removeExame(indice: number) {
 
       <div class="est__field">
         <label for="est-comportamento">
-          {{ t('atendimentos.estruturada.campos.comportamento') }}
+          {{ t('acessos.estruturada.campos.comportamento') }}
         </label>
         <Textarea
           id="est-comportamento"
@@ -530,7 +530,7 @@ function removeExame(indice: number) {
           :maxlength="LIMITES_ESCALARES.comportamento"
           :invalid="Boolean(erroDe('comportamento'))"
           :aria-describedby="describedBy('comportamento')"
-          :placeholder="t('atendimentos.estruturada.placeholders.comportamento')"
+          :placeholder="t('acessos.estruturada.placeholders.comportamento')"
         />
         <small
           v-if="erroDe('comportamento')"
@@ -548,7 +548,7 @@ function removeExame(indice: number) {
       <div class="est__row">
         <div class="est__field">
           <label for="est-dataEntrada">{{
-            t('atendimentos.estruturada.campos.dataEntrada')
+            t('acessos.estruturada.campos.dataEntrada')
           }}</label>
           <input
             id="est-dataEntrada"
@@ -570,7 +570,7 @@ function removeExame(indice: number) {
         </div>
 
         <div class="est__field">
-          <label for="est-dataSaida">{{ t('atendimentos.estruturada.campos.dataSaida') }}</label>
+          <label for="est-dataSaida">{{ t('acessos.estruturada.campos.dataSaida') }}</label>
           <input
             id="est-dataSaida"
             v-model="form.dataSaida"
@@ -588,7 +588,7 @@ function removeExame(indice: number) {
       </div>
 
       <div class="est__field">
-        <label for="est-alimentacao">{{ t('atendimentos.estruturada.campos.alimentacao') }}</label>
+        <label for="est-alimentacao">{{ t('acessos.estruturada.campos.alimentacao') }}</label>
         <Textarea
           id="est-alimentacao"
           v-model="form.alimentacao"
@@ -598,7 +598,7 @@ function removeExame(indice: number) {
           :maxlength="LIMITES_ESCALARES.alimentacao"
           :invalid="Boolean(erroDe('alimentacao'))"
           :aria-describedby="describedBy('alimentacao')"
-          :placeholder="t('atendimentos.estruturada.placeholders.alimentacao')"
+          :placeholder="t('acessos.estruturada.placeholders.alimentacao')"
         />
         <small
           v-if="erroDe('alimentacao')"
@@ -612,7 +612,7 @@ function removeExame(indice: number) {
 
       <div class="est__field">
         <label for="est-comportamento-hotel">
-          {{ t('atendimentos.estruturada.campos.comportamento') }}
+          {{ t('acessos.estruturada.campos.comportamento') }}
         </label>
         <Textarea
           id="est-comportamento-hotel"
@@ -623,7 +623,7 @@ function removeExame(indice: number) {
           :maxlength="LIMITES_ESCALARES.comportamento"
           :invalid="Boolean(erroDe('comportamento'))"
           :aria-describedby="describedBy('comportamento')"
-          :placeholder="t('atendimentos.estruturada.placeholders.comportamentoHotel')"
+          :placeholder="t('acessos.estruturada.placeholders.comportamentoHotel')"
         />
         <small
           v-if="erroDe('comportamento')"
@@ -637,7 +637,7 @@ function removeExame(indice: number) {
 
       <div class="est__field">
         <label for="est-intercorrencias">
-          {{ t('atendimentos.estruturada.campos.intercorrencias') }}
+          {{ t('acessos.estruturada.campos.intercorrencias') }}
         </label>
         <Textarea
           id="est-intercorrencias"
@@ -648,7 +648,7 @@ function removeExame(indice: number) {
           :maxlength="LIMITES_ESCALARES.intercorrencias"
           :invalid="Boolean(erroDe('intercorrencias'))"
           :aria-describedby="describedBy('intercorrencias')"
-          :placeholder="t('atendimentos.estruturada.placeholders.intercorrencias')"
+          :placeholder="t('acessos.estruturada.placeholders.intercorrencias')"
         />
         <small
           v-if="erroDe('intercorrencias')"

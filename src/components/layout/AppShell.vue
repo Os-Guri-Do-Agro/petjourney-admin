@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
@@ -13,19 +13,21 @@ import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
 import {
   filterNavigationGroups,
   getSectionLandingPath,
-  isHomeMenuContext,
   navItemMatches,
+  OVERVIEW_SECTION_ID,
   parseNavTarget,
   resolveActiveSectionId,
   resolvePageLabel,
-  stripHomeMenuContext,
   useAppNavigation,
+  type AppNavigationGroup,
   type AppNavigationItem,
   type AppNavigationSection,
 } from '@/composables/useAppNavigation'
 import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
+import { isCompactDensity, isListNavigator } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
+import CronometroConsulta from '@/features/cronometro/components/CronometroConsulta.vue'
 import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
 import { getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
@@ -56,10 +58,11 @@ const {
   visible: cupomComingSoonVisible,
   open: openCupomComingSoon,
 } = useCupomComingSoon()
-const { navigationSections, hasClinicalProfile } = useAppNavigation()
+const { navigationSections, navigationGroups, overviewItem, hasClinicalProfile } =
+  useAppNavigation()
 const { logout } = useLogout()
 const cupomFeatureEnabled = CUPOM_FEATURE_ENABLED
-const activeSectionId = ref('home')
+const activeSectionId = ref(OVERVIEW_SECTION_ID)
 const defaultLandingPath = computed(() => getDefaultLandingPath())
 const themeSwitchDark = ref(isDarkMode.value)
 const themeTogglePending = ref(false)
@@ -84,11 +87,21 @@ function readCollapsedPreference() {
   return window.localStorage.getItem(NAVIGATOR_COLLAPSED_STORAGE_KEY) === 'true'
 }
 
-/** No desktop o rail permanece navegável; só a lista de páginas recolhe. */
+/**
+ * No modo seções o trilho permanece navegável quando recolhido — só a lista de páginas some.
+ * No modo lista não há trilho, então recolher esconde o menu inteiro; deixar uma tira vazia de
+ * 4,6 rem ocupando a lateral seria pior que nada.
+ */
 const drawerOpen = computed(() =>
   compactViewport.value ? compactDrawerOpen.value : !railCollapsed.value,
 )
-const navigatorHidden = computed(() => compactViewport.value && !compactDrawerOpen.value)
+
+const navigatorHidden = computed(() =>
+  compactViewport.value
+    ? !compactDrawerOpen.value
+    : isListNavigator.value && railCollapsed.value,
+)
+
 const panelHidden = computed(() => !compactViewport.value && railCollapsed.value)
 
 function setRailCollapsed(collapsed: boolean) {
@@ -189,6 +202,13 @@ const shellStyle = computed(() => {
     '--shell-accent': colors.vet.primary,
     '--shell-accent-strong': colors.auth.sageStrong,
     '--shell-accent-soft': colors.vet.secondary,
+    /** Teal da marca escurecido: superfície cheia com ícone claro por cima. */
+    '--shell-accent-deep': colors.vet.focusFrom,
+    /**
+     * Texto do item aberto. No claro é o mesmo teal do ladrilho; no escuro precisa inverter
+     * para o sage claro, senão o rótulo some contra o fundo quase preto do painel.
+     */
+    '--shell-nav-active-text': isDark ? colors.auth.sageStrong : colors.vet.focusFrom,
     '--shell-cream': colors.auth.sageTint,
     '--shell-shadow-rgb': colors.auth.shadowRgb,
     '--rail-logout-red': colors.red,
@@ -198,82 +218,115 @@ const shellStyle = computed(() => {
   }
 })
 
-const fallbackSection = computed(() => navigationSections.value[0] as NavigationSection)
+/**
+ * Seção com uma tela só não abre painel: vira link direto no trilho.
+ *
+ * "Conta" tem exatamente um destino, e abrir um painel de 18 rem para exibir um único link é
+ * gastar meia tela para dizer o que o próprio botão já dizia.
+ */
+function temPainel(section: NavigationSection) {
+  return section.items.length > 1
+}
+
+const fallbackSection = computed(
+  () =>
+    (navigationSections.value.find(temPainel) ??
+      navigationSections.value[0]) as NavigationSection,
+)
+
+/**
+ * Seção mostrada no painel. Na visão geral nenhuma seção está ativa, e o painel **mantém a
+ * última** em vez de saltar para a primeira: quem abre o resumo do dia e volta continua no
+ * mesmo lugar do menu.
+ */
+const painelSectionId = ref(fallbackSection.value.id)
+
 const activeSection = computed<NavigationSection>(
   () =>
-    navigationSections.value.find((section) => section.id === activeSectionId.value) ??
+    navigationSections.value.find((section) => section.id === painelSectionId.value) ??
     fallbackSection.value,
 )
 
+const naVisaoGeral = computed(() => activeSectionId.value === OVERVIEW_SECTION_ID)
+
 function isNavItemActive(item: NavigationItem) {
   const { path: itemPath, hash: itemHash } = parseNavTarget(item.to)
-
   const hashOk = itemHash ? itemHash === route.hash : true
-  const pathOk = navItemMatches(itemPath, route.path)
 
-  if (!pathOk || !hashOk) {
-    return false
-  }
-
-  if (activeSectionId.value === 'home' && itemPath !== '/inicio') {
-    return isHomeMenuContext(route.query)
-  }
-
-  if (activeSectionId.value !== 'home' && isHomeMenuContext(route.query)) {
-    return false
-  }
-
-  return true
+  return navItemMatches(itemPath, route.path) && hashOk
 }
 
-const filteredNavigationGroups = computed(() => {
-  if (!activeSection.value.groups?.length) {
-    return []
-  }
+/** No modo lista o filtro varre o menu inteiro; no modo seções, só a seção aberta. */
+const gruposDoPainel = computed<AppNavigationGroup[]>(() =>
+  isListNavigator.value
+    ? navigationGroups.value
+    : [
+        {
+          id: activeSection.value.id,
+          label: activeSection.value.label,
+          items: activeSection.value.items,
+        },
+      ],
+)
 
-  return filterNavigationGroups(activeSection.value.groups, panelFilterQuery.value)
-})
+const filteredNavigationGroups = computed(() =>
+  filterNavigationGroups(gruposDoPainel.value, panelFilterQuery.value),
+)
 
-const hasPanelFilter = computed(() => Boolean(activeSection.value.groups?.length))
+/**
+ * O filtro só se paga quando há lista para varrer. Com cinco links visíveis ele é mais um campo
+ * ocupando altura do que um atalho.
+ */
+const hasPanelFilter = computed(
+  () => gruposDoPainel.value.reduce((total, grupo) => total + grupo.items.length, 0) >= 8,
+)
+
 const panelFilterHasNoResults = computed(
-  () => hasPanelFilter.value && panelFilterQuery.value.trim().length > 0 && filteredNavigationGroups.value.length === 0,
+  () =>
+    panelFilterQuery.value.trim().length > 0 && filteredNavigationGroups.value.length === 0,
 )
 
 const activePageLabel = computed(() =>
   resolvePageLabel(route.path, route.hash, navigationSections.value),
 )
 
-const activeSectionLabel = computed(() => activeSection.value.label)
+/**
+ * O cabeçalho nomeia a seção **da página aberta**, não a que está no painel.
+ *
+ * Numa seção sem painel — Conta — o painel segue mostrando a anterior, e o cabeçalho anunciava
+ * "Portal · Configurações" enquanto a própria página dizia "Conta".
+ */
+const activeSectionLabel = computed(() => {
+  if (naVisaoGeral.value) {
+    return overviewItem.value.label
+  }
+
+  const secao = navigationSections.value.find((entry) => entry.id === activeSectionId.value)
+
+  return secao?.label ?? activeSection.value.label
+})
 
 function handleSectionChange(sectionId: string) {
   const section =
     navigationSections.value.find((entry) => entry.id === sectionId) ?? fallbackSection.value
-  let target = getSectionLandingPath(section)
 
-  activeSectionId.value = sectionId
+  painelSectionId.value = section.id
   panelFilterQuery.value = ''
 
   if (!compactViewport.value) {
     setRailCollapsed(false)
   }
 
+  const target = getSectionLandingPath(section)
+
   if (!target) {
     return
   }
 
-  if (sectionId !== 'home') {
-    target = stripHomeMenuContext(target)
-  }
-
   const { path: targetPath, hash: targetHash } = parseNavTarget(target)
-  const samePath = targetPath === route.path
   const sameHash = targetHash ? targetHash === route.hash : true
-  const sameHomeContext =
-    sectionId === 'home'
-      ? isHomeMenuContext(route.query) || targetPath === '/inicio'
-      : !isHomeMenuContext(route.query)
 
-  if (!samePath || !sameHash || !sameHomeContext) {
+  if (targetPath !== route.path || !sameHash) {
     void router.push(target)
   }
 }
@@ -290,21 +343,46 @@ const headerDisplayName = computed(
 const headerAvatarUrl = computed(() => usuarioPerfilStore.avatarUrl)
 
 const shellClasses = computed(() => ({
-  'app-shell--rail-only': panelHidden.value,
+  'app-shell--rail-only': panelHidden.value && !isListNavigator.value,
   'app-shell--navigator-hidden': navigatorHidden.value,
   'app-shell--navigator-overlay': compactViewport.value && compactDrawerOpen.value,
+  'app-shell--list-nav': isListNavigator.value,
+  'app-shell--dense': isCompactDensity.value,
 }))
 
 watch(
-  () => [route.path, route.query.menu] as const,
+  () => route.path,
   () => {
-    activeSectionId.value = resolveActiveSectionId(
-      route.path,
-      hasClinicalProfile.value,
-      route.query,
+    activeSectionId.value = resolveActiveSectionId(route.path, hasClinicalProfile.value)
+
+    const secao = navigationSections.value.find(
+      (entry) => entry.id === activeSectionId.value,
     )
+
+    if (secao && temPainel(secao)) {
+      painelSectionId.value = secao.id
+    }
   },
   { immediate: true },
+)
+
+/**
+ * Traz o item ativo para a vista quando a lista não cabe inteira.
+ *
+ * No modo lista são treze telas numa coluna só: num monitor mais baixo o último grupo nasce
+ * abaixo da dobra, e quem abre Configurações não vê onde está no menu.
+ */
+const listaDeNavegacao = ref<HTMLElement | null>(null)
+
+watch(
+  () => route.path,
+  async () => {
+    await nextTick()
+
+    const ativo = listaDeNavegacao.value?.querySelector('.router-link-active')
+
+    ativo?.scrollIntoView({ block: 'nearest' })
+  },
 )
 
 function requestLogout() {
@@ -366,7 +444,11 @@ onUnmounted(() => {
     />
 
     <aside class="app-navigator" :inert="navigatorHidden || undefined">
-      <nav class="section-rail" :aria-label="t('shell.aria.sections')">
+      <nav
+        v-if="!isListNavigator"
+        class="section-rail"
+        :aria-label="t('shell.aria.sections')"
+      >
         <RouterLink
           class="rail-brand"
           :to="defaultLandingPath"
@@ -376,21 +458,59 @@ onUnmounted(() => {
           <img :src="logoMarkUrl" alt="" />
         </RouterLink>
 
-        <button
-          v-for="section in navigationSections"
-          :key="section.id"
+        <!--
+          A visão geral é destino, não seção: link direto. Como seção, o painel dela repetia
+          todas as outras e o menu duplicava doze itens.
+        -->
+        <RouterLink
           class="rail-button"
-          :class="{ 'rail-button--active': activeSectionId === section.id }"
-          type="button"
-          :aria-current="activeSectionId === section.id ? 'true' : undefined"
-          :title="section.label"
-          @click="handleSectionChange(section.id)"
+          :class="{ 'rail-button--active': naVisaoGeral }"
+          :to="overviewItem.to"
+          :aria-current="naVisaoGeral ? 'page' : undefined"
+          :title="overviewItem.label"
+          active-class=""
+          @click="closeCompactDrawer"
         >
           <span class="rail-button__icon" aria-hidden="true">
-            <i :class="section.icon" />
+            <i :class="overviewItem.icon" />
           </span>
-          <span class="rail-button__label">{{ section.label }}</span>
-        </button>
+          <span class="rail-button__label">{{ overviewItem.label }}</span>
+        </RouterLink>
+
+        <span class="rail-divider" aria-hidden="true" />
+
+        <template v-for="section in navigationSections" :key="section.id">
+          <button
+            v-if="temPainel(section)"
+            class="rail-button"
+            :class="{ 'rail-button--active': activeSectionId === section.id }"
+            type="button"
+            :aria-current="activeSectionId === section.id ? 'true' : undefined"
+            :title="section.label"
+            @click="handleSectionChange(section.id)"
+          >
+            <span class="rail-button__icon" aria-hidden="true">
+              <i :class="section.icon" />
+            </span>
+            <span class="rail-button__label">{{ section.label }}</span>
+          </button>
+
+          <RouterLink
+            v-else
+            class="rail-button"
+            :class="{ 'rail-button--active': activeSectionId === section.id }"
+            :to="section.items[0]?.to ?? '/'"
+            :aria-current="activeSectionId === section.id ? 'page' : undefined"
+            :title="section.label"
+            active-class=""
+            @click="closeCompactDrawer"
+          >
+            <span class="rail-button__icon" aria-hidden="true">
+              <i :class="section.icon" />
+            </span>
+            <span class="rail-button__label">{{ section.label }}</span>
+          </RouterLink>
+        </template>
 
         <div class="rail-bottom-actions">
           <button
@@ -417,7 +537,11 @@ onUnmounted(() => {
       </nav>
 
       <section class="navigator-panel" :inert="panelHidden || undefined">
-        <header class="navigator-brand">
+        <!--
+          A marca só aparece aqui quando não há trilho: com os dois, o mesmo logotipo nascia
+          duas vezes lado a lado.
+        -->
+        <header v-if="isListNavigator" class="navigator-brand">
           <RouterLink
             class="navigator-brand__link"
             :to="defaultLandingPath"
@@ -429,11 +553,37 @@ onUnmounted(() => {
           </RouterLink>
         </header>
 
-        <div class="navigator-section-heading">
-          <span>{{ t('shell.menuHeading') }}</span>
-          <strong>{{ activeSection.label }}</strong>
-          <small v-if="activeSection.panelSubtitle">{{ activeSection.panelSubtitle }}</small>
-        </div>
+        <!--
+          Cabeçalho do painel: ícone da seção, nome e quantas telas ela tem.
+          O rótulo do trilho é uma micro-legenda de 9px sob o ícone; este é o título de verdade,
+          e é ele que ancora a coluna na altura do cabeçalho da página.
+        -->
+        <header v-if="!isListNavigator" class="navigator-section-heading">
+          <span class="navigator-section-heading__icone" aria-hidden="true">
+            <i :class="activeSection.icon" />
+          </span>
+          <span class="navigator-section-heading__texto">
+            <strong>{{ activeSection.label }}</strong>
+            <small>
+              {{ t('shell.telasNaSecao', { contagem: activeSection.items.length }, activeSection.items.length) }}
+            </small>
+          </span>
+        </header>
+
+        <RouterLink
+          v-if="isListNavigator"
+          class="page-nav__link page-nav__link--overview"
+          :class="{ 'router-link-active': naVisaoGeral }"
+          :to="overviewItem.to"
+          :aria-current="naVisaoGeral ? 'page' : undefined"
+          active-class=""
+          @click="closeCompactDrawer"
+        >
+          <span class="page-nav__icon" aria-hidden="true">
+            <i :class="overviewItem.icon" />
+          </span>
+          <span class="page-nav__label">{{ overviewItem.label }}</span>
+        </RouterLink>
 
         <div v-if="hasPanelFilter" class="page-nav__filter">
           <label class="page-nav__filter-field" for="panel-nav-filter">
@@ -459,57 +609,28 @@ onUnmounted(() => {
         </div>
 
         <nav
+          ref="listaDeNavegacao"
           class="page-nav"
           :aria-label="t('shell.aria.pagesOf', { label: activeSection.label })"
         >
-          <template v-if="activeSection.groups?.length">
-            <p v-if="panelFilterHasNoResults" class="page-nav__empty">
-              {{ t('shell.filterEmpty', { q: panelFilterQuery.trim() }) }}
-            </p>
+          <p v-if="panelFilterHasNoResults" class="page-nav__empty">
+            {{ t('shell.filterEmpty', { q: panelFilterQuery.trim() }) }}
+          </p>
 
-            <div
-              v-for="group in filteredNavigationGroups"
-              :key="group.id"
-              class="page-nav__group"
-            >
-              <p class="page-nav__group-label">{{ group.label }}</p>
-              <RouterLink
-                v-for="item in group.items"
-                :key="`${group.id}-${item.to}`"
-                class="page-nav__link"
-                :class="{
-                  'router-link-active': isNavItemActive(item),
-                  'page-nav__link--soon': item.comingSoon,
-                  'page-nav__link--locked': item.locked,
-                }"
-                :aria-current="isNavItemActive(item) ? 'page' : undefined"
-                :to="item.to"
-                active-class=""
-                @click="handleNavItemClick($event, item)"
-              >
-                <span class="page-nav__icon" aria-hidden="true">
-                  <i :class="item.icon" />
-                </span>
-                <span class="page-nav__label">{{ item.label }}</span>
-                <span v-if="item.comingSoon" class="page-nav__soon">{{
-                  t('comingSoon.cupom.badge')
-                }}</span>
-                <span
-                  v-else-if="item.locked"
-                  class="page-nav__lock"
-                  :title="t('frame.suspended.title')"
-                  aria-hidden="true"
-                >
-                  <i class="pi pi-lock" />
-                </span>
-              </RouterLink>
-            </div>
-          </template>
+          <div
+            v-for="group in filteredNavigationGroups"
+            :key="group.id"
+            class="page-nav__group"
+          >
+            <!--
+              O rótulo do grupo só serve quando há mais de um. Numa seção só, ele repetiria o
+              nome que o trilho e o cabeçalho já mostram.
+            -->
+            <p v-if="isListNavigator" class="page-nav__group-label">{{ group.label }}</p>
 
-          <template v-else>
             <RouterLink
-              v-for="item in activeSection.items"
-              :key="item.label"
+              v-for="item in group.items"
+              :key="`${group.id}-${item.to}`"
               class="page-nav__link"
               :class="{
                 'router-link-active': isNavItemActive(item),
@@ -537,8 +658,16 @@ onUnmounted(() => {
                 <i class="pi pi-lock" />
               </span>
             </RouterLink>
-          </template>
+          </div>
         </nav>
+
+        <!-- Sem trilho, sair precisa de um lugar. -->
+        <div v-if="isListNavigator" class="panel-bottom-actions">
+          <button class="panel-action" type="button" @click="requestLogout">
+            <i class="pi pi-sign-out" aria-hidden="true" />
+            {{ t('shell.logout') }}
+          </button>
+        </div>
       </section>
     </aside>
 
@@ -570,6 +699,12 @@ onUnmounted(() => {
       </div>
 
       <div class="app-header__right">
+        <!--
+          O cronômetro só existe para quem atende: é tempo clínico faturável, não um relógio de
+          ponto. Num perfil sem agenda ele seria um botão que não mede nada.
+        -->
+        <CronometroConsulta v-if="hasClinicalProfile" />
+
         <!-- Busca global: ocultada temporariamente
         <label class="header-search" for="header-search">
           <i class="pi pi-search" aria-hidden="true" />
@@ -702,9 +837,13 @@ onUnmounted(() => {
 
 <style scoped>
 .app-shell {
-  --navigator-width: 19.5rem;
+  --navigator-width: 18rem;
   --navigator-rail: 4.6rem;
   --navigator-offset: var(--navigator-width);
+  /* Uma medida governa a altura da linha do menu; a densidade troca só ela. */
+  --nav-row-height: 2.4rem;
+  --nav-row-gap: 0.12rem;
+  --nav-group-gap: 0.9rem;
   --navigator-ease: cubic-bezier(0.32, 0.72, 0, 1);
   --header-height: var(--pj-shell-header-height, 4.25rem);
   min-height: 100vh;
@@ -717,6 +856,23 @@ onUnmounted(() => {
 /** Recolhido no desktop: o rail continua visível e navegável. */
 .app-shell--rail-only {
   --navigator-offset: var(--navigator-rail);
+}
+
+/** Lista única: sem trilho, a coluna inteira é o menu. */
+.app-shell--list-nav {
+  --navigator-rail: 0rem;
+  --navigator-width: 16.5rem;
+}
+
+.app-shell--dense {
+  --navigator-width: 16.25rem;
+  --nav-row-height: 2rem;
+  --nav-row-gap: 0.02rem;
+  --nav-group-gap: 0.62rem;
+}
+
+.app-shell--dense.app-shell--list-nav {
+  --navigator-width: 15rem;
 }
 
 .app-shell--navigator-hidden {
@@ -750,6 +906,14 @@ onUnmounted(() => {
 
 .app-shell--rail-only .app-navigator {
   width: var(--navigator-rail);
+}
+
+/**
+ * Sem o trilho no DOM, o painel caía na primeira coluna do grid — que vale zero — e o menu
+ * inteiro renderizava numa faixa branca vazia. Uma coluna só quando não há trilho.
+ */
+.app-shell--list-nav .app-navigator {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .app-shell--navigator-hidden .app-navigator {
@@ -839,24 +1003,29 @@ onUnmounted(() => {
   color: var(--shell-on-brand);
 }
 
+/**
+ * Seção aberta: pastilha clara e elevada.
+ *
+ * Havia também uma barrinha em `left: -0.42rem` — exatamente a medida do respiro do trilho, o
+ * que a punha em cima da borda da janela e a fazia parecer falha de renderização. A pastilha já
+ * distingue por **forma e elevação**, não só por cor, então a barra saiu em vez de ser
+ * empurrada para dentro e brigar com o próprio pill.
+ */
 .rail-button--active,
 .rail-button--active:hover {
   background: var(--shell-rail-active-bg);
+  box-shadow: 0 2px 10px rgb(var(--shell-shadow-rgb) / 0.18);
   /* Sobre o pill claro o sage puro fica fraco no texto de 0.58rem. */
   color: color-mix(in srgb, var(--shell-accent-strong) 55%, var(--shell-text));
 }
 
-/** Marca a seção ativa também para quem não distingue a cor do pill. */
-.rail-button--active::before {
-  position: absolute;
-  top: 50%;
-  left: -0.42rem;
-  width: 0.22rem;
-  height: 1.5rem;
-  border-radius: 0 999px 999px 0;
-  background: var(--shell-on-brand);
-  content: '';
-  transform: translateY(-50%);
+/** Separa o destino único (visão geral) das seções, que abrem painel. */
+.rail-divider {
+  display: block;
+  width: 1.65rem;
+  height: 1px;
+  margin: 0.42rem auto;
+  background: color-mix(in srgb, var(--shell-on-brand) 22%, transparent);
 }
 
 .rail-bottom-actions {
@@ -926,29 +1095,63 @@ onUnmounted(() => {
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  padding: 1rem 0.9rem 0.35rem;
+  padding: 0 0.75rem 0.55rem;
   background: var(--shell-surface);
   opacity: 1;
   transition: opacity 160ms ease;
+}
+
+/** Sem trilho, "sair" perde o lugar dele; volta ao pé da coluna. */
+.panel-bottom-actions {
+  flex-shrink: 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--shell-line);
+}
+
+.panel-action {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: var(--nav-row-height);
+  padding: 0 0.6rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--shell-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.83rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.panel-action i {
+  width: 1.15rem;
+  font-size: 0.9rem;
+}
+
+.panel-action:hover {
+  background: color-mix(in srgb, var(--rail-logout-red) 10%, transparent);
+  color: var(--rail-logout-red);
+}
+
+.panel-action:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--shell-accent) 55%, transparent);
+  outline-offset: 2px;
 }
 
 .app-shell--rail-only .navigator-panel {
   opacity: 0;
 }
 
-.navigator-brand {
-  flex-shrink: 0;
-  padding-bottom: 0.85rem;
-  border-bottom: 1px solid var(--shell-line);
-}
-
 .navigator-brand__link {
   display: grid;
   min-width: 0;
-  gap: 0.3rem;
+  gap: 0.15rem;
   justify-items: start;
-  padding: 0.5rem 0.55rem;
-  border-radius: 0.8rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.7rem;
   text-decoration: none;
   transition: background 140ms ease;
 }
@@ -978,15 +1181,63 @@ onUnmounted(() => {
   text-transform: uppercase;
 }
 
-.navigator-section-heading {
-  display: grid;
-  gap: 0.16rem;
-  margin-top: 0.95rem;
-  margin-bottom: 0.7rem;
-  padding: 0 0.25rem;
+/**
+ * O topo do painel ocupa exatamente a altura do cabeçalho e fecha com a mesma linha.
+ *
+ * Sem isso o primeiro item do menu nascia no meio da faixa do cabeçalho, e a régua horizontal
+ * que atravessa a tela morria na borda do navegador.
+ */
+.navigator-section-heading,
+.navigator-brand {
+  display: flex;
+  height: var(--header-height);
+  flex-shrink: 0;
+  align-items: center;
+  margin: 0 -0.75rem 0.7rem;
+  padding: 0 1.35rem;
+  box-shadow: 0 1px 0 var(--shell-line);
 }
 
-.navigator-section-heading span,
+.navigator-section-heading {
+  gap: 0.65rem;
+}
+
+/** Único ladrilho preenchido do cabeçalho: dá peso ao título sem repetir caixa em cada item. */
+.navigator-section-heading__icone {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--shell-accent) 16%, var(--shell-surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 24%, transparent);
+  color: var(--shell-accent-strong);
+  font-size: 0.85rem;
+}
+
+.navigator-section-heading__texto {
+  display: grid;
+  min-width: 0;
+  gap: 0.05rem;
+}
+
+.navigator-section-heading__texto strong {
+  overflow: hidden;
+  color: var(--shell-text);
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigator-section-heading__texto small {
+  color: var(--shell-soft);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
 .header-context span {
   color: var(--shell-soft);
   font-size: 0.64rem;
@@ -995,28 +1246,14 @@ onUnmounted(() => {
   text-transform: uppercase;
 }
 
-.navigator-section-heading strong {
-  color: var(--shell-text);
-  font-size: 1.02rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-}
-
-.navigator-section-heading small {
-  color: var(--shell-muted);
-  font-size: 0.78rem;
-  font-weight: 500;
-  line-height: 1.35;
-}
-
 .page-nav {
   display: grid;
   min-height: 0;
   flex: 1 1 auto;
   align-content: start;
-  gap: 0.7rem;
+  gap: var(--nav-row-gap);
   overflow-y: auto;
-  padding: 0.1rem 0.25rem 1rem 0;
+  padding: 0.1rem 0.25rem 0.75rem 0;
   scrollbar-color: color-mix(in srgb, var(--shell-muted) 32%, transparent) transparent;
   scrollbar-width: thin;
 }
@@ -1115,41 +1352,57 @@ onUnmounted(() => {
 
 .page-nav__group {
   display: grid;
-  gap: 0.22rem;
+  gap: var(--nav-row-gap);
 }
 
 .page-nav__group + .page-nav__group {
-  margin-top: 0.35rem;
+  margin-top: var(--nav-group-gap);
 }
 
+/** Fio à direita do rótulo: separa os grupos sem gastar mais altura entre eles. */
 .page-nav__group-label {
-  margin: 0 0 0.2rem;
-  padding: 0 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 0.35rem;
+  padding: 0 0.6rem;
   color: var(--shell-soft);
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
+}
+
+.page-nav__group-label::after {
+  height: 1px;
+  flex: 1 1 auto;
+  background: var(--shell-line);
+  content: '';
 }
 
 .page-nav__link {
   position: relative;
   display: flex;
-  min-height: 2.55rem;
+  min-height: var(--nav-row-height);
   align-items: center;
   justify-content: flex-start;
-  gap: 0.55rem;
-  padding: 0 0.72rem;
+  gap: 0.6rem;
+  padding: 0 0.6rem;
   border: 1px solid transparent;
-  border-radius: 0.82rem;
+  border-radius: 0.6rem;
   color: var(--shell-muted);
-  font-size: 0.84rem;
-  font-weight: 650;
+  font-size: 0.83rem;
+  font-weight: 600;
   text-decoration: none;
   transition:
     background 160ms ease,
     border-color 160ms ease,
     color 160ms ease;
+}
+
+.page-nav__link--overview {
+  flex-shrink: 0;
+  margin-bottom: 0.55rem;
 }
 
 .page-nav__label {
@@ -1193,23 +1446,30 @@ onUnmounted(() => {
   color: var(--shell-accent-strong);
 }
 
+/**
+ * O ladrilho do ícone é **marca de estado**, não decoração.
+ *
+ * Antes cada item carregava um quadrado com fundo próprio: treze quadrados iguais numa coluna
+ * viram textura, o olho conta caixas em vez de ler nomes. Aqui o ladrilho nasce transparente e
+ * só ganha fundo no item sob o cursor e no item aberto — quem se destaca é um, não todos.
+ */
 .page-nav__icon {
   display: grid;
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 1.7rem;
+  height: 1.7rem;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 0.68rem;
-  background: color-mix(in srgb, var(--shell-accent-soft) 16%, var(--shell-surface));
-  color: var(--shell-soft);
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--shell-muted);
   transition:
     background 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease;
+    box-shadow 160ms ease,
+    color 160ms ease;
 }
 
 .page-nav__icon i {
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   line-height: 1;
 }
 
@@ -1225,19 +1485,14 @@ onUnmounted(() => {
 }
 
 .page-nav__link.router-link-active {
-  border-color: color-mix(in srgb, var(--shell-accent) 24%, transparent);
-  background: color-mix(in srgb, var(--shell-accent-soft) 34%, var(--shell-surface));
-  color: var(--shell-accent-strong);
+  border-color: color-mix(in srgb, var(--shell-accent) 30%, transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--shell-accent-soft) 46%, var(--shell-surface)),
+    color-mix(in srgb, var(--shell-accent-soft) 26%, var(--shell-surface))
+  );
+  color: var(--shell-nav-active-text);
   font-weight: 750;
-}
-
-.page-nav__link.router-link-active::after {
-  width: 0.35rem;
-  height: 0.35rem;
-  flex: 0 0 auto;
-  border-radius: 999px;
-  background: var(--shell-accent-strong);
-  content: '';
 }
 
 .page-nav__link:hover .page-nav__icon {
@@ -1245,10 +1500,14 @@ onUnmounted(() => {
   color: var(--shell-accent-strong);
 }
 
+/*
+ * O ladrilho aberto usa o teal profundo da marca, não `accent-strong`: aquele é um sage
+ * acinzentado pensado para texto, e cheio de fundo lê como grafite no meio da paleta verde.
+ */
 .page-nav__link.router-link-active .page-nav__icon {
-  background: color-mix(in srgb, var(--shell-accent) 22%, var(--shell-surface));
-  color: var(--shell-accent-strong);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--shell-accent) 16%, transparent);
+  background: var(--shell-accent-deep);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--shell-accent-deep) 45%, transparent);
+  color: #ffffff;
 }
 
 .app-header {

@@ -93,7 +93,7 @@ Backend pronto e aditivo. O portal sobe quando quiser.
 | `src/service/parceiro/types.ts` | Tipos do contrato: `MotivoBlocoVazio`, `MotivosSnapshot`, `EntradaDiarioCompartilhada`, `DocumentoCompartilhado`, campos novos em `ItemSnapshot` e `CompartilhamentoDetalhe` |
 | `src/utils/parceiro/snapshot-compartilhado.ts` | **Nucleo puro** das regras da secao 3. Sem Vue, sem i18n: devolve chave de motivo, nao frase |
 | `src/utils/parceiro/__tests__/snapshot-compartilhado.spec.ts` | Cobre AC-P2, AC-P3, AC-P5, AC-P6, AC-P7 |
-| `src/pages/(accounts)/parceiro/atendimentos/[id].vue` | Consome o nucleo e traduz. Secoes novas: diario, documentos, carimbo |
+| `src/pages/(accounts)/parceiro/acessos/[id].vue` | Consome o nucleo e traduz. Secoes novas: diario, documentos, carimbo |
 | `src/service/api.ts` | `Accept-Language` na request (AC-P4) |
 | `src/locales/{pt,en,en-GB,es}.json` | Copy (AC-P9) |
 

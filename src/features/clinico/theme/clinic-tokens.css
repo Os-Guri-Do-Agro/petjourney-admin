@@ -1,0 +1,698 @@
+/**
+ * Tokens do módulo clínico — épico A.
+ *
+ * Nenhum componente do módulo escreve cor, espaçamento ou fonte literal. Tudo sai daqui.
+ *
+ * Por que em `:root` e não num escopo de página: overlay de `Select` e painel de `Dialog` do
+ * PrimeVue são teleportados para fora da árvore da página e não herdariam tokens presos a um
+ * contêiner. No `:root` eles alcançam qualquer nó, teleportado ou não.
+ *
+ * Regra de cor herdada do design system da casa: sálvia para tudo que é institucional e
+ * positivo; quente **só** para risco, pendência e urgência. E o teste que decide se um token
+ * novo pode existir: em escala de cinza, nenhuma informação pode se perder — por isso todo
+ * estado tem, além da cor, um rótulo, um ícone ou uma forma.
+ */
+
+:root {
+  /* ---------------------------------------------------------------- superfícies */
+  --clinic-bg: #f3f7f5;
+  --clinic-surface: #ffffff;
+  --clinic-surface-soft: #f8faf9;
+  --clinic-surface-sunken: #eef3f1;
+  --clinic-line: #e6eeeb;
+  --clinic-line-soft: #eef4f2;
+  --clinic-line-strong: #d3e0dc;
+
+  /* ------------------------------------------------------------------- tipografia */
+  --clinic-text: #1f2f2b;
+  --clinic-muted: #485753;
+  --clinic-faint: #5c6b65;
+
+  /* ------------------------------------------------------------------ acento sálvia */
+  --clinic-accent: #84c1b4;
+  --clinic-accent-strong: #456a60;
+  --clinic-accent-deep: #5c7e76;
+  --clinic-accent-tint: #e2efeb;
+  --clinic-heat-ink: #1f2f2b;
+  --clinic-accent-soft: #dcebe7;
+  --clinic-on-accent: #ffffff;
+
+  /* ------------------------------------------------- degraus do mapa de calor
+   *
+   * Quatro passos fechados, não um gradiente: entre 3 e 4 atendimentos, degrau contínuo vira
+   * ruído de cor. Os valores são a mistura do acento com a superfície já resolvida — 22%, 45%,
+   * 68% e 100% —, escritos em hexadecimal porque quem os lê é o ApexCharts, via
+   * `getComputedStyle`, e propriedade personalizada não resolve `color-mix()` na leitura.
+   *
+   * A tinta de cada degrau vem de token existente: `text` no 1 e no 2, `heat-ink` no 3,
+   * `surface` no 4. Escurecer o degrau 3 até o branco fechar 4,5:1 fecharia junto a distância
+   * para o 4, e um mapa de quatro degraus com dois iguais deixa de ser mapa.
+   */
+  --clinic-heat-1: #e4f1ef;
+  --clinic-heat-2: #c8e3dd;
+  --clinic-heat-3: #819a93;
+  --clinic-heat-4: #456a60;
+
+  /* -------------------------------------------------- significado clínico (só risco) */
+  --clinic-risk-text: #a2503a;
+  --clinic-risk-bg: #fbeee8;
+  --clinic-risk-line: #f1e2da;
+  --clinic-attention-text: #856112;
+  --clinic-attention-bg: #f7f0e0;
+  --clinic-attention-line: #ecdfc2;
+  --clinic-ok-text: #517d71;
+  --clinic-ok-bg: #eaf4f0;
+  --clinic-ok-line: #d6e9e2;
+  --clinic-neutral-text: #8a8579;
+  --clinic-neutral-bg: #f0efec;
+  --clinic-neutral-line: #e3e1dc;
+
+  /* --------------------------------------------- acentos de coluna por profissional */
+  --clinic-col-0: #84c1b4;
+  --clinic-col-1: #7fa3c4;
+  --clinic-col-2: #c4a57f;
+  --clinic-col-3: #a78fc4;
+  --clinic-col-4: #7fb98f;
+  --clinic-col-5: #c48fa2;
+
+  /* --------------------------------------------------------------- forma e elevação */
+  --clinic-radius-card: 1rem;
+  --clinic-radius-control: 0.7rem;
+  --clinic-radius-chip: 999px;
+  --clinic-shadow-rgb: 31 47 43;
+  --clinic-shadow-card:
+    0 1px 2px rgb(var(--clinic-shadow-rgb) / 5%),
+    0 4px 12px -4px rgb(var(--clinic-shadow-rgb) / 8%);
+  --clinic-shadow-float: 0 12px 32px rgb(var(--clinic-shadow-rgb) / 14%);
+  --clinic-focus-ring: 0 0 0 2px var(--clinic-surface), 0 0 0 4px var(--clinic-accent-strong);
+
+  /* ------------------------------------------------------------------- espaçamento */
+  --clinic-space-1: 0.25rem;
+  --clinic-space-2: 0.4rem;
+  --clinic-space-3: 0.6rem;
+  --clinic-space-4: 0.85rem;
+  --clinic-space-5: 1.15rem;
+  --clinic-space-6: 1.6rem;
+
+  /*
+   * Fonte: o design system pede DM Sans. O portal não carrega webfont — a pilha usa a família
+   * quando ela existe na máquina e degrada para a do sistema, sem custo de rede.
+   */
+  --clinic-font-sans: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* -------------------------------------------------------------------- densidade */
+  /* Padrão: média. Os outros dois vêm dos seletores de densidade abaixo. */
+  --clinic-font-base: 0.8125rem; /* 13px — densidade de tela larga, não de dedo */
+  --clinic-font-value: 0.875rem; /* 14px — valor clínico, sempre tabular */
+  --clinic-font-label: 0.6875rem;
+  --clinic-font-title: 1.05rem;
+  --clinic-row-height: 36px;
+  --clinic-hit-target: 28px; /* alvo de mouse, não de toque */
+  --clinic-cell-padding-y: 0.3rem;
+  --clinic-cell-padding-x: 0.55rem;
+
+  /* ------------------------------------------------------------ zoom do eixo de tempo */
+  /* Altura em pixels de um slot de 15 minutos. */
+  --clinic-slot-height: 14px;
+  --clinic-slot-minutes: 15;
+  --clinic-time-axis-width: 60px;
+}
+
+:root[data-clinic-density='compacta'] {
+  --clinic-font-base: 0.78125rem;
+  --clinic-font-value: 0.84375rem;
+  --clinic-row-height: 32px;
+  --clinic-cell-padding-y: 0.2rem;
+  --clinic-cell-padding-x: 0.45rem;
+}
+
+:root[data-clinic-density='confortavel'] {
+  --clinic-font-base: 0.875rem;
+  --clinic-font-value: 0.9375rem;
+  --clinic-row-height: 44px;
+  --clinic-hit-target: 34px;
+  --clinic-cell-padding-y: 0.5rem;
+  --clinic-cell-padding-x: 0.75rem;
+}
+
+:root[data-clinic-zoom='reduzido'] {
+  --clinic-slot-height: 10px;
+}
+
+:root[data-clinic-zoom='ampliado'] {
+  --clinic-slot-height: 20px;
+}
+
+/* ---------------------------------------------------------------------- modo escuro */
+/*
+ * O `PetJourneyPreset` inverte `surface` 900/950 no topo e o Aura usa esses tokens para
+ * `formField.background`, `content.background` e `overlay.*.background`. Resultado: campo e
+ * overlay do PrimeVue nascem claros no escuro. Cada componente do módulo pinta o próprio
+ * fundo com estes tokens — e como eles vivem no `:root`, o overlay teleportado também os vê.
+ */
+:root.app-dark {
+  --clinic-bg: #0b1210;
+  --clinic-surface: #121d19;
+  --clinic-surface-soft: #182822;
+  --clinic-surface-sunken: #0f1a16;
+  --clinic-line: #263a33;
+  --clinic-line-soft: #1e302a;
+  --clinic-line-strong: #335046;
+
+  --clinic-text: #f2f8f5;
+  --clinic-muted: #b2c4bd;
+  --clinic-faint: #8a9e96;
+
+  --clinic-accent: #84c1b4;
+  --clinic-accent-strong: #bfe3db;
+  --clinic-accent-deep: #4e8e80;
+  --clinic-accent-tint: #1b302a;
+  --clinic-heat-ink: #0f1a16;
+  --clinic-accent-soft: #244139;
+  --clinic-on-accent: #0f1714;
+
+  --clinic-heat-1: #2b413b;
+  --clinic-heat-2: #45675f;
+  --clinic-heat-3: #88a49d;
+  --clinic-heat-4: #bfe3db;
+
+  --clinic-risk-text: #f2ae9b;
+  --clinic-risk-bg: #3a211c;
+  --clinic-risk-line: #59342d;
+  --clinic-attention-text: #f0c77d;
+  --clinic-attention-bg: #372a16;
+  --clinic-attention-line: #55411f;
+  --clinic-ok-text: #a8dec9;
+  --clinic-ok-bg: #17372c;
+  --clinic-ok-line: #245244;
+  --clinic-neutral-text: #b9c9c3;
+  --clinic-neutral-bg: #21332d;
+  --clinic-neutral-line: #2f453e;
+
+  --clinic-col-0: #84c1b4;
+  --clinic-col-1: #93b7d6;
+  --clinic-col-2: #d6bb93;
+  --clinic-col-3: #b9a4d6;
+  --clinic-col-4: #93cfa3;
+  --clinic-col-5: #d6a3b5;
+
+  --clinic-shadow-rgb: 0 0 0;
+  --clinic-shadow-card:
+    0 1px 2px rgb(var(--clinic-shadow-rgb) / 26%),
+    0 4px 12px -4px rgb(var(--clinic-shadow-rgb) / 34%);
+  --clinic-shadow-float: 0 14px 34px rgb(var(--clinic-shadow-rgb) / 46%);
+}
+
+/* -------------------------------------------------------------- utilitários do módulo */
+
+/**
+ * Raiz de qualquer tela do módulo. Não redefine token: só aplica a tipografia base e serve de
+ * gancho para o que precisa existir uma vez por página.
+ */
+.clinic-scope {
+  color: var(--clinic-text);
+  font-family: var(--clinic-font-sans);
+  font-size: var(--clinic-font-base);
+}
+
+/**
+ * Valor clínico. Tabular porque coluna de número que dança na vertical obriga a reler linha a
+ * linha — e reler número é onde o erro entra.
+ */
+.clinic-value {
+  font-size: var(--clinic-font-value);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: -0.01em;
+}
+
+.clinic-label {
+  color: var(--clinic-faint);
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.clinic-card {
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-card);
+  background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-card);
+}
+
+/** Foco visível é requisito, não enfeite: o módulo inteiro precisa andar por teclado. */
+.clinic-focusable:focus-visible {
+  outline: none;
+  box-shadow: var(--clinic-focus-ring);
+}
+
+/* ------------------------------------------------- campos e overlays do PrimeVue
+
+ O `PetJourneyPreset` inverte `surface` 900/950 no topo, e o Aura deriva
+ `formField.background`, `content.background` e `overlay.*.background` desses tokens. Efeito
+ prático: **todo campo e overlay do PrimeVue nasce com fundo claro no modo escuro**.
+
+ Duas armadilhas que já custaram tempo e que estas regras contornam:
+
+ 1. `class="x"` num componente PrimeVue cai na **raiz** dele, então `.x :deep(.p-select)`
+    nunca casa. Por isso as regras aqui são globais e miram a classe do próprio elemento.
+ 2. Overlay de `Select` e painel de `Dialog` são teleportados para fora da página. Como os
+    tokens vivem no `:root`, eles alcançam o overlay; o que falta é a classe, e ela entra
+    por `:pt="{ overlay: { class: 'clinic-overlay' } }"`.
+*/
+.clinic-scope .p-inputtext,
+.clinic-scope .p-textarea,
+.clinic-scope .p-select,
+.clinic-scope .p-multiselect,
+.clinic-scope .p-inputnumber-input,
+.clinic-scope .p-datepicker-input,
+.clinic-scope .p-togglebutton,
+.clinic-overlay .p-inputtext {
+  border-color: var(--clinic-line-strong);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface);
+  color: var(--clinic-text);
+  font-family: var(--clinic-font-sans);
+  font-size: var(--clinic-font-base);
+}
+
+.clinic-scope .p-inputtext::placeholder,
+.clinic-scope .p-textarea::placeholder {
+  color: var(--clinic-faint);
+}
+
+.clinic-scope .p-inputtext:enabled:hover,
+.clinic-scope .p-textarea:enabled:hover,
+.clinic-scope .p-select:not(.p-disabled):hover {
+  border-color: var(--clinic-accent);
+}
+
+.clinic-scope .p-inputtext:enabled:focus,
+.clinic-scope .p-textarea:enabled:focus,
+.clinic-scope .p-select:not(.p-disabled).p-focus {
+  border-color: var(--clinic-accent-deep);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--clinic-accent) 35%, transparent);
+}
+
+.clinic-scope .p-select-label,
+.clinic-scope .p-multiselect-label {
+  color: var(--clinic-text);
+}
+
+/*
+ * Campo desabilitado. O Aura deriva o fundo de `surface.200`, que no `PetJourneyPreset` é o
+ * bege `#F5EBE0` — num formulário clínico isso lê como "atenção" e não como "indisponível".
+ * O módulo pinta o próprio: fundo rebaixado, texto apagado, nenhum matiz quente.
+ */
+.clinic-scope .p-inputtext:disabled,
+.clinic-scope .p-textarea:disabled,
+.clinic-scope .p-inputnumber-input:disabled,
+.clinic-scope .p-select.p-disabled,
+.clinic-scope .p-multiselect.p-disabled {
+  border-color: var(--clinic-line);
+  background: var(--clinic-surface-sunken);
+  color: var(--clinic-faint);
+  opacity: 1;
+}
+
+.clinic-scope .p-select.p-disabled .p-select-label,
+.clinic-scope .p-multiselect.p-disabled .p-multiselect-label {
+  color: var(--clinic-faint);
+}
+
+.clinic-scope .p-select-dropdown,
+.clinic-scope .p-multiselect-dropdown {
+  color: var(--clinic-muted);
+}
+
+/* Overlay teleportado: painel de Select, MultiSelect, DatePicker e Popover do módulo. */
+.clinic-overlay,
+.clinic-overlay.p-select-overlay,
+.clinic-overlay.p-multiselect-overlay,
+.clinic-overlay.p-popover,
+.clinic-overlay.p-datepicker-panel {
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-float);
+  color: var(--clinic-text);
+  font-family: var(--clinic-font-sans);
+  font-size: var(--clinic-font-base);
+}
+
+.clinic-overlay .p-select-option,
+.clinic-overlay .p-multiselect-option {
+  color: var(--clinic-text);
+}
+
+.clinic-overlay .p-select-option:not(.p-disabled):hover,
+.clinic-overlay .p-multiselect-option:not(.p-disabled):hover {
+  background: var(--clinic-surface-soft);
+}
+
+.clinic-overlay .p-select-option.p-select-option-selected,
+.clinic-overlay .p-multiselect-option.p-multiselect-option-selected {
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+}
+
+.clinic-overlay .p-select-empty-message,
+.clinic-overlay .p-multiselect-empty-message {
+  color: var(--clinic-muted);
+}
+
+/* Diálogo do módulo: o painel também é teleportado e também precisa pintar o próprio fundo. */
+/*
+ * Diálogo do módulo: o painel também é teleportado e também precisa pintar o próprio fundo.
+ *
+ * `overflow: hidden` não é detalhe: sem ele o cabeçalho e o rodapé pintam o fundo em quadrado
+ * por cima dos cantos arredondados, e o diálogo aparece com quatro cantos brancos vazando para
+ * fora da borda.
+ */
+.clinic-dialog.p-dialog {
+  overflow: hidden;
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-card);
+  background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-float);
+  color: var(--clinic-text);
+  font-family: var(--clinic-font-sans);
+}
+
+.clinic-dialog .p-dialog-content {
+  background: var(--clinic-surface);
+  color: var(--clinic-text);
+}
+
+/*
+ * Cabeçalho e rodapé numa faixa própria.
+ *
+ * Três superfícies iguais separadas por nada faziam o diálogo ler como um retângulo de campos.
+ * A faixa dá começo e fim sem custar uma linha de texto — e é o que separa "título" de "primeiro
+ * rótulo do formulário".
+ */
+.clinic-dialog .p-dialog-header,
+.clinic-dialog .p-dialog-footer {
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-text);
+}
+
+.clinic-dialog .p-dialog-header {
+  border-bottom: 1px solid var(--clinic-line);
+}
+
+/*
+ * Título do diálogo com o mesmo ladrilho dos cartões.
+ *
+ * Vem do slot `#header`, não da prop `header`, que só aceita texto puro. O `h2` substitui o
+ * `p-dialog-title` do PrimeVue, então precisa repetir o peso dele: sem isto o título sairia com
+ * o tamanho padrão de `h2` da página, maior que o do cartão que abriu o diálogo.
+ */
+.clinic-dialog__titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--clinic-space-3);
+  margin: 0;
+  color: var(--clinic-text);
+  font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: -0.015em;
+}
+
+.clinic-dialog__marca {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+  font-size: 0.8rem;
+}
+
+/*
+ * O rodapé do PrimeVue nasce com `padding-top: 0` — herança de um rodapé sem linha, onde a folga
+ * vinha do conteúdo acima. Com a faixa e a borda, os botões encostam no traço. O `padding-block`
+ * devolve o respiro em cima sem mexer no recuo lateral do tema.
+ */
+.clinic-dialog .p-dialog-footer {
+  padding-block: var(--clinic-space-5);
+  border-top: 1px solid var(--clinic-line);
+}
+
+/*
+ * O conteúdo do PrimeVue também nasce com `padding-top: 0`, pelo mesmo motivo do rodapé: o tema
+ * padrão não tem faixa de cabeçalho, então a folga vinha do título. Com a faixa, a primeira
+ * linha do formulário encosta no traço.
+ */
+.clinic-dialog .p-dialog-content {
+  padding-top: var(--clinic-space-5);
+}
+
+.clinic-dialog .p-dialog-title {
+  font-size: var(--clinic-font-title);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+/** O véu escurece o fundo o bastante para o diálogo parecer estar acima, não dentro. */
+.p-dialog-mask.p-overlay-mask {
+  background: rgb(var(--clinic-shadow-rgb) / 0.44);
+  backdrop-filter: blur(2px);
+}
+
+/*
+ * Entrada curta e discreta. Diálogo que aparece de estalo parece falha de renderização; o mesmo
+ * diálogo com 160 ms de escala parece ter vindo de algum lugar.
+ */
+@keyframes clinic-dialog-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+}
+
+.clinic-dialog.p-dialog {
+  animation: clinic-dialog-entrada 160ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clinic-dialog.p-dialog {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clinic-scope *,
+  .clinic-scope *::before,
+  .clinic-scope *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------------------ impressão
+
+ Documento em A4, não a tela impressa.
+
+ A raiz de impressão é teleportada para o `body` justamente para poder esconder todo o resto
+ com um seletor de filho direto — o `#app`, o contêiner de toasts, qualquer overlay aberto.
+ Sem isso, imprimir daria três páginas de interface e nenhuma de prontuário.
+
+ O papel não tem modo escuro, não tem densidade escolhida e não tem token: a folha desenha em
+ preto sobre branco, em milímetros. O `color-scheme: light` impede que o navegador entregue a
+ versão escura para a impressora.
+*/
+.clinic-print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm 14mm 16mm;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color-scheme: light;
+    overflow: visible !important;
+  }
+
+  body > *:not(.clinic-print-root) {
+    display: none !important;
+  }
+
+  .clinic-print-root {
+    display: block !important;
+    width: 100%;
+  }
+}
+
+/**
+ * Caixa de seleção no acento da clínica.
+ *
+ * O PrimeVue marca no azul do tema base, e um único quadrado azul no meio de uma paleta verde
+ * terrosa lê como componente de outro produto colado na tela.
+ */
+.clinic-scope .p-checkbox-box {
+  border-color: var(--clinic-line-strong);
+  background: var(--clinic-surface);
+}
+
+.clinic-scope .p-checkbox-checked .p-checkbox-box,
+.clinic-scope .p-checkbox:not(.p-disabled):has(.p-checkbox-input:checked) .p-checkbox-box {
+  border-color: var(--clinic-accent-strong);
+  background: var(--clinic-accent-strong);
+}
+
+.clinic-scope .p-checkbox-checked .p-checkbox-icon {
+  color: var(--clinic-surface);
+}
+
+.clinic-scope .p-checkbox:not(.p-disabled) .p-checkbox-box:hover {
+  border-color: var(--clinic-accent-strong);
+}
+
+/* --------------------------------------------------------------------------
+ * Botões do PrimeVue
+ *
+ * O preset pinta `secondary`, `outlined` e `text` a partir da escala `surface`, e no escuro essa
+ * escala é invertida: o rótulo saía `#2b423a` — verde quase preto — sobre painel `#121d19`.
+ * Razão de contraste 1,6:1, ou seja, texto invisível. É a mesma armadilha que já obrigou a
+ * pintar campo e overlay à mão, agora nos botões.
+ *
+ * Aqui a cor vem sempre dos tokens da clínica, que já têm par claro/escuro.
+ * ------------------------------------------------------------------------ */
+
+.clinic-scope .p-button.p-button-secondary.p-button-outlined,
+.clinic-scope .p-button.p-button-secondary.p-button-text,
+.clinic-scope .p-button.p-button-outlined:not([class*='p-button-']),
+.clinic-dialog .p-button.p-button-secondary.p-button-outlined,
+.clinic-dialog .p-button.p-button-secondary.p-button-text,
+.clinic-overlay .p-button.p-button-secondary.p-button-outlined,
+.clinic-overlay .p-button.p-button-secondary.p-button-text {
+  border-color: var(--clinic-line-strong);
+  background: transparent;
+  color: var(--clinic-text);
+}
+
+.clinic-scope .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
+.clinic-scope .p-button.p-button-secondary.p-button-text:not(:disabled):hover,
+.clinic-dialog .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
+.clinic-dialog .p-button.p-button-secondary.p-button-text:not(:disabled):hover,
+.clinic-overlay .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
+.clinic-overlay .p-button.p-button-secondary.p-button-text:not(:disabled):hover {
+  border-color: var(--clinic-accent);
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-accent-strong);
+}
+
+/*
+ * Desabilitado precisa ler como desabilitado — não como texto sumido.
+ *
+ * Trocar só a cor do texto não bastava: o botão primário continuava com o fundo sage cheio, e
+ * cinza apagado sobre sage dá 1,4:1. Desabilitado perde o preenchimento junto, que é o que faz
+ * o estado ser reconhecido antes de alguém tentar clicar.
+ */
+.clinic-scope .p-button:disabled,
+.clinic-dialog .p-button:disabled,
+.clinic-overlay .p-button:disabled {
+  border-color: var(--clinic-line);
+  background: var(--clinic-surface-sunken);
+  color: var(--clinic-muted);
+  opacity: 1;
+}
+
+/*
+ * O placeholder do Select cai na mesma escala invertida do botão secundário. Ele precisa ficar
+ * mais apagado que o valor escolhido, mas ainda legível.
+ */
+.clinic-scope .p-select-label.p-placeholder,
+.clinic-scope .p-multiselect-label.p-placeholder,
+.clinic-overlay .p-select-label.p-placeholder {
+  color: var(--clinic-muted);
+}
+
+/**
+ * Invólucro de escopo sem caixa.
+ *
+ * As ações do cabeçalho vivem no `PartnerPageFrame`, fora da `div.clinic-scope` da página. Este
+ * `span` existe só para as regras acima alcançarem o botão; `display: contents` o apaga do
+ * layout, então o `flex` do cabeçalho continua vendo os botões como filhos diretos.
+ */
+.clinic-acoes {
+  display: contents;
+}
+
+/* -------------------------------------------------------------------- ApexCharts
+
+ O Apex injeta a própria folha de estilo no `<head>` e pinta a dica com um branco fixo e um
+ cinza fixo. É a mesma armadilha do campo e do overlay do PrimeVue, agora em SVG: no modo
+ escuro o cartão da dica nasce claro por cima de um gráfico escuro.
+
+ As regras vivem aqui, e não no `<style scoped>` de cada gráfico, por dois motivos. A dica é
+ criada pela biblioteca depois da montagem, então não recebe o atributo de escopo do Vue; e os
+ três gráficos do resumo precisariam repetir o mesmo bloco.
+
+ Cor, tipografia e sombra saem dos tokens do módulo — o tema `light`/`dark` que a configuração
+ do gráfico manda serve só para o Apex escolher o arranjo, não a tinta.
+*/
+.clinic-scope .apexcharts-canvas {
+  font-family: var(--clinic-font-sans);
+}
+
+.clinic-scope .apexcharts-tooltip.apexcharts-theme-light,
+.clinic-scope .apexcharts-tooltip.apexcharts-theme-dark {
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-float);
+  color: var(--clinic-text);
+  font-family: var(--clinic-font-sans);
+}
+
+.clinic-scope .apexcharts-tooltip .apexcharts-tooltip-title {
+  margin-bottom: 0.3rem;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--clinic-line);
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-text);
+  font-family: var(--clinic-font-sans);
+  font-size: var(--clinic-font-label);
+  font-weight: 750;
+}
+
+.clinic-scope .apexcharts-tooltip .apexcharts-tooltip-text-y-label {
+  color: var(--clinic-muted);
+}
+
+.clinic-scope .apexcharts-tooltip .apexcharts-tooltip-text-y-value,
+.clinic-scope .apexcharts-tooltip .apexcharts-tooltip-text-z-value {
+  color: var(--clinic-text);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+/** Número dentro do gráfico é valor clínico: mesma regra de tabular do resto do módulo. */
+.clinic-scope .apexcharts-datalabel,
+.clinic-scope .apexcharts-datalabel-value,
+.clinic-scope .apexcharts-yaxis-label,
+.clinic-scope .apexcharts-xaxis-label {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Foco visível na navegação por teclado do gráfico. O Apex move o foco entre pontos com as
+ * setas; sem contorno, quem anda por teclado não sabe onde está.
+ */
+.clinic-scope .apexcharts-canvas :focus-visible {
+  outline: 2px solid var(--clinic-accent-deep);
+  outline-offset: 1px;
+}

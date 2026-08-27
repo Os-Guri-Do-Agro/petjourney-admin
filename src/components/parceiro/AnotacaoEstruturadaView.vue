@@ -40,7 +40,7 @@ const visivel = computed(() => temEstruturados(props.anotacao))
 const escalares = computed(() =>
   escalaresPreenchidos(props.anotacao).map((item) => ({
     campo: item.campo,
-    label: t(`atendimentos.estruturada.campos.${item.campo}`),
+    label: t(`acessos.estruturada.campos.${item.campo}`),
     valor: formatar(item.campo, item.valor),
     longo: CAMPOS_LONGOS.includes(item.campo),
   })),
@@ -79,13 +79,13 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
   return [
     dose,
     item.frequencia,
-    item.duracaoDias != null ? t('atendimentos.estruturada.view.duracao', item.duracaoDias) : '',
+    item.duracaoDias != null ? t('acessos.estruturada.view.duracao', item.duracaoDias) : '',
   ].filter(Boolean)
 }
 </script>
 
 <template>
-  <section v-if="visivel" class="estv" :aria-label="t('atendimentos.estruturada.view.title')">
+  <section v-if="visivel" class="estv" :aria-label="t('acessos.estruturada.view.title')">
     <dl v-if="escalares.length" class="estv__facts">
       <div
         v-for="item in escalares"
@@ -101,7 +101,7 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
     <div v-if="anotacao.prescricaoItens?.length" class="estv__block">
       <h4>
         <i class="pi pi-inbox" aria-hidden="true" />
-        {{ t('atendimentos.estruturada.prescricao.title') }}
+        {{ t('acessos.estruturada.prescricao.title') }}
       </h4>
       <ul class="estv__items">
         <li v-for="item in anotacao.prescricaoItens" :key="item.id">
@@ -111,7 +111,7 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
           </span>
           <span v-if="!item.frequencia" class="estv__warn">
             <i class="pi pi-info-circle" aria-hidden="true" />
-            {{ t('atendimentos.estruturada.view.semFrequencia') }}
+            {{ t('acessos.estruturada.view.semFrequencia') }}
           </span>
           <p v-if="item.instrucoes" class="estv__note">{{ item.instrucoes }}</p>
         </li>
@@ -121,7 +121,7 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
     <div v-if="anotacao.examesSolicitados?.length" class="estv__block">
       <h4>
         <i class="pi pi-search" aria-hidden="true" />
-        {{ t('atendimentos.estruturada.exames.title') }}
+        {{ t('acessos.estruturada.exames.title') }}
       </h4>
       <ul class="estv__items">
         <li v-for="item in anotacao.examesSolicitados" :key="item.id">
