@@ -37,6 +37,20 @@ export type AppNavigationSection = {
  */
 export const CLINICAL_MENU_ENABLED = true
 
+/**
+ * Modo demonstração do módulo clínico.
+ *
+ * Com `true`, o menu clínico aparece para **qualquer conta do portal**, mesmo sem perfil
+ * veterinário — é o que permite apresentar o módulo a partir de uma conta de parceiro enquanto
+ * a API clínica não existe.
+ *
+ * O interruptor é uma constante e não uma variável de ambiente de propósito: ele precisa ser
+ * revisto por quem lê o código, não esquecido ligado num painel de deploy. **Vire para `false`
+ * junto com a primeira entrega da API clínica** — a partir daí o que está atrás do menu é
+ * prontuário de paciente real.
+ */
+export const CLINICAL_MENU_DEMO = true
+
 /** Equipe oculta no go-live até a operação do time estar pronta no portal. */
 export const EQUIPE_MENU_ENABLED = false
 
@@ -80,8 +94,21 @@ export function useAppNavigation() {
   const { t, locale } = useI18n()
   const parceiroStore = useParceiroStore()
 
+  /**
+   * Quem vê o módulo clínico.
+   *
+   * Exigia `hasVeterinarioProfile()` — o claim `veterinarioId` no token. Conta de parceiro não
+   * traz esse claim, então o menu não montava para ninguém do portal, e o módulo só era
+   * alcançável digitando `/veterinario/...` na barra de endereço (a rota nunca exigiu o perfil;
+   * o guard só pede sessão).
+   *
+   * Enquanto o módulo roda sobre a camada mocada, o menu está aberto a qualquer conta do portal,
+   * para poder ser demonstrado. **Quando a API clínica existir, isto volta a exigir o perfil** —
+   * aí o que está atrás do menu é prontuário de paciente real, e prontuário não se mostra a quem
+   * não é do corpo clínico.
+   */
   const hasClinicalProfile = computed(
-    () => CLINICAL_MENU_ENABLED && hasVeterinarioProfile(),
+    () => CLINICAL_MENU_ENABLED && (CLINICAL_MENU_DEMO || hasVeterinarioProfile()),
   )
 
   const accountItems = computed<AppNavigationItem[]>(() => {
