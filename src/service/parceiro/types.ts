@@ -302,8 +302,20 @@ export type EntradaDiarioCompartilhada = {
   fotoIds?: string[]
 }
 
-/** Parte 15: por que um bloco de categoria compartilhada veio vazio. */
-export type MotivoBlocoVazio = 'SEM_REGISTRO' | 'FILTRADO_JANELA'
+/**
+ * Por que um bloco de categoria compartilhada veio vazio (Parte 15).
+ *
+ * - `SEM_REGISTRO`: o responsável não tem registro nessa categoria.
+ * - `FILTRADO_JANELA`: há registro, mas nenhum caiu na janela compartilhada.
+ * - `REMOVIDO_PELO_TUTOR`: **havia** e o responsável tirou depois de conceder o acesso.
+ *
+ * O terceiro é o que não pode virar o primeiro. Um bloco retirado indistinguível de um que
+ * nunca teve dado faz quem atende concluir que o pet não tem vacina, quando o que ele perdeu
+ * foi a permissão de ver. É gravado no snapshot no instante da subtração — o helper que monta
+ * o snapshot é puro e não conhece histórico, então quem não gravar na hora perde a informação
+ * para sempre.
+ */
+export type MotivoBlocoVazio = 'SEM_REGISTRO' | 'FILTRADO_JANELA' | 'REMOVIDO_PELO_TUTOR'
 
 export type BlocoSnapshot =
   | 'alergias'

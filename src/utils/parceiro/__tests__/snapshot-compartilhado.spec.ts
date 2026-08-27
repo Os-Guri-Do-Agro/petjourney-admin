@@ -90,6 +90,15 @@ describe('estadoDoBloco', () => {
     expect(estadoDoBloco(fonte(), 'medicamentos', 0)).toBe('GENERICO')
   })
 
+  /** Categoria retirada de um acesso já concedido: a seção fica, vazia, dizendo o porquê. */
+  it('categoria removida pelo responsável não se confunde com sem registro', () => {
+    const removida = fonte({
+      snapshot: snapshot({ motivos: { vacinas: 'REMOVIDO_PELO_TUTOR' } }),
+    })
+
+    expect(estadoDoBloco(removida, 'vacinas', 0)).toBe('REMOVIDO_PELO_TUTOR')
+  })
+
   it('motivo presente para outro bloco não vaza para o bloco vazio', () => {
     const comMotivo = fonte({ snapshot: snapshot({ motivos: { vacinas: 'SEM_REGISTRO' } }) })
 
@@ -104,6 +113,16 @@ describe('normalizarMotivo', () => {
 
   it('FILTRADO_JANELA fora do diário vira genérico: a frase da janela mentiria ali', () => {
     expect(normalizarMotivo('alergias', 'FILTRADO_JANELA')).toBe('GENERICO')
+  })
+
+  /**
+   * O oposto do genérico: aqui a tela **precisa** afirmar. Cair em "nada a mostrar" faria quem
+   * atende ler ausência de vacina onde houve perda de permissão.
+   */
+  it('REMOVIDO_PELO_TUTOR vale em qualquer bloco', () => {
+    expect(normalizarMotivo('vacinas', 'REMOVIDO_PELO_TUTOR')).toBe('REMOVIDO_PELO_TUTOR')
+    expect(normalizarMotivo('documentos', 'REMOVIDO_PELO_TUTOR')).toBe('REMOVIDO_PELO_TUTOR')
+    expect(normalizarMotivo('diario', 'REMOVIDO_PELO_TUTOR')).toBe('REMOVIDO_PELO_TUTOR')
   })
 
   it('enum desconhecido vira genérico em vez de afirmar ausência de registro', () => {

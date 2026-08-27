@@ -15,6 +15,7 @@ import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useAgora } from '@/composables/useAgora'
+import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
@@ -210,6 +211,11 @@ function textoMotivo(bloco: BlocoSnapshot, motivo: MotivoVazioRender) {
 
   if (motivo === 'SEM_REGISTRO') {
     return t(`acessos.snapshot.vazio.semRegistro.${bloco}`)
+  }
+
+  /** Frase única para todos os blocos: o que aconteceu é o mesmo, mudou só a categoria. */
+  if (motivo === 'REMOVIDO_PELO_TUTOR') {
+    return t('acessos.snapshot.vazio.removido')
   }
 
   return t('acessos.snapshot.vazio.generico')
@@ -419,7 +425,14 @@ function resetAnotacaoForm() {
   }
 }
 
-async function loadDetalhe() {
+/**
+ * `silencioso` é a releitura de fundo — a que acontece ao voltar para a aba.
+ *
+ * Ela não pode desmontar a tela: esvaziar `detalhe` e acender o spinner faria a página piscar
+ * a cada alt-tab, e trocaria uma leitura que estava boa por um esqueleto. E falha de fundo não
+ * vira tela de erro pelo mesmo motivo — a rede caiu, o que já estava lido continua válido.
+ */
+async function loadDetalhe(silencioso = false) {
   const id = compartilhamentoId.value
 
   if (!id) {
@@ -427,9 +440,11 @@ async function loadDetalhe() {
     return
   }
 
-  loading.value = true
-  error.value = ''
-  detalhe.value = null
+  if (!silencioso) {
+    loading.value = true
+    error.value = ''
+    detalhe.value = null
+  }
 
   try {
     await ensureContext()
@@ -440,9 +455,13 @@ async function loadDetalhe() {
       return
     }
 
-    error.value = err instanceof Error ? err.message : t('acessos.detalhe.errorLoad')
+    if (!silencioso) {
+      error.value = err instanceof Error ? err.message : t('acessos.detalhe.errorLoad')
+    }
   } finally {
-    loading.value = false
+    if (!silencioso) {
+      loading.value = false
+    }
   }
 }
 
@@ -579,13 +598,26 @@ async function abrirAnexo(anexoId: string) {
   try {
     const { signedUrl } = await getAnexoSignedUrl(detalhe.value.id, anexoId, parceiroQuery())
     window.open(signedUrl, '_blank', 'noopener')
-  } catch {
+  } catch (err) {
+    /*
+     * O anexo é da anotação da própria empresa e o responsável não o remove — mas o acesso
+     * inteiro ele encerra, e aí o cofre vai junto. Sem distinguir, o 409 saía como "arquivo
+     * indisponível" e escondia que o prontuário todo tinha acabado.
+     */
+    const encerrado = classificarFalhaArquivo(err) === 'ACESSO_ENCERRADO'
+
     toast.add({
       severity: 'warn',
-      summary: t('acessos.anexo.indisponivel'),
-      detail: t('acessos.anexo.indisponivelDetail'),
-      life: 4500,
+      summary: t(encerrado ? 'acessos.anexo.acessoEncerrado' : 'acessos.anexo.indisponivel'),
+      detail: t(
+        encerrado ? 'acessos.anexo.acessoEncerradoDetail' : 'acessos.anexo.indisponivelDetail',
+      ),
+      life: encerrado ? 6000 : 4500,
     })
+
+    if (encerrado) {
+      await loadDetalhe()
+    }
   } finally {
     abrindoAnexoId.value = null
   }
@@ -620,16 +652,35 @@ async function comArquivoUrl(
     const { signedUrl } = await getArquivoSignedUrl(detalhe.value.id, arquivoId, parceiroQuery())
     usar(signedUrl)
   } catch (err) {
+    const falha = classificarFalhaArquivo(err)
+
     /**
      * 409 = o acesso caiu entre o load e o clique. Avisar e deixar a tela como
      * estava mentiria: o prontuário inteiro já não existe mais, não só este
      * arquivo. Recarregar traz o detalhe enxuto e o cabeçalho de encerrado.
      */
-    if (classificarFalhaArquivo(err) === 'ACESSO_ENCERRADO') {
+    if (falha === 'ACESSO_ENCERRADO') {
       toast.add({
         severity: 'warn',
         summary: t('acessos.anexo.acessoEncerrado'),
         detail: t('acessos.anexo.acessoEncerradoDetail'),
+        life: 6000,
+      })
+      await loadDetalhe()
+      return
+    }
+
+    /**
+     * Arquivo removido do cofre com o acesso ainda vivo. Recarrega pelo mesmo
+     * motivo do 409, em escala menor: o documento continua listado na tela até
+     * alguém reler, e uma lista que oferece um arquivo que não existe convida ao
+     * segundo clique.
+     */
+    if (falha === 'ARQUIVO_REMOVIDO') {
+      toast.add({
+        severity: 'warn',
+        summary: t('acessos.anexo.removido'),
+        detail: t('acessos.anexo.removidoDetail'),
         life: 6000,
       })
       await loadDetalhe()
@@ -683,6 +734,12 @@ watch(compartilhamentoId, (id, oldId) => {
 onMounted(() => {
   void loadDetalhe()
 })
+
+/**
+ * O responsável pode ter retirado uma categoria, apagado um documento ou encurtado a validade
+ * enquanto esta aba estava em segundo plano, e ninguém avisa. Voltar para a aba relê.
+ */
+useRevalidarAoVoltar(() => void loadDetalhe(true))
 </script>
 
 <template>
@@ -693,7 +750,7 @@ onMounted(() => {
     :error="error"
     :no-partner-access="store.semAcessoParceiro"
     guidance
-    @retry="loadDetalhe"
+    @retry="loadDetalhe()"
   >
     <template #actions>
       <Button

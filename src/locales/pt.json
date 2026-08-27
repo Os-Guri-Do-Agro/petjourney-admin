@@ -887,6 +887,7 @@
       "vazio": {
         "generico": "Nada a mostrar nesta seção neste acesso.",
         "diarioFiltrado": "Acompanhamento sem anormalidade registrada na janela compartilhada.",
+        "removido": "O responsável removeu esta categoria do acesso.",
         "semRegistro": {
           "alergias": "O responsável não registrou alergias para este pet.",
           "vacinas": "O responsável não registrou vacinas para este pet.",
@@ -1059,7 +1060,9 @@
     },
     "anexo": {
       "indisponivel": "Arquivo indisponível",
-      "indisponivelDetail": "O arquivo não está mais disponível (pode ter sido removido após a revogação).",
+      "indisponivelDetail": "Não foi possível abrir o arquivo agora. Tente de novo em instantes.",
+      "removido": "Arquivo removido",
+      "removidoDetail": "O responsável tirou este documento do acesso. Atualizamos a lista.",
       "acessoEncerrado": "Acesso encerrado",
       "acessoEncerradoDetail": "O responsável encerrou este acesso, então o prontuário não está mais disponível. Atualizamos a tela."
     }

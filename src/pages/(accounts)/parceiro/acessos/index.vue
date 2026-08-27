@@ -13,6 +13,7 @@ import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import VincularCodigoDialog from '@/components/parceiro/VincularCodigoDialog.vue'
 import { useAgora } from '@/composables/useAgora'
+import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
@@ -205,11 +206,20 @@ function queryAtual(cursorAtual?: string) {
   }
 }
 
-async function loadFirstPage() {
+/**
+ * `silencioso` é a releitura de fundo — a que acontece ao voltar para a aba.
+ *
+ * Ela troca a lista quando dá certo e não faz nada quando dá errado: acender o spinner ou
+ * esvaziar a lista por causa de uma falha de rede em segundo plano tiraria da tela dados que
+ * continuavam bons.
+ */
+async function loadFirstPage(silencioso = false) {
   const id = ++requestId
 
-  loading.value = true
-  error.value = ''
+  if (!silencioso) {
+    loading.value = true
+    error.value = ''
+  }
 
   try {
     await ensureContext()
@@ -222,7 +232,7 @@ async function loadFirstPage() {
     items.value = page.data
     cursor.value = page.meta.proximoCursor ?? null
   } catch (err) {
-    if (id !== requestId) {
+    if (id !== requestId || silencioso) {
       return
     }
 
@@ -236,7 +246,7 @@ async function loadFirstPage() {
 
     error.value = err instanceof Error ? err.message : t('acessos.list.errorLoad')
   } finally {
-    if (id === requestId) {
+    if (id === requestId && !silencioso) {
       loading.value = false
     }
   }
@@ -371,6 +381,12 @@ onMounted(() => {
 
   void loadFirstPage()
 })
+
+/**
+ * Mesma razão do detalhe: a validade de um acesso pode ter encurtado sem aviso, e esta lista
+ * mostra contagem regressiva. Relendo na volta, o número volta a valer.
+ */
+useRevalidarAoVoltar(() => void loadFirstPage(true))
 </script>
 
 <template>
@@ -544,7 +560,7 @@ onMounted(() => {
 
       <div v-else-if="error" class="atend-state atend-state--error" role="alert">
         <p>{{ error }}</p>
-        <Button :label="t('common.retry')" severity="secondary" @click="loadFirstPage" />
+        <Button :label="t('common.retry')" severity="secondary" @click="loadFirstPage()" />
       </div>
 
       <!-- Vazio por filtro é outro problema do usuário: a saída é limpar o filtro,
