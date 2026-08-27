@@ -887,6 +887,7 @@
       "vazio": {
         "generico": "Nada para mostrar en esta sección en este acceso.",
         "diarioFiltrado": "Seguimiento sin anormalidad registrada en la ventana compartida.",
+        "removido": "El responsable quitó esta categoría del acceso.",
         "semRegistro": {
           "alergias": "El tutor no registró alergias para esta mascota.",
           "vacinas": "El tutor no registró vacunas para esta mascota.",
@@ -1059,7 +1060,9 @@
     },
     "anexo": {
       "indisponivel": "Archivo no disponible",
-      "indisponivelDetail": "El archivo ya no está disponible (puede haberse eliminado tras la revocación).",
+      "indisponivelDetail": "No se pudo abrir el archivo ahora. Inténtalo de nuevo en un momento.",
+      "removido": "Archivo eliminado",
+      "removidoDetail": "El responsable quitó este documento del acceso. Actualizamos la lista.",
       "acessoEncerrado": "Acceso finalizado",
       "acessoEncerradoDetail": "El responsable finalizó este acceso, por lo que el historial ya no está disponible. Actualizamos la pantalla."
     }

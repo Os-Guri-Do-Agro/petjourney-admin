@@ -73,12 +73,16 @@ export function categoriaCompartilhada(fonte: FonteSnapshot, bloco: BlocoSnapsho
 }
 
 /**
- * `FILTRADO_JANELA` só faz sentido no diário; `SEM_REGISTRO` vale em qualquer bloco.
- * Qualquer outro valor — inclusive um enum novo que o backend passe a mandar — cai
- * em `GENERICO`.
+ * `FILTRADO_JANELA` só faz sentido no diário; `SEM_REGISTRO` e `REMOVIDO_PELO_TUTOR` valem em
+ * qualquer bloco. Qualquer outro valor — inclusive um enum novo que o backend passe a mandar —
+ * cai em `GENERICO`.
  *
  * O motivo é a regra 5 da spec: não inferir. "O responsável não registrou" é uma
  * afirmação sobre o prontuário de alguém, e errar nela é pior do que ser vago.
+ *
+ * `REMOVIDO_PELO_TUTOR` é a exceção que confirma a regra: ele **é** a informação. Sem tratá-lo,
+ * o bloco que o responsável retirou cai em `GENERICO` e some a única diferença que importa
+ * entre "não existe" e "existe e você não pode mais ver".
  */
 export function normalizarMotivo(
   bloco: BlocoSnapshot,
@@ -86,6 +90,10 @@ export function normalizarMotivo(
 ): MotivoVazioRender {
   if (motivo === 'SEM_REGISTRO') {
     return 'SEM_REGISTRO'
+  }
+
+  if (motivo === 'REMOVIDO_PELO_TUTOR') {
+    return 'REMOVIDO_PELO_TUTOR'
   }
 
   if (motivo === 'FILTRADO_JANELA' && bloco === 'diario') {

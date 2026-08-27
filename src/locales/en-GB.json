@@ -887,6 +887,7 @@
       "vazio": {
         "generico": "Nothing to show in this section for this access.",
         "diarioFiltrado": "Monitoring with no abnormality recorded in the shared window.",
+        "removido": "The pet parent removed this category from the access.",
         "semRegistro": {
           "alergias": "The pet parent has not recorded any allergies for this pet.",
           "vacinas": "The pet parent has not recorded any vaccines for this pet.",
@@ -1059,7 +1060,9 @@
     },
     "anexo": {
       "indisponivel": "File unavailable",
-      "indisponivelDetail": "The file is no longer available (it may have been removed after revocation).",
+      "indisponivelDetail": "We could not open the file right now. Try again in a moment.",
+      "removido": "File removed",
+      "removidoDetail": "The pet parent removed this document from the access. We refreshed the list.",
       "acessoEncerrado": "Access ended",
       "acessoEncerradoDetail": "The pet parent ended this access, so the record is no longer available. We refreshed the screen."
     }
