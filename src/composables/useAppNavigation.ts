@@ -47,7 +47,7 @@ export const CLINICAL_MENU_ENABLED = true
  * O interruptor é uma constante e não uma variável de ambiente de propósito: ele precisa ser
  * revisto por quem lê o código, não esquecido ligado num painel de deploy. **Vire para `false`
  * junto com a primeira entrega da API clínica** — a partir daí o que está atrás do menu é
- * prontuário de paciente real.
+ * prontuário de paciente real
  */
 export const CLINICAL_MENU_DEMO = true
 
