@@ -1,4 +1,23 @@
 <script setup lang="ts">
+/**
+ * Atalhos da visão geral: um caminho para cada tela do painel.
+ *
+ * A versão anterior desenhava três colunas fixas. Como os grupos têm tamanhos muito diferentes
+ * — oito telas em Clínica, uma em Conta —, a última linha de cada grupo sobrava pela metade e
+ * o conjunto lia como cartão espalhado, não como lista organizada. Aqui a grade se preenche
+ * sozinha a partir de uma largura mínima: os cartões têm sempre o mesmo tamanho e encostam uns
+ * nos outros, que é o que faz um painel parecer arrumado.
+ *
+ * Duas coisas saíram do cartão, e as duas por serem repetição:
+ *
+ * - **O nome do grupo embaixo de cada tela.** Ele já está no título do grupo, três centímetros
+ *   acima; repetido em cada cartão, dobrava a altura de todos para não dizer nada.
+ * - **O texto de apoio da seção.** Continua existindo, atrás do botão de ajuda do cabeçalho da
+ *   página — quem precisa dele precisa uma vez, e quem trabalha aqui todo dia não precisa nunca.
+ *
+ * Com o cartão em uma linha só, a mesma área que mostrava seis telas mostra doze — e a busca,
+ * que antes ocupava uma faixa inteira, cabe ao lado do título.
+ */
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -9,6 +28,7 @@ import {
   type AppNavigationItem,
 } from '@/composables/useAppNavigation'
 import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { currentColors } from '@/theme/color-mode'
 
 const { t } = useI18n()
@@ -48,9 +68,7 @@ const filteredGroups = computed(() =>
 
 const hasActiveFilter = computed(() => filterQuery.value.trim().length > 0)
 
-const showEmptyFilter = computed(
-  () => hasActiveFilter.value && filteredGroups.value.length === 0,
-)
+const showEmptyFilter = computed(() => hasActiveFilter.value && filteredGroups.value.length === 0)
 
 const totalShortcuts = computed(() =>
   homeShortcutGroups.value.reduce((sum, group) => sum + group.items.length, 0),
@@ -61,36 +79,39 @@ const totalShortcuts = computed(() =>
   <section class="home-shortcuts" :style="styleVars" aria-labelledby="home-shortcuts-title">
     <header class="home-shortcuts__head">
       <div class="home-shortcuts__title-row">
-        <p class="home-shortcuts__index">03</p>
         <h2 id="home-shortcuts-title">{{ t('inicio.shortcuts.title') }}</h2>
         <span class="home-shortcuts__count">{{
           t('inicio.shortcuts.countAvailable', { n: totalShortcuts })
         }}</span>
+
+        <!-- A busca cabe ao lado do título: com quinze telas ela é conveniência, não estrutura. -->
+        <label class="home-shortcuts__filter" for="home-shortcuts-filter">
+          <i class="pi pi-search" aria-hidden="true" />
+          <input
+            id="home-shortcuts-filter"
+            v-model="filterQuery"
+            type="search"
+            :placeholder="t('inicio.shortcuts.filterPlaceholder')"
+            autocomplete="off"
+          />
+          <button
+            v-if="hasActiveFilter"
+            class="home-shortcuts__clear"
+            type="button"
+            :aria-label="t('inicio.shortcuts.clearFilterAria')"
+            @click="filterQuery = ''"
+          >
+            <i class="pi pi-times" aria-hidden="true" />
+          </button>
+        </label>
       </div>
-      <p>{{ t('inicio.shortcuts.lede') }}</p>
+
+      <p v-if="isGuidanceVisible" class="home-shortcuts__lede">
+        {{ t('inicio.shortcuts.lede') }}
+      </p>
     </header>
 
     <div class="home-shortcuts__panel">
-      <label class="home-shortcuts__filter" for="home-shortcuts-filter">
-        <i class="pi pi-search" aria-hidden="true" />
-        <input
-          id="home-shortcuts-filter"
-          v-model="filterQuery"
-          type="search"
-          :placeholder="t('inicio.shortcuts.filterPlaceholder')"
-          autocomplete="off"
-        />
-        <button
-          v-if="hasActiveFilter"
-          class="home-shortcuts__clear"
-          type="button"
-          :aria-label="t('inicio.shortcuts.clearFilterAria')"
-          @click="filterQuery = ''"
-        >
-          <i class="pi pi-times" aria-hidden="true" />
-        </button>
-      </label>
-
       <p v-if="showEmptyFilter" class="home-shortcuts__empty" role="status">
         {{ t('inicio.shortcuts.emptyFilter', { q: filterQuery.trim() }) }}
       </p>
@@ -98,6 +119,7 @@ const totalShortcuts = computed(() =>
       <div v-else class="home-shortcuts__groups">
         <div v-for="group in filteredGroups" :key="group.id" class="home-shortcuts__group">
           <h3>{{ group.label }}</h3>
+
           <div class="home-shortcuts__grid">
             <RouterLink
               v-for="item in group.items"
@@ -113,13 +135,19 @@ const totalShortcuts = computed(() =>
               <span class="shortcut-card__icon" aria-hidden="true">
                 <i :class="item.icon" />
               </span>
-              <span class="shortcut-card__body">
-                <strong>{{ item.label }}</strong>
-                <small v-if="item.comingSoon">{{ t('comingSoon.cupom.badge') }}</small>
-                <small v-else-if="item.locked">{{ t('frame.suspended.title') }}</small>
-                <small v-else>{{ group.label }}</small>
+
+              <span class="shortcut-card__label">{{ item.label }}</span>
+
+              <!--
+                O estado vira selo ao lado do nome, e não segunda linha: "Em breve" embaixo de
+                cada atalho fazia todos os cartões pagarem a altura de um estado que só dois
+                deles têm.
+              -->
+              <span v-if="item.comingSoon" class="shortcut-card__selo">
+                {{ t('comingSoon.cupom.badge') }}
               </span>
               <i
+                v-else
                 class="shortcut-card__arrow"
                 :class="item.locked ? 'pi pi-lock' : 'pi pi-arrow-right'"
                 aria-hidden="true"
@@ -135,41 +163,31 @@ const totalShortcuts = computed(() =>
 <style scoped>
 .home-shortcuts {
   display: grid;
-  gap: 0.9rem;
+  gap: 0.75rem;
   width: 100%;
 }
 
 .home-shortcuts__head {
   display: grid;
-  gap: 0.28rem;
-  padding-bottom: 0.55rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--shortcuts-line) 85%, transparent);
+  gap: 0.35rem;
 }
 
 .home-shortcuts__title-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 0.55rem;
-}
-
-.home-shortcuts__index {
-  margin: 0;
-  color: var(--shortcuts-faint);
-  font-size: 0.72rem;
-  font-weight: 750;
-  letter-spacing: 0.08em;
 }
 
 .home-shortcuts__head h2 {
   margin: 0;
+  color: var(--shortcuts-text);
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--shortcuts-text);
 }
 
-.home-shortcuts__head > p {
+.home-shortcuts__lede {
   margin: 0;
   color: var(--shortcuts-muted);
   font-size: 0.82rem;
@@ -178,11 +196,11 @@ const totalShortcuts = computed(() =>
 
 .home-shortcuts__count {
   flex: 0 0 auto;
-  padding: 0.22rem 0.58rem;
+  padding: 0.18rem 0.55rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--shortcuts-primary-soft) 35%, var(--shortcuts-card));
   color: var(--shortcuts-primary-strong);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -191,7 +209,7 @@ const totalShortcuts = computed(() =>
   display: grid;
   gap: 1rem;
   width: 100%;
-  padding: 1.15rem 1.2rem 1.25rem;
+  padding: 1.05rem 1.1rem 1.15rem;
   border: 1px solid var(--shortcuts-line);
   border-radius: 1.2rem;
   background: var(--shortcuts-card);
@@ -200,13 +218,15 @@ const totalShortcuts = computed(() =>
 
 .home-shortcuts__filter {
   display: flex;
+  width: min(16rem, 100%);
   align-items: center;
-  gap: 0.55rem;
-  min-height: 2.85rem;
-  padding: 0 0.35rem 0 0.9rem;
+  min-height: 2.2rem;
+  margin-left: auto;
+  padding: 0 0.2rem 0 0.7rem;
+  gap: 0.45rem;
   border: 1px solid var(--shortcuts-line);
-  border-radius: 0.9rem;
-  background: var(--shortcuts-surface);
+  border-radius: 0.75rem;
+  background: var(--shortcuts-card);
   color: var(--shortcuts-muted);
   transition:
     border-color 140ms ease,
@@ -219,7 +239,7 @@ const totalShortcuts = computed(() =>
 }
 
 .home-shortcuts__filter > i {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
 
 .home-shortcuts__filter input {
@@ -229,7 +249,7 @@ const totalShortcuts = computed(() =>
   background: transparent;
   color: var(--shortcuts-text);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   outline: none;
 }
 
@@ -239,14 +259,13 @@ const totalShortcuts = computed(() =>
 
 .home-shortcuts__clear {
   display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 1.75rem;
+  height: 1.75rem;
   flex: 0 0 auto;
   place-items: center;
-  margin-right: 0.15rem;
   border: 0;
-  border-radius: 0.65rem;
-  background: var(--shortcuts-card);
+  border-radius: 0.55rem;
+  background: transparent;
   color: var(--shortcuts-muted);
   cursor: pointer;
 }
@@ -269,40 +288,61 @@ const totalShortcuts = computed(() =>
 
 .home-shortcuts__groups {
   display: grid;
-  gap: 1.15rem;
+  gap: 1.05rem;
 }
 
+/*
+ * O título do grupo puxa um filete até a borda. É o que separa quatro blocos empilhados sem
+ * gastar uma caixa para cada um — caixa dentro de caixa é o que fazia a área parecer cheia.
+ */
 .home-shortcuts__group h3 {
-  margin: 0 0 0.55rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.5rem;
   color: var(--shortcuts-faint);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
+.home-shortcuts__group h3::after {
+  height: 1px;
+  flex: 1;
+  background: color-mix(in srgb, var(--shortcuts-line) 80%, transparent);
+  content: '';
+}
+
+/*
+ * Preenchimento automático em vez de três colunas fixas.
+ *
+ * Com número fixo, um grupo de oito deixa dois buracos na última linha e um grupo de um deixa
+ * dois terços vazios — é daí que vinha a sensação de cartão jogado. Com `auto-fill` a largura
+ * mínima manda: sobra espaço, entra mais uma coluna; falta, sai uma.
+ */
 .home-shortcuts__grid {
   display: grid;
-  gap: 0.7rem;
   width: 100%;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
 }
 
 .shortcut-card {
   display: flex;
+  min-width: 0;
   align-items: center;
-  gap: 0.75rem;
-  min-height: 4.1rem;
-  padding: 0.8rem 0.9rem;
+  gap: 0.6rem;
+  min-height: 2.9rem;
+  padding: 0.4rem 0.7rem 0.4rem 0.45rem;
   border: 1px solid var(--shortcuts-line);
-  border-radius: 0.95rem;
+  border-radius: 0.8rem;
   background: color-mix(in srgb, var(--shortcuts-surface) 70%, var(--shortcuts-card));
   color: inherit;
   text-decoration: none;
   transition:
     border-color 150ms ease,
-    background 150ms ease,
-    transform 150ms ease;
+    background 150ms ease;
 }
 
 .shortcut-card:hover,
@@ -310,76 +350,79 @@ const totalShortcuts = computed(() =>
   border-color: color-mix(in srgb, var(--shortcuts-primary) 36%, var(--shortcuts-line));
   background: color-mix(in srgb, var(--shortcuts-primary-soft) 20%, var(--shortcuts-card));
   outline: none;
-  transform: translateY(-1px);
 }
 
 .shortcut-card--locked {
   opacity: 0.78;
 }
 
-.shortcut-card--locked:hover,
-.shortcut-card--locked:focus-visible {
-  transform: none;
-}
-
 .shortcut-card:hover .shortcut-card__arrow,
 .shortcut-card:focus-visible .shortcut-card__arrow {
-  transform: translateX(3px);
   color: var(--shortcuts-primary-strong);
+  transform: translateX(3px);
 }
 
 .shortcut-card__icon {
   display: grid;
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 2rem;
+  height: 2rem;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 0.75rem;
+  border-radius: 0.6rem;
   background: color-mix(in srgb, var(--shortcuts-primary) 15%, var(--shortcuts-card));
   color: var(--shortcuts-primary-strong);
-  font-size: 0.95rem;
+  font-size: 0.86rem;
 }
 
-.shortcut-card__body {
-  display: grid;
-  gap: 0.12rem;
-  min-width: 0;
+.shortcut-card__label {
+  overflow: hidden;
   flex: 1;
-}
-
-.shortcut-card__body strong {
+  min-width: 0;
   color: var(--shortcuts-text);
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: 0.86rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.shortcut-card__body small {
-  color: var(--shortcuts-muted);
-  font-size: 0.74rem;
+.shortcut-card__selo {
+  flex: 0 0 auto;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--shortcuts-primary-soft) 40%, var(--shortcuts-card));
+  color: var(--shortcuts-primary-strong);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .shortcut-card__arrow {
+  flex: 0 0 auto;
   color: var(--shortcuts-faint);
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   transition:
     transform 150ms ease,
     color 150ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shortcut-card:hover,
-  .shortcut-card:focus-visible {
+  .shortcut-card__arrow {
+    transition: none;
+  }
+
+  .shortcut-card:hover .shortcut-card__arrow,
+  .shortcut-card:focus-visible .shortcut-card__arrow {
     transform: none;
   }
 }
 
-@media (max-width: 980px) {
-  .home-shortcuts__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 720px) {
+  .home-shortcuts__filter {
+    width: 100%;
+    margin-left: 0;
+  }
+
   .home-shortcuts__grid {
     grid-template-columns: 1fr;
   }

@@ -6,6 +6,7 @@ import HomeNavigationShortcuts from '@/components/home/HomeNavigationShortcuts.v
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PortalParceiroDashboard from '@/components/parceiro/PortalParceiroDashboard.vue'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { getAuthUser } from '@/service/auth/auth-session'
@@ -73,6 +74,7 @@ onUnmounted(() => {
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
     block-when-suspended
+    guidance
     @retry="ensureContext(true)"
   >
     <template #actions>
@@ -84,7 +86,7 @@ onUnmounted(() => {
     <div class="inicio-shell" :style="pageAtmosphere">
       <PartnerOperabilityBanner />
 
-      <p class="inicio-lede">
+      <p v-if="isGuidanceVisible" class="inicio-lede">
         {{ t('inicio.lede') }}
       </p>
 

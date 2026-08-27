@@ -4,6 +4,7 @@ import Skeleton from 'primevue/skeleton'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import type { IndicacaoMetricas } from '@/service/parceiro/types'
 import {
@@ -78,7 +79,7 @@ function barraAria(day: string, count: number) {
     <header class="qrm__head">
       <div>
         <h3 id="qrm-title">{{ t('divulgacao.metricas.title') }}</h3>
-        <p>{{ t('divulgacao.metricas.lede') }}</p>
+        <p v-if="isGuidanceVisible">{{ t('divulgacao.metricas.lede') }}</p>
       </div>
       <Button
         v-if="erro === 'indisponivel' || erro === 'erro'"

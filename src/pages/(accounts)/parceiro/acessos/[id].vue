@@ -15,6 +15,7 @@ import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useAgora } from '@/composables/useAgora'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -691,6 +692,7 @@ onMounted(() => {
     :loading="loading"
     :error="error"
     :no-partner-access="store.semAcessoParceiro"
+    guidance
     @retry="loadDetalhe"
   >
     <template #actions>
@@ -731,11 +733,7 @@ onMounted(() => {
               {{ detalhe.especieLabel }}
               <template v-if="isAtivo && detalhe.petCastrado != null">
                 ·
-                {{
-                  detalhe.petCastrado
-                    ? t('acessos.pet.castrado')
-                    : t('acessos.pet.naoCastrado')
-                }}
+                {{ detalhe.petCastrado ? t('acessos.pet.castrado') : t('acessos.pet.naoCastrado') }}
               </template>
             </p>
 
@@ -926,7 +924,7 @@ onMounted(() => {
           <header class="atd-docs__head">
             <div>
               <h2 id="atd-docs-title">{{ t('acessos.documentos.title') }}</h2>
-              <p>{{ t('acessos.documentos.lede') }}</p>
+              <p v-if="isGuidanceVisible">{{ t('acessos.documentos.lede') }}</p>
             </div>
             <span v-if="documentos.length" class="atd-docs__count">{{
               t('acessos.documentos.count', { n: documentos.length })
@@ -997,7 +995,7 @@ onMounted(() => {
           <header class="atd-docs__head">
             <div>
               <h2 id="atd-diario-title">{{ t('acessos.diario.title') }}</h2>
-              <p>{{ t('acessos.diario.lede') }}</p>
+              <p v-if="isGuidanceVisible">{{ t('acessos.diario.lede') }}</p>
             </div>
             <span v-if="diario.length" class="atd-docs__count">{{
               t('acessos.diario.count', { n: diario.length })
@@ -1079,7 +1077,7 @@ onMounted(() => {
             <header class="atd-notes__head">
               <div>
                 <h2 id="atd-notes-title">{{ t('acessos.anotacoes.title') }}</h2>
-                <p>{{ t('acessos.anotacoes.lede') }}</p>
+                <p v-if="isGuidanceVisible">{{ t('acessos.anotacoes.lede') }}</p>
               </div>
               <span v-if="anotacoesOrdenadas.length" class="atd-notes__count">{{
                 t('acessos.anotacoes.count', { n: anotacoesOrdenadas.length })

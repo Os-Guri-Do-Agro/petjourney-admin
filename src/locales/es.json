@@ -387,6 +387,10 @@
           "message": "Seleccione la empresa socia e intente validar de nuevo."
         }
       }
+    },
+    "guidance": {
+      "show": "Mostrar explicaciones",
+      "hide": "Ocultar explicaciones"
     }
   },
   "frame": {

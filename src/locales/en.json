@@ -387,6 +387,10 @@
           "message": "Select the partner company and try validating again."
         }
       }
+    },
+    "guidance": {
+      "show": "Show descriptions",
+      "hide": "Hide descriptions"
     }
   },
   "frame": {

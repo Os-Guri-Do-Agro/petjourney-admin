@@ -3,15 +3,14 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ProgramaParticipacaoCard from '@/components/parceiro/ProgramaParticipacaoCard.vue'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { currentColors } from '@/theme/color-mode'
 
 const { t } = useI18n()
 const { store } = useParceiroPortal()
 
-const isLoading = computed(
-  () => store.loadState === 'loading' || store.loadState === 'idle',
-)
+const isLoading = computed(() => store.loadState === 'loading' || store.loadState === 'idle')
 
 const viewStyle = computed(() => {
   const colors = currentColors.value
@@ -61,11 +60,8 @@ const activationSteps = computed(() => [
   <div class="programas-view" :style="viewStyle">
     <section class="prog-zone" aria-labelledby="prog-cards-title">
       <header class="prog-zone__head">
-        <div class="prog-zone__title-row">
-          <p class="prog-zone__index">01</p>
-          <h2 id="prog-cards-title">{{ t('programas.available.title') }}</h2>
-        </div>
-        <p>{{ t('programas.available.lede') }}</p>
+        <h2 id="prog-cards-title">{{ t('programas.available.title') }}</h2>
+        <p v-if="isGuidanceVisible">{{ t('programas.available.lede') }}</p>
       </header>
 
       <div
@@ -82,11 +78,8 @@ const activationSteps = computed(() => [
 
     <section class="prog-zone" aria-labelledby="activation-title">
       <header class="prog-zone__head">
-        <div class="prog-zone__title-row">
-          <p class="prog-zone__index">02</p>
-          <h2 id="activation-title">{{ t('programas.activation.title') }}</h2>
-        </div>
-        <p>{{ t('programas.activation.lede') }}</p>
+        <h2 id="activation-title">{{ t('programas.activation.title') }}</h2>
+        <p v-if="isGuidanceVisible">{{ t('programas.activation.lede') }}</p>
       </header>
 
       <div class="activation-panel">
@@ -138,20 +131,6 @@ const activationSteps = computed(() => [
   gap: 0.28rem;
   padding-bottom: 0.55rem;
   border-bottom: 1px solid color-mix(in srgb, var(--prog-line) 85%, transparent);
-}
-
-.prog-zone__title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0.55rem;
-}
-
-.prog-zone__index {
-  margin: 0;
-  color: var(--prog-faint);
-  font-size: 0.72rem;
-  font-weight: 750;
-  letter-spacing: 0.08em;
 }
 
 .prog-zone__head h2 {

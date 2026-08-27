@@ -13,6 +13,7 @@ import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import VincularCodigoDialog from '@/components/parceiro/VincularCodigoDialog.vue'
 import { useAgora } from '@/composables/useAgora'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -379,6 +380,7 @@ onMounted(() => {
     :loading="false"
     :error="loadError"
     :no-partner-access="store.semAcessoParceiro"
+    guidance
     @retry="ensureContext(true)"
   >
     <template #actions>
@@ -396,7 +398,7 @@ onMounted(() => {
          do gate de página cheia. -->
     <PartnerOperabilityBanner cover-suspended />
 
-    <p class="atend-lede">{{ t('acessos.lede') }}</p>
+    <p v-if="isGuidanceVisible" class="atend-lede">{{ t('acessos.lede') }}</p>
 
     <PartnerSectionTabs
       :tabs="tabs"

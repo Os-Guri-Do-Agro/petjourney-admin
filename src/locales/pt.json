@@ -387,6 +387,10 @@
           "message": "Selecione a empresa parceira e tente validar de novo."
         }
       }
+    },
+    "guidance": {
+      "show": "Mostrar explicações",
+      "hide": "Ocultar explicações"
     }
   },
   "frame": {
