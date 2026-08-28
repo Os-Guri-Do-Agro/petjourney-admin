@@ -892,6 +892,7 @@
           "alergias": "The pet parent has not recorded any allergies for this pet.",
           "vacinas": "The pet parent has not recorded any vaccines for this pet.",
           "medicamentos": "The pet parent has not recorded any medications for this pet.",
+          "tratamentosContinuos": "The pet parent has not recorded any ongoing treatment for this pet.",
           "comportamento": "The pet parent has not recorded any behavior notes for this pet.",
           "diagnosticos": "The pet parent has not recorded any diagnoses for this pet.",
           "diario": "The pet parent has not recorded any diary entries for this pet.",
@@ -901,6 +902,17 @@
       "emptyTitle": "Nothing shared in this access",
       "emptyBody": "The pet parent granted the visit but did not include any clinical data for {pet}. Whatever you record in the notes still reaches them.",
       "emptyCta": "Go to notes"
+    },
+    "tratamentos": {
+      "title": "Ongoing treatment",
+      "lede": "Medication the pet takes every day. This is the one that cannot be missed during the stay.",
+      "count": "{n} treatments",
+      "campos": {
+        "motivo": "What it is for",
+        "diagnostico": "Diagnosis",
+        "desde": "Since",
+        "observacoes": "Notes from the pet parent"
+      }
     },
     "documentos": {
       "title": "Shared documents",
@@ -950,6 +962,9 @@
       "textoPlaceholder": "How the visit went, remarks for the pet parent...",
       "profissional": "Professional (optional)",
       "profissionalPlaceholder": "If empty, we use your account name",
+      "especialidade": "Area of practice (optional)",
+      "especialidadeOutraPlaceholder": "e.g. Acupuncture",
+      "especialidadeNaoSalva": "The note was saved, but this server does not store the area of practice yet.",
       "anexos": "Attachments (up to {n})",
       "adicionarAnexo": "Add attachment",
       "anexoHint": "JPG, PNG, WebP, HEIC, or PDF, up to 10 MB each.",
@@ -970,6 +985,21 @@
         "title": "Recording blocked",
         "body": "You can read this appointment record, but you cannot record your notes while the registration is suspended."
       }
+    },
+    "especialidade": {
+      "CLINICO_GERAL": "General practice",
+      "CARDIOLOGIA": "Cardiology",
+      "DERMATOLOGIA": "Dermatology",
+      "ORTOPEDIA": "Orthopedics",
+      "OFTALMOLOGIA": "Ophthalmology",
+      "ODONTOLOGIA": "Dentistry",
+      "NEUROLOGIA": "Neurology",
+      "ONCOLOGIA": "Oncology",
+      "ENDOCRINOLOGIA": "Endocrinology",
+      "GASTROENTEROLOGIA": "Gastroenterology",
+      "CIRURGIA": "Surgery",
+      "ANIMAIS_EXOTICOS": "Exotic animals",
+      "OUTRA": "Other"
     },
     "estruturada": {
       "title": {

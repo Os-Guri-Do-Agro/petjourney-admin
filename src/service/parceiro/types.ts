@@ -317,12 +317,49 @@ export type EntradaDiarioCompartilhada = {
  */
 export type MotivoBlocoVazio = 'SEM_REGISTRO' | 'FILTRADO_JANELA' | 'REMOVIDO_PELO_TUTOR'
 
+/**
+ * Tratamento contínuo do pet (Parte 16), em bloco próprio.
+ *
+ * Não é um `ItemSnapshot` com campos a mais: o que separa os dois não é layout,
+ * é o dano de não cumprir. "Toma 1 comprimido todo dia" e "tomou dipirona uma
+ * vez em março" não podem pesar igual para quem vai cuidar do pet uma semana.
+ * Posologia, motivo, diagnóstico, "desde quando" e observação vêm separados
+ * porque é o que torna o tratamento executável por quem não convive com ele.
+ */
+export type ItemTratamentoContinuo = {
+  /** Nome do medicamento, texto livre do responsável. O backend não traduz. */
+  titulo: string
+  /** Posologia numa linha: "2 mg · 1x ao dia · oral". */
+  detalhe?: string | null
+  /**
+   * Mesma linha com os termos traduzidos. Hoje sai igual a `detalhe` (é tudo
+   * texto livre) e existe por simetria: quando dose, frequência ou via virarem
+   * enum, a tradução entra lá e a tela não muda. Leia `detalheLabel ?? detalhe`.
+   */
+  detalheLabel?: string | null
+  /** Sempre `true` vindo da API: é o item cuja falha tem dano imediato. */
+  destaque: boolean
+  /** Para que serve, texto livre do responsável ("para a dor"). */
+  motivo?: string | null
+  /**
+   * Diagnóstico vinculado, já localizado ("Hepática", nunca `HEPATICA`). Campo
+   * PRÓPRIO e não fallback de `motivo`: o caso comum é os dois preenchidos, e
+   * mostrar só um entrega ao parceiro menos do que o responsável viu.
+   */
+  diagnostico?: string | null
+  /** ISO 8601 da data de início. O "desde quando". */
+  desde?: string | null
+  /** Observação do responsável ("dar junto com a comida"). */
+  observacoes?: string | null
+}
+
 export type BlocoSnapshot =
   | 'alergias'
   | 'vacinas'
   | 'medicamentos'
   | 'comportamento'
   | 'diagnosticos'
+  | 'tratamentosContinuos'
   | 'diario'
   | 'documentos'
 
@@ -349,6 +386,20 @@ export type SnapshotPetCompartilhado = {
   medicamentos?: ItemSnapshot[]
   comportamento?: ItemSnapshot[]
   diagnosticos?: ItemSnapshot[]
+  /**
+   * Tratamento contínuo em bloco próprio (Parte 16).
+   *
+   * A AUSÊNCIA da chave carrega significado: acesso criado antes da Parte 16 não
+   * a tem, e é assim que a tela sabe que não deve abrir o bloco (naquele acesso
+   * o tratamento sai fundido dentro de `medicamentos`, como sempre esteve).
+   * `[]` diz outra coisa: o acesso fala sobre tratamento e não há nenhum em
+   * curso.
+   *
+   * Por isso nunca escreva `snapshot.tratamentosContinuos ?? []`: isso funde os
+   * dois casos e esconde o remédio de todo dia de todo acesso anterior ao
+   * deploy. Quem decide é `estadoTratamentosContinuos`, que recebe a chave crua.
+   */
+  tratamentosContinuos?: ItemTratamentoContinuo[]
   observacoesTutor?: string | null
   /** Vazio quando a categoria DIARIO não foi liberada. */
   diario?: EntradaDiarioCompartilhada[]
@@ -409,6 +460,15 @@ export type Anotacao = AnotacaoEstruturada & {
   id: string
   empresaNome: string
   profissionalNome: string | null
+  /**
+   * Área do profissional: a CHAVE do enum quando é uma das opções da lista, ou o texto
+   * livre quando ele escolheu "Outra". Quem traduz é a tela, nunca o backend, então nunca
+   * imprima este valor cru (ver `rotuloEspecialidade`).
+   *
+   * Ausente em anotação criada antes do campo existir, e é por isso que o tipo admite
+   * `undefined` além de `null`.
+   */
+  profissionalEspecialidade?: string | null
   servicoRealizado: string
   texto: string
   criadaEm: string
@@ -505,6 +565,11 @@ export type NovaAnotacaoPayload = {
   servicoRealizado: string
   texto: string
   profissionalNome?: string
+  /**
+   * Chave do enum ou texto livre, no máximo 60 caracteres. Ausente quando o parceiro não
+   * escolheu área: string vazia diria que a área é "".
+   */
+  profissionalEspecialidade?: string
   /** Tipo do acesso: decide quais campos estruturados podem ser enviados. */
   tipoServico: TipoServicoPrestador
   estruturado?: AnotacaoEstruturadaInput

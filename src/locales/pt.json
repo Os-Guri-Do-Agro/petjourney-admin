@@ -892,6 +892,7 @@
           "alergias": "O responsável não registrou alergias para este pet.",
           "vacinas": "O responsável não registrou vacinas para este pet.",
           "medicamentos": "O responsável não registrou medicamentos para este pet.",
+          "tratamentosContinuos": "O responsável não registrou tratamento contínuo para este pet.",
           "comportamento": "O responsável não registrou comportamento para este pet.",
           "diagnosticos": "O responsável não registrou diagnósticos para este pet.",
           "diario": "O responsável não registrou entradas de diário para este pet.",
@@ -901,6 +902,17 @@
       "emptyTitle": "Nada compartilhado neste acesso",
       "emptyBody": "O responsável liberou o atendimento, mas não incluiu nenhum dado clínico de {pet}. Mesmo assim, tudo que você registrar nas anotações chega até ele.",
       "emptyCta": "Ir para anotações"
+    },
+    "tratamentos": {
+      "title": "Tratamento contínuo",
+      "lede": "Remédio de uso contínuo. É o que o pet toma todo dia, e o que não pode faltar durante a estadia.",
+      "count": "{n} tratamentos",
+      "campos": {
+        "motivo": "Para que serve",
+        "diagnostico": "Diagnóstico",
+        "desde": "Desde",
+        "observacoes": "Observações do responsável"
+      }
     },
     "documentos": {
       "title": "Documentos compartilhados",
@@ -950,6 +962,9 @@
       "textoPlaceholder": "Como foi o atendimento, observações para o responsável...",
       "profissional": "Profissional (opcional)",
       "profissionalPlaceholder": "Se vazio, usamos o nome da sua conta",
+      "especialidade": "Área de atuação (opcional)",
+      "especialidadeOutraPlaceholder": "Ex.: Acupuntura",
+      "especialidadeNaoSalva": "A anotação foi salva, mas este servidor ainda não guarda a área de atuação.",
       "anexos": "Anexos (até {n})",
       "adicionarAnexo": "Adicionar anexo",
       "anexoHint": "JPG, PNG, WebP, HEIC ou PDF, até 10 MB cada.",
@@ -970,6 +985,21 @@
         "title": "Registro bloqueado",
         "body": "Você pode ler o prontuário deste atendimento, mas não registrar o retorno enquanto o cadastro estiver suspenso."
       }
+    },
+    "especialidade": {
+      "CLINICO_GERAL": "Clínico geral",
+      "CARDIOLOGIA": "Cardiologia",
+      "DERMATOLOGIA": "Dermatologia",
+      "ORTOPEDIA": "Ortopedia",
+      "OFTALMOLOGIA": "Oftalmologia",
+      "ODONTOLOGIA": "Odontologia",
+      "NEUROLOGIA": "Neurologia",
+      "ONCOLOGIA": "Oncologia",
+      "ENDOCRINOLOGIA": "Endocrinologia",
+      "GASTROENTEROLOGIA": "Gastroenterologia",
+      "CIRURGIA": "Cirurgia",
+      "ANIMAIS_EXOTICOS": "Animais exóticos",
+      "OUTRA": "Outra"
     },
     "estruturada": {
       "title": {

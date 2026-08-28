@@ -892,6 +892,7 @@
           "alergias": "El tutor no registró alergias para esta mascota.",
           "vacinas": "El tutor no registró vacunas para esta mascota.",
           "medicamentos": "El tutor no registró medicamentos para esta mascota.",
+          "tratamentosContinuos": "El tutor no registró tratamiento continuo para esta mascota.",
           "comportamento": "El tutor no registró comportamiento para esta mascota.",
           "diagnosticos": "El tutor no registró diagnósticos para esta mascota.",
           "diario": "El tutor no registró entradas de diario para esta mascota.",
@@ -901,6 +902,17 @@
       "emptyTitle": "Nada compartido en este acceso",
       "emptyBody": "El tutor autorizó la atención, pero no incluyó ningún dato clínico de {pet}. Lo que registre en las notas igual le llega.",
       "emptyCta": "Ir a las notas"
+    },
+    "tratamentos": {
+      "title": "Tratamiento continuo",
+      "lede": "Medicamento de uso continuo. Es lo que la mascota toma todos los días y lo que no puede faltar durante la estadía.",
+      "count": "{n} tratamientos",
+      "campos": {
+        "motivo": "Para qué sirve",
+        "diagnostico": "Diagnóstico",
+        "desde": "Desde",
+        "observacoes": "Observaciones del tutor"
+      }
     },
     "documentos": {
       "title": "Documentos compartidos",
@@ -950,6 +962,9 @@
       "textoPlaceholder": "Cómo fue la atención, observaciones para el tutor...",
       "profissional": "Profesional (opcional)",
       "profissionalPlaceholder": "Si queda vacío, usamos el nombre de su cuenta",
+      "especialidade": "Área de actuación (opcional)",
+      "especialidadeOutraPlaceholder": "Ej.: Acupuntura",
+      "especialidadeNaoSalva": "La anotación se guardó, pero este servidor todavía no guarda el área de actuación.",
       "anexos": "Adjuntos (hasta {n})",
       "adicionarAnexo": "Agregar adjunto",
       "anexoHint": "JPG, PNG, WebP, HEIC o PDF, hasta 10 MB cada uno.",
@@ -970,6 +985,21 @@
         "title": "Registro bloqueado",
         "body": "Puede leer el historial de esta atención, pero no registrar su devolución mientras el registro esté suspendido."
       }
+    },
+    "especialidade": {
+      "CLINICO_GERAL": "Clínica general",
+      "CARDIOLOGIA": "Cardiología",
+      "DERMATOLOGIA": "Dermatología",
+      "ORTOPEDIA": "Ortopedia",
+      "OFTALMOLOGIA": "Oftalmología",
+      "ODONTOLOGIA": "Odontología",
+      "NEUROLOGIA": "Neurología",
+      "ONCOLOGIA": "Oncología",
+      "ENDOCRINOLOGIA": "Endocrinología",
+      "GASTROENTEROLOGIA": "Gastroenterología",
+      "CIRURGIA": "Cirugía",
+      "ANIMAIS_EXOTICOS": "Animales exóticos",
+      "OUTRA": "Otra"
     },
     "estruturada": {
       "title": {

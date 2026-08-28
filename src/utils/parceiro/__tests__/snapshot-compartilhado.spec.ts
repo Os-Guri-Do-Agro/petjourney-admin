@@ -4,6 +4,7 @@ import type { ItemSnapshot, SnapshotPetCompartilhado } from '@/service/parceiro/
 import {
   carimboDoResumo,
   estadoDoBloco,
+  estadoTratamentosContinuos,
   montarBlocosLista,
   normalizarMotivo,
   rotuloItem,
@@ -90,13 +91,39 @@ describe('estadoDoBloco', () => {
     expect(estadoDoBloco(fonte(), 'medicamentos', 0)).toBe('GENERICO')
   })
 
-  /** Categoria retirada de um acesso já concedido: a seção fica, vazia, dizendo o porquê. */
+  /**
+   * Categoria retirada de um acesso já concedido: a seção fica, vazia, dizendo o porquê.
+   *
+   * O acesso chega com VACINAS FORA de `categorias`, que é como o backend responde depois
+   * da subtração. Enquanto a regra lia o consentimento antes do motivo, este caso caía em
+   * `OCULTO` e a frase nunca aparecia: quem atende lia ausência de vacina onde houve perda
+   * de permissão.
+   */
   it('categoria removida pelo responsável não se confunde com sem registro', () => {
+    const removida = fonte({
+      categorias: TODAS_CATEGORIAS.filter((c) => c !== 'VACINAS'),
+      snapshot: snapshot({ motivos: { vacinas: 'REMOVIDO_PELO_TUTOR' } }),
+    })
+
+    expect(estadoDoBloco(removida, 'vacinas', 0)).toBe('REMOVIDO_PELO_TUTOR')
+    expect(montarBlocosLista(removida).map((b) => b.id)).toContain('vacinas')
+  })
+
+  it('categoria removida com a categoria ainda na lista também fala', () => {
     const removida = fonte({
       snapshot: snapshot({ motivos: { vacinas: 'REMOVIDO_PELO_TUTOR' } }),
     })
 
     expect(estadoDoBloco(removida, 'vacinas', 0)).toBe('REMOVIDO_PELO_TUTOR')
+  })
+
+  it('conteúdo presente vence carimbo de removido residual', () => {
+    const removida = fonte({
+      categorias: TODAS_CATEGORIAS.filter((c) => c !== 'VACINAS'),
+      snapshot: snapshot({ motivos: { vacinas: 'REMOVIDO_PELO_TUTOR' } }),
+    })
+
+    expect(estadoDoBloco(removida, 'vacinas', 2)).toBe('OCULTO')
   })
 
   it('motivo presente para outro bloco não vaza para o bloco vazio', () => {
@@ -204,5 +231,74 @@ describe('carimboDoResumo', () => {
       data: '2026-08-10T10:00:00.000Z',
       atualizado: false,
     })
+  })
+})
+
+/**
+ * Bloco próprio de tratamento contínuo (Parte 16).
+ *
+ * A distinção entre chave AUSENTE e lista vazia é o miolo: errar nela esconde o remédio de
+ * todo dia de todo acesso criado antes do deploy, sem erro nenhum na tela.
+ */
+describe('estadoTratamentosContinuos', () => {
+  const REMEDIO = {
+    titulo: 'Prednisolona',
+    detalhe: '2 mg · 1x ao dia · oral',
+    detalheLabel: '2 mg · 1x ao dia · oral',
+    destaque: true,
+    motivo: 'para a dor',
+    diagnostico: 'Artrose',
+    desde: '2025-03-10T00:00:00.000Z',
+    observacoes: 'dar junto com a comida',
+  }
+
+  const comTratamentos = [...TODAS_CATEGORIAS, 'TRATAMENTOS']
+
+  it('chave ausente não abre o bloco: naquele acesso o remédio sai dentro de Medicamentos', () => {
+    expect(estadoTratamentosContinuos(fonte({ categorias: comTratamentos }))).toBe('OCULTO')
+  })
+
+  it('lista vazia com TRATAMENTOS consentido abre o bloco e diz por que está vazio', () => {
+    const vazio = fonte({
+      categorias: comTratamentos,
+      snapshot: snapshot({
+        tratamentosContinuos: [],
+        motivos: { tratamentosContinuos: 'SEM_REGISTRO' },
+      }),
+    })
+
+    expect(estadoTratamentosContinuos(vazio)).toBe('SEM_REGISTRO')
+  })
+
+  it('lista vazia sem TRATAMENTOS consentido não deixa rastro', () => {
+    const naoCompartilhado = fonte({ snapshot: snapshot({ tratamentosContinuos: [] }) })
+
+    expect(estadoTratamentosContinuos(naoCompartilhado)).toBe('OCULTO')
+  })
+
+  it('com tratamento em curso o bloco mostra conteúdo', () => {
+    const comItem = fonte({
+      categorias: comTratamentos,
+      snapshot: snapshot({ tratamentosContinuos: [REMEDIO] }),
+    })
+
+    expect(estadoTratamentosContinuos(comItem)).toBe('CONTEUDO')
+  })
+
+  it('retirada pelo responsável fala mesmo com a categoria fora da lista', () => {
+    const removido = fonte({
+      snapshot: snapshot({
+        tratamentosContinuos: [],
+        motivos: { tratamentosContinuos: 'REMOVIDO_PELO_TUTOR' },
+      }),
+    })
+
+    expect(estadoTratamentosContinuos(removido)).toBe('REMOVIDO_PELO_TUTOR')
+  })
+
+  it('acesso encerrado não abre o bloco', () => {
+    const encerrado = fonte({ status: 'REVOGADO', snapshot: null, categorias: undefined })
+
+    expect(estadoTratamentosContinuos(encerrado)).toBe('OCULTO')
   })
 })

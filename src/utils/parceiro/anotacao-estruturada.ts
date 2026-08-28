@@ -82,6 +82,12 @@ export const LIMITES_EXAME_SOLICITADO = {
 /** Campos livres que já existiam; ganharam teto no backend (`LIMITES_CAMPOS_LIVRES`). */
 export const LIMITES_CAMPOS_LIVRES = {
   profissionalNome: 200,
+  /**
+   * 60 basta: o valor e a CHAVE do enum (a mais longa, GASTROENTEROLOGIA, tem 18) ou uma
+   * area curta escrita a mao ("Fisioterapia"). O teto existe porque o campo e livre e vai
+   * parar na tela do responsavel.
+   */
+  profissionalEspecialidade: 60,
   servicoRealizado: 1000,
   texto: 10000,
 } as const

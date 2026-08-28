@@ -131,6 +131,12 @@ export function criarAnotacao(id: string, payload: NovaAnotacaoPayload, params?:
     form.set('profissionalNome', payload.profissionalNome.trim())
   }
 
+  // Campo ausente não entra no form, pela mesma razão dos estruturados: o backend precisa
+  // poder distinguir "não mandou" de "mandou vazio".
+  if (payload.profissionalEspecialidade?.trim()) {
+    form.set('profissionalEspecialidade', payload.profissionalEspecialidade.trim())
+  }
+
   appendEstruturado(form, payload)
 
   if (payload.anexos?.length) {

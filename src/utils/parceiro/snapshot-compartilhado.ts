@@ -1,6 +1,7 @@
 import type {
   BlocoSnapshot,
   ItemSnapshot,
+  ItemTratamentoContinuo,
   MotivoBlocoVazio,
   SnapshotPetCompartilhado,
   StatusCompartilhamento,
@@ -31,6 +32,7 @@ const CATEGORIA_DO_BLOCO: Record<BlocoSnapshot, string> = {
   medicamentos: 'MEDICAMENTOS',
   comportamento: 'COMPORTAMENTO',
   diagnosticos: 'DIAGNOSTICOS',
+  tratamentosContinuos: 'TRATAMENTOS',
   diario: 'DIARIO',
   documentos: 'DOCUMENTOS',
 }
@@ -109,7 +111,26 @@ export function estadoDoBloco(
   bloco: BlocoSnapshot,
   quantidade: number,
 ): EstadoBloco {
-  if (!snapshotDisponivel(fonte) || !categoriaCompartilhada(fonte, bloco)) {
+  if (!snapshotDisponivel(fonte)) {
+    return 'OCULTO'
+  }
+
+  const motivo = fonte.snapshot?.motivos?.[bloco]
+
+  /*
+   * `REMOVIDO_PELO_TUTOR` chega com a categoria FORA de `categorias`: ao subtrair,
+   * o backend a filtra da lista e grava o carimbo no snapshot. Ler o consentimento
+   * primeiro, como esta regra fazia, devolvia `OCULTO` e a frase nunca chegava à
+   * tela — justo a única que não podia faltar.
+   *
+   * Dizê-la não vaza nada: o carimbo só é gravado sobre categoria que ESTEVE no
+   * acesso. Calá-la, sim, faz quem atende ler "sem vacina" onde é "sem permissão".
+   */
+  if (motivo === 'REMOVIDO_PELO_TUTOR' && quantidade === 0) {
+    return 'REMOVIDO_PELO_TUTOR'
+  }
+
+  if (!categoriaCompartilhada(fonte, bloco)) {
     return 'OCULTO'
   }
 
@@ -117,7 +138,40 @@ export function estadoDoBloco(
     return 'CONTEUDO'
   }
 
-  return normalizarMotivo(bloco, fonte.snapshot?.motivos?.[bloco])
+  return normalizarMotivo(bloco, motivo)
+}
+
+/**
+ * Estado do bloco de tratamento contínuo (Parte 16).
+ *
+ * Separado de `estadoDoBloco` porque aqui quem decide é a presença da CHAVE, e não
+ * o tamanho da lista. São três coisas diferentes:
+ *
+ * - chave AUSENTE: acesso criado antes da Parte 16. Não existe bloco próprio, e o
+ *   tratamento daquele acesso sai fundido dentro de `medicamentos`, como sempre
+ *   esteve. Abrir um bloco vazio aqui diria que não há tratamento quando ele está
+ *   logo abaixo, em Medicamentos.
+ * - chave `[]` com `TRATAMENTOS` consentido: o acesso FALA sobre tratamento e não
+ *   há nenhum em curso. Isso é informação clínica e merece a frase de vazio.
+ * - chave `[]` sem `TRATAMENTOS`: o responsável não compartilhou tratamento. Não
+ *   deixa rastro, como qualquer categoria de fora.
+ */
+export function estadoTratamentosContinuos(fonte: FonteSnapshot): EstadoBloco {
+  if (!snapshotDisponivel(fonte)) {
+    return 'OCULTO'
+  }
+
+  const itens: ItemTratamentoContinuo[] | undefined = fonte.snapshot?.tratamentosContinuos
+
+  if (itens === undefined) {
+    // Chave ausente não é lista vazia. Só a retirada explícita fala mais alto, e
+    // ela não acontece sem a chave ter existido antes.
+    return fonte.snapshot?.motivos?.tratamentosContinuos === 'REMOVIDO_PELO_TUTOR'
+      ? 'REMOVIDO_PELO_TUTOR'
+      : 'OCULTO'
+  }
+
+  return estadoDoBloco(fonte, 'tratamentosContinuos', itens.length)
 }
 
 /** As cinco listas clínicas, na ordem, já resolvidas entre conteúdo e vazio-com-motivo. */

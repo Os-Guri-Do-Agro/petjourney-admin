@@ -28,6 +28,7 @@ import {
   getCompartilhamentoDetalhe,
 } from '@/service/parceiro/compartilhamentos-service'
 import type {
+  Anotacao,
   BlocoSnapshot,
   CompartilhamentoDetalhe,
   StatusCompartilhamento,
@@ -35,6 +36,14 @@ import type {
 } from '@/service/parceiro/types'
 import { calcularTempoRestante } from '@/utils/format/expiracao'
 import { classificarFalhaArquivo } from '@/utils/parceiro/arquivo-compartilhado'
+import {
+  ESPECIALIDADES,
+  ESPECIALIDADE_OUTRA,
+  rotuloEspecialidade,
+  servidorGuardouEspecialidade,
+  valorEspecialidade,
+  type EscolhaEspecialidade,
+} from '@/utils/parceiro/especialidade'
 import {
   criarAnotacaoEstruturadaForm,
   LIMITES_CAMPOS_LIVRES,
@@ -50,6 +59,7 @@ import type {
 import {
   carimboDoResumo,
   estadoDoBloco,
+  estadoTratamentosContinuos,
   montarBlocosLista,
   rotuloItem,
 } from '@/utils/parceiro/snapshot-compartilhado'
@@ -90,7 +100,43 @@ const anotacaoForm = reactive({
   servicoRealizado: '',
   texto: '',
   profissionalNome: '',
+  especialidade: null as EscolhaEspecialidade,
+  especialidadeOutra: '',
 })
+
+/** Prefixo das chaves de rotulo de area, usado no chip e na linha do autor. */
+const SUFIXO_ESPECIALIDADE = 'acessos.especialidade.'
+
+/** A lista fechada mais "Outra": fora dela, o valor e texto livre do parceiro. */
+const opcoesEspecialidade = [...ESPECIALIDADES, ESPECIALIDADE_OUTRA] as const
+
+/** Clicar de novo limpa: o campo e opcional e sem isso nao ha como desfazer a escolha. */
+function selecionarEspecialidade(opcao: (typeof opcoesEspecialidade)[number]) {
+  anotacaoForm.especialidade = anotacaoForm.especialidade === opcao ? null : opcao
+
+  if (anotacaoForm.especialidade !== ESPECIALIDADE_OUTRA) {
+    anotacaoForm.especialidadeOutra = ''
+  }
+}
+
+/**
+ * Linha do autor: "Dra. Ana (Cardiologia)".
+ *
+ * A area so vira parenteses quando existe: anotacao criada antes do campo vem sem ele e a
+ * linha sai como sempre saiu, nunca com "(null)". Sem nome e com area, a area aparece
+ * sozinha, porque e a unica coisa que se sabe de quem atendeu.
+ */
+function autorDaAnotacao(anotacao: Anotacao): string | null {
+  const area = rotuloEspecialidade(anotacao.profissionalEspecialidade, (chave) =>
+    t(SUFIXO_ESPECIALIDADE + chave),
+  )
+
+  if (!anotacao.profissionalNome) {
+    return area
+  }
+
+  return area ? anotacao.profissionalNome + ' (' + area + ')' : anotacao.profissionalNome
+}
 const estruturadaForm = ref(criarAnotacaoEstruturadaForm())
 const estruturadaErros = ref<Record<string, string>>({})
 const anexosForm = ref<AnexoForm[]>([])
@@ -237,6 +283,52 @@ const snapshotListSections = computed(() =>
 )
 
 /**
+ * Tratamento contínuo em bloco próprio (Parte 16): o remédio de todo dia.
+ *
+ * Quem decide se o bloco existe é `estadoTratamentosContinuos`, e não o tamanho desta
+ * lista: a chave ausente no snapshot significa "acesso criado antes da Parte 16", e ali o
+ * tratamento continua saindo fundido dentro de Medicamentos. O `?? []` abaixo é só para
+ * iterar depois que o estado já disse `CONTEUDO`.
+ */
+const tratamentosEstado = computed(() => estadoTratamentosContinuos(fonteSnapshot.value))
+
+const tratamentosContinuos = computed(() =>
+  (detalhe.value?.snapshot?.tratamentosContinuos ?? []).map((item, index) => {
+    const campos = [
+      { chave: 'motivo', valor: item.motivo },
+      { chave: 'diagnostico', valor: item.diagnostico },
+      { chave: 'desde', valor: item.desde ? formatDate(item.desde) : null },
+    ]
+      // Campo nulo não vira linha vazia nem "(null)" na tela.
+      .filter((campo) => Boolean(campo.valor && campo.valor.trim()))
+      .map((campo) => ({
+        chave: campo.chave,
+        label: t(`acessos.tratamentos.campos.${campo.chave}`),
+        valor: campo.valor as string,
+      }))
+
+    return {
+      key: `${item.titulo}-${index}`,
+      titulo: item.titulo,
+      /*
+       * `detalheLabel` é a mesma posologia com os enums traduzidos. Hoje sai igual a
+       * `detalhe` (dose, frequência e via são texto livre do responsável); ler o label
+       * primeiro deixa a tela pronta para quando algum deles virar enum no backend.
+       */
+      posologia: (item.detalheLabel ?? item.detalhe ?? '').trim(),
+      campos,
+      observacoes: item.observacoes?.trim() || null,
+    }
+  }),
+)
+
+const tratamentosVazioTexto = computed(() =>
+  tratamentosEstado.value === 'OCULTO' || tratamentosEstado.value === 'CONTEUDO'
+    ? ''
+    : textoMotivo('tratamentosContinuos', tratamentosEstado.value),
+)
+
+/**
  * Documentos do prontuário liberados item a item. O snapshot traz só ids do cofre
  * (`arquivoIds`), nunca URL: cada abrir/baixar pede uma signed URL nova.
  */
@@ -335,6 +427,7 @@ const resumoVazio = computed(
     !mensagemTutor.value &&
     !showObservacoesTutor.value &&
     snapshotListSections.value.length === 0 &&
+    tratamentosEstado.value === 'OCULTO' &&
     documentosEstado.value === 'OCULTO' &&
     diarioEstado.value === 'OCULTO',
 )
@@ -415,6 +508,8 @@ function resetAnotacaoForm() {
   anotacaoForm.servicoRealizado = ''
   anotacaoForm.texto = ''
   anotacaoForm.profissionalNome = ''
+  anotacaoForm.especialidade = null
+  anotacaoForm.especialidadeOutra = ''
   estruturadaForm.value = criarAnotacaoEstruturadaForm()
   estruturadaErros.value = {}
   anexosForm.value = []
@@ -548,6 +643,12 @@ async function submitAnotacao() {
     return
   }
 
+  const areaEnviada = valorEspecialidade(
+    anotacaoForm.especialidade,
+    anotacaoForm.especialidadeOutra,
+    LIMITES_CAMPOS_LIVRES.profissionalEspecialidade,
+  )
+
   submittingAnotacao.value = true
   formError.value = ''
 
@@ -558,6 +659,7 @@ async function submitAnotacao() {
         servicoRealizado: servico,
         texto,
         profissionalNome: anotacaoForm.profissionalNome.trim() || undefined,
+        profissionalEspecialidade: areaEnviada,
         tipoServico: detalhe.value.tipoServico,
         estruturado:
           montarAnotacaoEstruturada(detalhe.value.tipoServico, estruturadaForm.value) ?? undefined,
@@ -566,6 +668,20 @@ async function submitAnotacao() {
       },
       parceiroQuery(),
     )
+
+    /*
+     * A rota e multipart e nao passa pela ValidationPipe: um servidor que nao conhece o
+     * campo o ignora em SILENCIO, sem 400 nenhum. Comparar o que foi mandado com o que
+     * voltou e o unico jeito de saber, e sem este aviso o parceiro preencheria a area,
+     * veria a anotacao salva e nunca descobriria que ela nao foi guardada.
+     */
+    if (!servidorGuardouEspecialidade(areaEnviada, nova.profissionalEspecialidade)) {
+      toast.add({
+        severity: 'warn',
+        summary: t('acessos.anotacao.especialidadeNaoSalva'),
+        life: 6000,
+      })
+    }
 
     detalhe.value = {
       ...detalhe.value,
@@ -895,6 +1011,50 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           </section>
         </div>
 
+        <!-- Tratamento contínuo (Parte 16), ACIMA das listas clínicas: é o remédio de
+             todo dia, e o item cuja falha tem dano imediato para quem vai cuidar do pet
+             sem conviver com ele. -->
+        <section
+          v-if="tratamentosEstado !== 'OCULTO'"
+          class="atd-diario"
+          aria-labelledby="atd-trat-title"
+        >
+          <header class="atd-docs__head">
+            <div>
+              <h2 id="atd-trat-title">{{ t('acessos.tratamentos.title') }}</h2>
+              <p v-if="isGuidanceVisible">{{ t('acessos.tratamentos.lede') }}</p>
+            </div>
+            <span v-if="tratamentosContinuos.length" class="atd-docs__count">{{
+              t('acessos.tratamentos.count', { n: tratamentosContinuos.length })
+            }}</span>
+          </header>
+
+          <p v-if="tratamentosVazioTexto" class="atd-bloco-vazio">{{ tratamentosVazioTexto }}</p>
+
+          <ul v-else class="atd-trat__list">
+            <li v-for="item in tratamentosContinuos" :key="item.key" class="atd-trat__entry">
+              <header class="atd-trat__head">
+                <i class="pi pi-heart-fill" aria-hidden="true" />
+                <strong>{{ item.titulo }}</strong>
+              </header>
+
+              <p v-if="item.posologia" class="atd-trat__posologia">{{ item.posologia }}</p>
+
+              <dl v-if="item.campos.length" class="atd-trat__grid">
+                <div v-for="campo in item.campos" :key="campo.chave">
+                  <dt>{{ campo.label }}</dt>
+                  <dd>{{ campo.valor }}</dd>
+                </div>
+              </dl>
+
+              <div v-if="item.observacoes" class="atd-trat__text">
+                <span>{{ t('acessos.tratamentos.campos.observacoes') }}</span>
+                <p>{{ item.observacoes }}</p>
+              </div>
+            </li>
+          </ul>
+        </section>
+
         <section
           v-if="snapshotListSections.length"
           class="atd-clinical"
@@ -1176,10 +1336,10 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     <p class="atd-note__byline">
                       <i class="pi pi-building" aria-hidden="true" />
                       <span>{{ anotacao.empresaNome }}</span>
-                      <template v-if="anotacao.profissionalNome">
+                      <template v-if="autorDaAnotacao(anotacao)">
                         <span class="atd-note__sep" aria-hidden="true">·</span>
                         <i class="pi pi-user" aria-hidden="true" />
-                        <span>{{ anotacao.profissionalNome }}</span>
+                        <span>{{ autorDaAnotacao(anotacao) }}</span>
                       </template>
                     </p>
                   </header>
@@ -1289,6 +1449,34 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   v-model="anotacaoForm.profissionalNome"
                   :maxlength="LIMITES_CAMPOS_LIVRES.profissionalNome"
                   :placeholder="t('acessos.anotacao.profissionalPlaceholder')"
+                />
+              </div>
+
+              <!-- Area de atuacao: lista fechada em chips mais "Outra" com texto livre.
+                   O que viaja e a CHAVE quando e uma das opcoes; "Fisioterapia" e
+                   "Acupuntura" sao casos legitimos e um enum fechado viraria 400. -->
+              <div class="atd-field">
+                <span class="atd-field__label">{{ t('acessos.anotacao.especialidade') }}</span>
+                <div class="atd-chips">
+                  <button
+                    v-for="opcao in opcoesEspecialidade"
+                    :key="opcao"
+                    type="button"
+                    class="atd-chip"
+                    :class="{ 'atd-chip--on': anotacaoForm.especialidade === opcao }"
+                    :aria-pressed="anotacaoForm.especialidade === opcao"
+                    :disabled="submittingAnotacao"
+                    @click="selecionarEspecialidade(opcao)"
+                  >
+                    {{ t(SUFIXO_ESPECIALIDADE + opcao) }}
+                  </button>
+                </div>
+                <InputText
+                  v-if="anotacaoForm.especialidade === ESPECIALIDADE_OUTRA"
+                  v-model="anotacaoForm.especialidadeOutra"
+                  :maxlength="LIMITES_CAMPOS_LIVRES.profissionalEspecialidade"
+                  :placeholder="t('acessos.anotacao.especialidadeOutraPlaceholder')"
+                  :disabled="submittingAnotacao"
                 />
               </div>
 
@@ -2036,6 +2224,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   font-weight: 700;
 }
 
+.atd-trat__list,
 .atd-diario__list {
   display: grid;
   gap: 0.55rem;
@@ -2045,6 +2234,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   list-style: none;
 }
 
+.atd-trat__entry,
 .atd-diario__entry {
   display: grid;
   gap: 0.55rem;
@@ -2055,6 +2245,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   background: var(--partner-card);
 }
 
+.atd-trat__head,
 .atd-diario__head {
   display: flex;
   align-items: center;
@@ -2063,9 +2254,54 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   font-size: 0.86rem;
 }
 
+.atd-trat__head i,
 .atd-diario__head i {
   color: var(--partner-primary-strong);
   font-size: 0.8rem;
+}
+
+.atd-trat__posologia {
+  margin: 0;
+  color: var(--partner-amber-text);
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.atd-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.atd-chip {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--partner-line);
+  border-radius: 999px;
+  background: var(--partner-card);
+  color: var(--partner-muted);
+  font-size: 0.76rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.atd-chip:hover:not(:disabled) {
+  border-color: var(--partner-primary-strong);
+  color: var(--partner-text);
+}
+
+.atd-chip--on {
+  border-color: var(--partner-primary-strong);
+  background: color-mix(in srgb, var(--partner-primary-strong) 12%, var(--partner-card));
+  color: var(--partner-primary-strong);
+}
+
+.atd-chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .atd-diario__tags {
@@ -2092,6 +2328,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   color: var(--partner-amber-text);
 }
 
+.atd-trat__grid,
 .atd-diario__grid {
   display: grid;
   gap: 0.35rem;
@@ -2099,6 +2336,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   margin: 0;
 }
 
+.atd-trat__grid dt,
 .atd-diario__grid dt {
   color: var(--partner-faint);
   font-size: 0.68rem;
@@ -2107,6 +2345,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   text-transform: uppercase;
 }
 
+.atd-trat__grid dd,
 .atd-diario__grid dd {
   margin: 0.1rem 0 0;
   color: var(--partner-text);
@@ -2114,6 +2353,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   font-weight: 650;
 }
 
+.atd-trat__text span,
 .atd-diario__text span {
   display: block;
   color: var(--partner-faint);
@@ -2123,6 +2363,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   text-transform: uppercase;
 }
 
+.atd-trat__text p,
 .atd-diario__text p {
   margin: 0.15rem 0 0;
   color: var(--partner-text);
