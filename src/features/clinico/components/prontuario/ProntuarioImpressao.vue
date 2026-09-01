@@ -90,11 +90,37 @@ const sistemasAvaliados = computed(() =>
  * Sinais gerais viram uma linha de "rótulo: valor" só com o que foi respondido. Imprimir os
  * campos em branco produziria meia página de dois-pontos vazios.
  */
+/**
+ * Mucosas e hidratação para o papel.
+ *
+ * Só o que foi avaliado entra: "Mucosas: não avaliadas" num prontuário impresso ocupa linha
+ * para dizer que ninguém olhou, e o silêncio já diz isso.
+ */
+const perfusao = computed(() => {
+  const { mucosas, hidratacao } = props.encounter.exameFisico
+  const itens: Array<{ rotulo: string; valor: string }> = []
+
+  if (mucosas && mucosas !== 'nao-avaliado') {
+    itens.push({
+      rotulo: t('clinico.prontuario.exameFisico.mucosas'),
+      valor: t(`clinico.prontuario.exameFisico.mucosa.${mucosas}`),
+    })
+  }
+
+  if (hidratacao) {
+    itens.push({
+      rotulo: t('clinico.prontuario.exameFisico.hidratacaoRotulo'),
+      valor: t(`clinico.prontuario.exameFisico.hidratacao.${hidratacao}`),
+    })
+  }
+
+  return itens
+})
+
 const sinaisGerais = computed(() => {
   const { anamnese } = props.encounter
   const campos: Array<[string, string]> = [
     ['apetite', anamnese.apetite],
-    ['hidratacao', anamnese.hidratacao],
     ['evacuacao', anamnese.evacuacao],
     ['miccao', anamnese.miccao],
     ['ambiente', anamnese.ambiente],
@@ -246,6 +272,20 @@ function nomeDoExame(id: string) {
     <!-- exame físico -->
     <section class="bloco">
       <h2>{{ t('clinico.prontuario.exameFisico.titulo') }}</h2>
+
+      <!--
+        Mucosas e hidratação antes da tabela de vitais: no papel, é a leitura de perfusão que
+        contextualiza os números que vêm em seguida. A hidratação saiu da anamnese e chegou
+        aqui — é achado de exame, não relato do responsável.
+      -->
+      <p v-if="perfusao.length > 0" class="campo">
+        <span class="campo__rotulo">{{ t('clinico.prontuario.exameFisico.perfusao') }}</span>
+        <span>
+          <template v-for="(item, indice) in perfusao" :key="item.rotulo">
+            <template v-if="indice > 0"> · </template>{{ item.rotulo }}: {{ item.valor }}
+          </template>
+        </span>
+      </p>
 
       <table v-if="vitaisRegistrados.length > 0" class="tabela">
         <thead>

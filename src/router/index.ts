@@ -1,6 +1,12 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 import { EQUIPE_MENU_ENABLED } from '@/composables/useAppNavigation'
+import {
+  aplicarParametroDaUrl,
+  PARAMETRO_DO_MODULO,
+  rotaPertenceAoModulo,
+  useModuloClinico,
+} from '@/composables/useModuloClinico'
 import { isAuthenticated } from '@/service/auth/auth-session'
 
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
@@ -70,6 +76,31 @@ function getSafeRedirectPath(redirect: unknown) {
 router.beforeEach((to) => {
   const hasActiveSession = isAuthenticated()
   const isPublicRoute = publicRoutes.has(to.path)
+
+  /*
+   * O interruptor oculto do módulo clínico.
+   *
+   * O parâmetro é lido em **qualquer** rota, não só nas clínicas: é assim que o link de
+   * demonstração funciona a partir de onde a pessoa já estiver. Depois de aplicado, ele sai da
+   * URL — `?clinico=on` colado na barra de endereço transforma o caminho oculto numa placa, e
+   * qualquer captura de tela o entregaria.
+   */
+  if (aplicarParametroDaUrl(to.query[PARAMETRO_DO_MODULO])) {
+    const query = { ...to.query }
+
+    delete query[PARAMETRO_DO_MODULO]
+
+    return { path: to.path, query, hash: to.hash, replace: true }
+  }
+
+  /*
+   * Menu escondido não basta: sem esta guarda, quem tem `/veterinario/agenda` no histórico do
+   * navegador continuaria entrando. Redireciona para o início em vez de mostrar "não
+   * encontrado" — a rota existe, só não é para ser alcançada assim.
+   */
+  if (hasActiveSession && rotaPertenceAoModulo(to.path) && !useModuloClinico().ativo.value) {
+    return getDefaultLandingPath()
+  }
 
   if (to.path === '/' || to.path === '/tutor') {
     return hasActiveSession

@@ -10,7 +10,8 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 import { waitlistRepository } from '../data/repositories'
-import type { ISODateTime, WaitlistEntry } from '../data/types'
+import type { ISODateTime, WaitlistEntry, WaitlistPriority, WaitlistWindow } from '../data/types'
+import { posicoesDaFila } from '../domain/waitlist'
 
 import { clinicClock, useClinicoStore } from './clinico'
 
@@ -42,6 +43,18 @@ export const useFilaStore = defineStore('clinico-fila', () => {
   )
 
   const vazio = computed(() => !carregando.value && !erro.value && ativas.value.length === 0)
+
+  /**
+   * Posição de cada entrada que aguarda. É o que responde "sou o quantos?" no telefone.
+   *
+   * Fica na store, e não na tela, porque a agenda também precisa dela: a oferta de vaga mostra
+   * os candidatos e a posição é o que justifica a ordem em que eles aparecem.
+   */
+  const posicoes = computed(() => posicoesDaFila(entradas.value))
+
+  function posicaoDe(id: string): number | null {
+    return posicoes.value.get(id) ?? null
+  }
 
   async function carregar() {
     carregando.value = true
@@ -100,6 +113,39 @@ export const useFilaStore = defineStore('clinico-fila', () => {
     }
   }
 
+  /**
+   * Entrada manual na fila.
+   *
+   * O caminho que fechava o ciclo e não existia: sem horário bom, o responsável entra na fila
+   * ali mesmo, sem trocar de tela e sem a recepção anotar num papel.
+   */
+  async function adicionar(input: {
+    petId: string
+    tutorId: string
+    typeId: string
+    professionalId: string | null
+    prioridade: WaitlistPriority
+    janelas: WaitlistWindow[]
+    observacao: string
+  }) {
+    salvando.value = true
+
+    try {
+      const criada = await waitlistRepository.adicionar(input)
+
+      clinico.invalidarTudo()
+      await carregar()
+
+      return criada
+    } catch {
+      erro.value = 'clinico.erros.mutacao'
+
+      return null
+    } finally {
+      salvando.value = false
+    }
+  }
+
   async function remover(id: string) {
     salvando.value = true
 
@@ -133,6 +179,9 @@ export const useFilaStore = defineStore('clinico-fila', () => {
     erro,
     vazio,
     vagaAberta,
+    posicoes,
+    posicaoDe,
+    adicionar,
     carregar,
     aoLiberarHorario,
     dispensarVaga,

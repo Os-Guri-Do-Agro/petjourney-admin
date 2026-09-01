@@ -17,6 +17,7 @@ import type {
   AgendaDia,
   Appointment,
   AppointmentStatus,
+  AppointmentTypeKind,
   Block,
   BlockReason,
   CancelReason,
@@ -56,6 +57,8 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
   const agrupamento = ref<AgrupamentoAgenda>('profissional')
   const filtroProfissionais = ref<string[]>([])
   const filtroStatus = ref<AppointmentStatus[]>([])
+  /** Filtro por tipo de atendimento — é a legenda quem o liga e desliga. */
+  const filtroTipos = ref<AppointmentTypeKind[]>([])
   const focoId = ref<string | null>(null)
 
   const dia = ref<AgendaDia | null>(null)
@@ -184,7 +187,13 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
 
   async function mover(
     id: string,
-    destino: { inicio: ISODateTime; fim: ISODateTime; professionalId?: string },
+    destino: {
+      inicio: ISODateTime
+      fim: ISODateTime
+      professionalId?: string
+      /** Ausente significa "mantém as salas"; presente substitui a lista inteira. */
+      roomIds?: string[]
+    },
   ) {
     const resultado = await comSalvamento(() => agendaRepository.mover(id, destino))
 
@@ -284,9 +293,16 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
       : [...filtroStatus.value, status]
   }
 
+  function alternarFiltroTipo(kind: AppointmentTypeKind) {
+    filtroTipos.value = filtroTipos.value.includes(kind)
+      ? filtroTipos.value.filter((item) => item !== kind)
+      : [...filtroTipos.value, kind]
+  }
+
   function limparFiltros() {
     filtroProfissionais.value = []
     filtroStatus.value = []
+    filtroTipos.value = []
   }
 
   return {
@@ -295,6 +311,7 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
     agrupamento,
     filtroProfissionais,
     filtroStatus,
+    filtroTipos,
     focoId,
     dia,
     semanaDias,
@@ -325,6 +342,7 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
     hoje,
     alternarFiltroProfissional,
     alternarFiltroStatus,
+    alternarFiltroTipo,
     limparFiltros,
   }
 })

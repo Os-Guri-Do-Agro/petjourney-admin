@@ -12,7 +12,7 @@
 import { watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import type { AppointmentStatus } from '../data/types'
+import type { AppointmentStatus, AppointmentTypeKind } from '../data/types'
 import type { AgrupamentoAgenda, VisaoAgenda } from '../stores/agenda'
 import { useAgendaStore } from '../stores/agenda'
 import { clinicClock } from '../stores/clinico'
@@ -27,6 +27,15 @@ const STATUS: AppointmentStatus[] = [
   'finalizado',
   'falta',
   'cancelado',
+]
+const TIPOS: AppointmentTypeKind[] = [
+  'consulta',
+  'retorno',
+  'vacina',
+  'exame',
+  'cirurgia',
+  'banho',
+  'emergencia',
 ]
 
 function comoLista(valor: unknown): string[] {
@@ -57,6 +66,7 @@ export function useAgendaUrlState() {
     const agrupar = primeiro(route.query.agrupar) as AgrupamentoAgenda
     const profissionais = comoLista(primeiro(route.query.prof))
     const status = comoLista(primeiro(route.query.status)) as AppointmentStatus[]
+    const tipos = comoLista(primeiro(route.query.tipo)) as AppointmentTypeKind[]
     const foco = primeiro(route.query.foco)
 
     agenda.data = /^\d{4}-\d{2}-\d{2}$/.test(data) ? data : clinicClock.today()
@@ -64,6 +74,7 @@ export function useAgendaUrlState() {
     agenda.agrupamento = AGRUPAMENTOS.includes(agrupar) ? agrupar : 'profissional'
     agenda.filtroProfissionais = profissionais
     agenda.filtroStatus = status.filter((item) => STATUS.includes(item))
+    agenda.filtroTipos = tipos.filter((item) => TIPOS.includes(item))
     agenda.focoId = foco || null
   }
 
@@ -91,6 +102,10 @@ export function useAgendaUrlState() {
       query.status = agenda.filtroStatus.join(',')
     }
 
+    if (agenda.filtroTipos.length > 0) {
+      query.tipo = agenda.filtroTipos.join(',')
+    }
+
     if (agenda.focoId) {
       query.foco = agenda.focoId
     }
@@ -112,6 +127,7 @@ export function useAgendaUrlState() {
       agenda.agrupamento,
       agenda.filtroProfissionais.join(','),
       agenda.filtroStatus.join(','),
+      agenda.filtroTipos.join(','),
       agenda.focoId,
     ],
     escreverNaUrl,

@@ -38,6 +38,7 @@ function pet(patch: Partial<Pet> = {}): Pet {
     especie: 'canina',
     raca: 'SRD',
     sexo: 'macho',
+    porte: null,
     nascimento: '2020-01-01',
     castrado: true,
     pesoKg: 10,

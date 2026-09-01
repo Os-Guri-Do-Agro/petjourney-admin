@@ -14,6 +14,8 @@ export type MockOperation =
   | 'agenda.cancelar'
   | 'agenda.bloqueio'
   | 'agenda.reserva'
+  /** Busca de horários livres — hoje só o retorno do prontuário a consome. */
+  | 'agenda.slots'
   | 'encounter.abrir'
   | 'encounter.salvar'
   | 'encounter.finalizar'

@@ -43,7 +43,7 @@ export function progressoDaAnamnese(encounter: Encounter): ProgressoDaEtapa {
     anamnese.historia.trim(),
     anamnese.duracaoSintomas.trim(),
     anamnese.apetite,
-    anamnese.hidratacao,
+    anamnese.evacuacao,
   ]
 
   const preenchidos = campos.filter(Boolean).length

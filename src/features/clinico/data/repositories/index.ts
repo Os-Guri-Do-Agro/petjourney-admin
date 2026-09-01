@@ -7,6 +7,7 @@ export { waitlistRepository, OFERTA_MINUTOS } from './waitlist-repository'
 export {
   patientRepository,
   LIMITE_REINCIDENCIA,
+  type FaltaDetalhada,
   type PacienteResumo,
 } from './patient-repository'
 export { catalogRepository, type CatalogosClinicos } from './catalog-repository'

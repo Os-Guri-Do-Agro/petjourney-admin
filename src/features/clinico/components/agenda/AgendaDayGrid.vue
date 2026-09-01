@@ -17,11 +17,14 @@ import AgendaAppointmentCard from './AgendaAppointmentCard.vue'
 import { useAgendaDia } from '../../composables/useAgendaDia'
 import { useAgendaDrag, type ArrasteProposta } from '../../composables/useAgendaDrag'
 import { useClinicFormat } from '../../composables/useClinicFormat'
+import type { Appointment } from '../../data/types'
 import { useAgendaStore } from '../../stores/agenda'
+import { clinicClock } from '../../stores/clinico'
 
 const emit = defineEmits<{
   abrir: [appointmentId: string]
   propor: [proposta: ArrasteProposta]
+  marcarFalta: [appointmentId: string]
   criarEm: [payload: { professionalId: string; minuto: number }]
 }>()
 
@@ -77,11 +80,38 @@ function colunaDoPonteiro(evento: PointerEvent) {
  */
 let ultimoArrasteEm = 0
 
+/**
+ * O que a coluna de destino significa, no agrupamento vigente.
+ *
+ * Por profissional, soltar na coluna vizinha troca quem atende e mantém a sala. Por sala, é o
+ * contrário: troca a sala e mantém quem atende — e a troca é **cirúrgica**, substituindo só a
+ * sala de origem na lista. Um atendimento pode ocupar duas salas (centro cirúrgico e
+ * recuperação); arrastar da coluna "Recuperação" para "Consultório 2" não pode apagar o centro
+ * cirúrgico junto.
+ */
+function destinoDaColuna(colunaId: string, appointment: Appointment) {
+  if (agenda.agrupamento === 'profissional') {
+    return { professionalId: colunaId, roomIds: appointment.roomIds }
+  }
+
+  const origem = colunas.value.find((coluna) =>
+    coluna.cards.some((card) => card.id === appointment.id),
+  )
+  const salaDeOrigem = origem?.roomId ?? null
+
+  const roomIds = salaDeOrigem
+    ? appointment.roomIds.map((id) => (id === salaDeOrigem ? colunaId : id))
+    : [...new Set([...appointment.roomIds, colunaId])]
+
+  return { professionalId: appointment.professionalId, roomIds: [...new Set(roomIds)] }
+}
+
 const arraste = useAgendaDrag({
   data: () => agenda.data,
   passoMinutos: () => passoDaGrade.value,
   minutoDoPonteiro,
   colunaDoPonteiro,
+  destinoDaColuna,
   aoPropor: (proposta) => {
     ultimoArrasteEm = performance.now()
     emit('propor', proposta)
@@ -116,10 +146,38 @@ const previaVisual = computed(() => {
     return null
   }
 
+  /**
+   * Conflitos **do destino**, recalculados a cada pixel do gesto.
+   *
+   * Antes o fantasma herdava `conflitos` do card original, e isso mentia nas duas direções:
+   * arrastar para um horário livre continuava exibindo o aviso antigo, e arrastar para cima de
+   * um horário cheio não exibia nada até soltar. Quem arrasta precisa ver a sobreposição
+   * **enquanto** decide — descobrir só na caixa de confirmação transforma cada tentativa num
+   * diálogo para fechar.
+   */
+  const inicio = clinicClock.toIso(agenda.data, previa.inicioMin)
+  const fim = clinicClock.toIso(agenda.data, previa.fimMin)
+  const destino = destinoDaColuna(previa.colunaId, original.appointment)
+
+  const conflitos = agenda.conflitosDe({
+    id: original.appointment.id,
+    petId: original.appointment.petId,
+    professionalId: destino.professionalId,
+    roomIds: destino.roomIds,
+    typeId: original.appointment.typeId,
+    inicio,
+    fim,
+    linkedGroupId: original.appointment.linkedGroupId,
+  })
+
   return {
     colunaId: previa.colunaId,
+    conflitos,
+    /** Só aviso e impedimento acendem a faixa; `info` continua assunto do diálogo. */
+    alerta: conflitos.some((conflito) => conflito.severity !== 'info'),
     card: {
       ...original,
+      conflitos,
       inicioMin: previa.inicioMin,
       fimMin: previa.fimMin,
       topPx: grade.paraTopo(previa.inicioMin),
@@ -182,7 +240,17 @@ function aoTeclarNoCard(evento: KeyboardEvent, appointmentId: string) {
   }
 
   evento.preventDefault()
-  arraste.moverPorTeclado(card.appointment, movimento[0], idsDasColunas.value, movimento[1])
+  const colunaDoCard =
+    colunas.value.find((coluna) => coluna.cards.some((item) => item.id === appointmentId))?.id ??
+    card.appointment.professionalId
+
+  arraste.moverPorTeclado(
+    card.appointment,
+    movimento[0],
+    idsDasColunas.value,
+    colunaDoCard,
+    movimento[1],
+  )
 }
 
 let relogio: ReturnType<typeof setInterval> | null = null
@@ -305,19 +373,58 @@ watch(() => agenda.data, medir)
             :cor="coluna.cor"
             :selecionado="agenda.focoId === card.id"
             @abrir="aoAbrir"
+            @marcar-falta="emit('marcarFalta', $event)"
             @iniciar-arraste="
               (evento, modo) => arraste.iniciar(evento, card.appointment, modo, coluna.id)
             "
             @keydown="aoTeclarNoCard($event, card.id)"
           />
 
-          <AgendaAppointmentCard
-            v-if="previaVisual && previaVisual.colunaId === coluna.id"
-            :card="previaVisual.card"
-            :cor="coluna.cor"
-            fantasma
-            :arrastavel="false"
-          />
+          <!--
+            Faixa do destino. Marca a fatia de tempo onde o card vai cair, atravessando a
+            largura da coluna — o fantasma sozinho não mostra o alcance quando ele é estreito
+            por dividir a faixa com outro atendimento. Muda de tom quando há sobreposição.
+          -->
+          <template v-if="previaVisual && previaVisual.colunaId === coluna.id">
+            <div
+              class="destino"
+              :class="{ 'destino--conflito': previaVisual.alerta }"
+              :style="{
+                top: `${previaVisual.card.topPx}px`,
+                height: `${previaVisual.card.alturaPx}px`,
+              }"
+              aria-hidden="true"
+            />
+
+            <AgendaAppointmentCard
+              :card="previaVisual.card"
+              :cor="coluna.cor"
+              fantasma
+              :arrastavel="false"
+            />
+
+            <!--
+              O motivo, por escrito, colado no destino. "Está vermelho" não diz se o choque é
+              com outro paciente, com o almoço ou com um bloqueio — e são três decisões
+              diferentes. Aparece durante o gesto, antes de a confirmação existir.
+            -->
+            <p
+              v-if="previaVisual.alerta"
+              class="destino__aviso"
+              :style="{ top: `${previaVisual.card.topPx + previaVisual.card.alturaPx + 2}px` }"
+              role="status"
+            >
+              <i class="pi pi-exclamation-circle" aria-hidden="true" />
+              <span>
+                {{
+                  previaVisual.conflitos
+                    .filter((conflito) => conflito.severity !== 'info')
+                    .map(formato.conflito)
+                    .join(' · ')
+                }}
+              </span>
+            </p>
+          </template>
 
           <p v-if="coluna.cards.length === 0" class="coluna__vazia">
             {{ t('clinico.agenda.colunaVazia') }}
@@ -376,6 +483,55 @@ watch(() => agenda.data, medir)
 .grade--arrastando {
   cursor: grabbing;
   user-select: none;
+}
+
+/*
+ * Destino do arraste: faixa larga por trás do fantasma, atravessando a coluna inteira.
+ *
+ * Fica **atrás** dos cards (z-index baixo) de propósito — precisa mostrar contra o que o
+ * horário está batendo, e não cobrir justamente isso.
+ */
+.destino {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: 1;
+  border: 1px dashed var(--clinic-accent-strong);
+  border-radius: 0.5rem;
+  background: var(--clinic-accent-tint);
+  pointer-events: none;
+}
+
+.destino--conflito {
+  border-color: var(--clinic-attention-text);
+  background: var(--clinic-attention-bg);
+}
+
+/*
+ * O aviso acompanha o fantasma e some com ele. Largura mínima maior que a coluna: um choque
+ * de sala tem nome comprido, e cortá-lo em "Sala ocupa…" devolve o problema de não saber
+ * contra o quê se está batendo.
+ */
+.destino__aviso {
+  position: absolute;
+  left: 0;
+  z-index: 7;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+  min-width: max(100%, 12rem);
+  max-width: 20rem;
+  margin: 0;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--clinic-attention-line);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-attention-bg);
+  box-shadow: var(--clinic-shadow-float);
+  color: var(--clinic-attention-text);
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+  line-height: 1.3;
+  pointer-events: none;
 }
 
 .grade__cabecalho {

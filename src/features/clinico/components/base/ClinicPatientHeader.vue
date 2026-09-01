@@ -15,6 +15,7 @@ import { useI18n } from 'vue-i18n'
 import ClinicAlertChip from './ClinicAlertChip.vue'
 import type { Pet, Tutor } from '../../data/types'
 import { useClinicFormat } from '../../composables/useClinicFormat'
+import { porteDoPaciente } from '../../domain/porte'
 
 const props = withDefaults(
   defineProps<{
@@ -38,9 +39,20 @@ const meta = computed(() => {
     return [] as string[]
   }
 
+  /**
+   * O porte entra na linha de identificação porque **é ele que escolhe a faixa de
+   * referência** do exame físico. Sem ele visível, um valor marcado como alterado num cão
+   * grande e normal num pequeno não teria explicação na tela.
+   *
+   * Aparece só quando a espécie tem porte clínico — em gato e ave a linha ganharia uma
+   * palavra a mais sem informação nenhuma.
+   */
+  const porte = porteDoPaciente(pet)
+
   return [
     formato.especie(pet.especie),
     pet.raca,
+    porte ? t(`clinico.paciente.porte.${porte}`) : '',
     formato.idade(pet.nascimento),
     t(`clinico.sexo.${pet.sexo}`),
     pet.castrado ? t('clinico.paciente.castrado') : t('clinico.paciente.inteiro'),

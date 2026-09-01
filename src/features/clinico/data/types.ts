@@ -113,6 +113,24 @@ export type Tutor = {
 }
 
 export type PetSpecies = 'canina' | 'felina' | 'ave' | 'roedor' | 'reptil' | 'equina'
+
+/**
+ * Porte do paciente.
+ *
+ * Existe porque **faixa de referência por espécie sozinha erra**: um cão de 3 kg tem
+ * frequência cardíaca muito acima de um de 60 kg, e uma faixa única marcaria como alterado o
+ * que é normal para o porte — ensinando o profissional a ignorar o destaque, que é o pior
+ * desfecho possível para o realce de valor fora da faixa.
+ *
+ * É campo do paciente, e **não conta a partir do peso**: filhote de dogue alemão pesa 10 kg e
+ * é gigante. Nulo significa não informado — aí o peso serve de estimativa, com a ressalva de
+ * que é palpite (ver `domain/porte.ts`).
+ */
+export type PetPorte = 'mini' | 'pequeno' | 'medio' | 'grande' | 'gigante'
+
+/** Faixa etária clínica. Derivada do nascimento e do porte, nunca digitada. */
+export type FaixaEtaria = 'filhote' | 'adulto' | 'idoso'
+
 export type PetSex = 'macho' | 'femea'
 
 export type PetAlertKind =
@@ -147,6 +165,8 @@ export type Pet = {
    */
   nascimento: ISODate | null
   castrado: boolean
+  /** Porte informado pela clínica. `null` cai na estimativa por peso. */
+  porte: PetPorte | null
   pesoKg: number | null
   tutorId: string
   alertas: PetAlert[]
@@ -318,9 +338,23 @@ export type VitalKey =
   | 'escoreCorporal'
   | 'pressaoSistolica'
 
+/**
+ * Faixa de referência de um sinal vital.
+ *
+ * `porte` e `faixaEtaria` são **qualificadores opcionais**, e é isso que faz o modelo
+ * funcionar: a faixa sem qualificador nenhum vale para a espécie inteira, e a que traz um ou
+ * os dois vence quando o paciente casa com ela. Assim o catálogo cresce por onde importa —
+ * cão, onde porte muda tudo — sem exigir uma linha por combinação em espécies onde não muda.
+ *
+ * A resolução do mais específico para o mais geral está em `domain/ranges.ts`.
+ */
 export type ReferenceRange = {
   vital: VitalKey
   especie: PetSpecies
+  /** Ausente: vale para qualquer porte. */
+  porte?: PetPorte
+  /** Ausente: vale para qualquer idade. */
+  faixaEtaria?: FaixaEtaria
   min: number
   max: number
   unidade: string
@@ -346,12 +380,46 @@ export type SystemFinding = {
   nota: string
 }
 
+/**
+ * Como o quadro vem se comportando desde que começou.
+ *
+ * É o eixo que decide urgência, e o único que permite comparar dois atendimentos do mesmo
+ * quadro. "Dor há três dias" não diz nada sozinho; "dor há três dias, piorando" é outra
+ * consulta. Vazio significa não perguntado — que é diferente de estável.
+ */
+export type EvolucaoDoQuadro = 'piorando' | 'estavel' | 'melhorando' | 'intermitente' | ''
+
+/**
+ * Antecedente do paciente: o que já aconteceu e ainda pesa na decisão de hoje.
+ *
+ * Estruturado por `kind` porque é isto que o vet varre antes de prescrever — e varrer um
+ * parágrafo de texto livre à procura de "já fez cirurgia?" é como a informação se perde
+ * justamente na consulta em que ela importa.
+ */
+export type AntecedenteKind =
+  | 'cirurgia'
+  | 'doenca-previa'
+  | 'alergia'
+  | 'medicacao-continua'
+  | 'reacao-vacinal'
+  | 'trauma'
+  | 'outro'
+
+export type Antecedente = {
+  id: string
+  kind: AntecedenteKind
+  descricao: string
+  /** Ano aproximado, livre: "2023", "filhote", "há 2 anos". Data exata quase nunca existe. */
+  quando: string
+}
+
 export type Anamnese = {
   queixaPrincipal: string
   historia: string
   duracaoSintomas: string
+  evolucao: EvolucaoDoQuadro
+  antecedentes: Antecedente[]
   apetite: 'normal' | 'aumentado' | 'reduzido' | 'ausente' | ''
-  hidratacao: 'normal' | 'leve' | 'moderada' | 'grave' | ''
   evacuacao: 'normal' | 'diarreia' | 'constipacao' | ''
   miccao: 'normal' | 'aumentada' | 'reduzida' | 'disuria' | ''
   ambiente: 'domiciliar' | 'externo' | 'misto' | ''
@@ -359,8 +427,34 @@ export type Anamnese = {
   vermifugacaoEmDia: boolean | null
 }
 
+/**
+ * Coloração das mucosas.
+ *
+ * Achado que muda conduta sozinho: mucosa pálida é hemorragia ou anemia até prova em
+ * contrário, ictérica manda olhar fígado, cianótica é urgência respiratória. Não tem faixa
+ * numérica e por isso não cabe em `vitais` — mas é exame físico, não conversa.
+ */
+export type MucosaStatus =
+  | 'normocoradas'
+  | 'palidas'
+  | 'ictericas'
+  | 'cianoticas'
+  | 'congestas'
+  | 'nao-avaliado'
+
+/**
+ * Grau de desidratação estimado no exame.
+ *
+ * Morava na anamnese, que era o lugar errado: desidratação se estima por turgor cutâneo,
+ * mucosas e enoftalmia — coisas que se veem com o paciente na mesa, não que o responsável
+ * relate por telefone. Vazio é "ainda não avaliado".
+ */
+export type HidratacaoGrau = 'normal' | 'leve' | 'moderada' | 'grave' | ''
+
 export type ExameFisico = {
   vitais: Record<VitalKey, Measurement>
+  mucosas: MucosaStatus
+  hidratacao: HidratacaoGrau
   sistemas: Record<SystemKey, SystemFinding>
   observacao: string
 }
@@ -417,6 +511,33 @@ export type CarePlan = {
   }
 }
 
+/**
+ * O que o responsável respondeu no app **antes** da consulta.
+ *
+ * É onde o diferencial do produto aterrissa no prontuário: o mesmo caminho pelo qual o
+ * agendamento nasce no app e cai na agenda, aplicado ao conteúdo clínico. Chega como
+ * **sugestão**, nunca como valor preenchido — quem assina o prontuário é o veterinário, e um
+ * campo que já vem escrito é um campo que ninguém relê.
+ *
+ * Por isso a procedência viaja junto: um peso informado pelo responsável e um peso aferido na
+ * balança da clínica não têm o mesmo valor, e a tela precisa poder dizer qual é qual.
+ */
+export type PreConsulta = {
+  appointmentId: string
+  /** Quando o responsável respondeu. Resposta de duas semanas atrás vale menos. */
+  respondidoEm: ISODateTime
+  queixaPrincipal: string
+  duracaoSintomas: string
+  evolucao: EvolucaoDoQuadro
+  apetite: Anamnese['apetite']
+  evacuacao: Anamnese['evacuacao']
+  miccao: Anamnese['miccao']
+  /** Peso informado em casa. Sugestão de partida, não medição. */
+  pesoInformadoKg: number | null
+  /** Texto livre do responsável, na íntegra e sem edição. */
+  observacao: string
+}
+
 export type EncounterStatus = 'rascunho' | 'finalizado'
 
 export type EncounterLock = {
@@ -442,6 +563,8 @@ export type Encounter = {
   versao: number
   /** Quem detém a edição. Segundo dispositivo entra em leitura. */
   lock: EncounterLock | null
+  /** Respostas do responsável no app, quando houve. Sugestão, nunca valor aplicado. */
+  preConsulta: PreConsulta | null
 }
 
 export type EncounterPatch = Partial<
@@ -559,6 +682,8 @@ export type TimelineEventKind =
   | 'vacina'
   | 'exame'
   | 'cirurgia'
+  /** Internação: o requisito a nomeia ao lado de consultas, vacinas e exames. */
+  | 'internacao'
   | 'prescricao'
   | 'falta'
   | 'observacao'
@@ -589,6 +714,24 @@ export type AgendaDia = {
   bloqueios: Block[]
 }
 
+/**
+ * Ocupação de um profissional num dia, quebrada por período.
+ *
+ * O agregado do dia esconde exatamente a resposta que a recepção precisa dar: "a agenda da Ana
+ * cheia e a do Caio vazia" somam 50% e não dizem a quem oferecer. E a pergunta no balcão nunca
+ * é sobre o dia inteiro — é "tem alguma coisa **de manhã** na terça?".
+ */
+export type CargaDoProfissional = {
+  professionalId: string
+  agendados: number
+  ocupadoMinutos: number
+  /** 0..n do dia inteiro. Acima de 1, o profissional está vendido além do expediente. */
+  ocupacao: number
+  /** Ocupação só da manhã e só da tarde, na mesma escala. */
+  ocupacaoManha: number
+  ocupacaoTarde: number
+}
+
 export type DiaCarga = {
   data: ISODate
   agendados: number
@@ -598,6 +741,8 @@ export type DiaCarga = {
   ocupacao: number
   faltas: number
   encaixes: number
+  /** Por profissional ativo, na ordem da equipe. Vazio quando a clínica não abre. */
+  porProfissional: CargaDoProfissional[]
 }
 
 export type NoShowSummary = {

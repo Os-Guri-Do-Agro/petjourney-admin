@@ -13,6 +13,7 @@
  * O campo de história aceita **comandos com `/`**: é o que permite escrever a consulta inteira
  * sem tirar as mãos do teclado.
  */
+import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
@@ -22,7 +23,7 @@ import { useI18n } from 'vue-i18n'
 import ClinicField from '../base/ClinicField.vue'
 import ClinicForm from '../base/ClinicForm.vue'
 import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
-import type { Anamnese } from '../../data/types'
+import type { Anamnese, Antecedente, AntecedenteKind, EvolucaoDoQuadro } from '../../data/types'
 
 const props = defineProps<{
   valor: Anamnese
@@ -36,6 +37,87 @@ const { t } = useI18n()
 
 const comandosAbertos = ref(false)
 
+/**
+ * Evolução do quadro.
+ *
+ * O eixo que decide urgência, e o único campo que permite comparar dois atendimentos do mesmo
+ * quadro. "Dor há três dias" não diz nada sozinho; "dor há três dias, piorando" é outra
+ * consulta — e é a diferença entre marcar retorno em duas semanas ou pedir exame hoje.
+ *
+ * O tom acompanha a gravidade para a varredura funcionar sem leitura, no mesmo padrão dos
+ * sistemas do exame físico.
+ */
+const opcoesEvolucao = computed(() =>
+  (
+    [
+      { valor: 'piorando', tom: 'risco' },
+      { valor: 'estavel', tom: 'atencao' },
+      { valor: 'melhorando', tom: 'ok' },
+      { valor: 'intermitente', tom: 'neutro' },
+    ] as const
+  ).map((opcao) => ({
+    valor: opcao.valor as EvolucaoDoQuadro,
+    tom: opcao.tom,
+    rotulo: t(`clinico.prontuario.anamnese.evolucaoOpcoes.${opcao.valor}`),
+  })),
+)
+
+// ------------------------------------------------------------------ antecedentes
+
+/**
+ * Os tipos de antecedente, na ordem em que pesam na decisão de hoje.
+ *
+ * Alergia e medicação contínua vêm primeiro porque são as duas que mudam a prescrição — e
+ * prescrição errada por antecedente não lido é o erro que este campo existe para evitar.
+ */
+const TIPOS_DE_ANTECEDENTE: AntecedenteKind[] = [
+  'alergia',
+  'medicacao-continua',
+  'doenca-previa',
+  'cirurgia',
+  'reacao-vacinal',
+  'trauma',
+  'outro',
+]
+
+const opcoesAntecedente = computed(() =>
+  TIPOS_DE_ANTECEDENTE.map((kind) => ({
+    value: kind,
+    label: t(`clinico.prontuario.anamnese.antecedenteKind.${kind}`),
+  })),
+)
+
+const novoKind = ref<AntecedenteKind>('alergia')
+const novaDescricao = ref('')
+const novoQuando = ref('')
+
+const podeAdicionar = computed(() => novaDescricao.value.trim().length > 0)
+
+function adicionarAntecedente() {
+  if (!podeAdicionar.value) {
+    return
+  }
+
+  const antecedente: Antecedente = {
+    id: `ant-${Date.now().toString(36)}`,
+    kind: novoKind.value,
+    descricao: novaDescricao.value.trim(),
+    quando: novoQuando.value.trim(),
+  }
+
+  emit('atualizar', { antecedentes: [...props.valor.antecedentes, antecedente] })
+
+  /* O tipo permanece: quem cadastra duas alergias não deve reescolher "alergia" na segunda. */
+  novaDescricao.value = ''
+  novoQuando.value = ''
+}
+
+function removerAntecedente(id: string) {
+  emit('atualizar', {
+    antecedentes: props.valor.antecedentes.filter((item) => item.id !== id),
+  })
+}
+
 function opcoes(chaves: readonly string[]) {
   return chaves.map((chave) => ({
     valor: chave,
@@ -44,7 +126,10 @@ function opcoes(chaves: readonly string[]) {
 }
 
 const opcoesApetite = computed(() => opcoes(['normal', 'aumentado', 'reduzido', 'ausente']))
-const opcoesHidratacao = computed(() => opcoes(['normal', 'leve', 'moderada', 'grave']))
+/*
+ * Hidratação saiu daqui e foi para o exame físico: desidratação se estima por turgor cutâneo e
+ * mucosas, com o paciente na mesa — não é relato do responsável.
+ */
 const opcoesEvacuacao = computed(() => opcoes(['normal', 'diarreia', 'constipacao']))
 const opcoesMiccao = computed(() => opcoes(['normal', 'aumentada', 'reduzida', 'disuria']))
 const opcoesAmbiente = computed(() => opcoes(['domiciliar', 'externo', 'misto']))
@@ -60,7 +145,6 @@ const opcoesSimNao = computed(() => [
  */
 const sinaisGerais = computed(() => [
   { campo: 'apetite' as const, opcoes: opcoesApetite.value },
-  { campo: 'hidratacao' as const, opcoes: opcoesHidratacao.value },
   { campo: 'evacuacao' as const, opcoes: opcoesEvacuacao.value },
   { campo: 'miccao' as const, opcoes: opcoesMiccao.value },
   { campo: 'ambiente' as const, opcoes: opcoesAmbiente.value },
@@ -128,6 +212,23 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
         </template>
       </ClinicField>
     </div>
+
+    <!--
+      Evolução fica colada em queixa e duração porque é a terceira parte da mesma frase: "o quê,
+      há quanto tempo, e como vem se comportando". Separá-la em outro bloco faria a pergunta ser
+      esquecida — e é a que muda a conduta.
+    -->
+    <ClinicField :rotulo="t('clinico.prontuario.anamnese.evolucao')">
+      <ClinicToggleGroup
+        :model-value="valor.evolucao"
+        :opcoes="opcoesEvolucao"
+        :desabilitado="somenteLeitura"
+        limpavel
+        :vazio="''"
+        :rotulo="t('clinico.prontuario.anamnese.evolucao')"
+        @update:model-value="definir('evolucao', $event as EvolucaoDoQuadro)"
+      />
+    </ClinicField>
 
     <!-- 2. o que o responsável observou -->
     <ClinicField
@@ -229,10 +330,155 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
         </ClinicField>
       </div>
     </fieldset>
+    <!--
+      Antecedentes: o que já aconteceu e ainda pesa. Lista estruturada, e não um parágrafo,
+      porque é isto que o vet varre antes de prescrever — procurar "já fez cirurgia?" dentro de
+      um texto corrido é como a informação se perde na consulta em que ela importa.
+    -->
+    <ClinicField :rotulo="t('clinico.prontuario.anamnese.antecedentes')" largo>
+      <div class="antecedentes">
+        <ul v-if="valor.antecedentes.length > 0" class="antecedentes__lista">
+          <li v-for="antecedente in valor.antecedentes" :key="antecedente.id">
+            <span class="antecedentes__kind">
+              {{ t(`clinico.prontuario.anamnese.antecedenteKind.${antecedente.kind}`) }}
+            </span>
+            <span class="antecedentes__descricao">{{ antecedente.descricao }}</span>
+            <span v-if="antecedente.quando" class="antecedentes__quando">
+              {{ antecedente.quando }}
+            </span>
+            <button
+              v-if="!somenteLeitura"
+              type="button"
+              class="antecedentes__remover clinic-focusable"
+              :aria-label="t('clinico.comum.remover')"
+              @click="removerAntecedente(antecedente.id)"
+            >
+              <i class="pi pi-times" aria-hidden="true" />
+            </button>
+          </li>
+        </ul>
+
+        <p v-else class="antecedentes__vazio">
+          {{ t('clinico.prontuario.anamnese.antecedentesVazio') }}
+        </p>
+
+        <div v-if="!somenteLeitura" class="antecedentes__novo">
+          <Select
+            v-model="novoKind"
+            :options="opcoesAntecedente"
+            option-label="label"
+            option-value="value"
+            class="antecedentes__tipo"
+          />
+          <InputText
+            v-model="novaDescricao"
+            :placeholder="t('clinico.prontuario.anamnese.antecedenteExemplo')"
+            class="antecedentes__campo"
+            @keydown.enter.prevent="adicionarAntecedente"
+          />
+          <InputText
+            v-model="novoQuando"
+            :placeholder="t('clinico.prontuario.anamnese.antecedenteQuando')"
+            class="antecedentes__quando-campo"
+            @keydown.enter.prevent="adicionarAntecedente"
+          />
+          <Button
+            icon="pi pi-plus"
+            size="small"
+            :disabled="!podeAdicionar"
+            :aria-label="t('clinico.comum.adicionar')"
+            @click="adicionarAntecedente"
+          />
+        </div>
+      </div>
+    </ClinicField>
   </ClinicForm>
 </template>
 
 <style scoped>
+.antecedentes {
+  display: grid;
+  gap: var(--clinic-space-2);
+}
+
+.antecedentes__lista {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.antecedentes__lista li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--clinic-space-2);
+  padding: 0.25rem var(--clinic-space-2);
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface-soft);
+}
+
+/* O tipo é etiqueta, não texto: é por ele que o olho varre a lista. */
+.antecedentes__kind {
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--clinic-radius-chip);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+  font-size: var(--clinic-font-label);
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.antecedentes__descricao {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.antecedentes__quando {
+  color: var(--clinic-faint);
+  font-size: var(--clinic-font-label);
+  white-space: nowrap;
+}
+
+.antecedentes__remover {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  place-items: center;
+  border: none;
+  border-radius: var(--clinic-radius-control);
+  background: transparent;
+  color: var(--clinic-muted);
+  cursor: pointer;
+  font-size: 0.65rem;
+}
+
+.antecedentes__remover:hover {
+  background: var(--clinic-risk-bg);
+  color: var(--clinic-risk-text);
+}
+
+.antecedentes__vazio {
+  margin: 0;
+  color: var(--clinic-faint);
+  font-size: var(--clinic-font-label);
+}
+
+.antecedentes__novo {
+  display: grid;
+  grid-template-columns: 10rem minmax(0, 1fr) 8rem auto;
+  gap: var(--clinic-space-2);
+}
+
+@media (max-width: 720px) {
+  .antecedentes__lista li,
+  .antecedentes__novo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* A queixa principal ganha o dobro da largura: é o campo que resume a consulta. */
 .queixa {
   display: grid;

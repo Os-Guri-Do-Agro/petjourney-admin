@@ -10,35 +10,129 @@
  * senão a fila vira lista de promessas que ninguém cobra.
  */
 import Button from 'primevue/button'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
-import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
+import FilaAdicionarDialog from '@/features/clinico/components/agenda/FilaAdicionarDialog.vue'
+import FilaOfertaDialog from '@/features/clinico/components/agenda/FilaOfertaDialog.vue'
+import type {
+  AcaoDeLinha,
+  ColunaTabela,
+} from '@/features/clinico/components/base/table-types'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import type { WaitlistEntry } from '@/features/clinico/data/types'
+import { useAvisosStore } from '@/features/clinico/stores/avisos'
 import { useFilaStore } from '@/features/clinico/stores/fila'
 import { useClinicoStore } from '@/features/clinico/stores/clinico'
 
 const { t } = useI18n()
 const clinico = useClinicoStore()
 const fila = useFilaStore()
+const avisos = useAvisosStore()
 const formato = useClinicFormat()
 
-const colunas = computed<ColunaTabela[]>(() => [
-  { id: 'paciente', rotulo: t('clinico.pacientes.colunaPaciente'), largura: 'minmax(0, 1.6fr)' },
+/**
+ * A coluna de ações saiu daqui.
+ *
+ * Antes era uma coluna `acoes` de 13 rem com os botões montados à mão no slot, e cada tela que
+ * fazia isso reinventava largura, alinhamento e o `@click.stop` que impede o clique na ação de
+ * também selecionar a linha. Agora as ações são contrato da tabela (`:acoes`), e a coluna
+ * nasce do número delas.
+ */
+const colunas = computed<ColunaTabela<WaitlistEntry>[]>(() => [
+  {
+    /*
+     * A posição é a primeira coluna porque é a primeira pergunta: "sou o quantos?". Quem já
+     * recebeu oferta não tem posição — o horário dele está reservado, e contá-lo empurraria a
+     * fila inteira para trás por algo já resolvido.
+     */
+    id: 'posicao',
+    rotulo: t('clinico.fila.colunaPosicao'),
+    largura: '4.5rem',
+    numerico: true,
+    ordenarPor: (linha) => fila.posicaoDe(linha.id),
+    ordemInicial: 'asc',
+  },
+  {
+    id: 'paciente',
+    rotulo: t('clinico.pacientes.colunaPaciente'),
+    largura: 'minmax(0, 1.6fr)',
+    ordenarPor: (linha) => clinico.pet(linha.petId)?.nome ?? null,
+  },
   {
     id: 'responsavel',
     rotulo: t('clinico.pacientes.colunaResponsavel'),
     largura: 'minmax(0, 1.3fr)',
     ocultarEmTelaEstreita: true,
+    ordenarPor: (linha) => clinico.tutor(linha.tutorId)?.nome ?? null,
   },
-  { id: 'janelas', rotulo: t('clinico.fila.janelas'), largura: 'minmax(0, 1.4fr)' },
-  { id: 'situacao', rotulo: t('clinico.fila.colunaSituacao'), largura: '9rem' },
-  { id: 'acoes', rotulo: '', largura: '13rem', alinharAoFim: true },
+  {
+    id: 'janelas',
+    rotulo: t('clinico.fila.janelas'),
+    largura: 'minmax(0, 1.4fr)',
+    /** Ordena pela espera, que é o que a coluna realmente comunica. */
+    ordenarPor: (linha) => linha.criadoEm,
+  },
+  {
+    id: 'situacao',
+    rotulo: t('clinico.fila.colunaSituacao'),
+    largura: '9rem',
+    ordenarPor: (linha) => linha.status,
+  },
 ])
+
+/**
+ * As três ações da fila.
+ *
+ * Aceitar e recusar só existem para quem recebeu oferta; remover, só para quem ainda aguarda.
+ * Elas **somem** quando não cabem, em vez de aparecerem apagadas: ícone desabilitado numa
+ * tabela de vinte linhas é ruído que não vira ação nunca.
+ */
+const acoes = computed<AcaoDeLinha<WaitlistEntry>[]>(() => [
+  {
+    id: 'aceitar',
+    rotulo: t('clinico.fila.aceitar'),
+    icone: 'pi pi-check',
+    visivel: (linha) => linha.status === 'ofertado',
+  },
+  {
+    id: 'recusar',
+    rotulo: t('clinico.fila.recusar'),
+    icone: 'pi pi-times',
+    visivel: (linha) => linha.status === 'ofertado',
+  },
+  {
+    id: 'remover',
+    rotulo: t('clinico.fila.remover'),
+    icone: 'pi pi-trash',
+    perigo: true,
+    visivel: (linha) => linha.status === 'aguardando',
+  },
+])
+
+const paraOfertar = ref<WaitlistEntry | null>(null)
+const adicionarAberto = ref(false)
+
+function executarAcao({ acao, linha }: { acao: AcaoDeLinha<WaitlistEntry>; linha: WaitlistEntry }) {
+  if (acao.id === 'aceitar') {
+    void fila.responder(linha.id, true)
+
+    return
+  }
+
+  if (acao.id === 'recusar') {
+    void fila.responder(linha.id, false)
+
+    return
+  }
+
+  if (acao.id === 'remover') {
+    void fila.remover(linha.id)
+  }
+}
 
 const severidadePorPrioridade = {
   urgente: 'risco',
@@ -52,6 +146,27 @@ function janelaLegivel(entrada: WaitlistEntry) {
   return entrada.janelas
     .map((janela) => `${DIAS[janela.weekday]} ${janela.inicio}–${janela.fim}`)
     .join(' · ')
+}
+
+async function confirmarOferta({ mensagem }: { mensagem: string }) {
+  const entrada = paraOfertar.value
+  const inicio = fila.vagaAberta?.inicio
+
+  if (!entrada || !inicio) {
+    return
+  }
+
+  await fila.ofertar(entrada.id, inicio)
+
+  /* O texto ofertado vira comprovante, como o da remarcação e o do reagendamento. */
+  avisos.registrar({
+    appointmentId: entrada.id,
+    tutorId: entrada.tutorId,
+    kind: 'oferta-de-vaga',
+    texto: mensagem,
+  })
+
+  paraOfertar.value = null
 }
 
 const erroTraduzido = computed(() => (fila.erro ? t(fila.erro) : ''))
@@ -77,12 +192,34 @@ onMounted(carregar)
     @retry="carregar"
   >
     <div class="fila clinic-scope">
+      <!--
+        A entrada na fila fica no topo, ao lado da lista: é a ação que a recepção dispara
+        quando acaba de dizer "não tenho horário essa semana".
+      -->
+      <div class="fila__barra">
+        <Button
+          :label="t('clinico.fila.adicionar')"
+          icon="pi pi-plus"
+          size="small"
+          @click="adicionarAberto = true"
+        />
+      </div>
+
       <ClinicDataTable
         :colunas="colunas"
         :linhas="fila.ativas"
         :chave="(entrada) => entrada.id"
+        :acoes="acoes"
         :rotulo="t('clinico.fila.titulo')"
+        @acao="executarAcao"
       >
+        <template #celula-posicao="{ linha }">
+          <strong v-if="fila.posicaoDe(linha.id)" class="fila__posicao">
+            {{ fila.posicaoDe(linha.id) }}
+          </strong>
+          <span v-else class="fila__meta">—</span>
+        </template>
+
         <template #celula-paciente="{ linha }">
           <span class="fila__titulo">
             <strong class="fila__nome">{{ clinico.pet(linha.petId)?.nome }}</strong>
@@ -133,34 +270,6 @@ onMounted(carregar)
           </span>
         </template>
 
-        <template #celula-acoes="{ linha }">
-          <div class="fila__acoes">
-            <template v-if="linha.status === 'ofertado'">
-              <Button
-                :label="t('clinico.fila.aceitar')"
-                size="small"
-                :loading="fila.salvando"
-                @click.stop="fila.responder(linha.id, true)"
-              />
-              <Button
-                :label="t('clinico.fila.recusar')"
-                size="small"
-                severity="secondary"
-                text
-                @click.stop="fila.responder(linha.id, false)"
-              />
-            </template>
-
-            <Button
-              v-else-if="linha.status === 'aguardando'"
-              :label="t('clinico.fila.remover')"
-              size="small"
-              severity="secondary"
-              text
-              @click.stop="fila.remover(linha.id)"
-            />
-          </div>
-        </template>
       </ClinicDataTable>
 
       <!--
@@ -190,7 +299,7 @@ onMounted(carregar)
               "
               size="small"
               :loading="fila.salvando"
-              @click="fila.ofertar(candidato.id, fila.vagaAberta!.inicio)"
+              @click="paraOfertar = candidato"
             />
           </li>
         </ul>
@@ -204,6 +313,19 @@ onMounted(carregar)
         />
       </section>
     </div>
+
+    <FilaAdicionarDialog v-model:visivel="adicionarAberto" @adicionado="fila.carregar()" />
+
+    <!--
+      A oferta passa por uma prévia, no mesmo padrão da remarcação: o requisito pede "a
+      mensagem que sai", e disparar sem mostrar o texto é o que faz ninguém saber o que foi dito.
+    -->
+    <FilaOfertaDialog
+      :entrada="paraOfertar"
+      :slot-inicio="fila.vagaAberta?.inicio ?? null"
+      @confirmar="confirmarOferta"
+      @fechar="paraOfertar = null"
+    />
   </PartnerPageFrame>
 </template>
 
@@ -211,6 +333,19 @@ onMounted(carregar)
 .fila {
   display: grid;
   gap: var(--clinic-space-4);
+}
+
+.fila__barra {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* A posição é número de leitura rápida: peso e tabular, para comparar linhas de relance. */
+.fila__posicao {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
 
 .fila__nome {
@@ -264,13 +399,6 @@ onMounted(carregar)
 
 .fila__prazo--curto {
   color: var(--clinic-risk-text);
-}
-
-.fila__acoes {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--clinic-space-1);
 }
 
 .vaga {

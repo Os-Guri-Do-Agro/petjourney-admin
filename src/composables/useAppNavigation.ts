@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 
 import i18n from '@/i18n'
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
+import { useModuloClinico } from '@/composables/useModuloClinico'
 import { useParceiroStore } from '@/stores/parceiro'
 
 export type AppNavigationItem = {
@@ -107,8 +108,20 @@ export function useAppNavigation() {
    * aí o que está atrás do menu é prontuário de paciente real, e prontuário não se mostra a quem
    * não é do corpo clínico.
    */
+  const { ativo: moduloClinicoAtivo } = useModuloClinico()
+
   const hasClinicalProfile = computed(
-    () => CLINICAL_MENU_ENABLED && (CLINICAL_MENU_DEMO || hasVeterinarioProfile()),
+    () =>
+      /*
+       * O interruptor oculto vem **antes** de tudo: enquanto as telas rodam sobre dados
+       * mocados, elas não aparecem para quem abriu o portal para trabalhar. Um menu
+       * "Pacientes" com bichos que não existem é indistinguível de um defeito.
+       *
+       * Ligar é decisão de quem vai demonstrar — ver `useModuloClinico`.
+       */
+      moduloClinicoAtivo.value &&
+      CLINICAL_MENU_ENABLED &&
+      (CLINICAL_MENU_DEMO || hasVeterinarioProfile()),
   )
 
   const accountItems = computed<AppNavigationItem[]>(() => {

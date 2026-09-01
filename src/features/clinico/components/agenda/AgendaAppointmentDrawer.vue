@@ -17,6 +17,7 @@ import ClinicPatientHeader from '../base/ClinicPatientHeader.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { Appointment, AppointmentStatus } from '../../data/types'
 import { useAgendaStore } from '../../stores/agenda'
+import { useAvisosStore } from '../../stores/avisos'
 import { useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{ appointment: Appointment | null }>()
@@ -31,6 +32,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const agenda = useAgendaStore()
+const avisos = useAvisosStore()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
 
@@ -79,6 +81,11 @@ const proximoStatus = computed<AppointmentStatus | null>(() => {
       return null
   }
 })
+
+/** Avisos deste atendimento, do mais recente para o mais antigo. */
+const avisosDoAtendimento = computed(() =>
+  props.appointment ? avisos.doAtendimento(props.appointment.id) : [],
+)
 
 const encerrado = computed(() =>
   ['finalizado', 'cancelado', 'falta'].includes(props.appointment?.status ?? ''),
@@ -148,6 +155,25 @@ const encerrado = computed(() =>
       </ul>
     </section>
 
+    <!--
+      Comprovante de que o responsável foi avisado. Fica acima das ações porque é o que se
+      confere **antes** de ligar de novo: sem ele, a recepção repete o aviso ou deixa de dar.
+    -->
+    <section v-if="avisosDoAtendimento.length > 0" class="drawer__secao">
+      <h3 class="clinic-label">{{ t('clinico.avisos.titulo') }}</h3>
+      <ul class="drawer__avisos-enviados">
+        <li v-for="aviso in avisosDoAtendimento" :key="aviso.id">
+          <span class="drawer__aviso-topo">
+            <strong>{{ t(`clinico.avisos.kind.${aviso.kind}`) }}</strong>
+            <span class="drawer__aviso-quando clinic-value">
+              {{ formato.relativo(aviso.enviadoEm) }}
+            </span>
+          </span>
+          <p class="drawer__aviso-texto">{{ aviso.texto }}</p>
+        </li>
+      </ul>
+    </section>
+
     <div class="drawer__acoes">
       <Button
         v-if="proximoStatus"
@@ -175,7 +201,7 @@ const encerrado = computed(() =>
 
       <div v-if="!encerrado" class="drawer__acoes-risco">
         <Button
-          :label="formato.status('falta')"
+          :label="t('clinico.faltas.marcar')"
           icon="pi pi-user-minus"
           severity="warn"
           text
@@ -270,6 +296,42 @@ const encerrado = computed(() =>
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.drawer__avisos-enviados {
+  display: grid;
+  gap: var(--clinic-space-2);
+  margin: 0;
+  padding: 0;
+  max-height: 11rem;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.drawer__avisos-enviados li {
+  padding: var(--clinic-space-2) var(--clinic-space-3);
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface-soft);
+}
+
+.drawer__aviso-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--clinic-space-2);
+  font-size: var(--clinic-font-label);
+}
+
+.drawer__aviso-quando {
+  color: var(--clinic-faint);
+}
+
+.drawer__aviso-texto {
+  margin: 0.2rem 0 0;
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+  line-height: 1.45;
 }
 
 .drawer__acoes {

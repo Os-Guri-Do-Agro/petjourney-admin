@@ -22,7 +22,8 @@ import { clinicClock, useClinicoStore } from '../../stores/clinico'
 const props = defineProps<{ proposta: ArrasteProposta | null }>()
 
 const emit = defineEmits<{
-  confirmar: [proposta: ArrasteProposta]
+  /** A mensagem viaja junto: ela vira comprovante do lado de fora, não morre com a caixa. */
+  confirmar: [proposta: ArrasteProposta, mensagem: string]
   fechar: []
 }>()
 
@@ -61,7 +62,7 @@ const conflitos = computed(() => {
     id: proposta.appointment.id,
     petId: proposta.appointment.petId,
     professionalId: proposta.professionalId,
-    roomIds: proposta.appointment.roomIds,
+    roomIds: proposta.roomIds,
     typeId: proposta.appointment.typeId,
     inicio: proposta.inicio,
     fim: proposta.fim,
@@ -70,6 +71,30 @@ const conflitos = computed(() => {
 })
 
 const temAviso = computed(() => conflitos.value.length > 0)
+
+/**
+ * Salas de origem e destino, só quando **mudaram**.
+ *
+ * No agrupamento por sala, arrastar troca de sala e não de profissional — e a linha "de → para"
+ * mostrando o mesmo nome dos dois lados faria a confirmação parecer um engano. Comparação por
+ * conjunto, não por ordem: a mesma cirurgia listada em outra ordem não é uma mudança.
+ */
+const salasMudaram = computed(() => {
+  const proposta = props.proposta
+
+  if (!proposta) {
+    return false
+  }
+
+  const antes = [...proposta.appointment.roomIds].sort().join(',')
+  const depois = [...proposta.roomIds].sort().join(',')
+
+  return antes !== depois
+})
+
+function nomesDasSalas(ids: string[]) {
+  return ids.map((id) => clinico.sala(id)?.nome ?? id).join(' + ')
+}
 
 const grupoLigado = computed(() => Boolean(props.proposta?.appointment.linkedGroupId))
 
@@ -124,6 +149,16 @@ watch(
         </div>
       </div>
 
+      <!-- Troca de sala: só aparece quando houve, e nomeia as duas pontas. -->
+      <p v-if="salasMudaram" class="mover__salas">
+        <i class="pi pi-home" aria-hidden="true" />
+        <span>
+          {{ nomesDasSalas(proposta.appointment.roomIds) || '—' }}
+          <i class="pi pi-arrow-right mover__salas-seta" aria-hidden="true" />
+          <strong>{{ nomesDasSalas(proposta.roomIds) || '—' }}</strong>
+        </span>
+      </p>
+
       <p v-if="grupoLigado" class="mover__ligado">
         <i class="pi pi-link" aria-hidden="true" />
         {{ t('clinico.agenda.duasSalas') }}
@@ -161,7 +196,7 @@ watch(
         "
         :severity="temAviso ? 'warn' : 'primary'"
         :loading="agenda.salvando"
-        @click="proposta && emit('confirmar', proposta)"
+        @click="proposta && emit('confirmar', proposta, mensagem)"
       />
     </template>
   </Dialog>
@@ -216,6 +251,25 @@ watch(
 
 .mover__seta {
   color: var(--clinic-faint);
+}
+
+.mover__salas {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+}
+
+.mover__salas strong {
+  color: var(--clinic-text);
+  font-weight: 750;
+}
+
+.mover__salas-seta {
+  margin: 0 0.2rem;
+  font-size: 0.6rem;
 }
 
 .mover__ligado {

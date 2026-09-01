@@ -6,9 +6,15 @@
  */
 
 import { materializarBloqueios } from '../../domain/conflicts'
-import { cargaDoDia } from '../../domain/load'
+import { slotsLivres } from '../../domain/slots'
+import { CAPACIDADE_MINUTOS_POR_PROFISSIONAL, cargaDoDia } from '../../domain/load'
 import { addDays, createClinicClock, weekDates, weekdayOf } from '../../domain/clinic-time'
-import { CLINIC_UTC_OFFSET, professionalsFixture } from '../fixtures'
+import {
+  appointmentTypesFixture,
+  CLINIC_UTC_OFFSET,
+  professionalsFixture,
+  roomsFixture,
+} from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import {
   agoraIso,
@@ -27,6 +33,7 @@ import type {
   CancelReason,
   DiaCarga,
   Encounter,
+  SlotSugestao,
   Hold,
   ISODate,
   ISODateTime,
@@ -137,6 +144,104 @@ export const agendaRepository = {
       }
     })
   },
+  /**
+   * Horários livres para o retorno sugerido no prontuário.
+   *
+   * Mora no repositório, e não na tela, porque é conta de agenda inteira: precisa dos
+   * atendimentos, dos bloqueios e do expediente de **outro dia**, e a store da agenda só tem o
+   * dia que está na tela. Na API real esta busca é do servidor pelo mesmo motivo.
+   *
+   * A data alvo é uma sugestão, não uma exigência: se ela cair em dia fechado ou já lotado, a
+   * busca **avança** dia a dia dentro da janela de tolerância. Retorno em 15 dias que cai num
+   * feriado não vira "não há horário" — vira 16.
+   */
+  /**
+   * O mesmo motor serve ao reagendamento de uma falta.
+   *
+   * Reagendar uma falta é a mesma pergunta que sugerir um retorno — "quando este paciente cabe
+   * de novo na agenda desta pessoa?" — só que a data de partida é a da falta e a distância
+   * costuma ser curta. Duplicar a busca criaria duas listas que divergem na primeira vez que
+   * alguém mexer nas regras de conflito.
+   */
+  sugerirReagendamento(input: {
+    petId: string
+    professionalId: string
+    typeId: string
+    /** Data da falta. */
+    aPartirDe: ISODate
+    /** Dias adiante em que a recepção aceita reoferecer. Curto de propósito. */
+    emDias?: number
+    tolerancia?: number
+    limite?: number
+  }): Promise<SlotSugestao[]> {
+    return agendaRepository.sugerirRetorno({
+      ...input,
+      /* Reagendamento começa no dia seguinte, não semanas depois. */
+      emDias: input.emDias ?? 1,
+      tolerancia: input.tolerancia ?? 14,
+    })
+  },
+
+  sugerirRetorno(input: {
+    petId: string
+    professionalId: string
+    typeId: string
+    /** Data do atendimento que originou o retorno. */
+    aPartirDe: ISODate
+    emDias: number
+    /** Dias após a data alvo em que ainda vale procurar. */
+    tolerancia?: number
+    limite?: number
+  }): Promise<SlotSugestao[]> {
+    return simularChamada('agenda.slots', () => {
+      const dataset = getDataset()
+      const tipo = appointmentTypesFixture.find((item) => item.id === input.typeId)
+      const duracaoMinutos = tipo?.duracaoMinutos ?? 30
+      const tolerancia = input.tolerancia ?? 7
+      const limite = input.limite ?? 6
+      const encontrados: SlotSugestao[] = []
+
+      for (let offset = 0; offset <= tolerancia && encontrados.length < limite; offset += 1) {
+        const data = addDays(input.aPartirDe, input.emDias + offset)
+        const horario = dataset.clinic.horarios.find((item) => item.weekday === weekdayOf(data))
+        const feriado = dataset.clinic.feriados.find((item) => item.date === data) ?? null
+
+        if (horario?.fechado || feriado?.fechado) {
+          continue
+        }
+
+        const livres = slotsLivres(
+          {
+            petId: input.petId,
+            typeId: input.typeId,
+            duracaoMinutos,
+            /** O retorno é com quem atendeu: continuidade vale mais que horário cedo. */
+            professionalIds: [input.professionalId],
+            roomIds: [],
+            preferenciaMinutos: null,
+            data,
+          },
+          {
+            clinic: dataset.clinic,
+            clock,
+            data,
+            atendimentos: atendimentosDoDia(data),
+            bloqueios: materializarBloqueios(dataset.blocks, data, clock),
+            tipos: appointmentTypesFixture,
+            salas: roomsFixture,
+            pets: dataset.pets,
+            capacidadeMinutos: CAPACIDADE_MINUTOS_POR_PROFISSIONAL,
+          },
+          limite - encontrados.length,
+        )
+
+        encontrados.push(...livres)
+      }
+
+      return encontrados.slice(0, limite)
+    })
+  },
+
   criar(input: {
     petId: string
     tutorId: string
@@ -198,7 +303,13 @@ export const agendaRepository = {
    */
   mover(
     id: string,
-    destino: { inicio: ISODateTime; fim: ISODateTime; professionalId?: string },
+    destino: {
+      inicio: ISODateTime
+      fim: ISODateTime
+      professionalId?: string
+      /** Trocar de coluna no agrupamento por sala muda a sala, não quem atende. */
+      roomIds?: string[]
+    },
   ): Promise<MutacaoAgenda> {
     return simularChamada('agenda.mover', () => {
       const dataset = getDataset()
@@ -230,6 +341,14 @@ export const agendaRepository = {
 
         if (ehAlvo && destino.professionalId) {
           appointment.professionalId = destino.professionalId
+        }
+
+        /*
+         * Só o alvo troca de sala. O par ligado (a recuperação de uma cirurgia) acompanha o
+         * horário, nunca a sala — é justamente por estar em outra sala que ele existe.
+         */
+        if (ehAlvo && destino.roomIds) {
+          appointment.roomIds = [...destino.roomIds]
         }
 
         appointment.atualizadoEm = agora

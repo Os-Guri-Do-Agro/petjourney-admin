@@ -18,6 +18,7 @@ import { computed, ref } from 'vue'
 import i18n from '@/i18n'
 
 import {
+  agendaRepository,
   EncounterLockedError,
   encounterRepository,
 } from '../data/repositories'
@@ -26,6 +27,7 @@ import type {
   EncounterDraft,
   EncounterLock,
   EncounterPatch,
+  SlotSugestao,
   TimelineEvent,
 } from '../data/types'
 
@@ -314,6 +316,115 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     })
   }
 
+  // ------------------------------------------------------------------ retorno
+
+  const sugestoesDeRetorno = ref<SlotSugestao[]>([])
+  const buscandoRetorno = ref(false)
+
+  /** Data de parede do atendimento — base do "em N dias" que a escolha de retorno mostra. */
+  const dataDoAtendimento = computed(() =>
+    encounter.value ? clinicClock.dateOf(encounter.value.abertoEm) : clinicClock.today(),
+  )
+
+  /**
+   * Horários possíveis para o retorno indicado na conduta.
+   *
+   * Nasce vazio e só é buscado quando alguém pede — o retorno é opcional, e disparar a busca a
+   * cada tecla digitada no campo de dias faria uma consulta de agenda por dígito.
+   */
+  async function buscarSugestoesDeRetorno() {
+    const atual = encounter.value
+    const emDias = atual?.conduta.retorno.emDias
+
+    if (!atual || emDias === null || emDias === undefined) {
+      sugestoesDeRetorno.value = []
+
+      return
+    }
+
+    buscandoRetorno.value = true
+
+    try {
+      sugestoesDeRetorno.value = await agendaRepository.sugerirRetorno({
+        petId: atual.petId,
+        professionalId: atual.professionalId,
+        /** Sem tipo escolhido, o retorno é uma consulta de retorno. */
+        typeId: atual.conduta.retorno.typeId ?? 'tipo-retorno',
+        aPartirDe: clinicClock.dateOf(atual.abertoEm),
+        emDias,
+      })
+    } catch {
+      sugestoesDeRetorno.value = []
+    } finally {
+      buscandoRetorno.value = false
+    }
+  }
+
+  /**
+   * Cria o retorno de verdade e amarra o id na conduta.
+   *
+   * Antes daqui, "Agendar retorno" só navegava para a agenda **focando o atendimento que
+   * acabava de terminar**: nada era criado, o `emDias` e o tipo escolhidos ficavam para trás, e
+   * `retorno.appointmentId` nunca era preenchido — então o aviso de "retorno pendente" não
+   * sumia nem depois de o vet marcar o retorno à mão.
+   *
+   * O id gravado é o que fecha o ciclo: é por ele que a conduta sabe que o próximo atendimento
+   * já existe, e é ele que some com o aviso.
+   */
+  async function agendarRetorno(slot: SlotSugestao) {
+    const atual = encounter.value
+
+    if (!atual || somenteLeitura.value) {
+      return null
+    }
+
+    salvando.value = true
+
+    try {
+      const resultado = await agendaRepository.criar({
+        petId: atual.petId,
+        tutorId: atual.tutorId,
+        professionalId: slot.professionalId,
+        roomIds: [],
+        typeId: atual.conduta.retorno.typeId ?? 'tipo-retorno',
+        inicio: slot.inicio,
+        fim: slot.fim,
+        encaixe: false,
+        observacao: '',
+        origem: 'retorno',
+      })
+
+      const criado = resultado.atendimentos[0] ?? null
+
+      if (criado) {
+        /*
+         * Passa pelo `atualizar` como qualquer edição de campo: entra no autosave, no rascunho
+         * local e no bloqueio de somente leitura. Gravar direto no `encounter` deixaria o id
+         * fora do rascunho, e uma interrupção logo depois perderia o vínculo com um
+         * atendimento que **já existe** na agenda — o pior dos dois mundos.
+         */
+        atualizar({
+          conduta: {
+            ...atual.conduta,
+            retorno: { ...atual.conduta.retorno, appointmentId: criado.id },
+          },
+        })
+
+        sugestoesDeRetorno.value = []
+        /** A agenda ganhou um atendimento: quem estiver olhando o dia precisa saber. */
+        clinico.invalidarTudo()
+      }
+
+      return criado
+    } catch {
+      erro.value = 'clinico.erros.mutacao'
+
+      return null
+    } finally {
+      salvando.value = false
+    }
+  }
+
   async function finalizar() {
     if (!encounter.value) {
       return
@@ -358,6 +469,7 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     consultaAnterior.value = null
     timeline.value = []
     rascunhoPendente.value = null
+    sugestoesDeRetorno.value = []
     salvoEm.value = null
     erro.value = ''
     patchAcumulado = {}
@@ -372,6 +484,9 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     salvoEm,
     erro,
     rascunhoPendente,
+    sugestoesDeRetorno,
+    buscandoRetorno,
+    dataDoAtendimento,
     simulandoSegundoDispositivo,
     dispositivo,
     somenteLeitura,
@@ -384,6 +499,8 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     gravar,
     descarregar,
     assumirEdicao,
+    buscarSugestoesDeRetorno,
+    agendarRetorno,
     finalizar,
     restaurarRascunho,
     descartarRascunho,

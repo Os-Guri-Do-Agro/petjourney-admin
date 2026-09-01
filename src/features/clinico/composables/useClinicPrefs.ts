@@ -21,6 +21,14 @@ export type ClinicZoom = (typeof ZOOMS)[number]
 const CHAVE_DENSIDADE = 'clinic.density'
 const CHAVE_ZOOM = 'clinic.zoom'
 const CHAVE_OCULTAR_CANCELADOS = 'clinic.hideCancelled'
+/**
+ * Legenda recolhida ou aberta.
+ *
+ * Nasce **aberta**: fechada por padrão, ninguém descobriria que a faixa colorida do card tem
+ * significado, e a legenda existiria só para quem já não precisa dela. Quem conhece a grade
+ * de cor fecha uma vez e a preferência persiste.
+ */
+const CHAVE_LEGENDA = 'clinic.legendOpen'
 
 /** Altura em pixels do slot de 15 minutos, espelhando `clinic-tokens.css`. */
 const ALTURA_POR_ZOOM: Record<ClinicZoom, number> = {
@@ -45,6 +53,12 @@ const ocultarCancelados = ref(
   typeof window === 'undefined'
     ? false
     : window.localStorage.getItem(CHAVE_OCULTAR_CANCELADOS) === 'true',
+)
+
+const legendaAberta = ref(
+  typeof window === 'undefined'
+    ? true
+    : window.localStorage.getItem(CHAVE_LEGENDA) !== 'false',
 )
 
 function aplicarNoDocumento() {
@@ -74,6 +88,10 @@ watch(ocultarCancelados, (valor) => {
   window.localStorage.setItem(CHAVE_OCULTAR_CANCELADOS, String(valor))
 })
 
+watch(legendaAberta, (valor) => {
+  window.localStorage.setItem(CHAVE_LEGENDA, String(valor))
+})
+
 function proximo<T>(lista: readonly T[], atual: T): T {
   const indice = lista.indexOf(atual)
 
@@ -85,6 +103,10 @@ export function useClinicPrefs() {
     densidade,
     zoom,
     ocultarCancelados,
+    legendaAberta,
+    alternarLegenda: () => {
+      legendaAberta.value = !legendaAberta.value
+    },
     /** Pixels por minuto — a grade calcula posição a partir daqui, nunca de número solto. */
     pixelsPorMinuto: computed(() => ALTURA_POR_ZOOM[zoom.value] / 15),
     alturaDoSlot: computed(() => ALTURA_POR_ZOOM[zoom.value]),

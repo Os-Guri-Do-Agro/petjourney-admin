@@ -14,12 +14,27 @@ import { useI18n } from 'vue-i18n'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { faixaDeOcupacao } from '../../domain/load'
 import { useAgendaStore } from '../../stores/agenda'
-import { clinicClock } from '../../stores/clinico'
+import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
 const emit = defineEmits<{ escolherDia: [data: string] }>()
 
 const { t } = useI18n()
 const agenda = useAgendaStore()
+const clinico = useClinicoStore()
+
+/* A semana identifica o profissional pelas iniciais e pela cor da coluna dele na grade: é o
+ * mesmo par que a pessoa já aprendeu olhando o dia, e o card não tem largura para nomes. */
+function nomeDe(professionalId: string) {
+  return clinico.profissional(professionalId)?.nome ?? ''
+}
+
+function iniciaisDe(professionalId: string) {
+  return clinico.profissional(professionalId)?.iniciais ?? '?'
+}
+
+function corDe(professionalId: string) {
+  return clinico.corDaColuna(professionalId)
+}
 const formato = useClinicFormat()
 
 const dias = computed(() =>
@@ -72,6 +87,50 @@ const dias = computed(() =>
             </li>
             <li v-if="dia.faltas > 0" class="dia__faltas">
               {{ t('clinico.agenda.semana.faltas', { contagem: dia.faltas }, dia.faltas) }}
+            </li>
+          </ul>
+
+          <!--
+            A quebra por profissional é o que faz a semana responder a pergunta do balcão. O
+            agregado do dia diz 50% quando uma agenda está cheia e a outra vazia — e não diz a
+            quem oferecer. Manhã e tarde em barras separadas porque ninguém pergunta pelo dia
+            inteiro: pergunta "tem alguma coisa de manhã na terça?".
+          -->
+          <ul class="pessoas">
+            <li
+              v-for="pessoa in dia.porProfissional"
+              :key="pessoa.professionalId"
+              class="pessoa"
+              :title="
+                t('clinico.agenda.semana.detalhePessoa', {
+                  nome: nomeDe(pessoa.professionalId),
+                  manha: formato.percentual(pessoa.ocupacaoManha),
+                  tarde: formato.percentual(pessoa.ocupacaoTarde),
+                })
+              "
+            >
+              <span class="pessoa__iniciais" :style="{ background: corDe(pessoa.professionalId) }">
+                {{ iniciaisDe(pessoa.professionalId) }}
+              </span>
+
+              <span class="pessoa__periodos" aria-hidden="true">
+                <span
+                  class="pessoa__periodo"
+                  :class="`pessoa__periodo--${faixaDeOcupacao(pessoa.ocupacaoManha)}`"
+                >
+                  <span :style="{ width: `${Math.min(pessoa.ocupacaoManha, 1) * 100}%` }" />
+                </span>
+                <span
+                  class="pessoa__periodo"
+                  :class="`pessoa__periodo--${faixaDeOcupacao(pessoa.ocupacaoTarde)}`"
+                >
+                  <span :style="{ width: `${Math.min(pessoa.ocupacaoTarde, 1) * 100}%` }" />
+                </span>
+              </span>
+
+              <span class="pessoa__valor clinic-value">
+                {{ formato.percentual(pessoa.ocupacao) }}
+              </span>
             </li>
           </ul>
         </template>
@@ -188,6 +247,72 @@ const dias = computed(() =>
   color: var(--clinic-muted);
   font-size: var(--clinic-font-label);
   list-style: none;
+}
+
+/* --------------------------------------------------------- carga por profissional */
+
+.pessoas {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0.15rem 0 0;
+  padding: 0.35rem 0 0;
+  border-top: 1px solid var(--clinic-line);
+  list-style: none;
+}
+
+.pessoa {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pessoa__iniciais {
+  display: grid;
+  width: 1.1rem;
+  height: 1.1rem;
+  place-items: center;
+  border-radius: 0.3rem;
+  color: var(--clinic-text);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* Duas barras por pessoa: manhã e tarde. Juntas, ocupam a mesma altura de uma. */
+.pessoa__periodos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.pessoa__periodo {
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--clinic-line);
+}
+
+.pessoa__periodo span {
+  display: block;
+  height: 100%;
+  background: var(--clinic-accent);
+}
+
+.pessoa__periodo--cheio span {
+  background: var(--clinic-attention-text);
+}
+
+.pessoa__periodo--excedido span {
+  background: var(--clinic-risk-text);
+}
+
+.pessoa__valor {
+  color: var(--clinic-faint);
+  font-size: 0.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .dia__faltas {

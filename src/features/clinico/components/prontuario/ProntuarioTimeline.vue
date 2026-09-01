@@ -6,12 +6,12 @@
  * histórico inteiro para lembrar o que prescreveu há duas semanas. O que interessa no retorno
  * é o par: o que foi dito e o que aconteceu depois.
  */
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import type { Encounter, TimelineEvent } from '../../data/types'
+import type { Encounter, TimelineEvent, TimelineEventKind } from '../../data/types'
 import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
 const props = withDefaults(
@@ -34,14 +34,48 @@ const { t } = useI18n()
 const formato = useClinicFormat()
 const clinico = useClinicoStore()
 
-const visiveis = computed(() => props.eventos.slice(0, props.limite))
-const restantes = computed(() => Math.max(props.eventos.length - props.limite, 0))
+/**
+ * Filtro por tipo.
+ *
+ * É a tela que o vet abre antes de entrar na sala, e a pergunta que ele faz é sempre estreita:
+ * "quando foi a última vacina?", "já operou?". Sem filtro, responder qualquer uma delas obriga
+ * a rolar a lista inteira e ler o que não interessa.
+ *
+ * Só aparecem os tipos que **existem neste paciente** — uma ficha "Internação" num pet que
+ * nunca internou é um clique que só devolve lista vazia. O filtro é de seleção única: a
+ * pergunta é sobre um tipo de cada vez, e múltipla escolha aqui pediria um botão de aplicar.
+ */
+const filtro = ref<TimelineEventKind | null>(null)
+
+const tiposPresentes = computed(() => {
+  const contagem = new Map<TimelineEventKind, number>()
+
+  for (const evento of props.eventos) {
+    contagem.set(evento.kind, (contagem.get(evento.kind) ?? 0) + 1)
+  }
+
+  return [...contagem.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([kind, total]) => ({ kind, total }))
+})
+
+const filtrados = computed(() =>
+  filtro.value ? props.eventos.filter((evento) => evento.kind === filtro.value) : props.eventos,
+)
+
+function alternarFiltro(kind: TimelineEventKind) {
+  filtro.value = filtro.value === kind ? null : kind
+}
+
+const visiveis = computed(() => filtrados.value.slice(0, props.limite))
+const restantes = computed(() => Math.max(filtrados.value.length - props.limite, 0))
 
 const ICONE: Record<TimelineEvent['kind'], string> = {
   consulta: 'pi pi-file',
   vacina: 'pi pi-shield',
   exame: 'pi pi-search',
   cirurgia: 'pi pi-heart',
+  internacao: 'pi pi-home',
   prescricao: 'pi pi-book',
   falta: 'pi pi-user-minus',
   observacao: 'pi pi-comment',
@@ -95,6 +129,26 @@ const prescricoesAnteriores = computed(() =>
 
     <section class="historico">
       <h3 class="clinic-label">{{ t('clinico.prontuario.timeline.titulo') }}</h3>
+
+      <!--
+        Fichas de filtro com a contagem: além de filtrar, elas respondem "o que já foi feito
+        neste pet" antes de qualquer clique — que é a pergunta que traz o vet a esta lista.
+      -->
+      <div v-if="tiposPresentes.length > 1" class="filtro" role="group">
+        <button
+          v-for="tipo in tiposPresentes"
+          :key="tipo.kind"
+          type="button"
+          class="filtro__ficha clinic-focusable"
+          :class="{ 'filtro__ficha--ativa': filtro === tipo.kind }"
+          :aria-pressed="filtro === tipo.kind"
+          @click="alternarFiltro(tipo.kind)"
+        >
+          <i :class="ICONE[tipo.kind]" aria-hidden="true" />
+          <span>{{ t(`clinico.prontuario.timeline.kind.${tipo.kind}`) }}</span>
+          <span class="filtro__contagem clinic-value">{{ tipo.total }}</span>
+        </button>
+      </div>
 
       <ol v-if="visiveis.length > 0" class="linha">
         <li v-for="evento in visiveis" :key="evento.id" class="linha__item">
@@ -188,6 +242,53 @@ const prescricoesAnteriores = computed(() =>
   color: var(--clinic-accent-strong);
   font-size: var(--clinic-font-label);
   font-weight: 700;
+}
+
+.filtro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  margin-top: var(--clinic-space-2);
+}
+
+.filtro__ficha {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-chip);
+  background: var(--clinic-surface);
+  color: var(--clinic-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--clinic-font-label);
+}
+
+.filtro__ficha i {
+  font-size: 0.6rem;
+}
+
+.filtro__ficha:hover {
+  border-color: var(--clinic-line-strong);
+  color: var(--clinic-text);
+}
+
+/* Filtro ligado ganha contorno e fundo, não só cor: o estado sobrevive à escala de cinza. */
+.filtro__ficha--ativa {
+  border-color: var(--clinic-accent-strong);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+  font-weight: 700;
+}
+
+.filtro__contagem {
+  color: var(--clinic-faint);
+  font-weight: 750;
+}
+
+.filtro__ficha--ativa .filtro__contagem {
+  color: var(--clinic-accent-strong);
 }
 
 .historico {

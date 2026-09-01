@@ -42,12 +42,13 @@ import {
   traduzirMedicamentos,
 } from '../domain/catalog-i18n'
 import { createClinicClock } from '../domain/clinic-time'
+import { faixaEtariaDoPaciente, porteDoPaciente } from '../domain/porte'
 import { encontrarFaixa } from '../domain/ranges'
 
 export const clinicClock = createClinicClock(CLINIC_UTC_OFFSET)
 
-/** Capacidade diária por profissional acima da qual a carga vira aviso. */
-export const CAPACIDADE_MINUTOS_POR_PROFISSIONAL = 8 * 60
+/** Reexportado do domínio: a agenda já o importava daqui. */
+export { CAPACIDADE_MINUTOS_POR_PROFISSIONAL } from '../domain/load'
 
 export const useClinicoStore = defineStore('clinico', () => {
   const clinic = ref<Clinic | null>(null)
@@ -191,8 +192,31 @@ export const useClinicoStore = defineStore('clinico', () => {
     return principal ? descricaoDoDiagnostico(principal) : ''
   }
 
+  /**
+   * Faixa de referência para uma espécie, sem qualificar porte nem idade.
+   *
+   * Continua existindo para quem só tem a espécie na mão. Quando há paciente, `faixaDoPaciente`
+   * é o caminho certo — é ele que distingue o yorkshire do são-bernardo.
+   */
   function faixaDe(vital: VitalKey, especie: PetSpecies): ReferenceRange | null {
     return encontrarFaixa(faixas.value, vital, especie)
+  }
+
+  /**
+   * Faixa de referência do vital **para este paciente**, qualificada por porte e idade.
+   *
+   * A faixa etária é derivada aqui, do relógio da clínica, e não lida de campo: paciente que
+   * envelhece só quando alguém edita a ficha julgaria o vital pela régua errada por anos.
+   */
+  function faixaDoPaciente(vital: VitalKey, pet: Pet | null): ReferenceRange | null {
+    if (!pet) {
+      return null
+    }
+
+    return encontrarFaixa(faixas.value, vital, pet.especie, {
+      porte: porteDoPaciente(pet),
+      faixaEtaria: faixaEtariaDoPaciente(pet, clinicClock.today()),
+    })
   }
 
   /** Cor de coluna do profissional — índice, nunca literal: o token resolve claro e escuro. */
@@ -234,6 +258,7 @@ export const useClinicoStore = defineStore('clinico', () => {
     descricaoDoDiagnostico,
     diagnosticoPrincipal,
     faixaDe,
+    faixaDoPaciente,
     corDaColuna,
     $resetModulo,
   }

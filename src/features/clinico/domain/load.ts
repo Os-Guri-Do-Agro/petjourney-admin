@@ -7,6 +7,7 @@
 
 import type {
   Appointment,
+  CargaDoProfissional,
   Clinic,
   DiaCarga,
   ISODate,
@@ -16,6 +17,14 @@ import type {
 
 import { clockToMinutes, type ClinicClock, weekdayOf } from './clinic-time'
 import { ocupaHorario } from './conflicts'
+
+/**
+ * Capacidade diária por profissional acima da qual a carga vira aviso.
+ *
+ * Mora no domínio porque tanto a store quanto o repositório precisam dela — e repositório
+ * importando store seria a camada de dados dependendo da de apresentação.
+ */
+export const CAPACIDADE_MINUTOS_POR_PROFISSIONAL = 8 * 60
 
 export function capacidadeDoDia(
   clinic: Clinic,
@@ -52,6 +61,8 @@ export function cargaDoDia(
     )
 
   const capacidade = capacidadeDoDia(clinic, data, profissionais)
+  /** Capacidade de **uma** coluna: o total é dela vezes o número de profissionais. */
+  const porPessoa = profissionais.length > 0 ? capacidade / profissionais.length : 0
 
   return {
     data,
@@ -61,7 +72,64 @@ export function cargaDoDia(
     ocupacao: capacidade > 0 ? Math.min(ocupado / capacidade, 2) : 0,
     faltas: doDia.filter((appointment) => appointment.status === 'falta').length,
     encaixes: doDia.filter((appointment) => appointment.encaixe && ocupaHorario(appointment)).length,
+    porProfissional: cargaPorProfissional(doDia, profissionais, porPessoa, clock),
   }
+}
+
+/** Meio-dia divide manhã e tarde. Não é regra clínica: é como a pergunta chega no balcão. */
+const MEIO_DIA_EM_MINUTOS = 12 * 60
+
+/**
+ * Ocupação de cada profissional no dia, e dentro dele por período.
+ *
+ * O período sai do **início** do atendimento, não do intervalo que ele cobre. Uma cirurgia que
+ * começa 11h30 e vai até 14h conta inteira na manhã, e é assim que quem atende no balcão a
+ * enxerga: "a Ana está em cirurgia desde a manhã". Ratear o bloco entre os dois períodos daria
+ * um número mais exato e uma resposta pior.
+ */
+function cargaPorProfissional(
+  doDia: Appointment[],
+  profissionais: Professional[],
+  capacidadePorPessoa: number,
+  clock: ClinicClock,
+): CargaDoProfissional[] {
+  return profissionais.map((professional) => {
+    const seus = doDia.filter(
+      (appointment) => appointment.professionalId === professional.id && ocupaHorario(appointment),
+    )
+
+    let ocupado = 0
+    let manha = 0
+    let tarde = 0
+
+    for (const appointment of seus) {
+      const minutos = clock.durationMinutes(appointment.inicio, appointment.fim)
+
+      ocupado += minutos
+
+      if (clock.minutesOf(appointment.inicio) < MEIO_DIA_EM_MINUTOS) {
+        manha += minutos
+      } else {
+        tarde += minutos
+      }
+    }
+
+    const proporcao = (valor: number) =>
+      capacidadePorPessoa > 0 ? Math.min(valor / capacidadePorPessoa, 2) : 0
+
+    return {
+      professionalId: professional.id,
+      agendados: seus.length,
+      ocupadoMinutos: ocupado,
+      ocupacao: proporcao(ocupado),
+      /*
+       * Manhã e tarde comparam contra **meio** expediente cada, não contra o dia inteiro —
+       * senão uma manhã lotada apareceria como 50% e pareceria haver espaço.
+       */
+      ocupacaoManha: capacidadePorPessoa > 0 ? Math.min(manha / (capacidadePorPessoa / 2), 2) : 0,
+      ocupacaoTarde: capacidadePorPessoa > 0 ? Math.min(tarde / (capacidadePorPessoa / 2), 2) : 0,
+    }
+  })
 }
 
 export type FaixaOcupacao = 'vazio' | 'tranquilo' | 'cheio' | 'excedido'

@@ -18,7 +18,10 @@ import ClinicShortcutsDialog from '@/features/clinico/components/base/ClinicShor
 import AgendaAppointmentDrawer from '@/features/clinico/components/agenda/AgendaAppointmentDrawer.vue'
 import AgendaCancelDialog from '@/features/clinico/components/agenda/AgendaCancelDialog.vue'
 import AgendaDayGrid from '@/features/clinico/components/agenda/AgendaDayGrid.vue'
+import AgendaLegenda from '@/features/clinico/components/agenda/AgendaLegenda.vue'
 import AgendaMoveDialog from '@/features/clinico/components/agenda/AgendaMoveDialog.vue'
+import AgendaReagendarDialog from '@/features/clinico/components/agenda/AgendaReagendarDialog.vue'
+import FilaAdicionarDialog from '@/features/clinico/components/agenda/FilaAdicionarDialog.vue'
 import AgendaBloquearDialog from '@/features/clinico/components/agenda/AgendaBloquearDialog.vue'
 import AgendaCriarDialog from '@/features/clinico/components/agenda/AgendaCriarDialog.vue'
 import AgendaToolbar from '@/features/clinico/components/agenda/AgendaToolbar.vue'
@@ -30,9 +33,16 @@ import { useAgendaUrlState } from '@/features/clinico/composables/useAgendaUrlSt
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { useClinicPrefs } from '@/features/clinico/composables/useClinicPrefs'
 import { useClinicShortcuts } from '@/features/clinico/composables/useClinicShortcuts'
-import type { Appointment, AppointmentStatus, CancelReason } from '@/features/clinico/data/types'
+import { agendaRepository } from '@/features/clinico/data/repositories'
+import type {
+  Appointment,
+  AppointmentStatus,
+  CancelReason,
+  SlotSugestao,
+} from '@/features/clinico/data/types'
 import { useAgendaStore } from '@/features/clinico/stores/agenda'
-import { useClinicoStore } from '@/features/clinico/stores/clinico'
+import { useAvisosStore } from '@/features/clinico/stores/avisos'
+import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useFilaStore } from '@/features/clinico/stores/fila'
 
 const { t } = useI18n()
@@ -40,6 +50,7 @@ const router = useRouter()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
 const fila = useFilaStore()
+const avisos = useAvisosStore()
 const formato = useClinicFormat()
 const { alternarDensidade } = useClinicPrefs()
 
@@ -95,12 +106,27 @@ function fecharDrawer() {
   agenda.focoId = null
 }
 
-async function confirmarMovimento(proposta: ArrasteProposta) {
+async function confirmarMovimento(proposta: ArrasteProposta, mensagem: string) {
   await agenda.mover(proposta.appointment.id, {
     inicio: proposta.inicio,
     fim: proposta.fim,
     professionalId: proposta.professionalId,
+    roomIds: proposta.roomIds,
   })
+
+  /*
+   * O texto que a caixa mostrou não pode morrer com ela: é o comprovante de que o responsável
+   * foi avisado, e é o que a recepção consulta quando alguém liga dizendo que não sabia.
+   */
+  if (mensagem.trim()) {
+    avisos.registrar({
+      appointmentId: proposta.appointment.id,
+      tutorId: proposta.appointment.tutorId,
+      kind: 'remarcacao',
+      texto: mensagem,
+    })
+  }
+
   propostaDeMovimento.value = null
 }
 
@@ -113,6 +139,26 @@ async function avisarFilaDaVaga(appointment: Appointment) {
   await fila.aoLiberarHorario(appointment.inicio, appointment.professionalId)
 }
 
+/**
+ * Marcar falta, venha de onde vier.
+ *
+ * O card e o drawer chamam o mesmo caminho, e é aqui que as três consequências acontecem
+ * juntas: o status muda, a fila é avisada de que um horário vagou, e **o reagendamento é
+ * oferecido na hora**. Oferecer depois é não oferecer: quem marca falta às três da tarde não
+ * volta à lista às seis para lembrar de ligar.
+ */
+async function marcarFalta(appointmentId: string) {
+  const appointment = agenda.atendimentos.find((item) => item.id === appointmentId)
+
+  if (!appointment) {
+    return
+  }
+
+  await agenda.alterarStatus(appointmentId, 'falta')
+  await avisarFilaDaVaga(appointment)
+  abrirReagendamento(appointment)
+}
+
 async function alterarStatus(status: AppointmentStatus) {
   const appointment = selecionado.value
 
@@ -120,10 +166,79 @@ async function alterarStatus(status: AppointmentStatus) {
     return
   }
 
-  await agenda.alterarStatus(appointment.id, status)
-
   if (status === 'falta') {
-    await avisarFilaDaVaga(appointment)
+    await marcarFalta(appointment.id)
+
+    return
+  }
+
+  await agenda.alterarStatus(appointment.id, status)
+}
+
+// ----------------------------------------------------------------- reagendamento
+
+const faltaParaReagendar = ref<Appointment | null>(null)
+const sugestoesDeReagendamento = ref<SlotSugestao[]>([])
+const buscandoReagendamento = ref(false)
+
+function abrirReagendamento(appointment: Appointment) {
+  faltaParaReagendar.value = appointment
+  sugestoesDeReagendamento.value = []
+  buscandoReagendamento.value = true
+
+  void agendaRepository
+    .sugerirReagendamento({
+      petId: appointment.petId,
+      professionalId: appointment.professionalId,
+      typeId: appointment.typeId,
+      aPartirDe: clinicClock.dateOf(appointment.inicio),
+    })
+    .then((sugestoes) => {
+      sugestoesDeReagendamento.value = sugestoes
+    })
+    .catch(() => {
+      sugestoesDeReagendamento.value = []
+    })
+    .finally(() => {
+      buscandoReagendamento.value = false
+    })
+}
+
+async function confirmarReagendamento({
+  slot,
+  mensagem,
+}: {
+  slot: SlotSugestao
+  mensagem: string
+}) {
+  const falta = faltaParaReagendar.value
+
+  if (!falta) {
+    return
+  }
+
+  const criado = await agenda.criar({
+    petId: falta.petId,
+    tutorId: falta.tutorId,
+    professionalId: slot.professionalId,
+    roomIds: falta.roomIds,
+    typeId: falta.typeId,
+    inicio: slot.inicio,
+    fim: slot.fim,
+    encaixe: false,
+    observacao: '',
+    origem: 'recepcao',
+  })
+
+  if (criado) {
+    /* O aviso ao responsável fica registrado no atendimento novo, não se perde no diálogo. */
+    avisos.registrar({
+      appointmentId: criado.id,
+      kind: 'reagendamento',
+      texto: mensagem,
+      tutorId: falta.tutorId,
+    })
+    faltaParaReagendar.value = null
   }
 }
 
@@ -135,6 +250,15 @@ async function confirmarCancelamento(motivo: CancelReason) {
   }
 
   await agenda.cancelar(appointment.id, motivo)
+  avisos.registrar({
+    appointmentId: appointment.id,
+    tutorId: appointment.tutorId,
+    kind: 'cancelamento',
+    texto: t('clinico.agenda.cancelarDialogo.aviso', {
+      paciente: clinico.pet(appointment.petId)?.nome ?? '',
+      motivo: t(`clinico.cancelamento.${motivo}`),
+    }),
+  })
   atendimentoParaCancelar.value = null
   await avisarFilaDaVaga(appointment)
 }
@@ -176,6 +300,29 @@ const bloquearAberto = ref(false)
  * É o caminho que a recepção usa de verdade: o horário é escolhido olhando o buraco na agenda,
  * não digitado num campo depois.
  */
+/**
+ * Entrada na fila a partir da criação sem horário.
+ *
+ * Fecha o diálogo de agendamento e abre o da fila **já com o que foi digitado** — repetir
+ * paciente e tipo seria cobrar duas vezes a mesma informação, no meio de uma ligação.
+ */
+const filaAberta = ref(false)
+const filaPet = ref<string | null>(null)
+const filaTipo = ref<string | null>(null)
+const filaProfissional = ref<string | null>(null)
+
+function abrirEntradaNaFila(sugestao: {
+  petId: string | null
+  typeId: string | null
+  professionalId: string | null
+}) {
+  criarAberto.value = false
+  filaPet.value = sugestao.petId
+  filaTipo.value = sugestao.typeId
+  filaProfissional.value = sugestao.professionalId
+  filaAberta.value = true
+}
+
 const criarProfissional = ref<string | null>(null)
 const criarMinuto = ref<number | null>(null)
 
@@ -319,10 +466,18 @@ useClinicShortcuts({
         "
       />
 
-      <div v-else class="agenda__corpo">
+      <!--
+        A legenda fica **acima** da grade e fora dela: dentro, rolaria junto e sumiria assim
+        que alguém descesse até a tarde — que é exatamente quando a grade fica cheia e a chave
+        de leitura passa a fazer falta.
+      -->
+      <AgendaLegenda v-if="agenda.visao === 'dia' && !agenda.clinicaFechada" />
+
+      <div v-if="agenda.visao !== 'semana'" class="agenda__corpo">
         <AgendaDayGrid
           @abrir="abrir"
           @propor="propostaDeMovimento = $event"
+          @marcar-falta="marcarFalta"
           @criar-em="abrirCriacao(false, $event)"
         />
 
@@ -344,6 +499,7 @@ useClinicShortcuts({
       :sugestao-profissional="criarProfissional"
       :minuto-inicial="criarMinuto"
       @criado="agenda.recarregar()"
+      @entrar-na-fila="abrirEntradaNaFila"
     />
 
     <AgendaBloquearDialog
@@ -362,6 +518,27 @@ useClinicShortcuts({
       :appointment="paraCancelar"
       @confirmar="confirmarCancelamento"
       @fechar="atendimentoParaCancelar = null"
+    />
+
+    <!--
+      Reagendamento abre logo depois de marcar a falta — com o telefone do responsável à mão e
+      horários já buscados. Oferecer depois é não oferecer.
+    -->
+    <AgendaReagendarDialog
+      :appointment="faltaParaReagendar"
+      :sugestoes="sugestoesDeReagendamento"
+      :buscando="buscandoReagendamento"
+      :salvando="agenda.salvando"
+      @confirmar="confirmarReagendamento"
+      @fechar="faltaParaReagendar = null"
+    />
+
+    <FilaAdicionarDialog
+      v-model:visivel="filaAberta"
+      :pet-id="filaPet"
+      :type-id="filaTipo"
+      :professional-id="filaProfissional"
+      @adicionado="fila.carregar()"
     />
 
     <ClinicShortcutsDialog v-model:visible="ajudaAberta" />

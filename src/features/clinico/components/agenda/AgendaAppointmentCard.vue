@@ -14,7 +14,9 @@ import { useI18n } from 'vue-i18n'
 
 import type { CardAgenda } from '../../composables/useAgendaDia'
 import { useClinicFormat } from '../../composables/useClinicFormat'
+import { aparenciaDoTipo } from '../../domain/appointment-kind'
 import { severidadeMaxima } from '../../domain/conflicts'
+import { clinicClock } from '../../stores/clinico'
 
 const props = withDefaults(
   defineProps<{
@@ -31,6 +33,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   abrir: [id: string]
   iniciarArraste: [evento: PointerEvent, modo: 'mover' | 'inicio' | 'fim']
+  marcarFalta: [id: string]
 }>()
 
 const { t } = useI18n()
@@ -58,6 +61,16 @@ const faixa = computed(() => {
 const severidade = computed(() => severidadeMaxima(props.card.conflitos))
 
 /**
+ * Tipo do atendimento: acento na borda esquerda e ícone ao lado do nome.
+ *
+ * A cor do card já pertence à **coluna** (o profissional, ou a sala) e não pode ser
+ * requisitada pelo tipo sem desmanchar a leitura de "de quem é este bloco". Por isso o tipo
+ * ganha a faixa da esquerda — território livre — e o ícone, que é o que sobrevive à escala de
+ * cinza e a quem não distingue os sete pastéis.
+ */
+const tipo = computed(() => aparenciaDoTipo(props.card.tipo?.kind))
+
+/**
  * Só aviso e impedimento marcam o card. Conflito `info` — almoço atravessado, carga do dia,
  * sala fora da indicada — continua no drawer, onde há espaço para ler. Marcar os três níveis
  * põe um ícone em quase todo card, e um ícone que aparece sempre deixa de ser lido.
@@ -67,6 +80,29 @@ const avisosVisiveis = computed(() =>
 )
 const cancelado = computed(() => appointment.value.status === 'cancelado')
 const faltou = computed(() => appointment.value.status === 'falta')
+
+/**
+ * Marcar falta direto no card.
+ *
+ * Antes a ação existia **só** no rodapé do drawer, atrás de dois cliques, e nada no card
+ * sugeria que ela morava lá. Falta se marca em lote, no fim do turno, olhando a grade — não
+ * abrindo um atendimento de cada vez.
+ *
+ * Só aparece para quem já devia ter chegado e não chegou: marcar falta de um horário que ainda
+ * não passou é sempre engano, e um botão que só faz sentido depois das 14h não pode estar
+ * disponível às 9h.
+ */
+const podeMarcarFalta = computed(() => {
+  if (props.fantasma || !props.arrastavel) {
+    return false
+  }
+
+  if (!['agendado', 'confirmado'].includes(appointment.value.status)) {
+    return false
+  }
+
+  return clinicClock.nowIso() > appointment.value.inicio
+})
 
 const alertaDeRisco = computed(() =>
   props.card.pet?.alertas.find((alerta) => alerta.severidade === 'risco') ?? null,
@@ -103,6 +139,7 @@ const estilo = computed(() => {
     left: `calc(${props.card.lane * largura}% + 1px)`,
     width: `calc(${largura}% - 2px)`,
     '--card-cor': props.cor,
+    '--card-tipo': tipo.value.cor,
   }
 })
 </script>
@@ -161,6 +198,12 @@ const estilo = computed(() => {
     </div>
 
     <div v-if="faixa !== 'minima'" class="card__linha card__linha--secundaria">
+      <!--
+        Ícone do tipo antes do nome: junto com a faixa da esquerda, é o par que deixa o tipo
+        legível sem cor. Some com o nome quando o card não tem altura — nessa faixa nada além
+        de hora e paciente cabe, e o tipo continua no rótulo acessível e no drawer.
+      -->
+      <i v-if="tipo.icone" :class="['card__tipo-icone', tipo.icone]" aria-hidden="true" />
       <span class="card__tipo">{{ card.tipo?.nome }}</span>
       <span v-if="appointment.encaixe" class="card__marca">
         {{ t('clinico.agenda.encaixeMarca') }}
@@ -175,6 +218,23 @@ const estilo = computed(() => {
       <span class="card__status">{{ formato.status(appointment.status) }}</span>
       <span class="card__duracao clinic-value">{{ formato.hora(appointment.fim) }}</span>
     </div>
+
+    <!--
+      Falta a um clique, sem abrir o atendimento.
+      Aparece no hover e no foco; em tela de toque fica sempre visível, porque dedo não tem
+      hover e a ação ficaria inalcançável.
+    -->
+    <button
+      v-if="podeMarcarFalta"
+      type="button"
+      class="card__falta clinic-focusable"
+      :title="t('clinico.faltas.marcar')"
+      :aria-label="`${t('clinico.faltas.marcar')} — ${card.pet?.nome ?? ''}`"
+      @click.stop="emit('marcarFalta', appointment.id)"
+      @pointerdown.stop
+    >
+      <i class="pi pi-user-minus" aria-hidden="true" />
+    </button>
 
     <span
       v-if="arrastavel && faixa !== 'minima'"
@@ -191,8 +251,10 @@ const estilo = computed(() => {
   display: grid;
   align-content: start;
   overflow: hidden;
-  padding: 2px 6px;
+  padding: 2px 6px 2px 8px;
   border: 1px solid color-mix(in srgb, var(--card-cor) 52%, var(--clinic-line));
+  /* A faixa do tipo. Fica na borda, não em pseudo-elemento, para sobreviver ao overflow. */
+  border-left: 3px solid var(--card-tipo);
   border-radius: 0.5rem;
   background: color-mix(in srgb, var(--card-cor) 10%, var(--clinic-surface));
   color: var(--clinic-text);
@@ -209,7 +271,8 @@ const estilo = computed(() => {
 }
 
 .card--selecionado {
-  border-color: var(--clinic-accent-strong);
+  border-block-color: var(--clinic-accent-strong);
+  border-inline-end-color: var(--clinic-accent-strong);
   box-shadow: var(--clinic-focus-ring);
   z-index: 4;
 }
@@ -262,6 +325,14 @@ const estilo = computed(() => {
   font-size: calc(var(--clinic-font-label) - 0.5px);
 }
 
+.card__tipo-icone {
+  flex: 0 0 auto;
+  color: var(--card-tipo);
+  font-size: 0.6rem;
+  /* Alinhado pela linha de base do texto ao lado, não pelo centro da caixa. */
+  transform: translateY(0.5px);
+}
+
 .card__tipo {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -303,6 +374,56 @@ const estilo = computed(() => {
   flex: 0 0 auto;
 }
 
+/*
+ * Botão de falta: canto superior direito, por cima do card.
+ *
+ * Fica invisível até o hover para não competir com o nome do paciente — numa grade de 40
+ * atendimentos, 40 ícones permanentes viram textura. No foco por teclado aparece igual, senão
+ * a ação existiria só para quem usa mouse.
+ */
+.card__falta {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  z-index: 5;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--clinic-attention-line);
+  border-radius: 0.35rem;
+  background: var(--clinic-surface);
+  color: var(--clinic-attention-text);
+  cursor: pointer;
+  font-size: 0.6rem;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.card:hover .card__falta,
+.card__falta:focus-visible {
+  opacity: 1;
+}
+
+.card__falta:hover {
+  border-color: var(--clinic-risk-line);
+  background: var(--clinic-risk-bg);
+  color: var(--clinic-risk-text);
+}
+
+/* Dedo e caneta não têm hover: em toque, a ação é sempre visível. */
+@media (hover: none) {
+  .card__falta {
+    opacity: 1;
+  }
+}
+
+/* Card mínimo não tem altura para o botão sem cobrir a hora. */
+.card--minima .card__falta {
+  display: none;
+}
+
 /* Alças de 6 px: alvo de mouse, não de dedo. */
 .card__alca {
   position: absolute;
@@ -326,6 +447,8 @@ const estilo = computed(() => {
  */
 .card--liberado {
   border-style: dashed;
+  /* A faixa do tipo continua sólida: tracejar 3 px a transforma numa coluna de pontos. */
+  border-left-style: solid;
   background: var(--clinic-surface);
   opacity: 0.62;
 }
@@ -335,12 +458,19 @@ const estilo = computed(() => {
   text-decoration: line-through;
 }
 
+/*
+ * Toda variante de estado repinta as bordas **menos a esquerda**: aquela é a faixa do tipo, e
+ * é a única coisa no card que não muda quando o paciente falta ou o atendimento termina.
+ * Perdê-la faria a legenda mentir justamente nos cards que a recepção revisita no fim do dia.
+ */
 .card--falta {
-  border-color: var(--clinic-risk-line);
+  border-block-color: var(--clinic-risk-line);
+  border-inline-end-color: var(--clinic-risk-line);
 }
 
 .card--em-atendimento {
-  border-color: var(--clinic-accent-strong);
+  border-block-color: var(--clinic-accent-strong);
+  border-inline-end-color: var(--clinic-accent-strong);
   background: color-mix(in srgb, var(--card-cor) 30%, var(--clinic-surface));
 }
 
@@ -350,7 +480,8 @@ const estilo = computed(() => {
 
 /* Finalizado é história do dia, não tarefa: perde saturação e peso, mas continua legível. */
 .card--finalizado {
-  border-color: var(--clinic-line);
+  border-block-color: var(--clinic-line);
+  border-inline-end-color: var(--clinic-line);
   background: var(--clinic-surface-soft);
   color: var(--clinic-muted);
 }

@@ -27,8 +27,10 @@ import ClinicRefValue from '../base/ClinicRefValue.vue'
 import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
 import type {
   ExameFisico,
+  HidratacaoGrau,
   Measurement,
-  PetSpecies,
+  MucosaStatus,
+  Pet,
   SystemFinding,
   SystemKey,
   VitalKey,
@@ -39,7 +41,14 @@ import { useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{
   valor: ExameFisico
-  especie: PetSpecies
+  /**
+   * O paciente inteiro, e não só a espécie.
+   *
+   * A faixa de referência é qualificada por **porte e idade**, não apenas por espécie: um
+   * yorkshire de 3 kg em 140 bpm está em repouso e um são-bernardo em 140 bpm está
+   * taquicárdico. Com só a espécie na mão, o componente marcaria um dos dois errado sempre.
+   */
+  pet: Pet | null
   somenteLeitura: boolean
   motivoLeitura: string
 }>()
@@ -98,7 +107,63 @@ const alterados = computed(
 )
 
 function faixaDe(vital: VitalKey) {
-  return clinico.faixaDe(vital, props.especie)
+  return clinico.faixaDoPaciente(vital, props.pet)
+}
+
+/**
+ * Coloração das mucosas.
+ *
+ * Vive fora de `vitais` porque não tem número nem faixa — mas é exame físico, e dos que mais
+ * mudam conduta sozinhos: pálida é hemorragia ou anemia até prova em contrário, ictérica manda
+ * olhar fígado, cianótica é urgência respiratória.
+ *
+ * O tom acompanha a gravidade para a varredura funcionar sem leitura, no mesmo padrão dos oito
+ * sistemas logo abaixo.
+ */
+const opcoesMucosas = computed(() =>
+  (
+    [
+      { valor: 'normocoradas', tom: 'ok' },
+      { valor: 'palidas', tom: 'atencao' },
+      { valor: 'ictericas', tom: 'atencao' },
+      { valor: 'cianoticas', tom: 'risco' },
+      { valor: 'congestas', tom: 'atencao' },
+      { valor: 'nao-avaliado', tom: 'neutro' },
+    ] as const
+  ).map((opcao) => ({
+    valor: opcao.valor,
+    tom: opcao.tom,
+    rotulo: t(`clinico.prontuario.exameFisico.mucosa.${opcao.valor}`),
+  })),
+)
+
+/**
+ * Grau de desidratação.
+ *
+ * Estava na anamnese, que era o lugar errado: desidratação se estima por turgor cutâneo,
+ * mucosas e enoftalmia — com o paciente na mesa, não por relato de telefone.
+ */
+const opcoesHidratacao = computed(() =>
+  (
+    [
+      { valor: 'normal', tom: 'ok' },
+      { valor: 'leve', tom: 'atencao' },
+      { valor: 'moderada', tom: 'atencao' },
+      { valor: 'grave', tom: 'risco' },
+    ] as const
+  ).map((opcao) => ({
+    valor: opcao.valor,
+    tom: opcao.tom,
+    rotulo: t(`clinico.prontuario.exameFisico.hidratacao.${opcao.valor}`),
+  })),
+)
+
+function aplicarMucosas(valor: MucosaStatus) {
+  emit('atualizar', { exameFisico: { ...props.valor, mucosas: valor } })
+}
+
+function aplicarHidratacao(valor: HidratacaoGrau) {
+  emit('atualizar', { exameFisico: { ...props.valor, hidratacao: valor } })
 }
 
 function medicao(vital: VitalKey): Measurement {
@@ -223,6 +288,34 @@ function unidadeDe(vital: VitalKey) {
           </button>
         </span>
       </label>
+    </div>
+
+    <!--
+      Mucosas e hidratação ficam **entre** os vitais e os sistemas, e não dentro de nenhum dos
+      dois: não têm número nem faixa (então não são vitais), e não são um dos oito sistemas.
+      São a leitura de perfusão que o vet faz assim que põe a mão no paciente, e é nessa ordem
+      que ela acontece.
+    -->
+    <div class="perfusao">
+      <ClinicField :rotulo="t('clinico.prontuario.exameFisico.mucosas')">
+        <ClinicToggleGroup
+          :model-value="valor.mucosas"
+          :opcoes="opcoesMucosas"
+          :desabilitado="somenteLeitura"
+          :rotulo="t('clinico.prontuario.exameFisico.mucosas')"
+          @update:model-value="aplicarMucosas($event as MucosaStatus)"
+        />
+      </ClinicField>
+
+      <ClinicField :rotulo="t('clinico.prontuario.exameFisico.hidratacaoRotulo')">
+        <ClinicToggleGroup
+          :model-value="valor.hidratacao"
+          :opcoes="opcoesHidratacao"
+          :desabilitado="somenteLeitura"
+          :rotulo="t('clinico.prontuario.exameFisico.hidratacaoRotulo')"
+          @update:model-value="aplicarHidratacao($event as HidratacaoGrau)"
+        />
+      </ClinicField>
     </div>
 
     <fieldset class="sistemas">
@@ -399,6 +492,16 @@ function unidadeDe(vital: VitalKey) {
 .vital__marcar:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/*
+ * Mucosas e hidratação lado a lado. Em tela estreita empilham — são duas escolhas com seis e
+ * quatro opções, e espremê-las na mesma linha quebraria as fichas ao meio.
+ */
+.perfusao {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--clinic-space-3) var(--clinic-space-5);
 }
 
 .sistemas {

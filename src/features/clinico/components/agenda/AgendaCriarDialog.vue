@@ -49,6 +49,10 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:visivel': [valor: boolean]
   criado: []
+  /** Sem horário: a recepção manda o responsável para a fila sem trocar de tela. */
+  entrarNaFila: [
+    sugestao: { petId: string | null; typeId: string | null; professionalId: string | null },
+  ]
 }>()
 
 const { t } = useI18n()
@@ -142,6 +146,22 @@ const conflitos = computed(() => {
 })
 
 const gravidade = computed(() => severidadeMaxima(conflitos.value))
+
+/**
+ * Há choque **e** nenhuma alternativa livre: é literalmente "não tenho horário".
+ *
+ * A distinção importa. Com alternativa, a resposta é outro horário; sem nenhuma, a única
+ * resposta honesta é a fila de espera — e é aí que ela precisa aparecer.
+ */
+const semHorarioBom = computed(
+  () =>
+    completo.value &&
+    alternativas.value.length === 0 &&
+    conflitos.value.some(
+      (conflito) =>
+        conflito.kind === 'professional-overlap' || conflito.kind === 'room-overlap',
+    ),
+)
 
 /**
  * Alternativas só quando há choque de horário. Sugerir outro horário para quem não tem conflito
@@ -399,6 +419,27 @@ async function confirmar() {
         :rotulo="formato.conflito(conflito)"
       />
 
+      <!--
+        Sem horário que sirva, a fila de espera é a saída — e ela precisa estar **aqui**, no
+        momento em que a recepção descobre que não tem vaga. Mandar procurar outra tela é como
+        o fluxo se perdia: a pessoa desligava o telefone com um "eu te aviso" que não virava
+        registro nenhum.
+      -->
+      <section v-if="semHorarioBom" class="sem-vaga">
+        <div>
+          <strong>{{ t('clinico.agenda.criar.semVagaTitulo') }}</strong>
+          <p>{{ t('clinico.agenda.criar.semVagaDescricao') }}</p>
+        </div>
+        <Button
+          :label="t('clinico.fila.adicionar')"
+          icon="pi pi-users"
+          size="small"
+          severity="secondary"
+          outlined
+          @click="emit('entrarNaFila', { petId, typeId, professionalId })"
+        />
+      </section>
+
       <section v-if="alternativas.length > 0" class="alternativas">
         <h4 class="clinic-label">{{ t('clinico.agenda.criar.alternativas') }}</h4>
         <div class="alternativas__lista">
@@ -512,6 +553,30 @@ async function confirmar() {
 .opcao small {
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
+}
+
+.sem-vaga {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--clinic-space-3);
+  padding: var(--clinic-space-3) var(--clinic-space-4);
+  border: 1px solid var(--clinic-attention-line);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-attention-bg);
+}
+
+.sem-vaga strong {
+  color: var(--clinic-attention-text);
+  font-weight: 750;
+}
+
+.sem-vaga p {
+  margin: 0.15rem 0 0;
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+  line-height: 1.45;
 }
 
 .alternativas {

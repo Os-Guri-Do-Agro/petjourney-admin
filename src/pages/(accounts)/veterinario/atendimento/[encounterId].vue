@@ -33,11 +33,14 @@ import DocumentoAtestado from '@/features/clinico/components/documentos/Document
 import DocumentoReceituario from '@/features/clinico/components/documentos/DocumentoReceituario.vue'
 import type { DocumentoId } from '@/features/clinico/components/documentos/documento-types'
 import ProntuarioImpressao from '@/features/clinico/components/prontuario/ProntuarioImpressao.vue'
+import ProntuarioPreConsulta from '@/features/clinico/components/prontuario/ProntuarioPreConsulta.vue'
 import ProntuarioResumo from '@/features/clinico/components/prontuario/ProntuarioResumo.vue'
+import ProntuarioRetornoDialog from '@/features/clinico/components/prontuario/ProntuarioRetornoDialog.vue'
 import ProntuarioStepper from '@/features/clinico/components/prontuario/ProntuarioStepper.vue'
 import ProntuarioTimeline from '@/features/clinico/components/prontuario/ProntuarioTimeline.vue'
 import type { PassoProntuario } from '@/features/clinico/components/prontuario/step-types'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
+import type { SlotSugestao } from '@/features/clinico/data/types'
 import type { EtapaId } from '@/features/clinico/domain/encounter-progress'
 import {
   alergiaNaoConfirmada,
@@ -294,8 +297,26 @@ function salvarEmPdf() {
   void emitirDocumento('prontuario')
 }
 
+/**
+ * Abre a escolha de horário do retorno e dispara a busca.
+ *
+ * Antes daqui a função só navegava para a agenda focando o atendimento **que acabava de
+ * terminar** — não criava nada, perdia os dias e o tipo escolhidos na conduta, e deixava o
+ * aviso de retorno pendente na tela para sempre, mesmo depois de marcarem o retorno à mão.
+ */
+const retornoAberto = ref(false)
+
 function agendarRetorno() {
-  void router.push({ path: '/veterinario/agenda', query: { foco: encounter.value?.appointmentId } })
+  retornoAberto.value = true
+  void prontuario.buscarSugestoesDeRetorno()
+}
+
+async function confirmarRetorno(slot: SlotSugestao) {
+  const criado = await prontuario.agendarRetorno(slot)
+
+  if (criado) {
+    retornoAberto.value = false
+  }
 }
 
 onMounted(carregar)
@@ -431,6 +452,20 @@ onBeforeUnmount(() => {
 
       <div class="prontuario__corpo" :class="{ 'prontuario__corpo--com-aside': historicoAberto }">
         <div class="etapa">
+          <!--
+            A pré-consulta abre **acima** da anamnese: é o que o vet lê antes de digitar, e
+            embaixo do formulário ela chegaria depois de o campo já ter sido preenchido à mão.
+          -->
+          <template v-if="etapa === 'anamnese'">
+            <ProntuarioPreConsulta
+              v-if="encounter.preConsulta"
+              :pre-consulta="encounter.preConsulta"
+              :anamnese="encounter.anamnese"
+              :somente-leitura="prontuario.somenteLeitura"
+              @aplicar="prontuario.atualizar({ anamnese: { ...encounter.anamnese, ...$event } })"
+            />
+          </template>
+
           <ProntuarioAnamnese
             v-if="etapa === 'anamnese'"
             :valor="encounter.anamnese"
@@ -442,7 +477,7 @@ onBeforeUnmount(() => {
           <ProntuarioExameFisico
             v-else-if="etapa === 'exame'"
             :valor="encounter.exameFisico"
-            :especie="prontuario.pet?.especie ?? 'canina'"
+            :pet="prontuario.pet"
             :somente-leitura="prontuario.somenteLeitura"
             :motivo-leitura="motivoLeitura"
             @atualizar="prontuario.atualizar($event)"
@@ -604,6 +639,17 @@ onBeforeUnmount(() => {
         />
       </div>
     </Teleport>
+
+    <ProntuarioRetornoDialog
+      v-if="encounter"
+      v-model:visivel="retornoAberto"
+      :sugestoes="prontuario.sugestoesDeRetorno"
+      :buscando="prontuario.buscandoRetorno"
+      :salvando="prontuario.salvando"
+      :a-partir-de="prontuario.dataDoAtendimento"
+      :em-dias="encounter.conduta.retorno.emDias"
+      @escolher="confirmarRetorno"
+    />
   </PartnerPageFrame>
 </template>
 

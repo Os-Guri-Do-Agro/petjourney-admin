@@ -1735,7 +1735,10 @@
     }
   },
   "clinico": {
-    "modulo": "Clínica",
+    "modulo": {
+      "visivel": "Módulo clínico visível",
+      "oculto": "Módulo clínico oculto"
+    },
     "formato": {
       "minutos": "{valor} min",
       "horas": "{valor} h",
@@ -1843,12 +1846,25 @@
         "email": "E-mail (opcional)",
         "salvar": "Cadastrar e usar",
         "erro": "Não foi possível cadastrar o paciente."
+      },
+      "porte": {
+        "mini": "Mini",
+        "pequeno": "Pequeno",
+        "medio": "Médio",
+        "grande": "Grande",
+        "gigante": "Gigante"
+      },
+      "faixaEtaria": {
+        "filhote": "Filhote",
+        "adulto": "Adulto",
+        "idoso": "Idoso"
       }
     },
     "tabela": {
       "carregando": "Carregando…",
       "vazio": "Nada por aqui",
-      "tentarDeNovo": "Tentar de novo"
+      "tentarDeNovo": "Tentar de novo",
+      "acoes": "Ações"
     },
     "erros": {
       "catalogos": "Não deu para carregar os dados da clínica.",
@@ -1931,7 +1947,8 @@
         "titulo": "Cancelar atendimento",
         "motivo": "Motivo",
         "descricao": "O horário volta a ficar livre, mas o card continua visível no dia.",
-        "confirmar": "Cancelar atendimento"
+        "confirmar": "Cancelar atendimento",
+        "aviso": "O atendimento do {paciente} foi cancelado ({motivo}). Entre em contato para remarcar."
       },
       "bloqueioDialogo": {
         "titulo": "Bloquear horário",
@@ -1954,7 +1971,8 @@
         "encaixes": "{contagem} encaixe | {contagem} encaixes",
         "ocupacao": "{valor} de ocupação",
         "melhoresAlternativas": "Melhores horários",
-        "semAlternativa": "Nenhum horário livre nos próximos dias."
+        "semAlternativa": "Nenhum horário livre nos próximos dias.",
+        "detalhePessoa": "{nome} · manhã {manha}, tarde {tarde}"
       },
       "exibicao": "Exibição",
       "maisAcoes": "Mais ações",
@@ -1971,7 +1989,9 @@
         "semSala": "Sem sala definida",
         "agendar": "Agendar",
         "agendarMesmoAssim": "Agendar mesmo assim",
-        "alternativas": "Horários livres neste dia"
+        "alternativas": "Horários livres neste dia",
+        "semVagaTitulo": "Sem horário livre",
+        "semVagaDescricao": "Nenhuma alternativa nesta busca. O responsável pode entrar na fila e ser avisado quando abrir."
       },
       "bloqueio": {
         "titulo": "Bloquear horário",
@@ -1984,6 +2004,10 @@
         "repetir": "Repetir toda semana",
         "diasDaSemana": "Dias da semana",
         "salvar": "Bloquear"
+      },
+      "legenda": {
+        "titulo": "Legenda",
+        "filtrar": "Mostrar só {tipo}"
       }
     },
     "meuDia": {
@@ -2206,7 +2230,14 @@
         "ninguem": "Ninguém na fila cabe nesta janela.",
         "depois": "Agora não"
       },
-      "colunaSituacao": "Situação"
+      "colunaSituacao": "Situação",
+      "colunaPosicao": "Pos.",
+      "qualquerProfissional": "Qualquer profissional",
+      "posicaoNaFila": "{posicao}º na fila",
+      "oferta": {
+        "prazo": "A oferta expira em {minutos} minutos. Passado o prazo, a vaga volta para a clínica.",
+        "mensagemPadrao": "Olá! Abriu um horário para o {paciente} em {data} às {hora}. Confirma? Guardamos por {minutos} minutos."
+      }
     },
     "faltas": {
       "titulo": "Faltas",
@@ -2237,6 +2268,17 @@
         "agenda": "Agenda parada",
         "reincidentes": "Reincidentes",
         "limite": "a partir de {limite} faltas"
+      },
+      "marcar": "Marcar falta",
+      "reagendar": {
+        "titulo": "Reagendar",
+        "confirmar": "Reagendar e avisar",
+        "faltouEm": "Faltou em {data} às {hora}",
+        "mensagemPadrao": "Olá! Sentimos falta do {paciente} hoje. Conseguimos um novo horário em {data} às {hora} — podemos confirmar?"
+      },
+      "historico": {
+        "titulo": "Faltas de {nome}",
+        "reagendado": "Reagendado para {data}"
       }
     },
     "prontuario": {
@@ -2312,7 +2354,27 @@
           "nao": "Não"
         },
         "sinaisGerais": "Sinais gerais",
-        "prevencao": "Prevenção"
+        "prevencao": "Prevenção",
+        "evolucao": "Evolução",
+        "evolucaoOpcoes": {
+          "piorando": "Piorando",
+          "estavel": "Estável",
+          "melhorando": "Melhorando",
+          "intermitente": "Intermitente"
+        },
+        "antecedentes": "Antecedentes",
+        "antecedentesVazio": "Nenhum antecedente registrado.",
+        "antecedenteExemplo": "Ex.: alergia a amoxicilina",
+        "antecedenteQuando": "Quando",
+        "antecedenteKind": {
+          "cirurgia": "Cirurgia",
+          "doenca-previa": "Doença prévia",
+          "alergia": "Alergia",
+          "medicacao-continua": "Medicação contínua",
+          "reacao-vacinal": "Reação vacinal",
+          "trauma": "Trauma",
+          "outro": "Outro"
+        }
       },
       "exameFisico": {
         "titulo": "Exame físico",
@@ -2342,7 +2404,24 @@
           "alterado": "Alterado",
           "nao-avaliado": "Não avaliado"
         },
-        "notaAlterado": "O que está alterado"
+        "notaAlterado": "O que está alterado",
+        "mucosas": "Mucosas",
+        "mucosa": {
+          "normocoradas": "Normocoradas",
+          "palidas": "Pálidas",
+          "ictericas": "Ictéricas",
+          "cianoticas": "Cianóticas",
+          "congestas": "Congestas",
+          "nao-avaliado": "Não avaliadas"
+        },
+        "hidratacaoRotulo": "Hidratação",
+        "hidratacao": {
+          "normal": "Normal",
+          "leve": "Leve",
+          "moderada": "Moderada",
+          "grave": "Grave"
+        },
+        "perfusao": "Perfusão"
       },
       "diagnostico": {
         "titulo": "Diagnóstico",
@@ -2398,6 +2477,11 @@
           "intravenosa": "Intravenosa",
           "topica": "Tópica",
           "otologica": "Otológica"
+        },
+        "retornoDialogo": {
+          "titulo": "Agendar retorno",
+          "descricao": "Horários livres com o mesmo profissional, a partir da data sugerida na conduta.",
+          "emDias": "em {contagem} dia | em {contagem} dias"
         }
       },
       "timeline": {
@@ -2413,7 +2497,8 @@
           "cirurgia": "Cirurgia",
           "prescricao": "Prescrição",
           "falta": "Falta",
-          "observacao": "Observação"
+          "observacao": "Observação",
+          "internacao": "Internação"
         },
         "mostrar": "Histórico",
         "ocultar": "Ocultar histórico"
@@ -2455,6 +2540,12 @@
         "vazio": "Não registrado",
         "achados": "Achados",
         "alergiaPendente": "Prescrição de {medicamento} em conflito com alergia registrada, sem aceite."
+      },
+      "preConsulta": {
+        "titulo": "Respondido no app",
+        "origem": "Pelo responsável, {quando}",
+        "aplicar": "Usar respostas",
+        "pesoInformado": "Peso informado em casa: {valor} — confirme na balança"
       }
     },
     "pacientes": {
@@ -2572,7 +2663,19 @@
       "filtros": "Filtros",
       "resultados": "{contagem} resultado | {contagem} resultados",
       "semResultado": "Nenhum resultado para esta busca.",
-      "cancelar": "Cancelar"
+      "cancelar": "Cancelar",
+      "adicionar": "Adicionar",
+      "remover": "Remover"
+    },
+    "avisos": {
+      "titulo": "Avisos enviados",
+      "vazio": "Nenhum aviso enviado para este atendimento.",
+      "kind": {
+        "reagendamento": "Reagendamento",
+        "remarcacao": "Remarcação",
+        "cancelamento": "Cancelamento",
+        "oferta-de-vaga": "Oferta de vaga"
+      }
     }
   },
   "cronometro": {

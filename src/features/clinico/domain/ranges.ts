@@ -7,19 +7,92 @@
  */
 
 import type {
+  FaixaEtaria,
   Measurement,
+  PetPorte,
   PetSpecies,
   RangeStatus,
   ReferenceRange,
   VitalKey,
 } from '../data/types'
 
+/**
+ * Qualificadores do paciente que refinam a faixa. Ausentes viram "qualquer".
+ */
+export type QualificadoresDaFaixa = {
+  porte?: PetPorte | null
+  faixaEtaria?: FaixaEtaria | null
+}
+
+/**
+ * Quão específica é a faixa para **este** paciente.
+ *
+ * Peso 2 para porte e 1 para idade, somados. Porte pesa mais porque em cão ele desloca a
+ * frequência cardíaca mais do que a idade adulta desloca — e quando as duas competem, a faixa
+ * do porte certo erra menos que a da idade certa.
+ *
+ * Devolve `null` quando a faixa **contradiz** o paciente: faixa de cão gigante não serve para
+ * um mini, e cair nela por falta de opção melhor seria pior que não ter faixa.
+ */
+function especificidade(
+  faixa: ReferenceRange,
+  qualificadores: QualificadoresDaFaixa,
+): number | null {
+  let pontos = 0
+
+  if (faixa.porte) {
+    if (faixa.porte !== qualificadores.porte) {
+      return null
+    }
+
+    pontos += 2
+  }
+
+  if (faixa.faixaEtaria) {
+    if (faixa.faixaEtaria !== qualificadores.faixaEtaria) {
+      return null
+    }
+
+    pontos += 1
+  }
+
+  return pontos
+}
+
+/**
+ * Faixa de referência do vital para o paciente.
+ *
+ * Resolve do mais específico para o mais geral: porte e idade, depois porte, depois idade,
+ * depois a faixa da espécie inteira. Nenhuma serve? `null`, e a tela mostra o valor sem
+ * julgar — **inventar faixa é pior que não ter**.
+ *
+ * Os qualificadores são opcionais em quem chama porque nem todo paciente os tem: nascimento
+ * desconhecido é comum, e nesse caso a busca simplesmente ignora o eixo da idade em vez de
+ * chutar "adulto".
+ */
 export function encontrarFaixa(
   faixas: ReferenceRange[],
   vital: VitalKey,
   especie: PetSpecies,
+  qualificadores: QualificadoresDaFaixa = {},
 ): ReferenceRange | null {
-  return faixas.find((faixa) => faixa.vital === vital && faixa.especie === especie) ?? null
+  let melhor: ReferenceRange | null = null
+  let melhorPontuacao = -1
+
+  for (const faixa of faixas) {
+    if (faixa.vital !== vital || faixa.especie !== especie) {
+      continue
+    }
+
+    const pontos = especificidade(faixa, qualificadores)
+
+    if (pontos !== null && pontos > melhorPontuacao) {
+      melhor = faixa
+      melhorPontuacao = pontos
+    }
+  }
+
+  return melhor
 }
 
 export function statusDaMedicao(

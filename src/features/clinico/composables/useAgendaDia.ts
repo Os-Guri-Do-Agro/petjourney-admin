@@ -192,6 +192,19 @@ export function useAgendaDia(scrollTop: Ref<number>, alturaVisivel: Ref<number>)
         return false
       }
 
+      /**
+       * Filtro por tipo — ligado pela legenda. O `kind` vem do catálogo, não do
+       * atendimento: filtrar por `typeId` casaria "Consulta" e "Consulta de retorno" como
+       * coisas distintas, e a legenda mostra uma entrada só por `kind`.
+       */
+      if (agenda.filtroTipos.length > 0) {
+        const kind = clinico.tipo(appointment.typeId)?.kind
+
+        if (!kind || !agenda.filtroTipos.includes(kind)) {
+          return false
+        }
+      }
+
       return true
     }),
   )

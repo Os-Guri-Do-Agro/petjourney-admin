@@ -208,11 +208,29 @@ const authArtStyle = computed(() => ({
 /* No terço superior da arte: centrado no eixo, o texto desce até a pata.
    Medida curta de propósito — linha longa em tela larga cansa e desalinha o bloco. */
 .auth-visual-panel__center {
+  position: relative;
+  /* Sem contexto próprio o véu de z-index negativo cairia atrás da arte da página. */
+  isolation: isolate;
   display: grid;
   gap: clamp(1.5rem, 3vw, 2.5rem);
   max-width: 30rem;
   margin-top: clamp(1rem, 8vh, 6rem);
   margin-bottom: auto;
+}
+
+/* A pata da arte começa a ~62% da altura da imagem: em tela baixa (1600x900,
+   1366x768) ela sobe até os benefícios e o texto branco some sobre o branco dela.
+   O véu repõe o verde chapado da arte (#84C1B4, idêntico nos dois temas) atrás da
+   copy — invisível sobre a faixa verde, opaco sobre a pata. Borda difusa para não
+   marcar retângulo contra o JPEG. */
+.auth-visual-panel__center::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -1.75rem -2.25rem;
+  border-radius: 2.5rem;
+  background: var(--auth-sage);
+  filter: blur(1.25rem);
 }
 
 .auth-visual-panel h2 {

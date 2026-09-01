@@ -23,9 +23,29 @@ export type ArrasteProposta = {
   inicio: ISODateTime
   fim: ISODateTime
   professionalId: string
+  /**
+   * Salas do destino.
+   *
+   * Existe porque a coluna **não é sempre um profissional**: no agrupamento por sala, soltar
+   * o card na coluna ao lado troca a sala e mantém quem atende. Antes a proposta só carregava
+   * `professionalId` e a grade entregava o id da coluna nele — arrastar em "por sala" gravava
+   * um id de sala dentro de `professionalId`, e o atendimento sumia de todas as colunas de
+   * profissional sem erro nenhum na tela.
+   */
+  roomIds: string[]
   /** `true` quando só a borda foi puxada: a duração mudou, o início não. */
   redimensionou: boolean
 }
+
+/**
+ * Como a coluna de destino vira profissional e salas.
+ *
+ * Quem monta a grade sabe o que a coluna significa no agrupamento vigente; o arraste, não.
+ */
+export type DestinoDaColuna = (
+  colunaId: string,
+  appointment: Appointment,
+) => { professionalId: string; roomIds: string[] }
 
 export type ModoArraste = 'mover' | 'inicio' | 'fim'
 
@@ -49,6 +69,7 @@ export function useAgendaDrag(opcoes: {
   passoMinutos: () => number
   minutoDoPonteiro: (evento: PointerEvent) => number
   colunaDoPonteiro: (evento: PointerEvent) => string | null
+  destinoDaColuna: DestinoDaColuna
   aoPropor: (proposta: ArrasteProposta) => void
 }) {
   const estado = ref<EstadoArraste | null>(null)
@@ -144,11 +165,14 @@ export function useAgendaDrag(opcoes: {
       return
     }
 
+    const destino = opcoes.destinoDaColuna(alvo.colunaId, atual.appointment)
+
     opcoes.aoPropor({
       appointment: atual.appointment,
       inicio: clinicClock.toIso(opcoes.data(), alvo.inicioMin),
       fim: clinicClock.toIso(opcoes.data(), alvo.fimMin),
-      professionalId: alvo.colunaId,
+      professionalId: destino.professionalId,
+      roomIds: destino.roomIds,
       redimensionou: atual.modo !== 'mover',
     })
   }
@@ -190,6 +214,14 @@ export function useAgendaDrag(opcoes: {
     appointment: Appointment,
     passos: number,
     colunas: string[],
+    /**
+     * Coluna em que o card está **agora**, na grade como ela está agrupada.
+     *
+     * Antes o índice saía de `colunas.indexOf(appointment.professionalId)`, o que só acerta
+     * no agrupamento por profissional: por sala esse `indexOf` devolve `-1`, e a primeira
+     * seta lateral jogava o atendimento para a coluna 0 qualquer que fosse a de origem.
+     */
+    colunaAtualId: string,
     deltaColuna = 0,
   ) {
     const data = opcoes.data()
@@ -197,17 +229,19 @@ export function useAgendaDrag(opcoes: {
     const fimMin = clinicClock.minutesFrom(appointment.fim, data)
     const deslocamento = passos * opcoes.passoMinutos()
 
-    const indiceAtual = colunas.indexOf(appointment.professionalId)
+    const indiceAtual = colunas.indexOf(colunaAtualId)
     const novoIndice = Math.min(
       Math.max(indiceAtual + deltaColuna, 0),
       Math.max(colunas.length - 1, 0),
     )
+    const destino = opcoes.destinoDaColuna(colunas[novoIndice] ?? colunaAtualId, appointment)
 
     opcoes.aoPropor({
       appointment,
       inicio: clinicClock.toIso(data, inicioMin + deslocamento),
       fim: clinicClock.toIso(data, fimMin + deslocamento),
-      professionalId: colunas[novoIndice] ?? appointment.professionalId,
+      professionalId: destino.professionalId,
+      roomIds: destino.roomIds,
       redimensionou: false,
     })
   }

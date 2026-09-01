@@ -277,7 +277,12 @@ function aplicarStatus(appointments: Appointment[], semente: number): Appointmen
  * pode roubá-los: às oito da manhã eles são justamente os mais próximos do agora, e promovê-los
  * apagaria o "finalizado" e a "falta" que eles existem para mostrar.
  */
-const ESTADOS_GARANTIDOS = new Set(['apt-finalizado-cedo', 'apt-falta-hoje'])
+const ESTADOS_GARANTIDOS = new Set([
+  'apt-finalizado-cedo',
+  'apt-falta-hoje',
+  /* A pré-consulta só faz sentido em atendimento que ainda vai acontecer. */
+  'apt-pre-consulta',
+])
 
 /**
  * Garante que o dia âncora sempre tenha alguém **em atendimento** e alguém **aguardando** na
@@ -377,7 +382,7 @@ function exameFisicoVazio(): ExameFisico {
     sistemas[sistema] = { status: 'nao-avaliado', nota: '' }
   }
 
-  return { vitais, sistemas, observacao: '' }
+  return { vitais, mucosas: 'nao-avaliado', hidratacao: '', sistemas, observacao: '' }
 }
 
 function anamneseVazia(): Anamnese {
@@ -385,8 +390,9 @@ function anamneseVazia(): Anamnese {
     queixaPrincipal: '',
     historia: '',
     duracaoSintomas: '',
+    evolucao: '',
+    antecedentes: [],
     apetite: '',
-    hidratacao: '',
     evacuacao: '',
     miccao: '',
     ambiente: '',
@@ -420,6 +426,7 @@ export function encounterVazio(appointment: Appointment, abertoEm: string): Enco
     conduta: condutaVazia(),
     versao: 1,
     lock: null,
+    preConsulta: null,
   }
 }
 
@@ -506,7 +513,6 @@ function encounterPreenchido(
       historia: 'Responsável relata início dos sinais há poucos dias, sem outros animais afetados.',
       duracaoSintomas: `${intBetween(rng, 1, 9)} dias`,
       apetite: rng() < 0.5 ? 'reduzido' : 'normal',
-      hidratacao: 'normal',
       evacuacao: 'normal',
       miccao: 'normal',
       ambiente: 'domiciliar',
@@ -673,18 +679,29 @@ function casosDoDiaAncora(ancora: ISODate): {
     }),
   )
 
-  // 2. Encaixe: emergência fora da grade, marcada como encaixe.
+  /*
+   * 2. Encaixe: emergência **dentro de um bloco reservado**.
+   *
+   * O caso difícil do requisito não é "encaixe fora da grade" — é o encaixe atravessando um
+   * horário que alguém tinha protegido. Antes, este atendimento caía às 10:20, quando nenhum
+   * bloqueio da prof-ana cobria o horário: a grade mostrava um encaixe comum e o conflito
+   * `block-invasion` nunca era exercitado.
+   *
+   * Agora ele nasce às 16:20, por cima do `bloco-pessoal` da prof-ana — e a tela precisa
+   * mostrar a emergência por cima da faixa reservada, com o aviso, **sem impedir**. É a
+   * situação real: o cachorro atropelado não espera o compromisso pessoal terminar.
+   */
   appointments.push(
     montarAppointment({
       id: 'apt-encaixe',
       petId: 'pet-thor',
-      professionalId: 'prof-ana',
+      professionalId: 'prof-tiago',
       typeId: 'tipo-emergencia',
       data: ancora,
-      inicioMin: clockToMinutes('10:20'),
+      inicioMin: clockToMinutes('16:20'),
       encaixe: true,
       origem: 'encaixe',
-      observacao: 'Trazido pela recepção sem agendamento.',
+      observacao: 'Atropelamento. Trazido pela recepção por cima do bloqueio.',
     }),
   )
 
@@ -825,6 +842,27 @@ function casosDoDiaAncora(ancora: ISODate): {
       typeId: 'tipo-retorno',
       data: ancora,
       inicioMin: clockToMinutes('08:45'),
+    }),
+  )
+
+  /*
+   * 13. Agendamento vindo do app, com pré-consulta respondida na véspera.
+   *
+   * Precisa ser um atendimento **que ainda vai acontecer**: pré-consulta num prontuário já
+   * fechado não demonstra nada, porque o vet já viu o paciente. Antes o único atendimento com
+   * `origem: 'app'` no dia era um finalizado das oito da manhã — e o painel nunca aparecia.
+   */
+  appointments.push(
+    montarAppointment({
+      id: 'apt-pre-consulta',
+      petId: 'pet-amora',
+      professionalId: 'prof-helena',
+      typeId: 'tipo-consulta',
+      data: ancora,
+      inicioMin: clockToMinutes('15:30'),
+      origem: 'app',
+      statusFixo: 'confirmado',
+      observacao: 'Agendado pelo app. Responsável respondeu a pré-consulta.',
     }),
   )
 
@@ -1292,7 +1330,56 @@ function montarTimeline(encounters: Encounter[], appointments: Appointment[]): T
     })
   }
 
+  eventos.push(...internacoesPlantadas(encounters))
+
   return eventos.sort((a, b) => b.em.localeCompare(a.em))
+}
+
+/**
+ * Internações na linha do tempo.
+ *
+ * O requisito nomeia internação ao lado de consultas, vacinas e exames — e ela não sai de um
+ * atendimento de agenda: internação dura dias e nasce de uma decisão dentro da consulta. Sem
+ * um modelo próprio de internação no protótipo, ela entra na linha do tempo como o evento que
+ * é, plantada nos pacientes que a história do dataset justifica.
+ *
+ * Sem isto, o filtro por tipo abriria com uma opção que nunca teria nada atrás.
+ */
+function internacoesPlantadas(encounters: Encounter[]): TimelineEvent[] {
+  const PLANTADAS: Array<{ petId: string; diasAtras: number; titulo: string; resumo: string }> = [
+    {
+      petId: 'pet-bento',
+      diasAtras: 21,
+      titulo: 'Internação pós-cirúrgica',
+      resumo: 'Três dias em observação após osteossíntese. Alta sem intercorrência.',
+    },
+    {
+      petId: 'pet-cacau',
+      diasAtras: 96,
+      titulo: 'Internação por desidratação',
+      resumo: 'Fluidoterapia por 48 h. Recuperou apetite no segundo dia.',
+    },
+    {
+      petId: 'pet-luna',
+      diasAtras: 240,
+      titulo: 'Internação por gastroenterite',
+      resumo: 'Dois dias com antiemético e fluidos.',
+    },
+  ]
+
+  /** Só planta para paciente que já tem história no dataset — senão a linha nasce órfã. */
+  const comHistorico = new Set(encounters.map((encounter) => encounter.petId))
+
+  return PLANTADAS.filter((item) => comHistorico.has(item.petId)).map((item) => ({
+    id: `tl-internacao-${item.petId}`,
+    petId: item.petId,
+    kind: 'internacao' as const,
+    em: iso(addDays(clock.today(), -item.diasAtras), 10 * 60),
+    titulo: item.titulo,
+    resumo: item.resumo,
+    encounterId: null,
+    appointmentId: null,
+  }))
 }
 
 // ---------------------------------------------------------------------------
@@ -1423,7 +1510,6 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
         duracaoSintomas: '3 dias',
         historia: 'Sem trauma observado. Piora ao levantar após repouso.',
         apetite: 'normal',
-        hidratacao: 'normal',
       },
       exameFisico: {
         ...aberto.exameFisico,
@@ -1491,11 +1577,55 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
         ...aberto.anamnese,
         queixaPrincipal: 'Tosse seca há uma semana',
         duracaoSintomas: '7 dias',
+        evolucao: 'piorando',
         historia: 'Responsável relata piora à noite e após passeio.',
+        antecedentes: [
+          {
+            id: 'ant-esquecido-1',
+            kind: 'medicacao-continua',
+            descricao: 'Enalapril 5 mg, uma vez ao dia',
+            quando: 'desde 2024',
+          },
+        ],
       },
       versao: 2,
     })
     esquecido.encounterId = aberto.id
+  }
+
+  /**
+   * Um atendimento do dia com **pré-consulta respondida no app**.
+   *
+   * É o caso que demonstra o elo do produto dentro do prontuário: o responsável respondeu antes
+   * de sair de casa, e o vet abre a consulta com o quadro já descrito — para **conferir**, não
+   * para copiar. Sem um caso plantado, a sugestão nunca apareceria na demonstração.
+   */
+  const vindoDoApp = comStatus.find((appointment) => appointment.id === 'apt-pre-consulta')
+
+  if (vindoDoApp && !vindoDoApp.encounterId) {
+    const aberto = encounterVazio(vindoDoApp, vindoDoApp.inicio)
+    const pet = petsFixture.find((item) => item.id === vindoDoApp.petId)
+
+    encounters.push({
+      ...aberto,
+      preConsulta: {
+        appointmentId: vindoDoApp.id,
+        /** Respondido na véspera: recente o bastante para valer, antigo o bastante para conferir. */
+        respondidoEm: iso(addDays(clock.dateOf(vindoDoApp.inicio), -1), 20 * 60 + 40),
+        queixaPrincipal: 'Está se coçando muito, principalmente as orelhas',
+        duracaoSintomas: '5 dias',
+        evolucao: 'piorando',
+        apetite: 'normal',
+        evacuacao: 'normal',
+        miccao: 'normal',
+        /* Peso de balança de casa: parte de onde partir, não medição. */
+        pesoInformadoKg: pet?.pesoKg ? Number((pet.pesoKg + 0.4).toFixed(1)) : null,
+        observacao:
+          'Começou depois que fomos ao parque. Ele dorme na varanda e tem outro cachorro em casa, que não está se coçando.',
+      },
+      versao: 0,
+    })
+    vindoDoApp.encounterId = aberto.id
   }
 
   /**

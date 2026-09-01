@@ -1735,7 +1735,10 @@
     }
   },
   "clinico": {
-    "modulo": "Clinic",
+    "modulo": {
+      "visivel": "Clinical module visible",
+      "oculto": "Clinical module hidden"
+    },
     "formato": {
       "minutos": "{valor} min",
       "horas": "{valor} h",
@@ -1843,12 +1846,25 @@
         "email": "Email (optional)",
         "salvar": "Register and use",
         "erro": "The patient could not be registered."
+      },
+      "porte": {
+        "mini": "Toy",
+        "pequeno": "Small",
+        "medio": "Medium",
+        "grande": "Large",
+        "gigante": "Giant"
+      },
+      "faixaEtaria": {
+        "filhote": "Puppy/kitten",
+        "adulto": "Adult",
+        "idoso": "Senior"
       }
     },
     "tabela": {
       "carregando": "Loading…",
       "vazio": "Nothing here",
-      "tentarDeNovo": "Try again"
+      "tentarDeNovo": "Try again",
+      "acoes": "Actions"
     },
     "erros": {
       "catalogos": "We couldn't load the clinic data.",
@@ -1931,7 +1947,8 @@
         "titulo": "Cancel appointment",
         "motivo": "Reason",
         "descricao": "The slot frees up, but the card stays visible on the day.",
-        "confirmar": "Cancel appointment"
+        "confirmar": "Cancel appointment",
+        "aviso": "The appointment for {paciente} was cancelled ({motivo}). Get in touch to rebook."
       },
       "bloqueioDialogo": {
         "titulo": "Block time",
@@ -1954,7 +1971,8 @@
         "encaixes": "{contagem} squeeze-in | {contagem} squeeze-ins",
         "ocupacao": "{valor} booked",
         "melhoresAlternativas": "Best times",
-        "semAlternativa": "No free slots in the coming days."
+        "semAlternativa": "No free slots in the coming days.",
+        "detalhePessoa": "{nome} · morning {manha}, afternoon {tarde}"
       },
       "exibicao": "Display",
       "maisAcoes": "More actions",
@@ -1971,7 +1989,9 @@
         "semSala": "No room set",
         "agendar": "Schedule",
         "agendarMesmoAssim": "Schedule anyway",
-        "alternativas": "Free slots on this day"
+        "alternativas": "Free slots on this day",
+        "semVagaTitulo": "No free slot",
+        "semVagaDescricao": "No alternative in this search. The owner can join the waiting list and be notified when one opens."
       },
       "bloqueio": {
         "titulo": "Block time",
@@ -1984,6 +2004,10 @@
         "repetir": "Repeat weekly",
         "diasDaSemana": "Days of the week",
         "salvar": "Block"
+      },
+      "legenda": {
+        "titulo": "Legend",
+        "filtrar": "Show only {tipo}"
       }
     },
     "meuDia": {
@@ -2206,7 +2230,14 @@
         "ninguem": "Nobody on the list fits this window.",
         "depois": "Not now"
       },
-      "colunaSituacao": "Status"
+      "colunaSituacao": "Status",
+      "colunaPosicao": "Pos.",
+      "qualquerProfissional": "Any professional",
+      "posicaoNaFila": "#{posicao} in queue",
+      "oferta": {
+        "prazo": "The offer expires in {minutos} minutes. After that, the slot returns to the clinic.",
+        "mensagemPadrao": "Hello! A slot opened up for {paciente} on {data} at {hora}. Shall we confirm? We will hold it for {minutos} minutes."
+      }
     },
     "faltas": {
       "titulo": "No-shows",
@@ -2237,6 +2268,17 @@
         "agenda": "Idle schedule",
         "reincidentes": "Repeat no-shows",
         "limite": "from {limite} no-shows"
+      },
+      "marcar": "Mark no-show",
+      "reagendar": {
+        "titulo": "Reschedule",
+        "confirmar": "Reschedule and notify",
+        "faltouEm": "No-show on {data} at {hora}",
+        "mensagemPadrao": "Hello! We missed {paciente} today. We have a new slot on {data} at {hora} — shall we confirm?"
+      },
+      "historico": {
+        "titulo": "No-shows for {nome}",
+        "reagendado": "Rescheduled to {data}"
       }
     },
     "prontuario": {
@@ -2312,7 +2354,27 @@
           "nao": "No"
         },
         "sinaisGerais": "General signs",
-        "prevencao": "Preventive care"
+        "prevencao": "Preventive care",
+        "evolucao": "Progression",
+        "evolucaoOpcoes": {
+          "piorando": "Worsening",
+          "estavel": "Stable",
+          "melhorando": "Improving",
+          "intermitente": "Intermittent"
+        },
+        "antecedentes": "History",
+        "antecedentesVazio": "No past history recorded.",
+        "antecedenteExemplo": "e.g. allergy to amoxicillin",
+        "antecedenteQuando": "When",
+        "antecedenteKind": {
+          "cirurgia": "Surgery",
+          "doenca-previa": "Previous illness",
+          "alergia": "Allergy",
+          "medicacao-continua": "Ongoing medication",
+          "reacao-vacinal": "Vaccine reaction",
+          "trauma": "Trauma",
+          "outro": "Other"
+        }
       },
       "exameFisico": {
         "titulo": "Physical exam",
@@ -2342,7 +2404,24 @@
           "alterado": "Abnormal",
           "nao-avaliado": "Not assessed"
         },
-        "notaAlterado": "What is abnormal"
+        "notaAlterado": "What is abnormal",
+        "mucosas": "Mucous membranes",
+        "mucosa": {
+          "normocoradas": "Normal colour",
+          "palidas": "Pale",
+          "ictericas": "Jaundiced",
+          "cianoticas": "Cyanotic",
+          "congestas": "Congested",
+          "nao-avaliado": "Not assessed"
+        },
+        "hidratacaoRotulo": "Hydration",
+        "hidratacao": {
+          "normal": "Normal",
+          "leve": "Mild",
+          "moderada": "Moderate",
+          "grave": "Severe"
+        },
+        "perfusao": "Perfusion"
       },
       "diagnostico": {
         "titulo": "Diagnosis",
@@ -2398,6 +2477,11 @@
           "intravenosa": "Intravenous",
           "topica": "Topical",
           "otologica": "Otic"
+        },
+        "retornoDialogo": {
+          "titulo": "Schedule follow-up",
+          "descricao": "Free slots with the same professional, from the date suggested in the care plan.",
+          "emDias": "in {contagem} day | in {contagem} days"
         }
       },
       "timeline": {
@@ -2413,7 +2497,8 @@
           "cirurgia": "Surgery",
           "prescricao": "Prescription",
           "falta": "No-show",
-          "observacao": "Note"
+          "observacao": "Note",
+          "internacao": "Hospitalisation"
         },
         "mostrar": "History",
         "ocultar": "Hide history"
@@ -2455,6 +2540,12 @@
         "vazio": "Not recorded",
         "achados": "Findings",
         "alergiaPendente": "Prescription of {medicamento} conflicts with a recorded allergy and was not accepted."
+      },
+      "preConsulta": {
+        "titulo": "Answered in the app",
+        "origem": "By the owner, {quando}",
+        "aplicar": "Use answers",
+        "pesoInformado": "Weight reported at home: {valor} — confirm on the scale"
       }
     },
     "pacientes": {
@@ -2572,7 +2663,19 @@
       "filtros": "Filters",
       "resultados": "{contagem} result | {contagem} results",
       "semResultado": "No results for this search.",
-      "cancelar": "Cancel"
+      "cancelar": "Cancel",
+      "adicionar": "Add",
+      "remover": "Remove"
+    },
+    "avisos": {
+      "titulo": "Notices sent",
+      "vazio": "No notice sent for this appointment.",
+      "kind": {
+        "reagendamento": "Reschedule",
+        "remarcacao": "Time change",
+        "cancelamento": "Cancellation",
+        "oferta-de-vaga": "Slot offer"
+      }
     }
   },
   "cronometro": {

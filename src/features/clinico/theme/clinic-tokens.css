@@ -75,6 +75,24 @@
   --clinic-col-4: #7fb98f;
   --clinic-col-5: #c48fa2;
 
+  /*
+   * ------------------------------------------------- acentos por tipo de atendimento
+   *
+   * Escala **separada** da de coluna de propósito. A coluna diz de quem é o atendimento e o
+   * acento diz o que é; reaproveitar os mesmos seis tons faria a grade sugerir um parentesco
+   * que não existe — "verde" significaria a Ana numa borda e vacina na outra.
+   *
+   * Emergência é o único tom quente saturado da escala: é o que a recepção precisa achar
+   * antes de ler qualquer coisa. Os demais ficam pastel para não competirem entre si.
+   */
+  --clinic-tipo-consulta: #6f97b8;
+  --clinic-tipo-retorno: #8fb0a0;
+  --clinic-tipo-vacina: #9b8ec0;
+  --clinic-tipo-exame: #b9a06a;
+  --clinic-tipo-cirurgia: #a56f7f;
+  --clinic-tipo-banho: #79b3ba;
+  --clinic-tipo-emergencia: #c1613f;
+
   /* --------------------------------------------------------------- forma e elevação */
   --clinic-radius-card: 1rem;
   --clinic-radius-control: 0.7rem;
@@ -195,6 +213,18 @@
   --clinic-col-3: #b9a4d6;
   --clinic-col-4: #93cfa3;
   --clinic-col-5: #d6a3b5;
+
+  /*
+   * Os mesmos sete acentos, clareados para o fundo escuro. O tom claro do tema claro some
+   * contra a superfície 900 — acento que não se vê não codifica nada.
+   */
+  --clinic-tipo-consulta: #8fb6d6;
+  --clinic-tipo-retorno: #a9ccbb;
+  --clinic-tipo-vacina: #b6a9d9;
+  --clinic-tipo-exame: #d6bd86;
+  --clinic-tipo-cirurgia: #c68e9d;
+  --clinic-tipo-banho: #93cfd6;
+  --clinic-tipo-emergencia: #e2825c;
 
   --clinic-shadow-rgb: 0 0 0;
   --clinic-shadow-card:

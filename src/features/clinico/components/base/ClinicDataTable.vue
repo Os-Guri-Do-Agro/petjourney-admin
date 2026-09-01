@@ -13,11 +13,13 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import type { ColunaTabela } from './table-types'
+import { ordenarLinhas, proximaOrdenacao } from '../../domain/table-sort'
+
+import type { AcaoDeLinha, ColunaTabela, OrdenacaoTabela } from './table-types'
 
 const props = withDefaults(
   defineProps<{
-    colunas: ColunaTabela[]
+    colunas: ColunaTabela<T>[]
     linhas: T[]
     chave: (linha: T) => string
     carregando?: boolean
@@ -25,6 +27,17 @@ const props = withDefaults(
     vazioTitulo?: string
     vazioDescricao?: string
     selecionadaId?: string | null
+    /**
+     * Somente leitura: o quarto estado.
+     *
+     * Não é "desabilitada". A tabela continua legível, rolável e ordenável — o que sai é o
+     * que **muda alguma coisa**: seleção e ações. Prontuário finalizado e atendimento em
+     * edição noutro dispositivo são para ler, e ler continua valendo.
+     */
+    somenteLeitura?: boolean
+    motivoSomenteLeitura?: string
+    /** Ações por linha. Vazio significa coluna de ação nenhuma. */
+    acoes?: AcaoDeLinha<T>[]
     /** Rótulo acessível da tabela inteira. */
     rotulo?: string
   }>(),
@@ -34,6 +47,9 @@ const props = withDefaults(
     vazioTitulo: '',
     vazioDescricao: '',
     selecionadaId: null,
+    somenteLeitura: false,
+    motivoSomenteLeitura: '',
+    acoes: () => [],
     rotulo: '',
   },
 )
@@ -42,13 +58,107 @@ const emit = defineEmits<{
   ativar: [linha: T]
   selecionar: [linha: T]
   tentarDeNovo: []
+  acao: [payload: { acao: AcaoDeLinha<T>; linha: T }]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const corpo = ref<HTMLElement | null>(null)
 
+// --------------------------------------------------------------------------- ordenação
+
+const ordenacao = ref<OrdenacaoTabela>({ coluna: null, direcao: 'asc' })
+
+const colunaOrdenada = computed(() =>
+  props.colunas.find((coluna) => coluna.id === ordenacao.value.coluna) ?? null,
+)
+
+/**
+ * As linhas como a tabela as mostra.
+ *
+ * Sem coluna escolhida, devolve a lista **como veio** — a ordem de chegada costuma ser
+ * significativa (a fila chega por prioridade e antiguidade) e não pode ser perdida só por a
+ * tabela saber ordenar.
+ */
+const linhasVisiveis = computed(() => {
+  const coluna = colunaOrdenada.value
+
+  if (!coluna?.ordenarPor) {
+    return props.linhas
+  }
+
+  return ordenarLinhas(props.linhas, coluna.ordenarPor, ordenacao.value.direcao, locale.value)
+})
+
+function ordemInicialDe(coluna: ColunaTabela<T>) {
+  return coluna.ordemInicial ?? (coluna.numerico ? 'desc' : 'asc')
+}
+
+function alternarOrdenacao(coluna: ColunaTabela<T>) {
+  if (!coluna.ordenarPor) {
+    return
+  }
+
+  ordenacao.value = proximaOrdenacao(ordenacao.value, coluna.id, ordemInicialDe(coluna))
+}
+
+/** `aria-sort` é o que faz a ordenação existir para leitor de tela; a seta é para o resto. */
+function ariaSort(coluna: ColunaTabela<T>) {
+  if (!coluna.ordenarPor) {
+    return undefined
+  }
+
+  if (ordenacao.value.coluna !== coluna.id) {
+    return 'none' as const
+  }
+
+  return ordenacao.value.direcao === 'asc' ? ('ascending' as const) : ('descending' as const)
+}
+
+// ------------------------------------------------------------------------------ ações
+
+const temAcoes = computed(() => props.acoes.length > 0 && !props.somenteLeitura)
+
+function acoesDaLinha(linha: T) {
+  return props.acoes.filter((acao) => acao.visivel?.(linha) ?? true)
+}
+
+/**
+ * O `stopPropagation` que toda tela reimplementava.
+ *
+ * Sem ele, clicar em "Remover" também seleciona a linha — e a tela abre o detalhe do registro
+ * que acabou de sair.
+ */
+function dispararAcao(evento: MouseEvent, acao: AcaoDeLinha<T>, linha: T) {
+  evento.stopPropagation()
+
+  if (acao.desabilitada?.(linha)) {
+    return
+  }
+
+  emit('acao', { acao, linha })
+}
+
+function aoSelecionar(linha: T) {
+  if (props.somenteLeitura) {
+    return
+  }
+
+  emit('selecionar', linha)
+}
+
+/**
+ * Largura da coluna de ações.
+ *
+ * Sai do número de ações em vez de ser fixa: uma tabela com uma ação não deve reservar a
+ * largura de três, e três ações não podem espremer-se na largura de uma.
+ */
+const larguraDasAcoes = computed(() => `${Math.max(props.acoes.length, 1) * 2.2 + 0.6}rem`)
+
 const template = computed(() =>
-  props.colunas.map((coluna) => coluna.largura ?? 'minmax(0, 1fr)').join(' '),
+  [
+    ...props.colunas.map((coluna) => coluna.largura ?? 'minmax(0, 1fr)'),
+    ...(temAcoes.value ? [larguraDasAcoes.value] : []),
+  ].join(' '),
 )
 
 /**
@@ -60,10 +170,12 @@ const template = computed(() =>
  * pixel e escrevia "2 4 / 0 8" na vertical, com o cabeçalho por cima do vizinho.
  */
 const templateEstreito = computed(() =>
-  props.colunas
-    .filter((coluna) => !coluna.ocultarEmTelaEstreita)
-    .map((coluna) => coluna.largura ?? 'minmax(0, 1fr)')
-    .join(' '),
+  [
+    ...props.colunas
+      .filter((coluna) => !coluna.ocultarEmTelaEstreita)
+      .map((coluna) => coluna.largura ?? 'minmax(0, 1fr)'),
+    ...(temAcoes.value ? [larguraDasAcoes.value] : []),
+  ].join(' '),
 )
 
 const vazia = computed(
@@ -77,9 +189,11 @@ function focarLinha(indice: number) {
 }
 
 function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
+  const total = linhasVisiveis.value.length
+
   if (evento.key === 'ArrowDown') {
     evento.preventDefault()
-    focarLinha(Math.min(indice + 1, props.linhas.length - 1))
+    focarLinha(Math.min(indice + 1, total - 1))
 
     return
   }
@@ -100,7 +214,7 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
   if (evento.key === 'End') {
     evento.preventDefault()
-    focarLinha(props.linhas.length - 1)
+    focarLinha(total - 1)
 
     return
   }
@@ -127,12 +241,56 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
             :class="{
               'tabela__celula--fim': coluna.alinharAoFim,
               'tabela__celula--oculta': coluna.ocultarEmTelaEstreita,
+              'tabela__th--ordenavel': Boolean(coluna.ordenarPor),
+              'tabela__th--ativa': ordenacao.coluna === coluna.id,
             }"
             role="columnheader"
+            :aria-sort="ariaSort(coluna)"
           >
-            {{ coluna.rotulo }}
+            <!--
+              Coluna ordenável é um botão de verdade, não um `div` com `@click`: é o que dá
+              foco por teclado e ativação por `Enter` de graça.
+            -->
+            <button
+              v-if="coluna.ordenarPor"
+              type="button"
+              class="tabela__ordenar clinic-focusable"
+              @click="alternarOrdenacao(coluna)"
+            >
+              <span>{{ coluna.rotulo }}</span>
+              <!--
+                A seta só aparece na coluna ativa; nas demais, um traço discreto no hover diz
+                que dá para ordenar. Sete setas cinzas no cabeçalho ensinam a ignorar todas.
+              -->
+              <i
+                class="pi tabela__seta"
+                :class="
+                  ordenacao.coluna === coluna.id
+                    ? ordenacao.direcao === 'asc'
+                      ? 'pi-sort-amount-up-alt'
+                      : 'pi-sort-amount-down'
+                    : 'pi-sort-alt tabela__seta--fantasma'
+                "
+                aria-hidden="true"
+              />
+            </button>
+
+            <template v-else>{{ coluna.rotulo }}</template>
+          </div>
+
+          <div v-if="temAcoes" class="tabela__th tabela__celula--fim" role="columnheader">
+            <span class="tabela__oculto-visual">{{ t('clinico.tabela.acoes') }}</span>
           </div>
         </div>
+
+        <!--
+          Somente leitura anuncia o motivo. Tabela que simplesmente para de responder ao
+          clique parece quebrada; com o motivo, é uma regra.
+        -->
+        <p v-if="somenteLeitura && motivoSomenteLeitura" class="tabela__leitura" role="status">
+          <i class="pi pi-lock" aria-hidden="true" />
+          <span>{{ motivoSomenteLeitura }}</span>
+        </p>
 
         <div v-if="carregando" class="tabela__estado" role="status" aria-live="polite">
           <i class="pi pi-spin pi-spinner" aria-hidden="true" />
@@ -155,14 +313,17 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
         <div v-else ref="corpo" class="tabela__corpo">
           <div
-            v-for="(linha, indice) in linhas"
+            v-for="(linha, indice) in linhasVisiveis"
             :key="chave(linha)"
             class="tabela__linha clinic-focusable"
-            :class="{ 'tabela__linha--selecionada': selecionadaId === chave(linha) }"
+            :class="{
+              'tabela__linha--selecionada': selecionadaId === chave(linha),
+              'tabela__linha--leitura': somenteLeitura,
+            }"
             :data-linha="chave(linha)"
             role="row"
             tabindex="0"
-            @click="emit('selecionar', linha)"
+            @click="aoSelecionar(linha)"
             @dblclick="emit('ativar', linha)"
             @keydown="aoTeclar($event, indice, linha)"
           >
@@ -178,6 +339,23 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
               role="cell"
             >
               <slot :name="`celula-${coluna.id}`" :linha="linha" :indice="indice" />
+            </div>
+
+            <div v-if="temAcoes" class="tabela__td tabela__acoes" role="cell">
+              <button
+                v-for="acao in acoesDaLinha(linha)"
+                :key="acao.id"
+                type="button"
+                class="tabela__acao clinic-focusable"
+                :class="{ 'tabela__acao--perigo': acao.perigo }"
+                :disabled="acao.desabilitada?.(linha) ?? false"
+                :title="acao.rotulo"
+                :aria-label="acao.rotulo"
+                @click="dispararAcao($event, acao, linha)"
+              >
+                <i v-if="acao.icone" :class="acao.icone" aria-hidden="true" />
+                <span v-else>{{ acao.rotulo }}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -231,11 +409,81 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
   text-transform: uppercase;
 }
 
+/* ------------------------------------------------------------------------- ordenação */
+
+.tabela__ordenar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0.3rem;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.tabela__ordenar:hover {
+  color: var(--clinic-text);
+}
+
+.tabela__th--ativa {
+  color: var(--clinic-text);
+}
+
+.tabela__seta {
+  flex: 0 0 auto;
+  font-size: 0.62rem;
+}
+
+/*
+ * Nas colunas ordenáveis ainda não usadas, a seta fica invisível e só aparece no hover ou no
+ * foco. Sete setas cinzas permanentes no cabeçalho treinam o olho a ignorar todas — inclusive
+ * a que marca a ordenação em vigor.
+ */
+.tabela__seta--fantasma {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.tabela__ordenar:hover .tabela__seta--fantasma,
+.tabela__ordenar:focus-visible .tabela__seta--fantasma {
+  opacity: 0.55;
+}
+
+/* -------------------------------------------------------------------- somente leitura */
+
+.tabela__leitura {
+  display: flex;
+  align-items: center;
+  gap: var(--clinic-space-2);
+  margin: 0;
+  padding: var(--clinic-cell-padding-y) var(--clinic-space-4);
+  border-bottom: 1px solid var(--clinic-line);
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+}
+
 .tabela__linha {
   min-height: var(--clinic-row-height);
   border-bottom: 1px solid var(--clinic-line-soft);
   cursor: pointer;
   transition: background 120ms ease;
+}
+
+/* Leitura não é "desabilitada": o texto continua com contraste cheio, só não é clicável. */
+.tabela__linha--leitura {
+  cursor: default;
+}
+
+.tabela__linha--leitura:hover {
+  background: transparent;
 }
 
 .tabela__linha:last-child {
@@ -270,6 +518,80 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 .tabela__celula--fim {
   justify-self: end;
   text-align: right;
+}
+
+/* ----------------------------------------------------------------------- ações da linha */
+
+.tabela__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.15rem;
+}
+
+/*
+ * As ações só aparecem no hover, no foco de dentro delas ou na linha selecionada. Uma fileira
+ * de ícones em todas as linhas de uma tabela de duzentas transforma a coluna num padrão
+ * visual que compete com o dado — e a tabela clínica existe para ler dado.
+ */
+.tabela__acao {
+  display: grid;
+  width: var(--clinic-hit-target);
+  height: var(--clinic-hit-target);
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--clinic-radius-control);
+  background: transparent;
+  color: var(--clinic-muted);
+  cursor: pointer;
+  font: inherit;
+  opacity: 0;
+  transition:
+    opacity 120ms ease,
+    background 120ms ease;
+}
+
+.tabela__linha:hover .tabela__acao,
+.tabela__linha--selecionada .tabela__acao,
+.tabela__acao:focus-visible {
+  opacity: 1;
+}
+
+.tabela__acao:hover:not(:disabled) {
+  border-color: var(--clinic-line-strong);
+  background: var(--clinic-surface);
+  color: var(--clinic-text);
+}
+
+.tabela__acao--perigo:hover:not(:disabled) {
+  border-color: var(--clinic-risk-line);
+  background: var(--clinic-risk-bg);
+  color: var(--clinic-risk-text);
+}
+
+.tabela__acao:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+/*
+ * Sem `hover` — dedo e caneta não têm hover, e a ação ficaria inalcançável. Em tela de toque
+ * as ações são sempre visíveis.
+ */
+@media (hover: none) {
+  .tabela__acao {
+    opacity: 1;
+  }
+}
+
+/** Escondido do olho, presente para leitor de tela. */
+.tabela__oculto-visual {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .tabela__estado {

@@ -7,13 +7,14 @@
  */
 
 import { resumirFaltas } from '../../domain/load'
-import { createClinicClock } from '../../domain/clinic-time'
+import { createClinicClock, diffDays } from '../../domain/clinic-time'
 import { CLINIC_UTC_OFFSET } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import { getDataset, novoId } from '../store'
 import type {
   Appointment,
   ISODate,
+  ISODateTime,
   NoShowSummary,
   Pet,
   PetSex,
@@ -25,9 +26,23 @@ const clock = createClinicClock(CLINIC_UTC_OFFSET)
 
 export const LIMITE_REINCIDENCIA = 3
 
+/**
+ * Uma falta, com o que aconteceu depois dela.
+ *
+ * O agregado (NoShowSummary) dimensiona o problema; isto aqui é o que permite decidir.
+ */
+export type FaltaDetalhada = {
+  appointment: Appointment
+  pet: Pet | null
+  minutosPerdidos: number
+  /** Instante do atendimento que substituiu esta falta, quando houve. */
+  reagendadoPara: ISODateTime | null
+  reagendadoId: string | null
+}
+
 /** Duas letras para o avatar: primeira do nome e primeira do segundo termo, quando existe. */
 function iniciaisDe(nome: string): string {
-  const partes = nome.trim().split(/s+/).filter(Boolean)
+  const partes = nome.trim().split(/\s+/).filter(Boolean)
   const primeira = partes[0]?.[0] ?? '?'
   const segunda = partes[1]?.[0] ?? partes[0]?.[1] ?? ''
 
@@ -130,6 +145,55 @@ export const patientRepository = {
     )
   },
 
+  /**
+   * As faltas em si de um responsável, não o agregado.
+   *
+   * O painel mostra "3 faltas, 90 minutos perdidos" — e isso basta para dimensionar o problema,
+   * mas não para decidir o que fazer. Três faltas em três anos e três faltas no mês são
+   * situações diferentes, e só a lista separa as duas.
+   *
+   * Cada linha carrega se o horário **foi reagendado depois**: falta que virou consulta na
+   * semana seguinte não é o mesmo caso de falta que nunca voltou, e cobrar as duas igual é como
+   * a política de reincidência perde a confiança de quem a aplica.
+   */
+  faltasDoResponsavel(tutorId: string): Promise<FaltaDetalhada[]> {
+    return simularChamada('paciente.historico', () => {
+      const dataset = getDataset()
+      const faltas = dataset.appointments
+        .filter(
+          (appointment) => appointment.tutorId === tutorId && appointment.status === 'falta',
+        )
+        .sort((a, b) => b.inicio.localeCompare(a.inicio))
+
+      return faltas.map((falta) => {
+        /*
+         * Reagendado = existe atendimento do mesmo paciente, depois desta falta, criado
+         * **após** ela ter acontecido. A janela de 60 dias evita chamar de reagendamento a
+         * consulta de rotina que já estava marcada meses à frente.
+         */
+        const limite = clock.dateOf(falta.inicio)
+        const reagendado =
+          dataset.appointments.find(
+            (candidato) =>
+              candidato.id !== falta.id &&
+              candidato.petId === falta.petId &&
+              candidato.status !== 'cancelado' &&
+              candidato.inicio > falta.inicio &&
+              candidato.criadoEm >= falta.inicio &&
+              diffDays(limite, clock.dateOf(candidato.inicio)) <= 60,
+          ) ?? null
+
+        return {
+          appointment: falta,
+          pet: dataset.pets.find((item) => item.id === falta.petId) ?? null,
+          minutosPerdidos: clock.durationMinutes(falta.inicio, falta.fim),
+          reagendadoPara: reagendado?.inicio ?? null,
+          reagendadoId: reagendado?.id ?? null,
+        }
+      })
+    })
+  },
+
   /*
    * Cópia, não a array do dataset.
    *
@@ -193,6 +257,8 @@ export const patientRepository = {
         sexo: input.sexo,
         nascimento: input.nascimento,
         castrado: input.castrado,
+        /* Cadastro rápido não pergunta porte; a estimativa por peso cobre até alguém informar. */
+        porte: null,
         pesoKg: input.pesoKg,
         tutorId: responsavel.id,
         alertas: [],

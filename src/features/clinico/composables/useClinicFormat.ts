@@ -79,6 +79,22 @@ export function useClinicFormat() {
     }).format(new Date(`${data}T12:00:00Z`))
   }
 
+  /**
+   * Nome curto do dia a partir do **índice** (0 = domingo), sem precisar de uma data.
+   *
+   * A fila trabalha com dias da semana soltos — a janela que o responsável aceita não tem data
+   * — e montar um ISO falso só para formatar seria inventar um dia que não existe.
+   */
+  function diaDaSemanaCurtoPorIndice(weekday: number): string {
+    /* 2024-01-07 é um domingo: somar o índice cai no dia certo da mesma semana. */
+    const base = new Date(Date.UTC(2024, 0, 7 + weekday, 12))
+
+    return new Intl.DateTimeFormat(localeIntl.value, {
+      weekday: 'short',
+      timeZone: 'UTC',
+    }).format(base)
+  }
+
   function diaDaSemanaCurto(data: ISODate): string {
     return new Intl.DateTimeFormat(localeIntl.value, {
       weekday: 'short',
@@ -285,6 +301,7 @@ export function useClinicFormat() {
     dataPorExtenso,
     dataCurta,
     diaDaSemanaCurto,
+    diaDaSemanaCurtoPorIndice,
     duracao,
     relativo,
     idade,
