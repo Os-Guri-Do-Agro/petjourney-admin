@@ -1810,7 +1810,8 @@
       "cronico": "Condición crónica",
       "imunossuprimido": "Inmunodeprimido",
       "gestante": "Gestante",
-      "inadimplente": "Pendiente de pago"
+      "inadimplente": "Pendiente de pago",
+      "medicacao-continua": "Medicación continua"
     },
     "severidade": {
       "info": "Información",
@@ -2340,7 +2341,7 @@
         "lote": "Lote",
         "fabricante": "Fabricante",
         "proxima": "Próxima dose",
-        "ressalva": "Lote, fabricante e data de reforço devem ser conferidos na carteira de vacinação do animal. Documento sem esses campos preenchidos não substitui a carteira para fins de viagem."
+        "ressalva": "Lote y fabricante según el registro de esta clínica. Las vacunas aplicadas en otro servicio deben verificarse en la libreta del animal."
       },
       "orcamento": {
         "titulo": "Presupuesto",
@@ -2742,6 +2743,21 @@
         "origem": "Por el responsable, {quando}",
         "aplicar": "Usar respuestas",
         "pesoInformado": "Peso informado en casa: {valor} — confirme en la balanza"
+      },
+      "teclado": {
+        "titulo": "Teclas de la historia clínica",
+        "descricao": "La consulta entera sin salir del teclado.",
+        "modo": "Escritura rápida",
+        "verTeclas": "Ver teclas",
+        "acao": {
+          "campoSeguinte": "Campo siguiente",
+          "escolherOpcao": "Elegir opción del grupo",
+          "entreOpcoes": "Entre las opciones",
+          "proximaEtapa": "Etapa siguiente",
+          "etapaAnterior": "Etapa anterior",
+          "focarPrimeiro": "Volver al primer campo",
+          "ajuda": "Este mapa"
+        }
       }
     },
     "pacientes": {
@@ -2889,6 +2905,37 @@
       "vistaDoResponsavel": "Cómo lo ve el responsable",
       "lembrete": "Se convierte en recordatorio: {quantidade}, {frequencia}",
       "lembreteContinuo": "Recordatorio continuo, sin fecha de fin"
+    },
+    "vacinas": {
+      "titulo": "Vacunas",
+      "subtitulo": "A quién llamar para el refuerzo — la consulta que la clínica provoca.",
+      "vazioTitulo": "Ningún refuerzo pendiente",
+      "vazioDescricao": "Todos los pacientes con vacuna registrada están al día.",
+      "colunaVacina": "Vacuna",
+      "colunaQuando": "Refuerzo",
+      "ligar": "Llamar",
+      "agendar": "Agendar",
+      "obrigatoria": "Obligatoria",
+      "ligarHoje": "llamar hoy",
+      "proximosDias": "próximos 30 días",
+      "potencial": "Agenda a recuperar",
+      "potencialDetalhe": "estimado en 20 min por aplicación",
+      "doseSeguinte": "{dose}ª dosis de la serie",
+      "atrasadoDias": "{dias} d de atraso",
+      "emDias": "en {dias} d",
+      "situacao": {
+        "vencido": "Vencido",
+        "proximo": "Por vencer",
+        "serie-incompleta": "Serie abierta",
+        "em-dia": "Al día"
+      },
+      "registrar": "Registrar vacuna",
+      "lote": "Lote",
+      "validadeLote": "Validez del lote",
+      "dose": "Dosis",
+      "aplicada": "Aplicada",
+      "doseDeTotal": "{dose} de {total}",
+      "proximaEm": "Próxima dosis el {data}"
     }
   },
   "cronometro": {

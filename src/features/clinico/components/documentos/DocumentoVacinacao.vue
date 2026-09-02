@@ -2,32 +2,28 @@
 /**
  * Comprovante de vacinação — A4.
  *
- * **Este documento é o mais incompleto do lote, e é honesto que seja.** O módulo registra
- * vacina como *tipo de atendimento* e como evento da linha do tempo, mas não guarda **lote,
- * fabricante nem validade** — e sem esses três o papel não serve para viagem nem para
- * condomínio, que são justamente as duas situações em que ele é pedido.
+ * Passou a ler o **registro de vacinação de verdade**: lote, fabricante, dose da série e a data
+ * do reforço saem da aplicação gravada, não de campos em branco. É o que faz este papel valer
+ * para viagem e condomínio, que são as duas situações em que ele é pedido.
  *
- * O protótipo mostra a folha certa com os campos em branco, em vez de inventar números de lote.
- * Um comprovante com lote fictício é pior que um com lacuna: a lacuna se vê, o número inventado
- * não.
- *
- * Para fechar de verdade, falta modelar o registro de vacina — o que também destrava atestado
- * de viagem e o controle de reforço.
+ * As linhas em branco ao final continuam existindo de propósito: clínica que migra de sistema
+ * traz carteira de papel, e a folha precisa aceitar o histórico anterior escrito à mão.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import DocumentoFolha from './DocumentoFolha.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import type { Encounter, Pet, TimelineEvent, Tutor } from '../../data/types'
+import { vacinaRepository } from '../../data/repositories'
+import type { AplicacaoVacina, Encounter, Pet, Tutor } from '../../data/types'
 import { clinicClock } from '../../stores/clinico'
 
 const props = defineProps<{
   encounter: Encounter
   pet: Pet | null
   tutor: Tutor | null
-  /** Eventos de vacina do paciente, da linha do tempo. */
-  eventos: TimelineEvent[]
+  /** Aplicações registradas do paciente. */
+  aplicacoes: AplicacaoVacina[]
 }>()
 
 const { t } = useI18n()
@@ -37,11 +33,24 @@ const dataDoDocumento = computed(() =>
   clinicClock.dateOf(props.encounter.finalizadoEm ?? props.encounter.abertoEm),
 )
 
+const catalogo = vacinaRepository.catalogo()
+
 /** Da mais recente para a mais antiga: é a última dose que decide se está em dia. */
 const vacinas = computed(() =>
-  props.eventos
-    .filter((evento) => evento.kind === 'vacina')
-    .sort((a, b) => b.em.localeCompare(a.em)),
+  [...props.aplicacoes]
+    .sort((a, b) => b.aplicadaEm.localeCompare(a.aplicadaEm))
+    .map((aplicacao) => {
+      const vacina = catalogo.find((item) => item.id === aplicacao.vacinaId)
+
+      return {
+        id: aplicacao.id,
+        data: clinicClock.dateOf(aplicacao.aplicadaEm),
+        nome: vacina?.nome ?? aplicacao.vacinaId,
+        fabricante: vacina?.fabricante ?? '',
+        lote: aplicacao.lote,
+        proxima: aplicacao.proximaDoseEm,
+      }
+    }),
 )
 </script>
 
@@ -71,18 +80,17 @@ const vacinas = computed(() =>
       </thead>
       <tbody>
         <tr v-for="vacina in vacinas" :key="vacina.id">
-          <td>{{ formato.dataCurta(clinicClock.dateOf(vacina.em)) }}</td>
-          <td>{{ vacina.titulo || t('clinico.prontuario.timeline.kind.vacina') }}</td>
-          <!--
-            Lote, fabricante e reforço saem em branco: o módulo não guarda esses campos, e
-            preenchê-los com algo plausível transformaria uma lacuna visível num erro invisível.
-          -->
-          <td class="vazia" />
-          <td class="vazia" />
-          <td class="vazia" />
+          <td>{{ formato.dataCurta(vacina.data) }}</td>
+          <td>{{ vacina.nome }}</td>
+          <td>{{ vacina.lote }}</td>
+          <td>{{ vacina.fabricante }}</td>
+          <td>{{ formato.dataCurta(vacina.proxima) }}</td>
         </tr>
 
-        <!-- Linhas em branco para a clínica completar à mão enquanto o registro não existe. -->
+        <!--
+          Linhas em branco para o histórico anterior à migração: clínica que troca de sistema
+          traz carteira de papel, e a folha precisa aceitá-la escrita à mão.
+        -->
         <tr v-for="n in Math.max(0, 6 - vacinas.length)" :key="`vazia-${n}`">
           <td class="vazia" />
           <td class="vazia" />

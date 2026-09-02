@@ -73,6 +73,8 @@ const CLINICAL_ROUTES = [
   { key: 'clinico.atendimentos.titulo', to: '/veterinario/atendimentos', icon: 'pi pi-file-edit' },
   { key: 'clinico.fila.titulo', to: '/veterinario/fila', icon: 'pi pi-hourglass' },
   { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'pi pi-user-minus' },
+  /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
+  { key: 'clinico.vacinas.titulo', to: '/veterinario/vacinas', icon: 'pi pi-shield' },
   { key: 'clinico.atividades.titulo', to: '/veterinario/atividades', icon: 'pi pi-list' },
 ] as const
 

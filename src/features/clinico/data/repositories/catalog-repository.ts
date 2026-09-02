@@ -15,6 +15,7 @@ import {
   professionalsFixture,
   referenceRangesFixture,
   roomsFixture,
+  vacinasFixture,
 } from '../fixtures'
 import { getDataset } from '../store'
 import type {
@@ -26,6 +27,7 @@ import type {
   Professional,
   ReferenceRange,
   Room,
+  Vacina,
 } from '../types'
 
 export type CatalogosClinicos = {
@@ -37,6 +39,7 @@ export type CatalogosClinicos = {
   diagnosticos: DiagnosisCatalogItem[]
   exames: ExamCatalogItem[]
   faixas: ReferenceRange[]
+  vacinas: Vacina[]
 }
 
 export const catalogRepository = {
@@ -50,6 +53,7 @@ export const catalogRepository = {
       diagnosticos: diagnosisCatalogFixture,
       exames: examCatalogFixture,
       faixas: referenceRangesFixture,
+      vacinas: vacinasFixture,
     }))
   },
 

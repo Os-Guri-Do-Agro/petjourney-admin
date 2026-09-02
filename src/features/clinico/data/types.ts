@@ -137,6 +137,14 @@ export type PetAlertKind =
   | 'alergia'
   | 'agressivo'
   | 'cronico'
+  /**
+   * Medicação de uso contínuo.
+   *
+   * O terceiro alerta que o vet precisa ver **sem clicar**, ao lado de alergia e comorbidade —
+   * e o que decide interação na hora de prescrever. Um paciente em enalapril não recebe
+   * anti-inflamatório sem que alguém pense duas vezes.
+   */
+  | 'medicacao-continua'
   | 'imunossuprimido'
   | 'gestante'
   | 'inadimplente'
@@ -544,6 +552,69 @@ export type PreConsulta = {
   pesoInformadoKg: number | null
   /** Texto livre do responsável, na íntegra e sem edição. */
   observacao: string
+}
+
+// ---------------------------------------------------------------------------
+// Vacinação
+// ---------------------------------------------------------------------------
+
+/**
+ * Vacina do catálogo da clínica.
+ *
+ * Existe separado do `AppointmentType` porque "vacina" como tipo de agendamento responde
+ * *quanto tempo reservar*; isto aqui responde *o que foi aplicado*. Sem este catálogo, o
+ * comprovante saía com o campo do produto em branco e não servia para viagem nem condomínio —
+ * que são as duas situações em que ele é pedido.
+ */
+export type Vacina = {
+  id: string
+  nome: string
+  fabricante: string
+  especies: PetSpecies[]
+  /** Doses da série inicial. Filhote toma três de V10; adulto toma uma. */
+  dosesNaSerie: number
+  /** Dias até o reforço. É daqui que sai o recall — a recorrência que sustenta a clínica. */
+  intervaloReforcoDias: number
+  /** Obrigatória por lei ou por exigência de viagem. Muda a insistência do lembrete. */
+  obrigatoria: boolean
+}
+
+/**
+ * Uma aplicação registrada.
+ *
+ * `lote` e `validadeLote` não são burocracia: é o que a farmacovigilância exige rastrear se
+ * houver reação adversa em lote, e o que a companhia aérea confere no balcão.
+ */
+export type AplicacaoVacina = {
+  id: string
+  petId: string
+  vacinaId: string
+  professionalId: string
+  aplicadaEm: ISODateTime
+  lote: string
+  validadeLote: ISODate
+  /** Qual dose da série. 1 de 3, 2 de 3… */
+  dose: number
+  via: PrescriptionRoute
+  /** Data calculada do reforço, congelada na aplicação. */
+  proximaDoseEm: ISODate
+  observacao: string
+}
+
+/** Situação do reforço de um paciente. Recalculada, nunca persistida. */
+export type SituacaoDoReforco = 'em-dia' | 'proximo' | 'vencido' | 'serie-incompleta'
+
+export type ReforcoPendente = {
+  petId: string
+  vacinaId: string
+  /** A última aplicação desta vacina neste paciente. */
+  ultimaEm: ISODateTime
+  proximaDoseEm: ISODate
+  situacao: SituacaoDoReforco
+  /** Negativo quando já venceu. É o número que ordena a lista de recall. */
+  diasParaVencer: number
+  /** Dose seguinte da série, quando a série ainda não fechou. */
+  doseSeguinte: number | null
 }
 
 // ---------------------------------------------------------------------------

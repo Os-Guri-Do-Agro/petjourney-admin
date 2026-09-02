@@ -202,9 +202,14 @@ espera (liga com a L7 do requisito 01).
 - [x] **P4** Filtro na linha do tempo e internação no domínio — fichas por tipo com a contagem,
       só dos tipos que existem no paciente, e o tipo `internacao` plantado no dataset.
 
-### Bloco D — Velocidade
+### Bloco D — Velocidade ✅
 
-- [ ] **P5** Modo de digitação rápida só com teclado, com mapa de teclas
+- [x] **P5** Modo de digitação rápida só com teclado, com mapa de teclas. `Enter` avança campo —
+      e no último, muda de etapa; número escolhe a opção do grupo; `Alt` mais setas troca de
+      etapa; e o foco vai sozinho ao primeiro campo da etapa nova.
+- [x] **Extra** O `ClinicToggleGroup` virou um `radiogroup` de verdade: uma parada de Tab por
+      grupo, setas navegando e número escolhendo direto. O comentário afirmava isso desde o
+      início; o código não fazia nada. 10 testes.
 
 ---
 

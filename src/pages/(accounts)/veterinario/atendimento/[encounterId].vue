@@ -49,10 +49,18 @@ import ProntuarioReceita from '@/features/clinico/components/prontuario/Prontuar
 import ProntuarioResumo from '@/features/clinico/components/prontuario/ProntuarioResumo.vue'
 import ProntuarioRetornoDialog from '@/features/clinico/components/prontuario/ProntuarioRetornoDialog.vue'
 import ProntuarioStepper from '@/features/clinico/components/prontuario/ProntuarioStepper.vue'
+import ProntuarioTecladoDialog from '@/features/clinico/components/prontuario/ProntuarioTecladoDialog.vue'
+import ProntuarioVacinacao from '@/features/clinico/components/prontuario/ProntuarioVacinacao.vue'
 import ProntuarioTimeline from '@/features/clinico/components/prontuario/ProntuarioTimeline.vue'
 import type { PassoProntuario } from '@/features/clinico/components/prontuario/step-types'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
-import type { Prescription, SlotSugestao } from '@/features/clinico/data/types'
+import { useProntuarioTeclado } from '@/features/clinico/composables/useProntuarioTeclado'
+import { vacinaRepository } from '@/features/clinico/data/repositories'
+import type {
+  AplicacaoVacina,
+  Prescription,
+  SlotSugestao,
+} from '@/features/clinico/data/types'
 import type { EtapaId } from '@/features/clinico/domain/encounter-progress'
 import {
   alergiaNaoConfirmada,
@@ -74,6 +82,44 @@ const assumirAberto = ref(false)
 const finalizarAberto = ref(false)
 const etapa = ref<EtapaId>('anamnese')
 const historicoAberto = ref(false)
+
+// ------------------------------------------------------------------ modo teclado
+
+/**
+ * Digitação rápida.
+ *
+ * Nasce **ligado**: o modo não muda o que a tela faz com o mouse — só acrescenta caminhos de
+ * teclado. Um interruptor desligado por padrão significaria que ninguém o encontra, e o
+ * requisito pede que a consulta seja registrada mais rápido do que se escreve à mão.
+ *
+ * A preferência persiste porque quem desliga tem motivo (leitor de tela com esquema próprio de
+ * navegação, por exemplo) e não quer religar a cada paciente.
+ */
+const CHAVE_TECLADO = 'clinic.keyboardMode'
+
+const modoTeclado = ref(
+  typeof window === 'undefined' || window.localStorage.getItem(CHAVE_TECLADO) !== 'false',
+)
+
+const mapaAberto = ref(false)
+const corpoDaEtapa = ref<HTMLElement | null>(null)
+
+watch(modoTeclado, (valor) => {
+  window.localStorage.setItem(CHAVE_TECLADO, String(valor))
+})
+
+useProntuarioTeclado({
+  raiz: corpoDaEtapa,
+  etapa: computed(() => etapa.value),
+  ativo: computed(() => modoTeclado.value && !prontuario.somenteLeitura),
+  acoes: {
+    proximaEtapa: () => proximaEtapa.value && irParaEtapa(proximaEtapa.value.id),
+    etapaAnterior: () => etapaAnterior.value && irParaEtapa(etapaAnterior.value.id),
+    ajuda: () => {
+      mapaAberto.value = !mapaAberto.value
+    },
+  },
+})
 
 const idDaRota = computed(() => String(route.params.encounterId ?? ''))
 const encounter = computed(() => prontuario.encounter)
@@ -278,6 +324,13 @@ async function carregar() {
 async function finalizar() {
   await prontuario.finalizar()
   finalizarAberto.value = false
+
+  /*
+   * Devolve à agenda. Antes a tela ficava onde estava, virava somente leitura e o passo
+   * seguinte do dia — o próximo paciente — exigia achar o menu. O atendimento acabou; o lugar
+   * de quem acabou de atender é a grade.
+   */
+  void router.push('/veterinario/agenda')
 }
 
 async function assumir() {
@@ -336,6 +389,17 @@ function salvarEmPdf() {
  * terminar** — não criava nada, perdia os dias e o tipo escolhidos na conduta, e deixava o
  * aviso de retorno pendente na tela para sempre, mesmo depois de marcarem o retorno à mão.
  */
+/** Aplicações de vacina do paciente — o comprovante imprime a partir delas. */
+const aplicacoesDeVacina = ref<AplicacaoVacina[]>([])
+
+watch(
+  () => prontuario.pet?.id,
+  async (petId) => {
+    aplicacoesDeVacina.value = petId ? await vacinaRepository.doPaciente(petId) : []
+  },
+  { immediate: true },
+)
+
 const retornoAberto = ref(false)
 
 /**
@@ -504,8 +568,29 @@ onBeforeUnmount(() => {
 
       <ProntuarioStepper :passos="passos" :ativo="etapa" @ir="irParaEtapa" />
 
+      <!--
+        O interruptor fica junto do stepper porque é ali que o modo se manifesta: é o stepper
+        que `Alt + →` percorre. Escondido em ajustes, ninguém saberia que existe.
+      -->
+      <div class="teclado">
+        <label class="teclado__toggle">
+          <input v-model="modoTeclado" type="checkbox" />
+          <span>{{ t('clinico.prontuario.teclado.modo') }}</span>
+        </label>
+
+        <button
+          type="button"
+          class="teclado__mapa clinic-focusable"
+          :title="t('clinico.prontuario.teclado.titulo')"
+          @click="mapaAberto = true"
+        >
+          <i class="pi pi-question-circle" aria-hidden="true" />
+          {{ t('clinico.prontuario.teclado.verTeclas') }}
+        </button>
+      </div>
+
       <div class="prontuario__corpo" :class="{ 'prontuario__corpo--com-aside': historicoAberto }">
-        <div class="etapa">
+        <div ref="corpoDaEtapa" class="etapa">
           <!--
             A pré-consulta abre **acima** da anamnese: é o que o vet lê antes de digitar, e
             embaixo do formulário ela chegaria depois de o campo já ter sido preenchido à mão.
@@ -561,6 +646,17 @@ onBeforeUnmount(() => {
             atendimento, e separá-lo numa etapa própria faria a receita virar uma tarefa que
             se esquece de fazer.
           -->
+          <!--
+            Vacinação vive na conduta, ao lado da receita: as duas são o que sai do atendimento
+            e vão para a carteira do animal.
+          -->
+          <ProntuarioVacinacao
+            v-if="etapa === 'conduta'"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :somente-leitura="prontuario.somenteLeitura"
+          />
+
           <ProntuarioReceita
             v-if="etapa === 'conduta'"
             :encounter="encounter"
@@ -731,7 +827,7 @@ onBeforeUnmount(() => {
           :encounter="encounter"
           :pet="prontuario.pet"
           :tutor="prontuario.tutor"
-          :eventos="prontuario.timeline"
+          :aplicacoes="aplicacoesDeVacina"
         />
         <DocumentoOrcamento
           v-else-if="documentoParaImprimir === 'orcamento'"
@@ -760,6 +856,8 @@ onBeforeUnmount(() => {
       </div>
     </Teleport>
 
+    <ProntuarioTecladoDialog v-model:visible="mapaAberto" />
+
     <ProntuarioRetornoDialog
       v-if="encounter"
       v-model:visivel="retornoAberto"
@@ -777,6 +875,43 @@ onBeforeUnmount(() => {
 .prontuario {
   display: grid;
   gap: var(--clinic-space-3);
+}
+
+.teclado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--clinic-space-3);
+}
+
+.teclado__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--clinic-muted);
+  cursor: pointer;
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+}
+
+.teclado__mapa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--clinic-accent-strong);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+}
+
+.teclado__mapa:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .prontuario__corpo {

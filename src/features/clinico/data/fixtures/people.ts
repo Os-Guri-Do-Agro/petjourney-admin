@@ -446,6 +446,17 @@ export const petsFixture: Pet[] = [
     iniciais: 'CA',
     alertas: [
       { id: 'alerta-cacau-1', kind: 'cronico', severidade: 'atencao', detalhe: 'Discopatia' },
+      /*
+       * O par que o cabeçalho precisa mostrar junto: comorbidade **e** o que ela está tomando.
+       * Ver a discopatia sem ver o gabapentina faz o vet prescrever por cima de um analgésico
+       * que já está em curso.
+       */
+      {
+        id: 'alerta-cacau-2',
+        kind: 'medicacao-continua',
+        severidade: 'atencao',
+        detalhe: 'Gabapentina 10 mg/kg, 12/12 h',
+      },
     ],
   },
   {
@@ -460,6 +471,19 @@ export const petsFixture: Pet[] = [
     pesoKg: 35.7,
     tutorId: 'tutor-eduardo',
     iniciais: 'NE',
-    alertas: [],
+    alertas: [
+      /*
+       * Cardiopata em enalapril: o caso que o bulário mais precisa cruzar. Anti-inflamatório
+       * não esteroidal em paciente sob IECA é interação de manual, e o alerta é o que a põe
+       * na frente do vet antes de ele abrir o bulário.
+       */
+      {
+        id: 'alerta-nero-1',
+        kind: 'medicacao-continua',
+        severidade: 'risco',
+        detalhe: 'Enalapril 0,5 mg/kg, 12/12 h',
+      },
+      { id: 'alerta-nero-2', kind: 'cronico', severidade: 'atencao', detalhe: 'Doença mitral' },
+    ],
   },
 ]

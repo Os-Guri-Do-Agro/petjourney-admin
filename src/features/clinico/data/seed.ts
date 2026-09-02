@@ -27,6 +27,7 @@ import { alergiaConflitante, calcularDose } from '../domain/dose'
 import {
   CLINIC_UTC_OFFSET,
   appointmentTypesFixture,
+  vacinasFixture,
   clinicFixture,
   diagnosisCatalogFixture,
   examCatalogFixture,
@@ -39,6 +40,7 @@ import {
 import { createPrng, hashSeed, intBetween, pickFrom } from './mock-runtime'
 import type {
   Anamnese,
+  AplicacaoVacina,
   Appointment,
   AppointmentStatus,
   AppointmentType,
@@ -120,6 +122,8 @@ export type SeedResult = {
   encounters: Encounter[]
   waitlist: WaitlistEntry[]
   timeline: TimelineEvent[]
+  /** Vacinas aplicadas — a carteira do paciente e o motor de recall saem daqui. */
+  aplicacoesDeVacina: AplicacaoVacina[]
   casos: CasoDificil[]
   /**
    * Cópia dos pacientes e responsáveis da fixture.
@@ -1336,6 +1340,76 @@ function montarTimeline(encounters: Encounter[], appointments: Appointment[]): T
 }
 
 /**
+ * Vacinas aplicadas, plantadas para a carteira e o recall existirem na demonstração.
+ *
+ * A distribuição é deliberada e cobre as quatro situações que a lista de chamada precisa
+ * mostrar — **em dia, a vencer, vencido e série incompleta**. Sem um caso de cada, a tela de
+ * recall abriria com uma pilha só e o vendedor não teria o que apontar.
+ *
+ * As datas nascem relativas a hoje pelo mesmo motivo do resto do dataset: data fixa morre na
+ * semana seguinte.
+ */
+function aplicacoesDeVacinaPlantadas(hoje: ISODate): AplicacaoVacina[] {
+  const PLANTADAS: Array<{
+    petId: string
+    vacinaId: string
+    diasAtras: number
+    dose: number
+    /** O que este caso existe para demonstrar. */
+    caso: string
+  }> = [
+    /* Em dia: aplicou há pouco, série fechada. */
+    { petId: 'pet-luna', vacinaId: 'vac-antirrabica-canina', diasAtras: 40, dose: 1, caso: 'em dia' },
+    { petId: 'pet-luna', vacinaId: 'vac-v10', diasAtras: 60, dose: 3, caso: 'em dia' },
+
+    /* A vencer: dentro da janela de 30 dias — é a ligação da semana. */
+    { petId: 'pet-bidu', vacinaId: 'vac-v10', diasAtras: 345, dose: 3, caso: 'a vencer' },
+    { petId: 'pet-mel', vacinaId: 'vac-antirrabica-canina', diasAtras: 350, dose: 1, caso: 'a vencer' },
+
+    /* Vencido: passou da data — é a ligação de hoje. */
+    { petId: 'pet-thor', vacinaId: 'vac-antirrabica-canina', diasAtras: 430, dose: 1, caso: 'vencido' },
+    { petId: 'pet-nina', vacinaId: 'vac-v10', diasAtras: 500, dose: 3, caso: 'vencido' },
+    { petId: 'pet-sushi', vacinaId: 'vac-v4-felina', diasAtras: 420, dose: 3, caso: 'vencido' },
+
+    /*
+     * Série aberta: filhote no meio da série, com a próxima dose **ainda por vir**.
+     *
+     * A janela é curta de propósito. Passados os 28 dias entre doses, o caso deixa de ser
+     * "série aberta" e vira "vencido" — que é a regra certa, mas some com esta situação da
+     * demonstração. Aplicações recentes mantêm as quatro pilhas visíveis.
+     */
+    { petId: 'pet-amora', vacinaId: 'vac-v10', diasAtras: 12, dose: 1, caso: 'série aberta' },
+    { petId: 'pet-pandora', vacinaId: 'vac-v4-felina', diasAtras: 18, dose: 2, caso: 'série aberta' },
+
+    /* Histórico mais fundo, para a carteira do paciente ter profundidade. */
+    { petId: 'pet-nina', vacinaId: 'vac-antirrabica-canina', diasAtras: 500, dose: 1, caso: 'histórico' },
+    { petId: 'pet-nina', vacinaId: 'vac-gripe-canina', diasAtras: 520, dose: 2, caso: 'histórico' },
+    { petId: 'pet-bento', vacinaId: 'vac-v10', diasAtras: 200, dose: 3, caso: 'histórico' },
+  ]
+
+  return PLANTADAS.map((item, indice) => {
+    const vacina = vacinasFixture.find((v) => v.id === item.vacinaId)
+    const data = addDays(hoje, -item.diasAtras)
+    const dentroDaSerie = vacina ? item.dose < vacina.dosesNaSerie : false
+
+    return {
+      id: `apl-${indice}-${item.petId}`,
+      petId: item.petId,
+      vacinaId: item.vacinaId,
+      /* Vacina é ato de quem aplica: fica com a clínica geral. */
+      professionalId: 'prof-ana',
+      aplicadaEm: iso(data, 9 * 60 + 30),
+      lote: `L${data.slice(0, 4)}-${String(indice + 1).padStart(3, '0')}`,
+      validadeLote: addDays(data, 540),
+      dose: item.dose,
+      via: 'subcutanea' as const,
+      proximaDoseEm: addDays(data, dentroDaSerie ? 28 : (vacina?.intervaloReforcoDias ?? 365)),
+      observacao: '',
+    }
+  })
+}
+
+/**
  * Internações na linha do tempo.
  *
  * O requisito nomeia internação ao lado de consultas, vacinas e exames — e ela não sai de um
@@ -1719,6 +1793,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     encounters,
     waitlist: montarFila(ancora),
     timeline: montarTimeline(encounters, comStatus),
+    aplicacoesDeVacina: aplicacoesDeVacinaPlantadas(clock.today()),
     casos,
     pets: petsFixture.map((pet) => ({ ...pet, alertas: [...pet.alertas] })),
     tutores: tutorsFixture.map((tutor) => ({ ...tutor })),

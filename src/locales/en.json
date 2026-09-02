@@ -1810,7 +1810,8 @@
       "cronico": "Chronic condition",
       "imunossuprimido": "Immunosuppressed",
       "gestante": "Pregnant",
-      "inadimplente": "Outstanding balance"
+      "inadimplente": "Outstanding balance",
+      "medicacao-continua": "Ongoing medication"
     },
     "severidade": {
       "info": "Info",
@@ -2340,7 +2341,7 @@
         "lote": "Batch",
         "fabricante": "Manufacturer",
         "proxima": "Next dose",
-        "ressalva": "Batch, manufacturer and booster date must be checked against the animal’s vaccination card. Without those fields completed, this document does not replace the card for travel purposes."
+        "ressalva": "Batch and manufacturer as recorded by this clinic. Vaccines given elsewhere must be checked against the animal's card."
       },
       "orcamento": {
         "titulo": "Estimate",
@@ -2742,6 +2743,21 @@
         "origem": "By the owner, {quando}",
         "aplicar": "Use answers",
         "pesoInformado": "Weight reported at home: {valor} — confirm on the scale"
+      },
+      "teclado": {
+        "titulo": "Record shortcuts",
+        "descricao": "The whole consultation without leaving the keyboard.",
+        "modo": "Fast entry",
+        "verTeclas": "View keys",
+        "acao": {
+          "campoSeguinte": "Next field",
+          "escolherOpcao": "Pick an option",
+          "entreOpcoes": "Between options",
+          "proximaEtapa": "Next step",
+          "etapaAnterior": "Previous step",
+          "focarPrimeiro": "Back to first field",
+          "ajuda": "This map"
+        }
       }
     },
     "pacientes": {
@@ -2889,6 +2905,37 @@
       "vistaDoResponsavel": "What the owner sees",
       "lembrete": "Becomes an app reminder: {quantidade}, {frequencia}",
       "lembreteContinuo": "Ongoing reminder, no end date"
+    },
+    "vacinas": {
+      "titulo": "Vaccines",
+      "subtitulo": "Who to call for a booster — the visit the clinic can prompt.",
+      "vazioTitulo": "No boosters due",
+      "vazioDescricao": "Every patient with a recorded vaccine is up to date.",
+      "colunaVacina": "Vaccine",
+      "colunaQuando": "Booster",
+      "ligar": "Call",
+      "agendar": "Book",
+      "obrigatoria": "Required",
+      "ligarHoje": "call today",
+      "proximosDias": "next 30 days",
+      "potencial": "Schedule to recover",
+      "potencialDetalhe": "estimated at 20 min per dose",
+      "doseSeguinte": "dose {dose} of the series",
+      "atrasadoDias": "{dias} d overdue",
+      "emDias": "in {dias} d",
+      "situacao": {
+        "vencido": "Overdue",
+        "proximo": "Due soon",
+        "serie-incompleta": "Series open",
+        "em-dia": "Up to date"
+      },
+      "registrar": "Record vaccine",
+      "lote": "Batch",
+      "validadeLote": "Batch expiry",
+      "dose": "Dose",
+      "aplicada": "Given",
+      "doseDeTotal": "{dose} of {total}",
+      "proximaEm": "Next dose on {data}"
     }
   },
   "cronometro": {
