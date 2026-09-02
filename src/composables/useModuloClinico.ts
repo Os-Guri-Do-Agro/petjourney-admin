@@ -27,11 +27,39 @@
  * se quer aqui, que é uma pessoa ligar na própria máquina, para a própria sessão de
  * demonstração, sem republicar nada. E persiste porque quem ligou não quer religar a cada
  * recarga da página no meio da apresentação.
+ *
+ * ## Por que o interruptor tem dono
+ *
+ * `localStorage` é do **navegador**, não da conta. Enquanto o valor gravado era apenas `true`,
+ * ele sobrevivia ao logout e à criação de uma conta nova na mesma máquina: quem ligasse o
+ * módulo uma vez para demonstrar continuava vendo as telas mocadas depois, com qualquer conta —
+ * e foi assim que elas apareceram numa conta recém-criada em produção.
+ *
+ * Por isso o que se grava é o **`userId` para quem o módulo foi ligado**, e não um booleano. O
+ * módulo só existe quando esse dono é o usuário da sessão atual. Renovação de token não mexe em
+ * nada (mesmo dono); logout apaga a sessão e o módulo some junto; outra conta na mesma máquina
+ * nasce sem ele, que é a regra que este arquivo existe para garantir.
+ *
+ * O caso de ligar **antes** de entrar (o link `?clinico=on` que cai na tela de login) grava
+ * `SEM_DONO`, e o primeiro usuário que entrar em seguida vira o dono. Sem isso, o link só
+ * funcionaria depois do login — e é justamente antes que ele é usado.
  */
 
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
+import { authSessionVersion, getAuthUser } from '@/service/auth/auth-session'
+
+/** Guarda o `userId` dono do desbloqueio; ausente significa desligado. */
 const CHAVE = 'clinic.moduleUnlocked'
+
+/**
+ * Ligado sem sessão: vale para quem entrar em seguida, e só para essa pessoa.
+ *
+ * Não é "vale para todo mundo": assim que alguém entra, o valor é reescrito com o `userId`
+ * dela. Deixá-lo como coringa permanente recriaria exatamente o vazamento que este arquivo
+ * corrige.
+ */
+const SEM_DONO = '*'
 /** Nome do parâmetro e da sequência. Curto o bastante para digitar sem errar. */
 export const PARAMETRO_DO_MODULO = 'clinico'
 const SEQUENCIA = 'clinico'
@@ -44,16 +72,16 @@ const SEQUENCIA = 'clinico'
  */
 export const ROTAS_DO_MODULO = ['/veterinario', '/design/clinico']
 
-function lerArmazenado(): boolean {
+function lerArmazenado(): string | null {
   if (typeof window === 'undefined') {
-    return false
+    return null
   }
 
   try {
-    return window.localStorage.getItem(CHAVE) === 'true'
+    return window.localStorage.getItem(CHAVE)
   } catch {
     /* Navegador com armazenamento bloqueado: o módulo simplesmente fica desligado. */
-    return false
+    return null
   }
 }
 
@@ -61,16 +89,22 @@ function lerArmazenado(): boolean {
  * Estado global do módulo, e não por componente: o menu, o guard de rota e a tela de ajustes
  * precisam ver o mesmo valor no mesmo instante.
  */
-const desbloqueado = ref(lerArmazenado())
+const dono = ref<string | null>(lerArmazenado())
 
-function gravar(valor: boolean) {
+function usuarioAtual(): string | null {
+  return getAuthUser()?.userId ?? null
+}
+
+function gravar(valor: string | null) {
+  dono.value = valor
+
   if (typeof window === 'undefined') {
     return
   }
 
   try {
     if (valor) {
-      window.localStorage.setItem(CHAVE, 'true')
+      window.localStorage.setItem(CHAVE, valor)
     } else {
       window.localStorage.removeItem(CHAVE)
     }
@@ -79,15 +113,45 @@ function gravar(valor: boolean) {
   }
 }
 
+/**
+ * `true` só quando o dono gravado é quem está na sessão agora.
+ *
+ * Depende de `authSessionVersion` de propósito: é o sinal que o `auth-session` emite a cada
+ * login, logout e troca de perfil, e sem ele o menu continuaria montado com o valor de antes
+ * até alguma outra coisa forçar o recálculo.
+ */
+const ativoParaSessao = computed(() => {
+  void authSessionVersion.value
+
+  if (!dono.value) {
+    return false
+  }
+
+  return dono.value === SEM_DONO || dono.value === usuarioAtual()
+})
+
+/**
+ * Promove o desbloqueio anônimo assim que alguém entra.
+ *
+ * É o que faz o link `?clinico=on` clicado na tela de login continuar valendo depois do login,
+ * sem que o desbloqueio fique valendo para todas as contas seguintes.
+ */
+watch(authSessionVersion, () => {
+  const usuario = usuarioAtual()
+
+  if (dono.value === SEM_DONO && usuario) {
+    gravar(usuario)
+  }
+})
+
 export function definirModuloClinico(valor: boolean) {
-  desbloqueado.value = valor
-  gravar(valor)
+  gravar(valor ? (usuarioAtual() ?? SEM_DONO) : null)
 }
 
 export function alternarModuloClinico() {
-  definirModuloClinico(!desbloqueado.value)
+  definirModuloClinico(!ativoParaSessao.value)
 
-  return desbloqueado.value
+  return ativoParaSessao.value
 }
 
 /**
@@ -181,8 +245,8 @@ export function instalarSequenciaSecreta(aoAtivar?: (ativo: boolean) => void) {
 
 export function useModuloClinico() {
   return {
-    /** `true` quando as telas clínicas devem existir para esta pessoa, nesta máquina. */
-    ativo: computed(() => desbloqueado.value),
+    /** `true` quando as telas clínicas devem existir para **esta conta**, nesta máquina. */
+    ativo: ativoParaSessao,
     definir: definirModuloClinico,
     alternar: alternarModuloClinico,
   }

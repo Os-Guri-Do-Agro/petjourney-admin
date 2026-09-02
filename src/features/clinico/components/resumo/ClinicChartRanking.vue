@@ -82,7 +82,15 @@ const opcoes = computed<ApexOptions>(() => {
       /* Num ranking a grade vertical é ruído: o que se compara é comprimento, não valor exato. */
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: false } },
-      padding: { top: -14, right: 44, bottom: -14, left: 0 },
+      /*
+       * `left` **não** pode ser zero, por mais que não haja grade a afastar.
+       *
+       * É esta folga que abriga o rótulo do eixo. Zerada, o Apex encosta a coluna de nomes na
+       * borda do SVG e a primeira letra de cada rótulo longo fica do lado de fora — o corte
+       * aparecia só em inglês, porque em português os nomes cabiam antes do limite e nunca
+       * chegavam à borda ("Chronic kidney disease" virava "hronic kidney disease").
+       */
+      padding: { top: -14, right: 44, bottom: -14, left: 10 },
     },
     legend: { show: false },
     states: tema.estados.value,

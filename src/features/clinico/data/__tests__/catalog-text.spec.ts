@@ -23,6 +23,7 @@ import { LOCALES, type Locale } from '@/i18n/locales'
 import { traduzirMedicamentos } from '../../domain/catalog-i18n'
 import { TEXTO_DO_CATALOGO, type TextoDoCatalogo } from '../fixtures/catalog-text'
 import { diagnosisCatalogFixture, examCatalogFixture } from '../fixtures/catalogs'
+import { appointmentTypesFixture, roomsFixture } from '../fixtures/clinic'
 import { medicationsFixture } from '../fixtures/medications'
 
 const IDIOMAS = LOCALES.filter((locale) => locale !== 'pt')
@@ -58,6 +59,25 @@ describe.each(IDIOMAS)('catálogo clínico em %s', (locale) => {
     const semNome = examCatalogFixture
       .filter((item) => !texto.exames[item.id])
       .map((item) => item.id)
+
+    expect(semNome).toEqual([])
+  })
+
+  it('nomeia todos os tipos de atendimento', () => {
+    /**
+     * Entrou depois dos outros, e a falta apareceu na tela: com o portal em inglês, o resumo
+     * da clínica listava "Emergência" e "Banho e tosa" ao lado de diagnósticos traduzidos.
+     * Tipo novo sem tradução volta a produzir exatamente isso, e é isto que falha primeiro.
+     */
+    const semNome = appointmentTypesFixture
+      .filter((item) => !texto.tipos[item.id])
+      .map((item) => item.id)
+
+    expect(semNome).toEqual([])
+  })
+
+  it('nomeia todas as salas', () => {
+    const semNome = roomsFixture.filter((item) => !texto.salas[item.id]).map((item) => item.id)
 
     expect(semNome).toEqual([])
   })

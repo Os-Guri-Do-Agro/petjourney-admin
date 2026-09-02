@@ -46,6 +46,16 @@ export type TextoDoCatalogo = {
   /** Nome do exame, por id. */
   exames: Record<string, string>
   medicamentos: Record<string, TextoDoMedicamento>
+  /**
+   * Nome do tipo de atendimento, por id.
+   *
+   * Traduzido por **id**, e não pelo `kind`, pela mesma razão dos exames: o nome é do
+   * catálogo, não do enum. Uma clínica que renomeie "Consulta" para "Consulta de rotina"
+   * mantém o próprio nome — a sobreposição só alcança o que ela conhece.
+   */
+  tipos: Record<string, string>
+  /** Nome da sala, por id. Aparece no agrupamento "por sala" da agenda. */
+  salas: Record<string, string>
 }
 
 // ---------------------------------------------------------------------------
@@ -77,6 +87,24 @@ const INGLES: TextoDoCatalogo = {
     'exame-ultrassom': 'Abdominal ultrasound',
     'exame-eco': 'Doppler echocardiogram',
     'exame-citologia': 'Skin cytology',
+  },
+  tipos: {
+    'tipo-consulta': 'Consultation',
+    'tipo-retorno': 'Follow-up',
+    'tipo-vacina': 'Vaccination',
+    'tipo-exame': 'Imaging exam',
+    'tipo-cirurgia': 'Surgery',
+    'tipo-banho': 'Grooming',
+    'tipo-emergencia': 'Emergency',
+  },
+  salas: {
+    'sala-1': 'Exam room 1',
+    'sala-2': 'Exam room 2',
+    'sala-3': 'Exam room 3',
+    'sala-cirurgia': 'Operating theatre',
+    'sala-recuperacao': 'Recovery',
+    'sala-banho': 'Grooming',
+    'sala-exame': 'Imaging',
   },
   medicamentos: {
     'med-amoxicilina': {
@@ -408,6 +436,24 @@ const ESPANHOL: TextoDoCatalogo = {
     'exame-ultrassom': 'Ecografía abdominal',
     'exame-eco': 'Ecocardiograma Doppler',
     'exame-citologia': 'Citología cutánea',
+  },
+  tipos: {
+    'tipo-consulta': 'Consulta',
+    'tipo-retorno': 'Revisión',
+    'tipo-vacina': 'Vacunación',
+    'tipo-exame': 'Examen de imagen',
+    'tipo-cirurgia': 'Cirugía',
+    'tipo-banho': 'Baño y peluquería',
+    'tipo-emergencia': 'Urgencia',
+  },
+  salas: {
+    'sala-1': 'Consultorio 1',
+    'sala-2': 'Consultorio 2',
+    'sala-3': 'Consultorio 3',
+    'sala-cirurgia': 'Quirófano',
+    'sala-recuperacao': 'Recuperación',
+    'sala-banho': 'Baño y peluquería',
+    'sala-exame': 'Imagen',
   },
   medicamentos: {
     'med-amoxicilina': {
@@ -774,6 +820,8 @@ const INGLES_BRITANICO: TextoDoCatalogo = {
   diagnosticos: mapear(INGLES.diagnosticos, britanizar),
   exames: mapear(INGLES.exames, britanizar),
   medicamentos: mapear(INGLES.medicamentos, britanizarMedicamento),
+  tipos: mapear(INGLES.tipos, britanizar),
+  salas: mapear(INGLES.salas, britanizar),
 }
 
 /**

@@ -18,7 +18,13 @@ import {
   type TextoDoCatalogo,
   type TextoDoMedicamento,
 } from '../data/fixtures/catalog-text'
-import type { DiagnosisCatalogItem, ExamCatalogItem, Medication } from '../data/types'
+import type {
+  AppointmentType,
+  DiagnosisCatalogItem,
+  ExamCatalogItem,
+  Medication,
+  Room,
+} from '../data/types'
 
 /** Lista traduzida só vale se disser o mesmo número de coisas que a original. */
 function lista(base: string[], traduzida: string[] | undefined): string[] {
@@ -63,6 +69,33 @@ export function traduzirExames(
   }
 
   return base.map((item) => ({ ...item, nome: texto.exames[item.id] ?? item.nome }))
+}
+
+/**
+ * Tipo de atendimento e sala.
+ *
+ * Entraram tarde, e o sintoma foi o esperado: com a tela em inglês, o resumo listava
+ * "Emergência" e "Banho e tosa" ao lado de diagnósticos já traduzidos. São catálogo como os
+ * outros — o nome vem do dado, não de uma chave de interface — e por isso são traduzidos aqui,
+ * na leitura, e não em cada tela que mostra um tipo.
+ */
+export function traduzirTipos(
+  base: AppointmentType[],
+  texto: TextoDoCatalogo | undefined,
+): AppointmentType[] {
+  if (!texto) {
+    return base
+  }
+
+  return base.map((item) => ({ ...item, nome: texto.tipos[item.id] ?? item.nome }))
+}
+
+export function traduzirSalas(base: Room[], texto: TextoDoCatalogo | undefined): Room[] {
+  if (!texto) {
+    return base
+  }
+
+  return base.map((item) => ({ ...item, nome: texto.salas[item.id] ?? item.nome }))
 }
 
 function traduzirMedicamento(base: Medication, texto: TextoDoMedicamento): Medication {

@@ -40,6 +40,8 @@ import {
   traduzirDiagnosticos,
   traduzirExames,
   traduzirMedicamentos,
+  traduzirSalas,
+  traduzirTipos,
 } from '../domain/catalog-i18n'
 import { createClinicClock } from '../domain/clinic-time'
 import { faixaEtariaDoPaciente, porteDoPaciente } from '../domain/porte'
@@ -53,8 +55,8 @@ export { CAPACIDADE_MINUTOS_POR_PROFISSIONAL } from '../domain/load'
 export const useClinicoStore = defineStore('clinico', () => {
   const clinic = ref<Clinic | null>(null)
   const profissionais = ref<Professional[]>([])
-  const salas = ref<Room[]>([])
-  const tipos = ref<AppointmentType[]>([])
+  const salasBase = ref<Room[]>([])
+  const tiposBase = ref<AppointmentType[]>([])
   /*
    * Bulário, diagnósticos e exames guardam o **português** e são traduzidos na leitura.
    *
@@ -79,6 +81,8 @@ export const useClinicoStore = defineStore('clinico', () => {
     traduzirDiagnosticos(diagnosticosBase.value, textoDoCatalogo.value),
   )
   const exames = computed(() => traduzirExames(examesBase.value, textoDoCatalogo.value))
+  const tipos = computed(() => traduzirTipos(tiposBase.value, textoDoCatalogo.value))
+  const salas = computed(() => traduzirSalas(salasBase.value, textoDoCatalogo.value))
   const pets = ref<Pet[]>([])
   const tutores = ref<Tutor[]>([])
 
@@ -109,8 +113,8 @@ export const useClinicoStore = defineStore('clinico', () => {
   function aplicar(catalogos: CatalogosClinicos) {
     clinic.value = catalogos.clinic
     profissionais.value = catalogos.profissionais
-    salas.value = catalogos.salas
-    tipos.value = catalogos.tipos
+    salasBase.value = catalogos.salas
+    tiposBase.value = catalogos.tipos
     medicamentosBase.value = catalogos.medicamentos
     diagnosticosBase.value = catalogos.diagnosticos
     examesBase.value = catalogos.exames

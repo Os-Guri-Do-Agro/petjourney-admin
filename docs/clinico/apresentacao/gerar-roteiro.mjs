@@ -224,7 +224,7 @@ const antes = [
   p('O módulo nasce **oculto** de propósito — ele não aparece para quem entra no portal normalmente. Para ligar, há dois caminhos:'),
   bullet('Acrescentar **?clinico=on** ao fim do endereço de qualquer tela do portal e dar Enter.'),
   bullet('Ou simplesmente **digitar a palavra “clinico”** com o portal aberto, fora de qualquer campo de texto.'),
-  p('O portal guarda essa escolha no navegador: uma vez ligado, continua ligado naquele computador.'),
+  p('O portal guarda essa escolha **para a conta que está logada**, naquele computador. Ou seja: ligue com a conta que você vai usar para apresentar. Se outra pessoa entrar na mesma máquina com a conta dela, o módulo volta a ficar invisível — que é o comportamento correto, e o motivo de ele nunca aparecer para um cliente por acidente.'),
   atencao('Confirme que os grupos **“Clínico”** e **“Pets”** apareceram no menu lateral **antes** de a plateia entrar na sala. Se não apareceram, o módulo não está ligado — e nenhuma tela deste roteiro existe.'),
 
   h2('2. Não apresentar num domingo'),
@@ -411,7 +411,7 @@ const planoB = [
   tabela(
     ['Se acontecer', 'O que fazer'],
     [
-      ['O menu “Clínico” não aparece', 'O módulo está desligado. Acrescente ?clinico=on ao endereço e recarregue. Se persistir, digite “clinico” com a tela aberta, fora de um campo de texto.'],
+      ['O menu “Clínico” não aparece', 'O módulo está desligado para esta conta. Acrescente ?clinico=on ao endereço e recarregue, ou digite “clinico” com a tela aberta, fora de um campo de texto. Confirme também que você está logado com a conta em que ligou.'],
       ['A agenda abre vazia', 'Verifique se é domingo. Se for, o ato 1 e o ato 2 não têm dado — pule direto para o prontuário, que funciona em qualquer dia.'],
       ['Uma tela demora ou trava', 'Recarregue a página (F5). Os dados são recriados na hora e nada se perde, porque nada está salvo em servidor.'],
       ['Errou um passo e a tela ficou em estado estranho', 'Recarregue. É a vantagem de rodar sobre dados de demonstração: o mundo volta ao início.'],
