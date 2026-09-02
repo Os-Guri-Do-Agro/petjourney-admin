@@ -135,11 +135,14 @@ A lista honesta, para não prometer o que não existe.
 
 - **Nenhuma API.** Tudo roda sobre a camada mocada; recarregar com outra semente recria o mundo
 - **Preços**: o orçamento sai com os itens e os valores em branco
-- **Lote, fabricante e validade de vacina**: o comprovante sai com esses campos em branco, e
-  isso o torna insuficiente para viagem
 - **Plano de saúde do paciente**: operadora e apólice são preenchidos à mão no relatório
 - **Microchip**
-- **Modo de digitação rápida só com teclado** (a agenda tem atalhos; o prontuário, não)
+
+> Duas linhas saíram desta lista depois que foram construídas: **lote, fabricante e validade de
+> vacina** (hoje o registro existe, e o comprovante sai preenchido) e o **modo de digitação
+> rápida no prontuário**. O que continua sem destino é o outro lado: nenhum desses campos de
+> vacina tem onde aterrissar na API — `model Vacina` guarda só nome e data
+> ([06-perguntas-ao-app.md](./06-perguntas-ao-app.md)).
 
 ---
 
@@ -153,9 +156,9 @@ produto, não de apresentação** — que é exatamente o que este requisito exi
 2. **O painel de casos difíceis é só de desenvolvimento** (`import.meta.env.DEV`). Num build
    publicado, os atalhos para os doze casos plantados somem — e alcançá-los passa a exigir
    navegar até cada um.
-3. **Vacinação não fecha o ciclo.** O roteiro do enunciado diz "atende, prescreve, **vacina**",
-   e vacina existe como tipo de atendimento e evento de histórico, mas não como **registro**:
-   não há tela de aplicar vacina com lote e reforço.
+3. ~~**Vacinação não fecha o ciclo.**~~ **Fechado.** O registro de aplicação (lote, fabricante,
+   validade, dose da série) e a lista de chamada de reforço em `/veterinario/vacinas` foram
+   construídos depois deste levantamento.
 4. **O consentimento não nasce onde deveria.** Ele é assinado antes do procedimento, e o lugar
    dele é a agenda, quando o tipo é cirurgia — hoje só existe para reimpressão no fim.
 
