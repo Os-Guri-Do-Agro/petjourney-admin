@@ -1546,7 +1546,13 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
                * de retorno, dois controles da conduta abriam em branco e ninguém via como eles
                * ficam preenchidos.
                */
-              examesSolicitados: ['Radiografia de quadril', 'Hemograma completo'],
+              /*
+               * **Id do catálogo, não o nome.** Estava gravando 'Radiografia de quadril' e
+               * 'Hemograma completo': o `MultiSelect` compara por `exame.id`, não achava opção
+               * nenhuma e desenhava duas fichas vazias — só o "x", sem texto. O nome do exame
+               * é o rótulo; a identidade é o id.
+               */
+              examesSolicitados: ['exame-raiox-quadril', 'exame-hemograma'],
               retorno: { emDias: 15, typeId: 'tipo-retorno', appointmentId: null },
             }
           : aberto.conduta,

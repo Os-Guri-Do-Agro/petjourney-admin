@@ -9,6 +9,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest'
 
+import { examCatalogFixture } from '../fixtures'
 import { getDataset, resetDataset } from '../store'
 
 describe('anamnese estruturada', () => {
@@ -100,5 +101,28 @@ describe('linha do tempo', () => {
     const tipos = new Set(getDataset().timeline.map((evento) => evento.kind))
 
     expect(tipos.size).toBeGreaterThanOrEqual(3)
+  })
+})
+
+describe('conduta: exames solicitados', () => {
+  beforeEach(() => {
+    resetDataset()
+  })
+
+  it('guarda id do catálogo, nunca o nome do exame', () => {
+    /**
+     * Um caso plantado gravava `'Radiografia de quadril'` no lugar de
+     * `'exame-raiox-quadril'`. O `MultiSelect` compara por id, não achava opção nenhuma e
+     * desenhava **fichas vazias** — só o botão de remover, sem texto. Não quebrava nada, não
+     * aparecia no console, e a tela ficava com dois chips fantasmas.
+     */
+    const dataset = getDataset()
+    const idsValidos = new Set(examCatalogFixture.map((exame) => exame.id))
+
+    for (const encounter of dataset.encounters) {
+      for (const exame of encounter.conduta.examesSolicitados) {
+        expect(idsValidos.has(exame), `exame "${exame}" fora do catálogo`).toBe(true)
+      }
+    }
   })
 })

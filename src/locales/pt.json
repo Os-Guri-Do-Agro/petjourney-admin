@@ -780,7 +780,13 @@
       "emptyFiltroBody": "Ajuste a busca ou o período. A busca alcança só o nome do pet.",
       "documentos": "{n} documentos",
       "diario": "Diário",
-      "resumoAtualizado": "Resumo atualizado em {data}"
+      "resumoAtualizado": "Resumo atualizado em {data}",
+      "encerradoEm": "Encerrado em {data}",
+      "status": {
+        "ATIVO": "Ativo",
+        "EXPIRADO": "Expirado",
+        "REVOGADO": "Revogado"
+      }
     },
     "servico": {
       "BANHO": "Banho",
@@ -1751,7 +1757,8 @@
       "anosMeses": "{anos}a {meses}m",
       "semvalor": "—",
       "dias": "{valor} dia | {valor} dias",
-      "idadeDesconhecida": "idade não informada"
+      "idadeDesconhecida": "idade não informada",
+      "kg": "kg"
     },
     "sexo": {
       "macho": "Macho",
@@ -2161,6 +2168,50 @@
         "atestado-comparecimento": {
           "titulo": "Atestado de comparecimento",
           "descricao": "Justifica a ausência do responsável durante o atendimento."
+        },
+        "pedido-exame": {
+          "titulo": "Pedido de exame",
+          "descricao": "Encaminha ao laboratório com a indicação clínica."
+        },
+        "orientacoes": {
+          "titulo": "Orientações ao responsável",
+          "descricao": "A folha que o responsável leva para casa."
+        },
+        "encaminhamento": {
+          "titulo": "Encaminhamento",
+          "descricao": "Carta de referência com o resumo do caso."
+        },
+        "relatorio-plano": {
+          "titulo": "Relatório para plano de saúde",
+          "descricao": "Justificativa clínica para reembolso."
+        },
+        "atestado-viagem": {
+          "titulo": "Atestado de saúde para viagem",
+          "descricao": "Exige antirrábica e vermifugação em dia."
+        },
+        "declaracao-obito": {
+          "titulo": "Declaração de óbito animal",
+          "descricao": "Necessária para cremação ou sepultamento."
+        },
+        "comprovante-vacinacao": {
+          "titulo": "Comprovante de vacinação",
+          "descricao": "Lote e fabricante ainda não são registrados."
+        },
+        "termo-consentimento": {
+          "titulo": "Termo de consentimento livre e esclarecido",
+          "descricao": "Assinado pelo responsável antes do procedimento."
+        },
+        "termo-recusa": {
+          "titulo": "Termo de recusa de tratamento",
+          "descricao": "Registra que a conduta indicada não foi autorizada."
+        },
+        "termo-eutanasia": {
+          "titulo": "Termo de autorização para eutanásia",
+          "descricao": "Exige assinatura e identificação do animal."
+        },
+        "orcamento": {
+          "titulo": "Orçamento",
+          "descricao": "Valores preenchidos pela clínica."
         }
       },
       "receita": {
@@ -2195,7 +2246,132 @@
         "comparecimento": {
           "titulo": "Atestado de comparecimento",
           "corpo": "Atesto, para os devidos fins, que {responsavel} esteve nesta clínica no dia {data}, das {entrada} às {saida}, acompanhando o animal {paciente} durante atendimento veterinário."
+        },
+        "viagem": {
+          "titulo": "Atestado de saúde para viagem",
+          "corpo": "Atesto que o animal {paciente}, da espécie {especie}, foi examinado nesta data ({data}) e não apresentou sinais clínicos de doença infectocontagiosa, encontrando-se apto ao transporte.",
+          "antirrabica": "Vacina antirrábica — data e lote",
+          "vermifugacao": "Vermifugação — data e produto",
+          "validade": "Validade exigida pelo destino"
         }
+      },
+      "pedidoExame": {
+        "titulo": "Pedido de exame",
+        "solicito": "Solicito os seguintes exames",
+        "indicacao": "Indicação clínica",
+        "coleta": "Orientações de coleta",
+        "jejum": "Manter jejum de 8 a 12 horas para os exames laboratoriais. Água à vontade.",
+        "contato": "Em caso de dúvida, contatar a clínica: {telefone}",
+        "vazio": "Nenhum exame solicitado neste atendimento.",
+        "grupo": {
+          "laboratorio": "laboratório",
+          "imagem": "imagem",
+          "outros": "outros"
+        }
+      },
+      "orientacoes": {
+        "titulo": "Orientações ao responsável",
+        "cuidados": "Cuidados em casa",
+        "medicacao": "Medicação",
+        "contInuo": "uso contínuo",
+        "retornoEm": "Retornar em {dias} dias, ou antes se houver piora.",
+        "procureTitulo": "Procure a clínica antes do retorno se observar",
+        "procureTexto": "Recusa alimentar por mais de 24 h, vômito ou diarreia persistentes, apatia acentuada, dificuldade para respirar, sangramento, convulsão, ou qualquer piora do quadro que motivou a consulta."
+      },
+      "encaminhamento": {
+        "titulo": "Encaminhamento",
+        "para": "Encaminho ao colega",
+        "paraDica": "Nome e especialidade do profissional ou serviço de destino",
+        "motivo": "Motivo do encaminhamento",
+        "achados": "Achados do exame",
+        "emUso": "Medicação em uso",
+        "solicito": "Solicito",
+        "disponivel": "Prontuário completo à disposição do colega mediante solicitação e autorização do responsável."
+      },
+      "termo": {
+        "detalhamento": "Descrição do procedimento",
+        "objetoIndefinido": "o procedimento indicado nesta data",
+        "consentimento": {
+          "titulo": "Termo de consentimento livre e esclarecido",
+          "declaracao": "Eu, {responsavel}, responsável pelo animal {paciente}, declaro que fui esclarecido(a) de forma clara sobre o procedimento indicado em razão de {objeto}, tendo sido informado(a) dos benefícios esperados, dos riscos envolvidos e das alternativas existentes. Autorizo sua realização pela equipe desta clínica.",
+          "itensTitulo": "Fui informado(a) de que",
+          "itens": "Todo procedimento com anestesia envolve risco, ainda que o paciente esteja estável e os exames pré-operatórios sejam normais.|Podem ocorrer complicações não previstas, exigindo mudança de conduta durante o ato.|Poderá ser necessário realizar procedimentos adicionais não previstos, para preservar a vida do animal.|Nenhum resultado foi garantido; o compromisso assumido é de meio, não de resultado.",
+          "ciencia": "Declaro que li este termo, que minhas dúvidas foram respondidas e que autorizo o procedimento de forma livre e esclarecida."
+        },
+        "recusa": {
+          "titulo": "Termo de recusa de tratamento",
+          "declaracao": "Eu, {responsavel}, responsável pelo animal {paciente}, declaro que fui esclarecido(a) sobre a conduta indicada pelo médico-veterinário em razão de {objeto}, e que, por decisão própria, NÃO autorizo sua realização.",
+          "itensTitulo": "Fui informado(a) de que",
+          "itens": "A recusa do tratamento indicado pode agravar o quadro do animal.|A recusa pode levar a sofrimento evitável e, em alguns casos, ao óbito.|A responsabilidade pelas consequências desta decisão é integralmente minha.|Posso reconsiderar esta decisão a qualquer momento e retornar à clínica.",
+          "ciencia": "Declaro que a recusa é decisão minha, tomada após esclarecimento, e isento a equipe desta clínica das consequências dela decorrentes."
+        },
+        "eutanasia": {
+          "titulo": "Termo de autorização para eutanásia",
+          "carimbo": "Documento de autorização — exige assinatura do responsável",
+          "declaracao": "Eu, {responsavel}, responsável pelo animal {paciente}, declaro que fui esclarecido(a) sobre o quadro clínico de {objeto}, sobre o prognóstico apresentado e sobre as alternativas de tratamento e de cuidados paliativos, e autorizo a realização da eutanásia.",
+          "itensTitulo": "Declaro estar ciente de que",
+          "itens": "A eutanásia é ato irreversível.|Fui informado(a) das alternativas existentes, incluindo cuidados paliativos.|A decisão foi tomada por mim, sem coação, após esclarecimento.|Sou o(a) responsável legal pelo animal identificado neste documento.",
+          "ciencia": "Declaro, sob minha responsabilidade, ser o(a) legítimo(a) responsável pelo animal aqui identificado e autorizo o procedimento."
+        }
+      },
+      "obito": {
+        "titulo": "Declaração de óbito animal",
+        "declaracao": "Declaro, para os devidos fins, que o animal {paciente}, da espécie {especie}, raça {raca}, sexo {sexo}, com {idade}, pertencente a {responsavel}, veio a óbito conforme os dados registrados abaixo.",
+        "quando": "Data e hora do óbito",
+        "hora": "Hora",
+        "causa": "Causa provável do óbito",
+        "semNecropsia": "Causa provável, estabelecida por avaliação clínica. Não foi realizada necropsia.",
+        "identificacao": "Identificação do animal",
+        "microchip": "Microchip",
+        "pelagem": "Pelagem e sinais particulares",
+        "destinacao": "Destinação do corpo",
+        "destino": {
+          "cremacao-individual": "Cremação individual",
+          "cremacao-coletiva": "Cremação coletiva",
+          "sepultamento": "Sepultamento",
+          "retirado": "Retirado pelo responsável"
+        }
+      },
+      "vacinacao": {
+        "titulo": "Comprovante de vacinação",
+        "declaracao": "Declaro que o animal {paciente} recebeu nesta clínica as vacinas abaixo.",
+        "vacina": "Vacina",
+        "lote": "Lote",
+        "fabricante": "Fabricante",
+        "proxima": "Próxima dose",
+        "ressalva": "Lote, fabricante e data de reforço devem ser conferidos na carteira de vacinação do animal. Documento sem esses campos preenchidos não substitui a carteira para fins de viagem."
+      },
+      "orcamento": {
+        "titulo": "Orçamento",
+        "carimbo": "Orçamento — não é autorização de procedimento",
+        "consulta": "Consulta",
+        "item": "Item",
+        "grupoColuna": "Tipo",
+        "valor": "Valor",
+        "total": "Total",
+        "grupo": {
+          "atendimento": "Atendimento",
+          "exame": "Exame",
+          "medicamento": "Medicamento"
+        },
+        "validade": "Orçamento válido por 15 dias a partir da data de emissão.",
+        "ressalva": "Valores estimados. Procedimentos adicionais identificados durante o atendimento serão informados antes da execução."
+      },
+      "relatorioPlano": {
+        "titulo": "Relatório para plano de saúde",
+        "operadora": "Operadora",
+        "apolice": "Apólice / carteirinha",
+        "quadro": "Quadro clínico",
+        "achados": "Achados objetivos",
+        "itens": "Itens e justificativa clínica",
+        "justificativa": "Justificativa"
+      },
+      "outros": "Outros documentos ({contagem})",
+      "grupo": {
+        "atendimento": "Do atendimento",
+        "declaracoes": "Declarações",
+        "termos": "Termos assinados pelo responsável",
+        "terceiros": "Para terceiros"
       }
     },
     "fila": {
@@ -2482,7 +2658,26 @@
           "titulo": "Agendar retorno",
           "descricao": "Horários livres com o mesmo profissional, a partir da data sugerida na conduta.",
           "emDias": "em {contagem} dia | em {contagem} dias"
-        }
+        },
+        "usoContinuo": "Uso contínuo",
+        "conta": {
+          "peso-por-dose": "1. {peso} kg × {mgPorKg} mg/kg = {mg} mg por administração",
+          "dose-por-concentracao": "2. {mg} mg ÷ {concentracao} mg = {quantidade} por administração",
+          "total": "3. {porDia}× ao dia × {dias} dias = {total} administrações"
+        },
+        "fracao": {
+          "inteiro": "{inteiros} comprimido inteiro por administração",
+          "meio": "Meio comprimido por administração",
+          "um-e-meio": "Um comprimido e meio por administração",
+          "quarto": "Um quarto de comprimido por administração",
+          "tres-quartos": "Três quartos de comprimido por administração",
+          "multiplo": "{quantidade} comprimidos por administração",
+          "aproximado": "{quantidade} comprimidos por administração",
+          "arredondado": "a conta deu {calculado}; confirme o arredondamento"
+        },
+        "aCadaHoras": "a cada {horas} h",
+        "porDias": "por {dias} dias",
+        "resumoQuantidade": "{quantidade} {unidade}"
       },
       "timeline": {
         "titulo": "Histórico",
@@ -2665,7 +2860,8 @@
       "semResultado": "Nenhum resultado para esta busca.",
       "cancelar": "Cancelar",
       "adicionar": "Adicionar",
-      "remover": "Remover"
+      "remover": "Remover",
+      "todos": "Todos"
     },
     "avisos": {
       "titulo": "Avisos enviados",
@@ -2676,6 +2872,22 @@
         "cancelamento": "Cancelamento",
         "oferta-de-vaga": "Oferta de vaga"
       }
+    },
+    "receita": {
+      "titulo": "Receita",
+      "emitir": "Assinar e emitir",
+      "enviar": "Enviar ao responsável",
+      "enviada": "Enviada ao responsável",
+      "repetir": "Repetir última receita",
+      "repetirDica": "Última receita assinada em {data}",
+      "assinadaPor": "Assinada eletronicamente por {nome}",
+      "codigo": "Código de verificação",
+      "validaAte": "Válida até {data}",
+      "controlada": "Controle especial · Portaria 344/98",
+      "semPrescricao": "Nenhuma prescrição para emitir.",
+      "vistaDoResponsavel": "Como o responsável vê",
+      "lembrete": "Vira lembrete no app: {quantidade}, {frequencia}",
+      "lembreteContinuo": "Lembrete contínuo, sem data de fim"
     }
   },
   "cronometro": {

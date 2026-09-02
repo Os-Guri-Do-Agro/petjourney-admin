@@ -10,7 +10,6 @@ import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBa
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerPanelLoading from '@/components/parceiro/PartnerPanelLoading.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
-import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import VincularCodigoDialog from '@/components/parceiro/VincularCodigoDialog.vue'
 import { useAgora } from '@/composables/useAgora'
 import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
@@ -25,7 +24,6 @@ import {
   type CompartilhamentoResumo,
   type EspeciePet,
   type OrdenacaoPacientes,
-  type StatusCompartilhamento,
   type TipoServicoPrestador,
 } from '@/service/parceiro/types'
 import { currentColors } from '@/theme/color-mode'
@@ -307,9 +305,16 @@ function servicoLabel(item: CompartilhamentoResumo) {
   return t(`acessos.servico.${item.tipoServico}`)
 }
 
-function expiraLabel(item: CompartilhamentoResumo) {
+/**
+ * Prazo do card: contagem regressiva enquanto o acesso vive, data de encerramento
+ * depois. No histórico a data solta com ícone de relógio parecia contagem viva;
+ * dizer "encerrado em" custa uma palavra e tira a dúvida.
+ */
+function prazoLabel(item: CompartilhamentoResumo) {
   if (item.status !== 'ATIVO') {
-    return new Date(item.expiraEm).toLocaleDateString(INTL_LOCALE[locale.value as Locale])
+    return t('acessos.list.encerradoEm', {
+      data: new Date(item.expiraEm).toLocaleDateString(INTL_LOCALE[locale.value as Locale]),
+    })
   }
 
   const restante = calcularTempoRestante(item.expiraEm, agora.value)
@@ -326,14 +331,21 @@ function expiraLabel(item: CompartilhamentoResumo) {
   }
 }
 
-function statusBadge(status: StatusCompartilhamento) {
-  const map: Record<StatusCompartilhamento, 'ATIVO' | 'SUSPENSO' | 'REJEITADO'> = {
-    ATIVO: 'ATIVO',
-    EXPIRADO: 'SUSPENSO',
-    REVOGADO: 'REJEITADO',
+/**
+ * Só o acesso que fecha hoje ganha âmbar. Pintar toda contagem de alerta fazia a
+ * lista inteira gritar, e aí nenhum card gritava.
+ */
+function prazoUrgente(item: CompartilhamentoResumo) {
+  if (item.status !== 'ATIVO') {
+    return false
   }
 
-  return map[status]
+  return calcularTempoRestante(item.expiraEm, agora.value).estado !== 'dias'
+}
+
+/** Ativo, expirado ou revogado — o que o parceiro precisa ler, sem apelido de auditoria. */
+function statusLabel(item: CompartilhamentoResumo) {
+  return t(`acessos.list.status.${item.status}`)
 }
 
 function openDetalhe(id: string) {
@@ -602,62 +614,90 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
       </div>
 
       <template v-else>
-        <div class="atend-list">
-          <button
-            v-for="item in items"
-            :key="item.id"
-            type="button"
-            class="atend-row"
-            @click="openDetalhe(item.id)"
-          >
-            <div class="atend-row__pet">
-              <img
-                v-if="item.petFoto"
-                :src="item.petFoto"
-                :alt="''"
-                class="atend-row__foto"
-                aria-hidden="true"
-              />
-              <span v-else class="atend-row__foto atend-row__foto--empty" aria-hidden="true">
-                <i class="pi pi-heart" />
+        <ul class="atend-list">
+          <li v-for="item in items" :key="item.id">
+            <!-- O cartão inteiro é o alvo: o parceiro clica no nome do pet, não
+                 num link escondido no canto. -->
+            <button
+              type="button"
+              class="atend-card"
+              :class="{ 'atend-card--encerrado': item.status !== 'ATIVO' }"
+              @click="openDetalhe(item.id)"
+            >
+              <span class="atend-card__foto" aria-hidden="true">
+                <img v-if="item.petFoto" :src="item.petFoto" alt="" />
+                <i v-else class="pi pi-heart" />
               </span>
-              <div>
-                <strong>{{ item.petNome }}</strong>
-                <p>{{ item.especieLabel }}</p>
-              </div>
-            </div>
 
-            <span class="atend-row__chip">{{ servicoLabel(item) }}</span>
+              <span class="atend-card__corpo">
+                <span class="atend-card__topo">
+                  <strong class="atend-card__nome">{{ item.petNome }}</strong>
+                  <span class="atend-card__especie">{{ item.especieLabel }}</span>
+                  <span class="atend-card__servico">{{ servicoLabel(item) }}</span>
+                </span>
 
-            <div class="atend-row__meta">
-              <span class="atend-row__expira">
-                <i class="pi pi-clock" aria-hidden="true" />
-                {{ expiraLabel(item) }}
-              </span>
-              <span class="atend-row__anotacoes">
-                <i class="pi pi-comment" aria-hidden="true" />
-                {{ t('acessos.list.anotacoes', { n: item.totalAnotacoes }) }}
-              </span>
-              <!-- Prontuário junto: decide a ordem de leitura antes de abrir. -->
-              <span v-if="item.totalDocumentos" class="atend-row__prontuario">
-                <i class="pi pi-file" aria-hidden="true" />
-                {{ t('acessos.list.documentos', { n: item.totalDocumentos }) }}
-              </span>
-              <span v-if="item.temDiario" class="atend-row__prontuario">
-                <i class="pi pi-book" aria-hidden="true" />
-                {{ t('acessos.list.diario') }}
-              </span>
-              <!-- O responsável mexeu depois de entregar: o que foi lido ontem
-                   pode não valer mais, e em estadia isso muda a conduta. -->
-              <span v-if="resumoAtualizado(item)" class="atend-row__atualizado">
-                <i class="pi pi-refresh" aria-hidden="true" />
-                {{ t('acessos.list.resumoAtualizado', { data: resumoAtualizado(item) }) }}
-              </span>
-            </div>
+                <!-- Fatos do acesso numa linha só: antes eram cinco frases
+                     empilhadas, todas do mesmo tamanho, e o card virava parágrafo. -->
+                <span class="atend-card__fatos">
+                  <span class="atend-fato" :class="{ 'atend-fato--prazo': prazoUrgente(item) }">
+                    <i
+                      class="pi"
+                      :class="item.status === 'ATIVO' ? 'pi-clock' : 'pi-calendar'"
+                      aria-hidden="true"
+                    />
+                    {{ prazoLabel(item) }}
+                  </span>
 
-            <PartnerStatusBadge :status="statusBadge(item.status)" />
-          </button>
-        </div>
+                  <!-- Contagens viram número com ícone; a frase inteira fica no
+                       rótulo acessível, que é onde ela ainda serve. -->
+                  <span
+                    class="atend-fato"
+                    :class="{ 'atend-fato--vazio': !item.totalAnotacoes }"
+                    :title="t('acessos.list.anotacoes', { n: item.totalAnotacoes })"
+                  >
+                    <i class="pi pi-comment" aria-hidden="true" />
+                    <span aria-hidden="true">{{ item.totalAnotacoes }}</span>
+                    <span class="atend-sr">
+                      {{ t('acessos.list.anotacoes', { n: item.totalAnotacoes }) }}
+                    </span>
+                  </span>
+
+                  <!-- Prontuário junto: decide a ordem de leitura antes de abrir. -->
+                  <span
+                    v-if="item.totalDocumentos"
+                    class="atend-fato atend-fato--conteudo"
+                    :title="t('acessos.list.documentos', { n: item.totalDocumentos })"
+                  >
+                    <i class="pi pi-file" aria-hidden="true" />
+                    <span aria-hidden="true">{{ item.totalDocumentos }}</span>
+                    <span class="atend-sr">
+                      {{ t('acessos.list.documentos', { n: item.totalDocumentos }) }}
+                    </span>
+                  </span>
+
+                  <span v-if="item.temDiario" class="atend-fato atend-fato--conteudo">
+                    <i class="pi pi-book" aria-hidden="true" />
+                    {{ t('acessos.list.diario') }}
+                  </span>
+
+                  <!-- O responsável mexeu depois de entregar: o que foi lido ontem
+                       pode não valer mais, e em estadia isso muda a conduta. -->
+                  <span v-if="resumoAtualizado(item)" class="atend-fato atend-fato--alerta">
+                    <i class="pi pi-refresh" aria-hidden="true" />
+                    {{ t('acessos.list.resumoAtualizado', { data: resumoAtualizado(item) }) }}
+                  </span>
+                </span>
+              </span>
+
+              <span class="atend-card__lado">
+                <span class="atend-card__status" :class="`atend-card__status--${item.status}`">
+                  {{ statusLabel(item) }}
+                </span>
+                <i class="pi pi-chevron-right atend-card__seta" aria-hidden="true" />
+              </span>
+            </button>
+          </li>
+        </ul>
 
         <div v-if="hasMore" class="atend-more">
           <Button
@@ -949,20 +989,24 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   line-height: 1.5;
 }
 
+/* Sequência de itens, não decoração: o leitor de tela anuncia quantos acessos há. */
 .atend-list {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.atend-row {
+.atend-card {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) auto minmax(0, 1fr) auto;
-  gap: 1rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.85rem;
   align-items: center;
   width: 100%;
-  padding: 0.8rem 1rem;
+  padding: 0.7rem 0.9rem;
   border: 1px solid var(--partner-line);
-  border-radius: 0.95rem;
+  border-radius: 0.9rem;
   background: var(--partner-card);
   color: inherit;
   font: inherit;
@@ -971,101 +1015,207 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease,
-    transform 0.15s ease;
+    background 0.15s ease;
 }
 
-.atend-row:hover,
-.atend-row:focus-visible {
+.atend-card:hover,
+.atend-card:focus-visible {
   border-color: var(--partner-primary-strong);
-  box-shadow: 0 10px 22px rgb(var(--partner-shadow-rgb) / 0.08);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgb(var(--partner-shadow-rgb) / 0.08);
 }
 
-.atend-row:focus-visible {
+.atend-card:focus-visible {
   outline: 2px solid var(--partner-primary);
   outline-offset: 2px;
 }
 
-.atend-row__pet {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  min-width: 0;
-}
-
-.atend-row__foto {
-  width: 2.6rem;
-  height: 2.6rem;
-  flex: 0 0 auto;
-  border-radius: 0.8rem;
-  object-fit: cover;
-}
-
-.atend-row__foto--empty {
+.atend-card__foto {
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--partner-primary) 15%, var(--partner-card));
+  overflow: hidden;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--partner-primary) 14%, var(--partner-card));
   color: var(--partner-primary-strong);
 }
 
-.atend-row__pet strong {
-  display: block;
+.atend-card__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.atend-card__corpo {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+/* Identidade numa linha só: nome, espécie e serviço andam juntos. O chip solto
+   no meio do card não pertencia a nada. */
+.atend-card__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.atend-card__nome {
   overflow: hidden;
+  max-width: 100%;
   color: var(--partner-text);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.atend-row__pet p {
-  margin: 0.1rem 0 0;
-  color: var(--partner-muted);
+.atend-card__especie {
+  color: var(--partner-faint);
   font-size: 0.78rem;
 }
 
-.atend-row__chip {
-  display: inline-flex;
-  padding: 0.26rem 0.6rem;
+.atend-card__servico {
+  padding: 0.14rem 0.5rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 14%, var(--partner-card));
+  background: color-mix(in srgb, var(--partner-primary) 13%, var(--partner-card));
   color: var(--partner-primary-strong);
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
-.atend-row__meta {
-  display: grid;
-  gap: 0.25rem;
+/* Os fatos do acesso correm na horizontal e quebram sozinhos. Empilhados, cinco
+   frases do mesmo peso viravam parágrafo e o card crescia sem dizer mais. */
+.atend-card__fatos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.4rem;
   min-width: 0;
 }
 
-.atend-row__expira,
-.atend-row__anotacoes,
-.atend-row__prontuario,
-.atend-row__atualizado {
+.atend-fato {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
+  padding: 0.16rem 0.45rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--partner-surface) 70%, var(--partner-card));
   color: var(--partner-muted);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.atend-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.atend-fato i {
+  font-size: 0.72rem;
+}
+
+/* Zero anotações continua sendo informação, mas não merece o mesmo peso de uma. */
+.atend-fato--vazio {
+  color: var(--partner-faint);
+  font-weight: 500;
 }
 
 /* Indicador de conteúdo: informa, não alarma. */
-.atend-row__prontuario {
+.atend-fato--conteudo {
+  background: color-mix(in srgb, var(--partner-primary) 10%, var(--partner-card));
   color: var(--partner-primary-strong);
-  font-weight: 650;
+}
+
+/* Âmbar só no acesso que fecha hoje; ver a lista inteira em alerta era o mesmo
+   que não ter alerta nenhum. */
+.atend-fato--prazo {
+  background: var(--partner-amber-bg);
+  color: var(--partner-amber-text);
 }
 
 /* O resumo mudou depois da entrega: precisa saltar mais que os demais. */
-.atend-row__atualizado {
+.atend-fato--alerta {
+  background: var(--partner-warm-bg);
   color: var(--partner-warm-text);
-  font-weight: 650;
+  white-space: normal;
 }
 
-.atend-row__expira {
-  color: var(--partner-amber-text);
-  font-weight: 650;
+.atend-card__lado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.atend-card__status {
+  padding: 0.24rem 0.58rem;
+  border: 1px solid var(--partner-line);
+  border-radius: 999px;
+  background: var(--partner-surface);
+  color: var(--partner-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.atend-card__status--ATIVO {
+  background: var(--partner-success-bg);
+  color: var(--partner-success-text);
+}
+
+.atend-card__status--REVOGADO {
+  background: var(--partner-warm-bg);
+  color: var(--partner-warm-text);
+}
+
+.atend-card__seta {
+  color: var(--partner-faint);
+  font-size: 0.78rem;
+}
+
+/* Encerrado é a mesma forma em tom apagado: o histórico se lê como arquivo e não
+   deve competir com um acesso vivo na aba ao lado. O hover devolve o contraste
+   para deixar claro que o card ainda abre. */
+.atend-card--encerrado {
+  border-color: color-mix(in srgb, var(--partner-line) 72%, transparent);
+  background: color-mix(in srgb, var(--partner-surface) 62%, var(--partner-card));
+}
+
+.atend-card--encerrado .atend-card__servico,
+.atend-card--encerrado .atend-fato {
+  background: color-mix(in srgb, var(--partner-surface) 45%, var(--partner-card));
+  color: var(--partner-muted);
+}
+
+.atend-card--encerrado .atend-fato--alerta {
+  background: var(--partner-warm-bg);
+  color: var(--partner-warm-text);
+}
+
+.atend-card--encerrado .atend-card__foto img {
+  filter: saturate(0.7);
+  opacity: 0.85;
+}
+
+.atend-card--encerrado:hover,
+.atend-card--encerrado:focus-visible {
+  background: var(--partner-card);
+}
+
+.atend-card--encerrado:hover .atend-card__foto img,
+.atend-card--encerrado:focus-visible .atend-card__foto img {
+  filter: none;
+  opacity: 1;
 }
 
 .atend-more {
@@ -1074,32 +1224,17 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   padding-top: 0.25rem;
 }
 
-@media (max-width: 860px) {
-  .atend-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      'pet badge'
-      'chip meta';
-    row-gap: 0.6rem;
+@media (max-width: 720px) {
+  .atend-card {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 0.55rem;
   }
 
-  .atend-row__pet {
-    grid-area: pet;
-  }
-
-  .atend-row__chip {
-    grid-area: chip;
-    justify-self: start;
-  }
-
-  .atend-row__meta {
-    grid-area: meta;
-    justify-items: end;
-  }
-
-  .atend-row > :last-child {
-    grid-area: badge;
-    justify-self: end;
+  /* Sem espaço para a coluna da direita, o status desce alinhado ao conteúdo e a
+     seta segura a borda: a linha continua legível como rodapé do card. */
+  .atend-card__lado {
+    grid-column: 2;
+    justify-content: space-between;
   }
 }
 </style>

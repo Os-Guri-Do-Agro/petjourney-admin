@@ -486,7 +486,15 @@ export type DoseCalc = {
   /** Volume ou número de comprimidos, conforme a apresentação. */
   quantidadeApresentacao: number
   frequenciaHoras: number
-  duracaoDias: number
+  /**
+   * Duração em dias, ou `null` para **uso contínuo**.
+   *
+   * Contínuo não é "duração muito longa": é a ausência de data de fim. Representá-lo como 365
+   * dias faria a receita vencer sozinha e o lembrete do responsável parar num dia arbitrário —
+   * num anti-hipertensivo, parar é o efeito adverso.
+   */
+  duracaoDias: number | null
+  /** Zero quando o uso é contínuo: não há total a somar. */
   totalAdministracoes: number
 }
 
@@ -536,6 +544,58 @@ export type PreConsulta = {
   pesoInformadoKg: number | null
   /** Texto livre do responsável, na íntegra e sem edição. */
   observacao: string
+}
+
+// ---------------------------------------------------------------------------
+// Receituário
+// ---------------------------------------------------------------------------
+
+/**
+ * Assinatura eletrônica da receita.
+ *
+ * Nome e conselho são **congelados no momento da assinatura**, e não lidos do cadastro na hora
+ * de exibir. A receita é documento: se o profissional trocar de conselho ou sair da clínica no
+ * ano que vem, o papel emitido hoje continua tendo de dizer quem assinou hoje.
+ */
+export type AssinaturaEletronica = {
+  professionalId: string
+  nome: string
+  /** CRMV, como estava no cadastro no instante da assinatura. */
+  conselho: string
+  assinadoEm: ISODateTime
+  /**
+   * Código verificador. É o que a farmácia confere e o que o responsável vê no app.
+   *
+   * No protótipo é derivado de forma determinística; na API real será o resumo criptográfico
+   * do documento assinado. A forma na tela é a mesma, e é o que importa agora.
+   */
+  codigo: string
+}
+
+export type ReceitaStatus = 'rascunho' | 'assinada' | 'enviada'
+
+export type Receita = {
+  id: string
+  encounterId: string
+  petId: string
+  tutorId: string
+  /** Cópia das prescrições no instante da emissão — a receita não muda se a conduta mudar. */
+  prescricoes: Prescription[]
+  status: ReceitaStatus
+  emitidaEm: ISODateTime
+  /**
+   * Validade da receita.
+   *
+   * Receita comum vale 30 dias; a de controle especial (Portaria 344/98) também, mas com
+   * retenção da via na farmácia. Sem validade impressa, a farmácia recusa — e o responsável
+   * volta à clínica por um papel, não por um atendimento.
+   */
+  validaAte: ISODate
+  /** `true` quando qualquer item é controlado: muda a folha e a retenção. */
+  controlada: boolean
+  assinatura: AssinaturaEletronica | null
+  /** Quando foi entregue ao responsável no app. */
+  enviadaEm: ISODateTime | null
 }
 
 export type EncounterStatus = 'rascunho' | 'finalizado'

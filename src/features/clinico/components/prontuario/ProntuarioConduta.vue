@@ -37,6 +37,7 @@ import {
   calcularDose,
   faixaDeReferencia,
 } from '../../domain/dose'
+import { fracionar, passosDaConta, type PassoDaConta } from '../../domain/receita'
 import { useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{
@@ -56,6 +57,11 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
+
+/** Escrito como variável CSS porque quem desenha o rótulo é uma regra global (ver tokens). */
+const rotuloTodos = computed(() => ({
+  '--clinic-rotulo-todos': JSON.stringify(t('clinico.comum.todos')),
+}))
 
 const opcoesExames = computed(() =>
   clinico.exames.map((exame) => ({ valor: exame.id, rotulo: exame.nome })),
@@ -267,6 +273,49 @@ function aplicarEscolhaDoBulario(escolha: {
   })
 }
 
+/**
+ * Os passos da conta, para o vet conferir de cabeça.
+ *
+ * O requisito é explícito: *"a conta precisa aparecer, não só o resultado"*. Um número pronto
+ * num campo não se confere — e conferir de cabeça é o que impede o erro de vírgula de virar
+ * erro de paciente.
+ */
+function contaDaPrescricao(prescricao: Prescription) {
+  const medicamento = clinico.medicamento(prescricao.medicamentoId)
+
+  return medicamento ? passosDaConta(prescricao.calculo, medicamento) : []
+}
+
+function textoDoPasso(passo: PassoDaConta) {
+  return t(`clinico.prontuario.conduta.conta.${passo.kind}`, passo.params)
+}
+
+/**
+ * Como a quantidade é dita a quem vai dar o remédio.
+ *
+ * "0,5 comprimido" é resultado de divisão; ninguém parte um comprimido em 0,5. O responsável
+ * precisa de "meio comprimido" — e o vet precisa saber quando a conta **não** cai numa fração
+ * que dê para partir na mão, porque essa decisão é dele.
+ */
+function fracionamentoDe(prescricao: Prescription) {
+  const medicamento = clinico.medicamento(prescricao.medicamentoId)
+
+  if (!medicamento) {
+    return null
+  }
+
+  return fracionar(prescricao.calculo.quantidadeApresentacao, medicamento.unidadeApresentacao)
+}
+
+/** Uso contínuo: sem data de fim. Não é duração longa — é a ausência de duração. */
+function ehContinuo(prescricao: Prescription) {
+  return prescricao.calculo.duracaoDias === null
+}
+
+function alternarContinuo(prescricao: Prescription) {
+  recalcular(prescricao, { duracaoDias: ehContinuo(prescricao) ? 7 : null })
+}
+
 function resumoDaDose(prescricao: Prescription) {
   const medicamento = clinico.medicamento(prescricao.medicamentoId)
 
@@ -322,7 +371,17 @@ function resumoDaDose(prescricao: Prescription) {
           display="chip"
           fluid
           :disabled="somenteLeitura"
-          :pt="{ overlay: { class: 'clinic-overlay' } }"
+          :pt="{
+            overlay: {
+              class: 'clinic-overlay',
+              /*
+               * O rótulo 'Todos' do seletor de tudo chega por variável CSS, com o texto já
+               * traduzido: o overlay é teleportado para fora do escopo e a regra que o desenha
+               * é global, então ela não tem como saber o idioma da tela.
+               */
+              style: rotuloTodos,
+            },
+          }"
           @update:model-value="aplicar({ examesSolicitados: $event ?? [] })"
         />
       </template>
@@ -406,6 +465,23 @@ function resumoDaDose(prescricao: Prescription) {
               />
             </template>
           </ClinicField>
+
+          <!--
+            Remover mora **na linha**, não flutuando sobre ela.
+            Antes era `position: absolute` no canto do cartão: caía por cima do rótulo "Via" e
+            encostava no seletor. Como terceira coluna, ele ganha a própria faixa e desce até a
+            altura dos campos, alinhado com eles.
+          -->
+          <Button
+            v-if="!somenteLeitura"
+            icon="pi pi-trash"
+            severity="danger"
+            text
+            class="prescricao__remover"
+            :aria-label="t('clinico.prontuario.diagnostico.remover')"
+            :title="t('clinico.prontuario.diagnostico.remover')"
+            @click="removerPrescricao(prescricao.id)"
+          />
         </div>
 
         <div class="prescricao__linha prescricao__linha--numeros">
@@ -437,19 +513,73 @@ function resumoDaDose(prescricao: Prescription) {
 
           <ClinicField :rotulo="t('clinico.prontuario.conduta.duracao')">
             <template #default="{ id }">
-              <InputNumber
-                :input-id="id"
-                :model-value="prescricao.calculo.duracaoDias"
-                :disabled="somenteLeitura"
-                fluid
-                @update:model-value="recalcular(prescricao, { duracaoDias: $event ?? 1 })"
-              />
+              <div class="duracao">
+                <InputNumber
+                  :input-id="id"
+                  :model-value="prescricao.calculo.duracaoDias"
+                  :disabled="somenteLeitura || ehContinuo(prescricao)"
+                  :placeholder="ehContinuo(prescricao) ? '—' : undefined"
+                  fluid
+                  @update:model-value="recalcular(prescricao, { duracaoDias: $event ?? 1 })"
+                />
+
+                <!--
+                  Uso contínuo é um estado, não um número grande. Anti-hipertensivo com "365
+                  dias" faz a receita vencer sozinha e o lembrete do responsável parar num dia
+                  arbitrário — e, num contínuo, parar é o efeito adverso.
+                -->
+                <button
+                  type="button"
+                  class="duracao__continuo clinic-focusable"
+                  :class="{ 'duracao__continuo--ativo': ehContinuo(prescricao) }"
+                  :aria-pressed="ehContinuo(prescricao)"
+                  :disabled="somenteLeitura"
+                  @click="alternarContinuo(prescricao)"
+                >
+                  {{ t('clinico.prontuario.conduta.usoContinuo') }}
+                </button>
+              </div>
             </template>
           </ClinicField>
         </div>
 
+        <!--
+          A conta, aberta. Cada linha é um passo que o vet confere de cabeça; é aqui que um erro
+          de concentração aparece antes de a receita sair impressa.
+        -->
+        <ol v-if="contaDaPrescricao(prescricao).length > 0" class="conta">
+          <li v-for="(passo, indice) in contaDaPrescricao(prescricao)" :key="indice">
+            {{ textoDoPasso(passo) }}
+          </li>
+        </ol>
+
         <!-- A dose por extenso: é isto que se lê em voz alta para o responsável. -->
         <p class="prescricao__resumo clinic-value">{{ resumoDaDose(prescricao) }}</p>
+
+        <!--
+          Fracionamento em palavra, não em decimal. E quando a conta não cai numa fração
+          partível, a tela diz — em vez de imprimir 0,37 comprimido e deixar a decisão para
+          quem está segurando o animal.
+        -->
+        <p v-if="fracionamentoDe(prescricao)" class="fracao" :class="{ 'fracao--aproximada': fracionamentoDe(prescricao)!.aproximado }">
+          <i
+            :class="fracionamentoDe(prescricao)!.aproximado ? 'pi pi-exclamation-circle' : 'pi pi-check-circle'"
+            aria-hidden="true"
+          />
+          <span>
+            {{
+              t(`clinico.prontuario.conduta.fracao.${fracionamentoDe(prescricao)!.kind}`, {
+                inteiros: fracionamentoDe(prescricao)!.inteiros,
+                quantidade: formato.numero(fracionamentoDe(prescricao)!.quantidade, 2),
+              })
+            }}
+            <template v-if="fracionamentoDe(prescricao)!.aproximado">
+              — {{ t('clinico.prontuario.conduta.fracao.arredondado', {
+                calculado: formato.numero(prescricao.calculo.quantidadeApresentacao, 2),
+              }) }}
+            </template>
+          </span>
+        </p>
 
         <ClinicAlertChip
           v-if="avisoDaDose(prescricao)"
@@ -499,17 +629,6 @@ function resumoDaDose(prescricao: Prescription) {
             <span>{{ t('clinico.prontuario.conduta.alergiaConfirmar') }}</span>
           </label>
         </div>
-
-        <Button
-          v-if="!somenteLeitura"
-          icon="pi pi-trash"
-          severity="danger"
-          text
-          size="small"
-          class="prescricao__remover"
-          :aria-label="t('clinico.prontuario.diagnostico.remover')"
-          @click="removerPrescricao(prescricao.id)"
-        />
       </article>
     </section>
 
@@ -599,7 +718,6 @@ function resumoDaDose(prescricao: Prescription) {
 }
 
 .prescricao {
-  position: relative;
   display: grid;
   gap: var(--clinic-space-3);
   padding: var(--clinic-space-4);
@@ -614,12 +732,79 @@ function resumoDaDose(prescricao: Prescription) {
 
 .prescricao__linha {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
   gap: var(--clinic-space-3);
 }
 
+/* A linha de números não tem o botão de remover: três colunas iguais e nada mais. */
 .prescricao__linha--numeros {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.duracao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--clinic-space-2);
+}
+
+.duracao__continuo {
+  min-height: var(--clinic-hit-target);
+  padding: 0 var(--clinic-space-3);
+  border: 1px solid var(--clinic-line-strong);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface);
+  color: var(--clinic-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.duracao__continuo--ativo {
+  border-color: var(--clinic-accent-strong);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+}
+
+.duracao__continuo:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/*
+ * A conta em passos numerados: a numeração aqui **é** informação — é a ordem em que se confere,
+ * e cada linha depende da anterior.
+ */
+.conta {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0;
+  padding: var(--clinic-space-2) var(--clinic-space-3) var(--clinic-space-2) var(--clinic-space-5);
+  border: 1px dashed var(--clinic-line-strong);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+.fracao {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--clinic-ok-text);
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+/* Arredondamento é decisão do vet: aparece em tom de atenção, não como confirmação. */
+.fracao--aproximada {
+  color: var(--clinic-attention-text);
 }
 
 .prescricao__resumo {
@@ -632,10 +817,13 @@ function resumoDaDose(prescricao: Prescription) {
   line-height: 1.5;
 }
 
+/*
+ * Alinhado com os campos, não com os rótulos: `end` desce o botão até a base da linha, que é
+ * onde os seletores estão. Alinhado ao topo, ele ficaria na altura do texto "Via".
+ */
 .prescricao__remover {
-  position: absolute;
-  top: var(--clinic-space-2);
-  right: var(--clinic-space-2);
+  align-self: end;
+  margin-bottom: 1px;
 }
 
 .alergia {

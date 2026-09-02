@@ -71,13 +71,18 @@ const alertasOrdenados = computed(() => {
 
 <template>
   <header v-if="pet" class="paciente" :class="{ 'paciente--compacto': compacto }">
-    <div class="paciente__avatar" :aria-hidden="true">{{ pet.iniciais }}</div>
+    <!--
+      O quadro é o que estica; o avatar dentro dele tira a largura da própria altura.
+      Duas camadas porque `aspect-ratio` precisa de uma dimensão **definida** para derivar a
+      outra — e a altura de um item de flex esticado só fica definida depois do layout. Com o
+      quadro assumindo o esticamento, o avatar recebe uma altura concreta e vira quadrado.
+    -->
+    <div class="paciente__quadro">
+      <div class="paciente__avatar" :aria-hidden="true">{{ pet.iniciais }}</div>
+    </div>
 
     <div class="paciente__corpo">
-      <div class="paciente__topo">
-        <h2 class="paciente__nome" :title="pet.nome">{{ pet.nome }}</h2>
-        <span class="paciente__peso clinic-value">{{ formato.peso(pet.pesoKg) }}</span>
-      </div>
+      <h2 class="paciente__nome" :title="pet.nome">{{ pet.nome }}</h2>
 
       <p class="paciente__meta">
         <span v-for="(item, indice) in meta" :key="item">
@@ -104,8 +109,22 @@ const alertasOrdenados = computed(() => {
       </ul>
     </div>
 
-    <div v-if="$slots.acoes" class="paciente__acoes">
-      <slot name="acoes" />
+    <!--
+      Trilho da direita: **dado em cima, ação embaixo**, com uma divisória entre os dois.
+      Antes o peso morava na linha do nome, mas o nome tem `flex: 1 1 auto` e cresce — o
+      resultado era "6,4 kg" empurrado até a borda direita, encostado no botão. Peso é o
+      número mais consultado do cabeçalho (toda dose sai dele) e estava com o peso visual de
+      uma legenda, colado numa ação.
+    -->
+    <div v-if="!compacto || $slots.acoes" class="paciente__trilho">
+      <div v-if="pet.pesoKg !== null" class="peso">
+        <span class="peso__valor clinic-value">{{ formato.numero(pet.pesoKg, 1) }}</span>
+        <span class="peso__unidade">{{ t('clinico.formato.kg') }}</span>
+      </div>
+
+      <div v-if="$slots.acoes" class="paciente__acoes">
+        <slot name="acoes" />
+      </div>
     </div>
   </header>
 </template>
@@ -131,24 +150,48 @@ const alertasOrdenados = computed(() => {
   border-radius: var(--clinic-radius-control);
 }
 
+/*
+ * O avatar **acompanha a altura do bloco de informação** ao lado.
+ *
+ * Quadrado fixo, ele flutuava alinhado ao topo enquanto o corpo do cartão descia por quatro
+ * linhas — nome, meta, responsável e alertas —, e a borda inferior do cartão não encontrava
+ * nada do lado esquerdo. Esticado, ele fecha a coluna: o olho lê um bloco, não um marcador
+ * solto acima de um vazio.
+ *
+ * `align-self: stretch` só funciona sem altura declarada; o piso fica no `min-height`, para o
+ * caso de o cartão ter uma linha só.
+ */
+/* O quadro não desenha nada: só carrega o esticamento para o avatar ter altura definida. */
+.paciente__quadro {
+  flex: 0 0 auto;
+  align-self: stretch;
+  min-height: 3.6rem;
+}
+
 .paciente__avatar {
   display: grid;
-  width: 2.9rem;
-  height: 2.9rem;
-  flex: 0 0 auto;
+  height: 100%;
+  /* A largura sai da altura: o bloco é quadrado seja qual for o tamanho do cartão. */
+  aspect-ratio: 1;
   place-items: center;
-  border-radius: 0.9rem;
+  border-radius: 1.1rem;
   background: var(--clinic-accent-tint);
+  /* Contorno interno: dá borda ao bloco sem escurecer o fundo nem inventar outra cor. */
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--clinic-accent-strong) 22%, transparent);
   color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-value);
+  font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: 0.02em;
 }
 
+/* No drawer o cartão tem menos linhas, então o avatar volta a acompanhá-las. */
+.paciente--compacto .paciente__quadro {
+  min-height: 2.6rem;
+}
+
 .paciente--compacto .paciente__avatar {
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 0.7rem;
+  border-radius: 0.8rem;
+  font-size: var(--clinic-font-value);
 }
 
 .paciente__corpo {
@@ -159,33 +202,14 @@ const alertasOrdenados = computed(() => {
 }
 
 /*
- * `flex-wrap` aqui não é enfeite: em cartão de ~20rem o nome longo empurrava o peso para
- * fora da borda e ele sumia. Quando não cabe na mesma linha, o peso desce — e continua
- * legível, que é o que importa.
- */
-.paciente__topo {
-  display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 var(--clinic-space-3);
-}
-
-/*
  * Nome longo ganha duas linhas e quebra onde precisar. Sem isto, "Maximiliano Bartholomeu von
- * Schnauzerhausen III" empurra o peso e as ações para fora da coluna em 1024.
+ * Schnauzerhausen III" empurra o trilho da direita para fora da coluna em 1024.
  */
 .paciente__nome {
   display: -webkit-box;
   overflow: hidden;
   min-width: 0;
   margin: 0;
-  /*
-   * Base `auto` deixa o nome pedir a largura do seu próprio texto. Nome curto divide a linha
-   * com o peso; nome longo empurra o peso para a linha de baixo, inteiro, em vez de deixá-lo
-   * ser cortado pela borda do cartão.
-   */
-  flex: 1 1 auto;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -202,11 +226,41 @@ const alertasOrdenados = computed(() => {
   font-size: var(--clinic-font-value);
 }
 
-.paciente__peso {
+/* ------------------------------------------------------------------- trilho direito */
+
+.paciente__trilho {
+  display: flex;
   flex: 0 0 auto;
-  color: var(--clinic-muted);
-  font-weight: 700;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--clinic-space-2);
+}
+
+/*
+ * O peso como valor clínico, não como legenda: número grande e unidade pequena ao lado, no
+ * mesmo tratamento que o módulo dá a qualquer medição. É dele que sai toda dose.
+ */
+.peso {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
   white-space: nowrap;
+}
+
+.peso__valor {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.peso__unidade {
+  color: var(--clinic-faint);
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+}
+
+.paciente--compacto .peso__valor {
+  font-size: 1.05rem;
 }
 
 .paciente__meta {
@@ -262,12 +316,20 @@ const alertasOrdenados = computed(() => {
   list-style: none;
 }
 
+/* A divisória separa o que se lê do que se clica. Sem ela os dois viram um bloco só. */
 .paciente__acoes {
   display: flex;
-  flex: 0 0 auto;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--clinic-space-2);
+  padding-top: var(--clinic-space-2);
+  border-top: 1px solid var(--clinic-line);
+}
+
+/* Sem peso não há o que separar: a divisória sobraria como um traço solto. */
+.paciente__trilho > .paciente__acoes:first-child {
+  padding-top: 0;
+  border-top: 0;
 }
 
 /*
@@ -279,21 +341,34 @@ const alertasOrdenados = computed(() => {
  * Fica no fim da folha de propósito: precisa vencer o `flex: 1 1 auto` declarado acima, e as
  * duas regras têm a mesma especificidade.
  */
+/*
+ * Estreito: o trilho desce e vira uma faixa horizontal — peso à esquerda, ações à direita.
+ *
+ * Empilhado à direita numa coluna de 26 rem ele espremia o corpo do cartão e o nome quebrava
+ * em três linhas. Como faixa, os dois continuam legíveis e a divisória passa a separar o
+ * trilho do resto do cartão — que é a mesma leitura, na horizontal.
+ *
+ * A consulta é de **contêiner**, não de janela: o cabeçalho aparece no prontuário em coluna
+ * larga e no drawer de 320 px, e é a largura recebida que decide, não o tamanho da tela.
+ */
 @container (max-width: 26rem) {
-  .paciente__nome {
-    flex: 1 1 100%;
-  }
-}
-
-/* Em 768 as ações caem para baixo em vez de espremer o nome. */
-@media (max-width: 768px) {
   .paciente {
     flex-wrap: wrap;
   }
 
-  .paciente__acoes {
+  .paciente__trilho {
     width: 100%;
-    justify-content: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--clinic-space-2);
+    border-top: 1px solid var(--clinic-line);
+  }
+
+  /* A divisória subiu para o trilho: repeti-la nas ações desenharia duas linhas. */
+  .paciente__acoes {
+    padding-top: 0;
+    border-top: 0;
   }
 }
 </style>

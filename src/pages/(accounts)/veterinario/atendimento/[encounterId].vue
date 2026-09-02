@@ -30,17 +30,29 @@ import ProntuarioConduta from '@/features/clinico/components/prontuario/Prontuar
 import ProntuarioDiagnostico from '@/features/clinico/components/prontuario/ProntuarioDiagnostico.vue'
 import ProntuarioExameFisico from '@/features/clinico/components/prontuario/ProntuarioExameFisico.vue'
 import DocumentoAtestado from '@/features/clinico/components/documentos/DocumentoAtestado.vue'
+import DocumentoEncaminhamento from '@/features/clinico/components/documentos/DocumentoEncaminhamento.vue'
+import DocumentoObito from '@/features/clinico/components/documentos/DocumentoObito.vue'
+import DocumentoOrcamento from '@/features/clinico/components/documentos/DocumentoOrcamento.vue'
+import DocumentoOrientacoes from '@/features/clinico/components/documentos/DocumentoOrientacoes.vue'
+import DocumentoPedidoExame from '@/features/clinico/components/documentos/DocumentoPedidoExame.vue'
 import DocumentoReceituario from '@/features/clinico/components/documentos/DocumentoReceituario.vue'
-import type { DocumentoId } from '@/features/clinico/components/documentos/documento-types'
+import DocumentoRelatorioPlano from '@/features/clinico/components/documentos/DocumentoRelatorioPlano.vue'
+import DocumentoTermo from '@/features/clinico/components/documentos/DocumentoTermo.vue'
+import DocumentoVacinacao from '@/features/clinico/components/documentos/DocumentoVacinacao.vue'
+import type {
+  DocumentoId,
+  TermoKind,
+} from '@/features/clinico/components/documentos/documento-types'
 import ProntuarioImpressao from '@/features/clinico/components/prontuario/ProntuarioImpressao.vue'
 import ProntuarioPreConsulta from '@/features/clinico/components/prontuario/ProntuarioPreConsulta.vue'
+import ProntuarioReceita from '@/features/clinico/components/prontuario/ProntuarioReceita.vue'
 import ProntuarioResumo from '@/features/clinico/components/prontuario/ProntuarioResumo.vue'
 import ProntuarioRetornoDialog from '@/features/clinico/components/prontuario/ProntuarioRetornoDialog.vue'
 import ProntuarioStepper from '@/features/clinico/components/prontuario/ProntuarioStepper.vue'
 import ProntuarioTimeline from '@/features/clinico/components/prontuario/ProntuarioTimeline.vue'
 import type { PassoProntuario } from '@/features/clinico/components/prontuario/step-types'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
-import type { SlotSugestao } from '@/features/clinico/data/types'
+import type { Prescription, SlotSugestao } from '@/features/clinico/data/types'
 import type { EtapaId } from '@/features/clinico/domain/encounter-progress'
 import {
   alergiaNaoConfirmada,
@@ -284,6 +296,26 @@ async function assumir() {
  */
 const documentoParaImprimir = ref<DocumentoId>('prontuario')
 
+/** Qual termo, quando é um termo. `null` para todo o resto. */
+const termoParaImprimir = computed<TermoKind | null>(() => {
+  const mapa: Partial<Record<DocumentoId, TermoKind>> = {
+    'termo-consentimento': 'consentimento',
+    'termo-recusa': 'recusa',
+    'termo-eutanasia': 'eutanasia',
+  }
+
+  return mapa[documentoParaImprimir.value] ?? null
+})
+
+/** Os três atestados dividem componente; o `else` do teleporte cai aqui. */
+const tipoDoAtestado = computed<'saude' | 'comparecimento' | 'viagem'>(() => {
+  if (documentoParaImprimir.value === 'atestado-comparecimento') {
+    return 'comparecimento'
+  }
+
+  return documentoParaImprimir.value === 'atestado-viagem' ? 'viagem' : 'saude'
+})
+
 async function emitirDocumento(documento: DocumentoId) {
   documentoParaImprimir.value = documento
 
@@ -305,6 +337,28 @@ function salvarEmPdf() {
  * aviso de retorno pendente na tela para sempre, mesmo depois de marcarem o retorno à mão.
  */
 const retornoAberto = ref(false)
+
+/**
+ * Repetir a receita anterior.
+ *
+ * As prescrições chegam já copiadas e com ids novos; aqui elas só entram na conduta de hoje.
+ * **Acrescenta** em vez de substituir: quem repete o contínuo do mês passado costuma estar
+ * prescrevendo algo novo por cima, e apagar o que já foi digitado seria perder trabalho.
+ */
+function repetirReceita(prescricoes: Prescription[]) {
+  const atual = encounter.value
+
+  if (!atual) {
+    return
+  }
+
+  prontuario.atualizar({
+    conduta: {
+      ...atual.conduta,
+      prescricoes: [...atual.conduta.prescricoes, ...prescricoes],
+    },
+  })
+}
 
 function agendarRetorno() {
   retornoAberto.value = true
@@ -502,6 +556,18 @@ onBeforeUnmount(() => {
             @agendar-retorno="agendarRetorno"
           />
 
+          <!--
+            A emissão fica **abaixo** da conduta, na mesma etapa: assinar é o último ato do
+            atendimento, e separá-lo numa etapa própria faria a receita virar uma tarefa que
+            se esquece de fazer.
+          -->
+          <ProntuarioReceita
+            v-if="etapa === 'conduta'"
+            :encounter="encounter"
+            :somente-leitura="prontuario.somenteLeitura"
+            @repetir="repetirReceita"
+          />
+
           <ProntuarioResumo
             v-else
             :encounter="encounter"
@@ -630,12 +696,66 @@ onBeforeUnmount(() => {
           :pet="prontuario.pet"
           :tutor="prontuario.tutor"
         />
+        <DocumentoPedidoExame
+          v-else-if="documentoParaImprimir === 'pedido-exame'"
+          :encounter="encounter"
+          :pet="prontuario.pet"
+          :tutor="prontuario.tutor"
+        />
+        <DocumentoOrientacoes
+          v-else-if="documentoParaImprimir === 'orientacoes'"
+          :encounter="encounter"
+          :pet="prontuario.pet"
+          :tutor="prontuario.tutor"
+        />
+        <DocumentoEncaminhamento
+          v-else-if="documentoParaImprimir === 'encaminhamento'"
+          :encounter="encounter"
+          :pet="prontuario.pet"
+          :tutor="prontuario.tutor"
+        />
+        <DocumentoRelatorioPlano
+          v-else-if="documentoParaImprimir === 'relatorio-plano'"
+          :encounter="encounter"
+          :pet="prontuario.pet"
+          :tutor="prontuario.tutor"
+        />
+        <DocumentoObito
+          v-else-if="documentoParaImprimir === 'declaracao-obito'"
+          :encounter="encounter"
+          :pet="prontuario.pet"
+          :tutor="prontuario.tutor"
+        />
+        <DocumentoVacinacao
+          v-else-if="documentoParaImprimir === 'comprovante-vacinacao'"
+          :encounter="encounter"
+          :pet="prontuario.pet"
+          :tutor="prontuario.tutor"
+          :eventos="prontuario.timeline"
+        />
+        <DocumentoOrcamento
+          v-else-if="documentoParaImprimir === 'orcamento'"
+          :encounter="encounter"
+          :pet="prontuario.pet"
+          :tutor="prontuario.tutor"
+        />
+        <!--
+          Os três termos compartilham componente: a estrutura é a mesma — texto declaratório e
+          duas assinaturas —, e o que muda é a gravidade do texto, que vem do `kind`.
+        -->
+        <DocumentoTermo
+          v-else-if="termoParaImprimir"
+          :encounter="encounter"
+          :pet="prontuario.pet"
+          :tutor="prontuario.tutor"
+          :kind="termoParaImprimir"
+        />
         <DocumentoAtestado
           v-else
           :encounter="encounter"
           :pet="prontuario.pet"
           :tutor="prontuario.tutor"
-          :tipo="documentoParaImprimir === 'atestado-saude' ? 'saude' : 'comparecimento'"
+          :tipo="tipoDoAtestado"
         />
       </div>
     </Teleport>

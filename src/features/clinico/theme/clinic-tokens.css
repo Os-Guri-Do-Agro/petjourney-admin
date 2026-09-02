@@ -392,6 +392,29 @@
   color: var(--clinic-muted);
 }
 
+/*
+ * "Todos" ao lado do seletor de tudo do `MultiSelect`.
+ *
+ * O PrimeVue desenha ali um checkbox **sem rótulo nenhum**: uma caixa solta no topo da lista,
+ * que ninguém sabe o que faz até clicar e ver as nove opções marcarem de uma vez.
+ *
+ * Não dá para resolver pelo slot `header` — ele renderiza **antes** desta linha, não dentro
+ * dela. E o overlay é teleportado para fora de `.clinic-scope`, então a regra tem de ser
+ * global. O texto chega por variável, escrita pelo componente com o `t()` já resolvido: CSS
+ * não traduz, e um "Todos" cravado aqui apareceria em português numa tela em espanhol.
+ */
+.clinic-overlay .p-multiselect-header::after {
+  content: var(--clinic-rotulo-todos, '');
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.clinic-overlay .p-multiselect-header {
+  gap: var(--clinic-space-2);
+}
+
 /* Diálogo do módulo: o painel também é teleportado e também precisa pintar o próprio fundo. */
 /*
  * Diálogo do módulo: o painel também é teleportado e também precisa pintar o próprio fundo.

@@ -21,7 +21,8 @@ export type DoseInput = {
   pesoKg: number | null
   mgPorKg: number
   frequenciaHoras: number
-  duracaoDias: number
+  /** `null` para uso contínuo: não há data de fim, e portanto não há total a somar. */
+  duracaoDias: number | null
   /** Espécie do paciente. Sem ela a conferência cai na faixa geral do bulário. */
   especie?: PetSpecies | null
 }
@@ -52,7 +53,14 @@ export function calcularDose(input: DoseInput): DoseCalc | null {
     quantidadeApresentacao: quantidade,
     frequenciaHoras,
     duracaoDias,
-    totalAdministracoes: Math.max(1, Math.round(administracoesPorDia * Math.max(duracaoDias, 0))),
+    /*
+     * Uso contínuo não tem total. Somar administrações de algo sem data de fim produziria um
+     * número inventado — e um número inventado numa receita é indistinguível de um conferido.
+     */
+    totalAdministracoes:
+      duracaoDias === null
+        ? 0
+        : Math.max(1, Math.round(administracoesPorDia * Math.max(duracaoDias, 0))),
   }
 }
 

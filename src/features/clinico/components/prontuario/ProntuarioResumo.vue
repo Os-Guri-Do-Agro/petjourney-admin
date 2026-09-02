@@ -16,7 +16,7 @@
  *   farmácia.
  */
 import Button from 'primevue/button'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicAlertChip from '../base/ClinicAlertChip.vue'
@@ -120,35 +120,196 @@ const exames = computed(() =>
   ),
 )
 
-const documentos = computed(() => [
+/**
+ * O catálogo de documentos, com **grupo** e **quando sugerir**.
+ *
+ * Quinze cartões iguais numa grade era uma tela de busca desenhada como tela de navegação: o
+ * profissional chega sabendo o que quer, e varria quinze para achar o de sempre. Pior, dava o
+ * mesmo peso visual ao que sai de toda consulta e ao que sai de uma em cem — com
+ * "Declaração de óbito" ao lado de "Receituário" numa consulta de rotina, o que além de
+ * confuso é tonalmente errado.
+ *
+ * Agora o que **este atendimento implica** vem em cartão, e o resto fica numa lista agrupada,
+ * recolhida. `sugerido` é a regra que decide de que lado cada um cai.
+ */
+const catalogo = computed(() => [
   {
     id: 'prontuario' as DocumentoId,
     icone: 'pi pi-file',
+    grupo: 'atendimento' as const,
     disponivel: true,
+    /* O registro em si: sempre pertinente. */
+    sugerido: true,
     detalhe: '',
   },
   {
     id: 'receituario' as DocumentoId,
     icone: 'pi pi-book',
+    grupo: 'atendimento' as const,
     disponivel: prescricoes.value.length > 0,
+    sugerido: prescricoes.value.length > 0,
     detalhe: temControlado.value ? t('clinico.documentos.cartao.receituarioControle') : '',
   },
   {
     id: 'atestado-saude' as DocumentoId,
     icone: 'pi pi-verified',
+    grupo: 'declaracoes' as const,
     disponivel: true,
+    /* Atestado sai a pedido do responsável, não por implicação do atendimento. */
+    sugerido: false,
     detalhe: '',
   },
   {
     id: 'atestado-comparecimento' as DocumentoId,
     icone: 'pi pi-clock',
+    grupo: 'declaracoes' as const,
     disponivel: true,
+    sugerido: false,
     detalhe: formato.intervalo(
       props.encounter.abertoEm,
       props.encounter.finalizadoEm ?? props.encounter.abertoEm,
     ),
   },
+
+  // ------------------------------------------------ recortes do prontuário
+  {
+    id: 'pedido-exame' as DocumentoId,
+    icone: 'pi pi-search',
+    grupo: 'atendimento' as const,
+    /* Sem exame pedido, a folha sairia com uma lista vazia — pior que botão ausente. */
+    disponivel: props.encounter.conduta.examesSolicitados.length > 0,
+    sugerido: props.encounter.conduta.examesSolicitados.length > 0,
+    detalhe: '',
+  },
+  {
+    id: 'orientacoes' as DocumentoId,
+    icone: 'pi pi-home',
+    grupo: 'atendimento' as const,
+    disponivel:
+      Boolean(props.encounter.conduta.orientacoes.trim()) || prescricoes.value.length > 0,
+    sugerido:
+      Boolean(props.encounter.conduta.orientacoes.trim()) || prescricoes.value.length > 0,
+    detalhe: '',
+  },
+  {
+    id: 'encaminhamento' as DocumentoId,
+    icone: 'pi pi-send',
+    grupo: 'terceiros' as const,
+    disponivel: true,
+    sugerido: false,
+    detalhe: '',
+  },
+  {
+    id: 'relatorio-plano' as DocumentoId,
+    icone: 'pi pi-shield',
+    grupo: 'terceiros' as const,
+    disponivel: true,
+    sugerido: false,
+    detalhe: '',
+  },
+
+  // ------------------------------------------------ declarações
+  {
+    id: 'atestado-viagem' as DocumentoId,
+    icone: 'pi pi-globe',
+    grupo: 'declaracoes' as const,
+    disponivel: true,
+    sugerido: false,
+    detalhe: '',
+  },
+  {
+    id: 'comprovante-vacinacao' as DocumentoId,
+    icone: 'pi pi-shield',
+    grupo: 'declaracoes' as const,
+    disponivel: true,
+    /*
+     * Não sugerido: o prontuário não sabe se hoje houve vacina — o tipo do atendimento mora
+     * no agendamento, não aqui. Sugerir por engano seria pior que deixar na lista.
+     */
+    sugerido: false,
+    detalhe: '',
+  },
+  {
+    id: 'declaracao-obito' as DocumentoId,
+    icone: 'pi pi-heart',
+    grupo: 'termos' as const,
+    disponivel: true,
+    /* Nunca sugerido. Oferecer isto numa consulta de rotina é indelicado e assustador. */
+    sugerido: false,
+    detalhe: '',
+  },
+
+  // ------------------------------------------------ termos do responsável
+  {
+    id: 'termo-consentimento' as DocumentoId,
+    icone: 'pi pi-check-square',
+    grupo: 'termos' as const,
+    disponivel: true,
+    /*
+     * O consentimento é assinado **antes** do procedimento, a partir da agenda — não no fim do
+     * atendimento. Aqui ele fica disponível para reimpressão, não sugerido.
+     */
+    sugerido: false,
+    detalhe: '',
+  },
+  {
+    id: 'termo-recusa' as DocumentoId,
+    icone: 'pi pi-times-circle',
+    grupo: 'termos' as const,
+    disponivel: true,
+    sugerido: false,
+    detalhe: '',
+  },
+  {
+    id: 'termo-eutanasia' as DocumentoId,
+    icone: 'pi pi-file-edit',
+    grupo: 'termos' as const,
+    disponivel: true,
+    sugerido: false,
+    detalhe: '',
+  },
+
+  // ------------------------------------------------ administrativo
+  {
+    id: 'orcamento' as DocumentoId,
+    icone: 'pi pi-dollar',
+    grupo: 'terceiros' as const,
+    disponivel: true,
+    sugerido: false,
+    detalhe: '',
+  },
 ])
+
+/** O que este atendimento implica. Cartão grande, no topo. */
+const sugeridos = computed(() =>
+  catalogo.value.filter((documento) => documento.sugerido && documento.disponivel),
+)
+
+/**
+ * Todo o resto, agrupado.
+ *
+ * Os grupos são por **quem recebe o papel**, e não por tipo de documento: atendimento (fica na
+ * clínica ou vai com o responsável), declarações (afirmam um fato a terceiros), termos (o
+ * responsável assina) e terceiros (colega, plano, laboratório). É a divisão que o profissional
+ * usa para procurar.
+ */
+const GRUPOS = ['atendimento', 'declaracoes', 'termos', 'terceiros'] as const
+
+const outros = computed(() =>
+  GRUPOS.map((grupo) => ({
+    grupo,
+    documentos: catalogo.value.filter(
+      (documento) => documento.grupo === grupo && !sugeridos.value.includes(documento),
+    ),
+  })).filter((item) => item.documentos.length > 0),
+)
+
+const totalDeOutros = computed(() =>
+  outros.value.reduce((total, item) => total + item.documentos.length, 0),
+)
+
+/** Recolhido por padrão: o caminho comum são os sugeridos, e ele não pode custar uma rolagem. */
+const outrosAbertos = ref(false)
 
 const dataDoAtendimento = computed(() =>
   clinicClock.dateOf(props.encounter.finalizadoEm ?? props.encounter.abertoEm),
@@ -249,22 +410,18 @@ const dataDoAtendimento = computed(() =>
         <p>{{ t('clinico.documentos.ajuda') }}</p>
       </header>
 
+      <!--
+        Sugeridos: o que **este** atendimento implica. Três ou quatro, em cartão, porque é o
+        caminho de nove em cada dez vezes e não pode custar um clique a mais.
+      -->
       <div class="documentos__grade">
-        <article
-          v-for="documento in documentos"
-          :key="documento.id"
-          class="documento"
-          :class="{ 'documento--indisponivel': !documento.disponivel }"
-        >
+        <article v-for="documento in sugeridos" :key="documento.id" class="documento">
           <span class="documento__icone" aria-hidden="true"><i :class="documento.icone" /></span>
 
           <div class="documento__corpo">
             <strong>{{ t(`clinico.documentos.cartao.${documento.id}.titulo`) }}</strong>
             <small>{{ t(`clinico.documentos.cartao.${documento.id}.descricao`) }}</small>
             <small v-if="documento.detalhe" class="documento__detalhe">{{ documento.detalhe }}</small>
-            <small v-if="!documento.disponivel" class="documento__bloqueio">
-              {{ t('clinico.documentos.cartao.semPrescricao') }}
-            </small>
           </div>
 
           <Button
@@ -273,11 +430,61 @@ const dataDoAtendimento = computed(() =>
             size="small"
             severity="secondary"
             outlined
-            :disabled="!documento.disponivel"
             :label="t('clinico.documentos.emitir')"
             @click="emit('emitir', documento.id)"
           />
         </article>
+      </div>
+
+      <!--
+        O resto atrás de uma dobra. Lista densa em vez de cartão: são onze, e onze cartões
+        empurram o resumo do atendimento para fora da tela — sendo que o resumo é o motivo de a
+        etapa existir.
+      -->
+      <div class="outros">
+        <button
+          type="button"
+          class="outros__gatilho clinic-focusable"
+          :aria-expanded="outrosAbertos"
+          @click="outrosAbertos = !outrosAbertos"
+        >
+          <i
+            class="pi"
+            :class="outrosAbertos ? 'pi-chevron-down' : 'pi-chevron-right'"
+            aria-hidden="true"
+          />
+          {{ t('clinico.documentos.outros', { contagem: totalDeOutros }) }}
+        </button>
+
+        <div v-if="outrosAbertos" class="outros__grupos">
+          <section v-for="bloco in outros" :key="bloco.grupo" class="grupo">
+            <h5 class="grupo__titulo clinic-label">
+              {{ t(`clinico.documentos.grupo.${bloco.grupo}`) }}
+            </h5>
+
+            <ul class="grupo__lista">
+              <li v-for="documento in bloco.documentos" :key="documento.id">
+                <!--
+                  A linha inteira é o botão: o alvo é a largura da lista, não um ícone de
+                  impressora no fim dela.
+                -->
+                <button
+                  type="button"
+                  class="linha clinic-focusable"
+                  :disabled="!documento.disponivel"
+                  @click="emit('emitir', documento.id)"
+                >
+                  <i :class="documento.icone" class="linha__icone" aria-hidden="true" />
+                  <span class="linha__corpo">
+                    <strong>{{ t(`clinico.documentos.cartao.${documento.id}.titulo`) }}</strong>
+                    <small>{{ t(`clinico.documentos.cartao.${documento.id}.descricao`) }}</small>
+                  </span>
+                  <i class="pi pi-print linha__acao" aria-hidden="true" />
+                </button>
+              </li>
+            </ul>
+          </section>
+        </div>
       </div>
 
       <p class="documentos__nota">
@@ -451,6 +658,127 @@ const dataDoAtendimento = computed(() =>
 .documento__bloqueio {
   color: var(--clinic-attention-text) !important;
   font-weight: 650;
+}
+
+/* ------------------------------------------------------------- outros documentos */
+
+.outros {
+  display: grid;
+  gap: var(--clinic-space-3);
+}
+
+.outros__gatilho {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--clinic-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--clinic-font-label);
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.outros__gatilho:hover {
+  color: var(--clinic-text);
+}
+
+.outros__gatilho i {
+  font-size: 0.6rem;
+}
+
+.outros__grupos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: var(--clinic-space-4);
+}
+
+.grupo__titulo {
+  margin: 0 0 var(--clinic-space-2);
+}
+
+.grupo__lista {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Linha densa: um documento ocupa a altura de duas linhas de texto, não a de um cartão. É o que
+ * permite onze caberem sem rolagem e sem esconder o resumo.
+ */
+.linha {
+  display: grid;
+  width: 100%;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--clinic-space-3);
+  padding: var(--clinic-space-2) var(--clinic-space-3);
+  border: 1px solid transparent;
+  border-radius: var(--clinic-radius-control);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.linha:hover:not(:disabled) {
+  border-color: var(--clinic-line);
+  background: var(--clinic-surface-soft);
+}
+
+.linha:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.linha__icone {
+  color: var(--clinic-accent-strong);
+  font-size: 0.8rem;
+}
+
+.linha__corpo {
+  display: grid;
+  min-width: 0;
+  gap: 0.05rem;
+}
+
+.linha__corpo strong {
+  font-size: var(--clinic-font-base);
+  font-weight: 700;
+}
+
+.linha__corpo small {
+  color: var(--clinic-faint);
+  font-size: var(--clinic-font-label);
+  line-height: 1.35;
+}
+
+/* O ícone de impressora só aparece no alvo focado: em onze linhas viraria textura. */
+.linha__acao {
+  color: var(--clinic-faint);
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.linha:hover .linha__acao,
+.linha:focus-visible .linha__acao {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .linha__acao {
+    opacity: 1;
+  }
 }
 
 .documentos__nota {

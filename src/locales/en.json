@@ -780,7 +780,13 @@
       "emptyFiltroBody": "Adjust the search or the period. The search only covers the pet name.",
       "documentos": "{n} documents",
       "diario": "Diary",
-      "resumoAtualizado": "Summary updated on {data}"
+      "resumoAtualizado": "Summary updated on {data}",
+      "encerradoEm": "Ended on {data}",
+      "status": {
+        "ATIVO": "Active",
+        "EXPIRADO": "Expired",
+        "REVOGADO": "Revoked"
+      }
     },
     "servico": {
       "BANHO": "Bath",
@@ -1751,7 +1757,8 @@
       "anosMeses": "{anos}y {meses}m",
       "semvalor": "—",
       "dias": "{valor} day | {valor} days",
-      "idadeDesconhecida": "age unknown"
+      "idadeDesconhecida": "age unknown",
+      "kg": "kg"
     },
     "sexo": {
       "macho": "Male",
@@ -2161,6 +2168,50 @@
         "atestado-comparecimento": {
           "titulo": "Attendance certificate",
           "descricao": "Justifies the owner absence during the visit."
+        },
+        "pedido-exame": {
+          "titulo": "Test request",
+          "descricao": "Sent to the lab with the clinical indication."
+        },
+        "orientacoes": {
+          "titulo": "Home care instructions",
+          "descricao": "The sheet the owner takes home."
+        },
+        "encaminhamento": {
+          "titulo": "Referral",
+          "descricao": "Referral letter with the case summary."
+        },
+        "relatorio-plano": {
+          "titulo": "Insurance report",
+          "descricao": "Clinical justification for reimbursement."
+        },
+        "atestado-viagem": {
+          "titulo": "Health certificate for travel",
+          "descricao": "Requires rabies vaccine and deworming up to date."
+        },
+        "declaracao-obito": {
+          "titulo": "Certificate of death",
+          "descricao": "Required for cremation or burial."
+        },
+        "comprovante-vacinacao": {
+          "titulo": "Vaccination record",
+          "descricao": "Batch and manufacturer not yet recorded."
+        },
+        "termo-consentimento": {
+          "titulo": "Informed consent form",
+          "descricao": "Signed by the owner before the procedure."
+        },
+        "termo-recusa": {
+          "titulo": "Treatment refusal form",
+          "descricao": "Records that the advised treatment was declined."
+        },
+        "termo-eutanasia": {
+          "titulo": "Euthanasia authorisation form",
+          "descricao": "Requires signature and animal identification."
+        },
+        "orcamento": {
+          "titulo": "Estimate",
+          "descricao": "Amounts filled in by the clinic."
         }
       },
       "receita": {
@@ -2195,7 +2246,132 @@
         "comparecimento": {
           "titulo": "Attendance certificate",
           "corpo": "I certify that {responsavel} was at this clinic on {data}, from {entrada} to {saida}, accompanying the animal {paciente} during veterinary care."
+        },
+        "viagem": {
+          "titulo": "Health certificate for travel",
+          "corpo": "I certify that the animal {paciente}, species {especie}, was examined on this date ({data}) and showed no clinical signs of infectious disease, being fit for transport.",
+          "antirrabica": "Rabies vaccine — date and batch",
+          "vermifugacao": "Deworming — date and product",
+          "validade": "Validity required by destination"
         }
+      },
+      "pedidoExame": {
+        "titulo": "Test request",
+        "solicito": "I request the following tests",
+        "indicacao": "Clinical indication",
+        "coleta": "Collection notes",
+        "jejum": "Fast for 8 to 12 hours for laboratory tests. Water is allowed.",
+        "contato": "For questions, contact the clinic: {telefone}",
+        "vazio": "No tests requested in this consultation.",
+        "grupo": {
+          "laboratorio": "laboratory",
+          "imagem": "imaging",
+          "outros": "other"
+        }
+      },
+      "orientacoes": {
+        "titulo": "Home care instructions",
+        "cuidados": "Care at home",
+        "medicacao": "Medication",
+        "contInuo": "ongoing use",
+        "retornoEm": "Return in {dias} days, or sooner if the condition worsens.",
+        "procureTitulo": "Contact the clinic before the follow-up if you notice",
+        "procureTexto": "Refusal to eat for more than 24 h, persistent vomiting or diarrhoea, marked lethargy, difficulty breathing, bleeding, seizure, or any worsening of the condition that prompted this visit."
+      },
+      "encaminhamento": {
+        "titulo": "Referral",
+        "para": "Referred to",
+        "paraDica": "Name and speciality of the receiving professional or service",
+        "motivo": "Reason for referral",
+        "achados": "Examination findings",
+        "emUso": "Current medication",
+        "solicito": "I request",
+        "disponivel": "Full medical record available to the colleague on request and with the owner’s authorisation."
+      },
+      "termo": {
+        "detalhamento": "Description of the procedure",
+        "objetoIndefinido": "the procedure indicated on this date",
+        "consentimento": {
+          "titulo": "Informed consent form",
+          "declaracao": "I, {responsavel}, responsible for the animal {paciente}, declare that I have been clearly informed about the procedure indicated for {objeto}, including its expected benefits, the risks involved and the available alternatives. I authorise the clinic’s team to carry it out.",
+          "itensTitulo": "I have been informed that",
+          "itens": "Any procedure under anaesthesia carries risk, even when the patient is stable and pre-operative tests are normal.|Unforeseen complications may occur, requiring a change of approach during the procedure.|Additional unplanned procedures may be necessary to preserve the animal’s life.|No outcome has been guaranteed; the commitment is one of means, not of result.",
+          "ciencia": "I declare that I have read this form, that my questions were answered, and that I authorise the procedure freely and with full information."
+        },
+        "recusa": {
+          "titulo": "Treatment refusal form",
+          "declaracao": "I, {responsavel}, responsible for the animal {paciente}, declare that I have been informed of the treatment recommended by the veterinarian for {objeto}, and that, by my own decision, I DO NOT authorise it.",
+          "itensTitulo": "I have been informed that",
+          "itens": "Refusing the recommended treatment may worsen the animal’s condition.|Refusal may lead to avoidable suffering and, in some cases, to death.|Responsibility for the consequences of this decision is entirely mine.|I may reconsider this decision at any time and return to the clinic.",
+          "ciencia": "I declare that this refusal is my own decision, taken after being informed, and I release the clinic’s team from its consequences."
+        },
+        "eutanasia": {
+          "titulo": "Euthanasia authorisation form",
+          "carimbo": "Authorisation document — requires the owner’s signature",
+          "declaracao": "I, {responsavel}, responsible for the animal {paciente}, declare that I have been informed about the clinical condition of {objeto}, about the prognosis presented and about the treatment and palliative care alternatives, and I authorise euthanasia.",
+          "itensTitulo": "I declare that I understand that",
+          "itens": "Euthanasia is an irreversible act.|I was informed of the available alternatives, including palliative care.|The decision was made by me, without coercion, after being informed.|I am the legal guardian of the animal identified in this document.",
+          "ciencia": "I declare, under my responsibility, that I am the lawful guardian of the animal identified here and I authorise the procedure."
+        }
+      },
+      "obito": {
+        "titulo": "Certificate of death",
+        "declaracao": "I certify that the animal {paciente}, species {especie}, breed {raca}, sex {sexo}, aged {idade}, belonging to {responsavel}, has died as recorded below.",
+        "quando": "Date and time of death",
+        "hora": "Time",
+        "causa": "Probable cause of death",
+        "semNecropsia": "Probable cause, established by clinical assessment. No necropsy was performed.",
+        "identificacao": "Animal identification",
+        "microchip": "Microchip",
+        "pelagem": "Coat and distinguishing marks",
+        "destinacao": "Disposal of the body",
+        "destino": {
+          "cremacao-individual": "Individual cremation",
+          "cremacao-coletiva": "Communal cremation",
+          "sepultamento": "Burial",
+          "retirado": "Taken by the owner"
+        }
+      },
+      "vacinacao": {
+        "titulo": "Vaccination record",
+        "declaracao": "I certify that the animal {paciente} received the vaccines listed below at this clinic.",
+        "vacina": "Vaccine",
+        "lote": "Batch",
+        "fabricante": "Manufacturer",
+        "proxima": "Next dose",
+        "ressalva": "Batch, manufacturer and booster date must be checked against the animal’s vaccination card. Without those fields completed, this document does not replace the card for travel purposes."
+      },
+      "orcamento": {
+        "titulo": "Estimate",
+        "carimbo": "Estimate — not an authorisation to proceed",
+        "consulta": "Consultation",
+        "item": "Item",
+        "grupoColuna": "Type",
+        "valor": "Amount",
+        "total": "Total",
+        "grupo": {
+          "atendimento": "Consultation",
+          "exame": "Test",
+          "medicamento": "Medication"
+        },
+        "validade": "Estimate valid for 15 days from the date of issue.",
+        "ressalva": "Estimated amounts. Additional procedures identified during care will be reported before being carried out."
+      },
+      "relatorioPlano": {
+        "titulo": "Insurance report",
+        "operadora": "Insurer",
+        "apolice": "Policy / member number",
+        "quadro": "Clinical picture",
+        "achados": "Objective findings",
+        "itens": "Items and clinical justification",
+        "justificativa": "Justification"
+      },
+      "outros": "Other documents ({contagem})",
+      "grupo": {
+        "atendimento": "From this consultation",
+        "declaracoes": "Certificates",
+        "termos": "Forms signed by the owner",
+        "terceiros": "For third parties"
       }
     },
     "fila": {
@@ -2482,7 +2658,26 @@
           "titulo": "Schedule follow-up",
           "descricao": "Free slots with the same professional, from the date suggested in the care plan.",
           "emDias": "in {contagem} day | in {contagem} days"
-        }
+        },
+        "usoContinuo": "Ongoing use",
+        "conta": {
+          "peso-por-dose": "1. {peso} kg × {mgPorKg} mg/kg = {mg} mg per dose",
+          "dose-por-concentracao": "2. {mg} mg ÷ {concentracao} mg = {quantidade} per dose",
+          "total": "3. {porDia}× a day × {dias} days = {total} doses"
+        },
+        "fracao": {
+          "inteiro": "{inteiros} whole tablet per dose",
+          "meio": "Half a tablet per dose",
+          "um-e-meio": "One and a half tablets per dose",
+          "quarto": "A quarter of a tablet per dose",
+          "tres-quartos": "Three quarters of a tablet per dose",
+          "multiplo": "{quantidade} tablets per dose",
+          "aproximado": "{quantidade} tablets per dose",
+          "arredondado": "the calculation gave {calculado}; confirm the rounding"
+        },
+        "aCadaHoras": "every {horas} h",
+        "porDias": "for {dias} days",
+        "resumoQuantidade": "{quantidade} {unidade}"
       },
       "timeline": {
         "titulo": "History",
@@ -2665,7 +2860,8 @@
       "semResultado": "No results for this search.",
       "cancelar": "Cancel",
       "adicionar": "Add",
-      "remover": "Remove"
+      "remover": "Remove",
+      "todos": "All"
     },
     "avisos": {
       "titulo": "Notices sent",
@@ -2676,6 +2872,22 @@
         "cancelamento": "Cancellation",
         "oferta-de-vaga": "Slot offer"
       }
+    },
+    "receita": {
+      "titulo": "Prescription",
+      "emitir": "Sign and issue",
+      "enviar": "Send to owner",
+      "enviada": "Sent to owner",
+      "repetir": "Repeat last prescription",
+      "repetirDica": "Last signed on {data}",
+      "assinadaPor": "Electronically signed by {nome}",
+      "codigo": "Verification code",
+      "validaAte": "Valid until {data}",
+      "controlada": "Controlled substance · Ordinance 344/98",
+      "semPrescricao": "No prescription to issue.",
+      "vistaDoResponsavel": "What the owner sees",
+      "lembrete": "Becomes an app reminder: {quantidade}, {frequencia}",
+      "lembreteContinuo": "Ongoing reminder, no end date"
     }
   },
   "cronometro": {

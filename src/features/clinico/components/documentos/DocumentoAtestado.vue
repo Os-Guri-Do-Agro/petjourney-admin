@@ -26,7 +26,12 @@ const props = defineProps<{
   encounter: Encounter
   pet: Pet | null
   tutor: Tutor | null
-  tipo: 'saude' | 'comparecimento'
+  /**
+   * O de **viagem** é o de saúde com três exigências a mais: antirrábica em dia, vermifugação
+   * e uma janela de validade curta. Separá-lo num componente próprio duplicaria a moldura
+   * inteira por causa de um parágrafo.
+   */
+  tipo: 'saude' | 'comparecimento' | 'viagem'
 }>()
 
 const { t } = useI18n()
@@ -67,6 +72,14 @@ const declaracao = computed(() => {
     })
   }
 
+  if (props.tipo === 'viagem') {
+    return t('clinico.documentos.atestado.viagem.corpo', {
+      paciente: props.pet?.nome ?? '',
+      especie: props.pet ? formato.especie(props.pet.especie) : '',
+      data: formato.dataPorExtenso(dataDoDocumento.value),
+    })
+  }
+
   if (diagnosticos.value.length > 0) {
     return t('clinico.documentos.atestado.saude.corpoComDiagnostico', {
       paciente: props.pet?.nome ?? '',
@@ -91,10 +104,25 @@ const observacoes = computed(() => props.encounter.conduta.orientacoes.trim())
     :pet="pet"
     :tutor="tutor"
     :data-documento="dataDoDocumento"
-    :mostrar-alertas="tipo === 'saude'"
+    :mostrar-alertas="tipo !== 'comparecimento'"
   >
     <section class="corpo">
       <p class="corpo__texto">{{ declaracao }}</p>
+
+      <!--
+        O atestado de viagem depende de três coisas que o módulo **não registra**: lote da
+        antirrábica, data da vermifugação e prazo de validade exigido pelo destino. Os campos
+        saem em branco para a clínica preencher — inventá-los produziria um papel que a
+        companhia aérea recusa no balcão, com o responsável já no aeroporto.
+      -->
+      <div v-if="tipo === 'viagem'" class="viagem">
+        <div v-for="chave in ['antirrabica', 'vermifugacao', 'validade']" :key="chave" class="viagem__campo">
+          <span class="viagem__rotulo">
+            {{ t(`clinico.documentos.atestado.viagem.${chave}`) }}
+          </span>
+          <span class="viagem__linha" aria-hidden="true" />
+        </div>
+      </div>
 
       <p v-if="tipo === 'saude' && observacoes" class="corpo__texto">
         <strong>{{ t('clinico.documentos.atestado.saude.recomendacoes') }}</strong>
@@ -119,6 +147,31 @@ const observacoes = computed(() => props.encounter.conduta.orientacoes.trim())
 </template>
 
 <style scoped>
+.viagem {
+  display: grid;
+  gap: 3mm;
+  margin: 5mm 0;
+  padding: 4mm;
+  border: 0.3mm solid #000;
+}
+
+.viagem__campo {
+  display: grid;
+  gap: 1mm;
+}
+
+.viagem__rotulo {
+  font-size: 8.5pt;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.viagem__linha {
+  display: block;
+  height: 5mm;
+  border-bottom: 0.3mm solid #000;
+}
+
 .corpo {
   margin-top: 8mm;
 }
