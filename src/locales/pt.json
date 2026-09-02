@@ -1865,7 +1865,8 @@
         "filhote": "Filhote",
         "adulto": "Adulto",
         "idoso": "Idoso"
-      }
+      },
+      "pesoHoje": "hoje"
     },
     "tabela": {
       "carregando": "Carregando…",

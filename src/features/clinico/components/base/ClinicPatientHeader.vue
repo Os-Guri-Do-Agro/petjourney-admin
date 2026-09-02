@@ -25,8 +25,17 @@ const props = withDefaults(
     compacto?: boolean
     /** Esconde os alertas quando quem chama já os mostra em outro lugar. */
     semAlertas?: boolean
+    /**
+     * Peso **em vigor**, quando quem chama sabe mais que o cadastro.
+     *
+     * O prontuário calcula dose com o peso aferido hoje; o cabeçalho mostrava o do cadastro. Na
+     * hora em que o vet pesa o animal na consulta, os dois divergiam na mesma tela — a receita
+     * dizia uma coisa e o topo da página, outra. Numa demonstração é a incoerência que alguém
+     * da plateia percebe primeiro.
+     */
+    pesoKg?: number | null
   }>(),
-  { compacto: false, semAlertas: false },
+  { compacto: false, semAlertas: false, pesoKg: undefined },
 )
 
 const { t } = useI18n()
@@ -57,6 +66,22 @@ const meta = computed(() => {
     t(`clinico.sexo.${pet.sexo}`),
     pet.castrado ? t('clinico.paciente.castrado') : t('clinico.paciente.inteiro'),
   ].filter(Boolean)
+})
+
+/**
+ * O peso que a tela mostra: o informado por quem chama, e o do cadastro como reserva.
+ *
+ * `aferidoHoje` marca quando ele vem da balança desta consulta e **difere** do cadastro — é o
+ * que explica a diferença em vez de deixá-la parecer erro.
+ */
+const peso = computed(() => {
+  const doCadastro = props.pet?.pesoKg ?? null
+  const vigente = props.pesoKg === undefined ? doCadastro : props.pesoKg
+
+  return {
+    valor: vigente,
+    aferidoHoje: vigente !== null && doCadastro !== null && vigente !== doCadastro,
+  }
 })
 
 /** Alerta de risco vem primeiro: é o que muda conduta antes de a consulta começar. */
@@ -117,9 +142,11 @@ const alertasOrdenados = computed(() => {
       uma legenda, colado numa ação.
     -->
     <div v-if="!compacto || $slots.acoes" class="paciente__trilho">
-      <div v-if="pet.pesoKg !== null" class="peso">
-        <span class="peso__valor clinic-value">{{ formato.numero(pet.pesoKg, 1) }}</span>
+      <div v-if="peso.valor !== null" class="peso">
+        <span class="peso__valor clinic-value">{{ formato.numero(peso.valor, 1) }}</span>
         <span class="peso__unidade">{{ t('clinico.formato.kg') }}</span>
+        <!-- Pesado hoje e diferente do cadastro: a marca explica a diferença. -->
+        <span v-if="peso.aferidoHoje" class="peso__hoje">{{ t('clinico.paciente.pesoHoje') }}</span>
       </div>
 
       <div v-if="$slots.acoes" class="paciente__acoes">
@@ -257,6 +284,18 @@ const alertasOrdenados = computed(() => {
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
   font-weight: 700;
+}
+
+/* A marca de "hoje" é ficha, não texto solto: precisa ser lida como qualificador do número. */
+.peso__hoje {
+  padding: 0.05rem 0.3rem;
+  border-radius: var(--clinic-radius-chip);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .paciente--compacto .peso__valor {

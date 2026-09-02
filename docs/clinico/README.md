@@ -15,6 +15,7 @@ a mesma assinatura. Nenhum componente conhece `fixtures`.
 | 02 | Fundação visual do módulo clínico | [02-fundacao-visual.md](./02-fundacao-visual.md) | Bloco A entregue; B–D pendentes |
 | 03 | Prontuário eletrônico estruturado | [03-prontuario-estruturado.md](./03-prontuario-estruturado.md) | Blocos A–C entregues; falta o modo teclado |
 | 04 | Receituário digital | [04-receituario-digital.md](./04-receituario-digital.md) | Entregue no que cabe ao portal |
+| 05 | Roteiro de demonstração | [05-roteiro-de-demonstracao.md](./05-roteiro-de-demonstracao.md) | Roteiro escrito; 4 buracos de percurso listados |
 
 > **Nota de ordem.** O 02 é fundação e o 01 é consumidor dela — mas a fundação já está
 > construída e em uso, então não há bloqueio real. As lacunas do 02 que tocam o 01 são a
