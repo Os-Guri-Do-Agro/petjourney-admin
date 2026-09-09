@@ -72,6 +72,12 @@ const CLINICAL_ROUTES = [
   { key: 'clinico.agenda.titulo', to: '/veterinario/agenda', icon: 'pi pi-calendar' },
   { key: 'clinico.atendimentos.titulo', to: '/veterinario/atendimentos', icon: 'pi pi-file-edit' },
   { key: 'clinico.fila.titulo', to: '/veterinario/fila', icon: 'pi pi-hourglass' },
+  /*
+   * Internação vem logo depois da fila porque é a mesma pergunta com outro relógio: a fila é
+   * quem espera hoje, a internação é quem está aqui há três dias. As duas são trabalho em
+   * curso, e nenhuma delas cabe na agenda.
+   */
+  { key: 'clinico.internacao.titulo', to: '/veterinario/internacao', icon: 'pi pi-building' },
   { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'pi pi-user-minus' },
   /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
   { key: 'clinico.vacinas.titulo', to: '/veterinario/vacinas', icon: 'pi pi-shield' },

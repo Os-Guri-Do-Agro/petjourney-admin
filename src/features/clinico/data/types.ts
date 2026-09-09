@@ -894,3 +894,312 @@ export type SlotSugestao = {
   /** Menor é melhor: distância em minutos da preferência original. */
   distanciaMinutos: number
 }
+
+// ---------------------------------------------------------------------------
+// Internação
+// ---------------------------------------------------------------------------
+
+/**
+ * Um leito nomeado dentro de uma sala de internação.
+ *
+ * A sala já existe (`Room` de kind `internacao`), e não basta: a clínica interna **por leito**,
+ * não por sala. "Recuperação" comporta seis animais, e a pergunta da recepção ao telefone é
+ * "tem vaga?" — que só tem resposta se a unidade de ocupação for o leito.
+ *
+ * `kind` não é decoração: gato ao lado de cão late a noite inteira e não come, e paciente com
+ * parvovirose não divide ar com pós-cirúrgico. Um mapa que ignore isso oferece a vaga errada.
+ */
+export type LeitoKind = 'geral' | 'felino' | 'isolamento' | 'uti'
+
+/**
+ * Por que um leito saiu de operação.
+ *
+ * `kind`, e não texto livre, pela mesma razão que o motivo de cancelamento da agenda: é o que
+ * permite contar quantos leitos a clínica perde por reforma num trimestre, e traduzir nos quatro
+ * idiomas. O texto que descreve o caso concreto vai no `detalheInativo`, ao lado.
+ */
+export type LeitoInativoMotivo =
+  | 'manutencao'
+  | 'desinfeccao'
+  | 'reforma'
+  | 'equipamento'
+  | 'outro'
+
+/**
+ * Um leito da clínica.
+ *
+ * **O sistema não adivinha quantos leitos existem.** Quem monta a internação é a clínica: ela
+ * cadastra os leitos que tem, dá nome a eles, e mexe nesse número quando cresce ou reforma. Por
+ * isso o leito é dado editável, e não constante de código.
+ */
+export type Leito = {
+  id: string
+  nome: string
+  roomId: string
+  kind: LeitoKind
+  /** Fora de operação por manutenção ou desinfecção — ocupa espaço no mapa e não recebe. */
+  ativo: boolean
+  /** Só faz sentido com `ativo: false`. Nulo enquanto o leito está em operação. */
+  motivoInativo: LeitoInativoMotivo | null
+  /** O caso concreto: "trocar a grade", "aguardando peça". Vazio quando o motivo basta. */
+  detalheInativo: string
+  /**
+   * Desde quando está parado.
+   *
+   * É o que transforma "em manutenção" em informação: um leito parado há duas horas é uma
+   * manutenção; parado há três semanas é uma vaga que a clínica esqueceu que tinha.
+   */
+  inativoDesde: ISODateTime | null
+}
+
+/**
+ * Gravidade do paciente internado, no julgamento de quem está de plantão.
+ *
+ * É o eixo que ordena o mapa de leitos e o **único** dado do módulo que muda o comportamento do
+ * boletim: piorar não é uma cor diferente na tela, é uma regra de comunicação (ver
+ * `domain/internacao.ts`).
+ */
+export type GravidadeClinica = 'estavel' | 'atencao' | 'critico'
+
+export type InternacaoStatus = 'internado' | 'alta' | 'obito' | 'transferido'
+
+/**
+ * Uma internação.
+ *
+ * Dura dias e **não é um `Appointment`**: agendamento tem começo e fim na grade, internação tem
+ * entrada e uma alta que ninguém sabe quando será. Forçá-la na agenda produziria um atendimento
+ * de 72 horas atravessando três colunas de profissional — e a agenda perderia a única coisa que
+ * ela faz bem, que é caber num dia.
+ *
+ * Nasce de uma decisão dentro de uma consulta: por isso `encounterId` aponta para o atendimento
+ * que a originou, e é `null` quando o animal chegou internado de outro serviço.
+ */
+export type Internacao = {
+  id: string
+  petId: string
+  tutorId: string
+  leitoId: string
+  /** Veterinário responsável pelo caso — não é quem está de plantão agora. */
+  responsavelId: string
+  encounterId: string | null
+  motivo: string
+  /** Diagnóstico de trabalho, em texto: a internação começa antes de ele fechar. */
+  diagnostico: string
+  entradaEm: ISODateTime
+  /**
+   * Previsão de alta, sempre um chute e sempre exibida como tal.
+   *
+   * Existe porque é a primeira pergunta do responsável e porque o mapa de leitos precisa
+   * projetar vaga. `null` quando é cedo demais para arriscar.
+   */
+  altaPrevistaEm: ISODateTime | null
+  altaEm: ISODateTime | null
+  status: InternacaoStatus
+  gravidade: GravidadeClinica
+  /** Peso na entrada. Toda dose do plantão é recalculada sobre ele, não sobre o cadastro. */
+  pesoEntradaKg: number
+  observacao: string
+}
+
+/**
+ * O que foi prescrito para o plantão executar.
+ *
+ * Deliberadamente **não** é `Prescription`: aquela é receita para o responsável dar em casa, com
+ * duração em dias e assinatura para a farmácia. Esta é ordem de serviço interna, medida em
+ * horários, e metade dela nem é medicamento — "aferir temperatura 4/4 h" e "fluidoterapia a 60
+ * mL/h" são prescrição de internação e não cabem em nenhuma receita.
+ */
+export type ItemDePrescricaoKind =
+  | 'medicamento'
+  | 'fluido'
+  | 'monitoramento'
+  | 'alimentacao'
+  | 'procedimento'
+
+export type PrescricaoDeInternacao = {
+  id: string
+  internacaoId: string
+  kind: ItemDePrescricaoKind
+  /** Preenchido só quando `kind` é `medicamento`; o resto do bulário não descreve. */
+  medicamentoId: string | null
+  /** O que a enfermagem lê no checklist. Para medicamento, a dose já calculada. */
+  descricao: string
+  via: PrescriptionRoute | null
+  doseTexto: string
+  /** De quantas em quantas horas. 24 é uma vez ao dia. */
+  frequenciaHoras: number
+  /**
+   * Fluido em bomba não tem horário: corre.
+   *
+   * Contínuo entra no checklist como **conferência** de horário em horário, não como
+   * administração — e é por isso que precisa ser um campo, não uma frequência inventada.
+   */
+  continuo: boolean
+  primeiroHorario: ISODateTime
+  /** `null` é "até segunda ordem" — que é o normal em internação. */
+  encerraEm: ISODateTime | null
+  prescritoPor: string
+  prescritoEm: ISODateTime
+  suspensaEm: ISODateTime | null
+  /** Motivo da suspensão, em texto: quem lê o checklist amanhã precisa saber por quê. */
+  motivoSuspensao: string
+  observacao: string
+}
+
+/**
+ * Situação **persistida** de uma administração.
+ *
+ * `atrasada` não está aqui de propósito: atraso é uma leitura do relógio contra o horário
+ * previsto, e gravá-lo produziria um registro que envelhece errado — a dose marcada como
+ * atrasada às 14h continuaria atrasada depois de dada às 14h10. Ver
+ * `situacaoDaAdministracao()`.
+ */
+export type AdministracaoStatus = 'pendente' | 'feita' | 'pulada' | 'recusada' | 'suspensa'
+
+/** O que a leitura devolve, já cruzada com o relógio. */
+export type SituacaoDaAdministracao =
+  | 'futura'
+  | 'na-janela'
+  | 'atrasada'
+  | 'feita'
+  | 'pulada'
+  | 'recusada'
+  | 'suspensa'
+
+/**
+ * Um horário concreto de uma prescrição.
+ *
+ * Materializado no momento da prescrição, e não derivado na leitura, porque **o registro de
+ * quem executou precisa de uma linha para morar**. Derivar os horários faria "dado por Helena
+ * às 14h05" pendurar em nada; e suspender a prescrição amanhã apagaria as doses de ontem, que
+ * é justamente o que a auditoria de um óbito vai procurar.
+ */
+export type AdministracaoAgendada = {
+  id: string
+  internacaoId: string
+  prescricaoId: string
+  previstaPara: ISODateTime
+  status: AdministracaoStatus
+  executadaEm: ISODateTime | null
+  /** Quem executou. Não é quem prescreveu, e a diferença é o ponto do registro. */
+  executadaPor: string | null
+  /** Plantão em que caiu a execução — pode não ser o plantão da previsão. */
+  plantaoId: string | null
+  observacao: string
+}
+
+export type PlantaoKind = 'manha' | 'tarde' | 'noite'
+
+/**
+ * Um plantão.
+ *
+ * A passagem de turno é o momento em que a informação mais se perde numa internação, e o
+ * protótipo a trata como registro, não como conversa: `entregueEm` e `recebidoPor` existem para
+ * que exista uma resposta à pergunta "quem estava com o paciente às 3 da manhã".
+ */
+export type Plantao = {
+  id: string
+  kind: PlantaoKind
+  inicio: ISODateTime
+  fim: ISODateTime
+  responsavelId: string
+  /** Nulo enquanto o plantão está aberto. */
+  entregueEm: ISODateTime | null
+  recebidoPor: string | null
+  notaDePassagem: string
+  /**
+   * Administrações que o plantão **não** fechou e passou adiante, congeladas na entrega.
+   *
+   * Congeladas porque a lista precisa dizer o que estava pendente **naquele instante**;
+   * recalculada depois, ela mostraria a pendência já resolvida pelo turno seguinte e a
+   * passagem perderia o sentido.
+   */
+  pendenciasEntregues: string[]
+}
+
+/**
+ * Evolução de um plantão sobre um paciente.
+ *
+ * Uma por plantão e por paciente — não uma por turno inteiro. O que interessa a quem assume às
+ * 19h é "como o Bento passou a tarde", e uma nota única do turno misturaria seis pacientes num
+ * parágrafo que ninguém relê.
+ */
+export type EvolucaoDeInternacao = {
+  id: string
+  internacaoId: string
+  plantaoId: string
+  professionalId: string
+  registradoEm: ISODateTime
+  /** Vitais do turno. Mesmo `Measurement` do prontuário: `naoAferido` continua sendo informação. */
+  vitais: Record<VitalKey, Measurement>
+  /** O que o animal fez: comeu, urinou, dormiu. É o que o responsável quer ouvir. */
+  observado: string
+  /** Leitura clínica do turno. */
+  avaliacao: string
+  /** O que o próximo plantão precisa fazer. */
+  plano: string
+  gravidade: GravidadeClinica
+}
+
+/**
+ * Frequência com que o responsável recebe boletim.
+ *
+ * `1` existe porque o requisito o pede — o responsável que quer notícia de hora em hora. Não é
+ * um capricho a ser negado: é o mesmo responsável que hoje liga quatro vezes por dia, e cada
+ * ligação custa mais à recepção do que um boletim automático.
+ */
+export type FrequenciaDeBoletim = 1 | 2 | 4 | 6 | 8 | 12 | 24
+
+export type PreferenciaDeBoletim = {
+  internacaoId: string
+  frequenciaHoras: FrequenciaDeBoletim
+  /** Foto em todo boletim. O responsável quase sempre quer; a clínica nem sempre pode. */
+  fotoSempre: boolean
+  /**
+   * Silêncio noturno.
+   *
+   * Boletim de hora em hora às 3 da manhã acorda o responsável para dizer que o animal dorme.
+   * Quando ligado, a madrugada acumula e sai num boletim só ao amanhecer — salvo piora, que
+   * nunca espera.
+   */
+  silencioNoturno: boolean
+}
+
+/**
+ * Situação de um boletim.
+ *
+ * `retido` é o estado que dá razão a este tipo existir. Um boletim de piora **não sai sozinho**:
+ * fica retido até alguém da clínica ligar para o responsável. Notícia grave chegando por
+ * notificação de aplicativo, sem voz humana antes, é a forma mais rápida de transformar um
+ * diferencial de produto num processo.
+ */
+export type BoletimStatus = 'rascunho' | 'retido' | 'liberado' | 'enviado'
+
+export type BoletimOrigem = 'automatico' | 'manual'
+
+export type BoletimAoTutor = {
+  id: string
+  internacaoId: string
+  origem: BoletimOrigem
+  status: BoletimStatus
+  /** Gravidade no instante em que o boletim foi composto — o texto fala dela. */
+  gravidade: GravidadeClinica
+  texto: string
+  /** Iniciais que o mock desenha no lugar da foto; a API trará a URL. */
+  foto: string | null
+  fotoLegenda: string
+  geradoEm: ISODateTime
+  /** Quem compôs ou revisou. `null` em boletim automático que ninguém tocou. */
+  autorId: string | null
+  enviadoEm: ISODateTime | null
+  /**
+   * Ligação exigida antes do envio, e o instante em que foi feita.
+   *
+   * Duas informações e não uma: `exigeLigacao` sem `ligacaoEm` é o boletim travado, e é esse
+   * par que a tela precisa mostrar para que o travamento seja compreensível em vez de parecer
+   * um bug.
+   */
+  exigeLigacao: boolean
+  ligacaoEm: ISODateTime | null
+  ligacaoPor: string | null
+}

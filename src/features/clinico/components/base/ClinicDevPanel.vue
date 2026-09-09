@@ -4,7 +4,7 @@
  *
  * O módulo roda inteiro sem API, e este painel é o que torna isso revisável: sobe latência,
  * força erro por operação, derruba tudo, desloca o relógio, recria os dados com outra semente
- * e **pula direto para cada um dos 12 casos difíceis**. Sem ele, alcançar "cirurgia em duas
+ * e **pula direto para cada um dos 15 casos difíceis**. Sem ele, alcançar "cirurgia em duas
  * salas que atravessa o almoço num dia de feriado" vira caça ao tesouro.
  *
  * A régua do épico: todo caso difícil precisa estar a até três cliques daqui.

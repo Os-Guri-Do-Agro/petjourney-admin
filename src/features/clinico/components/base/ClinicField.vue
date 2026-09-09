@@ -50,9 +50,19 @@ const descrito = computed(() =>
 </template>
 
 <style scoped>
+/*
+ * As linhas do campo ficam **coladas no topo**, aconteça o que acontecer com a altura da caixa.
+ *
+ * Sem isto, um campo esticado por um vizinho mais alto — o que tem dica, ou aquele cujo rótulo
+ * quebrou em duas linhas — distribuía a sobra entre rótulo, controle e dica (`align-content` de
+ * grade é `stretch` por padrão). O efeito é o controle descer alguns pixels em relação ao do
+ * lado: numa fileira de dois campos, um com dica e outro sem, os dois inputs saem desalinhados
+ * sem que nada na folha de estilo peça isso.
+ */
 .campo {
   display: grid;
   min-width: 0;
+  align-content: start;
   gap: 0.25rem;
 }
 

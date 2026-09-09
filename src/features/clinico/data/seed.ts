@@ -38,6 +38,7 @@ import {
   roomsFixture,
 } from './fixtures'
 import { createPrng, hashSeed, intBetween, pickFrom } from './mock-runtime'
+import { gerarInternacoes, type DatasetDeInternacao } from './seed-internacao'
 import type {
   Anamnese,
   AplicacaoVacina,
@@ -103,6 +104,14 @@ export type CasoId =
   | 'alergia-prescricao'
   | 'nomes-extremos'
   | 'retorno-sem-horario'
+  /*
+   * Os três casos difíceis da internação. Vivem em `seed-internacao.ts`, e não aqui, porque
+   * dependem do plantão corrente e não do dia âncora — mas precisam constar do painel junto
+   * com os outros, senão demonstrar a internação passa a depender de alguém decorar a rota.
+   */
+  | 'internacao-piora'
+  | 'internacao-troca-plantao'
+  | 'internacao-boletim-horario'
 
 export type CasoDificil = {
   id: CasoId
@@ -124,6 +133,8 @@ export type SeedResult = {
   timeline: TimelineEvent[]
   /** Vacinas aplicadas — a carteira do paciente e o motor de recall saem daqui. */
   aplicacoesDeVacina: AplicacaoVacina[]
+  /** Leitos, plantões, aprazamento e boletins. Ancorado no plantão corrente, não no dia âncora. */
+  internacao: DatasetDeInternacao
   casos: CasoDificil[]
   /**
    * Cópia dos pacientes e responsáveis da fixture.
@@ -1456,6 +1467,69 @@ function internacoesPlantadas(encounters: Encounter[]): TimelineEvent[] {
   }))
 }
 
+/**
+ * Os casos difíceis da internação, apontados para as rotas que os mostram.
+ *
+ * O painel navega, não explica: cada linha precisa cair na tela onde o caso está aberto. Por
+ * isso a piora aponta para o paciente internado e não para o mapa — no mapa ela é um ponto
+ * vermelho, na tela do paciente ela é o boletim travado esperando a ligação.
+ */
+/**
+ * A internação em curso também é história do paciente.
+ *
+ * Sem isto, abrir o histórico do Bento durante a internação dele mostraria a cirurgia de
+ * anteontem e nada depois — como se ele tivesse ido para casa. O evento entra com a data de
+ * **entrada**, não com a de hoje, porque é ali que ele pertence na linha.
+ */
+function eventosDasInternacoesAbertas(internacao: DatasetDeInternacao): TimelineEvent[] {
+  return internacao.internacoes
+    .filter((item) => item.status === 'internado')
+    .map((item) => ({
+      id: `tl-internacao-aberta-${item.id}`,
+      petId: item.petId,
+      kind: 'internacao' as const,
+      em: item.entradaEm,
+      titulo: item.motivo,
+      resumo: item.diagnostico,
+      encounterId: item.encounterId,
+      appointmentId: null,
+    }))
+}
+
+function casosDaInternacao(internacao: DatasetDeInternacao): CasoDificil[] {
+  const tofu = internacao.internacoes.find((item) => item.id === 'int-tofu')
+  const cacau = internacao.internacoes.find((item) => item.id === 'int-cacau')
+
+  return [
+    ...(tofu
+      ? [
+          {
+            id: 'internacao-piora' as const,
+            rota: `/veterinario/internacao/${tofu.id}?aba=boletim`,
+            appointmentId: null,
+            encounterId: null,
+          },
+        ]
+      : []),
+    {
+      id: 'internacao-troca-plantao' as const,
+      rota: '/veterinario/internacao?passagem=1',
+      appointmentId: null,
+      encounterId: null,
+    },
+    ...(cacau
+      ? [
+          {
+            id: 'internacao-boletim-horario' as const,
+            rota: `/veterinario/internacao/${cacau.id}?aba=boletim`,
+            appointmentId: null,
+            encounterId: null,
+          },
+        ]
+      : []),
+  ]
+}
+
 // ---------------------------------------------------------------------------
 // Entrada pública
 // ---------------------------------------------------------------------------
@@ -1779,6 +1853,8 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     }
   }
 
+  const internacao = gerarInternacoes(semente)
+
   const clinic: Clinic = {
     ...clinicFixture,
     feriados: [...feriadosDoAno(ancora), diaFechadoProximo(ancora)],
@@ -1792,9 +1868,13 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     blocks,
     encounters,
     waitlist: montarFila(ancora),
-    timeline: montarTimeline(encounters, comStatus),
+    timeline: [
+      ...montarTimeline(encounters, comStatus),
+      ...eventosDasInternacoesAbertas(internacao),
+    ].sort((a, b) => b.em.localeCompare(a.em)),
     aplicacoesDeVacina: aplicacoesDeVacinaPlantadas(clock.today()),
-    casos,
+    internacao,
+    casos: [...casos, ...casosDaInternacao(internacao)],
     pets: petsFixture.map((pet) => ({ ...pet, alertas: [...pet.alertas] })),
     tutores: tutorsFixture.map((tutor) => ({ ...tutor })),
   }

@@ -24,6 +24,21 @@ export type MockOperation =
   | 'paciente.listar'
   | 'paciente.historico'
   | 'catalogo.listar'
+  /*
+   * A internação tem operações próprias porque a granularidade da falha é outra: marcar uma
+   * dose como dada precisa poder falhar sozinha, sem derrubar o mapa de leitos junto — é
+   * exatamente esse cenário que a enfermagem vive com o wi-fi da sala dos fundos.
+   */
+  | 'internacao.mapa'
+  | 'internacao.paciente'
+  | 'internacao.administrar'
+  | 'internacao.prescrever'
+  | 'internacao.evoluir'
+  | 'internacao.passagem'
+  | 'internacao.boletim'
+  | 'internacao.internar'
+  /** Cadastro de leitos: configuração da clínica, não trabalho de plantão. */
+  | 'internacao.leitos'
 
 export class MockError extends Error {
   /** `kind` traduzível, nunca texto pronto de servidor. */

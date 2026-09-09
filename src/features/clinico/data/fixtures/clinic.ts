@@ -118,6 +118,14 @@ export const roomsFixture: Room[] = [
   { id: 'sala-3', nome: 'Consultório 3', kind: 'consultorio' },
   { id: 'sala-cirurgia', nome: 'Centro cirúrgico', kind: 'cirurgia' },
   { id: 'sala-recuperacao', nome: 'Recuperação', kind: 'internacao' },
+  /*
+   * O isolamento é sala à parte, e não um leito marcado dentro da recuperação.
+   *
+   * Parvovirose e felino com coriza não dividem ar com pós-cirúrgico, e uma clínica que
+   * representa isolamento como "a jaula do canto" acaba oferecendo a vaga errada quando o
+   * mapa aperta — que é justamente quando ele mais aperta.
+   */
+  { id: 'sala-isolamento', nome: 'Isolamento', kind: 'internacao' },
   { id: 'sala-banho', nome: 'Banho e tosa', kind: 'banho' },
   { id: 'sala-exame', nome: 'Imagem', kind: 'exame' },
 ]

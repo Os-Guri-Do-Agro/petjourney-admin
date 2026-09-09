@@ -34,6 +34,10 @@ const CASOS_ESPERADOS: CasoId[] = [
   'alergia-prescricao',
   'nomes-extremos',
   'retorno-sem-horario',
+  /* Internação: ancorados no plantão corrente, e por isso presentes a qualquer hora do dia. */
+  'internacao-piora',
+  'internacao-troca-plantao',
+  'internacao-boletim-horario',
 ]
 
 afterEach(() => {
@@ -102,7 +106,7 @@ describe('seed do módulo clínico', () => {
     )
   })
 
-  it('entrega os 12 casos difíceis, cada um com rota própria', () => {
+  it('entrega os 15 casos difíceis, cada um com rota própria', () => {
     const dataset = gerarDataset()
     const ids = dataset.casos.map((caso) => caso.id)
 

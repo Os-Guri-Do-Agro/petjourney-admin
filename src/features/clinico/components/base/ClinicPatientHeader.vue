@@ -159,6 +159,17 @@ const alertasOrdenados = computed(() => {
 <style scoped>
 .paciente {
   display: flex;
+  /*
+   * A quebra fica **fora** da consulta de contêiner, e é o que faz o modo estreito funcionar.
+   *
+   * `container-type` está neste mesmo elemento, e uma `@container` estiliza os **descendentes**
+   * do contêiner, nunca o contêiner em si — a regra `flex-wrap` que morava lá dentro jamais
+   * chegou a valer. O `width: 100%` do trilho valia (ele é descendente), então num cartão
+   * estreito o trilho tomava a linha inteira sem poder quebrar: o corpo era espremido a 0px e o
+   * peso caía por cima do nome do paciente. Na largura folgada nada muda — os itens cabem numa
+   * linha e a quebra nunca é exercida.
+   */
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: var(--clinic-space-4);
   min-width: 0;
@@ -188,18 +199,31 @@ const alertasOrdenados = computed(() => {
  * `align-self: stretch` só funciona sem altura declarada; o piso fica no `min-height`, para o
  * caso de o cartão ter uma linha só.
  */
-/* O quadro não desenha nada: só carrega o esticamento para o avatar ter altura definida. */
+/*
+ * O avatar é **quadrado**, com as duas medidas declaradas.
+ *
+ * Já foi tentado tirar a largura da altura (`aspect-ratio` sobre `height: 100%`, o quadro
+ * esticado dando a altura). A dependência é circular — a largura intrínseca de um filho medido
+ * pela altura é zero —, o quadro nascia com 0px e o avatar transbordava 73px por cima do nome do
+ * paciente, em toda tela que usa este cabeçalho. Declarar só a largura corrigiu o transbordo mas
+ * deixou o bloco esticar na vertical: virava um retângulo alto sempre que o cartão passava de
+ * duas linhas.
+ *
+ * Com lado fixo o quadrado é quadrado em qualquer altura de cartão. Fica **centrado**, e não
+ * colado no topo, porque era isso que o esticamento resolvia: alinhado ao nome, ele deixava a
+ * coluna esquerda vazia embaixo enquanto o corpo descia por quatro linhas. Centrado, o olho lê
+ * um bloco só, sem o vão.
+ */
 .paciente__quadro {
-  flex: 0 0 auto;
-  align-self: stretch;
-  min-height: 3.6rem;
+  flex: 0 0 3.6rem;
+  align-self: center;
+  height: 3.6rem;
 }
 
 .paciente__avatar {
   display: grid;
+  width: 100%;
   height: 100%;
-  /* A largura sai da altura: o bloco é quadrado seja qual for o tamanho do cartão. */
-  aspect-ratio: 1;
   place-items: center;
   border-radius: 1.1rem;
   background: var(--clinic-accent-tint);
@@ -211,9 +235,10 @@ const alertasOrdenados = computed(() => {
   letter-spacing: 0.02em;
 }
 
-/* No drawer o cartão tem menos linhas, então o avatar volta a acompanhá-las. */
+/* No drawer o cartão tem menos linhas, e o quadrado encolhe junto — sem deixar de ser quadrado. */
 .paciente--compacto .paciente__quadro {
-  min-height: 2.6rem;
+  flex-basis: 2.6rem;
+  height: 2.6rem;
 }
 
 .paciente--compacto .paciente__avatar {
@@ -391,10 +416,6 @@ const alertasOrdenados = computed(() => {
  * larga e no drawer de 320 px, e é a largura recebida que decide, não o tamanho da tela.
  */
 @container (max-width: 26rem) {
-  .paciente {
-    flex-wrap: wrap;
-  }
-
   .paciente__trilho {
     width: 100%;
     flex-direction: row;
