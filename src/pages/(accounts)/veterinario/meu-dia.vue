@@ -8,10 +8,26 @@
  * Esta tela responde nesta ordem, e a ordem é o conteúdo:
  * 1. o que estou atendendo, ou o que vem em seguida;
  * 2. quem já chegou e está esperando;
- * 3. quem tem alerta que muda conduta hoje;
- * 4. que retorno ficou sem horário marcado — receita parada na mesa.
+ * 3. quem está internado e cobra alguma coisa agora;
+ * 4. quem tem alerta que muda conduta hoje;
+ * 5. que retorno ficou sem horário marcado — receita parada na mesa.
  *
  * A agenda completa fica a um clique.
+ *
+ * ## Por que a internação entrou aqui
+ *
+ * Ela não estava, e a ausência tinha consequência: um veterinário com cinco animais internados
+ * abria a landing do próprio perfil e não via nenhum deles. O portal parecia dois sistemas — o
+ * das consultas, que "Meu dia" resumia, e o da internação, que só existia para quem lembrasse de
+ * abrir o mapa de leitos. Foi essa costura faltando que fez o fluxo ser descrito como confuso.
+ *
+ * O bloco mostra **só quem cobra ação** — dose atrasada, boletim que não saiu —, e não a lista de
+ * internados. Quem quer a lista tem o mapa; quem abre esta tela às oito da manhã quer saber o que
+ * não pode esperar. Um bloco que repete o mapa inteiro é um bloco que ninguém lê duas vezes.
+ *
+ * O boletim retido sobe **acima de tudo**, junto com o destaque: é a única pendência do dia em
+ * que há uma pessoa do outro lado, sem notícia do próprio animal, esperando um telefonema que
+ * ninguém sabe que precisa dar.
  */
 import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'
@@ -28,17 +44,19 @@ import type { Appointment } from '@/features/clinico/data/types'
 import { retornosVencidos, type RetornoPendente } from '@/features/clinico/domain/follow-up'
 import { useAgendaStore } from '@/features/clinico/stores/agenda'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
+import { useInternacaoStore } from '@/features/clinico/stores/internacao'
 
 const { t } = useI18n()
 const router = useRouter()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
+const internacao = useInternacaoStore()
 const formato = useClinicFormat()
 
 const retornosPendentes = ref<RetornoPendente[]>([])
 
-const agora = computed(() =>
-  agenda.atendimentos.find((item) => item.status === 'em-atendimento') ?? null,
+const agora = computed(
+  () => agenda.atendimentos.find((item) => item.status === 'em-atendimento') ?? null,
 )
 
 /** O próximo é o primeiro que ainda não começou — inclusive o encaixe que entrou agora. */
@@ -49,8 +67,7 @@ const aSeguir = computed(() => {
     agenda.atendimentos
       .filter(
         (item) =>
-          item.inicio > instante &&
-          !['cancelado', 'falta', 'finalizado'].includes(item.status),
+          item.inicio > instante && !['cancelado', 'falta', 'finalizado'].includes(item.status),
       )
       .sort((a, b) => a.inicio.localeCompare(b.inicio))[0] ?? null
   )
@@ -94,6 +111,22 @@ const alertasDoDia = computed(() => {
 })
 
 /**
+ * Os internados que cobram alguma coisa **agora**.
+ *
+ * Ordenados pelo que mais dói: primeiro quem tem boletim retido — há uma pessoa esperando
+ * telefonema —, depois quem tem mais doses atrasadas. Um internado tranquilo não entra: quem
+ * quer a lista completa tem o mapa de leitos, e repetir o mapa aqui faria o bloco virar
+ * paisagem.
+ */
+const internadosComPendencia = computed(() =>
+  (internacao.mapa?.leitos ?? [])
+    .filter((item) => item.internacao !== null && (item.atrasadas > 0 || item.boletimRetido))
+    .sort((a, b) => Number(b.boletimRetido) - Number(a.boletimRetido) || b.atrasadas - a.atrasadas),
+)
+
+const boletinsRetidos = computed(() => internacao.mapa?.boletinsRetidos ?? 0)
+
+/**
  * Quantos itens cada bloco mostra antes de ceder o resto para a página que é dona do assunto.
  * Quatro é o que se lê de relance; o quinto já obriga a rolar, e um painel de "o que é agora"
  * que exige rolagem deixou de responder a pergunta.
@@ -101,6 +134,7 @@ const alertasDoDia = computed(() => {
 const LIMITE_DO_BLOCO = 4
 
 const esperandoVisiveis = computed(() => esperando.value.slice(0, LIMITE_DO_BLOCO))
+const internadosVisiveis = computed(() => internadosComPendencia.value.slice(0, LIMITE_DO_BLOCO))
 const alertasVisiveis = computed(() => alertasDoDia.value.slice(0, LIMITE_DO_BLOCO))
 const retornosVisiveis = computed(() => retornosPendentes.value.slice(0, LIMITE_DO_BLOCO))
 
@@ -121,16 +155,32 @@ function irParaAgenda(appointmentId?: string) {
   })
 }
 
+function irParaInternacao(internacaoId?: string) {
+  void router.push(
+    internacaoId ? `/veterinario/internacao/${internacaoId}` : '/veterinario/internacao',
+  )
+}
+
 async function carregar() {
   await clinico.carregar()
   agenda.hoje()
   await agenda.carregarDia()
+
+  /*
+   * O mapa de leitos entra fora do `await` em sequência: ele é o único bloco desta tela que não
+   * pertence à agenda, e prendê-lo atrás dela faria a landing esperar duas viagens para desenhar
+   * a primeira. Falhar aqui também não derruba o resto — sem internação, "Meu dia" continua
+   * respondendo o que sempre respondeu.
+   */
+  const mapa = internacao.carregarMapa()
 
   retornosPendentes.value = retornosVencidos(
     await encounterRepository.listarRetornosPendentes(),
     clinicClock,
     clinicClock.today(),
   )
+
+  await mapa
 }
 
 onMounted(carregar)
@@ -158,6 +208,23 @@ onMounted(carregar)
     </template>
 
     <div class="dia clinic-scope">
+      <!--
+        O boletim retido abre a tela, acima do próprio destaque.
+
+        É a única pendência do dia com uma pessoa do outro lado — um responsável sem notícia do
+        animal dele — e a única que não pode esperar alguém lembrar de abrir outra tela.
+      -->
+      <button
+        v-if="boletinsRetidos > 0"
+        type="button"
+        class="retidos clinic-focusable"
+        @click="irParaInternacao()"
+      >
+        <i class="pi pi-phone" aria-hidden="true" />
+        <span>{{ t('clinico.internacao.retidosAviso', { total: boletinsRetidos }) }}</span>
+        <i class="pi pi-arrow-right" aria-hidden="true" />
+      </button>
+
       <!-- 1. o que é agora -->
       <section class="destaque">
         <header class="destaque__topo">
@@ -176,7 +243,9 @@ onMounted(carregar)
           >
             <template #acoes>
               <Button
-                :label="agora ? t('clinico.meuDia.continuar') : t('clinico.meuDia.iniciarAtendimento')"
+                :label="
+                  agora ? t('clinico.meuDia.continuar') : t('clinico.meuDia.iniciarAtendimento')
+                "
                 icon="pi pi-file-edit"
                 @click="abrirProntuario((agora ?? aSeguir)!)"
               />
@@ -187,9 +256,7 @@ onMounted(carregar)
             {{ clinico.tipo((agora ?? aSeguir)!.typeId)?.nome }}
             ·
             {{ clinico.profissional((agora ?? aSeguir)!.professionalId)?.nome }}
-            <template v-if="!agora">
-              · {{ formato.relativo(aSeguir!.inicio) }}
-            </template>
+            <template v-if="!agora"> · {{ formato.relativo(aSeguir!.inicio) }} </template>
           </p>
         </template>
 
@@ -209,7 +276,11 @@ onMounted(carregar)
 
           <ul v-if="esperando.length > 0" class="lista">
             <li v-for="item in esperandoVisiveis" :key="item.id">
-              <button type="button" class="lista__item clinic-focusable" @click="irParaAgenda(item.id)">
+              <button
+                type="button"
+                class="lista__item clinic-focusable"
+                @click="irParaAgenda(item.id)"
+              >
                 <span class="lista__hora clinic-value">{{ formato.hora(item.inicio) }}</span>
                 <span class="lista__corpo">
                   <strong>{{ clinico.pet(item.petId)?.nome }}</strong>
@@ -230,7 +301,9 @@ onMounted(carregar)
             </li>
           </ul>
 
-          <p v-else class="vazio"><i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.esperandoVazio') }}</p>
+          <p v-else class="vazio">
+            <i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.esperandoVazio') }}
+          </p>
           <RouterLink
             v-if="esperando.length > LIMITE_DO_BLOCO"
             class="bloco__mais"
@@ -241,7 +314,59 @@ onMounted(carregar)
           </RouterLink>
         </section>
 
-        <!-- 3. alertas que mudam conduta hoje -->
+        <!-- 3. quem está internado e cobra alguma coisa agora -->
+        <section class="bloco" :class="{ 'bloco--vazio': internadosComPendencia.length === 0 }">
+          <h2 class="bloco__titulo">
+            <i class="pi pi-building" aria-hidden="true" />
+            {{ t('clinico.meuDia.internados') }}
+            <span v-if="internadosComPendencia.length > 0" class="bloco__contagem clinic-value">
+              {{ internadosComPendencia.length }}
+            </span>
+          </h2>
+
+          <ul v-if="internadosComPendencia.length > 0" class="lista">
+            <li v-for="item in internadosVisiveis" :key="item.leito.id">
+              <button
+                type="button"
+                class="lista__item clinic-focusable"
+                @click="irParaInternacao(item.internacao!.id)"
+              >
+                <span class="lista__hora clinic-value">{{ item.leito.nome }}</span>
+                <span class="lista__corpo">
+                  <strong>{{ item.petNome }}</strong>
+                  <small>
+                    <!--
+                      Boletim primeiro, dose depois: a ordem da linha é a ordem da urgência, e o
+                      telefonema pendente é o que a clínica descobre tarde demais.
+                    -->
+                    <span v-if="item.boletimRetido" class="lista__atraso">
+                      {{ t('clinico.internacao.leito.boletimRetido') }}
+                    </span>
+                    <template v-if="item.boletimRetido && item.atrasadas > 0"> · </template>
+                    <template v-if="item.atrasadas > 0">
+                      {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }) }}
+                    </template>
+                  </small>
+                </span>
+                <i class="pi pi-chevron-right" aria-hidden="true" />
+              </button>
+            </li>
+          </ul>
+
+          <p v-else class="vazio">
+            <i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.internadosVazio') }}
+          </p>
+          <RouterLink
+            v-if="internadosComPendencia.length > LIMITE_DO_BLOCO"
+            class="bloco__mais"
+            to="/veterinario/internacao"
+          >
+            {{ t('clinico.comum.verTodos', { contagem: internadosComPendencia.length }) }}
+            <i class="pi pi-arrow-right" aria-hidden="true" />
+          </RouterLink>
+        </section>
+
+        <!-- 4. alertas que mudam conduta hoje -->
         <section class="bloco" :class="{ 'bloco--vazio': alertasDoDia.length === 0 }">
           <h2 class="bloco__titulo">
             <i class="pi pi-exclamation-triangle" aria-hidden="true" />
@@ -277,7 +402,9 @@ onMounted(carregar)
             </li>
           </ul>
 
-          <p v-else class="vazio"><i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.alertasVazio') }}</p>
+          <p v-else class="vazio">
+            <i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.alertasVazio') }}
+          </p>
           <RouterLink
             v-if="alertasDoDia.length > LIMITE_DO_BLOCO"
             class="bloco__mais"
@@ -288,7 +415,7 @@ onMounted(carregar)
           </RouterLink>
         </section>
 
-        <!-- 4. retorno sem horário: receita parada na mesa -->
+        <!-- 5. retorno sem horário: receita parada na mesa -->
         <section class="bloco" :class="{ 'bloco--vazio': retornosPendentes.length === 0 }">
           <h2 class="bloco__titulo">
             <i class="pi pi-replay" aria-hidden="true" />
@@ -313,7 +440,11 @@ onMounted(carregar)
                     <span class="lista__atraso clinic-value">
                       {{
                         t('clinico.formato.haTempo', {
-                          valor: t('clinico.formato.dias', { valor: item.diasDeAtraso }, item.diasDeAtraso),
+                          valor: t(
+                            'clinico.formato.dias',
+                            { valor: item.diasDeAtraso },
+                            item.diasDeAtraso,
+                          ),
                         })
                       }}
                     </span>
@@ -330,7 +461,9 @@ onMounted(carregar)
             </li>
           </ul>
 
-          <p v-else class="vazio"><i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.retornosVazio') }}</p>
+          <p v-else class="vazio">
+            <i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.retornosVazio') }}
+          </p>
           <RouterLink
             v-if="retornosPendentes.length > LIMITE_DO_BLOCO"
             class="bloco__mais"
@@ -351,6 +484,41 @@ onMounted(carregar)
 .dia {
   display: grid;
   gap: var(--clinic-space-4);
+}
+
+/*
+ * A faixa do boletim retido é um botão, e não um aviso.
+ *
+ * No mapa de leitos ela é texto: quem está lá já chegou ao lugar onde se resolve. Aqui ela
+ * aparece três telas antes, e um aviso que diz "ligue para alguém" sem levar a lugar nenhum
+ * transfere para quem lê o trabalho de descobrir onde é esse lugar.
+ */
+.retidos {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: var(--clinic-space-3) var(--clinic-space-4);
+  border: 1px solid var(--clinic-risk-line);
+  border-radius: var(--clinic-radius-control);
+  gap: var(--clinic-space-3);
+  background: var(--clinic-risk-bg);
+  color: var(--clinic-risk-text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+}
+
+.retidos span {
+  flex: 1 1 auto;
+}
+
+.retidos:hover {
+  background: color-mix(in srgb, var(--clinic-risk-line) 22%, var(--clinic-risk-bg));
+}
+
+.retidos i:last-child {
+  font-size: 0.72rem;
 }
 
 /*

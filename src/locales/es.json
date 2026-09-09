@@ -1745,6 +1745,30 @@
       "visivel": "Módulo clínico visible",
       "oculto": "Módulo clínico oculto"
     },
+    "navegacao": {
+      "secao": "Clínica",
+      "agora": "Ahora",
+      "emCurso": "En curso",
+      "pendencias": "Pendientes",
+      "analise": "Análisis",
+      "selo": {
+        "fila": "{total} paciente en la lista de espera | {total} pacientes en la lista de espera",
+        "internacao": "{total} tarea por resolver en internación | {total} tareas por resolver en internación",
+        "atividades": "{total} pendiente | {total} pendientes",
+        "vacinas": "{total} refuerzo vencido | {total} refuerzos vencidos"
+      }
+    },
+    "busca": {
+      "abrir": "Buscar un paciente o una pantalla del módulo clínico",
+      "abrirCurto": "Buscar",
+      "titulo": "Buscar en la clínica",
+      "placeholder": "Nombre de la mascota, del responsable, teléfono o pantalla…",
+      "dica": "Flechas para recorrer, Enter para abrir, Esc para cerrar.",
+      "telas": "Pantallas",
+      "pacientes": "Pacientes",
+      "buscando": "Buscando…",
+      "semResultado": "No se encontró nada para «{termo}»."
+    },
     "formato": {
       "minutos": "{valor} min",
       "horas": "{valor} h",
@@ -1883,7 +1907,8 @@
       "fila": "No se pudo cargar la lista de espera.",
       "internacao": "No se pudo cargar la internación.",
       "internacaoAcao": "El registro no se guardó. Inténtalo de nuevo.",
-      "internacaoLeito": "Esta cama no está disponible."
+      "internacaoLeito": "Esta cama no está disponible.",
+      "altaSemAviso": "El fallecimiento y la derivación exigen que alguien haya hablado por teléfono con el responsable."
     },
     "densidade": {
       "titulo": "Densidad",
@@ -2031,6 +2056,8 @@
       "semProximo": "Nada más agendado para hoy.",
       "esperando": "Ya llegaron",
       "esperandoVazio": "Nadie esperando en recepción.",
+      "internados": "Internados que te reclaman",
+      "internadosVazio": "Ningún internado con dosis atrasada o parte retenido.",
       "esperaDe": "esperando {valor}",
       "alertasDoDia": "Alertas que cambian la conducta hoy",
       "alertasVazio": "Ningún alerta clínico entre los pacientes de hoy.",
@@ -2783,7 +2810,9 @@
         "agenda": "Agenda",
         "comProximo": "Con cita agendada",
         "semProximo": "Sin cita agendada"
-      }
+      },
+      "internadoAgora": "Internado ahora",
+      "verInternacao": "Abrir internación"
     },
     "atendimentos": {
       "titulo": "Atenciones",
@@ -2818,6 +2847,7 @@
       "bloquear": "Bloquear horario",
       "encaixar": "Sobrecupo",
       "buscar": "Buscar paciente",
+      "buscaGlobal": "Buscar en todo el módulo clínico",
       "densidade": "Alternar densidad",
       "fechar_": "Cerrar el panel abierto",
       "mover": "Mover la cita enfocada 15 min",
@@ -3004,6 +3034,7 @@
         "horas": "{horas} h",
         "pendentes": "Por hacer",
         "atrasadas": "{total} atrasadas",
+        "boletimRetido": "El parte espera una llamada",
         "proximaMinutos": "Siguiente en {minutos} min",
         "proximaHoras": "Siguiente en {horas} h"
       },
@@ -3111,6 +3142,62 @@
         "motivoExemplo": "Postoperatorio de osteosíntesis",
         "diagnosticoExemplo": "Fractura de fémur derecho"
       },
+      "alta": {
+        "abrir": "Cerrar internación",
+        "titulo": "Cerrar internación",
+        "sobre": "Este registro cierra la internación de {nome} y devuelve la jaula al mapa.",
+        "desfechoRotulo": "Cómo termina",
+        "desfecho": {
+          "alta": "Alta",
+          "transferido": "Derivado",
+          "obito": "Fallecimiento"
+        },
+        "resumoTitulo": "Lo que queda registrado",
+        "permanencia": "Permanencia",
+        "dosesFeitas": "Dosis administradas",
+        "dosesNaoFeitas": "Rechazadas u omitidas",
+        "boletinsEnviados": "Partes enviados",
+        "aviso": {
+          "dose-pendente": "{total} dosis sigue pendiente ahora. Queda registrada como no administrada. | {total} dosis siguen pendientes ahora. Quedan registradas como no administradas.",
+          "dose-futura": "{total} dosis prevista más adelante será suspendida por el cierre. | {total} dosis previstas más adelante serán suspendidas por el cierre.",
+          "boletim-retido": "{total} parte nunca salió por falta de llamada. Cerrar no lo envía. | {total} partes nunca salieron por falta de llamada. Cerrar no los envía."
+        },
+        "orientacao": {
+          "alta": "Indicaciones del alta",
+          "transferido": "Lo acordado en la derivación",
+          "obito": "Lo comunicado al responsable"
+        },
+        "orientacaoDica": {
+          "alta": "Va junto con el mensaje que el responsable recibe en la aplicación.",
+          "transferido": "Queda en el registro de la internación. Nada de esto sale por mensaje.",
+          "obito": "Queda en el registro de la internación. Nada de esto sale por mensaje."
+        },
+        "orientacaoExemplo": {
+          "alta": "Reposo por 3 días, alimento húmedo, control en 7 días.",
+          "transferido": "Derivado al Hospital Veterinario X para hemodiálisis, con copia de la historia.",
+          "obito": "Comunicado a la responsable por teléfono a las 14:20; orientada sobre la cremación."
+        },
+        "canal": {
+          "alta": "El responsable recibe en la aplicación el aviso de que la mascota se fue a casa.",
+          "transferido": "No se envía ningún mensaje. La derivación se comunica por teléfono.",
+          "obito": "No se envía ningún mensaje. Un fallecimiento nunca llega por notificación."
+        },
+        "confirmaLigacao": {
+          "transferido": "Hablé por teléfono con el responsable sobre la derivación.",
+          "obito": "Hablé por teléfono con el responsable sobre el fallecimiento."
+        },
+        "confirmar": {
+          "alta": "Registrar alta",
+          "transferido": "Registrar derivación",
+          "obito": "Registrar fallecimiento"
+        },
+        "cancelar": "Cancelar",
+        "encerrada": {
+          "alta": "Internación cerrada con alta el {quando}.",
+          "transferido": "Internación cerrada por derivación el {quando}.",
+          "obito": "Internación cerrada por fallecimiento el {quando}."
+        }
+      },
       "prescricao": {
         "ativasTitulo": "Prescripción en curso",
         "semAtivas": "Ningún ítem prescrito.",
@@ -3159,7 +3246,8 @@
         "noLeito": "Cama {leito}",
         "diagnostico": "Diagnóstico de trabajo",
         "altaEm": "alta prevista {data}",
-        "semPrevisaoDeAlta": "sin previsión de alta"
+        "semPrevisaoDeAlta": "sin previsión de alta",
+        "verHistorico": "Historial del paciente"
       },
       "leitos": {
         "titulo": "Camas de la clínica",

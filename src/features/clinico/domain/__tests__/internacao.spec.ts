@@ -13,7 +13,9 @@ import {
   administracoesDoPlantao,
   atrasoEmMinutos,
   atravessaAPassagem,
+  avisosDaAlta,
   boletinsPorDia,
+  DESFECHOS,
   dentroDoSilencioNoturno,
   exigeLigacaoAntes,
   horariosDaPrescricao,
@@ -29,6 +31,8 @@ import {
   plantaoSeguinte,
   podeEnviar,
   proximoBoletimEm,
+  resumirAlta,
+  saiPorMensagem,
   situacaoDaAdministracao,
   taxaDeOcupacao,
 } from '../internacao'
@@ -490,5 +494,121 @@ describe('frequência do boletim', () => {
     expect(boletinsPorDia(1, false)).toBe(24)
     expect(boletinsPorDia(6, false)).toBe(4)
     expect(boletinsPorDia(1, true)).toBe(16)
+  })
+})
+
+/**
+ * A conferência de última hora antes de um registro que não se desfaz.
+ *
+ * O que estes testes seguram é a **ausência de trava**: nenhuma pendência impede a alta. Travar
+ * pareceria zelo e produziria o contrário — o animal sai pela porta e o mapa continua dizendo
+ * que ele está no leito R3, porque a clínica não conseguiu registrar a verdade.
+ */
+describe('encerramento da internação', () => {
+  const internado: Internacao = {
+    id: 'int-1',
+    petId: 'pet-1',
+    tutorId: 'tutor-1',
+    leitoId: 'l1',
+    responsavelId: 'prof-ana',
+    encounterId: null,
+    motivo: 'Pós-operatório',
+    diagnostico: 'Fratura',
+    entradaEm: iso('2026-09-08', 10),
+    altaPrevistaEm: null,
+    altaEm: null,
+    status: 'internado',
+    gravidade: 'estavel',
+    pesoEntradaKg: 12,
+    observacao: '',
+  }
+
+  const agora = iso('2026-09-09', 14)
+
+  it('separa o que cobra ação agora do que apenas será suspenso', () => {
+    const resumo = resumirAlta({
+      internacao: internado,
+      administracoes: [
+        administracao({ id: 'a1', status: 'feita' }),
+        administracao({ id: 'a2', status: 'recusada' }),
+        /* Atrasada há duas horas: cobra ação neste minuto. */
+        administracao({ id: 'a3', previstaPara: iso('2026-09-09', 12) }),
+        /* Amanhã de manhã: some com o encerramento, e ninguém precisa fazer nada por ela. */
+        administracao({ id: 'a4', previstaPara: iso('2026-09-10', 8) }),
+      ],
+      boletins: [boletim({ id: 'b1', status: 'enviado' }), boletim({ id: 'b2', status: 'retido' })],
+      agora,
+    })
+
+    expect(resumo.horas).toBe(28)
+    expect(resumo.feitas).toBe(1)
+    expect(resumo.naoFeitas).toBe(1)
+    expect(resumo.pendentesAgora).toBe(1)
+    expect(resumo.aSuspender).toBe(1)
+    expect(resumo.boletinsRetidos).toBe(1)
+    expect(resumo.boletinsEnviados).toBe(1)
+  })
+
+  /* A mesma dose contada nas duas colunas diria "1 pendente e 1 a suspender" sobre uma dose só. */
+  it('não conta a mesma dose como pendente e como a suspender', () => {
+    const resumo = resumirAlta({
+      internacao: internado,
+      administracoes: [administracao({ previstaPara: iso('2026-09-09', 12) })],
+      boletins: [],
+      agora,
+    })
+
+    expect(resumo.pendentesAgora + resumo.aSuspender).toBe(1)
+  })
+
+  it('ignora administração de outra internação', () => {
+    const resumo = resumirAlta({
+      internacao: internado,
+      administracoes: [administracao({ internacaoId: 'int-outra', status: 'feita' })],
+      boletins: [],
+      agora,
+    })
+
+    expect(resumo.feitas).toBe(0)
+  })
+
+  it('cada pendência vira aviso, e nenhuma vira trava', () => {
+    const resumo = resumirAlta({
+      internacao: internado,
+      administracoes: [
+        administracao({ id: 'a1', previstaPara: iso('2026-09-09', 12) }),
+        administracao({ id: 'a2', previstaPara: iso('2026-09-10', 8) }),
+      ],
+      boletins: [boletim({ status: 'retido' })],
+      agora,
+    })
+
+    expect(avisosDaAlta(resumo)).toEqual(['dose-pendente', 'dose-futura', 'boletim-retido'])
+  })
+
+  it('internação sem pendência nenhuma não inventa aviso', () => {
+    const resumo = resumirAlta({
+      internacao: internado,
+      administracoes: [administracao({ status: 'feita' })],
+      boletins: [boletim({ status: 'enviado' })],
+      agora,
+    })
+
+    expect(avisosDaAlta(resumo)).toEqual([])
+  })
+
+  /**
+   * A outra ponta da regra que dá nome ao requisito: a piora não sai por aplicativo, e o fim
+   * grave também não.
+   */
+  it('só a alta pode ser contada por mensagem', () => {
+    expect(saiPorMensagem('alta')).toBe(true)
+    expect(saiPorMensagem('obito')).toBe(false)
+    expect(saiPorMensagem('transferido')).toBe(false)
+  })
+
+  /* O esperado primeiro, o grave por último: a ordem da lista é a ordem de frequência real. */
+  it('oferece os três desfechos, com o óbito por último', () => {
+    expect(DESFECHOS).toEqual(['alta', 'transferido', 'obito'])
   })
 })

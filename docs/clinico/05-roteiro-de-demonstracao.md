@@ -151,11 +151,13 @@ A lista honesta, para não prometer o que não existe.
 Onde a demonstração exige que o apresentador navegue à mão. **Cada um destes é buraco de
 produto, não de apresentação** — que é exatamente o que este requisito existe para revelar.
 
-1. **Depois de "Finalizar atendimento", a tela fica onde está.** Ela vira somente leitura, mas
-   não devolve à agenda; o passo seguinte da história é um clique no menu.
-2. **O painel de casos difíceis é só de desenvolvimento** (`import.meta.env.DEV`). Num build
-   publicado, os atalhos para os doze casos plantados somem — e alcançá-los passa a exigir
-   navegar até cada um.
+1. ~~**Depois de "Finalizar atendimento", a tela fica onde está.**~~ **Fechado.** `finalizar()`
+   devolve à agenda.
+2. ~~**O painel de casos difíceis é só de desenvolvimento**~~ **Fechado.** Ele agora acompanha o
+   **desbloqueio do módulo** e não `import.meta.env.DEV`: quem ligou o módulo com `?clinico=on`
+   ou com a sequência secreta ligou de propósito, e tudo atrás desse interruptor é dado de
+   demonstração. O painel também passou a existir na tela de internação, onde estão os casos
+   difíceis dela.
 3. ~~**Vacinação não fecha o ciclo.**~~ **Fechado.** O registro de aplicação (lote, fabricante,
    validade, dose da série) e a lista de chamada de reforço em `/veterinario/vacinas` foram
    construídos depois deste levantamento.
@@ -173,5 +175,7 @@ Conferido contra o código em 2026-09-02:
 - [x] Coerência de pet, peso e data entre telas — **o peso foi corrigido nesta rodada**
 - [x] Roteiro escrito
 - [x] Lista honesta de protótipo × real
-- [ ] Transições sem buracos — quatro buracos listados acima
+- [ ] Transições sem buracos — **um** buraco restante (o consentimento, item 4). Os três
+      primeiros foram fechados; ver [08](./08-orientacao-do-fluxo.md) para o que mudou na
+      navegação entre as telas
 - [ ] Rodada com alguém que opera clínica — **gate de processo**, não entregável de código

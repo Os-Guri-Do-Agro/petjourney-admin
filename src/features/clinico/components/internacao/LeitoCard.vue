@@ -120,6 +120,20 @@ const proxima = computed(() => {
         {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }) }}
       </p>
 
+      <!--
+        De quem é o boletim preso.
+
+        O total ficava no topo da página — "1 boletim retido" — e não dizia de quem: achar o
+        paciente custava abrir os cinco internados um a um. É a pendência com uma pessoa do
+        outro lado esperando um telefonema, e a única desta tela que não pode esperar o fim do
+        turno; por isso ela ganha o selo mais forte, com ícone de telefone e não de alerta —
+        o que se pede aqui não é atenção, é uma ligação.
+      -->
+      <p v-if="item.boletimRetido" class="leito__selo leito__selo--boletim">
+        <i class="pi pi-phone" aria-hidden="true" />
+        {{ t('clinico.internacao.leito.boletimRetido') }}
+      </p>
+
       <p v-if="proxima" class="leito__proxima">{{ proxima }}</p>
     </template>
 
@@ -350,6 +364,20 @@ const proxima = computed(() => {
   color: var(--clinic-risk-text);
   font-size: var(--clinic-font-label);
   font-weight: 700;
+}
+
+/*
+ * O selo do boletim é cheio, e o do atraso é contornado.
+ *
+ * Os dois podem aparecer no mesmo cartão, e com a mesma marcação o olho os leria como duas
+ * linhas da mesma coisa. São dois pedidos diferentes: o atraso chama a enfermagem, que está no
+ * corredor; o boletim retido chama alguém para pegar o telefone.
+ */
+.leito__selo--boletim {
+  border-color: transparent;
+  background: var(--clinic-risk-text);
+  color: var(--clinic-surface);
+  font-weight: 800;
 }
 
 .leito__selo i {

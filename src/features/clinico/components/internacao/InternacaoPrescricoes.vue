@@ -36,6 +36,14 @@ const props = defineProps<{
   agora: ISODateTime
   salvando: boolean
   prescritorId: string
+  /**
+   * A internação já terminou.
+   *
+   * Prescrever para um animal que foi para casa é uma ordem que ninguém vai executar — e o que
+   * ela produz é uma linha de checklist que nasce órfã. A lista continua inteira e legível: o
+   * que some é a porta de escrever. Registro fechado se lê, não se continua.
+   */
+  encerrada?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -209,6 +217,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
       <header class="bloco__topo">
         <h3 class="bloco__titulo">{{ t('clinico.internacao.prescricao.ativasTitulo') }}</h3>
         <Button
+          v-if="!encerrada"
           :label="t('clinico.internacao.prescricao.nova')"
           icon="pi pi-plus"
           size="small"

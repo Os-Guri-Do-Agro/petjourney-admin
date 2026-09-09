@@ -18,6 +18,7 @@ import { nextTick } from 'vue'
 
 import i18n from '@/i18n'
 
+import AltaDialog from '../AltaDialog.vue'
 import BoletimNoApp from '../BoletimNoApp.vue'
 import InternacaoChecklist from '../InternacaoChecklist.vue'
 import GerenciarLeitosDialog from '../GerenciarLeitosDialog.vue'
@@ -25,7 +26,7 @@ import LeitoCard from '../LeitoCard.vue'
 import { internacaoRepository } from '../../../data/repositories'
 import { setMockConfig } from '../../../data/mock-runtime'
 import { resetDataset } from '../../../data/store'
-import { situacaoDaAdministracao } from '../../../domain/internacao'
+import { resumirAlta, situacaoDaAdministracao } from '../../../domain/internacao'
 import { getDataset } from '../../../data/store'
 import { clinicClock, useClinicoStore } from '../../../stores/clinico'
 
@@ -200,7 +201,15 @@ describe('celular do responsável', () => {
     expect(wrapper.findAll('.balao')).toHaveLength(enviados.length)
     /* O boletim retido não chegou ao celular — é essa ausência que explica a regra. */
     expect(wrapper.find('.celular__retido').exists()).toBe(true)
-    expect(wrapper.text()).not.toContain(retido.texto || ' ')
+    /*
+     * O texto precisa existir antes de se afirmar que ele não aparece: `toContain('')` é
+     * verdadeiro para qualquer tela, e a asserção passaria sobre um boletim vazio.
+     *
+     * A guarda anterior era `retido.texto || '\0'` — um byte nulo cru no meio do arquivo, que
+     * fazia o `grep` tratar a fonte como binária e não afirmava coisa alguma.
+     */
+    expect(retido.texto.length).toBeGreaterThan(0)
+    expect(wrapper.text()).not.toContain(retido.texto)
   })
 
   it('depois da ligação e do envio, a mensagem aparece marcada como tal', async () => {
@@ -342,6 +351,149 @@ describe('cadastro de leitos', () => {
     expect(document.body.textContent).toContain(
       i18n.global.t('clinico.internacao.leitos.intervalo', { de: 1, ate: 8, total: 48 }),
     )
+
+    wrapper.unmount()
+  })
+})
+
+/**
+ * O encerramento — a tela que faltava para o ciclo fechar.
+ *
+ * O que se afirma aqui não é layout: é que a **regra grave chega até o dedo**. O diálogo não pode
+ * deixar registrar óbito sem a ligação, e não pode prometer mensagem onde nenhuma mensagem sai.
+ */
+describe('diálogo de alta', () => {
+  async function montar() {
+    const paciente = await internacaoRepository.doPaciente('int-bento')
+    const clinico = useClinicoStore()
+
+    await clinico.carregar()
+
+    return mount(AltaDialog, {
+      props: {
+        aberto: true,
+        pet: clinico.pet(paciente!.internacao.petId),
+        resumo: resumirAlta({
+          internacao: paciente!.internacao,
+          administracoes: paciente!.administracoes,
+          boletins: paciente!.boletins,
+          agora: clinicClock.nowIso(),
+        }),
+        salvando: false,
+        erro: '',
+      },
+      global: COM_I18N,
+      attachTo: document.body,
+    })
+  }
+
+  /**
+   * O botão do rodapé, e não "o botão cujo texto diz alta".
+   *
+   * As opções do `ClinicToggleGroup` são `button` com `role="radio"`, e uma delas se chama
+   * exatamente "Alta" — procurar por texto no `body` inteiro devolvia o rádio e afirmava sobre a
+   * coisa errada. O rodapé do diálogo tem dois botões, e o de confirmar é o último.
+   */
+  function botaoDeConfirmar(): HTMLButtonElement | undefined {
+    const rodape = document.body.querySelector('.p-dialog-footer')
+    const botoes = [...(rodape?.querySelectorAll('button') ?? [])]
+
+    return botoes[botoes.length - 1]
+  }
+
+  /** O diálogo é teleportado para o `body`: `wrapper.find` não o alcança. */
+  async function escrever(texto: string) {
+    const campo = document.body.querySelector('textarea') as HTMLTextAreaElement | null
+
+    expect(campo).not.toBeNull()
+
+    campo!.value = texto
+    campo!.dispatchEvent(new Event('input'))
+    await nextTick()
+  }
+
+  it('nasce na alta, e nenhum caminho de chave vaza para a tela', async () => {
+    const wrapper = await montar()
+    await nextTick()
+
+    const texto = document.body.textContent ?? ''
+
+    expect(texto).toContain(i18n.global.t('clinico.internacao.alta.desfecho.alta'))
+    expect(texto).toContain(i18n.global.t('clinico.internacao.alta.canal.alta'))
+    expect(texto).not.toContain('clinico.internacao')
+    expect(texto).not.toContain('[object Object]')
+
+    wrapper.unmount()
+  })
+
+  /*
+   * A conferência de última hora precisa aparecer sem clique: quem está encerrando não vai
+   * expandir uma seção para descobrir que deixou um boletim retido para trás.
+   */
+  it('mostra os números do que fica registrado', async () => {
+    const wrapper = await montar()
+    await nextTick()
+
+    const texto = document.body.textContent ?? ''
+
+    expect(texto).toContain(i18n.global.t('clinico.internacao.alta.resumoTitulo'))
+    expect(texto).toContain(i18n.global.t('clinico.internacao.alta.dosesFeitas'))
+
+    wrapper.unmount()
+  })
+
+  it('a orientação é obrigatória — sem ela, não confirma', async () => {
+    const wrapper = await montar()
+    await nextTick()
+
+    expect(botaoDeConfirmar()?.disabled).toBe(true)
+
+    await escrever('Repouso por 3 dias.')
+
+    expect(botaoDeConfirmar()?.disabled).toBe(false)
+    expect(wrapper.emitted('confirmar')).toBeUndefined()
+
+    botaoDeConfirmar()?.click()
+    await nextTick()
+
+    expect(wrapper.emitted('confirmar')?.[0]?.[0]).toMatchObject({
+      status: 'alta',
+      avisadoPorTelefone: false,
+    })
+
+    wrapper.unmount()
+  })
+
+  /** A regra que dá nome ao requisito, na outra ponta: óbito não sai sem alguém ter ligado. */
+  it('óbito com a orientação escrita continua travado até a ligação ser marcada', async () => {
+    const wrapper = await montar()
+    await nextTick()
+
+    const opcaoObito = [...document.body.querySelectorAll('[role="radio"]')].find(
+      (opcao) =>
+        opcao.textContent?.trim() === i18n.global.t('clinico.internacao.alta.desfecho.obito'),
+    ) as HTMLElement | undefined
+
+    expect(opcaoObito).toBeDefined()
+
+    opcaoObito!.click()
+    await nextTick()
+
+    await escrever('Parada às 3h40.')
+
+    expect(document.body.textContent).toContain(
+      i18n.global.t('clinico.internacao.alta.canal.obito'),
+    )
+    expect(botaoDeConfirmar()?.disabled).toBe(true)
+
+    const caixa = document.body.querySelector('input[type="checkbox"]') as HTMLElement | null
+
+    expect(caixa).not.toBeNull()
+
+    caixa!.click()
+    await nextTick()
+
+    expect(botaoDeConfirmar()?.disabled).toBe(false)
 
     wrapper.unmount()
   })

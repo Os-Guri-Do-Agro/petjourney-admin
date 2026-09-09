@@ -16,6 +16,7 @@
 import {
   exigeLigacaoAntes,
   horariosDaPrescricao,
+  horasInternado,
   HORIZONTE_DE_APRAZAMENTO_HORAS,
   idDoPlantao,
   limitesDoPlantao,
@@ -26,13 +27,15 @@ import {
   pendenciasDaPassagem,
   plantaoDe,
   plantaoSeguinte,
+  saiPorMensagem,
   situacaoDaAdministracao,
   taxaDeOcupacao,
+  type DesfechoDaInternacao,
   type ImpedimentoDeLeito,
   type OcupacaoDoLeito,
 } from '../../domain/internacao'
 import { createClinicClock } from '../../domain/clinic-time'
-import { montarTextoDoBoletim } from '../boletim-texto'
+import { montarTextoDeAlta, montarTextoDoBoletim } from '../boletim-texto'
 import { CLINIC_UTC_OFFSET } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import { agoraIso, getDataset, novoId } from '../store'
@@ -78,6 +81,14 @@ export type LeitoNoMapa = OcupacaoDoLeito & {
   /** Pendências que cobram ação agora — é o número que decide a cor do cartão. */
   pendentes: number
   atrasadas: number
+  /**
+   * Este paciente tem boletim preso esperando ligação.
+   *
+   * O mapa já contava os retidos num total no topo da página — "1 boletim retido" —, e esse
+   * total não dizia **de quem**. Achar o paciente custava abrir os cinco internados um a um,
+   * exatamente a busca que o boletim retido não tem tempo de esperar.
+   */
+  boletimRetido: boolean
   /** Minutos até a próxima administração prevista. `null` quando não há nenhuma à frente. */
   proximaEmMinutos: number | null
   horasInternado: number
@@ -171,6 +182,27 @@ export class LeitoOcupadoError extends Error {
   constructor(leitoId: string) {
     super(`[mock] leito ${leitoId} indisponível`)
     this.name = 'LeitoOcupadoError'
+  }
+}
+
+/**
+ * Encerramento grave sem ligação registrada.
+ *
+ * Óbito e transferência não podem ser fechados enquanto ninguém tiver falado com o responsável.
+ * É a **mesma regra do boletim de piora**, no outro extremo da internação: notícia grave não
+ * chega por aplicativo, e o responsável que descobre a morte do animal por notificação não volta
+ * a essa clínica — mesmo que tudo o que se fez antes disso tenha sido impecável.
+ *
+ * Mora aqui, e não na tela, pelo mesmo motivo de sempre: tela se contorna, e uma rota de API
+ * amanhã contornaria sozinha.
+ */
+export class AltaSemAvisoError extends Error {
+  readonly desfecho: 'obito' | 'transferido'
+
+  constructor(desfecho: 'obito' | 'transferido') {
+    super(`[mock] ${desfecho} exige ligação ao responsável antes do encerramento`)
+    this.name = 'AltaSemAvisoError'
+    this.desfecho = desfecho
   }
 }
 
@@ -330,6 +362,12 @@ export const internacaoRepository = {
               (entry) => entry.situacao === 'na-janela' || entry.situacao === 'atrasada',
             ).length,
             atrasadas: situacoes.filter((entry) => entry.situacao === 'atrasada').length,
+            boletimRetido: ocupacao.internacao
+              ? dataset.boletins.some(
+                  (item) =>
+                    item.internacaoId === ocupacao.internacao!.id && item.status === 'retido',
+                )
+              : false,
             proximaEmMinutos: futuras[0]
               ? Math.round((Date.parse(futuras[0].previstaPara) - Date.parse(agora)) / 60_000)
               : null,
@@ -1051,17 +1089,40 @@ export const internacaoRepository = {
    * Suspende o que estava pendente em vez de deixar horários futuros de um paciente que já foi
    * para casa — e é isso que devolve o leito ao mapa.
    */
+  /**
+   * Encerra a internação e devolve o leito.
+   *
+   * Duas coisas mudaram quando a alta ganhou tela — antes esta função existia sem que nada a
+   * chamasse, e o animal entrava no mapa de leitos para nunca sair:
+   *
+   * 1. **A alta escreve a última mensagem ao responsável.** A conversa do aplicativo terminava no
+   *    boletim das 14h, e quem estava do outro lado ficava com o celular na mão sem saber se já
+   *    podia parar de olhar. O boletim de alta fecha o ciclo que os outros abriram.
+   * 2. **Óbito e transferência não saem por mensagem.** Exigem `avisadoPorTelefone`, e o
+   *    encerramento é recusado sem ele. É a regra do boletim de piora aplicada ao fim.
+   *
+   * `professionalId` é quem assina o encerramento. Sem esse nome, "o animal recebeu alta às 16h"
+   * é uma linha que não responde a ninguém depois — e a alta é justamente o registro que a
+   * auditoria de um caso difícil vai procurar primeiro.
+   */
   darAlta(input: {
     internacaoId: string
-    status: Extract<Internacao['status'], 'alta' | 'obito' | 'transferido'>
+    status: DesfechoDaInternacao
     observacao: string
-  }): Promise<Internacao | null> {
+    professionalId: string
+    /** Registro de que alguém falou com o responsável. Obrigatório em óbito e transferência. */
+    avisadoPorTelefone?: boolean
+  }): Promise<{ internacao: Internacao; boletim: BoletimAoTutor | null } | null> {
     return simularChamada('internacao.internar', () => {
       const dataset = base()
       const internacao = dataset.internacoes.find((item) => item.id === input.internacaoId)
 
       if (!internacao) {
         return null
+      }
+
+      if (!saiPorMensagem(input.status) && !input.avisadoPorTelefone) {
+        throw new AltaSemAvisoError(input.status as 'obito' | 'transferido')
       }
 
       const agora = agoraIso()
@@ -1080,7 +1141,42 @@ export const internacaoRepository = {
         }
       }
 
-      return { ...internacao }
+      /*
+       * O boletim de alta nasce **liberado**, e não retido: é a única boa notícia da série, e
+       * `comporBoletim` não serve aqui porque ele decide a retenção pela gravidade — um animal
+       * que passou a internação inteira crítico e teve alta cairia como notícia grave.
+       */
+      let boletim: BoletimAoTutor | null = null
+
+      if (saiPorMensagem(input.status)) {
+        const petNome =
+          getDataset().pets.find((pet) => pet.id === internacao.petId)?.nome ?? 'Seu pet'
+
+        boletim = {
+          id: novoId('bol'),
+          internacaoId: internacao.id,
+          origem: 'manual',
+          status: 'liberado',
+          gravidade: internacao.gravidade,
+          texto: montarTextoDeAlta({
+            petNome,
+            horas: horasInternado(internacao, agora),
+            orientacao: internacao.observacao,
+          }),
+          foto: null,
+          fotoLegenda: '',
+          geradoEm: agora,
+          autorId: input.professionalId,
+          enviadoEm: null,
+          exigeLigacao: false,
+          ligacaoEm: null,
+          ligacaoPor: null,
+        }
+
+        dataset.boletins.push(boletim)
+      }
+
+      return { internacao: { ...internacao }, boletim }
     })
   },
 }

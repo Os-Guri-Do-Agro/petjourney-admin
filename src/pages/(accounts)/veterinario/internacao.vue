@@ -19,6 +19,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import ClinicDevPanel from '@/features/clinico/components/base/ClinicDevPanel.vue'
 import ClinicStat from '@/features/clinico/components/base/ClinicStat.vue'
 import GerenciarLeitosDialog from '@/features/clinico/components/internacao/GerenciarLeitosDialog.vue'
 import InternarDialog from '@/features/clinico/components/internacao/InternarDialog.vue'
@@ -286,6 +287,15 @@ function abrirLeito(leitoId: string) {
       @entregar="entregarPlantao"
       @ir-para="abrir"
     />
+
+    <!--
+      O painel de casos difíceis também mora aqui.
+
+      Ele vivia só na agenda e em "Meu dia", e os casos plantados da internação — a piora com
+      boletim travado, a dose em cima da troca de plantão — ficavam do outro lado do menu de
+      quem estava demonstrando a internação.
+    -->
+    <ClinicDevPanel />
   </PartnerPageFrame>
 </template>
 

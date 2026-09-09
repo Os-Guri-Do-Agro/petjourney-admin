@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  watch,
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
 import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
 import ComingSoonFeatureDialog from '@/components/common/ComingSoonFeatureDialog.vue'
+import AppNavLink from '@/components/layout/AppNavLink.vue'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
@@ -136,6 +145,25 @@ function handleViewportChange(event: MediaQueryListEvent) {
 }
 
 function handleShellKeydown(event: KeyboardEvent) {
+  /*
+   * `Ctrl/⌘ + K` abre a busca do módulo, e atravessa campo de texto de propósito: é a única
+   * tecla do portal que precisa funcionar **enquanto** alguém digita — quem está no meio de uma
+   * anamnese e precisa conferir o histórico do paciente não vai clicar fora antes.
+   *
+   * A agenda tem atalhos de uma letra, e nenhum deles colide: o ouvinte de lá ignora tudo o que
+   * vem com `Ctrl`, `Alt` ou `Meta`.
+   */
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+    if (!hasClinicalProfile.value) {
+      return
+    }
+
+    event.preventDefault()
+    buscaAberta.value = !buscaAberta.value
+
+    return
+  }
+
   if (event.key !== 'Escape') {
     return
   }
@@ -168,8 +196,35 @@ function handleThemeToggle() {
     themeTogglePending.value = false
   }, THEME_SWITCH_DURATION_MS)
 }
-// const searchQuery = ref('') // busca do header (temporariamente desligada)
+// const searchQuery = ref('') // busca do header do portal (temporariamente desligada)
 const panelFilterQuery = ref('')
+
+/**
+ * Busca global do módulo clínico, aberta por `Ctrl/⌘ + K` de qualquer tela.
+ *
+ * Mora no shell, e não numa página, porque o valor dela é justamente **não depender de onde se
+ * está**: quem está perdido não vai primeiro à tela certa para então procurar.
+ */
+const buscaAberta = ref(false)
+
+/**
+ * Assíncrona de propósito.
+ *
+ * A busca consulta o repositório de pacientes, e um `import` estático arrastaria a camada de
+ * dados clínicos inteira — pacientes, agenda, internação, bulário — para o primeiro
+ * carregamento de **toda** conta do portal, inclusive as que não têm o módulo. Aqui ela só
+ * chega quando o `v-if` do módulo permite montá-la.
+ */
+const ClinicBuscaGlobal = defineAsyncComponent(
+  () => import('@/features/clinico/components/base/ClinicBuscaGlobal.vue'),
+)
+
+/** O rótulo da tecla segue a máquina: num Mac, `Ctrl` é a combinação errada e ninguém a usa. */
+const atalhoDaBusca = computed(() =>
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
+    ? '⌘K'
+    : 'Ctrl+K',
+)
 const authUser = computed(() => getAuthUser())
 const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
 const logoHeaderUrl = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
@@ -211,6 +266,14 @@ const shellStyle = computed(() => {
     '--shell-nav-active-text': isDark ? colors.auth.sageStrong : colors.vet.focusFrom,
     '--shell-cream': colors.auth.sageTint,
     '--shell-shadow-rgb': colors.auth.shadowRgb,
+    /*
+     * Tons do selo de pendência do menu. Vêm do tema, e não de hex solto no componente da
+     * linha: o mesmo âmbar já marca atenção nos painéis, e um segundo âmbar levemente diferente
+     * a dois centímetros dele lê-se como defeito de renderização, não como outra coisa.
+     */
+    '--shell-attention': colors.dashboard.amberText,
+    '--shell-attention-bg': colors.dashboard.amberBg,
+    '--shell-attention-line': colors.dashboard.amber,
     '--rail-logout-red': colors.red,
     '--rail-logout-mix-base': isDark ? colors.bg.card : LightColors.auth.white,
     /** Branco real — `auth.white` no dark é superfície escura. */
@@ -265,6 +328,7 @@ const gruposDoPainel = computed<AppNavigationGroup[]>(() =>
           id: activeSection.value.id,
           label: activeSection.value.label,
           items: activeSection.value.items,
+          blocos: activeSection.value.blocos,
         },
       ],
 )
@@ -570,20 +634,15 @@ onUnmounted(() => {
           </span>
         </header>
 
-        <RouterLink
+        <AppNavLink
           v-if="isListNavigator"
-          class="page-nav__link page-nav__link--overview"
-          :class="{ 'router-link-active': naVisaoGeral }"
-          :to="overviewItem.to"
-          :aria-current="naVisaoGeral ? 'page' : undefined"
-          active-class=""
-          @click="closeCompactDrawer"
-        >
-          <span class="page-nav__icon" aria-hidden="true">
-            <i :class="overviewItem.icon" />
-          </span>
-          <span class="page-nav__label">{{ overviewItem.label }}</span>
-        </RouterLink>
+          :item="overviewItem"
+          :ativo="naVisaoGeral"
+          destaque
+          :rotulo-bloqueado="t('frame.suspended.title')"
+          :rotulo-em-breve="t('comingSoon.cupom.badge')"
+          @clique="closeCompactDrawer"
+        />
 
         <div v-if="hasPanelFilter" class="page-nav__filter">
           <label class="page-nav__filter-field" for="panel-nav-filter">
@@ -628,36 +687,42 @@ onUnmounted(() => {
             -->
             <p v-if="isListNavigator" class="page-nav__group-label">{{ group.label }}</p>
 
-            <RouterLink
-              v-for="item in group.items"
-              :key="`${group.id}-${item.to}`"
-              class="page-nav__link"
-              :class="{
-                'router-link-active': isNavItemActive(item),
-                'page-nav__link--soon': item.comingSoon,
-                'page-nav__link--locked': item.locked,
-              }"
-              :aria-current="isNavItemActive(item) ? 'page' : undefined"
-              :to="item.to"
-              active-class=""
-              @click="handleNavItemClick($event, item)"
-            >
-              <span class="page-nav__icon" aria-hidden="true">
-                <i :class="item.icon" />
-              </span>
-              <span class="page-nav__label">{{ item.label }}</span>
-              <span v-if="item.comingSoon" class="page-nav__soon">{{
-                t('comingSoon.cupom.badge')
-              }}</span>
-              <span
-                v-else-if="item.locked"
-                class="page-nav__lock"
-                :title="t('frame.suspended.title')"
-                aria-hidden="true"
+            <!--
+              Seção com blocos — hoje a Clínica, com dez destinos. Sem os rótulos, os dez ficam
+              numa lista plana em que descobrir qual responde à pergunta do momento exige ler os
+              dez. Nada saiu da lista: ela só deixou de exigir leitura inteira.
+            -->
+            <template v-if="group.blocos">
+              <div
+                v-for="bloco in group.blocos"
+                :key="`${group.id}-${bloco.id}`"
+                class="page-nav__bloco"
               >
-                <i class="pi pi-lock" />
-              </span>
-            </RouterLink>
+                <p class="page-nav__group-label page-nav__group-label--bloco">
+                  {{ bloco.label }}
+                </p>
+
+                <AppNavLink
+                  v-for="item in bloco.items"
+                  :key="`${group.id}-${item.to}`"
+                  :item="item"
+                  :ativo="isNavItemActive(item)"
+                  :rotulo-bloqueado="t('frame.suspended.title')"
+                  :rotulo-em-breve="t('comingSoon.cupom.badge')"
+                  @clique="handleNavItemClick($event, item)"
+                />
+              </div>
+            </template>
+
+            <AppNavLink
+              v-for="item in group.blocos ? [] : group.items"
+              :key="`${group.id}-${item.to}`"
+              :item="item"
+              :ativo="isNavItemActive(item)"
+              :rotulo-bloqueado="t('frame.suspended.title')"
+              :rotulo-em-breve="t('comingSoon.cupom.badge')"
+              @clique="handleNavItemClick($event, item)"
+            />
           </div>
         </nav>
 
@@ -705,12 +770,28 @@ onUnmounted(() => {
         -->
         <CronometroConsulta v-if="hasClinicalProfile" />
 
-        <!-- Busca global: ocultada temporariamente
-        <label class="header-search" for="header-search">
-          <i class="pi pi-search" aria-hidden="true" />
-          <input id="header-search" v-model="searchQuery" type="search" placeholder="Pesquisar" />
-        </label>
+        <!--
+          A busca do módulo clínico.
+
+          O campo do portal continua desligado — ele nunca teve o que buscar. Este botão abre a
+          busca do módulo, que tem: as doze telas e os pacientes com história. Aparece só para
+          quem vê o módulo, porque fora dele ele abriria uma janela vazia.
+
+          É botão e não campo de propósito: um campo permanente no cabeçalho promete busca em
+          toda tela do portal, e a promessa vale só dentro da clínica.
         -->
+        <button
+          v-if="hasClinicalProfile"
+          class="header-search header-search--botao"
+          type="button"
+          :title="t('clinico.busca.abrir')"
+          :aria-label="t('clinico.busca.abrir')"
+          @click="buscaAberta = true"
+        >
+          <i class="pi pi-search" aria-hidden="true" />
+          <span class="header-search__texto">{{ t('clinico.busca.abrirCurto') }}</span>
+          <kbd class="header-search__tecla">{{ atalhoDaBusca }}</kbd>
+        </button>
 
         <button
           class="header-resgate"
@@ -832,6 +913,18 @@ onUnmounted(() => {
 
     <ValidarCupomDialog v-if="cupomFeatureEnabled" />
     <ComingSoonFeatureDialog v-model:visible="cupomComingSoonVisible" />
+
+    <!--
+      A busca do módulo clínico vive no shell porque o valor dela é não depender de onde se
+      está. Só é montada para quem vê o módulo — fora dele, ela abriria uma janela vazia e
+      arrastaria a camada de dados clínicos para o pacote de quem nunca vai usá-la.
+    -->
+    <ClinicBuscaGlobal
+      v-if="hasClinicalProfile"
+      :aberto="buscaAberta"
+      :secoes="navigationSections"
+      @fechar="buscaAberta = false"
+    />
   </div>
 </template>
 
@@ -1380,134 +1473,35 @@ onUnmounted(() => {
   content: '';
 }
 
-.page-nav__link {
-  position: relative;
-  display: flex;
-  min-height: var(--nav-row-height);
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.6rem;
-  padding: 0 0.6rem;
-  border: 1px solid transparent;
-  border-radius: 0.6rem;
-  color: var(--shell-muted);
-  font-size: 0.83rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
-}
-
-.page-nav__link--overview {
-  flex-shrink: 0;
-  margin-bottom: 0.55rem;
-}
-
-.page-nav__label {
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-.page-nav__soon {
-  flex-shrink: 0;
-  padding: 0.12rem 0.4rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--shell-accent) 16%, transparent);
-  color: var(--shell-accent-strong);
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  line-height: 1.2;
-}
-
-.page-nav__lock {
+.page-nav__bloco {
   display: grid;
-  flex-shrink: 0;
-  width: 1.35rem;
-  height: 1.35rem;
-  place-items: center;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--shell-muted) 14%, transparent);
-  color: var(--shell-muted);
-  font-size: 0.68rem;
-}
-
-.page-nav__link--locked {
-  opacity: 0.78;
-}
-
-.page-nav__link--soon:hover,
-.page-nav__link--soon:focus-visible {
-  border-color: color-mix(in srgb, var(--shell-accent) 18%, var(--shell-line));
-  background: color-mix(in srgb, var(--shell-accent-soft) 30%, var(--shell-surface));
-  color: var(--shell-accent-strong);
-}
-
-/**
- * O ladrilho do ícone é **marca de estado**, não decoração.
- *
- * Antes cada item carregava um quadrado com fundo próprio: treze quadrados iguais numa coluna
- * viram textura, o olho conta caixas em vez de ler nomes. Aqui o ladrilho nasce transparente e
- * só ganha fundo no item sob o cursor e no item aberto — quem se destaca é um, não todos.
- */
-.page-nav__icon {
-  display: grid;
-  width: 1.7rem;
-  height: 1.7rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.55rem;
-  background: transparent;
-  color: var(--shell-muted);
-  transition:
-    background 160ms ease,
-    box-shadow 160ms ease,
-    color 160ms ease;
-}
-
-.page-nav__icon i {
-  font-size: 0.88rem;
-  line-height: 1;
-}
-
-/** Hover é convite; ativo é estado — pesos visuais distintos de propósito. */
-.page-nav__link:hover {
-  background: color-mix(in srgb, var(--shell-accent) 7%, var(--shell-surface));
-  color: var(--shell-text);
-}
-
-.page-nav__link:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--shell-accent) 55%, transparent);
-  outline-offset: 2px;
-}
-
-.page-nav__link.router-link-active {
-  border-color: color-mix(in srgb, var(--shell-accent) 30%, transparent);
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--shell-accent-soft) 46%, var(--shell-surface)),
-    color-mix(in srgb, var(--shell-accent-soft) 26%, var(--shell-surface))
-  );
-  color: var(--shell-nav-active-text);
-  font-weight: 750;
-}
-
-.page-nav__link:hover .page-nav__icon {
-  background: color-mix(in srgb, var(--shell-accent) 12%, var(--shell-surface));
-  color: var(--shell-accent-strong);
+  gap: var(--nav-row-gap);
 }
 
 /*
- * O ladrilho aberto usa o teal profundo da marca, não `accent-strong`: aquele é um sage
- * acinzentado pensado para texto, e cheio de fundo lê como grafite no meio da paleta verde.
+ * O ar entre blocos é o que faz a divisão funcionar. Sem ele, quatro rótulos e dez linhas
+ * viram uma coluna contínua com quatro palavras em maiúscula no meio — e a lista continua
+ * pedindo leitura inteira, que é o problema que os blocos existem para resolver.
  */
-.page-nav__link.router-link-active .page-nav__icon {
-  background: var(--shell-accent-deep);
-  box-shadow: 0 1px 4px color-mix(in srgb, var(--shell-accent-deep) 45%, transparent);
-  color: #ffffff;
+.page-nav__bloco + .page-nav__bloco {
+  margin-top: var(--nav-group-gap);
+}
+
+/*
+ * O rótulo do bloco é meio degrau abaixo do rótulo da seção: mesma família, menos peso e sem o
+ * fio à direita. O fio separa **seções**, e repeti-lo aqui poria a mesma marca de fim de assunto
+ * dentro de um assunto só.
+ */
+.page-nav__group-label--bloco {
+  margin-bottom: 0.15rem;
+  color: var(--shell-soft);
+  font-size: 0.6rem;
+  letter-spacing: 0.13em;
+  opacity: 0.9;
+}
+
+.page-nav__group-label--bloco::after {
+  background: color-mix(in srgb, var(--shell-line) 55%, transparent);
 }
 
 .app-header {
@@ -1581,6 +1575,59 @@ onUnmounted(() => {
 
 .header-search input::placeholder {
   color: var(--shell-soft);
+}
+
+/*
+ * A busca do módulo herda a caixa do campo do portal de propósito: é o mesmo lugar, o mesmo
+ * tamanho e o mesmo ícone que o cabeçalho sempre teve — só que agora abre algo.
+ */
+.header-search--botao {
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.header-search--botao:hover {
+  border-color: color-mix(in srgb, var(--shell-accent) 40%, var(--shell-line));
+  background: color-mix(in srgb, var(--shell-accent) 6%, var(--shell-surface));
+  color: var(--shell-text);
+}
+
+.header-search--botao:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--shell-accent) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.header-search__texto {
+  overflow: hidden;
+  flex: 1 1 auto;
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A tecla é pista, não botão: some no toque, onde não existe atalho de teclado nenhum. */
+.header-search__tecla {
+  flex: 0 0 auto;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--shell-line);
+  border-radius: 0.35rem;
+  background: var(--shell-surface-soft);
+  color: var(--shell-soft);
+  font-family: inherit;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+@media (pointer: coarse) {
+  .header-search__tecla {
+    display: none;
+  }
 }
 
 .header-resgate {

@@ -17,6 +17,7 @@ import { computed, ref } from 'vue'
 import i18n from '@/i18n'
 import type { Locale } from '@/i18n/locales'
 
+import { invalidarPendenciasClinicas } from '../composables/useClinicoPendencias'
 import { CLINIC_UTC_OFFSET } from '../data/fixtures'
 import { TEXTO_DO_CATALOGO } from '../data/fixtures/catalog-text'
 import { catalogRepository, type CatalogosClinicos } from '../data/repositories'
@@ -143,9 +144,17 @@ export const useClinicoStore = defineStore('clinico', () => {
     }
   }
 
-  /** Ponto único de invalidação. Toda mutação do módulo passa por aqui. */
+  /**
+   * Ponto único de invalidação. Toda mutação do módulo passa por aqui.
+   *
+   * Além das telas abertas, avisa o contador do menu: uma dose marcada, uma alta ou um
+   * atendimento fechado mudam o número que o menu mostra ao lado da tela de onde a mutação
+   * saiu, e um contador que só se atualiza no F5 é pior que contador nenhum — ele mente com
+   * ar de autoridade.
+   */
   function invalidarTudo() {
     revisao.value += 1
+    invalidarPendenciasClinicas()
   }
 
   function pet(petId: string): Pet | null {

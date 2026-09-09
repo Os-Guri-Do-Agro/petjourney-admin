@@ -63,10 +63,7 @@ export function horariosDaPrescricao(
   clock: ClinicClock,
 ): ISODateTime[] {
   const passoHoras = Math.max(1, Math.round(prescricao.frequenciaHoras))
-  const limite = Math.min(
-    Date.parse(prescricao.encerraEm ?? ate),
-    Date.parse(ate),
-  )
+  const limite = Math.min(Date.parse(prescricao.encerraEm ?? ate), Date.parse(ate))
 
   const referencia = clock.dateOf(prescricao.primeiroHorario)
   const inicioMin = clock.minutesFrom(prescricao.primeiroHorario, referencia)
@@ -111,10 +108,7 @@ export function situacaoDaAdministracao(
 }
 
 /** Minutos de atraso de uma pendência. Zero para o que ainda está na janela ou já foi resolvido. */
-export function atrasoEmMinutos(
-  administracao: AdministracaoAgendada,
-  agora: ISODateTime,
-): number {
+export function atrasoEmMinutos(administracao: AdministracaoAgendada, agora: ISODateTime): number {
   if (situacaoDaAdministracao(administracao, agora) !== 'atrasada') {
     return 0
   }
@@ -278,12 +272,7 @@ export function pendenciasDaPassagem(input: {
   internacoesComEvolucaoNoTurno: string[]
 }): PendenciasDaPassagem {
   const { fim } = limitesDoPlantao(input.kind, input.data, input.clock)
-  const doTurno = administracoesDoPlantao(
-    input.administracoes,
-    input.kind,
-    input.data,
-    input.clock,
-  )
+  const doTurno = administracoesDoPlantao(input.administracoes, input.kind, input.data, input.clock)
   const registradas = new Set(input.internacoesComEvolucaoNoTurno)
 
   /*
@@ -296,8 +285,7 @@ export function pendenciasDaPassagem(input: {
 
   return {
     atrasadas: doTurno.filter(
-      (item) =>
-        !naTroca.has(item.id) && situacaoDaAdministracao(item, input.agora) === 'atrasada',
+      (item) => !naTroca.has(item.id) && situacaoDaAdministracao(item, input.agora) === 'atrasada',
     ),
     emCimaDaTroca,
     semEvolucao: input.internacoesAbertas.filter((id) => !registradas.has(id)),
@@ -320,10 +308,7 @@ export type OcupacaoDoLeito = {
  * que o mapa responde é "onde há vaga e quem está onde", e ela exige que o leito vazio ocupe
  * espaço na tela. Uma lista de internados esconde exatamente a informação que falta.
  */
-export function mapaDeLeitos(
-  leitos: Leito[],
-  internacoes: Internacao[],
-): OcupacaoDoLeito[] {
+export function mapaDeLeitos(leitos: Leito[], internacoes: Internacao[]): OcupacaoDoLeito[] {
   const abertas = internacoes.filter((item) => item.status === 'internado')
 
   return leitos.map((leito) => ({
@@ -448,10 +433,7 @@ export function taxaDeOcupacao(leitos: Leito[], internacoes: Internacao[]): numb
 export function horasInternado(internacao: Internacao, agora: ISODateTime): number {
   const fim = internacao.altaEm ?? agora
 
-  return Math.max(
-    0,
-    Math.floor((Date.parse(fim) - Date.parse(internacao.entradaEm)) / 3_600_000),
-  )
+  return Math.max(0, Math.floor((Date.parse(fim) - Date.parse(internacao.entradaEm)) / 3_600_000))
 }
 
 // ---------------------------------------------------------------------------
@@ -555,10 +537,7 @@ export function proximoBoletimEm(input: {
   const data = clock.dateOf(previsto)
   const minutos = clock.minutesOf(previsto)
 
-  return clock.toIso(
-    minutos >= SILENCIO_INICIO_MIN ? addDays(data, 1) : data,
-    SILENCIO_FIM_MIN,
-  )
+  return clock.toIso(minutos >= SILENCIO_INICIO_MIN ? addDays(data, 1) : data, SILENCIO_FIM_MIN)
 }
 
 /**
@@ -598,4 +577,118 @@ export type FatosDoBoletim = {
   comeu: boolean | null
   observado: string
   exigeLigacao: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Alta
+// ---------------------------------------------------------------------------
+
+/**
+ * Como a internação termina.
+ *
+ * São três, e não dois, porque "transferido" não é alta nem óbito: o animal saiu vivo e o caso
+ * **continua** em outro lugar. Somá-lo à alta faria a clínica ler como sucesso um encaminhamento
+ * para um centro de referência às três da manhã, e somá-lo ao óbito seria pior ainda.
+ */
+export type DesfechoDaInternacao = Extract<Internacao['status'], 'alta' | 'obito' | 'transferido'>
+
+/** Na ordem em que a tela os oferece: o esperado primeiro, o grave por último. */
+export const DESFECHOS: DesfechoDaInternacao[] = ['alta', 'transferido', 'obito']
+
+/**
+ * O desfecho pode ser contado ao responsável por mensagem?
+ *
+ * Só a alta. É a **mesma regra do boletim de piora**, aplicada ao fim da internação: notícia
+ * grave não chega por notificação. Óbito e transferência exigem uma voz humana antes — e quem
+ * recebe a notícia de que o animal morreu por push não volta a essa clínica, mesmo que tudo o
+ * que se fez antes disso tenha sido impecável.
+ *
+ * A regra é do repositório, e não da tela. Se vivesse na tela, bastaria outra tela — ou uma rota
+ * de API amanhã — para o óbito escapar por notificação.
+ */
+export function saiPorMensagem(desfecho: DesfechoDaInternacao): boolean {
+  return desfecho === 'alta'
+}
+
+/**
+ * O que a internação deixa para trás no instante da alta.
+ *
+ * Números, e não uma lista: quem está fechando a internação já viu o checklist. O que ele
+ * precisa aqui é a conferência de última hora — "ficou alguma coisa?" — antes de um registro que
+ * não se desfaz.
+ */
+export type ResumoDaAlta = {
+  horas: number
+  /** Doses concluídas durante a internação inteira. */
+  feitas: number
+  /** Recusadas e puladas: o que não entrou no animal, e a alta não apaga. */
+  naoFeitas: number
+  /** Pendentes agora — o que está na janela ou atrasado **neste minuto**. */
+  pendentesAgora: number
+  /** Pendentes no futuro: serão suspensas pela alta, e a tela diz quantas antes de confirmar. */
+  aSuspender: number
+  /** Boletins que nunca saíram porque a ligação não foi registrada. */
+  boletinsRetidos: number
+  /** Boletins efetivamente entregues ao responsável durante a internação. */
+  boletinsEnviados: number
+}
+
+export function resumirAlta(input: {
+  internacao: Internacao
+  administracoes: AdministracaoAgendada[]
+  boletins: BoletimAoTutor[]
+  agora: ISODateTime
+}): ResumoDaAlta {
+  const doPaciente = input.administracoes.filter(
+    (item) => item.internacaoId === input.internacao.id,
+  )
+
+  const pendentes = doPaciente.filter((item) => item.status === 'pendente')
+
+  return {
+    horas: horasInternado(input.internacao, input.agora),
+    feitas: doPaciente.filter((item) => item.status === 'feita').length,
+    naoFeitas: doPaciente.filter((item) => item.status === 'recusada' || item.status === 'pulada')
+      .length,
+    pendentesAgora: pendentesAgora(pendentes, input.agora).length,
+    /*
+     * "A suspender" é o que sobra depois de tirar o que já cobra ação agora — as duas contas
+     * somadas dariam a mesma dose duas vezes, e a tela diria "1 pendente e 1 a suspender" sobre
+     * uma dose só.
+     */
+    aSuspender: pendentes.length - pendentesAgora(pendentes, input.agora).length,
+    boletinsRetidos: input.boletins.filter((item) => item.status === 'retido').length,
+    boletinsEnviados: input.boletins.filter((item) => item.status === 'enviado').length,
+  }
+}
+
+/**
+ * O que a tela precisa dizer em voz alta antes de a alta ser confirmada.
+ *
+ * São **avisos, e nunca travas**. A tentação de bloquear é grande e está errada: um animal pode
+ * ir para casa com a dose das 18h por dar — o responsável leva o comprimido no bolso — e um
+ * óbito acontece com um boletim retido na fila. Travar a alta nesses casos não faz a clínica
+ * resolver a pendência; faz o animal sair pela porta enquanto o sistema segue dizendo que ele
+ * está no leito R3, e é assim que o mapa de leitos deixa de ser confiável.
+ *
+ * Trava, aqui, existe uma só, e é a do desfecho grave que não pode sair por mensagem.
+ */
+export type AvisoDeAlta = 'dose-pendente' | 'dose-futura' | 'boletim-retido'
+
+export function avisosDaAlta(resumo: ResumoDaAlta): AvisoDeAlta[] {
+  const avisos: AvisoDeAlta[] = []
+
+  if (resumo.pendentesAgora > 0) {
+    avisos.push('dose-pendente')
+  }
+
+  if (resumo.aSuspender > 0) {
+    avisos.push('dose-futura')
+  }
+
+  if (resumo.boletinsRetidos > 0) {
+    avisos.push('boletim-retido')
+  }
+
+  return avisos
 }

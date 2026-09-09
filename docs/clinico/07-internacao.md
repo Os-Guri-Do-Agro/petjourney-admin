@@ -31,6 +31,7 @@ ligar para a clínica.
 | **Boletim: frequência configurável** | Feito — de 1 em 1 hora até 24 em 24, com o custo em mensagens/dia à vista |
 | Prévia do que o responsável vê | Feito — a conversa do app ao lado da tela da clínica |
 | **Cadastro de leitos** | Feito — a clínica cadastra, renomeia, tira de operação com motivo e devolve |
+| **Alta hospitalar** | Feito — três desfechos, conferência do que fica para trás e a última mensagem ao responsável |
 
 ### Casos difíceis
 
@@ -116,6 +117,67 @@ ligar para a clínica.
 
 - **A janela de tolerância é de 30 minutos.** Apertada demais, o checklist vive vermelho num
   plantão que está indo bem — e um checklist que vive vermelho ninguém lê, que é o desfecho pior.
+
+### A alta
+
+O motor da alta existia desde o primeiro dia — `internacaoRepository.darAlta` — e **nenhuma tela o
+chamava**. O animal entrava no mapa de leitos e não tinha por onde sair: o protótipo demonstrava
+metade de um ciclo e parava exatamente onde a clínica precisa registrar o que aconteceu.
+
+- **São três desfechos, e não dois.** "Transferido" não é alta nem óbito: o animal saiu vivo e o
+  caso **continua** em outro lugar. Somá-lo à alta faria a clínica ler como sucesso um
+  encaminhamento às 3 da manhã para um centro de referência; somá-lo ao óbito seria pior.
+
+- **Óbito e transferência não saem por mensagem.** É a **mesma regra do boletim de piora**, no
+  outro extremo da internação: notícia grave não chega por notificação. As duas exigem
+  `avisadoPorTelefone`, e o repositório recusa o encerramento sem ele (`AltaSemAvisoError`). A
+  regra mora lá, e não na tela, pelo motivo de sempre — tela se contorna, e uma rota de API amanhã
+  contornaria sozinha.
+
+- **A alta escreve a última mensagem ao responsável.** A conversa do aplicativo terminava no
+  boletim das 14h, e quem estava do outro lado ficava com o celular na mão num sábado à noite sem
+  saber se já podia parar de olhar. O boletim de alta fecha o ciclo que os outros abriram, e nasce
+  **liberado** — `comporBoletim` não serve aqui porque decide a retenção pela gravidade, e um
+  animal que passou a internação inteira crítico e teve alta cairia como notícia grave, preso
+  esperando uma ligação que ninguém precisa dar.
+
+- **Nenhuma pendência trava a alta.** Um animal pode ir para casa com a dose das 18h no bolso do
+  responsável, e um óbito acontece com boletim retido na fila. Travar não faz a clínica resolver a
+  pendência: faz o animal sair pela porta enquanto o sistema segue dizendo que ele está no leito
+  R3 — e é assim que um mapa de leitos deixa de ser confiável. O diálogo **avisa** e deixa
+  registrar.
+
+- **A orientação é obrigatória nos três desfechos.** Na alta ela é o que o responsável vai ler no
+  aplicativo e seguir em casa. No óbito e na transferência é o registro do que foi dito ao
+  telefone — a única linha que responde, seis meses depois, ao que exatamente foi comunicado.
+
+- **A conferência é de números, não de lista.** Quem chegou ao encerramento já viu o checklist. O
+  que falta é a pergunta "ficou alguma coisa?" antes de um registro que não se desfaz. Pendentes
+  agora e a suspender são contados **separados**: somar as duas colunas diria "1 pendente e 1 a
+  suspender" sobre uma dose só.
+
+- **Encerrar fica na migalha, não junto das abas.** As quatro abas são o trabalho do turno, que se
+  repete a cada meia hora; a alta acontece uma vez e não se desfaz. Na mesma fileira, as duas
+  coisas convidariam ao clique errado no fim de um plantão de doze horas.
+
+- **A internação encerrada continua alcançável, e diz que está encerrada na primeira linha.** Sem
+  a faixa, a tela de um animal que foi para casa é indistinguível da de um animal que está no
+  leito — e alguém marca uma dose numa internação que acabou ontem. Prescrever some; a lista
+  inteira continua legível. Registro fechado se lê, não se continua.
+
+- **A faixa de encerramento é neutra nos três desfechos.** Verde de sucesso na linha que diz que o
+  animal morreu seria a pior escolha possível de paleta.
+
+### O boletim retido ganhou dono
+
+O mapa contava os retidos num total no topo — "1 boletim retido" — e esse total não dizia **de
+quem**. Achar o paciente custava abrir os cinco internados um a um, que é exatamente a busca que um
+boletim retido não tem tempo de esperar. `LeitoNoMapa.boletimRetido` põe o selo no cartão, com
+ícone de telefone e não de alerta: o que se pede ali não é atenção, é uma ligação.
+
+O selo é **cheio**, e o do atraso é contornado. Os dois podem aparecer no mesmo cartão, e com a
+mesma marcação o olho os leria como duas linhas da mesma coisa — são dois pedidos diferentes: o
+atraso chama a enfermagem, que está no corredor; o boletim chama alguém para pegar o telefone.
 
 ---
 

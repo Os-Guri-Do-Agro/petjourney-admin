@@ -2,6 +2,10 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import i18n from '@/i18n'
+import {
+  useClinicoPendencias,
+  type ContagemDePendencia,
+} from '@/features/clinico/composables/useClinicoPendencias'
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { useModuloClinico } from '@/composables/useModuloClinico'
 import { useParceiroStore } from '@/stores/parceiro'
@@ -14,12 +18,40 @@ export type AppNavigationItem = {
   comingSoon?: boolean
   /** Cadastro suspenso: item visível com cadeado; a tela destino mostra o gate. */
   locked?: boolean
+  /**
+   * Quanto trabalho está parado atrás deste link.
+   *
+   * Só conta o que **alguém precisa fazer** — nunca volume de rotina. Zero não vira selo: um
+   * "0" ao lado de cada tela é ruído que ensina a não olhar para a coluna.
+   */
+  badge?: number
+  /** Gravidade do selo, na mesma escada de tom do módulo clínico. */
+  badgeTom?: 'neutro' | 'atencao' | 'risco'
+  /** O que o número quer dizer, para quem passa o mouse e para o leitor de tela. */
+  badgeTitulo?: string
+}
+
+/**
+ * Um bloco de telas dentro de uma seção, com rótulo próprio.
+ *
+ * Existe por causa da seção **Clínica**, que tem dez destinos. Dez links seguidos, sem hierarquia
+ * nenhuma, obrigam quem chega a ler os dez para descobrir qual responde à pergunta do momento —
+ * e foi essa lista plana que produziu a reclamação de "fluxo confuso". Os blocos não tiram nem
+ * escondem nada: dão à lista a mesma ordem que a cabeça de quem opera já usa — o que é **agora**,
+ * o que está **em curso**, o que **ficou para trás** e o que se olha **depois**.
+ */
+export type AppNavigationBloco = {
+  id: string
+  label: string
+  items: AppNavigationItem[]
 }
 
 export type AppNavigationGroup = {
   id: string
   label: string
   items: AppNavigationItem[]
+  /** Subdivisão rotulada de `items`. Quando ausente, a lista é plana como sempre foi. */
+  blocos?: AppNavigationBloco[]
 }
 
 export type AppNavigationSection = {
@@ -27,6 +59,7 @@ export type AppNavigationSection = {
   label: string
   icon: string
   items: AppNavigationItem[]
+  blocos?: AppNavigationBloco[]
 }
 
 /**
@@ -65,24 +98,74 @@ export const EQUIPE_MENU_ENABLED = false
  */
 export const OVERVIEW_SECTION_ID = 'overview'
 
-/** Rotas do módulo clínico. Os rótulos vêm dos catálogos; nada fixo em português aqui. */
-const CLINICAL_ROUTES = [
-  { key: 'clinico.meuDia.titulo', to: '/veterinario/meu-dia', icon: 'pi pi-sun' },
-  { key: 'clinico.resumo.titulo', to: '/veterinario/resumo', icon: 'pi pi-chart-bar' },
-  { key: 'clinico.agenda.titulo', to: '/veterinario/agenda', icon: 'pi pi-calendar' },
-  { key: 'clinico.atendimentos.titulo', to: '/veterinario/atendimentos', icon: 'pi pi-file-edit' },
-  { key: 'clinico.fila.titulo', to: '/veterinario/fila', icon: 'pi pi-hourglass' },
-  /*
-   * Internação vem logo depois da fila porque é a mesma pergunta com outro relógio: a fila é
-   * quem espera hoje, a internação é quem está aqui há três dias. As duas são trabalho em
-   * curso, e nenhuma delas cabe na agenda.
-   */
-  { key: 'clinico.internacao.titulo', to: '/veterinario/internacao', icon: 'pi pi-building' },
-  { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'pi pi-user-minus' },
-  /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
-  { key: 'clinico.vacinas.titulo', to: '/veterinario/vacinas', icon: 'pi pi-shield' },
-  { key: 'clinico.atividades.titulo', to: '/veterinario/atividades', icon: 'pi pi-list' },
-] as const
+/**
+ * Rotas do módulo clínico, agrupadas pela pergunta que respondem.
+ *
+ * Os rótulos vêm dos catálogos; nada fixo em português aqui.
+ *
+ * A lista era plana e tinha dez itens em ordem de construção — Meu dia, Resumo, Agenda,
+ * Prontuários, Fila, Internação, Faltas, Vacinas, Atividades. Ordem de construção não é ordem de
+ * uso: o Resumo, que se olha na segunda de manhã uma vez por semana, ficava em segundo lugar,
+ * acima da Agenda; e a Fila aparecia depois dos Prontuários, embora as duas coisas aconteçam em
+ * momentos opostos do dia.
+ *
+ * Os quatro blocos abaixo são as quatro perguntas, na ordem em que a clínica as faz:
+ *
+ * 1. **Agora** — o que está acontecendo neste minuto e onde cabe mais alguém.
+ * 2. **Em curso** — o trabalho aberto que atravessa o dia: prontuário sem fecho, animal internado.
+ * 3. **Pendências** — o que ficou para trás e envelhece calado.
+ * 4. **Análise** — o que só faz sentido olhar depois que o dia acabou.
+ *
+ * Nada saiu da lista. O que mudou é que ela deixou de exigir que se leia inteira.
+ */
+type RotaClinica = { key: string; to: string; icon: string }
+
+type BlocoClinico = { id: string; key: string; rotas: readonly RotaClinica[] }
+
+const CLINICAL_BLOCKS: readonly BlocoClinico[] = [
+  {
+    id: 'agora',
+    key: 'clinico.navegacao.agora',
+    rotas: [
+      { key: 'clinico.meuDia.titulo', to: '/veterinario/meu-dia', icon: 'pi pi-sun' },
+      { key: 'clinico.agenda.titulo', to: '/veterinario/agenda', icon: 'pi pi-calendar' },
+      { key: 'clinico.fila.titulo', to: '/veterinario/fila', icon: 'pi pi-hourglass' },
+    ],
+  },
+  {
+    /*
+     * Internação vem logo depois do prontuário porque é a mesma pergunta com outro relógio: o
+     * prontuário é o trabalho de vinte minutos, a internação é o de três dias. As duas são
+     * trabalho **aberto**, e nenhuma delas cabe na agenda.
+     */
+    id: 'em-curso',
+    key: 'clinico.navegacao.emCurso',
+    rotas: [
+      {
+        key: 'clinico.atendimentos.titulo',
+        to: '/veterinario/atendimentos',
+        icon: 'pi pi-file-edit',
+      },
+      { key: 'clinico.internacao.titulo', to: '/veterinario/internacao', icon: 'pi pi-building' },
+    ],
+  },
+  {
+    id: 'pendencias',
+    key: 'clinico.navegacao.pendencias',
+    rotas: [
+      { key: 'clinico.atividades.titulo', to: '/veterinario/atividades', icon: 'pi pi-list' },
+      { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'pi pi-user-minus' },
+      /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
+      { key: 'clinico.vacinas.titulo', to: '/veterinario/vacinas', icon: 'pi pi-shield' },
+    ],
+  },
+  {
+    id: 'analise',
+    key: 'clinico.navegacao.analise',
+    rotas: [{ key: 'clinico.resumo.titulo', to: '/veterinario/resumo', icon: 'pi pi-chart-bar' }],
+  },
+]
+
 
 const PATIENT_ROUTES = [
   { key: 'clinico.pacientes.titulo', to: '/veterinario/pacientes', icon: 'pi pi-users' },
@@ -137,15 +220,69 @@ export function useAppNavigation() {
     return [{ label: t('nav.items.settings'), to: '/settings', icon: 'pi pi-cog' }]
   })
 
-  const clinicalItems = computed<AppNavigationItem[]>(() => {
+  /**
+   * Trabalho parado atrás de cada tela clínica.
+   *
+   * Carrega sozinho quando o módulo está ligado para esta conta, e fica zerado quando não está —
+   * ver `useClinicoPendencias`.
+   */
+  const pendencias = useClinicoPendencias(() => hasClinicalProfile.value)
+
+  /**
+   * Contadores por rota, com a frase que explica o número.
+   *
+   * A frase é por rota e não uma só para todas: "3" ao lado de Fila e "3" ao lado de Vacinas
+   * são três coisas diferentes, e um `title` genérico de "3 pendências" desperdiça o único
+   * lugar em que a tela pode dizer *o quê*. É também o texto que o leitor de tela lê — para
+   * quem não vê a cor do selo, ele é a informação inteira.
+   *
+   * Rota sem entrada aqui simplesmente não ganha selo.
+   */
+  const contagemPorRota = computed<
+    Record<string, { contagem: ContagemDePendencia; frase: string } | undefined>
+  >(() => ({
+    '/veterinario/fila': { contagem: pendencias.fila.value, frase: 'clinico.navegacao.selo.fila' },
+    '/veterinario/internacao': {
+      contagem: pendencias.internacao.value,
+      frase: 'clinico.navegacao.selo.internacao',
+    },
+    '/veterinario/atividades': {
+      contagem: pendencias.atividades.value,
+      frase: 'clinico.navegacao.selo.atividades',
+    },
+    '/veterinario/vacinas': {
+      contagem: pendencias.vacinas.value,
+      frase: 'clinico.navegacao.selo.vacinas',
+    },
+  }))
+
+  function decorarRota(rota: { key: string; to: string; icon: string }): AppNavigationItem {
+    const selo = contagemPorRota.value[rota.to]
+    const item: AppNavigationItem = { label: t(rota.key), to: rota.to, icon: rota.icon }
+
+    /* Zero não vira selo: um "0" em cada linha é ruído que ensina a não olhar para a coluna. */
+    if (selo && selo.contagem.total > 0) {
+      item.badge = selo.contagem.total
+      item.badgeTom = selo.contagem.tom
+      item.badgeTitulo = t(selo.frase, { total: selo.contagem.total }, selo.contagem.total)
+    }
+
+    return item
+  }
+
+  const clinicalBlocos = computed<AppNavigationBloco[]>(() => {
     void locale.value
 
-    return CLINICAL_ROUTES.map((rota) => ({
-      label: t(rota.key),
-      to: rota.to,
-      icon: rota.icon,
+    return CLINICAL_BLOCKS.map((bloco) => ({
+      id: bloco.id,
+      label: t(bloco.key),
+      items: bloco.rotas.map(decorarRota),
     }))
   })
+
+  const clinicalItems = computed<AppNavigationItem[]>(() =>
+    clinicalBlocos.value.flatMap((bloco) => bloco.items),
+  )
 
   const patientItems = computed<AppNavigationItem[]>(() => {
     void locale.value
@@ -205,9 +342,15 @@ export function useAppNavigation() {
       sections.push(
         {
           id: 'clinical',
-          label: t('clinico.modulo'),
+          /*
+           * `clinico.modulo` é um objeto — `{ visivel, oculto }`, as duas frases do interruptor
+           * do módulo. Usado como rótulo, `t()` não achava texto e devolvia o próprio caminho:
+           * a seção clínica se chamava **"clinico.modulo"** no trilho e no cabeçalho da página.
+           */
+          label: t('clinico.navegacao.secao'),
           icon: 'pi pi-calendar',
           items: clinicalItems.value,
+          blocos: clinicalBlocos.value,
         },
         {
           id: 'patients',
@@ -237,6 +380,7 @@ export function useAppNavigation() {
       id: section.id,
       label: section.label,
       items: section.items,
+      blocos: section.blocos,
     })),
   )
 
@@ -356,14 +500,29 @@ export function filterNavigationGroups(
   }
 
   return groups
-    .map((group) => ({
-      ...group,
-      items: group.items.filter(
-        (item) =>
-          item.label.toLowerCase().includes(normalized) ||
-          group.label.toLowerCase().includes(normalized),
-      ),
-    }))
+    .map((group) => {
+      const cabe = (item: AppNavigationItem, rotuloDoBloco: string) =>
+        item.label.toLowerCase().includes(normalized) ||
+        group.label.toLowerCase().includes(normalized) ||
+        rotuloDoBloco.toLowerCase().includes(normalized)
+
+      /*
+       * O bloco filtra junto e some quando esvazia. Deixá-lo com o rótulo e nenhuma linha faria
+       * a busca devolver cabeçalhos de nada — que é como alguém conclui que a busca quebrou.
+       *
+       * O rótulo do bloco também é termo de busca: quem digita "pendências" espera as três
+       * telas do bloco, mesmo que nenhuma delas se chame assim.
+       */
+      const blocos = group.blocos
+        ?.map((bloco) => ({ ...bloco, items: bloco.items.filter((item) => cabe(item, bloco.label)) }))
+        .filter((bloco) => bloco.items.length > 0)
+
+      const items = blocos
+        ? blocos.flatMap((bloco) => bloco.items)
+        : group.items.filter((item) => cabe(item, ''))
+
+      return { ...group, items, ...(blocos ? { blocos } : {}) }
+    })
     .filter((group) => group.items.length > 0)
 }
 

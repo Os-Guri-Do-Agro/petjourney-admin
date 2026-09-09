@@ -76,3 +76,51 @@ export function montarTextoDoBoletim(fatos: FatosDoBoletim): string {
 
   return partes.join(' ')
 }
+
+/**
+ * A última mensagem da internação: o animal foi para casa.
+ *
+ * Fecha a conversa que os boletins abriram. Sem ela, a última coisa que o responsável leu no
+ * aplicativo continua sendo o boletim das 14h — e ele fica com o celular na mão num sábado à
+ * noite sem saber se pode parar de olhar.
+ *
+ * Só existe para o desfecho **alta**. Óbito e transferência não saem por mensagem, pela mesma
+ * razão que a piora não sai: quem recebe essa notícia por notificação não volta à clínica.
+ *
+ * Três coisas, nesta ordem, e nada além: **foi para casa**, quanto tempo ficou, e o que fazer
+ * agora. A gratidão vem no fim porque no começo soa a formulário.
+ */
+export type FatosDaAlta = {
+  petNome: string
+  horas: number
+  /** Orientação de alta escrita pelo veterinário. Vazio quando ele não escreveu nada. */
+  orientacao: string
+}
+
+export function montarTextoDeAlta(fatos: FatosDaAlta): string {
+  const partes: string[] = []
+
+  /*
+   * "Ficou 3 dias" e "ficou 18 horas" são a mesma informação em unidades diferentes, e quem
+   * recebe lê a que corresponde à própria experiência: quem deixou o animal de manhã e buscou à
+   * tarde não pensa em dias.
+   */
+  const dias = Math.floor(fatos.horas / 24)
+  const permanencia =
+    dias >= 1
+      ? `${dias} ${dias === 1 ? 'dia' : 'dias'}`
+      : `${Math.max(1, fatos.horas)} ${fatos.horas === 1 ? 'hora' : 'horas'}`
+
+  partes.push(`${fatos.petNome} recebeu alta e já está indo para casa.`)
+  partes.push(`Ficou ${permanencia} internado conosco.`)
+
+  if (fatos.orientacao.trim()) {
+    partes.push(fatos.orientacao.trim())
+  }
+
+  partes.push(
+    'As orientações e a receita foram entregues na recepção. Qualquer dúvida, estamos à disposição.',
+  )
+
+  return partes.join(' ')
+}

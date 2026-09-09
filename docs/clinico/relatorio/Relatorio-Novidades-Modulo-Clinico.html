@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Módulo clínico — relatório de novidades</title>
+    <style>
+      /*
+       * Documento para impressão em A4.
+       *
+       * A régua deste layout é uma só: **nada que decida alguma coisa pode depender de cor**.
+       * O relatório é impresso, encaminhado em preto e branco e lido em tela de celular, e as
+       * três leituras precisam entregar a mesma hierarquia. Por isso cada nível se distingue por
+       * peso, tamanho e espaço antes de se distinguir por tom.
+       */
+      @page {
+        size: A4;
+        margin: 17mm 15mm 15mm;
+      }
+
+      :root {
+        --verde: #456a60;
+        --verde-fundo: #eef4f2;
+        --verde-linha: #d6e9e2;
+        --tinta: #1f2f2b;
+        --cinza: #5f716b;
+        --fraco: #8a9a94;
+        --ambar: #8a6d1f;
+        --ambar-fundo: #fbf3e2;
+        --ambar-linha: #e6d4a8;
+        --risco: #a2503f;
+        --risco-fundo: #fbeee8;
+        --linha: #e3ebe8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--tinta);
+        font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        font-size: 10.2pt;
+        line-height: 1.55;
+      }
+
+      /* ------------------------------------------------------------ capa */
+
+      .capa {
+        padding-bottom: 10mm;
+        border-bottom: 2.5pt solid var(--verde);
+        margin-bottom: 8mm;
+      }
+
+      .capa__etiqueta {
+        margin: 0 0 3mm;
+        color: var(--verde);
+        font-size: 8pt;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .capa h1 {
+        margin: 0 0 2mm;
+        font-size: 24pt;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+      }
+
+      .capa__linha {
+        margin: 0;
+        color: var(--cinza);
+        font-size: 11pt;
+      }
+
+      .capa__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6mm;
+        margin-top: 6mm;
+        color: var(--fraco);
+        font-size: 8.5pt;
+      }
+
+      .capa__meta strong {
+        color: var(--cinza);
+        font-weight: 700;
+      }
+
+      /* -------------------------------------------------------- estrutura */
+
+      h2 {
+        margin: 9mm 0 3mm;
+        padding-bottom: 1.6mm;
+        border-bottom: 1pt solid var(--verde-linha);
+        color: var(--verde);
+        font-size: 14pt;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        break-after: avoid;
+      }
+
+      h3 {
+        margin: 6mm 0 2mm;
+        font-size: 11pt;
+        font-weight: 750;
+        break-after: avoid;
+      }
+
+      h4 {
+        margin: 4mm 0 1.5mm;
+        color: var(--cinza);
+        font-size: 8.5pt;
+        font-weight: 800;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        break-after: avoid;
+      }
+
+      p {
+        margin: 0 0 2.6mm;
+      }
+
+      ul {
+        margin: 0 0 3mm;
+        padding-left: 5mm;
+      }
+
+      li {
+        margin-bottom: 1.4mm;
+      }
+
+      strong {
+        font-weight: 700;
+      }
+
+      code {
+        padding: 0 0.6mm;
+        border-radius: 1mm;
+        background: var(--verde-fundo);
+        color: var(--verde);
+        font-family: 'Cascadia Mono', Consolas, monospace;
+        font-size: 8.8pt;
+      }
+
+      .secao {
+        break-inside: avoid-page;
+      }
+
+      .quebra {
+        break-before: page;
+      }
+
+      /* --------------------------------------------------------- números */
+
+      .numeros {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3mm;
+        margin: 5mm 0 2mm;
+      }
+
+      .numero {
+        padding: 3.5mm 3mm;
+        border: 0.8pt solid var(--verde-linha);
+        border-radius: 2mm;
+        background: var(--verde-fundo);
+      }
+
+      .numero__valor {
+        display: block;
+        font-size: 17pt;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+
+      .numero__rotulo {
+        display: block;
+        margin-top: 1mm;
+        color: var(--cinza);
+        font-size: 8pt;
+        line-height: 1.35;
+      }
+
+      /* ----------------------------------------------------------- antes/depois */
+
+      .par {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        margin: 0 0 4mm;
+        border: 0.8pt solid var(--linha);
+        border-radius: 2mm;
+        overflow: hidden;
+        break-inside: avoid;
+      }
+
+      .par__lado {
+        padding: 3mm 3.5mm;
+      }
+
+      .par__lado--antes {
+        border-right: 0.8pt solid var(--linha);
+        background: #fafbfa;
+      }
+
+      .par__lado--depois {
+        background: var(--verde-fundo);
+      }
+
+      .par__rotulo {
+        margin: 0 0 1.5mm;
+        font-size: 7.6pt;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .par__lado--antes .par__rotulo {
+        color: var(--fraco);
+      }
+
+      .par__lado--depois .par__rotulo {
+        color: var(--verde);
+      }
+
+      .par p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* ------------------------------------------------------------ tabela */
+
+      table {
+        width: 100%;
+        margin: 0 0 4mm;
+        border-collapse: collapse;
+        font-size: 9.2pt;
+        break-inside: avoid;
+      }
+
+      th {
+        padding: 2mm 2.5mm;
+        border-bottom: 1.2pt solid var(--verde);
+        color: var(--verde);
+        font-size: 8pt;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-align: left;
+        text-transform: uppercase;
+      }
+
+      td {
+        padding: 2mm 2.5mm;
+        border-bottom: 0.6pt solid var(--linha);
+        vertical-align: top;
+      }
+
+      tbody tr:nth-child(even) td {
+        background: #fafbfa;
+      }
+
+      /* ------------------------------------------------------------ caixas */
+
+      .nota {
+        margin: 0 0 4mm;
+        padding: 3mm 3.5mm;
+        border-left: 2.5pt solid var(--verde);
+        background: var(--verde-fundo);
+        break-inside: avoid;
+      }
+
+      .nota--atencao {
+        border-left-color: var(--ambar);
+        background: var(--ambar-fundo);
+      }
+
+      .nota--risco {
+        border-left-color: var(--risco);
+        background: var(--risco-fundo);
+      }
+
+      .nota p:last-child {
+        margin-bottom: 0;
+      }
+
+      .nota__titulo {
+        margin: 0 0 1.5mm;
+        font-size: 9pt;
+        font-weight: 800;
+      }
+
+      /* ------------------------------------------------------------ regra */
+
+      .regra {
+        margin: 0 0 4mm;
+        padding: 3mm 3.5mm;
+        border: 0.8pt dashed var(--verde);
+        border-radius: 2mm;
+        break-inside: avoid;
+      }
+
+      .regra__marca {
+        display: inline-block;
+        margin-right: 2mm;
+        padding: 0.4mm 2mm;
+        border-radius: 6mm;
+        background: var(--verde);
+        color: #fff;
+        font-size: 7.4pt;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        vertical-align: 0.4mm;
+      }
+
+      /* -------------------------------------------------------- prioridade */
+
+      .prioridade {
+        display: inline-block;
+        min-width: 16mm;
+        padding: 0.3mm 1.8mm;
+        border-radius: 1mm;
+        font-size: 7.4pt;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .prioridade--alta {
+        border: 0.7pt solid var(--risco);
+        background: var(--risco-fundo);
+        color: var(--risco);
+      }
+
+      .prioridade--media {
+        border: 0.7pt solid var(--ambar-linha);
+        background: var(--ambar-fundo);
+        color: var(--ambar);
+      }
+
+      .prioridade--baixa {
+        border: 0.7pt solid var(--linha);
+        background: #fafbfa;
+        color: var(--cinza);
+      }
+
+      /* ---------------------------------------------------------- rodapé */
+
+      .rodape {
+        margin-top: 10mm;
+        padding-top: 3mm;
+        border-top: 1pt solid var(--verde-linha);
+        color: var(--fraco);
+        font-size: 8pt;
+      }
+
+      .verificacao {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2mm 5mm;
+        margin: 0 0 4mm;
+        font-size: 9.2pt;
+      }
+
+      .verificacao div {
+        display: flex;
+        gap: 2mm;
+        padding: 1.6mm 0;
+        border-bottom: 0.6pt solid var(--linha);
+      }
+
+      .verificacao span:first-child {
+        flex: 1 1 auto;
+        color: var(--cinza);
+      }
+
+      .verificacao span:last-child {
+        font-weight: 750;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="capa">
+      <p class="capa__etiqueta">PetJourney · Portal do parceiro</p>
+      <h1>Módulo clínico — relatório de novidades</h1>
+      <p class="capa__linha">
+        Orientação do fluxo, alta hospitalar e os defeitos encontrados no caminho.
+      </p>
+      <div class="capa__meta">
+        <span><strong>Data:</strong> 9 de setembro de 2026</span>
+        <span><strong>Ramo:</strong> develop</span>
+        <span><strong>Escopo:</strong> <code>src/features/clinico</code>, menu do portal</span>
+        <span><strong>Natureza:</strong> protótipo navegável, sem API</span>
+      </div>
+    </header>
+
+    <section class="secao">
+      <h2>Em uma página</h2>
+
+      <p>
+        O ponto de partida foi uma reclamação: <strong>o fluxo clínico está confuso</strong>. A
+        auditoria não encontrou tela faltando nem tela sobrando. Encontrou uma
+        <strong>lista plana de dez destinos</strong>, todos aparentemente vazios, sem nenhuma
+        indicação de qual responde à pergunta do momento — e nenhuma forma de chegar a um paciente
+        sem antes adivinhar em qual das quatro listas ele está agora.
+      </p>
+
+      <p>
+        Ao percorrer o módulo inteiro atrás disso, apareceu algo maior: a
+        <strong>alta hospitalar não tinha tela</strong>. O motor existia no repositório desde o
+        primeiro dia e nenhuma tela o chamava — o animal entrava no mapa de leitos e não tinha por
+        onde sair. O protótipo demonstrava metade de um ciclo e parava exatamente onde a clínica
+        precisa registrar o que aconteceu.
+      </p>
+
+      <p>
+        Nada foi removido. Os dez destinos continuam os dez, com os mesmos nomes e as mesmas
+        rotas; o que mudou é que a lista deixou de exigir leitura inteira, o menu passou a dizer
+        onde está o trabalho, e a internação deixou de ser um sistema paralelo.
+      </p>
+
+      <div class="numeros">
+        <div class="numero">
+          <span class="numero__valor">691</span>
+          <span class="numero__rotulo">testes passando<br />(eram 661)</span>
+        </div>
+        <div class="numero">
+          <span class="numero__valor">+30</span>
+          <span class="numero__rotulo">testes novos, em 59 arquivos</span>
+        </div>
+        <div class="numero">
+          <span class="numero__valor">3</span>
+          <span class="numero__rotulo">defeitos encontrados e corrigidos</span>
+        </div>
+        <div class="numero">
+          <span class="numero__valor">62</span>
+          <span class="numero__rotulo">chaves novas, nos 4 idiomas</span>
+        </div>
+      </div>
+
+      <div class="nota">
+        <p class="nota__titulo">A régua que orientou cada decisão</p>
+        <p>
+          Nada foi retirado do que já existia. Toda mudança ou <strong>encurta um caminho</strong>
+          que a clínica já percorria, ou <strong>fecha um ciclo</strong> que começava e não
+          terminava. Onde havia dúvida entre travar e avisar, a escolha foi avisar: regra que
+          impede o registro da verdade não protege ninguém — produz um sistema que a clínica
+          contorna no papel.
+        </p>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+
+    <section class="quebra">
+      <h2>Parte 1 · Orientação — a resposta à reclamação</h2>
+
+      <h3>1.1 O menu agora diz onde está o trabalho</h3>
+
+      <div class="par">
+        <div class="par__lado par__lado--antes">
+          <p class="par__rotulo">Antes</p>
+          <p>
+            Dez destinos, todos com a mesma aparência. Para saber se havia alguém na fila, uma dose
+            atrasada ou um rascunho sem fecho, era preciso <strong>abrir as dez telas</strong> e
+            conferir uma a uma. Quem opera a clínica fazia essa ronda várias vezes por dia.
+          </p>
+        </div>
+        <div class="par__lado par__lado--depois">
+          <p class="par__rotulo">Agora</p>
+          <p>
+            Cada tela com trabalho parado carrega um selo com o número. Fila, Internação,
+            Atividades e Vacinas. A ronda das dez telas virou um olhar para a coluna.
+          </p>
+        </div>
+      </div>
+
+      <h4>As regras do selo</h4>
+      <ul>
+        <li>
+          <strong>Só conta o que alguém precisa fazer.</strong> "38 atendimentos hoje" não é
+          pendência, é rotina; "2 doses atrasadas" é. Um contador que soma rotina ensina a ignorar
+          contador — e aí ele para de funcionar no dia em que o número importa.
+        </li>
+        <li>
+          <strong>Cada número aparece em um lugar só.</strong> O rascunho de prontuário é pendência
+          de <em>Atividades</em> e não também de <em>Prontuários</em>: o mesmo trabalho contado duas
+          vezes faz a clínica procurar duas vezes e achar uma.
+        </li>
+        <li><strong>Zero não vira selo.</strong> Um "0" em cada linha é ruído que ensina a não olhar.</li>
+        <li>
+          <strong>Três tons, e cada um sobe um canal além da cor.</strong> Em escala de cinza, ou
+          para quem não distingue vermelho de âmbar, a diferença entre "há gente na fila" e "há um
+          boletim preso" continua de pé. O número nunca fica sozinho para o leitor de tela: a frase
+          que o explica é <strong>por tela</strong>, porque "3" ao lado de Fila e "3" ao lado de
+          Vacinas são três coisas diferentes.
+        </li>
+      </ul>
+
+      <h3>1.2 Os dez destinos viraram quatro perguntas</h3>
+
+      <p>
+        A ordem anterior era a de construção — Meu dia, Resumo, Agenda, Prontuários, Fila,
+        Internação, Faltas, Vacinas, Atividades. Ordem de construção não é ordem de uso: o Resumo,
+        que se olha na segunda de manhã uma vez por semana, ficava em segundo lugar, acima da
+        Agenda.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 26mm">Bloco</th>
+            <th style="width: 52mm">A pergunta que ele responde</th>
+            <th>Telas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Agora</strong></td>
+            <td>O que está acontecendo neste minuto, e onde cabe mais alguém</td>
+            <td>Meu dia · Agenda · Fila de espera</td>
+          </tr>
+          <tr>
+            <td><strong>Em curso</strong></td>
+            <td>O trabalho aberto que atravessa o dia</td>
+            <td>Prontuários · Internação</td>
+          </tr>
+          <tr>
+            <td><strong>Pendências</strong></td>
+            <td>O que ficou para trás e envelhece calado</td>
+            <td>Atividades · Faltas · Vacinas</td>
+          </tr>
+          <tr>
+            <td><strong>Análise</strong></td>
+            <td>O que só faz sentido olhar depois que o dia acabou</td>
+            <td>Resumo</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        O rótulo do bloco também é termo de busca: quem digita "pendências" no filtro do menu
+        recebe as três telas do bloco, mesmo que nenhuma delas se chame assim.
+      </p>
+
+      <h3>1.3 Busca global — <code>Ctrl / ⌘ + K</code></h3>
+
+      <div class="par">
+        <div class="par__lado par__lado--antes">
+          <p class="par__rotulo">Antes</p>
+          <p>
+            Para chegar ao Bento era preciso saber <em>por onde</em> se chega ao Bento: Pacientes se
+            veio ontem, Internação se está no leito, Agenda se tem horário hoje, Prontuários se
+            ficou em rascunho. Quem opera a clínica sabe o nome do animal — quase nunca sabe em qual
+            das quatro listas ele está.
+          </p>
+        </div>
+        <div class="par__lado par__lado--depois">
+          <p class="par__rotulo">Agora</p>
+          <p>
+            Digita-se o que se sabe — nome do animal, nome de quem responde por ele, telefone, ou o
+            nome da tela — e a resposta é o destino. De qualquer tela, sem tirar as mãos do teclado.
+          </p>
+        </div>
+      </div>
+
+      <ul>
+        <li>
+          <strong>Telas e pacientes na mesma lista, telas primeiro.</strong> Separar em abas
+          obrigaria a escolher antes de procurar — exatamente a escolha que quem está perdido não
+          consegue fazer.
+        </li>
+        <li>
+          <strong>Abre mostrando as telas, sem digitar nada.</strong> Uma paleta vazia é uma
+          pergunta feita a quem não sabe a resposta. Com a lista à vista, ela também é o mapa do
+          módulo — e é assim que ela ensina o menu a quem chegou hoje.
+        </li>
+        <li>
+          <strong>O atalho atravessa campo de texto.</strong> É a única tecla do portal que precisa
+          funcionar <em>enquanto</em> alguém digita: quem está no meio de uma anamnese e precisa
+          conferir o histórico não vai clicar fora antes. Não colide com os atalhos de uma letra da
+          agenda.
+        </li>
+        <li>
+          <strong>O paciente carrega o que o identifica.</strong> Há dois "Mel" no cadastro, e é o
+          nome de quem responde por eles que os separa. Quem escolhe errado no balcão abre o
+          prontuário errado.
+        </li>
+      </ul>
+
+      <h3>1.4 A internação deixou de ser um sistema paralelo</h3>
+
+      <p>
+        Um veterinário com cinco animais internados abria a landing do próprio perfil e não via
+        nenhum deles. O portal parecia dois sistemas: o das consultas, que "Meu dia" resumia, e o da
+        internação, que só existia para quem lembrasse de abrir o mapa de leitos.
+      </p>
+
+      <ul>
+        <li>
+          <strong>"Meu dia" ganhou o bloco <em>Internados que cobram você</em></strong> — só quem
+          tem dose atrasada ou boletim preso, nunca a lista inteira. Quem quer a lista tem o mapa;
+          quem abre a landing às oito da manhã quer saber o que não pode esperar.
+        </li>
+        <li>
+          <strong>O boletim retido subiu para o topo de "Meu dia", como botão.</strong> No mapa ele
+          é texto — quem está lá já chegou ao lugar onde se resolve. Três telas antes, um aviso que
+          diz "ligue para alguém" sem levar a lugar nenhum transfere para quem lê o trabalho de
+          descobrir onde é esse lugar.
+        </li>
+        <li>
+          <strong>O histórico do paciente sabe que ele está internado agora</strong>, e leva ao
+          leito. Era a página mais completa que a clínica tem sobre um animal, e a única que não
+          sabia que ele estava internado ali dentro.
+        </li>
+        <li>
+          <strong>A internação deixou de ser um beco:</strong> do leito se chega ao histórico do
+          paciente sem passar pelo menu.
+        </li>
+      </ul>
+    </section>
+
+    <!-- ================================================================= -->
+
+    <section class="quebra">
+      <h2>Parte 2 · Internação — o ciclo que agora fecha</h2>
+
+      <div class="nota nota--risco">
+        <p class="nota__titulo">O que estava faltando</p>
+        <p>
+          <code>internacaoRepository.darAlta</code> existia desde o primeiro dia e
+          <strong>nenhuma tela o chamava</strong>. O animal entrava no mapa de leitos e não tinha
+          por onde sair: internar, medicar, evoluir e comunicar funcionavam; encerrar, não. Além do
+          registro que ficava por fazer, o mapa de leitos perdia o sentido — leito ocupado por um
+          animal que foi para casa é uma vaga que a clínica não sabe que tem.
+        </p>
+      </div>
+
+      <h3>2.1 Três desfechos, e não dois</h3>
+
+      <p>
+        <strong>Alta</strong>, <strong>transferência</strong> e <strong>óbito</strong>. A
+        transferência é o caso que costuma sumir dos sistemas: o animal saiu vivo e o caso continua
+        em outro lugar. Somá-la à alta faria a clínica ler como sucesso um encaminhamento às três da
+        manhã para um centro de referência; somá-la ao óbito seria pior.
+      </p>
+
+      <div class="regra">
+        <p>
+          <span class="regra__marca">Regra de servidor</span>
+          <strong>Óbito e transferência não saem por mensagem.</strong>
+        </p>
+        <p>
+          É a mesma regra do boletim de piora, aplicada ao outro extremo da internação: notícia
+          grave não chega por notificação. As duas exigem o registro da ligação, e o repositório
+          recusa o encerramento sem ele — <code>AltaSemAvisoError</code>. A regra mora lá, e não na
+          tela, pelo motivo de sempre: tela se contorna, e uma rota de API amanhã contornaria
+          sozinha.
+        </p>
+      </div>
+
+      <h3>2.2 A última mensagem ao responsável</h3>
+
+      <p>
+        A conversa do aplicativo terminava no boletim das 14h, e quem estava do outro lado ficava
+        com o celular na mão num sábado à noite sem saber se já podia parar de olhar. A alta agora
+        escreve a mensagem que fecha o ciclo que os boletins abriram: o animal foi para casa, quanto
+        tempo ficou, e o que fazer agora.
+      </p>
+
+      <p>
+        Ela nasce <strong>liberada</strong>, e não retida. O compositor comum decide a retenção pela
+        gravidade — e um animal que passou a internação inteira crítico e teve alta cairia como
+        notícia grave, preso esperando uma ligação que ninguém precisa dar.
+      </p>
+
+      <h3>2.3 A conferência de última hora</h3>
+
+      <p>
+        Antes de confirmar, o diálogo mostra o que fica para trás: permanência, doses dadas,
+        recusadas ou puladas, boletins entregues — e avisa sobre dose pendente agora, dose futura
+        que será suspensa e boletim que nunca saiu.
+      </p>
+
+      <div class="nota nota--atencao">
+        <p class="nota__titulo">São avisos, e nunca travas</p>
+        <p>
+          A tentação de bloquear é grande e está errada. Um animal pode ir para casa com a dose das
+          18h no bolso do responsável, e um óbito acontece com um boletim retido na fila. Travar não
+          faz a clínica resolver a pendência: faz o animal sair pela porta enquanto o sistema segue
+          dizendo que ele está no leito R3 — e é assim que um mapa de leitos deixa de ser confiável.
+        </p>
+      </div>
+
+      <ul>
+        <li>
+          <strong>A orientação é obrigatória nos três desfechos.</strong> Na alta ela é o que o
+          responsável vai ler e seguir em casa. No óbito e na transferência é o registro do que foi
+          dito ao telefone — a única linha que responde, seis meses depois, ao que exatamente foi
+          comunicado e por quem.
+        </li>
+        <li>
+          <strong>Encerrar fica na migalha, não junto das abas.</strong> As quatro abas são o
+          trabalho do turno, que se repete a cada meia hora; a alta acontece uma vez e não se
+          desfaz. Na mesma fileira, as duas coisas convidariam ao clique errado no fim de um plantão
+          de doze horas.
+        </li>
+        <li>
+          <strong>A internação encerrada continua alcançável</strong> — pelo link que alguém mandou,
+          pelo histórico, pela auditoria de seis meses depois — e diz que está encerrada na primeira
+          linha. Prescrever some; a lista inteira continua legível. Registro fechado se lê, não se
+          continua.
+        </li>
+        <li>
+          <strong>A faixa de encerramento é neutra nos três desfechos.</strong> Verde de sucesso na
+          linha que diz que o animal morreu seria a pior escolha possível de paleta.
+        </li>
+      </ul>
+
+      <h3>2.4 O boletim retido ganhou dono</h3>
+
+      <p>
+        O mapa contava os retidos num total no topo — "1 boletim retido" — e esse total não dizia
+        <strong>de quem</strong>. Achar o paciente custava abrir os cinco internados um a um, que é
+        exatamente a busca que um boletim retido não tem tempo de esperar. Agora o selo está no
+        cartão do leito, com ícone de telefone e não de alerta: o que se pede ali não é atenção, é
+        uma ligação.
+      </p>
+
+      <p>
+        O selo do boletim é cheio e o do atraso é contornado. Os dois podem aparecer no mesmo
+        cartão, e com a mesma marcação o olho os leria como duas linhas da mesma coisa. São dois
+        pedidos diferentes: o atraso chama a enfermagem, que está no corredor; o boletim chama
+        alguém para pegar o telefone.
+      </p>
+    </section>
+
+    <!-- ================================================================= -->
+
+    <section class="quebra">
+      <h2>Parte 3 · Defeitos encontrados no caminho</h2>
+
+      <p>
+        Nenhum dos três foi procurado. Os três apareceram porque a revisão passou por código que
+        ninguém tinha motivo para reler.
+      </p>
+
+      <h3>D1 · A seção clínica se chamava "clinico.modulo"</h3>
+
+      <p>
+        O rótulo da seção mais usada do portal — no trilho lateral e no cabeçalho de toda página
+        clínica — vinha de <code>t('clinico.modulo')</code>. A chave existe, mas resolve para um
+        <strong>objeto</strong>: as duas frases do interruptor do módulo. O <code>vue-i18n</code>
+        devolve o próprio caminho quando não encontra texto, e a seção se anunciava com um caminho
+        de código.
+      </p>
+
+      <p>
+        Passou por revisão de tipos, build e testes porque nenhum dos três olha para o
+        <em>valor</em> da chave. O teste que pegaria isto já existe no projeto — a asserção "não usa
+        como texto nada que seja um grupo" — mas varre apenas os arquivos da internação.
+        <strong>Corrigido</strong> com uma chave de texto própria.
+      </p>
+
+      <h3>D2 · A busca de pacientes não filtrava</h3>
+
+      <p>
+        A comparação por telefone era
+        <code>telefone.replace(/\D/g,'').includes(termo.replace(/\D/g,''))</code>. Um termo
+        <strong>sem nenhum dígito</strong> vira string vazia, e qualquer texto contém string vazia:
+        buscar "Rita" casava com o telefone de todo mundo e devolvia o cadastro inteiro.
+      </p>
+
+      <p>
+        O defeito era invisível justamente porque não perdia nada — o paciente procurado estava
+        sempre na lista, junto de outros vinte e três, ordenados por nome. Quem usava concluía que a
+        busca era ruim, não que estava quebrada. Foi encontrado ao escrever o teste da busca global,
+        que esperava zero resultados para um termo inventado. <strong>Corrigido</strong>, e agora
+        coberto por seis testes.
+      </p>
+
+      <h3>D3 · Um byte nulo dentro de um arquivo de teste</h3>
+
+      <p>
+        Uma asserção de <code>render.spec.ts</code> carregava um NUL cru na fonte. Fazia o
+        <code>grep</code> tratar o arquivo como binário, e a guarda não afirmava coisa alguma.
+        <strong>Corrigido</strong> pela asserção que ela pretendia ser.
+      </p>
+
+      <h3>Ainda aberto, e fora deste escopo</h3>
+
+      <p>
+        Dois arquivos de teste que já estavam no ramo violam uma regra do <code>oxlint</code>
+        (<code>expect</code> com argumento extra) e fazem <code>npm run lint</code> falhar. São
+        anteriores a este trabalho e não foram tocados — mexer em testes alheios ao escopo é
+        exatamente o tipo de mudança que se confunde com a mudança que se queria revisar.
+      </p>
+    </section>
+
+    <!-- ================================================================= -->
+
+    <section class="quebra">
+      <h2>Parte 4 · O que recomendo a seguir</h2>
+
+      <p>
+        O que a auditoria encontrou e <strong>não</strong> foi construído, em ordem de quanto custa
+        a ausência.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 20mm">Prioridade</th>
+            <th style="width: 46mm">O quê</th>
+            <th>Por quê</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="prioridade prioridade--alta">Alta</span></td>
+            <td><strong>Consentimento na agenda, quando o tipo é cirurgia</strong></td>
+            <td>
+              O termo é assinado <em>antes</em> do procedimento e hoje só existe para reimpressão no
+              fim. É o último buraco conhecido do percurso de demonstração — e, na operação real, é
+              o documento cuja ausência aparece só quando já houve um problema.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="prioridade prioridade--alta">Alta</span></td>
+            <td><strong>Resumo de alta imprimível</strong></td>
+            <td>
+              A alta já registra a orientação e manda a mensagem ao responsável. Falta o papel que
+              vai junto com o animal — o mesmo caminho que a receita e o atestado já têm.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="prioridade prioridade--media">Média</span></td>
+            <td><strong>Alerta de medicação contínua no cabeçalho do paciente</strong></td>
+            <td>
+              Já previsto na fundação visual (F6) e ainda não construído. É o alerta que muda conduta
+              antes de a consulta começar, e o cruzamento com o bulário é o que evita a interação
+              medicamentosa que ninguém lembrou de checar.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="prioridade prioridade--media">Média</span></td>
+            <td><strong>Estados de carga dentro dos componentes clínicos</strong></td>
+            <td>
+              Carregando, vazio e erro moram na página de referência, e não nos componentes (F4/F5).
+              Enquanto isso, cada tela nova reinventa os quatro estados — e alguma esquece um.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="prioridade prioridade--media">Média</span></td>
+            <td><strong>A internação encerrada na linha do tempo do paciente</strong></td>
+            <td>
+              A internação em curso já entra no histórico. A encerrada precisa entrar com o desfecho
+              e a permanência: são três dias de tratamento que, hoje, saem do registro quando o
+              animal vai para casa.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="prioridade prioridade--baixa">Baixa</span></td>
+            <td><strong>A busca global alcançar atendimentos e internações abertas</strong></td>
+            <td>
+              Hoje ela leva a telas e pacientes. Buscar por "Bento" e receber também o rascunho de
+              prontuário dele encurtaria mais um caminho — mas o caminho já é curto pelo paciente.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="prioridade prioridade--baixa">Baixa</span></td>
+            <td><strong>Selos de pendência também no trilho recolhido</strong></td>
+            <td>
+              Com o menu recolhido, o trabalho parado volta a ficar invisível. Um ponto no ícone da
+              seção resolveria — vale medir se alguém opera recolhido antes de construir.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="nota nota--atencao">
+        <p class="nota__titulo">Gate de processo, não entregável de código</p>
+        <p>
+          Os quatro rótulos do menu — Agora, Em curso, Pendências, Análise — são as quatro perguntas
+          que <em>nós</em> achamos que a clínica faz. Antes de tratá-los como assentados, vale uma
+          rodada de vinte minutos com alguém que opera clínica de verdade, olhando o menu e dizendo
+          em voz alta o que procura. É a única verificação deste relatório que não pode ser feita
+          por teste automatizado.
+        </p>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+
+    <section class="secao">
+      <h2>Verificação desta rodada</h2>
+
+      <div class="verificacao">
+        <div><span>Testes unitários</span><span>691 passando, 59 arquivos</span></div>
+        <div><span>Verificação de tipos</span><span><code>vue-tsc</code> limpo</span></div>
+        <div><span>Build de produção</span><span>gerado sem erro</span></div>
+        <div><span>Paridade de i18n</span><span>4 idiomas, sem divergência</span></div>
+        <div><span>Lint dos arquivos tocados</span><span>limpo (oxlint + eslint)</span></div>
+        <div><span>Formatação</span><span>Prettier aplicado</span></div>
+      </div>
+
+      <h4>Cuidado com o tamanho do pacote</h4>
+      <p>
+        Duas peças novas são lidas pelo menu do portal, que existe para <strong>toda</strong> conta
+        — inclusive as que não têm o módulo clínico. Tanto a contagem de pendências quanto a busca
+        global carregam a camada de dados clínicos <strong>sob demanda</strong>, e não no topo do
+        arquivo: um <code>import</code> estático arrastaria o dataset inteiro de demonstração para o
+        primeiro carregamento de todo mundo, para calcular quatro números que a maioria das contas
+        nunca vê. O build confirma: a camada de dados continua num pedaço próprio.
+      </p>
+
+      <div class="rodape">
+        <p>
+          Documentação técnica correspondente:
+          <code>docs/clinico/08-orientacao-do-fluxo.md</code> (orientação, com os três defeitos
+          detalhados) e <code>docs/clinico/07-internacao.md</code> (alta hospitalar). O roteiro de
+          demonstração em <code>docs/clinico/05-roteiro-de-demonstracao.md</code> foi atualizado:
+          dos quatro buracos de percurso listados, três estão fechados.
+        </p>
+        <p>
+          Este documento é gerado a partir de
+          <code>docs/clinico/relatorio/Relatorio-Novidades-Modulo-Clinico.html</code>. O HTML é a
+          fonte; o PDF é a saída.
+        </p>
+      </div>
+    </section>
+  </body>
+</html>

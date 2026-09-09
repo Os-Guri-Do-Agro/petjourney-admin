@@ -1745,6 +1745,30 @@
       "visivel": "Clinical module visible",
       "oculto": "Clinical module hidden"
     },
+    "navegacao": {
+      "secao": "Clinic",
+      "agora": "Now",
+      "emCurso": "In progress",
+      "pendencias": "Pending",
+      "analise": "Analysis",
+      "selo": {
+        "fila": "{total} patient on the waitlist | {total} patients on the waitlist",
+        "internacao": "{total} item to handle in inpatients | {total} items to handle in inpatients",
+        "atividades": "{total} open task | {total} open tasks",
+        "vacinas": "{total} overdue booster | {total} overdue boosters"
+      }
+    },
+    "busca": {
+      "abrir": "Search for a patient or a clinical screen",
+      "abrirCurto": "Search",
+      "titulo": "Search the clinic",
+      "placeholder": "Pet name, owner, phone or screen…",
+      "dica": "Arrows to move, Enter to open, Esc to close.",
+      "telas": "Screens",
+      "pacientes": "Patients",
+      "buscando": "Searching…",
+      "semResultado": "Nothing found for “{termo}”."
+    },
     "formato": {
       "minutos": "{valor} min",
       "horas": "{valor} h",
@@ -1883,7 +1907,8 @@
       "fila": "We couldn't load the waitlist.",
       "internacao": "Could not load the inpatient data.",
       "internacaoAcao": "The record was not saved. Try again.",
-      "internacaoLeito": "That bed is not available."
+      "internacaoLeito": "That bed is not available.",
+      "altaSemAviso": "A death or a transfer requires that someone has spoken to the owner by phone."
     },
     "densidade": {
       "titulo": "Density",
@@ -2031,6 +2056,8 @@
       "semProximo": "Nothing else booked for today.",
       "esperando": "Already here",
       "esperandoVazio": "Nobody waiting at the front desk.",
+      "internados": "Inpatients needing you",
+      "internadosVazio": "No inpatient with an overdue dose or a held update.",
       "esperaDe": "waiting {valor}",
       "alertasDoDia": "Alerts that change today's care",
       "alertasVazio": "No clinical alerts among today's patients.",
@@ -2783,7 +2810,9 @@
         "agenda": "Schedule",
         "comProximo": "Has an appointment",
         "semProximo": "No appointment"
-      }
+      },
+      "internadoAgora": "Admitted right now",
+      "verInternacao": "Open admission"
     },
     "atendimentos": {
       "titulo": "Visits",
@@ -2818,6 +2847,7 @@
       "bloquear": "Block time",
       "encaixar": "Squeeze in",
       "buscar": "Find patient",
+      "buscaGlobal": "Search anywhere in the clinical module",
       "densidade": "Toggle density",
       "fechar_": "Close the open panel",
       "mover": "Move the focused appointment by 15 min",
@@ -3004,6 +3034,7 @@
         "horas": "{horas} h",
         "pendentes": "Due",
         "atrasadas": "{total} overdue",
+        "boletimRetido": "Update waiting on a call",
         "proximaMinutos": "Next in {minutos} min",
         "proximaHoras": "Next in {horas} h"
       },
@@ -3111,6 +3142,62 @@
         "motivoExemplo": "Post-op after osteosynthesis",
         "diagnosticoExemplo": "Right femur fracture"
       },
+      "alta": {
+        "abrir": "Close admission",
+        "titulo": "Close admission",
+        "sobre": "This record closes the admission of {nome} and returns the cage to the map.",
+        "desfechoRotulo": "How it ends",
+        "desfecho": {
+          "alta": "Discharged",
+          "transferido": "Transferred",
+          "obito": "Died"
+        },
+        "resumoTitulo": "What goes on record",
+        "permanencia": "Length of stay",
+        "dosesFeitas": "Doses given",
+        "dosesNaoFeitas": "Refused or skipped",
+        "boletinsEnviados": "Updates sent",
+        "aviso": {
+          "dose-pendente": "{total} dose is still due right now. It stays on record as not given. | {total} doses are still due right now. They stay on record as not given.",
+          "dose-futura": "{total} scheduled dose will be suspended by this closure. | {total} scheduled doses will be suspended by this closure.",
+          "boletim-retido": "{total} update never went out for lack of a phone call. Closing does not send it. | {total} updates never went out for lack of a phone call. Closing does not send them."
+        },
+        "orientacao": {
+          "alta": "Discharge instructions",
+          "transferido": "What was agreed on the transfer",
+          "obito": "What was told to the owner"
+        },
+        "orientacaoDica": {
+          "alta": "Goes out with the message the owner receives in the app.",
+          "transferido": "Stays in the admission record. None of this goes out as a message.",
+          "obito": "Stays in the admission record. None of this goes out as a message."
+        },
+        "orientacaoExemplo": {
+          "alta": "Rest for 3 days, wet food, recheck in 7 days.",
+          "transferido": "Referred to Hospital X for haemodialysis, chart copy sent along.",
+          "obito": "Owner told by phone at 2:20 pm; guided on cremation options."
+        },
+        "canal": {
+          "alta": "The owner gets an app message saying the pet went home.",
+          "transferido": "No message is sent. A transfer is told by phone.",
+          "obito": "No message is sent. A death never arrives as a notification."
+        },
+        "confirmaLigacao": {
+          "transferido": "I spoke to the owner by phone about the transfer.",
+          "obito": "I spoke to the owner by phone about the death."
+        },
+        "confirmar": {
+          "alta": "Record discharge",
+          "transferido": "Record transfer",
+          "obito": "Record death"
+        },
+        "cancelar": "Cancel",
+        "encerrada": {
+          "alta": "Admission closed with discharge on {quando}.",
+          "transferido": "Admission closed by transfer on {quando}.",
+          "obito": "Admission closed by death on {quando}."
+        }
+      },
       "prescricao": {
         "ativasTitulo": "Active prescription",
         "semAtivas": "Nothing prescribed.",
@@ -3159,7 +3246,8 @@
         "noLeito": "Bed {leito}",
         "diagnostico": "Working diagnosis",
         "altaEm": "discharge expected {data}",
-        "semPrevisaoDeAlta": "no discharge estimate"
+        "semPrevisaoDeAlta": "no discharge estimate",
+        "verHistorico": "Patient history"
       },
       "leitos": {
         "titulo": "Clinic beds",

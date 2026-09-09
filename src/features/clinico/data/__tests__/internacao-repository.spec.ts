@@ -15,6 +15,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { situacaoDaAdministracao } from '../../domain/internacao'
 import { MockError, setMockConfig, resetMockConfig } from '../mock-runtime'
 import {
+  AltaSemAvisoError,
   BoletimBloqueadoError,
   internacaoRepository,
   LeitoOcupadoError,
@@ -495,6 +496,7 @@ describe('entrada e alta', () => {
       internacaoId: 'int-pipoca',
       status: 'alta',
       observacao: 'Fezes normais por 24 h.',
+      professionalId: 'prof-ana',
     })
 
     const depois = await internacaoRepository.mapa()
@@ -510,6 +512,77 @@ describe('entrada e alta', () => {
     )
 
     expect(orfas).toHaveLength(0)
+  })
+
+  /*
+   * A outra metade da regra que dá nome ao requisito. A piora não sai por aplicativo, e o fim
+   * também não: óbito e transferência exigem que alguém tenha falado com o responsável antes.
+   */
+  it('recusa óbito e transferência sem ligação registrada', async () => {
+    await expect(
+      internacaoRepository.darAlta({
+        internacaoId: 'int-pipoca',
+        status: 'obito',
+        observacao: 'Parada às 3h40.',
+        professionalId: 'prof-ana',
+      }),
+    ).rejects.toBeInstanceOf(AltaSemAvisoError)
+
+    await expect(
+      internacaoRepository.darAlta({
+        internacaoId: 'int-pipoca',
+        status: 'transferido',
+        observacao: 'Encaminhado para hemodiálise.',
+        professionalId: 'prof-ana',
+      }),
+    ).rejects.toBeInstanceOf(AltaSemAvisoError)
+
+    /* A internação continua aberta: recusar não pode ter encerrado nada pela metade. */
+    const paciente = await internacaoRepository.doPaciente('int-pipoca')
+
+    expect(paciente?.internacao.status).toBe('internado')
+  })
+
+  it('aceita o desfecho grave com a ligação registrada, e não manda mensagem nenhuma', async () => {
+    const antes = (await internacaoRepository.doPaciente('int-pipoca'))!.boletins.length
+
+    const resultado = await internacaoRepository.darAlta({
+      internacaoId: 'int-pipoca',
+      status: 'obito',
+      observacao: 'Comunicado à responsável por telefone às 3h50.',
+      professionalId: 'prof-ana',
+      avisadoPorTelefone: true,
+    })
+
+    expect(resultado?.internacao.status).toBe('obito')
+    expect(resultado?.boletim).toBeNull()
+
+    const depois = await internacaoRepository.doPaciente('int-pipoca')
+
+    expect(depois?.boletins).toHaveLength(antes)
+  })
+
+  /*
+   * O boletim de alta nasce **liberado**, e não retido — mesmo num paciente que passou a
+   * internação inteira crítico. Compô-lo pela gravidade faria "o Bento foi para casa" chegar
+   * como notícia grave e ficar preso esperando uma ligação que ninguém precisa dar.
+   */
+  it('a alta escreve a última mensagem ao responsável, pronta para sair', async () => {
+    const resultado = await internacaoRepository.darAlta({
+      internacaoId: 'int-bento',
+      status: 'alta',
+      observacao: 'Repouso por 3 dias.',
+      professionalId: 'prof-ana',
+    })
+
+    expect(resultado?.boletim?.status).toBe('liberado')
+    expect(resultado?.boletim?.exigeLigacao).toBe(false)
+    expect(resultado?.boletim?.texto).toContain('alta')
+    expect(resultado?.boletim?.texto).toContain('Repouso por 3 dias.')
+
+    await expect(
+      internacaoRepository.enviarBoletim(resultado!.boletim!.id),
+    ).resolves.toMatchObject({ status: 'enviado' })
   })
 })
 

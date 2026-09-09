@@ -101,12 +101,23 @@ export const patientRepository = {
             return true
           }
 
+          /*
+           * Os dígitos do termo, quando há algum.
+           *
+           * A comparação por telefone era `telefone.replace(/\D/g, '').includes(alvo.replace(...))`
+           * sem esta guarda — e um termo **sem nenhum dígito** vira string vazia, que qualquer
+           * texto contém. O resultado é que buscar "Rita" ou "zzzz" devolvia o cadastro inteiro
+           * pelo casamento de telefone com nada: a busca parecia funcionar (a lista sempre tinha
+           * o paciente procurado, em algum lugar) e nunca filtrava.
+           */
+          const digitos = alvo.replace(/\D/g, '')
+
           return (
             normalizar(pet.nome).includes(alvo) ||
             normalizar(pet.raca).includes(alvo) ||
             normalizar(tutor?.nome ?? '').includes(alvo) ||
-            (tutor?.telefone ?? '').replace(/\D/g, '').includes(alvo.replace(/\D/g, '')) ||
-            false
+            (digitos.length > 0 &&
+              (tutor?.telefone ?? '').replace(/\D/g, '').includes(digitos))
           )
         })
         .sort((a, b) => a.pet.nome.localeCompare(b.pet.nome, 'pt-BR'))

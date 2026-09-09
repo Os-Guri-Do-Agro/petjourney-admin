@@ -24,6 +24,7 @@ import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
 import ClinicStat from '@/features/clinico/components/base/ClinicStat.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
+import AltaDialog from '@/features/clinico/components/internacao/AltaDialog.vue'
 import InternacaoBoletins from '@/features/clinico/components/internacao/InternacaoBoletins.vue'
 import InternacaoChecklist from '@/features/clinico/components/internacao/InternacaoChecklist.vue'
 import InternacaoEvolucoes from '@/features/clinico/components/internacao/InternacaoEvolucoes.vue'
@@ -38,7 +39,7 @@ import type {
   PrescriptionRoute,
   VitalKey,
 } from '@/features/clinico/data/types'
-import { horasInternado } from '@/features/clinico/domain/internacao'
+import { horasInternado, type DesfechoDaInternacao } from '@/features/clinico/domain/internacao'
 import { useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useInternacaoStore } from '@/features/clinico/stores/internacao'
 
@@ -98,9 +99,10 @@ const opcoesDeAba = computed(() =>
 
     return {
       valor,
-      rotulo: total > 0
-        ? `${t(`clinico.internacao.abas.${valor}`)} · ${total}`
-        : t(`clinico.internacao.abas.${valor}`),
+      rotulo:
+        total > 0
+          ? `${t(`clinico.internacao.abas.${valor}`)} · ${total}`
+          : t(`clinico.internacao.abas.${valor}`),
       tom: (retidos > 0 ? 'risco' : pendentes > 0 ? 'atencao' : 'neutro') as
         | 'risco'
         | 'atencao'
@@ -171,10 +173,7 @@ const leitoDescrito = computed(() => {
   return `${nome} · ${kind}`
 })
 
-async function registrar(
-  administracaoId: string,
-  status: 'feita' | 'recusada' | 'pulada',
-) {
+async function registrar(administracaoId: string, status: 'feita' | 'recusada' | 'pulada') {
   await internacao.registrar({
     administracaoId,
     status,
@@ -237,6 +236,57 @@ async function suspender(prescricaoId: string, motivo: string) {
 function voltar() {
   void router.push('/veterinario/internacao')
 }
+
+function verHistorico() {
+  const petId = paciente.value?.internacao.petId
+
+  if (petId) {
+    void router.push(`/veterinario/paciente/${petId}/historico`)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Encerramento
+// ---------------------------------------------------------------------------
+
+const altaAberta = ref(false)
+
+/**
+ * A internação já encerrada continua alcançável — pelo link que alguém mandou, pelo histórico do
+ * paciente, pela auditoria de seis meses depois. O que muda é que o registro vira leitura: o
+ * checklist de um animal que foi para casa não recebe dose nova.
+ */
+const encerrada = computed(() => paciente.value?.internacao.status !== 'internado')
+
+const desfechoRegistrado = computed(() =>
+  paciente.value && encerrada.value
+    ? (paciente.value.internacao.status as DesfechoDaInternacao)
+    : null,
+)
+
+/** Dia e hora do encerramento, na ordem em que a clínica escreve numa ficha. */
+const encerradaEm = computed(() => {
+  const quando = paciente.value?.internacao.altaEm
+
+  return quando ? `${formato.dataCurta(quando.slice(0, 10))} · ${formato.hora(quando)}` : ''
+})
+
+async function encerrar(entrada: {
+  status: DesfechoDaInternacao
+  observacao: string
+  avisadoPorTelefone: boolean
+}) {
+  const aceita = await internacao.darAlta({ internacaoId: internacaoId.value, ...entrada })
+
+  /*
+   * Fecha **só quando passou**. Recusado por regra — óbito sem ligação registrada —, o diálogo
+   * fica aberto com o motivo à vista: sumir com ele deixaria o usuário sem saber por que nada
+   * mudou, que é a forma mais rápida de a regra parecer um defeito.
+   */
+  if (aceita) {
+    altaAberta.value = false
+  }
+}
 </script>
 
 <template>
@@ -250,27 +300,71 @@ function voltar() {
     :empty-description="t('clinico.internacao.paciente.naoEncontradoDescricao')"
   >
     <div v-if="paciente" class="internado clinic-scope">
-<!--
+      <!--
         A volta ao mapa é navegação, não conteúdo: fica sozinha na linha de cima, como migalha.
         Dividindo a linha com o cartão do paciente, ela espremia a identidade no meio da tela e
         se lia como se fosse parte dela.
       -->
       <header class="topo">
-        <Button
-          class="topo__voltar"
-          :label="t('clinico.internacao.paciente.voltar')"
-          icon="pi pi-arrow-left"
-          severity="secondary"
-          text
-          @click="voltar"
-        />
+        <div class="topo__linha">
+          <Button
+            class="topo__voltar"
+            :label="t('clinico.internacao.paciente.voltar')"
+            icon="pi pi-arrow-left"
+            severity="secondary"
+            text
+            @click="voltar"
+          />
 
-        <ClinicPatientHeader
-          :pet="pet"
-          :tutor="tutor"
-          :peso-kg="paciente.internacao.pesoEntradaKg"
-        />
+          <!--
+            Encerrar fica na migalha, e não junto das abas.
+
+            As quatro abas são o trabalho do turno, que se repete a cada meia hora; a alta
+            acontece uma vez e não se desfaz. Pôr as duas coisas na mesma fileira convidaria ao
+            clique errado no fim de um plantão de doze horas.
+          -->
+          <Button
+            v-if="!encerrada"
+            :label="t('clinico.internacao.alta.abrir')"
+            icon="pi pi-sign-out"
+            severity="secondary"
+            outlined
+            size="small"
+            @click="altaAberta = true"
+          />
+        </div>
+
+        <ClinicPatientHeader :pet="pet" :tutor="tutor" :peso-kg="paciente.internacao.pesoEntradaKg">
+          <!--
+            A saída para o histórico do paciente.
+
+            A internação era um beco: entrava-se pelo mapa de leitos e a única saída era voltar
+            para ele. Quem precisava saber o que aconteceu com este animal antes de ele ser
+            internado — a cirurgia de anteontem, a alergia registrada no ano passado — tinha de
+            achar Pacientes no menu e buscar pelo nome, com o paciente aberto na tela ao lado.
+          -->
+          <template #acoes>
+            <Button
+              :label="t('clinico.internacao.paciente.verHistorico')"
+              icon="pi pi-history"
+              severity="secondary"
+              outlined
+              size="small"
+              @click="verHistorico"
+            />
+          </template>
+        </ClinicPatientHeader>
       </header>
+
+      <!--
+        A internação encerrada continua alcançável, e precisa dizer isso na primeira linha. Sem
+        esta faixa, a tela de um animal que foi para casa é indistinguível da de um animal que
+        está no leito — e alguém marca uma dose numa internação que acabou ontem.
+      -->
+      <p v-if="desfechoRegistrado" class="encerrada" role="status">
+        <i class="pi pi-check-circle" aria-hidden="true" />
+        {{ t(`clinico.internacao.alta.encerrada.${desfechoRegistrado}`, { quando: encerradaEm }) }}
+      </p>
 
       <section class="numeros">
         <ClinicStat
@@ -280,7 +374,7 @@ function voltar() {
           :icone="ICONE_DA_GRAVIDADE[paciente.internacao.gravidade]"
           :tom="TOM_DA_GRAVIDADE[paciente.internacao.gravidade]"
         />
-<!--
+        <!--
           Entrada e alta são a mesma pergunta — quanto tempo este animal fica — e por isso moram
           no mesmo indicador. Em cartões separados, os dois ocupavam metade da fileira para dizer
           duas datas, e a fileira de cinco quebrava em 4+1 na largura de tablet.
@@ -309,7 +403,7 @@ function voltar() {
         />
       </section>
 
-<div
+      <div
         v-if="paciente.internacao.diagnostico || paciente.internacao.observacao"
         class="contexto"
       >
@@ -387,10 +481,21 @@ function voltar() {
         :agora="internacao.agora"
         :salvando="internacao.salvando"
         :prescritor-id="plantonistaId"
+        :encerrada="encerrada"
         @prescrever="prescrever"
         @suspender="suspender"
       />
     </div>
+
+    <AltaDialog
+      :aberto="altaAberta"
+      :pet="pet"
+      :resumo="internacao.resumoDaAlta"
+      :salvando="internacao.salvando"
+      :erro="internacao.erroDeAcao"
+      @fechar="altaAberta = false"
+      @confirmar="encerrar"
+    />
   </PartnerPageFrame>
 </template>
 
@@ -406,8 +511,38 @@ function voltar() {
   gap: var(--clinic-space-2);
 }
 
+.topo__linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--clinic-space-3);
+}
+
 .topo__voltar {
   justify-self: start;
+}
+
+/*
+ * A faixa de encerramento é neutra de propósito, e não verde de sucesso nem vermelha de alarme:
+ * ela cobre alta, transferência e óbito com a mesma marcação, e pintar de verde a linha que diz
+ * que o animal morreu seria a pior escolha possível de paleta.
+ */
+.encerrada {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: var(--clinic-space-3) var(--clinic-space-4);
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-control);
+  gap: var(--clinic-space-3);
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-muted);
+  font-weight: 700;
+}
+
+.encerrada i {
+  color: var(--clinic-faint);
 }
 
 .numeros {

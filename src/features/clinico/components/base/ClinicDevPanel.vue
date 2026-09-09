@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Painel de desenvolvimento do módulo clínico — **só fora de produção**.
+ * Painel de desenvolvimento do módulo clínico.
  *
  * O módulo roda inteiro sem API, e este painel é o que torna isso revisável: sobe latência,
  * força erro por operação, derruba tudo, desloca o relógio, recria os dados com outra semente
@@ -8,10 +8,25 @@
  * salas que atravessa o almoço num dia de feriado" vira caça ao tesouro.
  *
  * A régua do épico: todo caso difícil precisa estar a até três cliques daqui.
+ *
+ * ## Por que ele não é mais só de `DEV`
+ *
+ * Era `import.meta.env.DEV` e só. Num build publicado — que é justamente onde a demonstração ao
+ * cliente acontece — o painel sumia, e alcançar cada caso plantado voltava a exigir navegar até
+ * ele à mão. O buraco estava listado no roteiro de demonstração como buraco **de produto**: os
+ * quinze casos existiam e ninguém conseguia mostrá-los.
+ *
+ * Agora ele também aparece quando o **módulo clínico está desbloqueado para esta conta**. Não é
+ * afrouxamento: esse desbloqueio já é um interruptor oculto, que exige `?clinico=on` ou digitar
+ * a sequência secreta, e tudo o que está atrás dele é dado de demonstração. Quem chegou até aqui
+ * chegou de propósito — e o que o painel controla é a camada mocada, que não existe para quem
+ * abriu o portal para trabalhar.
  */
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+
+import { useModuloClinico } from '@/composables/useModuloClinico'
 
 import {
   getMockConfig,
@@ -26,7 +41,9 @@ import { useAgendaStore } from '../../stores/agenda'
 import { useClinicoStore } from '../../stores/clinico'
 import { useProntuarioStore } from '../../stores/prontuario'
 
-const habilitado = import.meta.env.DEV
+const { ativo: moduloClinicoAtivo } = useModuloClinico()
+
+const habilitado = computed(() => import.meta.env.DEV || moduloClinicoAtivo.value)
 
 const { t } = useI18n()
 const router = useRouter()

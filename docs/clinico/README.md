@@ -17,8 +17,11 @@ a mesma assinatura. Nenhum componente conhece `fixtures`.
 | 04 | Receituário digital | [04-receituario-digital.md](./04-receituario-digital.md) | Entregue no que cabe ao portal |
 | 05 | Roteiro de demonstração | [05-roteiro-de-demonstracao.md](./05-roteiro-de-demonstracao.md) | Roteiro escrito; buracos de percurso listados |
 | 06 | Perguntas ao time do app | [06-perguntas-ao-app.md](./06-perguntas-ao-app.md) | Respondido e conferido contra `origin/develop` — divergências listadas |
-| 07 | Internação com boletim ao responsável | [07-internacao.md](./07-internacao.md) | Completo — 3 casos difíceis plantados e cobertos por teste |
+| 07 | Internação com boletim ao responsável | [07-internacao.md](./07-internacao.md) | Completo — 3 casos difíceis plantados e cobertos por teste; **alta hospitalar entregue** |
+| 08 | Orientação do fluxo clínico | [08-orientacao-do-fluxo.md](./08-orientacao-do-fluxo.md) | Completo — 3 defeitos encontrados e corrigidos |
 | — | **Roteiro de apresentação** (Word e PDF) | [apresentacao/](./apresentacao/) | Para quem apresenta ao cliente — 10 páginas, 12 minutos |
+| — | **Novidades do fluxo clínico** (PDF) | [relatorio/](./relatorio/) | Para quem vai testar — 7 páginas, com roteiro de teste e o que ainda não existe |
+| — | **Relatório de novidades** (PDF) | [relatorio/](./relatorio/) | Registro técnico da rodada — 8 páginas, com o que recomendo a seguir |
 
 > O **05** é o levantamento técnico do percurso, escrito para quem constrói. O documento em
 > [apresentacao/](./apresentacao/) é a versão para quem **apresenta**: mesma demonstração, sem

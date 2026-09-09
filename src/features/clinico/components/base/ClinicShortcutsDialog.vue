@@ -38,8 +38,17 @@ const GRUPOS: Record<string, AcaoAtalho[]> = {
   acoes: ['novo', 'encaixar', 'bloquear', 'buscar', 'densidade', 'desfazer', 'ajuda', 'fechar'],
 }
 
-/** Ações que não vêm da tabela global porque vivem dentro de um card ou de um campo. */
+/**
+ * Ações que não vêm da tabela global porque vivem dentro de um card, de um campo — ou fora da
+ * agenda inteira.
+ *
+ * A busca do módulo é o caso de fora: ela mora no shell, funciona em qualquer tela e por isso
+ * não está em `TECLAS`, que é a tabela da agenda. Precisa aparecer aqui de qualquer forma —
+ * um atalho que ninguém descobre é um atalho que não existe, e este é o que substitui metade
+ * das voltas pelo menu.
+ */
 const CONTEXTUAIS: Array<{ chave: string; teclas: string }> = [
+  { chave: 'buscaGlobal', teclas: 'Ctrl / ⌘ + K' },
   { chave: 'mover', teclas: 'Shift + ↑ ↓' },
   { chave: 'selecionar', teclas: 'Enter' },
   { chave: 'proximoCampo', teclas: 'Tab' },

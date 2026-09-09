@@ -15,6 +15,7 @@ import { defineStore } from 'pinia'
 import { computed, onScopeDispose, ref } from 'vue'
 
 import {
+  AltaSemAvisoError,
   BoletimBloqueadoError,
   internacaoRepository,
   LeitoRecusadoError,
@@ -39,7 +40,9 @@ import type {
 import {
   atravessaAPassagem,
   pendentesAgora,
+  resumirAlta,
   situacaoDaAdministracao,
+  type DesfechoDaInternacao,
 } from '../domain/internacao'
 
 import { clinicClock, useClinicoStore } from './clinico'
@@ -140,6 +143,24 @@ export const useInternacaoStore = defineStore('clinico-internacao', () => {
 
   const pendentesDoPaciente = computed(() =>
     paciente.value ? pendentesAgora(paciente.value.administracoes, agora.value) : [],
+  )
+
+  /**
+   * O que a internação deixa para trás, para a conferência de última hora antes da alta.
+   *
+   * Depende de `agora`, que avança sozinho: o diálogo aberto por dois minutos enquanto o
+   * veterinário escreve a orientação não pode dizer "nenhuma pendência" sobre uma dose que
+   * acabou de entrar na janela.
+   */
+  const resumoDaAlta = computed(() =>
+    paciente.value
+      ? resumirAlta({
+          internacao: paciente.value.internacao,
+          administracoes: paciente.value.administracoes,
+          boletins: paciente.value.boletins,
+          agora: agora.value,
+        })
+      : null,
   )
 
   /** Boletins que não saíram e esperam alguém — a fila que a tela não pode deixar esconder. */
@@ -455,23 +476,61 @@ export const useInternacaoStore = defineStore('clinico-internacao', () => {
     }
   }
 
-  async function darAlta(
-    internacaoId: string,
-    status: 'alta' | 'obito' | 'transferido',
-    observacao: string,
-  ) {
+  /**
+   * Encerra a internação.
+   *
+   * Devolve `true` quando o encerramento passou — a tela precisa saber para fechar o diálogo, e
+   * **só fechar quando passou**: recusado por regra, o formulário fica aberto com o motivo à
+   * vista, como já acontece no cadastro de leitos.
+   *
+   * A recusa por falta de ligação não é falha de rede: é a regra funcionando, e merece a frase
+   * que diz qual regra. Tratá-la como erro genérico ensinaria a tentar de novo do mesmo jeito.
+   */
+  async function darAlta(input: {
+    internacaoId: string
+    status: DesfechoDaInternacao
+    observacao: string
+    avisadoPorTelefone: boolean
+  }): Promise<boolean> {
     salvando.value = true
     erroDeAcao.value = ''
 
     try {
-      await internacaoRepository.darAlta({ internacaoId, status, observacao })
-      await carregarPaciente(internacaoId)
+      await internacaoRepository.darAlta({
+        ...input,
+        professionalId: plantonistaDaVez(),
+      })
+
+      await carregarPaciente(input.internacaoId)
+      await carregarMapa()
       clinico.invalidarTudo()
-    } catch {
-      erroDeAcao.value = 'clinico.erros.internacaoAcao'
+
+      return true
+    } catch (erro) {
+      erroDeAcao.value =
+        erro instanceof AltaSemAvisoError
+          ? 'clinico.erros.altaSemAviso'
+          : 'clinico.erros.internacaoAcao'
+
+      return false
     } finally {
       salvando.value = false
     }
+  }
+
+  /**
+   * Quem assina o que está sendo registrado agora: o plantonista da vez.
+   *
+   * Cai no responsável clínico do caso quando não há plantão aberto — a alta das 6 da manhã de
+   * um domingo precisa de um nome, e "" não é nome.
+   */
+  function plantonistaDaVez(): string {
+    return (
+      mapa.value?.plantaoAtual?.responsavelId ??
+      passagem.value?.plantao.responsavelId ??
+      paciente.value?.internacao.responsavelId ??
+      ''
+    )
   }
 
   // -------------------------------------------------------------------------
@@ -563,6 +622,7 @@ export const useInternacaoStore = defineStore('clinico-internacao', () => {
     erroDeAcao,
     checklist,
     pendentesDoPaciente,
+    resumoDaAlta,
     boletinsRetidos,
     proximoBoletimPendente,
     naTrocaDePlantao,

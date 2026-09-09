@@ -5,6 +5,7 @@
  * Cabeçalho do paciente, linha do tempo e a lista de atendimentos com o que aconteceu em cada
  * um — inclusive as faltas, que fazem parte da história e costumam sumir das telas bonitas.
  */
+import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -15,7 +16,12 @@ import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatien
 import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
 import ProntuarioTimeline from '@/features/clinico/components/prontuario/ProntuarioTimeline.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
-import { encounterRepository, patientRepository } from '@/features/clinico/data/repositories'
+import {
+  encounterRepository,
+  internacaoRepository,
+  patientRepository,
+  type LeitoNoMapa,
+} from '@/features/clinico/data/repositories'
 import type { Appointment, Pet, TimelineEvent, Tutor } from '@/features/clinico/data/types'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 
@@ -29,6 +35,8 @@ const pet = ref<Pet | null>(null)
 const tutor = ref<Tutor | null>(null)
 const eventos = ref<TimelineEvent[]>([])
 const atendimentos = ref<Appointment[]>([])
+/** O leito onde este paciente está **agora**, quando está. */
+const internacaoAberta = ref<LeitoNoMapa | null>(null)
 const carregando = ref(false)
 const erro = ref('')
 
@@ -62,9 +70,7 @@ const diagnosticoDoAtendimento = computed(
     ),
 )
 
-const vazio = computed(
-  () => !carregando.value && !erro.value && atendimentos.value.length === 0,
-)
+const vazio = computed(() => !carregando.value && !erro.value && atendimentos.value.length === 0)
 
 async function carregar() {
   carregando.value = true
@@ -78,13 +84,22 @@ async function carregar() {
     pet.value = dados?.pet ?? null
     tutor.value = dados?.tutor ?? null
 
-    const [historico, lista] = await Promise.all([
+    const [historico, lista, mapa] = await Promise.all([
       encounterRepository.historico(petId.value),
       patientRepository.atendimentosDoPet(petId.value),
+      /*
+       * O mapa de leitos responde "este animal está aqui agora?". Falhar não derruba a página:
+       * o histórico continua sendo histórico, e o que se perde é apenas o atalho para o leito.
+       */
+      internacaoRepository.mapa().catch(() => null),
     ])
 
     eventos.value = historico
     atendimentos.value = lista
+    internacaoAberta.value =
+      mapa?.leitos.find(
+        (item) => item.internacao !== null && item.internacao.petId === petId.value,
+      ) ?? null
   } catch {
     erro.value = t('clinico.erros.prontuario')
   } finally {
@@ -98,6 +113,14 @@ function abrir(appointment: Appointment) {
   }
 
   void router.push(`/veterinario/atendimento/${appointment.encounterId}`)
+}
+
+function abrirInternacao() {
+  const id = internacaoAberta.value?.internacao?.id
+
+  if (id) {
+    void router.push(`/veterinario/internacao/${id}`)
+  }
 }
 
 onMounted(carregar)
@@ -116,7 +139,33 @@ watch(petId, carregar)
     @retry="carregar"
   >
     <div class="historico clinic-scope">
-      <ClinicPatientHeader :pet="pet" :tutor="tutor" />
+      <ClinicPatientHeader :pet="pet" :tutor="tutor">
+        <!--
+          Quando o animal está internado **neste minuto**, o histórico diz isso e leva ao leito.
+
+          Sem esta linha, a página mais completa que a clínica tem sobre um paciente era a única
+          que não sabia que ele estava internado ali dentro: a internação aparecia na linha do
+          tempo como um evento entre outros, com data de entrada e nenhuma indicação de que ainda
+          está acontecendo.
+        -->
+        <template v-if="internacaoAberta" #acoes>
+          <Button
+            :label="t('clinico.pacientes.verInternacao')"
+            icon="pi pi-building"
+            severity="secondary"
+            outlined
+            size="small"
+            @click="abrirInternacao"
+          />
+        </template>
+      </ClinicPatientHeader>
+
+      <p v-if="internacaoAberta" class="historico__internado" role="status">
+        <i class="pi pi-building" aria-hidden="true" />
+        {{ t('clinico.pacientes.internadoAgora') }} ·
+        <strong>{{ internacaoAberta.leito.nome }}</strong>
+        <span>{{ internacaoAberta.internacao!.motivo }}</span>
+      </p>
 
       <div class="historico__corpo">
         <ClinicDataTable
@@ -177,6 +226,31 @@ watch(petId, carregar)
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   gap: var(--clinic-space-3);
+}
+
+/*
+ * "Internado agora" é estado, não alerta: o animal estar no leito não é problema nenhum. Por
+ * isso a faixa usa o acento do módulo e não o tom de risco — pintá-la de vermelho faria a
+ * página gritar sobre um pós-operatório que está correndo bem.
+ */
+.historico__internado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 0;
+  padding: var(--clinic-space-2) var(--clinic-space-3);
+  border: 1px solid var(--clinic-accent);
+  border-radius: var(--clinic-radius-control);
+  gap: var(--clinic-space-2);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+}
+
+.historico__internado span {
+  color: var(--clinic-muted);
+  font-weight: 500;
 }
 
 .historico__meta {

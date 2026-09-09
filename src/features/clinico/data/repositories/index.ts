@@ -14,6 +14,7 @@ export { catalogRepository, type CatalogosClinicos } from './catalog-repository'
 export { vacinaRepository, type ChamadaDeVacina } from './vacina-repository'
 export {
   internacaoRepository,
+  AltaSemAvisoError,
   BoletimBloqueadoError,
   LeitoOcupadoError,
   LeitoRecusadoError,
