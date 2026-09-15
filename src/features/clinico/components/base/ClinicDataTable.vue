@@ -309,6 +309,17 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
           <i class="pi pi-inbox" aria-hidden="true" />
           <strong>{{ vazioTitulo || t('clinico.tabela.vazio') }}</strong>
           <span v-if="vazioDescricao">{{ vazioDescricao }}</span>
+
+          <!--
+            A saída do vazio.
+
+            Lista vazia que só descreve o vazio deixa quem chegou sem próximo passo — e o
+            próximo passo quase sempre existe: cadastrar o que não está lá. O slot é opcional
+            porque nem toda tabela tem uma saída (a fila de hoje vazia é boa notícia).
+          -->
+          <div v-if="$slots['vazio-acao']" class="tabela__estado-acao">
+            <slot name="vazio-acao" />
+          </div>
         </div>
 
         <div v-else ref="corpo" class="tabela__corpo">
@@ -614,6 +625,10 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
 .tabela__estado--erro i {
   color: var(--clinic-risk-text);
+}
+
+.tabela__estado-acao {
+  margin-top: var(--clinic-space-2);
 }
 
 .tabela__estado--vazio strong {

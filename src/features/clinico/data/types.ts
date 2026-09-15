@@ -104,12 +104,56 @@ export type AppointmentType = {
 // Pessoas e pacientes
 // ---------------------------------------------------------------------------
 
+/**
+ * Endereço do responsável.
+ *
+ * Não é dado de cobrança — é exigência de receita. O receituário de controle especial
+ * (Portaria SVS/MS 344/98) identifica o **comprador** por nome, documento e endereço, e a
+ * farmácia recusa a retenção sem os três. Guardar o endereço no cadastro é a diferença entre
+ * imprimir a receita e mandar o responsável voltar em casa buscar uma conta de luz.
+ *
+ * Campo em branco é resposta honesta: quem marca por telefone raramente dita o CEP. O que não
+ * pode é não haver onde escrever quando alguém dita.
+ */
+export type EnderecoPostal = {
+  cep: string
+  logradouro: string
+  numero: string
+  complemento: string
+  bairro: string
+  cidade: string
+  /** Sigla de duas letras, sempre em maiúsculas. */
+  uf: string
+}
+
+/**
+ * Por onde a clínica fala com o responsável.
+ *
+ * Existe porque o módulo **liga**: o boletim de internação exige ligação antes do envio
+ * (`exigeLigacao`), a vaga que abre na fila precisa de resposta em minutos e a confirmação de
+ * véspera sai por um canal só. Sem este campo, quem está de plantão às onze da noite decide no
+ * chute entre ligar e mandar mensagem — e erra com quem nunca atende o telefone.
+ */
+export type ContatoPreferido = 'whatsapp' | 'ligacao' | 'email'
+
 export type Tutor = {
   id: string
   nome: string
   telefone: string
+  /**
+   * Segundo número, para quando o primeiro não atende.
+   *
+   * A internação transforma "não consegui falar" em problema clínico: o boletim fica retido, a
+   * alta espera e alguém precisa autorizar procedimento. Um número só é ponto único de falha num
+   * fluxo que não tolera espera.
+   */
+  telefoneSecundario: string
   email: string
+  /** CPF do responsável. Vazio quando ninguém informou; quando preenchido, é validado. */
   documento: string
+  preferenciaContato: ContatoPreferido
+  /** `null` enquanto ninguém informou — ver `EnderecoPostal`. */
+  endereco: EnderecoPostal | null
 }
 
 export type PetSpecies = 'canina' | 'felina' | 'ave' | 'roedor' | 'reptil' | 'equina'
@@ -176,6 +220,22 @@ export type Pet = {
   /** Porte informado pela clínica. `null` cai na estimativa por peso. */
   porte: PetPorte | null
   pesoKg: number | null
+  /**
+   * Número do transponder, sem formatação.
+   *
+   * É a única identificação do paciente que não depende de alguém reconhecer o animal — e a que
+   * documento assinado pede. O atestado de óbito tem campo de microchip desde sempre; até agora
+   * ele saía em branco porque o cadastro não perguntava, e a clínica preenchia à mão um número
+   * que já estava na ficha de papel.
+   */
+  microchip: string
+  /**
+   * Cor e tipo de pelagem, como a clínica descreveria para alguém reconhecer o animal.
+   *
+   * Identificação, não estética: é o que separa dois SRD pretos do mesmo porte no mapa de leitos,
+   * e o que o atestado de óbito exige junto de espécie, raça e sexo.
+   */
+  pelagem: string
   tutorId: string
   alertas: PetAlert[]
   /** Iniciais para o avatar; o módulo não carrega foto no mock. */
@@ -551,6 +611,59 @@ export type PreConsulta = {
   /** Peso informado em casa. Sugestão de partida, não medição. */
   pesoInformadoKg: number | null
   /** Texto livre do responsável, na íntegra e sem edição. */
+  observacao: string
+}
+
+// ---------------------------------------------------------------------------
+// O que foi feito no paciente
+// ---------------------------------------------------------------------------
+
+export type AtoClinicoKind = 'medicamento' | 'procedimento'
+
+/**
+ * De onde o ato veio — e, por consequência, quem manda nele.
+ *
+ * Só `clinica` e `avulso` são **gravados** como ato. Vacina e internação já têm registro
+ * próprio, mais rico que este: a aplicação de vacina carrega lote e validade porque a
+ * farmacovigilância os exige, e a administração de internação carrega o plantão em que caiu a
+ * execução. Copiá-los para cá criaria duas versões do mesmo fato, que divergem no primeiro
+ * acerto feito em um lado só. Eles entram na história **derivados**, na leitura.
+ *
+ * `avulso` é o que o responsável conta e a clínica não viu acontecer: castração feita em outro
+ * serviço, vermífugo dado em casa. Vale registrar — o vet precisa saber —, e vale dizer que a
+ * clínica não presenciou.
+ */
+export type OrigemDoAto = 'clinica' | 'internacao' | 'vacina' | 'avulso'
+
+/**
+ * Um ato clínico **executado** no paciente, com a hora em que foi executado.
+ *
+ * É a diferença entre o que foi mandado fazer e o que de fato aconteceu — e é a segunda coisa
+ * que o módulo não guardava fora da internação. Receita de consulta diz o que o responsável deve
+ * dar em casa; não diz que a dipirona foi aplicada na veia ali mesmo, nem que o curativo foi
+ * trocado, nem quando. Sem isso, "o que este animal já recebeu?" só tinha resposta em quem
+ * lembrava.
+ *
+ * `realizadoEm` é obrigatório e é o ponto do registro: ato sem hora não responde à pergunta que
+ * faz alguém procurá-lo — se a reação começou antes ou depois da aplicação.
+ */
+export type AtoClinico = {
+  id: string
+  petId: string
+  kind: AtoClinicoKind
+  origem: OrigemDoAto
+  /** Atendimento em que aconteceu, quando aconteceu em um. É o elo para o prontuário. */
+  encounterId: string | null
+  internacaoId: string | null
+  /** Só em `kind: 'medicamento'` que saiu do bulário; procedimento não tem catálogo. */
+  medicamentoId: string | null
+  /** O que foi feito, na frase que quem leu o prontuário vai encontrar. */
+  descricao: string
+  via: PrescriptionRoute | null
+  doseTexto: string
+  realizadoEm: ISODateTime
+  /** Quem executou. Vazio em `avulso`: a clínica não viu acontecer. */
+  professionalId: string
   observacao: string
 }
 

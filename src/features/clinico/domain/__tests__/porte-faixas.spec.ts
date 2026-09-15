@@ -27,6 +27,8 @@ function pet(patch: Partial<Pet> = {}): Pet {
     castrado: false,
     porte: null,
     pesoKg: 12,
+    microchip: '',
+    pelagem: '',
     tutorId: 'tutor-teste',
     alertas: [],
     iniciais: 'TE',

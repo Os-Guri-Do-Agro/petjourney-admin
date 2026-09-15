@@ -23,7 +23,8 @@ import { useI18n } from 'vue-i18n'
 
 import ClinicField from '../base/ClinicField.vue'
 import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
-import type { WaitlistPriority, WaitlistWindow, WeekdayIndex } from '../../data/types'
+import PacienteNovoForm from '../pacientes/PacienteNovoForm.vue'
+import type { Pet, WaitlistPriority, WaitlistWindow, WeekdayIndex } from '../../data/types'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { useFilaStore } from '../../stores/fila'
 import { useClinicoStore } from '../../stores/clinico'
@@ -50,6 +51,16 @@ const fila = useFilaStore()
 const formato = useClinicFormat()
 
 const DIAS_UTEIS: WeekdayIndex[] = [1, 2, 3, 4, 5]
+
+/**
+ * O mesmo diálogo trocando de conteúdo, como na criação de atendimento.
+ *
+ * O paciente que não está na lista é tão comum aqui quanto lá: a fila costuma nascer da ligação
+ * em que a agenda estava cheia — e quem liga com bicho novo é justamente quem não tem horário.
+ * Sem esta porta, a recepção fechava o diálogo, ia à tela de pacientes, cadastrava e voltava para
+ * refazer a janela de dias e horários do zero.
+ */
+const cadastrandoPaciente = ref(false)
 
 /* Prefixo 'escolhido' porque o nome cru colidiria com a prop de pré-seleção de mesmo nome. */
 const petEscolhidoId = ref<string | null>(null)
@@ -117,6 +128,7 @@ watch(
     }
 
     /* Reabrir limpo, mas honrando o que a agenda já sabia. */
+    cadastrandoPaciente.value = false
     petEscolhidoId.value = props.petId
     tipoEscolhidoId.value = props.typeId ?? clinico.tipos[0]?.id ?? null
     profissionalEscolhidoId.value = props.professionalId
@@ -127,6 +139,12 @@ watch(
     observacao.value = ''
   },
 )
+
+/** Cadastrado, já entra escolhido: ninguém procuraria de novo na lista o que acabou de criar. */
+function aoCriarPaciente(pet: Pet) {
+  petEscolhidoId.value = pet.id
+  cadastrandoPaciente.value = false
+}
 
 async function salvar() {
   const pet = petEscolhido.value
@@ -160,8 +178,15 @@ async function salvar() {
     :style="{ width: 'min(34rem, 94vw)' }"
     :header="t('clinico.fila.adicionar')"
     :dismissable-mask="true"
+    :pt="{ footer: cadastrandoPaciente ? { style: { display: 'none' } } : {} }"
   >
-    <div class="entrada clinic-scope">
+    <PacienteNovoForm
+      v-if="cadastrandoPaciente"
+      @criado="aoCriarPaciente"
+      @cancelar="cadastrandoPaciente = false"
+    />
+
+    <div v-else class="entrada clinic-scope">
       <ClinicField :rotulo="t('clinico.pacientes.colunaPaciente')">
         <Select
           v-model="petEscolhidoId"
@@ -171,7 +196,19 @@ async function salvar() {
           filter
           fluid
           :placeholder="t('clinico.pacientes.buscar')"
-        />
+          :pt="{ overlay: { class: 'clinic-overlay' } }"
+        >
+          <template #footer>
+            <button type="button" class="cadastrar" @click="cadastrandoPaciente = true">
+              <span class="cadastrar__marca" aria-hidden="true"><i class="pi pi-user-plus" /></span>
+              <span class="cadastrar__texto">
+                <strong>{{ t('clinico.paciente.novo.atalho') }}</strong>
+                <small>{{ t('clinico.paciente.novo.atalhoAjuda') }}</small>
+              </span>
+              <i class="pi pi-arrow-right cadastrar__seta" aria-hidden="true" />
+            </button>
+          </template>
+        </Select>
       </ClinicField>
 
       <div class="entrada__par">
@@ -256,6 +293,75 @@ async function salvar() {
 </template>
 
 <style scoped>
+/*
+ * O atalho do rodapé da lista.
+ *
+ * Mesma forma da criação de atendimento, e de propósito: é o mesmo gesto, e duas aparências para
+ * a mesma porta fariam parecer que são coisas diferentes.
+ */
+.cadastrar {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--clinic-space-2);
+  padding: var(--clinic-space-2) var(--clinic-space-3);
+  border: 0;
+  border-top: 1px solid var(--clinic-line-strong);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+}
+
+.cadastrar:hover,
+.cadastrar:focus-visible {
+  background: var(--clinic-accent-strong);
+  color: var(--clinic-surface);
+}
+
+.cadastrar__marca {
+  display: grid;
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: none;
+  border-radius: 999px;
+  background: var(--clinic-accent-strong);
+  color: var(--clinic-surface);
+  place-items: center;
+}
+
+.cadastrar:hover .cadastrar__marca,
+.cadastrar:focus-visible .cadastrar__marca {
+  background: var(--clinic-surface);
+  color: var(--clinic-accent-strong);
+}
+
+.cadastrar__marca i {
+  font-size: 0.78rem;
+}
+
+.cadastrar__texto {
+  display: grid;
+  min-width: 0;
+  gap: 0.05rem;
+}
+
+.cadastrar__texto strong {
+  font-size: var(--clinic-font-base);
+  font-weight: 750;
+}
+
+.cadastrar__texto small {
+  font-size: var(--clinic-font-label);
+  opacity: 0.8;
+}
+
+.cadastrar__seta {
+  margin-left: auto;
+  font-size: 0.72rem;
+}
+
 .entrada {
   display: grid;
   gap: var(--clinic-space-3);

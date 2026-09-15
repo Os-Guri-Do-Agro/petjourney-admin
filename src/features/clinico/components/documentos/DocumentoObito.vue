@@ -9,7 +9,8 @@
  * Duas exigências que o papel precisa cumprir e que a pressa faz esquecer:
  *
  * - **Identificação inequívoca do animal.** A crematória precisa saber que o corpo que recebeu
- *   é o do documento. Espécie, raça, sexo, pelagem e microchip quando houver.
+ *   é o do documento. Espécie, raça, sexo, pelagem e microchip quando houver — e agora eles saem
+ *   do cadastro, em vez de virarem sempre linha em branco para preencher à mão.
  * - **Causa declarada, não presumida.** Sem necropsia, a causa é *provável* — e o documento
  *   precisa dizer isso com todas as letras. Afirmar causa que ninguém confirmou é o tipo de
  *   frase que volta como problema.
@@ -96,17 +97,26 @@ const causa = computed(() => {
       <p class="ressalva">{{ t('clinico.documentos.obito.semNecropsia') }}</p>
     </section>
 
-    <!-- Microchip fica em branco no protótipo: o módulo ainda não guarda o número. -->
+    <!--
+      Microchip e pelagem saem do cadastro quando ele os tem, e viram linha em branco quando não.
+
+      A linha em branco não é preguiça: é o documento admitindo que o dado não existe, para quem
+      assina preencher à mão em vez de assinar um campo que alguém deduziu. O que mudou é que a
+      linha deixou de ser o caso normal — até agora ela era o único caso, porque o cadastro não
+      perguntava o número do transponder.
+    -->
     <section class="bloco">
       <h2>{{ t('clinico.documentos.obito.identificacao') }}</h2>
       <div class="campos">
         <span class="campo">
           <span class="campo__rotulo">{{ t('clinico.documentos.obito.microchip') }}</span>
-          <span class="campo__linha" aria-hidden="true" />
+          <span v-if="pet?.microchip" class="campo__valor">{{ pet.microchip }}</span>
+          <span v-else class="campo__linha" aria-hidden="true" />
         </span>
         <span class="campo">
           <span class="campo__rotulo">{{ t('clinico.documentos.obito.pelagem') }}</span>
-          <span class="campo__linha" aria-hidden="true" />
+          <span v-if="pet?.pelagem" class="campo__valor">{{ pet.pelagem }}</span>
+          <span v-else class="campo__linha" aria-hidden="true" />
         </span>
       </div>
     </section>
@@ -168,6 +178,14 @@ const causa = computed(() => {
   display: block;
   height: 5mm;
   border-bottom: 0.3mm solid #000;
+}
+
+/* Mesma altura da linha em branco: os dois campos se alinham preenchido ou não. */
+.campo__valor {
+  display: block;
+  height: 5mm;
+  font-size: 10pt;
+  line-height: 5mm;
 }
 
 .campo__linha--larga {

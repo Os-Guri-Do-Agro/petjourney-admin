@@ -219,6 +219,18 @@ function ir(destino: Destino) {
 }
 
 /**
+ * A saída do "nada encontrado".
+ *
+ * Procurar um paciente e não achar é, na clínica, quase sempre a mesma coisa: ele ainda não
+ * está cadastrado. Dizer só "nada encontrado" devolve a pergunta a quem perguntou — e este é o
+ * ponto do módulo por onde mais gente passa, já que a busca atende o portal inteiro.
+ */
+function cadastrarPaciente() {
+  emit('fechar')
+  void router.push('/veterinario/paciente/novo')
+}
+
+/**
  * Setas percorrem, `Enter` vai, `Esc` fecha.
  *
  * A lista dá a volta nas duas pontas: com seis resultados, chegar ao último e continuar
@@ -275,9 +287,16 @@ function aoTeclar(evento: KeyboardEvent) {
 
       <p class="busca__dica">{{ t('clinico.busca.dica') }}</p>
 
-      <p v-if="vazio" class="busca__vazio">
-        {{ t('clinico.busca.semResultado', { termo: termo.trim() }) }}
-      </p>
+      <div v-if="vazio" class="busca__vazio">
+        <p class="busca__vazio-frase">
+          {{ t('clinico.busca.semResultado', { termo: termo.trim() }) }}
+        </p>
+
+        <button type="button" class="busca__cadastrar" @click="cadastrarPaciente">
+          <i class="pi pi-user-plus" aria-hidden="true" />
+          {{ t('clinico.paciente.novo.atalho') }}
+        </button>
+      </div>
 
       <ul v-else class="busca__lista" role="listbox" :aria-label="t('clinico.busca.titulo')">
         <li v-if="telasEncontradas.length > 0" class="busca__grupo" role="presentation">
@@ -442,5 +461,39 @@ function aoTeclar(evento: KeyboardEvent) {
   padding: var(--clinic-space-3) var(--clinic-space-2);
   color: var(--clinic-faint);
   list-style: none;
+}
+
+.busca__vazio {
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.busca__vazio-frase {
+  margin: 0;
+}
+
+.busca__cadastrar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--clinic-accent-strong);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--clinic-font-label);
+  font-weight: 750;
+}
+
+.busca__cadastrar:hover,
+.busca__cadastrar:focus-visible {
+  background: var(--clinic-accent-strong);
+  color: var(--clinic-surface);
+}
+
+.busca__cadastrar i {
+  font-size: 0.72rem;
 }
 </style>

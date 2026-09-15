@@ -41,7 +41,7 @@ const descrito = computed(() =>
     </label>
 
     <div class="campo__controle">
-      <slot :id="idControle" :descrito-por="descrito || undefined" />
+      <slot :id="idControle" :descrito="descrito || undefined" />
     </div>
 
     <p v-if="dica && !erro" :id="idDica" class="campo__dica">{{ dica }}</p>

@@ -59,6 +59,7 @@ import type {
   Prescription,
   Professional,
   SystemKey,
+  AtoClinico,
   TimelineEvent,
   Tutor,
   VitalKey,
@@ -133,6 +134,13 @@ export type SeedResult = {
   timeline: TimelineEvent[]
   /** Vacinas aplicadas — a carteira do paciente e o motor de recall saem daqui. */
   aplicacoesDeVacina: AplicacaoVacina[]
+  /**
+   * Procedimentos realizados e medicação aplicada na clínica.
+   *
+   * Só o que não tem registro próprio em outro lugar. Vacina e dose de internação entram na
+   * história do paciente **derivadas** na leitura — ver `domain/atos.ts`.
+   */
+  atos: AtoClinico[]
   /** Leitos, plantões, aprazamento e boletins. Ancorado no plantão corrente, não no dia âncora. */
   internacao: DatasetDeInternacao
   casos: CasoDificil[]
@@ -1360,6 +1368,125 @@ function montarTimeline(encounters: Encounter[], appointments: Appointment[]): T
  * As datas nascem relativas a hoje pelo mesmo motivo do resto do dataset: data fixa morre na
  * semana seguinte.
  */
+/**
+ * Procedimentos e aplicações plantados.
+ *
+ * Três casos que a tela precisa saber desenhar, e que o dataset não produzia de outro jeito:
+ * o ato **da consulta** (com elo para o prontuário), o ato **avulso** — contado pelo responsável,
+ * que a clínica não presenciou e por isso não tem profissional — e o procedimento antigo que
+ * explica uma cicatriz.
+ */
+function atosPlantados(encounters: Encounter[], hoje: ISODate): AtoClinico[] {
+  const PLANTADOS: Array<{
+    petId: string
+    kind: AtoClinico['kind']
+    origem: AtoClinico['origem']
+    medicamentoId: string | null
+    descricao: string
+    via: AtoClinico['via']
+    doseTexto: string
+    diasAtras: number
+    minuto: number
+    professionalId: string
+    observacao: string
+  }> = [
+    {
+      petId: 'pet-luna',
+      kind: 'medicamento',
+      origem: 'clinica',
+      medicamentoId: 'med-dipirona',
+      descricao: 'Dipirona',
+      via: 'intravenosa',
+      doseTexto: '310 mg',
+      diasAtras: 14,
+      minuto: 10 * 60 + 40,
+      professionalId: 'prof-ana',
+      observacao: 'Aplicada no consultório; dor cedeu em 20 min.',
+    },
+    {
+      petId: 'pet-luna',
+      kind: 'procedimento',
+      origem: 'avulso',
+      medicamentoId: null,
+      descricao: 'Castração',
+      via: null,
+      doseTexto: '',
+      diasAtras: 900,
+      minuto: 9 * 60,
+      professionalId: '',
+      observacao: 'Relato do responsável: feita em outro serviço.',
+    },
+    {
+      petId: 'pet-cacau',
+      kind: 'procedimento',
+      origem: 'clinica',
+      medicamentoId: null,
+      descricao: 'Limpeza dentária sob sedação',
+      via: null,
+      doseTexto: '',
+      diasAtras: 96,
+      minuto: 14 * 60 + 15,
+      professionalId: 'prof-caio',
+      observacao: 'Extração de dois incisivos.',
+    },
+    {
+      petId: 'pet-nero',
+      kind: 'medicamento',
+      origem: 'clinica',
+      medicamentoId: 'med-furosemida',
+      descricao: 'Furosemida — primeira dose supervisionada',
+      via: 'oral',
+      doseTexto: '35 mg',
+      diasAtras: 60,
+      minuto: 11 * 60,
+      professionalId: 'prof-helena',
+      observacao: '',
+    },
+    {
+      petId: 'pet-bento',
+      kind: 'procedimento',
+      origem: 'clinica',
+      medicamentoId: null,
+      descricao: 'Troca de curativo',
+      via: null,
+      doseTexto: '',
+      diasAtras: 18,
+      minuto: 16 * 60 + 30,
+      professionalId: 'prof-tiago',
+      observacao: 'Ferida limpa, sem secreção.',
+    },
+  ]
+
+  return PLANTADOS.map((item, indice) => {
+    const em = iso(addDays(hoje, -item.diasAtras), item.minuto)
+
+    /** O elo para o prontuário só existe quando há um atendimento do mesmo dia para apontar. */
+    const doDia =
+      item.origem === 'clinica'
+        ? (encounters.find(
+            (encounter) =>
+              encounter.petId === item.petId && clock.dateOf(encounter.abertoEm) === clock.dateOf(em),
+          ) ?? null)
+        : null
+
+    return {
+      id: `ato-plantado-${indice}`,
+      petId: item.petId,
+      kind: item.kind,
+      origem: item.origem,
+      encounterId: doDia?.id ?? null,
+      internacaoId: null,
+      medicamentoId: item.medicamentoId,
+      descricao: item.descricao,
+      via: item.via,
+      doseTexto: item.doseTexto,
+      realizadoEm: em,
+      professionalId: item.professionalId,
+      observacao: item.observacao,
+    }
+  })
+}
+
 function aplicacoesDeVacinaPlantadas(hoje: ISODate): AplicacaoVacina[] {
   const PLANTADAS: Array<{
     petId: string
@@ -1873,6 +2000,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
       ...eventosDasInternacoesAbertas(internacao),
     ].sort((a, b) => b.em.localeCompare(a.em)),
     aplicacoesDeVacina: aplicacoesDeVacinaPlantadas(clock.today()),
+    atos: atosPlantados(encounters, clock.today()),
     internacao,
     casos: [...casos, ...casosDaInternacao(internacao)],
     pets: petsFixture.map((pet) => ({ ...pet, alertas: [...pet.alertas] })),

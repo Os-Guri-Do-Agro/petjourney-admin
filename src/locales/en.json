@@ -1862,6 +1862,7 @@
       "abrirProntuario": "Open record",
       "novo": {
         "atalho": "Register new patient",
+        "atalhoAjuda": "Quick registration, without leaving this screen",
         "titulo": "New patient",
         "ajuda": "Only what booking needs. Birth date and weight can wait for the visit.",
         "nome": "Patient name",
@@ -1869,15 +1870,87 @@
         "sexo": "Sex",
         "nascimento": "Birth date (optional)",
         "peso": "Weight (optional)",
-        "castrado": "Neutered",
-        "responsavelNovo": "Register new owner",
+        "castrado": "Neutered?",
         "buscarResponsavel": "Search owner",
         "nomeResponsavel": "Owner name",
         "telefone": "Phone",
-        "documento": "Document (optional)",
+        "documento": "Document / CPF (optional)",
         "email": "Email (optional)",
         "salvar": "Register and use",
-        "erro": "The patient could not be registered."
+        "erro": "The patient could not be registered.",
+        "ajudaCompleta": "The full record. Only name and owner are required — the rest goes in when it exists.",
+        "pesoDica": "From the scale. Dosing is calculated from it.",
+        "identificacao": "Identification",
+        "microchip": "Microchip",
+        "microchipDica": "15 digits. Printed on certificates.",
+        "pelagem": "Coat",
+        "pelagemDica": "Color and type, as someone would describe the animal.",
+        "porte": "Size",
+        "porteDica": "Of the adult breed, not today's weight. It qualifies the reference ranges.",
+        "porteNaoInformado": "Not informed",
+        "alertas": "Clinical alerts",
+        "alertasAjuda": "They show in the patient header, before any prescription.",
+        "gravidade": "Severity",
+        "alertaDica": {
+          "alergia": "Which drug or substance",
+          "medicacao-continua": "Which drug, dose and interval",
+          "cronico": "Which condition",
+          "imunossuprimido": "Why: chemotherapy, steroids, disease",
+          "agressivo": "What handling the animal requires",
+          "gestante": "How far along",
+          "inadimplente": "What is outstanding"
+        },
+        "semelhanteTitulo": "A similar owner already exists",
+        "usarEste": "Use this one",
+        "semelhante": {
+          "documento": "same document",
+          "telefone": "same phone",
+          "nome": "same name"
+        },
+        "telefoneSecundario": "Secondary phone (optional)",
+        "telefoneSecundarioDica": "For when the first one does not answer — hospitalization depends on it.",
+        "canalPreferido": "Contact by",
+        "canalDica": "How the clinic sends notices and status updates.",
+        "canal": {
+          "whatsapp": "WhatsApp",
+          "ligacao": "Phone call",
+          "email": "Email"
+        },
+        "enderecoAjuda": "Address (optional). Controlled-drug prescriptions require the owner's address.",
+        "cep": "Postal code",
+        "logradouro": "Street",
+        "numero": "Number",
+        "complemento": "Unit",
+        "bairro": "District",
+        "cidade": "City",
+        "uf": "State",
+        "erros": {
+          "obrigatorio": "Required field.",
+          "documento": "Invalid document number.",
+          "telefone": "Invalid phone. Include the area code.",
+          "email": "Invalid email.",
+          "cep": "The postal code has 8 digits.",
+          "futuro": "The date cannot be in the future."
+        },
+        "salvarCompleto": "Register patient",
+        "sim": "Yes",
+        "nao": "No",
+        "origem": {
+          "novo": "New owner",
+          "existente": "Already registered"
+        },
+        "quemResponde": "Who answers for the patient",
+        "escolhaResponsavel": "Pick from the list",
+        "telefoneSecundarioCurto": "Phone 2",
+        "documentoCurto": "Document",
+        "emailCurto": "Email",
+        "enderecoCurto": "Address",
+        "previa": {
+          "titulo": "How the clinic will see it",
+          "semResponsavel": "No owner: nobody to call.",
+          "nomeVazio": "Patient name",
+          "semAlertas": "No alerts flagged"
+        }
       },
       "porte": {
         "mini": "Toy",
@@ -1891,7 +1964,60 @@
         "adulto": "Adult",
         "idoso": "Senior"
       },
-      "pesoHoje": "today"
+      "pesoHoje": "today",
+      "atos": {
+        "titulo": "Medications and procedures",
+        "ajuda": "What this patient received, and when.",
+        "registrar": "Record",
+        "colunaQuando": "When",
+        "colunaAto": "What",
+        "colunaOrigem": "Where",
+        "colunaQuem": "Who",
+        "semProfissional": "Reported",
+        "vazioTitulo": "Nothing recorded yet",
+        "vazioDescricao": "Vaccines and inpatient doses show up here on their own. The rest is recorded.",
+        "kind": {
+          "medicamento": "Medication",
+          "procedimento": "Procedure"
+        },
+        "origem": {
+          "clinica": "At the clinic",
+          "internacao": "Hospitalization",
+          "vacina": "Vaccine",
+          "avulso": "Reported"
+        },
+        "filtro": {
+          "todos": "All",
+          "medicamento": "Medications",
+          "procedimento": "Procedures"
+        },
+        "novo": {
+          "titulo": "Record a procedure or medication",
+          "ajuda": "What was done to {nome}, and when. Vaccines go in the vaccination record; inpatient doses, in the checklist.",
+          "tipo": "Type",
+          "medicamento": "From the formulary",
+          "medicamentoDica": "Picking here lets the history count how many times it has been used.",
+          "medicamentoVazio": "Not in the formulary",
+          "descricao": "What was done",
+          "descricaoDica": "The sentence whoever opens this record in a year will find.",
+          "via": "Route",
+          "semVia": "Not applicable",
+          "dose": "Dose",
+          "doseDica": "As it was administered.",
+          "quando": "When it happened",
+          "quandoDica": "Not the time it was entered — the time of the act.",
+          "quem": "Who performed it",
+          "quemDica": "Left blank: the clinic did not witness it, and the record will say so.",
+          "quemNinguem": "Nobody from the clinic",
+          "observacao": "Note",
+          "salvar": "Record",
+          "erros": {
+            "descricao": "Say what was done.",
+            "quando": "Enter the date and time.",
+            "futuro": "The act cannot be in the future."
+          }
+        }
+      }
     },
     "tabela": {
       "carregando": "Loading…",
@@ -2941,7 +3067,7 @@
     },
     "vacinas": {
       "titulo": "Vaccines",
-      "subtitulo": "Who to call for a booster — the visit the clinic can prompt.",
+      "subtitulo": "What the clinic has given, and who is still to call.",
       "vazioTitulo": "No boosters due",
       "vazioDescricao": "Every patient with a recorded vaccine is up to date.",
       "colunaVacina": "Vaccine",
@@ -2968,7 +3094,19 @@
       "dose": "Dose",
       "aplicada": "Given",
       "doseDeTotal": "{dose} of {total}",
-      "proximaEm": "Next dose on {data}"
+      "proximaEm": "Next dose on {data}",
+      "aba": {
+        "aplicadas": "Given",
+        "atraso": "Overdue"
+      },
+      "buscar": "Patient, owner, vaccine or batch…",
+      "aplicadasVazioTitulo": "No vaccinations recorded",
+      "aplicadasVazioDescricao": "Every vaccine given during a visit shows up here.",
+      "validade": "exp. {data}",
+      "filtro": {
+        "quando": "When",
+        "ultimosDias": "Last {dias} days"
+      }
     },
     "internacao": {
       "titulo": "Inpatients",

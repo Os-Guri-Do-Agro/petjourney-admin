@@ -42,6 +42,8 @@ function pet(patch: Partial<Pet> = {}): Pet {
     nascimento: '2020-01-01',
     castrado: true,
     pesoKg: 10,
+    microchip: '',
+    pelagem: '',
     tutorId: 'tutor-teste',
     alertas: [],
     iniciais: 'TE',

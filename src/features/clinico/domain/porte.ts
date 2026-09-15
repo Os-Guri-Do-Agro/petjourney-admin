@@ -34,7 +34,7 @@ const LIMITES_DE_PORTE: { ate: number; porte: PetPorte }[] = [
  * referência. Em gato, ave e roedor a dispersão não justifica — e inventar porte para eles
  * criaria faixas que ninguém preencheria.
  */
-const ESPECIES_COM_PORTE: PetSpecies[] = ['canina']
+export const ESPECIES_COM_PORTE: PetSpecies[] = ['canina']
 
 export function porteDoPaciente(pet: Pick<Pet, 'especie' | 'porte' | 'pesoKg'>): PetPorte | null {
   if (!ESPECIES_COM_PORTE.includes(pet.especie)) {

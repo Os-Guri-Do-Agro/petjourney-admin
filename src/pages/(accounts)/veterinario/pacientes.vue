@@ -8,7 +8,17 @@
  * Os filtros respondem às perguntas que a lista sozinha não responde: "quais gatos?", "quem
  * tem alerta de risco?", "quem está sem retorno marcado?". Ficam atrás de um botão só, com as
  * escolhas visíveis em fichas — filtro escondido é como alguém conclui que a lista sumiu.
+ *
+ * **Cadastrar é ação desta tela, e não só do agendamento.** Até agora o único caminho para um
+ * paciente novo era abrir a agenda, começar a marcar um horário e descobrir o atalho no rodapé
+ * da lista de pacientes — um lugar que só encontra quem já estava marcando. Quem chega no balcão
+ * com um filhote e nenhuma consulta marcada estava na tela certa e não tinha por onde começar.
+ * O botão está aqui em dois lugares: encostado no título, e dentro da lista vazia — que é
+ * exatamente onde alguém para quando procurou o paciente e ele não existe. Os dois levam à
+ * página de cadastro: a ficha inteira tem mais de vinte campos e não cabe num diálogo sem criar
+ * uma rolagem dentro da outra.
  */
+import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -138,6 +148,19 @@ const grupos = computed<GrupoDeFiltro[]>(() => [
   },
 ])
 
+let atrasoDaBusca: ReturnType<typeof setTimeout> | null = null
+
+function cancelarBuscaAtrasada() {
+  if (atrasoDaBusca) {
+    clearTimeout(atrasoDaBusca)
+    atrasoDaBusca = null
+  }
+}
+
+function cadastrar() {
+  void router.push('/veterinario/paciente/novo')
+}
+
 async function buscar() {
   carregando.value = true
   erro.value = ''
@@ -151,13 +174,8 @@ async function buscar() {
   }
 }
 
-let atrasoDaBusca: ReturnType<typeof setTimeout> | null = null
-
 watch(termo, () => {
-  if (atrasoDaBusca) {
-    clearTimeout(atrasoDaBusca)
-  }
-
+  cancelarBuscaAtrasada()
   atrasoDaBusca = setTimeout(() => void buscar(), 250)
 })
 
@@ -176,6 +194,14 @@ onMounted(async () => {
     block-when-suspended
     @retry="buscar"
   >
+    <template #actions>
+      <Button
+        icon="pi pi-user-plus"
+        :label="t('clinico.paciente.novo.atalho')"
+        @click="cadastrar"
+      />
+    </template>
+
     <div class="pacientes clinic-scope">
       <ClinicFilterBar
         v-model:busca="termo"
@@ -195,6 +221,16 @@ onMounted(async () => {
         :rotulo="t('clinico.pacientes.titulo')"
         @ativar="(linha) => router.push(`/veterinario/paciente/${linha.pet.id}/historico`)"
       >
+        <template #vazio-acao>
+          <Button
+            icon="pi pi-user-plus"
+            severity="secondary"
+            outlined
+            :label="t('clinico.paciente.novo.atalho')"
+            @click="cadastrar"
+          />
+        </template>
+
         <template #celula-paciente="{ linha }">
           <strong class="pacientes__nome">{{ linha.pet.nome }}</strong>
           <span class="pacientes__meta">

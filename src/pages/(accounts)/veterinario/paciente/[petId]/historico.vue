@@ -4,6 +4,12 @@
  *
  * Cabeçalho do paciente, linha do tempo e a lista de atendimentos com o que aconteceu em cada
  * um — inclusive as faltas, que fazem parte da história e costumam sumir das telas bonitas.
+ *
+ * E o que o animal **recebeu**, que é outra pergunta. Atendimento responde "quando esteve aqui";
+ * ato responde "o que entrou nele, e quando" — a pergunta que se faz antes de prescrever e
+ * depois de uma reação adversa. As duas listas convivem porque nenhuma responde pela outra: uma
+ * consulta sem nada aplicado é linha na primeira e não na segunda, e a dose dada às 3 da manhã
+ * no leito é linha na segunda e em nenhum atendimento.
  */
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -13,6 +19,8 @@ import { useRoute, useRouter } from 'vue-router'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
+import AtoNovoDialog from '@/features/clinico/components/pacientes/AtoNovoDialog.vue'
+import AtosDoPaciente from '@/features/clinico/components/pacientes/AtosDoPaciente.vue'
 import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
 import ProntuarioTimeline from '@/features/clinico/components/prontuario/ProntuarioTimeline.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
@@ -22,7 +30,13 @@ import {
   patientRepository,
   type LeitoNoMapa,
 } from '@/features/clinico/data/repositories'
-import type { Appointment, Pet, TimelineEvent, Tutor } from '@/features/clinico/data/types'
+import type {
+  Appointment,
+  AtoClinico,
+  Pet,
+  TimelineEvent,
+  Tutor,
+} from '@/features/clinico/data/types'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 
 const { t } = useI18n()
@@ -35,6 +49,8 @@ const pet = ref<Pet | null>(null)
 const tutor = ref<Tutor | null>(null)
 const eventos = ref<TimelineEvent[]>([])
 const atendimentos = ref<Appointment[]>([])
+const atos = ref<AtoClinico[]>([])
+const registrandoAto = ref(false)
 /** O leito onde este paciente está **agora**, quando está. */
 const internacaoAberta = ref<LeitoNoMapa | null>(null)
 const carregando = ref(false)
@@ -84,9 +100,10 @@ async function carregar() {
     pet.value = dados?.pet ?? null
     tutor.value = dados?.tutor ?? null
 
-    const [historico, lista, mapa] = await Promise.all([
+    const [historico, lista, recebidos, mapa] = await Promise.all([
       encounterRepository.historico(petId.value),
       patientRepository.atendimentosDoPet(petId.value),
+      patientRepository.historicoDeAtos(petId.value),
       /*
        * O mapa de leitos responde "este animal está aqui agora?". Falhar não derruba a página:
        * o histórico continua sendo histórico, e o que se perde é apenas o atalho para o leito.
@@ -96,6 +113,7 @@ async function carregar() {
 
     eventos.value = historico
     atendimentos.value = lista
+    atos.value = recebidos
     internacaoAberta.value =
       mapa?.leitos.find(
         (item) => item.internacao !== null && item.internacao.petId === petId.value,
@@ -113,6 +131,26 @@ function abrir(appointment: Appointment) {
   }
 
   void router.push(`/veterinario/atendimento/${appointment.encounterId}`)
+}
+
+/**
+ * O ato lançado aqui não pertence a um atendimento.
+ *
+ * `encounterId` fica nulo de propósito: esta tela é a ficha do paciente, e o que se lança dela é
+ * o que aconteceu fora de uma consulta aberta — o relato do responsável, o curativo do balcão.
+ * O ato **da** consulta nasce no prontuário, com o elo já no lugar.
+ */
+async function registrarAto(
+  valor: Omit<Parameters<typeof patientRepository.registrarAto>[0], "petId" | "encounterId">,
+) {
+  await patientRepository.registrarAto({ ...valor, petId: petId.value, encounterId: null })
+
+  registrandoAto.value = false
+  atos.value = await patientRepository.historicoDeAtos(petId.value)
+}
+
+function abrirAtendimento(encounterId: string) {
+  void router.push(`/veterinario/atendimento/${encounterId}`)
 }
 
 function abrirInternacao() {
@@ -211,6 +249,19 @@ watch(petId, carregar)
         <!-- Aqui a lista completa é o ponto da página: nada de limite. -->
         <ProntuarioTimeline :eventos="eventos" :anterior="null" :limite="eventos.length" />
       </div>
+
+      <AtosDoPaciente
+        :atos="atos"
+        :carregando="carregando"
+        @registrar="registrandoAto = true"
+        @abrir-atendimento="abrirAtendimento"
+      />
+
+      <AtoNovoDialog
+        v-model:visivel="registrandoAto"
+        :pet-nome="pet?.nome ?? ''"
+        @registrar="registrarAto"
+      />
     </div>
   </PartnerPageFrame>
 </template>

@@ -26,7 +26,7 @@ import { useI18n } from 'vue-i18n'
 
 import ClinicAlertChip from '../base/ClinicAlertChip.vue'
 import ClinicField from '../base/ClinicField.vue'
-import PacienteNovoForm from './PacienteNovoForm.vue'
+import PacienteNovoForm from '../pacientes/PacienteNovoForm.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { ISODate, Pet } from '../../data/types'
 import { clockToMinutes, minutesToClock } from '../../domain/clinic-time'
@@ -329,11 +329,21 @@ async function confirmar() {
             <!--
               O atalho fica no rodapé da lista aberta: é exatamente onde o olho está no momento
               em que a busca não devolve o paciente.
+
+              **E parece um botão.** Na primeira versão era texto em cor de acento sobre fundo
+              transparente, no fim de uma lista de sessenta nomes — a mesma forma de um rodapé
+              decorativo. Quem não sabia que ele existia não o encontrava, e quem sabia ainda
+              precisava procurar. Agora tem faixa própria, ícone em disco e a seta que diz que
+              leva a algum lugar.
             -->
             <template #footer>
               <button type="button" class="cadastrar" @click="cadastrandoPaciente = true">
-                <i class="pi pi-plus" aria-hidden="true" />
-                {{ t('clinico.paciente.novo.atalho') }}
+                <span class="cadastrar__marca" aria-hidden="true"><i class="pi pi-user-plus" /></span>
+                <span class="cadastrar__texto">
+                  <strong>{{ t('clinico.paciente.novo.atalho') }}</strong>
+                  <small>{{ t('clinico.paciente.novo.atalhoAjuda') }}</small>
+                </span>
+                <i class="pi pi-arrow-right cadastrar__seta" aria-hidden="true" />
               </button>
             </template>
           </Select>
@@ -530,24 +540,63 @@ async function confirmar() {
   display: flex;
   width: 100%;
   align-items: center;
-  gap: 0.45rem;
+  gap: var(--clinic-space-2);
   padding: var(--clinic-space-2) var(--clinic-space-3);
   border: 0;
-  border-top: 1px solid var(--clinic-line);
-  background: transparent;
+  border-top: 1px solid var(--clinic-line-strong);
+  background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
   cursor: pointer;
   font: inherit;
-  font-size: var(--clinic-font-label);
+  text-align: start;
+}
+
+.cadastrar:hover,
+.cadastrar:focus-visible {
+  background: var(--clinic-accent-strong);
+  color: var(--clinic-surface);
+}
+
+.cadastrar__marca {
+  display: grid;
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: none;
+  border-radius: 999px;
+  background: var(--clinic-accent-strong);
+  color: var(--clinic-surface);
+  place-items: center;
+}
+
+.cadastrar:hover .cadastrar__marca,
+.cadastrar:focus-visible .cadastrar__marca {
+  background: var(--clinic-surface);
+  color: var(--clinic-accent-strong);
+}
+
+.cadastrar__marca i {
+  font-size: 0.78rem;
+}
+
+.cadastrar__texto {
+  display: grid;
+  min-width: 0;
+  gap: 0.05rem;
+}
+
+.cadastrar__texto strong {
+  font-size: var(--clinic-font-base);
   font-weight: 750;
 }
 
-.cadastrar:hover {
-  background: var(--clinic-accent-tint);
+.cadastrar__texto small {
+  font-size: var(--clinic-font-label);
+  opacity: 0.8;
 }
 
-.cadastrar i {
-  font-size: 0.7rem;
+.cadastrar__seta {
+  margin-left: auto;
+  font-size: 0.72rem;
 }
 
 .opcao small {

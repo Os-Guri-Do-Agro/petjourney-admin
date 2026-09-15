@@ -358,12 +358,12 @@ const opcoesRisco = computed(() =>
               atalho="Q"
               :erro="estado === 'erro' ? 'Campo obrigatório' : ''"
             >
-              <template #default="{ id, descritoPor }">
+              <template #default="{ id, descrito }">
                 <InputText
                   :id="id"
                   v-model="demoQueixa"
                   fluid
-                  :aria-describedby="descritoPor"
+                  :aria-describedby="descrito"
                   :disabled="estado === 'vazio'"
                 />
               </template>

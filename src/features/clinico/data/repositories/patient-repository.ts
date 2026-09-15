@@ -6,17 +6,27 @@
  * "Açaí".
  */
 
+import { historicoDeAtos } from '../../domain/atos'
 import { resumirFaltas } from '../../domain/load'
 import { createClinicClock, diffDays } from '../../domain/clinic-time'
 import { CLINIC_UTC_OFFSET } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import { getDataset, novoId } from '../store'
+import { vacinasFixture } from '../fixtures/vacinas'
 import type {
+  AlertSeverity,
   Appointment,
+  AtoClinico,
+  AtoClinicoKind,
+  PrescriptionRoute,
+  ContatoPreferido,
+  EnderecoPostal,
   ISODate,
   ISODateTime,
   NoShowSummary,
   Pet,
+  PetAlertKind,
+  PetPorte,
   PetSex,
   PetSpecies,
   Tutor,
@@ -221,14 +231,110 @@ export const patientRepository = {
   },
 
   /**
-   * Cadastro de paciente feito no balcão, no meio de um agendamento.
+   * Tudo o que este paciente recebeu, do mais recente para o mais antigo.
    *
-   * Aceita responsável existente ou novo — quem liga para marcar costuma ser cliente antigo com
-   * bicho novo, e obrigar a recadastrar a pessoa criaria um segundo cadastro com o mesmo telefone.
+   * Junta três registros que nunca se encontravam — a carteira de vacinas, o checklist da
+   * internação e os atos gravados na consulta — e é por isso que existe: "este animal já tomou
+   * isso?" é a pergunta que se faz antes de prescrever e depois de uma reação adversa, e até
+   * aqui ela não tinha tela.
    *
-   * O que é exigido aqui é o mínimo para o atendimento acontecer: nome, espécie e alguém por quem
-   * chamar. Data de nascimento e peso entram depois, na primeira consulta — pedi-los no telefone
-   * é convidar quem atende a inventar.
+   * A junção é de leitura, e não uma quarta tabela. Ver `domain/atos.ts`.
+   */
+  historicoDeAtos(petId: string): Promise<AtoClinico[]> {
+    return simularChamada('paciente.historico', () => {
+      const dataset = getDataset()
+
+      return historicoDeAtos({
+        petId,
+        atos: dataset.atos,
+        aplicacoes: dataset.aplicacoesDeVacina,
+        vacinas: vacinasFixture,
+        administracoes: dataset.internacao.administracoes,
+        prescricoes: dataset.internacao.prescricoes,
+        internacoes: dataset.internacao.internacoes,
+      })
+    })
+  },
+
+  /**
+   * Grava um procedimento realizado ou uma medicação aplicada.
+   *
+   * Só isto se grava: vacina e dose de internação já têm registro próprio e entram derivadas.
+   * Uma porta que aceitasse gravá-las aqui produziria a segunda cópia que `domain/atos.ts`
+   * existe para evitar.
+   *
+   * `realizadoEm` vem de fora e não do relógio: o ato quase sempre é lançado depois de
+   * acontecer — no fim da consulta, ou semanas depois, quando o responsável conta uma castração
+   * feita em outro serviço. Carimbar a hora do lançamento seria gravar quando alguém digitou,
+   * que é a única hora que ninguém vai querer saber.
+   */
+  registrarAto(input: {
+    petId: string
+    kind: AtoClinicoKind
+    medicamentoId: string | null
+    descricao: string
+    via: PrescriptionRoute | null
+    doseTexto: string
+    realizadoEm: ISODateTime
+    /** Vazio quando a clínica não presenciou — o ato nasce `avulso`. */
+    professionalId: string
+    encounterId: string | null
+    observacao: string
+  }): Promise<AtoClinico> {
+    return simularChamada('paciente.historico', () => {
+      const dataset = getDataset()
+
+      if (!dataset.pets.some((pet) => pet.id === input.petId)) {
+        throw new Error(`paciente.registrarAto: ${input.petId} não existe`)
+      }
+
+      if (!input.descricao.trim()) {
+        throw new Error('paciente.registrarAto: ato sem descrição')
+      }
+
+      const ato: AtoClinico = {
+        id: novoId('ato'),
+        petId: input.petId,
+        kind: input.kind,
+        /*
+         * Quem executou define a origem: sem profissional, a clínica não viu acontecer.
+         *
+         * `clinica` e não `consulta` porque o ato pode ter acontecido sem consulta aberta — o
+         * curativo do balcão é feito por alguém da equipe e não pertence a atendimento nenhum.
+         * O elo com o prontuário, quando existe, é `encounterId`; a origem diz apenas quem fez.
+         */
+        origem: input.professionalId ? 'clinica' : 'avulso',
+        encounterId: input.encounterId,
+        internacaoId: null,
+        medicamentoId: input.kind === 'medicamento' ? input.medicamentoId : null,
+        descricao: input.descricao.trim(),
+        via: input.via,
+        doseTexto: input.doseTexto.trim(),
+        realizadoEm: input.realizadoEm,
+        professionalId: input.professionalId,
+        observacao: input.observacao.trim(),
+      }
+
+      dataset.atos.push(ato)
+
+      return ato
+    })
+  },
+
+  /**
+   * Cadastro de paciente — o de balcão e o completo, pelo mesmo caminho.
+   *
+   * Aceita responsável existente ou novo. Quem liga para marcar costuma ser cliente antigo com
+   * bicho novo, e obrigar a recadastrar a pessoa criaria um segundo cadastro com o mesmo
+   * telefone — o defeito que parte o histórico em dois e faz a falta não somar.
+   *
+   * **O exigido é o mesmo nos dois modos**: nome do paciente e alguém por quem chamar. O que
+   * muda é quanto a tela pergunta. Nascimento, peso, porte, microchip, pelagem, alerta e
+   * endereço entram quando existem; campo em branco aqui é resposta honesta, e não um dado que
+   * a recepção inventou para vencer um asterisco.
+   *
+   * O alerta chega sem `id` de propósito: quem cadastra descreve a alergia, não numera linha de
+   * banco. O identificador nasce aqui, junto do paciente.
    */
   criarPaciente(input: {
     nome: string
@@ -237,26 +343,50 @@ export const patientRepository = {
     sexo: PetSex
     nascimento: ISODate | null
     pesoKg: number | null
+    porte: PetPorte | null
     castrado: boolean
+    microchip: string
+    pelagem: string
+    alertas: Array<{ kind: PetAlertKind; severidade: AlertSeverity; detalhe: string }>
     tutorId: string | null
-    novoTutor: { nome: string; telefone: string; documento: string; email: string } | null
+    novoTutor: {
+      nome: string
+      telefone: string
+      telefoneSecundario: string
+      documento: string
+      email: string
+      preferenciaContato: ContatoPreferido
+      endereco: EnderecoPostal | null
+    } | null
   }): Promise<{ pet: Pet; tutor: Tutor }> {
     return simularChamada('paciente.listar', () => {
       const dataset = getDataset()
 
-      const tutor = input.tutorId
+      const existente = input.tutorId
         ? dataset.tutores.find((item) => item.id === input.tutorId)
         : undefined
 
-      const responsavel: Tutor = tutor ?? {
-        id: novoId('tutor'),
-        nome: input.novoTutor?.nome.trim() ?? '',
-        telefone: input.novoTutor?.telefone.trim() ?? '',
-        email: input.novoTutor?.email.trim() ?? '',
-        documento: input.novoTutor?.documento.trim() ?? '',
+      /*
+       * Paciente sem responsável é paciente que ninguém consegue avisar — e o módulo inteiro
+       * (confirmação, fila, boletim de internação) parte do princípio de que há para quem ligar.
+       * Recusar aqui evita que uma tela futura crie o órfão que só aparece na hora da alta.
+       */
+      if (!existente && !input.novoTutor) {
+        throw new Error('paciente.criar: sem responsável existente nem novo')
       }
 
-      if (!tutor) {
+      const responsavel: Tutor = existente ?? {
+        id: novoId('tutor'),
+        nome: input.novoTutor!.nome.trim(),
+        telefone: input.novoTutor!.telefone.trim(),
+        telefoneSecundario: input.novoTutor!.telefoneSecundario.trim(),
+        email: input.novoTutor!.email.trim(),
+        documento: input.novoTutor!.documento.trim(),
+        preferenciaContato: input.novoTutor!.preferenciaContato,
+        endereco: input.novoTutor!.endereco,
+      }
+
+      if (!existente) {
         dataset.tutores.push(responsavel)
       }
 
@@ -268,11 +398,20 @@ export const patientRepository = {
         sexo: input.sexo,
         nascimento: input.nascimento,
         castrado: input.castrado,
-        /* Cadastro rápido não pergunta porte; a estimativa por peso cobre até alguém informar. */
-        porte: null,
+        /* Sem porte informado, a estimativa por peso cobre — e se anuncia como palpite. */
+        porte: input.porte,
         pesoKg: input.pesoKg,
+        microchip: input.microchip.replace(/\D/g, ''),
+        pelagem: input.pelagem.trim(),
         tutorId: responsavel.id,
-        alertas: [],
+        alertas: input.alertas
+          .filter((alerta) => alerta.kind)
+          .map((alerta) => ({
+            id: novoId('alerta'),
+            kind: alerta.kind,
+            severidade: alerta.severidade,
+            detalhe: alerta.detalhe.trim(),
+          })),
         iniciais: iniciaisDe(input.nome),
       }
 

@@ -1862,6 +1862,7 @@
       "abrirProntuario": "Abrir prontuário",
       "novo": {
         "atalho": "Cadastrar novo paciente",
+        "atalhoAjuda": "Cadastro rápido, sem sair daqui",
         "titulo": "Novo paciente",
         "ajuda": "Só o essencial para marcar. Nascimento e peso podem ficar para a consulta.",
         "nome": "Nome do paciente",
@@ -1869,15 +1870,87 @@
         "sexo": "Sexo",
         "nascimento": "Nascimento (opcional)",
         "peso": "Peso (opcional)",
-        "castrado": "Castrado",
-        "responsavelNovo": "Cadastrar novo responsável",
+        "castrado": "Castrado?",
         "buscarResponsavel": "Buscar responsável",
         "nomeResponsavel": "Nome do responsável",
         "telefone": "Telefone",
-        "documento": "Documento (opcional)",
+        "documento": "CPF (opcional)",
         "email": "E-mail (opcional)",
         "salvar": "Cadastrar e usar",
-        "erro": "Não foi possível cadastrar o paciente."
+        "erro": "Não foi possível cadastrar o paciente.",
+        "ajudaCompleta": "A ficha inteira. Só nome e responsável são obrigatórios — o resto entra quando existe.",
+        "pesoDica": "O da balança. A dose do bulário sai daqui.",
+        "identificacao": "Identificação",
+        "microchip": "Microchip",
+        "microchipDica": "15 dígitos. Sai nos atestados.",
+        "pelagem": "Pelagem",
+        "pelagemDica": "Cor e tipo, como alguém descreveria o animal.",
+        "porte": "Porte",
+        "porteDica": "Da raça adulta, não do peso de hoje. Qualifica as faixas de referência.",
+        "porteNaoInformado": "Não informado",
+        "alertas": "Alertas clínicos",
+        "alertasAjuda": "Aparecem no cabeçalho do paciente, antes de qualquer prescrição.",
+        "gravidade": "Gravidade",
+        "alertaDica": {
+          "alergia": "Qual princípio ativo ou substância",
+          "medicacao-continua": "Qual medicamento, dose e intervalo",
+          "cronico": "Qual condição",
+          "imunossuprimido": "Por quê: quimioterapia, corticoide, doença",
+          "agressivo": "Que manejo o animal exige",
+          "gestante": "Tempo de gestação",
+          "inadimplente": "O que está em aberto"
+        },
+        "semelhanteTitulo": "Já existe um responsável parecido",
+        "usarEste": "Usar este",
+        "semelhante": {
+          "documento": "mesmo CPF",
+          "telefone": "mesmo telefone",
+          "nome": "mesmo nome"
+        },
+        "telefoneSecundario": "Telefone secundário (opcional)",
+        "telefoneSecundarioDica": "Para quando o primeiro não atende — a internação depende disso.",
+        "canalPreferido": "Falar por",
+        "canalDica": "Por onde a clínica avisa e manda boletim.",
+        "canal": {
+          "whatsapp": "WhatsApp",
+          "ligacao": "Ligação",
+          "email": "E-mail"
+        },
+        "enderecoAjuda": "Endereço (opcional). A receita de controle especial exige o endereço do responsável.",
+        "cep": "CEP",
+        "logradouro": "Logradouro",
+        "numero": "Número",
+        "complemento": "Complemento",
+        "bairro": "Bairro",
+        "cidade": "Cidade",
+        "uf": "UF",
+        "erros": {
+          "obrigatorio": "Campo obrigatório.",
+          "documento": "CPF inválido.",
+          "telefone": "Telefone inválido. Use DDD + número.",
+          "email": "E-mail inválido.",
+          "cep": "O CEP tem 8 dígitos.",
+          "futuro": "A data não pode ser no futuro."
+        },
+        "salvarCompleto": "Cadastrar paciente",
+        "sim": "Sim",
+        "nao": "Não",
+        "origem": {
+          "novo": "Novo responsável",
+          "existente": "Já cadastrado"
+        },
+        "quemResponde": "Quem responde pelo paciente",
+        "escolhaResponsavel": "Escolha na lista",
+        "telefoneSecundarioCurto": "Telefone 2",
+        "documentoCurto": "CPF",
+        "emailCurto": "E-mail",
+        "enderecoCurto": "Endereço",
+        "previa": {
+          "titulo": "Como vai aparecer na clínica",
+          "semResponsavel": "Sem responsável: ninguém a quem avisar.",
+          "nomeVazio": "Nome do paciente",
+          "semAlertas": "Nenhum alerta marcado"
+        }
       },
       "porte": {
         "mini": "Mini",
@@ -1891,7 +1964,60 @@
         "adulto": "Adulto",
         "idoso": "Idoso"
       },
-      "pesoHoje": "hoje"
+      "pesoHoje": "hoje",
+      "atos": {
+        "titulo": "Medicamentos e procedimentos",
+        "ajuda": "O que este paciente recebeu, e quando.",
+        "registrar": "Registrar",
+        "colunaQuando": "Quando",
+        "colunaAto": "O que",
+        "colunaOrigem": "Onde",
+        "colunaQuem": "Quem",
+        "semProfissional": "Relatado",
+        "vazioTitulo": "Nada registrado ainda",
+        "vazioDescricao": "Vacinas e doses de internação aparecem aqui sozinhas. O resto se registra.",
+        "kind": {
+          "medicamento": "Medicamento",
+          "procedimento": "Procedimento"
+        },
+        "origem": {
+          "clinica": "Na clínica",
+          "internacao": "Internação",
+          "vacina": "Vacina",
+          "avulso": "Relato"
+        },
+        "filtro": {
+          "todos": "Tudo",
+          "medicamento": "Medicamentos",
+          "procedimento": "Procedimentos"
+        },
+        "novo": {
+          "titulo": "Registrar procedimento ou medicação",
+          "ajuda": "O que foi feito em {nome}, e quando. Vacina se registra na carteira; dose de internação, no checklist.",
+          "tipo": "Tipo",
+          "medicamento": "Do bulário",
+          "medicamentoDica": "Escolher aqui deixa o histórico contar quantas vezes já foi usado.",
+          "medicamentoVazio": "Não está no bulário",
+          "descricao": "O que foi feito",
+          "descricaoDica": "A frase que quem abrir a ficha daqui a um ano vai encontrar.",
+          "via": "Via",
+          "semVia": "Não se aplica",
+          "dose": "Dose",
+          "doseDica": "Como foi administrada.",
+          "quando": "Quando aconteceu",
+          "quandoDica": "Não é a hora do lançamento — é a hora do ato.",
+          "quem": "Quem executou",
+          "quemDica": "Em branco: a clínica não presenciou, e o registro dirá isso.",
+          "quemNinguem": "Ninguém da clínica",
+          "observacao": "Observação",
+          "salvar": "Registrar",
+          "erros": {
+            "descricao": "Diga o que foi feito.",
+            "quando": "Informe a data e a hora.",
+            "futuro": "O ato não pode estar no futuro."
+          }
+        }
+      }
     },
     "tabela": {
       "carregando": "Carregando…",
@@ -2941,7 +3067,7 @@
     },
     "vacinas": {
       "titulo": "Vacinas",
-      "subtitulo": "Quem chamar para reforço — a consulta que a clínica provoca.",
+      "subtitulo": "O que a clínica aplicou, e quem falta chamar.",
       "vazioTitulo": "Nenhum reforço pendente",
       "vazioDescricao": "Todos os pacientes com vacina registrada estão em dia.",
       "colunaVacina": "Vacina",
@@ -2968,7 +3094,19 @@
       "dose": "Dose",
       "aplicada": "Aplicada",
       "doseDeTotal": "{dose} de {total}",
-      "proximaEm": "Próxima dose em {data}"
+      "proximaEm": "Próxima dose em {data}",
+      "aba": {
+        "aplicadas": "Aplicadas",
+        "atraso": "Em atraso"
+      },
+      "buscar": "Paciente, responsável, vacina ou lote…",
+      "aplicadasVazioTitulo": "Nenhuma aplicação registrada",
+      "aplicadasVazioDescricao": "Cada vacina aplicada no atendimento aparece aqui.",
+      "validade": "val. {data}",
+      "filtro": {
+        "quando": "Quando",
+        "ultimosDias": "Últimos {dias} dias"
+      }
     },
     "internacao": {
       "titulo": "Internação",

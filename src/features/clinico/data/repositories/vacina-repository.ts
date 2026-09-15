@@ -8,6 +8,10 @@
  * - **A lista de chamada da clínica** — quem está vencido ou a vencer, de todos os pacientes.
  *   É o motor de recorrência: vacina é a única consulta que a clínica pode **provocar**, e uma
  *   clínica que não chama perde a visita para o pet shop da esquina.
+ * - **O que a clínica aplicou** — todas as aplicações, de todos os pacientes, da mais recente
+ *   para a mais antiga. É o registro: o que saiu da geladeira, em quem, por quem e de que lote.
+ *   A pergunta que ele responde não é "quem chamar", é "o que foi feito" — e é a que aparece
+ *   quando a farmacovigilância pergunta por um lote, ou quando alguém confere o estoque.
  */
 
 import { createClinicClock } from '../../domain/clinic-time'
@@ -18,6 +22,7 @@ import { agoraIso, getDataset, novoId } from '../store'
 import type {
   AplicacaoVacina,
   ISODate,
+  PetSpecies,
   PrescriptionRoute,
   ReforcoPendente,
   Vacina,
@@ -34,6 +39,22 @@ export type ChamadaDeVacina = ReforcoPendente & {
   obrigatoria: boolean
 }
 
+/**
+ * Uma aplicação com o que a tela precisa para desenhar a linha sem buscar de novo.
+ *
+ * Mesma escolha da lista de chamada: o repositório resolve paciente, responsável e vacina uma
+ * vez, em vez de deixar a tabela fazer três buscas por linha em cada renderização.
+ */
+export type AplicacaoNaLista = AplicacaoVacina & {
+  petNome: string
+  especie: PetSpecies
+  tutorNome: string
+  vacinaNome: string
+  obrigatoria: boolean
+  /** Doses da série no catálogo — é o denominador de "2 de 3". */
+  dosesNaSerie: number
+}
+
 export const vacinaRepository = {
   catalogo(): Vacina[] {
     return [...vacinasFixture]
@@ -46,6 +67,42 @@ export const vacinaRepository = {
         .aplicacoesDeVacina.filter((item) => item.petId === petId)
         .sort((a, b) => b.aplicadaEm.localeCompare(a.aplicadaEm)),
     )
+  },
+
+  /**
+   * Tudo o que a clínica aplicou, da aplicação mais recente para a mais antiga.
+   *
+   * Aplicação cujo paciente não existe mais no cadastro é descartada em silêncio: a linha não
+   * teria nome, e uma tabela com células vazias no lugar do paciente parece defeito de carga.
+   */
+  aplicadas(): Promise<AplicacaoNaLista[]> {
+    return simularChamada('paciente.listar', () => {
+      const dataset = getDataset()
+
+      return dataset.aplicacoesDeVacina
+        .map((aplicacao) => {
+          const pet = dataset.pets.find((item) => item.id === aplicacao.petId)
+
+          if (!pet) {
+            return null
+          }
+
+          const tutor = dataset.tutores.find((item) => item.id === pet.tutorId)
+          const vacina = vacinasFixture.find((item) => item.id === aplicacao.vacinaId)
+
+          return {
+            ...aplicacao,
+            petNome: pet.nome,
+            especie: pet.especie,
+            tutorNome: tutor?.nome ?? '',
+            vacinaNome: vacina?.nome ?? aplicacao.vacinaId,
+            obrigatoria: vacina?.obrigatoria ?? false,
+            dosesNaSerie: vacina?.dosesNaSerie ?? 1,
+          }
+        })
+        .filter((item): item is AplicacaoNaLista => item !== null)
+        .sort((a, b) => b.aplicadaEm.localeCompare(a.aplicadaEm))
+    })
   },
 
   reforcosDoPaciente(petId: string): Promise<ReforcoPendente[]> {
