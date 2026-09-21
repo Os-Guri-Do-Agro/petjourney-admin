@@ -203,8 +203,15 @@ async function evoluir(entrada: {
   }
 }
 
-async function compor(observado: string) {
-  await internacao.gerarBoletim({ autorId: plantonistaId.value, observado })
+/**
+ * O que o plantão escreveu **é** a mensagem.
+ *
+ * Vai como `texto`, e não como `observado`: o campo agora guarda o boletim inteiro, e mandá-lo
+ * como observação faria o repositório embrulhá-lo numa segunda moldura — com o estado do
+ * paciente e a temperatura repetidos, porque o modelo já os trouxe.
+ */
+async function compor(texto: string) {
+  await internacao.gerarBoletim({ autorId: plantonistaId.value, observado: '', texto })
 }
 
 async function ligar(boletimId: string) {
@@ -470,6 +477,7 @@ async function encerrar(entrada: {
         :pet="pet"
         :tutor="tutor"
         :salvando="internacao.salvando"
+        :modelos="internacao.modelosDeBoletim"
         @ligar="ligar"
         @enviar="internacao.enviarBoletim"
         @compor="compor"

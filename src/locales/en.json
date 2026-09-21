@@ -3315,9 +3315,7 @@
         "enviar": "Send to owner",
         "bloqueadoErro": "This update requires the phone call before it can be sent.",
         "composerTitulo": "Write an update",
-        "composerAjuda": "The patient state and what was done in the period are added for you. Write what only the person at the cage knows.",
-        "observado": "What to tell the owner",
-        "observadoDica": "One or two sentences. Did it eat? Sleep? Stand up?",
+        "composerAjuda": "Pick a ready-made template, which already carries this patient’s data, and adjust whatever you want before generating.",
         "compor": "Create update",
         "prontosTitulo": "Ready to send",
         "origem": {
@@ -3339,7 +3337,11 @@
         "appAjuda": "The same thread the owner opens in the app.",
         "foto": "Photo in the update",
         "fotoNunca": "Only when the team attaches one",
-        "observadoExemplo": "Slept all afternoon and ate on his own."
+        "modelosTitulo": "Ready-made templates",
+        "mensagem": "Message to the owner",
+        "mensagemDica": "This is the text the owner will read. Edit it freely.",
+        "mensagemExemplo": "Pick a template above or write the message.",
+        "limpar": "Clear"
       },
       "app": {
         "vazio": "No updates received yet.",

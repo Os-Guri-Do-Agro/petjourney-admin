@@ -3315,9 +3315,7 @@
         "enviar": "Enviar al responsable",
         "bloqueadoErro": "Este parte exige la llamada antes del envío.",
         "composerTitulo": "Escribir un parte",
-        "composerAjuda": "El estado del paciente y lo hecho en el período se añaden solos. Escribe lo que solo sabe quien estuvo con el animal.",
-        "observado": "Qué contarle al responsable",
-        "observadoDica": "Una o dos frases. ¿Comió? ¿Durmió? ¿Se levantó?",
+        "composerAjuda": "Elija una plantilla lista, que ya trae los datos de este paciente, y ajuste lo que quiera antes de generar.",
         "compor": "Generar parte",
         "prontosTitulo": "Listos para enviar",
         "origem": {
@@ -3339,7 +3337,11 @@
         "appAjuda": "La misma conversación que el responsable abre en la aplicación.",
         "foto": "Foto en el parte",
         "fotoNunca": "Solo cuando el equipo la adjunte",
-        "observadoExemplo": "Durmió toda la tarde y comió solo."
+        "modelosTitulo": "Plantillas listas",
+        "mensagem": "Mensaje al responsable",
+        "mensagemDica": "Este es el texto que el responsable va a leer. Edítelo a voluntad.",
+        "mensagemExemplo": "Elija una plantilla arriba o escriba el mensaje.",
+        "limpar": "Limpiar"
       },
       "app": {
         "vazio": "Aún no ha recibido ningún parte.",

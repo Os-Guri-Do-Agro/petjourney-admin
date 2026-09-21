@@ -3315,9 +3315,7 @@
         "enviar": "Pošaljite vlasniku",
         "bloqueadoErro": "Pre slanja ovog izveštaja potrebno je obaviti telefonski poziv.",
         "composerTitulo": "Napišite izveštaj",
-        "composerAjuda": "Stanje pacijenta i ono što je urađeno u tom periodu dodaju se automatski. Napišite ono što zna samo osoba koja je bila uz pacijenta.",
-        "observado": "Šta reći vlasniku",
-        "observadoDica": "Jedna ili dve rečenice. Da li jede? Spava? Ustaje?",
+        "composerAjuda": "Izaberite gotov obrazac, koji već nosi podatke ovog pacijenta, pa podesite šta želite pre generisanja.",
         "compor": "Napravite izveštaj",
         "prontosTitulo": "Spremni za slanje",
         "origem": {
@@ -3339,7 +3337,11 @@
         "appAjuda": "Isti razgovor koji vlasnik otvara u aplikaciji.",
         "foto": "Fotografija u izveštaju",
         "fotoNunca": "Samo kada je tim priloži",
-        "observadoExemplo": "Spavao je celo popodne i sam je jeo."
+        "modelosTitulo": "Gotovi obrasci",
+        "mensagem": "Poruka vlasniku",
+        "mensagemDica": "Ovo je tekst koji će vlasnik pročitati. Slobodno ga izmenite.",
+        "mensagemExemplo": "Izaberite obrazac iznad ili napišite poruku.",
+        "limpar": "Očisti"
       },
       "app": {
         "vazio": "Još nema primljenih izveštaja.",
