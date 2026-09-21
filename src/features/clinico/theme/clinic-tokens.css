@@ -14,19 +14,34 @@
  */
 
 :root {
-  /* ---------------------------------------------------------------- superfícies */
-  --clinic-bg: #f3f7f5;
-  --clinic-surface: #ffffff;
-  --clinic-surface-soft: #f8faf9;
-  --clinic-surface-sunken: #eef3f1;
-  --clinic-line: #e6eeeb;
-  --clinic-line-soft: #eef4f2;
-  --clinic-line-strong: #d3e0dc;
+  /* ---------------------------------------------------------------- superfícies
+   *
+   * A escada do claro não é branco sobre branco. A primeira versão punha fundo, cartão e bloco
+   * interno dentro de três pontos de luminosidade um do outro, todos encostados no branco puro:
+   * em monitor claro a tela virava uma chapa que ofusca, e a hierarquia só existia porque a
+   * sombra do cartão a desenhava. Aqui o fundo desce um degrau de verdade, o cartão sai do
+   * branco puro para um branco quebrado e o bloco interno fica no meio — a separação passa a
+   * vir da própria superfície, e não do brilho.
+   *
+   * O texto não mudou junto: escurecer fundo só aumenta o contraste da tinta, nunca reduz.
+   */
+  --clinic-bg: #e6edea;
+  --clinic-surface: #fbfcfb;
+  --clinic-surface-soft: #f0f5f3;
+  --clinic-surface-sunken: #e2eae7;
+  --clinic-line: #d8e3df;
+  --clinic-line-soft: #e3ebe8;
+  --clinic-line-strong: #c3d2cd;
 
-  /* ------------------------------------------------------------------- tipografia */
+  /* ------------------------------------------------------------------- tipografia
+   *
+   * `muted` e `faint` descem junto com as superfícies: contraste é razão, e escurecer o fundo
+   * derruba a razão do texto escuro. Os dois foram reescurecidos no mesmo matiz até recuperar a
+   * razão que tinham contra o fundo antigo.
+   */
   --clinic-text: #1f2f2b;
-  --clinic-muted: #485753;
-  --clinic-faint: #5c6b65;
+  --clinic-muted: #43504d;
+  --clinic-faint: #56645f;
 
   /* ------------------------------------------------------------------ acento sálvia */
   --clinic-accent: #84c1b4;
@@ -48,8 +63,8 @@
    * `surface` no 4. Escurecer o degrau 3 até o branco fechar 4,5:1 fecharia junto a distância
    * para o 4, e um mapa de quatro degraus com dois iguais deixa de ser mapa.
    */
-  --clinic-heat-1: #e4f1ef;
-  --clinic-heat-2: #c8e3dd;
+  --clinic-heat-1: #e1efeb;
+  --clinic-heat-2: #c5e2db;
   --clinic-heat-3: #819a93;
   --clinic-heat-4: #456a60;
 

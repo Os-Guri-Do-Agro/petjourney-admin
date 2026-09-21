@@ -13,17 +13,26 @@ Tom **acolhedor + clínico clean + moderno**. Muito espaço em branco, cartões 
 | Primária (sálvia)            | `#84C1B4`                 |
 | Secundária (sálvia clara)    | `#B8CDC9`                 |
 | Primária escura (texto/ação) | `#4F756B` / `#6E9189`     |
-| Tinta primária (fundos)      | `#EEF3F1`                 |
+| Tinta primária (fundos)      | `#E5EEEA`                 |
 | Texto principal              | `#28332F`                 |
-| Texto secundário             | `#6B7A75`                 |
-| Texto suave / labels         | `#8A9A94` · `#A3B0AB`     |
-| Linhas / bordas              | `#EAF0EE`                 |
-| Fundo do app                 | `#F4F7F6`                 |
+| Texto secundário             | `#606D69`                 |
+| Texto suave / labels         | `#83928D` · `#9BA7A3`     |
+| Linhas / bordas              | `#DFE8E5`                 |
+| Fundo do app                 | `#E6EDEA`                 |
+| Superfície de cartão         | `#FBFCFB`                 |
+| Bloco interno ao cartão      | `#F0F5F3`                 |
 | Alerta alto (terracota)      | `#C5715A` sobre `#FBEEE8` |
 | Alerta médio (âmbar)         | `#B68A3E` sobre `#F7F0E0` |
 | Sucesso / confirmado         | `#3E7355` sobre `#E4F0E9` |
 
 Regra: sálvia para tudo que é institucional e positivo; quente **só** para risco, pendência e urgência. Nada de cor decorativa.
+
+**Superfícies do claro.** Três degraus, nessa ordem: fundo do app → cartão → bloco interno ao
+cartão. Nenhum deles é branco puro. "Muito espaço em branco" é sobre respiro, não sobre
+luminosidade: quando os três degraus ficam a poucos pontos de `#FFFFFF`, a tela vira uma chapa
+que cansa a vista em monitor claro e a hierarquia passa a depender só da sombra do cartão. O
+branco puro segue existindo, mas só como **tinta** — texto e ícone sobre sálvia cheia (token
+`text.inverse`) — e como quiet zone de QR.
 
 ## Tipografia
 

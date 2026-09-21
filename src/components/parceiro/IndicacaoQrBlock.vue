@@ -59,7 +59,8 @@ const blockStyle = computed(() => {
     '--iqr-primary': colors.vet.primary,
     '--iqr-primary-soft': colors.vet.secondary,
     '--iqr-primary-strong': colors.dashboard.primaryStrong,
-    '--iqr-img-bg': LightColors.auth.white,
+    /** Quiet zone do QR: branco puro, para não tirar contraste de leitor nenhum. */
+    '--iqr-img-bg': LightColors.text.inverse,
   }
 })
 

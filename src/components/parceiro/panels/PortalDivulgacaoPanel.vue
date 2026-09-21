@@ -141,7 +141,7 @@ const panelStyle = computed(() => {
     '--div-warm-bg': colors.dashboard.warmBg,
     '--div-warm-text': colors.dashboard.warmText,
     '--div-shadow-rgb': colors.auth.shadowRgb,
-    '--div-on-primary': LightColors.auth.white,
+    '--div-on-primary': LightColors.text.inverse,
   }
 })
 

@@ -25,7 +25,7 @@ export const PetJourneyPreset = definePreset(Aura, {
       light: {
         primary: {
           color: LightColors.vet.primary,
-          contrastColor: LightColors.auth.white,
+          contrastColor: LightColors.text.inverse,
           hoverColor: LightColors.auth.sageStrong,
           activeColor: LightColors.dashboard.primaryStrong,
         },
@@ -67,7 +67,7 @@ export const PetJourneyPreset = definePreset(Aura, {
         primary: {
           color: DarkColors.vet.primary,
           /** Texto sobre botão sálvia: branco no dark (não tinta escura). */
-          contrastColor: LightColors.auth.white,
+          contrastColor: LightColors.text.inverse,
           hoverColor: DarkColors.auth.sageStrong,
           activeColor: DarkColors.dashboard.primaryDeep,
         },

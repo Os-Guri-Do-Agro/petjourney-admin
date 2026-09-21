@@ -131,8 +131,8 @@ const pageStyle = computed(() => {
     '--partner-primary': colors.vet.primary,
     '--partner-primary-soft': colors.vet.secondary,
     '--partner-primary-strong': colors.dashboard.primaryStrong,
-    /** Sempre branco real — `auth.white` no dark é superfície escura. */
-    '--partner-on-primary': LightColors.auth.white,
+    /** Sempre branco real: `auth.white` é superfície (quebrada no claro, escura no dark). */
+    '--partner-on-primary': LightColors.text.inverse,
     '--partner-warm-bg': colors.dashboard.warmBg,
     '--partner-warm-text': colors.dashboard.warmText,
     '--partner-success-bg': colors.dashboard.successBg,

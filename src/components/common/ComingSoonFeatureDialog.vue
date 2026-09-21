@@ -41,7 +41,7 @@ const dialogStyle = computed(() => {
     '--soon-primary': colors.vet.primary,
     '--soon-primary-soft': colors.vet.secondary,
     '--soon-primary-strong': colors.dashboard.primaryStrong,
-    '--soon-on-primary': LightColors.auth.white,
+    '--soon-on-primary': LightColors.text.inverse,
     '--soon-shadow-rgb': colors.auth.shadowRgb,
   }
 })

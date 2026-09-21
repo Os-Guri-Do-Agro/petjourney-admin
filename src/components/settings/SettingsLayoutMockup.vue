@@ -81,8 +81,8 @@ withDefaults(
 }
 
 .maquete--claro {
-  --maquete-fundo: #f3f7f5;
-  --maquete-superficie: #ffffff;
+  --maquete-fundo: #e6edea;
+  --maquete-superficie: #fbfcfb;
   --maquete-linha: #dfeae6;
   --maquete-traco: #c9d6d1;
   --maquete-trilho: #84c1b4;

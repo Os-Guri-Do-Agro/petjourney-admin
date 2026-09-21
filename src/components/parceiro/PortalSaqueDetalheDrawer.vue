@@ -60,8 +60,8 @@ const drawerStyle = computed(() => {
     '--sd-success-bg': colors.dashboard.successBg,
     '--sd-success-text': colors.dashboard.successText,
     '--sd-shadow-rgb': colors.auth.shadowRgb,
-    /** Sempre branco real — `auth.white` no dark é superfície escura. */
-    '--sd-on-cta': LightColors.auth.white,
+    /** Sempre branco real: `auth.white` é superfície (quebrada no claro, escura no dark). */
+    '--sd-on-cta': LightColors.text.inverse,
   }
 })
 

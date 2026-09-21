@@ -53,8 +53,8 @@ const dialogStyle = computed(() => {
     '--vc-warm-bg': colors.dashboard.warmBg,
     '--vc-warm-text': colors.dashboard.warmText,
     '--vc-shadow-rgb': colors.auth.shadowRgb,
-    /** Sempre branco real — `auth.white` no dark é superfície escura. */
-    '--vc-on-cta': LightColors.auth.white,
+    /** Sempre branco real: `auth.white` é superfície (quebrada no claro, escura no dark). */
+    '--vc-on-cta': LightColors.text.inverse,
   }
 })
 

@@ -4,9 +4,9 @@ export const LightColors = {
   red: '#F28482',
   danger: '#ff4444',
   success: '#A8DADC',
-  white: '#FAF9F6',
+  white: '#FBFCFB',
   purple: '#BDB2FF',
-  gray: '#F5EBE0',
+  gray: '#DCE6E2',
   orange: '#FFB7A1',
   pink: '#FAD2E1',
   brown: '#D5BDAF',
@@ -14,21 +14,21 @@ export const LightColors = {
   internacao: '#5B6B8C',
   text: {
     primary: '#1a1a1a',
-    secondary: '#666',
-    muted: '#999',
+    secondary: '#5F5F5F',
+    muted: '#919191',
     inverse: '#ffffff',
     inverse85: '#ffffffD9',
     inverse20: '#ffffff33',
   },
   bg: {
-    light: '#f5f5f5',
-    card: '#f0f0f0',
-    screen: '#f8f9fa',
+    light: '#E6EDEA',
+    card: '#EDF2F0',
+    screen: '#F0F5F3',
   },
   border: {
-    light: '#e0e0e0',
-    default: '#ddd',
-    subtle: '#eee',
+    light: '#D8E3DF',
+    default: '#C6D4CF',
+    subtle: '#E3EBE8',
   },
   tutor: {
     primary: '#457B9D',
@@ -41,28 +41,43 @@ export const LightColors = {
     focusFrom: '#3C7B6D',
     focusTo: '#2E6156',
   },
+  /*
+   * Os tons auxiliares (`muted`, `soft`, `divider`, `faint`, `navIcon`) desceram junto com as
+   * superfícies. Contraste é razão, não distância: baixar o fundo de `#F3F7F5` para `#E6EDEA`
+   * **reduz** a razão do texto escuro, e o secundário — que já passava raspando em `4,17:1`
+   * sobre o fundo do app — cairia para `3,79:1`. Cada tom foi reescurecido no mesmo matiz até
+   * recuperar, no mínimo, a razão que tinha antes contra a superfície mais dura; o secundário
+   * foi além e agora fecha `4,54:1`, que é o AA que ele nunca tinha tido.
+   */
   auth: {
     sageStrong: '#6E9189',
-    sageTint: '#EEF3F1',
+    sageTint: '#E5EEEA',
     text: '#28332F',
-    muted: '#6B7A75',
-    soft: '#8A9A94',
-    divider: '#A3B0AB',
-    line: '#EAF0EE',
-    appBg: '#F4F7F6',
-    white: '#FFFFFF',
+    muted: '#606D69',
+    soft: '#83928D',
+    divider: '#9BA7A3',
+    line: '#DFE8E5',
+    appBg: '#E6EDEA',
+    /** Superfície mais clara do modo — branco quebrado. Branco puro: `text.inverse`. */
+    white: '#FBFCFB',
     shadowRgb: '40 51 47',
   },
+  /*
+   * Superfícies do claro: fundo (`bg`) → cartão (`surface`) → bloco interno (`surfaceSoft`).
+   * Os três degraus são espaçados o bastante para se lerem sem sombra, e o cartão é branco
+   * quebrado, não branco puro — branco puro em tela inteira ofusca. Tinta branca de verdade
+   * (texto/ícone sobre sálvia) sai de `text.inverse`, que não acompanha esse ajuste.
+   */
   dashboard: {
-    bg: '#F3F7F5',
-    surface: '#FFFFFF',
-    surfaceSoft: '#F8FAF9',
-    line: '#E6EEEB',
-    lineSoft: '#EEF4F2',
+    bg: '#E6EDEA',
+    surface: '#FBFCFB',
+    surfaceSoft: '#F0F5F3',
+    line: '#D8E3DF',
+    lineSoft: '#E3EBE8',
     text: '#1F2F2B',
-    muted: '#6B7A75',
-    faint: '#A3B0AB',
-    navIcon: '#7C8A85',
+    muted: '#606D69',
+    faint: '#9BA7A3',
+    navIcon: '#75827E',
     primaryDeep: '#5C7E76',
     primaryStrong: '#4F756B',
     successText: '#517D71',

@@ -255,7 +255,7 @@ const shellStyle = computed(() => {
     '--shell-muted': colors.auth.muted,
     '--shell-soft': colors.auth.soft,
     '--shell-brand': isDark ? colors.bg.card : colors.vet.primary,
-    '--shell-on-brand': isDark ? colors.text.primary : LightColors.auth.white,
+    '--shell-on-brand': isDark ? colors.text.primary : LightColors.text.inverse,
     '--shell-on-brand-muted': isDark ? colors.auth.soft : '#ffffffC2',
     '--shell-rail-active-bg': isDark ? colors.auth.sageTint : LightColors.auth.white,
     '--shell-accent': colors.vet.primary,
@@ -280,8 +280,8 @@ const shellStyle = computed(() => {
     '--shell-attention-line': colors.dashboard.amber,
     '--rail-logout-red': colors.red,
     '--rail-logout-mix-base': isDark ? colors.bg.card : LightColors.auth.white,
-    /** Branco real — `auth.white` no dark é superfície escura. */
-    '--rail-logout-icon': LightColors.auth.white,
+    /** Branco real: `auth.white` é superfície (quebrada no claro, escura no dark). */
+    '--rail-logout-icon': LightColors.text.inverse,
   }
 })
 

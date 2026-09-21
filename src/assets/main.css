@@ -68,9 +68,9 @@ body,
 }
 :root {
   --pj-shell-header-height: 4.25rem;
-  --pj-toast-card: #ffffff;
-  --pj-toast-surface: #f2f7f5;
-  --pj-toast-line: #d9e6e1;
+  --pj-toast-card: #fbfcfb;
+  --pj-toast-surface: #eef4f1;
+  --pj-toast-line: #d5e1dc;
   --pj-toast-text: #1f2f2b;
   --pj-toast-muted: #5f716b;
   --pj-toast-faint: #8a9a94;
