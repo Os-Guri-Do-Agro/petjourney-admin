@@ -126,7 +126,7 @@ const vacinas = computed(() =>
 .tabela td {
   padding: 2mm 2mm;
   border: 0.25mm solid #000;
-  text-align: left;
+  text-align: start;
 }
 
 .tabela th {

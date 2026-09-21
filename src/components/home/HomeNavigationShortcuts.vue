@@ -18,6 +18,10 @@
  * Com o cartão em uma linha só, a mesma área que mostrava seis telas mostra doze — e a busca,
  * que antes ocupava uma faixa inteira, cabe ao lado do título.
  */
+import Button from 'primevue/button'
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
+import InputText from 'primevue/inputtext'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -81,29 +85,35 @@ const totalShortcuts = computed(() =>
       <div class="home-shortcuts__title-row">
         <h2 id="home-shortcuts-title">{{ t('inicio.shortcuts.title') }}</h2>
         <span class="home-shortcuts__count">{{
-          t('inicio.shortcuts.countAvailable', { n: totalShortcuts })
+          t('inicio.shortcuts.countAvailable', { n: totalShortcuts }, totalShortcuts)
         }}</span>
 
         <!-- A busca cabe ao lado do título: com quinze telas ela é conveniência, não estrutura. -->
-        <label class="home-shortcuts__filter" for="home-shortcuts-filter">
-          <i class="pi pi-search" aria-hidden="true" />
-          <input
-            id="home-shortcuts-filter"
-            v-model="filterQuery"
-            type="search"
-            :placeholder="t('inicio.shortcuts.filterPlaceholder')"
-            autocomplete="off"
-          />
-          <button
+        <div class="home-shortcuts__filter">
+          <IconField class="home-shortcuts__filter-field">
+            <InputIcon class="pi pi-search" />
+            <InputText
+              id="home-shortcuts-filter"
+              v-model="filterQuery"
+              type="search"
+              size="small"
+              fluid
+              :placeholder="t('inicio.shortcuts.filterPlaceholder')"
+              :aria-label="t('inicio.shortcuts.filterPlaceholder')"
+              autocomplete="off"
+            />
+          </IconField>
+          <Button
             v-if="hasActiveFilter"
             class="home-shortcuts__clear"
             type="button"
+            text
+            severity="secondary"
+            icon="pi pi-times"
             :aria-label="t('inicio.shortcuts.clearFilterAria')"
             @click="filterQuery = ''"
-          >
-            <i class="pi pi-times" aria-hidden="true" />
-          </button>
-        </label>
+          />
+        </div>
       </div>
 
       <p v-if="isGuidanceVisible" class="home-shortcuts__lede">
@@ -221,9 +231,10 @@ const totalShortcuts = computed(() =>
   width: min(16rem, 100%);
   align-items: center;
   min-height: 2.2rem;
-  margin-left: auto;
-  padding: 0 0.2rem 0 0.7rem;
-  gap: 0.45rem;
+  margin-inline-start: auto;
+  padding-block: 0;
+  padding-inline: 0 0.2rem;
+  gap: 0.2rem;
   border: 1px solid var(--shortcuts-line);
   border-radius: 0.75rem;
   background: var(--shortcuts-card);
@@ -238,40 +249,48 @@ const totalShortcuts = computed(() =>
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--shortcuts-primary) 14%, transparent);
 }
 
-.home-shortcuts__filter > i {
+/* A caixa e o anel de foco são do `.home-shortcuts__filter`; o campo do PrimeVue fica sem borda. */
+.home-shortcuts__filter-field {
+  min-width: 0;
+  flex: 1 1 auto;
+  color: var(--shortcuts-muted);
+}
+
+.home-shortcuts__filter-field :deep(.p-inputicon) {
+  color: inherit;
   font-size: 0.82rem;
 }
 
-.home-shortcuts__filter input {
-  width: 100%;
-  min-width: 0;
+.home-shortcuts__filter-field :deep(.p-inputtext),
+.home-shortcuts__filter-field :deep(.p-inputtext:enabled:hover),
+.home-shortcuts__filter-field :deep(.p-inputtext:enabled:focus) {
+  padding-block: 0.4rem;
   border: 0;
   background: transparent;
+  box-shadow: none;
   color: var(--shortcuts-text);
-  font: inherit;
   font-size: 0.82rem;
   outline: none;
 }
 
-.home-shortcuts__filter input::placeholder {
+.home-shortcuts__filter-field :deep(.p-inputtext::placeholder) {
   color: var(--shortcuts-faint);
 }
 
-.home-shortcuts__clear {
-  display: grid;
+.home-shortcuts__clear.p-button {
   width: 1.75rem;
   height: 1.75rem;
   flex: 0 0 auto;
-  place-items: center;
-  border: 0;
+  padding: 0;
   border-radius: 0.55rem;
-  background: transparent;
   color: var(--shortcuts-muted);
-  cursor: pointer;
 }
 
-.home-shortcuts__clear:hover,
-.home-shortcuts__clear:focus-visible {
+.home-shortcuts__clear.p-button:not(:disabled):hover,
+.home-shortcuts__clear.p-button:not(:disabled):active,
+.home-shortcuts__clear.p-button:focus-visible {
+  background: transparent;
+  box-shadow: none;
   color: var(--shortcuts-primary-strong);
   outline: none;
 }
@@ -334,7 +353,8 @@ const totalShortcuts = computed(() =>
   align-items: center;
   gap: 0.6rem;
   min-height: 2.9rem;
-  padding: 0.4rem 0.7rem 0.4rem 0.45rem;
+  padding-block: 0.4rem;
+  padding-inline: 0.45rem 0.7rem;
   border: 1px solid var(--shortcuts-line);
   border-radius: 0.8rem;
   background: color-mix(in srgb, var(--shortcuts-surface) 70%, var(--shortcuts-card));
@@ -420,7 +440,7 @@ const totalShortcuts = computed(() =>
 @media (max-width: 720px) {
   .home-shortcuts__filter {
     width: 100%;
-    margin-left: 0;
+    margin-inline-start: 0;
   }
 
   .home-shortcuts__grid {

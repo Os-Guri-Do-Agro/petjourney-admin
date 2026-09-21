@@ -33,7 +33,7 @@ const props = defineProps<{
   kind: TermoKind
 }>()
 
-const { t } = useI18n()
+const { t, tm } = useI18n()
 const clinico = useClinicoStore()
 
 const dataDoDocumento = computed(() =>
@@ -60,11 +60,19 @@ const objeto = computed(() => {
 
 /** Os riscos que o texto obriga a declarar. Lista curta e por extenso, nunca "etc". */
 const itens = computed<string[]>(() => {
-  const chave = `clinico.documentos.termo.${props.kind}.itens`
-  const lista = t(chave)
+  /*
+   * A tradução guarda os itens separados por `|`: um array por idioma seria pior de manter.
+   * Lido com `tm()` (texto cru), nunca com `t()`: para o vue-i18n `|` separa formas de plural, e
+   * `t()` devolvia um item só (o segundo), em qualquer idioma.
+   */
+  const lista: unknown = tm(`clinico.documentos.termo.${props.kind}.itens`)
 
-  /* A tradução guarda os itens separados por `|`: um array por idioma seria pior de manter. */
-  return lista === chave ? [] : lista.split('|')
+  return typeof lista === 'string'
+    ? lista
+        .split('|')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : []
 })
 </script>
 
@@ -153,7 +161,7 @@ const itens = computed<string[]>(() => {
 
 .itens {
   margin: 0;
-  padding-left: 6mm;
+  padding-inline-start: 6mm;
   font-size: 10pt;
   line-height: 1.7;
 }

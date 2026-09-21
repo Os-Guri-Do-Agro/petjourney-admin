@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -233,7 +234,15 @@ watch(drawerVisible, (open) => {
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadSaques">{{ t('carteira.saques.retry') }}</button>
+      <Button
+        type="button"
+        :label="t('carteira.saques.retry')"
+        icon="pi pi-refresh"
+        severity="secondary"
+        outlined
+        size="small"
+        @click="loadSaques"
+      />
     </div>
 
     <div v-else-if="saques.length === 0" class="portal-panel__empty">
@@ -257,7 +266,7 @@ watch(drawerVisible, (open) => {
           <h4 class="saques-day__head">{{ day.label }}</h4>
 
           <div class="saques-list">
-            <button
+            <Button
               v-for="saque in day.items"
               :key="saque.id"
               type="button"
@@ -265,14 +274,14 @@ watch(drawerVisible, (open) => {
               @click="openSaqueDetail(saque.id)"
             >
               <div>
-                <strong>{{ formatCentavosToBrl(saque.valorCentavos) }}</strong>
+                <strong>{{ formatCentavosToBrl(saque.valorCentavos, intlLocale()) }}</strong>
                 <p>
                   {{ t('carteira.saques.requestedAt', { data: formatTime(saque.createdAt) }) }}
                 </p>
                 <p v-if="saque.motivoFalha" class="saque-row__fail">{{ saque.motivoFalha }}</p>
               </div>
               <PartnerStatusBadge :status="statusMap[saque.status]" />
-            </button>
+            </Button>
           </div>
         </div>
       </section>
@@ -296,14 +305,6 @@ watch(drawerVisible, (open) => {
 .portal-panel__state--error p {
   margin: 0;
   color: var(--partner-warm-text);
-}
-
-.portal-panel__state button {
-  border: 1px solid var(--partner-line);
-  border-radius: 0.6rem;
-  padding: 0.45rem 0.85rem;
-  background: var(--partner-card);
-  cursor: pointer;
 }
 
 .portal-panel__empty strong {
@@ -332,7 +333,11 @@ watch(drawerVisible, (open) => {
   font-size: 0.95rem;
   font-weight: 750;
   letter-spacing: -0.01em;
-  text-transform: capitalize;
+}
+
+/* Só a primeira letra: `capitalize` fazia "Setembro De 2026" (e "Septembar" no sérvio). */
+.saques-month__head h3::first-letter {
+  text-transform: uppercase;
 }
 
 .saques-day {
@@ -355,9 +360,8 @@ watch(drawerVisible, (open) => {
   gap: 0.45rem;
 }
 
-.saque-row {
-  display: flex;
-  align-items: center;
+/* Linha clicável rica: Button com slot, sem o visual de CTA do preset. */
+.saque-row.p-button {
   justify-content: space-between;
   gap: 1rem;
   width: 100%;
@@ -366,17 +370,20 @@ watch(drawerVisible, (open) => {
   border-radius: 0.85rem;
   background: var(--partner-card);
   color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s ease;
+  font-size: inherit;
+  text-align: start;
 }
 
-.saque-row:hover,
-.saque-row:focus-visible {
+.saque-row.p-button:not(:disabled):hover,
+.saque-row.p-button:not(:disabled):active,
+.saque-row.p-button:focus-visible {
   border-color: var(--partner-primary-strong);
+  background: var(--partner-card);
+  color: inherit;
 }
 
-.saque-row:focus-visible {
+.saque-row.p-button:focus-visible {
+  box-shadow: none;
   outline: 2px solid var(--partner-primary);
   outline-offset: 2px;
 }

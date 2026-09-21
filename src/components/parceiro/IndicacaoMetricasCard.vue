@@ -70,7 +70,7 @@ function formatarDia(day: string) {
 }
 
 function barraAria(day: string, count: number) {
-  return t('divulgacao.metricas.barraAria', { dia: formatarDia(day), n: count })
+  return t('divulgacao.metricas.barraAria', { dia: formatarDia(day), n: count }, count)
 }
 </script>
 

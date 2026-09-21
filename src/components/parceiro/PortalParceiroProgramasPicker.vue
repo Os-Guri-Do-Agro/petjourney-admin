@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Checkbox from 'primevue/checkbox'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -104,17 +105,17 @@ function toggle(modo: ModoParticipacao) {
             <span>{{ t(`parceiroCadastro.programas.${card.modo}.tagline`) }}</span>
           </div>
 
-          <input
+          <!-- O cartão inteiro é o <label>: clicar em qualquer ponto alterna o Checkbox. -->
+          <Checkbox
             v-if="card.estado === 'editavel'"
-            class="prog-card__input"
-            type="checkbox"
-            :checked="isSelecionado(card.modo)"
+            class="prog-card__check"
+            binary
+            size="large"
+            :input-id="`prog-pick-${card.modo}`"
+            :model-value="isSelecionado(card.modo)"
             :disabled="disabled"
-            @change="toggle(card.modo)"
+            @update:model-value="toggle(card.modo)"
           />
-          <span v-if="card.estado === 'editavel'" class="prog-card__mark" aria-hidden="true">
-            <i class="pi pi-check" />
-          </span>
           <span v-else class="prog-card__lock" :data-tone="card.estado">
             {{
               card.estado === 'ativo'
@@ -238,7 +239,7 @@ function toggle(modo: ModoParticipacao) {
   transform: translateY(-1px);
 }
 
-/* O foco vive no checkbox visualmente escondido: o anel tem que aparecer no cartão. */
+/* O foco vive no Checkbox, mas o cartão inteiro é o alvo: o anel aparece no cartão. */
 .prog-card:focus-within:not(.prog-card--locked) {
   border-color: var(--partner-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-primary) 22%, transparent);
@@ -303,35 +304,8 @@ function toggle(modo: ModoParticipacao) {
   font-size: 0.78rem;
 }
 
-/* Visualmente escondido, mas continua sendo o alvo de teclado e leitor de tela. */
-.prog-card__input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.prog-card__mark {
-  display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
-  place-items: center;
-  border: 1.5px solid var(--partner-line);
+.prog-card__check :deep(.p-checkbox-box) {
   border-radius: 0.55rem;
-  background: var(--partner-surface);
-  color: transparent;
-  font-size: 0.7rem;
-  transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
-}
-
-.prog-card--on .prog-card__mark {
-  border-color: var(--partner-primary);
-  background: var(--partner-primary);
-  color: var(--partner-on-primary);
 }
 
 .prog-card__lock {

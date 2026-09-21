@@ -26,6 +26,8 @@ import Textarea from 'primevue/textarea'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+
 import ClinicField from '../base/ClinicField.vue'
 import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
 import type { AtoClinicoKind, ISODateTime, PrescriptionRoute } from '../../data/types'
@@ -61,7 +63,7 @@ const VIAS: PrescriptionRoute[] = [
   'otologica',
 ]
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const clinico = useClinicoStore()
 
 const kind = ref<AtoClinicoKind>('medicamento')
@@ -89,7 +91,7 @@ const opcoesMedicamento = computed(() =>
       rotulo: item.nome,
       detalhe: item.principioAtivo,
     }))
-    .sort((a, b) => a.rotulo.localeCompare(b.rotulo, 'pt-BR')),
+    .sort((a, b) => a.rotulo.localeCompare(b.rotulo, INTL_LOCALE[locale.value as Locale])),
 )
 
 const opcoesVia = computed(() => [

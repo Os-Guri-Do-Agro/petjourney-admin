@@ -251,16 +251,18 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
 
           <ul v-if="comandosAbertos" class="comandos" role="listbox">
             <li v-for="chave in COMANDOS" :key="chave">
-              <button
+              <Button
                 type="button"
-                class="comandos__item clinic-focusable"
+                class="comandos__item"
+                text
+                fluid
                 role="option"
                 :aria-selected="false"
                 @click="inserirComando(chave)"
               >
                 <span class="comandos__barra">/</span>
                 {{ t(`clinico.comandos.${chave}`) }}
-              </button>
+              </Button>
             </li>
           </ul>
         </div>
@@ -346,15 +348,19 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
             <span v-if="antecedente.quando" class="antecedentes__quando">
               {{ antecedente.quando }}
             </span>
-            <button
+            <Button
               v-if="!somenteLeitura"
               type="button"
-              class="antecedentes__remover clinic-focusable"
+              class="antecedentes__remover"
+              icon="pi pi-times"
+              severity="secondary"
+              text
+              rounded
+              size="small"
               :aria-label="t('clinico.comum.remover')"
+              :title="t('clinico.comum.remover')"
               @click="removerAntecedente(antecedente.id)"
-            >
-              <i class="pi pi-times" aria-hidden="true" />
-            </button>
+            />
           </li>
         </ul>
 
@@ -442,20 +448,9 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
   white-space: nowrap;
 }
 
-.antecedentes__remover {
-  display: grid;
-  width: 1.4rem;
-  height: 1.4rem;
-  place-items: center;
-  border: none;
-  border-radius: var(--clinic-radius-control);
-  background: transparent;
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font-size: 0.65rem;
-}
-
-.antecedentes__remover:hover {
+/* Remover é destrutivo: o hover avisa em vermelho antes do clique, e não depois. */
+.antecedentes__remover.p-button.p-button-secondary.p-button-text:not(:disabled):hover {
+  border-color: transparent;
   background: var(--clinic-risk-bg);
   color: var(--clinic-risk-text);
 }
@@ -519,7 +514,7 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
 .comandos {
   position: absolute;
   top: 100%;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 20;
   display: grid;
   gap: 0.1rem;
@@ -533,23 +528,20 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
   list-style: none;
 }
 
-.comandos__item {
-  display: flex;
-  width: 100%;
-  align-items: center;
+/* Opção do menu de comandos: botão de texto alinhado à esquerda, na cor do texto clínico. */
+.comandos__item.p-button {
+  justify-content: flex-start;
   gap: 0.4rem;
   min-height: var(--clinic-hit-target);
   padding: 0 var(--clinic-space-2);
-  border: none;
   border-radius: 0.4rem;
-  background: transparent;
   color: var(--clinic-text);
-  cursor: pointer;
   font: inherit;
-  text-align: left;
+  text-align: start;
 }
 
-.comandos__item:hover {
+.comandos__item.p-button:not(:disabled):hover,
+.comandos__item.p-button:not(:disabled):active {
   background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
 }

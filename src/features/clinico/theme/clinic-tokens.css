@@ -116,7 +116,7 @@
    * Fonte: o design system pede DM Sans. O portal não carrega webfont — a pilha usa a família
    * quando ela existe na máquina e degrada para a do sistema, sem custo de rede.
    */
-  --clinic-font-sans: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --clinic-font-sans: 'DM Sans', 'PetJourney Arabic', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
   /* -------------------------------------------------------------------- densidade */
   /* Padrão: média. Os outros dois vêm dos seletores de densidade abaixo. */
@@ -305,6 +305,24 @@
   color: var(--clinic-text);
   font-family: var(--clinic-font-sans);
   font-size: var(--clinic-font-base);
+}
+
+/*
+ * Dentro de um `SelectButton` os segmentos são uma peça só: o raio acima valeria para cada
+ * segmento e partiria o grupo em botões soltos. Só as pontas externas ficam arredondadas.
+ */
+.clinic-scope .p-selectbutton .p-togglebutton {
+  border-radius: 0;
+}
+
+.clinic-scope .p-selectbutton .p-togglebutton:first-child {
+  border-start-start-radius: var(--clinic-radius-control);
+  border-end-start-radius: var(--clinic-radius-control);
+}
+
+.clinic-scope .p-selectbutton .p-togglebutton:last-child {
+  border-start-end-radius: var(--clinic-radius-control);
+  border-end-end-radius: var(--clinic-radius-control);
 }
 
 .clinic-scope .p-inputtext::placeholder,

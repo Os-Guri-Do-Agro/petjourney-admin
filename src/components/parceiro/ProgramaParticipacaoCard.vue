@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -156,7 +157,7 @@ const saldoLabel = computed(() => {
     return '-'
   }
 
-  return formatCentavosToBrl(saldoSacavelCentavos.value)
+  return formatCentavosToBrl(saldoSacavelCentavos.value, INTL_LOCALE[locale.value as Locale])
 })
 
 const decididoEmLabel = computed(() => {
@@ -380,34 +381,32 @@ watch(modoStatus, () => {
     </div>
 
     <div class="programa-card__action">
-      <button
+      <Button
         v-if="showSolicitarButton"
         class="programa-card__button programa-card__button--primary"
         type="button"
-        :disabled="submitting"
+        :label="ctaLabel"
+        :loading="submitting"
         @click="handleSolicitar"
-      >
-        <i v-if="submitting" class="pi pi-spin pi-spinner" aria-hidden="true" />
-        <span>{{ ctaLabel }}</span>
-      </button>
+      />
 
-      <RouterLink
+      <Button
         v-else-if="cta.type === 'carteira'"
+        :as="RouterLink"
         class="programa-card__button programa-card__button--primary"
         :to="cta.to"
-      >
-        <span>{{ ctaLabel }}</span>
-        <i class="pi pi-arrow-right" aria-hidden="true" />
-      </RouterLink>
+        :label="ctaLabel"
+        icon="pi pi-arrow-right"
+        icon-pos="right"
+      />
 
-      <button
+      <Button
         v-else-if="cta.type === 'aguardando'"
         class="programa-card__button programa-card__button--waiting"
         type="button"
+        :label="ctaLabel"
         disabled
-      >
-        {{ ctaLabel }}
-      </button>
+      />
 
       <p
         v-else-if="modoStatus === 'ATIVO' && modo === 'participativo'"
@@ -471,7 +470,7 @@ watch(modoStatus, () => {
 .programa-card__glow {
   position: absolute;
   top: -4rem;
-  right: 0;
+  inset-inline-end: 0;
   z-index: 0;
   width: 11rem;
   max-width: 55%;
@@ -480,6 +479,10 @@ watch(modoStatus, () => {
   background: rgb(var(--pf-glow-rgb) / 0.14);
   pointer-events: none;
   transform: translateX(30%);
+}
+
+[dir='rtl'] .programa-card__glow {
+  transform: translateX(-30%);
 }
 
 .programa-card--focus > :not(.programa-card__glow) {
@@ -511,12 +514,14 @@ watch(modoStatus, () => {
   color: var(--pf-on-soft);
 }
 
-.programa-card--focus .programa-card__button--primary {
+.programa-card--focus .programa-card__button--primary.p-button,
+.programa-card--focus .programa-card__button--primary.p-button:not(:disabled):hover,
+.programa-card--focus .programa-card__button--primary.p-button:not(:disabled):active {
   background: var(--pf-cta-bg);
   color: var(--pf-cta-text);
 }
 
-.programa-card--focus .programa-card__button--waiting {
+.programa-card--focus .programa-card__button--waiting.p-button:disabled {
   background: var(--pf-chip);
   color: var(--pf-on);
 }
@@ -717,62 +722,66 @@ watch(modoStatus, () => {
   padding-top: 0.25rem;
 }
 
-.programa-card__button {
-  display: inline-flex;
+.programa-card__button.p-button {
   width: 100%;
   min-height: 2.75rem;
-  align-items: center;
-  justify-content: center;
   gap: 0.5rem;
   border: 0;
   border-radius: 0.85rem;
-  font: inherit;
   font-size: 0.88rem;
-  font-weight: 700;
   text-decoration: none;
-  cursor: pointer;
   transition:
     background 140ms ease,
     opacity 140ms ease,
     transform 140ms ease;
 }
 
-.programa-card__button i {
+.programa-card__button.p-button :deep(.p-button-label) {
+  font-weight: 700;
+}
+
+.programa-card__button.p-button :deep(.p-button-icon) {
   transition: transform 140ms ease;
 }
 
-.programa-card__button--primary {
+.programa-card__button--primary.p-button,
+.programa-card__button--primary.p-button:not(:disabled):hover,
+.programa-card__button--primary.p-button:not(:disabled):active {
+  border: 0;
   background: var(--prog-primary);
   color: color-mix(in srgb, white 96%, transparent);
 }
 
-.programa-card--participativo .programa-card__button--primary {
+.programa-card--participativo .programa-card__button--primary.p-button,
+.programa-card--participativo .programa-card__button--primary.p-button:not(:disabled):hover,
+.programa-card--participativo .programa-card__button--primary.p-button:not(:disabled):active {
   background: color-mix(in srgb, var(--prog-primary) 88%, var(--prog-text));
 }
 
-.programa-card__button--primary:hover,
-.programa-card__button--primary:focus-visible {
+.programa-card__button--primary.p-button:not(:disabled):hover,
+.programa-card__button--primary.p-button:focus-visible {
   transform: translateY(-1px);
-  outline: none;
   filter: brightness(1.03);
 }
 
-.programa-card__button--primary:hover i,
-.programa-card__button--primary:focus-visible i {
+.programa-card__button--primary.p-button:not(:disabled):hover :deep(.p-button-icon),
+.programa-card__button--primary.p-button:focus-visible :deep(.p-button-icon) {
   transform: translateX(2px);
 }
 
-.programa-card__button--primary:disabled {
+.programa-card__button--primary.p-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
   transform: none;
   filter: none;
 }
 
-.programa-card__button--waiting {
+/* Estado informativo, não ação: sem a opacidade de desabilitado do preset. */
+.programa-card__button--waiting.p-button:disabled {
   background: color-mix(in srgb, var(--prog-primary-soft) 28%, var(--prog-card));
   color: var(--prog-muted);
   cursor: default;
+  opacity: 1;
 }
 
 .programa-card__active-note {
@@ -823,7 +832,7 @@ watch(modoStatus, () => {
 
 @media (prefers-reduced-motion: reduce) {
   .programa-card:hover,
-  .programa-card__button--primary:hover {
+  .programa-card__button--primary.p-button:not(:disabled):hover {
     transform: none;
   }
 }

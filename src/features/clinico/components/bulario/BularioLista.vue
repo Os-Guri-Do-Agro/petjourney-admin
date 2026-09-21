@@ -10,6 +10,7 @@
  * na mesa procura "otite", não "enrofloxacina": bulário que só casa pelo nome do remédio serve
  * a quem já sabe a resposta.
  */
+import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -138,10 +139,12 @@ function gravidade(medicamento: Medication) {
 
     <ul v-else class="bulario-lista__itens">
       <li v-for="medicamento in visiveis" :key="medicamento.id">
-        <button
+        <Button
           type="button"
-          class="item clinic-focusable"
+          class="item"
           :class="{ 'item--aberto': medicamento.id === selecionadoId }"
+          text
+          fluid
           :aria-current="medicamento.id === selecionadoId ? 'true' : undefined"
           @click="emit('selecionar', medicamento)"
         >
@@ -165,7 +168,7 @@ function gravidade(medicamento: Medication) {
           </span>
 
           <i class="pi pi-chevron-right" aria-hidden="true" />
-        </button>
+        </Button>
       </li>
     </ul>
   </div>
@@ -200,27 +203,31 @@ function gravidade(medicamento: Medication) {
   max-height: 19rem;
 }
 
-.item {
-  display: flex;
-  width: 100%;
-  align-items: center;
+/*
+ * Linha da lista: botão de texto com conteúdo próprio. O tema centraliza e pinta o texto de
+ * sálvia; a linha alinha à esquerda, herda a cor e usa o fundo suave da clínica no hover.
+ */
+.item.p-button {
+  justify-content: flex-start;
   gap: var(--clinic-space-3);
   padding: var(--clinic-cell-padding-y) var(--clinic-space-3);
   border: 1px solid transparent;
   border-radius: var(--clinic-radius-control);
-  background: transparent;
   color: inherit;
-  cursor: pointer;
   font: inherit;
-  text-align: left;
+  text-align: start;
 }
 
-.item:hover {
+.item.p-button:not(:disabled):hover,
+.item.p-button:not(:disabled):active {
+  border-color: transparent;
   background: var(--clinic-surface-soft);
+  color: inherit;
 }
 
-.item--aberto,
-.item--aberto:hover {
+.item--aberto.p-button,
+.item--aberto.p-button:not(:disabled):hover,
+.item--aberto.p-button:not(:disabled):active {
   border-color: color-mix(in srgb, var(--clinic-accent) 34%, transparent);
   background: var(--clinic-accent-tint);
 }

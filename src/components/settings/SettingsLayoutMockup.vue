@@ -118,7 +118,7 @@ withDefaults(
 
 .maquete__pastilha--curta {
   width: 1.7em;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .maquete__corpo {
@@ -154,7 +154,7 @@ withDefaults(
   align-content: start;
   gap: 0.42em;
   padding: 0.6em 0.5em;
-  border-right: 1px solid var(--maquete-linha);
+  border-inline-end: 1px solid var(--maquete-linha);
   background: var(--maquete-superficie);
 }
 

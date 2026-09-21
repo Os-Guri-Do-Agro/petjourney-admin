@@ -263,7 +263,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
 
           <p class="item__rodape">
             {{
-              t('clinico.internacao.prescricao.feitas', { total: feitas(prescricao) })
+              t('clinico.internacao.prescricao.feitas', { total: feitas(prescricao) }, feitas(prescricao))
             }}
             ·
             {{
@@ -471,7 +471,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
               })
             }}
             ·
-            {{ t('clinico.internacao.prescricao.feitas', { total: feitas(prescricao) }) }}
+            {{ t('clinico.internacao.prescricao.feitas', { total: feitas(prescricao) }, feitas(prescricao)) }}
           </p>
         </div>
       </article>

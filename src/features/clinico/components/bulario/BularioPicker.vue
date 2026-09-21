@@ -152,7 +152,7 @@ function confirmar() {
 .picker__ficha {
   max-height: 24rem;
   overflow-y: auto;
-  padding-right: var(--clinic-space-2);
+  padding-inline-end: var(--clinic-space-2);
 }
 
 .picker__rodape {
@@ -165,7 +165,7 @@ function confirmar() {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin-right: auto;
+  margin-inline-end: auto;
   color: var(--clinic-risk-text);
   font-size: var(--clinic-font-label);
   font-weight: 700;

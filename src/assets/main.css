@@ -1,6 +1,27 @@
 @import 'primeicons/primeicons.css';
 @import 'tailwindcss';
 
+/*
+ * Árabe: nenhuma fonte do portal (DM Sans / system-ui) garante glifos árabes iguais em todo
+ * sistema. A Readex Pro (a mesma do app) entra só para a faixa árabe via `unicode-range`: texto
+ * latino continua caindo na fonte seguinte da pilha, em qualquer idioma.
+ */
+@font-face {
+  font-family: 'PetJourney Arabic';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 160 700;
+  src: url('@fontsource-variable/readex-pro/files/readex-pro-arabic-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
+@theme {
+  --font-sans:
+    'PetJourney Arabic', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
 html {
   overflow-x: clip;
 }
@@ -9,6 +30,41 @@ body,
 #app {
   max-width: 100%;
   overflow-x: clip;
+}
+
+/*
+ * RTL: ícones direcionais do PrimeIcons espelham na horizontal. Usa a propriedade individual
+ * `scale` (e não `transform`) para compor com rotações que os componentes já aplicam.
+ */
+[dir='rtl']
+  :is(
+    .pi-chevron-left,
+    .pi-chevron-right,
+    .pi-angle-left,
+    .pi-angle-right,
+    .pi-angle-double-left,
+    .pi-angle-double-right,
+    .pi-arrow-left,
+    .pi-arrow-right,
+    .pi-arrow-up-right,
+    .pi-arrow-up-left,
+    .pi-arrow-down-right,
+    .pi-arrow-down-left,
+    .pi-sign-in,
+    .pi-sign-out,
+    .pi-send,
+    .pi-reply,
+    .pi-step-forward,
+    .pi-step-backward,
+    .pi-step-forward-alt,
+    .pi-step-backward-alt,
+    .pi-caret-left,
+    .pi-caret-right,
+    .pi-forward,
+    .pi-backward,
+    .pi-external-link
+  ) {
+  scale: -1 1;
 }
 :root {
   --pj-shell-header-height: 4.25rem;
@@ -73,7 +129,8 @@ body,
   display: flex !important;
   align-items: flex-start !important;
   gap: 0.85rem !important;
-  padding: 0.9rem 0.85rem 0.9rem 1rem !important;
+  padding-block: 0.9rem !important;
+  padding-inline: 1rem 0.85rem !important;
   border: 0 !important;
   background: transparent !important;
 }

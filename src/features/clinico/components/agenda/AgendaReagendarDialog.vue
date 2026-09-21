@@ -151,7 +151,7 @@ function confirmar() {
         <!-- O telefone fica clicável: a ligação acontece agora, não depois. -->
         <a v-if="tutor" class="reagendar__telefone clinic-value" :href="`tel:${tutor.telefone}`">
           <i class="pi pi-phone" aria-hidden="true" />
-          {{ tutor.telefone }}
+          <bdi dir="ltr">{{ tutor.telefone }}</bdi>
         </a>
       </header>
 
@@ -168,10 +168,12 @@ function confirmar() {
       <template v-else>
         <ul class="reagendar__lista" role="radiogroup" :aria-label="t('clinico.faltas.reagendar.titulo')">
           <li v-for="opcao in opcoes" :key="opcao.slot.inicio">
-            <button
-              type="button"
-              class="opcao clinic-focusable"
+            <Button
+              class="opcao"
               :class="{ 'opcao--ativa': escolhido?.inicio === opcao.slot.inicio }"
+              severity="secondary"
+              outlined
+              fluid
               role="radio"
               :aria-checked="escolhido?.inicio === opcao.slot.inicio"
               @click="escolher(opcao.slot)"
@@ -186,7 +188,7 @@ function confirmar() {
                 {{ formato.intervalo(opcao.slot.inicio, opcao.slot.fim) }}
               </span>
               <span class="opcao__prof">{{ opcao.profissional }}</span>
-            </button>
+            </Button>
           </li>
         </ul>
 
@@ -292,30 +294,27 @@ function confirmar() {
   list-style: none;
 }
 
-.opcao {
+/* Cada horário é uma linha de três colunas, não um botão de rótulo centralizado. */
+.opcao.p-button {
   display: grid;
-  width: 100%;
   grid-template-columns: auto auto minmax(0, 1fr);
-  align-items: center;
+  justify-content: stretch;
   gap: var(--clinic-space-3);
   padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
+  font-size: var(--clinic-font-base);
+  font-weight: inherit;
+  text-align: start;
 }
 
-.opcao:hover {
-  border-color: var(--clinic-accent);
-}
-
-/* Escolhido ganha contorno e fundo, não só cor de texto: o estado precisa sobreviver ao cinza. */
-.opcao--ativa {
+/*
+ * Escolhido ganha contorno e fundo, não só cor de texto: o estado precisa sobreviver ao cinza.
+ * O seletor repete as classes do botão para vencer a regra de botão contornado do módulo.
+ */
+.opcao--ativa.p-button.p-button-secondary.p-button-outlined,
+.opcao--ativa.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
   border-color: var(--clinic-accent-strong);
   background: var(--clinic-accent-tint);
+  color: var(--clinic-text);
   font-weight: 700;
 }
 
@@ -345,7 +344,7 @@ function confirmar() {
   overflow: hidden;
   color: var(--clinic-muted);
   font-size: var(--clinic-font-label);
-  text-align: right;
+  text-align: end;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

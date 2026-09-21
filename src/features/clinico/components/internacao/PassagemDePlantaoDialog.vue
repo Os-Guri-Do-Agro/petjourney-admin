@@ -16,10 +16,11 @@
  * das 19h paira sem dono é exatamente o processo que o papel já fazia mal.
  */
 import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicField from '../base/ClinicField.vue'
@@ -90,6 +91,8 @@ const nada = computed(
     naTroca.value.length === 0 && atrasadas.value.length === 0 && semEvolucao.value.length === 0,
 )
 
+const idDecisao = useId()
+
 function alternarDecisao(id: string) {
   const proxima = new Set(decididas.value)
 
@@ -129,7 +132,8 @@ function entregar() {
         </strong>
         <span>
           {{ clinico.profissional(passagem.plantao.responsavelId)?.nome }}
-          →
+          <!-- Ícone, e não o caractere "→": seta de texto não espelha no árabe. -->
+          <i class="pi pi-arrow-right passagem__seta" aria-hidden="true" />
           {{ t(`clinico.internacao.plantao.${passagem.seguinte.kind}`) }}
         </span>
       </p>
@@ -144,20 +148,21 @@ function entregar() {
 
         <ul class="lista__itens">
           <li v-for="item in naTroca" :key="item.administracao.id" class="linha">
-            <label class="linha__decisao">
-              <input
-                type="checkbox"
-                :checked="decididas.has(item.administracao.id)"
-                @change="alternarDecisao(item.administracao.id)"
+            <div class="linha__decisao">
+              <Checkbox
+                binary
+                :input-id="`${idDecisao}-${item.administracao.id}`"
+                :model-value="decididas.has(item.administracao.id)"
+                @update:model-value="alternarDecisao(item.administracao.id)"
               />
-              <span class="linha__texto">
+              <label class="linha__texto" :for="`${idDecisao}-${item.administracao.id}`">
                 <strong class="clinic-value">
                   {{ formato.hora(item.administracao.previstaPara) }}
                 </strong>
                 {{ item.descricao }}
                 <em>{{ item.petNome }} · {{ item.leitoNome }}</em>
-              </span>
-            </label>
+              </label>
+            </div>
             <Button
               :label="t('clinico.internacao.passagem.abrir')"
               severity="secondary"
@@ -253,7 +258,7 @@ function entregar() {
 
     <template #footer>
       <span v-if="faltaDecidir.length > 0" class="trava">
-        {{ t('clinico.internacao.passagem.trava', { total: faltaDecidir.length }) }}
+        {{ t('clinico.internacao.passagem.trava', { total: faltaDecidir.length }, faltaDecidir.length) }}
       </span>
 
       <Button
@@ -293,6 +298,11 @@ function entregar() {
 .passagem__turno span {
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
+}
+
+.passagem__seta {
+  font-size: 0.7em;
+  margin-inline: 0.2rem;
 }
 
 .lista {
@@ -346,19 +356,18 @@ function entregar() {
   min-width: 0;
   align-items: flex-start;
   gap: var(--clinic-space-2);
-  cursor: pointer;
 }
 
 /*
- * A caixa é nativa — aqui a escolha é múltipla, e o `ClinicToggleGroup` do módulo é de escolha
- * única. O que ela não pode é ficar sem tratamento nenhum: sem `accent-color` ela desenhava o
- * azul do sistema no meio de uma tela inteira de tokens sálvia.
+ * Caixa do PrimeVue, e não `ClinicToggleGroup`: aqui a escolha é múltipla, e o grupo do módulo é
+ * de escolha única. A cor sálvia vem da camada global (`.clinic-scope .p-checkbox-box`); aqui só
+ * o alinhamento com a primeira linha do texto.
  */
-.linha__decisao input {
-  width: 1.05rem;
-  height: 1.05rem;
-  margin: 0.15rem 0 0;
-  accent-color: var(--clinic-accent-strong);
+.linha__decisao .p-checkbox {
+  margin-top: 0.1rem;
+}
+
+.linha__decisao label {
   cursor: pointer;
 }
 
@@ -369,7 +378,7 @@ function entregar() {
 }
 
 .linha__texto strong {
-  margin-right: var(--clinic-space-2);
+  margin-inline-end: var(--clinic-space-2);
   font-weight: 750;
 }
 
@@ -396,7 +405,7 @@ function entregar() {
 }
 
 .trava {
-  margin-right: auto;
+  margin-inline-end: auto;
   color: var(--clinic-attention-text);
   font-size: var(--clinic-font-label);
   font-weight: 700;

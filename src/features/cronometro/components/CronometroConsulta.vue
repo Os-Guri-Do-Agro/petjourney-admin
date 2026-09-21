@@ -19,7 +19,9 @@
  * que só existe em cor não sobrevive a quem não distingue âmbar de verde, nem à sala mal
  * iluminada em que metade destes atendimentos acontece.
  */
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import Button from 'primevue/button'
+import Select from 'primevue/select'
+import { computed, onMounted, onUnmounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useAgora } from '@/composables/useAgora'
@@ -85,8 +87,14 @@ const totalDoDia = computed(() => ({
   cobravel: totalDeMinutosCobraveis(cronometro.sessoesDeHoje),
 }))
 
-const opcoesDeBloco = BLOCOS_MINUTOS
-const opcoesDeIncremento = INCREMENTOS_MINUTOS
+const idCampo = useId()
+
+const opcoesDeBloco = computed(() =>
+  BLOCOS_MINUTOS.map((valor) => ({ valor, rotulo: t('cronometro.minutos', { valor }) })),
+)
+const opcoesDeIncremento = computed(() =>
+  INCREMENTOS_MINUTOS.map((valor) => ({ valor, rotulo: t('cronometro.minutos', { valor }) })),
+)
 
 function alternarPainel() {
   painelAberto.value = !painelAberto.value
@@ -150,9 +158,11 @@ onUnmounted(() => {
 
 <template>
   <div ref="raiz" class="cron" :class="`cron--${cronometro.sessao ? estado : 'ocioso'}`">
-    <button
+    <Button
       class="cron__chip"
       type="button"
+      text
+      severity="secondary"
       :class="{ 'cron__chip--pausado': pausado }"
       :aria-expanded="cronometro.sessao ? painelAberto : undefined"
       :aria-label="
@@ -186,40 +196,43 @@ onUnmounted(() => {
           {{ t('cronometro.ultimaHa', { valor: intervaloDesdeAUltima }) }}
         </small>
       </span>
-    </button>
+    </Button>
 
-    <button
+    <Button
       v-if="cronometro.sessao"
       class="cron__acao"
       type="button"
+      text
+      severity="secondary"
+      :icon="rodando ? 'pi pi-pause' : 'pi pi-play'"
       :aria-label="rodando ? t('cronometro.pausar') : t('cronometro.retomar')"
       :title="rodando ? t('cronometro.pausar') : t('cronometro.retomar')"
       @click="cronometro.alternar()"
-    >
-      <i :class="rodando ? 'pi pi-pause' : 'pi pi-play'" aria-hidden="true" />
-    </button>
+    />
 
-    <button
+    <Button
       v-if="cronometro.sessao"
       class="cron__acao cron__acao--encerrar"
       type="button"
+      text
+      severity="secondary"
+      icon="pi pi-stop-circle"
       :aria-label="t('cronometro.encerrar')"
       :title="t('cronometro.encerrar')"
       @click="encerrar"
-    >
-      <i class="pi pi-stop-circle" aria-hidden="true" />
-    </button>
+    />
 
-    <button
+    <Button
       v-else
       class="cron__acao"
       type="button"
+      text
+      severity="secondary"
+      icon="pi pi-angle-down"
       :aria-expanded="painelAberto"
       :aria-label="t('cronometro.abrirPainel')"
       @click="alternarPainel"
-    >
-      <i class="pi pi-angle-down" aria-hidden="true" />
-    </button>
+    />
 
     <div v-if="painelAberto" class="painel" role="dialog" :aria-label="t('cronometro.titulo')">
       <header class="painel__topo">
@@ -232,9 +245,15 @@ onUnmounted(() => {
         <div v-if="medicao.esquecida" class="aviso">
           <strong>{{ t('cronometro.esquecidaTitulo') }}</strong>
           <p>{{ t('cronometro.esquecidaDescricao') }}</p>
-          <button type="button" class="aviso__acao" @click="descartar">
-            {{ t('cronometro.descartar') }}
-          </button>
+          <Button
+            class="aviso__acao"
+            type="button"
+            size="small"
+            outlined
+            severity="danger"
+            :label="t('cronometro.descartar')"
+            @click="descartar"
+          />
         </div>
 
         <dl class="numeros">
@@ -276,20 +295,34 @@ onUnmounted(() => {
         </p>
 
         <div class="painel__botoes">
-          <button type="button" class="botao" @click="cronometro.alternar()">
-            {{ rodando ? t('cronometro.pausar') : t('cronometro.retomar') }}
-          </button>
-          <button type="button" class="botao botao--forte" @click="encerrar">
-            {{ t('cronometro.encerrar') }}
-          </button>
+          <Button
+            type="button"
+            size="small"
+            severity="secondary"
+            outlined
+            fluid
+            :label="rodando ? t('cronometro.pausar') : t('cronometro.retomar')"
+            @click="cronometro.alternar()"
+          />
+          <Button
+            type="button"
+            size="small"
+            fluid
+            :label="t('cronometro.encerrar')"
+            @click="encerrar"
+          />
         </div>
       </section>
 
       <section v-else class="painel__bloco">
         <p class="painel__vazio">{{ t('cronometro.semSessao') }}</p>
-        <button type="button" class="botao botao--forte" @click="cronometro.iniciar()">
-          {{ t('cronometro.iniciar') }}
-        </button>
+        <Button
+          type="button"
+          size="small"
+          fluid
+          :label="t('cronometro.iniciar')"
+          @click="cronometro.iniciar()"
+        />
       </section>
 
       <!-- Total do dia: é o que o profissional pago por tempo precisa somar no fim do turno. -->
@@ -313,49 +346,53 @@ onUnmounted(() => {
           </div>
         </dl>
 
-        <button
+        <Button
           v-if="totalDoDia.atendimentos > 0"
+          class="painel__discreto"
           type="button"
-          class="botao botao--discreto"
+          size="small"
+          text
+          severity="secondary"
+          :label="t('cronometro.limparHistorico')"
           @click="cronometro.limparHistorico()"
-        >
-          {{ t('cronometro.limparHistorico') }}
-        </button>
+        />
       </section>
 
       <!-- Configuração: bloco e incremento mudam por país, por clínica e por tabela. -->
       <section class="painel__bloco">
-        <label class="campo">
-          <span>{{ t('cronometro.bloco') }}</span>
-          <select
-            :value="cronometro.preferencias.blocoMinutos"
-            @change="
-              cronometro.definirPreferencias({
-                blocoMinutos: Number(($event.target as HTMLSelectElement).value),
-              })
-            "
-          >
-            <option v-for="opcao in opcoesDeBloco" :key="opcao" :value="opcao">
-              {{ t('cronometro.minutos', { valor: opcao }) }}
-            </option>
-          </select>
-        </label>
+        <!--
+          `append-to="self"`: o painel fecha em clique fora da raiz, e o overlay do Select
+          teleportado para o `body` contaria como fora — escolher uma opção fecharia o painel.
+        -->
+        <div class="campo">
+          <label :for="`${idCampo}-bloco`">{{ t('cronometro.bloco') }}</label>
+          <Select
+            :input-id="`${idCampo}-bloco`"
+            :model-value="cronometro.preferencias.blocoMinutos"
+            :options="opcoesDeBloco"
+            option-label="rotulo"
+            option-value="valor"
+            size="small"
+            fluid
+            append-to="self"
+            @update:model-value="cronometro.definirPreferencias({ blocoMinutos: $event })"
+          />
+        </div>
 
-        <label class="campo">
-          <span>{{ t('cronometro.incremento') }}</span>
-          <select
-            :value="cronometro.preferencias.incrementoMinutos"
-            @change="
-              cronometro.definirPreferencias({
-                incrementoMinutos: Number(($event.target as HTMLSelectElement).value),
-              })
-            "
-          >
-            <option v-for="opcao in opcoesDeIncremento" :key="opcao" :value="opcao">
-              {{ t('cronometro.minutos', { valor: opcao }) }}
-            </option>
-          </select>
-        </label>
+        <div class="campo">
+          <label :for="`${idCampo}-incremento`">{{ t('cronometro.incremento') }}</label>
+          <Select
+            :input-id="`${idCampo}-incremento`"
+            :model-value="cronometro.preferencias.incrementoMinutos"
+            :options="opcoesDeIncremento"
+            option-label="rotulo"
+            option-value="valor"
+            size="small"
+            fluid
+            append-to="self"
+            @update:model-value="cronometro.definirPreferencias({ incrementoMinutos: $event })"
+          />
+        </div>
 
         <p class="painel__nota">{{ t('cronometro.comoFunciona') }}</p>
       </section>
@@ -399,22 +436,13 @@ onUnmounted(() => {
   --cron-fundo: color-mix(in srgb, var(--danger-soft) 18%, var(--shell-surface));
 }
 
-.cron__chip {
-  display: inline-flex;
-  align-items: center;
+.cron__chip.p-button {
   gap: 0.5rem;
   min-height: 2.15rem;
-  padding: 0.1rem 0.55rem 0.1rem 0.1rem;
-  border: none;
+  padding-block: 0.1rem;
+  padding-inline: 0.1rem 0.55rem;
   border-radius: 0.64rem;
-  background: transparent;
   color: var(--shell-text);
-  cursor: pointer;
-  font: inherit;
-}
-
-.cron__chip:hover {
-  background: var(--shell-surface-soft);
 }
 
 .cron__marca {
@@ -434,7 +462,7 @@ onUnmounted(() => {
   gap: 0.05rem;
   justify-items: start;
   line-height: 1.15;
-  text-align: left;
+  text-align: start;
 }
 
 .cron__tempo {
@@ -464,25 +492,16 @@ onUnmounted(() => {
   color: var(--shell-muted);
 }
 
-.cron__acao {
-  display: grid;
+.cron__acao.p-button {
   width: 1.9rem;
   height: 1.9rem;
-  place-items: center;
-  border: none;
+  padding: 0;
   border-radius: 0.55rem;
-  background: transparent;
   color: var(--shell-muted);
-  cursor: pointer;
   font-size: 0.78rem;
 }
 
-.cron__acao:hover {
-  background: var(--shell-surface-soft);
-  color: var(--shell-text);
-}
-
-.cron__acao--encerrar:hover {
+.cron__acao--encerrar.p-button:not(:disabled):hover {
   color: var(--danger-soft);
 }
 
@@ -490,7 +509,7 @@ onUnmounted(() => {
   position: absolute;
   z-index: 60;
   top: calc(100% + 0.5rem);
-  right: 0;
+  inset-inline-end: 0;
   display: grid;
   width: min(22rem, calc(100vw - 2rem));
   gap: 0.85rem;
@@ -500,7 +519,7 @@ onUnmounted(() => {
   background: var(--shell-surface);
   box-shadow: 0 14px 34px rgb(var(--shell-shadow-rgb) / 22%);
   color: var(--shell-text);
-  text-align: left;
+  text-align: start;
 }
 
 .painel__topo h2 {
@@ -614,41 +633,8 @@ onUnmounted(() => {
   gap: 0.4rem;
 }
 
-.botao {
-  flex: 1;
-  padding: 0.45rem 0.6rem;
-  border: 1px solid var(--shell-line);
-  border-radius: 0.6rem;
-  background: var(--shell-surface);
-  color: var(--shell-text);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.74rem;
-  font-weight: 700;
-}
-
-.botao:hover {
-  background: var(--shell-surface-soft);
-}
-
-.botao--forte {
-  border-color: transparent;
-  background: var(--shell-accent-strong);
-  color: var(--shell-on-brand);
-}
-
-.botao--forte:hover {
-  filter: brightness(1.06);
-  background: var(--shell-accent-strong);
-}
-
-.botao--discreto {
-  flex: 0 0 auto;
+.painel__discreto.p-button {
   justify-self: start;
-  border-color: transparent;
-  background: transparent;
-  color: var(--shell-muted);
-  font-size: 0.68rem;
 }
 
 .aviso {
@@ -670,17 +656,8 @@ onUnmounted(() => {
   line-height: 1.45;
 }
 
-.aviso__acao {
+.aviso__acao.p-button {
   justify-self: start;
-  padding: 0.28rem 0.55rem;
-  border: 1px solid color-mix(in srgb, var(--danger-soft) 40%, transparent);
-  border-radius: 0.5rem;
-  background: transparent;
-  color: var(--danger-soft);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.7rem;
-  font-weight: 700;
 }
 
 .campo {
@@ -688,20 +665,10 @@ onUnmounted(() => {
   gap: 0.2rem;
 }
 
-.campo span {
+.campo label {
   color: var(--shell-muted);
   font-size: 0.66rem;
   font-weight: 700;
-}
-
-.campo select {
-  padding: 0.35rem 0.45rem;
-  border: 1px solid var(--shell-line);
-  border-radius: 0.55rem;
-  background: var(--shell-surface);
-  color: var(--shell-text);
-  font: inherit;
-  font-size: 0.74rem;
 }
 
 /* No cabeçalho estreito sobra o relógio, que é o que não pode sumir. */

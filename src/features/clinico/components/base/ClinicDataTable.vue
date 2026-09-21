@@ -10,8 +10,11 @@
  * Navegação por teclado é requisito do módulo, não cortesia: setas movem a linha focada,
  * `Enter` abre, `Home`/`End` vão às pontas.
  */
+import Button from 'primevue/button'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 
 import { ordenarLinhas, proximaOrdenacao } from '../../domain/table-sort'
 
@@ -86,7 +89,12 @@ const linhasVisiveis = computed(() => {
     return props.linhas
   }
 
-  return ordenarLinhas(props.linhas, coluna.ordenarPor, ordenacao.value.direcao, locale.value)
+  return ordenarLinhas(
+    props.linhas,
+    coluna.ordenarPor,
+    ordenacao.value.direcao,
+    INTL_LOCALE[locale.value as Locale],
+  )
 })
 
 function ordemInicialDe(coluna: ColunaTabela<T>) {
@@ -251,10 +259,12 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
               Coluna ordenável é um botão de verdade, não um `div` com `@click`: é o que dá
               foco por teclado e ativação por `Enter` de graça.
             -->
-            <button
+            <Button
               v-if="coluna.ordenarPor"
               type="button"
-              class="tabela__ordenar clinic-focusable"
+              class="tabela__ordenar"
+              text
+              size="small"
               @click="alternarOrdenacao(coluna)"
             >
               <span>{{ coluna.rotulo }}</span>
@@ -273,7 +283,7 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
                 "
                 aria-hidden="true"
               />
-            </button>
+            </Button>
 
             <template v-else>{{ coluna.rotulo }}</template>
           </div>
@@ -300,9 +310,16 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
         <div v-else-if="erro" class="tabela__estado tabela__estado--erro" role="alert">
           <i class="pi pi-exclamation-circle" aria-hidden="true" />
           <span>{{ erro }}</span>
-          <button type="button" class="tabela__retry" @click="emit('tentarDeNovo')">
-            {{ t('clinico.tabela.tentarDeNovo') }}
-          </button>
+          <Button
+            type="button"
+            class="tabela__retry"
+            severity="secondary"
+            outlined
+            size="small"
+            icon="pi pi-refresh"
+            :label="t('clinico.tabela.tentarDeNovo')"
+            @click="emit('tentarDeNovo')"
+          />
         </div>
 
         <div v-else-if="vazia" class="tabela__estado tabela__estado--vazio">
@@ -353,20 +370,22 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
             </div>
 
             <div v-if="temAcoes" class="tabela__td tabela__acoes" role="cell">
-              <button
+              <Button
                 v-for="acao in acoesDaLinha(linha)"
                 :key="acao.id"
                 type="button"
-                class="tabela__acao clinic-focusable"
+                class="tabela__acao"
                 :class="{ 'tabela__acao--perigo': acao.perigo }"
+                text
+                :severity="acao.perigo ? 'danger' : 'secondary'"
+                size="small"
+                :icon="acao.icone"
+                :label="acao.icone ? undefined : acao.rotulo"
                 :disabled="acao.desabilitada?.(linha) ?? false"
                 :title="acao.rotulo"
                 :aria-label="acao.rotulo"
                 @click="dispararAcao($event, acao, linha)"
-              >
-                <i v-if="acao.icone" :class="acao.icone" aria-hidden="true" />
-                <span v-else>{{ acao.rotulo }}</span>
-              </button>
+              />
             </div>
           </div>
         </div>
@@ -422,23 +441,25 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
 /* ------------------------------------------------------------------------- ordenação */
 
-.tabela__ordenar {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
+/*
+ * O botão herda a tipografia do cabeçalho (caixa alta, espaçamento, cor apagada): ele é o
+ * rótulo da coluna, só que clicável. O fundo de hover do tema num rótulo de 11 px vira uma
+ * pílula maior que a palavra — fica só a mudança de cor.
+ */
+.tabela__ordenar.p-button {
   max-width: 100%;
+  gap: 0.3rem;
   padding: 0;
-  border: 0;
   border-radius: 0.3rem;
-  background: none;
   color: inherit;
-  cursor: pointer;
   font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
 }
 
-.tabela__ordenar:hover {
+.tabela__ordenar.p-button:not(:disabled):hover,
+.tabela__ordenar.p-button:not(:disabled):active {
+  background: transparent;
   color: var(--clinic-text);
 }
 
@@ -528,7 +549,7 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
 .tabela__celula--fim {
   justify-self: end;
-  text-align: right;
+  text-align: end;
 }
 
 /* ----------------------------------------------------------------------- ações da linha */
@@ -544,18 +565,10 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
  * de ícones em todas as linhas de uma tabela de duzentas transforma a coluna num padrão
  * visual que compete com o dado — e a tabela clínica existe para ler dado.
  */
-.tabela__acao {
-  display: grid;
-  width: var(--clinic-hit-target);
-  height: var(--clinic-hit-target);
+.tabela__acao.p-button {
+  min-height: var(--clinic-hit-target);
   flex: 0 0 auto;
-  place-items: center;
-  border: 1px solid transparent;
   border-radius: var(--clinic-radius-control);
-  background: transparent;
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
   opacity: 0;
   transition:
     opacity 120ms ease,
@@ -564,25 +577,24 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
 .tabela__linha:hover .tabela__acao,
 .tabela__linha--selecionada .tabela__acao,
-.tabela__acao:focus-visible {
+.tabela__acao.p-button:focus-visible {
   opacity: 1;
 }
 
-.tabela__acao:hover:not(:disabled) {
-  border-color: var(--clinic-line-strong);
-  background: var(--clinic-surface);
-  color: var(--clinic-text);
+.tabela__acao.p-button-icon-only {
+  width: var(--clinic-hit-target);
 }
 
-.tabela__acao--perigo:hover:not(:disabled) {
+.tabela__acao--perigo.p-button:not(:disabled):hover {
   border-color: var(--clinic-risk-line);
   background: var(--clinic-risk-bg);
   color: var(--clinic-risk-text);
 }
 
-.tabela__acao:disabled {
+.tabela__linha:hover .tabela__acao.p-button:disabled,
+.tabela__linha--selecionada .tabela__acao.p-button:disabled {
   cursor: not-allowed;
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
 /*
@@ -590,7 +602,7 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
  * as ações são sempre visíveis.
  */
 @media (hover: none) {
-  .tabela__acao {
+  .tabela__acao.p-button {
     opacity: 1;
   }
 }
@@ -636,16 +648,8 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
   font-size: var(--clinic-font-value);
 }
 
-.tabela__retry {
+.tabela__retry.p-button {
   min-height: var(--clinic-hit-target);
-  padding: 0 var(--clinic-space-4);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-text);
-  cursor: pointer;
-  font: inherit;
-  font-weight: 700;
 }
 
 @media (max-width: 1024px) {

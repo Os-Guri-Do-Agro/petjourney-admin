@@ -45,7 +45,7 @@ export const DESFAZER_SEGUNDOS = 8
 export type AcaoDesfazivel = {
   token: string
   /** `kind` traduzível da ação — a faixa de desfazer nomeia o que aconteceu. */
-  kind: 'mover' | 'cancelar' | 'falta' | 'criar' | 'status'
+  kind: 'mover' | 'editar' | 'cancelar' | 'falta' | 'criar' | 'status'
   expiraEm: number
 }
 
@@ -204,6 +204,33 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
     return resultado?.atendimentos ?? []
   }
 
+  /**
+   * Edita tipo, sala, profissional, horário e observação de um atendimento que já existe.
+   *
+   * Separada de `mover` porque as duas respondem a perguntas diferentes na faixa de desfazer:
+   * "atendimento remarcado" não descreve quem só corrigiu o tipo, e é essa frase que a recepção
+   * lê para decidir se aperta Z.
+   */
+  async function editar(
+    id: string,
+    dados: {
+      typeId: string
+      professionalId: string
+      roomIds: string[]
+      inicio: ISODateTime
+      fim: ISODateTime
+      observacao: string
+    },
+  ) {
+    const resultado = await comSalvamento(() => agendaRepository.editar(id, dados))
+
+    if (resultado) {
+      await depoisDeMutar(resultado.undoToken, 'editar')
+    }
+
+    return resultado?.atendimentos[0] ?? null
+  }
+
   async function alterarStatus(id: string, status: AppointmentStatus) {
     const resultado = await comSalvamento(() => agendaRepository.alterarStatus(id, status))
 
@@ -332,6 +359,7 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
     recarregar,
     criar,
     mover,
+    editar,
     alterarStatus,
     cancelar,
     criarBloqueio,

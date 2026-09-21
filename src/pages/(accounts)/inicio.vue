@@ -31,13 +31,20 @@ const loadError = computed(() =>
   store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
 )
 
-const todayLabel = computed(() =>
-  now.value.toLocaleDateString(INTL_LOCALE[locale.value as Locale], {
+/**
+ * Só a primeira letra sobe. `text-transform: capitalize` fazia "Quinta-Feira, 17 De Setembro" e,
+ * no sérvio, "Četvrtak, 17. Septembar" (mês com maiúscula é erro nos dois idiomas).
+ */
+const todayLabel = computed(() => {
+  const intlLocale = INTL_LOCALE[locale.value as Locale]
+  const label = now.value.toLocaleDateString(intlLocale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-  }),
-)
+  })
+
+  return label.charAt(0).toLocaleUpperCase(intlLocale) + label.slice(1)
+})
 
 const pageAtmosphere = computed(() => {
   const colors = currentColors.value
@@ -111,7 +118,6 @@ onUnmounted(() => {
   font-size: 0.78rem;
   font-weight: 650;
   letter-spacing: 0.01em;
-  text-transform: capitalize;
   box-shadow: 0 8px 18px rgb(var(--inicio-shadow-rgb, 40 51 47) / 0.04);
 }
 

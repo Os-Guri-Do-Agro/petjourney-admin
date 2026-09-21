@@ -15,6 +15,7 @@
  * campo. E os oito sistemas viraram escolhas em linha: o campo de observação **só aparece
  * quando o achado é "alterado"**, porque é o único caso em que há o que escrever.
  */
+import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
@@ -267,10 +268,20 @@ function unidadeDe(vital: VitalKey) {
           </span>
           <span v-else />
 
-          <button
+          <!-- `.prevent`: o botão mora dentro do `<label>` do vital, que focaria o campo. -->
+          <Button
             type="button"
-            class="vital__marcar clinic-focusable"
+            class="vital__marcar"
             :class="{ 'vital__marcar--ativo': medicao(vital).naoAferido }"
+            severity="secondary"
+            text
+            rounded
+            size="small"
+            :label="
+              medicao(vital).naoAferido
+                ? t('clinico.prontuario.naoAferido')
+                : t('clinico.prontuario.naoMedir')
+            "
             :aria-pressed="medicao(vital).naoAferido"
             :disabled="somenteLeitura"
             @click.prevent="
@@ -279,13 +290,7 @@ function unidadeDe(vital: VitalKey) {
                 valor: medicao(vital).naoAferido ? medicao(vital).valor : null,
               })
             "
-          >
-            {{
-              medicao(vital).naoAferido
-                ? t('clinico.prontuario.naoAferido')
-                : t('clinico.prontuario.naoMedir')
-            }}
-          </button>
+          />
         </span>
       </label>
     </div>
@@ -440,7 +445,7 @@ function unidadeDe(vital: VitalKey) {
   font-variant-numeric: tabular-nums;
   font-weight: 750;
   letter-spacing: -0.02em;
-  text-align: right;
+  text-align: end;
 }
 
 .vital__rodape {
@@ -464,32 +469,39 @@ function unidadeDe(vital: VitalKey) {
  * "Não medir" é texto, não um ícone de proibido: o ícone dizia "bloqueado" quando o que se
  * quer dizer é "decidi não aferir". Discreto enquanto é oferta, marcado quando é registro.
  */
-.vital__marcar {
+/*
+ * Ação discreta no rodapé do vital: pílula de texto apagado, que só ganha fundo no hover. A
+ * especificidade passa a regra global da clínica para botão secundário de texto, que daria a
+ * ela o peso de uma ação principal do cartão.
+ */
+.vital__marcar.p-button {
   flex: 0 0 auto;
   padding: 0.1rem 0.4rem;
   border: 1px solid transparent;
-  border-radius: var(--clinic-radius-chip);
-  background: transparent;
-  color: var(--clinic-faint);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
-  font-weight: 700;
   white-space: nowrap;
 }
 
-.vital__marcar:hover:not(:disabled) {
+.vital__marcar.p-button.p-button-secondary.p-button-text {
+  color: var(--clinic-faint);
+}
+
+.vital__marcar.p-button.p-button-secondary.p-button-text:not(:disabled):hover {
+  border-color: transparent;
   background: var(--clinic-surface-sunken);
   color: var(--clinic-muted);
 }
 
-.vital__marcar--ativo {
+.vital__marcar--ativo.p-button.p-button-secondary.p-button-text,
+.vital__marcar--ativo.p-button.p-button-secondary.p-button-text:not(:disabled):hover {
   border-color: var(--clinic-neutral-line);
   background: var(--clinic-neutral-bg);
   color: var(--clinic-neutral-text);
 }
 
-.vital__marcar:disabled {
+.vital__marcar.p-button:disabled {
+  border-color: transparent;
+  background: transparent;
   cursor: not-allowed;
   opacity: 0.5;
 }

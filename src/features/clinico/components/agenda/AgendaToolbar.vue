@@ -18,8 +18,12 @@
  * Nenhum atalho de teclado foi removido: cada item continua mostrando a sua tecla no `title`.
  */
 import Button from 'primevue/button'
+import Menu from 'primevue/menu'
+import type { MenuItem } from 'primevue/menuitem'
 import Popover from 'primevue/popover'
-import { computed, ref } from 'vue'
+import SelectButton from 'primevue/selectbutton'
+import ToggleSwitch from 'primevue/toggleswitch'
+import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicDensityToggle from '../base/ClinicDensityToggle.vue'
@@ -44,7 +48,9 @@ const { ocultarCancelados } = useClinicPrefs()
 
 const exibicao = ref<InstanceType<typeof Popover> | null>(null)
 const filtros = ref<InstanceType<typeof Popover> | null>(null)
-const acoes = ref<InstanceType<typeof Popover> | null>(null)
+const acoes = ref<InstanceType<typeof Menu> | null>(null)
+
+const idOcultarCancelados = useId()
 
 const ehHoje = computed(() => agenda.data === clinicClock.today())
 
@@ -61,96 +67,131 @@ const STATUS_FILTRAVEIS: AppointmentStatus[] = [
 const filtrosAtivos = computed(
   () => agenda.filtroProfissionais.length + agenda.filtroStatus.length,
 )
+
+/** A tecla vai no `title` de cada opção: o atalho continua descobrível sem abrir a ajuda. */
+const opcoesVisao = computed(() => [
+  { valor: 'dia', rotulo: t('clinico.agenda.visaoDia'), atalho: 'D' },
+  { valor: 'semana', rotulo: t('clinico.agenda.visaoSemana'), atalho: 'S' },
+])
+
+const opcoesAgrupamento = computed(() => [
+  {
+    valor: 'profissional',
+    rotulo: t('clinico.agenda.agruparPorProfissional'),
+    icone: 'pi pi-user',
+    atalho: 'P',
+  },
+  {
+    valor: 'sala',
+    rotulo: t('clinico.agenda.agruparPorSala'),
+    icone: 'pi pi-building',
+    atalho: 'R',
+  },
+])
+
+const itensAcoes = computed<MenuItem[]>(() => [
+  {
+    label: t('clinico.agenda.encaixar'),
+    icon: 'pi pi-bolt',
+    atalho: 'E',
+    command: () => emit('encaixar'),
+  },
+  {
+    label: t('clinico.agenda.bloquear'),
+    icon: 'pi pi-ban',
+    atalho: 'B',
+    command: () => emit('bloquear'),
+  },
+  {
+    label: t('clinico.atalhos.abrir'),
+    icon: 'pi pi-question-circle',
+    atalho: '?',
+    command: () => emit('ajuda'),
+  },
+])
 </script>
 
 <template>
   <div class="barra">
     <!-- onde estou -->
     <div class="barra__data">
-      <button
-        type="button"
-        class="barra__seta clinic-focusable"
+      <Button
+        icon="pi pi-chevron-left"
+        severity="secondary"
+        outlined
+        size="small"
         :title="`${t('clinico.agenda.diaAnterior')} (←)`"
         :aria-label="t('clinico.agenda.diaAnterior')"
         @click="agenda.avancar(-1)"
-      >
-        <i class="pi pi-chevron-left" aria-hidden="true" />
-      </button>
+      />
 
       <div class="barra__hoje">
         <strong class="barra__titulo">{{ formato.dataLonga(agenda.data) }}</strong>
-        <button
+        <Button
           v-if="!ehHoje"
-          type="button"
-          class="barra__link clinic-focusable"
+          class="barra__link"
+          link
+          size="small"
+          :label="t('clinico.agenda.hoje')"
           :title="`${t('clinico.agenda.hoje')} (T)`"
           @click="agenda.hoje()"
-        >
-          {{ t('clinico.agenda.hoje') }}
-        </button>
+        />
         <span v-else class="barra__marca">{{ t('clinico.agenda.hoje') }}</span>
       </div>
 
-      <button
-        type="button"
-        class="barra__seta clinic-focusable"
+      <Button
+        icon="pi pi-chevron-right"
+        severity="secondary"
+        outlined
+        size="small"
         :title="`${t('clinico.agenda.proximoDia')} (→)`"
         :aria-label="t('clinico.agenda.proximoDia')"
         @click="agenda.avancar(1)"
-      >
-        <i class="pi pi-chevron-right" aria-hidden="true" />
-      </button>
+      />
     </div>
 
     <!-- o que estou vendo -->
-    <div class="segmentado" role="radiogroup" :aria-label="t('clinico.agenda.visaoDia')">
-      <button
-        type="button"
-        class="segmentado__botao clinic-focusable"
-        :class="{ 'segmentado__botao--ativo': agenda.visao === 'dia' }"
-        role="radio"
-        :aria-checked="agenda.visao === 'dia'"
-        :title="`${t('clinico.agenda.visaoDia')} (D)`"
-        @click="agenda.visao = 'dia'"
-      >
-        {{ t('clinico.agenda.visaoDia') }}
-      </button>
-      <button
-        type="button"
-        class="segmentado__botao clinic-focusable"
-        :class="{ 'segmentado__botao--ativo': agenda.visao === 'semana' }"
-        role="radio"
-        :aria-checked="agenda.visao === 'semana'"
-        :title="`${t('clinico.agenda.visaoSemana')} (S)`"
-        @click="agenda.visao = 'semana'"
-      >
-        {{ t('clinico.agenda.visaoSemana') }}
-      </button>
-    </div>
+    <SelectButton
+      v-model="agenda.visao"
+      class="segmentado"
+      :options="opcoesVisao"
+      option-label="rotulo"
+      option-value="valor"
+      :allow-empty="false"
+      size="small"
+      :aria-label="t('clinico.agenda.visaoDia')"
+    >
+      <template #option="{ option }">
+        <span :title="`${option.rotulo} (${option.atalho})`">{{ option.rotulo }}</span>
+      </template>
+    </SelectButton>
 
     <!-- ações -->
     <div class="barra__acoes">
-      <button
-        type="button"
-        class="painel-botao clinic-focusable"
+      <Button
+        class="painel-botao"
         :class="{ 'painel-botao--ativo': filtrosAtivos > 0 }"
+        icon="pi pi-filter"
+        severity="secondary"
+        outlined
+        size="small"
+        :label="t('clinico.agenda.filtros')"
+        :badge="filtrosAtivos > 0 ? String(filtrosAtivos) : undefined"
         :aria-label="t('clinico.agenda.filtros')"
+        aria-haspopup="true"
         @click="filtros?.toggle($event)"
-      >
-        <i class="pi pi-filter" aria-hidden="true" />
-        <span>{{ t('clinico.agenda.filtros') }}</span>
-        <span v-if="filtrosAtivos > 0" class="painel-botao__contagem">{{ filtrosAtivos }}</span>
-      </button>
+      />
 
-      <button
-        type="button"
-        class="painel-botao clinic-focusable"
+      <Button
+        icon="pi pi-sliders-h"
+        severity="secondary"
+        outlined
+        size="small"
+        :label="t('clinico.agenda.exibicao')"
         :aria-label="t('clinico.agenda.exibicao')"
+        aria-haspopup="true"
         @click="exibicao?.toggle($event)"
-      >
-        <i class="pi pi-sliders-h" aria-hidden="true" />
-        <span>{{ t('clinico.agenda.exibicao') }}</span>
-      </button>
+      />
 
       <Button
         :label="t('clinico.agenda.novoAtendimento')"
@@ -160,15 +201,16 @@ const filtrosAtivos = computed(
         @click="emit('novo')"
       />
 
-      <button
-        type="button"
-        class="painel-botao painel-botao--icone clinic-focusable"
+      <Button
+        icon="pi pi-ellipsis-v"
+        severity="secondary"
+        outlined
+        size="small"
         :aria-label="t('clinico.agenda.maisAcoes')"
         :title="t('clinico.agenda.maisAcoes')"
+        aria-haspopup="true"
         @click="acoes?.toggle($event)"
-      >
-        <i class="pi pi-ellipsis-v" aria-hidden="true" />
-      </button>
+      />
     </div>
 
     <!-- ------------------------------------------------------------------ filtros -->
@@ -177,12 +219,15 @@ const filtrosAtivos = computed(
         <section class="painel__secao">
           <h3 class="clinic-label">{{ t('clinico.agenda.agruparPorProfissional') }}</h3>
           <div class="fichas">
-            <button
+            <Button
               v-for="profissional in clinico.profissionais"
               :key="profissional.id"
-              type="button"
-              class="ficha clinic-focusable"
+              class="ficha"
               :class="{ 'ficha--ativa': agenda.filtroProfissionais.includes(profissional.id) }"
+              severity="secondary"
+              outlined
+              rounded
+              size="small"
               :aria-pressed="agenda.filtroProfissionais.includes(profissional.id)"
               @click="agenda.alternarFiltroProfissional(profissional.id)"
             >
@@ -191,30 +236,33 @@ const filtrosAtivos = computed(
                 :style="{ background: clinico.corDaColuna(profissional.id) }"
                 aria-hidden="true"
               />
-              {{ profissional.nome }}
-            </button>
+              <span>{{ profissional.nome }}</span>
+            </Button>
           </div>
         </section>
 
         <section class="painel__secao">
           <h3 class="clinic-label">{{ t('clinico.status.agendado') }}</h3>
           <div class="fichas">
-            <button
+            <Button
               v-for="status in STATUS_FILTRAVEIS"
               :key="status"
-              type="button"
-              class="ficha clinic-focusable"
+              class="ficha"
               :class="{ 'ficha--ativa': agenda.filtroStatus.includes(status) }"
+              severity="secondary"
+              outlined
+              rounded
+              size="small"
+              :label="formato.status(status)"
               :aria-pressed="agenda.filtroStatus.includes(status)"
               @click="agenda.alternarFiltroStatus(status)"
-            >
-              {{ formato.status(status) }}
-            </button>
+            />
           </div>
         </section>
 
         <Button
           v-if="filtrosAtivos > 0"
+          class="painel__limpar"
           :label="t('clinico.agenda.limparFiltros')"
           icon="pi pi-times"
           severity="secondary"
@@ -230,32 +278,24 @@ const filtrosAtivos = computed(
       <div class="painel clinic-scope">
         <section v-if="agenda.visao === 'dia'" class="painel__secao">
           <h3 class="clinic-label">{{ t('clinico.agenda.exibicao') }}</h3>
-          <div class="segmentado segmentado--largo" role="radiogroup">
-            <button
-              type="button"
-              class="segmentado__botao clinic-focusable"
-              :class="{ 'segmentado__botao--ativo': agenda.agrupamento === 'profissional' }"
-              role="radio"
-              :aria-checked="agenda.agrupamento === 'profissional'"
-              :title="`${t('clinico.agenda.agruparPorProfissional')} (P)`"
-              @click="agenda.agrupamento = 'profissional'"
-            >
-              <i class="pi pi-user" aria-hidden="true" />
-              <span>{{ t('clinico.agenda.agruparPorProfissional') }}</span>
-            </button>
-            <button
-              type="button"
-              class="segmentado__botao clinic-focusable"
-              :class="{ 'segmentado__botao--ativo': agenda.agrupamento === 'sala' }"
-              role="radio"
-              :aria-checked="agenda.agrupamento === 'sala'"
-              :title="`${t('clinico.agenda.agruparPorSala')} (R)`"
-              @click="agenda.agrupamento = 'sala'"
-            >
-              <i class="pi pi-building" aria-hidden="true" />
-              <span>{{ t('clinico.agenda.agruparPorSala') }}</span>
-            </button>
-          </div>
+          <SelectButton
+            v-model="agenda.agrupamento"
+            class="segmentado"
+            :options="opcoesAgrupamento"
+            option-label="rotulo"
+            option-value="valor"
+            :allow-empty="false"
+            size="small"
+            fluid
+            :aria-label="t('clinico.agenda.exibicao')"
+          >
+            <template #option="{ option }">
+              <span class="segmentado__opcao" :title="`${option.rotulo} (${option.atalho})`">
+                <i :class="option.icone" aria-hidden="true" />
+                <span>{{ option.rotulo }}</span>
+              </span>
+            </template>
+          </SelectButton>
         </section>
 
         <section class="painel__secao">
@@ -263,33 +303,23 @@ const filtrosAtivos = computed(
           <ClinicDensityToggle />
         </section>
 
-        <label class="painel__switch">
-          <input v-model="ocultarCancelados" type="checkbox" />
-          <span>{{ t('clinico.agenda.ocultarCancelados') }}</span>
-        </label>
+        <div class="painel__switch">
+          <ToggleSwitch v-model="ocultarCancelados" :input-id="idOcultarCancelados" />
+          <label :for="idOcultarCancelados">{{ t('clinico.agenda.ocultarCancelados') }}</label>
+        </div>
       </div>
     </Popover>
 
     <!-- -------------------------------------------------------------- mais ações -->
-    <Popover ref="acoes" class="clinic-overlay">
-      <div class="painel painel--menu clinic-scope">
-        <button type="button" class="menu__item clinic-focusable" @click="emit('encaixar')">
-          <i class="pi pi-bolt" aria-hidden="true" />
-          <span>{{ t('clinico.agenda.encaixar') }}</span>
-          <kbd>E</kbd>
-        </button>
-        <button type="button" class="menu__item clinic-focusable" @click="emit('bloquear')">
-          <i class="pi pi-ban" aria-hidden="true" />
-          <span>{{ t('clinico.agenda.bloquear') }}</span>
-          <kbd>B</kbd>
-        </button>
-        <button type="button" class="menu__item clinic-focusable" @click="emit('ajuda')">
-          <i class="pi pi-question-circle" aria-hidden="true" />
-          <span>{{ t('clinico.atalhos.abrir') }}</span>
-          <kbd>?</kbd>
-        </button>
-      </div>
-    </Popover>
+    <Menu ref="acoes" :model="itensAcoes" popup :pt="{ root: { class: 'clinic-overlay' } }">
+      <template #item="{ item, props }">
+        <a v-bind="props.action" class="menu__item">
+          <span v-bind="props.icon" />
+          <span v-bind="props.label" class="menu__rotulo">{{ item.label }}</span>
+          <kbd>{{ item.atalho }}</kbd>
+        </a>
+      </template>
+    </Menu>
   </div>
 </template>
 
@@ -312,23 +342,6 @@ const filtrosAtivos = computed(
   gap: var(--clinic-space-2);
 }
 
-.barra__seta {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
-}
-
-.barra__seta:hover {
-  border-color: var(--clinic-accent);
-  color: var(--clinic-accent-strong);
-}
-
 .barra__hoje {
   display: grid;
   gap: 0.1rem;
@@ -349,18 +362,11 @@ const filtrosAtivos = computed(
   text-transform: uppercase;
 }
 
-.barra__link {
+/* "Hoje" é um link sob a data: sem o recuo de botão, alinhado à esquerda do título. */
+.barra__link.p-button {
   justify-self: start;
   padding: 0;
-  border: none;
-  background: none;
-  color: var(--clinic-accent-strong);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 .barra__marca {
@@ -377,44 +383,11 @@ const filtrosAtivos = computed(
   flex-wrap: wrap;
   align-items: center;
   gap: var(--clinic-space-2);
-  margin-left: auto;
-}
-
-.segmentado {
-  display: inline-flex;
-  padding: 2px;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
-}
-
-.segmentado--largo {
-  width: 100%;
-}
-
-.segmentado__botao {
-  display: inline-flex;
-  min-height: var(--clinic-hit-target);
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  padding: 0 var(--clinic-space-3);
-  border: none;
-  border-radius: calc(var(--clinic-radius-control) - 2px);
-  background: transparent;
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
+  margin-inline-start: auto;
 }
 
 /* Anel + peso: a marcação precisa se ler antes da cor, e sobreviver à escala de cinza. */
-.segmentado__botao--ativo {
-  background: var(--clinic-surface);
+.segmentado :deep(.p-togglebutton-checked .p-togglebutton-content) {
   box-shadow:
     var(--clinic-shadow-card),
     inset 0 0 0 1.5px var(--clinic-accent-strong);
@@ -422,51 +395,28 @@ const filtrosAtivos = computed(
   font-weight: 800;
 }
 
-.segmentado__botao i {
+.segmentado__opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.segmentado__opcao i {
   font-size: 0.7rem;
 }
 
-.painel-botao {
-  display: inline-flex;
-  min-height: var(--clinic-hit-target);
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0 var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.painel-botao:hover {
-  border-color: var(--clinic-accent);
-  color: var(--clinic-accent-strong);
-}
-
-.painel-botao--icone {
-  padding-inline: var(--clinic-space-2);
-}
-
-/* Filtro ativo se anuncia: contador na etiqueta evita "a agenda sumiu". */
-.painel-botao--ativo {
+/*
+ * Filtro ativo se anuncia: contorno e fundo no acento, além do contador na etiqueta — evita
+ * "a agenda sumiu". O seletor repete as classes do botão para vencer a regra do módulo.
+ */
+.painel-botao--ativo.p-button.p-button-secondary.p-button-outlined,
+.painel-botao--ativo.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
+.ficha--ativa.p-button.p-button-secondary.p-button-outlined,
+.ficha--ativa.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
   border-color: var(--clinic-accent);
   background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
-}
-
-.painel-botao__contagem {
-  min-width: 1.1rem;
-  padding: 0 0.25rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
-  font-size: 0.62rem;
-  font-weight: 800;
-  text-align: center;
 }
 
 .painel {
@@ -476,24 +426,26 @@ const filtrosAtivos = computed(
   padding: var(--clinic-space-2);
 }
 
-.painel--menu {
-  gap: 0.15rem;
-  width: min(15rem, 90vw);
-}
-
 .painel__secao {
   display: grid;
   gap: var(--clinic-space-2);
 }
 
+.painel__limpar.p-button {
+  justify-self: start;
+}
+
 .painel__switch {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--clinic-space-2);
   color: var(--clinic-muted);
-  cursor: pointer;
   font-size: var(--clinic-font-base);
   font-weight: 650;
+}
+
+.painel__switch label {
+  cursor: pointer;
 }
 
 .fichas {
@@ -502,26 +454,8 @@ const filtrosAtivos = computed(
   gap: var(--clinic-space-1);
 }
 
-.ficha {
-  display: inline-flex;
-  min-height: 1.7rem;
-  align-items: center;
+.ficha.p-button {
   gap: 0.35rem;
-  padding: 0 var(--clinic-space-2);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.ficha--ativa {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
 }
 
 .ficha__cor {
@@ -531,33 +465,11 @@ const filtrosAtivos = computed(
 }
 
 .menu__item {
-  display: flex;
-  width: 100%;
-  align-items: center;
   gap: var(--clinic-space-2);
-  min-height: var(--clinic-row-height);
-  padding: 0 var(--clinic-space-2);
-  border: none;
-  border-radius: var(--clinic-radius-control);
-  background: transparent;
-  color: var(--clinic-text);
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
 }
 
-.menu__item:hover {
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.menu__item span {
+.menu__rotulo {
   flex: 1;
-}
-
-.menu__item i {
-  color: var(--clinic-muted);
-  font-size: 0.75rem;
 }
 
 .menu__item kbd {
@@ -572,7 +484,7 @@ const filtrosAtivos = computed(
 @media (max-width: 900px) {
   .barra__acoes {
     width: 100%;
-    margin-left: 0;
+    margin-inline-start: 0;
   }
 }
 </style>

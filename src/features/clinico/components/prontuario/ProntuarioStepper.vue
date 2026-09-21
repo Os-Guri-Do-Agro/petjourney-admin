@@ -12,7 +12,12 @@
  *
  * Cada passo é um botão de verdade: `Tab` percorre, `Enter` entra, e o rodapé de cada etapa
  * leva à seguinte sem tocar no mouse.
+ *
+ * Não é o `Stepper` do PrimeVue de propósito: aquele é dono dos painéis e do valor ativo, e aqui
+ * quem troca a etapa é a página (rodapé, atalhos, âncora). O que vem do framework é o `Button`
+ * de cada passo; a navegação continua sendo `nav` com `ol` e `aria-current="step"`.
  */
+import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -42,10 +47,11 @@ const indiceAtivo = computed(() => props.passos.findIndex((passo) => passo.id ==
   <nav class="passos" :aria-label="t('clinico.prontuario.passos.aria')">
     <ol class="passos__lista">
       <li v-for="(passo, indice) in passos" :key="passo.id" class="passos__item">
-        <button
+        <Button
           type="button"
-          class="passo clinic-focusable"
+          class="passo"
           :class="[`passo--${passo.estado}`, { 'passo--ativo': passo.id === ativo }]"
+          text
           :aria-current="passo.id === ativo ? 'step' : undefined"
           @click="emit('ir', passo.id)"
         >
@@ -57,7 +63,7 @@ const indiceAtivo = computed(() => props.passos.findIndex((passo) => passo.id ==
             <span class="passo__rotulo">{{ passo.rotulo }}</span>
             <span v-if="passo.resumo" class="passo__resumo">{{ passo.resumo }}</span>
           </span>
-        </button>
+        </Button>
 
         <!-- O traço entre passos indica a ordem sem prometer que ela é obrigatória. -->
         <span
@@ -96,28 +102,30 @@ const indiceAtivo = computed(() => props.passos.findIndex((passo) => passo.id ==
   align-items: center;
 }
 
-.passo {
-  display: flex;
+/* Botão de texto com conteúdo próprio: alinhado à esquerda, apagado até ser o passo da vez. */
+.passo.p-button {
   min-width: 0;
   flex: 1;
-  align-items: center;
+  justify-content: flex-start;
   gap: var(--clinic-space-2);
   padding: var(--clinic-space-2) var(--clinic-space-3);
   border: 1px solid transparent;
   border-radius: var(--clinic-radius-control);
-  background: transparent;
   color: var(--clinic-muted);
-  cursor: pointer;
   font: inherit;
-  text-align: left;
+  text-align: start;
 }
 
-.passo:hover {
+.passo.p-button:not(:disabled):hover,
+.passo.p-button:not(:disabled):active {
+  border-color: transparent;
   background: var(--clinic-surface-soft);
   color: var(--clinic-text);
 }
 
-.passo--ativo {
+.passo--ativo.p-button,
+.passo--ativo.p-button:not(:disabled):hover,
+.passo--ativo.p-button:not(:disabled):active {
   border-color: var(--clinic-accent);
   background: var(--clinic-accent-tint);
   color: var(--clinic-text);
@@ -192,7 +200,7 @@ const indiceAtivo = computed(() => props.passos.findIndex((passo) => passo.id ==
     width: 0.5rem;
   }
 
-  .passo {
+  .passo.p-button {
     padding-inline: var(--clinic-space-2);
   }
 }

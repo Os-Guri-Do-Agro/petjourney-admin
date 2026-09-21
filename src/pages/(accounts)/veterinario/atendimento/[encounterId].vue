@@ -19,7 +19,8 @@
  */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import ToggleSwitch from 'primevue/toggleswitch'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 
@@ -101,6 +102,7 @@ const modoTeclado = ref(
   typeof window === 'undefined' || window.localStorage.getItem(CHAVE_TECLADO) !== 'false',
 )
 
+const idModoTeclado = useId()
 const mapaAberto = ref(false)
 const corpoDaEtapa = ref<HTMLElement | null>(null)
 
@@ -210,9 +212,11 @@ const passos = computed<PassoProntuario[]>(() => {
         conduta?.estado === 'alerta'
           ? t('clinico.prontuario.conduta.alergiaConfirmar')
           : atual.conduta.prescricoes.length > 0
-            ? t('clinico.prontuario.passos.prescricoes', {
-                contagem: atual.conduta.prescricoes.length,
-              })
+            ? t(
+                'clinico.prontuario.passos.prescricoes',
+                { contagem: atual.conduta.prescricoes.length },
+                atual.conduta.prescricoes.length,
+              )
             : atual.conduta.orientacoes,
     },
     {
@@ -573,20 +577,21 @@ onBeforeUnmount(() => {
         que `Alt + →` percorre. Escondido em ajustes, ninguém saberia que existe.
       -->
       <div class="teclado">
-        <label class="teclado__toggle">
-          <input v-model="modoTeclado" type="checkbox" />
-          <span>{{ t('clinico.prontuario.teclado.modo') }}</span>
-        </label>
+        <span class="teclado__toggle">
+          <ToggleSwitch v-model="modoTeclado" :input-id="idModoTeclado" />
+          <label :for="idModoTeclado">{{ t('clinico.prontuario.teclado.modo') }}</label>
+        </span>
 
-        <button
+        <Button
           type="button"
           class="teclado__mapa clinic-focusable"
+          link
+          size="small"
+          icon="pi pi-question-circle"
+          :label="t('clinico.prontuario.teclado.verTeclas')"
           :title="t('clinico.prontuario.teclado.titulo')"
           @click="mapaAberto = true"
-        >
-          <i class="pi pi-question-circle" aria-hidden="true" />
-          {{ t('clinico.prontuario.teclado.verTeclas') }}
-        </button>
+        />
       </div>
 
       <div class="prontuario__corpo" :class="{ 'prontuario__corpo--com-aside': historicoAberto }">
@@ -888,29 +893,30 @@ onBeforeUnmount(() => {
 .teclado__toggle {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.45rem;
   color: var(--clinic-muted);
-  cursor: pointer;
   font-size: var(--clinic-font-label);
   font-weight: 700;
 }
 
-.teclado__mapa {
-  display: inline-flex;
-  align-items: center;
+.teclado__toggle label {
+  cursor: pointer;
+}
+
+.teclado__mapa.p-button {
   gap: 0.3rem;
   padding: 0;
-  border: 0;
-  background: none;
-  color: var(--clinic-accent-strong);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
-  font-weight: 700;
 }
 
-.teclado__mapa:hover {
-  text-decoration: underline;
+.teclado__mapa.p-button,
+.teclado__mapa.p-button:not(:disabled):hover,
+.teclado__mapa.p-button:not(:disabled):active {
+  color: var(--clinic-accent-strong);
+}
+
+.teclado__mapa :deep(.p-button-label) {
+  font-weight: 700;
   text-underline-offset: 2px;
 }
 

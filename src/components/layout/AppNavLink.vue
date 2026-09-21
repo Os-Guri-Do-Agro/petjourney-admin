@@ -204,6 +204,15 @@ defineEmits<{ (evento: 'clique', payload: MouseEvent): void }>()
   font-weight: 750;
 }
 
+/* O degradê parte do início da linha de leitura. */
+[dir='rtl'] .page-nav__link.router-link-active {
+  background: linear-gradient(
+    270deg,
+    color-mix(in srgb, var(--shell-accent-soft) 46%, var(--shell-surface)),
+    color-mix(in srgb, var(--shell-accent-soft) 26%, var(--shell-surface))
+  );
+}
+
 .page-nav__link:hover .page-nav__icon {
   background: color-mix(in srgb, var(--shell-accent) 12%, var(--shell-surface));
   color: var(--shell-accent-strong);

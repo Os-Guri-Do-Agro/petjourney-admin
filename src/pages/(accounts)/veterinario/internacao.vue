@@ -178,7 +178,7 @@ function abrirLeito(leitoId: string) {
         <ClinicStat
           :rotulo="t('clinico.internacao.stat.ocupacao')"
           :valor="ocupacao"
-          :detalhe="t('clinico.internacao.stat.vagas', { total: vagas })"
+          :detalhe="t('clinico.internacao.stat.vagas', { total: vagas }, vagas)"
           icone="pi pi-th-large"
         />
         <ClinicStat
@@ -191,7 +191,7 @@ function abrirLeito(leitoId: string) {
         <ClinicStat
           :rotulo="t('clinico.internacao.stat.pendentes')"
           :valor="String(pendentesNoTurno)"
-          :detalhe="t('clinico.internacao.stat.atrasadas', { total: atrasadasNoTurno })"
+          :detalhe="t('clinico.internacao.stat.atrasadas', { total: atrasadasNoTurno }, atrasadasNoTurno)"
           icone="pi pi-list-check"
           :tom="atrasadasNoTurno > 0 ? 'atencao' : 'neutro'"
         />

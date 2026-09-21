@@ -233,7 +233,7 @@ function nomeDoExame(id: string) {
       <div>
         <h2>{{ t('clinico.paciente.responsavel') }}</h2>
         <p class="folha__destaque">{{ tutor?.nome }}</p>
-        <p>{{ tutor?.telefone }}</p>
+        <p><bdi dir="ltr">{{ tutor?.telefone }}</bdi></p>
         <p v-if="tutor?.documento">
           {{ t('clinico.prontuario.impressao.documento') }} {{ tutor.documento }}
         </p>
@@ -440,7 +440,7 @@ function nomeDoExame(id: string) {
   max-width: 180mm;
   margin: 0 auto;
   color: #000;
-  font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'DM Sans', 'PetJourney Arabic', 'Segoe UI', system-ui, sans-serif;
   font-size: 9.5pt;
   line-height: 1.45;
 }
@@ -493,7 +493,7 @@ function nomeDoExame(id: string) {
 
 .folha__meta {
   margin: 0;
-  text-align: right;
+  text-align: end;
 }
 
 .folha__meta div + div {
@@ -581,7 +581,7 @@ function nomeDoExame(id: string) {
 .tabela td {
   padding: 1mm 2mm;
   border-bottom: 0.4pt solid #666;
-  text-align: left;
+  text-align: start;
 }
 
 .tabela th {
@@ -593,12 +593,12 @@ function nomeDoExame(id: string) {
 
 .tabela__numero {
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  text-align: end;
 }
 
 .itens {
   margin: 0;
-  padding-left: 5mm;
+  padding-inline-start: 5mm;
 }
 
 .itens li {

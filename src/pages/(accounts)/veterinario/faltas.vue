@@ -14,7 +14,8 @@
  * proíbe vira regra contornada no papel.
  */
 import Button from 'primevue/button'
-import { computed, onMounted, ref } from 'vue'
+import ToggleSwitch from 'primevue/toggleswitch'
+import { computed, onMounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
@@ -53,6 +54,7 @@ const linhas = ref<LinhaFalta[]>([])
 const carregando = ref(false)
 const erro = ref('')
 const politicaAtiva = ref(true)
+const idPolitica = useId()
 const recorte = ref<Recorte>('reincidentes')
 
 /**
@@ -360,7 +362,7 @@ onMounted(carregar)
 
         <template #celula-responsavel="{ linha }">
           <span class="faltas__nome">{{ linha.tutor?.nome }}</span>
-          <span class="faltas__meta">{{ linha.tutor?.telefone }}</span>
+          <span class="faltas__meta"><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span>
         </template>
 
         <template #celula-faltas="{ linha }">
@@ -389,14 +391,15 @@ onMounted(carregar)
           <h2 class="detalhe__titulo">
             {{ t('clinico.faltas.historico.titulo', { nome: nomeDoResponsavelAberto }) }}
           </h2>
-          <button
+          <Button
             type="button"
-            class="detalhe__fechar clinic-focusable"
+            class="detalhe__fechar"
+            text
+            severity="secondary"
+            icon="pi pi-times"
             :aria-label="t('clinico.atalhos.fechar')"
             @click="responsavelAberto = null"
-          >
-            <i class="pi pi-times" aria-hidden="true" />
-          </button>
+          />
         </header>
 
         <p v-if="carregandoDetalhe" class="detalhe__estado" role="status">
@@ -455,9 +458,9 @@ onMounted(carregar)
           <p>{{ t('clinico.faltas.politica.descricao', { limite: LIMITE_REINCIDENCIA }) }}</p>
         </div>
 
-        <label class="politica__toggle">
-          <input v-model="politicaAtiva" type="checkbox" />
-          <span>
+        <div class="politica__toggle">
+          <ToggleSwitch v-model="politicaAtiva" :input-id="idPolitica" />
+          <label :for="idPolitica">
             <strong>{{ t('clinico.faltas.politica.ativar') }}</strong>
             <small>
               {{
@@ -466,8 +469,8 @@ onMounted(carregar)
                   : t('clinico.faltas.politica.inativo')
               }}
             </small>
-          </span>
-        </label>
+          </label>
+        </div>
       </section>
     </div>
 
@@ -550,21 +553,10 @@ onMounted(carregar)
   letter-spacing: -0.02em;
 }
 
-.detalhe__fechar {
-  display: grid;
+.detalhe__fechar.p-button {
   width: var(--clinic-hit-target);
   height: var(--clinic-hit-target);
-  place-items: center;
-  border: none;
   border-radius: var(--clinic-radius-control);
-  background: transparent;
-  color: var(--clinic-muted);
-  cursor: pointer;
-}
-
-.detalhe__fechar:hover {
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-text);
 }
 
 .detalhe__estado {
@@ -666,12 +658,12 @@ onMounted(carregar)
   display: flex;
   align-items: flex-start;
   gap: var(--clinic-space-2);
-  cursor: pointer;
 }
 
-.politica__toggle span {
+.politica__toggle label {
   display: grid;
   gap: 0.1rem;
+  cursor: pointer;
 }
 
 .politica__toggle small {

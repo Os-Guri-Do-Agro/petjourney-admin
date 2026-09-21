@@ -24,6 +24,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
@@ -55,7 +56,7 @@ const ABAS: Aba[] = ['aplicadas', 'atraso']
  */
 const JANELAS = [30, 90, 365] as const
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const clinico = useClinicoStore()
@@ -189,7 +190,7 @@ function dentroDaJanela(aplicacao: AplicacaoNaLista, dias: number): boolean {
  */
 const gruposDeFiltro = computed<GrupoDeFiltro[]>(() => {
   const vacinasUsadas = [...new Set(aplicacoes.value.map((item) => item.vacinaNome))].sort((a, b) =>
-    a.localeCompare(b, 'pt-BR'),
+    a.localeCompare(b, INTL_LOCALE[locale.value as Locale]),
   )
 
   return [
@@ -198,7 +199,7 @@ const gruposDeFiltro = computed<GrupoDeFiltro[]>(() => {
       rotulo: t('clinico.vacinas.filtro.quando'),
       opcoes: JANELAS.map((dias) => ({
         valor: `janela:${dias}`,
-        rotulo: t('clinico.vacinas.filtro.ultimosDias', { dias }),
+        rotulo: t('clinico.vacinas.filtro.ultimosDias', { dias }, dias),
         contagem: aplicacoes.value.filter((item) => dentroDaJanela(item, dias)).length,
       })),
     },

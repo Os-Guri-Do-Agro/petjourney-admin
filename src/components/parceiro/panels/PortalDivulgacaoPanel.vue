@@ -551,15 +551,15 @@ watch(lastSuccessAt, (at) => {
                   <span class="share-kit__label">{{ t('divulgacao.shareKit.codeLabel') }}</span>
                   <div class="share-kit__code-row">
                     <strong class="share-kit__code">{{ codigoIndicacao }}</strong>
-                    <button
+                    <Button
                       type="button"
                       class="share-kit__icon-btn"
+                      icon="pi pi-copy"
                       :aria-label="t('divulgacao.shareKit.copyCodeAria')"
+                      :title="t('divulgacao.shareKit.copyCodeAria')"
                       :disabled="!indicacao.podeIndicar"
                       @click="copyToClipboard(codigoIndicacao, t('divulgacao.shareKit.codeLabel'))"
-                    >
-                      <i class="pi pi-copy" aria-hidden="true" />
-                    </button>
+                    />
                   </div>
                 </div>
 
@@ -567,15 +567,14 @@ watch(lastSuccessAt, (at) => {
                   <span class="share-kit__label">{{ t('divulgacao.shareKit.linkLabel') }}</span>
                   <div class="share-kit__link-field">
                     <code>{{ linkIndicacao }}</code>
-                    <button
+                    <Button
                       type="button"
                       class="share-kit__copy-cta"
+                      icon="pi pi-link"
+                      :label="t('divulgacao.shareKit.copyLink')"
                       :disabled="!indicacao.podeIndicar"
                       @click="copyToClipboard(linkIndicacao, t('divulgacao.shareKit.linkName'))"
-                    >
-                      <i class="pi pi-link" aria-hidden="true" />
-                      {{ t('divulgacao.shareKit.copyLink') }}
-                    </button>
+                    />
                   </div>
                 </div>
 
@@ -695,22 +694,20 @@ watch(lastSuccessAt, (at) => {
               </li>
             </ul>
 
-            <button
+            <Button
               type="button"
               class="indicacao-terms__toggle"
+              :label="
+                termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')
+              "
+              :icon="termsOpen ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+              icon-pos="right"
+              text
+              size="small"
               :aria-expanded="termsOpen"
               aria-controls="div-terms-full"
               @click="termsOpen = !termsOpen"
-            >
-              <span>{{
-                termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')
-              }}</span>
-              <i
-                class="pi"
-                :class="termsOpen ? 'pi-chevron-up' : 'pi-chevron-down'"
-                aria-hidden="true"
-              />
-            </button>
+            />
 
             <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
             <dl v-show="termsOpen" id="div-terms-full" class="indicacao-terms__grid">
@@ -757,7 +754,7 @@ watch(lastSuccessAt, (at) => {
                 </div>
                 <div class="cupom-row__meta">
                   <span class="cupom-row__discount">{{ cupom.descontoPercentual }}%</span>
-                  <span>{{ t('divulgacao.cupons.usos', { n: cupom.totalResgates }) }}</span>
+                  <span>{{ t('divulgacao.cupons.usos', { n: cupom.totalResgates }, cupom.totalResgates) }}</span>
                   <PartnerStatusBadge :status="cupom.ativo ? 'ATIVO' : 'SUSPENSO'" />
                 </div>
               </li>
@@ -1020,37 +1017,27 @@ watch(lastSuccessAt, (at) => {
   line-height: 1.35;
 }
 
-.indicacao-terms__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+.indicacao-terms__toggle.p-button {
   justify-self: start;
+  gap: 0.4rem;
   padding: 0.4rem 0.7rem;
-  border: 1px solid transparent;
   border-radius: 0.6rem;
-  background: transparent;
   color: var(--div-primary-strong);
-  font: inherit;
   font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease;
 }
 
-.indicacao-terms__toggle:hover {
+.indicacao-terms__toggle.p-button :deep(.p-button-label) {
+  font-weight: 700;
+}
+
+.indicacao-terms__toggle.p-button :deep(.p-button-icon) {
+  font-size: 0.7rem;
+}
+
+.indicacao-terms__toggle.p-button:not(:disabled):hover {
   border-color: color-mix(in srgb, var(--div-primary) 28%, var(--div-line));
   background: color-mix(in srgb, var(--div-primary-soft) 26%, transparent);
-}
-
-.indicacao-terms__toggle:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--div-primary) 55%, transparent);
-  outline-offset: 2px;
-}
-
-.indicacao-terms__toggle i {
-  font-size: 0.7rem;
+  color: var(--div-primary-strong);
 }
 
 /* Nível 2: o detalhe completo, incluindo o que não cabe no resumo. */
@@ -1356,7 +1343,7 @@ watch(lastSuccessAt, (at) => {
   font-size: clamp(1.15rem, 2vw, 1.4rem);
 }
 
-.share-kit--compact .share-kit__icon-btn {
+.share-kit--compact .share-kit__icon-btn.p-button {
   width: 2.45rem;
   height: 2.45rem;
 }
@@ -1367,7 +1354,7 @@ watch(lastSuccessAt, (at) => {
   padding: 0.4rem;
 }
 
-.share-kit--compact .share-kit__copy-cta {
+.share-kit--compact .share-kit__copy-cta.p-button {
   width: 100%;
   min-height: 2.25rem;
 }
@@ -1407,29 +1394,30 @@ watch(lastSuccessAt, (at) => {
   letter-spacing: 0.1em;
 }
 
-.share-kit__icon-btn {
-  display: grid;
+/* Botões sobre o cartão de foco (tinta --pf-*): o preset não conhece essa superfície. */
+.share-kit__icon-btn.p-button,
+.share-kit__icon-btn.p-button:not(:disabled):hover,
+.share-kit__icon-btn.p-button:not(:disabled):active {
   width: 2.75rem;
   height: 2.75rem;
-  place-items: center;
   border: 1px solid var(--pf-line, var(--div-line));
   border-radius: 0.85rem;
   background: var(--pf-field, var(--div-card));
   color: var(--pf-on, var(--div-muted));
-  cursor: pointer;
   transition:
     background 140ms ease,
     border-color 140ms ease,
     filter 140ms ease;
 }
 
-.share-kit__icon-btn:hover:not(:disabled),
-.share-kit__icon-btn:focus-visible:not(:disabled) {
+.share-kit__icon-btn.p-button:not(:disabled):hover,
+.share-kit__icon-btn.p-button:focus-visible:not(:disabled) {
   filter: brightness(1.08);
+  box-shadow: none;
   outline: none;
 }
 
-.share-kit__icon-btn:disabled {
+.share-kit__icon-btn.p-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
@@ -1457,10 +1445,9 @@ watch(lastSuccessAt, (at) => {
   opacity: 0.92;
 }
 
-.share-kit__copy-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.share-kit__copy-cta.p-button,
+.share-kit__copy-cta.p-button:not(:disabled):hover,
+.share-kit__copy-cta.p-button:not(:disabled):active {
   gap: 0.4rem;
   align-self: center;
   min-height: 2.45rem;
@@ -1470,22 +1457,25 @@ watch(lastSuccessAt, (at) => {
   background: var(--pf-cta-bg, color-mix(in srgb, var(--div-primary) 16%, var(--div-card)));
   color: var(--pf-cta-text, var(--div-primary-strong));
   font-size: 0.82rem;
-  font-weight: 700;
   white-space: nowrap;
-  cursor: pointer;
   transition:
     filter 140ms ease,
     transform 140ms ease;
 }
 
-.share-kit__copy-cta:hover:not(:disabled),
-.share-kit__copy-cta:focus-visible:not(:disabled) {
+.share-kit__copy-cta.p-button :deep(.p-button-label) {
+  font-weight: 700;
+}
+
+.share-kit__copy-cta.p-button:not(:disabled):hover,
+.share-kit__copy-cta.p-button:focus-visible:not(:disabled) {
   filter: brightness(1.04);
+  box-shadow: none;
   outline: none;
   transform: translateY(-1px);
 }
 
-.share-kit__copy-cta:disabled {
+.share-kit__copy-cta.p-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
@@ -1512,7 +1502,9 @@ watch(lastSuccessAt, (at) => {
   color: var(--div-primary-strong);
 }
 
-.share-kit.partner-focus--muted .share-kit__icon-btn {
+.share-kit.partner-focus--muted .share-kit__icon-btn.p-button,
+.share-kit.partner-focus--muted .share-kit__icon-btn.p-button:not(:disabled):hover,
+.share-kit.partner-focus--muted .share-kit__icon-btn.p-button:not(:disabled):active {
   border-color: var(--div-line);
   background: var(--div-card);
   color: var(--div-muted);
@@ -1523,7 +1515,9 @@ watch(lastSuccessAt, (at) => {
   background: color-mix(in srgb, var(--div-surface) 70%, var(--div-card));
 }
 
-.share-kit.partner-focus--muted .share-kit__copy-cta {
+.share-kit.partner-focus--muted .share-kit__copy-cta.p-button,
+.share-kit.partner-focus--muted .share-kit__copy-cta.p-button:not(:disabled):hover,
+.share-kit.partner-focus--muted .share-kit__copy-cta.p-button:not(:disabled):active {
   background: color-mix(in srgb, var(--div-primary) 16%, var(--div-card));
   color: var(--div-primary-strong);
 }
@@ -1848,7 +1842,7 @@ watch(lastSuccessAt, (at) => {
     grid-template-columns: 1fr;
   }
 
-  .share-kit__copy-cta {
+  .share-kit__copy-cta.p-button {
     width: 100%;
   }
 

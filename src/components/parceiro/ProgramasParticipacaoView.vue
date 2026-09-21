@@ -197,7 +197,7 @@ const activationSteps = computed(() => [
   content: '';
   position: absolute;
   top: calc(var(--activation-pad-y) + (var(--activation-number-size) / 2));
-  left: 100%;
+  inset-inline-start: 100%;
   width: var(--activation-gap);
   height: 0;
   border-top: 2px dashed color-mix(in srgb, var(--prog-primary) 45%, var(--prog-line));

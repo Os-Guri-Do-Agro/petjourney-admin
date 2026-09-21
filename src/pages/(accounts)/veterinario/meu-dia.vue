@@ -214,16 +214,17 @@ onMounted(carregar)
         É a única pendência do dia com uma pessoa do outro lado — um responsável sem notícia do
         animal dele — e a única que não pode esperar alguém lembrar de abrir outra tela.
       -->
-      <button
+      <Button
         v-if="boletinsRetidos > 0"
         type="button"
         class="retidos clinic-focusable"
+        text
         @click="irParaInternacao()"
       >
         <i class="pi pi-phone" aria-hidden="true" />
         <span>{{ t('clinico.internacao.retidosAviso', { total: boletinsRetidos }) }}</span>
         <i class="pi pi-arrow-right" aria-hidden="true" />
-      </button>
+      </Button>
 
       <!-- 1. o que é agora -->
       <section class="destaque">
@@ -276,9 +277,10 @@ onMounted(carregar)
 
           <ul v-if="esperando.length > 0" class="lista">
             <li v-for="item in esperandoVisiveis" :key="item.id">
-              <button
+              <Button
                 type="button"
                 class="lista__item clinic-focusable"
+                text
                 @click="irParaAgenda(item.id)"
               >
                 <span class="lista__hora clinic-value">{{ formato.hora(item.inicio) }}</span>
@@ -297,7 +299,7 @@ onMounted(carregar)
                   </small>
                 </span>
                 <i class="pi pi-chevron-right" aria-hidden="true" />
-              </button>
+              </Button>
             </li>
           </ul>
 
@@ -326,9 +328,10 @@ onMounted(carregar)
 
           <ul v-if="internadosComPendencia.length > 0" class="lista">
             <li v-for="item in internadosVisiveis" :key="item.leito.id">
-              <button
+              <Button
                 type="button"
                 class="lista__item clinic-focusable"
+                text
                 @click="irParaInternacao(item.internacao!.id)"
               >
                 <span class="lista__hora clinic-value">{{ item.leito.nome }}</span>
@@ -344,12 +347,12 @@ onMounted(carregar)
                     </span>
                     <template v-if="item.boletimRetido && item.atrasadas > 0"> · </template>
                     <template v-if="item.atrasadas > 0">
-                      {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }) }}
+                      {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }, item.atrasadas) }}
                     </template>
                   </small>
                 </span>
                 <i class="pi pi-chevron-right" aria-hidden="true" />
-              </button>
+              </Button>
             </li>
           </ul>
 
@@ -378,9 +381,10 @@ onMounted(carregar)
 
           <ul v-if="alertasDoDia.length > 0" class="lista">
             <li v-for="item in alertasVisiveis" :key="item.pet.id">
-              <button
+              <Button
                 type="button"
                 class="lista__item clinic-focusable"
+                text
                 @click="irParaAgenda(item.appointment.id)"
               >
                 <span class="lista__hora clinic-value">
@@ -398,7 +402,7 @@ onMounted(carregar)
                     />
                   </span>
                 </span>
-              </button>
+              </Button>
             </li>
           </ul>
 
@@ -493,28 +497,36 @@ onMounted(carregar)
  * aparece três telas antes, e um aviso que diz "ligue para alguém" sem levar a lugar nenhum
  * transfere para quem lê o trabalho de descobrir onde é esse lugar.
  */
-.retidos {
+.retidos.p-button {
   display: flex;
   width: 100%;
-  align-items: center;
+  justify-content: flex-start;
   padding: var(--clinic-space-3) var(--clinic-space-4);
   border: 1px solid var(--clinic-risk-line);
   border-radius: var(--clinic-radius-control);
   gap: var(--clinic-space-3);
   background: var(--clinic-risk-bg);
   color: var(--clinic-risk-text);
-  cursor: pointer;
   font: inherit;
   font-weight: 700;
-  text-align: left;
+  text-align: start;
 }
 
 .retidos span {
   flex: 1 1 auto;
 }
 
-.retidos:hover {
+.retidos.p-button:not(:disabled):hover,
+.retidos.p-button:not(:disabled):active {
+  border-color: var(--clinic-risk-line);
   background: color-mix(in srgb, var(--clinic-risk-line) 22%, var(--clinic-risk-bg));
+  color: var(--clinic-risk-text);
+}
+
+.retidos.p-button:focus-visible,
+.lista__item.p-button:focus-visible {
+  outline: none;
+  box-shadow: var(--clinic-focus-ring);
 }
 
 .retidos i:last-child {
@@ -604,7 +616,7 @@ onMounted(carregar)
 }
 
 .bloco__contagem {
-  margin-left: auto;
+  margin-inline-start: auto;
   min-width: 1.3rem;
   padding: 0 0.35rem;
   border-radius: var(--clinic-radius-chip);
@@ -623,10 +635,13 @@ onMounted(carregar)
   list-style: none;
 }
 
-.lista__item {
+/* A linha clicável é `Button`; a de retorno (com ação própria) é `div`. As duas leem igual. */
+.lista__item,
+.lista__item.p-button {
   display: flex;
   width: 100%;
   align-items: center;
+  justify-content: flex-start;
   gap: var(--clinic-space-3);
   min-height: var(--clinic-row-height);
   padding: var(--clinic-cell-padding-y) var(--clinic-space-2);
@@ -634,21 +649,15 @@ onMounted(carregar)
   border-radius: var(--clinic-radius-control);
   background: transparent;
   color: inherit;
-  cursor: pointer;
   font: inherit;
-  text-align: left;
+  text-align: start;
 }
 
-.lista__item:hover {
+.lista__item.p-button:not(:disabled):hover,
+.lista__item.p-button:not(:disabled):active {
+  border: none;
   background: var(--clinic-surface-soft);
-}
-
-.lista__item--estatico {
-  cursor: default;
-}
-
-.lista__item--estatico:hover {
-  background: transparent;
+  color: inherit;
 }
 
 .lista__hora {

@@ -359,6 +359,75 @@ export const agendaRepository = {
     })
   },
 
+  /**
+   * Edição de um atendimento que já existe.
+   *
+   * Até aqui só dava para **mover** (arraste) e **cancelar**. Tipo, sala e observação eram
+   * imutáveis: marcou "Consulta" quando era "Retorno", o único caminho era cancelar e criar de
+   * novo — o que dispara aviso de cancelamento para quem não teve atendimento nenhum cancelado,
+   * e parte o histórico do paciente em dois registros para um atendimento só.
+   *
+   * O paciente fica de fora de propósito. Trocar quem é atendido não é editar este atendimento,
+   * é criar outro: o tutor é diferente, o histórico é de outro bicho e o aviso vai para outro
+   * telefone. Deixar isso num `Select` é convidar o engano que nenhuma tela desfaz depois.
+   *
+   * O grupo ligado acompanha o horário pelo mesmo delta de `mover`, e pela mesma razão: a
+   * cirurgia que ocupa centro e recuperação não pode ter as pernas separadas no tempo. Já tipo,
+   * sala e observação valem **só para o alvo** — é justamente por serem diferentes que as duas
+   * pernas existem.
+   */
+  editar(
+    id: string,
+    dados: {
+      typeId: string
+      professionalId: string
+      roomIds: string[]
+      inicio: ISODateTime
+      fim: ISODateTime
+      observacao: string
+    },
+  ): Promise<MutacaoAgenda> {
+    return simularChamada('agenda.editar', () => {
+      const dataset = getDataset()
+      const alvo = dataset.appointments.find((appointment) => appointment.id === id)
+
+      if (!alvo) {
+        throw new Error('agenda.editar: atendimento inexistente')
+      }
+
+      const grupo =
+        alvo.linkedGroupId === null
+          ? [alvo]
+          : dataset.appointments.filter(
+              (appointment) => appointment.linkedGroupId === alvo.linkedGroupId,
+            )
+
+      const token = registrarDesfazer(grupo)
+      const delta = Date.parse(dados.inicio) - Date.parse(alvo.inicio)
+      const agora = agoraIso()
+      const alterados: Appointment[] = []
+
+      for (const appointment of grupo) {
+        const ehAlvo = appointment.id === alvo.id
+
+        appointment.inicio = ehAlvo ? dados.inicio : deslocar(appointment.inicio, delta)
+        appointment.fim = ehAlvo ? dados.fim : deslocar(appointment.fim, delta)
+
+        if (ehAlvo) {
+          appointment.typeId = dados.typeId
+          appointment.professionalId = dados.professionalId
+          appointment.roomIds = [...dados.roomIds]
+          appointment.observacao = dados.observacao
+        }
+
+        appointment.atualizadoEm = agora
+        alterados.push({ ...appointment })
+      }
+
+      return { atendimentos: alterados, undoToken: token }
+    })
+  },
+
   alterarStatus(id: string, status: AppointmentStatus): Promise<MutacaoAgenda> {
     return simularChamada('agenda.status', () => {
       const dataset = getDataset()

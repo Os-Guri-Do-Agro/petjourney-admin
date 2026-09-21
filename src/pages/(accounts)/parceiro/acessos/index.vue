@@ -523,16 +523,17 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
         <!-- Filtro binário: acesso com prontuário pede leitura antes do
              atendimento, acesso só de identidade não. `aria-pressed` porque é
              um estado que fica ligado, não uma ação que dispara e passa. -->
-        <button
+        <Button
           type="button"
           class="atend-filtros__toggle"
           :class="{ 'atend-filtros__toggle--on': filtros.comProntuario }"
+          icon="pi pi-folder-open"
+          :label="t('acessos.filtros.comProntuario')"
+          severity="secondary"
+          outlined
           :aria-pressed="filtros.comProntuario"
           @click="filtros.comProntuario = !filtros.comProntuario"
-        >
-          <i class="pi pi-folder-open" aria-hidden="true" />
-          {{ t('acessos.filtros.comProntuario') }}
-        </button>
+        />
 
         <div class="atend-filtros__periodo" role="group" :aria-label="periodoAriaLabel">
           <span class="atend-filtros__periodo-label" aria-hidden="true">
@@ -541,7 +542,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
           <label class="atend-filtros__sr" for="atend-de">
             {{ t('acessos.filtros.vinculadoDe') }}
           </label>
-          <input
+          <InputText
             id="atend-de"
             v-model="filtros.vinculadoDe"
             class="atend-filtros__date"
@@ -552,7 +553,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
           <label class="atend-filtros__sr" for="atend-ate">
             {{ t('acessos.filtros.vinculadoAte') }}
           </label>
-          <input
+          <InputText
             id="atend-ate"
             v-model="filtros.vinculadoAte"
             class="atend-filtros__date"
@@ -618,7 +619,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
           <li v-for="item in items" :key="item.id">
             <!-- O cartão inteiro é o alvo: o parceiro clica no nome do pet, não
                  num link escondido no canto. -->
-            <button
+            <Button
               type="button"
               class="atend-card"
               :class="{ 'atend-card--encerrado': item.status !== 'ATIVO' }"
@@ -653,12 +654,12 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
                   <span
                     class="atend-fato"
                     :class="{ 'atend-fato--vazio': !item.totalAnotacoes }"
-                    :title="t('acessos.list.anotacoes', { n: item.totalAnotacoes })"
+                    :title="t('acessos.list.anotacoes', { n: item.totalAnotacoes }, item.totalAnotacoes)"
                   >
                     <i class="pi pi-comment" aria-hidden="true" />
                     <span aria-hidden="true">{{ item.totalAnotacoes }}</span>
                     <span class="atend-sr">
-                      {{ t('acessos.list.anotacoes', { n: item.totalAnotacoes }) }}
+                      {{ t('acessos.list.anotacoes', { n: item.totalAnotacoes }, item.totalAnotacoes) }}
                     </span>
                   </span>
 
@@ -666,12 +667,12 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
                   <span
                     v-if="item.totalDocumentos"
                     class="atend-fato atend-fato--conteudo"
-                    :title="t('acessos.list.documentos', { n: item.totalDocumentos })"
+                    :title="t('acessos.list.documentos', { n: item.totalDocumentos }, item.totalDocumentos)"
                   >
                     <i class="pi pi-file" aria-hidden="true" />
                     <span aria-hidden="true">{{ item.totalDocumentos }}</span>
                     <span class="atend-sr">
-                      {{ t('acessos.list.documentos', { n: item.totalDocumentos }) }}
+                      {{ t('acessos.list.documentos', { n: item.totalDocumentos }, item.totalDocumentos) }}
                     </span>
                   </span>
 
@@ -695,7 +696,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
                 </span>
                 <i class="pi pi-chevron-right atend-card__seta" aria-hidden="true" />
               </span>
-            </button>
+            </Button>
           </li>
         </ul>
 
@@ -760,7 +761,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 .atend-filtros__search i {
   position: absolute;
   top: 50%;
-  left: 0.75rem;
+  inset-inline-start: 0.75rem;
   transform: translateY(-50%);
   color: var(--partner-faint);
   font-size: 0.82rem;
@@ -769,7 +770,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 
 .atend-filtros__search :deep(.p-inputtext) {
   width: 100%;
-  padding-left: 2.1rem;
+  padding-inline-start: 2.1rem;
   border: 1px solid var(--partner-line);
   border-radius: 0.7rem;
   background: var(--partner-card);
@@ -818,37 +819,37 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 }
 
 /* Mesma altura e raio dos selects do lado: é mais um filtro na fileira. */
-.atend-filtros__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+/* Filtro liga/desliga (aria-pressed): Button com o mesmo desenho dos outros campos da barra. */
+.atend-filtros__toggle.p-button {
   flex: 0 1 auto;
+  gap: 0.4rem;
   min-height: 2.25rem;
   padding: 0 0.75rem;
-  border: 1px solid var(--partner-line);
+  border-color: var(--partner-line);
   border-radius: 0.7rem;
   background: var(--partner-card);
   color: var(--partner-muted);
-  cursor: pointer;
   font-size: 0.82rem;
+}
+
+.atend-filtros__toggle.p-button :deep(.p-button-label) {
   font-weight: 650;
-  transition:
-    border-color 150ms ease,
-    background 150ms ease,
-    color 150ms ease;
 }
 
-.atend-filtros__toggle:hover {
+.atend-filtros__toggle.p-button:not(:disabled):hover {
   border-color: color-mix(in srgb, var(--partner-primary) 40%, var(--partner-line));
+  background: var(--partner-card);
+  color: var(--partner-muted);
 }
 
-.atend-filtros__toggle:focus-visible {
+.atend-filtros__toggle.p-button:focus-visible {
   border-color: var(--partner-primary);
   outline: none;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-primary) 20%, transparent);
 }
 
-.atend-filtros__toggle--on {
+.atend-filtros__toggle--on.p-button,
+.atend-filtros__toggle--on.p-button:not(:disabled):hover {
   border-color: var(--partner-primary);
   background: color-mix(in srgb, var(--partner-primary-soft) 45%, var(--partner-card));
   color: var(--partner-primary-strong);
@@ -892,7 +893,8 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   align-items: center;
   gap: 0.4rem;
   min-width: 0;
-  padding: 0.2rem 0.55rem 0.2rem 0.7rem;
+  padding-block: 0.2rem;
+  padding-inline: 0.7rem 0.55rem;
   border: 1px solid var(--partner-line);
   border-radius: 0.7rem;
   background: var(--partner-card);
@@ -910,24 +912,25 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   font-size: 0.68rem;
 }
 
-.atend-filtros__date {
+/* InputText type=date embutido na pílula do período: sem moldura própria. */
+.atend-filtros__date.p-inputtext {
   min-width: 0;
   width: 8.2rem;
   padding: 0.32rem 0.4rem;
   border: 0;
   border-radius: 0.45rem;
   background: transparent;
+  box-shadow: none;
   color: var(--partner-text);
-  font: inherit;
   font-size: 0.8rem;
   font-weight: 600;
 }
 
-.atend-filtros__date:hover {
+.atend-filtros__date.p-inputtext:enabled:hover {
   background: color-mix(in srgb, var(--partner-primary) 8%, transparent);
 }
 
-.atend-filtros__date:focus-visible {
+.atend-filtros__date.p-inputtext:enabled:focus {
   outline: 2px solid color-mix(in srgb, var(--partner-primary) 45%, transparent);
   outline-offset: 1px;
 }
@@ -945,7 +948,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
     flex: 1 1 100%;
   }
 
-  .atend-filtros__date {
+  .atend-filtros__date.p-inputtext {
     flex: 1 1 0;
     width: auto;
   }
@@ -998,7 +1001,8 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   list-style: none;
 }
 
-.atend-card {
+/* Cartão clicável rico: Button com slot, sem o visual de CTA do preset. */
+.atend-card.p-button {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.85rem;
@@ -1009,22 +1013,24 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   border-radius: 0.9rem;
   background: var(--partner-card);
   color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
+  font-size: inherit;
+  text-align: start;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease,
     background 0.15s ease;
 }
 
-.atend-card:hover,
-.atend-card:focus-visible {
+.atend-card.p-button:not(:disabled):hover,
+.atend-card.p-button:not(:disabled):active,
+.atend-card.p-button:focus-visible {
   border-color: var(--partner-primary-strong);
+  background: var(--partner-card);
   box-shadow: 0 8px 18px rgb(var(--partner-shadow-rgb) / 0.08);
+  color: inherit;
 }
 
-.atend-card:focus-visible {
+.atend-card.p-button:focus-visible {
   outline: 2px solid var(--partner-primary);
   outline-offset: 2px;
 }
@@ -1186,7 +1192,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 /* Encerrado é a mesma forma em tom apagado: o histórico se lê como arquivo e não
    deve competir com um acesso vivo na aba ao lado. O hover devolve o contraste
    para deixar claro que o card ainda abre. */
-.atend-card--encerrado {
+.atend-card--encerrado.p-button {
   border-color: color-mix(in srgb, var(--partner-line) 72%, transparent);
   background: color-mix(in srgb, var(--partner-surface) 62%, var(--partner-card));
 }
@@ -1207,8 +1213,8 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   opacity: 0.85;
 }
 
-.atend-card--encerrado:hover,
-.atend-card--encerrado:focus-visible {
+.atend-card--encerrado.p-button:not(:disabled):hover,
+.atend-card--encerrado.p-button:focus-visible {
   background: var(--partner-card);
 }
 
@@ -1225,7 +1231,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 }
 
 @media (max-width: 720px) {
-  .atend-card {
+  .atend-card.p-button {
     grid-template-columns: auto minmax(0, 1fr);
     row-gap: 0.55rem;
   }

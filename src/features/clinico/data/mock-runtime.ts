@@ -10,6 +10,7 @@ export type MockOperation =
   | 'agenda.semana'
   | 'agenda.criar'
   | 'agenda.mover'
+  | 'agenda.editar'
   | 'agenda.status'
   | 'agenda.cancelar'
   | 'agenda.bloqueio'

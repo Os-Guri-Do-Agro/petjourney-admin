@@ -119,7 +119,7 @@ const alertasOrdenados = computed(() => {
         <span class="clinic-label">{{ t('clinico.paciente.responsavel') }}</span>
         <span class="paciente__tutor-nome" :title="tutor.nome">{{ tutor.nome }}</span>
         <a class="paciente__telefone clinic-value" :href="`tel:${tutor.telefone}`">
-          {{ tutor.telefone }}
+          <bdi dir="ltr">{{ tutor.telefone }}</bdi>
         </a>
       </p>
 

@@ -145,3 +145,39 @@
 | Tentar novamente | Try again | Try again | Intentar de nuevo |
 | Copiar | Copy | Copy | Copiar |
 | Copiado | Copied | Copied | Copiado |
+
+---
+
+## 8. Portal: Sérvio (`sr`) e Árabe (`ar`), 2026-09-17
+
+> Mesmas decisões do app mobile (§7 do glossário do app em `petjourney-app/docs/traduction/i18n-glossary.md`). Registro técnico e decisões abertas: `i18n-sr-ar-portal.md`. PDF para a equipe de tradução: `PetJourney-Portal-revisao-traducao-sr-ar.pdf` (nesta pasta).
+
+| Locale | Tag Intl | Tag da API | `<html lang>` | Variante | Tratamento |
+|---|---|---|---|---|---|
+| `sr` | `sr-Latn-RS` | `sr-Latn` | `sr-Latn` | sérvio latino (latinica), ekavski | formal "Vi" com maiúscula; botões no imperativo formal |
+| `ar` | `ar-u-nu-latn` | `ar` | `ar` (`dir="rtl"`) | árabe moderno padrão (MSA), layout espelhado | neutro de gênero quando possível (masdar, يرجى/يمكنك) |
+
+### Regras técnicas do vue-i18n para sr/ar
+- **Plural (pipe):** sr `one | few | other` (4 formas `zero | one | few | other` quando o en começa pela forma de zero); ar sempre 6 formas `zero | one | two | few | many | other`. Regras em `src/i18n/plural.ts`; o gate `check:i18n` barra quantidade errada.
+- **Cada forma é a frase inteira**, não só a palavra que muda.
+- **Chaves que só são plural em sr/ar** (o en não flexiona, mas o código passa o número): lista `PLURAL_ONLY_IN_SR_AR` em `scripts/check-i18n-parity.mjs`. Toda chamada dessas chaves passa o número como 3º argumento de `t()`.
+- Número + substantivo em chave que não é plural: rótulo com dois-pontos (`"Beleške: {n}"`) ou unidade invariável.
+- `|` nunca em texto comum; `@` só como `{'@'}`; sem em-dash (exceção: `clinico.formato.semvalor`).
+- `clinico.documentos.termo.*.itens` é lista separada por `|` lida com `tm()`, não plural.
+
+### Termos do portal (sr / ar)
+
+| en (aprovado) | sr | ar |
+|---|---|---|
+| pet parent / owner | staratelj / vlasnik | مربي الحيوان الأليف (curto: المربي) / المالك |
+| Overview / Programs / Promotion / Access / Finance | Početna / Programi / Promocija / Pristupi / Finansije | نظرة عامة / البرامج / الترويج / صلاحيات الوصول / المالية |
+| statement / payouts / wallet overview | izvod / isplate / Sažetak | كشف الحساب / عمليات السحب / نظرة عامة |
+| counter (balcão) | pult | مكتب الاستقبال |
+| participation / affiliate program | udeo / afilijejt program | حصة / برنامج التسويق بالعمولة |
+| medical record (clínica) / health record (compartilhado) | medicinski karton / zdravstveni karton | السجل الطبي / السجل الصحي |
+| consultation / follow-up / tests | pregled / kontrola / analize | زيارة بيطرية / زيارة متابعة / الفحوصات |
+| waitlist / no-show / squeeze-in | lista čekanja / nedolazak / vanredni termin | قائمة الانتظار / عدم الحضور / موعد إضافي |
+| prescription (conduta) / receita (documento) | terapija / recept | الوصفة الطبية / وصفة طبية |
+| drug formulary / tablet | vodič za lekove / tbl. (invariável) | دليل الأدوية / قرص |
+| inpatients / bed / shift handover | hospitalizacija / boks / primopredaja smene | التنويم / سرير / تسليم المناوبة |
+| X ago / in X | pre {valor} / za {valor} | منذ {valor} / بعد {valor} |

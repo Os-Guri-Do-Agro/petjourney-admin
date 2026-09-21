@@ -9,10 +9,12 @@
 
 import { describe, expect, it } from 'vitest'
 
+import ar from '@/locales/ar.json'
 import en from '@/locales/en.json'
 import enGB from '@/locales/en-GB.json'
 import es from '@/locales/es.json'
 import pt from '@/locales/pt.json'
+import sr from '@/locales/sr.json'
 
 import type { DocumentoId, TermoKind } from '../documento-types'
 
@@ -37,10 +39,10 @@ const DOCUMENTOS: DocumentoId[] = [
 
 const TERMOS: TermoKind[] = ['consentimento', 'recusa', 'eutanasia']
 
-const IDIOMAS = { pt, en, 'en-GB': enGB, es } as Record<string, typeof pt>
+const IDIOMAS = { pt, en, 'en-GB': enGB, es, sr, ar } as Record<string, typeof pt>
 
 describe('cartões de documento', () => {
-  it('todo documento tem título e descrição nos quatro idiomas', () => {
+  it('todo documento tem título e descrição em todos os idiomas', () => {
     for (const [nome, dicionario] of Object.entries(IDIOMAS)) {
       const cartoes = dicionario.clinico.documentos.cartao as Record<
         string,

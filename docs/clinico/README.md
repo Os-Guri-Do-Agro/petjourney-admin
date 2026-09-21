@@ -19,14 +19,16 @@ a mesma assinatura. Nenhum componente conhece `fixtures`.
 | 06 | Perguntas ao time do app | [06-perguntas-ao-app.md](./06-perguntas-ao-app.md) | Respondido e conferido contra `origin/develop` — divergências listadas |
 | 07 | Internação com boletim ao responsável | [07-internacao.md](./07-internacao.md) | Completo — 3 casos difíceis plantados e cobertos por teste; **alta hospitalar entregue** |
 | 08 | Orientação do fluxo clínico | [08-orientacao-do-fluxo.md](./08-orientacao-do-fluxo.md) | Completo — 3 defeitos encontrados e corrigidos |
+| — | **Apresentação do fluxo clínico** (PowerPoint) | [apresentacao/](./apresentacao/) | Os slides — 22 telas, o fluxo inteiro em quatro blocos |
 | — | **Roteiro de apresentação** (Word e PDF) | [apresentacao/](./apresentacao/) | Para quem apresenta ao cliente — 10 páginas, 12 minutos |
 | — | **Novidades do fluxo clínico** (PDF) | [relatorio/](./relatorio/) | Para quem vai testar — 7 páginas, com roteiro de teste e o que ainda não existe |
 | — | **Relatório de novidades** (PDF) | [relatorio/](./relatorio/) | Registro técnico da rodada — 8 páginas, com o que recomendo a seguir |
 
-> O **05** é o levantamento técnico do percurso, escrito para quem constrói. O documento em
-> [apresentacao/](./apresentacao/) é a versão para quem **apresenta**: mesma demonstração, sem
-> vocabulário de código, com fala sugerida, perguntas prováveis e plano B. Ao mudar uma tela do
-> fluxo, os dois precisam ser revisados — o Word é gerado por script, não editado à mão.
+> O **05** é o levantamento técnico do percurso, escrito para quem constrói. Os documentos em
+> [apresentacao/](./apresentacao/) são a versão para quem **apresenta**: os slides que vão na
+> parede e o roteiro falado, sem vocabulário de código, com fala sugerida, perguntas prováveis e
+> plano B. Ao mudar uma tela do fluxo, os três precisam ser revisados — tanto o PowerPoint quanto
+> o Word são gerados por script, não editados à mão.
 
 > **Nota de ordem.** O 02 é fundação e o 01 é consumidor dela — mas a fundação já está
 > construída e em uso, então não há bloqueio real. As lacunas do 02 que tocam o 01 são a

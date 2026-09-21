@@ -4,7 +4,9 @@
     "pt": "PT",
     "en": "EN",
     "en-GB": "UK",
-    "es": "ES"
+    "es": "ES",
+    "sr": "SR",
+    "ar": "AR"
   },
   "comingSoon": {
     "cupom": {
@@ -2082,7 +2084,8 @@
         "cancelar": "Appointment cancelled.",
         "falta": "No-show recorded.",
         "criar": "Appointment created.",
-        "status": "Status updated."
+        "status": "Status updated.",
+        "editar": "Appointment updated."
       },
       "mover": {
         "titulo": "Confirm reschedule",
@@ -2094,6 +2097,16 @@
         "confirmar": "Reschedule",
         "confirmarComAviso": "Reschedule anyway",
         "cancelar": "Leave as is"
+      },
+      "editar": {
+        "titulo": "Edit appointment",
+        "pacienteFixo": "To see a different patient, cancel this appointment and book a new one.",
+        "mudancas": "What's changing",
+        "grupoLigado": "The linked appointment follows the new time.",
+        "salvar": "Save",
+        "salvarEAvisar": "Save and notify",
+        "salvarMesmoAssim": "Save anyway",
+        "mensagemPadrao": "Hi! {paciente}'s appointment is now on {data} at {hora}. Just reply here if anything comes up."
       },
       "encaixeDialogo": {
         "titulo": "Squeeze in appointment",
@@ -2543,6 +2556,7 @@
         "preferencial": "Priority",
         "urgente": "Urgent"
       },
+      "prioridadeRotulo": "Priority",
       "situacao": {
         "aguardando": "Waiting",
         "ofertado": "Slot offered",

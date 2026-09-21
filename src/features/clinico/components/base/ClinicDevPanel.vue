@@ -22,7 +22,11 @@
  * chegou de propósito — e o que o painel controla é a camada mocada, que não existe para quem
  * abriu o portal para trabalhar.
  */
-import { computed, ref } from 'vue'
+import Button from 'primevue/button'
+import InputNumber from 'primevue/inputnumber'
+import Slider from 'primevue/slider'
+import ToggleSwitch from 'primevue/toggleswitch'
+import { computed, onUnmounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -51,6 +55,7 @@ const agenda = useAgendaStore()
 const clinico = useClinicoStore()
 const prontuario = useProntuarioStore()
 
+const idCampo = useId()
 const aberto = ref(false)
 const latencia = ref(getMockConfig().latenciaMs)
 const offline = ref(getMockConfig().offline)
@@ -97,6 +102,19 @@ async function aplicarRelogio() {
   await recarregarTudo()
 }
 
+/**
+ * O `Slider` avisa a cada passo do arraste, e deslocar o relógio recarrega o módulo inteiro.
+ * Espera o puxador parar antes de aplicar — o `change` do range nativo só vinha ao soltar.
+ */
+let esperaDoRelogio: ReturnType<typeof setTimeout> | undefined
+
+function agendarRelogio() {
+  clearTimeout(esperaDoRelogio)
+  esperaDoRelogio = setTimeout(() => void aplicarRelogio(), 250)
+}
+
+onUnmounted(() => clearTimeout(esperaDoRelogio))
+
 async function recriar() {
   resetDataset(semente.value)
   clinico.$resetModulo()
@@ -114,6 +132,7 @@ function restaurar() {
   latencia.value = getMockConfig().latenciaMs
   offline.value = false
   horasDeslocadas.value = 0
+  clearTimeout(esperaDoRelogio)
   setClockSkew(0)
 
   for (const operacao of OPERACOES) {
@@ -129,9 +148,13 @@ function irPara(rota: string) {
 
 <template>
   <div v-if="habilitado" class="dev clinic-scope">
-    <button
+    <Button
       type="button"
-      class="dev__gatilho clinic-focusable"
+      class="dev__gatilho"
+      severity="secondary"
+      outlined
+      rounded
+      size="small"
       :aria-expanded="aberto"
       :title="t('clinico.painel.abrir')"
       @click="aberto = !aberto"
@@ -141,19 +164,21 @@ function irPara(rota: string) {
         {{ resumo.atendimentos }}<template v-if="resumo.atendimentos !== resumo.esperado">
           /{{ resumo.esperado }}</template>
       </span>
-    </button>
+    </Button>
 
     <section v-if="aberto" class="dev__painel" :aria-label="t('clinico.painel.titulo')">
       <header class="dev__topo">
         <strong>{{ t('clinico.painel.titulo') }}</strong>
-        <button
+        <Button
           type="button"
-          class="dev__fechar clinic-focusable"
+          icon="pi pi-times"
+          severity="secondary"
+          text
+          rounded
+          size="small"
           :aria-label="t('clinico.atalhos.fechar')"
           @click="aberto = false"
-        >
-          <i class="pi pi-times" aria-hidden="true" />
-        </button>
+        />
       </header>
 
       <p class="dev__descricao">{{ t('clinico.painel.descricao') }}</p>
@@ -167,86 +192,124 @@ function irPara(rota: string) {
         }}
       </p>
 
-      <label class="dev__campo">
-        <span class="clinic-label">{{ t('clinico.painel.latencia') }}</span>
-        <input
-          v-model.number="latencia"
-          type="range"
-          min="0"
-          max="3000"
-          step="50"
+      <div class="dev__campo">
+        <span :id="`${idCampo}-latencia`" class="clinic-label">
+          {{ t('clinico.painel.latencia') }}
+        </span>
+        <output class="clinic-value">{{ latencia }}</output>
+        <Slider
+          v-model="latencia"
+          class="dev__trilho"
+          :min="0"
+          :max="3000"
+          :step="50"
+          :aria-labelledby="`${idCampo}-latencia`"
           @change="aplicarLatencia"
         />
-        <output class="clinic-value">{{ latencia }}</output>
-      </label>
+      </div>
 
-      <label class="dev__linha">
-        <input v-model="offline" type="checkbox" @change="aplicarOffline" />
-        <span>{{ t('clinico.painel.offline') }}</span>
-      </label>
+      <div class="dev__linha">
+        <ToggleSwitch
+          v-model="offline"
+          :input-id="`${idCampo}-offline`"
+          @update:model-value="aplicarOffline"
+        />
+        <label :for="`${idCampo}-offline`">{{ t('clinico.painel.offline') }}</label>
+      </div>
 
       <fieldset class="dev__grupo">
         <legend class="clinic-label">{{ t('clinico.painel.erro') }}</legend>
-        <label v-for="operacao in OPERACOES" :key="operacao" class="dev__campo dev__campo--curto">
-          <span class="dev__operacao">{{ operacao }}</span>
-          <input
-            v-model.number="taxas[operacao]"
-            type="range"
-            min="0"
-            max="1"
-            step="0.25"
+        <div v-for="operacao in OPERACOES" :key="operacao" class="dev__campo">
+          <span :id="`${idCampo}-${operacao}`" class="dev__operacao">{{ operacao }}</span>
+          <output class="clinic-value">{{ Math.round((taxas[operacao] ?? 0) * 100) }}%</output>
+          <Slider
+            v-model="taxas[operacao]"
+            class="dev__trilho"
+            :min="0"
+            :max="1"
+            :step="0.25"
+            :aria-labelledby="`${idCampo}-${operacao}`"
             @change="aplicarTaxa(operacao)"
           />
-          <output class="clinic-value">{{ Math.round((taxas[operacao] ?? 0) * 100) }}%</output>
-        </label>
+        </div>
       </fieldset>
 
-      <label class="dev__campo">
-        <span class="clinic-label">{{ t('clinico.painel.relogio') }}</span>
-        <input
-          v-model.number="horasDeslocadas"
-          type="range"
-          min="-12"
-          max="12"
-          step="1"
-          @change="aplicarRelogio"
-        />
+      <div class="dev__campo">
+        <span :id="`${idCampo}-relogio`" class="clinic-label">
+          {{ t('clinico.painel.relogio') }}
+        </span>
         <output class="clinic-value">{{ horasDeslocadas }}h</output>
-      </label>
-
-      <div class="dev__campo dev__campo--linha">
-        <span class="clinic-label">{{ t('clinico.painel.semente') }}</span>
-        <input v-model.number="semente" type="number" class="dev__numero" />
-        <button type="button" class="dev__acao clinic-focusable" @click="recriar">
-          {{ t('clinico.painel.recriar') }}
-        </button>
+        <Slider
+          v-model="horasDeslocadas"
+          class="dev__trilho"
+          :min="-12"
+          :max="12"
+          :step="1"
+          :aria-labelledby="`${idCampo}-relogio`"
+          @change="agendarRelogio"
+        />
       </div>
 
-      <label class="dev__linha">
-        <input
-          type="checkbox"
-          :checked="prontuario.simulandoSegundoDispositivo"
-          @change="prontuario.alternarSegundoDispositivo()"
+      <div class="dev__campo dev__campo--linha">
+        <label :for="`${idCampo}-semente`" class="clinic-label">
+          {{ t('clinico.painel.semente') }}
+        </label>
+        <InputNumber
+          v-model="semente"
+          :input-id="`${idCampo}-semente`"
+          :use-grouping="false"
+          size="small"
+          fluid
         />
-        <span>{{ t('clinico.painel.segundoDispositivo') }}</span>
-      </label>
+        <Button
+          type="button"
+          severity="secondary"
+          outlined
+          size="small"
+          :label="t('clinico.painel.recriar')"
+          @click="recriar"
+        />
+      </div>
+
+      <div class="dev__linha">
+        <ToggleSwitch
+          :input-id="`${idCampo}-segundo`"
+          :model-value="prontuario.simulandoSegundoDispositivo"
+          @update:model-value="prontuario.alternarSegundoDispositivo()"
+        />
+        <label :for="`${idCampo}-segundo`">{{ t('clinico.painel.segundoDispositivo') }}</label>
+      </div>
 
       <fieldset class="dev__grupo">
         <legend class="clinic-label">{{ t('clinico.painel.casos') }}</legend>
         <ul class="dev__casos">
           <li v-for="caso in resumo.casos" :key="caso.id">
-            <button type="button" class="dev__caso clinic-focusable" @click="irPara(caso.rota)">
-              <span>{{ caso.id }}</span>
-              <i class="pi pi-arrow-right" aria-hidden="true" />
-            </button>
+            <Button
+              type="button"
+              class="dev__caso"
+              severity="secondary"
+              text
+              size="small"
+              fluid
+              :label="caso.id"
+              icon="pi pi-arrow-right"
+              icon-pos="right"
+              @click="irPara(caso.rota)"
+            />
           </li>
         </ul>
       </fieldset>
 
-      <button type="button" class="dev__acao dev__acao--largo clinic-focusable" @click="restaurar">
-        <i class="pi pi-refresh" aria-hidden="true" />
-        {{ t('clinico.tabela.tentarDeNovo') }}
-      </button>
+      <Button
+        type="button"
+        severity="secondary"
+        outlined
+        size="small"
+        fluid
+        icon="pi pi-refresh"
+        :label="t('clinico.tabela.tentarDeNovo')"
+        @click="restaurar"
+      />
     </section>
   </div>
 </template>
@@ -255,36 +318,28 @@ function irPara(rota: string) {
 .dev {
   position: fixed;
   bottom: var(--clinic-space-4);
-  left: var(--clinic-space-4);
+  inset-inline-start: var(--clinic-space-4);
   z-index: 70;
 }
 
-.dev__gatilho {
-  display: inline-flex;
-  align-items: center;
+/* Tracejado de propósito: é ferramenta de bastidor, e não pode passar por ação do produto. */
+.dev__gatilho.p-button {
   gap: 0.35rem;
-  padding: 0.35rem var(--clinic-space-3);
-  border: 1px dashed var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-chip);
+  border-style: dashed;
   background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
   font-weight: 700;
   opacity: 0.8;
 }
 
-.dev__gatilho:hover {
-  border-color: var(--clinic-accent);
-  color: var(--clinic-accent-strong);
+.dev__gatilho.p-button:hover {
   opacity: 1;
 }
 
 .dev__painel {
   position: absolute;
   bottom: calc(100% + 0.5rem);
-  left: 0;
+  inset-inline-start: 0;
   display: grid;
   gap: var(--clinic-space-3);
   width: min(22rem, 90vw);
@@ -301,18 +356,6 @@ function irPara(rota: string) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.dev__fechar {
-  display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
-  place-items: center;
-  border: none;
-  border-radius: 0.4rem;
-  background: transparent;
-  color: var(--clinic-muted);
-  cursor: pointer;
 }
 
 .dev__descricao {
@@ -338,14 +381,10 @@ function irPara(rota: string) {
   gap: 0.3rem;
 }
 
-.dev__campo input[type='range'] {
+/* O trilho ocupa a linha inteira embaixo do rótulo e do valor; a margem é a folga do puxador. */
+.dev__trilho.p-slider {
   grid-column: 1 / -1;
-  width: 100%;
-  accent-color: var(--clinic-accent-deep);
-}
-
-.dev__campo--curto {
-  grid-template-columns: 1fr auto;
+  margin: 0.45rem 0.5rem;
 }
 
 .dev__campo--linha {
@@ -361,11 +400,14 @@ function irPara(rota: string) {
 .dev__linha {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   color: var(--clinic-muted);
-  cursor: pointer;
   font-size: var(--clinic-font-label);
   font-weight: 700;
+}
+
+.dev__linha label {
+  cursor: pointer;
 }
 
 .dev__grupo {
@@ -377,38 +419,6 @@ function irPara(rota: string) {
   border-radius: var(--clinic-radius-control);
 }
 
-.dev__numero {
-  width: 100%;
-  min-height: var(--clinic-hit-target);
-  padding: 0 var(--clinic-space-2);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-text);
-  font: inherit;
-}
-
-.dev__acao {
-  display: inline-flex;
-  min-height: var(--clinic-hit-target);
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  padding: 0 var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-text);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.dev__acao--largo {
-  width: 100%;
-}
-
 .dev__casos {
   display: grid;
   gap: 0.2rem;
@@ -417,30 +427,8 @@ function irPara(rota: string) {
   list-style: none;
 }
 
-.dev__caso {
-  display: flex;
-  width: 100%;
-  align-items: center;
+.dev__caso.p-button {
   justify-content: space-between;
-  gap: 0.3rem;
-  padding: 0.25rem var(--clinic-space-2);
-  border: none;
-  border-radius: 0.4rem;
-  background: transparent;
-  color: var(--clinic-text);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  text-align: left;
-}
-
-.dev__caso:hover {
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.dev__caso i {
-  font-size: 0.6rem;
-  opacity: 0.6;
+  text-align: start;
 }
 </style>

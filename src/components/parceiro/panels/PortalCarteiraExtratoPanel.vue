@@ -182,7 +182,15 @@ onMounted(() => {
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadExtrato()">{{ t('carteira.extrato.retry') }}</button>
+      <Button
+        type="button"
+        :label="t('carteira.extrato.retry')"
+        icon="pi pi-refresh"
+        severity="secondary"
+        outlined
+        size="small"
+        @click="loadExtrato()"
+      />
     </div>
 
     <div v-else-if="items.length === 0" class="portal-panel__empty">
@@ -221,7 +229,7 @@ onMounted(() => {
                 </div>
                 <div class="extrato-row__value">
                   <strong :class="{ 'is-negative': item.valorCentavos < 0 }">
-                    {{ formatCentavosToBrl(item.valorCentavos) }}
+                    {{ formatCentavosToBrl(item.valorCentavos, intlLocale()) }}
                   </strong>
                   <time :datetime="item.createdAt">{{ formatTime(item.createdAt) }}</time>
                 </div>
@@ -259,14 +267,6 @@ onMounted(() => {
   color: var(--partner-warm-text);
 }
 
-.portal-panel__state button {
-  border: 1px solid var(--partner-line);
-  border-radius: 0.6rem;
-  padding: 0.45rem 0.85rem;
-  background: var(--partner-card);
-  cursor: pointer;
-}
-
 .portal-panel__empty strong {
   color: var(--partner-text, inherit);
 }
@@ -293,7 +293,11 @@ onMounted(() => {
   font-size: 0.95rem;
   font-weight: 750;
   letter-spacing: -0.01em;
-  text-transform: capitalize;
+}
+
+/* Só a primeira letra: `capitalize` fazia "Setembro De 2026" (e "Septembar" no sérvio). */
+.extrato-month__head h3::first-letter {
+  text-transform: uppercase;
 }
 
 .extrato-day {

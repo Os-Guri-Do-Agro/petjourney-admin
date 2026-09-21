@@ -1,0 +1,3497 @@
+{
+  "languageSwitcher": {
+    "label": "Jezik",
+    "pt": "PT",
+    "en": "EN",
+    "en-GB": "UK",
+    "es": "ES",
+    "sr": "SR",
+    "ar": "AR"
+  },
+  "comingSoon": {
+    "cupom": {
+      "badge": "Uskoro",
+      "navHint": "Kuponi i promocija su u razvoju",
+      "title": "Kuponi stižu uskoro",
+      "lede": "Uskoro ćete na pultu potvrđivati iskorišćene kupone, pratiti kampanje i gledati kako stiže svaka konverzija, sve na jednom mestu.",
+      "body": "Doterujemo poslednje detalje pred pokretanje. Pratite nas: kada se otvori, Vaša promocija dobija potpuno novi ritam.",
+      "cta": "Jedva čekam! Nazad na kontrolnu tablu",
+      "sectionCta": "Saznajte više",
+      "closeAria": "Zatvorite obaveštenje"
+    }
+  },
+  "auth": {
+    "layout": {
+      "title": "Više klijenata. Veći domet. Veća zarada za Vaš brend.",
+      "description": "Portal PetJourney povezuje Vašu firmu sa starateljima ljubimaca: lako preporučujte i pratite rast na jednom mestu.",
+      "benefits": {
+        "programs": "Programi za partnere koji žele da rastu",
+        "indicacao": "Kod, link i QR kod spremni za deljenje",
+        "results": "Rezultati i zarada u realnom vremenu"
+      }
+    },
+    "login": {
+      "title": "Dobro došli nazad",
+      "description": "Prijavite se na portal i podstaknite partnerstvo preporukama i rezultatima.",
+      "email": {
+        "label": "Imejl",
+        "placeholder": "vi{'@'}firma.rs"
+      },
+      "password": {
+        "label": "Lozinka",
+        "placeholder": "Unesite lozinku",
+        "forgot": "Zaboravili ste lozinku?",
+        "show": "Prikažite lozinku",
+        "hide": "Sakrijte lozinku"
+      },
+      "remember": "Ostanite prijavljeni na ovom računaru",
+      "submit": "Prijavite se na portal",
+      "submitting": "Prijavljivanje...",
+      "support": {
+        "prompt": "Prvi put ste ovde?",
+        "createAccount": "Napravite nalog"
+      },
+      "reactivate": {
+        "title": "Neaktivan profil",
+        "copyBoth": "Ovaj nalog ima neaktivne profile. Ponovo aktivirajte profil veterinara da biste ušli na portal.",
+        "copyVet": "Vaš profil veterinara je neaktivan. Ponovo ga aktivirajte da biste nastavili na portalu.",
+        "copyGeneric": "Na ovom nalogu postoji neaktivan profil. Ponovo ga aktivirajte da biste nastavili.",
+        "loading": "Ponovno aktiviranje…",
+        "vet": "Ponovo aktivirajte profil veterinara",
+        "tutor": "Ponovo aktivirajte profil staratelja",
+        "otherAccount": "Koristite drugi nalog"
+      },
+      "toast": {
+        "loginError": {
+          "summary": "Greška pri prijavi",
+          "fallback": "Prijava nije uspela. Pokušajte ponovo."
+        },
+        "stillInactive": {
+          "summary": "Profil je i dalje neaktivan",
+          "detail": "Ponovna aktivacija je zatražena, ali token i dalje pokazuje neaktivan profil. Pokušajte ponovo."
+        },
+        "reactivated": {
+          "summary": "Profil je ponovo aktiviran",
+          "detail": "Dobro došli nazad na portal."
+        },
+        "reactivateError": {
+          "summary": "Ponovna aktivacija nije uspela",
+          "fallback": "Pokušajte ponovo za trenutak."
+        }
+      }
+    },
+    "register": {
+      "stepLabels": {
+        "identity": "Identitet",
+        "account": "Nalog"
+      },
+      "stepOf": "Korak {current} od {total}",
+      "stepsAria": "Koraci registracije",
+      "step1": {
+        "title": "Identitet",
+        "description": "Unesite ime i imejl da biste napravili partnerski nalog."
+      },
+      "step3": {
+        "title": "Bezbednost naloga",
+        "description": "Postavite jaku lozinku i prihvatite uslove korišćenja."
+      },
+      "name": {
+        "label": "Ime i prezime",
+        "placeholder": "dr Jelena Petrović"
+      },
+      "email": {
+        "label": "Imejl",
+        "placeholder": "jelena{'@'}klinika.rs",
+        "hint": "Ovaj imejl koristićemo za prijavu i važna obaveštenja.",
+        "checking": "Provera dostupnosti imejla...",
+        "available": "Imejl je dostupan."
+      },
+      "password": {
+        "label": "Lozinka",
+        "placeholder": "Napravite sigurnu lozinku",
+        "show": "Prikažite lozinku",
+        "hide": "Sakrijte lozinku"
+      },
+      "confirmPassword": {
+        "label": "Potvrdite lozinku",
+        "placeholder": "Ponovite lozinku"
+      },
+      "terms": {
+        "copy": "Pročitao/la sam i prihvatam uslove korišćenja i politiku privatnosti portala PetJourney.",
+        "details": "detalji"
+      },
+      "remember": "Ostanite prijavljeni na ovom računaru posle registracije",
+      "continue": "Nastavite",
+      "validating": "Provera...",
+      "createAccount": "Napravite nalog",
+      "creating": "Pravljenje naloga...",
+      "back": "Nazad",
+      "support": {
+        "prompt": "Već imate nalog?",
+        "login": "Prijavite se"
+      },
+      "errors": {
+        "nameMin": "Unesite najmanje 3 znaka.",
+        "emailRequired": "Imejl je obavezan.",
+        "emailInvalid": "Unesite ispravan imejl.",
+        "emailTaken": "Ovaj imejl je već registrovan.",
+        "emailCheckFailed": "Provera imejla nije uspela.",
+        "emailVerifyFirst": "Proverite dostupnost imejla pre nego što nastavite.",
+        "passwordRequirements": "Lozinka ne ispunjava sve zahteve.",
+        "confirmRequired": "Potvrdite lozinku.",
+        "confirmMismatch": "Lozinke se ne podudaraju.",
+        "termsRequired": "Da biste nastavili, morate da prihvatite uslove.",
+        "submitFailed": "Registracija nije uspela."
+      },
+      "toast": {
+        "success": {
+          "summary": "Nalog je napravljen",
+          "detail": "Dobro došli! Sada registrujte svoju firmu da biste počeli."
+        },
+        "error": {
+          "summary": "Greška pri registraciji"
+        }
+      }
+    },
+    "forgot": {
+      "step1": {
+        "eyebrow": "Oporavak naloga",
+        "title": "Resetujte lozinku",
+        "description": "Unesite registrovani imejl da biste dobili šestocifreni kod."
+      },
+      "step2": {
+        "eyebrow": "Nova lozinka",
+        "title": "Napravite jaku lozinku",
+        "description": "Postavite novu lozinku za nalog. Zatim se vratite na prijavu."
+      },
+      "email": {
+        "label": "Imejl",
+        "placeholder": "vi{'@'}klinika.rs",
+        "hint": "Iz bezbednosnih razloga odgovor je isti čak i ako imejl ne postoji."
+      },
+      "submit": "Pošaljite kod",
+      "sending": "Slanje…",
+      "backToLogin": "Nazad na prijavu",
+      "requestNewCode": "Zatražite novi kod",
+      "password": {
+        "label": "Nova lozinka",
+        "placeholder": "Napravite jaku lozinku",
+        "show": "Prikažite lozinku",
+        "hide": "Sakrijte lozinku"
+      },
+      "confirm": {
+        "label": "Potvrdite lozinku",
+        "placeholder": "Ponovite novu lozinku"
+      },
+      "reset": "Resetujte lozinku",
+      "resetting": "Resetovanje…",
+      "pin": {
+        "eyebrow": "Još malo",
+        "title": "Unesite kod",
+        "lede": "Ako za ovaj imejl postoji nalog, poslali smo šestocifreni kod. Proverite prijemno sanduče i folder za neželjenu poštu.",
+        "label": "Verifikacioni kod",
+        "hint": "Nalepite ceo kod ili unesite po jednu cifru u svako polje.",
+        "digitAria": "Cifra {n} od 6",
+        "placeholder": "000000",
+        "verify": "Nastavite",
+        "verifying": "Provera…"
+      },
+      "errors": {
+        "emailRequired": "Imejl je obavezan.",
+        "emailInvalid": "Unesite ispravan imejl.",
+        "pinLength": "Unesite šestocifreni kod.",
+        "pinInvalid": "Nevažeći kod. Proverite ga i pokušajte ponovo.",
+        "passwordRequirements": "Lozinka ne ispunjava sve zahteve.",
+        "confirmRequired": "Potvrdite novu lozinku.",
+        "mismatch": "Lozinke se ne podudaraju.",
+        "throttle": "Previše pokušaja. Sačekajte nekoliko minuta i pokušajte ponovo.",
+        "generic": "Došlo je do greške. Pokušajte ponovo."
+      },
+      "toasts": {
+        "sendError": {
+          "summary": "Slanje koda nije uspelo"
+        },
+        "tokenMissing": {
+          "summary": "Kod je istekao",
+          "detail": "Zatražite novi kod i pokušajte ponovo."
+        },
+        "success": {
+          "summary": "Lozinka je promenjena",
+          "detail": "Prijavite se imejlom i novom lozinkom."
+        },
+        "resetError": {
+          "summary": "Resetovanje lozinke nije uspelo"
+        }
+      }
+    },
+    "passwordRequirements": {
+      "minLength": "Najmanje 6 znakova",
+      "hasNumber": "Najmanje jedan broj",
+      "hasUppercase": "Najmanje jedno veliko slovo",
+      "hasSpecialChar": "Najmanje jedan specijalni znak"
+    }
+  },
+  "common": {
+    "confirmTitle": "Potvrdite radnju",
+    "confirmMessage": "Da li ste sigurni da želite da nastavite?",
+    "confirm": "Potvrdite",
+    "cancel": "Otkažite",
+    "close": "Zatvorite",
+    "loading": "Učitavanje...",
+    "emptyTitle": "Ovde još nema ničega",
+    "retry": "Pokušajte ponovo",
+    "tryAgain": "Pokušajte ponovo",
+    "back": "Nazad",
+    "save": "Sačuvajte",
+    "continue": "Nastavite",
+    "copy": "Kopirajte",
+    "copied": "Kopirano",
+    "send": "Pošaljite",
+    "sending": "Slanje...",
+    "signIn": "Prijavite se",
+    "createAccount": "Napravite nalog",
+    "forgotPassword": "Zaboravljena lozinka",
+    "signOut": "Odjavite se",
+    "yes": "Da",
+    "no": "Ne"
+  },
+  "nav": {
+    "sections": {
+      "portal": "Portal",
+      "account": "Nalog"
+    },
+    "groups": {
+      "portal": "Portal",
+      "account": "Nalog",
+      "pets": "Ljubimci"
+    },
+    "items": {
+      "overview": "Početna",
+      "programas": "Programi",
+      "divulgacao": "Promocija",
+      "acessos": "Pristupi",
+      "financeiro": "Finansije",
+      "settings": "Podešavanja"
+    },
+    "pageLabels": {
+      "overview": "Početna",
+      "saqueDetail": "Detalji isplate",
+      "financeiro": "Finansije",
+      "programas": "Programi učešća",
+      "divulgacao": "Promocija",
+      "acessos": "Pristupi",
+      "convite": "Prihvatanje poziva",
+      "selecionar": "Izbor partnera",
+      "portal": "Portal",
+      "settings": "Podešavanja",
+      "fallback": "Kontrolna tabla"
+    }
+  },
+  "shell": {
+    "logout": "Odjavite se",
+    "telasNaSecao": "{contagem} ekran | {contagem} ekrana | {contagem} ekrana",
+    "filterPlaceholder": "Filtrirajte ekrane...",
+    "filterEmpty": "Nema ekrana za „{q}“.",
+    "filterClear": "Obrišite filter",
+    "brand": {
+      "badge": "Partnerski portal"
+    },
+    "drawer": {
+      "close": "Zatvorite navigaciju",
+      "open": "Otvorite navigaciju",
+      "collapse": "Skupite meni",
+      "expand": "Proširite meni"
+    },
+    "aria": {
+      "sections": "Odeljci portala",
+      "brand": "PetJourney",
+      "brandHome": "Početna stranica PetJourney",
+      "pagesOf": "Stranice u odeljku {label}"
+    },
+    "theme": {
+      "activateLight": "Uključite svetlu temu",
+      "activateDark": "Uključite tamnu temu",
+      "lightTitle": "Svetla tema",
+      "darkTitle": "Tamna tema",
+      "lightLabel": "Svetla",
+      "darkLabel": "Tamna"
+    },
+    "user": {
+      "fallbackName": "Veterinar",
+      "role": "Partnerski nalog",
+      "perfil": "Profil",
+      "settings": "Podešavanja",
+      "trocarEmpresa": "Promenite firmu",
+      "logout": "Odjava"
+    },
+    "logoutConfirm": {
+      "title": "Želite da se odjavite?",
+      "message": "Bićete odjavljeni sa ovog portala. Da biste mu ponovo pristupili, moraćete da se prijavite.",
+      "cancel": "Ostanite na portalu"
+    },
+    "cupom": {
+      "cta": "Potvrdite kupon",
+      "disabledTitle": "Dostupno samo partnerima kojima je rad omogućen",
+      "disabledAria": "Potvrda kupona nije dostupna: nalog nema partnerski pristup",
+      "close": "Zatvorite",
+      "eyebrow": "Pult · brzo iskorišćenje",
+      "title": "Potvrda kupona",
+      "lede": "Unesite kod iz aplikacije staratelja i odmah potvrdite popust.",
+      "blockedBanner": "Ovaj partner još nije odobren za rad. Potvrda kupona postaje dostupna posle odobrenja.",
+      "codeLabel": "Kod kupona",
+      "codePlaceholder": "ABCDEF2345",
+      "hint": "Važi oko 5 minuta · jednokratna upotreba · razmaci i mala slova se automatski ispravljaju",
+      "formatHint": "Koristite od 6 do 32 znaka (A-Z i 2-9). Bez 0, 1 i razmaka. Proverite kod u aplikaciji kupca.",
+      "successEyebrow": "Iskorišćenje je potvrđeno",
+      "successTitle": "Važeći kupon",
+      "discountLabel": "popusta",
+      "submit": "Potvrdite kod",
+      "validateAnother": "Potvrdite drugi kod",
+      "applyOk": "U redu, primenite popust",
+      "networkHintBefore": "Ako je veza prekinuta tokom slanja, proverite odeljak",
+      "networkHintLink": "Iskorišćeni kuponi",
+      "networkHintAfter": "pre nego što pokušate ponovo: uspešan POST već iskorišćava kod.",
+      "meta": {
+        "campaign": "Kampanja",
+        "code": "Kod",
+        "customer": "Kupac",
+        "channel": "Kanal",
+        "channelManual": "Ručno unet kod"
+      },
+      "errorEyebrow": "Nije potvrđeno",
+      "errors": {
+        "noOp": {
+          "title": "Partner nije odobren za rad",
+          "message": "Sačekajte odobrenje akreditacije da biste potvrđivali kupone."
+        },
+        "generic": {
+          "title": "Greška pri potvrdi",
+          "message": "Potvrda koda nije uspela. Pokušajte ponovo.",
+          "messageShort": "Potvrda koda nije uspela."
+        },
+        "invalid": {
+          "title": "Nevažeći kod",
+          "message": "Nevažeći kod. Proverite sa kupcem."
+        },
+        "expired": {
+          "title": "Kod je istekao",
+          "message": "Kod je istekao. Zamolite kupca da u aplikaciji napravi novi (dva dodira)."
+        },
+        "conflict": {
+          "title": "Potvrda nije uspela"
+        },
+        "forbidden": {
+          "title": "Nema pristupa",
+          "message": "Nema pristupa ovom kuponu. Proverite registraciju i odobrenje partnera."
+        },
+        "noBusiness": {
+          "title": "Firma nije izabrana",
+          "message": "Izaberite partnersku firmu i ponovo pokušajte da potvrdite kod."
+        }
+      }
+    },
+    "guidance": {
+      "show": "Prikažite opise",
+      "hide": "Sakrijte opise"
+    }
+  },
+  "frame": {
+    "loading": "Učitavanje...",
+    "emptyDefault": "Ovde još nema ničega",
+    "error": {
+      "title": "Učitavanje nije uspelo",
+      "retry": "Pokušajte ponovo"
+    },
+    "tabs": {
+      "aria": "Kartice: {labels}"
+    },
+    "noAccess": {
+      "title": "Partnerski portal još nije omogućen",
+      "body": "Vaš nalog još nije povezan sa partnerskom firmom. Registrujte firmu na kartici „Firma“ u odeljku „Podešavanja“: registracija prvo ide na proveru, a zatim je tim PetJourney odobrava.",
+      "hint": "Ako ste već poslali registraciju, sačekajte proveru ili proverite ponovo za nekoliko trenutaka. Možete i da prihvatite poziv u tim.",
+      "ctaPrograms": "Registrujte firmu",
+      "ctaSettings": "Idite na podešavanja",
+      "retry": "Proverite ponovo",
+      "contactLabel": "Pitanja:"
+    },
+    "accessRevoked": {
+      "title": "Vaš pristup portalu je okončan",
+      "body": "Ova partnerska registracija više nije aktivna, pa delovi portala nisu dostupni za ovaj nalog.",
+      "hint": "Ako mislite da je došlo do greške, obratite nam se. Možete i da registrujete novu firmu na kartici „Firma“ u odeljku „Podešavanja“.",
+      "ctaSupport": "Obratite se podršci",
+      "ctaNewCompany": "Registrujte novu firmu"
+    },
+    "operability": {
+      "pending": {
+        "title": "Registracija je na proveri",
+        "body": "Radnje na portalu ostaju blokirane dok akreditacija ne bude odobrena.",
+        "link": "Pratite akreditaciju"
+      },
+      "rejected": {
+        "title": "Registracija je odbijena",
+        "body": "Ispravite podatke o firmi i ponovo ih pošaljite na proveru.",
+        "link": "Pregledajte registraciju"
+      },
+      "reasonPrefix": "Razlog:",
+      "suspendedReadOnly": {
+        "title": "Registracija je suspendovana",
+        "body": "Uvid u posete ostaje dostupan jer je staratelj odobrio ovaj pristup. Povezivanje novih kodova i unos beleški blokirani su dok se suspenzija ne reši.",
+        "link": "Obratite se podršci"
+      }
+    },
+    "suspended": {
+      "title": "Registracija je suspendovana",
+      "body": "Pristup partnerskom portalu je blokiran. Samo podrška PetJourney može ponovo da omogući rad.",
+      "channelsLede": "Obratite nam se preko jednog od ovih kanala:",
+      "channels": {
+        "whatsapp": "WhatsApp",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "email": "Imejl"
+      }
+    }
+  },
+  "statusBadge": {
+    "PENDENTE": "Na proveri",
+    "SOLICITADO": "Na proveri",
+    "APROVADO": "Odobreno",
+    "REJEITADO": "Odbijeno",
+    "SUSPENSO": "Suspendovano",
+    "NAO_SOLICITADO": "Nije aktivno",
+    "ATIVO": "Aktivno ✓"
+  },
+  "errors": {
+    "api": {
+      "missingBaseUrl": "Ova verzija portala nema podešenu adresu servera. Obratite se tehničkom timu.",
+      "invalidResponse": "Server je odgovorio u neočekivanom formatu. Pokušajte ponovo za trenutak.",
+      "genericStatus": "Greška {status}"
+    },
+    "notFound": {
+      "brandAlt": "PetJourney",
+      "title": "Stranica nije pronađena",
+      "body": "Adresa koju ste otvorili ne postoji ili je premeštena. Proverite link ili se vratite na glavni deo portala.",
+      "goHome": "Idite na početnu",
+      "back": "Nazad"
+    }
+  },
+  "inicio": {
+    "subtitle": "Početna",
+    "greeting": {
+      "hello": "Zdravo",
+      "helloName": "Zdravo, {name}"
+    },
+    "lede": "Preporuke i udeo iz partnerstva, pregledno složeni da biste brzo delovali.",
+    "dash": {
+      "errorLoad": "Učitavanje kontrolne table nije uspelo.",
+      "retry": "Pokušajte ponovo",
+      "focus": {
+        "title": "U fokusu",
+        "lede": "Udeo i preporuke: ono što danas pokreće partnerstvo.",
+        "loadingAria": "Učitavanje udela i preporuka"
+      },
+      "commission": {
+        "eyebrowActive": "Udeo · afilijejt program aktivan",
+        "badge": "Novčanik",
+        "sacavelNow": "dostupno za isplatu odmah",
+        "metaHold": "Ukupno stanje je {valor}, a deo je u bezbednosnom periodu od 14 dana.",
+        "openWallet": "Otvorite novčanik",
+        "eyebrowMuted": "Udeo",
+        "badgeMuted": "Nije aktivno",
+        "inactiveTitle": "Afilijejt program",
+        "inactiveMeta": "Aktivirajte afilijejt program da biste pratili stanje, izvod i isplate preko PIX-a.",
+        "seePrograms": "Pogledajte programe"
+      },
+      "referral": {
+        "eyebrow": "Kod za preporuku",
+        "copyAria": "Kopirajte kod za preporuku",
+        "meta": "Podelite kod i ostvarite udeo za svakog staratelja koji se pretplati.",
+        "cta": "Pogledajte preporuke",
+        "toastCopied": "Kod je kopiran",
+        "toastCopyFail": "Kopiranje nije uspelo",
+        "toastCopyFailDetail": "Kopirajte kod ručno.",
+        "esperaFallback": "Vaš kod za preporuku postaje dostupan kada afilijejt program bude aktivan.",
+        "esperaCta": "Pogledajte programe"
+      },
+      "pulse": {
+        "title": "Puls mreže",
+        "lede": "Pokazatelji kupona i njihovog iskorišćenja.",
+        "loadingAria": "Učitavanje pokazatelja"
+      },
+      "metrics": {
+        "cuponsAtivos": "Aktivni kuponi",
+        "cuponsHint": "Spremni za iskorišćenje",
+        "resgatesTotal": "Iskorišćeni kuponi (ukupno)",
+        "resgatesTotalHint": "Od početka",
+        "resgates30d": "Iskorišćeni kuponi (30 dana)",
+        "resgates30dHint": "Poslednji mesec"
+      }
+    },
+    "shortcuts": {
+      "title": "Prečice",
+      "countAvailable": "{n} dostupna | {n} dostupne | {n} dostupnih",
+      "lede": "Filtrirajte po nazivu ekrana ili odeljka.",
+      "filterPlaceholder": "Filtrirajte po ekranu ili odeljku...",
+      "clearFilterAria": "Obrišite filter",
+      "emptyFilter": "Nema ekrana za „{q}“."
+    }
+  },
+  "programas": {
+    "subtitle": "Portal",
+    "title": "Programi učešća",
+    "ledeNoAccess": "Registrujte svoju partnersku firmu da biste se pridružili mreži PetJourney. Registraciju otvarate dugmetom „Akreditacija“ iznad.",
+    "lede": "Izaberite programe mreže PetJourney. Svaki program je nezavisan i prolazi proveru tima.",
+    "available": {
+      "title": "Dostupni programi",
+      "lede": "Zatražite afilijejt i/ili participativni program, u skladu sa modelom Vaše firme.",
+      "loadingAria": "Učitavanje programa"
+    },
+    "activation": {
+      "title": "Kako funkcioniše aktivacija",
+      "lede": "Jednostavan postupak, uz proveru tima PetJourney.",
+      "step1": {
+        "title": "Zahtev",
+        "desc": "Vlasnik naloga traži aktivaciju programa."
+      },
+      "step2": {
+        "title": "Na proveri",
+        "desc": "Tim PetJourney pregleda zahtev."
+      },
+      "step3": {
+        "title": "Aktivno",
+        "desc": "Pogodnosti su otključane za firmu."
+      },
+      "noteNoAccess": "Registrujte firmu na kartici „Firma“ u odeljku „Podešavanja“. Kada akreditacija bude odobrena, vlasnik naloga ovde traži programe.",
+      "noteWithAccess": "Samo vlasnik naloga može da zatraži aktivaciju. Operateri prate status, ali ne mogu da šalju zahteve."
+    },
+    "cred": {
+      "zoneTitle": "Akreditacija"
+    },
+    "card": {
+      "afiliado": {
+        "title": "Afilijejt program",
+        "subtitle": "Ponavljajući udeo",
+        "description": "Ostvarite udeo od 5% na svaku pretplatu nastalu iz Vaše preporuke, iz meseca u mesec, najduže 18 meseci. Pratite stanje u novčaniku i isplatite ga preko PIX-a.",
+        "feature1": "5% po pretplati, pri svakoj plaćenoj obnovi",
+        "feature2": "Period od 18 meseci po preporučenom staratelju",
+        "feature3": "Isplata preko PIX-a od R$ 50,00"
+      },
+      "participativo": {
+        "title": "Participativni program",
+        "subtitle": "Sadržaj i vidljivost",
+        "description": "Učestvujte u pravljenju sadržaja za PetJourney. Nudimo vidljivost i autoritet Vašem brendu na platformi i na društvenim mrežama.",
+        "soon": "(Uskoro.)",
+        "feature1": "Oznaka participativnog partnera na Vašem profilu",
+        "feature2": "Vidljivost brenda na platformi",
+        "feature3": "Prisustvo na društvenim mrežama PetJourney"
+      },
+      "status": {
+        "naoSolicitado": "Nije aktivno",
+        "solicitado": "Na proveri",
+        "ativo": "Aktivno",
+        "rejeitado": "Odbijeno",
+        "suspenso": "Suspendovano"
+      },
+      "info": {
+        "saldo": "Dostupno stanje",
+        "ativoDesde": "Aktivno od",
+        "pending": "Vaš zahtev je poslat i čeka proveru tima PetJourney.",
+        "rejected": "Zahtev je odbijen. Možete da ga ispravite i pošaljete novi.",
+        "suspended": "Program je suspendovan. Samo podrška PetJourney može ponovo da ga aktivira.",
+        "motivoLabel": "Razlog:",
+        "decididoEm": "Datum odluke: {data}",
+        "contactSupport": "Kontaktirajte podršku"
+      },
+      "cta": {
+        "solicitar": "Zatražite",
+        "solicitarNovamente": "Zatražite ponovo",
+        "aguardando": "Čeka se provera",
+        "carteira": "Idite u novčanik"
+      },
+      "activeNoteParticipativo": "Program je aktivan. Tim PetJourney će Vas pozvati na broj telefona iz registracije kako biste dogovorili rad na sadržaju.",
+      "toast": {
+        "actionUnavailable": "Radnja nije dostupna",
+        "ownerOnly": "Samo vlasnik firme može da zatraži programe.",
+        "sent": "Zahtev je poslat",
+        "sentDetail": "Sačekajte proveru tima PetJourney.",
+        "error": "Greška pri slanju zahteva"
+      },
+      "error": {
+        "generic": "Slanje zahteva nije uspelo.",
+        "forbidden": "Nemate dozvolu da pošaljete zahtev. Proverite povezanost naloga ili se obratite vlasniku firme.",
+        "afiliadoNaoAtivo": "Aktivirajte afilijejt program da biste pristupili novčaniku.",
+        "notOperable": "Vaša registracija je još na proveri.",
+        "alreadyRequested": "Ovaj program je već zatražen ili je aktivan.",
+        "modoSuspenso": "Ovaj program je suspendovan za Vašu firmu. Obratite se podršci da biste ga ponovo aktivirali."
+      }
+    }
+  },
+  "parceiroCadastro": {
+    "motivoLabel": "Navedeni razlog",
+    "categorias": {
+      "CLINICA_VETERINARIA": "Veterinarska klinika",
+      "PET_SHOP": "Pet shop",
+      "BANHO_TOSA": "Šišanje i nega",
+      "ADESTRAMENTO": "Dresura",
+      "HOTEL_CRECHE": "Hotel i dnevni boravak",
+      "FARMACIA": "Apoteka",
+      "OUTRO": "Ostalo"
+    },
+    "form": {
+      "nome": "Naziv firme",
+      "nomePlaceholder": "Pet shop iz komšiluka",
+      "nomeRequired": "Unesite naziv firme.",
+      "categoria": "Kategorija",
+      "categoriaPlaceholder": "Izaberite kategoriju",
+      "cnpj": "CNPJ",
+      "cnpjPlaceholder": "00.000.000/0000-00",
+      "telefone": "Poslovni telefon",
+      "telefonePlaceholder": "(11) 99999-8888",
+      "cnpjRequired": "Unesite CNPJ firme.",
+      "cnpjInvalid": "CNPJ nije ispravan. Proverite brojeve.",
+      "telefoneRequired": "Unesite kontakt telefon.",
+      "telefoneInvalid": "Telefon nije ispravan. Unesite pozivni broj i broj telefona.",
+      "requiredLegend": "Naziv, CNPJ i telefon su obavezni: tim ih koristi da proveri Vašu registraciju i da Vas kontaktira."
+    },
+    "wizard": {
+      "title": "Registrujte svoju partnersku firmu",
+      "lede": "Registracija najpre ide na proveru, a zatim je procenjuje tim PetJourney. Rezultat ćete dobiti imejlom.",
+      "step1Title": "Registracija",
+      "step1Desc": "Pošaljite osnovne podatke o firmi.",
+      "step2Title": "Na proveri",
+      "step2Desc": "Tim PetJourney proverava registraciju.",
+      "step3Title": "Odobreno",
+      "step3Desc": "Dopunite podatke i zatražite programe.",
+      "submit": "Pošaljite registraciju"
+    },
+    "pendente": {
+      "title": "Registracija je na proveri",
+      "body": "Dobićete imejl sa rezultatom. U međuvremenu možete da pregledate poslate podatke.",
+      "analiseLabel": "Trenutno na proveri",
+      "itemCadastro": "Registracija firme",
+      "analiseHint": "O svemu se odlučuje u istoj proveri. Ne morate ništa ponovo da tražite."
+    },
+    "rejeitado": {
+      "title": "Registracija je odbijena",
+      "body": "Ispravite podatke ispod i ponovo ih pošaljite. Registracija se vraća na proveru.",
+      "resubmit": "Ispravite i ponovo pošaljite",
+      "operadorHint": "Samo vlasnik firme može da ispravi i ponovo pošalje registraciju.",
+      "programasHint": "Proverite i karticu „Programi“: odbijanjem su otkazani otvoreni zahtevi, pa ponovo označite ono što želite da aktivirate."
+    },
+    "suspenso": {
+      "title": "Registracija je suspendovana",
+      "body": "Rad je blokiran. Samo podrška PetJourney može ponovo da ga omogući.",
+      "contact": "Kontaktirajte podršku"
+    },
+    "aprovado": {
+      "title": "Firma je akreditovana",
+      "body": "Vaša firma je odobrena za rad na portalu.",
+      "desde": "Poslednje ažuriranje: {data}.",
+      "incomplete": "Dopunite kategoriju i telefon da biste završili registraciju."
+    },
+    "editar": {
+      "title": "Izmenite registraciju",
+      "lede": "Ažurirajte podatke o firmi. Izmene se čuvaju odmah.",
+      "submit": "Sačuvajte izmene"
+    },
+    "toast": {
+      "enviado": "Registracija je poslata",
+      "enviadoDetail": "Sada je na redu tim PetJourney. Rezultat ćete dobiti imejlom.",
+      "salvo": "Registracija je ažurirana",
+      "salvoDetail": "Izmene podataka o firmi su sačuvane.",
+      "enviadoComProgramas": "Poslato na proveru: registracija i {programas}. Rezultat stiže imejlom."
+    },
+    "errors": {
+      "generic": "Slanje registracije nije uspelo.",
+      "jaExiste": "Vaš nalog već ima partnersku registraciju koja je na proveri ili odobrena.",
+      "suspenso": "Registracija je suspendovana. Kontaktirajte podršku da biste je ponovo aktivirali.",
+      "nomeEmUso": "Ovaj naziv je već registrovala druga firma.",
+      "cnpjEmUso": "Ovaj CNPJ je već registrovala druga firma."
+    },
+    "tabs": {
+      "aria": "Odeljci registracije",
+      "dados": "Podaci o firmi",
+      "programas": "Programi"
+    },
+    "resumo": {
+      "label": "Ide na proveru:",
+      "cadastro": "Registracija firme",
+      "edit": "Izaberite programe"
+    },
+    "programas": {
+      "title": "Šta želite da aktivirate",
+      "lede": "Označite ih sada i tim PetJourney će o svemu odlučiti odjednom, zajedno sa akreditacijom. U suprotnom, svaki program kasnije postaje novi zahtev, uz novo čekanje.",
+      "counter": "nijedan izabran | {count} izabran | {count} izabrana | {count} izabranih",
+      "selected": "Uključeno",
+      "notSelected": "Nije uključeno",
+      "cancelWarning": "Izbor je poništen: trenutni zahtev će biti otkazan.",
+      "lockedAtivo": "Već aktivno",
+      "lockedSuspenso": "Suspendovano",
+      "lockedHint": "Ovaj program se ne menja ovde.",
+      "note": "Oba programa su opciona i ne blokiraju akreditaciju. Možete ih zatražiti i kasnije, na ekranu „Programi“.",
+      "how": {
+        "step1Title": "Vi birate",
+        "step1Desc": "Vaš izbor ide uz registraciju, u jednom slanju.",
+        "step2Title": "Tim proverava",
+        "step2Desc": "O akreditaciji i programima odlučuje se u istoj proveri.",
+        "step3Title": "Aktivirano",
+        "step3Desc": "Nakon odobrenja, funkcije programa pojavljuju se na portalu."
+      },
+      "afiliado": {
+        "name": "Afilijejt program",
+        "tagline": "Udeo po preporuci",
+        "description": "Za svakog staratelja koji se pretplati preko Vaše preporuke dobijate udeo, a sve pratite na portalu.",
+        "feature1": "Udeo za svaku preporuku koja postane pretplata",
+        "feature2": "Novčanik sa stanjem i izvodom u realnom vremenu",
+        "feature3": "PIX isplata kad god želite"
+      },
+      "participativo": {
+        "name": "Participativni program",
+        "tagline": "Vidljivost u mreži",
+        "description": "Vaša firma se pojavljuje u partnerskoj mreži PetJourney i nudi pogodnosti starateljima koji već koriste aplikaciju.",
+        "feature1": "Prisustvo u partnerskoj mreži aplikacije",
+        "feature2": "Kuponi i pogodnosti za privlačenje novih klijenata",
+        "feature3": "Oznaka partnera i pozivnice za kampanje mreže"
+      }
+    }
+  },
+  "acessos": {
+    "subtitle": "Portal",
+    "title": "Pristupi",
+    "lede": "Podaci o ljubimcima podeljeni sa Vašom firmom: sažetak, istorija i verifikovane beleške.",
+    "tabs": {
+      "ativos": {
+        "label": "Aktivni",
+        "description": "Važeći pristupi, sa sažetkom i beleškama."
+      },
+      "historico": {
+        "label": "Istorija",
+        "description": "Istekli ili opozvani pristupi, samo sa beleškama Vaše firme."
+      }
+    },
+    "list": {
+      "loadingTitle": "Učitavanje poseta",
+      "loadingDesc": "Preuzimaju se pristupi povezani sa firmom.",
+      "errorLoad": "Greška pri učitavanju poseta.",
+      "emptyAtivosTitle": "Nema aktivnih pristupa",
+      "emptyAtivosBody": "Zatražite od staratelja šestocifreni kod i povežite ga da biste ovde videli podatke o ljubimcu.",
+      "emptyHistoricoTitle": "Još nema istorije",
+      "emptyHistoricoBody": "Završeni pristupi pojavljuju se ovde sa beleškama Vaše firme.",
+      "anotacoes": "{n} beleška | {n} beleške | {n} beleški",
+      "loadMore": "Učitajte još",
+      "emptyFiltroTitle": "Nema rezultata za ove filtere",
+      "emptyFiltroBody": "Promenite pretragu ili period. Pretraga obuhvata samo ime ljubimca.",
+      "documentos": "{n} dokument | {n} dokumenta | {n} dokumenata",
+      "diario": "Dnevnik",
+      "resumoAtualizado": "Rezime ažuriran: {data}",
+      "encerradoEm": "Završeno: {data}",
+      "status": {
+        "ATIVO": "Aktivno",
+        "EXPIRADO": "Isteklo",
+        "REVOGADO": "Opozvano"
+      }
+    },
+    "servico": {
+      "BANHO": "Kupanje",
+      "TOSA": "Šišanje",
+      "CONSULTA": "Pregled",
+      "EXAME": "Analiza",
+      "HOTEL": "Hotel",
+      "OUTRO": "Ostalo"
+    },
+    "especie": {
+      "CACHORRO": "Pas",
+      "GATO": "Mačka",
+      "AVE": "Ptica",
+      "ROEDOR": "Glodar",
+      "COELHO": "Zec",
+      "PEIXE": "Riba",
+      "REPTIL": "Gmizavac"
+    },
+    "filtros": {
+      "aria": "Filteri liste poseta",
+      "q": "Pretraga po imenu ljubimca",
+      "qPlaceholder": "npr. Maza",
+      "especie": "Vrsta",
+      "tipoServico": "Vrsta usluge",
+      "ordenarPor": "Sortiranje",
+      "ordem": {
+        "recentes": "Najnovije",
+        "nome": "Ime ljubimca",
+        "expiraEm": "Rok važenja"
+      },
+      "periodo": "Period",
+      "vinculadoDe": "Povezano od",
+      "vinculadoAte": "Povezano do",
+      "limpar": "Obrišite filtere",
+      "comProntuario": "Sa kartonom"
+    },
+    "expira": {
+      "expirado": "Isteklo",
+      "dias": "ističe za {d} d {h} h",
+      "horas": "ističe za {h} h {m} min",
+      "minutos": "ističe za {m} min"
+    },
+    "vincular": {
+      "cta": "Povežite kod",
+      "bloqueado": "Dostupno nakon odobrenja registracije.",
+      "title": "Povežite kod staratelja",
+      "lede": "Unesite šestocifreni kod koji je staratelj generisao u aplikaciji. Pristup će se pojaviti na Vašoj listi.",
+      "eyebrow": "Partnerski portal",
+      "codigoLabel": "Pristupni kod",
+      "digitoAria": "Cifra {n} od 6",
+      "hint": "Kod generiše staratelj u aplikaciji PetJourney.",
+      "submit": "Povežite",
+      "aguarde": "Sačekajte {s} s",
+      "codigoInvalidoFormato": "Kod se sastoji od 6 cifara.",
+      "naoEncontrado": "Kod je neispravan ili je istekao. Proverite ga sa starateljem.",
+      "outraEmpresa": "Ovaj pristup je već povezan sa drugom firmom.",
+      "naoOperacional": "Vaša partnerska registracija još nije odobrena za rad.",
+      "throttle": "Previše pokušaja. Sačekajte minut i pokušajte ponovo.",
+      "erroGenerico": "Povezivanje koda nije uspelo."
+    },
+    "detalhe": {
+      "subtitle": "Poseta",
+      "title": "Detalji posete",
+      "loadingAria": "Učitavanje detalja posete",
+      "errorLoad": "Greška pri učitavanju posete.",
+      "mensagemTutor": "Poruka staratelja",
+      "metaAria": "Usluga i rok važenja deljenja",
+      "back": "Nazad",
+      "tabs": {
+        "resumo": {
+          "label": "Rezime ljubimca",
+          "description": "Poruka staratelja i sažetak odobren u trenutku deljenja."
+        },
+        "anotacoes": {
+          "label": "Beleške",
+          "description": "Verifikovani zapisi Vaše firme za ovu posetu."
+        }
+      }
+    },
+    "pet": {
+      "castrado": "Sterilisan",
+      "naoCastrado": "Nije sterilisan"
+    },
+    "encerrado": {
+      "title": "Pristup je završen",
+      "expirado": "Deljenje je isteklo. Klinički sažetak više nije dostupan; ostaju beleške Vaše firme.",
+      "revogado": "Staratelj je opozvao pristup. Klinički sažetak više nije dostupan; ostaju beleške Vaše firme."
+    },
+    "snapshot": {
+      "peso": "Težina",
+      "alergias": "Alergije",
+      "vacinas": "Vakcine",
+      "medicamentos": "Lekovi",
+      "comportamento": "Ponašanje",
+      "diagnosticos": "Dijagnoze",
+      "observacoes": "Napomene staratelja",
+      "clinicalTitle": "Podeljeni klinički podaci",
+      "clinicalLede": "Sažetak koji je odobrio staratelj. Po potrebi proširite svaku listu.",
+      "sectionsCount": "{n} odeljak | {n} odeljka | {n} odeljaka",
+      "itemsCount": "{n} stavka | {n} stavke | {n} stavki",
+      "semItens": "Nema stavki",
+      "carimbo": "Rezime generisan: {data}",
+      "carimboAtualizado": "Staratelj je ažurirao rezime: {data}",
+      "vazio": {
+        "generico": "Za ovaj pristup nema podataka u ovom odeljku.",
+        "diarioFiltrado": "Praćenje bez zabeleženih odstupanja u podeljenom periodu.",
+        "removido": "Staratelj je uklonio ovu kategoriju iz pristupa.",
+        "semRegistro": {
+          "alergias": "Staratelj nije zabeležio alergije za ovog ljubimca.",
+          "vacinas": "Staratelj nije zabeležio vakcine za ovog ljubimca.",
+          "medicamentos": "Staratelj nije zabeležio lekove za ovog ljubimca.",
+          "tratamentosContinuos": "Staratelj nije zabeležio stalnu terapiju za ovog ljubimca.",
+          "comportamento": "Staratelj nije zabeležio napomene o ponašanju ovog ljubimca.",
+          "diagnosticos": "Staratelj nije zabeležio dijagnoze za ovog ljubimca.",
+          "diario": "Staratelj nije zabeležio unose u dnevnik za ovog ljubimca.",
+          "documentos": "Staratelj nije priložio dokumente u karton ovog ljubimca."
+        }
+      },
+      "emptyTitle": "Ništa nije podeljeno u ovom pristupu",
+      "emptyBody": "Staratelj je odobrio posetu, ali nije uključio nijedan klinički podatak za ljubimca {pet}. Ipak, sve što unesete u beleške stiže do staratelja.",
+      "emptyCta": "Idite na beleške"
+    },
+    "tratamentos": {
+      "title": "Stalna terapija",
+      "lede": "Lek koji ljubimac uzima svakog dana. To je terapija koja ne sme da se preskoči tokom boravka.",
+      "count": "{n} terapija | {n} terapije | {n} terapija",
+      "campos": {
+        "motivo": "Čemu služi",
+        "diagnostico": "Dijagnoza",
+        "desde": "Od",
+        "observacoes": "Napomene staratelja"
+      }
+    },
+    "documentos": {
+      "title": "Podeljeni dokumenti",
+      "lede": "Fajlovi koje je staratelj odobrio za ovu posetu. Link za pregled ističe za nekoliko minuta.",
+      "count": "{n} dokument | {n} dokumenta | {n} dokumenata",
+      "abrir": "Otvorite",
+      "baixar": "Preuzmite",
+      "arquivoN": "Fajl {n}",
+      "emissao": "Izdato: {data}",
+      "expiracao": "Važi do {data}",
+      "semArquivo": "Nema dostupnog fajla"
+    },
+    "diario": {
+      "title": "Dnevnik ljubimca",
+      "lede": "Dani sa zabeleženim odstupanjem u periodu koji je staratelj odobrio.",
+      "count": "{n} unos | {n} unosa | {n} unosa",
+      "fotos": "{n} fotografija | {n} fotografije | {n} fotografija",
+      "abrirFoto": "Fotografija {n}",
+      "campos": {
+        "vitalidade": "Energija",
+        "alimentacao": "Ishrana",
+        "hidratacao": "Unos vode",
+        "fezes": "Stolica",
+        "urina": "Urin",
+        "cicloCio": "Ciklus teranja",
+        "remedios": "Lekovi",
+        "observacoes": "Napomene",
+        "nota": "Beleška staratelja"
+      }
+    },
+    "anotacoes": {
+      "title": "Istorija beleški",
+      "lede": "Zapisi Vaše firme za ovu posetu, od najnovijih.",
+      "count": "{n} zapis | {n} zapisa | {n} zapisa",
+      "empty": "Još nema beleški.",
+      "emptyHint": "Koristite formular pored ove liste da zabeležite šta je urađeno.",
+      "emptyHintClosed": "Dok je pristup bio aktivan, tim je ovde mogao da dodaje beleške.",
+      "anexosLabel": "Prilozi",
+      "abrirAnexo": "Otvorite prilog"
+    },
+    "anotacao": {
+      "title": "Nova beleška",
+      "lede": "Zabeležite uslugu i ono što staratelj treba da zna. Prilozi ostaju povezani sa ovom posetom.",
+      "servico": "Obavljena usluga",
+      "servicoPlaceholder": "Kupanje i šišanje",
+      "texto": "Beleška",
+      "textoPlaceholder": "Kako je prošla poseta, napomene za staratelja...",
+      "profissional": "Stručno lice (opciono)",
+      "profissionalPlaceholder": "Ako ostane prazno, koristimo ime Vašeg naloga",
+      "especialidade": "Oblast rada (opciono)",
+      "especialidadeOutraPlaceholder": "npr. Akupunktura",
+      "especialidadeNaoSalva": "Beleška je sačuvana, ali ovaj server još ne čuva oblast rada.",
+      "anexos": "Prilozi (do {n})",
+      "adicionarAnexo": "Dodajte prilog",
+      "anexoHint": "JPG, PNG, WebP, HEIC ili PDF, do 10 MB po fajlu.",
+      "tipoDocumento": "Vrsta dokumenta",
+      "tipoDocumentoPlaceholder": "Izaberite vrstu (opciono)",
+      "semClassificacao": "Bez klasifikacije",
+      "removerAnexo": "Uklonite prilog",
+      "enviar": "Sačuvajte belešku",
+      "camposObrigatorios": "Popunite obavljenu uslugu i tekst beleške.",
+      "maxAnexos": "Najviše {n} prilog po belešci. | Najviše {n} priloga po belešci. | Najviše {n} priloga po belešci.",
+      "tipoInvalido": "Fajl nije prihvaćen: {nome}.",
+      "tamanhoInvalido": "Fajl je veći od 10 MB: {nome}.",
+      "encerrado": "Ovaj pristup je završen; beleške više nisu moguće.",
+      "criada": "Beleška je sačuvana",
+      "erro": "Čuvanje beleške nije uspelo.",
+      "textoLongo": "Neki tekst prelazi dozvoljeno ograničenje. Skratite ga i pokušajte ponovo.",
+      "somenteLeitura": {
+        "title": "Beleženje je blokirano",
+        "body": "Možete da čitate karton ove posete, ali ne možete da unosite beleške dok je registracija suspendovana."
+      }
+    },
+    "especialidade": {
+      "CLINICO_GERAL": "Opšta praksa",
+      "CARDIOLOGIA": "Kardiologija",
+      "DERMATOLOGIA": "Dermatologija",
+      "ORTOPEDIA": "Ortopedija",
+      "OFTALMOLOGIA": "Oftalmologija",
+      "ODONTOLOGIA": "Stomatologija",
+      "NEUROLOGIA": "Neurologija",
+      "ONCOLOGIA": "Onkologija",
+      "ENDOCRINOLOGIA": "Endokrinologija",
+      "GASTROENTEROLOGIA": "Gastroenterologija",
+      "CIRURGIA": "Hirurgija",
+      "ANIMAIS_EXOTICOS": "Egzotične životinje",
+      "OUTRA": "Ostalo"
+    },
+    "estruturada": {
+      "title": {
+        "CONSULTA": "Detalji pregleda",
+        "EXAME": "Detalji analize",
+        "BANHO": "Detalji kupanja",
+        "TOSA": "Detalji šišanja",
+        "HOTEL": "Detalji boravka"
+      },
+      "lede": {
+        "CONSULTA": "Sve je opciono. Ono što ovde popunite staratelj može jednim dodirom da doda u zdravstveni karton ljubimca.",
+        "EXAME": "Sve je opciono. Kada je popunjen, nalaz ulazi u zdravstveni karton kao analiza, a ne kao običan tekst.",
+        "BANHO": "Sve je opciono. Pomaže staratelju da prati stanje kože i dlake i ponašanje ljubimca.",
+        "TOSA": "Sve je opciono. Pomaže staratelju da prati stanje kože i dlake i ponašanje ljubimca.",
+        "HOTEL": "Sve je opciono. Zabeležite period i kako je ljubimac proveo boravak."
+      },
+      "campos": {
+        "motivo": "Razlog posete",
+        "diagnostico": "Dijagnoza",
+        "pesoKg": "Izmerena težina",
+        "tipoExame": "Vrsta analize",
+        "laudoTexto": "Rezultat / nalaz",
+        "dataResultado": "Datum nalaza",
+        "produtos": "Korišćeni proizvodi",
+        "condicaoPele": "Stanje kože i dlake",
+        "comportamento": "Ponašanje",
+        "dataEntrada": "Dolazak",
+        "dataSaida": "Odlazak",
+        "alimentacao": "Ishrana",
+        "intercorrencias": "Nepredviđeni događaji"
+      },
+      "placeholders": {
+        "motivo": "Povraćanje već 2 dana",
+        "diagnostico": "Šta ste zaključili tokom posete",
+        "pesoKg": "12,4",
+        "tipoExame": "Ultrazvuk abdomena",
+        "laudoTexto": "Nalaz i zaključak analize",
+        "produtos": "Neutralni šampon, regenerator",
+        "condicaoPele": "Kakvo je bilo stanje kože i dlake",
+        "comportamento": "Kako je ljubimac reagovao tokom usluge",
+        "comportamentoHotel": "Kako se ljubimac ponašao tokom boravka",
+        "alimentacao": "Dobar apetit, hranu doneo staratelj",
+        "intercorrencias": "Nešto neočekivano u tom periodu"
+      },
+      "prescricao": {
+        "title": "Terapija",
+        "add": "Dodajte lek",
+        "remove": "Uklonite lek {n}",
+        "empty": "Nije propisan nijedan lek.",
+        "item": "Lek {n}",
+        "nome": "Lek",
+        "nomePlaceholder": "Omeprazol",
+        "dose": "Doza",
+        "unidade": "Jedinica",
+        "frequencia": "Učestalost",
+        "frequenciaPlaceholder": "Jednom dnevno",
+        "frequenciaHint": "Bez učestalosti staratelj ne može da pretvori ovu stavku u lek ljubimca.",
+        "duracaoDias": "Trajanje (dani)",
+        "instrucoes": "Uputstva",
+        "instrucoesPlaceholder": "Davati uz hranu"
+      },
+      "exames": {
+        "title": "Zatražene analize",
+        "add": "Dodajte analizu",
+        "remove": "Uklonite analizu {n}",
+        "empty": "Nije zatražena nijedna analiza.",
+        "item": "Analiza {n}",
+        "nome": "Analiza",
+        "nomePlaceholder": "Kompletna krvna slika",
+        "observacao": "Napomena",
+        "observacaoPlaceholder": "Natašte"
+      },
+      "erros": {
+        "formulario": "Proverite označena polja.",
+        "obrigatorio": "Popunite ovo polje ili uklonite stavku.",
+        "maxLength": "Najveći dozvoljeni broj znakova: {max}.",
+        "pesoFaixa": "Težina mora biti između {min} i {max} kg.",
+        "duracaoFaixa": "Trajanje u danima mora biti između {min} i {max}.",
+        "maxItens": "Najveći broj stavki: {max}.",
+        "dataInvalida": "Neispravan datum.",
+        "intervaloData": "Odlazak ne može biti pre dolaska."
+      },
+      "view": {
+        "title": "Strukturirani podaci beleške",
+        "duracao": "{n} dan | {n} dana | {n} dana",
+        "semFrequencia": "Bez učestalosti: neće postati lek ljubimca."
+      }
+    },
+    "anexo": {
+      "indisponivel": "Fajl nije dostupan",
+      "indisponivelDetail": "Trenutno nije moguće otvoriti fajl. Pokušajte ponovo za nekoliko trenutaka.",
+      "removido": "Fajl je uklonjen",
+      "removidoDetail": "Staratelj je uklonio ovaj dokument iz pristupa. Osvežili smo listu.",
+      "acessoEncerrado": "Pristup je završen",
+      "acessoEncerradoDetail": "Staratelj je prekinuo ovaj pristup, pa karton više nije dostupan. Osvežili smo ekran."
+    }
+  },
+  "divulgacao": {
+    "subtitle": "Portal",
+    "title": "Promocija",
+    "lede": "Preporuke i udeo iz partnerstva na jednom mestu, za jasnu promociju.",
+    "errorLoad": "Greška pri učitavanju promocije.",
+    "retry": "Pokušajte ponovo",
+    "indicacao": {
+      "title": "Preporuka",
+      "lede": "Kod, link i QR kod za privlačenje pretplatnika povezanih sa firmom.",
+      "loadingAria": "Učitavanje kompleta za preporuke"
+    },
+    "shareKit": {
+      "eyebrow": "Komplet za preporuke",
+      "title": "Podelite i povežite pretplatnike",
+      "unavailable": "Nije dostupno",
+      "codeLabel": "Kod",
+      "copyCodeAria": "Kopirajte kod",
+      "linkName": "Link",
+      "linkLabel": "Gotov link",
+      "copyLink": "Kopirajte link",
+      "qrAlt": "QR kod za preporuku",
+      "qrCaption": "Skenirajte telefonom",
+      "qrIndisponivel": "QR kod trenutno nije dostupan. Koristite kod ili link.",
+      "qrExport": "Izvezite QR kod",
+      "qrExportOk": "QR kod je izvezen",
+      "qrExportOkDetail": "Slika je sačuvana u fascikli za preuzimanja.",
+      "qrExportSavedDetail": "Slika je sačuvana na lokaciji koju ste izabrali.",
+      "qrExportOpened": "QR kod je otvoren",
+      "qrExportOpenedDetail": "Direktno preuzimanje nije bilo moguće. Slika je otvorena u novoj kartici kako biste je sačuvali.",
+      "qrExportFail": "Izvoz nije uspeo",
+      "qrExportFailDetail": "Pregledač je blokirao novu karticu. Dozvolite iskačuće prozore za ovaj sajt i pokušajte ponovo.",
+      "hint": "Udeo u novčaniku zahteva aktivan afilijejt program.",
+      "esperaHint": "Kod, link i QR kod su deo afilijejt programa: postaju dostupni zajedno sa novčanikom, čim program bude aktivan.",
+      "esperaCta": "Pogledajte programe"
+    },
+    "howItWorks": {
+      "eyebrow": "Vaš pokretač rasta",
+      "title": "Podelite. Povežite. Rastite.",
+      "lede": "Svaki razgovor za pultom može da donese pretplatnika aplikacije PetJourney vezanog za Vašu firmu. Bez komplikovanog levka prodaje: Vi podelite, staratelj se pridruži, a veza ostaje Vaša.",
+      "steps": {
+        "share": {
+          "title": "Podelite komplet",
+          "body": "Koristite kod, gotov link ili QR kod na pultu, u aplikacijama WhatsApp i Instagram ili u štampanim materijalima."
+        },
+        "signup": {
+          "title": "Staratelj se registruje",
+          "body": "Ko otvori Vaš link, pravi nalog u aplikaciji PetJourney preko Vaše preporuke, jednostavno i uz praćenje."
+        },
+        "link": {
+          "title": "Pretplata ostaje Vaša",
+          "body": "Kada se staratelj pretplati, preporuka ostaje povezana sa Vašom firmom. To je odnos koji nastavlja da radi za Vas."
+        },
+        "earn": {
+          "title": "Udeo u novčaniku",
+          "body": "Uz aktivan afilijejt program, svaka pretplata koja ispunjava uslove donosi udeo koji možete da pratite i isplatite na portalu."
+        }
+      },
+      "promise": "Manje truda oko promocije. Više pretplatnika na Vašim vratima.",
+      "note": "Udeo zahteva aktivan afilijejt program. Ako ga još nemate, zatražite ga u odeljku „Programi“."
+    },
+    "metrics": {
+      "aria": "Metrike promocije",
+      "cuponsAtivos": "Aktivni kuponi",
+      "resgatesTotais": "Ukupno iskorišćenja",
+      "ultimos30d": "Poslednjih 30 dana"
+    },
+    "toast": {
+      "copied": "Kopirano",
+      "copiedDetail": "{label} je kopiran.",
+      "copyFail": "Kopiranje nije uspelo",
+      "copyFailDetail": "Kopirajte sadržaj ručno i pokušajte ponovo.",
+      "error": "Greška",
+      "moreCuponsFail": "Učitavanje dodatnih kupona nije uspelo.",
+      "moreResgatesFail": "Učitavanje dodatnih iskorišćenja nije uspelo."
+    },
+    "lists": {
+      "title": "Kuponi i iskorišćenja",
+      "lede": "Popusti firme i istorija korišćenja, jedno pored drugog.",
+      "loadingAria": "Učitavanje kupona i iskorišćenja"
+    },
+    "cupons": {
+      "title": "Kuponi",
+      "lede": "Popusti za staratelje ljubimaca. Ne donose udeo.",
+      "empty": "Trenutno nema kupona.",
+      "usos": "{n} korišćenje | {n} korišćenja | {n} korišćenja",
+      "loadMore": "Još kupona"
+    },
+    "resgates": {
+      "title": "Iskorišćeni kuponi",
+      "lede": "Bez ličnih podataka staratelja.",
+      "empty": "Još nema iskorišćenih kupona.",
+      "canalQr": "Preko QR koda",
+      "canalManual": "Ručno unet kod",
+      "loadMore": "Još iskorišćenja"
+    },
+    "terms": {
+      "title": "Pravila udela",
+      "lede": "Jasni brojevi, bez sitnih slova. Ovako udeo stiže do Vas.",
+      "highlights": {
+        "percent": {
+          "value": "5%",
+          "caption": "od svake pretplate preko preporuke"
+        },
+        "recurring": {
+          "value": "Svakog meseca",
+          "caption": "pri svakoj plaćenoj obnovi"
+        },
+        "window": {
+          "value": "18 meseci",
+          "caption": "po preporučenom staratelju"
+        }
+      },
+      "toggleShow": "Prikažite sva pravila",
+      "toggleHide": "Sakrijte sva pravila",
+      "percent": {
+        "title": "5% od svake pretplate",
+        "body": "Dobijate 5% od vrednosti plana na koji se pretplati svako ko se pridružio preko Vaše preporuke."
+      },
+      "recurring": {
+        "title": "Svakog meseca, ne samo prvog",
+        "body": "Udeo se pripisuje pri svakoj plaćenoj obnovi, iz meseca u mesec, dok god staratelj ima aktivnu pretplatu."
+      },
+      "window": {
+        "title": "Do 18 meseci",
+        "body": "Računanje počinje od prve plaćene pretplate preporučenog staratelja i traje 18 meseci. Nakon toga pretplata se nastavlja, ali više ne donosi novi udeo."
+      },
+      "hold": {
+        "title": "Dostupno posle 14 dana",
+        "body": "Svaki pripisani iznos čeka 14 dana pre nego što postane stanje za isplatu. To je rok za eventualni povraćaj novca za kupovinu."
+      },
+      "payout": {
+        "title": "Isplata od R$ 50,00",
+        "body": "Kada stanje za isplatu pređe minimum, zatražite isplatu u novčaniku i primite je na registrovani PIX ključ."
+      },
+      "requirement": {
+        "title": "Važi od aktivacije",
+        "body": "Računaju se samo pretplate plaćene nakon odobrenja Vašeg afilijejt programa. Preporuka pre aktivacije ne donosi udeo."
+      }
+    },
+    "metricas": {
+      "title": "Skeniranja Vašeg QR koda",
+      "lede": "Koliko ljudi je skeniralo Vaš QR kod za preporuku i kada.",
+      "leituras": "{n} skeniranje | {n} skeniranja | {n} skeniranja",
+      "chartAria": "Skeniranja po danu",
+      "barraAria": "{dia}: {n} skeniranje | {dia}: {n} skeniranja | {dia}: {n} skeniranja",
+      "recentes": "Nedavna skeniranja",
+      "vazio": "Još nema skeniranja. Podelite QR kod na pultu i na društvenim mrežama da biste počeli da merite.",
+      "erro": {
+        "naoOperavel": "Metrike postaju dostupne čim registracija firme bude odobrena.",
+        "indisponivel": "Metrike trenutno nisu dostupne. Pokušajte ponovo za trenutak.",
+        "erro": "Učitavanje skeniranja nije uspelo."
+      }
+    }
+  },
+  "carteira": {
+    "subtitle": "Portal",
+    "title": "Finansije",
+    "tabs": {
+      "ariaLabel": "Kartice: {labels}",
+      "visao": {
+        "label": "Sažetak",
+        "description": "Stanja, PIX ključ i zahtev za isplatu."
+      },
+      "extrato": {
+        "label": "Izvod",
+        "description": "Prilivi od udela i odlivi."
+      },
+      "saques": {
+        "label": "Isplate",
+        "description": "Status zahteva za isplatu."
+      }
+    },
+    "gate": {
+      "title": "Potreban je afilijejt program",
+      "body": "Novčanik, izvod i isplate dostupni su samo uz aktivan afilijejt program. Zatražite ga na ekranu „Programi“.",
+      "cta": "Zatražite afilijejt program"
+    },
+    "visao": {
+      "loadingAria": "Učitavanje novčanika",
+      "errorLoad": "Greška pri učitavanju novčanika.",
+      "retry": "Pokušajte ponovo",
+      "saldoSacavel": "Stanje za isplatu",
+      "saldoSacavelHint": "Dostupno za isplatu preko PIX-a",
+      "saldoTotal": "Ukupno stanje",
+      "totalSacado": "Ukupno isplaćeno",
+      "alertBlocked": "Isplate su privremeno blokirane (provera zaštite od prevara ili negativno stanje).",
+      "alertHold": "Stanje je u periodu zadržavanja (14 dana za svaki pripisani iznos). Iznos još nije dostupan za isplatu.",
+      "alertComissaoDisabled": "Udeo od preporuka je privremeno isključen u ovom okruženju. Novčanik može ostati na nuli čak i uz aktivne preporuke, i to nije greška u Vašoj registraciji.",
+      "pix": {
+        "title": "PIX ključ",
+        "label": "PIX ključ",
+        "hint": "Neophodan za zahteve za isplatu.",
+        "placeholder": "ime{'@'}firma.com ili CNPJ",
+        "save": "Sačuvajte ključ"
+      },
+      "saque": {
+        "title": "Zahtev za isplatu",
+        "submit": "Zatražite isplatu",
+        "hint": "Minimum: {valor}. Ciklus: presek 27. u mesecu, isplata do 5. u mesecu.",
+        "valorLabel": "Iznos (R$)",
+        "valorPlaceholder": "0,00",
+        "currency": "R$"
+      }
+    },
+    "help": {
+      "title": "Kako funkcioniše novčanik",
+      "lede": "Korisne informacije pre unosa PIX ključa ili zahteva za isplatu.",
+      "contactEmail": "Imejl",
+      "contactWhatsapp": "WhatsApp",
+      "comissao": {
+        "title": "Kako se puni stanje",
+        "body": "Preporuke koje postanu pretplatnici donose udeo u novčaniku kada je afilijejt program aktivan."
+      },
+      "saldos": {
+        "title": "Ukupno stanje i stanje za isplatu",
+        "body": "Ukupno stanje sabira sve pripisane iznose; stanje za isplatu se oslobađa nakon bezbednosnog perioda od 14 dana za svaki iznos."
+      },
+      "pix": {
+        "title": "PIX je obavezan",
+        "body": "Registrujte PIX ključ firme pre zahteva za isplatu. Samo vlasnik naloga može da menja PIX i traži isplate."
+      },
+      "ciclo": {
+        "title": "Ciklus isplate",
+        "body": "Minimalna isplata je R$ 50,00. Presek je 27. u mesecu, a okvirna isplata do 5. u mesecu. Status pratite na kartici „Isplate“."
+      },
+      "footerPrefix": "Imate pitanja?",
+      "footerOrWhatsapp": "ili WhatsApp"
+    },
+    "toast": {
+      "pixSaved": "PIX ključ je sačuvan",
+      "pixSavedDetail": "Novčanik može da koristi ovaj ključ za naredne isplate.",
+      "pixSaveError": "Greška pri čuvanju PIX ključa",
+      "tryAgain": "Pokušajte ponovo.",
+      "invalidValue": "Nevažeći iznos",
+      "minWithdraw": "Minimalna isplata je R$ 50,00.",
+      "insufficient": "Nedovoljno stanje",
+      "maxWithdraw": "Maksimalni iznos za isplatu trenutno je {valor}.",
+      "pixRequired": "PIX je obavezan",
+      "pixRequiredDetail": "Registrujte PIX ključ pre zahteva za isplatu.",
+      "withdrawRequested": "Isplata je zatražena",
+      "withdrawRequestedDetail": "Status pratite na kartici „Isplate“.",
+      "withdrawError": "Greška pri isplati",
+      "withdrawErrorDetail": "Zahtev za isplatu nije mogao da se završi."
+    },
+    "extrato": {
+      "loadingTitle": "Učitavanje izvoda...",
+      "loadingDesc": "Preuzimamo nedavne prilive od udela i odlive.",
+      "errorLoad": "Greška pri učitavanju izvoda.",
+      "retry": "Pokušajte ponovo",
+      "emptyTitle": "Nema transakcija",
+      "emptyBody": "Ovde se prikazuju prilivi od udela i odlivi po isplatama.",
+      "loadMore": "Učitajte još",
+      "today": "Danas",
+      "yesterday": "Juče"
+    },
+    "saques": {
+      "loadingTitle": "Učitavanje isplata...",
+      "loadingDesc": "Preuzimamo zahteve i status plaćanja.",
+      "errorLoad": "Greška pri učitavanju isplata.",
+      "retry": "Pokušajte ponovo",
+      "emptyTitle": "Nema zatraženih isplata",
+      "emptyBody": "Zatražite isplatu na kartici „Sažetak“ kada budete imali stanje za isplatu.",
+      "requestedAt": "Zatraženo {data}"
+    },
+    "detail": {
+      "subtitle": "Finansije",
+      "title": "Detalji isplate",
+      "back": "Nazad",
+      "loadingAria": "Učitavanje detalja isplate",
+      "errorInvalidId": "Nevažeći identifikator isplate.",
+      "errorLoad": "Greška pri učitavanju isplate.",
+      "valorLabel": "Zatraženi iznos",
+      "requestedAt": "Datum zahteva",
+      "liquidatedAt": "Datum isplate",
+      "timelineLabel": "Hronologija",
+      "awaitingLiquidation": "Čeka isplatu",
+      "awaitingLiquidationHint": "Plaćanje još nije potvrđeno.",
+      "pixSnapshot": "PIX ključ (u trenutku zahteva)",
+      "pixCopied": "PIX ključ je kopiran.",
+      "pixCopyError": "Kopiranje PIX ključa nije uspelo.",
+      "failReason": "Razlog neuspeha",
+      "receipt": "Dokaz o uplati",
+      "pendingHint": "Isplate ručno realizuje PetJourney. Okvirni ciklus: presek 27. u mesecu, isplata do 5. u mesecu."
+    }
+  },
+  "parceiro": {
+    "store": {
+      "errorNeedsSelection": "Izaberite partnersku firmu kojom želite da upravljate. Unesite identifikator partnera.",
+      "errorNoAccess": "Vaš nalog nema pristup partnerskom portalu.",
+      "errorAccessRevoked": "Vaš pristup partnerskom portalu je ukinut.",
+      "errorGeneric": "Učitavanje podataka o partneru nije uspelo."
+    },
+    "selecionar": {
+      "subtitle": "Više firmi",
+      "title": "Izaberite partnera",
+      "body": "Vaš nalog pripada većem broju partnerskih firmi. Izaberite kojom sada želite da upravljate.",
+      "roleDono": "Vaša firma",
+      "roleOperador": "Tim",
+      "current": "U upotrebi",
+      "errorLoad": "Učitavanje Vaših firmi nije uspelo.",
+      "emptyTitle": "Nema povezanih firmi",
+      "emptyBody": "Vaš nalog još ne pripada nijednoj partnerskoj firmi.",
+      "newTitle": "Registrujte drugu firmu",
+      "newBody": "Možete da registrujete svoju firmu i ovde pratite proveru.",
+      "newCta": "Registrujte firmu",
+      "toast": {
+        "error": "Pristup nije uspeo",
+        "errorDetail": "Pokušajte ponovo za trenutak.",
+        "stale": "Ova firma više nije dostupna",
+        "staleDetail": "Osvežili smo listu prema onome čemu Vaš nalog sada ima pristup."
+      }
+    },
+    "convite": {
+      "subtitle": "Tim",
+      "title": "Prihvatite poziv",
+      "body": "Pozvani ste u tim partnerske firme portala PetJourney. Unesite identifikator iz imejla ili otvorite kompletan link poziva.",
+      "idLabel": "ID partnera",
+      "idHint": "Obavezno. Nalazi se u linku kao ?parceiroId=...",
+      "idPlaceholder": "cuid-firme",
+      "accept": "Prihvatite poziv",
+      "footnote": "Nakon prihvatanja radite na portalu sa ulogom koju je odredio vlasnik firme.",
+      "toast": {
+        "warnTitle": "Navedite firmu",
+        "warnDetail": "Link poziva mora da sadrži identifikator partnera.",
+        "success": "Poziv je prihvaćen",
+        "successDetail": "Sada možete da pristupite portalu firme.",
+        "error": "Prihvatanje nije uspelo",
+        "errorDetail": "Proverite link ili pokušajte ponovo."
+      }
+    }
+  },
+  "settings": {
+    "title": "Podešavanja",
+    "subtitle": "Nalog",
+    "tabs": {
+      "perfil": {
+        "label": "Profil",
+        "description": "Ime, kontakti, dokument i profesionalni podaci."
+      },
+      "empresa": {
+        "label": "Firma",
+        "description": "Akreditacija i podaci partnerske firme."
+      },
+      "seguranca": {
+        "label": "Bezbednost",
+        "description": "Promena lozinke prijavljenog naloga."
+      },
+      "aparencia": {
+        "label": "Izgled",
+        "description": "Tema, raspored bočnog menija i gustina lista."
+      },
+      "conta": {
+        "label": "Nalog",
+        "description": "Sesija, deaktivacija profila i buduće preferencije."
+      }
+    },
+    "aparencia": {
+      "tema": {
+        "titulo": "Tema",
+        "descricao": "Važi za ovaj pregledač. Izbor je dostupan i na vrhu ekrana.",
+        "claro": {
+          "label": "Svetla",
+          "hint": "Svetla pozadina, podrazumevana za panel."
+        },
+        "escuro": {
+          "label": "Tamna",
+          "hint": "Tamna pozadina, za prostorije sa slabim osvetljenjem."
+        }
+      },
+      "menu": {
+        "titulo": "Bočni meni",
+        "descricao": "Kako su ekrani panela raspoređeni sa strane.",
+        "secoes": {
+          "label": "Odeljci",
+          "hint": "Traka sa ikonama levo, a pored nje samo ekrani otvorenog odeljka."
+        },
+        "lista": {
+          "label": "Jedna lista",
+          "hint": "Jedna kolona, sa svim odeljcima otvorenim odjednom."
+        }
+      },
+      "densidade": {
+        "titulo": "Gustina",
+        "descricao": "Visina redova u meniju.",
+        "confortavel": {
+          "label": "Prostrana",
+          "hint": "Više prostora između stavki."
+        },
+        "compacta": {
+          "label": "Kompaktna",
+          "hint": "Više ekrana vidljivo bez skrolovanja."
+        }
+      },
+      "nota": "Preferencije se čuvaju u ovom pregledaču i primenjuju se pri sledećoj poseti.",
+      "aplicada": "u upotrebi"
+    },
+    "perfil": {
+      "fallbackName": "Korisnik",
+      "photoHint": "Kliknite na fotografiju da biste izabrali novu sliku.",
+      "aria": {
+        "changePhoto": "Promenite profilnu fotografiju",
+        "uploadingPhoto": "Otpremanje fotografije…",
+        "roles": "Uloge naloga"
+      },
+      "roles": {
+        "veterinario": "Veterinar",
+        "donoParceiro": "Vlasnik partnerske firme",
+        "operadorParceiro": "Operater partnerske firme",
+        "admin": "Admin"
+      },
+      "partnerContext": {
+        "papelDono": "VLASNIK",
+        "papelOperador": "OPERATER",
+        "template": "{parceiroNome} · {papel}"
+      },
+      "sections": {
+        "identidade": "Identitet",
+        "contato": "Kontakt",
+        "documento": "Dokument",
+        "vet": "Veterinarski profil",
+        "vetOptionalHint": "Opciono. Popunite CRMV i specijalnost samo ako radite kao veterinar."
+      },
+      "fields": {
+        "nome": {
+          "label": "Ime i prezime",
+          "placeholder": "Vaše ime"
+        },
+        "email": {
+          "label": "Imejl",
+          "hint": "Povezano sa prijavom, samo za čitanje."
+        },
+        "telefone": {
+          "label": "Telefon",
+          "placeholder": "(11) 98888-7777"
+        },
+        "whatsapp": {
+          "label": "WhatsApp",
+          "placeholder": "(11) 98888-7777"
+        },
+        "cpf": {
+          "label": "CPF",
+          "placeholder": "000.000.000-00",
+          "hintLocked": "Već je registrovan i ne može da se menja.",
+          "hintOptional": "Opciono. Nakon čuvanja se zaključava."
+        },
+        "crmv": {
+          "label": "CRMV",
+          "placeholder": "CRMV-SP 12345"
+        },
+        "especialidade": {
+          "label": "Specijalnost",
+          "placeholder": "Opšta praksa"
+        }
+      },
+      "actions": {
+        "save": "Sačuvajte profil",
+        "retry": "Pokušajte ponovo"
+      },
+      "errors": {
+        "nomeMin": "Unesite najmanje 3 znaka.",
+        "telefone": "Unesite važeći broj telefona sa pozivnim brojem.",
+        "whatsapp": "Unesite važeći WhatsApp broj sa pozivnim brojem.",
+        "cpf": "Nevažeći CPF.",
+        "crmvRequired": "CRMV je obavezan za veterinarski profil.",
+        "especialidadeRequired": "Unesite specijalnost.",
+        "sessionUnavailable": "Sesija nije dostupna. Prijavite se ponovo.",
+        "loadFailed": "Učitavanje profila nije uspelo.",
+        "loadTitle": "Učitavanje nije uspelo"
+      },
+      "photo": {
+        "errors": {
+          "invalidType": "Koristite sliku u formatu JPEG, PNG, WEBP ili GIF.",
+          "maxSize": "Slika može imati najviše 5 MB."
+        }
+      },
+      "toasts": {
+        "partial": {
+          "summary": "Nepotpun profil",
+          "detail": "Kompletan profil nije pronađen u API-ju. Možete da izmenite i sačuvate ono što je dostupno."
+        },
+        "saved": {
+          "summary": "Profil je ažuriran",
+          "detail": "Vaši podaci su uspešno sačuvani."
+        },
+        "saveError": {
+          "summary": "Čuvanje nije uspelo",
+          "detailFallback": "Pokušajte ponovo za trenutak."
+        },
+        "invalidFile": {
+          "summary": "Nevažeći fajl"
+        },
+        "photoOk": {
+          "summary": "Fotografija je ažurirana",
+          "detail": "Nova fotografija je već na Vašem profilu."
+        },
+        "photoError": {
+          "summary": "Otpremanje fotografije nije uspelo",
+          "detailFallback": "Pokušajte ponovo za trenutak."
+        }
+      }
+    },
+    "seguranca": {
+      "aside": {
+        "title": "Promena lozinke",
+        "body": "Trenutna sesija ostaje aktivna nakon promene. Izaberite jaku lozinku koja se koristi samo za ovaj nalog.",
+        "bullets": {
+          "minLength": "Najmanje 6 znakova",
+          "complexity": "Broj, veliko slovo i specijalni znak",
+          "reuse": "Ne koristite lozinke sa drugih sistema"
+        }
+      },
+      "fields": {
+        "current": {
+          "label": "Trenutna lozinka",
+          "placeholder": "Unesite trenutnu lozinku"
+        },
+        "new": {
+          "label": "Nova lozinka",
+          "placeholder": "Napravite jaku lozinku"
+        },
+        "confirm": {
+          "label": "Potvrdite novu lozinku",
+          "placeholder": "Ponovite novu lozinku"
+        }
+      },
+      "aria": {
+        "showPassword": "Prikažite lozinku",
+        "hidePassword": "Sakrijte lozinku"
+      },
+      "actions": {
+        "change": "Promenite lozinku"
+      },
+      "errors": {
+        "currentRequired": "Unesite trenutnu lozinku.",
+        "newInvalid": "Nova lozinka ne ispunjava sve zahteve.",
+        "confirmRequired": "Potvrdite novu lozinku.",
+        "mismatch": "Lozinke se ne podudaraju."
+      },
+      "toasts": {
+        "success": {
+          "summary": "Lozinka je promenjena",
+          "detail": "Koristite novu lozinku pri sledećoj prijavi."
+        },
+        "error": {
+          "summary": "Promena lozinke nije uspela",
+          "detailFallback": "Proverite trenutnu lozinku i pokušajte ponovo."
+        }
+      }
+    },
+    "conta": {
+      "session": {
+        "eyebrow": "Sesija na ovom uređaju",
+        "fallbackName": "Korisnik",
+        "logoutHint": "Odjava uklanja pristup samo na ovom računaru; Vaši podaci u oblaku ostaju netaknuti."
+      },
+      "aria": {
+        "roles": "Uloge"
+      },
+      "roles": {
+        "veterinario": "Veterinar",
+        "dono": "Vlasnik",
+        "operador": "Operater",
+        "admin": "Admin"
+      },
+      "partnerContext": {
+        "papelDono": "VLASNIK",
+        "papelOperador": "OPERATER"
+      },
+      "actions": {
+        "logout": "Odjavite se sa naloga"
+      },
+      "prefs": {
+        "title": "Jezik",
+        "subtitle": "Izaberite jezik interfejsa ovog panela.",
+        "body": "Izbor se čuva na ovom uređaju i važi za naredne posete."
+      },
+      "risk": {
+        "eyebrow": "Osetljiva zona",
+        "title": "Deaktivacija profila",
+        "lede": "Privremena pauza profila, za razliku od odjave sa uređaja ili brisanja naloga.",
+        "actions": {
+          "deactivate": "Deaktivirajte profil"
+        },
+        "points": {
+          "soft": {
+            "title": "Privremeno",
+            "text": "Podaci naloga ostaju sačuvani. Profil ponovo aktivirate pri sledećoj prijavi."
+          },
+          "scope": {
+            "title": "Samo profil",
+            "text": "Ne briše kliniku, partnera ni istoriju: samo pauzira aktivni profil."
+          },
+          "notDelete": {
+            "title": "Nije brisanje",
+            "text": "Trajno zatvaranje naloga (LGPD) je poseban postupak i ne prikazuje se ovde."
+          }
+        }
+      },
+      "inactivate": {
+        "dialog": {
+          "title": "Deaktivirajte profil",
+          "lede": "Izaberite razlog pauze. Zatim ćemo potvrditi deaktivaciju i završiti ovu sesiju."
+        },
+        "loading": "Učitavanje razloga…",
+        "fields": {
+          "reason": {
+            "label": "Razlog",
+            "placeholder": "Izaberite razlog"
+          },
+          "custom": {
+            "label": "Recite nam više (obavezno)",
+            "placeholder": "Opišite razlog"
+          }
+        },
+        "actions": {
+          "cancel": "Otkažite",
+          "confirm": "Potvrdite deaktivaciju"
+        },
+        "errors": {
+          "noReasons": "Trenutno nema dostupnih razloga. Pokušajte ponovo kasnije.",
+          "loadReasons": "Učitavanje razloga nije uspelo.",
+          "reasonRequired": "Izaberite razlog da biste nastavili.",
+          "customMin": "Opišite razlog sa najmanje 3 znaka.",
+          "failedFallback": "Deaktivacija profila nije uspela."
+        },
+        "toasts": {
+          "success": {
+            "summary": "Profil je deaktiviran",
+            "detail": "Vaša sesija je završena. Profil možete ponovo da aktivirate pri sledećoj prijavi."
+          },
+          "error": {
+            "summary": "Deaktivacija nije uspela"
+          }
+        }
+      }
+    }
+  },
+  "clinico": {
+    "modulo": {
+      "visivel": "Klinički modul je prikazan",
+      "oculto": "Klinički modul je sakriven"
+    },
+    "navegacao": {
+      "secao": "Klinika",
+      "agora": "Sada",
+      "emCurso": "U toku",
+      "pendencias": "Za rešavanje",
+      "analise": "Analitika",
+      "selo": {
+        "fila": "{total} pacijent na listi čekanja | {total} pacijenta na listi čekanja | {total} pacijenata na listi čekanja",
+        "internacao": "{total} stavka za rešavanje na hospitalizaciji | {total} stavke za rešavanje na hospitalizaciji | {total} stavki za rešavanje na hospitalizaciji",
+        "atividades": "{total} otvoren zadatak | {total} otvorena zadatka | {total} otvorenih zadataka",
+        "vacinas": "{total} revakcinacija kasni | {total} revakcinacije kasne | {total} revakcinacija kasni"
+      }
+    },
+    "busca": {
+      "abrir": "Pretražite pacijente ili ekrane kliničkog modula",
+      "abrirCurto": "Pretraga",
+      "titulo": "Pretraga klinike",
+      "placeholder": "Ime ljubimca, vlasnik, telefon ili ekran…",
+      "dica": "Strelice za kretanje, Enter za otvaranje, Esc za zatvaranje.",
+      "telas": "Ekrani",
+      "pacientes": "Pacijenti",
+      "buscando": "Pretraga…",
+      "semResultado": "Nema rezultata za „{termo}“."
+    },
+    "formato": {
+      "minutos": "{valor} min",
+      "horas": "{valor} h",
+      "horasMinutos": "{horas} h {minutos} min",
+      "agora": "sada",
+      "haTempo": "pre {valor}",
+      "emTempo": "za {valor}",
+      "anos": "{valor} godina | {valor} godine | {valor} godina",
+      "meses": "{valor} mesec | {valor} meseca | {valor} meseci",
+      "anosMeses": "{anos} g. {meses} mes.",
+      "semvalor": "—",
+      "dias": "{valor} dan | {valor} dana | {valor} dana",
+      "idadeDesconhecida": "starost nije navedena",
+      "kg": "kg"
+    },
+    "sexo": {
+      "macho": "Mužjak",
+      "femea": "Ženka"
+    },
+    "especie": {
+      "canina": "Pas",
+      "felina": "Mačka",
+      "ave": "Ptica",
+      "roedor": "Glodar",
+      "reptil": "Gmizavac",
+      "equina": "Konj"
+    },
+    "status": {
+      "agendado": "Zakazano",
+      "confirmado": "Potvrđeno",
+      "aguardando": "Čeka",
+      "em-atendimento": "Na pregledu",
+      "finalizado": "Završeno",
+      "falta": "Nedolazak",
+      "cancelado": "Otkazano"
+    },
+    "origem": {
+      "recepcao": "Recepcija",
+      "app": "Aplikacija",
+      "telefone": "Telefon",
+      "encaixe": "Vanredni termin",
+      "retorno": "Kontrola",
+      "fila": "Lista čekanja"
+    },
+    "bloqueio": {
+      "almoco": "Ručak",
+      "reuniao": "Sastanak",
+      "ferias": "Odsustvo",
+      "manutencao": "Održavanje",
+      "bloqueio-pessoal": "Lična blokada",
+      "feriado": "Praznik"
+    },
+    "cancelamento": {
+      "responsavel-desmarcou": "Staratelj je otkazao",
+      "clinica-remarcou": "Klinika je pomerila termin",
+      "paciente-indisponivel": "Pacijent nije dostupan",
+      "duplicado": "Dupli termin",
+      "outro": "Drugi razlog"
+    },
+    "alertas": {
+      "alergia": "Alergija",
+      "agressivo": "Potrebna fiksacija",
+      "cronico": "Hronično stanje",
+      "imunossuprimido": "Imunosupresija",
+      "gestante": "Gravidna",
+      "inadimplente": "Neizmiren dug",
+      "medicacao-continua": "Dugotrajna terapija"
+    },
+    "severidade": {
+      "info": "Info",
+      "atencao": "Oprez",
+      "risco": "Rizik"
+    },
+    "conflitos": {
+      "professional-overlap": "Preklapa se sa terminom pacijenta {paciente} od {hora}: {minutos} min preklapanja.",
+      "room-overlap": "Prostoriju {sala} u to vreme već zauzima pacijent {paciente}.",
+      "pet-double-book": "{paciente} već ima zakazan termin u {hora}.",
+      "block-invasion": "Zalazi {minutos} min u blokadu „{motivo}“.",
+      "outside-hours": "Van radnog vremena, koje traje od {abre} do {fecha}.",
+      "lunch-overlap": "Zalazi {minutos} min u pauzu za ručak.",
+      "holiday-closed": "Klinika je zatvorena: {feriado}.",
+      "over-capacity": "Opterećenje dana raste na {minutos} min, iznad uobičajenih {capacidade} min.",
+      "type-room-mismatch": "Prostorija {sala} nije predviđena za tip termina „{tipo}“."
+    },
+    "paciente": {
+      "responsavel": "Staratelj",
+      "castrado": "Sterilisan",
+      "inteiro": "Nesterilisan",
+      "semPeso": "Težina nije uneta",
+      "verHistorico": "Pogledajte istoriju",
+      "abrirProntuario": "Otvorite karton",
+      "novo": {
+        "atalho": "Dodajte novog pacijenta",
+        "atalhoAjuda": "Brzo dodavanje, bez napuštanja ovog ekrana",
+        "titulo": "Novi pacijent",
+        "ajuda": "Samo ono što je potrebno za zakazivanje. Datum rođenja i težina mogu da sačekaju pregled.",
+        "nome": "Ime pacijenta",
+        "raca": "Rasa",
+        "sexo": "Pol",
+        "nascimento": "Datum rođenja (opciono)",
+        "peso": "Težina (opciono)",
+        "castrado": "Sterilisan?",
+        "buscarResponsavel": "Pretražite vlasnike",
+        "nomeResponsavel": "Ime vlasnika",
+        "telefone": "Telefon",
+        "documento": "Dokument / CPF (opciono)",
+        "email": "Imejl (opciono)",
+        "salvar": "Sačuvajte i izaberite",
+        "erro": "Dodavanje pacijenta nije uspelo.",
+        "ajudaCompleta": "Kompletan karton. Obavezni su samo ime i vlasnik, ostalo unesite kada bude dostupno.",
+        "pesoDica": "Sa vage. Na osnovu nje se računa doza.",
+        "identificacao": "Identifikacija",
+        "microchip": "Mikročip",
+        "microchipDica": "15 cifara. Štampa se na potvrdama.",
+        "pelagem": "Dlaka",
+        "pelagemDica": "Boja i tip, onako kako bi neko opisao životinju.",
+        "porte": "Veličina",
+        "porteDica": "Veličina odrasle jedinke te rase, ne današnja težina. Određuje referentne opsege.",
+        "porteNaoInformado": "Nije navedeno",
+        "alertas": "Klinička upozorenja",
+        "alertasAjuda": "Prikazuju se u zaglavlju pacijenta, pre bilo kakve terapije.",
+        "gravidade": "Ozbiljnost",
+        "alertaDica": {
+          "alergia": "Koji lek ili supstanca",
+          "medicacao-continua": "Koji lek, doza i interval",
+          "cronico": "Koje stanje",
+          "imunossuprimido": "Razlog: hemioterapija, kortikosteroidi, bolest",
+          "agressivo": "Kakvo rukovanje životinja zahteva",
+          "gestante": "Stadijum gravidnosti",
+          "inadimplente": "Šta nije izmireno"
+        },
+        "semelhanteTitulo": "Već postoji sličan vlasnik",
+        "usarEste": "Izaberite ovog",
+        "semelhante": {
+          "documento": "isti dokument",
+          "telefone": "isti telefon",
+          "nome": "isto ime"
+        },
+        "telefoneSecundario": "Drugi telefon (opciono)",
+        "telefoneSecundarioDica": "Za slučaj da se niko ne javi na prvi broj; neophodan je tokom hospitalizacije.",
+        "canalPreferido": "Kontakt putem",
+        "canalDica": "Kanal kojim klinika šalje obaveštenja i izveštaje o stanju.",
+        "canal": {
+          "whatsapp": "WhatsApp",
+          "ligacao": "Telefonski poziv",
+          "email": "Imejl"
+        },
+        "enderecoAjuda": "Adresa (opciono). Za recept za kontrolisane lekove potrebna je adresa vlasnika.",
+        "cep": "Poštanski broj",
+        "logradouro": "Ulica",
+        "numero": "Broj",
+        "complemento": "Stan",
+        "bairro": "Naselje",
+        "cidade": "Grad",
+        "uf": "Region",
+        "erros": {
+          "obrigatorio": "Obavezno polje.",
+          "documento": "Neispravan broj dokumenta.",
+          "telefone": "Neispravan telefon. Unesite i pozivni broj.",
+          "email": "Neispravan imejl.",
+          "cep": "Poštanski broj ima 8 cifara.",
+          "futuro": "Datum ne može biti u budućnosti."
+        },
+        "salvarCompleto": "Dodajte pacijenta",
+        "sim": "Da",
+        "nao": "Ne",
+        "origem": {
+          "novo": "Novi vlasnik",
+          "existente": "Postojeći"
+        },
+        "quemResponde": "Ko je odgovoran za pacijenta",
+        "escolhaResponsavel": "Izaberite sa liste",
+        "telefoneSecundarioCurto": "Telefon 2",
+        "documentoCurto": "Dokument",
+        "emailCurto": "Imejl",
+        "enderecoCurto": "Adresa",
+        "previa": {
+          "titulo": "Kako će ga klinika videti",
+          "semResponsavel": "Bez vlasnika: nema koga da se pozove.",
+          "nomeVazio": "Ime pacijenta",
+          "semAlertas": "Nema označenih upozorenja"
+        }
+      },
+      "porte": {
+        "mini": "Patuljasti",
+        "pequeno": "Mali",
+        "medio": "Srednji",
+        "grande": "Veliki",
+        "gigante": "Džinovski"
+      },
+      "faixaEtaria": {
+        "filhote": "Mladunče",
+        "adulto": "Odrasli",
+        "idoso": "Stariji"
+      },
+      "pesoHoje": "danas",
+      "atos": {
+        "titulo": "Lekovi i procedure",
+        "ajuda": "Šta je ovaj pacijent primio i kada.",
+        "registrar": "Zabeležite",
+        "colunaQuando": "Kada",
+        "colunaAto": "Šta",
+        "colunaOrigem": "Gde",
+        "colunaQuem": "Ko",
+        "semProfissional": "Prijavljeno",
+        "vazioTitulo": "Još ništa nije zabeleženo",
+        "vazioDescricao": "Vakcine i doze tokom hospitalizacije pojavljuju se ovde automatski. Ostalo se beleži ručno.",
+        "kind": {
+          "medicamento": "Lek",
+          "procedimento": "Procedura"
+        },
+        "origem": {
+          "clinica": "U klinici",
+          "internacao": "Hospitalizacija",
+          "vacina": "Vakcina",
+          "avulso": "Prijavljeno"
+        },
+        "filtro": {
+          "todos": "Sve",
+          "medicamento": "Lekovi",
+          "procedimento": "Procedure"
+        },
+        "novo": {
+          "titulo": "Zabeležite proceduru ili lek",
+          "ajuda": "Šta je urađeno pacijentu {nome} i kada. Vakcine se unose u vakcinalni karton, a doze tokom hospitalizacije u ček-listu.",
+          "tipo": "Vrsta",
+          "medicamento": "Iz vodiča za lekove",
+          "medicamentoDica": "Kada izaberete lek odavde, istorija može da prati koliko puta je korišćen.",
+          "medicamentoVazio": "Nije u vodiču za lekove",
+          "descricao": "Šta je urađeno",
+          "descricaoDica": "Rečenica koju će pročitati onaj ko otvori ovaj karton za godinu dana.",
+          "via": "Način primene",
+          "semVia": "Nije primenljivo",
+          "dose": "Doza",
+          "doseDica": "Kako je primenjena.",
+          "quando": "Kada se desilo",
+          "quandoDica": "Ne vreme unosa, već vreme kada je urađeno.",
+          "quem": "Ko je izvršio",
+          "quemDica": "Ako ostane prazno: klinika nije prisustvovala i to će pisati u zapisu.",
+          "quemNinguem": "Niko iz klinike",
+          "observacao": "Napomena",
+          "salvar": "Zabeležite",
+          "erros": {
+            "descricao": "Navedite šta je urađeno.",
+            "quando": "Unesite datum i vreme.",
+            "futuro": "Postupak ne može biti u budućnosti."
+          }
+        }
+      }
+    },
+    "tabela": {
+      "carregando": "Učitavanje…",
+      "vazio": "Ovde nema ničega",
+      "tentarDeNovo": "Pokušajte ponovo",
+      "acoes": "Radnje"
+    },
+    "erros": {
+      "catalogos": "Nismo uspeli da učitamo podatke klinike.",
+      "agenda": "Nismo uspeli da učitamo raspored.",
+      "mutacao": "Izmena nije sačuvana. Pokušajte ponovo.",
+      "prontuario": "Nismo uspeli da učitamo karton.",
+      "fila": "Nismo uspeli da učitamo listu čekanja.",
+      "internacao": "Nismo uspeli da učitamo podatke o hospitalizaciji.",
+      "internacaoAcao": "Zapis nije sačuvan. Pokušajte ponovo.",
+      "internacaoLeito": "Taj boks nije slobodan.",
+      "altaSemAviso": "Za smrtni ishod ili premeštaj neko mora prethodno da razgovara sa vlasnikom telefonom."
+    },
+    "densidade": {
+      "titulo": "Gustina",
+      "compacta": "Kompaktna",
+      "media": "Srednja",
+      "confortavel": "Prostrana"
+    },
+    "zoom": {
+      "titulo": "Uvećanje mreže",
+      "reduzido": "Malo",
+      "medio": "Srednje",
+      "ampliado": "Veliko"
+    },
+    "agenda": {
+      "titulo": "Raspored",
+      "subtitulo": "Klinika",
+      "hoje": "Danas",
+      "diaAnterior": "Prethodni dan",
+      "proximoDia": "Sledeći dan",
+      "visaoDia": "Dan",
+      "visaoSemana": "Nedelja",
+      "agruparPorProfissional": "Po stručnom licu",
+      "agruparPorSala": "Po prostoriji",
+      "novoAtendimento": "Novi termin",
+      "encaixar": "Vanredni termin",
+      "bloquear": "Blokirajte vreme",
+      "ocultarCancelados": "Sakrijte otkazane",
+      "filtros": "Filteri",
+      "limparFiltros": "Obrišite filtere",
+      "vazioTitulo": "Nema termina za ovaj dan",
+      "vazioDescricao": "Zakažite prvi termin ili se vratite na dan sa terminima.",
+      "fechadaTitulo": "Klinika ne radi",
+      "fechadaDescricao": "Praznik: {feriado}. Termin i dalje možete zakazati, uz potvrdu.",
+      "linhaDoAgora": "Sada",
+      "encaixeMarca": "Vanredni",
+      "duasSalas": "Zauzima dve prostorije",
+      "ocupacao": "Zauzeto: {minutos} min",
+      "conflitosNoCard": "{contagem} upozorenje | {contagem} upozorenja | {contagem} upozorenja",
+      "semSala": "Prostorija nije određena",
+      "colunaVazia": "Nema termina",
+      "arrastarDica": "Prevucite da biste pomerili termin. Shift + strelice pomeraju po 15 minuta.",
+      "desfazer": "Poništite",
+      "desfeito": {
+        "mover": "Termin je pomeren.",
+        "cancelar": "Termin je otkazan.",
+        "falta": "Nedolazak je zabeležen.",
+        "criar": "Termin je zakazan.",
+        "status": "Status je ažuriran.",
+        "editar": "Termin je izmenjen."
+      },
+      "mover": {
+        "titulo": "Potvrdite pomeranje termina",
+        "de": "Trenutno",
+        "para": "Novo",
+        "profissional": "Stručno lice",
+        "mensagem": "Poruka koja se šalje staratelju",
+        "mensagemPadrao": "Dobar dan! Termin za ljubimca {paciente} pomeren je na {data} u {hora}. Ako Vam bilo šta zatreba, samo odgovorite na ovu poruku.",
+        "confirmar": "Pomerite termin",
+        "confirmarComAviso": "Ipak pomerite termin",
+        "cancelar": "Ostavite kako jeste"
+      },
+      "editar": {
+        "titulo": "Izmenite termin",
+        "pacienteFixo": "Za drugog pacijenta otkažite ovaj termin i zakažite novi.",
+        "mudancas": "Šta se menja",
+        "grupoLigado": "Povezani termin prati novo vreme.",
+        "salvar": "Sačuvajte",
+        "salvarEAvisar": "Sačuvajte i obavestite",
+        "salvarMesmoAssim": "Ipak sačuvajte",
+        "mensagemPadrao": "Dobar dan! Termin za ljubimca {paciente} sada je {data} u {hora}. Ako Vam bilo šta zatreba, samo odgovorite na ovu poruku."
+      },
+      "encaixeDialogo": {
+        "titulo": "Vanredni termin",
+        "descricao": "Vanredni termin se dodaje van mreže i tako je i označen.",
+        "confirmar": "Ipak dodajte vanredni termin"
+      },
+      "fechadaDialogo": {
+        "titulo": "Zakazivanje u neradni dan",
+        "descricao": "Klinika ne radi ({feriado}). Potvrdite dva puta, kako niko ne bi zakazao termin a da to ne primeti.",
+        "primeiroPasso": "Razumem da klinika ne radi",
+        "confirmar": "Ipak zakažite"
+      },
+      "cancelarDialogo": {
+        "titulo": "Otkažite termin",
+        "motivo": "Razlog",
+        "descricao": "Vreme se oslobađa, ali kartica ostaje vidljiva za taj dan.",
+        "confirmar": "Otkažite termin",
+        "aviso": "Termin za ljubimca {paciente} je otkazan ({motivo}). Javite nam se da zakažemo novi termin."
+      },
+      "bloqueioDialogo": {
+        "titulo": "Blokirajte vreme",
+        "motivo": "Razlog",
+        "detalhe": "Detalji",
+        "profissional": "Stručno lice",
+        "todosOsProfissionais": "Ceo tim",
+        "sala": "Prostorija",
+        "qualquerSala": "Bilo koja prostorija",
+        "inicio": "Početak",
+        "fim": "Kraj",
+        "repetir": "Ponavlja se svake nedelje",
+        "confirmar": "Blokirajte"
+      },
+      "semana": {
+        "titulo": "Nedelja",
+        "carga": "Opterećenje",
+        "agendados": "{contagem} termin | {contagem} termina | {contagem} termina",
+        "faltas": "{contagem} nedolazak | {contagem} nedolaska | {contagem} nedolazaka",
+        "encaixes": "{contagem} vanredni termin | {contagem} vanredna termina | {contagem} vanrednih termina",
+        "ocupacao": "Popunjenost: {valor}",
+        "melhoresAlternativas": "Najbolji termini",
+        "semAlternativa": "Narednih dana nema slobodnih termina.",
+        "detalhePessoa": "{nome} · pre podne {manha}, po podne {tarde}"
+      },
+      "exibicao": "Prikaz",
+      "maisAcoes": "Još radnji",
+      "criar": {
+        "titulo": "Novi termin",
+        "tituloEncaixe": "Novi vanredni termin",
+        "encaixe": "Vanredni termin",
+        "paciente": "Pacijent",
+        "buscarPaciente": "Pretražite pacijente",
+        "escolhaPaciente": "Izaberite pacijenta",
+        "tipo": "Vrsta termina",
+        "hora": "Početak",
+        "sala": "Prostorija",
+        "semSala": "Prostorija nije određena",
+        "agendar": "Zakažite",
+        "agendarMesmoAssim": "Ipak zakažite",
+        "alternativas": "Slobodni termini ovog dana",
+        "semVagaTitulo": "Nema slobodnog termina",
+        "semVagaDescricao": "Ova pretraga nije pronašla alternativu. Vlasnik može da se upiše na listu čekanja i dobije obaveštenje kada se termin oslobodi."
+      },
+      "bloqueio": {
+        "titulo": "Blokirajte vreme",
+        "motivo": "Razlog",
+        "ate": "Kraj",
+        "janelaInvalida": "Kraj mora biti posle početka.",
+        "clinicaInteira": "Cela klinika",
+        "semSala": "Bez određene prostorije",
+        "detalhe": "Detalji",
+        "repetir": "Ponavlja se svake nedelje",
+        "diasDaSemana": "Dani u nedelji",
+        "salvar": "Blokirajte"
+      },
+      "legenda": {
+        "titulo": "Legenda",
+        "filtrar": "Prikažite samo: {tipo}"
+      }
+    },
+    "meuDia": {
+      "titulo": "Danas u klinici",
+      "subtitulo": "Klinika",
+      "agora": "Sada",
+      "aSeguir": "Sledeće",
+      "semAtendimentoAgora": "Trenutno nema pregleda u toku.",
+      "semProximo": "Za danas nema više zakazanih termina.",
+      "esperando": "Već su stigli",
+      "esperandoVazio": "Niko ne čeka na recepciji.",
+      "internados": "Hospitalizovani pacijenti kojima ste potrebni",
+      "internadosVazio": "Nema hospitalizovanih pacijenata sa zakasnelom dozom ili zadržanim izveštajem.",
+      "esperaDe": "dolazak: {valor}",
+      "alertasDoDia": "Upozorenja koja danas menjaju lečenje",
+      "alertasVazio": "Nema kliničkih upozorenja kod današnjih pacijenata.",
+      "retornosSemHorario": "Kontrole bez zakazanog termina",
+      "retornosVazio": "Nema kontrola na čekanju.",
+      "marcarRetorno": "Zakažite kontrolu",
+      "irParaAgenda": "Pogledajte ceo raspored",
+      "iniciarAtendimento": "Započnite pregled",
+      "continuar": "Nastavite"
+    },
+    "resumo": {
+      "titulo": "Rezime klinike",
+      "subtitulo": "Klinika",
+      "intervalo": "{inicio} – {fim}",
+      "semMovimento": "Nema pregleda u ovom periodu.",
+      "semDados": "Nema podataka za ovaj period.",
+      "semProntuario": "Nijedan karton nije završen u ovom periodu.",
+      "periodo": {
+        "rotulo": "Period",
+        "hoje": "Danas",
+        "semana": "Ove nedelje",
+        "semana-passada": "Prošle nedelje",
+        "trinta-dias": "30 dana"
+      },
+      "filtro": {
+        "todosProfissionais": "Sva stručna lica",
+        "todosTipos": "Sve vrste"
+      },
+      "indicador": {
+        "atendidos": "Obavljeni pregledi",
+        "horas": "{valor} h pregleda",
+        "comparecimento": "Dolaznost",
+        "faltasNoPeriodo": "bez nedolazaka | {contagem} nedolazak | {contagem} nedolaska | {contagem} nedolazaka",
+        "ocupacao": "Prosečna popunjenost",
+        "ocupacaoDetalhe": "Prosek za dane kada je klinika radila",
+        "novos": "Novi pacijenti",
+        "encaixes": "bez vanrednih termina | {contagem} vanredni termin | {contagem} vanredna termina | {contagem} vanrednih termina"
+      },
+      "grafico": {
+        "porDia": "Aktivnost po danima",
+        "porDiaAjuda": "Kolone prikazuju zbir pregleda, a linija popunjenost rasporeda.",
+        "porTipo": "Po vrsti termina",
+        "porProfissional": "Po stručnom licu",
+        "horarios": "Najprometniji sati",
+        "horariosAjuda": "Koliko pregleda počinje u svakom satu.",
+        "diagnosticos": "Najčešće dijagnoze"
+      },
+      "legenda": {
+        "finalizados": "Obavljeni",
+        "previstos": "Predstojeći",
+        "faltas": "Nedolasci",
+        "ocupacao": "Popunjenost",
+        "fechado": "Zatvoreno"
+      }
+    },
+    "bulario": {
+      "titulo": "Vodič za lekove",
+      "subtitulo": "Klinika",
+      "buscaPlaceholder": "Pretražite po leku, aktivnoj supstanci ili indikaciji",
+      "semResultado": "Nijedan lek ne odgovara ovim filterima.",
+      "escolha": "Izaberite lek sa liste.",
+      "semPaciente": "Uklonite pacijenta",
+      "temAviso": "Postoji upozorenje za ovog pacijenta",
+      "controlado": "Kontrolisan",
+      "escolherTitulo": "Izaberite iz vodiča za lekove",
+      "usar": "Dodajte u terapiju",
+      "usarMesmoAssim": "Ipak propišite",
+      "proibidoRodape": "Kontraindikovano za vrstu ovog pacijenta.",
+      "avisosDoPaciente": "Oprez: {nome}",
+      "doseTitulo": "Doza po vrsti",
+      "doseEspecie": "Vrsta",
+      "doseFaixa": "Uobičajeni opseg",
+      "doseIntervalo": "Interval",
+      "doseDuracao": "Uobičajeno trajanje",
+      "doseProibida": "Kontraindikovano za ovu vrstu",
+      "destePaciente": "ovaj pacijent",
+      "cadaHoras": "na svakih {horas} h",
+      "vias": "Načini primene",
+      "indicacoes": "Indikacije",
+      "contraindicacoes": "Kontraindikacije",
+      "efeitosAdversos": "Neželjeni efekti",
+      "interacoes": "Interakcije",
+      "isencao": "Sadržaj za podršku pri odlučivanju. Ne zamenjuje uputstvo proizvođača niti procenu odgovornog veterinara.",
+      "filtro": {
+        "classe": "Klasa",
+        "especie": "Vrsta",
+        "controle": "Kontrola"
+      },
+      "classe": {
+        "antibiotico": "Antibiotik",
+        "anti-inflamatorio": "Protivupalni lek",
+        "analgesico": "Analgetik",
+        "corticoide": "Kortikosteroid",
+        "antiemetico": "Antiemetik",
+        "gastroprotetor": "Gastroprotektiv",
+        "antiparasitario": "Antiparazitik",
+        "sedativo": "Sedativ",
+        "cardiologico": "Kardiološki lek",
+        "dermatologico": "Dermatološki lek"
+      },
+      "aviso": {
+        "especie-proibida": "Kontraindikovano za ovu vrstu. {detalhe}",
+        "sem-dose-da-especie": "Vodič za lekove nema dozu za ovu vrstu.",
+        "alergia": "Zabeležena alergija: {detalhe}"
+      },
+      "cuidado": {
+        "gestante": "Gravidnost: ova aktivna supstanca zahteva oprez.",
+        "lactante": "Laktacija: ova aktivna supstanca zahteva oprez.",
+        "filhote": "Mlad pacijent: ova aktivna supstanca zahteva oprez.",
+        "idoso": "Stariji pacijent: ova aktivna supstanca zahteva oprez.",
+        "renal": "Zabeleženo oboljenje bubrega: {detalhe}",
+        "hepatico": "Zabeleženo oboljenje jetre: {detalhe}",
+        "cardiaco": "Zabeleženo srčano oboljenje: {detalhe}",
+        "gastrico": "Zabeleženo oboljenje želuca: {detalhe}"
+      }
+    },
+    "documentos": {
+      "titulo": "Dokumenti pregleda",
+      "ajuda": "Svaki dokument se štampa na listu A4, spreman za štampu ili čuvanje kao PDF.",
+      "emitir": "Sačuvajte kao PDF",
+      "notaImpressao": "Otvara se prozor za štampu sa dokumentom; kao odredište izaberite „Sačuvaj kao PDF“ da biste ga poslali vlasniku.",
+      "data": "Datum",
+      "passoComReceita": "Proverite i izdajte recept, potvrdu ili karton",
+      "passoSemReceita": "Proverite i izdajte potvrdu ili karton",
+      "cartao": {
+        "receituarioControle": "Štampa se na posebnom listu, u dva primerka",
+        "semPrescricao": "Na ovom pregledu nije propisan lek",
+        "prontuario": {
+          "titulo": "Kompletan medicinski karton",
+          "descricao": "Anamneza, klinički pregled, dijagnoza i terapijski plan."
+        },
+        "receituario": {
+          "titulo": "Recept",
+          "descricao": "Lekovi sa doziranjem napisanim rečima i količinom za izdavanje."
+        },
+        "atestado-saude": {
+          "titulo": "Potvrda o zdravstvenom stanju",
+          "descricao": "Potvrđuje da je životinja pregledana i šta je utvrđeno."
+        },
+        "atestado-comparecimento": {
+          "titulo": "Potvrda o prisustvu",
+          "descricao": "Opravdava odsustvo vlasnika tokom pregleda."
+        },
+        "pedido-exame": {
+          "titulo": "Zahtev za analize",
+          "descricao": "Šalje se laboratoriji uz kliničku indikaciju."
+        },
+        "orientacoes": {
+          "titulo": "Uputstva za negu kod kuće",
+          "descricao": "List koji vlasnik nosi kući."
+        },
+        "encaminhamento": {
+          "titulo": "Uput",
+          "descricao": "Uput sa rezimeom slučaja."
+        },
+        "relatorio-plano": {
+          "titulo": "Izveštaj za osiguranje",
+          "descricao": "Kliničko obrazloženje za refundaciju."
+        },
+        "atestado-viagem": {
+          "titulo": "Potvrda o zdravstvenom stanju za putovanje",
+          "descricao": "Zahteva ažurnu vakcinaciju protiv besnila i dehelmintizaciju."
+        },
+        "declaracao-obito": {
+          "titulo": "Potvrda o uginuću",
+          "descricao": "Potrebna za kremaciju ili sahranu."
+        },
+        "comprovante-vacinacao": {
+          "titulo": "Potvrda o vakcinaciji",
+          "descricao": "Serija i proizvođač se još ne beleže."
+        },
+        "termo-consentimento": {
+          "titulo": "Obrazac informisanog pristanka",
+          "descricao": "Vlasnik ga potpisuje pre procedure."
+        },
+        "termo-recusa": {
+          "titulo": "Obrazac o odbijanju lečenja",
+          "descricao": "Beleži da preporučeno lečenje nije prihvaćeno."
+        },
+        "termo-eutanasia": {
+          "titulo": "Obrazac saglasnosti za eutanaziju",
+          "descricao": "Zahteva potpis i identifikaciju životinje."
+        },
+        "orcamento": {
+          "titulo": "Predračun",
+          "descricao": "Iznose unosi klinika."
+        }
+      },
+      "receita": {
+        "titulo": "Veterinarski recept",
+        "tituloControle": "Recept za kontrolisane supstance",
+        "semPrescricao": "Na ovom pregledu nije propisan nijedan lek.",
+        "usoRotulo": "Primena:",
+        "quantidadeTotal": "Količina za izdavanje: {valor} {unidade}",
+        "via": {
+          "primeira": "Primerak 1: zadržava apoteka",
+          "segunda": "Primerak 2: uputstvo za vlasnika"
+        },
+        "avisoControle": "Recept za kontrolisane supstance u dva primerka, u skladu sa važećim propisima.",
+        "comprador": "Podaci o kupcu",
+        "fornecedor": "Podaci o izdavaocu",
+        "nome": "Ime",
+        "documentoIdentidade": "Lični dokument",
+        "endereco": "Adresa",
+        "telefone": "Telefon",
+        "dataDispensacao": "Datum izdavanja",
+        "assinaturaFarmaceutico": "Potpis farmaceuta"
+      },
+      "atestado": {
+        "finalidade": "Svrha:",
+        "rodape": "Izdato na zahtev vlasnika, u svrhe za koje bude potrebno.",
+        "saude": {
+          "titulo": "Potvrda o zdravstvenom stanju",
+          "corpoComDiagnostico": "Potvrđujem da je dana {data} izvršen pregled životinje {paciente}, gore identifikovane, i da je utvrđeno sledeće: {diagnostico}.",
+          "corpoSemAchado": "Potvrđujem da je dana {data} izvršen pregled životinje {paciente}, gore identifikovane, i da tokom obavljenog pregleda nisu utvrđena klinička odstupanja.",
+          "recomendacoes": "Preporuke:"
+        },
+        "comparecimento": {
+          "titulo": "Potvrda o prisustvu",
+          "corpo": "Potvrđujem da je lice {responsavel} dana {data}, od {entrada} do {saida}, bilo prisutno u ovoj klinici kao pratnja životinje {paciente} tokom veterinarskog pregleda."
+        },
+        "viagem": {
+          "titulo": "Potvrda o zdravstvenom stanju za putovanje",
+          "corpo": "Potvrđujem da je životinja {paciente}, vrsta: {especie}, pregledana na današnji dan ({data}), da nije pokazivala kliničke znake zarazne bolesti i da je sposobna za transport.",
+          "antirrabica": "Vakcina protiv besnila: datum i serija",
+          "vermifugacao": "Dehelmintizacija: datum i preparat",
+          "validade": "Rok važenja koji zahteva zemlja odredišta"
+        }
+      },
+      "pedidoExame": {
+        "titulo": "Zahtev za analize",
+        "solicito": "Zahtevam sledeće analize",
+        "indicacao": "Klinička indikacija",
+        "coleta": "Napomene za uzorkovanje",
+        "jejum": "Za laboratorijske analize potrebno je gladovanje od 8 do 12 sati. Voda je dozvoljena.",
+        "contato": "Za pitanja se obratite klinici: {telefone}",
+        "vazio": "Na ovom pregledu nisu zatražene analize.",
+        "grupo": {
+          "laboratorio": "laboratorija",
+          "imagem": "snimanje",
+          "outros": "ostalo"
+        }
+      },
+      "orientacoes": {
+        "titulo": "Uputstva za negu kod kuće",
+        "cuidados": "Nega kod kuće",
+        "medicacao": "Lekovi",
+        "contInuo": "dugotrajna primena",
+        "retornoEm": "Dođite na kontrolu za {dias} dan, ili ranije ako se stanje pogorša. | Dođite na kontrolu za {dias} dana, ili ranije ako se stanje pogorša. | Dođite na kontrolu za {dias} dana, ili ranije ako se stanje pogorša.",
+        "procureTitulo": "Obratite se klinici pre kontrole ako primetite",
+        "procureTexto": "Odbijanje hrane duže od 24 h, uporno povraćanje ili proliv, izraženu apatiju, otežano disanje, krvarenje, konvulzije ili bilo kakvo pogoršanje stanja zbog kog je obavljen ovaj pregled."
+      },
+      "encaminhamento": {
+        "titulo": "Uput",
+        "para": "Upućuje se",
+        "paraDica": "Ime i specijalnost stručnog lica ili službe kojoj se pacijent upućuje",
+        "motivo": "Razlog upućivanja",
+        "achados": "Nalazi pregleda",
+        "emUso": "Trenutna terapija",
+        "solicito": "Zahtevam",
+        "disponivel": "Kompletan medicinski karton dostupan je kolegi na zahtev i uz saglasnost vlasnika."
+      },
+      "termo": {
+        "detalhamento": "Opis procedure",
+        "objetoIndefinido": "procedura preporučena na ovaj datum",
+        "consentimento": {
+          "titulo": "Obrazac informisanog pristanka",
+          "declaracao": "Ja, {responsavel}, kao odgovorno lice za životinju {paciente}, izjavljujem da sam jasno obavešten(a) o preporučenoj proceduri (indikacija: {objeto}), uključujući njene očekivane koristi, moguće rizike i dostupne alternative. Ovlašćujem tim ove klinike da je sprovede.",
+          "itensTitulo": "Obavešten(a) sam da",
+          "itens": "Svaka procedura pod anestezijom nosi rizik, čak i kada je pacijent stabilan, a preoperativne analize uredne.|Mogu nastati nepredviđene komplikacije koje zahtevaju promenu pristupa tokom procedure.|Radi očuvanja života životinje mogu biti potrebne dodatne, neplanirane procedure.|Nijedan ishod nije garantovan; preuzeta obaveza je obaveza sredstva, a ne rezultata.",
+          "ciencia": "Izjavljujem da sam upoznat(a) sa sadržajem ovog obrasca, da su sva moja pitanja dobila odgovor i da proceduru odobravam slobodno i uz potpunu informisanost."
+        },
+        "recusa": {
+          "titulo": "Obrazac o odbijanju lečenja",
+          "declaracao": "Ja, {responsavel}, kao odgovorno lice za životinju {paciente}, izjavljujem da sam obavešten(a) o lečenju koje je veterinar preporučio (indikacija: {objeto}) i da ga, svojom odlukom, NE odobravam.",
+          "itensTitulo": "Obavešten(a) sam da",
+          "itens": "Odbijanje preporučenog lečenja može pogoršati stanje životinje.|Odbijanje može dovesti do patnje koja se mogla izbeći i, u nekim slučajevima, do uginuća.|Odgovornost za posledice ove odluke u potpunosti snosim ja.|Ovu odluku mogu da preispitam u bilo kom trenutku i da se vratim u kliniku.",
+          "ciencia": "Izjavljujem da je ovo odbijanje moja lična odluka, doneta nakon što sam obavešten(a), i oslobađam tim ove klinike odgovornosti za njene posledice."
+        },
+        "eutanasia": {
+          "titulo": "Obrazac saglasnosti za eutanaziju",
+          "carimbo": "Dokument o saglasnosti: zahteva potpis vlasnika",
+          "declaracao": "Ja, {responsavel}, kao odgovorno lice za životinju {paciente}, izjavljujem da sam obavešten(a) o kliničkom stanju ({objeto}), o iznetoj prognozi i o alternativama u vidu lečenja i palijativne nege, i dajem saglasnost za izvođenje eutanazije.",
+          "itensTitulo": "Izjavljujem da sam svestan(a) da",
+          "itens": "Eutanazija je nepovratan postupak.|Obavešten(a) sam o dostupnim alternativama, uključujući palijativnu negu.|Odluka je moja, doneta bez prinude, nakon što sam obavešten(a).|Ja sam zakoniti staratelj životinje identifikovane u ovom dokumentu.",
+          "ciencia": "Izjavljujem, pod punom odgovornošću, da sam zakoniti staratelj ovde identifikovane životinje i dajem saglasnost za proceduru."
+        }
+      },
+      "obito": {
+        "titulo": "Potvrda o uginuću",
+        "declaracao": "Potvrđujem da je životinja {paciente}, vrsta: {especie}, rasa: {raca}, pol: {sexo}, starost: {idade}, vlasnik: {responsavel}, uginula prema podacima navedenim u nastavku.",
+        "quando": "Datum i vreme uginuća",
+        "hora": "Vreme",
+        "causa": "Verovatan uzrok uginuća",
+        "semNecropsia": "Verovatan uzrok, utvrđen kliničkom procenom. Nekropsija nije obavljena.",
+        "identificacao": "Identifikacija životinje",
+        "microchip": "Mikročip",
+        "pelagem": "Dlaka i posebni znaci",
+        "destinacao": "Postupanje sa telom",
+        "destino": {
+          "cremacao-individual": "Individualna kremacija",
+          "cremacao-coletiva": "Zajednička kremacija",
+          "sepultamento": "Sahrana",
+          "retirado": "Preuzima vlasnik"
+        }
+      },
+      "vacinacao": {
+        "titulo": "Potvrda o vakcinaciji",
+        "declaracao": "Potvrđujem da je životinja {paciente} u ovoj klinici primila niže navedene vakcine.",
+        "vacina": "Vakcina",
+        "lote": "Serija",
+        "fabricante": "Proizvođač",
+        "proxima": "Sledeća doza",
+        "ressalva": "Serija i proizvođač prema evidenciji ove klinike. Vakcine primljene na drugom mestu treba proveriti u vakcinalnoj knjižici životinje."
+      },
+      "orcamento": {
+        "titulo": "Predračun",
+        "carimbo": "Predračun: ne predstavlja saglasnost za izvođenje procedure",
+        "consulta": "Pregled",
+        "item": "Stavka",
+        "grupoColuna": "Vrsta",
+        "valor": "Iznos",
+        "total": "Ukupno",
+        "grupo": {
+          "atendimento": "Pregled",
+          "exame": "Analiza",
+          "medicamento": "Lek"
+        },
+        "validade": "Predračun važi 15 dana od datuma izdavanja.",
+        "ressalva": "Procenjeni iznosi. O dodatnim procedurama utvrđenim tokom lečenja bićete obavešteni pre njihovog izvođenja."
+      },
+      "relatorioPlano": {
+        "titulo": "Izveštaj za osiguranje",
+        "operadora": "Osiguravač",
+        "apolice": "Polisa / broj osiguranika",
+        "quadro": "Klinička slika",
+        "achados": "Objektivni nalazi",
+        "itens": "Stavke i kliničko obrazloženje",
+        "justificativa": "Obrazloženje"
+      },
+      "outros": "Ostali dokumenti ({contagem})",
+      "grupo": {
+        "atendimento": "Sa ovog pregleda",
+        "declaracoes": "Potvrde",
+        "termos": "Obrasci koje potpisuje vlasnik",
+        "terceiros": "Za treća lica"
+      }
+    },
+    "fila": {
+      "titulo": "Lista čekanja",
+      "subtitulo": "Klinika",
+      "vazioTitulo": "Lista čekanja je prazna",
+      "vazioDescricao": "Kada nema odgovarajućeg termina, dodajte pacijenta ovde umesto da improvizujete.",
+      "adicionar": "Dodajte na listu čekanja",
+      "prioridade": {
+        "normal": "Normalno",
+        "preferencial": "Prioritetno",
+        "urgente": "Hitno"
+      },
+      "prioridadeRotulo": "Prioritet",
+      "situacao": {
+        "aguardando": "Čeka",
+        "ofertado": "Termin ponuđen",
+        "aceito": "Prihvaćeno",
+        "expirado": "Ponuda istekla",
+        "removido": "Uklonjeno"
+      },
+      "janelas": "Dostupnost",
+      "esperaDesde": "Upis na listu: {valor}",
+      "ofertaExpiraEm": "Ističe {valor}",
+      "ofertarVaga": "Ponudite termin",
+      "aceitar": "Zabeležite prihvatanje",
+      "recusar": "Zabeležite odbijanje",
+      "remover": "Uklonite sa liste",
+      "vagaAberta": {
+        "titulo": "Upravo se oslobodio termin",
+        "descricao": "Termin u {hora} ({profissional}) je slobodan. Ovim pacijentima odgovara taj termin.",
+        "oferecer": "Ponudite pacijentu {paciente}",
+        "ninguem": "Nikome sa liste ne odgovara ovaj termin.",
+        "depois": "Ne sada"
+      },
+      "colunaSituacao": "Status",
+      "colunaPosicao": "Poz.",
+      "qualquerProfissional": "Bilo koje stručno lice",
+      "posicaoNaFila": "{posicao}. na listi",
+      "oferta": {
+        "prazo": "Ponuda ističe za {minutos} minut. Posle toga termin se vraća klinici. | Ponuda ističe za {minutos} minuta. Posle toga termin se vraća klinici. | Ponuda ističe za {minutos} minuta. Posle toga termin se vraća klinici.",
+        "mensagemPadrao": "Dobar dan! Oslobodio se termin za Vašeg ljubimca {paciente}: {data} u {hora}. Da li potvrđujete? Termin ćemo čuvati {minutos} minut. | Dobar dan! Oslobodio se termin za Vašeg ljubimca {paciente}: {data} u {hora}. Da li potvrđujete? Termin ćemo čuvati {minutos} minuta. | Dobar dan! Oslobodio se termin za Vašeg ljubimca {paciente}: {data} u {hora}. Da li potvrđujete? Termin ćemo čuvati {minutos} minuta."
+      }
+    },
+    "faltas": {
+      "titulo": "Nedolasci",
+      "subtitulo": "Klinika",
+      "vazioTitulo": "Nema zabeleženih nedolazaka",
+      "vazioDescricao": "Dobar znak: niko nije propustio termin u ovom periodu.",
+      "colunaPaciente": "Pacijent",
+      "colunaResponsavel": "Staratelj",
+      "colunaFaltas": "Nedolasci",
+      "colunaMinutos": "Izgubljeno vreme",
+      "colunaUltima": "Poslednji",
+      "reincidente": "Učestalo",
+      "totalMinutos": "{valor} izgubljenog vremena u periodu",
+      "politica": {
+        "titulo": "Pravilo za učestale nedolaske",
+        "descricao": "Kada broj nedolazaka dostigne {limite}, sistem predlaže da se zatraži potvrda pre rezervacije termina. To je samo predlog: klinika odlučuje od slučaja do slučaja.",
+        "ativar": "Predlog potvrde kod učestalih nedolazaka",
+        "ativo": "Predlog uključen",
+        "inativo": "Predlog isključen"
+      },
+      "filtro": {
+        "reincidentes": "Učestali",
+        "todas": "Svi"
+      },
+      "resumo": {
+        "total": "Nedolasci u periodu",
+        "pacientes": "{contagem} pacijent | {contagem} pacijenta | {contagem} pacijenata",
+        "agenda": "Izgubljeno vreme",
+        "reincidentes": "Učestali nedolasci",
+        "limite": "prag nedolazaka: {limite}"
+      },
+      "marcar": "Označite nedolazak",
+      "reagendar": {
+        "titulo": "Ponovno zakazivanje",
+        "confirmar": "Zakažite ponovo i obavestite",
+        "faltouEm": "Nedolazak {data} u {hora}",
+        "mensagemPadrao": "Dobar dan! Danas Vas nismo videli sa ljubimcem {paciente}. Imamo slobodan termin {data} u {hora}. Da li da ga potvrdimo?"
+      },
+      "historico": {
+        "titulo": "Nedolasci: {nome}",
+        "reagendado": "Novi termin: {data}"
+      }
+    },
+    "prontuario": {
+      "titulo": "Medicinski karton",
+      "subtitulo": "Klinika",
+      "vazioTitulo": "Još nema kartona",
+      "vazioDescricao": "Kartoni se pojavljuju ovde kako se pregledi završavaju.",
+      "rascunho": "Nacrt",
+      "finalizado": "Završeno",
+      "salvandoAgora": "Čuvanje…",
+      "salvoEm": "Sačuvano u {valor}",
+      "rascunhoLocal": "Nacrt je sačuvan u ovom pregledaču",
+      "restaurarRascunho": "Vratite nacrt",
+      "descartarRascunho": "Odbacite",
+      "naoAferido": "nije mereno",
+      "marcarNaoAferido": "Označite kao nemereno",
+      "referencia": "referentno",
+      "semReferencia": "bez referentnog opsega",
+      "faixa": {
+        "abaixo": "ispod",
+        "dentro": "u opsegu",
+        "acima": "iznad",
+        "sem-referencia": "bez opsega",
+        "nao-aferido": "nije mereno"
+      },
+      "somenteLeitura": "Karton se uređuje na uređaju {dispositivo} od {desde}. Imate prikaz samo za čitanje.",
+      "assumirEdicao": "Preuzmite uređivanje",
+      "assumirDialogo": {
+        "titulo": "Preuzimanje uređivanja",
+        "descricao": "Ovaj karton je otvoren na drugom uređaju. Kada preuzmete uređivanje, taj uređaj prelazi u režim čitanja, a Vi možete da uporedite promene polje po polje.",
+        "confirmar": "Ipak preuzmite"
+      },
+      "comparar": "Uporedite verzije",
+      "campo": "Polje",
+      "dispositivo": {
+        "navegador": "Pregledač",
+        "servidor": "Server",
+        "simulado": "Recepcija · Chrome"
+      },
+      "versaoAtual": "Na ovom ekranu",
+      "versaoServidor": "Na serveru",
+      "anamnese": {
+        "titulo": "Anamneza",
+        "descricao": "Zašto je pacijent doveden i šta je staratelj primetio.",
+        "queixaPrincipal": "Glavna tegoba",
+        "historia": "Istorija bolesti",
+        "duracaoSintomas": "Koliko dugo",
+        "duracaoExemplo": "3 dana",
+        "apetite": "Apetit",
+        "hidratacao": "Hidratacija",
+        "evacuacao": "Defekacija",
+        "miccao": "Mokrenje",
+        "ambiente": "Okruženje",
+        "vacinacao": "Vakcinacija ažurna",
+        "vermifugacao": "Dehelmintizacija ažurna",
+        "opcoes": {
+          "normal": "Normalno",
+          "aumentado": "Povećan",
+          "reduzido": "Smanjen",
+          "ausente": "Odsutan",
+          "leve": "Blaga dehidratacija",
+          "moderada": "Umerena dehidratacija",
+          "grave": "Teška dehidratacija",
+          "diarreia": "Dijareja",
+          "constipacao": "Opstipacija",
+          "aumentada": "Pojačano",
+          "reduzida": "Smanjeno",
+          "disuria": "Disurija",
+          "domiciliar": "U zatvorenom",
+          "externo": "Izlazi napolje",
+          "misto": "Kombinovano",
+          "sim": "Da",
+          "nao": "Ne"
+        },
+        "sinaisGerais": "Opšti znaci",
+        "prevencao": "Prevencija",
+        "evolucao": "Tok",
+        "evolucaoOpcoes": {
+          "piorando": "Pogoršava se",
+          "estavel": "Stabilno",
+          "melhorando": "Poboljšava se",
+          "intermitente": "Povremeno"
+        },
+        "antecedentes": "Prethodna stanja",
+        "antecedentesVazio": "Nema zabeleženih prethodnih stanja.",
+        "antecedenteExemplo": "npr. alergija na amoksicilin",
+        "antecedenteQuando": "Kada",
+        "antecedenteKind": {
+          "cirurgia": "Operacija",
+          "doenca-previa": "Ranija bolest",
+          "alergia": "Alergija",
+          "medicacao-continua": "Dugotrajna terapija",
+          "reacao-vacinal": "Reakcija na vakcinu",
+          "trauma": "Povreda",
+          "outro": "Ostalo"
+        }
+      },
+      "exameFisico": {
+        "titulo": "Klinički pregled",
+        "descricao": "Vrednosti se porede sa opsegom za vrstu dok kucate.",
+        "vitais": "Vitalni parametri",
+        "sistemas": "Sistemi",
+        "observacao": "Napomene uz pregled",
+        "peso": "Težina",
+        "temperatura": "Temperatura",
+        "frequenciaCardiaca": "Srčana frekvencija",
+        "frequenciaRespiratoria": "Respiratorna frekvencija",
+        "tempoPreenchimentoCapilar": "CRT",
+        "escoreCorporal": "Telesna kondicija",
+        "pressaoSistolica": "Sistolni pritisak",
+        "sistema": {
+          "cardiovascular": "Kardiovaskularni",
+          "respiratorio": "Respiratorni",
+          "digestorio": "Digestivni",
+          "urinario": "Urinarni",
+          "tegumentar": "Koža i adneksi",
+          "locomotor": "Mišićno-skeletni",
+          "neurologico": "Neurološki",
+          "linfonodos": "Limfni čvorovi"
+        },
+        "achado": {
+          "normal": "Bez promena",
+          "alterado": "Izmenjeno",
+          "nao-avaliado": "Nije procenjeno"
+        },
+        "notaAlterado": "Šta je izmenjeno",
+        "mucosas": "Sluzokože",
+        "mucosa": {
+          "normocoradas": "Normalne boje",
+          "palidas": "Blede",
+          "ictericas": "Ikterične",
+          "cianoticas": "Cijanotične",
+          "congestas": "Kongestivne",
+          "nao-avaliado": "Nisu procenjene"
+        },
+        "hidratacaoRotulo": "Hidratacija",
+        "hidratacao": {
+          "normal": "Normalna",
+          "leve": "Blaga",
+          "moderada": "Umerena",
+          "grave": "Teška"
+        },
+        "perfusao": "Perfuzija"
+      },
+      "diagnostico": {
+        "titulo": "Dijagnoza",
+        "descricao": "Pretražite po šifri ili opisu.",
+        "buscar": "Pretražite dijagnoze",
+        "adicionar": "Dodajte",
+        "remover": "Uklonite",
+        "vazio": "Nema zabeležene dijagnoze.",
+        "tipo": {
+          "presuntivo": "Pretpostavljena",
+          "definitivo": "Definitivna",
+          "diferencial": "Diferencijalna"
+        }
+      },
+      "conduta": {
+        "titulo": "Terapijski plan",
+        "descricao": "Uputstva, terapija i ono što je dogovoreno za dalje.",
+        "orientacoes": "Uputstva za staratelja",
+        "exames": "Zatražene analize",
+        "prescricoes": "Terapija",
+        "adicionarPrescricao": "Dodajte lek",
+        "semPrescricao": "Nije propisan nijedan lek.",
+        "medicamento": "Lek",
+        "via": "Način primene",
+        "dosePorKg": "Doza (mg/kg)",
+        "frequencia": "Interval (h)",
+        "duracao": "Trajanje (dani)",
+        "observacao": "Napomena",
+        "resumoDose": "{quantidade} {unidade} ({mg} mg) na {frequencia} h tokom {duracao} dana; ukupan broj doza: {total}.",
+        "semPeso": "Bez težine pacijenta doza se ne izračunava.",
+        "avisoDose": {
+          "abaixo-da-usual": "Ispod uobičajene doze ({min}–{max} mg/kg).",
+          "acima-da-usual": "Iznad uobičajene doze ({min}–{max} mg/kg).",
+          "peso-ausente": "Unesite težinu u kliničkom pregledu da bi se izračunala doza."
+        },
+        "alergiaTitulo": "Zabeležena alergija na {principio}",
+        "alergiaDescricao": "U kartonu ovog pacijenta zabeležena je alergija na {principio}. Propisivanje je i dalje moguće, uz izričitu potvrdu.",
+        "alergiaConfirmar": "Potvrđujem i ipak želim da propišem",
+        "retorno": "Kontrola",
+        "retornoEmDias": "Kontrola za (dana)",
+        "retornoTipo": "Vrsta kontrole",
+        "retornoAgendar": "Zakažite u rasporedu",
+        "retornoAgendado": "Kontrola je zakazana za {data} u {hora}.",
+        "retornoPendente": "Kontrola je preporučena, termin nije zakazan.",
+        "unidade": {
+          "ml": "mL",
+          "comprimido": "tbl. | tbl. | tbl."
+        },
+        "via_": {
+          "oral": "Oralno",
+          "subcutanea": "Subkutano",
+          "intramuscular": "Intramuskularno",
+          "intravenosa": "Intravenozno",
+          "topica": "Lokalno",
+          "otologica": "U uvo"
+        },
+        "retornoDialogo": {
+          "titulo": "Zakazivanje kontrole",
+          "descricao": "Slobodni termini kod istog stručnog lica, od datuma predloženog u terapijskom planu.",
+          "emDias": "za {contagem} dan | za {contagem} dana | za {contagem} dana"
+        },
+        "usoContinuo": "Dugotrajna terapija",
+        "conta": {
+          "peso-por-dose": "1. {peso} kg × {mgPorKg} mg/kg = {mg} mg po dozi",
+          "dose-por-concentracao": "2. {mg} mg ÷ {concentracao} mg = {quantidade} po dozi",
+          "total": "3. {porDia}× dnevno × {dias} d = {total} (ukupan broj doza)"
+        },
+        "fracao": {
+          "inteiro": "Cele tablete po dozi: {inteiros}",
+          "meio": "Pola tablete po dozi",
+          "um-e-meio": "Jedna i po tableta po dozi",
+          "quarto": "Četvrtina tablete po dozi",
+          "tres-quartos": "Tri četvrtine tablete po dozi",
+          "multiplo": "{quantidade} tablete po dozi",
+          "aproximado": "{quantidade} tablete po dozi",
+          "arredondado": "proračun je dao {calculado}; potvrdite zaokruživanje"
+        },
+        "aCadaHoras": "na {horas} h",
+        "porDias": "tokom {dias} dana | tokom {dias} dana | tokom {dias} dana",
+        "resumoQuantidade": "{quantidade} {unidade}"
+      },
+      "timeline": {
+        "titulo": "Istorija",
+        "vazio": "Ovaj pacijent još nema zabeleženu istoriju.",
+        "consultaAnterior": "Prethodni pregled",
+        "doseAnterior": "{mg} mg na {frequencia} h tokom {duracao} dana",
+        "verConsultaAnterior": "Pogledajte prethodni pregled",
+        "kind": {
+          "consulta": "Pregled",
+          "vacina": "Vakcinacija",
+          "exame": "Analiza",
+          "cirurgia": "Operacija",
+          "prescricao": "Terapija",
+          "falta": "Nedolazak",
+          "observacao": "Napomena",
+          "internacao": "Hospitalizacija"
+        },
+        "mostrar": "Istorija",
+        "ocultar": "Sakrijte istoriju"
+      },
+      "finalizar": "Završite pregled",
+      "finalizarDialogo": {
+        "titulo": "Završetak pregleda",
+        "descricao": "Kada se pregled završi, karton se više ne može direktno menjati.",
+        "pendencias": "Još nedostaje: {itens}",
+        "confirmar": "Ipak završite"
+      },
+      "passos": {
+        "vitaisAferidos": "Izmereno: {preenchidos} od {total}",
+        "prescricoes": "{contagem} propisan lek | {contagem} propisana leka | {contagem} propisanih lekova",
+        "sistemasAlterados": "{contagem} izmenjen | {contagem} izmenjena | {contagem} izmenjenih",
+        "aria": "Koraci pregleda"
+      },
+      "naoMedir": "bez merenja",
+      "filtro": {
+        "situacao": "Status",
+        "profissional": "Stručno lice"
+      },
+      "buscar": "Pretražite po pacijentu ili dijagnozi",
+      "imprimir": "Sačuvajte kao PDF",
+      "impressao": {
+        "titulo": "Medicinski karton",
+        "dica": "Otvara dijalog za štampu u pregledaču: kao odredište izaberite „Sačuvaj kao PDF“.",
+        "paciente": "Pacijent",
+        "documento": "ID",
+        "valor": "Vrednost",
+        "semRegistro": "Na ovom pregledu nisu zabeleženi vitalni parametri.",
+        "emitidoEm": "Izdato {data}",
+        "dataAtendimento": "Datum pregleda",
+        "naoRegistrado": "Nije zabeleženo."
+      },
+      "resumo": {
+        "titulo": "Rezime",
+        "descricao": "Proverite šta je zabeleženo pre izdavanja dokumenata.",
+        "vazio": "Nije zabeleženo",
+        "achados": "Nalazi",
+        "alergiaPendente": "Propisivanje leka {medicamento} je u sukobu sa zabeleženom alergijom i nije potvrđeno."
+      },
+      "preConsulta": {
+        "titulo": "Odgovoreno u aplikaciji",
+        "origem": "Od vlasnika, {quando}",
+        "aplicar": "Primenite odgovore",
+        "pesoInformado": "Težina navedena kod kuće: {valor}; proverite na vagi"
+      },
+      "teclado": {
+        "titulo": "Prečice u kartonu",
+        "descricao": "Ceo pregled bez odvajanja od tastature.",
+        "modo": "Brzi unos",
+        "verTeclas": "Prikažite tastere",
+        "acao": {
+          "campoSeguinte": "Sledeće polje",
+          "escolherOpcao": "Izbor opcije",
+          "entreOpcoes": "Kretanje kroz opcije",
+          "proximaEtapa": "Sledeći korak",
+          "etapaAnterior": "Prethodni korak",
+          "focarPrimeiro": "Povratak na prvo polje",
+          "ajuda": "Ova lista"
+        }
+      }
+    },
+    "pacientes": {
+      "titulo": "Pacijenti",
+      "subtitulo": "Klinika",
+      "buscar": "Pretražite po pacijentu, staratelju ili telefonu",
+      "vazioTitulo": "Nije pronađen nijedan pacijent",
+      "vazioDescricao": "Promenite pretragu ili dodajte pacijenta na recepciji.",
+      "colunaPaciente": "Pacijent",
+      "colunaResponsavel": "Staratelj",
+      "colunaUltimo": "Poslednji pregled",
+      "colunaProximo": "Sledeći",
+      "colunaAlertas": "Upozorenja",
+      "colunaAtendimento": "Pregled",
+      "semRegistro": "nema zapisa",
+      "filtro": {
+        "especie": "Vrsta",
+        "comAlerta": "Sa upozorenjem",
+        "semAlerta": "Bez upozorenja",
+        "agenda": "Raspored",
+        "comProximo": "Ima zakazan termin",
+        "semProximo": "Nema zakazan termin"
+      },
+      "internadoAgora": "Trenutno hospitalizovan",
+      "verInternacao": "Otvorite hospitalizaciju"
+    },
+    "atendimentos": {
+      "titulo": "Pregledi",
+      "subtitulo": "Klinika"
+    },
+    "atividades": {
+      "titulo": "Zadaci",
+      "subtitulo": "Klinika",
+      "vazioTitulo": "Nema otvorenih zadataka",
+      "vazioDescricao": "Ovde se pojavljuju kartoni u nacrtu i kontrole bez termina.",
+      "rascunhos": "Kartoni u nacrtu",
+      "retornos": "Kontrole bez termina",
+      "ofertasDaFila": "Ponude sa liste čekanja bez odgovora"
+    },
+    "atalhos": {
+      "titulo": "Prečice na tastaturi",
+      "abrir": "Prikažite prečice",
+      "fechar": "Zatvorite",
+      "dica": "Pritisnite ? za prikaz prečica",
+      "grupo": {
+        "navegacao": "Navigacija",
+        "acoes": "Radnje",
+        "prontuario": "Karton"
+      },
+      "diaAnterior": "Prethodni dan",
+      "proximoDia": "Sledeći dan",
+      "semanaAnterior": "Prethodna nedelja",
+      "proximaSemana": "Sledeća nedelja",
+      "hoje": "Prelazak na danas",
+      "visao": "Prebacivanje dan/nedelja",
+      "novo": "Novi termin",
+      "bloquear": "Blokada vremena",
+      "encaixar": "Vanredni termin",
+      "buscar": "Pretraga pacijenta",
+      "buscaGlobal": "Pretraga celog kliničkog modula",
+      "densidade": "Promena gustine prikaza",
+      "fechar_": "Zatvaranje otvorenog panela",
+      "mover": "Pomeranje izabranog termina za 15 min",
+      "selecionar": "Otvaranje izabranog termina",
+      "proximoCampo": "Sledeće polje",
+      "comandoBarra": "Komande u polju za napomene"
+    },
+    "comandos": {
+      "titulo": "Komande",
+      "dica": "Unesite / da biste ubacili gotov tekst",
+      "naoAferido": "nije mereno",
+      "semAlteracoes": "bez promena",
+      "retorno": "kontrola za",
+      "jejum": "gladovanje",
+      "vazio": "Nema komande sa tim nazivom."
+    },
+    "painel": {
+      "titulo": "Razvojni panel",
+      "abrir": "Razvojni panel",
+      "descricao": "Samo van produkcije. Upravlja simuliranim slojem bez ponovnog učitavanja stranice.",
+      "latencia": "Latencija (ms)",
+      "erro": "Greška po operaciji",
+      "operacao": "Operacija",
+      "taxa": "Stopa",
+      "offline": "Isključite sve (oflajn)",
+      "relogio": "Pomerite sat (h)",
+      "recriar": "Ponovo generišite podatke",
+      "semente": "Seed",
+      "casos": "Teški slučajevi",
+      "irPara": "Idite",
+      "segundoDispositivo": "Simulirajte drugi uređaj",
+      "resumo": "Termini na referentni dan ({ancora}): {atendimentos}"
+    },
+    "design": {
+      "titulo": "Referenca kliničkog modula",
+      "subtitulo": "Dizajn",
+      "descricao": "Pet osnovnih komponenti u četiri stanja, sa gustinom uživo. Ovo je merilo modula: komponenta koja ovde ne prođe ne ulazi ni u raspored ni u karton.",
+      "estados": "Četiri stanja",
+      "estado": {
+        "carregando": "Učitavanje",
+        "erro": "Greška",
+        "vazio": "Prazno",
+        "pronto": "Sa podacima"
+      },
+      "nomesExtremos": "Ekstremna imena",
+      "nomesExtremosDescricao": "Ime od dva slova, veoma dugo ime i mnogo dijakritika, jedno pored drugog. Ako se zaglavlje polomi, ovde će se polomiti prvo.",
+      "cansaco": "Zamor na 200 redova",
+      "cansacoDescricao": "Dvesta redova zaredom u izabranoj gustini. Dovoljno da se proceni da li tabela zamara pre kraja smene.",
+      "escalaDeCinza": "Prikaz u nijansama sive",
+      "escalaDeCinzaDescricao": "Nijedna informacija ne sme da se izgubi bez boje. Svako stanje ima ikonu, oznaku ili oblik pored nijanse.",
+      "tokens": "Tokeni",
+      "feedback": "Povratne informacije od nekoga ko vodi kliniku",
+      "feedbackVazio": "Još nema zabeleženih povratnih informacija. Ovde zapišite šta je klinički tim primetio, sa datumom i imenom.",
+      "larguras": "Proverite na 1280, 1024 i 768"
+    },
+    "comum": {
+      "verTodos": "Prikažite sve ({contagem})",
+      "filtros": "Filteri",
+      "resultados": "{contagem} rezultat | {contagem} rezultata | {contagem} rezultata",
+      "semResultado": "Nema rezultata za ovu pretragu.",
+      "cancelar": "Otkažite",
+      "adicionar": "Dodajte",
+      "remover": "Uklonite",
+      "todos": "Svi"
+    },
+    "avisos": {
+      "titulo": "Poslata obaveštenja",
+      "vazio": "Za ovaj termin nije poslato nijedno obaveštenje.",
+      "kind": {
+        "reagendamento": "Ponovno zakazivanje",
+        "remarcacao": "Promena vremena",
+        "cancelamento": "Otkazivanje",
+        "oferta-de-vaga": "Ponuda termina"
+      }
+    },
+    "receita": {
+      "titulo": "Recept",
+      "emitir": "Potpišite i izdajte",
+      "enviar": "Pošaljite vlasniku",
+      "enviada": "Poslato vlasniku",
+      "repetir": "Ponovite poslednji recept",
+      "repetirDica": "Poslednji recept potpisan {data}",
+      "assinadaPor": "Elektronski potpis: {nome}",
+      "codigo": "Kod za proveru",
+      "validaAte": "Važi do {data}",
+      "controlada": "Kontrolisana supstanca · Pravilnik 344/98",
+      "semPrescricao": "Nema terapije za izdavanje.",
+      "vistaDoResponsavel": "Prikaz za vlasnika",
+      "lembrete": "Postaje podsetnik u aplikaciji: {quantidade}, {frequencia}",
+      "lembreteContinuo": "Trajni podsetnik, bez datuma završetka"
+    },
+    "vacinas": {
+      "titulo": "Vakcine",
+      "subtitulo": "Šta je klinika primenila i koga još treba pozvati.",
+      "vazioTitulo": "Nema dospelih revakcinacija",
+      "vazioDescricao": "Svi pacijenti sa zabeleženom vakcinom su ažurni.",
+      "colunaVacina": "Vakcina",
+      "colunaQuando": "Revakcinacija",
+      "ligar": "Pozovite",
+      "agendar": "Zakažite",
+      "obrigatoria": "Obavezna",
+      "ligarHoje": "pozvati danas",
+      "proximosDias": "narednih 30 dana",
+      "potencial": "Vreme za popunjavanje",
+      "potencialDetalhe": "procena: 20 min po dozi",
+      "doseSeguinte": "{dose}. doza u ciklusu",
+      "atrasadoDias": "kasni {dias} d",
+      "emDias": "za {dias} d",
+      "situacao": {
+        "vencido": "Kasni",
+        "proximo": "Uskoro dospeva",
+        "serie-incompleta": "Ciklus u toku",
+        "em-dia": "Ažurno"
+      },
+      "registrar": "Zabeležite vakcinu",
+      "lote": "Serija",
+      "validadeLote": "Rok upotrebe serije",
+      "dose": "Doza",
+      "aplicada": "Primenjena",
+      "doseDeTotal": "{dose} od {total}",
+      "proximaEm": "Sledeća doza {data}",
+      "aba": {
+        "aplicadas": "Primenjene",
+        "atraso": "Kasne"
+      },
+      "buscar": "Pacijent, vlasnik, vakcina ili serija…",
+      "aplicadasVazioTitulo": "Nema zabeleženih vakcinacija",
+      "aplicadasVazioDescricao": "Ovde se pojavljuje svaka vakcina primenjena tokom pregleda.",
+      "validade": "rok: {data}",
+      "filtro": {
+        "quando": "Kada",
+        "ultimosDias": "Poslednji {dias} dan | Poslednja {dias} dana | Poslednjih {dias} dana"
+      }
+    },
+    "internacao": {
+      "titulo": "Hospitalizacija",
+      "subtitulo": "Mapa boksova, terapija po satnici i izveštaj koji vlasnik dobija.",
+      "vazioTitulo": "Nema registrovanih boksova",
+      "vazioDescricao": "Registrujte boksove klinike da biste ovde pratili hospitalizacije.",
+      "retidosAviso": "Izveštaji koji čekaju telefonski poziv: {total}. Loše vesti se nikada ne šalju kroz aplikaciju pre nego što neko razgovara s vlasnikom.",
+      "gravidade": {
+        "estavel": "Stabilno",
+        "atencao": "Pod nadzorom",
+        "critico": "Kritično"
+      },
+      "leitoKind": {
+        "geral": "Opšti",
+        "felino": "Za mačke",
+        "isolamento": "Izolacija",
+        "uti": "JIN"
+      },
+      "itemKind": {
+        "medicamento": "Lek",
+        "fluido": "Infuzija",
+        "monitoramento": "Monitoring",
+        "alimentacao": "Ishrana",
+        "procedimento": "Procedura"
+      },
+      "situacao": {
+        "futura": "Planirano",
+        "na-janela": "Na redu",
+        "atrasada": "Kasni",
+        "feita": "Primenjeno",
+        "pulada": "Preskočeno",
+        "recusada": "Odbijeno",
+        "suspensa": "Obustavljeno"
+      },
+      "abas": {
+        "checklist": "Ček-lista",
+        "evolucao": "Tok lečenja",
+        "boletim": "Izveštaj vlasniku",
+        "prescricao": "Terapija"
+      },
+      "plantao": {
+        "manha": "Jutarnja smena",
+        "tarde": "Popodnevna smena",
+        "noite": "Noćna smena",
+        "responsavel": "U smeni: {nome}",
+        "passar": "Predajte smenu"
+      },
+      "stat": {
+        "ocupacao": "Popunjenost boksova",
+        "vagas": "{total} slobodan | {total} slobodna | {total} slobodnih",
+        "criticos": "Kritično stanje",
+        "criticosDetalhe": "pacijenti trenutno u kritičnom stanju",
+        "pendentes": "Sada na redu",
+        "atrasadas": "{total} kasni | {total} kasne | {total} kasni",
+        "boletins": "Zadržani izveštaji",
+        "boletinsDetalhe": "čeka se telefonski poziv"
+      },
+      "leito": {
+        "livre": "Slobodan",
+        "foraDeOperacao": "Van upotrebe",
+        "internar": "Hospitalizujte",
+        "internadoHa": "Na hospitalizaciji",
+        "horas": "{horas} h",
+        "pendentes": "Na redu",
+        "atrasadas": "{total} kasni | {total} kasne | {total} kasni",
+        "boletimRetido": "Izveštaj čeka poziv",
+        "proximaMinutos": "Sledeća za {minutos} min",
+        "proximaHoras": "Sledeća za {horas} h"
+      },
+      "checklist": {
+        "vazio": "Ništa nije planirano za ovaj period.",
+        "agora": "Sada · {hora}",
+        "recusou": "Odbijeno",
+        "desfazer": "Poništite",
+        "por": "{nome}, u {hora}",
+        "atrasoMinutos": "{minutos} min kašnjenja",
+        "conferencia": "provera pumpe",
+        "naTroca": "Pada u vreme primopredaje smene: dogovorite ko je daje pre predaje smene.",
+        "checar": "Zabeležite"
+      },
+      "evolucao": {
+        "registrarTitulo": "Tok lečenja u ovoj smeni",
+        "jaRegistrada": "Već zabeleženo u ovoj smeni",
+        "turnoAnterior": "Prethodna smena",
+        "observado": "Šta je primećeno",
+        "observadoDica": "Jede, mokri, spava: to vlasnik želi da čuje.",
+        "avaliacao": "Klinička procena",
+        "plano": "Plan",
+        "planoDica": "Šta sledeća smena treba da uradi.",
+        "gravidade": "Stanje pacijenta",
+        "registrar": "Sačuvajte belešku",
+        "historicoTitulo": "Tok lečenja po smenama",
+        "semEvolucao": "Još nema beleški o toku lečenja.",
+        "avisoPiora": "Beleženje pogoršanja stvara izveštaj koji se šalje tek kada neko pozove vlasnika.",
+        "observadoExemplo": "Pojeo je ceo obrok i dvaput mokrio.",
+        "avaliacaoExemplo": "Bol pod kontrolom. Nema novih znakova.",
+        "planoExemplo": "Nastaviti analgeziju i ponovo proceniti u 22 h."
+      },
+      "boletim": {
+        "retidoTitulo": "Zadržan izveštaj",
+        "retidoRegra": "Stanje pacijenta se pogoršalo. Ovaj izveštaj se šalje tek kada neko iz klinike razgovara s vlasnikom telefonom.",
+        "ligacaoPendente": "Pozovite: {nome}, {telefone}",
+        "ligacaoFeita": "Poziv obavljen u {hora} ({nome})",
+        "registrarLigacao": "Zabeležite poziv",
+        "enviar": "Pošaljite vlasniku",
+        "bloqueadoErro": "Pre slanja ovog izveštaja potrebno je obaviti telefonski poziv.",
+        "composerTitulo": "Napišite izveštaj",
+        "composerAjuda": "Stanje pacijenta i ono što je urađeno u tom periodu dodaju se automatski. Napišite ono što zna samo osoba koja je bila uz pacijenta.",
+        "observado": "Šta reći vlasniku",
+        "observadoDica": "Jedna ili dve rečenice. Da li jede? Spava? Ustaje?",
+        "compor": "Napravite izveštaj",
+        "prontosTitulo": "Spremni za slanje",
+        "origem": {
+          "automatico": "Automatski",
+          "manual": "Napisao tim"
+        },
+        "frequenciaTitulo": "Učestalost izveštaja",
+        "frequenciaAjuda": "Bira vlasnik. Svaki izveštaj košta recepciju manje od jednog telefonskog poziva.",
+        "frequencia": "Slanje",
+        "aCadaHoras": "Svakih {horas} h",
+        "porDia": "{total} dnevno",
+        "custoAtual": "To je {total} poruka dnevno. | To su {total} poruke dnevno. | To je {total} poruka dnevno.",
+        "silencio": "Noću",
+        "silencioLigado": "Bez slanja od 22 do 7 h",
+        "silencioDesligado": "Slanje u bilo koje doba",
+        "fotoSempre": "Fotografija kad god je moguće",
+        "proximo": "Sledeći automatski izveštaj u {hora}",
+        "appTitulo": "Na telefonu vlasnika",
+        "appAjuda": "Isti razgovor koji vlasnik otvara u aplikaciji.",
+        "foto": "Fotografija u izveštaju",
+        "fotoNunca": "Samo kada je tim priloži",
+        "observadoExemplo": "Spavao je celo popodne i sam je jeo."
+      },
+      "app": {
+        "vazio": "Još nema primljenih izveštaja.",
+        "foto": "Fotografiju je poslala klinika",
+        "aposLigacao": "Poslato nakon telefonskog poziva",
+        "retido": "{total} izveštaj je još u klinici i čeka poziv. | {total} izveštaja su još u klinici i čekaju poziv. | {total} izveštaja je još u klinici i čeka poziv."
+      },
+      "passagem": {
+        "titulo": "Primopredaja smene",
+        "emCimaDaTroca": "U vreme primopredaje",
+        "emCimaDaTrocaAjuda": "Ove doze padaju tačno u vreme primopredaje. Označite svaku kada dogovorite ko je daje: smena koja odlazi ili smena koja dolazi.",
+        "atrasadas": "Nezatvoreno u ovoj smeni",
+        "semEvolucao": "Nema beleške o toku lečenja",
+        "abrir": "Otvorite",
+        "nada": "Ništa nije ostalo otvoreno u ovoj smeni.",
+        "recebidoPor": "Ko preuzima smenu",
+        "nota": "Napomena za primopredaju",
+        "notaDica": "Šta sledeća smena treba da zna, a nije ni na jednoj listi.",
+        "entregar": "Predajte smenu",
+        "cancelar": "Otkažite",
+        "trava": "Za {total} dozu u vreme primopredaje još nije doneta odluka. | Za {total} doze u vreme primopredaje još nije doneta odluka. | Za {total} doza u vreme primopredaje još nije doneta odluka.",
+        "notaExemplo": "Mila je postala nemirna posle doze u 16 h."
+      },
+      "internar": {
+        "titulo": "Hospitalizujte pacijenta",
+        "paciente": "Pacijent",
+        "responsavelClinico": "Nadležni veterinar",
+        "motivo": "Razlog hospitalizacije",
+        "diagnostico": "Radna dijagnoza",
+        "peso": "Težina pri prijemu",
+        "pesoDica": "Sve doze na odeljenju računaju se prema ovoj težini.",
+        "gravidade": "Stanje pri prijemu",
+        "avisoFelino": "Mačka u opštem boksu: pored pasa mačke obično prestanu da jedu.",
+        "avisoCritico": "Kritičan pacijent van jedinice intenzivne nege. Proverite da li je ona zaista zauzeta.",
+        "confirmar": "Hospitalizujte",
+        "cancelar": "Otkažite",
+        "escolhaPaciente": "Izaberite pacijenta",
+        "buscarPaciente": "Pretražite po imenu",
+        "motivoExemplo": "Postoperativni oporavak nakon osteosinteze",
+        "diagnosticoExemplo": "Prelom desne butne kosti"
+      },
+      "alta": {
+        "abrir": "Završite hospitalizaciju",
+        "titulo": "Završetak hospitalizacije",
+        "sobre": "Ovim unosom završava se hospitalizacija pacijenta {nome}, a boks se vraća na mapu.",
+        "desfechoRotulo": "Ishod",
+        "desfecho": {
+          "alta": "Otpust",
+          "transferido": "Premeštaj",
+          "obito": "Smrtni ishod"
+        },
+        "resumoTitulo": "Šta ostaje u evidenciji",
+        "permanencia": "Dužina boravka",
+        "dosesFeitas": "Primenjene doze",
+        "dosesNaoFeitas": "Odbijene ili preskočene",
+        "boletinsEnviados": "Poslati izveštaji",
+        "aviso": {
+          "dose-pendente": "{total} doza je trenutno još na redu. Ostaje zabeležena kao neprimenjena. | {total} doze su trenutno još na redu. Ostaju zabeležene kao neprimenjene. | {total} doza je trenutno još na redu. Ostaju zabeležene kao neprimenjene.",
+          "dose-futura": "{total} planirana doza biće obustavljena završetkom hospitalizacije. | {total} planirane doze biće obustavljene završetkom hospitalizacije. | {total} planiranih doza biće obustavljeno završetkom hospitalizacije.",
+          "boletim-retido": "{total} izveštaj nikada nije poslat jer poziv nije obavljen. Završetak hospitalizacije ga neće poslati. | {total} izveštaja nikada nisu poslata jer poziv nije obavljen. Završetak hospitalizacije ih neće poslati. | {total} izveštaja nikada nije poslato jer poziv nije obavljen. Završetak hospitalizacije ih neće poslati."
+        },
+        "orientacao": {
+          "alta": "Uputstva pri otpustu",
+          "transferido": "Šta je dogovoreno pri premeštaju",
+          "obito": "Šta je saopšteno vlasniku"
+        },
+        "orientacaoDica": {
+          "alta": "Šalje se uz poruku koju vlasnik dobija u aplikaciji.",
+          "transferido": "Ostaje u evidenciji hospitalizacije. Ništa od ovoga se ne šalje kao poruka.",
+          "obito": "Ostaje u evidenciji hospitalizacije. Ništa od ovoga se ne šalje kao poruka."
+        },
+        "orientacaoExemplo": {
+          "alta": "Mirovanje 3 dana, vlažna hrana, kontrola za 7 dana.",
+          "transferido": "Upućen u Veterinarsku bolnicu X na hemodijalizu, uz kopiju medicinskog kartona.",
+          "obito": "Vlasnik je obavešten telefonom u 14:20; objašnjene su mogućnosti kremacije."
+        },
+        "canal": {
+          "alta": "Vlasnik dobija poruku u aplikaciji da je ljubimac otišao kući.",
+          "transferido": "Ne šalje se nikakva poruka. O premeštaju se obaveštava telefonom.",
+          "obito": "Ne šalje se nikakva poruka. Smrtni ishod se nikada ne saopštava putem obaveštenja."
+        },
+        "confirmaLigacao": {
+          "transferido": "Potvrđujem telefonski razgovor s vlasnikom o premeštaju.",
+          "obito": "Potvrđujem telefonski razgovor s vlasnikom o smrtnom ishodu."
+        },
+        "confirmar": {
+          "alta": "Zabeležite otpust",
+          "transferido": "Zabeležite premeštaj",
+          "obito": "Zabeležite smrtni ishod"
+        },
+        "cancelar": "Otkažite",
+        "encerrada": {
+          "alta": "Hospitalizacija je završena otpustom ({quando}).",
+          "transferido": "Hospitalizacija je završena premeštajem ({quando}).",
+          "obito": "Hospitalizacija je završena smrtnim ishodom ({quando})."
+        }
+      },
+      "prescricao": {
+        "ativasTitulo": "Aktuelna terapija",
+        "semAtivas": "Ništa nije propisano.",
+        "nova": "Nova stavka",
+        "novaTitulo": "Nova stavka terapije",
+        "tipo": "Vrsta",
+        "medicamento": "Lek",
+        "descricao": "Šta tehničar čita",
+        "dose": "Doza",
+        "doseDica": "Već izračunata, tačno onako kako će se dati.",
+        "via": "Način primene",
+        "frequencia": "Učestalost",
+        "aCada": "Svakih {horas} h",
+        "continuo": "Kontinuirano, provera svakih {horas} h",
+        "primeira": "Prva primena za",
+        "primeiraDica": "Za koliko sati od sada.",
+        "criar": "Propišite",
+        "proxima": "Sledeća u {hora}",
+        "feitas": "{total} primenjena doza | {total} primenjene doze | {total} primenjenih doza",
+        "por": "veterinar: {nome}",
+        "suspender": "Obustavite",
+        "suspenderAlvo": "Obustavljanje: {item}. Ono što je već dato ostaje u evidenciji.",
+        "motivo": "Razlog",
+        "confirmarSuspensao": "Obustavite",
+        "cancelar": "Otkažite",
+        "suspensasTitulo": "Obustavljeno",
+        "suspensaEm": "Obustavljeno u {hora}: {motivo}",
+        "descricaoExemplo": "Izmeriti temperaturu, SF i RF",
+        "doseExemplo": "25 mg/kg: 1,6 mL",
+        "motivoExemplo": "Prelazak na intravensku primenu.",
+        "escolhaMedicamento": "Izaberite iz vodiča za lekove",
+        "buscarMedicamento": "Pretražite po nazivu"
+      },
+      "paciente": {
+        "titulo": "Hospitalizovani pacijent",
+        "voltar": "Mapa boksova",
+        "internadoHa": "Na hospitalizaciji",
+        "responsavelClinico": "Nadležni veterinar",
+        "pendentes": "Sada na redu",
+        "pendentesDetalhe": "na redu ili kasne",
+        "abasRotulo": "Odeljak",
+        "naTroca": "{total} primena pada u vreme primopredaje smene. | {total} primene padaju u vreme primopredaje smene. | {total} primena pada u vreme primopredaje smene.",
+        "naoEncontradoTitulo": "Hospitalizacija nije pronađena",
+        "naoEncontradoDescricao": "Pacijent je možda otpušten. Vratite se na mapu boksova.",
+        "estado": "Stanje pacijenta",
+        "noLeito": "Boks {leito}",
+        "diagnostico": "Radna dijagnoza",
+        "altaEm": "planirani otpust: {data}",
+        "semPrevisaoDeAlta": "otpust nije planiran",
+        "verHistorico": "Istorija pacijenta"
+      },
+      "leitos": {
+        "titulo": "Boksovi klinike",
+        "tituloGrade": "Boksovi · {total}",
+        "gerenciar": "Upravljajte boksovima",
+        "ajuda": "Klinika registruje boksove kojima raspolaže. Boks van upotrebe ostaje na mapi, označen, i ne računa se u slobodna mesta.",
+        "conta": "Registrovano: {total} · u upotrebi: {ativos}",
+        "adicionar": "Dodajte boks",
+        "novoTitulo": "Novi boks",
+        "tipo": "Vrsta",
+        "sala": "Prostorija",
+        "nome": "Naziv",
+        "nomeDica": "Kako ga tim zove: R3, F2, JIN.",
+        "criar": "Registrujte",
+        "salvar": "Sačuvajte",
+        "editar": "Izmenite",
+        "desativar": "Stavite van upotrebe",
+        "reativar": "Vratite u upotrebu",
+        "remover": "Uklonite",
+        "cancelar": "Otkažite",
+        "fechar": "Zatvorite",
+        "desativarAlvo": "Stavite boks {leito} van upotrebe",
+        "motivoRotulo": "Razlog",
+        "detalhe": "Detalji",
+        "detalheDica": "Konkretan slučaj, za onoga ko ovo bude čitao za nedelju dana.",
+        "detalheExemplo": "Zamena rešetke i odvoda.",
+        "confirmarDesativacao": "Stavite van upotrebe",
+        "paradoDesde": "stavljen van upotrebe {quando}",
+        "motivo": {
+          "manutencao": "Održavanje",
+          "desinfeccao": "Dezinfekcija",
+          "reforma": "Renoviranje",
+          "equipamento": "Nedostaje oprema",
+          "outro": "Drugi razlog"
+        },
+        "recusa": {
+          "ocupado": "U ovom boksu je pacijent. Premestite ga ili ga otpustite pre nego što boks stavite van upotrebe.",
+          "tem-historico": "U ovom boksu su već bili pacijenti i ne može se obrisati. Stavite ga van upotrebe.",
+          "nome-repetido": "Boks s tim nazivom već postoji.",
+          "sem-nome": "Unesite naziv boksa."
+        },
+        "ocupadoCurto": "Zauzet",
+        "buscar": "Pretražite po boksu, vrsti, prostoriji ili pacijentu",
+        "recorteRotulo": "Status",
+        "recorte": {
+          "todos": "Svi",
+          "operacao": "U upotrebi",
+          "parados": "Van upotrebe"
+        },
+        "semResultado": "Nijedan boks nije pronađen za „{termo}“.",
+        "intervalo": "{de}–{ate} od {total}",
+        "paginas": "Stranice liste boksova",
+        "anterior": "Prethodna stranica",
+        "proxima": "Sledeća stranica"
+      }
+    }
+  },
+  "cronometro": {
+    "titulo": "Tajmer pregleda",
+    "iniciar": "Pokrenite",
+    "ariaIniciar": "Pokrenite tajmer pregleda",
+    "ariaAbrir": "Tajmer: {tempo}, {estado}. Otvorite panel.",
+    "abrirPainel": "Otvorite panel tajmera",
+    "pausar": "Pauzirajte",
+    "retomar": "Nastavite",
+    "encerrar": "Zaustavite",
+    "descartar": "Odbacite",
+    "pausado": "Pauzirano",
+    "semSessao": "Nijedan pregled se ne meri",
+    "semPaciente": "Nije povezan nijedan pregled",
+    "estado": {
+      "dentro": "U okviru bloka",
+      "no-limite": "Blok se bliži kraju",
+      "excedido": "Blok je prekoračen"
+    },
+    "unidades": "{contagem} jedinica | {contagem} jedinice | {contagem} jedinica",
+    "decorrido": "Proteklo",
+    "cobravel": "Za naplatu",
+    "minutos": "{valor} min",
+    "proximaUnidade": "sledeća jedinica za {valor}",
+    "excedente": "prekoračenje: {valor}",
+    "esquecidaTitulo": "Tajmer radi već dugo",
+    "esquecidaDescricao": "Radi duže od četiri sata. Ako je greškom ostao uključen, odbacite ga: zaustavljanje bi to vreme zabeležilo kao radno.",
+    "hoje": "Danas",
+    "hojeResumo": "{contagem} pregled | {contagem} pregleda | {contagem} pregleda",
+    "totalDecorrido": "Vreme na pregledima",
+    "totalCobravel": "Ukupno za naplatu",
+    "ultimaHa": "poslednji pre {valor}",
+    "semHistorico": "Danas nije završen nijedan pregled.",
+    "limparHistorico": "Obrišite današnje unose",
+    "bloco": "Blok pregleda",
+    "incremento": "Obračunski korak",
+    "comoFunciona": "Vreme se zaokružuje naviše do sledeće jedinice. Stvarno proteklo vreme uvek je vidljivo pored."
+  }
+}

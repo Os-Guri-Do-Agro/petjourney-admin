@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
+import InputText from 'primevue/inputtext'
+import Popover from 'primevue/popover'
 import {
   computed,
   defineAsyncComponent,
@@ -449,8 +453,30 @@ watch(
   },
 )
 
+const userMenu = ref<InstanceType<typeof Popover> | null>(null)
+
+/**
+ * O menu do avatar sai da árvore do shell (vai para o `body`), então as variáveis `--shell-*`
+ * vão junto — e os tokens do Popover são trocados por elas, para o cartão seguir o do cabeçalho.
+ */
+const userMenuStyle = computed(() => ({
+  ...shellStyle.value,
+  '--p-popover-background': 'var(--shell-surface)',
+  '--p-popover-border-color': 'var(--shell-line)',
+  '--p-popover-border-radius': '1rem',
+  '--p-popover-content-padding': '0.45rem',
+}))
+
+function toggleUserMenu(event: Event) {
+  userMenu.value?.toggle(event)
+}
+
+function closeUserMenu() {
+  userMenu.value?.hide()
+}
+
 function requestLogout() {
-  userMenuOpen.value = false
+  closeUserMenu()
   logoutConfirmVisible.value = true
 }
 
@@ -474,7 +500,7 @@ function handleHeaderCupomClick() {
 }
 
 async function handleLogout() {
-  userMenuOpen.value = false
+  closeUserMenu()
   await logout()
 }
 
@@ -499,10 +525,12 @@ onUnmounted(() => {
 
 <template>
   <div class="app-shell" :class="shellClasses" :style="shellStyle">
-    <button
+    <Button
       v-if="compactViewport && compactDrawerOpen"
       class="navigator-scrim"
       type="button"
+      text
+      severity="secondary"
       :aria-label="t('shell.drawer.close')"
       @click="closeCompactDrawer"
     />
@@ -544,11 +572,13 @@ onUnmounted(() => {
         <span class="rail-divider" aria-hidden="true" />
 
         <template v-for="section in navigationSections" :key="section.id">
-          <button
+          <Button
             v-if="temPainel(section)"
             class="rail-button"
             :class="{ 'rail-button--active': activeSectionId === section.id }"
             type="button"
+            text
+            severity="secondary"
             :aria-current="activeSectionId === section.id ? 'true' : undefined"
             :title="section.label"
             @click="handleSectionChange(section.id)"
@@ -557,7 +587,7 @@ onUnmounted(() => {
               <i :class="section.icon" />
             </span>
             <span class="rail-button__label">{{ section.label }}</span>
-          </button>
+          </Button>
 
           <RouterLink
             v-else
@@ -577,26 +607,28 @@ onUnmounted(() => {
         </template>
 
         <div class="rail-bottom-actions">
-          <button
+          <Button
             class="rail-action rail-action--collapse"
             type="button"
+            text
+            severity="secondary"
+            icon="pi pi-angle-double-left"
             :aria-label="railCollapsed ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
             :title="railCollapsed ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
             :aria-expanded="!railCollapsed"
             @click="toggleNavigator"
-          >
-            <i class="pi pi-angle-double-left" aria-hidden="true" />
-          </button>
+          />
 
-          <button
+          <Button
             class="rail-action rail-action--danger"
             type="button"
+            text
+            severity="secondary"
+            icon="pi pi-sign-out"
             :aria-label="t('shell.logout')"
             :title="t('shell.logout')"
             @click="requestLogout"
-          >
-            <i class="pi pi-sign-out" aria-hidden="true" />
-          </button>
+          />
         </div>
       </nav>
 
@@ -645,26 +677,31 @@ onUnmounted(() => {
         />
 
         <div v-if="hasPanelFilter" class="page-nav__filter">
-          <label class="page-nav__filter-field" for="panel-nav-filter">
-            <i class="pi pi-search" aria-hidden="true" />
-            <input
+          <IconField class="page-nav__filter-field">
+            <InputIcon class="pi pi-search" />
+            <InputText
               id="panel-nav-filter"
               v-model="panelFilterQuery"
               type="search"
+              size="small"
+              fluid
               :placeholder="t('shell.filterPlaceholder')"
+              :aria-label="t('shell.filterPlaceholder')"
               autocomplete="off"
             />
-          </label>
-          <button
+          </IconField>
+          <Button
             v-if="panelFilterQuery"
             class="page-nav__filter-clear"
             type="button"
+            text
+            rounded
+            severity="secondary"
+            icon="pi pi-times"
             :aria-label="t('shell.filterClear')"
             :title="t('shell.filterClear')"
             @click="panelFilterQuery = ''"
-          >
-            <i class="pi pi-times" aria-hidden="true" />
-          </button>
+          />
         </div>
 
         <nav
@@ -728,10 +765,15 @@ onUnmounted(() => {
 
         <!-- Sem trilho, sair precisa de um lugar. -->
         <div v-if="isListNavigator" class="panel-bottom-actions">
-          <button class="panel-action" type="button" @click="requestLogout">
-            <i class="pi pi-sign-out" aria-hidden="true" />
-            {{ t('shell.logout') }}
-          </button>
+          <Button
+            class="panel-action"
+            type="button"
+            text
+            severity="secondary"
+            icon="pi pi-sign-out"
+            :label="t('shell.logout')"
+            @click="requestLogout"
+          />
         </div>
       </section>
     </aside>
@@ -780,10 +822,12 @@ onUnmounted(() => {
           É botão e não campo de propósito: um campo permanente no cabeçalho promete busca em
           toda tela do portal, e a promessa vale só dentro da clínica.
         -->
-        <button
+        <Button
           v-if="hasClinicalProfile"
           class="header-search header-search--botao"
           type="button"
+          text
+          severity="secondary"
           :title="t('clinico.busca.abrir')"
           :aria-label="t('clinico.busca.abrir')"
           @click="buscaAberta = true"
@@ -791,11 +835,13 @@ onUnmounted(() => {
           <i class="pi pi-search" aria-hidden="true" />
           <span class="header-search__texto">{{ t('clinico.busca.abrirCurto') }}</span>
           <kbd class="header-search__tecla">{{ atalhoDaBusca }}</kbd>
-        </button>
+        </Button>
 
-        <button
+        <Button
           class="header-resgate"
           type="button"
+          text
+          severity="secondary"
           :disabled="cupomFeatureEnabled && !canOpenCupomResgate"
           :title="
             !cupomFeatureEnabled
@@ -820,12 +866,18 @@ onUnmounted(() => {
           <span v-if="!cupomFeatureEnabled" class="header-resgate__soon">{{
             t('comingSoon.cupom.badge')
           }}</span>
-        </button>
+        </Button>
 
-        <button
+        <!--
+          Segue botão (com `aria-pressed`), e não `ToggleSwitch`: o trilho rotulado com sol e lua
+          animados é a identidade do cabeçalho, e o `ToggleSwitch` não comporta rótulo interno.
+        -->
+        <Button
           class="theme-switch"
           :class="{ 'theme-switch--dark': themeSwitchDark }"
           type="button"
+          text
+          severity="secondary"
           :aria-label="
             themeSwitchDark ? t('shell.theme.activateLight') : t('shell.theme.activateDark')
           "
@@ -846,15 +898,18 @@ onUnmounted(() => {
               t('shell.theme.darkLabel')
             }}</span>
           </span>
-        </button>
+        </Button>
 
         <div class="user-menu">
-          <button
+          <Button
             class="user-menu__trigger"
             type="button"
+            text
+            severity="secondary"
             :aria-expanded="userMenuOpen"
             aria-haspopup="menu"
-            @click="userMenuOpen = !userMenuOpen"
+            :aria-controls="userMenuOpen ? 'user-menu-dropdown' : undefined"
+            @click="toggleUserMenu"
           >
             <span class="user-avatar">
               <img v-if="headerAvatarUrl" :src="headerAvatarUrl" alt="" />
@@ -865,34 +920,48 @@ onUnmounted(() => {
               <small>{{ t('shell.user.role') }}</small>
             </span>
             <i class="pi pi-angle-down" aria-hidden="true" />
-          </button>
+          </Button>
 
-          <div v-if="userMenuOpen" class="user-menu__dropdown" role="menu">
-            <RouterLink role="menuitem" to="/settings?aba=perfil" @click="userMenuOpen = false">
-              <i class="pi pi-user" aria-hidden="true" />
-              {{ t('shell.user.perfil') }}
-            </RouterLink>
-            <RouterLink role="menuitem" to="/settings" @click="userMenuOpen = false">
-              <i class="pi pi-cog" aria-hidden="true" />
-              {{ t('shell.user.settings') }}
-            </RouterLink>
-            <RouterLink
-              role="menuitem"
-              to="/parceiro/selecionar"
-              @click="userMenuOpen = false"
-            >
-              <i class="pi pi-building" aria-hidden="true" />
-              {{ t('shell.user.trocarEmpresa') }}
-            </RouterLink>
-            <div class="user-menu__locale" role="none">
-              <span class="user-menu__locale-label">{{ t('languageSwitcher.label') }}</span>
-              <LanguageSwitcher variant="menu" />
+          <!--
+            Popover no `body`: fecha no clique fora e no Esc, o que o menu à mão não fazia. As
+            variáveis `--shell-*` seguem junto pelo `style`, já que o overlay sai da árvore do shell.
+          -->
+          <Popover
+            ref="userMenu"
+            class="user-menu__popover"
+            :style="userMenuStyle"
+            @show="userMenuOpen = true"
+            @hide="userMenuOpen = false"
+          >
+            <div id="user-menu-dropdown" class="user-menu__dropdown" role="menu">
+              <RouterLink role="menuitem" to="/settings?aba=perfil" @click="closeUserMenu">
+                <i class="pi pi-user" aria-hidden="true" />
+                {{ t('shell.user.perfil') }}
+              </RouterLink>
+              <RouterLink role="menuitem" to="/settings" @click="closeUserMenu">
+                <i class="pi pi-cog" aria-hidden="true" />
+                {{ t('shell.user.settings') }}
+              </RouterLink>
+              <RouterLink role="menuitem" to="/parceiro/selecionar" @click="closeUserMenu">
+                <i class="pi pi-building" aria-hidden="true" />
+                {{ t('shell.user.trocarEmpresa') }}
+              </RouterLink>
+              <div class="user-menu__locale" role="none">
+                <span class="user-menu__locale-label">{{ t('languageSwitcher.label') }}</span>
+                <LanguageSwitcher variant="menu" />
+              </div>
+              <Button
+                class="user-menu__logout"
+                type="button"
+                role="menuitem"
+                text
+                severity="danger"
+                icon="pi pi-sign-out"
+                :label="t('shell.user.logout')"
+                @click="requestLogout"
+              />
             </div>
-            <Button type="button" role="menuitem" text severity="danger" @click="requestLogout">
-              <i class="pi pi-sign-out" aria-hidden="true" />
-              {{ t('shell.user.logout') }}
-            </Button>
-          </div>
+          </Popover>
         </div>
       </div>
     </header>
@@ -972,25 +1041,31 @@ onUnmounted(() => {
   --navigator-offset: 0rem;
 }
 
-.navigator-scrim {
+.navigator-scrim.p-button,
+.navigator-scrim.p-button:not(:disabled):hover,
+.navigator-scrim.p-button:not(:disabled):active {
   position: fixed;
   z-index: 45;
   inset: 0;
+  width: auto;
+  height: auto;
+  padding: 0;
   border: 0;
+  border-radius: 0;
   background: rgb(var(--shell-shadow-rgb) / 0.42);
-  cursor: pointer;
 }
 
 .app-navigator {
   position: fixed;
   z-index: 50;
-  inset: 0 auto 0 0;
+  inset-block: 0;
+  inset-inline: 0 auto;
   display: grid;
   width: var(--navigator-width);
   height: 100vh;
   grid-template-columns: var(--navigator-rail) calc(var(--navigator-width) - var(--navigator-rail));
   overflow: hidden;
-  border-right: 1px solid var(--shell-line);
+  border-inline-end: 1px solid var(--shell-line);
   background: var(--shell-surface);
   transition:
     width 220ms var(--navigator-ease),
@@ -1013,8 +1088,16 @@ onUnmounted(() => {
   transform: translateX(-100%);
 }
 
+[dir='rtl'] .app-shell--navigator-hidden .app-navigator {
+  transform: translateX(100%);
+}
+
 .app-shell--navigator-overlay .app-navigator {
   box-shadow: 18px 0 48px rgb(var(--shell-shadow-rgb) / 0.22);
+}
+
+[dir='rtl'] .app-shell--navigator-overlay .app-navigator {
+  box-shadow: -18px 0 48px rgb(var(--shell-shadow-rgb) / 0.22);
 }
 
 .section-rail {
@@ -1051,7 +1134,9 @@ onUnmounted(() => {
   object-fit: contain;
 }
 
-.rail-button {
+/* Seções com painel são `Button`; a de destino único é `RouterLink`. As duas leem igual. */
+.rail-button,
+.rail-button.p-button {
   position: relative;
   display: grid;
   width: 100%;
@@ -1062,6 +1147,7 @@ onUnmounted(() => {
   border-radius: 0.85rem;
   background: transparent;
   color: color-mix(in srgb, var(--shell-on-brand) 74%, transparent);
+  font-size: inherit;
   cursor: pointer;
   transition:
     background 160ms ease,
@@ -1091,7 +1177,10 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
-.rail-button:hover {
+.rail-button:hover,
+.rail-button.p-button:not(:disabled):hover,
+.rail-button.p-button:not(:disabled):active {
+  border: 0;
   background: color-mix(in srgb, var(--shell-on-brand) 12%, transparent);
   color: var(--shell-on-brand);
 }
@@ -1105,7 +1194,10 @@ onUnmounted(() => {
  * empurrada para dentro e brigar com o próprio pill.
  */
 .rail-button--active,
-.rail-button--active:hover {
+.rail-button--active:hover,
+.rail-button--active.p-button,
+.rail-button--active.p-button:not(:disabled):hover,
+.rail-button--active.p-button:not(:disabled):active {
   background: var(--shell-rail-active-bg);
   box-shadow: 0 2px 10px rgb(var(--shell-shadow-rgb) / 0.18);
   /* Sobre o pill claro o sage puro fica fraco no texto de 0.58rem. */
@@ -1137,41 +1229,42 @@ onUnmounted(() => {
   content: '';
 }
 
-.rail-action {
-  display: grid;
+.rail-action.p-button {
   width: 2.35rem;
   height: 2.35rem;
-  place-items: center;
+  padding: 0;
   border: 0;
   border-radius: 0.75rem;
   background: color-mix(in srgb, var(--shell-on-brand) 10%, transparent);
   color: color-mix(in srgb, var(--shell-on-brand) 78%, transparent);
-  cursor: pointer;
   font-size: 0.92rem;
   transition:
     background 160ms ease,
     color 160ms ease;
 }
 
-.rail-action:hover {
+.rail-action.p-button:not(:disabled):hover,
+.rail-action.p-button:not(:disabled):active {
+  border: 0;
   background: color-mix(in srgb, var(--shell-on-brand) 18%, transparent);
   color: var(--shell-on-brand);
 }
 
-.rail-action--collapse i {
+.rail-action--collapse :deep(.p-button-icon) {
   transition: transform 220ms var(--navigator-ease);
 }
 
-.app-shell--rail-only .rail-action--collapse i {
+.app-shell--rail-only .rail-action--collapse :deep(.p-button-icon) {
   transform: rotate(180deg);
 }
 
-.rail-action--danger {
+.rail-action--danger.p-button {
   background: color-mix(in srgb, var(--rail-logout-red) 16%, transparent);
   color: color-mix(in srgb, var(--rail-logout-red) 88%, var(--rail-logout-icon));
 }
 
-.rail-action--danger:hover {
+.rail-action--danger.p-button:not(:disabled):hover,
+.rail-action--danger.p-button:not(:disabled):active {
   background: color-mix(in srgb, var(--rail-logout-red) 30%, transparent);
   color: var(--rail-logout-icon);
 }
@@ -1179,6 +1272,7 @@ onUnmounted(() => {
 .rail-brand:focus-visible,
 .rail-button:focus-visible,
 .rail-action:focus-visible {
+  box-shadow: none;
   outline: 2px solid var(--shell-on-brand);
   outline-offset: 2px;
 }
@@ -1201,10 +1295,10 @@ onUnmounted(() => {
   border-top: 1px solid var(--shell-line);
 }
 
-.panel-action {
+.panel-action.p-button {
   display: flex;
   width: 100%;
-  align-items: center;
+  justify-content: flex-start;
   gap: 0.6rem;
   min-height: var(--nav-row-height);
   padding: 0 0.6rem;
@@ -1212,24 +1306,28 @@ onUnmounted(() => {
   border-radius: 0.6rem;
   background: transparent;
   color: var(--shell-muted);
-  cursor: pointer;
-  font: inherit;
   font-size: 0.83rem;
-  font-weight: 600;
-  text-align: left;
+  text-align: start;
 }
 
-.panel-action i {
+.panel-action :deep(.p-button-label) {
+  font-weight: 600;
+}
+
+.panel-action :deep(.p-button-icon) {
   width: 1.15rem;
   font-size: 0.9rem;
 }
 
-.panel-action:hover {
+.panel-action.p-button:not(:disabled):hover,
+.panel-action.p-button:not(:disabled):active {
+  border: 0;
   background: color-mix(in srgb, var(--rail-logout-red) 10%, transparent);
   color: var(--rail-logout-red);
 }
 
-.panel-action:focus-visible {
+.panel-action.p-button:focus-visible {
+  box-shadow: none;
   outline: 2px solid color-mix(in srgb, var(--shell-accent) 55%, transparent);
   outline-offset: 2px;
 }
@@ -1346,7 +1444,8 @@ onUnmounted(() => {
   align-content: start;
   gap: var(--nav-row-gap);
   overflow-y: auto;
-  padding: 0.1rem 0.25rem 0.75rem 0;
+  padding-block: 0.1rem 0.75rem;
+  padding-inline: 0 0.25rem;
   scrollbar-color: color-mix(in srgb, var(--shell-muted) 32%, transparent) transparent;
   scrollbar-width: thin;
 }
@@ -1365,7 +1464,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.15rem;
   margin-bottom: 0.2rem;
-  padding-right: 0.25rem;
+  padding-inline-end: 0.25rem;
   border: 1px solid var(--shell-line);
   border-radius: 0.75rem;
   background: var(--shell-surface-soft);
@@ -1378,61 +1477,59 @@ onUnmounted(() => {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--shell-accent) 12%, transparent);
 }
 
+/*
+ * O campo do PrimeVue perde a caixa própria: quem desenha a borda e o anel de foco é o
+ * `.page-nav__filter`, que também abraça o botão de limpar.
+ */
 .page-nav__filter-field {
-  display: flex;
   min-width: 0;
   flex: 1 1 auto;
-  align-items: center;
-  gap: 0.55rem;
+  color: var(--shell-soft);
 }
 
-.page-nav__filter-field i {
-  margin-left: 0.65rem;
+.page-nav__filter-field :deep(.p-inputicon) {
+  color: inherit;
   font-size: 0.8rem;
 }
 
-.page-nav__filter input {
-  width: 100%;
-  min-width: 0;
-  padding: 0.55rem 0.35rem 0.55rem 0;
+.page-nav__filter-field :deep(.p-inputtext),
+.page-nav__filter-field :deep(.p-inputtext:enabled:hover),
+.page-nav__filter-field :deep(.p-inputtext:enabled:focus) {
+  padding-block: 0.55rem;
+  padding-inline-end: 0.35rem;
   border: 0;
   background: transparent;
+  box-shadow: none;
   color: var(--shell-text);
-  font: inherit;
   font-size: 0.82rem;
   outline: none;
 }
 
-.page-nav__filter input::-webkit-search-cancel-button {
+.page-nav__filter-field :deep(.p-inputtext::-webkit-search-cancel-button) {
   appearance: none;
 }
 
-.page-nav__filter input::placeholder {
+.page-nav__filter-field :deep(.p-inputtext::placeholder) {
   color: var(--shell-soft);
 }
 
-.page-nav__filter-clear {
-  display: grid;
+.page-nav__filter-clear.p-button {
   width: 1.5rem;
   height: 1.5rem;
   flex: 0 0 auto;
-  place-items: center;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
+  padding: 0;
   color: var(--shell-muted);
-  cursor: pointer;
   font-size: 0.68rem;
 }
 
-.page-nav__filter-clear:hover {
+.page-nav__filter-clear.p-button:not(:disabled):hover,
+.page-nav__filter-clear.p-button:not(:disabled):active {
   background: color-mix(in srgb, var(--shell-muted) 16%, transparent);
   color: var(--shell-text);
 }
 
-.page-nav__filter-clear:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--shell-accent) 55%, transparent);
-  outline-offset: 1px;
+.page-nav__filter-clear :deep(.p-button-icon) {
+  font-size: inherit;
 }
 
 .page-nav__empty {
@@ -1508,8 +1605,8 @@ onUnmounted(() => {
   position: fixed;
   z-index: 40;
   top: 0;
-  right: 0;
-  left: var(--navigator-offset);
+  inset-inline-end: 0;
+  inset-inline-start: var(--navigator-offset);
   display: flex;
   height: var(--header-height);
   align-items: center;
@@ -1519,6 +1616,10 @@ onUnmounted(() => {
   box-shadow: 0 1px 0 var(--shell-line);
   backdrop-filter: blur(14px);
   transition: left 220ms var(--navigator-ease);
+}
+
+[dir='rtl'] .app-header {
+  transition: right 220ms var(--navigator-ease);
 }
 
 .app-header__left,
@@ -1581,23 +1682,28 @@ onUnmounted(() => {
  * A busca do módulo herda a caixa do campo do portal de propósito: é o mesmo lugar, o mesmo
  * tamanho e o mesmo ícone que o cabeçalho sempre teve — só que agora abre algo.
  */
-.header-search--botao {
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
+.header-search--botao.p-button {
+  justify-content: flex-start;
+  border: 1px solid var(--shell-line);
+  background: var(--shell-surface);
+  color: var(--shell-soft);
+  font-size: inherit;
+  text-align: start;
   transition:
     background 160ms ease,
     border-color 160ms ease,
     color 160ms ease;
 }
 
-.header-search--botao:hover {
+.header-search--botao.p-button:not(:disabled):hover,
+.header-search--botao.p-button:not(:disabled):active {
   border-color: color-mix(in srgb, var(--shell-accent) 40%, var(--shell-line));
   background: color-mix(in srgb, var(--shell-accent) 6%, var(--shell-surface));
   color: var(--shell-text);
 }
 
-.header-search--botao:focus-visible {
+.header-search--botao.p-button:focus-visible {
+  box-shadow: none;
   outline: 2px solid color-mix(in srgb, var(--shell-accent) 55%, transparent);
   outline-offset: 2px;
 }
@@ -1630,31 +1736,30 @@ onUnmounted(() => {
   }
 }
 
-.header-resgate {
-  display: inline-flex;
-  align-items: center;
+.header-resgate.p-button {
   gap: 0.5rem;
   min-height: 2.45rem;
-  padding: 0.22rem 0.78rem 0.22rem 0.28rem;
+  padding-block: 0.22rem;
+  padding-inline: 0.28rem 0.78rem;
   border: 1px solid var(--shell-line);
   border-radius: 0.72rem;
   background: var(--shell-surface);
   color: var(--shell-text);
-  font: inherit;
   font-size: 0.78rem;
   font-weight: 700;
-  cursor: pointer;
   transition:
     background 160ms ease,
     border-color 160ms ease;
 }
 
-.header-resgate:hover:not(:disabled) {
+.header-resgate.p-button:not(:disabled):hover,
+.header-resgate.p-button:not(:disabled):active {
   background: var(--shell-surface-soft);
   border-color: color-mix(in srgb, var(--shell-accent) 28%, var(--shell-line));
+  color: var(--shell-text);
 }
 
-.header-resgate:disabled {
+.header-resgate.p-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
@@ -1677,7 +1782,7 @@ onUnmounted(() => {
 }
 
 .header-resgate__soon {
-  margin-left: 0.15rem;
+  margin-inline-start: 0.15rem;
   padding: 0.12rem 0.4rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--shell-accent) 18%, transparent);
@@ -1689,23 +1794,22 @@ onUnmounted(() => {
   line-height: 1.2;
 }
 
-.theme-switch {
-  display: inline-flex;
-  align-items: center;
+.theme-switch.p-button {
   min-height: 2.45rem;
   padding: 0.22rem;
   border: 1px solid var(--shell-line);
   border-radius: 0.72rem;
   background: var(--shell-surface);
   color: var(--shell-text);
-  font: inherit;
   font-size: 0.78rem;
   font-weight: 700;
-  cursor: pointer;
 }
 
-.theme-switch:hover {
+.theme-switch.p-button:not(:disabled):hover,
+.theme-switch.p-button:not(:disabled):active {
+  border-color: var(--shell-line);
   background: var(--shell-surface-soft);
+  color: var(--shell-text);
 }
 
 .theme-switch__rail {
@@ -1720,7 +1824,7 @@ onUnmounted(() => {
 .theme-switch__thumb {
   position: absolute;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 1;
   display: grid;
   width: var(--theme-thumb);
@@ -1737,6 +1841,10 @@ onUnmounted(() => {
 
 .theme-switch--dark .theme-switch__thumb {
   transform: translateX(calc(var(--theme-rail-w) - var(--theme-thumb)));
+}
+
+[dir='rtl'] .theme-switch--dark .theme-switch__thumb {
+  transform: translateX(calc(var(--theme-thumb) - var(--theme-rail-w)));
 }
 
 .theme-switch__icon {
@@ -1781,24 +1889,32 @@ onUnmounted(() => {
 }
 
 .theme-switch__label--light {
-  left: var(--theme-thumb);
-  right: 0;
+  inset-inline-start: var(--theme-thumb);
+  inset-inline-end: 0;
   opacity: 1;
   transform: translateX(0);
 }
 
 .theme-switch__label--dark {
-  left: 0;
-  right: var(--theme-thumb);
+  inset-inline-start: 0;
+  inset-inline-end: var(--theme-thumb);
   opacity: 0;
   pointer-events: none;
   transform: translateX(0.2rem);
+}
+
+[dir='rtl'] .theme-switch__label--dark {
+  transform: translateX(-0.2rem);
 }
 
 .theme-switch--dark .theme-switch__label--light {
   opacity: 0;
   pointer-events: none;
   transform: translateX(-0.2rem);
+}
+
+[dir='rtl'] .theme-switch--dark .theme-switch__label--light {
+  transform: translateX(0.2rem);
 }
 
 .theme-switch--dark .theme-switch__label--dark {
@@ -1812,10 +1928,12 @@ onUnmounted(() => {
   .app-header,
   .app-content,
   .navigator-panel,
-  .rail-action--collapse i,
+  .rail-action--collapse :deep(.p-button-icon),
   .theme-switch__thumb,
   .theme-switch__icon,
-  .theme-switch__label {
+  .theme-switch__label,
+  html[dir='rtl'] .app-header,
+  html[dir='rtl'] .app-content {
     transition: none;
   }
 
@@ -1838,31 +1956,44 @@ onUnmounted(() => {
   min-height: 100vh;
   max-width: 100%;
   padding-top: var(--header-height);
-  padding-left: var(--navigator-offset);
+  padding-inline-start: var(--navigator-offset);
   /* Painéis laterais não-modais empurram o conteúdo (var setada por useSidePanelOffset) */
-  padding-right: var(--pj-side-panel-offset, 0px);
+  padding-inline-end: var(--pj-side-panel-offset, 0px);
   overflow-x: clip;
   transition:
     padding-left 220ms var(--navigator-ease),
     padding-right 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/* Em RTL os lados físicos se invertem; as durações acompanham cada lado lógico. */
+[dir='rtl'] .app-content {
+  transition:
+    padding-right 220ms var(--navigator-ease),
+    padding-left 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 .user-menu {
   position: relative;
 }
 
-.user-menu__trigger {
-  display: inline-flex;
-  align-items: center;
+.user-menu__trigger.p-button {
   gap: 0.65rem;
   min-height: 2.65rem;
-  padding: 0.25rem 0.45rem 0.25rem 0.3rem;
+  padding-block: 0.25rem;
+  padding-inline: 0.3rem 0.45rem;
   border: 1px solid var(--shell-line);
   border-radius: 0.78rem;
   background: var(--shell-surface);
   color: var(--shell-text);
+  font-size: inherit;
   line-height: 1;
-  cursor: pointer;
+}
+
+.user-menu__trigger.p-button:not(:disabled):hover,
+.user-menu__trigger.p-button:not(:disabled):active {
+  border-color: var(--shell-line);
+  background: var(--shell-surface-soft);
+  color: var(--shell-text);
 }
 
 .user-avatar {
@@ -1899,22 +2030,17 @@ onUnmounted(() => {
   font-size: 0.72rem;
 }
 
+/* A caixa (borda, raio, fundo, respiro) vem do Popover, com os tokens em `userMenuStyle`. */
 .user-menu__dropdown {
-  position: absolute;
-  top: calc(100% + 0.65rem);
-  right: 0;
   display: grid;
   min-width: 13rem;
-  padding: 0.45rem;
-  border: 1px solid var(--shell-line);
-  border-radius: 1rem;
-  background: var(--shell-surface);
 }
 
 .user-menu__dropdown > a,
-.user-menu__dropdown > .p-button {
+.user-menu__logout.p-button {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.65rem;
   min-height: 2.55rem;
   padding: 0 0.75rem;
@@ -1925,13 +2051,19 @@ onUnmounted(() => {
   font: inherit;
   font-size: 0.9rem;
   font-weight: 600;
-  text-align: left;
+  text-align: start;
   text-decoration: none;
   cursor: pointer;
 }
 
+.user-menu__logout :deep(.p-button-label) {
+  font-weight: 600;
+}
+
 .user-menu__dropdown > a:hover,
-.user-menu__dropdown > .p-button:hover {
+.user-menu__logout.p-button:not(:disabled):hover,
+.user-menu__logout.p-button:not(:disabled):active {
+  border: 0;
   background: var(--shell-surface-soft);
 }
 
@@ -1952,7 +2084,9 @@ onUnmounted(() => {
   text-transform: uppercase;
 }
 
-.user-menu__dropdown > .p-button {
+.user-menu__logout.p-button,
+.user-menu__logout.p-button:not(:disabled):hover,
+.user-menu__logout.p-button:not(:disabled):active {
   color: color-mix(in srgb, var(--danger-soft) 80%, var(--shell-text));
 }
 
@@ -1978,7 +2112,7 @@ onUnmounted(() => {
 
   .app-content {
     /* Em telas estreitas o painel lateral sobrepõe em vez de empurrar */
-    padding-right: 0;
+    padding-inline-end: 0;
   }
 
   .user-menu__identity,
@@ -1993,11 +2127,11 @@ onUnmounted(() => {
     --theme-rail-w: 3.85rem;
   }
 
-  .header-resgate {
+  .header-resgate.p-button {
     padding: 0.22rem;
   }
 
-  .header-search {
+  .header-search.p-button {
     width: 2.5rem;
     min-width: 2.5rem;
     padding: 0;

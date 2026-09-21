@@ -106,7 +106,29 @@ const authArtStyle = computed(() => ({
   /* Preso à viewport: em página alta (cadastro) a arte não estica nem some ao rolar. */
   background-attachment: fixed;
   color: var(--auth-text);
-  font-family: 'DM Sans', Inter, system-ui, sans-serif;
+  font-family: 'DM Sans', 'PetJourney Arabic', Inter, system-ui, sans-serif;
+}
+
+/*
+ * Árabe: as colunas trocam de lado, e a faixa verde da arte precisa ir junto, senão a copy
+ * branca da marca fica sobre o fundo claro. Imagem de fundo não espelha: a arte passa para um
+ * pseudo-elemento fixo, invertido na horizontal.
+ */
+[dir='rtl'] .auth-page {
+  isolation: isolate;
+  background-image: none;
+}
+
+[dir='rtl'] .auth-page::before {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background-image: var(--auth-art);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  transform: scaleX(-1);
 }
 
 .bg-color-icon {
@@ -139,7 +161,7 @@ const authArtStyle = computed(() => ({
   display: none;
   position: absolute;
   top: 1.25rem;
-  right: 1.25rem;
+  inset-inline-end: 1.25rem;
   z-index: 2;
 }
 
@@ -201,7 +223,8 @@ const authArtStyle = computed(() => ({
   flex-direction: column;
   justify-content: flex-start;
   gap: clamp(1.5rem, 3vw, 2.5rem);
-  padding: clamp(2rem, 4vw, 3.25rem) clamp(1.5rem, 3vw, 3rem) clamp(2rem, 4vw, 3.25rem) 0;
+  padding-block: clamp(2rem, 4vw, 3.25rem);
+  padding-inline: 0 clamp(1.5rem, 3vw, 3rem);
   color: var(--auth-on-brand);
 }
 
@@ -284,6 +307,10 @@ const authArtStyle = computed(() => ({
 @media (max-width: 980px) {
   .auth-page {
     background-image: none;
+  }
+
+  [dir='rtl'] .auth-page::before {
+    display: none;
   }
 
   .auth-shell {

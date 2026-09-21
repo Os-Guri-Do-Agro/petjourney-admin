@@ -8,6 +8,7 @@
  * Clicar num dia leva para a grade daquele dia; é a rota mais curta entre "a quinta está
  * vazia" e "marquei na quinta".
  */
+import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -55,9 +56,11 @@ const dias = computed(() =>
       class="dia"
       :class="[`dia--${dia.faixa}`, { 'dia--hoje': dia.ehHoje, 'dia--fechado': dia.fechado }]"
     >
-      <button
-        type="button"
-        class="dia__botao clinic-focusable"
+      <Button
+        class="dia__botao"
+        severity="secondary"
+        outlined
+        fluid
         @click="emit('escolherDia', dia.data)"
       >
         <header class="dia__topo">
@@ -134,7 +137,7 @@ const dias = computed(() =>
             </li>
           </ul>
         </template>
-      </button>
+      </Button>
     </article>
   </div>
 </template>
@@ -150,34 +153,37 @@ const dias = computed(() =>
   min-width: 0;
 }
 
-.dia__botao {
+/*
+ * O dia inteiro é o alvo do clique. O botão perde o miolo centralizado de botão e vira cartão:
+ * conteúdo empilhado, à esquerda, com a borda e a sombra dos cartões do módulo.
+ */
+.dia__botao.p-button {
   display: grid;
-  width: 100%;
   align-content: start;
+  justify-content: stretch;
   gap: var(--clinic-space-2);
   min-height: 9rem;
   padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
+  border-color: var(--clinic-line);
   border-radius: var(--clinic-radius-card);
+  box-shadow: var(--clinic-shadow-card);
+  font-size: var(--clinic-font-base);
+  font-weight: inherit;
+  text-align: start;
+}
+
+/* Repete as classes do botão para vencer a regra de botão contornado do módulo. */
+.dia__botao.p-button.p-button-secondary.p-button-outlined {
+  border-color: var(--clinic-line);
   background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
 }
 
-.dia__botao:hover {
-  border-color: var(--clinic-accent);
-  box-shadow: var(--clinic-shadow-card);
-}
-
-.dia--hoje .dia__botao {
+.dia--hoje .dia__botao.p-button.p-button-secondary.p-button-outlined {
   border-color: var(--clinic-accent-strong);
   box-shadow: inset 0 2px 0 var(--clinic-accent-strong);
 }
 
-.dia--fechado .dia__botao {
+.dia--fechado .dia__botao.p-button.p-button-secondary.p-button-outlined {
   background: var(--clinic-surface-sunken);
 }
 

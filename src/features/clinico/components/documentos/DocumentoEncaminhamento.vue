@@ -73,7 +73,7 @@ const diagnosticos = computed(() =>
   props.encounter.diagnosticos.map((item) => ({
     id: item.id,
     texto: clinico.descricaoDoDiagnostico(item),
-    kind: t(`clinico.prontuario.diagnostico.kind.${item.kind}`),
+    kind: t(`clinico.prontuario.diagnostico.tipo.${item.kind}`),
   })),
 )
 
@@ -191,7 +191,7 @@ const medicacoes = computed(() =>
 
 .lista {
   margin: 0;
-  padding-left: 5mm;
+  padding-inline-start: 5mm;
   font-size: 10pt;
   line-height: 1.6;
 }

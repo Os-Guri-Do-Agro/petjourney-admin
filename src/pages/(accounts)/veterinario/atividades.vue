@@ -84,9 +84,10 @@ onMounted(carregar)
 
         <ul class="pilha__lista">
           <li v-for="encounter in rascunhos" :key="encounter.id">
-            <button
+            <Button
               type="button"
               class="item clinic-focusable"
+              text
               @click="router.push(`/veterinario/atendimento/${encounter.id}`)"
             >
               <span class="item__corpo">
@@ -97,7 +98,7 @@ onMounted(carregar)
                 </small>
               </span>
               <i class="pi pi-chevron-right" aria-hidden="true" />
-            </button>
+            </Button>
           </li>
         </ul>
       </section>
@@ -144,9 +145,10 @@ onMounted(carregar)
 
         <ul class="pilha__lista">
           <li v-for="entrada in fila.ofertadas" :key="entrada.id">
-            <button
+            <Button
               type="button"
               class="item clinic-focusable"
+              text
               @click="router.push('/veterinario/fila')"
             >
               <span class="item__corpo">
@@ -160,7 +162,7 @@ onMounted(carregar)
                 </small>
               </span>
               <i class="pi pi-chevron-right" aria-hidden="true" />
-            </button>
+            </Button>
           </li>
         </ul>
       </section>
@@ -233,10 +235,13 @@ onMounted(carregar)
   list-style: none;
 }
 
-.item {
+/* A linha clicável é `Button`; a de retorno (com ação própria) é `div`. As duas leem igual. */
+.item,
+.item.p-button {
   display: flex;
   width: 100%;
   align-items: center;
+  justify-content: flex-start;
   gap: var(--clinic-space-3);
   min-height: var(--clinic-row-height);
   padding: var(--clinic-cell-padding-y) var(--clinic-space-2);
@@ -244,21 +249,20 @@ onMounted(carregar)
   border-radius: var(--clinic-radius-control);
   background: transparent;
   color: inherit;
-  cursor: pointer;
   font: inherit;
-  text-align: left;
+  text-align: start;
 }
 
-.item:hover {
+.item.p-button:not(:disabled):hover,
+.item.p-button:not(:disabled):active {
+  border: none;
   background: var(--clinic-surface-soft);
+  color: inherit;
 }
 
-.item--estatico {
-  cursor: default;
-}
-
-.item--estatico:hover {
-  background: transparent;
+.item.p-button:focus-visible {
+  outline: none;
+  box-shadow: var(--clinic-focus-ring);
 }
 
 .item__corpo {

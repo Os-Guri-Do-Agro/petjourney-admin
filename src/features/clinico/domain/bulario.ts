@@ -100,16 +100,69 @@ export function idadeEmMeses(pet: Pet, hoje: Date): number | null {
  * crônica" no alerta, e é essa palavra que liga ao cuidado `renal` do bulário. Um dicionário de
  * termos por cuidado é grosseiro de propósito — errar para mais aqui custa um aviso a mais na
  * tela; errar para menos custa uma prescrição sem conferência.
+ *
+ * O alerta fica no idioma em que a clínica escreveu, não no da tela: cada lista traz os termos em
+ * português, depois em sérvio (radicais, para cobrir os casos da declinação) e em árabe.
  */
 const TERMOS: Record<MedicationCaution, string[]> = {
-  gestante: ['gestante', 'gestação', 'prenhez'],
-  lactante: ['lactante', 'amamentando', 'lactação'],
-  filhote: ['filhote', 'neonato'],
-  idoso: ['idoso', 'geriátrico'],
-  renal: ['renal', 'rim', 'nefro', 'creatinina'],
-  hepatico: ['hepát', 'fígado', 'figado'],
-  cardiaco: ['cardio', 'cardíac', 'cardiac', 'valva', 'insuficiência cardíaca'],
-  gastrico: ['gástric', 'gastric', 'úlcera', 'ulcera', 'gastrite'],
+  gestante: ['gestante', 'gestação', 'prenhez', 'gravid', 'bremen', 'skotn', 'حامل', 'الحمل'],
+  lactante: ['lactante', 'amamentando', 'lactação', 'laktacij', 'doji', 'مرضع', 'رضاعة', 'إرضاع'],
+  filhote: [
+    'filhote',
+    'neonato',
+    'štene',
+    'štenc',
+    'mače',
+    'mladun',
+    'neonat',
+    'جرو',
+    'جراء',
+    'هريرة',
+    'حديث الولادة',
+  ],
+  idoso: ['idoso', 'geriátrico', 'gerijatr', 'stariji', 'مسن', 'كبير السن', 'شيخوخة'],
+  renal: [
+    'renal',
+    'rim',
+    'nefro',
+    'creatinina',
+    'bubreg',
+    'bubrež',
+    'kreatinin',
+    'nefr',
+    'كلوي',
+    'الكلى',
+    'كلى',
+    'كرياتينين',
+  ],
+  hepatico: ['hepát', 'fígado', 'figado', 'hepat', 'jetr', 'كبد'],
+  cardiaco: [
+    'cardio',
+    'cardíac',
+    'cardiac',
+    'valva',
+    'insuficiência cardíaca',
+    'kardi',
+    'srčan',
+    'srce',
+    'zalist',
+    'قلب',
+    'صمام',
+  ],
+  gastrico: [
+    'gástric',
+    'gastric',
+    'úlcera',
+    'ulcera',
+    'gastrite',
+    'gastri',
+    'želud',
+    'čir',
+    'معدة',
+    'المعدة',
+    'معدي',
+    'قرحة',
+  ],
 }
 
 function alertaCasaComCuidado(texto: string, cuidado: MedicationCaution): boolean {

@@ -8,6 +8,8 @@
  * consulta, e obrigar a remover e readicionar seria fricção sem motivo.
  */
 import Button from 'primevue/button'
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import { computed, ref } from 'vue'
@@ -115,15 +117,15 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
     <p v-else class="vazio">{{ t('clinico.prontuario.diagnostico.vazio') }}</p>
 
     <div v-if="!somenteLeitura" class="busca">
-      <label class="busca__campo">
-        <i class="pi pi-search" aria-hidden="true" />
+      <IconField>
+        <InputIcon class="pi pi-search" />
         <InputText
           v-model="termo"
           :placeholder="t('clinico.prontuario.diagnostico.buscar')"
           :aria-label="t('clinico.prontuario.diagnostico.buscar')"
           fluid
         />
-      </label>
+      </IconField>
 
       <!--
         A sugestão é uma linha inteira clicável, com respiro suficiente para o olho separar uma
@@ -132,9 +134,11 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
       -->
       <ul v-if="sugestoes.length > 0" class="sugestoes">
         <li v-for="sugestao in sugestoes" :key="sugestao.codigo">
-          <button
+          <Button
             type="button"
-            class="sugestoes__item clinic-focusable"
+            class="sugestoes__item"
+            text
+            fluid
             @click="adicionar(sugestao.codigo, sugestao.descricao)"
           >
             <span class="codigo">{{ sugestao.codigo }}</span>
@@ -143,7 +147,7 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
               <i class="pi pi-plus" aria-hidden="true" />
               {{ t('clinico.prontuario.diagnostico.adicionar') }}
             </span>
-          </button>
+          </Button>
         </li>
       </ul>
 
@@ -209,26 +213,6 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
   gap: var(--clinic-space-2);
 }
 
-.busca__campo {
-  position: relative;
-  display: block;
-}
-
-.busca__campo i {
-  position: absolute;
-  top: 50%;
-  left: var(--clinic-space-3);
-  z-index: 1;
-  color: var(--clinic-faint);
-  font-size: 0.8rem;
-  pointer-events: none;
-  transform: translateY(-50%);
-}
-
-.busca__campo :deep(input) {
-  padding-left: 2.1rem;
-}
-
 .sugestoes {
   display: grid;
   gap: 0.2rem;
@@ -240,26 +224,29 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
   list-style: none;
 }
 
-.sugestoes__item {
+/*
+ * Linha de sugestão: botão de texto com layout próprio em grade (código, descrição, ação). O
+ * tema o faria flex centralizado e sálvia; a linha herda a cor e ganha moldura no hover.
+ */
+.sugestoes__item.p-button {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  width: 100%;
   align-items: center;
   gap: var(--clinic-space-3);
   min-height: calc(var(--clinic-row-height) + 4px);
   padding: 0 var(--clinic-space-2);
   border: 1px solid transparent;
   border-radius: var(--clinic-radius-control);
-  background: transparent;
   color: inherit;
-  cursor: pointer;
   font: inherit;
-  text-align: left;
+  text-align: start;
 }
 
-.sugestoes__item:hover {
+.sugestoes__item.p-button:not(:disabled):hover,
+.sugestoes__item.p-button:not(:disabled):active {
   border-color: var(--clinic-accent);
   background: var(--clinic-surface);
+  color: inherit;
 }
 
 .sugestoes__descricao {

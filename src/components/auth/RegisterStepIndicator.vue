@@ -76,8 +76,8 @@ const indicatorStyle = computed(() => {
   content: '';
   position: absolute;
   top: 1rem;
-  right: 50%;
-  left: calc(-50% - 0.25rem);
+  inset-inline-end: 50%;
+  inset-inline-start: calc(-50% - 0.25rem);
   height: 2px;
   margin: 0 1.4rem;
   border-radius: 999px;

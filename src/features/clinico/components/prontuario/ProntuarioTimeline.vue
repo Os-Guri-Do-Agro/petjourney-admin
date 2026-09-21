@@ -6,6 +6,7 @@
  * histórico inteiro para lembrar o que prescreveu há duas semanas. O que interessa no retorno
  * é o par: o que foi dito e o que aconteceu depois.
  */
+import Button from 'primevue/button'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -135,19 +136,23 @@ const prescricoesAnteriores = computed(() =>
         neste pet" antes de qualquer clique — que é a pergunta que traz o vet a esta lista.
       -->
       <div v-if="tiposPresentes.length > 1" class="filtro" role="group">
-        <button
+        <Button
           v-for="tipo in tiposPresentes"
           :key="tipo.kind"
           type="button"
-          class="filtro__ficha clinic-focusable"
+          class="filtro__ficha"
           :class="{ 'filtro__ficha--ativa': filtro === tipo.kind }"
+          severity="secondary"
+          outlined
+          rounded
+          size="small"
           :aria-pressed="filtro === tipo.kind"
           @click="alternarFiltro(tipo.kind)"
         >
           <i :class="ICONE[tipo.kind]" aria-hidden="true" />
           <span>{{ t(`clinico.prontuario.timeline.kind.${tipo.kind}`) }}</span>
           <span class="filtro__contagem clinic-value">{{ tipo.total }}</span>
-        </button>
+        </Button>
       </div>
 
       <ol v-if="visiveis.length > 0" class="linha">
@@ -251,31 +256,36 @@ const prescricoesAnteriores = computed(() =>
   margin-top: var(--clinic-space-2);
 }
 
-.filtro__ficha {
-  display: inline-flex;
-  align-items: center;
+/*
+ * Ficha: pílula contornada e compacta. A especificidade passa a regra global da clínica para
+ * botão secundário contornado, que daria a toda ficha a moldura forte e o texto cheio.
+ */
+.filtro__ficha.p-button {
   gap: 0.25rem;
   padding: 0.1rem 0.4rem;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
   font: inherit;
   font-size: var(--clinic-font-label);
+}
+
+.filtro__ficha.p-button.p-button-secondary.p-button-outlined {
+  border-color: var(--clinic-line);
+  background: var(--clinic-surface);
+  color: var(--clinic-muted);
 }
 
 .filtro__ficha i {
   font-size: 0.6rem;
 }
 
-.filtro__ficha:hover {
+.filtro__ficha.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
   border-color: var(--clinic-line-strong);
+  background: var(--clinic-surface);
   color: var(--clinic-text);
 }
 
 /* Filtro ligado ganha contorno e fundo, não só cor: o estado sobrevive à escala de cinza. */
-.filtro__ficha--ativa {
+.filtro__ficha--ativa.p-button.p-button-secondary.p-button-outlined,
+.filtro__ficha--ativa.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
   border-color: var(--clinic-accent-strong);
   background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);

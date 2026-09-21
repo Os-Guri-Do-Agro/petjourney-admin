@@ -58,12 +58,16 @@ watch(
       return
     }
 
-    mensagem.value = t('clinico.fila.oferta.mensagemPadrao', {
-      paciente: pet.value?.nome ?? '',
-      data: formato.dataCurta(clinicClock.dateOf(props.slotInicio)),
-      hora: formato.hora(props.slotInicio),
-      minutos: OFERTA_MINUTOS,
-    })
+    mensagem.value = t(
+      'clinico.fila.oferta.mensagemPadrao',
+      {
+        paciente: pet.value?.nome ?? '',
+        data: formato.dataCurta(clinicClock.dateOf(props.slotInicio)),
+        hora: formato.hora(props.slotInicio),
+        minutos: OFERTA_MINUTOS,
+      },
+      OFERTA_MINUTOS,
+    )
   },
   { immediate: true },
 )
@@ -97,7 +101,7 @@ watch(
       <!-- O prazo é a regra que faz a fila funcionar: dito antes do texto, não depois. -->
       <p class="oferta__prazo">
         <i class="pi pi-clock" aria-hidden="true" />
-        {{ t('clinico.fila.oferta.prazo', { minutos: OFERTA_MINUTOS }) }}
+        {{ t('clinico.fila.oferta.prazo', { minutos: OFERTA_MINUTOS }, OFERTA_MINUTOS) }}
       </p>
 
       <label class="oferta__campo">

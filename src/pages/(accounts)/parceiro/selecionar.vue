@@ -119,7 +119,7 @@ onMounted(() => {
 
       <ul v-if="opcoes.length" class="select__list">
         <li v-for="opcao in opcoes" :key="opcao.parceiroId">
-          <button
+          <Button
             class="select__item"
             type="button"
             :class="{ 'select__item--active': opcao.ativo }"
@@ -154,7 +154,7 @@ onMounted(() => {
               />
               <i v-else class="pi pi-angle-right" aria-hidden="true" />
             </span>
-          </button>
+          </Button>
         </li>
       </ul>
 
@@ -193,43 +193,46 @@ onMounted(() => {
   list-style: none;
 }
 
-.select__item {
-  display: flex;
+/* Opção de perfil: Button com slot (ícone + nome + status), sem o visual de CTA do preset. */
+.select__item.p-button {
+  justify-content: flex-start;
   width: 100%;
-  align-items: center;
   gap: 0.75rem;
   padding: 0.85rem 0.95rem;
   border: 1px solid var(--sel-line);
   border-radius: 0.95rem;
   background: var(--sel-card);
   color: inherit;
-  cursor: pointer;
-  text-align: left;
+  font-size: inherit;
+  text-align: start;
   transition:
     border-color 150ms ease,
     background 150ms ease,
     transform 150ms ease;
 }
 
-.select__item:hover:not(:disabled),
-.select__item:focus-visible {
+.select__item.p-button:not(:disabled):hover,
+.select__item.p-button:not(:disabled):active,
+.select__item.p-button:focus-visible {
   border-color: color-mix(in srgb, var(--sel-accent) 34%, var(--sel-line));
   background: color-mix(in srgb, var(--sel-soft) 55%, var(--sel-card));
+  color: inherit;
   outline: none;
   transform: translateY(-1px);
 }
 
-.select__item:focus-visible {
+.select__item.p-button:focus-visible {
+  box-shadow: none;
   outline: 2px solid var(--sel-accent-strong);
   outline-offset: 2px;
 }
 
-.select__item:disabled {
+.select__item.p-button:disabled {
   cursor: default;
   opacity: 0.7;
 }
 
-.select__item--active {
+.select__item--active.p-button {
   border-color: color-mix(in srgb, var(--sel-accent) 45%, var(--sel-line));
   background: color-mix(in srgb, var(--sel-soft) 70%, var(--sel-card));
 }

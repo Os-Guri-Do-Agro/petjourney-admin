@@ -119,6 +119,19 @@ const porMensagem = computed(() => saiPorMensagem(desfecho.value))
 
 const avisos = computed(() => (props.resumo ? avisosDaAlta(props.resumo) : []))
 
+type AvisoDaAlta = ReturnType<typeof avisosDaAlta>[number]
+
+/** A contagem de cada aviso. Vai também como número do plural: sem ele a frase sai no singular. */
+function totalDoAviso(aviso: AvisoDaAlta): number {
+  if (!props.resumo) {
+    return 0
+  }
+  if (aviso === 'dose-pendente') {
+    return props.resumo.pendentesAgora
+  }
+  return aviso === 'dose-futura' ? props.resumo.aSuspender : props.resumo.boletinsRetidos
+}
+
 /**
  * A orientação é obrigatória, e não por burocracia.
  *
@@ -196,14 +209,11 @@ function confirmar() {
           <i class="pi pi-exclamation-circle" aria-hidden="true" />
           <span>
             {{
-              t(`clinico.internacao.alta.aviso.${aviso}`, {
-                total:
-                  aviso === 'dose-pendente'
-                    ? resumo.pendentesAgora
-                    : aviso === 'dose-futura'
-                      ? resumo.aSuspender
-                      : resumo.boletinsRetidos,
-              })
+              t(
+                `clinico.internacao.alta.aviso.${aviso}`,
+                { total: totalDoAviso(aviso) },
+                totalDoAviso(aviso),
+              )
             }}
           </span>
         </p>

@@ -16,7 +16,14 @@ export default defineConfigWithVueTs(
     files: ['**/*.{vue,ts,mts,tsx}'],
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/src/_mocks/**']),
+  globalIgnores([
+    '**/dist/**',
+    '**/dist-ssr/**',
+    '**/coverage/**',
+    '**/src/_mocks/**',
+    // Pasta de trabalho local da tradução sr/ar (fora do git).
+    '.i18n-work/**',
+  ]),
 
   ...pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,

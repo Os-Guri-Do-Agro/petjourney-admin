@@ -8,6 +8,7 @@ import { useI18n } from 'vue-i18n'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PartnerFocusCard from '@/components/parceiro/PartnerFocusCard.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
 import {
   getCarteira,
@@ -25,9 +26,14 @@ const emit = defineEmits<{
   needsProgramas: []
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
+
+/** Valores em BRL escritos no formato do idioma da tela. */
+function formatBrl(centavos: number) {
+  return formatCentavosToBrl(centavos, INTL_LOCALE[locale.value as Locale])
+}
 
 const carteira = ref<Carteira | null>(null)
 const loading = ref(true)
@@ -171,7 +177,7 @@ async function requestWithdraw() {
       severity: 'warn',
       summary: t('carteira.toast.insufficient'),
       detail: t('carteira.toast.maxWithdraw', {
-        valor: formatCentavosToBrl(carteira.value.saldoSacavelCentavos),
+        valor: formatBrl(carteira.value.saldoSacavelCentavos),
       }),
       life: 4000,
     })
@@ -280,23 +286,31 @@ onMounted(() => {
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadCarteira">{{ t('carteira.visao.retry') }}</button>
+      <Button
+        type="button"
+        :label="t('carteira.visao.retry')"
+        icon="pi pi-refresh"
+        severity="secondary"
+        outlined
+        size="small"
+        @click="loadCarteira"
+      />
     </div>
 
     <template v-else-if="carteira">
       <section class="carteira-metrics">
         <PartnerFocusCard class="metric metric--focus">
           <span>{{ t('carteira.visao.saldoSacavel') }}</span>
-          <strong>{{ formatCentavosToBrl(carteira.saldoSacavelCentavos) }}</strong>
+          <strong>{{ formatBrl(carteira.saldoSacavelCentavos) }}</strong>
           <small>{{ t('carteira.visao.saldoSacavelHint') }}</small>
         </PartnerFocusCard>
         <article class="metric">
           <span>{{ t('carteira.visao.saldoTotal') }}</span>
-          <strong>{{ formatCentavosToBrl(carteira.saldoTotalCentavos) }}</strong>
+          <strong>{{ formatBrl(carteira.saldoTotalCentavos) }}</strong>
         </article>
         <article class="metric">
           <span>{{ t('carteira.visao.totalSacado') }}</span>
-          <strong>{{ formatCentavosToBrl(carteira.totalSacadoCentavos) }}</strong>
+          <strong>{{ formatBrl(carteira.totalSacadoCentavos) }}</strong>
         </article>
       </section>
 
@@ -319,14 +333,14 @@ onMounted(() => {
             <AuthTextField
               id="chave-pix"
               v-model="chavePix"
-              :disabled="!store.isDono || savingPix"
+              :disabled="!store.isDono"
               :hint="t('carteira.visao.pix.hint')"
               :label="t('carteira.visao.pix.label')"
               :placeholder="t('carteira.visao.pix.placeholder')"
             />
             <Button
               :label="t('carteira.visao.pix.save')"
-              :disabled="!store.isDono"
+              :disabled="!store.isDono || savingPix"
               :loading="savingPix"
               @click="savePix"
             />
@@ -351,11 +365,11 @@ onMounted(() => {
               </template>
             </AuthTextField>
             <p class="carteira-hint">
-              {{ t('carteira.visao.saque.hint', { valor: formatCentavosToBrl(minSaqueCentavos) }) }}
+              {{ t('carteira.visao.saque.hint', { valor: formatBrl(minSaqueCentavos) }) }}
             </p>
             <Button
               :label="t('carteira.visao.saque.submit')"
-              :disabled="!canRequestWithdraw"
+              :disabled="!canRequestWithdraw || requestingSaque"
               :loading="requestingSaque"
               @click="requestWithdraw"
             />
@@ -427,14 +441,6 @@ onMounted(() => {
 .portal-panel__state--error p {
   margin: 0;
   color: var(--partner-warm-text);
-}
-
-.portal-panel__state button {
-  border: 1px solid var(--partner-line);
-  border-radius: 0.6rem;
-  padding: 0.45rem 0.85rem;
-  background: var(--partner-card);
-  cursor: pointer;
 }
 
 .carteira-skeleton {

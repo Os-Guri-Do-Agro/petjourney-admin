@@ -2,6 +2,9 @@
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import Tab from 'primevue/tab'
+import TabList from 'primevue/tablist'
+import Tabs from 'primevue/tabs'
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -192,29 +195,30 @@ function handleSubmit() {
 
 <template>
   <form class="cad-form-shell" novalidate @submit.prevent="handleSubmit">
-    <div
+    <!-- Painéis ficam abaixo via v-show (cad-panel-*): id/aria-controls do Tab apontam para eles. -->
+    <Tabs
       v-if="showProgramas"
-      class="cad-tabs"
-      role="tablist"
-      :aria-label="t('parceiroCadastro.tabs.aria')"
+      :value="activeTab"
+      @update:value="(value) => (activeTab = value as FormTab)"
     >
-      <button
-        v-for="tab in tabs"
-        :id="`cad-tab-${tab.id}`"
-        :key="tab.id"
-        class="cad-tabs__button"
-        :class="{ 'cad-tabs__button--active': activeTab === tab.id }"
-        type="button"
-        role="tab"
-        :aria-selected="activeTab === tab.id"
-        :aria-controls="`cad-panel-${tab.id}`"
-        @click="activeTab = tab.id"
+      <TabList
+        class="cad-tabs"
+        :pt="{ tabList: { 'aria-label': t('parceiroCadastro.tabs.aria') } }"
       >
-        <i :class="tab.icon" aria-hidden="true" />
-        <span>{{ tab.label }}</span>
-        <span v-if="tab.id === 'programas'" class="cad-tabs__count">{{ programas.length }}</span>
-      </button>
-    </div>
+        <Tab
+          v-for="tab in tabs"
+          :id="`cad-tab-${tab.id}`"
+          :key="tab.id"
+          class="cad-tabs__button"
+          :value="tab.id"
+          :aria-controls="`cad-panel-${tab.id}`"
+        >
+          <i :class="tab.icon" aria-hidden="true" />
+          <span>{{ tab.label }}</span>
+          <span v-if="tab.id === 'programas'" class="cad-tabs__count">{{ programas.length }}</span>
+        </Tab>
+      </TabList>
+    </Tabs>
 
     <div
       v-show="!showProgramas || activeTab === 'dados'"
@@ -321,14 +325,15 @@ function handleSubmit() {
           {{ item }}
         </li>
       </ul>
-      <button
+      <Button
         v-if="activeTab === 'dados'"
         class="cad-resumo__link"
         type="button"
+        link
+        size="small"
+        :label="t('parceiroCadastro.resumo.edit')"
         @click="activeTab = 'programas'"
-      >
-        {{ t('parceiroCadastro.resumo.edit') }}
-      </button>
+      />
     </div>
 
     <div class="cad-form__actions">
@@ -343,8 +348,12 @@ function handleSubmit() {
   gap: 1rem;
 }
 
-.cad-tabs {
-  display: flex;
+.cad-tabs.p-tablist {
+  overflow: visible;
+  background: transparent;
+}
+
+.cad-tabs :deep(.p-tablist-tab-list) {
   flex-wrap: wrap;
   gap: 0.35rem;
   padding: 0.28rem;
@@ -353,10 +362,16 @@ function handleSubmit() {
   background: color-mix(in srgb, var(--partner-primary-soft) 10%, transparent);
 }
 
-.cad-tabs__button {
+/* Destaque em pílula — a barra deslizante do Aura não se aplica aqui. */
+.cad-tabs :deep(.p-tablist-active-bar) {
+  display: none;
+}
+
+.cad-tabs__button.p-tab {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  margin: 0;
   padding: 0.48rem 0.9rem;
   border: 1px solid transparent;
   border-radius: 0.62rem;
@@ -364,23 +379,19 @@ function handleSubmit() {
   color: var(--partner-muted);
   font-size: 0.84rem;
   font-weight: 650;
-  cursor: pointer;
-  transition:
-    background 140ms ease,
-    color 140ms ease,
-    border-color 140ms ease;
 }
 
 .cad-tabs__button i {
   font-size: 0.8rem;
 }
 
-.cad-tabs__button:hover {
+.cad-tabs__button.p-tab:not(.p-tab-active):not(.p-disabled):hover {
+  border-color: transparent;
   background: color-mix(in srgb, var(--partner-primary-soft) 35%, transparent);
   color: var(--partner-text);
 }
 
-.cad-tabs__button--active {
+.cad-tabs__button.p-tab-active {
   border-color: color-mix(in srgb, var(--partner-primary-strong) 35%, transparent);
   background: var(--partner-primary);
   color: var(--partner-on-primary);
@@ -399,7 +410,7 @@ function handleSubmit() {
   font-weight: 750;
 }
 
-.cad-tabs__button--active .cad-tabs__count {
+.cad-tabs__button.p-tab-active .cad-tabs__count {
   background: color-mix(in srgb, var(--partner-on-primary) 26%, transparent);
   color: var(--partner-on-primary);
 }
@@ -488,14 +499,15 @@ function handleSubmit() {
   font-size: 0.7rem;
 }
 
-.cad-resumo__link {
-  margin-left: auto;
-  border: 0;
-  background: none;
+.cad-resumo__link.p-button {
+  margin-inline-start: auto;
+  padding: 0;
   color: var(--partner-primary-strong);
   font-size: 0.8rem;
+}
+
+.cad-resumo__link.p-button :deep(.p-button-label) {
   font-weight: 700;
-  cursor: pointer;
   text-decoration: underline;
 }
 
@@ -572,8 +584,8 @@ function handleSubmit() {
     grid-template-columns: 1fr;
   }
 
-  .cad-resumo__link {
-    margin-left: 0;
+  .cad-resumo__link.p-button {
+    margin-inline-start: 0;
   }
 
   .cad-form__actions :deep(.p-button) {

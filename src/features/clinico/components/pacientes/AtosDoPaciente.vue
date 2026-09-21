@@ -18,6 +18,7 @@
  * - **O filtro é por natureza do ato, não por origem.** Quem procura medicamento não quer
  *   vacina e curativo no meio — e quem procura vacina tem a carteira, que diz muito mais.
  */
+import Button from 'primevue/button'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -119,10 +120,13 @@ function abrir(ato: AtoClinico) {
         <p class="atos__ajuda">{{ t('clinico.paciente.atos.ajuda') }}</p>
       </div>
 
-      <button type="button" class="atos__registrar" @click="emit('registrar')">
-        <i class="pi pi-plus" aria-hidden="true" />
-        {{ t('clinico.paciente.atos.registrar') }}
-      </button>
+      <Button
+        type="button"
+        size="small"
+        icon="pi pi-plus"
+        :label="t('clinico.paciente.atos.registrar')"
+        @click="emit('registrar')"
+      />
     </header>
 
     <ClinicToggleGroup
@@ -142,10 +146,14 @@ function abrir(ato: AtoClinico) {
       @ativar="abrir"
     >
       <template #vazio-acao>
-        <button type="button" class="atos__registrar" @click="emit('registrar')">
-          <i class="pi pi-plus" aria-hidden="true" />
-          {{ t('clinico.paciente.atos.registrar') }}
-        </button>
+        <Button
+          type="button"
+          outlined
+          size="small"
+          icon="pi pi-plus"
+          :label="t('clinico.paciente.atos.registrar')"
+          @click="emit('registrar')"
+        />
       </template>
 
       <template #celula-quando="{ linha }">
@@ -211,31 +219,6 @@ function abrir(ato: AtoClinico) {
   margin: 0.1rem 0 0;
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
-}
-
-.atos__registrar {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.7rem;
-  border: 1px solid var(--clinic-accent-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-}
-
-.atos__registrar:hover,
-.atos__registrar:focus-visible {
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
-}
-
-.atos__registrar i {
-  font-size: 0.7rem;
 }
 
 .atos__nome {

@@ -241,7 +241,7 @@ onMounted(async () => {
 
         <template #celula-responsavel="{ linha }">
           <span class="pacientes__nome">{{ linha.tutor?.nome }}</span>
-          <span class="pacientes__meta">{{ linha.tutor?.telefone }}</span>
+          <span class="pacientes__meta"><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span>
         </template>
 
         <template #celula-ultimo="{ linha }">

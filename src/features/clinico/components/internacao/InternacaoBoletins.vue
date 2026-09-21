@@ -273,9 +273,11 @@ function compor() {
 
         <p class="custo">
           {{
-            t('clinico.internacao.boletim.custoAtual', {
-              total: boletinsPorDia(preferencia.frequenciaHoras, preferencia.silencioNoturno),
-            })
+            t(
+              'clinico.internacao.boletim.custoAtual',
+              { total: boletinsPorDia(preferencia.frequenciaHoras, preferencia.silencioNoturno) },
+              boletinsPorDia(preferencia.frequenciaHoras, preferencia.silencioNoturno),
+            )
           }}
         </p>
 

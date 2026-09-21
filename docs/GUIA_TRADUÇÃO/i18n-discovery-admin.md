@@ -12,9 +12,9 @@
 | Stack | Vue 3 + Vite + TypeScript + Vue Router + Pinia + PrimeVue + Tailwind v4 |
 | i18n antes desta migração | Inexistente (textos PT-BR hardcoded) |
 | Stack i18n adotada | `vue-i18n` (Composition API, `legacy: false`) — **implementada 2026-07-14** |
-| Catálogos | `src/locales/{pt,en,en-GB,es}.json` (**642** chaves-folha, paridade OK) |
+| Catálogos | `src/locales/{pt,en,en-GB,es}.json` (**642** chaves-folha, paridade OK); **2026-09-17:** + `sr.json` (sérvio latino) e `ar.json` (árabe, RTL), 2.527 chaves por idioma, ver `i18n-sr-ar-portal.md` |
 | Persistência | `localStorage` chave `APP_LOCALE` (sem locale na URL) |
-| Fallback | `pt` |
+| Fallback | `pt`; sr e ar → en → pt |
 | Tom | igual ao glossário compartilhado (`i18n-glossary.md`) |
 | Progresso | `i18n-progress-admin.md` (todas as superfícies ativas validadas) |
 

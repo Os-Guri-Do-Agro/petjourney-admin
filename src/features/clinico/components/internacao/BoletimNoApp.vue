@@ -120,7 +120,7 @@ watch(
       </div>
 
       <p v-if="emEspera > 0" class="celular__retido">
-        {{ t('clinico.internacao.app.retido', { total: emEspera }) }}
+        {{ t('clinico.internacao.app.retido', { total: emEspera }, emEspera) }}
       </p>
     </div>
   </div>
@@ -211,7 +211,8 @@ watch(
 
 .balao {
   padding: var(--clinic-space-3);
-  border-radius: 0.9rem 0.9rem 0.9rem 0.2rem;
+  border-radius: 0.9rem;
+  border-end-start-radius: 0.2rem;
   background: var(--clinic-surface);
 }
 

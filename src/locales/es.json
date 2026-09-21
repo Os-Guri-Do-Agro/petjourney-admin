@@ -4,7 +4,9 @@
     "pt": "PT",
     "en": "EN",
     "en-GB": "UK",
-    "es": "ES"
+    "es": "ES",
+    "sr": "SR",
+    "ar": "AR"
   },
   "comingSoon": {
     "cupom": {
@@ -2082,7 +2084,8 @@
         "cancelar": "Cita cancelada.",
         "falta": "Ausencia registrada.",
         "criar": "Cita creada.",
-        "status": "Estado actualizado."
+        "status": "Estado actualizado.",
+        "editar": "Cita actualizada."
       },
       "mover": {
         "titulo": "Confirmar reprogramación",
@@ -2094,6 +2097,16 @@
         "confirmar": "Reprogramar",
         "confirmarComAviso": "Reprogramar de todos modos",
         "cancelar": "Dejar como está"
+      },
+      "editar": {
+        "titulo": "Editar cita",
+        "pacienteFixo": "Para atender a otro paciente, cancela esta cita y crea una nueva.",
+        "mudancas": "Qué cambia",
+        "grupoLigado": "La cita vinculada sigue el nuevo horario.",
+        "salvar": "Guardar",
+        "salvarEAvisar": "Guardar y avisar",
+        "salvarMesmoAssim": "Guardar de todos modos",
+        "mensagemPadrao": "¡Hola! La cita de {paciente} ahora es el {data}, a las {hora}. Cualquier cosa, responde por aquí."
       },
       "encaixeDialogo": {
         "titulo": "Agregar sobrecupo",
@@ -2543,6 +2556,7 @@
         "preferencial": "Preferente",
         "urgente": "Urgente"
       },
+      "prioridadeRotulo": "Prioridad",
       "situacao": {
         "aguardando": "En espera",
         "ofertado": "Cupo ofrecido",

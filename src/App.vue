@@ -7,9 +7,15 @@ import { RouterView, useRoute, useRouter } from 'vue-router'
 
 import AppShell from '@/components/layout/AppShell.vue'
 import { instalarSequenciaSecreta, rotaPertenceAoModulo } from '@/composables/useModuloClinico'
+import { isRTLLocale, type Locale } from '@/i18n/locales'
 import { authSessionVersion, isAuthenticated } from '@/service/auth/auth-session'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+/** O Toast do PrimeVue posiciona pelo lado físico: no árabe o canto de leitura é o esquerdo. */
+const toastPosition = computed(() =>
+  isRTLLocale(locale.value as Locale) ? 'top-left' : 'top-right',
+)
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
@@ -63,7 +69,7 @@ onBeforeUnmount(() => desinstalar())
 
 <template>
   <Toast
-    position="top-right"
+    :position="toastPosition"
     :pt="{
       messageIcon: { style: 'display: none' },
     }"

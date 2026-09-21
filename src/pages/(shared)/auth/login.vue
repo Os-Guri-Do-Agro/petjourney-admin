@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -286,32 +287,37 @@ function cancelReactivate() {
           </template>
 
           <template #trailing>
-            <button
+            <Button
               :aria-label="
                 showPassword ? t('auth.login.password.hide') : t('auth.login.password.show')
               "
               class="login-password-toggle"
               :disabled="loading"
+              :icon="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+              rounded
+              severity="secondary"
+              text
               type="button"
               @click="showPassword = !showPassword"
-            >
-              <i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" aria-hidden="true" />
-            </button>
+            />
           </template>
         </AuthTextField>
       </div>
 
-      <label class="login-remember">
-        <input v-model="rememberAccess" :disabled="loading" type="checkbox" />
-        <span>
-          <i class="pi pi-check" aria-hidden="true" />
-        </span>
+      <label class="login-remember" for="login-remember">
+        <Checkbox
+          v-model="rememberAccess"
+          binary
+          :disabled="loading"
+          input-id="login-remember"
+          size="small"
+        />
         {{ t('auth.login.remember') }}
       </label>
 
       <AuthButton :loading="loading" full-width type="submit">
         {{ loading ? t('auth.login.submitting') : t('auth.login.submit') }}
-        <i v-if="!loading" class="pi pi-arrow-right ml-2" aria-hidden="true" />
+        <i v-if="!loading" class="pi pi-arrow-right ms-2" aria-hidden="true" />
       </AuthButton>
 
       <!-- Conta da clínica: ocultado por enquanto
@@ -319,10 +325,10 @@ function cancelReactivate() {
         <span>ou</span>
       </div>
 
-      <button class="login-clinic-button" type="button">
-        <i class="pi pi-building" aria-hidden="true" />
+      <AuthButton full-width variant="secondary">
+        <i class="pi pi-building me-2" aria-hidden="true" />
         Acessar com conta da clínica
-      </button>
+      </AuthButton>
       -->
     </form>
 
@@ -365,33 +371,15 @@ function cancelReactivate() {
   text-decoration: none;
 }
 
-.login-password-toggle {
-  display: inline-flex;
+.login-password-toggle.p-button {
   width: 2rem;
   height: 2rem;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
   color: var(--auth-soft);
-  cursor: pointer;
-  transition:
-    background 160ms ease,
-    opacity 160ms ease;
 }
 
-.login-password-toggle:hover {
+.login-password-toggle.p-button:not(:disabled):hover {
   background: var(--auth-sage-tint);
-}
-
-.login-password-toggle:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.login-password-toggle .pi {
-  font-size: 1rem;
+  color: var(--auth-soft);
 }
 
 .login-remember {
@@ -403,33 +391,6 @@ function cancelReactivate() {
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-}
-
-.login-remember input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.login-remember span {
-  display: grid;
-  width: 1rem;
-  height: 1rem;
-  place-items: center;
-  border-radius: 0.3rem;
-  background: var(--auth-sage);
-  color: var(--auth-cta-text);
-}
-
-.login-remember span .pi {
-  font-size: 0.58rem;
-  font-weight: 700;
-}
-
-.login-remember input:not(:checked) + span {
-  border: 1px solid var(--auth-line);
-  background: var(--auth-field-bg);
-  color: transparent;
 }
 
 .login-divider {
@@ -447,20 +408,6 @@ function cancelReactivate() {
   height: 1px;
   background: var(--auth-line);
   content: '';
-}
-
-.login-clinic-button {
-  display: inline-flex;
-  height: 3.125rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  border: 1px solid var(--auth-border);
-  border-radius: 0.875rem;
-  background: var(--auth-field-bg);
-  color: var(--auth-text);
-  font-weight: 800;
-  cursor: pointer;
 }
 
 .login-support {

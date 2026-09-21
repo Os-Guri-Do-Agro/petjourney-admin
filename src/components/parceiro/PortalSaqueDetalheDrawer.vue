@@ -10,7 +10,7 @@ import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
-import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+import { INTL_LOCALE, isRTLLocale, type Locale } from '@/i18n/locales'
 import { getSaqueDetalhe } from '@/service/parceiro/parceiro-portal-service'
 import type { SaqueDetalhe } from '@/service/parceiro/types'
 import { LightColors } from '@/theme/colors'
@@ -70,6 +70,14 @@ const drawerPt = computed(() => ({
   header: { class: 'saque-drawer__header-shell' },
   content: { class: 'saque-drawer__content-shell' },
 }))
+
+/**
+ * O PrimeVue posiciona o Drawer pelo lado físico. O painel fica no fim da linha de leitura (à
+ * direita em LTR, à esquerda no árabe), do mesmo lado em que o `AppShell` abre espaço para ele.
+ */
+const drawerPosition = computed(() =>
+  isRTLLocale(locale.value as Locale) ? 'left' : 'right',
+)
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString(INTL_LOCALE[locale.value as Locale], {
@@ -141,7 +149,7 @@ watch(
 <template>
   <Drawer
     v-model:visible="visible"
-    position="right"
+    :position="drawerPosition"
     :modal="false"
     :dismissable="false"
     :block-scroll="false"
@@ -196,7 +204,7 @@ watch(
         <section class="saque-drawer__hero" :data-status="saque.status">
           <p class="saque-drawer__hero-label">{{ t('carteira.detail.valorLabel') }}</p>
           <strong class="saque-drawer__hero-value">
-            {{ formatCentavosToBrl(saque.valorCentavos) }}
+            {{ formatCentavosToBrl(saque.valorCentavos, INTL_LOCALE[locale as Locale]) }}
           </strong>
           <PartnerStatusBadge :status="statusMap[saque.status]" />
         </section>
@@ -269,7 +277,7 @@ watch(
 .saque-drawer__header {
   display: grid;
   gap: 0.2rem;
-  padding-right: 0.5rem;
+  padding-inline-end: 0.5rem;
 }
 
 .saque-drawer__eyebrow {
@@ -515,7 +523,7 @@ watch(
   height: calc(100% - var(--pj-shell-header-height, 4.25rem));
   margin-top: var(--pj-shell-header-height, 4.25rem);
   align-self: flex-start;
-  border-left: 1px solid color-mix(in srgb, var(--sd-line, #eaf0ee) 90%, transparent);
+  border-inline-start: 1px solid color-mix(in srgb, var(--sd-line, #eaf0ee) 90%, transparent);
   background: var(--sd-bg, #fff);
   box-shadow: none;
 }

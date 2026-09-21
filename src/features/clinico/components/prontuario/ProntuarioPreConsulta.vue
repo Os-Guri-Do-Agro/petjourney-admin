@@ -253,9 +253,11 @@ function aplicar() {
 .pre__citacao {
   margin: 0;
   padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-left: 3px solid var(--clinic-accent);
+  border-inline-start: 3px solid var(--clinic-accent);
   background: var(--clinic-surface);
-  border-radius: 0 var(--clinic-radius-control) var(--clinic-radius-control) 0;
+  border-radius: 0;
+  border-start-end-radius: var(--clinic-radius-control);
+  border-end-end-radius: var(--clinic-radius-control);
   color: var(--clinic-muted);
   font-style: italic;
   line-height: 1.5;

@@ -4,7 +4,9 @@
     "pt": "PT",
     "en": "EN",
     "en-GB": "UK",
-    "es": "ES"
+    "es": "ES",
+    "sr": "SR",
+    "ar": "AR"
   },
   "comingSoon": {
     "cupom": {
@@ -2082,7 +2084,8 @@
         "cancelar": "Atendimento cancelado.",
         "falta": "Falta registrada.",
         "criar": "Atendimento criado.",
-        "status": "Situação atualizada."
+        "status": "Situação atualizada.",
+        "editar": "Atendimento editado."
       },
       "mover": {
         "titulo": "Confirmar remarcação",
@@ -2094,6 +2097,16 @@
         "confirmar": "Remarcar",
         "confirmarComAviso": "Remarcar mesmo assim",
         "cancelar": "Manter como está"
+      },
+      "editar": {
+        "titulo": "Editar atendimento",
+        "pacienteFixo": "Para atender outro paciente, cancele este e crie um novo.",
+        "mudancas": "O que muda",
+        "grupoLigado": "O atendimento ligado acompanha o horário.",
+        "salvar": "Salvar",
+        "salvarEAvisar": "Salvar e avisar",
+        "salvarMesmoAssim": "Salvar mesmo assim",
+        "mensagemPadrao": "Olá! O atendimento de {paciente} agora é {data}, às {hora}. Qualquer coisa, é só responder por aqui."
       },
       "encaixeDialogo": {
         "titulo": "Encaixar atendimento",
@@ -2543,6 +2556,7 @@
         "preferencial": "Preferencial",
         "urgente": "Urgente"
       },
+      "prioridadeRotulo": "Prioridade",
       "situacao": {
         "aguardando": "Aguardando",
         "ofertado": "Vaga oferecida",

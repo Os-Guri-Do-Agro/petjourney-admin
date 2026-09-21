@@ -29,13 +29,16 @@
  * - **Número escolhe direto.** É a tecla que faz o prontuário andar: com o grupo em foco, `2`
  *   marca a segunda opção sem passar pela primeira. Oito sistemas viram oito toques.
  */
+import SelectButton from 'primevue/selectbutton'
 import { computed, nextTick, ref } from 'vue'
 
 export type TomDaOpcao = 'neutro' | 'ok' | 'atencao' | 'risco' | 'acento'
 
+type Opcao = { valor: T; rotulo: string; icone?: string; tom?: TomDaOpcao }
+
 const props = defineProps<{
   modelValue: T
-  opcoes: Array<{ valor: T; rotulo: string; icone?: string; tom?: TomDaOpcao }>
+  opcoes: Opcao[]
   rotulo: string
   desabilitado?: boolean
   /** Permite desmarcar clicando na opção já escolhida. */
@@ -46,7 +49,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ 'update:modelValue': [valor: T] }>()
 
-const grupo = ref<HTMLElement | null>(null)
+const grupo = ref<{ $el: HTMLElement } | null>(null)
 
 const indiceAtivo = computed(() => {
   const encontrado = props.opcoes.findIndex((opcao) => opcao.valor === props.modelValue)
@@ -55,8 +58,39 @@ const indiceAtivo = computed(() => {
   return encontrado >= 0 ? encontrado : 0
 })
 
+/**
+ * O `SelectButton` desenha as opções, mas a semântica continua sendo a de `radiogroup`.
+ *
+ * Ele nasce como `group` de botões com `aria-pressed` e uma parada de Tab por opção — o oposto
+ * do que este componente promete. O passthrough de cada `ToggleButton` devolve o papel de
+ * `radio`, o `aria-checked`, o tabindex móvel e o tom da opção.
+ *
+ * O botão só conhece o próprio rótulo (`onLabel`), então é por ele que se acha o índice.
+ */
+const indicePorRotulo = computed(
+  () => new Map(props.opcoes.map((opcao, indice) => [opcao.rotulo, indice])),
+)
+
+const passthrough = computed(() => ({
+  pcToggleButton: {
+    root: ({ props: botao }: { props: { onLabel?: string } }) => {
+      const indice = indicePorRotulo.value.get(botao.onLabel ?? '') ?? -1
+      const opcao = props.opcoes[indice]
+
+      return {
+        class: ['grupo__opcao', `grupo__opcao--${opcao?.tom ?? 'acento'}`],
+        role: 'radio',
+        'aria-checked': opcao !== undefined && opcao.valor === props.modelValue,
+        'aria-pressed': undefined,
+        tabindex: indice === indiceAtivo.value ? 0 : -1,
+        title: opcao ? `${opcao.rotulo} (${indice + 1})` : undefined,
+      }
+    },
+  },
+}))
+
 function focarOpcao(indice: number) {
-  const alvo = grupo.value?.querySelectorAll<HTMLElement>('[role="radio"]')?.[indice]
+  const alvo = grupo.value?.$el?.querySelectorAll<HTMLElement>('[role="radio"]')?.[indice]
 
   alvo?.focus()
 }
@@ -119,47 +153,60 @@ function aoTeclar(evento: KeyboardEvent) {
   }
 }
 
-function escolher(valor: T) {
+/**
+ * Clique numa opção.
+ *
+ * Com `limpavel`, o `SelectButton` devolve `null` ao desmarcar; aqui ele vira o `vazio` que
+ * quem usa o grupo combinou. Sem `limpavel`, a opção já escolhida nem chega a emitir.
+ */
+function escolher(valor: T | null) {
   if (props.desabilitado) {
     return
   }
 
-  if (props.limpavel && valor === props.modelValue) {
+  if (valor === null && props.limpavel) {
     emit('update:modelValue', (props.vazio ?? null) as T)
 
     return
   }
 
-  emit('update:modelValue', valor)
+  emit('update:modelValue', valor as T)
 }
 </script>
 
 <template>
-  <div ref="grupo" class="grupo" role="radiogroup" :aria-label="rotulo" @keydown="aoTeclar">
-    <button
-      v-for="(opcao, indice) in opcoes"
-      :key="String(opcao.valor)"
-      type="button"
-      class="grupo__opcao clinic-focusable"
-      :class="[
-        `grupo__opcao--${opcao.tom ?? 'acento'}`,
-        { 'grupo__opcao--ativa': opcao.valor === modelValue },
-      ]"
-      role="radio"
-      :aria-checked="opcao.valor === modelValue"
-      :disabled="desabilitado"
-      :tabindex="indice === indiceAtivo ? 0 : -1"
-      :title="`${opcao.rotulo} (${indice + 1})`"
-      @click="escolher(opcao.valor)"
-    >
-      <i v-if="opcao.icone" :class="opcao.icone" aria-hidden="true" />
-      <span>{{ opcao.rotulo }}</span>
-    </button>
-  </div>
+  <SelectButton
+    ref="grupo"
+    class="grupo"
+    :model-value="modelValue"
+    :options="opcoes"
+    option-label="rotulo"
+    option-value="valor"
+    :disabled="desabilitado"
+    :allow-empty="Boolean(limpavel)"
+    role="radiogroup"
+    :aria-label="rotulo"
+    :pt="passthrough"
+    @update:model-value="escolher"
+    @keydown="aoTeclar"
+  >
+    <template #option="{ option }">
+      <i v-if="option.icone" :class="option.icone" aria-hidden="true" />
+      <span>{{ option.rotulo }}</span>
+    </template>
+  </SelectButton>
 </template>
 
 <style scoped>
-.grupo {
+/*
+ * Trilho rebaixado com as opções dentro, em vez da fileira de botões colados do tema: o grupo
+ * convive com campos de formulário, e uma barra de botões cheios pesaria mais que a pergunta.
+ *
+ * `.grupo.p-selectbutton` mais `:deep` porque os botões são filhos do `SelectButton` e não
+ * recebem o atributo de escopo — e a especificidade precisa passar a do tema e a da camada
+ * global da clínica (`.clinic-scope .p-togglebutton`).
+ */
+.grupo.p-selectbutton {
   display: inline-flex;
   max-width: 100%;
   flex-wrap: wrap;
@@ -170,26 +217,26 @@ function escolher(valor: T) {
   background: var(--clinic-surface-sunken);
 }
 
-.grupo__opcao {
-  display: inline-flex;
+.grupo.p-selectbutton :deep(.p-togglebutton) {
   min-height: calc(var(--clinic-hit-target) - 4px);
   flex: 1;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  padding: 0 var(--clinic-space-3);
+  padding: 0;
   border: none;
   border-radius: calc(var(--clinic-radius-control) - 3px);
   background: transparent;
   color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-base);
   font-weight: 600;
   white-space: nowrap;
 }
 
-.grupo__opcao:hover:not(:disabled):not(.grupo__opcao--ativa) {
+.grupo.p-selectbutton :deep(.p-togglebutton-content) {
+  gap: 0.3rem;
+  padding: 0 var(--clinic-space-3);
+  border-radius: inherit;
+}
+
+.grupo.p-selectbutton :deep(.p-togglebutton:not(:disabled):not(.p-togglebutton-checked):hover) {
   background: color-mix(in srgb, var(--clinic-muted) 10%, transparent);
   color: var(--clinic-text);
 }
@@ -198,44 +245,60 @@ function escolher(valor: T) {
  * Três sinais somados, para que a marcação sobreviva a qualquer um deles faltar: anel
  * (forma), peso 800 (tipografia) e fundo (cor). Em escala de cinza o anel e o peso bastam.
  */
-.grupo__opcao--ativa {
-  background: var(--clinic-surface);
-  box-shadow: inset 0 0 0 1.5px var(--clinic-accent-strong);
+.grupo.p-selectbutton :deep(.p-togglebutton-checked) {
+  background: transparent;
   color: var(--clinic-accent-strong);
   font-weight: 800;
 }
 
-.grupo__opcao--ok.grupo__opcao--ativa {
-  background: var(--clinic-ok-bg);
-  box-shadow: inset 0 0 0 1.5px var(--clinic-ok-text);
+.grupo.p-selectbutton :deep(.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--clinic-surface);
+  box-shadow: inset 0 0 0 1.5px var(--clinic-accent-strong);
+}
+
+.grupo.p-selectbutton :deep(.grupo__opcao--ok.p-togglebutton-checked) {
   color: var(--clinic-ok-text);
 }
 
-.grupo__opcao--atencao.grupo__opcao--ativa {
-  background: var(--clinic-attention-bg);
-  box-shadow: inset 0 0 0 1.5px var(--clinic-attention-text);
+.grupo.p-selectbutton :deep(.grupo__opcao--ok.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--clinic-ok-bg);
+  box-shadow: inset 0 0 0 1.5px var(--clinic-ok-text);
+}
+
+.grupo.p-selectbutton :deep(.grupo__opcao--atencao.p-togglebutton-checked) {
   color: var(--clinic-attention-text);
 }
 
-.grupo__opcao--risco.grupo__opcao--ativa {
-  background: var(--clinic-risk-bg);
-  box-shadow: inset 0 0 0 1.5px var(--clinic-risk-text);
+.grupo.p-selectbutton :deep(.grupo__opcao--atencao.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--clinic-attention-bg);
+  box-shadow: inset 0 0 0 1.5px var(--clinic-attention-text);
+}
+
+.grupo.p-selectbutton :deep(.grupo__opcao--risco.p-togglebutton-checked) {
   color: var(--clinic-risk-text);
 }
 
+.grupo.p-selectbutton :deep(.grupo__opcao--risco.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--clinic-risk-bg);
+  box-shadow: inset 0 0 0 1.5px var(--clinic-risk-text);
+}
+
 /* Neutro é a escolha que não afirma nada — "não avaliado", "sem preferência". */
-.grupo__opcao--neutro.grupo__opcao--ativa {
-  background: var(--clinic-neutral-bg);
-  box-shadow: inset 0 0 0 1.5px var(--clinic-neutral-text);
+.grupo.p-selectbutton :deep(.grupo__opcao--neutro.p-togglebutton-checked) {
   color: var(--clinic-neutral-text);
 }
 
-.grupo__opcao:disabled {
+.grupo.p-selectbutton :deep(.grupo__opcao--neutro.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--clinic-neutral-bg);
+  box-shadow: inset 0 0 0 1.5px var(--clinic-neutral-text);
+}
+
+.grupo.p-selectbutton :deep(.p-togglebutton:disabled) {
   cursor: not-allowed;
   opacity: 0.55;
 }
 
-.grupo__opcao i {
+.grupo.p-selectbutton :deep(.p-togglebutton-content i) {
   font-size: 0.7rem;
 }
 </style>

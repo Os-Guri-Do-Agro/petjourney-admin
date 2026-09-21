@@ -119,7 +119,7 @@ const pedeJejum = computed(() =>
 
 .lista {
   margin: 0;
-  padding-left: 6mm;
+  padding-inline-start: 6mm;
   font-size: 11pt;
   line-height: 1.7;
 }
@@ -130,7 +130,7 @@ const pedeJejum = computed(() =>
 
 /* O grupo do exame vai entre parênteses, discreto: orienta o balcão sem competir com o nome. */
 .grupo {
-  margin-left: 2mm;
+  margin-inline-start: 2mm;
   font-size: 9pt;
 }
 

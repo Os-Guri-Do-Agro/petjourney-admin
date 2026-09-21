@@ -24,6 +24,7 @@ const props = defineProps<{ appointment: Appointment | null }>()
 
 const emit = defineEmits<{
   fechar: []
+  editar: []
   alterarStatus: [status: AppointmentStatus]
   cancelar: []
   abrirProntuario: []
@@ -102,14 +103,37 @@ const encerrado = computed(() =>
   >
     <header class="drawer__topo">
       <span class="clinic-label">{{ formato.status(appointment.status) }}</span>
-      <button
-        type="button"
-        class="drawer__fechar clinic-focusable"
-        :aria-label="t('clinico.atalhos.fechar')"
-        @click="emit('fechar')"
-      >
-        <i class="pi pi-times" aria-hidden="true" />
-      </button>
+
+      <div class="drawer__topo-acoes">
+        <!--
+          Editar mora no cabeçalho, ao lado do status, e não no rodapé com as ações de risco:
+          corrigir o tipo de um atendimento não pertence à mesma família de falta e cancelamento.
+          Fica escondido quando o atendimento já encerrou — editar o que acabou de ser cancelado
+          ou faltado não conserta nada e ainda mexeria num horário que já voltou para a fila.
+        -->
+        <Button
+          v-if="!encerrado"
+          icon="pi pi-pencil"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          :title="t('clinico.agenda.editar.titulo')"
+          :aria-label="t('clinico.agenda.editar.titulo')"
+          @click="emit('editar')"
+        />
+
+        <Button
+          icon="pi pi-times"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          :title="t('clinico.atalhos.fechar')"
+          :aria-label="t('clinico.atalhos.fechar')"
+          @click="emit('fechar')"
+        />
+      </div>
     </header>
 
     <ClinicPatientHeader :pet="pet" :tutor="tutor" compacto />
@@ -241,21 +265,10 @@ const encerrado = computed(() =>
   justify-content: space-between;
 }
 
-.drawer__fechar {
-  display: grid;
-  width: var(--clinic-hit-target);
-  height: var(--clinic-hit-target);
-  place-items: center;
-  border: none;
-  border-radius: var(--clinic-radius-control);
-  background: transparent;
-  color: var(--clinic-muted);
-  cursor: pointer;
-}
-
-.drawer__fechar:hover {
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-text);
+.drawer__topo-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--clinic-space-1);
 }
 
 .drawer__dados {

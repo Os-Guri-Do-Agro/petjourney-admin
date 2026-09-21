@@ -370,7 +370,7 @@ function trocarPeriodo(periodo: PeriodoId) {
 .resumo__selects {
   display: flex;
   gap: var(--clinic-space-2);
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .resumo__select {
@@ -459,7 +459,7 @@ function trocarPeriodo(periodo: PeriodoId) {
 @media (max-width: 720px) {
   .resumo__selects {
     width: 100%;
-    margin-left: 0;
+    margin-inline-start: 0;
   }
 
   .resumo__select {

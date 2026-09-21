@@ -424,9 +424,11 @@ async function encerrar(entrada: {
       <p v-if="internacao.naTrocaDePlantao.length > 0" class="troca" role="status">
         <i class="pi pi-arrow-right-arrow-left" aria-hidden="true" />
         {{
-          t('clinico.internacao.paciente.naTroca', {
-            total: internacao.naTrocaDePlantao.length,
-          })
+          t(
+            'clinico.internacao.paciente.naTroca',
+            { total: internacao.naTrocaDePlantao.length },
+            internacao.naTrocaDePlantao.length,
+          )
         }}
       </p>
 
@@ -572,7 +574,7 @@ async function encerrar(entrada: {
 }
 
 .contexto__linha .clinic-label {
-  margin-right: var(--clinic-space-2);
+  margin-inline-end: var(--clinic-space-2);
 }
 
 .troca {

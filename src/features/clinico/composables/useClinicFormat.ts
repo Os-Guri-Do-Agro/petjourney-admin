@@ -9,6 +9,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { INTL_LOCALE, isLocale, DEFAULT_LOCALE } from '@/i18n/locales'
+
 import { minutesToClock } from '../domain/clinic-time'
 import type {
   AlertSeverity,
@@ -34,9 +36,14 @@ const clock = createClinicClock(CLINIC_UTC_OFFSET)
 const PARAMS_DE_HORARIO = new Set(['hora', 'abre', 'fecha'])
 
 export function useClinicFormat() {
-  const { t, locale, n } = useI18n()
+  const { t, locale } = useI18n()
 
-  const localeIntl = computed(() => (locale.value === 'pt' ? 'pt-BR' : locale.value))
+  /**
+   * Tag do `Intl` pelo mapa do projeto, nunca o código cru do idioma: `sr` sozinho formata em
+   * cirílico e `ar` pode sair com dígitos ٠١٢. Pelo mesmo motivo números não passam pelo `n()` do
+   * vue-i18n, que entrega o código cru ao `Intl`.
+   */
+  const localeIntl = computed(() => INTL_LOCALE[isLocale(locale.value) ? locale.value : DEFAULT_LOCALE])
 
   function hora(iso: ISODateTime): string {
     return minutesToClock(clock.minutesOf(iso))
@@ -181,19 +188,19 @@ export function useClinicFormat() {
     }
 
     if (anos <= 0) {
-      return t('clinico.formato.meses', { valor: Math.max(meses, 0) })
+      return t('clinico.formato.meses', { valor: Math.max(meses, 0) }, Math.max(meses, 0))
     }
 
     return meses === 0
-      ? t('clinico.formato.anos', { valor: anos })
+      ? t('clinico.formato.anos', { valor: anos }, anos)
       : t('clinico.formato.anosMeses', { anos, meses })
   }
 
   function numero(valor: number, casas: number): string {
-    return n(valor, {
+    return new Intl.NumberFormat(localeIntl.value, {
       minimumFractionDigits: casas,
       maximumFractionDigits: casas,
-    })
+    }).format(valor)
   }
 
   function peso(valor: number | null): string {
@@ -240,7 +247,9 @@ export function useClinicFormat() {
   }
 
   function percentual(valor: number): string {
-    return n(valor, { style: 'percent', maximumFractionDigits: 0 })
+    return new Intl.NumberFormat(localeIntl.value, { style: 'percent', maximumFractionDigits: 0 }).format(
+      valor,
+    )
   }
 
   // ------------------------------------------------------------ traduções por `kind`

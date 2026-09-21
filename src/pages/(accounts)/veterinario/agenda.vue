@@ -18,6 +18,7 @@ import ClinicShortcutsDialog from '@/features/clinico/components/base/ClinicShor
 import AgendaAppointmentDrawer from '@/features/clinico/components/agenda/AgendaAppointmentDrawer.vue'
 import AgendaCancelDialog from '@/features/clinico/components/agenda/AgendaCancelDialog.vue'
 import AgendaDayGrid from '@/features/clinico/components/agenda/AgendaDayGrid.vue'
+import AgendaEditarDialog from '@/features/clinico/components/agenda/AgendaEditarDialog.vue'
 import AgendaLegenda from '@/features/clinico/components/agenda/AgendaLegenda.vue'
 import AgendaMoveDialog from '@/features/clinico/components/agenda/AgendaMoveDialog.vue'
 import AgendaReagendarDialog from '@/features/clinico/components/agenda/AgendaReagendarDialog.vue'
@@ -58,6 +59,7 @@ useAgendaUrlState()
 
 const propostaDeMovimento = ref<ArrasteProposta | null>(null)
 const atendimentoParaCancelar = ref<string | null>(null)
+const atendimentoParaEditar = ref<string | null>(null)
 const ajudaAberta = ref(false)
 
 const selecionado = computed(
@@ -66,6 +68,10 @@ const selecionado = computed(
 
 const paraCancelar = computed(
   () => agenda.atendimentos.find((item) => item.id === atendimentoParaCancelar.value) ?? null,
+)
+
+const paraEditar = computed(
+  () => agenda.atendimentos.find((item) => item.id === atendimentoParaEditar.value) ?? null,
 )
 
 const feriado = computed(() => agenda.dia?.feriado ?? null)
@@ -104,6 +110,44 @@ function abrir(appointmentId: string) {
 
 function fecharDrawer() {
   agenda.focoId = null
+}
+
+/**
+ * Salva a edição — e registra o aviso **só quando houve o que avisar**.
+ *
+ * A caixa já decide isso e manda a mensagem vazia quando a mudança é interna (tipo, sala,
+ * observação). Aqui o comprovante entra como `remarcacao`, que é o que a mudança significa do
+ * lado de fora: quem recebeu a ligação não distingue "editaram o horário" de "remarcaram".
+ */
+async function salvarEdicao(
+  dados: {
+    typeId: string
+    professionalId: string
+    roomIds: string[]
+    inicio: string
+    fim: string
+    observacao: string
+  },
+  mensagem: string,
+) {
+  const appointment = paraEditar.value
+
+  if (!appointment) {
+    return
+  }
+
+  await agenda.editar(appointment.id, dados)
+
+  if (mensagem.trim()) {
+    avisos.registrar({
+      appointmentId: appointment.id,
+      tutorId: appointment.tutorId,
+      kind: 'remarcacao',
+      texto: mensagem,
+    })
+  }
+
+  atendimentoParaEditar.value = null
 }
 
 async function confirmarMovimento(proposta: ArrasteProposta, mensagem: string) {
@@ -484,6 +528,7 @@ useClinicShortcuts({
         <AgendaAppointmentDrawer
           :appointment="selecionado"
           @fechar="fecharDrawer"
+          @editar="atendimentoParaEditar = selecionado?.id ?? null"
           @alterar-status="alterarStatus"
           @cancelar="atendimentoParaCancelar = selecionado?.id ?? null"
           @abrir-prontuario="abrirProntuario"
@@ -512,6 +557,12 @@ useClinicShortcuts({
       :proposta="propostaDeMovimento"
       @confirmar="confirmarMovimento"
       @fechar="propostaDeMovimento = null"
+    />
+
+    <AgendaEditarDialog
+      :appointment="paraEditar"
+      @salvar="salvarEdicao"
+      @fechar="atendimentoParaEditar = null"
     />
 
     <AgendaCancelDialog
@@ -580,7 +631,7 @@ useClinicShortcuts({
 }
 
 .agenda__fechada strong {
-  margin-right: 0.3rem;
+  margin-inline-end: 0.3rem;
 }
 
 .vaga {

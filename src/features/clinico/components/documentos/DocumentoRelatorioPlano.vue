@@ -204,7 +204,7 @@ const itens = computed(() => {
 
 .lista {
   margin: 0;
-  padding-left: 5mm;
+  padding-inline-start: 5mm;
   font-size: 10pt;
   line-height: 1.6;
 }
@@ -219,7 +219,7 @@ const itens = computed(() => {
 .tabela td {
   padding: 2mm;
   border: 0.25mm solid #000;
-  text-align: left;
+  text-align: start;
 }
 
 .tabela th {

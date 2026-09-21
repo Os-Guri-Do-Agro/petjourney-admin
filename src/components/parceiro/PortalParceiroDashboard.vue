@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -13,14 +14,20 @@ import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
 import { getCarteira, getPortalIndicacao } from '@/service/parceiro/parceiro-portal-service'
 import type { Carteira, PortalIndicacao } from '@/service/parceiro/types'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { formatCentavosToBrl } from '@/utils/format/money'
 import { currentColors } from '@/theme/color-mode'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 const { lastSuccessAt } = useCupomResgateModal()
 const { focusSurfaceStyle } = usePartnerFocusSurface()
+
+/** Valores em BRL escritos no formato do idioma da tela. */
+function formatBrl(centavos: number) {
+  return formatCentavosToBrl(centavos, INTL_LOCALE[locale.value as Locale])
+}
 
 const indicacao = ref<PortalIndicacao | null>(null)
 const carteira = ref<Carteira | null>(null)
@@ -96,11 +103,11 @@ const metrics = computed(() => [
 ])
 
 const saldoSacavelLabel = computed(() =>
-  carteira.value != null ? formatCentavosToBrl(carteira.value.saldoSacavelCentavos) : '-',
+  carteira.value != null ? formatBrl(carteira.value.saldoSacavelCentavos) : '-',
 )
 
 const saldoTotalLabel = computed(() =>
-  carteira.value != null ? formatCentavosToBrl(carteira.value.saldoTotalCentavos) : '-',
+  carteira.value != null ? formatBrl(carteira.value.saldoTotalCentavos) : '-',
 )
 
 const showCommissionCard = computed(() => store.statusAfiliadoAtivo)
@@ -173,7 +180,15 @@ watch(lastSuccessAt, (at) => {
   <div class="partner-dash" :style="dashStyle">
     <div v-if="error" class="partner-dash__state partner-dash__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadDashboardData">{{ t('inicio.dash.retry') }}</button>
+      <Button
+        type="button"
+        :label="t('inicio.dash.retry')"
+        icon="pi pi-refresh"
+        severity="secondary"
+        outlined
+        size="small"
+        @click="loadDashboardData"
+      />
     </div>
 
     <template v-else>
@@ -313,15 +328,17 @@ watch(lastSuccessAt, (at) => {
               <template v-else>
                 <div class="referral-card__code-row">
                   <strong class="referral-card__code">{{ codigoIndicacao }}</strong>
-                  <button
+                  <Button
                     v-if="codigoIndicacao"
                     class="referral-card__copy"
                     type="button"
+                    icon="pi pi-copy"
+                    severity="secondary"
+                    outlined
                     :aria-label="t('inicio.dash.referral.copyAria')"
+                    :title="t('inicio.dash.referral.copyAria')"
                     @click="copyCodigo"
-                  >
-                    <i class="pi pi-copy" aria-hidden="true" />
-                  </button>
+                  />
                 </div>
                 <p class="referral-card__meta">
                   {{ t('inicio.dash.referral.meta') }}
@@ -457,15 +474,6 @@ watch(lastSuccessAt, (at) => {
   margin: 0;
 }
 
-.partner-dash__state button {
-  border: 1px solid var(--dash-line);
-  border-radius: 0.7rem;
-  padding: 0.45rem 0.85rem;
-  background: var(--dash-card);
-  color: var(--dash-text);
-  cursor: pointer;
-}
-
 .commission-card--skeleton .commission-card__meta,
 .referral-card--skeleton .referral-card__meta {
   display: grid;
@@ -564,7 +572,7 @@ watch(lastSuccessAt, (at) => {
 .commission-card__glow {
   position: absolute;
   top: -4rem;
-  right: 0;
+  inset-inline-end: 0;
   width: 11rem;
   max-width: 55%;
   height: 11rem;
@@ -572,6 +580,10 @@ watch(lastSuccessAt, (at) => {
   background: rgb(var(--dash-commission-glow-rgb) / 0.14);
   pointer-events: none;
   transform: translateX(30%);
+}
+
+[dir='rtl'] .commission-card__glow {
+  transform: translateX(-30%);
 }
 
 .commission-card__top {
@@ -771,28 +783,20 @@ watch(lastSuccessAt, (at) => {
   font-weight: 750;
 }
 
-.referral-card__copy {
-  display: grid;
+.referral-card__copy.p-button {
   width: 2.5rem;
   height: 2.5rem;
-  place-items: center;
-  border: 1px solid var(--dash-line);
+  flex-shrink: 0;
+  border-color: var(--dash-line);
   border-radius: 0.75rem;
   background: var(--dash-card);
   color: var(--dash-muted);
-  cursor: pointer;
-  transition:
-    background 140ms ease,
-    border-color 140ms ease,
-    color 140ms ease;
 }
 
-.referral-card__copy:hover,
-.referral-card__copy:focus-visible {
+.referral-card__copy.p-button:not(:disabled):hover {
   border-color: color-mix(in srgb, var(--dash-primary) 30%, var(--dash-line));
   background: color-mix(in srgb, var(--dash-primary-soft) 22%, var(--dash-card));
   color: var(--dash-primary-strong);
-  outline: none;
 }
 
 .referral-card .referral-card__meta {

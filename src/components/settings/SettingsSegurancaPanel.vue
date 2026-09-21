@@ -114,18 +114,19 @@ async function handleChangePassword() {
         :error="senhaAtualError"
       >
         <template #trailing>
-          <button
+          <Button
             type="button"
             class="settings-seguranca__eye"
+            text
+            severity="secondary"
+            :icon="showCurrentPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
             :aria-label="
               showCurrentPassword
                 ? t('settings.seguranca.aria.hidePassword')
                 : t('settings.seguranca.aria.showPassword')
             "
             @click="showCurrentPassword = !showCurrentPassword"
-          >
-            <i :class="showCurrentPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" aria-hidden="true" />
-          </button>
+          />
         </template>
       </AuthTextField>
 
@@ -140,18 +141,19 @@ async function handleChangePassword() {
         :error="novaSenhaError"
       >
         <template #trailing>
-          <button
+          <Button
             type="button"
             class="settings-seguranca__eye"
+            text
+            severity="secondary"
+            :icon="showNewPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
             :aria-label="
               showNewPassword
                 ? t('settings.seguranca.aria.hidePassword')
                 : t('settings.seguranca.aria.showPassword')
             "
             @click="showNewPassword = !showNewPassword"
-          >
-            <i :class="showNewPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" aria-hidden="true" />
-          </button>
+          />
         </template>
       </AuthTextField>
 
@@ -168,18 +170,19 @@ async function handleChangePassword() {
         :error="confirmarSenhaError"
       >
         <template #trailing>
-          <button
+          <Button
             type="button"
             class="settings-seguranca__eye"
+            text
+            severity="secondary"
+            :icon="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
             :aria-label="
               showConfirmPassword
                 ? t('settings.seguranca.aria.hidePassword')
                 : t('settings.seguranca.aria.showPassword')
             "
             @click="showConfirmPassword = !showConfirmPassword"
-          >
-            <i :class="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" aria-hidden="true" />
-          </button>
+          />
         </template>
       </AuthTextField>
 
@@ -233,7 +236,7 @@ async function handleChangePassword() {
   display: grid;
   gap: 0.35rem;
   margin: 0.15rem 0 0;
-  padding-left: 1.1rem;
+  padding-inline-start: 1.1rem;
 }
 
 .settings-seguranca__panel {
@@ -253,23 +256,20 @@ async function handleChangePassword() {
   border-top: 1px solid var(--partner-line);
 }
 
-.settings-seguranca__eye {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.settings-seguranca__eye.p-button {
   width: 2rem;
   height: 2rem;
   padding: 0;
-  border: 0;
   border-radius: 0.5rem;
-  background: transparent;
   color: inherit;
-  cursor: pointer;
 }
 
-.settings-seguranca__eye:hover,
-.settings-seguranca__eye:focus-visible {
+.settings-seguranca__eye.p-button:not(:disabled):hover,
+.settings-seguranca__eye.p-button:not(:disabled):active,
+.settings-seguranca__eye.p-button:focus-visible {
   background: color-mix(in srgb, var(--partner-primary) 14%, transparent);
+  box-shadow: none;
+  color: inherit;
   outline: none;
 }
 

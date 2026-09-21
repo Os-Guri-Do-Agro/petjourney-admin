@@ -1,10 +1,10 @@
 import { onBeforeUnmount, watch, type Ref } from 'vue'
 
 /**
- * Painéis laterais não-modais (drawers à direita) empurram o conteúdo da página
+ * Painéis laterais não-modais (drawers no fim da linha de leitura) empurram o conteúdo da página
  * em vez de flutuar sobre ele. O painel seta `--pj-side-panel-offset` no <html>
  * enquanto está aberto e o `.app-content` do AppShell consome esse valor como
- * padding-right (só em telas largas; no mobile o painel sobrepõe).
+ * padding-inline-end (só em telas largas; no mobile o painel sobrepõe).
  */
 let activeCount = 0
 

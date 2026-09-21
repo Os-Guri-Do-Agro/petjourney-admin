@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -319,7 +321,7 @@ async function handleSubmit() {
             :type="passwordInputType"
           >
             <template #trailing>
-              <button
+              <Button
                 :aria-label="
                   showPassword
                     ? t('auth.register.password.hide')
@@ -327,11 +329,13 @@ async function handleSubmit() {
                 "
                 class="register-password-toggle"
                 :disabled="isBusy"
+                :icon="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                rounded
+                severity="secondary"
+                text
                 type="button"
                 @click="showPassword = !showPassword"
-              >
-                <i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" aria-hidden="true" />
-              </button>
+              />
             </template>
           </AuthTextField>
 
@@ -349,7 +353,7 @@ async function handleSubmit() {
             :type="confirmPasswordInputType"
           >
             <template #trailing>
-              <button
+              <Button
                 :aria-label="
                   showConfirmPassword
                     ? t('auth.register.password.hide')
@@ -357,22 +361,26 @@ async function handleSubmit() {
                 "
                 class="register-password-toggle"
                 :disabled="isBusy"
+                :icon="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                rounded
+                severity="secondary"
+                text
                 type="button"
                 @click="showConfirmPassword = !showConfirmPassword"
-              >
-                <i
-                  :class="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
-                  aria-hidden="true"
-                />
-              </button>
+              />
             </template>
           </AuthTextField>
 
-          <label class="register-terms">
-            <input v-model="acceptedTerms" :disabled="isBusy" type="checkbox" />
-            <span class="register-terms__box" aria-hidden="true">
-              <i class="pi pi-check" />
-            </span>
+          <label class="register-terms" for="register-accept-terms">
+            <Checkbox
+              v-model="acceptedTerms"
+              binary
+              class="register-terms__check"
+              :disabled="isBusy"
+              input-id="register-accept-terms"
+              :invalid="Boolean(termsError)"
+              size="small"
+            />
             <span class="register-terms__copy">
               {{ t('auth.register.terms.copy') }}
               <a
@@ -388,11 +396,15 @@ async function handleSubmit() {
           </label>
           <p v-if="termsError" class="register-form__inline-error">{{ termsError }}</p>
 
-          <label class="register-terms">
-            <input v-model="rememberAccess" :disabled="isBusy" type="checkbox" />
-            <span class="register-terms__box" aria-hidden="true">
-              <i class="pi pi-check" />
-            </span>
+          <label class="register-terms" for="register-remember">
+            <Checkbox
+              v-model="rememberAccess"
+              binary
+              class="register-terms__check"
+              :disabled="isBusy"
+              input-id="register-remember"
+              size="small"
+            />
             <span class="register-terms__copy">
               {{ t('auth.register.remember') }}
             </span>
@@ -484,22 +496,15 @@ async function handleSubmit() {
   gap: 0.75rem;
 }
 
-.register-password-toggle {
-  display: inline-flex;
+.register-password-toggle.p-button {
   width: 2rem;
   height: 2rem;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
   color: var(--auth-soft);
-  cursor: pointer;
 }
 
-.register-password-toggle:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+.register-password-toggle.p-button:not(:disabled):hover {
+  background: var(--auth-sage-tint);
+  color: var(--auth-soft);
 }
 
 .register-terms {
@@ -513,33 +518,9 @@ async function handleSubmit() {
   cursor: pointer;
 }
 
-.register-terms input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.register-terms__box {
-  display: grid;
-  width: 1rem;
-  height: 1rem;
+.register-terms__check {
   flex: 0 0 auto;
   margin-top: 0.15rem;
-  place-items: center;
-  border-radius: 0.3rem;
-  background: var(--auth-sage);
-  color: var(--auth-cta-text);
-}
-
-.register-terms__box .pi {
-  font-size: 0.58rem;
-  font-weight: 700;
-}
-
-.register-terms input:not(:checked) + .register-terms__box {
-  border: 1px solid var(--auth-line);
-  background: var(--auth-field-bg);
-  color: transparent;
 }
 
 .register-terms__copy {

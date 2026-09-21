@@ -264,7 +264,7 @@ function faixa(minimo: number, maximo: number) {
 .doses__tabela td {
   padding: 0.38rem 0.5rem;
   border-bottom: 1px solid var(--clinic-line-soft);
-  text-align: left;
+  text-align: start;
 }
 
 .doses__tabela thead th {
@@ -286,7 +286,7 @@ function faixa(minimo: number, maximo: number) {
 }
 
 .doses__marca {
-  margin-left: 0.35rem;
+  margin-inline-start: 0.35rem;
   padding: 0 0.35rem;
   border-radius: var(--clinic-radius-chip);
   background: var(--clinic-accent-strong);
@@ -332,7 +332,7 @@ function faixa(minimo: number, maximo: number) {
 }
 
 .bloco__lista li {
-  padding-left: 1rem;
+  padding-inline-start: 1rem;
   color: var(--clinic-text);
   font-size: var(--clinic-font-label);
   line-height: 1.45;
@@ -340,7 +340,7 @@ function faixa(minimo: number, maximo: number) {
 }
 
 .bloco__lista li::before {
-  margin-right: 0.5rem;
+  margin-inline-end: 0.5rem;
   content: '•';
 }
 

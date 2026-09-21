@@ -73,22 +73,19 @@ const proxima = computed(() => {
     <template v-if="item.internacao">
       <!--
         O botão é o nome do paciente, mas o **alvo do clique é o cartão inteiro**: o `::after`
-        dele se estende por toda a superfície (ver o CSS). Continua sendo um `<button>` de
-        verdade — teclado, foco e leitor de tela nativos, com o nome do paciente como rótulo —
+        dele se estende por toda a superfície (ver o CSS). Continua sendo um botão de verdade
+        (`Button` do PrimeVue, que renderiza `<button>`) — teclado, foco e leitor de tela
+        nativos, com o nome do paciente como rótulo —
         em vez de um `role="button"` no `<article>`, que leria o cartão inteiro em voz alta,
         números e selos incluídos, para dizer "abrir o Bento".
       -->
-      <button
-        type="button"
-        class="leito__paciente"
-        @click="emit('abrir', item.internacao.id)"
-      >
+      <Button type="button" class="leito__paciente" text @click="emit('abrir', item.internacao.id)">
         <span class="leito__iniciais" aria-hidden="true">{{ item.petIniciais }}</span>
         <span class="leito__identidade">
           <strong class="leito__pet">{{ item.petNome }}</strong>
           <span class="leito__motivo">{{ item.internacao.motivo }}</span>
         </span>
-      </button>
+      </Button>
 
       <!--
         O chip precisa caber no próprio texto. Como filho direto de uma coluna flex ele era
@@ -117,7 +114,7 @@ const proxima = computed(() => {
       -->
       <p v-if="item.atrasadas > 0" class="leito__selo">
         <i class="pi pi-exclamation-circle" aria-hidden="true" />
-        {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }) }}
+        {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }, item.atrasadas) }}
       </p>
 
       <!--
@@ -260,16 +257,28 @@ const proxima = computed(() => {
   text-transform: uppercase;
 }
 
-.leito__paciente {
-  display: flex;
+/*
+ * `position: static` e `overflow: visible` desfazem dois padrões do `.p-button`: com eles o
+ * `::after` abaixo se ancoraria no próprio botão e seria recortado por ele, e o alvo estendido
+ * voltaria a ser só o nome.
+ */
+.leito__paciente.p-button {
+  position: static;
   min-width: 0;
-  align-items: center;
+  justify-content: flex-start;
   padding: 0;
   border: 0;
+  overflow: visible;
   gap: var(--clinic-space-3);
-  background: none;
-  cursor: pointer;
+  color: inherit;
   text-align: start;
+}
+
+/* O hover é do cartão inteiro (`.leito--clicavel:hover`); o fundo do botão de texto sobraria. */
+.leito__paciente.p-button:not(:disabled):hover,
+.leito__paciente.p-button:not(:disabled):active {
+  background: transparent;
+  color: inherit;
 }
 
 /*
@@ -285,8 +294,9 @@ const proxima = computed(() => {
   inset: 0;
 }
 
-.leito__paciente:focus-visible {
+.leito__paciente.p-button:focus-visible {
   outline: none;
+  box-shadow: none;
 }
 
 /* O foco contorna o cartão, que é o que o clique de fato aciona — não só o nome. */

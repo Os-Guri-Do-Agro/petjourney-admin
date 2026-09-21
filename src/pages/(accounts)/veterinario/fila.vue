@@ -140,11 +140,13 @@ const severidadePorPrioridade = {
   normal: 'info',
 } as const
 
-const DIAS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'] as const
-
+/** Dia da semana pelo `Intl` do idioma da tela: abreviação fixa em português vazava para todo idioma. */
 function janelaLegivel(entrada: WaitlistEntry) {
   return entrada.janelas
-    .map((janela) => `${DIAS[janela.weekday]} ${janela.inicio}–${janela.fim}`)
+    .map(
+      (janela) =>
+        `${formato.diaDaSemanaCurtoPorIndice(janela.weekday)} ${janela.inicio}–${janela.fim}`,
+    )
     .join(' · ')
 }
 
@@ -243,7 +245,7 @@ onMounted(carregar)
 
         <template #celula-responsavel="{ linha }">
           <span class="fila__nome">{{ clinico.tutor(linha.tutorId)?.nome }}</span>
-          <span class="fila__meta">{{ clinico.tutor(linha.tutorId)?.telefone }}</span>
+          <span class="fila__meta"><bdi dir="ltr">{{ clinico.tutor(linha.tutorId)?.telefone }}</bdi></span>
         </template>
 
         <template #celula-janelas="{ linha }">

@@ -19,6 +19,7 @@
  * - **Clicar filtra.** A legenda já é a lista de tipos do dia; obrigar a abrir outro painel
  *   para filtrar por tipo seria pedir duas vezes a mesma informação.
  */
+import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -98,27 +99,27 @@ const itens = computed<ItemDaLegenda[]>(() =>
 
 <template>
   <section v-if="itens.length > 0" class="legenda">
-    <button
-      type="button"
-      class="legenda__alternar clinic-focusable"
+    <Button
+      class="legenda__alternar"
+      severity="secondary"
+      text
+      size="small"
+      :icon="legendaAberta ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+      :label="t('clinico.agenda.legenda.titulo')"
+      :badge="temFiltro ? String(agenda.filtroTipos.length) : undefined"
       :aria-expanded="legendaAberta"
       @click="alternarLegenda()"
-    >
-      <i
-        class="pi legenda__seta"
-        :class="legendaAberta ? 'pi-chevron-down' : 'pi-chevron-right'"
-        aria-hidden="true"
-      />
-      {{ t('clinico.agenda.legenda.titulo') }}
-      <span v-if="temFiltro" class="legenda__contador">{{ agenda.filtroTipos.length }}</span>
-    </button>
+    />
 
     <ul v-if="legendaAberta" class="legenda__lista">
       <li v-for="item in itens" :key="item.kind">
-        <button
-          type="button"
-          class="chave clinic-focusable"
+        <Button
+          class="chave"
           :class="{ 'chave--ativa': item.ativo, 'chave--ausente': item.ausente }"
+          severity="secondary"
+          text
+          rounded
+          size="small"
           :aria-pressed="item.ativo"
           :title="t('clinico.agenda.legenda.filtrar', { tipo: item.nome })"
           :style="{ '--chave-cor': item.cor }"
@@ -135,17 +136,17 @@ const itens = computed<ItemDaLegenda[]>(() =>
           <span v-if="!item.ausente" class="chave__contagem clinic-value">
             {{ item.contagem }}
           </span>
-        </button>
+        </Button>
       </li>
 
       <li v-if="temFiltro">
-        <button
-          type="button"
-          class="legenda__limpar clinic-focusable"
+        <Button
+          link
+          size="small"
+          class="legenda__limpar"
+          :label="t('clinico.agenda.limparFiltros')"
           @click="agenda.filtroTipos = []"
-        >
-          {{ t('clinico.agenda.limparFiltros') }}
-        </button>
+        />
       </li>
     </ul>
   </section>
@@ -159,41 +160,17 @@ const itens = computed<ItemDaLegenda[]>(() =>
   gap: var(--clinic-space-2) var(--clinic-space-3);
 }
 
-.legenda__alternar {
-  display: inline-flex;
-  align-items: center;
+/* Rótulo de seção, não ação principal: caixa alta e corpo de etiqueta, como os títulos do módulo. */
+.legenda__alternar.p-button {
   gap: 0.3rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--clinic-faint);
-  cursor: pointer;
-  font: inherit;
+  padding-inline: var(--clinic-space-1);
   font-size: var(--clinic-font-label);
-  font-weight: 750;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.legenda__alternar:hover {
-  color: var(--clinic-text);
-}
-
-.legenda__seta {
+.legenda__alternar :deep(.p-button-icon) {
   font-size: 0.6rem;
-}
-
-.legenda__contador {
-  display: inline-grid;
-  min-width: 1.05rem;
-  height: 1.05rem;
-  place-items: center;
-  padding: 0 0.25rem;
-  border-radius: 999px;
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
-  font-size: 0.62rem;
-  letter-spacing: 0;
 }
 
 .legenda__lista {
@@ -206,31 +183,22 @@ const itens = computed<ItemDaLegenda[]>(() =>
   list-style: none;
 }
 
-.chave {
-  display: inline-flex;
-  align-items: center;
+.chave.p-button {
   gap: 0.35rem;
-  padding: 0.15rem 0.5rem 0.15rem 0.25rem;
+  padding-block: 0.15rem;
+  padding-inline: 0.25rem 0.5rem;
   border: 1px solid transparent;
-  border-radius: var(--clinic-radius-chip);
-  background: none;
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
-}
-
-.chave:hover {
-  border-color: var(--clinic-line);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-text);
+  font-weight: 400;
 }
 
 /*
  * Filtro ligado é estado, não ênfase: ganha contorno e fundo, e não só uma cor mais forte.
  * Quem olha a barra precisa ver que **há um filtro** antes de descobrir qual.
+ * O seletor repete as classes do botão para vencer a regra de botão de texto do módulo.
  */
-.chave--ativa {
+.chave--ativa.p-button.p-button-secondary.p-button-text,
+.chave--ativa.p-button.p-button-secondary.p-button-text:not(:disabled):hover {
   border-color: color-mix(in srgb, var(--chave-cor) 60%, var(--clinic-line));
   background: color-mix(in srgb, var(--chave-cor) 16%, var(--clinic-surface));
   color: var(--clinic-text);
@@ -238,7 +206,7 @@ const itens = computed<ItemDaLegenda[]>(() =>
 }
 
 /* Tipo sem atendimento no dia: continua clicável, mas não disputa atenção. */
-.chave--ausente {
+.chave--ausente.p-button {
   opacity: 0.45;
 }
 
@@ -268,15 +236,8 @@ const itens = computed<ItemDaLegenda[]>(() =>
   color: var(--clinic-muted);
 }
 
-.legenda__limpar {
+.legenda__limpar.p-button {
   padding: 0.15rem 0.4rem;
-  border: 0;
-  background: none;
-  color: var(--clinic-accent-strong);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
-  font-weight: 700;
-  text-decoration: underline;
 }
 </style>

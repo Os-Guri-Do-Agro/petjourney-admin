@@ -160,18 +160,21 @@ const pageStyle = computed(() => {
           fica sempre no mesmo lugar, encostado no título. Ação de tela muda de página para
           página; controle de leitura, não.
         -->
-        <button
+        <Button
           v-if="guidance"
           class="partner-page__guidance"
           :class="{ 'partner-page__guidance--ativo': isGuidanceVisible }"
           type="button"
+          icon="pi pi-info-circle"
+          :label="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
+          outlined
+          rounded
+          severity="secondary"
+          size="small"
           :aria-pressed="isGuidanceVisible"
           :title="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
           @click="toggleGuidance"
-        >
-          <i class="pi pi-info-circle" aria-hidden="true" />
-          <span>{{ isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show') }}</span>
-        </button>
+        />
 
         <slot name="actions" />
       </div>
@@ -354,39 +357,38 @@ const pageStyle = computed(() => {
   gap: 0.5rem;
 }
 
-.partner-page__guidance {
-  display: inline-flex;
+.partner-page__guidance.p-button {
   min-height: 2.2rem;
-  align-items: center;
   gap: 0.4rem;
   padding: 0.35rem 0.75rem;
-  border: 1px solid var(--partner-line, transparent);
-  border-radius: 999px;
-  background: transparent;
+  border-color: var(--partner-line, transparent);
   color: var(--partner-faint, inherit);
-  cursor: pointer;
-  font: inherit;
   font-size: 0.76rem;
+}
+
+.partner-page__guidance.p-button :deep(.p-button-label) {
   font-weight: 650;
 }
 
-.partner-page__guidance:hover {
+.partner-page__guidance.p-button:not(:disabled):hover {
+  border-color: var(--partner-line, transparent);
   background: var(--partner-card, transparent);
   color: var(--partner-muted, inherit);
 }
 
-.partner-page__guidance--ativo {
+.partner-page__guidance--ativo.p-button,
+.partner-page__guidance--ativo.p-button:not(:disabled):hover {
   background: var(--partner-card, transparent);
   color: var(--partner-text, inherit);
 }
 
 /* No estreito sobra o ícone: o rótulo empurraria as ações da tela para outra linha. */
 @media (max-width: 720px) {
-  .partner-page__guidance {
+  .partner-page__guidance.p-button {
     padding-inline: 0.55rem;
   }
 
-  .partner-page__guidance span {
+  .partner-page__guidance.p-button :deep(.p-button-label) {
     display: none;
   }
 }
@@ -446,7 +448,7 @@ const pageStyle = computed(() => {
   gap: 0.75rem;
   width: min(100%, 42rem);
   margin-top: 0.25rem;
-  text-align: left;
+  text-align: start;
 }
 
 .partner-page__support-lede {
@@ -542,7 +544,7 @@ const pageStyle = computed(() => {
   .partner-page__channel-arrow {
     display: block;
     flex: 0 0 auto;
-    margin-left: auto;
+    margin-inline-start: auto;
     color: var(--partner-faint);
     font-size: 0.75rem;
   }

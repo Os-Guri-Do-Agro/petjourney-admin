@@ -571,7 +571,7 @@ function onAnexosSelected(event: Event) {
 
   for (const file of files) {
     if (anexosForm.value.length >= MAX_ANEXOS) {
-      formError.value = t('acessos.anotacao.maxAnexos', { n: MAX_ANEXOS })
+      formError.value = t('acessos.anotacao.maxAnexos', { n: MAX_ANEXOS }, MAX_ANEXOS)
       break
     }
 
@@ -833,12 +833,25 @@ function baixarArquivo(arquivoId: string, nome: string) {
 }
 
 function formatBytes(bytes: number) {
+  const numero = new Intl.NumberFormat(INTL_LOCALE[locale.value as Locale], {
+    maximumFractionDigits: 1,
+  })
+
   if (bytes >= 1024 * 1024) {
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    return `${numero.format(bytes / (1024 * 1024))} MB`
   }
 
-  return `${Math.max(1, Math.round(bytes / 1024))} KB`
+  return `${numero.format(Math.max(1, Math.round(bytes / 1024)))} KB`
 }
+
+/** Peso no formato numérico do idioma da tela (vírgula ou ponto decimal). */
+const pesoKgLegivel = computed(() =>
+  pesoKg.value == null
+    ? ''
+    : new Intl.NumberFormat(INTL_LOCALE[locale.value as Locale], {
+        maximumFractionDigits: 2,
+      }).format(pesoKg.value),
+)
 
 watch(compartilhamentoId, (id, oldId) => {
   if (id && id !== oldId) {
@@ -926,7 +939,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
         <dl v-if="pesoKg != null" class="atd-hero__facts">
           <div class="atd-hero__fact">
             <dt>{{ t('acessos.snapshot.peso') }}</dt>
-            <dd>{{ pesoKg }} kg</dd>
+            <dd>{{ pesoKgLegivel }} kg</dd>
           </div>
         </dl>
       </section>
@@ -1025,7 +1038,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               <p v-if="isGuidanceVisible">{{ t('acessos.tratamentos.lede') }}</p>
             </div>
             <span v-if="tratamentosContinuos.length" class="atd-docs__count">{{
-              t('acessos.tratamentos.count', { n: tratamentosContinuos.length })
+              t('acessos.tratamentos.count', { n: tratamentosContinuos.length }, tratamentosContinuos.length)
             }}</span>
           </header>
 
@@ -1066,7 +1079,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               <p>{{ t('acessos.snapshot.clinicalLede') }}</p>
             </div>
             <span class="atd-clinical__count">{{
-              t('acessos.snapshot.sectionsCount', { n: snapshotListSections.length })
+              t('acessos.snapshot.sectionsCount', { n: snapshotListSections.length }, snapshotListSections.length)
             }}</span>
           </header>
 
@@ -1079,7 +1092,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               :data-open="isSectionOpen(section.id) ? 'true' : 'false'"
             >
               <h3 class="atd-fold__heading">
-                <button
+                <Button
                   type="button"
                   class="atd-fold__trigger"
                   :aria-expanded="isSectionOpen(section.id)"
@@ -1093,7 +1106,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     <strong>{{ section.title }}</strong>
                     <small>{{
                       section.items.length
-                        ? t('acessos.snapshot.itemsCount', { n: section.items.length })
+                        ? t('acessos.snapshot.itemsCount', { n: section.items.length }, section.items.length)
                         : t('acessos.snapshot.semItens')
                     }}</small>
                   </span>
@@ -1102,7 +1115,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     :class="isSectionOpen(section.id) ? 'pi-chevron-up' : 'pi-chevron-down'"
                     aria-hidden="true"
                   />
-                </button>
+                </Button>
               </h3>
 
               <div
@@ -1144,7 +1157,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               <p v-if="isGuidanceVisible">{{ t('acessos.documentos.lede') }}</p>
             </div>
             <span v-if="documentos.length" class="atd-docs__count">{{
-              t('acessos.documentos.count', { n: documentos.length })
+              t('acessos.documentos.count', { n: documentos.length }, documentos.length)
             }}</span>
           </header>
 
@@ -1215,7 +1228,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               <p v-if="isGuidanceVisible">{{ t('acessos.diario.lede') }}</p>
             </div>
             <span v-if="diario.length" class="atd-docs__count">{{
-              t('acessos.diario.count', { n: diario.length })
+              t('acessos.diario.count', { n: diario.length }, diario.length)
             }}</span>
           </header>
 
@@ -1262,7 +1275,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
               <div v-if="entrada.fotoIds.length" class="atd-diario__fotos">
                 <span class="atd-diario__fotos-label">
-                  {{ t('acessos.diario.fotos', { n: entrada.fotoIds.length }) }}
+                  {{ t('acessos.diario.fotos', { n: entrada.fotoIds.length }, entrada.fotoIds.length) }}
                 </span>
                 <Button
                   v-for="(fotoId, index) in entrada.fotoIds"
@@ -1297,7 +1310,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 <p v-if="isGuidanceVisible">{{ t('acessos.anotacoes.lede') }}</p>
               </div>
               <span v-if="anotacoesOrdenadas.length" class="atd-notes__count">{{
-                t('acessos.anotacoes.count', { n: anotacoesOrdenadas.length })
+                t('acessos.anotacoes.count', { n: anotacoesOrdenadas.length }, anotacoesOrdenadas.length)
               }}</span>
             </header>
 
@@ -1355,7 +1368,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     </p>
                     <ul class="atd-note__attachments">
                       <li v-for="anexo in anotacao.anexos" :key="anexo.id">
-                        <button
+                        <Button
                           type="button"
                           class="atd-note__file"
                           :disabled="abrindoAnexoId === anexo.id"
@@ -1381,7 +1394,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                             </small>
                           </span>
                           <i class="pi pi-external-link atd-note__file-go" aria-hidden="true" />
-                        </button>
+                        </Button>
                       </li>
                     </ul>
                   </div>
@@ -1458,18 +1471,23 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               <div class="atd-field">
                 <span class="atd-field__label">{{ t('acessos.anotacao.especialidade') }}</span>
                 <div class="atd-chips">
-                  <button
+                  <!-- Chips que quebram linha, com desmarcar ao clicar de novo: Button com
+                       aria-pressed em vez de SelectButton (grupo colado, sem quebra). -->
+                  <Button
                     v-for="opcao in opcoesEspecialidade"
                     :key="opcao"
                     type="button"
                     class="atd-chip"
                     :class="{ 'atd-chip--on': anotacaoForm.especialidade === opcao }"
+                    :label="t(SUFIXO_ESPECIALIDADE + opcao)"
+                    severity="secondary"
+                    outlined
+                    rounded
+                    size="small"
                     :aria-pressed="anotacaoForm.especialidade === opcao"
                     :disabled="submittingAnotacao"
                     @click="selecionarEspecialidade(opcao)"
-                  >
-                    {{ t(SUFIXO_ESPECIALIDADE + opcao) }}
-                  </button>
+                  />
                 </div>
                 <InputText
                   v-if="anotacaoForm.especialidade === ESPECIALIDADE_OUTRA"
@@ -1875,27 +1893,30 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   margin: 0;
 }
 
-.atd-fold__trigger {
-  display: flex;
+/* Gatilho de seção recolhível: Button com slot, sem o visual de CTA do preset. */
+.atd-fold__trigger.p-button {
+  justify-content: flex-start;
   width: 100%;
-  align-items: center;
   gap: 0.75rem;
   padding: 0.85rem 0.95rem;
   border: 0;
+  border-radius: 0;
   background: transparent;
   color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
+  font-size: inherit;
+  text-align: start;
 }
 
-.atd-fold__trigger:hover,
-.atd-fold__trigger:focus-visible {
+.atd-fold__trigger.p-button:not(:disabled):hover,
+.atd-fold__trigger.p-button:not(:disabled):active,
+.atd-fold__trigger.p-button:focus-visible {
+  border: 0;
   background: color-mix(in srgb, var(--partner-surface) 70%, transparent);
+  color: inherit;
   outline: none;
 }
 
-.atd-fold__trigger:focus-visible {
+.atd-fold__trigger.p-button:focus-visible {
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--partner-primary) 45%, transparent);
 }
 
@@ -1942,14 +1963,16 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 }
 
 .atd-fold__body {
-  padding: 0 0.55rem 0.75rem 0.85rem;
+  padding-block: 0 0.75rem;
+  padding-inline: 0.85rem 0.55rem;
 }
 
 .atd-fold__scroll {
   max-height: min(14.5rem, 42vh);
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 0.1rem 0.45rem 0.15rem 0;
+  padding-block: 0.1rem 0.15rem;
+  padding-inline: 0 0.45rem;
   border-radius: 0.75rem;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -2204,7 +2227,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .atd-doc__files {
   display: grid;
   gap: 0.4rem;
-  margin: 0 0 0 auto;
+  margin-block: 0;
+  margin-inline: auto 0;
   padding: 0;
   list-style: none;
 }
@@ -2218,7 +2242,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 }
 
 .atd-doc__file-label {
-  margin-right: 0.15rem;
+  margin-inline-end: 0.15rem;
   color: var(--partner-faint);
   font-size: 0.72rem;
   font-weight: 700;
@@ -2273,33 +2297,32 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   gap: 0.35rem;
 }
 
-.atd-chip {
+.atd-chip.p-button {
   padding: 0.3rem 0.65rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 999px;
+  border-color: var(--partner-line);
   background: var(--partner-card);
   color: var(--partner-muted);
   font-size: 0.76rem;
-  font-weight: 650;
-  cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease,
-    color 0.15s ease;
 }
 
-.atd-chip:hover:not(:disabled) {
+.atd-chip.p-button :deep(.p-button-label) {
+  font-weight: 650;
+}
+
+.atd-chip.p-button:not(:disabled):hover {
   border-color: var(--partner-primary-strong);
+  background: var(--partner-card);
   color: var(--partner-text);
 }
 
-.atd-chip--on {
+.atd-chip--on.p-button,
+.atd-chip--on.p-button:not(:disabled):hover {
   border-color: var(--partner-primary-strong);
   background: color-mix(in srgb, var(--partner-primary-strong) 12%, var(--partner-card));
   color: var(--partner-primary-strong);
 }
 
-.atd-chip:disabled {
+.atd-chip.p-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -2660,32 +2683,33 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   list-style: none;
 }
 
-.atd-note__file {
-  display: flex;
+/* Anexo clicável: Button com slot (ícone + nome + tamanho), sem o visual de CTA do preset. */
+.atd-note__file.p-button {
+  justify-content: flex-start;
   width: 100%;
-  align-items: center;
   gap: 0.65rem;
   padding: 0.55rem 0.7rem;
   border: 1px solid color-mix(in srgb, var(--partner-line) 90%, transparent);
   border-radius: 0.8rem;
   background: color-mix(in srgb, var(--partner-surface) 70%, var(--partner-card));
   color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
+  font-size: inherit;
+  text-align: start;
   transition:
     border-color 150ms ease,
     background 150ms ease;
 }
 
-.atd-note__file:hover,
-.atd-note__file:focus-visible {
+.atd-note__file.p-button:not(:disabled):hover,
+.atd-note__file.p-button:not(:disabled):active,
+.atd-note__file.p-button:focus-visible {
   border-color: color-mix(in srgb, var(--partner-primary) 36%, var(--partner-line));
   background: color-mix(in srgb, var(--partner-primary-soft) 22%, var(--partner-card));
+  color: inherit;
   outline: none;
 }
 
-.atd-note__file:disabled {
+.atd-note__file.p-button:disabled {
   cursor: wait;
   opacity: 0.72;
 }

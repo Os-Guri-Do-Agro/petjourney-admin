@@ -9,6 +9,7 @@
  * Falta e cancelamento **continuam visíveis** — riscados e esmaecidos. Sumir da grade é como
  * a recepção perde a informação de que o horário vagou.
  */
+import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -136,7 +137,7 @@ const estilo = computed(() => {
   return {
     top: `${props.card.topPx}px`,
     height: `${props.card.alturaPx}px`,
-    left: `calc(${props.card.lane * largura}% + 1px)`,
+    insetInlineStart: `calc(${props.card.lane * largura}% + 1px)`,
     width: `calc(${largura}% - 2px)`,
     '--card-cor': props.cor,
     '--card-tipo': tipo.value.cor,
@@ -224,17 +225,18 @@ const estilo = computed(() => {
       Aparece no hover e no foco; em tela de toque fica sempre visível, porque dedo não tem
       hover e a ação ficaria inalcançável.
     -->
-    <button
+    <Button
       v-if="podeMarcarFalta"
-      type="button"
-      class="card__falta clinic-focusable"
+      class="card__falta"
+      icon="pi pi-user-minus"
+      severity="warn"
+      outlined
+      size="small"
       :title="t('clinico.faltas.marcar')"
       :aria-label="`${t('clinico.faltas.marcar')} — ${card.pet?.nome ?? ''}`"
       @click.stop="emit('marcarFalta', appointment.id)"
       @pointerdown.stop
-    >
-      <i class="pi pi-user-minus" aria-hidden="true" />
-    </button>
+    />
 
     <span
       v-if="arrastavel && faixa !== 'minima'"
@@ -251,10 +253,11 @@ const estilo = computed(() => {
   display: grid;
   align-content: start;
   overflow: hidden;
-  padding: 2px 6px 2px 8px;
+  padding-block: 2px;
+  padding-inline: 8px 6px;
   border: 1px solid color-mix(in srgb, var(--card-cor) 52%, var(--clinic-line));
   /* A faixa do tipo. Fica na borda, não em pseudo-elemento, para sobreviver ao overflow. */
-  border-left: 3px solid var(--card-tipo);
+  border-inline-start: 3px solid var(--card-tipo);
   border-radius: 0.5rem;
   background: color-mix(in srgb, var(--card-cor) 10%, var(--clinic-surface));
   color: var(--clinic-text);
@@ -381,53 +384,47 @@ const estilo = computed(() => {
  * atendimentos, 40 ícones permanentes viram textura. No foco por teclado aparece igual, senão
  * a ação existiria só para quem usa mouse.
  */
-.card__falta {
+.card__falta.p-button {
   position: absolute;
   top: 1px;
-  right: 1px;
+  inset-inline-end: 1px;
   z-index: 5;
-  display: grid;
   width: 18px;
   height: 18px;
-  place-items: center;
   padding: 0;
-  border: 1px solid var(--clinic-attention-line);
   border-radius: 0.35rem;
+  /* Opaco: o botão fica por cima do nome do paciente e não pode deixá-lo aparecer por baixo. */
   background: var(--clinic-surface);
-  color: var(--clinic-attention-text);
-  cursor: pointer;
   font-size: 0.6rem;
   opacity: 0;
   transition: opacity 120ms ease;
 }
 
-.card:hover .card__falta,
-.card__falta:focus-visible {
-  opacity: 1;
+.card__falta :deep(.p-button-icon) {
+  font-size: 0.6rem;
 }
 
-.card__falta:hover {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
+.card:hover .card__falta.p-button,
+.card__falta.p-button:focus-visible {
+  opacity: 1;
 }
 
 /* Dedo e caneta não têm hover: em toque, a ação é sempre visível. */
 @media (hover: none) {
-  .card__falta {
+  .card__falta.p-button {
     opacity: 1;
   }
 }
 
 /* Card mínimo não tem altura para o botão sem cobrir a hora. */
-.card--minima .card__falta {
+.card--minima .card__falta.p-button {
   display: none;
 }
 
 /* Alças de 6 px: alvo de mouse, não de dedo. */
 .card__alca {
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   height: 6px;
   width: 100%;
   cursor: ns-resize;
@@ -448,7 +445,7 @@ const estilo = computed(() => {
 .card--liberado {
   border-style: dashed;
   /* A faixa do tipo continua sólida: tracejar 3 px a transforma numa coluna de pontos. */
-  border-left-style: solid;
+  border-inline-start-style: solid;
   background: var(--clinic-surface);
   opacity: 0.62;
 }
@@ -500,9 +497,8 @@ const estilo = computed(() => {
 }
 
 .card--aviso {
-  border-top-color: var(--clinic-attention-text);
-  border-right-color: var(--clinic-attention-text);
-  border-bottom-color: var(--clinic-attention-text);
+  border-block-color: var(--clinic-attention-text);
+  border-inline-end-color: var(--clinic-attention-text);
 }
 
 /*

@@ -178,7 +178,7 @@ function repetir() {
             <span class="responsavel__quando">
               {{ item.frequencia }}
               <template v-if="item.dias !== null">
-                · {{ t('clinico.prontuario.conduta.porDias', { dias: item.dias }) }}
+                · {{ t('clinico.prontuario.conduta.porDias', { dias: item.dias }, item.dias) }}
               </template>
             </span>
             <span class="responsavel__lembrete">

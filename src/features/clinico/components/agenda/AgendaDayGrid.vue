@@ -75,10 +75,24 @@ function colunaDoPonteiro(evento: PointerEvent) {
 }
 
 /**
- * O `click` do card dispara logo depois do `pointerup` que encerra o arraste. Sem esta marca,
- * toda remarcação abriria o drawer por cima da confirmação.
+ * Instante em que o último gesto de ponteiro terminou.
+ *
+ * O `click` dispara logo depois do `pointerup` que encerra o arraste. Sem esta marca, toda
+ * remarcação abriria alguma coisa por cima da confirmação — e **qual** coisa depende de onde o
+ * card foi solto, porque o clique nasce no ancestral comum entre a origem e o destino do gesto:
+ *
+ * - solto em cima do card de origem → o clique é do card → abriria o drawer;
+ * - solto em qualquer outro lugar da coluna → o clique é **da coluna** → abriria "novo
+ *   atendimento" no minuto da soltura, que é justamente o caso normal de remarcar.
+ *
+ * Por isso as duas portas — `aoAbrir` e `aoClicarNoVazio` — consultam a mesma marca, e ela é
+ * carimbada no fim de **todo** gesto: o que propôs, o que voltou ao lugar de origem e o
+ * cancelado por `Esc` deixam para trás exatamente o mesmo clique.
  */
-let ultimoArrasteEm = 0
+let ultimoGestoEm = 0
+
+/** Janela em que um clique ainda é rastro do gesto que acabou, e não um clique novo. */
+const RASTRO_DO_GESTO_MS = 250
 
 /**
  * O que a coluna de destino significa, no agrupamento vigente.
@@ -112,14 +126,19 @@ const arraste = useAgendaDrag({
   minutoDoPonteiro,
   colunaDoPonteiro,
   destinoDaColuna,
-  aoPropor: (proposta) => {
-    ultimoArrasteEm = performance.now()
-    emit('propor', proposta)
+  aoPropor: (proposta) => emit('propor', proposta),
+  aoTerminarGesto: () => {
+    ultimoGestoEm = performance.now()
   },
 })
 
+/** `true` enquanto o clique que chega ainda é o rastro do gesto que acabou de terminar. */
+function rastroDeGesto() {
+  return performance.now() - ultimoGestoEm < RASTRO_DO_GESTO_MS
+}
+
 function aoAbrir(appointmentId: string) {
-  if (performance.now() - ultimoArrasteEm < 250) {
+  if (rastroDeGesto()) {
     return
   }
 
@@ -201,6 +220,10 @@ function medir() {
  * para a grade. Poupa a recepção de reescrever o que acabou de apontar.
  */
 function aoClicarNoVazio(evento: MouseEvent, professionalId: string) {
+  if (rastroDeGesto()) {
+    return
+  }
+
   const caixa = conteudo.value?.getBoundingClientRect()
 
   if (!caixa) {
@@ -493,7 +516,7 @@ watch(() => agenda.data, medir)
  */
 .destino {
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   width: 100%;
   z-index: 1;
   border: 1px dashed var(--clinic-accent-strong);
@@ -514,7 +537,7 @@ watch(() => agenda.data, medir)
  */
 .destino__aviso {
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 7;
   display: flex;
   align-items: flex-start;
@@ -545,7 +568,7 @@ watch(() => agenda.data, medir)
   display: grid;
   align-items: center;
   padding: var(--clinic-space-2);
-  border-right: 1px solid var(--clinic-line);
+  border-inline-end: 1px solid var(--clinic-line);
   text-align: center;
 }
 
@@ -555,11 +578,11 @@ watch(() => agenda.data, medir)
   align-content: center;
   gap: 0.1rem;
   padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-right: 1px solid var(--clinic-line-soft);
+  border-inline-end: 1px solid var(--clinic-line-soft);
 }
 
 .grade__coluna-topo:last-child {
-  border-right: none;
+  border-inline-end: none;
 }
 
 .grade__titulo {
@@ -616,13 +639,13 @@ watch(() => agenda.data, medir)
 
 .eixo {
   position: relative;
-  border-right: 1px solid var(--clinic-line);
+  border-inline-end: 1px solid var(--clinic-line);
   background: var(--clinic-surface-soft);
 }
 
 .eixo__marca {
   position: absolute;
-  right: var(--clinic-space-2);
+  inset-inline-end: var(--clinic-space-2);
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
   font-variant-numeric: tabular-nums;
@@ -643,16 +666,16 @@ watch(() => agenda.data, medir)
   position: relative;
   z-index: 1;
   min-width: 0;
-  border-right: 1px solid var(--clinic-line-soft);
+  border-inline-end: 1px solid var(--clinic-line-soft);
 }
 
 .coluna:last-child {
-  border-right: none;
+  border-inline-end: none;
 }
 
 .coluna__linha {
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   width: 100%;
   border-top: 1px solid var(--clinic-line-soft);
   pointer-events: none;
@@ -665,7 +688,7 @@ watch(() => agenda.data, medir)
 .coluna__vazia {
   position: absolute;
   top: 40%;
-  left: 0;
+  inset-inline-start: 0;
   width: 100%;
   margin: 0;
   color: var(--clinic-faint);
@@ -677,7 +700,7 @@ watch(() => agenda.data, medir)
 /* Bloqueio é fundo, não card: fica atrás e não recebe clique. */
 .bloqueio {
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   width: 100%;
   overflow: hidden;
   padding: 2px 6px;
@@ -717,7 +740,7 @@ watch(() => agenda.data, medir)
  */
 .faixa-clinica {
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 0;
   display: flex;
   width: 100%;
@@ -743,12 +766,12 @@ watch(() => agenda.data, medir)
 
 .faixa-clinica__rotulo {
   width: var(--clinic-time-axis-width);
-  padding-right: var(--clinic-space-2);
+  padding-inline-end: var(--clinic-space-2);
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
   font-weight: 750;
   letter-spacing: 0.08em;
-  text-align: right;
+  text-align: end;
   text-transform: uppercase;
 }
 
@@ -761,7 +784,7 @@ watch(() => agenda.data, medir)
  */
 .agora {
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 0;
   width: 100%;
   border-top: 2px solid var(--clinic-risk-text);
@@ -772,7 +795,7 @@ watch(() => agenda.data, medir)
   position: absolute;
   z-index: 5;
   top: -0.75rem;
-  left: 2px;
+  inset-inline-start: 2px;
   padding: 0 0.3rem;
   border-radius: 0.3rem;
   background: var(--clinic-risk-text);
