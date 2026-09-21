@@ -24,12 +24,52 @@
 
 html {
   overflow-x: clip;
+  /*
+   * Goteira da barra de rolagem sempre reservada. Sem ela, a trava de modal abaixo tira a
+   * barra e a página inteira alarga uns 15px no instante em que o diálogo abre.
+   */
+  scrollbar-gutter: stable;
 }
 
 body,
 #app {
   max-width: 100%;
   overflow-x: clip;
+}
+
+/*
+ * Trava de rolagem do modal.
+ *
+ * O PrimeVue põe `p-overflow-hidden` no `<body>` ao abrir um Dialog modal e conta com o tema
+ * para definir a regra — que esta versão não emite em lugar nenhum: a classe entra no DOM e
+ * não faz nada. Por isso a tela atrás do diálogo continuava rolando, e quem abria o painel de
+ * um `Select` e girava a roda via o fundo andar junto.
+ *
+ * Estilizar só o `<body>` não resolveria: com `overflow-x: clip` no `<html>`, o eixo vertical
+ * restante computa para `auto` e quem rola passa a ser o `<html>`. A partir daí o overflow do
+ * `<body>` deixa de ser propagado para a viewport — a trava precisa ir no elemento que de fato
+ * rola. `overflow-y` isolado preserva o `clip` horizontal, que existe por outro motivo.
+ */
+html:has(> body.p-overflow-hidden) {
+  overflow-y: hidden;
+}
+
+/*
+ * Rolagem de overlay não encadeia para trás.
+ *
+ * Painel de Select, MultiSelect e afins é teleportado para fora da árvore da página, mas a
+ * rolagem dele encadeia normalmente: ao chegar no fim da lista, a roda continua no elemento
+ * rolável de trás — o corpo do diálogo. `contain` corta o encadeamento sem travar a lista.
+ */
+.p-select-list-container,
+.p-multiselect-list-container,
+.p-autocomplete-list-container,
+.p-cascadeselect-list-container,
+.p-listbox-list-container,
+.p-virtualscroller,
+.p-dialog-content,
+.p-drawer-content {
+  overscroll-behavior: contain;
 }
 
 /*
