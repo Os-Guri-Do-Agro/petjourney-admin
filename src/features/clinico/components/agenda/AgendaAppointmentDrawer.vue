@@ -163,6 +163,23 @@ const encerrado = computed(() =>
         <dt class="clinic-label">{{ t('clinico.agenda.cancelarDialogo.motivo') }}</dt>
         <dd>{{ formato.motivoCancelamento(appointment.motivoCancelamento) }}</dd>
       </div>
+      <!--
+        Por que o paciente não veio. Aparece no drawer da falta porque é a pergunta que alguém
+        faz antes de ligar de novo — e porque a ausência dela é informação: falta sem motivo é
+        falta que ninguém apurou.
+      -->
+      <div v-if="appointment.status === 'falta'">
+        <dt class="clinic-label">{{ t('clinico.faltas.justificativa.motivo') }}</dt>
+        <dd v-if="appointment.justificativaDeFalta">
+          {{ formato.motivoFalta(appointment.justificativaDeFalta.motivo) }}
+          <span class="drawer__canal">
+            {{ formato.canalDeContato(appointment.justificativaDeFalta.canal) }}
+          </span>
+        </dd>
+        <dd v-else class="drawer__pendente">
+          {{ t('clinico.faltas.justificativa.pendente') }}
+        </dd>
+      </div>
     </dl>
 
     <p v-if="appointment.observacao" class="drawer__observacao">{{ appointment.observacao }}</p>
@@ -286,6 +303,18 @@ const encerrado = computed(() =>
   margin: 0;
   font-weight: 650;
   overflow-wrap: anywhere;
+}
+
+/* O canal ao lado do motivo: como se soube, em tom secundário. */
+.drawer__canal {
+  color: var(--clinic-faint);
+  font-size: var(--clinic-font-label);
+}
+
+/* Falta sem motivo não é campo vazio, é tarefa aberta — e o tom diz isso. */
+.drawer__pendente {
+  color: var(--clinic-attention-text);
+  font-weight: 700;
 }
 
 .drawer__observacao {

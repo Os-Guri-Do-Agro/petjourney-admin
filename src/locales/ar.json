@@ -2085,7 +2085,8 @@
         "falta": "تم تسجيل عدم الحضور.",
         "criar": "تم إنشاء الموعد.",
         "status": "تم تحديث الحالة.",
-        "editar": "تم تحديث الموعد."
+        "editar": "تم تحديث الموعد.",
+        "justificar": "تم تسجيل سبب عدم الحضور."
       },
       "mover": {
         "titulo": "تأكيد إعادة الجدولة",
@@ -2608,14 +2609,17 @@
       },
       "filtro": {
         "reincidentes": "متكرر",
-        "todas": "الكل"
+        "todas": "الكل",
+        "pendentes": "بانتظار السبب"
       },
       "resumo": {
         "total": "عدم الحضور خلال الفترة",
         "pacientes": "لا يوجد مرضى | مريض واحد | مريضان | {contagem} مرضى | {contagem} مريضًا | {contagem} مريض",
         "agenda": "الوقت الضائع",
         "reincidentes": "عدم حضور متكرر",
-        "limite": "عدد حالات عدم الحضور: {limite} أو أكثر"
+        "limite": "عدد حالات عدم الحضور: {limite} أو أكثر",
+        "pendentes": "تخلفات بانتظار السبب",
+        "pendentesDetalhe": "لم يتواصل أحد بعد"
       },
       "marcar": "تسجيل عدم الحضور",
       "reagendar": {
@@ -2626,7 +2630,43 @@
       },
       "historico": {
         "titulo": "حالات عدم حضور {nome}",
-        "reagendado": "تمت إعادة الجدولة إلى {data}"
+        "reagendado": "تمت إعادة الجدولة إلى {data}",
+        "encerrado": "تم إغلاق الحالة"
+      },
+      "motivo": {
+        "esqueceu": "نسي الموعد",
+        "imprevisto": "ظرف طارئ",
+        "transporte": "لا يوجد وسيلة نقل",
+        "paciente-melhorou": "تحسنت حالة الحيوان",
+        "emergencia": "ذهب إلى الطوارئ",
+        "custo": "التكلفة",
+        "insatisfacao": "عدم الرضا",
+        "outro": "سبب آخر",
+        "obito": "وفاة الحيوان"
+      },
+      "canal": {
+        "telefone": "عبر الهاتف",
+        "whatsapp": "عبر واتساب",
+        "presencial": "حضوريًا",
+        "sem-resposta": "بلا رد"
+      },
+      "justificativa": {
+        "titulo": "سبب التخلف عن الموعد",
+        "acao": "تسجيل السبب",
+        "editar": "تعديل السبب",
+        "motivo": "سبب التخلف",
+        "canal": "طريقة التواصل",
+        "observacao": "ملاحظة",
+        "observacaoDica": "فقط ما لا يوضحه السبب.",
+        "confirmar": "حفظ السبب",
+        "adiar": "تأجيل لاحقًا",
+        "pendente": "لم يتم التواصل بعد",
+        "whatsapp": "واتساب",
+        "semTelefone": "لا يوجد هاتف مسجل",
+        "registradaPor": "سجله {nome} · {quando}",
+        "mensagem": "مرحبًا! افتقدنا {paciente} في موعد {data}. هل كل شيء بخير؟ هل نحدد موعدًا جديدًا؟",
+        "mensagemObito": "مرحبًا. علمنا بوفاة {paciente} ونشاطركم الحزن. نحن هنا إن احتجتم أي شيء.",
+        "avisoObito": "بعد تسجيل الوفاة، لن يُعرض موعد جديد لهذا التخلف."
       }
     },
     "prontuario": {
@@ -3111,7 +3151,8 @@
       "proximaEm": "الجرعة التالية في {data}",
       "aba": {
         "aplicadas": "المعطاة",
-        "atraso": "متأخرة"
+        "atraso": "متأخرة",
+        "estoque": "المخزون"
       },
       "buscar": "المريض أو المالك أو اللقاح أو التشغيلة…",
       "aplicadasVazioTitulo": "لا توجد تطعيمات مسجلة",
@@ -3120,6 +3161,52 @@
       "filtro": {
         "quando": "الفترة",
         "ultimosDias": "اليوم | آخر يوم | آخر يومين | آخر {dias} أيام | آخر {dias} يومًا | آخر {dias} يوم"
+      },
+      "estoque": {
+        "doses": "جرعة",
+        "saldo": "الرصيد",
+        "minimo": "الحد الأدنى",
+        "valorParado": "القيمة المجمدة",
+        "dosesEmEstoque": "الجرعات في المخزون",
+        "valorParadoDetalhe": "{valor} مجمدة في الثلاجة",
+        "vencendo": "تنتهي خلال {dias} ي",
+        "emRisco": "{valor} في خطر",
+        "abaixoDoMinimo": "لقاحات للشراء",
+        "perdaNoPeriodo": "{valor} خسارة · {doses} جرعة",
+        "cobertura": "تكفي {dias} ي",
+        "semCobertura": "لا استهلاك في الفترة",
+        "recebidoEm": "استُلمت في {data} · {total} جرعة",
+        "saidas": "{aplicadas} معطاة · {perdidas} مفقودة",
+        "custoUnitario": "{valor} للجرعة",
+        "semConsumo": "لم تُعط أي جرعة في الفترة.",
+        "semLotes": "لا توجد دفعات مسجلة",
+        "semPerdas": "لا توجد خسائر مسجلة.",
+        "situacaoSaldo": {
+          "zerado": "نفد",
+          "abaixo": "دون الحد الأدنى",
+          "ok": "ضمن المستوى"
+        },
+        "situacaoLote": {
+          "vencido": "منتهية",
+          "vencendo": "توشك على الانتهاء",
+          "ativo": "سارية",
+          "esgotado": "مستنفدة"
+        },
+        "perda": {
+          "quebra": "كسر",
+          "temperatura": "حرارة",
+          "vencimento": "انتهاء الصلاحية"
+        },
+        "grafico": {
+          "consumo": "الجرعات المعطاة شهريًا",
+          "consumoAjuda": "دوران كل لقاح على مدار السنة. هو ما يحدد كمية الشراء.",
+          "saldo": "الرصيد مقابل الحد الأدنى",
+          "saldoAjuda": "العلامة على كل شريط هي حد ذلك اللقاح. الشريط دون العلامة يعني الشراء.",
+          "perdas": "الخسائر حسب السبب",
+          "perdasAjuda": "الحرارة تأخذ الدفعة كاملة؛ وانتهاء الصلاحية شراء يفوق الدوران.",
+          "validade": "صلاحية الدفعات",
+          "validadeAjuda": "كل شريط يمتد من الاستلام إلى انتهاء الصلاحية. الرقم بالداخل هو الرصيد."
+        }
       }
     },
     "internacao": {

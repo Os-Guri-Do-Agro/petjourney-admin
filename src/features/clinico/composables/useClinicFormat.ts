@@ -16,11 +16,13 @@ import type {
   AlertSeverity,
   AppointmentStatus,
   BlockReason,
+  CanalDeContato,
   CancelReason,
   Conflict,
   ISODate,
   ISODateTime,
   Measurement,
+  MotivoDeFalta,
   PetAlertKind,
   PetSpecies,
   RangeStatus,
@@ -100,6 +102,31 @@ export function useClinicFormat() {
       weekday: 'short',
       timeZone: 'UTC',
     }).format(base)
+  }
+
+  /**
+   * Mês e ano curtos: `set/26`.
+   *
+   * O eixo do consumo tem doze colunas numa largura de cartão. "Setembro de 2026" não cabe em
+   * nenhuma delas, e só o mês — sem o ano — faria a coluna mais antiga e a mais nova de uma
+   * janela que atravessa o réveillon parecerem o mesmo mês.
+   *
+   * Montado por partes em vez de formatado direto: `month: 'short'` com `year: '2-digit'`
+   * devolve `mai. de 26` em português e `May 26` em inglês — a primeira não cabe na coluna e as
+   * duas juntas não dão uma régua só. As partes dão o nome do mês no idioma de quem lê, com a
+   * barra que o eixo precisa. O ponto abreviativo sai junto: `mai/26`, e não `mai./26`.
+   */
+  function mesCurto(data: ISODate): string {
+    const partes = new Intl.DateTimeFormat(localeIntl.value, {
+      month: 'short',
+      year: '2-digit',
+      timeZone: 'UTC',
+    }).formatToParts(new Date(`${data}T12:00:00Z`))
+
+    const mes = partes.find((parte) => parte.type === 'month')?.value.replace(/\.$/, '') ?? ''
+    const ano = partes.find((parte) => parte.type === 'year')?.value ?? ''
+
+    return `${mes}/${ano}`
   }
 
   function diaDaSemanaCurto(data: ISODate): string {
@@ -203,6 +230,26 @@ export function useClinicFormat() {
     }).format(valor)
   }
 
+  /**
+   * Dinheiro, a partir de **centavos**.
+   *
+   * A entrada é inteira porque é assim que o valor é guardado: custo unitário em centavos, e a
+   * multiplicação por contagem de doses feita antes da divisão. Receber reais com casa decimal
+   * aqui devolveria o erro de ponto flutuante que guardar em centavos existe para evitar — o
+   * total do painel deixaria de bater com o da nota por alguns centavos, que é justamente o
+   * tipo de diferença que faz a clínica parar de confiar na tela.
+   *
+   * A moeda é do país da clínica e não do idioma de quem lê: o mesmo estoque vale os mesmos
+   * reais para quem abre a tela em inglês.
+   */
+  function moeda(centavos: number): string {
+    return new Intl.NumberFormat(localeIntl.value, {
+      style: 'currency',
+      currency: 'BRL',
+      maximumFractionDigits: 2,
+    }).format(centavos / 100)
+  }
+
   function peso(valor: number | null): string {
     return valor === null ? t('clinico.formato.semvalor') : `${numero(valor, valor >= 100 ? 0 : 1)} kg`
   }
@@ -270,6 +317,14 @@ export function useClinicFormat() {
     return valor ? t(`clinico.cancelamento.${valor}`) : ''
   }
 
+  function motivoFalta(valor: MotivoDeFalta | null): string {
+    return valor ? t(`clinico.faltas.motivo.${valor}`) : ''
+  }
+
+  function canalDeContato(valor: CanalDeContato | null): string {
+    return valor ? t(`clinico.faltas.canal.${valor}`) : ''
+  }
+
   function alerta(valor: PetAlertKind): string {
     return t(`clinico.alertas.${valor}`)
   }
@@ -309,12 +364,14 @@ export function useClinicFormat() {
     dataLonga,
     dataPorExtenso,
     dataCurta,
+    mesCurto,
     diaDaSemanaCurto,
     diaDaSemanaCurtoPorIndice,
     duracao,
     relativo,
     idade,
     numero,
+    moeda,
     peso,
     medicao,
     faixaDeReferencia,
@@ -323,6 +380,8 @@ export function useClinicFormat() {
     especie,
     motivoBloqueio,
     motivoCancelamento,
+    motivoFalta,
+    canalDeContato,
     alerta,
     severidade,
     prioridadeDaFila,

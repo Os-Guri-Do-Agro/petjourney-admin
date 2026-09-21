@@ -19,6 +19,7 @@ import AgendaAppointmentDrawer from '@/features/clinico/components/agenda/Agenda
 import AgendaCancelDialog from '@/features/clinico/components/agenda/AgendaCancelDialog.vue'
 import AgendaDayGrid from '@/features/clinico/components/agenda/AgendaDayGrid.vue'
 import AgendaEditarDialog from '@/features/clinico/components/agenda/AgendaEditarDialog.vue'
+import AgendaFaltaDialog from '@/features/clinico/components/agenda/AgendaFaltaDialog.vue'
 import AgendaLegenda from '@/features/clinico/components/agenda/AgendaLegenda.vue'
 import AgendaMoveDialog from '@/features/clinico/components/agenda/AgendaMoveDialog.vue'
 import AgendaReagendarDialog from '@/features/clinico/components/agenda/AgendaReagendarDialog.vue'
@@ -34,13 +35,19 @@ import { useAgendaUrlState } from '@/features/clinico/composables/useAgendaUrlSt
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { useClinicPrefs } from '@/features/clinico/composables/useClinicPrefs'
 import { useClinicShortcuts } from '@/features/clinico/composables/useClinicShortcuts'
-import { agendaRepository } from '@/features/clinico/data/repositories'
+import {
+  agendaRepository,
+  type EntradaDeJustificativa,
+} from '@/features/clinico/data/repositories'
 import type {
   Appointment,
   AppointmentStatus,
+  CanalDeContato,
   CancelReason,
+  MotivoDeFalta,
   SlotSugestao,
 } from '@/features/clinico/data/types'
+import { motivoEncerraOCaso } from '@/features/clinico/domain/faltas'
 import { useAgendaStore } from '@/features/clinico/stores/agenda'
 import { useAvisosStore } from '@/features/clinico/stores/avisos'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
@@ -59,6 +66,7 @@ useAgendaUrlState()
 
 const propostaDeMovimento = ref<ArrasteProposta | null>(null)
 const atendimentoParaCancelar = ref<string | null>(null)
+const atendimentoParaFaltar = ref<string | null>(null)
 const atendimentoParaEditar = ref<string | null>(null)
 const ajudaAberta = ref(false)
 
@@ -68,6 +76,15 @@ const selecionado = computed(
 
 const paraCancelar = computed(
   () => agenda.atendimentos.find((item) => item.id === atendimentoParaCancelar.value) ?? null,
+)
+
+const paraFaltar = computed(
+  () => agenda.atendimentos.find((item) => item.id === atendimentoParaFaltar.value) ?? null,
+)
+
+/** O responsável do atendimento em falta — é o telefone que o diálogo oferece. */
+const tutorDaFalta = computed(() =>
+  paraFaltar.value ? (clinico.tutor(paraFaltar.value.tutorId) ?? null) : null,
 )
 
 const paraEditar = computed(
@@ -184,23 +201,77 @@ async function avisarFilaDaVaga(appointment: Appointment) {
 }
 
 /**
- * Marcar falta, venha de onde vier.
+ * Marcar falta, venha de onde vier — e o motivo vem antes do status.
  *
- * O card e o drawer chamam o mesmo caminho, e é aqui que as três consequências acontecem
- * juntas: o status muda, a fila é avisada de que um horário vagou, e **o reagendamento é
- * oferecido na hora**. Oferecer depois é não oferecer: quem marca falta às três da tarde não
- * volta à lista às seis para lembrar de ligar.
+ * O card e o drawer chamam o mesmo caminho. A ordem inverteu de propósito: antes a falta era
+ * gravada no clique e a tela seguia direto para o reagendamento, então o motivo nunca era
+ * perguntado e o painel de faltas herdava uma lista em que ninguém sabia por que ninguém veio.
+ * Agora o clique abre a justificativa — que é onde está o telefone do responsável — e o status
+ * só muda quando a recepção decide entre registrar o motivo e deixar para depois.
+ *
+ * As duas saídas do diálogo terminam nas mesmas três consequências: o status muda, a fila é
+ * avisada de que um horário vagou, e **o reagendamento é oferecido na hora**. Oferecer depois é
+ * não oferecer: quem marca falta às três da tarde não volta à lista às seis para lembrar de
+ * ligar. O que muda é só a falta nascer com motivo ou entrar na fila de pendências do painel.
  */
-async function marcarFalta(appointmentId: string) {
+function marcarFalta(appointmentId: string) {
   const appointment = agenda.atendimentos.find((item) => item.id === appointmentId)
 
   if (!appointment) {
     return
   }
 
-  await agenda.alterarStatus(appointmentId, 'falta')
+  atendimentoParaFaltar.value = appointmentId
+}
+
+/**
+ * O que acontece depois da falta — e o que **não** acontece quando o paciente morreu.
+ *
+ * A vaga continua sendo oferecida à fila nos dois casos: o horário vagou de fato, e a oferta vai
+ * para outra pessoa. O que some é a proposta de remarcação, que iria para o responsável do
+ * animal que acabou de morrer. Ela é aberta automaticamente logo depois da falta justamente para
+ * não depender de ninguém lembrar — e é por isso que o caso precisa ser tratado aqui, e não
+ * confiado a quem estiver com a tela aberta.
+ */
+async function concluirFalta(
+  appointment: Appointment,
+  justificativa: EntradaDeJustificativa | null,
+) {
+  await agenda.alterarStatus(appointment.id, 'falta', justificativa)
+  atendimentoParaFaltar.value = null
   await avisarFilaDaVaga(appointment)
+
+  if (justificativa && motivoEncerraOCaso(justificativa.motivo)) {
+    return
+  }
+
   abrirReagendamento(appointment)
+}
+
+async function registrarFalta(entrada: {
+  motivo: MotivoDeFalta
+  canal: CanalDeContato
+  observacao: string
+}) {
+  const appointment = paraFaltar.value
+
+  if (!appointment) {
+    return
+  }
+
+  await concluirFalta(appointment, {
+    ...entrada,
+    /* Quem registra é quem está com a agenda aberta — na API real, o usuário da sessão. */
+    professionalId: appointment.professionalId,
+  })
+}
+
+async function adiarJustificativa() {
+  const appointment = paraFaltar.value
+
+  if (appointment) {
+    await concluirFalta(appointment, null)
+  }
 }
 
 async function alterarStatus(status: AppointmentStatus) {
@@ -422,6 +493,12 @@ useClinicShortcuts({
       return
     }
 
+    if (atendimentoParaFaltar.value) {
+      atendimentoParaFaltar.value = null
+
+      return
+    }
+
     if (ajudaAberta.value) {
       ajudaAberta.value = false
 
@@ -569,6 +646,19 @@ useClinicShortcuts({
       :appointment="paraCancelar"
       @confirmar="confirmarCancelamento"
       @fechar="atendimentoParaCancelar = null"
+    />
+
+    <!--
+      A justificativa vem **antes** de a falta ser gravada: é o diálogo que traz o telefone do
+      responsável, e perguntar depois é não perguntar.
+    -->
+    <AgendaFaltaDialog
+      :appointment="paraFaltar"
+      :tutor="tutorDaFalta"
+      :salvando="agenda.salvando"
+      @confirmar="registrarFalta"
+      @adiar="adiarJustificativa"
+      @fechar="atendimentoParaFaltar = null"
     />
 
     <!--

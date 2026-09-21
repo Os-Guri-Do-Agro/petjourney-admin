@@ -12,7 +12,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import { agendaRepository } from '../data/repositories'
+import { agendaRepository, type EntradaDeJustificativa } from '../data/repositories'
 import type {
   AgendaDia,
   Appointment,
@@ -45,7 +45,7 @@ export const DESFAZER_SEGUNDOS = 8
 export type AcaoDesfazivel = {
   token: string
   /** `kind` traduzível da ação — a faixa de desfazer nomeia o que aconteceu. */
-  kind: 'mover' | 'editar' | 'cancelar' | 'falta' | 'criar' | 'status'
+  kind: 'mover' | 'editar' | 'cancelar' | 'falta' | 'justificar' | 'criar' | 'status'
   expiraEm: number
 }
 
@@ -231,11 +231,28 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
     return resultado?.atendimentos[0] ?? null
   }
 
-  async function alterarStatus(id: string, status: AppointmentStatus) {
-    const resultado = await comSalvamento(() => agendaRepository.alterarStatus(id, status))
+  async function alterarStatus(
+    id: string,
+    status: AppointmentStatus,
+    justificativa?: EntradaDeJustificativa | null,
+  ) {
+    const resultado = await comSalvamento(() =>
+      agendaRepository.alterarStatus(id, status, justificativa),
+    )
 
     if (resultado) {
       await depoisDeMutar(resultado.undoToken, status === 'falta' ? 'falta' : 'status')
+    }
+
+    return resultado?.atendimentos[0] ?? null
+  }
+
+  /** Registra o motivo de uma falta que já existe. O status não muda — ver o repositório. */
+  async function justificarFalta(id: string, entrada: EntradaDeJustificativa) {
+    const resultado = await comSalvamento(() => agendaRepository.justificarFalta(id, entrada))
+
+    if (resultado) {
+      await depoisDeMutar(resultado.undoToken, 'justificar')
     }
 
     return resultado?.atendimentos[0] ?? null
@@ -361,6 +378,7 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
     mover,
     editar,
     alterarStatus,
+    justificarFalta,
     cancelar,
     criarBloqueio,
     removerBloqueio,

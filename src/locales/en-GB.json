@@ -2085,7 +2085,8 @@
         "falta": "No-show recorded.",
         "criar": "Appointment created.",
         "status": "Status updated.",
-        "editar": "Appointment updated."
+        "editar": "Appointment updated.",
+        "justificar": "No-show reason recorded."
       },
       "mover": {
         "titulo": "Confirm reschedule",
@@ -2608,14 +2609,17 @@
       },
       "filtro": {
         "reincidentes": "Repeat",
-        "todas": "All"
+        "todas": "All",
+        "pendentes": "To chase"
       },
       "resumo": {
         "total": "No-shows in the period",
         "pacientes": "{contagem} patient | {contagem} patients",
         "agenda": "Idle schedule",
         "reincidentes": "Repeat no-shows",
-        "limite": "from {limite} no-shows"
+        "limite": "from {limite} no-shows",
+        "pendentes": "No-shows to chase",
+        "pendentesDetalhe": "nobody has reached out yet"
       },
       "marcar": "Mark no-show",
       "reagendar": {
@@ -2626,7 +2630,43 @@
       },
       "historico": {
         "titulo": "No-shows for {nome}",
-        "reagendado": "Rescheduled to {data}"
+        "reagendado": "Rescheduled to {data}",
+        "encerrado": "Case closed"
+      },
+      "motivo": {
+        "esqueceu": "Forgot",
+        "imprevisto": "Something came up",
+        "transporte": "No transport",
+        "paciente-melhorou": "Patient got better",
+        "emergencia": "Went to emergency",
+        "custo": "Cost",
+        "insatisfacao": "Unhappy with the clinic",
+        "outro": "Other reason",
+        "obito": "Patient passed away"
+      },
+      "canal": {
+        "telefone": "By phone",
+        "whatsapp": "By WhatsApp",
+        "presencial": "In person",
+        "sem-resposta": "No answer"
+      },
+      "justificativa": {
+        "titulo": "No-show reason",
+        "acao": "Add reason",
+        "editar": "Change the reason",
+        "motivo": "Reason for the no-show",
+        "canal": "How we reached them",
+        "observacao": "Note",
+        "observacaoDica": "Only what the reason does not say.",
+        "confirmar": "Save reason",
+        "adiar": "Leave for later",
+        "pendente": "Not contacted yet",
+        "whatsapp": "WhatsApp",
+        "semTelefone": "No phone on file",
+        "registradaPor": "Recorded by {nome} · {quando}",
+        "mensagem": "Hello! We missed {paciente} at the {data} appointment. Is everything alright? Shall we rebook?",
+        "mensagemObito": "Hello. We heard about {paciente}'s passing and we are very sorry. We are here if you need anything.",
+        "avisoObito": "Once the death is recorded, this no-show stops being offered a new appointment."
       }
     },
     "prontuario": {
@@ -3111,7 +3151,8 @@
       "proximaEm": "Next dose on {data}",
       "aba": {
         "aplicadas": "Given",
-        "atraso": "Overdue"
+        "atraso": "Overdue",
+        "estoque": "Stock"
       },
       "buscar": "Patient, owner, vaccine or batch…",
       "aplicadasVazioTitulo": "No vaccinations recorded",
@@ -3120,6 +3161,52 @@
       "filtro": {
         "quando": "When",
         "ultimosDias": "Last {dias} days"
+      },
+      "estoque": {
+        "doses": "doses",
+        "saldo": "On hand",
+        "minimo": "Minimum",
+        "valorParado": "Tied-up value",
+        "dosesEmEstoque": "Doses in stock",
+        "valorParadoDetalhe": "{valor} sitting in the fridge",
+        "vencendo": "Expiring in {dias} d",
+        "emRisco": "{valor} at risk",
+        "abaixoDoMinimo": "Vaccines to buy",
+        "perdaNoPeriodo": "{valor} wasted · {doses} doses",
+        "cobertura": "{dias} d of cover",
+        "semCobertura": "no usage in the period",
+        "recebidoEm": "received {data} · {total} doses",
+        "saidas": "{aplicadas} given · {perdidas} lost",
+        "custoUnitario": "{valor} per dose",
+        "semConsumo": "No doses given in the period.",
+        "semLotes": "No batches recorded",
+        "semPerdas": "No losses recorded.",
+        "situacaoSaldo": {
+          "zerado": "Out of stock",
+          "abaixo": "Below minimum",
+          "ok": "In stock"
+        },
+        "situacaoLote": {
+          "vencido": "Expired",
+          "vencendo": "Expiring",
+          "ativo": "Active",
+          "esgotado": "Used up"
+        },
+        "perda": {
+          "quebra": "Breakage",
+          "temperatura": "Temperature",
+          "vencimento": "Expiry"
+        },
+        "grafico": {
+          "consumo": "Doses given per month",
+          "consumoAjuda": "How each vaccine turns over across the year. This is what sets how much to buy.",
+          "saldo": "On hand against minimum",
+          "saldoAjuda": "The mark on each bar is that vaccine's floor. A bar short of the mark is an order.",
+          "perdas": "Losses by cause",
+          "perdasAjuda": "Temperature takes the whole batch; expiry means buying past the turnover.",
+          "validade": "Batch shelf life",
+          "validadeAjuda": "Each bar runs from delivery to expiry. The number inside is what is left."
+        }
       }
     },
     "internacao": {

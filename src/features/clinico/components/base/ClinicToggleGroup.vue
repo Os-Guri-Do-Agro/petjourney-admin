@@ -217,9 +217,24 @@ function escolher(valor: T | null) {
   background: var(--clinic-surface-sunken);
 }
 
+/*
+ * `1 1 auto`, e **não** `1`.
+ *
+ * `flex: 1` é `1 1 0%`: a base de cada opção vira zero e todas terminam com a mesma largura,
+ * a do rótulo médio. Quem tem rótulo mais longo que a média perde o que sobra — e perde em
+ * silêncio, porque o `ToggleButton` do tema corta com `overflow: hidden` e sem reticências.
+ * "Série aberta · 2" aparecia como "Série aberta ·": some justamente a contagem, que é o que
+ * o rótulo existe para carregar, e o corte parece decisão de projeto.
+ *
+ * Com a base no conteúdo, nenhuma opção encolhe abaixo do próprio texto; a sobra da linha
+ * continua distribuída entre todas, que é o que dá o trilho preenchido. E quando a linha
+ * acaba, o `flex-wrap` do trilho passa a valer de verdade: a opção desce para a linha de
+ * baixo inteira, em vez de ficar meio escrita. Com base zero ela nunca transbordava, então
+ * nunca quebrava — o `wrap` do contêiner era letra morta.
+ */
 .grupo.p-selectbutton :deep(.p-togglebutton) {
   min-height: calc(var(--clinic-hit-target) - 4px);
-  flex: 1;
+  flex: 1 1 auto;
   padding: 0;
   border: none;
   border-radius: calc(var(--clinic-radius-control) - 3px);

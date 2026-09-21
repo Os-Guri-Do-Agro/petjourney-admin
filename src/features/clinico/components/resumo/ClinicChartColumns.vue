@@ -28,7 +28,7 @@
  */
 import type { ApexAxisChartSeries, ApexOptions, ApexYAxis } from 'apexcharts'
 import { computed } from 'vue'
-import VueApexCharts from './apex'
+import VueApexCharts from '../charts/apex'
 
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { useClinicChartTheme } from '../../composables/useClinicChartTheme'

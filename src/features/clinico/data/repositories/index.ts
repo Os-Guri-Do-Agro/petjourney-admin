@@ -1,4 +1,8 @@
-export { agendaRepository, type MutacaoAgenda } from './agenda-repository'
+export {
+  agendaRepository,
+  type EntradaDeJustificativa,
+  type MutacaoAgenda,
+} from './agenda-repository'
 export {
   encounterRepository,
   EncounterLockedError,

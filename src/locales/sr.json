@@ -2085,7 +2085,8 @@
         "falta": "Nedolazak je zabeležen.",
         "criar": "Termin je zakazan.",
         "status": "Status je ažuriran.",
-        "editar": "Termin je izmenjen."
+        "editar": "Termin je izmenjen.",
+        "justificar": "Razlog nedolaska je zabeležen."
       },
       "mover": {
         "titulo": "Potvrdite pomeranje termina",
@@ -2608,14 +2609,17 @@
       },
       "filtro": {
         "reincidentes": "Učestali",
-        "todas": "Svi"
+        "todas": "Svi",
+        "pendentes": "Za obradu"
       },
       "resumo": {
         "total": "Nedolasci u periodu",
         "pacientes": "{contagem} pacijent | {contagem} pacijenta | {contagem} pacijenata",
         "agenda": "Izgubljeno vreme",
         "reincidentes": "Učestali nedolasci",
-        "limite": "prag nedolazaka: {limite}"
+        "limite": "prag nedolazaka: {limite}",
+        "pendentes": "Izostanci za obradu",
+        "pendentesDetalhe": "niko još nije kontaktirao"
       },
       "marcar": "Označite nedolazak",
       "reagendar": {
@@ -2626,7 +2630,43 @@
       },
       "historico": {
         "titulo": "Nedolasci: {nome}",
-        "reagendado": "Novi termin: {data}"
+        "reagendado": "Novi termin: {data}",
+        "encerrado": "Slučaj zatvoren"
+      },
+      "motivo": {
+        "esqueceu": "Zaboravio",
+        "imprevisto": "Nepredviđena obaveza",
+        "transporte": "Bez prevoza",
+        "paciente-melhorou": "Pacijentu je bolje",
+        "emergencia": "Otišli na hitnu",
+        "custo": "Cena",
+        "insatisfacao": "Nezadovoljstvo",
+        "outro": "Drugi razlog",
+        "obito": "Smrt pacijenta"
+      },
+      "canal": {
+        "telefone": "Telefonom",
+        "whatsapp": "Preko WhatsApp-a",
+        "presencial": "Lično",
+        "sem-resposta": "Bez odgovora"
+      },
+      "justificativa": {
+        "titulo": "Razlog izostanka",
+        "acao": "Unesi razlog",
+        "editar": "Izmeni razlog",
+        "motivo": "Razlog izostanka",
+        "canal": "Kako smo razgovarali",
+        "observacao": "Napomena",
+        "observacaoDica": "Samo ono što razlog ne kaže.",
+        "confirmar": "Sačuvaj razlog",
+        "adiar": "Ostavi za kasnije",
+        "pendente": "Još bez kontakta",
+        "whatsapp": "WhatsApp",
+        "semTelefone": "Nema unetog telefona",
+        "registradaPor": "Uneo {nome} · {quando}",
+        "mensagem": "Zdravo! Nedostajao nam je {paciente} na pregledu {data}. Da li je sve u redu? Da zakažemo novi termin?",
+        "mensagemObito": "Zdravo. Saznali smo za gubitak ljubimca {paciente} i veoma nam je žao. Tu smo ako vam nešto zatreba.",
+        "avisoObito": "Kada se smrt zabeleži, ovaj izostanak više ne dobija ponudu novog termina."
       }
     },
     "prontuario": {
@@ -3111,7 +3151,8 @@
       "proximaEm": "Sledeća doza {data}",
       "aba": {
         "aplicadas": "Primenjene",
-        "atraso": "Kasne"
+        "atraso": "Kasne",
+        "estoque": "Zalihe"
       },
       "buscar": "Pacijent, vlasnik, vakcina ili serija…",
       "aplicadasVazioTitulo": "Nema zabeleženih vakcinacija",
@@ -3120,6 +3161,52 @@
       "filtro": {
         "quando": "Kada",
         "ultimosDias": "Poslednji {dias} dan | Poslednja {dias} dana | Poslednjih {dias} dana"
+      },
+      "estoque": {
+        "doses": "doza",
+        "saldo": "Stanje",
+        "minimo": "Minimum",
+        "valorParado": "Vezana vrednost",
+        "dosesEmEstoque": "Doza na stanju",
+        "valorParadoDetalhe": "{valor} vezano u frizideru",
+        "vencendo": "Ističe za {dias} d",
+        "emRisco": "{valor} pod rizikom",
+        "abaixoDoMinimo": "Vakcine za nabavku",
+        "perdaNoPeriodo": "{valor} gubitka · {doses} doza",
+        "cobertura": "pokriva {dias} d",
+        "semCobertura": "bez potrošnje u periodu",
+        "recebidoEm": "primljeno {data} · {total} doza",
+        "saidas": "{aplicadas} primenjeno · {perdidas} izgubljeno",
+        "custoUnitario": "{valor} po dozi",
+        "semConsumo": "Nijedna doza nije primenjena u periodu.",
+        "semLotes": "Nijedna serija nije zavedena",
+        "semPerdas": "Nijedan gubitak nije zaveden.",
+        "situacaoSaldo": {
+          "zerado": "Nestalo",
+          "abaixo": "Ispod minimuma",
+          "ok": "Na nivou"
+        },
+        "situacaoLote": {
+          "vencido": "Isteklo",
+          "vencendo": "Uskoro ističe",
+          "ativo": "Aktivno",
+          "esgotado": "Potrošeno"
+        },
+        "perda": {
+          "quebra": "Lom",
+          "temperatura": "Temperatura",
+          "vencimento": "Istek roka"
+        },
+        "grafico": {
+          "consumo": "Primenjene doze po mesecu",
+          "consumoAjuda": "Obrt svake vakcine tokom godine. On govori koliko treba nabaviti.",
+          "saldo": "Stanje u odnosu na minimum",
+          "saldoAjuda": "Oznaka na svakoj traci je prag te vakcine. Traka ispod oznake znači nabavku.",
+          "perdas": "Gubici po uzroku",
+          "perdasAjuda": "Temperatura odnosi celu seriju; istek roka je nabavka veća od obrta.",
+          "validade": "Rok trajanja serija",
+          "validadeAjuda": "Svaka traka ide od prijema do isteka roka. Broj unutra je stanje."
+        }
       }
     },
     "internacao": {

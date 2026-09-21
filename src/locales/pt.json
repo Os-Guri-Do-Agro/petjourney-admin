@@ -2085,7 +2085,8 @@
         "falta": "Falta registrada.",
         "criar": "Atendimento criado.",
         "status": "Situação atualizada.",
-        "editar": "Atendimento editado."
+        "editar": "Atendimento editado.",
+        "justificar": "Motivo da falta registrado."
       },
       "mover": {
         "titulo": "Confirmar remarcação",
@@ -2608,25 +2609,64 @@
       },
       "filtro": {
         "reincidentes": "Reincidentes",
-        "todas": "Todas"
+        "todas": "Todas",
+        "pendentes": "A justificar"
       },
       "resumo": {
         "total": "Faltas no período",
         "pacientes": "{contagem} paciente | {contagem} pacientes",
         "agenda": "Agenda parada",
         "reincidentes": "Reincidentes",
-        "limite": "a partir de {limite} faltas"
+        "limite": "a partir de {limite} faltas",
+        "pendentes": "Faltas a justificar",
+        "pendentesDetalhe": "ninguém entrou em contato ainda"
       },
       "marcar": "Marcar falta",
       "reagendar": {
         "titulo": "Reagendar",
         "confirmar": "Reagendar e avisar",
         "faltouEm": "Faltou em {data} às {hora}",
-        "mensagemPadrao": "Olá! Sentimos falta do {paciente} hoje. Conseguimos um novo horário em {data} às {hora} — podemos confirmar?"
+        "mensagemPadrao": "Olá! Sentimos falta de {paciente} hoje. Conseguimos um novo horário em {data} às {hora} — podemos confirmar?"
       },
       "historico": {
         "titulo": "Faltas de {nome}",
-        "reagendado": "Reagendado para {data}"
+        "reagendado": "Reagendado para {data}",
+        "encerrado": "Caso encerrado"
+      },
+      "motivo": {
+        "esqueceu": "Esqueceu",
+        "imprevisto": "Imprevisto",
+        "transporte": "Sem transporte",
+        "paciente-melhorou": "Paciente melhorou",
+        "emergencia": "Foi para emergência",
+        "custo": "Custo",
+        "insatisfacao": "Insatisfação",
+        "outro": "Outro motivo",
+        "obito": "Óbito do paciente"
+      },
+      "canal": {
+        "telefone": "Por telefone",
+        "whatsapp": "Por WhatsApp",
+        "presencial": "Presencialmente",
+        "sem-resposta": "Sem resposta"
+      },
+      "justificativa": {
+        "titulo": "Justificativa da falta",
+        "acao": "Justificar",
+        "editar": "Alterar a justificativa",
+        "motivo": "Motivo da falta",
+        "canal": "Como falamos",
+        "observacao": "Observação",
+        "observacaoDica": "Só o que o motivo não diz.",
+        "confirmar": "Registrar motivo",
+        "adiar": "Deixar para depois",
+        "pendente": "Ainda sem contato",
+        "whatsapp": "WhatsApp",
+        "semTelefone": "Sem telefone cadastrado",
+        "registradaPor": "Registrado por {nome} · {quando}",
+        "mensagem": "Olá! Sentimos falta de {paciente} na consulta de {data}. Está tudo bem? Podemos remarcar?",
+        "mensagemObito": "Olá. Soubemos do falecimento de {paciente} e sentimos muito. Estamos à disposição no que precisar.",
+        "avisoObito": "Com o óbito registrado, esta falta deixa de receber oferta de remarcação."
       }
     },
     "prontuario": {
@@ -3111,7 +3151,8 @@
       "proximaEm": "Próxima dose em {data}",
       "aba": {
         "aplicadas": "Aplicadas",
-        "atraso": "Em atraso"
+        "atraso": "Em atraso",
+        "estoque": "Estoque"
       },
       "buscar": "Paciente, responsável, vacina ou lote…",
       "aplicadasVazioTitulo": "Nenhuma aplicação registrada",
@@ -3120,6 +3161,52 @@
       "filtro": {
         "quando": "Quando",
         "ultimosDias": "Últimos {dias} dias"
+      },
+      "estoque": {
+        "doses": "doses",
+        "saldo": "Saldo",
+        "minimo": "Mínimo",
+        "valorParado": "Valor parado",
+        "dosesEmEstoque": "Doses em estoque",
+        "valorParadoDetalhe": "{valor} parados na geladeira",
+        "vencendo": "Vencem em {dias} d",
+        "emRisco": "{valor} em risco",
+        "abaixoDoMinimo": "Vacinas a comprar",
+        "perdaNoPeriodo": "{valor} de perda · {doses} doses",
+        "cobertura": "cobertura de {dias} d",
+        "semCobertura": "sem saída no período",
+        "recebidoEm": "recebido em {data} · {total} doses",
+        "saidas": "{aplicadas} aplicadas · {perdidas} perdidas",
+        "custoUnitario": "{valor} por dose",
+        "semConsumo": "Nenhuma dose aplicada no período.",
+        "semLotes": "Nenhum lote registrado",
+        "semPerdas": "Nenhuma perda registrada.",
+        "situacaoSaldo": {
+          "zerado": "Acabou",
+          "abaixo": "Abaixo do mínimo",
+          "ok": "Em nível"
+        },
+        "situacaoLote": {
+          "vencido": "Vencido",
+          "vencendo": "A vencer",
+          "ativo": "Ativo",
+          "esgotado": "Esgotado"
+        },
+        "perda": {
+          "quebra": "Quebra",
+          "temperatura": "Temperatura",
+          "vencimento": "Vencimento"
+        },
+        "grafico": {
+          "consumo": "Doses aplicadas por mês",
+          "consumoAjuda": "O giro de cada vacina ao longo do ano. É ele que diz quanto comprar.",
+          "saldo": "Saldo contra o mínimo",
+          "saldoAjuda": "A marca em cada barra é o piso daquela vacina. Barra aquém da marca é compra.",
+          "perdas": "Perdas por motivo",
+          "perdasAjuda": "Temperatura leva o lote inteiro; vencimento é compra maior que o giro.",
+          "validade": "Validade dos lotes",
+          "validadeAjuda": "Cada barra vai do recebimento ao vencimento. O número dentro é o saldo."
+        }
       }
     },
     "internacao": {

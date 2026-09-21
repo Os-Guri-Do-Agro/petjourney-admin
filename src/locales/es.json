@@ -2085,7 +2085,8 @@
         "falta": "Ausencia registrada.",
         "criar": "Cita creada.",
         "status": "Estado actualizado.",
-        "editar": "Cita actualizada."
+        "editar": "Cita actualizada.",
+        "justificar": "Motivo de la ausencia registrado."
       },
       "mover": {
         "titulo": "Confirmar reprogramación",
@@ -2608,14 +2609,17 @@
       },
       "filtro": {
         "reincidentes": "Reincidentes",
-        "todas": "Todas"
+        "todas": "Todas",
+        "pendentes": "Por justificar"
       },
       "resumo": {
         "total": "Ausencias del período",
         "pacientes": "{contagem} paciente | {contagem} pacientes",
         "agenda": "Agenda perdida",
         "reincidentes": "Reincidentes",
-        "limite": "a partir de {limite} ausencias"
+        "limite": "a partir de {limite} ausencias",
+        "pendentes": "Faltas por justificar",
+        "pendentesDetalhe": "nadie se ha puesto en contacto"
       },
       "marcar": "Marcar falta",
       "reagendar": {
@@ -2626,7 +2630,43 @@
       },
       "historico": {
         "titulo": "Faltas de {nome}",
-        "reagendado": "Reagendado para {data}"
+        "reagendado": "Reagendado para {data}",
+        "encerrado": "Caso cerrado"
+      },
+      "motivo": {
+        "esqueceu": "Se olvidó",
+        "imprevisto": "Imprevisto",
+        "transporte": "Sin transporte",
+        "paciente-melhorou": "El paciente mejoró",
+        "emergencia": "Fue a urgencias",
+        "custo": "Costo",
+        "insatisfacao": "Insatisfacción",
+        "outro": "Otro motivo",
+        "obito": "Fallecimiento del paciente"
+      },
+      "canal": {
+        "telefone": "Por teléfono",
+        "whatsapp": "Por WhatsApp",
+        "presencial": "En persona",
+        "sem-resposta": "Sin respuesta"
+      },
+      "justificativa": {
+        "titulo": "Justificación de la falta",
+        "acao": "Justificar",
+        "editar": "Cambiar la justificación",
+        "motivo": "Motivo de la falta",
+        "canal": "Cómo hablamos",
+        "observacao": "Observación",
+        "observacaoDica": "Solo lo que el motivo no dice.",
+        "confirmar": "Registrar motivo",
+        "adiar": "Dejar para después",
+        "pendente": "Aún sin contacto",
+        "whatsapp": "WhatsApp",
+        "semTelefone": "Sin teléfono registrado",
+        "registradaPor": "Registrado por {nome} · {quando}",
+        "mensagem": "¡Hola! Extrañamos a {paciente} en la consulta del {data}. ¿Está todo bien? ¿Reprogramamos?",
+        "mensagemObito": "Hola. Supimos del fallecimiento de {paciente} y lo sentimos mucho. Estamos a disposición para lo que necesite.",
+        "avisoObito": "Con el fallecimiento registrado, esta ausencia deja de recibir oferta de reprogramación."
       }
     },
     "prontuario": {
@@ -3111,7 +3151,8 @@
       "proximaEm": "Próxima dosis el {data}",
       "aba": {
         "aplicadas": "Aplicadas",
-        "atraso": "Atrasadas"
+        "atraso": "Atrasadas",
+        "estoque": "Existencias"
       },
       "buscar": "Paciente, responsable, vacuna o lote…",
       "aplicadasVazioTitulo": "Ninguna aplicación registrada",
@@ -3120,6 +3161,52 @@
       "filtro": {
         "quando": "Cuándo",
         "ultimosDias": "Últimos {dias} días"
+      },
+      "estoque": {
+        "doses": "dosis",
+        "saldo": "Existencias",
+        "minimo": "Mínimo",
+        "valorParado": "Valor inmovilizado",
+        "dosesEmEstoque": "Dosis en existencias",
+        "valorParadoDetalhe": "{valor} inmovilizados en la nevera",
+        "vencendo": "Vencen en {dias} d",
+        "emRisco": "{valor} en riesgo",
+        "abaixoDoMinimo": "Vacunas por comprar",
+        "perdaNoPeriodo": "{valor} de pérdida · {doses} dosis",
+        "cobertura": "cobertura de {dias} d",
+        "semCobertura": "sin salida en el período",
+        "recebidoEm": "recibido el {data} · {total} dosis",
+        "saidas": "{aplicadas} aplicadas · {perdidas} perdidas",
+        "custoUnitario": "{valor} por dosis",
+        "semConsumo": "Ninguna dosis aplicada en el período.",
+        "semLotes": "Ningún lote registrado",
+        "semPerdas": "Ninguna pérdida registrada.",
+        "situacaoSaldo": {
+          "zerado": "Agotada",
+          "abaixo": "Bajo el mínimo",
+          "ok": "En nivel"
+        },
+        "situacaoLote": {
+          "vencido": "Vencido",
+          "vencendo": "Por vencer",
+          "ativo": "Activo",
+          "esgotado": "Agotado"
+        },
+        "perda": {
+          "quebra": "Rotura",
+          "temperatura": "Temperatura",
+          "vencimento": "Vencimiento"
+        },
+        "grafico": {
+          "consumo": "Dosis aplicadas por mes",
+          "consumoAjuda": "La rotación de cada vacuna a lo largo del año. Es lo que dice cuánto comprar.",
+          "saldo": "Existencias frente al mínimo",
+          "saldoAjuda": "La marca de cada barra es el piso de esa vacuna. Barra por debajo es compra.",
+          "perdas": "Pérdidas por motivo",
+          "perdasAjuda": "La temperatura se lleva el lote entero; el vencimiento es comprar de más.",
+          "validade": "Vigencia de los lotes",
+          "validadeAjuda": "Cada barra va de la recepción al vencimiento. El número dentro son las existencias."
+        }
       }
     },
     "internacao": {

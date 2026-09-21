@@ -23,6 +23,7 @@ import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicStat from '@/features/clinico/components/base/ClinicStat.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
+import AgendaFaltaDialog from '@/features/clinico/components/agenda/AgendaFaltaDialog.vue'
 import AgendaReagendarDialog from '@/features/clinico/components/agenda/AgendaReagendarDialog.vue'
 import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
@@ -34,16 +35,19 @@ import {
 } from '@/features/clinico/data/repositories'
 import type {
   Appointment,
+  CanalDeContato,
+  MotivoDeFalta,
   NoShowSummary,
   Pet,
   SlotSugestao,
   Tutor,
 } from '@/features/clinico/data/types'
+import { aceitaReagendamento } from '@/features/clinico/domain/faltas'
 import { useAvisosStore } from '@/features/clinico/stores/avisos'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 
 type LinhaFalta = NoShowSummary & { pet: Pet | null; tutor: Tutor | null }
-type Recorte = 'reincidentes' | 'todas'
+type Recorte = 'pendentes' | 'reincidentes' | 'todas'
 
 const { t } = useI18n()
 const clinico = useClinicoStore()
@@ -87,6 +91,65 @@ async function alternarDetalhe(linha: LinhaFalta) {
     detalhe.value = []
   } finally {
     carregandoDetalhe.value = false
+  }
+}
+
+// ------------------------------------------------------------------ justificativa
+
+/**
+ * Registrar por que o paciente não veio, a partir do painel.
+ *
+ * É o caminho normal e não a exceção: a falta é marcada quando o horário passa, e o motivo só
+ * aparece quando alguém liga — o que costuma ser no fim do dia, com esta lista aberta. Por isso
+ * o diálogo é o **mesmo** da agenda: ele traz o telefone do responsável junto, e uma segunda
+ * caixa só para a mesma pergunta divergiria na primeira mudança de motivos.
+ */
+const faltaParaJustificar = ref<FaltaDetalhada | null>(null)
+const justificando = ref(false)
+
+const tutorDaJustificativa = computed(() =>
+  faltaParaJustificar.value
+    ? (clinico.tutor(faltaParaJustificar.value.appointment.tutorId) ?? null)
+    : null,
+)
+
+async function registrarJustificativa(entrada: {
+  motivo: MotivoDeFalta
+  canal: CanalDeContato
+  observacao: string
+}) {
+  const falta = faltaParaJustificar.value
+
+  if (!falta) {
+    return
+  }
+
+  justificando.value = true
+
+  try {
+    await agendaRepository.justificarFalta(falta.appointment.id, {
+      ...entrada,
+      /* Quem registra é quem está com o painel aberto — na API real, o usuário da sessão. */
+      professionalId: falta.appointment.professionalId,
+    })
+
+    clinico.invalidarTudo()
+    faltaParaJustificar.value = null
+
+    /*
+     * As duas listas precisam refletir na hora: a de baixo perde o botão de justificar, e a de
+     * cima perde a linha da fila de pendências. Recarregar só uma deixaria a tela contradizendo
+     * a si mesma até o próximo F5.
+     */
+    linhas.value = await patientRepository.resumoDeFaltas()
+
+    if (responsavelAberto.value) {
+      detalhe.value = await patientRepository.faltasDoResponsavel(responsavelAberto.value)
+    }
+  } catch {
+    erro.value = t('clinico.erros.mutacao')
+  } finally {
+    justificando.value = false
   }
 }
 
@@ -236,8 +299,27 @@ const nomeDoResponsavelAberto = computed(
 
 const reincidentes = computed(() => linhas.value.filter((linha) => linha.reincidente))
 
-const visiveis = computed(() =>
-  recorte.value === 'reincidentes' ? reincidentes.value : linhas.value,
+/**
+ * Quem ainda tem falta sem motivo apurado.
+ *
+ * É a fila de trabalho da tela, e é diferente de reincidência: reincidente é com quem
+ * **conversar** sobre a política; pendente é quem ainda nem foi procurado. Um responsável com
+ * cinco faltas todas justificadas por transporte não precisa de ligação — precisa de outro
+ * horário.
+ */
+const pendentes = computed(() => linhas.value.filter((linha) => linha.semJustificativa > 0))
+
+const visiveis = computed(() => {
+  if (recorte.value === 'pendentes') {
+    return pendentes.value
+  }
+
+  return recorte.value === 'reincidentes' ? reincidentes.value : linhas.value
+})
+
+/** Faltas sem motivo, somadas — o número do cartão, e não a contagem de responsáveis. */
+const totalPendentes = computed(() =>
+  linhas.value.reduce((total, linha) => total + linha.semJustificativa, 0),
 )
 
 const totalFaltas = computed(() =>
@@ -250,12 +332,19 @@ const totalMinutos = computed(() =>
 
 const opcoesRecorte = computed(() => [
   {
+    valor: 'pendentes' as Recorte,
+    rotulo: `${t('clinico.faltas.filtro.pendentes')} · ${pendentes.value.length}`,
+    tom: pendentes.value.length > 0 ? ('atencao' as const) : ('neutro' as const),
+  },
+  {
     valor: 'reincidentes' as Recorte,
     rotulo: `${t('clinico.faltas.filtro.reincidentes')} · ${reincidentes.value.length}`,
+    tom: 'neutro' as const,
   },
   {
     valor: 'todas' as Recorte,
     rotulo: `${t('clinico.faltas.filtro.todas')} · ${linhas.value.length}`,
+    tom: 'neutro' as const,
   },
 ])
 
@@ -318,6 +407,17 @@ onMounted(carregar)
           :rotulo="t('clinico.faltas.resumo.reincidentes')"
           :valor="String(reincidentes.length)"
           :detalhe="t('clinico.faltas.resumo.limite', { limite: LIMITE_REINCIDENCIA })"
+        />
+        <!--
+          O quarto número, e o único que é fila de trabalho: quantas faltas ninguém apurou.
+          Os outros três dimensionam o problema; este diz o que fazer hoje.
+        -->
+        <ClinicStat
+          icone="pi pi-phone"
+          :tom="totalPendentes > 0 ? 'atencao' : 'neutro'"
+          :rotulo="t('clinico.faltas.resumo.pendentes')"
+          :valor="String(totalPendentes)"
+          :detalhe="t('clinico.faltas.resumo.pendentesDetalhe')"
         />
       </div>
 
@@ -424,30 +524,89 @@ onMounted(carregar)
                 {{ clinico.tipo(falta.appointment.typeId)?.nome }} ·
                 {{ formato.duracao(falta.minutosPerdidos) }}
               </span>
+
+              <!--
+                O motivo, quando existe, vem embaixo do paciente e não numa coluna própria: é
+                texto de tamanho variável, e o que se lê aqui é a frase inteira — "transporte,
+                por WhatsApp" — não um campo a ser comparado linha a linha.
+              -->
+              <button
+                v-if="falta.appointment.justificativaDeFalta"
+                type="button"
+                class="falta__motivo"
+                :title="t('clinico.faltas.justificativa.editar')"
+                @click.stop="faltaParaJustificar = falta"
+              >
+                <i class="pi pi-comment" aria-hidden="true" />
+                <span>
+                  {{ formato.motivoFalta(falta.appointment.justificativaDeFalta.motivo) }}
+                  <span class="falta__canal">
+                    · {{ formato.canalDeContato(falta.appointment.justificativaDeFalta.canal) }}
+                  </span>
+                </span>
+              </button>
+              <span
+                v-if="falta.appointment.justificativaDeFalta?.observacao"
+                class="falta__observacao"
+              >
+                {{ falta.appointment.justificativaDeFalta.observacao }}
+              </span>
             </div>
 
             <!--
-              Falta que já voltou não pede ação; falta que nunca voltou pede. Dizer qual é qual
-              é o que impede a recepção de ligar para quem já remarcou.
+              Duas ações, e a ordem importa: **apurar vem antes de reagendar**.
+
+              Sem motivo, a recepção não sabe o que oferecer — quem faltou por transporte quer
+              outro horário, quem faltou por custo quer outra conversa. Por isso a falta sem
+              justificativa mostra "Justificar" em destaque, e o reagendamento fica para depois
+              de se saber o porquê.
             -->
-            <ClinicAlertChip
-              v-if="falta.reagendadoPara"
-              severidade="info"
-              :rotulo="
-                t('clinico.faltas.historico.reagendado', {
-                  data: formato.dataCurta(clinicClock.dateOf(falta.reagendadoPara)),
-                })
-              "
-            />
-            <Button
-              v-else
-              :label="t('clinico.faltas.reagendar.titulo')"
-              icon="pi pi-calendar-plus"
-              size="small"
-              severity="secondary"
-              outlined
-              @click="abrirReagendamento(falta)"
-            />
+            <div class="falta__acoes">
+              <Button
+                v-if="!falta.appointment.justificativaDeFalta"
+                :label="t('clinico.faltas.justificativa.acao')"
+                icon="pi pi-phone"
+                size="small"
+                severity="warn"
+                outlined
+                @click.stop="faltaParaJustificar = falta"
+              />
+
+              <!--
+                Óbito registrado: o botão de reagendar **some**, e não fica desabilitado.
+
+                Botão cinza ainda é um convite — alguém passa o mouse, lê "Reagendar" e procura
+                por que não dá. Aqui não há o que explicar nem o que tentar: o caso acabou, e a
+                única coisa que a linha precisa dizer é isso.
+
+                E vem **antes** da ficha de reagendado, de propósito. Se o dado disser as duas
+                coisas — o que só acontece com histórico inconsistente —, a que a tela precisa
+                mostrar é a que encerra.
+              -->
+              <ClinicAlertChip
+                v-if="!aceitaReagendamento(falta.appointment)"
+                severidade="info"
+                :rotulo="t('clinico.faltas.historico.encerrado')"
+              />
+              <ClinicAlertChip
+                v-else-if="falta.reagendadoPara"
+                severidade="info"
+                :rotulo="
+                  t('clinico.faltas.historico.reagendado', {
+                    data: formato.dataCurta(clinicClock.dateOf(falta.reagendadoPara)),
+                  })
+                "
+              />
+              <Button
+                v-else
+                :label="t('clinico.faltas.reagendar.titulo')"
+                icon="pi pi-calendar-plus"
+                size="small"
+                severity="secondary"
+                outlined
+                @click="abrirReagendamento(falta)"
+              />
+            </div>
           </li>
         </ol>
       </section>
@@ -481,6 +640,19 @@ onMounted(carregar)
       :salvando="salvando"
       @confirmar="confirmarReagendamento"
       @fechar="paraReagendar = null"
+    />
+
+    <!--
+      O mesmo diálogo da agenda. Aqui ele nunca adia — a falta já existe e o painel é exatamente
+      o lugar de apurar —, então fechar é desistir, não "deixar para depois".
+    -->
+    <AgendaFaltaDialog
+      :appointment="faltaParaJustificar?.appointment ?? null"
+      :tutor="tutorDaJustificativa"
+      :salvando="justificando"
+      @confirmar="registrarJustificativa"
+      @adiar="faltaParaJustificar = null"
+      @fechar="faltaParaJustificar = null"
     />
   </PartnerPageFrame>
 </template>
@@ -617,6 +789,59 @@ onMounted(carregar)
 .falta__meta {
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
+}
+
+/*
+ * O motivo é um botão, e não um chip.
+ *
+ * Quem lê "transporte" numa falta é exatamente quem pode querer corrigir para "custo" depois de
+ * uma segunda ligação. Deixar o texto inerte obrigaria a inventar um segundo ponto de entrada
+ * para a correção; assim o próprio motivo é o caminho de volta ao diálogo.
+ */
+.falta__motivo {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--clinic-accent-strong);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+  text-align: start;
+}
+
+.falta__motivo:hover {
+  text-decoration: underline;
+}
+
+.falta__motivo:focus-visible {
+  border-radius: var(--clinic-radius-chip);
+  outline: none;
+  box-shadow: var(--clinic-focus-ring);
+}
+
+.falta__canal {
+  color: var(--clinic-faint);
+  font-weight: 600;
+}
+
+.falta__observacao {
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+  line-height: 1.4;
+}
+
+.falta__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--clinic-space-2);
 }
 
 @media (max-width: 640px) {

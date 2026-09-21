@@ -12,9 +12,14 @@
  *   para a mais antiga. É o registro: o que saiu da geladeira, em quem, por quem e de que lote.
  *   A pergunta que ele responde não é "quem chamar", é "o que foi feito" — e é a que aparece
  *   quando a farmacovigilância pergunta por um lote, ou quando alguém confere o estoque.
+ * - **O estoque** — o que tem na geladeira, o que vence antes de sair e o que falta comprar.
+ *   Vacina é o único insumo da clínica que estraga sozinho na prateleira, e o cálculo inteiro
+ *   sai de uma passada só (`domain/estoque-vacinas.ts`) para a tela não ter um cartão dizendo
+ *   uma coisa e um gráfico dizendo outra.
  */
 
 import { createClinicClock } from '../../domain/clinic-time'
+import { resumirEstoque, type ResumoDoEstoque } from '../../domain/estoque-vacinas'
 import { listaDeChamada, proximaDose, reforcosDoPaciente } from '../../domain/vacinacao'
 import { CLINIC_UTC_OFFSET, vacinasFixture } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
@@ -22,6 +27,7 @@ import { agoraIso, getDataset, novoId } from '../store'
 import type {
   AplicacaoVacina,
   ISODate,
+  LoteDeVacina,
   PetSpecies,
   PrescriptionRoute,
   ReforcoPendente,
@@ -102,6 +108,33 @@ export const vacinaRepository = {
         })
         .filter((item): item is AplicacaoNaLista => item !== null)
         .sort((a, b) => b.aplicadaEm.localeCompare(a.aplicadaEm))
+    })
+  },
+
+  /** Os lotes crus, para quem precisa do registro e não do cálculo. */
+  lotes(): Promise<LoteDeVacina[]> {
+    return simularChamada('paciente.listar', () =>
+      getDataset().lotesDeVacina.map((lote) => ({ ...lote, perdas: [...lote.perdas] })),
+    )
+  },
+
+  /**
+   * O estoque inteiro, calculado de uma vez.
+   *
+   * Indicadores, lotes, saldo por vacina e consumo mensal saem juntos e do mesmo recorte. A tela
+   * não faz conta nenhuma: o clássico "o cartão diz 40 doses e o gráfico soma 38" nasce de cada
+   * pedaço da tela somar por conta própria.
+   */
+  estoque(): Promise<ResumoDoEstoque> {
+    return simularChamada('paciente.listar', () => {
+      const dataset = getDataset()
+
+      return resumirEstoque({
+        lotes: dataset.lotesDeVacina,
+        vacinas: vacinasFixture,
+        aplicacoes: dataset.aplicacoesDeVacina,
+        hoje: clock.today(),
+      })
     })
   },
 

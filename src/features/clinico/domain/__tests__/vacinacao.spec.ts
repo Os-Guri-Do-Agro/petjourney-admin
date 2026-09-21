@@ -28,6 +28,7 @@ const V10: Vacina = {
   dosesNaSerie: 3,
   intervaloReforcoDias: 365,
   obrigatoria: false,
+  estoqueMinimo: 10,
 }
 
 const ANTIRRABICA: Vacina = {
@@ -38,6 +39,7 @@ const ANTIRRABICA: Vacina = {
   dosesNaSerie: 1,
   intervaloReforcoDias: 365,
   obrigatoria: true,
+  estoqueMinimo: 10,
 }
 
 function aplicacao(patch: Partial<AplicacaoVacina> = {}): AplicacaoVacina {

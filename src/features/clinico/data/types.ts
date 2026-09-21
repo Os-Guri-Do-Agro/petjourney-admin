@@ -264,6 +264,68 @@ export type CancelReason =
   | 'duplicado'
   | 'outro'
 
+/**
+ * Por que o paciente não veio.
+ *
+ * Cancelamento e falta são coisas diferentes, e por isso não compartilham a lista de motivos.
+ * Cancelar é um aviso — alguém decidiu antes e a clínica pôde reaproveitar o horário. Falta é
+ * um horário queimado, e o motivo dela só existe **depois**, quando a clínica liga para
+ * perguntar. É por isso que a justificativa pode não existir: ela nasce de uma conversa que
+ * ainda não aconteceu.
+ *
+ * `kind`, nunca texto livre. É o que permite contar "quantas faltas foram esquecimento" — que é
+ * a pergunta que muda a política — e traduzir nos seis idiomas do portal.
+ */
+export type MotivoDeFalta =
+  /** Esqueceu, ou errou o dia. O motivo mais comum, e o único que lembrete resolve. */
+  | 'esqueceu'
+  | 'imprevisto'
+  | 'transporte'
+  /** Achou que não precisava mais: o bicho melhorou sozinho. */
+  | 'paciente-melhorou'
+  /** Piorou e foi para outro lugar — plantão, emergência. */
+  | 'emergencia'
+  | 'custo'
+  | 'insatisfacao'
+  /**
+   * O paciente morreu.
+   *
+   * Não é "mais um motivo da lista", e o código trata isso em voz alta: é o único que **encerra**
+   * a conversa em vez de continuá-la. Registrado, a clínica para de oferecer remarcação para
+   * aquele horário e para de tratar a ausência como algo a cobrar.
+   *
+   * Precisa existir justamente porque a alternativa é pior: sem ele, a falta de um animal que
+   * morreu fica para sempre como "sem justificativa", e a recepção liga para um responsável de
+   * luto perguntando por que ele não apareceu. Ver `domain/faltas.ts`.
+   */
+  | 'obito'
+  | 'outro'
+
+/**
+ * Como a clínica chegou ao responsável.
+ *
+ * `sem-resposta` é o valor que faz esta lista valer a pena: registra a tentativa que não deu em
+ * nada. Sem ele, a recepção não distingue "ninguém ligou ainda" de "ligamos três vezes e não
+ * atenderam" — e liga de novo para quem já foi procurado.
+ */
+export type CanalDeContato = 'telefone' | 'whatsapp' | 'presencial' | 'sem-resposta'
+
+/**
+ * A justificativa de uma falta.
+ *
+ * Guarda **quem registrou e quando** junto com o motivo, porque o valor dela é ser prova de que
+ * a clínica procurou o responsável. Sem isso, "sem justificativa" e "ninguém tentou" viram a
+ * mesma linha na tela, e a segunda é a única que pede trabalho.
+ */
+export type JustificativaDeFalta = {
+  motivo: MotivoDeFalta
+  canal: CanalDeContato
+  /** Detalhe livre: só o que o `kind` não cobre. Entra no histórico, nunca em contagem. */
+  observacao: string
+  professionalId: string
+  registradaEm: ISODateTime
+}
+
 export type Appointment = {
   id: string
   petId: string
@@ -284,6 +346,14 @@ export type Appointment = {
   canceladoEm: ISODateTime | null
   /** `kind` de motivo, nunca texto pronto: a tela traduz. */
   motivoCancelamento: CancelReason | null
+  /**
+   * Por que o paciente não veio. `null` enquanto ninguém falou com o responsável.
+   *
+   * Nulo é um estado de verdade, e não um dado faltando: a falta é marcada na hora em que o
+   * horário passa, e o motivo só aparece quando alguém liga. O painel de faltas existe em boa
+   * parte para essa fila — as que ainda estão sem justificativa.
+   */
+  justificativaDeFalta: JustificativaDeFalta | null
   encounterId: string | null
   /** Atendimentos ligados (mesma cirurgia em duas salas) compartilham o grupo. */
   linkedGroupId: string | null
@@ -690,6 +760,51 @@ export type Vacina = {
   intervaloReforcoDias: number
   /** Obrigatória por lei ou por exigência de viagem. Muda a insistência do lembrete. */
   obrigatoria: boolean
+  /**
+   * Doses abaixo das quais a clínica precisa comprar.
+   *
+   * É por vacina, e não um número único da clínica, porque o que define o piso é o **giro**:
+   * antirrábica sai toda semana e precisa de fôlego; FeLV sai uma vez por mês e um piso alto
+   * só serviria para deixar frasco vencendo na geladeira.
+   */
+  estoqueMinimo: number
+}
+
+/**
+ * Por que uma dose saiu do estoque sem entrar em paciente.
+ *
+ * Separado em três de propósito: os três se corrigem de formas diferentes. `quebra` é manuseio,
+ * `temperatura` é equipamento — a mais cara, porque leva o lote inteiro junto — e `vencimento` é
+ * compra mal dimensionada. Um número só de "perdas" não diz qual conversa ter.
+ */
+export type MotivoDePerda = 'quebra' | 'temperatura' | 'vencimento'
+
+export type PerdaDeLote = {
+  em: ISODate
+  quantidade: number
+  motivo: MotivoDePerda
+}
+
+/**
+ * Um lote de vacina na geladeira.
+ *
+ * **O que saiu não é campo deste tipo.** As doses consumidas são contadas a partir das
+ * aplicações que citam o `codigo` — a mesma string que já vai na carteira do animal. Guardar um
+ * contador aqui criaria uma segunda verdade sobre o mesmo fato, e as duas divergiriam no
+ * primeiro registro de aplicação que falhasse no meio.
+ */
+export type LoteDeVacina = {
+  id: string
+  vacinaId: string
+  /** O código impresso no frasco. É a chave que liga a aplicação ao lote. */
+  codigo: string
+  fornecedor: string
+  recebidoEm: ISODate
+  validade: ISODate
+  quantidadeRecebida: number
+  /** Custo unitário em **centavos**. Dinheiro em inteiro, nunca em ponto flutuante. */
+  custoUnitario: number
+  perdas: PerdaDeLote[]
 }
 
 /**
@@ -997,6 +1112,14 @@ export type NoShowSummary = {
   minutosPerdidos: number
   ultimaFaltaEm: ISODateTime | null
   reincidente: boolean
+  /**
+   * Quantas destas faltas ainda não têm motivo registrado.
+   *
+   * É a fila de trabalho do painel. Reincidência diz com quem **conversar**; este número diz
+   * quem ainda nem foi procurado — e são perguntas diferentes: um responsável com cinco faltas
+   * todas justificadas por transporte não precisa de ligação, precisa de outro horário.
+   */
+  semJustificativa: number
 }
 
 export type SlotSugestao = {

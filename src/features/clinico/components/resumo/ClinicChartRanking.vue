@@ -18,7 +18,7 @@
  */
 import type { ApexAxisChartSeries, ApexFormatterOpts, ApexOptions } from 'apexcharts'
 import { computed } from 'vue'
-import VueApexCharts from './apex'
+import VueApexCharts from '../charts/apex'
 
 import { useClinicChartTheme } from '../../composables/useClinicChartTheme'
 import type { Fatia } from '../../domain/resumo'

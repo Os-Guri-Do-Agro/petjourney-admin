@@ -53,6 +53,45 @@
   --clinic-heat-3: #819a93;
   --clinic-heat-4: #456a60;
 
+  /* ------------------------------------------------- séries de gráfico (identidade)
+   *
+   * Seis cores para quando o gráfico precisa dizer **qual** — qual vacina saiu, qual
+   * item da pilha é qual. É o único lugar do módulo com paleta categórica, e ela existe
+   * porque a rampa de acento é uma cor só: seis tons do mesmo verde numa coluna
+   * empilhada não se distinguem, e a legenda deixa de responder o que foi perguntada.
+   *
+   * Três regras que a paleta obedece, e que qualquer troca precisa obedecer junto:
+   *
+   * - **A ordem é fixa e nunca circula.** O slot é atribuído pela posição da vacina no
+   *   catálogo, não pelo tamanho da fatia: um filtro que muda quem aparece não pode
+   *   repintar quem ficou, senão a leitura de uma semana não vale para a seguinte. Uma
+   *   sétima série não ganha cor gerada — ela vira "outras".
+   * - **Nenhuma delas mora na faixa de risco ou atenção.** Esses dois são estado, não
+   *   identidade; uma série cor de tijolo ao lado de um alerta cor de tijolo faz a
+   *   pessoa ler perigo onde só havia a terceira vacina da lista.
+   * - **Os degraus foram medidos, e conferidos par a par — todos os pares.** Não só os
+   *   vizinhos. Numa coluna empilhada a regra comum é conferir só quem se encosta, mas
+   *   aqui qualquer duas podem se encostar: basta a vacina do meio não ter saído naquele
+   *   mês para o primeiro segmento ficar colado no último. E a legenda põe as seis lado
+   *   a lado o tempo todo. A primeira versão desta paleta passava entre vizinhos e
+   *   reprovava entre todos os pares (ΔE 7,7 entre o slot 1 e o slot 6, na visão normal)
+   *   — e o defeito aparecia exatamente onde o teste não olhava: na legenda, onde os dois
+   *   verdes eram o mesmo ponto para qualquer leitor.
+   *
+   * Números do conjunto atual, entre todos os 15 pares: sob protanopia e deuteranopia,
+   * ΔE 9,4 no claro e 7,0 no escuro; sob visão normal, 16,6 e 15,0; contraste contra a
+   * superfície acima de 3:1 nos dois modos. O 7,0 do escuro fica na faixa que só vale
+   * acompanhada de codificação secundária, e ela está lá: respiro de 2 px entre os
+   * segmentos, total escrito no topo da coluna e o nome da vacina na dica — a cor nunca é
+   * o único jeito de ler o valor.
+   */
+  --clinic-series-1: #009962;
+  --clinic-series-2: #2389e2;
+  --clinic-series-3: #a067ac;
+  --clinic-series-4: #8d1c5f;
+  --clinic-series-5: #4640a7;
+  --clinic-series-6: #485d00;
+
   /* -------------------------------------------------- significado clínico (só risco) */
   --clinic-risk-text: #a2503a;
   --clinic-risk-bg: #fbeee8;
@@ -193,6 +232,20 @@
   --clinic-heat-2: #45675f;
   --clinic-heat-3: #88a49d;
   --clinic-heat-4: #bfe3db;
+
+  /*
+   * As mesmas seis matizes da paleta clara, re-degrauadas para o fundo escuro — não é a
+   * paleta clara invertida nem clareada por filtro. **A matiz de cada slot é a mesma nos
+   * dois modos**, senão a vacina trocaria de identidade ao alternar o tema, que é o pior
+   * jeito de gastar o canal da cor. Validada contra `--clinic-surface` deste modo, na
+   * faixa de luminosidade do escuro e par a par entre os seis.
+   */
+  --clinic-series-1: #00ab5c;
+  --clinic-series-2: #0071c7;
+  --clinic-series-3: #9649a7;
+  --clinic-series-4: #df5ba1;
+  --clinic-series-5: #898ed2;
+  --clinic-series-6: #5a7300;
 
   --clinic-risk-text: #f2ae9b;
   --clinic-risk-bg: #3a211c;
@@ -710,7 +763,7 @@
 
  As regras vivem aqui, e não no `<style scoped>` de cada gráfico, por dois motivos. A dica é
  criada pela biblioteca depois da montagem, então não recebe o atributo de escopo do Vue; e os
- três gráficos do resumo precisariam repetir o mesmo bloco.
+ gráficos do resumo e do estoque precisariam repetir o mesmo bloco.
 
  Cor, tipografia e sombra saem dos tokens do módulo — o tema `light`/`dark` que a configuração
  do gráfico manda serve só para o Apex escolher o arranjo, não a tinta.
@@ -749,6 +802,30 @@
   color: var(--clinic-text);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
+}
+
+/*
+ * Dica escrita à mão, para o gráfico cuja padrão não serve.
+ *
+ * A linha do tempo dos lotes é um `rangeBar`, e a dica que o Apex monta sozinho para esse tipo
+ * mostra o par de datas cru — quando o que a pessoa precisa é o lote, a vacina, o saldo e a
+ * situação. O componente devolve o HTML; o desenho dele mora aqui, junto com o resto da dica.
+ */
+.clinic-scope .apexcharts-tooltip .clinic-chart-dica {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.4rem 0.6rem;
+  font-size: var(--clinic-font-label);
+}
+
+.clinic-scope .apexcharts-tooltip .clinic-chart-dica > span:first-child {
+  color: var(--clinic-text);
+  font-weight: 750;
+}
+
+.clinic-scope .apexcharts-tooltip .clinic-chart-dica > span + span {
+  color: var(--clinic-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /** Número dentro do gráfico é valor clínico: mesma regra de tabular do resto do módulo. */

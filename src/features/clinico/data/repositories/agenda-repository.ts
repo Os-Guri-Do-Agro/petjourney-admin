@@ -31,6 +31,7 @@ import type {
   Block,
   BlockReason,
   CancelReason,
+  JustificativaDeFalta,
   DiaCarga,
   Encounter,
   SlotSugestao,
@@ -41,6 +42,32 @@ import type {
 } from '../types'
 
 const clock = createClinicClock(CLINIC_UTC_OFFSET)
+
+/**
+ * O que a tela informa ao justificar uma falta.
+ *
+ * Quem registrou e quando **não** vêm daqui: são carimbados na gravação, como o `canceladoEm`
+ * do cancelamento. Deixar a tela mandar o instante seria deixá-la mandar um instante errado.
+ */
+export type EntradaDeJustificativa = {
+  motivo: JustificativaDeFalta['motivo']
+  canal: JustificativaDeFalta['canal']
+  observacao: string
+  professionalId: string
+}
+
+function montarJustificativa(
+  entrada: EntradaDeJustificativa,
+  agora: ISODateTime,
+): JustificativaDeFalta {
+  return {
+    motivo: entrada.motivo,
+    canal: entrada.canal,
+    observacao: entrada.observacao.trim(),
+    professionalId: entrada.professionalId,
+    registradaEm: agora,
+  }
+}
 
 /** Pilha de restauração do desfazer. Curta de propósito: 8 segundos não guardam história. */
 const desfazerPorToken = new Map<string, () => void>()
@@ -275,6 +302,7 @@ export const agendaRepository = {
         finalizadoEm: null,
         canceladoEm: null,
         motivoCancelamento: null,
+        justificativaDeFalta: null,
         encounterId: null,
         linkedGroupId: null,
         criadoEm: agora,
@@ -428,7 +456,21 @@ export const agendaRepository = {
     })
   },
 
-  alterarStatus(id: string, status: AppointmentStatus): Promise<MutacaoAgenda> {
+  /**
+   * Muda o status. Com `justificativa`, a falta já nasce com o motivo vinculado.
+   *
+   * O motivo entra **na mesma mutação** e não numa chamada seguinte, por causa do desfazer: duas
+   * chamadas gerariam dois tokens, e o Z da recepção desfaria só o segundo — devolvendo um
+   * atendimento em falta sem motivo, que é um estado que ninguém pediu.
+   *
+   * Ele continua opcional porque marcar falta e saber o porquê acontecem em momentos
+   * diferentes: o horário passa às nove, a ligação sai à tarde. Ver `justificarFalta`.
+   */
+  alterarStatus(
+    id: string,
+    status: AppointmentStatus,
+    justificativa?: EntradaDeJustificativa | null,
+  ): Promise<MutacaoAgenda> {
     return simularChamada('agenda.status', () => {
       const dataset = getDataset()
       const alvo = dataset.appointments.find((appointment) => appointment.id === id)
@@ -443,6 +485,10 @@ export const agendaRepository = {
       alvo.status = status
       alvo.atualizadoEm = agora
 
+      if (status === 'falta' && justificativa) {
+        alvo.justificativaDeFalta = montarJustificativa(justificativa, agora)
+      }
+
       if (status === 'aguardando' && !alvo.chegadaEm) {
         alvo.chegadaEm = agora
       }
@@ -454,6 +500,40 @@ export const agendaRepository = {
       if (status === 'finalizado') {
         alvo.finalizadoEm = agora
       }
+
+      return { atendimentos: [{ ...alvo }], undoToken: token }
+    })
+  },
+
+  /**
+   * Registra por que o paciente não veio, depois que a falta já existe.
+   *
+   * É o caminho normal, e não a exceção: quem marca a falta é o horário que passou, quem
+   * descobre o motivo é a ligação que sai depois. O status não é tocado aqui — justificar não
+   * desfaz a falta, e confundir as duas coisas apagaria da conta da clínica um horário que
+   * continua tendo sido queimado.
+   *
+   * Registrar de novo **sobrescreve**: a segunda ligação sabe mais que a primeira, e guardar as
+   * duas transformaria a linha do painel numa thread que ninguém vai ler.
+   */
+  justificarFalta(id: string, entrada: EntradaDeJustificativa): Promise<MutacaoAgenda> {
+    return simularChamada('agenda.status', () => {
+      const dataset = getDataset()
+      const alvo = dataset.appointments.find((appointment) => appointment.id === id)
+
+      if (!alvo) {
+        throw new Error('agenda.justificar: atendimento inexistente')
+      }
+
+      if (alvo.status !== 'falta') {
+        throw new Error('agenda.justificar: atendimento não está em falta')
+      }
+
+      const token = registrarDesfazer([alvo])
+      const agora = agoraIso()
+
+      alvo.justificativaDeFalta = montarJustificativa(entrada, agora)
+      alvo.atualizadoEm = agora
 
       return { atendimentos: [{ ...alvo }], undoToken: token }
     })

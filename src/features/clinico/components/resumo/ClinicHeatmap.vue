@@ -16,7 +16,7 @@
  */
 import type { ApexAxisChartSeries, ApexOptions } from 'apexcharts'
 import { computed } from 'vue'
-import VueApexCharts from './apex'
+import VueApexCharts from '../charts/apex'
 
 import { useClinicChartTheme } from '../../composables/useClinicChartTheme'
 import type { CelulaDeHora } from '../../domain/resumo'

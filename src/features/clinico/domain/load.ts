@@ -175,10 +175,20 @@ export function resumirFaltas(
       minutosPerdidos: 0,
       ultimaFaltaEm: null,
       reincidente: false,
+      semJustificativa: 0,
     }
 
     atual.faltas += 1
     atual.minutosPerdidos += clock.durationMinutes(appointment.inicio, appointment.fim)
+
+    /*
+     * A falta sem motivo é a que ainda pede trabalho: alguém precisa ligar. Contada aqui, e não
+     * derivada na tela, porque é a mesma passada que já percorre as faltas — e porque o painel
+     * ordena por ela.
+     */
+    if (!appointment.justificativaDeFalta) {
+      atual.semJustificativa += 1
+    }
 
     if (!atual.ultimaFaltaEm || appointment.inicio > atual.ultimaFaltaEm) {
       atual.ultimaFaltaEm = appointment.inicio

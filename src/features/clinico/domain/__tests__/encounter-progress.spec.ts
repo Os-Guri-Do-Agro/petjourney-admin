@@ -50,6 +50,7 @@ function appointment(): Appointment {
     finalizadoEm: null,
     canceladoEm: null,
     motivoCancelamento: null,
+    justificativaDeFalta: null,
     encounterId: null,
     linkedGroupId: null,
     criadoEm: clock.toIso(DATA, 480),

@@ -127,6 +127,7 @@ const VACINAS: Vacina[] = [
     dosesNaSerie: 3,
     intervaloReforcoDias: 365,
     obrigatoria: false,
+    estoqueMinimo: 10,
   },
 ]
 
