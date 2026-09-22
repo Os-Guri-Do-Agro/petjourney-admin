@@ -58,7 +58,8 @@ export const PetJourneyPreset = definePreset(Aura, {
         content: {
           background: LightColors.white,
           hoverBackground: LightColors.bg.screen,
-          borderColor: LightColors.border.light,
+          /* Borda de input e painel: o degrau visível, não o sussurrado. */
+          borderColor: LightColors.border.default,
           color: LightColors.text.primary,
           hoverColor: LightColors.dashboard.primaryStrong,
         },

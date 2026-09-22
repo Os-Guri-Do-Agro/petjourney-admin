@@ -38,6 +38,7 @@ const pageStyle = computed(() => {
     '--sel-card': colors.dashboard.surface,
     '--sel-soft': colors.dashboard.surfaceSoft,
     '--sel-line': colors.dashboard.line,
+    '--sel-line-strong': colors.dashboard.lineStrong,
     '--sel-muted': colors.dashboard.muted,
     '--sel-accent': colors.vet.primary,
     '--sel-accent-strong': colors.dashboard.primaryStrong,
@@ -286,7 +287,7 @@ onMounted(() => {
   gap: 0.6rem;
   justify-items: start;
   padding: 1rem 1.05rem;
-  border: 1px dashed var(--sel-line);
+  border: 1px dashed var(--sel-line-strong);
   border-radius: 0.95rem;
   background: transparent;
 }

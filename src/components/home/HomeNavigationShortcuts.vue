@@ -56,6 +56,7 @@ const styleVars = computed(() => {
     '--shortcuts-card': colors.dashboard.surface,
     '--shortcuts-surface': colors.dashboard.surfaceSoft,
     '--shortcuts-line': colors.dashboard.line,
+    '--shortcuts-line-strong': colors.dashboard.lineStrong,
     '--shortcuts-text': colors.dashboard.text,
     '--shortcuts-muted': colors.dashboard.muted,
     '--shortcuts-faint': colors.dashboard.faint,
@@ -298,7 +299,8 @@ const totalShortcuts = computed(() =>
 .home-shortcuts__empty {
   margin: 0;
   padding: 1rem;
-  border: 1px dashed var(--shortcuts-line);
+  /* Estado vazio é a borda com mais intenção da tela: sai da linha forte, não da comum. */
+  border: 1px dashed var(--shortcuts-line-strong);
   border-radius: 0.9rem;
   color: var(--shortcuts-muted);
   font-size: 0.88rem;

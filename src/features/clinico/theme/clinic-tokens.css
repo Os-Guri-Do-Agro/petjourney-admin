@@ -16,22 +16,30 @@
 :root {
   /* ---------------------------------------------------------------- superfícies
    *
-   * A escada do claro não é branco sobre branco. A primeira versão punha fundo, cartão e bloco
-   * interno dentro de três pontos de luminosidade um do outro, todos encostados no branco puro:
-   * em monitor claro a tela virava uma chapa que ofusca, e a hierarquia só existia porque a
-   * sombra do cartão a desenhava. Aqui o fundo desce um degrau de verdade, o cartão sai do
-   * branco puro para um branco quebrado e o bloco interno fica no meio — a separação passa a
-   * vir da própria superfície, e não do brilho.
+   * Espelha a escada de `theme/colors.ts` — o módulo tem tokens próprios, não paleta própria.
    *
-   * O texto não mudou junto: escurecer fundo só aumenta o contraste da tinta, nunca reduz.
+   * Degraus iguais em OKLCH no matiz da família (178,5°), com o pico em 93,8% de luminância em
+   * vez dos 97,1% de antes. A versão original punha página, cartão e bloco interno dentro de
+   * três pontos um do outro, todos encostados no branco puro: a hierarquia só existia porque a
+   * sombra do cartão a desenhava, e para ser legível a tela tinha que ofuscar.
+   *
+   * Agora quem separa é a linha — `line` passou de 1,28:1 para 1,86:1 contra o cartão. Foi o
+   * que permitiu baixar o brilho sem perder a leitura.
    */
-  --clinic-bg: #e6edea;
-  --clinic-surface: #fbfcfb;
-  --clinic-surface-soft: #f0f5f3;
-  --clinic-surface-sunken: #e2eae7;
-  --clinic-line: #d8e3df;
-  --clinic-line-soft: #e3ebe8;
-  --clinic-line-strong: #c3d2cd;
+  --clinic-bg: #e1ece9;
+  --clinic-surface: #f4f9f8;
+  --clinic-surface-soft: #eaf3f0;
+  --clinic-surface-sunken: #d8e5e2;
+  --clinic-line: #aebbb8;
+  --clinic-line-soft: #c9d2d0;
+  /*
+   * Sálvia médio, o degrau que faltava entre o acento e o sálvia forte. É a linha que precisa
+   * ser vista: tracejado de vaga vazia, hachura de bloqueio, régua de rodapé de diálogo,
+   * contorno de chip de atalho. O valor anterior (#c3d2cd) ficava em 1,5:1 contra o cartão —
+   * desenhava a intenção e não entregava a borda. Este fecha 2,6:1, que é borda de verdade e
+   * ainda longe de virar tinta: texto nunca sai daqui.
+   */
+  --clinic-line-strong: #84a59d;
 
   /* ------------------------------------------------------------------- tipografia
    *
@@ -63,8 +71,8 @@
    * `surface` no 4. Escurecer o degrau 3 até o branco fechar 4,5:1 fecharia junto a distância
    * para o 4, e um mapa de quatro degraus com dois iguais deixa de ser mapa.
    */
-  --clinic-heat-1: #e1efeb;
-  --clinic-heat-2: #c5e2db;
+  --clinic-heat-1: #dbede9;
+  --clinic-heat-2: #c2e0d9;
   --clinic-heat-3: #819a93;
   --clinic-heat-4: #456a60;
 
@@ -114,10 +122,10 @@
   --clinic-attention-text: #856112;
   --clinic-attention-bg: #f7f0e0;
   --clinic-attention-line: #ecdfc2;
-  --clinic-ok-text: #517d71;
+  --clinic-ok-text: #4b776b;
   --clinic-ok-bg: #eaf4f0;
   --clinic-ok-line: #d6e9e2;
-  --clinic-neutral-text: #8a8579;
+  --clinic-neutral-text: #716c61;
   --clinic-neutral-bg: #f0efec;
   --clinic-neutral-line: #e3e1dc;
 

@@ -81,10 +81,10 @@ withDefaults(
 }
 
 .maquete--claro {
-  --maquete-fundo: #e6edea;
-  --maquete-superficie: #fbfcfb;
-  --maquete-linha: #dfeae6;
-  --maquete-traco: #c9d6d1;
+  --maquete-fundo: #e1ece9;
+  --maquete-superficie: #f4f9f8;
+  --maquete-linha: #c9d2d0;
+  --maquete-traco: #aebbb8;
   --maquete-trilho: #84c1b4;
   --maquete-acento: #3c7b6d;
   --maquete-acento-suave: #d8ebe5;

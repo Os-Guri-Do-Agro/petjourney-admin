@@ -246,7 +246,6 @@ const shellStyle = computed(() => {
     '--profile-primary': colors.vet.primary,
     '--profile-secondary': colors.vet.secondary,
     '--clinical-muted': colors.auth.muted,
-    '--danger-soft': colors.red,
     '--shell-bg': colors.auth.appBg,
     '--shell-surface': colors.auth.white,
     '--shell-surface-soft': colors.auth.sageTint,
@@ -278,10 +277,12 @@ const shellStyle = computed(() => {
     '--shell-attention': colors.dashboard.amberText,
     '--shell-attention-bg': colors.dashboard.amberBg,
     '--shell-attention-line': colors.dashboard.amber,
+    /** Só tinge o chip; quem carrega o significado legível é a tinta abaixo. */
     '--rail-logout-red': colors.red,
-    '--rail-logout-mix-base': isDark ? colors.bg.card : LightColors.auth.white,
-    /** Branco real: `auth.white` é superfície (quebrada no claro, escura no dark). */
-    '--rail-logout-icon': LightColors.text.inverse,
+    /** Ícone sobre o chip tingido do trilho. */
+    '--rail-logout-icon': colors.danger,
+    /** "Sair" escrito sobre superfície clara (painel e menu da conta). */
+    '--rail-logout-text': colors.dashboard.warmText,
   }
 })
 
@@ -1258,9 +1259,13 @@ onUnmounted(() => {
   transform: rotate(180deg);
 }
 
+/*
+ * Sair, no trilho. O chip tinge, a tinta informa — e a tinta não se mistura ao coral: era
+ * exatamente essa mistura que devolvia o ícone ao pastel e o fazia sumir no fundo.
+ */
 .rail-action--danger.p-button {
   background: color-mix(in srgb, var(--rail-logout-red) 16%, transparent);
-  color: color-mix(in srgb, var(--rail-logout-red) 88%, var(--rail-logout-icon));
+  color: var(--rail-logout-icon);
 }
 
 .rail-action--danger.p-button:not(:disabled):hover,
@@ -1323,7 +1328,7 @@ onUnmounted(() => {
 .panel-action.p-button:not(:disabled):active {
   border: 0;
   background: color-mix(in srgb, var(--rail-logout-red) 10%, transparent);
-  color: var(--rail-logout-red);
+  color: var(--rail-logout-text);
 }
 
 .panel-action.p-button:focus-visible {
@@ -2087,7 +2092,7 @@ onUnmounted(() => {
 .user-menu__logout.p-button,
 .user-menu__logout.p-button:not(:disabled):hover,
 .user-menu__logout.p-button:not(:disabled):active {
-  color: color-mix(in srgb, var(--danger-soft) 80%, var(--shell-text));
+  color: var(--rail-logout-text);
 }
 
 @media (max-width: 900px) {
