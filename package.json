@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@fontsource-variable/readex-pro": "^5.3.0",
+    "@phosphor-icons/vue": "^2.2.1",
     "@primeuix/themes": "^2.0.3",
     "@tailwindcss/vite": "^4.3.1",
     "apexcharts": "^7.0.0",

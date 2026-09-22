@@ -8,6 +8,7 @@ import {
 } from '@/features/clinico/composables/useClinicoPendencias'
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { useModuloClinico } from '@/composables/useModuloClinico'
+import { useModuloHotel } from '@/composables/useModuloHotel'
 import { useParceiroStore } from '@/stores/parceiro'
 
 export type AppNavigationItem = {
@@ -85,6 +86,72 @@ export const CLINICAL_MENU_ENABLED = true
  */
 export const CLINICAL_MENU_DEMO = true
 
+/**
+ * Menu do hotel. Ligado com a entrada do módulo `src/features/hotel`.
+ *
+ * A camada é mocada e determinística (`features/hotel/data`), com a mesma forma da API futura —
+ * nenhum dado fictício vaza para fora do módulo.
+ */
+export const HOTEL_MENU_ENABLED = true
+
+/**
+ * Modo demonstração do módulo hotel.
+ *
+ * Mesma constante e mesma razão do clínico: enquanto o módulo roda sobre dados de demonstração,
+ * ele é apresentável a partir de qualquer conta do portal. **Vire para `false` junto com a
+ * primeira entrega da API de hospedagem** — a partir daí o que está atrás do menu é a rotina de um
+ * animal de verdade, com o telefone de um responsável de verdade.
+ */
+export const HOTEL_MENU_DEMO = true
+
+/**
+ * Rotas do hotel, agrupadas pela pergunta que respondem.
+ *
+ * Os três blocos nasceram com o módulo, e não depois de alguém reclamar — é a lição que o menu
+ * clínico aprendeu caro (ver `docs/clinico/08-orientacao-do-fluxo.md`): uma lista plana de nove
+ * destinos obriga quem chega a ler os nove para descobrir qual responde à pergunta do momento.
+ *
+ * 1. **Hoje** — o que acontece agora e onde cabe mais alguém.
+ * 2. **Hospedagem** — o que está vendido e quem está na casa.
+ * 3. **A casa** — como o hotel é configurado, e como ele foi.
+ */
+const HOTEL_BLOCKS: readonly BlocoDeModulo[] = [
+  /*
+   * O ensino não é um destino do menu: é o botão "Como usar" dentro de cada tela.
+   *
+   * Existiu aqui uma tela "Como funciona", primeira da lista, que explicava o fluxo inteiro num
+   * lugar só. Saiu porque ensinava longe do que ensinava — quem lia "a coluna de documentação é
+   * ordenável" ainda não tinha visto coluna nenhuma. Agora cada tela tem o próprio tutorial, e a
+   * frase aparece apontando para o objeto de que fala.
+   */
+  {
+    id: 'hotel-vender',
+    key: 'hotel.navegacao.vender',
+    rotas: [
+      { key: 'hotel.mapa.titulo', to: '/hotel/mapa', icon: 'pi pi-th-large' },
+      { key: 'hotel.reservas.titulo', to: '/hotel/reservas', icon: 'pi pi-calendar' },
+    ],
+  },
+  {
+    /* Receber, cuidar e entregar acontecem no mesmo dia e pelas mesmas mãos: um bloco só. */
+    id: 'hotel-dia',
+    key: 'hotel.navegacao.dia',
+    rotas: [
+      { key: 'hotel.painel.titulo', to: '/hotel/painel', icon: 'pi pi-sun' },
+      { key: 'hotel.rotina.titulo', to: '/hotel/rotina', icon: 'pi pi-list-check' },
+      { key: 'hotel.hospedes.titulo', to: '/hotel/hospedes', icon: 'pi pi-heart' },
+    ],
+  },
+  {
+    id: 'hotel-casa',
+    key: 'hotel.navegacao.casa',
+    rotas: [
+      { key: 'hotel.acomodacoes.titulo', to: '/hotel/acomodacoes', icon: 'pi pi-building' },
+      { key: 'hotel.resumo.titulo', to: '/hotel/resumo', icon: 'pi pi-chart-bar' },
+    ],
+  },
+]
+
 /** Equipe oculta no go-live até a operação do time estar pronta no portal. */
 export const EQUIPE_MENU_ENABLED = false
 
@@ -118,11 +185,12 @@ export const OVERVIEW_SECTION_ID = 'overview'
  *
  * Nada saiu da lista. O que mudou é que ela deixou de exigir que se leia inteira.
  */
-type RotaClinica = { key: string; to: string; icon: string }
+/** Um destino de menu de um módulo. Compartilhado entre a clínica e o hotel. */
+type RotaDeModulo = { key: string; to: string; icon: string }
 
-type BlocoClinico = { id: string; key: string; rotas: readonly RotaClinica[] }
+type BlocoDeModulo = { id: string; key: string; rotas: readonly RotaDeModulo[] }
 
-const CLINICAL_BLOCKS: readonly BlocoClinico[] = [
+const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
   {
     id: 'agora',
     key: 'clinico.navegacao.agora',
@@ -166,7 +234,6 @@ const CLINICAL_BLOCKS: readonly BlocoClinico[] = [
   },
 ]
 
-
 const PATIENT_ROUTES = [
   { key: 'clinico.pacientes.titulo', to: '/veterinario/pacientes', icon: 'pi pi-users' },
   { key: 'clinico.bulario.titulo', to: '/veterinario/bulario', icon: 'pi pi-book' },
@@ -200,6 +267,7 @@ export function useAppNavigation() {
    * não é do corpo clínico.
    */
   const { ativo: moduloClinicoAtivo } = useModuloClinico()
+  const { ativo: moduloHotelAtivo } = useModuloHotel()
 
   const hasClinicalProfile = computed(
     () =>
@@ -213,6 +281,30 @@ export function useAppNavigation() {
       moduloClinicoAtivo.value &&
       CLINICAL_MENU_ENABLED &&
       (CLINICAL_MENU_DEMO || hasVeterinarioProfile()),
+  )
+
+  /**
+   * Quem vê o módulo hotel.
+   *
+   * Mesma regra e mesma ordem do clínico: o interruptor oculto vem antes de tudo. Uma casa pode
+   * ter os dois módulos, um só, ou nenhum — e por isso os dois portões são independentes.
+   */
+  const hasHotelProfile = computed(
+    () => moduloHotelAtivo.value && HOTEL_MENU_ENABLED && HOTEL_MENU_DEMO,
+  )
+
+  const hotelBlocos = computed<AppNavigationBloco[]>(() => {
+    void locale.value
+
+    return HOTEL_BLOCKS.map((bloco) => ({
+      id: bloco.id,
+      label: t(bloco.key),
+      items: bloco.rotas.map((rota) => ({ label: t(rota.key), to: rota.to, icon: rota.icon })),
+    }))
+  })
+
+  const hotelItems = computed<AppNavigationItem[]>(() =>
+    hotelBlocos.value.flatMap((bloco) => bloco.items),
   )
 
   const accountItems = computed<AppNavigationItem[]>(() => {
@@ -361,6 +453,16 @@ export function useAppNavigation() {
       )
     }
 
+    if (hasHotelProfile.value) {
+      sections.push({
+        id: 'hotel',
+        label: t('hotel.navegacao.secao'),
+        icon: 'pi pi-building',
+        items: hotelItems.value,
+        blocos: hotelBlocos.value,
+      })
+    }
+
     sections.push({
       id: 'account',
       label: t('nav.sections.account'),
@@ -391,6 +493,7 @@ export function useAppNavigation() {
     navigationGroups,
     overviewItem,
     hasClinicalProfile,
+    hasHotelProfile,
     homeShortcutGroups,
   }
 }
@@ -400,6 +503,15 @@ export function navItemMatches(itemPath: string, currentPath: string) {
 }
 
 export function resolveActiveSectionId(path: string, hasClinical: boolean) {
+  /*
+   * O hotel vem antes das outras comparações porque `/hotel` não colide com nenhuma delas — e
+   * porque deixá-lo no fim o faria cair no `return 'portal'` quando o módulo estivesse desligado,
+   * marcando a seção errada no trilho durante a navegação que o guard ainda vai interromper.
+   */
+  if (path.startsWith('/hotel')) {
+    return 'hotel'
+  }
+
   if (path === '/inicio') {
     return OVERVIEW_SECTION_ID
   }
@@ -461,6 +573,15 @@ export function resolvePageLabel(path: string, hash: string, sections: AppNaviga
     return t('nav.pageLabels.portal')
   }
 
+  /* Reserva e estadia não são itens de menu: sem estas linhas o cabeçalho diria 'Painel' nas duas. */
+  if (path.startsWith('/hotel/reserva/')) {
+    return t('hotel.reserva.titulo')
+  }
+
+  if (path.startsWith('/hotel/hospedagem/')) {
+    return t('hotel.estadia.titulo')
+  }
+
   /* O atendimento não é item de menu — sem esta linha o cabeçalho dizia 'Painel' no prontuário. */
   if (path.startsWith('/veterinario/atendimento')) {
     return t('clinico.prontuario.titulo')
@@ -514,7 +635,10 @@ export function filterNavigationGroups(
        * telas do bloco, mesmo que nenhuma delas se chame assim.
        */
       const blocos = group.blocos
-        ?.map((bloco) => ({ ...bloco, items: bloco.items.filter((item) => cabe(item, bloco.label)) }))
+        ?.map((bloco) => ({
+          ...bloco,
+          items: bloco.items.filter((item) => cabe(item, bloco.label)),
+        }))
         .filter((bloco) => bloco.items.length > 0)
 
       const items = blocos

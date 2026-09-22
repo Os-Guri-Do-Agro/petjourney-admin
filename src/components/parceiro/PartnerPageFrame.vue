@@ -37,6 +37,18 @@ const props = withDefaults(
      * ignorar o controle.
      */
     guidance?: boolean
+    /**
+     * A tela tem um tutorial guiado, e o botão de ajuda passa a abri-lo.
+     *
+     * O mesmo botão, outro comportamento: em vez de ligar parágrafos de apoio, ele percorre a
+     * tela passo a passo, apontando para cada parte. Onde há tutorial, a explicação mora ao lado
+     * do que explica — ler "a coluna de documentação é ordenável" não ajuda quem ainda não sabe
+     * qual é a coluna.
+     *
+     * Quem não declara continua com o botão de sempre. As duas formas convivem porque migrar
+     * todas as telas do portal de uma vez não é assunto de quem só precisava de tutorial numa.
+     */
+    tour?: boolean
   }>(),
   {
     subtitle: '',
@@ -46,6 +58,7 @@ const props = withDefaults(
     blockWhenSuspended: false,
     empty: false,
     guidance: false,
+    tour: false,
     emptyTitle: '',
     emptyDescription: '',
     emptyActionLabel: '',
@@ -55,6 +68,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   retry: []
   emptyAction: []
+  tour: []
 }>()
 
 const { t } = useI18n()
@@ -152,7 +166,7 @@ const pageStyle = computed(() => {
         <h1 class="partner-page__title">{{ title }}</h1>
       </div>
       <div
-        v-if="(guidance || $slots.actions) && !noPartnerAccess && !showSuspended"
+        v-if="(guidance || tour || $slots.actions) && !noPartnerAccess && !showSuspended"
         class="partner-page__actions"
       >
         <!--
@@ -161,7 +175,21 @@ const pageStyle = computed(() => {
           página; controle de leitura, não.
         -->
         <Button
-          v-if="guidance"
+          v-if="tour"
+          class="partner-page__guidance"
+          type="button"
+          icon="pi pi-question-circle"
+          :label="t('shell.guidance.tour')"
+          outlined
+          rounded
+          severity="secondary"
+          size="small"
+          :title="t('shell.guidance.tourTitulo')"
+          @click="emit('tour')"
+        />
+
+        <Button
+          v-else-if="guidance"
           class="partner-page__guidance"
           :class="{ 'partner-page__guidance--ativo': isGuidanceVisible }"
           type="button"

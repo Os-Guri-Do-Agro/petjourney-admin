@@ -253,7 +253,8 @@
     "forgotPassword": "Esqueci minha senha",
     "signOut": "Sair",
     "yes": "Sim",
-    "no": "Não"
+    "no": "Não",
+    "selectAll": "Todos"
   },
   "nav": {
     "sections": {
@@ -392,7 +393,9 @@
     },
     "guidance": {
       "show": "Mostrar explicações",
-      "hide": "Ocultar explicações"
+      "hide": "Ocultar explicações",
+      "tour": "Como usar",
+      "tourTitulo": "Ver um tutorial desta tela, parte por parte"
     }
   },
   "frame": {
@@ -3543,6 +3546,883 @@
         "paginas": "Páginas da lista de leitos",
         "anterior": "Página anterior",
         "proxima": "Próxima página"
+      }
+    }
+  },
+  "hotel": {
+    "acomodacaoKind": {
+      "baia": "Baia",
+      "coletiva": "Convivência",
+      "gatil": "Gatil",
+      "isolamento": "Isolamento",
+      "suite": "Suíte"
+    },
+    "acomodacoes": {
+      "acompanhante": "Acompanhante",
+      "bloco": "Bloco",
+      "cabem": "cabe {total} | cabem {total}",
+      "capacidade": "Capacidade",
+      "capacidadeDica": "Quantos animais da mesma casa cabem juntos.",
+      "desativar": "Tirar de operação",
+      "detalhe": "Detalhe",
+      "editar": "Editar acomodação",
+      "especies": "Espécies aceitas",
+      "higienizacao": "Higienização",
+      "higienizacaoDica": "Tempo entre uma saída e a entrada seguinte.",
+      "motivo": "Motivo",
+      "nome": "Nome",
+      "nova": "Nova acomodação",
+      "operacao": "Operação",
+      "paradas": "{total} fora de operação",
+      "porteMaximo": "Porte máximo",
+      "reativar": "Devolver à operação",
+      "recursos": "Recursos",
+      "remover": "Remover do cadastro",
+      "removerConfirma": "Remover é definitivo. Confirma?",
+      "removerSim": "Remover",
+      "resumo": "{total} acomodação cadastrada | {total} acomodações cadastradas",
+      "subtitulo": "Hotel",
+      "tarifa": "Tarifa",
+      "tarifas": "Tarifas",
+      "temporadas": "Temporadas",
+      "tipo": "Tipo",
+      "titulo": "Acomodações",
+      "secaoIdentidade": "O que é",
+      "secaoQuemCabe": "Quem cabe",
+      "secaoPreco": "Preparo e preço"
+    },
+    "adaptacao": {
+      "em-adaptacao": "Em adaptação",
+      "estressado": "Estressado",
+      "tranquilo": "Tranquilo"
+    },
+    "autorizacao": {
+      "atendimento-veterinario": "Atendimento veterinário de urgência",
+      "banho": "Banho",
+      "foto-em-rede-social": "Foto em rede social",
+      "passeio-externo": "Passeio fora do hotel",
+      "recreacao-em-grupo": "Recreação em grupo",
+      "transporte": "Transporte"
+    },
+    "checkin": {
+      "acrescentar": "Acrescentar",
+      "alimentacao": "Alimentação",
+      "autorizacoes": "Autorizações",
+      "bloqueado": "Falta documentação obrigatória: {itens}",
+      "chegada": "Chegada",
+      "confirmar": "Confirmar check-in",
+      "contato": "Contato de emergência",
+      "emergencia": "Emergência",
+      "horarios": "Horários",
+      "inspecao": "Inspeção de entrada",
+      "inspecaoDica": "Carrapato, ferida, claudicação, estado do pelo.",
+      "marca": "Marca",
+      "novoPertence": "Acrescentar pertence",
+      "pertences": "Pertences",
+      "peso": "Peso na balança",
+      "pesoCadastro": "No cadastro: {valor}",
+      "petiscos": "Petiscos",
+      "porcao": "Porção",
+      "racaoPropria": "Ração trazida de casa",
+      "removerPertence": "Remover {item}",
+      "restricoes": "Restrições",
+      "titulo": "Check-in de {pet}",
+      "veterinario": "Veterinário de confiança",
+      "recadoDaReserva": "Na reserva:",
+      "exigidaPelaVenda": "serviço vendido",
+      "vendaSemAutorizacao": "A reserva vendeu serviço que depende de: {itens}. Sem a autorização, a casa não pode executar — e a conta continua cobrando.",
+      "medicacao": "Medicação que veio de casa",
+      "medicacaoLede": "O hotel não prescreve: registra o que já era dado, para continuar dando na hora certa.",
+      "remedio": "Remédio",
+      "remedioDica": "Benazepril 5 mg",
+      "dose": "Dose",
+      "doseDica": "1/2 comprimido",
+      "via": "Via",
+      "receita": "Receita",
+      "receitaDica": "Número e quem assinou",
+      "acrescentarRemedio": "Acrescentar remédio",
+      "removerRemedio": "Remover remédio",
+      "medicacaoSemHorario": "Remédio sem horário não vira tarefa nenhuma, e ninguém vai ser avisado de dar."
+    },
+    "checkout": {
+      "confirmar": "Fechar estadia",
+      "devolvido": "Devolvido",
+      "fechamento": "Fechamento",
+      "oQueHouve": "O que houve com este item",
+      "ocorrenciaTravada": "{total} ocorrência grave ainda sem contato com o responsável. | {total} ocorrências graves ainda sem contato com o responsável.",
+      "perdaRelevante": "Perdeu peso o bastante para merecer uma conversa com o responsável.",
+      "pertences": "Conferência de pertences",
+      "pesagem": "Pesagem de saída",
+      "pesoEntrada": "Entrou com {valor}",
+      "pesoSaida": "Peso de saída",
+      "registrarPeso": "Registrar peso",
+      "saidaTardia": "Saída depois do horário: {percentual}% de diária a mais.",
+      "saldo": "Saldo a receber",
+      "titulo": "Check-out de {pet}",
+      "comoChegou": "Como ele chegou",
+      "comoChegouLede": "Registrado no check-in. Confira antes de entregar: é o que responde \"ele já chegou assim\".",
+      "quemRetira": "Quem está levando",
+      "outraPessoa": "Outra pessoa",
+      "voltarALista": "Voltar à lista",
+      "outraPessoaDica": "Nome de quem veio buscar",
+      "foraDaLista": "Esta pessoa não estava autorizada na reserva. O nome fica registrado na estadia."
+    },
+    "comum": {
+      "cancelar": "Cancelar",
+      "fechar": "Fechar",
+      "salvar": "Salvar"
+    },
+    "dev": {
+      "casos": "Casos plantados",
+      "dados": "Dados",
+      "fechar": "Fechar painel",
+      "latencia": "Latência: {valor} ms",
+      "offline": "Offline",
+      "recriar": "Recriar dados",
+      "rede": "Rede",
+      "semente": "Semente",
+      "titulo": "Demonstração"
+    },
+    "diario": {
+      "comFoto": "Com foto",
+      "oQue": "O que aconteceu",
+      "registrar": "Registrar",
+      "texto": "Como foi",
+      "textoDica": "O que o responsável gostaria de ler sobre este momento.",
+      "titulo": "Registrar no diário de {pet}"
+    },
+    "erros": {
+      "acao": "Não foi possível concluir. Tente de novo.",
+      "admissao": "A documentação de admissão impede o check-in.",
+      "boletimRetido": "O boletim só sai depois da ligação ao responsável.",
+      "cadastro": {
+        "nao-encontrada": "Acomodação não encontrada.",
+        "nome-repetido": "Já existe uma acomodação com este nome.",
+        "ocupada": "Há hóspede nesta acomodação agora.",
+        "tem-historico": "Esta acomodação já hospedou: tire de operação em vez de remover.",
+        "tem-reserva": "Há reserva futura nesta acomodação."
+      },
+      "catalogos": "Não foi possível carregar os dados do hotel.",
+      "estadia": "Não foi possível carregar a estadia.",
+      "hospedes": "Não foi possível carregar os hóspedes.",
+      "mapa": "Não foi possível carregar o mapa de acomodações.",
+      "passagemTravada": "Há ocorrência grave sem contato: o turno não pode ser entregue.",
+      "reservas": "Não foi possível carregar as reservas.",
+      "resumo": "Não foi possível carregar o resumo.",
+      "rotina": "Não foi possível carregar a rotina do turno.",
+      "saida": {
+        "ocorrencia-sem-contato": "Há ocorrência grave sem contato com o responsável.",
+        "pertences": "Há pertences sem conferência.",
+        "peso-de-saida": "Falta registrar o peso de saída."
+      },
+      "vaga": {
+        "capacidade": "Esta acomodação não comporta esse número de animais.",
+        "especie": "Esta acomodação não aceita a espécie do animal.",
+        "higienizacao": "A acomodação ainda está em higienização nesse horário.",
+        "inativa": "Esta acomodação está fora de operação.",
+        "ocupada": "Já há reserva nesta acomodação no período escolhido.",
+        "periodo-invalido": "A saída precisa ser depois da entrada.",
+        "porte": "O porte do animal não cabe nesta acomodação."
+      }
+    },
+    "especie": {
+      "ave": "Ave",
+      "canina": "Cão",
+      "equina": "Equino",
+      "felina": "Gato",
+      "reptil": "Réptil",
+      "roedor": "Roedor"
+    },
+    "estadia": {
+      "alimentacao": "Alimentação",
+      "autorizacoes": "Autorizações",
+      "boletim": "Boletim ao responsável",
+      "boletimRetido": "Retido: falta a ligação ao responsável.",
+      "comunicado": "Comunicado às {hora}",
+      "diario": "Diário do hóspede",
+      "emergencia": "Emergência",
+      "encerrada": "Encerrada",
+      "enviado": "Enviado",
+      "enviarBoletim": "Enviar",
+      "fazerCheckOut": "Fazer check-out",
+      "ficha": "Ficha da estadia",
+      "gerarBoletim": "Gerar",
+      "inspecao": "Inspeção de entrada",
+      "medicacao": "Medicação",
+      "ocorrencias": "Ocorrências",
+      "pertences": "Pertences",
+      "precisaLigar": "Ligue para {nome} antes do fim do turno",
+      "racaoDaCasa": "Ração da casa",
+      "registrar": "Registrar",
+      "registrarLigacao": "Registrar ligação",
+      "registrarOcorrencia": "Registrar",
+      "rotinaHoje": "Rotina de hoje",
+      "semBoletim": "Nenhum boletim gerado.",
+      "semContato": "Sem contato",
+      "semDiario": "Nada registrado ainda.",
+      "semMedicacao": "Nenhuma",
+      "semOcorrencias": "Nenhuma ocorrência.",
+      "semRotina": "Nenhuma tarefa para hoje.",
+      "stat": {
+        "entrada": "Entrada",
+        "peso": "Peso de entrada",
+        "prevista": "prevista",
+        "recebidoPor": "Recebido por {nome}",
+        "saida": "Saída",
+        "saidaPeso": "saiu com {valor}",
+        "saiu": "saiu",
+        "saldo": "Saldo",
+        "saldoDetalhe": "a receber na saída",
+        "semPesagem": "sem pesagem de saída"
+      },
+      "subtitulo": "Hotel",
+      "titulo": "Estadia",
+      "voltar": "Hóspedes",
+      "comoEstaSeAdaptando": "Como ele está se adaptando"
+    },
+    "exigencia": {
+      "antipulgas": "Antipulgas",
+      "exame-parasitologico": "Exame parasitológico",
+      "termo-responsabilidade": "Termo de responsabilidade",
+      "vacina-antirrabica": "Vacina antirrábica",
+      "vacina-giardia": "Vacina contra giárdia",
+      "vacina-polivalente": "Vacina polivalente",
+      "vacina-tosse-canis": "Vacina da tosse dos canis",
+      "vermifugo": "Vermífugo"
+    },
+    "exigencias": {
+      "apresentacao": "Data da apresentação",
+      "apresentadoEm": "Apresentado em {data}",
+      "autorizadaPor": "Autorizada por",
+      "bloqueado": "{total} documento impede o check-in. | {total} documentos impedem o check-in.",
+      "comAviso": "{total} documento pede atenção. | {total} documentos pedem atenção.",
+      "confirmarDispensa": "Dispensar mesmo assim",
+      "confirmarRegistro": "Registrar comprovante",
+      "dispensaAviso": "A dispensa fica registrada com seu nome e o motivo escrito.",
+      "dispensadaPor": "Dispensada por {nome}",
+      "dispensar": "Dispensar",
+      "dispensarTitulo": "Dispensar {item}",
+      "documento": "Identificação do documento",
+      "documentoDica": "Lote da vacina, número da receita, nome do arquivo.",
+      "motivo": "Motivo da dispensa",
+      "motivoDica": "Por que a casa está aceitando o hóspede sem este documento.",
+      "registrar": "Registrar",
+      "registrarTitulo": "Registrar {item}",
+      "semComprovante": "Nenhum comprovante apresentado",
+      "semValidade": "Este documento não tem validade.",
+      "tudoEmDia": "Documentação em dia para todo o período.",
+      "valeAte": "Vale até {data}",
+      "validadeCalculada": "Válido até {data}",
+      "venceDurante": "Vence em {data}, {dias} dia antes da saída | Vence em {data}, {dias} dias antes da saída"
+    },
+    "formato": {
+      "agora": "agora",
+      "dias": "{valor} dia | {valor} dias",
+      "emTempo": "em {valor}",
+      "haTempo": "há {valor}",
+      "horas": "{valor} h",
+      "horasMinutos": "{horas} h {minutos} min",
+      "minutos": "{valor} min",
+      "semvalor": "—"
+    },
+    "grade": {
+      "acomodacao": "Acomodação",
+      "barraTitulo": "{pet} · {tutor} · {periodo}",
+      "legenda": {
+        "atencao": "Documentação pendente",
+        "confirmada": "Reserva confirmada",
+        "hospedado": "Na casa agora",
+        "livre": "Livre",
+        "parada": "Fora de operação",
+        "pendente": "Sem sinal pago"
+      },
+      "legendaTabela": "Ocupação das acomodações, uma coluna por noite",
+      "reservarEm": "Reservar {acomodacao} a partir de {data}"
+    },
+    "gravidade": {
+      "grave": "Grave",
+      "leve": "Leve",
+      "moderada": "Moderada"
+    },
+    "hospedes": {
+      "cartao": {
+        "atrasadas": "{total} atrasada | {total} atrasadas",
+        "boletimRetido": "O recado ao responsável está parado esperando uma ligação",
+        "faltaPesar": "Falta pesar antes de entregar",
+        "hojeAs": "hoje às {hora}",
+        "naCasaHa": "Na casa há",
+        "nadaAFazer": "nada pendente",
+        "noites": "{total} noite | {total} noites",
+        "pendentes": "{total} para agora | {total} para agora",
+        "precisaLigar": "Ligue para {tutor} antes do fim do turno",
+        "proxima": "próxima em {tempo}",
+        "rotina": "Rotina",
+        "sai": "Sai"
+      },
+      "irParaRotina": "Abrir rotina do turno",
+      "ninguemPrecisa": "Ninguém precisa de você agora. A casa está em dia.",
+      "ninguemSai": "Ninguém sai hoje.",
+      "recorte": {
+        "precisam": "Precisam de mim ({total})",
+        "saem": "Saem hoje ({total})",
+        "todos": "Todos ({total})"
+      },
+      "recorteRotulo": "Mostrar",
+      "subtitulo": "Hotel",
+      "titulo": "Hóspedes na casa",
+      "vazioDescricao": "Os hóspedes aparecem aqui depois do check-in.",
+      "vazioTitulo": "Nenhum hóspede na casa"
+    },
+    "impedimento": {
+      "capacidade": "Capacidade insuficiente",
+      "especie": "Espécie não aceita",
+      "higienizacao": "Em higienização",
+      "inativa": "Fora de operação",
+      "ocupada": "Ocupada",
+      "porte": "Porte não cabe"
+    },
+    "linhaDoDia": {
+      "agora": "Agora",
+      "rotulo": "Chegadas e saídas de hoje, hora a hora",
+      "semMovimento": "Nenhuma chegada nem saída hoje."
+    },
+    "mapa": {
+      "especie": "Espécie",
+      "foraDaGrade": "O período procurado está fora das três semanas à vista. Use as setas para chegar até ele.",
+      "hoje": "Hoje",
+      "ocupantes": "Animais",
+      "periodo": "Período",
+      "porte": "Porte",
+      "procuraAnimais": "animal ou mais",
+      "procuraDe": "de",
+      "procuraInicio": "Tenho um",
+      "qualquerEspecie": "Qualquer espécie",
+      "qualquerPorte": "Qualquer porte",
+      "respostaNao": "Nenhuma acomodação livre para {noites} noite | Nenhuma acomodação livre para {noites} noites",
+      "respostaSim": "{total} acomodação serve | {total} acomodações servem",
+      "semNenhumaReserva": "{total} acomodação sem nenhuma reserva no período | {total} acomodações sem nenhuma reserva no período",
+      "semanaAnterior": "Semana anterior",
+      "semanaSeguinte": "Semana seguinte",
+      "subtitulo": "Hotel",
+      "titulo": "Mapa de acomodações",
+      "vazioDescricao": "Cadastre as acomodações da casa para começar a vender diárias.",
+      "vazioTitulo": "Nenhuma acomodação cadastrada",
+      "verReservas": "Ver reservas"
+    },
+    "modulo": {
+      "oculto": "Módulo hotel oculto",
+      "visivel": "Módulo hotel visível"
+    },
+    "motivoCancelamento": {
+      "animal-doente": "Animal doente",
+      "hotel-indisponivel": "Hotel sem vaga",
+      "outro": "Outro motivo",
+      "preco": "Preço",
+      "responsavel-desistiu": "Responsável desistiu",
+      "viagem-cancelada": "Viagem cancelada"
+    },
+    "motivoInativa": {
+      "desinfeccao": "Desinfecção",
+      "equipamento": "Equipamento",
+      "manutencao": "Manutenção",
+      "outro": "Outro motivo",
+      "reforma": "Reforma"
+    },
+    "navegacao": {
+      "casa": "A casa",
+      "dia": "2 · O dia",
+      "secao": "Hotel",
+      "vender": "1 · Vender"
+    },
+    "ocorrencia": {
+      "conduta": "O que a casa fez",
+      "condutaDica": "Ocorrência sem conduta não ajuda quem lê amanhã.",
+      "descricao": "Descrição",
+      "descricaoDica": "O que foi observado, quando e por quanto tempo.",
+      "encaminhar": "Encaminhar ao veterinário",
+      "gravidade": "Gravidade",
+      "oQue": "O que aconteceu",
+      "registrar": "Registrar ocorrência",
+      "titulo": "Ocorrência com {pet}",
+      "vaiTravar": "Ocorrência grave exige ligação ao responsável antes do fim do turno."
+    },
+    "ocorrenciaKind": {
+      "apatia": "Apatia",
+      "briga": "Briga",
+      "destruicao": "Destruição",
+      "diarreia": "Diarreia",
+      "estresse": "Estresse",
+      "lesao": "Lesão",
+      "outro": "Outro",
+      "recusa-alimentar": "Recusa alimentar",
+      "tentativa-de-fuga": "Tentativa de fuga",
+      "tosse": "Tosse",
+      "vomito": "Vômito"
+    },
+    "orcamento": {
+      "item": "Item",
+      "linha": {
+        "acompanhante": "Diária do acompanhante",
+        "desconto": "Desconto",
+        "diaria": "Diária",
+        "meia-diaria": "Saída tardia",
+        "servico": "Serviço",
+        "temporada": "Acréscimo de temporada"
+      },
+      "pago": "Já pago",
+      "quantidade": "Qtd.",
+      "saldo": "Saldo a receber",
+      "sinalSugerido": "Sinal sugerido",
+      "somaTotal": "Total da estadia",
+      "titulo": "Orçamento",
+      "total": "Total",
+      "unitario": "Unitário"
+    },
+    "origem": {
+      "app": "Aplicativo",
+      "balcao": "Balcão",
+      "indicacao": "Indicação",
+      "retorno": "Retorno",
+      "telefone": "Telefone",
+      "whatsapp": "WhatsApp"
+    },
+    "painel": {
+      "chegamHoje": "Chegam hoje ({total})",
+      "faltaPesar": "Falta pesar",
+      "irParaRotina": "Abrir rotina",
+      "podeEntrar": "Pode entrar",
+      "precisaAgora": "Precisa de você agora ({total})",
+      "prontoParaSair": "Pronto para sair",
+      "responsavel": "Responsável: {nome}",
+      "resumo": {
+        "atrasadas": "{total} atrasada | {total} atrasadas",
+        "chegam": "chega | chegam",
+        "naCasa": "na casa",
+        "saem": "sai | saem",
+        "tarefas": "tarefa para agora | tarefas para agora"
+      },
+      "saemHoje": "Saem hoje ({total})",
+      "semChegadas": "Nenhuma chegada prevista para hoje.",
+      "semSaidas": "Nenhuma saída prevista para hoje.",
+      "titulo": "Painel do dia",
+      "travaAdmissao": "{pet} chega hoje sem a documentação exigida.",
+      "travaAdmissaoAcao": "Peça o documento agora, ou dispense com seu nome.",
+      "travaBoletim": "O boletim de {pet} está retido esperando uma ligação.",
+      "travaBoletimAcao": "Abra a estadia para liberar o recado.",
+      "travaOcorrencia": "Ligue para o responsável de {pet}: há uma ocorrência grave sem contato.",
+      "travaOcorrenciaAcao": "Ligue para {telefone} e registre a ligação na estadia.",
+      "vazioDescricao": "Nenhum hóspede na casa e nenhuma chegada prevista para hoje.",
+      "vazioTitulo": "Nada acontecendo hoje"
+    },
+    "porte": {
+      "gigante": "Gigante",
+      "grande": "Grande",
+      "medio": "Médio",
+      "mini": "Mini",
+      "pequeno": "Pequeno"
+    },
+    "recurso": {
+      "area-externa": "Área externa",
+      "camera": "Câmera",
+      "climatizacao": "Climatizada",
+      "janela": "Janela",
+      "piso-aquecido": "Piso aquecido"
+    },
+    "registroKind": {
+      "banho": "Banho",
+      "brincadeira": "Brincadeira",
+      "carinho": "Carinho",
+      "eliminacao": "Xixi e cocô",
+      "observacao": "Observação",
+      "passeio": "Passeio",
+      "refeicao": "Refeição",
+      "sono": "Sono"
+    },
+    "reserva": {
+      "acompanhante": "Acompanhante da mesma casa",
+      "avisoAdmissao": "Documentação a resolver antes da entrada: {itens}",
+      "checkInBloqueado": "O check-in está bloqueado pela documentação pendente.",
+      "confirmarSinal": "Registrar sinal e confirmar",
+      "criar": "Criar reserva",
+      "diarias": "{total} diária | {total} diárias",
+      "escolhaHospede": "Escolha o animal",
+      "exigencias": "Documentação de admissão",
+      "fazerCheckIn": "Fazer check-in",
+      "hospede": "Hóspede",
+      "irParaEstadia": "Abrir estadia",
+      "jaHospedado": "Este hóspede já está na casa.",
+      "novaTitulo": "Nova reserva · {acomodacao}",
+      "observacao": "Observação do responsável",
+      "observacaoDica": "Medos, manias, o que ajuda a acalmar.",
+      "origem": "Como chegou",
+      "periodo": "Período",
+      "porDiaria": " por diária",
+      "saidaTardia": "A saída prevista é depois do horário: {valor} a mais na conta.",
+      "semAcompanhante": "Sem acompanhante",
+      "semServico": "Nenhum serviço",
+      "servicos": "Serviços",
+      "sinalDevolve": "Cancelamento neste prazo ainda devolve o sinal.",
+      "sinalNaoDevolve": "Fora do prazo: o cancelamento não devolve o sinal.",
+      "subtitulo": "Hotel",
+      "titulo": "Reserva",
+      "chegaAs": "chega às",
+      "saiAs": "sai às",
+      "autorizados": "Quem mais pode retirar",
+      "autorizadosDica": "Nome de quem o responsável autoriza",
+      "acrescentarAutorizado": "Acrescentar autorizado",
+      "removerAutorizado": "Remover {nome}",
+      "quantasNoites": "Noites",
+      "noitesAtalho": "{total} noite | {total} noites",
+      "semVaga": "Esta acomodação não serve para esse período: {motivo}"
+    },
+    "reservaStatus": {
+      "cancelada": "Cancelada",
+      "confirmada": "Confirmada",
+      "encerrada": "Encerrada",
+      "hospedado": "Na casa",
+      "nao-compareceu": "Não compareceu",
+      "pendente": "Pendente"
+    },
+    "reservas": {
+      "buscar": "Buscar por hóspede, responsável ou acomodação",
+      "chegaEm": "chega em {dias} dia | chega em {dias} dias",
+      "chegaHoje": "chega hoje",
+      "coluna": {
+        "acomodacao": "Acomodação",
+        "admissao": "Documentação",
+        "diarias": "Diárias",
+        "entrada": "Entrada",
+        "hospede": "Hóspede",
+        "saldo": "Saldo",
+        "status": "Situação"
+      },
+      "espera": "Lista de espera ({total})",
+      "filtroAdmissao": "Documentação",
+      "filtroBloco": "Bloco",
+      "filtroStatus": "Situação",
+      "novaNoMapa": "Nova reserva",
+      "semResultadoDescricao": "Nenhuma reserva corresponde à busca ou aos filtros.",
+      "semResultadoTitulo": "Nada encontrado",
+      "subtitulo": "Hotel",
+      "titulo": "Reservas",
+      "vazioDescricao": "As reservas aparecem aqui assim que a primeira for criada pelo mapa.",
+      "vazioTitulo": "Nenhuma reserva",
+      "vesperaLede": "Chegam nos próximos três dias e ainda não podem entrar.",
+      "vesperaTitulo": "{total} chegada com documento pendente | {total} chegadas com documento pendente",
+      "horizonte": "Mostrar",
+      "horizonteProximas": "A partir de hoje",
+      "horizonteTodas": "Tudo, com histórico"
+    },
+    "resumo": {
+      "cancelamento": "Cancelamento",
+      "graves": "{total} grave | {total} graves",
+      "naoComparecimento": "Não comparecimento",
+      "naoComparecimentoDetalhe": "vaga queimada, sem aviso",
+      "ocorrencias": "Ocorrências",
+      "ocupacaoAria": "Barras de ocupação diária no período escolhido",
+      "ocupacaoPorDia": "Ocupação por dia",
+      "perdas": "Perdas",
+      "periodo": "Período",
+      "porOrigem": "Receita por origem",
+      "porServico": "Receita por serviço",
+      "reservas": "{total} reserva | {total} reservas",
+      "semOcorrencias": "Nenhuma ocorrência no período.",
+      "semServicos": "Nenhum serviço contratado no período.",
+      "stat": {
+        "diariaMedia": "Diária média",
+        "diariaMediaDetalhe": "receita por diária vendida",
+        "diarias": "{total} diária vendida | {total} diárias vendidas",
+        "ocupacao": "Ocupação média",
+        "ocupacaoDetalhe": "no período escolhido",
+        "receita": "Receita",
+        "retorno": "Retorno",
+        "retornoDetalhe": "de responsáveis que já vieram"
+      },
+      "subtitulo": "Hotel",
+      "titulo": "Resumo",
+      "vazioDescricao": "Nenhuma estadia faturada no intervalo escolhido.",
+      "vazioTitulo": "Nada no período",
+      "vezes": "{total} vez | {total} vezes"
+    },
+    "rotina": {
+      "animais": "{total} animal | {total} animais",
+      "atrasadas": "{total} atrasada | {total} atrasadas",
+      "de": "de {total} tarefa do dia | de {total} tarefas do dia",
+      "depoisDoTurno": "Seu turno acaba às {hora}. O que vem abaixo fica para quem assume.",
+      "desfazer": "Desfazer",
+      "feita": "Feita",
+      "filtroTipo": "Filtrar por tipo",
+      "jaPassou": "Já resolvido ({total} horário) | Já resolvido ({total} horários)",
+      "jaResolvidas": "{total} já resolvida | {total} já resolvidas",
+      "maisTarde": "Mais tarde hoje",
+      "marcadaAs": "Marcada às {hora}",
+      "marcarRonda": "Marcar a {total} como feita | Marcar as {total} como feitas",
+      "paraAgora": "Para agora",
+      "pular": "Pular",
+      "recusou": "Recusou",
+      "titulo": "Rotina do turno",
+      "todas": "Todas as tarefas",
+      "tudoEmDia": "Nada pendente neste momento. A próxima tarefa aparece aqui na hora dela.",
+      "vazioDescricao": "A rotina nasce com o check-in. Sem hóspedes na casa, não há o que fazer.",
+      "vazioTitulo": "Nenhuma tarefa hoje"
+    },
+    "servico": {
+      "adestramento": "Adestramento",
+      "banho": "Banho",
+      "medicacao-assistida": "Medicação assistida",
+      "passeio-extra": "Passeio extra",
+      "recreacao-individual": "Recreação individual",
+      "tosa": "Tosa",
+      "transporte": "Transporte"
+    },
+    "situacaoExigencia": {
+      "ausente": "Não apresentado",
+      "dispensado": "Dispensado",
+      "ok": "Em dia",
+      "vence-durante": "Vence durante",
+      "vencido": "Vencido"
+    },
+    "situacaoTarefa": {
+      "atrasada": "Atrasada",
+      "feita": "Feita",
+      "futura": "Mais tarde",
+      "na-janela": "Na hora",
+      "pulada": "Pulada",
+      "recusada": "Recusou"
+    },
+    "tarefaKind": {
+      "agua": "Água",
+      "banho": "Banho",
+      "higiene": "Higiene",
+      "medicacao": "Medicação",
+      "passeio": "Passeio",
+      "pesagem": "Pesagem",
+      "recreacao": "Recreação",
+      "refeicao": "Refeição",
+      "tosa": "Tosa",
+      "adestramento": "Adestramento"
+    },
+    "turno": {
+      "boletinsRetidos": "Boletins retidos",
+      "boletinsRetidosTexto": "{total} boletim espera ligação antes de sair. | {total} boletins esperam ligação antes de sair.",
+      "entregar": "Entregar turno",
+      "manha": "Manhã",
+      "noite": "Noite",
+      "nota": "Nota de passagem",
+      "notaDica": "O que o próximo turno precisa saber e a lista não diz.",
+      "passar": "Passar turno",
+      "pendencias": "Fica pendente ({total} tarefa) | Fica pendente ({total} tarefas)",
+      "recebidoPor": "Quem assume",
+      "resolver": "Resolver",
+      "semPendencias": "Nada fica pendente neste turno.",
+      "tarde": "Tarde",
+      "titulo": "Passagem de turno",
+      "travado": "Isto impede a passagem",
+      "sai": "entrega",
+      "entra": "assume"
+    },
+    "via": {
+      "oftalmica": "Oftálmica",
+      "oral": "Oral",
+      "otologica": "Otológica",
+      "subcutanea": "Subcutânea",
+      "topica": "Tópica"
+    },
+    "tour": {
+      "passo": "{atual} de {total}",
+      "proximo": "Próximo",
+      "anterior": "Anterior",
+      "terminar": "Entendi",
+      "sair": "Fechar",
+      "mapa": {
+        "pergunta": {
+          "titulo": "A pergunta desta tela",
+          "texto": "Tem vaga nesse período? Tudo aqui existe para você responder isso com o telefone na mão."
+        },
+        "procura": {
+          "titulo": "Diga o que estão procurando",
+          "texto": "Espécie, porte, as datas e quantos animais. É a mesma frase que a pessoa diz do outro lado da linha, na mesma ordem."
+        },
+        "resposta": {
+          "titulo": "A resposta, em uma frase",
+          "texto": "Quantas acomodações servem para aquele período. Verde quer dizer que dá; vermelho, que não há vaga."
+        },
+        "grade": {
+          "titulo": "O calendário da casa",
+          "texto": "Cada linha é uma acomodação, cada coluna é uma noite. As barras são o que já está vendido, e o vazio entre elas é onde cabe a próxima reserva. Clique num vazio para reservar a partir daquele dia."
+        },
+        "legenda": {
+          "titulo": "O que cada cor quer dizer",
+          "texto": "Quem está na casa agora, o que está confirmado, o que ainda não pagou sinal e o que está fora de operação. A barra listrada é acomodação parada, e ela não é vendável."
+        }
+      },
+      "reservas": {
+        "pergunta": {
+          "titulo": "A pergunta desta tela",
+          "texto": "O que está vendido, e o que vai dar trabalho. É a tela da véspera: abra no fim da tarde para saber o que resolver antes de amanhã."
+        },
+        "vespera": {
+          "titulo": "O que não pode esperar",
+          "texto": "Quem chega nos próximos três dias e ainda não pode entrar por falta de documento. Três dias porque é o prazo em que o responsável ainda consegue trazer o papel."
+        },
+        "horizonte": {
+          "titulo": "Até onde a lista olha",
+          "texto": "A tela abre no que vem pela frente, que é a pergunta do dia a dia. O histórico não sumiu: está na outra opção, para quando você procurar a estadia do mês passado."
+        },
+        "tabela": {
+          "titulo": "A coluna que importa",
+          "texto": "Documentação é ordenável: um clique no cabeçalho põe no topo tudo o que vai travar no balcão. É por ela que se varre a semana."
+        },
+        "espera": {
+          "titulo": "Quem ficou sem vaga",
+          "texto": "A lista de espera fica no rodapé porque só é consultada quando uma reserva cai — e nesse momento você já está nesta tela."
+        }
+      },
+      "painel": {
+        "pergunta": {
+          "titulo": "A pergunta desta tela",
+          "texto": "O que acontece hoje. É a primeira tela do dia: abra de manhã e você sabe o que vem primeiro."
+        },
+        "travas": {
+          "titulo": "O que precisa de você agora",
+          "texto": "Abre a tela porque tem prazo: uma ligação pendente, um boletim preso atrás dela, um animal que chega sem vacina. Cada item é um botão que leva ao lugar onde se resolve."
+        },
+        "resumo": {
+          "titulo": "O dia em uma linha",
+          "texto": "Quantos estão na casa, quantos chegam, quantos saem e quantas tarefas estão para agora. Quatro números que cabem numa frase."
+        },
+        "trilho": {
+          "titulo": "A linha do tempo do dia",
+          "texto": "Chegadas em cima, saídas embaixo, e uma marca em \"agora\". O triângulo ao lado de um nome quer dizer que aquela entrada ou saída está travada."
+        },
+        "colunas": {
+          "titulo": "Quem chega e quem sai",
+          "texto": "A mesma informação do trilho, em lista, com o selo do que impede. Clique em qualquer linha para abrir a reserva ou a estadia."
+        }
+      },
+      "rotina": {
+        "pergunta": {
+          "titulo": "A pergunta desta tela",
+          "texto": "O que é para fazer agora. É a prancheta do turno: deixe aberta no celular enquanto trabalha no canil."
+        },
+        "progresso": {
+          "titulo": "Quanto já foi feito",
+          "texto": "Quantas tarefas do dia já foram marcadas, do total. Serve para saber se o turno está em dia sem contar linha por linha."
+        },
+        "filtros": {
+          "titulo": "Um tipo de tarefa por vez",
+          "texto": "Refeição, medicação, passeio, higiene, água. Quem vai servir a comida de todo mundo de uma vez filtra por refeição e desce a lista."
+        },
+        "tempo": {
+          "titulo": "Agora, mais tarde, e o que passou",
+          "texto": "As tarefas ficam num eixo de horários, em três tempos. O que está atrasado sobe para o topo, marcado — não some no meio da lista."
+        },
+        "marcar": {
+          "titulo": "Marcar custa um toque",
+          "texto": "Feita, recusou ou pular, direto na linha. \"Recusou\" não é erro de digitação: é informação clínica, e quatro refeições recusadas seguidas viram uma ocorrência."
+        },
+        "ronda": {
+          "titulo": "Uma ronda, não vinte linhas",
+          "texto": "As tarefas do mesmo serviço no mesmo horário viram uma ronda — \"Refeição, 20 animais\". Ronda curta já vem aberta; ronda longa abre num toque. Dá para marcar a ronda inteira de uma vez, menos a de medicação: remédio se marca um a um."
+        }
+      },
+      "hospedes": {
+        "pergunta": {
+          "titulo": "A pergunta desta tela",
+          "texto": "Como está cada animal na casa. Um cartão por hóspede, ordenados por quem precisa de você primeiro."
+        },
+        "recortes": {
+          "titulo": "Três recortes",
+          "texto": "Todos, os que precisam de você, e os que saem hoje. O do meio é o que se olha no meio do turno; o da direita, no fim da manhã."
+        },
+        "cartao": {
+          "titulo": "O cartão inteiro muda de cor",
+          "texto": "Quando algo trava naquele hóspede, não é um selinho discreto que muda: é o cartão todo. Dá para ver do outro lado da sala."
+        },
+        "linhas": {
+          "titulo": "As três linhas do cartão",
+          "texto": "Rotina diz se há tarefa atrasada; na casa há, quantas noites ele já dormiu; sai, quando vai embora. Clique no cartão para abrir a estadia inteira."
+        }
+      },
+      "reserva": {
+        "pergunta": {
+          "titulo": "A pergunta desta tela",
+          "texto": "Quanto custa, e esse animal pode entrar. É o contrato da hospedagem, e é daqui que sai o check-in."
+        },
+        "periodo": {
+          "titulo": "O período e a conta",
+          "texto": "Entrada, saída, quantas diárias e em qual acomodação. Se a saída prevista passar do horário da casa, a meia diária já aparece no orçamento — não vira surpresa no balcão."
+        },
+        "exigencias": {
+          "titulo": "A documentação de admissão",
+          "texto": "A validade é conferida contra o último dia da estadia, não contra hoje. Vermelho impede a entrada; âmbar avisa que vence no meio da estadia e ainda dá tempo de renovar."
+        },
+        "checkin": {
+          "titulo": "O botão só acende quando pode",
+          "texto": "Fazer check-in fica bloqueado enquanto houver documento que impede. Não é lembrete: é regra, e ela não é contornável por esta tela nem por nenhuma outra."
+        }
+      },
+      "estadia": {
+        "pergunta": {
+          "titulo": "A pergunta desta tela",
+          "texto": "Como esse animal está passando. Tudo sobre a hospedagem em um lugar, e o check-out se faz daqui."
+        },
+        "rotina": {
+          "titulo": "A rotina de hoje, só dele",
+          "texto": "As tarefas nascem da ficha de entrada: a comida que o responsável mandou, o remédio no horário, o passeio. Dá para marcar daqui sem voltar para a prancheta do turno."
+        },
+        "ocorrencias": {
+          "titulo": "Ocorrências e o boletim",
+          "texto": "Notícia ruim não vai por aplicativo. Uma ocorrência grave segura o boletim do responsável até alguém da casa ligar — e o botão de registrar a ligação está ali do lado."
+        },
+        "ficha": {
+          "titulo": "A ficha da estadia",
+          "texto": "O que o responsável combinou: ração e horários, medicação, o que veio na mala, o que ele autorizou e para quem ligar numa emergência."
+        },
+        "checkout": {
+          "titulo": "O que entrou tem que sair",
+          "texto": "O check-out não fecha enquanto cada pertence não for conferido e o animal não for pesado de novo. É a reclamação mais barata de evitar e a mais cara de resolver."
+        }
+      },
+      "acomodacoes": {
+        "pergunta": {
+          "titulo": "A pergunta desta tela",
+          "texto": "Como a casa é montada. O sistema não adivinha quantas baias você tem: quem cadastra é a operação, no dia em que a casa muda."
+        },
+        "blocos": {
+          "titulo": "Agrupadas por bloco",
+          "texto": "Canil A, Canil B, Gatil, Jardim. Cada cartão diz o tipo, o porte que aceita, quantos cabem e qual tarifa cobra. Clique para editar."
+        },
+        "parada": {
+          "titulo": "Fora de operação, com data",
+          "texto": "Uma baia em reforma sai do mapa e não pode ser vendida. O \"há quantos dias\" é a informação: parada há duas horas é manutenção; há três semanas, é vaga esquecida."
+        },
+        "tarifas": {
+          "titulo": "Preço por porte, e temporada",
+          "texto": "A tabela cruza tarifa e porte, e o acompanhante entra por um percentual. As temporadas ficam abaixo: são recorrentes, valem todo ano na mesma faixa de datas."
+        }
+      },
+      "resumo": {
+        "pergunta": {
+          "titulo": "A pergunta desta tela",
+          "texto": "Valeu a pena o mês. É a única tela que olha para trás, e serve para decidir, não para operar."
+        },
+        "periodo": {
+          "titulo": "Escolha o período",
+          "texto": "Abre nos últimos trinta dias. Todo número e todo cartão desta tela responde pelo período escolhido aqui, e por nenhum outro."
+        },
+        "numeros": {
+          "titulo": "Os quatro números",
+          "texto": "Ocupação média, receita, diária média e retorno. O retorno conta responsáveis que já tinham vindo antes — é fidelidade, não volume."
+        },
+        "grafico": {
+          "titulo": "Ocupação dia a dia",
+          "texto": "Desenhada dia a dia, e não como média: a média esconde exatamente o que se quer ver, que é a casa lotar no fim de semana e esvaziar na terça."
+        },
+        "cartoes": {
+          "titulo": "De onde vem, e o que se perde",
+          "texto": "Receita por origem da reserva e por serviço, as ocorrências do período, e as perdas. Cancelamento é aviso — deu para revender; não comparecer é vaga queimada."
+        }
       }
     }
   },

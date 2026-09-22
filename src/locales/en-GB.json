@@ -253,7 +253,8 @@
     "forgotPassword": "Forgotten password",
     "signOut": "Sign out",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "selectAll": "All"
   },
   "nav": {
     "sections": {
@@ -392,7 +393,9 @@
     },
     "guidance": {
       "show": "Show descriptions",
-      "hide": "Hide descriptions"
+      "hide": "Hide descriptions",
+      "tour": "How to use",
+      "tourTitulo": "Walk through this screen, part by part"
     }
   },
   "frame": {
@@ -3543,6 +3546,883 @@
         "paginas": "Bed list pages",
         "anterior": "Previous page",
         "proxima": "Next page"
+      }
+    }
+  },
+  "hotel": {
+    "acomodacaoKind": {
+      "baia": "Kennel",
+      "coletiva": "Shared",
+      "gatil": "Cattery",
+      "isolamento": "Isolation",
+      "suite": "Suite"
+    },
+    "acomodacoes": {
+      "acompanhante": "Companion",
+      "bloco": "Block",
+      "cabem": "fits {total} | fits {total}",
+      "capacidade": "Capacity",
+      "capacidadeDica": "How many animals from the same home fit together.",
+      "desativar": "Take out of service",
+      "detalhe": "Detail",
+      "editar": "Edit room",
+      "especies": "Species accepted",
+      "higienizacao": "Cleaning window",
+      "higienizacaoDica": "Time between one departure and the next arrival.",
+      "motivo": "Reason",
+      "nome": "Name",
+      "nova": "New room",
+      "operacao": "Service",
+      "paradas": "{total} out of service",
+      "porteMaximo": "Maximum size",
+      "reativar": "Put back in service",
+      "recursos": "Features",
+      "remover": "Remove from the register",
+      "removerConfirma": "Removing is permanent. Confirm?",
+      "removerSim": "Remove",
+      "resumo": "{total} room registered | {total} rooms registered",
+      "subtitulo": "Hotel",
+      "tarifa": "Rate",
+      "tarifas": "Rates",
+      "temporadas": "Seasons",
+      "tipo": "Type",
+      "titulo": "Accommodation",
+      "secaoIdentidade": "What it is",
+      "secaoQuemCabe": "Who fits",
+      "secaoPreco": "Turnaround and price"
+    },
+    "adaptacao": {
+      "em-adaptacao": "Settling in",
+      "estressado": "Stressed",
+      "tranquilo": "Settled"
+    },
+    "autorizacao": {
+      "atendimento-veterinario": "Emergency veterinary care",
+      "banho": "Bath",
+      "foto-em-rede-social": "Photos on social media",
+      "passeio-externo": "Walks outside the hotel",
+      "recreacao-em-grupo": "Group play",
+      "transporte": "Transport"
+    },
+    "checkin": {
+      "acrescentar": "Add",
+      "alimentacao": "Feeding",
+      "autorizacoes": "Permissions",
+      "bloqueado": "Required paperwork missing: {itens}",
+      "chegada": "Arrival",
+      "confirmar": "Confirm check-in",
+      "contato": "Emergency contact",
+      "emergencia": "Emergency",
+      "horarios": "Times",
+      "inspecao": "Arrival check",
+      "inspecaoDica": "Ticks, fleas, wounds, limping, coat condition.",
+      "marca": "Brand",
+      "novoPertence": "Add belonging",
+      "pertences": "Belongings",
+      "peso": "Weight on the scale",
+      "pesoCadastro": "On file: {valor}",
+      "petiscos": "Treats",
+      "porcao": "Portion",
+      "racaoPropria": "Food brought from home",
+      "removerPertence": "Remove {item}",
+      "restricoes": "Restrictions",
+      "titulo": "Check-in for {pet}",
+      "veterinario": "Owner's vet",
+      "recadoDaReserva": "On the booking:",
+      "exigidaPelaVenda": "service sold",
+      "vendaSemAutorizacao": "The booking sold a service that depends on: {itens}. Without the authorisation the house cannot do it, and the bill still charges for it.",
+      "medicacao": "Medication brought from home",
+      "medicacaoLede": "The house does not prescribe: it records what was already being given, to keep giving it on time.",
+      "remedio": "Medicine",
+      "remedioDica": "Benazepril 5 mg",
+      "dose": "Dose",
+      "doseDica": "half a tablet",
+      "via": "Route",
+      "receita": "Prescription",
+      "receitaDica": "Number and who signed it",
+      "acrescentarRemedio": "Add medicine",
+      "removerRemedio": "Remove medicine",
+      "medicacaoSemHorario": "A medicine with no times becomes no task at all, and nobody will be told to give it."
+    },
+    "checkout": {
+      "confirmar": "Close stay",
+      "devolvido": "Returned",
+      "fechamento": "Settlement",
+      "oQueHouve": "What happened to this item",
+      "ocorrenciaTravada": "{total} serious incident still without a call to the owner. | {total} serious incidents still without a call to the owner.",
+      "perdaRelevante": "Lost enough weight to deserve a conversation with the owner.",
+      "pertences": "Belongings check",
+      "pesagem": "Departure weighing",
+      "pesoEntrada": "Arrived at {valor}",
+      "pesoSaida": "Weight at departure",
+      "registrarPeso": "Record weight",
+      "saidaTardia": "Departure after check-out time: {percentual}% of a night extra.",
+      "saldo": "Balance due",
+      "titulo": "Check-out for {pet}",
+      "comoChegou": "How they arrived",
+      "comoChegouLede": "Recorded at check-in. Check it before handing over: it is what answers \"they arrived like that\".",
+      "quemRetira": "Who is collecting",
+      "outraPessoa": "Someone else",
+      "voltarALista": "Back to the list",
+      "outraPessoaDica": "Name of whoever came to collect",
+      "foraDaLista": "This person was not authorised on the booking. The name is recorded on the stay."
+    },
+    "comum": {
+      "cancelar": "Cancel",
+      "fechar": "Close",
+      "salvar": "Save"
+    },
+    "dev": {
+      "casos": "Planted cases",
+      "dados": "Data",
+      "fechar": "Close panel",
+      "latencia": "Latency: {valor} ms",
+      "offline": "Offline",
+      "recriar": "Rebuild data",
+      "rede": "Network",
+      "semente": "Seed",
+      "titulo": "Demo"
+    },
+    "diario": {
+      "comFoto": "With photo",
+      "oQue": "What happened",
+      "registrar": "Add entry",
+      "texto": "How it went",
+      "textoDica": "What the owner would like to read about this moment.",
+      "titulo": "Add to {pet}'s diary"
+    },
+    "erros": {
+      "acao": "That could not be completed. Try again.",
+      "admissao": "The admission paperwork blocks check-in.",
+      "boletimRetido": "The update only goes out after the call to the owner.",
+      "cadastro": {
+        "nao-encontrada": "Room not found.",
+        "nome-repetido": "A room with this name already exists.",
+        "ocupada": "There is a guest in this room right now.",
+        "tem-historico": "This room has hosted before: take it out of service instead of removing it.",
+        "tem-reserva": "There is a future booking for this room."
+      },
+      "catalogos": "The hotel data could not be loaded.",
+      "estadia": "The stay could not be loaded.",
+      "hospedes": "The guests could not be loaded.",
+      "mapa": "The accommodation map could not be loaded.",
+      "passagemTravada": "A serious incident has not been reported: the shift cannot be handed over.",
+      "reservas": "The bookings could not be loaded.",
+      "resumo": "The summary could not be loaded.",
+      "rotina": "The shift routine could not be loaded.",
+      "saida": {
+        "ocorrencia-sem-contato": "A serious incident has not been reported to the owner.",
+        "pertences": "Some belongings have not been checked.",
+        "peso-de-saida": "The departure weight is still missing."
+      },
+      "vaga": {
+        "capacidade": "This room does not fit that many animals.",
+        "especie": "This room does not accept the animal's species.",
+        "higienizacao": "The room is still being cleaned at that time.",
+        "inativa": "This room is out of service.",
+        "ocupada": "There is already a booking for this room in that period.",
+        "periodo-invalido": "The departure must be after the arrival.",
+        "porte": "The animal is too large for this room."
+      }
+    },
+    "especie": {
+      "ave": "Bird",
+      "canina": "Dog",
+      "equina": "Equine",
+      "felina": "Cat",
+      "reptil": "Reptile",
+      "roedor": "Rodent"
+    },
+    "estadia": {
+      "alimentacao": "Feeding",
+      "autorizacoes": "Permissions",
+      "boletim": "Update to the owner",
+      "boletimRetido": "On hold: the call to the owner is still missing.",
+      "comunicado": "Reported at {hora}",
+      "diario": "Guest diary",
+      "emergencia": "Emergency",
+      "encerrada": "Closed",
+      "enviado": "Sent",
+      "enviarBoletim": "Send",
+      "fazerCheckOut": "Check out",
+      "ficha": "Stay record",
+      "gerarBoletim": "Compose",
+      "inspecao": "Arrival check",
+      "medicacao": "Medication",
+      "ocorrencias": "Incidents",
+      "pertences": "Belongings",
+      "precisaLigar": "Call {nome} before the shift ends",
+      "racaoDaCasa": "House food",
+      "registrar": "Add entry",
+      "registrarLigacao": "Record the call",
+      "registrarOcorrencia": "Record",
+      "rotinaHoje": "Today's routine",
+      "semBoletim": "No update composed yet.",
+      "semContato": "Not reported",
+      "semDiario": "Nothing recorded yet.",
+      "semMedicacao": "None",
+      "semOcorrencias": "No incidents.",
+      "semRotina": "No tasks for today.",
+      "stat": {
+        "entrada": "Arrival",
+        "peso": "Arrival weight",
+        "prevista": "planned",
+        "recebidoPor": "Received by {nome}",
+        "saida": "Departure",
+        "saidaPeso": "left at {valor}",
+        "saiu": "left",
+        "saldo": "Balance",
+        "saldoDetalhe": "due at departure",
+        "semPesagem": "not weighed at departure"
+      },
+      "subtitulo": "Hotel",
+      "titulo": "Stay",
+      "voltar": "Guests",
+      "comoEstaSeAdaptando": "How they are settling in"
+    },
+    "exigencia": {
+      "antipulgas": "Flea treatment",
+      "exame-parasitologico": "Parasitology test",
+      "termo-responsabilidade": "Signed agreement",
+      "vacina-antirrabica": "Rabies vaccine",
+      "vacina-giardia": "Giardia vaccine",
+      "vacina-polivalente": "Multivalent vaccine",
+      "vacina-tosse-canis": "Kennel cough vaccine",
+      "vermifugo": "Deworming"
+    },
+    "exigencias": {
+      "apresentacao": "Date presented",
+      "apresentadoEm": "Presented on {data}",
+      "autorizadaPor": "Authorised by",
+      "bloqueado": "{total} document blocks check-in. | {total} documents block check-in.",
+      "comAviso": "{total} document needs attention. | {total} documents need attention.",
+      "confirmarDispensa": "Waive anyway",
+      "confirmarRegistro": "Record proof",
+      "dispensaAviso": "The waiver is recorded with your name and the reason you write.",
+      "dispensadaPor": "Waived by {nome}",
+      "dispensar": "Waive",
+      "dispensarTitulo": "Waive {item}",
+      "documento": "Document reference",
+      "documentoDica": "Vaccine batch, prescription number, file name.",
+      "motivo": "Reason for the waiver",
+      "motivoDica": "Why the house is accepting the guest without this document.",
+      "registrar": "Record",
+      "registrarTitulo": "Record {item}",
+      "semComprovante": "No proof presented",
+      "semValidade": "This document does not expire.",
+      "tudoEmDia": "Paperwork valid for the whole stay.",
+      "valeAte": "Valid until {data}",
+      "validadeCalculada": "Valid until {data}",
+      "venceDurante": "Expires on {data}, {dias} day before departure | Expires on {data}, {dias} days before departure"
+    },
+    "formato": {
+      "agora": "now",
+      "dias": "{valor} day | {valor} days",
+      "emTempo": "in {valor}",
+      "haTempo": "{valor} ago",
+      "horas": "{valor} h",
+      "horasMinutos": "{horas} h {minutos} min",
+      "minutos": "{valor} min",
+      "semvalor": "—"
+    },
+    "grade": {
+      "acomodacao": "Room",
+      "barraTitulo": "{pet} · {tutor} · {periodo}",
+      "legenda": {
+        "atencao": "Paperwork missing",
+        "confirmada": "Confirmed booking",
+        "hospedado": "In the house now",
+        "livre": "Free",
+        "parada": "Out of service",
+        "pendente": "No deposit paid"
+      },
+      "legendaTabela": "Room occupancy, one column per night",
+      "reservarEm": "Book {acomodacao} from {data}"
+    },
+    "gravidade": {
+      "grave": "Serious",
+      "leve": "Mild",
+      "moderada": "Moderate"
+    },
+    "hospedes": {
+      "cartao": {
+        "atrasadas": "{total} overdue | {total} overdue",
+        "boletimRetido": "The note to the owner is on hold waiting for a call",
+        "faltaPesar": "Needs weighing before handover",
+        "hojeAs": "today at {hora}",
+        "naCasaHa": "In the house for",
+        "nadaAFazer": "nothing pending",
+        "noites": "{total} night | {total} nights",
+        "pendentes": "{total} due now | {total} due now",
+        "precisaLigar": "Call {tutor} before the shift ends",
+        "proxima": "next in {tempo}",
+        "rotina": "Routine",
+        "sai": "Leaves"
+      },
+      "irParaRotina": "Open shift routine",
+      "ninguemPrecisa": "Nobody needs you right now. The house is up to date.",
+      "ninguemSai": "Nobody is leaving today.",
+      "recorte": {
+        "precisam": "Need me ({total})",
+        "saem": "Leaving today ({total})",
+        "todos": "All ({total})"
+      },
+      "recorteRotulo": "Show",
+      "subtitulo": "Hotel",
+      "titulo": "Guests in the house",
+      "vazioDescricao": "Guests appear here after check-in.",
+      "vazioTitulo": "No guests in the house"
+    },
+    "impedimento": {
+      "capacidade": "Not enough capacity",
+      "especie": "Species not accepted",
+      "higienizacao": "Being cleaned",
+      "inativa": "Out of service",
+      "ocupada": "Occupied",
+      "porte": "Size does not fit"
+    },
+    "linhaDoDia": {
+      "agora": "Now",
+      "rotulo": "Today's arrivals and departures, hour by hour",
+      "semMovimento": "No arrivals or departures today."
+    },
+    "mapa": {
+      "especie": "Species",
+      "foraDaGrade": "The dates you are looking for are outside the three weeks on screen. Use the arrows to reach them.",
+      "hoje": "Today",
+      "ocupantes": "Animals",
+      "periodo": "Dates",
+      "porte": "Size",
+      "procuraAnimais": "animal or more",
+      "procuraDe": "from",
+      "procuraInicio": "I have a",
+      "qualquerEspecie": "Any species",
+      "qualquerPorte": "Any size",
+      "respostaNao": "No room free for {noites} night | No room free for {noites} nights",
+      "respostaSim": "{total} room works | {total} rooms work",
+      "semNenhumaReserva": "{total} room with no booking at all in this range | {total} rooms with no booking at all in this range",
+      "semanaAnterior": "Previous week",
+      "semanaSeguinte": "Next week",
+      "subtitulo": "Hotel",
+      "titulo": "Accommodation map",
+      "vazioDescricao": "Register the rooms you have to start selling nights.",
+      "vazioTitulo": "No accommodation registered",
+      "verReservas": "View bookings"
+    },
+    "modulo": {
+      "oculto": "Hotel module hidden",
+      "visivel": "Hotel module visible"
+    },
+    "motivoCancelamento": {
+      "animal-doente": "Animal unwell",
+      "hotel-indisponivel": "Hotel fully booked",
+      "outro": "Other reason",
+      "preco": "Price",
+      "responsavel-desistiu": "Owner changed their mind",
+      "viagem-cancelada": "Trip cancelled"
+    },
+    "motivoInativa": {
+      "desinfeccao": "Disinfection",
+      "equipamento": "Equipment",
+      "manutencao": "Maintenance",
+      "outro": "Other reason",
+      "reforma": "Refurbishment"
+    },
+    "navegacao": {
+      "casa": "The house",
+      "dia": "2 · The day",
+      "secao": "Hotel",
+      "vender": "1 · Sell"
+    },
+    "ocorrencia": {
+      "conduta": "What the house did",
+      "condutaDica": "An incident without an action helps nobody tomorrow.",
+      "descricao": "Description",
+      "descricaoDica": "What was seen, when and for how long.",
+      "encaminhar": "Refer to the vet",
+      "gravidade": "Severity",
+      "oQue": "What happened",
+      "registrar": "Record incident",
+      "titulo": "Incident with {pet}",
+      "vaiTravar": "A serious incident requires a call to the owner before the shift ends."
+    },
+    "ocorrenciaKind": {
+      "apatia": "Lethargy",
+      "briga": "Fight",
+      "destruicao": "Damage",
+      "diarreia": "Diarrhoea",
+      "estresse": "Stress",
+      "lesao": "Injury",
+      "outro": "Other",
+      "recusa-alimentar": "Refusing food",
+      "tentativa-de-fuga": "Escape attempt",
+      "tosse": "Coughing",
+      "vomito": "Vomiting"
+    },
+    "orcamento": {
+      "item": "Item",
+      "linha": {
+        "acompanhante": "Companion night",
+        "desconto": "Discount",
+        "diaria": "Night",
+        "meia-diaria": "Late check-out",
+        "servico": "Service",
+        "temporada": "Season surcharge"
+      },
+      "pago": "Already paid",
+      "quantidade": "Qty",
+      "saldo": "Balance due",
+      "sinalSugerido": "Suggested deposit",
+      "somaTotal": "Stay total",
+      "titulo": "Quote",
+      "total": "Total",
+      "unitario": "Unit"
+    },
+    "origem": {
+      "app": "App",
+      "balcao": "Front desk",
+      "indicacao": "Referral",
+      "retorno": "Returning",
+      "telefone": "Phone",
+      "whatsapp": "WhatsApp"
+    },
+    "painel": {
+      "chegamHoje": "Arriving today ({total})",
+      "faltaPesar": "Not weighed yet",
+      "irParaRotina": "Open routine",
+      "podeEntrar": "Can come in",
+      "precisaAgora": "Needs you now ({total})",
+      "prontoParaSair": "Ready to leave",
+      "responsavel": "On duty: {nome}",
+      "resumo": {
+        "atrasadas": "{total} overdue | {total} overdue",
+        "chegam": "arriving | arriving",
+        "naCasa": "in the house",
+        "saem": "leaving | leaving",
+        "tarefas": "task due now | tasks due now"
+      },
+      "saemHoje": "Leaving today ({total})",
+      "semChegadas": "No arrivals expected today.",
+      "semSaidas": "No departures expected today.",
+      "titulo": "Day board",
+      "travaAdmissao": "{pet} arrives today without the required paperwork.",
+      "travaAdmissaoAcao": "Ask for the document now, or waive it with your name.",
+      "travaBoletim": "The update for {pet} is on hold waiting for a phone call.",
+      "travaBoletimAcao": "Open the stay to release the note.",
+      "travaOcorrencia": "Call the owner of {pet}: a serious incident has not been reported.",
+      "travaOcorrenciaAcao": "Call {telefone} and record the call on the stay.",
+      "vazioDescricao": "No guests in the house and no arrivals expected today.",
+      "vazioTitulo": "Nothing happening today"
+    },
+    "porte": {
+      "gigante": "Giant",
+      "grande": "Large",
+      "medio": "Medium",
+      "mini": "Toy",
+      "pequeno": "Small"
+    },
+    "recurso": {
+      "area-externa": "Outdoor area",
+      "camera": "Camera",
+      "climatizacao": "Climate control",
+      "janela": "Window",
+      "piso-aquecido": "Heated floor"
+    },
+    "registroKind": {
+      "banho": "Bath",
+      "brincadeira": "Play",
+      "carinho": "Cuddles",
+      "eliminacao": "Toilet",
+      "observacao": "Note",
+      "passeio": "Walk",
+      "refeicao": "Meal",
+      "sono": "Sleep"
+    },
+    "reserva": {
+      "acompanhante": "Companion from the same home",
+      "avisoAdmissao": "Paperwork to sort out before arrival: {itens}",
+      "checkInBloqueado": "Check-in is blocked by missing paperwork.",
+      "confirmarSinal": "Record deposit and confirm",
+      "criar": "Create booking",
+      "diarias": "{total} night | {total} nights",
+      "escolhaHospede": "Choose the animal",
+      "exigencias": "Admission paperwork",
+      "fazerCheckIn": "Check in",
+      "hospede": "Guest",
+      "irParaEstadia": "Open stay",
+      "jaHospedado": "This guest is already in the house.",
+      "novaTitulo": "New booking · {acomodacao}",
+      "observacao": "Owner's note",
+      "observacaoDica": "Fears, habits, what helps to calm the animal down.",
+      "origem": "How it came in",
+      "periodo": "Dates",
+      "porDiaria": " per night",
+      "saidaTardia": "The planned departure is after check-out time: {valor} extra.",
+      "semAcompanhante": "No companion",
+      "semServico": "No services",
+      "servicos": "Services",
+      "sinalDevolve": "Cancelling within this window still refunds the deposit.",
+      "sinalNaoDevolve": "Outside the window: cancelling does not refund the deposit.",
+      "subtitulo": "Hotel",
+      "titulo": "Booking",
+      "chegaAs": "arrives at",
+      "saiAs": "leaves at",
+      "autorizados": "Who else may collect",
+      "autorizadosDica": "Name of someone the owner authorises",
+      "acrescentarAutorizado": "Add authorised person",
+      "removerAutorizado": "Remove {nome}",
+      "quantasNoites": "Nights",
+      "noitesAtalho": "{total} night | {total} nights",
+      "semVaga": "This room does not fit that period: {motivo}"
+    },
+    "reservaStatus": {
+      "cancelada": "Cancelled",
+      "confirmada": "Confirmed",
+      "encerrada": "Closed",
+      "hospedado": "In the house",
+      "nao-compareceu": "No-show",
+      "pendente": "Pending"
+    },
+    "reservas": {
+      "buscar": "Search by guest, owner or room",
+      "chegaEm": "arrives in {dias} day | arrives in {dias} days",
+      "chegaHoje": "arrives today",
+      "coluna": {
+        "acomodacao": "Room",
+        "admissao": "Paperwork",
+        "diarias": "Nights",
+        "entrada": "Arrival",
+        "hospede": "Guest",
+        "saldo": "Balance",
+        "status": "Status"
+      },
+      "espera": "Waiting list ({total})",
+      "filtroAdmissao": "Paperwork",
+      "filtroBloco": "Block",
+      "filtroStatus": "Status",
+      "novaNoMapa": "New booking",
+      "semResultadoDescricao": "No booking matches the search or the filters.",
+      "semResultadoTitulo": "Nothing found",
+      "subtitulo": "Hotel",
+      "titulo": "Bookings",
+      "vazioDescricao": "Bookings show up here as soon as the first one is made from the map.",
+      "vazioTitulo": "No bookings",
+      "vesperaLede": "They arrive in the next three days and still cannot come in.",
+      "vesperaTitulo": "{total} arrival with paperwork missing | {total} arrivals with paperwork missing",
+      "horizonte": "Show",
+      "horizonteProximas": "From today",
+      "horizonteTodas": "Everything, with history"
+    },
+    "resumo": {
+      "cancelamento": "Cancellation",
+      "graves": "{total} serious | {total} serious",
+      "naoComparecimento": "No-show",
+      "naoComparecimentoDetalhe": "room lost, without warning",
+      "ocorrencias": "Incidents",
+      "ocupacaoAria": "Daily occupancy bars for the chosen period",
+      "ocupacaoPorDia": "Occupancy per day",
+      "perdas": "Losses",
+      "periodo": "Period",
+      "porOrigem": "Revenue by source",
+      "porServico": "Revenue by service",
+      "reservas": "{total} booking | {total} bookings",
+      "semOcorrencias": "No incidents in this period.",
+      "semServicos": "No services booked in this period.",
+      "stat": {
+        "diariaMedia": "Average night",
+        "diariaMediaDetalhe": "revenue per night sold",
+        "diarias": "{total} night sold | {total} nights sold",
+        "ocupacao": "Average occupancy",
+        "ocupacaoDetalhe": "over the chosen period",
+        "receita": "Revenue",
+        "retorno": "Returning",
+        "retornoDetalhe": "of owners who had come before"
+      },
+      "subtitulo": "Hotel",
+      "titulo": "Summary",
+      "vazioDescricao": "No stay was billed in the chosen range.",
+      "vazioTitulo": "Nothing in this period",
+      "vezes": "{total} time | {total} times"
+    },
+    "rotina": {
+      "animais": "{total} animal | {total} animals",
+      "atrasadas": "{total} overdue | {total} overdue",
+      "de": "of {total} task today | of {total} tasks today",
+      "depoisDoTurno": "Your shift ends at {hora}. What follows is for whoever takes over.",
+      "desfazer": "Undo",
+      "feita": "Done",
+      "filtroTipo": "Filter by type",
+      "jaPassou": "Already done ({total} time slot) | Already done ({total} time slots)",
+      "jaResolvidas": "{total} already done | {total} already done",
+      "maisTarde": "Later today",
+      "marcadaAs": "Marked at {hora}",
+      "marcarRonda": "Mark the {total} as done | Mark all {total} as done",
+      "paraAgora": "Due now",
+      "pular": "Skip",
+      "recusou": "Refused",
+      "titulo": "Shift routine",
+      "todas": "All tasks",
+      "tudoEmDia": "Nothing pending right now. The next task appears here when its time comes.",
+      "vazioDescricao": "The routine starts at check-in. With no guests, there is nothing to do.",
+      "vazioTitulo": "No tasks today"
+    },
+    "servico": {
+      "adestramento": "Training",
+      "banho": "Bath",
+      "medicacao-assistida": "Assisted medication",
+      "passeio-extra": "Extra walk",
+      "recreacao-individual": "One-to-one play",
+      "tosa": "Grooming",
+      "transporte": "Transport"
+    },
+    "situacaoExigencia": {
+      "ausente": "Not presented",
+      "dispensado": "Waived",
+      "ok": "Valid",
+      "vence-durante": "Expires mid-stay",
+      "vencido": "Expired"
+    },
+    "situacaoTarefa": {
+      "atrasada": "Overdue",
+      "feita": "Done",
+      "futura": "Later",
+      "na-janela": "Due now",
+      "pulada": "Skipped",
+      "recusada": "Refused"
+    },
+    "tarefaKind": {
+      "agua": "Water",
+      "banho": "Bath",
+      "higiene": "Cleaning",
+      "medicacao": "Medication",
+      "passeio": "Walk",
+      "pesagem": "Weighing",
+      "recreacao": "Play",
+      "refeicao": "Meal",
+      "tosa": "Grooming",
+      "adestramento": "Training"
+    },
+    "turno": {
+      "boletinsRetidos": "Updates on hold",
+      "boletinsRetidosTexto": "{total} update is waiting for a call before it can go out. | {total} updates are waiting for a call before they can go out.",
+      "entregar": "Hand over",
+      "manha": "Morning",
+      "noite": "Night",
+      "nota": "Handover note",
+      "notaDica": "What the next shift needs to know and the list does not say.",
+      "passar": "Hand over shift",
+      "pendencias": "Left pending ({total} task) | Left pending ({total} tasks)",
+      "recebidoPor": "Taking over",
+      "resolver": "Resolve",
+      "semPendencias": "Nothing is left pending on this shift.",
+      "tarde": "Afternoon",
+      "titulo": "Shift handover",
+      "travado": "This blocks the handover",
+      "sai": "handing over",
+      "entra": "taking over"
+    },
+    "via": {
+      "oftalmica": "Eye",
+      "oral": "Oral",
+      "otologica": "Ear",
+      "subcutanea": "Subcutaneous",
+      "topica": "Topical"
+    },
+    "tour": {
+      "passo": "{atual} of {total}",
+      "proximo": "Next",
+      "anterior": "Back",
+      "terminar": "Got it",
+      "sair": "Close",
+      "mapa": {
+        "pergunta": {
+          "titulo": "What this screen answers",
+          "texto": "Is there a room free for those dates? Everything here exists so you can answer that with the caller still on the line."
+        },
+        "procura": {
+          "titulo": "Describe what they need",
+          "texto": "Species, size, the dates and how many animals. The same sentence the caller says, in the same order."
+        },
+        "resposta": {
+          "titulo": "The answer, in one sentence",
+          "texto": "How many rooms fit those dates. Green means yes; red means nothing is free."
+        },
+        "grade": {
+          "titulo": "The house's calendar",
+          "texto": "Each row is a room, each column a night. The bars are what is already sold, and the gap between them is where the next booking fits. Click an empty cell to book from that day."
+        },
+        "legenda": {
+          "titulo": "What each colour means",
+          "texto": "Who is in the house now, what is confirmed, what has no deposit yet, and what is out of service. The hatched bar is a room out of operation, and it cannot be sold."
+        }
+      },
+      "reservas": {
+        "pergunta": {
+          "titulo": "What this screen answers",
+          "texto": "What is sold, and what will cause trouble. This is the day-before screen: open it late afternoon to see what to sort out before tomorrow."
+        },
+        "vespera": {
+          "titulo": "What can't wait",
+          "texto": "Who arrives within three days and still cannot check in for missing paperwork. Three days because that is how long the owner still has to bring it."
+        },
+        "horizonte": {
+          "titulo": "How far the list looks",
+          "texto": "The screen opens on what is ahead, which is the everyday question. History has not gone: it is in the other option, for when you need last month's stay."
+        },
+        "tabela": {
+          "titulo": "The column that matters",
+          "texto": "Paperwork is sortable: one click on the header brings everything that will block at the desk to the top. That is how you sweep the week."
+        },
+        "espera": {
+          "titulo": "Who missed out",
+          "texto": "The waiting list sits at the bottom because it is only read when a booking falls through, and by then you are already on this screen."
+        }
+      },
+      "painel": {
+        "pergunta": {
+          "titulo": "What this screen answers",
+          "texto": "What happens today. This is the first screen of the day: open it in the morning and you know what comes first."
+        },
+        "travas": {
+          "titulo": "What needs you now",
+          "texto": "It opens the screen because it has a deadline: a pending call, a report held behind it, an animal arriving without a vaccine. Each item is a button that takes you where it gets solved."
+        },
+        "resumo": {
+          "titulo": "The day in one line",
+          "texto": "How many are in the house, how many arrive, how many leave, and how many tasks are due now. Four numbers that fit in a sentence."
+        },
+        "trilho": {
+          "titulo": "The day's timeline",
+          "texto": "Arrivals above, departures below, and a mark on \"now\". A triangle beside a name means that arrival or departure is blocked."
+        },
+        "colunas": {
+          "titulo": "Who arrives and who leaves",
+          "texto": "The same information as the timeline, as a list, with the badge for what blocks. Click any row to open the booking or the stay."
+        }
+      },
+      "rotina": {
+        "pergunta": {
+          "titulo": "What this screen answers",
+          "texto": "What to do right now. This is the shift clipboard: keep it open on your phone while you work the kennel."
+        },
+        "progresso": {
+          "titulo": "How much is done",
+          "texto": "How many of today's tasks are already ticked, out of the total. It tells you whether the shift is on track without counting rows."
+        },
+        "filtros": {
+          "titulo": "One kind of task at a time",
+          "texto": "Meal, medication, walk, cleaning, water. Whoever is feeding everyone at once filters by meal and works down the list."
+        },
+        "tempo": {
+          "titulo": "Now, later, and what has passed",
+          "texto": "Tasks sit on a time rail, in three tempos. Anything overdue rises to the top, flagged, instead of hiding mid-list."
+        },
+        "marcar": {
+          "titulo": "Ticking costs one tap",
+          "texto": "Done, refused or skip, right on the row. \"Refused\" is not a typo: it is clinical information, and four refused meals in a row become an incident."
+        },
+        "ronda": {
+          "titulo": "One round, not twenty lines",
+          "texto": "Tasks of the same service at the same hour become a round — \"Meal, 20 animals\". Short rounds open by default; long ones open with a tap. A whole round can be marked at once, except medication: that one is marked animal by animal."
+        }
+      },
+      "hospedes": {
+        "pergunta": {
+          "titulo": "What this screen answers",
+          "texto": "How each animal in the house is doing. One card per guest, ordered by who needs you first."
+        },
+        "recortes": {
+          "titulo": "Three cuts",
+          "texto": "Everyone, those who need you, and those leaving today. The middle one is what you check mid-shift; the right one, late morning."
+        },
+        "cartao": {
+          "titulo": "The whole card changes colour",
+          "texto": "When something is blocked for that guest, it is not a discreet little badge that changes: it is the whole card. You can see it from across the room."
+        },
+        "linhas": {
+          "titulo": "The card's three lines",
+          "texto": "Routine says whether a task is overdue; in the house, how many nights they have slept; out, when they leave. Click the card to open the full stay."
+        }
+      },
+      "reserva": {
+        "pergunta": {
+          "titulo": "What this screen answers",
+          "texto": "What it costs, and whether this animal may come in. This is the stay contract, and check-in starts here."
+        },
+        "periodo": {
+          "titulo": "The dates and the bill",
+          "texto": "In, out, how many nights and in which room. If the planned departure is past the house time, the half-night is already on the quote, not a surprise at the desk."
+        },
+        "exigencias": {
+          "titulo": "Admission paperwork",
+          "texto": "Validity is checked against the last day of the stay, not against today. Red blocks entry; amber warns it expires mid-stay and there is still time to renew."
+        },
+        "checkin": {
+          "titulo": "The button only lights when allowed",
+          "texto": "Check-in stays blocked while a document bars it. It is not a reminder: it is a rule, and no screen can go around it."
+        }
+      },
+      "estadia": {
+        "pergunta": {
+          "titulo": "What this screen answers",
+          "texto": "How this animal is doing. Everything about the stay in one place, and check-out happens here."
+        },
+        "rotina": {
+          "titulo": "Today's routine, just theirs",
+          "texto": "Tasks come from the intake form: the food the owner sent, the medicine on time, the walk. You can tick them here without going back to the shift clipboard."
+        },
+        "ocorrencias": {
+          "titulo": "Incidents and the report",
+          "texto": "Bad news does not go by app. A serious incident holds the owner's report until someone from the house calls, and the button to log that call is right there."
+        },
+        "ficha": {
+          "titulo": "The stay record",
+          "texto": "What the owner agreed: food and times, medication, what came in the bag, what they authorised and who to call in an emergency."
+        },
+        "checkout": {
+          "titulo": "What came in must go out",
+          "texto": "Check-out will not close until every belonging is checked off and the animal is weighed again. It is the cheapest complaint to prevent and the dearest to fix."
+        }
+      },
+      "acomodacoes": {
+        "pergunta": {
+          "titulo": "What this screen answers",
+          "texto": "How the house is set up. The system does not guess how many kennels you have: the operation registers them, on the day the house changes."
+        },
+        "blocos": {
+          "titulo": "Grouped by block",
+          "texto": "Kennel A, Kennel B, Cattery, Garden. Each card says the type, the size it takes, how many fit and which rate it charges. Click to edit."
+        },
+        "parada": {
+          "titulo": "Out of service, with a date",
+          "texto": "A room under repair leaves the map and cannot be sold. The \"how many days\" is the information: down for two hours is maintenance; for three weeks, it is a forgotten room."
+        },
+        "tarifas": {
+          "titulo": "Price by size, and season",
+          "texto": "The table crosses rate and size, and a companion is charged as a percentage. Seasons sit below: they recur, applying every year on the same date range."
+        }
+      },
+      "resumo": {
+        "pergunta": {
+          "titulo": "What this screen answers",
+          "texto": "Was the month worth it. This is the only screen that looks back, and it is for deciding, not for operating."
+        },
+        "periodo": {
+          "titulo": "Pick the period",
+          "texto": "It opens on the last thirty days. Every number and every card on this screen answers for the period chosen here, and no other."
+        },
+        "numeros": {
+          "titulo": "The four numbers",
+          "texto": "Average occupancy, revenue, average nightly rate and returning rate. Returning counts owners who had come before: it is loyalty, not volume."
+        },
+        "grafico": {
+          "titulo": "Occupancy day by day",
+          "texto": "Drawn day by day, not as an average: the average hides exactly what you want to see, which is the house filling on the weekend and emptying on Tuesday."
+        },
+        "cartoes": {
+          "titulo": "Where it comes from, and what is lost",
+          "texto": "Revenue by booking source and by service, the period's incidents, and the losses. A cancellation is notice, you could resell; a no-show is a burnt room."
+        }
       }
     }
   },

@@ -413,6 +413,7 @@ export const patientRepository = {
             detalhe: alerta.detalhe.trim(),
           })),
         iniciais: iniciaisDe(input.nome),
+        fotoUrl: '',
       }
 
       dataset.pets.push(pet)

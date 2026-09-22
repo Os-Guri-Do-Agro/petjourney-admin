@@ -54,7 +54,7 @@ const PLURAL_ONLY_IN_SR_AR = new Set([
 const isListKey = (key) => /^clinico\.documentos\.termo\.[^.]+\.itens$/.test(key)
 
 /** Símbolo de "sem valor" (igual em todo idioma): única exceção ao em-dash em sr/ar. */
-const DASH_SYMBOL_KEYS = new Set(['clinico.formato.semvalor'])
+const DASH_SYMBOL_KEYS = new Set(['clinico.formato.semvalor', 'hotel.formato.semvalor'])
 
 const flatten = (o, p = '', out = {}) => {
   for (const [k, v] of Object.entries(o)) {

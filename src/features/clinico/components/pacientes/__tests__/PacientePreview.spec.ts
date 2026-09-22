@@ -40,6 +40,7 @@ function pet(patch: Partial<Pet> = {}): Pet {
     tutorId: 'rascunho-tutor',
     alertas: [],
     iniciais: 'QU',
+    fotoUrl: '',
     ...patch,
   }
 }
@@ -74,6 +75,7 @@ function emRepouso(): RascunhoDoPaciente {
       microchip: '',
       pelagem: '',
       iniciais: '',
+      fotoUrl: '',
     }),
     tutor: { ...tutor(), nome: '', telefone: '' },
   }

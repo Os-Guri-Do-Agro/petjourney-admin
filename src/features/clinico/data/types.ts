@@ -238,8 +238,17 @@ export type Pet = {
   pelagem: string
   tutorId: string
   alertas: PetAlert[]
-  /** Iniciais para o avatar; o módulo não carrega foto no mock. */
+  /** Iniciais para o avatar, usadas quando não há retrato. */
   iniciais: string
+  /**
+   * O retrato do animal.
+   *
+   * Vazio em toda a camada mocada, e de propósito: povoar o repositório de fotos inventadas
+   * criaria retratos falsos que alguém acabaria tomando por dado real. O campo existe para que a
+   * interface já fale a língua da API — `PetAvatar` mostra a foto quando ela chega e desenha o
+   * avatar de iniciais enquanto não chega.
+   */
+  fotoUrl: string
 }
 
 // ---------------------------------------------------------------------------

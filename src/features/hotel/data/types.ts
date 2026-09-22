@@ -1,0 +1,794 @@
+/**
+ * Contratos de domínio do módulo hotel.
+ *
+ * Estes tipos são a forma da API futura: a camada mocada em `data/` os produz e os repositórios
+ * os devolvem com a mesma assinatura que o backend terá. Componente nenhum conhece `fixtures` —
+ * só estes contratos.
+ *
+ * Terminologia: `tutorId` / `Tutor` sobrevivem como identificador de código e campo de API. Em
+ * texto visível em português o termo é sempre "responsável".
+ *
+ * O que **não** está aqui, de propósito: `Pet` e `Tutor`. Pet e responsável são cadastro da casa,
+ * compartilhado entre os módulos do portal — o mesmo labrador que se consulta na clínica é o que
+ * se hospeda no hotel. Duplicá-los aqui criaria dois cadastros que divergem no terceiro mês. Ver
+ * `data/fixtures/people.ts`.
+ */
+
+import type {
+  ClockTime,
+  ISODate,
+  ISODateTime,
+  PetPorte,
+  PetSpecies,
+} from '@/features/clinico/data/types'
+
+/**
+ * Reexportados para que o módulo hotel tenha um ponto único de tipos, como o clínico tem.
+ *
+ * `ISODate` e `ClockTime` não são "tipos da clínica": são a forma como o portal inteiro escreve
+ * data e hora de parede. Redeclará-los aqui criaria dois aliases idênticos que divergem no dia em
+ * que alguém mudar um deles.
+ */
+export type { ClockTime, ISODate, ISODateTime, PetPorte, PetSpecies }
+
+// ---------------------------------------------------------------------------
+// A casa
+// ---------------------------------------------------------------------------
+
+/**
+ * Um bloco físico do hotel.
+ *
+ * Existe porque a operação anda por bloco, não por acomodação: quem alimenta às 8h percorre o
+ * canil inteiro, e a tela de rotina precisa poder se reduzir ao que aquela pessoa vai fazer. É
+ * também o que separa o gatil do canil no mapa — e um gato que ouve latido a noite inteira não
+ * come.
+ */
+export type BlocoKind = 'canil' | 'gatil' | 'externo' | 'isolamento'
+
+export type Bloco = {
+  id: string
+  nome: string
+  kind: BlocoKind
+  /** Ordem de exibição no mapa. A casa tem uma ordem física, e a tela a respeita. */
+  ordem: number
+}
+
+/**
+ * Tipo de acomodação.
+ *
+ * Não é decoração: decide **quem pode ficar onde**. Gato em baia de cão não é uma preferência
+ * estética, é um hóspede que não come; coletiva não recebe quem tem histórico de briga; e
+ * isolamento existe para a chegada com suspeita — o hóspede que tosse no dia da entrada não pode
+ * dividir ar com os outros trinta antes de alguém olhar.
+ */
+export type AcomodacaoKind = 'suite' | 'baia' | 'gatil' | 'coletiva' | 'isolamento'
+
+/**
+ * O que a acomodação oferece.
+ *
+ * Entra no dado porque é **argumento de venda e critério de escolha**: o responsável que paga
+ * suíte paga pela câmera, e o hotel que oferece a acomodação errada num dia de 34 °C descobre
+ * isso pela reclamação.
+ */
+export type RecursoDaAcomodacao =
+  | 'camera'
+  | 'climatizacao'
+  | 'area-externa'
+  | 'piso-aquecido'
+  | 'janela'
+
+/**
+ * Por que uma acomodação saiu de operação.
+ *
+ * `kind`, e não texto livre, pelo mesmo motivo que o motivo de inatividade do leito: é o que
+ * permite contar quantas diárias a casa perde por reforma num trimestre, e traduzir nos seis
+ * idiomas. O caso concreto vai no `detalheInativa`, ao lado.
+ */
+export type AcomodacaoInativaMotivo =
+  | 'manutencao'
+  | 'desinfeccao'
+  | 'reforma'
+  | 'equipamento'
+  | 'outro'
+
+/**
+ * Uma acomodação do hotel.
+ *
+ * **O sistema não adivinha como o hotel é.** Quem monta a casa é a operação: cadastra o que tem,
+ * dá nome, e mexe nesse número quando cresce ou reforma. Por isso a acomodação é dado editável, e
+ * não constante de código.
+ */
+export type Acomodacao = {
+  id: string
+  nome: string
+  blocoId: string
+  kind: AcomodacaoKind
+  /**
+   * Quantos animais **da mesma casa** cabem.
+   *
+   * Não é lotação de desconhecidos: dois cães que moram juntos dormem juntos, e separá-los é
+   * pior para os dois. Capacidade maior que 1 é o que permite a reserva com acompanhante.
+   */
+  capacidade: number
+  /** Porte máximo aceito. Um gigante numa baia de porte médio não deita esticado. */
+  porteMaximo: PetPorte
+  /** Espécies aceitas. Lista vazia significa qualquer uma — que na prática nunca é o caso. */
+  especiesAceitas: PetSpecies[]
+  recursos: RecursoDaAcomodacao[]
+  /**
+   * Minutos entre uma saída e a entrada seguinte.
+   *
+   * É a regra R2 virando número: lavar, secar e trocar a cama leva tempo, e uma vaga oferecida
+   * dentro dessa janela é uma vaga que não existe. Zero é resposta válida para coletiva.
+   */
+  higienizacaoMinutos: number
+  tarifaId: string
+  ativa: boolean
+  /** Só faz sentido com `ativa: false`. Nulo enquanto a acomodação está em operação. */
+  motivoInativa: AcomodacaoInativaMotivo | null
+  /** O caso concreto: "trocar o piso", "aguardando peça". Vazio quando o motivo basta. */
+  detalheInativa: string
+  /**
+   * Desde quando está parada.
+   *
+   * É o que transforma "em manutenção" em informação: parada há duas horas é manutenção; parada
+   * há três semanas é uma vaga que o hotel esqueceu que tinha.
+   */
+  inativaDesde: ISODateTime | null
+}
+
+// ---------------------------------------------------------------------------
+// Preço
+// ---------------------------------------------------------------------------
+
+/**
+ * Tabela de diárias.
+ *
+ * Tudo em **centavos**, inteiro. Guardar reais com casa decimal devolveria o erro de ponto
+ * flutuante que centavos existem para evitar — e o total do orçamento deixaria de bater com o da
+ * nota por alguns centavos, que é o tipo de diferença que faz o cliente parar de confiar na conta.
+ */
+export type Tarifa = {
+  id: string
+  nome: string
+  /** Diária cheia por porte. O gigante ocupa mais espaço e come mais. */
+  diariaPorPorte: Record<PetPorte, number>
+  /**
+   * Quanto custa o segundo animal da mesma casa, em percentual da diária cheia.
+   *
+   * Percentual e não valor fixo porque a diária varia por porte, e um desconto fixo viraria
+   * gratuidade no porte mini.
+   */
+  acompanhantePercentual: number
+}
+
+/**
+ * Período com preço diferente.
+ *
+ * Dezembro, julho, feriado prolongado. É acréscimo percentual sobre a diária, e não uma segunda
+ * tabela, porque o que muda numa alta temporada é o multiplicador — manter duas tabelas faria a
+ * casa esquecer de reajustar uma delas.
+ */
+export type Temporada = {
+  id: string
+  nome: string
+  inicio: ISODate
+  fim: ISODate
+  acrescimoPercentual: number
+}
+
+export type ServicoKind =
+  | 'banho'
+  | 'tosa'
+  | 'passeio-extra'
+  | 'recreacao-individual'
+  | 'transporte'
+  | 'adestramento'
+  | 'medicacao-assistida'
+
+export type Servico = {
+  id: string
+  kind: ServicoKind
+  precoCentavos: number
+  /** Cobrado uma vez pela estadia, ou por diária. */
+  porDiaria: boolean
+  ativo: boolean
+}
+
+export type ServicoContratado = {
+  servicoId: string
+  quantidade: number
+  /** Preço no momento da contratação. O reajuste de amanhã não altera o que foi combinado. */
+  precoUnitarioCentavos: number
+  observacao: string
+}
+
+/**
+ * Política da casa sobre horário e sinal.
+ *
+ * Vive no cadastro e não em constante porque é **a regra que mais gera discussão no balcão**, e
+ * discussão de balcão se resolve mostrando a regra na tela antes de o cliente chegar.
+ */
+export type PoliticaDoHotel = {
+  /** Depois deste horário a saída começa a custar. */
+  horarioDeSaida: ClockTime
+  /** Até aqui, meia diária; passou, diária cheia. */
+  limiteMeiaDiaria: ClockTime
+  meiaDiariaPercentual: number
+  /** A partir de que horas a entrada do dia é aceita. */
+  horarioDeEntrada: ClockTime
+  /** Percentual da estadia cobrado como sinal para confirmar a reserva. */
+  sinalPercentual: number
+  /** Cancelamento com mais dias que isto devolve o sinal. */
+  cancelamentoSemCustoDias: number
+}
+
+export type Hotel = {
+  id: string
+  nome: string
+  endereco: string
+  telefone: string
+  /** Offset fixo da parede do hotel. Toda conversão de tempo passa por aqui. */
+  utcOffset: string
+  politica: PoliticaDoHotel
+}
+
+// ---------------------------------------------------------------------------
+// Equipe
+// ---------------------------------------------------------------------------
+
+export type FuncaoDaEquipe =
+  | 'recepcao'
+  | 'cuidador'
+  | 'banhista'
+  | 'adestrador'
+  | 'veterinario'
+  | 'gerente'
+
+/**
+ * Quem trabalha na casa.
+ *
+ * Toda execução de tarefa, toda ocorrência e toda passagem de turno carregam um nome daqui — é o
+ * que permite responder "quem estava com ele às três da manhã", que é a pergunta que ninguém faz
+ * até o dia em que precisa.
+ */
+export type Cuidador = {
+  id: string
+  nome: string
+  iniciais: string
+  funcao: FuncaoDaEquipe
+  /** Índice na escala de cores (0..5). Nunca uma cor literal. */
+  corIndice: number
+  ativo: boolean
+}
+
+export type TurnoKind = 'manha' | 'tarde' | 'noite'
+
+/**
+ * Um turno do hotel.
+ *
+ * A passagem é o momento em que a informação mais se perde numa hospedagem, e o protótipo a trata
+ * como registro e não como conversa: `entregueEm` e `recebidoPor` existem para que haja resposta
+ * quando alguém perguntar quem estava com o animal.
+ */
+export type Turno = {
+  id: string
+  kind: TurnoKind
+  inicio: ISODateTime
+  fim: ISODateTime
+  responsavelId: string
+  /** Nulo enquanto o turno está aberto. */
+  entregueEm: ISODateTime | null
+  recebidoPor: string | null
+  notaDePassagem: string
+  /**
+   * Tarefas que o turno **não** fechou e passou adiante, congeladas na entrega.
+   *
+   * Congeladas porque a lista precisa dizer o que estava pendente **naquele instante**;
+   * recalculada depois, mostraria a pendência já resolvida pelo turno seguinte, e a passagem
+   * perderia o sentido.
+   */
+  pendenciasEntregues: string[]
+}
+
+// ---------------------------------------------------------------------------
+// Exigências de admissão
+// ---------------------------------------------------------------------------
+
+/**
+ * O que a casa exige para aceitar um hóspede.
+ *
+ * É **dado e não constante de código** porque varia entre hotéis e muda com a legislação local:
+ * um hotel de São Paulo exige gripe canina, um do interior pode não exigir, e a lista precisa
+ * mudar sem republicar o portal.
+ */
+export type ExigenciaKind =
+  | 'vacina-polivalente'
+  | 'vacina-antirrabica'
+  | 'vacina-tosse-canis'
+  | 'vacina-giardia'
+  | 'vermifugo'
+  | 'antipulgas'
+  | 'exame-parasitologico'
+  | 'termo-responsabilidade'
+
+export type Exigencia = {
+  kind: ExigenciaKind
+  /** Espécies a que se aplica. Antirrábica vale para cão e gato; tosse dos canis, só para cão. */
+  especies: PetSpecies[]
+  /** Quantos meses o comprovante vale. `null` é documento sem validade (o termo assinado). */
+  validadeMeses: number | null
+  /**
+   * Vencida impede a entrada, ou apenas avisa?
+   *
+   * Nem toda exigência é da mesma natureza. A antirrábica é lei; o antipulgas é boa prática. Tratar
+   * as duas como bloqueio faria o balcão dispensar as duas com a mesma leveza — e a dispensa que
+   * vira rotina deixa de ser decisão.
+   */
+  bloqueia: boolean
+}
+
+/**
+ * Um comprovante apresentado.
+ *
+ * É registro **do hotel**, e não leitura da carteira clínica, de propósito: a maioria dos hóspedes
+ * se vacina em outro lugar, e um hotel que só soubesse ler a carteira da própria clínica recusaria
+ * quem está em dia. Quando o animal também é paciente da casa, o comprovante nasce pré-preenchido
+ * — mas quem responde por ele continua sendo o registro daqui.
+ */
+export type Comprovante = {
+  id: string
+  petId: string
+  kind: ExigenciaKind
+  apresentadoEm: ISODate
+  /** `null` para documento sem validade. */
+  validoAte: ISODate | null
+  /** Identificação do papel: lote da vacina, número da receita, nome do arquivo. */
+  documento: string
+  observacao: string
+}
+
+/**
+ * Dispensa nominal de uma exigência, para uma reserva.
+ *
+ * Existe porque a alternativa é pior. Sem ela, o hotel que decide aceitar um hóspede sem um
+ * comprovante faz isso **fora do sistema**, e some o registro de que alguém decidiu, quem decidiu
+ * e por quê. A dispensa nominal transforma uma burla numa decisão auditável.
+ */
+export type DispensaDeExigencia = {
+  kind: ExigenciaKind
+  motivo: string
+  autorizadaPor: string
+  autorizadaEm: ISODateTime
+}
+
+/**
+ * Situação de uma exigência, calculada contra o **último dia da estadia**.
+ *
+ * `vence-durante` é o estado que dá razão a este tipo existir. Checar contra hoje aprovaria uma
+ * antirrábica que vence no dia 27 para uma reserva que sai no dia 30 — e o problema apareceria no
+ * dia 27, com o responsável a 600 km dali.
+ */
+export type SituacaoDaExigencia = 'ok' | 'vence-durante' | 'vencido' | 'ausente' | 'dispensado'
+
+// ---------------------------------------------------------------------------
+// Reserva
+// ---------------------------------------------------------------------------
+
+/**
+ * Estados de uma reserva.
+ *
+ * `nao-compareceu` é distinto de `cancelada` pelo mesmo motivo que falta é distinta de
+ * cancelamento na agenda clínica: um é aviso — alguém decidiu antes e a casa pôde revender —, o
+ * outro é vaga queimada. Só o segundo tem política de sinal, e juntá-los tornaria impossível saber
+ * quanto a casa perde por ano com quem simplesmente não aparece.
+ */
+export type ReservaStatus =
+  | 'pendente'
+  | 'confirmada'
+  | 'hospedado'
+  | 'encerrada'
+  | 'cancelada'
+  | 'nao-compareceu'
+
+export type ReservaOrigem = 'balcao' | 'telefone' | 'whatsapp' | 'app' | 'retorno' | 'indicacao'
+
+export type MotivoDeCancelamento =
+  | 'responsavel-desistiu'
+  | 'viagem-cancelada'
+  | 'animal-doente'
+  | 'hotel-indisponivel'
+  | 'preco'
+  | 'outro'
+
+/**
+ * Uma linha do orçamento.
+ *
+ * O orçamento é uma lista e não um total porque **um total sozinho é uma conta que o cliente não
+ * confere e a recepção não defende**. Cada linha diz o que é, quantas vezes e quanto — e a soma
+ * acontece à vista.
+ */
+export type LinhaDoOrcamento = {
+  kind: 'diaria' | 'acompanhante' | 'temporada' | 'servico' | 'meia-diaria' | 'desconto'
+  /** `kind` do serviço, quando a linha é de serviço. A tela traduz; nada de texto pronto. */
+  servicoKind: ServicoKind | null
+  quantidade: number
+  valorUnitarioCentavos: number
+  totalCentavos: number
+}
+
+export type Orcamento = {
+  linhas: LinhaDoOrcamento[]
+  totalCentavos: number
+  sinalCentavos: number
+  /** Total menos o que já foi pago. É o número que o balcão cobra na saída. */
+  saldoCentavos: number
+}
+
+export type Reserva = {
+  id: string
+  petId: string
+  tutorId: string
+  /** Segundo animal da mesma casa, na mesma acomodação. `null` no caso normal. */
+  acompanhantePetId: string | null
+  acomodacaoId: string
+  entradaPrevista: ISODateTime
+  saidaPrevista: ISODateTime
+  /**
+   * Diárias contadas pela regra da casa, não por diferença de datas.
+   *
+   * Guardado e não derivado porque a regra pode mudar, e uma reserva vendida com sete diárias
+   * continua valendo sete mesmo que a casa passe a contar diferente no mês seguinte.
+   */
+  diarias: number
+  status: ReservaStatus
+  origem: ReservaOrigem
+  servicos: ServicoContratado[]
+  orcamento: Orcamento
+  /** Quanto já entrou. Sinal e pagamentos parciais somam aqui. */
+  pagoCentavos: number
+  /** O que o responsável contou e não cabe em campo: "tem medo de trovão". */
+  observacao: string
+  /**
+   * Quem, além do responsável, pode retirar o animal.
+   *
+   * Combinado na reserva porque é quando a pessoa está disponível para dizer — descobrir no balcão
+   * que quem veio buscar não é o responsável, com o animal já pronto, é a conversa que ninguém
+   * quer ter. A conferência acontece no check-out, e o nome de quem retirou fica gravado.
+   *
+   * Lista vazia significa "só o responsável".
+   */
+  autorizadosARetirar: string[]
+  dispensas: DispensaDeExigencia[]
+  criadoEm: ISODateTime
+  atualizadoEm: ISODateTime
+  canceladaEm: ISODateTime | null
+  motivoCancelamento: MotivoDeCancelamento | null
+}
+
+/**
+ * Quem quer um intervalo que está lotado.
+ *
+ * Alta temporada lota, e reserva cai. Sem esta fila, a vaga que abre no dia 18 de dezembro é
+ * vendida para quem ligar por acaso, e não para quem pediu primeiro.
+ */
+export type EsperaStatus = 'aguardando' | 'ofertada' | 'convertida' | 'desistiu' | 'expirada'
+
+export type EntradaDeEspera = {
+  id: string
+  petId: string
+  tutorId: string
+  entradaDesejada: ISODate
+  saidaDesejada: ISODate
+  /** Tipo aceito. Vazio significa qualquer um que caiba no porte. */
+  kindsAceitos: AcomodacaoKind[]
+  status: EsperaStatus
+  criadoEm: ISODateTime
+  /** Quando a vaga foi oferecida, e até quando a oferta vale. */
+  ofertadaEm: ISODateTime | null
+  ofertaExpiraEm: ISODateTime | null
+  observacao: string
+}
+
+// ---------------------------------------------------------------------------
+// Estadia
+// ---------------------------------------------------------------------------
+
+/**
+ * Um pertence que entrou com o hóspede.
+ *
+ * A regra R4 vira este tipo: o que entrou tem que sair. Pertence perdido é a reclamação mais
+ * barata de evitar — custa uma linha no check-in — e a mais cara de resolver.
+ */
+export type Pertence = {
+  id: string
+  descricao: string
+  quantidade: number
+  /** Marcado na conferência de saída. */
+  devolvido: boolean
+  /** Quando não foi devolvido: o que houve. Sem isto, o check-out não fecha. */
+  observacao: string
+}
+
+/**
+ * O que o hóspede come.
+ *
+ * `racaoPropria` importa mais do que parece: trocar a ração de um animal ansioso longe de casa
+ * produz diarreia no segundo dia, e o hotel leva a culpa por uma mudança que o responsável pediu.
+ */
+export type PlanoAlimentar = {
+  racaoPropria: boolean
+  marca: string
+  porcaoGramas: number
+  /** Horários das refeições, na parede do hotel. */
+  horarios: ClockTime[]
+  restricoes: string
+  petiscos: string
+}
+
+export type ViaDeMedicacao = 'oral' | 'topica' | 'otologica' | 'oftalmica' | 'subcutanea'
+
+/**
+ * Medicação que o hóspede já usava e continua usando.
+ *
+ * Não é prescrição: o hotel **não prescreve**. É a continuidade de um tratamento decidido fora,
+ * com a receita como documento de respaldo. Por isso `receita` é campo e não observação — sem ela,
+ * o hotel administra medicamento por conta própria.
+ */
+export type MedicacaoDaEstadia = {
+  id: string
+  hospedagemId: string
+  descricao: string
+  via: ViaDeMedicacao
+  doseTexto: string
+  horarios: ClockTime[]
+  inicio: ISODate
+  /** `null` é "durante toda a estadia". */
+  fim: ISODate | null
+  receita: string
+  observacao: string
+  suspensaEm: ISODateTime | null
+}
+
+/**
+ * O que o responsável autorizou.
+ *
+ * Cada uma é um sim ou não registrado, com data — e não um parágrafo de termo que ninguém lê. É a
+ * diferença entre "o termo dizia" e "ele marcou não no dia 12".
+ */
+export type AutorizacaoKind =
+  | 'banho'
+  | 'passeio-externo'
+  | 'recreacao-em-grupo'
+  | 'foto-em-rede-social'
+  | 'atendimento-veterinario'
+  | 'transporte'
+
+export type Autorizacao = {
+  kind: AutorizacaoKind
+  concedida: boolean
+  /** Teto de gasto autorizado, em centavos. Só faz sentido no atendimento veterinário. */
+  limiteCentavos: number | null
+  registradaEm: ISODateTime
+}
+
+export type HospedagemStatus = 'hospedado' | 'encerrada'
+
+/**
+ * Como o hóspede está se dando.
+ *
+ * Três degraus, e o do meio é o que importa: um animal "em adaptação" no terceiro dia é uma
+ * conversa com o responsável; no primeiro, é o normal.
+ */
+export type Adaptacao = 'tranquilo' | 'em-adaptacao' | 'estressado'
+
+export type Hospedagem = {
+  id: string
+  reservaId: string
+  petId: string
+  tutorId: string
+  acomodacaoId: string
+  entradaEm: ISODateTime
+  saidaPrevistaEm: ISODateTime
+  saidaEm: ISODateTime | null
+  status: HospedagemStatus
+  /** Peso na entrada. É a referência da dose e a prova do que o animal perdeu ou ganhou. */
+  pesoEntradaKg: number
+  pesoSaidaKg: number | null
+  /** O que foi visto na inspeção de chegada: carrapato, ferida, claudicação. */
+  inspecaoDeEntrada: string
+  pertences: Pertence[]
+  planoAlimentar: PlanoAlimentar
+  autorizacoes: Autorizacao[]
+  contatoEmergencia: string
+  /** Veterinário de confiança do responsável — quem se liga antes do plantão desconhecido. */
+  veterinarioDeConfianca: string
+  adaptacao: Adaptacao
+  observacao: string
+  /** Quem fez o check-in, e quem fez o check-out. São pessoas **do hotel**. */
+  recebidoPor: string
+  entreguePor: string | null
+  /**
+   * Quem, da família, levou o animal embora.
+   *
+   * Diferente de `entreguePor`, que é o funcionário. Esta é a outra ponta do gesto, e não existia:
+   * o sistema sabia qual atendente entregou e não sabia **a quem**. Vazio enquanto a estadia está
+   * aberta.
+   */
+  retiradoPor: string
+}
+
+// ---------------------------------------------------------------------------
+// Rotina
+// ---------------------------------------------------------------------------
+
+/**
+ * O que se faz por um hóspede num dia.
+ *
+ * `banho`, `tosa`, `recreacao` e `adestramento` são os **serviços vendidos** virando trabalho.
+ * Antes eles existiam no catálogo de preço e não na prancheta: cobrava-se o banho e ninguém era
+ * avisado de dar o banho.
+ */
+export type TarefaKind =
+  | 'refeicao'
+  | 'medicacao'
+  | 'passeio'
+  | 'recreacao'
+  | 'higiene'
+  | 'agua'
+  | 'pesagem'
+  | 'banho'
+  | 'tosa'
+  | 'adestramento'
+
+/**
+ * Situação **persistida** de uma tarefa.
+ *
+ * `atrasada` não está aqui de propósito: atraso é uma leitura do relógio contra o horário
+ * previsto, e gravá-lo produziria um registro que envelhece errado — a refeição marcada como
+ * atrasada às 8h continuaria atrasada depois de servida às 8h10. Ver `situacaoDaTarefa()`.
+ *
+ * `recusada` não é `pulada`. Pular é decisão da casa; recusar é o animal não ter comido, e **isso
+ * é informação clínica** — alimenta o boletim e, repetido, vira ocorrência.
+ */
+export type TarefaStatus = 'pendente' | 'feita' | 'recusada' | 'pulada'
+
+export type SituacaoDaTarefa = 'futura' | 'na-janela' | 'atrasada' | 'feita' | 'recusada' | 'pulada'
+
+export type TarefaDeRotina = {
+  id: string
+  hospedagemId: string
+  kind: TarefaKind
+  /** O que quem está no canil lê na prancheta. Para medicação, a dose já escrita. */
+  descricao: string
+  /** De onde a tarefa nasceu, quando nasceu de um registro: a medicação da estadia. */
+  origemId: string | null
+  previstaPara: ISODateTime
+  status: TarefaStatus
+  executadaEm: ISODateTime | null
+  /** Quem executou. Não é quem planejou, e a diferença é o ponto do registro. */
+  executadaPor: string | null
+  turnoId: string | null
+  observacao: string
+}
+
+// ---------------------------------------------------------------------------
+// Diário, ocorrência e boletim
+// ---------------------------------------------------------------------------
+
+export type RegistroKind =
+  | 'refeicao'
+  | 'passeio'
+  | 'brincadeira'
+  | 'sono'
+  | 'eliminacao'
+  | 'banho'
+  | 'carinho'
+  | 'observacao'
+
+/**
+ * Uma entrada do diário do hóspede.
+ *
+ * É o conteúdo do boletim e o motivo pelo qual o responsável recontrata. O hotel vende diária; o
+ * que o cliente compra é saber que o animal está bem, e o diário é a única prova disso.
+ */
+export type RegistroDoDiario = {
+  id: string
+  hospedagemId: string
+  kind: RegistroKind
+  texto: string
+  /** Iniciais que o mock desenha no lugar da foto; a API trará a URL. */
+  foto: string | null
+  registradoEm: ISODateTime
+  registradoPor: string
+  turnoId: string | null
+}
+
+export type OcorrenciaKind =
+  | 'briga'
+  | 'tentativa-de-fuga'
+  | 'lesao'
+  | 'vomito'
+  | 'diarreia'
+  | 'recusa-alimentar'
+  | 'apatia'
+  | 'tosse'
+  | 'estresse'
+  | 'destruicao'
+  | 'outro'
+
+/**
+ * Gravidade de uma ocorrência.
+ *
+ * É o campo que aciona a regra R3: `grave` exige contato por voz com o responsável antes do fim do
+ * turno, e trava a passagem enquanto não houver. Leve e moderada vão para o diário e viram
+ * conteúdo do boletim do dia.
+ */
+export type GravidadeDaOcorrencia = 'leve' | 'moderada' | 'grave'
+
+export type Ocorrencia = {
+  id: string
+  hospedagemId: string
+  kind: OcorrenciaKind
+  gravidade: GravidadeDaOcorrencia
+  descricao: string
+  /** O que a casa fez a respeito. Ocorrência sem conduta é fofoca. */
+  conduta: string
+  registradaEm: ISODateTime
+  registradaPor: string
+  /**
+   * Contato com o responsável, e o instante em que aconteceu.
+   *
+   * Duas informações e não uma: `exigeContato` sem `contatoEm` é a ocorrência travada, e é esse
+   * par que a tela precisa mostrar para que o travamento seja compreensível em vez de parecer um
+   * defeito.
+   */
+  exigeContato: boolean
+  contatoEm: ISODateTime | null
+  contatoPor: string | null
+  /** Levado ao veterinário de retaguarda. */
+  encaminhadaAoVeterinario: boolean
+}
+
+export type BoletimStatus = 'rascunho' | 'retido' | 'enviado'
+
+/**
+ * O boletim que sai para o responsável.
+ *
+ * `retido` existe pela regra R3: um boletim que carrega ocorrência grave **não sai sozinho** —
+ * fica retido até alguém da casa ligar. Notícia ruim chegando por notificação de aplicativo, sem
+ * voz humana antes, é a forma mais rápida de transformar um diferencial de produto num processo.
+ *
+ * O texto é montado no repositório, em português, e não na apresentação. Parece contradizer a
+ * disciplina do módulo (`kind` viaja, texto se traduz), e não contradiz: o boletim **não é
+ * interface**, é uma mensagem endereçada ao responsável, escrita no idioma dele e congelada no
+ * envio. O idioma da tela do hotel não tem nada a ver com o idioma em que a Rita lê que o gato
+ * dela não comeu.
+ */
+export type Boletim = {
+  id: string
+  hospedagemId: string
+  status: BoletimStatus
+  texto: string
+  fotos: string[]
+  geradoEm: ISODateTime
+  /** Quem compôs ou revisou. `null` em boletim automático que ninguém tocou. */
+  autorId: string | null
+  enviadoEm: ISODateTime | null
+  exigeContato: boolean
+  contatoEm: ISODateTime | null
+}
+
+/**
+ * Frequência com que o responsável recebe boletim.
+ *
+ * Menor que 12 h não existe aqui, ao contrário da internação: hotel não é UTI, e um boletim de
+ * hora em hora sobre um animal que está bem ensina o responsável a não ler nenhum.
+ */
+export type FrequenciaDeBoletim = 12 | 24 | 48
+
+export type PreferenciaDeBoletim = {
+  hospedagemId: string
+  frequenciaHoras: FrequenciaDeBoletim
+  fotoSempre: boolean
+}

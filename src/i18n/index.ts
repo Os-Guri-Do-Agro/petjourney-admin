@@ -41,6 +41,23 @@ function applyDocumentLocale(locale: Locale) {
 
   document.documentElement.lang = HTML_LANG[locale]
   document.documentElement.dir = isRTLLocale(locale) ? 'rtl' : 'ltr'
+
+  /*
+   * O rótulo do "marcar todos" do MultiSelect, para o CSS.
+   *
+   * O PrimeVue desenha aquele primeiro item só com a caixa de seleção, sem texto: no meio de uma
+   * lista de serviços, a linha em branco parece opção quebrada, não "todos". O componente não
+   * aceita rótulo por prop, e o slot `header` renderiza **acima** da linha, então o texto viria
+   * como título de seção em vez de etiqueta da caixa.
+   *
+   * Publicar aqui resolve os quatro MultiSelect do projeto de uma vez e segue a troca de idioma,
+   * que é justamente o que esta função já existe para fazer. `JSON.stringify` entrega a string
+   * entre aspas, que é a forma que o `content` do CSS exige.
+   */
+  document.documentElement.style.setProperty(
+    '--rotulo-marcar-todos',
+    JSON.stringify(i18n.global.t('common.selectAll')),
+  )
 }
 
 export async function changeLocale(locale: Locale) {

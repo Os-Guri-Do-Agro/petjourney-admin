@@ -13,7 +13,9 @@
   font-weight: 160 700;
   src: url('@fontsource-variable/readex-pro/files/readex-pro-arabic-wght-normal.woff2')
     format('woff2-variations');
-  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+  unicode-range:
+    U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF,
+    U+FE70-FE74, U+FE76-FEFC;
 }
 
 @theme {
@@ -52,6 +54,23 @@ body,
  */
 html:has(> body.p-overflow-hidden) {
   overflow-y: hidden;
+}
+
+/*
+ * O "marcar todos" do MultiSelect ganha rótulo.
+ *
+ * O PrimeVue desenha essa linha só com a caixa de seleção. No topo de uma lista de serviços, uma
+ * linha em branco antes de "Banho · R$ 89,00" parece opção quebrada — foi assim que ela foi
+ * relatada. O componente não aceita rótulo por prop, e o slot `header` renderiza acima da linha.
+ *
+ * O texto vem de `--rotulo-marcar-todos`, publicada por `applyDocumentLocale` a cada troca de
+ * idioma. Sem ela a regra não escreve nada, que é o comportamento de hoje — nunca um `[object]`
+ * ou um nome de variável na tela.
+ */
+.p-multiselect-header:has(.p-checkbox):not(:has(.p-multiselect-filter-container))::after {
+  content: var(--rotulo-marcar-todos, '');
+  color: var(--p-multiselect-option-color, inherit);
+  font-size: 0.875rem;
 }
 
 /*

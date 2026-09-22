@@ -384,11 +384,57 @@
 }
 
 /*
+ * A caixa do segmento, escrita aqui e não só herdada do PrimeVue.
+ *
+ * O estilo dos componentes do PrimeVue 4 é **injetado em tempo de execução**, e não vem de folha
+ * estática: quando essa injeção falta, o `ToggleButton` perde padding e borda e o grupo inteiro
+ * colapsa numa tira de texto corrido — "TodasRefeiçãoMedicação…". Reproduzido em laboratório
+ * apagando as 23 regras do PrimeVue: o filtro caiu de 566 px para 360, exatamente o que a tela
+ * relatada mostrava.
+ *
+ * A regra abaixo repete os valores do próprio PrimeVue, então não muda nada quando ele está lá;
+ * o que ela compra é o controle continuar sendo um botão quando ele não está. Este arquivo já
+ * declarava cor de borda, raio e fundo do segmento — faltavam as medidas da caixa.
+ */
+.clinic-scope .p-togglebutton {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0.25rem;
+}
+
+.clinic-scope .p-togglebutton-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+}
+
+/*
  * Dentro de um `SelectButton` os segmentos são uma peça só: o raio acima valeria para cada
  * segmento e partiria o grupo em botões soltos. Só as pontas externas ficam arredondadas.
  */
 .clinic-scope .p-selectbutton .p-togglebutton {
   border-radius: 0;
+}
+
+/*
+ * Sem isto o segmento encolhe antes de o grupo quebrar linha, e some o padding recém-escrito.
+ *
+ * O `:not()` preserva o modo `fluid` do PrimeVue, que reparte a largura igualmente entre os
+ * segmentos e depende de `flex: 1 1 0`. Ninguém no projeto usa `fluid` hoje, mas esta regra tem
+ * especificidade maior que a dele e o desligaria em silêncio no dia em que alguém usar.
+ */
+.clinic-scope .p-selectbutton:not(.p-selectbutton-fluid) .p-togglebutton {
+  flex: 0 0 auto;
+}
+
+/*
+ * E o grupo quebra linha, que é o par obrigatório da regra acima: segmento que não encolhe dentro
+ * de contêiner que não quebra transborda — trocaria um defeito por outro em diálogo estreito.
+ * Vários grupos do projeto já declaravam isto localmente; aqui vira o padrão.
+ */
+.clinic-scope .p-selectbutton {
+  flex-wrap: wrap;
 }
 
 .clinic-scope .p-selectbutton .p-togglebutton:first-child {

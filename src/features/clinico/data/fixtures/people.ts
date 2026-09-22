@@ -220,6 +220,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Caramelo, pelo curto',
     tutorId: 'tutor-marina',
     iniciais: 'LU',
+    fotoUrl: '',
     alertas: [
       {
         id: 'alerta-luna-1',
@@ -243,6 +244,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Sal e pimenta, pelo duro',
     tutorId: 'tutor-bartholomeu',
     iniciais: 'MB',
+    fotoUrl: '',
     alertas: [
       { id: 'alerta-max-1', kind: 'cronico', severidade: 'atencao', detalhe: 'Cardiopatia' },
       { id: 'alerta-max-2', kind: 'agressivo', severidade: 'atencao', detalhe: 'Contenção dupla' },
@@ -262,6 +264,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Seal point, pelo curto',
     tutorId: 'tutor-ana-lu',
     iniciais: 'NI',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -278,6 +281,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Dourado com máscara escura, pelo longo',
     tutorId: 'tutor-joao',
     iniciais: 'AN',
+    fotoUrl: '',
     alertas: [{ id: 'alerta-acai-1', kind: 'cronico', severidade: 'atencao', detalhe: 'Dermatite atópica' }],
   },
   {
@@ -294,6 +298,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Branco e cinza, pelo curto',
     tutorId: 'tutor-rita',
     iniciais: 'TO',
+    fotoUrl: '',
     alertas: [
       { id: 'alerta-tofu-1', kind: 'cronico', severidade: 'risco', detalhe: 'Doença renal crônica' },
     ],
@@ -312,6 +317,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Tricolor, pelo curto',
     tutorId: 'tutor-sergio',
     iniciais: 'BI',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -328,6 +334,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Dourado claro, pelo longo',
     tutorId: 'tutor-luciana',
     iniciais: 'ME',
+    fotoUrl: '',
     alertas: [{ id: 'alerta-mel-1', kind: 'gestante', severidade: 'atencao', detalhe: '5 semanas' }],
   },
   {
@@ -344,6 +351,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Creme, pelo longo',
     tutorId: 'tutor-daniel',
     iniciais: 'SU',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -360,6 +368,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Branco e marrom, rosetas',
     tutorId: 'tutor-fatima',
     iniciais: 'PI',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -376,6 +385,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Preto e castanho, pelo curto',
     tutorId: 'tutor-eduardo',
     iniciais: 'TH',
+    fotoUrl: '',
     alertas: [
       { id: 'alerta-thor-1', kind: 'agressivo', severidade: 'risco', detalhe: 'Focinheira obrigatória' },
     ],
@@ -394,6 +404,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Branco e dourado, pelo longo',
     tutorId: 'tutor-camila',
     iniciais: 'NI',
+    fotoUrl: '',
     alertas: [
       {
         id: 'alerta-nina-1',
@@ -418,6 +429,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Marrom tabby, pelo semilongo',
     tutorId: 'tutor-heitor',
     iniciais: 'SI',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -434,6 +446,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Cinza com face amarela',
     tutorId: 'tutor-marina',
     iniciais: 'FR',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -450,6 +463,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Preto e branco, pelo semilongo',
     tutorId: 'tutor-rita',
     iniciais: 'ZE',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -466,6 +480,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Apricot, pelo encaracolado',
     tutorId: 'tutor-luciana',
     iniciais: 'AM',
+    fotoUrl: '',
     alertas: [
       { id: 'alerta-amora-1', kind: 'cronico', severidade: 'atencao', detalhe: 'Hipotireoidismo' },
     ],
@@ -484,6 +499,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Branco com manchas castanhas, pelo curto',
     tutorId: 'tutor-daniel',
     iniciais: 'JA',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -500,6 +516,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Casco escuro com escudos alaranjados',
     tutorId: 'tutor-fatima',
     iniciais: 'BR',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -516,6 +533,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Laranja tabby, pelo curto',
     tutorId: 'tutor-camila',
     iniciais: 'OL',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -532,6 +550,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Baio, crina escura',
     tutorId: 'tutor-bartholomeu',
     iniciais: 'DU',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -548,6 +567,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Fulvo com máscara preta, pelo curto',
     tutorId: 'tutor-sergio',
     iniciais: 'LO',
+    fotoUrl: '',
     alertas: [
       { id: 'alerta-lola-1', kind: 'cronico', severidade: 'risco', detalhe: 'Braquicefálica' },
     ],
@@ -566,6 +586,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Rosetada marrom, pelo curto',
     tutorId: 'tutor-heitor',
     iniciais: 'PA',
+    fotoUrl: '',
     alertas: [],
   },
   {
@@ -582,6 +603,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Preto, pelo curto',
     tutorId: 'tutor-joao',
     iniciais: 'BE',
+    fotoUrl: '',
     alertas: [{ id: 'alerta-bento-1', kind: 'inadimplente', severidade: 'info', detalhe: '' }],
   },
   {
@@ -598,6 +620,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Chocolate e castanho, pelo curto',
     tutorId: 'tutor-ana-lu',
     iniciais: 'CA',
+    fotoUrl: '',
     alertas: [
       { id: 'alerta-cacau-1', kind: 'cronico', severidade: 'atencao', detalhe: 'Discopatia' },
       /*
@@ -627,6 +650,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Capa preta com castanho, pelo duplo',
     tutorId: 'tutor-eduardo',
     iniciais: 'NE',
+    fotoUrl: '',
     alertas: [
       /*
        * Cardiopata em enalapril: o caso que o bulário mais precisa cruzar. Anti-inflamatório

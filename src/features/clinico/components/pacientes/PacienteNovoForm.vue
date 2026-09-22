@@ -471,6 +471,7 @@ const rascunho = computed<RascunhoDoPaciente>(() => {
       detalhe: alerta.detalhe.trim(),
     })),
     iniciais: iniciaisDe(nome.value),
+    fotoUrl: '',
   }
 
   return { pet, tutor }
