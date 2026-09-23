@@ -3846,19 +3846,32 @@
       "moderada": "Umereno"
     },
     "hospedes": {
+      "acao": {
+        "abrir": "Otvori boravak: {pet}",
+        "ligar": "Pozovi"
+      },
+      "banda": {
+        "emDia": "Na čisto",
+        "precisam": "Traže tebe",
+        "saem": "Odlaze danas"
+      },
       "cartao": {
         "atrasadas": "{total} kasni | {total} kasne | {total} kasni",
         "boletimRetido": "Poruka vlasniku stoji i čeka poziv",
         "faltaPesar": "Treba izmeriti pre predaje",
         "hojeAs": "danas u {hora}",
-        "naCasaHa": "U kući već",
-        "nadaAFazer": "ništa ne čeka",
-        "noites": "{total} noć | {total} noći | {total} noći",
-        "pendentes": "{total} za sada | {total} za sada | {total} za sada",
-        "precisaLigar": "Pozovite vlasnika {tutor} pre kraja smene",
-        "proxima": "sledeće za {tempo}",
-        "rotina": "Rutina",
-        "sai": "Odlazi"
+        "noites": "{total} noć | {total} noći | {total} noći"
+      },
+      "dia": {
+        "contagem": "{feitas} od {total}",
+        "rotulo": "Dnevna rutina"
+      },
+      "foco": {
+        "agora": "sada",
+        "atrasou": "kasni {tempo}",
+        "em": "za {tempo}",
+        "ligar": "Pozovi: {tutor}",
+        "nadaPendente": "Danas nema ničega"
       },
       "irParaRotina": "Otvori rutinu smene",
       "ninguemPrecisa": "Niko vas sada ne treba. Kuća je u redu.",
@@ -3869,6 +3882,8 @@
         "todos": "Sve ({total})"
       },
       "recorteRotulo": "Prikaži",
+      "resumo": "{precisam} od {total} traži tebe | {precisam} od {total} traže tebe | {precisam} od {total} traži tebe",
+      "resumoEmDia": "Kuća je na čisto",
       "subtitulo": "Hotel",
       "titulo": "Gosti u kući",
       "vazioDescricao": "Gosti se pojavljuju ovde posle prijave.",
@@ -4193,16 +4208,17 @@
       "recusada": "Odbio"
     },
     "tarefaKind": {
+      "adestramento": "Obuka",
       "agua": "Voda",
       "banho": "Kupanje",
+      "cuidado": "Nega",
       "higiene": "Čišćenje",
       "medicacao": "Terapija",
       "passeio": "Šetnja",
       "pesagem": "Merenje",
       "recreacao": "Igra",
       "refeicao": "Obrok",
-      "tosa": "Šišanje",
-      "adestramento": "Obuka"
+      "tosa": "Šišanje"
     },
     "turno": {
       "boletinsRetidos": "Zadržani izveštaji",
@@ -4347,12 +4363,12 @@
           "texto": "Svi, oni kojima trebate, i oni koji danas odlaze. Srednji se gleda sredinom smene; desni, pred kraj jutra."
         },
         "cartao": {
-          "titulo": "Cela kartica menja boju",
-          "texto": "Kada nešto zapne kod tog gosta, ne menja se diskretna oznaka: menja se cela kartica. Vidi se s druge strane prostorije."
+          "titulo": "Red koji traži akciju",
+          "texto": "Disk pokazuje koja je usluga i popunjava se kada dođe vreme. Broj pored njega kaže koliko ih već kasni. To je jedini red na kartici koji se menja sam, bez ijednog dodira."
         },
         "linhas": {
-          "titulo": "Tri reda kartice",
-          "texto": "Rutina kaže da li kasni zadatak; u kući, koliko je noći prespavao; odlazi, kada ide. Kliknite karticu da otvorite ceo boravak."
+          "titulo": "Ko je na čisto, skuplja se",
+          "texto": "Mirni prelaze u tanak spisak u dnu strane, da prostor pripadne onima kojima si potreban. Klikni na naslov trake da je otvoriš i zatvoriš."
         }
       },
       "reserva": {
@@ -4489,13 +4505,12 @@
       "vigenciaDica": "Ako počne sutra, tekuća smena ostaje netaknuta."
     },
     "gerenciar": {
-      "titulo": "Upravljanje rutinom",
       "padrao": "Standardna rutina kuće",
       "padraoDica": "termini koji važe za sve goste",
-      "medicacao": "Upiši terapiju",
-      "medicacaoDica": "lek koji je stigao sa gostom",
       "propor": "Predloži rutinu",
-      "proporDica": "predlog pročitan iz kartona, za pregled pre odobravanja"
+      "proporDica": "predlog pročitan iz kartona, za pregled pre odobravanja",
+      "titulo": "Upravljanje rutinom",
+      "trocar": "Promeni"
     },
     "medicacaoNova": {
       "titulo": "Upiši terapiju",
@@ -4555,6 +4570,36 @@
       "propor": "Predloži izmene",
       "origemProposta": "iz pregledanog predloga",
       "origemPessoa": "upisano ručno"
+    },
+    "acrescentar": {
+      "acrescentar": "Dodaj",
+      "ajusteCasaFaz": "kuća radi {horarios}",
+      "ajusteCasaNaoFaz": "kuća ne radi ovu uslugu",
+      "ajusteHorarios": "Termini za ovog gosta",
+      "ajusteServico": "Usluga kuće",
+      "ajusteVazio": "Ostavi prazno da obustaviš ovu uslugu samo za njega.",
+      "cancelar": "Otkaži",
+      "cuidadoIrParaMedicacao": "Unesi lek",
+      "cuidadoNaoEhRemedio": "Lek ne ide ovde. Doza i recept žive pod Lekom, a odatle dolazi i pokriće za davanje tuđeg leka.",
+      "cuidadoOQue": "Šta treba uraditi",
+      "cuidadoOQueDica": "Rečima onoga ko to radi: promeniti zavoj na desnoj šapi",
+      "faltaMotivo": "Bez razloga, niko neće znati kako ovo kasnije poništiti.",
+      "motivo": "Razlog",
+      "motivoDica": "U decembru je to jedina linija koja objašnjava zašto je ovaj gost drugačiji.",
+      "oQue": "Šta dodati",
+      "servicoCobra": "{preco} ulazi u račun boravka.",
+      "servicoDia": "Dan",
+      "servicoHora": "Vreme",
+      "servicoQual": "Usluga",
+      "titulo": "Dodaj u rutinu",
+      "viaAjuste": "Podesi termine kuće",
+      "viaAjusteDica": "promeni ili obustavi samo za ovog gosta",
+      "viaCuidado": "Nega gosta",
+      "viaCuidadoDica": "zavoj, oblog, kaputić: bez doze",
+      "viaMedicacao": "Lek",
+      "viaMedicacaoDica": "lek sa dozom i receptom",
+      "viaServico": "Dodatna usluga",
+      "viaServicoDica": "kupanje, šišanje, šetnja: naplaćuje se"
     }
   },
   "cronometro": {

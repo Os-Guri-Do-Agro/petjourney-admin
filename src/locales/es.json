@@ -3846,19 +3846,32 @@
       "moderada": "Moderada"
     },
     "hospedes": {
+      "acao": {
+        "abrir": "Abrir la estancia de {pet}",
+        "ligar": "Llamar"
+      },
+      "banda": {
+        "emDia": "Al día",
+        "precisam": "Te necesitan",
+        "saem": "Salen hoy"
+      },
       "cartao": {
         "atrasadas": "{total} atrasada | {total} atrasadas",
         "boletimRetido": "El recado al responsable está parado esperando una llamada",
         "faltaPesar": "Falta pesar antes de entregar",
         "hojeAs": "hoy a las {hora}",
-        "naCasaHa": "En la casa hace",
-        "nadaAFazer": "nada pendiente",
-        "noites": "{total} noche | {total} noches",
-        "pendentes": "{total} para ahora | {total} para ahora",
-        "precisaLigar": "Llama a {tutor} antes de que acabe el turno",
-        "proxima": "próxima en {tempo}",
-        "rotina": "Rutina",
-        "sai": "Sale"
+        "noites": "{total} noche | {total} noches"
+      },
+      "dia": {
+        "contagem": "{feitas} de {total}",
+        "rotulo": "Rutina del día"
+      },
+      "foco": {
+        "agora": "ahora",
+        "atrasou": "{tempo} de retraso",
+        "em": "en {tempo}",
+        "ligar": "Llama a {tutor}",
+        "nadaPendente": "Nada pendiente hoy"
       },
       "irParaRotina": "Abrir rutina del turno",
       "ninguemPrecisa": "Nadie te necesita ahora. La casa está al día.",
@@ -3869,6 +3882,8 @@
         "todos": "Todos ({total})"
       },
       "recorteRotulo": "Mostrar",
+      "resumo": "{precisam} de {total} te necesita | {precisam} de {total} te necesitan",
+      "resumoEmDia": "La casa está al día",
       "subtitulo": "Hotel",
       "titulo": "Huéspedes en la casa",
       "vazioDescricao": "Los huéspedes aparecen aquí después de la entrada.",
@@ -4193,16 +4208,17 @@
       "recusada": "Rechazó"
     },
     "tarefaKind": {
+      "adestramento": "Adiestramiento",
       "agua": "Agua",
       "banho": "Baño",
+      "cuidado": "Cuidado",
       "higiene": "Limpieza",
       "medicacao": "Medicación",
       "passeio": "Paseo",
       "pesagem": "Pesaje",
       "recreacao": "Juego",
       "refeicao": "Comida",
-      "tosa": "Corte de pelo",
-      "adestramento": "Adiestramiento"
+      "tosa": "Corte de pelo"
     },
     "turno": {
       "boletinsRetidos": "Partes retenidos",
@@ -4347,12 +4363,12 @@
           "texto": "Todos, los que te necesitan, y los que salen hoy. El del medio se mira a mitad del turno; el de la derecha, al final de la mañana."
         },
         "cartao": {
-          "titulo": "La tarjeta entera cambia de color",
-          "texto": "Cuando algo traba en ese huésped, no cambia un sellito discreto: cambia toda la tarjeta. Se ve desde el otro lado de la sala."
+          "titulo": "La línea que pide acción",
+          "texto": "El disco muestra qué servicio es, y se llena cuando llega la hora. El número al lado cuenta cuántas ya se retrasaron. Es la única línea de la tarjeta que cambia sola, sin que nadie toque la pantalla."
         },
         "linhas": {
-          "titulo": "Las tres líneas de la tarjeta",
-          "texto": "Rutina dice si hay tarea atrasada; en la casa, cuántas noches ya durmió; sale, cuándo se va. Haz clic en la tarjeta para abrir toda la estadía."
+          "titulo": "Quien está al día queda recogido",
+          "texto": "Los tranquilos pasan a una lista fina al pie de la página, para que el espacio sea de quien te necesita. Haz clic en el título de la franja para abrirla y cerrarla."
         }
       },
       "reserva": {
@@ -4489,13 +4505,12 @@
       "vigenciaDica": "Empezar mañana no toca el turno de quien trabaja ahora."
     },
     "gerenciar": {
-      "titulo": "Gestionar rutina",
       "padrao": "Rutina estándar de la casa",
       "padraoDica": "los horarios que valen para todos los huéspedes",
-      "medicacao": "Registrar medicación",
-      "medicacaoDica": "medicamento que llegó con un huésped",
       "propor": "Proponer rutina",
-      "proporDica": "sugerencia leída de la ficha, para revisar antes de aprobar"
+      "proporDica": "sugerencia leída de la ficha, para revisar antes de aprobar",
+      "titulo": "Gestionar rutina",
+      "trocar": "Cambiar"
     },
     "medicacaoNova": {
       "titulo": "Registrar medicación",
@@ -4555,6 +4570,36 @@
       "propor": "Proponer ajustes",
       "origemProposta": "de una propuesta revisada",
       "origemPessoa": "registrado a mano"
+    },
+    "acrescentar": {
+      "acrescentar": "Añadir",
+      "ajusteCasaFaz": "la casa hace {horarios}",
+      "ajusteCasaNaoFaz": "la casa no hace este servicio",
+      "ajusteHorarios": "Horarios para este huésped",
+      "ajusteServico": "Servicio de la casa",
+      "ajusteVazio": "Deja vacío para suspender este servicio solo para él.",
+      "cancelar": "Cancelar",
+      "cuidadoIrParaMedicacao": "Registrar medicación",
+      "cuidadoNaoEhRemedio": "El medicamento no entra aquí. Dosis y receta viven en Medicación, y de ahí sale el respaldo para administrar el medicamento de otra persona.",
+      "cuidadoOQue": "Qué hacer",
+      "cuidadoOQueDica": "En palabras de quien lo ejecuta: cambiar el vendaje de la pata derecha",
+      "faltaMotivo": "Sin motivo, nadie sabrá cómo deshacer esto después.",
+      "motivo": "Motivo",
+      "motivoDica": "En diciembre es la única línea que explica por qué este huésped es distinto.",
+      "oQue": "Qué añadir",
+      "servicoCobra": "{preco} entran en la cuenta de la estancia.",
+      "servicoDia": "Día",
+      "servicoHora": "Hora",
+      "servicoQual": "Servicio",
+      "titulo": "Añadir a la rutina",
+      "viaAjuste": "Ajustar horarios de la casa",
+      "viaAjusteDica": "cambiar o suspender solo para este huésped",
+      "viaCuidado": "Cuidado del huésped",
+      "viaCuidadoDica": "vendaje, compresa, abrigo — sin dosis",
+      "viaMedicacao": "Medicación",
+      "viaMedicacaoDica": "medicamento con dosis y receta",
+      "viaServico": "Servicio extra",
+      "viaServicoDica": "baño, peluquería, paseo — se cobra"
     }
   },
   "cronometro": {

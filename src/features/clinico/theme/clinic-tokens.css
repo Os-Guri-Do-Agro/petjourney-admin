@@ -26,12 +26,39 @@
    * Agora quem separa é a linha — `line` passou de 1,28:1 para 1,86:1 contra o cartão. Foi o
    * que permitiu baixar o brilho sem perder a leitura.
    */
-  --clinic-bg: #e1ece9;
-  --clinic-surface: #f4f9f8;
-  --clinic-surface-soft: #eaf3f0;
-  --clinic-surface-sunken: #d8e5e2;
-  --clinic-line: #aebbb8;
-  --clinic-line-soft: #c9d2d0;
+  /*
+   * O plano da página é o único degrau que sai da família sálvia.
+   *
+   * A queixa era "as telas estão muito verdes", e a medição desmentiu a explicação óbvia: o croma
+   * das superfícies é 0,005–0,015, elas mal são verdes em intensidade. O que satura a tela é o
+   * **matiz único** — 174–183° em superfície, linha, acento e texto. Nada escapava do teal.
+   *
+   * Então o que muda aqui é o matiz, não o valor: 178° → 74° com a luminância travada (93,4% nos
+   * dois) e o croma **caindo** de 0,0124 para 0,0080. Todas as quinze razões que dependem deste
+   * token ficam idênticas até a segunda casa — texto 11,59, muted 6,97, faint 5,14, cartão 1,14.
+   * Despintar o verde saiu de graça em contraste; o que ele custou foi decidir onde parar.
+   *
+   * E para aqui. Cartão, bloco e afundado **não** giram: o cartão é base de mistura de dezenas de
+   * `color-mix`, `--clinic-accent-tint` e `--clinic-heat-1/2` são misturas contra ele congeladas
+   * em hexadecimal, e o afundado é o fundo de campo desabilitado, que o comentário lá embaixo
+   * proíbe de ser bege — num formulário clínico, bege lê "atenção" e não "indisponível". O plano
+   * da página não é base de mistura de nada, e é a maior chapa da tela.
+   *
+   * O escuro não acompanha: a página escura é #0b1210, a 17% de luminância, onde girar matiz é
+   * invisível. Vale a assimetria para não mexer no que ninguém veria.
+   */
+  --clinic-bg: #f0eae3;
+  --clinic-surface: #fbf7f4;
+  --clinic-surface-soft: #f5f0ec;
+  /*
+   * O afundado é o único degrau que sai quase acromático (croma 0,0017), e de propósito: ele é o
+   * fundo de campo e de botão desabilitados, e o comentário lá embaixo já registrava que bege ali
+   * lê "atenção" em vez de "indisponível". Ficou 12,9× menos cromático que o fundo de atenção —
+   * indisponível não tem temperatura.
+   */
+  --clinic-surface-sunken: #e6dfd6;
+  --clinic-line: #c8b5a8;
+  --clinic-line-soft: #ddcdc4;
   /*
    * Sálvia médio, o degrau que faltava entre o acento e o sálvia forte. É a linha que precisa
    * ser vista: tracejado de vaga vazia, hachura de bloqueio, régua de rodapé de diálogo,
@@ -59,6 +86,23 @@
   --clinic-heat-ink: #1f2f2b;
   --clinic-accent-soft: #dcebe7;
   --clinic-on-accent: #ffffff;
+
+  /* ------------------------------------------------- o que não é do meu turno
+   *
+   * A regra de cor da casa tem duas gavetas: sálvia para o institucional positivo, quente para
+   * risco e pendência. Faltava a terceira coisa que esta tela diz o tempo todo e não tinha como
+   * dizer em cor: **o que é de outro**. O que fica para quem assume não é positivo nem urgente —
+   * é de outra pessoa, e é a única lacuna que a regra deixa aberta.
+   *
+   * O navy é `LightColors.primary`, que estava na paleta da casa com zero consumidores. Ele tem
+   * dois empregos, ambos na mesma tela e ambos dizendo a mesma frase: a fronteira que separa o
+   * meu turno do seguinte, e o botão de passar o turno. Dois usos é o que faz a cor se ensinar
+   * sozinha — um só vira enfeite inexplicado.
+   *
+   * Nunca preenche superfície. Se a urgência não pinta cartão, a entrega também não.
+   */
+  --clinic-outro-turno: #1d3557;
+  --clinic-outro-turno-line: #6982a4;
 
   /* ------------------------------------------------- degraus do mapa de calor
    *
@@ -269,6 +313,10 @@
   --clinic-heat-ink: #0f1a16;
   --clinic-accent-soft: #244139;
   --clinic-on-accent: #0f1714;
+
+  /* O mesmo papel, do outro lado: tinta clara o bastante para o painel escuro (8,6:1 no cartão). */
+  --clinic-outro-turno: #a3b9d8;
+  --clinic-outro-turno-line: #5b7395;
 
   --clinic-heat-1: #2b413b;
   --clinic-heat-2: #45675f;
@@ -783,8 +831,16 @@
  * Aqui a cor vem sempre dos tokens da clínica, que já têm par claro/escuro.
  * ------------------------------------------------------------------------ */
 
+/*
+ * A segunda linha era um seletor morto: quem carrega `p-button-outlined` já satisfaz
+ * `[class*='p-button-']`, então a negação nunca podia ser verdadeira e o `outlined` sem severity
+ * jamais recebeu a cor da casa — ficava no Aura cru. A negação certa é das severidades, uma a uma.
+ */
 .clinic-scope .p-button.p-button-secondary.p-button-outlined,
-.clinic-scope .p-button.p-button-outlined:not([class*='p-button-']),
+.clinic-scope
+  .p-button.p-button-outlined:not(.p-button-primary):not(.p-button-success):not(.p-button-info):not(
+    .p-button-warn
+  ):not(.p-button-help):not(.p-button-danger):not(.p-button-contrast),
 .clinic-dialog .p-button.p-button-secondary.p-button-outlined,
 .clinic-overlay .p-button.p-button-secondary.p-button-outlined {
   border-color: var(--clinic-line-strong);
@@ -798,6 +854,34 @@
   border-color: var(--clinic-accent);
   background: var(--clinic-surface-soft);
   color: var(--clinic-accent-strong);
+}
+
+/*
+ * Passar o turno: a mesma cor que a fronteira da lista usa lá em cima, pelo mesmo motivo.
+ *
+ * Continua contornado, e isso é decisão e não descuido: verde cheio, nesta tela, significa "isto
+ * pede o polegar agora", e passar o turno às 14h não pede. O que faltava ao botão não era peso —
+ * era **significado** e **caixa**. A borda sai de 1,07:1, que é borda nenhuma, para 3,26:1.
+ *
+ * A especificidade é escrita para vencer: as regras de `secondary outlined` acima fecham (0,4,0)
+ * e (0,6,0), então uma regra `.clinic-scope .p-button.acao-turno` — (0,3,0) — perderia em
+ * silêncio, e ordem no arquivo não resolve empate de especificidade. Estas fecham (0,6,0) e
+ * (0,7,0). O `:not(:disabled)` existe para não passarem por cima do desabilitado, lá embaixo.
+ */
+.clinic-scope .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled),
+.clinic-dialog .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled),
+.clinic-overlay .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled) {
+  border-color: var(--clinic-outro-turno-line);
+  background: transparent;
+  color: var(--clinic-outro-turno);
+}
+
+.clinic-scope .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled):hover,
+.clinic-dialog .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled):hover,
+.clinic-overlay .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled):hover {
+  border-color: var(--clinic-outro-turno);
+  background: color-mix(in srgb, var(--clinic-outro-turno) 8%, transparent);
+  color: var(--clinic-outro-turno);
 }
 
 /*

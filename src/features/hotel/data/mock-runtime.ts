@@ -41,6 +41,8 @@ export type HotelOperation =
   | 'rotina.propor'
   | 'rotina.aprovar'
   | 'medicacao.registrar'
+  | 'cuidado.registrar'
+  | 'servico.acrescentar'
   | 'rotina.marcar'
   | 'diario.registrar'
   | 'ocorrencia.registrar'

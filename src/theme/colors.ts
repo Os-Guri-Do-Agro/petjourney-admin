@@ -13,9 +13,9 @@ export const LightColors = {
    */
   danger: '#752712',
   success: '#A8DADC',
-  white: '#F4F9F8',
+  white: '#FBF7F4',
   purple: '#BDB2FF',
-  gray: '#D8E5E2',
+  gray: '#E6DFD6',
   orange: '#FFB7A1',
   pink: '#FAD2E1',
   brown: '#D5BDAF',
@@ -30,14 +30,14 @@ export const LightColors = {
     inverse20: '#ffffff33',
   },
   bg: {
-    light: '#E1ECE9',
-    card: '#EAF3F0',
-    screen: '#EAF3F0',
+    light: '#F0EAE3',
+    card: '#F5F0EC',
+    screen: '#F5F0EC',
   },
   border: {
-    light: '#C9D2D0',
-    default: '#AEBBB8',
-    subtle: '#D9E1DF',
+    light: '#DDCDC4',
+    default: '#C8B5A8',
+    subtle: '#EADFD8',
   },
   tutor: {
     primary: '#457B9D',
@@ -69,10 +69,10 @@ export const LightColors = {
     muted: '#616C69',
     soft: '#727B79',
     divider: '#7D8583',
-    line: '#C9D2D0',
-    appBg: '#E1ECE9',
+    line: '#DDCDC4',
+    appBg: '#F0EAE3',
     /** Superfície mais clara do modo — branco quebrado. Branco puro: `text.inverse`. */
-    white: '#F4F9F8',
+    white: '#FBF7F4',
     shadowRgb: '40 51 47',
   },
   /*
@@ -91,11 +91,16 @@ export const LightColors = {
    * ofuscante para ser legível. Com linha de verdade, o brilho pode baixar.
    */
   dashboard: {
-    bg: '#E1ECE9',
-    surface: '#F4F9F8',
-    surfaceSoft: '#EAF3F0',
-    line: '#AEBBB8',
-    lineSoft: '#C9D2D0',
+    /*
+     * Quem pinta a página do parceiro é este, não `--clinic-bg` — que tem um único consumidor em
+     * todo o `src`. Os dois espelham o mesmo degrau e precisam andar juntos: ver a justificativa
+     * do giro de matiz no `clinic-tokens.css`.
+     */
+    bg: '#F0EAE3',
+    surface: '#FBF7F4',
+    surfaceSoft: '#F5F0EC',
+    line: '#C8B5A8',
+    lineSoft: '#DDCDC4',
     /** Linha com intenção: tracejado de estado vazio, régua estrutural. 2,5:1 no cartão. */
     lineStrong: '#84A59D',
     text: '#1F2F2B',

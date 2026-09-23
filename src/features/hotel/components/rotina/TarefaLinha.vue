@@ -321,11 +321,21 @@ const horaFora = computed(() => {
   height: 2.1rem;
   flex: 0 0 auto;
   place-items: center;
+  border: 1px solid var(--clinic-line);
   border-radius: 0.65rem;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
+  background: transparent;
+  color: var(--clinic-muted);
   font-size: 0.82rem;
 }
+
+/*
+ * Em repouso o disco é vazado, e isso é o que faz os outros três estados existirem.
+ *
+ * Ele era sálvia cheio — e como quase toda tarefa de um dia está em repouso, eram dezenas de
+ * discos preenchidos por turno dizendo "nada aqui". Um preenchimento que aparece em todo mundo
+ * não distingue ninguém, e ainda era a fonte de verde mais repetida da tela. Vazado, o disco só
+ * ganha tinta quando tem o que dizer.
+ */
 
 /* Na janela e atrasada: disco cheio. É o único lugar da fileira onde a cor muda. */
 .tarefa--na-janela .tarefa__icone {

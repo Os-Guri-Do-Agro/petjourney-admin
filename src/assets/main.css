@@ -127,9 +127,9 @@ html:has(> body.p-overflow-hidden) {
 }
 :root {
   --pj-shell-header-height: 4.25rem;
-  --pj-toast-card: #f4f9f8;
-  --pj-toast-surface: #eaf3f0;
-  --pj-toast-line: #c9d2d0;
+  --pj-toast-card: #fbf7f4;
+  --pj-toast-surface: #f5f0ec;
+  --pj-toast-line: #ddcdc4;
   --pj-toast-text: #1f2f2b;
   --pj-toast-muted: #5f716b;
   --pj-toast-faint: #727b79;

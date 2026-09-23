@@ -370,7 +370,6 @@ function marcarPendentes() {
   width: 1.05rem;
   height: 1.05rem;
   flex: 0 0 auto;
-  color: var(--clinic-accent-strong);
 }
 
 /* Um degrau acima da fileira: o token existe, e agora vale. */

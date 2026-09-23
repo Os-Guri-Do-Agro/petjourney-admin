@@ -201,6 +201,17 @@ export type ServicoContratado = {
   /** Preço no momento da contratação. O reajuste de amanhã não altera o que foi combinado. */
   precoUnitarioCentavos: number
   observacao: string
+  /**
+   * Quando ele acontece. Ausente: o primeiro dia inteiro da estadia, que é o padrão de sempre.
+   *
+   * Existe para o serviço **vendido no meio da estadia** — o responsável liga na quarta e pede um
+   * banho antes de buscar o animal na sexta. Sem isto, a geração jogaria esse banho no primeiro dia
+   * inteiro, que já passou; e nada nasce no passado, então o banho simplesmente nunca apareceria na
+   * prancheta de ninguém. Seria cobrado e não seria feito.
+   */
+  dia?: ISODate
+  /** A hora escolhida. Ausente: a do catálogo (ver `HORA_DO_SERVICO`). */
+  hora?: ClockTime
 }
 
 /**
@@ -551,6 +562,31 @@ export type MedicacaoDaEstadia = {
 }
 
 /**
+ * Um cuidado recorrente deste hóspede, que não é remédio nem serviço.
+ *
+ * Tem a forma de `MedicacaoDaEstadia` de propósito — descrição, horários, janela e um campo para
+ * encerrar sem apagar — porque as duas respondem à mesma pergunta: *o que este animal precisa que
+ * os outros não precisam, e a que horas*. O que as separa é o que **não** está aqui: não há dose,
+ * não há via e não há receita.
+ *
+ * Essa ausência é a regra, não um campo esquecido. Pomada, colírio e comprimido entram por
+ * `MedicacaoDaEstadia`, onde a dose é obrigatória e a receita é o documento de respaldo — o hotel
+ * administra medicamento de outra pessoa, e precisa poder provar com o quê e por ordem de quem.
+ */
+export type CuidadoDaEstadia = {
+  id: string
+  hospedagemId: string
+  /** O que fazer, em palavras de quem executa: "trocar o curativo da pata direita". */
+  descricao: string
+  horarios: ClockTime[]
+  inicio: ISODate
+  /** `null` é "durante toda a estadia". */
+  fim: ISODate | null
+  observacao: string
+  encerradoEm: ISODateTime | null
+}
+
+/**
  * O que o responsável autorizou.
  *
  * Cada uma é um sim ou não registrado, com data — e não um parágrafo de termo que ninguém lê. É a
@@ -640,6 +676,17 @@ export type TarefaKind =
   | 'banho'
   | 'tosa'
   | 'adestramento'
+  /**
+   * O cuidado deste hóspede: o curativo que se troca, a compressa, o casaco à noite.
+   *
+   * Existe porque havia um buraco entre três coisas que já existiam. Não é **medicação** — não tem
+   * dose, via nem receita, e por isso não pode entrar por aquela porta. Não é **serviço vendido** —
+   * ninguém cobra por trocar um curativo. E não é **rotina da casa** — vale para um animal só.
+   *
+   * Sem ele, esse trabalho ou não era registrado, ou era registrado como remédio, que é pior:
+   * produz uma linha de medicação sem dose e sem receita no prontuário de um animal.
+   */
+  | 'cuidado'
 
 /**
  * O que a **casa** faz por todos os hóspedes, e portanto o que a casa pode cadastrar.

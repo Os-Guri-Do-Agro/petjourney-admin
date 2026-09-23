@@ -3846,19 +3846,32 @@
       "moderada": "Moderate"
     },
     "hospedes": {
+      "acao": {
+        "abrir": "Open {pet}'s stay",
+        "ligar": "Call"
+      },
+      "banda": {
+        "emDia": "Up to date",
+        "precisam": "Need you",
+        "saem": "Leaving today"
+      },
       "cartao": {
         "atrasadas": "{total} overdue | {total} overdue",
         "boletimRetido": "The note to the owner is on hold waiting for a call",
         "faltaPesar": "Needs weighing before handover",
         "hojeAs": "today at {hora}",
-        "naCasaHa": "In the house for",
-        "nadaAFazer": "nothing pending",
-        "noites": "{total} night | {total} nights",
-        "pendentes": "{total} due now | {total} due now",
-        "precisaLigar": "Call {tutor} before the shift ends",
-        "proxima": "next in {tempo}",
-        "rotina": "Routine",
-        "sai": "Leaves"
+        "noites": "{total} night | {total} nights"
+      },
+      "dia": {
+        "contagem": "{feitas} of {total}",
+        "rotulo": "Today's routine"
+      },
+      "foco": {
+        "agora": "now",
+        "atrasou": "{tempo} late",
+        "em": "in {tempo}",
+        "ligar": "Call {tutor}",
+        "nadaPendente": "Nothing pending today"
       },
       "irParaRotina": "Open shift routine",
       "ninguemPrecisa": "Nobody needs you right now. The house is up to date.",
@@ -3869,6 +3882,8 @@
         "todos": "All ({total})"
       },
       "recorteRotulo": "Show",
+      "resumo": "{precisam} of {total} needs you | {precisam} of {total} need you",
+      "resumoEmDia": "The house is up to date",
       "subtitulo": "Hotel",
       "titulo": "Guests in the house",
       "vazioDescricao": "Guests appear here after check-in.",
@@ -4193,16 +4208,17 @@
       "recusada": "Refused"
     },
     "tarefaKind": {
+      "adestramento": "Training",
       "agua": "Water",
       "banho": "Bath",
+      "cuidado": "Care",
       "higiene": "Cleaning",
       "medicacao": "Medication",
       "passeio": "Walk",
       "pesagem": "Weighing",
       "recreacao": "Play",
       "refeicao": "Meal",
-      "tosa": "Grooming",
-      "adestramento": "Training"
+      "tosa": "Grooming"
     },
     "turno": {
       "boletinsRetidos": "Updates on hold",
@@ -4347,12 +4363,12 @@
           "texto": "Everyone, those who need you, and those leaving today. The middle one is what you check mid-shift; the right one, late morning."
         },
         "cartao": {
-          "titulo": "The whole card changes colour",
-          "texto": "When something is blocked for that guest, it is not a discreet little badge that changes: it is the whole card. You can see it from across the room."
+          "titulo": "The line that asks for action",
+          "texto": "The disc shows which service, and fills in when the time comes. The number beside it counts how many are already late. It is the only line on the card that changes on its own, with nobody touching the screen."
         },
         "linhas": {
-          "titulo": "The card's three lines",
-          "texto": "Routine says whether a task is overdue; in the house, how many nights they have slept; out, when they leave. Click the card to open the full stay."
+          "titulo": "Those who are fine stay folded away",
+          "texto": "The calm ones become a thin list at the foot of the page, so the room goes to whoever needs you. Click the band title to open and close it."
         }
       },
       "reserva": {
@@ -4489,13 +4505,12 @@
       "vigenciaDica": "Starting tomorrow leaves the current shift untouched."
     },
     "gerenciar": {
-      "titulo": "Manage routine",
       "padrao": "House routine",
       "padraoDica": "the times that apply to every guest",
-      "medicacao": "Record medication",
-      "medicacaoDica": "medication that arrived with a guest",
       "propor": "Propose a routine",
-      "proporDica": "a suggestion read from the record, to review before approving"
+      "proporDica": "a suggestion read from the record, to review before approving",
+      "titulo": "Manage routine",
+      "trocar": "Change"
     },
     "medicacaoNova": {
       "titulo": "Record medication",
@@ -4555,6 +4570,36 @@
       "propor": "Propose adjustments",
       "origemProposta": "from a reviewed proposal",
       "origemPessoa": "recorded by hand"
+    },
+    "acrescentar": {
+      "acrescentar": "Add",
+      "ajusteCasaFaz": "the house does {horarios}",
+      "ajusteCasaNaoFaz": "the house does not do this service",
+      "ajusteHorarios": "Times for this guest",
+      "ajusteServico": "House service",
+      "ajusteVazio": "Leave empty to suspend this service for them only.",
+      "cancelar": "Cancel",
+      "cuidadoIrParaMedicacao": "Record medication",
+      "cuidadoNaoEhRemedio": "Medication does not go here. Dose and prescription live under Medication, and that is where the backing for giving someone else a drug comes from.",
+      "cuidadoOQue": "What to do",
+      "cuidadoOQueDica": "In the words of whoever does it: change the dressing on the right paw",
+      "faltaMotivo": "Without a reason, nobody will know how to undo this later.",
+      "motivo": "Reason",
+      "motivoDica": "In December, this is the only line explaining why this guest is different.",
+      "oQue": "What to add",
+      "servicoCobra": "{preco} goes on the stay bill.",
+      "servicoDia": "Day",
+      "servicoHora": "Time",
+      "servicoQual": "Service",
+      "titulo": "Add to the routine",
+      "viaAjuste": "Adjust house times",
+      "viaAjusteDica": "change or suspend for this guest only",
+      "viaCuidado": "Guest care",
+      "viaCuidadoDica": "dressing, compress, coat — no dose",
+      "viaMedicacao": "Medication",
+      "viaMedicacaoDica": "a drug with dose and prescription",
+      "viaServico": "Extra service",
+      "viaServicoDica": "bath, grooming, walk — it gets charged"
     }
   },
   "cronometro": {

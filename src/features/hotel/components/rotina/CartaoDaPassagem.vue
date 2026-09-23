@@ -110,6 +110,7 @@ const cabecalho = computed(() => {
 
     <Button
       :label="t('hotel.turno.passar')"
+      class="acao-turno"
       icon="pi pi-sign-out"
       severity="secondary"
       outlined

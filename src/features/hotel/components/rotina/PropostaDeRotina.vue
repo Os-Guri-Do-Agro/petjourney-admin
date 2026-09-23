@@ -41,13 +41,13 @@
  * ## Nada foi gravado
  *
  * O cabeçalho diz isso em cinza, junto do motor e da hora da leitura, e não em vermelho: uma
- * proposta ainda não gravada é o estado normal dela, não um alerta. O alerta — o `Message` que
- * avisa que não há modelo nem rede — esse fica, e não pode sumir enquanto for verdade.
+ * proposta ainda não gravada é o estado normal dela, não um alerta. E a nota que avisa que não há
+ * modelo nem rede fica logo abaixo, **presa junto do cabeçalho**: ela não pode sumir enquanto for
+ * verdade, nem rolar para fora de vista com o resto.
  */
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
 import Select from 'primevue/select'
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -210,53 +210,54 @@ function aprovar() {
 
 <template>
   <div class="proposta">
-      <!--
+    <!--
         Sem hóspede escolhido não há o que revisar, e a tela não finge que há: o diálogo é só a
         pergunta de quem é a rotina.
       -->
-      <div v-if="!hospedagemId" class="campo">
-        <label :for="`${idCampo}-hospede`">{{ t('hotel.proposta.escolherHospede') }}</label>
+    <div v-if="!hospedagemId" class="campo">
+      <label :for="`${idCampo}-hospede`">{{ t('hotel.proposta.escolherHospede') }}</label>
 
-        <Select
-          :input-id="`${idCampo}-hospede`"
-          :model-value="hospedagemId"
-          :options="hospedes"
-          option-label="petNome"
-          option-value="hospedagemId"
-          fluid
-          @update:model-value="(id: string) => emit('atualizar:hospedagemId', id)"
-        >
-          <!--
+      <Select
+        :input-id="`${idCampo}-hospede`"
+        :model-value="hospedagemId"
+        :options="hospedes"
+        option-label="petNome"
+        option-value="hospedagemId"
+        fluid
+        @update:model-value="(id: string) => emit('atualizar:hospedagemId', id)"
+      >
+        <!--
             O painel do Select é teleportado para fora da página, então `:deep` daqui não alcança
             a fileira dele. O que alcança é o conteúdo do slot, que carrega o atributo de escopo
             consigo — então o rosto do animal é montado dentro do que é meu.
           -->
-          <template #option="{ option }">
-            <span class="opcao">
-              <PetAvatar
-                :nome="option.petNome"
-                :iniciais="option.petIniciais"
-                :especie="option.petEspecie"
-                :foto-url="option.petFotoUrl"
-                tamanho="xs"
-              />
-              <span class="opcao__nome">{{ option.petNome }}</span>
-              <span class="opcao__onde">{{ option.acomodacaoNome }}</span>
-            </span>
-          </template>
-        </Select>
-      </div>
+        <template #option="{ option }">
+          <span class="opcao">
+            <PetAvatar
+              :nome="option.petNome"
+              :iniciais="option.petIniciais"
+              :especie="option.petEspecie"
+              :foto-url="option.petFotoUrl"
+              tamanho="xs"
+            />
+            <span class="opcao__nome">{{ option.petNome }}</span>
+            <span class="opcao__onde">{{ option.acomodacaoNome }}</span>
+          </span>
+        </template>
+      </Select>
+    </div>
 
-      <p v-else-if="gerando" class="estado">
-        <i class="pi pi-spin pi-spinner" aria-hidden="true" />
-        {{ t('hotel.proposta.gerando') }}
-      </p>
+    <p v-else-if="gerando" class="estado">
+      <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+      {{ t('hotel.proposta.gerando') }}
+    </p>
 
-      <template v-else-if="proposta">
-        <!--
+    <template v-else-if="proposta">
+      <!--
           De quem é, de quando é, quem falou, e que nada disso existe ainda no banco. Em cinza:
           uma proposta não gravada é o estado normal dela, e não um alerta.
         -->
+      <div class="proposta__cabecalho">
         <header class="cabecalho">
           <strong v-if="hospede" class="cabecalho__pet">
             <PetAvatar
@@ -277,8 +278,18 @@ function aprovar() {
         </header>
 
         <!-- A frase que não pode sumir enquanto for verdade: não há modelo e não há rede. -->
-        <Message severity="secondary" :closable="false">{{ t('hotel.proposta.aviso') }}</Message>
+        <p class="aviso">
+          <i class="pi pi-info-circle" aria-hidden="true" />
+          {{ t('hotel.proposta.aviso') }}
+        </p>
+      </div>
 
+      <!--
+          O miolo é a única parte que rola. Cabeçalho e ações ficam presos nas pontas: numa
+          revisão, as duas coisas que não podem sumir de vista são **de quem é** a proposta e
+          **como aceitá-la** — e eram exatamente as duas que sumiam quando a lista ficava longa.
+        -->
+      <div class="proposta__corpo">
         <!-- ---------------------------------------------------------- contexto: a casa -->
         <section v-if="herdadas.length > 0" class="secao">
           <h3 class="secao__titulo">{{ t('hotel.proposta.casaJaFaz') }}</h3>
@@ -412,15 +423,16 @@ function aprovar() {
             t('hotel.proposta.descartadas', { total: proposta.descartadas }, proposta.descartadas)
           }}
         </p>
-      </template>
+      </div>
+    </template>
 
-      <p v-if="erro" class="erro">{{ t(erro) }}</p>
+    <p v-if="erro" class="erro">{{ t(erro) }}</p>
 
-      <!--
+    <!--
         As ações moram **dentro** do painel, e não num rodapé de diálogo: aqui não há diálogo.
         Ficam encostadas no fim, que é onde a leitura termina.
       -->
-      <div class="proposta__rodape">
+    <div class="proposta__rodape">
       <Button
         :label="t('hotel.proposta.descartar')"
         severity="secondary"
@@ -442,18 +454,74 @@ function aprovar() {
         :disabled="total === 0"
         @click="aprovar"
       />
-      </div>
     </div>
+  </div>
 </template>
 
 <style scoped>
+/*
+ * Três faixas: cabeçalho preso, miolo que rola, ações presas.
+ *
+ * A primeira versão era uma coluna só, e o defeito aparecia quando a proposta ficava longa: o nome
+ * do animal e o botão de aprovar saíam de vista, e o `Aprovar` — que é o ponto inteiro da tela —
+ * só voltava depois de rolar a lista toda.
+ *
+ * `min-block-size: 0` é o que faz isso funcionar, e é a linha que se esquece: sem ela um item
+ * flexível se recusa a encolher abaixo do próprio conteúdo, o miolo nunca ganha altura limitada, e
+ * ninguém rola nada.
+ */
 .proposta {
+  display: flex;
+  min-block-size: 0;
+  flex-direction: column;
+  gap: var(--clinic-space-3);
+}
+
+.proposta__cabecalho {
   display: grid;
+  flex: 0 0 auto;
+  gap: var(--clinic-space-2);
+}
+
+.proposta__corpo {
+  display: grid;
+  overflow-y: auto;
+  min-block-size: 0;
+  flex: 1 1 auto;
+  align-content: start;
   gap: var(--clinic-space-4);
+  overscroll-behavior: contain;
+}
+
+/*
+ * O aviso de que não há modelo nem rede, em nota e não em caixa.
+ *
+ * Como `Message` do PrimeVue ele custava perto de cem pixels de uma coluna de 28 rem — e aparece
+ * em **toda** proposta, sempre com o mesmo texto. Nota compacta diz o mesmo e devolve o espaço a
+ * quem precisa dele, que são as sugestões. O que não pode é desaparecer: enquanto for verdade que
+ * a inteligência é encenada, a tela tem de dizer isso sem ninguém precisar procurar.
+ */
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  margin: 0;
+  padding: var(--clinic-space-2) var(--clinic-space-3);
+  border-radius: var(--clinic-radius-control);
+  gap: var(--clinic-space-2);
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+}
+
+.aviso .pi {
+  margin-block-start: 0.1rem;
+  color: var(--clinic-faint);
+  font-size: 0.7rem;
 }
 
 .proposta__rodape {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: flex-end;
   padding-block-start: var(--clinic-space-3);
@@ -596,9 +664,10 @@ function aprovar() {
   height: 1.6rem;
   flex: 0 0 auto;
   place-items: center;
+  border: 1px solid var(--clinic-line);
   border-radius: 0.55rem;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
+  background: transparent;
+  color: var(--clinic-muted);
   font-size: 0.7rem;
 }
 

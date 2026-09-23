@@ -173,7 +173,6 @@ const vigentes = computed(() => props.ajustes.filter((ajuste) => !ajuste.revogad
 .ajuste .ajuste__icone {
   width: 1.05rem;
   height: 1.05rem;
-  color: var(--clinic-accent-strong);
 }
 
 .ajuste__corpo {

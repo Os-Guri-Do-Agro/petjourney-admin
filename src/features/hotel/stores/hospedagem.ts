@@ -312,6 +312,61 @@ export const useHospedagemStore = defineStore('hotel-hospedagem', () => {
    * Sem isso, cada refeição servida recarregaria a prancheta inteira e a lista saltaria sob o dedo
    * de quem está marcando as dezoito da manhã.
    */
+  /** Um cuidado recorrente que não é remédio: curativo, compressa, casaco. */
+  async function registrarCuidado(entrada: {
+    hospedagemId: string
+    descricao: string
+    horarios: string[]
+    observacao: string
+  }) {
+    const registrado = await mutar(() => hospedagemRepository.registrarCuidado(entrada))
+
+    if (!registrado) return null
+
+    await carregarPrancheta()
+
+    if (estadia.value?.hospedagem.id === entrada.hospedagemId) {
+      await carregarEstadia(entrada.hospedagemId)
+    }
+
+    return registrado
+  }
+
+  /** Um serviço vendido no meio da estadia. Entra na conta — ver o repositório. */
+  async function acrescentarServico(entrada: {
+    hospedagemId: string
+    servicoId: string
+    dia: ISODate
+    hora: string
+    observacao: string
+  }) {
+    const feito = await mutar(() => hospedagemRepository.acrescentarServico(entrada))
+
+    if (feito === null) return false
+
+    await carregarPrancheta()
+
+    return true
+  }
+
+  /** O ajuste escrito à mão, sem passar por proposta. */
+  async function registrarAjuste(entrada: {
+    hospedagemId: string
+    kind: TarefaDaCasaKind
+    horarios: ClockTime[]
+    motivo: string
+  }) {
+    const gravado = await mutar(() =>
+      propostaRepository.registrarAjuste({ ...entrada, por: hotelStore.operadorAtual() }),
+    )
+
+    if (!gravado) return null
+
+    await carregarPrancheta()
+
+    return gravado
+  }
+
   async function marcarTarefa(tarefaId: string, status: TarefaStatus, observacao?: string) {
     const atualizada = await mutar(() =>
       hospedagemRepository.marcarTarefa({
@@ -512,6 +567,9 @@ export const useHospedagemStore = defineStore('hotel-hospedagem', () => {
     proporRotina,
     aprovarProposta,
     registrarMedicacao,
+    registrarCuidado,
+    acrescentarServico,
+    registrarAjuste,
     registrarNoDiario,
     registrarOcorrencia,
     registrarContato,

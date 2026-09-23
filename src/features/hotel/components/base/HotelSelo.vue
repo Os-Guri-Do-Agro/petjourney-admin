@@ -9,6 +9,11 @@
  *
  * O ícone é opcional e sempre decorativo: a palavra é a informação, e um selo que dependa do
  * ícone para ser lido é um selo que o leitor de tela não entrega.
+ *
+ * Ele entra por dois caminhos. A prop `icone` recebe uma classe do PrimeIcons, que é o que serve
+ * para glifo de interface; o slot `#icone` recebe um componente, que é o que o Phosphor entrega.
+ * Sem o slot, a regra da casa de que o desenho do domínio vem do Phosphor simplesmente não
+ * alcançaria nenhum selo — e "falta pesar" sem a balança é a palavra sozinha outra vez.
  */
 withDefaults(
   defineProps<{
@@ -24,7 +29,9 @@ withDefaults(
 
 <template>
   <span class="selo" :class="[`selo--${tom}`, { 'selo--plano': plano }]">
-    <i v-if="icone" :class="icone" aria-hidden="true" />
+    <slot name="icone">
+      <i v-if="icone" :class="icone" aria-hidden="true" />
+    </slot>
     {{ rotulo }}
   </span>
 </template>
@@ -46,6 +53,13 @@ withDefaults(
 
 .selo i {
   font-size: 0.7em;
+}
+
+/* O componente do Phosphor não é fonte-ícone: ele mede pelo próprio quadro, não pelo `em`. */
+.selo :deep(svg) {
+  width: 0.95em;
+  height: 0.95em;
+  flex: 0 0 auto;
 }
 
 .selo--plano {

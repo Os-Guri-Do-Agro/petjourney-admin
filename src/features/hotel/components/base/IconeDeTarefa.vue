@@ -29,6 +29,7 @@
  * obedecendo a regra da casa de que o estado mora no disco e o ícone só acompanha.
  */
 import {
+  PhBandaids,
   PhBathtub,
   PhBone,
   PhBowlFood,
@@ -63,6 +64,8 @@ const ICONES: Record<TarefaKind, Component> = {
   tosa: PhScissors,
   /* O ossinho é o prêmio, que é com o que se adestra. */
   adestramento: PhBone,
+  /* Curativo: o cuidado que não é remédio nem serviço, e que precisa se distinguir dos dois. */
+  cuidado: PhBandaids,
   pesagem: PhScales,
 }
 

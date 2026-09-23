@@ -82,7 +82,12 @@ const TELAS = [
    * precisa ser reconferida sempre que a forma da tela mudar; foi reajustada três vezes.
    */
   { arquivo: '03-rotina', rota: '/hotel/rotina', altura: 1300 },
-  { arquivo: '04-hospedes', rota: '/hotel/hospedes', altura: 640 },
+  /*
+   * 1120: o cartão de hóspede passou de três linhas soltas para quatro faixas com a barra do dia,
+   * e ficou quase duas vezes mais alto. Com os 640 de antes a captura cortava a segunda fileira ao
+   * meio.
+   */
+  { arquivo: '04-hospedes', rota: '/hotel/hospedes', altura: 1120 },
   { arquivo: '05-reservas', rota: '/hotel/reservas', altura: 1400 },
   { arquivo: '06-reserva', rota: '/hotel/reserva/res-bidu', altura: 980 },
   { arquivo: '07-estadia', rota: '/hotel/hospedagem/hosp-tofu', altura: 1670 },

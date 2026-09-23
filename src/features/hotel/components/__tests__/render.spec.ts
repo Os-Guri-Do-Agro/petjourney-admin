@@ -28,7 +28,7 @@ import HotelSelo from '../base/HotelSelo.vue'
 import { addDays } from '@/features/clinico/domain/clinic-time'
 
 import { hospedagemRepository, reservaRepository } from '../../data/repositories'
-import { getDataset, resetDataset } from '../../data/store'
+import { agoraIso, getDataset, resetDataset } from '../../data/store'
 import { avaliarAdmissao } from '../../domain/admissao'
 import { dataDe } from '../../domain/hotel-time'
 import { situacaoDaTarefa } from '../../domain/rotina'
@@ -162,7 +162,10 @@ describe('cartão de hóspede', () => {
     const hospedes = await hospedagemRepository.listar()
     const hospede = hospedes[0]!
 
-    const wrapper = mount(HospedeCard, { props: { hospede }, global: COM_I18N })
+    const wrapper = mount(HospedeCard, {
+      props: { hospede, agora: agoraIso() },
+      global: COM_I18N,
+    })
     const texto = wrapper.text()
 
     expect(texto).toContain(hospede.petNome)
@@ -171,15 +174,44 @@ describe('cartão de hóspede', () => {
     expect(texto).not.toContain('hotel.')
   })
 
-  it('o cartão inteiro muda de tom quando algo trava, e não só um selo no canto', async () => {
+  /*
+   * A versão anterior deste teste fixava `.cartao--risco`, que pintava a superfície inteira. Foi
+   * derrubado por medição: `--clinic-risk-bg` e `--clinic-attention-bg` têm luminância
+   * praticamente igual, então em escala de cinza os dois estados eram a mesma cor, e as duas
+   * regras ainda trocavam a borda do cartão por uma **mais fraca** que a do cartão calmo.
+   *
+   * Agora o estado mora no disco — que muda de vazado para cheio, um canal de forma que sobrevive
+   * ao cinza —, e a superfície é sempre a mesma. É o que este teste passa a proteger.
+   */
+  it('o estado mora no disco, e a superfície do cartão nunca é pintada', async () => {
     const hospedes = await hospedagemRepository.listar()
     const travado = hospedes.find((item) => item.ocorrenciaTravada)!
+    const calmo = hospedes.find(
+      (item) => !item.ocorrenciaTravada && !item.boletimRetido && item.atrasadas === 0,
+    )
 
-    const wrapper = mount(HospedeCard, { props: { hospede: travado }, global: COM_I18N })
+    const wrapper = mount(HospedeCard, {
+      props: { hospede: travado, agora: agoraIso() },
+      global: COM_I18N,
+    })
 
-    /* Um selo pequeno não sobrevive a uma grade de doze cartões: o olho não lê canto. */
-    expect(wrapper.find('.cartao--risco').exists()).toBe(true)
+    expect(wrapper.find('.cartao--travado .foco__disco').exists()).toBe(true)
+    expect(wrapper.find('.cartao--risco').exists()).toBe(false)
+
+    /* O número do tutor chegava do repositório e nunca era desenhado: o cartão mandava ligar e
+       escondia para quem. */
     expect(wrapper.text()).toContain(travado.tutorNome)
+    expect(wrapper.text()).toContain(travado.tutorTelefone)
+
+    if (calmo) {
+      const sereno = mount(HospedeCard, {
+        props: { hospede: calmo, agora: agoraIso() },
+        global: COM_I18N,
+      })
+
+      expect(sereno.find('.cartao--travado').exists()).toBe(false)
+      expect(sereno.find('.foco__disco').exists()).toBe(true)
+    }
   })
 })
 

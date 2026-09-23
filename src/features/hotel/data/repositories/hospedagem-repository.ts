@@ -33,6 +33,8 @@ import { reconciliarDia } from '../../domain/materializacao'
 import { rotinaEfetiva } from '../../domain/rotina-padrao'
 import {
   atrasadasAgora,
+  diaDaRotina,
+  focoDoHospede,
   pendenciasDoTurno,
   pendentesAgora,
   planejarDia,
@@ -53,6 +55,7 @@ import type {
   Hospedagem,
   ISODate,
   ISODateTime,
+  CuidadoDaEstadia,
   MedicacaoDaEstadia,
   Ocorrencia,
   OcorrenciaKind,
@@ -62,6 +65,7 @@ import type {
   RegistroDoDiario,
   RegistroKind,
   TarefaDeRotina,
+  TarefaKind,
   TarefaStatus,
   ViaDeMedicacao,
   Turno,
@@ -110,6 +114,7 @@ function garantirHorizonte(dia: ISODate) {
       utcOffset: HOTEL_UTC_OFFSET,
       planoAlimentar: hospedagem.planoAlimentar,
       medicacoes: dataset.medicacoes.filter((item) => item.hospedagemId === hospedagem.id),
+      cuidados: dataset.cuidados.filter((item) => item.hospedagemId === hospedagem.id),
       passeioAutorizado: hospedagem.autorizacoes.some(
         (item) => item.kind === 'passeio-externo' && item.concedida,
       ),
@@ -210,6 +215,17 @@ export type HospedeNaCasa = {
   noites: number
   saiHoje: boolean
   proximaEmMinutos: number | null
+  /**
+   * A tarefa que decide o cartão: a mais antiga atrasada, ou a próxima à frente.
+   *
+   * Quem varre a grade lê o desenho antes da palavra, e passeio e medicação pedem preparos
+   * diferentes: "daqui a 40 min" sozinho não diz qual dos dois é, e é justamente a diferença que
+   * faz alguém largar o que está fazendo agora ou daqui a meia hora. Vai a tarefa inteira porque
+   * o ícone sai do `kind` e o relógio sai do `previstaPara` — separados, podem discordar.
+   */
+  foco: { kind: TarefaKind; previstaPara: ISODateTime; atrasada: boolean } | null
+  /** O dia da rotina deste hóspede: quantas tarefas tem e quantas já saíram do caminho. */
+  rotinaDoDia: { total: number; resolvidas: number }
 }
 
 export type EstadiaDetalhada = {
@@ -271,6 +287,27 @@ export type PassagemDeTurno = {
 
 function tarefasDe(hospedagemId: string) {
   return base().tarefas.filter((tarefa) => tarefa.hospedagemId === hospedagemId)
+}
+
+/**
+ * O foco de um hóspede, achatado para o que a grade precisa.
+ *
+ * A tarefa inteira não atravessa: `TarefaDeRotina` carrega identificador, turno, observação e
+ * executor, e nada disso é desenhado na grade. Mandar o objeto cheio convidaria alguém a marcar
+ * tarefa a partir daqui, que é decisão de produto e não consequência de tipo.
+ */
+function focoDe(tarefas: TarefaDeRotina[], agora: ISODateTime) {
+  const foco = focoDoHospede(tarefas, agora)
+
+  if (!foco) {
+    return null
+  }
+
+  return {
+    kind: foco.kind,
+    previstaPara: foco.previstaPara,
+    atrasada: situacaoDaTarefa(foco, agora) === 'atrasada',
+  }
 }
 
 function ocorrenciasDe(hospedagemId: string) {
@@ -337,6 +374,8 @@ export const hospedagemRepository = {
               noites: noitesNaCasa(hospedagem, agora),
               saiHoje: dataDe(hospedagem.saidaPrevistaEm) === hoje,
               proximaEmMinutos: proximaEmMinutos(tarefas, agora),
+              foco: focoDe(tarefas, agora),
+              rotinaDoDia: diaDaRotina(tarefas, hoje, agora),
             }
           })
           /*
@@ -661,45 +700,106 @@ export const hospedagemRepository = {
 
       dataset.medicacoes.push(medicacao)
 
-      /* As doses de hoje e de amanhã que ainda estão à frente do relógio. */
-      for (const dia of [dataDe(agora), addDays(dataDe(agora), 1)]) {
-        const planejadas = planejarDia({
-          hospedagemId: hospedagem.id,
-          dia,
-          utcOffset: HOTEL_UTC_OFFSET,
-          planoAlimentar: hospedagem.planoAlimentar,
-          medicacoes: dataset.medicacoes.filter((item) => item.hospedagemId === hospedagem.id),
-          passeioAutorizado: hospedagem.autorizacoes.some(
-            (item) => item.kind === 'passeio-externo' && item.concedida,
-          ),
-          entradaEm: hospedagem.entradaEm,
-          saidaPrevistaEm: hospedagem.saidaPrevistaEm,
-          rotinaPadrao: [],
-        })
-
-        const { criar } = reconciliarDia({
-          existentes: tarefasDoDia(
-            dataset.tarefas.filter((item) => item.hospedagemId === hospedagem.id),
-            dia,
-          ),
-          planejadas,
-          agora,
-        })
-
-        for (const planejada of criar) {
-          dataset.tarefas.push({
-            id: novoId('tarefa'),
-            ...planejada,
-            status: 'pendente',
-            executadaEm: null,
-            executadaPor: null,
-            turnoId: null,
-            observacao: '',
-          })
-        }
-      }
+      /*
+       * As doses de hoje e de amanhã, pela **mesma porta** que tudo o mais usa. Esta função já
+       * sabe não criar nada no passado e não duplicar o que existe; refazer a conta aqui seria uma
+       * segunda regra sobre quando uma tarefa nasce, e duas regras divergem.
+       */
+      garantirHorizonte(dataDe(agora))
+      garantirHorizonte(addDays(dataDe(agora), 1))
 
       return medicacao
+    })
+  },
+
+  /**
+   * Um cuidado recorrente que **não é remédio**: curativo, compressa, casaco à noite.
+   *
+   * Existe porque havia um buraco entre três portas. Remédio entra por `registrarMedicacao`, onde
+   * dose e via são obrigatórias e a receita é o respaldo. Banho e tosa entram por
+   * `acrescentarServico`, que cobra. E água e higiene vêm da rotina da casa, que vale para todos.
+   * Trocar um curativo não é nenhuma das três — e sem lugar próprio, esse trabalho ou não era
+   * registrado, ou era registrado como medicação: uma linha de remédio sem dose e sem receita no
+   * prontuário de um animal, que é o pior dos dois mundos.
+   *
+   * O que este caminho **não** aceita é dose. A tela diz isso e oferece a porta certa; aqui o tipo
+   * simplesmente não tem o campo.
+   */
+  registrarCuidado(entrada: {
+    hospedagemId: string
+    descricao: string
+    horarios: string[]
+    observacao: string
+  }): Promise<CuidadoDaEstadia> {
+    return simularChamada('cuidado.registrar', () => {
+      const dataset = getDataset()
+      const agora = agoraIso()
+
+      const cuidado: CuidadoDaEstadia = {
+        id: novoId('cuidado'),
+        hospedagemId: entrada.hospedagemId,
+        descricao: entrada.descricao,
+        horarios: entrada.horarios as CuidadoDaEstadia['horarios'],
+        inicio: dataDe(agora),
+        fim: null,
+        observacao: entrada.observacao,
+        encerradoEm: null,
+      }
+
+      dataset.cuidados.push(cuidado)
+
+      garantirHorizonte(dataDe(agora))
+      garantirHorizonte(addDays(dataDe(agora), 1))
+
+      return cuidado
+    })
+  },
+
+  /**
+   * Um serviço vendido **no meio da estadia**: o banho que o responsável pediu por telefone.
+   *
+   * Duas coisas acontecem, e as duas precisam acontecer juntas. O serviço entra em
+   * `reserva.servicos`, que é de onde o orçamento do check-out é recalculado — então ele **é
+   * cobrado**, e a tela diz o preço antes de gravar. E ele ganha um dia próprio, porque a geração
+   * coloca serviço avulso no primeiro dia inteiro da estadia: sem data, um banho vendido na quarta
+   * cairia numa segunda que já passou, e nada nasce no passado. Seria cobrado e nunca feito.
+   *
+   * A tarefa não é criada aqui: `garantirHorizonte` a materializa a partir do contrato, como faz
+   * com todo o resto. Criar à mão abriria uma segunda fonte para a mesma tarefa.
+   */
+  acrescentarServico(entrada: {
+    hospedagemId: string
+    servicoId: string
+    dia: ISODate
+    hora: string
+    observacao: string
+  }): Promise<void> {
+    return simularChamada('servico.acrescentar', () => {
+      const dataset = getDataset()
+      const hospedagem = dataset.hospedagens.find((item) => item.id === entrada.hospedagemId)!
+      const reserva = dataset.reservas.find((item) => item.id === hospedagem.reservaId)
+      const servico = dataset.servicos.find((item) => item.id === entrada.servicoId)
+
+      if (!reserva || !servico) {
+        return
+      }
+
+      reserva.servicos = [
+        ...reserva.servicos,
+        {
+          servicoId: servico.id,
+          quantidade: 1,
+          /* O preço de hoje, congelado: o reajuste de amanhã não altera o que foi combinado. */
+          precoUnitarioCentavos: servico.precoCentavos,
+          observacao: entrada.observacao,
+          dia: entrada.dia,
+          hora: entrada.hora as CuidadoDaEstadia['horarios'][number],
+        },
+      ]
+
+      reserva.atualizadoEm = agoraIso()
+
+      garantirHorizonte(entrada.dia)
     })
   },
 

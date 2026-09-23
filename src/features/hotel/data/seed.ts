@@ -64,6 +64,7 @@ import type {
   Reserva,
   Servico,
   AjusteDeRotina,
+  CuidadoDaEstadia,
   PublicacaoDeRotina,
   RotinaPadrao,
   TarefaDeRotina,
@@ -114,6 +115,8 @@ export type SeedResult = {
   reservas: Reserva[]
   hospedagens: Hospedagem[]
   medicacoes: MedicacaoDaEstadia[]
+  /** Curativo, compressa, casaco: o cuidado que nao e remedio nem servico vendido. */
+  cuidados: CuidadoDaEstadia[]
   tarefas: TarefaDeRotina[]
   /** A rotina que a casa faz por todos. Nasce com os horários iniciais. */
   rotinaPadrao: RotinaPadrao
@@ -1296,6 +1299,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     reservas,
     hospedagens,
     medicacoes,
+    cuidados: [],
     rotinaPadrao: {
       id: `rot-${semente}`,
       versao: 1,

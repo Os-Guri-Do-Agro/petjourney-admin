@@ -15,6 +15,7 @@
 
 import type {
   ClockTime,
+  CuidadoDaEstadia,
   ItemDeRotina,
   ISODate,
   ISODateTime,
@@ -188,14 +189,88 @@ export function atrasadasAgora(tarefas: TarefaDeRotina[], agora: ISODateTime): T
   return tarefas.filter((tarefa) => situacaoDaTarefa(tarefa, agora) === 'atrasada')
 }
 
+/**
+ * A próxima à frente — a tarefa, não o relógio.
+ *
+ * `proximaEmMinutos` respondia metade da pergunta. "Daqui a 40 min" não muda o que a pessoa faz;
+ * "daqui a 40 min, remédio" muda, porque remédio se prepara antes. As duas leituras saem da mesma
+ * varredura, então a de minutos passou a derivar desta em vez de repetir o filtro.
+ */
+export function proximaTarefa(
+  tarefas: TarefaDeRotina[],
+  agora: ISODateTime,
+): TarefaDeRotina | null {
+  return (
+    tarefas
+      .filter((tarefa) => tarefa.status === 'pendente' && tarefa.previstaPara > agora)
+      .sort((um, outro) => um.previstaPara.localeCompare(outro.previstaPara))[0] ?? null
+  )
+}
+
 /** A próxima à frente, em minutos. `null` quando não há nenhuma. */
 export function proximaEmMinutos(tarefas: TarefaDeRotina[], agora: ISODateTime): number | null {
-  const futuras = tarefas
-    .filter((tarefa) => tarefa.status === 'pendente' && tarefa.previstaPara > agora)
-    .map((tarefa) => Math.round((Date.parse(tarefa.previstaPara) - Date.parse(agora)) / 60_000))
-    .sort((um, outro) => um - outro)
+  const proxima = proximaTarefa(tarefas, agora)
 
-  return futuras[0] ?? null
+  if (!proxima) {
+    return null
+  }
+
+  return Math.round((Date.parse(proxima.previstaPara) - Date.parse(agora)) / 60_000)
+}
+
+/**
+ * A tarefa que decide o cartão de um hóspede.
+ *
+ * A grade de hóspedes responde "como está cada um dos meus cinco?", e a resposta honesta não é um
+ * número: é **uma** tarefa. A mais antiga atrasada, porque atraso se resolve pela ponta velha; e
+ * não havendo atraso, a próxima à frente, porque aí a pergunta vira "quanto tempo eu tenho".
+ *
+ * Devolve a tarefa inteira, e não o tipo dela, porque quem desenha precisa das duas metades: o
+ * ícone sai do `kind` e o relógio sai do `previstaPara`. Separar as duas obrigaria a varrer a
+ * lista duas vezes e abriria a porta para as duas discordarem.
+ */
+export function focoDoHospede(
+  tarefas: TarefaDeRotina[],
+  agora: ISODateTime,
+): TarefaDeRotina | null {
+  const atrasadas = atrasadasAgora(tarefas, agora).sort((um, outro) =>
+    um.previstaPara.localeCompare(outro.previstaPara),
+  )
+
+  return atrasadas[0] ?? proximaTarefa(tarefas, agora)
+}
+
+/**
+ * O que há para fazer hoje, e quanto disso já saiu do caminho.
+ *
+ * "Saiu do caminho" é tudo que não está pendente — feita, recusada e pulada. Recusar e pular são
+ * decisões registradas, e uma barra que só conta `feita` mostraria trabalho pendente que ninguém
+ * vai fazer, que é exatamente o que ensina a ignorar a barra.
+ *
+ * **O atraso de ontem conta como trabalho de hoje**, e isso não é detalhe: contando só o que estava
+ * previsto para hoje, um hóspede com as sete tarefas do dia resolvidas e duas pendências vencidas
+ * ontem aparecia como "7 de 7", barra cheia, ao lado de uma linha dizendo "2 atrasadas". O mesmo
+ * cartão afirmava duas coisas contrárias. Tarefa vencida não deixa de ser trabalho por ter virado
+ * o dia — ela só deixa de aparecer numa conta que olha o calendário em vez da fila.
+ *
+ * O dia e o agora entram por parâmetro e não saem de `new Date()` aqui dentro: a casa inteira lê o
+ * relógio num lugar só, e função de domínio que consulta o relógio não se testa.
+ */
+export function diaDaRotina(
+  tarefas: TarefaDeRotina[],
+  dia: string,
+  agora: ISODateTime,
+): { total: number; resolvidas: number } {
+  const emJogo = tarefas.filter(
+    (tarefa) =>
+      tarefa.previstaPara.startsWith(dia) ||
+      (tarefa.status === 'pendente' && tarefa.previstaPara < agora),
+  )
+
+  return {
+    total: emJogo.length,
+    resolvidas: emJogo.filter((tarefa) => tarefa.status !== 'pendente').length,
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -288,6 +363,13 @@ export function planejarDia(entrada: {
   /** O catálogo, para saber se o serviço é por diária ou uma vez só. */
   catalogoDeServicos?: Servico[]
   /**
+   * Os cuidados deste hóspede: curativo, compressa, casaco.
+   *
+   * Opcional pelo mesmo motivo dos serviços — a maioria das estadias não tem nenhum, e as chamadas
+   * que existiam antes deste campo continuam valendo sem mudar uma linha.
+   */
+  cuidados?: CuidadoDaEstadia[]
+  /**
    * A rotina da casa em vigor. Ausente: os horários iniciais (`ROTINA_PADRAO_INICIAL`).
    *
    * Opcional para que as chamadas que não conhecem template — e os testes que existiam antes dele —
@@ -344,6 +426,28 @@ export function planejarDia(entrada: {
   }
 
   /*
+   * Os cuidados do hóspede: curativo, compressa, casaco à noite.
+   *
+   * Vêm logo depois da medicação porque têm a mesma forma — janela própria dentro da estadia e uma
+   * saída por encerramento — e respondem à mesma pergunta: o que **este** animal precisa e os
+   * outros não. O que os separa é o que não têm: dose, via e receita. Pomada e colírio entram pela
+   * medicação, onde essas três coisas são obrigatórias.
+   */
+  for (const cuidado of entrada.cuidados ?? []) {
+    if (cuidado.encerradoEm) {
+      continue
+    }
+
+    if (entrada.dia < cuidado.inicio || (cuidado.fim && entrada.dia > cuidado.fim)) {
+      continue
+    }
+
+    for (const hora of cuidado.horarios) {
+      acrescentar('cuidado', hora, cuidado.descricao, cuidado.id)
+    }
+  }
+
+  /*
    * A rotina da casa, como ela estiver cadastrada.
    *
    * O item desligado não gera nada, e o que exige autorização só gera para quem a concedeu — que
@@ -383,7 +487,12 @@ export function planejarDia(entrada: {
       continue
     }
 
-    if (!servico.porDiaria && entrada.dia !== primeiroDiaInteiro) {
+    /*
+     * O que é cobrado uma vez acontece **no dia combinado**, e só nele. O padrão continua sendo o
+     * primeiro dia inteiro — quem vendeu o banho na reserva não escolheu data nenhuma —, mas o
+     * serviço acrescentado no meio da estadia traz a sua, e é ela que manda.
+     */
+    if (!servico.porDiaria && entrada.dia !== (contratado.dia ?? primeiroDiaInteiro)) {
       continue
     }
 
@@ -393,7 +502,7 @@ export function planejarDia(entrada: {
     for (let indice = 0; indice < vezes; indice += 1) {
       acrescentar(
         planta.kind,
-        somarMinutos(planta.hora, indice * 30),
+        somarMinutos(contratado.hora ?? planta.hora, indice * 30),
         contratado.observacao,
         contratado.servicoId,
       )

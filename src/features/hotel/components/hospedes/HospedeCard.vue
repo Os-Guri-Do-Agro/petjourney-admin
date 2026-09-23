@@ -2,28 +2,69 @@
 /**
  * Um hóspede na casa.
  *
- * Era uma linha de tabela, e tabela é a forma errada aqui. A lista de hóspedes não é um
- * inventário para varrer por coluna: é a pergunta "como está cada um dos meus cinco?", e a
- * resposta é um rosto, um estado e o que falta fazer. Numa tabela, "Thor" é texto de célula; num
- * cartão, é quem está dentro da baia.
+ * ## A pergunta
  *
- * O cartão é organizado pelo que a pessoa procura, nesta ordem:
+ * Esta tela não é um inventário para varrer por coluna: é a pergunta **"como está cada um dos meus
+ * cinco?"**. A resposta é um rosto, uma coisa que cobra ação, e até quando ele fica.
  *
- * 1. **Quem** — iniciais grandes, nome, acomodação.
- * 2. **Como está** — adaptação, e o que trava, se travar.
- * 3. **O que falta** — a barra de rotina do dia, que é a única coisa acionável daqui.
- * 4. **Até quando** — a saída, com o dia de hoje em destaque.
+ * ## A anatomia, e por que ela é assim
+ *
+ * O cartão tem quatro faixas, e a ordem delas é a ordem em que se pergunta:
+ *
+ * 1. **Quem** — rosto, nome, onde dorme, de quem é.
+ * 2. **O que cobra ação** — num bloco embutido, com fundo próprio.
+ * 3. **Como vai o dia** — a barra da rotina.
+ * 4. **Até quando, e o que fazer** — as datas e a única ação.
+ *
+ * A faixa 2 ser um **bloco embutido**, e não mais uma linha solta, é o que resolve a queixa de
+ * "tela feia". A versão anterior era o retângulo do cartão com três linhas de texto flutuando
+ * dentro, cada uma com o próprio vazio à direita — nada ancorava o olho, e a única coisa com peso
+ * era o disco. Com o bloco, o cartão passa a ter um dentro: o que cobra ação tem superfície
+ * própria, e o resto se organiza em volta dele.
+ *
+ * A faixa 3 é a **barra que o docstring da primeira versão prometia e nunca foi construída** —
+ * "3. O que falta: a barra de rotina do dia". O número existia no repositório e não era desenhado.
+ * Ela é também o que dá altura honesta ao cartão: quatro hóspedes numa tela larga deixavam metade
+ * da página em branco, e a correção certa é o cartão ter o que mostrar, não inventar enfeite para
+ * ocupar viewport.
+ *
+ * ## O que não mudou, e por quê
+ *
+ * O cartão continua sendo um `<li>` com link esticado no nome, e não um `<button>` envolvendo
+ * tudo — aquilo era HTML inválido e era o que impedia qualquer ação dentro dele.
+ *
+ * E a superfície continua **nunca sendo pintada por estado**: medido, `--clinic-risk-bg` e
+ * `--clinic-attention-bg` têm luminância praticamente idêntica, então em escala de cinza os dois
+ * eram a mesma cor. O estado mora no disco, que vai de vazado a cheio — canal de forma, que
+ * sobrevive ao cinza e ao daltonismo.
  */
-import { computed } from 'vue'
+import {
+  PhChatCircleText,
+  PhCheckCircle,
+  PhDoorOpen,
+  PhHouseLine,
+  PhMapPin,
+  PhMoon,
+  PhPhoneCall,
+  PhScales,
+} from '@phosphor-icons/vue'
+import Button from 'primevue/button'
+import { computed, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import HotelSelo from '../base/HotelSelo.vue'
+import IconeDeTarefa from '../base/IconeDeTarefa.vue'
 import PetAvatar from '../base/PetAvatar.vue'
 import { useHotelFormat } from '../../composables/useHotelFormat'
 import type { HospedeNaCasa } from '../../data/repositories'
 import { tomDaAdaptacao } from '../../domain/estadia'
 
-const props = defineProps<{ hospede: HospedeNaCasa }>()
+const props = defineProps<{
+  hospede: HospedeNaCasa
+  /** O relógio da casa, que pulsa. É ele que faz o contador descer sem recarregar a lista. */
+  agora: string
+  blocoNome?: string
+}>()
 
 const emit = defineEmits<{ abrir: [hospedagemId: string] }>()
 
@@ -31,177 +72,289 @@ const { t } = useI18n()
 const formato = useHotelFormat()
 
 /**
- * O cartão inteiro muda de tom quando algo trava.
+ * O estado do cartão, num valor só.
  *
- * Um selo pequeno no canto não sobrevive a uma tela com doze cartões: o olho varre a grade e não
- * lê canto. O que trava precisa mudar a **silhueta** do cartão.
+ * A ordem é a de quem larga o que está fazendo: ligação primeiro, porque é o único trabalho que
+ * não se resolve andando pelo corredor; depois o atraso; depois o recado parado; depois a tarefa
+ * que vem; e por fim a calma.
  */
-const tom = computed(() => {
-  if (props.hospede.ocorrenciaTravada) {
-    return 'risco'
-  }
+type Estado = 'travado' | 'atrasada' | 'recado' | 'aguardando' | 'calmo'
 
-  if (props.hospede.atrasadas > 0 || props.hospede.boletimRetido) {
-    return 'atencao'
-  }
+const estado = computed<Estado>(() => {
+  if (props.hospede.ocorrenciaTravada) return 'travado'
+  if (props.hospede.foco?.atrasada) return 'atrasada'
+  if (props.hospede.boletimRetido) return 'recado'
+  if (props.hospede.foco) return 'aguardando'
 
   return 'calmo'
 })
 
-/** A barra de rotina: feito sobre total do dia. Vazia some — barra a 0% é ruído. */
-const rotina = computed(() => {
-  const total = props.hospede.pendentes + props.hospede.atrasadas
+/**
+ * O ícone do bloco quando o foco não é uma tarefa.
+ *
+ * Mapa `Record<Estado, …>` de propósito, como o do `IconeDeTarefa`: acrescentar um estado sem dar
+ * ícone a ele passa a ser erro de compilação, e não um quadrado vazio descoberto em produção.
+ */
+const ICONE_DO_ESTADO: Record<Estado, Component> = {
+  travado: PhPhoneCall,
+  atrasada: PhCheckCircle,
+  recado: PhChatCircleText,
+  aguardando: PhCheckCircle,
+  calmo: PhCheckCircle,
+}
 
-  return { pendentes: total, atrasadas: props.hospede.atrasadas }
+/** Quanto falta (ou quanto passou) para a tarefa em foco, contra o relógio que pulsa. */
+const minutos = computed(() => {
+  if (!props.hospede.foco) return 0
+
+  return Math.round(
+    (Date.parse(props.hospede.foco.previstaPara) - Date.parse(props.agora)) / 60_000,
+  )
 })
 
-const proxima = computed(() =>
-  props.hospede.proximaEmMinutos === null ? '' : formato.duracao(props.hospede.proximaEmMinutos),
+/**
+ * O contador, em palavras.
+ *
+ * Não usa `formato.relativo`: aquele lê o relógio por dentro, então não é reativo — o contador
+ * congelaria no instante do carregamento, que é exatamente o defeito que esta linha existe para
+ * não ter.
+ */
+const quando = computed(() => {
+  if (!props.hospede.foco) return ''
+
+  const m = minutos.value
+
+  if (m <= 0 && m > -2) return t('hotel.hospedes.foco.agora')
+  if (m < 0) return t('hotel.hospedes.foco.atrasou', { tempo: formato.duracao(-m) })
+
+  return t('hotel.hospedes.foco.em', { tempo: formato.duracao(m) })
+})
+
+/**
+ * O dia em três fatias: o que saiu do caminho, o que atrasou, e o que ainda vem.
+ *
+ * As larguras são percentuais do total e somam 100 por construção — barra com `flex` e três
+ * pedaços que se disputam largura mente sobre a proporção assim que um deles tem texto dentro.
+ */
+const dia = computed(() => {
+  const { total, resolvidas } = props.hospede.rotinaDoDia
+
+  if (total === 0) {
+    return null
+  }
+
+  const atrasadas = Math.min(props.hospede.atrasadas, total - resolvidas)
+
+  return {
+    total,
+    resolvidas,
+    feito: `${(resolvidas / total) * 100}%`,
+    atraso: `${(atrasadas / total) * 100}%`,
+  }
+})
+
+const faltaPesar = computed(
+  () => props.hospede.saiHoje && props.hospede.hospedagem.pesoSaidaKg === null,
 )
+
+const saida = computed(() =>
+  props.hospede.saiHoje
+    ? t('hotel.hospedes.cartao.hojeAs', {
+        hora: formato.hora(props.hospede.hospedagem.saidaPrevistaEm),
+      })
+    : formato.quando(props.hospede.hospedagem.saidaPrevistaEm),
+)
+
+const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
 </script>
 
 <template>
-  <article class="cartao" :class="`cartao--${tom}`">
-    <button type="button" class="cartao__botao" @click="emit('abrir', hospede.hospedagem.id)">
-      <header class="quem">
-        <PetAvatar
-          :nome="hospede.petNome"
-          :iniciais="hospede.petIniciais"
-          :especie="hospede.petEspecie"
-          :foto-url="hospede.petFotoUrl"
-          tamanho="md"
-        />
+  <li class="cartao" :class="`cartao--${estado}`">
+    <!-- 1 · Quem. O nome é o único focável, e o `::after` dele cobre o cartão inteiro. -->
+    <header class="quem">
+      <PetAvatar
+        class="quem__rosto"
+        :nome="hospede.petNome"
+        :iniciais="hospede.petIniciais"
+        :especie="hospede.petEspecie"
+        :foto-url="hospede.petFotoUrl"
+        tamanho="lg"
+      />
 
-        <span class="quem__texto">
-          <strong class="quem__nome">{{ hospede.petNome }}</strong>
-          <span class="quem__onde">{{ hospede.acomodacaoNome }}</span>
-          <span class="quem__tutor">{{ hospede.tutorNome }}</span>
+      <div class="quem__texto">
+        <p class="quem__linha">
+          <button
+            type="button"
+            class="quem__nome"
+            :aria-label="t('hotel.hospedes.acao.abrir', { pet: hospede.petNome })"
+            @click="emit('abrir', hospede.hospedagem.id)"
+          >
+            {{ hospede.petNome }}
+          </button>
+
+          <HotelSelo
+            v-if="adaptacao !== 'tranquilo'"
+            :rotulo="formato.adaptacao(adaptacao)"
+            :tom="tomDaAdaptacao(adaptacao)"
+          />
+        </p>
+
+        <p class="quem__onde">
+          <span class="dado">
+            <PhMapPin weight="duotone" aria-hidden="true" />{{ hospede.acomodacaoNome }}
+          </span>
+          <span v-if="blocoNome" class="dado">
+            <PhHouseLine weight="duotone" aria-hidden="true" />{{ blocoNome }}
+          </span>
+          <span class="dado">
+            <i class="pi pi-user" aria-hidden="true" />{{ hospede.tutorNome }}
+          </span>
+        </p>
+      </div>
+    </header>
+
+    <!--
+      2 · O que cobra ação, num bloco com superfície própria.
+      É o que ancora o olho: sem ele o cartão é um retângulo com linhas soltas dentro.
+    -->
+    <section class="foco">
+      <span class="foco__disco">
+        <IconeDeTarefa v-if="hospede.foco && estado !== 'travado'" :kind="hospede.foco.kind" />
+        <component :is="ICONE_DO_ESTADO[estado]" v-else weight="duotone" aria-hidden="true" />
+      </span>
+
+      <div class="foco__texto">
+        <template v-if="estado === 'travado'">
+          <p class="foco__frase">
+            {{ t('hotel.hospedes.foco.ligar', { tutor: hospede.tutorNome }) }}
+          </p>
+          <p v-if="hospede.atrasadas > 0" class="foco__nota foco__nota--risco">
+            {{
+              t('hotel.hospedes.cartao.atrasadas', { total: hospede.atrasadas }, hospede.atrasadas)
+            }}
+          </p>
+        </template>
+
+        <template v-else-if="hospede.foco">
+          <p class="foco__frase">
+            <span class="foco__hora clinic-value">{{
+              formato.hora(hospede.foco.previstaPara)
+            }}</span>
+            {{ formato.tarefaKind(hospede.foco.kind) }}
+          </p>
+          <p class="foco__nota" :class="{ 'foco__nota--risco': estado === 'atrasada' }">
+            {{ quando }}
+            <template v-if="hospede.atrasadas > 1">
+              ·
+              {{
+                t(
+                  'hotel.hospedes.cartao.atrasadas',
+                  { total: hospede.atrasadas },
+                  hospede.atrasadas,
+                )
+              }}
+            </template>
+          </p>
+        </template>
+
+        <template v-else-if="estado === 'recado'">
+          <p class="foco__frase">{{ t('hotel.hospedes.cartao.boletimRetido') }}</p>
+        </template>
+
+        <template v-else>
+          <p class="foco__frase foco__frase--calma">
+            {{ t('hotel.hospedes.foco.nadaPendente') }}
+          </p>
+        </template>
+      </div>
+    </section>
+
+    <!--
+      3 · O dia. A barra que a primeira versão deste cartão prometia no próprio comentário e nunca
+      construiu — o número já vinha do repositório e era descartado.
+    -->
+    <section v-if="dia" class="dia">
+      <p class="dia__topo">
+        <span class="dia__rotulo">{{ t('hotel.hospedes.dia.rotulo') }}</span>
+        <span class="dia__conta clinic-value">
+          {{ t('hotel.hospedes.dia.contagem', { feitas: dia.resolvidas, total: dia.total }) }}
         </span>
+      </p>
 
-        <HotelSelo
-          :rotulo="formato.adaptacao(hospede.hospedagem.adaptacao)"
-          :tom="tomDaAdaptacao(hospede.hospedagem.adaptacao)"
-        />
-      </header>
+      <span
+        class="barra"
+        role="img"
+        :aria-label="t('hotel.hospedes.dia.contagem', { feitas: dia.resolvidas, total: dia.total })"
+      >
+        <span class="barra__feito" :style="{ inlineSize: dia.feito }" />
+        <span class="barra__atraso" :style="{ inlineSize: dia.atraso }" />
+      </span>
+    </section>
+
+    <!-- 4 · Até quando, e a única ação. O ícone é o rótulo: sem calha, sem caixa-alta miúda. -->
+    <footer class="pe">
+      <span class="dado">
+        <PhMoon weight="duotone" aria-hidden="true" />
+        {{ t('hotel.hospedes.cartao.noites', { total: hospede.noites }, hospede.noites) }}
+      </span>
+
+      <span class="dado" :class="{ 'dado--hoje': hospede.saiHoje }">
+        <PhDoorOpen weight="duotone" aria-hidden="true" />{{ saida }}
+      </span>
+
+      <HotelSelo v-if="faltaPesar" :rotulo="t('hotel.hospedes.cartao.faltaPesar')" tom="atencao">
+        <template #icone><PhScales weight="duotone" aria-hidden="true" /></template>
+      </HotelSelo>
 
       <!--
-        O que trava vem antes de tudo o mais, com a frase inteira. "Ligar" sozinho não diz para
-        quem nem por quê, e é essa a informação que decide se alguém larga o que está fazendo.
+        Ligar é o que a prancheta do turno não faz — e o número chegava no repositório e nunca era
+        desenhado, então o cartão mandava ligar e escondia para quem.
       -->
-      <p v-if="hospede.ocorrenciaTravada" class="trava trava--risco">
-        <i class="pi pi-phone" aria-hidden="true" />
-        {{ t('hotel.hospedes.cartao.precisaLigar', { tutor: hospede.tutorNome }) }}
-      </p>
-
-      <p v-else-if="hospede.boletimRetido" class="trava trava--atencao">
-        <i class="pi pi-comment" aria-hidden="true" />
-        {{ t('hotel.hospedes.cartao.boletimRetido') }}
-      </p>
-
-      <dl class="fatos">
-        <div class="fato">
-          <dt>{{ t('hotel.hospedes.cartao.rotina') }}</dt>
-          <dd>
-            <template v-if="rotina.atrasadas > 0">
-              <strong class="fato--alerta">
-                {{
-                  t(
-                    'hotel.hospedes.cartao.atrasadas',
-                    { total: rotina.atrasadas },
-                    rotina.atrasadas,
-                  )
-                }}
-              </strong>
-            </template>
-            <template v-else-if="rotina.pendentes > 0">
-              {{
-                t('hotel.hospedes.cartao.pendentes', { total: rotina.pendentes }, rotina.pendentes)
-              }}
-            </template>
-            <template v-else-if="proxima">
-              {{ t('hotel.hospedes.cartao.proxima', { tempo: proxima }) }}
-            </template>
-            <template v-else>{{ t('hotel.hospedes.cartao.nadaAFazer') }}</template>
-          </dd>
-        </div>
-
-        <div class="fato">
-          <dt>{{ t('hotel.hospedes.cartao.naCasaHa') }}</dt>
-          <dd>
-            {{ t('hotel.hospedes.cartao.noites', { total: hospede.noites }, hospede.noites) }}
-          </dd>
-        </div>
-
-        <div class="fato">
-          <dt>{{ t('hotel.hospedes.cartao.sai') }}</dt>
-          <dd :class="{ 'fato--destaque': hospede.saiHoje }">
-            <template v-if="hospede.saiHoje">
-              {{
-                t('hotel.hospedes.cartao.hojeAs', {
-                  hora: formato.hora(hospede.hospedagem.saidaPrevistaEm),
-                })
-              }}
-            </template>
-            <template v-else>
-              {{ formato.quando(hospede.hospedagem.saidaPrevistaEm) }}
-            </template>
-          </dd>
-        </div>
-      </dl>
-
-      <footer v-if="hospede.saiHoje && hospede.hospedagem.pesoSaidaKg === null" class="rodape">
-        <HotelSelo
-          :rotulo="t('hotel.hospedes.cartao.faltaPesar')"
-          tom="atencao"
-          icone="pi pi-exclamation-triangle"
+      <span v-if="estado === 'travado'" class="pe__acao">
+        <Button
+          as="a"
+          :href="`tel:${hospede.tutorTelefone}`"
+          :label="t('hotel.hospedes.acao.ligar')"
+          icon="pi pi-phone"
+          severity="secondary"
+          outlined
+          size="small"
         />
-      </footer>
-    </button>
-  </article>
+        <span class="pe__tel clinic-value">
+          <bdi dir="ltr">{{ hospede.tutorTelefone }}</bdi>
+        </span>
+      </span>
+    </footer>
+  </li>
 </template>
 
 <style scoped>
 .cartao {
+  position: relative;
+  display: grid;
+  align-content: start;
+  padding: var(--clinic-space-5);
   border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
+  gap: var(--clinic-space-4);
   background: var(--clinic-surface);
   box-shadow: var(--clinic-shadow-card);
+  transition:
+    box-shadow 160ms ease,
+    border-color 160ms ease;
 }
 
-.cartao--atencao {
-  border-color: var(--clinic-attention-line);
-  background: color-mix(in srgb, var(--clinic-attention-bg) 45%, var(--clinic-surface));
+.cartao:hover {
+  border-color: var(--clinic-line-strong);
+  box-shadow: var(--clinic-shadow-float);
 }
 
-/* Sem barra lateral: o cartão inteiro já muda de tom, que é sinal de sobra. */
-.cartao--risco {
-  border-color: var(--clinic-risk-line);
-  background: color-mix(in srgb, var(--clinic-risk-bg) 55%, var(--clinic-surface));
+/* O anel de foco é do teclado, e é o token que o módulo já tinha e não usava. */
+.cartao:has(.quem__nome:focus-visible) {
+  box-shadow: var(--clinic-focus-ring);
 }
 
-.cartao__botao {
-  display: grid;
-  width: 100%;
-  height: 100%;
-  align-content: start;
-  padding: var(--clinic-space-4);
-  border: 0;
-  border-radius: inherit;
-  gap: var(--clinic-space-3);
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  text-align: start;
-}
-
-.cartao__botao:hover,
-.cartao__botao:focus-visible {
-  background: color-mix(in srgb, var(--clinic-accent-tint) 55%, transparent);
-  outline: none;
-}
-
-/* ------------------------------------------------------------------ quem */
+/* --------------------------------------------------------------- 1 · quem */
 
 .quem {
   display: flex;
@@ -209,98 +362,281 @@ const proxima = computed(() =>
   gap: var(--clinic-space-3);
 }
 
+/*
+ * O rosto ganha um halo da própria superfície, e não uma borda: o anel separa o avatar do cartão
+ * sem desenhar mais uma linha numa tela que já tem muitas.
+ */
+.quem__rosto {
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 3px var(--clinic-surface-soft);
+}
+
 .quem__texto {
   display: grid;
   min-width: 0;
-  flex: 1;
-  gap: 0;
+  gap: 0.15rem;
 }
 
+.quem__linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+  gap: var(--clinic-space-2);
+}
+
+/*
+ * O nome é um botão, e o `::after` faz dele o alvo do cartão inteiro. É o padrão de link
+ * esticado: um foco por cartão para quem anda por teclado, superfície toda para quem usa o dedo.
+ */
 .quem__nome {
-  font-size: 1.02rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--clinic-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.15rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  letter-spacing: -0.025em;
+  text-align: start;
+}
+
+.quem__nome::after {
+  position: absolute;
+  content: '';
+  inset: 0;
+}
+
+.quem__nome:focus-visible {
+  outline: none;
 }
 
 .quem__onde {
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.quem__tutor {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ------------------------------------------------------------------ trava */
-
-.trava {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+  gap: 0.15rem var(--clinic-space-3);
 }
 
-.trava--risco {
-  background: var(--clinic-risk-bg);
+/* -------------------------------------------------------------- 2 · o foco */
+
+/*
+ * A superfície própria é o que transforma "três linhas soltas" em "um cartão com um dentro".
+ * Continua sendo superfície neutra, nunca tinta de estado: quem diz o estado é o disco.
+ */
+.foco {
+  display: flex;
+  align-items: center;
+  min-block-size: 3.4rem;
+  padding: var(--clinic-space-3);
+  border-radius: var(--clinic-radius-control);
+  gap: var(--clinic-space-3);
+  background: var(--clinic-surface-soft);
+}
+
+.foco__disco {
+  display: grid;
+  width: 2.3rem;
+  height: 2.3rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--clinic-line);
+  border-radius: 0.7rem;
+  background: var(--clinic-surface);
+  color: var(--clinic-muted);
+}
+
+.foco__disco :deep(svg) {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+/*
+ * O disco enche quando tem o que dizer. É a única troca de cor da faixa, e é troca de **forma**
+ * antes de ser de matiz: vazado contra cheio sobrevive ao cinza.
+ */
+.cartao--travado .foco__disco,
+.cartao--atrasada .foco__disco {
+  border-color: transparent;
+  background: var(--clinic-risk-text);
+  color: var(--clinic-on-accent);
+}
+
+.cartao--recado .foco__disco {
+  border-color: transparent;
+  background: var(--clinic-attention-text);
+  color: var(--clinic-on-accent);
+}
+
+.cartao--aguardando .foco__disco {
+  border-color: transparent;
+  background: var(--clinic-accent-deep);
+  color: var(--clinic-on-accent);
+}
+
+.foco__texto {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.foco__frase {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 0;
+  gap: var(--clinic-space-2);
+  color: var(--clinic-text);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.foco__frase--calma {
+  color: var(--clinic-muted);
+  font-weight: 500;
+}
+
+.cartao--travado .foco__frase {
   color: var(--clinic-risk-text);
 }
 
-.trava--atencao {
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
+.foco__hora {
+  color: var(--clinic-text);
+  font-variant-numeric: tabular-nums;
 }
 
-/* ------------------------------------------------------------------ fatos */
-
-.fatos {
-  display: grid;
-  gap: 0.35rem;
+.foco__nota {
   margin: 0;
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+  font-variant-numeric: tabular-nums;
 }
 
-.fato {
-  display: grid;
-  align-items: baseline;
-  gap: var(--clinic-space-2);
-  grid-template-columns: 6.5rem 1fr;
-}
-
-.fato dt {
-  color: var(--clinic-faint);
-  font-size: 0.66rem;
+.foco__nota--risco {
+  color: var(--clinic-risk-text);
   font-weight: 700;
-  letter-spacing: 0.05em;
+}
+
+/* --------------------------------------------------------------- 3 · o dia */
+
+.dia {
+  display: grid;
+  gap: var(--clinic-space-2);
+}
+
+.dia__topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0;
+  gap: var(--clinic-space-2);
+}
+
+.dia__rotulo {
+  color: var(--clinic-faint);
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.fato dd {
-  margin: 0;
+.dia__conta {
+  color: var(--clinic-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+/*
+ * A barra é uma peça só, com duas fatias que crescem da mesma borda. `flex` e não `grid` porque a
+ * fatia de atraso encosta na de feito e as duas precisam somar sem calcular a sobra.
+ */
+.barra {
+  display: flex;
+  overflow: hidden;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--clinic-surface-sunken);
+}
+
+.barra__feito {
+  background: var(--clinic-accent-deep);
+}
+
+.barra__atraso {
+  background: var(--clinic-risk-text);
+}
+
+/* ----------------------------------------------------------------- 4 · o pé */
+
+.pe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-block-start: var(--clinic-space-3);
+  border-block-start: 1px solid var(--clinic-line-soft);
+  gap: var(--clinic-space-2) var(--clinic-space-4);
+}
+
+/*
+ * Escapa do `::after` do nome, que cobre o cartão inteiro. Sem o `z-index` o botão existiria e
+ * não seria clicável — o link esticado engoliria o toque.
+ */
+.pe__acao {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: auto;
+  gap: var(--clinic-space-2);
+}
+
+.pe__tel {
+  color: var(--clinic-muted);
   font-size: var(--clinic-font-label);
+  font-variant-numeric: tabular-nums;
 }
 
-.fato--alerta {
-  color: var(--clinic-risk-text);
-  font-weight: 800;
+/* ------------------------------------------------------------- compartilhado */
+
+.dado {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.3rem;
+  overflow: hidden;
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.fato--destaque {
+.dado :deep(svg),
+.dado .pi {
+  flex: 0 0 auto;
+  color: var(--clinic-faint);
+  font-size: 0.85em;
+}
+
+.dado :deep(svg) {
+  width: 1em;
+  height: 1em;
+}
+
+.dado--hoje {
   color: var(--clinic-accent-strong);
   font-weight: 750;
 }
 
-.rodape {
-  display: flex;
-  padding-top: var(--clinic-space-2);
-  border-top: 1px solid var(--clinic-line-soft);
+.dado--hoje :deep(svg) {
+  color: currentcolor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cartao {
+    transition: none;
+  }
 }
 </style>

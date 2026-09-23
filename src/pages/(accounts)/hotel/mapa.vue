@@ -386,14 +386,16 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
 
     <template #actions>
-      <Button
-        :label="t('hotel.mapa.verReservas')"
-        icon="pi pi-list"
-        severity="secondary"
-        outlined
-        size="small"
-        @click="router.push('/hotel/reservas')"
-      />
+      <span class="clinic-scope clinic-acoes">
+        <Button
+          :label="t('hotel.mapa.verReservas')"
+          icon="pi pi-list"
+          severity="secondary"
+          outlined
+          size="small"
+          @click="router.push('/hotel/reservas')"
+        />
+      </span>
     </template>
   </PartnerPageFrame>
 </template>

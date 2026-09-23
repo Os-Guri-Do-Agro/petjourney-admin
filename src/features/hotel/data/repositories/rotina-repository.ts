@@ -83,6 +83,7 @@ function montarDias(itens: ItemDeRotina[], vigenteDesde: ISODateTime) {
   return hospedados().flatMap((hospedagem) => {
     const reserva = dataset.reservas.find((item) => item.id === hospedagem.reservaId)
     const medicacoes = dataset.medicacoes.filter((item) => item.hospedagemId === hospedagem.id)
+    const cuidados = dataset.cuidados.filter((item) => item.hospedagemId === hospedagem.id)
     const passeioAutorizado = hospedagem.autorizacoes.some(
       (item) => item.kind === 'passeio-externo' && item.concedida,
     )
@@ -99,6 +100,7 @@ function montarDias(itens: ItemDeRotina[], vigenteDesde: ISODateTime) {
         utcOffset: HOTEL_UTC_OFFSET,
         planoAlimentar: hospedagem.planoAlimentar,
         medicacoes,
+        cuidados,
         passeioAutorizado,
         entradaEm: hospedagem.entradaEm,
         saidaPrevistaEm: hospedagem.saidaPrevistaEm,
@@ -371,6 +373,56 @@ export const propostaRepository = {
       }
 
       return criados
+    })
+  },
+
+  /**
+   * O ajuste que uma pessoa escreve, sem passar por proposta nenhuma.
+   *
+   * `AjusteDeRotina` sempre teve `origem: 'pessoa' | 'proposta'`, e até aqui só 'proposta' era
+   * alcançável: dava para aceitar uma sugestão da máquina e não dava para dizer à mão "a Nina não
+   * passeia enquanto se adapta". A metade que faltava era justamente a que se usa todo dia.
+   *
+   * O motivo é obrigatório pela mesma razão de sempre: em dezembro, ele é a única linha que explica
+   * por que a água daquele hóspede tem uma troca a mais que a da casa.
+   */
+  registrarAjuste(entrada: {
+    hospedagemId: string
+    kind: TarefaDaCasaKind
+    horarios: ClockTime[]
+    motivo: string
+    por: string
+  }): Promise<AjusteDeRotina> {
+    return simularChamada('rotina.aprovar', () => {
+      const dataset = getDataset()
+      const agora = agoraIso()
+
+      /* Um ajuste novo do mesmo tipo revoga o anterior: dois vigentes seriam duas verdades. */
+      for (const ajuste of dataset.ajustesDeRotina) {
+        const mesmo =
+          ajuste.hospedagemId === entrada.hospedagemId &&
+          ajuste.kind === entrada.kind &&
+          !ajuste.revogadoEm
+
+        if (mesmo) ajuste.revogadoEm = agora
+      }
+
+      const novo: AjusteDeRotina = {
+        id: novoId('ajuste'),
+        hospedagemId: entrada.hospedagemId,
+        kind: entrada.kind,
+        acao: entrada.horarios.length === 0 ? 'suspende' : 'substitui',
+        horarios: [...entrada.horarios],
+        motivo: entrada.motivo,
+        origem: 'pessoa',
+        registradoEm: agora,
+        registradoPor: entrada.por,
+        revogadoEm: null,
+      }
+
+      dataset.ajustesDeRotina.push(novo)
+
+      return novo
     })
   },
 

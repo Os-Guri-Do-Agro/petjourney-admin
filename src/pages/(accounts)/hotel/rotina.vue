@@ -44,7 +44,7 @@ import IconeDeTarefa from '@/features/hotel/components/base/IconeDeTarefa.vue'
 import type { PassoDoTour } from '@/features/hotel/components/base/tour-types'
 import CartaoDaPassagem from '@/features/hotel/components/rotina/CartaoDaPassagem.vue'
 import GerenciarRotina from '@/features/hotel/components/rotina/GerenciarRotina.vue'
-import MedicacaoDialog from '@/features/hotel/components/rotina/MedicacaoDialog.vue'
+import AcrescentarNaRotina from '@/features/hotel/components/rotina/AcrescentarNaRotina.vue'
 import PassagemDialog from '@/features/hotel/components/rotina/PassagemDialog.vue'
 import RondaDoHorario from '@/features/hotel/components/rotina/RondaDoHorario.vue'
 import { useHotelFormat } from '@/features/hotel/composables/useHotelFormat'
@@ -104,9 +104,33 @@ async function aprovarProposta(payload: Parameters<typeof hospedagem.aprovarProp
   }
 }
 
+/*
+ * As quatro portas de acrescentar algo à rotina de um hóspede. Cada uma grava por um caminho
+ * diferente — dose, ajuste, venda, cuidado —, e todas fecham o diálogo só quando a gravação deu
+ * certo: fechar antes esconderia o erro que a pessoa precisa ler.
+ */
 async function registrarMedicacao(payload: Parameters<typeof hospedagem.registrarMedicacao>[0]) {
   if (await hospedagem.registrarMedicacao(payload)) {
     medicacaoAberta.value = false
+  }
+}
+
+async function registrarCuidado(payload: Parameters<typeof hospedagem.registrarCuidado>[0]) {
+  if (await hospedagem.registrarCuidado(payload)) {
+    medicacaoAberta.value = false
+  }
+}
+
+async function acrescentarServico(payload: Parameters<typeof hospedagem.acrescentarServico>[0]) {
+  if (await hospedagem.acrescentarServico(payload)) {
+    medicacaoAberta.value = false
+  }
+}
+
+async function registrarAjuste(payload: Parameters<typeof hospedagem.registrarAjuste>[0]) {
+  if (await hospedagem.registrarAjuste(payload)) {
+    medicacaoAberta.value = false
+    recarregarHospedes()
   }
 }
 
@@ -703,13 +727,20 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       @ir-para="(id) => router.push(`/hotel/hospedagem/${id}`)"
     />
 
-    <MedicacaoDialog
+    <AcrescentarNaRotina
       :aberto="medicacaoAberta"
       :hospedes="hospedes"
+      :hospedagem-id="hospedeEscolhido"
+      :rotina-da-casa="rotinaDaCasa"
+      :servicos="hotelStore.servicos"
+      :hoje="hospedagem.dia"
       :salvando="hospedagem.salvando"
       :erro="hospedagem.erroDeAcao ? t(hospedagem.erroDeAcao) : ''"
       @fechar="medicacaoAberta = false"
-      @registrar="registrarMedicacao"
+      @medicacao="registrarMedicacao"
+      @cuidado="registrarCuidado"
+      @servico="acrescentarServico"
+      @ajuste="registrarAjuste"
     />
 
 
@@ -718,14 +749,22 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
 
     <template #actions>
-      <Button
-        :label="t('hotel.turno.passar')"
-        icon="pi pi-sign-out"
-        severity="secondary"
-        outlined
-        size="small"
-        @click="passagemAberta = true"
-      />
+      <!--
+        O `span` não é embrulho à toa: o slot `#actions` renderiza noutro ramo da árvore, fora da
+        `div.clinic-scope` da página, e sem ele o botão caía no tema cru — rótulo a 3,30:1, que
+        reprova, e borda a 1,07:1, que é borda nenhuma. Era esta a causa de ele parecer apagado.
+      -->
+      <span class="clinic-scope clinic-acoes">
+        <Button
+          :label="t('hotel.turno.passar')"
+          class="acao-turno"
+          icon="pi pi-sign-out"
+          severity="secondary"
+          outlined
+          size="small"
+          @click="passagemAberta = true"
+        />
+      </span>
     </template>
   </PartnerPageFrame>
 </template>
@@ -753,10 +792,18 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 /*
- * Abaixo de 1100 px as duas não cabem sem espremer: o gerenciamento desce para baixo da pauta,
- * que é a ordem em que se lê — primeiro o que falta fazer, depois o que mudar.
+ * O ponto de corte é 1400 px, e o número vem de uma conta, não de gosto.
+ *
+ * A coluna da direita custa 28 rem fixos, o trilho de navegação leva perto de 290 px, e as folgas
+ * somam mais 60. Para a pauta ainda ter os ~620 px em que a fileira de tarefa funciona — disco,
+ * nome, e os três botões na mesma linha —, a janela precisa de cerca de 1400.
+ *
+ * Com o corte em 1100, a faixa entre 1100 e 1400 entregava duas colunas com a pauta em 320 px: o
+ * "Pular" subia por cima do selo "Atrasada" e a fileira virava um bolo. O detalhe que engana é que
+ * a media query mede a **janela**, e quem ficou estreita foi a **coluna** — a regra de 620 px da
+ * fileira nunca disparava, porque a janela continuava larga.
  */
-@media (max-width: 1100px) {
+@media (max-width: 1400px) {
   .tela {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -865,11 +912,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
  * acompanha o texto, não uma pastilha. A classe pousa na raiz do componente do ícone, e o
  * atributo de escopo vai junto — por isso o seletor alcança mesmo com o painel teleportado.
  */
+/* Sem cor própria: o ícone herda a do rótulo que acompanha, como o resto do módulo. */
 .filtro__icone {
   width: 1.15rem;
   height: 1.15rem;
   flex: 0 0 auto;
-  color: var(--clinic-accent-strong);
 }
 
 /* O rótulo estica e empurra a contagem para a borda: a coluna de números fica alinhada. */
@@ -937,10 +984,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   justify-items: center;
   margin: 0;
   padding: var(--clinic-space-6) var(--clinic-space-5);
-  border: 1px solid var(--clinic-accent-soft);
+  border: 1px solid var(--clinic-line-strong);
   border-radius: var(--clinic-radius-card);
   gap: var(--clinic-space-4);
-  background: var(--clinic-accent-tint);
+  background: var(--clinic-surface);
   color: var(--clinic-accent-strong);
   font-weight: 700;
   text-align: center;
@@ -1013,7 +1060,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   align-items: center;
   margin-block: var(--clinic-space-2);
   gap: 0.45rem;
-  color: var(--clinic-faint);
+  color: var(--clinic-outro-turno);
   font-size: var(--clinic-font-label);
   font-weight: 400;
 }
@@ -1021,7 +1068,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .fronteira::after {
   height: 1px;
   flex: 1;
-  background: var(--clinic-line-soft);
+  background: var(--clinic-outro-turno-line);
   content: '';
 }
 
