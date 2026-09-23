@@ -642,6 +642,129 @@ export type TarefaKind =
   | 'adestramento'
 
 /**
+ * O que a **casa** faz por todos os hóspedes, e portanto o que a casa pode cadastrar.
+ *
+ * Este recorte é a parede do gerenciamento de rotinas, e existe como tipo — e não como uma
+ * verificação em algum lugar — para que atravessá-lo seja **erro de compilação**. Uma regra
+ * escrita num `if` some numa refatoração de sexta-feira sem ninguém notar; um `Extract` não some.
+ *
+ * Quem fica de fora, e por quê:
+ *
+ * - **`refeicao`** — os horários vêm de `PlanoAlimentar.horarios`, que é o que o responsável
+ *   ditou na entrada. A casa não decide a que horas o animal de outra pessoa come.
+ * - **`medicacao`** — o hotel **não prescreve** (ver `MedicacaoDaEstadia`). Horário e dose saem da
+ *   receita, e nenhum cadastro de rotina pode criá-los, alterá-los ou removê-los.
+ * - **`banho`, `tosa`, `recreacao`, `adestramento`** — são serviços **vendidos**, e nascem do que
+ *   foi contratado na reserva. Um template que os criasse produziria trabalho que ninguém cobrou,
+ *   e um que os retirasse apagaria serviço já pago.
+ *
+ * `pesagem` entra, e é a primeira vez que este `kind` fica alcançável: ele já tinha ícone e nunca
+ * teve gerador.
+ */
+export type TarefaDaCasaKind = Extract<
+  TarefaKind,
+  'agua' | 'higiene' | 'passeio' | 'pesagem'
+>
+
+/** Os quatro, em ordem de leitura. A tela não inventa a própria ordem. */
+export const TAREFAS_DA_CASA: TarefaDaCasaKind[] = ['agua', 'higiene', 'passeio', 'pesagem']
+
+export function ehTarefaDaCasa(kind: TarefaKind): kind is TarefaDaCasaKind {
+  return (TAREFAS_DA_CASA as TarefaKind[]).includes(kind)
+}
+
+/**
+ * Uma linha da rotina padrão: um serviço da casa e os horários em que ele acontece.
+ *
+ * `ativo` existe em vez de simplesmente apagar a linha porque desligar a pesagem por um mês e
+ * religá-la depois não pode custar redigitar os horários — e porque uma linha apagada não conta a
+ * história de que a casa já fez aquilo.
+ */
+export type ItemDeRotina = {
+  id: string
+  kind: TarefaDaCasaKind
+  horarios: ClockTime[]
+  /**
+   * A autorização sem a qual este item não vira tarefa para um hóspede.
+   *
+   * Passeio é o caso: o responsável autoriza ou não, e **a casa não decide isso por ninguém**.
+   * Sem a autorização concedida, o item existe no cadastro e simplesmente não gera tarefa
+   * para aquele animal — não é erro, não é aviso, é o consentimento funcionando.
+   */
+  exigeAutorizacao: AutorizacaoKind | null
+  ativo: boolean
+}
+
+/**
+ * A rotina que a casa faz por todos os hóspedes.
+ *
+ * Era três constantes dentro de `domain/rotina.ts`, com um comentário explicando que virariam
+ * cadastro quando alguém pedisse. Alguém pediu.
+ *
+ * **Uma só, sem escopo por espécie nem por bloco.** Dois templates que casam com o mesmo animal
+ * exigem uma regra de precedência, e regra de precedência sem ninguém pedindo é exatamente a
+ * dívida que este tipo está pagando. Quando a casa precisar de rotina diferente por bloco, ela
+ * vai dizer qual ganha.
+ *
+ * `versao` sobe a cada publicação e não é decoração: é o que permite a uma tarefa materializada
+ * ontem conviver com o plano de hoje sem ninguém precisar decidir qual das duas mente.
+ */
+export type RotinaPadrao = {
+  id: string
+  versao: number
+  itens: ItemDeRotina[]
+  /** A partir de quando vale. Nada antes disto é tocado, nunca. */
+  vigenteDesde: ISODateTime
+  publicadaEm: ISODateTime
+  publicadaPor: string
+}
+
+/**
+ * O que muda na rotina **de um hóspede específico**.
+ *
+ * A rotina da casa vale para todos; isto é a exceção, e exceção sem motivo escrito é exceção que
+ * ninguém sabe desfazer em dezembro. Por isso `motivo` é campo obrigatório e não observação.
+ *
+ * `revogadoEm` é a lição de `MedicacaoDaEstadia.suspensaEm`, que mora neste mesmo arquivo:
+ * encerrar não pode ser apagar a linha que carrega o porquê. "Nina sem passeio enquanto se adapta"
+ * precisa terminar no terceiro dia **e** continuar explicando por que existiu.
+ *
+ * O `kind` é `TarefaDaCasaKind`: um ajuste é fisicamente incapaz de mexer em refeição ou medicação.
+ */
+export type AjusteDeRotina = {
+  id: string
+  hospedagemId: string
+  kind: TarefaDaCasaKind
+  /** `suspende` é `substitui` com lista vazia, mas escrito — é o que aparece no histórico. */
+  acao: 'substitui' | 'suspende'
+  horarios: ClockTime[]
+  motivo: string
+  /** De onde veio o aceite: alguém digitou, ou alguém aprovou uma sugestão. */
+  origem: 'pessoa' | 'proposta'
+  registradoEm: ISODateTime
+  registradoPor: string
+  revogadoEm: ISODateTime | null
+}
+
+/**
+ * O registro de uma publicação, para que ela possa ser desfeita.
+ *
+ * Guarda os itens **anteriores** e os ids que nasceram. Não guarda o que foi retirado, e isso é
+ * de propósito: desfazer devolve o template à versão anterior, e a materialização recria sozinha
+ * o que aquela versão previa. Ressuscitar registros seria uma segunda verdade sobre o mesmo dia.
+ */
+export type PublicacaoDeRotina = {
+  id: string
+  versao: number
+  itensAnteriores: ItemDeRotina[]
+  /** Ids das tarefas criadas por esta publicação. Só elas podem ser removidas ao desfazer. */
+  criadas: string[]
+  retiradas: number
+  em: ISODateTime
+  por: string
+}
+
+/**
  * Situação **persistida** de uma tarefa.
  *
  * `atrasada` não está aqui de propósito: atraso é uma leitura do relógio contra o horário

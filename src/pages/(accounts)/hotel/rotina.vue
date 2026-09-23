@@ -2,17 +2,33 @@
 /**
  * Rotina do turno — a prancheta.
  *
- * Esta tela é usada **em pé, com uma mão, no corredor do canil**, e a forma dela vem disso: um
- * trilho vertical de horários à esquerda e as tarefas daquele horário à direita, como uma
- * prancheta de papel. A hora é o eixo porque às 8h alguém alimenta os dezoito — a pergunta não é
- * "o que falta para o Thor", é "o que é para agora".
+ * Esta tela é usada **em pé, com uma mão, no corredor do canil**, e a forma dela vem disso. A hora
+ * ordena tudo porque às 8h alguém alimenta os dezoito — a pergunta não é "o que falta para o
+ * Thor", é "o que é para agora". O que passou fica recolhido; o que vem depois fica abaixo.
  *
- * Duas coisas que a primeira versão errava e esta corrige:
+ * ## A pauta e a folha de trabalho
  *
- * - **Era mais uma fileira de números e uma lista**, igual às outras oito telas. Agora tem o eixo
- *   do tempo desenhado, que é o que separa uma prancheta de um relatório.
- * - **Abria mostrando o dia inteiro.** O que se precisa em pé no corredor é o bloco de **agora**;
- *   o resto do dia fica abaixo, e o que passou fica recolhido.
+ * A tela mostra **duas coisas em registros diferentes**, e o erro que ela cometeu por muito tempo
+ * foi desenhar as duas do mesmo jeito: toda tarefa do dia era um cartão com disco, nome e três
+ * botões, das 07:00 às 22:00, para as quarenta e nove. Mas quem está no corredor só tem uma ronda
+ * na mão por vez; as outras onze precisa **enxergar**, não executar.
+ *
+ * Agora o dia é uma **pauta** — uma fileira por ronda, com hora, serviço, quantos, quantos
+ * atrasados e o botão de marcar o lote ali mesmo — e só a ronda aberta é **folha de trabalho**,
+ * com os animais um por fileira. Quem decide qual é qual é `RONDA_ABRE_ATE`, que já existia e já
+ * era testada: ela mudou de emprego, não de valor.
+ *
+ * Num hotel de cinco, nada nasce fechado e não há um toque a dar antes de trabalhar. Num hotel de
+ * quarenta, o bloco das 18:00 deixa de ser 29 caixas e vira duas fileiras.
+ *
+ * ## Por que não há mais um eixo do tempo desenhado
+ *
+ * Havia uma calha de 3,6 rem à esquerda, com um chip da hora e um fio descendo. Ela era a única
+ * forma que distinguia esta tela das irmãs, e por isso doeu tirá-la — mas cobrava aquela largura
+ * de **toda** fileira, o dia inteiro, para desenhar decoração, e no telefone tirava 2,9 rem dos
+ * 390 disponíveis justamente do nome do animal. A hora entrou para dentro do cartão da ronda: como
+ * todos têm a mesma largura e a hora é tabular na primeira célula, a coluna de horas continua lá —
+ * desenhada pelo próprio conteúdo, e não por uma calha vazia.
  */
 import { PhCat, PhListChecks } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
@@ -26,15 +42,25 @@ import HotelDevPanel from '@/features/hotel/components/base/HotelDevPanel.vue'
 import HotelTour from '@/features/hotel/components/base/HotelTour.vue'
 import IconeDeTarefa from '@/features/hotel/components/base/IconeDeTarefa.vue'
 import type { PassoDoTour } from '@/features/hotel/components/base/tour-types'
+import CartaoDaPassagem from '@/features/hotel/components/rotina/CartaoDaPassagem.vue'
+import GerenciarRotina from '@/features/hotel/components/rotina/GerenciarRotina.vue'
+import MedicacaoDialog from '@/features/hotel/components/rotina/MedicacaoDialog.vue'
 import PassagemDialog from '@/features/hotel/components/rotina/PassagemDialog.vue'
 import RondaDoHorario from '@/features/hotel/components/rotina/RondaDoHorario.vue'
 import { useHotelFormat } from '@/features/hotel/composables/useHotelFormat'
-import type { TarefaKind, TarefaStatus } from '@/features/hotel/data/types'
+import {
+  hospedesParaRotina,
+  rotinaPadraoRepository,
+  type HospedeParaRotina,
+} from '@/features/hotel/data/repositories'
+import type { ItemDeRotina, TarefaKind, TarefaStatus } from '@/features/hotel/data/types'
 import type { TempoDaPrancheta } from '@/features/hotel/domain/rotina'
+import type { LinhaDaRonda } from '@/features/hotel/components/rotina/ronda-types'
 import {
   agruparEmRondas,
   repartirPorTempo,
   RONDA_ABRE_ATE,
+  tempoDaTarefa,
 } from '@/features/hotel/domain/rotina'
 import { useHospedagemStore } from '@/features/hotel/stores/hospedagem'
 import { useHotelStore } from '@/features/hotel/stores/hotel'
@@ -46,6 +72,44 @@ const hotelStore = useHotelStore()
 const hospedagem = useHospedagemStore()
 
 const passagemAberta = ref(false)
+
+/*
+ * O gerenciamento de rotina, a partir da prancheta.
+ *
+ * Cadastro não entra nesta tela — ela é usada em pé, com uma mão, no corredor. O que entra é a
+ * **porta**: registrar o remédio que acabou de chegar e pedir uma proposta são coisas que
+ * acontecem enquanto a pessoa está aqui, com o animal na frente. O cadastro dos horários da casa
+ * mora na tela `/hotel/rotina-padrao`, e o cartão só leva até lá.
+ */
+const medicacaoAberta = ref(false)
+const propostaAberta = ref(false)
+const hospedeEscolhido = ref('')
+const hospedes = ref<HospedeParaRotina[]>([])
+const rotinaDaCasa = ref<ItemDeRotina[]>([])
+
+function recarregarHospedes() {
+  hospedes.value = hospedesParaRotina()
+}
+
+async function escolherParaProposta(id: string) {
+  hospedeEscolhido.value = id
+
+  if (id) await hospedagem.proporRotina(id)
+}
+
+async function aprovarProposta(payload: Parameters<typeof hospedagem.aprovarProposta>[0]) {
+  if (await hospedagem.aprovarProposta(payload)) {
+    propostaAberta.value = false
+    recarregarHospedes()
+  }
+}
+
+async function registrarMedicacao(payload: Parameters<typeof hospedagem.registrarMedicacao>[0]) {
+  if (await hospedagem.registrarMedicacao(payload)) {
+    medicacaoAberta.value = false
+  }
+}
+
 const filtroKind = ref<TarefaKind | 'todas'>('todas')
 const mostrarPassado = ref(false)
 
@@ -65,6 +129,8 @@ const KINDS: TarefaKind[] = [
 onMounted(async () => {
   await hospedagem.carregarPrancheta()
   await hospedagem.carregarPassagem()
+  recarregarHospedes()
+  rotinaDaCasa.value = (await rotinaPadraoRepository.atual()).itens
 })
 
 watch(
@@ -141,13 +207,69 @@ const blocos = computed(() =>
  * Os três tempos da prancheta, cada horário já repartido em rondas. As duas regras moram no
  * domínio, junto dos testes que as guardam — ver `repartirPorTempo` e `agruparEmRondas`.
  */
+/**
+ * O que foi marcado **nesta sessão** e onde estava quando foi marcado.
+ *
+ * Sem isto, marcar uma tarefa dentro de uma ronda aberta a manda na hora para "já passou": a
+ * fileira evapora sob o dedo, as de baixo sobem, e o toque seguinte cai no animal errado. Quem
+ * serve vinte comedouros perde o lugar vinte vezes, e o "Desfazer" — que `TarefaLinha` promete
+ * barato — passa a exigir abrir outra seção para achar o que sumiu.
+ *
+ * Fica na tela e não no domínio de propósito: a regra do relógio continua sendo a única verdade
+ * sobre onde uma tarefa pertence. Isto é uma cortesia de rolagem, com a validade de uma sessão.
+ * Solta-se quando a ronda fecha (o trabalho dela acabou) ou quando o filtro muda (a lista é outra).
+ */
+const retidas = ref(new Map<string, TempoDaPrancheta>())
+
+function tempoDaLinha(linha: LinhaDaRonda): TempoDaPrancheta {
+  return retidas.value.get(linha.tarefa.id) ?? tempoDaTarefa(linha.situacao)
+}
+
+function reter(tarefaId: string, status: TarefaStatus) {
+  const proxima = new Map(retidas.value)
+
+  /* Desfazer devolve a tarefa ao trabalho: o relógio volta a mandar nela imediatamente. */
+  if (status === 'pendente') {
+    proxima.delete(tarefaId)
+  } else if (!proxima.has(tarefaId)) {
+    const linha = blocos.value
+      .flatMap((bloco) => bloco.linhas)
+      .find((item) => item.tarefa.id === tarefaId)
+
+    if (!linha) return
+
+    proxima.set(tarefaId, tempoDaTarefa(linha.situacao))
+  }
+
+  retidas.value = proxima
+}
+
+function liberar(linhas: LinhaDaRonda[]) {
+  if (!linhas.some((linha) => retidas.value.has(linha.tarefa.id))) return
+
+  const proxima = new Map(retidas.value)
+
+  for (const linha of linhas) proxima.delete(linha.tarefa.id)
+
+  retidas.value = proxima
+}
+
+/* Trocar o filtro troca a lista inteira: não há lugar a guardar. */
+watch(filtroKind, () => {
+  retidas.value = new Map()
+})
+
 function emRondas(tempo: TempoDaPrancheta) {
-  return repartirPorTempo(blocos.value, tempo).map((bloco) => {
+  return repartirPorTempo(blocos.value, tempo, tempoDaLinha).map((bloco) => {
     /*
      * Todas as tarefas daquele horário, e não só as deste tempo: é delas que sai quantas da ronda
      * já foram resolvidas. Sem esse número, quem marca doze de quarenta vê a ronda encolher para
      * vinte e oito sem nada dizendo que as doze foram suas — e num hotel grande é aí que se perde
      * a conta e se marca de novo o que já estava feito.
+     *
+     * Conta-se **por status**, e não subtraindo o tamanho da lista do total. A subtração dava o
+     * mesmo resultado enquanto a lista só tinha pendentes; agora que a marcada fica no lugar, ela
+     * passaria a contar como pendente e o número andaria para trás a cada toque.
      */
     const todasDoHorario = blocos.value.find((item) => item.hora === bloco.hora)?.linhas ?? []
 
@@ -155,9 +277,9 @@ function emRondas(tempo: TempoDaPrancheta) {
       ...bloco,
       rondas: agruparEmRondas(bloco.hora, bloco.linhas).map((ronda) => ({
         ...ronda,
-        resolvidas:
-          todasDoHorario.filter((linha) => linha.tarefa.kind === ronda.kind).length -
-          ronda.linhas.length,
+        resolvidas: todasDoHorario.filter(
+          (linha) => linha.tarefa.kind === ronda.kind && linha.tarefa.status !== 'pendente',
+        ).length,
       })),
     }
   })
@@ -226,6 +348,10 @@ const vazio = computed(
 )
 
 async function marcar(payload: { tarefaId: string; status: TarefaStatus }) {
+  /* Retém **antes** de gravar: depois da gravação a linha já mudou de situação e o tempo original
+     se perdeu. */
+  reter(payload.tarefaId, payload.status)
+
   await hospedagem.marcarTarefa(payload.tarefaId, payload.status)
 }
 
@@ -247,6 +373,8 @@ async function marcar(payload: { tarefaId: string; status: TarefaStatus }) {
  */
 async function marcarRonda(ids: string[]) {
   for (const id of ids) {
+    reter(id, 'feita')
+
     if (!(await hospedagem.marcarTarefa(id, 'feita'))) return
   }
 }
@@ -264,11 +392,19 @@ function rondaAberta(chave: string, tamanho: number) {
   return rondasAbertas.value.get(chave) ?? tamanho <= RONDA_ABRE_ATE
 }
 
-function alternarRonda(chave: string, tamanho: number) {
-  rondasAbertas.value = new Map(rondasAbertas.value).set(
-    chave,
-    !rondaAberta(chave, tamanho),
-  )
+/**
+ * Abre ou fecha, e **fechar solta o que estava retido**.
+ *
+ * Fechar uma ronda é dizer "acabei com esta": as marcadas que ficavam à vista só para não sumirem
+ * sob o dedo já não têm trabalho a proteger, e descem para "já passou", que é onde pertencem.
+ * Sem isto elas ficariam penduradas na seção errada até alguém recarregar a página.
+ */
+function alternarRonda(chave: string, linhas: LinhaDaRonda[]) {
+  const abrindo = !rondaAberta(chave, linhas.length)
+
+  rondasAbertas.value = new Map(rondasAbertas.value).set(chave, abrindo)
+
+  if (!abrindo) liberar(linhas)
 }
 
 async function entregarTurno(nota: string, recebidoPor: string) {
@@ -310,9 +446,21 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     texto: t('hotel.tour.rotina.ronda.texto'),
   },
   {
-    alvo: '.horario',
+    /*
+     * Apontava para `.horario`, que era a calha do eixo do tempo e deixou de existir quando a
+     * hora entrou para dentro do cartão da ronda. Um passo cujo alvo some é **descartado em
+     * silêncio** por `HotelTour` — o tutorial encolheria de seis para cinco passos sem nada
+     * ficar vermelho. A fileira da tarefa é o alvo certo: é sobre marcar que este passo fala.
+     */
+    alvo: '.tarefa',
     titulo: t('hotel.tour.rotina.marcar.titulo'),
     texto: t('hotel.tour.rotina.marcar.texto'),
+  },
+  {
+    /* O roteiro acaba onde o turno acaba, que é o pé da página. */
+    alvo: '.fim',
+    titulo: t('hotel.tour.rotina.passagem.titulo'),
+    texto: t('hotel.tour.rotina.passagem.texto'),
   },
 ])
 </script>
@@ -330,7 +478,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     :empty-description="t('hotel.rotina.vazioDescricao')"
     @retry="hospedagem.carregarPrancheta()"
   >
-    <div class="rotina clinic-scope">
+    <div class="tela clinic-scope">
+      <div class="rotina">
       <!-- O progresso do dia numa frase e numa pista, e o filtro por tipo. -->
       <div class="barra">
         <div class="progresso">
@@ -374,6 +523,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           :aria-label="t('hotel.rotina.filtroTipo')"
           :pt="{ overlay: { class: 'clinic-overlay' } }"
           class="filtro"
+          size="small"
           scroll-height="22rem"
         >
           <!--
@@ -421,27 +571,24 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           {{ t('hotel.rotina.paraAgora') }}
         </h2>
 
-        <div v-for="bloco in agora" :key="bloco.hora" class="horario">
-          <div class="horario__eixo">
-            <span class="horario__hora clinic-value">{{ bloco.hora }}</span>
-            <span class="horario__linha" aria-hidden="true" />
-          </div>
-
-          <ul class="horario__rondas">
+        <ul class="pauta">
+          <template v-for="bloco in agora" :key="bloco.hora">
             <RondaDoHorario
               v-for="ronda in bloco.rondas"
               :key="ronda.chave"
               :kind="ronda.kind"
+              :hora="bloco.hora"
               :linhas="ronda.linhas"
               :resolvidas="ronda.resolvidas"
+              :blocos="hotelStore.blocoPorId"
               :aberta="rondaAberta(ronda.chave, ronda.linhas.length)"
               :salvando="hospedagem.salvando"
-              @alternar="alternarRonda(ronda.chave, ronda.linhas.length)"
+              @alternar="alternarRonda(ronda.chave, ronda.linhas)"
               @marcar="marcar"
               @marcar-todas="marcarRonda"
             />
-          </ul>
-        </div>
+          </template>
+        </ul>
       </section>
 
       <!--
@@ -461,38 +608,31 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           {{ t('hotel.rotina.maisTarde') }}
         </h2>
 
-        <template v-for="bloco in adiante" :key="bloco.hora">
-          <!-- Onde o turno acaba. Daqui para baixo a lista é de quem assume, e isso muda o que
-               quem está lendo agora precisa planejar. -->
-          <p v-if="bloco.hora === primeiroDepoisDoTurno" class="fronteira">
-            <i class="pi pi-sign-out" aria-hidden="true" />
-            {{ t('hotel.rotina.depoisDoTurno', { hora: fimDoTurno }) }}
-          </p>
+        <ul class="pauta">
+          <template v-for="bloco in adiante" :key="bloco.hora">
+            <!-- Onde o turno acaba. Daqui para baixo a lista é de quem assume, e isso muda o que
+                 quem está lendo agora precisa planejar. -->
+            <li v-if="bloco.hora === primeiroDepoisDoTurno" class="fronteira">
+              <i class="pi pi-sign-out" aria-hidden="true" />
+              {{ t('hotel.rotina.depoisDoTurno', { hora: fimDoTurno }) }}
+            </li>
 
-          <div class="horario horario--adiante">
-            <div class="horario__eixo">
-              <span class="horario__hora clinic-value">{{ bloco.hora }}</span>
-              <span class="horario__linha" aria-hidden="true" />
-            </div>
-
-            <div class="horario__conteudo">
-              <ul class="horario__rondas">
-                <RondaDoHorario
-                  v-for="ronda in bloco.rondas"
-                  :key="ronda.chave"
-                  :kind="ronda.kind"
-                  :linhas="ronda.linhas"
+            <RondaDoHorario
+              v-for="ronda in bloco.rondas"
+              :key="ronda.chave"
+              :kind="ronda.kind"
+              :hora="bloco.hora"
+              :linhas="ronda.linhas"
               :resolvidas="ronda.resolvidas"
-                  :aberta="rondaAberta(ronda.chave, ronda.linhas.length)"
-                  :salvando="hospedagem.salvando"
-                  @alternar="alternarRonda(ronda.chave, ronda.linhas.length)"
-                  @marcar="marcar"
-                  @marcar-todas="marcarRonda"
-                />
-              </ul>
-            </div>
-          </div>
-        </template>
+              :blocos="hotelStore.blocoPorId"
+              :aberta="rondaAberta(ronda.chave, ronda.linhas.length)"
+              :salvando="hospedagem.salvando"
+              @alternar="alternarRonda(ronda.chave, ronda.linhas)"
+              @marcar="marcar"
+              @marcar-todas="marcarRonda"
+            />
+          </template>
+        </ul>
       </section>
 
       <!-- ------------------------------------------------------------ o que já passou -->
@@ -505,32 +645,51 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           {{ t('hotel.rotina.jaPassou', { total: passado.length }, passado.length) }}
         </button>
 
-        <template v-if="mostrarPassado">
-          <div v-for="bloco in passado" :key="bloco.hora" class="horario horario--passado">
-            <div class="horario__eixo">
-              <span class="horario__hora clinic-value">{{ bloco.hora }}</span>
-              <span class="horario__linha" aria-hidden="true" />
-            </div>
-
-            <div class="horario__conteudo">
-              <ul class="horario__rondas">
-                <RondaDoHorario
-                  v-for="ronda in bloco.rondas"
-                  :key="ronda.chave"
-                  :kind="ronda.kind"
-                  :linhas="ronda.linhas"
+        <ul v-if="mostrarPassado" class="pauta pauta--passado">
+          <template v-for="bloco in passado" :key="bloco.hora">
+            <RondaDoHorario
+              v-for="ronda in bloco.rondas"
+              :key="ronda.chave"
+              :kind="ronda.kind"
+              :hora="bloco.hora"
+              :linhas="ronda.linhas"
               :resolvidas="ronda.resolvidas"
-                  :aberta="rondaAberta(ronda.chave, ronda.linhas.length)"
-                  :salvando="hospedagem.salvando"
-                  @alternar="alternarRonda(ronda.chave, ronda.linhas.length)"
-                  @marcar="marcar"
-                  @marcar-todas="marcarRonda"
-                />
-              </ul>
-            </div>
-          </div>
-        </template>
+              :blocos="hotelStore.blocoPorId"
+              :aberta="rondaAberta(ronda.chave, ronda.linhas.length)"
+              :salvando="hospedagem.salvando"
+              @alternar="alternarRonda(ronda.chave, ronda.linhas)"
+              @marcar="marcar"
+              @marcar-todas="marcarRonda"
+            />
+          </template>
+        </ul>
       </section>
+
+      <!--
+        O fim do turno fecha a prancheta, que é onde ele de fato acontece: quem trabalha o turno
+        inteiro nesta tela precisa ver o que trava a entrega muito antes das 22h.
+      -->
+        <CartaoDaPassagem
+          :passagem="hospedagem.passagem"
+          :cuidadores="hotelStore.cuidadores"
+          @passar="passagemAberta = true"
+        />
+      </div>
+
+      <GerenciarRotina
+        :rotina-da-casa="rotinaDaCasa"
+        :hospedes="hospedes"
+        :hospedagem-id="hospedeEscolhido"
+        :proposta="hospedagem.proposta"
+        :gerando="hospedagem.gerandoProposta"
+        :salvando="hospedagem.salvando"
+        :erro="hospedagem.erroDeAcao"
+        @atualizar:hospedagem-id="escolherParaProposta"
+        @propor="escolherParaProposta(hospedeEscolhido)"
+        @medicacao="recarregarHospedes(); medicacaoAberta = true"
+        @descartar="hospedagem.proposta = null"
+        @aprovar="aprovarProposta"
+      />
     </div>
 
     <PassagemDialog
@@ -543,6 +702,16 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       @entregar="({ nota, recebidoPor }) => entregarTurno(nota, recebidoPor)"
       @ir-para="(id) => router.push(`/hotel/hospedagem/${id}`)"
     />
+
+    <MedicacaoDialog
+      :aberto="medicacaoAberta"
+      :hospedes="hospedes"
+      :salvando="hospedagem.salvando"
+      :erro="hospedagem.erroDeAcao ? t(hospedagem.erroDeAcao) : ''"
+      @fechar="medicacaoAberta = false"
+      @registrar="registrarMedicacao"
+    />
+
 
     <HotelDevPanel />
 
@@ -562,17 +731,60 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </template>
 
 <style scoped>
+/*
+ * Duas colunas: o que está acontecendo, e o que se pode mudar.
+ *
+ * A largura voltou a ser a da página inteira, e a medida de leitura saiu. Ela existia para
+ * resolver um vazio à direita — a pauta é uma lista de coluna única e não tinha o que fazer com
+ * 1500 px. Agora tem: a segunda coluna é o gerenciamento, e ela ocupa exatamente o espaço que
+ * antes sobrava. O problema se resolveu por conteúdo, não por teto.
+ *
+ * `28rem` fixos à direita, e não uma fração: o painel tem largura de leitura própria, e crescer
+ * junto com o monitor faria a coluna de horários dele se esparramar. Quem cresce é a pauta.
+ *
+ * `align-items: start` para que a coluna da direita possa grudar — item de grade esticado nunca
+ * gruda, porque já ocupa a altura toda e não chega ao limite que dispara o `sticky`.
+ */
+.tela {
+  display: grid;
+  align-items: start;
+  gap: var(--clinic-space-5);
+  grid-template-columns: minmax(0, 1fr) 28rem;
+}
+
+/*
+ * Abaixo de 1100 px as duas não cabem sem espremer: o gerenciamento desce para baixo da pauta,
+ * que é a ordem em que se lê — primeiro o que falta fazer, depois o que mudar.
+ */
+@media (max-width: 1100px) {
+  .tela {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .rotina {
   display: grid;
+  min-width: 0;
   gap: var(--clinic-space-4);
 }
 
+/*
+ * O topo é um cartão, como em todas as telas irmãs do módulo.
+ *
+ * Eram dois objetos soltos sobre o fundo da página, um encostado em cada ponta de uma barra sem
+ * largura máxima — com quase 950 px de nada entre a frase do dia e o filtro. Dentro de um cartão
+ * de 52 rem, o mesmo `space-between` deixa de ser um buraco e vira folga interna.
+ */
 .barra {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
+  padding: var(--clinic-space-3) var(--clinic-space-4);
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-card);
   gap: var(--clinic-space-3);
+  background: var(--clinic-surface);
 }
 
 /*
@@ -597,12 +809,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   margin-inline-end: 0.2rem;
   color: var(--clinic-text);
   font-size: 1.3rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .progresso__alerta {
   color: var(--clinic-risk-text);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 /* ------------------------------------------------------------------ a pista do dia */
@@ -683,6 +895,17 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: var(--clinic-space-2);
 }
 
+/*
+ * O rótulo da seção atravessa a largura inteira.
+ *
+ * Ele é o nível mais alto da tela e era o texto mais fraco dela: 11 px em caixa alta disputando
+ * com chips verdes cheios e com itens em negrito dois níveis abaixo. Crescer não resolveria — um
+ * rótulo de seção grande rouba o lugar do conteúdo.
+ *
+ * O que o torna o nível mais alto é ser **o único elemento que vai de ponta a ponta**: o texto à
+ * esquerda e um filete correndo até a borda da coluna. É o mesmo idioma que a régua da fronteira
+ * do turno já usa nesta página, e ali ele já tinha sido aprovado.
+ */
 .tempo__titulo {
   display: flex;
   align-items: center;
@@ -690,101 +913,93 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 0.4rem;
   color: var(--clinic-accent-strong);
   font-size: var(--clinic-font-label);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+.tempo__titulo::after {
+  height: 1px;
+  flex: 1;
+  background: var(--tempo-regua, var(--clinic-line));
+  content: '';
+}
+
+/* O que não é "agora" fala mais baixo — inclusive a régua. */
 .tempo__titulo--calmo {
+  --tempo-regua: var(--clinic-line-soft);
+
   color: var(--clinic-faint);
 }
 
 .emDia {
-  display: flex;
-  align-items: center;
+  display: grid;
+  justify-items: center;
   margin: 0;
-  padding: var(--clinic-space-5) var(--clinic-space-4);
+  padding: var(--clinic-space-6) var(--clinic-space-5);
   border: 1px solid var(--clinic-accent-soft);
   border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-3);
+  gap: var(--clinic-space-4);
   background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
   font-weight: 700;
+  text-align: center;
 }
-
-.emDia__bicho {
-  width: 2.6rem;
-  height: 2.6rem;
-  flex: 0 0 auto;
-}
-
-/* ------------------------------------------------------------------ o eixo do tempo */
 
 /*
- * `minmax(0, 1fr)` e não `1fr`.
+ * O gato é **grande**, e é o único lugar da tela onde algo tem licença para ser.
  *
- * `1fr` é atalho para `minmax(auto, 1fr)`, e esse `auto` é um piso de largura mínima do conteúdo:
- * a coluna se recusa a encolher abaixo do que as tarefas medem, e num telefone de 420 px a linha
- * saía com 510 e era **cortada** pelo `overflow: clip` do quadro da página — medido: da borda
- * esquerda em 70 até 580. O que ficava de fora eram justamente os botões, encostados à direita.
- * Numa tela cuja premissa é ser usada em pé e com uma mão, isso é a tela inteira sem serventia.
+ * Nasceu com 2,6 rem, que é tamanho de ícone de aviso — e o comentário que o introduziu prometia
+ * "um gato grande e macio". Em 2,6 rem o `duotone` do Phosphor não se lê: o preenchimento por
+ * baixo do contorno vira uma mancha, e o desenho perde justamente a maciez que o fez ser escolhido.
+ *
+ * Crescer aqui não custa nada ao trabalho. Este bloco só existe quando **não há uma única tarefa
+ * pendente** — é o único instante em que ninguém está com pressa, e o único em que a tela pode
+ * respirar sem atrapalhar. Nas outras 49 tarefas do dia ele não aparece.
  */
-.horario {
+.emDia__bicho {
+  width: 7.5rem;
+  height: 7.5rem;
+}
+
+/* No telefone ele encolhe, mas continua sendo a primeira coisa que se vê. */
+@media (max-width: 620px) {
+  .emDia {
+    padding: var(--clinic-space-5) var(--clinic-space-4);
+  }
+
+  .emDia__bicho {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+}
+
+/* ------------------------------------------------------------------ a pauta do turno */
+
+/*
+ * A pauta: um cartão de ronda por fileira, e a hora **dentro** de cada um.
+ *
+ * Aqui existia uma calha de 3,6 rem à esquerda, com um chip verde da hora e um fio descendo até o
+ * horário seguinte — o eixo do tempo desenhado. Ele saiu, e a hora virou a primeira célula do
+ * cartão (ver `RondaDoHorario`).
+ *
+ * A calha cobrava a mesma largura de **toda** fileira, o dia inteiro, para desenhar decoração; no
+ * telefone cobrava 2,9 rem dos 390 disponíveis, roubando-os justamente do nome do animal. E ela
+ * não saiu barata: as duas notas que moravam aqui documentavam dois defeitos que ela mesma
+ * produzia — a linha cortada a 420 px de largura e os 220 px de chip verde esticado ao lado das
+ * tarefas. Sem coluna elástica e sem item de grade que possa esticar, os dois ficam
+ * estruturalmente impossíveis.
+ *
+ * A coluna de horas não se perdeu: como todo cartão tem a mesma largura e a hora é tabular na
+ * primeira célula, os dígitos caem uns sobre os outros de fileira em fileira. Quem desenha a
+ * coluna agora é o conteúdo, e não uma calha vazia.
+ */
+.pauta {
   display: grid;
   gap: var(--clinic-space-3);
-  grid-template-columns: 3.6rem minmax(0, 1fr);
-}
-
-/*
- * Duas fileiras declaradas, e é isto que conserta o eixo.
- *
- * Sem `grid-template-rows`, as duas fileiras automáticas herdavam o `align-content: normal` da
- * grade — que em grid se comporta como `stretch` — e cresciam para preencher a altura do bloco.
- * A etiqueta da hora, que é um chip de 22 px, esticava junto: medida na tela, **220 px** de
- * verde-escuro descendo ao lado das tarefas. Com `auto 1fr`, a hora fica do tamanho da hora e
- * quem cresce é o fio, que é o que deve mesmo crescer.
- */
-.horario__eixo {
-  display: grid;
-  justify-items: center;
-  gap: 0.3rem;
-  grid-template-rows: auto 1fr;
-}
-
-.horario__hora {
-  padding: 0.15rem 0.4rem;
-  border-radius: 0.4rem;
-  background: var(--clinic-accent-deep);
-  color: var(--clinic-on-accent);
-  font-size: 0.78rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.horario--adiante .horario__hora {
-  background: transparent;
-  color: var(--clinic-muted);
-  box-shadow: inset 0 0 0 1px var(--clinic-line);
-}
-
-.horario--passado .horario__hora {
-  background: transparent;
-  color: var(--clinic-faint);
-  box-shadow: inset 0 0 0 1px var(--clinic-line-soft);
-}
-
-/* A linha que desce ligando um horário ao seguinte: é ela que faz o eixo parecer um eixo. */
-.horario__linha {
-  width: 2px;
-  height: 100%;
-  min-height: 0.6rem;
-  border-radius: 1px;
-  background: var(--clinic-line);
-}
-
-.horario--adiante .horario__linha,
-.horario--passado .horario__linha {
-  background: var(--clinic-line-soft);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 /*
@@ -796,11 +1011,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .fronteira {
   display: flex;
   align-items: center;
-  margin: var(--clinic-space-3) 0 var(--clinic-space-2);
+  margin-block: var(--clinic-space-2);
   gap: 0.45rem;
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
-  font-weight: 650;
+  font-weight: 400;
 }
 
 .fronteira::after {
@@ -810,31 +1025,13 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   content: '';
 }
 
-.horario__conteudo {
-  display: grid;
-  gap: var(--clinic-space-1);
-  padding-bottom: var(--clinic-space-3);
-}
-
 /*
- * As rondas de um horário, empilhadas.
+ * O que já passou fala mais baixo pelos próprios tokens, não por transparência.
  *
- * A grade de colunas desceu um nível: mora dentro da ronda, onde as tarefas de fato se repetem
- * (ver `RondaDoHorario`). Aqui em cima são duas ou três linhas por horário, e empilhar é o certo
- * — "Refeição" e "Água" lado a lado leriam como duas colunas de uma tabela que não existe.
+ * Havia um `opacity: 0.75` aqui. Ele empilhava perda de contraste sobre um conteúdo que já estava
+ * no piso — o cinza apagado do resolvido — e levava junto o que não devia apagar, como o selo de
+ * uma recusa. O passado já se anuncia pelo texto riscado e pela cor do disco.
  */
-.horario__rondas {
-  display: grid;
-  gap: var(--clinic-space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.horario--passado .horario__rondas {
-  opacity: 0.75;
-}
-
 .recolhido {
   display: flex;
   align-items: center;
@@ -855,8 +1052,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 @media (max-width: 720px) {
-  .horario {
-    grid-template-columns: 2.9rem minmax(0, 1fr);
+  /*
+   * No telefone os cartões encostam nas bordas da coluna e a folga entre eles encolhe: o que
+   * sobrava para a calha do eixo volta inteiro para o texto das fileiras.
+   */
+  .pauta {
+    gap: var(--clinic-space-2);
   }
 }
 </style>

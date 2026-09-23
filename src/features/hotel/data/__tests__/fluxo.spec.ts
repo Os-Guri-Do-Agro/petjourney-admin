@@ -21,6 +21,8 @@ import {
   BoletimRetidoError,
   CadastroRecusadoError,
   hospedagemRepository,
+  rotinaPadraoRepository,
+  amanhaNaCasa,
   PassagemTravadaError,
   reservaRepository,
   SaidaBloqueadaError,
@@ -450,5 +452,175 @@ describe('cadastro da casa', () => {
         detalhe: '',
       }),
     ).rejects.toThrow(CadastroRecusadoError)
+  })
+})
+
+describe('a rotina existe em todo dia da estadia, não só nos dois que alguém gerou', () => {
+  it('o terceiro dia de uma estadia longa tem tarefas', async () => {
+    /*
+     * As tarefas nasciam em dois momentos e só neles: a semente gera ontem e hoje, o check-in gera
+     * hoje e amanhã. Ninguém gerava o resto, e numa estadia de sete noites o terceiro dia chegava
+     * com a prancheta **vazia** — a casa passava o dia sem lista. O defeito nunca aparecia na
+     * demonstração porque a demonstração sempre olha hoje.
+     */
+    const dataset = getDataset()
+    const hospedado = dataset.hospedagens.find((item) => item.status === 'hospedado')!
+
+    const daquiATresDias = addDays(dataset.ancora, 3)
+
+    /* A estadia precisa de fato alcançar esse dia, senão o teste não prova nada. */
+    expect(hospedado.saidaPrevistaEm.slice(0, 10) >= daquiATresDias).toBe(true)
+
+    const tarefas = await hospedagemRepository.rotina(daquiATresDias)
+
+    expect(tarefas.length).toBeGreaterThan(0)
+    expect(tarefas.some((item) => item.tarefa.hospedagemId === hospedado.id)).toBe(true)
+  })
+
+  it('reler o mesmo dia não duplica nada', async () => {
+    /* A leitura materializa. Sem a chave idempotente, abrir a prancheta duas vezes dobraria o dia. */
+    const daquiADoisDias = addDays(getDataset().ancora, 2)
+
+    const primeira = await hospedagemRepository.rotina(daquiADoisDias)
+    const segunda = await hospedagemRepository.rotina(daquiADoisDias)
+
+    expect(segunda).toHaveLength(primeira.length)
+
+    const ids = segunda.map((item) => item.tarefa.id)
+
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('não materializa dia nenhum para quem já foi embora', async () => {
+    const dataset = getDataset()
+    const encerrada = dataset.hospedagens.find((item) => item.status !== 'hospedado')
+
+    if (!encerrada) return
+
+    const tarefas = await hospedagemRepository.rotina(addDays(dataset.ancora, 3))
+
+    expect(tarefas.some((item) => item.tarefa.hospedagemId === encerrada.id)).toBe(false)
+  })
+})
+
+describe('a casa cadastra a própria rotina', () => {
+  it('publicar um plano novo não apaga o trabalho já feito', async () => {
+    /*
+     * A prova de que o cadastro não destrói histórico. Marca-se metade do dia, troca-se o plano
+     * inteiro por outro sem um horário em comum, e o que foi executado tem de sair do outro lado
+     * com o mesmo id, o mesmo executor e a mesma hora.
+     */
+    const dataset = getDataset()
+    const hoje = dataset.ancora
+
+    const antes = await hospedagemRepository.rotina(hoje)
+    const daCasa = antes.filter((item) => item.tarefa.kind === 'agua')
+
+    expect(daCasa.length).toBeGreaterThan(0)
+
+    const marcadas = daCasa.slice(0, Math.max(1, Math.floor(daCasa.length / 2)))
+
+    for (const item of marcadas) {
+      await hospedagemRepository.marcarTarefa({
+        tarefaId: item.tarefa.id,
+        status: 'feita',
+        executadaPor: 'cuidador-teste',
+      })
+    }
+
+    const atual = await rotinaPadraoRepository.atual()
+
+    /* Um plano de água sem nenhum horário em comum com o anterior. */
+    const novos = atual.itens.map((item) =>
+      item.kind === 'agua' ? { ...item, horarios: ['05:30', '23:30'] } : item,
+    )
+
+    await rotinaPadraoRepository.publicar({
+      itens: novos,
+      vigenteDesde: `${hoje}T00:00:00-04:00`,
+      por: 'cuidador-teste',
+    })
+
+    const depois = getDataset().tarefas
+
+    for (const item of marcadas) {
+      const sobrevivente = depois.find((tarefa) => tarefa.id === item.tarefa.id)
+
+      expect(sobrevivente, `a tarefa ${item.tarefa.id} sumiu ao publicar`).toBeDefined()
+      expect(sobrevivente!.status).toBe('feita')
+      expect(sobrevivente!.executadaPor).toBe('cuidador-teste')
+    }
+  })
+
+  it('a previsão diz a verdade: os números batem com o que a publicação faz', async () => {
+    const dataset = getDataset()
+    const atual = await rotinaPadraoRepository.atual()
+    const vigenteDesde = `${dataset.ancora}T00:00:00-04:00`
+
+    const novos = atual.itens.map((item) =>
+      item.kind === 'higiene' ? { ...item, horarios: ['23:10', '23:20', '23:30'] } : item,
+    )
+
+    const previsao = await rotinaPadraoRepository.previsao({ itens: novos, vigenteDesde })
+
+    const antes = getDataset().tarefas.length
+
+    await rotinaPadraoRepository.publicar({ itens: novos, vigenteDesde, por: 'cuidador-teste' })
+
+    const depois = getDataset().tarefas.length
+
+    expect(depois - antes).toBe(previsao.criadas - previsao.retiradas)
+  })
+
+  it('o cadastro vale para quem entrar depois', async () => {
+    const dataset = getDataset()
+    const atual = await rotinaPadraoRepository.atual()
+
+    /* A casa liga a pesagem, que sempre existiu como tipo e nunca teve gerador. */
+    const comPesagem = atual.itens.map((item) =>
+      item.kind === 'pesagem' ? { ...item, ativo: true, horarios: ['07:30'] } : item,
+    )
+
+    await rotinaPadraoRepository.publicar({
+      itens: comPesagem,
+      vigenteDesde: `${dataset.ancora}T00:00:00-04:00`,
+      por: 'cuidador-teste',
+    })
+
+    /* Um dia adiante, ainda não materializado: nasce já com a pesagem. */
+    const adiante = await hospedagemRepository.rotina(addDays(dataset.ancora, 2))
+
+    expect(adiante.some((item) => item.tarefa.kind === 'pesagem')).toBe(true)
+  })
+
+  it('desfazer volta o cadastro e tira as tarefas que ninguém tocou', async () => {
+    const dataset = getDataset()
+    const atual = await rotinaPadraoRepository.atual()
+
+    const novos = atual.itens.map((item) =>
+      item.kind === 'agua' ? { ...item, horarios: [...item.horarios, '23:45'] } : item,
+    )
+
+    await rotinaPadraoRepository.publicar({
+      itens: novos,
+      vigenteDesde: `${dataset.ancora}T00:00:00-04:00`,
+      por: 'cuidador-teste',
+    })
+
+    const comExtra = getDataset().tarefas.filter((item) =>
+      item.previstaPara.includes('23:45'),
+    ).length
+
+    expect(comExtra).toBeGreaterThan(0)
+
+    const revertido = await rotinaPadraoRepository.desfazer()
+
+    expect(revertido.itens.find((item) => item.kind === 'agua')!.horarios).toEqual(
+      atual.itens.find((item) => item.kind === 'agua')!.horarios,
+    )
+
+    expect(
+      getDataset().tarefas.filter((item) => item.previstaPara.includes('23:45')),
+    ).toHaveLength(0)
   })
 })

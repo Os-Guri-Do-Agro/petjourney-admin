@@ -29,6 +29,7 @@ import { useI18n } from 'vue-i18n'
 
 import { useHotelFormat } from '../../composables/useHotelFormat'
 import type { AvaliacaoDeAdmissao } from '../../domain/admissao'
+import { lerHorarios } from '../../domain/rotina-padrao'
 import type {
   Autorizacao,
   AutorizacaoKind,
@@ -148,13 +149,6 @@ function removerMedicacao(indice: number) {
 /** Os horários são digitados como se ditam ao telefone: "8:00, 20:00". */
 const horariosPorMedicacao = ref<string[]>([])
 
-function lerHorarios(texto: string): string[] {
-  return texto
-    .split(/[,;]/)
-    .map((item) => item.trim())
-    .filter((item) => /^\d{1,2}:\d{2}$/.test(item))
-    .map((item) => item.padStart(5, '0'))
-}
 
 /**
  * Medicação registrada sem horário não vira tarefa nenhuma — e some.

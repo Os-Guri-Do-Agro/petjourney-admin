@@ -3710,6 +3710,7 @@
       "reservas": "Não foi possível carregar as reservas.",
       "resumo": "Não foi possível carregar o resumo.",
       "rotina": "Não foi possível carregar a rotina do turno.",
+      "rotinaPadrao": "Não foi possível carregar a rotina padrão.",
       "saida": {
         "ocorrencia-sem-contato": "Há ocorrência grave sem contato com o responsável.",
         "pertences": "Há pertences sem conferência.",
@@ -4163,6 +4164,7 @@
       "titulo": "Rotina do turno",
       "todas": "Todas as tarefas",
       "tudoEmDia": "Nada pendente neste momento. A próxima tarefa aparece aqui na hora dela.",
+      "umaAUma": "uma a uma",
       "vazioDescricao": "A rotina nasce com o check-in. Sem hóspedes na casa, não há o que fazer.",
       "vazioTitulo": "Nenhuma tarefa hoje"
     },
@@ -4219,7 +4221,12 @@
       "titulo": "Passagem de turno",
       "travado": "Isto impede a passagem",
       "sai": "entrega",
-      "entra": "assume"
+      "entra": "assume",
+      "fimDoTurno": "Fim do turno",
+      "assumeCom": "assume {turno} · {pessoa}",
+      "ficam": "{total} tarefa fica para quem assume | {total} tarefas ficam para quem assume",
+      "travaEntrega": "{total} ocorrência sem contato trava a entrega | {total} ocorrências sem contato travam a entrega",
+      "nadaTrava": "Nada trava a entrega"
     },
     "via": {
       "oftalmica": "Oftálmica",
@@ -4315,7 +4322,7 @@
         },
         "tempo": {
           "titulo": "Agora, mais tarde, e o que passou",
-          "texto": "As tarefas ficam num eixo de horários, em três tempos. O que está atrasado sobe para o topo, marcado — não some no meio da lista."
+          "texto": "As tarefas se agrupam em rondas, e cada ronda traz a hora na frente. O que está atrasado sobe para \"Para agora\", com a hora em vermelho — não some no meio da lista."
         },
         "marcar": {
           "titulo": "Marcar custa um toque",
@@ -4324,6 +4331,10 @@
         "ronda": {
           "titulo": "Uma ronda, não vinte linhas",
           "texto": "As tarefas do mesmo serviço no mesmo horário viram uma ronda — \"Refeição, 20 animais\". Ronda curta já vem aberta; ronda longa abre num toque. Dá para marcar a ronda inteira de uma vez, menos a de medicação: remédio se marca um a um."
+        },
+        "passagem": {
+          "titulo": "O turno acaba aqui",
+          "texto": "No pé da prancheta: quantas tarefas ficam para quem assume e o que impede a entrega. Aparece desde o começo do turno, e não só na hora de passar — ocorrência sem contato às 22h já não dá para resolver."
         }
       },
       "hospedes": {
@@ -4423,7 +4434,127 @@
           "titulo": "De onde vem, e o que se perde",
           "texto": "Receita por origem da reserva e por serviço, as ocorrências do período, e as perdas. Cancelamento é aviso — deu para revender; não comparecer é vaga queimada."
         }
+      },
+      "rotinaPadrao": {
+        "pergunta": {
+          "titulo": "A pergunta desta tela",
+          "texto": "O que a casa faz por todos os hóspedes, e a que horas. É a régua que a rotina de cada animal herda."
+        },
+        "regua": {
+          "titulo": "O dia inteiro numa régua",
+          "texto": "Cada faixa é um serviço da casa, com os horários marcados sobre as 24 horas. De longe dá para ver se o dia está bem distribuído ou se tudo cai de manhã."
+        },
+        "limite": {
+          "titulo": "O que não se cadastra aqui",
+          "texto": "Refeição e medicação não aparecem: os horários vêm da ficha de cada hóspede. O hotel não prescreve, e nenhum cadastro pode criar ou mudar uma dose."
+        },
+        "publicar": {
+          "titulo": "Publicar diz antes o que vai fazer",
+          "texto": "Antes de salvar, a tela mostra quantas tarefas nascem, quantas saem e quantas ficam intocadas. O que já foi feito nunca é tocado, e começar amanhã não mexe no turno de quem está trabalhando agora."
+        }
       }
+    },
+    "rotinaPadrao": {
+      "aplicar": "Aplicar",
+      "ativo": "A casa faz isto",
+      "campoHorarios": "Horários",
+      "campoHorariosDica": "Como se ditam ao telefone: 8:00, 12:00, 18:00",
+      "cancelar": "Cancelar",
+      "criadas": "{total} tarefa nasce | {total} tarefas nascem",
+      "desfazer": "Desfazer",
+      "desligada": "desligada",
+      "editar": "Editar",
+      "editarTitulo": "Horários de {servico}",
+      "exigeAutorizacao": "só para quem tem autorização do responsável",
+      "horarios": "{total} horário | {total} horários",
+      "naoMexe": "Refeição e medicação não entram aqui: os horários vêm da ficha de cada hóspede, e o hotel não prescreve.",
+      "noTurno": "{total} cai no turno de agora | {total} caem no turno de agora",
+      "porDia": "{total} tarefa por hóspede, por dia | {total} tarefas por hóspede, por dia",
+      "preservadas": "{total} tarefa fica intocada | {total} tarefas ficam intocadas",
+      "preservadasDica": "O que já foi feito, recusado ou pulado nunca é tocado.",
+      "previsao": "O que isto muda",
+      "publicar": "Publicar alterações",
+      "publicarTitulo": "Publicar a rotina",
+      "retiradas": "{total} tarefa sai | {total} tarefas saem",
+      "semHorario": "sem horário",
+      "semMudanca": "Nada mudou.",
+      "subtitulo": "O que a casa faz por todos os hóspedes",
+      "titulo": "Rotina padrão",
+      "vazioDescricao": "A casa ainda não declarou o que faz por todos os hóspedes.",
+      "vazioTitulo": "Nenhum serviço cadastrado",
+      "versao": "versão {versao} · por {pessoa}",
+      "vigencia": "A partir de quando",
+      "vigenciaAgora": "Agora",
+      "vigenciaAmanha": "Amanhã",
+      "vigenciaDica": "Começar amanhã não mexe no turno de quem está trabalhando agora."
+    },
+    "gerenciar": {
+      "titulo": "Gerenciar rotina",
+      "padrao": "Rotina padrão da casa",
+      "padraoDica": "os horários que valem para todos os hóspedes",
+      "medicacao": "Registrar medicação",
+      "medicacaoDica": "remédio que chegou com um hóspede",
+      "propor": "Propor rotina",
+      "proporDica": "sugestão lida da ficha, para revisar antes de aprovar"
+    },
+    "medicacaoNova": {
+      "titulo": "Registrar medicação",
+      "hospede": "Hóspede",
+      "escolherHospede": "Escolha o hóspede",
+      "descricao": "Medicamento",
+      "descricaoDica": "Nome e concentração, como está na caixa",
+      "via": "Via",
+      "dose": "Dose",
+      "doseDica": "1 comprimido, 20 gotas, 2 ml",
+      "horarios": "Horários",
+      "horariosDica": "Como se ditam ao telefone: 8:00, 20:00",
+      "receita": "Receita",
+      "receitaDica": "CRMV e número. Sem ela o remédio é dado do mesmo jeito, e fica pendente na ficha.",
+      "observacao": "Observação",
+      "soDaquiParaFrente": "As doses nascem a partir de agora. A de hoje que já passou não é criada: dose que nasce atrasada é registro falso de dose perdida.",
+      "faltaHorario": "Sem horário, o remédio não vira tarefa nenhuma.",
+      "registrar": "Registrar",
+      "cancelar": "Cancelar",
+      "registrada": "Medicação registrada. As doses à frente já estão na prancheta."
+    },
+    "proposta": {
+      "titulo": "Proposta de rotina",
+      "escolherHospede": "Escolha o hóspede",
+      "lidaEm": "lida da ficha às {hora}",
+      "motorLocal": "simulação local",
+      "nadaGravado": "nada foi gravado",
+      "aviso": "Nesta versão não há modelo nem rede: a proposta vem de uma simulação determinista sobre os dados da casa. O que é real é o fluxo de revisar e aprovar.",
+      "casaJaFaz": "A casa já faz",
+      "daFicha": "Da ficha",
+      "proponhoMudar": "Proponho mudar",
+      "transcrita": "transcrita",
+      "naoEdita": "A casa não prescreve: para mudar dose ou horário é preciso receita.",
+      "naoProponho": "O que não proponho",
+      "recusaMedicacao": "Medicação — não proponho remédio nem dose. O hotel não prescreve.",
+      "recusaRefeicao": "Refeição — mudar horário de refeição se combina com o responsável.",
+      "porqueInspecao": "inspeção de entrada: \"{valor}\"",
+      "porqueAdaptacao": "o hóspede foi recebido como {valor}",
+      "porqueEstadiaLonga": "estadia de {valor} noites: o peso de saída sem um meio do caminho não diz quando o animal emagreceu",
+      "porqueMedicacao": "da receita registrada: {valor}",
+      "porquePlano": "dos horários de refeição da ficha",
+      "porqueCasa": "da rotina padrão da casa",
+      "descartadas": "{total} sugestão descartada na verificação | {total} sugestões descartadas na verificação",
+      "semMudancas": "Nada a propor para este hóspede: a rotina da casa já dá conta.",
+      "aprovar": "Aprovar {total} mudança | Aprovar {total} mudanças",
+      "aprovarNenhuma": "Aprovar",
+      "descartar": "Descartar",
+      "aprovada": "Ajustes gravados na ficha do hóspede.",
+      "gerando": "Lendo a ficha…"
+    },
+    "planoDaEstadia": {
+      "titulo": "Plano da estadia",
+      "semAjustes": "Este hóspede segue a rotina padrão da casa.",
+      "suspenso": "suspenso",
+      "desde": "desde {data}",
+      "encerrar": "Encerrar",
+      "propor": "Propor ajustes",
+      "origemProposta": "de uma proposta revisada",
+      "origemPessoa": "registrado à mão"
     }
   },
   "cronometro": {

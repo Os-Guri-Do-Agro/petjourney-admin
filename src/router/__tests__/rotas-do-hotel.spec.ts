@@ -31,6 +31,7 @@ const TELAS = [
   '/hotel/reservas',
   '/hotel/hospedes',
   '/hotel/acomodacoes',
+  '/hotel/rotina-padrao',
   '/hotel/resumo',
 ]
 

@@ -186,6 +186,25 @@
   --clinic-font-value: 0.875rem; /* 14px — valor clínico, sempre tabular */
   --clinic-font-label: 0.6875rem;
   --clinic-font-title: 1.05rem;
+
+  /*
+   * O texto corrido de um componente, por nome.
+   *
+   * Existia como `var(--clinic-font-body)` em 28 declarações de 23 arquivos e **não era declarado
+   * em lugar nenhum**. Propriedade customizada sem valor torna a declaração inteira inválida no
+   * momento do cálculo, então todas elas caíam no tamanho herdado — e o efeito colateral era
+   * silencioso e caro: na rotina do turno, o nome da ronda e o nome do animal pediam tamanhos
+   * diferentes e saíam idênticos, porque os dois pediam este token. O degrau entre um nível e o
+   * seguinte nunca chegou a existir.
+   *
+   * Entra apontando para `--clinic-font-base`, que é o tamanho em que esses 28 usos já vinham
+   * caindo: declarar o token não muda um pixel hoje: só devolve às 28 declarações o direito de
+   * valer alguma coisa. Quem quiser um degrau agora tem onde pedi-lo.
+   *
+   * Mora aqui e não ao lado de cada uso porque as três densidades trocam `--clinic-font-base` no
+   * próprio `:root` — a substituição resolve no mesmo elemento, então uma declaração serve às três.
+   */
+  --clinic-font-body: var(--clinic-font-base);
   --clinic-row-height: 36px;
   --clinic-hit-target: 28px; /* alvo de mouse, não de toque */
   --clinic-cell-padding-y: 0.3rem;
@@ -765,24 +784,50 @@
  * ------------------------------------------------------------------------ */
 
 .clinic-scope .p-button.p-button-secondary.p-button-outlined,
-.clinic-scope .p-button.p-button-secondary.p-button-text,
 .clinic-scope .p-button.p-button-outlined:not([class*='p-button-']),
 .clinic-dialog .p-button.p-button-secondary.p-button-outlined,
-.clinic-dialog .p-button.p-button-secondary.p-button-text,
-.clinic-overlay .p-button.p-button-secondary.p-button-outlined,
-.clinic-overlay .p-button.p-button-secondary.p-button-text {
+.clinic-overlay .p-button.p-button-secondary.p-button-outlined {
   border-color: var(--clinic-line-strong);
   background: transparent;
   color: var(--clinic-text);
 }
 
 .clinic-scope .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
-.clinic-scope .p-button.p-button-secondary.p-button-text:not(:disabled):hover,
 .clinic-dialog .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
-.clinic-dialog .p-button.p-button-secondary.p-button-text:not(:disabled):hover,
-.clinic-overlay .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
-.clinic-overlay .p-button.p-button-secondary.p-button-text:not(:disabled):hover {
+.clinic-overlay .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
   border-color: var(--clinic-accent);
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-accent-strong);
+}
+
+/*
+ * `text` é o botão sem caixa — e estava desenhando uma.
+ *
+ * Os seletores de `text` moravam no mesmo bloco que os de `outlined`, herdando com eles o
+ * `border-color: var(--clinic-line-strong)`. O resultado é que os dois níveis de ênfase que o
+ * PrimeVue oferece — contornado e sem contorno — saíam idênticos na tela, e a hierarquia que
+ * alguém escreveu escolhendo `text` num lugar e `outlined` no outro não chegava a existir.
+ *
+ * Onde isso mais custava: uma fileira de tarefa da rotina do turno tem "Pular" (`text`),
+ * "Recusou" (`outlined`) e "Feita" (cheio). Três pesos pedidos, dois desenhados. Multiplicado
+ * pelas tarefas de um dia, eram dezenas de molduras que só faziam ruído.
+ *
+ * O bloco é separado, e não uma correção pendurada no anterior, porque `text` não é um
+ * `outlined` com a borda apagada: é outro nível de ênfase, e vai querer divergir de novo.
+ */
+.clinic-scope .p-button.p-button-secondary.p-button-text,
+.clinic-dialog .p-button.p-button-secondary.p-button-text,
+.clinic-overlay .p-button.p-button-secondary.p-button-text {
+  border-color: transparent;
+  background: transparent;
+  color: var(--clinic-text);
+}
+
+/* No repouso não há caixa; no hover aparece o fundo, que é o que anuncia o alvo — nunca a borda. */
+.clinic-scope .p-button.p-button-secondary.p-button-text:not(:disabled):hover,
+.clinic-dialog .p-button.p-button-secondary.p-button-text:not(:disabled):hover,
+.clinic-overlay .p-button.p-button-secondary.p-button-text:not(:disabled):hover {
+  border-color: transparent;
   background: var(--clinic-surface-soft);
   color: var(--clinic-accent-strong);
 }
@@ -801,6 +846,25 @@
   background: var(--clinic-surface-sunken);
   color: var(--clinic-muted);
   opacity: 1;
+}
+
+/*
+ * ...menos o `text`, que não tem preenchimento para perder.
+ *
+ * A regra acima existe para o botão cheio: tirar o sage dele é o que faz o desabilitado ser
+ * reconhecido antes de alguém tentar clicar. Aplicada a um botão sem caixa, ela faz o contrário —
+ * *cria* uma caixa no momento em que o botão fica indisponível.
+ *
+ * Isso é visível toda vez que se marca uma tarefa: a rotina desabilita a fileira inteira enquanto
+ * a gravação viaja (`:disabled="salvando"`), e sem esta regra o "Pular" e o "Marcar as N" piscam
+ * uma moldura a cada toque. Um piscar por tarefa, dezenas por turno. Aqui o desabilitado continua
+ * sendo dito só pela cor do texto, que é o único canal que este botão tem.
+ */
+.clinic-scope .p-button.p-button-text:disabled,
+.clinic-dialog .p-button.p-button-text:disabled,
+.clinic-overlay .p-button.p-button-text:disabled {
+  border-color: transparent;
+  background: transparent;
 }
 
 /*

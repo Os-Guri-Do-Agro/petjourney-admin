@@ -18,6 +18,7 @@ import { computed, onScopeDispose, ref } from 'vue'
 import {
   BoletimRetidoError,
   hospedagemRepository,
+  propostaRepository,
   PassagemTravadaError,
   SaidaBloqueadaError,
   situacaoDaTarefa,
@@ -29,6 +30,7 @@ import {
 import type {
   Adaptacao,
   Autorizacao,
+  ClockTime,
   GravidadeDaOcorrencia,
   ISODate,
   ISODateTime,
@@ -36,9 +38,12 @@ import type {
   OcorrenciaKind,
   PlanoAlimentar,
   RegistroKind,
+  TarefaDaCasaKind,
   TarefaStatus,
+  ViaDeMedicacao,
 } from '../data/types'
 import { agruparPorHorario } from '../domain/rotina'
+import type { PropostaDeRotina } from '../domain/rotina-sugerida'
 
 import { hotelClock, useHotelStore } from './hotel'
 
@@ -231,6 +236,74 @@ export const useHospedagemStore = defineStore('hotel-hospedagem', () => {
     return mutar(() =>
       hospedagemRepository.checkIn({ ...entrada, recebidoPor: hotelStore.operadorAtual() }),
     )
+  }
+
+  /**
+   * A proposta de rotina de um hóspede.
+   *
+   * Fica na store e não no componente porque **duas telas abrem o mesmo diálogo** — a prancheta do
+   * turno e a ficha da estadia —, e duas cópias do mesmo estado é a forma de as duas discordarem
+   * sobre o que está sendo proposto.
+   */
+  const proposta = ref<PropostaDeRotina | null>(null)
+  const gerandoProposta = ref(false)
+
+  async function proporRotina(hospedagemId: string) {
+    gerandoProposta.value = true
+    proposta.value = null
+    erroDeAcao.value = ''
+
+    try {
+      proposta.value = await propostaRepository.propor(hospedagemId)
+    } catch {
+      erroDeAcao.value = 'hotel.erros.acao'
+    } finally {
+      gerandoProposta.value = false
+    }
+
+    return proposta.value
+  }
+
+  async function aprovarProposta(entrada: {
+    hospedagemId: string
+    sugestoes: { kind: TarefaDaCasaKind; horarios: ClockTime[]; motivo: string }[]
+  }) {
+    const gravados = await mutar(() =>
+      propostaRepository.aprovar({ ...entrada, por: hotelStore.operadorAtual() }),
+    )
+
+    if (!gravados) return null
+
+    /*
+     * Aprovar grava `AjusteDeRotina`, nunca tarefa. As tarefas nascem depois, pela materialização,
+     * e por isso a prancheta precisa ser relida — é ela que vai pedir o dia com a rotina nova.
+     */
+    proposta.value = null
+    await carregarPrancheta()
+
+    return gravados
+  }
+
+  async function registrarMedicacao(entrada: {
+    hospedagemId: string
+    descricao: string
+    via: ViaDeMedicacao
+    doseTexto: string
+    horarios: string[]
+    receita: string
+    observacao: string
+  }) {
+    const registrada = await mutar(() => hospedagemRepository.registrarMedicacao(entrada))
+
+    if (!registrada) return null
+
+    await carregarPrancheta()
+
+    if (estadia.value?.hospedagem.id === entrada.hospedagemId) {
+      await carregarEstadia(entrada.hospedagemId)
+    }
+
+    return registrada
   }
 
   /**
@@ -434,6 +507,11 @@ export const useHospedagemStore = defineStore('hotel-hospedagem', () => {
     carregarPassagem,
     checkIn,
     marcarTarefa,
+    proposta,
+    gerandoProposta,
+    proporRotina,
+    aprovarProposta,
+    registrarMedicacao,
     registrarNoDiario,
     registrarOcorrencia,
     registrarContato,

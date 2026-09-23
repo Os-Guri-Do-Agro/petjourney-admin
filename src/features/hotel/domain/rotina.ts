@@ -15,6 +15,7 @@
 
 import type {
   ClockTime,
+  ItemDeRotina,
   ISODate,
   ISODateTime,
   MedicacaoDaEstadia,
@@ -95,11 +96,27 @@ export function tempoDaTarefa(situacao: SituacaoDaTarefa): TempoDaPrancheta {
 export function repartirPorTempo<
   Linha extends { situacao: SituacaoDaTarefa },
   Bloco extends { linhas: Linha[] },
->(blocos: Bloco[], tempo: TempoDaPrancheta): Bloco[] {
+>(
+  blocos: Bloco[],
+  tempo: TempoDaPrancheta,
+  /**
+   * Em que tempo cada linha cai. O padrão é o relógio, que é a regra.
+   *
+   * O parâmetro existe para a tela poder **segurar no lugar** o que acabou de ser marcado. Sem
+   * ele, marcar uma tarefa dentro de uma ronda aberta a manda na hora para "já passou": a fileira
+   * evapora sob o dedo, as de baixo sobem, e o próximo toque cai no animal errado. Quem está
+   * marcando vinte comedouros em pé no corredor perde o lugar a cada toque — e o "Desfazer", que
+   * deveria ser barato, passa a exigir abrir outra seção para achar o que sumiu.
+   *
+   * A regra do relógio continua intacta e continua sendo a única fonte de verdade: a tela informa
+   * uma exceção **por linha e por sessão**, e o domínio não guarda nada.
+   */
+  tempoDaLinha: (linha: Linha) => TempoDaPrancheta = (linha) => tempoDaTarefa(linha.situacao),
+): Bloco[] {
   return blocos
     .map((bloco) => ({
       ...bloco,
-      linhas: bloco.linhas.filter((linha) => tempoDaTarefa(linha.situacao) === tempo),
+      linhas: bloco.linhas.filter((linha) => tempoDaLinha(linha) === tempo),
     }))
     .filter((bloco) => bloco.linhas.length > 0)
 }
@@ -192,15 +209,36 @@ export type TarefaPlanejada = Omit<
 >
 
 /**
- * Higiene da acomodação e troca de água, nos horários fixos da casa.
+ * Higiene da acomodação, troca de água e passeio: a rotina que a casa faz por todos.
  *
- * Fixos e não configuráveis nesta rodada de propósito: são a rotina que não muda por hóspede, e
- * transformá-los em cadastro agora acrescentaria uma tela de configuração antes de existir alguém
- * pedindo para mudá-los.
+ * Eram três constantes fixas, com um comentário dizendo que virariam cadastro **quando alguém
+ * pedisse para mudá-las** — configuração antes do pedido é tela que ninguém abre. O pedido chegou,
+ * e elas viraram `RotinaPadrao` (ver `data/types.ts` e a tela `/hotel/rotina-padrao`).
+ *
+ * O que sobra aqui é o **estado inicial**: os horários com que a casa nasce, antes de alguém
+ * publicar os seus. Continuam sendo estes porque mudá-los junto com a funcionalidade misturaria
+ * duas coisas — a casa que já rodava com estes horários não deve ver nada diferente no dia em que
+ * o cadastro aparece.
+ *
+ * `pesagem` entra desligada. Ela é um `TarefaKind` que sempre existiu e nunca teve gerador: a casa
+ * agora pode ligá-la, e deixá-la ligada por padrão inventaria trabalho que ninguém pediu.
  */
 const HIGIENE: ClockTime[] = ['09:00', '16:00']
 const AGUA: ClockTime[] = ['07:00', '12:00', '18:00', '22:00']
 const PASSEIO: ClockTime[] = ['10:00', '15:00']
+
+export const ROTINA_PADRAO_INICIAL: ItemDeRotina[] = [
+  { id: 'rot-agua', kind: 'agua', horarios: AGUA, exigeAutorizacao: null, ativo: true },
+  { id: 'rot-higiene', kind: 'higiene', horarios: HIGIENE, exigeAutorizacao: null, ativo: true },
+  {
+    id: 'rot-passeio',
+    kind: 'passeio',
+    horarios: PASSEIO,
+    exigeAutorizacao: 'passeio-externo',
+    ativo: true,
+  },
+  { id: 'rot-pesagem', kind: 'pesagem', horarios: [], exigeAutorizacao: null, ativo: false },
+]
 
 /**
  * O serviço vendido, na prancheta de quem vai executá-lo.
@@ -249,6 +287,13 @@ export function planejarDia(entrada: {
   servicos?: ServicoContratado[]
   /** O catálogo, para saber se o serviço é por diária ou uma vez só. */
   catalogoDeServicos?: Servico[]
+  /**
+   * A rotina da casa em vigor. Ausente: os horários iniciais (`ROTINA_PADRAO_INICIAL`).
+   *
+   * Opcional para que as chamadas que não conhecem template — e os testes que existiam antes dele —
+   * continuem valendo sem mudar uma linha.
+   */
+  rotinaPadrao?: ItemDeRotina[]
 }): TarefaPlanejada[] {
   const planejadas: TarefaPlanejada[] = []
 
@@ -298,18 +343,25 @@ export function planejarDia(entrada: {
     }
   }
 
-  if (entrada.passeioAutorizado) {
-    for (const hora of PASSEIO) {
-      acrescentar('passeio', hora, '')
+  /*
+   * A rotina da casa, como ela estiver cadastrada.
+   *
+   * O item desligado não gera nada, e o que exige autorização só gera para quem a concedeu — que
+   * é a regra do passeio, agora escrita em dado em vez de num `if`. Um item sem horário nenhum
+   * também não gera: é a forma de a casa manter a linha no cadastro sem que ela aconteça.
+   */
+  for (const item of entrada.rotinaPadrao ?? ROTINA_PADRAO_INICIAL) {
+    if (!item.ativo) {
+      continue
     }
-  }
 
-  for (const hora of HIGIENE) {
-    acrescentar('higiene', hora, '')
-  }
+    if (item.exigeAutorizacao === 'passeio-externo' && !entrada.passeioAutorizado) {
+      continue
+    }
 
-  for (const hora of AGUA) {
-    acrescentar('agua', hora, '')
+    for (const hora of item.horarios) {
+      acrescentar(item.kind, hora, '')
+    }
   }
 
   /*

@@ -27,7 +27,7 @@ import type { Pet, Tutor } from '@/features/clinico/data/types'
 
 import { porteCabe } from '../domain/disponibilidade'
 import { instante } from '../domain/hotel-time'
-import { planejarDia } from '../domain/rotina'
+import { planejarDia, ROTINA_PADRAO_INICIAL } from '../domain/rotina'
 import { montarOrcamento } from '../domain/tarifas'
 
 import {
@@ -63,6 +63,9 @@ import type {
   RegistroDoDiario,
   Reserva,
   Servico,
+  AjusteDeRotina,
+  PublicacaoDeRotina,
+  RotinaPadrao,
   TarefaDeRotina,
   Tarifa,
   Temporada,
@@ -112,6 +115,12 @@ export type SeedResult = {
   hospedagens: Hospedagem[]
   medicacoes: MedicacaoDaEstadia[]
   tarefas: TarefaDeRotina[]
+  /** A rotina que a casa faz por todos. Nasce com os horários iniciais. */
+  rotinaPadrao: RotinaPadrao
+  /** O histórico de publicações, para poder desfazer a última. */
+  publicacoesDeRotina: PublicacaoDeRotina[]
+  /** O que muda na rotina de um hóspede específico. */
+  ajustesDeRotina: AjusteDeRotina[]
   diario: RegistroDoDiario[]
   ocorrencias: Ocorrencia[]
   boletins: Boletim[]
@@ -1287,6 +1296,17 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     reservas,
     hospedagens,
     medicacoes,
+    rotinaPadrao: {
+      id: `rot-${semente}`,
+      versao: 1,
+      itens: ROTINA_PADRAO_INICIAL.map((item) => ({ ...item, horarios: [...item.horarios] })),
+      /* Vigente desde antes de qualquer estadia: a casa sempre teve estes horários. */
+      vigenteDesde: `${ancora}T00:00:00-04:00`,
+      publicadaEm: `${ancora}T00:00:00-04:00`,
+      publicadaPor: cuidadoresFixture[0]?.id ?? '',
+    },
+    publicacoesDeRotina: [],
+    ajustesDeRotina: [],
     tarefas,
     diario,
     ocorrencias,

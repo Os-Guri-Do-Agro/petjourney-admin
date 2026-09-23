@@ -28,10 +28,18 @@ import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import CheckOutDialog from '@/features/hotel/components/estadia/CheckOutDialog.vue'
 import DiarioDialog from '@/features/hotel/components/estadia/DiarioDialog.vue'
 import OcorrenciaDialog from '@/features/hotel/components/estadia/OcorrenciaDialog.vue'
+import PlanoDaEstadia from '@/features/hotel/components/estadia/PlanoDaEstadia.vue'
+import PropostaDeRotinaDialog from '@/features/hotel/components/rotina/PropostaDeRotinaDialog.vue'
 import TarefaLinha from '@/features/hotel/components/rotina/TarefaLinha.vue'
 import { useHotelFormat } from '@/features/hotel/composables/useHotelFormat'
 import type { Adaptacao, TarefaStatus } from '@/features/hotel/data/types'
 import { tomDaAdaptacao, tomDaGravidade } from '@/features/hotel/domain/estadia'
+import {
+  ajustesDoHospede,
+  hospedesParaRotina,
+  propostaRepository,
+  type HospedeParaRotina,
+} from '@/features/hotel/data/repositories'
 import { useHospedagemStore } from '@/features/hotel/stores/hospedagem'
 import { useHotelStore } from '@/features/hotel/stores/hotel'
 
@@ -48,11 +56,41 @@ const hospedagem = useHospedagemStore()
 const hospedagemId = computed(() => String(route.params.hospedagemId ?? ''))
 
 const ocorrenciaAberta = ref(false)
+
+/* O plano deste animal: o que a casa faz por todos, menos o que muda para ele. */
+const propostaAberta = ref(false)
+const ajustes = ref<ReturnType<typeof ajustesDoHospede>>([])
+const hospedes = ref<HospedeParaRotina[]>([])
+
+function recarregarAjustes() {
+  ajustes.value = ajustesDoHospede(hospedagemId.value)
+  hospedes.value = hospedesParaRotina()
+}
+
+async function abrirProposta() {
+  recarregarAjustes()
+  propostaAberta.value = true
+  await hospedagem.proporRotina(hospedagemId.value)
+}
+
+async function aprovarProposta(payload: Parameters<typeof hospedagem.aprovarProposta>[0]) {
+  if (await hospedagem.aprovarProposta(payload)) {
+    propostaAberta.value = false
+    recarregarAjustes()
+  }
+}
+
+async function revogarAjuste(ajusteId: string) {
+  await propostaRepository.revogar(ajusteId)
+  recarregarAjustes()
+  await hospedagem.carregarEstadia(hospedagemId.value)
+}
 const diarioAberto = ref(false)
 const checkOutAberto = ref(false)
 
 onMounted(async () => {
   await hospedagem.carregarEstadia(hospedagemId.value)
+  recarregarAjustes()
 })
 
 watch(
@@ -268,7 +306,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               {{ t('hotel.estadia.semRotina') }}
             </p>
 
-            <ul v-else class="lista">
+            <ul v-else class="lista lista--rotina">
               <TarefaLinha
                 v-for="item in hospedagem.checklistDaEstadia"
                 :key="item.tarefa.id"
@@ -279,6 +317,17 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               />
             </ul>
           </section>
+
+          <!--
+            Logo abaixo de "Rotina de hoje", e a posição é o argumento: a de cima responde o que
+            falta hoje, esta responde por que é isso que falta.
+          -->
+          <PlanoDaEstadia
+            :ajustes="ajustes"
+            :salvando="hospedagem.salvando"
+            @propor="abrirProposta"
+            @revogar="revogarAjuste"
+          />
 
           <section class="cartao">
             <header class="cartao__topo">
@@ -540,6 +589,18 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       @confirmar="fecharEstadia"
     />
 
+    <PropostaDeRotinaDialog
+      :aberto="propostaAberta"
+      :hospedes="hospedes"
+      :hospedagem-id="hospedagemId"
+      :proposta="hospedagem.proposta"
+      :gerando="hospedagem.gerandoProposta"
+      :salvando="hospedagem.salvando"
+      :erro="hospedagem.erroDeAcao ? t(hospedagem.erroDeAcao) : ''"
+      @fechar="propostaAberta = false"
+      @aprovar="aprovarProposta"
+    />
+
     <HotelDevPanel />
 
     <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
@@ -688,6 +749,24 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/*
+ * A rotina da estadia usa a mesma `TarefaLinha` da prancheta, e lá ela deixou de ser cartão para
+ * virar fileira: sem borda, sem fundo, sem raio. Quem separa uma da outra passou a ser o filete
+ * que o pai desenha — na prancheta é o cartão da ronda, e aqui é este bloco.
+ *
+ * Sem isto, a lista desta aba viraria um bolo de texto sem divisão nenhuma no mesmo commit em que
+ * a prancheta melhorou. O sangramento lateral leva o filete até as bordas do cartão, que é o que
+ * faz a divisão parecer estrutura e não um traço solto no meio do texto.
+ */
+.lista--rotina {
+  gap: 0;
+  margin-inline: calc(var(--clinic-space-4) * -1);
+}
+
+.lista--rotina > li + li {
+  border-block-start: 1px solid var(--clinic-line-soft);
 }
 
 .lista--ocorrencias li {

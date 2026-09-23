@@ -147,6 +147,13 @@ const HOTEL_BLOCKS: readonly BlocoDeModulo[] = [
     key: 'hotel.navegacao.casa',
     rotas: [
       { key: 'hotel.acomodacoes.titulo', to: '/hotel/acomodacoes', icon: 'pi pi-building' },
+      /*
+       * Fica ao lado de Acomodações porque é a mesma classe de trabalho: configuração que se abre
+       * no dia da mudança, e não um painel que se consulta todo dia. A rota é `rotina-padrao` e
+       * não `rotinas` — `/hotel/rotina` já é a prancheta do turno, e "Rotina" ao lado de "Rotinas"
+       * no menu é a armadilha que `rotas-do-hotel.spec.ts` existe para evitar do lado do código.
+       */
+      { key: 'hotel.rotinaPadrao.titulo', to: '/hotel/rotina-padrao', icon: 'pi pi-stopwatch' },
       { key: 'hotel.resumo.titulo', to: '/hotel/resumo', icon: 'pi pi-chart-bar' },
     ],
   },

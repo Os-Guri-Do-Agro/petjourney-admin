@@ -29,6 +29,8 @@ import {
   type ImpedimentoDeSaida,
 } from '../../domain/estadia'
 import { contarDiarias, dataDe, maisMinutos } from '../../domain/hotel-time'
+import { reconciliarDia } from '../../domain/materializacao'
+import { rotinaEfetiva } from '../../domain/rotina-padrao'
 import {
   atrasadasAgora,
   pendenciasDoTurno,
@@ -61,11 +63,93 @@ import type {
   RegistroKind,
   TarefaDeRotina,
   TarefaStatus,
+  ViaDeMedicacao,
   Turno,
 } from '../types'
 
 function base() {
   return getDataset()
+}
+
+/**
+ * Materializa o dia pedido para quem está na casa, se ninguém o materializou ainda.
+ *
+ * ## O defeito que isto conserta
+ *
+ * As tarefas de um dia nasciam em dois momentos, e só nesses dois: a semente gera **ontem e hoje**,
+ * e o check-in gera **hoje e amanhã**. Ninguém gerava o resto. Numa estadia de sete noites, o
+ * terceiro dia chegava com a prancheta **vazia** — não "sem tarefas pendentes", vazia — e a casa
+ * passava o dia sem lista. O defeito não aparecia na demonstração porque a demonstração sempre
+ * olha hoje.
+ *
+ * Num sistema de verdade isto é trabalho noturno do servidor. Aqui não há servidor, então a
+ * materialização acontece na leitura, e é honesto dizer que **uma leitura escreve**. Só funciona
+ * porque `reconciliarDia` é idempotente pela chave da tarefa: abrir a mesma prancheta dez vezes
+ * cria as tarefas na primeira e nada nas outras nove.
+ *
+ * ## O que ela nunca faz
+ *
+ * Não cria nada no passado, não toca no que já existe, e não retira coisa alguma — só o balde
+ * `criar` é usado. Preencher lacuna e publicar plano novo passam pela mesma função de domínio, mas
+ * são operações diferentes: esta só sabe acrescentar o que falta.
+ */
+function garantirHorizonte(dia: ISODate) {
+  const dataset = getDataset()
+  const agora = agoraIso()
+
+  for (const hospedagem of dataset.hospedagens) {
+    if (hospedagem.status !== 'hospedado') {
+      continue
+    }
+
+    const reserva = dataset.reservas.find((item) => item.id === hospedagem.reservaId)
+
+    const planejadas = planejarDia({
+      hospedagemId: hospedagem.id,
+      dia,
+      utcOffset: HOTEL_UTC_OFFSET,
+      planoAlimentar: hospedagem.planoAlimentar,
+      medicacoes: dataset.medicacoes.filter((item) => item.hospedagemId === hospedagem.id),
+      passeioAutorizado: hospedagem.autorizacoes.some(
+        (item) => item.kind === 'passeio-externo' && item.concedida,
+      ),
+      entradaEm: hospedagem.entradaEm,
+      saidaPrevistaEm: hospedagem.saidaPrevistaEm,
+      servicos: reserva?.servicos,
+      catalogoDeServicos: dataset.servicos,
+      rotinaPadrao: rotinaEfetiva(
+        dataset.rotinaPadrao.itens,
+        dataset.ajustesDeRotina.filter(
+          (ajuste) => ajuste.hospedagemId === hospedagem.id && !ajuste.revogadoEm,
+        ),
+      ),
+    })
+
+    if (planejadas.length === 0) {
+      continue
+    }
+
+    const { criar } = reconciliarDia({
+      existentes: tarefasDoDia(
+        dataset.tarefas.filter((item) => item.hospedagemId === hospedagem.id),
+        dia,
+      ),
+      planejadas,
+      agora,
+    })
+
+    for (const planejada of criar) {
+      dataset.tarefas.push({
+        id: novoId('tarefa'),
+        ...planejada,
+        status: 'pendente',
+        executadaEm: null,
+        executadaPor: null,
+        turnoId: null,
+        observacao: '',
+      })
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -317,6 +401,8 @@ export const hospedagemRepository = {
    */
   rotina(dia: ISODate = hojeIso()): Promise<TarefaNaPrancheta[]> {
     return simularChamada('rotina.listar', () => {
+      garantirHorizonte(dia)
+
       const emAberto = new Set(
         base()
           .hospedagens.filter((item) => item.status === 'hospedado')
@@ -495,6 +581,7 @@ export const hospedagemRepository = {
           /* O que foi vendido vira tarefa: sem isto, o banho é cobrado e ninguém é avisado. */
           servicos: reserva.servicos,
           catalogoDeServicos: dataset.servicos,
+          rotinaPadrao: dataset.rotinaPadrao.itens,
         })
 
         for (const planejada of planejadas) {
@@ -528,6 +615,94 @@ export const hospedagemRepository = {
    * no lugar, e uma tela que se remonta a cada clique faz quem está no canil perder o dedo de onde
    * estava — exatamente o que a internação aprendeu com o checklist de doses.
    */
+  /**
+   * O remédio que chegou com o animal, ou que o responsável trouxe no meio da estadia.
+   *
+   * Existia um buraco: o check-in aceitava medicação, a rotina gerava as doses, a ficha mostrava —
+   * mas depois do check-in **não havia porta nenhuma**. O animal que chega às 15h40 com um frasco
+   * na sacola esperava o próximo check-in, que nunca vem.
+   *
+   * **Nenhuma dose nasce no passado.** Registrar às 15h40 um remédio de 08:00 e 20:00 cria a das
+   * 20:00 e não cria a das 08:00 — uma dose que nasce já atrasada é uma acusação falsa: diz que a
+   * casa falhou com o animal num horário em que a tarefa ainda não existia. Quem decidiu isso foi
+   * `reconciliarDia`, e é a mesma regra que vale para tudo o mais.
+   *
+   * A receita **não trava**. É a mesma decisão que `CheckInDialog` já tomou por escrito: exigir o
+   * documento no corredor produz "ok" digitado no campo, ou o animal sem antibiótico. A receita
+   * vazia é pendência visível, nunca bloqueio.
+   */
+  registrarMedicacao(entrada: {
+    hospedagemId: string
+    descricao: string
+    via: ViaDeMedicacao
+    doseTexto: string
+    horarios: string[]
+    receita: string
+    observacao: string
+  }): Promise<MedicacaoDaEstadia> {
+    return simularChamada('medicacao.registrar', () => {
+      const dataset = getDataset()
+      const agora = agoraIso()
+      const hospedagem = dataset.hospedagens.find((item) => item.id === entrada.hospedagemId)!
+
+      const medicacao: MedicacaoDaEstadia = {
+        id: novoId('med'),
+        hospedagemId: entrada.hospedagemId,
+        descricao: entrada.descricao,
+        via: entrada.via,
+        doseTexto: entrada.doseTexto,
+        horarios: entrada.horarios as MedicacaoDaEstadia['horarios'],
+        inicio: dataDe(agora),
+        fim: null,
+        receita: entrada.receita,
+        observacao: entrada.observacao,
+        suspensaEm: null,
+      }
+
+      dataset.medicacoes.push(medicacao)
+
+      /* As doses de hoje e de amanhã que ainda estão à frente do relógio. */
+      for (const dia of [dataDe(agora), addDays(dataDe(agora), 1)]) {
+        const planejadas = planejarDia({
+          hospedagemId: hospedagem.id,
+          dia,
+          utcOffset: HOTEL_UTC_OFFSET,
+          planoAlimentar: hospedagem.planoAlimentar,
+          medicacoes: dataset.medicacoes.filter((item) => item.hospedagemId === hospedagem.id),
+          passeioAutorizado: hospedagem.autorizacoes.some(
+            (item) => item.kind === 'passeio-externo' && item.concedida,
+          ),
+          entradaEm: hospedagem.entradaEm,
+          saidaPrevistaEm: hospedagem.saidaPrevistaEm,
+          rotinaPadrao: [],
+        })
+
+        const { criar } = reconciliarDia({
+          existentes: tarefasDoDia(
+            dataset.tarefas.filter((item) => item.hospedagemId === hospedagem.id),
+            dia,
+          ),
+          planejadas,
+          agora,
+        })
+
+        for (const planejada of criar) {
+          dataset.tarefas.push({
+            id: novoId('tarefa'),
+            ...planejada,
+            status: 'pendente',
+            executadaEm: null,
+            executadaPor: null,
+            turnoId: null,
+            observacao: '',
+          })
+        }
+      }
+
+      return medicacao
+    })
+  },
+
   marcarTarefa(entrada: {
     tarefaId: string
     status: TarefaStatus

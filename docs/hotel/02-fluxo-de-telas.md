@@ -17,7 +17,7 @@ O hotel nasce com o remédio já aplicado — **três blocos de menu, na ordem d
 |---|---|---|
 | **1 · Vender** | Mapa, Reservas | Tem vaga? O que está vendido? |
 | **2 · O dia** | Painel, Rotina, Hóspedes | O que acontece hoje, o que fazer agora, como cada um está |
-| **A casa** | Acomodações, Resumo | Como o hotel é montado, e como ele foi |
+| **A casa** | Acomodações, Rotina padrão, Resumo | Como o hotel é montado, o que ele faz por todos, e como ele foi |
 
 > Receber, cuidar e entregar acontecem no mesmo dia e pelas mesmas mãos — por isso os três moram
 > num bloco só. A separação em quatro momentos continua valendo onde ela ensina: no tutorial que
@@ -41,10 +41,11 @@ mesma forma obrigam a ler o título **toda vez**.
 | Reservas | Faixa de véspera + tabela densa |
 | Reserva | Documento em duas colunas: contrato e conta |
 | Painel | Linha do tempo horizontal do dia |
-| Rotina | Eixo vertical de horários, com cartões marcáveis |
+| Rotina | Pauta de rondas, uma fileira por ronda, com a hora na primeira célula |
 | Hóspedes | Grade de cartões com avatar |
 | Estadia | Dossiê: hero, checklist, diário, ficha |
 | Acomodações | Planta da casa por bloco, mais tabelas de preço |
+| Rotina padrão | Régua de relógio horizontal: uma faixa de 24 h por serviço |
 | Resumo | Gráfico de barras por dia |
 
 A pergunta que cada tela responde **não é mais uma faixa no topo**. Ela existiu como cartão fixo
@@ -240,7 +241,7 @@ Mesma disciplina do módulo clínico, e pelos mesmos motivos:
 1. Domínio e dados (tipos, regras, seed, repositórios) — sem isso, tela é maquete.
 2. Mapa, Reservas, Reserva — o eixo da venda.
 3. Painel, Rotina, Hóspedes, Estadia — o eixo da operação.
-4. Acomodações, Resumo — configuração e análise.
+4. Acomodações, Rotina padrão, Resumo — configuração e análise.
 
 ## Entregue
 
@@ -252,10 +253,11 @@ As nove telas existem e navegam sobre a camada mocada. Situação por tela:
 | `/hotel/reservas` | Completa — faixa de véspera, tabela densa ordenável, lista de espera |
 | `/hotel/reserva/[id]` | Completa — período, orçamento linha a linha, exigências com dispensa nominal, check-in |
 | `/hotel/painel` | Completa — travas com a ação escrita, linha do tempo do dia, chegadas e saídas |
-| `/hotel/rotina` | Completa — eixo de horários em três tempos, marcação em um toque |
+| `/hotel/rotina` | Completa — pauta de rondas em três tempos, marcação em um toque, fim de turno no pé |
 | `/hotel/hospedes` | Completa — cartões ordenados por quem cobra ação, com três recortes |
 | `/hotel/hospedagem/[id]` | Completa — rotina, diário, ocorrências, boletim, ficha, check-out |
 | `/hotel/acomodacoes` | Completa — cadastro, operação, remoção guardada, tarifas e temporadas |
+| `/hotel/rotina-padrao` | Completa — régua de 24 h por serviço, publicação com previsão e desfazer |
 | `/hotel/resumo` | Completa — ocupação por dia, receita por origem e serviço, perdas |
 
 Todas com capturas no [documento de apresentação](./apresentacao/).

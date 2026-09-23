@@ -153,6 +153,8 @@ export const useHotelStore = defineStore('hotel', () => {
   return {
     hotel,
     blocos,
+    /* O índice, e não só a lista: a rotina ordena as fileiras de uma ronda pela ordem da casa. */
+    blocoPorId,
     acomodacoes,
     tarifas,
     temporadas,

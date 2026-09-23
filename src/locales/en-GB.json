@@ -3710,6 +3710,7 @@
       "reservas": "The bookings could not be loaded.",
       "resumo": "The summary could not be loaded.",
       "rotina": "The shift routine could not be loaded.",
+      "rotinaPadrao": "Could not load the house routine.",
       "saida": {
         "ocorrencia-sem-contato": "A serious incident has not been reported to the owner.",
         "pertences": "Some belongings have not been checked.",
@@ -4163,6 +4164,7 @@
       "titulo": "Shift routine",
       "todas": "All tasks",
       "tudoEmDia": "Nothing pending right now. The next task appears here when its time comes.",
+      "umaAUma": "one by one",
       "vazioDescricao": "The routine starts at check-in. With no guests, there is nothing to do.",
       "vazioTitulo": "No tasks today"
     },
@@ -4219,7 +4221,12 @@
       "titulo": "Shift handover",
       "travado": "This blocks the handover",
       "sai": "handing over",
-      "entra": "taking over"
+      "entra": "taking over",
+      "fimDoTurno": "End of shift",
+      "assumeCom": "{turno} takes over · {pessoa}",
+      "ficam": "{total} task stays for the next shift | {total} tasks stay for the next shift",
+      "travaEntrega": "{total} incident without contact blocks handover | {total} incidents without contact block handover",
+      "nadaTrava": "Nothing blocks handover"
     },
     "via": {
       "oftalmica": "Eye",
@@ -4315,7 +4322,7 @@
         },
         "tempo": {
           "titulo": "Now, later, and what has passed",
-          "texto": "Tasks sit on a time rail, in three tempos. Anything overdue rises to the top, flagged, instead of hiding mid-list."
+          "texto": "Tasks group into rounds, and each round leads with its time. Anything overdue moves up to \"For now\", with the time in red — it never gets lost mid-list."
         },
         "marcar": {
           "titulo": "Ticking costs one tap",
@@ -4324,6 +4331,10 @@
         "ronda": {
           "titulo": "One round, not twenty lines",
           "texto": "Tasks of the same service at the same hour become a round — \"Meal, 20 animals\". Short rounds open by default; long ones open with a tap. A whole round can be marked at once, except medication: that one is marked animal by animal."
+        },
+        "passagem": {
+          "titulo": "The shift ends here",
+          "texto": "At the foot of the clipboard: how many tasks stay for the next shift and what blocks handover. It shows from the start of the shift, not just at handover time — an incident without contact at 10pm can no longer be fixed."
         }
       },
       "hospedes": {
@@ -4423,7 +4434,127 @@
           "titulo": "Where it comes from, and what is lost",
           "texto": "Revenue by booking source and by service, the period's incidents, and the losses. A cancellation is notice, you could resell; a no-show is a burnt room."
         }
+      },
+      "rotinaPadrao": {
+        "pergunta": {
+          "titulo": "This screen's question",
+          "texto": "What the house does for every guest, and at what times. It is the baseline each animal routine inherits."
+        },
+        "regua": {
+          "titulo": "The whole day on one ruler",
+          "texto": "Each band is a house service, with its times marked across 24 hours. From a distance you can see whether the day is well spread or everything lands in the morning."
+        },
+        "limite": {
+          "titulo": "What is not set here",
+          "texto": "Meals and medication do not appear: their times come from each guest record. The hotel does not prescribe, and no setup screen can create or change a dose."
+        },
+        "publicar": {
+          "titulo": "Publishing says what it will do first",
+          "texto": "Before saving, the screen shows how many tasks are created, removed and left untouched. Anything already done is never touched, and starting tomorrow leaves the current shift alone."
+        }
       }
+    },
+    "rotinaPadrao": {
+      "aplicar": "Apply",
+      "ativo": "The house does this",
+      "campoHorarios": "Times",
+      "campoHorariosDica": "As you would say them out loud: 8:00, 12:00, 18:00",
+      "cancelar": "Cancel",
+      "criadas": "{total} task is created | {total} tasks are created",
+      "desfazer": "Undo",
+      "desligada": "off",
+      "editar": "Edit",
+      "editarTitulo": "{servico} times",
+      "exigeAutorizacao": "only for guests whose owner allowed it",
+      "horarios": "{total} time | {total} times",
+      "naoMexe": "Meals and medication are not set here: their times come from each guest record, and the hotel does not prescribe.",
+      "noTurno": "{total} lands in the current shift | {total} land in the current shift",
+      "porDia": "{total} task per guest, per day | {total} tasks per guest, per day",
+      "preservadas": "{total} task stays untouched | {total} tasks stay untouched",
+      "preservadasDica": "Anything already done, refused or skipped is never touched.",
+      "previsao": "What this changes",
+      "publicar": "Publish changes",
+      "publicarTitulo": "Publish the routine",
+      "retiradas": "{total} task is removed | {total} tasks are removed",
+      "semHorario": "no time set",
+      "semMudanca": "Nothing changed.",
+      "subtitulo": "What the house does for every guest",
+      "titulo": "House routine",
+      "vazioDescricao": "The house has not declared what it does for every guest yet.",
+      "vazioTitulo": "No service set up",
+      "versao": "version {versao} · by {pessoa}",
+      "vigencia": "Starting when",
+      "vigenciaAgora": "Now",
+      "vigenciaAmanha": "Tomorrow",
+      "vigenciaDica": "Starting tomorrow leaves the current shift untouched."
+    },
+    "gerenciar": {
+      "titulo": "Manage routine",
+      "padrao": "House routine",
+      "padraoDica": "the times that apply to every guest",
+      "medicacao": "Record medication",
+      "medicacaoDica": "medication that arrived with a guest",
+      "propor": "Propose a routine",
+      "proporDica": "a suggestion read from the record, to review before approving"
+    },
+    "medicacaoNova": {
+      "titulo": "Record medication",
+      "hospede": "Guest",
+      "escolherHospede": "Choose the guest",
+      "descricao": "Medication",
+      "descricaoDica": "Name and strength, as printed on the box",
+      "via": "Route",
+      "dose": "Dose",
+      "doseDica": "1 tablet, 20 drops, 2 ml",
+      "horarios": "Times",
+      "horariosDica": "As you would say them out loud: 8:00, 20:00",
+      "receita": "Prescription",
+      "receitaDica": "Vet licence and number. Without it the medicine is given all the same, and the record stays pending.",
+      "observacao": "Note",
+      "soDaquiParaFrente": "Doses start from now. Today's dose that has already passed is not created: a dose born late is a false record of a missed dose.",
+      "faltaHorario": "With no time set, the medicine becomes no task at all.",
+      "registrar": "Record",
+      "cancelar": "Cancel",
+      "registrada": "Medication recorded. The doses ahead are already on the clipboard."
+    },
+    "proposta": {
+      "titulo": "Routine proposal",
+      "escolherHospede": "Choose the guest",
+      "lidaEm": "read from the record at {hora}",
+      "motorLocal": "local simulation",
+      "nadaGravado": "nothing was saved",
+      "aviso": "In this version there is no model and no network: the proposal comes from a deterministic simulation over the house's own data. What is real is the flow of reviewing and approving.",
+      "casaJaFaz": "The house already does",
+      "daFicha": "From the record",
+      "proponhoMudar": "I propose changing",
+      "transcrita": "transcribed",
+      "naoEdita": "The house does not prescribe: changing a dose or a time needs a prescription.",
+      "naoProponho": "What I do not propose",
+      "recusaMedicacao": "Medication — I do not propose medicine or dose. The hotel does not prescribe.",
+      "recusaRefeicao": "Meals — changing a meal time is agreed with the owner.",
+      "porqueInspecao": "arrival check: \"{valor}\"",
+      "porqueAdaptacao": "the guest was received as {valor}",
+      "porqueEstadiaLonga": "a {valor}-night stay: a departure weight with nothing in between does not say when the animal lost it",
+      "porqueMedicacao": "from the recorded prescription: {valor}",
+      "porquePlano": "from the meal times on the record",
+      "porqueCasa": "from the house routine",
+      "descartadas": "{total} suggestion discarded in the check | {total} suggestions discarded in the check",
+      "semMudancas": "Nothing to propose for this guest: the house routine already covers it.",
+      "aprovar": "Approve {total} change | Approve {total} changes",
+      "aprovarNenhuma": "Approve",
+      "descartar": "Discard",
+      "aprovada": "Adjustments saved to the guest record.",
+      "gerando": "Reading the record…"
+    },
+    "planoDaEstadia": {
+      "titulo": "Stay plan",
+      "semAjustes": "This guest follows the house routine.",
+      "suspenso": "suspended",
+      "desde": "since {data}",
+      "encerrar": "End",
+      "propor": "Propose adjustments",
+      "origemProposta": "from a reviewed proposal",
+      "origemPessoa": "recorded by hand"
     }
   },
   "cronometro": {

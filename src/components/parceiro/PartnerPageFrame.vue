@@ -49,6 +49,25 @@ const props = withDefaults(
      * todas as telas do portal de uma vez não é assunto de quem só precisava de tutorial numa.
      */
     tour?: boolean
+    /**
+     * Uma medida de leitura para a página inteira, por exemplo `60rem`. Vazio: a página ocupa a
+     * largura toda, que é o comportamento de sempre.
+     *
+     * Existe porque **constranger só o conteúdo não funciona**. A rotina do turno é uma lista de
+     * uma coluna só, e numa tela larga ela não tem o que fazer com 1500 px: as fileiras esticam,
+     * e o botão principal afasta-se do texto que ele marca. Mas quando só o corpo ganhava um
+     * teto, o cabeçalho continuava indo até a borda — e uma página cujo título vai até o fim
+     * enquanto o conteúdo para no meio não lê como coluna, lê como defeito de carregamento.
+     *
+     * Por isso a medida vale para **cabeçalho, ações, estados e corpo juntos**, e centraliza: o
+     * vazio deixa de ser uma sobra à direita e vira margem dos dois lados, que é a forma que
+     * anuncia "isto acaba aqui de propósito". As ações da tela passam a encostar na mesma borda
+     * que os cartões do conteúdo.
+     *
+     * É opcional e nenhuma tela a tem por padrão: as outras do portal são grades e tabelas, que
+     * usam bem a largura e não devem encolher por causa desta.
+     */
+    measure?: string
   }>(),
   {
     subtitle: '',
@@ -62,6 +81,7 @@ const props = withDefaults(
     emptyTitle: '',
     emptyDescription: '',
     emptyActionLabel: '',
+    measure: '',
   },
 )
 
@@ -159,7 +179,11 @@ const pageStyle = computed(() => {
 </script>
 
 <template>
-  <section class="partner-page" :style="pageStyle">
+  <section
+    class="partner-page"
+    :class="{ 'partner-page--medida': !!measure }"
+    :style="[pageStyle, measure ? { '--partner-measure': measure } : {}]"
+  >
     <header class="partner-page__header">
       <div>
         <p v-if="subtitle" class="partner-page__subtitle">{{ subtitle }}</p>
@@ -424,6 +448,28 @@ const pageStyle = computed(() => {
 .partner-page__body {
   display: grid;
   gap: 1rem;
+}
+
+/*
+ * A medida de leitura, quando a tela pede uma.
+ *
+ * Vale para as quatro faixas da página — cabeçalho, corpo e os estados de carregamento/vazio/erro
+ * — porque constranger uma só produz o defeito que isto existe para evitar: título e ações indo
+ * até a borda enquanto o conteúdo para no meio, com um vazio à direita que lê como bug.
+ *
+ * `margin-inline: auto` e não `0`: centralizado, a sobra vira margem simétrica, que é uma forma
+ * conhecida de dizer "a coluna acaba aqui". Encostada à esquerda, a mesma sobra vira um buraco.
+ */
+.partner-page--medida .partner-page__header,
+.partner-page--medida .partner-page__body,
+.partner-page--medida .partner-page__state {
+  max-inline-size: var(--partner-measure);
+  margin-inline: auto;
+}
+
+/* A margem de baixo do cabeçalho é dele, e `margin-inline` não pode apagá-la. */
+.partner-page--medida .partner-page__header {
+  margin-block-end: 1.35rem;
 }
 
 .partner-page__state {

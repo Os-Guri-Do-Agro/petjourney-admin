@@ -7,6 +7,14 @@
 
 export { catalogoRepository, type CatalogosDoHotel } from './catalogo-repository'
 export {
+  rotinaPadraoRepository,
+  propostaRepository,
+  amanhaNaCasa,
+  ajustesDoHospede,
+  hospedesParaRotina,
+  type HospedeParaRotina,
+} from './rotina-repository'
+export {
   reservaRepository,
   AdmissaoBloqueadaError,
   VagaIndisponivelError,
