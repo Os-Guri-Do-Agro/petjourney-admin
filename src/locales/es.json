@@ -2025,10 +2025,11 @@
       }
     },
     "tabela": {
+      "abrir": "Ver detalles",
+      "acoes": "Acciones",
       "carregando": "Cargando…",
-      "vazio": "Nada por aquí",
       "tentarDeNovo": "Reintentar",
-      "acoes": "Acciones"
+      "vazio": "Nada por aquí"
     },
     "erros": {
       "catalogos": "No se pudieron cargar los datos de la clínica.",
@@ -4135,6 +4136,19 @@
       "whatsapp": "WhatsApp"
     },
     "painel": {
+      "bemEstar": {
+        "titulo": "Bienestar en la casa",
+        "adaptacao": "Adaptación",
+        "medicacao": "Medicación de hoy",
+        "cuidados": "Cuidados pendientes",
+        "todosTranquilos": "{total} huésped, tranquilo | {total} huéspedes, todos tranquilos",
+        "demaisTranquilos": "y {total} más tranquilo | y {total} más tranquilos",
+        "dosesPendentes": "{total} pendiente | {total} pendientes",
+        "estado": {
+          "em-adaptacao": "en adaptación | en adaptación",
+          "estressado": "estresado | estresados"
+        }
+      },
       "chegamHoje": "Llegan hoy ({total})",
       "faltaPesar": "Falta pesar",
       "irParaRotina": "Abrir rutina",

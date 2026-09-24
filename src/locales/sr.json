@@ -2025,10 +2025,11 @@
       }
     },
     "tabela": {
+      "abrir": "Prikaži detalje",
+      "acoes": "Radnje",
       "carregando": "Učitavanje…",
-      "vazio": "Ovde nema ničega",
       "tentarDeNovo": "Pokušajte ponovo",
-      "acoes": "Radnje"
+      "vazio": "Ovde nema ničega"
     },
     "erros": {
       "catalogos": "Nismo uspeli da učitamo podatke klinike.",
@@ -4135,6 +4136,19 @@
       "whatsapp": "WhatsApp"
     },
     "painel": {
+      "bemEstar": {
+        "titulo": "Dobrobit u kući",
+        "adaptacao": "Prilagođavanje",
+        "medicacao": "Terapija za danas",
+        "cuidados": "Otvorena nega",
+        "todosTranquilos": "{total} gost, miran | {total} gosta, svi mirni | {total} gostiju, svi mirni",
+        "demaisTranquilos": "i još {total} miran | i još {total} mirna | i još {total} mirnih",
+        "dosesPendentes": "{total} na čekanju | {total} na čekanju | {total} na čekanju",
+        "estado": {
+          "em-adaptacao": "u prilagođavanju | u prilagođavanju | u prilagođavanju",
+          "estressado": "pod stresom | pod stresom | pod stresom"
+        }
+      },
       "chegamHoje": "Dolaze danas ({total})",
       "faltaPesar": "Nije izmeren",
       "irParaRotina": "Otvori rutinu",

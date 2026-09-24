@@ -75,7 +75,7 @@ if (!navegador) {
  */
 const TELAS = [
   { arquivo: '01-mapa', rota: '/hotel/mapa', altura: 1600 },
-  { arquivo: '02-painel', rota: '/hotel/painel', altura: 800 },
+  { arquivo: '02-painel', rota: '/hotel/painel', altura: 1010 },
   /*
    * 1300: as duas colunas de tarefas fecham juntas em 1116, 1295 e 1358 — alturas entre esses
    * valores cortam uma fileira ao meio, que num PDF lê como erro de diagramação. Esta altura
@@ -88,7 +88,7 @@ const TELAS = [
    * meio.
    */
   { arquivo: '04-hospedes', rota: '/hotel/hospedes', altura: 1120 },
-  { arquivo: '05-reservas', rota: '/hotel/reservas', altura: 1400 },
+  { arquivo: '05-reservas', rota: '/hotel/reservas', altura: 1010 },
   { arquivo: '06-reserva', rota: '/hotel/reserva/res-bidu', altura: 980 },
   { arquivo: '07-estadia', rota: '/hotel/hospedagem/hosp-tofu', altura: 1670 },
     /*

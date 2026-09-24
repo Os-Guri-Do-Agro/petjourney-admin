@@ -458,10 +458,33 @@ function inicioDeMes(data: ISODate, indice: number): string {
 /*
  * Apagar, e não esconder: quando há uma procura ativa, as linhas que não servem continuam
  * legíveis — some o peso, não a informação. Esconder faria a recepção achar que a casa encolheu.
+ *
+ * ## Por que dessaturar, e não baixar a opacidade
+ *
+ * A versão anterior usava `opacity: 0.38`, e o resultado contrariava o próprio parágrafo acima: a
+ * opacidade atravessa tudo, inclusive o nome do hóspede dentro da barra, e a 0.38 o nome sumia no
+ * fundo. Quem procurava "tem baia grande livre?" perdia de vista **quem estava nas outras baias**
+ * — que é exatamente a informação que se usa para negociar uma troca.
+ *
+ * Dessaturar separa as duas coisas. A **cor** é o que diz "esta linha entrou na sua busca", então
+ * é a cor que precisa sumir; a **luminância** é o que sustenta a leitura do texto, e ela fica.
+ * Perto do cinza, a linha deixa de competir por atenção sem deixar de ser legível.
  */
 .linha--apagada .acom,
 .linha--apagada .faixa {
-  opacity: 0.38;
+  filter: saturate(0.18) opacity(0.78);
+}
+
+/*
+ * Apontar devolve a linha inteira. Procurar acomodação é justamente o momento em que se precisa
+ * ler quem já está nas que não servem, e obrigar a limpar o filtro para isso é obrigar a perder o
+ * resultado da busca para consultar o que está do lado dele.
+ */
+.linha--apagada:hover .acom,
+.linha--apagada:hover .faixa,
+.linha--apagada:focus-within .acom,
+.linha--apagada:focus-within .faixa {
+  filter: none;
 }
 
 .linha--serve .acom {
@@ -528,6 +551,20 @@ function inicioDeMes(data: ISODate, indice: number): string {
   font-weight: 700;
   text-align: start;
   white-space: nowrap;
+  /*
+   * O anel já nasce aqui, transparente. Declará-lo só no `:hover` faria a largura ir de zero a dois
+   * — a cor não teria de onde transicionar, e o realce apareceria de estalo. Reservado desde o
+   * início, o hover troca apenas a cor, que é o que `transition` sabe animar.
+   */
+  outline: 2px solid transparent;
+  outline-offset: 1px;
+  transition: outline-color 150ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra {
+    transition: none;
+  }
 }
 
 .barra__nome {
@@ -535,10 +572,22 @@ function inicioDeMes(data: ISODate, indice: number): string {
   text-overflow: ellipsis;
 }
 
+/*
+ * O realce é um anel, e não um clareamento.
+ *
+ * O hover anterior era `brightness(0.94)`, que funciona num fundo cheio e desaparece nos outros
+ * dois: a barra `--pendente` é quase branca com contorno tracejado, e escurecê-la 6% não produz
+ * diferença que alguém perceba. Um anel lê igual nas três variantes, porque não depende da cor
+ * que a barra já tem.
+ *
+ * `outline`, e não `box-shadow`, porque `--atencao` usa `box-shadow: inset` para o contorno âmbar:
+ * declarar sombra aqui apagaria o aviso justo na barra em que ele mais importa. E `z-index` sobe
+ * porque as barras se encostam — sem isso o anel fica por baixo da vizinha.
+ */
 .barra:hover,
 .barra:focus-visible {
-  filter: brightness(0.94);
-  outline: none;
+  z-index: 2;
+  outline-color: var(--clinic-accent-strong);
 }
 
 /* Quem está dentro da casa: cor cheia. Quem vem chegando: mais leve. Quem não pagou: contorno. */

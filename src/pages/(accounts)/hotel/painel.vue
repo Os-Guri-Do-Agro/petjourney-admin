@@ -24,6 +24,7 @@ import HotelTour from '@/features/hotel/components/base/HotelTour.vue'
 import type { PassoDoTour } from '@/features/hotel/components/base/tour-types'
 import HotelSelo from '@/features/hotel/components/base/HotelSelo.vue'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
+import BemEstarDaCasa from '@/features/hotel/components/painel/BemEstarDaCasa.vue'
 import LinhaDoDia from '@/features/hotel/components/painel/LinhaDoDia.vue'
 import type { MarcaDoDia } from '@/features/hotel/components/painel/dia-types'
 import PassagemDialog from '@/features/hotel/components/rotina/PassagemDialog.vue'
@@ -404,6 +405,18 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           </ul>
         </section>
       </div>
+
+      <!--
+        Como os bichos estão. Vem depois do movimento do dia de propósito: chegada e saída têm
+        hora marcada e por isso mandam na manhã, mas o animal estressado não tem hora — ele fica
+        até alguém olhar. Abaixo da dobra do movimento, acima do fechamento do turno.
+      -->
+      <BemEstarDaCasa
+        :hospedes="hospedagem.hospedes"
+        :prancheta="hospedagem.prancheta"
+        :agora="hospedagem.agora"
+        @abrir="(rota) => router.push(rota)"
+      />
 
       <section v-if="turno" class="turno">
         <div class="turno__quem">

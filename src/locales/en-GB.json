@@ -2025,10 +2025,11 @@
       }
     },
     "tabela": {
+      "abrir": "View details",
+      "acoes": "Actions",
       "carregando": "Loading…",
-      "vazio": "Nothing here",
       "tentarDeNovo": "Try again",
-      "acoes": "Actions"
+      "vazio": "Nothing here"
     },
     "erros": {
       "catalogos": "We couldn't load the clinic data.",
@@ -4135,6 +4136,19 @@
       "whatsapp": "WhatsApp"
     },
     "painel": {
+      "bemEstar": {
+        "titulo": "Welfare in the house",
+        "adaptacao": "Settling in",
+        "medicacao": "Today's medication",
+        "cuidados": "Open care",
+        "todosTranquilos": "{total} guest, settled | {total} guests, all settled",
+        "demaisTranquilos": "and {total} more settled | and {total} more settled",
+        "dosesPendentes": "{total} due | {total} due",
+        "estado": {
+          "em-adaptacao": "settling in | settling in",
+          "estressado": "stressed | stressed"
+        }
+      },
       "chegamHoje": "Arriving today ({total})",
       "faltaPesar": "Not weighed yet",
       "irParaRotina": "Open routine",

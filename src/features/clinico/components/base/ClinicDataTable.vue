@@ -11,7 +11,7 @@
  * `Enter` abre, `Home`/`End` vão às pontas.
  */
 import Button from 'primevue/button'
-import { computed, ref } from 'vue'
+import { computed, getCurrentInstance, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -71,8 +71,8 @@ const corpo = ref<HTMLElement | null>(null)
 
 const ordenacao = ref<OrdenacaoTabela>({ coluna: null, direcao: 'asc' })
 
-const colunaOrdenada = computed(() =>
-  props.colunas.find((coluna) => coluna.id === ordenacao.value.coluna) ?? null,
+const colunaOrdenada = computed(
+  () => props.colunas.find((coluna) => coluna.id === ordenacao.value.coluna) ?? null,
 )
 
 /**
@@ -126,6 +126,30 @@ function ariaSort(coluna: ColunaTabela<T>) {
 
 const temAcoes = computed(() => props.acoes.length > 0 && !props.somenteLeitura)
 
+/**
+ * A seta de abrir, e por que ela precisa existir.
+ *
+ * A linha sempre abriu — `@dblclick` no mouse, `Enter` no teclado. Só que duplo clique é convenção
+ * de grade de aplicativo desktop: na web ninguém tenta, e o resultado é uma lista que parece
+ * inerte. Quem olhou esta tela concluiu que não havia interação nenhuma, e estava certo do ponto
+ * de vista de quem usa: uma ação que não se anuncia não existe.
+ *
+ * A seta é a única coisa que muda. O clique simples continua selecionando, o duplo continua
+ * abrindo, e o teclado continua igual — trocar essas regras mexeria no hábito de oito telas, e o
+ * problema aqui nunca foi o que o clique faz, foi ninguém saber que ele faz.
+ *
+ * ## Por que detectar o ouvinte em vez de uma prop
+ *
+ * Três das nove telas que usam esta tabela (`faltas`, `fila`, e a página de design) não escutam
+ * `ativar`: nelas a linha não leva a lugar nenhum. Uma prop de opt-in obrigaria a editar as seis
+ * restantes uma a uma, e quem criasse a décima tela esqueceria — o padrão voltaria a ser a seta
+ * ausente. Lendo o ouvinte, quem passa `@ativar` ganha a seta no mesmo gesto em que declara que a
+ * linha abre, e quem não passa não ganha seta morta.
+ */
+const podeAbrir = computed(
+  () => Boolean(getCurrentInstance()?.vnode.props?.onAtivar) && !props.somenteLeitura,
+)
+
 function acoesDaLinha(linha: T) {
   return props.acoes.filter((acao) => acao.visivel?.(linha) ?? true)
 }
@@ -162,10 +186,18 @@ function aoSelecionar(linha: T) {
  */
 const larguraDasAcoes = computed(() => `${Math.max(props.acoes.length, 1) * 2.2 + 0.6}rem`)
 
+/**
+ * A trilha da seta é fixa e estreita: ela não é uma coluna de dado, é a borda da linha ganhando
+ * uma alça. Reservada sempre que a linha abre, mesmo com a seta invisível, para que aparecer ao
+ * passar o mouse não empurre o conteúdo da linha um centímetro para a esquerda.
+ */
+const LARGURA_DA_SETA = '1.75rem'
+
 const template = computed(() =>
   [
     ...props.colunas.map((coluna) => coluna.largura ?? 'minmax(0, 1fr)'),
     ...(temAcoes.value ? [larguraDasAcoes.value] : []),
+    ...(podeAbrir.value ? [LARGURA_DA_SETA] : []),
   ].join(' '),
 )
 
@@ -183,12 +215,11 @@ const templateEstreito = computed(() =>
       .filter((coluna) => !coluna.ocultarEmTelaEstreita)
       .map((coluna) => coluna.largura ?? 'minmax(0, 1fr)'),
     ...(temAcoes.value ? [larguraDasAcoes.value] : []),
+    ...(podeAbrir.value ? [LARGURA_DA_SETA] : []),
   ].join(' '),
 )
 
-const vazia = computed(
-  () => !props.carregando && !props.erro && props.linhas.length === 0,
-)
+const vazia = computed(() => !props.carregando && !props.erro && props.linhas.length === 0)
 
 function focarLinha(indice: number) {
   const alvo = corpo.value?.querySelectorAll<HTMLElement>('[data-linha]')?.[indice]
@@ -291,6 +322,10 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
           <div v-if="temAcoes" class="tabela__th tabela__celula--fim" role="columnheader">
             <span class="tabela__oculto-visual">{{ t('clinico.tabela.acoes') }}</span>
           </div>
+
+          <div v-if="podeAbrir" class="tabela__th tabela__celula--fim" role="columnheader">
+            <span class="tabela__oculto-visual">{{ t('clinico.tabela.abrir') }}</span>
+          </div>
         </div>
 
         <!--
@@ -386,6 +421,23 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
                 :aria-label="acao.rotulo"
                 @click="dispararAcao($event, acao, linha)"
               />
+            </div>
+
+            <!--
+              Botão de verdade, e não um ícone decorativo: quem navega por teclado chega nele com
+              Tab e o aciona com Enter, e o leitor de tela anuncia "Abrir <linha>" em vez de uma
+              seta muda. O `stopPropagation` impede que abrir também selecione por baixo.
+            -->
+            <div v-if="podeAbrir" class="tabela__td tabela__abrir" role="cell">
+              <button
+                type="button"
+                class="tabela__seta-abrir"
+                :aria-label="t('clinico.tabela.abrir')"
+                :title="t('clinico.tabela.abrir')"
+                @click.stop="emit('ativar', linha)"
+              >
+                <i class="pi pi-chevron-right" aria-hidden="true" />
+              </button>
             </div>
           </div>
         </div>
@@ -558,6 +610,63 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
   display: flex;
   justify-content: flex-end;
   gap: 0.15rem;
+}
+
+/*
+ * ## Por que a seta fica visível o tempo todo, em vez de aparecer ao passar o mouse
+ *
+ * Revelar no `:hover` resolveria o "qual linha estou apontando" e deixaria intacto o problema que
+ * originou isto: a lista **parece inerte à primeira vista**. Quem abre a tela e varre os olhos não
+ * passa o mouse em nada; decide em um segundo se ali há algo clicável. Uma coluna de setas fracas
+ * responde essa pergunta antes de qualquer gesto — é o mesmo motivo pelo qual a lista do celular
+ * carrega o seu chevron sempre aceso.
+ *
+ * Fraca é o que a mantém honesta: ela informa que a linha leva a algum lugar sem competir com o
+ * dado, que é o que a pessoa veio ler. No `:hover` e no foco ela ganha cor e contraste, e aí sim
+ * responde "esta aqui".
+ */
+.tabela__abrir {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tabela__seta-abrir {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--clinic-radius-chip);
+  background: none;
+  color: var(--clinic-faint);
+  cursor: pointer;
+  font-size: 0.7rem;
+  place-items: center;
+  transition:
+    color 150ms ease-out,
+    background 150ms ease-out;
+}
+
+.tabela__linha:hover .tabela__seta-abrir,
+.tabela__linha:focus-within .tabela__seta-abrir {
+  color: var(--clinic-accent-strong);
+}
+
+.tabela__seta-abrir:hover,
+.tabela__seta-abrir:focus-visible {
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+}
+
+/* Linha só de leitura não leva a lugar nenhum: a seta seria uma promessa falsa. */
+.tabela__linha--leitura .tabela__seta-abrir {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabela__seta-abrir {
+    transition: none;
+  }
 }
 
 /*

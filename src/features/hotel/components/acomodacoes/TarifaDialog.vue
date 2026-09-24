@@ -213,7 +213,12 @@ function salvar() {
     </form>
 
     <template #footer>
-      <Button :label="t('hotel.comum.cancelar')" severity="secondary" text @click="emit('fechar')" />
+      <Button
+        :label="t('hotel.comum.cancelar')"
+        severity="secondary"
+        text
+        @click="emit('fechar')"
+      />
       <Button
         :label="t('hotel.comum.salvar')"
         icon="pi pi-check"
@@ -269,9 +274,34 @@ function salvar() {
   text-transform: uppercase;
 }
 
+/*
+ * ## Por que `min-width: 0`, e por que o campo precisa de largura explícita
+ *
+ * Item de grid nasce com `min-width: auto`, o que significa "não encolha abaixo do meu conteúdo".
+ * O `InputNumber` do PrimeVue carrega um `<input>` com largura intrínseca de cerca de 20 caracteres
+ * — 173px medidos aqui —, e a coluna deste fieldset tem 154px. O item se recusava a encolher, o
+ * campo vazava para fora da borda, e o fieldset passava a ter 510px de conteúdo em 500px de caixa.
+ *
+ * `min-width: 0` devolve ao item o direito de encolher; `width: 100%` no campo faz ele ocupar a
+ * célula em vez da largura que o navegador inventa para um `<input>` sem instrução. Um sem o outro
+ * não resolve: só o `min-width` deixaria o campo transbordar do item, e só a largura não impediria
+ * a coluna de ser empurrada.
+ */
 .porte {
   display: grid;
+  min-width: 0;
   gap: var(--clinic-space-2);
+}
+
+/*
+ * `:deep` porque a marcação é do PrimeVue: o componente rende `span.p-inputnumber > input`, e o
+ * estilo escopado não alcança nenhum dos dois sozinho. Os dois precisam da regra — o `span` é quem
+ * ocupa a célula, o `input` é quem tem a largura intrínseca a anular.
+ */
+.porte :deep(.p-inputnumber),
+.porte :deep(.p-inputnumber input) {
+  width: 100%;
+  min-width: 0;
 }
 
 .aviso {
