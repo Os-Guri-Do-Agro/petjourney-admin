@@ -41,6 +41,7 @@ import {
   servicosFixture,
   tarifasFixture,
   temporadasFixture,
+  tiposDeAcomodacaoFixture,
   tutorsFixture,
   type TemporadaSazonal,
 } from './fixtures'
@@ -70,6 +71,7 @@ import type {
   TarefaDeRotina,
   Tarifa,
   Temporada,
+  TipoDeAcomodacao,
   Turno,
 } from './types'
 
@@ -96,6 +98,8 @@ export type SeedResult = {
   ancora: ISODate
   hotel: Hotel
   blocos: Bloco[]
+  /** Os tipos de acomodação que a casa cadastrou. Ver `TipoDeAcomodacao`. */
+  tiposDeAcomodacao: TipoDeAcomodacao[]
   acomodacoes: Acomodacao[]
   tarifas: Tarifa[]
   temporadas: Temporada[]
@@ -1261,7 +1265,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
       tutorId: 'tutor-daniel',
       entradaDesejada: addDays(ancora, 3),
       saidaDesejada: addDays(ancora, 10),
-      kindsAceitos: ['baia', 'suite'],
+      tiposAceitos: ['tipo-baia', 'tipo-suite'],
       status: 'aguardando',
       criadoEm: iso(addDays(ancora, -4), '11:00'),
       ofertadaEm: null,
@@ -1274,7 +1278,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
       tutorId: 'tutor-heitor',
       entradaDesejada: addDays(ancora, 10),
       saidaDesejada: addDays(ancora, 17),
-      kindsAceitos: ['gatil'],
+      tiposAceitos: ['tipo-gatil'],
       status: 'aguardando',
       criadoEm: iso(addDays(ancora, -2), '16:30'),
       ofertadaEm: null,
@@ -1288,6 +1292,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     ancora,
     hotel: hotelFixture,
     blocos: blocosFixture,
+    tiposDeAcomodacao: tiposDeAcomodacaoFixture.map((item) => ({ ...item })),
     acomodacoes,
     tarifas: tarifasFixture,
     temporadas,

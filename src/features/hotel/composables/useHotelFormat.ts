@@ -18,7 +18,6 @@ import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
 import { HOTEL_UTC_OFFSET } from '../data/fixtures'
 import type {
   AcomodacaoInativaMotivo,
-  AcomodacaoKind,
   Adaptacao,
   AutorizacaoKind,
   ExigenciaKind,
@@ -260,7 +259,6 @@ export function useHotelFormat() {
     peso,
     variacao,
 
-    acomodacaoKind: porKind<AcomodacaoKind>('acomodacaoKind'),
     motivoInativa: porKind<AcomodacaoInativaMotivo>('motivoInativa'),
     recurso: porKind<RecursoDaAcomodacao>('recurso'),
     porte: porKind<PetPorte>('porte'),

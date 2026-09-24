@@ -43,25 +43,57 @@ export type { ClockTime, ISODate, ISODateTime, PetPorte, PetSpecies }
  * também o que separa o gatil do canil no mapa — e um gato que ouve latido a noite inteira não
  * come.
  */
-export type BlocoKind = 'canil' | 'gatil' | 'externo' | 'isolamento'
-
 export type Bloco = {
   id: string
   nome: string
-  kind: BlocoKind
+  /**
+   * O desenho, escolhido pela casa.
+   *
+   * Era um `kind` fechado — canil, gatil, área externa, isolamento —, que é a mesma imposição de
+   * vocabulário que o tipo de acomodação tinha: "canil" e "gatil" pressupõem que a casa hospeda
+   * cão e gato. O nome do corredor sempre foi dela; agora o resto também é.
+   */
+  icone: IconeDeAcomodacao
   /** Ordem de exibição no mapa. A casa tem uma ordem física, e a tela a respeita. */
   ordem: number
 }
 
 /**
- * Tipo de acomodação.
+ * O desenho de um tipo de acomodação.
  *
- * Não é decoração: decide **quem pode ficar onde**. Gato em baia de cão não é uma preferência
- * estética, é um hóspede que não come; coletiva não recebe quem tem histórico de briga; e
- * isolamento existe para a chegada com suspeita — o hóspede que tosse no dia da entrada não pode
- * dividir ar com os outros trinta antes de alguém olhar.
+ * Esta lista é fechada e **é a única coisa nossa** que sobra no tipo: é vocabulário visual, não
+ * vocabulário de negócio. A casa escolhe entre estes desenhos; o nome quem dá é ela.
  */
-export type AcomodacaoKind = 'suite' | 'baia' | 'gatil' | 'coletiva' | 'isolamento'
+export type IconeDeAcomodacao =
+  | 'casa'
+  | 'cama'
+  | 'gato'
+  | 'cao'
+  | 'grupo'
+  | 'escudo'
+  | 'arvore'
+  | 'passaro'
+  | 'coelho'
+
+/**
+ * Tipo de acomodação — **cadastrado pela casa**, não herdado de nós.
+ *
+ * Era uma união fechada: `suite | baia | gatil | coletiva | isolamento`. Cinco palavras nossas,
+ * moldadas em cão e gato, impostas a quem abre a tela. Um hotel que chama as unidades de "chalé"
+ * lia "Baia" e não se reconhecia; um que hospeda aves não tinha vocabulário nenhum — "gatil" e
+ * "canil" não são nomes neutros, são a nossa suposição sobre que animais existem.
+ *
+ * O tipo continua decidindo **quem pode ficar onde**, mas por meio das espécies e do porte da
+ * acomodação, que são dado. A regra de vaga nunca ramificou pelo nome do tipo — ela só o usa para
+ * filtrar —, e é isso que torna a abertura segura: nenhuma decisão de negócio dependia da palavra.
+ */
+export type TipoDeAcomodacao = {
+  id: string
+  nome: string
+  icone: IconeDeAcomodacao
+  /** Ordem de exibição. A casa lista os tipos na ordem em que pensa neles. */
+  ordem: number
+}
 
 /**
  * O que a acomodação oferece.
@@ -102,7 +134,8 @@ export type Acomodacao = {
   id: string
   nome: string
   blocoId: string
-  kind: AcomodacaoKind
+  /** Aponta para um `TipoDeAcomodacao` cadastrado pela casa. */
+  tipoId: string
   /**
    * Quantos animais **da mesma casa** cabem.
    *
@@ -491,8 +524,8 @@ export type EntradaDeEspera = {
   tutorId: string
   entradaDesejada: ISODate
   saidaDesejada: ISODate
-  /** Tipo aceito. Vazio significa qualquer um que caiba no porte. */
-  kindsAceitos: AcomodacaoKind[]
+  /** Tipos aceitos, por id. Vazio significa qualquer um que caiba no porte. */
+  tiposAceitos: string[]
   status: EsperaStatus
   criadoEm: ISODateTime
   /** Quando a vaga foi oferecida, e até quando a oferta vale. */

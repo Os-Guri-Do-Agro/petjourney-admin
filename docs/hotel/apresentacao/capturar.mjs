@@ -91,10 +91,17 @@ const TELAS = [
   { arquivo: '05-reservas', rota: '/hotel/reservas', altura: 1400 },
   { arquivo: '06-reserva', rota: '/hotel/reserva/res-bidu', altura: 980 },
   { arquivo: '07-estadia', rota: '/hotel/hospedagem/hosp-tofu', altura: 1670 },
-  { arquivo: '08-acomodacoes', rota: '/hotel/acomodacoes', altura: 1340 },
+    /*
+   * 2250: o cadastro passou a ter três seções com cabeçalho próprio e uma régua do ano por
+   * temporada. Os 1340 de antes cortavam a tabela de preço ao meio.
+   */
+  { arquivo: '08-acomodacoes', rota: '/hotel/acomodacoes', altura: 1500 },
   { arquivo: '09-resumo', rota: '/hotel/resumo', altura: 920 },
-  /* A régua de 24 h tem altura previsível: quatro faixas e o rodapé da parede. */
-  { arquivo: '10-rotina-padrao', rota: '/hotel/rotina-padrao', altura: 620 },
+  /*
+   * 700: os quatro serviços viraram cartões em duas colunas, com os horários escritos e a régua
+   * de 24 h como rodapé de cada um. Os 620 de antes eram da lista de faixas horizontais.
+   */
+  { arquivo: '10-rotina-padrao', rota: '/hotel/rotina-padrao', altura: 700 },
 ]
 
 const SEMEADOR = `<!doctype html>

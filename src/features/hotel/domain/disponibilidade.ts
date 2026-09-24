@@ -12,7 +12,6 @@
 
 import type {
   Acomodacao,
-  AcomodacaoKind,
   ISODateTime,
   PetPorte,
   PetSpecies,
@@ -215,11 +214,11 @@ export function mapaDoPeriodo(entrada: {
   porte?: PetPorte | null
   especie?: PetSpecies | null
   ocupantes?: number
-  kinds?: AcomodacaoKind[]
+  tipos?: string[]
   ignorarReservaId?: string
 }): VagaNoPeriodo[] {
-  const filtradas = entrada.kinds?.length
-    ? entrada.acomodacoes.filter((item) => entrada.kinds?.includes(item.kind))
+  const filtradas = entrada.tipos?.length
+    ? entrada.acomodacoes.filter((item) => entrada.tipos?.includes(item.tipoId))
     : entrada.acomodacoes
 
   return filtradas.map((acomodacao) =>

@@ -45,6 +45,7 @@ import {
   PhHouseLine,
   PhMapPin,
   PhMoon,
+  PhPawPrint,
   PhPhoneCall,
   PhScales,
 } from '@phosphor-icons/vue'
@@ -172,14 +173,30 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
   <li class="cartao" :class="`cartao--${estado}`">
     <!-- 1 · Quem. O nome é o único focável, e o `::after` dele cobre o cartão inteiro. -->
     <header class="quem">
-      <PetAvatar
-        class="quem__rosto"
-        :nome="hospede.petNome"
-        :iniciais="hospede.petIniciais"
-        :especie="hospede.petEspecie"
-        :foto-url="hospede.petFotoUrl"
-        tamanho="lg"
-      />
+      <!--
+        Dois rostos quando são dois animais. A estadia é uma só — eles dividem acomodação e rotina
+        —, então é um cartão só; mas esconder o segundo fazia a casa ter seis hóspedes e a tela
+        mostrar cinco.
+      -->
+      <span class="quem__rostos" :class="{ 'quem__rostos--dupla': hospede.acompanhante }">
+        <PetAvatar
+          class="quem__rosto"
+          :nome="hospede.petNome"
+          :iniciais="hospede.petIniciais"
+          :especie="hospede.petEspecie"
+          :foto-url="hospede.petFotoUrl"
+          tamanho="lg"
+        />
+        <PetAvatar
+          v-if="hospede.acompanhante"
+          class="quem__rosto quem__rosto--segundo"
+          :nome="hospede.acompanhante.nome"
+          :iniciais="hospede.acompanhante.iniciais"
+          :especie="hospede.acompanhante.especie"
+          :foto-url="hospede.acompanhante.fotoUrl"
+          tamanho="sm"
+        />
+      </span>
 
       <div class="quem__texto">
         <p class="quem__linha">
@@ -191,6 +208,11 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
           >
             {{ hospede.petNome }}
           </button>
+
+          <span v-if="hospede.acompanhante" class="quem__dupla">
+            <PhPawPrint weight="duotone" aria-hidden="true" />
+            {{ t('hotel.hospedes.cartao.com', { pet: hospede.acompanhante.nome }) }}
+          </span>
 
           <HotelSelo
             v-if="adaptacao !== 'tranquilo'"
@@ -329,10 +351,18 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
 </template>
 
 <style scoped>
+/*
+ * Coluna flex, e não grade: é o que permite ao pé descer com `margin-block-start: auto`.
+ *
+ * Numa fileira de dois cartões, o de quem tem botão de ligar ficava mais alto e o vizinho
+ * terminava no ar — as duas datas de saída, que são a mesma informação, saíam em alturas
+ * diferentes. Com o pé ancorado embaixo, os cartões da fileira fecham na mesma linha.
+ */
 .cartao {
   position: relative;
-  display: grid;
-  align-content: start;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
   padding: var(--clinic-space-5);
   border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
@@ -366,9 +396,53 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
  * O rosto ganha um halo da própria superfície, e não uma borda: o anel separa o avatar do cartão
  * sem desenhar mais uma linha numa tela que já tem muitas.
  */
-.quem__rosto {
+/*
+ * Os rostos. Quando são dois, o segundo encaixa no canto do primeiro em vez de ocupar uma coluna
+ * própria: eles dividem a acomodação, e o desenho diz isso antes da palavra.
+ */
+.quem__rostos {
+  position: relative;
+  display: inline-flex;
   flex: 0 0 auto;
+}
+
+.quem__rosto {
   box-shadow: 0 0 0 3px var(--clinic-surface-soft);
+}
+
+/*
+ * O segundo encosta no canto do primeiro e não o cobre: quem nomeia o cartão é o titular da
+ * estadia, e um acompanhante que esconde o rosto dele troca a identidade da fileira. Daí o
+ * tamanho `sm` contra o `lg` do titular e o deslocamento para fora do círculo.
+ */
+.quem__rosto--segundo {
+  position: absolute;
+  inset-block-end: -0.2rem;
+  inset-inline-end: -0.6rem;
+  box-shadow: 0 0 0 2px var(--clinic-surface);
+}
+
+/* O par ocupa mais largura que um rosto só; sem a folga ele encosta no nome. */
+.quem__rostos--dupla {
+  margin-inline-end: 0.5rem;
+}
+
+.quem__dupla {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--clinic-line-soft);
+  border-radius: var(--clinic-radius-chip);
+  gap: 0.25rem;
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+}
+
+.quem__dupla :deep(svg),
+.quem__dupla > svg {
+  width: 0.9em;
+  height: 0.9em;
 }
 
 .quem__texto {
@@ -431,6 +505,7 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
   align-items: center;
   min-block-size: 3.4rem;
   padding: var(--clinic-space-3);
+  border-inline-start: 3px solid var(--clinic-line);
   border-radius: var(--clinic-radius-control);
   gap: var(--clinic-space-3);
   background: var(--clinic-surface-soft);
@@ -474,6 +549,30 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
   border-color: transparent;
   background: var(--clinic-accent-deep);
   color: var(--clinic-on-accent);
+}
+
+/*
+ * A aresta do bloco, na cor do estado.
+ *
+ * É **borda**, não preenchimento, e a diferença não é cosmética: a regra da casa proíbe pintar a
+ * superfície por estado porque risco e atenção têm luminância quase idêntica e, em escala de
+ * cinza, viram a mesma cor. Uma aresta de 3 px existe ou não existe antes de ter cor nenhuma — é
+ * canal de forma, e sobrevive ao cinza e ao daltonismo como o disco sobrevive.
+ *
+ * É também o único ponto de cor saturada do cartão, e o que faz o bloco ler como chamada em vez de
+ * caixa cinza.
+ */
+.cartao--travado .foco,
+.cartao--atrasada .foco {
+  border-inline-start-color: var(--clinic-risk-text);
+}
+
+.cartao--recado .foco {
+  border-inline-start-color: var(--clinic-attention-text);
+}
+
+.cartao--aguardando .foco {
+  border-inline-start-color: var(--clinic-accent-deep);
 }
 
 .foco__texto {
@@ -575,6 +674,7 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  margin-block-start: auto;
   padding-block-start: var(--clinic-space-3);
   border-block-start: 1px solid var(--clinic-line-soft);
   gap: var(--clinic-space-2) var(--clinic-space-4);

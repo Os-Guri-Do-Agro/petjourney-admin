@@ -27,7 +27,7 @@ const baia: Acomodacao = {
   id: 'acom-a1',
   nome: 'Baia A1',
   blocoId: 'bloco-a',
-  kind: 'baia',
+  tipoId: 'tipo-baia',
   capacidade: 2,
   porteMaximo: 'grande',
   especiesAceitas: ['canina'],
@@ -199,7 +199,7 @@ describe('o mapa e a ocupação', () => {
   const acomodacoes: Acomodacao[] = [
     baia,
     { ...baia, id: 'acom-a2', nome: 'Baia A2' },
-    { ...baia, id: 'acom-g1', nome: 'Gatil G1', kind: 'gatil', especiesAceitas: ['felina'] },
+    { ...baia, id: 'acom-g1', nome: 'Gatil G1', tipoId: 'tipo-gatil', especiesAceitas: ['felina'] },
     { ...baia, id: 'acom-a7', nome: 'Baia A7', ativa: false },
   ]
 
@@ -209,7 +209,7 @@ describe('o mapa e a ocupação', () => {
       reservas: [],
       inicio: iso('2026-07-01', '09:00'),
       fim: iso('2026-07-03', '10:00'),
-      kinds: ['gatil'],
+      tipos: ['tipo-gatil'],
     })
 
     expect(vagas.map((vaga) => vaga.acomodacao.id)).toEqual(['acom-g1'])

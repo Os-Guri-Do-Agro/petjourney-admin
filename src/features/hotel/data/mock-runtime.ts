@@ -20,6 +20,8 @@ export { createPrng, hashSeed, intBetween, pickFrom }
 
 export type HotelOperation =
   | 'catalogo.carregar'
+  /** Cadastro de corredor, tabela de preço e temporada — a casa mudando de forma. */
+  | 'catalogo.salvar'
   | 'mapa.periodo'
   | 'reserva.listar'
   | 'reserva.abrir'

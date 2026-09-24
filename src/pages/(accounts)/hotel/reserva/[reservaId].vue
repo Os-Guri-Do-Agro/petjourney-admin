@@ -237,7 +237,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               {{ t('hotel.reserva.diarias', { total: reserva.diarias }, reserva.diarias) }}
               · {{ acomodacao?.nome }}
               <template v-if="acomodacao">
-                ({{ formato.acomodacaoKind(acomodacao.kind) }})
+                ({{ hotelStore.tipoDeAcomodacao(acomodacao.tipoId)?.nome }})
               </template>
             </p>
 

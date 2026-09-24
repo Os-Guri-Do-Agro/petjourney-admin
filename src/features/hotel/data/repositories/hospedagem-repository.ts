@@ -203,6 +203,19 @@ export type HospedeNaCasa = {
   /** Espécie e retrato: o avatar do hóspede acompanha o nome em toda lista. */
   petEspecie: PetSpecies | null
   petFotoUrl: string
+  /**
+   * O segundo animal da mesma casa, quando a estadia tem dois dividindo a acomodação.
+   *
+   * A lista devolve **uma linha por estadia**, e a estadia é que carrega o acompanhante — então,
+   * sem este campo, o segundo animal está na casa e não aparece em tela nenhuma. Era o caso da
+   * Amora no dado de demonstração: a casa tinha seis hóspedes e a tela mostrava cinco.
+   */
+  acompanhante: {
+    nome: string
+    iniciais: string
+    especie: PetSpecies | null
+    fotoUrl: string
+  } | null
   tutorNome: string
   tutorTelefone: string
   acomodacaoNome: string
@@ -290,6 +303,34 @@ function tarefasDe(hospedagemId: string) {
 }
 
 /**
+ * O segundo animal da estadia, achatado para o que o cartão desenha. `null` no caso normal.
+ *
+ * Sai da **reserva** e não da hospedagem: quem carrega o acompanhante é o que foi vendido, e a
+ * hospedagem é o que foi aberto a partir dele.
+ */
+function companheiroDaReserva(reservaId: string) {
+  const dataset = base()
+  const petId = dataset.reservas.find((item) => item.id === reservaId)?.acompanhantePetId
+
+  if (!petId) {
+    return null
+  }
+
+  const pet = dataset.pets.find((item) => item.id === petId)
+
+  if (!pet) {
+    return null
+  }
+
+  return {
+    nome: pet.nome,
+    iniciais: pet.iniciais,
+    especie: pet.especie,
+    fotoUrl: pet.fotoUrl,
+  }
+}
+
+/**
  * O foco de um hóspede, achatado para o que a grade precisa.
  *
  * A tarefa inteira não atravessa: `TarefaDeRotina` carrega identificador, turno, observação e
@@ -361,6 +402,7 @@ export const hospedagemRepository = {
               petIniciais: pet?.iniciais ?? '',
               petEspecie: pet?.especie ?? null,
               petFotoUrl: pet?.fotoUrl ?? '',
+              acompanhante: companheiroDaReserva(hospedagem.reservaId),
               tutorNome: tutor?.nome ?? '',
               tutorTelefone: tutor?.telefone ?? '',
               acomodacaoNome: acomodacao?.nome ?? '',

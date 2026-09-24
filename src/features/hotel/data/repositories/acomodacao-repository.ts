@@ -13,7 +13,6 @@ import { agoraIso, getDataset } from '../store'
 import type {
   Acomodacao,
   AcomodacaoInativaMotivo,
-  AcomodacaoKind,
   PetPorte,
   PetSpecies,
   RecursoDaAcomodacao,
@@ -35,6 +34,22 @@ export type ImpedimentoDeCadastro =
   | 'tem-reserva'
   | 'tem-historico'
   | 'nao-encontrada'
+  /**
+   * O item ainda é apontado por outro.
+   *
+   * Vale para o corredor que tem acomodação dentro e para a tabela de preço que alguma acomodação
+   * usa. Apagar qualquer um dos dois deixaria a acomodação apontando para um identificador morto —
+   * e o defeito não apareceria no momento do apagamento, e sim na próxima vez que alguém tentasse
+   * fazer uma reserva.
+   */
+  | 'em-uso'
+  /**
+   * Sobrou um, e um é o mínimo.
+   *
+   * Sem nenhuma tabela de preço não há como cadastrar acomodação nenhuma; sem nenhum corredor não
+   * há onde pôr o que se cadastrar. A tela ficaria num estado do qual ela mesma não sabe sair.
+   */
+  | 'ultimo'
 
 export class CadastroRecusadoError extends Error {
   readonly kind: ImpedimentoDeCadastro
@@ -69,7 +84,7 @@ export const acomodacaoRepository = {
   criar(entrada: {
     nome: string
     blocoId: string
-    kind: AcomodacaoKind
+    tipoId: string
     capacidade: number
     porteMaximo: PetPorte
     especiesAceitas: PetSpecies[]
@@ -90,7 +105,7 @@ export const acomodacaoRepository = {
         id: `acom-${entrada.nome.trim().toLocaleLowerCase('pt-BR').replace(/\s+/g, '-')}`,
         nome: entrada.nome.trim(),
         blocoId: entrada.blocoId,
-        kind: entrada.kind,
+        tipoId: entrada.tipoId,
         capacidade: Math.max(1, entrada.capacidade),
         porteMaximo: entrada.porteMaximo,
         especiesAceitas: entrada.especiesAceitas,
@@ -112,7 +127,7 @@ export const acomodacaoRepository = {
   editar(entrada: {
     acomodacaoId: string
     nome: string
-    kind: AcomodacaoKind
+    tipoId: string
     capacidade: number
     porteMaximo: PetPorte
     especiesAceitas: PetSpecies[]
@@ -140,13 +155,13 @@ export const acomodacaoRepository = {
 
       if (
         vivas.length > 0 &&
-        (entrada.capacidade < acomodacao.capacidade || entrada.kind !== acomodacao.kind)
+        (entrada.capacidade < acomodacao.capacidade || entrada.tipoId !== acomodacao.tipoId)
       ) {
         throw new CadastroRecusadoError('tem-reserva')
       }
 
       acomodacao.nome = entrada.nome.trim()
-      acomodacao.kind = entrada.kind
+      acomodacao.tipoId = entrada.tipoId
       acomodacao.capacidade = Math.max(1, entrada.capacidade)
       acomodacao.porteMaximo = entrada.porteMaximo
       acomodacao.especiesAceitas = entrada.especiesAceitas

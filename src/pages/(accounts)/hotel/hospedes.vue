@@ -18,6 +18,11 @@
  * quem sai hoje, e quem está em dia. Quem sai hoje **e** cobra ação fica na primeira — e não perde
  * a informação da saída, porque ela está no pé de todo cartão.
  *
+ * As réguas que nomeiam as faixas só aparecem quando há **mais de uma** faixa com gente. Régua
+ * serve para separar uma coisa de outra; com todo mundo cobrando ação, a régua "PRECISAM DE VOCÊ"
+ * ficava dois centímetros abaixo da aba "Precisam de mim" dizendo o mesmo de outro jeito, e não
+ * separava nada.
+ *
  * A banda fria é recolhível, e **nasce aberta quando a primeira tem dois hóspedes ou menos**: é
  * exatamente o caso em que a página ficaria curta, e é o conteúdo de verdade que preenche o espaço
  * em vez de um enfeite inventado para ocupar viewport.
@@ -29,10 +34,19 @@
  * "Todos"; nos outros dois recortes a lista já está filtrada e uma banda só repetiria o título do
  * filtro.
  */
-import { PhDoorOpen, PhMoon, PhWarningCircle, PhListChecks } from '@phosphor-icons/vue'
+import {
+  PhDoorOpen,
+  PhListChecks,
+  PhMagnifyingGlass,
+  PhMoon,
+  PhPawPrint,
+  PhWarningCircle,
+} from '@phosphor-icons/vue'
 import Button from 'primevue/button'
+import IconField from 'primevue/iconfield'
+import InputText from 'primevue/inputtext'
 import SelectButton from 'primevue/selectbutton'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -62,6 +76,89 @@ type Recorte = 'todos' | 'precisam' | 'saem'
 
 const recorte = ref<Recorte>('todos')
 
+/**
+ * O desenho de cada recorte.
+ *
+ * Mapa `Record<Recorte, …>` de propósito: recorte novo sem ícone passa a ser erro de compilação.
+ * E os três repetem o glifo da faixa correspondente lá embaixo — a aba e a régua que ela filtra
+ * precisam ser a mesma coisa no olho, senão o filtro parece levar a outro lugar.
+ */
+const ICONE_DO_RECORTE: Record<Recorte, Component> = {
+  todos: PhPawPrint,
+  precisam: PhWarningCircle,
+  saem: PhDoorOpen,
+}
+
+/*
+ * O slot `#option` do `SelectButton` entrega a opção como `any` — o componente não propaga o tipo
+ * da lista. O acessor recebe esse `any` num parâmetro tipado, o que mantém o mapa exaustivo: quem
+ * acrescentar um recorte continua obrigado a dar ícone a ele.
+ */
+function iconeDoRecorte(valor: Recorte) {
+  return ICONE_DO_RECORTE[valor]
+}
+
+/**
+ * A busca por nome.
+ *
+ * Procura no nome do animal **e** no do responsável, e é de propósito que os dois caiam no mesmo
+ * campo: quem atende o telefone ouve "aqui é a Luciana, queria saber da Mel" e não sabe de
+ * antemão qual dos dois nomes vai lembrar primeiro. Buscando pelo responsável, todos os animais
+ * dele aparecem juntos — que é a pergunta que ele está fazendo.
+ *
+ * `NFD` mais a faixa de acentos combinantes: quem digita apressado escreve "jose" e "tofu", e uma
+ * busca que exige o acento certo é uma busca que falha justamente no turno cheio.
+ */
+const busca = ref('')
+
+function normalizar(texto: string) {
+  return texto
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
+const termo = computed(() => normalizar(busca.value))
+
+const encontrados = computed(() => {
+  if (!termo.value) {
+    return hospedagem.hospedes
+  }
+
+  return hospedagem.hospedes.filter(
+    (hospede) =>
+      normalizar(hospede.petNome).includes(termo.value) ||
+      normalizar(hospede.tutorNome).includes(termo.value) ||
+      /* O segundo animal da estadia também é hóspede: procurar por ele tem de achar o cartão. */
+      (hospede.acompanhante ? normalizar(hospede.acompanhante.nome).includes(termo.value) : false),
+  )
+})
+
+/**
+ * O responsável, quando a busca encontrou **ele** e ele tem mais de um animal na casa.
+ *
+ * Sem esta linha, procurar "Luciana" devolve dois cartões sem dizer por quê — e dois cartões de
+ * animais diferentes lado a lado parecem um erro de busca, não a resposta certa.
+ */
+const tutorEncontrado = computed(() => {
+  if (!termo.value || encontrados.value.length < 2) {
+    return null
+  }
+
+  const tutores = new Set(encontrados.value.map((hospede) => hospede.tutorNome))
+
+  if (tutores.size !== 1) {
+    return null
+  }
+
+  const nome = encontrados.value[0]!.tutorNome
+
+  return normalizar(nome).includes(termo.value)
+    ? { nome, total: encontrados.value.length }
+    : null
+})
+
 /** A banda fria começa fechada; o `onMounted` decide pela ocupação real assim que ela chega. */
 const emDiaAberta = ref(false)
 
@@ -85,14 +182,14 @@ function precisaDeAlguem(hospede: HospedeNaCasa) {
 
 const visiveis = computed(() => {
   if (recorte.value === 'precisam') {
-    return hospedagem.hospedes.filter(precisaDeAlguem)
+    return encontrados.value.filter(precisaDeAlguem)
   }
 
   if (recorte.value === 'saem') {
-    return hospedagem.hospedes.filter((hospede) => hospede.saiHoje)
+    return encontrados.value.filter((hospede) => hospede.saiHoje)
   }
 
-  return hospedagem.hospedes
+  return encontrados.value
 })
 
 /*
@@ -113,6 +210,19 @@ const emDia = computed(() =>
 /** As bandas só organizam o "todos": nos outros recortes a lista já vem filtrada. */
 const porBandas = computed(() => recorte.value === 'todos')
 
+/**
+ * A régua da faixa só aparece quando há mais de uma faixa com gente.
+ *
+ * Com todo mundo cobrando ação, a régua "PRECISAM DE VOCÊ 5" ficava dois centímetros abaixo da aba
+ * "Precisam de mim 5" dizendo a mesma coisa de outro jeito. Régua serve para separar uma coisa de
+ * outra; quando só existe uma coisa, ela não separa nada e vira ruído.
+ */
+const bandasComGente = computed(
+  () => [precisam.value, saem.value, emDia.value].filter((banda) => banda.length > 0).length,
+)
+
+const mostrarReguas = computed(() => bandasComGente.value > 1)
+
 /*
  * A faixa fria abre sozinha quando a página seria curta.
  *
@@ -128,11 +238,17 @@ watch(
   { immediate: true },
 )
 
-const quantosPrecisam = computed(() => hospedagem.hospedes.filter(precisaDeAlguem).length)
-const quantosSaem = computed(() => hospedagem.hospedes.filter((item) => item.saiHoje).length)
+/*
+ * As contagens das abas seguem a busca, e não o total da casa.
+ *
+ * Aba dizendo "Todos (5)" com um cartão na tela é aba mentindo: a busca já recortou, e o número
+ * precisa contar o que a aba vai mostrar se for clicada.
+ */
+const quantosPrecisam = computed(() => encontrados.value.filter(precisaDeAlguem).length)
+const quantosSaem = computed(() => encontrados.value.filter((item) => item.saiHoje).length)
 
 const resumo = computed(() => {
-  const total = hospedagem.hospedes.length
+  const total = encontrados.value.length
 
   if (total === 0 || quantosPrecisam.value === 0) {
     return t('hotel.hospedes.resumoEmDia')
@@ -145,18 +261,28 @@ const resumo = computed(() => {
   )
 })
 
+/*
+ * O rótulo e a contagem entram separados, e não "Todos (5)" numa string só.
+ *
+ * Costurados, os dois saíam com o mesmo peso e o mesmo tamanho, e os parênteses eram a única coisa
+ * distinguindo o nome da aba do número dela. Separados, o número vira uma pastilha tabular ao lado
+ * do rótulo — e é o número que muda toda vez que alguém marca uma tarefa.
+ */
 const opcoes = computed(() => [
   {
     valor: 'todos' as const,
-    rotulo: t('hotel.hospedes.recorte.todos', { total: hospedagem.hospedes.length }),
+    rotulo: t('hotel.hospedes.recorte.todos'),
+    total: encontrados.value.length,
   },
   {
     valor: 'precisam' as const,
-    rotulo: t('hotel.hospedes.recorte.precisam', { total: quantosPrecisam.value }),
+    rotulo: t('hotel.hospedes.recorte.precisam'),
+    total: quantosPrecisam.value,
   },
   {
     valor: 'saem' as const,
-    rotulo: t('hotel.hospedes.recorte.saem', { total: quantosSaem.value }),
+    rotulo: t('hotel.hospedes.recorte.saem'),
+    total: quantosSaem.value,
   },
 ])
 
@@ -223,29 +349,96 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <div class="barra">
         <SelectButton
           v-model="recorte"
+          class="abas"
           :options="opcoes"
           option-label="rotulo"
           option-value="valor"
           :allow-empty="false"
           :aria-label="t('hotel.hospedes.recorteRotulo')"
-        />
+        >
+          <template #option="{ option }">
+            <component
+              :is="iconeDoRecorte(option.valor)"
+              class="aba__icone"
+              weight="duotone"
+              aria-hidden="true"
+            />
+            <span class="aba__rotulo">{{ option.rotulo }}</span>
+            <span class="aba__conta clinic-value">{{ option.total }}</span>
+          </template>
+        </SelectButton>
 
-        <p class="barra__resumo">{{ resumo }}</p>
+        <!--
+          O resumo mora no meio, e não numa linha própria abaixo.
+
+          Solto, ele era uma quarta faixa empilhada no topo dizendo o que as abas já contavam. Aqui
+          ele ocupa o vão entre os dois controles — que numa tela larga eram quase setecentos pixels
+          de nada — e o vão deixa de ser vazio para virar conteúdo.
+        -->
+        <p class="barra__resumo">
+          <span>{{ resumo }}</span>
+
+          <!--
+            Quando a busca casou com o responsável e ele tem mais de um na casa, a tela diz por que
+            está mostrando vários — dois animais diferentes lado a lado parecem erro de busca.
+          -->
+          <span v-if="tutorEncontrado" class="barra__tutor">
+            <i class="pi pi-user" aria-hidden="true" />
+            {{
+              t(
+                'hotel.hospedes.busca.doTutor',
+                { total: tutorEncontrado.total, tutor: tutorEncontrado.nome },
+                tutorEncontrado.total,
+              )
+            }}
+          </span>
+        </p>
+
+        <IconField class="busca">
+          <PhMagnifyingGlass class="busca__lupa" weight="duotone" aria-hidden="true" />
+          <InputText
+            v-model="busca"
+            class="busca__campo"
+            type="search"
+            :placeholder="t('hotel.hospedes.busca.dica')"
+            :aria-label="t('hotel.hospedes.busca.rotulo')"
+          />
+        </IconField>
       </div>
 
-      <p v-if="visiveis.length === 0" class="nada">
-        <PhMoon class="nada__icone" weight="duotone" aria-hidden="true" />
-        {{
-          recorte === 'precisam'
-            ? t('hotel.hospedes.ninguemPrecisa')
-            : t('hotel.hospedes.ninguemSai')
-        }}
-      </p>
+      <div v-if="visiveis.length === 0" class="nada">
+        <component
+          :is="termo ? PhMagnifyingGlass : PhMoon"
+          class="nada__icone"
+          weight="duotone"
+          aria-hidden="true"
+        />
+
+        <p class="nada__texto">
+          <template v-if="termo">
+            {{ t('hotel.hospedes.busca.semResultado', { termo: busca.trim() }) }}
+          </template>
+          <template v-else-if="recorte === 'precisam'">
+            {{ t('hotel.hospedes.ninguemPrecisa') }}
+          </template>
+          <template v-else>{{ t('hotel.hospedes.ninguemSai') }}</template>
+        </p>
+
+        <Button
+          v-if="termo"
+          :label="t('hotel.hospedes.busca.limpar')"
+          icon="pi pi-times"
+          severity="secondary"
+          outlined
+          size="small"
+          @click="busca = ''"
+        />
+      </div>
 
       <!-- O recorte "Todos" ganha as três bandas; os outros já vêm filtrados. -->
       <template v-else-if="porBandas">
         <section v-if="precisam.length > 0" class="banda">
-          <h2 class="banda__titulo">
+          <h2 v-if="mostrarReguas" class="banda__titulo">
             <PhWarningCircle weight="duotone" aria-hidden="true" />
             {{ t('hotel.hospedes.banda.precisam') }}
             <span class="banda__conta clinic-value">{{ precisam.length }}</span>
@@ -264,7 +457,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         </section>
 
         <section v-if="saem.length > 0" class="banda">
-          <h2 class="banda__titulo">
+          <h2 v-if="mostrarReguas" class="banda__titulo">
             <PhDoorOpen weight="duotone" aria-hidden="true" />
             {{ t('hotel.hospedes.banda.saem') }}
             <span class="banda__conta clinic-value">{{ saem.length }}</span>
@@ -348,13 +541,109 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: var(--clinic-space-5);
 }
 
+.hospedes {
+  gap: var(--clinic-space-4);
+}
+
+/*
+ * Os controles numa peça só.
+ *
+ * Soltos na página, a aba ficava numa ponta, a busca na outra e o vão entre elas lia como defeito
+ * de alinhamento. Dentro de uma moldura, o mesmo vão vira respiro — e os três elementos passam a
+ * se ler como um painel de controle, que é o que eles são.
+ */
 .barra {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  padding: var(--clinic-space-3);
+  border: 1px solid var(--clinic-line-soft);
+  border-radius: var(--clinic-radius-card);
   gap: var(--clinic-space-3);
+  background: var(--clinic-surface);
 }
+
+/* ---------------------------------------------------------------- as abas */
+
+/*
+ * O segmento ganha ícone, rótulo e contagem — nessa ordem, que é a ordem da leitura: o desenho
+ * localiza, a palavra confirma, o número informa. O desenho de cada aba é o mesmo da régua da
+ * faixa que ela filtra, para o filtro não parecer levar a outro lugar.
+ */
+.abas :deep(.p-togglebutton-content) {
+  gap: 0.4rem;
+}
+
+.aba__icone {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+}
+
+.aba__rotulo {
+  white-space: nowrap;
+}
+
+/*
+ * A contagem é pastilha, não parêntese.
+ *
+ * Costurada no rótulo ela saía com o mesmo peso e o mesmo tamanho da palavra, e os parênteses eram
+ * a única coisa separando o nome da aba do número dela. Tabular porque é número que muda a cada
+ * tarefa marcada, e dígito que dança na horizontal obriga a reler.
+ */
+.aba__conta {
+  padding-inline: 0.4rem;
+  border-radius: var(--clinic-radius-chip);
+  background: var(--clinic-surface-sunken);
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.abas :deep(.p-togglebutton-checked) .aba__conta {
+  background: var(--clinic-accent-deep);
+  color: var(--clinic-on-accent);
+}
+
+/* --------------------------------------------------------------- a busca */
+
+/*
+ * O `position` é declarado aqui e não herdado do `IconField`: o estilo do PrimeVue 4 é injetado em
+ * tempo de execução, e quando essa injeção falta a lupa — que é absoluta — escapa para o canto da
+ * página. É a mesma armadilha que já obrigou este projeto a reescrever a caixa do segmento.
+ */
+.busca {
+  position: relative;
+  min-width: 17rem;
+}
+
+.busca__lupa {
+  position: absolute;
+  inset-inline-start: 0.7rem;
+  top: 50%;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--clinic-faint);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.busca__campo {
+  width: 100%;
+  padding-inline-start: 2.3rem;
+}
+
+/*
+ * O `type="search"` do WebKit desenha um "x" próprio, fora de qualquer token da casa e sem par no
+ * Firefox. O limpar desta tela é o botão do estado vazio, que é onde ele é preciso.
+ */
+.busca__campo::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+/* ------------------------------------------------------------- o resumo */
 
 /*
  * O resumo é uma frase em peso normal, e não um número grande com barra.
@@ -364,10 +653,32 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
  * O que a pessoa precisa saber ao chegar cabe numa linha.
  */
 .barra__resumo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   margin: 0;
+  gap: var(--clinic-space-2) var(--clinic-space-3);
   color: var(--clinic-muted);
   font-size: var(--clinic-font-label);
 }
+
+.barra__tutor {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--clinic-accent-soft);
+  border-radius: var(--clinic-radius-chip);
+  gap: 0.3rem;
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+  font-weight: 700;
+}
+
+.barra__tutor .pi {
+  font-size: 0.7em;
+}
+
+/* --------------------------------------------------------- o estado vazio */
 
 .nada {
   display: grid;
@@ -380,6 +691,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   background: var(--clinic-surface);
   color: var(--clinic-muted);
   text-align: center;
+}
+
+.nada__texto {
+  margin: 0;
 }
 
 .nada__icone {

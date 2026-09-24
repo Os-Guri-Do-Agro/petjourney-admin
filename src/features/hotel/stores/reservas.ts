@@ -22,7 +22,6 @@ import {
   type ReservaNaLista,
 } from '../data/repositories'
 import type {
-  AcomodacaoKind,
   ExigenciaKind,
   ISODate,
   ISODateTime,
@@ -41,7 +40,7 @@ export type FiltroDeBusca = {
   porte: PetPorte | null
   especie: PetSpecies | null
   ocupantes: number
-  kinds: AcomodacaoKind[]
+  tipos: string[]
 }
 
 export const useReservasStore = defineStore('hotel-reservas', () => {
@@ -56,7 +55,7 @@ export const useReservasStore = defineStore('hotel-reservas', () => {
   const de = ref<ISODate>(addDays(hotelClock.today(), 1))
   const ate = ref<ISODate>(addDays(hotelClock.today(), 4))
 
-  const filtro = ref<FiltroDeBusca>({ porte: null, especie: null, ocupantes: 1, kinds: [] })
+  const filtro = ref<FiltroDeBusca>({ porte: null, especie: null, ocupantes: 1, tipos: [] })
 
   const mapa = ref<MapaDoPeriodo | null>(null)
   const lista = ref<ReservaNaLista[]>([])
@@ -114,7 +113,7 @@ export const useReservasStore = defineStore('hotel-reservas', () => {
         porte: filtro.value.porte,
         especie: filtro.value.especie,
         ocupantes: filtro.value.ocupantes,
-        kinds: filtro.value.kinds,
+        tipos: filtro.value.tipos,
       })
     } catch {
       erro.value = 'hotel.erros.mapa'

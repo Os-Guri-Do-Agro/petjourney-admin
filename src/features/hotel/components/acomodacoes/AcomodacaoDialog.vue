@@ -24,8 +24,8 @@ import { useHotelFormat } from '../../composables/useHotelFormat'
 import type {
   Acomodacao,
   AcomodacaoInativaMotivo,
-  AcomodacaoKind,
   Bloco,
+  TipoDeAcomodacao,
   PetPorte,
   PetSpecies,
   RecursoDaAcomodacao,
@@ -36,7 +36,17 @@ const props = defineProps<{
   aberto: boolean
   /** `null` cria; preenchido edita. */
   acomodacao: Acomodacao | null
+  /**
+   * O corredor em que a criação começa.
+   *
+   * Quem toca no "+" de dentro do Canil B está dizendo onde quer a vaga. Sem isto, o diálogo
+   * abria no primeiro corredor da lista e a pessoa criava a baia no lugar errado sem perceber —
+   * um campo já preenchido é um campo que ninguém relê.
+   */
+  blocoSugerido?: string
   blocos: Bloco[]
+  /** Os tipos que a casa cadastrou. O nome de cada um é dela. */
+  tipos: TipoDeAcomodacao[]
   tarifas: Tarifa[]
   salvando: boolean
   erro: string
@@ -48,7 +58,7 @@ const emit = defineEmits<{
     payload: {
       nome: string
       blocoId: string
-      kind: AcomodacaoKind
+      tipoId: string
       capacidade: number
       porteMaximo: PetPorte
       especiesAceitas: PetSpecies[]
@@ -66,9 +76,14 @@ const { t } = useI18n()
 const formato = useHotelFormat()
 const idCampo = useId()
 
-const KINDS: AcomodacaoKind[] = ['baia', 'suite', 'gatil', 'coletiva', 'isolamento']
 const PORTES: PetPorte[] = ['mini', 'pequeno', 'medio', 'grande', 'gigante']
-const ESPECIES: PetSpecies[] = ['canina', 'felina', 'ave', 'roedor', 'reptil']
+/*
+ * Todas as espécies que o cadastro do portal conhece.
+ *
+ * A lista anterior parava em réptil e deixava "equina" de fora sem motivo — e uma espécie que o
+ * domínio tem e a tela esconde é uma hospedagem que a casa não consegue cadastrar.
+ */
+const ESPECIES: PetSpecies[] = ['canina', 'felina', 'ave', 'roedor', 'reptil', 'equina']
 const RECURSOS: RecursoDaAcomodacao[] = [
   'camera',
   'climatizacao',
@@ -86,7 +101,7 @@ const MOTIVOS: AcomodacaoInativaMotivo[] = [
 
 const nome = ref('')
 const blocoId = ref('')
-const kind = ref<AcomodacaoKind>('baia')
+const tipoId = ref('')
 const capacidade = ref<number>(1)
 const porteMaximo = ref<PetPorte>('grande')
 const especies = ref<PetSpecies[]>(['canina'])
@@ -113,8 +128,8 @@ watch(
     const alvo = props.acomodacao
 
     nome.value = alvo?.nome ?? ''
-    blocoId.value = alvo?.blocoId ?? props.blocos[0]?.id ?? ''
-    kind.value = alvo?.kind ?? 'baia'
+    blocoId.value = alvo?.blocoId ?? props.blocoSugerido ?? props.blocos[0]?.id ?? ''
+    tipoId.value = alvo?.tipoId ?? props.tipos[0]?.id ?? ''
     capacidade.value = alvo?.capacidade ?? 1
     porteMaximo.value = alvo?.porteMaximo ?? 'grande'
     especies.value = alvo?.especiesAceitas ?? ['canina']
@@ -136,7 +151,7 @@ function salvar() {
   emit('salvar', {
     nome: nome.value,
     blocoId: blocoId.value,
-    kind: kind.value,
+    tipoId: tipoId.value,
     capacidade: capacidade.value,
     porteMaximo: porteMaximo.value,
     especiesAceitas: especies.value,
@@ -171,7 +186,7 @@ function salvar() {
           </div>
 
           <div class="campo">
-            <label :for="`${idCampo}-bloco`">{{ t('hotel.acomodacoes.bloco') }}</label>
+            <label :for="`${idCampo}-bloco`">{{ t('hotel.acomodacoes.corredor.rotulo') }}</label>
             <Select
               :input-id="`${idCampo}-bloco`"
               v-model="blocoId"
@@ -183,12 +198,12 @@ function salvar() {
           </div>
 
           <div class="campo">
-            <label :for="`${idCampo}-kind`">{{ t('hotel.acomodacoes.tipo') }}</label>
+            <label :for="`${idCampo}-kind`">{{ t('hotel.acomodacoes.tipo.rotulo') }}</label>
             <Select
               :input-id="`${idCampo}-kind`"
-              v-model="kind"
+              v-model="tipoId"
               :options="
-                KINDS.map((item) => ({ valor: item, rotulo: formato.acomodacaoKind(item) }))
+                tipos.map((item) => ({ valor: item.id, rotulo: item.nome }))
               "
               option-label="rotulo"
               option-value="valor"

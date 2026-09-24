@@ -25,6 +25,7 @@ import type {
   Servico,
   Tarifa,
   Temporada,
+  TipoDeAcomodacao,
 } from '../data/types'
 import { createClinicClock } from '../domain/hotel-time'
 
@@ -34,6 +35,7 @@ export const useHotelStore = defineStore('hotel', () => {
   const hotel = ref<Hotel | null>(null)
   const blocos = ref<Bloco[]>([])
   const acomodacoes = ref<Acomodacao[]>([])
+  const tiposDeAcomodacao = ref<TipoDeAcomodacao[]>([])
   const tarifas = ref<Tarifa[]>([])
   const temporadas = ref<Temporada[]>([])
   const temporadasSazonais = ref<TemporadaSazonal[]>([])
@@ -60,12 +62,17 @@ export const useHotelStore = defineStore('hotel', () => {
   const tutorPorId = computed(() => new Map(tutores.value.map((item) => [item.id, item])))
   const cuidadorPorId = computed(() => new Map(cuidadores.value.map((item) => [item.id, item])))
   const servicoPorId = computed(() => new Map(servicos.value.map((item) => [item.id, item])))
+  const tipoPorId = computed(
+    () => new Map(tiposDeAcomodacao.value.map((item) => [item.id, item])),
+  )
+
   const tarifaPorId = computed(() => new Map(tarifas.value.map((item) => [item.id, item])))
 
   function aplicar(catalogos: CatalogosDoHotel) {
     hotel.value = catalogos.hotel
     blocos.value = catalogos.blocos
     acomodacoes.value = catalogos.acomodacoes
+    tiposDeAcomodacao.value = catalogos.tiposDeAcomodacao
     tarifas.value = catalogos.tarifas
     temporadas.value = catalogos.temporadas
     temporadasSazonais.value = catalogos.temporadasSazonais
@@ -124,6 +131,11 @@ export const useHotelStore = defineStore('hotel', () => {
     return servicoPorId.value.get(id) ?? null
   }
 
+  /** O tipo cadastrado pela casa. `null` quando a acomodação aponta para um id que sumiu. */
+  function tipoDeAcomodacao(id: string): TipoDeAcomodacao | null {
+    return tipoPorId.value.get(id) ?? null
+  }
+
   function tarifa(id: string): Tarifa | null {
     return tarifaPorId.value.get(id) ?? null
   }
@@ -156,6 +168,8 @@ export const useHotelStore = defineStore('hotel', () => {
     /* O índice, e não só a lista: a rotina ordena as fileiras de uma ronda pela ordem da casa. */
     blocoPorId,
     acomodacoes,
+    tiposDeAcomodacao,
+    tipoPorId,
     tarifas,
     temporadas,
     temporadasSazonais,
@@ -177,6 +191,7 @@ export const useHotelStore = defineStore('hotel', () => {
     tutor,
     cuidador,
     servico,
+    tipoDeAcomodacao,
     tarifa,
     operadorAtual,
     corDoCuidador,

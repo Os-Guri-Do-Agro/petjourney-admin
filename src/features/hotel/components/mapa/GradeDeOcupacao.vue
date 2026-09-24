@@ -25,6 +25,7 @@ import PetAvatar from '../base/PetAvatar.vue'
 import { useHotelFormat } from '../../composables/useHotelFormat'
 import type { FaixaNaGrade, GradeDeOcupacao, LinhaDaGrade } from '../../data/repositories'
 import type { Bloco, ISODate } from '../../data/types'
+import { useHotelStore } from '../../stores/hotel'
 
 const props = defineProps<{
   grade: GradeDeOcupacao
@@ -41,6 +42,8 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const formato = useHotelFormat()
+/* O nome do tipo é cadastro da casa, não tradução nossa: sai da store, não do formatador. */
+const hotelStore = useHotelStore()
 
 /** Agrupa por bloco, na ordem física da casa. */
 const grupos = computed(() =>
@@ -186,7 +189,7 @@ function inicioDeMes(data: ISODate, indice: number): string {
             <th scope="row" class="acom">
               <span class="acom__nome">{{ linha.acomodacao.nome }}</span>
               <span class="acom__tipo">
-                {{ formato.acomodacaoKind(linha.acomodacao.kind) }} ·
+                {{ hotelStore.tipoDeAcomodacao(linha.acomodacao.tipoId)?.nome }} ·
                 {{ formato.porte(linha.acomodacao.porteMaximo) }}
               </span>
             </th>

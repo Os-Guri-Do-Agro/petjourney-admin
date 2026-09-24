@@ -70,6 +70,12 @@ const resolvedAriaLabel = computed(
           :value="tab.id"
           :aria-controls="`partner-panel-${tab.id}`"
         >
+          <!--
+            O desenho entra por slot, e não por uma prop de ícone.
+            Assim este componente continua servindo às telas do portal sem carregar a biblioteca de
+            ícones de nenhum módulo — quem sabe qual glifo cabe em cada aba é a tela, não a faixa.
+          -->
+          <slot name="icone" :tab="tab" />
           {{ tab.label }}
         </Tab>
       </TabList>
@@ -105,14 +111,24 @@ const resolvedAriaLabel = computed(
 }
 
 .partner-tabs__button.p-tab {
+  display: inline-flex;
+  align-items: center;
   margin: 0;
   padding: 0.48rem 0.9rem;
   border: 1px solid transparent;
   border-radius: 0.62rem;
+  gap: 0.4rem;
   background: transparent;
   color: var(--tab-muted);
   font-size: 0.84rem;
   font-weight: 650;
+}
+
+/* O desenho do slot mede pelo próprio quadro, e não pelo `em` como a fonte-ícone. */
+.partner-tabs__button.p-tab :deep(svg) {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
 }
 
 .partner-tabs__button.p-tab:not(.p-tab-active):not(.p-disabled):hover {

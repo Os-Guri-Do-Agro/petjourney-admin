@@ -514,6 +514,59 @@
   border-end-end-radius: var(--clinic-radius-control);
 }
 
+/*
+ * Os segmentos **dividem** a borda.
+ *
+ * Cada `togglebutton` desenha uma borda de 1 px em volta de si, então entre dois vizinhos o traço
+ * saía com 2 px — o dobro da moldura externa do próprio grupo. Era isso que fazia o controle
+ * parecer quebrado: não é um grupo com divisórias, são botões encostados. Puxar um pixel para trás
+ * faz as duas bordas ocuparem o mesmo pixel.
+ *
+ * `margin-inline-start` e não `margin-left`: em árabe o grupo inverte, e a sobreposição precisa
+ * acontecer do lado de dentro nos dois sentidos.
+ */
+.clinic-scope .p-selectbutton .p-togglebutton + .p-togglebutton {
+  margin-inline-start: -1px;
+}
+
+/*
+ * O selecionado, dito pela casa e não pelo tema base.
+ *
+ * Sem esta regra o estado caía no preset, que deriva `togglebutton` da escala `surface` — o
+ * segmento escolhido ficava com a borda de outra cor e parecia saltar para fora do grupo, que era
+ * a segunda metade do defeito.
+ *
+ * O `z-index` é obrigatório junto da borda compartilhada: com os segmentos sobrepostos, quem vem
+ * depois na ordem do documento cobre a borda de quem veio antes, e o selecionado perderia o
+ * próprio contorno do lado direito.
+ */
+.clinic-scope .p-selectbutton .p-togglebutton.p-togglebutton-checked {
+  position: relative;
+  z-index: 1;
+  border-color: var(--clinic-accent-deep);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+  font-weight: 750;
+}
+
+.clinic-scope .p-selectbutton .p-togglebutton:not(.p-togglebutton-checked) {
+  background: var(--clinic-surface);
+  color: var(--clinic-muted);
+}
+
+.clinic-scope
+  .p-selectbutton
+  .p-togglebutton:not(.p-togglebutton-checked):not(.p-disabled):hover {
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-text);
+}
+
+/* O foco também sobe: anel cortado pelo vizinho não é anel. */
+.clinic-scope .p-selectbutton .p-togglebutton:has(:focus-visible) {
+  position: relative;
+  z-index: 2;
+}
+
 .clinic-scope .p-inputtext::placeholder,
 .clinic-scope .p-textarea::placeholder {
   color: var(--clinic-faint);

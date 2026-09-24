@@ -13,6 +13,7 @@ export {
   hotelFixture,
   servicosFixture,
   tarifasFixture,
+  tiposDeAcomodacaoFixture,
   temporadasFixture,
   type TemporadaSazonal,
 } from './hotel'

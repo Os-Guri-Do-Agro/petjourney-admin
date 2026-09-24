@@ -3550,46 +3550,129 @@
     }
   },
   "hotel": {
-    "acomodacaoKind": {
-      "baia": "Box",
-      "coletiva": "Convivencia",
-      "gatil": "Gatera",
-      "isolamento": "Aislamiento",
-      "suite": "Suite"
-    },
     "acomodacoes": {
+      "aCasa": "La casa",
+      "abasRotulo": "Registros de la casa",
       "acompanhante": "Acompañante",
-      "bloco": "Bloque",
       "cabem": "cabe {total} | caben {total}",
       "capacidade": "Capacidad",
       "capacidadeDica": "Cuántos animales de la misma casa caben juntos.",
+      "corredor": {
+        "descer": "Mover abajo",
+        "desenho": "Símbolo",
+        "editar": "Editar pasillo",
+        "nome": "Nombre del pasillo",
+        "nomeDica": "Canil A, Gatera, Jardín…",
+        "nomeExplica": "El nombre es tuyo. Así aparece el pasillo en el mapa y en la rutina.",
+        "novo": "Nuevo pasillo",
+        "remover": "Eliminar pasillo",
+        "removerMesmo": "¿Eliminar este pasillo? No se puede deshacer.",
+        "rotulo": "Pasillo",
+        "subir": "Mover arriba",
+        "temVagas": "Tiene {total} alojamiento dentro. Muévelo o elimínalo antes. | Tiene {total} alojamientos dentro. Muévelos o elimínalos antes."
+      },
       "desativar": "Sacar de servicio",
       "detalhe": "Detalle",
       "editar": "Editar alojamiento",
       "especies": "Especies aceptadas",
       "higienizacao": "Higienización",
       "higienizacaoDica": "Tiempo entre una salida y la entrada siguiente.",
+      "lugares": "{total} plaza | {total} plazas",
       "motivo": "Motivo",
       "nome": "Nombre",
       "nova": "Nuevo alojamiento",
       "operacao": "Servicio",
       "paradas": "{total} fuera de servicio",
       "porteMaximo": "Tamaño máximo",
+      "preco": {
+        "acompanhante": "Segundo animal de la misma casa",
+        "acompanhanteDica": "Porcentaje de la tarifa completa. Porcentaje y no importe fijo porque la tarifa varía por tamaño.",
+        "daquiEmDiante": "Vale de ahora en adelante. Una reserva ya cerrada mantiene el precio al que se vendió.",
+        "diarias": "Tarifa diaria por tamaño",
+        "editar": "Editar tabla",
+        "emUso": "{total} alojamiento usa esta tabla. Cambia la suya antes. | {total} alojamientos usan esta tabla. Cambia la suya antes.",
+        "nome": "Nombre de la tabla",
+        "nomeDica": "Estándar, Suite, Gatera…",
+        "nova": "Nueva tabla",
+        "remover": "Eliminar tabla",
+        "removerMesmo": "¿Eliminar esta tabla de precios?",
+        "resumo": "Cuánto cuesta la noche, según el tamaño del animal.",
+        "usos": "en {total} plaza | en {total} plazas"
+      },
       "reativar": "Devolver al servicio",
       "recursos": "Recursos",
       "remover": "Quitar del registro",
       "removerConfirma": "Quitar es definitivo. ¿Confirmas?",
       "removerSim": "Quitar",
       "resumo": "{total} alojamiento registrado | {total} alojamientos registrados",
+      "secaoIdentidade": "Qué es",
+      "secaoPreco": "Preparación y precio",
+      "secaoQuemCabe": "Quién cabe",
       "subtitulo": "Hotel",
       "tarifa": "Tarifa",
       "tarifas": "Tarifas",
+      "temporada": {
+        "acrescimo": "Recargo",
+        "acrescimoDica": "Porcentaje sobre la tarifa de la tabla, no una segunda tabla.",
+        "ate": "Hasta",
+        "atravessaOAno": "Este intervalo cruza el cambio de año.",
+        "de": "Desde",
+        "dia": "Día",
+        "editar": "Editar temporada",
+        "nome": "Nombre de la temporada",
+        "nomeDica": "Fin de año, Vacaciones de julio, Carnaval…",
+        "nova": "Nueva temporada",
+        "remover": "Eliminar temporada",
+        "removerMesmo": "¿Eliminar esta temporada?",
+        "resumo": "Cuándo sube la tarifa. Vale todos los años, sin volver a cargarla."
+      },
       "temporadas": "Temporadas",
-      "tipo": "Tipo",
-      "titulo": "Alojamientos",
-      "secaoIdentidade": "Qué es",
-      "secaoQuemCabe": "Quién cabe",
-      "secaoPreco": "Preparación y precio"
+      "tipo": {
+        "desenho": "Símbolo",
+        "editar": "Editar tipo",
+        "emUso": "{total} alojamiento usa este tipo. Cambia el suyo antes. | {total} alojamientos usan este tipo. Cambia el suyo antes.",
+        "nome": "Cómo lo llama la casa",
+        "nomeDica": "Box, Suite, Cabaña, Jaula, Aviario…",
+        "nomeExplica": "El nombre es tuyo. Es la etiqueta que aparece en todas las pantallas del hotel.",
+        "novo": "Nuevo tipo",
+        "remover": "Eliminar tipo",
+        "removerMesmo": "¿Eliminar este tipo?",
+        "resumo": "Cómo llama la casa a cada tipo de plaza. El nombre es tuyo; el símbolo lo eliges.",
+        "rotulo": "Tipo",
+        "usos": "en {total} plaza | en {total} plazas"
+      },
+      "tipos": "Tipos",
+      "titulo": "Alojamientos"
+    },
+    "acrescentar": {
+      "acrescentar": "Añadir",
+      "ajusteCasaFaz": "la casa hace {horarios}",
+      "ajusteCasaNaoFaz": "la casa no hace este servicio",
+      "ajusteHorarios": "Horarios para este huésped",
+      "ajusteServico": "Servicio de la casa",
+      "ajusteVazio": "Deja vacío para suspender este servicio solo para él.",
+      "cancelar": "Cancelar",
+      "cuidadoIrParaMedicacao": "Registrar medicación",
+      "cuidadoNaoEhRemedio": "El medicamento no entra aquí. Dosis y receta viven en Medicación, y de ahí sale el respaldo para administrar el medicamento de otra persona.",
+      "cuidadoOQue": "Qué hacer",
+      "cuidadoOQueDica": "En palabras de quien lo ejecuta: cambiar el vendaje de la pata derecha",
+      "faltaMotivo": "Sin motivo, nadie sabrá cómo deshacer esto después.",
+      "motivo": "Motivo",
+      "motivoDica": "En diciembre es la única línea que explica por qué este huésped es distinto.",
+      "oQue": "Qué añadir",
+      "servicoCobra": "{preco} entran en la cuenta de la estancia.",
+      "servicoDia": "Día",
+      "servicoHora": "Hora",
+      "servicoQual": "Servicio",
+      "titulo": "Añadir a la rutina",
+      "viaAjuste": "Ajustar horarios de la casa",
+      "viaAjusteDica": "cambiar o suspender solo para este huésped",
+      "viaCuidado": "Cuidado del huésped",
+      "viaCuidadoDica": "vendaje, compresa, abrigo — sin dosis",
+      "viaMedicacao": "Medicación",
+      "viaMedicacaoDica": "medicamento con dosis y receta",
+      "viaServico": "Servicio extra",
+      "viaServicoDica": "baño, peluquería, paseo — se cobra"
     },
     "adaptacao": {
       "em-adaptacao": "En adaptación",
@@ -3606,17 +3689,24 @@
     },
     "checkin": {
       "acrescentar": "Añadir",
+      "acrescentarRemedio": "Agregar remedio",
       "alimentacao": "Alimentación",
       "autorizacoes": "Autorizaciones",
       "bloqueado": "Falta documentación obligatoria: {itens}",
       "chegada": "Llegada",
       "confirmar": "Confirmar entrada",
       "contato": "Contacto de emergencia",
+      "dose": "Dosis",
+      "doseDica": "1/2 comprimido",
       "emergencia": "Emergencia",
+      "exigidaPelaVenda": "servicio vendido",
       "horarios": "Horarios",
       "inspecao": "Inspección de entrada",
       "inspecaoDica": "Garrapatas, pulgas, heridas, cojera, estado del pelo.",
       "marca": "Marca",
+      "medicacao": "Medicación que vino de casa",
+      "medicacaoLede": "El hotel no prescribe: registra lo que ya se daba, para seguir dándolo a la hora correcta.",
+      "medicacaoSemHorario": "Un remedio sin horario no se vuelve tarea alguna, y nadie será avisado de darlo.",
       "novoPertence": "Añadir pertenencia",
       "pertences": "Pertenencias",
       "peso": "Peso en la balanza",
@@ -3624,53 +3714,57 @@
       "petiscos": "Premios",
       "porcao": "Ración",
       "racaoPropria": "Comida traída de casa",
-      "removerPertence": "Quitar {item}",
-      "restricoes": "Restricciones",
-      "titulo": "Entrada de {pet}",
-      "veterinario": "Veterinario de confianza",
       "recadoDaReserva": "En la reserva:",
-      "exigidaPelaVenda": "servicio vendido",
-      "vendaSemAutorizacao": "La reserva vendió un servicio que depende de: {itens}. Sin la autorización la casa no puede ejecutarlo, y la cuenta sigue cobrando.",
-      "medicacao": "Medicación que vino de casa",
-      "medicacaoLede": "El hotel no prescribe: registra lo que ya se daba, para seguir dándolo a la hora correcta.",
-      "remedio": "Remedio",
-      "remedioDica": "Benazepril 5 mg",
-      "dose": "Dosis",
-      "doseDica": "1/2 comprimido",
-      "via": "Vía",
       "receita": "Receta",
       "receitaDica": "Número y quién la firmó",
-      "acrescentarRemedio": "Agregar remedio",
+      "remedio": "Remedio",
+      "remedioDica": "Benazepril 5 mg",
+      "removerPertence": "Quitar {item}",
       "removerRemedio": "Quitar remedio",
-      "medicacaoSemHorario": "Un remedio sin horario no se vuelve tarea alguna, y nadie será avisado de darlo."
+      "restricoes": "Restricciones",
+      "titulo": "Entrada de {pet}",
+      "vendaSemAutorizacao": "La reserva vendió un servicio que depende de: {itens}. Sin la autorización la casa no puede ejecutarlo, y la cuenta sigue cobrando.",
+      "veterinario": "Veterinario de confianza",
+      "via": "Vía"
     },
     "checkout": {
+      "comoChegou": "Cómo llegó",
+      "comoChegouLede": "Registrado en el check-in. Compruébalo antes de entregar: es lo que responde \"ya llegó así\".",
       "confirmar": "Cerrar estancia",
       "devolvido": "Devuelto",
       "fechamento": "Cierre",
+      "foraDaLista": "Esta persona no estaba autorizada en la reserva. El nombre queda registrado en la estadía.",
       "oQueHouve": "Qué pasó con este artículo",
       "ocorrenciaTravada": "{total} incidencia grave aún sin aviso al responsable. | {total} incidencias graves aún sin aviso al responsable.",
+      "outraPessoa": "Otra persona",
+      "outraPessoaDica": "Nombre de quien vino a buscar",
       "perdaRelevante": "Perdió peso suficiente para merecer una conversación con el responsable.",
       "pertences": "Revisión de pertenencias",
       "pesagem": "Pesaje de salida",
       "pesoEntrada": "Entró con {valor}",
       "pesoSaida": "Peso de salida",
+      "quemRetira": "Quién se lo lleva",
       "registrarPeso": "Registrar peso",
       "saidaTardia": "Salida después del horario: {percentual}% de noche extra.",
       "saldo": "Saldo por cobrar",
       "titulo": "Salida de {pet}",
-      "comoChegou": "Cómo llegó",
-      "comoChegouLede": "Registrado en el check-in. Compruébalo antes de entregar: es lo que responde \"ya llegó así\".",
-      "quemRetira": "Quién se lo lleva",
-      "outraPessoa": "Otra persona",
-      "voltarALista": "Volver a la lista",
-      "outraPessoaDica": "Nombre de quien vino a buscar",
-      "foraDaLista": "Esta persona no estaba autorizada en la reserva. El nombre queda registrado en la estadía."
+      "voltarALista": "Volver a la lista"
     },
     "comum": {
       "cancelar": "Cancelar",
       "fechar": "Cerrar",
       "salvar": "Guardar"
+    },
+    "desenho": {
+      "arvore": "Árbol",
+      "cama": "Cama",
+      "cao": "Perro",
+      "casa": "Casa",
+      "coelho": "Conejo",
+      "escudo": "Escudo",
+      "gato": "Gato",
+      "grupo": "Grupo",
+      "passaro": "Pájaro"
     },
     "dev": {
       "casos": "Casos preparados",
@@ -3696,11 +3790,13 @@
       "admissao": "La documentación de admisión impide la entrada.",
       "boletimRetido": "El parte solo sale después de la llamada al responsable.",
       "cadastro": {
+        "em-uso": "Todavía hay algo apuntando a este elemento.",
         "nao-encontrada": "Alojamiento no encontrado.",
         "nome-repetido": "Ya existe un alojamiento con este nombre.",
         "ocupada": "Hay un huésped en este alojamiento ahora.",
         "tem-historico": "Este alojamiento ya ha hospedado: sácalo de servicio en vez de quitarlo.",
-        "tem-reserva": "Hay una reserva futura en este alojamiento."
+        "tem-reserva": "Hay una reserva futura en este alojamiento.",
+        "ultimo": "Debe quedar al menos uno."
       },
       "catalogos": "No se pudieron cargar los datos del hotel.",
       "estadia": "No se pudo cargar la estancia.",
@@ -3739,6 +3835,7 @@
       "autorizacoes": "Autorizaciones",
       "boletim": "Parte al responsable",
       "boletimRetido": "Retenido: falta la llamada al responsable.",
+      "comoEstaSeAdaptando": "Cómo se está adaptando",
       "comunicado": "Avisado a las {hora}",
       "diario": "Diario del huésped",
       "emergencia": "Emergencia",
@@ -3778,8 +3875,7 @@
       },
       "subtitulo": "Hotel",
       "titulo": "Estancia",
-      "voltar": "Huéspedes",
-      "comoEstaSeAdaptando": "Cómo se está adaptando"
+      "voltar": "Huéspedes"
     },
     "exigencia": {
       "antipulgas": "Antipulgas",
@@ -3826,6 +3922,14 @@
       "minutos": "{valor} min",
       "semvalor": "—"
     },
+    "gerenciar": {
+      "padrao": "Rutina estándar de la casa",
+      "padraoDica": "los horarios que valen para todos los huéspedes",
+      "propor": "Proponer rutina",
+      "proporDica": "sugerencia leída de la ficha, para revisar antes de aprobar",
+      "titulo": "Gestionar rutina",
+      "trocar": "Cambiar"
+    },
     "grade": {
       "acomodacao": "Alojamiento",
       "barraTitulo": "{pet} · {tutor} · {periodo}",
@@ -3855,9 +3959,17 @@
         "precisam": "Te necesitan",
         "saem": "Salen hoy"
       },
+      "busca": {
+        "dica": "Nombre de la mascota o del responsable",
+        "doTutor": "{total} huésped de {tutor} | {total} huéspedes de {tutor}",
+        "limpar": "Limpiar búsqueda",
+        "rotulo": "Buscar huésped",
+        "semResultado": "Ningún huésped encontrado para \"{termo}\"."
+      },
       "cartao": {
         "atrasadas": "{total} atrasada | {total} atrasadas",
         "boletimRetido": "El recado al responsable está parado esperando una llamada",
+        "com": "con {pet}",
         "faltaPesar": "Falta pesar antes de entregar",
         "hojeAs": "hoy a las {hora}",
         "noites": "{total} noche | {total} noches"
@@ -3877,9 +3989,9 @@
       "ninguemPrecisa": "Nadie te necesita ahora. La casa está al día.",
       "ninguemSai": "Hoy no sale nadie.",
       "recorte": {
-        "precisam": "Me necesitan ({total})",
-        "saem": "Salen hoy ({total})",
-        "todos": "Todos ({total})"
+        "precisam": "Me necesitan",
+        "saem": "Salen hoy",
+        "todos": "Todos"
       },
       "recorteRotulo": "Mostrar",
       "resumo": "{precisam} de {total} te necesita | {precisam} de {total} te necesitan",
@@ -3924,6 +4036,26 @@
       "vazioDescricao": "Registra los alojamientos de la casa para empezar a vender noches.",
       "vazioTitulo": "Ningún alojamiento registrado",
       "verReservas": "Ver reservas"
+    },
+    "medicacaoNova": {
+      "cancelar": "Cancelar",
+      "descricao": "Medicamento",
+      "descricaoDica": "Nombre y concentración, como está en la caja",
+      "dose": "Dosis",
+      "doseDica": "1 comprimido, 20 gotas, 2 ml",
+      "escolherHospede": "Elige el huésped",
+      "faltaHorario": "Sin horario, el medicamento no se convierte en ninguna tarea.",
+      "horarios": "Horarios",
+      "horariosDica": "Como se dictan por teléfono: 8:00, 20:00",
+      "hospede": "Huésped",
+      "observacao": "Observación",
+      "receita": "Receta",
+      "receitaDica": "Colegiado y número. Sin ella el medicamento se da igual, y queda pendiente en la ficha.",
+      "registrada": "Medicación registrada. Las dosis por venir ya están en la planilla.",
+      "registrar": "Registrar",
+      "soDaquiParaFrente": "Las dosis nacen a partir de ahora. La de hoy que ya pasó no se crea: una dosis que nace atrasada es un registro falso de dosis perdida.",
+      "titulo": "Registrar medicación",
+      "via": "Vía"
     },
     "modulo": {
       "oculto": "Módulo hotel oculto",
@@ -4030,12 +4162,51 @@
       "vazioDescricao": "No hay huéspedes en la casa ni llegadas previstas para hoy.",
       "vazioTitulo": "Nada que hacer hoy"
     },
+    "planoDaEstadia": {
+      "desde": "desde {data}",
+      "encerrar": "Finalizar",
+      "origemPessoa": "registrado a mano",
+      "origemProposta": "de una propuesta revisada",
+      "propor": "Proponer ajustes",
+      "semAjustes": "Este huésped sigue la rutina estándar de la casa.",
+      "suspenso": "suspendido",
+      "titulo": "Plan de la estancia"
+    },
     "porte": {
       "gigante": "Gigante",
       "grande": "Grande",
       "medio": "Mediano",
       "mini": "Mini",
       "pequeno": "Pequeño"
+    },
+    "proposta": {
+      "aprovada": "Ajustes guardados en la ficha del huésped.",
+      "aprovar": "Aprobar {total} cambio | Aprobar {total} cambios",
+      "aprovarNenhuma": "Aprobar",
+      "aviso": "En esta versión no hay modelo ni red: la propuesta viene de una simulación determinista sobre los datos de la casa. Lo real es el flujo de revisar y aprobar.",
+      "casaJaFaz": "La casa ya hace",
+      "daFicha": "De la ficha",
+      "descartadas": "{total} sugerencia descartada en la verificación | {total} sugerencias descartadas en la verificación",
+      "descartar": "Descartar",
+      "escolherHospede": "Elige el huésped",
+      "gerando": "Leyendo la ficha…",
+      "lidaEm": "leída de la ficha a las {hora}",
+      "motorLocal": "simulación local",
+      "nadaGravado": "no se guardó nada",
+      "naoEdita": "La casa no prescribe: para cambiar dosis u horario hace falta receta.",
+      "naoProponho": "Lo que no propongo",
+      "porqueAdaptacao": "el huésped fue recibido como {valor}",
+      "porqueCasa": "de la rutina estándar de la casa",
+      "porqueEstadiaLonga": "estancia de {valor} noches: el peso de salida sin un punto intermedio no dice cuándo adelgazó el animal",
+      "porqueInspecao": "inspección de entrada: \"{valor}\"",
+      "porqueMedicacao": "de la receta registrada: {valor}",
+      "porquePlano": "de los horarios de comida de la ficha",
+      "proponhoMudar": "Propongo cambiar",
+      "recusaMedicacao": "Medicación — no propongo medicamento ni dosis. El hotel no prescribe.",
+      "recusaRefeicao": "Comida — cambiar el horario de comida se acuerda con el responsable.",
+      "semMudancas": "Nada que proponer para este huésped: la rutina de la casa ya lo cubre.",
+      "titulo": "Propuesta de rutina",
+      "transcrita": "transcrita"
     },
     "recurso": {
       "area-externa": "Zona exterior",
@@ -4056,8 +4227,12 @@
     },
     "reserva": {
       "acompanhante": "Acompañante de la misma casa",
+      "acrescentarAutorizado": "Agregar autorizado",
+      "autorizados": "Quién más puede retirar",
+      "autorizadosDica": "Nombre de quien el responsable autoriza",
       "avisoAdmissao": "Documentación por resolver antes de la entrada: {itens}",
       "checkInBloqueado": "La entrada está bloqueada por documentación pendiente.",
+      "chegaAs": "llega a las",
       "confirmarSinal": "Registrar seña y confirmar",
       "criar": "Crear reserva",
       "diarias": "{total} noche | {total} noches",
@@ -4067,29 +4242,25 @@
       "hospede": "Huésped",
       "irParaEstadia": "Abrir estancia",
       "jaHospedado": "Este huésped ya está en la casa.",
+      "noitesAtalho": "{total} noche | {total} noches",
       "novaTitulo": "Nueva reserva · {acomodacao}",
       "observacao": "Observación del responsable",
       "observacaoDica": "Miedos, manías, lo que ayuda a calmarlo.",
       "origem": "Cómo llegó",
       "periodo": "Fechas",
       "porDiaria": " por noche",
+      "quantasNoites": "Noches",
+      "removerAutorizado": "Quitar {nome}",
+      "saiAs": "sale a las",
       "saidaTardia": "La salida prevista es después del horario: {valor} más en la cuenta.",
       "semAcompanhante": "Sin acompañante",
       "semServico": "Ningún servicio",
+      "semVaga": "Este alojamiento no sirve para ese período: {motivo}",
       "servicos": "Servicios",
       "sinalDevolve": "Cancelar dentro de este plazo aún devuelve la seña.",
       "sinalNaoDevolve": "Fuera de plazo: la cancelación no devuelve la seña.",
       "subtitulo": "Hotel",
-      "titulo": "Reserva",
-      "chegaAs": "llega a las",
-      "saiAs": "sale a las",
-      "autorizados": "Quién más puede retirar",
-      "autorizadosDica": "Nombre de quien el responsable autoriza",
-      "acrescentarAutorizado": "Agregar autorizado",
-      "removerAutorizado": "Quitar {nome}",
-      "quantasNoites": "Noches",
-      "noitesAtalho": "{total} noche | {total} noches",
-      "semVaga": "Este alojamiento no sirve para ese período: {motivo}"
+      "titulo": "Reserva"
     },
     "reservaStatus": {
       "cancelada": "Cancelada",
@@ -4116,6 +4287,9 @@
       "filtroAdmissao": "Documentación",
       "filtroBloco": "Bloque",
       "filtroStatus": "Situación",
+      "horizonte": "Mostrar",
+      "horizonteProximas": "A partir de hoy",
+      "horizonteTodas": "Todo, con historial",
       "novaNoMapa": "Nueva reserva",
       "semResultadoDescricao": "Ninguna reserva coincide con la búsqueda o los filtros.",
       "semResultadoTitulo": "Nada encontrado",
@@ -4124,10 +4298,7 @@
       "vazioDescricao": "Las reservas aparecen aquí en cuanto se cree la primera desde el mapa.",
       "vazioTitulo": "Ninguna reserva",
       "vesperaLede": "Llegan en los próximos tres días y aún no pueden entrar.",
-      "vesperaTitulo": "{total} llegada con documentación pendiente | {total} llegadas con documentación pendiente",
-      "horizonte": "Mostrar",
-      "horizonteProximas": "A partir de hoy",
-      "horizonteTodas": "Todo, con historial"
+      "vesperaTitulo": "{total} llegada con documentación pendiente | {total} llegadas con documentación pendiente"
     },
     "resumo": {
       "cancelamento": "Cancelación",
@@ -4183,6 +4354,43 @@
       "vazioDescricao": "La rutina nace con la entrada. Sin huéspedes no hay nada que hacer.",
       "vazioTitulo": "Ninguna tarea hoy"
     },
+    "rotinaPadrao": {
+      "aplicar": "Aplicar",
+      "ativo": "La casa hace esto",
+      "campoHorarios": "Horarios",
+      "campoHorariosDica": "Sepáralos con comas. Puedes escribir 8:00 o 08:00.",
+      "cancelar": "Cancelar",
+      "criadas": "{total} tarea nace | {total} tareas nacen",
+      "desfazer": "Deshacer",
+      "desligada": "apagada",
+      "desligadaDica": "Fuera del plan de la casa. Sigue disponible en la ficha de cada huésped.",
+      "editar": "Editar",
+      "editarTitulo": "Horarios de {servico}",
+      "exigeAutorizacao": "solo para quien tiene autorización del responsable",
+      "horarios": "{total} horario | {total} horarios",
+      "naoMexe": "Comida y medicación no se definen aquí: los horarios vienen de la ficha de cada huésped, y el hotel no prescribe.",
+      "noTurno": "{total} cae en el turno actual | {total} caen en el turno actual",
+      "porDia": "{total} tarea por huésped, por día | {total} tareas por huésped, por día",
+      "preservadas": "{total} tarea queda intacta | {total} tareas quedan intactas",
+      "preservadasDica": "Lo ya hecho, rechazado o saltado nunca se toca.",
+      "previsao": "Qué cambia esto",
+      "publicar": "Publicar cambios",
+      "publicarTitulo": "Publicar la rutina",
+      "rascunho": "Borrador sin publicar",
+      "retiradas": "{total} tarea sale | {total} tareas salen",
+      "semHorario": "sin horario",
+      "semHorarioDica": "Sin horario: la casa no genera esta tarea para nadie.",
+      "semMudanca": "Nada cambió.",
+      "subtitulo": "Lo que la casa hace por todos los huéspedes",
+      "titulo": "Rutina estándar",
+      "vazioDescricao": "La casa aún no declaró lo que hace por todos los huéspedes.",
+      "vazioTitulo": "Ningún servicio configurado",
+      "versao": "versión {versao} · por {pessoa}",
+      "vigencia": "A partir de cuándo",
+      "vigenciaAgora": "Ahora",
+      "vigenciaAmanha": "Mañana",
+      "vigenciaDica": "Empezar mañana no toca el turno de quien trabaja ahora."
+    },
     "servico": {
       "adestramento": "Adiestramiento",
       "banho": "Baño",
@@ -4220,11 +4428,235 @@
       "refeicao": "Comida",
       "tosa": "Corte de pelo"
     },
+    "tour": {
+      "acomodacoes": {
+        "blocos": {
+          "texto": "Canil A, Canil B, Gatil, Jardín. Cada tarjeta dice el tipo, el tamaño que acepta, cuántos caben y qué tarifa cobra. Haz clic para editar.",
+          "titulo": "Agrupadas por bloque"
+        },
+        "parada": {
+          "texto": "Una jaula en reforma sale del mapa y no se puede vender. El \"hace cuántos días\" es la información: parada hace dos horas es mantenimiento; hace tres semanas, es plaza olvidada.",
+          "titulo": "Fuera de operación, con fecha"
+        },
+        "pergunta": {
+          "texto": "Cómo está montada la casa. El sistema no adivina cuántas jaulas tienes: quien las registra es la operación, el día en que la casa cambia.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "tarifas": {
+          "texto": "La casa son los pasillos y las plazas. Tarifas cruza tabla y tamaño, y el acompañante entra por un porcentaje. Las temporadas son recurrentes: valen todos los años en el mismo rango de fechas.",
+          "titulo": "Tres registros, tres pestañas"
+        }
+      },
+      "anterior": "Anterior",
+      "estadia": {
+        "checkout": {
+          "texto": "El check-out no cierra mientras cada pertenencia no sea verificada y el animal no sea pesado de nuevo. Es el reclamo más barato de evitar y el más caro de resolver.",
+          "titulo": "Lo que entró tiene que salir"
+        },
+        "ficha": {
+          "texto": "Lo que acordó el responsable: comida y horarios, medicación, lo que vino en la maleta, lo que autorizó y a quién llamar en una emergencia.",
+          "titulo": "La ficha de la estadía"
+        },
+        "ocorrencias": {
+          "texto": "La mala noticia no va por aplicación. Una ocurrencia grave retiene el boletín del responsable hasta que alguien de la casa llame, y el botón de registrar la llamada está al lado.",
+          "titulo": "Ocurrencias y el boletín"
+        },
+        "pergunta": {
+          "texto": "Cómo está pasando ese animal. Todo sobre el hospedaje en un lugar, y el check-out se hace desde aquí.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "rotina": {
+          "texto": "Las tareas nacen de la ficha de entrada: la comida que mandó el responsable, el remedio en el horario, el paseo. Se puede marcar desde aquí sin volver a la planilla del turno.",
+          "titulo": "La rutina de hoy, solo de él"
+        }
+      },
+      "hospedes": {
+        "cartao": {
+          "texto": "El disco muestra qué servicio es, y se llena cuando llega la hora. El número al lado cuenta cuántas ya se retrasaron. Es la única línea de la tarjeta que cambia sola, sin que nadie toque la pantalla.",
+          "titulo": "La línea que pide acción"
+        },
+        "linhas": {
+          "texto": "Los tranquilos pasan a una lista fina al pie de la página, para que el espacio sea de quien te necesita. Haz clic en el título de la franja para abrirla y cerrarla.",
+          "titulo": "Quien está al día queda recogido"
+        },
+        "pergunta": {
+          "texto": "Cómo está cada animal en la casa. Una tarjeta por huésped, ordenadas por quien te necesita primero.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "recortes": {
+          "texto": "Todos, los que te necesitan, y los que salen hoy. El del medio se mira a mitad del turno; el de la derecha, al final de la mañana.",
+          "titulo": "Tres recortes"
+        }
+      },
+      "mapa": {
+        "grade": {
+          "texto": "Cada fila es un alojamiento, cada columna una noche. Las barras son lo ya vendido, y el vacío entre ellas es donde cabe la próxima reserva. Haz clic en un vacío para reservar desde ese día.",
+          "titulo": "El calendario de la casa"
+        },
+        "legenda": {
+          "texto": "Quién está en la casa ahora, qué está confirmado, qué aún no pagó seña y qué está fuera de operación. La barra rayada es un alojamiento detenido, y no se puede vender.",
+          "titulo": "Qué significa cada color"
+        },
+        "pergunta": {
+          "texto": "¿Hay lugar en ese período? Todo aquí existe para que respondas eso con el teléfono en la mano.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "procura": {
+          "texto": "Especie, tamaño, las fechas y cuántos animales. Es la misma frase que dice la persona al teléfono, en el mismo orden.",
+          "titulo": "Di lo que están buscando"
+        },
+        "resposta": {
+          "texto": "Cuántos alojamientos sirven para ese período. Verde significa que sí; rojo, que no hay lugar.",
+          "titulo": "La respuesta, en una frase"
+        }
+      },
+      "painel": {
+        "colunas": {
+          "texto": "La misma información de la línea, en lista, con el sello de lo que impide. Haz clic en cualquier fila para abrir la reserva o la estadía.",
+          "titulo": "Quién llega y quién sale"
+        },
+        "pergunta": {
+          "texto": "Qué pasa hoy. Es la primera pantalla del día: ábrela por la mañana y sabes qué viene primero.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "resumo": {
+          "texto": "Cuántos están en la casa, cuántos llegan, cuántos salen y cuántas tareas hay para ahora. Cuatro números que caben en una frase.",
+          "titulo": "El día en una línea"
+        },
+        "travas": {
+          "texto": "Abre la pantalla porque tiene plazo: una llamada pendiente, un boletín retenido detrás de ella, un animal que llega sin vacuna. Cada ítem es un botón que lleva al lugar donde se resuelve.",
+          "titulo": "Lo que te necesita ahora"
+        },
+        "trilho": {
+          "texto": "Llegadas arriba, salidas abajo, y una marca en \"ahora\". El triángulo al lado de un nombre significa que esa entrada o salida está trabada.",
+          "titulo": "La línea del tiempo del día"
+        }
+      },
+      "passo": "{atual} de {total}",
+      "proximo": "Siguiente",
+      "reserva": {
+        "checkin": {
+          "texto": "Hacer check-in queda bloqueado mientras haya documento que impida. No es recordatorio: es regla, y no se puede esquivar por esta ni por ninguna pantalla.",
+          "titulo": "El botón solo se enciende cuando se puede"
+        },
+        "exigencias": {
+          "texto": "La validez se comprueba contra el último día de la estadía, no contra hoy. Rojo impide la entrada; ámbar avisa que vence a mitad de la estadía y todavía da tiempo de renovar.",
+          "titulo": "La documentación de admisión"
+        },
+        "pergunta": {
+          "texto": "Cuánto cuesta, y si ese animal puede entrar. Es el contrato del hospedaje, y de aquí sale el check-in.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "periodo": {
+          "texto": "Entrada, salida, cuántas diarias y en qué alojamiento. Si la salida prevista pasa del horario de la casa, la media diaria ya aparece en el presupuesto, no es sorpresa en el mostrador.",
+          "titulo": "El período y la cuenta"
+        }
+      },
+      "reservas": {
+        "espera": {
+          "texto": "La lista de espera está al pie porque solo se consulta cuando cae una reserva, y en ese momento ya estás en esta pantalla.",
+          "titulo": "Quién se quedó sin lugar"
+        },
+        "horizonte": {
+          "texto": "La pantalla abre en lo que viene, que es la pregunta del día a día. El historial no desapareció: está en la otra opción, para cuando busques la estadía del mes pasado.",
+          "titulo": "Hasta dónde mira la lista"
+        },
+        "pergunta": {
+          "texto": "Qué está vendido y qué va a dar trabajo. Es la pantalla de la víspera: ábrela al final de la tarde para saber qué resolver antes de mañana.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "tabela": {
+          "texto": "Documentación es ordenable: un clic en el encabezado pone arriba todo lo que va a trabar en el mostrador. Por ahí se barre la semana.",
+          "titulo": "La columna que importa"
+        },
+        "vespera": {
+          "texto": "Quién llega en los próximos tres días y aún no puede entrar por falta de documento. Tres días porque es el plazo en que el responsable todavía puede traerlo.",
+          "titulo": "Lo que no puede esperar"
+        }
+      },
+      "resumo": {
+        "cartoes": {
+          "texto": "Ingreso por origen de la reserva y por servicio, las ocurrencias del período, y las pérdidas. Cancelación es aviso, se pudo revender; no comparecer es plaza quemada.",
+          "titulo": "De dónde viene, y qué se pierde"
+        },
+        "grafico": {
+          "texto": "Dibujada día a día, no como media: la media esconde justo lo que se quiere ver, que es la casa llenarse el fin de semana y vaciarse el martes.",
+          "titulo": "Ocupación día a día"
+        },
+        "numeros": {
+          "texto": "Ocupación media, ingreso, diaria media y retorno. El retorno cuenta responsables que ya habían venido antes: es fidelidad, no volumen.",
+          "titulo": "Los cuatro números"
+        },
+        "pergunta": {
+          "texto": "Valió la pena el mes. Es la única pantalla que mira hacia atrás, y sirve para decidir, no para operar.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "periodo": {
+          "texto": "Abre en los últimos treinta días. Todo número y toda tarjeta de esta pantalla responde por el período elegido aquí, y por ningún otro.",
+          "titulo": "Elige el período"
+        }
+      },
+      "rotina": {
+        "filtros": {
+          "texto": "Comida, medicación, paseo, higiene, agua. Quien va a servir la comida de todos filtra por comida y baja la lista.",
+          "titulo": "Un tipo de tarea por vez"
+        },
+        "marcar": {
+          "texto": "Hecha, rechazó o saltar, directo en la línea. \"Rechazó\" no es un error: es información clínica, y cuatro comidas rechazadas seguidas se vuelven una ocurrencia.",
+          "titulo": "Marcar cuesta un toque"
+        },
+        "passagem": {
+          "texto": "Al pie de la planilla: cuántas tareas quedan para quien asume y qué impide la entrega. Aparece desde el comienzo del turno, no solo a la hora de pasarlo — una incidencia sin contacto a las 22h ya no se resuelve.",
+          "titulo": "El turno acaba aquí"
+        },
+        "pergunta": {
+          "texto": "Qué hay que hacer ahora. Es la planilla del turno: déjala abierta en el celular mientras trabajas en el canil.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "progresso": {
+          "texto": "Cuántas tareas del día ya se marcaron, del total. Sirve para saber si el turno está al día sin contar línea por línea.",
+          "titulo": "Cuánto ya se hizo"
+        },
+        "ronda": {
+          "texto": "Las tareas del mismo servicio en el mismo horario forman una ronda — \"Comida, 20 animales\". La ronda corta ya viene abierta; la larga se abre con un toque. Se puede marcar la ronda entera de una vez, salvo la de medicación: el remedio se marca uno a uno.",
+          "titulo": "Una ronda, no veinte líneas"
+        },
+        "tempo": {
+          "texto": "Las tareas se agrupan en rondas, y cada ronda lleva la hora delante. Lo atrasado sube a \"Para ahora\", con la hora en rojo — no se pierde en medio de la lista.",
+          "titulo": "Ahora, más tarde, y lo que pasó"
+        }
+      },
+      "rotinaPadrao": {
+        "limite": {
+          "texto": "Comida y medicación no aparecen: los horarios vienen de la ficha de cada huésped. El hotel no prescribe, y ninguna configuración puede crear ni cambiar una dosis.",
+          "titulo": "Lo que no se configura aquí"
+        },
+        "pergunta": {
+          "texto": "Lo que la casa hace por todos los huéspedes, y a qué horas. Es la base que hereda la rutina de cada animal.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "publicar": {
+          "texto": "Antes de guardar, la pantalla muestra cuántas tareas nacen, cuántas salen y cuántas quedan intactas. Lo ya hecho nunca se toca, y empezar mañana no toca el turno actual.",
+          "titulo": "Publicar dice antes lo que va a hacer"
+        },
+        "regua": {
+          "texto": "Cada banda es un servicio de la casa, con sus horarios marcados sobre las 24 horas. De lejos se ve si el día está bien repartido o si todo cae por la mañana.",
+          "titulo": "El día entero en una regla"
+        }
+      },
+      "sair": "Cerrar",
+      "terminar": "Entendido"
+    },
     "turno": {
+      "assumeCom": "asume {turno} · {pessoa}",
       "boletinsRetidos": "Partes retenidos",
       "boletinsRetidosTexto": "{total} parte espera una llamada antes de salir. | {total} partes esperan una llamada antes de salir.",
+      "entra": "asume",
       "entregar": "Entregar turno",
+      "ficam": "{total} tarea queda para quien asume | {total} tareas quedan para quien asume",
+      "fimDoTurno": "Fin del turno",
       "manha": "Mañana",
+      "nadaTrava": "Nada impide la entrega",
       "noite": "Noche",
       "nota": "Nota de cambio",
       "notaDica": "Lo que el turno siguiente necesita saber y la lista no dice.",
@@ -4232,17 +4664,12 @@
       "pendencias": "Queda pendiente ({total} tarea) | Queda pendiente ({total} tareas)",
       "recebidoPor": "Quién asume",
       "resolver": "Resolver",
+      "sai": "entrega",
       "semPendencias": "Nada queda pendiente en este turno.",
       "tarde": "Tarde",
       "titulo": "Cambio de turno",
-      "travado": "Esto impide el cambio",
-      "sai": "entrega",
-      "entra": "asume",
-      "fimDoTurno": "Fin del turno",
-      "assumeCom": "asume {turno} · {pessoa}",
-      "ficam": "{total} tarea queda para quien asume | {total} tareas quedan para quien asume",
       "travaEntrega": "{total} incidencia sin contacto impide la entrega | {total} incidencias sin contacto impiden la entrega",
-      "nadaTrava": "Nada impide la entrega"
+      "travado": "Esto impide el cambio"
     },
     "via": {
       "oftalmica": "Oftálmica",
@@ -4250,356 +4677,6 @@
       "otologica": "Ótica",
       "subcutanea": "Subcutánea",
       "topica": "Tópica"
-    },
-    "tour": {
-      "passo": "{atual} de {total}",
-      "proximo": "Siguiente",
-      "anterior": "Anterior",
-      "terminar": "Entendido",
-      "sair": "Cerrar",
-      "mapa": {
-        "pergunta": {
-          "titulo": "La pregunta de esta pantalla",
-          "texto": "¿Hay lugar en ese período? Todo aquí existe para que respondas eso con el teléfono en la mano."
-        },
-        "procura": {
-          "titulo": "Di lo que están buscando",
-          "texto": "Especie, tamaño, las fechas y cuántos animales. Es la misma frase que dice la persona al teléfono, en el mismo orden."
-        },
-        "resposta": {
-          "titulo": "La respuesta, en una frase",
-          "texto": "Cuántos alojamientos sirven para ese período. Verde significa que sí; rojo, que no hay lugar."
-        },
-        "grade": {
-          "titulo": "El calendario de la casa",
-          "texto": "Cada fila es un alojamiento, cada columna una noche. Las barras son lo ya vendido, y el vacío entre ellas es donde cabe la próxima reserva. Haz clic en un vacío para reservar desde ese día."
-        },
-        "legenda": {
-          "titulo": "Qué significa cada color",
-          "texto": "Quién está en la casa ahora, qué está confirmado, qué aún no pagó seña y qué está fuera de operación. La barra rayada es un alojamiento detenido, y no se puede vender."
-        }
-      },
-      "reservas": {
-        "pergunta": {
-          "titulo": "La pregunta de esta pantalla",
-          "texto": "Qué está vendido y qué va a dar trabajo. Es la pantalla de la víspera: ábrela al final de la tarde para saber qué resolver antes de mañana."
-        },
-        "vespera": {
-          "titulo": "Lo que no puede esperar",
-          "texto": "Quién llega en los próximos tres días y aún no puede entrar por falta de documento. Tres días porque es el plazo en que el responsable todavía puede traerlo."
-        },
-        "horizonte": {
-          "titulo": "Hasta dónde mira la lista",
-          "texto": "La pantalla abre en lo que viene, que es la pregunta del día a día. El historial no desapareció: está en la otra opción, para cuando busques la estadía del mes pasado."
-        },
-        "tabela": {
-          "titulo": "La columna que importa",
-          "texto": "Documentación es ordenable: un clic en el encabezado pone arriba todo lo que va a trabar en el mostrador. Por ahí se barre la semana."
-        },
-        "espera": {
-          "titulo": "Quién se quedó sin lugar",
-          "texto": "La lista de espera está al pie porque solo se consulta cuando cae una reserva, y en ese momento ya estás en esta pantalla."
-        }
-      },
-      "painel": {
-        "pergunta": {
-          "titulo": "La pregunta de esta pantalla",
-          "texto": "Qué pasa hoy. Es la primera pantalla del día: ábrela por la mañana y sabes qué viene primero."
-        },
-        "travas": {
-          "titulo": "Lo que te necesita ahora",
-          "texto": "Abre la pantalla porque tiene plazo: una llamada pendiente, un boletín retenido detrás de ella, un animal que llega sin vacuna. Cada ítem es un botón que lleva al lugar donde se resuelve."
-        },
-        "resumo": {
-          "titulo": "El día en una línea",
-          "texto": "Cuántos están en la casa, cuántos llegan, cuántos salen y cuántas tareas hay para ahora. Cuatro números que caben en una frase."
-        },
-        "trilho": {
-          "titulo": "La línea del tiempo del día",
-          "texto": "Llegadas arriba, salidas abajo, y una marca en \"ahora\". El triángulo al lado de un nombre significa que esa entrada o salida está trabada."
-        },
-        "colunas": {
-          "titulo": "Quién llega y quién sale",
-          "texto": "La misma información de la línea, en lista, con el sello de lo que impide. Haz clic en cualquier fila para abrir la reserva o la estadía."
-        }
-      },
-      "rotina": {
-        "pergunta": {
-          "titulo": "La pregunta de esta pantalla",
-          "texto": "Qué hay que hacer ahora. Es la planilla del turno: déjala abierta en el celular mientras trabajas en el canil."
-        },
-        "progresso": {
-          "titulo": "Cuánto ya se hizo",
-          "texto": "Cuántas tareas del día ya se marcaron, del total. Sirve para saber si el turno está al día sin contar línea por línea."
-        },
-        "filtros": {
-          "titulo": "Un tipo de tarea por vez",
-          "texto": "Comida, medicación, paseo, higiene, agua. Quien va a servir la comida de todos filtra por comida y baja la lista."
-        },
-        "tempo": {
-          "titulo": "Ahora, más tarde, y lo que pasó",
-          "texto": "Las tareas se agrupan en rondas, y cada ronda lleva la hora delante. Lo atrasado sube a \"Para ahora\", con la hora en rojo — no se pierde en medio de la lista."
-        },
-        "marcar": {
-          "titulo": "Marcar cuesta un toque",
-          "texto": "Hecha, rechazó o saltar, directo en la línea. \"Rechazó\" no es un error: es información clínica, y cuatro comidas rechazadas seguidas se vuelven una ocurrencia."
-        },
-        "ronda": {
-          "titulo": "Una ronda, no veinte líneas",
-          "texto": "Las tareas del mismo servicio en el mismo horario forman una ronda — \"Comida, 20 animales\". La ronda corta ya viene abierta; la larga se abre con un toque. Se puede marcar la ronda entera de una vez, salvo la de medicación: el remedio se marca uno a uno."
-        },
-        "passagem": {
-          "titulo": "El turno acaba aquí",
-          "texto": "Al pie de la planilla: cuántas tareas quedan para quien asume y qué impide la entrega. Aparece desde el comienzo del turno, no solo a la hora de pasarlo — una incidencia sin contacto a las 22h ya no se resuelve."
-        }
-      },
-      "hospedes": {
-        "pergunta": {
-          "titulo": "La pregunta de esta pantalla",
-          "texto": "Cómo está cada animal en la casa. Una tarjeta por huésped, ordenadas por quien te necesita primero."
-        },
-        "recortes": {
-          "titulo": "Tres recortes",
-          "texto": "Todos, los que te necesitan, y los que salen hoy. El del medio se mira a mitad del turno; el de la derecha, al final de la mañana."
-        },
-        "cartao": {
-          "titulo": "La línea que pide acción",
-          "texto": "El disco muestra qué servicio es, y se llena cuando llega la hora. El número al lado cuenta cuántas ya se retrasaron. Es la única línea de la tarjeta que cambia sola, sin que nadie toque la pantalla."
-        },
-        "linhas": {
-          "titulo": "Quien está al día queda recogido",
-          "texto": "Los tranquilos pasan a una lista fina al pie de la página, para que el espacio sea de quien te necesita. Haz clic en el título de la franja para abrirla y cerrarla."
-        }
-      },
-      "reserva": {
-        "pergunta": {
-          "titulo": "La pregunta de esta pantalla",
-          "texto": "Cuánto cuesta, y si ese animal puede entrar. Es el contrato del hospedaje, y de aquí sale el check-in."
-        },
-        "periodo": {
-          "titulo": "El período y la cuenta",
-          "texto": "Entrada, salida, cuántas diarias y en qué alojamiento. Si la salida prevista pasa del horario de la casa, la media diaria ya aparece en el presupuesto, no es sorpresa en el mostrador."
-        },
-        "exigencias": {
-          "titulo": "La documentación de admisión",
-          "texto": "La validez se comprueba contra el último día de la estadía, no contra hoy. Rojo impide la entrada; ámbar avisa que vence a mitad de la estadía y todavía da tiempo de renovar."
-        },
-        "checkin": {
-          "titulo": "El botón solo se enciende cuando se puede",
-          "texto": "Hacer check-in queda bloqueado mientras haya documento que impida. No es recordatorio: es regla, y no se puede esquivar por esta ni por ninguna pantalla."
-        }
-      },
-      "estadia": {
-        "pergunta": {
-          "titulo": "La pregunta de esta pantalla",
-          "texto": "Cómo está pasando ese animal. Todo sobre el hospedaje en un lugar, y el check-out se hace desde aquí."
-        },
-        "rotina": {
-          "titulo": "La rutina de hoy, solo de él",
-          "texto": "Las tareas nacen de la ficha de entrada: la comida que mandó el responsable, el remedio en el horario, el paseo. Se puede marcar desde aquí sin volver a la planilla del turno."
-        },
-        "ocorrencias": {
-          "titulo": "Ocurrencias y el boletín",
-          "texto": "La mala noticia no va por aplicación. Una ocurrencia grave retiene el boletín del responsable hasta que alguien de la casa llame, y el botón de registrar la llamada está al lado."
-        },
-        "ficha": {
-          "titulo": "La ficha de la estadía",
-          "texto": "Lo que acordó el responsable: comida y horarios, medicación, lo que vino en la maleta, lo que autorizó y a quién llamar en una emergencia."
-        },
-        "checkout": {
-          "titulo": "Lo que entró tiene que salir",
-          "texto": "El check-out no cierra mientras cada pertenencia no sea verificada y el animal no sea pesado de nuevo. Es el reclamo más barato de evitar y el más caro de resolver."
-        }
-      },
-      "acomodacoes": {
-        "pergunta": {
-          "titulo": "La pregunta de esta pantalla",
-          "texto": "Cómo está montada la casa. El sistema no adivina cuántas jaulas tienes: quien las registra es la operación, el día en que la casa cambia."
-        },
-        "blocos": {
-          "titulo": "Agrupadas por bloque",
-          "texto": "Canil A, Canil B, Gatil, Jardín. Cada tarjeta dice el tipo, el tamaño que acepta, cuántos caben y qué tarifa cobra. Haz clic para editar."
-        },
-        "parada": {
-          "titulo": "Fuera de operación, con fecha",
-          "texto": "Una jaula en reforma sale del mapa y no se puede vender. El \"hace cuántos días\" es la información: parada hace dos horas es mantenimiento; hace tres semanas, es plaza olvidada."
-        },
-        "tarifas": {
-          "titulo": "Precio por tamaño, y temporada",
-          "texto": "La tabla cruza tarifa y tamaño, y el acompañante entra por un porcentaje. Las temporadas están abajo: son recurrentes, valen todos los años en el mismo rango de fechas."
-        }
-      },
-      "resumo": {
-        "pergunta": {
-          "titulo": "La pregunta de esta pantalla",
-          "texto": "Valió la pena el mes. Es la única pantalla que mira hacia atrás, y sirve para decidir, no para operar."
-        },
-        "periodo": {
-          "titulo": "Elige el período",
-          "texto": "Abre en los últimos treinta días. Todo número y toda tarjeta de esta pantalla responde por el período elegido aquí, y por ningún otro."
-        },
-        "numeros": {
-          "titulo": "Los cuatro números",
-          "texto": "Ocupación media, ingreso, diaria media y retorno. El retorno cuenta responsables que ya habían venido antes: es fidelidad, no volumen."
-        },
-        "grafico": {
-          "titulo": "Ocupación día a día",
-          "texto": "Dibujada día a día, no como media: la media esconde justo lo que se quiere ver, que es la casa llenarse el fin de semana y vaciarse el martes."
-        },
-        "cartoes": {
-          "titulo": "De dónde viene, y qué se pierde",
-          "texto": "Ingreso por origen de la reserva y por servicio, las ocurrencias del período, y las pérdidas. Cancelación es aviso, se pudo revender; no comparecer es plaza quemada."
-        }
-      },
-      "rotinaPadrao": {
-        "pergunta": {
-          "titulo": "La pregunta de esta pantalla",
-          "texto": "Lo que la casa hace por todos los huéspedes, y a qué horas. Es la base que hereda la rutina de cada animal."
-        },
-        "regua": {
-          "titulo": "El día entero en una regla",
-          "texto": "Cada banda es un servicio de la casa, con sus horarios marcados sobre las 24 horas. De lejos se ve si el día está bien repartido o si todo cae por la mañana."
-        },
-        "limite": {
-          "titulo": "Lo que no se configura aquí",
-          "texto": "Comida y medicación no aparecen: los horarios vienen de la ficha de cada huésped. El hotel no prescribe, y ninguna configuración puede crear ni cambiar una dosis."
-        },
-        "publicar": {
-          "titulo": "Publicar dice antes lo que va a hacer",
-          "texto": "Antes de guardar, la pantalla muestra cuántas tareas nacen, cuántas salen y cuántas quedan intactas. Lo ya hecho nunca se toca, y empezar mañana no toca el turno actual."
-        }
-      }
-    },
-    "rotinaPadrao": {
-      "aplicar": "Aplicar",
-      "ativo": "La casa hace esto",
-      "campoHorarios": "Horarios",
-      "campoHorariosDica": "Como se dictan por teléfono: 8:00, 12:00, 18:00",
-      "cancelar": "Cancelar",
-      "criadas": "{total} tarea nace | {total} tareas nacen",
-      "desfazer": "Deshacer",
-      "desligada": "apagada",
-      "editar": "Editar",
-      "editarTitulo": "Horarios de {servico}",
-      "exigeAutorizacao": "solo para quien tiene autorización del responsable",
-      "horarios": "{total} horario | {total} horarios",
-      "naoMexe": "Comida y medicación no se definen aquí: los horarios vienen de la ficha de cada huésped, y el hotel no prescribe.",
-      "noTurno": "{total} cae en el turno actual | {total} caen en el turno actual",
-      "porDia": "{total} tarea por huésped, por día | {total} tareas por huésped, por día",
-      "preservadas": "{total} tarea queda intacta | {total} tareas quedan intactas",
-      "preservadasDica": "Lo ya hecho, rechazado o saltado nunca se toca.",
-      "previsao": "Qué cambia esto",
-      "publicar": "Publicar cambios",
-      "publicarTitulo": "Publicar la rutina",
-      "retiradas": "{total} tarea sale | {total} tareas salen",
-      "semHorario": "sin horario",
-      "semMudanca": "Nada cambió.",
-      "subtitulo": "Lo que la casa hace por todos los huéspedes",
-      "titulo": "Rutina estándar",
-      "vazioDescricao": "La casa aún no declaró lo que hace por todos los huéspedes.",
-      "vazioTitulo": "Ningún servicio configurado",
-      "versao": "versión {versao} · por {pessoa}",
-      "vigencia": "A partir de cuándo",
-      "vigenciaAgora": "Ahora",
-      "vigenciaAmanha": "Mañana",
-      "vigenciaDica": "Empezar mañana no toca el turno de quien trabaja ahora."
-    },
-    "gerenciar": {
-      "padrao": "Rutina estándar de la casa",
-      "padraoDica": "los horarios que valen para todos los huéspedes",
-      "propor": "Proponer rutina",
-      "proporDica": "sugerencia leída de la ficha, para revisar antes de aprobar",
-      "titulo": "Gestionar rutina",
-      "trocar": "Cambiar"
-    },
-    "medicacaoNova": {
-      "titulo": "Registrar medicación",
-      "hospede": "Huésped",
-      "escolherHospede": "Elige el huésped",
-      "descricao": "Medicamento",
-      "descricaoDica": "Nombre y concentración, como está en la caja",
-      "via": "Vía",
-      "dose": "Dosis",
-      "doseDica": "1 comprimido, 20 gotas, 2 ml",
-      "horarios": "Horarios",
-      "horariosDica": "Como se dictan por teléfono: 8:00, 20:00",
-      "receita": "Receta",
-      "receitaDica": "Colegiado y número. Sin ella el medicamento se da igual, y queda pendiente en la ficha.",
-      "observacao": "Observación",
-      "soDaquiParaFrente": "Las dosis nacen a partir de ahora. La de hoy que ya pasó no se crea: una dosis que nace atrasada es un registro falso de dosis perdida.",
-      "faltaHorario": "Sin horario, el medicamento no se convierte en ninguna tarea.",
-      "registrar": "Registrar",
-      "cancelar": "Cancelar",
-      "registrada": "Medicación registrada. Las dosis por venir ya están en la planilla."
-    },
-    "proposta": {
-      "titulo": "Propuesta de rutina",
-      "escolherHospede": "Elige el huésped",
-      "lidaEm": "leída de la ficha a las {hora}",
-      "motorLocal": "simulación local",
-      "nadaGravado": "no se guardó nada",
-      "aviso": "En esta versión no hay modelo ni red: la propuesta viene de una simulación determinista sobre los datos de la casa. Lo real es el flujo de revisar y aprobar.",
-      "casaJaFaz": "La casa ya hace",
-      "daFicha": "De la ficha",
-      "proponhoMudar": "Propongo cambiar",
-      "transcrita": "transcrita",
-      "naoEdita": "La casa no prescribe: para cambiar dosis u horario hace falta receta.",
-      "naoProponho": "Lo que no propongo",
-      "recusaMedicacao": "Medicación — no propongo medicamento ni dosis. El hotel no prescribe.",
-      "recusaRefeicao": "Comida — cambiar el horario de comida se acuerda con el responsable.",
-      "porqueInspecao": "inspección de entrada: \"{valor}\"",
-      "porqueAdaptacao": "el huésped fue recibido como {valor}",
-      "porqueEstadiaLonga": "estancia de {valor} noches: el peso de salida sin un punto intermedio no dice cuándo adelgazó el animal",
-      "porqueMedicacao": "de la receta registrada: {valor}",
-      "porquePlano": "de los horarios de comida de la ficha",
-      "porqueCasa": "de la rutina estándar de la casa",
-      "descartadas": "{total} sugerencia descartada en la verificación | {total} sugerencias descartadas en la verificación",
-      "semMudancas": "Nada que proponer para este huésped: la rutina de la casa ya lo cubre.",
-      "aprovar": "Aprobar {total} cambio | Aprobar {total} cambios",
-      "aprovarNenhuma": "Aprobar",
-      "descartar": "Descartar",
-      "aprovada": "Ajustes guardados en la ficha del huésped.",
-      "gerando": "Leyendo la ficha…"
-    },
-    "planoDaEstadia": {
-      "titulo": "Plan de la estancia",
-      "semAjustes": "Este huésped sigue la rutina estándar de la casa.",
-      "suspenso": "suspendido",
-      "desde": "desde {data}",
-      "encerrar": "Finalizar",
-      "propor": "Proponer ajustes",
-      "origemProposta": "de una propuesta revisada",
-      "origemPessoa": "registrado a mano"
-    },
-    "acrescentar": {
-      "acrescentar": "Añadir",
-      "ajusteCasaFaz": "la casa hace {horarios}",
-      "ajusteCasaNaoFaz": "la casa no hace este servicio",
-      "ajusteHorarios": "Horarios para este huésped",
-      "ajusteServico": "Servicio de la casa",
-      "ajusteVazio": "Deja vacío para suspender este servicio solo para él.",
-      "cancelar": "Cancelar",
-      "cuidadoIrParaMedicacao": "Registrar medicación",
-      "cuidadoNaoEhRemedio": "El medicamento no entra aquí. Dosis y receta viven en Medicación, y de ahí sale el respaldo para administrar el medicamento de otra persona.",
-      "cuidadoOQue": "Qué hacer",
-      "cuidadoOQueDica": "En palabras de quien lo ejecuta: cambiar el vendaje de la pata derecha",
-      "faltaMotivo": "Sin motivo, nadie sabrá cómo deshacer esto después.",
-      "motivo": "Motivo",
-      "motivoDica": "En diciembre es la única línea que explica por qué este huésped es distinto.",
-      "oQue": "Qué añadir",
-      "servicoCobra": "{preco} entran en la cuenta de la estancia.",
-      "servicoDia": "Día",
-      "servicoHora": "Hora",
-      "servicoQual": "Servicio",
-      "titulo": "Añadir a la rutina",
-      "viaAjuste": "Ajustar horarios de la casa",
-      "viaAjusteDica": "cambiar o suspender solo para este huésped",
-      "viaCuidado": "Cuidado del huésped",
-      "viaCuidadoDica": "vendaje, compresa, abrigo — sin dosis",
-      "viaMedicacao": "Medicación",
-      "viaMedicacaoDica": "medicamento con dosis y receta",
-      "viaServico": "Servicio extra",
-      "viaServicoDica": "baño, peluquería, paseo — se cobra"
     }
   },
   "cronometro": {

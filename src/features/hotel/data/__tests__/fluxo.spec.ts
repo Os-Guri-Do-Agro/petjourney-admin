@@ -601,6 +601,15 @@ describe('a casa cadastra a própria rotina', () => {
       item.kind === 'agua' ? { ...item, horarios: [...item.horarios, '23:45'] } : item,
     )
 
+    /*
+     * Amanhã é materializado antes de publicar, e não por capricho: `reconciliarDia` só cria o que
+     * ainda está à frente do relógio (`previstaPara > agora`), então o horário das 23:45 **de hoje**
+     * deixa de nascer a partir das 23:45 de hoje. Este teste reprovava todo dia entre 23:45 e a
+     * meia-noite, e reprovava dizendo "expected 0 to be greater than 0" — que não aponta para o
+     * relógio nem de longe. Com o dia seguinte no jogo, o horário está sempre no futuro.
+     */
+    await hospedagemRepository.rotina(addDays(dataset.ancora, 1))
+
     await rotinaPadraoRepository.publicar({
       itens: novos,
       vigenteDesde: `${dataset.ancora}T00:00:00-04:00`,

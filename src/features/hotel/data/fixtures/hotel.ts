@@ -21,6 +21,7 @@ import type {
   Servico,
   Tarifa,
   Temporada,
+  TipoDeAcomodacao,
 } from '../types'
 
 export const HOTEL_UTC_OFFSET = CLINIC_UTC_OFFSET
@@ -47,11 +48,11 @@ export const hotelFixture: Hotel = {
 }
 
 export const blocosFixture: Bloco[] = [
-  { id: 'bloco-canil-a', nome: 'Canil A', kind: 'canil', ordem: 1 },
-  { id: 'bloco-canil-b', nome: 'Canil B', kind: 'canil', ordem: 2 },
-  { id: 'bloco-gatil', nome: 'Gatil', kind: 'gatil', ordem: 3 },
-  { id: 'bloco-jardim', nome: 'Jardim', kind: 'externo', ordem: 4 },
-  { id: 'bloco-isolamento', nome: 'Isolamento', kind: 'isolamento', ordem: 5 },
+  { id: 'bloco-canil-a', nome: 'Canil A', icone: 'cao', ordem: 1 },
+  { id: 'bloco-canil-b', nome: 'Canil B', icone: 'cao', ordem: 2 },
+  { id: 'bloco-gatil', nome: 'Gatil', icone: 'gato', ordem: 3 },
+  { id: 'bloco-jardim', nome: 'Jardim', icone: 'arvore', ordem: 4 },
+  { id: 'bloco-isolamento', nome: 'Isolamento', icone: 'escudo', ordem: 5 },
 ]
 
 export const tarifasFixture: Tarifa[] = [
@@ -176,13 +177,28 @@ export const servicosFixture: Servico[] = [
   },
 ]
 
+/**
+ * Os tipos que esta casa cadastrou.
+ *
+ * Eram cinco palavras nossas numa união fechada do domínio. Viraram dado: é a casa que nomeia o
+ * que ela tem, e quem hospeda aves ou coelhos cadastra os próprios nomes em vez de escolher entre
+ * "baia" e "gatil". O que continua sendo nosso é só o desenho, que é vocabulário visual.
+ */
+export const tiposDeAcomodacaoFixture: TipoDeAcomodacao[] = [
+  { id: 'tipo-baia', nome: 'Baia', icone: 'casa', ordem: 1 },
+  { id: 'tipo-suite', nome: 'Suíte', icone: 'cama', ordem: 2 },
+  { id: 'tipo-gatil', nome: 'Gatil', icone: 'gato', ordem: 3 },
+  { id: 'tipo-coletiva', nome: 'Coletiva', icone: 'grupo', ordem: 4 },
+  { id: 'tipo-isolamento', nome: 'Isolamento', icone: 'escudo', ordem: 5 },
+]
+
 export const acomodacoesFixture: Acomodacao[] = [
   // ------------------------------------------------------------------ Canil A · baias padrão
   ...['A1', 'A2', 'A3', 'A4', 'A5', 'A6'].map<Acomodacao>((nome, indice) => ({
     id: `acom-${nome.toLowerCase()}`,
     nome: `Baia ${nome}`,
     blocoId: 'bloco-canil-a',
-    kind: 'baia',
+    tipoId: 'tipo-baia',
     capacidade: 2,
     porteMaximo: indice < 2 ? 'gigante' : 'grande',
     especiesAceitas: ['canina'],
@@ -200,7 +216,7 @@ export const acomodacoesFixture: Acomodacao[] = [
     id: `acom-${nome.toLowerCase()}`,
     nome: `Baia ${nome}`,
     blocoId: 'bloco-canil-b',
-    kind: 'baia',
+    tipoId: 'tipo-baia',
     capacidade: 2,
     porteMaximo: 'medio',
     especiesAceitas: ['canina'],
@@ -218,7 +234,7 @@ export const acomodacoesFixture: Acomodacao[] = [
     id: `acom-${nome.toLowerCase()}`,
     nome: `Suíte ${nome}`,
     blocoId: 'bloco-jardim',
-    kind: 'suite',
+    tipoId: 'tipo-suite',
     capacidade: 2,
     porteMaximo: 'gigante',
     especiesAceitas: ['canina'],
@@ -236,7 +252,7 @@ export const acomodacoesFixture: Acomodacao[] = [
     id: `acom-${nome.toLowerCase()}`,
     nome: `Gatil ${nome}`,
     blocoId: 'bloco-gatil',
-    kind: 'gatil',
+    tipoId: 'tipo-gatil',
     capacidade: 2,
     porteMaximo: 'medio',
     /*
@@ -258,7 +274,7 @@ export const acomodacoesFixture: Acomodacao[] = [
     id: 'acom-coletiva-1',
     nome: 'Convivência Norte',
     blocoId: 'bloco-jardim',
-    kind: 'coletiva',
+    tipoId: 'tipo-coletiva',
     capacidade: 4,
     porteMaximo: 'medio',
     especiesAceitas: ['canina'],
@@ -277,7 +293,7 @@ export const acomodacoesFixture: Acomodacao[] = [
     id: 'acom-iso-1',
     nome: 'Isolamento 1',
     blocoId: 'bloco-isolamento',
-    kind: 'isolamento',
+    tipoId: 'tipo-isolamento',
     capacidade: 1,
     porteMaximo: 'gigante',
     especiesAceitas: [],
@@ -301,7 +317,7 @@ export const acomodacoesFixture: Acomodacao[] = [
     id: 'acom-a7',
     nome: 'Baia A7',
     blocoId: 'bloco-canil-a',
-    kind: 'baia',
+    tipoId: 'tipo-baia',
     capacidade: 2,
     porteMaximo: 'grande',
     especiesAceitas: ['canina'],

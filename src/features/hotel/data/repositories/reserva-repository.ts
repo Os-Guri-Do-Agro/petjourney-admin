@@ -28,7 +28,6 @@ import { simularChamada } from '../mock-runtime'
 import { agoraIso, getDataset, hojeIso, novoId } from '../store'
 import type {
   Acomodacao,
-  AcomodacaoKind,
   Comprovante,
   DispensaDeExigencia,
   ExigenciaKind,
@@ -313,7 +312,7 @@ export const reservaRepository = {
     porte?: PetPorte | null
     especie?: PetSpecies | null
     ocupantes?: number
-    kinds?: AcomodacaoKind[]
+    tipos?: string[]
   }): Promise<MapaDoPeriodo> {
     return simularChamada('mapa.periodo', () => {
       const dataset = base()
@@ -326,7 +325,7 @@ export const reservaRepository = {
         porte: entrada.porte,
         especie: entrada.especie,
         ocupantes: entrada.ocupantes,
-        kinds: entrada.kinds,
+        tipos: entrada.tipos,
       })
 
       return {

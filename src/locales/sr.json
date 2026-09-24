@@ -3550,46 +3550,129 @@
     }
   },
   "hotel": {
-    "acomodacaoKind": {
-      "baia": "Boks",
-      "coletiva": "Zajednički",
-      "gatil": "Mačji boks",
-      "isolamento": "Izolacija",
-      "suite": "Apartman"
-    },
     "acomodacoes": {
+      "aCasa": "Kuća",
+      "abasRotulo": "Evidencije kuće",
       "acompanhante": "Pratilac",
-      "bloco": "Blok",
       "cabem": "staje {total} | staju {total} | staje {total}",
       "capacidade": "Kapacitet",
       "capacidadeDica": "Koliko životinja iz istog doma staje zajedno.",
+      "corredor": {
+        "descer": "Pomeri dole",
+        "desenho": "Znak",
+        "editar": "Izmeni hodnik",
+        "nome": "Naziv hodnika",
+        "nomeDica": "Pseći A, Mačji, Bašta...",
+        "nomeExplica": "Ime je tvoje. Tako se hodnik vidi na mapi i u rutini.",
+        "novo": "Novi hodnik",
+        "remover": "Obriši hodnik",
+        "removerMesmo": "Obrisati ovaj hodnik? To se ne može poništiti.",
+        "rotulo": "Hodnik",
+        "subir": "Pomeri gore",
+        "temVagas": "Unutra je {total} smeštaj. Prvo ga premesti ili obriši. | Unutra su {total} smeštaja. Prvo ih premesti ili obriši. | Unutra je {total} smeštaja. Prvo ih premesti ili obriši."
+      },
       "desativar": "Izbaci iz upotrebe",
       "detalhe": "Detalj",
       "editar": "Izmeni smeštaj",
       "especies": "Prihvaćene vrste",
       "higienizacao": "Vreme čišćenja",
       "higienizacaoDica": "Vreme između jednog odlaska i sledećeg dolaska.",
+      "lugares": "{total} mesto | {total} mesta | {total} mesta",
       "motivo": "Razlog",
       "nome": "Naziv",
       "nova": "Novi smeštaj",
       "operacao": "Rad",
       "paradas": "van upotrebe: {total}",
       "porteMaximo": "Najveća veličina",
+      "preco": {
+        "acompanhante": "Druga životinja iz iste kuće",
+        "acompanhanteDica": "Procenat pune cene. Procenat a ne fiksni iznos, jer cena zavisi od veličine.",
+        "daquiEmDiante": "Važi od sada. Već zaključena rezervacija zadržava cenu po kojoj je prodata.",
+        "diarias": "Cena noćenja po veličini",
+        "editar": "Izmeni cenovnik",
+        "emUso": "{total} smeštaj koristi ovaj cenovnik. Prvo mu promeni cenovnik. | {total} smeštaja koriste ovaj cenovnik. Prvo im promeni cenovnik. | {total} smeštaja koristi ovaj cenovnik. Prvo im promeni cenovnik.",
+        "nome": "Naziv cenovnika",
+        "nomeDica": "Standard, Apartman, Mačji...",
+        "nova": "Nov cenovnik",
+        "remover": "Obriši cenovnik",
+        "removerMesmo": "Obrisati ovaj cenovnik?",
+        "resumo": "Koliko košta noćenje, prema veličini životinje.",
+        "usos": "na {total} mestu | na {total} mesta | na {total} mesta"
+      },
       "reativar": "Vrati u upotrebu",
       "recursos": "Oprema",
       "remover": "Ukloni iz evidencije",
       "removerConfirma": "Uklanjanje je trajno. Potvrđujete?",
       "removerSim": "Ukloni",
       "resumo": "{total} unet smeštaj | {total} uneta smeštaja | {total} unetih smeštaja",
+      "secaoIdentidade": "Šta je",
+      "secaoPreco": "Priprema i cena",
+      "secaoQuemCabe": "Ko staje",
       "subtitulo": "Hotel",
       "tarifa": "Cenovnik",
       "tarifas": "Cenovnici",
+      "temporada": {
+        "acrescimo": "Doplata",
+        "acrescimoDica": "Procenat na cenu iz cenovnika, a ne drugi cenovnik.",
+        "ate": "Do",
+        "atravessaOAno": "Ovaj raspon prelazi u narednu godinu.",
+        "de": "Od",
+        "dia": "Dan",
+        "editar": "Izmeni sezonu",
+        "nome": "Naziv sezone",
+        "nomeDica": "Kraj godine, Julski raspust, Karneval...",
+        "nova": "Nova sezona",
+        "remover": "Obriši sezonu",
+        "removerMesmo": "Obrisati ovu sezonu?",
+        "resumo": "Kada cena raste. Važi svake godine, bez ponovnog unosa."
+      },
       "temporadas": "Sezone",
-      "tipo": "Vrsta",
-      "titulo": "Smeštaj",
-      "secaoIdentidade": "Šta je",
-      "secaoQuemCabe": "Ko staje",
-      "secaoPreco": "Priprema i cena"
+      "tipo": {
+        "desenho": "Znak",
+        "editar": "Izmeni tip",
+        "emUso": "{total} smeštaj koristi ovaj tip. Prvo mu promeni tip. | {total} smeštaja koriste ovaj tip. Prvo im promeni tip. | {total} smeštaja koristi ovaj tip. Prvo im promeni tip.",
+        "nome": "Kako ga kuća zove",
+        "nomeDica": "Boks, Apartman, Kućica, Kavez, Volijera...",
+        "nomeExplica": "Ime je tvoje. To je oznaka koja se vidi na svakom ekranu hotela.",
+        "novo": "Nov tip",
+        "remover": "Obriši tip",
+        "removerMesmo": "Obrisati ovaj tip?",
+        "resumo": "Kako kuća zove svaku vrstu mesta. Ime je tvoje; znak biraš ti.",
+        "rotulo": "Tip",
+        "usos": "na {total} mestu | na {total} mesta | na {total} mesta"
+      },
+      "tipos": "Tipovi",
+      "titulo": "Smeštaj"
+    },
+    "acrescentar": {
+      "acrescentar": "Dodaj",
+      "ajusteCasaFaz": "kuća radi {horarios}",
+      "ajusteCasaNaoFaz": "kuća ne radi ovu uslugu",
+      "ajusteHorarios": "Termini za ovog gosta",
+      "ajusteServico": "Usluga kuće",
+      "ajusteVazio": "Ostavi prazno da obustaviš ovu uslugu samo za njega.",
+      "cancelar": "Otkaži",
+      "cuidadoIrParaMedicacao": "Unesi lek",
+      "cuidadoNaoEhRemedio": "Lek ne ide ovde. Doza i recept žive pod Lekom, a odatle dolazi i pokriće za davanje tuđeg leka.",
+      "cuidadoOQue": "Šta treba uraditi",
+      "cuidadoOQueDica": "Rečima onoga ko to radi: promeniti zavoj na desnoj šapi",
+      "faltaMotivo": "Bez razloga, niko neće znati kako ovo kasnije poništiti.",
+      "motivo": "Razlog",
+      "motivoDica": "U decembru je to jedina linija koja objašnjava zašto je ovaj gost drugačiji.",
+      "oQue": "Šta dodati",
+      "servicoCobra": "{preco} ulazi u račun boravka.",
+      "servicoDia": "Dan",
+      "servicoHora": "Vreme",
+      "servicoQual": "Usluga",
+      "titulo": "Dodaj u rutinu",
+      "viaAjuste": "Podesi termine kuće",
+      "viaAjusteDica": "promeni ili obustavi samo za ovog gosta",
+      "viaCuidado": "Nega gosta",
+      "viaCuidadoDica": "zavoj, oblog, kaputić: bez doze",
+      "viaMedicacao": "Lek",
+      "viaMedicacaoDica": "lek sa dozom i receptom",
+      "viaServico": "Dodatna usluga",
+      "viaServicoDica": "kupanje, šišanje, šetnja: naplaćuje se"
     },
     "adaptacao": {
       "em-adaptacao": "Navikava se",
@@ -3606,17 +3689,24 @@
     },
     "checkin": {
       "acrescentar": "Dodaj",
+      "acrescentarRemedio": "Dodaj lek",
       "alimentacao": "Ishrana",
       "autorizacoes": "Dozvole",
       "bloqueado": "Nedostaje obavezna dokumentacija: {itens}",
       "chegada": "Dolazak",
       "confirmar": "Potvrdi prijavu",
       "contato": "Kontakt za hitne slučajeve",
+      "dose": "Doza",
+      "doseDica": "pola tablete",
       "emergencia": "Hitni slučaj",
+      "exigidaPelaVenda": "prodata usluga",
       "horarios": "Vreme",
       "inspecao": "Pregled pri dolasku",
       "inspecaoDica": "Krpelji, buve, rane, šepanje, stanje dlake.",
       "marca": "Marka",
+      "medicacao": "Lekovi doneti od kuće",
+      "medicacaoLede": "Kuća ne propisuje: beleži ono što se već davalo, da bi nastavila na vreme.",
+      "medicacaoSemHorario": "Lek bez termina ne postaje nijedan zadatak, i niko neće biti obavešten da ga da.",
       "novoPertence": "Dodaj stvar",
       "pertences": "Stvari",
       "peso": "Težina na vagi",
@@ -3624,53 +3714,57 @@
       "petiscos": "Poslastice",
       "porcao": "Obrok",
       "racaoPropria": "Hrana doneta od kuće",
-      "removerPertence": "Ukloni: {item}",
-      "restricoes": "Ograničenja",
-      "titulo": "Prijava gosta {pet}",
-      "veterinario": "Veterinar od poverenja",
       "recadoDaReserva": "U rezervaciji:",
-      "exigidaPelaVenda": "prodata usluga",
-      "vendaSemAutorizacao": "Rezervacija je prodala uslugu koja zavisi od: {itens}. Bez odobrenja kuća ne može da je izvrši, a račun i dalje naplaćuje.",
-      "medicacao": "Lekovi doneti od kuće",
-      "medicacaoLede": "Kuća ne propisuje: beleži ono što se već davalo, da bi nastavila na vreme.",
-      "remedio": "Lek",
-      "remedioDica": "Benazepril 5 mg",
-      "dose": "Doza",
-      "doseDica": "pola tablete",
-      "via": "Način",
       "receita": "Recept",
       "receitaDica": "Broj i ko ga je potpisao",
-      "acrescentarRemedio": "Dodaj lek",
+      "remedio": "Lek",
+      "remedioDica": "Benazepril 5 mg",
+      "removerPertence": "Ukloni: {item}",
       "removerRemedio": "Ukloni lek",
-      "medicacaoSemHorario": "Lek bez termina ne postaje nijedan zadatak, i niko neće biti obavešten da ga da."
+      "restricoes": "Ograničenja",
+      "titulo": "Prijava gosta {pet}",
+      "vendaSemAutorizacao": "Rezervacija je prodala uslugu koja zavisi od: {itens}. Bez odobrenja kuća ne može da je izvrši, a račun i dalje naplaćuje.",
+      "veterinario": "Veterinar od poverenja",
+      "via": "Način"
     },
     "checkout": {
+      "comoChegou": "Kako je stigao",
+      "comoChegouLede": "Zabeleženo pri prijavi. Proverite pre predaje: to je odgovor na „tako je i stigao“.",
       "confirmar": "Zatvori boravak",
       "devolvido": "Vraćeno",
       "fechamento": "Obračun",
+      "foraDaLista": "Ova osoba nije bila ovlašćena u rezervaciji. Ime ostaje zabeleženo uz boravak.",
       "oQueHouve": "Šta se desilo sa ovom stvari",
       "ocorrenciaTravada": "{total} ozbiljan incident bez javljanja vlasniku. | {total} ozbiljna incidenta bez javljanja vlasniku. | {total} ozbiljnih incidenata bez javljanja vlasniku.",
+      "outraPessoa": "Druga osoba",
+      "outraPessoaDica": "Ime osobe koja je došla",
       "perdaRelevante": "Izgubio je dovoljno težine da zasluži razgovor sa vlasnikom.",
       "pertences": "Provera stvari",
       "pesagem": "Merenje pri odlasku",
       "pesoEntrada": "Došao sa {valor}",
       "pesoSaida": "Težina pri odlasku",
+      "quemRetira": "Ko preuzima",
       "registrarPeso": "Upiši težinu",
       "saidaTardia": "Odlazak posle termina: dodatnih {percentual}% noćenja.",
       "saldo": "Saldo za naplatu",
       "titulo": "Odjava gosta {pet}",
-      "comoChegou": "Kako je stigao",
-      "comoChegouLede": "Zabeleženo pri prijavi. Proverite pre predaje: to je odgovor na „tako je i stigao“.",
-      "quemRetira": "Ko preuzima",
-      "outraPessoa": "Druga osoba",
-      "voltarALista": "Nazad na listu",
-      "outraPessoaDica": "Ime osobe koja je došla",
-      "foraDaLista": "Ova osoba nije bila ovlašćena u rezervaciji. Ime ostaje zabeleženo uz boravak."
+      "voltarALista": "Nazad na listu"
     },
     "comum": {
       "cancelar": "Otkaži",
       "fechar": "Zatvori",
       "salvar": "Sačuvaj"
+    },
+    "desenho": {
+      "arvore": "Drvo",
+      "cama": "Krevet",
+      "cao": "Pas",
+      "casa": "Kuća",
+      "coelho": "Zec",
+      "escudo": "Štit",
+      "gato": "Mačka",
+      "grupo": "Grupa",
+      "passaro": "Ptica"
     },
     "dev": {
       "casos": "Pripremljeni slučajevi",
@@ -3696,11 +3790,13 @@
       "admissao": "Dokumentacija za prijem blokira prijavu.",
       "boletimRetido": "Izveštaj izlazi tek posle poziva vlasniku.",
       "cadastro": {
+        "em-uso": "Nešto još uvek pokazuje na ovu stavku.",
         "nao-encontrada": "Smeštaj nije pronađen.",
         "nome-repetido": "Smeštaj sa ovim nazivom već postoji.",
         "ocupada": "U ovom smeštaju je gost upravo sada.",
         "tem-historico": "Ovaj smeštaj je već primao goste: izbacite ga iz upotrebe umesto da ga uklonite.",
-        "tem-reserva": "Postoji buduća rezervacija za ovaj smeštaj."
+        "tem-reserva": "Postoji buduća rezervacija za ovaj smeštaj.",
+        "ultimo": "Mora da ostane bar jedan."
       },
       "catalogos": "Podaci hotela nisu mogli biti učitani.",
       "estadia": "Boravak nije mogao biti učitan.",
@@ -3739,6 +3835,7 @@
       "autorizacoes": "Dozvole",
       "boletim": "Izveštaj vlasniku",
       "boletimRetido": "Zadržan: nedostaje poziv vlasniku.",
+      "comoEstaSeAdaptando": "Kako se privikava",
       "comunicado": "Javljeno u {hora}",
       "diario": "Dnevnik gosta",
       "emergencia": "Hitni slučaj",
@@ -3778,8 +3875,7 @@
       },
       "subtitulo": "Hotel",
       "titulo": "Boravak",
-      "voltar": "Gosti",
-      "comoEstaSeAdaptando": "Kako se privikava"
+      "voltar": "Gosti"
     },
     "exigencia": {
       "antipulgas": "Tretman protiv buva",
@@ -3826,6 +3922,14 @@
       "minutos": "{valor} min",
       "semvalor": "—"
     },
+    "gerenciar": {
+      "padrao": "Standardna rutina kuće",
+      "padraoDica": "termini koji važe za sve goste",
+      "propor": "Predloži rutinu",
+      "proporDica": "predlog pročitan iz kartona, za pregled pre odobravanja",
+      "titulo": "Upravljanje rutinom",
+      "trocar": "Promeni"
+    },
     "grade": {
       "acomodacao": "Smeštaj",
       "barraTitulo": "{pet} · {tutor} · {periodo}",
@@ -3855,9 +3959,17 @@
         "precisam": "Traže tebe",
         "saem": "Odlaze danas"
       },
+      "busca": {
+        "dica": "Ime ljubimca ili vlasnika",
+        "doTutor": "{total} gost vlasnika {tutor} | {total} gosta vlasnika {tutor} | {total} gostiju vlasnika {tutor}",
+        "limpar": "Obriši pretragu",
+        "rotulo": "Pretraga gostiju",
+        "semResultado": "Nema gosta za \"{termo}\"."
+      },
       "cartao": {
         "atrasadas": "{total} kasni | {total} kasne | {total} kasni",
         "boletimRetido": "Poruka vlasniku stoji i čeka poziv",
+        "com": "sa: {pet}",
         "faltaPesar": "Treba izmeriti pre predaje",
         "hojeAs": "danas u {hora}",
         "noites": "{total} noć | {total} noći | {total} noći"
@@ -3877,9 +3989,9 @@
       "ninguemPrecisa": "Niko vas sada ne treba. Kuća je u redu.",
       "ninguemSai": "Danas niko ne odlazi.",
       "recorte": {
-        "precisam": "Trebaju me ({total})",
-        "saem": "Odlaze danas ({total})",
-        "todos": "Sve ({total})"
+        "precisam": "Traže mene",
+        "saem": "Odlaze danas",
+        "todos": "Svi"
       },
       "recorteRotulo": "Prikaži",
       "resumo": "{precisam} od {total} traži tebe | {precisam} od {total} traže tebe | {precisam} od {total} traži tebe",
@@ -3924,6 +4036,26 @@
       "vazioDescricao": "Unesite smeštajne jedinice kuće da biste počeli da prodajete noćenja.",
       "vazioTitulo": "Nema unetog smeštaja",
       "verReservas": "Vidi rezervacije"
+    },
+    "medicacaoNova": {
+      "cancelar": "Otkaži",
+      "descricao": "Lek",
+      "descricaoDica": "Naziv i jačina, kako piše na kutiji",
+      "dose": "Doza",
+      "doseDica": "1 tableta, 20 kapi, 2 ml",
+      "escolherHospede": "Izaberi gosta",
+      "faltaHorario": "Bez termina lek ne postaje nijedan zadatak.",
+      "horarios": "Termini",
+      "horariosDica": "Kako se izgovaraju: 8:00, 20:00",
+      "hospede": "Gost",
+      "observacao": "Napomena",
+      "receita": "Recept",
+      "receitaDica": "Broj licence i broj recepta. Bez njega se lek daje isto tako, a u kartonu ostaje nedostatak.",
+      "registrada": "Terapija je upisana. Naredne doze su već na tabli.",
+      "registrar": "Upiši",
+      "soDaquiParaFrente": "Doze nastaju od sada. Današnja koja je već prošla se ne pravi: doza koja nastane zakasnelo je lažan zapis o propuštenoj dozi.",
+      "titulo": "Upiši terapiju",
+      "via": "Način"
     },
     "modulo": {
       "oculto": "Modul hotela je sakriven",
@@ -4030,12 +4162,51 @@
       "vazioDescricao": "Nema gostiju u kući ni najavljenih dolazaka za danas.",
       "vazioTitulo": "Danas nema ničega"
     },
+    "planoDaEstadia": {
+      "desde": "od {data}",
+      "encerrar": "Završi",
+      "origemPessoa": "upisano ručno",
+      "origemProposta": "iz pregledanog predloga",
+      "propor": "Predloži izmene",
+      "semAjustes": "Ovaj gost prati standardnu rutinu kuće.",
+      "suspenso": "obustavljeno",
+      "titulo": "Plan boravka"
+    },
     "porte": {
       "gigante": "Ogromna",
       "grande": "Velika",
       "medio": "Srednja",
       "mini": "Patuljasta",
       "pequeno": "Mala"
+    },
+    "proposta": {
+      "aprovada": "Izmene su upisane u karton gosta.",
+      "aprovar": "Odobri {total} izmenu | Odobri {total} izmene | Odobri {total} izmena",
+      "aprovarNenhuma": "Odobri",
+      "aviso": "U ovoj verziji nema modela ni mreže: predlog dolazi iz determinističke simulacije nad podacima kuće. Stvaran je tok pregleda i odobravanja.",
+      "casaJaFaz": "Kuća ovo već radi",
+      "daFicha": "Iz kartona",
+      "descartadas": "{total} predlog odbačen pri proveri | {total} predloga odbačena pri proveri | {total} predloga odbačeno pri proveri",
+      "descartar": "Odbaci",
+      "escolherHospede": "Izaberi gosta",
+      "gerando": "Čitam karton…",
+      "lidaEm": "pročitano iz kartona u {hora}",
+      "motorLocal": "lokalna simulacija",
+      "nadaGravado": "ništa nije sačuvano",
+      "naoEdita": "Kuća ne propisuje terapiju: za izmenu doze ili termina potreban je recept.",
+      "naoProponho": "Šta ne predlažem",
+      "porqueAdaptacao": "gost je primljen kao {valor}",
+      "porqueCasa": "iz standardne rutine kuće",
+      "porqueEstadiaLonga": "boravak od {valor} noći: težina pri odlasku bez merenja u međuvremenu ne kaže kada je životinja smršala",
+      "porqueInspecao": "pregled pri dolasku: \"{valor}\"",
+      "porqueMedicacao": "iz upisanog recepta: {valor}",
+      "porquePlano": "iz termina obroka u kartonu",
+      "proponhoMudar": "Predlažem izmenu",
+      "recusaMedicacao": "Terapija: ne predlažem ni lek ni dozu. Hotel ne propisuje terapiju.",
+      "recusaRefeicao": "Obrok: izmena termina obroka dogovara se sa vlasnikom.",
+      "semMudancas": "Nema šta da se predloži za ovog gosta: rutina kuće je dovoljna.",
+      "titulo": "Predlog rutine",
+      "transcrita": "prepisano"
     },
     "recurso": {
       "area-externa": "Spoljni prostor",
@@ -4056,8 +4227,12 @@
     },
     "reserva": {
       "acompanhante": "Pratilac iz istog doma",
+      "acrescentarAutorizado": "Dodaj ovlašćenog",
+      "autorizados": "Ko još može da preuzme",
+      "autorizadosDica": "Ime osobe koju vlasnik ovlašćuje",
       "avisoAdmissao": "Dokumentacija koju treba rešiti pre dolaska: {itens}",
       "checkInBloqueado": "Prijava je blokirana zbog dokumentacije koja nedostaje.",
+      "chegaAs": "stiže u",
       "confirmarSinal": "Upiši kaparu i potvrdi",
       "criar": "Napravi rezervaciju",
       "diarias": "{total} noćenje | {total} noćenja | {total} noćenja",
@@ -4067,29 +4242,25 @@
       "hospede": "Gost",
       "irParaEstadia": "Otvori boravak",
       "jaHospedado": "Ovaj gost je već u kući.",
+      "noitesAtalho": "{total} noć | {total} noći | {total} noći",
       "novaTitulo": "Nova rezervacija · {acomodacao}",
       "observacao": "Napomena vlasnika",
       "observacaoDica": "Strahovi, navike, šta pomaže da se smiri.",
       "origem": "Kako je stigla",
       "periodo": "Period",
       "porDiaria": " po noćenju",
+      "quantasNoites": "Noćenja",
+      "removerAutorizado": "Ukloni {nome}",
+      "saiAs": "odlazi u",
       "saidaTardia": "Predviđeni odlazak je posle termina: {valor} dodatno na računu.",
       "semAcompanhante": "Bez pratioca",
       "semServico": "Bez usluga",
+      "semVaga": "Ovaj smeštaj ne odgovara tom periodu: {motivo}",
       "servicos": "Usluge",
       "sinalDevolve": "Otkazivanje u ovom roku i dalje vraća kaparu.",
       "sinalNaoDevolve": "Van roka: otkazivanje ne vraća kaparu.",
       "subtitulo": "Hotel",
-      "titulo": "Rezervacija",
-      "chegaAs": "stiže u",
-      "saiAs": "odlazi u",
-      "autorizados": "Ko još može da preuzme",
-      "autorizadosDica": "Ime osobe koju vlasnik ovlašćuje",
-      "acrescentarAutorizado": "Dodaj ovlašćenog",
-      "removerAutorizado": "Ukloni {nome}",
-      "quantasNoites": "Noćenja",
-      "noitesAtalho": "{total} noć | {total} noći | {total} noći",
-      "semVaga": "Ovaj smeštaj ne odgovara tom periodu: {motivo}"
+      "titulo": "Rezervacija"
     },
     "reservaStatus": {
       "cancelada": "Otkazana",
@@ -4116,6 +4287,9 @@
       "filtroAdmissao": "Dokumentacija",
       "filtroBloco": "Blok",
       "filtroStatus": "Status",
+      "horizonte": "Prikaži",
+      "horizonteProximas": "Od danas",
+      "horizonteTodas": "Sve, sa istorijom",
       "novaNoMapa": "Nova rezervacija",
       "semResultadoDescricao": "Nijedna rezervacija ne odgovara pretrazi ili filterima.",
       "semResultadoTitulo": "Ništa nije pronađeno",
@@ -4124,10 +4298,7 @@
       "vazioDescricao": "Rezervacije se pojavljuju ovde čim prva bude napravljena sa mape.",
       "vazioTitulo": "Nema rezervacija",
       "vesperaLede": "Stižu u naredna tri dana i još ne smeju da uđu.",
-      "vesperaTitulo": "{total} dolazak bez dokumentacije | {total} dolaska bez dokumentacije | {total} dolazaka bez dokumentacije",
-      "horizonte": "Prikaži",
-      "horizonteProximas": "Od danas",
-      "horizonteTodas": "Sve, sa istorijom"
+      "vesperaTitulo": "{total} dolazak bez dokumentacije | {total} dolaska bez dokumentacije | {total} dolazaka bez dokumentacije"
     },
     "resumo": {
       "cancelamento": "Otkazivanje",
@@ -4183,6 +4354,43 @@
       "vazioDescricao": "Rutina počinje prijavom. Bez gostiju nema šta da se radi.",
       "vazioTitulo": "Danas nema zadataka"
     },
+    "rotinaPadrao": {
+      "aplicar": "Primeni",
+      "ativo": "Kuća ovo radi",
+      "campoHorarios": "Termini",
+      "campoHorariosDica": "Razdvoj ih zarezima. Može 8:00 ili 08:00.",
+      "cancelar": "Otkaži",
+      "criadas": "nastaje {total} zadatak | nastaju {total} zadatka | nastaje {total} zadataka",
+      "desfazer": "Poništi",
+      "desligada": "isključeno",
+      "desligadaDica": "Van plana kuće. I dalje je dostupno na kartonu svakog gosta.",
+      "editar": "Izmeni",
+      "editarTitulo": "Termini: {servico}",
+      "exigeAutorizacao": "samo za goste čiji je vlasnik dao saglasnost",
+      "horarios": "{total} termin | {total} termina | {total} termina",
+      "naoMexe": "Obroci i lekovi se ne podešavaju ovde: njihovi termini dolaze iz kartona svakog gosta, a hotel ne propisuje terapiju.",
+      "noTurno": "{total} pada u tekuću smenu | {total} padaju u tekuću smenu | {total} pada u tekuću smenu",
+      "porDia": "{total} zadatak po gostu dnevno | {total} zadatka po gostu dnevno | {total} zadataka po gostu dnevno",
+      "preservadas": "{total} zadatak ostaje netaknut | {total} zadatka ostaju netaknuta | {total} zadataka ostaje netaknuto",
+      "preservadasDica": "Ono što je urađeno, odbijeno ili preskočeno nikada se ne dira.",
+      "previsao": "Šta se menja",
+      "publicar": "Objavi izmene",
+      "publicarTitulo": "Objavi rutinu",
+      "rascunho": "Nacrt nije objavljen",
+      "retiradas": "izlazi {total} zadatak | izlaze {total} zadatka | izlazi {total} zadataka",
+      "semHorario": "bez termina",
+      "semHorarioDica": "Bez termina: kuća ovaj zadatak ne pravi ni za koga.",
+      "semMudanca": "Ništa se nije promenilo.",
+      "subtitulo": "Ono što kuća radi za sve goste",
+      "titulo": "Standardna rutina",
+      "vazioDescricao": "Kuća još nije navela šta radi za sve goste.",
+      "vazioTitulo": "Nijedna usluga nije podešena",
+      "versao": "verzija {versao} · {pessoa}",
+      "vigencia": "Od kada važi",
+      "vigenciaAgora": "Odmah",
+      "vigenciaAmanha": "Sutra",
+      "vigenciaDica": "Ako počne sutra, tekuća smena ostaje netaknuta."
+    },
     "servico": {
       "adestramento": "Obuka",
       "banho": "Kupanje",
@@ -4220,11 +4428,235 @@
       "refeicao": "Obrok",
       "tosa": "Šišanje"
     },
+    "tour": {
+      "acomodacoes": {
+        "blocos": {
+          "texto": "Odgajivačnica A, B, Mačji deo, Vrt. Svaka kartica kaže tip, veličinu koju prima, koliko ih staje i koju tarifu naplaćuje. Kliknite za izmenu.",
+          "titulo": "Grupisane po bloku"
+        },
+        "parada": {
+          "texto": "Boks u renoviranju izlazi sa mape i ne može se prodati. „Pre koliko dana“ je informacija: dva sata je održavanje; tri nedelje je zaboravljeno mesto.",
+          "titulo": "Van pogona, sa datumom"
+        },
+        "pergunta": {
+          "texto": "Kako je kuća postavljena. Sistem ne pogađa koliko boksova imate: upisuje ih operativa, onog dana kad se kuća promeni.",
+          "titulo": "Pitanje ovog ekrana"
+        },
+        "tarifas": {
+          "texto": "Kuća su hodnici i mesta. Cenovnici ukrštaju tabelu i veličinu, a druga životinja ulazi kao procenat. Sezone se ponavljaju: važe svake godine u istom rasponu datuma.",
+          "titulo": "Tri evidencije, tri kartice"
+        }
+      },
+      "anterior": "Nazad",
+      "estadia": {
+        "checkout": {
+          "texto": "Odjava se ne zatvara dok se svaka stvar ne proveri i životinja ponovo ne izmeri. To je najjeftinija žalba za sprečavanje i najskuplja za rešavanje.",
+          "titulo": "Što je ušlo mora da izađe"
+        },
+        "ficha": {
+          "texto": "Šta je vlasnik dogovorio: hrana i termini, lekovi, šta je došlo u torbi, šta je odobrio i koga zvati u hitnom slučaju.",
+          "titulo": "Karton boravka"
+        },
+        "ocorrencias": {
+          "texto": "Loša vest ne ide aplikacijom. Ozbiljan incident zadržava izveštaj vlasniku dok neko iz kuće ne pozove, a dugme za upis poziva je tu pored.",
+          "titulo": "Incidenti i izveštaj"
+        },
+        "pergunta": {
+          "texto": "Kako se ova životinja oseća. Sve o boravku na jednom mestu, i odjava se radi odavde.",
+          "titulo": "Pitanje ovog ekrana"
+        },
+        "rotina": {
+          "texto": "Zadaci nastaju iz prijemnog kartona: hrana koju je vlasnik poslao, lek na vreme, šetnja. Možete ih označiti odavde bez vraćanja na smensku tablu.",
+          "titulo": "Današnja rutina, samo njegova"
+        }
+      },
+      "hospedes": {
+        "cartao": {
+          "texto": "Disk pokazuje koja je usluga i popunjava se kada dođe vreme. Broj pored njega kaže koliko ih već kasni. To je jedini red na kartici koji se menja sam, bez ijednog dodira.",
+          "titulo": "Red koji traži akciju"
+        },
+        "linhas": {
+          "texto": "Mirni prelaze u tanak spisak u dnu strane, da prostor pripadne onima kojima si potreban. Klikni na naslov trake da je otvoriš i zatvoriš.",
+          "titulo": "Ko je na čisto, skuplja se"
+        },
+        "pergunta": {
+          "texto": "Kako je svaka životinja u kući. Jedna kartica po gostu, poređane po tome ko vas prvi treba.",
+          "titulo": "Pitanje ovog ekrana"
+        },
+        "recortes": {
+          "texto": "Svi, oni kojima trebate, i oni koji danas odlaze. Srednji se gleda sredinom smene; desni, pred kraj jutra.",
+          "titulo": "Tri preseka"
+        }
+      },
+      "mapa": {
+        "grade": {
+          "texto": "Svaki red je smeštaj, svaka kolona je noć. Trake su ono što je već prodato, a praznina između njih je gde staje sledeća rezervacija. Kliknite na prazno polje da rezervišete od tog dana.",
+          "titulo": "Kalendar kuće"
+        },
+        "legenda": {
+          "texto": "Ko je sada u kući, šta je potvrđeno, šta još nije platilo kaparu i šta je van pogona. Išrafirana traka je smeštaj van upotrebe i ne može se prodati.",
+          "titulo": "Šta znači svaka boja"
+        },
+        "pergunta": {
+          "texto": "Ima li mesta u tom periodu? Sve ovde postoji da to odgovorite dok je osoba još na vezi.",
+          "titulo": "Pitanje ovog ekrana"
+        },
+        "procura": {
+          "texto": "Vrsta, veličina, datumi i koliko životinja. Ista rečenica koju izgovara osoba na telefonu, istim redom.",
+          "titulo": "Recite šta traže"
+        },
+        "resposta": {
+          "texto": "Koliko smeštaja odgovara tom periodu. Zeleno znači da ima; crveno, da nema mesta.",
+          "titulo": "Odgovor, u jednoj rečenici"
+        }
+      },
+      "painel": {
+        "colunas": {
+          "texto": "Isti podaci kao na liniji, u listi, sa oznakom onoga što blokira. Kliknite bilo koji red da otvorite rezervaciju ili boravak.",
+          "titulo": "Ko dolazi i ko odlazi"
+        },
+        "pergunta": {
+          "texto": "Šta se dešava danas. Ovo je prvi ekran dana: otvorite ga ujutru i znate šta dolazi prvo.",
+          "titulo": "Pitanje ovog ekrana"
+        },
+        "resumo": {
+          "texto": "Koliko ih je u kući, koliko dolazi, koliko odlazi i koliko zadataka je za sada. Četiri broja koja staju u rečenicu.",
+          "titulo": "Dan u jednom redu"
+        },
+        "travas": {
+          "texto": "Otvara ekran jer ima rok: poziv koji čeka, izveštaj zadržan iza njega, životinja koja stiže bez vakcine. Svaka stavka je dugme koje vodi tamo gde se rešava.",
+          "titulo": "Šta vam treba sada"
+        },
+        "trilho": {
+          "texto": "Dolasci gore, odlasci dole, i oznaka na „sada“. Trougao pored imena znači da je taj dolazak ili odlazak blokiran.",
+          "titulo": "Vremenska linija dana"
+        }
+      },
+      "passo": "{atual} od {total}",
+      "proximo": "Dalje",
+      "reserva": {
+        "checkin": {
+          "texto": "Prijava ostaje blokirana dok postoji dokument koji je sprečava. To nije podsetnik: to je pravilo, i nijedan ekran ga ne zaobilazi.",
+          "titulo": "Dugme se pali samo kad sme"
+        },
+        "exigencias": {
+          "texto": "Važenje se proverava u odnosu na poslednji dan boravka, a ne na danas. Crveno sprečava ulazak; žuto upozorava da ističe usred boravka i da još ima vremena za obnovu.",
+          "titulo": "Dokumentacija za prijem"
+        },
+        "pergunta": {
+          "texto": "Koliko košta i da li ova životinja može da uđe. Ovo je ugovor o boravku, i odavde kreće prijava.",
+          "titulo": "Pitanje ovog ekrana"
+        },
+        "periodo": {
+          "texto": "Ulaz, izlaz, koliko noćenja i u kom smeštaju. Ako predviđeni odlazak pređe termin kuće, pola noćenja je već u predračunu, a ne iznenađenje na pultu.",
+          "titulo": "Period i račun"
+        }
+      },
+      "reservas": {
+        "espera": {
+          "texto": "Lista čekanja je u podnožju jer se gleda tek kad rezervacija otpadne, a tada ste ionako već na ovom ekranu.",
+          "titulo": "Ko je ostao bez mesta"
+        },
+        "horizonte": {
+          "texto": "Ekran se otvara na ono što dolazi, jer je to svakodnevno pitanje. Istorija nije nestala: u drugoj je opciji, za kad tražite boravak od prošlog meseca.",
+          "titulo": "Dokle lista gleda"
+        },
+        "pergunta": {
+          "texto": "Šta je prodato i šta će praviti problem. Ovo je ekran za dan ranije: otvorite ga kasno popodne da vidite šta treba rešiti do sutra.",
+          "titulo": "Pitanje ovog ekrana"
+        },
+        "tabela": {
+          "texto": "Dokumentacija se sortira: jedan klik na zaglavlje diže na vrh sve što će zapeti na pultu. Tako se pretražuje nedelja.",
+          "titulo": "Kolona koja je bitna"
+        },
+        "vespera": {
+          "texto": "Ko stiže u naredna tri dana i još ne može da uđe zbog dokumenta koji nedostaje. Tri dana jer je to rok u kom vlasnik još stigne da ga donese.",
+          "titulo": "Šta ne može da čeka"
+        }
+      },
+      "resumo": {
+        "cartoes": {
+          "texto": "Prihod po izvoru rezervacije i po usluzi, incidenti perioda, i gubici. Otkazivanje je najava, moglo se preprodati; nedolazak je izgubljeno mesto.",
+          "titulo": "Odakle dolazi, i šta se gubi"
+        },
+        "grafico": {
+          "texto": "Crta se iz dana u dan, ne kao prosek: prosek krije upravo ono što želite da vidite, a to je da se kuća puni vikendom i prazni utorkom.",
+          "titulo": "Popunjenost iz dana u dan"
+        },
+        "numeros": {
+          "texto": "Prosečna popunjenost, prihod, prosečno noćenje i povratnost. Povratnost broji vlasnike koji su već dolazili: to je lojalnost, ne obim.",
+          "titulo": "Četiri broja"
+        },
+        "pergunta": {
+          "texto": "Da li se mesec isplatio. Ovo je jedini ekran koji gleda unazad, i služi za odlučivanje, ne za rad.",
+          "titulo": "Pitanje ovog ekrana"
+        },
+        "periodo": {
+          "texto": "Otvara se na poslednjih trideset dana. Svaki broj i svaka kartica na ovom ekranu odgovara za ovde izabran period, i ni za koji drugi.",
+          "titulo": "Izaberite period"
+        }
+      },
+      "rotina": {
+        "filtros": {
+          "texto": "Obrok, lek, šetnja, higijena, voda. Ko hrani sve odjednom filtrira po obroku i ide niz listu.",
+          "titulo": "Jedna vrsta zadatka odjednom"
+        },
+        "marcar": {
+          "texto": "Urađeno, odbio ili preskoči, direktno u redu. „Odbio“ nije greška u kucanju: to je klinički podatak, a četiri odbijena obroka zaredom postaju incident.",
+          "titulo": "Označavanje košta jedan dodir"
+        },
+        "passagem": {
+          "texto": "U podnožju liste: koliko zadataka ostaje sledećoj smeni i šta sprečava predaju. Vidi se od početka smene, a ne tek pri predaji, jer incident bez kontakta u 22h više se ne može rešiti.",
+          "titulo": "Smena se završava ovde"
+        },
+        "pergunta": {
+          "texto": "Šta treba uraditi sada. Ovo je smenska tabla: držite je otvorenu na telefonu dok radite u odgajivačnici.",
+          "titulo": "Pitanje ovog ekrana"
+        },
+        "progresso": {
+          "texto": "Koliko je današnjih zadataka već označeno, od ukupnog broja. Služi da znate da li je smena u toku bez brojanja redova.",
+          "titulo": "Koliko je urađeno"
+        },
+        "ronda": {
+          "texto": "Zadaci iste usluge u istom terminu čine turu: \"Obrok, 20 životinja\". Kratka tura je već otvorena; duga se otvara jednim dodirom. Cela tura može da se označi odjednom, osim terapije: lek se označava jedan po jedan.",
+          "titulo": "Jedna tura, a ne dvadeset redova"
+        },
+        "tempo": {
+          "texto": "Zadaci se grupišu u ronde, a svaka ronda nosi vreme na početku. Ono što kasni penje se u „Za sada“, sa vremenom u crvenom; ne gubi se usred liste.",
+          "titulo": "Sada, kasnije, i šta je prošlo"
+        }
+      },
+      "rotinaPadrao": {
+        "limite": {
+          "texto": "Obroci i lekovi se ne pojavljuju: njihovi termini dolaze iz kartona svakog gosta. Hotel ne propisuje terapiju, i nijedno podešavanje ne može da napravi ili promeni dozu.",
+          "titulo": "Šta se ovde ne podešava"
+        },
+        "pergunta": {
+          "texto": "Šta kuća radi za sve goste i u koje vreme. To je osnova koju nasleđuje rutina svake životinje.",
+          "titulo": "Pitanje ovog ekrana"
+        },
+        "publicar": {
+          "texto": "Pre čuvanja, ekran pokazuje koliko zadataka nastaje, koliko izlazi i koliko ostaje netaknuto. Ono što je urađeno nikada se ne dira, a početak sutra ne dira tekuću smenu.",
+          "titulo": "Objavljivanje prvo kaže šta će uraditi"
+        },
+        "regua": {
+          "texto": "Svaka traka je usluga kuće, sa terminima označenim preko 24 sata. Izdaleka se vidi da li je dan dobro raspoređen ili sve pada ujutru.",
+          "titulo": "Ceo dan na jednoj skali"
+        }
+      },
+      "sair": "Zatvori",
+      "terminar": "Razumem"
+    },
     "turno": {
+      "assumeCom": "preuzima {turno} · {pessoa}",
       "boletinsRetidos": "Zadržani izveštaji",
       "boletinsRetidosTexto": "{total} izveštaj čeka poziv pre slanja. | {total} izveštaja čekaju poziv pre slanja. | {total} izveštaja čeka poziv pre slanja.",
+      "entra": "preuzima",
       "entregar": "Predaj smenu",
+      "ficam": "{total} zadatak ostaje sledećoj smeni | {total} zadatka ostaju sledećoj smeni | {total} zadataka ostaje sledećoj smeni",
+      "fimDoTurno": "Kraj smene",
       "manha": "Jutro",
+      "nadaTrava": "Ništa ne sprečava predaju",
       "noite": "Noć",
       "nota": "Beleška primopredaje",
       "notaDica": "Ono što sledeća smena treba da zna, a lista ne kaže.",
@@ -4232,17 +4664,12 @@
       "pendencias": "Ostaje neurađeno ({total} zadatak) | Ostaje neurađeno ({total} zadatka) | Ostaje neurađeno ({total} zadataka)",
       "recebidoPor": "Ko preuzima",
       "resolver": "Reši",
+      "sai": "predaje",
       "semPendencias": "U ovoj smeni ništa ne ostaje neurađeno.",
       "tarde": "Popodne",
       "titulo": "Primopredaja smene",
-      "travado": "Ovo sprečava primopredaju",
-      "sai": "predaje",
-      "entra": "preuzima",
-      "fimDoTurno": "Kraj smene",
-      "assumeCom": "preuzima {turno} · {pessoa}",
-      "ficam": "{total} zadatak ostaje sledećoj smeni | {total} zadatka ostaju sledećoj smeni | {total} zadataka ostaje sledećoj smeni",
       "travaEntrega": "{total} incident bez kontakta sprečava predaju | {total} incidenta bez kontakta sprečavaju predaju | {total} incidenata bez kontakta sprečava predaju",
-      "nadaTrava": "Ništa ne sprečava predaju"
+      "travado": "Ovo sprečava primopredaju"
     },
     "via": {
       "oftalmica": "U oko",
@@ -4250,356 +4677,6 @@
       "otologica": "U uvo",
       "subcutanea": "Potkožno",
       "topica": "Lokalno"
-    },
-    "tour": {
-      "passo": "{atual} od {total}",
-      "proximo": "Dalje",
-      "anterior": "Nazad",
-      "terminar": "Razumem",
-      "sair": "Zatvori",
-      "mapa": {
-        "pergunta": {
-          "titulo": "Pitanje ovog ekrana",
-          "texto": "Ima li mesta u tom periodu? Sve ovde postoji da to odgovorite dok je osoba još na vezi."
-        },
-        "procura": {
-          "titulo": "Recite šta traže",
-          "texto": "Vrsta, veličina, datumi i koliko životinja. Ista rečenica koju izgovara osoba na telefonu, istim redom."
-        },
-        "resposta": {
-          "titulo": "Odgovor, u jednoj rečenici",
-          "texto": "Koliko smeštaja odgovara tom periodu. Zeleno znači da ima; crveno, da nema mesta."
-        },
-        "grade": {
-          "titulo": "Kalendar kuće",
-          "texto": "Svaki red je smeštaj, svaka kolona je noć. Trake su ono što je već prodato, a praznina između njih je gde staje sledeća rezervacija. Kliknite na prazno polje da rezervišete od tog dana."
-        },
-        "legenda": {
-          "titulo": "Šta znači svaka boja",
-          "texto": "Ko je sada u kući, šta je potvrđeno, šta još nije platilo kaparu i šta je van pogona. Išrafirana traka je smeštaj van upotrebe i ne može se prodati."
-        }
-      },
-      "reservas": {
-        "pergunta": {
-          "titulo": "Pitanje ovog ekrana",
-          "texto": "Šta je prodato i šta će praviti problem. Ovo je ekran za dan ranije: otvorite ga kasno popodne da vidite šta treba rešiti do sutra."
-        },
-        "vespera": {
-          "titulo": "Šta ne može da čeka",
-          "texto": "Ko stiže u naredna tri dana i još ne može da uđe zbog dokumenta koji nedostaje. Tri dana jer je to rok u kom vlasnik još stigne da ga donese."
-        },
-        "horizonte": {
-          "titulo": "Dokle lista gleda",
-          "texto": "Ekran se otvara na ono što dolazi, jer je to svakodnevno pitanje. Istorija nije nestala: u drugoj je opciji, za kad tražite boravak od prošlog meseca."
-        },
-        "tabela": {
-          "titulo": "Kolona koja je bitna",
-          "texto": "Dokumentacija se sortira: jedan klik na zaglavlje diže na vrh sve što će zapeti na pultu. Tako se pretražuje nedelja."
-        },
-        "espera": {
-          "titulo": "Ko je ostao bez mesta",
-          "texto": "Lista čekanja je u podnožju jer se gleda tek kad rezervacija otpadne, a tada ste ionako već na ovom ekranu."
-        }
-      },
-      "painel": {
-        "pergunta": {
-          "titulo": "Pitanje ovog ekrana",
-          "texto": "Šta se dešava danas. Ovo je prvi ekran dana: otvorite ga ujutru i znate šta dolazi prvo."
-        },
-        "travas": {
-          "titulo": "Šta vam treba sada",
-          "texto": "Otvara ekran jer ima rok: poziv koji čeka, izveštaj zadržan iza njega, životinja koja stiže bez vakcine. Svaka stavka je dugme koje vodi tamo gde se rešava."
-        },
-        "resumo": {
-          "titulo": "Dan u jednom redu",
-          "texto": "Koliko ih je u kući, koliko dolazi, koliko odlazi i koliko zadataka je za sada. Četiri broja koja staju u rečenicu."
-        },
-        "trilho": {
-          "titulo": "Vremenska linija dana",
-          "texto": "Dolasci gore, odlasci dole, i oznaka na „sada“. Trougao pored imena znači da je taj dolazak ili odlazak blokiran."
-        },
-        "colunas": {
-          "titulo": "Ko dolazi i ko odlazi",
-          "texto": "Isti podaci kao na liniji, u listi, sa oznakom onoga što blokira. Kliknite bilo koji red da otvorite rezervaciju ili boravak."
-        }
-      },
-      "rotina": {
-        "pergunta": {
-          "titulo": "Pitanje ovog ekrana",
-          "texto": "Šta treba uraditi sada. Ovo je smenska tabla: držite je otvorenu na telefonu dok radite u odgajivačnici."
-        },
-        "progresso": {
-          "titulo": "Koliko je urađeno",
-          "texto": "Koliko je današnjih zadataka već označeno, od ukupnog broja. Služi da znate da li je smena u toku bez brojanja redova."
-        },
-        "filtros": {
-          "titulo": "Jedna vrsta zadatka odjednom",
-          "texto": "Obrok, lek, šetnja, higijena, voda. Ko hrani sve odjednom filtrira po obroku i ide niz listu."
-        },
-        "tempo": {
-          "titulo": "Sada, kasnije, i šta je prošlo",
-          "texto": "Zadaci se grupišu u ronde, a svaka ronda nosi vreme na početku. Ono što kasni penje se u „Za sada“, sa vremenom u crvenom; ne gubi se usred liste."
-        },
-        "marcar": {
-          "titulo": "Označavanje košta jedan dodir",
-          "texto": "Urađeno, odbio ili preskoči, direktno u redu. „Odbio“ nije greška u kucanju: to je klinički podatak, a četiri odbijena obroka zaredom postaju incident."
-        },
-        "ronda": {
-          "titulo": "Jedna tura, a ne dvadeset redova",
-          "texto": "Zadaci iste usluge u istom terminu čine turu: \"Obrok, 20 životinja\". Kratka tura je već otvorena; duga se otvara jednim dodirom. Cela tura može da se označi odjednom, osim terapije: lek se označava jedan po jedan."
-        },
-        "passagem": {
-          "titulo": "Smena se završava ovde",
-          "texto": "U podnožju liste: koliko zadataka ostaje sledećoj smeni i šta sprečava predaju. Vidi se od početka smene, a ne tek pri predaji, jer incident bez kontakta u 22h više se ne može rešiti."
-        }
-      },
-      "hospedes": {
-        "pergunta": {
-          "titulo": "Pitanje ovog ekrana",
-          "texto": "Kako je svaka životinja u kući. Jedna kartica po gostu, poređane po tome ko vas prvi treba."
-        },
-        "recortes": {
-          "titulo": "Tri preseka",
-          "texto": "Svi, oni kojima trebate, i oni koji danas odlaze. Srednji se gleda sredinom smene; desni, pred kraj jutra."
-        },
-        "cartao": {
-          "titulo": "Red koji traži akciju",
-          "texto": "Disk pokazuje koja je usluga i popunjava se kada dođe vreme. Broj pored njega kaže koliko ih već kasni. To je jedini red na kartici koji se menja sam, bez ijednog dodira."
-        },
-        "linhas": {
-          "titulo": "Ko je na čisto, skuplja se",
-          "texto": "Mirni prelaze u tanak spisak u dnu strane, da prostor pripadne onima kojima si potreban. Klikni na naslov trake da je otvoriš i zatvoriš."
-        }
-      },
-      "reserva": {
-        "pergunta": {
-          "titulo": "Pitanje ovog ekrana",
-          "texto": "Koliko košta i da li ova životinja može da uđe. Ovo je ugovor o boravku, i odavde kreće prijava."
-        },
-        "periodo": {
-          "titulo": "Period i račun",
-          "texto": "Ulaz, izlaz, koliko noćenja i u kom smeštaju. Ako predviđeni odlazak pređe termin kuće, pola noćenja je već u predračunu, a ne iznenađenje na pultu."
-        },
-        "exigencias": {
-          "titulo": "Dokumentacija za prijem",
-          "texto": "Važenje se proverava u odnosu na poslednji dan boravka, a ne na danas. Crveno sprečava ulazak; žuto upozorava da ističe usred boravka i da još ima vremena za obnovu."
-        },
-        "checkin": {
-          "titulo": "Dugme se pali samo kad sme",
-          "texto": "Prijava ostaje blokirana dok postoji dokument koji je sprečava. To nije podsetnik: to je pravilo, i nijedan ekran ga ne zaobilazi."
-        }
-      },
-      "estadia": {
-        "pergunta": {
-          "titulo": "Pitanje ovog ekrana",
-          "texto": "Kako se ova životinja oseća. Sve o boravku na jednom mestu, i odjava se radi odavde."
-        },
-        "rotina": {
-          "titulo": "Današnja rutina, samo njegova",
-          "texto": "Zadaci nastaju iz prijemnog kartona: hrana koju je vlasnik poslao, lek na vreme, šetnja. Možete ih označiti odavde bez vraćanja na smensku tablu."
-        },
-        "ocorrencias": {
-          "titulo": "Incidenti i izveštaj",
-          "texto": "Loša vest ne ide aplikacijom. Ozbiljan incident zadržava izveštaj vlasniku dok neko iz kuće ne pozove, a dugme za upis poziva je tu pored."
-        },
-        "ficha": {
-          "titulo": "Karton boravka",
-          "texto": "Šta je vlasnik dogovorio: hrana i termini, lekovi, šta je došlo u torbi, šta je odobrio i koga zvati u hitnom slučaju."
-        },
-        "checkout": {
-          "titulo": "Što je ušlo mora da izađe",
-          "texto": "Odjava se ne zatvara dok se svaka stvar ne proveri i životinja ponovo ne izmeri. To je najjeftinija žalba za sprečavanje i najskuplja za rešavanje."
-        }
-      },
-      "acomodacoes": {
-        "pergunta": {
-          "titulo": "Pitanje ovog ekrana",
-          "texto": "Kako je kuća postavljena. Sistem ne pogađa koliko boksova imate: upisuje ih operativa, onog dana kad se kuća promeni."
-        },
-        "blocos": {
-          "titulo": "Grupisane po bloku",
-          "texto": "Odgajivačnica A, B, Mačji deo, Vrt. Svaka kartica kaže tip, veličinu koju prima, koliko ih staje i koju tarifu naplaćuje. Kliknite za izmenu."
-        },
-        "parada": {
-          "titulo": "Van pogona, sa datumom",
-          "texto": "Boks u renoviranju izlazi sa mape i ne može se prodati. „Pre koliko dana“ je informacija: dva sata je održavanje; tri nedelje je zaboravljeno mesto."
-        },
-        "tarifas": {
-          "titulo": "Cena po veličini, i sezona",
-          "texto": "Tabela ukršta tarifu i veličinu, a pratilac se naplaćuje procentualno. Sezone su ispod: ponavljaju se svake godine u istom opsegu datuma."
-        }
-      },
-      "resumo": {
-        "pergunta": {
-          "titulo": "Pitanje ovog ekrana",
-          "texto": "Da li se mesec isplatio. Ovo je jedini ekran koji gleda unazad, i služi za odlučivanje, ne za rad."
-        },
-        "periodo": {
-          "titulo": "Izaberite period",
-          "texto": "Otvara se na poslednjih trideset dana. Svaki broj i svaka kartica na ovom ekranu odgovara za ovde izabran period, i ni za koji drugi."
-        },
-        "numeros": {
-          "titulo": "Četiri broja",
-          "texto": "Prosečna popunjenost, prihod, prosečno noćenje i povratnost. Povratnost broji vlasnike koji su već dolazili: to je lojalnost, ne obim."
-        },
-        "grafico": {
-          "titulo": "Popunjenost iz dana u dan",
-          "texto": "Crta se iz dana u dan, ne kao prosek: prosek krije upravo ono što želite da vidite, a to je da se kuća puni vikendom i prazni utorkom."
-        },
-        "cartoes": {
-          "titulo": "Odakle dolazi, i šta se gubi",
-          "texto": "Prihod po izvoru rezervacije i po usluzi, incidenti perioda, i gubici. Otkazivanje je najava, moglo se preprodati; nedolazak je izgubljeno mesto."
-        }
-      },
-      "rotinaPadrao": {
-        "pergunta": {
-          "titulo": "Pitanje ovog ekrana",
-          "texto": "Šta kuća radi za sve goste i u koje vreme. To je osnova koju nasleđuje rutina svake životinje."
-        },
-        "regua": {
-          "titulo": "Ceo dan na jednoj skali",
-          "texto": "Svaka traka je usluga kuće, sa terminima označenim preko 24 sata. Izdaleka se vidi da li je dan dobro raspoređen ili sve pada ujutru."
-        },
-        "limite": {
-          "titulo": "Šta se ovde ne podešava",
-          "texto": "Obroci i lekovi se ne pojavljuju: njihovi termini dolaze iz kartona svakog gosta. Hotel ne propisuje terapiju, i nijedno podešavanje ne može da napravi ili promeni dozu."
-        },
-        "publicar": {
-          "titulo": "Objavljivanje prvo kaže šta će uraditi",
-          "texto": "Pre čuvanja, ekran pokazuje koliko zadataka nastaje, koliko izlazi i koliko ostaje netaknuto. Ono što je urađeno nikada se ne dira, a početak sutra ne dira tekuću smenu."
-        }
-      }
-    },
-    "rotinaPadrao": {
-      "aplicar": "Primeni",
-      "ativo": "Kuća ovo radi",
-      "campoHorarios": "Termini",
-      "campoHorariosDica": "Kako se izgovaraju: 8:00, 12:00, 18:00",
-      "cancelar": "Otkaži",
-      "criadas": "nastaje {total} zadatak | nastaju {total} zadatka | nastaje {total} zadataka",
-      "desfazer": "Poništi",
-      "desligada": "isključeno",
-      "editar": "Izmeni",
-      "editarTitulo": "Termini: {servico}",
-      "exigeAutorizacao": "samo za goste čiji je vlasnik dao saglasnost",
-      "horarios": "{total} termin | {total} termina | {total} termina",
-      "naoMexe": "Obroci i lekovi se ne podešavaju ovde: njihovi termini dolaze iz kartona svakog gosta, a hotel ne propisuje terapiju.",
-      "noTurno": "{total} pada u tekuću smenu | {total} padaju u tekuću smenu | {total} pada u tekuću smenu",
-      "porDia": "{total} zadatak po gostu dnevno | {total} zadatka po gostu dnevno | {total} zadataka po gostu dnevno",
-      "preservadas": "{total} zadatak ostaje netaknut | {total} zadatka ostaju netaknuta | {total} zadataka ostaje netaknuto",
-      "preservadasDica": "Ono što je urađeno, odbijeno ili preskočeno nikada se ne dira.",
-      "previsao": "Šta se menja",
-      "publicar": "Objavi izmene",
-      "publicarTitulo": "Objavi rutinu",
-      "retiradas": "izlazi {total} zadatak | izlaze {total} zadatka | izlazi {total} zadataka",
-      "semHorario": "bez termina",
-      "semMudanca": "Ništa se nije promenilo.",
-      "subtitulo": "Ono što kuća radi za sve goste",
-      "titulo": "Standardna rutina",
-      "vazioDescricao": "Kuća još nije navela šta radi za sve goste.",
-      "vazioTitulo": "Nijedna usluga nije podešena",
-      "versao": "verzija {versao} · {pessoa}",
-      "vigencia": "Od kada važi",
-      "vigenciaAgora": "Odmah",
-      "vigenciaAmanha": "Sutra",
-      "vigenciaDica": "Ako počne sutra, tekuća smena ostaje netaknuta."
-    },
-    "gerenciar": {
-      "padrao": "Standardna rutina kuće",
-      "padraoDica": "termini koji važe za sve goste",
-      "propor": "Predloži rutinu",
-      "proporDica": "predlog pročitan iz kartona, za pregled pre odobravanja",
-      "titulo": "Upravljanje rutinom",
-      "trocar": "Promeni"
-    },
-    "medicacaoNova": {
-      "titulo": "Upiši terapiju",
-      "hospede": "Gost",
-      "escolherHospede": "Izaberi gosta",
-      "descricao": "Lek",
-      "descricaoDica": "Naziv i jačina, kako piše na kutiji",
-      "via": "Način",
-      "dose": "Doza",
-      "doseDica": "1 tableta, 20 kapi, 2 ml",
-      "horarios": "Termini",
-      "horariosDica": "Kako se izgovaraju: 8:00, 20:00",
-      "receita": "Recept",
-      "receitaDica": "Broj licence i broj recepta. Bez njega se lek daje isto tako, a u kartonu ostaje nedostatak.",
-      "observacao": "Napomena",
-      "soDaquiParaFrente": "Doze nastaju od sada. Današnja koja je već prošla se ne pravi: doza koja nastane zakasnelo je lažan zapis o propuštenoj dozi.",
-      "faltaHorario": "Bez termina lek ne postaje nijedan zadatak.",
-      "registrar": "Upiši",
-      "cancelar": "Otkaži",
-      "registrada": "Terapija je upisana. Naredne doze su već na tabli."
-    },
-    "proposta": {
-      "titulo": "Predlog rutine",
-      "escolherHospede": "Izaberi gosta",
-      "lidaEm": "pročitano iz kartona u {hora}",
-      "motorLocal": "lokalna simulacija",
-      "nadaGravado": "ništa nije sačuvano",
-      "aviso": "U ovoj verziji nema modela ni mreže: predlog dolazi iz determinističke simulacije nad podacima kuće. Stvaran je tok pregleda i odobravanja.",
-      "casaJaFaz": "Kuća ovo već radi",
-      "daFicha": "Iz kartona",
-      "proponhoMudar": "Predlažem izmenu",
-      "transcrita": "prepisano",
-      "naoEdita": "Kuća ne propisuje terapiju: za izmenu doze ili termina potreban je recept.",
-      "naoProponho": "Šta ne predlažem",
-      "recusaMedicacao": "Terapija: ne predlažem ni lek ni dozu. Hotel ne propisuje terapiju.",
-      "recusaRefeicao": "Obrok: izmena termina obroka dogovara se sa vlasnikom.",
-      "porqueInspecao": "pregled pri dolasku: \"{valor}\"",
-      "porqueAdaptacao": "gost je primljen kao {valor}",
-      "porqueEstadiaLonga": "boravak od {valor} noći: težina pri odlasku bez merenja u međuvremenu ne kaže kada je životinja smršala",
-      "porqueMedicacao": "iz upisanog recepta: {valor}",
-      "porquePlano": "iz termina obroka u kartonu",
-      "porqueCasa": "iz standardne rutine kuće",
-      "descartadas": "{total} predlog odbačen pri proveri | {total} predloga odbačena pri proveri | {total} predloga odbačeno pri proveri",
-      "semMudancas": "Nema šta da se predloži za ovog gosta: rutina kuće je dovoljna.",
-      "aprovar": "Odobri {total} izmenu | Odobri {total} izmene | Odobri {total} izmena",
-      "aprovarNenhuma": "Odobri",
-      "descartar": "Odbaci",
-      "aprovada": "Izmene su upisane u karton gosta.",
-      "gerando": "Čitam karton…"
-    },
-    "planoDaEstadia": {
-      "titulo": "Plan boravka",
-      "semAjustes": "Ovaj gost prati standardnu rutinu kuće.",
-      "suspenso": "obustavljeno",
-      "desde": "od {data}",
-      "encerrar": "Završi",
-      "propor": "Predloži izmene",
-      "origemProposta": "iz pregledanog predloga",
-      "origemPessoa": "upisano ručno"
-    },
-    "acrescentar": {
-      "acrescentar": "Dodaj",
-      "ajusteCasaFaz": "kuća radi {horarios}",
-      "ajusteCasaNaoFaz": "kuća ne radi ovu uslugu",
-      "ajusteHorarios": "Termini za ovog gosta",
-      "ajusteServico": "Usluga kuće",
-      "ajusteVazio": "Ostavi prazno da obustaviš ovu uslugu samo za njega.",
-      "cancelar": "Otkaži",
-      "cuidadoIrParaMedicacao": "Unesi lek",
-      "cuidadoNaoEhRemedio": "Lek ne ide ovde. Doza i recept žive pod Lekom, a odatle dolazi i pokriće za davanje tuđeg leka.",
-      "cuidadoOQue": "Šta treba uraditi",
-      "cuidadoOQueDica": "Rečima onoga ko to radi: promeniti zavoj na desnoj šapi",
-      "faltaMotivo": "Bez razloga, niko neće znati kako ovo kasnije poništiti.",
-      "motivo": "Razlog",
-      "motivoDica": "U decembru je to jedina linija koja objašnjava zašto je ovaj gost drugačiji.",
-      "oQue": "Šta dodati",
-      "servicoCobra": "{preco} ulazi u račun boravka.",
-      "servicoDia": "Dan",
-      "servicoHora": "Vreme",
-      "servicoQual": "Usluga",
-      "titulo": "Dodaj u rutinu",
-      "viaAjuste": "Podesi termine kuće",
-      "viaAjusteDica": "promeni ili obustavi samo za ovog gosta",
-      "viaCuidado": "Nega gosta",
-      "viaCuidadoDica": "zavoj, oblog, kaputić: bez doze",
-      "viaMedicacao": "Lek",
-      "viaMedicacaoDica": "lek sa dozom i receptom",
-      "viaServico": "Dodatna usluga",
-      "viaServicoDica": "kupanje, šišanje, šetnja: naplaćuje se"
     }
   },
   "cronometro": {
