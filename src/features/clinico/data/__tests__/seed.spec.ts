@@ -38,6 +38,10 @@ const CASOS_ESPERADOS: CasoId[] = [
   'internacao-piora',
   'internacao-troca-plantao',
   'internacao-boletim-horario',
+  /* O resumo "Este pet em 30 segundos": perda de peso, diário cheio e paciente sem histórico. */
+  'resumo-perda-de-peso',
+  'resumo-diario-cheio',
+  'resumo-pet-novo',
 ]
 
 afterEach(() => {
@@ -106,7 +110,7 @@ describe('seed do módulo clínico', () => {
     )
   })
 
-  it('entrega os 15 casos difíceis, cada um com rota própria', () => {
+  it('entrega os 18 casos difíceis, cada um com rota própria', () => {
     const dataset = gerarDataset()
     const ids = dataset.casos.map((caso) => caso.id)
 

@@ -2998,6 +2998,152 @@
       "internadoAgora": "منوَّم حاليًا",
       "verInternacao": "فتح ملف التنويم"
     },
+    "resumoDoPaciente": {
+      "titulo": "هذا الحيوان في 30 ثانية",
+      "naoEncontrado": "لم يتم العثور على المريض",
+      "abrirAtendimento": "فتح الزيارة",
+      "abrirAtendimentoDica": "تُفتح الزيارة وهذا الملخص في التاريخ المرضي",
+      "verHistorico": "السجل الكامل",
+      "verResumo": "ملخص في 30 ثانية",
+      "hojeAs": "اليوم، {hora} · {tipo} · {profissional}",
+      "erroAoAbrir": "تعذّر فتح الزيارة. حاول مرة أخرى.",
+      "sinais": {
+        "titulo": "ما يلفت الانتباه",
+        "nadaFora": "لا شيء غير معتاد منذ الزيارة الأخيرة.",
+        "perdaContinua": "فقدان وزن مستمر",
+        "perda": "انخفاض الوزن",
+        "perdaDetalhe": "{de} ← {para} كغ ({percentual}) خلال أسابيع: {semanas}",
+        "alarmeDetalhe": "سُجّل في المنزل بتاريخ {data}، {quando}",
+        "recorrenteDetalhe": "{vezes}× منذ الزيارة الأخيرة",
+        "apetite": "شهية منخفضة",
+        "apetiteDetalhe": "في {alterados} من أصل {total} تسجيلًا",
+        "mais": "والمزيد في الملخص: {total}"
+      },
+      "casa": {
+        "titulo": "في المنزل منذ الزيارة الأخيرة",
+        "tituloSemConsulta": "في المنزل خلال آخر 30 يومًا",
+        "registros": "تسجيلات التطبيق: {total}",
+        "semAlteracao": "دون تغيير: {total}",
+        "vazioTitulo": "لم يُسجَّل شيء في التطبيق خلال هذه الفترة",
+        "vazioDescricao": "لم يستخدم مربي الحيوان يوميات الحيوان الأليف. من المفيد السؤال خلال الزيارة عن حاله في المنزل.",
+        "peso": "الوزن في المنزل",
+        "apetite": "الشهية",
+        "comportamento": "السلوك",
+        "sintomas": "الأعراض",
+        "semRegistro": "لا يوجد تسجيل",
+        "nenhum": "لا شيء",
+        "alteradoEm": "متغيّر في {alterados} من أصل {total} تسجيلًا",
+        "normalEmTodos": "طبيعي في جميع التسجيلات ({total})",
+        "ultimo": "الأخير: {valor}، {quando}",
+        "notas": "بكلمات مربي الحيوان",
+        "verRegistros": "عرض التسجيلات ({total})",
+        "esconder": "إخفاء التسجيلات",
+        "filtro": "التسجيلات المعروضة",
+        "filtroAlteracao": "مع تغيير ({total})",
+        "filtroTodos": "الكل ({total})",
+        "apetiteValor": "الشهية: {valor}",
+        "semAlteracaoCurto": "دون تغيير"
+      },
+      "peso": {
+        "titulo": "الوزن خلال آخر 6 أشهر",
+        "serie": "الوزن",
+        "legendaClinica": "زيارة (ميزان العيادة)",
+        "legendaCasa": "في المنزل (ميزان مربي الحيوان)",
+        "origem": {
+          "clinica": "زيارة",
+          "casa": "في المنزل"
+        },
+        "umPonto": "وزنة واحدة فقط في الفترة: {peso}، بتاريخ {data}.",
+        "semPeso": "لا توجد وزنات خلال آخر 6 أشهر.",
+        "aria": "الوزن من {de} كغ إلى {para} كغ، عدد الأسابيع: {semanas}"
+      },
+      "essencial": {
+        "titulo": "الأساسي",
+        "alertas": "التنبيهات",
+        "condicoes": "الحالات النشطة",
+        "medicacao": "الأدوية الحالية",
+        "ultimaConsulta": "آخر زيارة",
+        "nenhum": "لا يوجد تسجيل",
+        "nenhuma": "لا يوجد تسجيل",
+        "usoContinuo": "استخدام مستمر",
+        "ate": "حتى {data}",
+        "primeiraVez": "أول مرة في العيادة",
+        "abrirProntuario": "فتح السجل الطبي"
+      },
+      "primeira": {
+        "titulo": "الزيارة الأولى",
+        "descricao": "لم يُسجَّل شيء بعد في العيادة ولا في التطبيق. ما يستحق السؤال عنه اليوم:",
+        "pesar": {
+          "titulo": "الوزن",
+          "detalhe": "لا يوجد وزن في الملف، وكل جرعة تعتمد عليه."
+        },
+        "vacinas": {
+          "titulo": "التطعيم وطارد الديدان",
+          "detalhe": "ما الذي تم، ومتى وأين. اطلب البطاقة إن وُجدت."
+        },
+        "filhote": {
+          "titulo": "المصدر والفطام",
+          "detalhe": "حيوان صغير: من أين جاء، ومتى فُصل عن أمه، وماذا يأكل الآن."
+        },
+        "antecedentes": {
+          "titulo": "السوابق المرضية",
+          "detalhe": "الأمراض والعمليات والحساسية المعروفة، بما فيها ما عولج في مكان آخر."
+        },
+        "diario": {
+          "titulo": "يوميات الحيوان الأليف",
+          "detalhe": "ادعُ مربي الحيوان إلى التسجيل في التطبيق. اليوميات هي ما يملأ هذه الشاشة في الزيارة القادمة."
+        }
+      },
+      "diario": {
+        "apetite": {
+          "normal": "طبيعية",
+          "aumentado": "مرتفعة",
+          "reduzido": "منخفضة",
+          "ausente": "لم يأكل"
+        },
+        "comportamento": {
+          "normal": "طبيعي",
+          "agitado": "مضطرب",
+          "quieto": "هادئ",
+          "apatico": "خامل"
+        },
+        "sintoma": {
+          "vomito": "قيء",
+          "diarreia": "إسهال",
+          "tosse": "سعال",
+          "espirro": "عطاس",
+          "coceira": "حكة",
+          "sede-aumentada": "عطش زائد",
+          "cansaco": "تعب",
+          "claudicacao": "عرج",
+          "falta-de-ar": "ضيق تنفس",
+          "desmaio": "إغماء",
+          "convulsao": "نوبة تشنج"
+        }
+      },
+      "anamnese": {
+        "cabecalho": "من يوميات الحيوان الأليف (سجّلها مربي الحيوان في التطبيق) منذ {data}، عدد التسجيلات: {total}:",
+        "perda": "فقدان وزن من {de} كغ إلى {para} كغ ({percentual}%)، عدد الأسابيع: {semanas}، بجمع الزيارات وميزان المنزل",
+        "alarme": "{sintomas} بتاريخ {data}: \"{nota}\"",
+        "pesoCasa": "الوزن على ميزان المنزل: {de} ← {para} كغ",
+        "apetite": "شهية منخفضة أو معدومة في {alterados} من أصل {total} تسجيلًا",
+        "comportamento": "سلوك متغيّر (هادئ أو خامل) في {alterados} من أصل {total} تسجيلًا",
+        "sintomas": "الأعراض المسجّلة: {lista}",
+        "semAlteracao": "لم يُسجَّل شيء غير طبيعي.",
+        "prescricao": "{nome} (موصوف، حتى {data})"
+      },
+      "verResumoComSinais": "ملخص في 30 ثانية: نقاط الانتباه: {total}",
+      "preferencia": "اقتراح هذا الملخص عند فتح سجل المريض",
+      "sugestao": {
+        "titulo": "{nome} في 30 ثانية",
+        "texto": "قبل تصفّح السجل: يجمع الملخص السجل الطبي وما سجّله مربي الحيوان في التطبيق منذ الزيارة الأخيرة.",
+        "primeiraVez": "أول مرة في العيادة. يعرض الملخص ما يستحق السؤال عنه في هذه الزيارة.",
+        "naoSugerir": "عدم الاقتراح مجددًا عند فتح السجل",
+        "comoReativar": "يبقى الزر في السجل. يمكنك إعادة تفعيل الاقتراح من شاشة الملخص.",
+        "agoraNao": "ليس الآن",
+        "ver": "عرض الملخص"
+      }
+    },
     "atendimentos": {
       "titulo": "الزيارات",
       "subtitulo": "العيادة"

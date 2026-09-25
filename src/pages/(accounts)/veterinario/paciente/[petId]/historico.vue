@@ -21,9 +21,11 @@ import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.
 import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
 import AtoNovoDialog from '@/features/clinico/components/pacientes/AtoNovoDialog.vue'
 import AtosDoPaciente from '@/features/clinico/components/pacientes/AtosDoPaciente.vue'
+import ResumoSugestaoDialog from '@/features/clinico/components/pacientes/resumo/ResumoSugestaoDialog.vue'
 import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
 import ProntuarioTimeline from '@/features/clinico/components/prontuario/ProntuarioTimeline.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
+import { useClinicPrefs } from '@/features/clinico/composables/useClinicPrefs'
 import {
   encounterRepository,
   internacaoRepository,
@@ -37,6 +39,10 @@ import type {
   TimelineEvent,
   Tutor,
 } from '@/features/clinico/data/types'
+import {
+  montarResumoDoPaciente,
+  type ResumoDoPaciente,
+} from '@/features/clinico/domain/resumo-do-paciente'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 
 const { t } = useI18n()
@@ -44,6 +50,7 @@ const route = useRoute()
 const router = useRouter()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
+const prefs = useClinicPrefs()
 
 const pet = ref<Pet | null>(null)
 const tutor = ref<Tutor | null>(null)
@@ -55,6 +62,9 @@ const registrandoAto = ref(false)
 const internacaoAberta = ref<LeitoNoMapa | null>(null)
 const carregando = ref(false)
 const erro = ref('')
+/** O resumo "Este pet em 30 segundos": alimenta o selo do botão e a sugestão ao abrir. */
+const resumo = ref<ResumoDoPaciente | null>(null)
+const sugestaoAberta = ref(false)
 
 const petId = computed(() => String(route.params.petId ?? ''))
 
@@ -100,7 +110,7 @@ async function carregar() {
     pet.value = dados?.pet ?? null
     tutor.value = dados?.tutor ?? null
 
-    const [historico, lista, recebidos, mapa] = await Promise.all([
+    const [historico, lista, recebidos, mapa, paraOResumo] = await Promise.all([
       encounterRepository.historico(petId.value),
       patientRepository.atendimentosDoPet(petId.value),
       patientRepository.historicoDeAtos(petId.value),
@@ -109,6 +119,8 @@ async function carregar() {
        * o histórico continua sendo histórico, e o que se perde é apenas o atalho para o leito.
        */
       internacaoRepository.mapa().catch(() => null),
+      /* Mesma regra: sem resumo, o histórico abre igual, só sem selo e sem sugestão. */
+      patientRepository.paraOResumo(petId.value).catch(() => null),
     ])
 
     eventos.value = historico
@@ -118,11 +130,42 @@ async function carregar() {
       mapa?.leitos.find(
         (item) => item.internacao !== null && item.internacao.petId === petId.value,
       ) ?? null
+    resumo.value =
+      dados && paraOResumo ? montarResumoDoPaciente({ pet: dados.pet, ...paraOResumo }) : null
+    sugestaoAberta.value = resumo.value !== null && prefs.sugerirResumo.value && !vindoDoResumo()
   } catch {
     erro.value = t('clinico.erros.prontuario')
   } finally {
     carregando.value = false
   }
+}
+
+/**
+ * Quem chegou aqui pelo "Histórico completo" do resumo acabou de lê-lo. Sugerir o resumo de
+ * volta seria o modal mandando a pessoa para a tela de onde ela saiu.
+ */
+function vindoDoResumo(): boolean {
+  const anterior = String(router.options.history.state.back ?? '')
+
+  return anterior.startsWith(`/veterinario/paciente/${petId.value}/resumo`)
+}
+
+/** Os sinais do resumo, no botão: o número diz que há o que ler, a cor diz o quanto. */
+const seloDoResumo = computed(() => {
+  const sinais = resumo.value?.sinais ?? []
+
+  if (sinais.length === 0) {
+    return null
+  }
+
+  return {
+    total: sinais.length,
+    risco: sinais.some((sinal) => sinal.severidade === 'risco'),
+  }
+})
+
+function verResumo() {
+  void router.push(`/veterinario/paciente/${petId.value}/resumo`)
 }
 
 function abrir(appointment: Appointment) {
@@ -186,14 +229,32 @@ watch(petId, carregar)
           tempo como um evento entre outros, com data de entrada e nenhuma indicação de que ainda
           está acontecendo.
         -->
-        <template v-if="internacaoAberta" #acoes>
+        <template #acoes>
           <Button
+            v-if="internacaoAberta"
             :label="t('clinico.pacientes.verInternacao')"
             icon="pi pi-building"
             severity="secondary"
             outlined
             size="small"
             @click="abrirInternacao"
+          />
+          <!--
+            A ação principal da ficha: o resumo é o que se lê antes de rolar o histórico. O selo
+            conta os sinais e fica no tom de risco quando algum é de risco — a urgência mora no
+            selo, não no botão inteiro.
+          -->
+          <Button
+            :label="t('clinico.resumoDoPaciente.verResumo')"
+            icon="pi pi-stopwatch"
+            :badge="seloDoResumo ? String(seloDoResumo.total) : undefined"
+            :badge-severity="seloDoResumo?.risco ? 'danger' : 'warn'"
+            :aria-label="
+              seloDoResumo
+                ? t('clinico.resumoDoPaciente.verResumoComSinais', { total: seloDoResumo.total })
+                : t('clinico.resumoDoPaciente.verResumo')
+            "
+            @click="verResumo"
           />
         </template>
       </ClinicPatientHeader>
@@ -255,6 +316,14 @@ watch(petId, carregar)
         :carregando="carregando"
         @registrar="registrandoAto = true"
         @abrir-atendimento="abrirAtendimento"
+      />
+
+      <ResumoSugestaoDialog
+        v-if="resumo && pet"
+        v-model:visivel="sugestaoAberta"
+        :pet-nome="pet.nome"
+        :resumo="resumo"
+        @ver="verResumo"
       />
 
       <AtoNovoDialog

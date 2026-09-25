@@ -250,6 +250,15 @@ onMounted(carregar)
                 icon="pi pi-file-edit"
                 @click="abrirProntuario((agora ?? aSeguir)!)"
               />
+              <!-- O que se lê antes de entrar na sala: só faz sentido para quem ainda vai entrar. -->
+              <Button
+                v-if="!agora"
+                :label="t('clinico.resumoDoPaciente.verResumo')"
+                icon="pi pi-stopwatch"
+                severity="secondary"
+                outlined
+                @click="router.push(`/veterinario/paciente/${aSeguir!.petId}/resumo`)"
+              />
             </template>
           </ClinicPatientHeader>
 

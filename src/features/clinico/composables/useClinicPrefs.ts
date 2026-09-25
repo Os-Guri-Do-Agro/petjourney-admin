@@ -29,6 +29,14 @@ const CHAVE_OCULTAR_CANCELADOS = 'clinic.hideCancelled'
  * de cor fecha uma vez e a preferência persiste.
  */
 const CHAVE_LEGENDA = 'clinic.legendOpen'
+/**
+ * Sugerir o resumo "Este pet em 30 segundos" ao abrir o histórico do paciente.
+ *
+ * Nasce **ligada**: a sugestão é como o vet descobre que o resumo existe. Quem já sabe desliga
+ * no próprio modal, e religa na tela do resumo — o lugar onde a preferência faz sentido de ser
+ * procurada. Desligar não esconde o resumo: o botão do histórico continua lá.
+ */
+const CHAVE_SUGERIR_RESUMO = 'clinic.suggestSummary'
 
 /** Altura em pixels do slot de 15 minutos, espelhando `clinic-tokens.css`. */
 const ALTURA_POR_ZOOM: Record<ClinicZoom, number> = {
@@ -59,6 +67,12 @@ const legendaAberta = ref(
   typeof window === 'undefined'
     ? true
     : window.localStorage.getItem(CHAVE_LEGENDA) !== 'false',
+)
+
+const sugerirResumo = ref(
+  typeof window === 'undefined'
+    ? true
+    : window.localStorage.getItem(CHAVE_SUGERIR_RESUMO) !== 'false',
 )
 
 function aplicarNoDocumento() {
@@ -92,6 +106,10 @@ watch(legendaAberta, (valor) => {
   window.localStorage.setItem(CHAVE_LEGENDA, String(valor))
 })
 
+watch(sugerirResumo, (valor) => {
+  window.localStorage.setItem(CHAVE_SUGERIR_RESUMO, String(valor))
+})
+
 function proximo<T>(lista: readonly T[], atual: T): T {
   const indice = lista.indexOf(atual)
 
@@ -104,6 +122,7 @@ export function useClinicPrefs() {
     zoom,
     ocultarCancelados,
     legendaAberta,
+    sugerirResumo,
     alternarLegenda: () => {
       legendaAberta.value = !legendaAberta.value
     },

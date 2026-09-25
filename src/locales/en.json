@@ -2998,6 +2998,152 @@
       "internadoAgora": "Admitted right now",
       "verInternacao": "Open admission"
     },
+    "resumoDoPaciente": {
+      "titulo": "This pet in 30 seconds",
+      "naoEncontrado": "Patient not found",
+      "abrirAtendimento": "Open consult",
+      "abrirAtendimentoDica": "the consult opens with this summary in the history",
+      "verHistorico": "Full history",
+      "verResumo": "30-second summary",
+      "hojeAs": "Today, {hora} · {tipo} · {profissional}",
+      "erroAoAbrir": "Could not open the consult. Try again.",
+      "sinais": {
+        "titulo": "What stands out",
+        "nadaFora": "Nothing unusual since the last visit.",
+        "perdaContinua": "Continuous weight loss",
+        "perda": "Weight drop",
+        "perdaDetalhe": "{de} → {para} kg ({percentual}) in {semanas} weeks",
+        "alarmeDetalhe": "logged at home on {data}, {quando}",
+        "recorrenteDetalhe": "{vezes}× since the last visit",
+        "apetite": "Reduced appetite",
+        "apetiteDetalhe": "in {alterados} of {total} entries",
+        "mais": "and {total} more in the summary"
+      },
+      "casa": {
+        "titulo": "At home since the last visit",
+        "tituloSemConsulta": "At home in the last 30 days",
+        "registros": "App entries: {total}",
+        "semAlteracao": "no change: {total}",
+        "vazioTitulo": "Nothing logged in the app in this period",
+        "vazioDescricao": "The pet parent didn't use the Pet diary. Worth asking during the visit how things have been at home.",
+        "peso": "Weight at home",
+        "apetite": "Appetite",
+        "comportamento": "Behavior",
+        "sintomas": "Symptoms",
+        "semRegistro": "Not logged",
+        "nenhum": "None",
+        "alteradoEm": "Changed in {alterados} of {total} entries",
+        "normalEmTodos": "Normal in all {total} entries",
+        "ultimo": "latest: {valor}, {quando}",
+        "notas": "In the pet parent's words",
+        "verRegistros": "View entries ({total})",
+        "esconder": "Hide entries",
+        "filtro": "Which entries to show",
+        "filtroAlteracao": "With changes ({total})",
+        "filtroTodos": "All ({total})",
+        "apetiteValor": "Appetite {valor}",
+        "semAlteracaoCurto": "No change"
+      },
+      "peso": {
+        "titulo": "Weight over the last 6 months",
+        "serie": "Weight",
+        "legendaClinica": "Visit (clinic scale)",
+        "legendaCasa": "At home (pet parent's scale)",
+        "origem": {
+          "clinica": "visit",
+          "casa": "at home"
+        },
+        "umPonto": "Only one weighing in the period: {peso}, on {data}.",
+        "semPeso": "No weighings in the last 6 months.",
+        "aria": "Weight from {de} kg to {para} kg over {semanas} weeks"
+      },
+      "essencial": {
+        "titulo": "Essentials",
+        "alertas": "Alerts",
+        "condicoes": "Active conditions",
+        "medicacao": "Current medication",
+        "ultimaConsulta": "Last visit",
+        "nenhum": "None recorded",
+        "nenhuma": "None recorded",
+        "usoContinuo": "ongoing",
+        "ate": "until {data}",
+        "primeiraVez": "First time at the clinic",
+        "abrirProntuario": "Open record"
+      },
+      "primeira": {
+        "titulo": "First visit",
+        "descricao": "Nothing recorded at the clinic or in the app yet. Worth covering today:",
+        "pesar": {
+          "titulo": "Weigh",
+          "detalhe": "There's no weight on file, and every dose depends on it."
+        },
+        "vacinas": {
+          "titulo": "Vaccination and deworming",
+          "detalhe": "What has been done, when and where. Ask for the vaccine card, if there is one."
+        },
+        "filhote": {
+          "titulo": "Origin and weaning",
+          "detalhe": "Young animal: where it came from, when it left its mother and what it eats now."
+        },
+        "antecedentes": {
+          "titulo": "Medical history",
+          "detalhe": "Known illnesses, surgeries and allergies, including those treated elsewhere."
+        },
+        "diario": {
+          "titulo": "Pet diary",
+          "detalhe": "Invite the pet parent to log in the app. The diary is what fills this screen at the next visit."
+        }
+      },
+      "diario": {
+        "apetite": {
+          "normal": "Normal",
+          "aumentado": "Increased",
+          "reduzido": "Reduced",
+          "ausente": "Didn't eat"
+        },
+        "comportamento": {
+          "normal": "Normal",
+          "agitado": "Restless",
+          "quieto": "Quiet",
+          "apatico": "Lethargic"
+        },
+        "sintoma": {
+          "vomito": "Vomiting",
+          "diarreia": "Diarrhea",
+          "tosse": "Cough",
+          "espirro": "Sneezing",
+          "coceira": "Itching",
+          "sede-aumentada": "Increased thirst",
+          "cansaco": "Tiredness",
+          "claudicacao": "Limping",
+          "falta-de-ar": "Shortness of breath",
+          "desmaio": "Fainting",
+          "convulsao": "Seizure"
+        }
+      },
+      "anamnese": {
+        "cabecalho": "From the Pet diary (logged by the pet parent in the app) since {data}, {total} entries:",
+        "perda": "weight loss from {de} kg to {para} kg ({percentual}%) over {semanas} weeks, combining visits and the home scale",
+        "alarme": "{sintomas} on {data}: \"{nota}\"",
+        "pesoCasa": "weight on the home scale: {de} → {para} kg",
+        "apetite": "reduced or absent appetite in {alterados} of {total} entries",
+        "comportamento": "changed behavior (quiet or lethargic) in {alterados} of {total} entries",
+        "sintomas": "symptoms logged: {lista}",
+        "semAlteracao": "Nothing unusual logged.",
+        "prescricao": "{nome} (prescribed, until {data})"
+      },
+      "verResumoComSinais": "30-second summary: {total} points of attention",
+      "preferencia": "Suggest this summary when opening the patient's history",
+      "sugestao": {
+        "titulo": "{nome} in 30 seconds",
+        "texto": "Before scrolling the history: the summary brings together the record and what the pet parent logged in the app since the last visit.",
+        "primeiraVez": "First time at the clinic. The summary lists what is worth covering in this visit.",
+        "naoSugerir": "Stop suggesting this when opening the history",
+        "comoReativar": "The button stays in the history. You can turn the suggestion back on from the summary screen.",
+        "agoraNao": "Not now",
+        "ver": "View summary"
+      }
+    },
     "atendimentos": {
       "titulo": "Visits",
       "subtitulo": "Clinic"

@@ -29,6 +29,7 @@ const emit = defineEmits<{
   cancelar: []
   abrirProntuario: []
   verHistorico: []
+  verResumo: []
 }>()
 
 const { t } = useI18n()
@@ -230,6 +231,15 @@ const encerrado = computed(() =>
         severity="secondary"
         outlined
         @click="emit('abrirProntuario')"
+      />
+
+      <!-- O resumo vem antes do histórico: é o que se lê na porta da sala. -->
+      <Button
+        :label="t('clinico.resumoDoPaciente.verResumo')"
+        icon="pi pi-stopwatch"
+        severity="secondary"
+        outlined
+        @click="emit('verResumo')"
       />
 
       <Button

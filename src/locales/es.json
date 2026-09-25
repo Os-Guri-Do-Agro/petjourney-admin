@@ -2998,6 +2998,152 @@
       "internadoAgora": "Internado ahora",
       "verInternacao": "Abrir internación"
     },
+    "resumoDoPaciente": {
+      "titulo": "Esta mascota en 30 segundos",
+      "naoEncontrado": "Paciente no encontrado",
+      "abrirAtendimento": "Abrir consulta",
+      "abrirAtendimentoDica": "la consulta se abre con este resumen en la anamnesis",
+      "verHistorico": "Historial completo",
+      "verResumo": "Resumen en 30 s",
+      "hojeAs": "Hoy, {hora} · {tipo} · {profissional}",
+      "erroAoAbrir": "No se pudo abrir la consulta. Inténtalo de nuevo.",
+      "sinais": {
+        "titulo": "Lo que llama la atención",
+        "nadaFora": "Nada fuera de lo común desde la última consulta.",
+        "perdaContinua": "Pérdida de peso continua",
+        "perda": "Caída de peso",
+        "perdaDetalhe": "{de} → {para} kg ({percentual}) en {semanas} semanas",
+        "alarmeDetalhe": "registrado en casa el {data}, {quando}",
+        "recorrenteDetalhe": "{vezes}× desde la última consulta",
+        "apetite": "Apetito reducido",
+        "apetiteDetalhe": "en {alterados} de {total} registros",
+        "mais": "y {total} más en el resumen"
+      },
+      "casa": {
+        "titulo": "En casa desde la última consulta",
+        "tituloSemConsulta": "En casa en los últimos 30 días",
+        "registros": "Registros en la app: {total}",
+        "semAlteracao": "sin cambios: {total}",
+        "vazioTitulo": "Nada registrado en la app en este período",
+        "vazioDescricao": "El tutor no usó el Diario de la mascota. Conviene preguntar en la consulta cómo ha estado en casa.",
+        "peso": "Peso en casa",
+        "apetite": "Apetito",
+        "comportamento": "Comportamiento",
+        "sintomas": "Síntomas",
+        "semRegistro": "Sin registro",
+        "nenhum": "Ninguno",
+        "alteradoEm": "Alterado en {alterados} de {total} registros",
+        "normalEmTodos": "Normal en los {total} registros",
+        "ultimo": "último: {valor}, {quando}",
+        "notas": "En palabras del tutor",
+        "verRegistros": "Ver registros ({total})",
+        "esconder": "Ocultar registros",
+        "filtro": "Qué registros mostrar",
+        "filtroAlteracao": "Con cambios ({total})",
+        "filtroTodos": "Todos ({total})",
+        "apetiteValor": "Apetito {valor}",
+        "semAlteracaoCurto": "Sin cambios"
+      },
+      "peso": {
+        "titulo": "Peso en los últimos 6 meses",
+        "serie": "Peso",
+        "legendaClinica": "Consulta (báscula de la clínica)",
+        "legendaCasa": "En casa (báscula del tutor)",
+        "origem": {
+          "clinica": "consulta",
+          "casa": "en casa"
+        },
+        "umPonto": "Una sola pesada en el período: {peso}, el {data}.",
+        "semPeso": "Ninguna pesada en los últimos 6 meses.",
+        "aria": "Peso de {de} kg a {para} kg en {semanas} semanas"
+      },
+      "essencial": {
+        "titulo": "Lo esencial",
+        "alertas": "Alertas",
+        "condicoes": "Condiciones activas",
+        "medicacao": "Medicación en uso",
+        "ultimaConsulta": "Última consulta",
+        "nenhum": "Ninguno registrado",
+        "nenhuma": "Ninguna registrada",
+        "usoContinuo": "uso continuo",
+        "ate": "hasta el {data}",
+        "primeiraVez": "Primera vez en la clínica",
+        "abrirProntuario": "Abrir historia clínica"
+      },
+      "primeira": {
+        "titulo": "Primera consulta",
+        "descricao": "Nada registrado todavía en la clínica ni en la app. Qué conviene averiguar hoy:",
+        "pesar": {
+          "titulo": "Pesar",
+          "detalhe": "No hay peso en la ficha, y toda dosis depende de él."
+        },
+        "vacinas": {
+          "titulo": "Vacunación y desparasitación",
+          "detalhe": "Qué se hizo, cuándo y dónde. Pedir la cartilla, si la hay."
+        },
+        "filhote": {
+          "titulo": "Origen y destete",
+          "detalhe": "Cachorro: de dónde vino, a qué edad se separó de la madre y qué come hoy."
+        },
+        "antecedentes": {
+          "titulo": "Antecedentes",
+          "detalhe": "Enfermedades, cirugías y alergias conocidas, incluso las tratadas en otro lugar."
+        },
+        "diario": {
+          "titulo": "Diario de la mascota",
+          "detalhe": "Invitar al tutor a registrar en la app. Es el diario lo que llena esta pantalla en la próxima consulta."
+        }
+      },
+      "diario": {
+        "apetite": {
+          "normal": "Normal",
+          "aumentado": "Aumentado",
+          "reduzido": "Reducido",
+          "ausente": "No comió"
+        },
+        "comportamento": {
+          "normal": "Normal",
+          "agitado": "Agitado",
+          "quieto": "Quieto",
+          "apatico": "Apático"
+        },
+        "sintoma": {
+          "vomito": "Vómito",
+          "diarreia": "Diarrea",
+          "tosse": "Tos",
+          "espirro": "Estornudos",
+          "coceira": "Picazón",
+          "sede-aumentada": "Sed aumentada",
+          "cansaco": "Cansancio",
+          "claudicacao": "Cojera",
+          "falta-de-ar": "Falta de aire",
+          "desmaio": "Desmayo",
+          "convulsao": "Convulsión"
+        }
+      },
+      "anamnese": {
+        "cabecalho": "Del Diario de la mascota (registrado por el tutor en la app) desde el {data}, {total} registros:",
+        "perda": "pérdida de peso de {de} kg a {para} kg ({percentual}%) en {semanas} semanas, sumando consultas y báscula de casa",
+        "alarme": "{sintomas} el {data}: \"{nota}\"",
+        "pesoCasa": "peso en la báscula de casa: {de} → {para} kg",
+        "apetite": "apetito reducido o ausente en {alterados} de {total} registros",
+        "comportamento": "comportamiento alterado (quieto o apático) en {alterados} de {total} registros",
+        "sintomas": "síntomas registrados: {lista}",
+        "semAlteracao": "Nada fuera de lo normal registrado.",
+        "prescricao": "{nome} (recetado, hasta el {data})"
+      },
+      "verResumoComSinais": "Resumen en 30 s: {total} puntos de atención",
+      "preferencia": "Sugerir este resumen al abrir el historial del paciente",
+      "sugestao": {
+        "titulo": "{nome} en 30 segundos",
+        "texto": "Antes de recorrer el historial: el resumen reúne la historia clínica y lo que el tutor registró en la app desde la última consulta.",
+        "primeiraVez": "Primera vez en la clínica. El resumen enumera lo que conviene averiguar en esta consulta.",
+        "naoSugerir": "No sugerir más al abrir el historial",
+        "comoReativar": "El botón sigue en el historial. Puedes volver a activar la sugerencia en la pantalla del resumen.",
+        "agoraNao": "Ahora no",
+        "ver": "Ver resumen"
+      }
+    },
     "atendimentos": {
       "titulo": "Atenciones",
       "subtitulo": "Clínica"

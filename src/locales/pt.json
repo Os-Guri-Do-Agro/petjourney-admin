@@ -2998,6 +2998,152 @@
       "internadoAgora": "Internado agora",
       "verInternacao": "Abrir internação"
     },
+    "resumoDoPaciente": {
+      "titulo": "Este pet em 30 segundos",
+      "naoEncontrado": "Paciente não encontrado",
+      "abrirAtendimento": "Abrir atendimento",
+      "abrirAtendimentoDica": "o atendimento abre com este resumo na anamnese",
+      "verHistorico": "Histórico completo",
+      "verResumo": "Resumo em 30 s",
+      "hojeAs": "Hoje, {hora} · {tipo} · {profissional}",
+      "erroAoAbrir": "Não foi possível abrir o atendimento. Tente de novo.",
+      "sinais": {
+        "titulo": "O que chama atenção",
+        "nadaFora": "Nada fora do comum desde a última consulta.",
+        "perdaContinua": "Perda de peso contínua",
+        "perda": "Queda de peso",
+        "perdaDetalhe": "{de} → {para} kg ({percentual}) em {semanas} semanas",
+        "alarmeDetalhe": "registrado em casa em {data}, {quando}",
+        "recorrenteDetalhe": "{vezes}× desde a última consulta",
+        "apetite": "Apetite reduzido",
+        "apetiteDetalhe": "em {alterados} de {total} registros",
+        "mais": "e mais {total} no resumo"
+      },
+      "casa": {
+        "titulo": "Em casa desde a última consulta",
+        "tituloSemConsulta": "Em casa nos últimos 30 dias",
+        "registros": "Registros no app: {total}",
+        "semAlteracao": "sem alteração: {total}",
+        "vazioTitulo": "Nada registrado no app neste período",
+        "vazioDescricao": "O responsável não usou o Diário Pet. Vale perguntar na consulta como ele tem passado em casa.",
+        "peso": "Peso em casa",
+        "apetite": "Apetite",
+        "comportamento": "Comportamento",
+        "sintomas": "Sintomas",
+        "semRegistro": "Sem registro",
+        "nenhum": "Nenhum",
+        "alteradoEm": "Alterado em {alterados} de {total} registros",
+        "normalEmTodos": "Normal nos {total} registros",
+        "ultimo": "último: {valor}, {quando}",
+        "notas": "Nas palavras do responsável",
+        "verRegistros": "Ver registros ({total})",
+        "esconder": "Esconder registros",
+        "filtro": "Quais registros mostrar",
+        "filtroAlteracao": "Com alteração ({total})",
+        "filtroTodos": "Todos ({total})",
+        "apetiteValor": "Apetite {valor}",
+        "semAlteracaoCurto": "Sem alteração"
+      },
+      "peso": {
+        "titulo": "Peso nos últimos 6 meses",
+        "serie": "Peso",
+        "legendaClinica": "Consulta (balança da clínica)",
+        "legendaCasa": "Em casa (balança do responsável)",
+        "origem": {
+          "clinica": "consulta",
+          "casa": "em casa"
+        },
+        "umPonto": "Uma pesagem só no período: {peso}, em {data}.",
+        "semPeso": "Nenhuma pesagem nos últimos 6 meses.",
+        "aria": "Peso de {de} kg para {para} kg em {semanas} semanas"
+      },
+      "essencial": {
+        "titulo": "Essencial",
+        "alertas": "Alertas",
+        "condicoes": "Condições ativas",
+        "medicacao": "Medicação em uso",
+        "ultimaConsulta": "Última consulta",
+        "nenhum": "Nenhum registrado",
+        "nenhuma": "Nenhuma registrada",
+        "usoContinuo": "uso contínuo",
+        "ate": "até {data}",
+        "primeiraVez": "Primeira vez na clínica",
+        "abrirProntuario": "Abrir prontuário"
+      },
+      "primeira": {
+        "titulo": "Primeira consulta",
+        "descricao": "Nada registrado na clínica nem no app ainda. O que vale levantar hoje:",
+        "pesar": {
+          "titulo": "Pesar",
+          "detalhe": "Não há peso no cadastro, e toda dose sai dele."
+        },
+        "vacinas": {
+          "titulo": "Vacinação e vermifugação",
+          "detalhe": "O que já foi feito, quando e onde. Pedir a carteira, se houver."
+        },
+        "filhote": {
+          "titulo": "Origem e desmame",
+          "detalhe": "Filhote: de onde veio, com que idade saiu da mãe e o que come hoje."
+        },
+        "antecedentes": {
+          "titulo": "Antecedentes",
+          "detalhe": "Doenças, cirurgias e alergias conhecidas, mesmo as tratadas em outro serviço."
+        },
+        "diario": {
+          "titulo": "Diário Pet",
+          "detalhe": "Convidar o responsável a registrar no app. É o diário que preenche esta tela na próxima consulta."
+        }
+      },
+      "diario": {
+        "apetite": {
+          "normal": "Normal",
+          "aumentado": "Aumentado",
+          "reduzido": "Reduzido",
+          "ausente": "Não comeu"
+        },
+        "comportamento": {
+          "normal": "Normal",
+          "agitado": "Agitado",
+          "quieto": "Quieto",
+          "apatico": "Apático"
+        },
+        "sintoma": {
+          "vomito": "Vômito",
+          "diarreia": "Diarreia",
+          "tosse": "Tosse",
+          "espirro": "Espirro",
+          "coceira": "Coceira",
+          "sede-aumentada": "Sede aumentada",
+          "cansaco": "Cansaço",
+          "claudicacao": "Mancando",
+          "falta-de-ar": "Falta de ar",
+          "desmaio": "Desmaio",
+          "convulsao": "Convulsão"
+        }
+      },
+      "anamnese": {
+        "cabecalho": "Do Diário Pet (registrado pelo responsável no app) desde {data}, {total} registros:",
+        "perda": "perda de peso de {de} kg para {para} kg ({percentual}%) em {semanas} semanas, somando consultas e balança de casa",
+        "alarme": "{sintomas} em {data}: \"{nota}\"",
+        "pesoCasa": "peso na balança de casa: {de} → {para} kg",
+        "apetite": "apetite reduzido ou ausente em {alterados} de {total} registros",
+        "comportamento": "comportamento alterado (quieto ou apático) em {alterados} de {total} registros",
+        "sintomas": "sintomas registrados: {lista}",
+        "semAlteracao": "Nada fora do normal registrado.",
+        "prescricao": "{nome} (receitado, até {data})"
+      },
+      "verResumoComSinais": "Resumo em 30 s: {total} pontos de atenção",
+      "preferencia": "Sugerir este resumo ao abrir o histórico do paciente",
+      "sugestao": {
+        "titulo": "{nome} em 30 segundos",
+        "texto": "Antes de rolar o histórico: o resumo junta o prontuário e o que o responsável registrou no app desde a última consulta.",
+        "primeiraVez": "Primeira vez na clínica. O resumo lista o que vale levantar nesta consulta.",
+        "naoSugerir": "Não sugerir mais ao abrir o histórico",
+        "comoReativar": "O botão continua no histórico. Dá para religar a sugestão na tela do resumo.",
+        "agoraNao": "Agora não",
+        "ver": "Ver resumo"
+      }
+    },
     "atendimentos": {
       "titulo": "Atendimentos",
       "subtitulo": "Clínica"

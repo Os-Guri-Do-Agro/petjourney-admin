@@ -39,6 +39,15 @@ import {
 } from './fixtures'
 import { createPrng, hashSeed, intBetween, pickFrom } from './mock-runtime'
 import { gerarInternacoes, type DatasetDeInternacao } from './seed-internacao'
+import {
+  CONSULTAS_DO_RESUMO,
+  HORARIOS_DE_HOJE,
+  PET_DIARIO_CHEIO,
+  PET_NOVO,
+  PET_PERDA_DE_PESO,
+  gerarDiario,
+  petsDoResumo,
+} from './seed-resumo'
 import type {
   Anamnese,
   AplicacaoVacina,
@@ -50,6 +59,7 @@ import type {
   Clinic,
   Diagnosis,
   Encounter,
+  EntradaDoDiario,
   ExameFisico,
   Holiday,
   ISODate,
@@ -115,6 +125,10 @@ export type CasoId =
   | 'internacao-piora'
   | 'internacao-troca-plantao'
   | 'internacao-boletim-horario'
+  /* Os três casos do resumo "Este pet em 30 segundos". Ver `seed-resumo.ts`. */
+  | 'resumo-perda-de-peso'
+  | 'resumo-diario-cheio'
+  | 'resumo-pet-novo'
 
 export type CasoDificil = {
   id: CasoId
@@ -162,6 +176,8 @@ export type SeedResult = {
    */
   pets: Pet[]
   tutores: Tutor[]
+  /** O que os responsáveis registraram no Diário Pet do app. Mais recente primeiro. */
+  diario: EntradaDoDiario[]
 }
 
 function iso(date: ISODate, minutes: number) {
@@ -176,7 +192,11 @@ function tipoPorId(id: string): AppointmentType {
 }
 
 function petPorId(id: string): Pet {
-  return petsFixture.find((pet) => pet.id === id) ?? (petsFixture[0] as Pet)
+  return (
+    petsFixture.find((pet) => pet.id === id) ??
+    petsDoResumo(clock.today()).find((pet) => pet.id === id) ??
+    (petsFixture[0] as Pet)
+  )
 }
 
 /**
@@ -958,6 +978,26 @@ function casosDoDiaAncora(ancora: ISODate): {
     }),
   )
 
+  /*
+   * 14. Os três pacientes do resumo "Este pet em 30 segundos", todos com horário hoje: o botão
+   * que abre o atendimento a partir do resumo precisa de um atendimento para abrir. Estado
+   * fixo, fora do sorteio do relógio — o resumo é lido **antes** de entrar na sala.
+   */
+  appointments.push(
+    ...HORARIOS_DE_HOJE.map((item) =>
+      montarAppointment({
+        id: item.id,
+        petId: item.petId,
+        professionalId: 'prof-helena',
+        typeId: item.typeId,
+        data: ancora,
+        inicioMin: clockToMinutes(item.inicio),
+        statusFixo: 'confirmado',
+        observacao: item.observacao,
+      }),
+    ),
+  )
+
   // 5. Bloqueio recorrente: reunião de equipe toda terça e quinta, materializada na data pedida.
   const blocks: Block[] = [
     {
@@ -1086,6 +1126,18 @@ function casosDoDiaAncora(ancora: ISODate): {
       appointmentId: 'apt-retorno-pendente',
       encounterId: null,
     },
+    ...(
+      [
+        ['resumo-perda-de-peso', PET_PERDA_DE_PESO, 'apt-resumo-perola'],
+        ['resumo-diario-cheio', PET_DIARIO_CHEIO, 'apt-resumo-chico'],
+        ['resumo-pet-novo', PET_NOVO, 'apt-resumo-pacoca'],
+      ] as const
+    ).map(([id, petId, appointmentId]) => ({
+      id,
+      rota: `/veterinario/paciente/${petId}/resumo`,
+      appointmentId,
+      encounterId: null,
+    })),
   ]
 
   return { appointments, blocks, casos }
@@ -2594,12 +2646,99 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     }
   }
 
+  /*
+   * O passado desenhado da Pérola e do Chico. Entra **depois** de todo sorteio sobre prontuários:
+   * no de quem recebe prontuário, cada consulta plantada consumiria um número do `rngEncounter`;
+   * no dos retornos vencidos, ela entraria na lista de candidatos e roubaria a vaga de alguém —
+   * o Chico apareceu em "retornos sem horário" com consulta marcada para hoje.
+   */
+  for (const consulta of CONSULTAS_DO_RESUMO) {
+    const data = addDays(hoje, -consulta.diasAtras)
+    const appointment = montarAppointment({
+      id: consulta.id,
+      petId: consulta.petId,
+      professionalId: consulta.professionalId,
+      typeId: consulta.typeId,
+      data,
+      inicioMin: clockToMinutes(consulta.inicio),
+      statusFixo: 'finalizado',
+    })
+    const pet = petPorId(consulta.petId)
+    const base = encounterVazio(appointment, appointment.inicio)
+    const prescricao = consulta.prescricao
+    const medicamento = prescricao
+      ? medicationsFixture.find((item) => item.id === prescricao.medicamentoId)
+      : undefined
+    const calculo =
+      prescricao && medicamento
+        ? calcularDose({
+            medicamento,
+            pesoKg: consulta.pesoKg,
+            mgPorKg: prescricao.mgPorKg,
+            frequenciaHoras: prescricao.frequenciaHoras,
+            duracaoDias: prescricao.duracaoDias,
+          })
+        : null
+
+    appointment.chegadaEm = iso(data, clockToMinutes(consulta.inicio) - 8)
+    appointment.iniciadoEm = appointment.inicio
+    appointment.finalizadoEm = appointment.fim
+    appointment.encounterId = base.id
+
+    encounters.push({
+      ...base,
+      status: 'finalizado',
+      finalizadoEm: appointment.fim,
+      anamnese: {
+        ...base.anamnese,
+        queixaPrincipal: consulta.queixa,
+        apetite: 'normal',
+        vacinacaoEmDia: true,
+      },
+      exameFisico: {
+        ...base.exameFisico,
+        vitais: {
+          ...base.exameFisico.vitais,
+          peso: medicao(consulta.pesoKg),
+          temperatura: medicao(pet.especie === 'felina' ? 38.6 : 38.4),
+        },
+      },
+      diagnosticos: consulta.diagnostico
+        ? [{ id: `diag-${appointment.id}`, ...consulta.diagnostico }]
+        : [],
+      conduta: {
+        ...condutaVazia(),
+        orientacoes: orientacaoDe(consulta.diagnostico?.codigo ?? ''),
+        prescricoes:
+          medicamento && calculo
+            ? [
+                {
+                  id: `presc-${appointment.id}-0`,
+                  medicamentoId: medicamento.id,
+                  via: 'oral',
+                  calculo,
+                  observacao: '',
+                  alergiaConfirmada: false,
+                },
+              ]
+            : [],
+      },
+      versao: 3,
+    })
+    comStatus.push(appointment)
+  }
+
   const internacao = gerarInternacoes(semente)
 
   const clinic: Clinic = {
     ...clinicFixture,
     feriados: [...feriadosDoAno(ancora), diaFechadoProximo(ancora)],
   }
+
+  const pets = [...petsFixture, ...petsDoResumo(hoje)].map((pet) => ({
+    ...pet,
+    alertas: [...pet.alertas],
+  }))
 
   /* Os lotes vêm antes das aplicações: é deles que sai o código que cada dose cita. */
   const lotesDeVacina = lotesDeVacinaPlantados(clock.today())
@@ -2621,8 +2760,9 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     atos: atosPlantados(encounters, clock.today()),
     internacao,
     casos: [...casos, ...casosDaInternacao(internacao)],
-    pets: petsFixture.map((pet) => ({ ...pet, alertas: [...pet.alertas] })),
+    pets,
     tutores: tutorsFixture.map((tutor) => ({ ...tutor })),
+    diario: gerarDiario(pets, hoje),
   }
 }
 

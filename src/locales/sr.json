@@ -2998,6 +2998,152 @@
       "internadoAgora": "Trenutno hospitalizovan",
       "verInternacao": "Otvorite hospitalizaciju"
     },
+    "resumoDoPaciente": {
+      "titulo": "Ovaj ljubimac za 30 sekundi",
+      "naoEncontrado": "Pacijent nije pronađen",
+      "abrirAtendimento": "Otvorite pregled",
+      "abrirAtendimentoDica": "pregled se otvara sa ovim rezimeom u anamnezi",
+      "verHistorico": "Cela istorija",
+      "verResumo": "Rezime za 30 s",
+      "hojeAs": "Danas, {hora} · {tipo} · {profissional}",
+      "erroAoAbrir": "Pregled nije mogao da se otvori. Pokušajte ponovo.",
+      "sinais": {
+        "titulo": "Šta privlači pažnju",
+        "nadaFora": "Ništa neuobičajeno od poslednjeg pregleda.",
+        "perdaContinua": "Stalan gubitak težine",
+        "perda": "Pad težine",
+        "perdaDetalhe": "{de} → {para} kg ({percentual}) za nedelja: {semanas}",
+        "alarmeDetalhe": "zabeleženo kod kuće {data}, {quando}",
+        "recorrenteDetalhe": "{vezes}× od poslednjeg pregleda",
+        "apetite": "Smanjen apetit",
+        "apetiteDetalhe": "u {alterados} od {total} unosa",
+        "mais": "još u rezimeu: {total}"
+      },
+      "casa": {
+        "titulo": "Kod kuće od poslednjeg pregleda",
+        "tituloSemConsulta": "Kod kuće u poslednjih 30 dana",
+        "registros": "Unosi u aplikaciji: {total}",
+        "semAlteracao": "bez promena: {total}",
+        "vazioTitulo": "Ništa nije zabeleženo u aplikaciji u ovom periodu",
+        "vazioDescricao": "Staratelj nije koristio Dnevnik ljubimca. Vredi pitati na pregledu kako je bilo kod kuće.",
+        "peso": "Težina kod kuće",
+        "apetite": "Apetit",
+        "comportamento": "Ponašanje",
+        "sintomas": "Simptomi",
+        "semRegistro": "Nema unosa",
+        "nenhum": "Nijedan",
+        "alteradoEm": "Promenjeno u {alterados} od {total} unosa",
+        "normalEmTodos": "Normalno u svim unosima ({total})",
+        "ultimo": "poslednje: {valor}, {quando}",
+        "notas": "Rečima staratelja",
+        "verRegistros": "Prikažite unose ({total})",
+        "esconder": "Sakrijte unose",
+        "filtro": "Koje unose prikazati",
+        "filtroAlteracao": "Sa promenama ({total})",
+        "filtroTodos": "Svi ({total})",
+        "apetiteValor": "Apetit: {valor}",
+        "semAlteracaoCurto": "Bez promena"
+      },
+      "peso": {
+        "titulo": "Težina u poslednjih 6 meseci",
+        "serie": "Težina",
+        "legendaClinica": "Pregled (vaga klinike)",
+        "legendaCasa": "Kod kuće (vaga staratelja)",
+        "origem": {
+          "clinica": "pregled",
+          "casa": "kod kuće"
+        },
+        "umPonto": "Samo jedno merenje u periodu: {peso}, {data}.",
+        "semPeso": "Nema merenja u poslednjih 6 meseci.",
+        "aria": "Težina od {de} kg do {para} kg, nedelja: {semanas}"
+      },
+      "essencial": {
+        "titulo": "Osnovno",
+        "alertas": "Upozorenja",
+        "condicoes": "Aktivna stanja",
+        "medicacao": "Trenutna terapija",
+        "ultimaConsulta": "Poslednji pregled",
+        "nenhum": "Ništa nije zabeleženo",
+        "nenhuma": "Ništa nije zabeleženo",
+        "usoContinuo": "stalna terapija",
+        "ate": "do {data}",
+        "primeiraVez": "Prvi put u klinici",
+        "abrirProntuario": "Otvorite karton"
+      },
+      "primeira": {
+        "titulo": "Prvi pregled",
+        "descricao": "Još ništa nije zabeleženo ni u klinici ni u aplikaciji. Šta vredi utvrditi danas:",
+        "pesar": {
+          "titulo": "Izmeriti",
+          "detalhe": "U kartonu nema težine, a svaka doza zavisi od nje."
+        },
+        "vacinas": {
+          "titulo": "Vakcinacija i dehelmintizacija",
+          "detalhe": "Šta je urađeno, kada i gde. Tražiti knjižicu, ako postoji."
+        },
+        "filhote": {
+          "titulo": "Poreklo i odbijanje od sise",
+          "detalhe": "Mladunče: odakle je došlo, sa koliko je nedelja odvojeno od majke i šta sada jede."
+        },
+        "antecedentes": {
+          "titulo": "Anamneza bolesti",
+          "detalhe": "Poznate bolesti, operacije i alergije, uključujući one lečene na drugom mestu."
+        },
+        "diario": {
+          "titulo": "Dnevnik ljubimca",
+          "detalhe": "Pozvati staratelja da beleži u aplikaciji. Dnevnik je ono što popunjava ovaj ekran na sledećem pregledu."
+        }
+      },
+      "diario": {
+        "apetite": {
+          "normal": "Normalan",
+          "aumentado": "Povećan",
+          "reduzido": "Smanjen",
+          "ausente": "Nije jeo"
+        },
+        "comportamento": {
+          "normal": "Normalno",
+          "agitado": "Nemirno",
+          "quieto": "Mirno",
+          "apatico": "Apatično"
+        },
+        "sintoma": {
+          "vomito": "Povraćanje",
+          "diarreia": "Proliv",
+          "tosse": "Kašalj",
+          "espirro": "Kijanje",
+          "coceira": "Svrab",
+          "sede-aumentada": "Pojačana žeđ",
+          "cansaco": "Umor",
+          "claudicacao": "Šepanje",
+          "falta-de-ar": "Otežano disanje",
+          "desmaio": "Nesvestica",
+          "convulsao": "Napad"
+        }
+      },
+      "anamnese": {
+        "cabecalho": "Iz Dnevnika ljubimca (beležio staratelj u aplikaciji) od {data}, broj unosa: {total}:",
+        "perda": "gubitak težine sa {de} kg na {para} kg ({percentual}%), nedelja: {semanas}, zajedno pregledi i kućna vaga",
+        "alarme": "{sintomas} {data}: \"{nota}\"",
+        "pesoCasa": "težina na kućnoj vagi: {de} → {para} kg",
+        "apetite": "smanjen ili odsutan apetit u {alterados} od {total} unosa",
+        "comportamento": "promenjeno ponašanje (mirno ili apatično) u {alterados} od {total} unosa",
+        "sintomas": "zabeleženi simptomi: {lista}",
+        "semAlteracao": "Ništa neuobičajeno nije zabeleženo.",
+        "prescricao": "{nome} (propisano, do {data})"
+      },
+      "verResumoComSinais": "Rezime za 30 s: tačke pažnje: {total}",
+      "preferencia": "Predložite ovaj rezime pri otvaranju istorije pacijenta",
+      "sugestao": {
+        "titulo": "{nome} za 30 sekundi",
+        "texto": "Pre pregledanja istorije: rezime spaja karton i ono što je staratelj zabeležio u aplikaciji od poslednjeg pregleda.",
+        "primeiraVez": "Prvi put u klinici. Rezime navodi šta vredi utvrditi na ovom pregledu.",
+        "naoSugerir": "Ne predlažite više pri otvaranju istorije",
+        "comoReativar": "Dugme ostaje u istoriji. Predlog možete ponovo uključiti na ekranu rezimea.",
+        "agoraNao": "Ne sada",
+        "ver": "Pogledajte rezime"
+      }
+    },
     "atendimentos": {
       "titulo": "Pregledi",
       "subtitulo": "Klinika"

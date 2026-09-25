@@ -694,6 +694,46 @@ export type PreConsulta = {
 }
 
 // ---------------------------------------------------------------------------
+// Diário do responsável
+// ---------------------------------------------------------------------------
+
+export type ApetiteNoDiario = 'normal' | 'aumentado' | 'reduzido' | 'ausente'
+export type ComportamentoNoDiario = 'normal' | 'agitado' | 'quieto' | 'apatico'
+
+export type SintomaNoDiario =
+  | 'vomito'
+  | 'diarreia'
+  | 'tosse'
+  | 'espirro'
+  | 'coceira'
+  | 'sede-aumentada'
+  | 'cansaco'
+  | 'claudicacao'
+  /* Os três abaixo são sinal de alarme: um registro basta para abrir o resumo com eles. */
+  | 'falta-de-ar'
+  | 'desmaio'
+  | 'convulsao'
+
+/**
+ * Um registro do Diário Pet, escrito pelo responsável no app.
+ *
+ * É o dado que só este produto tem: o que aconteceu em casa entre uma consulta e outra. Chega
+ * pelo compartilhamento e é **leitura** para a clínica — nenhum campo daqui é editado do lado
+ * de cá. O peso é de balança de casa: tendência vale, grama não.
+ */
+export type EntradaDoDiario = {
+  id: string
+  petId: string
+  registradoEm: ISODateTime
+  pesoKg: number | null
+  apetite: ApetiteNoDiario | null
+  comportamento: ComportamentoNoDiario | null
+  sintomas: SintomaNoDiario[]
+  /** Texto livre do responsável, na íntegra. */
+  nota: string
+}
+
+// ---------------------------------------------------------------------------
 // O que foi feito no paciente
 // ---------------------------------------------------------------------------
 

@@ -392,6 +392,14 @@ function abrirProntuario() {
   )
 }
 
+function verResumo() {
+  if (!selecionado.value) {
+    return
+  }
+
+  void router.push(`/veterinario/paciente/${selecionado.value.petId}/resumo`)
+}
+
 function verHistorico() {
   if (!selecionado.value) {
     return
@@ -610,6 +618,7 @@ useClinicShortcuts({
           @cancelar="atendimentoParaCancelar = selecionado?.id ?? null"
           @abrir-prontuario="abrirProntuario"
           @ver-historico="verHistorico"
+          @ver-resumo="verResumo"
         />
       </div>
     </div>

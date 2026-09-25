@@ -8,7 +8,8 @@
 
 import { historicoDeAtos } from '../../domain/atos'
 import { resumirFaltas } from '../../domain/load'
-import { createClinicClock, diffDays } from '../../domain/clinic-time'
+import { addDays, createClinicClock, diffDays } from '../../domain/clinic-time'
+import type { ConsultaDoResumo } from '../../domain/resumo-do-paciente'
 import { CLINIC_UTC_OFFSET } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import { getDataset, novoId } from '../store'
@@ -21,6 +22,7 @@ import type {
   PrescriptionRoute,
   ContatoPreferido,
   EnderecoPostal,
+  EntradaDoDiario,
   ISODate,
   ISODateTime,
   NoShowSummary,
@@ -153,6 +155,75 @@ export const patientRepository = {
         .appointments.filter((appointment) => appointment.petId === petId)
         .sort((a, b) => b.inicio.localeCompare(a.inicio)),
     )
+  },
+
+  /**
+   * O que o resumo "Este pet em 30 segundos" precisa, numa chamada só.
+   *
+   * O resumo é lido na porta da sala, com o paciente esperando: três chamadas em sequência
+   * seriam três esperas. A montagem em si (o que é sinal, o que é tendência) é do domínio —
+   * aqui só se junta o que existe e se resolve o fim de cada receita.
+   *
+   * `atendimentoDeHoje` é o horário ainda aberto do paciente no dia: é ele que o botão "abrir o
+   * atendimento" abre. Nulo quando o paciente não está na agenda de hoje.
+   */
+  paraOResumo(petId: string): Promise<{
+    consultas: ConsultaDoResumo[]
+    diario: EntradaDoDiario[]
+    atendimentoDeHoje: Appointment | null
+    agora: ISODateTime
+  }> {
+    return simularChamada('paciente.historico', () => {
+      const dataset = getDataset()
+      const agora = clock.nowIso()
+      const porAppointment = new Map(dataset.appointments.map((item) => [item.id, item]))
+
+      const consultas = dataset.encounters
+        .filter((encounter) => encounter.petId === petId && encounter.status === 'finalizado')
+        .map((encounter): ConsultaDoResumo => {
+          const em = encounter.finalizadoEm ?? encounter.abertoEm
+          /* O último dia de tratamento inteiro: receita de 14 dias termina à noite do 14º. */
+          const fimDoDia = (dias: number) =>
+            clock.toIso(addDays(clock.dateOf(em), dias), 23 * 60 + 59)
+
+          return {
+            encounterId: encounter.id,
+            appointmentId: encounter.appointmentId,
+            em,
+            typeId: porAppointment.get(encounter.appointmentId)?.typeId ?? '',
+            professionalId: encounter.professionalId,
+            diagnosticos: encounter.diagnosticos,
+            pesoKg: encounter.exameFisico.vitais.peso?.valor ?? null,
+            prescricoes: encounter.conduta.prescricoes.map((prescricao) => ({
+              medicamentoId: prescricao.medicamentoId,
+              /* Sem duração é receita contínua: não tem último dia. */
+              ate:
+                prescricao.calculo.duracaoDias === null
+                  ? null
+                  : fimDoDia(prescricao.calculo.duracaoDias),
+            })),
+          }
+        })
+
+      const hoje = clock.today()
+      const atendimentoDeHoje =
+        dataset.appointments
+          .filter(
+            (appointment) =>
+              appointment.petId === petId &&
+              clock.dateOf(appointment.inicio) >= hoje &&
+              !['cancelado', 'falta', 'finalizado'].includes(appointment.status),
+          )
+          .sort((a, b) => Date.parse(a.inicio) - Date.parse(b.inicio))
+          .find((appointment) => clock.dateOf(appointment.inicio) === dataset.ancora) ?? null
+
+      return {
+        consultas,
+        diario: dataset.diario.filter((entrada) => entrada.petId === petId),
+        atendimentoDeHoje,
+        agora,
+      }
+    })
   },
 
   /** Painel de faltas: quantas **e quanto** — minutos de agenda parados. */
