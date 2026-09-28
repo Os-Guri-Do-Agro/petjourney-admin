@@ -247,6 +247,19 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
     return resultado?.atendimentos[0] ?? null
   }
 
+  /** A recepção ligou e o responsável confirmou. A confirmação do app chega pela API. */
+  async function confirmarPresenca(id: string) {
+    const resultado = await comSalvamento(() =>
+      agendaRepository.confirmarPresenca(id, 'recepcao'),
+    )
+
+    if (resultado) {
+      await depoisDeMutar(resultado.undoToken, 'status')
+    }
+
+    return resultado?.atendimentos[0] ?? null
+  }
+
   /** Registra o motivo de uma falta que já existe. O status não muda — ver o repositório. */
   async function justificarFalta(id: string, entrada: EntradaDeJustificativa) {
     const resultado = await comSalvamento(() => agendaRepository.justificarFalta(id, entrada))
@@ -378,6 +391,7 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
     mover,
     editar,
     alterarStatus,
+    confirmarPresenca,
     justificarFalta,
     cancelar,
     criarBloqueio,

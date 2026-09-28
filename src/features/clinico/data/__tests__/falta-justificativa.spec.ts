@@ -397,7 +397,7 @@ describe('o dataset abre com os dois estados', () => {
       'obito',
       'outro',
     ])
-    const canaisValidos = new Set(['telefone', 'whatsapp', 'presencial', 'sem-resposta'])
+    const canaisValidos = new Set(['telefone', 'whatsapp', 'presencial', 'sem-resposta', 'app'])
 
     const justificadas = getDataset()
       .appointments.filter((item) => item.status === 'falta' && item.justificativaDeFalta)
@@ -408,7 +408,11 @@ describe('o dataset abre com os dois estados', () => {
     for (const registro of justificadas) {
       expect(motivosValidos.has(registro.motivo), `motivo ${registro.motivo}`).toBe(true)
       expect(canaisValidos.has(registro.canal), `canal ${registro.canal}`).toBe(true)
-      expect(registro.professionalId).not.toBe('')
+      /*
+       * Toda justificativa tem quem a registrou — menos a que chegou pelo app: essa o próprio
+       * responsável escreveu, e não há ninguém da clínica para pôr no lugar.
+       */
+      expect(registro.professionalId === '').toBe(registro.canal === 'app')
       expect(registro.registradaEm).toMatch(/^\d{4}-\d{2}-\d{2}T/)
     }
   })

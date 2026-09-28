@@ -7,7 +7,17 @@
  *
  * Terminologia: `tutorId` / `Tutor` sobrevivem como identificador de código e campo de API.
  * Em texto visível em português o termo é sempre "responsável".
+ *
+ * O que cruza com o app do responsável (diário, pré-consulta, consentimento) não é redeclarado
+ * aqui: vem de `contrato/responsavel.ts`, que é a forma no fio para os dois lados.
  */
+
+import type {
+  ConsentimentoDaClinica,
+  EntradaDoDiarioParaClinica,
+  PesoParaClinica,
+  RespostaDaPreConsulta,
+} from '../contrato/responsavel'
 
 /** `YYYY-MM-DD` na parede da clínica. */
 export type ISODate = string
@@ -316,8 +326,12 @@ export type MotivoDeFalta =
  * `sem-resposta` é o valor que faz esta lista valer a pena: registra a tentativa que não deu em
  * nada. Sem ele, a recepção não distingue "ninguém ligou ainda" de "ligamos três vezes e não
  * atenderam" — e liga de novo para quem já foi procurado.
+ *
+ * `app` é o único que a recepção não escolhe: é o responsável justificando sozinho, pelo app
+ * (`POST /tutor/clinica/agendamentos/:id/justificar-falta`). Ele não aparece no diálogo da
+ * falta, só no histórico — e é a falta que ninguém precisou ligar para entender.
  */
-export type CanalDeContato = 'telefone' | 'whatsapp' | 'presencial' | 'sem-resposta'
+export type CanalDeContato = 'telefone' | 'whatsapp' | 'presencial' | 'sem-resposta' | 'app'
 
 /**
  * A justificativa de uma falta.
@@ -368,6 +382,19 @@ export type Appointment = {
   linkedGroupId: string | null
   criadoEm: ISODateTime
   atualizadoEm: ISODateTime
+  /**
+   * Presença confirmada, e por onde. Ausente ou `null`: ninguém confirmou.
+   *
+   * O status `confirmado` sozinho não dizia quem confirmou — e "o responsável tocou Confirmar
+   * no app ontem à noite" e "a recepção ligou e alguém atendeu" pesam diferente na hora de
+   * decidir se vale ligar de novo.
+   */
+  confirmacao?: ConfirmacaoDePresenca | null
+}
+
+export type ConfirmacaoDePresenca = {
+  em: ISODateTime
+  por: 'app' | 'recepcao'
 }
 
 export type BlockReason =
@@ -460,7 +487,16 @@ export type WaitlistEntry = {
   criadoEm: ISODateTime
   ofertaExpiraEm: ISODateTime | null
   ofertaSlotInicio: ISODateTime | null
+  /**
+   * Com quem é a vaga oferecida. Ausente nas ofertas antigas, que caem no profissional pedido.
+   *
+   * Sem ele, o aceite não sabia em que coluna marcar: a entrada pede "qualquer profissional", e
+   * a vaga que abriu é de alguém.
+   */
+  ofertaProfessionalId?: string | null
   observacao: string
+  /** O atendimento que o aceite criou. É o que fecha a fila: aceitar vira horário marcado. */
+  appointmentId?: string | null
 }
 
 // ---------------------------------------------------------------------------
@@ -677,61 +713,36 @@ export type CarePlan = {
  * Por isso a procedência viaja junto: um peso informado pelo responsável e um peso aferido na
  * balança da clínica não têm o mesmo valor, e a tela precisa poder dizer qual é qual.
  */
-export type PreConsulta = {
+export type PreConsulta = RespostaDaPreConsulta & {
   appointmentId: string
   /** Quando o responsável respondeu. Resposta de duas semanas atrás vale menos. */
   respondidoEm: ISODateTime
-  queixaPrincipal: string
-  duracaoSintomas: string
-  evolucao: EvolucaoDoQuadro
-  apetite: Anamnese['apetite']
-  evacuacao: Anamnese['evacuacao']
-  miccao: Anamnese['miccao']
-  /** Peso informado em casa. Sugestão de partida, não medição. */
-  pesoInformadoKg: number | null
-  /** Texto livre do responsável, na íntegra e sem edição. */
-  observacao: string
 }
 
 // ---------------------------------------------------------------------------
 // Diário do responsável
 // ---------------------------------------------------------------------------
 
-export type ApetiteNoDiario = 'normal' | 'aumentado' | 'reduzido' | 'ausente'
-export type ComportamentoNoDiario = 'normal' | 'agitado' | 'quieto' | 'apatico'
+/**
+ * Um registro do Diário Pet, na forma em que a clínica o recebe (`EntradaDoDiarioParaClinica`,
+ * do contrato), guardado junto do pet a que pertence.
+ *
+ * É o dado que só este produto tem: o que aconteceu em casa entre uma consulta e outra. É
+ * **leitura** para a clínica — nenhum campo daqui é editado do lado de cá —, e os enums são os
+ * do `DiarioPet` do app, literais. Ver `contrato/responsavel.ts`.
+ */
+export type RegistroDoDiario = EntradaDoDiarioParaClinica & { petId: string }
 
-export type SintomaNoDiario =
-  | 'vomito'
-  | 'diarreia'
-  | 'tosse'
-  | 'espirro'
-  | 'coceira'
-  | 'sede-aumentada'
-  | 'cansaco'
-  | 'claudicacao'
-  /* Os três abaixo são sinal de alarme: um registro basta para abrir o resumo com eles. */
-  | 'falta-de-ar'
-  | 'desmaio'
-  | 'convulsao'
+/** Um `PesoRegistro` do app: balança de casa. Tendência vale, grama não. */
+export type PesagemDeCasa = PesoParaClinica & { petId: string }
 
 /**
- * Um registro do Diário Pet, escrito pelo responsável no app.
+ * O que o responsável deixa a clínica ver do diário, entre as consultas.
  *
- * É o dado que só este produto tem: o que aconteceu em casa entre uma consulta e outra. Chega
- * pelo compartilhamento e é **leitura** para a clínica — nenhum campo daqui é editado do lado
- * de cá. O peso é de balança de casa: tendência vale, grama não.
+ * É ele, e não a existência do diário, que decide se o "Este pet em 30 segundos" mostra o que
+ * aconteceu em casa. Diário sem consentimento é diário que a clínica não lê.
  */
-export type EntradaDoDiario = {
-  id: string
-  petId: string
-  registradoEm: ISODateTime
-  pesoKg: number | null
-  apetite: ApetiteNoDiario | null
-  comportamento: ComportamentoNoDiario | null
-  sintomas: SintomaNoDiario[]
-  /** Texto livre do responsável, na íntegra. */
-  nota: string
-}
+export type ConsentimentoDoResponsavel = ConsentimentoDaClinica & { tutorId: string }
 
 // ---------------------------------------------------------------------------
 // O que foi feito no paciente
@@ -973,6 +984,15 @@ export type Encounter = {
   lock: EncounterLock | null
   /** Respostas do responsável no app, quando houve. Sugestão, nunca valor aplicado. */
   preConsulta: PreConsulta | null
+  /**
+   * Quando o resumo do atendimento foi liberado para o responsável ver no app. Ausente ou
+   * `null`: ainda não foi.
+   *
+   * É um passo separado de finalizar, de propósito. Finalizar fecha o prontuário, que é da
+   * clínica; liberar entrega ao responsável o que ele precisa levar para casa — e o vet pode
+   * querer revisar a orientação antes de ela chegar num celular.
+   */
+  resumoLiberadoEm?: ISODateTime | null
 }
 
 export type EncounterPatch = Partial<
@@ -1465,6 +1485,11 @@ export type BoletimOrigem = 'automatico' | 'manual'
 export type BoletimAoTutor = {
   id: string
   internacaoId: string
+  /**
+   * Boletim de alta é a mensagem que encerra a conversa, e o app a mostra diferente. Ausente
+   * vale `atualizacao`.
+   */
+  tipo?: 'atualizacao' | 'alta'
   origem: BoletimOrigem
   status: BoletimStatus
   /** Gravidade no instante em que o boletim foi composto — o texto fala dela. */
@@ -1487,4 +1512,46 @@ export type BoletimAoTutor = {
   exigeLigacao: boolean
   ligacaoEm: ISODateTime | null
   ligacaoPor: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Escuta da consulta (anamnese por voz)
+// ---------------------------------------------------------------------------
+
+/**
+ * Quem falou um trecho da conversa.
+ *
+ * `nao-identificado` é o estado honesto do reconhecimento ao vivo, que não separa vozes: ele
+ * entrega texto, não autoria. Trecho de duas vozes ao mesmo tempo também cai aqui — a
+ * interferência diz o resto.
+ */
+export type FalanteDaEscuta = 'veterinario' | 'responsavel' | 'acompanhante' | 'nao-identificado'
+
+/**
+ * O que atrapalhou a escuta de um trecho.
+ *
+ * É o que a clínica tem de sobra e o reconhecimento de voz não sabe resolver sozinho: cachorro
+ * latindo na recepção, duas pessoas respondendo ao mesmo tempo, porta, secador. O trecho
+ * atrapalhado continua na conversa — apagá-lo esconderia de onde o erro veio —, mas tudo que
+ * nasce dele chega à revisão marcado.
+ */
+export type InterferenciaDaEscuta = 'latido' | 'fala-sobreposta' | 'ruido'
+
+/**
+ * Um trecho da conversa, como o reconhecimento de voz o entrega: texto final, sem o áudio.
+ *
+ * **O áudio não é guardado em lugar nenhum.** O que fica é este texto, e é ele que a revisão
+ * cita. Por isso o trecho é imutável: corrigir a transcrição apagaria a prova de que um campo
+ * veio do que foi dito — quem corrige é o campo, nunca a conversa.
+ */
+export type TrechoDaConversa = {
+  id: string
+  falante: FalanteDaEscuta
+  /** Vazio quando o trecho é só a interferência — um latido sem fala por cima. */
+  texto: string
+  /** Milissegundos desde o começo da gravação. */
+  emMs: number
+  /** Confiança do reconhecimento, de 0 a 1. */
+  confianca: number
+  interferencia: InterferenciaDaEscuta | null
 }

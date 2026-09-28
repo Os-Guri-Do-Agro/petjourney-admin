@@ -199,8 +199,12 @@ describe('celular do responsável', () => {
     })
 
     expect(wrapper.findAll('.balao')).toHaveLength(enviados.length)
-    /* O boletim retido não chegou ao celular — é essa ausência que explica a regra. */
-    expect(wrapper.find('.celular__retido').exists()).toBe(true)
+    /*
+     * O boletim retido não chegou ao celular, e o celular **não anuncia** que ele existe: um
+     * "1 boletim aguardando ligação" contaria a notícia antes da ligação. O contrato com o app
+     * não tem esse campo (`InternacaoNaClinica`), e a prévia mostra o que o app vai mostrar.
+     */
+    expect(wrapper.find('.celular__retido').exists()).toBe(false)
     /*
      * O texto precisa existir antes de se afirmar que ele não aparece: `toContain('')` é
      * verdadeiro para qualquer tela, e a asserção passaria sobre um boletim vazio.

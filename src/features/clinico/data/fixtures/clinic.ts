@@ -1,3 +1,4 @@
+import type { PoliticaDaClinica } from '../../contrato/responsavel'
 import type { AppointmentType, Clinic, Professional, Room } from '../types'
 
 /**
@@ -57,6 +58,20 @@ export const clinicFixture: Clinic = {
    * na virada do ano. Estes são os de referência para o caso difícil de dia fechado.
    */
   feriados: [],
+}
+
+/**
+ * Os prazos que a clínica combina com quem marca pelo app.
+ *
+ * Configuração da clínica, não do app: é ela que sabe quanto antes consegue reaproveitar um
+ * horário cancelado. O app recebe estes números pelo contrato e nunca os fixa. A oferta de vaga
+ * é de 30 minutos — as conversas com o time do app falavam em 15, e o número que vale é o daqui.
+ */
+export const politicaDaClinicaFixture: PoliticaDaClinica = {
+  cancelarAteHorasAntes: 2,
+  reservaMinutos: 5,
+  preConsultaAbreHorasAntes: 72,
+  ofertaDeVagaMinutos: 30,
 }
 
 export const professionalsFixture: Professional[] = [

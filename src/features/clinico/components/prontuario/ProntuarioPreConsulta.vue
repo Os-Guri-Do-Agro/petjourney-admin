@@ -13,16 +13,28 @@
  *   responsável.
  * - **A procedência fica visível.** Peso informado em casa e peso aferido na balança da clínica
  *   não valem o mesmo, e a tela precisa dizer qual é qual. Por isso o bloco tem moldura própria
- *   e diz de quem veio.
+ *   e diz de quem veio — e cada resposta que o app puxou do diário, sem o responsável mexer,
+ *   diz isso também.
  * - **A data importa.** Resposta de duas semanas atrás descreve outro quadro. A idade da
  *   resposta aparece ao lado do título, não escondida.
+ *
+ * As respostas chegam nos enums do Diário Pet (o contrato com o app). O que tem tradução
+ * clínica direta é aplicável na anamnese (`domain/pre-consulta.ts`); o que é achado — fezes com
+ * sangue, urina escura — aparece para o vet ler, e fica com ele.
  */
 import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useClinicFormat } from '../../composables/useClinicFormat'
+import type { RespostaDaPreConsulta } from '../../contrato/responsavel'
 import type { Anamnese, PreConsulta } from '../../data/types'
+import {
+  apetiteDaAnamnese,
+  evacuacaoDaAnamnese,
+  evolucaoDaAnamnese,
+  miccaoDaAnamnese,
+} from '../../domain/pre-consulta'
 
 const props = defineProps<{
   preConsulta: PreConsulta
@@ -37,54 +49,83 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const formato = useClinicFormat()
 
-/** Rótulo de cada resposta, na ordem em que o vet as lê. */
+type CampoDoDiario = 'alimentacao' | 'hidratacao' | 'fezes' | 'urina' | 'vitalidade'
+
+const CAMPOS_DO_DIARIO: CampoDoDiario[] = [
+  'alimentacao',
+  'hidratacao',
+  'fezes',
+  'urina',
+  'vitalidade',
+]
+
+function veioDoDiario(campo: RespostaDaPreConsulta['camposDoDiario'][number]) {
+  return props.preConsulta.camposDoDiario.includes(campo)
+}
+
+const duracao = computed(() =>
+  props.preConsulta.desdeQuando
+    ? t(`clinico.preConsulta.desdeQuando.${props.preConsulta.desdeQuando}`)
+    : '',
+)
+
+/** Rótulo de cada resposta, na ordem em que o vet as lê: o porquê, o quê, desde quando. */
 const respostas = computed(() => {
   const pre = props.preConsulta
+  const evolucao = evolucaoDaAnamnese(pre.evolucao)
 
   return [
+    {
+      chave: 'motivo',
+      rotulo: t('clinico.preConsulta.motivo'),
+      valor: t(`clinico.diario.motivo.${pre.motivo}`),
+      doDiario: false,
+    },
     {
       chave: 'queixaPrincipal',
       rotulo: t('clinico.prontuario.anamnese.queixaPrincipal'),
       valor: pre.queixaPrincipal,
+      doDiario: false,
+    },
+    {
+      chave: 'sintomas',
+      rotulo: t('clinico.diario.campo.sintomas'),
+      valor: pre.sintomas.map((sintoma) => t(`clinico.diario.sintomas.${sintoma}`)).join(' · '),
+      doDiario: veioDoDiario('sintomas'),
     },
     {
       chave: 'duracaoSintomas',
       rotulo: t('clinico.prontuario.anamnese.duracaoSintomas'),
-      valor: pre.duracaoSintomas,
+      valor: duracao.value,
+      doDiario: false,
     },
     {
       chave: 'evolucao',
       rotulo: t('clinico.prontuario.anamnese.evolucao'),
-      valor: pre.evolucao ? t(`clinico.prontuario.anamnese.evolucaoOpcoes.${pre.evolucao}`) : '',
+      valor: evolucao ? t(`clinico.prontuario.anamnese.evolucaoOpcoes.${evolucao}`) : '',
+      doDiario: false,
     },
-    {
-      chave: 'apetite',
-      rotulo: t('clinico.prontuario.anamnese.apetite'),
-      valor: pre.apetite ? t(`clinico.prontuario.anamnese.opcoes.${pre.apetite}`) : '',
-    },
+    ...CAMPOS_DO_DIARIO.map((campo) => ({
+      chave: campo,
+      rotulo: t(`clinico.diario.campo.${campo}`),
+      valor: pre[campo] ? t(`clinico.diario.${campo}.${pre[campo]}`) : '',
+      doDiario: veioDoDiario(campo),
+    })),
   ].filter((item) => Boolean(item.valor))
 })
 
-/**
- * O que ainda **difere** do que está no prontuário.
- *
- * Some assim que o vet aplica ou digita por cima: um botão que continua oferecendo o que já foi
- * aceito treina a pessoa a ignorá-lo.
- */
-const podeAplicar = computed(() => {
-  if (props.somenteLeitura) {
-    return false
-  }
-
+/** O que a resposta mandaria para a anamnese, se o vet aceitar. Só o que tem tradução clínica. */
+const sugerido = computed<Partial<Anamnese>>(() => {
   const pre = props.preConsulta
-  const atual = props.anamnese
 
-  return (
-    (Boolean(pre.queixaPrincipal) && !atual.queixaPrincipal.trim()) ||
-    (Boolean(pre.duracaoSintomas) && !atual.duracaoSintomas.trim()) ||
-    (Boolean(pre.evolucao) && !atual.evolucao) ||
-    (Boolean(pre.apetite) && !atual.apetite)
-  )
+  return {
+    queixaPrincipal: pre.queixaPrincipal,
+    duracaoSintomas: duracao.value,
+    evolucao: evolucaoDaAnamnese(pre.evolucao),
+    apetite: apetiteDaAnamnese(pre.alimentacao),
+    evacuacao: evacuacaoDaAnamnese(pre.fezes),
+    miccao: miccaoDaAnamnese(pre.urina),
+  }
 })
 
 /**
@@ -94,29 +135,27 @@ const podeAplicar = computed(() => {
  * que o responsável respondeu, e principalmente nesse caso: a divergência é achado clínico, não
  * erro a corrigir.
  */
-function aplicar() {
-  const pre = props.preConsulta
+const patch = computed<Partial<Anamnese>>(() => {
   const atual = props.anamnese
-  const patch: Partial<Anamnese> = {}
+  const resultado: Partial<Anamnese> = {}
 
-  if (pre.queixaPrincipal && !atual.queixaPrincipal.trim()) {
-    patch.queixaPrincipal = pre.queixaPrincipal
+  for (const [chave, valor] of Object.entries(sugerido.value) as Array<[keyof Anamnese, string]>) {
+    const presente = atual[chave]
+    const vazio = typeof presente === 'string' ? !presente.trim() : presente === null
+
+    if (valor && vazio) {
+      Object.assign(resultado, { [chave]: valor })
+    }
   }
 
-  if (pre.duracaoSintomas && !atual.duracaoSintomas.trim()) {
-    patch.duracaoSintomas = pre.duracaoSintomas
-  }
+  return resultado
+})
 
-  if (pre.evolucao && !atual.evolucao) {
-    patch.evolucao = pre.evolucao
-  }
-
-  if (pre.apetite && !atual.apetite) {
-    patch.apetite = pre.apetite
-  }
-
-  emit('aplicar', patch)
-}
+/**
+ * Some assim que o vet aplica ou digita por cima: um botão que continua oferecendo o que já foi
+ * aceito treina a pessoa a ignorá-lo.
+ */
+const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.value).length > 0)
 </script>
 
 <template>
@@ -143,13 +182,19 @@ function aplicar() {
         size="small"
         severity="secondary"
         outlined
-        @click="aplicar"
+        @click="emit('aplicar', patch)"
       />
     </header>
 
     <dl class="pre__respostas">
       <div v-for="resposta in respostas" :key="resposta.chave">
-        <dt class="clinic-label">{{ resposta.rotulo }}</dt>
+        <dt class="clinic-label">
+          {{ resposta.rotulo }}
+          <!-- O app puxou do diário e o responsável não mexeu: é leitura de casa, não resposta. -->
+          <span v-if="resposta.doDiario" class="pre__procedencia">
+            {{ t('clinico.preConsulta.doDiario') }}
+          </span>
+        </dt>
         <dd>{{ resposta.valor }}</dd>
       </div>
     </dl>
@@ -159,19 +204,27 @@ function aplicar() {
       dose antes de a balança confirmar, e confundi-lo com medição é o tipo de engano que só
       aparece na receita impressa.
     -->
-    <p v-if="preConsulta.pesoInformadoKg !== null" class="pre__peso">
+    <p v-if="preConsulta.pesoKg !== null" class="pre__peso">
       <i class="pi pi-info-circle" aria-hidden="true" />
       {{
         t('clinico.prontuario.preConsulta.pesoInformado', {
-          valor: formato.peso(preConsulta.pesoInformadoKg),
+          valor: formato.peso(preConsulta.pesoKg),
         })
       }}
+      <span v-if="preConsulta.pesadoEm" class="pre__quando">
+        {{ t('clinico.preConsulta.pesadoEm', { data: formato.dataCurta(preConsulta.pesadoEm) }) }}
+      </span>
     </p>
 
     <!-- Texto do responsável na íntegra, sem edição: é depoimento, não anotação clínica. -->
     <blockquote v-if="preConsulta.observacao" class="pre__citacao">
       {{ preConsulta.observacao }}
     </blockquote>
+
+    <p v-if="preConsulta.fotoIds.length > 0" class="pre__fotos">
+      <i class="pi pi-images" aria-hidden="true" />
+      {{ t('clinico.preConsulta.fotos', { total: preConsulta.fotoIds.length }) }}
+    </p>
   </section>
 </template>
 
@@ -240,14 +293,30 @@ function aplicar() {
   overflow-wrap: anywhere;
 }
 
-.pre__peso {
+/* A marca "do diário" é procedência, não destaque: o mesmo tom discreto do rótulo, sem caixa alta. */
+.pre__procedencia {
+  margin-inline-start: var(--clinic-space-1);
+  color: var(--clinic-accent-strong);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.pre__peso,
+.pre__fotos {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
   margin: 0;
   color: var(--clinic-muted);
   font-size: var(--clinic-font-label);
   font-weight: 650;
+}
+
+.pre__quando {
+  color: var(--clinic-faint);
+  font-weight: 500;
 }
 
 .pre__citacao {

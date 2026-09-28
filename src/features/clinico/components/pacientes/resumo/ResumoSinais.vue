@@ -13,9 +13,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
-
 import { useClinicFormat } from '../../../composables/useClinicFormat'
+import { useRotulosDoDiario } from '../../../composables/useRotulosDoDiario'
 import type { SinalDoResumo } from '../../../domain/resumo-do-paciente'
 import { clinicClock } from '../../../stores/clinico'
 
@@ -33,21 +32,9 @@ const props = withDefaults(
   { limite: Number.POSITIVE_INFINITY, semMoldura: false },
 )
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const formato = useClinicFormat()
-
-function listaDeSintomas(sintomas: string[]): string {
-  /* Só o primeiro nome da lista começa em maiúscula: "Desmaio e falta de ar". */
-  const nomes = sintomas.map((sintoma, indice) => {
-    const nome = t(`clinico.resumoDoPaciente.diario.sintoma.${sintoma}`)
-
-    return indice === 0 ? nome : nome.toLocaleLowerCase()
-  })
-
-  const tag = INTL_LOCALE[isLocale(locale.value) ? locale.value : DEFAULT_LOCALE]
-
-  return new Intl.ListFormat(tag, { type: 'conjunction' }).format(nomes)
-}
+const rotulos = useRotulosDoDiario()
 
 /** Balança de casa tem duas casas; a da clínica, uma. Zero à direita não é informação. */
 function kg(valor: number): string {
@@ -77,36 +64,46 @@ const linhas = computed(() =>
             percentual: percentual(sinal.variacao.percentual),
             semanas: sinal.variacao.semanas,
           }),
+          relato: '',
           citacao: '',
         }
-      case 'sintoma-de-alarme':
+      case 'alarme':
         return {
           chave: `alarme-${sinal.em}`,
           severidade: sinal.severidade,
-          titulo: listaDeSintomas(sinal.sintomas),
+          titulo: rotulos.lista(sinal.achados.map(rotulos.achado)),
           detalhe: t('clinico.resumoDoPaciente.sinais.alarmeDetalhe', {
             data: formato.dataCurta(clinicClock.dateOf(sinal.em)),
             quando: formato.relativo(sinal.em),
           }),
-          citacao: sinal.nota,
+          /*
+           * O que o enum não tem mora aqui: "desmaiou" não existe em `SintomaPet`, e é
+           * justamente a palavra que o vet precisa ler.
+           */
+          relato: sinal.relato ?? '',
+          citacao: sinal.texto ?? '',
         }
       case 'sintoma-recorrente':
         return {
           chave: `recorrente-${sinal.sintoma}`,
           severidade: sinal.severidade,
-          titulo: t(`clinico.resumoDoPaciente.diario.sintoma.${sinal.sintoma}`),
+          titulo: rotulos.sintoma(sinal.sintoma),
           detalhe: t('clinico.resumoDoPaciente.sinais.recorrenteDetalhe', { vezes: sinal.vezes }),
+          relato: '',
           citacao: '',
         }
-      case 'apetite':
+      case 'campo-alterado':
         return {
-          chave: 'apetite',
+          chave: `campo-${sinal.campo}`,
           severidade: sinal.severidade,
-          titulo: t('clinico.resumoDoPaciente.sinais.apetite'),
-          detalhe: t('clinico.resumoDoPaciente.sinais.apetiteDetalhe', {
+          titulo: `${rotulos.campo(sinal.campo)}: ${rotulos
+            .valor(sinal.campo, sinal.predominante)
+            .toLocaleLowerCase()}`,
+          detalhe: t('clinico.resumoDoPaciente.sinais.campoDetalhe', {
             alterados: sinal.alterados,
             total: sinal.total,
           }),
+          relato: '',
           citacao: '',
         }
     }
@@ -137,6 +134,9 @@ const linhas = computed(() =>
         <span class="sinal__texto">
           <strong class="sinal__titulo">{{ linha.titulo }}</strong>
           <span class="sinal__detalhe clinic-value">{{ linha.detalhe }}</span>
+          <span v-if="linha.relato" class="sinal__relato">
+            {{ t('clinico.resumoDoPaciente.sinais.relato', { relato: linha.relato }) }}
+          </span>
           <q v-if="linha.citacao" class="sinal__citacao">{{ linha.citacao }}</q>
         </span>
         <span class="sr-only">{{ formato.severidade(linha.severidade) }}</span>
@@ -226,6 +226,13 @@ const linhas = computed(() =>
 .sinal__detalhe {
   color: var(--clinic-muted);
   font-size: var(--clinic-font-body);
+}
+
+/* O relato fica na linha de baixo, em peso de texto: é a palavra que o enum não tinha. */
+.sinal__relato {
+  flex-basis: 100%;
+  font-size: var(--clinic-font-body);
+  font-weight: 700;
 }
 
 /* A fala do responsável, na íntegra: é o contexto que o número não dá. */

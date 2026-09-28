@@ -31,6 +31,7 @@ import type {
   Block,
   BlockReason,
   CancelReason,
+  ConfirmacaoDePresenca,
   JustificativaDeFalta,
   DiaCarga,
   Encounter,
@@ -500,6 +501,38 @@ export const agendaRepository = {
       if (status === 'finalizado') {
         alvo.finalizadoEm = agora
       }
+
+      return { atendimentos: [{ ...alvo }], undoToken: token }
+    })
+  },
+
+  /**
+   * Presença confirmada — pela recepção, que ligou e ouviu "vou, sim", ou pelo app, quando o
+   * responsável toca "Confirmar" na véspera.
+   *
+   * O "por onde" viaja junto (`confirmacao.por`): confirmação dada no app às dez da noite e
+   * confirmação arrancada numa ligação pesam diferente na hora de decidir se vale ligar de novo.
+   * Só horário que ainda vai acontecer confirma; o resto é erro de quem chamou.
+   */
+  confirmarPresenca(id: string, por: ConfirmacaoDePresenca['por']): Promise<MutacaoAgenda> {
+    return simularChamada('agenda.status', () => {
+      const dataset = getDataset()
+      const alvo = dataset.appointments.find((appointment) => appointment.id === id)
+
+      if (!alvo) {
+        throw new Error('agenda.confirmar: atendimento inexistente')
+      }
+
+      if (alvo.status !== 'agendado' && alvo.status !== 'confirmado') {
+        throw new Error('agenda.confirmar: atendimento que já não vai acontecer')
+      }
+
+      const token = registrarDesfazer([alvo])
+      const agora = agoraIso()
+
+      alvo.status = 'confirmado'
+      alvo.confirmacao = { em: agora, por }
+      alvo.atualizadoEm = agora
 
       return { atendimentos: [{ ...alvo }], undoToken: token }
     })

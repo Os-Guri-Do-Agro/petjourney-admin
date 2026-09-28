@@ -181,6 +181,11 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
     :somente-leitura="somenteLeitura"
     :motivo-somente-leitura="motivoLeitura"
   >
+    <!-- Outros jeitos de preencher a anamnese — a gravação da consulta — entram pelo cabeçalho. -->
+    <template v-if="$slots.acoes" #acoes>
+      <slot name="acoes" />
+    </template>
+
     <!-- 1. o que trouxe o paciente -->
     <div class="queixa">
       <ClinicField

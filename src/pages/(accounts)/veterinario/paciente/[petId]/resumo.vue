@@ -29,10 +29,17 @@ import ResumoPrimeiraConsulta from '@/features/clinico/components/pacientes/resu
 import ResumoSinais from '@/features/clinico/components/pacientes/resumo/ResumoSinais.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { useClinicPrefs } from '@/features/clinico/composables/useClinicPrefs'
+import { useRotulosDoDiario } from '@/features/clinico/composables/useRotulosDoDiario'
 import { patientRepository } from '@/features/clinico/data/repositories'
 import type { Anamnese, Antecedente, Appointment, Pet, Tutor } from '@/features/clinico/data/types'
 import {
+  apetiteDaAnamnese,
+  evacuacaoDaAnamnese,
+  miccaoDaAnamnese,
+} from '@/features/clinico/domain/pre-consulta'
+import {
   montarResumoDoPaciente,
+  ultimoDoCampo,
   type ResumoDoPaciente,
 } from '@/features/clinico/domain/resumo-do-paciente'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
@@ -44,6 +51,7 @@ const router = useRouter()
 const clinico = useClinicoStore()
 const prontuario = useProntuarioStore()
 const formato = useClinicFormat()
+const rotulos = useRotulosDoDiario()
 /** A sugestão do histórico se religa aqui: é onde quem a desligou vem procurar. */
 const { sugerirResumo } = useClinicPrefs()
 const idDaPreferencia = useId()
@@ -98,7 +106,10 @@ const perdaEmRisco = computed(
 
 const mostrarDiario = computed(
   () =>
-    resumo.value !== null && (!resumo.value.primeiraVez || resumo.value.diario.entradas.length > 0),
+    resumo.value !== null &&
+    (!resumo.value.primeiraVez ||
+      resumo.value.diario.entradas.length > 0 ||
+      !resumo.value.diario.liberado),
 )
 
 const mostrarPeso = computed(
@@ -140,8 +151,6 @@ function historiaDoDiario(dados: ResumoDoPaciente): string {
   }
 
   const linhas: string[] = []
-  const nomeDoSintoma = (sintoma: string) =>
-    t(`clinico.resumoDoPaciente.diario.sintoma.${sintoma}`).toLowerCase()
 
   for (const sinal of dados.sinais) {
     if (sinal.tipo === 'perda-de-peso') {
@@ -155,13 +164,21 @@ function historiaDoDiario(dados: ResumoDoPaciente): string {
       )
     }
 
-    if (sinal.tipo === 'sintoma-de-alarme') {
+    if (sinal.tipo === 'alarme') {
+      const achados = rotulos.lista(sinal.achados.map(rotulos.achado)).toLocaleLowerCase()
+      const relato = [sinal.relato, sinal.texto].filter(Boolean).join(' — ')
+
       linhas.push(
-        t('clinico.resumoDoPaciente.anamnese.alarme', {
-          sintomas: sinal.sintomas.map(nomeDoSintoma).join(', '),
-          data: formato.dataCurta(clinicClock.dateOf(sinal.em)),
-          nota: sinal.nota,
-        }),
+        relato
+          ? t('clinico.resumoDoPaciente.anamnese.alarme', {
+              sintomas: achados,
+              data: formato.dataCurta(clinicClock.dateOf(sinal.em)),
+              nota: relato,
+            })
+          : t('clinico.resumoDoPaciente.anamnese.alarmeSemTexto', {
+              sintomas: achados,
+              data: formato.dataCurta(clinicClock.dateOf(sinal.em)),
+            }),
       )
     }
   }
@@ -175,12 +192,12 @@ function historiaDoDiario(dados: ResumoDoPaciente): string {
     )
   }
 
-  for (const campo of ['apetite', 'comportamento'] as const) {
-    const contagem = diario[campo]
-
-    if (contagem && contagem.alterados > 0) {
+  for (const contagem of diario.campos) {
+    if (contagem.alterados > 0 && contagem.predominante) {
       linhas.push(
-        t(`clinico.resumoDoPaciente.anamnese.${campo}`, {
+        t('clinico.resumoDoPaciente.anamnese.campo', {
+          campo: rotulos.campo(contagem.campo).toLocaleLowerCase(),
+          valor: rotulos.valor(contagem.campo, contagem.predominante).toLocaleLowerCase(),
           alterados: contagem.alterados,
           total: contagem.total,
         }),
@@ -193,7 +210,19 @@ function historiaDoDiario(dados: ResumoDoPaciente): string {
   if (comuns.length > 0) {
     linhas.push(
       t('clinico.resumoDoPaciente.anamnese.sintomas', {
-        lista: comuns.map((item) => `${nomeDoSintoma(item.sintoma)} (${item.vezes}×)`).join(', '),
+        lista: comuns
+          .map((item) => `${rotulos.sintoma(item.sintoma).toLocaleLowerCase()} (${item.vezes}×)`)
+          .join(', '),
+      }),
+    )
+  }
+
+  if (diario.doencas.length > 0) {
+    linhas.push(
+      t('clinico.resumoDoPaciente.anamnese.doencas', {
+        lista: diario.doencas
+          .map((item) => rotulos.doenca(item.doenca).toLocaleLowerCase())
+          .join(', '),
       }),
     )
   }
@@ -219,8 +248,26 @@ function preencherAnamnese(atual: Anamnese, dados: ResumoDoPaciente): Partial<An
     acrescimo.historia = historia
   }
 
-  if (!atual.apetite && dados.diario.apetite) {
-    acrescimo.apetite = dados.diario.apetite.ultimo
+  /*
+   * O último registro de cada campo, traduzido para o vocabulário da anamnese — o mesmo mapa da
+   * pré-consulta. O que não tem tradução (fezes com sangue) fica fora: já está na história, e o
+   * vet decide.
+   */
+  const { campos } = dados.diario
+  const apetite = apetiteDaAnamnese(ultimoDoCampo(campos, 'alimentacao'))
+  const evacuacao = evacuacaoDaAnamnese(ultimoDoCampo(campos, 'fezes'))
+  const miccao = miccaoDaAnamnese(ultimoDoCampo(campos, 'urina'))
+
+  if (!atual.apetite && apetite) {
+    acrescimo.apetite = apetite
+  }
+
+  if (!atual.evacuacao && evacuacao) {
+    acrescimo.evacuacao = evacuacao
+  }
+
+  if (!atual.miccao && miccao) {
+    acrescimo.miccao = miccao
   }
 
   const jaListados = new Set(atual.antecedentes.map((item) => item.descricao.trim().toLowerCase()))

@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { WaitlistEntry, WaitlistPriority, WaitlistStatus } from '../../data/types'
-import { aFrenteDe, ordenarFila, posicoesDaFila } from '../waitlist'
+import { aFrenteDe, agruparJanelas, ordenarFila, posicoesDaFila } from '../waitlist'
 
 function entrada(
   id: string,
@@ -111,5 +111,31 @@ describe('aFrenteDe', () => {
   it('conta quantos passam na frente', () => {
     expect(aFrenteDe(FILA, 'a')).toBe(0)
     expect(aFrenteDe(FILA, 'd')).toBe(3)
+  })
+})
+
+describe('disponibilidade dita de uma vez', () => {
+  const tarde = (weekday: 0 | 1 | 2 | 3 | 4 | 5 | 6) => ({ weekday, inicio: '14:00', fim: '18:00' })
+
+  it('dias úteis seguidos com o mesmo horário viram uma faixa', () => {
+    expect(agruparJanelas([tarde(1), tarde(2), tarde(3), tarde(4), tarde(5)])).toEqual([
+      { de: 1, ate: 5, inicio: '14:00', fim: '18:00' },
+    ])
+  })
+
+  it('não junta dia salteado nem horário diferente', () => {
+    const manha = { weekday: 2 as const, inicio: '08:00', fim: '12:00' }
+
+    expect(agruparJanelas([tarde(3), tarde(1), manha])).toEqual([
+      { de: 1, ate: 1, inicio: '14:00', fim: '18:00' },
+      { de: 2, ate: 2, inicio: '08:00', fim: '12:00' },
+      { de: 3, ate: 3, inicio: '14:00', fim: '18:00' },
+    ])
+  })
+
+  it('a semana começa na segunda: sábado e domingo seguidos fecham a semana', () => {
+    expect(agruparJanelas([tarde(0), tarde(6), tarde(5)])).toEqual([
+      { de: 5, ate: 0, inicio: '14:00', fim: '18:00' },
+    ])
   })
 })

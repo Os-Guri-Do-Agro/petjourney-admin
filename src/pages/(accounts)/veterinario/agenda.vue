@@ -392,6 +392,14 @@ function abrirProntuario() {
   )
 }
 
+function confirmarPresenca() {
+  if (!selecionado.value) {
+    return
+  }
+
+  void agenda.confirmarPresenca(selecionado.value.id)
+}
+
 function verResumo() {
   if (!selecionado.value) {
     return
@@ -573,7 +581,9 @@ useClinicShortcuts({
             "
             size="small"
             :loading="fila.salvando"
-            @click="fila.ofertar(candidato.id, fila.vagaAberta!.inicio)"
+            @click="
+              fila.ofertar(candidato.id, fila.vagaAberta!.inicio, fila.vagaAberta!.professionalId)
+            "
           />
           <Button
             :label="t('clinico.fila.vagaAberta.depois')"
@@ -619,6 +629,7 @@ useClinicShortcuts({
           @abrir-prontuario="abrirProntuario"
           @ver-historico="verHistorico"
           @ver-resumo="verResumo"
+          @confirmar-presenca="confirmarPresenca"
         />
       </div>
     </div>

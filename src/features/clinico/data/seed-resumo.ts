@@ -14,21 +14,28 @@
  * hotel e alimenta o sorteio da agenda: um paciente a mais ali deslocaria todos os sorteios do
  * módulo e daria histórico aleatório justamente a quem precisa de um histórico desenhado.
  *
+ * **O diário tem a forma do app.** Cada registro é um `DiarioPet` como a clínica o recebe
+ * (`EntradaDoDiarioParaClinica`, do contrato), com os enums do Prisma literais, e o peso é um
+ * `PesoRegistro` à parte — é assim que o app grava. Não existe "desmaio" em `SintomaPet`: o
+ * desmaio do Chico chega como falta de ar e fraqueza, com o relato em `sintomasOutros`, que é o
+ * que o responsável faria no app de verdade.
+ *
  * O diário dos demais pacientes é sorteado por hash do id — sem consumir os geradores do
  * `seed.ts`, pelo mesmo motivo.
  */
 
+import type { SintomaPet, VitalidadePet } from '../contrato/responsavel'
 import { addDays, createClinicClock } from '../domain/clinic-time'
 
 import { CLINIC_UTC_OFFSET } from './fixtures'
 import { createPrng, hashSeed, intBetween, pickFrom } from './mock-runtime'
 import type {
-  ComportamentoNoDiario,
+  AppointmentOrigin,
   Diagnosis,
-  EntradaDoDiario,
   ISODate,
+  PesagemDeCasa,
   Pet,
-  SintomaNoDiario,
+  RegistroDoDiario,
 } from './types'
 
 const clock = createClinicClock(CLINIC_UTC_OFFSET)
@@ -109,20 +116,27 @@ export const HORARIOS_DE_HOJE: Array<{
   petId: string
   inicio: string
   typeId: string
+  origem: AppointmentOrigin
   observacao: string
 }> = [
   {
+    /*
+     * Marcado pelo app: é o horário que a demonstração do lado do responsável mostra como
+     * "consulta hoje", com a pré-consulta aberta e ainda sem resposta.
+     */
     id: 'apt-resumo-perola',
     petId: PET_PERDA_DE_PESO,
     inicio: '10:00',
     typeId: 'tipo-consulta',
-    observacao: 'Responsável acha que ela está mais magra.',
+    origem: 'app',
+    observacao: 'Acho que ela está mais magra e bebendo muita água.',
   },
   {
     id: 'apt-resumo-chico',
     petId: PET_DIARIO_CHEIO,
     inicio: '10:30',
     typeId: 'tipo-retorno',
+    origem: 'telefone',
     observacao: 'Retorno da síndrome braquicefálica.',
   },
   {
@@ -130,6 +144,7 @@ export const HORARIOS_DE_HOJE: Array<{
     petId: PET_NOVO,
     inicio: '11:00',
     typeId: 'tipo-consulta',
+    origem: 'recepcao',
     observacao: 'Primeira consulta. Adotada na semana passada.',
   },
 ]
@@ -148,7 +163,8 @@ export type ConsultaPlantada = {
     medicamentoId: string
     mgPorKg: number
     frequenciaHoras: number
-    duracaoDias: number
+    /** `null` é uso contínuo. */
+    duracaoDias: number | null
   } | null
 }
 
@@ -158,6 +174,10 @@ export type ConsultaPlantada = {
  * Mais antigas que a janela de três semanas do sorteio da agenda: a perda de peso só aparece
  * em meses, e a pergunta "o que aconteceu desde a última vez" precisa de uma última vez longe
  * o bastante para ter acontecido alguma coisa.
+ *
+ * O meloxicam contínuo da Pérola é de propósito o detalhe que o vet precisa cruzar: gata idosa,
+ * anti-inflamatório sem data para parar, perdendo peso e bebendo mais água. Cada fato mora numa
+ * tela diferente do prontuário; o resumo põe os três na mesma.
  */
 export const CONSULTAS_DO_RESUMO: ConsultaPlantada[] = [
   {
@@ -177,12 +197,17 @@ export const CONSULTAS_DO_RESUMO: ConsultaPlantada[] = [
     petId: PET_PERDA_DE_PESO,
     diasAtras: 95,
     inicio: '15:30',
-    typeId: 'tipo-retorno',
+    typeId: 'tipo-consulta',
     professionalId: 'prof-helena',
     pesoKg: 4.7,
-    queixa: 'Revisão de tártaro',
-    diagnostico: { codigo: 'GN-00', descricao: 'Check-up sem alterações', kind: 'definitivo' },
-    prescricao: null,
+    queixa: 'Não consegue mais pular no sofá',
+    diagnostico: { codigo: 'LO-05', descricao: 'Displasia coxofemoral', kind: 'definitivo' },
+    prescricao: {
+      medicamentoId: 'med-meloxicam',
+      mgPorKg: 0.05,
+      frequenciaHoras: 24,
+      duracaoDias: null,
+    },
   },
   {
     id: 'apt-resumo-perola-3',
@@ -237,9 +262,28 @@ export const CONSULTAS_DO_RESUMO: ConsultaPlantada[] = [
 // Diário
 // ---------------------------------------------------------------------------
 
-type Registro = Omit<EntradaDoDiario, 'id' | 'petId' | 'registradoEm'>
+type Registro = Omit<RegistroDoDiario, 'id' | 'petId' | 'data'>
 
-const NADA: Registro = { pesoKg: null, apetite: null, comportamento: null, sintomas: [], nota: '' }
+const NADA: Registro = {
+  vitalidade: null,
+  alimentacao: null,
+  hidratacao: null,
+  fezes: null,
+  urina: null,
+  sintomas: [],
+  sintomasOutros: null,
+  doencas: [],
+  observacoes: null,
+  remedios: null,
+  nota: null,
+  fotoIds: [],
+}
+
+function quando(hoje: ISODate, diasAtras: number, hora: string) {
+  const [h, m] = hora.split(':').map(Number)
+
+  return clock.toIso(addDays(hoje, -diasAtras), (h ?? 0) * 60 + (m ?? 0))
+}
 
 function registro(
   petId: string,
@@ -247,72 +291,113 @@ function registro(
   diasAtras: number,
   hora: string,
   valor: Partial<Registro>,
-): EntradaDoDiario {
-  const [h, m] = hora.split(':').map(Number)
-
+): RegistroDoDiario {
   return {
     id: `diario-${petId}-${diasAtras}-${hora.replace(':', '')}`,
     petId,
-    registradoEm: clock.toIso(addDays(hoje, -diasAtras), (h ?? 0) * 60 + (m ?? 0)),
+    data: quando(hoje, diasAtras, hora),
     ...NADA,
     ...valor,
   }
 }
 
+function pesagem(
+  petId: string,
+  hoje: ISODate,
+  diasAtras: number,
+  hora: string,
+  pesoKg: number,
+): PesagemDeCasa {
+  return {
+    id: `peso-${petId}-${diasAtras}`,
+    petId,
+    data: quando(hoje, diasAtras, hora),
+    pesoKg,
+  }
+}
+
+export type DiarioDoDataset = {
+  registros: RegistroDoDiario[]
+  pesagens: PesagemDeCasa[]
+}
+
 /**
  * Pérola: a perda que nenhum registro isolado denuncia.
  *
- * 4,9 kg na primeira consulta, 4,1 kg na balança de casa ontem — 16% em cinco meses, com o
- * apetite caindo e a sede subindo nas últimas semanas. É o quadro que o vet reconhece na hora,
+ * 4,9 kg na primeira consulta, 4,1 kg na balança de casa ontem — 16% em cinco meses, com a
+ * comida caindo e a água subindo nas últimas semanas. É o quadro que o vet reconhece na hora,
  * **se** alguém puser os números lado a lado.
  */
-function diarioDaPerola(hoje: ISODate): EntradaDoDiario[] {
+function diarioDaPerola(hoje: ISODate): DiarioDoDataset {
   const id = PET_PERDA_DE_PESO
   const r = (dias: number, hora: string, valor: Partial<Registro>) =>
     registro(id, hoje, dias, hora, valor)
+  const p = (dias: number, pesoKg: number) => pesagem(id, hoje, dias, '20:00', pesoKg)
 
-  return [
-    r(132, '20:10', { pesoKg: 4.85, apetite: 'normal', comportamento: 'normal' }),
-    r(117, '19:40', { pesoKg: 4.8, apetite: 'normal', comportamento: 'normal' }),
-    r(80, '21:05', { pesoKg: 4.65, apetite: 'normal', comportamento: 'normal' }),
-    r(66, '20:30', { pesoKg: 4.6, apetite: 'normal', comportamento: 'normal' }),
-    r(54, '19:55', {
-      pesoKg: 4.55,
-      apetite: 'reduzido',
-      sintomas: ['vomito'],
-      nota: 'Vomitou um pouco de ração depois do jantar.',
-    }),
-    /* Desde a última consulta. */
-    r(38, '20:15', { pesoKg: 4.45, apetite: 'normal', comportamento: 'normal' }),
-    r(34, '08:20', { apetite: 'reduzido', comportamento: 'normal' }),
-    r(31, '21:00', { pesoKg: 4.4, apetite: 'normal', sintomas: ['sede-aumentada'] }),
-    r(27, '19:30', {
-      apetite: 'reduzido',
-      comportamento: 'quieto',
-      sintomas: ['sede-aumentada'],
-      nota: 'Bebendo muita água. Enchi o pote duas vezes hoje.',
-    }),
-    r(24, '20:45', { pesoKg: 4.35, apetite: 'reduzido' }),
-    r(20, '07:50', { apetite: 'reduzido', sintomas: ['vomito'] }),
-    r(17, '20:10', { pesoKg: 4.3, apetite: 'reduzido', sintomas: ['sede-aumentada'] }),
-    r(13, '21:20', {
-      apetite: 'reduzido',
-      comportamento: 'quieto',
-      nota: 'Deixou metade da ração. Só come se for sachê.',
-    }),
-    r(10, '20:05', { pesoKg: 4.2, apetite: 'reduzido', sintomas: ['sede-aumentada'] }),
-    r(6, '19:45', { apetite: 'normal', comportamento: 'normal' }),
-    r(3, '20:30', {
-      pesoKg: 4.1,
-      apetite: 'reduzido',
-      comportamento: 'quieto',
-      sintomas: ['sede-aumentada'],
-      nota: 'Parece mais magra nas costas, dá para sentir os ossos.',
-    }),
-  ]
+  return {
+    registros: [
+      r(132, '20:10', { alimentacao: 'NORMAL', vitalidade: 'NORMAL' }),
+      r(117, '19:40', { alimentacao: 'NORMAL', vitalidade: 'ATIVO' }),
+      r(80, '21:05', { alimentacao: 'NORMAL', vitalidade: 'NORMAL' }),
+      r(66, '20:30', { alimentacao: 'NORMAL', vitalidade: 'CALMO' }),
+      r(54, '19:55', {
+        alimentacao: 'POUCO',
+        sintomas: ['VOMITO'],
+        observacoes: 'Vomitou um pouco de ração depois do jantar.',
+      }),
+      /* Desde a última consulta. */
+      r(38, '20:15', { alimentacao: 'NORMAL', hidratacao: 'NORMAL', vitalidade: 'NORMAL' }),
+      r(34, '08:20', { alimentacao: 'POUCO' }),
+      r(31, '21:00', { alimentacao: 'NORMAL', hidratacao: 'MUITO' }),
+      r(27, '19:30', {
+        alimentacao: 'POUCO',
+        hidratacao: 'MUITO',
+        vitalidade: 'DESANIMADO',
+        observacoes: 'Bebendo muita água. Enchi o pote duas vezes hoje.',
+      }),
+      r(24, '20:45', { alimentacao: 'POUCO' }),
+      r(20, '07:50', { alimentacao: 'POUCO', sintomas: ['VOMITO'] }),
+      r(17, '20:10', { alimentacao: 'POUCO', hidratacao: 'MUITO', urina: 'MUITO' }),
+      r(13, '21:20', {
+        alimentacao: 'POUCO',
+        vitalidade: 'CALMO',
+        observacoes: 'Deixou metade da ração. Só come se for sachê.',
+      }),
+      r(10, '20:05', { alimentacao: 'POUCO', hidratacao: 'MUITO' }),
+      r(6, '19:45', { alimentacao: 'NORMAL', vitalidade: 'NORMAL' }),
+      r(3, '20:30', {
+        alimentacao: 'POUCO',
+        hidratacao: 'MUITO',
+        vitalidade: 'DESANIMADO',
+        sintomas: ['PERDA_DE_PESO'],
+        observacoes: 'Parece mais magra nas costas, dá para sentir os ossos.',
+      }),
+      /* Dentro dos três dias que a pré-consulta usa para abrir preenchida. */
+      r(1, '21:10', {
+        alimentacao: 'POUCO',
+        hidratacao: 'MUITO',
+        fezes: 'NORMAL',
+        urina: 'MUITO',
+        vitalidade: 'CALMO',
+      }),
+    ],
+    pesagens: [
+      p(132, 4.85),
+      p(117, 4.8),
+      p(80, 4.65),
+      p(66, 4.6),
+      p(54, 4.55),
+      p(38, 4.45),
+      p(31, 4.4),
+      p(24, 4.35),
+      p(17, 4.3),
+      p(10, 4.2),
+      p(3, 4.1),
+    ],
+  }
 }
 
-const NOTAS_DO_CHICO = [
+const OBSERVACOES_DO_CHICO = [
   'Comeu tudo.',
   'Passeio de 20 minutos, tranquilo.',
   'Dormiu bem.',
@@ -324,6 +409,8 @@ const NOTAS_DO_CHICO = [
   '',
 ]
 
+const VITALIDADES_DO_CHICO: VitalidadePet[] = ['NORMAL', 'NORMAL', 'ATIVO', 'CALMO']
+
 /**
  * Chico: noventa registros, quase todos iguais — e o desmaio de nove dias atrás no meio deles.
  *
@@ -331,10 +418,11 @@ const NOTAS_DO_CHICO = [
  * contar só as médias esconde pela média. O resumo precisa mostrar o que é raro **porque** é
  * raro.
  */
-function diarioDoChico(hoje: ISODate): EntradaDoDiario[] {
+function diarioDoChico(hoje: ISODate): DiarioDoDataset {
   const id = PET_DIARIO_CHEIO
   const rng = createPrng(hashSeed(`diario|${id}`))
-  const entradas: EntradaDoDiario[] = []
+  const registros: RegistroDoDiario[] = []
+  const pesagens: PesagemDeCasa[] = []
 
   for (let dias = 30; dias >= 0; dias -= 1) {
     for (const hora of ['07:40', '13:10', '21:30']) {
@@ -343,50 +431,62 @@ function diarioDoChico(hoje: ISODate): EntradaDoDiario[] {
         continue
       }
 
-      entradas.push(
+      const observacao = pickFrom(rng, OBSERVACOES_DO_CHICO, '')
+
+      registros.push(
         registro(id, hoje, dias, hora, {
-          apetite: hora === '13:10' ? null : 'normal',
-          comportamento: 'normal',
-          pesoKg:
-            dias % 7 === 2 && hora === '07:40' ? pickFrom(rng, [9.2, 9.3, 9.2, 9.1], 9.2) : null,
-          nota: pickFrom(rng, NOTAS_DO_CHICO, ''),
+          alimentacao: hora === '13:10' ? null : 'NORMAL',
+          vitalidade: pickFrom(rng, VITALIDADES_DO_CHICO, 'NORMAL'),
+          observacoes: observacao || null,
         }),
       )
+    }
+
+    if (dias % 7 === 2) {
+      pesagens.push(pesagem(id, hoje, dias, '07:45', pickFrom(rng, [9.2, 9.3, 9.2, 9.1], 9.2)))
     }
   }
 
   const trocar = (dias: number, hora: string, valor: Partial<Registro>) => {
     const alvo = registro(id, hoje, dias, hora, {})
-    const indice = entradas.findIndex((item) => item.id === alvo.id)
+    const indice = registros.findIndex((item) => item.id === alvo.id)
 
     if (indice >= 0) {
-      entradas[indice] = { ...entradas[indice]!, ...valor }
+      registros[indice] = { ...registros[indice]!, ...valor }
     }
   }
 
   trocar(9, '13:10', {
-    comportamento: 'apatico',
-    sintomas: ['desmaio', 'falta-de-ar'],
-    nota: 'Depois do passeio no calor ficou com a língua roxa e desmaiou por uns segundos. Voltou sozinho, mas ficou cansado o resto do dia.',
+    vitalidade: 'APATICO',
+    sintomas: ['FALTA_DE_AR', 'FRAQUEZA'],
+    sintomasOutros: 'Desmaiou por alguns segundos',
+    observacoes:
+      'Depois do passeio no calor ficou com a língua roxa e desmaiou por uns segundos. Voltou sozinho, mas ficou cansado o resto do dia.',
   })
   trocar(9, '21:30', {
-    comportamento: 'quieto',
-    sintomas: ['cansaco'],
-    nota: 'Mais quieto que o normal.',
+    vitalidade: 'SONOLENTO',
+    observacoes: 'Mais quieto que o normal.',
   })
-  trocar(8, '07:40', { apetite: 'reduzido', nota: 'Comeu metade.' })
-  trocar(6, '21:30', { sintomas: ['tosse'], nota: 'Tosse seca depois de beber água.' })
-  /* A nota sorteada sai junto: "tudo certo hoje" ao lado de uma tosse é o dado desmentindo a si. */
-  trocar(4, '13:10', { sintomas: ['tosse'], nota: '' })
-  trocar(2, '21:30', { sintomas: ['tosse'], nota: '' })
-  trocar(1, '07:40', { sintomas: ['tosse'], nota: 'Tossiu de novo ao acordar.' })
+  trocar(8, '07:40', { alimentacao: 'POUCO', observacoes: 'Comeu metade.' })
+  trocar(6, '21:30', { sintomas: ['TOSSE'], observacoes: 'Tosse seca depois de beber água.' })
+  /* A observação sorteada sai junto: "tudo certo hoje" ao lado de uma tosse é o dado desmentindo a si. */
+  trocar(4, '13:10', { sintomas: ['TOSSE'], observacoes: null })
+  trocar(2, '21:30', { sintomas: ['TOSSE'], observacoes: null })
+  trocar(1, '07:40', { sintomas: ['TOSSE'], observacoes: 'Tossiu de novo ao acordar.' })
 
-  return entradas
+  return { registros, pesagens }
 }
 
-const NOTAS_COMUNS = ['Tudo certo.', 'Comeu bem.', 'Passeio normal.', '', '', '']
-const SINTOMAS_COMUNS: SintomaNoDiario[] = ['vomito', 'diarreia', 'coceira', 'espirro', 'tosse']
-const COMPORTAMENTOS: ComportamentoNoDiario[] = ['normal', 'normal', 'normal', 'normal', 'quieto']
+const OBSERVACOES_COMUNS = ['Tudo certo.', 'Comeu bem.', 'Passeio normal.', '', '', '']
+const SINTOMAS_COMUNS: SintomaPet[] = ['VOMITO', 'DIARREIA', 'COCEIRA', 'ESPIRRO', 'TOSSE']
+const VITALIDADES_COMUNS: VitalidadePet[] = [
+  'NORMAL',
+  'NORMAL',
+  'NORMAL',
+  'ATIVO',
+  'CALMO',
+  'SONOLENTO',
+]
 
 /**
  * Diário sorteado dos demais pacientes.
@@ -395,54 +495,74 @@ const COMPORTAMENTOS: ComportamentoNoDiario[] = ['normal', 'normal', 'normal', '
  * precisa dizer isso sem parecer quebrada. Equino fica de fora — ninguém pesa cavalo na
  * balança do banheiro.
  */
-function diarioSorteado(pet: Pet, hoje: ISODate): EntradaDoDiario[] {
+function diarioSorteado(pet: Pet, hoje: ISODate): DiarioDoDataset {
   const hash = hashSeed(`diario|${pet.id}`)
 
   if (hash % 3 === 0 || pet.especie === 'equina') {
-    return []
+    return { registros: [], pesagens: [] }
   }
 
   const rng = createPrng(hash)
-  const entradas: EntradaDoDiario[] = []
+  const registros: RegistroDoDiario[] = []
+  const pesagens: PesagemDeCasa[] = []
 
   for (let dias = 40 - intBetween(rng, 0, 4); dias >= 1; dias -= intBetween(rng, 2, 6)) {
     const comPeso = pet.pesoKg !== null && rng() < 0.35
     const casas = pet.pesoKg !== null && pet.pesoKg < 2 ? 100 : 10
-    const sintoma = rng() < 0.12 ? pickFrom(rng, SINTOMAS_COMUNS, 'vomito') : null
+    const sintoma = rng() < 0.12 ? pickFrom(rng, SINTOMAS_COMUNS, 'VOMITO') : null
+    const hora = pickFrom(rng, ['08:10', '12:40', '19:50', '21:15'], '19:50')
+    const observacao = pickFrom(rng, OBSERVACOES_COMUNS, '')
 
-    entradas.push(
-      registro(pet.id, hoje, dias, pickFrom(rng, ['08:10', '12:40', '19:50', '21:15'], '19:50'), {
-        pesoKg: comPeso
-          ? Math.round(pet.pesoKg! * (1 + (rng() - 0.5) * 0.03) * casas) / casas
-          : null,
-        apetite: rng() < 0.9 ? 'normal' : 'reduzido',
-        comportamento: pickFrom(rng, COMPORTAMENTOS, 'normal'),
+    registros.push(
+      registro(pet.id, hoje, dias, hora, {
+        alimentacao: rng() < 0.9 ? 'NORMAL' : 'POUCO',
+        hidratacao: rng() < 0.5 ? 'NORMAL' : null,
+        fezes: rng() < 0.4 ? 'NORMAL' : null,
+        vitalidade: pickFrom(rng, VITALIDADES_COMUNS, 'NORMAL'),
         sintomas: sintoma ? [sintoma] : [],
-        nota: pickFrom(rng, NOTAS_COMUNS, ''),
+        observacoes: observacao || null,
       }),
     )
+
+    if (comPeso) {
+      pesagens.push(
+        pesagem(
+          pet.id,
+          hoje,
+          dias,
+          hora,
+          Math.round(pet.pesoKg! * (1 + (rng() - 0.5) * 0.03) * casas) / casas,
+        ),
+      )
+    }
   }
 
-  return entradas
+  return { registros, pesagens }
 }
 
-export function gerarDiario(pets: Pet[], hoje: ISODate): EntradaDoDiario[] {
-  return pets
-    .flatMap((pet) => {
-      if (pet.id === PET_PERDA_DE_PESO) {
-        return diarioDaPerola(hoje)
-      }
+export function gerarDiario(pets: Pet[], hoje: ISODate): DiarioDoDataset {
+  const partes = pets.map((pet) => {
+    if (pet.id === PET_PERDA_DE_PESO) {
+      return diarioDaPerola(hoje)
+    }
 
-      if (pet.id === PET_DIARIO_CHEIO) {
-        return diarioDoChico(hoje)
-      }
+    if (pet.id === PET_DIARIO_CHEIO) {
+      return diarioDoChico(hoje)
+    }
 
-      /* A filhote nunca veio e o app ainda não foi aberto: o vazio é o caso. */
-      if (pet.id === PET_NOVO) {
-        return []
-      }
+    /* A filhote nunca veio e o app ainda não foi aberto: o vazio é o caso. */
+    if (pet.id === PET_NOVO) {
+      return { registros: [], pesagens: [] }
+    }
 
-      return diarioSorteado(pet, hoje)
-    })
-    .sort((a, b) => b.registradoEm.localeCompare(a.registradoEm))
+    return diarioSorteado(pet, hoje)
+  })
+
+  const maisRecentePrimeiro = (a: { data: string }, b: { data: string }) =>
+    Date.parse(b.data) - Date.parse(a.data)
+
+  return {
+    registros: partes.flatMap((parte) => parte.registros).sort(maisRecentePrimeiro),
+    pesagens: partes.flatMap((parte) => parte.pesagens).sort(maisRecentePrimeiro),
+  }
 }

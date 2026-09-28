@@ -16,9 +16,10 @@ import ClinicAlertChip from '../base/ClinicAlertChip.vue'
 import ClinicPatientHeader from '../base/ClinicPatientHeader.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { Appointment, AppointmentStatus } from '../../data/types'
+import { cancelarAte, podeConfirmarPresenca } from '../../domain/politica'
 import { useAgendaStore } from '../../stores/agenda'
 import { useAvisosStore } from '../../stores/avisos'
-import { useClinicoStore } from '../../stores/clinico'
+import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{ appointment: Appointment | null }>()
 
@@ -30,6 +31,7 @@ const emit = defineEmits<{
   abrirProntuario: []
   verHistorico: []
   verResumo: []
+  confirmarPresenca: []
 }>()
 
 const { t } = useI18n()
@@ -92,6 +94,63 @@ const avisosDoAtendimento = computed(() =>
 const encerrado = computed(() =>
   ['finalizado', 'cancelado', 'falta'].includes(props.appointment?.status ?? ''),
 )
+
+/**
+ * Quem confirmou presença, e por onde.
+ *
+ * "Sem confirmação" só aparece na janela em que confirmar diz alguma coisa (as 48 horas antes):
+ * cobrar confirmação de um horário de daqui a três semanas é ruído, e a linha pendente perderia
+ * o peso que tem na véspera.
+ */
+const presenca = computed(() => {
+  const appointment = props.appointment
+
+  if (!appointment || (appointment.status !== 'agendado' && appointment.status !== 'confirmado')) {
+    return null
+  }
+
+  if (appointment.confirmacao) {
+    return {
+      texto: t(`clinico.agenda.presenca.por.${appointment.confirmacao.por}`),
+      quando: formato.relativo(appointment.confirmacao.em),
+      pendente: false,
+    }
+  }
+
+  if (appointment.status === 'confirmado') {
+    return { texto: t('clinico.agenda.presenca.confirmada'), quando: '', pendente: false }
+  }
+
+  return podeConfirmarPresenca(appointment, clinicClock.nowIso())
+    ? { texto: t('clinico.agenda.presenca.semConfirmacao'), quando: '', pendente: true }
+    : null
+})
+
+/**
+ * Até quando o responsável mexe neste horário pelo app. É a pergunta que chega à recepção
+ * quando a pessoa liga dizendo "o app não me deixa cancelar".
+ */
+const prazoDoApp = computed(() => {
+  const appointment = props.appointment
+  const politica = clinico.politica
+
+  if (!appointment || !politica) {
+    return null
+  }
+
+  const limite = cancelarAte(appointment, politica, clinicClock.utcOffset)
+
+  if (!limite) {
+    return null
+  }
+
+  return Date.parse(clinicClock.nowIso()) < Date.parse(limite)
+    ? t('clinico.agenda.prazoApp.ate', {
+        data: formato.dataCurta(clinicClock.dateOf(limite)),
+        hora: formato.hora(limite),
+      })
+    : t('clinico.agenda.prazoApp.encerrado')
+})
 </script>
 
 <template>
@@ -155,6 +214,28 @@ const encerrado = computed(() =>
       <div>
         <dt class="clinic-label">{{ tipo?.nome }}</dt>
         <dd>{{ t(`clinico.origem.${appointment.origem}`) }}</dd>
+      </div>
+      <div v-if="presenca">
+        <dt class="clinic-label">{{ t('clinico.agenda.presenca.titulo') }}</dt>
+        <dd :class="{ drawer__pendente: presenca.pendente }">
+          {{ presenca.texto }}
+          <span v-if="presenca.quando" class="drawer__canal">{{ presenca.quando }}</span>
+        </dd>
+        <dd v-if="appointment.status === 'agendado'" class="drawer__acao-linha">
+          <Button
+            :label="t('clinico.agenda.presenca.registrar')"
+            icon="pi pi-check"
+            severity="secondary"
+            text
+            size="small"
+            :loading="agenda.salvando"
+            @click="emit('confirmarPresenca')"
+          />
+        </dd>
+      </div>
+      <div v-if="prazoDoApp">
+        <dt class="clinic-label">{{ t('clinico.agenda.prazoApp.titulo') }}</dt>
+        <dd class="drawer__prazo">{{ prazoDoApp }}</dd>
       </div>
       <div v-if="appointment.chegadaEm">
         <dt class="clinic-label">{{ t('clinico.meuDia.esperando') }}</dt>
@@ -319,6 +400,16 @@ const encerrado = computed(() =>
 .drawer__canal {
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
+}
+
+/* O botão de registrar confirmação encosta na linha da presença, sem virar ação principal. */
+.drawer__acao-linha {
+  margin-inline-start: calc(var(--clinic-space-2) * -1);
+}
+
+.drawer__prazo {
+  color: var(--clinic-muted);
+  font-weight: 600;
 }
 
 /* Falta sem motivo não é campo vazio, é tarefa aberta — e o tom diz isso. */

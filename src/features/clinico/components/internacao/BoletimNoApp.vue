@@ -7,9 +7,14 @@
  * ver, ao lado, o que sai do outro lado — senão o boletim vira mais um campo de formulário e
  * ninguém percebe que ele saiu seco, ou grande demais, ou tarde.
  *
- * É uma **prévia fiel, não um enfeite**: mesma ordem, mesmo agrupamento por dia e a mesma
- * distinção entre o que já chegou e o que ainda está na clínica. O boletim retido aparece aqui
- * como ausência — e é essa ausência que torna a regra da ligação compreensível de olhar.
+ * É uma **prévia fiel, não um enfeite**: mesma ordem, mesmo agrupamento por dia, e só o que já
+ * chegou ao celular. O boletim retido aparece aqui como **ausência pura**.
+ *
+ * Até aqui a prévia dizia "1 boletim ainda na clínica, aguardando ligação" — e o app de verdade
+ * não vai dizer isso, porque o contrato não tem esse campo (`contrato/responsavel.ts`, tipo
+ * `Internacao`). Um aviso de boletim retido contaria ao responsável que há notícia ruim antes da
+ * ligação, que é exatamente o que a retenção existe para impedir. Quem precisa saber do retido é
+ * a clínica, e ela sabe pela aba de boletins.
  */
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -35,8 +40,6 @@ const enviados = computed(() =>
     .filter((item) => item.status === 'enviado')
     .sort((a, b) => (a.enviadoEm ?? a.geradoEm).localeCompare(b.enviadoEm ?? b.geradoEm)),
 )
-
-const emEspera = computed(() => props.boletins.filter((item) => item.status === 'retido').length)
 
 type Dia = { data: string; rotulo: string; itens: BoletimAoTutor[] }
 
@@ -119,9 +122,6 @@ watch(
         </template>
       </div>
 
-      <p v-if="emEspera > 0" class="celular__retido">
-        {{ t('clinico.internacao.app.retido', { total: emEspera }, emEspera) }}
-      </p>
     </div>
   </div>
 </template>
@@ -263,16 +263,5 @@ watch(
   gap: 0.25rem;
   color: var(--clinic-accent-strong);
   font-weight: 700;
-}
-
-.celular__retido {
-  margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px dashed var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  text-align: center;
 }
 </style>

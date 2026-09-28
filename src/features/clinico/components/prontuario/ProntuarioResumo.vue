@@ -33,7 +33,7 @@ const props = defineProps<{
   tutor: Tutor | null
 }>()
 
-const emit = defineEmits<{ emitir: [documento: DocumentoId] }>()
+const emit = defineEmits<{ emitir: [documento: DocumentoId]; liberarResumo: [] }>()
 
 const { t } = useI18n()
 const clinico = useClinicoStore()
@@ -314,6 +314,30 @@ const outrosAbertos = ref(false)
 const dataDoAtendimento = computed(() =>
   clinicClock.dateOf(props.encounter.finalizadoEm ?? props.encounter.abertoEm),
 )
+
+/**
+ * O resumo no app do responsável: três estados, uma linha cada. Aberto não libera (o texto ainda
+ * muda); finalizado e não liberado é a ação; liberado diz quando.
+ */
+const noApp = computed(() => {
+  const liberadoEm = props.encounter.resumoLiberadoEm ?? null
+
+  if (props.encounter.status !== 'finalizado') {
+    return { estado: 'aberto' as const, texto: t('clinico.prontuario.resumo.app.aberto') }
+  }
+
+  if (!liberadoEm) {
+    return { estado: 'pronto' as const, texto: t('clinico.prontuario.resumo.app.pronto') }
+  }
+
+  return {
+    estado: 'liberado' as const,
+    texto: t('clinico.prontuario.resumo.app.liberado', {
+      data: formato.dataCurta(clinicClock.dateOf(liberadoEm)),
+      hora: formato.hora(liberadoEm),
+    }),
+  }
+})
 </script>
 
 <template>
@@ -403,6 +427,31 @@ const dataDoAtendimento = computed(() =>
         </span>
       </div>
     </div>
+
+    <!--
+      O que o responsável recebe no app. Fica antes dos documentos porque é a entrega que não
+      depende de papel — e a única que o vet precisa decidir ativamente.
+    -->
+    <section class="app" :class="`app--${noApp.estado}`" aria-labelledby="resumo-app-titulo">
+      <i
+        class="pi app__icone"
+        :class="noApp.estado === 'liberado' ? 'pi-check-circle' : 'pi-mobile'"
+        aria-hidden="true"
+      />
+      <div class="app__corpo">
+        <h4 id="resumo-app-titulo" class="clinic-label">
+          {{ t('clinico.prontuario.resumo.app.titulo') }}
+        </h4>
+        <p>{{ noApp.texto }}</p>
+      </div>
+      <Button
+        v-if="noApp.estado === 'pronto'"
+        :label="t('clinico.prontuario.resumo.app.liberar')"
+        icon="pi pi-send"
+        size="small"
+        @click="emit('liberarResumo')"
+      />
+    </section>
 
     <section class="documentos">
       <header class="documentos__topo">
@@ -496,6 +545,52 @@ const dataDoAtendimento = computed(() =>
 </template>
 
 <style scoped>
+/*
+ * A entrega no app é estado, não alerta: acento quando liberado, superfície neutra enquanto não.
+ * O botão é a única coisa com peso de ação na faixa.
+ */
+.app {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--clinic-space-3);
+  padding: var(--clinic-space-3);
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface);
+}
+
+.app--liberado {
+  border-color: var(--clinic-accent);
+  background: var(--clinic-accent-tint);
+}
+
+.app__icone {
+  color: var(--clinic-faint);
+  font-size: 1.1rem;
+}
+
+.app--liberado .app__icone {
+  color: var(--clinic-accent-strong);
+}
+
+.app__corpo {
+  display: grid;
+  flex: 1 1 18rem;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app__corpo h4,
+.app__corpo p {
+  margin: 0;
+}
+
+.app__corpo p {
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+}
+
 .resumo {
   display: grid;
   gap: var(--clinic-space-4);

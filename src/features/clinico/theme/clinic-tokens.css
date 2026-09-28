@@ -104,6 +104,23 @@
   --clinic-outro-turno: #1d3557;
   --clinic-outro-turno-line: #6982a4;
 
+  /* ------------------------------------------------- o que a máquina propôs
+   *
+   * A quarta gaveta: nem institucional, nem risco, nem de outro turno — **o que a máquina
+   * propôs e ninguém aprovou ainda**. É o periwinkle da paleta da casa (`LightColors.purple`,
+   * #BDB2FF), que estava sem consumidor nenhum, e ele só aparece onde essa frase é verdade: a
+   * moldura da anamnese por voz e o grifo do trecho da conversa que virou campo.
+   *
+   * O próprio #BDB2FF não serve de tinta — fica em 1,8:1 contra o cartão. A tinta é o mesmo
+   * matiz levado ao escuro até 6,7:1; o grifo é a mistura de 24% com o cartão (texto a 11,5:1
+   * por cima); e a linha fecha 3,2:1, que é borda de verdade.
+   *
+   * Nunca preenche superfície grande. Aprovado, o campo perde a cor: vira prontuário.
+   */
+  --clinic-maquina: #554aa8;
+  --clinic-maquina-bg: #ece6f7;
+  --clinic-maquina-line: #8c7fdc;
+
   /* ------------------------------------------------- degraus do mapa de calor
    *
    * Quatro passos fechados, não um gradiente: entre 3 e 4 atendimentos, degrau contínuo vira
@@ -317,6 +334,11 @@
   /* O mesmo papel, do outro lado: tinta clara o bastante para o painel escuro (8,6:1 no cartão). */
   --clinic-outro-turno: #a3b9d8;
   --clinic-outro-turno-line: #5b7395;
+
+  /* A proposta da máquina no escuro: tinta a 10,3:1 no painel, grifo com texto a 11,5:1. */
+  --clinic-maquina: #c9c1ff;
+  --clinic-maquina-bg: #2d353e;
+  --clinic-maquina-line: #6f64b8;
 
   --clinic-heat-1: #2b413b;
   --clinic-heat-2: #45675f;

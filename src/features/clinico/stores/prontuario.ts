@@ -480,6 +480,19 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     clinico.invalidarTudo()
   }
 
+  /** Entrega o resumo ao responsável, no app. Ver `encounterRepository.liberarResumo`. */
+  async function liberarResumo() {
+    if (!encounter.value || encounter.value.status !== 'finalizado') {
+      return
+    }
+
+    try {
+      encounter.value = await encounterRepository.liberarResumo(encounter.value.id)
+    } catch {
+      erro.value = 'clinico.erros.mutacao'
+    }
+  }
+
   /**
    * Simulação de segundo dispositivo, para o painel de desenvolvimento: injeta um lock alheio
    * sem precisar de outra máquina aberta.
@@ -542,6 +555,7 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     buscarSugestoesDeRetorno,
     agendarRetorno,
     finalizar,
+    liberarResumo,
     restaurarRascunho,
     descartarRascunho,
     alternarSegundoDispositivo,

@@ -2189,6 +2189,21 @@
       "legenda": {
         "titulo": "Legenda",
         "filtrar": "Mostrar só {tipo}"
+      },
+      "presenca": {
+        "titulo": "Presença",
+        "por": {
+          "app": "Confirmada pelo app",
+          "recepcao": "Confirmada pela recepção"
+        },
+        "confirmada": "Confirmada",
+        "semConfirmacao": "Ainda sem confirmação",
+        "registrar": "Registrar confirmação"
+      },
+      "prazoApp": {
+        "titulo": "Pelo app",
+        "ate": "Cancela ou remarca até {data}, {hora}",
+        "encerrado": "Prazo encerrado: só por telefone"
       }
     },
     "meuDia": {
@@ -2590,7 +2605,15 @@
       "oferta": {
         "prazo": "A oferta expira em {minutos} minutos. Passado o prazo, a vaga volta para a clínica.",
         "mensagemPadrao": "Olá! Abriu um horário para o {paciente} em {data} às {hora}. Confirma? Guardamos por {minutos} minutos."
-      }
+      },
+      "aceite": {
+        "marcado": "Horário de {paciente} marcado para {data} às {hora}, com {profissional}.",
+        "ofertaExpirada": "A oferta para {paciente} venceu antes do aceite. A vaga voltou para a clínica.",
+        "vagaPreenchida": "A vaga já foi preenchida. {paciente} voltou para a fila, na mesma posição.",
+        "verNaAgenda": "Ver na agenda",
+        "dispensar": "Dispensar aviso"
+      },
+      "marcadoPara": "Marcado: {data} · {hora}"
     },
     "faltas": {
       "titulo": "Faltas",
@@ -2652,7 +2675,8 @@
         "telefone": "Por telefone",
         "whatsapp": "Por WhatsApp",
         "presencial": "Presencialmente",
-        "sem-resposta": "Sem resposta"
+        "sem-resposta": "Sem resposta",
+        "app": "Pelo aplicativo"
       },
       "justificativa": {
         "titulo": "Justificativa da falta",
@@ -2950,7 +2974,14 @@
         "descricao": "Confira o que foi registrado antes de emitir os documentos.",
         "vazio": "Não registrado",
         "achados": "Achados",
-        "alergiaPendente": "Prescrição de {medicamento} em conflito com alergia registrada, sem aceite."
+        "alergiaPendente": "Prescrição de {medicamento} em conflito com alergia registrada, sem aceite.",
+        "app": {
+          "titulo": "No app do responsável",
+          "aberto": "O resumo pode ser liberado depois de finalizar o atendimento.",
+          "pronto": "O responsável recebe o diagnóstico em frase, as orientações, a receita, os exames e o retorno. Sem mg/kg e sem o exame físico.",
+          "liberado": "Liberado em {data}, às {hora}. O responsável foi avisado no app.",
+          "liberar": "Liberar para o responsável"
+        }
       },
       "preConsulta": {
         "titulo": "Respondido no app",
@@ -3015,9 +3046,9 @@
         "perdaDetalhe": "{de} → {para} kg ({percentual}) em {semanas} semanas",
         "alarmeDetalhe": "registrado em casa em {data}, {quando}",
         "recorrenteDetalhe": "{vezes}× desde a última consulta",
-        "apetite": "Apetite reduzido",
-        "apetiteDetalhe": "em {alterados} de {total} registros",
-        "mais": "e mais {total} no resumo"
+        "mais": "e mais {total} no resumo",
+        "campoDetalhe": "em {alterados} de {total} registros",
+        "relato": "Também relatado: {relato}"
       },
       "casa": {
         "titulo": "Em casa desde a última consulta",
@@ -3027,13 +3058,9 @@
         "vazioTitulo": "Nada registrado no app neste período",
         "vazioDescricao": "O responsável não usou o Diário Pet. Vale perguntar na consulta como ele tem passado em casa.",
         "peso": "Peso em casa",
-        "apetite": "Apetite",
-        "comportamento": "Comportamento",
-        "sintomas": "Sintomas",
         "semRegistro": "Sem registro",
         "nenhum": "Nenhum",
-        "alteradoEm": "Alterado em {alterados} de {total} registros",
-        "normalEmTodos": "Normal nos {total} registros",
+        "normalEmTodos": "Normal no único registro | Normal nos {total} registros",
         "ultimo": "último: {valor}, {quando}",
         "notas": "Nas palavras do responsável",
         "verRegistros": "Ver registros ({total})",
@@ -3041,8 +3068,10 @@
         "filtro": "Quais registros mostrar",
         "filtroAlteracao": "Com alteração ({total})",
         "filtroTodos": "Todos ({total})",
-        "apetiteValor": "Apetite {valor}",
-        "semAlteracaoCurto": "Sem alteração"
+        "semAlteracaoCurto": "Sem alteração",
+        "valorEm": "{valor} no único registro | {valor} em {alterados} de {total} registros",
+        "naoLiberadoTitulo": "O responsável não liberou o diário para a clínica",
+        "naoLiberadoDescricao": "A liberação é do responsável, no app, em Minhas clínicas. Sem ela, o resumo mostra só o que é da clínica."
       },
       "peso": {
         "titulo": "Peso nos últimos 6 meses",
@@ -3094,43 +3123,17 @@
           "detalhe": "Convidar o responsável a registrar no app. É o diário que preenche esta tela na próxima consulta."
         }
       },
-      "diario": {
-        "apetite": {
-          "normal": "Normal",
-          "aumentado": "Aumentado",
-          "reduzido": "Reduzido",
-          "ausente": "Não comeu"
-        },
-        "comportamento": {
-          "normal": "Normal",
-          "agitado": "Agitado",
-          "quieto": "Quieto",
-          "apatico": "Apático"
-        },
-        "sintoma": {
-          "vomito": "Vômito",
-          "diarreia": "Diarreia",
-          "tosse": "Tosse",
-          "espirro": "Espirro",
-          "coceira": "Coceira",
-          "sede-aumentada": "Sede aumentada",
-          "cansaco": "Cansaço",
-          "claudicacao": "Mancando",
-          "falta-de-ar": "Falta de ar",
-          "desmaio": "Desmaio",
-          "convulsao": "Convulsão"
-        }
-      },
       "anamnese": {
         "cabecalho": "Do Diário Pet (registrado pelo responsável no app) desde {data}, {total} registros:",
         "perda": "perda de peso de {de} kg para {para} kg ({percentual}%) em {semanas} semanas, somando consultas e balança de casa",
         "alarme": "{sintomas} em {data}: \"{nota}\"",
         "pesoCasa": "peso na balança de casa: {de} → {para} kg",
-        "apetite": "apetite reduzido ou ausente em {alterados} de {total} registros",
-        "comportamento": "comportamento alterado (quieto ou apático) em {alterados} de {total} registros",
         "sintomas": "sintomas registrados: {lista}",
         "semAlteracao": "Nada fora do normal registrado.",
-        "prescricao": "{nome} (receitado, até {data})"
+        "prescricao": "{nome} (receitado, até {data})",
+        "campo": "{campo}: {valor} em {alterados} de {total} registros",
+        "doencas": "doenças informadas pelo responsável: {lista}",
+        "alarmeSemTexto": "{sintomas} em {data}"
       },
       "verResumoComSinais": "Resumo em 30 s: {total} pontos de atenção",
       "preferencia": "Sugerir este resumo ao abrir o histórico do paciente",
@@ -3496,8 +3499,7 @@
       "app": {
         "vazio": "Nenhum boletim recebido ainda.",
         "foto": "Foto enviada pela clínica",
-        "aposLigacao": "Enviado após ligação",
-        "retido": "{total} boletim ainda na clínica, aguardando ligação."
+        "aposLigacao": "Enviado após ligação"
       },
       "passagem": {
         "titulo": "Passagem de plantão",
@@ -3693,6 +3695,260 @@
         "paginas": "Páginas da lista de leitos",
         "anterior": "Página anterior",
         "proxima": "Próxima página"
+      }
+    },
+    "diario": {
+      "campo": {
+        "alimentacao": "Alimentação",
+        "hidratacao": "Água",
+        "vitalidade": "Disposição",
+        "fezes": "Fezes",
+        "urina": "Urina",
+        "sintomas": "Sintomas",
+        "doencas": "Doenças informadas"
+      },
+      "motivo": {
+        "CHECKUP": "Check-up",
+        "SINTOMA": "Sintoma",
+        "RETORNO": "Retorno",
+        "EXAME": "Exame",
+        "VACINA": "Vacina",
+        "EMERGENCIA": "Emergência",
+        "OUTRO": "Outro"
+      },
+      "vitalidade": {
+        "AGITADO": "Agitado",
+        "ATIVO": "Ativo",
+        "NORMAL": "Normal",
+        "CALMO": "Calmo",
+        "SONOLENTO": "Sonolento",
+        "DESANIMADO": "Desanimado",
+        "APATICO": "Apático",
+        "LETARGICO": "Letárgico"
+      },
+      "alimentacao": {
+        "MUITO": "Muito",
+        "NORMAL": "Normal",
+        "POUCO": "Pouco",
+        "NADA": "Nada",
+        "RECUSOU": "Recusou",
+        "VOMITOU_APOS": "Vomitou após"
+      },
+      "hidratacao": {
+        "MUITO": "Muito",
+        "NORMAL": "Normal",
+        "POUCO": "Pouco",
+        "NADA": "Nada",
+        "RECUSOU": "Recusou",
+        "VOMITOU_APOS": "Vomitou após"
+      },
+      "fezes": {
+        "NORMAL": "Normal",
+        "MOLE": "Mole",
+        "PASTOSA": "Pastosa",
+        "DIARREIA": "Diarreia",
+        "RESSECADA": "Ressecada",
+        "COM_SANGUE": "Com sangue",
+        "COM_MUCO": "Com muco",
+        "COM_VERMES": "Com vermes",
+        "ESCURA": "Escura",
+        "CLARA": "Clara",
+        "NAO_DEFECOU": "Não defecou"
+      },
+      "urina": {
+        "NORMAL": "Normal",
+        "MUITO": "Muito",
+        "POUCO": "Pouco",
+        "NADA": "Nada",
+        "COM_SANGUE": "Com sangue",
+        "ESCURA": "Escura",
+        "COM_DIFICULDADE": "Com dificuldade",
+        "COM_ODOR_FORTE": "Com odor forte"
+      },
+      "sintomas": {
+        "FEBRE": "Febre",
+        "VOMITO": "Vômito",
+        "DIARREIA": "Diarreia",
+        "FRAQUEZA": "Fraqueza",
+        "LETARGIA": "Letargia",
+        "TREMORES": "Tremores",
+        "COCEIRA": "Coceira",
+        "ESPIRRO": "Espirro",
+        "TOSSE": "Tosse",
+        "CONVULSAO": "Convulsão",
+        "FALTA_DE_AR": "Falta de ar",
+        "SECRECAO_OCULAR": "Secreção ocular",
+        "SECRECAO_NASAL": "Secreção nasal",
+        "HALITOSE": "Mau hálito",
+        "CLAUDICACAO": "Mancando",
+        "SANGRAMENTO": "Sangramento",
+        "DESIDRATACAO": "Desidratação",
+        "INCHACO": "Inchaço",
+        "PERDA_DE_PESO": "Perda de peso",
+        "QUEDA_DE_PELO": "Queda de pelo",
+        "LAMBEDURA_EXCESSIVA": "Lambedura excessiva"
+      },
+      "doencas": {
+        "GRIPE": "Gripe",
+        "ALERGIA": "Alergia",
+        "INFECCAO": "Infecção",
+        "INFECCAO_URINARIA": "Infecção urinária",
+        "VIROSE": "Virose",
+        "INTOXICACAO": "Intoxicação",
+        "VERMINOSE": "Verminose",
+        "OTITE": "Otite",
+        "CONJUNTIVITE": "Conjuntivite",
+        "DERMATITE": "Dermatite",
+        "GASTRITE": "Gastrite",
+        "COLICA": "Cólica",
+        "INDIGESTAO": "Indigestão"
+      }
+    },
+    "preConsulta": {
+      "motivo": "Motivo",
+      "desdeQuando": {
+        "HOJE": "Hoje",
+        "UM_A_DOIS_DIAS": "1 a 2 dias",
+        "TRES_A_SETE_DIAS": "3 a 7 dias",
+        "UMA_A_DUAS_SEMANAS": "1 a 2 semanas",
+        "MAIS_DE_DUAS_SEMANAS": "Mais de 2 semanas"
+      },
+      "doDiario": "do diário",
+      "pesadoEm": "pesado em {data}",
+      "fotos": "Fotos anexadas: {total}"
+    },
+    "escuta": {
+      "titulo": "Anamnese por voz",
+      "gravar": "Gravar consulta",
+      "gravarDica": "A IA escuta a conversa e propõe os campos da anamnese; você revisa antes de salvar.",
+      "estado": {
+        "gravando": "Ouvindo",
+        "pausada": "Pausado, microfone fechado",
+        "encerrando": "Encerrando…",
+        "revisao": "Revise antes de salvar",
+        "aplicada": "Conversa gravada"
+      },
+      "autorizadaPor": "{responsavel} autorizou às {hora}",
+      "acoes": {
+        "pausar": "Pausar",
+        "retomar": "Retomar",
+        "encerrar": "Encerrar e revisar",
+        "adiantar": "Adiantar a conversa",
+        "descartar": "Descartar gravação",
+        "aplicar": "Aplicar {total} campo ao prontuário | Aplicar {total} campos ao prontuário",
+        "aplicarNenhum": "Marque o que vai entrar",
+        "gravarDeNovo": "Gravar de novo"
+      },
+      "fonte": {
+        "rotulo": "Ouvir",
+        "microfone": "Microfone",
+        "demonstracao": "Consulta de demonstração",
+        "semMicrofone": "Este navegador não transcreve voz. Use o Chrome ou o Edge, ou a consulta de demonstração.",
+        "microfoneDica": "Transcrição pelo navegador; no Chrome, o áudio passa pelo serviço de voz do Google. Para o prontuário só volta texto.",
+        "demonstracaoDica": "Uma consulta de exemplo, tocada acelerada. Quem lê a conversa é o mesmo motor do microfone."
+      },
+      "aviso": {
+        "microfone": "Transcrição do navegador, sem separar quem fala. Quem propõe os campos é um motor local de regras, sem modelo de linguagem: entende português e pouca coisa além. Confira cada campo.",
+        "demonstracao": "Demonstração: a conversa é uma gravação de exemplo. Quem propõe os campos é um motor local de regras, sem modelo de linguagem e sem rede."
+      },
+      "autorizacao": {
+        "titulo": "Gravar a consulta",
+        "pedido": "Antes de começar, peça a autorização de {responsavel}.",
+        "paraLer": "Para ler para {responsavel}",
+        "texto": "{responsavel}, posso gravar a nossa conversa? Ela serve só para preencher o prontuário de {pet}. O áudio não fica guardado: fica o texto, que eu reviso antes de salvar. Se preferir, não gravo, e dá para parar a qualquer momento.",
+        "oQueAcontece": "O que acontece",
+        "passoEscuta": "A IA escuta e propõe os campos da anamnese, cada um com o trecho de onde veio.",
+        "passoRevisao": "Nada entra no prontuário sem a sua revisão, campo a campo.",
+        "passoDecisao": "Diagnóstico e conduta não são preenchidos por voz: a decisão clínica é sua.",
+        "autorizou": "{responsavel} autorizou, começar",
+        "naoAutorizou": "Não autorizou",
+        "responsavelGenerico": "Responsável"
+      },
+      "erro": {
+        "sem-suporte": "Este navegador não transcreve voz. Use o Chrome ou o Edge, ou a consulta de demonstração.",
+        "permissao": "O navegador não deu acesso ao microfone. Libere no cadeado da barra de endereço, ou use a consulta de demonstração.",
+        "microfone": "Nenhum microfone encontrado neste computador.",
+        "rede": "Sem conexão com o serviço de voz. O que foi ouvido até aqui está abaixo.",
+        "servico": "O serviço de voz parou de responder. O que foi ouvido até aqui está abaixo."
+      },
+      "conversa": {
+        "titulo": "Conversa",
+        "voce": "Você",
+        "acompanhante": "Acompanhante",
+        "duasVozes": "Duas vozes",
+        "incerto": "Ouvido com dúvida",
+        "esperando": "Esperando a primeira fala…",
+        "vazia": "Nada foi ouvido.",
+        "interferencia": {
+          "latido": "Latido",
+          "fala-sobreposta": "Falas sobrepostas",
+          "ruido": "Ruído"
+        }
+      },
+      "proposta": {
+        "titulo": "Prontuário proposto",
+        "aindaNao": "Ainda não apareceu: {campos}",
+        "naoApareceu": "Não apareceu na conversa: {campos}",
+        "antecedente": "Antecedente",
+        "noProntuario": "Hoje no prontuário: {valor}. Aceitar substitui.",
+        "somaHistoria": "Entra no fim da história clínica.",
+        "jaRegistrado": "Já está nos antecedentes; não entra de novo.",
+        "corrigir": "Corrigir",
+        "pronto": "Pronto",
+        "cancelar": "Cancelar",
+        "desfazer": "Desfazer correção",
+        "corrigido": "Corrigido por você",
+        "proposto": "Proposto: {valor}",
+        "incluir": "Levar {campo} para o prontuário",
+        "verNaConversa": "Ver na conversa",
+        "quando": "Quando",
+        "descricao": "Descrição",
+        "aplicado": "aplicado",
+        "deFora": "ficou de fora",
+        "nenhumAntecedente": "Nenhum antecedente apareceu na conversa."
+      },
+      "alerta": {
+        "sem-origem": "Sem origem na conversa",
+        "fala-sobreposta": "Duas vozes no trecho",
+        "latido": "Latido no trecho",
+        "ruido": "Ruído no trecho",
+        "baixa-confianca": "Ouvido com dúvida",
+        "divergencia": "A conversa também disse: {valor}",
+        "deduzido": "Deduzido, não foi dito"
+      },
+      "notas": {
+        "titulo": "Ouvido e não preenchido",
+        "hipotese": "Hipótese dita em voz alta. Diagnóstico é decisão sua, na etapa de diagnóstico.",
+        "peso-informado": "Peso dito pelo responsável: informação de casa, não entra nos vitais. Confirme na balança.",
+        "medida": "Medida dita em voz alta. Os vitais entram pelo exame físico."
+      },
+      "rodape": {
+        "nadaSalvo": "Nada entrou no prontuário ainda. Marque o que vai entrar; corrigir também marca.",
+        "decisao": "A IA organiza o que foi dito. O que vai para o prontuário é decisão sua."
+      },
+      "resumo": {
+        "aplicados": "{total} campo aplicado | {total} campos aplicados",
+        "corrigidos": "{total} corrigido por você | {total} corrigidos por você",
+        "deFora": "{total} deixado de fora | {total} deixados de fora"
+      },
+      "indicador": {
+        "ouvindo": "Ouvindo a consulta",
+        "pausada": "Gravação pausada",
+        "voltar": "Voltar à anamnese"
+      },
+      "vista": {
+        "mostrarConversa": "Mostrar conversa",
+        "ocultarConversa": "Ocultar conversa",
+        "expandir": "Mostrar a anamnese por voz",
+        "recolher": "Recolher a anamnese por voz"
+      },
+      "meta": {
+        "campos": "{preenchidos} de {total} campos",
+        "conferir": "{total} para conferir",
+        "marcados": "Marcados: {marcados} de {total}"
+      },
+      "grupo": {
+        "queixa": "O que trouxe o paciente"
       }
     }
   },

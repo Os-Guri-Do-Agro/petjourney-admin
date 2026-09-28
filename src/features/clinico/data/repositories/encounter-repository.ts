@@ -113,6 +113,28 @@ export const encounterRepository = {
     })
   },
 
+  /**
+   * Libera o resumo do atendimento para o responsável ver no app.
+   *
+   * Passo separado de finalizar: finalizar fecha o prontuário, que é da clínica; liberar entrega
+   * ao responsável o que ele leva para casa. Só atendimento finalizado libera — resumo de
+   * consulta ainda aberta mudaria na mão de quem já leu. Liberar de novo não muda o instante: o
+   * responsável já foi avisado da primeira vez.
+   */
+  liberarResumo(encounterId: string): Promise<Encounter> {
+    return simularChamada('encounter.salvar', () => {
+      const encounter = encontrar(encounterId)
+
+      if (encounter.status !== 'finalizado') {
+        throw new Error('encounter.liberarResumo: atendimento ainda não finalizado')
+      }
+
+      encounter.resumoLiberadoEm ??= agoraIso()
+
+      return { ...encounter }
+    })
+  },
+
   finalizar(encounterId: string): Promise<Encounter> {
     return simularChamada('encounter.finalizar', () => {
       const dataset = getDataset()

@@ -9,7 +9,8 @@
 import { historicoDeAtos } from '../../domain/atos'
 import { resumirFaltas } from '../../domain/load'
 import { addDays, createClinicClock, diffDays } from '../../domain/clinic-time'
-import type { ConsultaDoResumo } from '../../domain/resumo-do-paciente'
+import type { DiarioParaClinica } from '../../contrato/responsavel'
+import { JANELA_DO_PESO_DIAS, type ConsultaDoResumo } from '../../domain/resumo-do-paciente'
 import { CLINIC_UTC_OFFSET } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import { getDataset, novoId } from '../store'
@@ -22,7 +23,6 @@ import type {
   PrescriptionRoute,
   ContatoPreferido,
   EnderecoPostal,
-  EntradaDoDiario,
   ISODate,
   ISODateTime,
   NoShowSummary,
@@ -166,10 +166,16 @@ export const patientRepository = {
    *
    * `atendimentoDeHoje` é o horário ainda aberto do paciente no dia: é ele que o botão "abrir o
    * atendimento" abre. Nulo quando o paciente não está na agenda de hoje.
+   *
+   * O diário vem como a API vai entregá-lo (`GET /parceiro/portal/pacientes/:petId/diario`, no
+   * contrato): **só com o consentimento do responsável**, a nota pessoal só se ele a liberou, e o
+   * peso de casa só se liberou o peso. Sem consentimento, `diario` é `null` — e o resumo diz
+   * "não liberou" em vez de parecer vazio. A janela cobre os seis meses do gráfico de peso; o
+   * recorte "desde a última consulta" é do domínio.
    */
   paraOResumo(petId: string): Promise<{
     consultas: ConsultaDoResumo[]
-    diario: EntradaDoDiario[]
+    diario: DiarioParaClinica | null
     atendimentoDeHoje: Appointment | null
     agora: ISODateTime
   }> {
@@ -217,9 +223,32 @@ export const patientRepository = {
           .sort((a, b) => Date.parse(a.inicio) - Date.parse(b.inicio))
           .find((appointment) => clock.dateOf(appointment.inicio) === dataset.ancora) ?? null
 
+      const tutorId = dataset.pets.find((pet) => pet.id === petId)?.tutorId
+      const consentimento = dataset.consentimentos.find((item) => item.tutorId === tutorId)
+      const desde = clock.toIso(addDays(hoje, -JANELA_DO_PESO_DIAS), 0)
+      const naJanela = (data: string) => Date.parse(data) >= Date.parse(desde)
+
+      const diario: DiarioParaClinica | null = consentimento?.diarioCompleto
+        ? {
+            petId,
+            desde,
+            entradas: dataset.diario
+              .filter((registro) => registro.petId === petId && naJanela(registro.data))
+              .map(({ petId: _pet, ...registro }) => ({
+                ...registro,
+                nota: consentimento.notas ? registro.nota : null,
+              })),
+            pesos: consentimento.peso
+              ? dataset.pesagensDeCasa
+                  .filter((pesagem) => pesagem.petId === petId && naJanela(pesagem.data))
+                  .map(({ petId: _pet, ...pesagem }) => pesagem)
+              : [],
+          }
+        : null
+
       return {
         consultas,
-        diario: dataset.diario.filter((entrada) => entrada.petId === petId),
+        diario,
         atendimentoDeHoje,
         agora,
       }

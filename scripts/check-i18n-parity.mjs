@@ -36,7 +36,6 @@ const PLURAL_ONLY_IN_SR_AR = new Set([
   'clinico.fila.oferta.prazo',
   'clinico.formato.anos',
   'clinico.formato.meses',
-  'clinico.internacao.app.retido',
   'clinico.internacao.boletim.custoAtual',
   'clinico.internacao.leito.atrasadas',
   'clinico.internacao.stat.vagas',

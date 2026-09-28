@@ -9,8 +9,18 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import { waitlistRepository } from '../data/repositories'
-import type { ISODateTime, WaitlistEntry, WaitlistPriority, WaitlistWindow } from '../data/types'
+import {
+  OfertaExpiradaError,
+  VagaJaPreenchidaError,
+  waitlistRepository,
+} from '../data/repositories'
+import type {
+  Appointment,
+  ISODateTime,
+  WaitlistEntry,
+  WaitlistPriority,
+  WaitlistWindow,
+} from '../data/types'
 import { posicoesDaFila } from '../domain/waitlist'
 
 import { clinicClock, useClinicoStore } from './clinico'
@@ -21,6 +31,15 @@ export type VagaAberta = {
   candidatos: WaitlistEntry[]
 }
 
+/**
+ * O que aconteceu com o último aceite. Fica fora de `erro` de propósito: `erro` troca a página
+ * inteira pelo estado de falha, e "a oferta venceu" não é falha da tela — é notícia a dar.
+ */
+export type ResultadoDoAceite =
+  | { tipo: 'marcado'; petId: string; atendimento: Appointment }
+  | { tipo: 'oferta-expirada'; petId: string }
+  | { tipo: 'vaga-preenchida'; petId: string }
+
 export const useFilaStore = defineStore('clinico-fila', () => {
   const clinico = useClinicoStore()
 
@@ -28,6 +47,7 @@ export const useFilaStore = defineStore('clinico-fila', () => {
   const carregando = ref(false)
   const salvando = ref(false)
   const erro = ref('')
+  const resultadoDoAceite = ref<ResultadoDoAceite | null>(null)
   const vagaAberta = ref<VagaAberta | null>(null)
 
   const aguardando = computed(() =>
@@ -84,11 +104,11 @@ export const useFilaStore = defineStore('clinico-fila', () => {
     vagaAberta.value = null
   }
 
-  async function ofertar(id: string, slotInicio: ISODateTime) {
+  async function ofertar(id: string, slotInicio: ISODateTime, professionalId: string) {
     salvando.value = true
 
     try {
-      await waitlistRepository.ofertar(id, slotInicio)
+      await waitlistRepository.ofertar(id, slotInicio, professionalId)
       clinico.invalidarTudo()
       await carregar()
       vagaAberta.value = null
@@ -100,17 +120,34 @@ export const useFilaStore = defineStore('clinico-fila', () => {
   }
 
   async function responder(id: string, aceitou: boolean) {
+    const petId = entradas.value.find((entrada) => entrada.id === id)?.petId ?? ''
+
     salvando.value = true
+    resultadoDoAceite.value = null
 
     try {
-      await waitlistRepository.responder(id, aceitou)
+      const { atendimento } = await waitlistRepository.responder(id, aceitou)
+
+      if (atendimento) {
+        resultadoDoAceite.value = { tipo: 'marcado', petId, atendimento }
+      }
+    } catch (falha) {
+      if (falha instanceof OfertaExpiradaError) {
+        resultadoDoAceite.value = { tipo: 'oferta-expirada', petId }
+      } else if (falha instanceof VagaJaPreenchidaError) {
+        resultadoDoAceite.value = { tipo: 'vaga-preenchida', petId }
+      } else {
+        erro.value = 'clinico.erros.mutacao'
+      }
+    } finally {
       clinico.invalidarTudo()
       await carregar()
-    } catch {
-      erro.value = 'clinico.erros.mutacao'
-    } finally {
       salvando.value = false
     }
+  }
+
+  function dispensarResultadoDoAceite() {
+    resultadoDoAceite.value = null
   }
 
   /**
@@ -179,6 +216,8 @@ export const useFilaStore = defineStore('clinico-fila', () => {
     erro,
     vazio,
     vagaAberta,
+    resultadoDoAceite,
+    dispensarResultadoDoAceite,
     posicoes,
     posicaoDe,
     adicionar,

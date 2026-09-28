@@ -11,25 +11,29 @@
  *   isolada — 4,5 kg na consulta, 4,4 kg em casa, nada assusta. A sequência é o achado, então o
  *   cálculo é sobre a série inteira, clínica e casa juntas.
  * - **Raro sobe porque é raro.** O responsável que registra três vezes por dia produz noventa
- *   linhas de "tudo certo"; um desmaio no meio delas não pode perder para a média. Sintoma de
+ *   linhas de "tudo certo"; um desmaio no meio delas não pode perder para a média. Achado de
  *   alarme vira sinal com **um** registro.
  * - **Resumir é contar, não cortar.** Os registros sem nada viram um número ("84 sem
  *   alteração"), e continuam a um clique. Esconder dado do vet não é resumir.
+ *
+ * O diário chega na forma do contrato com o app (`DiarioParaClinica`), com os enums do Diário
+ * Pet literais — e só chega se o responsável liberou (`ConsentimentoDaClinica`). Sem
+ * consentimento, o resumo diz isso em vez de parecer vazio.
  *
  * Função pura: recebe o que o repositório juntou e o instante de referência, devolve o resumo.
  */
 
 import type {
-  AlertSeverity,
-  ApetiteNoDiario,
-  ComportamentoNoDiario,
-  Diagnosis,
-  EntradaDoDiario,
-  ISODateTime,
-  Pet,
-  PetAlert,
-  SintomaNoDiario,
-} from '../data/types'
+  AspectoFezes,
+  ConsumoDiario,
+  DiarioParaClinica,
+  DoencaDiario,
+  EntradaDoDiarioParaClinica,
+  EstadoUrina,
+  SintomaPet,
+  VitalidadePet,
+} from '../contrato/responsavel'
+import type { AlertSeverity, Diagnosis, ISODateTime, Pet, PetAlert } from '../data/types'
 
 const DIA_MS = 24 * 60 * 60 * 1000
 
@@ -57,11 +61,14 @@ export const VEZES_PARA_RECORRENTE = 3
 /** Sem consulta anterior, "desde a última vez" é esta janela do diário. */
 const JANELA_SEM_CONSULTA_DIAS = 30
 
-export const SINTOMAS_DE_ALARME: readonly SintomaNoDiario[] = [
-  'desmaio',
-  'falta-de-ar',
-  'convulsao',
-]
+/** Sintomas que viram sinal de risco com um registro só. */
+export const SINTOMAS_DE_ALARME: readonly SintomaPet[] = ['CONVULSAO', 'FALTA_DE_AR', 'SANGRAMENTO']
+
+/** Sangue nas fezes é achado de alarme; o resto do aspecto é observação. */
+const FEZES_DE_ALARME: readonly AspectoFezes[] = ['COM_SANGUE']
+
+/** Sangue na urina, ou urina nenhuma — no gato, obstrução até prova em contrário. */
+const URINA_DE_ALARME: readonly EstadoUrina[] = ['COM_SANGUE', 'NADA']
 
 /**
  * "Check-up sem alterações" é diagnóstico no catálogo, mas não é condição de ninguém. Listado
@@ -69,8 +76,44 @@ export const SINTOMAS_DE_ALARME: readonly SintomaNoDiario[] = [
  */
 const DIAGNOSTICOS_QUE_NAO_SAO_CONDICAO = new Set(['GN-00'])
 
-const APETITE_ALTERADO: readonly ApetiteNoDiario[] = ['reduzido', 'ausente']
-const COMPORTAMENTO_ALTERADO: readonly ComportamentoNoDiario[] = ['quieto', 'apatico']
+/** Os campos de escolha única do diário, na ordem em que o vet os lê. */
+export const CAMPOS_DO_DIARIO = [
+  'alimentacao',
+  'hidratacao',
+  'vitalidade',
+  'fezes',
+  'urina',
+] as const
+export type CampoDoDiario = (typeof CAMPOS_DO_DIARIO)[number]
+
+export type ValorDoCampo = {
+  alimentacao: ConsumoDiario
+  hidratacao: ConsumoDiario
+  vitalidade: VitalidadePet
+  fezes: AspectoFezes
+  urina: EstadoUrina
+}
+
+/**
+ * O que é "alterado" em cada campo.
+ *
+ * Comida e água: qualquer coisa fora do normal, **inclusive a mais**. Gata idosa bebendo muito
+ * e comendo muito, emagrecendo, é o quadro clássico — "muito" não é notícia boa aqui.
+ * Disposição: ativo e calmo são jeitos de estar bem; o resto pede atenção.
+ */
+const ALTERADO: { [C in CampoDoDiario]: (valor: ValorDoCampo[C]) => boolean } = {
+  alimentacao: (valor) => valor !== 'NORMAL',
+  hidratacao: (valor) => valor !== 'NORMAL',
+  vitalidade: (valor) => !['NORMAL', 'ATIVO', 'CALMO'].includes(valor),
+  fezes: (valor) => valor !== 'NORMAL',
+  urina: (valor) => valor !== 'NORMAL',
+}
+
+function campoAlterado(campo: CampoDoDiario, entrada: EntradaDoDiarioParaClinica): boolean {
+  const valor = entrada[campo]
+
+  return valor !== null && (ALTERADO[campo] as (valor: string) => boolean)(valor)
+}
 
 export type ConsultaDoResumo = {
   encounterId: string
@@ -90,8 +133,8 @@ export type EntradaDoResumoDoPaciente = {
   pet: Pet
   /** Consultas finalizadas do paciente, em qualquer ordem. */
   consultas: ConsultaDoResumo[]
-  /** Registros do diário do paciente, em qualquer ordem. */
-  diario: EntradaDoDiario[]
+  /** O diário que o responsável liberou. `null`: ele não liberou para a clínica. */
+  diario: DiarioParaClinica | null
   agora: ISODateTime
 }
 
@@ -112,6 +155,11 @@ export type VariacaoDePeso = {
   continua: boolean
 }
 
+export type AchadoDeAlarme =
+  | { campo: 'sintomas'; valor: SintomaPet }
+  | { campo: 'fezes'; valor: AspectoFezes }
+  | { campo: 'urina'; valor: EstadoUrina }
+
 export type SinalDoResumo =
   | {
       tipo: 'perda-de-peso'
@@ -119,34 +167,43 @@ export type SinalDoResumo =
       variacao: VariacaoDePeso
     }
   | {
-      tipo: 'sintoma-de-alarme'
+      tipo: 'alarme'
       severidade: 'risco'
-      sintomas: SintomaNoDiario[]
+      achados: AchadoDeAlarme[]
       em: ISODateTime
-      nota: string
+      /** O que o responsável escreveu em "outros sintomas" — onde mora o que o enum não tem. */
+      relato: string | null
+      /** O texto do registro, na íntegra: é o contexto que o achado não dá. */
+      texto: string | null
     }
   | {
       tipo: 'sintoma-recorrente'
       severidade: 'atencao'
-      sintoma: SintomaNoDiario
+      sintoma: SintomaPet
       vezes: number
     }
   | {
-      tipo: 'apetite'
+      tipo: 'campo-alterado'
       severidade: 'atencao'
+      campo: CampoDoDiario
+      /** O valor alterado que mais apareceu: "pouco", "muito", "desanimado". */
+      predominante: string
       alterados: number
       total: number
     }
 
-export type ContagemDoDiario<T extends string> = {
+export type ContagemDoCampo = {
+  campo: CampoDoDiario
   total: number
   alterados: number
-  ultimo: T
+  /** O valor alterado mais frequente, quando houve algum. */
+  predominante: string | null
+  ultimo: string
   ultimoEm: ISODateTime
 }
 
 export type SintomaContado = {
-  sintoma: SintomaNoDiario
+  sintoma: SintomaPet
   vezes: number
   ultimaEm: ISODateTime
   alarme: boolean
@@ -168,16 +225,19 @@ export type ResumoDoPaciente = {
   condicoes: string[]
   medicacoes: MedicacaoEmUso[]
   diario: {
+    /** O responsável liberou o diário para a clínica. Sem isso, tudo abaixo vem vazio. */
+    liberado: boolean
     /** Início da janela: fim da última consulta ou, sem ela, os últimos 30 dias. */
     desde: ISODateTime
     /** Os registros da janela, mais recente primeiro. */
-    entradas: EntradaDoDiario[]
+    entradas: EntradaDoDiarioParaClinica[]
     semAlteracao: number
-    apetite: ContagemDoDiario<ApetiteNoDiario> | null
-    comportamento: ContagemDoDiario<ComportamentoNoDiario> | null
+    /** Uma contagem por campo que teve algum registro, na ordem de `CAMPOS_DO_DIARIO`. */
+    campos: ContagemDoCampo[]
     sintomas: SintomaContado[]
+    doencas: Array<{ doenca: DoencaDiario; vezes: number }>
     /** As falas do responsável que vale ler. No máximo três; alarme já sai no sinal. */
-    notas: EntradaDoDiario[]
+    notas: Array<{ entrada: EntradaDoDiarioParaClinica; texto: string }>
     peso: { deKg: number; paraKg: number; ultimoEm: ISODateTime } | null
   }
   peso: {
@@ -193,8 +253,8 @@ function diasEntre(de: ISODateTime, ate: ISODateTime): number {
 
 /**
  * Instante em milissegundos. Toda comparação de data daqui passa por ele: o dataset escreve o
- * fuso da clínica (`-03:00`) e `toISOString` escreve `Z`, e comparar os dois como texto dá a
- * resposta errada em qualquer horário depois das nove da noite.
+ * fuso da clínica (`-04:00`) e `toISOString` escreve `Z`, e comparar os dois como texto dá a
+ * resposta errada em qualquer horário depois das oito da noite.
  */
 function ms(iso: ISODateTime): number {
   return Date.parse(iso)
@@ -212,36 +272,77 @@ function normalizar(texto: string): string {
     .trim()
 }
 
-function temAlteracao(entrada: EntradaDoDiario): boolean {
+/** Os achados de alarme de um registro — vazio quando não há nenhum. */
+export function achadosDeAlarme(entrada: EntradaDoDiarioParaClinica): AchadoDeAlarme[] {
+  return [
+    ...entrada.sintomas
+      .filter((sintoma) => SINTOMAS_DE_ALARME.includes(sintoma))
+      .map((valor) => ({ campo: 'sintomas' as const, valor })),
+    ...(entrada.fezes && FEZES_DE_ALARME.includes(entrada.fezes)
+      ? [{ campo: 'fezes' as const, valor: entrada.fezes }]
+      : []),
+    ...(entrada.urina && URINA_DE_ALARME.includes(entrada.urina)
+      ? [{ campo: 'urina' as const, valor: entrada.urina }]
+      : []),
+  ]
+}
+
+/** O registro disse alguma coisa fora do normal? É o que separa o "84 sem alteração" do resto. */
+export function temAlteracao(entrada: EntradaDoDiarioParaClinica): boolean {
   return (
     entrada.sintomas.length > 0 ||
-    (entrada.apetite !== null && APETITE_ALTERADO.includes(entrada.apetite)) ||
-    (entrada.comportamento !== null && COMPORTAMENTO_ALTERADO.includes(entrada.comportamento))
+    entrada.doencas.length > 0 ||
+    Boolean(entrada.sintomasOutros?.trim()) ||
+    CAMPOS_DO_DIARIO.some((campo) => campoAlterado(campo, entrada))
   )
 }
 
-function temAlarme(entrada: EntradaDoDiario): boolean {
-  return entrada.sintomas.some((sintoma) => SINTOMAS_DE_ALARME.includes(sintoma))
+/** O texto que o responsável escreveu no registro, na ordem do mais clínico ao mais pessoal. */
+export function textoDoRegistro(entrada: EntradaDoDiarioParaClinica): string | null {
+  return (
+    entrada.observacoes?.trim() || entrada.sintomasOutros?.trim() || entrada.nota?.trim() || null
+  )
 }
 
-function contar<T extends string>(
-  entradas: EntradaDoDiario[],
-  campo: (entrada: EntradaDoDiario) => T | null,
-  alterados: readonly T[],
-): ContagemDoDiario<T> | null {
-  const comValor = entradas.filter((entrada) => campo(entrada) !== null)
+function contarCampo(
+  entradas: EntradaDoDiarioParaClinica[],
+  campo: CampoDoDiario,
+): ContagemDoCampo | null {
+  const comValor = entradas.filter((entrada) => entrada[campo] !== null)
   const ultima = comValor[0]
 
   if (!ultima) {
     return null
   }
 
-  return {
-    total: comValor.length,
-    alterados: comValor.filter((entrada) => alterados.includes(campo(entrada)!)).length,
-    ultimo: campo(ultima)!,
-    ultimoEm: ultima.registradoEm,
+  const vezesPorValor = new Map<string, number>()
+
+  for (const entrada of comValor.filter((item) => campoAlterado(campo, item))) {
+    const valor = entrada[campo] as string
+
+    vezesPorValor.set(valor, (vezesPorValor.get(valor) ?? 0) + 1)
   }
+
+  const predominante = [...vezesPorValor.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+
+  return {
+    campo,
+    total: comValor.length,
+    alterados: [...vezesPorValor.values()].reduce((soma, vezes) => soma + vezes, 0),
+    predominante,
+    ultimo: ultima[campo] as string,
+    ultimoEm: ultima.data,
+  }
+}
+
+/** O último valor registrado de um campo, com o tipo do próprio campo. */
+export function ultimoDoCampo<C extends CampoDoDiario>(
+  campos: ContagemDoCampo[],
+  campo: C,
+): ValorDoCampo[C] | null {
+  const contagem = campos.find((item) => item.campo === campo)
+
+  return contagem ? (contagem.ultimo as ValorDoCampo[C]) : null
 }
 
 /**
@@ -303,14 +404,19 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
   const desde =
     ultimaConsulta?.em ?? new Date(ms(agora) - JANELA_SEM_CONSULTA_DIAS * DIA_MS).toISOString()
 
-  const diarioOrdenado = entrada.diario
-    .filter((item) => item.petId === pet.id && ms(item.registradoEm) <= ms(agora))
-    .sort((a, b) => maisRecentePrimeiro(a.registradoEm, b.registradoEm))
-  const naJanela = diarioOrdenado.filter((item) => ms(item.registradoEm) > ms(desde))
+  const registros = (entrada.diario?.entradas ?? [])
+    .filter((item) => ms(item.data) <= ms(agora))
+    .sort((a, b) => maisRecentePrimeiro(a.data, b.data))
+  const naJanela = registros.filter((item) => ms(item.data) > ms(desde))
 
-  // ---------------------------------------------------------------- sintomas
+  const pesagensDeCasa = (entrada.diario?.pesos ?? [])
+    .filter((item) => ms(item.data) <= ms(agora))
+    .sort((a, b) => maisRecentePrimeiro(a.data, b.data))
 
-  const porSintoma = new Map<SintomaNoDiario, SintomaContado>()
+  // ---------------------------------------------------------------- sintomas e doenças
+
+  const porSintoma = new Map<SintomaPet, SintomaContado>()
+  const porDoenca = new Map<DoencaDiario, number>()
 
   for (const item of naJanela) {
     for (const sintoma of item.sintomas) {
@@ -320,9 +426,13 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
         sintoma,
         vezes: (atual?.vezes ?? 0) + 1,
         /* A janela vem do mais recente para o mais antigo: o primeiro visto é o último. */
-        ultimaEm: atual?.ultimaEm ?? item.registradoEm,
+        ultimaEm: atual?.ultimaEm ?? item.data,
         alarme: SINTOMAS_DE_ALARME.includes(sintoma),
       })
+    }
+
+    for (const doenca of item.doencas) {
+      porDoenca.set(doenca, (porDoenca.get(doenca) ?? 0) + 1)
     }
   }
 
@@ -342,22 +452,27 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
         pesoKg: consulta.pesoKg!,
         origem: 'clinica' as const,
       })),
-    ...diarioOrdenado
-      .filter((item) => item.pesoKg !== null)
-      .map((item) => ({ em: item.registradoEm, pesoKg: item.pesoKg!, origem: 'casa' as const })),
+    ...pesagensDeCasa.map((item) => ({
+      em: item.data,
+      pesoKg: item.pesoKg,
+      origem: 'casa' as const,
+    })),
   ]
     .filter((ponto) => ms(ponto.em) >= inicioDaSerie)
     .sort((a, b) => ms(a.em) - ms(b.em))
 
   const variacao = variacaoDePeso(serie)
 
-  const pesosDeCasa = naJanela.filter((item) => item.pesoKg !== null)
-  const pesoDeCasaMaisNovo = pesosDeCasa[0]
-  const pesoDeCasaMaisVelho = pesosDeCasa[pesosDeCasa.length - 1]
+  const pesosNaJanela = pesagensDeCasa.filter((item) => ms(item.data) > ms(desde))
+  const pesoMaisNovo = pesosNaJanela[0]
+  const pesoMaisVelho = pesosNaJanela[pesosNaJanela.length - 1]
 
   // ---------------------------------------------------------------- sinais
 
-  const apetite = contar(naJanela, (item) => item.apetite, APETITE_ALTERADO)
+  const campos = CAMPOS_DO_DIARIO.map((campo) => contarCampo(naJanela, campo)).filter(
+    (contagem): contagem is ContagemDoCampo => contagem !== null,
+  )
+
   const sinais: SinalDoResumo[] = []
   const perda = sinalDePeso(variacao)
 
@@ -365,14 +480,19 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
     sinais.push(perda)
   }
 
-  for (const item of naJanela.filter(temAlarme)) {
-    sinais.push({
-      tipo: 'sintoma-de-alarme',
-      severidade: 'risco',
-      sintomas: item.sintomas.filter((sintoma) => SINTOMAS_DE_ALARME.includes(sintoma)),
-      em: item.registradoEm,
-      nota: item.nota,
-    })
+  for (const item of naJanela) {
+    const achados = achadosDeAlarme(item)
+
+    if (achados.length > 0) {
+      sinais.push({
+        tipo: 'alarme',
+        severidade: 'risco',
+        achados,
+        em: item.data,
+        relato: item.sintomasOutros?.trim() || null,
+        texto: item.observacoes?.trim() || item.nota?.trim() || null,
+      })
+    }
   }
 
   for (const contado of sintomas) {
@@ -386,14 +506,18 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
     }
   }
 
-  /* Apetite alterado em metade dos registros, com registros suficientes para dizer "metade". */
-  if (apetite && apetite.total >= 3 && apetite.alterados * 2 >= apetite.total) {
-    sinais.push({
-      tipo: 'apetite',
-      severidade: 'atencao',
-      alterados: apetite.alterados,
-      total: apetite.total,
-    })
+  /* Campo alterado em metade dos registros, com registros suficientes para dizer "metade". */
+  for (const contagem of campos) {
+    if (contagem.total >= 3 && contagem.alterados * 2 >= contagem.total && contagem.predominante) {
+      sinais.push({
+        tipo: 'campo-alterado',
+        severidade: 'atencao',
+        campo: contagem.campo,
+        predominante: contagem.predominante,
+        alterados: contagem.alterados,
+        total: contagem.total,
+      })
+    }
   }
 
   sinais.sort((a, b) => ORDEM_DA_SEVERIDADE[a.severidade] - ORDEM_DA_SEVERIDADE[b.severidade])
@@ -448,6 +572,14 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
     .filter((alerta) => alerta.kind !== 'cronico' && alerta.kind !== 'medicacao-continua')
     .sort((a, b) => ORDEM_DA_SEVERIDADE[a.severidade] - ORDEM_DA_SEVERIDADE[b.severidade])
 
+  const notas = naJanela
+    .filter((item) => temAlteracao(item) && achadosDeAlarme(item).length === 0)
+    .map((item) => ({ entrada: item, texto: textoDoRegistro(item) }))
+    .filter((item): item is { entrada: EntradaDoDiarioParaClinica; texto: string } =>
+      Boolean(item.texto),
+    )
+    .slice(0, 3)
+
   return {
     primeiraVez: consultas.length === 0,
     ultimaConsulta,
@@ -457,21 +589,22 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
     condicoes,
     medicacoes,
     diario: {
+      liberado: entrada.diario !== null,
       desde,
       entradas: naJanela,
       semAlteracao: naJanela.filter((item) => !temAlteracao(item)).length,
-      apetite,
-      comportamento: contar(naJanela, (item) => item.comportamento, COMPORTAMENTO_ALTERADO),
+      campos,
       sintomas,
-      notas: naJanela
-        .filter((item) => item.nota.trim() && temAlteracao(item) && !temAlarme(item))
-        .slice(0, 3),
+      doencas: [...porDoenca.entries()]
+        .map(([doenca, vezes]) => ({ doenca, vezes }))
+        .sort((a, b) => b.vezes - a.vezes),
+      notas,
       peso:
-        pesoDeCasaMaisNovo && pesoDeCasaMaisVelho
+        pesoMaisNovo && pesoMaisVelho
           ? {
-              deKg: pesoDeCasaMaisVelho.pesoKg!,
-              paraKg: pesoDeCasaMaisNovo.pesoKg!,
-              ultimoEm: pesoDeCasaMaisNovo.registradoEm,
+              deKg: pesoMaisVelho.pesoKg,
+              paraKg: pesoMaisNovo.pesoKg,
+              ultimoEm: pesoMaisNovo.data,
             }
           : null,
     },

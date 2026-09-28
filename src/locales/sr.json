@@ -2189,6 +2189,21 @@
       "legenda": {
         "titulo": "Legenda",
         "filtrar": "Prikažite samo: {tipo}"
+      },
+      "presenca": {
+        "titulo": "Dolazak",
+        "por": {
+          "app": "Potvrđeno u aplikaciji",
+          "recepcao": "Potvrdila recepcija"
+        },
+        "confirmada": "Potvrđeno",
+        "semConfirmacao": "Još nije potvrđeno",
+        "registrar": "Zabeležite potvrdu"
+      },
+      "prazoApp": {
+        "titulo": "U aplikaciji",
+        "ate": "Može da otkaže ili pomeri do {data}, {hora}",
+        "encerrado": "Rok je istekao: samo telefonom"
       }
     },
     "meuDia": {
@@ -2590,7 +2605,15 @@
       "oferta": {
         "prazo": "Ponuda ističe za {minutos} minut. Posle toga termin se vraća klinici. | Ponuda ističe za {minutos} minuta. Posle toga termin se vraća klinici. | Ponuda ističe za {minutos} minuta. Posle toga termin se vraća klinici.",
         "mensagemPadrao": "Dobar dan! Oslobodio se termin za Vašeg ljubimca {paciente}: {data} u {hora}. Da li potvrđujete? Termin ćemo čuvati {minutos} minut. | Dobar dan! Oslobodio se termin za Vašeg ljubimca {paciente}: {data} u {hora}. Da li potvrđujete? Termin ćemo čuvati {minutos} minuta. | Dobar dan! Oslobodio se termin za Vašeg ljubimca {paciente}: {data} u {hora}. Da li potvrđujete? Termin ćemo čuvati {minutos} minuta."
-      }
+      },
+      "aceite": {
+        "marcado": "Termin zakazan: {paciente}, {data} u {hora}, kod: {profissional}.",
+        "ofertaExpirada": "Ponuda za {paciente} je istekla pre prihvatanja. Termin se vratio klinici.",
+        "vagaPreenchida": "Termin je već popunjen. {paciente} je ponovo na listi čekanja, na istom mestu.",
+        "verNaAgenda": "Pogledajte u rasporedu",
+        "dispensar": "Odbacite obaveštenje"
+      },
+      "marcadoPara": "Zakazano: {data} · {hora}"
     },
     "faltas": {
       "titulo": "Nedolasci",
@@ -2652,7 +2675,8 @@
         "telefone": "Telefonom",
         "whatsapp": "Preko WhatsApp-a",
         "presencial": "Lično",
-        "sem-resposta": "Bez odgovora"
+        "sem-resposta": "Bez odgovora",
+        "app": "Preko aplikacije"
       },
       "justificativa": {
         "titulo": "Razlog izostanka",
@@ -2950,7 +2974,14 @@
         "descricao": "Proverite šta je zabeleženo pre izdavanja dokumenata.",
         "vazio": "Nije zabeleženo",
         "achados": "Nalazi",
-        "alergiaPendente": "Propisivanje leka {medicamento} je u sukobu sa zabeleženom alergijom i nije potvrđeno."
+        "alergiaPendente": "Propisivanje leka {medicamento} je u sukobu sa zabeleženom alergijom i nije potvrđeno.",
+        "app": {
+          "titulo": "U aplikaciji staratelja",
+          "aberto": "Rezime može da se podeli nakon završetka pregleda.",
+          "pronto": "Staratelj dobija dijagnozu jednostavnim rečima, uputstva, recept, analize i kontrolu. Bez mg/kg i bez fizičkog pregleda.",
+          "liberado": "Podeljeno {data} u {hora}. Staratelj je obavešten u aplikaciji.",
+          "liberar": "Podelite sa starateljem"
+        }
       },
       "preConsulta": {
         "titulo": "Odgovoreno u aplikaciji",
@@ -3015,9 +3046,9 @@
         "perdaDetalhe": "{de} → {para} kg ({percentual}) za nedelja: {semanas}",
         "alarmeDetalhe": "zabeleženo kod kuće {data}, {quando}",
         "recorrenteDetalhe": "{vezes}× od poslednjeg pregleda",
-        "apetite": "Smanjen apetit",
-        "apetiteDetalhe": "u {alterados} od {total} unosa",
-        "mais": "još u rezimeu: {total}"
+        "mais": "još u rezimeu: {total}",
+        "campoDetalhe": "u {alterados} od {total} unosa",
+        "relato": "Takođe prijavljeno: {relato}"
       },
       "casa": {
         "titulo": "Kod kuće od poslednjeg pregleda",
@@ -3027,13 +3058,9 @@
         "vazioTitulo": "Ništa nije zabeleženo u aplikaciji u ovom periodu",
         "vazioDescricao": "Staratelj nije koristio Dnevnik ljubimca. Vredi pitati na pregledu kako je bilo kod kuće.",
         "peso": "Težina kod kuće",
-        "apetite": "Apetit",
-        "comportamento": "Ponašanje",
-        "sintomas": "Simptomi",
         "semRegistro": "Nema unosa",
         "nenhum": "Nijedan",
-        "alteradoEm": "Promenjeno u {alterados} od {total} unosa",
-        "normalEmTodos": "Normalno u svim unosima ({total})",
+        "normalEmTodos": "Normalno u jedinom unosu | Normalno u svim unosima ({total}) | Normalno u svim unosima ({total})",
         "ultimo": "poslednje: {valor}, {quando}",
         "notas": "Rečima staratelja",
         "verRegistros": "Prikažite unose ({total})",
@@ -3041,8 +3068,10 @@
         "filtro": "Koje unose prikazati",
         "filtroAlteracao": "Sa promenama ({total})",
         "filtroTodos": "Svi ({total})",
-        "apetiteValor": "Apetit: {valor}",
-        "semAlteracaoCurto": "Bez promena"
+        "semAlteracaoCurto": "Bez promena",
+        "valorEm": "{valor} u jedinom unosu | {valor} u {alterados} od {total} unosa | {valor} u {alterados} od {total} unosa",
+        "naoLiberadoTitulo": "Staratelj nije podelio dnevnik sa klinikom",
+        "naoLiberadoDescricao": "Deljenje zavisi od staratelja, u aplikaciji, u odeljku Moje klinike. Bez toga, rezime prikazuje samo zapise klinike."
       },
       "peso": {
         "titulo": "Težina u poslednjih 6 meseci",
@@ -3094,43 +3123,17 @@
           "detalhe": "Pozvati staratelja da beleži u aplikaciji. Dnevnik je ono što popunjava ovaj ekran na sledećem pregledu."
         }
       },
-      "diario": {
-        "apetite": {
-          "normal": "Normalan",
-          "aumentado": "Povećan",
-          "reduzido": "Smanjen",
-          "ausente": "Nije jeo"
-        },
-        "comportamento": {
-          "normal": "Normalno",
-          "agitado": "Nemirno",
-          "quieto": "Mirno",
-          "apatico": "Apatično"
-        },
-        "sintoma": {
-          "vomito": "Povraćanje",
-          "diarreia": "Proliv",
-          "tosse": "Kašalj",
-          "espirro": "Kijanje",
-          "coceira": "Svrab",
-          "sede-aumentada": "Pojačana žeđ",
-          "cansaco": "Umor",
-          "claudicacao": "Šepanje",
-          "falta-de-ar": "Otežano disanje",
-          "desmaio": "Nesvestica",
-          "convulsao": "Napad"
-        }
-      },
       "anamnese": {
         "cabecalho": "Iz Dnevnika ljubimca (beležio staratelj u aplikaciji) od {data}, broj unosa: {total}:",
         "perda": "gubitak težine sa {de} kg na {para} kg ({percentual}%), nedelja: {semanas}, zajedno pregledi i kućna vaga",
         "alarme": "{sintomas} {data}: \"{nota}\"",
         "pesoCasa": "težina na kućnoj vagi: {de} → {para} kg",
-        "apetite": "smanjen ili odsutan apetit u {alterados} od {total} unosa",
-        "comportamento": "promenjeno ponašanje (mirno ili apatično) u {alterados} od {total} unosa",
         "sintomas": "zabeleženi simptomi: {lista}",
         "semAlteracao": "Ništa neuobičajeno nije zabeleženo.",
-        "prescricao": "{nome} (propisano, do {data})"
+        "prescricao": "{nome} (propisano, do {data})",
+        "campo": "{campo}: {valor} u {alterados} od {total} unosa",
+        "doencas": "bolesti koje je prijavio staratelj: {lista}",
+        "alarmeSemTexto": "{sintomas} {data}"
       },
       "verResumoComSinais": "Rezime za 30 s: tačke pažnje: {total}",
       "preferencia": "Predložite ovaj rezime pri otvaranju istorije pacijenta",
@@ -3496,8 +3499,7 @@
       "app": {
         "vazio": "Još nema primljenih izveštaja.",
         "foto": "Fotografiju je poslala klinika",
-        "aposLigacao": "Poslato nakon telefonskog poziva",
-        "retido": "{total} izveštaj je još u klinici i čeka poziv. | {total} izveštaja su još u klinici i čekaju poziv. | {total} izveštaja je još u klinici i čeka poziv."
+        "aposLigacao": "Poslato nakon telefonskog poziva"
       },
       "passagem": {
         "titulo": "Primopredaja smene",
@@ -3693,6 +3695,260 @@
         "paginas": "Stranice liste boksova",
         "anterior": "Prethodna stranica",
         "proxima": "Sledeća stranica"
+      }
+    },
+    "diario": {
+      "campo": {
+        "alimentacao": "Ishrana",
+        "hidratacao": "Voda",
+        "vitalidade": "Raspoloženje",
+        "fezes": "Stolica",
+        "urina": "Urin",
+        "sintomas": "Simptomi",
+        "doencas": "Prijavljene bolesti"
+      },
+      "motivo": {
+        "CHECKUP": "Opšti pregled",
+        "SINTOMA": "Simptom",
+        "RETORNO": "Kontrola",
+        "EXAME": "Analiza",
+        "VACINA": "Vakcina",
+        "EMERGENCIA": "Hitan slučaj",
+        "OUTRO": "Drugo"
+      },
+      "vitalidade": {
+        "AGITADO": "Nemiran",
+        "ATIVO": "Aktivan",
+        "NORMAL": "Normalan",
+        "CALMO": "Miran",
+        "SONOLENTO": "Pospan",
+        "DESANIMADO": "Potišten",
+        "APATICO": "Apatičan",
+        "LETARGICO": "Letargičan"
+      },
+      "alimentacao": {
+        "MUITO": "Mnogo",
+        "NORMAL": "Normalno",
+        "POUCO": "Malo",
+        "NADA": "Ništa",
+        "RECUSOU": "Odbija",
+        "VOMITOU_APOS": "Povraćanje posle jela"
+      },
+      "hidratacao": {
+        "MUITO": "Mnogo",
+        "NORMAL": "Normalno",
+        "POUCO": "Malo",
+        "NADA": "Ništa",
+        "RECUSOU": "Odbija",
+        "VOMITOU_APOS": "Povraćanje posle pijenja"
+      },
+      "fezes": {
+        "NORMAL": "Normalna",
+        "MOLE": "Meka",
+        "PASTOSA": "Kašasta",
+        "DIARREIA": "Proliv",
+        "RESSECADA": "Suva i tvrda",
+        "COM_SANGUE": "Sa krvlju",
+        "COM_MUCO": "Sa sluzi",
+        "COM_VERMES": "Sa glistama",
+        "ESCURA": "Tamna",
+        "CLARA": "Svetla",
+        "NAO_DEFECOU": "Bez stolice"
+      },
+      "urina": {
+        "NORMAL": "Normalan",
+        "MUITO": "Mnogo",
+        "POUCO": "Malo",
+        "NADA": "Ništa",
+        "COM_SANGUE": "Sa krvlju",
+        "ESCURA": "Taman",
+        "COM_DIFICULDADE": "Otežano mokrenje",
+        "COM_ODOR_FORTE": "Jak miris"
+      },
+      "sintomas": {
+        "FEBRE": "Groznica",
+        "VOMITO": "Povraćanje",
+        "DIARREIA": "Proliv",
+        "FRAQUEZA": "Slabost",
+        "LETARGIA": "Letargija",
+        "TREMORES": "Drhtanje",
+        "COCEIRA": "Svrab",
+        "ESPIRRO": "Kijanje",
+        "TOSSE": "Kašalj",
+        "CONVULSAO": "Napad (konvulzije)",
+        "FALTA_DE_AR": "Otežano disanje",
+        "SECRECAO_OCULAR": "Iscedak iz očiju",
+        "SECRECAO_NASAL": "Iscedak iz nosa",
+        "HALITOSE": "Loš zadah",
+        "CLAUDICACAO": "Šepanje",
+        "SANGRAMENTO": "Krvarenje",
+        "DESIDRATACAO": "Dehidracija",
+        "INCHACO": "Otok",
+        "PERDA_DE_PESO": "Gubitak težine",
+        "QUEDA_DE_PELO": "Opadanje dlake",
+        "LAMBEDURA_EXCESSIVA": "Preterano lizanje"
+      },
+      "doencas": {
+        "GRIPE": "Grip",
+        "ALERGIA": "Alergija",
+        "INFECCAO": "Infekcija",
+        "INFECCAO_URINARIA": "Urinarna infekcija",
+        "VIROSE": "Viroza",
+        "INTOXICACAO": "Trovanje",
+        "VERMINOSE": "Crevni paraziti",
+        "OTITE": "Upala uha",
+        "CONJUNTIVITE": "Konjunktivitis",
+        "DERMATITE": "Dermatitis",
+        "GASTRITE": "Gastritis",
+        "COLICA": "Grčevi u stomaku",
+        "INDIGESTAO": "Loše varenje"
+      }
+    },
+    "preConsulta": {
+      "motivo": "Razlog",
+      "desdeQuando": {
+        "HOJE": "Danas",
+        "UM_A_DOIS_DIAS": "1 do 2 dana",
+        "TRES_A_SETE_DIAS": "3 do 7 dana",
+        "UMA_A_DUAS_SEMANAS": "1 do 2 nedelje",
+        "MAIS_DE_DUAS_SEMANAS": "Više od 2 nedelje"
+      },
+      "doDiario": "iz dnevnika",
+      "pesadoEm": "izmereno {data}",
+      "fotos": "Priložene fotografije: {total}"
+    },
+    "escuta": {
+      "titulo": "Anamneza glasom",
+      "gravar": "Snimi pregled",
+      "gravarDica": "Veštačka inteligencija sluša razgovor i predlaže polja anamneze; vi pregledate pre čuvanja.",
+      "estado": {
+        "gravando": "Sluša",
+        "pausada": "Pauzirano, mikrofon zatvoren",
+        "encerrando": "Završava se…",
+        "revisao": "Pregledajte pre čuvanja",
+        "aplicada": "Snimljeni razgovor"
+      },
+      "autorizadaPor": "Saglasnost: {responsavel}, u {hora}",
+      "acoes": {
+        "pausar": "Pauziraj",
+        "retomar": "Nastavi",
+        "encerrar": "Završi i pregledaj",
+        "adiantar": "Premotaj razgovor",
+        "descartar": "Odbaci snimak",
+        "aplicar": "Primeni {total} polje u karton | Primeni {total} polja u karton | Primeni {total} polja u karton",
+        "aplicarNenhum": "Označite šta ulazi",
+        "gravarDeNovo": "Snimi ponovo"
+      },
+      "fonte": {
+        "rotulo": "Slušaj",
+        "microfone": "Mikrofon",
+        "demonstracao": "Demo pregled",
+        "semMicrofone": "Ovaj pregledač ne prepisuje govor. Koristite Chrome ili Edge, ili demo pregled.",
+        "microfoneDica": "Prepis radi pregledač; u Chrome-u zvuk prolazi kroz Google servis za govor. U karton se vraća samo tekst.",
+        "demonstracaoDica": "Primer pregleda, pušten ubrzano. Čita ga isti motor kao i mikrofon."
+      },
+      "aviso": {
+        "microfone": "Prepis pregledača, bez razlikovanja govornika. Polja predlaže lokalni motor pravila, bez jezičkog modela: razume portugalski i malo šta drugo. Proverite svako polje.",
+        "demonstracao": "Demo: razgovor je primer snimka. Polja predlaže lokalni motor pravila, bez jezičkog modela i bez mreže."
+      },
+      "autorizacao": {
+        "titulo": "Snimanje pregleda",
+        "pedido": "Pre početka, zatražite saglasnost: {responsavel}.",
+        "paraLer": "Za čitanje: {responsavel}",
+        "texto": "{responsavel}, mogu li da snimim naš razgovor? Služi samo da se popuni karton za {pet}. Zvuk se ne čuva: ostaje tekst, koji pregledam pre čuvanja. Ako vam je draže, neću snimati, a možemo da prekinemo u bilo kom trenutku.",
+        "oQueAcontece": "Šta se dešava",
+        "passoEscuta": "Veštačka inteligencija sluša i predlaže polja anamneze, svako sa odlomkom iz kog je nastalo.",
+        "passoRevisao": "Ništa ne ulazi u karton bez vašeg pregleda, polje po polje.",
+        "passoDecisao": "Dijagnoza i terapija se ne popunjavaju glasom: klinička odluka je vaša.",
+        "autorizou": "Saglasnost data ({responsavel}), počni",
+        "naoAutorizou": "Bez saglasnosti",
+        "responsavelGenerico": "Vlasnik"
+      },
+      "erro": {
+        "sem-suporte": "Ovaj pregledač ne prepisuje govor. Koristite Chrome ili Edge, ili demo pregled.",
+        "permissao": "Pregledač nije dao pristup mikrofonu. Dozvolite ga preko katanca u adresnoj traci, ili koristite demo pregled.",
+        "microfone": "Na ovom računaru nije pronađen mikrofon.",
+        "rede": "Nema veze sa servisom za govor. Ono što je do sada čuto nalazi se ispod.",
+        "servico": "Servis za govor je prestao da odgovara. Ono što je do sada čuto nalazi se ispod."
+      },
+      "conversa": {
+        "titulo": "Razgovor",
+        "voce": "Vi",
+        "acompanhante": "Pratilac",
+        "duasVozes": "Dva glasa",
+        "incerto": "Čuto sa sumnjom",
+        "esperando": "Čeka se prva reč…",
+        "vazia": "Ništa nije čuto.",
+        "interferencia": {
+          "latido": "Lavež",
+          "fala-sobreposta": "Preklopljeni glasovi",
+          "ruido": "Buka"
+        }
+      },
+      "proposta": {
+        "titulo": "Predloženi karton",
+        "aindaNao": "Još se nije pojavilo: {campos}",
+        "naoApareceu": "Nije se pojavilo u razgovoru: {campos}",
+        "antecedente": "Ranije stanje",
+        "noProntuario": "Sada u kartonu: {valor}. Prihvatanje ga zamenjuje.",
+        "somaHistoria": "Dodaje se na kraj istorije bolesti.",
+        "jaRegistrado": "Već postoji među ranijim stanjima; ne dodaje se ponovo.",
+        "corrigir": "Ispravi",
+        "pronto": "Gotovo",
+        "cancelar": "Otkaži",
+        "desfazer": "Poništi ispravku",
+        "corrigido": "Ispravili ste",
+        "proposto": "Predloženo: {valor}",
+        "incluir": "Prenesi {campo} u karton",
+        "verNaConversa": "Prikaži u razgovoru",
+        "quando": "Kada",
+        "descricao": "Opis",
+        "aplicado": "primenjeno",
+        "deFora": "izostavljeno",
+        "nenhumAntecedente": "Nijedno ranije stanje se nije pojavilo u razgovoru."
+      },
+      "alerta": {
+        "sem-origem": "Nema izvora u razgovoru",
+        "fala-sobreposta": "Dva glasa u odlomku",
+        "latido": "Lavež u odlomku",
+        "ruido": "Buka u odlomku",
+        "baixa-confianca": "Čuto sa sumnjom",
+        "divergencia": "Razgovor je rekao i: {valor}",
+        "deduzido": "Zaključeno, nije rečeno"
+      },
+      "notas": {
+        "titulo": "Čuto i nije popunjeno",
+        "hipotese": "Hipoteza izgovorena naglas. Dijagnoza je vaša odluka, u koraku dijagnoze.",
+        "peso-informado": "Težinu je rekao vlasnik: podatak od kuće, ne ulazi u vitalne znake. Potvrdite na vagi.",
+        "medida": "Mera izgovorena naglas. Vitalni znaci se unose kroz fizički pregled."
+      },
+      "rodape": {
+        "nadaSalvo": "Ništa još nije ušlo u karton. Označite šta ulazi; ispravka takođe označava.",
+        "decisao": "Veštačka inteligencija sređuje ono što je rečeno. Šta ulazi u karton, odlučujete vi."
+      },
+      "resumo": {
+        "aplicados": "{total} polje primenjeno | {total} polja primenjena | {total} polja primenjeno",
+        "corrigidos": "{total} ispravljeno | {total} ispravljena | {total} ispravljeno",
+        "deFora": "{total} izostavljeno | {total} izostavljena | {total} izostavljeno"
+      },
+      "indicador": {
+        "ouvindo": "Pregled se sluša",
+        "pausada": "Snimanje pauzirano",
+        "voltar": "Nazad na anamnezu"
+      },
+      "vista": {
+        "mostrarConversa": "Prikaži razgovor",
+        "ocultarConversa": "Sakrij razgovor",
+        "expandir": "Prikaži anamnezu glasom",
+        "recolher": "Skupi anamnezu glasom"
+      },
+      "meta": {
+        "campos": "Polja: {preenchidos} od {total}",
+        "conferir": "Za proveru: {total}",
+        "marcados": "Označeno: {marcados} od {total}"
+      },
+      "grupo": {
+        "queixa": "Razlog dolaska"
       }
     }
   },

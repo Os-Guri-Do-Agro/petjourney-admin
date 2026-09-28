@@ -2189,6 +2189,21 @@
       "legenda": {
         "titulo": "Legend",
         "filtrar": "Show only {tipo}"
+      },
+      "presenca": {
+        "titulo": "Attendance",
+        "por": {
+          "app": "Confirmed in the app",
+          "recepcao": "Confirmed by reception"
+        },
+        "confirmada": "Confirmed",
+        "semConfirmacao": "Not confirmed yet",
+        "registrar": "Record confirmation"
+      },
+      "prazoApp": {
+        "titulo": "In the app",
+        "ate": "Can cancel or reschedule until {data}, {hora}",
+        "encerrado": "Deadline passed: phone only"
       }
     },
     "meuDia": {
@@ -2590,7 +2605,15 @@
       "oferta": {
         "prazo": "The offer expires in {minutos} minutes. After that, the slot returns to the clinic.",
         "mensagemPadrao": "Hello! A slot opened up for {paciente} on {data} at {hora}. Shall we confirm? We will hold it for {minutos} minutes."
-      }
+      },
+      "aceite": {
+        "marcado": "{paciente} booked for {data} at {hora}, with {profissional}.",
+        "ofertaExpirada": "The offer for {paciente} expired before it was accepted. The slot went back to the clinic.",
+        "vagaPreenchida": "The slot has already been filled. {paciente} is back on the waitlist, in the same position.",
+        "verNaAgenda": "View in schedule",
+        "dispensar": "Dismiss"
+      },
+      "marcadoPara": "Booked: {data} · {hora}"
     },
     "faltas": {
       "titulo": "No-shows",
@@ -2652,7 +2675,8 @@
         "telefone": "By phone",
         "whatsapp": "By WhatsApp",
         "presencial": "In person",
-        "sem-resposta": "No answer"
+        "sem-resposta": "No answer",
+        "app": "In the app"
       },
       "justificativa": {
         "titulo": "No-show reason",
@@ -2950,7 +2974,14 @@
         "descricao": "Check what was recorded before issuing the documents.",
         "vazio": "Not recorded",
         "achados": "Findings",
-        "alergiaPendente": "Prescription of {medicamento} conflicts with a recorded allergy and was not accepted."
+        "alergiaPendente": "Prescription of {medicamento} conflicts with a recorded allergy and was not accepted.",
+        "app": {
+          "titulo": "In the pet parent's app",
+          "aberto": "The summary can be shared after the consult is finalized.",
+          "pronto": "The pet parent gets the diagnosis in plain words, the instructions, the prescription, tests and follow-up. No mg/kg, no physical exam.",
+          "liberado": "Shared on {data} at {hora}. The pet parent was notified in the app.",
+          "liberar": "Share with pet parent"
+        }
       },
       "preConsulta": {
         "titulo": "Answered in the app",
@@ -3015,9 +3046,9 @@
         "perdaDetalhe": "{de} → {para} kg ({percentual}) in {semanas} weeks",
         "alarmeDetalhe": "logged at home on {data}, {quando}",
         "recorrenteDetalhe": "{vezes}× since the last visit",
-        "apetite": "Reduced appetite",
-        "apetiteDetalhe": "in {alterados} of {total} entries",
-        "mais": "and {total} more in the summary"
+        "mais": "and {total} more in the summary",
+        "campoDetalhe": "in {alterados} of {total} entries",
+        "relato": "Also reported: {relato}"
       },
       "casa": {
         "titulo": "At home since the last visit",
@@ -3027,13 +3058,9 @@
         "vazioTitulo": "Nothing logged in the app in this period",
         "vazioDescricao": "The pet parent didn't use the Pet diary. Worth asking during the visit how things have been at home.",
         "peso": "Weight at home",
-        "apetite": "Appetite",
-        "comportamento": "Behaviour",
-        "sintomas": "Symptoms",
         "semRegistro": "Not logged",
         "nenhum": "None",
-        "alteradoEm": "Changed in {alterados} of {total} entries",
-        "normalEmTodos": "Normal in all {total} entries",
+        "normalEmTodos": "Normal in the only entry | Normal in all {total} entries",
         "ultimo": "latest: {valor}, {quando}",
         "notas": "In the pet parent's words",
         "verRegistros": "View entries ({total})",
@@ -3041,8 +3068,10 @@
         "filtro": "Which entries to show",
         "filtroAlteracao": "With changes ({total})",
         "filtroTodos": "All ({total})",
-        "apetiteValor": "Appetite {valor}",
-        "semAlteracaoCurto": "No change"
+        "semAlteracaoCurto": "No change",
+        "valorEm": "{valor} in the only entry | {valor} in {alterados} of {total} entries",
+        "naoLiberadoTitulo": "The pet parent hasn't shared the diary with the clinic",
+        "naoLiberadoDescricao": "Sharing is up to the pet parent, in the app, under My clinics. Without it, the summary shows only the clinic's own records."
       },
       "peso": {
         "titulo": "Weight over the last 6 months",
@@ -3094,43 +3123,17 @@
           "detalhe": "Invite the pet parent to log in the app. The diary is what fills this screen at the next visit."
         }
       },
-      "diario": {
-        "apetite": {
-          "normal": "Normal",
-          "aumentado": "Increased",
-          "reduzido": "Reduced",
-          "ausente": "Didn't eat"
-        },
-        "comportamento": {
-          "normal": "Normal",
-          "agitado": "Restless",
-          "quieto": "Quiet",
-          "apatico": "Lethargic"
-        },
-        "sintoma": {
-          "vomito": "Vomiting",
-          "diarreia": "Diarrhoea",
-          "tosse": "Cough",
-          "espirro": "Sneezing",
-          "coceira": "Itching",
-          "sede-aumentada": "Increased thirst",
-          "cansaco": "Tiredness",
-          "claudicacao": "Limping",
-          "falta-de-ar": "Shortness of breath",
-          "desmaio": "Fainting",
-          "convulsao": "Seizure"
-        }
-      },
       "anamnese": {
         "cabecalho": "From the Pet diary (logged by the pet parent in the app) since {data}, {total} entries:",
         "perda": "weight loss from {de} kg to {para} kg ({percentual}%) over {semanas} weeks, combining visits and the home scale",
         "alarme": "{sintomas} on {data}: \"{nota}\"",
         "pesoCasa": "weight on the home scale: {de} → {para} kg",
-        "apetite": "reduced or absent appetite in {alterados} of {total} entries",
-        "comportamento": "changed behaviour (quiet or lethargic) in {alterados} of {total} entries",
         "sintomas": "symptoms logged: {lista}",
         "semAlteracao": "Nothing unusual logged.",
-        "prescricao": "{nome} (prescribed, until {data})"
+        "prescricao": "{nome} (prescribed, until {data})",
+        "campo": "{campo}: {valor} in {alterados} of {total} entries",
+        "doencas": "illnesses reported by the pet parent: {lista}",
+        "alarmeSemTexto": "{sintomas} on {data}"
       },
       "verResumoComSinais": "30-second summary: {total} points of attention",
       "preferencia": "Suggest this summary when opening the patient's history",
@@ -3496,8 +3499,7 @@
       "app": {
         "vazio": "No updates received yet.",
         "foto": "Photo sent by the clinic",
-        "aposLigacao": "Sent after a phone call",
-        "retido": "{total} update still at the clinic, waiting on a call."
+        "aposLigacao": "Sent after a phone call"
       },
       "passagem": {
         "titulo": "Shift handover",
@@ -3693,6 +3695,260 @@
         "paginas": "Bed list pages",
         "anterior": "Previous page",
         "proxima": "Next page"
+      }
+    },
+    "diario": {
+      "campo": {
+        "alimentacao": "Food",
+        "hidratacao": "Water",
+        "vitalidade": "Energy",
+        "fezes": "Stool",
+        "urina": "Urine",
+        "sintomas": "Symptoms",
+        "doencas": "Illnesses reported"
+      },
+      "motivo": {
+        "CHECKUP": "Check-up",
+        "SINTOMA": "Symptom",
+        "RETORNO": "Follow-up",
+        "EXAME": "Test",
+        "VACINA": "Vaccine",
+        "EMERGENCIA": "Emergency",
+        "OUTRO": "Other"
+      },
+      "vitalidade": {
+        "AGITADO": "Restless",
+        "ATIVO": "Active",
+        "NORMAL": "Normal",
+        "CALMO": "Calm",
+        "SONOLENTO": "Sleepy",
+        "DESANIMADO": "Down",
+        "APATICO": "Apathetic",
+        "LETARGICO": "Lethargic"
+      },
+      "alimentacao": {
+        "MUITO": "A lot",
+        "NORMAL": "Normal",
+        "POUCO": "A little",
+        "NADA": "None",
+        "RECUSOU": "Refused",
+        "VOMITOU_APOS": "Vomited after"
+      },
+      "hidratacao": {
+        "MUITO": "A lot",
+        "NORMAL": "Normal",
+        "POUCO": "A little",
+        "NADA": "None",
+        "RECUSOU": "Refused",
+        "VOMITOU_APOS": "Vomited after"
+      },
+      "fezes": {
+        "NORMAL": "Normal",
+        "MOLE": "Soft",
+        "PASTOSA": "Mushy",
+        "DIARREIA": "Diarrhoea",
+        "RESSECADA": "Dry",
+        "COM_SANGUE": "With blood",
+        "COM_MUCO": "With mucus",
+        "COM_VERMES": "With worms",
+        "ESCURA": "Dark",
+        "CLARA": "Light",
+        "NAO_DEFECOU": "Did not defecate"
+      },
+      "urina": {
+        "NORMAL": "Normal",
+        "MUITO": "A lot",
+        "POUCO": "A little",
+        "NADA": "None",
+        "COM_SANGUE": "With blood",
+        "ESCURA": "Dark",
+        "COM_DIFICULDADE": "With difficulty",
+        "COM_ODOR_FORTE": "Strong odour"
+      },
+      "sintomas": {
+        "FEBRE": "Fever",
+        "VOMITO": "Vomiting",
+        "DIARREIA": "Diarrhoea",
+        "FRAQUEZA": "Weakness",
+        "LETARGIA": "Lethargy",
+        "TREMORES": "Tremors",
+        "COCEIRA": "Itching",
+        "ESPIRRO": "Sneezing",
+        "TOSSE": "Cough",
+        "CONVULSAO": "Seizure",
+        "FALTA_DE_AR": "Shortness of breath",
+        "SECRECAO_OCULAR": "Eye discharge",
+        "SECRECAO_NASAL": "Nasal discharge",
+        "HALITOSE": "Bad breath",
+        "CLAUDICACAO": "Limping",
+        "SANGRAMENTO": "Bleeding",
+        "DESIDRATACAO": "Dehydration",
+        "INCHACO": "Swelling",
+        "PERDA_DE_PESO": "Weight loss",
+        "QUEDA_DE_PELO": "Hair loss",
+        "LAMBEDURA_EXCESSIVA": "Excessive licking"
+      },
+      "doencas": {
+        "GRIPE": "Flu",
+        "ALERGIA": "Allergy",
+        "INFECCAO": "Infection",
+        "INFECCAO_URINARIA": "Urinary infection",
+        "VIROSE": "Viral illness",
+        "INTOXICACAO": "Poisoning",
+        "VERMINOSE": "Worms",
+        "OTITE": "Ear infection",
+        "CONJUNTIVITE": "Conjunctivitis",
+        "DERMATITE": "Dermatitis",
+        "GASTRITE": "Gastritis",
+        "COLICA": "Colic",
+        "INDIGESTAO": "Indigestion"
+      }
+    },
+    "preConsulta": {
+      "motivo": "Reason",
+      "desdeQuando": {
+        "HOJE": "Today",
+        "UM_A_DOIS_DIAS": "1 to 2 days",
+        "TRES_A_SETE_DIAS": "3 to 7 days",
+        "UMA_A_DUAS_SEMANAS": "1 to 2 weeks",
+        "MAIS_DE_DUAS_SEMANAS": "More than 2 weeks"
+      },
+      "doDiario": "from the diary",
+      "pesadoEm": "weighed on {data}",
+      "fotos": "Photos attached: {total}"
+    },
+    "escuta": {
+      "titulo": "Voice history-taking",
+      "gravar": "Record consultation",
+      "gravarDica": "The AI listens to the conversation and proposes the history fields; you review before saving.",
+      "estado": {
+        "gravando": "Listening",
+        "pausada": "Paused, microphone off",
+        "encerrando": "Finishing…",
+        "revisao": "Review before saving",
+        "aplicada": "Recorded conversation"
+      },
+      "autorizadaPor": "{responsavel} consented at {hora}",
+      "acoes": {
+        "pausar": "Pause",
+        "retomar": "Resume",
+        "encerrar": "Stop and review",
+        "adiantar": "Skip ahead",
+        "descartar": "Discard recording",
+        "aplicar": "Apply {total} field to the record | Apply {total} fields to the record",
+        "aplicarNenhum": "Tick what goes in",
+        "gravarDeNovo": "Record again"
+      },
+      "fonte": {
+        "rotulo": "Listen to",
+        "microfone": "Microphone",
+        "demonstracao": "Demo consultation",
+        "semMicrofone": "This browser cannot transcribe speech. Use Chrome or Edge, or the demo consultation.",
+        "microfoneDica": "Transcribed by the browser; in Chrome, the audio goes through Google's speech service. Only text comes back to the record.",
+        "demonstracaoDica": "A sample consultation, played fast. The same engine as the microphone reads it."
+      },
+      "aviso": {
+        "microfone": "Browser transcription, without telling speakers apart. The fields are proposed by a local rule engine, with no language model: it understands Portuguese and little else. Check every field.",
+        "demonstracao": "Demo: the conversation is a sample recording. The fields are proposed by a local rule engine, with no language model and no network."
+      },
+      "autorizacao": {
+        "titulo": "Record the consultation",
+        "pedido": "Before you start, ask {responsavel} for consent.",
+        "paraLer": "To read to {responsavel}",
+        "texto": "{responsavel}, may I record our conversation? It is only used to fill in {pet}'s record. The audio is not kept: the text is, and I review it before saving. If you prefer, I won't record, and we can stop at any time.",
+        "oQueAcontece": "What happens",
+        "passoEscuta": "The AI listens and proposes the history fields, each with the excerpt it came from.",
+        "passoRevisao": "Nothing goes into the record without your review, field by field.",
+        "passoDecisao": "Diagnosis and treatment are not filled in by voice: the clinical decision is yours.",
+        "autorizou": "{responsavel} consented, start",
+        "naoAutorizou": "Did not consent",
+        "responsavelGenerico": "Owner"
+      },
+      "erro": {
+        "sem-suporte": "This browser cannot transcribe speech. Use Chrome or Edge, or the demo consultation.",
+        "permissao": "The browser did not grant microphone access. Allow it from the padlock in the address bar, or use the demo consultation.",
+        "microfone": "No microphone found on this computer.",
+        "rede": "No connection to the speech service. What was heard so far is below.",
+        "servico": "The speech service stopped responding. What was heard so far is below."
+      },
+      "conversa": {
+        "titulo": "Conversation",
+        "voce": "You",
+        "acompanhante": "Companion",
+        "duasVozes": "Two voices",
+        "incerto": "Heard with doubt",
+        "esperando": "Waiting for the first words…",
+        "vazia": "Nothing was heard.",
+        "interferencia": {
+          "latido": "Barking",
+          "fala-sobreposta": "Overlapping speech",
+          "ruido": "Noise"
+        }
+      },
+      "proposta": {
+        "titulo": "Proposed record",
+        "aindaNao": "Not mentioned yet: {campos}",
+        "naoApareceu": "Not mentioned in the conversation: {campos}",
+        "antecedente": "Past history",
+        "noProntuario": "In the record now: {valor}. Accepting replaces it.",
+        "somaHistoria": "Added to the end of the clinical history.",
+        "jaRegistrado": "Already in the past history; it won't be added again.",
+        "corrigir": "Correct",
+        "pronto": "Done",
+        "cancelar": "Cancel",
+        "desfazer": "Undo correction",
+        "corrigido": "Corrected by you",
+        "proposto": "Proposed: {valor}",
+        "incluir": "Take {campo} to the record",
+        "verNaConversa": "Show in the conversation",
+        "quando": "When",
+        "descricao": "Description",
+        "aplicado": "applied",
+        "deFora": "left out",
+        "nenhumAntecedente": "No past history came up in the conversation."
+      },
+      "alerta": {
+        "sem-origem": "Not found in the conversation",
+        "fala-sobreposta": "Two voices in the excerpt",
+        "latido": "Barking in the excerpt",
+        "ruido": "Noise in the excerpt",
+        "baixa-confianca": "Heard with doubt",
+        "divergencia": "The conversation also said: {valor}",
+        "deduzido": "Inferred, not said"
+      },
+      "notas": {
+        "titulo": "Heard and not filled in",
+        "hipotese": "Hypothesis said out loud. Diagnosis is your decision, in the diagnosis step.",
+        "peso-informado": "Weight given by the owner: home information, not a vital sign. Confirm on the scale.",
+        "medida": "Measurement said out loud. Vital signs go in through the physical exam."
+      },
+      "rodape": {
+        "nadaSalvo": "Nothing has gone into the record yet. Tick what goes in; correcting also ticks it.",
+        "decisao": "The AI organises what was said. What goes into the record is your decision."
+      },
+      "resumo": {
+        "aplicados": "{total} field applied | {total} fields applied",
+        "corrigidos": "{total} corrected by you | {total} corrected by you",
+        "deFora": "{total} left out | {total} left out"
+      },
+      "indicador": {
+        "ouvindo": "Listening to the consultation",
+        "pausada": "Recording paused",
+        "voltar": "Back to history"
+      },
+      "vista": {
+        "mostrarConversa": "Show conversation",
+        "ocultarConversa": "Hide conversation",
+        "expandir": "Show voice history-taking",
+        "recolher": "Collapse voice history-taking"
+      },
+      "meta": {
+        "campos": "{preenchidos} of {total} fields",
+        "conferir": "{total} to check",
+        "marcados": "Ticked: {marcados} of {total}"
+      },
+      "grupo": {
+        "queixa": "What brought the patient in"
       }
     }
   },

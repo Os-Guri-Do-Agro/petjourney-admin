@@ -1,0 +1,2574 @@
+{
+  "geradoEm": "2026-09-25T07:30:00-04:00",
+  "hojeDaClinica": "2026-09-25",
+  "responsavel": {
+    "id": "tutor-fatima",
+    "nome": "Fátima Gonçalves",
+    "telefone": "(11) 96622-7745"
+  },
+  "pets": [
+    {
+      "id": "pet-pipoca",
+      "nome": "Pipoca",
+      "fotoUrl": null,
+      "especie": "roedor",
+      "raca": "Porquinho-da-índia",
+      "nascimento": "2023-05-11"
+    },
+    {
+      "id": "pet-bruna",
+      "nome": "Brunilda",
+      "fotoUrl": null,
+      "especie": "reptil",
+      "raca": "Jabuti-piranga",
+      "nascimento": "2011-04-12"
+    },
+    {
+      "id": "pet-perola",
+      "nome": "Pérola",
+      "fotoUrl": null,
+      "especie": "felina",
+      "raca": "SRD",
+      "nascimento": "2014-05-02"
+    }
+  ],
+  "clinicas": [
+    {
+      "id": "clinic-petjourney",
+      "nome": "PetJourney Clínica Veterinária",
+      "telefone": "(11) 3555-0142",
+      "utcOffset": "-04:00",
+      "fotoUrl": null,
+      "telefoneSecundario": null,
+      "enderecoResumo": "Rua das Acácias, 421 — Vila Madalena, São Paulo/SP · CEP 05435-020",
+      "aceitaAgendamentoPeloApp": true,
+      "politica": {
+        "cancelarAteHorasAntes": 2,
+        "reservaMinutos": 5,
+        "preConsultaAbreHorasAntes": 72,
+        "ofertaDeVagaMinutos": 30
+      },
+      "petIds": [
+        "pet-perola",
+        "pet-bruna",
+        "pet-pipoca"
+      ],
+      "consentimento": {
+        "diarioCompleto": true,
+        "peso": true,
+        "notas": false,
+        "atualizadoEm": "2026-08-11T20:15:00-04:00"
+      },
+      "podeAlterarConsentimento": true
+    }
+  ],
+  "servicos": [
+    {
+      "id": "tipo-consulta",
+      "nome": "Consulta",
+      "tipo": "CONSULTA",
+      "duracaoMinutos": 30,
+      "temPreConsulta": true
+    },
+    {
+      "id": "tipo-retorno",
+      "nome": "Retorno",
+      "tipo": "RETORNO",
+      "duracaoMinutos": 20,
+      "temPreConsulta": true
+    },
+    {
+      "id": "tipo-vacina",
+      "nome": "Vacinação",
+      "tipo": "VACINA",
+      "duracaoMinutos": 15,
+      "temPreConsulta": false
+    },
+    {
+      "id": "tipo-exame",
+      "nome": "Exame de imagem",
+      "tipo": "EXAME",
+      "duracaoMinutos": 45,
+      "temPreConsulta": true
+    },
+    {
+      "id": "tipo-banho",
+      "nome": "Banho e tosa",
+      "tipo": "BANHO",
+      "duracaoMinutos": 90,
+      "temPreConsulta": false
+    }
+  ],
+  "horariosLivres": [
+    {
+      "inicio": "2026-09-26T08:00:00-04:00",
+      "fim": "2026-09-26T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T08:00:00-04:00",
+      "fim": "2026-09-26T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T08:15:00-04:00",
+      "fim": "2026-09-26T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T08:15:00-04:00",
+      "fim": "2026-09-26T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T08:30:00-04:00",
+      "fim": "2026-09-26T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T08:30:00-04:00",
+      "fim": "2026-09-26T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T08:30:00-04:00",
+      "fim": "2026-09-26T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T08:30:00-04:00",
+      "fim": "2026-09-26T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T08:45:00-04:00",
+      "fim": "2026-09-26T09:15:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T08:45:00-04:00",
+      "fim": "2026-09-26T09:15:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T09:00:00-04:00",
+      "fim": "2026-09-26T09:30:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T10:15:00-04:00",
+      "fim": "2026-09-26T10:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-26T11:30:00-04:00",
+      "fim": "2026-09-26T12:00:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T08:00:00-04:00",
+      "fim": "2026-09-28T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T08:00:00-04:00",
+      "fim": "2026-09-28T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T08:00:00-04:00",
+      "fim": "2026-09-28T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T08:15:00-04:00",
+      "fim": "2026-09-28T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T08:15:00-04:00",
+      "fim": "2026-09-28T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T08:15:00-04:00",
+      "fim": "2026-09-28T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T08:30:00-04:00",
+      "fim": "2026-09-28T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T08:30:00-04:00",
+      "fim": "2026-09-28T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T08:30:00-04:00",
+      "fim": "2026-09-28T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T08:45:00-04:00",
+      "fim": "2026-09-28T09:15:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T09:00:00-04:00",
+      "fim": "2026-09-28T09:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-28T09:15:00-04:00",
+      "fim": "2026-09-28T09:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:00:00-04:00",
+      "fim": "2026-09-29T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:00:00-04:00",
+      "fim": "2026-09-29T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:00:00-04:00",
+      "fim": "2026-09-29T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:00:00-04:00",
+      "fim": "2026-09-29T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:00:00-04:00",
+      "fim": "2026-09-29T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:15:00-04:00",
+      "fim": "2026-09-29T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:15:00-04:00",
+      "fim": "2026-09-29T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:15:00-04:00",
+      "fim": "2026-09-29T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:30:00-04:00",
+      "fim": "2026-09-29T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:30:00-04:00",
+      "fim": "2026-09-29T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T08:30:00-04:00",
+      "fim": "2026-09-29T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T09:00:00-04:00",
+      "fim": "2026-09-29T09:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T10:00:00-04:00",
+      "fim": "2026-09-29T10:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T11:15:00-04:00",
+      "fim": "2026-09-29T11:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-29T11:30:00-04:00",
+      "fim": "2026-09-29T12:00:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:00:00-04:00",
+      "fim": "2026-09-30T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:00:00-04:00",
+      "fim": "2026-09-30T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:00:00-04:00",
+      "fim": "2026-09-30T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:00:00-04:00",
+      "fim": "2026-09-30T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:15:00-04:00",
+      "fim": "2026-09-30T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:15:00-04:00",
+      "fim": "2026-09-30T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:15:00-04:00",
+      "fim": "2026-09-30T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:30:00-04:00",
+      "fim": "2026-09-30T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:30:00-04:00",
+      "fim": "2026-09-30T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:30:00-04:00",
+      "fim": "2026-09-30T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T08:45:00-04:00",
+      "fim": "2026-09-30T09:15:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T09:00:00-04:00",
+      "fim": "2026-09-30T09:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T09:00:00-04:00",
+      "fim": "2026-09-30T09:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T09:15:00-04:00",
+      "fim": "2026-09-30T09:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-09-30T09:15:00-04:00",
+      "fim": "2026-09-30T09:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:00:00-04:00",
+      "fim": "2026-10-01T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:00:00-04:00",
+      "fim": "2026-10-01T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:00:00-04:00",
+      "fim": "2026-10-01T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:00:00-04:00",
+      "fim": "2026-10-01T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:15:00-04:00",
+      "fim": "2026-10-01T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:15:00-04:00",
+      "fim": "2026-10-01T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:15:00-04:00",
+      "fim": "2026-10-01T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:15:00-04:00",
+      "fim": "2026-10-01T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:30:00-04:00",
+      "fim": "2026-10-01T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:30:00-04:00",
+      "fim": "2026-10-01T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:30:00-04:00",
+      "fim": "2026-10-01T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-01T08:30:00-04:00",
+      "fim": "2026-10-01T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:00:00-04:00",
+      "fim": "2026-10-02T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:00:00-04:00",
+      "fim": "2026-10-02T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:00:00-04:00",
+      "fim": "2026-10-02T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:00:00-04:00",
+      "fim": "2026-10-02T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:15:00-04:00",
+      "fim": "2026-10-02T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:15:00-04:00",
+      "fim": "2026-10-02T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:15:00-04:00",
+      "fim": "2026-10-02T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:30:00-04:00",
+      "fim": "2026-10-02T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:30:00-04:00",
+      "fim": "2026-10-02T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:30:00-04:00",
+      "fim": "2026-10-02T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:30:00-04:00",
+      "fim": "2026-10-02T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T08:45:00-04:00",
+      "fim": "2026-10-02T09:15:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T09:00:00-04:00",
+      "fim": "2026-10-02T09:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T09:30:00-04:00",
+      "fim": "2026-10-02T10:00:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-02T09:45:00-04:00",
+      "fim": "2026-10-02T10:15:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T08:00:00-04:00",
+      "fim": "2026-10-03T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T08:00:00-04:00",
+      "fim": "2026-10-03T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T08:15:00-04:00",
+      "fim": "2026-10-03T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T08:15:00-04:00",
+      "fim": "2026-10-03T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T08:30:00-04:00",
+      "fim": "2026-10-03T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T08:30:00-04:00",
+      "fim": "2026-10-03T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T09:15:00-04:00",
+      "fim": "2026-10-03T09:45:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T10:00:00-04:00",
+      "fim": "2026-10-03T10:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T10:15:00-04:00",
+      "fim": "2026-10-03T10:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T10:30:00-04:00",
+      "fim": "2026-10-03T11:00:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T10:45:00-04:00",
+      "fim": "2026-10-03T11:15:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T11:00:00-04:00",
+      "fim": "2026-10-03T11:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-03T11:15:00-04:00",
+      "fim": "2026-10-03T11:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:00:00-04:00",
+      "fim": "2026-10-05T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:00:00-04:00",
+      "fim": "2026-10-05T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:00:00-04:00",
+      "fim": "2026-10-05T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:00:00-04:00",
+      "fim": "2026-10-05T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:15:00-04:00",
+      "fim": "2026-10-05T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:15:00-04:00",
+      "fim": "2026-10-05T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:15:00-04:00",
+      "fim": "2026-10-05T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:15:00-04:00",
+      "fim": "2026-10-05T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:30:00-04:00",
+      "fim": "2026-10-05T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:30:00-04:00",
+      "fim": "2026-10-05T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:30:00-04:00",
+      "fim": "2026-10-05T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T08:45:00-04:00",
+      "fim": "2026-10-05T09:15:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T09:00:00-04:00",
+      "fim": "2026-10-05T09:30:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T09:15:00-04:00",
+      "fim": "2026-10-05T09:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-05T09:15:00-04:00",
+      "fim": "2026-10-05T09:45:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:00:00-04:00",
+      "fim": "2026-10-06T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:00:00-04:00",
+      "fim": "2026-10-06T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:00:00-04:00",
+      "fim": "2026-10-06T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:00:00-04:00",
+      "fim": "2026-10-06T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:15:00-04:00",
+      "fim": "2026-10-06T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:15:00-04:00",
+      "fim": "2026-10-06T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:15:00-04:00",
+      "fim": "2026-10-06T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:30:00-04:00",
+      "fim": "2026-10-06T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:30:00-04:00",
+      "fim": "2026-10-06T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:30:00-04:00",
+      "fim": "2026-10-06T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T08:45:00-04:00",
+      "fim": "2026-10-06T09:15:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T09:00:00-04:00",
+      "fim": "2026-10-06T09:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T09:15:00-04:00",
+      "fim": "2026-10-06T09:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T10:30:00-04:00",
+      "fim": "2026-10-06T11:00:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-06T10:45:00-04:00",
+      "fim": "2026-10-06T11:15:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:00:00-04:00",
+      "fim": "2026-10-07T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:00:00-04:00",
+      "fim": "2026-10-07T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:00:00-04:00",
+      "fim": "2026-10-07T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:00:00-04:00",
+      "fim": "2026-10-07T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:15:00-04:00",
+      "fim": "2026-10-07T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:15:00-04:00",
+      "fim": "2026-10-07T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:15:00-04:00",
+      "fim": "2026-10-07T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:15:00-04:00",
+      "fim": "2026-10-07T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:30:00-04:00",
+      "fim": "2026-10-07T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:30:00-04:00",
+      "fim": "2026-10-07T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:30:00-04:00",
+      "fim": "2026-10-07T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-07T08:30:00-04:00",
+      "fim": "2026-10-07T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:00:00-04:00",
+      "fim": "2026-10-08T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:00:00-04:00",
+      "fim": "2026-10-08T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:00:00-04:00",
+      "fim": "2026-10-08T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:00:00-04:00",
+      "fim": "2026-10-08T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:15:00-04:00",
+      "fim": "2026-10-08T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:15:00-04:00",
+      "fim": "2026-10-08T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:15:00-04:00",
+      "fim": "2026-10-08T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:15:00-04:00",
+      "fim": "2026-10-08T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:30:00-04:00",
+      "fim": "2026-10-08T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:30:00-04:00",
+      "fim": "2026-10-08T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:30:00-04:00",
+      "fim": "2026-10-08T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:30:00-04:00",
+      "fim": "2026-10-08T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T08:45:00-04:00",
+      "fim": "2026-10-08T09:15:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T09:00:00-04:00",
+      "fim": "2026-10-08T09:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-08T09:15:00-04:00",
+      "fim": "2026-10-08T09:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T08:00:00-04:00",
+      "fim": "2026-10-09T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T08:00:00-04:00",
+      "fim": "2026-10-09T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T08:00:00-04:00",
+      "fim": "2026-10-09T08:30:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T08:15:00-04:00",
+      "fim": "2026-10-09T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T08:15:00-04:00",
+      "fim": "2026-10-09T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T08:15:00-04:00",
+      "fim": "2026-10-09T08:45:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T08:30:00-04:00",
+      "fim": "2026-10-09T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T08:30:00-04:00",
+      "fim": "2026-10-09T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T08:30:00-04:00",
+      "fim": "2026-10-09T09:00:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T08:45:00-04:00",
+      "fim": "2026-10-09T09:15:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T10:00:00-04:00",
+      "fim": "2026-10-09T10:30:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T10:15:00-04:00",
+      "fim": "2026-10-09T10:45:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T10:30:00-04:00",
+      "fim": "2026-10-09T11:00:00-04:00",
+      "profissional": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T10:45:00-04:00",
+      "fim": "2026-10-09T11:15:00-04:00",
+      "profissional": {
+        "id": "prof-caio",
+        "nome": "Caio Nogueira",
+        "especialidade": "CIRURGIA",
+        "fotoUrl": null
+      }
+    },
+    {
+      "inicio": "2026-10-09T11:15:00-04:00",
+      "fim": "2026-10-09T11:45:00-04:00",
+      "profissional": {
+        "id": "prof-marcia",
+        "nome": "Márcia Do Espírito Santo Albuquerque",
+        "especialidade": "Anestesiologia",
+        "fotoUrl": null
+      }
+    }
+  ],
+  "agendamentos": [
+    {
+      "id": "apt-resumo-perola-1",
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "pet": {
+        "id": "pet-perola",
+        "nome": "Pérola",
+        "fotoUrl": null
+      },
+      "servico": {
+        "id": "tipo-consulta",
+        "nome": "Consulta",
+        "tipo": "CONSULTA",
+        "duracaoMinutos": 30,
+        "temPreConsulta": true
+      },
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      },
+      "inicio": "2026-04-28T10:00:00-04:00",
+      "fim": "2026-04-28T10:30:00-04:00",
+      "status": "FINALIZADO",
+      "origem": "RECEPCAO",
+      "observacao": "",
+      "criadoEm": "2026-04-25T09:00:00-04:00",
+      "canceladoEm": null,
+      "motivoCancelamento": null,
+      "podeConfirmar": false,
+      "podeCancelar": false,
+      "podeRemarcar": false,
+      "cancelarAte": null,
+      "preConsulta": {
+        "situacao": "FECHADA",
+        "abreEm": "2026-04-25T10:00:00-04:00",
+        "fechaEm": "2026-04-28T10:00:00-04:00",
+        "respondidaEm": null
+      },
+      "falta": null,
+      "atendimentoId": "enc-apt-resumo-perola-1"
+    },
+    {
+      "id": "apt-resumo-perola-2",
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "pet": {
+        "id": "pet-perola",
+        "nome": "Pérola",
+        "fotoUrl": null
+      },
+      "servico": {
+        "id": "tipo-consulta",
+        "nome": "Consulta",
+        "tipo": "CONSULTA",
+        "duracaoMinutos": 30,
+        "temPreConsulta": true
+      },
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      },
+      "inicio": "2026-06-22T15:30:00-04:00",
+      "fim": "2026-06-22T16:00:00-04:00",
+      "status": "FINALIZADO",
+      "origem": "RECEPCAO",
+      "observacao": "",
+      "criadoEm": "2026-06-19T09:00:00-04:00",
+      "canceladoEm": null,
+      "motivoCancelamento": null,
+      "podeConfirmar": false,
+      "podeCancelar": false,
+      "podeRemarcar": false,
+      "cancelarAte": null,
+      "preConsulta": {
+        "situacao": "FECHADA",
+        "abreEm": "2026-06-19T15:30:00-04:00",
+        "fechaEm": "2026-06-22T15:30:00-04:00",
+        "respondidaEm": null
+      },
+      "falta": null,
+      "atendimentoId": "enc-apt-resumo-perola-2"
+    },
+    {
+      "id": "apt-resumo-perola-3",
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "pet": {
+        "id": "pet-perola",
+        "nome": "Pérola",
+        "fotoUrl": null
+      },
+      "servico": {
+        "id": "tipo-consulta",
+        "nome": "Consulta",
+        "tipo": "CONSULTA",
+        "duracaoMinutos": 30,
+        "temPreConsulta": true
+      },
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      },
+      "inicio": "2026-08-14T09:30:00-04:00",
+      "fim": "2026-08-14T10:00:00-04:00",
+      "status": "FINALIZADO",
+      "origem": "RECEPCAO",
+      "observacao": "",
+      "criadoEm": "2026-08-11T09:00:00-04:00",
+      "canceladoEm": null,
+      "motivoCancelamento": null,
+      "podeConfirmar": false,
+      "podeCancelar": false,
+      "podeRemarcar": false,
+      "cancelarAte": null,
+      "preConsulta": {
+        "situacao": "FECHADA",
+        "abreEm": "2026-08-11T09:30:00-04:00",
+        "fechaEm": "2026-08-14T09:30:00-04:00",
+        "respondidaEm": null
+      },
+      "falta": null,
+      "atendimentoId": "enc-apt-resumo-perola-3"
+    },
+    {
+      "id": "apt-falta-brunilda",
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "pet": {
+        "id": "pet-bruna",
+        "nome": "Brunilda",
+        "fotoUrl": null
+      },
+      "servico": {
+        "id": "tipo-retorno",
+        "nome": "Retorno",
+        "tipo": "RETORNO",
+        "duracaoMinutos": 20,
+        "temPreConsulta": true
+      },
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      },
+      "inicio": "2026-09-15T14:00:00-04:00",
+      "fim": "2026-09-15T14:20:00-04:00",
+      "status": "FALTA",
+      "origem": "RETORNO",
+      "observacao": "",
+      "criadoEm": "2026-09-12T09:00:00-04:00",
+      "canceladoEm": null,
+      "motivoCancelamento": null,
+      "podeConfirmar": false,
+      "podeCancelar": false,
+      "podeRemarcar": false,
+      "cancelarAte": null,
+      "preConsulta": {
+        "situacao": "FECHADA",
+        "abreEm": "2026-09-12T14:00:00-04:00",
+        "fechaEm": "2026-09-15T14:00:00-04:00",
+        "respondidaEm": null
+      },
+      "falta": {
+        "motivo": null,
+        "canal": null
+      },
+      "atendimentoId": null
+    },
+    {
+      "id": "apt-resumo-perola",
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "pet": {
+        "id": "pet-perola",
+        "nome": "Pérola",
+        "fotoUrl": null
+      },
+      "servico": {
+        "id": "tipo-consulta",
+        "nome": "Consulta",
+        "tipo": "CONSULTA",
+        "duracaoMinutos": 30,
+        "temPreConsulta": true
+      },
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      },
+      "inicio": "2026-09-25T10:00:00-04:00",
+      "fim": "2026-09-25T10:30:00-04:00",
+      "status": "CONFIRMADO",
+      "origem": "APP",
+      "observacao": "Acho que ela está mais magra e bebendo muita água.",
+      "criadoEm": "2026-09-22T09:00:00-04:00",
+      "canceladoEm": null,
+      "motivoCancelamento": null,
+      "podeConfirmar": false,
+      "podeCancelar": true,
+      "podeRemarcar": true,
+      "cancelarAte": "2026-09-25T08:00:00-04:00",
+      "preConsulta": {
+        "situacao": "ABERTA",
+        "abreEm": "2026-09-22T10:00:00-04:00",
+        "fechaEm": "2026-09-25T10:00:00-04:00",
+        "respondidaEm": null
+      },
+      "falta": null,
+      "atendimentoId": null
+    }
+  ],
+  "preConsultas": [
+    {
+      "agendamentoId": "apt-resumo-perola",
+      "situacao": "ABERTA",
+      "abreEm": "2026-09-22T10:00:00-04:00",
+      "fechaEm": "2026-09-25T10:00:00-04:00",
+      "respondidaEm": null,
+      "resposta": null,
+      "sugestao": {
+        "alimentacao": "POUCO",
+        "hidratacao": "MUITO",
+        "fezes": "NORMAL",
+        "urina": "MUITO",
+        "vitalidade": "CALMO",
+        "sintomas": [
+          "PERDA_DE_PESO"
+        ],
+        "pesoKg": 4.1,
+        "pesadoEm": "2026-09-22"
+      }
+    }
+  ],
+  "fila": [
+    {
+      "id": "fila-brunilda",
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "pet": {
+        "id": "pet-bruna",
+        "nome": "Brunilda",
+        "fotoUrl": null
+      },
+      "servico": {
+        "id": "tipo-consulta",
+        "nome": "Consulta",
+        "tipo": "CONSULTA",
+        "duracaoMinutos": 30,
+        "temPreConsulta": true
+      },
+      "profissional": null,
+      "janelas": [
+        {
+          "diaDaSemana": 1,
+          "inicio": "14:00",
+          "fim": "18:00"
+        },
+        {
+          "diaDaSemana": 2,
+          "inicio": "14:00",
+          "fim": "18:00"
+        },
+        {
+          "diaDaSemana": 3,
+          "inicio": "14:00",
+          "fim": "18:00"
+        },
+        {
+          "diaDaSemana": 4,
+          "inicio": "14:00",
+          "fim": "18:00"
+        },
+        {
+          "diaDaSemana": 5,
+          "inicio": "14:00",
+          "fim": "18:00"
+        }
+      ],
+      "status": "OFERTADO",
+      "posicao": null,
+      "oferta": {
+        "inicio": "2026-09-28T15:00:00-04:00",
+        "fim": "2026-09-28T15:30:00-04:00",
+        "profissional": {
+          "id": "prof-helena",
+          "nome": "Helena Vasconcelos Prado",
+          "especialidade": "DERMATOLOGIA",
+          "fotoUrl": null
+        },
+        "expiraEm": "2026-09-25T07:55:00-04:00"
+      },
+      "observacao": "Casco com uma mancha mais clara. Pode ser à tarde, depois das duas.",
+      "criadoEm": "2026-09-19T10:12:00-04:00",
+      "agendamentoId": null
+    }
+  ],
+  "atendimentos": [
+    {
+      "id": "enc-apt-resumo-perola-3",
+      "agendamentoId": "apt-resumo-perola-3",
+      "consultaId": "consulta-enc-apt-resumo-perola-3",
+      "tipoDeConsulta": "CONSULTA",
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      },
+      "pet": {
+        "id": "pet-perola",
+        "nome": "Pérola",
+        "fotoUrl": null
+      },
+      "realizadoEm": "2026-08-14T10:00:00-04:00",
+      "idioma": "pt-BR",
+      "motivo": "Vômito ocasional e menos apetite",
+      "diagnostico": "Gastroenterite aguda (em investigação)",
+      "orientacoes": "Dieta leve e fracionada por 5 dias. Água à vontade e retorno se houver vômito.",
+      "sinaisDeAlerta": "Procure a clínica antes do retorno se observar: recusa alimentar por mais de 24 h, vômito ou diarreia persistentes, apatia acentuada, dificuldade para respirar, sangramento, convulsão, ou qualquer piora do quadro que motivou a consulta.",
+      "pesoAferidoKg": 4.5,
+      "receita": {
+        "id": "rec-enc-apt-resumo-perola-3",
+        "codigoVerificador": "WLJ6-LWUH-8T7L-WTVH",
+        "emitidaEm": "2026-08-14T10:00:00-04:00",
+        "validaAte": "2026-09-13",
+        "controlada": false,
+        "profissional": {
+          "id": "prof-ana",
+          "nome": "Ana Ribeiro",
+          "especialidade": "CLINICO_GERAL",
+          "fotoUrl": null
+        },
+        "idioma": "pt-BR",
+        "itens": [
+          {
+            "id": "presc-apt-resumo-perola-3-0",
+            "medicamento": "Omeprazol 10 mg",
+            "quantidade": 0.5,
+            "unidade": "COMPRIMIDO",
+            "fracao": "MEIO",
+            "frequenciaHoras": 24,
+            "via": "ORAL",
+            "instrucoes": "",
+            "duracaoDias": 14
+          }
+        ],
+        "documentoId": "doc-enc-apt-resumo-perola-3-receituario"
+      },
+      "exames": [],
+      "retorno": null,
+      "documentos": [
+        {
+          "id": "doc-enc-apt-resumo-perola-3-receituario",
+          "tipo": "RECEITUARIO",
+          "titulo": "Receituário",
+          "emitidoEm": "2026-08-14T10:00:00-04:00",
+          "codigoVerificador": "WLJ6-LWUH-8T7L-WTVH",
+          "url": "mock://documentos/enc-apt-resumo-perola-3/receituario.pdf",
+          "urlExpiraEm": "2026-09-25T07:45:00-04:00",
+          "exigeAssinaturaDoResponsavel": false,
+          "assinadoPeloResponsavelEm": null,
+          "documentoDoPetId": null
+        },
+        {
+          "id": "doc-enc-apt-resumo-perola-3-orientacoes",
+          "tipo": "ORIENTACOES",
+          "titulo": "Orientações ao responsável",
+          "emitidoEm": "2026-08-14T10:00:00-04:00",
+          "codigoVerificador": null,
+          "url": "mock://documentos/enc-apt-resumo-perola-3/orientacoes.pdf",
+          "urlExpiraEm": "2026-09-25T07:45:00-04:00",
+          "exigeAssinaturaDoResponsavel": false,
+          "assinadoPeloResponsavelEm": null,
+          "documentoDoPetId": null
+        }
+      ]
+    },
+    {
+      "id": "enc-apt-resumo-perola-2",
+      "agendamentoId": "apt-resumo-perola-2",
+      "consultaId": "consulta-enc-apt-resumo-perola-2",
+      "tipoDeConsulta": "CONSULTA",
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      },
+      "pet": {
+        "id": "pet-perola",
+        "nome": "Pérola",
+        "fotoUrl": null
+      },
+      "realizadoEm": "2026-06-22T16:00:00-04:00",
+      "idioma": "pt-BR",
+      "motivo": "Não consegue mais pular no sofá",
+      "diagnostico": "Displasia coxofemoral",
+      "orientacoes": "Repouso relativo, passeios curtos na coleira. Evitar escada e piso liso.",
+      "sinaisDeAlerta": "Procure a clínica antes do retorno se observar: recusa alimentar por mais de 24 h, vômito ou diarreia persistentes, apatia acentuada, dificuldade para respirar, sangramento, convulsão, ou qualquer piora do quadro que motivou a consulta.",
+      "pesoAferidoKg": 4.7,
+      "receita": {
+        "id": "rec-enc-apt-resumo-perola-2",
+        "codigoVerificador": "TEY0-8ZYA-E6K2-CZDR",
+        "emitidaEm": "2026-06-22T16:00:00-04:00",
+        "validaAte": "2026-07-22",
+        "controlada": false,
+        "profissional": {
+          "id": "prof-helena",
+          "nome": "Helena Vasconcelos Prado",
+          "especialidade": "DERMATOLOGIA",
+          "fotoUrl": null
+        },
+        "idioma": "pt-BR",
+        "itens": [
+          {
+            "id": "presc-apt-resumo-perola-2-0",
+            "medicamento": "Meloxicam 2 mg/mL",
+            "quantidade": 0.12,
+            "unidade": "ML",
+            "fracao": null,
+            "frequenciaHoras": 24,
+            "via": "ORAL",
+            "instrucoes": ""
+          }
+        ],
+        "documentoId": "doc-enc-apt-resumo-perola-2-receituario"
+      },
+      "exames": [],
+      "retorno": null,
+      "documentos": [
+        {
+          "id": "doc-enc-apt-resumo-perola-2-receituario",
+          "tipo": "RECEITUARIO",
+          "titulo": "Receituário",
+          "emitidoEm": "2026-06-22T16:00:00-04:00",
+          "codigoVerificador": "TEY0-8ZYA-E6K2-CZDR",
+          "url": "mock://documentos/enc-apt-resumo-perola-2/receituario.pdf",
+          "urlExpiraEm": "2026-09-25T07:45:00-04:00",
+          "exigeAssinaturaDoResponsavel": false,
+          "assinadoPeloResponsavelEm": null,
+          "documentoDoPetId": null
+        },
+        {
+          "id": "doc-enc-apt-resumo-perola-2-orientacoes",
+          "tipo": "ORIENTACOES",
+          "titulo": "Orientações ao responsável",
+          "emitidoEm": "2026-06-22T16:00:00-04:00",
+          "codigoVerificador": null,
+          "url": "mock://documentos/enc-apt-resumo-perola-2/orientacoes.pdf",
+          "urlExpiraEm": "2026-09-25T07:45:00-04:00",
+          "exigeAssinaturaDoResponsavel": false,
+          "assinadoPeloResponsavelEm": null,
+          "documentoDoPetId": null
+        }
+      ]
+    },
+    {
+      "id": "enc-apt-resumo-perola-1",
+      "agendamentoId": "apt-resumo-perola-1",
+      "consultaId": "consulta-enc-apt-resumo-perola-1",
+      "tipoDeConsulta": "CONSULTA",
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "profissional": {
+        "id": "prof-ana",
+        "nome": "Ana Ribeiro",
+        "especialidade": "CLINICO_GERAL",
+        "fotoUrl": null
+      },
+      "pet": {
+        "id": "pet-perola",
+        "nome": "Pérola",
+        "fotoUrl": null
+      },
+      "realizadoEm": "2026-04-28T10:30:00-04:00",
+      "idioma": "pt-BR",
+      "motivo": "Check-up anual",
+      "diagnostico": "Check-up sem alterações",
+      "orientacoes": "Manter vacinação e vermifugação em dia. Retorno de rotina em 12 meses.",
+      "sinaisDeAlerta": "Procure a clínica antes do retorno se observar: recusa alimentar por mais de 24 h, vômito ou diarreia persistentes, apatia acentuada, dificuldade para respirar, sangramento, convulsão, ou qualquer piora do quadro que motivou a consulta.",
+      "pesoAferidoKg": 4.9,
+      "receita": null,
+      "exames": [],
+      "retorno": null,
+      "documentos": [
+        {
+          "id": "doc-enc-apt-resumo-perola-1-orientacoes",
+          "tipo": "ORIENTACOES",
+          "titulo": "Orientações ao responsável",
+          "emitidoEm": "2026-04-28T10:30:00-04:00",
+          "codigoVerificador": null,
+          "url": "mock://documentos/enc-apt-resumo-perola-1/orientacoes.pdf",
+          "urlExpiraEm": "2026-09-25T07:45:00-04:00",
+          "exigeAssinaturaDoResponsavel": false,
+          "assinadoPeloResponsavelEm": null,
+          "documentoDoPetId": null
+        }
+      ]
+    }
+  ],
+  "vacinas": [
+    {
+      "id": "aplic-perola-v4",
+      "petId": "pet-perola",
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "profissional": {
+        "id": "prof-helena",
+        "nome": "Helena Vasconcelos Prado",
+        "especialidade": "DERMATOLOGIA",
+        "fotoUrl": null
+      },
+      "vacina": {
+        "nome": "V4 (quádrupla felina)",
+        "fabricante": "Zoetis",
+        "obrigatoria": false
+      },
+      "aplicadaEm": "2025-10-20T15:40:00-04:00",
+      "lote": "V4F-2410",
+      "validadeLote": "2026-04-28",
+      "dose": 3,
+      "dosesNaSerie": 3,
+      "proximaDoseEm": "2026-10-20",
+      "situacao": "PROXIMO",
+      "vacinaDaCarteiraId": null
+    }
+  ],
+  "internacoes": [
+    {
+      "id": "int-pipoca",
+      "pet": {
+        "id": "pet-pipoca",
+        "nome": "Pipoca",
+        "fotoUrl": null
+      },
+      "clinica": {
+        "id": "clinic-petjourney",
+        "nome": "PetJourney Clínica Veterinária",
+        "telefone": "(11) 3555-0142",
+        "utcOffset": "-04:00"
+      },
+      "status": "INTERNADO",
+      "entradaEm": "2026-09-23T15:30:00-04:00",
+      "motivo": "Diarreia com sangue e prostração",
+      "altaPrevistaEm": "2026-09-25T15:30:00-04:00",
+      "encerradaEm": null,
+      "responsavelClinico": {
+        "id": "prof-tiago",
+        "nome": "Tiago Sá",
+        "especialidade": "CARDIOLOGIA",
+        "fotoUrl": null
+      },
+      "preferencias": {
+        "frequenciaHoras": 12,
+        "fotoSempre": true,
+        "silencioNoturno": true
+      },
+      "ultimoBoletimEm": "2026-09-25T07:01:00-04:00"
+    }
+  ],
+  "boletins": [
+    {
+      "id": "bol-int-pipoca-3",
+      "internacaoId": "int-pipoca",
+      "tipo": "ATUALIZACAO",
+      "texto": "Pipoca está estável neste momento. Dormiu no ninho a noite inteira. Uma evacuação de madrugada, pastosa e sem sangue. Medicações e cuidados do período: 2 de 2 realizados no horário. Qualquer mudança, avisamos imediatamente.",
+      "idioma": "pt-BR",
+      "fotoUrl": "mock://fotos/bol-int-pipoca-3.jpg",
+      "fotoLegenda": "Foto de agora há pouco.",
+      "enviadoEm": "2026-09-25T07:01:00-04:00",
+      "aposLigacao": false
+    },
+    {
+      "id": "bol-int-pipoca-2",
+      "internacaoId": "int-pipoca",
+      "tipo": "ATUALIZACAO",
+      "texto": "Pipoca está estável neste momento. Explorou a caixa e comeu feno sozinha pela primeira vez. Fezes pastosas, sem sangue. Medicações e cuidados do período: 2 de 2 realizados no horário. Temperatura 38,8 °C — dentro do normal. Qualquer mudança, avisamos imediatamente.",
+      "idioma": "pt-BR",
+      "fotoUrl": null,
+      "fotoLegenda": null,
+      "enviadoEm": "2026-09-24T19:01:00-04:00",
+      "aposLigacao": false
+    },
+    {
+      "id": "bol-int-pipoca-1",
+      "internacaoId": "int-pipoca",
+      "tipo": "ATUALIZACAO",
+      "texto": "Pipoca está estável neste momento. Chegou prostrada e foi para o isolamento. Aceitou papinha na seringa. Fezes ainda líquidas, sem sangue desde a meia-noite. Medicações e cuidados do período: 3 de 3 realizados no horário. Qualquer mudança, avisamos imediatamente.",
+      "idioma": "pt-BR",
+      "fotoUrl": "mock://fotos/bol-int-pipoca-1.jpg",
+      "fotoLegenda": "Foto de agora há pouco.",
+      "enviadoEm": "2026-09-24T07:01:00-04:00",
+      "aposLigacao": false
+    }
+  ],
+  "notificacoes": [
+    {
+      "id": "notif-fila_vaga_oferecida-fila-brunilda",
+      "criadoEm": "2026-09-25T07:25:00-04:00",
+      "lidaEm": null,
+      "titulo": "Abriu um horário para Brunilda",
+      "corpo": "28/09 às 15:00 · PetJourney Clínica Veterinária. Responda até 07:55.",
+      "dados": {
+        "tipo": "FILA_VAGA_OFERECIDA",
+        "url": "/screens/clinica/fila?petId=pet-bruna&id=fila-brunilda",
+        "entradaId": "fila-brunilda",
+        "petId": "pet-bruna",
+        "petNome": "Brunilda",
+        "clinicaNome": "PetJourney Clínica Veterinária",
+        "inicio": "2026-09-28T15:00:00-04:00",
+        "expiraEm": "2026-09-25T07:55:00-04:00",
+        "mensagemDaClinica": null,
+        "idiomaDaMensagem": null
+      }
+    },
+    {
+      "id": "notif-internacao_boletim-bol-int-pipoca-3",
+      "criadoEm": "2026-09-25T07:01:00-04:00",
+      "lidaEm": null,
+      "titulo": "Notícias de Pipoca",
+      "corpo": "Novo boletim · PetJourney Clínica Veterinária",
+      "dados": {
+        "tipo": "INTERNACAO_BOLETIM",
+        "url": "/screens/clinica/internacao?petId=pet-pipoca&id=int-pipoca",
+        "internacaoId": "int-pipoca",
+        "boletimId": "bol-int-pipoca-3",
+        "petId": "pet-pipoca",
+        "petNome": "Pipoca",
+        "clinicaNome": "PetJourney Clínica Veterinária"
+      }
+    },
+    {
+      "id": "notif-internacao_boletim-bol-int-pipoca-2",
+      "criadoEm": "2026-09-24T19:01:00-04:00",
+      "lidaEm": null,
+      "titulo": "Notícias de Pipoca",
+      "corpo": "Novo boletim · PetJourney Clínica Veterinária",
+      "dados": {
+        "tipo": "INTERNACAO_BOLETIM",
+        "url": "/screens/clinica/internacao?petId=pet-pipoca&id=int-pipoca",
+        "internacaoId": "int-pipoca",
+        "boletimId": "bol-int-pipoca-2",
+        "petId": "pet-pipoca",
+        "petNome": "Pipoca",
+        "clinicaNome": "PetJourney Clínica Veterinária"
+      }
+    },
+    {
+      "id": "notif-agendamento_lembrete_vespera-apt-resumo-perola",
+      "criadoEm": "2026-09-24T18:00:00-04:00",
+      "lidaEm": "2026-09-24T20:37:00-04:00",
+      "titulo": "Amanhã, 10:00: Pérola",
+      "corpo": "PetJourney Clínica Veterinária. Toque para confirmar presença.",
+      "dados": {
+        "tipo": "AGENDAMENTO_LEMBRETE_VESPERA",
+        "url": "/screens/clinica/agendamento?petId=pet-perola&id=apt-resumo-perola",
+        "agendamentoId": "apt-resumo-perola",
+        "petId": "pet-perola",
+        "petNome": "Pérola",
+        "clinicaNome": "PetJourney Clínica Veterinária",
+        "inicio": "2026-09-25T10:00:00-04:00"
+      }
+    },
+    {
+      "id": "notif-pre_consulta_pendente-apt-resumo-perola",
+      "criadoEm": "2026-09-24T10:00:00-04:00",
+      "lidaEm": null,
+      "titulo": "Como Pérola está?",
+      "corpo": "Responda antes da consulta de 25/09 às 10:00. Leva dois minutos.",
+      "dados": {
+        "tipo": "PRE_CONSULTA_PENDENTE",
+        "url": "/screens/clinica/pre-consulta?petId=pet-perola&id=apt-resumo-perola",
+        "agendamentoId": "apt-resumo-perola",
+        "petId": "pet-perola",
+        "petNome": "Pérola",
+        "clinicaNome": "PetJourney Clínica Veterinária",
+        "inicio": "2026-09-25T10:00:00-04:00",
+        "fechaEm": "2026-09-25T10:00:00-04:00"
+      }
+    },
+    {
+      "id": "notif-internacao_boletim-bol-int-pipoca-1",
+      "criadoEm": "2026-09-24T07:01:00-04:00",
+      "lidaEm": "2026-09-24T07:41:00-04:00",
+      "titulo": "Notícias de Pipoca",
+      "corpo": "Novo boletim · PetJourney Clínica Veterinária",
+      "dados": {
+        "tipo": "INTERNACAO_BOLETIM",
+        "url": "/screens/clinica/internacao?petId=pet-pipoca&id=int-pipoca",
+        "internacaoId": "int-pipoca",
+        "boletimId": "bol-int-pipoca-1",
+        "petId": "pet-pipoca",
+        "petNome": "Pipoca",
+        "clinicaNome": "PetJourney Clínica Veterinária"
+      }
+    },
+    {
+      "id": "notif-vacina_reforco_proximo-aplic-perola-v4",
+      "criadoEm": "2026-09-20T10:00:00-04:00",
+      "lidaEm": "2026-09-20T10:40:00-04:00",
+      "titulo": "Reforço de V4 (quádrupla felina) chegando",
+      "corpo": "Pérola deve tomar até 20/10. Toque para agendar.",
+      "dados": {
+        "tipo": "VACINA_REFORCO_PROXIMO",
+        "url": "/screens/vacina/lista?petId=pet-perola&id=aplic-perola-v4",
+        "aplicacaoId": "aplic-perola-v4",
+        "petId": "pet-perola",
+        "petNome": "Pérola",
+        "vacinaNome": "V4 (quádrupla felina)",
+        "proximaDoseEm": "2026-10-20"
+      }
+    },
+    {
+      "id": "notif-agendamento_falta-apt-falta-brunilda",
+      "criadoEm": "2026-09-15T14:20:00-04:00",
+      "lidaEm": "2026-09-15T15:00:00-04:00",
+      "titulo": "Sentimos falta de Brunilda",
+      "corpo": "A consulta de 15/09 às 14:00 ficou sem ninguém. Conte o que houve e remarque.",
+      "dados": {
+        "tipo": "AGENDAMENTO_FALTA",
+        "url": "/screens/clinica/agendamento?petId=pet-bruna&id=apt-falta-brunilda",
+        "agendamentoId": "apt-falta-brunilda",
+        "petId": "pet-bruna",
+        "petNome": "Brunilda",
+        "clinicaNome": "PetJourney Clínica Veterinária",
+        "inicio": "2026-09-15T14:00:00-04:00",
+        "mensagemDaClinica": null,
+        "idiomaDaMensagem": null
+      }
+    },
+    {
+      "id": "notif-atendimento_resumo_disponivel-enc-apt-resumo-perola-3",
+      "criadoEm": "2026-08-14T10:25:00-04:00",
+      "lidaEm": "2026-08-14T11:05:00-04:00",
+      "titulo": "Resumo da consulta de Pérola",
+      "corpo": "As orientações e a receita já estão no app.",
+      "dados": {
+        "tipo": "ATENDIMENTO_RESUMO_DISPONIVEL",
+        "url": "/screens/clinica/atendimento?petId=pet-perola&id=enc-apt-resumo-perola-3",
+        "atendimentoId": "enc-apt-resumo-perola-3",
+        "petId": "pet-perola",
+        "petNome": "Pérola",
+        "clinicaNome": "PetJourney Clínica Veterinária",
+        "temReceita": true
+      }
+    }
+  ]
+}

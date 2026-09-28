@@ -19,6 +19,8 @@ a mesma assinatura. Nenhum componente conhece `fixtures`.
 | 06 | Perguntas ao time do app | [06-perguntas-ao-app.md](./06-perguntas-ao-app.md) | Respondido e conferido contra `origin/develop` — divergências listadas |
 | 07 | Internação com boletim ao responsável | [07-internacao.md](./07-internacao.md) | Completo — 3 casos difíceis plantados e cobertos por teste; **alta hospitalar entregue** |
 | 08 | Orientação do fluxo clínico | [08-orientacao-do-fluxo.md](./08-orientacao-do-fluxo.md) | Completo — 3 defeitos encontrados e corrigidos |
+| 09 | Módulo clínico na visão do responsável (para o `petjourney-app`) | [09-modulo-clinico-visao-do-responsavel.md](./09-modulo-clinico-visao-do-responsavel.md) | Passagem para o app; contrato em `src/features/clinico/contrato/`, dados em [contrato/demo-responsavel.json](./contrato/demo-responsavel.json) (`npm run contrato:demo`) |
+| 10 | Anamnese por voz | [10-anamnese-por-voz.md](./10-anamnese-por-voz.md) | Protótipo funcionando — microfone do navegador ou consulta de demonstração, motor local de regras com citação por campo |
 | — | **Apresentação do fluxo clínico** (PowerPoint) | [apresentacao/](./apresentacao/) | Os slides — 22 telas, o fluxo inteiro em quatro blocos |
 | — | **Roteiro de apresentação** (Word e PDF) | [apresentacao/](./apresentacao/) | Para quem apresenta ao cliente — 10 páginas, 12 minutos |
 | — | **Novidades do fluxo clínico** (PDF) | [relatorio/](./relatorio/) | Para quem vai testar — 7 páginas, com roteiro de teste e o que ainda não existe |

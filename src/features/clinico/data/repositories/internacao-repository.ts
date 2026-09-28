@@ -1229,6 +1229,8 @@ export const internacaoRepository = {
         boletim = {
           id: novoId('bol'),
           internacaoId: internacao.id,
+          /* A mensagem que encerra a conversa: o app a mostra diferente das atualizações. */
+          tipo: 'alta',
           origem: 'manual',
           status: 'liberado',
           gravidade: internacao.gravidade,

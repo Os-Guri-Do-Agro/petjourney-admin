@@ -18,6 +18,7 @@ import {
   vacinasFixture,
 } from '../fixtures'
 import { getDataset } from '../store'
+import type { PoliticaDaClinica } from '../../contrato/responsavel'
 import type {
   AppointmentType,
   Clinic,
@@ -32,6 +33,8 @@ import type {
 
 export type CatalogosClinicos = {
   clinic: Clinic
+  /** Os prazos combinados com quem marca pelo app. Ver `domain/politica.ts`. */
+  politica: PoliticaDaClinica
   profissionais: Professional[]
   salas: Room[]
   tipos: AppointmentType[]
@@ -46,6 +49,7 @@ export const catalogRepository = {
   carregar(): Promise<CatalogosClinicos> {
     return simularChamada('catalogo.listar', () => ({
       clinic: getDataset().clinic,
+      politica: getDataset().politica,
       profissionais: professionalsFixture.filter((professional) => professional.ativo),
       salas: roomsFixture,
       tipos: appointmentTypesFixture,

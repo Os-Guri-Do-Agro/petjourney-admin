@@ -7,6 +7,7 @@ export {
   CLINIC_UTC_OFFSET,
   appointmentTypesFixture,
   clinicFixture,
+  politicaDaClinicaFixture,
   professionalsFixture,
   roomsFixture,
 } from './clinic'

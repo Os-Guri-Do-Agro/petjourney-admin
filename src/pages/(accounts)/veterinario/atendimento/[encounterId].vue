@@ -30,6 +30,9 @@ import ProntuarioAnamnese from '@/features/clinico/components/prontuario/Prontua
 import ProntuarioConduta from '@/features/clinico/components/prontuario/ProntuarioConduta.vue'
 import ProntuarioDiagnostico from '@/features/clinico/components/prontuario/ProntuarioDiagnostico.vue'
 import ProntuarioExameFisico from '@/features/clinico/components/prontuario/ProntuarioExameFisico.vue'
+import EscutaGatilho from '@/features/clinico/components/escuta/EscutaGatilho.vue'
+import EscutaIndicador from '@/features/clinico/components/escuta/EscutaIndicador.vue'
+import EscutaPainel from '@/features/clinico/components/escuta/EscutaPainel.vue'
 import DocumentoAtestado from '@/features/clinico/components/documentos/DocumentoAtestado.vue'
 import DocumentoEncaminhamento from '@/features/clinico/components/documentos/DocumentoEncaminhamento.vue'
 import DocumentoObito from '@/features/clinico/components/documentos/DocumentoObito.vue'
@@ -68,6 +71,7 @@ import {
   progressoDoAtendimento,
 } from '@/features/clinico/domain/encounter-progress'
 import { useClinicoStore } from '@/features/clinico/stores/clinico'
+import { useEscutaStore } from '@/features/clinico/stores/escuta'
 import { useProntuarioStore } from '@/features/clinico/stores/prontuario'
 import { useCronometroStore } from '@/features/cronometro/stores/cronometro'
 
@@ -76,6 +80,7 @@ const route = useRoute()
 const router = useRouter()
 const clinico = useClinicoStore()
 const prontuario = useProntuarioStore()
+const escuta = useEscutaStore()
 const cronometro = useCronometroStore()
 const formato = useClinicFormat()
 
@@ -442,7 +447,28 @@ async function confirmarRetorno(slot: SlotSugestao) {
 }
 
 onMounted(carregar)
-watch(idDaRota, carregar)
+
+/**
+ * Trocar de atendimento pela mesma rota fecha o microfone: a autorização foi dada por outro
+ * responsável, para outro paciente.
+ */
+watch(idDaRota, () => {
+  escuta.suspender()
+  void carregar()
+})
+
+/**
+ * A gravação começou: o histórico recolhe. É contexto que o veterinário já leu antes de chamar o
+ * paciente, e a conversa ao lado do prontuário proposto precisa da largura inteira.
+ */
+watch(
+  () => escuta.fase,
+  (fase, anterior) => {
+    if (fase === 'gravando' && anterior === 'inativa') {
+      historicoAberto.value = false
+    }
+  },
+)
 
 /**
  * Oferece este atendimento ao cronômetro do cabeçalho.
@@ -465,12 +491,15 @@ watch(
 
 onBeforeRouteLeave(async () => {
   cronometro.definirContexto(null)
+  /* Microfone aberto numa tela que ninguém olha é o que a autorização do responsável não cobre. */
+  escuta.suspender()
   await prontuario.descarregar()
   prontuario.$limpar()
 })
 
 onBeforeUnmount(() => {
   cronometro.definirContexto(null)
+  escuta.suspender()
   void prontuario.descarregar()
 })
 </script>
@@ -577,6 +606,12 @@ onBeforeUnmount(() => {
         que `Alt + →` percorre. Escondido em ajustes, ninguém saberia que existe.
       -->
       <div class="teclado">
+        <!-- A gravação segue fora da anamnese; fora dela, isto é o que diz que o microfone está aberto. -->
+        <EscutaIndicador
+          v-if="escuta.emCurso && escuta.encounterId === encounter.id && etapa !== 'anamnese'"
+          @voltar="irParaEtapa('anamnese')"
+        />
+
         <span class="teclado__toggle">
           <ToggleSwitch v-model="modoTeclado" :input-id="idModoTeclado" />
           <label :for="idModoTeclado">{{ t('clinico.prontuario.teclado.modo') }}</label>
@@ -608,6 +643,20 @@ onBeforeUnmount(() => {
               :somente-leitura="prontuario.somenteLeitura"
               @aplicar="prontuario.atualizar({ anamnese: { ...encounter.anamnese, ...$event } })"
             />
+
+            <!--
+              A conversa gravada fica entre a pré-consulta e o formulário: é depois de ler o que o
+              responsável respondeu no app, e antes de o campo ser preenchido.
+            -->
+            <EscutaPainel
+              :encounter-id="encounter.id"
+              :anamnese="encounter.anamnese"
+              :pet="prontuario.pet"
+              :tutor="prontuario.tutor"
+              :somente-leitura="prontuario.somenteLeitura"
+              :motivo-leitura="motivoLeitura"
+              @aplicar="prontuario.atualizar({ anamnese: { ...encounter.anamnese, ...$event } })"
+            />
           </template>
 
           <ProntuarioAnamnese
@@ -616,7 +665,15 @@ onBeforeUnmount(() => {
             :somente-leitura="prontuario.somenteLeitura"
             :motivo-leitura="motivoLeitura"
             @atualizar="prontuario.atualizar({ anamnese: { ...encounter.anamnese, ...$event } })"
-          />
+          >
+            <template #acoes>
+              <EscutaGatilho
+                :encounter-id="encounter.id"
+                :somente-leitura="prontuario.somenteLeitura"
+                :motivo-leitura="motivoLeitura"
+              />
+            </template>
+          </ProntuarioAnamnese>
 
           <ProntuarioExameFisico
             v-else-if="etapa === 'exame'"
@@ -669,12 +726,17 @@ onBeforeUnmount(() => {
             @repetir="repetirReceita"
           />
 
+          <!--
+            `v-if` e não `v-else`: o `else` ficava pendurado no `v-if` da receita, e o resumo
+            inteiro aparecia embaixo da anamnese, do exame e do diagnóstico.
+          -->
           <ProntuarioResumo
-            v-else
+            v-if="etapa === 'resumo'"
             :encounter="encounter"
             :pet="prontuario.pet"
             :tutor="prontuario.tutor"
             @emitir="emitirDocumento"
+            @liberar-resumo="prontuario.liberarResumo()"
           />
 
           <!--

@@ -4,11 +4,14 @@
  *
  * É o bloco que nenhum concorrente consegue desenhar, e o que mais corre o risco de virar
  * ruído: o responsável que registra três vezes por dia produz noventa linhas. Por isso ele
- * **conta** antes de listar — uma linha por pergunta que o vet faria (peso, apetite,
- * comportamento, sintomas), e as falas do responsável que explicam alguma alteração.
+ * **conta** antes de listar — uma linha por pergunta que o vet faria (peso, alimentação, água,
+ * disposição, fezes, urina, sintomas), e as falas do responsável que explicam alguma alteração.
  *
  * A lista inteira continua a um clique, e abre filtrada no que tem alteração. "Todos" existe
  * para quem quer conferir; resumir não é esconder.
+ *
+ * Dois vazios diferentes, e a tela não os confunde: o responsável **não liberou** o diário para
+ * a clínica (é uma escolha dele, feita no app), ou liberou e **não registrou nada** no período.
  */
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
@@ -16,8 +19,16 @@ import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useClinicFormat } from '../../../composables/useClinicFormat'
-import type { ContagemDoDiario, ResumoDoPaciente } from '../../../domain/resumo-do-paciente'
-import type { EntradaDoDiario } from '../../../data/types'
+import { useRotulosDoDiario } from '../../../composables/useRotulosDoDiario'
+import type { EntradaDoDiarioParaClinica } from '../../../contrato/responsavel'
+import {
+  CAMPOS_DO_DIARIO,
+  achadosDeAlarme,
+  temAlteracao,
+  textoDoRegistro,
+  type ContagemDoCampo,
+  type ResumoDoPaciente,
+} from '../../../domain/resumo-do-paciente'
 import { clinicClock } from '../../../stores/clinico'
 
 const props = defineProps<{
@@ -28,6 +39,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const formato = useClinicFormat()
+const rotulos = useRotulosDoDiario()
 const idDaLista = useId()
 
 const aberto = ref(false)
@@ -55,60 +67,57 @@ function quando(iso: string): string {
   return `${formato.dataCurta(clinicClock.dateOf(iso))} · ${formato.hora(iso)}`
 }
 
-function linhaDeContagem<T extends string>(
-  contagem: ContagemDoDiario<T> | null,
-  campo: 'apetite' | 'comportamento',
-) {
-  if (!contagem) {
-    return null
-  }
-
+/**
+ * Uma linha por campo: o valor alterado que mais apareceu, contado ("Pouco em 10 de 13"), ou
+ * "normal em todos". O destaque só quando é a maioria — a mesma régua do sinal. Um em sessenta
+ * não é notícia.
+ */
+function linhaDoCampo(contagem: ContagemDoCampo) {
   return {
+    campo: contagem.campo,
+    rotulo: rotulos.campo(contagem.campo),
     valor:
-      contagem.alterados > 0
-        ? t('clinico.resumoDoPaciente.casa.alteradoEm', {
-            alterados: contagem.alterados,
-            total: contagem.total,
-          })
-        : t('clinico.resumoDoPaciente.casa.normalEmTodos', { total: contagem.total }),
-    /* Destaque só quando é a maioria — a mesma régua do sinal. Um em sessenta não é notícia. */
-    alterado: contagem.alterados * 2 >= contagem.total,
+      contagem.alterados > 0 && contagem.predominante
+        ? t(
+            'clinico.resumoDoPaciente.casa.valorEm',
+            {
+              valor: rotulos.valor(contagem.campo, contagem.predominante),
+              alterados: contagem.alterados,
+              total: contagem.total,
+            },
+            contagem.total,
+          )
+        : t(
+            'clinico.resumoDoPaciente.casa.normalEmTodos',
+            { total: contagem.total },
+            contagem.total,
+          ),
+    alterado: contagem.alterados * 2 >= contagem.total && contagem.alterados > 0,
     meta: t('clinico.resumoDoPaciente.casa.ultimo', {
-      valor: t(`clinico.resumoDoPaciente.diario.${campo}.${contagem.ultimo}`).toLocaleLowerCase(),
+      valor: rotulos.valor(contagem.campo, contagem.ultimo).toLocaleLowerCase(),
       quando: formato.relativo(contagem.ultimoEm),
     }),
   }
 }
 
-const apetite = computed(() => linhaDeContagem(props.diario.apetite, 'apetite'))
-const comportamento = computed(() => linhaDeContagem(props.diario.comportamento, 'comportamento'))
-
-const alterado = (entrada: EntradaDoDiario) =>
-  entrada.sintomas.length > 0 ||
-  entrada.apetite === 'reduzido' ||
-  entrada.apetite === 'ausente' ||
-  entrada.comportamento === 'quieto' ||
-  entrada.comportamento === 'apatico'
+const linhasDosCampos = computed(() => props.diario.campos.map(linhaDoCampo))
 
 const entradasVisiveis = computed(() =>
-  filtro.value === 'todos' ? props.diario.entradas : props.diario.entradas.filter(alterado),
+  filtro.value === 'todos' ? props.diario.entradas : props.diario.entradas.filter(temAlteracao),
 )
 
-/** O que cada registro disse, em pedaços curtos. "Normal" não entra: é o esperado. */
-function pedacos(entrada: EntradaDoDiario): string[] {
+/** O que cada registro disse, em pedaços curtos. Valor normal não entra: é o esperado. */
+function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
   return [
-    entrada.pesoKg !== null ? `${kg(entrada.pesoKg)} kg` : '',
-    entrada.apetite && entrada.apetite !== 'normal'
-      ? t('clinico.resumoDoPaciente.casa.apetiteValor', {
-          valor: t(
-            `clinico.resumoDoPaciente.diario.apetite.${entrada.apetite}`,
-          ).toLocaleLowerCase(),
-        })
-      : '',
-    entrada.comportamento && entrada.comportamento !== 'normal'
-      ? t(`clinico.resumoDoPaciente.diario.comportamento.${entrada.comportamento}`)
-      : '',
-    ...entrada.sintomas.map((sintoma) => t(`clinico.resumoDoPaciente.diario.sintoma.${sintoma}`)),
+    ...CAMPOS_DO_DIARIO.filter(
+      (campo) => entrada[campo] !== null && entrada[campo] !== 'NORMAL',
+    ).map(
+      (campo) =>
+        `${rotulos.campo(campo)}: ${rotulos.valor(campo, entrada[campo] as string).toLocaleLowerCase()}`,
+    ),
+    ...entrada.sintomas.map(rotulos.sintoma),
+    ...entrada.doencas.map(rotulos.doenca),
+    entrada.sintomasOutros ?? '',
   ].filter(Boolean)
 }
 </script>
@@ -130,7 +139,19 @@ function pedacos(entrada: EntradaDoDiario): string[] {
       </span>
     </header>
 
-    <div v-if="total === 0" class="casa__vazio">
+    <!--
+      Não liberou: é escolha do responsável, e a tela diz onde ela se muda — no app, não aqui.
+      Cadeado e não celular: o diário existe, só não é da clínica.
+    -->
+    <div v-if="!diario.liberado" class="casa__vazio">
+      <i class="pi pi-lock" aria-hidden="true" />
+      <p>
+        <strong>{{ t('clinico.resumoDoPaciente.casa.naoLiberadoTitulo') }}</strong>
+        {{ t('clinico.resumoDoPaciente.casa.naoLiberadoDescricao') }}
+      </p>
+    </div>
+
+    <div v-else-if="total === 0 && !diario.peso" class="casa__vazio">
       <i class="pi pi-mobile" aria-hidden="true" />
       <p>
         <strong>{{ t('clinico.resumoDoPaciente.casa.vazioTitulo') }}</strong>
@@ -151,30 +172,18 @@ function pedacos(entrada: EntradaDoDiario): string[] {
           <dd v-else class="casa__fraco">{{ t('clinico.resumoDoPaciente.casa.semRegistro') }}</dd>
         </div>
 
-        <div class="casa__linha">
-          <dt>{{ t('clinico.resumoDoPaciente.casa.apetite') }}</dt>
-          <dd v-if="apetite">
-            <span class="casa__valor" :class="{ 'casa__valor--alterado': apetite.alterado }">
-              {{ apetite.valor }}
+        <div v-for="linha in linhasDosCampos" :key="linha.campo" class="casa__linha">
+          <dt>{{ linha.rotulo }}</dt>
+          <dd>
+            <span class="casa__valor" :class="{ 'casa__valor--alterado': linha.alterado }">
+              {{ linha.valor }}
             </span>
-            <span class="casa__meta">{{ apetite.meta }}</span>
+            <span class="casa__meta">{{ linha.meta }}</span>
           </dd>
-          <dd v-else class="casa__fraco">{{ t('clinico.resumoDoPaciente.casa.semRegistro') }}</dd>
         </div>
 
         <div class="casa__linha">
-          <dt>{{ t('clinico.resumoDoPaciente.casa.comportamento') }}</dt>
-          <dd v-if="comportamento">
-            <span class="casa__valor" :class="{ 'casa__valor--alterado': comportamento.alterado }">
-              {{ comportamento.valor }}
-            </span>
-            <span class="casa__meta">{{ comportamento.meta }}</span>
-          </dd>
-          <dd v-else class="casa__fraco">{{ t('clinico.resumoDoPaciente.casa.semRegistro') }}</dd>
-        </div>
-
-        <div class="casa__linha">
-          <dt>{{ t('clinico.resumoDoPaciente.casa.sintomas') }}</dt>
+          <dt>{{ rotulos.campo('sintomas') }}</dt>
           <dd v-if="diario.sintomas.length > 0">
             <ul class="casa__sintomas">
               <li
@@ -183,24 +192,37 @@ function pedacos(entrada: EntradaDoDiario): string[] {
                 :class="{ 'casa__sintoma--alarme': item.alarme }"
               >
                 <i v-if="item.alarme" class="pi pi-exclamation-triangle" aria-hidden="true" />
-                {{ t(`clinico.resumoDoPaciente.diario.sintoma.${item.sintoma}`) }}
+                {{ rotulos.sintoma(item.sintoma) }}
                 <span class="clinic-value casa__vezes">×{{ item.vezes }}</span>
               </li>
             </ul>
           </dd>
           <dd v-else class="casa__fraco">{{ t('clinico.resumoDoPaciente.casa.nenhum') }}</dd>
         </div>
+
+        <!-- Doença que o responsável acha que o pet teve: é hipótese de casa, e diz isso no rótulo. -->
+        <div v-if="diario.doencas.length > 0" class="casa__linha">
+          <dt>{{ rotulos.campo('doencas') }}</dt>
+          <dd>
+            <ul class="casa__sintomas">
+              <li v-for="item in diario.doencas" :key="item.doenca">
+                {{ rotulos.doenca(item.doenca) }}
+                <span class="clinic-value casa__vezes">×{{ item.vezes }}</span>
+              </li>
+            </ul>
+          </dd>
+        </div>
       </dl>
 
       <div v-if="diario.notas.length > 0" class="casa__notas">
         <h3 class="clinic-label">{{ t('clinico.resumoDoPaciente.casa.notas') }}</h3>
-        <figure v-for="nota in diario.notas" :key="nota.id" class="nota">
-          <blockquote>{{ nota.nota }}</blockquote>
-          <figcaption class="clinic-value">{{ quando(nota.registradoEm) }}</figcaption>
+        <figure v-for="nota in diario.notas" :key="nota.entrada.id" class="nota">
+          <blockquote>{{ nota.texto }}</blockquote>
+          <figcaption class="clinic-value">{{ quando(nota.entrada.data) }}</figcaption>
         </figure>
       </div>
 
-      <div class="casa__rodape">
+      <div v-if="total > 0" class="casa__rodape">
         <Button
           :label="
             aberto
@@ -234,9 +256,12 @@ function pedacos(entrada: EntradaDoDiario): string[] {
               v-for="entrada in entradasVisiveis"
               :key="entrada.id"
               class="registro"
-              :class="{ 'registro--nada': !alterado(entrada) }"
+              :class="{
+                'registro--nada': !temAlteracao(entrada),
+                'registro--alarme': achadosDeAlarme(entrada).length > 0,
+              }"
             >
-              <span class="registro__quando clinic-value">{{ quando(entrada.registradoEm) }}</span>
+              <span class="registro__quando clinic-value">{{ quando(entrada.data) }}</span>
               <span class="registro__corpo">
                 <span class="registro__pedacos">
                   {{
@@ -244,7 +269,9 @@ function pedacos(entrada: EntradaDoDiario): string[] {
                     t('clinico.resumoDoPaciente.casa.semAlteracaoCurto')
                   }}
                 </span>
-                <span v-if="entrada.nota" class="registro__nota">{{ entrada.nota }}</span>
+                <span v-if="textoDoRegistro(entrada)" class="registro__nota">
+                  {{ textoDoRegistro(entrada) }}
+                </span>
               </span>
             </li>
           </ol>
@@ -446,6 +473,11 @@ function pedacos(entrada: EntradaDoDiario): string[] {
 
 .registro__pedacos {
   font-weight: 600;
+}
+
+/* O registro com achado de alarme puxa a cor do sinal: é o mesmo fato, lido de outro lugar. */
+.registro--alarme .registro__pedacos {
+  color: var(--clinic-risk-text);
 }
 
 .registro--nada .registro__pedacos {

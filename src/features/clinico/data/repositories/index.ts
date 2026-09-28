@@ -7,7 +7,12 @@ export {
   encounterRepository,
   EncounterLockedError,
 } from './encounter-repository'
-export { waitlistRepository, OFERTA_MINUTOS } from './waitlist-repository'
+export {
+  waitlistRepository,
+  OFERTA_MINUTOS,
+  OfertaExpiradaError,
+  VagaJaPreenchidaError,
+} from './waitlist-repository'
 export {
   patientRepository,
   LIMITE_REINCIDENCIA,

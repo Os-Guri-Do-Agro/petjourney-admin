@@ -61,8 +61,18 @@ function focaveis(raiz: HTMLElement): HTMLElement[] {
   ].join(',')
 
   return [...raiz.querySelectorAll<HTMLElement>(seletor)].filter(
-    (elemento) => elemento.tabIndex !== -1 && elemento.offsetParent !== null,
+    (elemento) =>
+      elemento.tabIndex !== -1 && elemento.offsetParent !== null && !foraDoTeclado(elemento),
   )
+}
+
+/**
+ * Painéis que não são sequência de campos — a anamnese por voz, com a revisão dela — ficam fora
+ * do avanço por `Enter` e do foco inicial da etapa. Continuam no Tab: saem do atalho, não do
+ * teclado. Sem isto, abrir a anamnese pousaria o foco em "Gravar consulta" e não na queixa.
+ */
+function foraDoTeclado(elemento: Element): boolean {
+  return elemento.closest('[data-fora-do-teclado]') !== null
 }
 
 export function useProntuarioTeclado(opcoes: {
@@ -144,7 +154,10 @@ export function useProntuarioTeclado(opcoes: {
     if (evento.key === 'Enter' && !evento.shiftKey && !ehMultilinha(evento.target)) {
       const alvo = evento.target
 
-      if (alvo instanceof HTMLInputElement || alvo instanceof HTMLSelectElement) {
+      if (
+        (alvo instanceof HTMLInputElement || alvo instanceof HTMLSelectElement) &&
+        !foraDoTeclado(alvo)
+      ) {
         evento.preventDefault()
         avancarCampo(alvo)
       }
