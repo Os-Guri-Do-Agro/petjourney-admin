@@ -619,6 +619,20 @@ export function resolvePageLabel(path: string, hash: string, sections: AppNaviga
     return t('clinico.paciente.novo.titulo')
   }
 
+  /* A ficha do paciente também não: sem estas linhas o histórico e o resumo diziam 'Painel'. */
+  if (/^\/veterinario\/paciente\/[^/]+\/historico/.test(path)) {
+    return t('clinico.prontuario.timeline.titulo')
+  }
+
+  if (/^\/veterinario\/paciente\/[^/]+\/resumo/.test(path)) {
+    return t('clinico.resumoDoPaciente.verResumo')
+  }
+
+  /* A carteira de vacinas do paciente também não é item de menu. Rótulo curto, pelo mesmo motivo. */
+  if (/^\/veterinario\/paciente\/[^/]+\/vacinas/.test(path)) {
+    return t('clinico.vacinas.titulo')
+  }
+
   /* O atendimento não é item de menu — sem esta linha o cabeçalho dizia 'Painel' no prontuário. */
   if (path.startsWith('/veterinario/atendimento')) {
     return t('clinico.prontuario.titulo')

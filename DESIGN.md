@@ -243,7 +243,25 @@ A Visão geral (`/inicio`) é a exceção com escopo. Ela recebeu um acabamento 
 só para ela: um véu de sálvia no topo da página, cartões macios de 20px com sombra e sem borda
 (a Linha do dia entre eles), selos de 6px e ações em pílula. O menu lateral, o
 cabeçalho e as outras telas seguem o sistema acima. Levar esse acabamento adiante é uma decisão em aberto do usuário. Nas seções abaixo, o
-que muda ali fica sob o subtítulo **Variante da Visão geral**. O código fica em
+que muda ali fica sob o subtítulo **Variante da Visão geral**.
+
+**Onde a variante já vale, por decisão do usuário:** a Visão geral; o migrador de dados
+(`/veterinario/paciente/importar`); e a **ficha do paciente** — Este pet em 30 s, Histórico e
+Vacinas (`/veterinario/paciente/:petId/*`) e os diálogos de vacina abertos dela. A ficha usa o
+mesmo código da Visão geral (`src/components/home/home-card.css`) mais
+`src/features/clinico/components/pacientes/ficha/ficha.css`, que traz o fundo, as pílulas e uma
+**ponte de tokens**: dentro de `.ficha-tema`, os `--clinic-*` apontam para os `--hc-*`, e os
+componentes do módulo (tabela, linha do tempo, protocolo, prévia do celular) trocam de acabamento
+só ali. O cabeçalho da ficha (`FichaCabeca.vue`) é a saudação com o conteúdo do paciente: a
+identificação pequena, o nome no lugar do "Olá", a frase de estado da vista em degradê e as
+pílulas — a ação da vista primeiro, e as outras vistas com o número que as faz ser abertas
+(sinais do resumo, vacinas atrasadas) num selo de 6px. O resto do módulo clínico segue o
+sistema acima.
+
+*Nota:* o código da Visão geral foi além do que esta variante descreve — fundo `#F5F7F6` com dois
+brilhos de sálvia e uma grade fina que some descendo, cartão branco com borda fina e sombra
+baixa, resumo e pílula cheia em degradê (`home-card.css`, `inicio.vue`). Onde este documento e o
+código divergem, a ficha segue o código, que é o que o usuário vê e aprovou. O código fica em
 [src/pages/(accounts)/inicio.vue](<src/pages/(accounts)/inicio.vue>) e `src/components/home/`,
 e a composição da tela, no brief `.impeccable/surfaces/src-pages-accounts-inicio-vue.md`.
 
@@ -654,6 +672,14 @@ nativo.
 - **Modo foco:** esconde a navegação e deixa a página inteira; header fica.
 - **Ícones:** Phosphor para domínio (animal, acomodação, turno), PrimeIcons para interface.
   Nunca SVG desenhado à mão.
+- **Tamanho do ícone mora no contêiner.** O ícone tem 1em de quem o contém, como em qualquer fonte
+  de ícones: a forma (disco, bloco, marcador) ou a linha de texto declara `font-size`, e o ícone
+  segue. Numa forma, o ícone fica entre metade e 60% do lado dela. O tema do PrimeVue fixava
+  `.pi` em 1rem e anulava isso em todo o portal — o visto de 16 px num disco de 17 px, a seta de
+  abrir linha ocupando dois terços do quadradinho, ícone de 16 px ao lado de rótulo de 11 px. A
+  regra `html .pi` em `src/assets/main.css` devolve o contrato; os ícones internos dos
+  componentes do PrimeVue (classe `p-*` no elemento) seguem o tamanho do tema. O Phosphor já nasce
+  em 1em.
 
 ### Toast
 
@@ -821,4 +847,5 @@ participação não fica na faixa: mora no painel do QR.
   ainda falta fazer: numa pista de pendências, horário vencido é atraso.
 - **Don't** levar o acabamento da Visão geral (véu de sálvia, cartão de 20px com sombra, selo
   de 6px, gravidade em coral e pêssego, identidade de módulo em ciano e pervinca) ao menu
-  lateral, ao cabeçalho ou a outra tela antes de o usuário aprovar.
+  lateral, ao cabeçalho ou a outra tela antes de o usuário aprovar. Já aprovadas: o migrador e a
+  ficha do paciente (ver Overview).

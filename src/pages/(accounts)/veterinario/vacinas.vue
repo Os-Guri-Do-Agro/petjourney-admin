@@ -277,9 +277,13 @@ const aplicadasVisiveis = computed(() => {
       return true
     }
 
-    return [item.petNome, item.tutorNome, item.vacinaNome, item.lote].some((campo) =>
-      semAcento(campo).includes(termo),
-    )
+    return [
+      item.petNome,
+      item.tutorNome,
+      item.vacinaNome,
+      item.lote ?? '',
+      item.externa?.local ?? '',
+    ].some((campo) => semAcento(campo).includes(termo))
   })
 })
 
@@ -318,8 +322,9 @@ const colunasAplicadas = computed<ColunaTabela<AplicacaoNaLista>[]>(() => [
   },
 ])
 
-function abrirPaciente(linha: AplicacaoNaLista) {
-  void router.push(`/veterinario/paciente/${linha.petId}/historico`)
+/** A linha abre a carteira do paciente — é lá que está a sequência e a prévia do app. */
+function abrirPaciente(linha: { petId: string }) {
+  void router.push(`/veterinario/paciente/${linha.petId}/vacinas`)
 }
 
 // --------------------------------------------------------------------- em atraso
@@ -678,18 +683,40 @@ function textoDeCobertura(dias: number | null): string {
             É o par que a farmacovigilância pede e o que a companhia aérea confere no balcão —
             um sem o outro não responde a pergunta de nenhum dos dois.
           -->
+          <!--
+            A dose de fora não tem lote, e a célula diz isso em vez de ficar vazia: vazia parece
+            registro incompleto; "outro local" é o registro dizendo exatamente o que sabe.
+          -->
           <template #celula-lote="{ linha }">
-            <span class="vacinas__nome clinic-value">{{ linha.lote }}</span>
-            <span class="vacinas__meta">
-              {{ t('clinico.vacinas.validade', { data: formato.dataCurta(linha.validadeLote) }) }}
-            </span>
+            <template v-if="linha.externa">
+              <span class="vacinas__nome">{{ t('clinico.vacinas.externa.semLote') }}</span>
+              <span class="vacinas__meta">{{ linha.externa.local }}</span>
+            </template>
+            <template v-else>
+              <span class="vacinas__nome clinic-value">{{ linha.lote }}</span>
+              <span v-if="linha.validadeLote" class="vacinas__meta">
+                {{ t('clinico.vacinas.validade', { data: formato.dataCurta(linha.validadeLote) }) }}
+              </span>
+            </template>
           </template>
 
           <template #celula-quem="{ linha }">
-            <span class="vacinas__nome">
-              {{ clinico.profissional(linha.professionalId)?.nome }}
-            </span>
-            <span v-if="linha.observacao" class="vacinas__meta">{{ linha.observacao }}</span>
+            <template v-if="linha.externa">
+              <span class="vacinas__nome">{{ t('clinico.vacinas.externa.outroLocal') }}</span>
+              <span class="vacinas__meta">
+                {{
+                  t('clinico.vacinas.externa.registradaPor', {
+                    nome: clinico.profissional(linha.externa.registradaPor)?.nome ?? '',
+                  })
+                }}
+              </span>
+            </template>
+            <template v-else>
+              <span class="vacinas__nome">
+                {{ clinico.profissional(linha.professionalId)?.nome }}
+              </span>
+              <span v-if="linha.observacao" class="vacinas__meta">{{ linha.observacao }}</span>
+            </template>
           </template>
         </ClinicDataTable>
       </template>
@@ -884,6 +911,7 @@ function textoDeCobertura(dias: number | null): string {
           :vazio-titulo="t('clinico.vacinas.vazioTitulo')"
           :rotulo="t('clinico.vacinas.titulo')"
           @acao="executarAcao"
+          @ativar="abrirPaciente"
         >
           <template #celula-paciente="{ linha }">
             <strong class="vacinas__nome">{{ linha.petNome }}</strong>

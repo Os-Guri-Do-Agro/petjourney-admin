@@ -395,6 +395,11 @@ orientações — não some com a seção nem mostra um título sem nada embaixo
 
 ## 9. Vacinas aplicadas na clínica
 
+> **Atualizado pela carteirinha conectada.** O contrato desta seção cresceu (dose externa, via,
+> próxima dose marcada, plano do protocolo) e a regra de atraso ficou igual à do app. O passo a
+> passo completo está em [14-carteirinha-visao-do-responsavel.md](./14-carteirinha-visao-do-responsavel.md);
+> o que está abaixo continua valendo.
+
 **Hoje:** a `Vacina` do app guarda nome e data. Lote, fabricante, validade e dose da série são
 da clínica.
 
@@ -634,13 +639,14 @@ O app não tem pet de mentira: os pets vêm da conta logada. O mock **empresta a
 da conta**:
 
 1. Casa pelo nome (sem acento e sem caixa): o pet "Pérola" da conta recebe a história da Pérola.
-2. O que sobrar casa pela ordem (1º pet livre ← Pérola, 2º ← Pipoca, 3º ← Brunilda), trocando
+2. O que sobrar casa pela ordem (1º pet livre ← Pérola, 2º ← Pipoca, 3º ← Brunilda, 4º ← Biscoito), trocando
    `pet.id`, `petId`, `petNome` e o nome dentro dos textos da clínica; as `url` das notificações
    se refazem com `urlDaNotificacaoClinica`.
 3. Conta com menos pets: as histórias que sobram ficam de fora.
 
-**Decisão:** para a demonstração que passa pelo portal, use uma conta com três pets chamados
-Pérola (gata), Pipoca (porquinho-da-índia) e Brunilda (jabuti). Aí nada precisa ser trocado.
+**Decisão:** para a demonstração que passa pelo portal, use uma conta com quatro pets chamados
+Pérola (gata), Pipoca (porquinho-da-índia), Brunilda (jabuti) e Biscoito (cão filhote). Aí nada
+precisa ser trocado. O Biscoito entrou com a carteirinha conectada ([14](./14-carteirinha-visao-do-responsavel.md)).
 
 ### O mock simula o servidor, não a tela
 
@@ -673,14 +679,19 @@ vaga de 30 min.
 
 | Pet                                                  | O que está acontecendo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | O que demonstra                                                                                                                                                     |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Pérola** (`pet-perola`), gata SRD, nascida em 2014 | Consulta **hoje, 10:00**, com Helena, marcada pelo app ("Acho que ela está mais magra e bebendo muita água") e confirmada pelo app na véspera. Às 07:30 ainda dá para cancelar (até 08:00). Pré-consulta **aberta e sem resposta**, com sugestão do diário: come pouco, bebe e urina muito, 4,1 kg na balança de casa. Três consultas liberadas: check-up (−150 dias, 4,9 kg); displasia coxofemoral (−95 dias, **meloxicam 0,12 mL uma vez por dia, uso contínuo**); gastroenterite em investigação (−42 dias, omeprazol meio comprimido por 14 dias, já terminou). V4 felina com reforço em 25 dias. | agendamento pelo app, prazo de cancelamento, pré-consulta preenchida pelo diário, resumo pós-consulta, receita contínua virando lembrete sem fim, reforço `PROXIMO` |
+| **Pérola** (`pet-perola`), gata SRD, nascida em 2014 | Consulta **hoje, 10:00**, com Helena, marcada pelo app ("Acho que ela está mais magra e bebendo muita água") e confirmada pelo app na véspera. Às 07:30 ainda dá para cancelar (até 08:00). Pré-consulta **aberta e sem resposta**, com sugestão do diário: come pouco, bebe e urina muito, 4,1 kg na balança de casa. Três consultas liberadas: check-up (−150 dias, 4,9 kg); displasia coxofemoral (−95 dias, **meloxicam 0,12 mL uma vez por dia, uso contínuo**); gastroenterite em investigação (−42 dias, omeprazol meio comprimido por 14 dias, já terminou). V4 felina com reforço em 25 dias; **antirrábica atrasada há 16 dias** (passou da data e da carência de 3). | agendamento pelo app, prazo de cancelamento, pré-consulta preenchida pelo diário, resumo pós-consulta, receita contínua virando lembrete sem fim, reforço `PROXIMO`, atraso `VENCIDO` que some quando a clínica aplica |
 | **Pipoca** (`pet-pipoca`), porquinho-da-índia        | **Internada** há 40 h por diarreia com sangue e prostração, com Tiago Sá. Boletins de 12 em 12 h, silêncio noturno, foto sempre: três boletins (7:01 de ontem, 19:01 de ontem, 7:01 de hoje), dois com foto, contando a melhora noite a noite. Alta prevista para hoje às 15:30.                                                                                                                                                                                                                                                                                                                       | conversa de boletins, a madrugada juntada às 7 h, preferências, push que não adianta conteúdo                                                                       |
 | **Brunilda** (`pet-bruna`), jabuti                   | **Faltou** a um retorno há 10 dias (14:00, com Helena), sem justificativa. Está na **lista de espera** para consulta, qualquer profissional, seg–sex das 14 h às 18 h, **com uma oferta aberta** no próximo dia útil que cabe nas janelas, às 15:00, vencendo 25 minutos depois do instante da demonstração.                                                                                                                                                                                                                                                                                           | falta e justificativa, fila, oferta com contador, aceite que vira agendamento                                                                                       |
+
+| **Biscoito** (`pet-biscoito`), cão SRD, 11 semanas | Filhote no meio da **série de filhote** da V10. A 1ª dose foi no **Pet Shop Amigo Fiel** (externa, comprovante conferido, sem lote); a **2ª vence hoje**. Giárdia 1 de 2 **só por relato** do criador. Antirrábica **a partir de 12 semanas** (daqui a 4 dias). | carteirinha conectada: protocolo por idade, dose de fora marcada, a aplicação da clínica chegando com selo, lote e a próxima dose já marcada ([14](./14-carteirinha-visao-do-responsavel.md)) |
 
 **As nove notificações** (mais recente primeiro): vaga oferecida à Brunilda (nova); boletim da
 Pipoca de hoje (novo); boletim de ontem à noite (novo); véspera da consulta da Pérola (lida — foi
 por ela que a Fátima confirmou); pré-consulta da Pérola (nova); boletim de ontem de manhã (lida);
 reforço da V4 (lida); falta da Brunilda (lida); resumo da última consulta da Pérola (lida).
+
+As duas doses externas do Biscoito geram também `VACINA_REGISTRADA_PELA_CLINICA`, que vive em
+`notificacoesDaCarteirinha` (fora do `Record` fechado — ver o doc 14).
 
 O JSON **é** o cenário: se algo aqui divergir dele, vale o JSON — e avise.
 

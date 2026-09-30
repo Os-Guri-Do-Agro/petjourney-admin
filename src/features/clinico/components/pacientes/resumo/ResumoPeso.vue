@@ -15,6 +15,7 @@
  * Sem animação de entrada: o gráfico é lido na porta da sala, e crescer a linha na segunda
  * abertura é só atraso.
  */
+import { PhScales } from '@phosphor-icons/vue'
 import type { ApexOptions } from 'apexcharts'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -165,7 +166,10 @@ const descricao = computed(() => {
 <template>
   <section class="peso" aria-labelledby="peso-titulo">
     <header class="peso__topo">
-      <h2 id="peso-titulo" class="peso__titulo">{{ t('clinico.resumoDoPaciente.peso.titulo') }}</h2>
+      <h2 id="peso-titulo" class="peso__titulo">
+        <PhScales class="peso__titulo-icone" weight="duotone" aria-hidden="true" />
+        {{ t('clinico.resumoDoPaciente.peso.titulo') }}
+      </h2>
 
       <!-- A legenda é da forma do marcador, não da cor: a linha tem uma cor só. -->
       <ul v-if="pontos.length >= 2" class="peso__legenda">
@@ -236,24 +240,36 @@ const descricao = computed(() => {
 .peso {
   display: grid;
   gap: var(--clinic-space-2);
-  padding: var(--clinic-space-3) var(--clinic-space-4);
+  padding: 1.2rem 1.35rem 1.35rem;
   border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
   background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-card);
 }
 
 .peso__topo {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--clinic-space-1) var(--clinic-space-3);
 }
 
 .peso__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   margin: 0;
-  font-size: var(--clinic-font-title);
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.peso__titulo-icone {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--clinic-accent);
 }
 
 .peso__legenda {

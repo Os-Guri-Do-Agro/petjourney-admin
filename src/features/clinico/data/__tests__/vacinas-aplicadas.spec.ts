@@ -46,8 +46,24 @@ describe('vacinas aplicadas', () => {
 
   it('carrega lote e validade, que é o par que a rastreabilidade pede', async () => {
     const lista = await vacinaRepository.aplicadas()
+    const daClinica = lista.filter((item) => item.origem === 'clinica')
 
-    expect(lista.every((item) => Boolean(item.lote) && Boolean(item.validadeLote))).toBe(true)
+    expect(daClinica.every((item) => Boolean(item.lote) && Boolean(item.validadeLote))).toBe(true)
+  })
+
+  it('a dose de outro lugar entra sem lote e dizendo onde foi', async () => {
+    /*
+     * A clínica não aplicou e não sabe de que frasco saiu. Um código ali seria rastreabilidade
+     * inventada — o registro diz o que sabe: o lugar, a procedência e quem transcreveu.
+     */
+    const externas = (await vacinaRepository.aplicadas()).filter(
+      (item) => item.origem === 'externa',
+    )
+
+    expect(externas.length).toBeGreaterThan(0)
+    expect(externas.every((item) => item.lote === null && item.validadeLote === null)).toBe(true)
+    expect(externas.every((item) => Boolean(item.externa?.local))).toBe(true)
+    expect(externas.every((item) => Boolean(item.externa?.registradaPor))).toBe(true)
   })
 
   it('descarta aplicação de paciente que não está mais no cadastro', async () => {
@@ -81,15 +97,18 @@ describe('vacinas aplicadas', () => {
   })
 
   it('a aplicação registrada agora entra na lista', async () => {
-    const criada = await vacinaRepository.registrar({
+    const criada = await vacinaRepository.aplicar({
       petId: 'pet-luna',
       vacinaId: 'vac-v10',
       professionalId: 'prof-ana',
       lote: 'L-2026-01',
-      validadeLote: '2027-06-30',
+      validadeLote: '2099-06-30',
       dose: 1,
+      dosesNaSerie: 3,
       via: 'subcutanea',
       observacao: '',
+      encounterId: null,
+      proximaNaAgenda: null,
     })
 
     const lista = await vacinaRepository.aplicadas()

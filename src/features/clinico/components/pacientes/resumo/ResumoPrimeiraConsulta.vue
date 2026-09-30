@@ -7,6 +7,7 @@
  * sabe: sem peso, pesar; filhote, perguntar origem e desmame. O último item é o que faz a
  * próxima abertura desta tela não ser vazia.
  */
+import { PhStethoscope } from '@phosphor-icons/vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -36,6 +37,7 @@ const itens = computed(() => {
 <template>
   <section class="primeira" aria-labelledby="primeira-titulo">
     <h2 id="primeira-titulo" class="primeira__titulo">
+      <PhStethoscope class="primeira__titulo-icone" weight="duotone" aria-hidden="true" />
       {{ t('clinico.resumoDoPaciente.primeira.titulo') }}
     </h2>
     <p class="primeira__descricao">{{ t('clinico.resumoDoPaciente.primeira.descricao') }}</p>
@@ -53,16 +55,28 @@ const itens = computed(() => {
 .primeira {
   display: grid;
   gap: var(--clinic-space-2);
-  padding: var(--clinic-space-3) var(--clinic-space-4);
+  padding: 1.2rem 1.35rem 1.35rem;
   border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
   background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-card);
 }
 
 .primeira__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   margin: 0;
-  font-size: var(--clinic-font-title);
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.primeira__titulo-icone {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--clinic-accent);
 }
 
 .primeira__descricao {

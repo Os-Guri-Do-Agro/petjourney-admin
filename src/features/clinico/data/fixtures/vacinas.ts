@@ -3,13 +3,18 @@ import type { Vacina } from '../types'
 /**
  * Catálogo de vacinas da clínica.
  *
- * Os intervalos são os de rotina no Brasil. Dois pontos que o catálogo precisa acertar para o
- * recall funcionar:
+ * Os intervalos são os de rotina no Brasil. Os pontos que o catálogo precisa acertar para o
+ * recall e o protocolo funcionarem:
  *
  * - **Série inicial e reforço são coisas diferentes.** Filhote toma três doses de V10 com 21 a
  *   30 dias entre elas; depois passa a uma por ano. Um catálogo que só guardasse "anual"
  *   perderia justamente as duas visitas mais próximas — que são as que trazem o cliente de
  *   volta no mês seguinte.
+ * - **Filhote e adulto sem histórico não fazem a mesma série.** O anticorpo que o filhote
+ *   recebe da mãe anula as primeiras doses, e é por isso que ele precisa de três; o adulto que
+ *   chega sem carteira não tem esse anticorpo no caminho e fecha com duas.
+ * - **Idade mínima é por vacina.** A V10 começa com 6 semanas; a antirrábica, com 12. Antes da
+ *   idade, a dose não está atrasada — ainda não cabe.
  * - **Obrigatória muda a insistência.** Antirrábica é exigência legal e de viagem; giárdia é
  *   opcional. Cobrar as duas com o mesmo tom faz a clínica parecer insistente no lugar errado.
  * - **O piso de estoque é por vacina.** Quem define o número é o giro: antirrábica sai toda
@@ -23,6 +28,10 @@ export const vacinasFixture: Vacina[] = [
     fabricante: 'Zoetis',
     especies: ['canina'],
     dosesNaSerie: 3,
+    dosesAdultoSemHistorico: 2,
+    idadeMinimaDias: 42,
+    essencial: true,
+    vias: ['subcutanea'],
     intervaloReforcoDias: 365,
     obrigatoria: false,
     estoqueMinimo: 10,
@@ -33,6 +42,10 @@ export const vacinasFixture: Vacina[] = [
     fabricante: 'Boehringer',
     especies: ['canina', 'felina'],
     dosesNaSerie: 1,
+    dosesAdultoSemHistorico: 1,
+    idadeMinimaDias: 84,
+    essencial: true,
+    vias: ['subcutanea', 'intramuscular'],
     intervaloReforcoDias: 365,
     /* Exigência legal e de trânsito: sem ela em dia, o animal não viaja. */
     obrigatoria: true,
@@ -44,6 +57,11 @@ export const vacinasFixture: Vacina[] = [
     fabricante: 'MSD',
     especies: ['canina'],
     dosesNaSerie: 2,
+    dosesAdultoSemHistorico: 2,
+    idadeMinimaDias: 56,
+    essencial: false,
+    /* A intranasal é a apresentação que mais sai; a injetável fica para o cão que não deixa. */
+    vias: ['intranasal', 'subcutanea'],
     intervaloReforcoDias: 365,
     obrigatoria: false,
     estoqueMinimo: 8,
@@ -54,6 +72,10 @@ export const vacinasFixture: Vacina[] = [
     fabricante: 'Zoetis',
     especies: ['canina'],
     dosesNaSerie: 2,
+    dosesAdultoSemHistorico: 2,
+    idadeMinimaDias: 56,
+    essencial: false,
+    vias: ['subcutanea'],
     intervaloReforcoDias: 365,
     obrigatoria: false,
     estoqueMinimo: 6,
@@ -64,6 +86,10 @@ export const vacinasFixture: Vacina[] = [
     fabricante: 'Zoetis',
     especies: ['felina'],
     dosesNaSerie: 3,
+    dosesAdultoSemHistorico: 2,
+    idadeMinimaDias: 56,
+    essencial: true,
+    vias: ['subcutanea'],
     intervaloReforcoDias: 365,
     obrigatoria: false,
     estoqueMinimo: 6,
@@ -74,6 +100,11 @@ export const vacinasFixture: Vacina[] = [
     fabricante: 'Boehringer',
     especies: ['felina'],
     dosesNaSerie: 2,
+    dosesAdultoSemHistorico: 2,
+    idadeMinimaDias: 56,
+    /* Depende de o gato sair de casa e do teste negativo antes — decisão de consulta. */
+    essencial: false,
+    vias: ['subcutanea'],
     intervaloReforcoDias: 365,
     obrigatoria: false,
     estoqueMinimo: 4,

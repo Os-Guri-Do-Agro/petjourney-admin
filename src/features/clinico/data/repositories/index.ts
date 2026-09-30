@@ -3,10 +3,7 @@ export {
   type EntradaDeJustificativa,
   type MutacaoAgenda,
 } from './agenda-repository'
-export {
-  encounterRepository,
-  EncounterLockedError,
-} from './encounter-repository'
+export { encounterRepository, EncounterLockedError } from './encounter-repository'
 export {
   waitlistRepository,
   OFERTA_MINUTOS,
@@ -25,7 +22,14 @@ export {
   type ResultadoDaLinha,
   type VinculosDaImportacao,
 } from './migracao-repository'
-export { vacinaRepository, type AplicacaoNaLista, type ChamadaDeVacina } from './vacina-repository'
+export {
+  vacinaRepository,
+  AplicacaoRecusadaError,
+  type AplicacaoNaLista,
+  type CarteirinhaNoApp,
+  type ChamadaDeVacina,
+  type ProximaNaAgenda,
+} from './vacina-repository'
 export {
   internacaoRepository,
   AltaSemAvisoError,

@@ -107,6 +107,53 @@ function atendimentosDoDia(data: ISODate): Appointment[] {
     .sort((a, b) => a.inicio.localeCompare(b.inicio))
 }
 
+export type NovoAtendimento = {
+  petId: string
+  tutorId: string
+  professionalId: string
+  roomIds: string[]
+  typeId: string
+  inicio: ISODateTime
+  fim: ISODateTime
+  encaixe: boolean
+  observacao: string
+  origem: Appointment['origem']
+}
+
+/**
+ * Um atendimento novo, no formato que `criar` grava.
+ *
+ * Exportado para quem marca horário **como consequência de outro registro** — a próxima dose
+ * da vacina, marcada na mesma gravação da aplicação. Chamar `criar` de dentro de outra chamada
+ * pagaria a latência duas vezes e deixaria uma janela em que a dose existe e o horário não.
+ */
+export function atendimentoNovo(input: NovoAtendimento, agora: ISODateTime): Appointment {
+  return {
+    id: novoId('apt'),
+    petId: input.petId,
+    tutorId: input.tutorId,
+    professionalId: input.professionalId,
+    roomIds: input.roomIds,
+    typeId: input.typeId,
+    inicio: input.inicio,
+    fim: input.fim,
+    status: 'agendado',
+    origem: input.origem,
+    encaixe: input.encaixe,
+    observacao: input.observacao,
+    chegadaEm: null,
+    iniciadoEm: null,
+    finalizadoEm: null,
+    canceladoEm: null,
+    motivoCancelamento: null,
+    justificativaDeFalta: null,
+    encounterId: null,
+    linkedGroupId: null,
+    criadoEm: agora,
+    atualizadoEm: agora,
+  }
+}
+
 export const agendaRepository = {
   obterDia(data: ISODate): Promise<AgendaDia> {
     return simularChamada('agenda.dia', () => {
@@ -270,45 +317,10 @@ export const agendaRepository = {
     })
   },
 
-  criar(input: {
-    petId: string
-    tutorId: string
-    professionalId: string
-    roomIds: string[]
-    typeId: string
-    inicio: ISODateTime
-    fim: ISODateTime
-    encaixe: boolean
-    observacao: string
-    origem: Appointment['origem']
-  }): Promise<MutacaoAgenda> {
+  criar(input: NovoAtendimento): Promise<MutacaoAgenda> {
     return simularChamada('agenda.criar', () => {
       const dataset = getDataset()
-      const agora = agoraIso()
-      const novo: Appointment = {
-        id: novoId('apt'),
-        petId: input.petId,
-        tutorId: input.tutorId,
-        professionalId: input.professionalId,
-        roomIds: input.roomIds,
-        typeId: input.typeId,
-        inicio: input.inicio,
-        fim: input.fim,
-        status: 'agendado',
-        origem: input.origem,
-        encaixe: input.encaixe,
-        observacao: input.observacao,
-        chegadaEm: null,
-        iniciadoEm: null,
-        finalizadoEm: null,
-        canceladoEm: null,
-        motivoCancelamento: null,
-        justificativaDeFalta: null,
-        encounterId: null,
-        linkedGroupId: null,
-        criadoEm: agora,
-        atualizadoEm: agora,
-      }
+      const novo = atendimentoNovo(input, agoraIso())
 
       /** Nada a restaurar: desfazer de uma criação é apagar. */
       const token = novoId('undo')

@@ -1,0 +1,254 @@
+/*
+ * O acabamento da ficha do paciente: o mesmo da Visão geral (`components/home/home-card.css`),
+ * aprovado pelo usuário para as três vistas do paciente — Este pet em 30 s, Histórico e Vacinas — e
+ * para os diálogos de vacina abertos delas.
+ *
+ * Três partes:
+ *
+ * 1. **O fundo** da Visão geral: dois brilhos de sálvia no topo e a grade fina que some descendo.
+ * 2. **A ponte de tokens.** Os componentes do módulo clínico pintam com `--clinic-*`. Dentro de
+ *    `.ficha-tema` esses tokens apontam para os da Visão geral (`--hc-*`), e a tabela, a linha do
+ *    tempo, o protocolo e a prévia do celular mudam de acabamento sem ganhar uma segunda versão.
+ *    Fora da ficha — agenda, atendimento, internação — nada muda.
+ * 3. **O cabeçalho e as pílulas**, iguais aos da saudação da Visão geral.
+ *
+ * Global de propósito, preso a `.ficha-tema`: vale na página e nos diálogos (que o PrimeVue leva para
+ * o `body`), e em nenhum outro lugar. As variáveis `--hc-*` vêm de `.hc-tema`, que as mesmas raízes
+ * também levam.
+ */
+
+/* ------------------------------------------------------------------ ponte de tokens */
+
+.ficha-tema {
+  --clinic-bg: var(--hc-fundo);
+  --clinic-surface: var(--hc-cartao);
+  --clinic-surface-soft: var(--hc-fundo);
+  --clinic-surface-sunken: var(--hc-linha);
+  --clinic-line: var(--hc-borda);
+  --clinic-line-soft: var(--hc-linha);
+  --clinic-text: var(--hc-tinta);
+  --clinic-muted: var(--hc-tinta-2);
+  /* O terceiro cinza da Visão geral fica abaixo de 4,5:1 a 11 px: aqui o apagado é o segundo. */
+  --clinic-faint: var(--hc-tinta-2);
+  --clinic-accent: var(--hc-marca);
+  --clinic-accent-strong: var(--hc-marca-forte);
+  --clinic-accent-tint: var(--hc-marca-clara);
+  --clinic-risk-text: var(--hc-coral-tinta);
+  --clinic-risk-bg: var(--hc-coral-fundo);
+  --clinic-risk-line: var(--hc-coral-fundo);
+  --clinic-attention-text: var(--hc-pessego-tinta);
+  --clinic-attention-bg: var(--hc-pessego-fundo);
+  --clinic-attention-line: var(--hc-pessego-fundo);
+  --clinic-ok-text: var(--hc-verde-tinta);
+  --clinic-ok-bg: var(--hc-verde-fundo);
+  --clinic-ok-line: var(--hc-verde-fundo);
+  --clinic-neutral-text: var(--hc-cinza-tinta);
+  --clinic-neutral-bg: var(--hc-cinza-fundo);
+  --clinic-neutral-line: var(--hc-cinza-fundo);
+  --clinic-shadow-card: var(--hc-sombra);
+  --clinic-radius-card: 1rem;
+  --clinic-focus-ring: 0 0 0 2px var(--hc-cartao), 0 0 0 4px var(--hc-marca);
+}
+
+/* ------------------------------------------------------------------ fundo
+ * Três classes, e não duas: o `PartnerPageFrame` pinta o próprio fundo em CSS com escopo, que
+ * empata com duas classes e carrega depois — o linho vencia e o fundo da Visão geral sumia.
+ */
+
+.ficha-tema.hc-tema.partner-page {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(52rem 26rem at 8% -6rem, rgb(120 196 178 / 30%), transparent 70%),
+    radial-gradient(44rem 24rem at 96% -4rem, rgb(96 178 196 / 22%), transparent 70%),
+    var(--hc-fundo);
+}
+
+.ficha-tema.hc-tema.partner-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--hc-grade) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hc-grade) 1px, transparent 1px);
+  background-size: 28px 28px;
+  content: '';
+  mask-image: linear-gradient(to bottom, #000 0, rgb(0 0 0 / 60%) 16rem, transparent 34rem);
+  pointer-events: none;
+}
+
+.app-dark .ficha-tema.hc-tema.partner-page {
+  background:
+    radial-gradient(52rem 26rem at 8% -6rem, rgb(108 201 181 / 13%), transparent 70%),
+    radial-gradient(44rem 24rem at 96% -4rem, rgb(108 198 208 / 9%), transparent 70%),
+    var(--hc-fundo);
+}
+
+/* ------------------------------------------------------------------ pílulas
+ * As ações da saudação da Visão geral (`.acao` em `inicio.vue`): contornada no fundo do cartão,
+ * cheia no degradê para o próximo passo natural. Nenhuma ação sem fundo ou borda à vista.
+ */
+
+.ficha-tema .ficha-pilula,
+.ficha-tema .ficha-pilula.p-button {
+  --pilula-sombra: 0 1px 2px rgb(20 32 28 / 5%);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0 0.95rem;
+  border: 1px solid #bfdcd3;
+  border-radius: 999px;
+  background: var(--hc-cartao);
+  box-shadow: var(--pilula-sombra);
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 150ms ease-out,
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.app-dark .ficha-tema .ficha-pilula,
+.app-dark .ficha-tema .ficha-pilula.p-button {
+  border-color: #2c4a42;
+}
+
+.ficha-tema .ficha-pilula:hover,
+.ficha-tema .ficha-pilula.p-button:not(:disabled):hover {
+  --pilula-sombra: 0 4px 12px -6px rgb(20 32 28 / 25%);
+
+  border-color: var(--hc-marca);
+  background: var(--hc-cartao);
+  color: var(--hc-tinta);
+}
+
+.ficha-tema .ficha-pilula--cheia,
+.ficha-tema .ficha-pilula--cheia.p-button {
+  --pilula-sombra: 0 6px 16px -8px rgb(31 100 87 / 70%);
+
+  border-color: transparent;
+  background: var(--hc-degrade-botao);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.ficha-tema .ficha-pilula--cheia:hover,
+.ficha-tema .ficha-pilula--cheia.p-button:not(:disabled):hover {
+  --pilula-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+
+  border-color: transparent;
+  background: var(--hc-degrade-botao);
+  color: #ffffff;
+}
+
+/* Desabilitada continua lendo como pílula: perde a sombra e a cor, não a borda. */
+.ficha-tema .ficha-pilula.p-button:disabled {
+  border-color: var(--hc-borda);
+  background: var(--hc-linha);
+  box-shadow: none;
+  color: var(--hc-tinta-3);
+  opacity: 1;
+}
+
+.ficha-tema .ficha-pilula:focus-visible,
+.ficha-tema .ficha-pilula.p-button:focus-visible {
+  outline: 2px solid var(--hc-marca);
+  outline-offset: 2px;
+}
+
+.ficha-tema .ficha-pilula__icone {
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--hc-marca);
+}
+
+.ficha-tema .ficha-pilula--cheia .ficha-pilula__icone,
+.ficha-tema .ficha-pilula.p-button:disabled .ficha-pilula__icone {
+  color: currentColor;
+}
+
+/* A contagem dentro da pílula: o selo de 6 px, no par da gravidade. */
+.ficha-tema .ficha-pilula__selo {
+  display: inline-grid;
+  min-width: 1.25rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.2;
+  place-items: center;
+}
+
+/* ------------------------------------------------------------------ cartões
+ * O cartão é o `.hc` da Visão geral. O que mora dentro dele fica plano: a tabela e a linha do tempo
+ * perdem a moldura própria, senão seria cartão dentro de cartão.
+ */
+
+.ficha-tema .hc .tabela,
+.ficha-tema .atos .tabela {
+  border: 0;
+  border-radius: 0.75rem;
+  box-shadow: none;
+}
+
+.ficha-tema .hc > .timeline {
+  width: auto;
+}
+
+.ficha-tema .hc > .timeline > .historico {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* O título da linha do tempo vira o do cartão que a contém. */
+.ficha-tema .hc > .timeline > .historico > .clinic-label {
+  display: none;
+}
+
+/*
+ * A grade de duas colunas das vistas da ficha. As colunas são decididas pela largura do conteúdo,
+ * não da janela — por isso quem contém a grade declara `container-type` (a consulta de contêiner
+ * estiliza os descendentes, nunca o próprio contêiner).
+ */
+.ficha-tema .ficha-conteudo {
+  display: grid;
+  gap: 1.25rem;
+  container-type: inline-size;
+}
+
+.ficha-tema .ficha-grade {
+  display: grid;
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.ficha-tema .ficha-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+/* A ajuda sob o título do cartão, como o "O que este paciente recebeu" de lá. */
+.ficha-tema .ficha-ajuda {
+  margin: -0.65rem 0 0;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ficha-tema .ficha-pilula,
+  .ficha-tema .ficha-pilula.p-button {
+    transition: none;
+  }
+}

@@ -194,8 +194,14 @@ const ORDEM_DA_SITUACAO: Record<SituacaoDoLote, number> = {
  * coisa e o gráfico diz outra" nasce de cada pedaço da tela fazer a própria conta.
  */
 export function resumirEstoque(entrada: EntradaDoEstoque): ResumoDoEstoque {
-  const { lotes, vacinas, aplicacoes, hoje } = entrada
+  const { lotes, vacinas, hoje } = entrada
   const meses = entrada.meses ?? MESES_DE_CONSUMO
+  /*
+   * Só o que saiu **desta** geladeira. A dose externa — a do pet shop, a da campanha — entra na
+   * carteira do animal, mas não gastou frasco daqui: contá-la no giro faria a clínica comprar
+   * para um consumo que não é dela.
+   */
+  const aplicacoes = entrada.aplicacoes.filter((aplicacao) => aplicacao.origem === 'clinica')
 
   const vacinaPorId = new Map(vacinas.map((vacina) => [vacina.id, vacina]))
 
@@ -209,7 +215,9 @@ export function resumirEstoque(entrada: EntradaDoEstoque): ResumoDoEstoque {
   const aplicadasPorCodigo = new Map<string, number>()
 
   for (const aplicacao of aplicacoes) {
-    aplicadasPorCodigo.set(aplicacao.lote, (aplicadasPorCodigo.get(aplicacao.lote) ?? 0) + 1)
+    if (aplicacao.lote) {
+      aplicadasPorCodigo.set(aplicacao.lote, (aplicadasPorCodigo.get(aplicacao.lote) ?? 0) + 1)
+    }
   }
 
   const noEstoque: LoteNoEstoque[] = lotes.map((lote) => {

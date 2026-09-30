@@ -401,13 +401,14 @@ function salvarEmPdf() {
 /** Aplicações de vacina do paciente — o comprovante imprime a partir delas. */
 const aplicacoesDeVacina = ref<AplicacaoVacina[]>([])
 
-watch(
-  () => prontuario.pet?.id,
-  async (petId) => {
-    aplicacoesDeVacina.value = petId ? await vacinaRepository.doPaciente(petId) : []
-  },
-  { immediate: true },
-)
+async function recarregarVacinas() {
+  const petId = prontuario.pet?.id
+
+  aplicacoesDeVacina.value = petId ? await vacinaRepository.doPaciente(petId) : []
+}
+
+/* A dose aplicada nesta consulta precisa sair no comprovante impresso logo depois. */
+watch(() => prontuario.pet?.id, recarregarVacinas, { immediate: true })
 
 const retornoAberto = ref(false)
 
@@ -717,6 +718,7 @@ onBeforeUnmount(() => {
             :encounter="encounter"
             :pet="prontuario.pet"
             :somente-leitura="prontuario.somenteLeitura"
+            @registrada="recarregarVacinas"
           />
 
           <ProntuarioReceita

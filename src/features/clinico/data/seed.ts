@@ -62,6 +62,7 @@ import {
   gerarDiario,
   petsDoResumo,
 } from './seed-resumo'
+import { aplicacoesDaVacinacao, eventosDaVacinacao, petsDaVacinacao } from './seed-vacinacao'
 import type {
   Anamnese,
   AplicacaoVacina,
@@ -1817,6 +1818,14 @@ type LotePlantado = {
   /** Centavos por dose. */
   custoUnitario: number
   perdas: PerdaPlantada[]
+  /**
+   * Doses que ficam no frasco até depois do vencimento, qualquer que seja o sorteio da rotina.
+   *
+   * O movimento de fundo é sorteado com a data do dia na semente: num dia ele gasta o lote até a
+   * última dose, noutro deixa três. O caso "lote vencido com dose dentro" não pode depender disso
+   * — é ele que a demonstração abre no diálogo de aplicar para mostrar o frasco travado.
+   */
+  sobraGarantida?: number
   /** O que este lote existe para demonstrar. */
   caso: string
 }
@@ -1877,6 +1886,7 @@ const LOTES_PLANTADOS: LotePlantado[] = [
     custoUnitario: 3250,
     /* Geladeira fora da faixa num fim de semana: leva o que estiver dentro, não uma dose só. */
     perdas: [{ diasAtras: 300, quantidade: 3, motivo: 'temperatura' }],
+    sobraGarantida: 2,
     caso: 'vencido, perda por temperatura',
   },
   {
@@ -2012,7 +2022,8 @@ function loteParaAplicacao(
         lote.vacinaId === vacinaId &&
         lote.recebidoEm <= em &&
         lote.validade >= em &&
-        (gasto.get(lote.codigo) ?? 0) < lote.quantidadeRecebida - perdasDoLotePlantado(lote),
+        (gasto.get(lote.codigo) ?? 0) <
+          lote.quantidadeRecebida - perdasDoLotePlantado(lote) - sobraGarantida(lote),
     )
     .sort((a, b) => a.validade.localeCompare(b.validade))
 
@@ -2029,6 +2040,10 @@ function loteParaAplicacao(
 
 function perdasDoLotePlantado(lote: LoteDeVacina): number {
   return lote.perdas.reduce((total, perda) => total + perda.quantidade, 0)
+}
+
+function sobraGarantida(lote: LoteDeVacina): number {
+  return LOTES_PLANTADOS.find((plantado) => plantado.codigo === lote.codigo)?.sobraGarantida ?? 0
 }
 
 /**
@@ -2132,6 +2147,7 @@ function aplicacoesDeVacinaPlantadas(hoje: ISODate, lotes: LoteDeVacina[]): Apli
       id: `apl-${indice}-${item.petId}`,
       petId: item.petId,
       vacinaId: item.vacinaId,
+      origem: 'clinica' as const,
       /* Vacina é ato de quem aplica: fica com a clínica geral. */
       professionalId: 'prof-ana',
       aplicadaEm: iso(data, 9 * 60 + 30),
@@ -2142,8 +2158,16 @@ function aplicacoesDeVacinaPlantadas(hoje: ISODate, lotes: LoteDeVacina[]): Apli
       lote: lote?.codigo ?? `L${data.slice(0, 4)}-${String(indice + 1).padStart(3, '0')}`,
       validadeLote: lote?.validade ?? addDays(data, 540),
       dose: item.dose,
-      via: 'subcutanea' as const,
+      /*
+       * O tamanho da série congelado como o catálogo o tinha — é o registro de antes do protocolo
+       * por idade, e a carteira desses animais continua dizendo o que sempre disse.
+       */
+      dosesNaSerie: vacina?.dosesNaSerie ?? 1,
+      via: vacina?.vias[0] ?? 'subcutanea',
       proximaDoseEm: addDays(data, dentroDaSerie ? 28 : (vacina?.intervaloReforcoDias ?? 365)),
+      agendamentoDaProximaId: null,
+      encounterId: null,
+      externa: null,
       observacao: '',
     })
   }
@@ -2914,7 +2938,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
 
   const clinic: Clinic = { ...clinicFixture, feriados }
 
-  const pets = [...petsFixture, ...petsDoResumo(hoje)].map((pet) => ({
+  const pets = [...petsFixture, ...petsDoResumo(hoje), ...petsDaVacinacao(hoje)].map((pet) => ({
     ...pet,
     alertas: [...pet.alertas],
   }))
@@ -2923,6 +2947,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
 
   /* Os lotes vêm antes das aplicações: é deles que sai o código que cada dose cita. */
   const lotesDeVacina = lotesDeVacinaPlantados(clock.today())
+  const daCarteirinha = aplicacoesDaVacinacao(clock.today(), iso)
 
   return {
     semente,
@@ -2935,10 +2960,12 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     timeline: [
       ...montarTimeline(encounters, comStatus),
       ...eventosDasInternacoesAbertas(internacao),
+      ...eventosDaVacinacao(daCarteirinha),
     ].sort((a, b) => b.em.localeCompare(a.em)),
     aplicacoesDeVacina: [
       ...aplicacoesDeVacinaPlantadas(clock.today(), lotesDeVacina),
       vacinaDaPerola(clock.today(), iso),
+      ...daCarteirinha,
     ],
     lotesDeVacina,
     atos: atosPlantados(encounters, clock.today()),

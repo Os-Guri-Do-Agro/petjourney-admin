@@ -797,10 +797,11 @@ export type AtoClinico = {
   medicamentoId: string | null
   /** O que foi feito, na frase que quem leu o prontuário vai encontrar. */
   descricao: string
-  via: PrescriptionRoute | null
+  /** A vacina derivada traz a via dela, que pode ser intranasal. */
+  via: PrescriptionRoute | ViaDeVacina | null
   doseTexto: string
   realizadoEm: ISODateTime
-  /** Quem executou. Vazio em `avulso`: a clínica não viu acontecer. */
+  /** Quem executou. Vazio em `avulso` e em vacina de fora: a clínica não viu acontecer. */
   professionalId: string
   observacao: string
 }
@@ -822,8 +823,33 @@ export type Vacina = {
   nome: string
   fabricante: string
   especies: PetSpecies[]
-  /** Doses da série inicial. Filhote toma três de V10; adulto toma uma. */
+  /** Doses da série inicial **de filhote**. Três de V10; a antirrábica é dose única. */
   dosesNaSerie: number
+  /**
+   * Doses da série de quem começa **adulto e sem histórico**.
+   *
+   * Menor que a de filhote, e é isso que faz o protocolo depender da idade: o filhote precisa
+   * de várias doses porque o anticorpo da mãe anula as primeiras; o adulto não tem esse
+   * anticorpo no caminho. Ver `domain/protocolo-vacinal.ts`.
+   */
+  dosesAdultoSemHistorico: number
+  /**
+   * Idade mínima para a primeira dose, em dias de vida.
+   *
+   * É o que faz a antirrábica do filhote aparecer como "a partir de 12 semanas" em vez de
+   * "atrasada": antes dessa idade ela não é devida, e a carteira não pode cobrar o que ainda
+   * não cabe.
+   */
+  idadeMinimaDias: number
+  /**
+   * Essencial para toda a espécie, ou recomendada conforme o estilo de vida.
+   *
+   * A essencial entra no protocolo de todo paciente; a opcional só entra quando alguém começa.
+   * Mostrar giárdia como "pendente" em todo cão faria a carteira de todo mundo parecer atrasada.
+   */
+  essencial: boolean
+  /** Vias aceitas, a de rotina primeiro. Gripe canina tem apresentação intranasal. */
+  vias: ViaDeVacina[]
   /** Dias até o reforço. É daqui que sai o recall — a recorrência que sustenta a clínica. */
   intervaloReforcoDias: number
   /** Obrigatória por lei ou por exigência de viagem. Muda a insistência do lembrete. */
@@ -876,24 +902,80 @@ export type LoteDeVacina = {
 }
 
 /**
+ * Vias de uma vacina.
+ *
+ * Não é a `PrescriptionRoute` da receita: vacina não se dá na veia nem no ouvido, e a
+ * traqueobronquite tem apresentação **intranasal**, que receita nenhuma usa. Reaproveitar a lista
+ * da receita oferecia seis vias erradas e escondia a única diferente.
+ */
+export type ViaDeVacina = 'subcutanea' | 'intramuscular' | 'intranasal' | 'oral'
+
+/**
+ * Onde a dose foi aplicada.
+ *
+ * `externa` é a dose que a clínica **não aplicou** — a do pet shop onde o filhote foi comprado,
+ * a da campanha da prefeitura, a da clínica antiga. Entra para o protocolo saber em que ponto o
+ * animal está, e entra marcada: sem lote, sem aplicador da casa, e com a procedência dita.
+ */
+export type OrigemDaAplicacao = 'clinica' | 'externa'
+
+/**
+ * Como a clínica ficou sabendo da dose de fora.
+ *
+ * `comprovante` — alguém daqui viu a carteirinha ou o atestado de onde foi aplicada.
+ * `relato` — só a palavra do responsável. Conta para o protocolo do mesmo jeito (a decisão de
+ * revacinar é do veterinário, não do sistema), mas os dois lados mostram a diferença.
+ */
+export type ProcedenciaExterna = 'comprovante' | 'relato'
+
+export type AplicacaoExterna = {
+  /** "Pet Shop Amigo Fiel", "Campanha municipal" — como está no papel. */
+  local: string
+  /** Quem aplicou lá, quando o papel diz. Vazio quando não diz. */
+  aplicador: string
+  procedencia: ProcedenciaExterna
+  /** Quem daqui transcreveu, e quando. É esse o nome que responde pelo registro. */
+  registradaPor: string
+  registradaEm: ISODateTime
+}
+
+/**
  * Uma aplicação registrada.
  *
  * `lote` e `validadeLote` não são burocracia: é o que a farmacovigilância exige rastrear se
- * houver reação adversa em lote, e o que a companhia aérea confere no balcão.
+ * houver reação adversa em lote, e o que a companhia aérea confere no balcão. Na dose **externa**
+ * os dois são nulos — a clínica não aplicou, não sabe de que frasco saiu, e inventar um código
+ * seria pior do que dizer que não sabe.
  */
 export type AplicacaoVacina = {
   id: string
   petId: string
   vacinaId: string
+  origem: OrigemDaAplicacao
+  /** Quem aplicou. Vazio na externa: quem responde por ela está em `externa.registradaPor`. */
   professionalId: string
   aplicadaEm: ISODateTime
-  lote: string
-  validadeLote: ISODate
+  lote: string | null
+  validadeLote: ISODate | null
   /** Qual dose da série. 1 de 3, 2 de 3… */
   dose: number
-  via: PrescriptionRoute
+  /**
+   * O tamanho da série, **congelado na aplicação**.
+   *
+   * Depende da idade em que a série começou (filhote ou adulto sem histórico), e a idade muda. Lido
+   * do catálogo na hora de mostrar, o "2 de 3" de um filhote virava "2 de 2" no dia em que ele
+   * fizesse um ano — reescrevendo o que está impresso na carteira dele.
+   */
+  dosesNaSerie: number
+  /** Nula na externa quando o papel não diz. */
+  via: ViaDeVacina | null
   /** Data calculada do reforço, congelada na aplicação. */
   proximaDoseEm: ISODate
+  /** O horário marcado para a próxima dose, quando a clínica marcou na hora. */
+  agendamentoDaProximaId: string | null
+  /** Atendimento em que a dose foi dada, quando foi dentro de um. */
+  encounterId: string | null
+  externa: AplicacaoExterna | null
   observacao: string
 }
 

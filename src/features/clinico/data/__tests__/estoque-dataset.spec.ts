@@ -84,7 +84,7 @@ describe('lotes do dataset', () => {
     const porCodigo = new Map(dataset.lotesDeVacina.map((lote) => [lote.codigo, lote]))
 
     const divergentes = dataset.aplicacoesDeVacina
-      .map((aplicacao) => ({ aplicacao, lote: porCodigo.get(aplicacao.lote) }))
+      .map((aplicacao) => ({ aplicacao, lote: porCodigo.get(aplicacao.lote ?? '') }))
       .filter(({ aplicacao, lote }) => lote && aplicacao.validadeLote !== lote.validade)
       .map(({ aplicacao }) => `${aplicacao.id} (${aplicacao.lote})`)
 
@@ -99,9 +99,11 @@ describe('lotes do dataset', () => {
      */
     const dataset = getDataset()
     const codigos = new Set(dataset.lotesDeVacina.map((lote) => lote.codigo))
-    const conhecidas = dataset.aplicacoesDeVacina.filter((item) => codigos.has(item.lote))
+    /* A dose externa não saiu desta geladeira: fica fora da conta. */
+    const daClinica = dataset.aplicacoesDeVacina.filter((item) => item.origem === 'clinica')
+    const conhecidas = daClinica.filter((item) => codigos.has(item.lote ?? ''))
 
-    expect(conhecidas.length / dataset.aplicacoesDeVacina.length).toBeGreaterThan(0.5)
+    expect(conhecidas.length / daClinica.length).toBeGreaterThan(0.5)
   })
 })
 

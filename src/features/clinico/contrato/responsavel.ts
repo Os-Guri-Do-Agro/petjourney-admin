@@ -322,8 +322,34 @@ export type FracaoDeDose = (typeof FRACOES_DE_DOSE)[number]
 export const UNIDADES_DE_DOSE = ['COMPRIMIDO', 'ML', 'GOTA', 'APLICACAO'] as const
 export type UnidadeDeDose = (typeof UNIDADES_DE_DOSE)[number]
 
+/**
+ * `VENCIDO` é **atrasado no sentido do app**: passou da data e da carência de
+ * `CARENCIA_DE_ATRASO_DA_VACINA_DIAS`. Entre a data e a carência a dose é `PROXIMO` — é o mesmo
+ * relógio do `VACINA_ATRASADA` que o app já recebe.
+ */
 export const SITUACOES_DO_REFORCO = ['EM_DIA', 'PROXIMO', 'VENCIDO', 'SERIE_INCOMPLETA'] as const
 export type SituacaoDoReforco = (typeof SITUACOES_DO_REFORCO)[number]
+
+/**
+ * Dias depois da data prevista em que a dose vira atrasada. É o `AJUSTES.vacinaAtrasoDias` da
+ * API e o `VACINA_ATRASO_DIAS` do app (`constants/vacina-atraso.ts`) — o mesmo número nos três.
+ */
+export const CARENCIA_DE_ATRASO_DA_VACINA_DIAS = 3
+
+/**
+ * Vias de vacina. Não é `ViaDeAdministracao` (a da receita): vacina não é intravenosa nem
+ * otológica, e a traqueobronquite canina é **intranasal**, que receita nenhuma usa.
+ */
+export const VIAS_DE_VACINA = ['SUBCUTANEA', 'INTRAMUSCULAR', 'INTRANASAL', 'ORAL'] as const
+export type ViaDeVacina = (typeof VIAS_DE_VACINA)[number]
+
+/** `EXTERNA` é a dose que a clínica registrou mas **não aplicou**: pet shop, campanha, outra clínica. */
+export const ORIGENS_DA_VACINA = ['CLINICA', 'EXTERNA'] as const
+export type OrigemDaVacina = (typeof ORIGENS_DA_VACINA)[number]
+
+/** `COMPROVANTE`: a clínica viu o papel. `RELATO`: só a palavra do responsável. */
+export const PROCEDENCIAS_DA_VACINA_EXTERNA = ['COMPROVANTE', 'RELATO'] as const
+export type ProcedenciaDaVacinaExterna = (typeof PROCEDENCIAS_DA_VACINA_EXTERNA)[number]
 
 export const STATUS_DE_INTERNACAO = ['INTERNADO', 'ALTA', 'OBITO', 'TRANSFERIDO'] as const
 export type StatusDeInternacao = (typeof STATUS_DE_INTERNACAO)[number]
@@ -864,20 +890,44 @@ export type LembreteCriadoDaReceita = {
 // Vacinas aplicadas na clínica
 // ---------------------------------------------------------------------------
 
+/**
+ * Uma dose **registrada pela clínica** — aplicada nela (`CLINICA`) ou transcrita de fora
+ * (`EXTERNA`). O nome ficou do tempo em que só havia a primeira; a segunda chegou com a
+ * carteirinha conectada (`docs/clinico/14-*.md`).
+ *
+ * O selo "Aplicada na {clínica}" é da `CLINICA` e só dela. A `EXTERNA` mostra onde foi aplicada e
+ * quem a registrou aqui — nunca o selo: a clínica não pode assinar o que não aplicou.
+ */
 export type VacinaAplicadaNaClinica = {
   id: Cuid
   petId: Cuid
+  /** Quem registrou. Na `CLINICA` é também onde foi aplicada. */
   clinica: ClinicaResumo
-  profissional: ProfissionalResumo
-  vacina: { nome: string; fabricante: string; obrigatoria: boolean }
+  origem: OrigemDaVacina
+  /** Quem aplicou. `null` na `EXTERNA`: quem responde por ela é `externa.registradaPor`. */
+  profissional: ProfissionalResumo | null
+  vacina: { nome: string; fabricante: string; obrigatoria: boolean; essencial: boolean }
   aplicadaEm: DataHoraIso
-  lote: string
-  validadeLote: DataIso
-  /** 1 de 3, 2 de 3... */
+  /** `null` na `EXTERNA`: a clínica não aplicou e não inventa um código. */
+  lote: string | null
+  validadeLote: DataIso | null
+  /** `null` quando o papel de fora não diz. */
+  via: ViaDeVacina | null
+  /** 1 de 3, 2 de 3... O total é o da série **deste** pet, congelado quando ela começou. */
   dose: number
   dosesNaSerie: number
   proximaDoseEm: DataIso
+  /** O horário que a clínica já marcou para a próxima dose. `null` = a marcar. */
+  proximaDoseAgendada: { agendamentoId: Cuid; inicio: DataHoraIso } | null
   situacao: SituacaoDoReforco
+  externa: {
+    /** Como está no papel: "Pet Shop Amigo Fiel", "Campanha municipal". */
+    local: string
+    aplicador: string | null
+    procedencia: ProcedenciaDaVacinaExterna
+    registradaPor: ProfissionalResumo
+    registradaEm: DataHoraIso
+  } | null
   /**
    * A `Vacina` da carteira do app que esta aplicação fechou, quando havia uma pendente com o
    * mesmo nome. É o que impede a vacina de aparecer duas vezes.
@@ -1344,3 +1394,149 @@ export const TEXTO_PT_DA_NOTIFICACAO_DO_VINCULO = (
       ? 'Confirme o pet que a clínica atende para ver tudo no app.'
       : `Confirme os ${dados.quantosPets} pets que a clínica atende para ver tudo no app.`,
 })
+
+// ---------------------------------------------------------------------------
+// Carteirinha conectada — o protocolo do pet e a dose que acabou de sair
+// ---------------------------------------------------------------------------
+
+/*
+ * A clínica aplica, e a carteirinha do app muda na hora: mesma entidade, dois lados. Além da dose
+ * (`VacinaAplicadaNaClinica`, acima), o app recebe o **plano** — a sequência inteira que a clínica
+ * montou para o pet, por espécie e idade, com onde ele está nela. É o que o responsável de um
+ * filhote mais precisa ver e o que ele hoje monta de cabeça. Passo a passo em
+ * `docs/clinico/14-*.md`.
+ *
+ * O plano da clínica **vale mais** que o `intervaloProximaDose` do app (`constants/vacina-protocols.ts`)
+ * para as vacinas que ela registrou: a data da próxima dose vem daqui, congelada na aplicação, e o
+ * app não recalcula. A tabela do app continua valendo para o que o responsável registra sozinho.
+ *
+ * A notificação nova vive fora de `TIPOS_DE_NOTIFICACAO_CLINICA`, como a do vínculo: aquele
+ * `Record` é fechado no app e obrigaria tudo a entrar na mesma leva.
+ */
+
+/** Série de filhote (antes de 16 semanas, mais doses) ou de adulto sem histórico. */
+export const TIPOS_DE_SERIE_VACINAL = ['FILHOTE', 'ADULTO'] as const
+export type TipoDeSerieVacinal = (typeof TIPOS_DE_SERIE_VACINAL)[number]
+
+/**
+ * - `APLICADA` — dada, aqui ou fora (`aplicacaoId` diz qual).
+ * - `DEVIDA` — a data chegou, ou passou há menos que a carência. É a dose de hoje.
+ * - `ATRASADA` — passou da carência. É o mesmo atraso do `VACINA_ATRASADA`.
+ * - `PREVISTA` — tem data, e ela não chegou.
+ * - `AGUARDA_IDADE` — o pet ainda não tem a idade mínima; `em` é o dia em que passa a ter.
+ * - `PENDENTE` — essencial que ninguém começou, num pet que já tem idade. Não é atraso.
+ */
+export const ESTADOS_DA_DOSE_NO_PLANO = [
+  'APLICADA',
+  'DEVIDA',
+  'ATRASADA',
+  'PREVISTA',
+  'AGUARDA_IDADE',
+  'PENDENTE',
+] as const
+export type EstadoDaDoseNoPlano = (typeof ESTADOS_DA_DOSE_NO_PLANO)[number]
+
+export const SITUACOES_NO_PLANO_VACINAL = [
+  'EM_DIA',
+  'A_VENCER',
+  'DEVIDA',
+  'ATRASADA',
+  'AGUARDA_IDADE',
+  'NAO_INICIADA',
+] as const
+export type SituacaoNoPlanoVacinal = (typeof SITUACOES_NO_PLANO_VACINAL)[number]
+
+export type DoseNoPlanoVacinal = {
+  /** 1 a `total` na série. O reforço anual repete `total` e vem com `tipo: 'REFORCO'`. */
+  numero: number
+  total: number
+  tipo: 'SERIE' | 'REFORCO'
+  estado: EstadoDaDoseNoPlano
+  /** Data aplicada, ou a data em que a dose passa a caber. */
+  em: DataIso
+  /** A `VacinaAplicadaNaClinica.id`, quando `APLICADA`. */
+  aplicacaoId: Cuid | null
+  agendamento: { id: Cuid; inicio: DataHoraIso } | null
+}
+
+export type VacinaNoPlanoVacinal = {
+  vacina: { nome: string; fabricante: string; obrigatoria: boolean; essencial: boolean }
+  tipoDeSerie: TipoDeSerieVacinal
+  situacao: SituacaoNoPlanoVacinal
+  aplicadasNaSerie: number
+  total: number
+  /** A série, na ordem, e o reforço que fecha o ciclo. */
+  doses: DoseNoPlanoVacinal[]
+}
+
+export type PlanoVacinalDoPet = {
+  petId: Cuid
+  /** A clínica que montou o plano. */
+  clinica: ClinicaResumo
+  /** Quando foi calculado. O plano muda sozinho com o calendário — o app não guarda cópia. */
+  geradoEm: DataHoraIso
+  /** Ordenadas pelo que pede ação: atrasada, devida, a vencer, não iniciada, aguarda idade, em dia. */
+  vacinas: VacinaNoPlanoVacinal[]
+  /** Opcionais da espécie que ninguém começou. O app mostra recolhido, nunca como pendência. */
+  opcionaisNaoIniciadas: Array<{ nome: string; fabricante: string }>
+  atrasadas: number
+}
+
+export const ROTAS_DA_CARTEIRINHA = {
+  plano: 'GET /tutor/clinica/vacinas/plano?petId=', // PlanoVacinalDoPet [PET_SEM_ACESSO]
+} as const
+
+export const TIPO_DE_NOTIFICACAO_DA_VACINA = 'VACINA_REGISTRADA_PELA_CLINICA' as const
+
+/**
+ * Sai quando a clínica registra uma dose — é o "na hora" da carteirinha. A **externa** também
+ * avisa: o responsável precisa saber que o que ele contou entrou, e como entrou.
+ */
+export type DadosDaVacinaRegistrada = BaseDaNotificacaoClinica & {
+  tipo: typeof TIPO_DE_NOTIFICACAO_DA_VACINA
+  aplicacaoId: Cuid
+  petId: Cuid
+  petNome: string
+  clinicaNome: string
+  vacinaNome: string
+  origem: OrigemDaVacina
+  dose: number
+  dosesNaSerie: number
+  /** Para o corpo dizer "a próxima já está marcada". */
+  proximaDoseEm: DataIso
+  proximaDoseAgendadaPara: DataHoraIso | null
+}
+
+/** A carteira que o app já tem. `id` é a aplicação, para a tela rolar até a linha nova. */
+export const ROTA_DA_NOTIFICACAO_DA_VACINA = '/screens/vacina/lista'
+
+export const TEXTO_PT_DA_NOTIFICACAO_DA_VACINA = (
+  dados: DadosDaVacinaRegistrada,
+): { titulo: string; corpo: string } => {
+  const serie = dados.dosesNaSerie > 1 ? ` (dose ${dados.dose} de ${dados.dosesNaSerie})` : ''
+
+  if (dados.origem === 'EXTERNA') {
+    return {
+      titulo: `${dados.vacinaNome}${serie} na carteirinha de ${dados.petNome}`,
+      corpo: `Registrada por ${dados.clinicaNome} como dose de outro local.`,
+    }
+  }
+
+  /*
+   * O reforço anual cai no mesmo dia e mês de hoje, um ano depois: sem o ano, "até 29/09" lê como
+   * hoje. Dentro da série, a data é de semanas, e o ano sobraria.
+   */
+  const fechouASerie = dados.dose >= dados.dosesNaSerie
+
+  return {
+    titulo: `${dados.petNome} tomou ${dados.vacinaNome}${serie}`,
+    corpo: dados.proximaDoseAgendadaPara
+      ? `${dados.clinicaNome}. A próxima já está marcada: ${diaEHora(dados.proximaDoseAgendadaPara)}.`
+      : `${dados.clinicaNome}. Próxima dose até ${fechouASerie ? diaComAno(dados.proximaDoseEm) : dia(dados.proximaDoseEm)}.`,
+  }
+}
+
+/** `2027-09-29` → `29/09/2027`. */
+function diaComAno(data: DataIso): string {
+  return `${dia(data)}/${data.slice(0, 4)}`
+}

@@ -1,35 +1,27 @@
 <script setup lang="ts">
 /**
- * Registro de vacinação, dentro do atendimento.
+ * Vacinação, dentro do atendimento.
  *
- * Fecha o beat que o roteiro de demonstração pede — "atende, prescreve, **vacina**" — e que até
- * aqui não existia: vacina era tipo de agendamento e evento de histórico, nunca um registro.
+ * Fecha o beat que o roteiro de demonstração pede — "atende, prescreve, **vacina**". Até aqui era
+ * um formulário solto: lote e validade digitados, via fixa em subcutânea, e nenhuma ideia de em
+ * que ponto do protocolo o animal estava. Agora é o **protocolo do paciente** — o mesmo da carteira
+ * — e o mesmo diálogo de aplicação, que já abre com a vacina da vez, a dose certa e o lote que
+ * vence primeiro.
  *
- * Três campos que parecem burocracia e não são:
- *
- * - **Lote e validade** — é o que a farmacovigilância rastreia se houver reação adversa num
- *   lote inteiro, e o que a companhia aérea confere no balcão. Sem eles o comprovante não serve
- *   para viagem, que é quando ele é pedido.
- * - **Dose da série** — filhote toma três de V10 com 28 dias entre elas; adulto toma uma por
- *   ano. É essa distinção que decide se a clínica chama de volta no mês que vem ou no ano que
- *   vem, e é dela que sai a recorrência.
- *
- * A próxima dose é calculada e mostrada **antes** de gravar: quem aplica confere a data que vai
- * sair na carteira, em vez de descobri-la depois.
+ * Quem aplica no atendimento é, por padrão, quem está atendendo; o diálogo deixa trocar, porque na
+ * clínica cheia quem dá a vacina é muitas vezes outra pessoa.
  */
 import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import Select from 'primevue/select'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
-import ClinicField from '../base/ClinicField.vue'
-import { useClinicFormat } from '../../composables/useClinicFormat'
+import AplicarVacinaDialog from '../vacinas/AplicarVacinaDialog.vue'
+import PlanoVacinalLista from '../vacinas/PlanoVacinalLista.vue'
+import { useRotulosDaVacina } from '../../composables/useRotulosDaVacina'
 import { vacinaRepository } from '../../data/repositories'
 import type { AplicacaoVacina, Encounter, Pet } from '../../data/types'
-import { addDays } from '../../domain/clinic-time'
-import { proximaDose, vacinasDaEspecie } from '../../domain/vacinacao'
-import { clinicClock } from '../../stores/clinico'
+import type { PlanoVacinal } from '../../domain/protocolo-vacinal'
 
 const props = defineProps<{
   encounter: Encounter
@@ -37,163 +29,118 @@ const props = defineProps<{
   somenteLeitura: boolean
 }>()
 
+const emit = defineEmits<{
+  registrada: [aplicacao: AplicacaoVacina]
+}>()
+
 const { t } = useI18n()
-const formato = useClinicFormat()
+const router = useRouter()
+const rotulos = useRotulosDaVacina()
 
+const plano = ref<PlanoVacinal | null>(null)
 const aplicadas = ref<AplicacaoVacina[]>([])
-const salvando = ref(false)
+const aplicando = ref(false)
+const vacinaDaLinha = ref<string | null>(null)
 
-const vacinaId = ref<string | null>(null)
-const lote = ref('')
-const validadeLote = ref(addDays(clinicClock.today(), 365))
-const dose = ref(1)
-
-const catalogo = computed(() =>
-  props.pet ? vacinasDaEspecie(vacinaRepository.catalogo(), props.pet.especie) : [],
-)
-
-const opcoes = computed(() =>
-  catalogo.value.map((vacina) => ({
-    value: vacina.id,
-    label: `${vacina.nome} · ${vacina.fabricante}`,
-  })),
-)
-
-const escolhida = computed(() => catalogo.value.find((item) => item.id === vacinaId.value) ?? null)
-
-/** Doses possíveis da série escolhida. V10 oferece 1, 2 e 3; antirrábica, só 1. */
-const opcoesDeDose = computed(() =>
-  Array.from({ length: escolhida.value?.dosesNaSerie ?? 1 }, (_, indice) => ({
-    value: indice + 1,
-    label: t('clinico.vacinas.doseDeTotal', {
-      dose: indice + 1,
-      total: escolhida.value?.dosesNaSerie ?? 1,
-    }),
-  })),
-)
-
-/** A data que vai para a carteira, mostrada antes de gravar. */
-const proxima = computed(() =>
-  escolhida.value ? proximaDose(escolhida.value, dose.value, clinicClock.today()) : null,
-)
-
-const podeRegistrar = computed(
-  () => !props.somenteLeitura && Boolean(vacinaId.value) && lote.value.trim().length > 0,
+/** Só as deste atendimento: o resto da carteira está no protocolo, logo acima. */
+const nesteAtendimento = computed(() =>
+  aplicadas.value.filter((item) => item.encounterId === props.encounter.id),
 )
 
 async function carregar() {
-  if (props.pet) {
-    aplicadas.value = await vacinaRepository.doPaciente(props.pet.id)
-  }
-}
-
-onMounted(carregar)
-
-async function registrar() {
-  if (!podeRegistrar.value || !props.pet || !vacinaId.value) {
+  if (!props.pet) {
     return
   }
 
-  salvando.value = true
+  plano.value = vacinaRepository.plano(props.pet.id)
+  aplicadas.value = await vacinaRepository.doPaciente(props.pet.id)
+}
 
-  try {
-    await vacinaRepository.registrar({
-      petId: props.pet.id,
-      vacinaId: vacinaId.value,
-      professionalId: props.encounter.professionalId,
-      lote: lote.value,
-      validadeLote: validadeLote.value,
-      dose: dose.value,
-      via: 'subcutanea',
-      observacao: '',
-    })
+onMounted(carregar)
+watch(() => props.pet?.id, carregar)
 
-    lote.value = ''
-    vacinaId.value = null
-    dose.value = 1
-    await carregar()
-  } finally {
-    salvando.value = false
-  }
+function abrir(vacinaId: string | null = null) {
+  vacinaDaLinha.value = vacinaId
+  aplicando.value = true
+}
+
+async function aplicada(aplicacao: AplicacaoVacina) {
+  await carregar()
+  emit('registrada', aplicacao)
 }
 
 function nomeDaVacina(id: string) {
   return vacinaRepository.catalogo().find((item) => item.id === id)?.nome ?? id
+}
+
+function abrirCarteira() {
+  if (props.pet) {
+    void router.push(`/veterinario/paciente/${props.pet.id}/vacinas`)
+  }
 }
 </script>
 
 <template>
   <section class="vacinacao">
     <header class="vacinacao__topo">
-      <h4 class="clinic-label">{{ t('clinico.vacinas.registrar') }}</h4>
+      <h4 class="clinic-label">{{ t('clinico.vacinas.carteira.protocolo') }}</h4>
+      <div class="vacinacao__acoes">
+        <Button
+          :label="t('clinico.vacinas.carteira.verCarteira')"
+          icon="pi pi-mobile"
+          severity="secondary"
+          outlined
+          size="small"
+          @click="abrirCarteira"
+        />
+        <Button
+          v-if="!somenteLeitura && pet && plano"
+          :label="t('clinico.vacinas.aplicar.abrir')"
+          icon="pi pi-plus"
+          size="small"
+          class="clinic-acao-principal"
+          @click="abrir()"
+        />
+      </div>
     </header>
 
-    <div v-if="!somenteLeitura" class="formulario">
-      <ClinicField :rotulo="t('clinico.vacinas.colunaVacina')">
-        <Select
-          v-model="vacinaId"
-          :options="opcoes"
-          option-label="label"
-          option-value="value"
-          fluid
-          :pt="{ overlay: { class: 'clinic-overlay' } }"
-        />
-      </ClinicField>
+    <PlanoVacinalLista
+      v-if="plano"
+      :plano="plano"
+      :somente-leitura="somenteLeitura"
+      @aplicar="abrir"
+    />
 
-      <ClinicField :rotulo="t('clinico.vacinas.lote')">
-        <InputText v-model="lote" fluid placeholder="L2026-014" />
-      </ClinicField>
+    <!-- O que saiu deste atendimento, para quem fecha a conduta conferir antes de assinar. -->
+    <ul v-if="nesteAtendimento.length > 0" class="vacinacao__agora">
+      <li v-for="aplicacao in nesteAtendimento" :key="aplicacao.id">
+        <i class="pi pi-check-circle" aria-hidden="true" />
+        <span>
+          <strong>{{ nomeDaVacina(aplicacao.vacinaId) }}</strong>
+          ·
+          {{
+            aplicacao.dosesNaSerie > 1
+              ? t('clinico.vacinas.doseDeTotal', {
+                  dose: aplicacao.dose,
+                  total: aplicacao.dosesNaSerie,
+                })
+              : t('clinico.vacinas.plano.doseUnica')
+          }}
+          · {{ t('clinico.vacinas.lote') }} {{ aplicacao.lote }} · {{ rotulos.via(aplicacao.via) }}
+        </span>
+      </li>
+    </ul>
 
-      <ClinicField :rotulo="t('clinico.vacinas.validadeLote')">
-        <InputText v-model="validadeLote" type="date" fluid />
-      </ClinicField>
-
-      <ClinicField :rotulo="t('clinico.vacinas.dose')">
-        <Select
-          v-model="dose"
-          :options="opcoesDeDose"
-          option-label="label"
-          option-value="value"
-          fluid
-          :pt="{ overlay: { class: 'clinic-overlay' } }"
-        />
-      </ClinicField>
-
-      <Button
-        :label="t('clinico.vacinas.registrar')"
-        icon="pi pi-plus"
-        size="small"
-        :disabled="!podeRegistrar"
-        :loading="salvando"
-        class="formulario__salvar"
-        @click="registrar"
-      />
-    </div>
-
-    <!--
-      A data do reforço aparece **antes** de gravar. É o que a clínica vai cobrar daqui a um ano
-      (ou daqui a 28 dias, se a série estiver aberta), e conferir depois é conferir tarde.
-    -->
-    <p v-if="proxima" class="proxima">
-      <i class="pi pi-calendar" aria-hidden="true" />
-      {{ t('clinico.vacinas.proximaEm', { data: formato.dataCurta(proxima) }) }}
-    </p>
-
-    <div v-if="aplicadas.length > 0" class="carteira">
-      <span class="clinic-label">{{ t('clinico.documentos.vacinacao.titulo') }}</span>
-
-      <ul class="carteira__lista">
-        <li v-for="aplicacao in aplicadas" :key="aplicacao.id">
-          <span class="carteira__data clinic-value">
-            {{ formato.dataCurta(clinicClock.dateOf(aplicacao.aplicadaEm)) }}
-          </span>
-          <span class="carteira__nome">{{ nomeDaVacina(aplicacao.vacinaId) }}</span>
-          <span class="carteira__lote">
-            {{ t('clinico.vacinas.lote') }} {{ aplicacao.lote }}
-          </span>
-        </li>
-      </ul>
-    </div>
+    <AplicarVacinaDialog
+      v-if="pet && plano"
+      v-model:visivel="aplicando"
+      :pet="pet"
+      :plano="plano"
+      :vacina-inicial="vacinaDaLinha"
+      :profissional-inicial="encounter.professionalId"
+      :encounter-id="encounter.id"
+      @aplicada="aplicada"
+    />
   </section>
 </template>
 
@@ -207,66 +154,41 @@ function nomeDaVacina(id: string) {
   background: var(--clinic-surface);
 }
 
-.formulario {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr) auto;
-  align-items: end;
-  gap: var(--clinic-space-3);
-}
-
-.formulario__salvar {
-  margin-bottom: 1px;
-}
-
-@media (max-width: 900px) {
-  .formulario {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
-  }
-}
-
-.proxima {
+.vacinacao__topo {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
-  margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-accent);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.carteira {
-  display: grid;
+  justify-content: space-between;
   gap: var(--clinic-space-2);
-  padding-top: var(--clinic-space-2);
-  border-top: 1px solid var(--clinic-line);
 }
 
-.carteira__lista {
-  display: grid;
-  gap: 0.15rem;
+.vacinacao__topo h4 {
   margin: 0;
-  padding: 0;
+}
+
+.vacinacao__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clinic-space-2);
+}
+
+.vacinacao__agora {
+  display: grid;
+  margin: 0;
+  padding: var(--clinic-space-3) 0 0;
+  border-top: 1px solid var(--clinic-line-soft);
+  gap: 0.3rem;
   list-style: none;
 }
 
-.carteira__lista li {
-  display: grid;
-  grid-template-columns: 5rem minmax(0, 1fr) auto;
+.vacinacao__agora li {
+  display: flex;
   align-items: baseline;
-  gap: var(--clinic-space-3);
+  gap: 0.4rem;
   font-size: var(--clinic-font-label);
 }
 
-.carteira__nome {
-  font-weight: 700;
-}
-
-.carteira__lote,
-.carteira__data {
-  color: var(--clinic-faint);
+.vacinacao__agora .pi {
+  color: var(--clinic-ok-text);
 }
 </style>

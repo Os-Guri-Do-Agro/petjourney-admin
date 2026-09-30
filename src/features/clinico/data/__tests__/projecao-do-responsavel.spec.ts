@@ -60,11 +60,14 @@ describe('só chega o que é do responsável', () => {
       ...demo.fila.map((item) => item.pet.id),
       ...demo.atendimentos.map((item) => item.pet.id),
       ...demo.vacinas.map((item) => item.petId),
+      ...demo.planosVacinais.map((item) => item.petId),
       ...demo.internacoes.map((item) => item.pet.id),
       ...demo.notificacoes.map((item) => item.dados.petId),
+      ...demo.notificacoesDaCarteirinha.map((item) => item.dados.petId),
     ]
 
-    expect(meus).toEqual(new Set(['pet-perola', 'pet-pipoca', 'pet-bruna']))
+    /* O Biscoito é o filhote da carteirinha conectada (`seed-vacinacao.ts`). */
+    expect(meus).toEqual(new Set(['pet-perola', 'pet-pipoca', 'pet-bruna', 'pet-biscoito']))
     expect(petIds.filter((petId) => !meus.has(petId))).toEqual([])
   })
 

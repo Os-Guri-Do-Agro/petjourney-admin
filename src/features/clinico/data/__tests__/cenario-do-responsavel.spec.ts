@@ -8,11 +8,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { setClockSkew } from '../../domain/clinic-time'
+import { montarPlanoVacinal } from '../../domain/protocolo-vacinal'
 import { reforcosDoPaciente } from '../../domain/vacinacao'
 import { vacinasFixture } from '../fixtures/vacinas'
 import { setMockConfig } from '../mock-runtime'
 import { OfertaExpiradaError, VagaJaPreenchidaError, waitlistRepository } from '../repositories'
 import { PET_DA_FILA, RESPONSAVEL_DA_DEMONSTRACAO } from '../seed-responsavel'
+import { PET_EM_PROTOCOLO } from '../seed-vacinacao'
 import { getDataset, resetDataset } from '../store'
 
 beforeEach(() => {
@@ -24,7 +26,7 @@ afterEach(() => {
   setClockSkew(0)
 })
 
-describe('a Fátima e os três pets', () => {
+describe('a Fátima e os quatro pets', () => {
   it('a Pérola tem consulta hoje, marcada e confirmada pelo app, sem pré-consulta respondida', () => {
     const dataset = getDataset()
     const hoje = dataset.appointments.find((item) => item.id === 'apt-resumo-perola')
@@ -37,7 +39,11 @@ describe('a Fátima e os três pets', () => {
     expect(encounter?.preConsulta ?? null).toBeNull()
   })
 
-  it('a V4 da Pérola vence em 25 dias: é o reforço "próximo"', () => {
+  it('a V4 da Pérola vence em 25 dias, e a antirrábica já passou da carência', () => {
+    /*
+     * As duas pontas do reforço na mesma paciente: a V4 é a da semana (próximo), a antirrábica é
+     * a de hoje (vencido) — e a consulta dela é hoje, que é quando a clínica resolve as duas.
+     */
     const dataset = getDataset()
     const reforcos = reforcosDoPaciente(
       dataset.aplicacoesDeVacina.filter((item) => item.petId === 'pet-perola'),
@@ -46,8 +52,31 @@ describe('a Fátima e os três pets', () => {
     )
 
     expect(reforcos).toEqual([
+      expect.objectContaining({ vacinaId: 'vac-antirrabica-canina', situacao: 'vencido' }),
       expect.objectContaining({ vacinaId: 'vac-v4-felina', situacao: 'proximo' }),
     ])
+  })
+
+  it('o Biscoito está no meio da série de filhote: a V10 de fora conta, a segunda é hoje', () => {
+    const dataset = getDataset()
+    const biscoito = dataset.pets.find((pet) => pet.id === PET_EM_PROTOCOLO)!
+    const plano = montarPlanoVacinal({
+      pet: biscoito,
+      vacinas: vacinasFixture,
+      aplicacoes: dataset.aplicacoesDeVacina,
+      agendamentos: [],
+      hoje: dataset.ancora,
+    })
+    const v10 = plano.vacinas.find((item) => item.vacina.id === 'vac-v10')!
+    const antirrabica = plano.vacinas.find((item) => item.vacina.id === 'vac-antirrabica-canina')!
+
+    expect(biscoito.tutorId).toBe(RESPONSAVEL_DA_DEMONSTRACAO)
+    expect(v10.tipoDeSerie).toBe('filhote')
+    expect(v10.aplicadasNaSerie).toBe(1)
+    expect(v10.doses[0]?.aplicacao?.origem).toBe('externa')
+    expect(v10.proxima).toMatchObject({ numero: 2, total: 3, estado: 'devida' })
+    /* Onze semanas: a antirrábica ainda não cabe. É "a partir de", nunca "atrasada". */
+    expect(antirrabica.situacao).toBe('aguarda-idade')
   })
 
   it('a Pipoca está internada, com boletins enviados e ao menos um com foto', () => {

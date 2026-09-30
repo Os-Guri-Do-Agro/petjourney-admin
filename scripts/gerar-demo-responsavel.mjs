@@ -84,6 +84,89 @@ console.log(
   ].join(' · '),
 )
 
+// ---------------------------------------------------------------------------
+// O momento da carteirinha conectada
+// ---------------------------------------------------------------------------
+
+/*
+ * O "depois" da demonstração: a clínica aplica a segunda V10 do Biscoito, com o lote que o
+ * diálogo sugere e a terceira dose já marcada. O arquivo traz o que o celular recebe nesse
+ * instante — a linha nova, o plano avançado, o aviso e o horário —, para o mock do app
+ * reproduzir a mudança "na hora" sem depender do portal aberto ao lado (doc 14, seção 7).
+ *
+ * Roda sobre o dataset do repositório (`getDataset`), e não sobre o `dataset` de cima, porque é
+ * o repositório que aplica: lote conferido, próxima dose congelada, horário gravado. Uma cópia
+ * montada à mão aqui seria uma segunda regra para a mesma aplicação.
+ */
+const { setMockConfig } = await clinico('data/mock-runtime.ts')
+const { getDataset } = await clinico('data/store.ts')
+const { agendaRepository, vacinaRepository } = await clinico('data/repositories/index.ts')
+const { projetarAgendamento } = await clinico('data/projecao-do-responsavel.ts')
+const { PET_EM_PROTOCOLO } = await clinico('data/seed-vacinacao.ts')
+
+setMockConfig({ latenciaMs: 0, jitterMs: 0 })
+
+const hoje = clock.today()
+const [lote] = (await vacinaRepository.lotesParaAplicar('vac-v10')).filter((item) => item.sugerido)
+const [horario] = await agendaRepository.sugerirRetorno({
+  petId: PET_EM_PROTOCOLO,
+  professionalId: 'prof-ana',
+  typeId: 'tipo-vacina',
+  aPartirDe: hoje,
+  emDias: 28,
+  tolerancia: 6,
+  limite: 1,
+})
+
+const aplicacao = await vacinaRepository.aplicar({
+  petId: PET_EM_PROTOCOLO,
+  vacinaId: 'vac-v10',
+  professionalId: 'prof-ana',
+  lote: lote.codigo,
+  validadeLote: lote.validade,
+  dose: 2,
+  dosesNaSerie: 3,
+  via: 'subcutanea',
+  observacao: '',
+  encounterId: null,
+  proximaNaAgenda: horario
+    ? { professionalId: horario.professionalId, inicio: horario.inicio, fim: horario.fim }
+    : null,
+})
+
+const carteirinha = await vacinaRepository.naCarteirinha(PET_EM_PROTOCOLO)
+const marcado = getDataset().appointments.find((item) => item.id === aplicacao.agendamentoDaProximaId)
+
+const depois = {
+  geradoEm: agora,
+  hojeDaClinica: demo.hojeDaClinica,
+  petId: PET_EM_PROTOCOLO,
+  /* A linha nova da carteira, o plano inteiro depois dela, o aviso e o horário marcado. */
+  vacina: carteirinha.vacinas.find((item) => item.id === aplicacao.id),
+  plano: carteirinha.plano,
+  notificacao: carteirinha.ultimaNotificacao,
+  agendamento: marcado
+    ? projetarAgendamento(marcado, {
+        dataset: getDataset(),
+        tutorId: RESPONSAVEL_DA_DEMONSTRACAO,
+        agora,
+        textos: {
+          emInvestigacao: '',
+          sinaisDeAlerta: '',
+          tituloDoDocumento: { RECEITUARIO: '', ORIENTACOES: '', PEDIDO_EXAME: '' },
+        },
+      })
+    : null,
+}
+
+const destinoDoDepois = resolve(raiz, 'docs/clinico/contrato/demo-carteirinha-aplicacao.json')
+
+writeFileSync(destinoDoDepois, `${JSON.stringify(depois, null, 2)}\n`)
+
+console.log(
+  `${relative(raiz, destinoDoDepois)} (V10 ${aplicacao.dose}/${aplicacao.dosesNaSerie} do Biscoito, lote ${aplicacao.lote}, próxima ${marcado?.inicio ?? 'sem horário'})`,
+)
+
 function lowerFirst(texto) {
   return texto.charAt(0).toLocaleLowerCase('pt-BR') + texto.slice(1)
 }

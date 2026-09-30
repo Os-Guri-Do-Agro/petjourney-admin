@@ -8,6 +8,7 @@
  * está vazia ("nenhuma registrada") — sumir com ela faria a ausência parecer esquecimento da
  * tela.
  */
+import { PhClipboardText } from '@phosphor-icons/vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -65,7 +66,8 @@ const ultima = computed(() => {
 
 <template>
   <section class="essencial" :aria-labelledby="'essencial-titulo'">
-    <h2 id="essencial-titulo" class="clinic-label essencial__titulo">
+    <h2 id="essencial-titulo" class="essencial__titulo">
+      <PhClipboardText class="essencial__titulo-icone" weight="duotone" aria-hidden="true" />
       {{ t('clinico.resumoDoPaciente.essencial.titulo') }}
     </h2>
 
@@ -145,14 +147,28 @@ const ultima = computed(() => {
 
 <style scoped>
 .essencial {
-  padding: var(--clinic-space-3) var(--clinic-space-4);
+  padding: 1.2rem 1.35rem 1.35rem;
   border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
   background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-card);
 }
 
 .essencial__titulo {
-  margin: 0 0 var(--clinic-space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 var(--clinic-space-3);
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.essencial__titulo-icone {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--clinic-accent);
 }
 
 .essencial__lista {

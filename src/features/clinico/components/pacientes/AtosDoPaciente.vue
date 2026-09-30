@@ -19,6 +19,7 @@
  *   vacina e curativo no meio — e quem procura vacina tem a carteira, que diz muito mais.
  */
 import Button from 'primevue/button'
+import { PhFirstAidKit, PhPlus } from '@phosphor-icons/vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -113,20 +114,30 @@ function abrir(ato: AtoClinico) {
 </script>
 
 <template>
+  <!--
+    Um cartão da ficha do paciente, no acabamento da Visão geral: título com ícone, ajuda embaixo e
+    a ação em pílula contornada. É a única tela em que ele aparece (o histórico do paciente).
+  -->
   <section class="atos">
     <header class="atos__topo">
       <div class="atos__titulos">
-        <h2 class="atos__titulo">{{ t('clinico.paciente.atos.titulo') }}</h2>
+        <h2 class="atos__titulo">
+          <PhFirstAidKit class="atos__titulo-icone" weight="duotone" aria-hidden="true" />
+          {{ t('clinico.paciente.atos.titulo') }}
+        </h2>
         <p class="atos__ajuda">{{ t('clinico.paciente.atos.ajuda') }}</p>
       </div>
 
       <Button
         type="button"
-        size="small"
-        icon="pi pi-plus"
+        class="ficha-pilula"
         :label="t('clinico.paciente.atos.registrar')"
         @click="emit('registrar')"
-      />
+      >
+        <template #icon>
+          <PhPlus class="ficha-pilula__icone" weight="bold" aria-hidden="true" />
+        </template>
+      </Button>
     </header>
 
     <ClinicToggleGroup
@@ -193,7 +204,13 @@ function abrir(ato: AtoClinico) {
 <style scoped>
 .atos {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 0.85rem;
+  min-width: 0;
+  padding: 1.2rem 1.35rem 1.35rem;
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-card);
+  background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-card);
 }
 
 .atos__topo {
@@ -209,16 +226,27 @@ function abrir(ato: AtoClinico) {
 }
 
 .atos__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   margin: 0;
   color: var(--clinic-text);
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.atos__titulo-icone {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--clinic-accent);
 }
 
 .atos__ajuda {
-  margin: 0.1rem 0 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  margin: 0.2rem 0 0;
+  color: var(--clinic-muted);
+  font-size: 0.8125rem;
 }
 
 .atos__nome {

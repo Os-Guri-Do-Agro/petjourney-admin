@@ -18,23 +18,74 @@
  *   uma coisa e um gráfico dizendo outra.
  */
 
+import type { PlanoVacinalDoPet, VacinaAplicadaNaClinica } from '../../contrato/responsavel'
 import { createClinicClock } from '../../domain/clinic-time'
 import { resumirEstoque, type ResumoDoEstoque } from '../../domain/estoque-vacinas'
+import {
+  avaliarValidade,
+  lotesParaAplicar,
+  type LoteParaAplicar,
+} from '../../domain/lote-na-aplicacao'
+import { montarPlanoVacinal, type PlanoVacinal } from '../../domain/protocolo-vacinal'
 import { listaDeChamada, proximaDose, reforcosDoPaciente } from '../../domain/vacinacao'
 import { CLINIC_UTC_OFFSET, vacinasFixture } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
+import {
+  projetarNotificacaoDaVacina,
+  projetarPlanoVacinal,
+  projetarVacina,
+  type NotificacaoDaCarteirinha,
+} from '../projecao-do-responsavel'
 import { agoraIso, getDataset, novoId } from '../store'
 import type {
   AplicacaoVacina,
   ISODate,
+  ISODateTime,
   LoteDeVacina,
   PetSpecies,
-  PrescriptionRoute,
+  ProcedenciaExterna,
   ReforcoPendente,
   Vacina,
+  ViaDeVacina,
 } from '../types'
 
+import { atendimentoNovo } from './agenda-repository'
+
 const clock = createClinicClock(CLINIC_UTC_OFFSET)
+
+/**
+ * Recusa de uma aplicação que a regra não deixa passar.
+ *
+ * `kind` traduzível, como o `MockError`: a tela escreve a frase, o repositório só diz qual regra.
+ */
+export class AplicacaoRecusadaError extends Error {
+  readonly kind: 'lote-vencido' | 'sem-validade' | 'vacina-fora-da-especie'
+
+  constructor(kind: AplicacaoRecusadaError['kind']) {
+    super(`vacina.aplicar: ${kind}`)
+    this.name = 'AplicacaoRecusadaError'
+    this.kind = kind
+  }
+}
+
+/** A carteirinha do app, como o contrato a entrega — o que a prévia do portal desenha. */
+export type CarteirinhaNoApp = {
+  petNome: string
+  petIniciais: string
+  nascimento: ISODate | null
+  clinicaNome: string
+  vacinas: VacinaAplicadaNaClinica[]
+  plano: PlanoVacinalDoPet
+  /** O aviso mais recente que a carteirinha soltou, para a prévia mostrar no topo do celular. */
+  ultimaNotificacao: NotificacaoDaCarteirinha | null
+}
+
+/** A próxima dose já marcada na agenda, junto com a aplicação. */
+export type ProximaNaAgenda = {
+  professionalId: string
+  inicio: ISODateTime
+  fim: ISODateTime
+}
 
 /** Uma linha da lista de chamada, já com o paciente resolvido para a tela não buscar de novo. */
 export type ChamadaDeVacina = ReforcoPendente & {
@@ -57,8 +108,6 @@ export type AplicacaoNaLista = AplicacaoVacina & {
   tutorNome: string
   vacinaNome: string
   obrigatoria: boolean
-  /** Doses da série no catálogo — é o denominador de "2 de 3". */
-  dosesNaSerie: number
 }
 
 export const vacinaRepository = {
@@ -103,7 +152,6 @@ export const vacinaRepository = {
             tutorNome: tutor?.nome ?? '',
             vacinaNome: vacina?.nome ?? aplicacao.vacinaId,
             obrigatoria: vacina?.obrigatoria ?? false,
-            dosesNaSerie: vacina?.dosesNaSerie ?? 1,
           }
         })
         .filter((item): item is AplicacaoNaLista => item !== null)
@@ -197,44 +245,174 @@ export const vacinaRepository = {
   },
 
   /**
-   * Registra uma aplicação.
+   * O protocolo do paciente: a sequência inteira e onde ele está nela.
    *
-   * A data do próximo reforço é **congelada aqui**, e não recalculada na leitura: se o
-   * calendário da vacina mudar no catálogo no ano que vem, o que já foi aplicado continua
-   * valendo pela regra do dia em que foi aplicado — que é o que está escrito na carteira do
-   * animal.
+   * Síncrono de propósito, como o `catalogo`: é conta sobre o que a tela já carregou, e o
+   * diálogo de aplicação o recalcula a cada troca de vacina sem pagar latência.
    */
-  registrar(input: {
+  plano(petId: string): PlanoVacinal | null {
+    const dataset = getDataset()
+    const pet = dataset.pets.find((item) => item.id === petId)
+
+    if (!pet) {
+      return null
+    }
+
+    return montarPlanoVacinal({
+      pet,
+      vacinas: vacinasFixture,
+      aplicacoes: dataset.aplicacoesDeVacina,
+      agendamentos: dataset.appointments
+        .filter((item) => item.petId === petId)
+        .map((item) => ({
+          id: item.id,
+          inicio: item.inicio,
+          cancelado: item.status === 'cancelado',
+        })),
+      hoje: clock.today(),
+    })
+  },
+
+  /** Os frascos desta vacina na geladeira, na ordem em que devem sair — o vencido travado no fim. */
+  lotesParaAplicar(vacinaId: string): Promise<LoteParaAplicar[]> {
+    return simularChamada('paciente.listar', () => {
+      const dataset = getDataset()
+      const hoje = clock.today()
+      const { lotes } = resumirEstoque({
+        lotes: dataset.lotesDeVacina,
+        vacinas: vacinasFixture,
+        aplicacoes: dataset.aplicacoesDeVacina,
+        hoje,
+      })
+
+      return lotesParaAplicar(lotes, vacinaId, hoje)
+    })
+  },
+
+  /**
+   * A carteirinha do responsável, **na forma do contrato**.
+   *
+   * A prévia do portal desenha isto, e não o registro da clínica, de propósito: se a prévia lesse
+   * o dado interno, ela mostraria o que a clínica sabe — e a demonstração precisa mostrar o que o
+   * celular recebe, com as mesmas lacunas (sem lote na externa, sem nome de quem aplicou fora).
+   */
+  naCarteirinha(petId: string): Promise<CarteirinhaNoApp | null> {
+    return simularChamada('paciente.historico', () => {
+      const dataset = getDataset()
+      const pet = dataset.pets.find((item) => item.id === petId)
+
+      if (!pet) {
+        return null
+      }
+
+      const ctx = { dataset, agora: agoraIso() }
+      const doPet = dataset.aplicacoesDeVacina.filter((item) => item.petId === petId)
+      const notificacoes = doPet
+        .map((item) => projetarNotificacaoDaVacina(item, ctx))
+        .sort((a, b) => b.criadoEm.localeCompare(a.criadoEm))
+
+      return {
+        petNome: pet.nome,
+        petIniciais: pet.iniciais,
+        nascimento: pet.nascimento,
+        clinicaNome: dataset.clinic.nome,
+        vacinas: doPet
+          .map((item) => projetarVacina(item, ctx))
+          .sort((a, b) => b.aplicadaEm.localeCompare(a.aplicadaEm)),
+        plano: projetarPlanoVacinal(petId, ctx),
+        ultimaNotificacao: notificacoes[0] ?? null,
+      }
+    })
+  },
+
+  /**
+   * Aplica uma dose aqui.
+   *
+   * Três coisas acontecem na mesma gravação, e nenhuma pode ficar para depois:
+   *
+   * - **A data da próxima dose é congelada.** Se o calendário da vacina mudar no catálogo no ano
+   *   que vem, o que já foi aplicado continua valendo pela regra do dia — que é o que está escrito
+   *   na carteira do animal. O tamanho da série também: é o da idade em que ela começou.
+   * - **O lote é conferido de novo.** A tela já trava o vencido, mas a regra mora aqui: um lote
+   *   vencido que passasse por um diálogo desatualizado entraria na carteira com validade anterior
+   *   à aplicação.
+   * - **A próxima dose é marcada**, quando quem aplica aceitou o horário sugerido. Marcar depois é
+   *   o que não acontece: o responsável sai da clínica com a data na cabeça e sem horário.
+   */
+  aplicar(input: {
     petId: string
     vacinaId: string
     professionalId: string
     lote: string
     validadeLote: ISODate
     dose: number
-    via: PrescriptionRoute
+    dosesNaSerie: number
+    via: ViaDeVacina
     observacao: string
+    encounterId: string | null
+    proximaNaAgenda: ProximaNaAgenda | null
   }): Promise<AplicacaoVacina> {
     return simularChamada('encounter.salvar', () => {
       const dataset = getDataset()
       const vacina = vacinasFixture.find((item) => item.id === input.vacinaId)
+      const pet = dataset.pets.find((item) => item.id === input.petId)
 
       if (!vacina) {
-        throw new Error(`vacina.registrar: ${input.vacinaId} fora do catálogo`)
+        throw new Error(`vacina.aplicar: ${input.vacinaId} fora do catálogo`)
+      }
+
+      if (!pet || !vacina.especies.includes(pet.especie)) {
+        throw new AplicacaoRecusadaError('vacina-fora-da-especie')
       }
 
       const agora = agoraIso()
+      const hoje = clock.dateOf(agora)
+      const validade = avaliarValidade(input.validadeLote, hoje)
+
+      if (!validade.pode) {
+        throw new AplicacaoRecusadaError(
+          validade.motivo === 'vencido' ? 'lote-vencido' : 'sem-validade',
+        )
+      }
+
       const aplicacao: AplicacaoVacina = {
         id: novoId('apl'),
         petId: input.petId,
         vacinaId: input.vacinaId,
+        origem: 'clinica',
         professionalId: input.professionalId,
         aplicadaEm: agora,
         lote: input.lote.trim(),
         validadeLote: input.validadeLote,
         dose: input.dose,
+        dosesNaSerie: input.dosesNaSerie,
         via: input.via,
-        proximaDoseEm: proximaDose(vacina, input.dose, clock.dateOf(agora)),
+        proximaDoseEm: proximaDose(vacina, input.dose, hoje, input.dosesNaSerie),
+        agendamentoDaProximaId: null,
+        encounterId: input.encounterId,
+        externa: null,
         observacao: input.observacao.trim(),
+      }
+
+      if (input.proximaNaAgenda) {
+        const marcado = atendimentoNovo(
+          {
+            petId: pet.id,
+            tutorId: pet.tutorId,
+            professionalId: input.proximaNaAgenda.professionalId,
+            roomIds: [],
+            typeId: 'tipo-vacina',
+            inicio: input.proximaNaAgenda.inicio,
+            fim: input.proximaNaAgenda.fim,
+            encaixe: false,
+            observacao: `${vacina.nome} · dose ${Math.min(input.dose + 1, input.dosesNaSerie)} de ${input.dosesNaSerie}`,
+            origem: 'retorno',
+          },
+          agora,
+        )
+
+        dataset.appointments.push(marcado)
+        aplicacao.agendamentoDaProximaId = marcado.id
       }
 
       dataset.aplicacoesDeVacina.push(aplicacao)
@@ -249,7 +427,83 @@ export const vacinaRepository = {
         kind: 'vacina',
         em: agora,
         titulo: vacina.nome,
-        resumo: `Lote ${aplicacao.lote} · dose ${input.dose}/${vacina.dosesNaSerie}`,
+        resumo: `Lote ${aplicacao.lote} · dose ${input.dose}/${input.dosesNaSerie}`,
+        encounterId: input.encounterId,
+        appointmentId: null,
+      })
+
+      return aplicacao
+    })
+  },
+
+  /**
+   * Registra uma dose que a clínica **não aplicou**.
+   *
+   * Sem lote e sem validade, e isso não é campo esquecido: a clínica não sabe de que frasco saiu,
+   * e um código copiado de memória seria rastreabilidade falsa. O que ela sabe — onde, quando,
+   * e se viu o papel — entra, com o nome de quem transcreveu. A próxima dose sai da mesma conta
+   * da aplicação daqui, porque a posição na série é a mesma.
+   */
+  registrarExterna(input: {
+    petId: string
+    vacinaId: string
+    aplicadaEm: ISODate
+    dose: number
+    dosesNaSerie: number
+    local: string
+    aplicador: string
+    procedencia: ProcedenciaExterna
+    registradaPor: string
+    observacao: string
+  }): Promise<AplicacaoVacina> {
+    return simularChamada('encounter.salvar', () => {
+      const dataset = getDataset()
+      const vacina = vacinasFixture.find((item) => item.id === input.vacinaId)
+      const pet = dataset.pets.find((item) => item.id === input.petId)
+
+      if (!vacina) {
+        throw new Error(`vacina.registrarExterna: ${input.vacinaId} fora do catálogo`)
+      }
+
+      if (!pet || !vacina.especies.includes(pet.especie)) {
+        throw new AplicacaoRecusadaError('vacina-fora-da-especie')
+      }
+
+      const agora = agoraIso()
+      const aplicacao: AplicacaoVacina = {
+        id: novoId('apl'),
+        petId: input.petId,
+        vacinaId: input.vacinaId,
+        origem: 'externa',
+        professionalId: '',
+        /* O papel diz o dia, não a hora: meio-dia é o menos enganoso dos horários inventados. */
+        aplicadaEm: clock.toIso(input.aplicadaEm, 12 * 60),
+        lote: null,
+        validadeLote: null,
+        dose: input.dose,
+        dosesNaSerie: input.dosesNaSerie,
+        via: null,
+        proximaDoseEm: proximaDose(vacina, input.dose, input.aplicadaEm, input.dosesNaSerie),
+        agendamentoDaProximaId: null,
+        encounterId: null,
+        externa: {
+          local: input.local.trim(),
+          aplicador: input.aplicador.trim(),
+          procedencia: input.procedencia,
+          registradaPor: input.registradaPor,
+          registradaEm: agora,
+        },
+        observacao: input.observacao.trim(),
+      }
+
+      dataset.aplicacoesDeVacina.push(aplicacao)
+      dataset.timeline.push({
+        id: `tl-vac-${aplicacao.id}`,
+        petId: input.petId,
+        kind: 'vacina',
+        em: aplicacao.aplicadaEm,
+        titulo: vacina.nome,
+        resumo: `${aplicacao.externa!.local} · dose ${input.dose}/${input.dosesNaSerie} · sem lote`,
         encounterId: null,
         appointmentId: null,
       })

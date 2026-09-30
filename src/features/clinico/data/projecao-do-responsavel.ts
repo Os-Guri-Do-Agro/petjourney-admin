@@ -48,8 +48,19 @@ import type {
   TipoDeServicoClinico,
   VacinaAplicadaNaClinica,
   ViaDeAdministracao,
+  ViaDeVacina as ViaDeVacinaNoContrato,
+  DadosDaVacinaRegistrada,
+  EstadoDaDoseNoPlano,
+  PlanoVacinalDoPet,
+  SituacaoNoPlanoVacinal,
 } from '../contrato/responsavel'
-import { TEXTOS_PT_DAS_NOTIFICACOES, urlDaNotificacaoClinica } from '../contrato/responsavel'
+import {
+  ROTA_DA_NOTIFICACAO_DA_VACINA,
+  TEXTO_PT_DA_NOTIFICACAO_DA_VACINA,
+  TEXTOS_PT_DAS_NOTIFICACOES,
+  TIPO_DE_NOTIFICACAO_DA_VACINA,
+  urlDaNotificacaoClinica,
+} from '../contrato/responsavel'
 import {
   addDays,
   createClinicClock,
@@ -73,6 +84,11 @@ import {
   type Fracionamento,
 } from '../domain/receita'
 import { slotsLivres } from '../domain/slots'
+import {
+  montarPlanoVacinal,
+  type EstadoDaDose,
+  type SituacaoNoPlano,
+} from '../domain/protocolo-vacinal'
 import { JANELA_DE_AVISO_EM_DIAS, situacaoDoReforco } from '../domain/vacinacao'
 import { posicoesDaFila } from '../domain/waitlist'
 
@@ -102,6 +118,7 @@ import type {
   PreConsulta,
   PrescriptionRoute,
   SituacaoDoReforco,
+  ViaDeVacina,
   WaitlistEntry,
   WaitlistStatus,
 } from './types'
@@ -215,6 +232,13 @@ const FRACAO: Record<Fracionamento['kind'], FracaoDeDose> = {
   aproximado: 'APROXIMADO',
 }
 
+const VIA_DA_VACINA: Record<ViaDeVacina, ViaDeVacinaNoContrato> = {
+  subcutanea: 'SUBCUTANEA',
+  intramuscular: 'INTRAMUSCULAR',
+  intranasal: 'INTRANASAL',
+  oral: 'ORAL',
+}
+
 const SITUACAO: Record<SituacaoDoReforco, SituacaoNoContrato> = {
   'em-dia': 'EM_DIA',
   proximo: 'PROXIMO',
@@ -280,7 +304,7 @@ function petResumo(ctx: ContextoDaProjecao, petId: string): PetResumo {
   }
 }
 
-function clinicaResumo(ctx: ContextoDaProjecao): ClinicaResumo {
+function clinicaResumo(ctx: Pick<ContextoDaProjecao, 'dataset'>): ClinicaResumo {
   const { clinic } = ctx.dataset
 
   return {
@@ -657,38 +681,206 @@ export function projetarAtendimento(
   }
 }
 
+/** O pedaço do contexto que a carteirinha usa — a prévia do portal monta sem os textos. */
+export type ContextoDaCarteirinha = Pick<ContextoDaProjecao, 'dataset' | 'agora'>
+
+function resumoDaVacina(vacinaId: string) {
+  const vacina = vacinasFixture.find((item) => item.id === vacinaId)
+
+  return {
+    nome: vacina?.nome ?? vacinaId,
+    fabricante: vacina?.fabricante ?? '',
+    obrigatoria: vacina?.obrigatoria ?? false,
+    essencial: vacina?.essencial ?? false,
+  }
+}
+
+/** O horário marcado para a próxima dose, se ainda estiver de pé. */
+function agendamentoDaProxima(
+  aplicacao: AplicacaoVacina,
+  ctx: ContextoDaCarteirinha,
+): { agendamentoId: string; inicio: DataHoraIso } | null {
+  const marcado = aplicacao.agendamentoDaProximaId
+    ? ctx.dataset.appointments.find(
+        (item) => item.id === aplicacao.agendamentoDaProximaId && item.status !== 'cancelado',
+      )
+    : undefined
+
+  return marcado ? { agendamentoId: marcado.id, inicio: marcado.inicio } : null
+}
+
 export function projetarVacina(
   aplicacao: AplicacaoVacina,
-  ctx: ContextoDaProjecao,
+  ctx: ContextoDaCarteirinha,
 ): VacinaAplicadaNaClinica {
-  const vacina = vacinasFixture.find((item) => item.id === aplicacao.vacinaId)
-  const dosesNaSerie = vacina?.dosesNaSerie ?? 1
+  const externa = aplicacao.externa
+  /*
+   * A situação é da **dose seguinte**, e ela só está em aberto na aplicação mais recente daquela
+   * vacina. Calculada em cada aplicação isolada, a primeira dose de uma série virava "vencida" três
+   * dias depois da data prevista — mesmo com a segunda já dada —, e a carteirinha do app mostraria
+   * uma dose atrasada que ninguém deve.
+   */
+  const substituida = ctx.dataset.aplicacoesDeVacina.some(
+    (outra) =>
+      outra.petId === aplicacao.petId &&
+      outra.vacinaId === aplicacao.vacinaId &&
+      outra.aplicadaEm > aplicacao.aplicadaEm,
+  )
 
   return {
     id: aplicacao.id,
     petId: aplicacao.petId,
     clinica: clinicaResumo(ctx),
-    profissional: profissional(aplicacao.professionalId),
-    vacina: {
-      nome: vacina?.nome ?? aplicacao.vacinaId,
-      fabricante: vacina?.fabricante ?? '',
-      obrigatoria: vacina?.obrigatoria ?? false,
-    },
+    origem: aplicacao.origem === 'clinica' ? 'CLINICA' : 'EXTERNA',
+    profissional: aplicacao.origem === 'clinica' ? profissional(aplicacao.professionalId) : null,
+    vacina: resumoDaVacina(aplicacao.vacinaId),
     aplicadaEm: aplicacao.aplicadaEm,
     lote: aplicacao.lote,
     validadeLote: aplicacao.validadeLote,
+    via: aplicacao.via ? VIA_DA_VACINA[aplicacao.via] : null,
     dose: aplicacao.dose,
-    dosesNaSerie,
+    dosesNaSerie: aplicacao.dosesNaSerie,
     proximaDoseEm: aplicacao.proximaDoseEm,
-    situacao:
-      SITUACAO[
-        situacaoDoReforco(
-          aplicacao.proximaDoseEm,
-          clock.dateOf(ctx.agora),
-          aplicacao.dose < dosesNaSerie,
-        )
-      ],
+    proximaDoseAgendada: substituida ? null : agendamentoDaProxima(aplicacao, ctx),
+    situacao: substituida
+      ? 'EM_DIA'
+      : SITUACAO[
+          situacaoDoReforco(
+            aplicacao.proximaDoseEm,
+            clock.dateOf(ctx.agora),
+            aplicacao.dose < aplicacao.dosesNaSerie,
+          )
+        ],
+    externa: externa
+      ? {
+          local: externa.local,
+          aplicador: externa.aplicador || null,
+          procedencia: externa.procedencia === 'comprovante' ? 'COMPROVANTE' : 'RELATO',
+          registradaPor: profissional(externa.registradaPor),
+          registradaEm: externa.registradaEm,
+        }
+      : null,
     vacinaDaCarteiraId: null,
+  }
+}
+
+const ESTADO_DA_DOSE: Record<EstadoDaDose, EstadoDaDoseNoPlano> = {
+  aplicada: 'APLICADA',
+  devida: 'DEVIDA',
+  atrasada: 'ATRASADA',
+  prevista: 'PREVISTA',
+  'aguarda-idade': 'AGUARDA_IDADE',
+  pendente: 'PENDENTE',
+}
+
+const SITUACAO_NO_PLANO: Record<SituacaoNoPlano, SituacaoNoPlanoVacinal> = {
+  'em-dia': 'EM_DIA',
+  'a-vencer': 'A_VENCER',
+  devida: 'DEVIDA',
+  atrasada: 'ATRASADA',
+  'aguarda-idade': 'AGUARDA_IDADE',
+  'nao-iniciada': 'NAO_INICIADA',
+}
+
+/**
+ * O protocolo do pet, como o app recebe.
+ *
+ * É o mesmo `montarPlanoVacinal` que a tela da clínica desenha — não uma segunda conta. Se o
+ * portal e o celular divergirem sobre onde o filhote está na série, o defeito está no desenho de
+ * um dos dois, nunca no cálculo.
+ */
+export function projetarPlanoVacinal(petId: string, ctx: ContextoDaCarteirinha): PlanoVacinalDoPet {
+  const { dataset } = ctx
+  const pet = dataset.pets.find((item) => item.id === petId)
+  const hoje = clock.dateOf(ctx.agora)
+  const plano = montarPlanoVacinal({
+    pet: pet ?? { id: petId, especie: 'canina', nascimento: null },
+    vacinas: vacinasFixture,
+    aplicacoes: dataset.aplicacoesDeVacina,
+    agendamentos: dataset.appointments
+      .filter((item) => item.petId === petId)
+      .map((item) => ({
+        id: item.id,
+        inicio: item.inicio,
+        cancelado: item.status === 'cancelado',
+      })),
+    hoje,
+  })
+
+  return {
+    petId,
+    clinica: clinicaResumo(ctx),
+    geradoEm: ctx.agora,
+    vacinas: plano.vacinas.map((item) => ({
+      vacina: resumoDaVacina(item.vacina.id),
+      tipoDeSerie: item.tipoDeSerie === 'filhote' ? 'FILHOTE' : 'ADULTO',
+      situacao: SITUACAO_NO_PLANO[item.situacao],
+      aplicadasNaSerie: item.aplicadasNaSerie,
+      total: item.total,
+      doses: item.doses.map((dose) => ({
+        numero: dose.numero,
+        total: dose.total,
+        tipo: dose.tipo === 'serie' ? 'SERIE' : 'REFORCO',
+        estado: ESTADO_DA_DOSE[dose.estado],
+        em: dose.em,
+        aplicacaoId: dose.aplicacao?.id ?? null,
+        agendamento: dose.agendamento,
+      })),
+    })),
+    opcionaisNaoIniciadas: plano.opcionaisNaoIniciadas.map((vacina) => ({
+      nome: vacina.nome,
+      fabricante: vacina.fabricante,
+    })),
+    atrasadas: plano.atrasadas,
+  }
+}
+
+/** Uma notificação da carteirinha, no formato das outras da demonstração. */
+export type NotificacaoDaCarteirinha = {
+  id: string
+  criadoEm: DataHoraIso
+  lidaEm: DataHoraIso | null
+  titulo: string
+  corpo: string
+  dados: DadosDaVacinaRegistrada
+}
+
+/**
+ * O aviso que sai quando a clínica registra uma dose.
+ *
+ * Sai no instante do registro — para a externa, quando foi transcrita, não quando foi aplicada lá
+ * fora: o aviso conta que a carteirinha mudou, e ela mudou agora.
+ */
+export function projetarNotificacaoDaVacina(
+  aplicacao: AplicacaoVacina,
+  ctx: ContextoDaCarteirinha,
+): NotificacaoDaCarteirinha {
+  const vacina = projetarVacina(aplicacao, ctx)
+  const criadoEm = aplicacao.externa?.registradaEm ?? aplicacao.aplicadaEm
+  const dados: DadosDaVacinaRegistrada = {
+    tipo: TIPO_DE_NOTIFICACAO_DA_VACINA,
+    url: `${ROTA_DA_NOTIFICACAO_DA_VACINA}?petId=${encodeURIComponent(aplicacao.petId)}&id=${encodeURIComponent(aplicacao.id)}`,
+    aplicacaoId: aplicacao.id,
+    petId: aplicacao.petId,
+    petNome: ctx.dataset.pets.find((item) => item.id === aplicacao.petId)?.nome ?? '',
+    clinicaNome: ctx.dataset.clinic.nome,
+    vacinaNome: vacina.vacina.nome,
+    origem: vacina.origem,
+    dose: vacina.dose,
+    dosesNaSerie: vacina.dosesNaSerie,
+    proximaDoseEm: vacina.proximaDoseEm,
+    proximaDoseAgendadaPara: vacina.proximaDoseAgendada?.inicio ?? null,
+  }
+
+  return {
+    id: `notif-vacina-registrada-${aplicacao.id}`,
+    criadoEm,
+    lidaEm:
+      Date.parse(ctx.agora) - Date.parse(criadoEm) > 24 * 60 * 60_000
+        ? somarMinutos(criadoEm, LIDA_DEPOIS_DE_MINUTOS)
+        : null,
+    ...TEXTO_PT_DA_NOTIFICACAO_DA_VACINA(dados),
+    dados,
   }
 }
 
@@ -1075,9 +1267,13 @@ export type DemoDoResponsavel = {
   fila: EntradaNaFila[]
   atendimentos: ResumoDoAtendimento[]
   vacinas: VacinaAplicadaNaClinica[]
+  /** Um por pet com espécie que a clínica vacina. Réptil e roedor não têm protocolo. */
+  planosVacinais: PlanoVacinalDoPet[]
   internacoes: InternacaoNaClinica[]
   boletins: BoletimDaInternacao[]
   notificacoes: NotificacaoDaDemonstracao[]
+  /** Fora de `notificacoes` pelo mesmo motivo do contrato: o tipo ainda não é do `Record` fechado. */
+  notificacoesDaCarteirinha: NotificacaoDaCarteirinha[]
 }
 
 /** Quanto do passado a demonstração carrega: o bastante para a perda de peso da Pérola. */
@@ -1137,8 +1333,19 @@ export function montarDemoDoResponsavel(ctx: ContextoDaProjecao): DemoDoResponsa
     vacinas: dataset.aplicacoesDeVacina
       .filter((item) => meusPets.has(item.petId))
       .map((item) => projetarVacina(item, ctx)),
+    planosVacinais: dataset.pets
+      .filter((pet) => meusPets.has(pet.id))
+      .filter((pet) => vacinasFixture.some((vacina) => vacina.especies.includes(pet.especie)))
+      .map((pet) => projetarPlanoVacinal(pet.id, ctx)),
     internacoes: internacoes.map((item) => projetarInternacao(item, ctx)),
     boletins: internacoes.flatMap((item) => projetarBoletins(item.id, ctx)),
     notificacoes: projetarNotificacoes(ctx),
+    notificacoesDaCarteirinha: dataset.aplicacoesDeVacina
+      .filter((item) => meusPets.has(item.petId))
+      .map((item) => projetarNotificacaoDaVacina(item, ctx))
+      /* Só as dos últimos dias: a caixa de entrada não é o histórico da carteira. */
+      .filter((item) => Date.parse(ctx.agora) - Date.parse(item.criadoEm) <= 7 * 86_400_000)
+      .filter((item) => Date.parse(item.criadoEm) <= Date.parse(ctx.agora))
+      .sort((a, b) => Date.parse(b.criadoEm) - Date.parse(a.criadoEm)),
   }
 }

@@ -90,6 +90,21 @@ export function useClinicFormat() {
   }
 
   /**
+   * `27/10/2027` — a data curta com o ano, para o que cai fora do ano corrente.
+   *
+   * A carteira de vacina mistura as duas coisas na mesma coluna: a dose de hoje e o reforço do ano
+   * que vem. Sem o ano, "27/10" do reforço anual lê como daqui a quatro semanas.
+   */
+  function dataCurtaComAno(data: ISODate): string {
+    return new Intl.DateTimeFormat(localeIntl.value, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${data}T12:00:00Z`))
+  }
+
+  /**
    * Nome curto do dia a partir do **índice** (0 = domingo), sem precisar de uma data.
    *
    * A fila trabalha com dias da semana soltos — a janela que o responsável aceita não tem data
@@ -373,6 +388,7 @@ export function useClinicFormat() {
     dataLonga,
     dataPorExtenso,
     dataCurta,
+    dataCurtaComAno,
     mesCurto,
     diaDaSemanaCurto,
     diaDaSemanaCurtoPorIndice,

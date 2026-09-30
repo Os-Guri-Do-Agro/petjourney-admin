@@ -26,6 +26,10 @@ const V10: Vacina = {
   fabricante: 'Zoetis',
   especies: ['canina'],
   dosesNaSerie: 3,
+  dosesAdultoSemHistorico: 2,
+  idadeMinimaDias: 42,
+  essencial: true,
+  vias: ['subcutanea'],
   intervaloReforcoDias: 365,
   obrigatoria: false,
   estoqueMinimo: 10,
@@ -37,6 +41,10 @@ const ANTIRRABICA: Vacina = {
   fabricante: 'Boehringer',
   especies: ['canina', 'felina'],
   dosesNaSerie: 1,
+  dosesAdultoSemHistorico: 1,
+  idadeMinimaDias: 42,
+  essencial: true,
+  vias: ['subcutanea'],
   intervaloReforcoDias: 365,
   obrigatoria: true,
   estoqueMinimo: 12,
@@ -62,17 +70,43 @@ function aplicacao(patch: Partial<AplicacaoVacina> = {}): AplicacaoVacina {
     id: 'apl-1',
     petId: 'pet-luna',
     vacinaId: 'vac-v10',
+    origem: 'clinica',
     professionalId: 'prof-ana',
     aplicadaEm: `${HOJE}T10:00:00-04:00`,
     lote: 'V10-A',
     validadeLote: addDays(HOJE, 300),
     dose: 1,
+    dosesNaSerie: 3,
     via: 'subcutanea',
     proximaDoseEm: addDays(HOJE, 28),
+    agendamentoDaProximaId: null,
+    encounterId: null,
+    externa: null,
     observacao: '',
     ...patch,
   }
 }
+
+describe('dose externa', () => {
+  it('não gasta frasco daqui nem entra no giro', () => {
+    /*
+     * A V10 que o filhote tomou no pet shop está na carteira dele, mas não saiu desta geladeira.
+     * Contá-la no consumo faria a clínica comprar para um giro que não é o dela.
+     */
+    const externa = aplicacao({
+      id: 'apl-fora',
+      origem: 'externa',
+      professionalId: '',
+      lote: null,
+      validadeLote: null,
+    })
+    const semExterna = resumir({ lotes: [lote()], aplicacoes: [aplicacao()] })
+    const comExterna = resumir({ lotes: [lote()], aplicacoes: [aplicacao(), externa] })
+
+    expect(comExterna.lotes[0]?.saldo).toBe(semExterna.lotes[0]?.saldo)
+    expect(ultimoMes(comExterna).total).toBe(ultimoMes(semExterna).total)
+  })
+})
 
 /** O mês corrente: o último ponto da janela. Sem `Array.at`, que o alvo do teste não tem. */
 function ultimoMes(resumo: ReturnType<typeof resumir>) {

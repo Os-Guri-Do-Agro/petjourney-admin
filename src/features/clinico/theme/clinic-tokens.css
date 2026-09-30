@@ -1027,6 +1027,29 @@
 }
 
 /*
+ * A ação principal de uma tela ou de um diálogo, cheia e legível.
+ *
+ * O primário do preset é o sage médio com texto branco — perto de 2:1, o botão que "quase não se
+ * vê" da rodada do migrador. Este é o mesmo verde escurecido até o texto passar de 4,5:1, e o
+ * texto sai do papel da clínica: no escuro, o `accent-strong` clareia e o papel escurece, e o
+ * contraste se mantém sem uma segunda regra.
+ */
+.clinic-scope .p-button.clinic-acao-principal:not(:disabled),
+.clinic-dialog .p-button.clinic-acao-principal:not(:disabled) {
+  border-color: var(--clinic-accent-strong);
+  background: var(--clinic-accent-strong);
+  color: var(--clinic-surface);
+}
+
+/* O hover se afasta do papel — mais escuro no claro, mais claro no escuro — e nunca perde contraste. */
+.clinic-scope .p-button.clinic-acao-principal:not(:disabled):hover,
+.clinic-dialog .p-button.clinic-acao-principal:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--clinic-accent-strong) 84%, var(--clinic-text));
+  background: color-mix(in srgb, var(--clinic-accent-strong) 84%, var(--clinic-text));
+  color: var(--clinic-surface);
+}
+
+/*
  * O placeholder do Select cai na mesma escala invertida do botão secundário. Ele precisa ficar
  * mais apagado que o valor escolhido, mas ainda legível.
  */

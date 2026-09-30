@@ -14,6 +14,7 @@
  * a clínica (é uma escolha dele, feita no app), ou liberou e **não registrou nada** no período.
  */
 import Button from 'primevue/button'
+import { PhHouseLine } from '@phosphor-icons/vue'
 import SelectButton from 'primevue/selectbutton'
 import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -126,6 +127,7 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
   <section class="casa" aria-labelledby="casa-titulo">
     <header class="casa__topo">
       <h2 id="casa-titulo" class="casa__titulo">
+        <PhHouseLine class="casa__titulo-icone" weight="duotone" aria-hidden="true" />
         {{
           temConsulta
             ? t('clinico.resumoDoPaciente.casa.titulo')
@@ -285,24 +287,36 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
 .casa {
   display: grid;
   gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3) var(--clinic-space-4);
+  padding: 1.2rem 1.35rem 1.35rem;
   border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
   background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-card);
 }
 
 .casa__topo {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--clinic-space-1) var(--clinic-space-3);
 }
 
 .casa__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   margin: 0;
-  font-size: var(--clinic-font-title);
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.casa__titulo-icone {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--clinic-accent);
 }
 
 .casa__meta {

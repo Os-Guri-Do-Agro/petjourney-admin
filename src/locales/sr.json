@@ -2752,7 +2752,8 @@
         "lote": "Serija",
         "fabricante": "Proizvođač",
         "proxima": "Sledeća doza",
-        "ressalva": "Serija i proizvođač prema evidenciji ove klinike. Vakcine primljene na drugom mestu treba proveriti u vakcinalnoj knjižici životinje."
+        "ressalva": "Serija i proizvođač prema evidenciji ove klinike. Vakcine primljene na drugom mestu treba proveriti u vakcinalnoj knjižici životinje.",
+        "externa": "{local} (bez serije)"
       },
       "orcamento": {
         "titulo": "Predračun",
@@ -3114,7 +3115,8 @@
           "intramuscular": "Intramuskularno",
           "intravenosa": "Intravenozno",
           "topica": "Lokalno",
-          "otologica": "U uvo"
+          "otologica": "U uvo",
+          "intranasal": "Intranazalno"
         },
         "retornoDialogo": {
           "titulo": "Zakazivanje kontrole",
@@ -3249,7 +3251,8 @@
         "semProximo": "Nema zakazan termin"
       },
       "internadoAgora": "Trenutno hospitalizovan",
-      "verInternacao": "Otvorite hospitalizaciju"
+      "verInternacao": "Otvorite hospitalizaciju",
+      "semAtendimentos": "Još nema pregleda u ovoj klinici"
     },
     "resumoDoPaciente": {
       "titulo": "Ovaj ljubimac za 30 sekundi",
@@ -3582,6 +3585,169 @@
           "validade": "Rok trajanja serija",
           "validadeAjuda": "Svaka traka ide od prijema do isteka roka. Broj unutra je stanje."
         }
+      },
+      "via": {
+        "subcutanea": "Subkutano",
+        "intramuscular": "Intramuskularno",
+        "intranasal": "Intranazalno",
+        "oral": "Oralno",
+        "naoInformada": "Put primene nije naveden"
+      },
+      "plano": {
+        "serie": {
+          "filhote": "Serija za mladunce",
+          "adulto": "Serija za odrasle"
+        },
+        "reforco": "Godišnja revakcinacija",
+        "doseUnica": "Jedna doza",
+        "atrasadaHa": "Kasni {dias} dan | Kasni {dias} dana | Kasni {dias} dana",
+        "hoje": "Danas",
+        "venceuHa": "Istekla pre {dias} dan | Istekla pre {dias} dana | Istekla pre {dias} dana",
+        "aPartirDe": "Od {data}",
+        "podeComecar": "Može da počne danas",
+        "emDias": "Za {dias} dan | Za {dias} dana | Za {dias} dana",
+        "situacao": {
+          "em-dia": "Ažurno",
+          "a-vencer": "Uskoro ističe",
+          "devida": "Za danas",
+          "atrasada": "Kasni",
+          "aguarda-idade": "Čeka uzrast",
+          "nao-iniciada": "Nije započeta"
+        },
+        "serieCompleta": "{serie} završena · godišnja revakcinacija",
+        "naoComecou": "{serie}, {total} doze · nije započeta",
+        "emAndamento": "{serie} · {feitas} od {total} primljeno",
+        "sequencia": "Redosled doza za {vacina}",
+        "agora": "Sada",
+        "marcadaPara": "Zakazano: {data} u {hora}",
+        "opcionais": "Neobavezne, nisu započete: {lista}. Ulaze u protokol kada neko počne.",
+        "unicaNaoComecou": "Jedna doza · nije započeta",
+        "unicaComReforco": "Jedna doza · godišnja revakcinacija"
+      },
+      "aplicar": {
+        "abrir": "Daj vakcinu",
+        "atalho": "Daj",
+        "titulo": "Daj vakcinu · {pet}",
+        "confirmar": "Daj i zabeleži",
+        "opcionalNaoIniciada": "Neobavezna, još nije započeta",
+        "serieDoPaciente": "{serie}: {total} doze za ovu vakcinu.",
+        "via": "Put primene",
+        "aplicador": "Ko daje",
+        "observacao": "Napomena",
+        "lote": {
+          "escolher": "Izaberite seriju",
+          "digitar": "Druga serija (upišite)",
+          "digitarDica": "Bočica koju zaliha ne poznaje",
+          "codigo": "Oznaka serije",
+          "usarPrimeiro": "Upotrebi prvo",
+          "saldo": "{doses} doza | {doses} doze | {doses} doza",
+          "vencido": "Serija je istekla {data}. Ne sme se dati: izdvojite bočicu za uništavanje.",
+          "venceHoje": "Serija ističe danas. Još uvek se može dati.",
+          "vencendoPrimeiro": "Ističe za {dias} dan. Prva ističe: upotrebite je pre ostalih. | Ističe za {dias} dana. Prva ističe: upotrebite je pre ostalih. | Ističe za {dias} dana. Prva ističe: upotrebite je pre ostalih.",
+          "vencendo": "Ističe za {dias} dan, još važi. | Ističe za {dias} dana, još važi. | Ističe za {dias} dana, još važi.",
+          "foraDoEstoque": "Serija nije u zalihama: doza važi, ali stanje u frižideru se ne smanjuje.",
+          "travados": "{lotes} je istekla i još je u frižideru. Nije ponuđena. | {lotes} su istekle i još su u frižideru. Nisu ponuđene. | {lotes} su istekle i još su u frižideru. Nisu ponuđene."
+        },
+        "proxima": {
+          "titulo": "Sledeća doza",
+          "naSerie": "Doza {dose} od {total}, {data}",
+          "reforco": "Godišnja revakcinacija, {data}",
+          "marcar": "Zakaži odmah",
+          "buscando": "Tražim termin…",
+          "sugestao": "{data} u {hora}, {profissional}",
+          "semHorario": "Nema slobodnog termina blizu tog datuma. Recepcija zakazuje kasnije.",
+          "recall": "Previše daleko za zakazivanje. Ulazi na spisak za pozivanje 30 dana ranije."
+        },
+        "erros": {
+          "lote": "Izaberite seriju ili upišite oznaku bočice.",
+          "validade": "Unesite rok trajanja serije.",
+          "salvar": "Zapis nije uspeo. Pokušajte ponovo."
+        },
+        "recusa": {
+          "lote-vencido": "Serija je istekla. Doza nije zabeležena.",
+          "sem-validade": "Bez roka trajanja serije doza ne može da se zabeleži.",
+          "vacina-fora-da-especie": "Ova vakcina nije za vrstu ovog pacijenta."
+        }
+      },
+      "externa": {
+        "abrir": "Zabeleži sa drugog mesta",
+        "titulo": "Vakcina data na drugom mestu",
+        "ajuda": "Doza koju je {pet} primio van ove klinike: pet šop, kampanja, druga klinika. Ulazi u protokol bez serije i ostaje označena, ovde i u aplikaciji vlasnika.",
+        "quando": "Datum davanja",
+        "onde": "Gde je data",
+        "ondeDica": "Kako piše na papiru: naziv pet šopa, klinike ili kampanje.",
+        "aplicador": "Ko ju je tamo dao (ako papir kaže)",
+        "quemRegistra": "Ko beleži",
+        "procedencia": {
+          "titulo": "Kako klinika zna",
+          "comprovante": "Video sam potvrdu",
+          "relato": "Samo reč vlasnika",
+          "consequencia": {
+            "comprovante": "Računa se u protokol i prikazuje se kao doza sa drugog mesta, proverena u klinici.",
+            "relato": "Računa se u protokol, ali je označena kao doza bez potvrde, ovde i u aplikaciji."
+          }
+        },
+        "semLoteExplicacao": "Bez serije i roka trajanja: klinika je nije dala i ne zna iz koje je bočice.",
+        "confirmar": "Zabeleži dozu",
+        "semLote": "Bez serije",
+        "naoAplicadaAqui": "nije data ovde",
+        "outroLocal": "Drugo mesto",
+        "registradaPor": "Zabeležio/la {nome}",
+        "procedenciaCurta": {
+          "comprovante": "Potvrdu proverio/la {nome}",
+          "relato": "Samo izjava, bez potvrde · {nome}"
+        },
+        "erros": {
+          "data": "Unesite datum davanja.",
+          "futuro": "Datum ne može biti posle današnjeg.",
+          "local": "Unesite gde je data."
+        }
+      },
+      "carteira": {
+        "verCarteira": "Knjižica i aplikacija",
+        "mesmoNoApp": "Aplikacija korisnika {responsavel} prikazuje isto kašnjenje.",
+        "protocolo": "Protokol",
+        "protocoloAjuda": {
+          "filhote": "{especie}, {idade}. Vakcina koja počne sada prati seriju za mladunce, sa više doza.",
+          "adulto": "{especie}, {idade}. Vakcina koja počne sada prati seriju za odrasle bez istorije."
+        },
+        "semIdade": "uzrast nije naveden",
+        "historicoTitulo": "Istorija davanja",
+        "historicoAjuda": "Ko je dao i gde. Doza sa drugog mesta prikazuje se bez serije.",
+        "historicoVazio": "Nijedna vakcina nije zabeležena",
+        "quemEOnde": "Ko i gde",
+        "nestaClinica": "U ovoj klinici",
+        "noApp": "U aplikaciji korisnika {responsavel}",
+        "noAppAjuda": "Ono što telefon prima. Menja se čim klinika zabeleži.",
+        "comAtraso": "Vakcine, {total} kasni | Vakcine, {total} kasne | Vakcine, {total} kasni"
+      },
+      "app": {
+        "titulo": "Knjižica vakcinacije",
+        "pushOrigem": "PetJourney · sada",
+        "resumo": {
+          "vacinas": "Vakcine",
+          "proxima": "Sledeća",
+          "atrasadas": "Kasne"
+        },
+        "protocolo": "Protokol · {clinica}",
+        "opcionais": "Neobavezne, nisu započete: {lista}",
+        "vazio": "Još nema zabeleženih vakcina.",
+        "nova": "Nova",
+        "aplicadaNa": "Data · {clinica}",
+        "outroLocal": "Drugo mesto · {local}",
+        "lote": "Serija {lote}",
+        "registradaPor": "Zabeležila {clinica}",
+        "procedencia": {
+          "COMPROVANTE": "potvrda proverena",
+          "RELATO": "bez potvrde"
+        },
+        "atrasadaHa": "Kasni {dias} dan | Kasni {dias} dana | Kasni {dias} dana",
+        "hoje": "Doza za danas",
+        "aPartirDe": "Od {data}",
+        "pendente": "Još nije započeta",
+        "proximaEm": "Sledeća doza {data}",
+        "marcada": "Zakazano {data}, {hora}",
+        "fecharAviso": "Zatvori obaveštenje"
       }
     },
     "internacao": {
@@ -4526,6 +4692,31 @@
           "ver": "Pogledajte",
           "continuar": "Nastavite"
         }
+      }
+    },
+    "ficha": {
+      "acoes": "Radnje u kartonu pacijenta",
+      "peso": "Težina",
+      "vacinas": {
+        "semProtocolo": "Nema protokola vakcinacije za vrstu {especie}",
+        "atrasada": "{vacina} kasni {dias} dan | {vacina} kasni {dias} dana | {vacina} kasni {dias} dana",
+        "atrasadas": "{total} vakcina kasni | {total} vakcine kasne | {total} vakcina kasni",
+        "hoje": "{vacina} za danas",
+        "hojeVarias": "{total} vakcina za danas | {total} vakcine za danas | {total} vakcina za danas",
+        "proxima": "Sledeća doza za {dias} dan | Sledeća doza za {dias} dana | Sledeća doza za {dias} dana",
+        "emDia": "Vakcine su ažurne"
+      },
+      "historico": {
+        "internado": "Trenutno na hospitalizaciji · {leito}",
+        "hoje": "Pregled danas u {hora}",
+        "ultimo": "Poslednji pregled pre {dias} dan | Poslednji pregled pre {dias} dana | Poslednji pregled pre {dias} dana",
+        "ultimoHoje": "Poslednji pregled danas",
+        "linhaDoTempo": "Vremenska linija"
+      },
+      "resumo": {
+        "sinais": "{total} znak traži pažnju | {total} znaka traže pažnju | {total} znakova traži pažnju",
+        "primeiraVez": "Prvi put u ovoj klinici",
+        "nada": "Ništa neuobičajeno od poslednjeg pregleda"
       }
     }
   },

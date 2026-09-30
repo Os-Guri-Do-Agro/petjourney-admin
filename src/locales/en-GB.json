@@ -2752,7 +2752,8 @@
         "lote": "Batch",
         "fabricante": "Manufacturer",
         "proxima": "Next dose",
-        "ressalva": "Batch and manufacturer as recorded by this clinic. Vaccines given elsewhere must be checked against the animal's card."
+        "ressalva": "Batch and manufacturer as recorded by this clinic. Vaccines given elsewhere must be checked against the animal's card.",
+        "externa": "{local} (no batch)"
       },
       "orcamento": {
         "titulo": "Estimate",
@@ -3114,7 +3115,8 @@
           "intramuscular": "Intramuscular",
           "intravenosa": "Intravenous",
           "topica": "Topical",
-          "otologica": "Otic"
+          "otologica": "Otic",
+          "intranasal": "Intranasal"
         },
         "retornoDialogo": {
           "titulo": "Schedule follow-up",
@@ -3249,7 +3251,8 @@
         "semProximo": "No appointment"
       },
       "internadoAgora": "Admitted right now",
-      "verInternacao": "Open admission"
+      "verInternacao": "Open admission",
+      "semAtendimentos": "No appointments at this clinic yet"
     },
     "resumoDoPaciente": {
       "titulo": "This pet in 30 seconds",
@@ -3582,6 +3585,169 @@
           "validade": "Batch shelf life",
           "validadeAjuda": "Each bar runs from delivery to expiry. The number inside is what is left."
         }
+      },
+      "via": {
+        "subcutanea": "Subcutaneous",
+        "intramuscular": "Intramuscular",
+        "intranasal": "Intranasal",
+        "oral": "Oral",
+        "naoInformada": "Route not stated"
+      },
+      "plano": {
+        "serie": {
+          "filhote": "Puppy/kitten series",
+          "adulto": "Adult series"
+        },
+        "reforco": "Annual booster",
+        "doseUnica": "Single dose",
+        "atrasadaHa": "Overdue by {dias} day | Overdue by {dias} days",
+        "hoje": "Today",
+        "venceuHa": "Due {dias} day ago | Due {dias} days ago",
+        "aPartirDe": "From {data}",
+        "podeComecar": "Can start today",
+        "emDias": "In {dias} day | In {dias} days",
+        "situacao": {
+          "em-dia": "Up to date",
+          "a-vencer": "Due soon",
+          "devida": "Due today",
+          "atrasada": "Overdue",
+          "aguarda-idade": "Waiting for age",
+          "nao-iniciada": "Not started"
+        },
+        "serieCompleta": "{serie} complete · annual booster",
+        "naoComecou": "{serie}, {total} doses · not started",
+        "emAndamento": "{serie} · {feitas} of {total} given",
+        "sequencia": "Dose sequence for {vacina}",
+        "agora": "Now",
+        "marcadaPara": "Booked: {data} at {hora}",
+        "opcionais": "Optional, not started: {lista}. They join the protocol once someone starts them.",
+        "unicaNaoComecou": "Single dose · not started",
+        "unicaComReforco": "Single dose · annual booster"
+      },
+      "aplicar": {
+        "abrir": "Give vaccine",
+        "atalho": "Give",
+        "titulo": "Give vaccine · {pet}",
+        "confirmar": "Give and record",
+        "opcionalNaoIniciada": "Optional, not started yet",
+        "serieDoPaciente": "{serie}: {total} doses for this vaccine.",
+        "via": "Route",
+        "aplicador": "Given by",
+        "observacao": "Note",
+        "lote": {
+          "escolher": "Choose the batch",
+          "digitar": "Other batch (type it)",
+          "digitarDica": "A vial the stock does not know",
+          "codigo": "Batch code",
+          "usarPrimeiro": "Use first",
+          "saldo": "{doses} dose | {doses} doses",
+          "vencido": "Batch expired on {data}. It cannot be given: set the vial aside for disposal.",
+          "venceHoje": "The batch expires today. It can still be given.",
+          "vencendoPrimeiro": "Expires in {dias} day. It is the first to expire: use it before the others. | Expires in {dias} days. It is the first to expire: use it before the others.",
+          "vencendo": "Expires in {dias} day, still within date. | Expires in {dias} days, still within date.",
+          "foraDoEstoque": "Batch not in stock: the dose counts, but the fridge balance does not go down.",
+          "travados": "{lotes} has expired and is still in the fridge. It is not offered. | {lotes} have expired and are still in the fridge. They are not offered."
+        },
+        "proxima": {
+          "titulo": "Next dose",
+          "naSerie": "Dose {dose} of {total} on {data}",
+          "reforco": "Annual booster on {data}",
+          "marcar": "Book it now",
+          "buscando": "Looking for a slot…",
+          "sugestao": "{data} at {hora} with {profissional}",
+          "semHorario": "No free slot near that date. Reception books it later.",
+          "recall": "Too far ahead to book now. It joins the call list 30 days before."
+        },
+        "erros": {
+          "lote": "Choose the batch or type the vial code.",
+          "validade": "Enter the batch expiry date.",
+          "salvar": "Could not record it. Try again."
+        },
+        "recusa": {
+          "lote-vencido": "The batch has expired. The dose was not recorded.",
+          "sem-validade": "Without the batch expiry date the dose cannot be recorded.",
+          "vacina-fora-da-especie": "This vaccine is not for this patient’s species."
+        }
+      },
+      "externa": {
+        "abrir": "Record from elsewhere",
+        "titulo": "Vaccine given elsewhere",
+        "ajuda": "A dose {pet} got outside this clinic: pet shop, campaign, another clinic. It joins the protocol without a batch and stays marked, here and in the owner’s app.",
+        "quando": "Date given",
+        "onde": "Where it was given",
+        "ondeDica": "As written on the card: pet shop, clinic or campaign name.",
+        "aplicador": "Who gave it there (if the card says)",
+        "quemRegistra": "Who is recording it",
+        "procedencia": {
+          "titulo": "How the clinic knows",
+          "comprovante": "I saw the record",
+          "relato": "Only the owner’s word",
+          "consequencia": {
+            "comprovante": "Counts for the protocol and shows as a dose from elsewhere, checked by the clinic.",
+            "relato": "Counts for the protocol, but shows as having no record, here and in the app."
+          }
+        },
+        "semLoteExplicacao": "No batch and no expiry: the clinic did not give it and does not know which vial it came from.",
+        "confirmar": "Record dose",
+        "semLote": "No batch",
+        "naoAplicadaAqui": "not given here",
+        "outroLocal": "Elsewhere",
+        "registradaPor": "Recorded by {nome}",
+        "procedenciaCurta": {
+          "comprovante": "Record checked by {nome}",
+          "relato": "Word only, no record · {nome}"
+        },
+        "erros": {
+          "data": "Enter the date it was given.",
+          "futuro": "The date cannot be after today.",
+          "local": "Enter where it was given."
+        }
+      },
+      "carteira": {
+        "verCarteira": "Card and app",
+        "mesmoNoApp": "{responsavel}’s app shows the same overdue dose.",
+        "protocolo": "Protocol",
+        "protocoloAjuda": {
+          "filhote": "{especie}, {idade}. A vaccine started now follows the puppy/kitten series, with more doses.",
+          "adulto": "{especie}, {idade}. A vaccine started now follows the adult series for animals without history."
+        },
+        "semIdade": "age not stated",
+        "historicoTitulo": "Doses given",
+        "historicoAjuda": "Who gave it and where. A dose from elsewhere shows without a batch.",
+        "historicoVazio": "No vaccine recorded",
+        "quemEOnde": "Who and where",
+        "nestaClinica": "At this clinic",
+        "noApp": "In {responsavel}’s app",
+        "noAppAjuda": "What the phone receives. It changes the moment the clinic records.",
+        "comAtraso": "Vaccines, {total} overdue | Vaccines, {total} overdue"
+      },
+      "app": {
+        "titulo": "Vaccination card",
+        "pushOrigem": "PetJourney · now",
+        "resumo": {
+          "vacinas": "Vaccines",
+          "proxima": "Next",
+          "atrasadas": "Overdue"
+        },
+        "protocolo": "Protocol · {clinica}",
+        "opcionais": "Optional, not started: {lista}",
+        "vazio": "No vaccine recorded yet.",
+        "nova": "New",
+        "aplicadaNa": "Given · {clinica}",
+        "outroLocal": "Elsewhere · {local}",
+        "lote": "Batch {lote}",
+        "registradaPor": "Recorded by {clinica}",
+        "procedencia": {
+          "COMPROVANTE": "record checked",
+          "RELATO": "no record"
+        },
+        "atrasadaHa": "Overdue by {dias} day | Overdue by {dias} days",
+        "hoje": "Dose due today",
+        "aPartirDe": "From {data}",
+        "pendente": "Not started yet",
+        "proximaEm": "Next dose {data}",
+        "marcada": "Booked {data}, {hora}",
+        "fecharAviso": "Dismiss notification"
       }
     },
     "internacao": {
@@ -4526,6 +4692,31 @@
           "ver": "View",
           "continuar": "Resume"
         }
+      }
+    },
+    "ficha": {
+      "acoes": "Patient record actions",
+      "peso": "Weight",
+      "vacinas": {
+        "semProtocolo": "No vaccine protocol for {especie}",
+        "atrasada": "{vacina} overdue by {dias} day | {vacina} overdue by {dias} days",
+        "atrasadas": "{total} vaccine overdue | {total} vaccines overdue",
+        "hoje": "{vacina} due today",
+        "hojeVarias": "{total} vaccine due today | {total} vaccines due today",
+        "proxima": "Next dose in {dias} day | Next dose in {dias} days",
+        "emDia": "Vaccines up to date"
+      },
+      "historico": {
+        "internado": "In hospital now · {leito}",
+        "hoje": "Appointment today at {hora}",
+        "ultimo": "Last appointment {dias} day ago | Last appointment {dias} days ago",
+        "ultimoHoje": "Last appointment today",
+        "linhaDoTempo": "Timeline"
+      },
+      "resumo": {
+        "sinais": "{total} sign needs attention | {total} signs need attention",
+        "primeiraVez": "First time at this clinic",
+        "nada": "Nothing out of the ordinary since the last appointment"
       }
     }
   },

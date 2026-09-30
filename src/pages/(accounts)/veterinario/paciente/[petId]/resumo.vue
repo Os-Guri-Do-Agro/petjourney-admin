@@ -16,12 +16,15 @@
  */
 import Button from 'primevue/button'
 import ToggleSwitch from 'primevue/toggleswitch'
+import { PhCalendarBlank, PhStethoscope, PhWarningCircle } from '@phosphor-icons/vue'
 import { computed, onMounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
+import '@/components/home/home-card.css'
+import '@/features/clinico/components/pacientes/ficha/ficha.css'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
+import FichaCabeca from '@/features/clinico/components/pacientes/ficha/FichaCabeca.vue'
 import ResumoEmCasa from '@/features/clinico/components/pacientes/resumo/ResumoEmCasa.vue'
 import ResumoEssencial from '@/features/clinico/components/pacientes/resumo/ResumoEssencial.vue'
 import ResumoPeso from '@/features/clinico/components/pacientes/resumo/ResumoPeso.vue'
@@ -103,6 +106,25 @@ const perdaEmRisco = computed(
       (sinal) => sinal.tipo === 'perda-de-peso' && sinal.severidade === 'risco',
     ) ?? false,
 )
+
+/**
+ * O estado do resumo numa frase, no lugar da saudação da Visão geral: quantos sinais pedem atenção,
+ * ou que não há nada fora do comum. Primeira vez é o caso próprio — sem consulta anterior, não há
+ * "desde a última consulta" para comparar.
+ */
+const frase = computed(() => {
+  const dados = resumo.value
+
+  if (!dados) {
+    return ''
+  }
+
+  if (dados.sinais.length > 0) {
+    return t('clinico.ficha.resumo.sinais', { total: dados.sinais.length }, dados.sinais.length)
+  }
+
+  return dados.primeiraVez ? t('clinico.ficha.resumo.primeiraVez') : t('clinico.ficha.resumo.nada')
+})
 
 const mostrarDiario = computed(
   () =>
@@ -340,7 +362,7 @@ watch(petId, carregar)
 
 <template>
   <PartnerPageFrame
-    :subtitle="t('clinico.resumoDoPaciente.titulo')"
+    class="ficha-tema hc-tema"
     :title="pet?.nome ?? t('clinico.resumoDoPaciente.titulo')"
     :loading="carregando && !pet"
     :error="erro"
@@ -349,45 +371,50 @@ watch(petId, carregar)
     block-when-suspended
     @retry="carregar"
   >
-    <div v-if="pet && resumo" class="resumo clinic-scope">
-      <div class="resumo__cabeca">
-        <ClinicPatientHeader :pet="pet" :tutor="tutor" sem-alertas>
-          <template #acoes>
-            <Button
-              v-if="atendimentoDeHoje"
-              :label="t('clinico.resumoDoPaciente.abrirAtendimento')"
-              icon="pi pi-file-edit"
-              :loading="abrindo"
-              @click="abrirAtendimento"
-            />
-            <Button
-              :label="t('clinico.resumoDoPaciente.verHistorico')"
-              icon="pi pi-history"
-              severity="secondary"
-              text
-              size="small"
-              @click="router.push(`/veterinario/paciente/${pet.id}/historico`)"
-            />
-          </template>
-        </ClinicPatientHeader>
-
-        <p v-if="linhaDeHoje" class="resumo__hoje">
-          <i class="pi pi-calendar" aria-hidden="true" />
-          {{ linhaDeHoje }}
-          <span class="resumo__dica"
-            >· {{ t('clinico.resumoDoPaciente.abrirAtendimentoDica') }}</span
+    <template v-if="pet" #cabecalho>
+      <FichaCabeca :pet="pet" :tutor="tutor" atual="resumo" :frase="frase" sem-alertas>
+        <template v-if="atendimentoDeHoje" #acoes>
+          <Button
+            class="ficha-pilula ficha-pilula--cheia"
+            :label="t('clinico.resumoDoPaciente.abrirAtendimento')"
+            :loading="abrindo"
+            @click="abrirAtendimento"
           >
+            <template #icon>
+              <PhStethoscope class="ficha-pilula__icone" weight="fill" aria-hidden="true" />
+            </template>
+          </Button>
+        </template>
+      </FichaCabeca>
+    </template>
+
+    <div v-if="pet && resumo" class="ficha-conteudo resumo clinic-scope">
+      <div v-if="linhaDeHoje || erroAoAbrir" class="resumo__cabeca">
+        <p v-if="linhaDeHoje" class="resumo__hoje">
+          <PhCalendarBlank class="resumo__hoje-icone" weight="duotone" aria-hidden="true" />
+          {{ linhaDeHoje }}
+          <span class="resumo__dica">· {{ t('clinico.resumoDoPaciente.abrirAtendimentoDica') }}</span>
         </p>
         <p v-if="erroAoAbrir" class="resumo__erro" role="alert">{{ erroAoAbrir }}</p>
       </div>
 
-      <ResumoSinais
+      <!-- O que chama atenção vem primeiro, num cartão com título, como a pauta da Visão geral. -->
+      <section
         v-if="!resumo.primeiraVez || resumo.sinais.length > 0"
-        :sinais="resumo.sinais"
-      />
+        class="hc"
+        aria-labelledby="resumo-sinais-titulo"
+      >
+        <header class="hc__cabeca">
+          <h2 id="resumo-sinais-titulo" class="hc__titulo">
+            <PhWarningCircle class="hc__icone" weight="duotone" aria-hidden="true" />
+            {{ t('clinico.resumoDoPaciente.sinais.titulo') }}
+          </h2>
+        </header>
+        <ResumoSinais :sinais="resumo.sinais" sem-moldura />
+      </section>
 
-      <div class="resumo__corpo">
-        <div class="resumo__principal">
+      <div class="ficha-grade resumo__corpo">
+        <div class="ficha-coluna">
           <ResumoPrimeiraConsulta v-if="resumo.primeiraVez" :pet="pet" />
           <ResumoEmCasa
             v-if="mostrarDiario"
@@ -397,7 +424,9 @@ watch(petId, carregar)
           <ResumoPeso v-if="mostrarPeso" :peso="resumo.peso" :em-risco="perdaEmRisco" />
         </div>
 
-        <ResumoEssencial :resumo="resumo" />
+        <div class="ficha-coluna resumo__lado">
+          <ResumoEssencial :resumo="resumo" />
+        </div>
       </div>
 
       <div class="resumo__preferencia">
@@ -409,76 +438,63 @@ watch(petId, carregar)
 </template>
 
 <style scoped>
-.resumo {
-  display: grid;
-  gap: var(--clinic-space-3);
-}
-
 .resumo__cabeca {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 0.35rem;
 }
 
 .resumo__hoje {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   margin: 0;
-  gap: var(--clinic-space-1) var(--clinic-space-2);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  gap: 0.25rem 0.5rem;
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
-.resumo__hoje .pi {
-  color: var(--clinic-faint);
+.resumo__hoje-icone {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--hc-marca);
 }
 
 .resumo__dica {
-  color: var(--clinic-faint);
+  color: var(--hc-tinta-2);
   font-weight: 500;
 }
 
 .resumo__erro {
   margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
+  color: var(--hc-coral-tinta);
+  font-size: 0.8125rem;
   font-weight: 700;
 }
 
 .resumo__preferencia {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 600;
+  gap: 0.5rem;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
 .resumo__preferencia label {
   cursor: pointer;
 }
 
-.resumo__corpo {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 20rem;
-  align-items: start;
-  gap: var(--clinic-space-3);
-}
-
-.resumo__principal {
-  display: grid;
-  gap: var(--clinic-space-3);
-  min-width: 0;
-}
-
-@media (max-width: 1100px) {
+/* O essencial ao lado, mais estreito; em uma coluna, ele sobe — é mais curto e responde antes. */
+@container (min-width: 62rem) {
   .resumo__corpo {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 21rem;
   }
+}
 
-  /* No estreito o essencial sobe: é mais curto e responde antes. */
-  .resumo__corpo > :last-child {
+@container (max-width: 61.99rem) {
+  .resumo__lado {
     order: -1;
   }
 }

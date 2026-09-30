@@ -2752,7 +2752,8 @@
         "lote": "Lote",
         "fabricante": "Fabricante",
         "proxima": "Próxima dose",
-        "ressalva": "Lote e fabricante conforme registro desta clínica. Vacinas aplicadas em outro serviço devem ser conferidas na carteira do animal."
+        "ressalva": "Lote e fabricante conforme registro desta clínica. Vacinas aplicadas em outro serviço devem ser conferidas na carteira do animal.",
+        "externa": "{local} (sem lote)"
       },
       "orcamento": {
         "titulo": "Orçamento",
@@ -3114,7 +3115,8 @@
           "intramuscular": "Intramuscular",
           "intravenosa": "Intravenosa",
           "topica": "Tópica",
-          "otologica": "Otológica"
+          "otologica": "Otológica",
+          "intranasal": "Intranasal"
         },
         "retornoDialogo": {
           "titulo": "Agendar retorno",
@@ -3249,7 +3251,8 @@
         "semProximo": "Sem horário marcado"
       },
       "internadoAgora": "Internado agora",
-      "verInternacao": "Abrir internação"
+      "verInternacao": "Abrir internação",
+      "semAtendimentos": "Nenhum atendimento nesta clínica ainda"
     },
     "resumoDoPaciente": {
       "titulo": "Este pet em 30 segundos",
@@ -3582,6 +3585,169 @@
           "validade": "Validade dos lotes",
           "validadeAjuda": "Cada barra vai do recebimento ao vencimento. O número dentro é o saldo."
         }
+      },
+      "via": {
+        "subcutanea": "Subcutânea",
+        "intramuscular": "Intramuscular",
+        "intranasal": "Intranasal",
+        "oral": "Oral",
+        "naoInformada": "Via não informada"
+      },
+      "plano": {
+        "serie": {
+          "filhote": "Série de filhote",
+          "adulto": "Série de adulto"
+        },
+        "reforco": "Reforço anual",
+        "doseUnica": "Dose única",
+        "atrasadaHa": "Atrasada há {dias} dia | Atrasada há {dias} dias",
+        "hoje": "Hoje",
+        "venceuHa": "Venceu há {dias} dia | Venceu há {dias} dias",
+        "aPartirDe": "A partir de {data}",
+        "podeComecar": "Pode começar hoje",
+        "emDias": "Em {dias} dia | Em {dias} dias",
+        "situacao": {
+          "em-dia": "Em dia",
+          "a-vencer": "A vencer",
+          "devida": "Para hoje",
+          "atrasada": "Atrasada",
+          "aguarda-idade": "Aguarda a idade",
+          "nao-iniciada": "Não iniciada"
+        },
+        "serieCompleta": "{serie} completa · reforço anual",
+        "naoComecou": "{serie}, {total} doses · não começou",
+        "emAndamento": "{serie} · {feitas} de {total} aplicadas",
+        "sequencia": "Sequência de doses de {vacina}",
+        "agora": "Agora",
+        "marcadaPara": "Marcada: {data} às {hora}",
+        "opcionais": "Opcionais não iniciadas: {lista}. Entram no protocolo quando alguém começar.",
+        "unicaNaoComecou": "Dose única · não começou",
+        "unicaComReforco": "Dose única · reforço anual"
+      },
+      "aplicar": {
+        "abrir": "Aplicar vacina",
+        "atalho": "Aplicar",
+        "titulo": "Aplicar vacina · {pet}",
+        "confirmar": "Aplicar e registrar",
+        "opcionalNaoIniciada": "Opcional, ainda não iniciada",
+        "serieDoPaciente": "{serie}: {total} doses nesta vacina.",
+        "via": "Via",
+        "aplicador": "Quem aplica",
+        "observacao": "Observação",
+        "lote": {
+          "escolher": "Escolha o lote",
+          "digitar": "Outro lote (digitar)",
+          "digitarDica": "Frasco que o estoque não conhece",
+          "codigo": "Código do lote",
+          "usarPrimeiro": "Usar primeiro",
+          "saldo": "{doses} dose | {doses} doses",
+          "vencido": "Lote vencido em {data}. Não pode ser aplicado: separe o frasco para descarte.",
+          "venceHoje": "O lote vence hoje. Ainda pode ser aplicado.",
+          "vencendoPrimeiro": "Vence em {dias} dia. É o primeiro a vencer: use este antes dos outros. | Vence em {dias} dias. É o primeiro a vencer: use este antes dos outros.",
+          "vencendo": "Vence em {dias} dia, ainda dentro da validade. | Vence em {dias} dias, ainda dentro da validade.",
+          "foraDoEstoque": "Lote fora do estoque: a aplicação vale, mas o saldo da geladeira não baixa.",
+          "travados": "{lotes} está vencido e continua na geladeira. Não entra como opção. | {lotes} estão vencidos e continuam na geladeira. Não entram como opção."
+        },
+        "proxima": {
+          "titulo": "Próxima dose",
+          "naSerie": "Dose {dose} de {total} em {data}",
+          "reforco": "Reforço anual em {data}",
+          "marcar": "Marcar na agenda agora",
+          "buscando": "Procurando horário…",
+          "sugestao": "{data} às {hora} com {profissional}",
+          "semHorario": "Sem horário livre perto dessa data. A recepção marca depois.",
+          "recall": "Longe demais para marcar agora. Entra na lista de chamada 30 dias antes."
+        },
+        "erros": {
+          "lote": "Escolha o lote ou digite o código do frasco.",
+          "validade": "Informe a validade do lote.",
+          "salvar": "Não foi possível registrar. Tente de novo."
+        },
+        "recusa": {
+          "lote-vencido": "O lote está vencido. A aplicação não foi registrada.",
+          "sem-validade": "Sem a validade do lote a aplicação não pode ser registrada.",
+          "vacina-fora-da-especie": "Esta vacina não é para a espécie do paciente."
+        }
+      },
+      "externa": {
+        "abrir": "Registrar de outro lugar",
+        "titulo": "Vacina aplicada em outro lugar",
+        "ajuda": "Dose que {pet} tomou fora daqui: pet shop, campanha, outra clínica. Entra no protocolo sem lote e fica marcada, aqui e no app do responsável.",
+        "quando": "Data da aplicação",
+        "onde": "Onde foi aplicada",
+        "ondeDica": "Como está no papel: nome do pet shop, da clínica ou da campanha.",
+        "aplicador": "Quem aplicou lá (se o papel disser)",
+        "quemRegistra": "Quem está registrando",
+        "procedencia": {
+          "titulo": "Como a clínica sabe",
+          "comprovante": "Vi o comprovante",
+          "relato": "Só o relato do responsável",
+          "consequencia": {
+            "comprovante": "Conta para o protocolo e aparece como dose de outro local, conferida pela clínica.",
+            "relato": "Conta para o protocolo, mas aparece marcada como sem comprovante, aqui e no app."
+          }
+        },
+        "semLoteExplicacao": "Sem lote e sem validade: a clínica não aplicou e não sabe de que frasco saiu.",
+        "confirmar": "Registrar dose",
+        "semLote": "Sem lote",
+        "naoAplicadaAqui": "não aplicada aqui",
+        "outroLocal": "Outro local",
+        "registradaPor": "Registrada por {nome}",
+        "procedenciaCurta": {
+          "comprovante": "Comprovante conferido por {nome}",
+          "relato": "Só relato, sem comprovante · {nome}"
+        },
+        "erros": {
+          "data": "Informe a data da aplicação.",
+          "futuro": "A data não pode ser depois de hoje.",
+          "local": "Informe onde foi aplicada."
+        }
+      },
+      "carteira": {
+        "verCarteira": "Carteira e app",
+        "mesmoNoApp": "O app de {responsavel} mostra o mesmo atraso.",
+        "protocolo": "Protocolo",
+        "protocoloAjuda": {
+          "filhote": "{especie}, {idade}. Vacina que começar agora segue a série de filhote, com mais doses.",
+          "adulto": "{especie}, {idade}. Vacina que começar agora segue a série de adulto sem histórico."
+        },
+        "semIdade": "idade não informada",
+        "historicoTitulo": "Histórico de aplicações",
+        "historicoAjuda": "Quem aplicou e onde. A dose de outro lugar aparece sem lote.",
+        "historicoVazio": "Nenhuma vacina registrada",
+        "quemEOnde": "Quem e onde",
+        "nestaClinica": "Nesta clínica",
+        "noApp": "No app de {responsavel}",
+        "noAppAjuda": "O que o celular recebe. Muda na hora em que a clínica registra.",
+        "comAtraso": "Vacinas, {total} atrasada | Vacinas, {total} atrasadas"
+      },
+      "app": {
+        "titulo": "Carteira de vacinação",
+        "pushOrigem": "PetJourney · agora",
+        "resumo": {
+          "vacinas": "Vacinas",
+          "proxima": "Próxima",
+          "atrasadas": "Atrasadas"
+        },
+        "protocolo": "Protocolo · {clinica}",
+        "opcionais": "Opcionais não iniciadas: {lista}",
+        "vazio": "Nenhuma vacina registrada ainda.",
+        "nova": "Nova",
+        "aplicadaNa": "Aplicada · {clinica}",
+        "outroLocal": "Outro local · {local}",
+        "lote": "Lote {lote}",
+        "registradaPor": "Registrada por {clinica}",
+        "procedencia": {
+          "COMPROVANTE": "comprovante conferido",
+          "RELATO": "sem comprovante"
+        },
+        "atrasadaHa": "Atrasada há {dias} dia | Atrasada há {dias} dias",
+        "hoje": "Dose para hoje",
+        "aPartirDe": "A partir de {data}",
+        "pendente": "Ainda não começou",
+        "proximaEm": "Próxima dose {data}",
+        "marcada": "Marcada {data}, {hora}",
+        "fecharAviso": "Fechar aviso"
       }
     },
     "internacao": {
@@ -4526,6 +4692,31 @@
           "ver": "Ver",
           "continuar": "Continuar"
         }
+      }
+    },
+    "ficha": {
+      "acoes": "Ações da ficha do paciente",
+      "peso": "Peso",
+      "vacinas": {
+        "semProtocolo": "Sem protocolo de vacina para {especie}",
+        "atrasada": "{vacina} atrasada há {dias} dia | {vacina} atrasada há {dias} dias",
+        "atrasadas": "{total} vacina atrasada | {total} vacinas atrasadas",
+        "hoje": "{vacina} para hoje",
+        "hojeVarias": "{total} vacina para hoje | {total} vacinas para hoje",
+        "proxima": "Próxima dose em {dias} dia | Próxima dose em {dias} dias",
+        "emDia": "Vacinas em dia"
+      },
+      "historico": {
+        "internado": "Em internação agora · {leito}",
+        "hoje": "Atendimento hoje às {hora}",
+        "ultimo": "Último atendimento há {dias} dia | Último atendimento há {dias} dias",
+        "ultimoHoje": "Último atendimento hoje",
+        "linhaDoTempo": "Linha do tempo"
+      },
+      "resumo": {
+        "sinais": "{total} sinal pede atenção | {total} sinais pedem atenção",
+        "primeiraVez": "Primeira vez nesta clínica",
+        "nada": "Nada fora do comum desde a última consulta"
       }
     }
   },

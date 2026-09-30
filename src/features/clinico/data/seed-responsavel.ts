@@ -76,13 +76,18 @@ export function vacinaDaPerola(
     id: 'aplic-perola-v4',
     petId: 'pet-perola',
     vacinaId: 'vac-v4-felina',
+    origem: 'clinica',
     professionalId: 'prof-helena',
     aplicadaEm: iso(aplicadaEm, 15 * 60 + 40),
     lote: 'V4F-2410',
     validadeLote: addDays(aplicadaEm, 190),
     dose: 3,
+    dosesNaSerie: 3,
     via: 'subcutanea',
     proximaDoseEm: addDays(aplicadaEm, 365),
+    agendamentoDaProximaId: null,
+    encounterId: null,
+    externa: null,
     observacao: 'Reforço anual.',
   }
 }

@@ -282,7 +282,13 @@ const alertasOrdenados = computed(() => {
 
 .paciente__trilho {
   display: flex;
-  flex: 0 0 auto;
+  /*
+   * O teto em 100% deixa as ações quebrarem linha dentro do cartão. Sem ele, o trilho media a
+   * fileira inteira de botões numa linha só e, com três ações num cartão de 450 px, o último botão
+   * passava por cima da borda.
+   */
+  max-width: 100%;
+  flex: 0 1 auto;
   flex-direction: column;
   align-items: flex-end;
   gap: var(--clinic-space-2);

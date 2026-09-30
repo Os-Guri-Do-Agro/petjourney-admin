@@ -24,6 +24,31 @@
     'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+/*
+ * Ícone do PrimeIcons segue o tamanho de quem o contém.
+ *
+ * O tema do PrimeVue injeta `.pi { font-size: var(--p-icon-size) }` — 1rem fixo. Isso quebra o
+ * contrato de toda fonte de ícones, em que o ícone tem 1em do contexto: o CSS do portal inteiro foi
+ * escrito assim, com a forma dizendo o tamanho do ícone (`.linha__marca { font-size: 0.65rem }`,
+ * `.coluna__icone { font-size: 0.62rem }`), e o tema anulava todos. O resultado se repetia tela a
+ * tela: o visto de 16 px encostando na borda de um disco de 17 px, a seta de abrir linha ocupando
+ * dois terços do quadradinho dela, ícone de 16 px ao lado de rótulo de 11 px.
+ *
+ * `html .pi` (0,1,1) ganha do `.pi` do tema (0,1,0) qualquer que seja a ordem em que os dois
+ * carregam, e perde para toda regra escrita numa tela — de contexto (`.x .pi`) ou na classe do
+ * próprio ícone (`.x__icone`, com o escopo do Vue) —, que continua mandando. A exclusão fica dentro
+ * de `:where()` para não somar especificidade: com `:not()` solto a regra subia a (0,2,1) e passava
+ * por cima do tamanho que o ícone do interruptor de tema declara. Os ícones internos dos
+ * componentes do PrimeVue — de botão, campo, menu, todos com uma classe `p-*` no próprio
+ * elemento — ficam de fora e seguem o tamanho do tema, que é o que o preset espera.
+ *
+ * Regra para quem desenha daqui em diante: **o tamanho do ícone mora no contêiner**, em
+ * `font-size`. Numa forma (disco, bloco, marcador), o ícone fica entre metade e 60% do lado dela.
+ */
+html .pi:where(:not([class^='p-'], [class*=' p-'])) {
+  font-size: inherit;
+}
+
 html {
   overflow-x: clip;
   /*

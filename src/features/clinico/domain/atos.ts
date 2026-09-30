@@ -110,7 +110,10 @@ function vacinasAplicadas(fonte: FonteDosAtos): AtoClinico[] {
       doseTexto: '',
       realizadoEm: item.aplicadaEm,
       professionalId: item.professionalId,
-      observacao: item.observacao,
+      /* A dose de fora diz onde foi dada: sem isso, "sem profissional" pareceria registro faltando. */
+      observacao: item.externa
+        ? [item.externa.local, item.observacao].filter(Boolean).join(' — ')
+        : item.observacao,
     }))
 }
 
