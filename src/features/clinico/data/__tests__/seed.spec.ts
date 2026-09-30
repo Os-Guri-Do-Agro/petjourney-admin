@@ -42,6 +42,10 @@ const CASOS_ESPERADOS: CasoId[] = [
   'resumo-perda-de-peso',
   'resumo-diario-cheio',
   'resumo-pet-novo',
+  /* Adesão ao tratamento: dá e não registra, crítico com queda, várias vezes ao dia. */
+  'adesao-sem-registro',
+  'adesao-critico',
+  'adesao-varias-vezes',
 ]
 
 afterEach(() => {
@@ -110,7 +114,7 @@ describe('seed do módulo clínico', () => {
     )
   })
 
-  it('entrega os 18 casos difíceis, cada um com rota própria', () => {
+  it('entrega os 21 casos difíceis, cada um com rota própria', () => {
     const dataset = gerarDataset()
     const ids = dataset.casos.map((caso) => caso.id)
 

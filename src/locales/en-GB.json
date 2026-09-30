@@ -625,11 +625,13 @@
         "atividades": "Tasks",
         "vacinas": "Vaccines",
         "rotina": "Routine",
-        "vespera": "Bookings"
+        "vespera": "Bookings",
+        "tratamentos": "Treatments"
       },
       "contagem": "{total} matter | {total} matters",
       "recolher": "Collapse {modulo}",
-      "expandir": "Expand {modulo}"
+      "expandir": "Expand {modulo}",
+      "tratamentos": "{total} critical treatment with dropping adherence | {total} critical treatments with dropping adherence"
     },
     "resumo": {
       "portal": "Track your earnings and share your code.",
@@ -1981,7 +1983,8 @@
         "fila": "{total} patient on the waitlist | {total} patients on the waitlist",
         "internacao": "{total} item to handle in inpatients | {total} items to handle in inpatients",
         "atividades": "{total} open task | {total} open tasks",
-        "vacinas": "{total} overdue booster | {total} overdue boosters"
+        "vacinas": "{total} overdue booster | {total} overdue boosters",
+        "tratamentos": "{total} critical treatment with dropping adherence | {total} critical treatments with dropping adherence"
       }
     },
     "busca": {
@@ -3273,7 +3276,8 @@
         "recorrenteDetalhe": "{vezes}× since the last visit",
         "mais": "and {total} more in the summary",
         "campoDetalhe": "in {alterados} of {total} entries",
-        "relato": "Also reported: {relato}"
+        "relato": "Also reported: {relato}",
+        "adesao": "{medicamento}: adherence dropped at home"
       },
       "casa": {
         "titulo": "At home since the last visit",
@@ -3358,7 +3362,8 @@
         "prescricao": "{nome} (prescribed, until {data})",
         "campo": "{campo}: {valor} in {alterados} of {total} entries",
         "doencas": "illnesses reported by the pet parent: {lista}",
-        "alarmeSemTexto": "{sintomas} on {data}"
+        "alarmeSemTexto": "{sintomas} on {data}",
+        "prescricaoComAdesao": "{prescricao} · in the app since {data}: {contagem}"
       },
       "verResumoComSinais": "30-second summary: {total} points of attention",
       "preferencia": "Suggest this summary when opening the patient's history",
@@ -3370,6 +3375,11 @@
         "comoReativar": "The button stays in the history. You can turn the suggestion back on from the summary screen.",
         "agoraNao": "Not now",
         "ver": "View summary"
+      },
+      "tratamentos": {
+        "titulo": "Medication at home",
+        "ajuda": "From what the household logged in the app since the last visit.",
+        "abrir": "Open treatment"
       }
     },
     "atendimentos": {
@@ -3495,7 +3505,8 @@
       "semPrescricao": "No prescription to issue.",
       "vistaDoResponsavel": "What the owner sees",
       "lembrete": "Becomes an app reminder: {quantidade}, {frequencia}",
-      "lembreteContinuo": "Ongoing reminder, no end date"
+      "lembreteContinuo": "Ongoing reminder, no end date",
+      "critico": "Critical treatment: alert the clinic if adherence drops at home"
     },
     "vacinas": {
       "titulo": "Vaccines",
@@ -4717,6 +4728,183 @@
         "sinais": "{total} sign needs attention | {total} signs need attention",
         "primeiraVez": "First time at this clinic",
         "nada": "Nothing out of the ordinary since the last appointment"
+      },
+      "tratamento": {
+        "pilula": "Treatment",
+        "alerta": "{medicamento}: adherence dropped",
+        "alertas": "{total} treatment with dropping adherence | {total} treatments with dropping adherence",
+        "umEmCurso": "{medicamento} ongoing",
+        "emCurso": "{total} medication ongoing | {total} medications ongoing",
+        "nenhumEmCurso": "No medication ongoing",
+        "semTratamento": "No home medication with a reminder"
+      }
+    },
+    "adesao": {
+      "titulo": "Home treatments",
+      "subtitulo": "Medication prescribed here, dose by dose, as the household logs it in the app.",
+      "situacao": {
+        "dada": "Given",
+        "pulada": "Skipped",
+        "sem-registro": "Not logged",
+        "aberta": "Dose due now",
+        "prevista": "Upcoming"
+      },
+      "motivo": {
+        "esqueci": "Forgot",
+        "cuspiu": "Spat it out",
+        "acabou": "Ran out"
+      },
+      "motivoNaFrase": {
+        "esqueci": "forgotten",
+        "cuspiu": "the pet spat it out",
+        "acabou": "the medication ran out"
+      },
+      "contagem": {
+        "dadas": "{total} given | {total} given",
+        "puladas": "{total} skipped | {total} skipped",
+        "semRegistro": "{total} not logged | {total} not logged",
+        "nenhuma": "No doses logged yet"
+      },
+      "periodo": {
+        "desdeConsulta": "Since the {data} visit",
+        "desdeInicio": "Since it started on {data}"
+      },
+      "dose": {
+        "ml": "{quantidade} mL",
+        "comprimido": "{quantidade} tablet | {quantidade} tablets",
+        "meio": "half a tablet",
+        "quarto": "a quarter of a tablet",
+        "tres-quartos": "three quarters of a tablet",
+        "um-e-meio": "one and a half tablets"
+      },
+      "posologia": {
+        "aCada": "every {horas} h",
+        "continuo": "ongoing",
+        "porDias": "for {dias} day | for {dias} days"
+      },
+      "faixa": {
+        "quando": "{data}, {hora}",
+        "dadaPor": "given by {nome} at {hora}",
+        "puladaPor": "skipped by {nome} · {motivo}",
+        "hoje": "today",
+        "marcoLegenda": "Last visit",
+        "semRegistroNota": "Not logged doesn't mean not given: the dose may have been given without being marked in the app."
+      },
+      "quem": "Logged by {lista}",
+      "horarioDestoante": "The {horario} dose is the one least often shown as given: {dadas} of {fechadas}.",
+      "critico": {
+        "selo": "Critical",
+        "alternar": "Critical: alert the clinic if adherence drops"
+      },
+      "alerta": {
+        "selo": "Adherence dropped",
+        "puladas": "{total} dose skipped since {quando} | {total} doses skipped since {quando}",
+        "queda": "Only {dadas} of {fechadas} doses show as given since {quando}",
+        "motivos": "Reason: {motivos}.",
+        "antes": "The week before: {dadas} of {fechadas}.",
+        "registrarContato": "Log contact",
+        "quemFalou": "Who spoke",
+        "nota": "What was agreed",
+        "notaPlaceholder": "E.g. the box ran out; new prescription sent",
+        "salvar": "Save contact",
+        "cancelar": "Cancel",
+        "contato": "Contact logged by {nome}, {quando}."
+      },
+      "registros": {
+        "ver": "Show log",
+        "esconder": "Hide log",
+        "colunaQuando": "Dose",
+        "colunaSituacao": "Status",
+        "colunaQuem": "Logged by",
+        "registradaAs": "logged {quando}",
+        "vazio": "No doses in this period",
+        "rotulo": "{medicamento} log"
+      },
+      "naoCompartilhado": "The household doesn't share this reminder's log.",
+      "naoCompartilhadoDetalhe": "The reminder exists in the app; what gets logged stays with the family.",
+      "ficha": {
+        "emCurso": "Ongoing medication",
+        "emCursoAjuda": "What the household logged in the app. The line on the strip marks the last visit, on {data}.",
+        "emCursoAjudaSemConsulta": "What the household logged in the app, since the first dose.",
+        "encerrados": "Finished",
+        "encerradosPeriodo": "from {inicio} to {fim}",
+        "vazioTitulo": "No medication with a reminder",
+        "vazioDescricao": "Once the pet parent sets up the prescription reminders in the app, what the household logs shows up here, dose by dose.",
+        "noApp": "On {responsavel}'s phone",
+        "noAppAjuda": "What the app shows. Tap as someone at home would: the record beside it updates right away.",
+        "celularDe": "Phone of",
+        "papel": {
+          "dono": "pet parent",
+          "familia": "family",
+          "leitura": "view only"
+        },
+        "emCursoAjudaSemFio": "What the household logged in the app. The last visit was on {data}."
+      },
+      "lista": {
+        "stat": {
+          "alertas": "Adherence dropped",
+          "alertasDetalhe": "Critical treatments: call today",
+          "emCurso": "Ongoing",
+          "emCursoDetalhe": "Medication with an app reminder",
+          "criticos": "Critical",
+          "criticosDetalhe": "Flagged by the vet when prescribing"
+        },
+        "recorte": {
+          "atencao": "Need attention",
+          "emCurso": "Ongoing",
+          "encerrados": "Finished"
+        },
+        "coluna": {
+          "paciente": "Patient",
+          "remedio": "Medication",
+          "janela": "Last {dias} days",
+          "responsavel": "Pet parent",
+          "situacao": "Status"
+        },
+        "situacaoEmCurso": "Ongoing",
+        "situacaoEncerrado": "Finished",
+        "vazioTitulo": "No home treatments yet",
+        "vazioDescricao": "Medication shows up here once the pet parent sets up the prescription reminders in the app.",
+        "vazioRecorte": {
+          "atencao": "No critical treatment with dropping adherence",
+          "emCurso": "No ongoing treatment",
+          "encerrados": "No finished treatment"
+        }
+      },
+      "app": {
+        "titulo": "Medication",
+        "pushOrigem": "PetJourney · {hora}",
+        "dei": "Given",
+        "abrir": "Open",
+        "pulei": "Skipped",
+        "porQue": "Why?",
+        "voltar": "Back",
+        "ontemAs": "Yesterday, {hora}",
+        "dadaPorVoce": "Given by you at {hora}",
+        "dadaPor": "Given by {nome} at {hora}",
+        "puladaPorVoce": "Skipped by you · {motivo}",
+        "puladaPor": "Skipped by {nome} · {motivo}",
+        "desfazer": "Undo",
+        "jaRegistrada": "{nome} already logged it at {hora}. No need to give it again.",
+        "foraDaJanela": "This dose has closed. The next one shows up at its time.",
+        "somenteLeitura": "You follow {pet}'s medication; only people with edit access log doses.",
+        "erro": "Couldn't log it. Try again.",
+        "receitaNova": "Prescription from {data}",
+        "receitaNovaDetalhe": "{total} medication without a reminder yet | {total} medications without a reminder yet",
+        "primeiraDose": "First dose",
+        "sugestaoDica": "Suggested time so no dose falls in the early hours.",
+        "compartilhar": "{clinica} sees what you log",
+        "criar": "Set up reminders",
+        "desde": "Since {data}:",
+        "encerrados": "Finished",
+        "avisosTitulo": "How reminders work",
+        "avisoUmPorHorario": "One reminder per time. Medications less than {minutos} min apart come in the same reminder.",
+        "avisoSemReaviso": "No second reminder: the next dose already is the reminder.",
+        "avisoComReaviso": "A second reminder only for medication every {horas} h or less often, and only if nobody logs it.",
+        "avisoSemCobranca": "If the time passes, the dose stays unlogged. Nobody gets chased.",
+        "compartilhado": "{clinica} sees this log",
+        "naoCompartilhado": "Only the family sees this log",
+        "vazio": "No medication with a reminder for {pet}."
       }
     }
   },

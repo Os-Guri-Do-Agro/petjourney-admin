@@ -11,12 +11,14 @@
  * Embaixo, o que o cabeçalho antigo do paciente mostrava e ninguém pode perder de vista: responsável
  * com telefone, peso e os alertas — risco primeiro, na cor da gravidade da Visão geral.
  *
- * Substitui o `ClinicPatientHeader` só nas três vistas da ficha. As outras telas (atendimento,
- * internação, drawer da agenda) continuam com ele.
+ * Substitui o `ClinicPatientHeader` só nas vistas da ficha. As outras telas (atendimento,
+ * internação, drawer da agenda) continuam com ele. A pílula do tratamento só aparece para quem
+ * tem remédio de casa com lembrete — com o selo coral quando um crítico perdeu o ritmo.
  */
 import {
   PhClockCounterClockwise,
   PhInfo,
+  PhPill,
   PhSyringe,
   PhTimer,
   PhWarning,
@@ -26,13 +28,20 @@ import { computed, ref, watch, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
+
 import { useClinicFormat } from '../../../composables/useClinicFormat'
-import { patientRepository, vacinaRepository } from '../../../data/repositories'
+import {
+  patientRepository,
+  tratamentoRepository,
+  vacinaRepository,
+} from '../../../data/repositories'
 import type { AlertSeverity, Pet, Tutor } from '../../../data/types'
 import { porteDoPaciente } from '../../../domain/porte'
 import { montarResumoDoPaciente } from '../../../domain/resumo-do-paciente'
+import { useClinicoStore } from '../../../stores/clinico'
 
-export type VistaDaFicha = 'resumo' | 'historico' | 'vacinas'
+export type VistaDaFicha = 'resumo' | 'historico' | 'vacinas' | 'tratamento'
 
 const props = withDefaults(
   defineProps<{
@@ -53,6 +62,7 @@ const props = withDefaults(
 
 const { t } = useI18n()
 const formato = useClinicFormat()
+const clinico = useClinicoStore()
 
 // ------------------------------------------------------------------ quem é
 
@@ -106,11 +116,14 @@ const temVacinas = computed(() =>
 
 const vacinasAtrasadas = ref(0)
 const sinais = ref<{ total: number; risco: boolean } | null>(null)
+/** Remédio de casa com lembrete. Sem nenhum, a pílula não aparece: não há o que ver lá. */
+const tratamentos = ref({ total: 0, alertas: 0 })
 
 async function conferir() {
   vacinasAtrasadas.value = temVacinas.value
     ? (vacinaRepository.plano(props.pet.id)?.atrasadas ?? 0)
     : 0
+  tratamentos.value = tratamentoRepository.contagem(props.pet.id)
 
   /* Sem resumo, a pílula abre igual, só sem o selo: o cabeçalho não depende dele. */
   try {
@@ -129,6 +142,9 @@ async function conferir() {
 }
 
 watch(() => props.pet.id, conferir, { immediate: true })
+
+/* Uma dose marcada ou um contato registrado muda os selos: a store avisa quando o mundo mudou. */
+watch(() => clinico.revisao, conferir)
 
 type Pilula = {
   vista: VistaDaFicha
@@ -174,10 +190,30 @@ const navegacao = computed<Pilula[]>(() => {
             }
           : null,
     },
+    {
+      vista: 'tratamento',
+      rotulo: t('clinico.ficha.tratamento.pilula'),
+      icone: PhPill,
+      selo:
+        tratamentos.value.alertas > 0
+          ? {
+              valor: tratamentos.value.alertas,
+              cor: 'coral',
+              aria: t(
+                'clinico.ficha.tratamento.alertas',
+                { total: tratamentos.value.alertas },
+                tratamentos.value.alertas,
+              ),
+            }
+          : null,
+    },
   ]
 
   const outras = todas.filter(
-    (pilula) => pilula.vista !== props.atual && (pilula.vista !== 'vacinas' || temVacinas.value),
+    (pilula) =>
+      pilula.vista !== props.atual &&
+      (pilula.vista !== 'vacinas' || temVacinas.value) &&
+      (pilula.vista !== 'tratamento' || tratamentos.value.total > 0),
   )
 
   /* A cheia vai na frente: é o próximo passo, e a Visão geral a põe sempre em primeiro. */
@@ -196,8 +232,25 @@ function destino(vista: VistaDaFicha): string {
 
 <template>
   <div class="cabeca">
-    <p class="cabeca__meta">{{ meta }}</p>
-    <h1 class="cabeca__nome">{{ pet.nome }}</h1>
+    <!--
+      O rosto ao lado do nome: quem está na recepção reconhece o animal antes de ler. Sem foto,
+      o avatar desenhado (iniciais, silhueta da espécie e cor fixa) — o mesmo do hotel, para o
+      mesmo animal ter a mesma cara nos dois módulos.
+    -->
+    <div class="cabeca__quem">
+      <PetAvatar
+        class="cabeca__avatar"
+        :nome="pet.nome"
+        :iniciais="pet.iniciais"
+        :especie="pet.especie"
+        :foto-url="pet.fotoUrl"
+        tamanho="xl"
+      />
+      <div class="cabeca__identidade">
+        <p class="cabeca__meta">{{ meta }}</p>
+        <h1 class="cabeca__nome">{{ pet.nome }}</h1>
+      </div>
+    </div>
 
     <div class="cabeca__linha">
       <p class="cabeca__frase" aria-live="polite">{{ frase }}</p>
@@ -274,6 +327,25 @@ function destino(vista: VistaDaFicha): string {
 .cabeca {
   display: grid;
   gap: 0.2rem;
+  min-width: 0;
+}
+
+.cabeca__quem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* Um aro do papel do cartão separa o rosto do véu de sálvia do fundo, sem moldura desenhada. */
+.cabeca__avatar {
+  box-shadow:
+    0 0 0 3px var(--hc-cartao),
+    var(--hc-sombra);
+}
+
+.cabeca__identidade {
+  display: grid;
   min-width: 0;
 }
 

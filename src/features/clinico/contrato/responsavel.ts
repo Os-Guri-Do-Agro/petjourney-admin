@@ -778,6 +778,12 @@ export type ItemDaReceita = {
   via: ViaDeAdministracao
   /** Texto da clínica (ex.: "dar após a refeição"), no idioma `idioma` da receita. */
   instrucoes: string
+  /**
+   * O tratamento que nasceu deste item quando alguém da casa tocou "Criar lembretes". `null`
+   * enquanto não criou — o item mostra o botão; com ele, "Lembrete ativo" leva ao tratamento
+   * (seção "Adesão ao tratamento").
+   */
+  tratamentoId: Cuid | null
 }
 
 export type ReceitaParaResponsavel = {
@@ -877,6 +883,12 @@ export type ResumoDoAtendimento = {
  */
 export type CriarLembretesDaReceita = {
   itens: Array<{ itemId: Cuid; primeiraDoseEm: DataHoraIso }>
+  /**
+   * Deixar a clínica que prescreveu ver o que a casa registrar nestes lembretes. A tela de criar
+   * diz isso com todas as letras e vem ligada; desligar aqui ou depois não apaga o lembrete, só
+   * fecha a janela da clínica (seção "Adesão ao tratamento").
+   */
+  compartilharComAClinica: boolean
 }
 
 export type LembreteCriadoDaReceita = {
@@ -884,6 +896,8 @@ export type LembreteCriadoDaReceita = {
   lembreteSerieId: Cuid
   /** Só no uso contínuo. */
   tratamentoFixoId: Cuid | null
+  /** O `TratamentoDoPet` que a casa passa a registrar, dose a dose. */
+  tratamentoId: Cuid
 }
 
 // ---------------------------------------------------------------------------
@@ -1539,4 +1553,311 @@ export const TEXTO_PT_DA_NOTIFICACAO_DA_VACINA = (
 /** `2027-09-29` → `29/09/2027`. */
 function diaComAno(data: DataIso): string {
   return `${dia(data)}/${data.slice(0, 4)}`
+}
+
+// ---------------------------------------------------------------------------
+// Adesão ao tratamento — o lembrete da receita, dose a dose
+// ---------------------------------------------------------------------------
+
+/*
+ * O lembrete da receita (seção "Depois da consulta") ganha o outro lado: cada dose tem registro
+ * — dada, ou pulada com motivo — e quem registrou. A clínica que prescreveu lê esses registros,
+ * se a casa deixar, e vê no retorno se o tratamento foi feito. Passo a passo em
+ * `docs/clinico/16-*.md`.
+ *
+ * Por baixo continua o que o app já tem: cada dose é uma `LembreteOcorrencia` da série, e "dei" é
+ * o `CONCLUIDO` que ela já grava. O que é novo: a dose **pulada** com motivo, **quem** registrou,
+ * a dose que fecha sozinha **sem registro**, e o compartilhamento com a clínica.
+ *
+ * Duas regras atravessam tudo, e são do requisito:
+ *
+ * - **Sem registro não é dose perdida.** Não existe tela, aviso ou texto que chame de falta a dose
+ *   que ninguém marcou. Ela tem estado próprio e fica fora das contas de "deu" e de "não deu".
+ * - **A dose não cobra.** Nenhum aviso diz "você esqueceu". A dose que passa sem registro fecha
+ *   calada quando chega a hora da seguinte.
+ *
+ * A notificação da dose é a do lembrete que o app já manda — não é tipo novo de
+ * `TipoNotificacao`. O que muda nela está em `REGRAS_DA_DOSE` e `AvisoDeDose`.
+ */
+
+/**
+ * - `DADA` / `PULADA` — alguém da casa registrou.
+ * - `SEM_REGISTRO` — o prazo passou e ninguém marcou. **Não** quer dizer que não deu.
+ * - `ABERTA` — é a dose da vez: dá para registrar até a hora da seguinte.
+ * - `PREVISTA` — ainda não chegou.
+ */
+export const SITUACOES_DA_DOSE = ['DADA', 'PULADA', 'SEM_REGISTRO', 'ABERTA', 'PREVISTA'] as const
+export type SituacaoDaDose = (typeof SITUACOES_DA_DOSE)[number]
+
+/** Os três motivos do requisito, nessa ordem na tela: um toque, sem texto livre. */
+export const MOTIVOS_DA_DOSE_PULADA = ['ESQUECI', 'CUSPIU', 'ACABOU'] as const
+export type MotivoDaDosePulada = (typeof MOTIVOS_DA_DOSE_PULADA)[number]
+
+/**
+ * As regras dos avisos de dose. O app, o motor de notificações da API e o mock do portal seguem
+ * as mesmas — é o que faz remédio de 8 em 8 horas por catorze dias não virar o aviso que se
+ * desliga. Ver "Sem virar spam" no doc 16.
+ */
+export const REGRAS_DA_DOSE = {
+  /** O registro abre antes da hora: quem deu às 7h40 a dose das 8h marca na hora. */
+  antecedenciaDoRegistroMin: 60,
+  /**
+   * Segundo aviso (o `reavisadoEm` que a série já tem) só com intervalo de um dia ou mais. De 8 em
+   * 8 horas, a próxima dose já é o lembrete — repetir a de agora dobraria os avisos do dia.
+   */
+  reavisoSoComIntervaloDeHoras: 24,
+  /** Doses de qualquer pet da conta dentro desta janela saem num aviso só. */
+  agruparDentroDeMin: 15,
+  /** A faixa que a sugestão do primeiro horário tenta deixar livre, quando a frequência deixa. */
+  madrugada: { de: '00:00', ate: '06:00' },
+} as const
+
+/** Quem registrou a dose. `eu` é quem está com este celular — a tela diz "você". */
+export type QuemRegistrou = {
+  id: Cuid
+  nome: string
+  eu: boolean
+}
+
+export type DoseDoTratamento = {
+  /** 1 é a primeira dose do tratamento. É a chave do registro, junto com o tratamento. */
+  numero: number
+  previstaEm: DataHoraIso
+  /** Até quando dá para registrar: a hora da dose seguinte. */
+  registravelAte: DataHoraIso
+  situacao: SituacaoDaDose
+  /** Só em `PULADA`. */
+  motivo: MotivoDaDosePulada | null
+  registradaEm: DataHoraIso | null
+  registradaPor: QuemRegistrou | null
+  /** A dose está aberta (ou abre na próxima hora) e quem olha tem acesso de edição. */
+  podeRegistrar: boolean
+  /** Registro de quem olha, com a janela ainda aberta: o "desfazer" do toque errado. */
+  podeDesfazer: boolean
+}
+
+export type TratamentoDoPet = {
+  id: Cuid
+  /** A `LembreteSerie` que faz os avisos. */
+  lembreteSerieId: Cuid
+  atendimentoId: Cuid | null
+  itemDaReceitaId: Cuid | null
+  clinica: ClinicaResumo
+  profissional: ProfissionalResumo
+  medicamento: string
+  /** A mesma forma de `ItemDaReceita`: "meio comprimido", nunca "0,5". */
+  quantidade: number
+  unidade: UnidadeDeDose
+  fracao: FracaoDeDose | null
+  via: ViaDeAdministracao
+  instrucoes: string
+  frequenciaHoras: number
+  /** Ausente = uso contínuo. */
+  duracaoDias?: number
+  inicioEm: DataHoraIso
+  /** A última dose. Ausente no uso contínuo. */
+  ultimaDoseEm?: DataHoraIso
+  situacao: 'EM_CURSO' | 'ENCERRADO'
+  /** A clínica vê os registros deste lembrete. */
+  compartilhadoComAClinica: boolean
+  /** Só o dono muda o compartilhamento, como o consentimento do diário. */
+  podeAlterarCompartilhamento: boolean
+  /** Os avisos, como valem para quem olha. */
+  avisos: {
+    /** Esta pessoa recebe os avisos deste lembrete. Cada um liga o seu. */
+    recebo: boolean
+    /** Há segundo aviso? Só com intervalo de 24 h ou mais (`REGRAS_DA_DOSE`). */
+    comReaviso: boolean
+  }
+  /** As doses de hoje e a de ontem que ainda dá para registrar, na ordem do relógio. */
+  doses: DoseDoTratamento[]
+  /**
+   * Os últimos 14 dias, dia a dia — a mesma faixa que a clínica vê, para a casa ver o mesmo que o
+   * vet. Mais antigo primeiro; o dia de hoje por último. Para trás disso, `historicoDeDoses`.
+   */
+  ultimosDias: Array<{
+    dia: DataIso
+    doses: Array<
+      Pick<DoseDoTratamento, 'numero' | 'previstaEm' | 'situacao' | 'motivo' | 'registradaPor'>
+    >
+  }>
+  /** Desde o início, contado. Sem porcentagem e sem nota — a conta é a mesma da clínica. */
+  historico: { desde: DataIso; dadas: number; puladas: number; semRegistro: number }
+}
+
+/** `GET` dos tratamentos de um pet, do ponto de vista de quem está com o celular. */
+export type TratamentosDoPet = {
+  pet: PetResumo
+  eu: QuemRegistrou & { acesso: 'LEITURA' | 'LEITURA_ESCRITA' }
+  /** Em curso primeiro; encerrados dos últimos 30 dias depois. */
+  tratamentos: TratamentoDoPet[]
+}
+
+export type RegistrarDose = {
+  numero: number
+  situacao: 'DADA' | 'PULADA'
+  /** Obrigatório na `PULADA`, proibido na `DADA`. */
+  motivo?: MotivoDaDosePulada
+}
+
+/** O "Dei" do aviso agrupado: todas as doses do aviso num toque. */
+export type RegistrarDoses = {
+  doses: Array<{ tratamentoId: Cuid; numero: number }>
+}
+
+export type AtualizarTratamento = {
+  compartilhadoComAClinica?: boolean
+  receberAvisos?: boolean
+}
+
+/**
+ * `DOSE_JA_REGISTRADA`: outra pessoa da casa registrou antes — o corpo traz o registro dela, e o
+ * app diz "Rafael já deu às 8h05" em vez de registrar de novo. É o que evita a dose dobrada.
+ * `DOSE_FORA_DA_JANELA`: a hora da dose seguinte já passou (ou a dose ainda não abriu).
+ */
+export type CodigoDeErroDaAdesao = 'DOSE_JA_REGISTRADA' | 'DOSE_FORA_DA_JANELA'
+
+export type ErroDaDose = Omit<ErroDaApi, 'codigo'> & {
+  codigo: CodigoDeErroDaAdesao
+  registroExistente?: DoseDoTratamento
+}
+
+export const ROTAS_DA_ADESAO = {
+  tratamentos: 'GET /tutor/clinica/tratamentos?petId=', // TratamentosDoPet [PET_SEM_ACESSO]
+  historicoDeDoses: 'GET /tutor/clinica/tratamentos/:id/doses?desde=&ate=', // DoseDoTratamento[], mais antiga primeiro (até 90 dias por pedido)
+  registrar: 'POST /tutor/clinica/tratamentos/:id/doses', // RegistrarDose → DoseDoTratamento [DOSE_JA_REGISTRADA, DOSE_FORA_DA_JANELA, SOMENTE_LEITURA]
+  registrarVarias: 'POST /tutor/clinica/tratamentos/doses', // RegistrarDoses → DoseDoTratamento[] (as já registradas voltam como estão)
+  desfazer: 'DELETE /tutor/clinica/tratamentos/:id/doses/:numero', // 204 [DOSE_FORA_DA_JANELA, SOMENTE_LEITURA]
+  atualizar: 'PATCH /tutor/clinica/tratamentos/:id', // AtualizarTratamento → TratamentoDoPet [SOMENTE_LEITURA]
+  // Lado do portal, aqui só para os dois concordarem:
+  paraClinica: 'GET /parceiro/portal/pacientes/:petId/tratamentos', // AdesaoParaClinica[] [PET_SEM_ACESSO]
+} as const
+
+/**
+ * O que a clínica lê: os registros crus de cada tratamento que ela prescreveu e que a casa
+ * compartilha. A grade, a situação de cada dose e o alerta são conta do portal, sobre isto — a
+ * API não manda número pronto, para a regra morar num lugar só.
+ */
+export type AdesaoParaClinica = {
+  tratamentoId: Cuid
+  itemDaReceitaId: Cuid | null
+  inicioEm: DataHoraIso
+  frequenciaHoras: number
+  duracaoDias?: number
+  encerradoEm: DataHoraIso | null
+  /** `false`: a clínica sabe que o lembrete existe e mais nada — `registros` vem vazio. */
+  compartilhado: boolean
+  registros: Array<{
+    numero: number
+    situacao: 'DADA' | 'PULADA'
+    motivo: MotivoDaDosePulada | null
+    registradaEm: DataHoraIso
+    registradaPor: { id: Cuid; nome: string; papel: 'DONO' | 'FAMILIA' }
+  }>
+}
+
+// --------------------------------------------------------------- o aviso da dose
+
+/** A categoria da notificação local/push com botões de ação (expo-notifications). */
+export const CATEGORIA_DO_AVISO_DE_DOSE = 'DOSE_DO_REMEDIO' as const
+
+/**
+ * `DEI` registra todas as doses do aviso sem abrir o app — é o "um toque" do requisito. `ABRIR`
+ * leva à tela do tratamento, onde estão "pulei" e o motivo: pular pede uma escolha, e escolha
+ * não cabe num botão de notificação.
+ */
+export const ACOES_DO_AVISO_DE_DOSE = ['DEI', 'ABRIR'] as const
+export type AcaoDoAvisoDeDose = (typeof ACOES_DO_AVISO_DE_DOSE)[number]
+
+export type AvisoDeDose = {
+  categoria: typeof CATEGORIA_DO_AVISO_DE_DOSE
+  /** O horário das doses do aviso — as agrupadas caem dentro de `agruparDentroDeMin`. */
+  previstaEm: DataHoraIso
+  doses: Array<{
+    tratamentoId: Cuid
+    numero: number
+    petId: Cuid
+    petNome: string
+    medicamento: string
+    quantidade: number
+    unidade: UnidadeDeDose
+    fracao: FracaoDeDose | null
+  }>
+  url: string
+}
+
+export const ROTA_DO_TRATAMENTO = '/screens/clinica/tratamento'
+
+/**
+ * O texto do aviso em português — o que o backend põe no catálogo e o mock usa.
+ *
+ * Nunca cobra: não há versão de "atrasado" nem de "você esqueceu". Um remédio: o nome e quanto
+ * dar. Mais de um no mesmo horário: quantos, e os nomes.
+ */
+export const TEXTO_PT_DO_AVISO_DE_DOSE = (
+  aviso: AvisoDeDose,
+): { titulo: string; corpo: string } => {
+  const pets = [...new Set(aviso.doses.map((dose) => dose.petNome))]
+  const [primeira] = aviso.doses
+
+  if (aviso.doses.length === 1 && primeira) {
+    return {
+      titulo: `Hora do remédio de ${primeira.petNome}`,
+      corpo: `${primeira.medicamento} · ${quantidadeEmTexto(primeira)}`,
+    }
+  }
+
+  if (pets.length === 1) {
+    return {
+      titulo: `${aviso.doses.length} remédios de ${pets[0]} às ${hora(aviso.previstaEm)}`,
+      corpo: aviso.doses.map((dose) => dose.medicamento).join(', '),
+    }
+  }
+
+  return {
+    titulo: `Remédios das ${hora(aviso.previstaEm)}`,
+    corpo: pets
+      .map(
+        (pet) =>
+          `${pet}: ${aviso.doses
+            .filter((dose) => dose.petNome === pet)
+            .map((dose) => dose.medicamento)
+            .join(', ')}`,
+      )
+      .join(' · '),
+  }
+}
+
+/** "meio comprimido", "0,12 mL", "2 comprimidos" — como a receita diz, em português. */
+export function quantidadeEmTexto(dose: {
+  quantidade: number
+  unidade: UnidadeDeDose
+  fracao: FracaoDeDose | null
+}): string {
+  const numero = dose.quantidade.toLocaleString('pt-BR', { maximumFractionDigits: 2 })
+
+  if (dose.unidade === 'ML') {
+    return `${numero} mL`
+  }
+
+  if (dose.unidade === 'GOTA') {
+    return `${numero} ${dose.quantidade === 1 ? 'gota' : 'gotas'}`
+  }
+
+  if (dose.unidade === 'APLICACAO') {
+    return `${numero} ${dose.quantidade === 1 ? 'aplicação' : 'aplicações'}`
+  }
+
+  switch (dose.fracao) {
+    case 'MEIO':
+      return 'meio comprimido'
+    case 'QUARTO':
+      return 'um quarto de comprimido'
+    case 'TRES_QUARTOS':
+      return 'três quartos de comprimido'
+    case 'UM_E_MEIO':
+      return 'um comprimido e meio'
+    default:
+      return `${numero} ${dose.quantidade === 1 ? 'comprimido' : 'comprimidos'}`
+  }
 }

@@ -1,9 +1,9 @@
 {
-  "geradoEm": "2026-09-29T07:30:00-04:00",
-  "hojeDaClinica": "2026-09-29",
+  "geradoEm": "2026-09-30T07:30:00-04:00",
+  "hojeDaClinica": "2026-09-30",
   "petId": "pet-biscoito",
   "vacina": {
-    "id": "apl-1-20260929",
+    "id": "apl-1-20260930",
     "petId": "pet-biscoito",
     "clinica": {
       "id": "clinic-petjourney",
@@ -24,16 +24,16 @@
       "obrigatoria": false,
       "essencial": true
     },
-    "aplicadaEm": "2026-09-29T07:30:00-04:00",
+    "aplicadaEm": "2026-09-30T07:30:00-04:00",
     "lote": "V10-2505",
-    "validadeLote": "2027-06-16",
+    "validadeLote": "2027-06-17",
     "via": "SUBCUTANEA",
     "dose": 2,
     "dosesNaSerie": 3,
-    "proximaDoseEm": "2026-10-27",
+    "proximaDoseEm": "2026-10-28",
     "proximaDoseAgendada": {
-      "agendamentoId": "apt-2-20260929",
-      "inicio": "2026-10-27T08:00:00-04:00"
+      "agendamentoId": "apt-2-20260930",
+      "inicio": "2026-10-28T08:00:00-04:00"
     },
     "situacao": "SERIE_INCOMPLETA",
     "externa": null,
@@ -47,7 +47,7 @@
       "telefone": "(11) 3555-0142",
       "utcOffset": "-04:00"
     },
-    "geradoEm": "2026-09-29T07:30:00-04:00",
+    "geradoEm": "2026-09-30T07:30:00-04:00",
     "vacinas": [
       {
         "vacina": {
@@ -66,7 +66,7 @@
             "total": 3,
             "tipo": "SERIE",
             "estado": "APLICADA",
-            "em": "2026-09-01",
+            "em": "2026-09-02",
             "aplicacaoId": "aplic-biscoito-v10-1",
             "agendamento": null
           },
@@ -75,8 +75,8 @@
             "total": 3,
             "tipo": "SERIE",
             "estado": "APLICADA",
-            "em": "2026-09-29",
-            "aplicacaoId": "apl-1-20260929",
+            "em": "2026-09-30",
+            "aplicacaoId": "apl-1-20260930",
             "agendamento": null
           },
           {
@@ -84,11 +84,11 @@
             "total": 3,
             "tipo": "SERIE",
             "estado": "PREVISTA",
-            "em": "2026-10-27",
+            "em": "2026-10-28",
             "aplicacaoId": null,
             "agendamento": {
-              "id": "apt-2-20260929",
-              "inicio": "2026-10-27T08:00:00-04:00"
+              "id": "apt-2-20260930",
+              "inicio": "2026-10-28T08:00:00-04:00"
             }
           },
           {
@@ -96,7 +96,7 @@
             "total": 3,
             "tipo": "REFORCO",
             "estado": "PREVISTA",
-            "em": "2027-10-27",
+            "em": "2027-10-28",
             "aplicacaoId": null,
             "agendamento": null
           }
@@ -119,7 +119,7 @@
             "total": 2,
             "tipo": "SERIE",
             "estado": "APLICADA",
-            "em": "2026-09-09",
+            "em": "2026-09-10",
             "aplicacaoId": "aplic-biscoito-giardia-1",
             "agendamento": null
           },
@@ -128,7 +128,7 @@
             "total": 2,
             "tipo": "SERIE",
             "estado": "PREVISTA",
-            "em": "2026-10-07",
+            "em": "2026-10-08",
             "aplicacaoId": null,
             "agendamento": null
           },
@@ -137,7 +137,7 @@
             "total": 2,
             "tipo": "REFORCO",
             "estado": "PREVISTA",
-            "em": "2027-10-07",
+            "em": "2027-10-08",
             "aplicacaoId": null,
             "agendamento": null
           }
@@ -160,7 +160,7 @@
             "total": 1,
             "tipo": "SERIE",
             "estado": "AGUARDA_IDADE",
-            "em": "2026-10-03",
+            "em": "2026-10-04",
             "aplicacaoId": null,
             "agendamento": null
           },
@@ -169,7 +169,7 @@
             "total": 1,
             "tipo": "REFORCO",
             "estado": "PREVISTA",
-            "em": "2027-10-03",
+            "em": "2027-10-04",
             "aplicacaoId": null,
             "agendamento": null
           }
@@ -185,15 +185,15 @@
     "atrasadas": 0
   },
   "notificacao": {
-    "id": "notif-vacina-registrada-apl-1-20260929",
-    "criadoEm": "2026-09-29T07:30:00-04:00",
+    "id": "notif-vacina-registrada-apl-1-20260930",
+    "criadoEm": "2026-09-30T07:30:00-04:00",
     "lidaEm": null,
     "titulo": "Biscoito tomou V10 (múltipla canina) (dose 2 de 3)",
-    "corpo": "PetJourney Clínica Veterinária. A próxima já está marcada: 27/10 às 08:00.",
+    "corpo": "PetJourney Clínica Veterinária. A próxima já está marcada: 28/10 às 08:00.",
     "dados": {
       "tipo": "VACINA_REGISTRADA_PELA_CLINICA",
-      "url": "/screens/vacina/lista?petId=pet-biscoito&id=apl-1-20260929",
-      "aplicacaoId": "apl-1-20260929",
+      "url": "/screens/vacina/lista?petId=pet-biscoito&id=apl-1-20260930",
+      "aplicacaoId": "apl-1-20260930",
       "petId": "pet-biscoito",
       "petNome": "Biscoito",
       "clinicaNome": "PetJourney Clínica Veterinária",
@@ -201,12 +201,12 @@
       "origem": "CLINICA",
       "dose": 2,
       "dosesNaSerie": 3,
-      "proximaDoseEm": "2026-10-27",
-      "proximaDoseAgendadaPara": "2026-10-27T08:00:00-04:00"
+      "proximaDoseEm": "2026-10-28",
+      "proximaDoseAgendadaPara": "2026-10-28T08:00:00-04:00"
     }
   },
   "agendamento": {
-    "id": "apt-2-20260929",
+    "id": "apt-2-20260930",
     "clinica": {
       "id": "clinic-petjourney",
       "nome": "PetJourney Clínica Veterinária",
@@ -231,18 +231,18 @@
       "especialidade": "CLINICO_GERAL",
       "fotoUrl": null
     },
-    "inicio": "2026-10-27T08:00:00-04:00",
-    "fim": "2026-10-27T08:15:00-04:00",
+    "inicio": "2026-10-28T08:00:00-04:00",
+    "fim": "2026-10-28T08:15:00-04:00",
     "status": "AGENDADO",
     "origem": "RETORNO",
     "observacao": "",
-    "criadoEm": "2026-09-29T07:30:00-04:00",
+    "criadoEm": "2026-09-30T07:30:00-04:00",
     "canceladoEm": null,
     "motivoCancelamento": null,
     "podeConfirmar": false,
     "podeCancelar": true,
     "podeRemarcar": true,
-    "cancelarAte": "2026-10-27T06:00:00-04:00",
+    "cancelarAte": "2026-10-28T06:00:00-04:00",
     "preConsulta": null,
     "falta": null,
     "atendimentoId": null

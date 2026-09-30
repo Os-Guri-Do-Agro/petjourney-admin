@@ -80,6 +80,12 @@ const fila = ref<ContagemDePendencia>(VAZIO)
 const internacao = ref<ContagemDePendencia>(VAZIO)
 const atividades = ref<ContagemDePendencia>(VAZIO)
 const vacinas = ref<ContagemDePendencia>(VAZIO)
+/**
+ * Tratamentos críticos cuja adesão caiu em casa. Risco, e não atenção: do outro lado há um animal
+ * cardiopata sem o diurético há dois dias, e ninguém na clínica sabe — é o mesmo raciocínio do
+ * boletim retido.
+ */
+const tratamentos = ref<ContagemDePendencia>(VAZIO)
 
 const carregando = ref(false)
 const carregado = ref(false)
@@ -97,7 +103,13 @@ let emVoo: Promise<void> | null = null
 
 async function apurar() {
   const [
-    { encounterRepository, internacaoRepository, vacinaRepository, waitlistRepository },
+    {
+      encounterRepository,
+      internacaoRepository,
+      tratamentoRepository,
+      vacinaRepository,
+      waitlistRepository,
+    },
     { retornosVencidos },
     { clinicClock },
   ] = await Promise.all([
@@ -106,12 +118,13 @@ async function apurar() {
     import('../stores/clinico'),
   ])
 
-  const [entradas, mapa, rascunhos, retornos, chamada] = await Promise.all([
+  const [entradas, mapa, rascunhos, retornos, chamada, emCasa] = await Promise.all([
     consultar(() => waitlistRepository.listar()),
     consultar(() => internacaoRepository.mapa()),
     consultar(() => encounterRepository.listarRascunhos(null)),
     consultar(() => encounterRepository.listarRetornosPendentes()),
     consultar(() => vacinaRepository.listaDeChamada()),
+    consultar(() => tratamentoRepository.daClinica()),
   ])
 
   /*
@@ -165,7 +178,12 @@ async function apurar() {
     vacinas.value = { total: emAtraso, tom: emAtraso > 0 ? 'atencao' : 'neutro' }
   }
 
-  situacao.value = situacaoPelasFontes([entradas, mapa, rascunhos, retornos, chamada])
+  if (emCasa.ok) {
+    const emQueda = emCasa.valor.filter((linha) => linha.alerta !== null).length
+    tratamentos.value = { total: emQueda, tom: emQueda > 0 ? 'risco' : 'neutro' }
+  }
+
+  situacao.value = situacaoPelasFontes([entradas, mapa, rascunhos, retornos, chamada, emCasa])
 
   if (situacao.value !== 'falhou') {
     conferidoEm.value = new Date()
@@ -244,6 +262,7 @@ export function useClinicoPendencias(ativo: () => boolean) {
     internacao: computed(() => (ativo() ? internacao.value : VAZIO)),
     atividades: computed(() => (ativo() ? atividades.value : VAZIO)),
     vacinas: computed(() => (ativo() ? vacinas.value : VAZIO)),
+    tratamentos: computed(() => (ativo() ? tratamentos.value : VAZIO)),
     situacao: computed(() => (ativo() ? situacao.value : null)),
     conferidoEm: computed(() => conferidoEm.value),
     carregando: computed(() => carregando.value),
@@ -258,6 +277,7 @@ export function limparPendenciasClinicas() {
   internacao.value = VAZIO
   atividades.value = VAZIO
   vacinas.value = VAZIO
+  tratamentos.value = VAZIO
   conferidoEm.value = null
   situacao.value = null
   carregado.value = false

@@ -72,6 +72,8 @@ export class AplicacaoRecusadaError extends Error {
 export type CarteirinhaNoApp = {
   petNome: string
   petIniciais: string
+  /** A foto do perfil do pet, quando há — a mesma que o app mostra. */
+  petFotoUrl: string
   nascimento: ISODate | null
   clinicaNome: string
   vacinas: VacinaAplicadaNaClinica[]
@@ -314,6 +316,7 @@ export const vacinaRepository = {
       return {
         petNome: pet.nome,
         petIniciais: pet.iniciais,
+        petFotoUrl: pet.fotoUrl,
         nascimento: pet.nascimento,
         clinicaNome: dataset.clinic.nome,
         vacinas: doPet

@@ -625,11 +625,13 @@
         "atividades": "Zadaci",
         "vacinas": "Vakcine",
         "rotina": "Rutina",
-        "vespera": "Rezervacije"
+        "vespera": "Rezervacije",
+        "tratamentos": "Terapije"
       },
       "contagem": "{total} predmet | {total} predmeta | {total} predmeta",
       "recolher": "Skupi {modulo}",
-      "expandir": "Proširi {modulo}"
+      "expandir": "Proširi {modulo}",
+      "tratamentos": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}"
     },
     "resumo": {
       "portal": "Pratite zaradu i podelite svoj kod.",
@@ -1981,7 +1983,8 @@
         "fila": "{total} pacijent na listi čekanja | {total} pacijenta na listi čekanja | {total} pacijenata na listi čekanja",
         "internacao": "{total} stavka za rešavanje na hospitalizaciji | {total} stavke za rešavanje na hospitalizaciji | {total} stavki za rešavanje na hospitalizaciji",
         "atividades": "{total} otvoren zadatak | {total} otvorena zadatka | {total} otvorenih zadataka",
-        "vacinas": "{total} revakcinacija kasni | {total} revakcinacije kasne | {total} revakcinacija kasni"
+        "vacinas": "{total} revakcinacija kasni | {total} revakcinacije kasne | {total} revakcinacija kasni",
+        "tratamentos": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}"
       }
     },
     "busca": {
@@ -3273,7 +3276,8 @@
         "recorrenteDetalhe": "{vezes}× od poslednjeg pregleda",
         "mais": "još u rezimeu: {total}",
         "campoDetalhe": "u {alterados} od {total} unosa",
-        "relato": "Takođe prijavljeno: {relato}"
+        "relato": "Takođe prijavljeno: {relato}",
+        "adesao": "{medicamento}: redovnost kod kuće je opala"
       },
       "casa": {
         "titulo": "Kod kuće od poslednjeg pregleda",
@@ -3358,7 +3362,8 @@
         "prescricao": "{nome} (propisano, do {data})",
         "campo": "{campo}: {valor} u {alterados} od {total} unosa",
         "doencas": "bolesti koje je prijavio staratelj: {lista}",
-        "alarmeSemTexto": "{sintomas} {data}"
+        "alarmeSemTexto": "{sintomas} {data}",
+        "prescricaoComAdesao": "{prescricao} · u aplikaciji od {data}: {contagem}"
       },
       "verResumoComSinais": "Rezime za 30 s: tačke pažnje: {total}",
       "preferencia": "Predložite ovaj rezime pri otvaranju istorije pacijenta",
@@ -3370,6 +3375,11 @@
         "comoReativar": "Dugme ostaje u istoriji. Predlog možete ponovo uključiti na ekranu rezimea.",
         "agoraNao": "Ne sada",
         "ver": "Pogledajte rezime"
+      },
+      "tratamentos": {
+        "titulo": "Lek kod kuće",
+        "ajuda": "Prema onome što su ukućani zabeležili u aplikaciji od poslednjeg pregleda.",
+        "abrir": "Otvori terapiju"
       }
     },
     "atendimentos": {
@@ -3495,7 +3505,8 @@
       "semPrescricao": "Nema terapije za izdavanje.",
       "vistaDoResponsavel": "Prikaz za vlasnika",
       "lembrete": "Postaje podsetnik u aplikaciji: {quantidade}, {frequencia}",
-      "lembreteContinuo": "Trajni podsetnik, bez datuma završetka"
+      "lembreteContinuo": "Trajni podsetnik, bez datuma završetka",
+      "critico": "Kritična terapija: obavesti kliniku ako redovnost kod kuće opadne"
     },
     "vacinas": {
       "titulo": "Vakcine",
@@ -4717,6 +4728,183 @@
         "sinais": "{total} znak traži pažnju | {total} znaka traže pažnju | {total} znakova traži pažnju",
         "primeiraVez": "Prvi put u ovoj klinici",
         "nada": "Ništa neuobičajeno od poslednjeg pregleda"
+      },
+      "tratamento": {
+        "pilula": "Terapija",
+        "alerta": "{medicamento}: redovnost je opala",
+        "alertas": "Terapije sa opadanjem redovnosti: {total} | Terapije sa opadanjem redovnosti: {total} | Terapije sa opadanjem redovnosti: {total}",
+        "umEmCurso": "{medicamento} u toku",
+        "emCurso": "{total} lek u toku | {total} leka u toku | {total} lekova u toku",
+        "nenhumEmCurso": "Nijedan lek nije u toku",
+        "semTratamento": "Nema kućnog leka sa podsetnikom"
+      }
+    },
+    "adesao": {
+      "titulo": "Terapija kod kuće",
+      "subtitulo": "Lek koji je propisala klinika, doza po doza, onako kako ga ukućani beleže u aplikaciji.",
+      "situacao": {
+        "dada": "Data",
+        "pulada": "Preskočena",
+        "sem-registro": "Bez zapisa",
+        "aberta": "Trenutna doza",
+        "prevista": "Predstoji"
+      },
+      "motivo": {
+        "esqueci": "Zaboravljeno",
+        "cuspiu": "Ispljunuto",
+        "acabou": "Nestalo"
+      },
+      "motivoNaFrase": {
+        "esqueci": "zaboravljeno",
+        "cuspiu": "ljubimac je ispljunuo lek",
+        "acabou": "nestalo je leka"
+      },
+      "contagem": {
+        "dadas": "date: {total} | date: {total} | date: {total}",
+        "puladas": "preskočene: {total} | preskočene: {total} | preskočene: {total}",
+        "semRegistro": "bez zapisa: {total} | bez zapisa: {total} | bez zapisa: {total}",
+        "nenhuma": "Još nijedna doza nije zabeležena"
+      },
+      "periodo": {
+        "desdeConsulta": "Od pregleda {data}",
+        "desdeInicio": "Od početka, {data}"
+      },
+      "dose": {
+        "ml": "{quantidade} mL",
+        "comprimido": "{quantidade} tableta | {quantidade} tablete | {quantidade} tableta",
+        "meio": "pola tablete",
+        "quarto": "četvrt tablete",
+        "tres-quartos": "tri četvrtine tablete",
+        "um-e-meio": "tableta i po"
+      },
+      "posologia": {
+        "aCada": "na {horas} h",
+        "continuo": "trajna terapija",
+        "porDias": "tokom {dias} dana | tokom {dias} dana | tokom {dias} dana"
+      },
+      "faixa": {
+        "quando": "{data}, {hora}",
+        "dadaPor": "data · {nome} · {hora}",
+        "puladaPor": "preskočena · {nome} · {motivo}",
+        "hoje": "danas",
+        "marcoLegenda": "Poslednji pregled",
+        "semRegistroNota": "Bez zapisa ne znači da nije dato: doza je možda data, a nije označena u aplikaciji."
+      },
+      "quem": "Beležili: {lista}",
+      "horarioDestoante": "Doza u {horario} se najređe vodi kao data: {dadas} od {fechadas}.",
+      "critico": {
+        "selo": "Kritično",
+        "alternar": "Kritično: obavesti kliniku ako redovnost opadne"
+      },
+      "alerta": {
+        "selo": "Redovnost je opala",
+        "puladas": "Preskočene doze od {quando}: {total} | Preskočene doze od {quando}: {total} | Preskočene doze od {quando}: {total}",
+        "queda": "Samo {dadas} od {fechadas} doza se vodi kao data od {quando}",
+        "motivos": "Razlog: {motivos}.",
+        "antes": "Nedelju dana ranije: {dadas} od {fechadas}.",
+        "registrarContato": "Zabeleži kontakt",
+        "quemFalou": "Ko je razgovarao",
+        "nota": "Šta je dogovoreno",
+        "notaPlaceholder": "Npr.: kutija se ispraznila; poslat novi recept",
+        "salvar": "Sačuvaj kontakt",
+        "cancelar": "Otkaži",
+        "contato": "Kontakt zabeležen: {nome}, {quando}."
+      },
+      "registros": {
+        "ver": "Prikaži zapise",
+        "esconder": "Sakrij zapise",
+        "colunaQuando": "Doza",
+        "colunaSituacao": "Stanje",
+        "colunaQuem": "Zapis",
+        "registradaAs": "zabeleženo {quando}",
+        "vazio": "Nema doza u periodu",
+        "rotulo": "Zapisi: {medicamento}"
+      },
+      "naoCompartilhado": "Ukućani ne dele zapise ovog podsetnika.",
+      "naoCompartilhadoDetalhe": "Podsetnik postoji u aplikaciji; zabeleženo ostaje u porodici.",
+      "ficha": {
+        "emCurso": "Lekovi u toku",
+        "emCursoAjuda": "Šta su ukućani zabeležili u aplikaciji. Linija na traci označava poslednji pregled, {data}.",
+        "emCursoAjudaSemConsulta": "Šta su ukućani zabeležili u aplikaciji, od prve doze.",
+        "encerrados": "Završeni",
+        "encerradosPeriodo": "od {inicio} do {fim}",
+        "vazioTitulo": "Nema leka sa podsetnikom",
+        "vazioDescricao": "Kada staratelj u aplikaciji napravi podsetnike za recept, ovde se pojavljuje šta ukućani zabeleže, doza po doza.",
+        "noApp": "Na telefonu: {responsavel}",
+        "noAppAjuda": "Ono što aplikacija prikazuje. Dodirnite kao neko kod kuće: karton pored se odmah menja.",
+        "celularDe": "Telefon",
+        "papel": {
+          "dono": "staratelj",
+          "familia": "porodica",
+          "leitura": "samo pregled"
+        },
+        "emCursoAjudaSemFio": "Šta su ukućani zabeležili u aplikaciji. Poslednji pregled je bio {data}."
+      },
+      "lista": {
+        "stat": {
+          "alertas": "Redovnost je opala",
+          "alertasDetalhe": "Kritične terapije: pozvati danas",
+          "emCurso": "U toku",
+          "emCursoDetalhe": "Lekovi sa podsetnikom u aplikaciji",
+          "criticos": "Kritične",
+          "criticosDetalhe": "Označio veterinar pri propisivanju"
+        },
+        "recorte": {
+          "atencao": "Traže pažnju",
+          "emCurso": "U toku",
+          "encerrados": "Završeni"
+        },
+        "coluna": {
+          "paciente": "Pacijent",
+          "remedio": "Lek",
+          "janela": "Poslednjih {dias} dana",
+          "responsavel": "Staratelj",
+          "situacao": "Stanje"
+        },
+        "situacaoEmCurso": "U toku",
+        "situacaoEncerrado": "Završeno",
+        "vazioTitulo": "Još nema terapija kod kuće",
+        "vazioDescricao": "Lekovi se pojavljuju ovde kada staratelj u aplikaciji napravi podsetnike za recept.",
+        "vazioRecorte": {
+          "atencao": "Nema kritične terapije sa opadanjem redovnosti",
+          "emCurso": "Nema terapije u toku",
+          "encerrados": "Nema završene terapije"
+        }
+      },
+      "app": {
+        "titulo": "Lekovi",
+        "pushOrigem": "PetJourney · {hora}",
+        "dei": "Dato",
+        "abrir": "Otvori",
+        "pulei": "Preskočeno",
+        "porQue": "Zašto?",
+        "voltar": "Nazad",
+        "ontemAs": "Juče, {hora}",
+        "dadaPorVoce": "Data · vi · {hora}",
+        "dadaPor": "Data · {nome} · {hora}",
+        "puladaPorVoce": "Preskočena · vi · {motivo}",
+        "puladaPor": "Preskočena · {nome} · {motivo}",
+        "desfazer": "Poništi",
+        "jaRegistrada": "Već zabeleženo: {nome}, u {hora}. Nema potrebe da se daje ponovo.",
+        "foraDaJanela": "Ova doza je zatvorena. Sledeća se pojavljuje u svoje vreme.",
+        "somenteLeitura": "Pratite lekove za ljubimca {pet}; doze beleže samo oni sa pravom izmene.",
+        "erro": "Beleženje nije uspelo. Pokušajte ponovo.",
+        "receitaNova": "Recept od {data}",
+        "receitaNovaDetalhe": "{total} lek još bez podsetnika | {total} leka još bez podsetnika | {total} lekova još bez podsetnika",
+        "primeiraDose": "Prva doza",
+        "sugestaoDica": "Predloženo vreme da nijedna doza ne padne u sitne sate.",
+        "compartilhar": "{clinica} vidi šta beležite",
+        "criar": "Napravi podsetnike",
+        "desde": "Od {data}:",
+        "encerrados": "Završeni",
+        "avisosTitulo": "Kako rade obaveštenja",
+        "avisoUmPorHorario": "Jedno obaveštenje po terminu. Lekovi na manje od {minutos} min razmaka stižu zajedno.",
+        "avisoSemReaviso": "Bez drugog obaveštenja: sledeća doza je već podsetnik.",
+        "avisoComReaviso": "Drugo obaveštenje samo za lek na {horas} h ili ređe, i samo ako niko ne označi.",
+        "avisoSemCobranca": "Ako termin prođe, doza ostaje bez zapisa. Niko ne dobija opomenu.",
+        "compartilhado": "{clinica} vidi ove zapise",
+        "naoCompartilhado": "Samo porodica vidi ove zapise",
+        "vazio": "Nema leka sa podsetnikom za ljubimca {pet}."
       }
     }
   },

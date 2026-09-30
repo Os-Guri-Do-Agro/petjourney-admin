@@ -28,6 +28,7 @@ import type {
   EntradaNaFila,
   FracaoDeDose,
   HorarioLivre,
+  QuemRegistrou,
   InternacaoNaClinica,
   ItemDaReceita,
   MotivoDeCancelamento,
@@ -50,17 +51,36 @@ import type {
   ViaDeAdministracao,
   ViaDeVacina as ViaDeVacinaNoContrato,
   DadosDaVacinaRegistrada,
+  DoseDoTratamento,
   EstadoDaDoseNoPlano,
+  AvisoDeDose,
+  MotivoDaDosePulada as MotivoDaDosePuladaNoContrato,
   PlanoVacinalDoPet,
+  SituacaoDaDose as SituacaoDaDoseNoContrato,
   SituacaoNoPlanoVacinal,
+  TratamentoDoPet,
+  TratamentosDoPet,
+  UnidadeDeDose,
 } from '../contrato/responsavel'
 import {
+  CATEGORIA_DO_AVISO_DE_DOSE,
+  REGRAS_DA_DOSE,
   ROTA_DA_NOTIFICACAO_DA_VACINA,
+  ROTA_DO_TRATAMENTO,
   TEXTO_PT_DA_NOTIFICACAO_DA_VACINA,
   TEXTOS_PT_DAS_NOTIFICACOES,
   TIPO_DE_NOTIFICACAO_DA_VACINA,
   urlDaNotificacaoClinica,
 } from '../contrato/responsavel'
+import {
+  dosesDoTratamento,
+  emCurso,
+  resumirAdesao,
+  ultimaDoseEm,
+  type DoseNaGrade,
+  type MotivoDaDosePulada,
+  type SituacaoDaDose,
+} from '../domain/adesao'
 import {
   addDays,
   createClinicClock,
@@ -114,10 +134,12 @@ import type {
   Encounter,
   ISODateTime,
   Internacao,
+  Medication,
   MotivoDeFalta,
   PreConsulta,
   PrescriptionRoute,
   SituacaoDoReforco,
+  TratamentoEmCasa,
   ViaDeVacina,
   WaitlistEntry,
   WaitlistStatus,
@@ -558,22 +580,39 @@ export function projetarEntradaNaFila(
   }
 }
 
+/**
+ * Quanto dar, na forma de quem dá: "meio comprimido" é `0,5` com `MEIO`; líquido vai em mL, sem
+ * fração. A receita e o tratamento dizem a dose do mesmo jeito porque passam por aqui.
+ */
+function naApresentacao(
+  quantidadeApresentacao: number,
+  unidade: Medication['unidadeApresentacao'],
+): { quantidade: number; unidade: UnidadeDeDose; fracao: FracaoDeDose | null } {
+  const fracao = fracionar(quantidadeApresentacao, unidade)
+
+  return {
+    quantidade: fracao?.quantidade ?? Math.round(quantidadeApresentacao * 100) / 100,
+    unidade: unidade === 'ml' ? 'ML' : 'COMPRIMIDO',
+    fracao: fracao ? FRACAO[fracao.kind] : null,
+  }
+}
+
 /** A receita humanizada: quanto dar, de quanto em quanto tempo, por quanto tempo. Sem mg/kg. */
-function itensDaReceita(encounter: Encounter): ItemDaReceita[] {
+function itensDaReceita(encounter: Encounter, tratamentos: TratamentoEmCasa[]): ItemDaReceita[] {
   return encounter.conduta.prescricoes.map((prescricao) => {
     const medicamento = medicationsFixture.find((item) => item.id === prescricao.medicamentoId)
-    const unidade = medicamento?.unidadeApresentacao ?? 'comprimido'
-    const fracao = fracionar(prescricao.calculo.quantidadeApresentacao, unidade)
     const item: ItemDaReceita = {
       id: prescricao.id,
       medicamento: medicamento?.nome ?? prescricao.medicamentoId,
-      quantidade:
-        fracao?.quantidade ?? Math.round(prescricao.calculo.quantidadeApresentacao * 100) / 100,
-      unidade: unidade === 'ml' ? 'ML' : 'COMPRIMIDO',
-      fracao: fracao ? FRACAO[fracao.kind] : null,
+      ...naApresentacao(
+        prescricao.calculo.quantidadeApresentacao,
+        medicamento?.unidadeApresentacao ?? 'comprimido',
+      ),
       frequenciaHoras: prescricao.calculo.frequenciaHoras,
       via: VIA[prescricao.via],
       instrucoes: prescricao.observacao,
+      tratamentoId:
+        tratamentos.find((tratamento) => tratamento.prescricaoId === prescricao.id)?.id ?? null,
     }
 
     /* Contínuo é a **ausência** da chave, como no DTO da API — nunca \`null\`, nunca 365. */
@@ -593,7 +632,7 @@ export function projetarAtendimento(
   const tipo = tipoDo(appointment?.typeId ?? 'tipo-consulta')
   const realizadoEm = encounter.finalizadoEm ?? encounter.abertoEm
   const dataDoAtendimento = clock.dateOf(realizadoEm)
-  const itens = itensDaReceita(encounter)
+  const itens = itensDaReceita(encounter, ctx.dataset.tratamentos)
   const exames = encounter.conduta.examesSolicitados.map((id) => {
     const exame = examCatalogFixture.find((item) => item.id === id)
 
@@ -1246,6 +1285,256 @@ export function projetarNotificacoes(ctx: ContextoDaProjecao): NotificacaoDaDemo
 }
 
 // ---------------------------------------------------------------------------
+// Adesão ao tratamento
+// ---------------------------------------------------------------------------
+
+const SITUACAO_DA_DOSE: Record<SituacaoDaDose, SituacaoDaDoseNoContrato> = {
+  dada: 'DADA',
+  pulada: 'PULADA',
+  'sem-registro': 'SEM_REGISTRO',
+  aberta: 'ABERTA',
+  prevista: 'PREVISTA',
+}
+
+const MOTIVO_DA_DOSE: Record<MotivoDaDosePulada, MotivoDaDosePuladaNoContrato> = {
+  esqueci: 'ESQUECI',
+  cuspiu: 'CUSPIU',
+  acabou: 'ACABOU',
+}
+
+/** Encerrado há mais que isso, o tratamento sai da tela de remédios do app. */
+const ENCERRADOS_VISIVEIS_DIAS = 30
+
+function ms(iso: ISODateTime): number {
+  return Date.parse(iso)
+}
+
+/** O fim do dia da clínica: o celular mostra as doses de hoje que ainda vão chegar. */
+function fimDoDia(agora: ISODateTime): ISODateTime {
+  return clock.toIso(clock.dateOf(agora), 23 * 60 + 59)
+}
+
+function quemRegistrou(cuidadorId: string, eu: string, ctx: ContextoDaCarteirinha): QuemRegistrou {
+  return {
+    id: cuidadorId,
+    nome: ctx.dataset.cuidadores.find((item) => item.id === cuidadorId)?.nome ?? '',
+    eu: cuidadorId === eu,
+  }
+}
+
+function projetarDose(
+  dose: DoseNaGrade,
+  eu: { id: string; edita: boolean },
+  ctx: ContextoDaCarteirinha,
+): DoseDoTratamento {
+  const registro = dose.registro
+
+  return {
+    numero: dose.numero,
+    previstaEm: dose.previstaEm,
+    registravelAte: dose.registravelAte,
+    situacao: SITUACAO_DA_DOSE[dose.situacao],
+    motivo: registro?.motivo ? MOTIVO_DA_DOSE[registro.motivo] : null,
+    registradaEm: registro?.registradaEm ?? null,
+    registradaPor: registro ? quemRegistrou(registro.cuidadorId, eu.id, ctx) : null,
+    podeRegistrar: eu.edita && !registro && dose.situacao === 'aberta',
+    podeDesfazer:
+      eu.edita && registro?.cuidadorId === eu.id && ms(ctx.agora) < ms(dose.registravelAte),
+  }
+}
+
+/** Quantos dias a faixa do celular mostra: os mesmos 14 da lista da clínica. */
+const DIAS_NA_FAIXA_DO_APP = 14
+
+/**
+ * Os dias da faixa, do mais antigo ao último — sem os dias antes da primeira dose, que não são
+ * "dia sem registro", são dia sem tratamento. O último é hoje, ou o dia da última dose de um
+ * tratamento que já terminou.
+ */
+function ultimosDias(doses: DoseNaGrade[], ultimo: string) {
+  const primeiroDia = doses[0] ? clock.dateOf(doses[0].previstaEm) : ultimo
+  const dias: Array<{ dia: string; doDia: DoseNaGrade[] }> = []
+
+  for (let atras = DIAS_NA_FAIXA_DO_APP - 1; atras >= 0; atras -= 1) {
+    const dia = addDays(ultimo, -atras)
+
+    if (dia >= primeiroDia) {
+      dias.push({ dia, doDia: doses.filter((dose) => clock.dateOf(dose.previstaEm) === dia) })
+    }
+  }
+
+  return dias
+}
+
+/** A tela de remédios de um pet, como quem está com o celular a vê. */
+export function projetarTratamentos(
+  petId: string,
+  cuidadorId: string,
+  ctx: ContextoDaCarteirinha,
+): TratamentosDoPet {
+  const { dataset, agora } = ctx
+  const pet = dataset.pets.find((item) => item.id === petId)
+  const cuidador = dataset.cuidadores.find((item) => item.id === cuidadorId)
+  const edita = cuidador?.acesso === 'edicao' && cuidador.petIds.includes(petId)
+  const hoje = clock.dateOf(agora)
+  const limiteDosEncerrados = ms(agora) - ENCERRADOS_VISIVEIS_DIAS * 86_400_000
+
+  const tratamentos = dataset.tratamentos
+    .filter((tratamento) => tratamento.petId === petId)
+    .map((tratamento): TratamentoDoPet | null => {
+      const ativo = emCurso(tratamento, agora)
+      const ultima = ultimaDoseEm(tratamento)
+      const terminouEm = tratamento.encerradoEm ?? ultima
+
+      if (!ativo && terminouEm && ms(terminouEm) < limiteDosEncerrados) {
+        return null
+      }
+
+      const doses = dosesDoTratamento(tratamento, dataset.registrosDeDose, agora, fimDoDia(agora))
+      const historico = resumirAdesao(doses, tratamento.inicioEm, agora, tratamento.frequenciaHoras)
+      const remedio = medicationsFixture.find((item) => item.id === tratamento.medicamentoId)
+
+      const projetado: TratamentoDoPet = {
+        id: tratamento.id,
+        lembreteSerieId: `serie-${tratamento.id}`,
+        atendimentoId: tratamento.encounterId,
+        itemDaReceitaId: tratamento.prescricaoId,
+        clinica: clinicaResumo(ctx),
+        profissional: profissional(tratamento.prescritoPor),
+        medicamento: remedio?.nome ?? tratamento.medicamento,
+        ...naApresentacao(tratamento.quantidade, tratamento.unidade),
+        via: VIA[tratamento.via],
+        instrucoes: tratamento.instrucoes,
+        frequenciaHoras: tratamento.frequenciaHoras,
+        inicioEm: tratamento.inicioEm,
+        situacao: ativo ? 'EM_CURSO' : 'ENCERRADO',
+        compartilhadoComAClinica: tratamento.compartilhadoComAClinica,
+        podeAlterarCompartilhamento: cuidador?.papel === 'dono',
+        avisos: {
+          recebo: edita && ativo,
+          comReaviso: tratamento.frequenciaHoras >= REGRAS_DA_DOSE.reavisoSoComIntervaloDeHoras,
+        },
+        doses: doses
+          .filter(
+            (dose) =>
+              ativo && (clock.dateOf(dose.previstaEm) === hoje || dose.situacao === 'aberta'),
+          )
+          .map((dose) => projetarDose(dose, { id: cuidadorId, edita }, ctx)),
+        ultimosDias: ultimosDias(
+          doses,
+          ativo ? hoje : clock.dateOf(doses[doses.length - 1]?.previstaEm ?? agora),
+        ).map(({ dia, doDia }) => ({
+          dia,
+          doses: doDia.map((dose) => {
+            const projetada = projetarDose(dose, { id: cuidadorId, edita }, ctx)
+
+            return {
+              numero: projetada.numero,
+              previstaEm: projetada.previstaEm,
+              situacao: projetada.situacao,
+              motivo: projetada.motivo,
+              registradaPor: projetada.registradaPor,
+            }
+          }),
+        })),
+        historico: {
+          desde: clock.dateOf(tratamento.inicioEm),
+          dadas: historico.dadas,
+          puladas: historico.puladas,
+          semRegistro: historico.semRegistro,
+        },
+      }
+
+      /* Contínuo e sem fim são a **ausência** das chaves, como no DTO — nunca `null`, nunca 365. */
+      if (tratamento.duracaoDias !== null) {
+        projetado.duracaoDias = tratamento.duracaoDias
+      }
+
+      if (ultima) {
+        projetado.ultimaDoseEm = ultima
+      }
+
+      return projetado
+    })
+    .filter((item): item is TratamentoDoPet => item !== null)
+    .sort((a, b) => Number(a.situacao === 'ENCERRADO') - Number(b.situacao === 'ENCERRADO'))
+
+  return {
+    pet: { id: petId, nome: pet?.nome ?? '', fotoUrl: null },
+    eu: {
+      id: cuidadorId,
+      nome: cuidador?.nome ?? '',
+      eu: true,
+      acesso: edita ? 'LEITURA_ESCRITA' : 'LEITURA',
+    },
+    tratamentos,
+  }
+}
+
+/**
+ * Os avisos de dose que saem entre `de` e `ate`, já agrupados.
+ *
+ * Só doses sem registro e ainda não fechadas — a dose que alguém da casa já marcou não avisa
+ * ninguém, e a que fechou sem registro não vira cobrança. Doses de qualquer pet da conta dentro
+ * de `agruparDentroDeMin` saem num aviso só, no horário da primeira.
+ */
+export function projetarAvisosDeDose(
+  tutorId: string,
+  ctx: ContextoDaCarteirinha,
+  de: ISODateTime,
+  ate: ISODateTime,
+): AvisoDeDose[] {
+  const { dataset, agora } = ctx
+  const pets = new Map(
+    dataset.pets.filter((pet) => pet.tutorId === tutorId).map((pet) => [pet.id, pet.nome]),
+  )
+
+  const doses = dataset.tratamentos
+    .filter((tratamento) => pets.has(tratamento.petId) && emCurso(tratamento, agora))
+    .flatMap((tratamento) =>
+      dosesDoTratamento(tratamento, dataset.registrosDeDose, agora, ate)
+        .filter(
+          (dose) =>
+            !dose.registro &&
+            ms(dose.previstaEm) >= ms(de) &&
+            (dose.situacao === 'aberta' || dose.situacao === 'prevista'),
+        )
+        .map((dose) => ({ tratamento, dose })),
+    )
+    .sort((a, b) => ms(a.dose.previstaEm) - ms(b.dose.previstaEm))
+
+  const avisos: AvisoDeDose[] = []
+  const janela = REGRAS_DA_DOSE.agruparDentroDeMin * 60_000
+
+  for (const { tratamento, dose } of doses) {
+    const ultimo = avisos[avisos.length - 1]
+    const remedio = medicationsFixture.find((item) => item.id === tratamento.medicamentoId)
+    const item = {
+      tratamentoId: tratamento.id,
+      numero: dose.numero,
+      petId: tratamento.petId,
+      petNome: pets.get(tratamento.petId) ?? '',
+      medicamento: remedio?.nome ?? tratamento.medicamento,
+      ...naApresentacao(tratamento.quantidade, tratamento.unidade),
+    }
+
+    if (ultimo && ms(dose.previstaEm) - ms(ultimo.previstaEm) <= janela) {
+      ultimo.doses.push(item)
+      continue
+    }
+
+    avisos.push({
+      categoria: CATEGORIA_DO_AVISO_DE_DOSE,
+      previstaEm: dose.previstaEm,
+      doses: [item],
+      url: `${ROTA_DO_TRATAMENTO}?petId=${encodeURIComponent(tratamento.petId)}&id=${encodeURIComponent(tratamento.id)}`,
+    })
+  }
+
+  return avisos
+}
+
+// ---------------------------------------------------------------------------
 // A demonstração inteira
 // ---------------------------------------------------------------------------
 
@@ -1274,6 +1563,13 @@ export type DemoDoResponsavel = {
   notificacoes: NotificacaoDaDemonstracao[]
   /** Fora de `notificacoes` pelo mesmo motivo do contrato: o tipo ainda não é do `Record` fechado. */
   notificacoesDaCarteirinha: NotificacaoDaCarteirinha[]
+  /**
+   * Os remédios de cada pet que tem tratamento, vistos pela Fátima. A família dela aparece nos
+   * registros (`registradaPor`), com `eu: false`.
+   */
+  tratamentos: TratamentosDoPet[]
+  /** Os avisos de dose que ainda saem hoje, já agrupados — o mock os agenda como locais. */
+  avisosDeDose: AvisoDeDose[]
 }
 
 /** Quanto do passado a demonstração carrega: o bastante para a perda de peso da Pérola. */
@@ -1347,5 +1643,10 @@ export function montarDemoDoResponsavel(ctx: ContextoDaProjecao): DemoDoResponsa
       .filter((item) => Date.parse(ctx.agora) - Date.parse(item.criadoEm) <= 7 * 86_400_000)
       .filter((item) => Date.parse(item.criadoEm) <= Date.parse(ctx.agora))
       .sort((a, b) => Date.parse(b.criadoEm) - Date.parse(a.criadoEm)),
+    tratamentos: [...meusPets]
+      .filter((petId) => dataset.tratamentos.some((item) => item.petId === petId))
+      .map((petId) => projetarTratamentos(petId, ctx.tutorId, ctx))
+      .filter((item) => item.tratamentos.length > 0),
+    avisosDeDose: projetarAvisosDeDose(ctx.tutorId, ctx, ctx.agora, fimDoDia(ctx.agora)),
   }
 }

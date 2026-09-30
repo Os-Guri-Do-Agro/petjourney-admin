@@ -30,9 +30,11 @@ import ResumoEssencial from '@/features/clinico/components/pacientes/resumo/Resu
 import ResumoPeso from '@/features/clinico/components/pacientes/resumo/ResumoPeso.vue'
 import ResumoPrimeiraConsulta from '@/features/clinico/components/pacientes/resumo/ResumoPrimeiraConsulta.vue'
 import ResumoSinais from '@/features/clinico/components/pacientes/resumo/ResumoSinais.vue'
+import ResumoTratamentos from '@/features/clinico/components/pacientes/resumo/ResumoTratamentos.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { useClinicPrefs } from '@/features/clinico/composables/useClinicPrefs'
 import { useRotulosDoDiario } from '@/features/clinico/composables/useRotulosDoDiario'
+import { useRotulosDoTratamento } from '@/features/clinico/composables/useRotulosDoTratamento'
 import { patientRepository } from '@/features/clinico/data/repositories'
 import type { Anamnese, Antecedente, Appointment, Pet, Tutor } from '@/features/clinico/data/types'
 import {
@@ -55,6 +57,7 @@ const clinico = useClinicoStore()
 const prontuario = useProntuarioStore()
 const formato = useClinicFormat()
 const rotulos = useRotulosDoDiario()
+const rotulosDoTratamento = useRotulosDoTratamento()
 /** A sugestão do histórico se religa aqui: é onde quem a desligou vem procurar. */
 const { sugerirResumo } = useClinicPrefs()
 const idDaPreferencia = useId()
@@ -90,6 +93,7 @@ async function carregar() {
           pet: dados.pet,
           consultas: fonte.consultas,
           diario: fonte.diario,
+          tratamentos: fonte.tratamentos,
           agora: fonte.agora,
         })
       : null
@@ -303,16 +307,38 @@ function preencherAnamnese(atual: Anamnese, dados: ResumoDoPaciente): Partial<An
   }
 
   for (const medicacao of dados.medicacoes) {
+    if (medicacao.origem === 'continua') {
+      acrescentar('medicacao-continua', medicacao.descricao)
+      continue
+    }
+
+    const prescricao = t('clinico.resumoDoPaciente.anamnese.prescricao', {
+      nome: clinico.medicamento(medicacao.medicamentoId)?.nome ?? medicacao.medicamentoId,
+      data: medicacao.ate
+        ? formato.dataCurta(clinicClock.dateOf(medicacao.ate))
+        : t('clinico.resumoDoPaciente.essencial.usoContinuo'),
+    })
+
+    /*
+     * Com lembrete no app, a adesão vai junto, com a procedência: é o dado que responde "foi
+     * dado?" antes da pergunta, e o vet assina em cima sabendo de onde ele veio.
+     */
+    const emCasa = dados.tratamentos.find(
+      (item) =>
+        item.medicamentoId === medicacao.medicamentoId &&
+        item.compartilhado &&
+        item.periodo.fechadas > 0,
+    )
+
     acrescentar(
       'medicacao-continua',
-      medicacao.origem === 'continua'
-        ? medicacao.descricao
-        : t('clinico.resumoDoPaciente.anamnese.prescricao', {
-            nome: clinico.medicamento(medicacao.medicamentoId)?.nome ?? medicacao.medicamentoId,
-            data: medicacao.ate
-              ? formato.dataCurta(clinicClock.dateOf(medicacao.ate))
-              : t('clinico.resumoDoPaciente.essencial.usoContinuo'),
-          }),
+      emCasa
+        ? t('clinico.resumoDoPaciente.anamnese.prescricaoComAdesao', {
+            prescricao,
+            data: formato.dataCurta(clinicClock.dateOf(emCasa.periodo.desde)),
+            contagem: rotulosDoTratamento.contagem(emCasa.periodo),
+          })
+        : prescricao,
     )
   }
 
@@ -420,6 +446,11 @@ watch(petId, carregar)
             v-if="mostrarDiario"
             :diario="resumo.diario"
             :tem-consulta="!resumo.primeiraVez"
+          />
+          <ResumoTratamentos
+            v-if="resumo.tratamentos.length > 0"
+            :pet-id="pet.id"
+            :tratamentos="resumo.tratamentos"
           />
           <ResumoPeso v-if="mostrarPeso" :peso="resumo.peso" :em-risco="perdaEmRisco" />
         </div>

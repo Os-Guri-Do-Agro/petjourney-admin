@@ -9,6 +9,12 @@ import type { Pet, Tutor } from '../types'
  * Três nomes extremos são propositais e servem de teste vivo do cabeçalho do paciente:
  * `pet-ni` (nome de duas letras), `pet-maximiliano` (nome longuíssimo) e `pet-acai`
  * (acentuação densa). Se o `PatientHeader` quebrar em 1280, 1024 ou 768, é aqui que aparece.
+ *
+ * **Foto só nos pets do roteiro de demonstração** (Mel, Pipoca, Brunilda e Cacau aqui; Pérola,
+ * Chico, Paçoca, Biscoito e Duna nos cenários). São retratos de licença livre do Wikimedia
+ * Commons, recortados em `public/demo/pacientes/`, com autor e licença em `CREDITOS.md` ao lado.
+ * O resto fica sem foto de propósito: é o avatar desenhado que a tela mostra quando o responsável
+ * não pôs foto no app, e esse caso precisa continuar à vista.
  */
 export const tutorsFixture: Tutor[] = [
   {
@@ -334,7 +340,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Dourado claro, pelo longo',
     tutorId: 'tutor-luciana',
     iniciais: 'ME',
-    fotoUrl: '',
+    fotoUrl: '/demo/pacientes/mel.jpg',
     alertas: [{ id: 'alerta-mel-1', kind: 'gestante', severidade: 'atencao', detalhe: '5 semanas' }],
   },
   {
@@ -368,7 +374,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Branco e marrom, rosetas',
     tutorId: 'tutor-fatima',
     iniciais: 'PI',
-    fotoUrl: '',
+    fotoUrl: '/demo/pacientes/pipoca.jpg',
     alertas: [],
   },
   {
@@ -516,7 +522,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Casco escuro com escudos alaranjados',
     tutorId: 'tutor-fatima',
     iniciais: 'BR',
-    fotoUrl: '',
+    fotoUrl: '/demo/pacientes/brunilda.jpg',
     alertas: [],
   },
   {
@@ -620,7 +626,7 @@ export const petsFixture: Pet[] = [
     pelagem: 'Chocolate e castanho, pelo curto',
     tutorId: 'tutor-ana-lu',
     iniciais: 'CA',
-    fotoUrl: '',
+    fotoUrl: '/demo/pacientes/cacau.jpg',
     alertas: [
       { id: 'alerta-cacau-1', kind: 'cronico', severidade: 'atencao', detalhe: 'Discopatia' },
       /*

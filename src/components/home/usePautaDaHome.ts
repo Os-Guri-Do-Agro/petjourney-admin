@@ -14,6 +14,7 @@ import {
   PhHourglassMedium,
   PhHouseLine,
   PhListChecks,
+  PhPill,
   PhStethoscope,
   PhSyringe,
 } from '@phosphor-icons/vue'
@@ -127,6 +128,12 @@ export function usePautaDaHome() {
               pendenciasClinicas.atividades.value,
             ),
             linha('vacinas', '/veterinario/vacinas', PhSyringe, pendenciasClinicas.vacinas.value),
+            linha(
+              'tratamentos',
+              '/veterinario/tratamentos',
+              PhPill,
+              pendenciasClinicas.tratamentos.value,
+            ),
           ].filter((item) => item.total > 0),
         ),
       })

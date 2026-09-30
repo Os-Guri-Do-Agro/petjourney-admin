@@ -697,6 +697,14 @@ export type Prescription = {
   observacao: string
   /** Confirmação explícita quando o pet tem alergia registrada ao princípio ativo. */
   alergiaConfirmada: boolean
+  /**
+   * Tratamento crítico: a clínica quer saber se a adesão cair em casa.
+   *
+   * Decisão do vet, na hora de prescrever — é ele quem sabe que furosemida numa insuficiência
+   * cardíaca não pode falhar dois dias e que o vermífugo pode. Ausente é `false`: a receita que
+   * já existia continua como era.
+   */
+  critico?: boolean
 }
 
 export type CarePlan = {
@@ -804,6 +812,74 @@ export type AtoClinico = {
   /** Quem executou. Vazio em `avulso` e em vacina de fora: a clínica não viu acontecer. */
   professionalId: string
   observacao: string
+}
+
+// ---------------------------------------------------------------------------
+// Adesão ao tratamento
+// ---------------------------------------------------------------------------
+
+/**
+ * Quem cuida do pet em casa e pode registrar a dose no app.
+ *
+ * É a família do app vista pela clínica: o dono e os membros com acesso ao pet. Existe aqui
+ * porque o registro diz **quem** deu — e porque, com duas pessoas cuidando, a pergunta do vet no
+ * retorno muda de "deu?" para "quem deu, e quando".
+ */
+export type Cuidador = {
+  id: string
+  /** O responsável da conta. A família é a dele. */
+  tutorId: string
+  nome: string
+  /** `dono` é o responsável; `familia` é quem ele convidou no app. */
+  papel: 'dono' | 'familia'
+  /** Só quem pode editar registra dose — o escopo `LEITURA_ESCRITA` do app. */
+  acesso: 'leitura' | 'edicao'
+  petIds: string[]
+}
+
+/**
+ * Um item da receita que virou lembrete no app — e, daí, dose a dose, registro em casa.
+ *
+ * Nasce quando o responsável toca "Criar lembretes" no resumo da consulta, nunca sozinho. A
+ * posologia é copiada da prescrição naquele instante, como a receita copia a conduta: se a dose
+ * mudar numa consulta seguinte, é outro tratamento, e o histórico deste continua lendo certo.
+ */
+export type TratamentoEmCasa = {
+  id: string
+  petId: string
+  tutorId: string
+  /** Atendimento de onde saiu a receita. Nulo no que veio de antes do módulo. */
+  encounterId: string | null
+  prescricaoId: string | null
+  /** Do bulário, quando é de lá. O nome abaixo é a reserva para o que não é. */
+  medicamentoId: string | null
+  medicamento: string
+  /** Por dose, na unidade da apresentação: 0,12 mL, meio comprimido. */
+  quantidade: number
+  unidade: Medication['unidadeApresentacao']
+  via: PrescriptionRoute
+  instrucoes: string
+  frequenciaHoras: number
+  /** `null` é uso contínuo — sem fim, nunca 365. */
+  duracaoDias: number | null
+  /** A primeira dose, no horário que o responsável escolheu. As outras saem da frequência. */
+  inicioEm: ISODateTime
+  /** Quando foi encerrado antes do fim: o vet suspendeu, o responsável desligou. */
+  encerradoEm: ISODateTime | null
+  /** Ver `Prescription.critico`. O vet pode mudar depois, na ficha. */
+  critico: boolean
+  prescritoPor: string
+  prescritoEm: ISODateTime
+  lembreteCriadoEm: ISODateTime
+  lembreteCriadoPor: string
+  /**
+   * O responsável deixa a clínica ver o que a casa registra neste lembrete. Escolha dele, na hora
+   * de criar — o app diz que a clínica vai ver. Sem isso, a clínica sabe que o lembrete existe e
+   * nada mais.
+   */
+  compartilhadoComAClinica: boolean
+  /** A última conversa da clínica com a casa sobre este tratamento. É ela que apaga o alerta. */
+  contato: { em: ISODateTime; professionalId: string; nota: string } | null
 }
 
 // ---------------------------------------------------------------------------

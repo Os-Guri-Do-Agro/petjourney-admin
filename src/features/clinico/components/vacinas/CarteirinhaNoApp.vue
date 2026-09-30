@@ -215,7 +215,10 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
       </Transition>
 
       <header class="topo">
-        <span class="topo__avatar" aria-hidden="true">{{ carteirinha.petIniciais }}</span>
+        <span class="topo__avatar" aria-hidden="true">
+          <img v-if="carteirinha.petFotoUrl" :src="carteirinha.petFotoUrl" alt="" />
+          <template v-else>{{ carteirinha.petIniciais }}</template>
+        </span>
         <span class="topo__identidade">
           <strong>{{ t('clinico.vacinas.app.titulo') }}</strong>
           <span>
@@ -494,6 +497,17 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
   font-size: var(--clinic-font-label);
   font-weight: 750;
   place-items: center;
+}
+
+/* A foto do perfil do pet, quando o app tem uma; sem ela, as iniciais. */
+.topo__avatar:has(img) {
+  overflow: hidden;
+}
+
+.topo__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .topo__identidade {

@@ -35,6 +35,8 @@ import type {
 } from '../contrato/responsavel'
 import type { AlertSeverity, Diagnosis, ISODateTime, Pet, PetAlert } from '../data/types'
 
+import type { AlertaDeAdesao, DoseNaGrade, ResumoDaAdesao } from './adesao'
+
 const DIA_MS = 24 * 60 * 60 * 1000
 
 /** Janela da tendência de peso. Mais longa que isso, a perda vira envelhecimento. */
@@ -129,12 +131,41 @@ export type ConsultaDoResumo = {
   prescricoes: Array<{ medicamentoId: string; ate: ISODateTime | null }>
 }
 
+/**
+ * Um remédio de casa, com o que a casa registrou desde a última consulta.
+ *
+ * É a pergunta do retorno — "o tratamento foi feito?" — respondida antes de alguém perguntar.
+ * Vem pronto do repositório (`domain/adesao.ts` faz a conta); o resumo só decide o que sobe.
+ */
+export type TratamentoNoResumo = {
+  id: string
+  medicamentoId: string | null
+  /** Reserva para o que não é do bulário. */
+  medicamento: string
+  critico: boolean
+  /** A casa compartilha os registros com a clínica. Sem isso, nada abaixo vale. */
+  compartilhado: boolean
+  emCurso: boolean
+  quantidade: number
+  unidade: 'ml' | 'comprimido'
+  frequenciaHoras: number
+  duracaoDias: number | null
+  /** As doses do período, para a faixa. */
+  doses: DoseNaGrade[]
+  periodo: ResumoDaAdesao
+  alerta: AlertaDeAdesao | null
+  /** Quem cuida, pelo id — "registrado por Fátima (31) e Rafael (9)". */
+  nomes: Record<string, string>
+}
+
 export type EntradaDoResumoDoPaciente = {
   pet: Pet
   /** Consultas finalizadas do paciente, em qualquer ordem. */
   consultas: ConsultaDoResumo[]
   /** O diário que o responsável liberou. `null`: ele não liberou para a clínica. */
   diario: DiarioParaClinica | null
+  /** Os remédios de casa com lembrete no app. Ausente é o mesmo que nenhum. */
+  tratamentos?: TratamentoNoResumo[]
   agora: ISODateTime
 }
 
@@ -191,6 +222,18 @@ export type SinalDoResumo =
       alterados: number
       total: number
     }
+  /*
+   * Um tratamento crítico cuja adesão caiu em casa. Risco: é o que muda a conduta antes da
+   * consulta começar — furosemida que acabou há dois dias explica o cansaço antes do exame.
+   */
+  | {
+      tipo: 'adesao'
+      severidade: 'risco'
+      tratamentoId: string
+      medicamentoId: string | null
+      medicamento: string
+      alerta: AlertaDeAdesao
+    }
 
 export type ContagemDoCampo = {
   campo: CampoDoDiario
@@ -224,6 +267,8 @@ export type ResumoDoPaciente = {
   alertas: PetAlert[]
   condicoes: string[]
   medicacoes: MedicacaoEmUso[]
+  /** Os remédios de casa em curso ou com dose no período, na ordem do repositório. */
+  tratamentos: TratamentoNoResumo[]
   diario: {
     /** O responsável liberou o diário para a clínica. Sem isso, tudo abaixo vem vazio. */
     liberado: boolean
@@ -520,6 +565,27 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
     }
   }
 
+  /*
+   * Os remédios de casa. Entra o que está em curso e o que teve dose desde a última consulta — o
+   * tratamento que terminou antes dela já foi assunto daquela consulta.
+   */
+  const tratamentos = (entrada.tratamentos ?? []).filter(
+    (tratamento) => tratamento.emCurso || tratamento.periodo.fechadas > 0,
+  )
+
+  for (const tratamento of tratamentos) {
+    if (tratamento.alerta) {
+      sinais.push({
+        tipo: 'adesao',
+        severidade: 'risco',
+        tratamentoId: tratamento.id,
+        medicamentoId: tratamento.medicamentoId,
+        medicamento: tratamento.medicamento,
+        alerta: tratamento.alerta,
+      })
+    }
+  }
+
   sinais.sort((a, b) => ORDEM_DA_SEVERIDADE[a.severidade] - ORDEM_DA_SEVERIDADE[b.severidade])
 
   // ---------------------------------------------------------------- cadastro
@@ -588,6 +654,7 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
     alertas,
     condicoes,
     medicacoes,
+    tratamentos,
     diario: {
       liberado: entrada.diario !== null,
       desde,

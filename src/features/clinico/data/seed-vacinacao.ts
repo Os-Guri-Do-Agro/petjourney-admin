@@ -45,7 +45,7 @@ export function petsDaVacinacao(hoje: ISODate): Pet[] {
       pelagem: 'Preto com meias brancas',
       tutorId: 'tutor-fatima',
       iniciais: 'BI',
-      fotoUrl: '',
+      fotoUrl: '/demo/pacientes/biscoito.jpg',
       alertas: [],
     },
   ]

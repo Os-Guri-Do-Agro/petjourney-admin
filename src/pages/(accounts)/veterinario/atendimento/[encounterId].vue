@@ -434,6 +434,24 @@ function repetirReceita(prescricoes: Prescription[]) {
   })
 }
 
+/** Crítico é da prescrição: vai com ela para a receita e, no app, para o tratamento de casa. */
+function marcarCritico(prescricaoId: string, critico: boolean) {
+  const atual = encounter.value
+
+  if (!atual) {
+    return
+  }
+
+  prontuario.atualizar({
+    conduta: {
+      ...atual.conduta,
+      prescricoes: atual.conduta.prescricoes.map((prescricao) =>
+        prescricao.id === prescricaoId ? { ...prescricao, critico } : prescricao,
+      ),
+    },
+  })
+}
+
 function agendarRetorno() {
   retornoAberto.value = true
   void prontuario.buscarSugestoesDeRetorno()
@@ -726,6 +744,7 @@ onBeforeUnmount(() => {
             :encounter="encounter"
             :somente-leitura="prontuario.somenteLeitura"
             @repetir="repetirReceita"
+            @critico="marcarCritico"
           />
 
           <!--

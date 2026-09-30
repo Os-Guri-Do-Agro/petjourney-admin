@@ -15,6 +15,7 @@ import { useI18n } from 'vue-i18n'
 
 import { useClinicFormat } from '../../../composables/useClinicFormat'
 import { useRotulosDoDiario } from '../../../composables/useRotulosDoDiario'
+import { useRotulosDoTratamento } from '../../../composables/useRotulosDoTratamento'
 import type { SinalDoResumo } from '../../../domain/resumo-do-paciente'
 import { clinicClock } from '../../../stores/clinico'
 
@@ -35,6 +36,7 @@ const props = withDefaults(
 const { t } = useI18n()
 const formato = useClinicFormat()
 const rotulos = useRotulosDoDiario()
+const rotulosDoTratamento = useRotulosDoTratamento()
 
 /** Balança de casa tem duas casas; a da clínica, uma. Zero à direita não é informação. */
 function kg(valor: number): string {
@@ -66,6 +68,7 @@ const linhas = computed(() =>
           }),
           relato: '',
           citacao: '',
+          complemento: '',
         }
       case 'alarme':
         return {
@@ -82,6 +85,7 @@ const linhas = computed(() =>
            */
           relato: sinal.relato ?? '',
           citacao: sinal.texto ?? '',
+          complemento: '',
         }
       case 'sintoma-recorrente':
         return {
@@ -91,6 +95,7 @@ const linhas = computed(() =>
           detalhe: t('clinico.resumoDoPaciente.sinais.recorrenteDetalhe', { vezes: sinal.vezes }),
           relato: '',
           citacao: '',
+          complemento: '',
         }
       case 'campo-alterado':
         return {
@@ -105,7 +110,27 @@ const linhas = computed(() =>
           }),
           relato: '',
           citacao: '',
+          complemento: '',
         }
+      case 'adesao': {
+        /*
+         * O remédio crítico que perdeu o ritmo em casa. O motivo vai na linha de baixo, nas
+         * palavras da casa — "acabou o remédio" diz ao vet o que fazer antes do exame.
+         */
+        const alerta = rotulosDoTratamento.alerta(sinal.alerta)
+
+        return {
+          chave: `adesao-${sinal.tratamentoId}`,
+          severidade: sinal.severidade,
+          titulo: t('clinico.resumoDoPaciente.sinais.adesao', {
+            medicamento: rotulosDoTratamento.nome(sinal),
+          }),
+          detalhe: alerta.titulo,
+          relato: '',
+          citacao: '',
+          complemento: alerta.detalhe,
+        }
+      }
     }
   }),
 )
@@ -136,6 +161,9 @@ const linhas = computed(() =>
           <span class="sinal__detalhe clinic-value">{{ linha.detalhe }}</span>
           <span v-if="linha.relato" class="sinal__relato">
             {{ t('clinico.resumoDoPaciente.sinais.relato', { relato: linha.relato }) }}
+          </span>
+          <span v-if="linha.complemento" class="sinal__complemento">
+            {{ linha.complemento }}
           </span>
           <q v-if="linha.citacao" class="sinal__citacao">{{ linha.citacao }}</q>
         </span>
@@ -233,6 +261,13 @@ const linhas = computed(() =>
   flex-basis: 100%;
   font-size: var(--clinic-font-body);
   font-weight: 700;
+}
+
+/* O motivo e o padrão de antes, numa linha própria, em tinta de texto. */
+.sinal__complemento {
+  flex-basis: 100%;
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-body);
 }
 
 /* A fala do responsável, na íntegra: é o contexto que o número não dá. */

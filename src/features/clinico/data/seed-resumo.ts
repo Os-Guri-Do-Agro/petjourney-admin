@@ -62,7 +62,7 @@ export function petsDoResumo(hoje: ISODate): Pet[] {
       pelagem: 'Tricolor, pelo curto',
       tutorId: 'tutor-fatima',
       iniciais: 'PE',
-      fotoUrl: '',
+      fotoUrl: '/demo/pacientes/perola.jpg',
       alertas: [],
     },
     {
@@ -79,7 +79,7 @@ export function petsDoResumo(hoje: ISODate): Pet[] {
       pelagem: 'Abricó com máscara preta, pelo curto',
       tutorId: 'tutor-luciana',
       iniciais: 'CH',
-      fotoUrl: '',
+      fotoUrl: '/demo/pacientes/chico.jpg',
       alertas: [
         {
           id: 'alerta-chico-1',
@@ -104,7 +104,7 @@ export function petsDoResumo(hoje: ISODate): Pet[] {
       pelagem: 'Caramelo com peito branco',
       tutorId: 'tutor-daniel',
       iniciais: 'PA',
-      fotoUrl: '',
+      fotoUrl: '/demo/pacientes/pacoca.jpg',
       alertas: [],
     },
   ]
@@ -165,6 +165,8 @@ export type ConsultaPlantada = {
     frequenciaHoras: number
     /** `null` é uso contínuo. */
     duracaoDias: number | null
+    /** Tratamento crítico: a clínica quer o alerta de adesão (ver `seed-adesao.ts`). */
+    critico?: boolean
   } | null
 }
 

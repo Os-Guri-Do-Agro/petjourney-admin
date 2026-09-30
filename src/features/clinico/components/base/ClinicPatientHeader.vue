@@ -88,9 +88,7 @@ const peso = computed(() => {
 const alertasOrdenados = computed(() => {
   const peso = { risco: 0, atencao: 1, info: 2 } as const
 
-  return [...(props.pet?.alertas ?? [])].sort(
-    (a, b) => peso[a.severidade] - peso[b.severidade],
-  )
+  return [...(props.pet?.alertas ?? [])].sort((a, b) => peso[a.severidade] - peso[b.severidade])
 })
 </script>
 
@@ -103,7 +101,10 @@ const alertasOrdenados = computed(() => {
       quadro assumindo o esticamento, o avatar recebe uma altura concreta e vira quadrado.
     -->
     <div class="paciente__quadro">
-      <div class="paciente__avatar" :aria-hidden="true">{{ pet.iniciais }}</div>
+      <div class="paciente__avatar" :aria-hidden="true">
+        <img v-if="pet.fotoUrl" class="paciente__foto" :src="pet.fotoUrl" alt="" />
+        <template v-else>{{ pet.iniciais }}</template>
+      </div>
     </div>
 
     <div class="paciente__corpo">
@@ -233,6 +234,17 @@ const alertasOrdenados = computed(() => {
   font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: 0.02em;
+}
+
+/* A foto ocupa o quadrado inteiro, com o mesmo raio; sem ela, as iniciais. */
+.paciente__avatar:has(.paciente__foto) {
+  overflow: hidden;
+}
+
+.paciente__foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* No drawer o cartão tem menos linhas, e o quadrado encolhe junto — sem deixar de ser quadrado. */

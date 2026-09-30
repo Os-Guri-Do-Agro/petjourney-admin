@@ -625,11 +625,13 @@
         "atividades": "Atividades",
         "vacinas": "Vacinas",
         "rotina": "Rotina",
-        "vespera": "Reservas"
+        "vespera": "Reservas",
+        "tratamentos": "Tratamentos"
       },
       "contagem": "{total} assunto | {total} assuntos",
       "recolher": "Recolher {modulo}",
-      "expandir": "Expandir {modulo}"
+      "expandir": "Expandir {modulo}",
+      "tratamentos": "{total} tratamento crítico com a adesão em queda | {total} tratamentos críticos com a adesão em queda"
     },
     "resumo": {
       "portal": "Acompanhe seus ganhos e compartilhe seu código.",
@@ -1981,7 +1983,8 @@
         "fila": "{total} paciente na fila | {total} pacientes na fila",
         "internacao": "{total} item a resolver na internação | {total} itens a resolver na internação",
         "atividades": "{total} pendência | {total} pendências",
-        "vacinas": "{total} reforço vencido | {total} reforços vencidos"
+        "vacinas": "{total} reforço vencido | {total} reforços vencidos",
+        "tratamentos": "{total} tratamento crítico com a adesão em queda | {total} tratamentos críticos com a adesão em queda"
       }
     },
     "busca": {
@@ -3273,7 +3276,8 @@
         "recorrenteDetalhe": "{vezes}× desde a última consulta",
         "mais": "e mais {total} no resumo",
         "campoDetalhe": "em {alterados} de {total} registros",
-        "relato": "Também relatado: {relato}"
+        "relato": "Também relatado: {relato}",
+        "adesao": "{medicamento}: a adesão caiu em casa"
       },
       "casa": {
         "titulo": "Em casa desde a última consulta",
@@ -3358,7 +3362,8 @@
         "prescricao": "{nome} (receitado, até {data})",
         "campo": "{campo}: {valor} em {alterados} de {total} registros",
         "doencas": "doenças informadas pelo responsável: {lista}",
-        "alarmeSemTexto": "{sintomas} em {data}"
+        "alarmeSemTexto": "{sintomas} em {data}",
+        "prescricaoComAdesao": "{prescricao} · no app desde {data}: {contagem}"
       },
       "verResumoComSinais": "Resumo em 30 s: {total} pontos de atenção",
       "preferencia": "Sugerir este resumo ao abrir o histórico do paciente",
@@ -3370,6 +3375,11 @@
         "comoReativar": "O botão continua no histórico. Dá para religar a sugestão na tela do resumo.",
         "agoraNao": "Agora não",
         "ver": "Ver resumo"
+      },
+      "tratamentos": {
+        "titulo": "Remédio em casa",
+        "ajuda": "Pelo que a casa registrou no app desde a última consulta.",
+        "abrir": "Abrir tratamento"
       }
     },
     "atendimentos": {
@@ -3495,7 +3505,8 @@
       "semPrescricao": "Nenhuma prescrição para emitir.",
       "vistaDoResponsavel": "Como o responsável vê",
       "lembrete": "Vira lembrete no app: {quantidade}, {frequencia}",
-      "lembreteContinuo": "Lembrete contínuo, sem data de fim"
+      "lembreteContinuo": "Lembrete contínuo, sem data de fim",
+      "critico": "Tratamento crítico: avisar a clínica se a adesão cair em casa"
     },
     "vacinas": {
       "titulo": "Vacinas",
@@ -4717,6 +4728,183 @@
         "sinais": "{total} sinal pede atenção | {total} sinais pedem atenção",
         "primeiraVez": "Primeira vez nesta clínica",
         "nada": "Nada fora do comum desde a última consulta"
+      },
+      "tratamento": {
+        "pilula": "Tratamento",
+        "alerta": "{medicamento}: a adesão caiu",
+        "alertas": "{total} tratamento com a adesão em queda | {total} tratamentos com a adesão em queda",
+        "umEmCurso": "{medicamento} em curso",
+        "emCurso": "{total} remédio em curso | {total} remédios em curso",
+        "nenhumEmCurso": "Nenhum remédio em curso",
+        "semTratamento": "Sem remédio de casa com lembrete"
+      }
+    },
+    "adesao": {
+      "titulo": "Tratamentos em casa",
+      "subtitulo": "O remédio que saiu da clínica, dose a dose, pelo que a casa registra no app.",
+      "situacao": {
+        "dada": "Dada",
+        "pulada": "Pulada",
+        "sem-registro": "Sem registro",
+        "aberta": "Dose da vez",
+        "prevista": "Prevista"
+      },
+      "motivo": {
+        "esqueci": "Esqueci",
+        "cuspiu": "Cuspiu",
+        "acabou": "Acabou"
+      },
+      "motivoNaFrase": {
+        "esqueci": "esquecimento",
+        "cuspiu": "o pet cuspiu",
+        "acabou": "acabou o remédio"
+      },
+      "contagem": {
+        "dadas": "{total} dada | {total} dadas",
+        "puladas": "{total} pulada | {total} puladas",
+        "semRegistro": "{total} sem registro | {total} sem registro",
+        "nenhuma": "Nenhuma dose registrada ainda"
+      },
+      "periodo": {
+        "desdeConsulta": "Desde a consulta de {data}",
+        "desdeInicio": "Desde o início, em {data}"
+      },
+      "dose": {
+        "ml": "{quantidade} mL",
+        "comprimido": "{quantidade} comprimido | {quantidade} comprimidos",
+        "meio": "meio comprimido",
+        "quarto": "um quarto de comprimido",
+        "tres-quartos": "três quartos de comprimido",
+        "um-e-meio": "um comprimido e meio"
+      },
+      "posologia": {
+        "aCada": "a cada {horas} h",
+        "continuo": "uso contínuo",
+        "porDias": "por {dias} dia | por {dias} dias"
+      },
+      "faixa": {
+        "quando": "{data}, {hora}",
+        "dadaPor": "dada por {nome} às {hora}",
+        "puladaPor": "pulada por {nome} · {motivo}",
+        "hoje": "hoje",
+        "marcoLegenda": "Última consulta",
+        "semRegistroNota": "Sem registro não quer dizer que não deu: a dose pode ter sido dada sem ser marcada no app."
+      },
+      "quem": "Registrado por {lista}",
+      "horarioDestoante": "A dose das {horario} é a que menos aparece como dada: {dadas} de {fechadas}.",
+      "critico": {
+        "selo": "Crítico",
+        "alternar": "Crítico: avisar a clínica se a adesão cair"
+      },
+      "alerta": {
+        "selo": "Adesão caiu",
+        "puladas": "{total} dose pulada desde {quando} | {total} doses puladas desde {quando}",
+        "queda": "Só {dadas} de {fechadas} doses aparecem como dadas desde {quando}",
+        "motivos": "Motivo: {motivos}.",
+        "antes": "Na semana anterior, {dadas} de {fechadas}.",
+        "registrarContato": "Registrar contato",
+        "quemFalou": "Quem falou",
+        "nota": "O que ficou combinado",
+        "notaPlaceholder": "Ex.: a caixa acabou; receita nova enviada",
+        "salvar": "Salvar contato",
+        "cancelar": "Cancelar",
+        "contato": "Contato registrado por {nome}, {quando}."
+      },
+      "registros": {
+        "ver": "Ver registros",
+        "esconder": "Esconder registros",
+        "colunaQuando": "Dose",
+        "colunaSituacao": "Situação",
+        "colunaQuem": "Quem registrou",
+        "registradaAs": "registrado em {quando}",
+        "vazio": "Nenhuma dose no período",
+        "rotulo": "Registros de {medicamento}"
+      },
+      "naoCompartilhado": "A casa não compartilha os registros deste lembrete.",
+      "naoCompartilhadoDetalhe": "O lembrete existe no app; o que for registrado nele fica com a família.",
+      "ficha": {
+        "emCurso": "Remédios em curso",
+        "emCursoAjuda": "O que a casa registrou no app. O fio na faixa marca a última consulta, em {data}.",
+        "emCursoAjudaSemConsulta": "O que a casa registrou no app, desde a primeira dose.",
+        "encerrados": "Encerrados",
+        "encerradosPeriodo": "de {inicio} a {fim}",
+        "vazioTitulo": "Nenhum remédio com lembrete",
+        "vazioDescricao": "Quando o responsável criar os lembretes da receita no app, o que a casa registrar aparece aqui, dose a dose.",
+        "noApp": "No celular de {responsavel}",
+        "noAppAjuda": "O que o app mostra. Toque como quem está em casa: a ficha ao lado muda na hora.",
+        "celularDe": "Celular de",
+        "papel": {
+          "dono": "responsável",
+          "familia": "família",
+          "leitura": "só leitura"
+        },
+        "emCursoAjudaSemFio": "O que a casa registrou no app. A última consulta foi em {data}."
+      },
+      "lista": {
+        "stat": {
+          "alertas": "Adesão caiu",
+          "alertasDetalhe": "Tratamentos críticos: ligar hoje",
+          "emCurso": "Em curso",
+          "emCursoDetalhe": "Remédios com lembrete no app",
+          "criticos": "Críticos",
+          "criticosDetalhe": "Marcados pelo vet ao prescrever"
+        },
+        "recorte": {
+          "atencao": "Pedem atenção",
+          "emCurso": "Em curso",
+          "encerrados": "Encerrados"
+        },
+        "coluna": {
+          "paciente": "Paciente",
+          "remedio": "Remédio",
+          "janela": "Últimos {dias} dias",
+          "responsavel": "Responsável",
+          "situacao": "Situação"
+        },
+        "situacaoEmCurso": "Em curso",
+        "situacaoEncerrado": "Encerrado",
+        "vazioTitulo": "Nenhum tratamento em casa ainda",
+        "vazioDescricao": "Os remédios aparecem aqui quando o responsável cria os lembretes da receita no app.",
+        "vazioRecorte": {
+          "atencao": "Nenhum tratamento crítico com a adesão em queda",
+          "emCurso": "Nenhum tratamento em curso",
+          "encerrados": "Nenhum tratamento encerrado"
+        }
+      },
+      "app": {
+        "titulo": "Remédios",
+        "pushOrigem": "PetJourney · {hora}",
+        "dei": "Dei",
+        "abrir": "Abrir",
+        "pulei": "Pulei",
+        "porQue": "Por quê?",
+        "voltar": "Voltar",
+        "ontemAs": "Ontem, {hora}",
+        "dadaPorVoce": "Dada por você às {hora}",
+        "dadaPor": "Dada por {nome} às {hora}",
+        "puladaPorVoce": "Pulada por você · {motivo}",
+        "puladaPor": "Pulada por {nome} · {motivo}",
+        "desfazer": "Desfazer",
+        "jaRegistrada": "{nome} já registrou às {hora}. Não precisa dar de novo.",
+        "foraDaJanela": "Esta dose já fechou. A próxima aparece no horário dela.",
+        "somenteLeitura": "Você acompanha os remédios de {pet}; só quem tem acesso de edição registra as doses.",
+        "erro": "Não foi possível registrar. Tente de novo.",
+        "receitaNova": "Receita de {data}",
+        "receitaNovaDetalhe": "{total} remédio ainda sem lembrete | {total} remédios ainda sem lembrete",
+        "primeiraDose": "Primeira dose",
+        "sugestaoDica": "Horário sugerido para nenhuma dose cair de madrugada.",
+        "compartilhar": "{clinica} vê o que vocês registrarem",
+        "criar": "Criar lembretes",
+        "desde": "Desde {data}:",
+        "encerrados": "Encerrados",
+        "avisosTitulo": "Como os avisos funcionam",
+        "avisoUmPorHorario": "Um aviso por horário. Remédios a menos de {minutos} min um do outro vêm no mesmo aviso.",
+        "avisoSemReaviso": "Sem segundo aviso: a próxima dose já é o lembrete.",
+        "avisoComReaviso": "Segundo aviso só para remédio de {horas} em {horas} h ou mais espaçado, e só se ninguém marcar.",
+        "avisoSemCobranca": "Se o horário passar, a dose fica sem registro. Ninguém é cobrado.",
+        "compartilhado": "{clinica} vê estes registros",
+        "naoCompartilhado": "Só a família vê estes registros",
+        "vazio": "Nenhum remédio com lembrete para {pet}."
       }
     }
   },

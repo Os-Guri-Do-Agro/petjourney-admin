@@ -809,6 +809,28 @@ participação não fica na faixa: mora no painel do QR.
 - O tom da faixa, véu claro como está ou chapa de Sálvia Profunda, é decisão em aberto do
   usuário.
 
+### Faixa de doses (adesão ao tratamento)
+
+Um quadradinho por dose, uma coluna por dia, uma linha por horário do dia (07:00, 15:00, 23:00).
+É a "adesão em uma linha" — desenhada, não calculada: mostra o fim de semana sem registro e a dose
+da noite que fica para trás, que nenhum número mostra. Mora na aba Tratamento da ficha, no cartão
+"Remédio em casa" do resumo e, compacta, na lista Tratamentos em casa
+(`components/tratamento/FaixaDeDoses.vue`).
+
+- **Estados, e só estes:** dada em sálvia (#2F8C7C, escuro #6CC9B5); pulada em pêssego
+  (#AD4A13, escuro #E07B3C); sem registro no cinza do trilho vazio (#BCC7C3, escuro #3A4A44); a
+  dose da vez só com contorno de 1.5px; prevista quase nada. Tokens num lugar só
+  (`faixa-cores.css`), para a legenda e a faixa não divergirem.
+- **Sem julgamento:** pulada nunca é vermelha — é o que a casa contou. Sem registro nunca usa cor
+  de aviso — a dose pode ter sido dada. O coral fica para o alerta da clínica, fora da faixa.
+- **Conferida para daltonismo:** sálvia × pêssego com ΔE 12 no claro e 14,4 no escuro. O pêssego da
+  Visão geral (#FFC39F) dava 5,1 contra a sálvia escura e por isso não é usado aqui.
+- **Marcas:** 10px (8px compacta), raio 2px, vão de 2px, sem contorno em volta. Em contêiner
+  estreito a coluna afina até 2px em vez de vazar. A última consulta é um fio de 1px no vão.
+- **Leitura:** ao passar o ponteiro, a dose diz dia, hora, situação e quem registrou. A frase ao lado
+  e a tabela de registros são a versão sem cor; o leitor de tela recebe a frase inteira.
+- **Legenda uma por cartão**, com a frase "Sem registro não quer dizer que não deu".
+
 ## Do's and Don'ts
 
 ### Do:

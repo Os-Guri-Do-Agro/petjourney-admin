@@ -236,6 +236,12 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
       { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'pi pi-user-minus' },
       /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
       { key: 'clinico.vacinas.titulo', to: '/veterinario/vacinas', icon: 'pi pi-shield' },
+      /* Pelo mesmo motivo: é onde mora o alerta de adesão — para quem a clínica precisa ligar. */
+      {
+        key: 'clinico.adesao.titulo',
+        to: '/veterinario/tratamentos',
+        icon: 'pi pi-calendar-clock',
+      },
     ],
   },
   {
@@ -359,6 +365,10 @@ export function useAppNavigation() {
     '/veterinario/vacinas': {
       contagem: pendencias.vacinas.value,
       frase: 'clinico.navegacao.selo.vacinas',
+    },
+    '/veterinario/tratamentos': {
+      contagem: pendencias.tratamentos.value,
+      frase: 'clinico.navegacao.selo.tratamentos',
     },
     '/hotel/rotina': {
       contagem: pendenciasDoHotel.rotina.value,
@@ -631,6 +641,10 @@ export function resolvePageLabel(path: string, hash: string, sections: AppNaviga
   /* A carteira de vacinas do paciente também não é item de menu. Rótulo curto, pelo mesmo motivo. */
   if (/^\/veterinario\/paciente\/[^/]+\/vacinas/.test(path)) {
     return t('clinico.vacinas.titulo')
+  }
+
+  if (/^\/veterinario\/paciente\/[^/]+\/tratamento/.test(path)) {
+    return t('clinico.ficha.tratamento.pilula')
   }
 
   /* O atendimento não é item de menu — sem esta linha o cabeçalho dizia 'Painel' no prontuário. */

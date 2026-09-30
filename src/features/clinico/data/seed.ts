@@ -39,6 +39,13 @@ import {
   roomsFixture,
 } from './fixtures'
 import { createPrng, hashSeed, intBetween, pickFrom } from './mock-runtime'
+import {
+  CONSULTAS_DA_ADESAO,
+  casosDaAdesao,
+  cuidadoresDoDataset,
+  gerarAdesao,
+  petsDaAdesao,
+} from './seed-adesao'
 import { gerarInternacoes, type DatasetDeInternacao } from './seed-internacao'
 import {
   consentimentosDosResponsaveis,
@@ -72,6 +79,7 @@ import type {
   Block,
   CarePlan,
   Clinic,
+  Cuidador,
   Diagnosis,
   ConsentimentoDoResponsavel,
   Encounter,
@@ -90,10 +98,12 @@ import type {
   SystemKey,
   AtoClinico,
   TimelineEvent,
+  TratamentoEmCasa,
   Tutor,
   VitalKey,
   WaitlistEntry,
 } from './types'
+import type { RegistroDeDose } from '../domain/adesao'
 
 export const SEMENTE_PADRAO = 0x5eed_c11c
 export const ATENDIMENTOS_NO_DIA_ANCORA = 40
@@ -146,6 +156,10 @@ export type CasoId =
   | 'resumo-perda-de-peso'
   | 'resumo-diario-cheio'
   | 'resumo-pet-novo'
+  /* Os três casos da adesão ao tratamento. Ver `seed-adesao.ts`. */
+  | 'adesao-sem-registro'
+  | 'adesao-critico'
+  | 'adesao-varias-vezes'
 
 export type CasoDificil = {
   id: CasoId
@@ -204,6 +218,15 @@ export type SeedResult = {
   consentimentos: ConsentimentoDoResponsavel[]
   /** Prazos combinados com quem marca pelo app. Ver `domain/politica.ts`. */
   politica: PoliticaDaClinica
+  /** Quem cuida de cada pet no app: o dono e a família dele. Ver `seed-adesao.ts`. */
+  cuidadores: Cuidador[]
+  /** Itens de receita que viraram lembrete no app. */
+  tratamentos: TratamentoEmCasa[]
+  /**
+   * O que a casa registrou, dose a dose. Só o que alguém marcou: a dose sem registro é a
+   * **ausência** de linha aqui, e a grade a deduz — ver `domain/adesao.ts`.
+   */
+  registrosDeDose: RegistroDeDose[]
 }
 
 function iso(date: ISODate, minutes: number) {
@@ -221,6 +244,7 @@ function petPorId(id: string): Pet {
   return (
     petsFixture.find((pet) => pet.id === id) ??
     petsDoResumo(clock.today()).find((pet) => pet.id === id) ??
+    petsDaAdesao(clock.today()).find((pet) => pet.id === id) ??
     (petsFixture[0] as Pet)
   )
 }
@@ -2729,12 +2753,12 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
   }
 
   /*
-   * O passado desenhado da Pérola e do Chico. Entra **depois** de todo sorteio sobre prontuários:
+   * O passado desenhado da Pérola, do Chico e da Duna. Entra **depois** de todo sorteio sobre prontuários:
    * no de quem recebe prontuário, cada consulta plantada consumiria um número do `rngEncounter`;
    * no dos retornos vencidos, ela entraria na lista de candidatos e roubaria a vaga de alguém —
    * o Chico apareceu em "retornos sem horário" com consulta marcada para hoje.
    */
-  for (const consulta of CONSULTAS_DO_RESUMO) {
+  for (const consulta of [...CONSULTAS_DO_RESUMO, ...CONSULTAS_DA_ADESAO]) {
     const data = addDays(hoje, -consulta.diasAtras)
     const appointment = montarAppointment({
       id: consulta.id,
@@ -2801,6 +2825,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
                   calculo,
                   observacao: '',
                   alergiaConfirmada: false,
+                  ...(prescricao?.critico ? { critico: true } : {}),
                 },
               ]
             : [],
@@ -2938,12 +2963,18 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
 
   const clinic: Clinic = { ...clinicFixture, feriados }
 
-  const pets = [...petsFixture, ...petsDoResumo(hoje), ...petsDaVacinacao(hoje)].map((pet) => ({
+  const pets = [
+    ...petsFixture,
+    ...petsDoResumo(hoje),
+    ...petsDaVacinacao(hoje),
+    ...petsDaAdesao(hoje),
+  ].map((pet) => ({
     ...pet,
     alertas: [...pet.alertas],
   }))
   const tutores = tutorsFixture.map((tutor) => ({ ...tutor }))
   const diario = gerarDiario(pets, hoje)
+  const adesao = gerarAdesao({ encounters, hoje, agora: clock.nowIso() })
 
   /* Os lotes vêm antes das aplicações: é deles que sai o código que cada dose cita. */
   const lotesDeVacina = lotesDeVacinaPlantados(clock.today())
@@ -2970,7 +3001,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     lotesDeVacina,
     atos: atosPlantados(encounters, clock.today()),
     internacao,
-    casos: [...casos, ...casosDaInternacao(internacao)],
+    casos: [...casos, ...casosDaInternacao(internacao), ...casosDaAdesao()],
     pets,
     tutores,
     diario: diario.registros,
@@ -2978,6 +3009,9 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     /* Liberado numa noite de mês e meio atrás: o consentimento é anterior à consulta de hoje. */
     consentimentos: consentimentosDosResponsaveis(tutores, iso(addDays(hoje, -45), 20 * 60 + 15)),
     politica: { ...politicaDaClinicaFixture },
+    cuidadores: cuidadoresDoDataset(tutores, pets),
+    tratamentos: adesao.tratamentos,
+    registrosDeDose: adesao.registrosDeDose,
   }
 }
 

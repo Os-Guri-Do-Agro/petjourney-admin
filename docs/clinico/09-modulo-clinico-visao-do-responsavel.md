@@ -379,6 +379,12 @@ orientações — não some com a seção nem mostra um título sem nada embaixo
   As doses seguintes saem da frequência. Não crie lembrete sem ela pedir. Item com lembrete já
   criado mostra "Lembrete ativo" e leva a ele.
 
+> **Atualizado pela adesão ao tratamento.** "Criar lembretes" ganhou o horário sugerido que poupa a
+> madrugada e o interruptor "a clínica vê o que vocês registrarem"
+> (`compartilharComAClinica`); o item traz `tratamentoId`, e "Lembrete ativo" abre a tela nova do
+> tratamento, com **Dei**, **Pulei** com motivo e quem deu. Passo a passo em
+> [16-adesao-visao-do-responsavel.md](./16-adesao-visao-do-responsavel.md).
+
 ### Exames, retorno, documentos
 
 - **Exames:** nome e se pede jejum — é a pergunta que todo mundo faz ao balcão.
@@ -692,6 +698,11 @@ reforço da V4 (lida); falta da Brunilda (lida); resumo da última consulta da P
 
 As duas doses externas do Biscoito geram também `VACINA_REGISTRADA_PELA_CLINICA`, que vive em
 `notificacoesDaCarteirinha` (fora do `Record` fechado — ver o doc 14).
+
+**A família e os remédios** (doc 16): a Fátima divide os remédios da Pérola com o filho, **Rafael
+Gonçalves** (acesso de edição, dá o remédio aos sábados), e a filha **Clara Gonçalves** acompanha
+com acesso de leitura. O meloxicam contínuo e o omeprazol já encerrado estão em `tratamentos`, com
+os domingos do começo **sem registro**; o aviso das 08:00 de hoje está em `avisosDeDose`.
 
 O JSON **é** o cenário: se algo aqui divergir dele, vale o JSON — e avise.
 

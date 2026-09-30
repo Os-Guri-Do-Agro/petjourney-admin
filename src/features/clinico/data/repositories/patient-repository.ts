@@ -10,11 +10,17 @@ import { historicoDeAtos } from '../../domain/atos'
 import { resumirFaltas } from '../../domain/load'
 import { addDays, createClinicClock, diffDays } from '../../domain/clinic-time'
 import type { DiarioParaClinica } from '../../contrato/responsavel'
-import { JANELA_DO_PESO_DIAS, type ConsultaDoResumo } from '../../domain/resumo-do-paciente'
+import {
+  JANELA_DO_PESO_DIAS,
+  type ConsultaDoResumo,
+  type TratamentoNoResumo,
+} from '../../domain/resumo-do-paciente'
 import { CLINIC_UTC_OFFSET } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import { getDataset, novoId } from '../store'
 import { vacinasFixture } from '../fixtures/vacinas'
+
+import { tratamentosDoResumo } from './tratamento-repository'
 import type {
   AlertSeverity,
   Appointment,
@@ -176,6 +182,7 @@ export const patientRepository = {
   paraOResumo(petId: string): Promise<{
     consultas: ConsultaDoResumo[]
     diario: DiarioParaClinica | null
+    tratamentos: TratamentoNoResumo[]
     atendimentoDeHoje: Appointment | null
     agora: ISODateTime
   }> {
@@ -249,6 +256,8 @@ export const patientRepository = {
       return {
         consultas,
         diario,
+        /* O remédio de casa: o que a casa registrou no app desde a última consulta. */
+        tratamentos: tratamentosDoResumo(petId),
         atendimentoDeHoje,
         agora,
       }

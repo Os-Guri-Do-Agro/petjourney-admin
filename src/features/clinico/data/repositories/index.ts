@@ -31,6 +31,15 @@ export {
   type ProximaNaAgenda,
 } from './vacina-repository'
 export {
+  tratamentoRepository,
+  DoseRecusadaError,
+  type AdesaoDoPaciente,
+  type LinhaDeTratamento,
+  type ReceitaSemLembrete,
+  type TratamentoNaFicha,
+  type TratamentosNoApp,
+} from './tratamento-repository'
+export {
   internacaoRepository,
   AltaSemAvisoError,
   BoletimBloqueadoError,

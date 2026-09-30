@@ -1,0 +1,27 @@
+/*
+ * As cores da faixa de doses, num lugar só: a faixa e a legenda dela precisam dizer a mesma coisa.
+ *
+ * Global de propósito, presa à classe `.faixa-cores`: o escopo do Vue daria a cada componente a
+ * sua cópia, e a legenda que diverge da faixa no primeiro ajuste de tom ensina a cor errada.
+ *
+ * O par sálvia × pêssego passou na conferência de daltonismo (ΔE 12 no claro, 14,4 no escuro — o
+ * pêssego da Visão geral, `#ffc39f`, dava 5,1 contra a sálvia escura e foi escurecido aqui). O
+ * cinza de "sem registro" é o do trilho vazio, e fica abaixo de 3:1 contra o cartão de propósito:
+ * é ausência, não série. A frase ao lado e a tabela de registros carregam o número.
+ */
+
+.faixa-cores {
+  --faixa-dada: #2f8c7c;
+  --faixa-pulada: #ad4a13;
+  --faixa-sem-registro: #bcc7c3;
+  --faixa-prevista: #e8edea;
+  --faixa-agora: #256f62;
+}
+
+.app-dark .faixa-cores {
+  --faixa-dada: #6cc9b5;
+  --faixa-pulada: #e07b3c;
+  --faixa-sem-registro: #3a4a44;
+  --faixa-prevista: #22302b;
+  --faixa-agora: #8fd9c8;
+}

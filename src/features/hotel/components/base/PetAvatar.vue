@@ -8,10 +8,11 @@
  *
  * ## A foto e o que entra no lugar dela
  *
- * `fotoUrl` é o caminho do retrato quando ele existe. A camada mocada **não tem fotos**, e inventar
- * uma imagem por hóspede seria povoar o repositório de retratos falsos que alguém acabaria
- * confundindo com dado real. Então o componente já fala a língua da API futura e, enquanto ela não
- * chega, desenha o que dá para desenhar com o que existe no cadastro:
+ * `fotoUrl` é o caminho do retrato quando ele existe. Na camada mocada, só os pets do roteiro de
+ * demonstração têm foto (retratos de licença livre em `public/demo/pacientes/`, com os créditos
+ * ao lado); inventar uma imagem para cada animal seria povoar o repositório de retratos que alguém
+ * acabaria confundindo com dado real. Para todos os outros, o componente desenha o que dá para
+ * desenhar com o que existe no cadastro:
  *
  * - **as iniciais**, que separam Mel de Thor;
  * - **uma cor fixa por animal**, tirada do nome, que é o que separa as duas Meis sem ler nada;
@@ -32,8 +33,11 @@ const props = withDefaults(
     especie?: PetSpecies | null
     /** O retrato, quando a API o tiver. Vazio cai no avatar desenhado. */
     fotoUrl?: string
-    /** `xs` cabe numa barra do mapa; `lg` encabeça a tela da estadia. */
-    tamanho?: 'xs' | 'sm' | 'md' | 'lg'
+    /**
+     * `xs` cabe numa barra do mapa; `lg` encabeça a tela da estadia; `xl` fica ao lado do nome
+     * grande da ficha do paciente, na clínica.
+     */
+    tamanho?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   }>(),
   { especie: null, fotoUrl: '', tamanho: 'sm' },
 )
@@ -154,6 +158,12 @@ const icone = computed(() => {
   width: 3.25rem;
   height: 3.25rem;
   font-size: 1.05rem;
+}
+
+.avatar--xl {
+  width: 4.5rem;
+  height: 4.5rem;
+  font-size: 1.4rem;
 }
 
 /* A silhueta não cabe no tamanho da barra do mapa: vira borrão e suja a letra. */

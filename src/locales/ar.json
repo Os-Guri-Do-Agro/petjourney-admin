@@ -625,11 +625,13 @@
         "atividades": "المهام",
         "vacinas": "اللقاحات",
         "rotina": "الروتين",
-        "vespera": "الحجوزات"
+        "vespera": "الحجوزات",
+        "tratamentos": "العلاجات"
       },
       "contagem": "لا أمور | أمر واحد | أمران | {total} أمور | {total} أمرًا | {total} أمر",
       "recolher": "طي {modulo}",
-      "expandir": "توسيع {modulo}"
+      "expandir": "توسيع {modulo}",
+      "tratamentos": "لا علاجات حرجة بالتزام منخفض | علاج حرج واحد بالتزام منخفض | علاجان حرجان بالتزام منخفض | {total} علاجات حرجة بالتزام منخفض | {total} علاجًا حرجًا بالتزام منخفض | {total} علاج حرج بالتزام منخفض"
     },
     "resumo": {
       "portal": "تابع أرباحك وشارك رمزك.",
@@ -1981,7 +1983,8 @@
         "fila": "لا يوجد مرضى في قائمة الانتظار | مريض واحد في قائمة الانتظار | مريضان في قائمة الانتظار | {total} مرضى في قائمة الانتظار | {total} مريضًا في قائمة الانتظار | {total} مريض في قائمة الانتظار",
         "internacao": "لا توجد بنود بحاجة إلى إجراء في التنويم | بند واحد بحاجة إلى إجراء في التنويم | بندان بحاجة إلى إجراء في التنويم | {total} بنود بحاجة إلى إجراء في التنويم | {total} بندًا بحاجة إلى إجراء في التنويم | {total} بند بحاجة إلى إجراء في التنويم",
         "atividades": "لا توجد مهام معلقة | مهمة معلقة واحدة | مهمتان معلقتان | {total} مهام معلقة | {total} مهمة معلقة | {total} مهمة معلقة",
-        "vacinas": "لا توجد جرعات معززة متأخرة | جرعة معززة متأخرة واحدة | جرعتان معززتان متأخرتان | {total} جرعات معززة متأخرة | {total} جرعة معززة متأخرة | {total} جرعة معززة متأخرة"
+        "vacinas": "لا توجد جرعات معززة متأخرة | جرعة معززة متأخرة واحدة | جرعتان معززتان متأخرتان | {total} جرعات معززة متأخرة | {total} جرعة معززة متأخرة | {total} جرعة معززة متأخرة",
+        "tratamentos": "لا علاجات حرجة بالتزام منخفض | علاج حرج واحد بالتزام منخفض | علاجان حرجان بالتزام منخفض | {total} علاجات حرجة بالتزام منخفض | {total} علاجًا حرجًا بالتزام منخفض | {total} علاج حرج بالتزام منخفض"
       }
     },
     "busca": {
@@ -3273,7 +3276,8 @@
         "recorrenteDetalhe": "{vezes}× منذ الزيارة الأخيرة",
         "mais": "والمزيد في الملخص: {total}",
         "campoDetalhe": "في {alterados} من أصل {total} تسجيلًا",
-        "relato": "أُبلغ أيضًا: {relato}"
+        "relato": "أُبلغ أيضًا: {relato}",
+        "adesao": "{medicamento}: انخفض الالتزام في المنزل"
       },
       "casa": {
         "titulo": "في المنزل منذ الزيارة الأخيرة",
@@ -3358,7 +3362,8 @@
         "prescricao": "{nome} (موصوف، حتى {data})",
         "campo": "{campo}: {valor} في {alterados} من أصل {total} تسجيلًا",
         "doencas": "أمراض أبلغ عنها مربي الحيوان: {lista}",
-        "alarmeSemTexto": "{sintomas} بتاريخ {data}"
+        "alarmeSemTexto": "{sintomas} بتاريخ {data}",
+        "prescricaoComAdesao": "{prescricao} · في التطبيق منذ {data}: {contagem}"
       },
       "verResumoComSinais": "ملخص في 30 ثانية: نقاط الانتباه: {total}",
       "preferencia": "اقتراح هذا الملخص عند فتح سجل المريض",
@@ -3370,6 +3375,11 @@
         "comoReativar": "يبقى الزر في السجل. يمكنك إعادة تفعيل الاقتراح من شاشة الملخص.",
         "agoraNao": "ليس الآن",
         "ver": "عرض الملخص"
+      },
+      "tratamentos": {
+        "titulo": "الدواء في المنزل",
+        "ajuda": "بحسب ما سجله أهل البيت في التطبيق منذ آخر زيارة.",
+        "abrir": "افتح العلاج"
       }
     },
     "atendimentos": {
@@ -3495,7 +3505,8 @@
       "semPrescricao": "لا توجد وصفة لإصدارها.",
       "vistaDoResponsavel": "ما يراه المالك",
       "lembrete": "يتحول إلى تذكير في التطبيق: {quantidade}، {frequencia}",
-      "lembreteContinuo": "تذكير مستمر، بلا تاريخ انتهاء"
+      "lembreteContinuo": "تذكير مستمر، بلا تاريخ انتهاء",
+      "critico": "علاج حرج: نبّه العيادة إذا انخفض الالتزام في المنزل"
     },
     "vacinas": {
       "titulo": "اللقاحات",
@@ -4717,6 +4728,183 @@
         "sinais": "لا علامات | علامة واحدة تحتاج انتباهًا | علامتان تحتاجان انتباهًا | {total} علامات تحتاج انتباهًا | {total} علامة تحتاج انتباهًا | {total} علامة تحتاج انتباهًا",
         "primeiraVez": "المرة الأولى في هذه العيادة",
         "nada": "لا شيء غير معتاد منذ آخر موعد"
+      },
+      "tratamento": {
+        "pilula": "العلاج",
+        "alerta": "{medicamento}: انخفض الالتزام",
+        "alertas": "لا علاجات بالتزام منخفض | علاج واحد بالتزام منخفض | علاجان بالتزام منخفض | {total} علاجات بالتزام منخفض | {total} علاجًا بالتزام منخفض | {total} علاج بالتزام منخفض",
+        "umEmCurso": "{medicamento} جارٍ",
+        "emCurso": "لا أدوية جارية | دواء واحد جارٍ | دواءان جاريان | {total} أدوية جارية | {total} دواءً جاريًا | {total} دواء جارٍ",
+        "nenhumEmCurso": "لا دواء جارٍ",
+        "semTratamento": "لا دواء منزلي بتذكير"
+      }
+    },
+    "adesao": {
+      "titulo": "العلاج في المنزل",
+      "subtitulo": "الدواء الذي وصفته العيادة، جرعة بجرعة، كما يسجله أهل البيت في التطبيق.",
+      "situacao": {
+        "dada": "أُعطيت",
+        "pulada": "تم تخطيها",
+        "sem-registro": "بلا تسجيل",
+        "aberta": "جرعة الآن",
+        "prevista": "قادمة"
+      },
+      "motivo": {
+        "esqueci": "نسيت",
+        "cuspiu": "بصقها",
+        "acabou": "نفد"
+      },
+      "motivoNaFrase": {
+        "esqueci": "النسيان",
+        "cuspiu": "الحيوان بصقها",
+        "acabou": "نفد الدواء"
+      },
+      "contagem": {
+        "dadas": "لم تُعط أي جرعة | جرعة واحدة أُعطيت | جرعتان أُعطيتا | {total} جرعات أُعطيت | {total} جرعة أُعطيت | {total} جرعة أُعطيت",
+        "puladas": "لا جرعات متخطاة | جرعة واحدة متخطاة | جرعتان متخطاتان | {total} جرعات متخطاة | {total} جرعة متخطاة | {total} جرعة متخطاة",
+        "semRegistro": "لا جرعات بلا تسجيل | جرعة واحدة بلا تسجيل | جرعتان بلا تسجيل | {total} جرعات بلا تسجيل | {total} جرعة بلا تسجيل | {total} جرعة بلا تسجيل",
+        "nenhuma": "لم تُسجل أي جرعة بعد"
+      },
+      "periodo": {
+        "desdeConsulta": "منذ زيارة {data}",
+        "desdeInicio": "منذ البداية في {data}"
+      },
+      "dose": {
+        "ml": "{quantidade} مل",
+        "comprimido": "{quantidade} قرص | قرص واحد | قرصان | {quantidade} أقراص | {quantidade} قرصًا | {quantidade} قرص",
+        "meio": "نصف قرص",
+        "quarto": "ربع قرص",
+        "tres-quartos": "ثلاثة أرباع قرص",
+        "um-e-meio": "قرص ونصف"
+      },
+      "posologia": {
+        "aCada": "كل {horas} ساعة",
+        "continuo": "استخدام مستمر",
+        "porDias": "لمدة أقل من يوم | لمدة يوم واحد | لمدة يومين | لمدة {dias} أيام | لمدة {dias} يومًا | لمدة {dias} يوم"
+      },
+      "faixa": {
+        "quando": "{data}، {hora}",
+        "dadaPor": "أعطاها {nome} الساعة {hora}",
+        "puladaPor": "تخطاها {nome} · {motivo}",
+        "hoje": "اليوم",
+        "marcoLegenda": "آخر زيارة",
+        "semRegistroNota": "عدم التسجيل لا يعني أن الجرعة لم تُعط: ربما أُعطيت دون تسجيلها في التطبيق."
+      },
+      "quem": "سجّلها: {lista}",
+      "horarioDestoante": "جرعة الساعة {horario} هي الأقل ظهورًا كمُعطاة: {dadas} من {fechadas}.",
+      "critico": {
+        "selo": "حرج",
+        "alternar": "حرج: نبّه العيادة إذا انخفض الالتزام"
+      },
+      "alerta": {
+        "selo": "انخفض الالتزام",
+        "puladas": "لا جرعات متخطاة منذ {quando} | جرعة واحدة متخطاة منذ {quando} | جرعتان متخطاتان منذ {quando} | {total} جرعات متخطاة منذ {quando} | {total} جرعة متخطاة منذ {quando} | {total} جرعة متخطاة منذ {quando}",
+        "queda": "تظهر {dadas} فقط من {fechadas} جرعات كمُعطاة منذ {quando}",
+        "motivos": "السبب: {motivos}.",
+        "antes": "في الأسبوع السابق: {dadas} من {fechadas}.",
+        "registrarContato": "سجّل التواصل",
+        "quemFalou": "من تحدث",
+        "nota": "ما تم الاتفاق عليه",
+        "notaPlaceholder": "مثال: نفدت العلبة؛ أُرسلت وصفة جديدة",
+        "salvar": "احفظ التواصل",
+        "cancelar": "إلغاء",
+        "contato": "سُجّل التواصل بواسطة {nome}، {quando}."
+      },
+      "registros": {
+        "ver": "عرض السجل",
+        "esconder": "إخفاء السجل",
+        "colunaQuando": "الجرعة",
+        "colunaSituacao": "الحالة",
+        "colunaQuem": "من سجّل",
+        "registradaAs": "سُجّلت {quando}",
+        "vazio": "لا جرعات في هذه الفترة",
+        "rotulo": "سجل {medicamento}"
+      },
+      "naoCompartilhado": "أهل البيت لا يشاركون سجل هذا التذكير.",
+      "naoCompartilhadoDetalhe": "التذكير موجود في التطبيق؛ ما يُسجّل فيه يبقى لدى العائلة.",
+      "ficha": {
+        "emCurso": "أدوية جارية",
+        "emCursoAjuda": "ما سجله أهل البيت في التطبيق. الخط في الشريط يحدد آخر زيارة، في {data}.",
+        "emCursoAjudaSemConsulta": "ما سجله أهل البيت في التطبيق منذ الجرعة الأولى.",
+        "encerrados": "منتهية",
+        "encerradosPeriodo": "من {inicio} إلى {fim}",
+        "vazioTitulo": "لا دواء بتذكير",
+        "vazioDescricao": "عندما ينشئ مربي الحيوان تذكيرات الوصفة في التطبيق، يظهر هنا ما يسجله أهل البيت، جرعة بجرعة.",
+        "noApp": "على هاتف {responsavel}",
+        "noAppAjuda": "ما يعرضه التطبيق. المس كما يفعل من في البيت: الملف المجاور يتغير فورًا.",
+        "celularDe": "هاتف",
+        "papel": {
+          "dono": "مربي الحيوان",
+          "familia": "العائلة",
+          "leitura": "للاطلاع فقط"
+        },
+        "emCursoAjudaSemFio": "ما سجله أهل البيت في التطبيق. كانت آخر زيارة في {data}."
+      },
+      "lista": {
+        "stat": {
+          "alertas": "انخفض الالتزام",
+          "alertasDetalhe": "علاجات حرجة: اتصل اليوم",
+          "emCurso": "جارية",
+          "emCursoDetalhe": "أدوية بتذكير في التطبيق",
+          "criticos": "حرجة",
+          "criticosDetalhe": "حددها الطبيب البيطري عند الوصف"
+        },
+        "recorte": {
+          "atencao": "تحتاج انتباهًا",
+          "emCurso": "جارية",
+          "encerrados": "منتهية"
+        },
+        "coluna": {
+          "paciente": "المريض",
+          "remedio": "الدواء",
+          "janela": "آخر {dias} يومًا",
+          "responsavel": "مربي الحيوان",
+          "situacao": "الحالة"
+        },
+        "situacaoEmCurso": "جارٍ",
+        "situacaoEncerrado": "منتهٍ",
+        "vazioTitulo": "لا علاجات منزلية بعد",
+        "vazioDescricao": "تظهر الأدوية هنا عندما ينشئ مربي الحيوان تذكيرات الوصفة في التطبيق.",
+        "vazioRecorte": {
+          "atencao": "لا علاج حرج بالتزام منخفض",
+          "emCurso": "لا علاج جارٍ",
+          "encerrados": "لا علاج منتهٍ"
+        }
+      },
+      "app": {
+        "titulo": "الأدوية",
+        "pushOrigem": "PetJourney · {hora}",
+        "dei": "أعطيتها",
+        "abrir": "افتح",
+        "pulei": "تخطيتها",
+        "porQue": "لماذا؟",
+        "voltar": "رجوع",
+        "ontemAs": "أمس، {hora}",
+        "dadaPorVoce": "أعطيتها أنت الساعة {hora}",
+        "dadaPor": "أعطاها {nome} الساعة {hora}",
+        "puladaPorVoce": "تخطيتها أنت · {motivo}",
+        "puladaPor": "تخطاها {nome} · {motivo}",
+        "desfazer": "تراجع",
+        "jaRegistrada": "سجّلها {nome} الساعة {hora}. لا داعي لإعطائها مرة أخرى.",
+        "foraDaJanela": "أُغلقت هذه الجرعة. تظهر التالية في موعدها.",
+        "somenteLeitura": "أنت تتابع أدوية {pet}؛ يسجل الجرعات فقط من لديه صلاحية التعديل.",
+        "erro": "تعذر التسجيل. حاول مرة أخرى.",
+        "receitaNova": "وصفة {data}",
+        "receitaNovaDetalhe": "لا أدوية بلا تذكير | دواء واحد بلا تذكير بعد | دواءان بلا تذكير بعد | {total} أدوية بلا تذكير بعد | {total} دواءً بلا تذكير بعد | {total} دواء بلا تذكير بعد",
+        "primeiraDose": "الجرعة الأولى",
+        "sugestaoDica": "وقت مقترح كي لا تقع أي جرعة في ساعات الفجر.",
+        "compartilhar": "ترى {clinica} ما تسجلونه",
+        "criar": "أنشئ التذكيرات",
+        "desde": "منذ {data}:",
+        "encerrados": "منتهية",
+        "avisosTitulo": "كيف تعمل التنبيهات",
+        "avisoUmPorHorario": "تنبيه واحد لكل موعد. الأدوية التي يفصل بينها أقل من {minutos} دقيقة تأتي في التنبيه نفسه.",
+        "avisoSemReaviso": "لا تنبيه ثانٍ: الجرعة التالية هي التذكير.",
+        "avisoComReaviso": "تنبيه ثانٍ فقط للدواء كل {horas} ساعة أو أقل تكرارًا، وفقط إذا لم يسجل أحد.",
+        "avisoSemCobranca": "إذا مر الموعد، تبقى الجرعة بلا تسجيل. لا يُلام أحد.",
+        "compartilhado": "ترى {clinica} هذا السجل",
+        "naoCompartilhado": "العائلة فقط ترى هذا السجل",
+        "vazio": "لا دواء بتذكير لـ {pet}."
       }
     }
   },
