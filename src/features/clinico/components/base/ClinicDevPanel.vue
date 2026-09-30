@@ -68,6 +68,7 @@ const OPERACOES: MockOperation[] = [
   'agenda.status',
   'encounter.salvar',
   'fila.listar',
+  'migracao.importar',
 ]
 
 const taxas = ref<Record<string, number>>(

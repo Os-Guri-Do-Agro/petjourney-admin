@@ -53,7 +53,7 @@ export type FaltaDetalhada = {
 }
 
 /** Duas letras para o avatar: primeira do nome e primeira do segundo termo, quando existe. */
-function iniciaisDe(nome: string): string {
+export function iniciaisDe(nome: string): string {
   const partes = nome.trim().split(/\s+/).filter(Boolean)
   const primeira = partes[0]?.[0] ?? '?'
   const segunda = partes[1]?.[0] ?? partes[0]?.[1] ?? ''

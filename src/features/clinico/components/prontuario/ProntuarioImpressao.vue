@@ -217,7 +217,7 @@ function nomeDoExame(id: string) {
         <p class="folha__destaque">{{ pet?.nome }}</p>
         <p>
           {{ pet ? formato.especie(pet.especie) : '' }} · {{ pet?.raca }} ·
-          {{ pet ? t(`clinico.sexo.${pet.sexo}`) : '' }} ·
+          {{ pet ? formato.sexo(pet.sexo) : '' }} ·
           {{ pet ? formato.idade(pet.nascimento) : '' }} ·
           {{ formato.peso(pet?.pesoKg ?? null) }}
         </p>

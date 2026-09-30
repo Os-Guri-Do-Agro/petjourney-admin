@@ -15,6 +15,7 @@ import {
   solicitarSaque,
   updateCarteiraPix,
 } from '@/service/parceiro/parceiro-portal-service'
+import { MIN_SAQUE_CENTAVOS } from '@/service/parceiro/regras-de-saque'
 import type { Carteira } from '@/service/parceiro/types'
 import {
   formatCentavosToBrl,
@@ -43,7 +44,8 @@ const valorSaque = ref('')
 const savingPix = ref(false)
 const requestingSaque = ref(false)
 
-const minSaqueCentavos = 5000
+/** A mesma regra que a visão geral usa para dizer se dá para sacar — ver `regras-de-saque`. */
+const minSaqueCentavos = MIN_SAQUE_CENTAVOS
 const comissaoIndicacaoEnabled = import.meta.env.VITE_COMISSAO_INDICACAO_ENABLED !== 'false'
 
 const CONTACT_EMAIL = 'atendimento@petjourney.health'

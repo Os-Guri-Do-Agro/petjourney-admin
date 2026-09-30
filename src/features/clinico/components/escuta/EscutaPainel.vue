@@ -472,12 +472,13 @@ const temAcoes = computed(
 </script>
 
 <template>
+  <!-- O sexo só conjuga as falas da consulta de demonstração: em branco, o masculino genérico. -->
   <EscutaAutorizacao
     v-if="pet"
     :encounter-id="encounterId"
     :responsavel="responsavel"
     :pet="pet.nome"
-    :sexo="pet.sexo"
+    :sexo="pet.sexo ?? 'macho'"
   />
 
   <section

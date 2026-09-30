@@ -1,0 +1,266 @@
+/*
+ * O acabamento da visão geral, espelhado do Prodify na paleta da casa.
+ *
+ * Pedido do usuário, sem meio-termo: "quero um design bem parecido, mas com nossa paleta de cores",
+ * ignorando as regras de design anteriores. Então: fundo claro com grade fina e um brilho suave,
+ * cartões brancos de verdade com borda fina e sombra baixa, títulos com ícone de linha, chips
+ * pastel em caixa alta, selos de prioridade, barras de progresso e a marca em degradê. O roxo do
+ * Prodify vira a sálvia da casa, puxando para o ciano no fim do degradê.
+ *
+ * Global de propósito: os cartões da visão geral são componentes separados que dividem o mesmo
+ * acabamento, e as variáveis moram na raiz da página (`.inicio-pagina`). O que o PrimeVue teleporta
+ * para o `body` (o painel lateral do QR) fica fora da página: leva `.hc-tema` para ter as mesmas.
+ */
+
+.inicio-pagina,
+.hc-tema {
+  --hc-fundo: #f5f7f6;
+  --hc-grade: rgb(47 111 99 / 5.5%);
+  --hc-cartao: #ffffff;
+  --hc-borda: #e8edea;
+  --hc-linha: #eef2f0;
+  --hc-tinta: #18221f;
+  --hc-tinta-2: #56645f;
+  --hc-tinta-3: #8b9893;
+  --hc-marca: #2f8c7c;
+  --hc-marca-forte: #256f62;
+  --hc-marca-clara: #e7f4f0;
+  /* O texto em degradê da saudação: do fim mais claro ao fundo da página ainda passa de 3:1. */
+  --hc-degrade: linear-gradient(90deg, #22695c 0%, #2a8d7c 45%, #2b87a8 100%);
+  /* A pílula cheia: o rótulo branco fica no meio do degradê, acima de 5:1. */
+  --hc-degrade-botao: linear-gradient(120deg, #1f6457 0%, #2f8a79 100%);
+  --hc-sombra: 0 1px 2px rgb(20 32 28 / 4%), 0 12px 30px -16px rgb(20 32 28 / 14%);
+  --hc-sombra-alta: 0 1px 2px rgb(20 32 28 / 6%), 0 18px 40px -18px rgb(20 32 28 / 22%);
+
+  --hc-ciano-fundo: #d3f1ee;
+  --hc-ciano-tinta: #0e6b66;
+  --hc-lilas-fundo: #ebe7fd;
+  --hc-lilas-tinta: #5443c2;
+  --hc-pessego-fundo: #ffe6d5;
+  --hc-pessego-tinta: #ad4a13;
+  --hc-coral-fundo: #fde2e2;
+  --hc-coral-tinta: #c43333;
+  --hc-verde-fundo: #daf2e3;
+  --hc-verde-tinta: #1d7443;
+  --hc-cinza-fundo: #eef1f0;
+  --hc-cinza-tinta: #56645f;
+  --hc-azul-fundo: #e2ecff;
+  --hc-azul-tinta: #3453c3;
+}
+
+.app-dark .inicio-pagina,
+.app-dark .hc-tema {
+  --hc-fundo: #0e1613;
+  --hc-grade: rgb(255 255 255 / 3.5%);
+  --hc-cartao: #151f1c;
+  --hc-borda: #22302b;
+  --hc-linha: #1f2b27;
+  --hc-tinta: #eef5f2;
+  --hc-tinta-2: #a9bbb4;
+  --hc-tinta-3: #7d918a;
+  --hc-marca: #6cc9b5;
+  --hc-marca-forte: #8fd9c8;
+  --hc-marca-clara: #1b322c;
+  --hc-degrade: linear-gradient(90deg, #8fd9c8 0%, #6cc9b5 45%, #6cc6d0 100%);
+  /* O mesmo do claro: texto branco sobre um degradê claro caía para ~2,5:1. */
+  --hc-degrade-botao: linear-gradient(120deg, #1f6457 0%, #2f8a79 100%);
+  --hc-sombra: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 30px -16px rgb(0 0 0 / 50%);
+  --hc-sombra-alta: 0 1px 2px rgb(0 0 0 / 35%), 0 18px 40px -18px rgb(0 0 0 / 60%);
+
+  --hc-ciano-fundo: #123a38;
+  --hc-ciano-tinta: #8fe0da;
+  --hc-lilas-fundo: #29244f;
+  --hc-lilas-tinta: #c9c0ff;
+  --hc-pessego-fundo: #3d2718;
+  --hc-pessego-tinta: #ffc39f;
+  --hc-coral-fundo: #3f1f22;
+  --hc-coral-tinta: #ffabab;
+  --hc-verde-fundo: #16362a;
+  --hc-verde-tinta: #93e2b3;
+  --hc-cinza-fundo: #222e2a;
+  --hc-cinza-tinta: #a9bbb4;
+  --hc-azul-fundo: #1c2848;
+  --hc-azul-tinta: #b3c6ff;
+}
+
+/* ------------------------------------------------------------------ cartão */
+
+.hc {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  min-width: 0;
+  padding: 1.2rem 1.35rem 1.35rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1rem;
+  background: var(--hc-cartao);
+  box-shadow: var(--hc-sombra);
+  color: var(--hc-tinta);
+}
+
+.hc__cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  min-height: 2rem;
+}
+
+.hc__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.hc__icone {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--hc-marca);
+}
+
+.hc__ferramentas {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--hc-tinta-3);
+  font-size: 0.8125rem;
+}
+
+/* O link discreto do canto, como o "Recents ▾" do Prodify. */
+.hc__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2rem;
+  padding-inline: 0.55rem;
+  border-radius: 0.6rem;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.hc__link:hover {
+  background: var(--hc-linha);
+  color: var(--hc-tinta);
+}
+
+.hc__link:focus-visible,
+.hc-foco:focus-visible {
+  outline: 2px solid var(--hc-marca);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ chips e selos */
+
+/* O chip de grupo: caixa alta, pastel, como o "IN PROGRESS" do Prodify. */
+.hc-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* O selo de prioridade: caixa normal, como o "High / Low / Normal" do Prodify. */
+.hc-selo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.hc--ciano {
+  background: var(--hc-ciano-fundo);
+  color: var(--hc-ciano-tinta);
+}
+
+.hc--lilas {
+  background: var(--hc-lilas-fundo);
+  color: var(--hc-lilas-tinta);
+}
+
+.hc--pessego {
+  background: var(--hc-pessego-fundo);
+  color: var(--hc-pessego-tinta);
+}
+
+.hc--coral {
+  background: var(--hc-coral-fundo);
+  color: var(--hc-coral-tinta);
+}
+
+.hc--verde {
+  background: var(--hc-verde-fundo);
+  color: var(--hc-verde-tinta);
+}
+
+.hc--cinza {
+  background: var(--hc-cinza-fundo);
+  color: var(--hc-cinza-tinta);
+}
+
+.hc--azul {
+  background: var(--hc-azul-fundo);
+  color: var(--hc-azul-tinta);
+}
+
+/* ------------------------------------------------------------------ barra de progresso */
+
+.hc-barra {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  inline-size: 5.5rem;
+  block-size: 0.4rem;
+  border-radius: 999px;
+  background: var(--hc-linha);
+}
+
+.hc-barra__cheia {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--barra-cor, var(--hc-marca));
+  transition: inline-size 400ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hc__link,
+  .hc-barra__cheia {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------ barras de rolagem
+ * A pedido, a visão geral rola sem barra à vista: a roda, o toque e o teclado continuam rolando.
+ * A classe vai na raiz do documento só enquanto a página está aberta (`inicio.vue`), para
+ * não mudar as outras telas do portal.
+ */
+html.sem-barra-de-rolagem {
+  scrollbar-width: none;
+}
+
+html.sem-barra-de-rolagem::-webkit-scrollbar {
+  display: none;
+}

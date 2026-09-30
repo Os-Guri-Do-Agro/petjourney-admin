@@ -271,13 +271,13 @@
       "programas": "Programas",
       "divulgacao": "Divulgação",
       "acessos": "Acessos",
-      "financeiro": "Financeiro",
+      "financeiro": "Ganhos de indicação",
       "settings": "Configurações"
     },
     "pageLabels": {
       "overview": "Visão geral",
       "saqueDetail": "Detalhe do saque",
-      "financeiro": "Financeiro",
+      "financeiro": "Ganhos de indicação",
       "programas": "Programas de participação",
       "divulgacao": "Divulgação",
       "acessos": "Acessos",
@@ -314,8 +314,8 @@
       "activateDark": "Ativar tema escuro",
       "lightTitle": "Tema claro",
       "darkTitle": "Tema escuro",
-      "lightLabel": "Light",
-      "darkLabel": "Dark"
+      "lightLabel": "Claro",
+      "darkLabel": "Escuro"
     },
     "user": {
       "fallbackName": "Veterinário",
@@ -536,6 +536,227 @@
       "filterPlaceholder": "Filtrar por tela ou seção...",
       "clearFilterAria": "Limpar filtro",
       "emptyFilter": "Nenhuma tela encontrada para “{q}”."
+    },
+    "ledePauta": "Seus ganhos de indicação e o que está esperando em cada módulo. Cada linha leva direto à tela onde está o trabalho.",
+    "saldo": {
+      "total": "Saldo total",
+      "retido": "Na janela de segurança",
+      "sacado": "Sacado até hoje",
+      "nota": "Cada participação passa 14 dias na janela de segurança antes de liberar para saque.",
+      "falhou": "Não foi possível carregar o saldo.",
+      "tentar": "Tentar de novo",
+      "carregandoAria": "Carregando o saldo",
+      "verExtrato": "Ver extrato",
+      "liberado": "liberado",
+      "bloqueadoRotulo": "bloqueado para saque",
+      "capacidade": {
+        "liberado": "Pronto para sacar.",
+        "abaixoDoMinimo": "O saque começa em {minimo}.",
+        "semChavePix": "Falta a chave PIX para sacar.",
+        "soDono": "Só o dono da conta pede o saque.",
+        "bloqueado": "O saque desta conta está bloqueado.",
+        "tudoRetido": "Todo o saldo ainda está na janela de segurança.",
+        "semSaldo": "Ainda não há ganhos. A participação entra aqui quando um responsável assina com o seu código."
+      },
+      "acao": {
+        "liberado": "Pedir saque",
+        "semChavePix": "Cadastrar chave PIX",
+        "bloqueado": "Ver o motivo"
+      },
+      "barraAria": "{liberado} liberados de {total}"
+    },
+    "programa": {
+      "titulo": "Programa de Afiliados",
+      "selo": {
+        "NAO_SOLICITADO": "Não ativo",
+        "SOLICITADO": "Em análise",
+        "REJEITADO": "Recusado",
+        "SUSPENSO": "Suspenso",
+        "ATIVO": "Ativo"
+      },
+      "texto": {
+        "NAO_SOLICITADO": "Ative o programa para receber participação por cada responsável que assinar com o seu código.",
+        "SOLICITADO": "Seu pedido está em análise. O resultado aparece aqui assim que for decidido.",
+        "REJEITADO": "O pedido não foi aprovado. Em Programas você vê como pedir de novo.",
+        "SUSPENSO": "O programa está suspenso. Em Programas você vê como regularizar.",
+        "ATIVO": "O programa está ativo."
+      },
+      "motivo": "Motivo informado: {motivo}",
+      "cta": "Ver programas"
+    },
+    "pauta": {
+      "titulo": "O que pede ação",
+      "conferido": "Conferido às {hora}",
+      "calma": "Nada pedindo ação agora",
+      "carregandoAria": "Conferindo pendências",
+      "fila": "{total} paciente aguardando na fila | {total} pacientes aguardando na fila",
+      "internacao": "{total} item a resolver na internação | {total} itens a resolver na internação",
+      "atividades": "{total} pendência em Atividades | {total} pendências em Atividades",
+      "vacinas": "{total} reforço de vacina vencido | {total} reforços de vacina vencidos",
+      "rotina": "{total} tarefa atrasada na rotina | {total} tarefas atrasadas na rotina",
+      "vespera": "{total} chegada travada nos próximos 3 dias | {total} chegadas travadas nos próximos 3 dias",
+      "conferindo": "Conferindo…",
+      "reconferir": "Conferir de novo",
+      "falhou": "Não foi possível conferir as pendências.",
+      "falhouDeNovo": "Não foi possível conferir de novo. Os números abaixo são da conferência anterior.",
+      "parcial": "Parte das pendências não pôde ser conferida.",
+      "tentar": "Tentar de novo",
+      "parte": {
+        "boletinsRetidos": "{total} boletim retido | {total} boletins retidos",
+        "administracoesAtrasadas": "{total} administração atrasada | {total} administrações atrasadas",
+        "rascunhos": "{total} prontuário em rascunho | {total} prontuários em rascunho",
+        "retornosVencidos": "{total} retorno vencido | {total} retornos vencidos",
+        "vagasOfertadas": "{total} vaga ofertada sem resposta | {total} vagas ofertadas sem resposta",
+        "medicacoesAtrasadas": "{total} medicação atrasada | {total} medicações atrasadas"
+      },
+      "coluna": {
+        "assunto": "Assunto",
+        "gravidade": "Gravidade",
+        "onde": "Onde"
+      },
+      "gravidade": {
+        "risco": "Urgente",
+        "atencao": "Atenção",
+        "neutro": "Normal"
+      },
+      "onde": {
+        "fila": "Fila",
+        "internacao": "Internação",
+        "atividades": "Atividades",
+        "vacinas": "Vacinas",
+        "rotina": "Rotina",
+        "vespera": "Reservas"
+      },
+      "contagem": "{total} assunto | {total} assuntos",
+      "recolher": "Recolher {modulo}",
+      "expandir": "Expandir {modulo}"
+    },
+    "resumo": {
+      "portal": "Acompanhe seus ganhos e compartilhe seu código.",
+      "conferindo": "Conferindo o que pede sua atenção…",
+      "urgentes": "{total} assunto urgente pede sua atenção hoje | {total} assuntos urgentes pedem sua atenção hoje",
+      "esperando": "{total} assunto espera por você hoje | {total} assuntos esperam por você hoje",
+      "falhou": "Não foi possível conferir as pendências agora.",
+      "emDia": "Tudo em dia por aqui."
+    },
+    "acoes": {
+      "rotulo": "Ações rápidas",
+      "agenda": "Agenda de hoje",
+      "mapa": "Mapa de vagas",
+      "compartilhar": "Compartilhar código"
+    },
+    "indique": {
+      "titulo": "Indique e ganhe",
+      "abrir": "Abrir divulgação",
+      "carregando": "Carregando o código…",
+      "falhou": "Não foi possível carregar o código de indicação.",
+      "descricao": "Cada responsável que assinar com o seu código gera participação para você.",
+      "copiar": "Copiar código",
+      "ampliarQr": "Ampliar o QR code",
+      "janelaTitulo": "QR code de indicação",
+      "instrucao": "Aponte a câmera do celular para assinar com este código.",
+      "baixar": "Baixar QR",
+      "imprimir": "Imprimir",
+      "impressaoBloqueada": "Não foi possível abrir a impressão",
+      "impressaoBloqueadaDetalhe": "Libere as janelas deste site no navegador e tente de novo.",
+      "link": "Link de indicação",
+      "linkCopiado": "Link copiado",
+      "comoFunciona": "Como funciona",
+      "seuCodigo": "Seu código de indicação"
+    },
+    "dia": {
+      "titulo": "Hoje",
+      "abrirAgenda": "Agenda completa",
+      "atendimentos": "{total} atendimento | {total} atendimentos",
+      "chegadas": "{total} chegada pendente | {total} chegadas pendentes",
+      "saidas": "{total} saída pendente | {total} saídas pendentes",
+      "estado": {
+        "feito": "{total} finalizado | {total} finalizados",
+        "agora": "{total} em atendimento | {total} em atendimento",
+        "esperando": "{total} aguardando | {total} aguardando",
+        "marcado": "{total} agendado | {total} agendados",
+        "falta": "{total} falta | {total} faltas"
+      },
+      "estadoNome": {
+        "feito": "Finalizado",
+        "agora": "Em atendimento",
+        "esperando": "Aguardando na recepção",
+        "marcado": "Agendado",
+        "falta": "Falta"
+      },
+      "descricao": "Agenda de hoje, das {abre} às {fecha}: {estados}.",
+      "almoco": "Almoço",
+      "carregando": "Carregando o dia…",
+      "falhouClinica": "Não foi possível carregar a agenda de hoje.",
+      "falhouHotel": "Não foi possível carregar as chegadas e saídas de hoje.",
+      "tentar": "Tentar de novo",
+      "fechada": "A clínica não abre hoje.",
+      "feriado": "Feriado: {nome}. A clínica não abre hoje.",
+      "semAtendimentos": "Nenhum atendimento agendado para hoje.",
+      "clinicaEncerrada": "Nada mais na agenda da clínica hoje.",
+      "movimento": {
+        "chegada": "Chegada",
+        "saida": "Saída",
+        "chegadaAria": "Chegada de {pet} às {hora}, {detalhe}",
+        "saidaAria": "Saída de {pet} às {hora}, {detalhe}",
+        "travadoChegada": "Admissão pendente",
+        "travadoSaida": "Pesagem de saída pendente",
+        "atrasado": "Atrasada"
+      },
+      "destaque": {
+        "emAtendimento": "Em atendimento",
+        "aSeguir": "A seguir",
+        "proximaChegada": "Próxima chegada",
+        "proximaSaida": "Próxima saída",
+        "desde": "desde {hora}",
+        "maisOutros": "e mais {total} | e mais {total}",
+        "aguardando": "aguardando há {tempo}",
+        "chegadaAtrasada": "Chegada atrasada",
+        "saidaAtrasada": "Saída atrasada"
+      },
+      "semMovimentoPendente": "Nenhuma chegada nem saída pendente."
+    },
+    "andamento": {
+      "titulo": "Andamento do dia",
+      "carregando": "Carregando o andamento do dia",
+      "vazio": "Ainda não há nada para medir hoje.",
+      "finalizados": "Atendimentos finalizados",
+      "finalizadosDetalhe": "{modulo} • {feitos} de {total}",
+      "comparecimento": "Comparecimento",
+      "comparecimentoDetalhe": "{modulo} • nenhuma falta | {modulo} • {total} falta | {modulo} • {total} faltas",
+      "rotina": "Rotina dos hóspedes",
+      "rotinaDetalhe": "{modulo} • {feitas} de {total}",
+      "ocupacao": "Ocupação",
+      "ocupacaoDetalhe": "{modulo} • {ocupadas} de {total}"
+    },
+    "modulos": {
+      "titulo": "Módulos",
+      "rotulo": "Acesso rápido",
+      "novoAgendamento": "Novo agendamento",
+      "novoAgendamentoDetalhe": "Marcar na agenda da clínica",
+      "atendimentosHoje": "Nenhum atendimento hoje | {total} atendimento hoje | {total} atendimentos hoje",
+      "hospedes": "Nenhum hóspede | {total} hóspede | {total} hóspedes",
+      "divulgacaoDetalhe": "Código, QR e materiais",
+      "programasDetalhe": "Afiliados: {status}",
+      "acessosDetalhe": "Pets compartilhados"
+    },
+    "agenda": {
+      "titulo": "Agenda",
+      "semana": "Dias da semana",
+      "anterior": "Semana anterior",
+      "proxima": "Próxima semana",
+      "carregando": "Carregando a agenda",
+      "falhou": "Não foi possível carregar a agenda deste dia.",
+      "fechada": "A clínica não abre neste dia.",
+      "vazio": "Nada marcado para este dia.",
+      "hoje": "Hoje",
+      "aguardando": "Aguardando",
+      "pendencia": "Pendente",
+      "chegadas": "{total} chegada | {total} chegadas",
+      "compromissos": "Compromissos do dia",
+      "posicao": "{atual} de {total}",
+      "compromissoAnterior": "Compromisso anterior",
+      "proximoCompromisso": "Próximo compromisso"
     }
   },
   "programas": {
@@ -1264,7 +1485,7 @@
   },
   "carteira": {
     "subtitle": "Portal",
-    "title": "Financeiro",
+    "title": "Ganhos de indicação",
     "tabs": {
       "ariaLabel": "Abas: {labels}",
       "visao": {
@@ -1373,7 +1594,7 @@
       "requestedAt": "Solicitado em {data}"
     },
     "detail": {
-      "subtitle": "Financeiro",
+      "subtitle": "Ganhos de indicação",
       "title": "Detalhe do saque",
       "back": "Voltar",
       "loadingAria": "Carregando detalhe do saque",
@@ -1781,8 +2002,8 @@
       "agora": "agora",
       "haTempo": "há {valor}",
       "emTempo": "em {valor}",
-      "anos": "{valor} anos",
-      "meses": "{valor} meses",
+      "anos": "{valor} ano | {valor} anos",
+      "meses": "{valor} mês | {valor} meses",
       "anosMeses": "{anos}a {meses}m",
       "semvalor": "—",
       "dias": "{valor} dia | {valor} dias",
@@ -1791,7 +2012,8 @@
     },
     "sexo": {
       "macho": "Macho",
-      "femea": "Fêmea"
+      "femea": "Fêmea",
+      "naoInformado": "Sexo não informado"
     },
     "especie": {
       "canina": "Canina",
@@ -3950,6 +4172,361 @@
       "grupo": {
         "queixa": "O que trouxe o paciente"
       }
+    },
+    "migracao": {
+      "titulo": "Trazer pacientes de outro sistema",
+      "atalho": "Importar planilha",
+      "sobre": "Pacientes",
+      "lede": "A base da clínica vem de uma planilha, sem redigitar nada.",
+      "trocar": "Trocar arquivo",
+      "arquivoLido": "{linhas} linha · {colunas} colunas | {linhas} linhas · {colunas} colunas",
+      "origem": "export do {nome} reconhecido",
+      "passos": {
+        "aria": "Etapas da importação",
+        "arquivo": "Arquivo",
+        "duvidas": "Dúvidas",
+        "semDuvidas": "Nenhuma dúvida",
+        "importar": "Importar"
+      },
+      "comum": {
+        "emBranco": "em branco",
+        "linha": "Linha {n}",
+        "linhasLista": "Linha {lista} | Linhas {lista}",
+        "linhasN": "{n} linha | {n} linhas",
+        "linhasPalavra": "linha | linhas",
+        "semEspecie": "espécie desconhecida",
+        "semNome": "sem nome",
+        "semTelefone": "sem telefone"
+      },
+      "arquivo": {
+        "titulo": "De onde vêm os dados?",
+        "texto": "Uma planilha do Excel ou o arquivo exportado do sistema que a clínica usa hoje. Reconhecemos o export do SimplesVet e do Vetus, e planilha feita à mão também serve.",
+        "soltar": "Arraste o arquivo para cá",
+        "ou": "ou",
+        "lendo": "Lendo o arquivo…",
+        "escolher": "Escolher arquivo",
+        "formatos": "Excel (.xlsx) ou .csv, até {mb} MB",
+        "promessa": "Nada é gravado até você confirmar, no último passo.",
+        "exemplosTitulo": "Não tem um arquivo agora?",
+        "exemplosTexto": "Experimente com um destes exemplos.",
+        "usar": "Usar este",
+        "baixar": "Baixar",
+        "demo": {
+          "clinica": {
+            "titulo": "Planilha feita na clínica",
+            "descricao": "Bagunçada de propósito: datas em vários formatos, telefones sem padrão, animal sem responsável e clientes que já estão cadastrados aqui."
+          },
+          "simplesvet": {
+            "titulo": "Export do SimplesVet",
+            "descricao": "Arquivo limpo de sistema. As colunas são reconhecidas sozinhas."
+          },
+          "vetus": {
+            "titulo": "Base grande do Vetus",
+            "descricao": "Para ver a importação em andamento, pausar no meio e continuar."
+          }
+        },
+        "erro": {
+          "vazio": "O arquivo está vazio.",
+          "grande-demais": "O arquivo passa do limite. Divida a planilha em partes e importe uma de cada vez.",
+          "xls-antigo": "Este é um .xls antigo. Abra no Excel e salve como .xlsx ou .csv.",
+          "formato-desconhecido": "Este arquivo não é uma planilha. Use .xlsx ou .csv.",
+          "corrompido": "Não foi possível abrir o arquivo. Tente salvar de novo pelo Excel.",
+          "sem-linhas": "A planilha não tem nenhuma linha embaixo do cabeçalho.",
+          "linhas-demais": "Linhas demais para uma importação só. Divida a planilha em partes."
+        }
+      },
+      "colunas": {
+        "titulo": "Colunas da planilha",
+        "texto": "O sistema ligou cada coluna a um campo do cadastro sozinho. Só mexa se alguma estiver no lugar errado.",
+        "travado": "A importação já começou: as colunas ficam como estão.",
+        "usadas": "{n} de {total} colunas usadas",
+        "faltam": "Sem esta coluna não dá para importar: {campos}. Ao fechar o painel, perguntamos qual é.",
+        "naoUsadasTitulo": "Esta coluna não vai para o cadastro | Estas {n} colunas não vão para o cadastro",
+        "naoUsadasTexto": "Tem conteúdo, mas não reconhecemos o que é. Se tiver algo que importa, diga para onde vai. | Têm conteúdo, mas não reconhecemos o que é. Se alguma tiver algo que importa, diga para onde vai.",
+        "usadasTitulo": "Coluna usada | {n} colunas usadas",
+        "coluna": "Coluna {letra}",
+        "semTitulo": "Sem título",
+        "vazia": "coluna vazia",
+        "voceEscolheu": "Você escolheu",
+        "sugestao": "Palpite: confira",
+        "naoVem": "{n} célula com conteúdo não vai ser trazida | {n} células com conteúdo não vão ser trazidas",
+        "vaiPara": "Vai para",
+        "vaiParaAria": "Para onde vai a coluna {coluna}",
+        "naoTrazer": "Não trazer esta coluna",
+        "grupoResponsavel": "Responsável",
+        "grupoAnimal": "Animal",
+        "grupoNenhum": "Nenhum",
+        "ver": "Ver colunas",
+        "nota": {
+          "todas": "Usamos a única coluna da planilha. | Usamos todas as {n} colunas da planilha.",
+          "parte": "Usamos {n} de {total} colunas da planilha.",
+          "fora": "Ficou de fora: {lista}. | Ficaram de fora: {lista}.",
+          "eMais": "{lista} e mais uma | {lista} e mais {n}"
+        }
+      },
+      "campo": {
+        "responsavelNome": "Nome do responsável",
+        "telefone": "Telefone",
+        "telefone2": "Telefone 2",
+        "email": "E-mail",
+        "cpf": "CPF",
+        "cep": "CEP",
+        "endereco": "Endereço",
+        "numero": "Número",
+        "bairro": "Bairro",
+        "cidade": "Cidade",
+        "uf": "UF",
+        "petNome": "Nome do animal",
+        "especie": "Espécie",
+        "raca": "Raça",
+        "sexo": "Sexo",
+        "castrado": "Castrado",
+        "nascimento": "Nascimento",
+        "idade": "Idade",
+        "peso": "Peso",
+        "microchip": "Microchip",
+        "pelagem": "Pelagem",
+        "alergia": "Alergias",
+        "situacao": "Ativo ou falecido"
+      },
+      "duvidas": {
+        "contador": "Pergunta {n} de {total}",
+        "nenhumaChip": "Tudo certo",
+        "nenhumaTitulo": "Nenhuma dúvida",
+        "nenhumaTexto": "O sistema entendeu todas as linhas sozinho. Continue para ver o resumo.",
+        "anterior": "Pergunta anterior",
+        "proxima": "Próxima pergunta",
+        "faltam": "Falta {n} resposta | Faltam {n} respostas",
+        "verResumo": "Ver o resumo",
+        "jaCadastrado": "Já cadastrado aqui",
+        "oAnimal": "O animal · linha {n}",
+        "linhaDeCima": "A linha de cima · linha {n}",
+        "semAnimal": "sem animal",
+        "coluna": {
+          "petNome": "Qual coluna tem o nome do animal?",
+          "responsavelNome": "Qual coluna tem o nome do responsável?",
+          "texto": "Não achamos essa coluna sozinhos. Escolha pelo conteúdo: mostramos o começo de cada uma.",
+          "hoje": "Já usada como: {campo}",
+          "semEla": "A planilha não tem essa informação? Sem ela não dá para importar: use um arquivo que tenha."
+        },
+        "especie": {
+          "pergunta": "Que espécie é “{valor}”?",
+          "perguntaBranco": "Qual é a espécie destes animais?",
+          "perguntaBrancoUm": "Qual é a espécie de {nome}?",
+          "texto": "Está escrito assim na planilha e o sistema não reconheceu. A espécie decide faixa de referência, dose e vacina: sem ela o animal não entra.",
+          "textoBranco": "A espécie está em branco e a raça não ajuda a descobrir. Sem espécie o animal não entra.",
+          "animais": "Animal que depende desta resposta | Animais que dependem desta resposta",
+          "deixarDeFora": "Deixar de fora por enquanto"
+        },
+        "responsavel-existente": {
+          "pergunta": "{nome} já é cliente da clínica?",
+          "texto": "Já existe alguém com esse nome cadastrado aqui, mas o telefone não bate. Pode ser a mesma pessoa com um número novo, ou alguém com o mesmo nome.",
+          "sim": "Sim, é a mesma pessoa",
+          "nao": "Não, é outra pessoa",
+          "curta": "Espera resposta: já é cliente?"
+        },
+        "mesma-pessoa": {
+          "pergunta": "{nome} aparece duas vezes. É a mesma pessoa?",
+          "texto": "O nome se repete na planilha com telefones diferentes. Se for a mesma pessoa, os animais ficam juntos no cadastro dela.",
+          "sim": "Sim, é a mesma pessoa",
+          "nao": "Não, são pessoas diferentes",
+          "curta": "Espera resposta: é a mesma pessoa?"
+        },
+        "orfao": {
+          "pergunta": "De quem é {nome}?",
+          "texto": "A linha {linha} tem o animal, mas o responsável está em branco. Costuma ser continuação da linha de cima, quando a célula estava mesclada no Excel.",
+          "sim": "É de {outro}",
+          "nao": "Deixar de fora",
+          "curta": "Espera resposta: de quem é o animal?",
+          "todos": "Ligar à linha de cima | Ligar os {n} animais à linha de cima"
+        },
+        "animal-repetido": {
+          "pergunta": "{nome} aparece duas vezes. É o mesmo animal?",
+          "texto": "Mesmo nome, mesma espécie e o mesmo responsável.",
+          "sim": "Sim, é o mesmo",
+          "nao": "Não, são dois animais",
+          "curta": "Espera resposta: é o mesmo animal?"
+        },
+        "animal-existente": {
+          "pergunta": "{nome} já é paciente da clínica?",
+          "texto": "Já existe um animal com esse nome e essa espécie no cadastro deste responsável.",
+          "sim": "Sim, juntar ao cadastro",
+          "nao": "Não, cadastrar outro",
+          "curta": "Espera resposta: já é paciente?"
+        }
+      },
+      "resumo": {
+        "titulo": "Pronto para importar",
+        "texto": "Isto é o que vai acontecer. Nada foi gravado ainda.",
+        "verQuais": "Ver quais",
+        "voltar": "Voltar às perguntas",
+        "importar": "Importar {n} linha | Importar {n} linhas",
+        "promessa": "Juntar com um cadastro que já existe nunca apaga o que a clínica já tinha.",
+        "entram": {
+          "titulo": "Vão entrar",
+          "pacientesNovos": "{n} paciente novo | {n} pacientes novos",
+          "pacientesExistentes": "{n} paciente que já existia recebe dados | {n} pacientes que já existiam recebem dados",
+          "responsaveisNovos": "{n} responsável novo | {n} responsáveis novos",
+          "responsaveisExistentes": "{n} responsável que já era cliente | {n} responsáveis que já eram clientes",
+          "soContato": "{n} responsável sem animal | {n} responsáveis sem animal"
+        },
+        "arrumamos": {
+          "titulo": "Arrumamos sozinhos",
+          "corrigidas": "Datas, telefones e pesos lidos do jeito certo",
+          "emBranco": "{n} valor errado fica em branco | {n} valores errados ficam em branco",
+          "semContato": "{n} responsável sem telefone nem e-mail | {n} responsáveis sem telefone nem e-mail",
+          "formatacao": "Formatação padronizada: {lista}"
+        },
+        "fora": {
+          "titulo": "Não vão entrar",
+          "nenhuma": "Nenhuma linha fica de fora."
+        }
+      },
+      "importacao": {
+        "titulo": {
+          "rodando": "Importando…",
+          "pausada": "Importação pausada",
+          "falhou": "A importação parou"
+        },
+        "progressoAria": "Progresso da importação",
+        "feitas": "{feitas} de {total} linhas",
+        "lote": "Lote {atual} de {total}",
+        "podeSair": "Pode sair desta tela: a importação continua, e a lista de pacientes mostra onde ela está.",
+        "terminandoLote": "Terminando o lote que já estava sendo gravado…",
+        "continuaDoPonto": "Ao continuar, ela segue de onde parou. Nenhuma linha é gravada duas vezes.",
+        "falha": "O lote {lote} não chegou a ser gravado, então nada dele entrou. Tente de novo.",
+        "pausar": "Pausar",
+        "continuar": "Continuar",
+        "tentarDeNovo": "Tentar de novo"
+      },
+      "relatorio": {
+        "chip": "Importação concluída",
+        "titulo": "{entraram} de {total} linhas entraram",
+        "texto": "{n} linha ficou de fora. O motivo e o que fazer estão abaixo. | {n} linhas ficaram de fora. Os motivos e o que fazer estão abaixo.",
+        "textoTudo": "Todas as linhas entraram.",
+        "entraram": "Entraram",
+        "completar": "Falta completar",
+        "emBranco": "{n} valor errado ficou em branco | {n} valores errados ficaram em branco",
+        "nadaACompletar": "Nada ficou faltando.",
+        "ficaram": "Ficaram de fora",
+        "baixarFora": "Baixar para corrigir",
+        "baixarCompletar": "Baixar a lista",
+        "verLinhas": "Ver linha por linha",
+        "outra": "Importar outra planilha",
+        "verPacientes": "Ver os pacientes",
+        "colunaLinha": "Linha",
+        "colunaOQueHouve": "O que houve",
+        "sufixoFora": "ficaram-de-fora",
+        "sufixoCompletar": "para-completar"
+      },
+      "linhas": {
+        "titulo": "Linha por linha",
+        "filtroAria": "Mostrar só",
+        "filtro": {
+          "todas": "Todas",
+          "entram": "Vão entrar",
+          "corrigidas": "Corrigidas",
+          "fora": "Não vão entrar"
+        },
+        "buscar": "Buscar pelo número da linha ou por um nome",
+        "vazio": "Nenhuma linha com esse filtro.",
+        "mais": "Mostrar mais {n}",
+        "abrirPaciente": "Abrir o paciente",
+        "naPlanilha": "Como estava na planilha",
+        "semNada": "Entrou como estava: nada precisou ser corrigido.",
+        "soResponsavel": "Só o responsável",
+        "semResponsavel": "Sem responsável",
+        "preenche": "{campo} estava em branco no cadastro e veio da planilha.",
+        "conflito": "{campo}: ficou {mantido}, que já estava no cadastro. A planilha dizia {ignorado}.",
+        "semContato": "Sem telefone nem e-mail: complete no cadastro para a clínica conseguir avisar.",
+        "correcoes": "{n} correção | {n} correções",
+        "emBranco": "{n} valor em branco | {n} valores em branco"
+      },
+      "situacao": {
+        "entra": "Entra",
+        "junta": "Atualiza cadastro",
+        "contato": "Só responsável",
+        "pendente": "Espera resposta",
+        "fora": "Não entra"
+      },
+      "acontece": {
+        "novo": "Paciente novo, com responsável novo.",
+        "novoDeExistente": "Paciente novo de {nome}, que já é cliente.",
+        "animalExistente": "{nome} já era paciente: o cadastro recebe o que faltava.",
+        "mesmaLinha": "É o mesmo animal da linha {linha}: os dados foram somados lá.",
+        "contato": "Entra só o responsável, sem animal.",
+        "contatoExistente": "{nome} já é cliente: o cadastro recebe o que faltava."
+      },
+      "motivo": {
+        "animal-sem-responsavel": {
+          "titulo": "Animal sem responsável",
+          "acao": "Preencha quem responde pelo animal e importe essas linhas de novo."
+        },
+        "animal-sem-nome": {
+          "titulo": "Animal sem nome",
+          "acao": "A linha tem dados de um animal, mas não o nome. Preencha e importe de novo."
+        },
+        "especie-desconhecida": {
+          "titulo": "Espécie desconhecida",
+          "acao": "Preencha a espécie na planilha e importe essas linhas de novo."
+        },
+        "responsavel-sem-nome": {
+          "titulo": "Responsável sem nome",
+          "acao": "Tem telefone ou CPF, mas nenhum nome. Preencha o nome e importe de novo."
+        },
+        "falecido": {
+          "titulo": "Animal falecido",
+          "acao": "Não entra como paciente, para ninguém receber lembrete de vacina de um animal que já morreu."
+        }
+      },
+      "ajuste": {
+        "data-ano-curto": "Nascimento “{de}” tinha o ano com dois dígitos: ficou {para}.",
+        "data-da-planilha": "Nascimento estava como número do Excel (“{de}”): ficou {para}.",
+        "data-americana": "Nascimento “{de}” estava com o mês antes do dia: ficou {para}.",
+        "data-sem-dia": "Nascimento “{de}” não tinha o dia: ficou {para}.",
+        "nascimento-pela-idade": "Tinha a idade (“{de}”) no lugar da data: nascimento estimado em {para}.",
+        "peso-em-gramas": "Peso “{de}” estava em gramas: ficou {para}.",
+        "telefone-nono-digito": "Telefone “{de}” não tinha o 9 do celular: ficou {para}.",
+        "telefone-ddd-da-clinica": "Telefone “{de}” estava sem DDD: ganhou o da clínica e ficou {para}.",
+        "telefone-dividido": "Havia dois telefones na mesma célula: {para} virou o telefone 2.",
+        "cpf-zeros": "CPF “{de}” perdeu os zeros da frente no Excel: ficou {para}.",
+        "cep-zero": "CEP “{de}” perdeu o zero da frente no Excel: ficou {para}.",
+        "especie-pela-raca": "Espécie em branco: pela raça ({de}), ficou {para}.",
+        "especie-escolhida": "Espécie “{de}”: ficou {para}, como você respondeu.",
+        "especie-escolhida-branco": "Espécie em branco: ficou {para}, como você respondeu.",
+        "celula-mesclada": "O responsável veio da célula mesclada de cima: {para}.",
+        "responsavel-da-linha-anterior": "Não tinha responsável: ligado a {para}, da linha de cima, como você respondeu.",
+        "data-invalida": "Nascimento “{de}” não existe no calendário: ficou em branco.",
+        "data-futura": "Nascimento “{de}” está no futuro: ficou em branco.",
+        "idade-invalida": "Idade “{de}” não deu para entender: ficou em branco.",
+        "peso-invalido": "Peso “{de}” não é possível para o animal: ficou em branco.",
+        "telefone-invalido": "Telefone “{de}” não é um número válido: não foi aproveitado.",
+        "cpf-invalido": "CPF “{de}” não é válido: ficou em branco.",
+        "email-invalido": "E-mail “{de}” está incompleto: ficou em branco.",
+        "cep-invalido": "CEP “{de}” está incompleto: ficou em branco.",
+        "uf-invalida": "UF “{de}” não existe: ficou em branco.",
+        "microchip-invalido": "Microchip “{de}” está incompleto: ficou em branco.",
+        "microchip-cientifico": "Microchip “{de}”: o Excel mostrou em notação científica e os últimos números se perderam. Exporte a coluna como texto para recuperar.",
+        "nao-reconhecido": "{campo} “{de}” não foi reconhecido: ficou em branco."
+      },
+      "padronizacao": {
+        "telefone": "{n} telefone | {n} telefones",
+        "documento": "{n} CPF | {n} CPFs",
+        "data": "{n} data | {n} datas",
+        "peso": "{n} peso | {n} pesos",
+        "nome": "{n} nome em maiúsculas | {n} nomes em maiúsculas",
+        "especie": "{n} espécie | {n} espécies",
+        "uf": "{n} UF | {n} UFs"
+      },
+      "aviso": {
+        "lista": {
+          "rodando": "Importação em andamento: {feitas} de {total} linhas.",
+          "pausada": "Importação pausada em {feitas} de {total} linhas.",
+          "falhou": "A importação parou em {feitas} de {total} linhas.",
+          "ver": "Ver",
+          "continuar": "Continuar"
+        }
+      }
     }
   },
   "hotel": {
@@ -4483,7 +5060,11 @@
       "casa": "A casa",
       "dia": "2 · O dia",
       "secao": "Hotel",
-      "vender": "1 · Vender"
+      "vender": "1 · Vender",
+      "selo": {
+        "rotina": "{total} tarefa atrasada | {total} tarefas atrasadas",
+        "vespera": "{total} chegada travada | {total} chegadas travadas"
+      }
     },
     "ocorrencia": {
       "conduta": "O que a casa fez",

@@ -63,7 +63,7 @@ const meta = computed(() => {
     pet.raca,
     porte ? t(`clinico.paciente.porte.${porte}`) : '',
     formato.idade(pet.nascimento),
-    t(`clinico.sexo.${pet.sexo}`),
+    formato.sexo(pet.sexo),
     pet.castrado ? t('clinico.paciente.castrado') : t('clinico.paciente.inteiro'),
   ].filter(Boolean)
 })

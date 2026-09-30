@@ -218,7 +218,15 @@ export type Pet = {
   nome: string
   especie: PetSpecies
   raca: string
-  sexo: PetSex
+  /**
+   * Nulo quando ninguém informou.
+   *
+   * O cadastro daqui sempre pergunta, mas a base que chega de outro sistema nem sempre sabe: a
+   * planilha de balcão tem a coluna em branco em boa parte das linhas. Escolher um sexo para
+   * vencer o campo seria inventar o dado que o atestado imprime — o mesmo motivo do nascimento
+   * logo abaixo. Quem mostra escreve "sexo não informado".
+   */
+  sexo: PetSex | null
   /**
    * Nulo quando ninguém informou.
    *

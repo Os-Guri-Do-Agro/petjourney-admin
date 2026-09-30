@@ -20,6 +20,11 @@ export {
   type PacienteResumo,
 } from './patient-repository'
 export { catalogRepository, type CatalogosClinicos } from './catalog-repository'
+export {
+  migracaoRepository,
+  type ResultadoDaLinha,
+  type VinculosDaImportacao,
+} from './migracao-repository'
 export { vacinaRepository, type AplicacaoNaLista, type ChamadaDeVacina } from './vacina-repository'
 export {
   internacaoRepository,

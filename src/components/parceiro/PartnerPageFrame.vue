@@ -185,10 +185,17 @@ const pageStyle = computed(() => {
     :style="[pageStyle, measure ? { '--partner-measure': measure } : {}]"
   >
     <header class="partner-page__header">
-      <div>
-        <p v-if="subtitle" class="partner-page__subtitle">{{ subtitle }}</p>
-        <h1 class="partner-page__title">{{ title }}</h1>
-      </div>
+      <!--
+        `cabecalho` substitui só o bloco do título; o botão de explicações e as ações da tela
+        continuam no mesmo lugar. Existe para a visão geral, cuja saudação tem mais de uma linha.
+        Quem usa o slot fica responsável pelo `h1`.
+      -->
+      <slot name="cabecalho">
+        <div>
+          <p v-if="subtitle" class="partner-page__subtitle">{{ subtitle }}</p>
+          <h1 class="partner-page__title">{{ title }}</h1>
+        </div>
+      </slot>
       <div
         v-if="(guidance || tour || $slots.actions) && !noPartnerAccess && !showSuspended"
         class="partner-page__actions"
@@ -409,13 +416,17 @@ const pageStyle = computed(() => {
   gap: 0.5rem;
 }
 
+/*
+ * Tinta secundária, não a apagada: em `faint` o rótulo ficava a 3,2:1 sobre a página, abaixo do
+ * piso AA para texto de 12px — e é o controle que existe em todas as telas do portal.
+ */
 .partner-page__guidance.p-button {
   min-height: 2.2rem;
   gap: 0.4rem;
   padding: 0.35rem 0.75rem;
   border-color: var(--partner-line, transparent);
-  color: var(--partner-faint, inherit);
-  font-size: 0.76rem;
+  color: var(--partner-muted, inherit);
+  font-size: 0.8125rem;
 }
 
 .partner-page__guidance.p-button :deep(.p-button-label) {
@@ -425,7 +436,7 @@ const pageStyle = computed(() => {
 .partner-page__guidance.p-button:not(:disabled):hover {
   border-color: var(--partner-line, transparent);
   background: var(--partner-card, transparent);
-  color: var(--partner-muted, inherit);
+  color: var(--partner-text, inherit);
 }
 
 .partner-page__guidance--ativo.p-button,

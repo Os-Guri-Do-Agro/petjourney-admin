@@ -40,6 +40,8 @@ export type MockOperation =
   | 'internacao.internar'
   /** Cadastro de leitos: configuração da clínica, não trabalho de plantão. */
   | 'internacao.leitos'
+  /** Um lote da importação. Falha sozinho: o lote seguinte espera, e nada do lote que falhou entra. */
+  | 'migracao.importar'
 
 export class MockError extends Error {
   /** `kind` traduzível, nunca texto pronto de servidor. */

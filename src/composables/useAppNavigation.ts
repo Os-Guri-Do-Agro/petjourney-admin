@@ -6,6 +6,7 @@ import {
   useClinicoPendencias,
   type ContagemDePendencia,
 } from '@/features/clinico/composables/useClinicoPendencias'
+import { useHotelPendencias } from '@/features/hotel/composables/useHotelPendencias'
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { useModuloClinico } from '@/composables/useModuloClinico'
 import { useModuloHotel } from '@/composables/useModuloHotel'
@@ -167,8 +168,11 @@ export const EQUIPE_MENU_ENABLED = false
  *
  * O menu tinha uma seção "Início" cujo painel repetia **todas** as outras: doze links existiam
  * em dois lugares, e o trilho prometia seções que a primeira seção desfazia. A visão geral virou
- * um link direto no topo do trilho; o inventário completo de telas vive na própria página
- * `/inicio`, que existe para isso.
+ * um link direto no topo do trilho.
+ *
+ * A página `/inicio` também deixou de ser inventário de telas: a grade de atalhos repetia o painel
+ * que está aberto ao lado dela. Ela agora responde o que o menu não sabe — quanto a parceria
+ * rendeu e o que está parado em cada módulo.
  */
 export const OVERVIEW_SECTION_ID = 'overview'
 
@@ -306,7 +310,7 @@ export function useAppNavigation() {
     return HOTEL_BLOCKS.map((bloco) => ({
       id: bloco.id,
       label: t(bloco.key),
-      items: bloco.rotas.map((rota) => ({ label: t(rota.key), to: rota.to, icon: rota.icon })),
+      items: bloco.rotas.map(decorarRota),
     }))
   })
 
@@ -326,6 +330,9 @@ export function useAppNavigation() {
    * ver `useClinicoPendencias`.
    */
   const pendencias = useClinicoPendencias(() => hasClinicalProfile.value)
+
+  /** O mesmo para o hotel: rotina atrasada e véspera travada. Ver `useHotelPendencias`. */
+  const pendenciasDoHotel = useHotelPendencias(() => hasHotelProfile.value)
 
   /**
    * Contadores por rota, com a frase que explica o número.
@@ -352,6 +359,14 @@ export function useAppNavigation() {
     '/veterinario/vacinas': {
       contagem: pendencias.vacinas.value,
       frase: 'clinico.navegacao.selo.vacinas',
+    },
+    '/hotel/rotina': {
+      contagem: pendenciasDoHotel.rotina.value,
+      frase: 'hotel.navegacao.selo.rotina',
+    },
+    '/hotel/reservas': {
+      contagem: pendenciasDoHotel.vespera.value,
+      frase: 'hotel.navegacao.selo.vespera',
     },
   }))
 
@@ -481,8 +496,11 @@ export function useAppNavigation() {
   })
 
   /**
-   * As mesmas seções em forma de lista, para o modo "lista única" do menu e para os atalhos da
-   * visão geral. Uma origem só: seção nova aparece nos dois lugares sem ninguém lembrar disso.
+   * As mesmas seções em forma de lista, para o modo "lista única" do menu. Uma origem só: seção
+   * nova aparece no trilho e na lista sem ninguém lembrar disso.
+   *
+   * `homeShortcutGroups` sobrevive como alias: alimentava a grade de atalhos da visão geral, que
+   * saiu da página, e o componente continua no repositório para quem quiser remontá-lo.
    */
   const navigationGroups = computed<AppNavigationGroup[]>(() =>
     navigationSections.value.map((section) => ({
@@ -502,6 +520,8 @@ export function useAppNavigation() {
     hasClinicalProfile,
     hasHotelProfile,
     homeShortcutGroups,
+    pendenciasClinicas: pendencias,
+    pendenciasDoHotel,
   }
 }
 
@@ -587,6 +607,16 @@ export function resolvePageLabel(path: string, hash: string, sections: AppNaviga
 
   if (path.startsWith('/hotel/hospedagem/')) {
     return t('hotel.estadia.titulo')
+  }
+
+  /* Cadastro e importação de pacientes não são itens de menu: sem estas linhas o cabeçalho dizia 'Painel'. */
+  /* O rótulo curto: o título inteiro quebrava em duas linhas no cabeçalho e espremia a conta. */
+  if (path.startsWith('/veterinario/paciente/importar')) {
+    return t('clinico.migracao.atalho')
+  }
+
+  if (path.startsWith('/veterinario/paciente/novo')) {
+    return t('clinico.paciente.novo.titulo')
   }
 
   /* O atendimento não é item de menu — sem esta linha o cabeçalho dizia 'Painel' no prontuário. */

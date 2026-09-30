@@ -13,6 +13,7 @@ import { computed, ref } from 'vue'
 
 import type { Pet, Tutor } from '@/features/clinico/data/types'
 
+import { invalidarPendenciasDoHotel } from '../composables/useHotelPendencias'
 import { HOTEL_UTC_OFFSET, type TemporadaSazonal } from '../data/fixtures'
 import { catalogoRepository, type CatalogosDoHotel } from '../data/repositories'
 import type {
@@ -102,9 +103,16 @@ export const useHotelStore = defineStore('hotel', () => {
     }
   }
 
-  /** Ponto único de invalidação. Toda mutação do módulo passa por aqui. */
+  /**
+   * Ponto único de invalidação. Toda mutação do módulo passa por aqui.
+   *
+   * Avisa também o contador do menu e da visão geral: uma tarefa marcada ou uma exigência
+   * dispensada mudam o número ao lado de Rotina e de Reservas, e contador que só atualiza no F5
+   * mente com ar de autoridade.
+   */
   function invalidarTudo() {
     revisao.value += 1
+    invalidarPendenciasDoHotel()
   }
 
   function acomodacao(id: string): Acomodacao | null {

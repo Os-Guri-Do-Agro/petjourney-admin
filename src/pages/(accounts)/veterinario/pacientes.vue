@@ -17,6 +17,10 @@
  * exatamente onde alguém para quando procurou o paciente e ele não existe. Os dois levam à
  * página de cadastro: a ficha inteira tem mais de vinte campos e não cabe num diálogo sem criar
  * uma rolagem dentro da outra.
+ *
+ * **Trazer a base de outro sistema também começa aqui**, pelo mesmo motivo: é outro jeito de
+ * cadastrar, muitos de uma vez. Enquanto uma importação estiver em andamento ou pausada, a
+ * lista avisa em cima — é por esse aviso que "continuar depois" é achável depois.
  */
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -33,10 +37,12 @@ import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { patientRepository, type PacienteResumo } from '@/features/clinico/data/repositories'
 import type { PetSpecies } from '@/features/clinico/data/types'
 import { useClinicoStore } from '@/features/clinico/stores/clinico'
+import { useMigracaoStore } from '@/features/clinico/stores/migracao'
 
 const { t } = useI18n()
 const router = useRouter()
 const clinico = useClinicoStore()
+const migracao = useMigracaoStore()
 const formato = useClinicFormat()
 
 const termo = ref('')
@@ -161,6 +167,10 @@ function cadastrar() {
   void router.push('/veterinario/paciente/novo')
 }
 
+function importar() {
+  void router.push('/veterinario/paciente/importar')
+}
+
 async function buscar() {
   carregando.value = true
   erro.value = ''
@@ -196,6 +206,14 @@ onMounted(async () => {
   >
     <template #actions>
       <Button
+        severity="secondary"
+        outlined
+        class="pacientes__importar"
+        icon="pi pi-file-import"
+        :label="t('clinico.migracao.atalho')"
+        @click="importar"
+      />
+      <Button
         icon="pi pi-user-plus"
         :label="t('clinico.paciente.novo.atalho')"
         @click="cadastrar"
@@ -203,6 +221,27 @@ onMounted(async () => {
     </template>
 
     <div class="pacientes clinic-scope">
+      <p v-if="migracao.emAndamento" class="pacientes__importacao" role="status">
+        <i
+          class="pi"
+          :class="migracao.estado === 'rodando' ? 'pi-spin pi-spinner' : 'pi-pause-circle'"
+          aria-hidden="true"
+        />
+        <span>
+          {{
+            t(`clinico.migracao.aviso.lista.${migracao.estado}`, {
+              feitas: formato.numero(migracao.cursor, 0),
+              total: formato.numero(migracao.total, 0),
+            })
+          }}
+        </span>
+        <Button
+          link
+          size="small"
+          :label="t(migracao.estado === 'rodando' ? 'clinico.migracao.aviso.lista.ver' : 'clinico.migracao.aviso.lista.continuar')"
+          @click="importar"
+        />
+      </p>
       <ClinicFilterBar
         v-model:busca="termo"
         v-model:selecionados="selecionados"
@@ -279,6 +318,42 @@ onMounted(async () => {
 .pacientes {
   display: grid;
   gap: var(--clinic-space-3);
+}
+
+/*
+ * O contornado da casa escreve em cinza (#797F7F sobre o linho, ~3,3:1) — o "botão que quase não
+ * se vê" do retorno do migrador. Esta entrada leva a tinta do texto e a borda em Régua de Sálvia.
+ */
+.pacientes__importar.p-button {
+  border-color: var(--clinic-line-strong);
+  color: var(--clinic-text);
+}
+
+.pacientes__importar.p-button :deep(.p-button-icon) {
+  color: var(--clinic-accent-strong);
+}
+
+.pacientes__importacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+  padding: var(--clinic-space-2) var(--clinic-space-4);
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface);
+  color: var(--clinic-muted);
+  gap: var(--clinic-space-2);
+}
+
+.pacientes__importacao .pi {
+  color: var(--clinic-accent-strong);
+}
+
+.pacientes__importacao .p-button-link {
+  padding: 0;
+  color: var(--clinic-accent-strong);
+  font-weight: 700;
 }
 
 .pacientes__nome {

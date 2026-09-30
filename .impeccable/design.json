@@ -1,0 +1,604 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-29T02:14:21.000Z",
+  "title": "Design System: PetJourney Admin",
+  "extensions": {
+    "colorMeta": {
+      "folha-de-salvia": {
+        "role": "primary",
+        "displayName": "Folha de Sálvia",
+        "darkCanonical": "#84C1B4",
+        "tonalRamp": [
+          "#1A2824",
+          "#2A3F39",
+          "#3D5A52",
+          "#4F756B",
+          "#6E9189",
+          "#84C1B4",
+          "#C2E0D9",
+          "#E5EEEA"
+        ]
+      },
+      "salvia-de-tinta": {
+        "role": "primary",
+        "displayName": "Sálvia de Tinta",
+        "darkCanonical": "#BFE3DB",
+        "tonalRamp": [
+          "#1A2824",
+          "#2A3F39",
+          "#3D5A52",
+          "#4F756B",
+          "#6E9189",
+          "#84C1B4",
+          "#C2E0D9",
+          "#E5EEEA"
+        ]
+      },
+      "salvia-de-tinta-escura": {
+        "role": "primary",
+        "displayName": "Sálvia de Tinta Escura",
+        "darkCanonical": "#BFE3DB",
+        "tonalRamp": [
+          "#1A2824",
+          "#2A3F39",
+          "#3D5A52",
+          "#4F756B",
+          "#6E9189",
+          "#84C1B4",
+          "#C2E0D9",
+          "#E5EEEA"
+        ]
+      },
+      "salvia-fosca": {
+        "role": "primary",
+        "displayName": "Sálvia Fosca",
+        "darkCanonical": "#B6DCD3"
+      },
+      "salvia-profunda": {
+        "role": "primary",
+        "displayName": "Sálvia Profunda",
+        "darkCanonical": "#2F6D5F"
+      },
+      "regua-de-salvia": {
+        "role": "primary",
+        "displayName": "Régua de Sálvia",
+        "darkCanonical": "#335046"
+      },
+      "veu-de-salvia": {
+        "role": "primary",
+        "displayName": "Véu de Sálvia",
+        "darkCanonical": "#20352F"
+      },
+      "azul-noite": {
+        "role": "secondary",
+        "displayName": "Azul-Noite",
+        "darkCanonical": "#A3B9D8",
+        "tonalRamp": [
+          "#0E1A2B",
+          "#1D3557",
+          "#344E73",
+          "#4C678F",
+          "#6982A4",
+          "#93A7C2",
+          "#C3CFDF",
+          "#E9EEF5"
+        ]
+      },
+      "pervinca": {
+        "role": "secondary",
+        "displayName": "Pervinca",
+        "darkCanonical": "#C9C1FF",
+        "tonalRamp": [
+          "#2A2456",
+          "#3F377F",
+          "#554AA8",
+          "#6F64B8",
+          "#8C7FDC",
+          "#BDB2FF",
+          "#DCD5FF",
+          "#ECE6F7"
+        ]
+      },
+      "pervinca-fundo": {
+        "role": "secondary",
+        "displayName": "Pervinca (fundo)",
+        "darkCanonical": "#2D353E"
+      },
+      "pervinca-linha": {
+        "role": "secondary",
+        "displayName": "Pervinca (linha)",
+        "darkCanonical": "#6F64B8"
+      },
+      "terracota-texto": {
+        "role": "tertiary",
+        "displayName": "Terracota",
+        "darkCanonical": "#F2AE9B",
+        "tonalRamp": [
+          "#3A211C",
+          "#752712",
+          "#A2503A",
+          "#C1613F",
+          "#D98E73",
+          "#F1E2DA",
+          "#FBEEE8",
+          "#FDF6F3"
+        ]
+      },
+      "terracota-fundo": {
+        "role": "tertiary",
+        "displayName": "Terracota (fundo)",
+        "darkCanonical": "#3A211C"
+      },
+      "terracota-acento": {
+        "role": "tertiary",
+        "displayName": "Terracota (acento)",
+        "darkCanonical": "#E38E78"
+      },
+      "terracota-queimada": {
+        "role": "tertiary",
+        "displayName": "Terracota Queimada",
+        "darkCanonical": "#F2AE9B"
+      },
+      "ambar-texto": {
+        "role": "tertiary",
+        "displayName": "Âmbar",
+        "darkCanonical": "#F0C77D",
+        "tonalRamp": [
+          "#372A16",
+          "#5E4510",
+          "#856112",
+          "#A87C2A",
+          "#C99A4E",
+          "#ECDFC2",
+          "#F7F0E0",
+          "#FBF8EF"
+        ]
+      },
+      "ambar-fundo": {
+        "role": "tertiary",
+        "displayName": "Âmbar (fundo)",
+        "darkCanonical": "#372A16"
+      },
+      "confirmado-texto": {
+        "role": "tertiary",
+        "displayName": "Confirmado",
+        "darkCanonical": "#A8DEC9"
+      },
+      "confirmado-fundo": {
+        "role": "tertiary",
+        "displayName": "Confirmado (fundo)",
+        "darkCanonical": "#17372C"
+      },
+      "pendente-texto": {
+        "role": "tertiary",
+        "displayName": "Pendente",
+        "darkCanonical": "#B9C9C3"
+      },
+      "pendente-fundo": {
+        "role": "tertiary",
+        "displayName": "Pendente (fundo)",
+        "darkCanonical": "#21332D"
+      },
+      "coral-texto": {
+        "role": "tertiary",
+        "displayName": "Coral · Visão geral",
+        "darkCanonical": "#F6A9A8",
+        "tonalRamp": [
+          "#47000A",
+          "#730017",
+          "#98222E",
+          "#BA4349",
+          "#DD6366",
+          "#FE8A8A",
+          "#FFC3C1",
+          "#FEE9E8"
+        ]
+      },
+      "coral-fundo": {
+        "role": "tertiary",
+        "displayName": "Coral (fundo) · Visão geral",
+        "darkCanonical": "#3F2226"
+      },
+      "pessego-texto": {
+        "role": "tertiary",
+        "displayName": "Pêssego · Visão geral",
+        "darkCanonical": "#FFC3A6",
+        "tonalRamp": [
+          "#3E1100",
+          "#652200",
+          "#873C1A",
+          "#A75938",
+          "#C87756",
+          "#EE9976",
+          "#FFC5AF",
+          "#FEEAE2"
+        ]
+      },
+      "pessego-fundo": {
+        "role": "tertiary",
+        "displayName": "Pêssego (fundo) · Visão geral",
+        "darkCanonical": "#3D2A20"
+      },
+      "pessego-cheio": {
+        "role": "tertiary",
+        "displayName": "Pêssego cheio · Visão geral",
+        "darkCanonical": "#8A4A2C"
+      },
+      "ciano-clinica-texto": {
+        "role": "tertiary",
+        "displayName": "Ciano da Clínica · Visão geral",
+        "darkCanonical": "#A8DADC",
+        "tonalRamp": [
+          "#092425",
+          "#173A3C",
+          "#1E5557",
+          "#427678",
+          "#639A9C",
+          "#87BCBE",
+          "#A8DADC",
+          "#D7EEEE"
+        ]
+      },
+      "ciano-clinica-fundo": {
+        "role": "tertiary",
+        "displayName": "Ciano da Clínica (fundo) · Visão geral",
+        "darkCanonical": "#173A3C"
+      },
+      "pervinca-hotel-texto": {
+        "role": "tertiary",
+        "displayName": "Pervinca do Hotel · Visão geral",
+        "darkCanonical": "#CFC7FF"
+      },
+      "pervinca-hotel-fundo": {
+        "role": "tertiary",
+        "displayName": "Pervinca do Hotel (fundo) · Visão geral",
+        "darkCanonical": "#2B2750"
+      },
+      "linho": {
+        "role": "neutral",
+        "displayName": "Linho",
+        "darkCanonical": "#0B1210",
+        "tonalRamp": [
+          "#2E2823",
+          "#4A423B",
+          "#6B6058",
+          "#8F8277",
+          "#C8B5A8",
+          "#DDCDC4",
+          "#F0EAE3",
+          "#FBF7F4"
+        ]
+      },
+      "linho-claro": {
+        "role": "neutral",
+        "displayName": "Linho Claro",
+        "darkCanonical": "#121D19"
+      },
+      "linho-macio": {
+        "role": "neutral",
+        "displayName": "Linho Macio",
+        "darkCanonical": "#182822"
+      },
+      "linho-afundado": {
+        "role": "neutral",
+        "displayName": "Linho Afundado",
+        "darkCanonical": "#0F1A16"
+      },
+      "costura": {
+        "role": "neutral",
+        "displayName": "Costura",
+        "darkCanonical": "#263A33"
+      },
+      "costura-suave": {
+        "role": "neutral",
+        "displayName": "Costura Suave",
+        "darkCanonical": "#1E302A"
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "darkCanonical": "#F2F8F5",
+        "tonalRamp": [
+          "#1F2F2B",
+          "#43504D",
+          "#56645F",
+          "#616C69",
+          "#7D8583",
+          "#A3AAA8",
+          "#CDD1D0",
+          "#EEF0EF"
+        ]
+      },
+      "tinta-secundaria": {
+        "role": "neutral",
+        "displayName": "Tinta Secundária",
+        "darkCanonical": "#B2C4BD"
+      },
+      "tinta-apagada": {
+        "role": "neutral",
+        "displayName": "Tinta Apagada",
+        "darkCanonical": "#8A9E96"
+      },
+      "branco-tinta": {
+        "role": "neutral",
+        "displayName": "Branco-Tinta",
+        "darkCanonical": "#0F1714"
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Título de página e de painel principal."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Título de cartão, seção e diálogo."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto corrido e célula de tabela na densidade média (13px)."
+      },
+      "value": {
+        "displayName": "Value",
+        "purpose": "Valor clínico, horário, dose, peso e dinheiro; sempre tabular."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Rótulo de campo e cabeçalho de coluna; caixa-alta em Tinta Apagada."
+      },
+      "chip": {
+        "displayName": "Chip",
+        "purpose": "Texto de pílula de estado, no par texto/fundo da gaveta."
+      }
+    },
+    "shadows": [
+      {
+        "name": "flutuante",
+        "value": "0 12px 32px rgb(31 47 43 / 14%)",
+        "purpose": "Diálogo, popover e overlay de Select."
+      },
+      {
+        "name": "toast",
+        "value": "0 14px 36px rgb(31 47 43 / 14%)",
+        "purpose": "Notificação no canto."
+      },
+      {
+        "name": "pastilha-do-trilho",
+        "value": "0 2px 10px rgb(40 51 47 / 18%)",
+        "purpose": "Seção ativa no trilho sálvia."
+      },
+      {
+        "name": "anel-de-foco",
+        "value": "0 0 0 2px #FBF7F4, 0 0 0 4px #456A60",
+        "purpose": "Foco visível por teclado em todo elemento navegável."
+      },
+      {
+        "name": "cartao-da-visao-geral",
+        "value": "0 1px 2px rgb(31 47 43 / 5%), 0 12px 32px -14px rgb(31 47 43 / 18%)",
+        "purpose": "Linha do dia, pauta e o cartão de ganhos, com a indicação dentro, em repouso, só na Visão geral; o cartão não tem borda. No escuro, a mesma receita troca a cor por preto e mantém as opacidades."
+      },
+      {
+        "name": "controle-claro-da-visao-geral",
+        "value": "0 1px 2px rgb(31 47 43 / 8%)",
+        "purpose": "Controle em Linho Claro, já no teto de luz, em repouso: a pílula Copiar da faixa de indicação e a marca do hotel na Linha do dia. Só na Visão geral."
+      },
+      {
+        "name": "controle-claro-da-visao-geral-hover",
+        "value": "0 4px 12px -4px rgb(31 47 43 / 24%)",
+        "purpose": "Hover do controle claro: sobe pela sombra em vez de clarear, trocando a variável da sombra e nunca a box-shadow inteira, para não apagar o anel de foco."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-navegador",
+        "value": "cubic-bezier(0.32, 0.72, 0, 1)",
+        "purpose": "Painel que abre, trilho que recolhe, diálogo que entra (160–220 ms)."
+      },
+      {
+        "name": "ease-padrao",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Troca de tema e transições de estado genéricas."
+      },
+      {
+        "name": "ease-saida",
+        "value": "ease-out",
+        "purpose": "Hover, grupo que recolhe, linha que entra ou sai e conta da Linha do dia que muda de estado, na Visão geral (140–180 ms)."
+      },
+      {
+        "name": "duracao-hover",
+        "value": "140ms",
+        "purpose": "Cor e fundo em hover."
+      },
+      {
+        "name": "duracao-painel",
+        "value": "220ms",
+        "purpose": "Abertura e recolhimento de navegação; teto prático de 300 ms em tela de operação."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "gaveta",
+        "value": "900px"
+      },
+      {
+        "name": "toque",
+        "value": "pointer: coarse"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão primário",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal da tela; um por contexto.",
+      "html": "<button class=\"ds-btn-primary\">Confirmar check-in</button>",
+      "css": ".ds-btn-primary { background: #84C1B4; color: #FFFFFF; border: 1px solid #84C1B4; border-radius: 0.7rem; padding: 0.5rem 1rem; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.8125rem; font-weight: 700; cursor: pointer; transition: background 140ms ease, border-color 140ms ease; } .ds-btn-primary:hover { background: #6E9189; border-color: #6E9189; } .ds-btn-primary:active { background: #4F756B; border-color: #4F756B; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #FBF7F4, 0 0 0 4px #456A60; }"
+    },
+    {
+      "name": "Botão secundário",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ação alternativa, contornada em Costura.",
+      "html": "<button class=\"ds-btn-secondary\">Ver prontuário</button>",
+      "css": ".ds-btn-secondary { background: #FBF7F4; color: #4F756B; border: 1px solid #C8B5A8; border-radius: 0.7rem; padding: 0.5rem 1rem; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.8125rem; font-weight: 700; cursor: pointer; transition: background 140ms ease, border-color 140ms ease; } .ds-btn-secondary:hover { background: #F5F0EC; border-color: #84A59D; } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 2px #FBF7F4, 0 0 0 4px #456A60; }"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo PrimeVue na densidade média, com label em caixa-alta.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Peso (kg)</span><input class=\"ds-input\" value=\"12,4\" /></label>",
+      "css": ".ds-field { display: grid; gap: 0.4rem; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-field-label { color: #7D8583; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; } .ds-input { height: 36px; padding: 0 0.75rem; background: #FBF7F4; color: #1F2F2B; border: 1px solid #C8B5A8; border-radius: 0.7rem; font: inherit; font-size: 0.875rem; font-variant-numeric: tabular-nums; transition: border-color 140ms ease; } .ds-input:hover { border-color: #84A59D; } .ds-input:focus-visible { outline: none; box-shadow: 0 0 0 2px #FBF7F4, 0 0 0 4px #456A60; }"
+    },
+    {
+      "name": "Chips de estado",
+      "kind": "chip",
+      "refersTo": "chip-risco",
+      "description": "As gavetas semânticas; sempre com rótulo, nunca pintando o contêiner.",
+      "html": "<div class=\"ds-chips\"><span class=\"ds-chip ds-chip-risco\">Risco alto</span><span class=\"ds-chip ds-chip-atencao\">Atrasado</span><span class=\"ds-chip ds-chip-ok\">Confirmado</span><span class=\"ds-chip ds-chip-pendente\">Aguardando</span><span class=\"ds-chip ds-chip-maquina\">Proposto</span></div>",
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-chip { display: inline-flex; align-items: center; padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; } .ds-chip-risco { background: #FBEEE8; color: #A2503A; } .ds-chip-atencao { background: #F7F0E0; color: #856112; } .ds-chip-ok { background: #EAF4F0; color: #4B776B; } .ds-chip-pendente { background: #F0EFEC; color: #716C61; } .ds-chip-maquina { background: #ECE6F7; color: #554AA8; }"
+    },
+    {
+      "name": "Cartão",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Unidade de trabalho; plano, borda completa, sem sombra em repouso.",
+      "html": "<article class=\"ds-card\"><h3 class=\"ds-card-title\">Thor · Suíte 4</h3><p class=\"ds-card-body\">Check-out amanhã às 10:00. Medicação das 14h registrada.</p></article>",
+      "css": ".ds-card { display: grid; gap: 0.4rem; max-width: 22rem; padding: 1.15rem; background: #FBF7F4; color: #1F2F2B; border: 1px solid #C8B5A8; border-radius: 1rem; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-card-title { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; } .ds-card-body { margin: 0; color: #616C69; font-size: 0.8125rem; line-height: 1.45; }"
+    },
+    {
+      "name": "Trilho de navegação",
+      "kind": "nav",
+      "refersTo": "nav-rail",
+      "description": "Trilho sálvia com pastilha clara elevada na seção ativa.",
+      "html": "<nav class=\"ds-rail\"><a class=\"ds-rail-item ds-rail-item-active\" href=\"#\">Clínica</a><a class=\"ds-rail-item\" href=\"#\">Hotel</a><a class=\"ds-rail-item\" href=\"#\">Portal</a></nav>",
+      "css": ".ds-rail { display: grid; gap: 0.3rem; width: 4.6rem; padding: 0.42rem; background: #84C1B4; border-radius: 1rem; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-rail-item { display: grid; place-items: center; min-height: 3rem; border-radius: 0.7rem; color: rgb(255 255 255 / 74%); font-size: 0.58rem; font-weight: 700; text-decoration: none; transition: background 160ms ease, color 160ms ease; } .ds-rail-item:hover { background: rgb(255 255 255 / 12%); color: #FFFFFF; } .ds-rail-item-active, .ds-rail-item-active:hover { background: #FBF7F4; color: #4F756B; box-shadow: 0 2px 10px rgb(40 51 47 / 18%); } .ds-rail-item:focus-visible { outline: none; box-shadow: 0 0 0 2px #84C1B4, 0 0 0 4px #FBF7F4; }"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Notificação flutuante sem ícone; borda misturada à cor do estado.",
+      "html": "<div class=\"ds-toast\"><strong class=\"ds-toast-title\">Check-in registrado</strong><span class=\"ds-toast-detail\">Thor entrou na Suíte 4.</span></div>",
+      "css": ".ds-toast { display: grid; gap: 0.2rem; width: 22.5rem; max-width: 100%; padding: 0.9rem 1rem; background: #FBF7F4; color: #1F2F2B; border: 1px solid color-mix(in srgb, #3E7355 42%, #DDCDC4); border-radius: 0.95rem; box-shadow: 0 14px 36px rgb(31 47 43 / 14%); font-family: ui-sans-serif, system-ui, sans-serif; } .ds-toast-title { font-size: 0.9rem; font-weight: 700; letter-spacing: -0.02em; } .ds-toast-detail { color: #5F716B; font-size: 0.8rem; font-weight: 500; line-height: 1.45; }"
+    },
+    {
+      "name": "Linha do dia",
+      "kind": "custom",
+      "refersTo": "inicio-card",
+      "description": "O dia num cartão da Visão geral, igual aos outros (Linho Claro, 20px, sombra macia, sem borda): régua, pistas na própria superfície do cartão abertas por fios de Costura, pista da clínica com o estado dentro de cada conta, pista do hotel com marcas de hora e rosto, fio do agora em sálvia como único sinal de onde o dia está, legenda que é o resumo e blocos por extenso em Linho Macio. Ícones omitidos na amostra.",
+      "html": "<section class=\"ds-dia\"><header class=\"ds-dia-cabeca\"><h3 class=\"ds-dia-titulo\">Hoje</h3><p class=\"ds-dia-resumo\">10 atendimentos · 1 chegada pendente · 1 saída pendente</p><a class=\"ds-dia-link\" href=\"#\">Agenda completa</a></header><div class=\"ds-dia-quadro\"><div class=\"ds-dia-camada\" aria-hidden=\"true\"><span class=\"ds-dia-risco\" style=\"left:10%\"></span><span class=\"ds-dia-risco\" style=\"left:20%\"></span><span class=\"ds-dia-risco\" style=\"left:30%\"></span><span class=\"ds-dia-risco\" style=\"left:40%\"></span><span class=\"ds-dia-risco\" style=\"left:50%\"></span><span class=\"ds-dia-risco\" style=\"left:60%\"></span><span class=\"ds-dia-risco\" style=\"left:70%\"></span><span class=\"ds-dia-risco\" style=\"left:80%\"></span><span class=\"ds-dia-risco\" style=\"left:90%\"></span></div><div class=\"ds-dia-regua\" aria-hidden=\"true\"><span class=\"ds-dia-hora ds-dia-hora-inicio\" style=\"left:0%\">08:00</span><span class=\"ds-dia-hora\" style=\"left:40%\">12:00</span><span class=\"ds-dia-hora\" style=\"left:60%\">14:00</span><span class=\"ds-dia-hora\" style=\"left:80%\">16:00</span><span class=\"ds-dia-hora ds-dia-hora-fim\" style=\"left:100%\">18:00</span></div><span class=\"ds-dia-divisa\" style=\"grid-row:2\" aria-hidden=\"true\"></span><span class=\"ds-dia-rotulo ds-dia-rotulo-clinica\" style=\"grid-row:2\">Clínica</span><div class=\"ds-pista\" style=\"grid-row:2;--pistas:2\"><span class=\"ds-pista-almoco\" style=\"left:40%;width:10%\"></span><div class=\"ds-contas\" aria-hidden=\"true\"><span class=\"ds-conta ds-conta-feito\" style=\"left:0%;width:calc(6.67% - 2px);top:0\"></span><span class=\"ds-conta ds-conta-feito\" style=\"left:6.67%;width:calc(6.67% - 2px);top:0\"></span><span class=\"ds-conta ds-conta-feito\" style=\"left:13.33%;width:calc(6.67% - 2px);top:0\"></span><span class=\"ds-conta ds-conta-agora\" style=\"left:20%;width:calc(6.67% - 2px);top:0\"></span><span class=\"ds-conta ds-conta-marcado\" style=\"left:30%;width:calc(5% - 2px);top:0\"></span><span class=\"ds-conta ds-conta-marcado\" style=\"left:50%;width:calc(6.67% - 2px);top:0\"></span><span class=\"ds-conta ds-conta-marcado\" style=\"left:60%;width:calc(5% - 2px);top:0\"></span><span class=\"ds-conta ds-conta-falta\" style=\"left:5%;width:calc(5% - 2px);top:0.875rem\"></span><span class=\"ds-conta ds-conta-esperando\" style=\"left:25%;width:calc(5% - 2px);top:0.875rem\"></span><span class=\"ds-conta ds-conta-marcado\" style=\"left:61.67%;width:calc(6.67% - 2px);top:0.875rem\"></span></div></div><span class=\"ds-dia-divisa\" style=\"grid-row:3\" aria-hidden=\"true\"></span><span class=\"ds-dia-rotulo ds-dia-rotulo-hotel\" style=\"grid-row:3\">Hotel</span><div class=\"ds-pista ds-pista-hotel\" style=\"grid-row:3\"><a class=\"ds-marca ds-marca-atrasada\" href=\"#\" style=\"left:15%\" aria-label=\"Chegada de Sushi às 09:30, Gatil G2. Atrasada\"><span class=\"ds-marca-hora\">09:30</span><span class=\"ds-rosto ds-rosto-xs ds-rosto-tom-4\"></span></a><a class=\"ds-marca\" href=\"#\" style=\"left:70%\" aria-label=\"Saída de Zeca às 15:00, Suíte 4\"><span class=\"ds-marca-hora\">15:00</span><span class=\"ds-rosto ds-rosto-xs\"></span></a></div><div class=\"ds-dia-camada ds-dia-camada-agora\" aria-hidden=\"true\"><span class=\"ds-dia-agora\" style=\"left:22%\"><span class=\"ds-dia-agora-hora\">10:12</span></span></div></div><ul class=\"ds-dia-legenda\" aria-hidden=\"true\"><li><span class=\"ds-amostra ds-conta-feito\"></span>3 finalizados</li><li><span class=\"ds-amostra ds-conta-agora\"></span>1 em atendimento</li><li><span class=\"ds-amostra ds-conta-esperando\"></span>1 aguardando</li><li><span class=\"ds-amostra ds-conta-marcado\"></span>4 agendados</li><li><span class=\"ds-amostra ds-conta-falta\"></span>1 falta</li><li><span class=\"ds-amostra ds-amostra-almoco\"></span>Almoço 12:00–13:00</li></ul><div class=\"ds-dia-destaques\"><a class=\"ds-destaque\" href=\"#\"><span class=\"ds-rosto ds-rosto-md ds-rosto-tom-4\">AM</span><span class=\"ds-destaque-texto\"><span class=\"ds-destaque-rotulo\"><span class=\"ds-amostra ds-conta-agora\"></span>Em atendimento <span class=\"ds-destaque-quando\">desde 10:00</span></span><span class=\"ds-destaque-corpo\"><strong>Amora</strong><span>Consulta · Dra. Helena</span></span></span></a><a class=\"ds-destaque\" href=\"#\"><span class=\"ds-rosto ds-rosto-md\">FR</span><span class=\"ds-destaque-texto\"><span class=\"ds-destaque-rotulo\"><span class=\"ds-amostra ds-conta-esperando\"></span>A seguir <span class=\"ds-destaque-quando ds-destaque-quando-atencao\">aguardando há 8 min</span></span><span class=\"ds-destaque-corpo\"><strong>10:30 · Frida</strong><span>Vacina · Dr. Paulo</span></span></span></a><a class=\"ds-destaque\" href=\"#\"><span class=\"ds-rosto ds-rosto-md ds-rosto-tom-4\">SU</span><span class=\"ds-destaque-texto\"><span class=\"ds-destaque-rotulo\"><span class=\"ds-amostra ds-conta-chegada\"></span>Chegada atrasada <span class=\"ds-destaque-quando ds-destaque-quando-atencao\">há 42 min</span></span><span class=\"ds-destaque-corpo\"><strong>09:30 · Sushi</strong><span>Gatil G2</span></span></span></a></div></section>",
+      "css": ".ds-dia { display: grid; gap: 1rem; max-width: 52rem; padding: 1.35rem 1.5rem 1.5rem; border-radius: 1.25rem; background: #FBF7F4; box-shadow: 0 1px 2px rgb(31 47 43 / 5%), 0 12px 32px -14px rgb(31 47 43 / 18%); color: #1F2F2B; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-dia-cabeca { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 1rem; min-height: 2.25rem; } .ds-dia-titulo { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; } .ds-dia-resumo { margin: 0; color: #43504D; font-size: 0.875rem; font-variant-numeric: tabular-nums; } .ds-dia-link { display: inline-flex; align-items: center; min-height: 2.25rem; padding: 0 0.6rem; margin-inline: auto -0.6rem; border-radius: 999px; color: #456A60; font-size: 0.8125rem; font-weight: 700; text-decoration: none; transition: background-color 150ms ease-out; } .ds-dia-link:hover { background: #E2EFEB; } .ds-dia-quadro { display: grid; grid-template-columns: 5.25rem minmax(0, 1fr); grid-template-rows: 1.5rem auto auto; column-gap: 1rem; row-gap: 0.55rem; } .ds-dia-camada { position: relative; grid-column: 2; grid-row: 1 / 4; pointer-events: none; } .ds-dia-camada-agora { z-index: 3; } .ds-dia-risco { position: absolute; top: 1.35rem; bottom: 0; width: 1px; background: rgb(140 120 105 / 16%); } .ds-dia-regua { position: relative; grid-column: 2; grid-row: 1; } .ds-dia-hora { position: absolute; top: 0.1rem; transform: translateX(-50%); color: #56645F; font-size: 0.75rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; } .ds-dia-hora-inicio { transform: none; } .ds-dia-hora-fim { transform: translateX(-100%); } .ds-dia-rotulo { grid-column: 1; align-self: start; justify-self: start; margin-top: 0.4rem; padding: 0.22rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; } .ds-dia-rotulo-clinica { background: #D7EEEE; color: #1E5557; } .ds-dia-rotulo-hotel { background: #E8E4FF; color: #4A3F9E; } .ds-pista { position: relative; grid-column: 2; height: calc(var(--pistas, 1) * 0.875rem + 0.75rem); } .ds-dia-divisa { grid-column: 1 / -1; align-self: start; margin-top: -0.28rem; border-top: 1px solid #C8B5A8; pointer-events: none; } .ds-pista-hotel { height: 2.65rem; } .ds-pista-almoco { position: absolute; top: 0; bottom: 0; border-inline: 1px dashed #84A59D; } .ds-contas { position: absolute; inset: 0.5rem 0; } .ds-conta { position: absolute; box-sizing: border-box; height: 0.625rem; min-width: 0.4rem; margin-left: 1px; border-radius: 999px; transition: filter 150ms ease-out, background-color 180ms ease-out, border-color 180ms ease-out; } .ds-conta:hover { filter: brightness(0.9) saturate(1.1); } .ds-conta-feito { background: #84A59D; } .ds-conta-agora { background: #1E5557; } .ds-conta-esperando { border: 1.5px solid #8F4322; background: #FFB7A1; } .ds-conta-marcado { border: 1.5px solid #1E5557; background: #D7EEEE; } .ds-conta-falta { border: 1.5px solid #A7313A; background: transparent; } .ds-conta-chegada { border: 1.5px solid #4A3F9E; background: #E8E4FF; } .ds-amostra { display: inline-block; flex-shrink: 0; box-sizing: border-box; width: 1rem; height: 0.5rem; border-radius: 999px; } .ds-amostra-almoco { border-inline: 1px dashed #84A59D; border-radius: 0; } .ds-marca { --ds-sombra: 0 1px 2px rgb(31 47 43 / 8%); position: absolute; top: 0.45rem; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 0.3rem; box-sizing: border-box; height: 1.75rem; padding: 0 0.3rem 0 0.45rem; border: 1px solid #8C7FDC; border-radius: 999px; background: #FBF7F4; color: #1F2F2B; font-size: 0.8125rem; font-weight: 700; font-variant-numeric: tabular-nums; text-decoration: none; white-space: nowrap; box-shadow: var(--ds-sombra); transition: box-shadow 150ms ease-out; } .ds-marca:hover { --ds-sombra: 0 4px 12px -4px rgb(31 47 43 / 24%); } .ds-marca-atrasada { border-color: #8F4322; } .ds-marca-atrasada .ds-marca-hora { color: #8F4322; } .ds-rosto { display: inline-grid; place-items: center; flex-shrink: 0; border-radius: 50%; background: #456A60; color: #F4F9F8; font-weight: 700; line-height: 1; } .ds-rosto-tom-4 { background: #5F7A52; color: #F5FAF2; } .ds-rosto-xs { width: 1.1rem; height: 1.1rem; } .ds-rosto-md { width: 2.4rem; height: 2.4rem; font-size: 0.8rem; } .ds-dia-agora { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #456A60; } .ds-dia-agora-hora { position: absolute; top: -0.05rem; left: 50%; transform: translateX(-50%); padding: 0.1rem 0.45rem; border-radius: 999px; background: #456A60; color: #FFFFFF; font-size: 0.75rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; white-space: nowrap; } .ds-dia-legenda { display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; margin: -0.35rem 0 0; padding: 0 0 0 6.25rem; list-style: none; } .ds-dia-legenda li { display: inline-flex; align-items: center; gap: 0.45rem; color: #43504D; font-size: 0.8125rem; font-variant-numeric: tabular-nums; } .ds-dia-destaques { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0.75rem; } .ds-destaque { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.15rem 0.85rem; min-width: 0; padding: 0.85rem 1rem; border-radius: 1rem; background: #F5F0EC; color: #1F2F2B; text-decoration: none; transition: background-color 150ms ease-out; } .ds-destaque:hover { background: #E2EFEB; } .ds-destaque-texto { display: grid; gap: 0.15rem; min-width: 0; } .ds-destaque-rotulo { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.45rem; color: #43504D; font-size: 0.8125rem; font-weight: 600; } .ds-destaque-quando { color: #456A60; font-variant-numeric: tabular-nums; } .ds-destaque-quando-atencao { color: #8F4322; } .ds-destaque-corpo { display: grid; gap: 0.1rem; min-width: 0; } .ds-destaque-corpo strong { overflow: hidden; font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; } .ds-destaque-corpo span { display: -webkit-box; overflow: hidden; color: #43504D; font-size: 0.8125rem; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; } .ds-dia-link:focus-visible, .ds-destaque:focus-visible, .ds-marca:focus-visible { outline: none; box-shadow: 0 0 0 2px #FBF7F4, 0 0 0 4px #456A60; } @media (prefers-reduced-motion: reduce) { .ds-dia-link, .ds-conta, .ds-marca, .ds-destaque { transition: none; } }"
+    },
+    {
+      "name": "Cartão da Visão geral",
+      "kind": "card",
+      "refersTo": "inicio-card",
+      "description": "Cartão macio da Visão geral, sem borda e com sombra em repouso; aqui com um grupo da pauta: selo de módulo, bloco do ícone em Phosphor duotone (só o urgente é cheio, no coral invertido; atenção em pêssego suave; normal em sálvia clara) e selos de gravidade na mesma vertical.",
+      "html": "<section class=\"ds-home-card\"><header class=\"ds-home-head\"><h3 class=\"ds-home-title\">O que pede ação</h3><a class=\"ds-home-link\" href=\"#\">Hoje na clínica</a></header><div class=\"ds-home-grupo\"><div class=\"ds-home-group\"><span class=\"ds-home-selo ds-home-selo-modulo ds-home-selo-clinica\">Clínica</span><span class=\"ds-home-count\">3 assuntos</span></div><div class=\"ds-home-cols\" aria-hidden=\"true\"><span class=\"ds-home-cols-assunto\">Assunto</span><span>Gravidade</span></div><ul class=\"ds-home-rows\"><li><a class=\"ds-home-row ds-home-row-risco\" href=\"#\"><span class=\"ds-home-bloco\" aria-hidden=\"true\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" width=\"1em\" height=\"1em\" fill=\"currentColor\"><g><path d=\"M248,112v56H112V80H216A32,32,0,0,1,248,112Z\" opacity=\"0.2\"></path><path d=\"M216,72H32V48a8,8,0,0,0-16,0V208a8,8,0,0,0,16,0V176H240v32a8,8,0,0,0,16,0V112A40,40,0,0,0,216,72ZM32,88h72v72H32Zm88,72V88h96a24,24,0,0,1,24,24v48Z\"></path></g></svg></span><span class=\"ds-home-row-text\"><strong>2 itens a resolver na internação</strong><span>1 boletim retido</span></span><span class=\"ds-home-selo ds-home-selo-risco\">Urgente</span><span class=\"ds-home-ir\" aria-hidden=\"true\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" width=\"1em\" height=\"1em\" fill=\"currentColor\"><g><path d=\"M216,128l-72,72V56Z\" opacity=\"0.2\"></path><path d=\"M221.66,122.34l-72-72A8,8,0,0,0,136,56v64H40a8,8,0,0,0,0,16h96v64a8,8,0,0,0,13.66,5.66l72-72A8,8,0,0,0,221.66,122.34ZM152,180.69V75.31L204.69,128Z\"></path></g></svg></span></a></li><li><a class=\"ds-home-row ds-home-row-atencao\" href=\"#\"><span class=\"ds-home-bloco\" aria-hidden=\"true\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" width=\"1em\" height=\"1em\" fill=\"currentColor\"><g><path d=\"M196,116l-89.66,89.66a8,8,0,0,1-5.65,2.34H48V155.31a8,8,0,0,1,2.34-5.65L140,60Z\" opacity=\"0.2\"></path><path d=\"M237.66,66.34l-48-48a8,8,0,0,0-11.32,11.32L196.69,48,168,76.69,133.66,42.34a8,8,0,0,0-11.32,11.32L128.69,60l-84,84A15.86,15.86,0,0,0,40,155.31v49.38L18.34,226.34a8,8,0,0,0,11.32,11.32L51.31,216h49.38A15.86,15.86,0,0,0,112,211.31l84-84,6.34,6.35a8,8,0,0,0,11.32-11.32L179.31,88,208,59.31l18.34,18.35a8,8,0,0,0,11.32-11.32ZM100.69,200H56V155.31l18-18,20.34,20.35a8,8,0,0,0,11.32-11.32L85.31,126,98,113.31l20.34,20.35a8,8,0,0,0,11.32-11.32L109.31,102,140,71.31,184.69,116Z\"></path></g></svg></span><span class=\"ds-home-row-text\"><strong>5 reforços de vacina vencidos</strong></span><span class=\"ds-home-selo ds-home-selo-atencao\">Atenção</span><span class=\"ds-home-ir\" aria-hidden=\"true\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" width=\"1em\" height=\"1em\" fill=\"currentColor\"><g><path d=\"M216,128l-72,72V56Z\" opacity=\"0.2\"></path><path d=\"M221.66,122.34l-72-72A8,8,0,0,0,136,56v64H40a8,8,0,0,0,0,16h96v64a8,8,0,0,0,13.66,5.66l72-72A8,8,0,0,0,221.66,122.34ZM152,180.69V75.31L204.69,128Z\"></path></g></svg></span></a></li><li><a class=\"ds-home-row ds-home-row-neutro\" href=\"#\"><span class=\"ds-home-bloco\" aria-hidden=\"true\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" width=\"1em\" height=\"1em\" fill=\"currentColor\"><g><path d=\"M180.92,88,128,128,74.67,88Z\" opacity=\"0.2\"></path><path d=\"M200,75.64V40a16,16,0,0,0-16-16H72A16,16,0,0,0,56,40V76a16.07,16.07,0,0,0,6.4,12.8L114.67,128,62.4,167.2A16.07,16.07,0,0,0,56,180v36a16,16,0,0,0,16,16H184a16,16,0,0,0,16-16V180.36a16.09,16.09,0,0,0-6.35-12.77L141.27,128l52.38-39.59A16.09,16.09,0,0,0,200,75.64ZM72,40H184V75.64L178.23,80H77.33L72,76Zm56,78L98.67,96h58.4Zm56,98H72V180l48-36v24a8,8,0,0,0,16,0V144.08l48,36.28Z\"></path></g></svg></span><span class=\"ds-home-row-text\"><strong>2 pacientes aguardando na fila</strong></span><span class=\"ds-home-selo ds-home-selo-neutro\">Normal</span><span class=\"ds-home-ir\" aria-hidden=\"true\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" width=\"1em\" height=\"1em\" fill=\"currentColor\"><g><path d=\"M216,128l-72,72V56Z\" opacity=\"0.2\"></path><path d=\"M221.66,122.34l-72-72A8,8,0,0,0,136,56v64H40a8,8,0,0,0,0,16h96v64a8,8,0,0,0,13.66,5.66l72-72A8,8,0,0,0,221.66,122.34ZM152,180.69V75.31L204.69,128Z\"></path></g></svg></span></a></li></ul></div><div class=\"ds-home-grupo ds-home-grupo-seguinte\"><div class=\"ds-home-group\"><span class=\"ds-home-selo ds-home-selo-modulo ds-home-selo-hotel\">Hotel</span><span class=\"ds-home-count\">2 assuntos</span></div></div></section>",
+      "css": ".ds-home-card { display: grid; gap: 1.15rem; max-width: 34rem; padding: 1.35rem 1.5rem 1.5rem; background: #FBF7F4; color: #1F2F2B; border-radius: 1.25rem; box-shadow: 0 1px 2px rgb(31 47 43 / 5%), 0 12px 32px -14px rgb(31 47 43 / 18%); font-family: ui-sans-serif, system-ui, sans-serif; } .ds-home-head { display: flex; align-items: center; justify-content: space-between; gap: 0.85rem; } .ds-home-title { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; } .ds-home-link { display: inline-flex; align-items: center; min-height: 2.25rem; padding: 0 0.6rem; margin-inline-end: -0.6rem; border-radius: 999px; color: #456A60; font-size: 0.8125rem; font-weight: 700; text-decoration: none; transition: background-color 150ms ease-out; } .ds-home-link:hover { background: #E2EFEB; } .ds-home-grupo { display: grid; gap: 0.6rem; } .ds-home-grupo-seguinte { padding-top: 1.15rem; border-top: 1px solid #C8B5A8; } .ds-home-group { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8125rem; } .ds-home-count { color: #43504D; font-variant-numeric: tabular-nums; } .ds-home-count::before { content: '• '; } .ds-home-cols { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) 5.75rem 1rem; column-gap: 0.85rem; padding: 0 0.4rem 0.4rem; color: #56645F; font-size: 0.75rem; font-weight: 600; } .ds-home-cols-assunto { grid-column: 2; } .ds-home-rows { display: grid; margin: 0; padding: 0; list-style: none; border-top: 1px solid #C8B5A8; } .ds-home-rows li + li { border-top: 1px solid #C8B5A8; } .ds-home-row { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) 5.75rem 1rem; align-items: center; gap: 0.6rem 0.85rem; min-height: 3.35rem; padding: 0.55rem 0.4rem; border-radius: 0.75rem; color: #1F2F2B; text-decoration: none; transition: background-color 150ms ease-out; } .ds-home-row:hover { background: #F5F0EC; } .ds-home-bloco { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 0.7rem; background: var(--ds-bloco-fundo); color: var(--ds-bloco-tinta); } .ds-home-bloco svg { width: 1.3rem; height: 1.3rem; } .ds-home-row-risco { --ds-bloco-fundo: #A7313A; --ds-bloco-tinta: #FDE3E2; } .ds-home-row-atencao { --ds-bloco-fundo: #FFE8DE; --ds-bloco-tinta: #8F4322; } .ds-home-row-neutro { --ds-bloco-fundo: #E2EFEB; --ds-bloco-tinta: #456A60; } .ds-home-row-text { display: grid; gap: 0.1rem; min-width: 0; font-variant-numeric: tabular-nums; } .ds-home-row-text strong { font-size: 0.875rem; font-weight: 600; } .ds-home-row-text span { color: #43504D; font-size: 0.8125rem; line-height: 1.4; } .ds-home-selo { justify-self: start; padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; } .ds-home-selo-modulo { letter-spacing: 0.05em; text-transform: uppercase; } .ds-home-selo-clinica { background: #D7EEEE; color: #1E5557; } .ds-home-selo-hotel { background: #E8E4FF; color: #4A3F9E; } .ds-home-selo-risco { background: #FDE3E2; color: #A7313A; } .ds-home-selo-atencao { background: #FFE8DE; color: #8F4322; } .ds-home-selo-neutro { background: #F0EFEC; color: #716C61; } .ds-home-ir { display: grid; color: #56645F; } .ds-home-ir svg { width: 1rem; height: 1rem; } .ds-home-link:focus-visible, .ds-home-row:focus-visible { outline: none; box-shadow: 0 0 0 2px #FBF7F4, 0 0 0 4px #456A60; } @media (prefers-reduced-motion: reduce) { .ds-home-link, .ds-home-row { transition: none; } }"
+    },
+    {
+      "name": "Pílulas da Visão geral",
+      "kind": "button",
+      "refersTo": "inicio-pilula-cheia",
+      "description": "Ação em pílula na Visão geral: cheia só para o próximo passo natural, contornada para o resto. No hover, a cheia anda em direção à tinta do texto.",
+      "html": "<nav class=\"ds-pills\" aria-label=\"Ações\"><a class=\"ds-pill ds-pill-cheia\" href=\"#\">Agenda de hoje</a><a class=\"ds-pill\" href=\"#\">Mapa de vagas</a><a class=\"ds-pill\" href=\"#\">Compartilhar código</a></nav>",
+      "css": ".ds-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-pill { display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0 1.05rem; border: 1px solid #C8B5A8; border-radius: 999px; background: #FBF7F4; color: #1F2F2B; font-size: 0.875rem; font-weight: 600; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px rgb(31 47 43 / 5%); transition: background-color 150ms ease-out, border-color 150ms ease-out; } .ds-pill:hover { border-color: #84A59D; background: #E2EFEB; } .ds-pill-cheia { border-color: #456A60; background: #456A60; color: #FFFFFF; } .ds-pill-cheia:hover { border-color: color-mix(in srgb, #456A60 82%, #1F2F2B); background: color-mix(in srgb, #456A60 82%, #1F2F2B); color: #FFFFFF; } .ds-pill:focus-visible { outline: none; box-shadow: 0 0 0 2px #FBF7F4, 0 0 0 4px #456A60; }"
+    },
+    {
+      "name": "Ganhos e indicação",
+      "kind": "custom",
+      "refersTo": "inicio-card",
+      "description": "Um cartão só para a parceria: os ganhos em cima e, na faixa de sálvia embaixo, o código de indicação com o QR pequeno, que abre o painel lateral do QR. As duas partes entram sem raio nem sombra próprios; o cartão recorta a faixa no raio dele. A imagem do QR e o painel foram omitidos na amostra. O tom da faixa é decisão em aberto do usuário.",
+      "html": "<section class=\"ds-ganhos\"><div class=\"ds-ganhos-parte\"><header class=\"ds-ganhos-head\"><h3 class=\"ds-ganhos-title\">Ganhos de indicação</h3><a class=\"ds-ganhos-link\" href=\"#\">Ver extrato</a></header><div class=\"ds-ganhos-destaque\"><p class=\"ds-ganhos-valor\">R$ 1.240,00</p><p class=\"ds-ganhos-rotulo\">liberado</p></div></div><div class=\"ds-indique\"><header class=\"ds-indique-head\"><h3 class=\"ds-indique-title\">Indique e ganhe</h3><a class=\"ds-indique-link\" href=\"#\">Abrir divulgação</a></header><div class=\"ds-indique-body\"><div class=\"ds-indique-text\"><p class=\"ds-indique-code\">CBC454</p><button class=\"ds-indique-copy\" type=\"button\">Copiar código</button></div><button class=\"ds-indique-qr\" type=\"button\" aria-label=\"Ampliar o QR code\"><span class=\"ds-indique-qr-dica\" aria-hidden=\"true\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\" width=\"1em\" height=\"1em\" fill=\"currentColor\"><g><path d=\"M220,48V96a12,12,0,0,1-24,0V77l-39.51,39.52a12,12,0,0,1-17-17L179,60H160a12,12,0,0,1,0-24h48A12,12,0,0,1,220,48ZM99.51,139.51,60,179V160a12,12,0,0,0-24,0v48a12,12,0,0,0,12,12H96a12,12,0,0,0,0-24H77l39.52-39.51a12,12,0,0,0-17-17Z\"></path></g></svg></span></button></div></div></section>",
+      "css": ".ds-ganhos { display: grid; max-width: 28rem; overflow: hidden; border-radius: 1.25rem; background: #FBF7F4; box-shadow: 0 1px 2px rgb(31 47 43 / 5%), 0 12px 32px -14px rgb(31 47 43 / 18%); color: #1F2F2B; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-ganhos-parte { display: grid; gap: 1.15rem; padding: 1.35rem 1.5rem 1.5rem; } .ds-ganhos-head, .ds-indique-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.4rem 0.85rem; min-height: 2.25rem; } .ds-ganhos-title, .ds-indique-title { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; } .ds-ganhos-link, .ds-indique-link { display: inline-flex; align-items: center; min-height: 2.25rem; padding: 0 0.6rem; margin-inline-end: -0.6rem; border-radius: 999px; font-size: 0.8125rem; font-weight: 700; text-decoration: none; transition: background-color 150ms ease-out; } .ds-ganhos-link { color: #456A60; } .ds-ganhos-link:hover { background: #E2EFEB; } .ds-ganhos-destaque { display: grid; gap: 0.2rem; } .ds-ganhos-valor { margin: 0; font-size: 2.5rem; font-weight: 750; line-height: 1.05; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; } .ds-ganhos-rotulo { margin: 0; color: #43504D; font-size: 0.8125rem; font-weight: 600; } .ds-indique { display: grid; gap: 0.85rem; padding: 1.1rem 1.5rem 1.25rem; background: linear-gradient(135deg, #E5EEEA 0%, #C9E2D9 100%); } .ds-indique-link { color: #1F2F2B; } .ds-indique-link:hover { background: rgb(251 247 244 / 60%); } .ds-indique-body { display: flex; align-items: center; justify-content: space-between; gap: 1.15rem; } .ds-indique-text { display: grid; gap: 0.3rem; justify-items: start; min-width: 0; } .ds-indique-code { margin: 0; font-size: 2rem; font-weight: 800; line-height: 1.1; letter-spacing: 0.1em; font-variant-numeric: tabular-nums; } .ds-indique-copy { --ds-sombra: 0 1px 2px rgb(31 47 43 / 8%); min-height: 2.25rem; padding: 0 0.85rem; border: 0; border-radius: 999px; background: #FBF7F4; color: #456A60; font: inherit; font-size: 0.875rem; font-weight: 700; cursor: pointer; box-shadow: var(--ds-sombra); transition: box-shadow 150ms ease-out; } .ds-indique-copy:hover { --ds-sombra: 0 4px 12px -4px rgb(31 47 43 / 24%); } .ds-indique-qr { --ds-sombra: 0 6px 18px -8px rgb(31 47 43 / 30%); position: relative; flex-shrink: 0; width: 4.75rem; height: 4.75rem; padding: 0.35rem; border: 0; border-radius: 0.8rem; background: #FFFFFF; cursor: pointer; box-shadow: var(--ds-sombra); transition: box-shadow 150ms ease-out; } .ds-indique-qr:hover { --ds-sombra: 0 10px 24px -8px rgb(31 47 43 / 40%); } .ds-indique-qr-dica { position: absolute; inset-block-end: -0.3rem; inset-inline-end: -0.3rem; display: grid; place-items: center; width: 1.35rem; height: 1.35rem; border-radius: 999px; background: #FBF7F4; color: #456A60; box-shadow: 0 2px 6px rgb(31 47 43 / 18%); } .ds-indique-qr-dica svg { width: 0.72rem; height: 0.72rem; } .ds-ganhos-link:focus-visible, .ds-indique-link:focus-visible, .ds-indique-copy:focus-visible, .ds-indique-qr:focus-visible { outline: none; box-shadow: 0 0 0 2px #FBF7F4, 0 0 0 4px #456A60; } @media (prefers-reduced-motion: reduce) { .ds-ganhos-link, .ds-indique-link, .ds-indique-copy, .ds-indique-qr { transition: none; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Consultório Calmo",
+    "overview": "Um consultório bem cuidado não grita. A sala é clara sem ofuscar, as paredes são de um tom quente e neutro, e a única cor que se repete é a da casa: sálvia. Quando algo precisa de atenção — um animal em risco, uma medicação atrasada, um turno que vai passar — o sinal aparece pequeno e exato, num ícone ou num rótulo, e todo o resto continua quieto. É isso que permite a mesma tela convencer numa demonstração e continuar descansada na oitava hora de uso.\n\nO sistema é denso por ofício e macio no toque. Densidade de estação de trabalho (corpo em 13px, linha de tabela de 36px, três níveis de densidade escolhidos pelo usuário) convive com cantos generosos e superfícies de linho, para que a ferramenta clínica não tenha frieza hospitalar. A hierarquia vem de tamanho, peso e linha — não de cor e não de sombra. A superfície é plana por padrão: a borda separa, e só o que realmente flutua ganha sombra.\n\nA Visão geral (`/inicio`) é a exceção com escopo. Ela recebeu um acabamento próprio, aprovado só para ela: um véu de sálvia no topo da página, cartões macios de 20px com sombra e sem borda (a Linha do dia entre eles), selos de 6px e ações em pílula. O menu lateral, o cabeçalho e as outras telas seguem o sistema acima. Levar esse acabamento adiante é uma decisão em aberto do usuário. Nas seções abaixo, o que muda ali fica sob o subtítulo Variante da Visão geral. O código fica em src/pages/(accounts)/inicio.vue e `src/components/home/`, e a composição da tela, no brief `.impeccable/surfaces/src-pages-accounts-inicio-vue.md`.",
+    "keyCharacteristics": [
+      "Verde é tinta, não papel: sálvia no acento, linho quente na superfície.",
+      "Cor fora do sálvia só entra com significado próprio, e nunca preenche área grande.",
+      "Plano por padrão; a linha separa, a sombra é reservada ao que flutua.",
+      "Cantos macios, densidade de estação de trabalho, números tabulares.",
+      "Modo claro é o padrão; o escuro espelha cada papel com valores próprios.",
+      "Movimento curto (140–220 ms) que explica mudança de estado e desliga com `prefers-reduced-motion`.",
+      "Uma variante com escopo, só na Visão geral: véu de sálvia no topo, cartão de 20px com sombra e sem borda (a Linha do dia também), selo de 6px, ação em pílula."
+    ],
+    "rules": [
+      {
+        "name": "The Tinta, Não Papel Rule",
+        "body": "Sálvia é a cor que escreve, marca e seleciona. Nenhuma superfície maior que um chip é sálvia, exceto o trilho de navegação — e, na Visão geral, o véu do topo e a faixa de \"Indique e ganhe\", a parte de baixo do cartão de ganhos.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quatro Gavetas Rule",
+        "body": "Cor fora do sálvia só existe para dizer uma destas frases: \"é risco ou pendência\" (terracota, âmbar; coral e pêssego na Visão geral), \"é do outro turno\" (azul-noite), \"a máquina propôs\" (pervinca), \"é desta categoria\" (paleta de tipo; identidade de módulo na Visão geral). Nenhuma cor decora, e nenhuma diferencia coisas do mesmo tipo.",
+        "section": "colors"
+      },
+      {
+        "name": "The Escala de Cinza Rule",
+        "body": "Em escala de cinza nenhuma informação pode se perder. Todo estado tem, além da cor, um rótulo, um ícone ou uma forma.",
+        "section": "colors"
+      },
+      {
+        "name": "The Pico de Luz Rule",
+        "body": "Nenhuma superfície mais clara que Linho Claro (#FBF7F4). Branco puro é tinta, não papel. Clarear cartão ou casca \"para destacar\" é o erro que já gerou duas rejeições.",
+        "section": "colors"
+      },
+      {
+        "name": "The Agora Não É Alarme Rule",
+        "body": "Na Visão geral, o agora é um fio de Sálvia de Tinta Escura, nunca vermelho nem coral. Vermelho que marca \"são 10h12\" ensina a ignorar o vermelho que marca \"ligue agora\". Na Linha do dia, coral é só a falta.",
+        "section": "colors"
+      },
+      {
+        "name": "The Número Tabular Rule",
+        "body": "Todo número que se compara na vertical usa `tnum`. Coluna de número que dança obriga a reler linha a linha, e reler número é onde o erro entra.",
+        "section": "typography"
+      },
+      {
+        "name": "The Peso Antes da Cor Rule",
+        "body": "Hierarquia sobe por tamanho e peso (500 → 700 → 750/800). Cor de texto só muda para indicar estado ou ação, nunca para dar importância. Na Visão geral, a linha-resumo é tinta sálvia porque diz o estado da pauta, e o peso dela (500) fica abaixo do título.",
+        "section": "typography"
+      },
+      {
+        "name": "The Plano por Padrão Rule",
+        "body": "Cartão em repouso não tem sombra. Se dois blocos precisam se separar, a resposta é linha ou degrau de linho. Divergência atual: `.clinic-card` ainda aplica `--clinic-shadow-card` (5%/8%) em repouso; o alvo é removê-la ao tocar cada tela, sem varredura em massa. Exceção com escopo: a Visão geral, onde o cartão troca a borda pela sombra (ver Variante).",
+        "section": "elevation"
+      },
+      {
+        "name": "The Linha Separa Rule",
+        "body": "Linha abaixo de 1,5:1 contra o cartão não existe para o olho. Se a borda não se vê, não compense clareando a página — escureça a linha.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usar sálvia como tinta (texto, ícone, seleção, trilho) e linho como papel.",
+      "Do marcar urgência num chip ou ícone cheio com rótulo, deixando a linha e o cartão neutros.",
+      "Do separar blocos com Costura (#C8B5A8) ou um degrau de linho antes de pensar em sombra.",
+      "Do usar números tabulares em toda coluna de valor, horário, dose e dinheiro.",
+      "Do dar a cada tela uma forma que corresponda à pergunta que ela responde.",
+      "Do manter transições em 140–220 ms com `ease`, `ease-out` ou `cubic-bezier(0.32, 0.72, 0, 1)`, e zerá-las em `prefers-reduced-motion`.",
+      "Do conferir cor de superfície amostrando o pixel da captura, não a olho.",
+      "Do, na Visão geral, deixar a sombra macia declarar o cartão sozinha, sem borda junto, e separar o que há dentro dele por Costura e degrau de linho, como no resto do sistema.",
+      "Do, na Visão geral, pôr os pastéis da paleta da casa só em selo de 6px e no bloco do ícone da pauta, e só com significado (coral e pêssego para gravidade, ciano e pervinca para módulo), com a tinta escurecida no próprio matiz até passar de 5:1.",
+      "Do, na Visão geral, desenhar o tempo num cartão como os outros, com as pistas na própria superfície dele e separadas por fios de Costura: o estado dentro da conta, a legenda como resumo e o agora num fio de Sálvia de Tinta Escura, o único sinal de onde o dia está."
+    ],
+    "donts": [
+      "Don't usar faixa de acento na borda esquerda (ou direita) de cartão, linha ou alerta.",
+      "Don't pintar cartão, linha ou faixa de ponta a ponta para sinalizar estado.",
+      "Don't criar barra de segmentos com muitos botões e contagens para uma ação rara.",
+      "Don't transformar todo bloco em cartão com a mesma borda, raio e fundo.",
+      "Don't usar cor para decorar ou para diferenciar itens do mesmo tipo.",
+      "Don't clarear superfície acima de #FBF7F4 nem usar branco puro como fundo.",
+      "Don't usar o creme #F5EBE0 como fundo de página — já foi recusado.",
+      "Don't usar `<button>`, `<select>`, `<input>` nativos nem SVG desenhado à mão.",
+      "Don't usar entrada escalonada de cartões, número que conta subindo, parallax ou hover que escala; nada de transição acima de 300 ms em tela de operação.",
+      "Don't, na Visão geral, pintar o agora de vermelho ou coral, nem apagar como passado o que ainda falta fazer: numa pista de pendências, horário vencido é atraso.",
+      "Don't levar o acabamento da Visão geral (véu de sálvia, cartão de 20px com sombra, selo de 6px, gravidade em coral e pêssego, identidade de módulo em ciano e pervinca) ao menu lateral, ao cabeçalho ou a outra tela antes de o usuário aprovar."
+    ]
+  }
+}

@@ -271,13 +271,13 @@
       "programas": "Programmes",
       "divulgacao": "Promotion",
       "acessos": "Access",
-      "financeiro": "Finance",
+      "financeiro": "Referral earnings",
       "settings": "Settings"
     },
     "pageLabels": {
       "overview": "Overview",
       "saqueDetail": "Payout detail",
-      "financeiro": "Finance",
+      "financeiro": "Referral earnings",
       "programas": "Participation programmes",
       "divulgacao": "Promotion",
       "acessos": "Access",
@@ -536,6 +536,227 @@
       "filterPlaceholder": "Filter by screen or section...",
       "clearFilterAria": "Clear filter",
       "emptyFilter": "No screens found for “{q}”."
+    },
+    "ledePauta": "Your referral earnings and what's waiting in each module. Each line takes you straight to the screen where the work is.",
+    "saldo": {
+      "total": "Total balance",
+      "retido": "In the security window",
+      "sacado": "Withdrawn to date",
+      "nota": "Each participation spends 14 days in the security window before it can be withdrawn.",
+      "falhou": "We couldn't load your balance.",
+      "tentar": "Try again",
+      "carregandoAria": "Loading balance",
+      "verExtrato": "View statement",
+      "liberado": "released",
+      "bloqueadoRotulo": "blocked for payout",
+      "capacidade": {
+        "liberado": "Ready for payout.",
+        "abaixoDoMinimo": "Payouts start at {minimo}.",
+        "semChavePix": "Add a PIX key to request a payout.",
+        "soDono": "Only the account owner can request a payout.",
+        "bloqueado": "Payouts for this account are blocked.",
+        "tudoRetido": "Your whole balance is still in the security window.",
+        "semSaldo": "No earnings yet. Participation shows up here when a pet parent subscribes with your code."
+      },
+      "acao": {
+        "liberado": "Request payout",
+        "semChavePix": "Add PIX key",
+        "bloqueado": "See why"
+      },
+      "barraAria": "{liberado} released of {total}"
+    },
+    "programa": {
+      "titulo": "Affiliate Programme",
+      "selo": {
+        "NAO_SOLICITADO": "Not active",
+        "SOLICITADO": "Under review",
+        "REJEITADO": "Declined",
+        "SUSPENSO": "Suspended",
+        "ATIVO": "Active"
+      },
+      "texto": {
+        "NAO_SOLICITADO": "Activate the programme to earn participation for each pet parent who subscribes with your code.",
+        "SOLICITADO": "Your request is under review. The result shows up here as soon as it's decided.",
+        "REJEITADO": "Your request wasn't approved. Go to Programmes to see how to apply again.",
+        "SUSPENSO": "The programme is suspended. Go to Programmes to see how to resolve it.",
+        "ATIVO": "The programme is active."
+      },
+      "motivo": "Reason given: {motivo}",
+      "cta": "See programmes"
+    },
+    "pauta": {
+      "titulo": "Needs action",
+      "conferido": "Checked at {hora}",
+      "calma": "Nothing needs action right now",
+      "carregandoAria": "Checking pending items",
+      "fila": "{total} patient waiting on the waitlist | {total} patients waiting on the waitlist",
+      "internacao": "{total} item to resolve in hospitalisation | {total} items to resolve in hospitalisation",
+      "atividades": "{total} pending item in Activities | {total} pending items in Activities",
+      "vacinas": "{total} overdue vaccine booster | {total} overdue vaccine boosters",
+      "rotina": "{total} overdue routine task | {total} overdue routine tasks",
+      "vespera": "{total} arrival blocked in the next 3 days | {total} arrivals blocked in the next 3 days",
+      "conferindo": "Checking…",
+      "reconferir": "Check again",
+      "falhou": "We couldn't check pending items.",
+      "falhouDeNovo": "We couldn't check again. The numbers below are from the previous check.",
+      "parcial": "Some pending items couldn't be checked.",
+      "tentar": "Try again",
+      "parte": {
+        "boletinsRetidos": "{total} update on hold | {total} updates on hold",
+        "administracoesAtrasadas": "{total} overdue administration | {total} overdue administrations",
+        "rascunhos": "{total} draft record | {total} draft records",
+        "retornosVencidos": "{total} overdue follow-up | {total} overdue follow-ups",
+        "vagasOfertadas": "{total} offered slot without a reply | {total} offered slots without a reply",
+        "medicacoesAtrasadas": "{total} overdue medication | {total} overdue medications"
+      },
+      "coluna": {
+        "assunto": "Matter",
+        "gravidade": "Severity",
+        "onde": "Where"
+      },
+      "gravidade": {
+        "risco": "Urgent",
+        "atencao": "Attention",
+        "neutro": "Normal"
+      },
+      "onde": {
+        "fila": "Waitlist",
+        "internacao": "Inpatients",
+        "atividades": "Tasks",
+        "vacinas": "Vaccines",
+        "rotina": "Routine",
+        "vespera": "Bookings"
+      },
+      "contagem": "{total} matter | {total} matters",
+      "recolher": "Collapse {modulo}",
+      "expandir": "Expand {modulo}"
+    },
+    "resumo": {
+      "portal": "Track your earnings and share your code.",
+      "conferindo": "Checking what needs your attention…",
+      "urgentes": "{total} urgent matter needs your attention today | {total} urgent matters need your attention today",
+      "esperando": "{total} matter is waiting for you today | {total} matters are waiting for you today",
+      "falhou": "We couldn't check pending items right now.",
+      "emDia": "All caught up here."
+    },
+    "acoes": {
+      "rotulo": "Quick actions",
+      "agenda": "Today's schedule",
+      "mapa": "Availability map",
+      "compartilhar": "Share code"
+    },
+    "indique": {
+      "titulo": "Refer and earn",
+      "abrir": "Open Promotion",
+      "carregando": "Loading code…",
+      "falhou": "We couldn't load your referral code.",
+      "descricao": "Each pet parent who subscribes with your code earns you participation.",
+      "copiar": "Copy code",
+      "ampliarQr": "Enlarge QR code",
+      "janelaTitulo": "Referral QR code",
+      "instrucao": "Point a phone camera here to subscribe with this code.",
+      "baixar": "Download QR",
+      "imprimir": "Print",
+      "impressaoBloqueada": "Couldn't open the print view",
+      "impressaoBloqueadaDetalhe": "Allow pop-ups for this site in your browser and try again.",
+      "link": "Referral link",
+      "linkCopiado": "Link copied",
+      "comoFunciona": "How it works",
+      "seuCodigo": "Your referral code"
+    },
+    "dia": {
+      "titulo": "Today",
+      "abrirAgenda": "Full schedule",
+      "atendimentos": "{total} appointment | {total} appointments",
+      "chegadas": "{total} arrival pending | {total} arrivals pending",
+      "saidas": "{total} departure pending | {total} departures pending",
+      "estado": {
+        "feito": "{total} completed | {total} completed",
+        "agora": "{total} in consult | {total} in consult",
+        "esperando": "{total} waiting | {total} waiting",
+        "marcado": "{total} scheduled | {total} scheduled",
+        "falta": "{total} no-show | {total} no-shows"
+      },
+      "estadoNome": {
+        "feito": "Completed",
+        "agora": "In consult",
+        "esperando": "Waiting at reception",
+        "marcado": "Scheduled",
+        "falta": "No-show"
+      },
+      "descricao": "Today's schedule, {abre} to {fecha}: {estados}.",
+      "almoco": "Lunch",
+      "carregando": "Loading the day…",
+      "falhouClinica": "We couldn't load today's schedule.",
+      "falhouHotel": "We couldn't load today's arrivals and departures.",
+      "tentar": "Try again",
+      "fechada": "The clinic is closed today.",
+      "feriado": "Holiday: {nome}. The clinic is closed today.",
+      "semAtendimentos": "No appointments scheduled for today.",
+      "clinicaEncerrada": "Nothing else on the clinic schedule today.",
+      "movimento": {
+        "chegada": "Arrival",
+        "saida": "Departure",
+        "chegadaAria": "Arrival of {pet} at {hora}, {detalhe}",
+        "saidaAria": "Departure of {pet} at {hora}, {detalhe}",
+        "travadoChegada": "Admission pending",
+        "travadoSaida": "Exit weigh-in pending",
+        "atrasado": "Late"
+      },
+      "destaque": {
+        "emAtendimento": "In consult",
+        "aSeguir": "Up next",
+        "proximaChegada": "Next arrival",
+        "proximaSaida": "Next departure",
+        "desde": "since {hora}",
+        "maisOutros": "and {total} more | and {total} more",
+        "aguardando": "waiting {tempo}",
+        "chegadaAtrasada": "Late arrival",
+        "saidaAtrasada": "Late departure"
+      },
+      "semMovimentoPendente": "No arrivals or departures pending."
+    },
+    "andamento": {
+      "titulo": "Today's progress",
+      "carregando": "Loading today's progress",
+      "vazio": "Nothing to measure yet today.",
+      "finalizados": "Completed appointments",
+      "finalizadosDetalhe": "{modulo} • {feitos} of {total}",
+      "comparecimento": "Attendance",
+      "comparecimentoDetalhe": "{modulo} • no no-shows | {modulo} • {total} no-show | {modulo} • {total} no-shows",
+      "rotina": "Guest routine",
+      "rotinaDetalhe": "{modulo} • {feitas} of {total}",
+      "ocupacao": "Occupancy",
+      "ocupacaoDetalhe": "{modulo} • {ocupadas} of {total}"
+    },
+    "modulos": {
+      "titulo": "Modules",
+      "rotulo": "Quick access",
+      "novoAgendamento": "New appointment",
+      "novoAgendamentoDetalhe": "Book on the clinic schedule",
+      "atendimentosHoje": "No appointments today | {total} appointment today | {total} appointments today",
+      "hospedes": "No guests | {total} guest | {total} guests",
+      "divulgacaoDetalhe": "Code, QR and materials",
+      "programasDetalhe": "Affiliate: {status}",
+      "acessosDetalhe": "Shared pets"
+    },
+    "agenda": {
+      "titulo": "Schedule",
+      "semana": "Days of the week",
+      "anterior": "Previous week",
+      "proxima": "Next week",
+      "carregando": "Loading the schedule",
+      "falhou": "Couldn't load the schedule for this day.",
+      "fechada": "The clinic is closed on this day.",
+      "vazio": "Nothing scheduled for this day.",
+      "hoje": "Today",
+      "aguardando": "Waiting",
+      "pendencia": "Pending",
+      "chegadas": "{total} arrival | {total} arrivals",
+      "compromissos": "The day's appointments",
+      "posicao": "{atual} of {total}",
+      "compromissoAnterior": "Previous appointment",
+      "proximoCompromisso": "Next appointment"
     }
   },
   "programas": {
@@ -1264,7 +1485,7 @@
   },
   "carteira": {
     "subtitle": "Portal",
-    "title": "Finance",
+    "title": "Referral earnings",
     "tabs": {
       "ariaLabel": "Tabs: {labels}",
       "visao": {
@@ -1373,7 +1594,7 @@
       "requestedAt": "Requested on {data}"
     },
     "detail": {
-      "subtitle": "Finance",
+      "subtitle": "Referral earnings",
       "title": "Payout detail",
       "back": "Back",
       "loadingAria": "Loading payout detail",
@@ -1781,8 +2002,8 @@
       "agora": "now",
       "haTempo": "{valor} ago",
       "emTempo": "in {valor}",
-      "anos": "{valor} years",
-      "meses": "{valor} months",
+      "anos": "{valor} year | {valor} years",
+      "meses": "{valor} month | {valor} months",
       "anosMeses": "{anos}y {meses}m",
       "semvalor": "—",
       "dias": "{valor} day | {valor} days",
@@ -1791,7 +2012,8 @@
     },
     "sexo": {
       "macho": "Male",
-      "femea": "Female"
+      "femea": "Female",
+      "naoInformado": "Sex not recorded"
     },
     "especie": {
       "canina": "Canine",
@@ -3950,6 +4172,361 @@
       "grupo": {
         "queixa": "What brought the patient in"
       }
+    },
+    "migracao": {
+      "titulo": "Import patients from another system",
+      "atalho": "Import spreadsheet",
+      "sobre": "Patients",
+      "lede": "The clinic's records come from a spreadsheet, with nothing to retype.",
+      "trocar": "Change file",
+      "arquivoLido": "{linhas} row · {colunas} columns | {linhas} rows · {colunas} columns",
+      "origem": "{nome} export recognised",
+      "passos": {
+        "aria": "Import steps",
+        "arquivo": "File",
+        "duvidas": "Questions",
+        "semDuvidas": "No questions",
+        "importar": "Import"
+      },
+      "comum": {
+        "emBranco": "blank",
+        "linha": "Row {n}",
+        "linhasLista": "Row {lista} | Rows {lista}",
+        "linhasN": "{n} row | {n} rows",
+        "linhasPalavra": "row | rows",
+        "semEspecie": "unknown species",
+        "semNome": "no name",
+        "semTelefone": "no phone"
+      },
+      "arquivo": {
+        "titulo": "Where is the data coming from?",
+        "texto": "An Excel spreadsheet or the file exported from the system the clinic uses today. We recognise SimplesVet and Vetus exports, and a hand-made spreadsheet works too.",
+        "soltar": "Drag the file here",
+        "ou": "or",
+        "lendo": "Reading the file…",
+        "escolher": "Choose file",
+        "formatos": "Excel (.xlsx) or .csv, up to {mb} MB",
+        "promessa": "Nothing is saved until you confirm, in the last step.",
+        "exemplosTitulo": "No file at hand?",
+        "exemplosTexto": "Try one of these samples.",
+        "usar": "Use this one",
+        "baixar": "Download",
+        "demo": {
+          "clinica": {
+            "titulo": "Spreadsheet made at the clinic",
+            "descricao": "Messy on purpose: dates in several formats, phones with no set pattern, an animal with no owner and clients already registered here."
+          },
+          "simplesvet": {
+            "titulo": "SimplesVet export",
+            "descricao": "Clean system file. The columns are recognised on their own."
+          },
+          "vetus": {
+            "titulo": "Large Vetus database",
+            "descricao": "To watch the import in progress, pause it midway and resume."
+          }
+        },
+        "erro": {
+          "vazio": "The file is empty.",
+          "grande-demais": "The file is over the limit. Split the spreadsheet into parts and import one at a time.",
+          "xls-antigo": "This is an old .xls file. Open it in Excel and save it as .xlsx or .csv.",
+          "formato-desconhecido": "This file is not a spreadsheet. Use .xlsx or .csv.",
+          "corrompido": "The file could not be opened. Try saving it again from Excel.",
+          "sem-linhas": "The spreadsheet has no rows below the header.",
+          "linhas-demais": "Too many rows for a single import. Split the spreadsheet into parts."
+        }
+      },
+      "colunas": {
+        "titulo": "Spreadsheet columns",
+        "texto": "The system matched each column to a record field on its own. Only change one if it's in the wrong place.",
+        "travado": "The import has started: the columns stay as they are.",
+        "usadas": "{n} of {total} columns used",
+        "faltam": "The import can't go ahead without this column: {campos}. When you close this panel, we'll ask which one it is.",
+        "naoUsadasTitulo": "This column isn't going into the records | These {n} columns aren't going into the records",
+        "naoUsadasTexto": "It has content, but we couldn't tell what it is. If it holds something important, choose where it goes. | They have content, but we couldn't tell what it is. If any of them holds something important, choose where it goes.",
+        "usadasTitulo": "Column used | {n} columns used",
+        "coluna": "Column {letra}",
+        "semTitulo": "Untitled",
+        "vazia": "empty column",
+        "voceEscolheu": "You chose",
+        "sugestao": "Best guess: check it",
+        "naoVem": "{n} filled cell won't be imported | {n} filled cells won't be imported",
+        "vaiPara": "Goes to",
+        "vaiParaAria": "Where column {coluna} goes",
+        "naoTrazer": "Don't import this column",
+        "grupoResponsavel": "Owner",
+        "grupoAnimal": "Animal",
+        "grupoNenhum": "None",
+        "ver": "View columns",
+        "nota": {
+          "todas": "We used the spreadsheet's only column. | We used all {n} spreadsheet columns.",
+          "parte": "We used {n} of {total} spreadsheet columns.",
+          "fora": "Left out: {lista}. | Left out: {lista}.",
+          "eMais": "{lista} and 1 more | {lista} and {n} more"
+        }
+      },
+      "campo": {
+        "responsavelNome": "Owner name",
+        "telefone": "Phone",
+        "telefone2": "Phone 2",
+        "email": "Email",
+        "cpf": "CPF",
+        "cep": "CEP",
+        "endereco": "Address",
+        "numero": "Number",
+        "bairro": "District",
+        "cidade": "Town or city",
+        "uf": "UF",
+        "petNome": "Animal name",
+        "especie": "Species",
+        "raca": "Breed",
+        "sexo": "Sex",
+        "castrado": "Neutered",
+        "nascimento": "Birth date",
+        "idade": "Age",
+        "peso": "Weight",
+        "microchip": "Microchip",
+        "pelagem": "Coat",
+        "alergia": "Allergies",
+        "situacao": "Active or deceased"
+      },
+      "duvidas": {
+        "contador": "Question {n} of {total}",
+        "nenhumaChip": "All set",
+        "nenhumaTitulo": "No questions",
+        "nenhumaTexto": "The system understood every row on its own. Continue to see the summary.",
+        "anterior": "Previous question",
+        "proxima": "Next question",
+        "faltam": "{n} answer left | {n} answers left",
+        "verResumo": "See the summary",
+        "jaCadastrado": "Already registered here",
+        "oAnimal": "The animal · row {n}",
+        "linhaDeCima": "The row above · row {n}",
+        "semAnimal": "no animal",
+        "coluna": {
+          "petNome": "Which column has the animal's name?",
+          "responsavelNome": "Which column has the owner's name?",
+          "texto": "We couldn't find this column on our own. Choose by content: we show the first entries of each one.",
+          "hoje": "Already used as: {campo}",
+          "semEla": "Doesn't the spreadsheet have this information? The import can't go ahead without it: use a file that has it."
+        },
+        "especie": {
+          "pergunta": "What species is “{valor}”?",
+          "perguntaBranco": "What species are these animals?",
+          "perguntaBrancoUm": "What species is {nome}?",
+          "texto": "It's written like this in the spreadsheet and the system didn't recognise it. Species sets reference ranges, doses and vaccines: without it, the animal can't be imported.",
+          "textoBranco": "The species is blank and the breed doesn't help work it out. Without a species, the animal can't be imported.",
+          "animais": "Animal that depends on this answer | Animals that depend on this answer",
+          "deixarDeFora": "Leave out for now"
+        },
+        "responsavel-existente": {
+          "pergunta": "Is {nome} already a client of the clinic?",
+          "texto": "Someone with this name is already registered here, but the phone doesn't match. It may be the same person with a new number, or someone with the same name.",
+          "sim": "Yes, same person",
+          "nao": "No, a different person",
+          "curta": "Awaiting answer: already a client?"
+        },
+        "mesma-pessoa": {
+          "pergunta": "{nome} appears twice. Is it the same person?",
+          "texto": "The name is repeated in the spreadsheet with different phones. If it's the same person, the animals stay together in their record.",
+          "sim": "Yes, same person",
+          "nao": "No, different people",
+          "curta": "Awaiting answer: same person?"
+        },
+        "orfao": {
+          "pergunta": "Whose animal is {nome}?",
+          "texto": "Row {linha} has the animal, but the owner is blank. It's usually a continuation of the row above, when the cell was merged in Excel.",
+          "sim": "It belongs to {outro}",
+          "nao": "Leave out",
+          "curta": "Awaiting answer: whose animal?",
+          "todos": "Link to the row above | Link the {n} animals to the row above"
+        },
+        "animal-repetido": {
+          "pergunta": "{nome} appears twice. Is it the same animal?",
+          "texto": "Same name, same species and same owner.",
+          "sim": "Yes, same animal",
+          "nao": "No, two animals",
+          "curta": "Awaiting answer: same animal?"
+        },
+        "animal-existente": {
+          "pergunta": "Is {nome} already a patient of the clinic?",
+          "texto": "There's already an animal with this name and species in this owner's record.",
+          "sim": "Yes, merge with the record",
+          "nao": "No, register another",
+          "curta": "Awaiting answer: already a patient?"
+        }
+      },
+      "resumo": {
+        "titulo": "Ready to import",
+        "texto": "This is what will happen. Nothing has been saved yet.",
+        "verQuais": "See which",
+        "voltar": "Back to questions",
+        "importar": "Import {n} row | Import {n} rows",
+        "promessa": "Merging with an existing record never deletes what the clinic already had.",
+        "entram": {
+          "titulo": "Going in",
+          "pacientesNovos": "{n} new patient | {n} new patients",
+          "pacientesExistentes": "{n} existing patient gets data | {n} existing patients get data",
+          "responsaveisNovos": "{n} new owner | {n} new owners",
+          "responsaveisExistentes": "{n} owner who was already a client | {n} owners who were already clients",
+          "soContato": "{n} owner with no animal | {n} owners with no animal"
+        },
+        "arrumamos": {
+          "titulo": "Fixed automatically",
+          "corrigidas": "Dates, phones and weights read the right way",
+          "emBranco": "{n} wrong value left blank | {n} wrong values left blank",
+          "semContato": "{n} owner with no phone or email | {n} owners with no phone or email",
+          "formatacao": "Formatting standardised: {lista}"
+        },
+        "fora": {
+          "titulo": "Not going in",
+          "nenhuma": "No row is left out."
+        }
+      },
+      "importacao": {
+        "titulo": {
+          "rodando": "Importing…",
+          "pausada": "Import paused",
+          "falhou": "The import stopped"
+        },
+        "progressoAria": "Import progress",
+        "feitas": "{feitas} of {total} rows",
+        "lote": "Batch {atual} of {total}",
+        "podeSair": "You can leave this screen: the import keeps going, and the patient list shows where it is.",
+        "terminandoLote": "Finishing the batch that was already being saved…",
+        "continuaDoPonto": "When you resume, it picks up where it stopped. No row is saved twice.",
+        "falha": "Batch {lote} wasn't saved, so nothing from it went in. Try again.",
+        "pausar": "Pause",
+        "continuar": "Resume",
+        "tentarDeNovo": "Try again"
+      },
+      "relatorio": {
+        "chip": "Import complete",
+        "titulo": "{entraram} of {total} rows went in",
+        "texto": "{n} row was left out. The reason and what to do are below. | {n} rows were left out. The reasons and what to do are below.",
+        "textoTudo": "Every row went in.",
+        "entraram": "Went in",
+        "completar": "Needs completing",
+        "emBranco": "{n} wrong value was left blank | {n} wrong values were left blank",
+        "nadaACompletar": "Nothing is missing.",
+        "ficaram": "Left out",
+        "baixarFora": "Download to fix",
+        "baixarCompletar": "Download the list",
+        "verLinhas": "See row by row",
+        "outra": "Import another spreadsheet",
+        "verPacientes": "View patients",
+        "colunaLinha": "Row",
+        "colunaOQueHouve": "What happened",
+        "sufixoFora": "left-out",
+        "sufixoCompletar": "to-complete"
+      },
+      "linhas": {
+        "titulo": "Row by row",
+        "filtroAria": "Show only",
+        "filtro": {
+          "todas": "All",
+          "entram": "Going in",
+          "corrigidas": "Fixed",
+          "fora": "Not going in"
+        },
+        "buscar": "Search by row number or a name",
+        "vazio": "No rows match this filter.",
+        "mais": "Show {n} more",
+        "abrirPaciente": "Open patient",
+        "naPlanilha": "As it was in the spreadsheet",
+        "semNada": "Went in as it was: nothing needed fixing.",
+        "soResponsavel": "Owner only",
+        "semResponsavel": "No owner",
+        "preenche": "{campo} was blank in the record and came from the spreadsheet.",
+        "conflito": "{campo}: kept {mantido}, already in the record. The spreadsheet said {ignorado}.",
+        "semContato": "No phone or email: complete the record so the clinic can reach them.",
+        "correcoes": "{n} correction | {n} corrections",
+        "emBranco": "{n} blank value | {n} blank values"
+      },
+      "situacao": {
+        "entra": "Goes in",
+        "junta": "Updates record",
+        "contato": "Owner only",
+        "pendente": "Awaiting answer",
+        "fora": "Left out"
+      },
+      "acontece": {
+        "novo": "New patient, with a new owner.",
+        "novoDeExistente": "New patient for {nome}, who is already a client.",
+        "animalExistente": "{nome} was already a patient: the record gets what was missing.",
+        "mesmaLinha": "Same animal as row {linha}: the data was combined there.",
+        "contato": "Only the owner goes in, with no animal.",
+        "contatoExistente": "{nome} is already a client: the record gets what was missing."
+      },
+      "motivo": {
+        "animal-sem-responsavel": {
+          "titulo": "Animal without an owner",
+          "acao": "Fill in who is responsible for the animal and import these rows again."
+        },
+        "animal-sem-nome": {
+          "titulo": "Animal without a name",
+          "acao": "The row has an animal's data, but not its name. Fill it in and import again."
+        },
+        "especie-desconhecida": {
+          "titulo": "Unknown species",
+          "acao": "Fill in the species in the spreadsheet and import these rows again."
+        },
+        "responsavel-sem-nome": {
+          "titulo": "Owner without a name",
+          "acao": "There's a phone or CPF, but no name. Fill in the name and import again."
+        },
+        "falecido": {
+          "titulo": "Deceased animal",
+          "acao": "Not added as a patient, so nobody gets a vaccine reminder for an animal that has died."
+        }
+      },
+      "ajuste": {
+        "data-ano-curto": "Birth date “{de}” had a two-digit year: changed to {para}.",
+        "data-da-planilha": "Birth date was an Excel number (“{de}”): changed to {para}.",
+        "data-americana": "Birth date “{de}” had the month before the day: changed to {para}.",
+        "data-sem-dia": "Birth date “{de}” had no day: changed to {para}.",
+        "nascimento-pela-idade": "It had the age (“{de}”) instead of the date: birth date estimated as {para}.",
+        "peso-em-gramas": "Weight “{de}” was in grams: changed to {para}.",
+        "telefone-nono-digito": "Phone “{de}” was missing the mobile 9: changed to {para}.",
+        "telefone-ddd-da-clinica": "Phone “{de}” had no DDD: given the clinic's, changed to {para}.",
+        "telefone-dividido": "There were two phones in the same cell: {para} became phone 2.",
+        "cpf-zeros": "CPF “{de}” lost its leading zeros in Excel: changed to {para}.",
+        "cep-zero": "CEP “{de}” lost its leading zero in Excel: changed to {para}.",
+        "especie-pela-raca": "Species blank: from the breed ({de}), set to {para}.",
+        "especie-escolhida": "Species “{de}”: set to {para}, as you answered.",
+        "especie-escolhida-branco": "Species blank: set to {para}, as you answered.",
+        "celula-mesclada": "The owner came from the merged cell above: {para}.",
+        "responsavel-da-linha-anterior": "No owner: linked to {para}, from the row above, as you answered.",
+        "data-invalida": "Birth date “{de}” doesn't exist on the calendar: left blank.",
+        "data-futura": "Birth date “{de}” is in the future: left blank.",
+        "idade-invalida": "Age “{de}” couldn't be understood: left blank.",
+        "peso-invalido": "Weight “{de}” isn't possible for the animal: left blank.",
+        "telefone-invalido": "Phone “{de}” isn't a valid number: not used.",
+        "cpf-invalido": "CPF “{de}” isn't valid: left blank.",
+        "email-invalido": "Email “{de}” is incomplete: left blank.",
+        "cep-invalido": "CEP “{de}” is incomplete: left blank.",
+        "uf-invalida": "UF “{de}” doesn't exist: left blank.",
+        "microchip-invalido": "Microchip “{de}” is incomplete: left blank.",
+        "microchip-cientifico": "Microchip “{de}”: Excel showed it in scientific notation and the last digits were lost. Export the column as text to recover them.",
+        "nao-reconhecido": "{campo} “{de}” wasn't recognised: left blank."
+      },
+      "padronizacao": {
+        "telefone": "{n} phone | {n} phones",
+        "documento": "{n} CPF | {n} CPFs",
+        "data": "{n} date | {n} dates",
+        "peso": "{n} weight | {n} weights",
+        "nome": "{n} all-caps name | {n} all-caps names",
+        "especie": "{n} species | {n} species",
+        "uf": "{n} UF | {n} UFs"
+      },
+      "aviso": {
+        "lista": {
+          "rodando": "Import in progress: {feitas} of {total} rows.",
+          "pausada": "Import paused at {feitas} of {total} rows.",
+          "falhou": "The import stopped at {feitas} of {total} rows.",
+          "ver": "View",
+          "continuar": "Resume"
+        }
+      }
     }
   },
   "hotel": {
@@ -4483,7 +5060,11 @@
       "casa": "The house",
       "dia": "2 · The day",
       "secao": "Hotel",
-      "vender": "1 · Sell"
+      "vender": "1 · Sell",
+      "selo": {
+        "rotina": "{total} overdue task | {total} overdue tasks",
+        "vespera": "{total} blocked arrival | {total} blocked arrivals"
+      }
     },
     "ocorrencia": {
       "conduta": "What the house did",

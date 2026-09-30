@@ -271,13 +271,13 @@
       "programas": "Programi",
       "divulgacao": "Promocija",
       "acessos": "Pristupi",
-      "financeiro": "Finansije",
+      "financeiro": "Zarada od preporuka",
       "settings": "Podešavanja"
     },
     "pageLabels": {
       "overview": "Početna",
       "saqueDetail": "Detalji isplate",
-      "financeiro": "Finansije",
+      "financeiro": "Zarada od preporuka",
       "programas": "Programi učešća",
       "divulgacao": "Promocija",
       "acessos": "Pristupi",
@@ -536,6 +536,227 @@
       "filterPlaceholder": "Filtrirajte po ekranu ili odeljku...",
       "clearFilterAria": "Obrišite filter",
       "emptyFilter": "Nema ekrana za „{q}“."
+    },
+    "ledePauta": "Vaša zarada od preporuka i ono što čeka u svakom modulu. Svaki red vodi pravo na ekran gde je posao.",
+    "saldo": {
+      "total": "Ukupno stanje",
+      "retido": "U sigurnosnom periodu",
+      "sacado": "Isplaćeno do sada",
+      "nota": "Svaki udeo provede 14 dana u sigurnosnom periodu pre nego što postane dostupan za isplatu.",
+      "falhou": "Stanje nije moguće učitati.",
+      "tentar": "Pokušaj ponovo",
+      "carregandoAria": "Učitavanje stanja",
+      "verExtrato": "Pogledaj izvod",
+      "liberado": "oslobođeno",
+      "bloqueadoRotulo": "blokirano za isplatu",
+      "capacidade": {
+        "liberado": "Spremno za isplatu.",
+        "abaixoDoMinimo": "Isplata počinje od {minimo}.",
+        "semChavePix": "Nedostaje PIX ključ za isplatu.",
+        "soDono": "Samo vlasnik naloga traži isplatu.",
+        "bloqueado": "Isplate za ovaj nalog su blokirane.",
+        "tudoRetido": "Celo stanje je još u sigurnosnom periodu.",
+        "semSaldo": "Još nema zarade. Udeo se pojavljuje ovde kada se staratelj pretplati sa vašim kodom."
+      },
+      "acao": {
+        "liberado": "Zatraži isplatu",
+        "semChavePix": "Registruj PIX ključ",
+        "bloqueado": "Pogledaj razlog"
+      },
+      "barraAria": "Oslobođeno {liberado} od {total}"
+    },
+    "programa": {
+      "titulo": "Partnerski program",
+      "selo": {
+        "NAO_SOLICITADO": "Nije aktivno",
+        "SOLICITADO": "Na proveri",
+        "REJEITADO": "Odbijeno",
+        "SUSPENSO": "Suspendovano",
+        "ATIVO": "Aktivno"
+      },
+      "texto": {
+        "NAO_SOLICITADO": "Aktivirajte program da biste ostvarili udeo za svakog staratelja koji se pretplati sa vašim kodom.",
+        "SOLICITADO": "Vaš zahtev je na proveri. Rezultat će se pojaviti ovde čim bude odlučeno.",
+        "REJEITADO": "Zahtev nije odobren. U Programima pogledajte kako da ga podnesete ponovo.",
+        "SUSPENSO": "Program je suspendovan. U Programima pogledajte kako da to rešite.",
+        "ATIVO": "Program je aktivan."
+      },
+      "motivo": "Navedeni razlog: {motivo}",
+      "cta": "Pogledaj programe"
+    },
+    "pauta": {
+      "titulo": "Čeka na akciju",
+      "conferido": "Provereno u {hora}",
+      "calma": "Trenutno ništa ne čeka na akciju",
+      "carregandoAria": "Provera obaveza",
+      "fila": "{total} pacijent čeka na listi čekanja | {total} pacijenta čekaju na listi čekanja | {total} pacijenata čeka na listi čekanja",
+      "internacao": "{total} stavka za rešavanje na hospitalizaciji | {total} stavke za rešavanje na hospitalizaciji | {total} stavki za rešavanje na hospitalizaciji",
+      "atividades": "{total} obaveza u Zadacima | {total} obaveze u Zadacima | {total} obaveza u Zadacima",
+      "vacinas": "{total} istekla revakcinacija | {total} istekle revakcinacije | {total} isteklih revakcinacija",
+      "rotina": "{total} zakasneli zadatak u rutini | {total} zakasnela zadatka u rutini | {total} zakasnelih zadataka u rutini",
+      "vespera": "{total} blokiran dolazak u naredna 3 dana | {total} blokirana dolaska u naredna 3 dana | {total} blokiranih dolazaka u naredna 3 dana",
+      "conferindo": "Provera…",
+      "reconferir": "Proveri ponovo",
+      "falhou": "Obaveze nije bilo moguće proveriti.",
+      "falhouDeNovo": "Ponovna provera nije uspela. Brojevi ispod su iz prethodne provere.",
+      "parcial": "Deo obaveza nije bilo moguće proveriti.",
+      "tentar": "Pokušaj ponovo",
+      "parte": {
+        "boletinsRetidos": "{total} zadržan izveštaj | {total} zadržana izveštaja | {total} zadržanih izveštaja",
+        "administracoesAtrasadas": "{total} zakasnela primena | {total} zakasnele primene | {total} zakasnelih primena",
+        "rascunhos": "{total} karton u nacrtu | {total} kartona u nacrtu | {total} kartona u nacrtu",
+        "retornosVencidos": "{total} zakasnela kontrola | {total} zakasnele kontrole | {total} zakasnelih kontrola",
+        "vagasOfertadas": "{total} ponuđen termin bez odgovora | {total} ponuđena termina bez odgovora | {total} ponuđenih termina bez odgovora",
+        "medicacoesAtrasadas": "{total} zakasneli lek | {total} zakasnela leka | {total} zakasnelih lekova"
+      },
+      "coluna": {
+        "assunto": "Predmet",
+        "gravidade": "Hitnost",
+        "onde": "Gde"
+      },
+      "gravidade": {
+        "risco": "Hitno",
+        "atencao": "Pažnja",
+        "neutro": "Normalno"
+      },
+      "onde": {
+        "fila": "Lista čekanja",
+        "internacao": "Hospitalizacija",
+        "atividades": "Zadaci",
+        "vacinas": "Vakcine",
+        "rotina": "Rutina",
+        "vespera": "Rezervacije"
+      },
+      "contagem": "{total} predmet | {total} predmeta | {total} predmeta",
+      "recolher": "Skupi {modulo}",
+      "expandir": "Proširi {modulo}"
+    },
+    "resumo": {
+      "portal": "Pratite zaradu i podelite svoj kod.",
+      "conferindo": "Proveravamo šta traži vašu pažnju…",
+      "urgentes": "{total} hitan predmet traži vašu pažnju danas | {total} hitna predmeta traže vašu pažnju danas | {total} hitnih predmeta traži vašu pažnju danas",
+      "esperando": "{total} predmet vas čeka danas | {total} predmeta vas čekaju danas | {total} predmeta vas čeka danas",
+      "falhou": "Obaveze trenutno nije moguće proveriti.",
+      "emDia": "Ovde je sve ažurno."
+    },
+    "acoes": {
+      "rotulo": "Brze radnje",
+      "agenda": "Današnji raspored",
+      "mapa": "Mapa slobodnih mesta",
+      "compartilhar": "Podeli kod"
+    },
+    "indique": {
+      "titulo": "Preporučite i zaradite",
+      "abrir": "Otvori Promociju",
+      "carregando": "Učitavanje koda…",
+      "falhou": "Kod za preporuku nije moguće učitati.",
+      "descricao": "Svaki staratelj koji se pretplati sa vašim kodom donosi vam udeo.",
+      "copiar": "Kopiraj kod",
+      "ampliarQr": "Uvećaj QR kod",
+      "janelaTitulo": "QR kod za preporuku",
+      "instrucao": "Usmerite kameru telefona ovde da biste se pretplatili sa ovim kodom.",
+      "baixar": "Preuzmi QR",
+      "imprimir": "Štampaj",
+      "impressaoBloqueada": "Štampanje nije moguće otvoriti",
+      "impressaoBloqueadaDetalhe": "Dozvolite iskačuće prozore za ovaj sajt u pregledaču i pokušajte ponovo.",
+      "link": "Link za preporuku",
+      "linkCopiado": "Link je kopiran",
+      "comoFunciona": "Kako funkcioniše",
+      "seuCodigo": "Vaš kod za preporuku"
+    },
+    "dia": {
+      "titulo": "Danas",
+      "abrirAgenda": "Ceo raspored",
+      "atendimentos": "{total} pregled | {total} pregleda | {total} pregleda",
+      "chegadas": "{total} dolazak na čekanju | {total} dolaska na čekanju | {total} dolazaka na čekanju",
+      "saidas": "{total} odlazak na čekanju | {total} odlaska na čekanju | {total} odlazaka na čekanju",
+      "estado": {
+        "feito": "{total} završen | {total} završena | {total} završenih",
+        "agora": "{total} na pregledu | {total} na pregledu | {total} na pregledu",
+        "esperando": "{total} čeka | {total} čekaju | {total} čeka",
+        "marcado": "{total} zakazan | {total} zakazana | {total} zakazanih",
+        "falta": "{total} nedolazak | {total} nedolaska | {total} nedolazaka"
+      },
+      "estadoNome": {
+        "feito": "Završeno",
+        "agora": "Na pregledu",
+        "esperando": "Čeka na prijemu",
+        "marcado": "Zakazano",
+        "falta": "Nedolazak"
+      },
+      "descricao": "Današnji raspored, od {abre} do {fecha}: {estados}.",
+      "almoco": "Pauza za ručak",
+      "carregando": "Učitavanje dana…",
+      "falhouClinica": "Današnji raspored nije moguće učitati.",
+      "falhouHotel": "Današnje dolaske i odlaske nije moguće učitati.",
+      "tentar": "Pokušaj ponovo",
+      "fechada": "Klinika danas ne radi.",
+      "feriado": "Praznik: {nome}. Klinika danas ne radi.",
+      "semAtendimentos": "Za danas nema zakazanih pregleda.",
+      "clinicaEncerrada": "U rasporedu klinike za danas nema više ničega.",
+      "movimento": {
+        "chegada": "Dolazak",
+        "saida": "Odlazak",
+        "chegadaAria": "Dolazak: {pet} u {hora}, {detalhe}",
+        "saidaAria": "Odlazak: {pet} u {hora}, {detalhe}",
+        "travadoChegada": "Prijem na čekanju",
+        "travadoSaida": "Nedostaje merenje pri odlasku",
+        "atrasado": "Kasni"
+      },
+      "destaque": {
+        "emAtendimento": "Na pregledu",
+        "aSeguir": "Sledeće",
+        "proximaChegada": "Sledeći dolazak",
+        "proximaSaida": "Sledeći odlazak",
+        "desde": "od {hora}",
+        "maisOutros": "i još {total} | i još {total} | i još {total}",
+        "aguardando": "čeka {tempo}",
+        "chegadaAtrasada": "Kasni dolazak",
+        "saidaAtrasada": "Kasni odlazak"
+      },
+      "semMovimentoPendente": "Nema dolazaka ni odlazaka na čekanju."
+    },
+    "andamento": {
+      "titulo": "Tok dana",
+      "carregando": "Učitavanje toka dana",
+      "vazio": "Danas još nema šta da se meri.",
+      "finalizados": "Završeni pregledi",
+      "finalizadosDetalhe": "{modulo} • {feitos} od {total}",
+      "comparecimento": "Dolaznost",
+      "comparecimentoDetalhe": "{modulo} • bez nedolazaka | {modulo} • {total} nedolazak | {modulo} • {total} nedolaska | {modulo} • {total} nedolazaka",
+      "rotina": "Rutina gostiju",
+      "rotinaDetalhe": "{modulo} • {feitas} od {total}",
+      "ocupacao": "Popunjenost",
+      "ocupacaoDetalhe": "{modulo} • {ocupadas} od {total}"
+    },
+    "modulos": {
+      "titulo": "Moduli",
+      "rotulo": "Brzi pristup",
+      "novoAgendamento": "Novi termin",
+      "novoAgendamentoDetalhe": "Zakažite u rasporedu klinike",
+      "atendimentosHoje": "Danas nema pregleda | {total} pregled danas | {total} pregleda danas | {total} pregleda danas",
+      "hospedes": "Nema gostiju | {total} gost | {total} gosta | {total} gostiju",
+      "divulgacaoDetalhe": "Kod, QR i materijali",
+      "programasDetalhe": "Afilijejt: {status}",
+      "acessosDetalhe": "Deljeni ljubimci"
+    },
+    "agenda": {
+      "titulo": "Raspored",
+      "semana": "Dani u nedelji",
+      "anterior": "Prethodna nedelja",
+      "proxima": "Sledeća nedelja",
+      "carregando": "Učitavanje rasporeda",
+      "falhou": "Nije moguće učitati raspored za ovaj dan.",
+      "fechada": "Klinika ne radi ovog dana.",
+      "vazio": "Ništa nije zakazano za ovaj dan.",
+      "hoje": "Danas",
+      "aguardando": "Čeka",
+      "pendencia": "Na čekanju",
+      "chegadas": "{total} dolazak | {total} dolaska | {total} dolazaka",
+      "compromissos": "Obaveze za dan",
+      "posicao": "{atual} od {total}",
+      "compromissoAnterior": "Prethodna obaveza",
+      "proximoCompromisso": "Sledeća obaveza"
     }
   },
   "programas": {
@@ -1264,7 +1485,7 @@
   },
   "carteira": {
     "subtitle": "Portal",
-    "title": "Finansije",
+    "title": "Zarada od preporuka",
     "tabs": {
       "ariaLabel": "Kartice: {labels}",
       "visao": {
@@ -1373,7 +1594,7 @@
       "requestedAt": "Zatraženo {data}"
     },
     "detail": {
-      "subtitle": "Finansije",
+      "subtitle": "Zarada od preporuka",
       "title": "Detalji isplate",
       "back": "Nazad",
       "loadingAria": "Učitavanje detalja isplate",
@@ -1791,7 +2012,8 @@
     },
     "sexo": {
       "macho": "Mužjak",
-      "femea": "Ženka"
+      "femea": "Ženka",
+      "naoInformado": "Pol nije naveden"
     },
     "especie": {
       "canina": "Pas",
@@ -3950,6 +4172,361 @@
       "grupo": {
         "queixa": "Razlog dolaska"
       }
+    },
+    "migracao": {
+      "titulo": "Prenos pacijenata iz drugog sistema",
+      "atalho": "Uvezite tabelu",
+      "sobre": "Pacijenti",
+      "lede": "Podaci klinike stižu iz tabele, bez ponovnog kucanja.",
+      "trocar": "Promenite fajl",
+      "arquivoLido": "{linhas} red · kolone: {colunas} | {linhas} reda · kolone: {colunas} | {linhas} redova · kolone: {colunas}",
+      "origem": "prepoznat izvoz iz sistema {nome}",
+      "passos": {
+        "aria": "Koraci uvoza",
+        "arquivo": "Fajl",
+        "duvidas": "Pitanja",
+        "semDuvidas": "Nema pitanja",
+        "importar": "Uvoz"
+      },
+      "comum": {
+        "emBranco": "prazno",
+        "linha": "Red {n}",
+        "linhasLista": "Red {lista} | Redovi {lista} | Redovi {lista}",
+        "linhasN": "{n} red | {n} reda | {n} redova",
+        "linhasPalavra": "red | reda | redova",
+        "semEspecie": "nepoznata vrsta",
+        "semNome": "bez imena",
+        "semTelefone": "bez telefona"
+      },
+      "arquivo": {
+        "titulo": "Odakle stižu podaci?",
+        "texto": "Excel tabela ili fajl izvezen iz sistema koji klinika sada koristi. Prepoznajemo izvoz iz sistema SimplesVet i Vetus, a može i ručno napravljena tabela.",
+        "soltar": "Prevucite fajl ovde",
+        "ou": "ili",
+        "lendo": "Čitanje fajla…",
+        "escolher": "Izaberite fajl",
+        "formatos": "Excel (.xlsx) ili .csv, do {mb} MB",
+        "promessa": "Ništa se ne čuva dok ne potvrdite, u poslednjem koraku.",
+        "exemplosTitulo": "Nemate fajl pri ruci?",
+        "exemplosTexto": "Probajte sa nekim od ovih primera.",
+        "usar": "Koristite ovaj",
+        "baixar": "Preuzmite",
+        "demo": {
+          "clinica": {
+            "titulo": "Tabela napravljena u klinici",
+            "descricao": "Namerno neuredna: datumi u više formata, telefoni bez pravila, životinja bez vlasnika i klijenti koji su ovde već upisani."
+          },
+          "simplesvet": {
+            "titulo": "Izvoz iz sistema SimplesVet",
+            "descricao": "Čist sistemski fajl. Kolone se prepoznaju same."
+          },
+          "vetus": {
+            "titulo": "Velika baza iz sistema Vetus",
+            "descricao": "Da vidite uvoz u toku, pauzirate ga na pola i nastavite."
+          }
+        },
+        "erro": {
+          "vazio": "Fajl je prazan.",
+          "grande-demais": "Fajl prelazi ograničenje. Podelite tabelu na delove i uvezite jedan po jedan.",
+          "xls-antigo": "Ovo je stari .xls fajl. Otvorite ga u Excelu i sačuvajte kao .xlsx ili .csv.",
+          "formato-desconhecido": "Ovaj fajl nije tabela. Koristite .xlsx ili .csv.",
+          "corrompido": "Fajl nije moguće otvoriti. Pokušajte da ga ponovo sačuvate iz Excela.",
+          "sem-linhas": "Tabela nema nijedan red ispod zaglavlja.",
+          "linhas-demais": "Previše redova za jedan uvoz. Podelite tabelu na delove."
+        }
+      },
+      "colunas": {
+        "titulo": "Kolone tabele",
+        "texto": "Sistem je sam povezao svaku kolonu sa poljem zapisa. Menjajte samo ako je neka kolona na pogrešnom mestu.",
+        "travado": "Uvoz je počeo: kolone ostaju kakve jesu.",
+        "usadas": "Korišćeno kolona: {n} od {total}",
+        "faltam": "Bez ove kolone uvoz nije moguć: {campos}. Kada zatvorite panel, pitaćemo koja je to kolona.",
+        "naoUsadasTitulo": "{n} kolona ne ide u zapis | {n} kolone ne idu u zapis | {n} kolona ne ide u zapis",
+        "naoUsadasTexto": "Ima sadržaj, ali nismo prepoznali šta je to. Ako sadrži nešto važno, izaberite gde ide. | Imaju sadržaj, ali nismo prepoznali šta je to. Ako neka sadrži nešto važno, izaberite gde ide. | Imaju sadržaj, ali nismo prepoznali šta je to. Ako neka sadrži nešto važno, izaberite gde ide.",
+        "usadasTitulo": "{n} korišćena kolona | {n} korišćene kolone | {n} korišćenih kolona",
+        "coluna": "Kolona {letra}",
+        "semTitulo": "Bez naslova",
+        "vazia": "prazna kolona",
+        "voceEscolheu": "Vaš izbor",
+        "sugestao": "Pretpostavka: proverite",
+        "naoVem": "{n} popunjena ćelija se neće uvesti | {n} popunjene ćelije se neće uvesti | {n} popunjenih ćelija se neće uvesti",
+        "vaiPara": "Ide u",
+        "vaiParaAria": "Gde ide kolona {coluna}",
+        "naoTrazer": "Izostavite ovu kolonu",
+        "grupoResponsavel": "Vlasnik",
+        "grupoAnimal": "Životinja",
+        "grupoNenhum": "Ništa",
+        "ver": "Prikažite kolone",
+        "nota": {
+          "todas": "Koristili smo {n} kolonu tabele. | Koristili smo sve {n} kolone tabele. | Koristili smo svih {n} kolona tabele.",
+          "parte": "Koristili smo {n} od {total} kolona tabele.",
+          "fora": "Izostavljena kolona: {lista}. | Izostavljene kolone: {lista}. | Izostavljene kolone: {lista}.",
+          "eMais": "{lista} i još {n} | {lista} i još {n} | {lista} i još {n}"
+        }
+      },
+      "campo": {
+        "responsavelNome": "Ime vlasnika",
+        "telefone": "Telefon",
+        "telefone2": "Telefon 2",
+        "email": "Imejl",
+        "cpf": "CPF",
+        "cep": "CEP",
+        "endereco": "Adresa",
+        "numero": "Broj",
+        "bairro": "Naselje",
+        "cidade": "Grad",
+        "uf": "UF",
+        "petNome": "Ime životinje",
+        "especie": "Vrsta",
+        "raca": "Rasa",
+        "sexo": "Pol",
+        "castrado": "Sterilisan",
+        "nascimento": "Datum rođenja",
+        "idade": "Starost",
+        "peso": "Težina",
+        "microchip": "Mikročip",
+        "pelagem": "Dlaka",
+        "alergia": "Alergije",
+        "situacao": "Živ ili uginuo"
+      },
+      "duvidas": {
+        "contador": "Pitanje {n} od {total}",
+        "nenhumaChip": "Sve je u redu",
+        "nenhumaTitulo": "Nema pitanja",
+        "nenhumaTexto": "Sistem je sam razumeo sve redove. Nastavite da vidite pregled.",
+        "anterior": "Prethodno pitanje",
+        "proxima": "Sledeće pitanje",
+        "faltam": "Nedostaje {n} odgovor | Nedostaju {n} odgovora | Nedostaje {n} odgovora",
+        "verResumo": "Pogledajte pregled",
+        "jaCadastrado": "Već upisan ovde",
+        "oAnimal": "Životinja · red {n}",
+        "linhaDeCima": "Red iznad · red {n}",
+        "semAnimal": "bez životinje",
+        "coluna": {
+          "petNome": "Koja kolona sadrži ime životinje?",
+          "responsavelNome": "Koja kolona sadrži ime vlasnika?",
+          "texto": "Nismo sami pronašli ovu kolonu. Izaberite prema sadržaju: prikazujemo početak svake kolone.",
+          "hoje": "Već se koristi kao: {campo}",
+          "semEla": "Tabela nema ovaj podatak? Bez njega uvoz nije moguć: koristite fajl koji ga sadrži."
+        },
+        "especie": {
+          "pergunta": "Koja je vrsta „{valor}“?",
+          "perguntaBranco": "Koje su vrste ove životinje?",
+          "perguntaBrancoUm": "Koje je vrste {nome}?",
+          "texto": "Tako piše u tabeli, a sistem to nije prepoznao. Od vrste zavise referentni opseg, doza i vakcina: bez nje se životinja ne uvozi.",
+          "textoBranco": "Vrsta je prazna, a rasa ne pomaže da se odredi. Bez vrste se životinja ne uvozi.",
+          "animais": "Životinja koja zavisi od ovog odgovora | Životinje koje zavise od ovog odgovora | Životinje koje zavise od ovog odgovora",
+          "deixarDeFora": "Izostavite za sada"
+        },
+        "responsavel-existente": {
+          "pergunta": "Da li je {nome} već klijent klinike?",
+          "texto": "Ovde je već upisan neko sa tim imenom, ali se telefon ne poklapa. Može biti ista osoba sa novim brojem ili neko drugi sa istim imenom.",
+          "sim": "Da, ista osoba",
+          "nao": "Ne, druga osoba",
+          "curta": "Čeka odgovor: već klijent?"
+        },
+        "mesma-pessoa": {
+          "pergunta": "{nome} se pojavljuje dvaput. Da li je to ista osoba?",
+          "texto": "Ime se ponavlja u tabeli sa različitim telefonima. Ako je ista osoba, životinje ostaju zajedno u njenom zapisu.",
+          "sim": "Da, ista osoba",
+          "nao": "Ne, to su različite osobe",
+          "curta": "Čeka odgovor: ista osoba?"
+        },
+        "orfao": {
+          "pergunta": "Čija je životinja {nome}?",
+          "texto": "Red {linha} ima životinju, ali je vlasnik prazan. Obično je to nastavak reda iznad, kada je ćelija bila spojena u Excelu.",
+          "sim": "Vlasnik je {outro}",
+          "nao": "Izostavite",
+          "curta": "Čeka odgovor: čija je životinja?",
+          "todos": "Povežite {n} životinju sa redom iznad | Povežite {n} životinje sa redom iznad | Povežite {n} životinja sa redom iznad"
+        },
+        "animal-repetido": {
+          "pergunta": "{nome} se pojavljuje dvaput. Da li je to ista životinja?",
+          "texto": "Isto ime, ista vrsta i isti vlasnik.",
+          "sim": "Da, ista je",
+          "nao": "Ne, to su dve životinje",
+          "curta": "Čeka odgovor: ista životinja?"
+        },
+        "animal-existente": {
+          "pergunta": "Da li je {nome} već pacijent klinike?",
+          "texto": "U zapisu ovog vlasnika već postoji životinja sa tim imenom i te vrste.",
+          "sim": "Da, spojite sa zapisom",
+          "nao": "Ne, dodajte novu",
+          "curta": "Čeka odgovor: već pacijent?"
+        }
+      },
+      "resumo": {
+        "titulo": "Spremno za uvoz",
+        "texto": "Ovo će se desiti. Još ništa nije sačuvano.",
+        "verQuais": "Prikažite ih",
+        "voltar": "Nazad na pitanja",
+        "importar": "Uvezite {n} red | Uvezite {n} reda | Uvezite {n} redova",
+        "promessa": "Spajanje sa postojećim zapisom nikada ne briše ono što je klinika već imala.",
+        "entram": {
+          "titulo": "Uvoze se",
+          "pacientesNovos": "{n} novi pacijent | {n} nova pacijenta | {n} novih pacijenata",
+          "pacientesExistentes": "{n} postojeći pacijent dobija podatke | {n} postojeća pacijenta dobijaju podatke | {n} postojećih pacijenata dobija podatke",
+          "responsaveisNovos": "{n} novi vlasnik | {n} nova vlasnika | {n} novih vlasnika",
+          "responsaveisExistentes": "{n} vlasnik koji je već klijent | {n} vlasnika koji su već klijenti | {n} vlasnika koji su već klijenti",
+          "soContato": "{n} vlasnik bez životinje | {n} vlasnika bez životinje | {n} vlasnika bez životinje"
+        },
+        "arrumamos": {
+          "titulo": "Ispravljeno automatski",
+          "corrigidas": "Datumi, telefoni i težine pročitani kako treba",
+          "emBranco": "{n} pogrešna vrednost ostaje prazna | {n} pogrešne vrednosti ostaju prazne | {n} pogrešnih vrednosti ostaje prazno",
+          "semContato": "{n} vlasnik bez telefona i imejla | {n} vlasnika bez telefona i imejla | {n} vlasnika bez telefona i imejla",
+          "formatacao": "Ujednačen format: {lista}"
+        },
+        "fora": {
+          "titulo": "Ne uvoze se",
+          "nenhuma": "Nijedan red nije izostavljen."
+        }
+      },
+      "importacao": {
+        "titulo": {
+          "rodando": "Uvoz u toku…",
+          "pausada": "Uvoz je pauziran",
+          "falhou": "Uvoz je prekinut"
+        },
+        "progressoAria": "Napredak uvoza",
+        "feitas": "Redovi: {feitas} od {total}",
+        "lote": "Paket {atual} od {total}",
+        "podeSair": "Možete napustiti ovaj ekran: uvoz se nastavlja, a lista pacijenata pokazuje dokle je stigao.",
+        "terminandoLote": "Završava se paket koji se već čuvao…",
+        "continuaDoPonto": "Kada nastavite, uvoz kreće od mesta gde je stao. Nijedan red se ne čuva dvaput.",
+        "falha": "Paket {lote} nije sačuvan, pa ništa iz njega nije uvezeno. Pokušajte ponovo.",
+        "pausar": "Pauzirajte",
+        "continuar": "Nastavite",
+        "tentarDeNovo": "Pokušajte ponovo"
+      },
+      "relatorio": {
+        "chip": "Uvoz je završen",
+        "titulo": "Uvezeno redova: {entraram} od {total}",
+        "texto": "{n} red je izostavljen. Razlog i šta treba uraditi su ispod. | {n} reda su izostavljena. Razlozi i šta treba uraditi su ispod. | {n} redova je izostavljeno. Razlozi i šta treba uraditi su ispod.",
+        "textoTudo": "Svi redovi su uvezeni.",
+        "entraram": "Uvezeno",
+        "completar": "Treba dopuniti",
+        "emBranco": "{n} pogrešna vrednost je ostala prazna | {n} pogrešne vrednosti su ostale prazne | {n} pogrešnih vrednosti je ostalo prazno",
+        "nadaACompletar": "Ništa ne nedostaje.",
+        "ficaram": "Izostavljeno",
+        "baixarFora": "Preuzmite za ispravku",
+        "baixarCompletar": "Preuzmite listu",
+        "verLinhas": "Pogledajte red po red",
+        "outra": "Uvezite drugu tabelu",
+        "verPacientes": "Pogledajte pacijente",
+        "colunaLinha": "Red",
+        "colunaOQueHouve": "Šta se desilo",
+        "sufixoFora": "izostavljeni",
+        "sufixoCompletar": "za-dopunu"
+      },
+      "linhas": {
+        "titulo": "Red po red",
+        "filtroAria": "Prikaži samo",
+        "filtro": {
+          "todas": "Svi",
+          "entram": "Uvoze se",
+          "corrigidas": "Ispravljeni",
+          "fora": "Ne uvoze se"
+        },
+        "buscar": "Pretražite po broju reda ili po imenu",
+        "vazio": "Nema redova za ovaj filter.",
+        "mais": "Prikažite još {n}",
+        "abrirPaciente": "Otvorite pacijenta",
+        "naPlanilha": "Kako je bilo u tabeli",
+        "semNada": "Uvezeno kako je bilo: ništa nije trebalo ispravljati.",
+        "soResponsavel": "Samo vlasnik",
+        "semResponsavel": "Bez vlasnika",
+        "preenche": "{campo}: u zapisu je bilo prazno, pa je preuzeto iz tabele.",
+        "conflito": "{campo}: ostalo je {mantido}, što je već bilo u zapisu. U tabeli je pisalo {ignorado}.",
+        "semContato": "Bez telefona i imejla: dopunite zapis da bi klinika mogla da obavesti vlasnika.",
+        "correcoes": "{n} ispravka | {n} ispravke | {n} ispravki",
+        "emBranco": "{n} prazna vrednost | {n} prazne vrednosti | {n} praznih vrednosti"
+      },
+      "situacao": {
+        "entra": "Uvozi se",
+        "junta": "Dopunjuje zapis",
+        "contato": "Samo vlasnik",
+        "pendente": "Čeka odgovor",
+        "fora": "Ne uvozi se"
+      },
+      "acontece": {
+        "novo": "Novi pacijent, sa novim vlasnikom.",
+        "novoDeExistente": "Novi pacijent postojećeg klijenta: {nome}.",
+        "animalExistente": "{nome} je već pacijent: zapis dobija ono što je nedostajalo.",
+        "mesmaLinha": "Ista životinja kao u redu {linha}: podaci su spojeni tamo.",
+        "contato": "Uvozi se samo vlasnik, bez životinje.",
+        "contatoExistente": "{nome} je već klijent: zapis dobija ono što je nedostajalo."
+      },
+      "motivo": {
+        "animal-sem-responsavel": {
+          "titulo": "Životinja bez vlasnika",
+          "acao": "Popunite vlasnika životinje i ponovo uvezite te redove."
+        },
+        "animal-sem-nome": {
+          "titulo": "Životinja bez imena",
+          "acao": "Red ima podatke o životinji, ali ne i ime. Popunite ga i ponovo uvezite."
+        },
+        "especie-desconhecida": {
+          "titulo": "Nepoznata vrsta",
+          "acao": "Popunite vrstu u tabeli i ponovo uvezite te redove."
+        },
+        "responsavel-sem-nome": {
+          "titulo": "Vlasnik bez imena",
+          "acao": "Postoji telefon ili CPF, ali nema imena. Popunite ime i ponovo uvezite."
+        },
+        "falecido": {
+          "titulo": "Uginula životinja",
+          "acao": "Ne uvozi se kao pacijent, da niko ne bi dobio podsetnik za vakcinu životinje koja je uginula."
+        }
+      },
+      "ajuste": {
+        "data-ano-curto": "Datum rođenja „{de}“ imao je godinu sa dve cifre: sada je {para}.",
+        "data-da-planilha": "Datum rođenja bio je Excel broj („{de}“): sada je {para}.",
+        "data-americana": "Datum rođenja „{de}“ imao je mesec pre dana: sada je {para}.",
+        "data-sem-dia": "Datum rođenja „{de}“ nije imao dan: sada je {para}.",
+        "nascimento-pela-idade": "Umesto datuma bila je starost („{de}“): procenjeni datum rođenja je {para}.",
+        "peso-em-gramas": "Težina „{de}“ bila je u gramima: sada je {para}.",
+        "telefone-nono-digito": "Telefonu „{de}“ nedostajala je cifra 9 za mobilni: sada je {para}.",
+        "telefone-ddd-da-clinica": "Telefon „{de}“ nije imao DDD: dodat je DDD klinike, sada je {para}.",
+        "telefone-dividido": "U istoj ćeliji bila su dva telefona: {para} je postao telefon 2.",
+        "cpf-zeros": "CPF „{de}“ je u Excelu izgubio početne nule: sada je {para}.",
+        "cep-zero": "CEP „{de}“ je u Excelu izgubio početnu nulu: sada je {para}.",
+        "especie-pela-raca": "Vrsta je bila prazna: po rasi ({de}) sada je {para}.",
+        "especie-escolhida": "Vrsta „{de}“: sada je {para}, prema Vašem odgovoru.",
+        "especie-escolhida-branco": "Vrsta je bila prazna: sada je {para}, prema Vašem odgovoru.",
+        "celula-mesclada": "Vlasnik je preuzet iz spojene ćelije iznad: {para}.",
+        "responsavel-da-linha-anterior": "Nije bilo vlasnika: povezano sa vlasnikom iz reda iznad ({para}), prema Vašem odgovoru.",
+        "data-invalida": "Datum rođenja „{de}“ ne postoji u kalendaru: ostavljeno je prazno.",
+        "data-futura": "Datum rođenja „{de}“ je u budućnosti: ostavljeno je prazno.",
+        "idade-invalida": "Starost „{de}“ nije bilo moguće razumeti: ostavljeno je prazno.",
+        "peso-invalido": "Težina „{de}“ nije moguća za životinju: ostavljeno je prazno.",
+        "telefone-invalido": "Telefon „{de}“ nije ispravan broj: nije iskorišćen.",
+        "cpf-invalido": "CPF „{de}“ nije ispravan: ostavljeno je prazno.",
+        "email-invalido": "Imejl „{de}“ je nepotpun: ostavljeno je prazno.",
+        "cep-invalido": "CEP „{de}“ je nepotpun: ostavljeno je prazno.",
+        "uf-invalida": "UF „{de}“ ne postoji: ostavljeno je prazno.",
+        "microchip-invalido": "Mikročip „{de}“ je nepotpun: ostavljeno je prazno.",
+        "microchip-cientifico": "Mikročip „{de}“: Excel ga je prikazao u naučnom zapisu i poslednje cifre su izgubljene. Izvezite kolonu kao tekst da biste ih vratili.",
+        "nao-reconhecido": "{campo} „{de}“ nije prepoznato: ostavljeno je prazno."
+      },
+      "padronizacao": {
+        "telefone": "{n} telefon | {n} telefona | {n} telefona",
+        "documento": "{n} CPF | {n} CPF-a | {n} CPF-ova",
+        "data": "{n} datum | {n} datuma | {n} datuma",
+        "peso": "{n} težina | {n} težine | {n} težina",
+        "nome": "{n} ime velikim slovima | {n} imena velikim slovima | {n} imena velikim slovima",
+        "especie": "{n} vrsta | {n} vrste | {n} vrsta",
+        "uf": "{n} UF | {n} UF-a | {n} UF-ova"
+      },
+      "aviso": {
+        "lista": {
+          "rodando": "Uvoz je u toku (redovi: {feitas} od {total}).",
+          "pausada": "Uvoz je pauziran (redovi: {feitas} od {total}).",
+          "falhou": "Uvoz je prekinut (redovi: {feitas} od {total}).",
+          "ver": "Pogledajte",
+          "continuar": "Nastavite"
+        }
+      }
     }
   },
   "hotel": {
@@ -4483,7 +5060,11 @@
       "casa": "Kuća",
       "dia": "2 · Dan",
       "secao": "Hotel",
-      "vender": "1 · Prodaja"
+      "vender": "1 · Prodaja",
+      "selo": {
+        "rotina": "{total} zakasneli zadatak | {total} zakasnela zadatka | {total} zakasnelih zadataka",
+        "vespera": "{total} blokiran dolazak | {total} blokirana dolaska | {total} blokiranih dolazaka"
+      }
     },
     "ocorrencia": {
       "conduta": "Šta je kuća uradila",

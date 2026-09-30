@@ -24,6 +24,7 @@ import type {
   Measurement,
   MotivoDeFalta,
   PetAlertKind,
+  PetSex,
   PetSpecies,
   RangeStatus,
   ReferenceRange,
@@ -309,6 +310,14 @@ export function useClinicFormat() {
     return t(`clinico.especie.${valor}`)
   }
 
+  /**
+   * Sexo, ou "sexo não informado". O nulo existe desde que a base vem de outro sistema
+   * (ver `Pet.sexo`): escrever a chave crua no atestado seria pior que a lacuna.
+   */
+  function sexo(valor: PetSex | null): string {
+    return valor ? t(`clinico.sexo.${valor}`) : t('clinico.sexo.naoInformado')
+  }
+
   function motivoBloqueio(valor: BlockReason): string {
     return t(`clinico.bloqueio.${valor}`)
   }
@@ -378,6 +387,7 @@ export function useClinicFormat() {
     percentual,
     status,
     especie,
+    sexo,
     motivoBloqueio,
     motivoCancelamento,
     motivoFalta,

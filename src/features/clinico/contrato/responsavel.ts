@@ -1208,3 +1208,139 @@ function dia(isoOuData: DataHoraIso | DataIso): string {
 function diaEHora(iso: DataHoraIso): string {
   return `${dia(iso)} às ${hora(iso)}`
 }
+
+// ---------------------------------------------------------------------------
+// Vínculo proposto pela clínica — a base que veio de outro sistema
+// ---------------------------------------------------------------------------
+
+/*
+ * Até aqui o vínculo clínica ↔ pet nascia de um gesto do responsável ou de um atendimento: o
+ * primeiro agendamento, a primeira consulta. A importação da base (`docs/clinico/11-*.md`) cria o
+ * caso inverso — **a clínica já conhece o responsável e o pet antes de o responsável conhecer o
+ * app**. O vínculo que sai dela é uma proposta: o app mostra, a pessoa confirma pet a pet, e só
+ * então a clínica passa a existir na área do pet. Passo a passo em `docs/clinico/12-*.md`.
+ *
+ * Nada desta seção entra ainda em `TIPOS_DE_NOTIFICACAO_CLINICA`: aquele `Record` é fechado no app
+ * e obriga os tipos a entrar na mesma leva. `VINCULO_PROPOSTO` entra lá quando o app implementar
+ * esta tela — até lá vive em `TIPO_DE_NOTIFICACAO_DO_VINCULO`, sem quebrar o build de quem recopiar.
+ */
+
+/** De onde nasceu o vínculo. `IMPORTACAO` é o único que chega como proposta. */
+export const ORIGENS_DO_VINCULO = ['AGENDAMENTO', 'ATENDIMENTO', 'IMPORTACAO'] as const
+export type OrigemDoVinculo = (typeof ORIGENS_DO_VINCULO)[number]
+
+/** A espécie como o cadastro da clínica guarda — é o de-para da importação que a produz. */
+export const ESPECIES_NA_CLINICA = ['CANINA', 'FELINA', 'AVE', 'ROEDOR', 'REPTIL', 'EQUINA'] as const
+export type EspecieNaClinica = (typeof ESPECIES_NA_CLINICA)[number]
+
+export const SEXOS_NA_CLINICA = ['MACHO', 'FEMEA'] as const
+export type SexoNaClinica = (typeof SEXOS_NA_CLINICA)[number]
+
+/** O pet como a clínica o conhece — ainda sem ligação com nenhum pet do app. */
+export type PetNaClinica = {
+  /** Id do paciente **na clínica**. Não é `Pet.id` do app. */
+  id: Cuid
+  nome: string
+  especie: EspecieNaClinica
+  raca: string | null
+  /** `null` quando a planilha não dizia: a importação não inventa sexo. */
+  sexo: SexoNaClinica | null
+  nascimento: DataIso | null
+  /**
+   * O pet do app que parece ser este: mesmo nome e mesma espécie, do mesmo responsável, sem
+   * vínculo com esta clínica. É palpite do servidor para a tela abrir com a escolha certa —
+   * **nunca liga sozinho**.
+   */
+  sugestaoDoApp: PetResumo | null
+}
+
+export const SITUACOES_DO_VINCULO_PROPOSTO = ['PENDENTE', 'RESPONDIDO', 'RECUSADO', 'EXPIRADO'] as const
+export type SituacaoDoVinculoProposto = (typeof SITUACOES_DO_VINCULO_PROPOSTO)[number]
+
+export type VinculoProposto = {
+  id: Cuid
+  clinica: ClinicaResumo
+  origem: 'IMPORTACAO'
+  situacao: SituacaoDoVinculoProposto
+  propostoEm: DataHoraIso
+  /** O convite vence; o cadastro na clínica, não. Vencido, só um convite novo da clínica. */
+  expiraEm: DataHoraIso
+  /**
+   * Como a clínica tem o responsável. Mascarado (`(11) 9••••-1030`, `ma•••@exemplo.com`): quem
+   * abre o convite ainda não provou ser quem a clínica acha que é.
+   */
+  dadosNaClinica: {
+    nome: string
+    telefoneMascarado: string | null
+    emailMascarado: string | null
+  }
+  /** Pode vir vazio: responsável importado sem animal ("só contato"). */
+  pets: PetNaClinica[]
+}
+
+/**
+ * Erros próprios da proposta. Separados de `CodigoDeErroClinico` pelo mesmo motivo da
+ * notificação: entram lá junto com a tela, sem obrigar ninguém a tratá-los antes.
+ */
+export type CodigoDeErroDoVinculo = 'VINCULO_INCOMPLETO' | 'VINCULO_EXPIRADO'
+
+export const ACOES_SOBRE_O_PET_NA_CLINICA = ['LIGAR', 'CRIAR', 'NAO_E_MEU'] as const
+export type AcaoSobreOPetNaClinica = (typeof ACOES_SOBRE_O_PET_NA_CLINICA)[number]
+
+/**
+ * A resposta, pet a pet. Todo pet da proposta precisa de uma ação — a API recusa resposta
+ * parcial com `VINCULO_INCOMPLETO`, para não sobrar pet "meio ligado".
+ */
+export type ResponderVinculo = {
+  pets: Array<
+    | { petNaClinicaId: Cuid; acao: 'LIGAR'; petId: Cuid }
+    | { petNaClinicaId: Cuid; acao: 'CRIAR' }
+    | { petNaClinicaId: Cuid; acao: 'NAO_E_MEU' }
+  >
+  /**
+   * O consentimento nasce todo `false`, como em qualquer vínculo. A tela pergunta na mesma
+   * resposta; ausente, fica `false` e pode ser mudado depois em "Minhas clínicas".
+   */
+  consentimento?: AtualizarConsentimento
+}
+
+export const MOTIVOS_DE_RECUSA_DO_VINCULO = ['NAO_SOU_EU', 'NAO_QUERO_VINCULO'] as const
+export type MotivoDeRecusaDoVinculo = (typeof MOTIVOS_DE_RECUSA_DO_VINCULO)[number]
+
+export type RecusarVinculo = { motivo: MotivoDeRecusaDoVinculo }
+
+/**
+ * O responsável viu um dado errado ("meu telefone mudou", "a Mel é fêmea"). O app **não edita**
+ * o cadastro da clínica: manda o pedido, e a clínica corrige. Texto livre, até 500 caracteres.
+ */
+export type PedirCorrecaoAClinica = { mensagem: string }
+
+export const TIPO_DE_NOTIFICACAO_DO_VINCULO = 'VINCULO_PROPOSTO' as const
+
+export type DadosDoVinculoProposto = BaseDaNotificacaoClinica & {
+  tipo: typeof TIPO_DE_NOTIFICACAO_DO_VINCULO
+  vinculoId: Cuid
+  clinicaNome: string
+  quantosPets: number
+}
+
+export const ROTAS_DO_VINCULO = {
+  propostas: 'GET /tutor/clinica/vinculos-propostos', // VinculoProposto[] (só PENDENTE)
+  proposta: 'GET /tutor/clinica/vinculos-propostos/:id', // VinculoProposto [VINCULO_EXPIRADO]
+  responder: 'POST /tutor/clinica/vinculos-propostos/:id/responder', // ResponderVinculo → ClinicaDoResponsavel [VINCULO_INCOMPLETO, VINCULO_EXPIRADO, PET_SEM_ACESSO]
+  recusar: 'POST /tutor/clinica/vinculos-propostos/:id/recusar', // RecusarVinculo → 204
+  pedirCorrecao: 'POST /tutor/clinica/vinculos-propostos/:id/correcao', // PedirCorrecaoAClinica → 204
+} as const
+
+/** `/screens/clinica/vinculo?id=…` — sem `petId`: a proposta é da pessoa, não de um pet. */
+export const ROTA_DA_NOTIFICACAO_DO_VINCULO = '/screens/clinica/vinculo'
+
+export const TEXTO_PT_DA_NOTIFICACAO_DO_VINCULO = (
+  dados: DadosDoVinculoProposto,
+): { titulo: string; corpo: string } => ({
+  titulo: `${dados.clinicaNome} trouxe seu cadastro`,
+  corpo:
+    dados.quantosPets === 1
+      ? 'Confirme o pet que a clínica atende para ver tudo no app.'
+      : `Confirme os ${dados.quantosPets} pets que a clínica atende para ver tudo no app.`,
+})
