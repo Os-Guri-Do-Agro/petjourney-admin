@@ -74,7 +74,7 @@ watch(
     modal
     :header="t('hotel.diario.titulo', { pet: petNome })"
     :style="{ width: 'min(34rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope hc-tema"
     @update:visible="emit('fechar')"
   >
     <div class="diario">

@@ -116,11 +116,10 @@ const OPCOES = Object.keys(DESENHOS) as IconeDeAcomodacao[]
 .desenhos__titulo {
   width: 100%;
   padding-inline: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .desenho {

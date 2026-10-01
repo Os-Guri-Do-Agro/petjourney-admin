@@ -132,11 +132,10 @@ const vigentes = computed(() => props.ajustes.filter((ajuste) => !ajuste.revogad
 
 .cartao__titulo {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .botao__icone {

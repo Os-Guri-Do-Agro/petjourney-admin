@@ -223,11 +223,9 @@ const contato = computed(() => [
 
 .previa__selo {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 /* O valor ausente é traço, e o traço é apagado: ele marca lugar sem competir com o preenchido. */

@@ -374,7 +374,7 @@ function confirmar() {
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(40rem, 94vw)' }"
   >
     <template #header>

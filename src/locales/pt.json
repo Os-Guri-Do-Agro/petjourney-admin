@@ -2429,28 +2429,44 @@
         "titulo": "Pelo app",
         "ate": "Cancela ou remarca até {data}, {hora}",
         "encerrado": "Prazo encerrado: só por telefone"
+      },
+      "acoesRotulo": "Ações da agenda",
+      "frase": {
+        "atendimentos": "{total} atendimento | {total} atendimentos",
+        "naRecepcao": "{total} na recepção",
+        "vazio": "Nenhum atendimento marcado"
       }
     },
     "meuDia": {
       "titulo": "Hoje na clínica",
-      "subtitulo": "Clínica",
       "agora": "Agora",
       "aSeguir": "A seguir",
-      "semAtendimentoAgora": "Nada em atendimento neste momento.",
       "semProximo": "Nada mais marcado para hoje.",
       "esperando": "Já chegaram",
-      "esperandoVazio": "Ninguém aguardando na recepção.",
-      "internados": "Internados que cobram você",
-      "internadosVazio": "Nenhum internado com dose atrasada ou boletim preso.",
       "esperaDe": "esperando {valor}",
-      "alertasDoDia": "Alertas que mudam conduta hoje",
-      "alertasVazio": "Nenhum alerta clínico entre os pacientes de hoje.",
-      "retornosSemHorario": "Retornos sem horário marcado",
-      "retornosVazio": "Nenhum retorno pendente.",
       "marcarRetorno": "Marcar retorno",
-      "irParaAgenda": "Ver agenda completa",
-      "iniciarAtendimento": "Iniciar atendimento",
-      "continuar": "Continuar"
+      "depois": "Depois",
+      "continuarCom": "Continuar {pet}",
+      "atenderCom": "Atender {pet}",
+      "agendaCompleta": "Agenda completa",
+      "mapaDeLeitos": "Mapa de leitos",
+      "acoesRotulo": "Ações do dia",
+      "resumo": {
+        "urgentes": "{total} assunto urgente pede sua atenção | {total} assuntos urgentes pedem sua atenção",
+        "pendentes": "{total} assunto esperando você | {total} assuntos esperando você",
+        "emDia": "Nada parado. O resto do dia está na agenda."
+      },
+      "pauta": {
+        "boletim": "Boletim de {pet} aguarda contato com o responsável",
+        "doses": "{total} dose atrasada | {total} doses atrasadas",
+        "naRecepcao": "{pet} espera na recepção",
+        "alerta": "{pet} às {hora}",
+        "retornos": "{total} retorno sem horário marcado | {total} retornos sem horário marcado",
+        "eMais": "{nomes} e mais {total}",
+        "mostrarMais": "Mostrar mais {total}",
+        "mostrarMenos": "Mostrar menos",
+        "ondeAgenda": "Agenda"
+      }
     },
     "resumo": {
       "titulo": "Resumo da clínica",
@@ -2865,15 +2881,6 @@
         "todas": "Todas",
         "pendentes": "A justificar"
       },
-      "resumo": {
-        "total": "Faltas no período",
-        "pacientes": "{contagem} paciente | {contagem} pacientes",
-        "agenda": "Agenda parada",
-        "reincidentes": "Reincidentes",
-        "limite": "a partir de {limite} faltas",
-        "pendentes": "Faltas a justificar",
-        "pendentesDetalhe": "ninguém entrou em contato ainda"
-      },
       "marcar": "Marcar falta",
       "reagendar": {
         "titulo": "Reagendar",
@@ -2921,6 +2928,15 @@
         "mensagem": "Olá! Sentimos falta de {paciente} na consulta de {data}. Está tudo bem? Podemos remarcar?",
         "mensagemObito": "Olá. Soubemos do falecimento de {paciente} e sentimos muito. Estamos à disposição no que precisar.",
         "avisoObito": "Com o óbito registrado, esta falta deixa de receber oferta de remarcação."
+      },
+      "frase": {
+        "pendentes": "{total} falta para justificar | {total} faltas para justificar",
+        "emDia": "Todas as faltas têm motivo",
+        "agenda": "{tempo} de agenda parada"
+      },
+      "acoes": {
+        "rotulo": "Ações das faltas",
+        "justificarProxima": "Justificar a próxima"
       }
     },
     "prontuario": {
@@ -3766,7 +3782,6 @@
       "subtitulo": "Mapa de leitos, prescrição por horário e o boletim que o responsável recebe.",
       "vazioTitulo": "Nenhum leito cadastrado",
       "vazioDescricao": "Cadastre os leitos da clínica para acompanhar as internações por aqui.",
-      "retidosAviso": "Boletins aguardando ligação: {total}. Notícia grave não sai por aplicativo antes de alguém falar com o responsável.",
       "gravidade": {
         "estavel": "Estável",
         "atencao": "Atenção",
@@ -3806,16 +3821,6 @@
         "noite": "Plantão da noite",
         "responsavel": "Plantão de {nome}",
         "passar": "Passar plantão"
-      },
-      "stat": {
-        "ocupacao": "Ocupação dos leitos",
-        "vagas": "{total} livres",
-        "criticos": "Em estado grave",
-        "criticosDetalhe": "pacientes críticos agora",
-        "pendentes": "A fazer agora",
-        "atrasadas": "{total} atrasadas",
-        "boletins": "Boletins retidos",
-        "boletinsDetalhe": "esperando ligação"
       },
       "leito": {
         "livre": "Livre",
@@ -4028,22 +4033,19 @@
         "voltar": "Mapa de leitos",
         "internadoHa": "Internado há",
         "responsavelClinico": "Veterinário responsável",
-        "pendentes": "A fazer agora",
-        "pendentesDetalhe": "no horário ou atrasadas",
         "abasRotulo": "Seção",
         "naTroca": "Há {total} administração em cima da troca de plantão.",
         "naoEncontradoTitulo": "Internação não encontrada",
         "naoEncontradoDescricao": "Ela pode ter recebido alta. Volte ao mapa de leitos.",
-        "estado": "Estado do paciente",
         "noLeito": "Leito {leito}",
         "diagnostico": "Diagnóstico de trabalho",
-        "altaEm": "alta prevista {data}",
-        "semPrevisaoDeAlta": "sem previsão de alta",
-        "verHistorico": "Histórico do paciente"
+        "previsaoDeAlta": "Previsão de alta",
+        "semPrevisao": "Sem previsão",
+        "observacao": "Observação na entrada",
+        "encerradaFrase": "Internação encerrada"
       },
       "leitos": {
         "titulo": "Leitos da clínica",
-        "tituloGrade": "Leitos · {total}",
         "gerenciar": "Gerenciar leitos",
         "ajuda": "A clínica cadastra os leitos que tem. Leito parado continua no mapa, marcado, e sai da conta de vagas.",
         "conta": "{total} cadastrados · {ativos} em operação",
@@ -4094,6 +4096,23 @@
         "paginas": "Páginas da lista de leitos",
         "anterior": "Página anterior",
         "proxima": "Próxima página"
+      },
+      "acoesRotulo": "Ações da internação",
+      "grupo": "{ocupados} de {ativos} ocupados",
+      "resumo": {
+        "ocupacao": "{ocupados} de {ativos} leitos ocupados",
+        "urgentes": "{total} urgente | {total} urgentes",
+        "proximaHora": "{total} paciente com dose na próxima hora | {total} pacientes com dose na próxima hora",
+        "emDia": "nada atrasado"
+      },
+      "pauta": {
+        "titulo": "O que pede ação no plantão",
+        "boletim": "Boletim de {pet} aguarda contato com o responsável",
+        "responsavel": "Responsável: {nome}",
+        "atrasadas": "{pet}: {total} administração atrasada | {pet}: {total} administrações atrasadas",
+        "proxima": "{pet}: próxima administração em {minutos} min",
+        "aFazer": "A fazer no plantão: {total}",
+        "vazio": "Nada atrasado no plantão."
       }
     },
     "diario": {
@@ -5311,7 +5330,7 @@
     "hospedes": {
       "acao": {
         "abrir": "Abrir a estadia de {pet}",
-        "ligar": "Ligar"
+        "registrarContato": "Registrar contato"
       },
       "banda": {
         "emDia": "Em dia",
@@ -5341,8 +5360,8 @@
         "agora": "agora",
         "atrasou": "atrasou {tempo}",
         "em": "em {tempo}",
-        "ligar": "Ligue para {tutor}",
-        "nadaPendente": "Nada pendente hoje"
+        "nadaPendente": "Nada pendente hoje",
+        "ocorrencia": "Ocorrência grave sem contato com {tutor}"
       },
       "irParaRotina": "Abrir rotina do turno",
       "ninguemPrecisa": "Ninguém precisa de você agora. A casa está em dia.",
@@ -5515,9 +5534,7 @@
       "faltaPesar": "Falta pesar",
       "irParaRotina": "Abrir rotina",
       "podeEntrar": "Pode entrar",
-      "precisaAgora": "Precisa de você agora ({total})",
       "prontoParaSair": "Pronto para sair",
-      "responsavel": "Responsável: {nome}",
       "resumo": {
         "atrasadas": "{total} atrasada | {total} atrasadas",
         "chegam": "chega | chegam",
@@ -5531,12 +5548,22 @@
       "titulo": "Painel do dia",
       "travaAdmissao": "{pet} chega hoje sem a documentação exigida.",
       "travaAdmissaoAcao": "Peça o documento agora, ou dispense com seu nome.",
-      "travaBoletim": "O boletim de {pet} está retido esperando uma ligação.",
-      "travaBoletimAcao": "Abra a estadia para liberar o recado.",
-      "travaOcorrencia": "Ligue para o responsável de {pet}: há uma ocorrência grave sem contato.",
-      "travaOcorrenciaAcao": "Ligue para {telefone} e registre a ligação na estadia.",
       "vazioDescricao": "Nenhum hóspede na casa e nenhuma chegada prevista para hoje.",
-      "vazioTitulo": "Nada acontecendo hoje"
+      "vazioTitulo": "Nada acontecendo hoje",
+      "acoesRotulo": "Ações do painel",
+      "frase": {
+        "urgentes": "{total} urgente | {total} urgentes"
+      },
+      "pauta": {
+        "ocorrencia": "Ocorrência grave de {pet} sem contato com o responsável",
+        "boletim": "Boletim de {pet} retido até o contato com o responsável",
+        "responsavel": "Responsável: {nome} · {telefone}"
+      },
+      "onde": {
+        "estadia": "Estadia",
+        "reserva": "Reserva"
+      },
+      "movimentoDoDia": "Movimento do dia"
     },
     "planoDaEstadia": {
       "desde": "desde {data}",
@@ -5848,7 +5875,7 @@
       },
       "hospedes": {
         "cartao": {
-          "texto": "O disco mostra qual serviço, e enche quando a hora chega. O número ao lado conta quantas já atrasaram. É a única linha do cartão que muda sozinha, sem ninguém tocar na tela.",
+          "texto": "O disco mostra qual serviço e ganha cor quando a hora chega: pêssego se atrasou, cheio de coral só quando há uma ocorrência grave sem contato com o responsável. O número ao lado conta quantas já atrasaram.",
           "titulo": "A linha que cobra ação"
         },
         "linhas": {
@@ -5896,7 +5923,7 @@
           "titulo": "A pergunta desta tela"
         },
         "resumo": {
-          "texto": "Quantos estão na casa, quantos chegam, quantos saem e quantas tarefas estão para agora. Quatro números que cabem numa frase.",
+          "texto": "Quantos estão na casa, quantos chegam, quantos saem e quantos assuntos são urgentes, numa frase só.",
           "titulo": "O dia em uma linha"
         },
         "travas": {

@@ -61,6 +61,7 @@ function cancelar() {
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.pacientes.titulo')"
     :title="t('clinico.paciente.novo.titulo')"
     :loading="carregando"

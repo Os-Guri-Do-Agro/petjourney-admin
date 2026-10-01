@@ -6,18 +6,32 @@
  * de todas as outras oito telas do módulo. Era a causa direta da crítica: "várias telas parecem a
  * mesma coisa, mesmo tendo outras utilidades".
  *
- * Agora ela tem a forma do que é: **um dia**. Um trilho de horas com as chegadas em cima e as
- * saídas embaixo, e uma linha vertical no agora. Quem abre às oito vê o dia inteiro de uma vez e
- * sabe o que vem primeiro — que é a única coisa que se pede a um painel de manhã.
+ * Ela tem a forma do que é: **um dia**. Um trilho de horas com as chegadas em cima e as saídas
+ * embaixo, e uma linha vertical no agora. Quem abre às oito vê o dia inteiro de uma vez e sabe o
+ * que vem primeiro — que é a única coisa que se pede a um painel de manhã.
  *
- * Os números não sumiram: viraram **uma frase**. "5 na casa, 2 chegam, 1 sai" cabe numa linha e
- * diz o mesmo que quatro cartões ocupando um terço da tela acima da dobra.
+ * ## A forma (redesenho de 30/09/2026)
+ *
+ * A de Hoje na clínica, com o dia do hotel:
+ *
+ * 1. **A saudação** — a data e o turno (horário e quem está de plantão) na linha pequena, e os
+ *    números do dia numa frase ("5 na casa · 2 chegam · 1 sai"), com as pílulas ao lado: abrir a
+ *    rotina é a cheia, o próximo passo de quem abre o painel; passar o turno é contornada.
+ * 2. **O que pede ação** — a pauta da Visão geral (`PautaTabela`). As faixas pintadas de ponta a
+ *    ponta que abriam a tela viraram linhas com selo: ocorrência sem contato e chegada sem
+ *    documento como urgentes, boletim retido e tarefas atrasadas como atenção. O contato com o
+ *    responsável se registra na estadia; a tela não liga.
+ * 3. **O dia** — o trilho, e as chegadas e saídas por extenso.
+ * 4. **Bem-estar na casa** — como os bichos estão, que não tem hora marcada.
  */
+import { PhArrowsLeftRight, PhClock, PhListChecks, PhSignIn, PhSignOut } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
+import PautaTabela from '@/components/home/PautaTabela.vue'
+import { porGravidade, type LinhaDaTabela } from '@/components/home/pauta-tabela'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import HotelDevPanel from '@/features/hotel/components/base/HotelDevPanel.vue'
 import HotelTour from '@/features/hotel/components/base/HotelTour.vue'
@@ -105,57 +119,89 @@ const marcas = computed<MarcaDoDia[]>(() => [
 ])
 
 /**
- * O que trava. Cada item é um botão que leva ao lugar onde se resolve.
- *
- * Só entra aqui o que **alguém precisa fazer agora**: ligação pendente, boletim preso atrás dela,
- * chegada de hoje sem documento. Documento vencendo de uma reserva de daqui a três dias é trabalho
- * da véspera e mora na tela de reservas.
+ * O que pede ação. Só entra o que **alguém precisa fazer agora**: ocorrência grave sem contato com
+ * o responsável, boletim preso atrás dela, chegada de hoje sem documento, e — numa linha só — as
+ * tarefas atrasadas da rotina, cuja lista mora na prancheta. Documento vencendo de uma reserva de
+ * daqui a três dias é trabalho da véspera e mora na tela de reservas.
  */
-const travas = computed(() => {
-  const lista: {
-    id: string
-    texto: string
-    acao: string
-    rota: string
-    tom: 'risco' | 'atencao'
-  }[] = []
+const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
+  const linhas: LinhaDaTabela[] = []
+  const estadia = t('hotel.painel.onde.estadia')
 
   for (const hospede of hospedagem.hospedes) {
+    const to = `/hotel/hospedagem/${hospede.hospedagem.id}`
+    const responsavel = t('hotel.painel.pauta.responsavel', {
+      nome: hospede.tutorNome,
+      telefone: hospede.tutorTelefone,
+    })
+
     if (hospede.ocorrenciaTravada) {
-      lista.push({
+      linhas.push({
         id: `ocor-${hospede.hospedagem.id}`,
-        texto: t('hotel.painel.travaOcorrencia', { pet: hospede.petNome }),
-        acao: t('hotel.painel.travaOcorrenciaAcao', { telefone: hospede.tutorTelefone }),
-        rota: `/hotel/hospedagem/${hospede.hospedagem.id}`,
+        to,
+        frase: t('hotel.painel.pauta.ocorrencia', { pet: hospede.petNome }),
+        detalhe: responsavel,
         tom: 'risco',
+        onde: estadia,
       })
     } else if (hospede.boletimRetido) {
-      lista.push({
+      linhas.push({
         id: `bol-${hospede.hospedagem.id}`,
-        texto: t('hotel.painel.travaBoletim', { pet: hospede.petNome }),
-        acao: t('hotel.painel.travaBoletimAcao'),
-        rota: `/hotel/hospedagem/${hospede.hospedagem.id}`,
+        to,
+        frase: t('hotel.painel.pauta.boletim', { pet: hospede.petNome }),
+        detalhe: responsavel,
         tom: 'atencao',
+        onde: estadia,
       })
     }
   }
 
   for (const linha of chegamHoje.value) {
     if (linha.admissao === 'ausente' || linha.admissao === 'vencido') {
-      lista.push({
+      linhas.push({
         id: `adm-${linha.reserva.id}`,
-        texto: t('hotel.painel.travaAdmissao', {
+        to: `/hotel/reserva/${linha.reserva.id}`,
+        frase: t('hotel.painel.travaAdmissao', {
           pet: linha.petNome,
           hora: formato.hora(linha.reserva.entradaPrevista),
         }),
-        acao: t('hotel.painel.travaAdmissaoAcao'),
-        rota: `/hotel/reserva/${linha.reserva.id}`,
+        detalhe: t('hotel.painel.travaAdmissaoAcao'),
         tom: 'risco',
+        onde: t('hotel.painel.onde.reserva'),
       })
     }
   }
 
-  return lista
+  const atrasadas = hospedagem.atrasadasNaPrancheta
+
+  if (atrasadas > 0) {
+    linhas.push({
+      id: 'rotina',
+      to: '/hotel/rotina',
+      frase: t('inicio.pauta.rotina', { total: atrasadas }, atrasadas),
+      tom: 'atencao',
+      onde: t('inicio.pauta.onde.rotina'),
+    })
+  }
+
+  return porGravidade(linhas)
+})
+
+const urgentes = computed(() => linhasDaPauta.value.filter((linha) => linha.tom === 'risco').length)
+
+/** A frase da saudação: os números do dia, e quantos assuntos são urgentes. */
+const fraseDoDia = computed(() => {
+  const partes = [
+    `${hospedagem.hospedes.length} ${t('hotel.painel.resumo.naCasa')}`,
+    `${chegamHoje.value.length} ${t('hotel.painel.resumo.chegam', {}, chegamHoje.value.length)}`,
+    `${saemHoje.value.length} ${t('hotel.painel.resumo.saem', {}, saemHoje.value.length)}`,
+  ]
+
+  if (urgentes.value > 0) {
+    partes.push(t('hotel.painel.frase.urgentes', { total: urgentes.value }, urgentes.value))
+  }
+
+  return partes.join(' · ')
 })
 
 const turno = computed(() => hospedagem.passagem?.turno ?? null)
@@ -163,6 +209,44 @@ const turno = computed(() => hospedagem.passagem?.turno ?? null)
 const plantonista = computed(() =>
   turno.value ? hotelStore.cuidador(turno.value.responsavelId) : null,
 )
+
+/** A linha pequena da saudação: a data e, quando há, o turno e quem está nele. */
+const linhaDoTurno = computed(() => {
+  const data = formato.dataLonga(hoje)
+  const partes = [data.charAt(0).toLocaleUpperCase() + data.slice(1)]
+
+  if (turno.value) {
+    partes.push(
+      `${formato.turno(turno.value.kind)} ${formato.hora(turno.value.inicio)}–${formato.hora(turno.value.fim)}`,
+    )
+  }
+
+  if (plantonista.value) {
+    partes.push(plantonista.value.nome)
+  }
+
+  return partes.join(' · ')
+})
+
+type Acao = { id: string; rotulo: string; icone: Component; to?: string; executar?: () => void }
+
+/** A cheia é abrir a rotina: quem abre o painel vai executar. Passar o turno fica contornada. */
+const acoes = computed<Acao[]>(() => {
+  const lista: Acao[] = [
+    { id: 'rotina', rotulo: t('hotel.painel.irParaRotina'), icone: PhListChecks, to: '/hotel/rotina' },
+  ]
+
+  if (turno.value) {
+    lista.push({
+      id: 'turno',
+      rotulo: t('hotel.turno.passar'),
+      icone: PhArrowsLeftRight,
+      executar: () => (passagemAberta.value = true),
+    })
+  }
+
+  return lista
+})
 
 const vazio = computed(
   () =>
@@ -177,6 +261,7 @@ async function entregarTurno(nota: string, recebidoPor: string) {
     passagemAberta.value = false
   }
 }
+
 /**
  * O tutorial desta tela, na ordem em que se lê a página.
  *
@@ -191,14 +276,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     texto: t('hotel.tour.painel.pergunta.texto'),
   },
   {
-    alvo: '.travas',
-    titulo: t('hotel.tour.painel.travas.titulo'),
-    texto: t('hotel.tour.painel.travas.texto'),
-  },
-  {
-    alvo: '.resumo',
+    alvo: '.hc-saudacao__resumo',
     titulo: t('hotel.tour.painel.resumo.titulo'),
     texto: t('hotel.tour.painel.resumo.texto'),
+  },
+  {
+    alvo: '.pauta',
+    titulo: t('hotel.tour.painel.travas.titulo'),
+    texto: t('hotel.tour.painel.travas.texto'),
   },
   {
     alvo: '.trilho',
@@ -215,8 +300,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="t('hotel.painel.titulo')"
-    :subtitle="formato.dataLonga(hoje)"
     tour
     @tour="tourAberto = true"
     :loading="hospedagem.carregando && hospedagem.hospedes.length === 0"
@@ -226,90 +311,90 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     :empty-description="t('hotel.painel.vazioDescricao')"
     @retry="carregar"
   >
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ linhaDoTurno }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('hotel.painel.titulo') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p class="hc-saudacao__resumo" aria-live="polite">{{ fraseDoDia }}</p>
+
+          <nav class="hc-acoes" :aria-label="t('hotel.painel.acoesRotulo')">
+            <template v-for="(acao, indice) in acoes" :key="acao.id">
+              <RouterLink
+                v-if="acao.to"
+                class="hc-pilula"
+                :class="{ 'hc-pilula--cheia': indice === 0 }"
+                :to="acao.to"
+              >
+                <component
+                  :is="acao.icone"
+                  class="hc-pilula__icone"
+                  :weight="indice === 0 ? 'fill' : 'duotone'"
+                  aria-hidden="true"
+                />
+                {{ acao.rotulo }}
+              </RouterLink>
+              <Button
+                v-else
+                type="button"
+                class="hc-pilula"
+                :label="acao.rotulo"
+                @click="acao.executar?.()"
+              >
+                <template #icon>
+                  <component
+                    :is="acao.icone"
+                    class="hc-pilula__icone"
+                    weight="duotone"
+                    aria-hidden="true"
+                  />
+                </template>
+              </Button>
+            </template>
+          </nav>
+        </div>
+      </div>
+    </template>
+
     <div class="painel clinic-scope">
       <!--
-        O que trava abre a página, acima do próprio dia. Não é indicador: é uma lista de tarefas
-        que seguram uma notícia dentro da casa, com um responsável do outro lado sem resposta.
+        O que trava abre a página, acima do próprio dia: são tarefas que seguram uma notícia dentro
+        da casa, com um responsável do outro lado sem resposta.
       -->
-      <section v-if="travas.length > 0" class="travas" aria-live="polite">
-        <h2 class="travas__titulo">
-          <i class="pi pi-bell" aria-hidden="true" />
-          {{ t('hotel.painel.precisaAgora', { total: travas.length }) }}
-        </h2>
+      <section v-if="linhasDaPauta.length > 0" class="hc pauta" aria-labelledby="painel-pauta">
+        <header class="hc__cabeca">
+          <h2 id="painel-pauta" class="hc__titulo">
+            <PhListChecks class="hc__icone" weight="duotone" aria-hidden="true" />
+            {{ t('inicio.pauta.titulo') }}
+          </h2>
+        </header>
 
-        <button
-          v-for="trava in travas"
-          :key="trava.id"
-          type="button"
-          class="trava"
-          :class="`trava--${trava.tom}`"
-          @click="router.push(trava.rota)"
-        >
-          <i class="pi pi-exclamation-circle" aria-hidden="true" />
-          <span class="trava__corpo">
-            <strong>{{ trava.texto }}</strong>
-            <span>{{ trava.acao }}</span>
-          </span>
-          <i class="pi pi-arrow-right" aria-hidden="true" />
-        </button>
+        <PautaTabela :linhas="linhasDaPauta" />
       </section>
 
       <!--
-        A frase-resumo mora **dentro** do cartão do dia, como cabeçalho dele.
-        Solta entre os avisos e o trilho, ela era um terceiro bloco flutuando entre dois blocos —
-        e o olho lia três coisas onde havia duas.
+        O título do cartão do dia: além de dizer o que ele é, é o cabeçalho que reserva o espaço do
+        rótulo do agora, que sobe acima do trilho — sem ele, o rótulo vazava por cima do cartão de
+        cima.
       -->
       <LinhaDoDia :marcas="marcas" :agora="hospedagem.agora" @abrir="(rota) => router.push(rota)">
         <template #resumo>
-          <p class="resumo">
-            <span class="resumo__item">
-              <strong class="clinic-value">{{ hospedagem.hospedes.length }}</strong>
-              {{ t('hotel.painel.resumo.naCasa') }}
-            </span>
-            <span class="resumo__sep" aria-hidden="true">·</span>
-            <span class="resumo__item">
-              <strong class="clinic-value">{{ chegamHoje.length }}</strong>
-              {{ t('hotel.painel.resumo.chegam', {}, chegamHoje.length) }}
-            </span>
-            <span class="resumo__sep" aria-hidden="true">·</span>
-            <span class="resumo__item">
-              <strong class="clinic-value">{{ saemHoje.length }}</strong>
-              {{ t('hotel.painel.resumo.saem', {}, saemHoje.length) }}
-            </span>
-            <span class="resumo__sep" aria-hidden="true">·</span>
-            <span
-              class="resumo__item"
-              :class="{ 'resumo__item--alerta': hospedagem.atrasadasNaPrancheta > 0 }"
-            >
-              <strong class="clinic-value">{{ hospedagem.pendentesNaPrancheta }}</strong>
-              {{ t('hotel.painel.resumo.tarefas', {}, hospedagem.pendentesNaPrancheta) }}
-              <template v-if="hospedagem.atrasadasNaPrancheta > 0">
-                ({{
-                  t(
-                    'hotel.painel.resumo.atrasadas',
-                    { total: hospedagem.atrasadasNaPrancheta },
-                    hospedagem.atrasadasNaPrancheta,
-                  )
-                }})
-              </template>
-            </span>
-          </p>
+          <h2 class="hc__titulo">
+            <PhClock class="hc__icone" weight="duotone" aria-hidden="true" />
+            {{ t('hotel.painel.movimentoDoDia') }}
+          </h2>
         </template>
       </LinhaDoDia>
 
       <div class="colunas">
-        <!--
-          As duas listas são cartões, e não títulos soltos sobre caixas soltas.
-          Cada linha era uma caixa com borda própria: três bordas empilhadas onde bastava uma, e o
-          olho contava molduras em vez de ler nomes.
-        -->
-        <section class="coluna">
-          <h2 class="coluna__titulo">
-            <span class="coluna__icone coluna__icone--entra" aria-hidden="true">
-              <i class="pi pi-arrow-down-left" />
-            </span>
-            {{ t('hotel.painel.chegamHoje', { total: chegamHoje.length }) }}
-          </h2>
+        <section class="hc coluna" aria-labelledby="painel-chegam">
+          <header class="hc__cabeca">
+            <h2 id="painel-chegam" class="hc__titulo">
+              <PhSignIn class="hc__icone" weight="duotone" aria-hidden="true" />
+              {{ t('hotel.painel.chegamHoje', { total: chegamHoje.length }) }}
+            </h2>
+          </header>
 
           <p v-if="chegamHoje.length === 0" class="coluna__vazio">
             {{ t('hotel.painel.semChegadas') }}
@@ -317,15 +402,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
           <ul v-else class="lista">
             <li v-for="linha in chegamHoje" :key="linha.reserva.id">
-              <button
-                type="button"
-                class="linha"
-                @click="router.push(`/hotel/reserva/${linha.reserva.id}`)"
-              >
-                <span class="linha__hora clinic-value">
-                  {{ formato.hora(linha.reserva.entradaPrevista) }}
-                </span>
-
+              <RouterLink class="linha" :to="`/hotel/reserva/${linha.reserva.id}`">
+                <span class="linha__hora">{{ formato.hora(linha.reserva.entradaPrevista) }}</span>
                 <PetAvatar
                   :nome="linha.petNome"
                   :iniciais="linha.petIniciais"
@@ -333,12 +411,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                   :foto-url="linha.petFotoUrl"
                   tamanho="sm"
                 />
-
                 <span class="linha__corpo">
                   <strong>{{ linha.petNome }}</strong>
                   <span>{{ linha.acomodacaoNome }} · {{ linha.tutorNome }}</span>
                 </span>
-
                 <HotelSelo
                   :rotulo="
                     linha.admissao === 'ok'
@@ -347,18 +423,18 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                   "
                   :tom="linha.admissao === 'ok' ? 'positivo' : tomDaAdmissao(linha.admissao)"
                 />
-              </button>
+              </RouterLink>
             </li>
           </ul>
         </section>
 
-        <section class="coluna">
-          <h2 class="coluna__titulo">
-            <span class="coluna__icone coluna__icone--sai" aria-hidden="true">
-              <i class="pi pi-arrow-up-right" />
-            </span>
-            {{ t('hotel.painel.saemHoje', { total: saemHoje.length }) }}
-          </h2>
+        <section class="hc coluna" aria-labelledby="painel-saem">
+          <header class="hc__cabeca">
+            <h2 id="painel-saem" class="hc__titulo">
+              <PhSignOut class="hc__icone" weight="duotone" aria-hidden="true" />
+              {{ t('hotel.painel.saemHoje', { total: saemHoje.length }) }}
+            </h2>
+          </header>
 
           <p v-if="saemHoje.length === 0" class="coluna__vazio">
             {{ t('hotel.painel.semSaidas') }}
@@ -366,15 +442,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
           <ul v-else class="lista">
             <li v-for="hospede in saemHoje" :key="hospede.hospedagem.id">
-              <button
-                type="button"
-                class="linha"
-                @click="router.push(`/hotel/hospedagem/${hospede.hospedagem.id}`)"
-              >
-                <span class="linha__hora clinic-value">
-                  {{ formato.hora(hospede.hospedagem.saidaPrevistaEm) }}
-                </span>
-
+              <RouterLink class="linha" :to="`/hotel/hospedagem/${hospede.hospedagem.id}`">
+                <span class="linha__hora">{{ formato.hora(hospede.hospedagem.saidaPrevistaEm) }}</span>
                 <PetAvatar
                   :nome="hospede.petNome"
                   :iniciais="hospede.petIniciais"
@@ -382,12 +451,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                   :foto-url="hospede.petFotoUrl"
                   tamanho="sm"
                 />
-
                 <span class="linha__corpo">
                   <strong>{{ hospede.petNome }}</strong>
                   <span>{{ hospede.acomodacaoNome }} · {{ hospede.tutorNome }}</span>
                 </span>
-
                 <HotelSelo
                   v-if="hospede.hospedagem.pesoSaidaKg === null"
                   :rotulo="t('hotel.painel.faltaPesar')"
@@ -400,7 +467,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                   tom="positivo"
                   icone="pi pi-check"
                 />
-              </button>
+              </RouterLink>
             </li>
           </ul>
         </section>
@@ -409,42 +476,13 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <!--
         Como os bichos estão. Vem depois do movimento do dia de propósito: chegada e saída têm
         hora marcada e por isso mandam na manhã, mas o animal estressado não tem hora — ele fica
-        até alguém olhar. Abaixo da dobra do movimento, acima do fechamento do turno.
+        até alguém olhar.
       -->
       <BemEstarDaCasa
         :hospedes="hospedagem.hospedes"
         :prancheta="hospedagem.prancheta"
         :agora="hospedagem.agora"
-        @abrir="(rota) => router.push(rota)"
       />
-
-      <section v-if="turno" class="turno">
-        <div class="turno__quem">
-          <strong>
-            {{ formato.turno(turno.kind) }} · {{ formato.hora(turno.inicio) }}–{{
-              formato.hora(turno.fim)
-            }}
-          </strong>
-          <span>{{ t('hotel.painel.responsavel', { nome: plantonista?.nome ?? '' }) }}</span>
-        </div>
-
-        <div class="turno__acoes">
-          <Button
-            :label="t('hotel.painel.irParaRotina')"
-            icon="pi pi-list-check"
-            severity="secondary"
-            outlined
-            @click="router.push('/hotel/rotina')"
-          />
-          <Button
-            :label="t('hotel.turno.passar')"
-            icon="pi pi-sign-out"
-            severity="secondary"
-            outlined
-            @click="passagemAberta = true"
-          />
-        </div>
-      </section>
     </div>
 
     <PassagemDialog
@@ -467,151 +505,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 <style scoped>
 .painel {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 1.25rem;
 }
 
-/* ------------------------------------------------------------------ travas */
-
-.travas {
-  display: grid;
-  gap: var(--clinic-space-2);
-}
-
-.travas__titulo {
-  display: flex;
-  align-items: center;
-  margin: 0;
-  gap: 0.35rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.travas__titulo .pi {
-  color: var(--clinic-risk-text);
-  font-size: 0.7rem;
-}
-
-/*
- * O aviso: cartão comum, urgência no ícone.
- *
- * Passou por duas versões erradas. A primeira era uma faixa rosa de ponta a ponta — "visualmente
- * agressiva". A segunda trocou o preenchimento por uma **barra colorida na lateral**, e a barra é
- * um clichê: aparece em todo aviso de todo template, não diz nada que o ícone já não diga, e deixa
- * a tela com cara de peça pronta.
- *
- * O que sobrou é o que de fato informa: um cartão igual aos outros, e um **disco cheio** com o
- * ícone da urgência. Disco cheio, e não contorno — é o que separa "isto exige ação" de "isto é uma
- * nota", sem pintar nada além de 28 px.
- */
-.trava {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
-  color: var(--clinic-text);
-  cursor: pointer;
-  font: inherit;
-  text-align: start;
-  transition:
-    border-color 120ms ease,
-    box-shadow 120ms ease;
-  --trava-tom: var(--clinic-risk-text);
-}
-
-.trava:hover,
-.trava:focus-visible {
-  border-color: var(--trava-tom);
-  box-shadow: 0 2px 10px rgb(31 47 43 / 0.08);
-  outline: none;
-}
-
-.trava--atencao {
-  --trava-tom: var(--clinic-attention-text);
-}
-
-/* O disco é o único lugar onde o tom preenche — e é o que faz a urgência ser vista de longe. */
-.trava > .pi-exclamation-circle {
-  display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--trava-tom);
-  color: var(--clinic-surface);
-  font-size: 0.82rem;
-}
-
-/* A seta some no repouso: ela é confirmação de que dá para clicar, não um elemento da frase. */
-.trava > .pi-arrow-right {
-  flex: 0 0 auto;
-  color: var(--clinic-faint);
-  font-size: 0.75rem;
-  transition:
-    color 120ms ease,
-    transform 120ms ease;
-}
-
-.trava:hover > .pi-arrow-right,
-.trava:focus-visible > .pi-arrow-right {
-  color: var(--trava-tom);
-  transform: translateX(2px);
-}
-
-.trava__corpo {
-  display: grid;
-  flex: 1;
-  gap: 0.05rem;
-}
-
-.trava__corpo strong {
-  color: var(--trava-tom);
-  font-weight: 750;
-}
-
-.trava__corpo span {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-}
-
-.trava__corpo span {
-  font-size: var(--clinic-font-label);
-  opacity: 0.9;
-}
-
-/* ------------------------------------------------------------------ resumo em frase */
-
-.resumo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  margin: 0;
-  gap: 0.5rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-body);
-}
-
-.resumo__item strong {
-  margin-inline-end: 0.2rem;
-  color: var(--clinic-text);
-  font-size: 1.15rem;
-  font-weight: 800;
-}
-
-.resumo__item--alerta strong {
-  color: var(--clinic-attention-text);
-}
-
-.resumo__sep {
-  color: var(--clinic-line-strong);
+.pauta {
+  gap: 0.75rem;
 }
 
 /* ------------------------------------------------------------------ colunas */
@@ -619,76 +517,26 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .colunas {
   display: grid;
   /*
-   * Cada cartão tem a altura do que carrega.
-   * Esticados à altura do vizinho, o que tem uma saída ficava com metade do corpo vazio ao lado do
-   * que tem duas chegadas — e vazio emparelhado com conteúdo lê como informação faltando.
+   * Cada cartão tem a altura do que carrega. Esticados à altura do vizinho, o que tem uma saída
+   * ficava com metade do corpo vazio ao lado do que tem duas chegadas — e vazio emparelhado com
+   * conteúdo lê como informação faltando.
    */
   align-items: start;
-  gap: var(--clinic-space-4);
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
 }
 
-/*
- * Cada coluna é **um** cartão, e as linhas vivem dentro dele.
- *
- * Antes cada linha era uma caixa com borda própria, sobre um título solto: para ler dois hóspedes
- * o olho atravessava três molduras. Agora a moldura é uma só, e as linhas se separam por um filete
- * — que é como qualquer lista de verdade se separa.
- */
 .coluna {
-  display: grid;
-  align-content: start;
-  overflow: hidden;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-}
-
-.coluna__titulo {
-  display: flex;
-  align-items: center;
-  margin: 0;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border-block-end: 1px solid var(--clinic-line-soft);
   gap: 0.5rem;
-  background: var(--clinic-surface-soft);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-  letter-spacing: 0.01em;
-}
-
-/*
- * A seta entra e a seta sai, em discos de tom oposto.
- * São os dois movimentos da casa, e dá para saber de qual coluna se trata sem ler o título — que
- * é o que se pede de um cabeçalho quando a tela tem duas listas parecidas lado a lado.
- */
-.coluna__icone {
-  display: grid;
-  width: 1.4rem;
-  height: 1.4rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 50%;
-  font-size: 0.62rem;
-}
-
-.coluna__icone--entra {
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.coluna__icone--sai {
-  background: var(--clinic-surface-sunken);
-  color: var(--clinic-muted);
 }
 
 .coluna__vazio {
   margin: 0;
-  padding: var(--clinic-space-4);
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--hc-tinta-2);
+  font-size: 0.875rem;
 }
 
+/* As linhas se separam por fio, como qualquer lista de verdade: uma moldura só, a do cartão. */
 .lista {
   display: grid;
   margin: 0;
@@ -696,43 +544,42 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   list-style: none;
 }
 
-.lista li + li .linha {
-  border-block-start: 1px solid var(--clinic-line-soft);
+.lista li + li {
+  border-block-start: 1px solid var(--hc-linha);
 }
 
 .linha {
   display: flex;
   align-items: center;
-  width: 100%;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 0;
-  gap: var(--clinic-space-3);
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  text-align: start;
-  transition: background 120ms ease;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.55rem 0.5rem;
+  border-radius: 0.5rem;
+  color: var(--hc-tinta);
+  text-decoration: none;
+  transition: background-color 150ms ease-out;
 }
 
-.linha:hover,
+.linha:hover {
+  background: var(--hc-fundo);
+}
+
 .linha:focus-visible {
-  background: var(--clinic-accent-tint);
-  outline: none;
+  outline: 2px solid var(--hc-marca);
+  outline-offset: -2px;
 }
 
 /*
- * A hora ganha coluna fixa e alinhamento tabular.
- * Sem largura fixa, "09:30" e "16:30" empurravam os nomes para posições diferentes, e a lista
- * perdia a coluna vertical que faz uma lista de horários ser lida de cima para baixo.
+ * A hora ganha coluna fixa e alinhamento tabular. Sem largura fixa, "09:30" e "16:30" empurravam
+ * os nomes para posições diferentes, e a lista perdia a coluna vertical dos horários.
  */
 .linha__hora {
   width: 2.9rem;
   flex: 0 0 auto;
-  color: var(--clinic-text);
-  font-size: 0.82rem;
+  color: var(--hc-marca-forte);
+  font-size: 0.875rem;
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .linha__corpo {
@@ -743,41 +590,21 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .linha__corpo strong {
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .linha__corpo span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  overflow: hidden;
+  color: var(--hc-tinta-2);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* ------------------------------------------------------------------ turno */
-
-.turno {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface-soft);
-}
-
-.turno__quem {
-  display: grid;
-  gap: 0.1rem;
-}
-
-.turno__quem span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.turno__acoes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--clinic-space-2);
+@media (prefers-reduced-motion: reduce) {
+  .linha {
+    transition: none;
+  }
 }
 </style>

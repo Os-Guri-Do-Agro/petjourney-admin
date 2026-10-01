@@ -13,7 +13,7 @@ import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
@@ -253,6 +253,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="t('hotel.reservas.titulo')"
     :subtitle="t('hotel.reservas.subtitulo')"
     :loading="reservas.carregando && reservas.lista.length === 0"
@@ -279,11 +280,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
         <ul class="vespera__lista">
           <li v-for="linha in vespera" :key="linha.reserva.id">
-            <button
-              type="button"
-              class="vespera__item"
-              @click="router.push(`/hotel/reserva/${linha.reserva.id}`)"
-            >
+            <RouterLink class="vespera__item" :to="`/hotel/reserva/${linha.reserva.id}`">
               <PetAvatar
                 :nome="linha.petNome"
                 :iniciais="linha.petIniciais"
@@ -308,7 +305,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 :tom="tomDaAdmissao(linha.admissao)"
               />
               <i class="pi pi-arrow-right" aria-hidden="true" />
-            </button>
+            </RouterLink>
           </li>
         </ul>
       </section>
@@ -464,13 +461,18 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   color: var(--clinic-text-muted);
 }
 
+/*
+ * Um cartão branco como os outros (redesenho de 30/09/2026), e não uma faixa pintada de pêssego de
+ * ponta a ponta: a atenção mora no ícone e no título, e a superfície fica quieta.
+ */
 .vespera {
   display: grid;
   gap: var(--clinic-space-2);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-attention-line);
+  padding: 1.1rem 1.35rem 1.25rem;
+  border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
-  background: var(--clinic-attention-bg);
+  background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-card);
 }
 
 .vespera__titulo {
@@ -509,9 +511,9 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: var(--clinic-space-2);
   background: var(--clinic-surface);
   color: inherit;
-  cursor: pointer;
   font: inherit;
   text-align: start;
+  text-decoration: none;
 }
 
 .vespera__item:hover,

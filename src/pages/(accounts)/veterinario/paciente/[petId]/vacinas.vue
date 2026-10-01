@@ -244,21 +244,21 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
       <FichaCabeca :pet="pet" :tutor="tutor" atual="vacinas" :frase="frase">
         <template v-if="temProtocolo" #acoes>
           <Button
-            class="ficha-pilula ficha-pilula--cheia"
+            class="hc-pilula hc-pilula--cheia"
             :label="t('clinico.vacinas.aplicar.abrir')"
             @click="abrirAplicar()"
           >
             <template #icon>
-              <PhSyringe class="ficha-pilula__icone" weight="fill" aria-hidden="true" />
+              <PhSyringe class="hc-pilula__icone" weight="fill" aria-hidden="true" />
             </template>
           </Button>
           <Button
-            class="ficha-pilula"
+            class="hc-pilula"
             :label="t('clinico.vacinas.externa.abrir')"
             @click="registrandoExterna = true"
           >
             <template #icon>
-              <PhMapPin class="ficha-pilula__icone" weight="duotone" aria-hidden="true" />
+              <PhMapPin class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
             </template>
           </Button>
         </template>

@@ -231,7 +231,7 @@ function salvar() {
   <Dialog
     :visible="visivel"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(38rem, 94vw)' }"
     :dismissable-mask="true"
     @update:visible="emit('update:visivel', $event)"

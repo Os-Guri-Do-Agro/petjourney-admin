@@ -193,24 +193,12 @@ defineEmits<{ (evento: 'clique', payload: MouseEvent): void }>()
   outline-offset: 2px;
 }
 
+/* A mesma pastilha verde-clara da seção aberta no trilho: o que está aberto se lê igual nos dois. */
 .page-nav__link.router-link-active {
-  border-color: color-mix(in srgb, var(--shell-accent) 30%, transparent);
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--shell-accent-soft) 46%, var(--shell-surface)),
-    color-mix(in srgb, var(--shell-accent-soft) 26%, var(--shell-surface))
-  );
+  border-color: transparent;
+  background: var(--shell-cream);
   color: var(--shell-nav-active-text);
   font-weight: 750;
-}
-
-/* O degradê parte do início da linha de leitura. */
-[dir='rtl'] .page-nav__link.router-link-active {
-  background: linear-gradient(
-    270deg,
-    color-mix(in srgb, var(--shell-accent-soft) 46%, var(--shell-surface)),
-    color-mix(in srgb, var(--shell-accent-soft) 26%, var(--shell-surface))
-  );
 }
 
 .page-nav__link:hover .page-nav__icon {
@@ -237,7 +225,8 @@ defineEmits<{ (evento: 'clique', payload: MouseEvent): void }>()
   justify-content: center;
   padding: 0.05rem 0.32rem;
   border: 1px solid transparent;
-  border-radius: 999px;
+  /* O selo de 6 px das telas, e não pílula: a pílula é das ações. */
+  border-radius: 6px;
   font-size: 0.68rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -247,23 +236,23 @@ defineEmits<{ (evento: 'clique', payload: MouseEvent): void }>()
 /*
  * Três tons e três pesos de moldura, e não três cores só: em escala de cinza — ou para quem não
  * distingue vermelho de âmbar — a diferença entre "há gente na fila" e "há um boletim retido"
- * precisa continuar de pé.
+ * precisa continuar de pé. Os pares são os da gravidade na Visão geral: pêssego e coral.
  */
 .page-nav__badge--neutro {
-  background: color-mix(in srgb, var(--shell-muted) 16%, transparent);
-  color: var(--shell-muted);
+  background: var(--hc-cinza-fundo);
+  color: var(--hc-cinza-tinta);
 }
 
 .page-nav__badge--atencao {
-  border-color: color-mix(in srgb, var(--shell-attention-line) 55%, transparent);
+  border-color: color-mix(in srgb, var(--shell-attention) 30%, transparent);
   background: var(--shell-attention-bg);
   color: var(--shell-attention);
 }
 
 .page-nav__badge--risco {
-  border-color: color-mix(in srgb, var(--danger-soft) 55%, transparent);
-  background: color-mix(in srgb, var(--danger-soft) 20%, transparent);
-  color: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--hc-coral-tinta) 45%, transparent);
+  background: var(--hc-coral-fundo);
+  color: var(--hc-coral-tinta);
   font-weight: 900;
 }
 

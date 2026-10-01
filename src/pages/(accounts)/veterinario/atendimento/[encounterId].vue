@@ -525,6 +525,7 @@ onBeforeUnmount(() => {
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.prontuario.subtitulo')"
     :title="t('clinico.prontuario.titulo')"
     :loading="prontuario.carregando && !encounter"

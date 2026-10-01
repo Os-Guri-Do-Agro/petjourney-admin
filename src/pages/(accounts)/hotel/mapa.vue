@@ -218,6 +218,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="t('hotel.mapa.titulo')"
     :subtitle="t('hotel.mapa.subtitulo')"
     tour

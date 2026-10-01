@@ -20,7 +20,7 @@
  */
 
 import type { ApexOptions } from 'apexcharts'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
@@ -109,6 +109,43 @@ const RESERVA: ClinicChartPalette = {
 
 const RAIZ_PADRAO = 16
 
+function hexParaRgb(cor: string): [number, number, number] | null {
+  const hex = cor.trim().replace('#', '')
+  const cheio = hex.length === 3 ? [...hex].map((c) => c + c).join('') : hex
+
+  if (!/^[0-9a-fA-F]{6}$/.test(cheio)) {
+    return null
+  }
+
+  return [0, 2, 4].map((i) => Number.parseInt(cheio.slice(i, i + 2), 16)) as [
+    number,
+    number,
+    number,
+  ]
+}
+
+/**
+ * `peso` de `cor` sobre `fundo`, em hex — o `color-mix` que o Apex não entende.
+ *
+ * Existe para a série "prevista" dos gráficos de coluna: no design novo a marca e a marca forte
+ * são dois verdes vizinhos, e "previsto" e "concluído" pintados com eles liam como a mesma série.
+ * Misturada ao fundo do cartão, a marca clareia no claro e escurece no escuro, e a diferença volta.
+ * Cor que não for hex volta sem mistura.
+ */
+export function misturar(cor: string, fundo: string, peso: number): string {
+  const a = hexParaRgb(cor)
+  const b = hexParaRgb(fundo)
+
+  if (!a || !b) {
+    return cor
+  }
+
+  return `#${a
+    .map((canal, i) => Math.round(canal * peso + b[i]! * (1 - peso)))
+    .map((canal) => canal.toString(16).padStart(2, '0'))
+    .join('')}`
+}
+
 /** `0.6875rem` → `11px`. O Apex mede texto com `parseFloat`, então a unidade tem que ser px. */
 function emPixels(valor: string, raiz: number): string {
   const numero = Number.parseFloat(valor)
@@ -129,8 +166,16 @@ function lerPaleta(): ClinicChartPalette {
     return { ...RESERVA }
   }
 
-  const estilo = getComputedStyle(document.documentElement)
-  const raiz = Number.parseFloat(estilo.fontSize) || RAIZ_PADRAO
+  /*
+   * A tela no design novo (`.hc-tema`, 30/09/2026) reaponta os `--clinic-*` para os tokens do
+   * portal na própria raiz dela, e não no `<html>`. Lido do `<html>`, o gráfico desenhava o linho
+   * antigo dentro de um cartão branco. O tamanho de fonte continua vindo do `<html>`: é a raiz do
+   * `rem`.
+   */
+  const alvo = document.querySelector('.hc-tema') ?? document.documentElement
+  const estilo = getComputedStyle(alvo)
+  const raiz =
+    Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || RAIZ_PADRAO
   const lida = { ...RESERVA }
 
   for (const token of TOKENS) {
@@ -217,6 +262,11 @@ function nomesDeCalendario(tag: string) {
 
 export function useClinicChartTheme() {
   observarRaiz()
+  /*
+   * Relida depois de montar: no `setup` a página nova ainda não está no documento, e a raiz
+   * `.hc-tema` que decide as cores não existe para ser lida.
+   */
+  onMounted(sincronizar)
 
   const { locale } = useI18n()
 

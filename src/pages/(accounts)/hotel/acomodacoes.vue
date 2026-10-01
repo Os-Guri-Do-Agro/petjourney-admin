@@ -385,6 +385,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="t('hotel.acomodacoes.titulo')"
     :subtitle="t('hotel.acomodacoes.subtitulo')"
     tour
@@ -1272,9 +1273,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .tabela thead th {
   border-bottom: 1px solid var(--clinic-line);
   color: var(--clinic-faint);
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .tabela tbody tr + tr th,

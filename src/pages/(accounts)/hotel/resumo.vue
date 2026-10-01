@@ -120,6 +120,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="t('hotel.resumo.titulo')"
     :subtitle="t('hotel.resumo.subtitulo')"
     tour
@@ -306,6 +307,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .cartao {
   display: grid;
+  /* Os cartões de uma linha crescem juntos; a lista fica no topo, e não espalhada pela altura. */
+  align-content: start;
   gap: var(--clinic-space-3);
   padding: var(--clinic-space-4);
   border: 1px solid var(--clinic-line);
@@ -315,11 +318,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .cartao__titulo {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .cartao__vazio {

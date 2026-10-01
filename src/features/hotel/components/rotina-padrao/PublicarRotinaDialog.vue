@@ -55,7 +55,7 @@ const nadaMuda = computed(
     modal
     :header="t('hotel.rotinaPadrao.publicarTitulo')"
     :style="{ width: 'min(32rem, 94vw)' }"
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     @update:visible="emit('fechar')"
   >
     <div class="publicar">
@@ -178,11 +178,10 @@ const nadaMuda = computed(
 
 .previsao__titulo {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .previsao__estado {

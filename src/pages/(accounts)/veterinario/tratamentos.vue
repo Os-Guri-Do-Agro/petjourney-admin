@@ -83,16 +83,19 @@ const criticos = computed(
 const opcoesDoRecorte = computed(() => [
   {
     valor: 'atencao' as const,
-    rotulo: `${t('clinico.adesao.lista.recorte.atencao')} · ${porRecorte.value.atencao.length}`,
+    rotulo: t('clinico.adesao.lista.recorte.atencao'),
+    contagem: porRecorte.value.atencao.length,
     tom: porRecorte.value.atencao.length > 0 ? ('risco' as const) : ('neutro' as const),
   },
   {
     valor: 'emCurso' as const,
-    rotulo: `${t('clinico.adesao.lista.recorte.emCurso')} · ${porRecorte.value.emCurso.length}`,
+    rotulo: t('clinico.adesao.lista.recorte.emCurso'),
+    contagem: porRecorte.value.emCurso.length,
   },
   {
     valor: 'encerrados' as const,
-    rotulo: `${t('clinico.adesao.lista.recorte.encerrados')} · ${porRecorte.value.encerrados.length}`,
+    rotulo: t('clinico.adesao.lista.recorte.encerrados'),
+    contagem: porRecorte.value.encerrados.length,
   },
 ])
 
@@ -165,6 +168,7 @@ function abrir(linha: LinhaDeTratamento) {
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="t('clinico.adesao.titulo')"
     :subtitle="t('clinico.adesao.subtitulo')"
     :loading="carregando && linhas.length === 0"

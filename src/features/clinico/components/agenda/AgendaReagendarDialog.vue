@@ -131,7 +131,7 @@ function confirmar() {
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(36rem, 94vw)' }"
     :header="t('clinico.faltas.reagendar.titulo')"
     :dismissable-mask="true"

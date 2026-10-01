@@ -408,13 +408,16 @@ onUnmounted(() => {
   gap: 0.15rem;
   padding: 0.16rem;
   border: 1px solid var(--shell-line);
-  border-radius: 0.78rem;
+  /* Pílula, como os outros controles do cabeçalho. */
+  border-radius: 999px;
   background: var(--shell-surface);
+  box-shadow: 0 1px 2px rgb(var(--shell-shadow-rgb) / 5%);
 }
 
 /*
- * O tom é do estado, não do gosto: sage enquanto dentro do bloco contratado, âmbar na virada,
- * vermelho depois. As três cores vêm com mudança de texto junto — a cor reforça, não informa.
+ * O tom é do estado, não do gosto: sálvia enquanto dentro do bloco contratado, pêssego na virada,
+ * coral depois — os pares da gravidade nas telas. As três cores vêm com mudança de texto junto —
+ * a cor reforça, não informa.
  */
 .cron--ocioso {
   --cron-tinta: var(--shell-muted);
@@ -423,25 +426,25 @@ onUnmounted(() => {
 
 .cron--dentro {
   --cron-tinta: var(--shell-accent-strong);
-  --cron-fundo: color-mix(in srgb, var(--shell-accent) 20%, var(--shell-surface));
+  --cron-fundo: var(--shell-cream);
 }
 
 .cron--no-limite {
-  --cron-tinta: #8a6100;
-  --cron-fundo: color-mix(in srgb, #f0b429 26%, var(--shell-surface));
+  --cron-tinta: var(--hc-pessego-tinta);
+  --cron-fundo: var(--hc-pessego-fundo);
 }
 
 .cron--excedido {
-  --cron-tinta: var(--danger-soft);
-  --cron-fundo: color-mix(in srgb, var(--danger-soft) 18%, var(--shell-surface));
+  --cron-tinta: var(--hc-coral-tinta);
+  --cron-fundo: var(--hc-coral-fundo);
 }
 
 .cron__chip.p-button {
   gap: 0.5rem;
   min-height: 2.15rem;
   padding-block: 0.1rem;
-  padding-inline: 0.1rem 0.55rem;
-  border-radius: 0.64rem;
+  padding-inline: 0.1rem 0.6rem;
+  border-radius: 999px;
   color: var(--shell-text);
 }
 
@@ -450,7 +453,7 @@ onUnmounted(() => {
   width: 1.95rem;
   height: 1.95rem;
   place-items: center;
-  border-radius: 0.55rem;
+  border-radius: 999px;
   background: var(--cron-fundo);
   color: var(--cron-tinta);
   font-size: 0.82rem;
@@ -496,13 +499,13 @@ onUnmounted(() => {
   width: 1.9rem;
   height: 1.9rem;
   padding: 0;
-  border-radius: 0.55rem;
+  border-radius: 999px;
   color: var(--shell-muted);
   font-size: 0.78rem;
 }
 
 .cron__acao--encerrar.p-button:not(:disabled):hover {
-  color: var(--danger-soft);
+  color: var(--hc-coral-tinta);
 }
 
 .painel {

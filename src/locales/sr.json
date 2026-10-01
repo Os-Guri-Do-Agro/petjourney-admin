@@ -2429,28 +2429,44 @@
         "titulo": "U aplikaciji",
         "ate": "Može da otkaže ili pomeri do {data}, {hora}",
         "encerrado": "Rok je istekao: samo telefonom"
+      },
+      "acoesRotulo": "Akcije rasporeda",
+      "frase": {
+        "atendimentos": "{total} termin | {total} termina | {total} termina",
+        "naRecepcao": "na recepciji: {total}",
+        "vazio": "Nema zakazanih termina"
       }
     },
     "meuDia": {
       "titulo": "Danas u klinici",
-      "subtitulo": "Klinika",
       "agora": "Sada",
       "aSeguir": "Sledeće",
-      "semAtendimentoAgora": "Trenutno nema pregleda u toku.",
       "semProximo": "Za danas nema više zakazanih termina.",
       "esperando": "Već su stigli",
-      "esperandoVazio": "Niko ne čeka na recepciji.",
-      "internados": "Hospitalizovani pacijenti kojima ste potrebni",
-      "internadosVazio": "Nema hospitalizovanih pacijenata sa zakasnelom dozom ili zadržanim izveštajem.",
       "esperaDe": "dolazak: {valor}",
-      "alertasDoDia": "Upozorenja koja danas menjaju lečenje",
-      "alertasVazio": "Nema kliničkih upozorenja kod današnjih pacijenata.",
-      "retornosSemHorario": "Kontrole bez zakazanog termina",
-      "retornosVazio": "Nema kontrola na čekanju.",
       "marcarRetorno": "Zakažite kontrolu",
-      "irParaAgenda": "Pogledajte ceo raspored",
-      "iniciarAtendimento": "Započnite pregled",
-      "continuar": "Nastavite"
+      "depois": "Kasnije",
+      "continuarCom": "Nastavite: {pet}",
+      "atenderCom": "Primite: {pet}",
+      "agendaCompleta": "Ceo raspored",
+      "mapaDeLeitos": "Mapa kreveta",
+      "acoesRotulo": "Današnje akcije",
+      "resumo": {
+        "urgentes": "{total} hitan predmet traži vašu pažnju | {total} hitna predmeta traže vašu pažnju | {total} hitnih predmeta traži vašu pažnju",
+        "pendentes": "{total} predmet vas čeka | {total} predmeta vas čekaju | {total} predmeta vas čeka",
+        "emDia": "Ništa ne stoji. Ostatak dana je u rasporedu."
+      },
+      "pauta": {
+        "boletim": "Izveštaj za {pet} čeka kontakt sa vlasnikom",
+        "doses": "{total} doza kasni | {total} doze kasne | {total} doza kasni",
+        "naRecepcao": "{pet} čeka na recepciji",
+        "alerta": "{pet} u {hora}",
+        "retornos": "{total} kontrola bez termina | {total} kontrole bez termina | {total} kontrola bez termina",
+        "eMais": "{nomes} i još {total}",
+        "mostrarMais": "Prikaži još {total}",
+        "mostrarMenos": "Prikaži manje",
+        "ondeAgenda": "Raspored"
+      }
     },
     "resumo": {
       "titulo": "Rezime klinike",
@@ -2865,15 +2881,6 @@
         "todas": "Svi",
         "pendentes": "Za obradu"
       },
-      "resumo": {
-        "total": "Nedolasci u periodu",
-        "pacientes": "{contagem} pacijent | {contagem} pacijenta | {contagem} pacijenata",
-        "agenda": "Izgubljeno vreme",
-        "reincidentes": "Učestali nedolasci",
-        "limite": "prag nedolazaka: {limite}",
-        "pendentes": "Izostanci za obradu",
-        "pendentesDetalhe": "niko još nije kontaktirao"
-      },
       "marcar": "Označite nedolazak",
       "reagendar": {
         "titulo": "Ponovno zakazivanje",
@@ -2921,6 +2928,15 @@
         "mensagem": "Zdravo! Nedostajao nam je {paciente} na pregledu {data}. Da li je sve u redu? Da zakažemo novi termin?",
         "mensagemObito": "Zdravo. Saznali smo za gubitak ljubimca {paciente} i veoma nam je žao. Tu smo ako vam nešto zatreba.",
         "avisoObito": "Kada se smrt zabeleži, ovaj izostanak više ne dobija ponudu novog termina."
+      },
+      "frase": {
+        "pendentes": "{total} izostanak za obradu | {total} izostanka za obradu | {total} izostanaka za obradu",
+        "emDia": "Svi izostanci imaju razlog",
+        "agenda": "{tempo} izgubljenog vremena"
+      },
+      "acoes": {
+        "rotulo": "Akcije za nedolaske",
+        "justificarProxima": "Obradite sledeći"
       }
     },
     "prontuario": {
@@ -3766,7 +3782,6 @@
       "subtitulo": "Mapa boksova, terapija po satnici i izveštaj koji vlasnik dobija.",
       "vazioTitulo": "Nema registrovanih boksova",
       "vazioDescricao": "Registrujte boksove klinike da biste ovde pratili hospitalizacije.",
-      "retidosAviso": "Izveštaji koji čekaju telefonski poziv: {total}. Loše vesti se nikada ne šalju kroz aplikaciju pre nego što neko razgovara s vlasnikom.",
       "gravidade": {
         "estavel": "Stabilno",
         "atencao": "Pod nadzorom",
@@ -3806,16 +3821,6 @@
         "noite": "Noćna smena",
         "responsavel": "U smeni: {nome}",
         "passar": "Predajte smenu"
-      },
-      "stat": {
-        "ocupacao": "Popunjenost boksova",
-        "vagas": "{total} slobodan | {total} slobodna | {total} slobodnih",
-        "criticos": "Kritično stanje",
-        "criticosDetalhe": "pacijenti trenutno u kritičnom stanju",
-        "pendentes": "Sada na redu",
-        "atrasadas": "{total} kasni | {total} kasne | {total} kasni",
-        "boletins": "Zadržani izveštaji",
-        "boletinsDetalhe": "čeka se telefonski poziv"
       },
       "leito": {
         "livre": "Slobodan",
@@ -4028,22 +4033,19 @@
         "voltar": "Mapa boksova",
         "internadoHa": "Na hospitalizaciji",
         "responsavelClinico": "Nadležni veterinar",
-        "pendentes": "Sada na redu",
-        "pendentesDetalhe": "na redu ili kasne",
         "abasRotulo": "Odeljak",
         "naTroca": "{total} primena pada u vreme primopredaje smene. | {total} primene padaju u vreme primopredaje smene. | {total} primena pada u vreme primopredaje smene.",
         "naoEncontradoTitulo": "Hospitalizacija nije pronađena",
         "naoEncontradoDescricao": "Pacijent je možda otpušten. Vratite se na mapu boksova.",
-        "estado": "Stanje pacijenta",
         "noLeito": "Boks {leito}",
         "diagnostico": "Radna dijagnoza",
-        "altaEm": "planirani otpust: {data}",
-        "semPrevisaoDeAlta": "otpust nije planiran",
-        "verHistorico": "Istorija pacijenta"
+        "previsaoDeAlta": "Očekivani otpust",
+        "semPrevisao": "Nije određen",
+        "observacao": "Napomena pri prijemu",
+        "encerradaFrase": "Hospitalizacija je završena"
       },
       "leitos": {
         "titulo": "Boksovi klinike",
-        "tituloGrade": "Boksovi · {total}",
         "gerenciar": "Upravljajte boksovima",
         "ajuda": "Klinika registruje boksove kojima raspolaže. Boks van upotrebe ostaje na mapi, označen, i ne računa se u slobodna mesta.",
         "conta": "Registrovano: {total} · u upotrebi: {ativos}",
@@ -4094,6 +4096,23 @@
         "paginas": "Stranice liste boksova",
         "anterior": "Prethodna stranica",
         "proxima": "Sledeća stranica"
+      },
+      "acoesRotulo": "Akcije hospitalizacije",
+      "grupo": "{ocupados} od {ativos} zauzeto",
+      "resumo": {
+        "ocupacao": "{ocupados} od {ativos} kreveta zauzeto",
+        "urgentes": "{total} hitno | {total} hitna | {total} hitnih",
+        "proximaHora": "{total} pacijent sa dozom u narednom satu | {total} pacijenta sa dozom u narednom satu | {total} pacijenata sa dozom u narednom satu",
+        "emDia": "ništa ne kasni"
+      },
+      "pauta": {
+        "titulo": "Čeka na akciju u smeni",
+        "boletim": "Izveštaj za {pet} čeka kontakt sa vlasnikom",
+        "responsavel": "Vlasnik: {nome}",
+        "atrasadas": "{pet}: {total} primena kasni | {pet}: {total} primene kasne | {pet}: {total} primena kasni",
+        "proxima": "{pet}: sledeća primena za {minutos} min",
+        "aFazer": "Za uraditi u smeni: {total}",
+        "vazio": "Ništa ne kasni u ovoj smeni."
       }
     },
     "diario": {
@@ -5311,7 +5330,7 @@
     "hospedes": {
       "acao": {
         "abrir": "Otvori boravak: {pet}",
-        "ligar": "Pozovi"
+        "registrarContato": "Evidentirajte kontakt"
       },
       "banda": {
         "emDia": "Na čisto",
@@ -5341,8 +5360,8 @@
         "agora": "sada",
         "atrasou": "kasni {tempo}",
         "em": "za {tempo}",
-        "ligar": "Pozovi: {tutor}",
-        "nadaPendente": "Danas nema ničega"
+        "nadaPendente": "Danas nema ničega",
+        "ocorrencia": "Ozbiljan incident, {tutor} još nije kontaktiran"
       },
       "irParaRotina": "Otvori rutinu smene",
       "ninguemPrecisa": "Niko vas sada ne treba. Kuća je u redu.",
@@ -5515,9 +5534,7 @@
       "faltaPesar": "Nije izmeren",
       "irParaRotina": "Otvori rutinu",
       "podeEntrar": "Sme da uđe",
-      "precisaAgora": "Treba vas sada ({total})",
       "prontoParaSair": "Spreman za odlazak",
-      "responsavel": "Dežura: {nome}",
       "resumo": {
         "atrasadas": "{total} kasni | {total} kasne | {total} kasni",
         "chegam": "dolazi | dolaze | dolazi",
@@ -5531,12 +5548,22 @@
       "titulo": "Tabla dana",
       "travaAdmissao": "Gost {pet} dolazi danas bez tražene dokumentacije.",
       "travaAdmissaoAcao": "Zatražite dokument sada ili ga oslobodite svojim imenom.",
-      "travaBoletim": "Izveštaj za gosta {pet} čeka telefonski poziv.",
-      "travaBoletimAcao": "Otvorite boravak da biste oslobodili poruku.",
-      "travaOcorrencia": "Pozovite vlasnika gosta {pet}: ozbiljan incident nije javljen.",
-      "travaOcorrenciaAcao": "Pozovite {telefone} i upišite poziv u boravak.",
       "vazioDescricao": "Nema gostiju u kući ni najavljenih dolazaka za danas.",
-      "vazioTitulo": "Danas nema ničega"
+      "vazioTitulo": "Danas nema ničega",
+      "acoesRotulo": "Akcije table",
+      "frase": {
+        "urgentes": "{total} hitno | {total} hitna | {total} hitnih"
+      },
+      "pauta": {
+        "ocorrencia": "Ozbiljan incident: {pet}, vlasnik još nije kontaktiran",
+        "boletim": "Izveštaj za {pet} čeka kontakt sa vlasnikom",
+        "responsavel": "Vlasnik: {nome} · {telefone}"
+      },
+      "onde": {
+        "estadia": "Boravak",
+        "reserva": "Rezervacija"
+      },
+      "movimentoDoDia": "Kretanje tokom dana"
     },
     "planoDaEstadia": {
       "desde": "od {data}",
@@ -5848,7 +5875,7 @@
       },
       "hospedes": {
         "cartao": {
-          "texto": "Disk pokazuje koja je usluga i popunjava se kada dođe vreme. Broj pored njega kaže koliko ih već kasni. To je jedini red na kartici koji se menja sam, bez ijednog dodira.",
+          "texto": "Disk pokazuje koju uslugu i dobija boju kad dođe vreme: breskva ako kasni, puna koralna samo kad postoji ozbiljan incident bez kontakta sa vlasnikom. Broj pored broji koliko ih već kasni.",
           "titulo": "Red koji traži akciju"
         },
         "linhas": {
@@ -5896,7 +5923,7 @@
           "titulo": "Pitanje ovog ekrana"
         },
         "resumo": {
-          "texto": "Koliko ih je u kući, koliko dolazi, koliko odlazi i koliko zadataka je za sada. Četiri broja koja staju u rečenicu.",
+          "texto": "Koliko ih je u kući, koliko dolazi, koliko odlazi i koliko je hitnih predmeta, u jednoj rečenici.",
           "titulo": "Dan u jednom redu"
         },
         "travas": {

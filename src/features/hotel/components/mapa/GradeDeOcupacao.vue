@@ -356,12 +356,10 @@ function inicioDeMes(data: ISODate, indice: number): string {
   border-bottom: 1px solid var(--clinic-line);
   background: var(--clinic-surface);
   color: var(--clinic-faint);
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 600;
   inset-inline-start: 0;
-  letter-spacing: 0.06em;
   text-align: start;
-  text-transform: uppercase;
 }
 
 .dia {
@@ -487,8 +485,13 @@ function inicioDeMes(data: ISODate, indice: number): string {
   filter: none;
 }
 
+/*
+ * A acomodação que serve para a busca ganha o fundo verde-claro de "escolhido", na célula do nome.
+ * Era uma faixa de 3 px na borda esquerda — o acento lateral que o design da casa recusa —, e as
+ * que não servem já saem apagadas: o contraste entre as duas é o que se lê.
+ */
 .linha--serve .acom {
-  box-shadow: inset 3px 0 0 var(--clinic-accent-strong);
+  background: var(--clinic-accent-tint);
 }
 
 .faixa {

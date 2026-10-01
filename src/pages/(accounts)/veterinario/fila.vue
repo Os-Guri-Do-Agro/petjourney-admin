@@ -225,6 +225,7 @@ onMounted(carregar)
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.fila.subtitulo')"
     :title="t('clinico.fila.titulo')"
     :loading="fila.carregando && fila.entradas.length === 0"

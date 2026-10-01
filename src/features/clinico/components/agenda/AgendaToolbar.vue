@@ -6,9 +6,11 @@
  * checkbox, três botões, ajuda e uma fileira de fichas de profissional. Tudo visível o tempo
  * todo, e portanto nada em destaque.
  *
- * Agora a barra mostra só o que se usa a cada minuto — **onde estou** (data), **o que estou
- * vendo** (dia ou semana) e **a ação principal** (novo atendimento) — e recolhe o resto em dois
- * painéis nomeados:
+ * Agora a barra mostra só o que se usa a cada minuto — **onde estou** (data) e **o que estou
+ * vendo** (dia ou semana) — e recolhe o resto em dois painéis nomeados. A ação principal (novo
+ * atendimento) subiu para a saudação da página em 30/09/2026, como a pílula cheia: a barra ficou
+ * só com o que mexe na grade.
+ *
  *
  * - **Exibição**: agrupamento, densidade, zoom e cancelados. Escolhas que se faz uma vez por
  *   turno, não uma vez por paciente.
@@ -34,7 +36,6 @@ import { useAgendaStore } from '../../stores/agenda'
 import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
 const emit = defineEmits<{
-  novo: []
   encaixar: []
   bloquear: []
   ajuda: []
@@ -191,14 +192,6 @@ const itensAcoes = computed<MenuItem[]>(() => [
         :aria-label="t('clinico.agenda.exibicao')"
         aria-haspopup="true"
         @click="exibicao?.toggle($event)"
-      />
-
-      <Button
-        :label="t('clinico.agenda.novoAtendimento')"
-        icon="pi pi-plus"
-        size="small"
-        :title="`${t('clinico.agenda.novoAtendimento')} (N)`"
-        @click="emit('novo')"
       />
 
       <Button

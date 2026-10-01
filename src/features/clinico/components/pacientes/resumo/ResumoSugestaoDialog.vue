@@ -73,7 +73,7 @@ function ver() {
   <Dialog
     :visible="visivel"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(34rem, 94vw)' }"
     :dismissable-mask="true"
     @update:visible="(valor) => (valor ? emit('update:visivel', true) : fechar())"

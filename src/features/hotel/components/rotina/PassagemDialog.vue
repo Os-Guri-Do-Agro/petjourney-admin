@@ -91,7 +91,7 @@ watch(
     modal
     :header="t('hotel.turno.titulo')"
     :style="{ width: 'min(58rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope hc-tema"
     @update:visible="emit('fechar')"
   >
     <div v-if="passagem" class="passagem">
@@ -281,10 +281,8 @@ watch(
 
 .turno__rotulo {
   color: var(--clinic-faint);
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .turno__lado strong {
@@ -355,11 +353,10 @@ watch(
 
 .bloco__titulo {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .bloco__texto {
@@ -521,11 +518,11 @@ watch(
 .entrega {
   display: grid;
   padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-accent-soft);
+  border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-control);
   gap: var(--clinic-space-3);
   grid-template-columns: minmax(12rem, 1fr) minmax(16rem, 2fr);
-  background: var(--clinic-accent-tint);
+  background: var(--clinic-surface-soft);
 }
 
 @media (max-width: 640px) {

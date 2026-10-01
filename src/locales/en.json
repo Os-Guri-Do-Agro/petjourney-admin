@@ -2429,28 +2429,44 @@
         "titulo": "In the app",
         "ate": "Can cancel or reschedule until {data}, {hora}",
         "encerrado": "Deadline passed: phone only"
+      },
+      "acoesRotulo": "Schedule actions",
+      "frase": {
+        "atendimentos": "{total} appointment | {total} appointments",
+        "naRecepcao": "{total} at reception",
+        "vazio": "No appointments booked"
       }
     },
     "meuDia": {
       "titulo": "Today at the clinic",
-      "subtitulo": "Clinic",
       "agora": "Now",
       "aSeguir": "Up next",
-      "semAtendimentoAgora": "Nothing in consult right now.",
       "semProximo": "Nothing else booked for today.",
       "esperando": "Already here",
-      "esperandoVazio": "Nobody waiting at the front desk.",
-      "internados": "Inpatients needing you",
-      "internadosVazio": "No inpatient with an overdue dose or a held update.",
       "esperaDe": "waiting {valor}",
-      "alertasDoDia": "Alerts that change today's care",
-      "alertasVazio": "No clinical alerts among today's patients.",
-      "retornosSemHorario": "Follow-ups with no slot booked",
-      "retornosVazio": "No follow-ups pending.",
       "marcarRetorno": "Book follow-up",
-      "irParaAgenda": "See full schedule",
-      "iniciarAtendimento": "Start consult",
-      "continuar": "Continue"
+      "depois": "Later",
+      "continuarCom": "Continue {pet}",
+      "atenderCom": "See {pet}",
+      "agendaCompleta": "Full schedule",
+      "mapaDeLeitos": "Bed map",
+      "acoesRotulo": "Today's actions",
+      "resumo": {
+        "urgentes": "{total} urgent matter needs your attention | {total} urgent matters need your attention",
+        "pendentes": "{total} matter waiting for you | {total} matters waiting for you",
+        "emDia": "Nothing stuck. The rest of the day is on the schedule."
+      },
+      "pauta": {
+        "boletim": "{pet}'s update is waiting on contact with the owner",
+        "doses": "{total} overdue dose | {total} overdue doses",
+        "naRecepcao": "{pet} is waiting at reception",
+        "alerta": "{pet} at {hora}",
+        "retornos": "{total} follow-up with no slot booked | {total} follow-ups with no slot booked",
+        "eMais": "{nomes} and {total} more",
+        "mostrarMais": "Show {total} more",
+        "mostrarMenos": "Show less",
+        "ondeAgenda": "Schedule"
+      }
     },
     "resumo": {
       "titulo": "Clinic summary",
@@ -2865,15 +2881,6 @@
         "todas": "All",
         "pendentes": "To chase"
       },
-      "resumo": {
-        "total": "No-shows in the period",
-        "pacientes": "{contagem} patient | {contagem} patients",
-        "agenda": "Idle schedule",
-        "reincidentes": "Repeat no-shows",
-        "limite": "from {limite} no-shows",
-        "pendentes": "No-shows to chase",
-        "pendentesDetalhe": "nobody has reached out yet"
-      },
       "marcar": "Mark no-show",
       "reagendar": {
         "titulo": "Reschedule",
@@ -2921,6 +2928,15 @@
         "mensagem": "Hello! We missed {paciente} at the {data} appointment. Is everything alright? Shall we rebook?",
         "mensagemObito": "Hello. We heard about {paciente}'s passing and we are very sorry. We are here if you need anything.",
         "avisoObito": "Once the death is recorded, this no-show stops being offered a new appointment."
+      },
+      "frase": {
+        "pendentes": "{total} no-show to chase | {total} no-shows to chase",
+        "emDia": "Every no-show has a reason",
+        "agenda": "{tempo} of idle schedule"
+      },
+      "acoes": {
+        "rotulo": "No-show actions",
+        "justificarProxima": "Chase the next one"
       }
     },
     "prontuario": {
@@ -3766,7 +3782,6 @@
       "subtitulo": "Bed map, timed prescriptions and the update the owner receives.",
       "vazioTitulo": "No beds registered",
       "vazioDescricao": "Register the clinic beds to follow admissions here.",
-      "retidosAviso": "Updates waiting on a phone call: {total}. Bad news never goes out through the app before someone speaks to the owner.",
       "gravidade": {
         "estavel": "Stable",
         "atencao": "Watch",
@@ -3806,16 +3821,6 @@
         "noite": "Night shift",
         "responsavel": "{nome} on duty",
         "passar": "Hand over shift"
-      },
-      "stat": {
-        "ocupacao": "Bed occupancy",
-        "vagas": "{total} free",
-        "criticos": "Critical",
-        "criticosDetalhe": "patients critical right now",
-        "pendentes": "Due now",
-        "atrasadas": "{total} overdue",
-        "boletins": "Updates on hold",
-        "boletinsDetalhe": "waiting on a phone call"
       },
       "leito": {
         "livre": "Free",
@@ -4028,22 +4033,19 @@
         "voltar": "Bed map",
         "internadoHa": "Admitted for",
         "responsavelClinico": "Attending vet",
-        "pendentes": "Due now",
-        "pendentesDetalhe": "due or overdue",
         "abasRotulo": "Section",
         "naTroca": "{total} administration falls on the shift handover.",
         "naoEncontradoTitulo": "Admission not found",
         "naoEncontradoDescricao": "It may have been discharged. Go back to the bed map.",
-        "estado": "Patient state",
         "noLeito": "Bed {leito}",
         "diagnostico": "Working diagnosis",
-        "altaEm": "discharge expected {data}",
-        "semPrevisaoDeAlta": "no discharge estimate",
-        "verHistorico": "Patient history"
+        "previsaoDeAlta": "Expected discharge",
+        "semPrevisao": "Not set",
+        "observacao": "Note on admission",
+        "encerradaFrase": "Hospital stay closed"
       },
       "leitos": {
         "titulo": "Clinic beds",
-        "tituloGrade": "Beds · {total}",
         "gerenciar": "Manage beds",
         "ajuda": "The clinic registers the beds it has. A bed out of service stays on the map, marked, and leaves the vacancy count.",
         "conta": "{total} registered · {ativos} in service",
@@ -4094,6 +4096,23 @@
         "paginas": "Bed list pages",
         "anterior": "Previous page",
         "proxima": "Next page"
+      },
+      "acoesRotulo": "Inpatient actions",
+      "grupo": "{ocupados} of {ativos} occupied",
+      "resumo": {
+        "ocupacao": "{ocupados} of {ativos} beds occupied",
+        "urgentes": "{total} urgent | {total} urgent",
+        "proximaHora": "{total} patient with a dose in the next hour | {total} patients with a dose in the next hour",
+        "emDia": "nothing overdue"
+      },
+      "pauta": {
+        "titulo": "Needs action this shift",
+        "boletim": "{pet}'s update is waiting on contact with the owner",
+        "responsavel": "Owner: {nome}",
+        "atrasadas": "{pet}: {total} overdue administration | {pet}: {total} overdue administrations",
+        "proxima": "{pet}: next administration in {minutos} min",
+        "aFazer": "To do this shift: {total}",
+        "vazio": "Nothing overdue this shift."
       }
     },
     "diario": {
@@ -5311,7 +5330,7 @@
     "hospedes": {
       "acao": {
         "abrir": "Open {pet}'s stay",
-        "ligar": "Call"
+        "registrarContato": "Log contact"
       },
       "banda": {
         "emDia": "Up to date",
@@ -5341,8 +5360,8 @@
         "agora": "now",
         "atrasou": "{tempo} late",
         "em": "in {tempo}",
-        "ligar": "Call {tutor}",
-        "nadaPendente": "Nothing pending today"
+        "nadaPendente": "Nothing pending today",
+        "ocorrencia": "Serious incident, {tutor} not contacted yet"
       },
       "irParaRotina": "Open shift routine",
       "ninguemPrecisa": "Nobody needs you right now. The house is up to date.",
@@ -5515,9 +5534,7 @@
       "faltaPesar": "Not weighed yet",
       "irParaRotina": "Open routine",
       "podeEntrar": "Can come in",
-      "precisaAgora": "Needs you now ({total})",
       "prontoParaSair": "Ready to leave",
-      "responsavel": "On duty: {nome}",
       "resumo": {
         "atrasadas": "{total} overdue | {total} overdue",
         "chegam": "arriving | arriving",
@@ -5531,12 +5548,22 @@
       "titulo": "Day board",
       "travaAdmissao": "{pet} arrives today without the required paperwork.",
       "travaAdmissaoAcao": "Ask for the document now, or waive it with your name.",
-      "travaBoletim": "The update for {pet} is on hold waiting for a phone call.",
-      "travaBoletimAcao": "Open the stay to release the note.",
-      "travaOcorrencia": "Call the owner of {pet}: a serious incident has not been reported.",
-      "travaOcorrenciaAcao": "Call {telefone} and record the call on the stay.",
       "vazioDescricao": "No guests in the house and no arrivals expected today.",
-      "vazioTitulo": "Nothing happening today"
+      "vazioTitulo": "Nothing happening today",
+      "acoesRotulo": "Dashboard actions",
+      "frase": {
+        "urgentes": "{total} urgent | {total} urgent"
+      },
+      "pauta": {
+        "ocorrencia": "Serious incident with {pet}, owner not contacted yet",
+        "boletim": "{pet}'s update held until the owner is contacted",
+        "responsavel": "Owner: {nome} · {telefone}"
+      },
+      "onde": {
+        "estadia": "Stay",
+        "reserva": "Booking"
+      },
+      "movimentoDoDia": "Today's movements"
     },
     "planoDaEstadia": {
       "desde": "since {data}",
@@ -5848,7 +5875,7 @@
       },
       "hospedes": {
         "cartao": {
-          "texto": "The disc shows which service, and fills in when the time comes. The number beside it counts how many are already late. It is the only line on the card that changes on its own, with nobody touching the screen.",
+          "texto": "The disc shows which service and takes on colour when it's due: peach if it's late, solid coral only when there's a serious incident the owner hasn't heard about. The number beside it counts how many are late.",
           "titulo": "The line that asks for action"
         },
         "linhas": {
@@ -5896,7 +5923,7 @@
           "titulo": "What this screen answers"
         },
         "resumo": {
-          "texto": "How many are in the house, how many arrive, how many leave, and how many tasks are due now. Four numbers that fit in a sentence.",
+          "texto": "How many are in, arriving and leaving, and how many matters are urgent, in a single sentence.",
           "titulo": "The day in one line"
         },
         "travas": {

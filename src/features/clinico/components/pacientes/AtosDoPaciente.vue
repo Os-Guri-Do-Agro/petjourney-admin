@@ -130,12 +130,12 @@ function abrir(ato: AtoClinico) {
 
       <Button
         type="button"
-        class="ficha-pilula"
+        class="hc-pilula"
         :label="t('clinico.paciente.atos.registrar')"
         @click="emit('registrar')"
       >
         <template #icon>
-          <PhPlus class="ficha-pilula__icone" weight="bold" aria-hidden="true" />
+          <PhPlus class="hc-pilula__icone" weight="bold" aria-hidden="true" />
         </template>
       </Button>
     </header>

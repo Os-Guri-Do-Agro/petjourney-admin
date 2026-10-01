@@ -69,6 +69,11 @@ const props = defineProps<{
   blocos: ReadonlyMap<string, { nome: string; ordem: number }>
   aberta: boolean
   salvando: boolean
+  /**
+   * A ronda é de mais tarde. O lote dela fica contornado: a pílula cheia é da ronda que é para
+   * agora, e duas cheias na mesma tela deixam de dizer qual é a vez.
+   */
+  adiante?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -198,7 +203,7 @@ function marcarPendentes() {
           :label="t('hotel.rotina.marcarRonda', { total: pendentes.length }, pendentes.length)"
           icon="pi pi-check-circle"
           severity="secondary"
-          text
+          outlined
           size="small"
           :disabled="salvando"
           @click="marcarPendentes"
@@ -242,8 +247,8 @@ function marcarPendentes() {
         class="ronda__lote"
         :label="t('hotel.rotina.marcarRonda', { total: pendentes.length }, pendentes.length)"
         icon="pi pi-check-circle"
-        severity="secondary"
-        text
+        :severity="adiante ? 'secondary' : undefined"
+        :outlined="adiante"
         size="small"
         :disabled="salvando"
         @click="marcarPendentes"
@@ -407,7 +412,11 @@ function marcarPendentes() {
   font-size: 0.7rem;
 }
 
-/* O lote encosta no fim da faixa, que é a borda do próprio grupo que ele marca. */
+/*
+ * O lote encosta no fim da faixa, que é a borda do próprio grupo que ele marca. No rodapé da ronda
+ * aberta ele é a pílula cheia — a única da lista (redesenho de 30/09/2026); no cabeçalho, onde cada
+ * ronda teria a sua, é contornado, para a pauta do dia não virar uma coluna de pílulas cheias.
+ */
 .ronda__lote {
   margin-inline-start: auto;
 }
@@ -460,10 +469,8 @@ function marcarPendentes() {
 .regua {
   padding: var(--clinic-space-2) var(--clinic-space-4) 0.15rem;
   color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------------------ o rodapé */

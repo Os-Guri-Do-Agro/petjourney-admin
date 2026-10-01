@@ -101,14 +101,14 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
   font-size: var(--clinic-font-label);
 }
 
+/* A legenda é o título do cartão do orçamento: tem o tamanho dos títulos de cartão vizinhos. */
 .orc__caption {
   padding-bottom: var(--clinic-space-2);
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   text-align: start;
-  text-transform: uppercase;
 }
 
 .orc th,
@@ -120,10 +120,8 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
 .orc thead th {
   border-bottom: 1px solid var(--clinic-line);
   color: var(--clinic-faint);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .orc tbody th {

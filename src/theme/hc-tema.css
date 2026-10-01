@@ -1,0 +1,586 @@
+/*
+ * O acabamento das telas no design novo — o da Visão geral (`components/home/home-card.css`).
+ *
+ * Nasceu na ficha do paciente (`ficha.css`) e em 30/09/2026 virou o do portal: toda tela migrada
+ * leva `.hc-tema` na raiz (o `PartnerPageFrame`) e ganha, sem uma segunda versão dos componentes:
+ *
+ * 1. **A ponte de tokens.** Os componentes do módulo clínico pintam com `--clinic-*`; dentro de
+ *    `.hc-tema` esses tokens apontam para os do portal (`--hc-*`, em `hc-tokens.css`). Tabela, linha
+ *    do tempo, cartão, campo — tudo troca de acabamento junto.
+ * 2. **O fundo** da Visão geral: dois brilhos de sálvia no topo e a grade fina que some descendo.
+ * 3. **O cabeçalho da página** na escala da saudação: título maior, subtítulo em texto de apoio.
+ * 4. **Botões em pílula.** O primário do PrimeVue vira a pílula cheia em degradê (o rótulo branco
+ *    passa de 5:1; o sálvia claro do preset deixava ~2:1), e o contornado, a pílula clara.
+ * 5. **`.hc-pilula`**, a ação desenhada à mão quando o `Button` não basta (link, contagem dentro).
+ *
+ * Global de propósito, preso a `.hc-tema`: vale na página e no que o PrimeVue leva para o `body`
+ * quando também leva a classe (diálogos, painéis), e em nenhum outro lugar.
+ */
+
+/* ------------------------------------------------------------------ ponte de tokens */
+
+.hc-tema {
+  --clinic-bg: var(--hc-fundo);
+  --clinic-surface: var(--hc-cartao);
+  --clinic-surface-soft: var(--hc-fundo);
+  --clinic-surface-sunken: var(--hc-linha);
+  --clinic-line: var(--hc-borda);
+  --clinic-line-soft: var(--hc-linha);
+  --clinic-text: var(--hc-tinta);
+  --clinic-muted: var(--hc-tinta-2);
+  /* O terceiro cinza da Visão geral fica abaixo de 4,5:1 a 11 px: aqui o apagado é o segundo. */
+  --clinic-faint: var(--hc-tinta-2);
+  --clinic-accent: var(--hc-marca);
+  --clinic-accent-strong: var(--hc-marca-forte);
+  /* A marca que preenche: barra de ocupação, marca de horário, desenho escolhido. */
+  --clinic-accent-deep: var(--hc-marca);
+  --clinic-accent-tint: var(--hc-marca-clara);
+  --clinic-accent-soft: var(--hc-marca-clara);
+  --clinic-risk-text: var(--hc-coral-tinta);
+  --clinic-risk-bg: var(--hc-coral-fundo);
+  --clinic-risk-line: var(--hc-coral-fundo);
+  --clinic-attention-text: var(--hc-pessego-tinta);
+  --clinic-attention-bg: var(--hc-pessego-fundo);
+  --clinic-attention-line: var(--hc-pessego-fundo);
+  --clinic-ok-text: var(--hc-verde-tinta);
+  --clinic-ok-bg: var(--hc-verde-fundo);
+  --clinic-ok-line: var(--hc-verde-fundo);
+  --clinic-neutral-text: var(--hc-cinza-tinta);
+  --clinic-neutral-bg: var(--hc-cinza-fundo);
+  --clinic-neutral-line: var(--hc-cinza-fundo);
+  --clinic-shadow-card: var(--hc-sombra);
+  --clinic-radius-card: 1rem;
+  --clinic-focus-ring: 0 0 0 2px var(--hc-cartao), 0 0 0 4px var(--hc-marca);
+
+  /* O contorno da pílula clara: sálvia bem clara, que escurece para a marca no hover. */
+  --hc-pilula-borda: #bfdcd3;
+}
+
+.app-dark .hc-tema {
+  --hc-pilula-borda: #2c4a42;
+}
+
+/*
+ * O `PartnerPageFrame` passa as cores dele por `style` na mesma raiz; sem `!important` o `style`
+ * venceria e o título, o subtítulo e o botão de explicações ficariam no linho.
+ */
+.hc-tema.partner-page {
+  --partner-bg: var(--hc-fundo) !important;
+  --partner-card: var(--hc-cartao) !important;
+  --partner-surface: var(--hc-cartao) !important;
+  --partner-line: var(--hc-borda) !important;
+  --partner-text: var(--hc-tinta) !important;
+  --partner-muted: var(--hc-tinta-2) !important;
+  --partner-faint: var(--hc-tinta-2) !important;
+}
+
+/* ------------------------------------------------------------------ overlays
+ * O que o PrimeVue leva para o `body` (popover, diálogo) só herda o acabamento quando leva
+ * `.hc-tema` — e aí a caixa dele é o branco dos cartões, e não o linho do preset.
+ */
+
+.p-popover.hc-tema {
+  --p-popover-background: var(--hc-cartao);
+  --p-popover-border-color: var(--hc-borda);
+  --p-popover-border-radius: 1rem;
+  --p-popover-shadow: var(--hc-sombra-alta);
+}
+
+.p-dialog.hc-tema {
+  --p-dialog-background: var(--hc-cartao);
+  --p-dialog-border-color: var(--hc-borda);
+  --p-dialog-color: var(--hc-tinta);
+}
+
+/* ------------------------------------------------------------------ fundo
+ * Com `html` na frente: o `PartnerPageFrame` pinta o próprio fundo em CSS com escopo, que empata
+ * com duas classes e carrega depois — o linho vencia e o fundo da Visão geral sumia.
+ */
+
+html .hc-tema.partner-page {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(52rem 26rem at 8% -6rem, rgb(120 196 178 / 30%), transparent 70%),
+    radial-gradient(44rem 24rem at 96% -4rem, rgb(96 178 196 / 22%), transparent 70%),
+    var(--hc-fundo);
+}
+
+html .hc-tema.partner-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--hc-grade) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hc-grade) 1px, transparent 1px);
+  background-size: 28px 28px;
+  content: '';
+  mask-image: linear-gradient(to bottom, #000 0, rgb(0 0 0 / 60%) 16rem, transparent 34rem);
+  pointer-events: none;
+}
+
+html.app-dark .hc-tema.partner-page {
+  background:
+    radial-gradient(52rem 26rem at 8% -6rem, rgb(108 201 181 / 13%), transparent 70%),
+    radial-gradient(44rem 24rem at 96% -4rem, rgb(108 198 208 / 9%), transparent 70%),
+    var(--hc-fundo);
+}
+
+/* ------------------------------------------------------------------ cabeçalho da página
+ * O subtítulo deixa de ser rótulo em caixa alta: é a linha pequena acima do título, como a data
+ * sobre o "Olá" da Visão geral. O título sobe para a escala da saudação.
+ */
+
+html .hc-tema .partner-page__subtitle {
+  margin: 0 0 0.35rem;
+  color: var(--hc-tinta-2);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html .hc-tema .partner-page__title {
+  color: var(--hc-tinta);
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+html .hc-tema .partner-page__header {
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* O rótulo quebrava em duas linhas ("Mostrar / explicações") dentro da pílula. */
+html .hc-tema .partner-page__guidance.p-button,
+html .inicio-pagina .partner-page__guidance.p-button {
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ saudação
+ * O cabeçalho das telas redesenhadas, pelo slot `cabecalho` do `PartnerPageFrame`: a data pequena,
+ * o título, e na mesma linha a frase de estado em degradê e as pílulas — a saudação da Visão geral
+ * (`inicio.vue`) com o conteúdo de cada tela. A frase diz o estado; a cor dela marca estado, não
+ * importância, e por isso o peso fica abaixo do título.
+ */
+
+.hc-tema .hc-saudacao {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.hc-tema .hc-saudacao__data {
+  color: var(--hc-tinta-2);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.hc-tema .hc-saudacao__titulo {
+  margin: 0.35rem 0 0;
+  color: var(--hc-tinta);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.hc-tema .hc-saudacao__linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.hc-tema .hc-saudacao__resumo {
+  margin: 0;
+  background: var(--hc-degrade);
+  background-clip: text;
+  color: transparent;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  -webkit-text-fill-color: transparent;
+}
+
+.hc-tema .hc-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* ------------------------------------------------------------------ botões do PrimeVue */
+
+.hc-tema {
+  --p-button-border-radius: 999px;
+  --p-button-rounded-border-radius: 999px;
+
+  --p-button-primary-background: var(--hc-degrade-botao);
+  --p-button-primary-hover-background: linear-gradient(120deg, #1a574c 0%, #287a6b 100%);
+  --p-button-primary-active-background: linear-gradient(120deg, #164a41 0%, #236b5e 100%);
+  --p-button-primary-border-color: transparent;
+  --p-button-primary-hover-border-color: transparent;
+  --p-button-primary-active-border-color: transparent;
+  --p-button-primary-color: #ffffff;
+  --p-button-primary-hover-color: #ffffff;
+  --p-button-primary-active-color: #ffffff;
+
+  --p-button-secondary-background: var(--hc-cartao);
+  --p-button-secondary-hover-background: var(--hc-cartao);
+  --p-button-secondary-active-background: var(--hc-marca-clara);
+  --p-button-secondary-border-color: var(--hc-pilula-borda);
+  --p-button-secondary-hover-border-color: var(--hc-marca);
+  --p-button-secondary-active-border-color: var(--hc-marca);
+  --p-button-secondary-color: var(--hc-tinta);
+  --p-button-secondary-hover-color: var(--hc-tinta);
+  --p-button-secondary-active-color: var(--hc-tinta);
+
+  --p-button-outlined-secondary-border-color: var(--hc-pilula-borda);
+  --p-button-outlined-secondary-color: var(--hc-tinta);
+  --p-button-outlined-secondary-hover-background: var(--hc-cartao);
+  --p-button-outlined-secondary-active-background: var(--hc-marca-clara);
+  --p-button-outlined-primary-border-color: var(--hc-pilula-borda);
+  --p-button-outlined-primary-color: var(--hc-marca-forte);
+  --p-button-outlined-primary-hover-background: var(--hc-marca-clara);
+  --p-button-outlined-primary-active-background: var(--hc-marca-clara);
+
+  --p-button-text-primary-color: var(--hc-marca-forte);
+  --p-button-text-primary-hover-background: var(--hc-marca-clara);
+  --p-button-text-primary-active-background: var(--hc-marca-clara);
+  --p-button-text-secondary-color: var(--hc-tinta-2);
+}
+
+/*
+ * A pílula com fundo sobe pela sombra, como as da Visão geral. A sombra é uma variável para o hover
+ * trocar só ela e não apagar o anel de foco.
+ */
+.hc-tema .p-button:not(.p-button-text, .p-button-link, .p-button-icon-only) {
+  --hc-botao-sombra: 0 1px 2px rgb(20 32 28 / 5%);
+
+  box-shadow: var(--hc-botao-sombra);
+}
+
+.hc-tema .p-button:not(.p-button-text, .p-button-link, .p-button-icon-only):not(:disabled):hover {
+  --hc-botao-sombra: 0 4px 12px -6px rgb(20 32 28 / 25%);
+}
+
+.hc-tema .p-button:not(.p-button-secondary, .p-button-outlined, .p-button-text, .p-button-link) {
+  --hc-botao-sombra: 0 6px 16px -8px rgb(31 100 87 / 70%);
+}
+
+.hc-tema
+  .p-button:not(.p-button-secondary, .p-button-outlined, .p-button-text, .p-button-link):not(
+    :disabled
+  ):hover {
+  --hc-botao-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+}
+
+.hc-tema .p-button.p-button-outlined:not(:disabled):hover {
+  border-color: var(--hc-marca);
+}
+
+/* ------------------------------------------------------------------ segmentos
+ * Os `SelectButton` crus (Dia/Semana da agenda, densidade, escolhas de diálogo) na mesma pílula do
+ * `ClinicToggleGroup`: trilho branco de fio fino, e a escolhida numa pílula verde-clara. O
+ * `ClinicToggleGroup` (`.grupo`) fica de fora — ele desenha o próprio, com as cores de tom.
+ * `html` na frente para passar das regras de `.clinic-scope` em `clinic-tokens.css`.
+ */
+
+/*
+ * O trilho com raio fixo, e não 999 px: o navegador reduz o raio que passa da meia altura, então
+ * numa linha (até 44 px) é a mesma pílula; quebrado em duas no estreito, vira retângulo
+ * arredondado em vez de uma bolha. Vale também para as abas de seção, abaixo.
+ */
+html .hc-tema .p-selectbutton:not(.grupo) {
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1.375rem;
+  background: var(--hc-cartao);
+}
+
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton,
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton:first-child,
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton:last-child {
+  margin-inline-start: 0;
+  padding: 0;
+  border-color: transparent;
+  border-radius: 999px;
+}
+
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton .p-togglebutton-content {
+  padding: 0.25rem 0.85rem;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+}
+
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton:not(.p-togglebutton-checked) {
+  background: transparent;
+  color: var(--hc-tinta-2);
+}
+
+html
+  .hc-tema
+  .p-selectbutton:not(.grupo)
+  .p-togglebutton:not(.p-togglebutton-checked):not(.p-disabled):hover {
+  background: var(--hc-linha);
+  color: var(--hc-tinta);
+}
+
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton.p-togglebutton-checked {
+  border-color: transparent;
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
+  font-weight: 700;
+}
+
+/*
+ * As abas de seção (`PartnerSectionTabs`: A casa/Tipos/Tarifas, Carteira, Acessos) no mesmo trilho.
+ * O componente passa as cores antigas por `style`; aqui as regras ganham pela classe, não pela
+ * variável, para que as telas ainda não migradas do portal continuem como estão.
+ */
+html .hc-tema .partner-tabs .p-tablist-tab-list {
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1.375rem;
+  background: var(--hc-cartao);
+}
+
+html .hc-tema .partner-tabs .partner-tabs__button.p-tab {
+  padding: 0.35rem 0.95rem;
+  border-color: transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--hc-tinta-2);
+  font-weight: 600;
+}
+
+html .hc-tema .partner-tabs .partner-tabs__button.p-tab:not(.p-tab-active):not(.p-disabled):hover {
+  background: var(--hc-linha);
+  color: var(--hc-tinta);
+}
+
+html .hc-tema .partner-tabs .partner-tabs__button.p-tab-active,
+html .hc-tema .partner-tabs .partner-tabs__button.p-tab-active:hover {
+  border-color: transparent;
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
+  font-weight: 700;
+}
+
+html .hc-tema .partner-tabs__description {
+  color: var(--hc-tinta-3);
+}
+
+/* ------------------------------------------------------------------ avisos
+ * O `Message` do Aura pinta a faixa no vermelho do Tailwind, fora da paleta. Aqui ele é contornado:
+ * fundo do cartão e fio na tinta do estado, que é quem carrega a urgência. O fio sai da mistura
+ * com o cartão, e não do `-fundo` (1,1:1 sobre o branco, invisível). `outline-offset` desenha o
+ * contorno por dentro, para o rolamento do diálogo não cortá-lo no topo.
+ */
+.hc-tema {
+  --p-message-border-radius: 0.75rem;
+  --p-message-error-background: var(--hc-cartao);
+  --p-message-error-border-color: color-mix(in srgb, var(--hc-coral-tinta) 35%, var(--hc-cartao));
+  --p-message-error-color: var(--hc-coral-tinta);
+  --p-message-error-shadow: none;
+  --p-message-warn-background: var(--hc-cartao);
+  --p-message-warn-border-color: color-mix(in srgb, var(--hc-pessego-tinta) 35%, var(--hc-cartao));
+  --p-message-warn-color: var(--hc-pessego-tinta);
+  --p-message-warn-shadow: none;
+  --p-message-info-background: var(--hc-cartao);
+  --p-message-info-border-color: var(--hc-pilula-borda);
+  --p-message-info-color: var(--hc-marca-forte);
+  --p-message-info-shadow: none;
+  --p-message-success-background: var(--hc-cartao);
+  --p-message-success-border-color: color-mix(in srgb, var(--hc-verde-tinta) 35%, var(--hc-cartao));
+  --p-message-success-color: var(--hc-verde-tinta);
+  --p-message-success-shadow: none;
+}
+
+.hc-tema .p-message {
+  outline-offset: -1px;
+}
+
+/* ------------------------------------------------------------------ interruptores
+ * O preset pinta o desligado no linho e a alça no creme. Aqui: trilho cinza, ligado na marca,
+ * alça branca. O menu da conta repete os mesmos valores em `AppShell.vue` (`.user-menu__tema`).
+ */
+.hc-tema {
+  --p-toggleswitch-background: color-mix(in srgb, var(--hc-tinta-3) 45%, var(--hc-cartao));
+  --p-toggleswitch-hover-background: color-mix(in srgb, var(--hc-tinta-3) 60%, var(--hc-cartao));
+  --p-toggleswitch-checked-background: var(--hc-marca);
+  --p-toggleswitch-checked-hover-background: var(--hc-marca-forte);
+  --p-toggleswitch-handle-background: #ffffff;
+  --p-toggleswitch-handle-hover-background: #ffffff;
+  --p-toggleswitch-handle-checked-background: #ffffff;
+  --p-toggleswitch-handle-checked-hover-background: #ffffff;
+}
+
+/* ------------------------------------------------------------------ pílulas à mão
+ * As ações da saudação da Visão geral (`.acao` em `inicio.vue`): contornada no fundo do cartão,
+ * cheia no degradê para o próximo passo natural. Nenhuma ação sem fundo ou borda à vista.
+ */
+
+.hc-tema .hc-pilula,
+.hc-tema .hc-pilula.p-button {
+  --pilula-sombra: 0 1px 2px rgb(20 32 28 / 5%);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0 0.95rem;
+  border: 1px solid var(--hc-pilula-borda);
+  border-radius: 999px;
+  background: var(--hc-cartao);
+  box-shadow: var(--pilula-sombra);
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 150ms ease-out,
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.hc-tema .hc-pilula:hover,
+.hc-tema .hc-pilula.p-button:not(:disabled):hover {
+  --pilula-sombra: 0 4px 12px -6px rgb(20 32 28 / 25%);
+
+  border-color: var(--hc-marca);
+  background: var(--hc-cartao);
+  color: var(--hc-tinta);
+}
+
+.hc-tema .hc-pilula--cheia,
+.hc-tema .hc-pilula--cheia.p-button {
+  --pilula-sombra: 0 6px 16px -8px rgb(31 100 87 / 70%);
+
+  border-color: transparent;
+  background: var(--hc-degrade-botao);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.hc-tema .hc-pilula--cheia:hover,
+.hc-tema .hc-pilula--cheia.p-button:not(:disabled):hover {
+  --pilula-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+
+  border-color: transparent;
+  background: var(--hc-degrade-botao);
+  color: #ffffff;
+}
+
+/* Desabilitada continua lendo como pílula: perde a sombra e a cor, não a borda. */
+.hc-tema .hc-pilula.p-button:disabled {
+  border-color: var(--hc-borda);
+  background: var(--hc-linha);
+  box-shadow: none;
+  color: var(--hc-tinta-3);
+  opacity: 1;
+}
+
+.hc-tema .hc-pilula:focus-visible,
+.hc-tema .hc-pilula.p-button:focus-visible {
+  outline: 2px solid var(--hc-marca);
+  outline-offset: 2px;
+}
+
+.hc-tema .hc-pilula__icone {
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--hc-marca);
+}
+
+.hc-tema .hc-pilula--cheia .hc-pilula__icone,
+.hc-tema .hc-pilula.p-button:disabled .hc-pilula__icone {
+  color: currentColor;
+}
+
+/* A contagem dentro da pílula: o selo de 6 px, no par da gravidade. */
+.hc-tema .hc-pilula__selo {
+  display: inline-grid;
+  min-width: 1.25rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.2;
+  place-items: center;
+}
+
+/* ------------------------------------------------------------------ rótulos e colunas
+ * Em caixa normal, como o rótulo de eixo da pauta ("Assunto", "Gravidade", "Onde"): a caixa alta
+ * espaçada era o rótulo do linho. `html` na frente porque o cabeçalho da tabela é CSS com escopo.
+ */
+
+html .hc-tema .clinic-label,
+html .hc-tema .tabela__th,
+html .hc-tema .campo__rotulo,
+html .hc-tema .stat__rotulo {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html .hc-tema .clinic-label,
+html .hc-tema .campo__rotulo,
+html .hc-tema .stat__rotulo {
+  color: var(--hc-tinta-2);
+}
+
+/* O rótulo do número é o título do cartão dele: sobe para a escala do título de cartão. */
+html .hc-tema .stat__rotulo {
+  font-size: 0.8125rem;
+}
+
+/* O rótulo de campo é lido antes de digitar: um degrau acima do rótulo de coluna. */
+html .hc-tema .campo__rotulo {
+  font-size: 0.8125rem;
+}
+
+/* ------------------------------------------------------------------ cartões
+ * O cartão é o `.hc` da Visão geral. O que mora dentro dele fica plano: a tabela e a linha do tempo
+ * perdem a moldura própria, senão seria cartão dentro de cartão.
+ */
+
+.hc-tema .hc .tabela,
+.hc-tema .atos .tabela {
+  border: 0;
+  border-radius: 0.75rem;
+  box-shadow: none;
+}
+
+.hc-tema .hc > .timeline {
+  width: auto;
+}
+
+.hc-tema .hc > .timeline > .historico {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* O título da linha do tempo vira o do cartão que a contém. */
+.hc-tema .hc > .timeline > .historico > .clinic-label {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hc-tema .hc-pilula,
+  .hc-tema .hc-pilula.p-button {
+    transition: none;
+  }
+}

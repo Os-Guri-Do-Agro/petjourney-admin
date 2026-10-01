@@ -270,7 +270,7 @@ function aoTeclar(evento: KeyboardEvent) {
   <Dialog
     v-model:visible="visivel"
     modal
-    class="clinic-dialog busca"
+    class="clinic-dialog hc-tema busca"
     :style="{ width: 'min(34rem, 96vw)' }"
     :header="t('clinico.busca.titulo')"
     dismissable-mask

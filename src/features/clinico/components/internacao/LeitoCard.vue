@@ -11,13 +11,23 @@
  * falta para a próxima**. Peso, diagnóstico e previsão de alta cabem na tela do paciente; num
  * cartão de mapa eles disputariam espaço com a única linha que decide para onde a enfermagem
  * anda em seguida.
+ *
+ * ## A forma (redesenho de 30/09/2026)
+ *
+ * O cartão da Visão geral, neutro. A urgência deixou de contornar o cartão inteiro com um anel
+ * coral ou areia — o mapa de oito leitos virava um mosaico de molduras — e mora em selos de 6 px:
+ * a gravidade no alto (estável, atenção, crítico), e o atraso e o boletim retido embaixo, cada um
+ * com ícone e palavra. O tipo do leito saiu do cartão: o mapa agrupa por tipo.
  */
 import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import InternacaoGravidade from './InternacaoGravidade.vue'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
+
 import type { LeitoNoMapa } from '../../data/repositories'
+import type { GravidadeClinica } from '../../data/types'
+import { useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{ item: LeitoNoMapa }>()
 
@@ -27,28 +37,21 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const clinico = useClinicoStore()
 
 const ocupado = computed(() => props.item.internacao !== null)
 const indisponivel = computed(() => !props.item.leito.ativo)
 
-/**
- * O tom do cartão sai da urgência, não da gravidade.
- *
- * Um paciente crítico com tudo em dia não precisa piscar; um estável com duas doses atrasadas
- * precisa. Pintar por gravidade deixaria o mapa vermelho no lugar onde nada há para fazer, e
- * silencioso onde há.
- */
-const tom = computed(() => {
-  if (!ocupado.value) {
-    return indisponivel.value ? 'inativo' : 'livre'
-  }
+const pet = computed(() =>
+  props.item.internacao ? clinico.pet(props.item.internacao.petId) : null,
+)
 
-  if (props.item.atrasadas > 0) {
-    return 'atrasado'
-  }
-
-  return props.item.pendentes > 0 ? 'pendente' : 'ocupado'
-})
+/** A gravidade no par de selo da Visão geral: verde, pêssego, coral. */
+const COR_DA_GRAVIDADE: Record<GravidadeClinica, string> = {
+  estavel: 'verde',
+  atencao: 'pessego',
+  critico: 'coral',
+}
 
 const proxima = computed(() => {
   const minutos = props.item.proximaEmMinutos
@@ -61,26 +64,46 @@ const proxima = computed(() => {
     ? t('clinico.internacao.leito.proximaMinutos', { minutos })
     : t('clinico.internacao.leito.proximaHoras', { horas: Math.round(minutos / 60) })
 })
+
+const estado = computed(() => {
+  if (ocupado.value) {
+    return 'ocupado'
+  }
+
+  return indisponivel.value ? 'inativo' : 'livre'
+})
 </script>
 
 <template>
-  <article class="leito" :class="[`leito--${tom}`, { 'leito--clicavel': ocupado }]">
+  <article class="leito" :class="[`leito--${estado}`, { 'leito--clicavel': ocupado }]">
     <header class="leito__topo">
-      <span class="leito__nome clinic-value">{{ item.leito.nome }}</span>
-      <span class="leito__kind">{{ t(`clinico.internacao.leitoKind.${item.leito.kind}`) }}</span>
+      <span class="leito__nome">{{ item.leito.nome }}</span>
+      <span
+        v-if="item.internacao"
+        class="hc-selo"
+        :class="`hc--${COR_DA_GRAVIDADE[item.internacao.gravidade]}`"
+      >
+        {{ t(`clinico.internacao.gravidade.${item.internacao.gravidade}`) }}
+      </span>
     </header>
 
     <template v-if="item.internacao">
       <!--
         O botão é o nome do paciente, mas o **alvo do clique é o cartão inteiro**: o `::after`
-        dele se estende por toda a superfície (ver o CSS). Continua sendo um botão de verdade
-        (`Button` do PrimeVue, que renderiza `<button>`) — teclado, foco e leitor de tela
-        nativos, com o nome do paciente como rótulo —
-        em vez de um `role="button"` no `<article>`, que leria o cartão inteiro em voz alta,
-        números e selos incluídos, para dizer "abrir o Bento".
+        dele se estende por toda a superfície (ver o CSS). Continua sendo um botão de verdade —
+        teclado, foco e leitor de tela nativos, com o nome do paciente como rótulo — em vez de um
+        `role="button"` no `<article>`, que leria o cartão inteiro em voz alta para dizer "abrir o
+        Bento".
       -->
       <Button type="button" class="leito__paciente" text @click="emit('abrir', item.internacao.id)">
-        <span class="leito__iniciais" aria-hidden="true">{{ item.petIniciais }}</span>
+        <PetAvatar
+          class="leito__avatar"
+          :nome="item.petNome"
+          :iniciais="item.petIniciais"
+          :especie="pet?.especie ?? null"
+          :foto-url="pet?.fotoUrl ?? ''"
+          tamanho="md"
+        />
         <span class="leito__identidade">
           <strong class="leito__pet">{{ item.petNome }}</strong>
           <span class="leito__motivo">{{ item.internacao.motivo }}</span>
@@ -88,50 +111,31 @@ const proxima = computed(() => {
       </Button>
 
       <!--
-        O chip precisa caber no próprio texto. Como filho direto de uma coluna flex ele era
-        esticado à largura do cartão e virava uma faixa — e uma faixa de fundo colorido lê como
-        alerta do cartão inteiro, não como o estado do paciente.
+        O que cobra ação, em selo: ícone, forma e palavra, três canais que sobrevivem à escala de
+        cinza. O do boletim é cheio e o do atraso, contornado: os dois podem aparecer juntos, e são
+        dois pedidos diferentes — o atraso chama a enfermagem; o boletim, alguém ao telefone.
       -->
-      <InternacaoGravidade class="leito__gravidade" :gravidade="item.internacao.gravidade" />
-
-      <dl class="leito__numeros">
-        <div>
-          <dt>{{ t('clinico.internacao.leito.internadoHa') }}</dt>
-          <dd class="clinic-value">
-            {{ t('clinico.internacao.leito.horas', { horas: item.horasInternado }) }}
-          </dd>
-        </div>
-        <div>
-          <dt>{{ t('clinico.internacao.leito.pendentes') }}</dt>
-          <dd class="clinic-value">{{ item.pendentes }}</dd>
-        </div>
-      </dl>
-
-      <!--
-        O atraso é um **selo**, não uma faixa na borda: ícone, forma e texto, três canais que
-        sobrevivem à escala de cinza e à impressão. A faixa lateral dizia a mesma coisa só pela
-        cor e pelo lado do cartão.
-      -->
-      <p v-if="item.atrasadas > 0" class="leito__selo">
-        <i class="pi pi-exclamation-circle" aria-hidden="true" />
-        {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }, item.atrasadas) }}
+      <p v-if="item.atrasadas > 0 || item.boletimRetido" class="leito__cobrancas">
+        <span v-if="item.boletimRetido" class="hc-selo leito__selo leito__selo--boletim">
+          <i class="pi pi-phone" aria-hidden="true" />
+          {{ t('clinico.internacao.leito.boletimRetido') }}
+        </span>
+        <span v-if="item.atrasadas > 0" class="hc-selo hc--coral leito__selo">
+          <i class="pi pi-exclamation-circle" aria-hidden="true" />
+          {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }, item.atrasadas) }}
+        </span>
       </p>
 
-      <!--
-        De quem é o boletim preso.
-
-        O total ficava no topo da página — "1 boletim retido" — e não dizia de quem: achar o
-        paciente custava abrir os cinco internados um a um. É a pendência com uma pessoa do
-        outro lado esperando um telefonema, e a única desta tela que não pode esperar o fim do
-        turno; por isso ela ganha o selo mais forte, com ícone de telefone e não de alerta —
-        o que se pede aqui não é atenção, é uma ligação.
-      -->
-      <p v-if="item.boletimRetido" class="leito__selo leito__selo--boletim">
-        <i class="pi pi-phone" aria-hidden="true" />
-        {{ t('clinico.internacao.leito.boletimRetido') }}
+      <p class="leito__rodape">
+        <span>
+          {{ t('clinico.internacao.leito.internadoHa') }}
+          <strong>{{ t('clinico.internacao.leito.horas', { horas: item.horasInternado }) }}</strong>
+        </span>
+        <span v-if="item.pendentes > 0">
+          {{ t('clinico.internacao.leito.pendentes') }} <strong>{{ item.pendentes }}</strong>
+        </span>
+        <span v-if="proxima">{{ proxima }}</span>
       </p>
-
-      <p v-if="proxima" class="leito__proxima">{{ proxima }}</p>
     </template>
 
     <template v-else>
@@ -159,27 +163,29 @@ const proxima = computed(() => {
 
 <style scoped>
 .leito {
+  --leito-sombra: var(--hc-sombra);
+
   /* Âncora do alvo estendido do botão do paciente. */
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 12.5rem;
+  min-height: 11.5rem;
   flex-direction: column;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+  gap: 0.75rem;
+  padding: 1rem 1.1rem 1.05rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1rem;
+  background: var(--hc-cartao);
+  box-shadow: var(--leito-sombra);
+  color: var(--hc-tinta);
+  transition:
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
 }
 
 /*
- * O cartão ocupado inteiro abre o paciente.
- *
- * Alvo de nome e avatar era uma mira de 2 cm num cartão de 15: quem clicava no motivo, no número
- * de pendências ou no espaço vazio não ia a lugar nenhum, e nada na tela dizia por quê. O cartão
- * de leito tem um destino só — não há segunda ação disputando a superfície —, então a superfície
- * inteira é o botão.
+ * O cartão ocupado inteiro abre o paciente. Ele sobe pela sombra, como as pílulas: trocar o fundo
+ * de um cartão branco não se vê.
  *
  * O leito **livre** fica de fora de propósito: ali a ação é internar alguém, e abrir um formulário
  * porque o dedo encostou no cartão vazio é o tipo de surpresa que ensina a ter medo da tela.
@@ -189,72 +195,38 @@ const proxima = computed(() => {
 }
 
 .leito--clicavel:hover {
-  background: var(--clinic-surface-soft);
+  --leito-sombra: var(--hc-sombra-alta);
+
+  border-color: color-mix(in srgb, var(--hc-marca) 40%, var(--hc-borda));
 }
 
-/*
- * A urgência contorna o cartão inteiro, e não um dos lados dele.
- *
- * Fundo colorido derruba o contraste do texto clínico que vive dentro do cartão, então o estado
- * fica na moldura. Em anel — e não em faixa à esquerda — porque a faixa lateral marca o cartão
- * por uma aresta só: some quando a grade quebra em coluna única e some de novo em qualquer
- * leitura que não seja da esquerda para a direita. O anel é a mesma informação sem direção.
- *
- * A escada é de três degraus e cada um sobe um canal, não só o tom: ocupado tranquilo fica com a
- * moldura padrão, pendente troca a cor da moldura, atrasado ganha o anel **e** o selo com ícone.
- */
-.leito--atrasado {
-  border-color: var(--clinic-risk-line);
-  box-shadow:
-    0 0 0 2px var(--clinic-risk-text),
-    var(--clinic-shadow-card);
-}
-
-/*
- * O degrau do meio também é um anel — só que em areia, e sem selo.
- *
- * Trocar apenas a cor da moldura de 1px não se enxerga: contra a linha padrão do cartão a
- * diferença é de dois por cento de luminância, e num mapa de oito leitos o cartão com duas doses
- * pendentes ficava idêntico ao que não tem nada para fazer. Mesmo desenho do atraso, um tom
- * abaixo: a escada continua legível e a hierarquia entre os dois permanece óbvia.
- */
-.leito--pendente {
-  border-color: var(--clinic-attention-line);
-  box-shadow:
-    0 0 0 2px var(--clinic-attention-line),
-    var(--clinic-shadow-card);
-}
-
-.leito--livre {
+.leito--livre,
+.leito--inativo {
+  justify-content: space-between;
   border-style: dashed;
-  background: var(--clinic-surface-soft);
+  border-color: color-mix(in srgb, var(--hc-tinta-3) 45%, transparent);
+  background: transparent;
   box-shadow: none;
 }
 
 .leito--inativo {
-  border-style: dashed;
-  background: var(--clinic-surface-sunken);
-  box-shadow: none;
-  opacity: 0.65;
+  background: var(--hc-linha);
+  opacity: 0.7;
 }
 
 .leito__topo {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 0.5rem;
 }
 
 .leito__nome {
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
-}
-
-.leito__kind {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  color: var(--hc-tinta);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 /*
@@ -269,7 +241,7 @@ const proxima = computed(() => {
   padding: 0;
   border: 0;
   overflow: visible;
-  gap: var(--clinic-space-3);
+  gap: 0.75rem;
   color: inherit;
   text-align: start;
 }
@@ -282,14 +254,12 @@ const proxima = computed(() => {
 }
 
 /*
- * O `::after` estende o botão por todo o cartão.
- *
- * É o que transforma a superfície inteira em alvo sem duplicar o `@click` no `<article>` — dois
- * manipuladores na mesma pilha disparariam duas vezes no clique sobre o nome.
+ * O `::after` estende o botão por todo o cartão — a superfície inteira vira alvo sem duplicar o
+ * `@click` no `<article>`, que dispararia duas vezes no clique sobre o nome.
  */
 .leito__paciente::after {
   position: absolute;
-  border-radius: var(--clinic-radius-card);
+  border-radius: 1rem;
   content: '';
   inset: 0;
 }
@@ -301,113 +271,91 @@ const proxima = computed(() => {
 
 /* O foco contorna o cartão, que é o que o clique de fato aciona — não só o nome. */
 .leito__paciente:focus-visible::after {
-  box-shadow: var(--clinic-focus-ring);
+  outline: 2px solid var(--hc-marca);
+  outline-offset: 2px;
 }
 
-.leito__iniciais {
-  display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-  place-items: center;
+.leito__avatar {
+  flex-shrink: 0;
 }
 
 .leito__identidade {
   display: grid;
   min-width: 0;
-  gap: 0.1rem;
+  gap: 0.15rem;
 }
 
 .leito__pet {
   overflow-wrap: anywhere;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-body);
-  font-weight: 700;
+  color: var(--hc-tinta);
+  font-size: 0.9375rem;
+  font-weight: 650;
   line-height: 1.25;
 }
 
 .leito__motivo {
   display: -webkit-box;
   overflow: hidden;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
   line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
-.leito__gravidade {
-  align-self: flex-start;
-}
-
-.leito__numeros {
+.leito__cobrancas {
   display: flex;
-  margin: auto 0 0;
-  gap: var(--clinic-space-4);
-}
-
-.leito__numeros dt {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.leito__numeros dd {
+  flex-wrap: wrap;
+  gap: 0.35rem;
   margin: 0;
-  font-weight: 700;
 }
 
 .leito__selo {
-  display: inline-flex;
-  align-self: flex-start;
-  align-items: center;
-  margin: 0;
-  padding: 0.15rem 0.5rem;
-  border: 1px solid var(--clinic-risk-line);
-  border-radius: var(--clinic-radius-chip);
-  gap: var(--clinic-space-1);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-/*
- * O selo do boletim é cheio, e o do atraso é contornado.
- *
- * Os dois podem aparecer no mesmo cartão, e com a mesma marcação o olho os leria como duas
- * linhas da mesma coisa. São dois pedidos diferentes: o atraso chama a enfermagem, que está no
- * corredor; o boletim retido chama alguém para pegar o telefone.
- */
-.leito__selo--boletim {
-  border-color: transparent;
-  background: var(--clinic-risk-text);
-  color: var(--clinic-surface);
-  font-weight: 800;
+  gap: 0.3rem;
 }
 
 .leito__selo i {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
 }
 
-.leito__proxima {
-  margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+/* O boletim é o selo cheio: o coral invertido do bloco urgente da pauta. */
+.leito__selo--boletim {
+  background: var(--hc-coral-tinta);
+  color: var(--hc-cartao);
+  font-weight: 700;
+}
+
+.leito__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  margin: auto 0 0;
+  padding-block-start: 0.7rem;
+  border-block-start: 1px solid var(--hc-linha);
+  color: var(--hc-tinta-2);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.leito__rodape strong {
+  color: var(--hc-tinta);
+  font-weight: 650;
 }
 
 .leito__vazio {
   margin: auto 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--hc-tinta-2);
+  font-size: 0.875rem;
   text-align: center;
 }
 
 .leito__internar {
   align-self: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leito {
+    transition: none;
+  }
 }
 </style>

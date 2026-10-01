@@ -89,7 +89,7 @@ function confirmar() {
   <Dialog
     :visible="visivel"
     modal
-    class="clinic-dialog picker"
+    class="clinic-dialog hc-tema picker"
     :style="{ width: 'min(62rem, 94vw)' }"
     @update:visible="emit('update:visivel', $event)"
   >

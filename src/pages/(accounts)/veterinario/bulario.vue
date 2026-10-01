@@ -92,6 +92,7 @@ onMounted(carregar)
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.bulario.subtitulo')"
     :title="t('clinico.bulario.titulo')"
     :loading="carregando && clinico.medicamentos.length === 0"

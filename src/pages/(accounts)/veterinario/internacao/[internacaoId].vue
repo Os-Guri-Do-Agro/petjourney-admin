@@ -14,16 +14,24 @@
  * O cabeçalho traz o **peso de entrada**, não o do cadastro. Toda dose do plantão foi calculada
  * sobre ele, e ver na tela um peso diferente do que multiplicou a dose é o tipo de incoerência
  * que corrói a confiança no resto do registro.
+ *
+ * ## A forma (redesenho de 30/09/2026)
+ *
+ * A saudação da ficha (`FichaCabeca`): o rosto e o nome como título, a frase de estado em degradê
+ * — gravidade, leito e o que falta fazer — e as pílulas. As vistas da ficha (resumo, histórico,
+ * vacinas) viram as saídas daqui, e "Encerrar internação" é a ação da página, contornada: acontece
+ * uma vez e não se desfaz. Os quatro cartões de número saíram; internado há, previsão de alta,
+ * veterinário responsável e diagnóstico ficam no cartão "Internação", um dado por linha.
  */
+import { PhBed } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
-import ClinicStat from '@/features/clinico/components/base/ClinicStat.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
+import FichaCabeca from '@/features/clinico/components/pacientes/ficha/FichaCabeca.vue'
 import AltaDialog from '@/features/clinico/components/internacao/AltaDialog.vue'
 import InternacaoBoletins from '@/features/clinico/components/internacao/InternacaoBoletins.vue'
 import InternacaoChecklist from '@/features/clinico/components/internacao/InternacaoChecklist.vue'
@@ -99,10 +107,8 @@ const opcoesDeAba = computed(() =>
 
     return {
       valor,
-      rotulo:
-        total > 0
-          ? `${t(`clinico.internacao.abas.${valor}`)} · ${total}`
-          : t(`clinico.internacao.abas.${valor}`),
+      rotulo: t(`clinico.internacao.abas.${valor}`),
+      contagem: total > 0 ? total : undefined,
       tom: (retidos > 0 ? 'risco' : pendentes > 0 ? 'atencao' : 'neutro') as
         | 'risco'
         | 'atencao'
@@ -115,25 +121,12 @@ const tempo = computed(() =>
   paciente.value ? horasInternado(paciente.value.internacao, internacao.agora) : 0,
 )
 
-/**
- * Gravidade e leito viram **um indicador do resumo**, e não dois selos soltos ao lado do cartão.
- *
- * Eles não são identidade do paciente — o Bento continua sendo o Bento fora da internação. São
- * estado *desta* internação, como "internado há" e "a fazer agora", e é nessa fileira que a
- * pergunta deles é feita. Soltos à direita do cartão, não pertenciam nem ao cabeçalho nem ao
- * resumo: sobravam num vão entre os dois, e o topo da tela parecia desalinhado.
- */
-const TOM_DA_GRAVIDADE: Record<GravidadeClinica, 'neutro' | 'atencao' | 'risco'> = {
-  estavel: 'neutro',
-  atencao: 'atencao',
-  critico: 'risco',
-}
+/** A data da alta prevista, ou que não há previsão. */
+const previsaoDeAlta = computed(() => {
+  const alta = paciente.value?.internacao.altaPrevistaEm
 
-const ICONE_DA_GRAVIDADE: Record<GravidadeClinica, string> = {
-  estavel: 'pi pi-check-circle',
-  atencao: 'pi pi-eye',
-  critico: 'pi pi-exclamation-triangle',
-}
+  return alta ? formato.dataCurta(alta.slice(0, 10)) : t('clinico.internacao.paciente.semPrevisao')
+})
 
 /**
  * O leito, e o tipo dele quando o tipo muda o que se faz ao chegar.
@@ -141,17 +134,6 @@ const ICONE_DA_GRAVIDADE: Record<GravidadeClinica, string> = {
  * "Leito R1" basta num leito geral. Em isolamento não basta: quem vai até lá precisa saber antes
  * de abrir a porta, e é a única informação desta linha que muda o comportamento de quem a lê.
  */
-/** Entrada e alta contadas juntas: é a mesma pergunta de planejamento. */
-const previsaoDeAlta = computed(() => {
-  const alta = paciente.value?.internacao.altaPrevistaEm
-
-  return alta
-    ? t('clinico.internacao.paciente.altaEm', {
-        data: formato.dataCurta(alta.slice(0, 10)),
-      })
-    : t('clinico.internacao.paciente.semPrevisaoDeAlta')
-})
-
 const leitoDescrito = computed(() => {
   const leito = paciente.value?.leito
 
@@ -171,6 +153,32 @@ const leitoDescrito = computed(() => {
   }
 
   return `${nome} · ${kind}`
+})
+
+/**
+ * A frase da saudação: o estado desta internação, na ordem em que se pergunta — como ele está,
+ * onde, e o que falta fazer. Encerrada, ela diz só isso.
+ */
+const fraseDeEstado = computed(() => {
+  if (!paciente.value) {
+    return ''
+  }
+
+  if (encerrada.value) {
+    return t('clinico.internacao.paciente.encerradaFrase')
+  }
+
+  const pendentes = internacao.pendentesDoPaciente.length
+
+  return [
+    t(`clinico.internacao.gravidade.${paciente.value.internacao.gravidade}`),
+    leitoDescrito.value,
+    pendentes > 0
+      ? t('clinico.internacao.pauta.aFazer', { total: pendentes })
+      : t('clinico.internacao.resumo.emDia'),
+  ]
+    .filter(Boolean)
+    .join(' · ')
 })
 
 async function registrar(administracaoId: string, status: 'feita' | 'recusada' | 'pulada') {
@@ -240,18 +248,6 @@ async function suspender(prescricaoId: string, motivo: string) {
   await internacao.suspender(prescricaoId, motivo)
 }
 
-function voltar() {
-  void router.push('/veterinario/internacao')
-}
-
-function verHistorico() {
-  const petId = paciente.value?.internacao.petId
-
-  if (petId) {
-    void router.push(`/veterinario/paciente/${petId}/historico`)
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Encerramento
 // ---------------------------------------------------------------------------
@@ -298,71 +294,41 @@ async function encerrar(entrada: {
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="t('clinico.internacao.paciente.titulo')"
-    :subtitle="paciente?.internacao.motivo ?? ''"
     :loading="internacao.carregando && !paciente"
     :error="internacao.erro ? t(internacao.erro) : ''"
     :empty="naoEncontrado"
     :empty-title="t('clinico.internacao.paciente.naoEncontradoTitulo')"
     :empty-description="t('clinico.internacao.paciente.naoEncontradoDescricao')"
   >
+    <template #cabecalho>
+      <div class="internado__topo">
+        <!-- A volta ao mapa é navegação, não conteúdo: fica sozinha acima, como migalha. -->
+        <RouterLink class="hc__link internado__voltar" to="/veterinario/internacao">
+          <i class="pi pi-arrow-left" aria-hidden="true" />
+          {{ t('clinico.internacao.paciente.voltar') }}
+        </RouterLink>
+
+        <!--
+          As vistas da ficha são as saídas daqui: a internação era um beco, e quem precisava saber
+          o que aconteceu antes — a cirurgia de anteontem, a alergia do ano passado — tinha de
+          buscar o paciente pelo menu.
+        -->
+        <FichaCabeca
+          v-if="pet && paciente"
+          :pet="pet"
+          :tutor="tutor"
+          :atual="null"
+          :frase="fraseDeEstado"
+          :peso-kg="paciente.internacao.pesoEntradaKg"
+        />
+
+        <h1 v-else class="hc-saudacao__titulo">{{ t('clinico.internacao.paciente.titulo') }}</h1>
+      </div>
+    </template>
+
     <div v-if="paciente" class="internado clinic-scope">
-      <!--
-        A volta ao mapa é navegação, não conteúdo: fica sozinha na linha de cima, como migalha.
-        Dividindo a linha com o cartão do paciente, ela espremia a identidade no meio da tela e
-        se lia como se fosse parte dela.
-      -->
-      <header class="topo">
-        <div class="topo__linha">
-          <Button
-            class="topo__voltar"
-            :label="t('clinico.internacao.paciente.voltar')"
-            icon="pi pi-arrow-left"
-            severity="secondary"
-            text
-            @click="voltar"
-          />
-
-          <!--
-            Encerrar fica na migalha, e não junto das abas.
-
-            As quatro abas são o trabalho do turno, que se repete a cada meia hora; a alta
-            acontece uma vez e não se desfaz. Pôr as duas coisas na mesma fileira convidaria ao
-            clique errado no fim de um plantão de doze horas.
-          -->
-          <Button
-            v-if="!encerrada"
-            :label="t('clinico.internacao.alta.abrir')"
-            icon="pi pi-sign-out"
-            severity="secondary"
-            outlined
-            size="small"
-            @click="altaAberta = true"
-          />
-        </div>
-
-        <ClinicPatientHeader :pet="pet" :tutor="tutor" :peso-kg="paciente.internacao.pesoEntradaKg">
-          <!--
-            A saída para o histórico do paciente.
-
-            A internação era um beco: entrava-se pelo mapa de leitos e a única saída era voltar
-            para ele. Quem precisava saber o que aconteceu com este animal antes de ele ser
-            internado — a cirurgia de anteontem, a alergia registrada no ano passado — tinha de
-            achar Pacientes no menu e buscar pelo nome, com o paciente aberto na tela ao lado.
-          -->
-          <template #acoes>
-            <Button
-              :label="t('clinico.internacao.paciente.verHistorico')"
-              icon="pi pi-history"
-              severity="secondary"
-              outlined
-              size="small"
-              @click="verHistorico"
-            />
-          </template>
-        </ClinicPatientHeader>
-      </header>
-
       <!--
         A internação encerrada continua alcançável, e precisa dizer isso na primeira linha. Sem
         esta faixa, a tela de um animal que foi para casa é indistinguível da de um animal que
@@ -373,55 +339,58 @@ async function encerrar(entrada: {
         {{ t(`clinico.internacao.alta.encerrada.${desfechoRegistrado}`, { quando: encerradaEm }) }}
       </p>
 
-      <section class="numeros">
-        <ClinicStat
-          :rotulo="t('clinico.internacao.paciente.estado')"
-          :valor="t(`clinico.internacao.gravidade.${paciente.internacao.gravidade}`)"
-          :detalhe="leitoDescrito"
-          :icone="ICONE_DA_GRAVIDADE[paciente.internacao.gravidade]"
-          :tom="TOM_DA_GRAVIDADE[paciente.internacao.gravidade]"
-        />
-        <!--
-          Entrada e alta são a mesma pergunta — quanto tempo este animal fica — e por isso moram
-          no mesmo indicador. Em cartões separados, os dois ocupavam metade da fileira para dizer
-          duas datas, e a fileira de cinco quebrava em 4+1 na largura de tablet.
-        -->
-        <ClinicStat
-          :rotulo="t('clinico.internacao.paciente.internadoHa')"
-          :valor="t('clinico.internacao.leito.horas', { horas: tempo })"
-          :detalhe="previsaoDeAlta"
-          icone="pi pi-clock"
-        />
-        <!--
-          Sem detalhe: o diagnóstico morava aqui e lia como credencial de quem assina o caso.
-          Ele passou para o bloco de contexto, junto da observação do plantão.
-        -->
-        <ClinicStat
-          :rotulo="t('clinico.internacao.paciente.responsavelClinico')"
-          :valor="clinico.profissional(paciente.internacao.responsavelId)?.nome ?? '—'"
-          icone="pi pi-user"
-        />
-        <ClinicStat
-          :rotulo="t('clinico.internacao.paciente.pendentes')"
-          :valor="String(internacao.pendentesDoPaciente.length)"
-          :detalhe="t('clinico.internacao.paciente.pendentesDetalhe')"
-          icone="pi pi-list-check"
-          :tom="internacao.pendentesDoPaciente.length > 0 ? 'atencao' : 'neutro'"
-        />
-      </section>
+      <!--
+        O que eram quatro cartões de número, um dado por linha: quanto tempo o animal está e vai
+        ficar, quem assina o caso e o que ele tem. Gravidade e leito subiram para a frase de estado.
+      -->
+      <section class="hc dados" aria-labelledby="internado-dados">
+        <header class="hc__cabeca">
+          <h2 id="internado-dados" class="hc__titulo">
+            <PhBed class="hc__icone" weight="duotone" aria-hidden="true" />
+            {{ t('clinico.internacao.titulo') }}
+          </h2>
 
-      <div
-        v-if="paciente.internacao.diagnostico || paciente.internacao.observacao"
-        class="contexto"
-      >
-        <p v-if="paciente.internacao.diagnostico" class="contexto__linha">
-          <span class="clinic-label">{{ t('clinico.internacao.paciente.diagnostico') }}</span>
-          {{ paciente.internacao.diagnostico }}
-        </p>
-        <p v-if="paciente.internacao.observacao" class="contexto__linha">
-          {{ paciente.internacao.observacao }}
-        </p>
-      </div>
+          <!--
+            Encerrar mora no cartão do que ele encerra, contornado: acontece uma vez e não se
+            desfaz. Não abre a fileira de pílulas do topo nem divide a linha com as abas, que são
+            o trabalho de cada meia hora — para não convidar ao clique errado no fim de um plantão
+            de doze horas.
+          -->
+          <Button
+            v-if="!encerrada"
+            type="button"
+            :label="t('clinico.internacao.alta.abrir')"
+            icon="pi pi-sign-out"
+            severity="secondary"
+            outlined
+            size="small"
+            @click="altaAberta = true"
+          />
+        </header>
+
+        <dl class="dados__lista">
+          <div class="dados__item">
+            <dt>{{ t('clinico.internacao.paciente.internadoHa') }}</dt>
+            <dd>{{ t('clinico.internacao.leito.horas', { horas: tempo }) }}</dd>
+          </div>
+          <div class="dados__item">
+            <dt>{{ t('clinico.internacao.paciente.previsaoDeAlta') }}</dt>
+            <dd>{{ previsaoDeAlta }}</dd>
+          </div>
+          <div class="dados__item">
+            <dt>{{ t('clinico.internacao.paciente.responsavelClinico') }}</dt>
+            <dd>{{ clinico.profissional(paciente.internacao.responsavelId)?.nome ?? '—' }}</dd>
+          </div>
+          <div v-if="paciente.internacao.diagnostico" class="dados__item dados__item--largo">
+            <dt>{{ t('clinico.internacao.paciente.diagnostico') }}</dt>
+            <dd>{{ paciente.internacao.diagnostico }}</dd>
+          </div>
+          <div v-if="paciente.internacao.observacao" class="dados__item dados__item--largo">
+            <dt>{{ t('clinico.internacao.paciente.observacao') }}</dt>
+            <dd>{{ paciente.internacao.observacao }}</dd>
+          </div>
+        </dl>
+      </section>
 
       <!--
         A dose em cima da troca aparece **fora** da aba do checklist. Quem abre a tela na aba do
@@ -512,98 +481,112 @@ async function encerrar(entrada: {
 <style scoped>
 .internado {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 1.25rem;
 }
 
-/* Migalha em cima, identidade embaixo — e o cartão do paciente ocupa a largura inteira. */
-.topo {
+/* ------------------------------------------------------------------ topo */
+
+.internado__topo {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 0.75rem;
+  min-width: 0;
 }
 
-.topo__linha {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-3);
-}
-
-.topo__voltar {
+.internado__voltar {
   justify-self: start;
+  margin-inline-start: -0.55rem;
 }
+
+.internado__voltar .pi {
+  font-size: 0.75rem;
+}
+
+[dir='rtl'] .internado__voltar .pi {
+  scale: -1 1;
+}
+
+/* ------------------------------------------------------------------ dados da internação */
+
+.dados__lista {
+  display: grid;
+  gap: 0.85rem 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  margin: 0;
+}
+
+.dados__item {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.dados__item--largo {
+  grid-column: 1 / -1;
+}
+
+.dados__item dt {
+  color: var(--hc-tinta-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dados__item dd {
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.dados__item--largo dd {
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------------ avisos
+ * Uma linha, como o aviso da pauta da Visão geral: ícone e frase, sem moldura pintada.
+ */
 
 /*
- * A faixa de encerramento é neutra de propósito, e não verde de sucesso nem vermelha de alarme:
- * ela cobre alta, transferência e óbito com a mesma marcação, e pintar de verde a linha que diz
- * que o animal morreu seria a pior escolha possível de paleta.
+ * O encerramento é neutro de propósito, e não verde de sucesso nem vermelho de alarme: ele cobre
+ * alta, transferência e óbito com a mesma marcação, e pintar de verde a linha que diz que o animal
+ * morreu seria a pior escolha possível de paleta.
  */
-.encerrada {
+.encerrada,
+.troca,
+.erroAcao {
   display: flex;
   align-items: center;
+  gap: 0.6rem;
   margin: 0;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-  font-weight: 700;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.encerrada {
+  background: var(--hc-cinza-fundo);
+  color: var(--hc-tinta);
 }
 
 .encerrada i {
-  color: var(--clinic-faint);
+  color: var(--hc-tinta-2);
 }
 
-.numeros {
-  display: grid;
-  gap: var(--clinic-space-3);
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-}
-
-/*
- * Bloco de contexto clínico: o que o paciente tem e o que o plantão observou.
- *
- * Moldura fechada e fundo rebaixado já o distinguem do resto da página — o filete à esquerda o
- * fazia parecer citação de outra tela.
- */
-.contexto {
-  display: grid;
-  gap: var(--clinic-space-1);
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
-}
-
-.contexto__linha {
-  margin: 0;
-  line-height: 1.5;
-}
-
-.contexto__linha .clinic-label {
-  margin-inline-end: var(--clinic-space-2);
-}
-
+/* A dose em cima da troca de plantão pede atenção: o par pêssego da pauta. */
 .troca {
-  display: flex;
-  align-items: center;
-  margin: 0;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px dashed var(--clinic-accent-strong);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
+  background: var(--hc-pessego-fundo);
+  color: var(--hc-tinta);
+}
+
+.troca i {
+  color: var(--hc-pessego-tinta);
 }
 
 .erroAcao {
-  margin: 0;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-risk-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
-  font-weight: 700;
+  background: var(--hc-coral-fundo);
+  color: var(--hc-coral-tinta);
 }
 </style>

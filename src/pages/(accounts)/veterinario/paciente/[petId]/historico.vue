@@ -271,12 +271,12 @@ watch(petId, carregar)
         -->
         <template v-if="internacaoAberta" #acoes>
           <Button
-            class="ficha-pilula"
+            class="hc-pilula"
             :label="t('clinico.pacientes.verInternacao')"
             @click="abrirInternacao"
           >
             <template #icon>
-              <PhBed class="ficha-pilula__icone" weight="duotone" aria-hidden="true" />
+              <PhBed class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
             </template>
           </Button>
         </template>

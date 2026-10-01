@@ -11,8 +11,9 @@
  * Embaixo, o que o cabeçalho antigo do paciente mostrava e ninguém pode perder de vista: responsável
  * com telefone, peso e os alertas — risco primeiro, na cor da gravidade da Visão geral.
  *
- * Substitui o `ClinicPatientHeader` só nas vistas da ficha. As outras telas (atendimento,
- * internação, drawer da agenda) continuam com ele. A pílula do tratamento só aparece para quem
+ * Substitui o `ClinicPatientHeader` nas vistas da ficha e no internado (`internacao/[id]`), que o
+ * usa com `atual: null` — as vistas da ficha viram as saídas dele. As outras telas (atendimento,
+ * drawer da agenda) continuam com o `ClinicPatientHeader`. A pílula do tratamento só aparece para quem
  * tem remédio de casa com lembrete — com o selo coral quando um crítico perdeu o ritmo.
  */
 import {
@@ -47,7 +48,8 @@ const props = withDefaults(
   defineProps<{
     pet: Pet
     tutor: Tutor | null
-    atual: VistaDaFicha
+    /** A vista aberta, que sai da fileira de pílulas. `null` fora da ficha: todas viram saída. */
+    atual: VistaDaFicha | null
     /** A frase de estado desta vista, em degradê. */
     frase: string
     /** Quando a vista não tem ação própria, qual das outras é o próximo passo (pílula cheia). */
@@ -261,21 +263,21 @@ function destino(vista: VistaDaFicha): string {
         <RouterLink
           v-for="pilula in navegacao"
           :key="pilula.vista"
-          class="ficha-pilula"
-          :class="{ 'ficha-pilula--cheia': pilula.vista === navCheia }"
+          class="hc-pilula"
+          :class="{ 'hc-pilula--cheia': pilula.vista === navCheia }"
           :to="destino(pilula.vista)"
           :aria-label="pilula.selo ? pilula.selo.aria : undefined"
         >
           <component
             :is="pilula.icone"
-            class="ficha-pilula__icone"
+            class="hc-pilula__icone"
             :weight="pilula.vista === navCheia ? 'fill' : 'duotone'"
             aria-hidden="true"
           />
           {{ pilula.rotulo }}
           <span
             v-if="pilula.selo"
-            class="ficha-pilula__selo"
+            class="hc-pilula__selo"
             :class="`hc--${pilula.selo.cor}`"
             aria-hidden="true"
           >

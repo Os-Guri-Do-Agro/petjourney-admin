@@ -197,6 +197,7 @@ onMounted(async () => {
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.pacientes.subtitulo')"
     :title="t('clinico.pacientes.titulo')"
     :loading="carregando && linhas.length === 0"

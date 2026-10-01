@@ -167,6 +167,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="pet?.nome ?? t('hotel.estadia.titulo')"
     :subtitle="t('hotel.estadia.subtitulo')"
     tour
@@ -515,11 +516,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               </dd>
 
               <dt>{{ t('hotel.estadia.emergencia') }}</dt>
+              <!-- Uma linha por contato: sem o do responsável, o veterinário sobe para a primeira. -->
               <dd>
-                {{ registro.contatoEmergencia }}
-                <template v-if="registro.veterinarioDeConfianca">
-                  <br />{{ registro.veterinarioDeConfianca }}
-                </template>
+                <span v-if="registro.contatoEmergencia" class="ficha__linha">
+                  {{ registro.contatoEmergencia }}
+                </span>
+                <span v-if="registro.veterinarioDeConfianca" class="ficha__linha">
+                  {{ registro.veterinarioDeConfianca }}
+                </span>
               </dd>
 
               <dt v-if="registro.inspecaoDeEntrada">{{ t('hotel.estadia.inspecao') }}</dt>
@@ -626,16 +630,25 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: var(--clinic-space-4);
 }
 
+/*
+ * Um cartão branco como os outros (redesenho de 30/09/2026), e não uma faixa pintada de coral de
+ * ponta a ponta: a urgência mora no título e no ícone, e o resto do texto fica na tinta.
+ */
 .trava {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-risk-line);
+  padding: 1.1rem 1.35rem;
+  border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
   gap: var(--clinic-space-3);
-  background: var(--clinic-risk-bg);
+  background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-card);
+  color: var(--clinic-muted);
+}
+
+.trava__texto strong {
   color: var(--clinic-risk-text);
 }
 
@@ -732,11 +745,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .cartao__titulo {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .cartao__vazio {
@@ -849,27 +861,21 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   font-size: 0.7rem;
 }
 
+/* O motivo do travamento é uma linha com ícone na cor do estado — a faixa pintada não volta. */
 .aviso {
   display: flex;
   align-items: center;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid transparent;
-  border-radius: var(--clinic-radius-control);
   gap: var(--clinic-space-2);
   font-size: var(--clinic-font-label);
   font-weight: 700;
 }
 
 .aviso--risco {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
   color: var(--clinic-risk-text);
 }
 
 .aviso--atencao {
-  border-color: var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
   color: var(--clinic-attention-text);
 }
 
@@ -927,7 +933,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 0.3rem;
 }
 
-.ficha__med {
+.ficha__med,
+.ficha__linha {
   display: block;
 }
 

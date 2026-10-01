@@ -239,24 +239,64 @@ modos), [src/theme/primevue.ts](src/theme/primevue.ts) (preset do PrimeVue) e
 (tokens de módulo, densidade, estados). `docs/DESIGN_SYSTEM.md` é registro histórico: a
 página verde-sálvia descrita lá foi substituída pelo linho.
 
-A Visão geral (`/inicio`) é a exceção com escopo. Ela recebeu um acabamento próprio, aprovado
-só para ela: um véu de sálvia no topo da página, cartões macios de 20px com sombra e sem borda
-(a Linha do dia entre eles), selos de 6px e ações em pílula. O menu lateral, o
-cabeçalho e as outras telas seguem o sistema acima. Levar esse acabamento adiante é uma decisão em aberto do usuário. Nas seções abaixo, o
-que muda ali fica sob o subtítulo **Variante da Visão geral**.
+**Em 30/09/2026 o acabamento da Visão geral deixou de ser exceção e virou o design do portal.**
+O usuário não gostava do visual de linho e decidiu levar o da Visão geral — fundo `#F5F7F6` com
+grade e brilho de sálvia, cartão branco de fio fino e sombra baixa, título com a frase de estado em
+degradê, ações em pílula e selos de 6px — a todas as telas, módulo por módulo. Onde este documento
+descreve o linho (Linho, Linho Claro, Costura, "Pico de Luz", "Plano por Padrão"), ele descreve as
+telas **ainda não migradas**; as migradas seguem a seção **Design do portal (migração)** logo abaixo
+e o código. A ordem combinada: moldura e Clínico (feitos), depois Hotel, Portal do parceiro e
+Conta/login.
 
-**Onde a variante já vale, por decisão do usuário:** a Visão geral; o migrador de dados
-(`/veterinario/paciente/importar`); e a **ficha do paciente** — Este pet em 30 s, Histórico e
-Vacinas (`/veterinario/paciente/:petId/*`) e os diálogos de vacina abertos dela. A ficha usa o
-mesmo código da Visão geral (`src/components/home/home-card.css`) mais
-`src/features/clinico/components/pacientes/ficha/ficha.css`, que traz o fundo, as pílulas e uma
-**ponte de tokens**: dentro de `.ficha-tema`, os `--clinic-*` apontam para os `--hc-*`, e os
-componentes do módulo (tabela, linha do tempo, protocolo, prévia do celular) trocam de acabamento
-só ali. O cabeçalho da ficha (`FichaCabeca.vue`) é a saudação com o conteúdo do paciente: a
-identificação pequena, o nome no lugar do "Olá", a frase de estado da vista em degradê e as
-pílulas — a ação da vista primeiro, e as outras vistas com o número que as faz ser abertas
-(sinais do resumo, vacinas atrasadas) num selo de 6px. O resto do módulo clínico segue o
-sistema acima.
+Nas seções abaixo, o que a Visão geral inaugurou fica sob o subtítulo **Variante da Visão geral** —
+é a origem do que hoje vale no portal.
+
+### Design do portal (migração)
+
+Como uma tela entra no design novo, e onde cada peça mora no código:
+
+- **Tokens** — `src/theme/hc-tokens.css`, na raiz (`:root` e `:root.app-dark`): os `--hc-*`
+  (fundo, cartão, borda, linha, três tintas, marca, marca forte, marca clara, degradês, sombras e
+  os pares de selo: ciano, lilás, pêssego, coral, verde, cinza, azul). Carregados no `main.ts`.
+- **Acabamento** — `src/theme/hc-tema.css`, preso a `.hc-tema`. A tela migra pondo
+  `class="hc-tema"` no `PartnerPageFrame`, e ganha: a **ponte de tokens** (`--clinic-*` apontam
+  para os `--hc-*`, então tabela, cartão, campo e gráfico trocam juntos), o fundo com grade e
+  brilho, o cabeçalho da página na escala da saudação, rótulos e cabeçalhos de coluna em caixa
+  normal, os botões do PrimeVue em pílula (o primário vira a pílula cheia em degradê, com o
+  branco acima de 5:1; o contornado, a pílula clara), os `SelectButton` em trilho de pílula, e
+  `.hc-pilula`. Diálogo e popover que o PrimeVue leva ao `body` precisam levar `hc-tema` também
+  (todos os `clinic-dialog` do Clínico já levam).
+- **Cartão** — `src/components/home/home-card.css` (`.hc`, `.hc__cabeca`, `.hc__titulo`,
+  `.hc-selo`, `.hc-chip`, `.hc--<par>`), global.
+- **Saudação** — `.hc-saudacao` no slot `cabecalho` do `PartnerPageFrame`: a linha pequena (data,
+  plantão ou módulo), o título, e na mesma linha a frase de estado em degradê e as pílulas, com a
+  cheia sendo o próximo passo natural. Numa tela de paciente, `FichaCabeca` (com `atual: null`
+  fora da ficha, como no internado).
+- **Pauta** — `src/components/home/PautaTabela.vue`: a lista "o que pede ação" (assunto, gravidade
+  em selo, onde se resolve), usada na Visão geral, em Hoje na clínica e na Internação. No lugar da
+  fileira de quatro cartões de número, que o redesenho tirou de Hoje na clínica, Internação e Faltas.
+- **Moldura** — trilho, painel e cabeçalho brancos com fio (`AppShell.vue`, variáveis `--shell-*`
+  apontando para os `--hc-*`), seção e página abertas em pastilha verde-clara, logotipo numa
+  pastilha no degradê, controles do cabeçalho em pílula e o tema (claro/escuro) no menu da conta.
+  O título da página no cabeçalho nunca quebra: com o cabeçalho abaixo de 66rem (container query,
+  segue o painel aberto ou recolhido), quem cede é a busca, que vira botão de ícone. Interruptor
+  (`ToggleSwitch`): trilho cinza, ligado na marca, alça branca — nunca o linho do preset.
+- **Segmentos** — `ClinicToggleGroup`: trilho em pílula, a escolhida numa pílula no par do tom, e
+  a contagem num selo (`contagem`), nunca escrita no rótulo. As abas de seção
+  (`PartnerSectionTabs`) ganham o mesmo trilho dentro de `.hc-tema`. O raio do trilho é fixo (meia
+  altura de uma linha), não 999px: no estreito, quando as opções quebram em duas linhas, ele vira
+  retângulo arredondado em vez de bolha.
+- **Avisos** — o motivo de um travamento ou pendência é uma linha com ícone na tinta do estado,
+  nunca uma faixa pintada (`.aviso`, `.exig__resumo`). O `Message` do PrimeVue, dentro de
+  `.hc-tema`, é contornado: fundo do cartão e fio na tinta do estado. Bloco que agrupa campos
+  (período da reserva, entrega do turno) fica no papel neutro (`--clinic-surface-soft`), não no
+  verde-claro: verde é tinta, não papel.
+
+**Já migradas:** a moldura; a Visão geral; o módulo Clínico inteiro (as 15 telas, a ficha, o
+migrador e os diálogos); o módulo Hotel inteiro (as 10 telas e os diálogos). Redesenhadas além do
+acabamento, com proposta aprovada: Hoje na clínica, Internação (mapa e internado), Agenda (bloco
+branco: o tipo só no ícone, a cor do fundo só para o estado), Faltas, Painel do dia, Hóspedes na
+casa e Rotina do turno.
 
 *Nota:* o código da Visão geral foi além do que esta variante descreve — fundo `#F5F7F6` com dois
 brilhos de sálvia e uma grade fina que some descendo, cartão branco com borda fina e sombra
@@ -274,8 +314,9 @@ e a composição da tela, no brief `.impeccable/surfaces/src-pages-accounts-inic
 - Modo claro é o padrão; o escuro espelha cada papel com valores próprios.
 - Movimento curto (140–220 ms) que explica mudança de estado e desliga com
   `prefers-reduced-motion`.
-- Uma variante com escopo, só na Visão geral: véu de sálvia no topo, cartão de 20px com sombra e
-  sem borda (a Linha do dia também), selo de 6px, ação em pílula.
+- O design do portal, nascido na Visão geral e em migração tela a tela desde 30/09/2026: fundo com
+  grade e brilho de sálvia, cartão branco de fio fino e sombra baixa, saudação com frase de estado
+  em degradê, selo de 6px, ação em pílula (ver **Design do portal (migração)**).
 
 ## Colors
 
@@ -389,8 +430,9 @@ resolver isso antes.
 ### Named Rules
 
 **The Tinta, Não Papel Rule.** Sálvia é a cor que escreve, marca e seleciona. Nenhuma
-superfície maior que um chip é sálvia, exceto o trilho de navegação — e, na Visão geral, o véu
-do topo e a faixa de "Indique e ganhe", a parte de baixo do cartão de ganhos.
+superfície maior que um chip é sálvia, exceto o brilho do topo das telas no design novo, a
+pastilha do logotipo e, na Visão geral, a faixa de "Indique e ganhe", a parte de baixo do cartão
+de ganhos. (O trilho de navegação sálvia deixou de existir com a moldura clara.)
 
 **The Quatro Gavetas Rule.** Cor fora do sálvia só existe para dizer uma destas frases: "é
 risco ou pendência" (terracota, âmbar; coral e pêssego na Visão geral), "é do outro turno"
@@ -663,12 +705,18 @@ nativo.
 
 ### Navigation
 
-- **Trilho:** faixa Folha de Sálvia de 4.6rem, ícone + label de 0.58rem em branco a 74%;
-  hover a 12% de branco; seção ativa como pastilha Linho Claro elevada com texto em sálvia
-  escurecida. Sem barrinha lateral.
-- **Painel:** lista de links sobre Linho Claro, linha de 2.4rem (2rem na densidade compacta),
-  grupos com label em caixa-alta; ativo em Sálvia Profunda, peso 750, sobre um degradê suave
-  de sálvia clara que parte do início da linha de leitura (inverte em RTL).
+- **Trilho (moldura clara, 30/09/2026):** faixa branca de 4.6rem com fio à direita, ícone +
+  label de 0.58rem na tinta de apoio; hover no cinza da linha; seção ativa em pastilha verde-clara
+  (`--hc-marca-clara`) com a tinta forte da marca. O logotipo é a única superfície verde da
+  moldura: a pata clara numa pastilha no degradê da pílula cheia. Sair e recolher são pílulas
+  contornadas. Sem barrinha lateral. (O trilho Folha de Sálvia com texto branco foi substituído;
+  as direções "trilho verde-escuro" e "moldura fundida no fundo" foram prototipadas e recusadas.)
+- **Painel:** lista de links sobre o branco do cartão, linha de 2.4rem (2rem na densidade
+  compacta), grupos com label em caixa-alta; ativo na mesma pastilha verde-clara do trilho, peso
+  750, com o ícone num ladrilho cheio. Os números de pendência são selos de 6px: cinza, pêssego
+  (atenção) ou coral (risco).
+- **Cabeçalho:** branco com fio embaixo; cronômetro, busca, cupom e conta em pílulas contornadas.
+  O seletor claro/escuro saiu do cabeçalho e é um interruptor "Tema escuro" no menu da conta.
 - **Modo foco:** esconde a navegação e deixa a página inteira; header fica.
 - **Ícones:** Phosphor para domínio (animal, acomodação, turno), PrimeIcons para interface.
   Nunca SVG desenhado à mão.
@@ -867,7 +915,10 @@ da noite que fica para trás, que nenhum número mostra. Mora na aba Tratamento 
   que escala; nada de transição acima de 300 ms em tela de operação.
 - **Don't**, na Visão geral, pintar o agora de vermelho ou coral, nem apagar como passado o que
   ainda falta fazer: numa pista de pendências, horário vencido é atraso.
-- **Don't** levar o acabamento da Visão geral (véu de sálvia, cartão de 20px com sombra, selo
-  de 6px, gravidade em coral e pêssego, identidade de módulo em ciano e pervinca) ao menu
-  lateral, ao cabeçalho ou a outra tela antes de o usuário aprovar. Já aprovadas: o migrador e a
-  ficha do paciente (ver Overview).
+- **Don't** misturar os dois acabamentos na mesma tela: uma tela está no design novo inteira
+  (`.hc-tema` na raiz, diálogos incluídos) ou ainda no linho. A migração vai tela a tela, olhando
+  antes e depois; o que ainda não foi migrado (Hotel, Portal do parceiro, Conta/login) não muda
+  "de carona" por regra global.
+- **Don't**, no design novo, voltar a fileira de quatro cartões de número acima de uma lista: o
+  que é fila de trabalho vai para a frase de estado e para a pauta; o que é recorte, para o selo
+  do segmento.

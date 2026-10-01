@@ -140,6 +140,7 @@ const horaFora = computed(() => {
     class="tarefa"
     :class="[
       `tarefa--${situacao}`,
+      `tarefa--kind-${tarefa.kind}`,
       { 'tarefa--resolvida': resolvida, 'tarefa--na-ronda': dentroDaRonda, 'tarefa--com-hora': !!hora },
     ]"
   >
@@ -337,13 +338,26 @@ const horaFora = computed(() => {
  * ganha tinta quando tem o que dizer.
  */
 
-/* Na janela e atrasada: disco cheio. É o único lugar da fileira onde a cor muda. */
+/*
+ * O disco ganha cor quando tem o que dizer, e só a medicação atrasada enche (redesenho de
+ * 30/09/2026) — a regra do bloco urgente da pauta da Visão geral. Com toda tarefa atrasada cheia de
+ * terracota, a manhã de um turno atrasado era uma coluna de blocos iguais, e o remédio que não foi
+ * dado se perdia no meio da água que atrasou meia hora. Atrasada é o pêssego suave; a da janela,
+ * a sálvia clara.
+ */
 .tarefa--na-janela .tarefa__icone {
-  background: var(--clinic-accent-deep);
-  color: var(--clinic-on-accent);
+  border-color: transparent;
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
 }
 
 .tarefa--atrasada .tarefa__icone {
+  border-color: transparent;
+  background: var(--clinic-attention-bg);
+  color: var(--clinic-attention-text);
+}
+
+.tarefa--atrasada.tarefa--kind-medicacao .tarefa__icone {
   background: var(--clinic-risk-text);
   color: var(--clinic-on-accent);
 }
@@ -426,45 +440,36 @@ const horaFora = computed(() => {
 }
 
 /*
- * O rótulo do botão principal, legível pela primeira vez.
+ * O "Feita" é a pílula contornada (redesenho de 30/09/2026): tinta sobre o branco do cartão, com o
+ * visto na cor da marca, e o contorno puxa para a marca no hover.
  *
- * O "Feita" herdava a cor primária do preset com tinta branca por cima: `#ffffff` sobre o sálvia
- * `#84c1b4` dá **2,04:1** — reprovado em qualquer nível, e não por pouco. O rótulo do botão que
- * se toca mais vezes em toda a tela era o texto menos legível dela, repetido dezenas de vezes.
- *
- * O fundo não muda; muda a tinta. Escura sobre o mesmo sálvia passa de 5,5:1, e o botão continua
- * sendo verde cheio, que é o que o faz ser achado sem leitura.
+ * Cheio, ele se repetia em toda tarefa do dia, e numa lista de quarenta virava uma coluna de
+ * pílulas pesando mais que os nomes — o que se lê é o animal, e o botão é onde o polegar cai. A
+ * pílula cheia fica para o lote ("Marcar as 2 como feitas"), que é uma só por ronda. Em escala de
+ * cinza a pílula continua achável pela forma e pelo visto.
  */
 .tarefa__feita.p-button {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent);
-  color: var(--clinic-heat-ink);
+  border-color: var(--hc-pilula-borda, var(--clinic-line));
+  background: var(--clinic-surface);
+  color: var(--clinic-text);
+}
+
+.tarefa__feita.p-button :deep(.p-button-icon) {
+  color: var(--clinic-accent);
 }
 
 .tarefa__feita.p-button:not(:disabled):hover {
-  border-color: var(--clinic-accent-deep);
-  background: var(--clinic-accent-deep);
-  color: var(--clinic-on-accent);
+  border-color: var(--clinic-accent);
+  background: var(--clinic-surface);
+  color: var(--clinic-text);
 }
 
 /*
- * O que é para depois não pede o polegar agora.
- *
- * Preenchido, o "Feita" se repetia em toda tarefa do dia — inclusive nas doze que só acontecem
- * às 20h — e em tela larga virava uma faixa vertical de verde. Verde cheio passa a significar
- * uma coisa só: **isto é para agora**. As de mais tarde ficam contornadas, com a mesma posição,
- * o mesmo tamanho e o mesmo toque; muda só quanto elas pedem o olho.
+ * O que é para depois pede menos o olho: mesma posição, mesmo tamanho e mesmo toque, com o rótulo
+ * na tinta de apoio.
  */
 .tarefa__feita--adiante.p-button {
-  border-color: var(--clinic-accent-deep);
-  background: transparent;
-  color: var(--clinic-accent-strong);
-}
-
-.tarefa__feita--adiante.p-button:not(:disabled):hover {
-  border-color: var(--clinic-accent-deep);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
+  color: var(--clinic-muted);
 }
 
 /*

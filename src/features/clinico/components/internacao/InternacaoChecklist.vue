@@ -314,14 +314,17 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
   background: var(--clinic-surface);
 }
 
-.item--atrasada {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
+/*
+ * A linha atrasada não se pinta: a situação dela vira selo coral, e o ícone vai junto. Uma coluna
+ * de linhas rosadas lia como alarme da tela inteira, e o texto clínico perdia contraste no fundo.
+ * A que está na janela, do mesmo jeito, em pêssego.
+ */
+.item--atrasada .item__icone {
+  color: var(--clinic-risk-text);
 }
 
-.item--na-janela {
-  border-color: var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
+.item--na-janela .item__icone {
+  color: var(--clinic-attention-text);
 }
 
 .item--feita {
@@ -345,7 +348,7 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
  * frase que explica o que ele significa já vem logo abaixo, dentro da própria linha.
  */
 .item--troca {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--clinic-accent-strong) 45%, transparent);
+  border-color: var(--clinic-accent);
 }
 
 .item__icone {
@@ -399,7 +402,23 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
   font-weight: 700;
 }
 
+/* O selo de 6 px da Visão geral, no par da gravidade. */
 .item--atrasada .item__situacao,
+.item--na-janela .item__situacao {
+  padding: 0.05rem 0.45rem;
+  border-radius: 6px;
+}
+
+.item--atrasada .item__situacao {
+  background: var(--clinic-risk-bg);
+  color: var(--clinic-risk-text);
+}
+
+.item--na-janela .item__situacao {
+  background: var(--clinic-attention-bg);
+  color: var(--clinic-attention-text);
+}
+
 .item__atraso {
   color: var(--clinic-risk-text);
 }

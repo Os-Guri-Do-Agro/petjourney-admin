@@ -71,7 +71,7 @@ function aplicar() {
     modal
     :header="item ? t('hotel.rotinaPadrao.editarTitulo', { servico: formato.tarefaKind(item.kind) }) : ''"
     :style="{ width: 'min(30rem, 94vw)' }"
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     @update:visible="emit('fechar')"
   >
     <div v-if="item" class="editor">

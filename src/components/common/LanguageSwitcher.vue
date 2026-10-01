@@ -128,6 +128,22 @@ const switcherStyle = computed(() => {
     }
   }
 
+  // O menu do avatar mora na moldura, que já está no design do portal: fio fino e cartão branco.
+  if (props.variant === 'menu') {
+    return {
+      ...base,
+      '--ls-text': 'var(--hc-tinta)',
+      '--ls-muted': 'var(--hc-tinta-2)',
+      '--ls-border': 'var(--hc-borda)',
+      '--ls-bg': 'var(--hc-cartao)',
+      '--ls-panel': 'var(--hc-cartao)',
+      '--ls-panel-text': 'var(--hc-tinta)',
+      '--ls-active': 'var(--hc-marca)',
+      '--ls-hover': 'var(--hc-fundo)',
+      '--ls-check': 'var(--hc-marca-forte)',
+    }
+  }
+
   return {
     ...base,
     '--ls-panel': colors.bg.screen,

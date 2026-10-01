@@ -30,7 +30,7 @@
  * todos têm a mesma largura e a hora é tabular na primeira célula, a coluna de horas continua lá —
  * desenhada pelo próprio conteúdo, e não por uma calha vazia.
  */
-import { PhCat, PhListChecks } from '@phosphor-icons/vue'
+import { PhArrowsLeftRight, PhCat, PhListChecks } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import Select from 'primevue/select'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -329,7 +329,8 @@ const feitasNoDia = computed(
  * a data, e a data já mora lá.
  */
 const subtitulo = computed(() => {
-  const data = formato.dataLonga(hospedagem.dia)
+  const longa = formato.dataLonga(hospedagem.dia)
+  const data = longa.charAt(0).toLocaleUpperCase() + longa.slice(1)
   const turno = hospedagem.passagem?.turno
 
   if (!turno) return data
@@ -339,14 +340,19 @@ const subtitulo = computed(() => {
   return `${data} · ${formato.turno(turno.kind)} ${janela}`
 })
 
-/** As duas fatias da barra, em porcentagem do dia. O resto da pista é o que ainda vem. */
-const fatia = computed(() => {
-  const total = hospedagem.prancheta.length || 1
+/**
+ * A frase da saudação (redesenho de 30/09/2026): quanto do dia já foi feito, e quantas atrasaram.
+ * Era um cartão no topo da lista, com a frase e uma pista de progresso; a frase subiu para o lugar
+ * dela, ao lado do título, e o topo da lista ficou só com o filtro.
+ */
+const fraseDoTurno = computed(() => {
+  const total = hospedagem.prancheta.length
+  const feitas = `${feitasNoDia.value} ${t('hotel.rotina.de', { total }, total)}`
+  const atrasadas = hospedagem.atrasadasNaPrancheta
 
-  return {
-    feitas: (feitasNoDia.value / total) * 100,
-    atrasadas: (hospedagem.atrasadasNaPrancheta / total) * 100,
-  }
+  return atrasadas > 0
+    ? `${feitas} · ${t('hotel.rotina.atrasadas', { total: atrasadas }, atrasadas)}`
+    : feitas
 })
 
 /**
@@ -450,7 +456,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     texto: t('hotel.tour.rotina.pergunta.texto'),
   },
   {
-    alvo: '.progresso',
+    alvo: '.hc-saudacao__resumo',
     titulo: t('hotel.tour.rotina.progresso.titulo'),
     texto: t('hotel.tour.rotina.progresso.texto'),
   },
@@ -491,6 +497,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="t('hotel.rotina.titulo')"
     :subtitle="subtitulo"
     tour
@@ -504,41 +511,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   >
     <div class="tela clinic-scope">
       <div class="rotina">
-      <!-- O progresso do dia numa frase e numa pista, e o filtro por tipo. -->
+      <!-- O filtro por tipo. O progresso do dia subiu para a frase da saudação. -->
       <div class="barra">
-        <div class="progresso">
-          <p class="progresso__frase">
-            <strong class="clinic-value">{{ feitasNoDia }}</strong>
-            {{
-              t(
-                'hotel.rotina.de',
-                { total: hospedagem.prancheta.length },
-                hospedagem.prancheta.length,
-              )
-            }}
-            <span v-if="hospedagem.atrasadasNaPrancheta > 0" class="progresso__alerta">
-              ·
-              {{
-                t(
-                  'hotel.rotina.atrasadas',
-                  { total: hospedagem.atrasadasNaPrancheta },
-                  hospedagem.atrasadasNaPrancheta,
-                )
-              }}
-            </span>
-          </p>
-
-          <!--
-            A pista repete em forma o que a frase diz em número, e é a forma que se lê de longe:
-            de relance dá para ver se o dia está em dia. `aria-hidden` porque a frase logo acima
-            já anuncia o mesmo — duas leituras seguidas do mesmo fato atrapalham quem ouve.
-          -->
-          <span class="pista" aria-hidden="true">
-            <span class="pista__feitas" :style="{ width: `${fatia.feitas}%` }" />
-            <span class="pista__atrasadas" :style="{ width: `${fatia.atrasadas}%` }" />
-          </span>
-        </div>
-
         <Select
           v-model="filtroKind"
           :options="tiposDoDia"
@@ -642,6 +616,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             </li>
 
             <RondaDoHorario
+              adiante
               v-for="ronda in bloco.rondas"
               :key="ronda.chave"
               :kind="ronda.kind"
@@ -748,23 +723,38 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
     <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
 
-    <template #actions>
-      <!--
-        O `span` não é embrulho à toa: o slot `#actions` renderiza noutro ramo da árvore, fora da
-        `div.clinic-scope` da página, e sem ele o botão caía no tema cru — rótulo a 3,30:1, que
-        reprova, e borda a 1,07:1, que é borda nenhuma. Era esta a causa de ele parecer apagado.
-      -->
-      <span class="clinic-scope clinic-acoes">
-        <Button
-          :label="t('hotel.turno.passar')"
-          class="acao-turno"
-          icon="pi pi-sign-out"
-          severity="secondary"
-          outlined
-          size="small"
-          @click="passagemAberta = true"
-        />
-      </span>
+    <!--
+      A saudação (redesenho de 30/09/2026): a data e o turno na linha pequena, o progresso do dia na
+      frase, e passar o turno como a pílula cheia — o rito com que esta tela se fecha.
+    -->
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ subtitulo }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('hotel.rotina.titulo') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p
+            v-if="hospedagem.prancheta.length > 0"
+            class="hc-saudacao__resumo"
+            aria-live="polite"
+          >
+            {{ fraseDoTurno }}
+          </p>
+
+          <nav class="hc-acoes" :aria-label="t('hotel.rotina.titulo')">
+            <Button
+              type="button"
+              class="hc-pilula hc-pilula--cheia acao-turno"
+              :label="t('hotel.turno.passar')"
+              @click="passagemAberta = true"
+            >
+              <template #icon>
+                <PhArrowsLeftRight class="hc-pilula__icone" weight="fill" aria-hidden="true" />
+              </template>
+            </Button>
+          </nav>
+        </div>
+      </div>
     </template>
   </PartnerPageFrame>
 </template>
@@ -816,70 +806,16 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 /*
- * O topo é um cartão, como em todas as telas irmãs do módulo.
- *
- * Eram dois objetos soltos sobre o fundo da página, um encostado em cada ponta de uma barra sem
- * largura máxima — com quase 950 px de nada entre a frase do dia e o filtro. Dentro de um cartão
- * de 52 rem, o mesmo `space-between` deixa de ser um buraco e vira folga interna.
+ * O topo da lista é só o filtro, direto sobre o plano (redesenho de 30/09/2026). A frase do dia e a
+ * pista de progresso, que faziam dele um cartão, subiram para a saudação — um cartão inteiro para
+ * um seletor seria moldura em volta de nada.
  */
 .barra {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
+  align-items: center;
+  justify-content: flex-start;
   gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
-}
-
-/*
- * A pista não cresce sem limite. Sem a largura de base, ela é o único item elástico da barra e
- * viraria uma fita de mil pixels num monitor largo — e uma barra de progresso muito longa deixa
- * de ser lida de relance, que é a única coisa que ela sabe fazer.
- */
-.progresso {
-  display: grid;
-  min-width: 14rem;
-  flex: 0 1 26rem;
-  gap: 0.35rem;
-}
-
-.progresso__frase {
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-body);
-}
-
-.progresso__frase strong {
-  margin-inline-end: 0.2rem;
-  color: var(--clinic-text);
-  font-size: 1.3rem;
-  font-weight: 700;
-}
-
-.progresso__alerta {
-  color: var(--clinic-risk-text);
-  font-weight: 700;
-}
-
-/* ------------------------------------------------------------------ a pista do dia */
-
-.pista {
-  display: flex;
-  overflow: hidden;
-  height: 0.4rem;
-  border-radius: 0.2rem;
-  background: var(--clinic-surface-sunken);
-}
-
-.pista__feitas {
-  background: var(--clinic-accent-deep);
-}
-
-.pista__atrasadas {
-  background: var(--clinic-risk-text);
 }
 
 /* ------------------------------------------------------------------ o filtro */
@@ -953,16 +889,16 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
  * esquerda e um filete correndo até a borda da coluna. É o mesmo idioma que a régua da fronteira
  * do turno já usa nesta página, e ali ele já tinha sido aprovado.
  */
+/* Título de seção em caixa normal (redesenho de 30/09/2026), como os títulos das telas novas. */
 .tempo__titulo {
   display: flex;
   align-items: center;
   margin: 0;
-  gap: 0.4rem;
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  gap: 0.45rem;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .tempo__titulo::after {

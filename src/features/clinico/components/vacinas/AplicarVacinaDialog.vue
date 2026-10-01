@@ -433,7 +433,7 @@ const textoDaSugestao = computed(() => {
   <Dialog
     :visible="visivel"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :class="classeDoTema"
     :style="{ width: 'min(40rem, 94vw)' }"
     :dismissable-mask="!salvando"
@@ -691,14 +691,14 @@ const textoDaSugestao = computed(() => {
         :label="t('clinico.comum.cancelar')"
         :severity="ficha ? undefined : 'secondary'"
         :outlined="!ficha"
-        :class="{ 'ficha-pilula': ficha }"
+        :class="{ 'hc-pilula': ficha }"
         :disabled="salvando"
         @click="emit('update:visivel', false)"
       />
       <Button
         :label="t('clinico.vacinas.aplicar.confirmar')"
         icon="pi pi-check"
-        :class="ficha ? 'ficha-pilula ficha-pilula--cheia' : 'clinic-acao-principal'"
+        :class="ficha ? 'hc-pilula hc-pilula--cheia' : 'clinic-acao-principal'"
         :loading="salvando"
         :disabled="!completo"
         @click="aplicar"

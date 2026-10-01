@@ -1,0 +1,1562 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Novidades de 16 a 30 de setembro</title>
+    <style>
+      /*
+       * Apresentação para a gestão e os sócios: o que entrou no portal entre 16 e 30/09/2026.
+       *
+       * Cada página é um slide de 1280 × 720 (16:9). O PDF sai deste arquivo pelo Edge em modo
+       * headless — ver README.md desta pasta. As imagens são capturas do sistema rodando, com
+       * dados de demonstração.
+       *
+       * Prévia de uma parte só: abrir com ?de=5 esconde os slides anteriores ao 5.
+       */
+
+      @page {
+        size: 1280px 720px;
+        margin: 0;
+      }
+
+      :root {
+        --tinta: #1f2f2b;
+        --suave: #43504d;
+        --fraco: #6b7a76;
+        --linha: #d6dedb;
+        --acento: #456a60;
+        --acento-claro: #e7f0ec;
+        --acento-borda: #a8cec3;
+        --alerta-bg: #f7f0e0;
+        --alerta-borda: #e2d3ab;
+        --alerta-tinta: #856112;
+        --risco-bg: #fbeee8;
+        --risco-tinta: #a2503a;
+        --papel: #fbfbfa;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--papel);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body {
+        color: var(--tinta);
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        counter-reset: slide;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      strong {
+        font-weight: 700;
+      }
+
+      /* ------------------------------------------------------------------ slide */
+
+      .slide {
+        position: relative;
+        width: 1280px;
+        height: 720px;
+        overflow: hidden;
+        padding: 40px 48px 0;
+        background: var(--papel);
+        break-after: page;
+        page-break-after: always;
+        counter-increment: slide;
+      }
+
+      .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+      }
+
+      .slide::after {
+        position: absolute;
+        right: 48px;
+        bottom: 18px;
+        color: var(--fraco);
+        content: counter(slide);
+        font-size: 11px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .rodape {
+        position: absolute;
+        bottom: 18px;
+        left: 48px;
+        color: var(--fraco);
+        font-size: 11px;
+      }
+
+      .rotulo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+        color: var(--acento);
+        font-size: 11.5px;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .rotulo__data {
+        color: var(--fraco);
+        font-weight: 600;
+        letter-spacing: 0.06em;
+      }
+
+      h1,
+      h2 {
+        margin: 0;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.12;
+      }
+
+      h2 {
+        font-size: 36px;
+      }
+
+      .lede {
+        max-width: 1100px;
+        margin-top: 10px;
+        color: var(--suave);
+        font-size: 18px;
+        line-height: 1.45;
+      }
+
+      .etiqueta {
+        display: inline-block;
+        padding: 2px 9px;
+        border-radius: 99px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .etiqueta--andamento {
+        border: 1px solid var(--alerta-borda);
+        background: var(--alerta-bg);
+        color: var(--alerta-tinta);
+      }
+
+      .titulo-secao {
+        margin-bottom: 10px;
+        color: var(--fraco);
+        font-size: 12.5px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      /* ---------------------------------------------------- slide com captura */
+
+      .tela {
+        display: grid;
+        grid-template-columns: 760px 1fr;
+        gap: 32px;
+        margin-top: 20px;
+      }
+
+      .tela figure {
+        margin: 0;
+      }
+
+      .tela img {
+        display: block;
+        width: 760px;
+        height: 475px;
+        border: 1px solid var(--linha);
+        border-radius: 8px;
+        box-shadow:
+          0 1px 2px rgb(31 47 43 / 6%),
+          0 10px 28px -14px rgb(31 47 43 / 28%);
+        object-fit: cover;
+        object-position: top left;
+      }
+
+      .olhar {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .olhar li {
+        padding: 11px 0;
+        border-top: 1px solid var(--linha);
+      }
+
+      .olhar li:first-child {
+        padding-top: 2px;
+        border-top: 0;
+      }
+
+      .olhar strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 16px;
+        line-height: 1.35;
+      }
+
+      .olhar span {
+        display: block;
+        color: var(--suave);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .nota {
+        margin-top: 10px;
+        color: var(--fraco);
+        font-size: 11.5px;
+        line-height: 1.4;
+      }
+
+      /* ------------------------------------------------- slide só de texto */
+
+      .texto {
+        display: grid;
+        grid-template-columns: 440px 1fr;
+        gap: 56px;
+        margin-top: 36px;
+      }
+
+      .cena {
+        padding: 2px 0 2px 18px;
+        border-left: 3px solid var(--acento-borda);
+        color: var(--tinta);
+        font-size: 25px;
+        font-style: italic;
+        line-height: 1.38;
+      }
+
+      .porque {
+        margin-top: 34px;
+      }
+
+      .porque p {
+        color: var(--suave);
+        font-size: 17px;
+        line-height: 1.5;
+      }
+
+      .lista {
+        margin: 0 0 28px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .lista li {
+        position: relative;
+        margin-bottom: 12px;
+        padding-left: 20px;
+        font-size: 16.5px;
+        line-height: 1.45;
+      }
+
+      .lista li::before {
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: var(--acento);
+        content: '▸';
+        font-weight: 800;
+      }
+
+      .lista--regras li::before {
+        content: '§';
+        font-size: 13px;
+      }
+
+      .aviso {
+        margin-top: 18px;
+        padding: 14px 16px;
+        border: 1px solid var(--alerta-borda);
+        border-radius: 6px;
+        background: var(--alerta-bg);
+        color: var(--alerta-tinta);
+        font-size: 15.5px;
+        line-height: 1.45;
+      }
+
+      .aviso strong {
+        color: var(--alerta-tinta);
+      }
+
+      /* -------------------------------------------------------------- capa */
+
+      .capa {
+        display: grid;
+        grid-template-columns: 1fr 330px;
+        gap: 64px;
+        align-items: end;
+        height: 600px;
+        padding-top: 40px;
+      }
+
+      .capa h1 {
+        margin-top: 14px;
+        font-size: 58px;
+        letter-spacing: -0.03em;
+      }
+
+      .capa .lede {
+        max-width: 720px;
+        margin-top: 22px;
+        font-size: 19px;
+        line-height: 1.5;
+      }
+
+      .capa__meta {
+        margin-top: 28px;
+        padding-top: 14px;
+        border-top: 1px solid var(--linha);
+        color: var(--fraco);
+        font-size: 13px;
+      }
+
+      .sumario {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: none;
+      }
+
+      .sumario li {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 0;
+        border-top: 1px solid var(--linha);
+        font-size: 15px;
+      }
+
+      .sumario li span {
+        color: var(--fraco);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ---------------------------------------------------------- em resumo */
+
+      .numeros {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 40px;
+        margin-top: 30px;
+      }
+
+      .numero .numero__area {
+        color: var(--acento);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .numero .numero__valor {
+        margin: 4px 0 6px;
+        font-size: 64px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+
+      .numero__valor small {
+        margin-left: 6px;
+        color: var(--suave);
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+
+      .numero p {
+        color: var(--suave);
+        font-size: 16.5px;
+        line-height: 1.5;
+      }
+
+      .linha-do-tempo {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        margin-top: 64px;
+        border-top: 2px solid var(--acento-borda);
+      }
+
+      .marco {
+        position: relative;
+        padding: 18px 16px 0 0;
+      }
+
+      .marco::before {
+        position: absolute;
+        top: -7px;
+        left: 0;
+        width: 12px;
+        height: 12px;
+        border: 2px solid var(--acento);
+        border-radius: 99px;
+        background: var(--papel);
+        content: '';
+      }
+
+      .marco__data {
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .marco p {
+        margin-top: 4px;
+        color: var(--suave);
+        font-size: 14.5px;
+        line-height: 1.45;
+      }
+
+      /* ------------------------------------------------------ fluxo do hotel */
+
+      .fluxo {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-top: 30px;
+      }
+
+      .fluxo__etapa {
+        padding: 18px 20px;
+        border: 1px solid var(--acento-borda);
+        border-radius: 8px;
+        background: var(--acento-claro);
+      }
+
+      .fluxo__nome {
+        display: block;
+        font-size: 20px;
+        font-weight: 800;
+      }
+
+      .fluxo__frase {
+        display: block;
+        margin-top: 2px;
+        color: var(--acento);
+        font-size: 15.5px;
+        font-style: italic;
+      }
+
+      .fluxo__telas {
+        display: block;
+        margin-top: 10px;
+        color: var(--suave);
+        font-size: 14px;
+      }
+
+      .regras {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 28px;
+        margin-top: 30px;
+      }
+
+      .regras strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 18px;
+        line-height: 1.3;
+      }
+
+      .regras p {
+        color: var(--suave);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      /* ------------------------------------------------- listas em colunas */
+
+      .colunas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 48px;
+        margin-top: 22px;
+      }
+
+      .item {
+        padding: 15px 0;
+        border-top: 1px solid var(--linha);
+      }
+
+      .item__cabeca {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .item strong {
+        font-size: 17px;
+        line-height: 1.35;
+      }
+
+      .item__data {
+        flex: none;
+        color: var(--fraco);
+        font-size: 13px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .item p {
+        margin-top: 4px;
+        color: var(--suave);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .item--decisao {
+        display: grid;
+        grid-template-columns: 30px 1fr;
+      }
+
+      .item--decisao .indice {
+        color: var(--acento);
+        font-size: 17px;
+        font-weight: 800;
+      }
+
+      /* ------------------------------------------------------------ tabela */
+
+      table {
+        width: 100%;
+        margin-top: 22px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 14px 18px 14px 0;
+        border-bottom: 1px solid var(--linha);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--fraco);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      td {
+        color: var(--suave);
+        font-size: 15.5px;
+        line-height: 1.5;
+      }
+
+      td:first-child {
+        width: 330px;
+        color: var(--tinta);
+        font-size: 16.5px;
+        font-weight: 700;
+      }
+
+      .telas-novas {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .telas-novas li {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 11px 0;
+        border-top: 1px solid var(--linha);
+        font-size: 17px;
+      }
+
+      .telas-novas li span {
+        color: var(--fraco);
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ============================================================== 1 · capa -->
+    <section class="slide">
+      <div class="capa">
+        <div>
+          <p class="rotulo">PetJourney · Portal administrativo</p>
+          <h1>O que mudou de<br />16 a 30 de setembro</h1>
+          <p class="lede">
+            Duas semanas, dezessete entregas. Um módulo novo, o Hotel, do telefone ao check-out. O
+            Clínico passa a contar a mesma história que o app do responsável vai contar. E o portal
+            fala seis idiomas, um deles da direita para a esquerda.
+          </p>
+          <p class="capa__meta">
+            Para a gestão e os sócios · 30 de setembro de 2026 · As imagens são capturas do sistema
+            rodando, com dados de demonstração.
+          </p>
+        </div>
+
+        <ul class="sumario">
+          <li>Em resumo <span>2</span></li>
+          <li>Hotel <span>3</span></li>
+          <li>Clínico <span>10</span></li>
+          <li>Portal <span>17</span></li>
+          <li>Em andamento <span>19</span></li>
+          <li>Para decidir <span>20</span></li>
+          <li>O que ainda não existe <span>21</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================ 2 · resumo -->
+    <section class="slide">
+      <p class="rotulo">Em resumo</p>
+      <h2>Três frentes andaram ao mesmo tempo</h2>
+
+      <div class="numeros">
+        <div class="numero">
+          <p class="numero__area">Hotel</p>
+          <p class="numero__valor">10<small>telas</small></p>
+          <p>
+            Um módulo inteiro, novo: vender o período, receber o animal, cuidar e entregar. Cada
+            tela tem o próprio "Como usar".
+          </p>
+        </div>
+        <div class="numero">
+          <p class="numero__area">Clínico</p>
+          <p class="numero__valor">5<small>telas novas</small></p>
+          <p>
+            Resumo do pet em 30 segundos, vacinas, tratamento em casa, a lista de tratamentos e a
+            importação de planilha. Mais a anamnese por voz e sete ajustes em telas que já existiam.
+          </p>
+        </div>
+        <div class="numero">
+          <p class="numero__area">Portal</p>
+          <p class="numero__valor">6<small>idiomas</small></p>
+          <p>
+            Sérvio e árabe entraram; em árabe a tela inteira espelha. A Visão geral, primeira tela
+            de todo mundo, foi refeita.
+          </p>
+        </div>
+      </div>
+
+      <div class="linha-do-tempo">
+        <div class="marco">
+          <p class="marco__data">21/09</p>
+          <p>Sérvio e árabe · tema claro recalibrado · ajustes do Clínico pós-reunião · boletins</p>
+        </div>
+        <div class="marco">
+          <p class="marco__data">22 a 24/09</p>
+          <p>Módulo Hotel, e três rodadas de acabamento nas telas</p>
+        </div>
+        <div class="marco">
+          <p class="marco__data">24 a 28/09</p>
+          <p>Este pet em 30 segundos · anamnese por voz · o que vai para o app</p>
+        </div>
+        <div class="marco">
+          <p class="marco__data">29/09</p>
+          <p>Visão geral nova · importar pacientes de outro sistema</p>
+        </div>
+        <div class="marco">
+          <p class="marco__data">30/09</p>
+          <p>Vacinas e carteirinha · tratamento em casa · design novo, em andamento</p>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ========================================================= 3 · hotel -->
+    <section class="slide">
+      <p class="rotulo">Hotel <span class="rotulo__data">módulo novo · 22 a 24/09</span></p>
+      <h2>Um hotel de animais faz sempre quatro coisas, nesta ordem</h2>
+      <p class="lede">
+        Vende um período, recebe o animal, cuida dele e o entrega de volta. O menu do módulo segue
+        essa ordem, e não "cadastros" e "relatórios".
+      </p>
+
+      <div class="fluxo">
+        <div class="fluxo__etapa">
+          <span class="fluxo__nome">1 · Vender</span>
+          <span class="fluxo__frase">"Tem vaga do dia 22 ao 30?"</span>
+          <span class="fluxo__telas">Mapa de acomodações · Reservas</span>
+        </div>
+        <div class="fluxo__etapa">
+          <span class="fluxo__nome">2 · Receber</span>
+          <span class="fluxo__frase">"Quem chega hoje, e pode entrar?"</span>
+          <span class="fluxo__telas">Painel do dia</span>
+        </div>
+        <div class="fluxo__etapa">
+          <span class="fluxo__nome">3 · Cuidar</span>
+          <span class="fluxo__frase">"O que é para fazer agora?"</span>
+          <span class="fluxo__telas">Rotina do turno · Hóspedes na casa</span>
+        </div>
+        <div class="fluxo__etapa">
+          <span class="fluxo__nome">4 · Entregar</span>
+          <span class="fluxo__frase">"Está tudo certo para ir embora?"</span>
+          <span class="fluxo__telas">A estadia, com o check-out</span>
+        </div>
+      </div>
+
+      <p class="titulo-secao" style="margin-top: 34px">
+        Os quatro erros que custam cliente, impedidos por regra e não por lembrete
+      </p>
+      <div class="regras" style="margin-top: 10px">
+        <div>
+          <strong>Vacina vencida não entra.</strong>
+          <p>
+            E a conta é feita contra o dia da saída: a antirrábica que vence no meio da estadia já
+            não serve.
+          </p>
+        </div>
+        <div>
+          <strong>A mesma baia não se vende duas vezes.</strong>
+          <p>O tempo de lavar e secar entra na conta antes de a vaga voltar ao mapa.</p>
+        </div>
+        <div>
+          <strong>Notícia ruim não vai por aplicativo.</strong>
+          <p>
+            Se algo sério acontece, o recado fica retido até alguém da casa ligar para o
+            responsável.
+          </p>
+        </div>
+        <div>
+          <strong>O que entrou tem que sair.</strong>
+          <p>O check-out não fecha enquanto cada pertence não for conferido.</p>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ========================================================== 4 · mapa -->
+    <section class="slide">
+      <p class="rotulo">Hotel · 1 Vender</p>
+      <h2>Mapa de acomodações</h2>
+      <p class="lede">
+        Toca o telefone: "tem vaga para o meu cão de 1 a 4 de outubro?". Cada linha é uma
+        acomodação e cada coluna uma noite. O que se procura é o espaço vazio.
+      </p>
+
+      <div class="tela">
+        <figure><img src="telas/hotel-mapa.png" alt="Mapa de acomodações" /></figure>
+        <ul class="olhar">
+          <li>
+            <strong>A procura é uma frase.</strong>
+            <span>
+              "Tenho um cão grande, de tal a tal dia", e a resposta vem inteira: "12 acomodações
+              servem". Clicar no vazio abre a reserva já preenchida.
+            </span>
+          </li>
+          <li>
+            <strong>A noite da saída fica livre.</strong>
+            <span>
+              Quem sai ao meio-dia libera aquela noite. Pintar o dia inteiro esconderia uma diária
+              vendável por estadia.
+            </span>
+          </li>
+          <li>
+            <strong>A baia A7 aparece hachurada.</strong>
+            <span>Está em reforma: o mapa mostra que ela existe e que não pode ser vendida.</span>
+          </li>
+          <li>
+            <strong>O triângulo nas barras do Zeus e do Bidu</strong>
+            <span>é documentação pendente, avisada antes da chegada.</span>
+          </li>
+        </ul>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ====================================================== 5 · reservas -->
+    <section class="slide">
+      <p class="rotulo">Hotel · 1 Vender</p>
+      <h2>Reservas</h2>
+      <p class="lede">
+        Fim de tarde de quinta: "o que eu preciso resolver antes de amanhã?". A resposta está na
+        faixa do topo, não na tabela.
+      </p>
+
+      <div class="tela">
+        <figure><img src="telas/hotel-reservas.png" alt="Lista de reservas" /></figure>
+        <ul class="olhar">
+          <li>
+            <strong>A faixa de véspera.</strong>
+            <span>
+              Quem chega nos próximos três dias e ainda não pode entrar. Três dias é o prazo em
+              que ainda dá para pedir o documento.
+            </span>
+          </li>
+          <li>
+            <strong>"Não compareceu" não é "Cancelada".</strong>
+            <span>
+              Cancelar deu para revender; não comparecer é vaga queimada. Juntar os dois esconde
+              quanto a casa perde por ano com quem não aparece.
+            </span>
+          </li>
+          <li>
+            <strong>Abre no que vem pela frente.</strong>
+            <span>O histórico fica a um clique, em "Tudo, com histórico".</span>
+          </li>
+          <li>
+            <strong>Lista de espera, no pé da página:</strong>
+            <span>a quem ligar, em ordem, quando uma reserva cai.</span>
+          </li>
+        </ul>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ======================================================== 6 · painel -->
+    <section class="slide">
+      <p class="rotulo">Hotel · 2 Receber</p>
+      <h2>Painel do dia</h2>
+      <p class="lede">
+        Oito da manhã: como vai ser o dia? A tela não é um resumo, é a lista do que fazer hoje.
+      </p>
+
+      <div class="tela">
+        <figure><img src="telas/hotel-painel.png" alt="Painel do dia" /></figure>
+        <ul class="olhar">
+          <li>
+            <strong>No topo, o que não pode esperar</strong>
+            <span>
+              com a ação escrita: "Ligue para o responsável de Tofu", "Zeus chega hoje sem a
+              documentação exigida".
+            </span>
+          </li>
+          <li>
+            <strong>Os números viraram uma frase.</strong>
+            <span>"5 na casa · 2 chegam · 1 sai · 7 tarefas para agora", em vez de quatro cartões.</span>
+          </li>
+          <li>
+            <strong>O dia desenhado como um dia.</strong>
+            <span>Chegadas em cima, saídas embaixo, e o agora marcado com a hora.</span>
+          </li>
+          <li>
+            <strong>Novo em 24/09: Bem-estar na casa.</strong>
+            <span>Quem está estressado ou em adaptação, a medicação de hoje e os cuidados em aberto.</span>
+          </li>
+        </ul>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ======================================================== 7 · rotina -->
+    <section class="slide">
+      <p class="rotulo">Hotel · 3 Cuidar</p>
+      <h2>Rotina do turno</h2>
+      <p class="lede">
+        No corredor do canil, com o celular numa mão e o pote na outra. As tarefas vêm por horário,
+        porque às oito alguém alimenta todos, e não abre ficha por ficha.
+      </p>
+
+      <div class="tela">
+        <figure><img src="telas/hotel-rotina.png" alt="Rotina do turno" /></figure>
+        <ul class="olhar">
+          <li>
+            <strong>"Recusou" não é "Pular".</strong>
+            <span>
+              Pular é decisão da casa. Recusar é o animal não ter comido, e isso vira informação no
+              boletim ao responsável.
+            </span>
+          </li>
+          <li>
+            <strong>Ronda marcada de uma vez,</strong>
+            <span>menos medicação, que é uma a uma.</span>
+          </li>
+          <li>
+            <strong>Rotina padrão da casa (nova).</strong>
+            <span>
+              Água, higiene, passeio e pesagem, nos horários que valem para todos. Mudar é
+              rascunho até publicar, com previsão do efeito e desfazer.
+            </span>
+          </li>
+          <li>
+            <strong>"Propor rotina" por hóspede.</strong>
+            <span>
+              Cada sugestão cita o registro que a justifica, e nada nasce marcado. É simulação por
+              regras: não há IA nesta versão.
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ======================================================= 8 · estadia -->
+    <section class="slide">
+      <p class="rotulo">Hotel · 3 Cuidar e 4 Entregar</p>
+      <h2>A estadia</h2>
+      <p class="lede">
+        O Tofu, um gato com doença renal, não come desde ontem, e a responsável está viajando. Tudo
+        sobre uma hospedagem cabe numa tela.
+      </p>
+
+      <div class="tela">
+        <figure><img src="telas/hotel-estadia.png" alt="Tela da estadia" /></figure>
+        <ul class="olhar">
+          <li>
+            <strong>No topo, o que trava,</strong>
+            <span>com o telefone e o botão que registra a ligação feita.</span>
+          </li>
+          <li>
+            <strong>O boletim está retido.</strong>
+            <span>Não sai enquanto ninguém ligar. É regra, não lembrete.</span>
+          </li>
+          <li>
+            <strong>Plano da estadia (novo, 23/09).</strong>
+            <span>
+              O que muda para este animal em relação à rotina da casa, com motivo, data e quem
+              decidiu.
+            </span>
+          </li>
+          <li>
+            <strong>O check-out diz por que não fecha</strong>
+            <span>("há pertences sem conferência"), em vez de simplesmente recusar.</span>
+          </li>
+        </ul>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ================================================= 9 · hotel, apoio -->
+    <section class="slide">
+      <p class="rotulo">Hotel · A casa</p>
+      <h2>As telas de apoio, e o que ficou de fora</h2>
+
+      <div class="colunas">
+        <div>
+          <div class="item">
+            <strong>Hóspedes na casa</strong>
+            <p>
+              Um cartão por animal, ordenado por quem precisa de você primeiro, com a barra da
+              rotina do dia. Busca por nome do pet ou do responsável.
+            </p>
+          </div>
+          <div class="item">
+            <strong>Acomodações</strong>
+            <p>
+              A casa monta a própria planta em quatro abas: corredores, tipos com o nome que ela
+              usa ("Chalé", "Box"), tarifas por porte e temporadas. Preço novo não mexe em reserva
+              já fechada.
+            </p>
+          </div>
+          <div class="item">
+            <strong>Resumo do período</strong>
+            <p>
+              Ocupação desenhada dia a dia, não em média: a média esconde a casa lotar no fim de
+              semana e esvaziar na terça.
+            </p>
+          </div>
+          <div class="item">
+            <strong>"Como usar" nas dez telas</strong>
+            <p>
+              Acende uma parte da tela por vez e explica ali mesmo. Substituiu uma tela de manual,
+              que ensinava longe do que ensinava.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <p class="titulo-secao" style="margin-top: 12px">Fora do escopo desta fase</p>
+          <table style="margin-top: 0">
+            <tbody>
+              <tr>
+                <td style="width: 210px">Nota fiscal e pagamento</td>
+                <td>O sistema calcula e registra a conta. Emitir nota e passar cartão é outro sistema.</td>
+              </tr>
+              <tr>
+                <td style="width: 210px">Câmera ao vivo</td>
+                <td>A acomodação já diz que tem câmera; o vídeo em si não entra agora.</td>
+              </tr>
+              <tr>
+                <td style="width: 210px">Creche</td>
+                <td>Entra e sai no mesmo dia: é outro produto, com outra grade e outro preço.</td>
+              </tr>
+              <tr>
+                <td style="width: 210px">App do responsável</td>
+                <td>O hotel já registra o que o app mostraria: diário, fotos, recados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ===================================================== 10 · clínico -->
+    <section class="slide">
+      <p class="rotulo">Clínico</p>
+      <h2>O consultório passa a contar a mesma história<br />que o app do responsável</h2>
+
+      <div class="texto" style="grid-template-columns: 1fr 470px; margin-top: 28px">
+        <div>
+          <p class="porque" style="margin-top: 0">
+            <span style="color: var(--suave); font-size: 18px; line-height: 1.55">
+              Quase tudo o que entrou no Clínico tem dois lados: o que a clínica vê no portal e o
+              que o responsável vai ver no celular. O portal já mostra os dois, com um celular
+              simulado ao lado da tela, e o que o app vai receber está escrito como contrato para
+              o time do app.
+            </span>
+          </p>
+          <p class="porque">
+            <span style="color: var(--suave); font-size: 18px; line-height: 1.55">
+              É isso que torna as novidades difíceis de copiar: a vacina aplicada aparece no
+              celular do responsável, a dose dada em casa aparece na ficha, e a pré-consulta
+              respondida no app chega pronta à anamnese.
+            </span>
+          </p>
+          <div class="aviso" style="margin-top: 24px">
+            <strong>Especificações entregues ao time do app:</strong> carteirinha de vacinas,
+            adesão ao tratamento e o vínculo dos pacientes importados. Nenhuma delas tem tela no app
+            ainda.
+          </div>
+        </div>
+
+        <div>
+          <p class="titulo-secao">Telas novas no período</p>
+          <ul class="telas-novas">
+            <li>Este pet em 30 segundos <span>24/09</span></li>
+            <li>Importar pacientes de outro sistema <span>29/09</span></li>
+            <li>Vacinas do paciente <span>30/09</span></li>
+            <li>Tratamento em casa, na ficha <span>30/09</span></li>
+            <li>Tratamentos em casa, da clínica toda <span>30/09</span></li>
+          </ul>
+          <p class="titulo-secao" style="margin-top: 22px">E dentro de telas que já existiam</p>
+          <p style="color: var(--suave); font-size: 16px; line-height: 1.55">
+            Anamnese por voz e pré-consulta, estoque de vacinas, modelos de boletim, motivo da
+            falta, edição de horário, aceite da fila e o resumo da consulta liberado para o app.
+          </p>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- =================================================== 11 · pet em 30s -->
+    <section class="slide">
+      <p class="rotulo">Clínico <span class="rotulo__data">24 e 28/09</span></p>
+      <h2>Este pet em 30 segundos</h2>
+
+      <div class="texto">
+        <div>
+          <p class="cena">
+            O veterinário está na porta da sala e tem trinta segundos para saber o que mudou desde
+            a última vez.
+          </p>
+          <div class="porque">
+            <p class="titulo-secao">Por que importa</p>
+            <p>
+              O prontuário não sabe o que aconteceu em casa, e o diário do responsável não tem
+              contexto clínico. O resumo junta os dois numa tela só, antes de a porta abrir.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <p class="titulo-secao">Como funciona</p>
+          <ul class="lista">
+            <li>Uma frase de estado no topo ("2 sinais pedem atenção") e, abaixo, o que chama atenção, o risco primeiro.</li>
+            <li>"Em casa desde a última consulta": o diário do app contado, não cortado ("comeu pouco em 10 de 13 dias").</li>
+            <li>O peso dos últimos seis meses, com a balança da clínica e a de casa separadas.</li>
+            <li>"Abrir atendimento" já traz a anamnese preenchida pelo diário, dizendo de onde veio cada frase.</li>
+          </ul>
+
+          <p class="titulo-secao">As regras que valem dizer</p>
+          <ul class="lista lista--regras">
+            <li><strong>Tendência vale mais que registro.</strong> Uma perda lenta de 5% em seis meses já é atenção, e nenhuma pesagem isolada mostraria isso.</li>
+            <li><strong>Sem consentimento, não há diário.</strong> A tela diz "o responsável não liberou", em vez de mostrar "nada registrado".</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ====================================================== 12 · voz -->
+    <section class="slide">
+      <p class="rotulo">Clínico <span class="rotulo__data">28/09</span></p>
+      <h2>Anamnese por voz, e a pré-consulta do app</h2>
+
+      <div class="texto">
+        <div>
+          <p class="cena">
+            A dor número um do veterinário é digitar: ele conversa com o responsável e depois
+            redigita tudo.
+          </p>
+          <div class="aviso" style="margin-top: 26px">
+            <strong>Sem IA nesta versão.</strong> A escuta funciona com um motor de regras local,
+            sem modelo de linguagem e sem internet, e está pronta para receber um. Alguns textos da
+            tela ainda dizem "IA" e precisam ser corrigidos antes de mostrar a um cliente.
+          </div>
+        </div>
+
+        <div>
+          <p class="titulo-secao">Como funciona</p>
+          <ul class="lista">
+            <li>"Gravar consulta" começa com o texto para ler ao responsável, pedindo autorização.</li>
+            <li>A conversa aparece ao lado. Ao encerrar, os campos vêm agrupados, cada um com o trecho da fala de onde saiu.</li>
+            <li>O veterinário marca o que entra, corrige e aplica ao prontuário. Nada nasce marcado.</li>
+            <li>Acima da anamnese fica o que o responsável respondeu no app antes de sair de casa, com a marca "do diário" no que veio de lá.</li>
+          </ul>
+
+          <p class="titulo-secao">As regras que valem dizer</p>
+          <ul class="lista lista--regras">
+            <li><strong>Diagnóstico e conduta nunca são preenchidos por voz.</strong> "Pode ser uma gastroenterite" fica em "ouvido e não preenchido".</li>
+            <li><strong>O áudio não é guardado.</strong> Só o que o veterinário aprovou entra no prontuário.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ===================================================== 13 · vacinas -->
+    <section class="slide">
+      <p class="rotulo">Clínico <span class="rotulo__data">21 e 30/09</span></p>
+      <h2>Vacinas e a carteirinha no celular do responsável</h2>
+
+      <div class="texto">
+        <div>
+          <p class="cena">
+            O filhote chega com a carteirinha do pet shop. A recepção precisa saber qual lote usar,
+            e o responsável quer ver no celular a vacina que acabou de ser aplicada.
+          </p>
+          <div class="porque">
+            <p class="titulo-secao">Por que importa</p>
+            <p>
+              É a prova mais fácil de mostrar e a mais difícil de copiar: exige um app com gente
+              usando do outro lado.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <p class="titulo-secao">Como funciona</p>
+          <ul class="lista">
+            <li>De um lado, o protocolo e o histórico de aplicações da clínica. Do outro, o celular do responsável. Aplicar muda os dois juntos, com a próxima dose já marcada.</li>
+            <li>A dose tomada em outro lugar entra por "Registrar de outro lugar".</li>
+            <li>Lote vencido fica travado, e o sugerido é sempre o que vence primeiro.</li>
+            <li><strong>Estoque de vacinas (21/09):</strong> o que tem, o que vence em 60 dias e o que comprar, decidido pela cobertura em dias no ritmo real de uso, e não pelo saldo.</li>
+          </ul>
+
+          <p class="titulo-secao">A regra que vale dizer</p>
+          <ul class="lista lista--regras">
+            <li><strong>Frasco vencido é prejuízo já pago e nunca faturado.</strong> Por isso "vencendo" (ainda dá para usar) e "vencido" (perda) aparecem separados.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- =================================================== 14 · adesão -->
+    <section class="slide">
+      <p class="rotulo">Clínico <span class="rotulo__data">30/09</span></p>
+      <h2>Tratamento em casa</h2>
+
+      <div class="texto">
+        <div>
+          <p class="cena">
+            "O tratamento não funcionou" e "o tratamento não foi feito" pedem condutas opostas, e o
+            veterinário não tinha como saber qual era o caso.
+          </p>
+          <div class="porque">
+            <p class="titulo-secao">Por que importa</p>
+            <p>
+              A clínica fica sabendo a quem ligar quando um remédio crítico, como o diurético de um
+              cardiopata, deixa de ser dado em casa.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <p class="titulo-secao">Como funciona</p>
+          <ul class="lista">
+            <li>Uma faixa por remédio, um quadrado por dose: dada, pulada ou sem registro, contadas desde a consulta.</li>
+            <li>No celular, o aviso "hora do remédio" com "Dei" e "Pulei" (esqueci, cuspiu, acabou). A família toda registra, e quem marca primeiro fecha a dose para todos, sem dose dobrada.</li>
+            <li>O veterinário marca o tratamento como crítico na receita. Se a adesão cai, a clínica vê na lista de tratamentos e na Visão geral.</li>
+          </ul>
+
+          <p class="titulo-secao">As regras que valem dizer</p>
+          <ul class="lista lista--regras">
+            <li><strong>Sem registro não é dose perdida,</strong> e nunca há porcentagem.</li>
+            <li><strong>O aviso não cobra.</strong> Não existe "você esqueceu". O alerta à clínica mede queda: quem nunca registrou não gera alerta.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ================================================= 15 · importar -->
+    <section class="slide">
+      <p class="rotulo">Clínico <span class="rotulo__data">29/09</span></p>
+      <h2>Importar pacientes de outro sistema</h2>
+
+      <div class="texto">
+        <div>
+          <p class="cena">
+            Nenhuma clínica troca de sistema se tiver que redigitar quinze anos de pacientes.
+          </p>
+          <div class="porque">
+            <p class="titulo-secao">Por que importa</p>
+            <p>
+              É a porta de entrada comercial. E uma importação que perde dado sem avisar destrói a
+              confiança no primeiro dia.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <p class="titulo-secao">Como funciona, em três passos</p>
+          <ul class="lista">
+            <li><strong>Arquivo:</strong> arrastar a planilha (.xlsx ou .csv). As colunas se ligam sozinhas.</li>
+            <li><strong>Dúvidas:</strong> uma pergunta por vez, em letra grande. "É a mesma pessoa?", com os dois cadastros lado a lado.</li>
+            <li><strong>Importar:</strong> o que vai entrar, o que foi arrumado sozinho e o que não vai entrar, com o motivo. No fim, uma planilha para baixar e corrigir, com a coluna "O que houve".</li>
+          </ul>
+
+          <p class="titulo-secao">As regras que valem dizer</p>
+          <ul class="lista lista--regras">
+            <li><strong>Nada é gravado antes do botão de importar.</strong></li>
+            <li><strong>Dado errado é pior que dado em branco.</strong> CPF inválido entra vazio, e o relatório avisa.</li>
+            <li><strong>Juntar a um cadastro existente nunca apaga o que a clínica tinha.</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ================================================ 16 · ajustes -->
+    <section class="slide">
+      <p class="rotulo">Clínico · nas telas que já existiam</p>
+      <h2>Sete ajustes no dia a dia da clínica</h2>
+
+      <div class="colunas" style="margin-top: 18px">
+        <div>
+          <div class="item">
+            <div class="item__cabeca"><strong>Corrigir um horário marcado errado</strong><span class="item__data">21/09</span></div>
+            <p>Tipo, profissional, sala e hora mudam sem cancelar e recriar, o que mandava aviso de cancelamento a quem não teve nada cancelado.</p>
+          </div>
+          <div class="item">
+            <div class="item__cabeca"><strong>Por que o paciente não veio</strong><span class="item__data">21/09</span></div>
+            <p>Marcar falta pergunta o motivo e como a clínica falou com o responsável. "Quatro faltas, todas por transporte" vira um horário no fim da tarde.</p>
+          </div>
+          <div class="item">
+            <div class="item__cabeca"><strong>Faltas a justificar</strong><span class="item__data">21/09</span></div>
+            <p>Quem ainda nem foi procurado ganha um recorte próprio. Apurar vem antes de reagendar.</p>
+          </div>
+          <div class="item">
+            <div class="item__cabeca"><strong>Boletim da internação pronto em um clique</strong><span class="item__data">21/09</span></div>
+            <p>Modelos do plantão ("passou bem a noite", "pós-operatório") já com nome, medicações e temperatura. Paciente que piorou continua com o boletim retido até alguém ligar.</p>
+          </div>
+        </div>
+
+        <div>
+          <div class="item">
+            <div class="item__cabeca"><strong>Vaga da fila aceita vira horário</strong><span class="item__data">28/09</span></div>
+            <p>O aceite confere se a vaga ainda está livre. Se alguém ocupou no balcão, o paciente volta à fila na mesma posição.</p>
+          </div>
+          <div class="item">
+            <div class="item__cabeca"><strong>Presença e prazo do app</strong><span class="item__data">28/09</span></div>
+            <p>Quem confirmou, e até quando o responsável pode cancelar pelo app. A recepção passa a ter resposta para "o app não me deixa cancelar".</p>
+          </div>
+          <div class="item">
+            <div class="item__cabeca"><strong>O resumo da consulta vai para o celular</strong><span class="item__data">28/09</span></div>
+            <p>Liberar é um passo separado de finalizar. O responsável recebe orientações, receita e retorno, sem mg/kg nem exame físico.</p>
+          </div>
+          <div class="item">
+            <div class="item__cabeca"><strong>E o catálogo clínico nos seis idiomas</strong><span class="item__data">21/09</span></div>
+            <p>Bulário, diagnósticos, exames e salas traduzidos, sem nenhuma contraindicação perdida na tradução.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ============================================== 17 · visão geral -->
+    <section class="slide">
+      <p class="rotulo">Portal <span class="rotulo__data">29/09</span></p>
+      <h2>Visão geral: a primeira tela do dia</h2>
+      <p class="lede">
+        Antes, quem abria o portal às oito via o painel financeiro da parceria. Agora vê o que está
+        parado na clínica e no hotel, por ordem de gravidade.
+      </p>
+
+      <div class="tela">
+        <figure><img src="telas/visao-geral.png" alt="Visão geral" /></figure>
+        <div>
+          <ul class="olhar">
+            <li>
+              <strong>"O que pede ação", um grupo por módulo.</strong>
+              <span>
+                O número é o mesmo do selo no menu: uma régua só. Zero não vira linha, e só o
+                urgente ganha cor forte.
+              </span>
+            </li>
+            <li>
+              <strong>Se a conferência falha, a tela nunca diz "em dia".</strong>
+              <span>Melhor avisar que não conferiu do que tranquilizar sem motivo.</span>
+            </li>
+            <li>
+              <strong>O trabalho vem antes do dinheiro.</strong>
+              <span>Módulos, agenda da semana e ganhos de indicação ficam à direita.</span>
+            </li>
+            <li>
+              <strong>A regra de saque foi unificada.</strong>
+              <span>A página inicial não promete mais um saque que a tela seguinte recusava.</span>
+            </li>
+          </ul>
+          <p class="nota">Nome da clínica e agenda desta captura são de demonstração.</p>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ================================================= 18 · idiomas -->
+    <section class="slide">
+      <p class="rotulo">Portal <span class="rotulo__data">21 e 23/09</span></p>
+      <h2>Seis idiomas, e um deles da direita para a esquerda</h2>
+      <p class="lede">
+        Português, inglês (americano e britânico), espanhol, e agora sérvio (Srpski) e árabe
+        (<span lang="ar" dir="rtl">العربية</span>).
+      </p>
+
+      <div class="texto" style="grid-template-columns: 1fr 1fr; margin-top: 24px">
+        <div>
+          <p class="titulo-secao">Sérvio e árabe</p>
+          <ul class="lista">
+            <li>Em árabe a tela inteira espelha na hora, sem recarregar: menu, painéis, setas e alinhamentos. Fonte própria para o texto árabe, e números em algarismos 0–9.</li>
+            <li>Sérvio em alfabeto latino, e regras de plural próprias de cada idioma.</li>
+            <li>O conteúdo clínico também foi traduzido, e o alerta de cuidado (renal, gestante, cardíaco) reconhece termos escritos em sérvio e em árabe.</li>
+          </ul>
+          <p class="titulo-secao">Ainda em português ou em inglês</p>
+          <ul class="lista">
+            <li>O boletim ao responsável, de propósito. O calendário e os gráficos. O que vem da API, até o servidor aceitar os dois idiomas.</li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="titulo-secao">Tema claro recalibrado</p>
+          <ul class="lista">
+            <li>Fim do branco puro: página, cartão e bloco interno em três degraus.</li>
+            <li>Contraste medido, e não no olho: textos e alertas passam no nível AA de acessibilidade.</li>
+            <li>Em 23/09 o fundo das telas passou de verde-sálvia para linho, depois do retorno de que "as telas estão muito verdes".</li>
+          </ul>
+          <p class="titulo-secao">Controles iguais em todo o portal</p>
+          <ul class="lista">
+            <li>Botões, menus e campos feitos à mão viraram componentes padrão. Menu agora fecha com Esc e com clique fora, em qualquer tela.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ============================================== 19 · em andamento -->
+    <section class="slide">
+      <p class="rotulo">Em andamento <span class="etiqueta etiqueta--andamento">ainda não publicado</span></p>
+      <h2>O acabamento da Visão geral vira o do portal inteiro</h2>
+      <p class="lede">
+        Decidido em 30/09. As capturas deste documento já mostram a moldura nova do menu e do
+        cabeçalho, que ainda não está publicada.
+      </p>
+
+      <div class="colunas" style="margin-top: 26px">
+        <div>
+          <div class="item">
+            <strong>Moldura clara</strong>
+            <p>
+              Menu e cabeçalho brancos, com fio fino. O verde fica no logotipo e no item aberto,
+              e não no fundo.
+            </p>
+          </div>
+          <div class="item">
+            <strong>Cabeçalho mais limpo</strong>
+            <p>O seletor de tema saiu do cabeçalho e virou "Tema escuro", no menu da conta.</p>
+          </div>
+          <div class="item">
+            <strong>As 15 telas do Clínico já recebem o acabamento novo</strong>
+            <p>Mesmo fundo, mesmo título, mesmos botões da Visão geral.</p>
+          </div>
+        </div>
+
+        <div>
+          <p class="titulo-secao" style="margin-top: 12px">Ordem combinada</p>
+          <table style="margin-top: 0">
+            <tbody>
+              <tr>
+                <td style="width: 150px">Agora</td>
+                <td>Redesenho de composição em Hoje na clínica, Internação, Agenda e Faltas.</td>
+              </tr>
+              <tr>
+                <td style="width: 150px">Depois</td>
+                <td>Hotel, Portal do parceiro, e por último Conta e login.</td>
+              </tr>
+              <tr>
+                <td style="width: 150px">O que motiva</td>
+                <td>
+                  O choque entre telas novas e antigas aparece ao navegar: um portal com duas
+                  caras parece dois produtos.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ============================================== 20 · para decidir -->
+    <section class="slide">
+      <p class="rotulo">Para decidir</p>
+      <h2>Seis escolhas que pedem o olhar da gestão</h2>
+      <p class="lede">
+        Foram tomadas para a demonstração andar e são defensáveis. Mas mudam o que o cliente vive,
+        e não deveriam ficar decididas só pelo desenvolvimento.
+      </p>
+
+      <div class="colunas" style="margin-top: 18px">
+        <div>
+          <div class="item item--decisao">
+            <span class="indice">1</span>
+            <div>
+              <strong>Vacina só atrasa depois de 3 dias de carência.</strong>
+              <p>É a mesma régua do servidor e do app, mas muda a lista de chamada: quem venceu há um ou dois dias aparece como "a vencer".</p>
+            </div>
+          </div>
+          <div class="item item--decisao">
+            <span class="indice">2</span>
+            <div>
+              <strong>Dose tomada fora, só relatada, conta para o protocolo.</strong>
+              <p>Sem lote e sem comprovante. Exigir comprovante trava o filhote que chegou com a carteirinha do pet shop.</p>
+            </div>
+          </div>
+          <div class="item item--decisao">
+            <span class="indice">3</span>
+            <div>
+              <strong>Compartilhar a adesão com a clínica vem ligado no app.</strong>
+              <p>O responsável pode desligar. Desligado por padrão, quase ninguém ligaria, e o alerta não existiria.</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="item item--decisao">
+            <span class="indice">4</span>
+            <div>
+              <strong>Quando o alerta de adesão dispara.</strong>
+              <p>Duas doses puladas em 72 horas, ou menos da metade dada por quem dava 80% antes. Os números são uma aposta a calibrar com uso real.</p>
+            </div>
+          </div>
+          <div class="item item--decisao">
+            <span class="indice">5</span>
+            <div>
+              <strong>Ainda há botões "Ligar" em duas telas.</strong>
+              <p>No cartão do hóspede e no diálogo de falta, contra a regra de que a tela só registra o contato e a ligação sai do telefone da clínica.</p>
+            </div>
+          </div>
+          <div class="item item--decisao">
+            <span class="indice">6</span>
+            <div>
+              <strong>A palavra "IA" na anamnese por voz.</strong>
+              <p>Hoje é um motor de regras. Ou se troca o texto, ou se decide quando entra um modelo de verdade.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="rodape">PetJourney · Novidades de 16 a 30/09/2026</p>
+    </section>
+
+    <!-- ========================================== 21 · o que não existe -->
+    <section class="slide">
+      <p class="rotulo">Fechamento</p>
+      <h2>O que ainda não existe</h2>
+      <p class="lede">Dito em voz alta, para não ser cobrado como esquecimento.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>O quê</th>
+            <th>Onde está hoje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Servidor para o Hotel e o Clínico</td>
+            <td>
+              Os dois módulos rodam sobre dados de demonstração em memória: recarregar a página
+              volta tudo ao começo. O próximo passo é o contrato com o back-end.
+            </td>
+          </tr>
+          <tr>
+            <td>O app do responsável, do outro lado</td>
+            <td>
+              Carteirinha, remédio em casa, resumo da consulta e boletim chegam a um celular
+              simulado dentro do portal. As especificações para o time do app estão escritas.
+            </td>
+          </tr>
+          <tr>
+            <td>Histórico na importação</td>
+            <td>
+              Entram pacientes e responsáveis. Vacinas, consultas e peso ainda não. O formato do
+              SimplesVet e do Vetus foi montado sem um arquivo real de nenhum dos dois.
+            </td>
+          </tr>
+          <tr>
+            <td>Modelo de linguagem na anamnese</td>
+            <td>Hoje, regras locais, só em português. A tela já está pronta para receber um modelo.</td>
+          </tr>
+          <tr>
+            <td>Hotel: nota, pagamento, câmera, creche</td>
+            <td>Fora do escopo desta fase.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="rodape">
+        Capturas do sistema rodando em 30/09/2026, com dados de demonstração · fonte:
+        docs/novidades/setembro-2026
+      </p>
+    </section>
+
+    <script>
+      /* Prévia: ?de=N esconde os slides anteriores ao N. Não afeta a impressão sem parâmetro. */
+      const de = Number(new URLSearchParams(location.search).get('de'))
+
+      if (de > 1) {
+        document.querySelectorAll('.slide').forEach((slide, i) => {
+          if (i + 1 < de) slide.style.display = 'none'
+        })
+        document.body.style.counterReset = `slide ${de - 1}`
+      }
+    </script>
+  </body>
+</html>

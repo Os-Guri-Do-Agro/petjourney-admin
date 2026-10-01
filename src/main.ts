@@ -1,5 +1,8 @@
 import './assets/main.css'
 import './features/clinico/theme/clinic-tokens.css'
+import './theme/hc-tokens.css'
+import './theme/hc-tema.css'
+import './components/home/home-card.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

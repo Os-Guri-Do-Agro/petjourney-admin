@@ -255,11 +255,16 @@ const estilo = computed(() => {
   overflow: hidden;
   padding-block: 2px;
   padding-inline: 8px 6px;
-  border: 1px solid color-mix(in srgb, var(--card-cor) 52%, var(--clinic-line));
-  /* A faixa do tipo. Fica na borda, não em pseudo-elemento, para sobreviver ao overflow. */
-  border-inline-start: 3px solid var(--card-tipo);
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--card-cor) 10%, var(--clinic-surface));
+  /*
+   * O bloco branco (redesenho de 30/09/2026). Saíram a faixa do tipo na borda esquerda e o fundo
+   * tingido pela cor do profissional: a grade inteira era um mosaico de tons, e o que muda de
+   * estado não saltava. O tipo mora no ícone colorido (`.card__tipo-icone`), o profissional na
+   * coluna, e a cor do fundo ficou para o estado — em atendimento, aguardando, finalizado.
+   */
+  border: 1px solid var(--clinic-line);
+  border-radius: 0.55rem;
+  background: var(--clinic-surface);
+  box-shadow: 0 1px 2px rgb(20 32 28 / 6%);
   color: var(--clinic-text);
   cursor: grab;
   touch-action: none;
@@ -274,8 +279,7 @@ const estilo = computed(() => {
 }
 
 .card--selecionado {
-  border-block-color: var(--clinic-accent-strong);
-  border-inline-end-color: var(--clinic-accent-strong);
+  border-color: var(--clinic-accent-strong);
   box-shadow: var(--clinic-focus-ring);
   z-index: 4;
 }
@@ -444,9 +448,8 @@ const estilo = computed(() => {
  */
 .card--liberado {
   border-style: dashed;
-  /* A faixa do tipo continua sólida: tracejar 3 px a transforma numa coluna de pontos. */
-  border-inline-start-style: solid;
-  background: var(--clinic-surface);
+  background: transparent;
+  box-shadow: none;
   opacity: 0.62;
 }
 
@@ -455,31 +458,26 @@ const estilo = computed(() => {
   text-decoration: line-through;
 }
 
-/*
- * Toda variante de estado repinta as bordas **menos a esquerda**: aquela é a faixa do tipo, e
- * é a única coisa no card que não muda quando o paciente falta ou o atendimento termina.
- * Perdê-la faria a legenda mentir justamente nos cards que a recepção revisita no fim do dia.
- */
+/* O estado pinta o bloco inteiro, e é a única cor de fundo da grade: o que está acontecendo salta. */
 .card--falta {
-  border-block-color: var(--clinic-risk-line);
-  border-inline-end-color: var(--clinic-risk-line);
+  border-color: color-mix(in srgb, var(--clinic-risk-text) 45%, transparent);
 }
 
 .card--em-atendimento {
-  border-block-color: var(--clinic-accent-strong);
-  border-inline-end-color: var(--clinic-accent-strong);
-  background: color-mix(in srgb, var(--card-cor) 30%, var(--clinic-surface));
+  border-color: color-mix(in srgb, var(--clinic-accent) 55%, transparent);
+  background: var(--clinic-accent-tint);
 }
 
 .card--aguardando {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--clinic-attention-text) 45%, transparent);
+  border-color: color-mix(in srgb, var(--clinic-attention-text) 55%, transparent);
+  background: color-mix(in srgb, var(--clinic-attention-bg) 55%, var(--clinic-surface));
 }
 
 /* Finalizado é história do dia, não tarefa: perde saturação e peso, mas continua legível. */
 .card--finalizado {
-  border-block-color: var(--clinic-line);
-  border-inline-end-color: var(--clinic-line);
+  border-color: var(--clinic-line);
   background: var(--clinic-surface-soft);
+  box-shadow: none;
   color: var(--clinic-muted);
 }
 
@@ -487,18 +485,13 @@ const estilo = computed(() => {
   font-weight: 650;
 }
 
-/* Encaixe entra fora da grade e precisa parecer o que é: listrado, não igual aos demais. */
-.card--encaixe {
-  background-image: repeating-linear-gradient(
-    135deg,
-    transparent 0 6px,
-    color-mix(in srgb, var(--clinic-attention-text) 12%, transparent) 6px 12px
-  );
-}
+/*
+ * O encaixe se diz pela marca "Encaixe" (`.card__marca`), e não mais por listras no fundo: o
+ * listrado competia com a cor do estado, que agora é a única cor de fundo do bloco.
+ */
 
 .card--aviso {
-  border-block-color: var(--clinic-attention-text);
-  border-inline-end-color: var(--clinic-attention-text);
+  border-color: color-mix(in srgb, var(--clinic-attention-text) 45%, var(--clinic-line));
 }
 
 /*

@@ -178,6 +178,7 @@ function trocarPeriodo(periodo: PeriodoId) {
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.resumo.subtitulo')"
     :title="t('clinico.resumo.titulo')"
     :loading="carregando && atendimentos.length === 0"

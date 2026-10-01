@@ -77,7 +77,7 @@ watch(
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(32rem, 94vw)' }"
     :header="t('clinico.fila.ofertarVaga')"
     :dismissable-mask="true"

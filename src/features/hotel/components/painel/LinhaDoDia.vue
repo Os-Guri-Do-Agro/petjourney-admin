@@ -192,14 +192,16 @@ function passou(marca: MarcaDoDia): boolean {
 </template>
 
 <style scoped>
+/* O cartão do dia é da família dos outros da tela: a mesma borda, o mesmo raio e a mesma sombra. */
 .dia {
   border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
   background: var(--clinic-surface);
+  box-shadow: var(--clinic-shadow-card);
 }
 
 .dia__topo {
-  padding: var(--clinic-space-3) var(--clinic-space-4);
+  padding: 1.1rem 1.35rem 0.85rem;
   border-block-end: 1px solid var(--clinic-line-soft);
 }
 

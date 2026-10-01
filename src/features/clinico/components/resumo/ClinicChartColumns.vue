@@ -31,7 +31,7 @@ import { computed } from 'vue'
 import VueApexCharts from '../charts/apex'
 
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import { useClinicChartTheme } from '../../composables/useClinicChartTheme'
+import { misturar, useClinicChartTheme } from '../../composables/useClinicChartTheme'
 import type { PontoDoDia } from '../../domain/resumo'
 
 const props = withDefaults(
@@ -162,7 +162,13 @@ const opcoes = computed<ApexOptions>(() => {
 
   return {
     chart: { ...tema.grafico.value, type: 'line', height: ALTURA, stacked: true },
-    colors: [cor['accent-strong'], cor.accent, cor['risk-text'], cor['attention-text']],
+    /* Previsto é a marca meio apagada: o que ainda vai acontecer lê mais leve que o concluído. */
+    colors: [
+      cor['accent-strong'],
+      misturar(cor.accent, cor.surface, 0.45),
+      cor['risk-text'],
+      cor['attention-text'],
+    ],
     grid: tema.grade.value,
     legend: tema.legenda.value,
     states: tema.estados.value,

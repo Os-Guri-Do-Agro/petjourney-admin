@@ -168,7 +168,7 @@ function salvar() {
     modal
     :header="editando ? t('hotel.acomodacoes.editar') : t('hotel.acomodacoes.nova')"
     :style="{ width: 'min(42rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope hc-tema"
     @update:visible="emit('fechar')"
   >
     <div class="form">
@@ -483,11 +483,10 @@ function salvar() {
 
 .secao__titulo {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 /*

@@ -345,7 +345,7 @@ function confirmar() {
     modal
     :header="t('hotel.reserva.novaTitulo', { acomodacao: acomodacao?.nome ?? '' })"
     :style="{ width: 'min(46rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope hc-tema"
     @update:visible="emit('fechar')"
   >
     <div class="nova">
@@ -608,16 +608,13 @@ function confirmar() {
   font-weight: 700;
 }
 
+/* O selo diz o estado; a frase explica, no cinza do texto. */
 .nova__admissao {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
   gap: var(--clinic-space-2);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
+  color: var(--clinic-muted);
   font-size: var(--clinic-font-label);
 }
 .autorizados {
@@ -648,9 +645,9 @@ function confirmar() {
   display: grid;
   gap: var(--clinic-space-2);
   padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-accent-soft);
+  border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
+  background: var(--clinic-surface-soft);
 }
 
 .quando__frase {

@@ -430,11 +430,9 @@ function unidadeDe(vital: VitalKey) {
 .vital__rotulo {
   overflow: hidden;
   color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-  letter-spacing: 0.06em;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-overflow: ellipsis;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 

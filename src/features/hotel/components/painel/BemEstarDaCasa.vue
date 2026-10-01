@@ -29,8 +29,10 @@
  * Porque a casa já sofre de achatamento: quando todo bloco tem a mesma borda, nada tem hierarquia.
  * Os três assuntos dividem um cartão e se separam por **título e respiro**, não por moldura.
  */
+import { PhHeartbeat } from '@phosphor-icons/vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
 import IconeDeTarefa from '../base/IconeDeTarefa.vue'
 import PetAvatar from '../base/PetAvatar.vue'
@@ -44,8 +46,6 @@ const props = defineProps<{
   /** Instante de agora, para separar a dose que passou da que ainda vem. */
   agora: ISODateTime
 }>()
-
-const emit = defineEmits<{ abrir: [rota: string] }>()
 
 const { t } = useI18n()
 const formato = useHotelFormat()
@@ -114,7 +114,10 @@ function rotaDaEstadia(hospedagemId: string): string {
 
 <template>
   <section class="bemEstar clinic-card">
-    <h2 class="bemEstar__titulo">{{ t('hotel.painel.bemEstar.titulo') }}</h2>
+    <h2 class="hc__titulo">
+      <PhHeartbeat class="hc__icone" weight="duotone" aria-hidden="true" />
+      {{ t('hotel.painel.bemEstar.titulo') }}
+    </h2>
 
     <div class="colunas">
       <!-- ---------------------------------------------------------------- adaptação -->
@@ -136,11 +139,7 @@ function rotaDaEstadia(hospedagemId: string): string {
 
               <ul class="bichos">
                 <li v-for="hospede in grupo.hospedes" :key="hospede.hospedagem.id">
-                  <button
-                    type="button"
-                    class="bicho"
-                    @click="emit('abrir', rotaDaEstadia(hospede.hospedagem.id))"
-                  >
+                  <RouterLink class="bicho" :to="rotaDaEstadia(hospede.hospedagem.id)">
                     <PetAvatar
                       :nome="hospede.petNome"
                       :iniciais="hospede.petIniciais"
@@ -150,7 +149,7 @@ function rotaDaEstadia(hospedagemId: string): string {
                     />
                     <span class="bicho__nome">{{ hospede.petNome }}</span>
                     <span class="bicho__onde">{{ hospede.acomodacaoNome }}</span>
-                  </button>
+                  </RouterLink>
                 </li>
               </ul>
             </div>
@@ -188,14 +187,10 @@ function rotaDaEstadia(hospedagemId: string): string {
             >
               <time class="dose__hora">{{ formato.hora(linha.tarefa.previstaPara) }}</time>
               <IconeDeTarefa kind="medicacao" class="dose__icone" />
-              <button
-                type="button"
-                class="dose__corpo"
-                @click="emit('abrir', rotaDaEstadia(linha.hospedagemId))"
-              >
+              <RouterLink class="dose__corpo" :to="rotaDaEstadia(linha.hospedagemId)">
                 <strong class="dose__quem">{{ linha.petNome }}</strong>
                 <span class="dose__oque">{{ linha.tarefa.descricao }}</span>
-              </button>
+              </RouterLink>
             </li>
           </ul>
         </div>
@@ -208,14 +203,10 @@ function rotaDaEstadia(hospedagemId: string): string {
             <li v-for="linha in cuidados" :key="linha.tarefa.id" class="dose">
               <time class="dose__hora">{{ formato.hora(linha.tarefa.previstaPara) }}</time>
               <IconeDeTarefa kind="cuidado" class="dose__icone" />
-              <button
-                type="button"
-                class="dose__corpo"
-                @click="emit('abrir', rotaDaEstadia(linha.hospedagemId))"
-              >
+              <RouterLink class="dose__corpo" :to="rotaDaEstadia(linha.hospedagemId)">
                 <strong class="dose__quem">{{ linha.petNome }}</strong>
                 <span class="dose__oque">{{ linha.tarefa.descricao }}</span>
-              </button>
+              </RouterLink>
             </li>
           </ul>
         </div>
@@ -232,14 +223,7 @@ function rotaDaEstadia(hospedagemId: string): string {
   padding: 1.25rem 1.25rem 1.5rem;
 }
 
-.bemEstar__titulo {
-  margin: 0;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--clinic-muted);
-}
+
 
 /*
  * Duas colunas, no mesmo `auto-fit` que o painel já usa nas listas de chegada e saída: quando a
@@ -368,9 +352,9 @@ function rotaDaEstadia(hospedagemId: string): string {
   border: 1px solid var(--clinic-line);
   border-radius: 999px;
   background: var(--clinic-surface);
-  cursor: pointer;
   font: inherit;
   color: inherit;
+  text-decoration: none;
   transition: border-color 150ms ease-out;
 }
 
@@ -426,13 +410,10 @@ function rotaDaEstadia(hospedagemId: string): string {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
   font: inherit;
   color: inherit;
   text-align: start;
+  text-decoration: none;
 }
 
 .dose__quem {

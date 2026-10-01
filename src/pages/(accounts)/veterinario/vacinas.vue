@@ -149,22 +149,26 @@ const visiveis = computed(() =>
 const opcoesRecorte = computed(() => [
   {
     valor: 'vencido' as Recorte,
-    rotulo: `${t('clinico.vacinas.situacao.vencido')} · ${porSituacao.value.vencido.length}`,
+    rotulo: t('clinico.vacinas.situacao.vencido'),
+    contagem: porSituacao.value.vencido.length,
     tom: 'risco' as const,
   },
   {
     valor: 'proximo' as Recorte,
-    rotulo: `${t('clinico.vacinas.situacao.proximo')} · ${porSituacao.value.proximo.length}`,
+    rotulo: t('clinico.vacinas.situacao.proximo'),
+    contagem: porSituacao.value.proximo.length,
     tom: 'atencao' as const,
   },
   {
     valor: 'serie-incompleta' as Recorte,
-    rotulo: `${t('clinico.vacinas.situacao.serie-incompleta')} · ${porSituacao.value['serie-incompleta'].length}`,
+    rotulo: t('clinico.vacinas.situacao.serie-incompleta'),
+    contagem: porSituacao.value['serie-incompleta'].length,
     tom: 'neutro' as const,
   },
   {
     valor: 'todos' as Recorte,
-    rotulo: `${t('clinico.faltas.filtro.todas')} · ${linhas.value.length}`,
+    rotulo: t('clinico.faltas.filtro.todas'),
+    contagem: linhas.value.length,
     tom: 'neutro' as const,
   },
 ])
@@ -174,16 +178,18 @@ const opcoesRecorte = computed(() => [
 const opcoesAba = computed(() => [
   {
     valor: 'aplicadas' as Aba,
-    rotulo: `${t('clinico.vacinas.aba.aplicadas')} · ${aplicacoes.value.length}`,
+    rotulo: t('clinico.vacinas.aba.aplicadas'),
+    contagem: aplicacoes.value.length,
     tom: 'neutro' as const,
   },
   {
     /*
-     * A contagem viaja no rótulo porque o número de atrasados é o que faz a clínica trocar de
+     * A contagem viaja no selo da aba porque o número de atrasados é o que faz a clínica trocar de
      * aba — e um selo que só aparece depois do clique chega tarde demais para provocar o clique.
      */
     valor: 'atraso' as Aba,
-    rotulo: `${t('clinico.vacinas.aba.atraso')} · ${porSituacao.value.vencido.length}`,
+    rotulo: t('clinico.vacinas.aba.atraso'),
+    contagem: porSituacao.value.vencido.length,
     tom: porSituacao.value.vencido.length > 0 ? ('risco' as const) : ('neutro' as const),
   },
   {
@@ -195,7 +201,8 @@ const opcoesAba = computed(() => [
      * para dar boas notícias a quem não ia clicar mesmo.
      */
     valor: 'estoque' as Aba,
-    rotulo: `${t('clinico.vacinas.aba.estoque')} · ${faltando.value}`,
+    rotulo: t('clinico.vacinas.aba.estoque'),
+    contagem: faltando.value,
     tom: faltando.value > 0 ? ('atencao' as const) : ('neutro' as const),
   },
 ])
@@ -527,6 +534,7 @@ function textoDeCobertura(dias: number | null): string {
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.vacinas.subtitulo')"
     :title="t('clinico.vacinas.titulo')"
     :loading="carregando && linhas.length === 0"

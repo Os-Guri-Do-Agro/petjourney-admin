@@ -125,7 +125,7 @@ function confirmar() {
           })
     "
     :style="{ width: 'min(34rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope hc-tema"
     @update:visible="emit('fechar')"
   >
     <div v-if="alvo" class="exig">
@@ -240,10 +240,6 @@ function confirmar() {
 
 .exig__validade {
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-accent-soft);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
   font-size: var(--clinic-font-label);
   font-weight: 700;

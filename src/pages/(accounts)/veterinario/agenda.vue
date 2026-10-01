@@ -8,6 +8,7 @@
  * O estado de visualização mora na URL (`useAgendaUrlState`): recarregar devolve exatamente a
  * mesma visão, e o link que a recepção manda para o veterinário abre onde deveria.
  */
+import { PhCalendarPlus } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -94,6 +95,25 @@ const paraEditar = computed(
 const feriado = computed(() => agenda.dia?.feriado ?? null)
 
 const erroTraduzido = computed(() => (agenda.erro ? t(agenda.erro) : ''))
+
+/**
+ * A frase da saudação (redesenho de 30/09/2026): quantos atendimentos o dia aberto tem, e quantos
+ * já esperam na recepção — a única conta que pede alguém levantar agora.
+ */
+const fraseDoDia = computed(() => {
+  const ativos = agenda.atendimentos.filter((item) => item.status !== 'cancelado')
+
+  if (ativos.length === 0) {
+    return t('clinico.agenda.frase.vazio')
+  }
+
+  const total = t('clinico.agenda.frase.atendimentos', { total: ativos.length }, ativos.length)
+  const naRecepcao = ativos.filter((item) => item.status === 'aguardando').length
+
+  return naRecepcao > 0
+    ? `${total} · ${t('clinico.agenda.frase.naRecepcao', { total: naRecepcao })}`
+    : total
+})
 
 /**
  * Dia fechado não é vazio: existe agenda possível ali, só não deveria haver. O frame mostra o
@@ -528,6 +548,7 @@ useClinicShortcuts({
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.agenda.subtitulo')"
     :title="t('clinico.agenda.titulo')"
     :loading="agenda.carregando && !agenda.dia"
@@ -540,9 +561,34 @@ useClinicShortcuts({
     @retry="carregar"
     @empty-action="abrirCriacao(false)"
   >
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('clinico.agenda.subtitulo') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('clinico.agenda.titulo') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p v-if="agenda.dia" class="hc-saudacao__resumo" aria-live="polite">{{ fraseDoDia }}</p>
+
+          <!-- A ação principal sobe da barra da grade: a barra ficou só com o que mexe na grade. -->
+          <nav class="hc-acoes" :aria-label="t('clinico.agenda.acoesRotulo')">
+            <Button
+              type="button"
+              class="hc-pilula hc-pilula--cheia"
+              :label="t('clinico.agenda.novoAtendimento')"
+              :title="`${t('clinico.agenda.novoAtendimento')} (N)`"
+              @click="abrirCriacao(false)"
+            >
+              <template #icon>
+                <PhCalendarPlus class="hc-pilula__icone" weight="fill" aria-hidden="true" />
+              </template>
+            </Button>
+          </nav>
+        </div>
+      </div>
+    </template>
+
     <div class="agenda clinic-scope">
       <AgendaToolbar
-        @novo="abrirCriacao(false)"
         @encaixar="abrirCriacao(true)"
         @bloquear="abrirBloqueio"
         @ajuda="ajudaAberta = true"

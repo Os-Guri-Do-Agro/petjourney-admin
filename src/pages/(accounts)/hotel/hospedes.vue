@@ -48,7 +48,7 @@ import InputText from 'primevue/inputtext'
 import SelectButton from 'primevue/selectbutton'
 import { computed, onMounted, ref, watch, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import HotelDevPanel from '@/features/hotel/components/base/HotelDevPanel.vue'
@@ -247,18 +247,19 @@ watch(
 const quantosPrecisam = computed(() => encontrados.value.filter(precisaDeAlguem).length)
 const quantosSaem = computed(() => encontrados.value.filter((item) => item.saiHoje).length)
 
-const resumo = computed(() => {
-  const total = encontrados.value.length
+/**
+ * A frase da saudação (redesenho de 30/09/2026): quantos da casa **inteira** precisam de alguém.
+ * Não segue a busca — quem busca um nome não quer que o estado da casa vire "1 de 1".
+ */
+const fraseDaCasa = computed(() => {
+  const total = hospedagem.hospedes.length
+  const precisam = hospedagem.hospedes.filter(precisaDeAlguem).length
 
-  if (total === 0 || quantosPrecisam.value === 0) {
+  if (total === 0 || precisam === 0) {
     return t('hotel.hospedes.resumoEmDia')
   }
 
-  return t(
-    'hotel.hospedes.resumo',
-    { precisam: quantosPrecisam.value, total },
-    quantosPrecisam.value,
-  )
+  return t('hotel.hospedes.resumo', { precisam, total }, precisam)
 })
 
 /*
@@ -334,6 +335,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="t('hotel.hospedes.titulo')"
     :subtitle="t('hotel.hospedes.subtitulo')"
     tour
@@ -369,15 +371,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         </SelectButton>
 
         <!--
-          O resumo mora no meio, e não numa linha própria abaixo.
-
-          Solto, ele era uma quarta faixa empilhada no topo dizendo o que as abas já contavam. Aqui
-          ele ocupa o vão entre os dois controles — que numa tela larga eram quase setecentos pixels
-          de nada — e o vão deixa de ser vazio para virar conteúdo.
+          O resumo da casa subiu para a frase da saudação. Aqui, no vão entre os dois controles,
+          fica só o que a busca precisa explicar.
         -->
         <p class="barra__resumo">
-          <span>{{ resumo }}</span>
-
           <!--
             Quando a busca casou com o responsável e ele tem mais de um na casa, a tela diz por que
             está mostrando vários — dois animais diferentes lado a lado parecem erro de busca.
@@ -515,18 +512,24 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       </ul>
     </div>
 
-    <template #actions>
-      <span class="clinic-scope clinic-acoes">
-        <Button
-          :label="t('hotel.hospedes.irParaRotina')"
-          severity="secondary"
-          outlined
-          size="small"
-          @click="router.push('/hotel/rotina')"
-        >
-          <template #icon><PhListChecks weight="duotone" aria-hidden="true" /></template>
-        </Button>
-      </span>
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('hotel.hospedes.subtitulo') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('hotel.hospedes.titulo') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p v-if="hospedagem.hospedes.length > 0" class="hc-saudacao__resumo" aria-live="polite">
+            {{ fraseDaCasa }}
+          </p>
+
+          <nav class="hc-acoes" :aria-label="t('hotel.hospedes.titulo')">
+            <RouterLink class="hc-pilula hc-pilula--cheia" to="/hotel/rotina">
+              <PhListChecks class="hc-pilula__icone" weight="fill" aria-hidden="true" />
+              {{ t('hotel.hospedes.irParaRotina') }}
+            </RouterLink>
+          </nav>
+        </div>
+      </div>
     </template>
 
     <HotelDevPanel />
@@ -617,6 +620,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .busca {
   position: relative;
   min-width: 17rem;
+}
+
+/* No estreito a busca desce para a própria linha: ocupa a largura, em vez de ficar à direita. */
+@media (max-width: 640px) {
+  .busca {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
 }
 
 .busca__lupa {
@@ -723,13 +734,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   border: 0;
   gap: var(--clinic-space-2);
   background: transparent;
-  color: var(--clinic-faint);
+  color: var(--clinic-text);
   font-family: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   text-align: start;
-  text-transform: uppercase;
 }
 
 .banda__titulo::after {

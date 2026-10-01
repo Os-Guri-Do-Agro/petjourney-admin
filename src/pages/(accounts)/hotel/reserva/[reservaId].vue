@@ -166,6 +166,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :title="pet?.nome ?? t('hotel.reserva.titulo')"
     :subtitle="t('hotel.reserva.subtitulo')"
     tour
@@ -438,11 +439,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .cartao__titulo {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .periodo {
@@ -478,23 +478,16 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   display: flex;
   align-items: center;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid transparent;
-  border-radius: var(--clinic-radius-control);
   gap: var(--clinic-space-2);
   font-size: var(--clinic-font-label);
   font-weight: 700;
 }
 
 .aviso--atencao {
-  border-color: var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
   color: var(--clinic-attention-text);
 }
 
 .aviso--risco {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
   color: var(--clinic-risk-text);
 }
 

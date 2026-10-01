@@ -216,12 +216,12 @@ function textoDaSituacao(dose: DoseNaGrade): string {
 
         <div v-if="!registrandoContato" class="trat__alerta-acoes">
           <Button
-            class="ficha-pilula"
+            class="hc-pilula"
             :label="t('clinico.adesao.alerta.registrarContato')"
             @click="registrandoContato = true"
           >
             <template #icon>
-              <PhChatCircleText class="ficha-pilula__icone" weight="duotone" aria-hidden="true" />
+              <PhChatCircleText class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
             </template>
           </Button>
         </div>
@@ -249,13 +249,13 @@ function textoDaSituacao(dose: DoseNaGrade): string {
           <div class="trat__contato-acoes">
             <Button
               type="submit"
-              class="ficha-pilula ficha-pilula--cheia"
+              class="hc-pilula hc-pilula--cheia"
               :label="t('clinico.adesao.alerta.salvar')"
               :loading="salvando"
             />
             <Button
               type="button"
-              class="ficha-pilula"
+              class="hc-pilula"
               :label="t('clinico.adesao.alerta.cancelar')"
               @click="registrandoContato = false"
             />
@@ -283,7 +283,7 @@ function textoDaSituacao(dose: DoseNaGrade): string {
         </div>
 
         <Button
-          class="ficha-pilula"
+          class="hc-pilula"
           :label="
             verRegistros
               ? t('clinico.adesao.registros.esconder')

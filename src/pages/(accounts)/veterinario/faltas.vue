@@ -12,8 +12,18 @@
  *
  * A política de reincidência é **sugestão**, e o toggle diz isso em voz alta. Regra que
  * proíbe vira regra contornada no papel.
+ *
+ * ## A forma (redesenho de 30/09/2026)
+ *
+ * A saudação da Visão geral. A fileira de quatro cartões de número saiu: o que é fila de trabalho
+ * (faltas a justificar) e o tamanho do problema (agenda parada) viraram a frase de estado, e
+ * reincidentes e "a justificar" já estão no recorte, com o número em selo. A pílula cheia é a fila
+ * de trabalho — justificar a próxima falta sem motivo —, e a política, que é configuração e muda
+ * uma vez, recolheu num popover atrás de uma pílula contornada.
  */
+import { PhPhoneCall, PhSlidersHorizontal } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
+import Popover from 'primevue/popover'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { computed, onMounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -21,7 +31,6 @@ import { useI18n } from 'vue-i18n'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
-import ClinicStat from '@/features/clinico/components/base/ClinicStat.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
 import AgendaFaltaDialog from '@/features/clinico/components/agenda/AgendaFaltaDialog.vue'
 import AgendaReagendarDialog from '@/features/clinico/components/agenda/AgendaReagendarDialog.vue'
@@ -322,9 +331,50 @@ const totalPendentes = computed(() =>
   linhas.value.reduce((total, linha) => total + linha.semJustificativa, 0),
 )
 
-const totalFaltas = computed(() =>
-  linhas.value.reduce((total, linha) => total + linha.faltas, 0),
-)
+/** A frase da saudação: a fila de trabalho primeiro, depois o tamanho do problema. */
+const fraseDoResumo = computed(() => {
+  const fila =
+    totalPendentes.value > 0
+      ? t('clinico.faltas.frase.pendentes', { total: totalPendentes.value }, totalPendentes.value)
+      : t('clinico.faltas.frase.emDia')
+
+  return `${fila} · ${t('clinico.faltas.frase.agenda', { tempo: formato.duracao(totalMinutos.value) })}`
+})
+
+const politica = ref<InstanceType<typeof Popover> | null>(null)
+const buscandoProxima = ref(false)
+
+/**
+ * Abre a justificativa da falta sem motivo mais antiga — a fila de trabalho do painel, um toque
+ * por vez. O histórico do responsável abre junto, para quem liga ter o resto das faltas à vista.
+ */
+async function justificarProxima() {
+  const linha = [...pendentes.value].sort((uma, outra) =>
+    (uma.ultimaFaltaEm ?? '').localeCompare(outra.ultimaFaltaEm ?? ''),
+  )[0]
+
+  if (!linha) {
+    return
+  }
+
+  buscandoProxima.value = true
+
+  try {
+    if (responsavelAberto.value !== linha.tutorId) {
+      await alternarDetalhe(linha)
+    }
+
+    const proxima = detalhe.value
+      .filter((falta) => !falta.appointment.justificativaDeFalta)
+      .sort((uma, outra) => uma.appointment.inicio.localeCompare(outra.appointment.inicio))[0]
+
+    if (proxima) {
+      faltaParaJustificar.value = proxima
+    }
+  } finally {
+    buscandoProxima.value = false
+  }
+}
 
 const totalMinutos = computed(() =>
   linhas.value.reduce((total, linha) => total + linha.minutosPerdidos, 0),
@@ -333,17 +383,20 @@ const totalMinutos = computed(() =>
 const opcoesRecorte = computed(() => [
   {
     valor: 'pendentes' as Recorte,
-    rotulo: `${t('clinico.faltas.filtro.pendentes')} · ${pendentes.value.length}`,
+    rotulo: t('clinico.faltas.filtro.pendentes'),
+    contagem: pendentes.value.length,
     tom: pendentes.value.length > 0 ? ('atencao' as const) : ('neutro' as const),
   },
   {
     valor: 'reincidentes' as Recorte,
-    rotulo: `${t('clinico.faltas.filtro.reincidentes')} · ${reincidentes.value.length}`,
+    rotulo: t('clinico.faltas.filtro.reincidentes'),
+    contagem: reincidentes.value.length,
     tom: 'neutro' as const,
   },
   {
     valor: 'todas' as Recorte,
-    rotulo: `${t('clinico.faltas.filtro.todas')} · ${linhas.value.length}`,
+    rotulo: t('clinico.faltas.filtro.todas'),
+    contagem: linhas.value.length,
     tom: 'neutro' as const,
   },
 ])
@@ -374,6 +427,7 @@ onMounted(carregar)
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.faltas.subtitulo')"
     :title="t('clinico.faltas.titulo')"
     :loading="carregando && linhas.length === 0"
@@ -384,43 +438,46 @@ onMounted(carregar)
     block-when-suspended
     @retry="carregar"
   >
-    <div class="faltas clinic-scope">
-      <!-- Os três números que dispensam ler a tabela para saber o tamanho do problema. -->
-      <div class="resumo">
-        <ClinicStat
-          icone="pi pi-user-minus"
-          :rotulo="t('clinico.faltas.resumo.total')"
-          :valor="String(totalFaltas)"
-          :detalhe="
-            t('clinico.faltas.resumo.pacientes', { contagem: linhas.length }, linhas.length)
-          "
-        />
-        <ClinicStat
-          icone="pi pi-clock"
-          tom="atencao"
-          :rotulo="t('clinico.faltas.resumo.agenda')"
-          :valor="formato.duracao(totalMinutos)"
-        />
-        <ClinicStat
-          icone="pi pi-replay"
-          :tom="reincidentes.length > 0 ? 'risco' : 'neutro'"
-          :rotulo="t('clinico.faltas.resumo.reincidentes')"
-          :valor="String(reincidentes.length)"
-          :detalhe="t('clinico.faltas.resumo.limite', { limite: LIMITE_REINCIDENCIA })"
-        />
-        <!--
-          O quarto número, e o único que é fila de trabalho: quantas faltas ninguém apurou.
-          Os outros três dimensionam o problema; este diz o que fazer hoje.
-        -->
-        <ClinicStat
-          icone="pi pi-phone"
-          :tom="totalPendentes > 0 ? 'atencao' : 'neutro'"
-          :rotulo="t('clinico.faltas.resumo.pendentes')"
-          :valor="String(totalPendentes)"
-          :detalhe="t('clinico.faltas.resumo.pendentesDetalhe')"
-        />
-      </div>
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('clinico.faltas.subtitulo') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('clinico.faltas.titulo') }}</h1>
 
+        <div class="hc-saudacao__linha">
+          <p v-if="linhas.length > 0" class="hc-saudacao__resumo" aria-live="polite">
+            {{ fraseDoResumo }}
+          </p>
+
+          <nav class="hc-acoes" :aria-label="t('clinico.faltas.acoes.rotulo')">
+            <Button
+              v-if="totalPendentes > 0"
+              type="button"
+              class="hc-pilula hc-pilula--cheia"
+              :label="t('clinico.faltas.acoes.justificarProxima')"
+              :loading="buscandoProxima"
+              @click="justificarProxima"
+            >
+              <template #icon>
+                <PhPhoneCall class="hc-pilula__icone" weight="fill" aria-hidden="true" />
+              </template>
+            </Button>
+            <Button
+              type="button"
+              class="hc-pilula"
+              :label="t('clinico.faltas.politica.titulo')"
+              aria-haspopup="dialog"
+              @click="politica?.toggle($event)"
+            >
+              <template #icon>
+                <PhSlidersHorizontal class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
+              </template>
+            </Button>
+          </nav>
+        </div>
+      </div>
+    </template>
+
+    <div class="faltas clinic-scope">
       <div class="faltas__recorte">
         <ClinicToggleGroup
           v-model="recorte"
@@ -530,10 +587,11 @@ onMounted(carregar)
                 texto de tamanho variável, e o que se lê aqui é a frase inteira — "transporte,
                 por WhatsApp" — não um campo a ser comparado linha a linha.
               -->
-              <button
+              <Button
                 v-if="falta.appointment.justificativaDeFalta"
                 type="button"
                 class="falta__motivo"
+                text
                 :title="t('clinico.faltas.justificativa.editar')"
                 @click.stop="faltaParaJustificar = falta"
               >
@@ -544,7 +602,7 @@ onMounted(carregar)
                     · {{ formato.canalDeContato(falta.appointment.justificativaDeFalta.canal) }}
                   </span>
                 </span>
-              </button>
+              </Button>
               <span
                 v-if="falta.appointment.justificativaDeFalta?.observacao"
                 class="falta__observacao"
@@ -611,7 +669,14 @@ onMounted(carregar)
         </ol>
       </section>
 
-      <section class="politica">
+    </div>
+
+    <!--
+      A política é configuração: muda uma vez, e ocupava uma seção inteira no pé da tela. Recolhida
+      atrás da pílula do topo, continua a um clique e diz em voz alta que é sugestão.
+    -->
+    <Popover ref="politica" class="hc-tema">
+      <section class="politica" :aria-label="t('clinico.faltas.politica.titulo')">
         <div class="politica__texto">
           <h2 class="politica__titulo">{{ t('clinico.faltas.politica.titulo') }}</h2>
           <p>{{ t('clinico.faltas.politica.descricao', { limite: LIMITE_REINCIDENCIA }) }}</p>
@@ -631,7 +696,7 @@ onMounted(carregar)
           </label>
         </div>
       </section>
-    </div>
+    </Popover>
 
     <AgendaReagendarDialog
       :appointment="paraReagendar"
@@ -660,12 +725,6 @@ onMounted(carregar)
 <style scoped>
 .faltas {
   display: grid;
-  gap: var(--clinic-space-3);
-}
-
-.resumo {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
   gap: var(--clinic-space-3);
 }
 
@@ -798,21 +857,29 @@ onMounted(carregar)
  * uma segunda ligação. Deixar o texto inerte obrigaria a inventar um segundo ponto de entrada
  * para a correção; assim o próprio motivo é o caminho de volta ao diálogo.
  */
-.falta__motivo {
+/* Botão de texto do PrimeVue com a cara de link do motivo: sem o respiro nem o fundo do tema. */
+.falta__motivo.p-button {
   display: inline-flex;
   align-items: center;
   justify-self: start;
   gap: 0.3rem;
+  min-height: 0;
   margin-top: 0.15rem;
   padding: 0;
   border: none;
   background: none;
   color: var(--clinic-accent-strong);
-  cursor: pointer;
   font: inherit;
   font-size: var(--clinic-font-label);
   font-weight: 700;
   text-align: start;
+}
+
+.falta__motivo.p-button:not(:disabled):hover {
+  background: none;
+  color: var(--clinic-accent-strong);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .falta__motivo:hover {
@@ -850,16 +917,12 @@ onMounted(carregar)
   }
 }
 
+/* Dentro do popover da pílula "Política de reincidência": sem moldura própria, o popover já é a caixa. */
 .politica {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--clinic-space-4);
-  padding: var(--clinic-space-5);
-  border: 1px dashed var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
+  display: grid;
+  gap: 0.9rem;
+  max-width: 24rem;
+  padding: 0.35rem 0.25rem;
 }
 
 .politica__texto {
@@ -868,9 +931,9 @@ onMounted(carregar)
 
 .politica__titulo {
   margin: 0 0 0.3rem;
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .politica__texto p {
@@ -893,9 +956,7 @@ onMounted(carregar)
 
 .politica__toggle small {
   color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 </style>

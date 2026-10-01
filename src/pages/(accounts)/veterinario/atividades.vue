@@ -64,6 +64,7 @@ onMounted(carregar)
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.atividades.subtitulo')"
     :title="t('clinico.atividades.titulo')"
     :loading="carregando && total === 0"
@@ -185,10 +186,11 @@ onMounted(carregar)
   grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
 }
 
+/* O cartão e o título dos cartões da Visão geral (`.hc`): título em caixa normal, na tinta. */
 .pilha {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-4);
+  gap: var(--clinic-space-3);
+  padding: 1.2rem 1.35rem 1.35rem;
   border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
   background: var(--clinic-surface);
@@ -198,13 +200,12 @@ onMounted(carregar)
 .pilha__titulo {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 0.55rem;
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .pilha__marca {

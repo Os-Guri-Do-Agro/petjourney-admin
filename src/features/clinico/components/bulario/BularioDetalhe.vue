@@ -267,12 +267,11 @@ function faixa(minimo: number, maximo: number) {
   text-align: start;
 }
 
+/* Cabeçalho de coluna em caixa normal, como o das tabelas e da pauta. */
 .doses__tabela thead th {
   color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .doses__tabela tbody th {

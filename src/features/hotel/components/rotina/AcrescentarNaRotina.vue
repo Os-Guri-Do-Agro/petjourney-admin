@@ -309,7 +309,7 @@ function gravar() {
     modal
     :header="t('hotel.acrescentar.titulo')"
     :style="{ width: 'min(36rem, 94vw)' }"
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     @update:visible="emit('fechar')"
   >
     <div class="form">

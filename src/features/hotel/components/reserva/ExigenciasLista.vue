@@ -163,33 +163,25 @@ function detalhe(item: ExigenciaAvaliada): string {
   gap: var(--clinic-space-3);
 }
 
+/* O veredito é uma linha com ícone na cor do estado — a faixa pintada não volta. */
 .exig__resumo {
   display: flex;
   align-items: center;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
   gap: var(--clinic-space-2);
   font-size: var(--clinic-font-label);
   font-weight: 700;
 }
 
 .exig__resumo--risco {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
   color: var(--clinic-risk-text);
 }
 
 .exig__resumo--atencao {
-  border-color: var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
   color: var(--clinic-attention-text);
 }
 
 .exig__resumo--ok {
-  border-color: var(--clinic-accent-soft);
-  background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
 }
 

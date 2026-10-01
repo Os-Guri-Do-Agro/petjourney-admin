@@ -148,7 +148,7 @@ function pesar() {
     modal
     :header="t('hotel.checkout.titulo', { pet: petNome })"
     :style="{ width: 'min(44rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope hc-tema"
     @update:visible="emit('fechar')"
   >
     <div v-if="hospedagem" class="saida">
@@ -352,11 +352,10 @@ function pesar() {
 
 .bloco__titulo {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .pertences {
@@ -410,11 +409,7 @@ function pesar() {
   display: flex;
   align-items: center;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
   gap: var(--clinic-space-2);
-  background: var(--clinic-attention-bg);
   color: var(--clinic-attention-text);
   font-size: var(--clinic-font-label);
   font-weight: 700;
@@ -430,10 +425,8 @@ function pesar() {
 
 .saida__saldo span {
   color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .saida__saldo strong {

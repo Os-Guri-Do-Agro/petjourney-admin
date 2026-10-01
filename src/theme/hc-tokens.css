@@ -1,0 +1,79 @@
+/*
+ * Os tokens do design do portal.
+ *
+ * Nasceram na Visão geral (`components/home/home-card.css`, daí o prefixo `--hc-`) e em 30/09/2026
+ * o usuário decidiu levá-los ao portal inteiro: a moldura (menu e cabeçalho) já pinta com eles, e as
+ * telas migram uma a uma. Por isso moram na raiz, e não na raiz de cada página — o que o PrimeVue
+ * teleporta para o `body` (diálogos, popovers) também os enxerga.
+ *
+ * `.hc-tema` continua existindo como marcador das telas migradas; as variáveis não dependem mais dela.
+ */
+
+:root {
+  --hc-fundo: #f5f7f6;
+  --hc-grade: rgb(47 111 99 / 5.5%);
+  --hc-cartao: #ffffff;
+  --hc-borda: #e8edea;
+  --hc-linha: #eef2f0;
+  --hc-tinta: #18221f;
+  --hc-tinta-2: #56645f;
+  --hc-tinta-3: #8b9893;
+  --hc-marca: #2f8c7c;
+  --hc-marca-forte: #256f62;
+  --hc-marca-clara: #e7f4f0;
+  /* O texto em degradê da saudação: do fim mais claro ao fundo da página ainda passa de 3:1. */
+  --hc-degrade: linear-gradient(90deg, #22695c 0%, #2a8d7c 45%, #2b87a8 100%);
+  /* A pílula cheia: o rótulo branco fica no meio do degradê, acima de 5:1. */
+  --hc-degrade-botao: linear-gradient(120deg, #1f6457 0%, #2f8a79 100%);
+  --hc-sombra: 0 1px 2px rgb(20 32 28 / 4%), 0 12px 30px -16px rgb(20 32 28 / 14%);
+  --hc-sombra-alta: 0 1px 2px rgb(20 32 28 / 6%), 0 18px 40px -18px rgb(20 32 28 / 22%);
+
+  --hc-ciano-fundo: #d3f1ee;
+  --hc-ciano-tinta: #0e6b66;
+  --hc-lilas-fundo: #ebe7fd;
+  --hc-lilas-tinta: #5443c2;
+  --hc-pessego-fundo: #ffe6d5;
+  --hc-pessego-tinta: #ad4a13;
+  --hc-coral-fundo: #fde2e2;
+  --hc-coral-tinta: #c43333;
+  --hc-verde-fundo: #daf2e3;
+  --hc-verde-tinta: #1d7443;
+  --hc-cinza-fundo: #eef1f0;
+  --hc-cinza-tinta: #56645f;
+  --hc-azul-fundo: #e2ecff;
+  --hc-azul-tinta: #3453c3;
+}
+
+:root.app-dark {
+  --hc-fundo: #0e1613;
+  --hc-grade: rgb(255 255 255 / 3.5%);
+  --hc-cartao: #151f1c;
+  --hc-borda: #22302b;
+  --hc-linha: #1f2b27;
+  --hc-tinta: #eef5f2;
+  --hc-tinta-2: #a9bbb4;
+  --hc-tinta-3: #7d918a;
+  --hc-marca: #6cc9b5;
+  --hc-marca-forte: #8fd9c8;
+  --hc-marca-clara: #1b322c;
+  --hc-degrade: linear-gradient(90deg, #8fd9c8 0%, #6cc9b5 45%, #6cc6d0 100%);
+  /* O mesmo do claro: texto branco sobre um degradê claro caía para ~2,5:1. */
+  --hc-degrade-botao: linear-gradient(120deg, #1f6457 0%, #2f8a79 100%);
+  --hc-sombra: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 30px -16px rgb(0 0 0 / 50%);
+  --hc-sombra-alta: 0 1px 2px rgb(0 0 0 / 35%), 0 18px 40px -18px rgb(0 0 0 / 60%);
+
+  --hc-ciano-fundo: #123a38;
+  --hc-ciano-tinta: #8fe0da;
+  --hc-lilas-fundo: #29244f;
+  --hc-lilas-tinta: #c9c0ff;
+  --hc-pessego-fundo: #3d2718;
+  --hc-pessego-tinta: #ffc39f;
+  --hc-coral-fundo: #3f1f22;
+  --hc-coral-tinta: #ffabab;
+  --hc-verde-fundo: #16362a;
+  --hc-verde-tinta: #93e2b3;
+  --hc-cinza-fundo: #222e2a;
+  --hc-cinza-tinta: #a9bbb4;
+  --hc-azul-fundo: #1c2848;
+  --hc-azul-tinta: #b3c6ff;
+}

@@ -316,10 +316,14 @@ function irPara(rota: string) {
 </template>
 
 <style scoped>
+/*
+ * No canto do fim, e não do início: lá embaixo, à esquerda, mora o "Sair" do trilho, e o gatilho
+ * nascia exatamente em cima dele.
+ */
 .dev {
   position: fixed;
   bottom: var(--clinic-space-4);
-  inset-inline-start: var(--clinic-space-4);
+  inset-inline-end: var(--clinic-space-4);
   z-index: 70;
 }
 
@@ -340,7 +344,7 @@ function irPara(rota: string) {
 .dev__painel {
   position: absolute;
   bottom: calc(100% + 0.5rem);
-  inset-inline-start: 0;
+  inset-inline-end: 0;
   display: grid;
   gap: var(--clinic-space-3);
   width: min(22rem, 90vw);

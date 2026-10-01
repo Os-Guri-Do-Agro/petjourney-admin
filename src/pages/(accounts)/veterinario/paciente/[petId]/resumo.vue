@@ -401,13 +401,13 @@ watch(petId, carregar)
       <FichaCabeca :pet="pet" :tutor="tutor" atual="resumo" :frase="frase" sem-alertas>
         <template v-if="atendimentoDeHoje" #acoes>
           <Button
-            class="ficha-pilula ficha-pilula--cheia"
+            class="hc-pilula hc-pilula--cheia"
             :label="t('clinico.resumoDoPaciente.abrirAtendimento')"
             :loading="abrindo"
             @click="abrirAtendimento"
           >
             <template #icon>
-              <PhStethoscope class="ficha-pilula__icone" weight="fill" aria-hidden="true" />
+              <PhStethoscope class="hc-pilula__icone" weight="fill" aria-hidden="true" />
             </template>
           </Button>
         </template>

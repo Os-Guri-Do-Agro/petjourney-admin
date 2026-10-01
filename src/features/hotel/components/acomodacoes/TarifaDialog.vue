@@ -125,7 +125,7 @@ function salvar() {
     modal
     :header="editando ? t('hotel.acomodacoes.preco.editar') : t('hotel.acomodacoes.preco.nova')"
     :style="{ width: 'min(34rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope hc-tema"
     @update:visible="emit('fechar')"
   >
     <form class="forma" @submit.prevent="salvar">
@@ -266,12 +266,11 @@ function salvar() {
 
 .portes__titulo {
   padding-inline: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
   grid-column: 1 / -1;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
 }
 
 /*

@@ -321,7 +321,7 @@ defineExpose({ voltarParaLista })
   <Dialog
     v-model:visible="visivel"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(46rem, 96vw)' }"
     :content-style="{ maxHeight: '68vh', overflowY: 'auto' }"
     :header="t('clinico.internacao.leitos.titulo')"

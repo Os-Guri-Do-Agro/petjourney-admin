@@ -178,7 +178,7 @@ async function salvar() {
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(34rem, 94vw)' }"
     :header="t('clinico.fila.adicionar')"
     :dismissable-mask="true"

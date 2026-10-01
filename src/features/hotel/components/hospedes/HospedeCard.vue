@@ -46,7 +46,7 @@ import {
   PhMapPin,
   PhMoon,
   PhPawPrint,
-  PhPhoneCall,
+  PhWarningCircle,
   PhScales,
 } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
@@ -97,7 +97,7 @@ const estado = computed<Estado>(() => {
  * ícone a ele passa a ser erro de compilação, e não um quadrado vazio descoberto em produção.
  */
 const ICONE_DO_ESTADO: Record<Estado, Component> = {
-  travado: PhPhoneCall,
+  travado: PhWarningCircle,
   atrasada: PhCheckCircle,
   recado: PhChatCircleText,
   aguardando: PhCheckCircle,
@@ -200,14 +200,15 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
 
       <div class="quem__texto">
         <p class="quem__linha">
-          <button
+          <Button
             type="button"
             class="quem__nome"
+            text
             :aria-label="t('hotel.hospedes.acao.abrir', { pet: hospede.petNome })"
             @click="emit('abrir', hospede.hospedagem.id)"
           >
             {{ hospede.petNome }}
-          </button>
+          </Button>
 
           <span v-if="hospede.acompanhante" class="quem__dupla">
             <PhPawPrint weight="duotone" aria-hidden="true" />
@@ -248,7 +249,7 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
       <div class="foco__texto">
         <template v-if="estado === 'travado'">
           <p class="foco__frase">
-            {{ t('hotel.hospedes.foco.ligar', { tutor: hospede.tutorNome }) }}
+            {{ t('hotel.hospedes.foco.ocorrencia', { tutor: hospede.tutorNome }) }}
           </p>
           <p v-if="hospede.atrasadas > 0" class="foco__nota foco__nota--risco">
             {{
@@ -329,18 +330,19 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
       </HotelSelo>
 
       <!--
-        Ligar é o que a prancheta do turno não faz — e o número chegava no repositório e nunca era
-        desenhado, então o cartão mandava ligar e escondia para quem.
+        A ação é registrar o contato, e não ligar (30/09/2026): quem liga é a casa, pelo telefone do
+        cadastro, que continua à vista ao lado. O registro mora na estadia — é lá que a ocorrência
+        destrava o boletim —, então o botão abre a estadia.
       -->
       <span v-if="estado === 'travado'" class="pe__acao">
         <Button
-          as="a"
-          :href="`tel:${hospede.tutorTelefone}`"
-          :label="t('hotel.hospedes.acao.ligar')"
-          icon="pi pi-phone"
+          type="button"
+          :label="t('hotel.hospedes.acao.registrarContato')"
+          icon="pi pi-pen-to-square"
           severity="secondary"
           outlined
           size="small"
+          @click="emit('abrir', hospede.hospedagem.id)"
         />
         <span class="pe__tel clinic-value">
           <bdi dir="ltr">{{ hospede.tutorTelefone }}</bdi>
@@ -463,12 +465,22 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
  * O nome é um botão, e o `::after` faz dele o alvo do cartão inteiro. É o padrão de link
  * esticado: um foco por cartão para quem anda por teclado, superfície toda para quem usa o dedo.
  */
-.quem__nome {
+/*
+ * Botão de texto do PrimeVue com a cara do nome. `position: static` e `overflow: visible` desfazem
+ * dois padrões do `.p-button`: com eles o `::after` se ancoraria no próprio botão e seria cortado
+ * por ele, e o cartão deixaria de ser alvo inteiro.
+ */
+.quem__nome.p-button,
+.quem__nome.p-button:not(:disabled):hover,
+.quem__nome.p-button:not(:disabled):active {
+  position: static;
+  min-height: 0;
   padding: 0;
   border: 0;
+  overflow: visible;
   background: transparent;
+  box-shadow: none;
   color: var(--clinic-text);
-  cursor: pointer;
   font: inherit;
   font-size: 1.15rem;
   font-weight: 800;
@@ -505,7 +517,6 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
   align-items: center;
   min-block-size: 3.4rem;
   padding: var(--clinic-space-3);
-  border-inline-start: 3px solid var(--clinic-line);
   border-radius: var(--clinic-radius-control);
   gap: var(--clinic-space-3);
   background: var(--clinic-surface-soft);
@@ -532,48 +543,35 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
  * O disco enche quando tem o que dizer. É a única troca de cor da faixa, e é troca de **forma**
  * antes de ser de matiz: vazado contra cheio sobrevive ao cinza.
  */
-.cartao--travado .foco__disco,
-.cartao--atrasada .foco__disco {
+/*
+ * Só o travado enche (redesenho de 30/09/2026), como o bloco urgente da pauta da Visão geral:
+ * numa casa de cinco, cinco discos cheios eram uma parede, e o que é grave deixava de saltar.
+ * Atraso e recado ficam no pêssego suave; o que aguarda, na sálvia clara.
+ */
+.cartao--travado .foco__disco {
   border-color: transparent;
   background: var(--clinic-risk-text);
   color: var(--clinic-on-accent);
 }
 
+.cartao--atrasada .foco__disco,
 .cartao--recado .foco__disco {
   border-color: transparent;
-  background: var(--clinic-attention-text);
-  color: var(--clinic-on-accent);
+  background: var(--clinic-attention-bg);
+  color: var(--clinic-attention-text);
 }
 
 .cartao--aguardando .foco__disco {
   border-color: transparent;
-  background: var(--clinic-accent-deep);
-  color: var(--clinic-on-accent);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
 }
 
 /*
- * A aresta do bloco, na cor do estado.
- *
- * É **borda**, não preenchimento, e a diferença não é cosmética: a regra da casa proíbe pintar a
- * superfície por estado porque risco e atenção têm luminância quase idêntica e, em escala de
- * cinza, viram a mesma cor. Uma aresta de 3 px existe ou não existe antes de ter cor nenhuma — é
- * canal de forma, e sobrevive ao cinza e ao daltonismo como o disco sobrevive.
- *
- * É também o único ponto de cor saturada do cartão, e o que faz o bloco ler como chamada em vez de
- * caixa cinza.
+ * Sem aresta colorida (redesenho de 30/09/2026). A faixa de 3 px na borda esquerda do bloco dizia o
+ * estado pela lateral — o acento que o design da casa recusa —, e repetia o que o disco já diz: ele
+ * enche na cor do estado, que é canal de forma (vazado contra cheio) e sobrevive ao cinza.
  */
-.cartao--travado .foco,
-.cartao--atrasada .foco {
-  border-inline-start-color: var(--clinic-risk-text);
-}
-
-.cartao--recado .foco {
-  border-inline-start-color: var(--clinic-attention-text);
-}
-
-.cartao--aguardando .foco {
-  border-inline-start-color: var(--clinic-accent-deep);
-}
 
 .foco__texto {
   display: grid;
@@ -634,12 +632,11 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
   gap: var(--clinic-space-2);
 }
 
+/* Rótulo em caixa normal, como os da pauta: a caixa alta espaçada era o rótulo do linho. */
 .dia__rotulo {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  color: var(--clinic-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .dia__conta {

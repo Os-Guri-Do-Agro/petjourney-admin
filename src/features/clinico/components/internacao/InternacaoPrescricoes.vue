@@ -331,7 +331,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
     <Dialog
       v-model:visible="abrindo"
       modal
-      class="clinic-dialog"
+      class="clinic-dialog hc-tema"
       :style="{ width: 'min(42rem, 96vw)' }"
       :header="t('clinico.internacao.prescricao.novaTitulo')"
       dismissable-mask

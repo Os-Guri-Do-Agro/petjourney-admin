@@ -1,52 +1,67 @@
 <script setup lang="ts">
 /**
- * Meu dia — a landing natural do perfil veterinário.
+ * Hoje na clínica — a landing natural do perfil veterinário.
  *
  * A agenda responde a pergunta errada para quem chega de manhã. Grade é ferramenta de quem
- * **procura horário**; quem abre o portal às oito pergunta **o que é agora**.
+ * **procura horário**; quem abre o portal às oito pergunta **o que é agora e o que não pode
+ * esperar**. A agenda completa fica a um clique.
  *
- * Esta tela responde nesta ordem, e a ordem é o conteúdo:
- * 1. o que estou atendendo, ou o que vem em seguida;
- * 2. quem já chegou e está esperando;
- * 3. quem está internado e cobra alguma coisa agora;
- * 4. quem tem alerta que muda conduta hoje;
- * 5. que retorno ficou sem horário marcado — receita parada na mesa.
+ * ## A forma (redesenho de 30/09/2026)
  *
- * A agenda completa fica a um clique.
+ * A da Visão geral, com o conteúdo do dia de quem atende:
  *
- * ## Por que a internação entrou aqui
+ * 1. **A saudação** — a data, o título e uma frase que diz o estado ("2 assuntos urgentes pedem
+ *    sua atenção"), com as pílulas ao lado. A cheia é o próximo passo natural: continuar o
+ *    atendimento em curso, ou começar o próximo.
+ * 2. **Agora e A seguir**, lado a lado — o paciente da sala, e os três que vêm depois dele.
+ * 3. **O que pede ação** — uma lista só, na forma da pauta da Visão geral (`PautaTabela`), por
+ *    gravidade: boletim retido e dose atrasada da internação, quem espera na recepção, alerta de
+ *    quem ainda vem hoje e, numa linha, os retornos sem horário.
  *
- * Ela não estava, e a ausência tinha consequência: um veterinário com cinco animais internados
- * abria a landing do próprio perfil e não via nenhum deles. O portal parecia dois sistemas — o
- * das consultas, que "Meu dia" resumia, e o da internação, que só existia para quem lembrasse de
- * abrir o mapa de leitos. Foi essa costura faltando que fez o fluxo ser descrito como confuso.
+ * Antes eram seis cartões iguais e uma faixa vermelha no topo. A faixa virou a primeira linha da
+ * lista, com o selo de urgente: a urgência mora no selo, não numa superfície pintada. Os retornos
+ * viraram uma linha que leva a Atividades, dona da lista inteira — as duas telas repetiam a mesma.
  *
- * O bloco mostra **só quem cobra ação** — dose atrasada, boletim que não saiu —, e não a lista de
- * internados. Quem quer a lista tem o mapa; quem abre esta tela às oito da manhã quer saber o que
- * não pode esperar. Um bloco que repete o mapa inteiro é um bloco que ninguém lê duas vezes.
+ * ## Por que a internação entra aqui
  *
- * O boletim retido sobe **acima de tudo**, junto com o destaque: é a única pendência do dia em
- * que há uma pessoa do outro lado, sem notícia do próprio animal, esperando um telefonema que
- * ninguém sabe que precisa dar.
+ * Um veterinário com cinco animais internados abria a landing do próprio perfil e não via nenhum
+ * deles: o portal parecia dois sistemas. Entra **só quem cobra ação** — boletim que não saiu, dose
+ * atrasada —, e não a lista de internados: quem quer a lista tem o mapa de leitos.
+ *
+ * O boletim retido vem antes de tudo: é a única pendência do dia com uma pessoa do outro lado, sem
+ * notícia do próprio animal, esperando um contato que ninguém sabe que precisa fazer.
  */
-import Button from 'primevue/button'
-import { computed, onMounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { RouterLink, useRouter } from 'vue-router'
+import '@/components/home/home-card.css'
 
+import {
+  PhBed,
+  PhCalendarBlank,
+  PhCheckCircle,
+  PhClipboardText,
+  PhClockCountdown,
+  PhStethoscope,
+  PhTimer,
+} from '@phosphor-icons/vue'
+import Button from 'primevue/button'
+import { computed, onMounted, ref, type Component } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { RouterLink, useRouter, type RouteLocationRaw } from 'vue-router'
+
+import PautaTabela from '@/components/home/PautaTabela.vue'
+import { porGravidade, type LinhaDaTabela } from '@/components/home/pauta-tabela'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
-import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
 import ClinicDevPanel from '@/features/clinico/components/base/ClinicDevPanel.vue'
+import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { encounterRepository } from '@/features/clinico/data/repositories'
-import type { Appointment } from '@/features/clinico/data/types'
+import type { Appointment, Pet } from '@/features/clinico/data/types'
 import { retornosVencidos, type RetornoPendente } from '@/features/clinico/domain/follow-up'
 import { useAgendaStore } from '@/features/clinico/stores/agenda'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useInternacaoStore } from '@/features/clinico/stores/internacao'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
@@ -54,6 +69,13 @@ const internacao = useInternacaoStore()
 const formato = useClinicFormat()
 
 const retornosPendentes = ref<RetornoPendente[]>([])
+
+/** Quantas linhas a lista mostra antes de recolher o resto: o que se lê sem rolar a tela. */
+const LIMITE_DA_PAUTA = 6
+/** Quantos atendimentos o "A seguir" mostra depois do destaque. */
+const LIMITE_A_SEGUIR = 3
+
+const ENCERRADOS: Appointment['status'][] = ['cancelado', 'falta', 'finalizado']
 
 const agora = computed(
   () => agenda.atendimentos.find((item) => item.status === 'em-atendimento') ?? null,
@@ -65,12 +87,28 @@ const aSeguir = computed(() => {
 
   return (
     agenda.atendimentos
-      .filter(
-        (item) =>
-          item.inicio > instante && !['cancelado', 'falta', 'finalizado'].includes(item.status),
-      )
+      .filter((item) => item.inicio > instante && !ENCERRADOS.includes(item.status))
       .sort((a, b) => a.inicio.localeCompare(b.inicio))[0] ?? null
   )
+})
+
+/** O paciente do cartão principal: o da sala, ou, com a sala vazia, o próximo. */
+const destaque = computed(() => agora.value ?? aSeguir.value)
+
+/** Os que vêm depois do destaque, sem repeti-lo. */
+const proximos = computed(() => {
+  const instante = clinicClock.nowIso()
+
+  return agenda.atendimentos
+    .filter(
+      (item) =>
+        item.id !== destaque.value?.id &&
+        item.inicio > instante &&
+        !ENCERRADOS.includes(item.status) &&
+        item.status !== 'em-atendimento',
+    )
+    .sort((a, b) => a.inicio.localeCompare(b.inicio))
+    .slice(0, LIMITE_A_SEGUIR)
 })
 
 const esperando = computed(() =>
@@ -80,43 +118,56 @@ const esperando = computed(() =>
 )
 
 /**
- * Alerta que muda conduta **hoje**: só de pacientes que a clínica vai ver hoje, e só os de
- * risco e atenção. Listar todo alerta de todo paciente transforma o painel em ruído.
- *
- * Uma linha por paciente, com todos os alertas dele juntos — repetir o nome três vezes faz a
- * lista parecer maior do que o problema é.
+ * Alerta que muda conduta hoje: de quem **ainda vem**, e só de risco e atenção. Quem já foi
+ * atendido sai — o alerta dele não muda mais nada hoje. Quem está na recepção leva o alerta na
+ * própria linha, e o destaque, no próprio cartão: repetir o nome faz a lista parecer maior do que
+ * o problema é.
  */
-const alertasDoDia = computed(() => {
+function alertasRelevantes(pet: Pet | null | undefined) {
+  return pet ? pet.alertas.filter((alerta) => alerta.severidade !== 'info') : []
+}
+
+function textoDoAlerta(alerta: Pet['alertas'][number]) {
+  return alerta.detalhe
+    ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}`
+    : formato.alerta(alerta.kind)
+}
+
+/**
+ * Até quanto tempo depois do horário marcado alguém que não chegou ainda "vem": o atraso comum de
+ * quem pega trânsito. Passou disso, é falta provável — e a falta tem tela própria.
+ */
+const TOLERANCIA_DE_ATRASO_MS = 30 * 60 * 1000
+
+const alertasDeQuemVem = computed(() => {
   const vistos = new Set<string>()
+  const limite = Date.parse(clinicClock.nowIso()) - TOLERANCIA_DE_ATRASO_MS
 
   return agenda.atendimentos
-    .filter((item) => !['cancelado', 'falta'].includes(item.status))
+    .filter(
+      (item) =>
+        (item.status === 'agendado' || item.status === 'confirmado') &&
+        item.id !== destaque.value?.id &&
+        Date.parse(item.inicio) >= limite,
+    )
+    .sort((a, b) => a.inicio.localeCompare(b.inicio))
     .flatMap((item) => {
       const pet = clinico.pet(item.petId)
+      const alertas = alertasRelevantes(pet)
 
-      if (!pet || vistos.has(pet.id)) {
-        return []
-      }
-
-      const relevantes = pet.alertas.filter((alerta) => alerta.severidade !== 'info')
-
-      if (relevantes.length === 0) {
+      if (!pet || alertas.length === 0 || vistos.has(pet.id)) {
         return []
       }
 
       vistos.add(pet.id)
 
-      return [{ pet, alertas: relevantes, appointment: item }]
+      return [{ pet, alertas, appointment: item }]
     })
 })
 
 /**
- * Os internados que cobram alguma coisa **agora**.
- *
- * Ordenados pelo que mais dói: primeiro quem tem boletim retido — há uma pessoa esperando
- * telefonema —, depois quem tem mais doses atrasadas. Um internado tranquilo não entra: quem
- * quer a lista completa tem o mapa de leitos, e repetir o mapa aqui faria o bloco virar
- * paisagem.
+ * Os internados que cobram alguma coisa **agora**: primeiro quem tem boletim retido, depois quem
+ * tem mais doses atrasadas. Um internado tranquilo não entra.
  */
 const internadosComPendencia = computed(() =>
   (internacao.mapa?.leitos ?? [])
@@ -124,19 +175,175 @@ const internadosComPendencia = computed(() =>
     .sort((a, b) => Number(b.boletimRetido) - Number(a.boletimRetido) || b.atrasadas - a.atrasadas),
 )
 
-const boletinsRetidos = computed(() => internacao.mapa?.boletinsRetidos ?? 0)
+function focoNaAgenda(appointmentId: string): RouteLocationRaw {
+  return { path: '/veterinario/agenda', query: { foco: appointmentId } }
+}
+
+/** "Lola, Nina e mais 4": os primeiros nomes dizem de quem se trata sem abrir a outra tela. */
+function nomesComResto(nomes: string[], mostrar = 2) {
+  const visiveis = nomes.slice(0, mostrar).join(', ')
+  const resto = nomes.length - mostrar
+
+  return resto > 0 ? t('clinico.meuDia.pauta.eMais', { nomes: visiveis, total: resto }) : visiveis
+}
+
+const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
+  const linhas: LinhaDaTabela[] = []
+  const ondeInternacao = t('inicio.pauta.onde.internacao')
+  const ondeAgenda = t('clinico.meuDia.pauta.ondeAgenda')
+
+  for (const item of internadosComPendencia.value) {
+    const to = `/veterinario/internacao/${item.internacao!.id}`
+    const doses = t('clinico.meuDia.pauta.doses', { total: item.atrasadas }, item.atrasadas)
+
+    if (item.boletimRetido) {
+      linhas.push({
+        id: `boletim-${item.leito.id}`,
+        to,
+        frase: t('clinico.meuDia.pauta.boletim', { pet: item.petNome }),
+        detalhe: [item.leito.nome, item.atrasadas > 0 ? doses : ''].filter(Boolean).join(' · '),
+        tom: 'risco',
+        onde: ondeInternacao,
+      })
+    } else {
+      linhas.push({
+        id: `doses-${item.leito.id}`,
+        to,
+        frase: `${item.petNome}: ${doses}`,
+        detalhe: item.leito.nome,
+        tom: 'risco',
+        onde: ondeInternacao,
+      })
+    }
+  }
+
+  for (const item of esperando.value) {
+    const pet = clinico.pet(item.petId)
+    const partes = [clinico.profissional(item.professionalId)?.nome ?? '']
+
+    if (item.chegadaEm) {
+      partes.push(t('clinico.meuDia.esperaDe', { valor: formato.relativo(item.chegadaEm) }))
+    }
+
+    partes.push(...alertasRelevantes(pet).map(textoDoAlerta))
+
+    linhas.push({
+      id: `espera-${item.id}`,
+      to: focoNaAgenda(item.id),
+      frase: t('clinico.meuDia.pauta.naRecepcao', { pet: pet?.nome ?? '' }),
+      detalhe: partes.filter(Boolean).join(' · '),
+      tom: 'atencao',
+      onde: ondeAgenda,
+    })
+  }
+
+  for (const { pet, alertas, appointment } of alertasDeQuemVem.value) {
+    linhas.push({
+      id: `alerta-${pet.id}`,
+      to: focoNaAgenda(appointment.id),
+      frase: t('clinico.meuDia.pauta.alerta', {
+        pet: pet.nome,
+        hora: formato.hora(appointment.inicio),
+      }),
+      detalhe: alertas.map(textoDoAlerta).join(' · '),
+      tom: 'atencao',
+      onde: ondeAgenda,
+    })
+  }
+
+  const retornos = retornosPendentes.value.length
+
+  if (retornos > 0) {
+    linhas.push({
+      id: 'retornos',
+      to: '/veterinario/atividades',
+      frase: t('clinico.meuDia.pauta.retornos', { total: retornos }, retornos),
+      detalhe: nomesComResto(
+        retornosPendentes.value.map((item) => clinico.pet(item.encounter.petId)?.nome ?? ''),
+      ),
+      tom: 'neutro',
+      onde: t('inicio.pauta.onde.atividades'),
+    })
+  }
+
+  return porGravidade(linhas)
+})
+
+/** A lista recolhida além do limite: urgência mora no alto, e o alto cabe na tela. */
+const pautaAberta = ref(false)
+
+const linhasVisiveis = computed(() =>
+  pautaAberta.value ? linhasDaPauta.value : linhasDaPauta.value.slice(0, LIMITE_DA_PAUTA),
+)
+
+const linhasRecolhidas = computed(() => Math.max(0, linhasDaPauta.value.length - LIMITE_DA_PAUTA))
+
+/** A frase da saudação: quantos assuntos urgentes, ou quantos esperando, ou o dia em dia. */
+const fraseDoResumo = computed(() => {
+  const total = linhasDaPauta.value.length
+  const urgentes = linhasDaPauta.value.filter((linha) => linha.tom === 'risco').length
+
+  if (urgentes > 0) {
+    return t('clinico.meuDia.resumo.urgentes', { total: urgentes }, urgentes)
+  }
+
+  if (total > 0) {
+    return t('clinico.meuDia.resumo.pendentes', { total }, total)
+  }
+
+  return t('clinico.meuDia.resumo.emDia')
+})
+
+const dataDeHoje = computed(() => {
+  const intl = INTL_LOCALE[locale.value as Locale]
+  const rotulo = new Date(clinicClock.nowIso()).toLocaleDateString(intl, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'long',
+  })
+
+  return rotulo.charAt(0).toLocaleUpperCase(intl) + rotulo.slice(1)
+})
+
+type Acao = { id: string; rotulo: string; icone: Component; to?: string; executar?: () => void }
 
 /**
- * Quantos itens cada bloco mostra antes de ceder o resto para a página que é dona do assunto.
- * Quatro é o que se lê de relance; o quinto já obriga a rolar, e um painel de "o que é agora"
- * que exige rolagem deixou de responder a pergunta.
+ * As pílulas da saudação. A primeira é cheia: continuar quem está na sala, ou atender o próximo.
+ * Sem ninguém na sala nem por vir, a agenda completa assume o lugar.
  */
-const LIMITE_DO_BLOCO = 4
+const acoes = computed<Acao[]>(() => {
+  const lista: Acao[] = []
+  const item = destaque.value
 
-const esperandoVisiveis = computed(() => esperando.value.slice(0, LIMITE_DO_BLOCO))
-const internadosVisiveis = computed(() => internadosComPendencia.value.slice(0, LIMITE_DO_BLOCO))
-const alertasVisiveis = computed(() => alertasDoDia.value.slice(0, LIMITE_DO_BLOCO))
-const retornosVisiveis = computed(() => retornosPendentes.value.slice(0, LIMITE_DO_BLOCO))
+  if (item) {
+    const nome = clinico.pet(item.petId)?.nome ?? ''
+
+    lista.push({
+      id: 'prontuario',
+      rotulo: agora.value
+        ? t('clinico.meuDia.continuarCom', { pet: nome })
+        : t('clinico.meuDia.atenderCom', { pet: nome }),
+      icone: PhStethoscope,
+      executar: () => abrirProntuario(item),
+    })
+  }
+
+  lista.push({
+    id: 'agenda',
+    rotulo: t('clinico.meuDia.agendaCompleta'),
+    icone: PhCalendarBlank,
+    to: '/veterinario/agenda',
+  })
+
+  lista.push({
+    id: 'leitos',
+    rotulo: t('clinico.meuDia.mapaDeLeitos'),
+    icone: PhBed,
+    to: '/veterinario/internacao',
+  })
+
+  return lista
+})
 
 const erroTraduzido = computed(() => (agenda.erro ? t(agenda.erro) : ''))
 
@@ -148,19 +355,6 @@ function abrirProntuario(appointment: Appointment) {
   )
 }
 
-function irParaAgenda(appointmentId?: string) {
-  void router.push({
-    path: '/veterinario/agenda',
-    query: appointmentId ? { foco: appointmentId } : {},
-  })
-}
-
-function irParaInternacao(internacaoId?: string) {
-  void router.push(
-    internacaoId ? `/veterinario/internacao/${internacaoId}` : '/veterinario/internacao',
-  )
-}
-
 async function carregar() {
   await clinico.carregar()
   agenda.hoje()
@@ -169,8 +363,7 @@ async function carregar() {
   /*
    * O mapa de leitos entra fora do `await` em sequência: ele é o único bloco desta tela que não
    * pertence à agenda, e prendê-lo atrás dela faria a landing esperar duas viagens para desenhar
-   * a primeira. Falhar aqui também não derruba o resto — sem internação, "Meu dia" continua
-   * respondendo o que sempre respondeu.
+   * a primeira. Falhar aqui também não derruba o resto.
    */
   const mapa = internacao.carregarMapa()
 
@@ -188,305 +381,176 @@ onMounted(carregar)
 
 <template>
   <PartnerPageFrame
-    :subtitle="t('clinico.meuDia.subtitulo')"
+    class="hc-tema hoje"
     :title="t('clinico.meuDia.titulo')"
     :loading="agenda.carregando && !agenda.dia"
     :error="erroTraduzido"
     block-when-suspended
     @retry="carregar"
   >
-    <template #actions>
-      <span class="clinic-scope clinic-acoes">
-        <Button
-          :label="t('clinico.meuDia.irParaAgenda')"
-          icon="pi pi-calendar"
-          severity="secondary"
-          outlined
-          @click="irParaAgenda()"
-        />
-      </span>
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <time class="hc-saudacao__data" :datetime="clinicClock.today()">{{ dataDeHoje }}</time>
+        <h1 class="hc-saudacao__titulo">{{ t('clinico.meuDia.titulo') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p class="hc-saudacao__resumo" aria-live="polite">{{ fraseDoResumo }}</p>
+
+          <nav class="hc-acoes" :aria-label="t('clinico.meuDia.acoesRotulo')">
+            <template v-for="(acao, indice) in acoes" :key="acao.id">
+              <RouterLink
+                v-if="acao.to"
+                class="hc-pilula"
+                :class="{ 'hc-pilula--cheia': indice === 0 }"
+                :to="acao.to"
+              >
+                <component
+                  :is="acao.icone"
+                  class="hc-pilula__icone"
+                  :weight="indice === 0 ? 'fill' : 'duotone'"
+                  aria-hidden="true"
+                />
+                {{ acao.rotulo }}
+              </RouterLink>
+              <Button
+                v-else
+                type="button"
+                class="hc-pilula"
+                :class="{ 'hc-pilula--cheia': indice === 0 }"
+                :label="acao.rotulo"
+                @click="acao.executar?.()"
+              >
+                <template #icon>
+                  <component
+                    :is="acao.icone"
+                    class="hc-pilula__icone"
+                    :weight="indice === 0 ? 'fill' : 'duotone'"
+                    aria-hidden="true"
+                  />
+                </template>
+              </Button>
+            </template>
+          </nav>
+        </div>
+      </div>
     </template>
 
-    <div class="dia clinic-scope">
-      <!--
-        O boletim retido abre a tela, acima do próprio destaque.
+    <div class="hoje__conteudo clinic-scope">
+      <div class="hoje__grade">
+        <!-- 1. o que é agora -->
+        <section class="hc agora" aria-labelledby="hoje-agora">
+          <header class="hc__cabeca">
+            <h2 id="hoje-agora" class="hc__titulo">
+              <PhStethoscope class="hc__icone" weight="duotone" aria-hidden="true" />
+              {{ agora ? t('clinico.meuDia.agora') : t('clinico.meuDia.aSeguir') }}
+            </h2>
+            <span v-if="destaque" class="agora__hora">{{ formato.hora(destaque.inicio) }}</span>
+          </header>
 
-        É a única pendência do dia com uma pessoa do outro lado — um responsável sem notícia do
-        animal dele — e a única que não pode esperar alguém lembrar de abrir outra tela.
-      -->
-      <Button
-        v-if="boletinsRetidos > 0"
-        type="button"
-        class="retidos clinic-focusable"
-        text
-        @click="irParaInternacao()"
-      >
-        <i class="pi pi-phone" aria-hidden="true" />
-        <span>{{ t('clinico.internacao.retidosAviso', { total: boletinsRetidos }) }}</span>
-        <i class="pi pi-arrow-right" aria-hidden="true" />
-      </Button>
+          <template v-if="destaque">
+            <ClinicPatientHeader
+              :pet="clinico.pet(destaque.petId)"
+              :tutor="clinico.tutor(destaque.tutorId)"
+            >
+              <!-- O que se lê antes de entrar na sala: só faz sentido para quem ainda vai entrar. -->
+              <template v-if="!agora" #acoes>
+                <RouterLink
+                  class="hc-pilula"
+                  :to="`/veterinario/paciente/${destaque.petId}/resumo`"
+                >
+                  <PhTimer class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
+                  {{ t('clinico.resumoDoPaciente.verResumo') }}
+                </RouterLink>
+              </template>
+            </ClinicPatientHeader>
 
-      <!-- 1. o que é agora -->
-      <section class="destaque">
-        <header class="destaque__topo">
-          <span class="clinic-label">
-            {{ agora ? t('clinico.meuDia.agora') : t('clinico.meuDia.aSeguir') }}
-          </span>
-          <span v-if="agora || aSeguir" class="destaque__hora clinic-value">
-            {{ formato.hora((agora ?? aSeguir)!.inicio) }}
+            <p class="agora__meta">
+              {{ clinico.tipo(destaque.typeId)?.nome }}
+              ·
+              {{ clinico.profissional(destaque.professionalId)?.nome }}
+              <template v-if="!agora"> · {{ formato.relativo(destaque.inicio) }}</template>
+            </p>
+          </template>
+
+          <p v-else class="hoje__vazio">
+            <PhCheckCircle class="hoje__vazio-icone" weight="fill" aria-hidden="true" />
+            {{ t('clinico.meuDia.semProximo') }}
+          </p>
+        </section>
+
+        <!-- 2. o que vem depois -->
+        <section class="hc seguir" aria-labelledby="hoje-seguir">
+          <header class="hc__cabeca">
+            <h2 id="hoje-seguir" class="hc__titulo">
+              <PhClockCountdown class="hc__icone" weight="duotone" aria-hidden="true" />
+              <!-- Com a sala vazia o cartão ao lado já é o "A seguir": este vira o "Depois". -->
+              {{ agora ? t('clinico.meuDia.aSeguir') : t('clinico.meuDia.depois') }}
+            </h2>
+            <RouterLink class="hc__link" to="/veterinario/agenda">
+              {{ t('clinico.meuDia.agendaCompleta') }}
+              <i class="pi pi-arrow-right hoje__seta" aria-hidden="true" />
+            </RouterLink>
+          </header>
+
+          <ul v-if="proximos.length > 0" class="seguir__lista">
+            <li v-for="item in proximos" :key="item.id">
+              <RouterLink class="seguir__item" :to="focoNaAgenda(item.id)">
+                <span class="seguir__hora">{{ formato.hora(item.inicio) }}</span>
+                <span class="seguir__corpo">
+                  <strong>{{ clinico.pet(item.petId)?.nome }}</strong>
+                  <small>
+                    {{ clinico.tipo(item.typeId)?.nome }} ·
+                    {{ clinico.profissional(item.professionalId)?.nome }}
+                  </small>
+                </span>
+              </RouterLink>
+            </li>
+          </ul>
+
+          <p v-else class="hoje__vazio">
+            <PhCheckCircle class="hoje__vazio-icone" weight="fill" aria-hidden="true" />
+            {{ t('clinico.meuDia.semProximo') }}
+          </p>
+        </section>
+      </div>
+
+      <!-- 3. o que pede ação -->
+      <section class="hc pauta" aria-labelledby="hoje-pauta">
+        <header class="hc__cabeca">
+          <h2 id="hoje-pauta" class="hc__titulo">
+            <PhClipboardText class="hc__icone" weight="duotone" aria-hidden="true" />
+            {{ t('inicio.pauta.titulo') }}
+          </h2>
+          <span v-if="linhasDaPauta.length > 0" class="pauta__contagem">
+            {{ t('inicio.pauta.contagem', { total: linhasDaPauta.length }, linhasDaPauta.length) }}
           </span>
         </header>
 
-        <template v-if="agora ?? aSeguir">
-          <ClinicPatientHeader
-            :pet="clinico.pet((agora ?? aSeguir)!.petId)"
-            :tutor="clinico.tutor((agora ?? aSeguir)!.tutorId)"
-          >
-            <template #acoes>
-              <Button
-                :label="
-                  agora ? t('clinico.meuDia.continuar') : t('clinico.meuDia.iniciarAtendimento')
-                "
-                icon="pi pi-file-edit"
-                @click="abrirProntuario((agora ?? aSeguir)!)"
-              />
-              <!-- O que se lê antes de entrar na sala: só faz sentido para quem ainda vai entrar. -->
-              <Button
-                v-if="!agora"
-                :label="t('clinico.resumoDoPaciente.verResumo')"
-                icon="pi pi-stopwatch"
-                severity="secondary"
-                outlined
-                @click="router.push(`/veterinario/paciente/${aSeguir!.petId}/resumo`)"
-              />
-            </template>
-          </ClinicPatientHeader>
+        <template v-if="linhasDaPauta.length > 0">
+          <PautaTabela :linhas="linhasVisiveis" />
 
-          <p class="destaque__meta">
-            {{ clinico.tipo((agora ?? aSeguir)!.typeId)?.nome }}
-            ·
-            {{ clinico.profissional((agora ?? aSeguir)!.professionalId)?.nome }}
-            <template v-if="!agora"> · {{ formato.relativo(aSeguir!.inicio) }} </template>
-          </p>
+          <Button
+            v-if="linhasRecolhidas > 0"
+            type="button"
+            class="pauta__mais"
+            severity="secondary"
+            text
+            size="small"
+            :label="
+              pautaAberta
+                ? t('clinico.meuDia.pauta.mostrarMenos')
+                : t('clinico.meuDia.pauta.mostrarMais', { total: linhasRecolhidas })
+            "
+            :aria-expanded="pautaAberta"
+            @click="pautaAberta = !pautaAberta"
+          />
         </template>
 
-        <p v-else class="vazio">{{ t('clinico.meuDia.semProximo') }}</p>
+        <p v-else class="hoje__vazio">
+          <PhCheckCircle class="hoje__vazio-icone" weight="fill" aria-hidden="true" />
+          {{ t('inicio.pauta.calma') }}
+        </p>
       </section>
-
-      <div class="colunas">
-        <!-- 2. quem já chegou -->
-        <section class="bloco" :class="{ 'bloco--vazio': esperando.length === 0 }">
-          <h2 class="bloco__titulo">
-            <i class="pi pi-users" aria-hidden="true" />
-            {{ t('clinico.meuDia.esperando') }}
-            <span v-if="esperando.length > 0" class="bloco__contagem clinic-value">
-              {{ esperando.length }}
-            </span>
-          </h2>
-
-          <ul v-if="esperando.length > 0" class="lista">
-            <li v-for="item in esperandoVisiveis" :key="item.id">
-              <Button
-                type="button"
-                class="lista__item clinic-focusable"
-                text
-                @click="irParaAgenda(item.id)"
-              >
-                <span class="lista__hora clinic-value">{{ formato.hora(item.inicio) }}</span>
-                <span class="lista__corpo">
-                  <strong>{{ clinico.pet(item.petId)?.nome }}</strong>
-                  <small>
-                    {{ clinico.profissional(item.professionalId)?.nome }}
-                    <template v-if="item.chegadaEm">
-                      ·
-                      {{
-                        t('clinico.meuDia.esperaDe', {
-                          valor: formato.relativo(item.chegadaEm),
-                        })
-                      }}
-                    </template>
-                  </small>
-                </span>
-                <i class="pi pi-chevron-right" aria-hidden="true" />
-              </Button>
-            </li>
-          </ul>
-
-          <p v-else class="vazio">
-            <i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.esperandoVazio') }}
-          </p>
-          <RouterLink
-            v-if="esperando.length > LIMITE_DO_BLOCO"
-            class="bloco__mais"
-            to="/veterinario/agenda"
-          >
-            {{ t('clinico.comum.verTodos', { contagem: esperando.length }) }}
-            <i class="pi pi-arrow-right" aria-hidden="true" />
-          </RouterLink>
-        </section>
-
-        <!-- 3. quem está internado e cobra alguma coisa agora -->
-        <section class="bloco" :class="{ 'bloco--vazio': internadosComPendencia.length === 0 }">
-          <h2 class="bloco__titulo">
-            <i class="pi pi-building" aria-hidden="true" />
-            {{ t('clinico.meuDia.internados') }}
-            <span v-if="internadosComPendencia.length > 0" class="bloco__contagem clinic-value">
-              {{ internadosComPendencia.length }}
-            </span>
-          </h2>
-
-          <ul v-if="internadosComPendencia.length > 0" class="lista">
-            <li v-for="item in internadosVisiveis" :key="item.leito.id">
-              <Button
-                type="button"
-                class="lista__item clinic-focusable"
-                text
-                @click="irParaInternacao(item.internacao!.id)"
-              >
-                <span class="lista__hora clinic-value">{{ item.leito.nome }}</span>
-                <span class="lista__corpo">
-                  <strong>{{ item.petNome }}</strong>
-                  <small>
-                    <!--
-                      Boletim primeiro, dose depois: a ordem da linha é a ordem da urgência, e o
-                      telefonema pendente é o que a clínica descobre tarde demais.
-                    -->
-                    <span v-if="item.boletimRetido" class="lista__atraso">
-                      {{ t('clinico.internacao.leito.boletimRetido') }}
-                    </span>
-                    <template v-if="item.boletimRetido && item.atrasadas > 0"> · </template>
-                    <template v-if="item.atrasadas > 0">
-                      {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }, item.atrasadas) }}
-                    </template>
-                  </small>
-                </span>
-                <i class="pi pi-chevron-right" aria-hidden="true" />
-              </Button>
-            </li>
-          </ul>
-
-          <p v-else class="vazio">
-            <i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.internadosVazio') }}
-          </p>
-          <RouterLink
-            v-if="internadosComPendencia.length > LIMITE_DO_BLOCO"
-            class="bloco__mais"
-            to="/veterinario/internacao"
-          >
-            {{ t('clinico.comum.verTodos', { contagem: internadosComPendencia.length }) }}
-            <i class="pi pi-arrow-right" aria-hidden="true" />
-          </RouterLink>
-        </section>
-
-        <!-- 4. alertas que mudam conduta hoje -->
-        <section class="bloco" :class="{ 'bloco--vazio': alertasDoDia.length === 0 }">
-          <h2 class="bloco__titulo">
-            <i class="pi pi-exclamation-triangle" aria-hidden="true" />
-            {{ t('clinico.meuDia.alertasDoDia') }}
-            <span v-if="alertasDoDia.length > 0" class="bloco__contagem clinic-value">
-              {{ alertasDoDia.length }}
-            </span>
-          </h2>
-
-          <ul v-if="alertasDoDia.length > 0" class="lista">
-            <li v-for="item in alertasVisiveis" :key="item.pet.id">
-              <Button
-                type="button"
-                class="lista__item clinic-focusable"
-                text
-                @click="irParaAgenda(item.appointment.id)"
-              >
-                <span class="lista__hora clinic-value">
-                  {{ formato.hora(item.appointment.inicio) }}
-                </span>
-                <span class="lista__corpo">
-                  <strong>{{ item.pet.nome }}</strong>
-                  <span class="lista__chips">
-                    <ClinicAlertChip
-                      v-for="alerta in item.alertas"
-                      :key="alerta.id"
-                      :severidade="alerta.severidade"
-                      :rotulo="formato.alerta(alerta.kind)"
-                      :detalhe="alerta.detalhe"
-                    />
-                  </span>
-                </span>
-              </Button>
-            </li>
-          </ul>
-
-          <p v-else class="vazio">
-            <i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.alertasVazio') }}
-          </p>
-          <RouterLink
-            v-if="alertasDoDia.length > LIMITE_DO_BLOCO"
-            class="bloco__mais"
-            to="/veterinario/agenda"
-          >
-            {{ t('clinico.comum.verTodos', { contagem: alertasDoDia.length }) }}
-            <i class="pi pi-arrow-right" aria-hidden="true" />
-          </RouterLink>
-        </section>
-
-        <!-- 5. retorno sem horário: receita parada na mesa -->
-        <section class="bloco" :class="{ 'bloco--vazio': retornosPendentes.length === 0 }">
-          <h2 class="bloco__titulo">
-            <i class="pi pi-replay" aria-hidden="true" />
-            {{ t('clinico.meuDia.retornosSemHorario') }}
-            <span v-if="retornosPendentes.length > 0" class="bloco__contagem clinic-value">
-              {{ retornosPendentes.length }}
-            </span>
-          </h2>
-
-          <ul v-if="retornosPendentes.length > 0" class="lista">
-            <li v-for="item in retornosVisiveis" :key="item.encounter.id">
-              <div class="lista__item lista__item--estatico">
-                <span class="lista__corpo">
-                  <strong>{{ clinico.pet(item.encounter.petId)?.nome }}</strong>
-                  <small>
-                    {{
-                      clinico.diagnosticoPrincipal(item.encounter) ||
-                      item.encounter.anamnese.queixaPrincipal
-                    }}
-                    ·
-                    <!-- Vencido há quanto tempo: é o atraso que faz a pendência doer. -->
-                    <span class="lista__atraso clinic-value">
-                      {{
-                        t('clinico.formato.haTempo', {
-                          valor: t(
-                            'clinico.formato.dias',
-                            { valor: item.diasDeAtraso },
-                            item.diasDeAtraso,
-                          ),
-                        })
-                      }}
-                    </span>
-                  </small>
-                </span>
-                <Button
-                  :label="t('clinico.meuDia.marcarRetorno')"
-                  size="small"
-                  severity="secondary"
-                  outlined
-                  @click="irParaAgenda()"
-                />
-              </div>
-            </li>
-          </ul>
-
-          <p v-else class="vazio">
-            <i class="pi pi-check" aria-hidden="true" />{{ t('clinico.meuDia.retornosVazio') }}
-          </p>
-          <RouterLink
-            v-if="retornosPendentes.length > LIMITE_DO_BLOCO"
-            class="bloco__mais"
-            to="/veterinario/atividades"
-          >
-            {{ t('clinico.comum.verTodos', { contagem: retornosPendentes.length }) }}
-            <i class="pi pi-arrow-right" aria-hidden="true" />
-          </RouterLink>
-        </section>
-      </div>
     </div>
 
     <ClinicDevPanel />
@@ -494,255 +558,169 @@ onMounted(carregar)
 </template>
 
 <style scoped>
-.dia {
+.hoje__conteudo {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 1.25rem;
+  container-type: inline-size;
 }
 
 /*
- * A faixa do boletim retido é um botão, e não um aviso.
- *
- * No mapa de leitos ela é texto: quem está lá já chegou ao lugar onde se resolve. Aqui ela
- * aparece três telas antes, e um aviso que diz "ligue para alguém" sem levar a lugar nenhum
- * transfere para quem lê o trabalho de descobrir onde é esse lugar.
+ * Agora e A seguir lado a lado quando o conteúdo tem largura para os dois — pela largura do
+ * conteúdo, não da janela: com trilho e painel abertos, um tablet deixa uns 720px para a página.
  */
-.retidos.p-button {
-  display: flex;
-  width: 100%;
-  justify-content: flex-start;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-risk-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
-  font: inherit;
-  font-weight: 700;
-  text-align: start;
-}
-
-.retidos span {
-  flex: 1 1 auto;
-}
-
-.retidos.p-button:not(:disabled):hover,
-.retidos.p-button:not(:disabled):active {
-  border-color: var(--clinic-risk-line);
-  background: color-mix(in srgb, var(--clinic-risk-line) 22%, var(--clinic-risk-bg));
-  color: var(--clinic-risk-text);
-}
-
-.retidos.p-button:focus-visible,
-.lista__item.p-button:focus-visible {
-  outline: none;
-  box-shadow: var(--clinic-focus-ring);
-}
-
-.retidos i:last-child {
-  font-size: 0.72rem;
-}
-
-/*
- * O destaque é o cartão que responde "o que é agora". Ele ganha o gradiente e a hora grande
- * porque é a única coisa da tela que se olha de longe; tudo abaixo é consulta.
- */
-.destaque {
+.hoje__grade {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-5);
-  border: 1px solid var(--clinic-accent);
-  border-radius: var(--clinic-radius-card);
-  background:
-    radial-gradient(
-      120% 140% at 100% 0%,
-      color-mix(in srgb, var(--clinic-accent) 22%, transparent) 0%,
-      transparent 55%
-    ),
-    var(--clinic-surface);
-}
-
-.destaque__topo {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--clinic-space-3);
-}
-
-.destaque__hora {
-  font-size: 1.75rem;
-  font-weight: 800;
-  letter-spacing: -0.045em;
-}
-
-.destaque__meta {
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-base);
-}
-
-/*
- * Três colunas de altura livre. Bloco vazio encolhe até a altura do próprio título em vez de
- * reservar uma coluna inteira de nada — que era o que fazia a tela parecer meio construída.
- */
-.colunas {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
   align-items: start;
-  gap: var(--clinic-space-3);
+  gap: 1.25rem;
 }
 
-.bloco {
-  display: grid;
-  align-content: start;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+@container (min-width: 56rem) {
+  .hoje__grade {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
 }
 
-.bloco--vazio {
-  border-style: dashed;
-  background: transparent;
-}
+/* ------------------------------------------------------------------ agora */
 
-.bloco__titulo {
-  display: flex;
-  align-items: center;
-  gap: var(--clinic-space-2);
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+.agora__hora {
+  color: var(--hc-tinta);
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
   font-weight: 750;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: -0.03em;
 }
 
-.bloco__titulo i {
-  color: var(--clinic-faint);
-  font-size: 0.75rem;
+/* O cabeçalho do paciente já é um cartão; aqui ele mora dentro de um, e fica plano. */
+.agora :deep(.paciente) {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
-.bloco__contagem {
-  margin-inline-start: auto;
-  min-width: 1.3rem;
-  padding: 0 0.35rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-weight: 800;
-  letter-spacing: 0;
-  text-align: center;
+.agora__meta {
+  margin: 0;
+  padding-block-start: 0.85rem;
+  border-block-start: 1px solid var(--hc-linha);
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
 }
 
-.lista {
+/* ------------------------------------------------------------------ a seguir */
+
+.seguir__lista {
   display: grid;
-  gap: 0.2rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* A linha clicável é `Button`; a de retorno (com ação própria) é `div`. As duas leem igual. */
-.lista__item,
-.lista__item.p-button {
+.seguir__lista li + li {
+  border-block-start: 1px solid var(--hc-linha);
+}
+
+.seguir__item {
   display: flex;
-  width: 100%;
   align-items: center;
-  justify-content: flex-start;
-  gap: var(--clinic-space-3);
-  min-height: var(--clinic-row-height);
-  padding: var(--clinic-cell-padding-y) var(--clinic-space-2);
-  border: none;
-  border-radius: var(--clinic-radius-control);
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: start;
+  gap: 0.85rem;
+  min-height: 3rem;
+  padding: 0.55rem 0.5rem;
+  border-radius: 0.5rem;
+  color: var(--hc-tinta);
+  text-decoration: none;
+  transition: background-color 150ms ease-out;
 }
 
-.lista__item.p-button:not(:disabled):hover,
-.lista__item.p-button:not(:disabled):active {
-  border: none;
-  background: var(--clinic-surface-soft);
-  color: inherit;
+.seguir__item:hover {
+  background: var(--hc-fundo);
 }
 
-.lista__hora {
+.seguir__item:focus-visible {
+  outline: 2px solid var(--hc-marca);
+  outline-offset: -2px;
+}
+
+.seguir__hora {
   flex: 0 0 auto;
-  color: var(--clinic-accent-strong);
-  font-weight: 800;
-}
-
-.lista__corpo {
-  display: grid;
-  min-width: 0;
-  flex: 1;
-  gap: 0.1rem;
-  justify-items: start;
-}
-
-.lista__corpo strong {
-  overflow: hidden;
-  max-width: 100%;
+  min-width: 3rem;
+  color: var(--hc-marca-forte);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
   font-weight: 700;
+}
+
+.seguir__corpo {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.seguir__corpo strong,
+.seguir__corpo small {
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.lista__corpo small {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.seguir__corpo strong {
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
-.lista__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.2rem;
+.seguir__corpo small {
+  color: var(--hc-tinta-2);
+  font-size: 0.75rem;
 }
 
-.lista__atraso {
-  color: var(--clinic-attention-text);
-  font-weight: 700;
-}
-
-.lista__item i {
-  color: var(--clinic-faint);
+.hoje__seta {
   font-size: 0.7rem;
 }
 
-.bloco__mais {
+[dir='rtl'] .hoje__seta {
+  scale: -1 1;
+}
+
+/* ------------------------------------------------------------------ o que pede ação */
+
+.pauta {
+  gap: 0.75rem;
+}
+
+.pauta__contagem {
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* `.pauta` na frente: o `.clinic-scope` pinta todo botão de texto com a tinta, e empatava. */
+.pauta .pauta__mais.p-button {
+  justify-self: start;
+  color: var(--hc-marca-forte);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ vazio */
+
+.hoje__vazio {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.2rem;
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-  text-decoration: none;
-}
-
-.bloco__mais:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.bloco__mais i {
-  font-size: 0.62rem;
-}
-
-.vazio {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   margin: 0;
-  color: var(--clinic-faint);
-  line-height: 1.5;
+  padding: 0.4rem 0.25rem;
+  color: var(--hc-tinta-2);
+  font-size: 0.875rem;
 }
 
-.vazio i {
-  color: var(--clinic-ok-text);
-  font-size: 0.7rem;
+.hoje__vazio-icone {
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--hc-verde-tinta);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seguir__item {
+    transition: none;
+  }
 }
 </style>

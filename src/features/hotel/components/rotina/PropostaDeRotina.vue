@@ -611,11 +611,10 @@ function aprovar() {
   align-items: center;
   margin: 0;
   gap: 0.4rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .secao__titulo::after {

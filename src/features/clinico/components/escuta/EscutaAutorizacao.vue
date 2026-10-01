@@ -91,7 +91,7 @@ function comecar() {
   <Dialog
     v-model:visible="escuta.autorizacaoAberta"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(34rem, 94vw)' }"
     dismissable-mask
   >
