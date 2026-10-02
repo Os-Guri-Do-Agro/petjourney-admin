@@ -9,6 +9,7 @@
  * Falta e cancelamento **continuam visíveis** — riscados e esmaecidos. Sumir da grade é como
  * a recepção perde a informação de que o horário vagou.
  */
+import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -42,16 +43,16 @@ const formato = useClinicFormat()
 const appointment = computed(() => props.card.appointment)
 
 /**
- * Três faixas de altura decidem o que cabe, medidas contra o que cada linha realmente ocupa:
- * hora e nome pedem ~16 px, o tipo mais ~14, o rodapé mais ~15, e ainda o padding. Os limites
- * anteriores eram otimistas e a segunda linha saía cortada ao meio.
+ * Três faixas de altura decidem o que cabe, medidas contra o que cada linha realmente ocupa: com o
+ * texto em 12,5 px, hora e nome pedem ~16 px, o tipo mais ~15, o rodapé mais ~15, e ainda o
+ * padding. Os limites acompanham o texto — com 11 px a grade cabia mais e não se lia.
  */
 const faixa = computed(() => {
-  if (props.card.alturaPx < 26) {
+  if (props.card.alturaPx < 30) {
     return 'minima'
   }
 
-  if (props.card.alturaPx < 54) {
+  if (props.card.alturaPx < 58) {
     return 'media'
   }
 
@@ -104,8 +105,19 @@ const podeMarcarFalta = computed(() => {
   return clinicClock.nowIso() > appointment.value.inicio
 })
 
-const alertaDeRisco = computed(() =>
-  props.card.pet?.alertas.find((alerta) => alerta.severidade === 'risco') ?? null,
+const alertaDeRisco = computed(
+  () => props.card.pet?.alertas.find((alerta) => alerta.severidade === 'risco') ?? null,
+)
+
+/**
+ * O alerta de risco escrito no card — "Alergia" —, e não só o triângulo.
+ *
+ * O triângulo dizia o que era apenas passando o mouse, e tablet não tem mouse: a recepção via o
+ * aviso e precisava abrir o atendimento para saber se era alergia ou temperamento. A palavra é
+ * curta; o detalhe (a que substância) continua na dica e no drawer.
+ */
+const palavraDoRisco = computed(() =>
+  alertaDeRisco.value ? formato.alerta(alertaDeRisco.value.kind) : '',
 )
 
 const rotuloAcessivel = computed(() => {
@@ -129,15 +141,28 @@ const rotuloAcessivel = computed(() => {
   return partes.filter(Boolean).join(' · ')
 })
 
+/** Recuo de cada degrau da cascata, em % da coluna. Três degraus no máximo. */
+const RECUO_DA_CASCATA = 16
+
+/**
+ * Sobreposição em cascata, e não em fatias.
+ *
+ * Dividir a coluna ao meio (ou em três) espremia cada card até "09:15 T…" — a hora e duas letras
+ * do nome, em 60 px. Na cascata, o card que começa depois entra **por cima**, recuado um degrau:
+ * como os horários de início diferem, a primeira linha de cada um (hora e nome) fica à vista no
+ * próprio topo, com quase a largura inteira. O de baixo continua clicável pela faixa da esquerda.
+ *
+ * Quem fica por cima é quem começa depois, e isso vem da ordem dos cards (por horário), sem
+ * z-index: pela faixa, o das 09:15 ficava por baixo do das 09:00 e sumia.
+ */
 const estilo = computed(() => {
-  /** Largura por faixa de sobreposição: dois no mesmo horário dividem a coluna ao meio. */
-  const largura = 100 / props.card.lanes
+  const recuo = Math.min(props.card.lane, 3) * RECUO_DA_CASCATA
 
   return {
     top: `${props.card.topPx}px`,
     height: `${props.card.alturaPx}px`,
-    left: `calc(${props.card.lane * largura}% + 1px)`,
-    width: `calc(${largura}% - 2px)`,
+    insetInlineStart: `calc(${recuo}% + 1px)`,
+    width: `calc(${100 - recuo}% - 2px)`,
     '--card-cor': props.cor,
     '--card-tipo': tipo.value.cor,
   }
@@ -156,6 +181,7 @@ const estilo = computed(() => {
         'card--liberado': cancelado || faltou,
         'card--encaixe': appointment.encaixe,
         'card--aviso': severidade === 'warning' || severidade === 'blocking',
+        'card--empilhado': card.lane > 0,
       },
     ]"
     :style="estilo"
@@ -180,11 +206,13 @@ const estilo = computed(() => {
       <span class="card__hora clinic-value">{{ formato.hora(appointment.inicio) }}</span>
       <span class="card__nome">{{ card.pet?.nome }}</span>
 
-      <i
+      <span
         v-if="alertaDeRisco"
-        class="pi pi-exclamation-triangle card__icone card__icone--risco"
-        :title="`${formato.alerta(alertaDeRisco.kind)} — ${alertaDeRisco.detalhe}`"
-      />
+        class="card__risco"
+        :title="`${palavraDoRisco} — ${alertaDeRisco.detalhe}`"
+      >
+        {{ palavraDoRisco }}
+      </span>
       <i
         v-if="avisosVisiveis.length > 0"
         class="pi pi-exclamation-circle card__icone card__icone--aviso"
@@ -224,17 +252,18 @@ const estilo = computed(() => {
       Aparece no hover e no foco; em tela de toque fica sempre visível, porque dedo não tem
       hover e a ação ficaria inalcançável.
     -->
-    <button
+    <Button
       v-if="podeMarcarFalta"
-      type="button"
-      class="card__falta clinic-focusable"
+      class="card__falta"
+      icon="pi pi-user-minus"
+      severity="warn"
+      outlined
+      size="small"
       :title="t('clinico.faltas.marcar')"
       :aria-label="`${t('clinico.faltas.marcar')} — ${card.pet?.nome ?? ''}`"
       @click.stop="emit('marcarFalta', appointment.id)"
       @pointerdown.stop
-    >
-      <i class="pi pi-user-minus" aria-hidden="true" />
-    </button>
+    />
 
     <span
       v-if="arrastavel && faixa !== 'minima'"
@@ -251,12 +280,18 @@ const estilo = computed(() => {
   display: grid;
   align-content: start;
   overflow: hidden;
-  padding: 2px 6px 2px 8px;
-  border: 1px solid color-mix(in srgb, var(--card-cor) 52%, var(--clinic-line));
-  /* A faixa do tipo. Fica na borda, não em pseudo-elemento, para sobreviver ao overflow. */
-  border-left: 3px solid var(--card-tipo);
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--card-cor) 10%, var(--clinic-surface));
+  padding-block: 2px;
+  padding-inline: 8px 6px;
+  /*
+   * O bloco branco (redesenho de 30/09/2026). Saíram a faixa do tipo na borda esquerda e o fundo
+   * tingido pela cor do profissional: a grade inteira era um mosaico de tons, e o que muda de
+   * estado não saltava. O tipo mora no ícone colorido (`.card__tipo-icone`), o profissional na
+   * coluna, e a cor do fundo ficou para o estado — em atendimento, aguardando, finalizado.
+   */
+  border: 1px solid var(--clinic-line);
+  border-radius: 0.55rem;
+  background: var(--clinic-surface);
+  box-shadow: 0 1px 2px rgb(20 32 28 / 6%);
   color: var(--clinic-text);
   cursor: grab;
   touch-action: none;
@@ -271,8 +306,7 @@ const estilo = computed(() => {
 }
 
 .card--selecionado {
-  border-block-color: var(--clinic-accent-strong);
-  border-inline-end-color: var(--clinic-accent-strong);
+  border-color: var(--clinic-accent-strong);
   box-shadow: var(--clinic-focus-ring);
   z-index: 4;
 }
@@ -291,17 +325,19 @@ const estilo = computed(() => {
   line-height: 1.25;
 }
 
+/* 12,5 px na primeira linha: com 11 px a agenda inteira era texto miúdo (138 trechos abaixo de 12). */
 .card__hora {
   flex: 0 0 auto;
-  font-size: var(--clinic-font-label);
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
 .card__nome {
-  min-width: 0;
+  /* O nome não cede tudo ao selo de risco: "Ni…" não identifica ninguém. */
+  min-width: min(2.75rem, 40%);
   overflow: hidden;
   flex: 1;
-  font-size: var(--clinic-font-label);
+  font-size: 0.78rem;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -309,7 +345,30 @@ const estilo = computed(() => {
 
 .card__icone {
   flex: 0 0 auto;
-  font-size: 0.62rem;
+  font-size: 0.7rem;
+}
+
+/* O alerta de risco por escrito: selo coral, curto, que não cede lugar ao nome. */
+.card__risco {
+  flex: 0 1 auto;
+  max-width: 6.5rem;
+  overflow: hidden;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  background: var(--hc-coral-fundo);
+  color: var(--hc-coral-tinta);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Degrau da cascata: um respiro de sombra separa o card de cima do de baixo. */
+.card--empilhado {
+  box-shadow:
+    -2px 0 0 var(--clinic-surface),
+    0 2px 6px rgb(20 32 28 / 12%);
 }
 
 .card__icone--risco {
@@ -322,13 +381,13 @@ const estilo = computed(() => {
 
 .card__linha--secundaria {
   color: var(--clinic-muted);
-  font-size: calc(var(--clinic-font-label) - 0.5px);
+  font-size: 0.72rem;
 }
 
 .card__tipo-icone {
   flex: 0 0 auto;
   color: var(--card-tipo);
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   /* Alinhado pela linha de base do texto ao lado, não pelo centro da caixa. */
   transform: translateY(0.5px);
 }
@@ -359,7 +418,7 @@ const estilo = computed(() => {
   gap: 0.3rem;
   padding-top: 2px;
   color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  font-size: 0.72rem;
   white-space: nowrap;
 }
 
@@ -381,53 +440,47 @@ const estilo = computed(() => {
  * atendimentos, 40 ícones permanentes viram textura. No foco por teclado aparece igual, senão
  * a ação existiria só para quem usa mouse.
  */
-.card__falta {
+.card__falta.p-button {
   position: absolute;
   top: 1px;
-  right: 1px;
+  inset-inline-end: 1px;
   z-index: 5;
-  display: grid;
   width: 18px;
   height: 18px;
-  place-items: center;
   padding: 0;
-  border: 1px solid var(--clinic-attention-line);
   border-radius: 0.35rem;
+  /* Opaco: o botão fica por cima do nome do paciente e não pode deixá-lo aparecer por baixo. */
   background: var(--clinic-surface);
-  color: var(--clinic-attention-text);
-  cursor: pointer;
   font-size: 0.6rem;
   opacity: 0;
   transition: opacity 120ms ease;
 }
 
-.card:hover .card__falta,
-.card__falta:focus-visible {
-  opacity: 1;
+.card__falta :deep(.p-button-icon) {
+  font-size: 0.6rem;
 }
 
-.card__falta:hover {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
+.card:hover .card__falta.p-button,
+.card__falta.p-button:focus-visible {
+  opacity: 1;
 }
 
 /* Dedo e caneta não têm hover: em toque, a ação é sempre visível. */
 @media (hover: none) {
-  .card__falta {
+  .card__falta.p-button {
     opacity: 1;
   }
 }
 
 /* Card mínimo não tem altura para o botão sem cobrir a hora. */
-.card--minima .card__falta {
+.card--minima .card__falta.p-button {
   display: none;
 }
 
 /* Alças de 6 px: alvo de mouse, não de dedo. */
 .card__alca {
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   height: 6px;
   width: 100%;
   cursor: ns-resize;
@@ -447,9 +500,8 @@ const estilo = computed(() => {
  */
 .card--liberado {
   border-style: dashed;
-  /* A faixa do tipo continua sólida: tracejar 3 px a transforma numa coluna de pontos. */
-  border-left-style: solid;
-  background: var(--clinic-surface);
+  background: transparent;
+  box-shadow: none;
   opacity: 0.62;
 }
 
@@ -458,31 +510,26 @@ const estilo = computed(() => {
   text-decoration: line-through;
 }
 
-/*
- * Toda variante de estado repinta as bordas **menos a esquerda**: aquela é a faixa do tipo, e
- * é a única coisa no card que não muda quando o paciente falta ou o atendimento termina.
- * Perdê-la faria a legenda mentir justamente nos cards que a recepção revisita no fim do dia.
- */
+/* O estado pinta o bloco inteiro, e é a única cor de fundo da grade: o que está acontecendo salta. */
 .card--falta {
-  border-block-color: var(--clinic-risk-line);
-  border-inline-end-color: var(--clinic-risk-line);
+  border-color: color-mix(in srgb, var(--clinic-risk-text) 45%, transparent);
 }
 
 .card--em-atendimento {
-  border-block-color: var(--clinic-accent-strong);
-  border-inline-end-color: var(--clinic-accent-strong);
-  background: color-mix(in srgb, var(--card-cor) 30%, var(--clinic-surface));
+  border-color: color-mix(in srgb, var(--clinic-accent) 55%, transparent);
+  background: var(--clinic-accent-tint);
 }
 
 .card--aguardando {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--clinic-attention-text) 45%, transparent);
+  border-color: color-mix(in srgb, var(--clinic-attention-text) 55%, transparent);
+  background: color-mix(in srgb, var(--clinic-attention-bg) 55%, var(--clinic-surface));
 }
 
 /* Finalizado é história do dia, não tarefa: perde saturação e peso, mas continua legível. */
 .card--finalizado {
-  border-block-color: var(--clinic-line);
-  border-inline-end-color: var(--clinic-line);
+  border-color: var(--clinic-line);
   background: var(--clinic-surface-soft);
+  box-shadow: none;
   color: var(--clinic-muted);
 }
 
@@ -490,19 +537,13 @@ const estilo = computed(() => {
   font-weight: 650;
 }
 
-/* Encaixe entra fora da grade e precisa parecer o que é: listrado, não igual aos demais. */
-.card--encaixe {
-  background-image: repeating-linear-gradient(
-    135deg,
-    transparent 0 6px,
-    color-mix(in srgb, var(--clinic-attention-text) 12%, transparent) 6px 12px
-  );
-}
+/*
+ * O encaixe se diz pela marca "Encaixe" (`.card__marca`), e não mais por listras no fundo: o
+ * listrado competia com a cor do estado, que agora é a única cor de fundo do bloco.
+ */
 
 .card--aviso {
-  border-top-color: var(--clinic-attention-text);
-  border-right-color: var(--clinic-attention-text);
-  border-bottom-color: var(--clinic-attention-text);
+  border-color: color-mix(in srgb, var(--clinic-attention-text) 45%, var(--clinic-line));
 }
 
 /*

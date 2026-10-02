@@ -8,31 +8,74 @@
  *
  * A oferta tem prazo. Passado o prazo ela expira sozinha e a vaga volta a ser da clínica —
  * senão a fila vira lista de promessas que ninguém cobra.
+ *
+ * A ordem da lista é a ordem do trabalho: primeiro as ofertas esperando resposta (têm prazo
+ * correndo), depois a fila pela posição, e por último o que já se resolveu. Antes as três vinham
+ * misturadas, e a resposta da oferta era um ✓ e um ✗ soltos no fim da linha — agora vão por extenso.
  */
 import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
+import ClinicPacienteCelula from '@/features/clinico/components/base/ClinicPacienteCelula.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import FilaAdicionarDialog from '@/features/clinico/components/agenda/FilaAdicionarDialog.vue'
 import FilaOfertaDialog from '@/features/clinico/components/agenda/FilaOfertaDialog.vue'
-import type {
-  AcaoDeLinha,
-  ColunaTabela,
-} from '@/features/clinico/components/base/table-types'
+import type { AcaoDeLinha, ColunaTabela } from '@/features/clinico/components/base/table-types'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import type { WaitlistEntry } from '@/features/clinico/data/types'
+import { agruparJanelas } from '@/features/clinico/domain/waitlist'
 import { useAvisosStore } from '@/features/clinico/stores/avisos'
 import { useFilaStore } from '@/features/clinico/stores/fila'
-import { useClinicoStore } from '@/features/clinico/stores/clinico'
+import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 
 const { t } = useI18n()
 const clinico = useClinicoStore()
 const fila = useFilaStore()
 const avisos = useAvisosStore()
 const formato = useClinicFormat()
+
+/**
+ * O que o aceite fez, dito em uma linha. Marcado leva à agenda, que é onde a recepção confere o
+ * horário; oferta vencida e vaga ocupada dizem o que aconteceu com o responsável, que é a
+ * pergunta seguinte de quem está no telefone.
+ */
+const aceite = computed(() => {
+  const resultado = fila.resultadoDoAceite
+
+  if (!resultado) {
+    return null
+  }
+
+  const paciente = clinico.pet(resultado.petId)?.nome ?? ''
+
+  if (resultado.tipo === 'marcado') {
+    const { atendimento } = resultado
+
+    return {
+      tipo: resultado.tipo,
+      texto: t('clinico.fila.aceite.marcado', {
+        paciente,
+        data: formato.dataCurta(clinicClock.dateOf(atendimento.inicio)),
+        hora: formato.hora(atendimento.inicio),
+        profissional: clinico.profissional(atendimento.professionalId)?.nome ?? '',
+      }),
+      rota: `/veterinario/agenda?data=${clinicClock.dateOf(atendimento.inicio)}&foco=${atendimento.id}`,
+    }
+  }
+
+  return {
+    tipo: resultado.tipo,
+    texto:
+      resultado.tipo === 'oferta-expirada'
+        ? t('clinico.fila.aceite.ofertaExpirada', { paciente })
+        : t('clinico.fila.aceite.vagaPreenchida', { paciente }),
+    rota: null,
+  }
+})
 
 /**
  * A coluna de ações saiu daqui.
@@ -59,13 +102,13 @@ const colunas = computed<ColunaTabela<WaitlistEntry>[]>(() => [
   {
     id: 'paciente',
     rotulo: t('clinico.pacientes.colunaPaciente'),
-    largura: 'minmax(0, 1.6fr)',
+    largura: 'minmax(0, 2.1fr)',
     ordenarPor: (linha) => clinico.pet(linha.petId)?.nome ?? null,
   },
   {
     id: 'responsavel',
     rotulo: t('clinico.pacientes.colunaResponsavel'),
-    largura: 'minmax(0, 1.3fr)',
+    largura: 'minmax(0, 1.1fr)',
     ocultarEmTelaEstreita: true,
     ordenarPor: (linha) => clinico.tutor(linha.tutorId)?.nome ?? null,
   },
@@ -95,13 +138,11 @@ const acoes = computed<AcaoDeLinha<WaitlistEntry>[]>(() => [
   {
     id: 'aceitar',
     rotulo: t('clinico.fila.aceitar'),
-    icone: 'pi pi-check',
     visivel: (linha) => linha.status === 'ofertado',
   },
   {
     id: 'recusar',
     rotulo: t('clinico.fila.recusar'),
-    icone: 'pi pi-times',
     visivel: (linha) => linha.status === 'ofertado',
   },
   {
@@ -140,23 +181,29 @@ const severidadePorPrioridade = {
   normal: 'info',
 } as const
 
-const DIAS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'] as const
+/**
+ * Dia da semana pelo `Intl` do idioma da tela: abreviação fixa em português vazava para todo
+ * idioma. Dias seguidos com o mesmo horário saem numa faixa só ("seg.–sex. 14:00–18:00").
+ */
+function janelasLegiveis(entrada: WaitlistEntry) {
+  return agruparJanelas(entrada.janelas).map((faixa) => {
+    const de = formato.diaDaSemanaCurtoPorIndice(faixa.de)
+    const dias =
+      faixa.de === faixa.ate ? de : `${de}–${formato.diaDaSemanaCurtoPorIndice(faixa.ate)}`
 
-function janelaLegivel(entrada: WaitlistEntry) {
-  return entrada.janelas
-    .map((janela) => `${DIAS[janela.weekday]} ${janela.inicio}–${janela.fim}`)
-    .join(' · ')
+    return `${dias} ${faixa.inicio}–${faixa.fim}`
+  })
 }
 
 async function confirmarOferta({ mensagem }: { mensagem: string }) {
   const entrada = paraOfertar.value
-  const inicio = fila.vagaAberta?.inicio
+  const vaga = fila.vagaAberta
 
-  if (!entrada || !inicio) {
+  if (!entrada || !vaga) {
     return
   }
 
-  await fila.ofertar(entrada.id, inicio)
+  await fila.ofertar(entrada.id, vaga.inicio, vaga.professionalId)
 
   /* O texto ofertado vira comprovante, como o da remarcação e o do reagendamento. */
   avisos.registrar({
@@ -171,6 +218,52 @@ async function confirmarOferta({ mensagem }: { mensagem: string }) {
 
 const erroTraduzido = computed(() => (fila.erro ? t(fila.erro) : ''))
 
+/** Peso de cada situação na ordem da lista: o que tem prazo correndo vem primeiro. */
+const ORDEM_DA_SITUACAO: Record<string, number> = {
+  ofertado: 0,
+  aguardando: 1,
+  aceito: 2,
+  expirado: 3,
+}
+
+const linhasOrdenadas = computed(() =>
+  [...fila.ativas].sort((a, b) => {
+    const porSituacao = (ORDEM_DA_SITUACAO[a.status] ?? 9) - (ORDEM_DA_SITUACAO[b.status] ?? 9)
+
+    if (porSituacao !== 0) {
+      return porSituacao
+    }
+
+    if (a.status === 'aguardando') {
+      return (fila.posicaoDe(a.id) ?? 0) - (fila.posicaoDe(b.id) ?? 0)
+    }
+
+    /* Entre as ofertas, a que expira primeiro vem antes: é a que se perde se ninguém ligar. */
+    if (a.status === 'ofertado') {
+      return (a.ofertaExpiraEm ?? '').localeCompare(b.ofertaExpiraEm ?? '')
+    }
+
+    return a.criadoEm.localeCompare(b.criadoEm)
+  }),
+)
+
+/** Quantos esperam vaga e quantas ofertas esperam resposta. */
+const fraseDoResumo = computed(() => {
+  if (fila.carregando && fila.entradas.length === 0) {
+    return ''
+  }
+
+  const aguardando = fila.ativas.filter((item) => item.status === 'aguardando').length
+  const ofertas = fila.ofertadas.length
+  const partes = [t('clinico.fila.saudacao.aguardando', { n: aguardando }, aguardando)]
+
+  if (ofertas > 0) {
+    partes.push(t('clinico.fila.saudacao.ofertas', { n: ofertas }, ofertas))
+  }
+
+  return partes.join(' · ')
+})
+
 async function carregar() {
   await clinico.carregar()
   await fila.carregar()
@@ -181,6 +274,7 @@ onMounted(carregar)
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.fila.subtitulo')"
     :title="t('clinico.fila.titulo')"
     :loading="fila.carregando && fila.entradas.length === 0"
@@ -191,23 +285,59 @@ onMounted(carregar)
     block-when-suspended
     @retry="carregar"
   >
-    <div class="fila clinic-scope">
-      <!--
-        A entrada na fila fica no topo, ao lado da lista: é a ação que a recepção dispara
-        quando acaba de dizer "não tenho horário essa semana".
-      -->
-      <div class="fila__barra">
-        <Button
-          :label="t('clinico.fila.adicionar')"
-          icon="pi pi-plus"
-          size="small"
-          @click="adicionarAberto = true"
-        />
+    <!--
+      A entrada na fila é a pílula cheia da saudação: é a ação que a recepção dispara quando acaba
+      de dizer "não tenho horário essa semana".
+    -->
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('clinico.fila.subtitulo') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('clinico.fila.titulo') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
+            {{ fraseDoResumo }}
+          </p>
+
+          <nav class="hc-acoes" :aria-label="t('clinico.fila.saudacao.acoes')">
+            <Button
+              type="button"
+              class="hc-pilula hc-pilula--cheia"
+              icon="pi pi-plus"
+              :label="t('clinico.fila.adicionar')"
+              @click="adicionarAberto = true"
+            />
+          </nav>
+        </div>
       </div>
+    </template>
+
+    <div class="fila clinic-scope">
+      <p v-if="aceite" class="aceite" :class="`aceite--${aceite.tipo}`" role="status">
+        <i
+          class="pi"
+          :class="aceite.tipo === 'marcado' ? 'pi-check-circle' : 'pi-info-circle'"
+          aria-hidden="true"
+        />
+        <span class="aceite__texto">{{ aceite.texto }}</span>
+        <RouterLink v-if="aceite.rota" class="aceite__link clinic-focusable" :to="aceite.rota">
+          {{ t('clinico.fila.aceite.verNaAgenda') }}
+          <i class="pi pi-arrow-right" aria-hidden="true" />
+        </RouterLink>
+        <Button
+          icon="pi pi-times"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          :aria-label="t('clinico.fila.aceite.dispensar')"
+          @click="fila.dispensarResultadoDoAceite()"
+        />
+      </p>
 
       <ClinicDataTable
         :colunas="colunas"
-        :linhas="fila.ativas"
+        :linhas="linhasOrdenadas"
         :chave="(entrada) => entrada.id"
         :acoes="acoes"
         :rotulo="t('clinico.fila.titulo')"
@@ -221,33 +351,40 @@ onMounted(carregar)
         </template>
 
         <template #celula-paciente="{ linha }">
-          <span class="fila__titulo">
-            <strong class="fila__nome">{{ clinico.pet(linha.petId)?.nome }}</strong>
+          <ClinicPacienteCelula :pet="clinico.pet(linha.petId)">
             <!--
               "Normal" é o padrão e não precisa ser dito: uma ficha em toda linha treina o olho
               a ignorar as fichas, inclusive as que importam.
             -->
-            <ClinicAlertChip
-              v-if="linha.prioridade !== 'normal'"
-              :severidade="severidadePorPrioridade[linha.prioridade]"
-              :rotulo="formato.prioridadeDaFila(linha.prioridade)"
-            />
-          </span>
-          <span class="fila__meta">
+            <template #selo>
+              <ClinicAlertChip
+                v-if="linha.prioridade !== 'normal'"
+                :severidade="severidadePorPrioridade[linha.prioridade]"
+                :rotulo="formato.prioridadeDaFila(linha.prioridade)"
+              />
+            </template>
             {{ clinico.tipo(linha.typeId)?.nome }}
             <template v-if="linha.professionalId">
               · {{ clinico.profissional(linha.professionalId)?.nome }}
             </template>
-          </span>
+          </ClinicPacienteCelula>
         </template>
 
         <template #celula-responsavel="{ linha }">
           <span class="fila__nome">{{ clinico.tutor(linha.tutorId)?.nome }}</span>
-          <span class="fila__meta">{{ clinico.tutor(linha.tutorId)?.telefone }}</span>
+          <span class="fila__meta"
+            ><bdi dir="ltr">{{ clinico.tutor(linha.tutorId)?.telefone }}</bdi></span
+          >
         </template>
 
         <template #celula-janelas="{ linha }">
-          <span class="fila__janela">{{ janelaLegivel(linha) }}</span>
+          <!-- Quebra só entre janelas: "qua." numa linha e "14:00–18:00" na outra não se lê. -->
+          <span class="fila__janela">
+            <template v-for="(faixa, indice) in janelasLegiveis(linha)" :key="indice">
+              <template v-if="indice > 0"> · </template>
+              <span class="fila__faixa">{{ faixa }}</span>
+            </template>
+          </span>
           <span class="fila__meta">
             {{ t('clinico.fila.esperaDesde', { valor: formato.relativo(linha.criadoEm) }) }}
           </span>
@@ -268,8 +405,19 @@ onMounted(carregar)
               })
             }}
           </span>
+          <!-- Aceito é horário marcado: a linha diz qual, para ninguém precisar abrir a agenda. -->
+          <span
+            v-else-if="linha.status === 'aceito' && linha.ofertaSlotInicio"
+            class="fila__prazo fila__prazo--marcado clinic-value"
+          >
+            {{
+              t('clinico.fila.marcadoPara', {
+                data: formato.dataCurta(clinicClock.dateOf(linha.ofertaSlotInicio)),
+                hora: formato.hora(linha.ofertaSlotInicio),
+              })
+            }}
+          </span>
         </template>
-
       </ClinicDataTable>
 
       <!--
@@ -390,6 +538,10 @@ onMounted(carregar)
   font-weight: 650;
 }
 
+.fila__faixa {
+  white-space: nowrap;
+}
+
 .fila__prazo {
   display: block;
   color: var(--clinic-attention-text);
@@ -399,6 +551,53 @@ onMounted(carregar)
 
 .fila__prazo--curto {
   color: var(--clinic-risk-text);
+}
+
+.fila__prazo--marcado {
+  color: var(--clinic-ok-text);
+}
+
+/*
+ * O resultado do aceite é estado, não alerta: uma linha com borda de acento quando deu certo,
+ * neutra quando a vaga escapou. Nenhum dos dois pede cor de risco — ninguém errou.
+ */
+.aceite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+  padding: var(--clinic-space-2) var(--clinic-space-3);
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-control);
+  gap: var(--clinic-space-2);
+  background: var(--clinic-surface);
+  font-size: var(--clinic-font-label);
+  font-weight: 600;
+}
+
+.aceite--marcado {
+  border-color: var(--clinic-accent);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+}
+
+.aceite__texto {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.aceite__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--clinic-space-1);
+  border-radius: var(--clinic-radius-control);
+  color: var(--clinic-accent-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.aceite__link:hover {
+  text-decoration: underline;
 }
 
 .vaga {

@@ -18,6 +18,7 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import SelectButton from 'primevue/selectbutton'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -103,10 +104,13 @@ const opcoesPrioridade = computed(() =>
 
 const NOMES_DOS_DIAS: WeekdayIndex[] = [0, 1, 2, 3, 4, 5, 6]
 
-function alternarDia(dia: WeekdayIndex) {
-  diasAceitos.value = diasAceitos.value.includes(dia)
-    ? diasAceitos.value.filter((item) => item !== dia)
-    : [...diasAceitos.value, dia].sort()
+const opcoesDias = computed(() =>
+  NOMES_DOS_DIAS.map((valor) => ({ valor, rotulo: formato.diaDaSemanaCurtoPorIndice(valor) })),
+)
+
+/** Guardados em ordem de semana, não de clique: é a ordem em que as janelas são lidas depois. */
+function definirDias(dias: WeekdayIndex[]) {
+  diasAceitos.value = [...dias].sort()
 }
 
 /** Uma janela por dia aceito: é a forma que o domínio já usa para cruzar com a vaga. */
@@ -174,7 +178,7 @@ async function salvar() {
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(34rem, 94vw)' }"
     :header="t('clinico.fila.adicionar')"
     :dismissable-mask="true"
@@ -199,14 +203,14 @@ async function salvar() {
           :pt="{ overlay: { class: 'clinic-overlay' } }"
         >
           <template #footer>
-            <button type="button" class="cadastrar" @click="cadastrandoPaciente = true">
+            <Button class="cadastrar" text fluid @click="cadastrandoPaciente = true">
               <span class="cadastrar__marca" aria-hidden="true"><i class="pi pi-user-plus" /></span>
               <span class="cadastrar__texto">
                 <strong>{{ t('clinico.paciente.novo.atalho') }}</strong>
                 <small>{{ t('clinico.paciente.novo.atalhoAjuda') }}</small>
               </span>
               <i class="pi pi-arrow-right cadastrar__seta" aria-hidden="true" />
-            </button>
+            </Button>
           </template>
         </Select>
       </ClinicField>
@@ -219,6 +223,7 @@ async function salvar() {
             option-label="label"
             option-value="value"
             fluid
+            :pt="{ overlay: { class: 'clinic-overlay' } }"
           />
         </ClinicField>
 
@@ -229,15 +234,16 @@ async function salvar() {
             option-label="label"
             option-value="value"
             fluid
+            :pt="{ overlay: { class: 'clinic-overlay' } }"
           />
         </ClinicField>
       </div>
 
-      <ClinicField :rotulo="t('clinico.fila.prioridade')">
+      <ClinicField :rotulo="t('clinico.fila.prioridadeRotulo')">
         <ClinicToggleGroup
           v-model="prioridade"
           :opcoes="opcoesPrioridade"
-          :rotulo="t('clinico.fila.prioridade')"
+          :rotulo="t('clinico.fila.prioridadeRotulo')"
         />
       </ClinicField>
 
@@ -247,19 +253,17 @@ async function salvar() {
       -->
       <ClinicField :rotulo="t('clinico.fila.janelas')">
         <div class="janela">
-          <div class="janela__dias" role="group" :aria-label="t('clinico.fila.janelas')">
-            <button
-              v-for="dia in NOMES_DOS_DIAS"
-              :key="dia"
-              type="button"
-              class="janela__dia clinic-focusable"
-              :class="{ 'janela__dia--ativo': diasAceitos.includes(dia) }"
-              :aria-pressed="diasAceitos.includes(dia)"
-              @click="alternarDia(dia)"
-            >
-              {{ formato.diaDaSemanaCurtoPorIndice(dia) }}
-            </button>
-          </div>
+          <SelectButton
+            class="janela__dias"
+            :model-value="diasAceitos"
+            :options="opcoesDias"
+            option-label="rotulo"
+            option-value="valor"
+            multiple
+            size="small"
+            :aria-label="t('clinico.fila.janelas')"
+            @update:model-value="definirDias"
+          />
 
           <div class="janela__horas">
             <InputText v-model="inicio" type="time" class="janela__hora" />
@@ -269,7 +273,7 @@ async function salvar() {
         </div>
       </ClinicField>
 
-      <ClinicField :rotulo="t('clinico.agenda.criar.observacao')">
+      <ClinicField :rotulo="t('clinico.prontuario.conduta.observacao')">
         <InputText v-model="observacao" fluid />
       </ClinicField>
     </div>
@@ -299,23 +303,22 @@ async function salvar() {
  * Mesma forma da criação de atendimento, e de propósito: é o mesmo gesto, e duas aparências para
  * a mesma porta fariam parecer que são coisas diferentes.
  */
-.cadastrar {
-  display: flex;
-  width: 100%;
-  align-items: center;
+.cadastrar.p-button.p-button-text {
+  justify-content: flex-start;
   gap: var(--clinic-space-2);
   padding: var(--clinic-space-2) var(--clinic-space-3);
   border: 0;
   border-top: 1px solid var(--clinic-line-strong);
+  border-radius: 0;
   background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
-  cursor: pointer;
-  font: inherit;
+  font-size: var(--clinic-font-base);
+  font-weight: inherit;
   text-align: start;
 }
 
-.cadastrar:hover,
-.cadastrar:focus-visible {
+.cadastrar.p-button.p-button-text:not(:disabled):hover,
+.cadastrar.p-button.p-button-text:focus-visible {
   background: var(--clinic-accent-strong);
   color: var(--clinic-surface);
 }
@@ -358,7 +361,7 @@ async function salvar() {
 }
 
 .cadastrar__seta {
-  margin-left: auto;
+  margin-inline-start: auto;
   font-size: 0.72rem;
 }
 
@@ -378,31 +381,18 @@ async function salvar() {
   gap: var(--clinic-space-2);
 }
 
-.janela__dias {
-  display: flex;
+.janela__dias.p-selectbutton {
   flex-wrap: wrap;
-  gap: 0.2rem;
 }
 
-.janela__dia {
+/* Dia aceito ganha anel e cor do acento: o estado precisa sobreviver à escala de cinza. */
+.janela__dias :deep(.p-togglebutton) {
   min-width: 2.6rem;
-  min-height: var(--clinic-hit-target);
-  padding: 0 0.4rem;
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
   text-transform: capitalize;
 }
 
-/* Dia aceito ganha contorno e fundo: o estado precisa sobreviver à escala de cinza. */
-.janela__dia--ativo {
-  border-color: var(--clinic-accent-strong);
-  background: var(--clinic-accent-tint);
+.janela__dias :deep(.p-togglebutton-checked .p-togglebutton-content) {
+  box-shadow: inset 0 0 0 1.5px var(--clinic-accent-strong);
   color: var(--clinic-accent-strong);
 }
 

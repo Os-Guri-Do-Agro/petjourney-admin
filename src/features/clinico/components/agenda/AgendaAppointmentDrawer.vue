@@ -16,18 +16,22 @@ import ClinicAlertChip from '../base/ClinicAlertChip.vue'
 import ClinicPatientHeader from '../base/ClinicPatientHeader.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { Appointment, AppointmentStatus } from '../../data/types'
+import { cancelarAte, podeConfirmarPresenca } from '../../domain/politica'
 import { useAgendaStore } from '../../stores/agenda'
 import { useAvisosStore } from '../../stores/avisos'
-import { useClinicoStore } from '../../stores/clinico'
+import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{ appointment: Appointment | null }>()
 
 const emit = defineEmits<{
   fechar: []
+  editar: []
   alterarStatus: [status: AppointmentStatus]
   cancelar: []
   abrirProntuario: []
   verHistorico: []
+  verResumo: []
+  confirmarPresenca: []
 }>()
 
 const { t } = useI18n()
@@ -67,7 +71,12 @@ const conflitos = computed(() => {
   })
 })
 
-/** O próximo passo natural do atendimento, para virar botão primário. */
+/**
+ * O próximo passo natural do atendimento, para virar botão primário.
+ *
+ * O botão diz a ação ("Registrar chegada"), e não o estado em que o atendimento vai ficar: com
+ * o rótulo "Aguardando", a recepção lia o botão como o estado atual e não clicava.
+ */
 const proximoStatus = computed<AppointmentStatus | null>(() => {
   switch (props.appointment?.status) {
     case 'agendado':
@@ -90,6 +99,63 @@ const avisosDoAtendimento = computed(() =>
 const encerrado = computed(() =>
   ['finalizado', 'cancelado', 'falta'].includes(props.appointment?.status ?? ''),
 )
+
+/**
+ * Quem confirmou presença, e por onde.
+ *
+ * "Sem confirmação" só aparece na janela em que confirmar diz alguma coisa (as 48 horas antes):
+ * cobrar confirmação de um horário de daqui a três semanas é ruído, e a linha pendente perderia
+ * o peso que tem na véspera.
+ */
+const presenca = computed(() => {
+  const appointment = props.appointment
+
+  if (!appointment || (appointment.status !== 'agendado' && appointment.status !== 'confirmado')) {
+    return null
+  }
+
+  if (appointment.confirmacao) {
+    return {
+      texto: t(`clinico.agenda.presenca.por.${appointment.confirmacao.por}`),
+      quando: formato.relativo(appointment.confirmacao.em),
+      pendente: false,
+    }
+  }
+
+  if (appointment.status === 'confirmado') {
+    return { texto: t('clinico.agenda.presenca.confirmada'), quando: '', pendente: false }
+  }
+
+  return podeConfirmarPresenca(appointment, clinicClock.nowIso())
+    ? { texto: t('clinico.agenda.presenca.semConfirmacao'), quando: '', pendente: true }
+    : null
+})
+
+/**
+ * Até quando o responsável mexe neste horário pelo app. É a pergunta que chega à recepção
+ * quando a pessoa liga dizendo "o app não me deixa cancelar".
+ */
+const prazoDoApp = computed(() => {
+  const appointment = props.appointment
+  const politica = clinico.politica
+
+  if (!appointment || !politica) {
+    return null
+  }
+
+  const limite = cancelarAte(appointment, politica, clinicClock.utcOffset)
+
+  if (!limite) {
+    return null
+  }
+
+  return Date.parse(clinicClock.nowIso()) < Date.parse(limite)
+    ? t('clinico.agenda.prazoApp.ate', {
+        data: formato.dataCurta(clinicClock.dateOf(limite)),
+        hora: formato.hora(limite),
+      })
+    : t('clinico.agenda.prazoApp.encerrado')
+})
 </script>
 
 <template>
@@ -102,14 +168,37 @@ const encerrado = computed(() =>
   >
     <header class="drawer__topo">
       <span class="clinic-label">{{ formato.status(appointment.status) }}</span>
-      <button
-        type="button"
-        class="drawer__fechar clinic-focusable"
-        :aria-label="t('clinico.atalhos.fechar')"
-        @click="emit('fechar')"
-      >
-        <i class="pi pi-times" aria-hidden="true" />
-      </button>
+
+      <div class="drawer__topo-acoes">
+        <!--
+          Editar mora no cabeçalho, ao lado do status, e não no rodapé com as ações de risco:
+          corrigir o tipo de um atendimento não pertence à mesma família de falta e cancelamento.
+          Fica escondido quando o atendimento já encerrou — editar o que acabou de ser cancelado
+          ou faltado não conserta nada e ainda mexeria num horário que já voltou para a fila.
+        -->
+        <Button
+          v-if="!encerrado"
+          icon="pi pi-pencil"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          :title="t('clinico.agenda.editar.titulo')"
+          :aria-label="t('clinico.agenda.editar.titulo')"
+          @click="emit('editar')"
+        />
+
+        <Button
+          icon="pi pi-times"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          :title="t('clinico.atalhos.fechar')"
+          :aria-label="t('clinico.atalhos.fechar')"
+          @click="emit('fechar')"
+        />
+      </div>
     </header>
 
     <ClinicPatientHeader :pet="pet" :tutor="tutor" compacto />
@@ -131,6 +220,28 @@ const encerrado = computed(() =>
         <dt class="clinic-label">{{ tipo?.nome }}</dt>
         <dd>{{ t(`clinico.origem.${appointment.origem}`) }}</dd>
       </div>
+      <div v-if="presenca">
+        <dt class="clinic-label">{{ t('clinico.agenda.presenca.titulo') }}</dt>
+        <dd :class="{ drawer__pendente: presenca.pendente }">
+          {{ presenca.texto }}
+          <span v-if="presenca.quando" class="drawer__canal">{{ presenca.quando }}</span>
+        </dd>
+        <dd v-if="appointment.status === 'agendado'" class="drawer__acao-linha">
+          <Button
+            :label="t('clinico.agenda.presenca.registrar')"
+            icon="pi pi-check"
+            severity="secondary"
+            text
+            size="small"
+            :loading="agenda.salvando"
+            @click="emit('confirmarPresenca')"
+          />
+        </dd>
+      </div>
+      <div v-if="prazoDoApp">
+        <dt class="clinic-label">{{ t('clinico.agenda.prazoApp.titulo') }}</dt>
+        <dd class="drawer__prazo">{{ prazoDoApp }}</dd>
+      </div>
       <div v-if="appointment.chegadaEm">
         <dt class="clinic-label">{{ t('clinico.meuDia.esperando') }}</dt>
         <dd class="clinic-value">{{ formato.relativo(appointment.chegadaEm) }}</dd>
@@ -139,12 +250,29 @@ const encerrado = computed(() =>
         <dt class="clinic-label">{{ t('clinico.agenda.cancelarDialogo.motivo') }}</dt>
         <dd>{{ formato.motivoCancelamento(appointment.motivoCancelamento) }}</dd>
       </div>
+      <!--
+        Por que o paciente não veio. Aparece no drawer da falta porque é a pergunta que alguém
+        faz antes de ligar de novo — e porque a ausência dela é informação: falta sem motivo é
+        falta que ninguém apurou.
+      -->
+      <div v-if="appointment.status === 'falta'">
+        <dt class="clinic-label">{{ t('clinico.faltas.justificativa.motivo') }}</dt>
+        <dd v-if="appointment.justificativaDeFalta">
+          {{ formato.motivoFalta(appointment.justificativaDeFalta.motivo) }}
+          <span class="drawer__canal">
+            {{ formato.canalDeContato(appointment.justificativaDeFalta.canal) }}
+          </span>
+        </dd>
+        <dd v-else class="drawer__pendente">
+          {{ t('clinico.faltas.justificativa.pendente') }}
+        </dd>
+      </div>
     </dl>
 
     <p v-if="appointment.observacao" class="drawer__observacao">{{ appointment.observacao }}</p>
 
     <section v-if="conflitos.length > 0" class="drawer__secao">
-      <h3 class="clinic-label">{{ t('clinico.agenda.filtros') }}</h3>
+      <h3 class="clinic-label">{{ t('clinico.agenda.conflitosTitulo') }}</h3>
       <ul class="drawer__avisos">
         <li v-for="(conflito, indice) in conflitos" :key="indice">
           <ClinicAlertChip
@@ -177,7 +305,7 @@ const encerrado = computed(() =>
     <div class="drawer__acoes">
       <Button
         v-if="proximoStatus"
-        :label="formato.status(proximoStatus)"
+        :label="t(`clinico.agenda.proximoPasso.${proximoStatus}`)"
         icon="pi pi-arrow-right"
         :loading="agenda.salvando"
         @click="emit('alterarStatus', proximoStatus)"
@@ -189,6 +317,15 @@ const encerrado = computed(() =>
         severity="secondary"
         outlined
         @click="emit('abrirProntuario')"
+      />
+
+      <!-- O resumo vem antes do histórico: é o que se lê na porta da sala. -->
+      <Button
+        :label="t('clinico.resumoDoPaciente.verResumo')"
+        icon="pi pi-stopwatch"
+        severity="secondary"
+        outlined
+        @click="emit('verResumo')"
       />
 
       <Button
@@ -241,21 +378,10 @@ const encerrado = computed(() =>
   justify-content: space-between;
 }
 
-.drawer__fechar {
-  display: grid;
-  width: var(--clinic-hit-target);
-  height: var(--clinic-hit-target);
-  place-items: center;
-  border: none;
-  border-radius: var(--clinic-radius-control);
-  background: transparent;
-  color: var(--clinic-muted);
-  cursor: pointer;
-}
-
-.drawer__fechar:hover {
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-text);
+.drawer__topo-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--clinic-space-1);
 }
 
 .drawer__dados {
@@ -273,6 +399,28 @@ const encerrado = computed(() =>
   margin: 0;
   font-weight: 650;
   overflow-wrap: anywhere;
+}
+
+/* O canal ao lado do motivo: como se soube, em tom secundário. */
+.drawer__canal {
+  color: var(--clinic-faint);
+  font-size: var(--clinic-font-label);
+}
+
+/* O botão de registrar confirmação encosta na linha da presença, sem virar ação principal. */
+.drawer__acao-linha {
+  margin-inline-start: calc(var(--clinic-space-2) * -1);
+}
+
+.drawer__prazo {
+  color: var(--clinic-muted);
+  font-weight: 600;
+}
+
+/* Falta sem motivo não é campo vazio, é tarefa aberta — e o tom diz isso. */
+.drawer__pendente {
+  color: var(--clinic-attention-text);
+  font-weight: 700;
 }
 
 .drawer__observacao {

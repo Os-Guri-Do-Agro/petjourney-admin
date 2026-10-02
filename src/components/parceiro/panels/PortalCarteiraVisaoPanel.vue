@@ -1,19 +1,36 @@
 <script setup lang="ts">
+/**
+ * O resumo da carteira: os fatos numa linha, e os diálogos de saque e de chave PIX.
+ *
+ * Era a aba "Visão geral": três cartões de número (saldo sacável, saldo total, total sacado),
+ * dois formulários abertos lado a lado e quatro cartões de ajuda. O saldo sacável subiu para a
+ * frase do topo da página, e as duas ações viraram as pílulas dela; aqui ficam o que a frase não
+ * diz (quanto já foi sacado, o mínimo, o ciclo, a chave) e os dois diálogos que as pílulas abrem.
+ *
+ * A página monta a saudação e chama `abrirSaque` / `abrirPix`; este painel carrega a carteira e
+ * conta à página o que ela precisa saber pelo evento `estado`.
+ */
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
-import PartnerFocusCard from '@/components/parceiro/PartnerFocusCard.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
 import {
   getCarteira,
   solicitarSaque,
   updateCarteiraPix,
 } from '@/service/parceiro/parceiro-portal-service'
+import {
+  capacidadeDeSaque,
+  MIN_SAQUE_CENTAVOS,
+  type CapacidadeDeSaque,
+} from '@/service/parceiro/regras-de-saque'
 import type { Carteira } from '@/service/parceiro/types'
 import {
   formatCentavosToBrl,
@@ -21,13 +38,27 @@ import {
   parseBrlToCentavos,
 } from '@/utils/format/money'
 
+export type EstadoDaCarteira = {
+  carregando: boolean
+  saldoSacavelCentavos: number
+  saldoTotalCentavos: number
+  capacidade: CapacidadeDeSaque | null
+  ehDono: boolean
+}
+
 const emit = defineEmits<{
   needsProgramas: []
+  estado: [estado: EstadoDaCarteira]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
+
+/** Valores em BRL escritos no formato do idioma da tela. */
+function formatBrl(centavos: number) {
+  return formatCentavosToBrl(centavos, INTL_LOCALE[locale.value as Locale])
+}
 
 const carteira = ref<Carteira | null>(null)
 const loading = ref(true)
@@ -36,58 +67,64 @@ const chavePix = ref('')
 const valorSaque = ref('')
 const savingPix = ref(false)
 const requestingSaque = ref(false)
+const saqueAberto = ref(false)
+const pixAberto = ref(false)
 
-const minSaqueCentavos = 5000
+/** A mesma regra que a visão geral usa para dizer se dá para sacar — ver `regras-de-saque`. */
+const minSaqueCentavos = MIN_SAQUE_CENTAVOS
 const comissaoIndicacaoEnabled = import.meta.env.VITE_COMISSAO_INDICACAO_ENABLED !== 'false'
 
-const CONTACT_EMAIL = 'atendimento@petjourney.health'
-const CONTACT_WHATSAPP_DISPLAY = '55 67 9883-7848'
-const CONTACT_WHATSAPP_HREF = 'https://wa.me/556798837848'
+const capacidade = computed(() =>
+  carteira.value ? capacidadeDeSaque(carteira.value, store.isDono) : null,
+)
 
-const helpItems = computed(() => [
-  {
-    id: 'comissao',
-    icon: 'pi pi-share-alt',
-    title: t('carteira.help.comissao.title'),
-    description: t('carteira.help.comissao.body'),
-  },
-  {
-    id: 'saldos',
-    icon: 'pi pi-wallet',
-    title: t('carteira.help.saldos.title'),
-    description: t('carteira.help.saldos.body'),
-  },
-  {
-    id: 'pix',
-    icon: 'pi pi-qrcode',
-    title: t('carteira.help.pix.title'),
-    description: t('carteira.help.pix.body'),
-  },
-  {
-    id: 'ciclo',
-    icon: 'pi pi-calendar',
-    title: t('carteira.help.ciclo.title'),
-    description: t('carteira.help.ciclo.body'),
-  },
-])
+/**
+ * O motivo de não dar para sacar, numa frase — a mesma da Visão geral. Só aparece quando há
+ * motivo: com o saque liberado, a linha de fatos não precisa se justificar.
+ */
+const motivo = computed(() => {
+  const situacao = capacidade.value
 
-const canRequestWithdraw = computed(() => {
-  if (!carteira.value || !store.isDono) {
-    return false
+  if (!situacao || situacao === 'liberado') {
+    return ''
   }
 
-  return (
-    !carteira.value.bloqueadoParaSaque &&
-    carteira.value.saldoSacavelCentavos > 0 &&
-    Boolean(carteira.value.chavePix)
-  )
+  return t(`inicio.saldo.capacidade.${situacao}`, { minimo: formatBrl(minSaqueCentavos) })
 })
+
+/**
+ * A chave na linha de fatos, com o meio escondido: "089…560" diz qual é a chave para quem a
+ * cadastrou, sem expor o CPF ou o telefone inteiro para quem passa atrás do balcão.
+ */
+const chaveMascarada = computed(() => {
+  const chave = carteira.value?.chavePix ?? ''
+
+  return chave.length > 8 ? `${chave.slice(0, 3)}…${chave.slice(-3)}` : chave
+})
+
+const retidoCentavos = computed(() =>
+  carteira.value
+    ? Math.max(0, carteira.value.saldoTotalCentavos - carteira.value.saldoSacavelCentavos)
+    : 0,
+)
 
 const showComissaoDisabledNotice = computed(
   () =>
     comissaoIndicacaoEnabled === false &&
     carteira.value != null &&
     carteira.value.saldoTotalCentavos === 0,
+)
+
+watch(
+  () => ({
+    carregando: loading.value,
+    saldoSacavelCentavos: carteira.value?.saldoSacavelCentavos ?? 0,
+    saldoTotalCentavos: carteira.value?.saldoTotalCentavos ?? 0,
+    capacidade: capacidade.value,
+    ehDono: store.isDono,
+  }),
+  (estado) => emit('estado', estado),
+  { immediate: true },
 )
 
 function onValorSaqueInput(value: string) {
@@ -125,6 +162,21 @@ async function loadCarteira() {
   }
 }
 
+/** O saque abre com o saldo inteiro: sacar tudo é o caso comum, e mudar o valor é um campo. */
+function abrirSaque() {
+  valorSaque.value = carteira.value
+    ? maskBrlCurrencyInput(String(carteira.value.saldoSacavelCentavos))
+    : ''
+  saqueAberto.value = true
+}
+
+function abrirPix() {
+  chavePix.value = carteira.value?.chavePix ?? ''
+  pixAberto.value = true
+}
+
+defineExpose({ abrirSaque, abrirPix })
+
 async function savePix() {
   if (!chavePix.value.trim()) {
     return
@@ -140,6 +192,7 @@ async function savePix() {
       detail: t('carteira.toast.pixSavedDetail'),
       life: 3000,
     })
+    pixAberto.value = false
     await loadCarteira()
   } catch (err) {
     toast.add({
@@ -171,7 +224,7 @@ async function requestWithdraw() {
       severity: 'warn',
       summary: t('carteira.toast.insufficient'),
       detail: t('carteira.toast.maxWithdraw', {
-        valor: formatCentavosToBrl(carteira.value.saldoSacavelCentavos),
+        valor: formatBrl(carteira.value.saldoSacavelCentavos),
       }),
       life: 4000,
     })
@@ -199,6 +252,7 @@ async function requestWithdraw() {
       life: 4000,
     })
     valorSaque.value = ''
+    saqueAberto.value = false
     await loadCarteira()
   } catch (err) {
     toast.add({
@@ -219,202 +273,155 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="partner-panel-visao" class="portal-panel" role="tabpanel" aria-labelledby="partner-tab-visao">
+  <div class="carteira-resumo">
     <div
       v-if="loading"
-      class="carteira-skeleton"
+      class="hc carteira-fatos"
       role="status"
       aria-live="polite"
       aria-busy="true"
       :aria-label="t('carteira.visao.loadingAria')"
     >
-      <section class="carteira-metrics" aria-hidden="true">
-        <PartnerFocusCard class="metric metric--focus metric--skeleton">
-          <Skeleton width="6.5rem" height="0.7rem" border-radius="4px" />
-          <Skeleton width="8.5rem" height="1.85rem" border-radius="6px" />
-          <Skeleton width="10rem" height="0.75rem" border-radius="4px" />
-        </PartnerFocusCard>
-        <article class="metric metric--skeleton">
-          <Skeleton width="5rem" height="0.75rem" border-radius="4px" />
-          <Skeleton width="7rem" height="1.35rem" border-radius="6px" />
-        </article>
-        <article class="metric metric--skeleton">
-          <Skeleton width="5.5rem" height="0.75rem" border-radius="4px" />
-          <Skeleton width="7rem" height="1.35rem" border-radius="6px" />
-        </article>
-      </section>
-
-      <div class="carteira-actions" aria-hidden="true">
-        <section class="carteira-panel carteira-panel--skeleton">
-          <Skeleton width="5.5rem" height="1rem" border-radius="4px" />
-          <div class="carteira-form">
-            <Skeleton width="100%" height="3.125rem" border-radius="0.875rem" />
-            <Skeleton width="7.5rem" height="2.5rem" border-radius="0.75rem" />
-          </div>
-        </section>
-
-        <section class="carteira-panel carteira-panel--skeleton">
-          <Skeleton width="7rem" height="1rem" border-radius="4px" />
-          <Skeleton width="100%" height="0.85rem" border-radius="4px" />
-          <div class="carteira-form">
-            <Skeleton width="100%" height="3.125rem" border-radius="0.875rem" />
-            <Skeleton width="7.5rem" height="2.5rem" border-radius="0.75rem" />
-          </div>
-        </section>
-      </div>
-
-      <section class="carteira-help carteira-help--skeleton" aria-hidden="true">
-        <Skeleton width="12rem" height="1rem" border-radius="4px" />
-        <Skeleton width="100%" height="0.85rem" border-radius="4px" />
-        <div class="carteira-help__grid">
-          <article v-for="index in 4" :key="index" class="carteira-help__item">
-            <Skeleton width="2.2rem" height="2.2rem" border-radius="0.7rem" />
-            <div class="carteira-help__copy">
-              <Skeleton width="8rem" height="0.85rem" border-radius="4px" />
-              <Skeleton width="100%" height="0.75rem" border-radius="4px" />
-            </div>
-          </article>
-        </div>
-      </section>
+      <Skeleton width="60%" height="1rem" border-radius="4px" />
     </div>
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadCarteira">{{ t('carteira.visao.retry') }}</button>
+      <Button
+        type="button"
+        :label="t('carteira.visao.retry')"
+        icon="pi pi-refresh"
+        severity="secondary"
+        outlined
+        size="small"
+        @click="loadCarteira"
+      />
     </div>
 
     <template v-else-if="carteira">
-      <section class="carteira-metrics">
-        <PartnerFocusCard class="metric metric--focus">
-          <span>{{ t('carteira.visao.saldoSacavel') }}</span>
-          <strong>{{ formatCentavosToBrl(carteira.saldoSacavelCentavos) }}</strong>
-          <small>{{ t('carteira.visao.saldoSacavelHint') }}</small>
-        </PartnerFocusCard>
-        <article class="metric">
-          <span>{{ t('carteira.visao.saldoTotal') }}</span>
-          <strong>{{ formatCentavosToBrl(carteira.saldoTotalCentavos) }}</strong>
-        </article>
-        <article class="metric">
-          <span>{{ t('carteira.visao.totalSacado') }}</span>
-          <strong>{{ formatCentavosToBrl(carteira.totalSacadoCentavos) }}</strong>
-        </article>
-      </section>
+      <section class="hc carteira-fatos" :aria-label="t('carteira.resumo.aria')">
+        <p v-if="motivo" class="carteira-fatos__motivo">
+          <i class="pi pi-info-circle" aria-hidden="true" />
+          {{ motivo }}
+        </p>
 
-      <p v-if="carteira.bloqueadoParaSaque" class="carteira-alert">
-        {{ t('carteira.visao.alertBlocked') }}
-      </p>
-
-      <p v-else-if="carteira.saldoSacavelCentavos === 0 && carteira.saldoTotalCentavos > 0" class="carteira-alert">
-        {{ t('carteira.visao.alertHold') }}
-      </p>
-
-      <p v-if="showComissaoDisabledNotice" class="carteira-alert">
-        {{ t('carteira.visao.alertComissaoDisabled') }}
-      </p>
-
-      <div class="carteira-actions">
-        <section class="carteira-panel">
-          <h3>{{ t('carteira.visao.pix.title') }}</h3>
-          <div class="carteira-form">
-            <AuthTextField
-              id="chave-pix"
-              v-model="chavePix"
-              :disabled="!store.isDono || savingPix"
-              :hint="t('carteira.visao.pix.hint')"
-              :label="t('carteira.visao.pix.label')"
-              :placeholder="t('carteira.visao.pix.placeholder')"
-            />
-            <Button
-              :label="t('carteira.visao.pix.save')"
-              :disabled="!store.isDono"
-              :loading="savingPix"
-              @click="savePix"
-            />
-          </div>
-        </section>
-
-        <section class="carteira-panel">
-          <h3>{{ t('carteira.visao.saque.title') }}</h3>
-          <div class="carteira-form">
-            <AuthTextField
-              id="valor-saque"
-              :model-value="valorSaque"
-              :disabled="!store.isDono || requestingSaque || carteira.bloqueadoParaSaque"
-              inputmode="numeric"
-              autocomplete="off"
-              :label="t('carteira.visao.saque.valorLabel')"
-              :placeholder="t('carteira.visao.saque.valorPlaceholder')"
-              @update:model-value="onValorSaqueInput"
-            >
-              <template #leading>
-                <span class="carteira-currency">{{ t('carteira.visao.saque.currency') }}</span>
-              </template>
-            </AuthTextField>
-            <p class="carteira-hint">
-              {{ t('carteira.visao.saque.hint', { valor: formatCentavosToBrl(minSaqueCentavos) }) }}
-            </p>
-            <Button
-              :label="t('carteira.visao.saque.submit')"
-              :disabled="!canRequestWithdraw"
-              :loading="requestingSaque"
-              @click="requestWithdraw"
-            />
-          </div>
-        </section>
-      </div>
-
-      <section class="carteira-help" aria-labelledby="carteira-help-title">
-        <header class="carteira-help__head">
-          <div>
-            <h3 id="carteira-help-title">{{ t('carteira.help.title') }}</h3>
-            <p>{{ t('carteira.help.lede') }}</p>
-          </div>
-          <div class="carteira-help__contacts">
-            <a
-              class="carteira-help__contact"
-              :href="`mailto:${CONTACT_EMAIL}`"
-            >
-              <i class="pi pi-envelope" aria-hidden="true" />
-              {{ t('carteira.help.contactEmail') }}
-            </a>
-            <a
-              class="carteira-help__contact carteira-help__contact--whatsapp"
-              :href="CONTACT_WHATSAPP_HREF"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <i class="pi pi-whatsapp" aria-hidden="true" />
-              {{ t('carteira.help.contactWhatsapp') }}
-            </a>
-          </div>
-        </header>
-
-        <ul class="carteira-help__grid">
-          <li v-for="item in helpItems" :key="item.id" class="carteira-help__item">
-            <span class="carteira-help__icon" aria-hidden="true">
-              <i :class="item.icon" />
-            </span>
-            <div class="carteira-help__copy">
-              <strong>{{ item.title }}</strong>
-              <p>{{ item.description }}</p>
-            </div>
+        <ul class="carteira-fatos__lista">
+          <li v-if="retidoCentavos > 0 && capacidade !== 'tudoRetido'">
+            {{ t('carteira.resumo.retido', { valor: formatBrl(retidoCentavos) }) }}
+          </li>
+          <li>
+            <strong>{{ formatBrl(carteira.totalSacadoCentavos) }}</strong>
+            {{ t('carteira.resumo.jaSacados') }}
+          </li>
+          <li>
+            {{ t('carteira.resumo.minimo') }} <strong>{{ formatBrl(minSaqueCentavos) }}</strong>
+          </li>
+          <li>{{ t('carteira.resumo.ciclo') }}</li>
+          <li v-if="carteira.chavePix">
+            {{ t('carteira.resumo.pix') }} <strong>{{ chaveMascarada }}</strong>
           </li>
         </ul>
-
-        <p class="carteira-help__footer">
-          {{ t('carteira.help.footerPrefix') }}
-          <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a>
-          {{ t('carteira.help.footerOrWhatsapp') }}
-          <a :href="CONTACT_WHATSAPP_HREF" target="_blank" rel="noopener noreferrer">
-            {{ CONTACT_WHATSAPP_DISPLAY }}
-          </a>
-        </p>
       </section>
+
+      <p v-if="showComissaoDisabledNotice" class="carteira-fatos__motivo">
+        <i class="pi pi-info-circle" aria-hidden="true" />
+        {{ t('carteira.visao.alertComissaoDisabled') }}
+      </p>
     </template>
+
+    <Dialog
+      v-model:visible="saqueAberto"
+      modal
+      class="clinic-dialog hc-tema"
+      :style="{ width: 'min(28rem, 94vw)' }"
+      :header="t('carteira.visao.saque.title')"
+      dismissable-mask
+    >
+      <div v-if="carteira" class="carteira-dialogo">
+        <p class="carteira-dialogo__saldo">
+          {{ t('carteira.dialogo.disponivel', { valor: formatBrl(carteira.saldoSacavelCentavos) }) }}
+        </p>
+        <AuthTextField
+          id="valor-saque"
+          :model-value="valorSaque"
+          :disabled="requestingSaque"
+          inputmode="numeric"
+          autocomplete="off"
+          :label="t('carteira.visao.saque.valorLabel')"
+          :placeholder="t('carteira.visao.saque.valorPlaceholder')"
+          @update:model-value="onValorSaqueInput"
+        >
+          <template #leading>
+            <span class="carteira-currency">{{ t('carteira.visao.saque.currency') }}</span>
+          </template>
+        </AuthTextField>
+        <p class="carteira-dialogo__dica">
+          {{ t('carteira.dialogo.paraPix', { chave: chaveMascarada }) }}
+          {{ t('carteira.visao.saque.hint', { valor: formatBrl(minSaqueCentavos) }) }}
+        </p>
+      </div>
+
+      <template #footer>
+        <Button
+          :label="t('carteira.dialogo.cancelar')"
+          severity="secondary"
+          text
+          @click="saqueAberto = false"
+        />
+        <Button
+          :label="t('carteira.visao.saque.submit')"
+          icon="pi pi-arrow-right"
+          :loading="requestingSaque"
+          :disabled="capacidade !== 'liberado'"
+          @click="requestWithdraw"
+        />
+      </template>
+    </Dialog>
+
+    <Dialog
+      v-model:visible="pixAberto"
+      modal
+      class="clinic-dialog hc-tema"
+      :style="{ width: 'min(28rem, 94vw)' }"
+      :header="t('carteira.visao.pix.title')"
+      dismissable-mask
+    >
+      <div class="carteira-dialogo">
+        <AuthTextField
+          id="chave-pix"
+          v-model="chavePix"
+          :disabled="!store.isDono || savingPix"
+          :hint="t('carteira.visao.pix.hint')"
+          :label="t('carteira.visao.pix.label')"
+          :placeholder="t('carteira.visao.pix.placeholder')"
+        />
+      </div>
+
+      <template #footer>
+        <Button
+          :label="t('carteira.dialogo.cancelar')"
+          severity="secondary"
+          text
+          @click="pixAberto = false"
+        />
+        <Button
+          :label="t('carteira.visao.pix.save')"
+          icon="pi pi-check"
+          :disabled="!store.isDono || !chavePix.trim()"
+          :loading="savingPix"
+          @click="savePix"
+        />
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <style scoped>
+.carteira-resumo {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .portal-panel__state {
   display: grid;
   justify-items: center;
@@ -429,296 +436,62 @@ onMounted(() => {
   color: var(--partner-warm-text);
 }
 
-.portal-panel__state button {
-  border: 1px solid var(--partner-line);
-  border-radius: 0.6rem;
-  padding: 0.45rem 0.85rem;
-  background: var(--partner-card);
-  cursor: pointer;
-}
-
-.carteira-skeleton {
+/* Os fatos numa linha: o que a frase do topo não diz, sem cartão para cada número. */
+.carteira-fatos {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  padding-block: 0.85rem;
 }
 
-.carteira-panel,
-.metric:not(.metric--focus) {
-  padding: 1rem 1.05rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.95rem;
-  background: var(--partner-card);
-}
-
-.carteira-hint,
-.carteira-alert {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.88rem;
-}
-
-.carteira-metrics {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, 1fr));
-  margin-bottom: 0.75rem;
-}
-
-.metric {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.metric span {
-  color: var(--partner-muted);
-  font-size: 0.8rem;
-}
-
-.metric strong {
-  font-size: 1.35rem;
-}
-
-.metric--focus {
-  gap: 0.25rem;
-}
-
-.metric--focus span {
-  color: var(--pf-on-soft);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.metric--focus strong {
-  font-size: clamp(1.45rem, 2.4vw, 1.85rem);
-  letter-spacing: -0.02em;
-}
-
-.metric--focus small {
-  color: var(--pf-on-soft);
-  font-size: 0.78rem;
-}
-
-.metric--skeleton,
-.carteira-panel--skeleton {
-  pointer-events: none;
-}
-
-.metric--focus.metric--skeleton :deep(.p-skeleton) {
-  --p-skeleton-background: color-mix(in srgb, white 34%, transparent);
-  --p-skeleton-animation-background: color-mix(in srgb, white 16%, transparent);
-}
-
-.metric--skeleton:not(.metric--focus) :deep(.p-skeleton),
-.carteira-panel--skeleton :deep(.p-skeleton),
-.carteira-help--skeleton :deep(.p-skeleton) {
-  --p-skeleton-background: color-mix(in srgb, var(--partner-primary-soft) 42%, var(--partner-card));
-  --p-skeleton-animation-background: color-mix(
-    in srgb,
-    var(--partner-primary-soft) 18%,
-    transparent
-  );
-}
-
-.carteira-alert {
-  margin-bottom: 0.75rem;
-  padding: 0.8rem 0.95rem;
-  border: 1px solid color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
-  border-radius: 0.8rem;
-  background: var(--partner-surface);
-  color: var(--partner-text);
-}
-
-.carteira-panel {
-  display: grid;
-  gap: 0.65rem;
-  margin-bottom: 0;
-  align-content: start;
-  min-width: 0;
-}
-
-.carteira-actions {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: stretch;
-  margin-bottom: 0.75rem;
-}
-
-.carteira-panel h3 {
-  margin: 0;
-  font-size: 0.98rem;
-}
-
-.carteira-form {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.carteira-currency {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--partner-muted);
-}
-
-.carteira-help {
-  display: grid;
-  gap: 1rem;
-  padding: 1.15rem 1.2rem 1.1rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 1.05rem;
-  background:
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--partner-surface) 88%, var(--partner-card)),
-      var(--partner-card)
-    );
-}
-
-.carteira-help--skeleton {
-  pointer-events: none;
-}
-
-.carteira-help__head {
+.carteira-fatos__lista {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.85rem;
-}
-
-.carteira-help__head h3 {
-  margin: 0 0 0.25rem;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.carteira-help__head p {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.84rem;
-  line-height: 1.4;
-}
-
-.carteira-help__contacts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.carteira-help__contact {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 2.35rem;
-  padding: 0.4rem 0.85rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.75rem;
-  background: var(--partner-card);
-  color: var(--partner-primary-strong);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition:
-    background 140ms ease,
-    border-color 140ms ease,
-    transform 140ms ease;
-}
-
-.carteira-help__contact:hover,
-.carteira-help__contact:focus-visible {
-  border-color: color-mix(in srgb, var(--partner-primary) 35%, var(--partner-line));
-  background: color-mix(in srgb, var(--partner-primary-soft) 28%, var(--partner-card));
-  outline: none;
-  transform: translateY(-1px);
-}
-
-.carteira-help__contact--whatsapp {
-  border-color: color-mix(in srgb, var(--partner-success-text) 28%, var(--partner-line));
-  color: var(--partner-success-text);
-}
-
-.carteira-help__contact--whatsapp:hover,
-.carteira-help__contact--whatsapp:focus-visible {
-  border-color: color-mix(in srgb, var(--partner-success-text) 45%, var(--partner-line));
-  background: color-mix(in srgb, var(--partner-success-bg) 70%, var(--partner-card));
-}
-
-.carteira-help__grid {
-  display: grid;
-  gap: 0.65rem;
+  gap: 0.4rem 1.5rem;
   margin: 0;
   padding: 0;
   list-style: none;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.carteira-help__item {
-  display: grid;
-  grid-template-columns: 2.2rem minmax(0, 1fr);
-  gap: 0.7rem;
-  align-items: start;
-  padding: 0.85rem 0.9rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.9rem;
-  background: var(--partner-card);
-}
-
-.carteira-help__icon {
-  display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
-  place-items: center;
-  border-radius: 0.7rem;
-  background: color-mix(in srgb, var(--partner-primary-soft) 42%, var(--partner-card));
-  color: var(--partner-primary-strong);
-  font-size: 0.9rem;
-}
-
-.carteira-help__copy {
-  display: grid;
-  gap: 0.22rem;
-  min-width: 0;
-}
-
-.carteira-help__copy strong {
-  font-size: 0.88rem;
-  letter-spacing: -0.01em;
-}
-
-.carteira-help__copy p {
-  margin: 0;
   color: var(--partner-muted);
-  font-size: 0.8rem;
-  line-height: 1.45;
+  font-size: 0.875rem;
 }
 
-.carteira-help__footer {
+.carteira-fatos__lista strong {
+  color: var(--partner-text);
+  font-weight: 700;
+}
+
+/* O motivo de não dar para sacar: uma linha com ícone na tinta de atenção, sem faixa pintada. */
+.carteira-fatos__motivo {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.8rem;
-  line-height: 1.45;
+  color: var(--hc-pessego-tinta);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
-.carteira-help__footer a {
-  color: var(--partner-primary-strong);
+/* O que está dentro dos diálogos vai para o `body`, fora da página: só tokens `--hc-*` aqui. */
+.carteira-dialogo {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.carteira-dialogo__saldo {
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 0.9375rem;
   font-weight: 650;
-  text-decoration: none;
 }
 
-.carteira-help__footer a:hover,
-.carteira-help__footer a:focus-visible {
-  text-decoration: underline;
-  outline: none;
+.carteira-dialogo__dica {
+  margin: 0;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  line-height: 1.45;
 }
 
-@media (max-width: 760px) {
-  .carteira-metrics,
-  .carteira-actions,
-  .carteira-help__grid {
-    grid-template-columns: 1fr;
-  }
+.carteira-currency {
+  color: var(--hc-tinta-2);
+  font-weight: 700;
 }
 </style>

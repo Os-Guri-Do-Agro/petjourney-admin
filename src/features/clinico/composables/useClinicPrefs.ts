@@ -29,6 +29,14 @@ const CHAVE_OCULTAR_CANCELADOS = 'clinic.hideCancelled'
  * de cor fecha uma vez e a preferência persiste.
  */
 const CHAVE_LEGENDA = 'clinic.legendOpen'
+/**
+ * Sugerir o resumo "Este pet em 30 segundos" ao abrir o histórico do paciente.
+ *
+ * Nasce **ligada**: a sugestão é como o vet descobre que o resumo existe. Quem já sabe desliga
+ * no próprio modal, e religa na tela do resumo — o lugar onde a preferência faz sentido de ser
+ * procurada. Desligar não esconde o resumo: o botão do histórico continua lá.
+ */
+const CHAVE_SUGERIR_RESUMO = 'clinic.suggestSummary'
 
 /** Altura em pixels do slot de 15 minutos, espelhando `clinic-tokens.css`. */
 const ALTURA_POR_ZOOM: Record<ClinicZoom, number> = {
@@ -49,16 +57,38 @@ function lerArmazenado<T extends string>(chave: string, aceitos: readonly T[], p
 
 const densidade = ref<ClinicDensidade>(lerArmazenado(CHAVE_DENSIDADE, DENSIDADES, 'media'))
 const zoom = ref<ClinicZoom>(lerArmazenado(CHAVE_ZOOM, ZOOMS, 'medio'))
+/**
+ * Cancelado nasce oculto: o horário já foi devolvido, e numa agenda cheia a linha riscada só
+ * disputa espaço com quem vem. Falta continua à vista — é o que a recepção ainda precisa tratar.
+ */
 const ocultarCancelados = ref(
   typeof window === 'undefined'
-    ? false
-    : window.localStorage.getItem(CHAVE_OCULTAR_CANCELADOS) === 'true',
+    ? true
+    : window.localStorage.getItem(CHAVE_OCULTAR_CANCELADOS) !== 'false',
 )
 
+/** As duas vistas do dia: a tabela (padrão, aguenta o dia cheio) e a linha do tempo proporcional. */
+export const FORMATOS_DA_AGENDA = ['tabela', 'linha-do-tempo'] as const
+export type FormatoDaAgenda = (typeof FORMATOS_DA_AGENDA)[number]
+const CHAVE_FORMATO_DA_AGENDA = 'clinic.formatoDaAgenda'
+
+const formatoDaAgenda = ref<FormatoDaAgenda>(
+  lerArmazenado(CHAVE_FORMATO_DA_AGENDA, FORMATOS_DA_AGENDA, 'tabela'),
+)
+
+/**
+ * A legenda nasce recolhida: quem usa a agenda todo dia já sabe o que cada ícone quer dizer, e a
+ * faixa aberta era mais uma linha entre o cabeçalho e o primeiro atendimento. Quem abre uma vez,
+ * mantém aberta (a escolha fica guardada).
+ */
 const legendaAberta = ref(
+  typeof window === 'undefined' ? false : window.localStorage.getItem(CHAVE_LEGENDA) === 'true',
+)
+
+const sugerirResumo = ref(
   typeof window === 'undefined'
     ? true
-    : window.localStorage.getItem(CHAVE_LEGENDA) !== 'false',
+    : window.localStorage.getItem(CHAVE_SUGERIR_RESUMO) !== 'false',
 )
 
 function aplicarNoDocumento() {
@@ -84,12 +114,20 @@ watch(zoom, (valor) => {
   window.localStorage.setItem(CHAVE_ZOOM, valor)
 })
 
+watch(formatoDaAgenda, (valor) => {
+  window.localStorage.setItem(CHAVE_FORMATO_DA_AGENDA, valor)
+})
+
 watch(ocultarCancelados, (valor) => {
   window.localStorage.setItem(CHAVE_OCULTAR_CANCELADOS, String(valor))
 })
 
 watch(legendaAberta, (valor) => {
   window.localStorage.setItem(CHAVE_LEGENDA, String(valor))
+})
+
+watch(sugerirResumo, (valor) => {
+  window.localStorage.setItem(CHAVE_SUGERIR_RESUMO, String(valor))
 })
 
 function proximo<T>(lista: readonly T[], atual: T): T {
@@ -103,7 +141,9 @@ export function useClinicPrefs() {
     densidade,
     zoom,
     ocultarCancelados,
+    formatoDaAgenda,
     legendaAberta,
+    sugerirResumo,
     alternarLegenda: () => {
       legendaAberta.value = !legendaAberta.value
     },

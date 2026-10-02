@@ -9,6 +9,7 @@
  * impossíveis de imaginar por nome, e ninguém deveria precisar escolher às cegas para descobrir
  * o que a escolha faz.
  */
+import RadioButton from 'primevue/radiobutton'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -105,7 +106,13 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
           class="opcao"
           :class="{ 'opcao--ativa': colorMode === opcao.valor }"
         >
-          <input v-model="colorMode" type="radio" name="aparencia-tema" :value="opcao.valor" />
+          <RadioButton
+            v-model="colorMode"
+            class="opcao__radio"
+            :input-id="`aparencia-tema-${opcao.valor}`"
+            name="aparencia-tema"
+            :value="opcao.valor"
+          />
 
           <SettingsLayoutMockup v-bind="opcao.maquete" />
 
@@ -113,8 +120,6 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
             <strong>{{ opcao.label }}</strong>
             <small>{{ opcao.hint }}</small>
           </span>
-
-          <span class="opcao__selo" aria-hidden="true"><i class="pi pi-check" /></span>
         </label>
       </div>
     </section>
@@ -135,12 +140,13 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
           class="opcao"
           :class="{ 'opcao--ativa': navigatorMode === opcao.valor }"
         >
-          <input
-            type="radio"
+          <RadioButton
+            class="opcao__radio"
+            :input-id="`aparencia-menu-${opcao.valor}`"
             name="aparencia-menu"
             :value="opcao.valor"
-            :checked="navigatorMode === opcao.valor"
-            @change="setNavigatorMode(opcao.valor)"
+            :model-value="navigatorMode"
+            @update:model-value="setNavigatorMode(opcao.valor)"
           />
 
           <SettingsLayoutMockup v-bind="opcao.maquete" />
@@ -149,8 +155,6 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
             <strong>{{ opcao.label }}</strong>
             <small>{{ opcao.hint }}</small>
           </span>
-
-          <span class="opcao__selo" aria-hidden="true"><i class="pi pi-check" /></span>
         </label>
       </div>
     </section>
@@ -171,12 +175,13 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
           class="opcao"
           :class="{ 'opcao--ativa': navigatorDensity === opcao.valor }"
         >
-          <input
-            type="radio"
+          <RadioButton
+            class="opcao__radio"
+            :input-id="`aparencia-densidade-${opcao.valor}`"
             name="aparencia-densidade"
             :value="opcao.valor"
-            :checked="navigatorDensity === opcao.valor"
-            @change="setNavigatorDensity(opcao.valor)"
+            :model-value="navigatorDensity"
+            @update:model-value="setNavigatorDensity(opcao.valor)"
           />
 
           <SettingsLayoutMockup v-bind="opcao.maquete" />
@@ -185,8 +190,6 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
             <strong>{{ opcao.label }}</strong>
             <small>{{ opcao.hint }}</small>
           </span>
-
-          <span class="opcao__selo" aria-hidden="true"><i class="pi pi-check" /></span>
         </label>
       </div>
     </section>
@@ -301,16 +304,11 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
     0 6px 16px rgb(var(--partner-shadow-rgb) / 0.1);
 }
 
-.opcao input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.opcao:has(input:focus-visible) {
+/*
+ * O cartão inteiro é o `<label>` do RadioButton: clicar na maquete marca a opção, e o rádio no
+ * canto é o controle de verdade (teclado, leitor de tela e estado marcado).
+ */
+.opcao:has(.p-radiobutton-input:focus-visible) {
   outline: 2px solid var(--partner-primary);
   outline-offset: 3px;
 }
@@ -319,7 +317,7 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
   display: grid;
   min-width: 0;
   gap: 0.15rem;
-  padding-right: 1rem;
+  padding-inline-end: 1rem;
 }
 
 .opcao__texto strong {
@@ -334,29 +332,10 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
   line-height: 1.42;
 }
 
-.opcao__selo {
+.opcao__radio.p-radiobutton {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  display: grid;
-  width: 1.4rem;
-  height: 1.4rem;
-  place-items: center;
-  border: 2px solid var(--partner-card);
-  border-radius: 999px;
-  background: var(--partner-primary-strong);
-  color: var(--partner-on-primary);
-  font-size: 0.58rem;
-  opacity: 0;
-  transform: scale(0.7);
-  transition:
-    opacity 150ms ease,
-    transform 150ms ease;
-}
-
-.opcao--ativa .opcao__selo {
-  opacity: 1;
-  transform: scale(1);
+  top: 0.55rem;
+  inset-inline-end: 0.55rem;
 }
 
 /* --- Nota -------------------------------------------------------------- */

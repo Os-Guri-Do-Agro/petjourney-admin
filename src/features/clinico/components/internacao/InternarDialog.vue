@@ -168,7 +168,7 @@ function confirmar() {
   <Dialog
     v-model:visible="visivel"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(34rem, 96vw)' }"
     :header="t('clinico.internacao.internar.titulo')"
     dismissable-mask

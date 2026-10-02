@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Hotel para animais — passeio pelas telas</title>
+    <style>
+      /*
+       * Documento para quem **nunca viu** um sistema de hotel.
+       *
+       * A régua que ele obedece: em nenhum momento aparece um termo de sistema sem que a frase
+       * anterior já tenha dito o que acontece no mundo real. Primeiro "a Rita liga perguntando se
+       * tem vaga", depois a tela que responde. Nunca o contrário.
+       *
+       * As imagens são capturas do sistema rodando, não maquetes. Regenerar: ver README.md.
+       */
+
+      @page {
+        size: A4;
+        margin: 16mm 15mm 18mm;
+      }
+
+      :root {
+        --tinta: #1f2f2b;
+        --suave: #43504d;
+        --fraco: #6b7a76;
+        --linha: #c9d2d0;
+        --acento: #456a60;
+        --acento-claro: #e2efeb;
+        --acento-borda: #a8cec3;
+        --alerta-bg: #f7f0e0;
+        --alerta-tinta: #856112;
+        --risco-bg: #fbeee8;
+        --risco-tinta: #a2503a;
+        --fundo: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        max-width: 180mm;
+        margin: 0 auto;
+        padding: 0;
+        background: var(--fundo);
+        color: var(--tinta);
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-size: 10.5pt;
+        line-height: 1.6;
+      }
+
+      h1 {
+        margin: 0 0 4pt;
+        font-size: 24pt;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+      }
+
+      h2 {
+        margin: 0 0 10pt;
+        padding-bottom: 5pt;
+        border-bottom: 2px solid var(--acento);
+        font-size: 15pt;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+      }
+
+      h3 {
+        margin: 16pt 0 5pt;
+        font-size: 11.5pt;
+        font-weight: 750;
+      }
+
+      p {
+        margin: 0 0 8pt;
+      }
+
+      strong {
+        font-weight: 700;
+      }
+
+      .lede {
+        color: var(--suave);
+        font-size: 12pt;
+        line-height: 1.55;
+      }
+
+      /* ---------------------------------------------------------------- capa */
+
+      .capa {
+        padding: 22pt 0 16pt;
+        border-bottom: 1px solid var(--linha);
+        margin-bottom: 18pt;
+      }
+
+      .capa__etiqueta {
+        margin-bottom: 6pt;
+        color: var(--acento);
+        font-size: 8.5pt;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .capa__meta {
+        margin-top: 12pt;
+        color: var(--fraco);
+        font-size: 9pt;
+      }
+
+      /* ---------------------------------------------------------------- seções */
+
+      section {
+        page-break-inside: avoid;
+        margin-bottom: 20pt;
+      }
+
+      .tela {
+        page-break-before: always;
+        padding-top: 4pt;
+      }
+
+      .tela:first-of-type {
+        page-break-before: auto;
+      }
+
+      .passo {
+        display: inline-block;
+        margin-bottom: 6pt;
+        padding: 2pt 7pt;
+        border-radius: 99pt;
+        background: var(--acento);
+        color: #fff;
+        font-size: 8pt;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .passo--apoio {
+        background: #8a9995;
+      }
+
+      /* A cena: o que acontece no mundo real, antes de qualquer tela. */
+      .cena {
+        margin: 0 0 10pt;
+        padding: 9pt 12pt;
+        border-left: 3px solid var(--acento-borda);
+        border-radius: 0 4pt 4pt 0;
+        background: var(--acento-claro);
+        font-size: 10.5pt;
+        font-style: italic;
+      }
+
+      .cena strong {
+        font-style: normal;
+      }
+
+      figure {
+        margin: 10pt 0 6pt;
+        page-break-inside: avoid;
+      }
+
+      figure img {
+        width: 100%;
+        border: 1px solid var(--linha);
+        border-radius: 5pt;
+        display: block;
+      }
+
+      figcaption {
+        margin-top: 5pt;
+        color: var(--fraco);
+        font-size: 8.5pt;
+        line-height: 1.45;
+      }
+
+      /* Lista de "o que olhar" — o que a pessoa deve procurar na imagem. */
+      .olhar {
+        margin: 8pt 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .olhar li {
+        position: relative;
+        margin-bottom: 5pt;
+        padding-left: 16pt;
+        font-size: 10pt;
+      }
+
+      .olhar li::before {
+        position: absolute;
+        left: 0;
+        color: var(--acento);
+        content: '▸';
+        font-weight: 800;
+      }
+
+      /* ---------------------------------------------------------------- fluxo */
+
+      .fluxo {
+        display: flex;
+        gap: 6pt;
+        margin: 12pt 0 4pt;
+      }
+
+      .fluxo__etapa {
+        flex: 1;
+        padding: 9pt 10pt;
+        border: 1px solid var(--acento-borda);
+        border-radius: 5pt;
+        background: var(--acento-claro);
+      }
+
+      .fluxo__numero {
+        display: inline-block;
+        width: 15pt;
+        height: 15pt;
+        margin-bottom: 4pt;
+        border-radius: 99pt;
+        background: var(--acento);
+        color: #fff;
+        font-size: 9pt;
+        font-weight: 800;
+        line-height: 15pt;
+        text-align: center;
+      }
+
+      .fluxo__nome {
+        display: block;
+        font-size: 11pt;
+        font-weight: 800;
+      }
+
+      .fluxo__frase {
+        display: block;
+        margin-top: 2pt;
+        color: var(--acento);
+        font-size: 9pt;
+        font-style: italic;
+      }
+
+      .fluxo__detalhe {
+        display: block;
+        margin-top: 4pt;
+        color: var(--suave);
+        font-size: 9pt;
+        line-height: 1.4;
+      }
+
+      /* ---------------------------------------------------------------- regras */
+
+      .regras {
+        margin: 10pt 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .regras li {
+        margin-bottom: 8pt;
+        padding: 9pt 11pt;
+        border: 1px solid var(--linha);
+        border-radius: 5pt;
+        page-break-inside: avoid;
+      }
+
+      .regras strong {
+        display: block;
+        margin-bottom: 2pt;
+        font-size: 10.5pt;
+      }
+
+      .regras span {
+        color: var(--suave);
+        font-size: 9.5pt;
+      }
+
+      /* ---------------------------------------------------------------- caixas */
+
+      .caixa {
+        margin: 12pt 0;
+        padding: 10pt 12pt;
+        border: 1px solid var(--linha);
+        border-radius: 5pt;
+        page-break-inside: avoid;
+      }
+
+      .caixa--alerta {
+        border-color: #e2d3ab;
+        background: var(--alerta-bg);
+        color: var(--alerta-tinta);
+      }
+
+      .caixa h3 {
+        margin-top: 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 8pt 0;
+        font-size: 9.5pt;
+      }
+
+      th,
+      td {
+        padding: 5pt 7pt;
+        border-bottom: 1px solid var(--linha);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--fraco);
+        font-size: 8pt;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .rodape {
+        margin-top: 18pt;
+        padding-top: 10pt;
+        border-top: 1px solid var(--linha);
+        color: var(--fraco);
+        font-size: 9pt;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="capa">
+      <p class="capa__etiqueta">PetJourney · Módulo hotel</p>
+      <h1>Um passeio pelo hotel, tela por tela</h1>
+      <p class="lede">
+        Este documento é para quem nunca usou um sistema de hospedagem de animais. Ele conta o que
+        acontece num hotel ao longo de uma semana, e mostra a tela que responde a cada momento.
+        Todas as imagens são do sistema rodando de verdade.
+      </p>
+      <p class="capa__meta">
+        Protótipo navegável, com dados de demonstração. Nenhuma tela depende de API.
+      </p>
+    </header>
+
+    <!-- ================================================================ o negócio -->
+    <section>
+      <h2>Primeiro: o que um hotel de animais faz</h2>
+
+      <p>
+        Um hotel de animais faz sempre a mesma coisa, nesta ordem: <strong>vende</strong> um
+        período, <strong>recebe</strong> o animal, <strong>cuida</strong> dele por alguns dias e
+        <strong>entrega</strong> de volta. Todas as telas do sistema cabem nesses quatro momentos —
+        e é por isso que o menu está organizado assim, e não por "cadastros" e "relatórios".
+      </p>
+
+      <div class="fluxo">
+        <div class="fluxo__etapa">
+          <span class="fluxo__numero">1</span>
+          <span class="fluxo__nome">Vender</span>
+          <span class="fluxo__frase">Tem vaga do dia 22 ao 30?</span>
+          <span class="fluxo__detalhe">
+            Alguém liga. Você procura o buraco no calendário, diz o preço e fecha a reserva.
+          </span>
+        </div>
+        <div class="fluxo__etapa">
+          <span class="fluxo__numero">2</span>
+          <span class="fluxo__nome">Receber</span>
+          <span class="fluxo__frase">Quem chega hoje, e pode entrar?</span>
+          <span class="fluxo__detalhe">
+            O carro estaciona. Confere a vacina, pesa o animal, anota o que ele trouxe.
+          </span>
+        </div>
+        <div class="fluxo__etapa">
+          <span class="fluxo__numero">3</span>
+          <span class="fluxo__nome">Cuidar</span>
+          <span class="fluxo__frase">O que é para fazer agora?</span>
+          <span class="fluxo__detalhe">
+            Comida na hora, remédio na hora, passeio, e um recado para o responsável.
+          </span>
+        </div>
+        <div class="fluxo__etapa">
+          <span class="fluxo__numero">4</span>
+          <span class="fluxo__nome">Entregar</span>
+          <span class="fluxo__frase">Está tudo certo para ir embora?</span>
+          <span class="fluxo__detalhe">
+            Confere os pertences, pesa de novo, fecha a conta e devolve com o relatório.
+          </span>
+        </div>
+      </div>
+
+      <h3>As quatro coisas que dão errado, e que o sistema segura sozinho</h3>
+
+      <p>
+        Um hotel cheio erra sempre nos mesmos quatro pontos. Não são detalhes técnicos — cada um
+        deles é um cliente perdido, e os quatro estão impedidos por regra, não por lembrete.
+      </p>
+
+      <ul class="regras">
+        <li>
+          <strong>Vacina vencida não entra.</strong>
+          <span>
+            E a conta é feita contra o <em>dia da saída</em>, não contra hoje. Uma antirrábica que
+            vence no dia 27 não serve para quem sai no dia 30 — e quem descobre isso no dia 27 vai
+            ter que telefonar para alguém que está a 600 km dali.
+          </span>
+        </li>
+        <li>
+          <strong>A mesma baia não é vendida duas vezes.</strong>
+          <span>
+            Nem no mesmo dia em que alguém sai: o tempo de lavar e secar entra na conta antes de a
+            vaga voltar a aparecer no mapa.
+          </span>
+        </li>
+        <li>
+          <strong>Notícia ruim não vai por aplicativo.</strong>
+          <span>
+            Se algo sério acontece, o sistema segura o recado até alguém da casa ligar para o
+            responsável. Descobrir pelo celular que o cachorro brigou é como se perde um cliente
+            que estava satisfeito até ali.
+          </span>
+        </li>
+        <li>
+          <strong>O que entrou tem que sair.</strong>
+          <span>
+            A coleira, a caminha, o pote. O check-out não fecha enquanto cada item não for
+            conferido — é a reclamação mais barata de evitar e a mais cara de resolver.
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ================================================================ telas -->
+
+    <section class="tela">
+      <span class="passo">Começar</span>
+      <h2>O ensino mora dentro de cada tela</h2>
+
+      <p class="cena">
+        <strong>A situação:</strong> é o primeiro dia de quem vai operar o hotel. Ninguém leu
+        manual nenhum.
+      </p>
+
+      <p>
+        Houve aqui uma tela "Como funciona", primeira do menu, que explicava o fluxo inteiro num
+        lugar só. Ela saiu, e por um motivo que vale dizer em voz alta:
+        <strong>ensinava longe do que ensinava</strong>. Quem lia "a coluna de documentação é
+        ordenável" ainda não tinha visto coluna nenhuma, e quando ia trabalhar a tela de ensino
+        tinha ficado para trás.
+      </p>
+
+      <p>
+        No lugar dela, toda tela tem um botão <strong>"Como usar"</strong> no canto superior
+        direito. Ele escurece o resto da página, acende uma parte de cada vez e explica aquela
+        parte ali mesmo — do cabeçalho até a última seção, na ordem em que se lê a tela. São
+        quatro ou cinco passos por tela, com "Anterior" e "Próximo", e o Esc fecha a qualquer
+        momento. Não roda sozinho na primeira visita e não guarda "já viu": a pergunta "o que é
+        esse selo âmbar?" chega no segundo mês, não no primeiro minuto, e no segundo mês o botão
+        continua lá.
+      </p>
+    </section>
+
+    <section class="tela">
+      <span class="passo">Etapa 1 · Vender</span>
+      <h2>Mapa de acomodações</h2>
+
+      <p class="cena">
+        <strong>A cena:</strong> toca o telefone. "Oi, vocês têm vaga para o meu labrador do dia 23
+        ao dia 26?"
+      </p>
+
+      <p>
+        Esta é a tela mais importante do sistema, e a que mais se parece com o que um hotel de
+        verdade usa. <strong>Cada linha é uma acomodação. Cada coluna é uma noite.</strong> As
+        barras verdes são o que já está vendido — e o que você procura é o <em>espaço vazio</em>
+        entre elas.
+      </p>
+
+      <p>
+        No topo, a procura é escrita como uma frase: "tenho um cão de porte grande, de tal dia a
+        tal dia". A resposta aparece do lado, inteira: <em>"12 acomodações servem"</em>. As linhas
+        que servem ficam acesas; as que não servem ficam apagadas, mas continuam visíveis — porque
+        quem está no telefone precisa enxergar as outras opções quando a primeira não dá.
+      </p>
+
+      <figure>
+        <img src="telas/01-mapa.png" alt="Mapa de ocupação" />
+        <figcaption>
+          Clicar num espaço vazio abre a reserva já com a acomodação e o dia preenchidos.
+        </figcaption>
+      </figure>
+
+      <ul class="olhar">
+        <li>
+          <strong>A noite da saída fica livre.</strong> Quem sai dia 30 ao meio-dia libera aquela
+          noite — e ela aparece à venda. Um sistema que pintasse o dia inteiro esconderia uma
+          diária vendável por estadia.
+        </li>
+        <li>
+          <strong>A baia A7 está hachurada.</strong> Está em reforma. O mapa mostra que ela existe
+          e que não pode ser vendida — some do mapa só o que nunca existiu.
+        </li>
+        <li>
+          <strong>Dois nomes numa barra.</strong> "Mel" e "Amora" são da mesma casa e dividem
+          acomodação. O preço do segundo animal é diferente, e o sistema já sabe disso.
+        </li>
+        <li>
+          <strong>O triângulo amarelo</strong> em cima da barra do Zeus e do Bidu é documentação
+          pendente, avisada semanas antes da chegada.
+        </li>
+      </ul>
+    </section>
+
+    <section class="tela">
+      <span class="passo">Etapa 1 · Vender</span>
+      <h2>Reservas</h2>
+
+      <p class="cena">
+        <strong>A cena:</strong> fim de tarde de quinta. "O que eu preciso resolver antes de amanhã?"
+      </p>
+
+      <p>
+        A lista de tudo o que está vendido. O que a torna útil não é a tabela — é a
+        <strong>faixa amarela no topo</strong>: as chegadas dos próximos três dias que ainda não
+        podem entrar. Três dias porque é o prazo em que ainda dá tempo de pedir o papel e o
+        responsável conseguir trazer.
+      </p>
+
+      <figure>
+        <img src="telas/05-reservas.png" alt="Lista de reservas" />
+        <figcaption>
+          A coluna "Documentação" é ordenável: um clique põe os problemas no topo.
+        </figcaption>
+      </figure>
+
+      <ul class="olhar">
+        <li>
+          <strong>"Não compareceu" é diferente de "Cancelada".</strong> Cancelar é um aviso — deu
+          para revender. Não comparecer é uma vaga queimada. Só o segundo tem política de sinal, e
+          juntar os dois torna impossível saber quanto a casa perde por ano com quem simplesmente
+          não aparece.
+        </li>
+        <li>
+          <strong>"Vence durante"</strong>, na linha do Bidu: a vacina está válida hoje e deixa de
+          valer no meio da estadia dele.
+        </li>
+        <li>
+          <strong>"Mostrar: a partir de hoje"</strong>, acima da busca. A tela abre no que vem pela
+          frente, porque é essa a pergunta de quinta à tarde. O histórico continua a um clique, na
+          outra opção — é lá que se procura a estadia do mês passado.
+        </li>
+        <li>
+          <strong>Lista de espera</strong>, no rodapé: quem quer um período que está lotado. Quando
+          uma reserva cai, é para essas pessoas que se liga — em ordem.
+        </li>
+      </ul>
+    </section>
+
+    <section class="tela">
+      <span class="passo">Etapa 1 · Vender</span>
+      <h2>A reserva</h2>
+
+      <p class="cena">
+        <strong>A cena:</strong> o cliente pergunta "e quanto vai ficar?"
+      </p>
+
+      <p>
+        O contrato da hospedagem, antes de virar estadia. A conta aparece
+        <strong>linha a linha</strong>: as diárias, o acompanhante, os serviços, o acréscimo de
+        temporada, o sinal, o saldo. Um total sozinho é uma conta que o cliente não confere e que a
+        recepção não consegue defender.
+      </p>
+
+      <figure>
+        <img src="telas/06-reserva.png" alt="Detalhe da reserva" />
+        <figcaption>
+          O check-in é feito desta mesma tela. Ele só acende quando a documentação permite.
+        </figcaption>
+      </figure>
+
+      <ul class="olhar">
+        <li>
+          <strong>A documentação, uma linha por item</strong>, com a validade e o que fazer a
+          respeito. Sem a ação ao lado, a recepção registra o papel fora do sistema.
+        </li>
+        <li>
+          <strong>"Dispensar" existe, e exige motivo e nome.</strong> Sem essa porta, a casa que
+          decide aceitar um hóspede sem o papel faz isso por fora — e some o registro de que
+          alguém decidiu. O que mantém a dispensa rara não é escondê-la: é ter de escrever por quê.
+        </li>
+        <li>
+          <strong>A saída tardia aparece aqui</strong>, com o valor, semanas antes. É a regra que
+          mais gera discussão no balcão, e discussão de balcão se resolve mostrando a regra antes
+          de o cliente chegar.
+        </li>
+      </ul>
+    </section>
+
+    <section class="tela">
+      <span class="passo">Etapa 2 · Receber</span>
+      <h2>Painel do dia</h2>
+
+      <p class="cena">
+        <strong>A cena:</strong> oito da manhã. Você abre o sistema e quer saber como vai ser o dia.
+      </p>
+
+      <p>
+        Não é um resumo: é a <strong>lista do que fazer hoje</strong>. No topo fica o que não pode
+        esperar, e cada item é um botão que leva ao lugar onde se resolve — com o telefone já
+        escrito. Abaixo, o dia desenhado como um dia: chegadas em cima, saídas embaixo, e uma
+        linha vermelha em "agora".
+      </p>
+
+      <figure>
+        <img src="telas/02-painel.png" alt="Painel do dia" />
+        <figcaption>
+          Os números viraram uma frase — "5 na casa, 2 chegam, 1 sai" — em vez de quatro cartões
+          ocupando um terço da tela.
+        </figcaption>
+      </figure>
+
+      <ul class="olhar">
+        <li>
+          <strong>"Pode entrar" e "Não apresentado"</strong>, ao lado de cada chegada. É a
+          informação que decide se o carro vai estacionar ou dar meia-volta.
+        </li>
+        <li>
+          <strong>"Falta pesar"</strong>, ao lado de quem sai: trinta segundos de balança que
+          deixam de existir no instante em que o carro sai do estacionamento.
+        </li>
+      </ul>
+    </section>
+
+    <section class="tela">
+      <span class="passo">Etapa 3 · Cuidar</span>
+      <h2>Rotina do turno</h2>
+
+      <p class="cena">
+        <strong>A cena:</strong> você está no corredor do canil, com o celular numa mão e o pote de
+        ração na outra.
+      </p>
+
+      <p>
+        A prancheta. Todas as tarefas de todos os hóspedes, organizadas por
+        <strong>horário</strong> — porque às 8h alguém alimenta os dezoito, e não percorre dezoito
+        fichas. Marcar custa um toque.
+      </p>
+
+      <figure>
+        <img src="telas/03-rotina.png" alt="Rotina do turno" />
+        <figcaption>
+          O que está para agora fica no topo; o que já passou fica recolhido.
+        </figcaption>
+      </figure>
+
+      <ul class="olhar">
+        <li>
+          <strong>"Recusou" é um botão, e não é o mesmo que "Pular".</strong> Pular é decisão da
+          casa. Recusar é o animal não ter comido — e isso é informação clínica: alimenta o recado
+          ao responsável e, repetido, vira uma ocorrência.
+        </li>
+        <li>
+          <strong>As tarefas nascem da ficha do hóspede.</strong> "Ração terapêutica renal · 35 g"
+          veio do que o responsável informou no check-in, não de alguém digitar todo dia.
+        </li>
+      </ul>
+    </section>
+
+    <section class="tela">
+      <span class="passo">Etapa 3 · Cuidar</span>
+      <h2>Hóspedes na casa</h2>
+
+      <p class="cena">
+        <strong>A cena:</strong> "como estão os meus cinco?"
+      </p>
+
+      <p>
+        Um cartão por animal, ordenados por quem precisa de você primeiro. O
+        <strong>cartão inteiro</strong> muda de cor quando algo trava — um selo pequeno no canto
+        não sobrevive a uma tela com doze cartões, porque o olho não lê canto.
+      </p>
+
+      <figure>
+        <img src="telas/04-hospedes.png" alt="Hóspedes na casa" />
+        <figcaption>
+          O Tofu está em vermelho: há uma ligação pendente. O Bento, em amarelo: sai hoje e ainda
+          não foi pesado.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="tela">
+      <span class="passo">Etapas 3 e 4 · Cuidar e entregar</span>
+      <h2>A estadia</h2>
+
+      <p class="cena">
+        <strong>A cena:</strong> o Tofu não come desde ontem. É um gato com doença renal, e o
+        responsável está viajando.
+      </p>
+
+      <p>
+        Tudo sobre uma hospedagem numa tela só. No topo, o que trava — com o telefone e o botão que
+        registra a ligação. Abaixo, a rotina do dia, as ocorrências, o recado que vai para o
+        responsável, e a ficha de entrada com pertences, alimentação e autorizações.
+      </p>
+
+      <figure>
+        <img src="telas/07-estadia.png" alt="Tela da estadia" />
+        <figcaption>
+          O recado está <em>retido</em>: ele não sai enquanto alguém não ligar. É a regra, não um
+          lembrete.
+        </figcaption>
+      </figure>
+
+      <ul class="olhar">
+        <li>
+          <strong>O botão de check-out está lá, e não funciona ainda:</strong> "Há pertences sem
+          conferência". O sistema diz por que, em vez de simplesmente recusar.
+        </li>
+        <li>
+          <strong>O diário do hóspede</strong> é o que o responsável de fato compra. O hotel vende
+          diária; o cliente compra saber que o animal está bem.
+        </li>
+      </ul>
+    </section>
+
+    <section class="tela">
+      <span class="passo passo--apoio">Apoio</span>
+      <h2>Acomodações e Resumo</h2>
+
+      <p class="cena">
+        <strong>A cena:</strong> a casa cresceu, você fez uma baia nova. E, no fim do mês, quer
+        saber se valeu a pena abrir no feriado.
+      </p>
+
+      <p>
+        Duas telas que não são do dia a dia. Em <strong>Acomodações</strong>, você monta a própria
+        casa: quantas baias, quem cabe em cada uma, quanto custa, e o que está em reforma. O
+        sistema não adivinha isso — pergunta.
+      </p>
+
+      <figure>
+        <img src="telas/08-acomodacoes.png" alt="Cadastro de acomodações" />
+        <figcaption>
+          Remover só é possível para o que nunca hospedou. O resto se tira de operação, porque
+          apagar apagaria a história junto.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <img src="telas/09-resumo.png" alt="Resumo do período" />
+        <figcaption>
+          A ocupação é desenhada dia a dia, e não como uma média: a média esconde exatamente o que
+          se quer ver, que é a casa lotar no fim de semana e esvaziar na terça.
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- ================================================================ fechamento -->
+    <section class="tela">
+      <h2>O que ainda não existe</h2>
+
+      <p>
+        Dito em voz alta para não ser cobrado como esquecimento. Nada disto está no protótipo, e
+        nenhum deles bloqueia a operação de um hotel:
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>O quê</th>
+            <th>Por que ficou de fora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Emissão de nota fiscal</td>
+            <td>O sistema calcula e registra a conta; emitir é outro sistema.</td>
+          </tr>
+          <tr>
+            <td>Processar pagamento</td>
+            <td>Registra o que foi pago e como. Não passa cartão.</td>
+          </tr>
+          <tr>
+            <td>Câmera ao vivo</td>
+            <td>A suíte já diz que tem câmera; o vídeo em si não entra agora.</td>
+          </tr>
+          <tr>
+            <td>Creche (entra e sai no mesmo dia)</td>
+            <td>É outro produto, com outra grade e outro preço. O modelo já a comporta.</td>
+          </tr>
+          <tr>
+            <td>App do responsável</td>
+            <td>
+              O hotel já registra tudo o que o app mostraria: diário, fotos, recados. Falta o outro
+              lado.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="caixa caixa--alerta">
+        <h3>Sobre os dados destas telas</h3>
+        <p>
+          Todos os animais, responsáveis e reservas são de demonstração, gerados pelo próprio
+          sistema. Eles mudam de data sozinhos — o "hoje" da tela é sempre hoje de verdade — e são
+          sempre os mesmos, para que a demonstração não dependa de sorte.
+        </p>
+        <p style="margin-bottom: 0">
+          Cinco situações difíceis estão plantadas de propósito e aparecem em qualquer dia: a
+          vacina que vence no meio da estadia, a chegada sem documento, a ocorrência grave sem
+          ligação, a saída tardia com pertence esquecido, e a baia parada há três semanas.
+        </p>
+      </div>
+
+      <p class="rodape">
+        Protótipo do módulo hotel · PetJourney. As capturas são do sistema em execução; para
+        regenerá-las, ver <code>docs/hotel/apresentacao/README.md</code>.
+      </p>
+    </section>
+  </body>
+</html>

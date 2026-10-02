@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import InputOtp from 'primevue/inputotp'
+import InputText from 'primevue/inputtext'
 import { useToast } from 'primevue/usetoast'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -28,15 +31,17 @@ const email = ref('')
 const emailError = ref('')
 const sendingCode = ref(false)
 
+const PIN_LENGTH = 6
+
 const pinDialogVisible = ref(false)
-const pinDigits = ref(['', '', '', '', '', ''])
+const pin = ref('')
 const pinError = ref('')
 const verifyingPin = ref(false)
 const resetToken = ref('')
-const pinInputRefs = ref<Array<HTMLInputElement | null>>([])
+/** Wrapper do InputOtp — as células são <input> internos do PrimeVue. */
+const pinOtpRef = ref<HTMLElement | null>(null)
 
-const pin = computed(() => pinDigits.value.join(''))
-const pinFilled = computed(() => pin.value.length === 6)
+const pinFilled = computed(() => pin.value.replace(/\D/g, '').length === PIN_LENGTH)
 
 const dialogStyle = computed(() => ({
   ...authStyle.value,
@@ -48,71 +53,39 @@ watch(pinDialogVisible, async (open) => {
   }
 
   await nextTick()
-  pinInputRefs.value[0]?.focus()
+  focusPinCell(0)
 })
 
-function setPinDigitRef(index: number, el: unknown) {
-  pinInputRefs.value[index] = (el as HTMLInputElement | null) ?? null
+function focusPinCell(index: number) {
+  pinOtpRef.value?.querySelectorAll<HTMLInputElement>('input')[index]?.focus()
 }
 
-function syncPinDigits(value: string) {
-  const digits = value.replace(/\D/g, '').slice(0, 6).split('')
-  pinDigits.value = Array.from({ length: 6 }, (_, i) => digits[i] ?? '')
+/** O slot do InputOtp entrega `attrs` como objeto `{ value }` (a tipagem do PrimeVue diz função). */
+function valorDaCelula(attrs: unknown) {
+  return (attrs as { value?: string } | null)?.value ?? ''
 }
 
-function onPinDigitInput(index: number, event: Event) {
-  const target = event.target as HTMLInputElement
-  const cleaned = target.value.replace(/\D/g, '')
-
-  if (cleaned.length > 1) {
-    syncPinDigits(cleaned)
-    const focusAt = Math.min(cleaned.length, 5)
-    pinInputRefs.value[focusAt]?.focus()
-    pinError.value = ''
-    return
-  }
-
-  const next = [...pinDigits.value]
-  next[index] = cleaned.slice(-1)
-  pinDigits.value = next
+function onPinChange() {
   pinError.value = ''
-
-  if (cleaned && index < 5) {
-    pinInputRefs.value[index + 1]?.focus()
-  }
 }
 
-function onPinKeydown(index: number, event: KeyboardEvent) {
-  if (event.key === 'Backspace' && !pinDigits.value[index] && index > 0) {
-    pinInputRefs.value[index - 1]?.focus()
-  }
-
-  if (event.key === 'ArrowLeft' && index > 0) {
-    event.preventDefault()
-    pinInputRefs.value[index - 1]?.focus()
-  }
-
-  if (event.key === 'ArrowRight' && index < 5) {
-    event.preventDefault()
-    pinInputRefs.value[index + 1]?.focus()
-  }
-}
-
+/**
+ * O InputOtp (integer-only) recusa colagens com separadores ("123 456", "123-456").
+ * Este handler roda depois dele (bubbling) e normaliza para só dígitos.
+ */
 function onPinPaste(event: ClipboardEvent) {
-  const text = event.clipboardData?.getData('text') ?? ''
-  if (!/\d/.test(text)) {
+  const digits = (event.clipboardData?.getData('text') ?? '').replace(/\D/g, '')
+  if (!digits) {
     return
   }
 
-  event.preventDefault()
-  syncPinDigits(text)
+  pin.value = digits.slice(0, PIN_LENGTH)
   pinError.value = ''
-  const focusAt = Math.min(text.replace(/\D/g, '').length, 5)
-  pinInputRefs.value[focusAt]?.focus()
+  focusPinCell(Math.min(pin.value.length, PIN_LENGTH - 1))
 }
 
 function clearPinDigits() {
-  pinDigits.value = ['', '', '', '', '', '']
+  pin.value = ''
   pinError.value = ''
 }
 const newPassword = ref('')
@@ -201,11 +174,11 @@ async function handleVerifyPin() {
   }
 
   pinError.value = ''
-  const code = pin.value
+  const code = pin.value.replace(/\D/g, '')
 
-  if (code.length < 6) {
+  if (code.length < PIN_LENGTH) {
     pinError.value = t('auth.forgot.errors.pinLength')
-    pinInputRefs.value[Math.min(code.length, 5)]?.focus()
+    focusPinCell(Math.min(code.length, PIN_LENGTH - 1))
     return
   }
 
@@ -224,10 +197,10 @@ async function handleVerifyPin() {
     confirmPasswordError.value = ''
     step.value = 2
   } catch {
-    pinError.value = t('auth.forgot.errors.pinInvalid')
     clearPinDigits()
+    pinError.value = t('auth.forgot.errors.pinInvalid')
     await nextTick()
-    pinInputRefs.value[0]?.focus()
+    focusPinCell(0)
   } finally {
     verifyingPin.value = false
   }
@@ -359,7 +332,7 @@ function closePinDialog() {
           :type="newPasswordType"
         >
           <template #trailing>
-            <button
+            <Button
               :aria-label="
                 showNewPassword
                   ? t('auth.forgot.password.hide')
@@ -367,11 +340,13 @@ function closePinDialog() {
               "
               class="forgot-password-toggle"
               :disabled="resetting"
+              :icon="showNewPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+              rounded
+              severity="secondary"
+              text
               type="button"
               @click="showNewPassword = !showNewPassword"
-            >
-              <i :class="showNewPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" aria-hidden="true" />
-            </button>
+            />
           </template>
         </AuthTextField>
 
@@ -389,7 +364,7 @@ function closePinDialog() {
           :type="confirmPasswordType"
         >
           <template #trailing>
-            <button
+            <Button
               :aria-label="
                 showConfirmPassword
                   ? t('auth.forgot.password.hide')
@@ -397,14 +372,13 @@ function closePinDialog() {
               "
               class="forgot-password-toggle"
               :disabled="resetting"
+              :icon="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+              rounded
+              severity="secondary"
+              text
               type="button"
               @click="showConfirmPassword = !showConfirmPassword"
-            >
-              <i
-                :class="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
-                aria-hidden="true"
-              />
-            </button>
+            />
           </template>
         </AuthTextField>
 
@@ -449,15 +423,16 @@ function closePinDialog() {
       @hide="closePinDialog"
     >
       <div class="forgot-pin" :style="dialogStyle">
-        <button
+        <Button
           class="forgot-pin__close"
           type="button"
+          icon="pi pi-times"
+          severity="secondary"
+          text
           :aria-label="t('common.close')"
           :disabled="verifyingPin"
           @click="closePinDialog"
-        >
-          <i class="pi pi-times" aria-hidden="true" />
-        </button>
+        />
 
         <div class="forgot-pin__hero">
           <span class="forgot-pin__icon" aria-hidden="true">
@@ -474,29 +449,35 @@ function closePinDialog() {
 
         <form class="forgot-pin__form" aria-labelledby="forgot-pin-title" @submit.prevent="handleVerifyPin">
           <div
-            class="forgot-pin__otp"
+            ref="pinOtpRef"
             role="group"
             :aria-label="t('auth.forgot.pin.label')"
             @paste="onPinPaste"
           >
-            <input
-              v-for="(digit, index) in pinDigits"
-              :key="index"
-              :ref="(el) => setPinDigitRef(index, el)"
-              class="forgot-pin__cell"
-              :class="{
-                'forgot-pin__cell--filled': Boolean(digit),
-                'forgot-pin__cell--invalid': Boolean(pinError),
-              }"
-              :value="digit"
-              inputmode="numeric"
-              autocomplete="one-time-code"
-              maxlength="1"
-              :aria-label="t('auth.forgot.pin.digitAria', { n: index + 1 })"
+            <InputOtp
+              v-model="pin"
+              class="forgot-pin__otp"
               :disabled="verifyingPin"
-              @input="onPinDigitInput(index, $event)"
-              @keydown="onPinKeydown(index, $event)"
-            />
+              integer-only
+              :invalid="Boolean(pinError)"
+              :length="PIN_LENGTH"
+              @change="onPinChange"
+            >
+              <template #default="{ attrs, events, index }">
+                <InputText
+                  :aria-label="t('auth.forgot.pin.digitAria', { n: index })"
+                  autocomplete="one-time-code"
+                  class="p-inputotp-input forgot-pin__cell"
+                  :class="{ 'forgot-pin__cell--filled': Boolean(valorDaCelula(attrs)) }"
+                  :disabled="verifyingPin"
+                  inputmode="numeric"
+                  :invalid="Boolean(pinError)"
+                  maxlength="1"
+                  v-bind="attrs"
+                  v-on="events"
+                />
+              </template>
+            </InputOtp>
           </div>
 
           <p v-if="pinError" class="forgot-pin__error" role="alert">{{ pinError }}</p>
@@ -527,22 +508,15 @@ function closePinDialog() {
   gap: 1rem;
 }
 
-.forgot-password-toggle {
-  display: inline-flex;
+.forgot-password-toggle.p-button {
   width: 2rem;
   height: 2rem;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
   color: var(--auth-soft);
-  cursor: pointer;
 }
 
-.forgot-password-toggle:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+.forgot-password-toggle.p-button:not(:disabled):hover {
+  background: var(--auth-sage-tint);
+  color: var(--auth-soft);
 }
 
 .forgot-pin {
@@ -554,32 +528,20 @@ function closePinDialog() {
   color: var(--auth-text);
 }
 
-.forgot-pin__close {
+.forgot-pin__close.p-button {
   position: absolute;
+  z-index: 1;
   top: -0.15rem;
-  right: -0.1rem;
-  display: grid;
+  inset-inline-end: -0.1rem;
   width: 2.15rem;
   height: 2.15rem;
-  place-items: center;
-  border: 0;
   border-radius: 0.7rem;
-  background: transparent;
   color: var(--auth-soft);
-  cursor: pointer;
-  transition:
-    background 160ms ease,
-    color 160ms ease;
 }
 
-.forgot-pin__close:hover:not(:disabled) {
+.forgot-pin__close.p-button:not(:disabled):hover {
   background: var(--auth-sage-tint);
   color: var(--auth-text);
-}
-
-.forgot-pin__close:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
 }
 
 .forgot-pin__hero {
@@ -661,52 +623,49 @@ function closePinDialog() {
   gap: 0.85rem;
 }
 
-.forgot-pin__otp {
+.forgot-pin__otp.p-inputotp {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.45rem;
 }
 
-.forgot-pin__cell {
+/* Visual de marca das células sobre o InputText do InputOtp. */
+.forgot-pin__cell.p-inputtext {
   width: 100%;
   aspect-ratio: 1;
   min-height: 2.85rem;
+  padding: 0;
   border: 1.5px solid var(--auth-line);
   border-radius: 0.85rem;
   background: var(--auth-field-bg);
   color: var(--auth-text);
-  font-family: inherit;
   font-size: 1.25rem;
   font-weight: 750;
-  text-align: center;
   caret-color: var(--auth-sage);
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease;
+  box-shadow: none;
 }
 
-.forgot-pin__cell:hover:not(:disabled) {
+.forgot-pin__cell.p-inputtext:enabled:hover {
   border-color: color-mix(in srgb, var(--auth-sage) 40%, var(--auth-line));
 }
 
-.forgot-pin__cell:focus {
+.forgot-pin__cell--filled.p-inputtext {
+  border-color: color-mix(in srgb, var(--auth-sage) 55%, var(--auth-line));
+  background: color-mix(in srgb, var(--auth-sage-tint) 40%, var(--auth-field-bg));
+}
+
+.forgot-pin__cell.p-inputtext:enabled:focus {
   outline: none;
   border-color: var(--auth-sage);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--auth-sage) 22%, transparent);
 }
 
-.forgot-pin__cell--filled {
-  border-color: color-mix(in srgb, var(--auth-sage) 55%, var(--auth-line));
-  background: color-mix(in srgb, var(--auth-sage-tint) 40%, var(--auth-field-bg));
-}
-
-.forgot-pin__cell--invalid {
+.forgot-pin__cell.p-inputtext.p-invalid {
   border-color: var(--auth-danger);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--auth-danger) 16%, transparent);
 }
 
-.forgot-pin__cell:disabled {
+.forgot-pin__cell.p-inputtext:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }

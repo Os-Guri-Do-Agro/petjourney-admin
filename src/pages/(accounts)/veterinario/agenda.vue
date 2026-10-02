@@ -8,6 +8,7 @@
  * O estado de visualização mora na URL (`useAgendaUrlState`): recarregar devolve exatamente a
  * mesma visão, e o link que a recepção manda para o veterinário abre onde deveria.
  */
+import { PhCalendarPlus } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -18,6 +19,9 @@ import ClinicShortcutsDialog from '@/features/clinico/components/base/ClinicShor
 import AgendaAppointmentDrawer from '@/features/clinico/components/agenda/AgendaAppointmentDrawer.vue'
 import AgendaCancelDialog from '@/features/clinico/components/agenda/AgendaCancelDialog.vue'
 import AgendaDayGrid from '@/features/clinico/components/agenda/AgendaDayGrid.vue'
+import AgendaTabelaDia from '@/features/clinico/components/agenda/AgendaTabelaDia.vue'
+import AgendaEditarDialog from '@/features/clinico/components/agenda/AgendaEditarDialog.vue'
+import AgendaFaltaDialog from '@/features/clinico/components/agenda/AgendaFaltaDialog.vue'
 import AgendaLegenda from '@/features/clinico/components/agenda/AgendaLegenda.vue'
 import AgendaMoveDialog from '@/features/clinico/components/agenda/AgendaMoveDialog.vue'
 import AgendaReagendarDialog from '@/features/clinico/components/agenda/AgendaReagendarDialog.vue'
@@ -33,13 +37,16 @@ import { useAgendaUrlState } from '@/features/clinico/composables/useAgendaUrlSt
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { useClinicPrefs } from '@/features/clinico/composables/useClinicPrefs'
 import { useClinicShortcuts } from '@/features/clinico/composables/useClinicShortcuts'
-import { agendaRepository } from '@/features/clinico/data/repositories'
+import { agendaRepository, type EntradaDeJustificativa } from '@/features/clinico/data/repositories'
 import type {
   Appointment,
   AppointmentStatus,
+  CanalDeContato,
   CancelReason,
+  MotivoDeFalta,
   SlotSugestao,
 } from '@/features/clinico/data/types'
+import { motivoEncerraOCaso } from '@/features/clinico/domain/faltas'
 import { useAgendaStore } from '@/features/clinico/stores/agenda'
 import { useAvisosStore } from '@/features/clinico/stores/avisos'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
@@ -52,12 +59,14 @@ const clinico = useClinicoStore()
 const fila = useFilaStore()
 const avisos = useAvisosStore()
 const formato = useClinicFormat()
-const { alternarDensidade } = useClinicPrefs()
+const { alternarDensidade, formatoDaAgenda } = useClinicPrefs()
 
 useAgendaUrlState()
 
 const propostaDeMovimento = ref<ArrasteProposta | null>(null)
 const atendimentoParaCancelar = ref<string | null>(null)
+const atendimentoParaFaltar = ref<string | null>(null)
+const atendimentoParaEditar = ref<string | null>(null)
 const ajudaAberta = ref(false)
 
 const selecionado = computed(
@@ -68,17 +77,47 @@ const paraCancelar = computed(
   () => agenda.atendimentos.find((item) => item.id === atendimentoParaCancelar.value) ?? null,
 )
 
+const paraFaltar = computed(
+  () => agenda.atendimentos.find((item) => item.id === atendimentoParaFaltar.value) ?? null,
+)
+
+/** O responsável do atendimento em falta — é o telefone que o diálogo oferece. */
+const tutorDaFalta = computed(() =>
+  paraFaltar.value ? (clinico.tutor(paraFaltar.value.tutorId) ?? null) : null,
+)
+
+const paraEditar = computed(
+  () => agenda.atendimentos.find((item) => item.id === atendimentoParaEditar.value) ?? null,
+)
+
 const feriado = computed(() => agenda.dia?.feriado ?? null)
 
 const erroTraduzido = computed(() => (agenda.erro ? t(agenda.erro) : ''))
 
 /**
+ * A frase da saudação (redesenho de 30/09/2026): quantos atendimentos o dia aberto tem, e quantos
+ * já esperam na recepção — a única conta que pede alguém levantar agora.
+ */
+const fraseDoDia = computed(() => {
+  const ativos = agenda.atendimentos.filter((item) => item.status !== 'cancelado')
+
+  if (ativos.length === 0) {
+    return t('clinico.agenda.frase.vazio')
+  }
+
+  const total = t('clinico.agenda.frase.atendimentos', { total: ativos.length }, ativos.length)
+  const naRecepcao = ativos.filter((item) => item.status === 'aguardando').length
+
+  return naRecepcao > 0
+    ? `${total} · ${t('clinico.agenda.frase.naRecepcao', { total: naRecepcao })}`
+    : total
+})
+
+/**
  * Dia fechado não é vazio: existe agenda possível ali, só não deveria haver. O frame mostra o
  * estado vazio quando não há nada; o aviso de clínica fechada é conteúdo, não estado.
  */
-const vazio = computed(
-  () => agenda.visao === 'dia' && agenda.vazio && !agenda.clinicaFechada,
-)
+const vazio = computed(() => agenda.visao === 'dia' && agenda.vazio && !agenda.clinicaFechada)
 
 async function carregar() {
   await clinico.carregar()
@@ -87,7 +126,10 @@ async function carregar() {
 
 onMounted(carregar)
 
-watch(() => [agenda.data, agenda.visao], () => void agenda.recarregar())
+watch(
+  () => [agenda.data, agenda.visao],
+  () => void agenda.recarregar(),
+)
 watch(
   () => clinico.revisao,
   () => {
@@ -104,6 +146,44 @@ function abrir(appointmentId: string) {
 
 function fecharDrawer() {
   agenda.focoId = null
+}
+
+/**
+ * Salva a edição — e registra o aviso **só quando houve o que avisar**.
+ *
+ * A caixa já decide isso e manda a mensagem vazia quando a mudança é interna (tipo, sala,
+ * observação). Aqui o comprovante entra como `remarcacao`, que é o que a mudança significa do
+ * lado de fora: quem recebeu a ligação não distingue "editaram o horário" de "remarcaram".
+ */
+async function salvarEdicao(
+  dados: {
+    typeId: string
+    professionalId: string
+    roomIds: string[]
+    inicio: string
+    fim: string
+    observacao: string
+  },
+  mensagem: string,
+) {
+  const appointment = paraEditar.value
+
+  if (!appointment) {
+    return
+  }
+
+  await agenda.editar(appointment.id, dados)
+
+  if (mensagem.trim()) {
+    avisos.registrar({
+      appointmentId: appointment.id,
+      tutorId: appointment.tutorId,
+      kind: 'remarcacao',
+      texto: mensagem,
+    })
+  }
+
+  atendimentoParaEditar.value = null
 }
 
 async function confirmarMovimento(proposta: ArrasteProposta, mensagem: string) {
@@ -140,23 +220,77 @@ async function avisarFilaDaVaga(appointment: Appointment) {
 }
 
 /**
- * Marcar falta, venha de onde vier.
+ * Marcar falta, venha de onde vier — e o motivo vem antes do status.
  *
- * O card e o drawer chamam o mesmo caminho, e é aqui que as três consequências acontecem
- * juntas: o status muda, a fila é avisada de que um horário vagou, e **o reagendamento é
- * oferecido na hora**. Oferecer depois é não oferecer: quem marca falta às três da tarde não
- * volta à lista às seis para lembrar de ligar.
+ * O card e o drawer chamam o mesmo caminho. A ordem inverteu de propósito: antes a falta era
+ * gravada no clique e a tela seguia direto para o reagendamento, então o motivo nunca era
+ * perguntado e o painel de faltas herdava uma lista em que ninguém sabia por que ninguém veio.
+ * Agora o clique abre a justificativa — que é onde está o telefone do responsável — e o status
+ * só muda quando a recepção decide entre registrar o motivo e deixar para depois.
+ *
+ * As duas saídas do diálogo terminam nas mesmas três consequências: o status muda, a fila é
+ * avisada de que um horário vagou, e **o reagendamento é oferecido na hora**. Oferecer depois é
+ * não oferecer: quem marca falta às três da tarde não volta à lista às seis para lembrar de
+ * ligar. O que muda é só a falta nascer com motivo ou entrar na fila de pendências do painel.
  */
-async function marcarFalta(appointmentId: string) {
+function marcarFalta(appointmentId: string) {
   const appointment = agenda.atendimentos.find((item) => item.id === appointmentId)
 
   if (!appointment) {
     return
   }
 
-  await agenda.alterarStatus(appointmentId, 'falta')
+  atendimentoParaFaltar.value = appointmentId
+}
+
+/**
+ * O que acontece depois da falta — e o que **não** acontece quando o paciente morreu.
+ *
+ * A vaga continua sendo oferecida à fila nos dois casos: o horário vagou de fato, e a oferta vai
+ * para outra pessoa. O que some é a proposta de remarcação, que iria para o responsável do
+ * animal que acabou de morrer. Ela é aberta automaticamente logo depois da falta justamente para
+ * não depender de ninguém lembrar — e é por isso que o caso precisa ser tratado aqui, e não
+ * confiado a quem estiver com a tela aberta.
+ */
+async function concluirFalta(
+  appointment: Appointment,
+  justificativa: EntradaDeJustificativa | null,
+) {
+  await agenda.alterarStatus(appointment.id, 'falta', justificativa)
+  atendimentoParaFaltar.value = null
   await avisarFilaDaVaga(appointment)
+
+  if (justificativa && motivoEncerraOCaso(justificativa.motivo)) {
+    return
+  }
+
   abrirReagendamento(appointment)
+}
+
+async function registrarFalta(entrada: {
+  motivo: MotivoDeFalta
+  canal: CanalDeContato
+  observacao: string
+}) {
+  const appointment = paraFaltar.value
+
+  if (!appointment) {
+    return
+  }
+
+  await concluirFalta(appointment, {
+    ...entrada,
+    /* Quem registra é quem está com a agenda aberta — na API real, o usuário da sessão. */
+    professionalId: appointment.professionalId,
+  })
+}
+
+async function adiarJustificativa() {
+  const appointment = paraFaltar.value
+
+  if (appointment) {
+    await concluirFalta(appointment, null)
+  }
 }
 
 async function alterarStatus(status: AppointmentStatus) {
@@ -277,6 +411,22 @@ function abrirProntuario() {
   )
 }
 
+function confirmarPresenca() {
+  if (!selecionado.value) {
+    return
+  }
+
+  void agenda.confirmarPresenca(selecionado.value.id)
+}
+
+function verResumo() {
+  if (!selecionado.value) {
+    return
+  }
+
+  void router.push(`/veterinario/paciente/${selecionado.value.petId}/resumo`)
+}
+
 function verHistorico() {
   if (!selecionado.value) {
     return
@@ -378,6 +528,12 @@ useClinicShortcuts({
       return
     }
 
+    if (atendimentoParaFaltar.value) {
+      atendimentoParaFaltar.value = null
+
+      return
+    }
+
     if (ajudaAberta.value) {
       ajudaAberta.value = false
 
@@ -391,9 +547,10 @@ useClinicShortcuts({
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.agenda.subtitulo')"
     :title="t('clinico.agenda.titulo')"
-    :loading="agenda.carregando && !agenda.dia"
+    :loading="!agenda.dia && !agenda.erro"
     :error="erroTraduzido"
     :empty="vazio"
     :empty-title="t('clinico.agenda.vazioTitulo')"
@@ -403,9 +560,34 @@ useClinicShortcuts({
     @retry="carregar"
     @empty-action="abrirCriacao(false)"
   >
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('clinico.agenda.subtitulo') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('clinico.agenda.titulo') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p v-if="agenda.dia" class="hc-saudacao__resumo" aria-live="polite">{{ fraseDoDia }}</p>
+
+          <!-- A ação principal sobe da barra da grade: a barra ficou só com o que mexe na grade. -->
+          <nav class="hc-acoes" :aria-label="t('clinico.agenda.acoesRotulo')">
+            <Button
+              type="button"
+              class="hc-pilula hc-pilula--cheia"
+              :label="t('clinico.agenda.novoAtendimento')"
+              :title="`${t('clinico.agenda.novoAtendimento')} (N)`"
+              @click="abrirCriacao(false)"
+            >
+              <template #icon>
+                <PhCalendarPlus class="hc-pilula__icone" weight="fill" aria-hidden="true" />
+              </template>
+            </Button>
+          </nav>
+        </div>
+      </div>
+    </template>
+
     <div class="agenda clinic-scope">
       <AgendaToolbar
-        @novo="abrirCriacao(false)"
         @encaixar="abrirCriacao(true)"
         @bloquear="abrirBloqueio"
         @ajuda="ajudaAberta = true"
@@ -444,7 +626,9 @@ useClinicShortcuts({
             "
             size="small"
             :loading="fila.salvando"
-            @click="fila.ofertar(candidato.id, fila.vagaAberta!.inicio)"
+            @click="
+              fila.ofertar(candidato.id, fila.vagaAberta!.inicio, fila.vagaAberta!.professionalId)
+            "
           />
           <Button
             :label="t('clinico.fila.vagaAberta.depois')"
@@ -474,7 +658,16 @@ useClinicShortcuts({
       <AgendaLegenda v-if="agenda.visao === 'dia' && !agenda.clinicaFechada" />
 
       <div v-if="agenda.visao !== 'semana'" class="agenda__corpo">
+        <!-- A tabela é o padrão: aguenta o dia cheio. A linha do tempo fica no menu Exibição. -->
+        <AgendaTabelaDia
+          v-if="formatoDaAgenda === 'tabela'"
+          @abrir="abrir"
+          @propor="propostaDeMovimento = $event"
+          @marcar-falta="marcarFalta"
+          @criar-em="abrirCriacao(false, $event)"
+        />
         <AgendaDayGrid
+          v-else
           @abrir="abrir"
           @propor="propostaDeMovimento = $event"
           @marcar-falta="marcarFalta"
@@ -484,10 +677,13 @@ useClinicShortcuts({
         <AgendaAppointmentDrawer
           :appointment="selecionado"
           @fechar="fecharDrawer"
+          @editar="atendimentoParaEditar = selecionado?.id ?? null"
           @alterar-status="alterarStatus"
           @cancelar="atendimentoParaCancelar = selecionado?.id ?? null"
           @abrir-prontuario="abrirProntuario"
           @ver-historico="verHistorico"
+          @ver-resumo="verResumo"
+          @confirmar-presenca="confirmarPresenca"
         />
       </div>
     </div>
@@ -514,10 +710,29 @@ useClinicShortcuts({
       @fechar="propostaDeMovimento = null"
     />
 
+    <AgendaEditarDialog
+      :appointment="paraEditar"
+      @salvar="salvarEdicao"
+      @fechar="atendimentoParaEditar = null"
+    />
+
     <AgendaCancelDialog
       :appointment="paraCancelar"
       @confirmar="confirmarCancelamento"
       @fechar="atendimentoParaCancelar = null"
+    />
+
+    <!--
+      A justificativa vem **antes** de a falta ser gravada: é o diálogo que traz o telefone do
+      responsável, e perguntar depois é não perguntar.
+    -->
+    <AgendaFaltaDialog
+      :appointment="paraFaltar"
+      :tutor="tutorDaFalta"
+      :salvando="agenda.salvando"
+      @confirmar="registrarFalta"
+      @adiar="adiarJustificativa"
+      @fechar="atendimentoParaFaltar = null"
     />
 
     <!--
@@ -580,7 +795,7 @@ useClinicShortcuts({
 }
 
 .agenda__fechada strong {
-  margin-right: 0.3rem;
+  margin-inline-end: 0.3rem;
 }
 
 .vaga {

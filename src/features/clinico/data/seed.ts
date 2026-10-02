@@ -29,6 +29,7 @@ import {
   appointmentTypesFixture,
   vacinasFixture,
   clinicFixture,
+  politicaDaClinicaFixture,
   diagnosisCatalogFixture,
   examCatalogFixture,
   medicationsFixture,
@@ -38,7 +39,37 @@ import {
   roomsFixture,
 } from './fixtures'
 import { createPrng, hashSeed, intBetween, pickFrom } from './mock-runtime'
+import {
+  CONSULTAS_DA_ADESAO,
+  casosDaAdesao,
+  cuidadoresDoDataset,
+  gerarAdesao,
+  petsDaAdesao,
+} from './seed-adesao'
 import { gerarInternacoes, type DatasetDeInternacao } from './seed-internacao'
+import {
+  consentimentosDosResponsaveis,
+  faltaDaBrunilda,
+  filaDaBrunilda,
+  JANELAS_DA_BRUNILDA,
+  justificativaPeloApp,
+  PET_DA_FILA,
+  proximoDiaUtil,
+  RESPONSAVEL_DA_DEMONSTRACAO,
+  vacinaDaPerola,
+} from './seed-responsavel'
+import { vagaLivre } from '../domain/politica'
+import type { PoliticaDaClinica } from '../contrato/responsavel'
+import {
+  CONSULTAS_DO_RESUMO,
+  HORARIOS_DE_HOJE,
+  PET_DIARIO_CHEIO,
+  PET_NOVO,
+  PET_PERDA_DE_PESO,
+  gerarDiario,
+  petsDoResumo,
+} from './seed-resumo'
+import { aplicacoesDaVacinacao, eventosDaVacinacao, petsDaVacinacao } from './seed-vacinacao'
 import type {
   Anamnese,
   AplicacaoVacina,
@@ -48,23 +79,31 @@ import type {
   Block,
   CarePlan,
   Clinic,
+  Cuidador,
   Diagnosis,
+  ConsentimentoDoResponsavel,
   Encounter,
   ExameFisico,
   Holiday,
   ISODate,
+  LoteDeVacina,
   Measurement,
   Medication,
+  MotivoDePerda,
+  PesagemDeCasa,
   Pet,
   Prescription,
   Professional,
+  RegistroDoDiario,
   SystemKey,
   AtoClinico,
   TimelineEvent,
+  TratamentoEmCasa,
   Tutor,
   VitalKey,
   WaitlistEntry,
 } from './types'
+import type { RegistroDeDose } from '../domain/adesao'
 
 export const SEMENTE_PADRAO = 0x5eed_c11c
 export const ATENDIMENTOS_NO_DIA_ANCORA = 40
@@ -113,6 +152,14 @@ export type CasoId =
   | 'internacao-piora'
   | 'internacao-troca-plantao'
   | 'internacao-boletim-horario'
+  /* Os três casos do resumo "Este pet em 30 segundos". Ver `seed-resumo.ts`. */
+  | 'resumo-perda-de-peso'
+  | 'resumo-diario-cheio'
+  | 'resumo-pet-novo'
+  /* Os três casos da adesão ao tratamento. Ver `seed-adesao.ts`. */
+  | 'adesao-sem-registro'
+  | 'adesao-critico'
+  | 'adesao-varias-vezes'
 
 export type CasoDificil = {
   id: CasoId
@@ -135,6 +182,13 @@ export type SeedResult = {
   /** Vacinas aplicadas — a carteira do paciente e o motor de recall saem daqui. */
   aplicacoesDeVacina: AplicacaoVacina[]
   /**
+   * Lotes de vacina na geladeira.
+   *
+   * O consumo de cada um **não** está aqui: ele é contado a partir das aplicações que citam o
+   * código do lote. Ver `domain/estoque-vacinas.ts`.
+   */
+  lotesDeVacina: LoteDeVacina[]
+  /**
    * Procedimentos realizados e medicação aplicada na clínica.
    *
    * Só o que não tem registro próprio em outro lugar. Vacina e dose de internação entram na
@@ -153,6 +207,26 @@ export type SeedResult = {
    */
   pets: Pet[]
   tutores: Tutor[]
+  /**
+   * O que os responsáveis registraram no Diário Pet do app, na forma do contrato. Mais recente
+   * primeiro. Quem pode ler é decidido por `consentimentos`, não pela existência do registro.
+   */
+  diario: RegistroDoDiario[]
+  /** `PesoRegistro` do app: balança de casa. Mais recente primeiro. */
+  pesagensDeCasa: PesagemDeCasa[]
+  /** O que cada responsável liberou para a clínica ver entre as consultas. */
+  consentimentos: ConsentimentoDoResponsavel[]
+  /** Prazos combinados com quem marca pelo app. Ver `domain/politica.ts`. */
+  politica: PoliticaDaClinica
+  /** Quem cuida de cada pet no app: o dono e a família dele. Ver `seed-adesao.ts`. */
+  cuidadores: Cuidador[]
+  /** Itens de receita que viraram lembrete no app. */
+  tratamentos: TratamentoEmCasa[]
+  /**
+   * O que a casa registrou, dose a dose. Só o que alguém marcou: a dose sem registro é a
+   * **ausência** de linha aqui, e a grade a deduz — ver `domain/adesao.ts`.
+   */
+  registrosDeDose: RegistroDeDose[]
 }
 
 function iso(date: ISODate, minutes: number) {
@@ -167,7 +241,12 @@ function tipoPorId(id: string): AppointmentType {
 }
 
 function petPorId(id: string): Pet {
-  return petsFixture.find((pet) => pet.id === id) ?? (petsFixture[0] as Pet)
+  return (
+    petsFixture.find((pet) => pet.id === id) ??
+    petsDoResumo(clock.today()).find((pet) => pet.id === id) ??
+    petsDaAdesao(clock.today()).find((pet) => pet.id === id) ??
+    (petsFixture[0] as Pet)
+  )
 }
 
 /**
@@ -207,6 +286,7 @@ type AppointmentSeed = {
   /** Status forçado; sem isto o `rngStatus` decide a partir do relógio. */
   statusFixo?: AppointmentStatus
   motivoCancelamento?: Appointment['motivoCancelamento']
+  justificativaDeFalta?: Appointment['justificativaDeFalta']
 }
 
 function montarAppointment(seed: AppointmentSeed): Appointment {
@@ -235,10 +315,59 @@ function montarAppointment(seed: AppointmentSeed): Appointment {
     finalizadoEm: null,
     canceladoEm: null,
     motivoCancelamento: seed.motivoCancelamento ?? null,
+    justificativaDeFalta: seed.justificativaDeFalta ?? null,
     encounterId: null,
     linkedGroupId: seed.linkedGroupId ?? null,
     criadoEm: iso(addDays(seed.data, -3), 9 * 60),
     atualizadoEm: iso(addDays(seed.data, -3), 9 * 60),
+  }
+}
+
+/** Os motivos que o dataset distribui, e o peso de cada um na vida real de uma clínica. */
+const MOTIVOS_DE_FALTA_PLANTADOS: Array<
+  NonNullable<Appointment['justificativaDeFalta']>['motivo']
+> = ['esqueceu', 'esqueceu', 'imprevisto', 'transporte', 'paciente-melhorou', 'custo', 'emergencia']
+
+const CANAIS_PLANTADOS: Array<NonNullable<Appointment['justificativaDeFalta']>['canal']> = [
+  'telefone',
+  'whatsapp',
+  'whatsapp',
+  'sem-resposta',
+]
+
+/**
+ * O motivo de uma falta sorteada — ou `null`, que é metade dos casos.
+ *
+ * **Não consome `rngStatus`.** O sorteio de status depende do relógio, e o arquivo inteiro
+ * existe em cima da separação entre os dois geradores: puxar um número a mais daqui deslocaria
+ * a sequência e o dia âncora deixaria de ter sempre os mesmos quarenta atendimentos. O valor
+ * sai de um hash do id, que é estável por construção e não tem sequência para deslocar.
+ *
+ * Perto de metade fica sem motivo de propósito: é a fila de trabalho do painel de faltas, e uma
+ * tela cuja fila abre vazia não demonstra para que serve.
+ */
+function justificativaPlantada(appointment: Appointment): Appointment['justificativaDeFalta'] {
+  const hash = hashSeed(`falta|${appointment.id}`)
+
+  if (hash % 100 < 45) {
+    return null
+  }
+
+  return {
+    motivo: MOTIVOS_DE_FALTA_PLANTADOS[hash % MOTIVOS_DE_FALTA_PLANTADOS.length]!,
+    /*
+     * `>>>`, e não `>>`.
+     *
+     * `hashSeed` devolve um inteiro **sem sinal** de 32 bits, e o deslocamento com sinal trata
+     * qualquer valor acima de 2³¹ como negativo: o índice saía negativo, o item vinha
+     * `undefined` e a tela escrevia o motivo seguido de um ponto solto, sem canal nenhum. O `!`
+     * daqui prometia que isso não acontecia — e era o `!` que estava errado.
+     */
+    canal: CANAIS_PLANTADOS[(hash >>> 3) % CANAIS_PLANTADOS.length]!,
+    observacao: '',
+    professionalId: 'prof-ana',
+    /* No dia seguinte ao da falta: é quando a recepção corre a lista. */
+    registradaEm: iso(addDays(clock.dateOf(appointment.inicio), 1), 10 * 60),
   }
 }
 
@@ -261,7 +390,11 @@ function aplicarStatus(appointments: Appointment[], semente: number): Appointmen
 
     if (fim < agora) {
       if (sorteio < 0.08) {
-        return { ...appointment, status: 'falta' as const }
+        return {
+          ...appointment,
+          status: 'falta' as const,
+          justificativaDeFalta: justificativaPlantada(appointment),
+        }
       }
 
       return {
@@ -453,11 +586,7 @@ export function encounterVazio(appointment: Appointment, abertoEm: string): Enco
   }
 }
 
-function encounterPreenchido(
-  appointment: Appointment,
-  pet: Pet,
-  rng: () => number,
-): Encounter {
+function encounterPreenchido(appointment: Appointment, pet: Pet, rng: () => number): Encounter {
   const base = encounterVazio(appointment, appointment.inicio)
 
   /**
@@ -598,11 +727,7 @@ function orientacaoDe(codigo: string): string {
  * **confirmada**: no histórico ela já foi decidida. O caso pendente de confirmação é plantado à
  * parte, no rascunho de hoje, que é onde a interface precisa cobrar a decisão.
  */
-function montarPrescricoes(
-  appointment: Appointment,
-  pet: Pet,
-  rng: () => number,
-): Prescription[] {
+function montarPrescricoes(appointment: Appointment, pet: Pet, rng: () => number): Prescription[] {
   const quantidade = rng() < 0.35 ? 2 : 1
   const escolhidos: Medication[] = []
 
@@ -902,6 +1027,27 @@ function casosDoDiaAncora(ancora: ISODate): {
     }),
   )
 
+  /*
+   * 14. Os três pacientes do resumo "Este pet em 30 segundos", todos com horário hoje: o botão
+   * que abre o atendimento a partir do resumo precisa de um atendimento para abrir. Estado
+   * fixo, fora do sorteio do relógio — o resumo é lido **antes** de entrar na sala.
+   */
+  appointments.push(
+    ...HORARIOS_DE_HOJE.map((item) =>
+      montarAppointment({
+        id: item.id,
+        petId: item.petId,
+        professionalId: 'prof-helena',
+        typeId: item.typeId,
+        data: ancora,
+        inicioMin: clockToMinutes(item.inicio),
+        statusFixo: 'confirmado',
+        origem: item.origem,
+        observacao: item.observacao,
+      }),
+    ),
+  )
+
   // 5. Bloqueio recorrente: reunião de equipe toda terça e quinta, materializada na data pedida.
   const blocks: Block[] = [
     {
@@ -963,8 +1109,18 @@ function casosDoDiaAncora(ancora: ISODate): {
   ]
 
   const casos: CasoDificil[] = [
-    { id: 'sobreposicao', rota: rotaAgenda('apt-sobrepoe-a'), appointmentId: 'apt-sobrepoe-a', encounterId: null },
-    { id: 'encaixe', rota: rotaAgenda('apt-encaixe'), appointmentId: 'apt-encaixe', encounterId: null },
+    {
+      id: 'sobreposicao',
+      rota: rotaAgenda('apt-sobrepoe-a'),
+      appointmentId: 'apt-sobrepoe-a',
+      encounterId: null,
+    },
+    {
+      id: 'encaixe',
+      rota: rotaAgenda('apt-encaixe'),
+      appointmentId: 'apt-encaixe',
+      encounterId: null,
+    },
     {
       id: 'duas-salas',
       rota: `/veterinario/agenda?data=${ancora}&agrupar=sala&foco=apt-cirurgia-centro`,
@@ -989,7 +1145,12 @@ function casosDoDiaAncora(ancora: ISODate): {
       appointmentId: null,
       encounterId: null,
     },
-    { id: 'falta-reincidente', rota: '/veterinario/faltas', appointmentId: null, encounterId: null },
+    {
+      id: 'falta-reincidente',
+      rota: '/veterinario/faltas',
+      appointmentId: null,
+      encounterId: null,
+    },
     {
       id: 'cancelado-visivel',
       rota: rotaAgenda('apt-cancelado'),
@@ -1015,6 +1176,18 @@ function casosDoDiaAncora(ancora: ISODate): {
       appointmentId: 'apt-retorno-pendente',
       encounterId: null,
     },
+    ...(
+      [
+        ['resumo-perda-de-peso', PET_PERDA_DE_PESO, 'apt-resumo-perola'],
+        ['resumo-diario-cheio', PET_DIARIO_CHEIO, 'apt-resumo-chico'],
+        ['resumo-pet-novo', PET_NOVO, 'apt-resumo-pacoca'],
+      ] as const
+    ).map(([id, petId, appointmentId]) => ({
+      id,
+      rota: `/veterinario/paciente/${petId}/resumo`,
+      appointmentId,
+      encounterId: null,
+    })),
   ]
 
   return { appointments, blocks, casos }
@@ -1037,11 +1210,46 @@ function proximoDiaDaSemana(from: ISODate, weekday: number): ISODate {
 // ---------------------------------------------------------------------------
 
 /**
- * Dois pacientes ficam de fora dos dias futuros de propósito: sem eles, todo paciente teria
- * horário marcado e o filtro "sem horário marcado" nasceria com contagem zero — uma opção que
- * ninguém consegue exercitar.
+ * Paciente fora dos dias futuros de propósito: sem ele, todo paciente teria horário marcado e o
+ * filtro "sem horário marcado" nasceria com contagem zero — uma opção que ninguém consegue
+ * exercitar. Os pets de `DA_DEMONSTRACAO_DO_APP` também ficam sem, por outro motivo.
  */
-const SEM_AGENDA_FUTURA = ['pet-brunilda', 'pet-duque']
+const SEM_AGENDA_FUTURA = ['pet-duque']
+
+/**
+ * Os pets da responsável da demonstração do app não entram em sorteio nenhum, nem no passado.
+ *
+ * A história deles é o cenário plantado em `seed-responsavel.ts`, contada igual no portal e no
+ * celular (`npm run contrato:demo`). Sorteados, ganhavam um horário a cada poucos dias e
+ * diagnóstico de outra espécie — o jabuti com síndrome braquicefálica —, e o app mostraria uma
+ * agenda que responsável nenhum tem.
+ */
+const DA_DEMONSTRACAO_DO_APP = new Set(
+  petsFixture.filter((pet) => pet.tutorId === RESPONSAVEL_DA_DEMONSTRACAO).map((pet) => pet.id),
+)
+
+/** Quem o gerador pode sortear para um horário. */
+function petsSorteaveis(): Pet[] {
+  return petsFixture.filter((pet) => !DA_DEMONSTRACAO_DO_APP.has(pet.id))
+}
+
+/**
+ * Quem pode receber horário no dia âncora e nos dias futuros.
+ *
+ * Duas exclusões além das de `petsSorteaveis`, por dois motivos diferentes.
+ * `SEM_AGENDA_FUTURA` mantém viva a opção "sem horário marcado". O paciente do óbito sai porque
+ * ele morreu: agenda futura para ele seria a incoerência que a tela de faltas existe justamente
+ * para não produzir.
+ *
+ * Excluir na **origem** e não filtrar depois é o que preserva os quarenta atendimentos do dia
+ * âncora. A primeira versão filtrava no fim e levava junto os horários que o gerador tinha dado
+ * a esse paciente hoje — o dia perdia atendimentos e o teste de fumaça do seed caía.
+ */
+function petsComAgenda(): Pet[] {
+  return petsSorteaveis().filter(
+    (pet) => !SEM_AGENDA_FUTURA.includes(pet.id) && pet.id !== PET_DO_OBITO,
+  )
+}
 
 function preencherDia(
   data: ISODate,
@@ -1050,7 +1258,7 @@ function preencherDia(
   ocupados: Set<string>,
   prefixo: string,
   salasJaTomadas: Set<string> = new Set(),
-  petsDisponiveis: Pet[] = petsFixture,
+  petsDisponiveis: Pet[] = petsSorteaveis(),
 ): Appointment[] {
   const horario = clinicFixture.horarios.find((item) => item.weekday === weekdayOf(data))
 
@@ -1092,7 +1300,11 @@ function preencherDia(
   function blocosDe(chave: string, inicioMin: number, duracao: number) {
     const blocos: string[] = []
 
-    for (let minuto = inicioMin; minuto < inicioMin + duracao; minuto += clinicFixture.slotMinutos) {
+    for (
+      let minuto = inicioMin;
+      minuto < inicioMin + duracao;
+      minuto += clinicFixture.slotMinutos
+    ) {
       blocos.push(`${chave}|${minuto}`)
     }
 
@@ -1172,19 +1384,135 @@ function preencherDia(
   return gerados
 }
 
+/**
+ * O motivo de cada falta reincidente — e a **ausência** dele nas duas mais recentes.
+ *
+ * As quatro faltas do mesmo responsável são o caso que o painel existe para discutir, e o que
+ * as torna discutíveis é a mistura: duas já foram apuradas e contam a mesma história
+ * (transporte), duas ainda esperam ligação. Justificar as quatro esvaziaria a fila de trabalho
+ * da tela; deixar as quatro em branco esconderia o que a justificativa mostra — que este
+ * responsável não está sumindo, está sem como chegar.
+ *
+ * As justificadas são as **mais antigas** de propósito: é assim que a apuração anda na prática,
+ * do fundo da fila para a frente.
+ */
+const MOTIVOS_DAS_REINCIDENTES: Array<Appointment['justificativaDeFalta']> = [
+  /* 4 dias atrás e 11 dias atrás: ainda sem contato. */
+  null,
+  null,
+  {
+    motivo: 'transporte',
+    canal: 'whatsapp',
+    observacao: 'Sem carro no dia; pediu horário no fim da tarde.',
+    professionalId: 'prof-ana',
+    registradaEm: '',
+  },
+  {
+    motivo: 'transporte',
+    canal: 'telefone',
+    observacao: 'Mesma dificuldade da vez anterior.',
+    professionalId: 'prof-ana',
+    registradaEm: '',
+  },
+]
+
+/**
+ * O paciente que morreu — o caso terminal do painel de faltas.
+ *
+ * Existe porque a tela precisa demonstrar o que o óbito **desliga**: a falta fica registrada e
+ * contada, e a oferta de remarcação some. Sem um caso no dataset, o estado "caso encerrado" é
+ * código que ninguém vê rodar.
+ *
+ * Fica num paciente só dele, longe do responsável reincidente: misturar as duas histórias faria
+ * a demonstração contar que a clínica cobra remarcação de quem perdeu o animal — que é
+ * exatamente o contrário do que a mudança serve para impedir.
+ */
+/**
+ * Um paciente só dele, e sem papel em nenhum outro caso.
+ *
+ * A primeira escolha foi o Cacau, e foi errada duas vezes: ele é o caso plantado de "retorno
+ * indicado sem horário marcado" no próprio dia âncora — que o filtro do óbito levava junto,
+ * derrubando os quarenta atendimentos do dia — e carrega histórico de internação que a história
+ * do óbito passaria a contradizer.
+ *
+ * A Lola não aparece em caso nenhum, e o alerta de braquicefálica que ela já tem no cadastro
+ * torna a história plausível sem precisar inventar nada.
+ */
+const PET_DO_OBITO = 'pet-lola'
+
+function faltaComObito(ancora: ISODate): Appointment {
+  const data = nextBusinessDay(addDays(ancora, -9))
+
+  return montarAppointment({
+    id: 'apt-falta-obito',
+    petId: PET_DO_OBITO,
+    professionalId: 'prof-tiago',
+    typeId: 'tipo-retorno',
+    data,
+    inicioMin: clockToMinutes('15:00'),
+    statusFixo: 'falta',
+    justificativaDeFalta: {
+      motivo: 'obito',
+      canal: 'telefone',
+      observacao: 'Responsável avisou no dia seguinte. Não oferecer remarcação.',
+      professionalId: 'prof-tiago',
+      registradaEm: iso(addDays(data, 1), 11 * 60),
+    },
+  })
+}
+
+/**
+ * Nada na agenda do paciente **depois do dia em que ele morreu**.
+ *
+ * O corte é na data do óbito, e não em hoje. A primeira versão cortava só o futuro, e o gerador
+ * — que espalha atendimentos por todos os pacientes sem saber desta história — deixou uma
+ * consulta quatro dias depois da morte: passada, portanto sobrevivente ao filtro, e visível no
+ * painel como "reagendado para 18/09" embaixo de um óbito registrado em 14/09.
+ *
+ * O que vem antes fica: é o histórico do paciente, e apagá-lo seria fingir que o animal nunca
+ * foi atendido.
+ *
+ * Isto é maquiagem de dataset, e não regra de negócio. A regra de verdade — a clínica saber que
+ * o paciente morreu e parar de agendar — depende de um estado no cadastro do próprio paciente,
+ * que este protótipo ainda não tem.
+ */
+function semAgendaDepoisDoObito(appointments: Appointment[]): Appointment[] {
+  const obito = appointments.find((appointment) => appointment.id === 'apt-falta-obito')
+
+  if (!obito) {
+    return appointments
+  }
+
+  const diaDoObito = clock.dateOf(obito.inicio)
+
+  return appointments.filter(
+    (appointment) =>
+      appointment.id === obito.id ||
+      appointment.petId !== PET_DO_OBITO ||
+      clock.dateOf(appointment.inicio) <= diaDoObito,
+  )
+}
+
 function faltasReincidentes(ancora: ISODate): Appointment[] {
   /** Um responsável com histórico é o que dá o que discutir no painel de faltas. */
-  return [4, 11, 18, 25].map((diasAtras, indice) =>
-    montarAppointment({
+  return [4, 11, 18, 25].map((diasAtras, indice) => {
+    const data = nextBusinessDay(addDays(ancora, -diasAtras))
+    const motivo = MOTIVOS_DAS_REINCIDENTES[indice]
+
+    return montarAppointment({
       id: `apt-falta-reincidente-${indice + 1}`,
       petId: 'pet-jack',
       professionalId: 'prof-ana',
       typeId: 'tipo-consulta',
-      data: nextBusinessDay(addDays(ancora, -diasAtras)),
+      data,
       inicioMin: clockToMinutes('09:30'),
       statusFixo: 'falta',
-    }),
-  )
+      /* Apurada no dia seguinte ao da falta: é quando a recepção corre a lista. */
+      justificativaDeFalta: motivo
+        ? { ...motivo, registradaEm: iso(addDays(data, 1), 10 * 60) }
+        : null,
+    })
+  })
 }
 
 function montarFila(ancora: ISODate): WaitlistEntry[] {
@@ -1465,7 +1793,8 @@ function atosPlantados(encounters: Encounter[], hoje: ISODate): AtoClinico[] {
       item.origem === 'clinica'
         ? (encounters.find(
             (encounter) =>
-              encounter.petId === item.petId && clock.dateOf(encounter.abertoEm) === clock.dateOf(em),
+              encounter.petId === item.petId &&
+              clock.dateOf(encounter.abertoEm) === clock.dateOf(em),
           ) ?? null)
         : null
 
@@ -1487,7 +1816,273 @@ function atosPlantados(encounters: Encounter[], hoje: ISODate): AtoClinico[] {
   })
 }
 
-function aplicacoesDeVacinaPlantadas(hoje: ISODate): AplicacaoVacina[] {
+/**
+ * Vacinas: o que entrou na geladeira e o que saiu dela.
+ *
+ * Lote e aplicação nascem **na mesma função**, e isso não é economia de arquivo. O que liga os
+ * dois é o código impresso no frasco: se o lote fosse plantado de um lado e a aplicação de
+ * outro, a primeira mudança em qualquer um dos dois lados deixaria a carteira do animal citando
+ * um lote que o estoque não conhece — e a tela de estoque contaria consumo zero num lote que
+ * girou o ano inteiro.
+ *
+ * A saída é atribuída por **PEPS**: cada aplicação consome o lote mais antigo daquela vacina que
+ * ainda estava dentro da validade no dia e ainda tinha dose. É o que a clínica faz na geladeira,
+ * e é o que faz o saldo de cada lote fechar sem nunca ficar negativo.
+ */
+type PerdaPlantada = { diasAtras: number; quantidade: number; motivo: MotivoDePerda }
+
+type LotePlantado = {
+  vacinaId: string
+  codigo: string
+  fornecedor: string
+  recebidoDiasAtras: number
+  /** Dias de prateleira contados do recebimento. */
+  validadeEmDias: number
+  quantidade: number
+  /** Centavos por dose. */
+  custoUnitario: number
+  perdas: PerdaPlantada[]
+  /**
+   * Doses que ficam no frasco até depois do vencimento, qualquer que seja o sorteio da rotina.
+   *
+   * O movimento de fundo é sorteado com a data do dia na semente: num dia ele gasta o lote até a
+   * última dose, noutro deixa três. O caso "lote vencido com dose dentro" não pode depender disso
+   * — é ele que a demonstração abre no diálogo de aplicar para mostrar o frasco travado.
+   */
+  sobraGarantida?: number
+  /** O que este lote existe para demonstrar. */
+  caso: string
+}
+
+/**
+ * Os lotes da geladeira.
+ *
+ * A lista é desenhada para que **cada situação do estoque tenha um caso**: sem um lote vencido
+ * com saldo, a tela nunca mostra prejuízo; sem dois a vencer, não há o que usar primeiro; e sem
+ * uma vacina zerada e outra abaixo do piso, o gráfico de compra abre reto e não há o que apontar
+ * numa demonstração.
+ */
+const LOTES_PLANTADOS: LotePlantado[] = [
+  /* Antirrábica: giro alto, três lotes na estrada — um morto, um correndo, um novo. */
+  {
+    vacinaId: 'vac-antirrabica-canina',
+    codigo: 'RAB-2410',
+    fornecedor: 'Distribuidora Vetline',
+    recebidoDiasAtras: 420,
+    validadeEmDias: 390,
+    quantidade: 26,
+    custoUnitario: 1890,
+    /* Venceu com dose dentro: é o prejuízo que a tela precisa saber mostrar. */
+    perdas: [{ diasAtras: 25, quantidade: 4, motivo: 'vencimento' }],
+    caso: 'vencido com saldo',
+  },
+  {
+    vacinaId: 'vac-antirrabica-canina',
+    codigo: 'RAB-2503',
+    fornecedor: 'Distribuidora Vetline',
+    recebidoDiasAtras: 200,
+    validadeEmDias: 245,
+    quantidade: 8,
+    custoUnitario: 1890,
+    perdas: [],
+    caso: 'a vencer',
+  },
+  {
+    vacinaId: 'vac-antirrabica-canina',
+    codigo: 'RAB-2601',
+    fornecedor: 'Distribuidora Vetline',
+    recebidoDiasAtras: 40,
+    validadeEmDias: 440,
+    quantidade: 6,
+    custoUnitario: 1950,
+    perdas: [],
+    caso: 'ativo',
+  },
+
+  /* V10: a mais cara da lista, e a que mais dói perder por temperatura. */
+  {
+    vacinaId: 'vac-v10',
+    codigo: 'V10-2409',
+    fornecedor: 'PetSupply Nacional',
+    recebidoDiasAtras: 380,
+    validadeEmDias: 360,
+    quantidade: 20,
+    custoUnitario: 3250,
+    /* Geladeira fora da faixa num fim de semana: leva o que estiver dentro, não uma dose só. */
+    perdas: [{ diasAtras: 300, quantidade: 3, motivo: 'temperatura' }],
+    sobraGarantida: 2,
+    caso: 'vencido, perda por temperatura',
+  },
+  {
+    vacinaId: 'vac-v10',
+    codigo: 'V10-2505',
+    fornecedor: 'PetSupply Nacional',
+    recebidoDiasAtras: 150,
+    validadeEmDias: 410,
+    quantidade: 8,
+    custoUnitario: 3390,
+    perdas: [],
+    caso: 'ativo',
+  },
+  {
+    vacinaId: 'vac-v10',
+    codigo: 'V10-2602',
+    fornecedor: 'PetSupply Nacional',
+    recebidoDiasAtras: 20,
+    validadeEmDias: 560,
+    quantidade: 6,
+    custoUnitario: 3390,
+    perdas: [],
+    caso: 'ativo',
+  },
+
+  /* V4 felina: um lote grande chegando ao fim da prateleira com dose dentro. */
+  {
+    vacinaId: 'vac-v4-felina',
+    codigo: 'V4F-2502',
+    fornecedor: 'Distribuidora Vetline',
+    recebidoDiasAtras: 300,
+    validadeEmDias: 345,
+    quantidade: 10,
+    custoUnitario: 2990,
+    perdas: [],
+    caso: 'a vencer',
+  },
+  {
+    vacinaId: 'vac-v4-felina',
+    codigo: 'V4F-2601',
+    fornecedor: 'Distribuidora Vetline',
+    recebidoDiasAtras: 35,
+    validadeEmDias: 515,
+    quantidade: 6,
+    custoUnitario: 3090,
+    perdas: [{ diasAtras: 10, quantidade: 1, motivo: 'quebra' }],
+    caso: 'ativo',
+  },
+
+  /* Gripe canina: giro baixo, lote único, sobra folgada. */
+  {
+    vacinaId: 'vac-gripe-canina',
+    codigo: 'GRP-2504',
+    fornecedor: 'PetSupply Nacional',
+    recebidoDiasAtras: 240,
+    validadeEmDias: 360,
+    quantidade: 26,
+    custoUnitario: 2290,
+    perdas: [{ diasAtras: 90, quantidade: 1, motivo: 'quebra' }],
+    caso: 'ativo',
+  },
+
+  /* Giárdia: fecha **abaixo do piso** — é o caso de "precisa comprar" sem estar zerado. */
+  {
+    vacinaId: 'vac-giardia',
+    codigo: 'GIA-2501',
+    fornecedor: 'Vacinas Brasil',
+    recebidoDiasAtras: 330,
+    validadeEmDias: 420,
+    quantidade: 26,
+    custoUnitario: 2790,
+    perdas: [{ diasAtras: 120, quantidade: 3, motivo: 'temperatura' }],
+    caso: 'abaixo do mínimo',
+  },
+
+  /* FeLV: fecha **zerado**. A vacina que a clínica deixou acabar. */
+  {
+    vacinaId: 'vac-felv',
+    codigo: 'FLV-2411',
+    fornecedor: 'Vacinas Brasil',
+    recebidoDiasAtras: 400,
+    validadeEmDias: 430,
+    quantidade: 6,
+    custoUnitario: 4150,
+    perdas: [{ diasAtras: 200, quantidade: 0, motivo: 'quebra' }],
+    caso: 'zerado',
+  },
+]
+
+function lotesDeVacinaPlantados(hoje: ISODate): LoteDeVacina[] {
+  return LOTES_PLANTADOS.map((plantado, indice) => {
+    const recebidoEm = addDays(hoje, -plantado.recebidoDiasAtras)
+
+    return {
+      id: `lote-${indice}-${plantado.codigo}`,
+      vacinaId: plantado.vacinaId,
+      codigo: plantado.codigo,
+      fornecedor: plantado.fornecedor,
+      recebidoEm,
+      validade: addDays(recebidoEm, plantado.validadeEmDias),
+      quantidadeRecebida: plantado.quantidade,
+      custoUnitario: plantado.custoUnitario,
+      perdas: plantado.perdas.map((perda) => ({
+        em: addDays(hoje, -perda.diasAtras),
+        quantidade: perda.quantidade,
+        motivo: perda.motivo,
+      })),
+    }
+  })
+}
+
+/**
+ * De que lote saiu esta dose.
+ *
+ * PEPS entre os lotes daquela vacina que já tinham chegado e ainda não tinham vencido no dia da
+ * aplicação, e que ainda têm dose livre. O contador de saída é passado de fora e vai sendo
+ * gasto, e é ele que garante que nenhum lote feche com saldo negativo — a conta do estoque
+ * depende disso para fechar.
+ *
+ * Sem lote elegível, a aplicação fica **sem lote de estoque** e a função devolve `null`: é o
+ * caso real da dose que veio de antes do controle de estoque, e a tela precisa saber conviver
+ * com ele em vez de inventar um código.
+ */
+function loteParaAplicacao(
+  lotes: LoteDeVacina[],
+  gasto: Map<string, number>,
+  vacinaId: string,
+  em: ISODate,
+): LoteDeVacina | null {
+  const elegiveis = lotes
+    .filter(
+      (lote) =>
+        lote.vacinaId === vacinaId &&
+        lote.recebidoEm <= em &&
+        lote.validade >= em &&
+        (gasto.get(lote.codigo) ?? 0) <
+          lote.quantidadeRecebida - perdasDoLotePlantado(lote) - sobraGarantida(lote),
+    )
+    .sort((a, b) => a.validade.localeCompare(b.validade))
+
+  const escolhido = elegiveis[0]
+
+  if (!escolhido) {
+    return null
+  }
+
+  gasto.set(escolhido.codigo, (gasto.get(escolhido.codigo) ?? 0) + 1)
+
+  return escolhido
+}
+
+function perdasDoLotePlantado(lote: LoteDeVacina): number {
+  return lote.perdas.reduce((total, perda) => total + perda.quantidade, 0)
+}
+
+function sobraGarantida(lote: LoteDeVacina): number {
+  return LOTES_PLANTADOS.find((plantado) => plantado.codigo === lote.codigo)?.sobraGarantida ?? 0
+}
+
+/**
+ * As aplicações que a demonstração precisa, em duas camadas.
+ *
+ * A primeira é a **lista plantada**: um caso de cada situação da lista de chamada. A segunda é o
+ * **movimento de fundo** — as vacinas de rotina que fazem o gráfico de consumo ter doze meses em
+ * vez de uma coluna. As duas camadas nunca tocam o mesmo par paciente × vacina, porque o que
+ * define a situação do recall é a **última** aplicação daquele par: uma dose de fundo caindo
+ * depois de um caso plantado apagaria justamente o caso que ele existe para mostrar.
+ *
+ * E o movimento de fundo fecha sempre **em dia**: série completa e dose recente. Quem entra na
+ * lista de chamada é quem a camada plantada colocou lá, e só.
+ */
+function aplicacoesDeVacinaPlantadas(hoje: ISODate, lotes: LoteDeVacina[]): AplicacaoVacina[] {
   const PLANTADAS: Array<{
     petId: string
     vacinaId: string
@@ -1497,15 +2092,33 @@ function aplicacoesDeVacinaPlantadas(hoje: ISODate): AplicacaoVacina[] {
     caso: string
   }> = [
     /* Em dia: aplicou há pouco, série fechada. */
-    { petId: 'pet-luna', vacinaId: 'vac-antirrabica-canina', diasAtras: 40, dose: 1, caso: 'em dia' },
+    {
+      petId: 'pet-luna',
+      vacinaId: 'vac-antirrabica-canina',
+      diasAtras: 40,
+      dose: 1,
+      caso: 'em dia',
+    },
     { petId: 'pet-luna', vacinaId: 'vac-v10', diasAtras: 60, dose: 3, caso: 'em dia' },
 
     /* A vencer: dentro da janela de 30 dias — é a ligação da semana. */
     { petId: 'pet-bidu', vacinaId: 'vac-v10', diasAtras: 345, dose: 3, caso: 'a vencer' },
-    { petId: 'pet-mel', vacinaId: 'vac-antirrabica-canina', diasAtras: 350, dose: 1, caso: 'a vencer' },
+    {
+      petId: 'pet-mel',
+      vacinaId: 'vac-antirrabica-canina',
+      diasAtras: 350,
+      dose: 1,
+      caso: 'a vencer',
+    },
 
     /* Vencido: passou da data — é a ligação de hoje. */
-    { petId: 'pet-thor', vacinaId: 'vac-antirrabica-canina', diasAtras: 430, dose: 1, caso: 'vencido' },
+    {
+      petId: 'pet-thor',
+      vacinaId: 'vac-antirrabica-canina',
+      diasAtras: 430,
+      dose: 1,
+      caso: 'vencido',
+    },
     { petId: 'pet-nina', vacinaId: 'vac-v10', diasAtras: 500, dose: 3, caso: 'vencido' },
     { petId: 'pet-sushi', vacinaId: 'vac-v4-felina', diasAtras: 420, dose: 3, caso: 'vencido' },
 
@@ -1517,34 +2130,177 @@ function aplicacoesDeVacinaPlantadas(hoje: ISODate): AplicacaoVacina[] {
      * demonstração. Aplicações recentes mantêm as quatro pilhas visíveis.
      */
     { petId: 'pet-amora', vacinaId: 'vac-v10', diasAtras: 12, dose: 1, caso: 'série aberta' },
-    { petId: 'pet-pandora', vacinaId: 'vac-v4-felina', diasAtras: 18, dose: 2, caso: 'série aberta' },
+    {
+      petId: 'pet-pandora',
+      vacinaId: 'vac-v4-felina',
+      diasAtras: 18,
+      dose: 2,
+      caso: 'série aberta',
+    },
 
     /* Histórico mais fundo, para a carteira do paciente ter profundidade. */
-    { petId: 'pet-nina', vacinaId: 'vac-antirrabica-canina', diasAtras: 500, dose: 1, caso: 'histórico' },
+    {
+      petId: 'pet-nina',
+      vacinaId: 'vac-antirrabica-canina',
+      diasAtras: 500,
+      dose: 1,
+      caso: 'histórico',
+    },
     { petId: 'pet-nina', vacinaId: 'vac-gripe-canina', diasAtras: 520, dose: 2, caso: 'histórico' },
     { petId: 'pet-bento', vacinaId: 'vac-v10', diasAtras: 200, dose: 3, caso: 'histórico' },
   ]
 
-  return PLANTADAS.map((item, indice) => {
+  const gasto = new Map<string, number>()
+  const aplicacoes: AplicacaoVacina[] = []
+
+  /*
+   * A ordem de criação é a ordem do tempo, da mais antiga para a mais recente. O PEPS depende
+   * disso: atribuir na ordem da lista escrita faria uma dose de dois anos atrás consumir o lote
+   * que só chegou no mês passado.
+   */
+  const rotina = rotinaDeVacinacao(hoje)
+  const todas = [...PLANTADAS, ...rotina].sort((a, b) => b.diasAtras - a.diasAtras)
+
+  for (const [indice, item] of todas.entries()) {
     const vacina = vacinasFixture.find((v) => v.id === item.vacinaId)
     const data = addDays(hoje, -item.diasAtras)
     const dentroDaSerie = vacina ? item.dose < vacina.dosesNaSerie : false
+    const lote = loteParaAplicacao(lotes, gasto, item.vacinaId, data)
 
-    return {
+    aplicacoes.push({
       id: `apl-${indice}-${item.petId}`,
       petId: item.petId,
       vacinaId: item.vacinaId,
+      origem: 'clinica' as const,
       /* Vacina é ato de quem aplica: fica com a clínica geral. */
       professionalId: 'prof-ana',
       aplicadaEm: iso(data, 9 * 60 + 30),
-      lote: `L${data.slice(0, 4)}-${String(indice + 1).padStart(3, '0')}`,
-      validadeLote: addDays(data, 540),
+      /*
+       * Sem lote de estoque, o código é derivado da data — é a dose de antes do controle, e o
+       * comprovante continua precisando de **alguma** rastreabilidade impressa.
+       */
+      lote: lote?.codigo ?? `L${data.slice(0, 4)}-${String(indice + 1).padStart(3, '0')}`,
+      validadeLote: lote?.validade ?? addDays(data, 540),
       dose: item.dose,
-      via: 'subcutanea' as const,
+      /*
+       * O tamanho da série congelado como o catálogo o tinha — é o registro de antes do protocolo
+       * por idade, e a carteira desses animais continua dizendo o que sempre disse.
+       */
+      dosesNaSerie: vacina?.dosesNaSerie ?? 1,
+      via: vacina?.vias[0] ?? 'subcutanea',
       proximaDoseEm: addDays(data, dentroDaSerie ? 28 : (vacina?.intervaloReforcoDias ?? 365)),
+      agendamentoDaProximaId: null,
+      encounterId: null,
+      externa: null,
       observacao: '',
+    })
+  }
+
+  return aplicacoes
+}
+
+/**
+ * O movimento de rotina dos últimos doze meses.
+ *
+ * Sem ele o gráfico de consumo teria treze pontos espalhados em dois anos e não mostraria giro
+ * nenhum — e giro é o que decide quanto comprar. As doses são sorteadas com semente fixa, para
+ * o dataset continuar sendo o mesmo a cada carga.
+ *
+ * Duas amarras que mantêm a lista de chamada intacta:
+ *
+ * - **Só pares que a camada plantada não usa.** Ver `aplicacoesDeVacinaPlantadas`.
+ * - **Sempre série completa e nunca além de 330 dias.** As duas juntas garantem `em-dia`: a
+ *   próxima dose cai a mais de um mês daqui, que é o que tira a linha da fila de chamada.
+ */
+function rotinaDeVacinacao(
+  hoje: ISODate,
+): Array<{ petId: string; vacinaId: string; diasAtras: number; dose: number; caso: string }> {
+  const rng = createPrng(hashSeed(`vacina-rotina-${hoje}`))
+  const usados = new Set([
+    'pet-luna|vac-antirrabica-canina',
+    'pet-luna|vac-v10',
+    'pet-bidu|vac-v10',
+    'pet-mel|vac-antirrabica-canina',
+    'pet-thor|vac-antirrabica-canina',
+    'pet-nina|vac-v10',
+    'pet-sushi|vac-v4-felina',
+    'pet-amora|vac-v10',
+    'pet-pandora|vac-v4-felina',
+    'pet-nina|vac-antirrabica-canina',
+    'pet-nina|vac-gripe-canina',
+    'pet-bento|vac-v10',
+  ])
+
+  /* Todo par paciente × vacina que a espécie permite e a camada plantada não ocupou. */
+  const pares: Array<{ petId: string; vacinaId: string; dosesNaSerie: number }> = []
+
+  for (const pet of petsFixture) {
+    for (const vacina of vacinasFixture) {
+      if (!vacina.especies.includes(pet.especie) || usados.has(`${pet.id}|${vacina.id}`)) {
+        continue
+      }
+
+      pares.push({ petId: pet.id, vacinaId: vacina.id, dosesNaSerie: vacina.dosesNaSerie })
     }
-  })
+  }
+
+  const saidas: Array<{
+    petId: string
+    vacinaId: string
+    diasAtras: number
+    dose: number
+    caso: string
+  }> = []
+
+  for (const par of pares) {
+    /*
+     * Nem todo par vira aplicação: uma clínica onde todo animal tomou todas as vacinas do
+     * catálogo não existe, e o gráfico de consumo sairia com as seis séries na mesma altura.
+     */
+    if (rng() > 0.85) {
+      continue
+    }
+
+    /*
+     * O reforço do ano, espalhado pela janela inteira.
+     *
+     * A primeira versão plantava dois reforços por par — o deste ano e o do ano passado, este
+     * último entre 340 e 364 dias atrás. Só que 340 a 364 dias atrás **é um mês só**: o gráfico
+     * abria com uma torre de vinte doses no mês mais antigo e o resto do ano raso, que é o
+     * oposto do giro que ele existe para mostrar. Um reforço por par, sorteado na janela
+     * inteira, desenha a linha que a clínica realmente tem.
+     */
+    const reforco = intBetween(rng, 5, 330)
+
+    saidas.push({
+      petId: par.petId,
+      vacinaId: par.vacinaId,
+      diasAtras: reforco,
+      dose: par.dosesNaSerie,
+      caso: 'reforço anual',
+    })
+
+    /*
+     * Parte dos pares ganha a **série inicial** que antecede esse reforço, 28 dias entre doses.
+     *
+     * É volume medicamente correto — filhote toma três de V10 — e ele não mexe no recall:
+     * as doses da série são mais antigas que o reforço, e quem decide a situação do par é a
+     * última aplicação.
+     */
+    if (par.dosesNaSerie > 1 && rng() < 0.45) {
+      for (let dose = 1; dose < par.dosesNaSerie; dose += 1) {
+        saidas.push({
+          petId: par.petId,
+          vacinaId: par.vacinaId,
+          diasAtras: reforco + (par.dosesNaSerie - dose) * 28,
+          dose,
+          caso: 'série inicial',
+        })
+      }
+    }
+  }
+
+  return saidas
 }
 
 /**
@@ -1691,7 +2447,11 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     const duracao = clock.durationMinutes(appointment.inicio, appointment.fim)
 
     for (const roomId of appointment.roomIds) {
-      for (let minuto = inicioMin; minuto < inicioMin + duracao; minuto += clinicFixture.slotMinutos) {
+      for (
+        let minuto = inicioMin;
+        minuto < inicioMin + duracao;
+        minuto += clinicFixture.slotMinutos
+      ) {
         salasTomadas.add(`${roomId}|${minuto}`)
       }
     }
@@ -1705,7 +2465,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     'apt-ancora',
     salasTomadas,
     /** Também fora do dia âncora: visto de manhã, o dia inteiro ainda é futuro. */
-    petsFixture.filter((pet) => !SEM_AGENDA_FUTURA.includes(pet.id)),
+    petsComAgenda(),
   )
 
   const outrosDias: Appointment[] = []
@@ -1732,15 +2492,21 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
         new Set(),
         `apt-${data}`,
         new Set(),
-        data > ancora
-          ? petsFixture.filter((pet) => !SEM_AGENDA_FUTURA.includes(pet.id))
-          : petsFixture,
+        data > ancora ? petsComAgenda() : petsSorteaveis(),
       ),
     )
   }
 
-  const todos = [...plantados, ...complemento, ...outrosDias, ...faltasReincidentes(ancora)]
-  const comStatus = garantirEstadosDoDia(aplicarStatus(todos, semente), ancora)
+  const todos = [
+    ...plantados,
+    ...complemento,
+    ...outrosDias,
+    ...faltasReincidentes(ancora),
+    faltaComObito(ancora),
+  ]
+  const comStatus = semAgendaDepoisDoObito(
+    garantirEstadosDoDia(aplicarStatus(todos, semente), ancora),
+  )
 
   /** Prontuários: os finalizados do passado e os abertos do dia âncora. */
   const rngEncounter = createPrng(semente ^ 0x1234_5678)
@@ -1893,16 +2659,25 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
         appointmentId: vindoDoApp.id,
         /** Respondido na véspera: recente o bastante para valer, antigo o bastante para conferir. */
         respondidoEm: iso(addDays(clock.dateOf(vindoDoApp.inicio), -1), 20 * 60 + 40),
+        /* Nos enums do Diário Pet: é o contrato com o app (`RespostaDaPreConsulta`). */
+        motivo: 'SINTOMA',
         queixaPrincipal: 'Está se coçando muito, principalmente as orelhas',
-        duracaoSintomas: '5 dias',
-        evolucao: 'piorando',
-        apetite: 'normal',
-        evacuacao: 'normal',
-        miccao: 'normal',
+        sintomas: ['COCEIRA', 'LAMBEDURA_EXCESSIVA'],
+        desdeQuando: 'TRES_A_SETE_DIAS',
+        evolucao: 'PIORANDO',
+        alimentacao: 'NORMAL',
+        hidratacao: 'NORMAL',
+        fezes: 'NORMAL',
+        urina: 'NORMAL',
+        vitalidade: 'AGITADO',
         /* Peso de balança de casa: parte de onde partir, não medição. */
-        pesoInformadoKg: pet?.pesoKg ? Number((pet.pesoKg + 0.4).toFixed(1)) : null,
+        pesoKg: pet?.pesoKg ? Number((pet.pesoKg + 0.4).toFixed(1)) : null,
+        pesadoEm: addDays(clock.dateOf(vindoDoApp.inicio), -1),
         observacao:
-          'Começou depois que fomos ao parque. Ele dorme na varanda e tem outro cachorro em casa, que não está se coçando.',
+          'Começou depois que fomos ao parque. Ela dorme na varanda e tem outro cachorro em casa, que não está se coçando.',
+        fotoIds: ['foto-amora-orelha-1', 'foto-amora-orelha-2'],
+        /* Humor e água vieram do diário de ontem; o resto ela respondeu na hora. */
+        camposDoDiario: ['hidratacao', 'vitalidade'],
       },
       versao: 0,
     })
@@ -1964,10 +2739,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     }
 
     /** O prazo é calculado para vencer há exatamente `atraso` dias — atraso visível na lista. */
-    const diasDesdeAConsulta = diffDays(
-      clock.dateOf(alvo.finalizadoEm ?? alvo.abertoEm),
-      ancora,
-    )
+    const diasDesdeAConsulta = diffDays(clock.dateOf(alvo.finalizadoEm ?? alvo.abertoEm), ancora)
 
     jaAjustados.add(alvo.id)
     alvo.conduta = {
@@ -1980,12 +2752,233 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     }
   }
 
+  /*
+   * O passado desenhado da Pérola, do Chico e da Duna. Entra **depois** de todo sorteio sobre prontuários:
+   * no de quem recebe prontuário, cada consulta plantada consumiria um número do `rngEncounter`;
+   * no dos retornos vencidos, ela entraria na lista de candidatos e roubaria a vaga de alguém —
+   * o Chico apareceu em "retornos sem horário" com consulta marcada para hoje.
+   */
+  for (const consulta of [...CONSULTAS_DO_RESUMO, ...CONSULTAS_DA_ADESAO]) {
+    const data = addDays(hoje, -consulta.diasAtras)
+    const appointment = montarAppointment({
+      id: consulta.id,
+      petId: consulta.petId,
+      professionalId: consulta.professionalId,
+      typeId: consulta.typeId,
+      data,
+      inicioMin: clockToMinutes(consulta.inicio),
+      statusFixo: 'finalizado',
+    })
+    const pet = petPorId(consulta.petId)
+    const base = encounterVazio(appointment, appointment.inicio)
+    const prescricao = consulta.prescricao
+    const medicamento = prescricao
+      ? medicationsFixture.find((item) => item.id === prescricao.medicamentoId)
+      : undefined
+    const calculo =
+      prescricao && medicamento
+        ? calcularDose({
+            medicamento,
+            pesoKg: consulta.pesoKg,
+            mgPorKg: prescricao.mgPorKg,
+            frequenciaHoras: prescricao.frequenciaHoras,
+            duracaoDias: prescricao.duracaoDias,
+          })
+        : null
+
+    appointment.chegadaEm = iso(data, clockToMinutes(consulta.inicio) - 8)
+    appointment.iniciadoEm = appointment.inicio
+    appointment.finalizadoEm = appointment.fim
+    appointment.encounterId = base.id
+
+    encounters.push({
+      ...base,
+      status: 'finalizado',
+      finalizadoEm: appointment.fim,
+      anamnese: {
+        ...base.anamnese,
+        queixaPrincipal: consulta.queixa,
+        apetite: 'normal',
+        vacinacaoEmDia: true,
+      },
+      exameFisico: {
+        ...base.exameFisico,
+        vitais: {
+          ...base.exameFisico.vitais,
+          peso: medicao(consulta.pesoKg),
+          temperatura: medicao(pet.especie === 'felina' ? 38.6 : 38.4),
+        },
+      },
+      diagnosticos: consulta.diagnostico
+        ? [{ id: `diag-${appointment.id}`, ...consulta.diagnostico }]
+        : [],
+      conduta: {
+        ...condutaVazia(),
+        orientacoes: orientacaoDe(consulta.diagnostico?.codigo ?? ''),
+        prescricoes:
+          medicamento && calculo
+            ? [
+                {
+                  id: `presc-${appointment.id}-0`,
+                  medicamentoId: medicamento.id,
+                  via: 'oral',
+                  calculo,
+                  observacao: '',
+                  alergiaConfirmada: false,
+                  ...(prescricao?.critico ? { critico: true } : {}),
+                },
+              ]
+            : [],
+      },
+      versao: 3,
+    })
+    comStatus.push(appointment)
+  }
+
+  /*
+   * O lado do responsável (`seed-responsavel.ts`): a falta da Brunilda, que ainda espera
+   * justificativa, e uma falta de outro responsável que ele mesmo justificou pelo app.
+   */
+  const falta = faltaDaBrunilda(hoje)
+
+  comStatus.push(
+    montarAppointment({
+      id: falta.id,
+      petId: falta.petId,
+      professionalId: falta.professionalId,
+      typeId: falta.typeId,
+      data: falta.data,
+      inicioMin: clockToMinutes(falta.inicio),
+      statusFixo: 'falta',
+      origem: 'retorno',
+    }),
+  )
+
+  const justificavelPeloApp = comStatus.find(
+    (appointment) =>
+      appointment.status === 'falta' &&
+      !appointment.justificativaDeFalta &&
+      appointment.petId !== PET_DA_FILA &&
+      appointment.tutorId !== RESPONSAVEL_DA_DEMONSTRACAO &&
+      clock.dateOf(appointment.inicio) < ancora,
+  )
+
+  if (justificavelPeloApp) {
+    /* Três horas depois do horário: o responsável viu o aviso no app e respondeu. */
+    justificavelPeloApp.justificativaDeFalta = justificativaPeloApp(
+      iso(
+        clock.dateOf(justificavelPeloApp.inicio),
+        clock.minutesOf(justificavelPeloApp.inicio) + 190,
+      ),
+    )
+  }
+
+  /*
+   * Presença confirmada, e por onde. Só hoje e o próximo dia útil: é a janela em que a
+   * confirmação diz alguma coisa. Quem marcou pelo app confirmou pelo app, na noite anterior;
+   * os outros, pela ligação da recepção.
+   */
+  const amanha = proximoDiaUtil(ancora)
+
+  for (const appointment of comStatus) {
+    const dia = clock.dateOf(appointment.inicio)
+
+    if (appointment.status === 'confirmado' && (dia === ancora || dia === amanha)) {
+      appointment.confirmacao = {
+        por: appointment.origem === 'app' ? 'app' : 'recepcao',
+        em: iso(addDays(dia, -1), 19 * 60 + (hashSeed(`confirma|${appointment.id}`) % 150)),
+      }
+    }
+  }
+
+  /*
+   * O resumo liberado para o responsável: tudo o que terminou antes de hoje, vinte e cinco
+   * minutos depois de fechar. O que termina hoje fica por liberar — é a ação que a demonstração
+   * precisa ter para mostrar.
+   */
+  for (const encounter of encounters) {
+    if (
+      encounter.status === 'finalizado' &&
+      encounter.finalizadoEm &&
+      clock.dateOf(encounter.finalizadoEm) < hoje
+    ) {
+      encounter.resumoLiberadoEm = iso(
+        clock.dateOf(encounter.finalizadoEm),
+        clock.minutesOf(encounter.finalizadoEm) + 25,
+      )
+    }
+  }
+
+  /*
+   * A vaga oferecida à Brunilda: o primeiro horário livre de verdade numa tarde que caiba nas
+   * janelas dela, com qualquer profissional. Livre de verdade porque o aceite confere — uma
+   * oferta para um horário ocupado levaria a demonstração a "vaga já preenchida". Dentro das
+   * janelas porque a clínica abre sábado e a Fátima só pode de segunda a sexta: oferecer o
+   * sábado seria oferecer o que ela já disse que não serve.
+   */
+  const feriados = [...feriadosDoAno(ancora), diaFechadoProximo(ancora)]
+  const duracaoDaConsulta = tipoPorId('tipo-consulta').duracaoMinutos
+  let vagaDaBrunilda: { inicio: string; professionalId: string } | null = null
+
+  for (let offset = 1; offset <= 14 && !vagaDaBrunilda; offset += 1) {
+    const dia = addDays(ancora, offset)
+    const horario = clinicFixture.horarios.find((item) => item.weekday === weekdayOf(dia))
+    const cabe = JANELAS_DA_BRUNILDA.some((janela) => janela.weekday === weekdayOf(dia))
+
+    if (!cabe || !horario || horario.fechado || feriados.some((item) => item.date === dia)) {
+      continue
+    }
+
+    for (let minuto = 15 * 60; minuto <= 17 * 60 + 30 && !vagaDaBrunilda; minuto += 15) {
+      for (const professional of professionalsFixture.filter((item) => item.ativo)) {
+        const vaga = {
+          professionalId: professional.id,
+          petId: PET_DA_FILA,
+          inicio: iso(dia, minuto),
+          fim: iso(dia, minuto + duracaoDaConsulta),
+        }
+
+        if (vagaLivre(comStatus, vaga)) {
+          vagaDaBrunilda = { inicio: vaga.inicio, professionalId: vaga.professionalId }
+          break
+        }
+      }
+    }
+  }
+
+  const agoraDaClinica = clock.now()
+  const fila = montarFila(ancora)
+
+  if (vagaDaBrunilda) {
+    fila.push(
+      filaDaBrunilda(
+        vagaDaBrunilda,
+        iso(addDays(hoje, -6), 10 * 60 + 12),
+        clock.toIso(agoraDaClinica.date, agoraDaClinica.minutes + 25),
+      ),
+    )
+  }
+
   const internacao = gerarInternacoes(semente)
 
-  const clinic: Clinic = {
-    ...clinicFixture,
-    feriados: [...feriadosDoAno(ancora), diaFechadoProximo(ancora)],
-  }
+  const clinic: Clinic = { ...clinicFixture, feriados }
+
+  const pets = [
+    ...petsFixture,
+    ...petsDoResumo(hoje),
+    ...petsDaVacinacao(hoje),
+    ...petsDaAdesao(hoje),
+  ].map((pet) => ({
+    ...pet,
+    alertas: [...pet.alertas],
+  }))
+  const tutores = tutorsFixture.map((tutor) => ({ ...tutor }))
+  const diario = gerarDiario(pets, hoje)
+  const adesao = gerarAdesao({ encounters, hoje, agora: clock.nowIso() })
+
+  /* Os lotes vêm antes das aplicações: é deles que sai o código que cada dose cita. */
+  const lotesDeVacina = lotesDeVacinaPlantados(clock.today())
+  const daCarteirinha = aplicacoesDaVacinacao(clock.today(), iso)
 
   return {
     semente,
@@ -1994,17 +2987,31 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     appointments: comStatus.sort((a, b) => a.inicio.localeCompare(b.inicio)),
     blocks,
     encounters,
-    waitlist: montarFila(ancora),
+    waitlist: fila,
     timeline: [
       ...montarTimeline(encounters, comStatus),
       ...eventosDasInternacoesAbertas(internacao),
+      ...eventosDaVacinacao(daCarteirinha),
     ].sort((a, b) => b.em.localeCompare(a.em)),
-    aplicacoesDeVacina: aplicacoesDeVacinaPlantadas(clock.today()),
+    aplicacoesDeVacina: [
+      ...aplicacoesDeVacinaPlantadas(clock.today(), lotesDeVacina),
+      vacinaDaPerola(clock.today(), iso),
+      ...daCarteirinha,
+    ],
+    lotesDeVacina,
     atos: atosPlantados(encounters, clock.today()),
     internacao,
-    casos: [...casos, ...casosDaInternacao(internacao)],
-    pets: petsFixture.map((pet) => ({ ...pet, alertas: [...pet.alertas] })),
-    tutores: tutorsFixture.map((tutor) => ({ ...tutor })),
+    casos: [...casos, ...casosDaInternacao(internacao), ...casosDaAdesao()],
+    pets,
+    tutores,
+    diario: diario.registros,
+    pesagensDeCasa: diario.pesagens,
+    /* Liberado numa noite de mês e meio atrás: o consentimento é anterior à consulta de hoje. */
+    consentimentos: consentimentosDosResponsaveis(tutores, iso(addDays(hoje, -45), 20 * 60 + 15)),
+    politica: { ...politicaDaClinicaFixture },
+    cuidadores: cuidadoresDoDataset(tutores, pets),
+    tratamentos: adesao.tratamentos,
+    registrosDeDose: adesao.registrosDeDose,
   }
 }
 

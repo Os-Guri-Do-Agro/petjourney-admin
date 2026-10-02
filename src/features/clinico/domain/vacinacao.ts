@@ -12,6 +12,8 @@
  *    justamente as que trazem o cliente de volta no mês seguinte.
  * 2. **Vencido e a vencer não são o mesmo aviso.** Um pede ligação hoje, o outro entra na fila
  *    da semana. Misturá-los faz a lista inteira parecer urgente e nenhuma parte dela ser lida.
+ * 3. **Atrasada é a mesma coisa dos dois lados.** A clínica e o app do responsável marcam atraso
+ *    no mesmo dia, pela mesma carência — ver `CARENCIA_DE_ATRASO_EM_DIAS`.
  */
 
 import { INTERVALO_ENTRE_DOSES_DA_SERIE } from '../data/fixtures/vacinas'
@@ -29,18 +31,46 @@ import { addDays, diffDays } from './clinic-time'
 export const JANELA_DE_AVISO_EM_DIAS = 30
 
 /**
+ * Dias depois da data prevista em que a dose passa a ser **atrasada**.
+ *
+ * O número não é daqui: é o `AJUSTES.vacinaAtrasoDias` do motor de notificação da API, que o app
+ * já espelha em `constants/vacina-atraso.ts` (`VACINA_ATRASO_DIAS`). É ele que solta o aviso
+ * `VACINA_ATRASADA` no celular do responsável.
+ *
+ * Até aqui a clínica contava atraso a partir do primeiro dia vencido. Posta ao lado da carteirinha
+ * do app — que é o que esta etapa demonstra —, a tela da clínica dizia "atrasada" por três dias
+ * enquanto o celular ainda dizia "próxima dose". Dois relógios para a mesma regra, lado a lado, é
+ * o defeito que a demonstração inteira existe para não ter. Entre a data e a carência a dose
+ * continua **a vencer**, que é o que ela é.
+ *
+ * Muda lá, muda aqui — e no app.
+ */
+export const CARENCIA_DE_ATRASO_EM_DIAS = 3
+
+/**
  * Quando é a próxima dose desta vacina, para este paciente.
  *
  * Dentro da série inicial o intervalo é curto e fixo; fechada a série, passa a valer o
- * intervalo de reforço da vacina.
+ * intervalo de reforço da vacina. `dosesNaSerie` vem da aplicação quando existe — é o tamanho da
+ * série **deste** paciente, que depende da idade em que ela começou.
  */
-export function proximaDose(vacina: Vacina, doseAplicada: number, aplicadaEm: ISODate): ISODate {
-  const dentroDaSerie = doseAplicada < vacina.dosesNaSerie
+export function proximaDose(
+  vacina: Vacina,
+  doseAplicada: number,
+  aplicadaEm: ISODate,
+  dosesNaSerie: number = vacina.dosesNaSerie,
+): ISODate {
+  const dentroDaSerie = doseAplicada < dosesNaSerie
 
   return addDays(
     aplicadaEm,
     dentroDaSerie ? INTERVALO_ENTRE_DOSES_DA_SERIE : vacina.intervaloReforcoDias,
   )
+}
+
+/** `true` quando a dose já passou da carência — o mesmo `vacinaEstaAtrasada` do app. */
+export function doseAtrasada(diasParaVencer: number): boolean {
+  return diasParaVencer <= -CARENCIA_DE_ATRASO_EM_DIAS
 }
 
 export function situacaoDoReforco(
@@ -50,7 +80,7 @@ export function situacaoDoReforco(
 ): SituacaoDoReforco {
   const dias = diffDays(hoje, proximaEm)
 
-  if (dias < 0) {
+  if (doseAtrasada(dias)) {
     return 'vencido'
   }
 
@@ -97,7 +127,7 @@ export function reforcosDoPaciente(
       continue
     }
 
-    const serieIncompleta = aplicacao.dose < vacina.dosesNaSerie
+    const serieIncompleta = aplicacao.dose < aplicacao.dosesNaSerie
 
     pendentes.push({
       petId: aplicacao.petId,

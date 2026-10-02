@@ -17,13 +17,17 @@
  *   a palavra é a informação.
  * - **O filtro é por natureza do ato, não por origem.** Quem procura medicamento não quer
  *   vacina e curativo no meio — e quem procura vacina tem a carteira, que diz muito mais.
+ *
+ * Mora na coluna estreita do histórico, ao lado da lista do que aconteceu. Por isso é lista de
+ * linhas, e não tabela: quatro colunas em 20 rem cortavam o cabeçalho ("O / que") e a coluna de
+ * quem executou sumia pela borda.
  */
+import Button from 'primevue/button'
+import { PhFirstAidKit, PhPill, PhPlus, PhBandaids } from '@phosphor-icons/vue'
+import Skeleton from 'primevue/skeleton'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import ClinicDataTable from '../base/ClinicDataTable.vue'
-import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
-import type { ColunaTabela } from '../base/table-types'
 import type { AtoClinico, AtoClinicoKind, OrigemDoAto } from '../../data/types'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { clinicClock, useClinicoStore } from '../../stores/clinico'
@@ -53,39 +57,25 @@ const opcoesFiltro = computed(() => {
   return [
     {
       valor: 'todos' as Filtro,
-      rotulo: `${t('clinico.paciente.atos.filtro.todos')} (${props.atos.length})`,
+      rotulo: t('clinico.paciente.atos.filtro.todos'),
+      total: props.atos.length,
     },
     {
       valor: 'medicamento' as Filtro,
-      rotulo: `${t('clinico.paciente.atos.filtro.medicamento')} (${contar('medicamento')})`,
+      rotulo: t('clinico.paciente.atos.filtro.medicamento'),
+      total: contar('medicamento'),
     },
     {
       valor: 'procedimento' as Filtro,
-      rotulo: `${t('clinico.paciente.atos.filtro.procedimento')} (${contar('procedimento')})`,
+      rotulo: t('clinico.paciente.atos.filtro.procedimento'),
+      total: contar('procedimento'),
     },
-  ]
+  ].filter((opcao) => opcao.valor === 'todos' || opcao.total > 0)
 })
 
 const visiveis = computed(() =>
   filtro.value === 'todos' ? props.atos : props.atos.filter((ato) => ato.kind === filtro.value),
 )
-
-const colunas = computed<ColunaTabela[]>(() => [
-  { id: 'quando', rotulo: t('clinico.paciente.atos.colunaQuando'), largura: '10rem' },
-  { id: 'ato', rotulo: t('clinico.paciente.atos.colunaAto'), largura: 'minmax(0, 2fr)' },
-  {
-    id: 'origem',
-    rotulo: t('clinico.paciente.atos.colunaOrigem'),
-    largura: '9rem',
-    ocultarEmTelaEstreita: true,
-  },
-  {
-    id: 'quem',
-    rotulo: t('clinico.paciente.atos.colunaQuem'),
-    largura: 'minmax(0, 1fr)',
-    ocultarEmTelaEstreita: true,
-  },
-])
 
 /** A segunda linha do ato: via e dose, quando existem. É o que distingue duas linhas iguais. */
 function detalhe(ato: AtoClinico): string {
@@ -96,6 +86,28 @@ function detalhe(ato: AtoClinico): string {
 
 function origem(valor: OrigemDoAto): string {
   return t(`clinico.paciente.atos.origem.${valor}`)
+}
+
+/**
+ * A cor do selo de origem tem significado: internação e vacina são categorias da casa, e o relato
+ * do responsável é ressalva (pêssego) — "alguém disse que aplicaram" não lê como "a clínica aplicou".
+ */
+const TOM_DA_ORIGEM: Record<OrigemDoAto, string> = {
+  clinica: 'hc--cinza',
+  internacao: 'hc--verde',
+  vacina: 'hc--ciano',
+  avulso: 'hc--pessego',
+}
+
+const anoAtual = computed(() => clinicClock.today().slice(0, 4))
+
+/** O ano só aparece quando não é este: "18/11/2025", mas "01/10". */
+function dataDoAto(ato: AtoClinico) {
+  const data = clinicClock.dateOf(ato.realizadoEm)
+
+  return data.slice(0, 4) === anoAtual.value
+    ? formato.dataCurta(data)
+    : formato.dataCurtaComAno(data)
 }
 
 function quem(ato: AtoClinico): string {
@@ -112,80 +124,116 @@ function abrir(ato: AtoClinico) {
 </script>
 
 <template>
+  <!--
+    Um cartão da ficha do paciente, no acabamento da Visão geral: título com ícone, ajuda embaixo e
+    a ação em pílula contornada. É a única tela em que ele aparece (o histórico do paciente).
+  -->
   <section class="atos">
     <header class="atos__topo">
       <div class="atos__titulos">
-        <h2 class="atos__titulo">{{ t('clinico.paciente.atos.titulo') }}</h2>
+        <h2 class="atos__titulo">
+          <PhFirstAidKit class="atos__titulo-icone" weight="duotone" aria-hidden="true" />
+          {{ t('clinico.paciente.atos.titulo') }}
+        </h2>
         <p class="atos__ajuda">{{ t('clinico.paciente.atos.ajuda') }}</p>
       </div>
 
-      <button type="button" class="atos__registrar" @click="emit('registrar')">
-        <i class="pi pi-plus" aria-hidden="true" />
-        {{ t('clinico.paciente.atos.registrar') }}
-      </button>
+      <Button
+        type="button"
+        class="hc-pilula"
+        :label="t('clinico.paciente.atos.registrar')"
+        @click="emit('registrar')"
+      >
+        <template #icon>
+          <PhPlus class="hc-pilula__icone" weight="bold" aria-hidden="true" />
+        </template>
+      </Button>
     </header>
 
-    <ClinicToggleGroup
-      v-model="filtro"
-      :opcoes="opcoesFiltro"
-      :rotulo="t('clinico.paciente.atos.titulo')"
-    />
-
-    <ClinicDataTable
-      :colunas="colunas"
-      :linhas="visiveis"
-      :chave="(ato) => ato.id"
-      :carregando="carregando"
-      :vazio-titulo="t('clinico.paciente.atos.vazioTitulo')"
-      :vazio-descricao="t('clinico.paciente.atos.vazioDescricao')"
-      :rotulo="t('clinico.paciente.atos.titulo')"
-      @ativar="abrir"
+    <div
+      v-if="atos.length > 0"
+      class="atos__filtro"
+      role="group"
+      :aria-label="t('clinico.paciente.atos.titulo')"
     >
-      <template #vazio-acao>
-        <button type="button" class="atos__registrar" @click="emit('registrar')">
-          <i class="pi pi-plus" aria-hidden="true" />
-          {{ t('clinico.paciente.atos.registrar') }}
-        </button>
-      </template>
+      <Button
+        v-for="opcao in opcoesFiltro"
+        :key="opcao.valor"
+        type="button"
+        class="atos__ficha"
+        :class="{ 'atos__ficha--ativa': filtro === opcao.valor }"
+        severity="secondary"
+        outlined
+        rounded
+        size="small"
+        :aria-pressed="filtro === opcao.valor"
+        @click="filtro = opcao.valor"
+      >
+        <span>{{ opcao.rotulo }}</span>
+        <span class="atos__contagem">{{ opcao.total }}</span>
+      </Button>
+    </div>
 
-      <template #celula-quando="{ linha }">
-        <strong class="clinic-value">
-          {{ formato.dataCurta(clinicClock.dateOf(linha.realizadoEm)) }}
-        </strong>
-        <span class="atos__meta">
-          {{ clinicClock.dateOf(linha.realizadoEm).slice(0, 4) }} ·
-          {{ formato.hora(linha.realizadoEm) }}
-        </span>
-      </template>
+    <div v-if="carregando && atos.length === 0" class="atos__carregando" aria-busy="true">
+      <Skeleton v-for="n in 3" :key="n" height="2.6rem" border-radius="0.6rem" />
+    </div>
 
-      <template #celula-ato="{ linha }">
-        <strong class="atos__nome">
-          <i
-            :class="linha.kind === 'medicamento' ? 'pi pi-inbox' : 'pi pi-briefcase'"
-            aria-hidden="true"
-          />
-          {{ linha.descricao }}
-        </strong>
-        <span v-if="detalhe(linha)" class="atos__meta">{{ detalhe(linha) }}</span>
-      </template>
+    <div v-else-if="atos.length === 0" class="atos__vazio">
+      <strong>{{ t('clinico.paciente.atos.vazioTitulo') }}</strong>
+      <p>{{ t('clinico.paciente.atos.vazioDescricao') }}</p>
+    </div>
 
-      <template #celula-origem="{ linha }">
-        <span class="selo" :class="`selo--${linha.origem}`">{{ origem(linha.origem) }}</span>
-      </template>
+    <ol v-else class="atos__lista" :aria-label="t('clinico.paciente.atos.titulo')">
+      <li v-for="ato in visiveis" :key="ato.id">
+        <component
+          :is="ato.encounterId ? Button : 'div'"
+          v-bind="ato.encounterId ? { type: 'button' } : {}"
+          class="atos__linha"
+          :class="{ 'atos__linha--abre': ato.encounterId }"
+          @click="abrir(ato)"
+        >
+          <span class="atos__quando">
+            <strong>{{ dataDoAto(ato) }}</strong>
+            <span>{{ formato.hora(ato.realizadoEm) }}</span>
+          </span>
 
-      <template #celula-quem="{ linha }">
-        <span :class="linha.professionalId ? 'atos__nome' : 'atos__relato'">
-          {{ quem(linha) }}
-        </span>
-      </template>
-    </ClinicDataTable>
+          <span class="atos__corpo">
+            <span class="atos__nome">
+              <component
+                :is="ato.kind === 'medicamento' ? PhPill : PhBandaids"
+                class="atos__tipo"
+                weight="duotone"
+                :aria-label="t(`clinico.paciente.atos.kind.${ato.kind}`)"
+              />
+              {{ ato.descricao }}
+            </span>
+            <span v-if="detalhe(ato)" class="atos__meta">{{ detalhe(ato) }}</span>
+            <span class="atos__origem">
+              <span class="hc-selo" :class="TOM_DA_ORIGEM[ato.origem]">{{
+                origem(ato.origem)
+              }}</span>
+              <span :class="ato.professionalId ? 'atos__quem' : 'atos__relato'">{{
+                quem(ato)
+              }}</span>
+            </span>
+          </span>
+        </component>
+      </li>
+    </ol>
   </section>
 </template>
 
 <style scoped>
 .atos {
   display: grid;
-  gap: var(--clinic-space-3);
+  align-content: start;
+  gap: 0.85rem;
+  min-width: 0;
+  padding: 1.2rem 1.35rem 1.35rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1rem;
+  background: var(--hc-cartao);
+  box-shadow: var(--hc-sombra);
 }
 
 .atos__topo {
@@ -193,7 +241,7 @@ function abrir(ato: AtoClinico) {
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 0.5rem;
 }
 
 .atos__titulos {
@@ -201,107 +249,186 @@ function abrir(ato: AtoClinico) {
 }
 
 .atos__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   margin: 0;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
+  color: var(--hc-tinta);
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.atos__titulo-icone {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--hc-marca);
 }
 
 .atos__ajuda {
-  margin: 0.1rem 0 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  margin: 0.2rem 0 0;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
 }
 
-.atos__registrar {
-  display: inline-flex;
-  align-items: center;
+.atos__filtro {
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
-  padding: 0.35rem 0.7rem;
-  border: 1px solid var(--clinic-accent-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
 }
 
-.atos__registrar:hover,
-.atos__registrar:focus-visible {
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
+.atos__ficha.p-button {
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8125rem;
 }
 
-.atos__registrar i {
-  font-size: 0.7rem;
+.atos__contagem {
+  color: var(--hc-tinta-3);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.atos__ficha--ativa.p-button,
+.atos__ficha--ativa.p-button:not(:disabled):hover {
+  border-color: var(--hc-marca);
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
+}
+
+.atos__carregando {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.atos__vazio {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+}
+
+.atos__vazio strong {
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
+}
+
+.atos__vazio p {
+  margin: 0;
+}
+
+.atos__lista {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.atos__lista > li + li {
+  border-top: 1px solid var(--hc-linha);
+}
+
+.atos__linha {
+  display: grid;
+  align-items: start;
+  gap: 0.75rem;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  width: 100%;
+  padding: 0.65rem 0.35rem;
+  border-radius: 0.6rem;
+  color: inherit;
+  text-align: start;
+}
+
+.atos__linha.p-button {
+  border: 0;
+  background: transparent;
+  font-size: inherit;
+  font-weight: inherit;
+  transition: background-color 0.15s ease-out;
+}
+
+.atos__lista .atos__linha.p-button,
+.atos__lista .atos__linha.p-button:not(:disabled):hover,
+.atos__lista .atos__linha.p-button:focus-visible {
+  box-shadow: none;
+}
+
+.atos__linha.p-button:not(:disabled):hover,
+.atos__linha.p-button:not(:disabled):active {
+  background: color-mix(in srgb, var(--hc-marca-clara) 45%, transparent);
+  color: inherit;
+}
+
+.atos__linha.p-button:focus-visible {
+  outline: 2px solid var(--hc-marca);
+  outline-offset: -2px;
+}
+
+.atos__quando {
+  display: grid;
+  gap: 0.05rem;
+  color: var(--hc-tinta-2);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.atos__quando strong {
+  color: var(--hc-tinta);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+.atos__corpo {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
 }
 
 .atos__nome {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 0.35rem;
-  overflow: hidden;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
+  font-weight: 650;
 }
 
-.atos__nome i {
-  flex: none;
-  color: var(--clinic-faint);
-  font-size: 0.7rem;
+.atos__tipo {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--hc-marca);
 }
 
 .atos__meta {
-  display: block;
-  overflow: hidden;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+}
+
+.atos__origem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.atos__quem {
+  color: var(--hc-tinta-2);
 }
 
 /* "Relatado" é itálico e apagado: diz que o dado existe e que a clínica não o presenciou. */
 .atos__relato {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--hc-tinta-3);
   font-style: italic;
 }
 
-.selo {
-  display: inline-block;
-  padding: 0.1rem 0.45rem;
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
-}
-
-.selo--internacao {
-  border-color: var(--clinic-accent-strong);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.selo--vacina {
-  border-color: var(--clinic-ok-line);
-  background: var(--clinic-ok-bg);
-  color: var(--clinic-ok-text);
-}
-
-/*
- * Relato do responsável ganha moldura âmbar, e não cinza.
- *
- * Não é alerta — é ressalva. A diferença entre "a clínica aplicou" e "alguém disse que
- * aplicaram" é exatamente o tipo de coisa que se lê rápido demais na terceira leitura do dia.
- */
-.selo--avulso {
-  border-color: var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
+@media (prefers-reduced-motion: reduce) {
+  .atos__linha.p-button {
+    transition: none;
+  }
 }
 </style>

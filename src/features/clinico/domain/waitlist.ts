@@ -18,7 +18,13 @@
  * contando-o empurraria todo mundo uma posição para trás por algo que já foi resolvido.
  */
 
-import type { WaitlistEntry, WaitlistPriority } from '../data/types'
+import type {
+  ClockTime,
+  WaitlistEntry,
+  WaitlistPriority,
+  WaitlistWindow,
+  WeekdayIndex,
+} from '../data/types'
 
 /** Menor é mais na frente. */
 const PESO: Record<WaitlistPriority, number> = {
@@ -41,9 +47,7 @@ export function ordenarFila(entradas: WaitlistEntry[]): WaitlistEntry[] {
  * de cada linha.
  */
 export function posicoesDaFila(entradas: WaitlistEntry[]): Map<string, number> {
-  const aguardando = ordenarFila(
-    entradas.filter((entrada) => entrada.status === 'aguardando'),
-  )
+  const aguardando = ordenarFila(entradas.filter((entrada) => entrada.status === 'aguardando'))
 
   return new Map(aguardando.map((entrada, indice) => [entrada.id, indice + 1]))
 }
@@ -58,4 +62,50 @@ export function aFrenteDe(entradas: WaitlistEntry[], id: string): number {
   const posicoes = posicoesDaFila(entradas)
 
   return Math.max((posicoes.get(id) ?? 1) - 1, 0)
+}
+
+/** Dias seguidos, com o mesmo horário, que a disponibilidade diz de uma vez. */
+export type FaixaDeJanelas = {
+  de: WeekdayIndex
+  ate: WeekdayIndex
+  inicio: ClockTime
+  fim: ClockTime
+}
+
+/** Segunda primeiro, domingo por último: a semana como a recepção a lê. */
+function posicaoNaSemana(dia: WeekdayIndex): number {
+  return (dia + 6) % 7
+}
+
+/**
+ * Janelas de dias seguidos com o mesmo horário viram uma faixa: "seg.–sex. 14:00–18:00".
+ *
+ * Cinco janelas iguais escritas uma a uma ocupavam três linhas da tabela para dizer "tardes de
+ * dia útil" — e a linha mais alta da fila parecia a mais importante. Só junta o que é igual e
+ * vizinho; dia com dois horários continua escrito por extenso.
+ */
+export function agruparJanelas(janelas: WaitlistWindow[]): FaixaDeJanelas[] {
+  const ordenadas = [...janelas].sort(
+    (a, b) =>
+      posicaoNaSemana(a.weekday) - posicaoNaSemana(b.weekday) || a.inicio.localeCompare(b.inicio),
+  )
+  const faixas: FaixaDeJanelas[] = []
+
+  for (const janela of ordenadas) {
+    const ultima = faixas[faixas.length - 1]
+
+    if (
+      ultima &&
+      ultima.inicio === janela.inicio &&
+      ultima.fim === janela.fim &&
+      posicaoNaSemana(janela.weekday) === posicaoNaSemana(ultima.ate) + 1
+    ) {
+      ultima.ate = janela.weekday
+      continue
+    }
+
+    faixas.push({ de: janela.weekday, ate: janela.weekday, inicio: janela.inicio, fim: janela.fim })
+  }
+
+  return faixas
 }

@@ -7,7 +7,17 @@
  *
  * Terminologia: `tutorId` / `Tutor` sobrevivem como identificador de código e campo de API.
  * Em texto visível em português o termo é sempre "responsável".
+ *
+ * O que cruza com o app do responsável (diário, pré-consulta, consentimento) não é redeclarado
+ * aqui: vem de `contrato/responsavel.ts`, que é a forma no fio para os dois lados.
  */
+
+import type {
+  ConsentimentoDaClinica,
+  EntradaDoDiarioParaClinica,
+  PesoParaClinica,
+  RespostaDaPreConsulta,
+} from '../contrato/responsavel'
 
 /** `YYYY-MM-DD` na parede da clínica. */
 export type ISODate = string
@@ -208,7 +218,15 @@ export type Pet = {
   nome: string
   especie: PetSpecies
   raca: string
-  sexo: PetSex
+  /**
+   * Nulo quando ninguém informou.
+   *
+   * O cadastro daqui sempre pergunta, mas a base que chega de outro sistema nem sempre sabe: a
+   * planilha de balcão tem a coluna em branco em boa parte das linhas. Escolher um sexo para
+   * vencer o campo seria inventar o dado que o atestado imprime — o mesmo motivo do nascimento
+   * logo abaixo. Quem mostra escreve "sexo não informado".
+   */
+  sexo: PetSex | null
   /**
    * Nulo quando ninguém informou.
    *
@@ -238,8 +256,17 @@ export type Pet = {
   pelagem: string
   tutorId: string
   alertas: PetAlert[]
-  /** Iniciais para o avatar; o módulo não carrega foto no mock. */
+  /** Iniciais para o avatar, usadas quando não há retrato. */
   iniciais: string
+  /**
+   * O retrato do animal.
+   *
+   * Vazio em toda a camada mocada, e de propósito: povoar o repositório de fotos inventadas
+   * criaria retratos falsos que alguém acabaria tomando por dado real. O campo existe para que a
+   * interface já fale a língua da API — `PetAvatar` mostra a foto quando ela chega e desenha o
+   * avatar de iniciais enquanto não chega.
+   */
+  fotoUrl: string
 }
 
 // ---------------------------------------------------------------------------
@@ -264,6 +291,72 @@ export type CancelReason =
   | 'duplicado'
   | 'outro'
 
+/**
+ * Por que o paciente não veio.
+ *
+ * Cancelamento e falta são coisas diferentes, e por isso não compartilham a lista de motivos.
+ * Cancelar é um aviso — alguém decidiu antes e a clínica pôde reaproveitar o horário. Falta é
+ * um horário queimado, e o motivo dela só existe **depois**, quando a clínica liga para
+ * perguntar. É por isso que a justificativa pode não existir: ela nasce de uma conversa que
+ * ainda não aconteceu.
+ *
+ * `kind`, nunca texto livre. É o que permite contar "quantas faltas foram esquecimento" — que é
+ * a pergunta que muda a política — e traduzir nos seis idiomas do portal.
+ */
+export type MotivoDeFalta =
+  /** Esqueceu, ou errou o dia. O motivo mais comum, e o único que lembrete resolve. */
+  | 'esqueceu'
+  | 'imprevisto'
+  | 'transporte'
+  /** Achou que não precisava mais: o bicho melhorou sozinho. */
+  | 'paciente-melhorou'
+  /** Piorou e foi para outro lugar — plantão, emergência. */
+  | 'emergencia'
+  | 'custo'
+  | 'insatisfacao'
+  /**
+   * O paciente morreu.
+   *
+   * Não é "mais um motivo da lista", e o código trata isso em voz alta: é o único que **encerra**
+   * a conversa em vez de continuá-la. Registrado, a clínica para de oferecer remarcação para
+   * aquele horário e para de tratar a ausência como algo a cobrar.
+   *
+   * Precisa existir justamente porque a alternativa é pior: sem ele, a falta de um animal que
+   * morreu fica para sempre como "sem justificativa", e a recepção liga para um responsável de
+   * luto perguntando por que ele não apareceu. Ver `domain/faltas.ts`.
+   */
+  | 'obito'
+  | 'outro'
+
+/**
+ * Como a clínica chegou ao responsável.
+ *
+ * `sem-resposta` é o valor que faz esta lista valer a pena: registra a tentativa que não deu em
+ * nada. Sem ele, a recepção não distingue "ninguém ligou ainda" de "ligamos três vezes e não
+ * atenderam" — e liga de novo para quem já foi procurado.
+ *
+ * `app` é o único que a recepção não escolhe: é o responsável justificando sozinho, pelo app
+ * (`POST /tutor/clinica/agendamentos/:id/justificar-falta`). Ele não aparece no diálogo da
+ * falta, só no histórico — e é a falta que ninguém precisou ligar para entender.
+ */
+export type CanalDeContato = 'telefone' | 'whatsapp' | 'presencial' | 'sem-resposta' | 'app'
+
+/**
+ * A justificativa de uma falta.
+ *
+ * Guarda **quem registrou e quando** junto com o motivo, porque o valor dela é ser prova de que
+ * a clínica procurou o responsável. Sem isso, "sem justificativa" e "ninguém tentou" viram a
+ * mesma linha na tela, e a segunda é a única que pede trabalho.
+ */
+export type JustificativaDeFalta = {
+  motivo: MotivoDeFalta
+  canal: CanalDeContato
+  /** Detalhe livre: só o que o `kind` não cobre. Entra no histórico, nunca em contagem. */
+  observacao: string
+  professionalId: string
+  registradaEm: ISODateTime
+}
+
 export type Appointment = {
   id: string
   petId: string
@@ -284,11 +377,32 @@ export type Appointment = {
   canceladoEm: ISODateTime | null
   /** `kind` de motivo, nunca texto pronto: a tela traduz. */
   motivoCancelamento: CancelReason | null
+  /**
+   * Por que o paciente não veio. `null` enquanto ninguém falou com o responsável.
+   *
+   * Nulo é um estado de verdade, e não um dado faltando: a falta é marcada na hora em que o
+   * horário passa, e o motivo só aparece quando alguém liga. O painel de faltas existe em boa
+   * parte para essa fila — as que ainda estão sem justificativa.
+   */
+  justificativaDeFalta: JustificativaDeFalta | null
   encounterId: string | null
   /** Atendimentos ligados (mesma cirurgia em duas salas) compartilham o grupo. */
   linkedGroupId: string | null
   criadoEm: ISODateTime
   atualizadoEm: ISODateTime
+  /**
+   * Presença confirmada, e por onde. Ausente ou `null`: ninguém confirmou.
+   *
+   * O status `confirmado` sozinho não dizia quem confirmou — e "o responsável tocou Confirmar
+   * no app ontem à noite" e "a recepção ligou e alguém atendeu" pesam diferente na hora de
+   * decidir se vale ligar de novo.
+   */
+  confirmacao?: ConfirmacaoDePresenca | null
+}
+
+export type ConfirmacaoDePresenca = {
+  em: ISODateTime
+  por: 'app' | 'recepcao'
 }
 
 export type BlockReason =
@@ -381,7 +495,16 @@ export type WaitlistEntry = {
   criadoEm: ISODateTime
   ofertaExpiraEm: ISODateTime | null
   ofertaSlotInicio: ISODateTime | null
+  /**
+   * Com quem é a vaga oferecida. Ausente nas ofertas antigas, que caem no profissional pedido.
+   *
+   * Sem ele, o aceite não sabia em que coluna marcar: a entrada pede "qualquer profissional", e
+   * a vaga que abriu é de alguém.
+   */
+  ofertaProfessionalId?: string | null
   observacao: string
+  /** O atendimento que o aceite criou. É o que fecha a fila: aceitar vira horário marcado. */
+  appointmentId?: string | null
 }
 
 // ---------------------------------------------------------------------------
@@ -574,6 +697,14 @@ export type Prescription = {
   observacao: string
   /** Confirmação explícita quando o pet tem alergia registrada ao princípio ativo. */
   alergiaConfirmada: boolean
+  /**
+   * Tratamento crítico: a clínica quer saber se a adesão cair em casa.
+   *
+   * Decisão do vet, na hora de prescrever — é ele quem sabe que furosemida numa insuficiência
+   * cardíaca não pode falhar dois dias e que o vermífugo pode. Ausente é `false`: a receita que
+   * já existia continua como era.
+   */
+  critico?: boolean
 }
 
 export type CarePlan = {
@@ -598,21 +729,36 @@ export type CarePlan = {
  * Por isso a procedência viaja junto: um peso informado pelo responsável e um peso aferido na
  * balança da clínica não têm o mesmo valor, e a tela precisa poder dizer qual é qual.
  */
-export type PreConsulta = {
+export type PreConsulta = RespostaDaPreConsulta & {
   appointmentId: string
   /** Quando o responsável respondeu. Resposta de duas semanas atrás vale menos. */
   respondidoEm: ISODateTime
-  queixaPrincipal: string
-  duracaoSintomas: string
-  evolucao: EvolucaoDoQuadro
-  apetite: Anamnese['apetite']
-  evacuacao: Anamnese['evacuacao']
-  miccao: Anamnese['miccao']
-  /** Peso informado em casa. Sugestão de partida, não medição. */
-  pesoInformadoKg: number | null
-  /** Texto livre do responsável, na íntegra e sem edição. */
-  observacao: string
 }
+
+// ---------------------------------------------------------------------------
+// Diário do responsável
+// ---------------------------------------------------------------------------
+
+/**
+ * Um registro do Diário Pet, na forma em que a clínica o recebe (`EntradaDoDiarioParaClinica`,
+ * do contrato), guardado junto do pet a que pertence.
+ *
+ * É o dado que só este produto tem: o que aconteceu em casa entre uma consulta e outra. É
+ * **leitura** para a clínica — nenhum campo daqui é editado do lado de cá —, e os enums são os
+ * do `DiarioPet` do app, literais. Ver `contrato/responsavel.ts`.
+ */
+export type RegistroDoDiario = EntradaDoDiarioParaClinica & { petId: string }
+
+/** Um `PesoRegistro` do app: balança de casa. Tendência vale, grama não. */
+export type PesagemDeCasa = PesoParaClinica & { petId: string }
+
+/**
+ * O que o responsável deixa a clínica ver do diário, entre as consultas.
+ *
+ * É ele, e não a existência do diário, que decide se o "Este pet em 30 segundos" mostra o que
+ * aconteceu em casa. Diário sem consentimento é diário que a clínica não lê.
+ */
+export type ConsentimentoDoResponsavel = ConsentimentoDaClinica & { tutorId: string }
 
 // ---------------------------------------------------------------------------
 // O que foi feito no paciente
@@ -659,12 +805,81 @@ export type AtoClinico = {
   medicamentoId: string | null
   /** O que foi feito, na frase que quem leu o prontuário vai encontrar. */
   descricao: string
-  via: PrescriptionRoute | null
+  /** A vacina derivada traz a via dela, que pode ser intranasal. */
+  via: PrescriptionRoute | ViaDeVacina | null
   doseTexto: string
   realizadoEm: ISODateTime
-  /** Quem executou. Vazio em `avulso`: a clínica não viu acontecer. */
+  /** Quem executou. Vazio em `avulso` e em vacina de fora: a clínica não viu acontecer. */
   professionalId: string
   observacao: string
+}
+
+// ---------------------------------------------------------------------------
+// Adesão ao tratamento
+// ---------------------------------------------------------------------------
+
+/**
+ * Quem cuida do pet em casa e pode registrar a dose no app.
+ *
+ * É a família do app vista pela clínica: o dono e os membros com acesso ao pet. Existe aqui
+ * porque o registro diz **quem** deu — e porque, com duas pessoas cuidando, a pergunta do vet no
+ * retorno muda de "deu?" para "quem deu, e quando".
+ */
+export type Cuidador = {
+  id: string
+  /** O responsável da conta. A família é a dele. */
+  tutorId: string
+  nome: string
+  /** `dono` é o responsável; `familia` é quem ele convidou no app. */
+  papel: 'dono' | 'familia'
+  /** Só quem pode editar registra dose — o escopo `LEITURA_ESCRITA` do app. */
+  acesso: 'leitura' | 'edicao'
+  petIds: string[]
+}
+
+/**
+ * Um item da receita que virou lembrete no app — e, daí, dose a dose, registro em casa.
+ *
+ * Nasce quando o responsável toca "Criar lembretes" no resumo da consulta, nunca sozinho. A
+ * posologia é copiada da prescrição naquele instante, como a receita copia a conduta: se a dose
+ * mudar numa consulta seguinte, é outro tratamento, e o histórico deste continua lendo certo.
+ */
+export type TratamentoEmCasa = {
+  id: string
+  petId: string
+  tutorId: string
+  /** Atendimento de onde saiu a receita. Nulo no que veio de antes do módulo. */
+  encounterId: string | null
+  prescricaoId: string | null
+  /** Do bulário, quando é de lá. O nome abaixo é a reserva para o que não é. */
+  medicamentoId: string | null
+  medicamento: string
+  /** Por dose, na unidade da apresentação: 0,12 mL, meio comprimido. */
+  quantidade: number
+  unidade: Medication['unidadeApresentacao']
+  via: PrescriptionRoute
+  instrucoes: string
+  frequenciaHoras: number
+  /** `null` é uso contínuo — sem fim, nunca 365. */
+  duracaoDias: number | null
+  /** A primeira dose, no horário que o responsável escolheu. As outras saem da frequência. */
+  inicioEm: ISODateTime
+  /** Quando foi encerrado antes do fim: o vet suspendeu, o responsável desligou. */
+  encerradoEm: ISODateTime | null
+  /** Ver `Prescription.critico`. O vet pode mudar depois, na ficha. */
+  critico: boolean
+  prescritoPor: string
+  prescritoEm: ISODateTime
+  lembreteCriadoEm: ISODateTime
+  lembreteCriadoPor: string
+  /**
+   * O responsável deixa a clínica ver o que a casa registra neste lembrete. Escolha dele, na hora
+   * de criar — o app diz que a clínica vai ver. Sem isso, a clínica sabe que o lembrete existe e
+   * nada mais.
+   */
+  compartilhadoComAClinica: boolean
+  /** A última conversa da clínica com a casa sobre este tratamento. É ela que apaga o alerta. */
+  contato: { em: ISODateTime; professionalId: string; nota: string } | null
 }
 
 // ---------------------------------------------------------------------------
@@ -684,33 +899,159 @@ export type Vacina = {
   nome: string
   fabricante: string
   especies: PetSpecies[]
-  /** Doses da série inicial. Filhote toma três de V10; adulto toma uma. */
+  /** Doses da série inicial **de filhote**. Três de V10; a antirrábica é dose única. */
   dosesNaSerie: number
+  /**
+   * Doses da série de quem começa **adulto e sem histórico**.
+   *
+   * Menor que a de filhote, e é isso que faz o protocolo depender da idade: o filhote precisa
+   * de várias doses porque o anticorpo da mãe anula as primeiras; o adulto não tem esse
+   * anticorpo no caminho. Ver `domain/protocolo-vacinal.ts`.
+   */
+  dosesAdultoSemHistorico: number
+  /**
+   * Idade mínima para a primeira dose, em dias de vida.
+   *
+   * É o que faz a antirrábica do filhote aparecer como "a partir de 12 semanas" em vez de
+   * "atrasada": antes dessa idade ela não é devida, e a carteira não pode cobrar o que ainda
+   * não cabe.
+   */
+  idadeMinimaDias: number
+  /**
+   * Essencial para toda a espécie, ou recomendada conforme o estilo de vida.
+   *
+   * A essencial entra no protocolo de todo paciente; a opcional só entra quando alguém começa.
+   * Mostrar giárdia como "pendente" em todo cão faria a carteira de todo mundo parecer atrasada.
+   */
+  essencial: boolean
+  /** Vias aceitas, a de rotina primeiro. Gripe canina tem apresentação intranasal. */
+  vias: ViaDeVacina[]
   /** Dias até o reforço. É daqui que sai o recall — a recorrência que sustenta a clínica. */
   intervaloReforcoDias: number
   /** Obrigatória por lei ou por exigência de viagem. Muda a insistência do lembrete. */
   obrigatoria: boolean
+  /**
+   * Doses abaixo das quais a clínica precisa comprar.
+   *
+   * É por vacina, e não um número único da clínica, porque o que define o piso é o **giro**:
+   * antirrábica sai toda semana e precisa de fôlego; FeLV sai uma vez por mês e um piso alto
+   * só serviria para deixar frasco vencendo na geladeira.
+   */
+  estoqueMinimo: number
+}
+
+/**
+ * Por que uma dose saiu do estoque sem entrar em paciente.
+ *
+ * Separado em três de propósito: os três se corrigem de formas diferentes. `quebra` é manuseio,
+ * `temperatura` é equipamento — a mais cara, porque leva o lote inteiro junto — e `vencimento` é
+ * compra mal dimensionada. Um número só de "perdas" não diz qual conversa ter.
+ */
+export type MotivoDePerda = 'quebra' | 'temperatura' | 'vencimento'
+
+export type PerdaDeLote = {
+  em: ISODate
+  quantidade: number
+  motivo: MotivoDePerda
+}
+
+/**
+ * Um lote de vacina na geladeira.
+ *
+ * **O que saiu não é campo deste tipo.** As doses consumidas são contadas a partir das
+ * aplicações que citam o `codigo` — a mesma string que já vai na carteira do animal. Guardar um
+ * contador aqui criaria uma segunda verdade sobre o mesmo fato, e as duas divergiriam no
+ * primeiro registro de aplicação que falhasse no meio.
+ */
+export type LoteDeVacina = {
+  id: string
+  vacinaId: string
+  /** O código impresso no frasco. É a chave que liga a aplicação ao lote. */
+  codigo: string
+  fornecedor: string
+  recebidoEm: ISODate
+  validade: ISODate
+  quantidadeRecebida: number
+  /** Custo unitário em **centavos**. Dinheiro em inteiro, nunca em ponto flutuante. */
+  custoUnitario: number
+  perdas: PerdaDeLote[]
+}
+
+/**
+ * Vias de uma vacina.
+ *
+ * Não é a `PrescriptionRoute` da receita: vacina não se dá na veia nem no ouvido, e a
+ * traqueobronquite tem apresentação **intranasal**, que receita nenhuma usa. Reaproveitar a lista
+ * da receita oferecia seis vias erradas e escondia a única diferente.
+ */
+export type ViaDeVacina = 'subcutanea' | 'intramuscular' | 'intranasal' | 'oral'
+
+/**
+ * Onde a dose foi aplicada.
+ *
+ * `externa` é a dose que a clínica **não aplicou** — a do pet shop onde o filhote foi comprado,
+ * a da campanha da prefeitura, a da clínica antiga. Entra para o protocolo saber em que ponto o
+ * animal está, e entra marcada: sem lote, sem aplicador da casa, e com a procedência dita.
+ */
+export type OrigemDaAplicacao = 'clinica' | 'externa'
+
+/**
+ * Como a clínica ficou sabendo da dose de fora.
+ *
+ * `comprovante` — alguém daqui viu a carteirinha ou o atestado de onde foi aplicada.
+ * `relato` — só a palavra do responsável. Conta para o protocolo do mesmo jeito (a decisão de
+ * revacinar é do veterinário, não do sistema), mas os dois lados mostram a diferença.
+ */
+export type ProcedenciaExterna = 'comprovante' | 'relato'
+
+export type AplicacaoExterna = {
+  /** "Pet Shop Amigo Fiel", "Campanha municipal" — como está no papel. */
+  local: string
+  /** Quem aplicou lá, quando o papel diz. Vazio quando não diz. */
+  aplicador: string
+  procedencia: ProcedenciaExterna
+  /** Quem daqui transcreveu, e quando. É esse o nome que responde pelo registro. */
+  registradaPor: string
+  registradaEm: ISODateTime
 }
 
 /**
  * Uma aplicação registrada.
  *
  * `lote` e `validadeLote` não são burocracia: é o que a farmacovigilância exige rastrear se
- * houver reação adversa em lote, e o que a companhia aérea confere no balcão.
+ * houver reação adversa em lote, e o que a companhia aérea confere no balcão. Na dose **externa**
+ * os dois são nulos — a clínica não aplicou, não sabe de que frasco saiu, e inventar um código
+ * seria pior do que dizer que não sabe.
  */
 export type AplicacaoVacina = {
   id: string
   petId: string
   vacinaId: string
+  origem: OrigemDaAplicacao
+  /** Quem aplicou. Vazio na externa: quem responde por ela está em `externa.registradaPor`. */
   professionalId: string
   aplicadaEm: ISODateTime
-  lote: string
-  validadeLote: ISODate
+  lote: string | null
+  validadeLote: ISODate | null
   /** Qual dose da série. 1 de 3, 2 de 3… */
   dose: number
-  via: PrescriptionRoute
+  /**
+   * O tamanho da série, **congelado na aplicação**.
+   *
+   * Depende da idade em que a série começou (filhote ou adulto sem histórico), e a idade muda. Lido
+   * do catálogo na hora de mostrar, o "2 de 3" de um filhote virava "2 de 2" no dia em que ele
+   * fizesse um ano — reescrevendo o que está impresso na carteira dele.
+   */
+  dosesNaSerie: number
+  /** Nula na externa quando o papel não diz. */
+  via: ViaDeVacina | null
   /** Data calculada do reforço, congelada na aplicação. */
   proximaDoseEm: ISODate
+  /** O horário marcado para a próxima dose, quando a clínica marcou na hora. */
+  agendamentoDaProximaId: string | null
+  /** Atendimento em que a dose foi dada, quando foi dentro de um. */
+  encounterId: string | null
+  externa: AplicacaoExterna | null
   observacao: string
 }
 
@@ -809,6 +1150,15 @@ export type Encounter = {
   lock: EncounterLock | null
   /** Respostas do responsável no app, quando houve. Sugestão, nunca valor aplicado. */
   preConsulta: PreConsulta | null
+  /**
+   * Quando o resumo do atendimento foi liberado para o responsável ver no app. Ausente ou
+   * `null`: ainda não foi.
+   *
+   * É um passo separado de finalizar, de propósito. Finalizar fecha o prontuário, que é da
+   * clínica; liberar entrega ao responsável o que ele precisa levar para casa — e o vet pode
+   * querer revisar a orientação antes de ela chegar num celular.
+   */
+  resumoLiberadoEm?: ISODateTime | null
 }
 
 export type EncounterPatch = Partial<
@@ -997,6 +1347,14 @@ export type NoShowSummary = {
   minutosPerdidos: number
   ultimaFaltaEm: ISODateTime | null
   reincidente: boolean
+  /**
+   * Quantas destas faltas ainda não têm motivo registrado.
+   *
+   * É a fila de trabalho do painel. Reincidência diz com quem **conversar**; este número diz
+   * quem ainda nem foi procurado — e são perguntas diferentes: um responsável com cinco faltas
+   * todas justificadas por transporte não precisa de ligação, precisa de outro horário.
+   */
+  semJustificativa: number
 }
 
 export type SlotSugestao = {
@@ -1293,6 +1651,11 @@ export type BoletimOrigem = 'automatico' | 'manual'
 export type BoletimAoTutor = {
   id: string
   internacaoId: string
+  /**
+   * Boletim de alta é a mensagem que encerra a conversa, e o app a mostra diferente. Ausente
+   * vale `atualizacao`.
+   */
+  tipo?: 'atualizacao' | 'alta'
   origem: BoletimOrigem
   status: BoletimStatus
   /** Gravidade no instante em que o boletim foi composto — o texto fala dela. */
@@ -1315,4 +1678,46 @@ export type BoletimAoTutor = {
   exigeLigacao: boolean
   ligacaoEm: ISODateTime | null
   ligacaoPor: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Escuta da consulta (anamnese por voz)
+// ---------------------------------------------------------------------------
+
+/**
+ * Quem falou um trecho da conversa.
+ *
+ * `nao-identificado` é o estado honesto do reconhecimento ao vivo, que não separa vozes: ele
+ * entrega texto, não autoria. Trecho de duas vozes ao mesmo tempo também cai aqui — a
+ * interferência diz o resto.
+ */
+export type FalanteDaEscuta = 'veterinario' | 'responsavel' | 'acompanhante' | 'nao-identificado'
+
+/**
+ * O que atrapalhou a escuta de um trecho.
+ *
+ * É o que a clínica tem de sobra e o reconhecimento de voz não sabe resolver sozinho: cachorro
+ * latindo na recepção, duas pessoas respondendo ao mesmo tempo, porta, secador. O trecho
+ * atrapalhado continua na conversa — apagá-lo esconderia de onde o erro veio —, mas tudo que
+ * nasce dele chega à revisão marcado.
+ */
+export type InterferenciaDaEscuta = 'latido' | 'fala-sobreposta' | 'ruido'
+
+/**
+ * Um trecho da conversa, como o reconhecimento de voz o entrega: texto final, sem o áudio.
+ *
+ * **O áudio não é guardado em lugar nenhum.** O que fica é este texto, e é ele que a revisão
+ * cita. Por isso o trecho é imutável: corrigir a transcrição apagaria a prova de que um campo
+ * veio do que foi dito — quem corrige é o campo, nunca a conversa.
+ */
+export type TrechoDaConversa = {
+  id: string
+  falante: FalanteDaEscuta
+  /** Vazio quando o trecho é só a interferência — um latido sem fala por cima. */
+  texto: string
+  /** Milissegundos desde o começo da gravação. */
+  emMs: number
+  /** Confiança do reconhecimento, de 0 a 1. */
+  confianca: number
+  interferencia: InterferenciaDaEscuta | null
 }

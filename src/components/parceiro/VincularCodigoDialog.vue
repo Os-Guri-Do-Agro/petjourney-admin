@@ -2,6 +2,7 @@
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputOtp from 'primevue/inputotp'
+import InputText from 'primevue/inputtext'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -150,7 +151,7 @@ async function handleVincular() {
     v-model:visible="visible"
     modal
     :draggable="false"
-    class="vincular-dialog"
+    class="vincular-dialog hc-tema"
     :pt="{ root: { class: 'vincular-dialog' } }"
     @show="focusPrimeiroDigito"
   >
@@ -161,15 +162,16 @@ async function handleVincular() {
         role="document"
         aria-labelledby="vinculo-title"
       >
-        <button
+        <Button
           class="vincular-dialog__close"
           type="button"
+          icon="pi pi-times"
+          severity="secondary"
+          outlined
           :aria-label="t('common.close')"
           :disabled="submitting"
           @click="closeCallback"
-        >
-          <i class="pi pi-times" aria-hidden="true" />
-        </button>
+        />
 
         <div class="vincular-dialog__badge" aria-hidden="true">
           <i class="pi pi-key" />
@@ -200,15 +202,15 @@ async function handleVincular() {
               @update:model-value="onCodigoModel"
             >
               <template #default="{ attrs, events, index }">
-                <input
+                <InputText
                   v-bind="attrs"
-                  type="text"
                   inputmode="numeric"
                   autocomplete="one-time-code"
                   maxlength="1"
-                  class="vincular-dialog__digit"
+                  class="p-inputotp-input vincular-dialog__digit"
                   :class="{ 'vincular-dialog__digit--invalid': Boolean(errorMessage) }"
                   :disabled="submitting"
+                  :invalid="Boolean(errorMessage)"
                   :aria-label="t('acessos.vincular.digitoAria', { n: index })"
                   v-on="events"
                 />
@@ -265,30 +267,25 @@ async function handleVincular() {
   color: var(--vk-text);
 }
 
-.vincular-dialog__close {
+.vincular-dialog__close.p-button {
   position: absolute;
   top: 0.85rem;
-  right: 0.85rem;
-  display: grid;
+  inset-inline-end: 0.85rem;
   width: 2.1rem;
   height: 2.1rem;
-  place-items: center;
-  border: 1px solid var(--vk-line);
+  border-color: var(--vk-line);
   border-radius: 0.65rem;
   background: var(--vk-surface-soft);
   color: var(--vk-muted);
-  cursor: pointer;
-  transition:
-    background 140ms ease,
-    color 140ms ease;
 }
 
-.vincular-dialog__close:hover {
+.vincular-dialog__close.p-button:not(:disabled):hover {
+  border-color: var(--vk-line);
   background: var(--vk-accent-bg);
   color: var(--vk-accent);
 }
 
-.vincular-dialog__close:disabled {
+.vincular-dialog__close.p-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -309,8 +306,6 @@ async function handleVincular() {
   color: var(--vk-accent);
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .vincular-dialog__title {
@@ -351,32 +346,31 @@ async function handleVincular() {
   gap: 0.45rem;
 }
 
-.vincular-dialog__digit {
+/* Visual de marca das células sobre o InputText do InputOtp. */
+.vincular-dialog__digit.p-inputtext {
   width: clamp(2.3rem, 11vw, 2.9rem);
   height: 3.1rem;
+  padding: 0;
   border: 1.5px solid var(--vk-line);
   border-radius: 0.75rem;
   background: var(--vk-surface-soft);
   color: var(--vk-text);
   font-size: 1.3rem;
   font-weight: 650;
-  text-align: center;
   outline: none;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  box-shadow: none;
 }
 
-.vincular-dialog__digit:focus {
+.vincular-dialog__digit.p-inputtext:enabled:focus {
   border-color: var(--vk-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--vk-accent) 20%, transparent);
 }
 
-.vincular-dialog__digit:disabled {
+.vincular-dialog__digit.p-inputtext:disabled {
   opacity: 0.6;
 }
 
-.vincular-dialog__digit--invalid {
+.vincular-dialog__digit--invalid.p-inputtext {
   border-color: var(--vk-warm);
   background: var(--vk-warm-bg);
 }
@@ -389,7 +383,8 @@ async function handleVincular() {
   user-select: none;
 }
 
-.vincular-dialog__shell > :deep(.p-button) {
+/* O botão de largura total é o de vincular; o de fechar fica no canto. */
+.vincular-dialog__shell > :deep(.p-button:not(.vincular-dialog__close)) {
   width: 100%;
   margin-top: 1rem;
 }

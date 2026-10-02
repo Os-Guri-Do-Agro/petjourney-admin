@@ -63,7 +63,7 @@ const meta = computed(() => {
     pet.raca,
     porte ? t(`clinico.paciente.porte.${porte}`) : '',
     formato.idade(pet.nascimento),
-    t(`clinico.sexo.${pet.sexo}`),
+    formato.sexo(pet.sexo),
     pet.castrado ? t('clinico.paciente.castrado') : t('clinico.paciente.inteiro'),
   ].filter(Boolean)
 })
@@ -88,9 +88,7 @@ const peso = computed(() => {
 const alertasOrdenados = computed(() => {
   const peso = { risco: 0, atencao: 1, info: 2 } as const
 
-  return [...(props.pet?.alertas ?? [])].sort(
-    (a, b) => peso[a.severidade] - peso[b.severidade],
-  )
+  return [...(props.pet?.alertas ?? [])].sort((a, b) => peso[a.severidade] - peso[b.severidade])
 })
 </script>
 
@@ -103,7 +101,10 @@ const alertasOrdenados = computed(() => {
       quadro assumindo o esticamento, o avatar recebe uma altura concreta e vira quadrado.
     -->
     <div class="paciente__quadro">
-      <div class="paciente__avatar" :aria-hidden="true">{{ pet.iniciais }}</div>
+      <div class="paciente__avatar" :aria-hidden="true">
+        <img v-if="pet.fotoUrl" class="paciente__foto" :src="pet.fotoUrl" alt="" />
+        <template v-else>{{ pet.iniciais }}</template>
+      </div>
     </div>
 
     <div class="paciente__corpo">
@@ -119,7 +120,7 @@ const alertasOrdenados = computed(() => {
         <span class="clinic-label">{{ t('clinico.paciente.responsavel') }}</span>
         <span class="paciente__tutor-nome" :title="tutor.nome">{{ tutor.nome }}</span>
         <a class="paciente__telefone clinic-value" :href="`tel:${tutor.telefone}`">
-          {{ tutor.telefone }}
+          <bdi dir="ltr">{{ tutor.telefone }}</bdi>
         </a>
       </p>
 
@@ -235,6 +236,17 @@ const alertasOrdenados = computed(() => {
   letter-spacing: 0.02em;
 }
 
+/* A foto ocupa o quadrado inteiro, com o mesmo raio; sem ela, as iniciais. */
+.paciente__avatar:has(.paciente__foto) {
+  overflow: hidden;
+}
+
+.paciente__foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* No drawer o cartão tem menos linhas, e o quadrado encolhe junto — sem deixar de ser quadrado. */
 .paciente--compacto .paciente__quadro {
   flex-basis: 2.6rem;
@@ -282,7 +294,13 @@ const alertasOrdenados = computed(() => {
 
 .paciente__trilho {
   display: flex;
-  flex: 0 0 auto;
+  /*
+   * O teto em 100% deixa as ações quebrarem linha dentro do cartão. Sem ele, o trilho media a
+   * fileira inteira de botões numa linha só e, com três ações num cartão de 450 px, o último botão
+   * passava por cima da borda.
+   */
+  max-width: 100%;
+  flex: 0 1 auto;
   flex-direction: column;
   align-items: flex-end;
   gap: var(--clinic-space-2);

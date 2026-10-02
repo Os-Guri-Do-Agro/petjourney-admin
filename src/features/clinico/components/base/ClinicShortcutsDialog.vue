@@ -105,7 +105,7 @@ const grupos = computed(() =>
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(40rem, 94vw)' }"
     :header="t('clinico.atalhos.titulo')"
     dismissable-mask

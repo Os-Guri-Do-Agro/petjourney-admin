@@ -18,6 +18,7 @@ import i18n from '@/i18n'
 import type { Locale } from '@/i18n/locales'
 
 import { invalidarPendenciasClinicas } from '../composables/useClinicoPendencias'
+import type { PoliticaDaClinica } from '../contrato/responsavel'
 import { CLINIC_UTC_OFFSET } from '../data/fixtures'
 import { TEXTO_DO_CATALOGO } from '../data/fixtures/catalog-text'
 import { catalogRepository, type CatalogosClinicos } from '../data/repositories'
@@ -55,6 +56,7 @@ export { CAPACIDADE_MINUTOS_POR_PROFISSIONAL } from '../domain/load'
 
 export const useClinicoStore = defineStore('clinico', () => {
   const clinic = ref<Clinic | null>(null)
+  const politica = ref<PoliticaDaClinica | null>(null)
   const profissionais = ref<Professional[]>([])
   const salasBase = ref<Room[]>([])
   const tiposBase = ref<AppointmentType[]>([])
@@ -113,6 +115,7 @@ export const useClinicoStore = defineStore('clinico', () => {
 
   function aplicar(catalogos: CatalogosClinicos) {
     clinic.value = catalogos.clinic
+    politica.value = catalogos.politica
     profissionais.value = catalogos.profissionais
     salasBase.value = catalogos.salas
     tiposBase.value = catalogos.tipos
@@ -254,6 +257,7 @@ export const useClinicoStore = defineStore('clinico', () => {
     diagnosticos,
     exames,
     faixas,
+    politica,
     pets,
     tutores,
     carregando,

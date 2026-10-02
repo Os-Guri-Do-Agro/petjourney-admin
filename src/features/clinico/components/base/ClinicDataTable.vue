@@ -10,8 +10,11 @@
  * Navegação por teclado é requisito do módulo, não cortesia: setas movem a linha focada,
  * `Enter` abre, `Home`/`End` vão às pontas.
  */
-import { computed, ref } from 'vue'
+import Button from 'primevue/button'
+import { computed, getCurrentInstance, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 
 import { ordenarLinhas, proximaOrdenacao } from '../../domain/table-sort'
 
@@ -68,8 +71,8 @@ const corpo = ref<HTMLElement | null>(null)
 
 const ordenacao = ref<OrdenacaoTabela>({ coluna: null, direcao: 'asc' })
 
-const colunaOrdenada = computed(() =>
-  props.colunas.find((coluna) => coluna.id === ordenacao.value.coluna) ?? null,
+const colunaOrdenada = computed(
+  () => props.colunas.find((coluna) => coluna.id === ordenacao.value.coluna) ?? null,
 )
 
 /**
@@ -86,7 +89,12 @@ const linhasVisiveis = computed(() => {
     return props.linhas
   }
 
-  return ordenarLinhas(props.linhas, coluna.ordenarPor, ordenacao.value.direcao, locale.value)
+  return ordenarLinhas(
+    props.linhas,
+    coluna.ordenarPor,
+    ordenacao.value.direcao,
+    INTL_LOCALE[locale.value as Locale],
+  )
 })
 
 function ordemInicialDe(coluna: ColunaTabela<T>) {
@@ -117,6 +125,30 @@ function ariaSort(coluna: ColunaTabela<T>) {
 // ------------------------------------------------------------------------------ ações
 
 const temAcoes = computed(() => props.acoes.length > 0 && !props.somenteLeitura)
+
+/**
+ * A seta de abrir, e por que ela precisa existir.
+ *
+ * A linha sempre abriu — `@dblclick` no mouse, `Enter` no teclado. Só que duplo clique é convenção
+ * de grade de aplicativo desktop: na web ninguém tenta, e o resultado é uma lista que parece
+ * inerte. Quem olhou esta tela concluiu que não havia interação nenhuma, e estava certo do ponto
+ * de vista de quem usa: uma ação que não se anuncia não existe.
+ *
+ * A seta é a única coisa que muda. O clique simples continua selecionando, o duplo continua
+ * abrindo, e o teclado continua igual — trocar essas regras mexeria no hábito de oito telas, e o
+ * problema aqui nunca foi o que o clique faz, foi ninguém saber que ele faz.
+ *
+ * ## Por que detectar o ouvinte em vez de uma prop
+ *
+ * Três das nove telas que usam esta tabela (`faltas`, `fila`, e a página de design) não escutam
+ * `ativar`: nelas a linha não leva a lugar nenhum. Uma prop de opt-in obrigaria a editar as seis
+ * restantes uma a uma, e quem criasse a décima tela esqueceria — o padrão voltaria a ser a seta
+ * ausente. Lendo o ouvinte, quem passa `@ativar` ganha a seta no mesmo gesto em que declara que a
+ * linha abre, e quem não passa não ganha seta morta.
+ */
+const podeAbrir = computed(
+  () => Boolean(getCurrentInstance()?.vnode.props?.onAtivar) && !props.somenteLeitura,
+)
 
 function acoesDaLinha(linha: T) {
   return props.acoes.filter((acao) => acao.visivel?.(linha) ?? true)
@@ -152,12 +184,32 @@ function aoSelecionar(linha: T) {
  * Sai do número de ações em vez de ser fixa: uma tabela com uma ação não deve reservar a
  * largura de três, e três ações não podem espremer-se na largura de uma.
  */
-const larguraDasAcoes = computed(() => `${Math.max(props.acoes.length, 1) * 2.2 + 0.6}rem`)
+/**
+ * Largura da coluna de ações: 2,2 rem por ícone, e o tamanho do rótulo para a ação escrita. A ação
+ * principal de uma linha (o "Registrar aceite" da fila) vai por extenso — ícone de ✓ sozinho não
+ * diz aceite de quê.
+ */
+const larguraDasAcoes = computed(() => {
+  const soma = props.acoes.reduce(
+    (total, acao) => total + (acao.icone ? 2.2 : 1.2 + acao.rotulo.length * 0.48),
+    0,
+  )
+
+  return `${Math.max(soma, 2.2) + 0.6}rem`
+})
+
+/**
+ * A trilha da seta é fixa e estreita: ela não é uma coluna de dado, é a borda da linha ganhando
+ * uma alça. Reservada sempre que a linha abre, mesmo com a seta invisível, para que aparecer ao
+ * passar o mouse não empurre o conteúdo da linha um centímetro para a esquerda.
+ */
+const LARGURA_DA_SETA = '1.75rem'
 
 const template = computed(() =>
   [
     ...props.colunas.map((coluna) => coluna.largura ?? 'minmax(0, 1fr)'),
     ...(temAcoes.value ? [larguraDasAcoes.value] : []),
+    ...(podeAbrir.value ? [LARGURA_DA_SETA] : []),
   ].join(' '),
 )
 
@@ -175,12 +227,11 @@ const templateEstreito = computed(() =>
       .filter((coluna) => !coluna.ocultarEmTelaEstreita)
       .map((coluna) => coluna.largura ?? 'minmax(0, 1fr)'),
     ...(temAcoes.value ? [larguraDasAcoes.value] : []),
+    ...(podeAbrir.value ? [LARGURA_DA_SETA] : []),
   ].join(' '),
 )
 
-const vazia = computed(
-  () => !props.carregando && !props.erro && props.linhas.length === 0,
-)
+const vazia = computed(() => !props.carregando && !props.erro && props.linhas.length === 0)
 
 function focarLinha(indice: number) {
   const alvo = corpo.value?.querySelectorAll<HTMLElement>('[data-linha]')?.[indice]
@@ -251,10 +302,12 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
               Coluna ordenável é um botão de verdade, não um `div` com `@click`: é o que dá
               foco por teclado e ativação por `Enter` de graça.
             -->
-            <button
+            <Button
               v-if="coluna.ordenarPor"
               type="button"
-              class="tabela__ordenar clinic-focusable"
+              class="tabela__ordenar"
+              text
+              size="small"
               @click="alternarOrdenacao(coluna)"
             >
               <span>{{ coluna.rotulo }}</span>
@@ -273,13 +326,17 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
                 "
                 aria-hidden="true"
               />
-            </button>
+            </Button>
 
             <template v-else>{{ coluna.rotulo }}</template>
           </div>
 
           <div v-if="temAcoes" class="tabela__th tabela__celula--fim" role="columnheader">
             <span class="tabela__oculto-visual">{{ t('clinico.tabela.acoes') }}</span>
+          </div>
+
+          <div v-if="podeAbrir" class="tabela__th tabela__celula--fim" role="columnheader">
+            <span class="tabela__oculto-visual">{{ t('clinico.tabela.abrir') }}</span>
           </div>
         </div>
 
@@ -300,9 +357,16 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
         <div v-else-if="erro" class="tabela__estado tabela__estado--erro" role="alert">
           <i class="pi pi-exclamation-circle" aria-hidden="true" />
           <span>{{ erro }}</span>
-          <button type="button" class="tabela__retry" @click="emit('tentarDeNovo')">
-            {{ t('clinico.tabela.tentarDeNovo') }}
-          </button>
+          <Button
+            type="button"
+            class="tabela__retry"
+            severity="secondary"
+            outlined
+            size="small"
+            icon="pi pi-refresh"
+            :label="t('clinico.tabela.tentarDeNovo')"
+            @click="emit('tentarDeNovo')"
+          />
         </div>
 
         <div v-else-if="vazia" class="tabela__estado tabela__estado--vazio">
@@ -353,19 +417,42 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
             </div>
 
             <div v-if="temAcoes" class="tabela__td tabela__acoes" role="cell">
-              <button
+              <Button
                 v-for="acao in acoesDaLinha(linha)"
                 :key="acao.id"
                 type="button"
-                class="tabela__acao clinic-focusable"
-                :class="{ 'tabela__acao--perigo': acao.perigo }"
+                class="tabela__acao"
+                :class="{
+                  'tabela__acao--perigo': acao.perigo,
+                  'tabela__acao--escrita': !acao.icone,
+                }"
+                :text="Boolean(acao.icone)"
+                :outlined="!acao.icone"
+                :severity="acao.perigo ? 'danger' : 'secondary'"
+                size="small"
+                :icon="acao.icone"
+                :label="acao.icone ? undefined : acao.rotulo"
                 :disabled="acao.desabilitada?.(linha) ?? false"
                 :title="acao.rotulo"
                 :aria-label="acao.rotulo"
                 @click="dispararAcao($event, acao, linha)"
+              />
+            </div>
+
+            <!--
+              Botão de verdade, e não um ícone decorativo: quem navega por teclado chega nele com
+              Tab e o aciona com Enter, e o leitor de tela anuncia "Abrir <linha>" em vez de uma
+              seta muda. O `stopPropagation` impede que abrir também selecione por baixo.
+            -->
+            <div v-if="podeAbrir" class="tabela__td tabela__abrir" role="cell">
+              <button
+                type="button"
+                class="tabela__seta-abrir"
+                :aria-label="t('clinico.tabela.abrir')"
+                :title="t('clinico.tabela.abrir')"
+                @click.stop="emit('ativar', linha)"
               >
-                <i v-if="acao.icone" :class="acao.icone" aria-hidden="true" />
-                <span v-else>{{ acao.rotulo }}</span>
+                <i class="pi pi-chevron-right" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -422,23 +509,25 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
 /* ------------------------------------------------------------------------- ordenação */
 
-.tabela__ordenar {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
+/*
+ * O botão herda a tipografia do cabeçalho (caixa alta, espaçamento, cor apagada): ele é o
+ * rótulo da coluna, só que clicável. O fundo de hover do tema num rótulo de 11 px vira uma
+ * pílula maior que a palavra — fica só a mudança de cor.
+ */
+.tabela__ordenar.p-button {
   max-width: 100%;
+  gap: 0.3rem;
   padding: 0;
-  border: 0;
   border-radius: 0.3rem;
-  background: none;
   color: inherit;
-  cursor: pointer;
   font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
 }
 
-.tabela__ordenar:hover {
+.tabela__ordenar.p-button:not(:disabled):hover,
+.tabela__ordenar.p-button:not(:disabled):active {
+  background: transparent;
   color: var(--clinic-text);
 }
 
@@ -528,7 +617,7 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
 .tabela__celula--fim {
   justify-self: end;
-  text-align: right;
+  text-align: end;
 }
 
 /* ----------------------------------------------------------------------- ações da linha */
@@ -540,22 +629,71 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 }
 
 /*
+ * ## Por que a seta fica visível o tempo todo, em vez de aparecer ao passar o mouse
+ *
+ * Revelar no `:hover` resolveria o "qual linha estou apontando" e deixaria intacto o problema que
+ * originou isto: a lista **parece inerte à primeira vista**. Quem abre a tela e varre os olhos não
+ * passa o mouse em nada; decide em um segundo se ali há algo clicável. Uma coluna de setas fracas
+ * responde essa pergunta antes de qualquer gesto — é o mesmo motivo pelo qual a lista do celular
+ * carrega o seu chevron sempre aceso.
+ *
+ * Fraca é o que a mantém honesta: ela informa que a linha leva a algum lugar sem competir com o
+ * dado, que é o que a pessoa veio ler. No `:hover` e no foco ela ganha cor e contraste, e aí sim
+ * responde "esta aqui".
+ */
+.tabela__abrir {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tabela__seta-abrir {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--clinic-radius-chip);
+  background: none;
+  color: var(--clinic-faint);
+  cursor: pointer;
+  font-size: 0.7rem;
+  place-items: center;
+  transition:
+    color 150ms ease-out,
+    background 150ms ease-out;
+}
+
+.tabela__linha:hover .tabela__seta-abrir,
+.tabela__linha:focus-within .tabela__seta-abrir {
+  color: var(--clinic-accent-strong);
+}
+
+.tabela__seta-abrir:hover,
+.tabela__seta-abrir:focus-visible {
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+}
+
+/* Linha só de leitura não leva a lugar nenhum: a seta seria uma promessa falsa. */
+.tabela__linha--leitura .tabela__seta-abrir {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabela__seta-abrir {
+    transition: none;
+  }
+}
+
+/*
  * As ações só aparecem no hover, no foco de dentro delas ou na linha selecionada. Uma fileira
  * de ícones em todas as linhas de uma tabela de duzentas transforma a coluna num padrão
  * visual que compete com o dado — e a tabela clínica existe para ler dado.
  */
-.tabela__acao {
-  display: grid;
-  width: var(--clinic-hit-target);
-  height: var(--clinic-hit-target);
+.tabela__acao.p-button {
+  min-height: var(--clinic-hit-target);
   flex: 0 0 auto;
-  place-items: center;
-  border: 1px solid transparent;
   border-radius: var(--clinic-radius-control);
-  background: transparent;
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
   opacity: 0;
   transition:
     opacity 120ms ease,
@@ -564,25 +702,34 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
 .tabela__linha:hover .tabela__acao,
 .tabela__linha--selecionada .tabela__acao,
-.tabela__acao:focus-visible {
+.tabela__acao.p-button:focus-visible {
   opacity: 1;
 }
 
-.tabela__acao:hover:not(:disabled) {
-  border-color: var(--clinic-line-strong);
-  background: var(--clinic-surface);
-  color: var(--clinic-text);
+/*
+ * A ação escrita é a principal da linha ("Registrar aceite"): fica sempre à vista, contornada. O
+ * esconde-até-o-hover vale para fileira de ícones, que viraria textura; uma ação por extenso que só
+ * aparece com o mouse em cima é a ação que ninguém encontra.
+ */
+.tabela__acao--escrita.p-button {
+  opacity: 1;
+  font-size: 0.8125rem;
 }
 
-.tabela__acao--perigo:hover:not(:disabled) {
+.tabela__acao.p-button-icon-only {
+  width: var(--clinic-hit-target);
+}
+
+.tabela__acao--perigo.p-button:not(:disabled):hover {
   border-color: var(--clinic-risk-line);
   background: var(--clinic-risk-bg);
   color: var(--clinic-risk-text);
 }
 
-.tabela__acao:disabled {
+.tabela__linha:hover .tabela__acao.p-button:disabled,
+.tabela__linha--selecionada .tabela__acao.p-button:disabled {
   cursor: not-allowed;
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
 /*
@@ -590,7 +737,7 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
  * as ações são sempre visíveis.
  */
 @media (hover: none) {
-  .tabela__acao {
+  .tabela__acao.p-button {
     opacity: 1;
   }
 }
@@ -636,16 +783,8 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
   font-size: var(--clinic-font-value);
 }
 
-.tabela__retry {
+.tabela__retry.p-button {
   min-height: var(--clinic-hit-target);
-  padding: 0 var(--clinic-space-4);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-text);
-  cursor: pointer;
-  font: inherit;
-  font-weight: 700;
 }
 
 @media (max-width: 1024px) {

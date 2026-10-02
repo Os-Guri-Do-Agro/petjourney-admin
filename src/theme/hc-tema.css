@@ -1,0 +1,867 @@
+/*
+ * O acabamento das telas no design novo — o da Visão geral (`components/home/home-card.css`).
+ *
+ * Nasceu na ficha do paciente (`ficha.css`) e em 30/09/2026 virou o do portal: toda tela migrada
+ * leva `.hc-tema` na raiz (o `PartnerPageFrame`) e ganha, sem uma segunda versão dos componentes:
+ *
+ * 1. **A ponte de tokens.** Os componentes do módulo clínico pintam com `--clinic-*`; dentro de
+ *    `.hc-tema` esses tokens apontam para os do portal (`--hc-*`, em `hc-tokens.css`). Tabela, linha
+ *    do tempo, cartão, campo — tudo troca de acabamento junto.
+ * 2. **O fundo** da Visão geral: dois brilhos de sálvia no topo e a grade fina que some descendo.
+ * 3. **O cabeçalho da página** na escala da saudação: título maior, subtítulo em texto de apoio.
+ * 4. **Botões em pílula.** O primário do PrimeVue vira a pílula cheia em degradê (o rótulo branco
+ *    passa de 5:1; o sálvia claro do preset deixava ~2:1), e o contornado, a pílula clara.
+ * 5. **`.hc-pilula`**, a ação desenhada à mão quando o `Button` não basta (link, contagem dentro).
+ *
+ * Global de propósito, preso a `.hc-tema`: vale na página e no que o PrimeVue leva para o `body`
+ * quando também leva a classe (diálogos, painéis), e em nenhum outro lugar.
+ */
+
+/* ------------------------------------------------------------------ ponte de tokens */
+
+.hc-tema {
+  --clinic-bg: var(--hc-pagina);
+  --clinic-surface: var(--hc-cartao);
+  --clinic-surface-soft: var(--hc-fundo);
+  --clinic-surface-sunken: var(--hc-linha);
+  --clinic-line: var(--hc-borda);
+  --clinic-line-soft: var(--hc-linha);
+  --clinic-text: var(--hc-tinta);
+  --clinic-muted: var(--hc-tinta-2);
+  /* O terceiro cinza da Visão geral fica abaixo de 4,5:1 a 11 px: aqui o apagado é o segundo. */
+  --clinic-faint: var(--hc-tinta-2);
+  --clinic-accent: var(--hc-marca);
+  --clinic-accent-strong: var(--hc-marca-forte);
+  /* A marca que preenche: barra de ocupação, marca de horário, desenho escolhido. */
+  --clinic-accent-deep: var(--hc-marca);
+  --clinic-accent-tint: var(--hc-marca-clara);
+  --clinic-accent-soft: var(--hc-marca-clara);
+  --clinic-risk-text: var(--hc-coral-tinta);
+  --clinic-risk-bg: var(--hc-coral-fundo);
+  --clinic-risk-line: var(--hc-coral-fundo);
+  --clinic-attention-text: var(--hc-pessego-tinta);
+  --clinic-attention-bg: var(--hc-pessego-fundo);
+  --clinic-attention-line: var(--hc-pessego-fundo);
+  --clinic-ok-text: var(--hc-verde-tinta);
+  --clinic-ok-bg: var(--hc-verde-fundo);
+  --clinic-ok-line: var(--hc-verde-fundo);
+  --clinic-neutral-text: var(--hc-cinza-tinta);
+  --clinic-neutral-bg: var(--hc-cinza-fundo);
+  --clinic-neutral-line: var(--hc-cinza-fundo);
+  --clinic-shadow-card: var(--hc-sombra);
+  --clinic-radius-card: 1rem;
+  --clinic-focus-ring: 0 0 0 2px var(--hc-cartao), 0 0 0 4px var(--hc-marca);
+
+  /* O contorno da pílula clara: sálvia bem clara, que escurece para a marca no hover. */
+  --hc-pilula-borda: #bfdcd3;
+}
+
+.app-dark .hc-tema {
+  --hc-pilula-borda: #2c4a42;
+}
+
+/*
+ * O `PartnerPageFrame` passa as cores dele por `style` na mesma raiz; sem `!important` o `style`
+ * venceria e o título, o subtítulo e o botão de explicações ficariam no linho.
+ */
+.hc-tema.partner-page {
+  --partner-bg: var(--hc-pagina) !important;
+  --partner-card: var(--hc-cartao) !important;
+  --partner-surface: var(--hc-cartao) !important;
+  --partner-line: var(--hc-borda) !important;
+  --partner-text: var(--hc-tinta) !important;
+  --partner-muted: var(--hc-tinta-2) !important;
+  --partner-faint: var(--hc-tinta-2) !important;
+}
+
+/* ------------------------------------------------------------------ ponte do Portal
+ * Os componentes do Portal (programas, divulgação, QR, carteira, cupom, vínculo) calculam as
+ * cores da paleta antiga e as passam por `style`, cada um com o seu prefixo. Dentro de
+ * `.hc-tema` cada papel aponta para o token novo — `!important` porque o `style` venceria. O
+ * seletor pelo atributo pega o elemento que declara a família, onde quer que ele esteja.
+ */
+
+.hc-tema [style*='--prog-'],
+.hc-tema[style*='--prog-'] {
+  --prog-card: var(--hc-cartao) !important;
+  --prog-surface: var(--hc-fundo) !important;
+  --prog-line: var(--hc-borda) !important;
+  --prog-line-soft: var(--hc-linha) !important;
+  --prog-text: var(--hc-tinta) !important;
+  --prog-muted: var(--hc-tinta-2) !important;
+  --prog-faint: var(--hc-tinta-2) !important;
+  --prog-primary: var(--hc-marca) !important;
+  --prog-primary-soft: var(--hc-marca-clara) !important;
+  --prog-primary-strong: var(--hc-marca-forte) !important;
+  --prog-success-bg: var(--hc-verde-fundo) !important;
+  --prog-success-text: var(--hc-verde-tinta) !important;
+  --prog-amber-bg: var(--hc-pessego-fundo) !important;
+  --prog-amber-text: var(--hc-pessego-tinta) !important;
+  --prog-warm-bg: var(--hc-coral-fundo) !important;
+  --prog-warm-text: var(--hc-coral-tinta) !important;
+  --prog-shadow-rgb: 20 32 28 !important;
+}
+
+.hc-tema [style*='--div-'],
+.hc-tema[style*='--div-'] {
+  --div-card: var(--hc-cartao) !important;
+  --div-surface: var(--hc-fundo) !important;
+  --div-line: var(--hc-borda) !important;
+  --div-line-soft: var(--hc-linha) !important;
+  --div-text: var(--hc-tinta) !important;
+  --div-muted: var(--hc-tinta-2) !important;
+  --div-faint: var(--hc-tinta-2) !important;
+  --div-on-primary: #ffffff !important;
+  --div-primary: var(--hc-marca) !important;
+  --div-primary-soft: var(--hc-marca-clara) !important;
+  --div-primary-strong: var(--hc-marca-forte) !important;
+  --div-success-bg: var(--hc-verde-fundo) !important;
+  --div-success-text: var(--hc-verde-tinta) !important;
+  --div-amber-bg: var(--hc-pessego-fundo) !important;
+  --div-amber-text: var(--hc-pessego-tinta) !important;
+  --div-warm-bg: var(--hc-coral-fundo) !important;
+  --div-warm-text: var(--hc-coral-tinta) !important;
+  --div-shadow-rgb: 20 32 28 !important;
+}
+
+.hc-tema [style*='--iqr-'],
+.hc-tema[style*='--iqr-'] {
+  --iqr-card: var(--hc-cartao) !important;
+  --iqr-surface: var(--hc-fundo) !important;
+  --iqr-line: var(--hc-borda) !important;
+  --iqr-text: var(--hc-tinta) !important;
+  --iqr-muted: var(--hc-tinta-2) !important;
+  --iqr-primary: var(--hc-marca) !important;
+  --iqr-primary-soft: var(--hc-marca-clara) !important;
+  --iqr-primary-strong: var(--hc-marca-forte) !important;
+}
+
+.hc-tema [style*='--sd-'],
+.hc-tema[style*='--sd-'] {
+  --sd-bg: var(--hc-cartao) !important;
+  --sd-surface: var(--hc-fundo) !important;
+  --sd-line: var(--hc-borda) !important;
+  --sd-text: var(--hc-tinta) !important;
+  --sd-muted: var(--hc-tinta-2) !important;
+  --sd-faint: var(--hc-tinta-2) !important;
+  --sd-on-cta: #ffffff !important;
+  --sd-primary: var(--hc-marca) !important;
+  --sd-primary-soft: var(--hc-marca-clara) !important;
+  --sd-primary-strong: var(--hc-marca-forte) !important;
+  --sd-success-bg: var(--hc-verde-fundo) !important;
+  --sd-success-text: var(--hc-verde-tinta) !important;
+  --sd-warm-bg: var(--hc-coral-fundo) !important;
+  --sd-warm-text: var(--hc-coral-tinta) !important;
+  --sd-shadow-rgb: 20 32 28 !important;
+}
+
+.hc-tema [style*='--vc-'],
+.hc-tema[style*='--vc-'] {
+  --vc-bg: var(--hc-cartao) !important;
+  --vc-surface: var(--hc-fundo) !important;
+  --vc-line: var(--hc-borda) !important;
+  --vc-text: var(--hc-tinta) !important;
+  --vc-muted: var(--hc-tinta-2) !important;
+  --vc-faint: var(--hc-tinta-2) !important;
+  --vc-on-cta: #ffffff !important;
+  --vc-primary: var(--hc-marca) !important;
+  --vc-primary-soft: var(--hc-marca-clara) !important;
+  --vc-primary-strong: var(--hc-marca-forte) !important;
+  --vc-success-bg: var(--hc-verde-fundo) !important;
+  --vc-success-text: var(--hc-verde-tinta) !important;
+  --vc-warm-bg: var(--hc-coral-fundo) !important;
+  --vc-warm-text: var(--hc-coral-tinta) !important;
+  --vc-shadow-rgb: 20 32 28 !important;
+}
+
+.hc-tema [style*='--vk-'],
+.hc-tema[style*='--vk-'] {
+  --vk-bg: var(--hc-cartao) !important;
+  --vk-surface-soft: var(--hc-fundo) !important;
+  --vk-line: var(--hc-borda) !important;
+  --vk-text: var(--hc-tinta) !important;
+  --vk-muted: var(--hc-tinta-2) !important;
+  --vk-accent: var(--hc-marca-forte) !important;
+  --vk-accent-bg: var(--hc-marca-clara) !important;
+  --vk-warm: var(--hc-coral-tinta) !important;
+  --vk-warm-bg: var(--hc-coral-fundo) !important;
+  --vk-warm-text: var(--hc-coral-tinta) !important;
+  --vk-shadow-rgb: 20 32 28 !important;
+}
+
+/*
+ * O cartão em foco (`usePartnerFocusSurface`): era um gradiente verde de ponta a ponta. No design
+ * novo verde é tinta, não papel — o foco vira o cartão branco da Visão geral, com o número em
+ * tinta e a ação na pílula cheia em degradê.
+ */
+.hc-tema [style*='--pf-from'],
+.hc-tema[style*='--pf-from'] {
+  --pf-from: var(--hc-cartao) !important;
+  --pf-to: var(--hc-cartao) !important;
+  --pf-glow-rgb: 255 255 255 !important;
+  --pf-on: var(--hc-tinta) !important;
+  --pf-on-soft: var(--hc-tinta-2) !important;
+  --pf-cta-bg: var(--hc-degrade-botao) !important;
+  --pf-cta-text: #ffffff !important;
+  --pf-shadow-rgb: 20 32 28 !important;
+  --pf-chip: var(--hc-marca-clara) !important;
+  --pf-field: var(--hc-fundo) !important;
+  --pf-line: var(--hc-borda) !important;
+}
+
+/* O brilho do canto era enfeite do cartão verde; no cartão branco ele só aparece no escuro, como mancha. */
+.hc-tema .partner-focus__glow,
+.hc-tema .programa-card__glow {
+  display: none;
+}
+
+.app-dark .hc-tema [style*='--pf-from'],
+.app-dark .hc-tema[style*='--pf-from'] {
+  --pf-glow-rgb: 21 31 28 !important;
+}
+
+/* Branco, o cartão em foco precisa do fio dos outros cartões para não boiar na página. */
+.hc-tema .programa-card--focus {
+  border: 1px solid var(--hc-borda);
+}
+
+/*
+ * Os campos de formulário do login (`AuthTextField`, família `--auth-*`) também aparecem no
+ * Portal (PIX, equipe). Dentro de `.hc-tema` eles ficam brancos com o fio de campo; o login,
+ * fora da classe, segue como está.
+ */
+.hc-tema [style*='--auth-field-bg'],
+.hc-tema[style*='--auth-field-bg'] {
+  --auth-field-bg: var(--hc-cartao) !important;
+  --auth-border: color-mix(in srgb, var(--hc-marca) 40%, var(--hc-cartao)) !important;
+  --auth-line: var(--hc-borda) !important;
+  --auth-text: var(--hc-tinta) !important;
+  --auth-muted: var(--hc-tinta-2) !important;
+  --auth-soft: var(--hc-tinta-3) !important;
+  --auth-divider: var(--hc-tinta-3) !important;
+  --auth-sage: var(--hc-marca) !important;
+  --auth-sage-strong: var(--hc-marca-forte) !important;
+  --auth-sage-soft: var(--hc-marca) !important;
+  --auth-sage-tint: var(--hc-marca-clara) !important;
+  --auth-focus: var(--hc-marca) !important;
+  --auth-focus-ring: var(--hc-marca-clara) !important;
+  --auth-link: var(--hc-marca-forte) !important;
+  --auth-danger: var(--hc-coral-tinta) !important;
+}
+
+/* O menu da busca de acessos (o overlay leva a família `--atend-ov-*`). */
+.hc-tema [style*='--atend-ov-'],
+[style*='--atend-ov-'] {
+  --atend-ov-bg: var(--hc-cartao) !important;
+  --atend-ov-hover: var(--hc-fundo) !important;
+  --atend-ov-line: var(--hc-borda) !important;
+  --atend-ov-muted: var(--hc-tinta-2) !important;
+  --atend-ov-selected-bg: var(--hc-marca-clara) !important;
+  --atend-ov-selected-text: var(--hc-marca-forte) !important;
+  --atend-ov-text: var(--hc-tinta) !important;
+}
+
+.hc-tema [style*='--div-page-muted'],
+.hc-tema[style*='--div-page-muted'] {
+  --div-page-muted: var(--hc-tinta-2) !important;
+}
+
+.hc-tema [style*='--prog-page-muted'],
+.hc-tema[style*='--prog-page-muted'] {
+  --prog-page-muted: var(--hc-tinta-2) !important;
+}
+
+/* ------------------------------------------------------------------ overlays
+ * O que o PrimeVue leva para o `body` (popover, diálogo) só herda o acabamento quando leva
+ * `.hc-tema` — e aí a caixa dele é o branco dos cartões, e não o linho do preset.
+ */
+
+.p-popover.hc-tema {
+  --p-popover-background: var(--hc-cartao);
+  --p-popover-border-color: var(--hc-borda);
+  --p-popover-border-radius: 1rem;
+  --p-popover-shadow: var(--hc-sombra-alta);
+}
+
+.p-dialog.hc-tema {
+  --p-dialog-background: var(--hc-cartao);
+  --p-dialog-border-color: var(--hc-borda);
+  --p-dialog-color: var(--hc-tinta);
+}
+
+.p-drawer.hc-tema {
+  --p-drawer-background: var(--hc-cartao);
+  --p-drawer-border-color: var(--hc-borda);
+  --p-drawer-color: var(--hc-tinta);
+}
+
+/*
+ * A gaveta da gravação da consulta (`EscutaPainel`) em tela larga: a área de conteúdo abre o espaço
+ * dela, e o prontuário estreita em vez de ficar escondido por baixo. A largura acompanha a gaveta.
+ */
+@media (min-width: 75rem) {
+  html.escuta-lateral .app-content {
+    padding-inline-end: min(30rem, 94vw);
+  }
+}
+
+/*
+ * O calendário do DatePicker é teleportado para o `body` e não herda a página: sem isto ele abria
+ * no linho antigo, com borda bege, no meio de um formulário branco. Quem o usa passa
+ * `panel-class="hc-tema"` (o `ClinicDateField` já passa).
+ */
+.p-datepicker-panel.hc-tema {
+  --p-datepicker-panel-background: var(--hc-cartao);
+  --p-datepicker-panel-border-color: var(--hc-borda);
+  --p-datepicker-panel-color: var(--hc-tinta);
+  --p-datepicker-panel-border-radius: 1rem;
+  --p-datepicker-panel-shadow: var(--hc-sombra-alta);
+  --p-datepicker-header-background: var(--hc-cartao);
+  --p-datepicker-header-border-color: var(--hc-linha);
+  --p-datepicker-header-color: var(--hc-tinta);
+  --p-datepicker-date-color: var(--hc-tinta);
+  --p-datepicker-week-day-color: var(--hc-tinta-2);
+  --p-datepicker-date-hover-background: var(--hc-marca-clara);
+  --p-datepicker-date-hover-color: var(--hc-marca-forte);
+  --p-datepicker-date-selected-background: var(--hc-marca);
+  --p-datepicker-date-selected-color: #fff;
+  --p-datepicker-date-range-selected-background: var(--hc-marca-clara);
+  --p-datepicker-date-range-selected-color: var(--hc-marca-forte);
+  --p-datepicker-date-focus-ring-color: var(--hc-marca);
+  --p-datepicker-today-background: var(--hc-linha);
+  --p-datepicker-today-color: var(--hc-tinta);
+  --p-datepicker-select-month-hover-background: var(--hc-marca-clara);
+  --p-datepicker-select-month-color: var(--hc-tinta);
+  --p-datepicker-select-month-hover-color: var(--hc-marca-forte);
+  --p-datepicker-select-year-hover-background: var(--hc-marca-clara);
+  --p-datepicker-select-year-color: var(--hc-tinta);
+  --p-datepicker-select-year-hover-color: var(--hc-marca-forte);
+}
+
+/* ------------------------------------------------------------------ fundo
+ * Com `html` na frente: o `PartnerPageFrame` pinta o próprio fundo em CSS com escopo, que empata
+ * com duas classes e carrega depois — o linho vencia e o fundo da Visão geral sumia.
+ */
+
+html .hc-tema.partner-page {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(52rem 26rem at 8% -6rem, rgb(120 196 178 / 30%), transparent 70%),
+    radial-gradient(44rem 24rem at 96% -4rem, rgb(96 178 196 / 22%), transparent 70%),
+    var(--hc-pagina);
+}
+
+html .hc-tema.partner-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--hc-grade) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hc-grade) 1px, transparent 1px);
+  background-size: 28px 28px;
+  content: '';
+  mask-image: linear-gradient(to bottom, #000 0, rgb(0 0 0 / 60%) 16rem, transparent 34rem);
+  pointer-events: none;
+}
+
+html.app-dark .hc-tema.partner-page {
+  background:
+    radial-gradient(52rem 26rem at 8% -6rem, rgb(108 201 181 / 13%), transparent 70%),
+    radial-gradient(44rem 24rem at 96% -4rem, rgb(108 198 208 / 9%), transparent 70%),
+    var(--hc-pagina);
+}
+
+/* ------------------------------------------------------------------ cabeçalho da página
+ * O subtítulo deixa de ser rótulo em caixa alta: é a linha pequena acima do título, como a data
+ * sobre o "Olá" da Visão geral. O título sobe para a escala da saudação.
+ */
+
+html .hc-tema .partner-page__subtitle {
+  margin: 0 0 0.35rem;
+  color: var(--hc-tinta-2);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html .hc-tema .partner-page__title {
+  color: var(--hc-tinta);
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+html .hc-tema .partner-page__header {
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* O rótulo quebrava em duas linhas ("Mostrar / explicações") dentro da pílula. */
+html .hc-tema .partner-page__guidance.p-button,
+html .inicio-pagina .partner-page__guidance.p-button {
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ saudação
+ * O cabeçalho das telas redesenhadas, pelo slot `cabecalho` do `PartnerPageFrame`: a data pequena,
+ * o título, e na mesma linha a frase de estado em degradê e as pílulas — a saudação da Visão geral
+ * (`inicio.vue`) com o conteúdo de cada tela. A frase diz o estado; a cor dela marca estado, não
+ * importância, e por isso o peso fica abaixo do título.
+ */
+
+.hc-tema .hc-saudacao {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.hc-tema .hc-saudacao__data {
+  color: var(--hc-tinta-2);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.hc-tema .hc-saudacao__titulo {
+  margin: 0.35rem 0 0;
+  color: var(--hc-tinta);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.hc-tema .hc-saudacao__linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.hc-tema .hc-saudacao__resumo {
+  margin: 0;
+  background: var(--hc-degrade);
+  background-clip: text;
+  color: transparent;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  -webkit-text-fill-color: transparent;
+}
+
+.hc-tema .hc-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* ------------------------------------------------------------------ botões do PrimeVue */
+
+.hc-tema {
+  --p-button-border-radius: 999px;
+  --p-button-rounded-border-radius: 999px;
+
+  --p-button-primary-background: var(--hc-degrade-botao);
+  --p-button-primary-hover-background: linear-gradient(120deg, #1a574c 0%, #287a6b 100%);
+  --p-button-primary-active-background: linear-gradient(120deg, #164a41 0%, #236b5e 100%);
+  --p-button-primary-border-color: transparent;
+  --p-button-primary-hover-border-color: transparent;
+  --p-button-primary-active-border-color: transparent;
+  --p-button-primary-color: #ffffff;
+  --p-button-primary-hover-color: #ffffff;
+  --p-button-primary-active-color: #ffffff;
+
+  --p-button-secondary-background: var(--hc-cartao);
+  --p-button-secondary-hover-background: var(--hc-cartao);
+  --p-button-secondary-active-background: var(--hc-marca-clara);
+  --p-button-secondary-border-color: var(--hc-pilula-borda);
+  --p-button-secondary-hover-border-color: var(--hc-marca);
+  --p-button-secondary-active-border-color: var(--hc-marca);
+  --p-button-secondary-color: var(--hc-tinta);
+  --p-button-secondary-hover-color: var(--hc-tinta);
+  --p-button-secondary-active-color: var(--hc-tinta);
+
+  --p-button-outlined-secondary-border-color: var(--hc-pilula-borda);
+  --p-button-outlined-secondary-color: var(--hc-tinta);
+  --p-button-outlined-secondary-hover-background: var(--hc-cartao);
+  --p-button-outlined-secondary-active-background: var(--hc-marca-clara);
+  --p-button-outlined-primary-border-color: var(--hc-pilula-borda);
+  --p-button-outlined-primary-color: var(--hc-marca-forte);
+  --p-button-outlined-primary-hover-background: var(--hc-marca-clara);
+  --p-button-outlined-primary-active-background: var(--hc-marca-clara);
+
+  --p-button-text-primary-color: var(--hc-marca-forte);
+  --p-button-text-primary-hover-background: var(--hc-marca-clara);
+  --p-button-text-primary-active-background: var(--hc-marca-clara);
+  --p-button-text-secondary-color: var(--hc-tinta-2);
+
+  /*
+   * O aviso (`severity="warn"`) no pêssego da casa. O do preset é o laranja do Tailwind
+   * (#f97316), fora da paleta e com branco abaixo de 3:1. Cheio, o fundo é a tinta do pêssego e o
+   * texto a cor do cartão — o par se inverte sozinho no escuro.
+   */
+  --p-button-warn-background: var(--hc-pessego-tinta);
+  --p-button-warn-hover-background: color-mix(in srgb, var(--hc-pessego-tinta) 88%, #000000);
+  --p-button-warn-active-background: color-mix(in srgb, var(--hc-pessego-tinta) 80%, #000000);
+  --p-button-warn-border-color: transparent;
+  --p-button-warn-hover-border-color: transparent;
+  --p-button-warn-active-border-color: transparent;
+  --p-button-warn-color: var(--hc-cartao);
+  --p-button-warn-hover-color: var(--hc-cartao);
+  --p-button-warn-active-color: var(--hc-cartao);
+  --p-button-outlined-warn-border-color: color-mix(in srgb, var(--hc-pessego-tinta) 45%, var(--hc-cartao));
+  --p-button-outlined-warn-color: var(--hc-pessego-tinta);
+  --p-button-outlined-warn-hover-background: var(--hc-pessego-fundo);
+  --p-button-outlined-warn-active-background: var(--hc-pessego-fundo);
+  --p-button-text-warn-color: var(--hc-pessego-tinta);
+  --p-button-text-warn-hover-background: var(--hc-pessego-fundo);
+  --p-button-text-warn-active-background: var(--hc-pessego-fundo);
+}
+
+/*
+ * A pílula com fundo sobe pela sombra, como as da Visão geral. A sombra é uma variável para o hover
+ * trocar só ela e não apagar o anel de foco.
+ */
+.hc-tema .p-button:not(.p-button-text, .p-button-link, .p-button-icon-only) {
+  --hc-botao-sombra: 0 1px 2px rgb(20 32 28 / 5%);
+
+  box-shadow: var(--hc-botao-sombra);
+}
+
+.hc-tema .p-button:not(.p-button-text, .p-button-link, .p-button-icon-only):not(:disabled):hover {
+  --hc-botao-sombra: 0 4px 12px -6px rgb(20 32 28 / 25%);
+}
+
+.hc-tema .p-button:not(.p-button-secondary, .p-button-outlined, .p-button-text, .p-button-link) {
+  --hc-botao-sombra: 0 6px 16px -8px rgb(31 100 87 / 70%);
+}
+
+.hc-tema
+  .p-button:not(.p-button-secondary, .p-button-outlined, .p-button-text, .p-button-link):not(
+    :disabled
+  ):hover {
+  --hc-botao-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+}
+
+/*
+ * Linhas que são `Button` só para serem clicáveis (o cartão de acesso, a linha de saque) não são
+ * pílulas: ficam com a sombra baixa dos cartões, e não com o brilho verde da ação cheia.
+ */
+.hc-tema .atend-card.p-button,
+.hc-tema .saque-row.p-button {
+  --hc-botao-sombra: 0 1px 2px rgb(20 32 28 / 4%);
+}
+
+.hc-tema .atend-card.p-button:not(:disabled):hover {
+  --hc-botao-sombra: 0 6px 16px -10px rgb(20 32 28 / 22%);
+}
+
+.hc-tema .p-button.p-button-outlined:not(:disabled):hover {
+  border-color: var(--hc-marca);
+}
+
+/* ------------------------------------------------------------------ segmentos
+ * Os `SelectButton` crus (Dia/Semana da agenda, densidade, escolhas de diálogo) na mesma pílula do
+ * `ClinicToggleGroup`: trilho branco de fio fino, e a escolhida numa pílula verde-clara. O
+ * `ClinicToggleGroup` (`.grupo`) fica de fora — ele desenha o próprio, com as cores de tom.
+ * `html` na frente para passar das regras de `.clinic-scope` em `clinic-tokens.css`.
+ */
+
+/*
+ * O trilho com raio fixo, e não 999 px: o navegador reduz o raio que passa da meia altura, então
+ * numa linha (até 44 px) é a mesma pílula; quebrado em duas no estreito, vira retângulo
+ * arredondado em vez de uma bolha. Vale também para as abas de seção, abaixo.
+ */
+html .hc-tema .p-selectbutton:not(.grupo) {
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1.375rem;
+  background: var(--hc-cartao);
+}
+
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton,
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton:first-child,
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton:last-child {
+  margin-inline-start: 0;
+  padding: 0;
+  border-color: transparent;
+  border-radius: 999px;
+}
+
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton .p-togglebutton-content {
+  padding: 0.25rem 0.85rem;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+}
+
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton:not(.p-togglebutton-checked) {
+  background: transparent;
+  color: var(--hc-tinta-2);
+}
+
+html
+  .hc-tema
+  .p-selectbutton:not(.grupo)
+  .p-togglebutton:not(.p-togglebutton-checked):not(.p-disabled):hover {
+  background: var(--hc-linha);
+  color: var(--hc-tinta);
+}
+
+html .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton.p-togglebutton-checked {
+  border-color: transparent;
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
+  font-weight: 700;
+}
+
+/*
+ * As abas de seção (`PartnerSectionTabs`: A casa/Tipos/Tarifas, Carteira, Acessos) no mesmo trilho.
+ * O componente passa as cores antigas por `style`; aqui as regras ganham pela classe, não pela
+ * variável, para que as telas ainda não migradas do portal continuem como estão.
+ */
+html .hc-tema .partner-tabs .p-tablist-tab-list {
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1.375rem;
+  background: var(--hc-cartao);
+}
+
+html .hc-tema .partner-tabs .partner-tabs__button.p-tab {
+  padding: 0.35rem 0.95rem;
+  border-color: transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--hc-tinta-2);
+  font-weight: 600;
+}
+
+html .hc-tema .partner-tabs .partner-tabs__button.p-tab:not(.p-tab-active):not(.p-disabled):hover {
+  background: var(--hc-linha);
+  color: var(--hc-tinta);
+}
+
+html .hc-tema .partner-tabs .partner-tabs__button.p-tab-active,
+html .hc-tema .partner-tabs .partner-tabs__button.p-tab-active:hover {
+  border-color: transparent;
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
+  font-weight: 700;
+}
+
+html .hc-tema .partner-tabs__description {
+  color: var(--hc-tinta-3);
+}
+
+/* ------------------------------------------------------------------ avisos
+ * O `Message` do Aura pinta a faixa no vermelho do Tailwind, fora da paleta. Aqui ele é contornado:
+ * fundo do cartão e fio na tinta do estado, que é quem carrega a urgência. O fio sai da mistura
+ * com o cartão, e não do `-fundo` (1,1:1 sobre o branco, invisível). `outline-offset` desenha o
+ * contorno por dentro, para o rolamento do diálogo não cortá-lo no topo.
+ */
+.hc-tema {
+  --p-message-border-radius: 0.75rem;
+  --p-message-error-background: var(--hc-cartao);
+  --p-message-error-border-color: color-mix(in srgb, var(--hc-coral-tinta) 35%, var(--hc-cartao));
+  --p-message-error-color: var(--hc-coral-tinta);
+  --p-message-error-shadow: none;
+  --p-message-warn-background: var(--hc-cartao);
+  --p-message-warn-border-color: color-mix(in srgb, var(--hc-pessego-tinta) 35%, var(--hc-cartao));
+  --p-message-warn-color: var(--hc-pessego-tinta);
+  --p-message-warn-shadow: none;
+  --p-message-info-background: var(--hc-cartao);
+  --p-message-info-border-color: var(--hc-pilula-borda);
+  --p-message-info-color: var(--hc-marca-forte);
+  --p-message-info-shadow: none;
+  --p-message-success-background: var(--hc-cartao);
+  --p-message-success-border-color: color-mix(in srgb, var(--hc-verde-tinta) 35%, var(--hc-cartao));
+  --p-message-success-color: var(--hc-verde-tinta);
+  --p-message-success-shadow: none;
+}
+
+.hc-tema .p-message {
+  outline-offset: -1px;
+}
+
+/* ------------------------------------------------------------------ interruptores
+ * O preset pinta o desligado no linho e a alça no creme. Aqui: trilho cinza, ligado na marca,
+ * alça branca. O menu da conta repete os mesmos valores em `AppShell.vue` (`.user-menu__tema`).
+ */
+.hc-tema {
+  --p-toggleswitch-background: color-mix(in srgb, var(--hc-tinta-3) 45%, var(--hc-cartao));
+  --p-toggleswitch-hover-background: color-mix(in srgb, var(--hc-tinta-3) 60%, var(--hc-cartao));
+  --p-toggleswitch-checked-background: var(--hc-marca);
+  --p-toggleswitch-checked-hover-background: var(--hc-marca-forte);
+  --p-toggleswitch-handle-background: #ffffff;
+  --p-toggleswitch-handle-hover-background: #ffffff;
+  --p-toggleswitch-handle-checked-background: #ffffff;
+  --p-toggleswitch-handle-checked-hover-background: #ffffff;
+}
+
+/* ------------------------------------------------------------------ pílulas à mão
+ * As ações da saudação da Visão geral (`.acao` em `inicio.vue`): contornada no fundo do cartão,
+ * cheia no degradê para o próximo passo natural. Nenhuma ação sem fundo ou borda à vista.
+ */
+
+.hc-tema .hc-pilula,
+.hc-tema .hc-pilula.p-button {
+  --pilula-sombra: 0 1px 2px rgb(20 32 28 / 5%);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0 0.95rem;
+  border: 1px solid var(--hc-pilula-borda);
+  border-radius: 999px;
+  background: var(--hc-cartao);
+  box-shadow: var(--pilula-sombra);
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 150ms ease-out,
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.hc-tema .hc-pilula:hover,
+.hc-tema .hc-pilula.p-button:not(:disabled):hover {
+  --pilula-sombra: 0 4px 12px -6px rgb(20 32 28 / 25%);
+
+  border-color: var(--hc-marca);
+  background: var(--hc-cartao);
+  color: var(--hc-tinta);
+}
+
+.hc-tema .hc-pilula--cheia,
+.hc-tema .hc-pilula--cheia.p-button {
+  --pilula-sombra: 0 6px 16px -8px rgb(31 100 87 / 70%);
+
+  border-color: transparent;
+  background: var(--hc-degrade-botao);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.hc-tema .hc-pilula--cheia:hover,
+.hc-tema .hc-pilula--cheia.p-button:not(:disabled):hover {
+  --pilula-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+
+  border-color: transparent;
+  background: var(--hc-degrade-botao);
+  color: #ffffff;
+}
+
+/* Desabilitada continua lendo como pílula: perde a sombra e a cor, não a borda. */
+.hc-tema .hc-pilula.p-button:disabled {
+  border-color: var(--hc-borda);
+  background: var(--hc-linha);
+  box-shadow: none;
+  color: var(--hc-tinta-3);
+  opacity: 1;
+}
+
+.hc-tema .hc-pilula:focus-visible,
+.hc-tema .hc-pilula.p-button:focus-visible {
+  outline: 2px solid var(--hc-marca);
+  outline-offset: 2px;
+}
+
+.hc-tema .hc-pilula__icone {
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--hc-marca);
+}
+
+.hc-tema .hc-pilula--cheia .hc-pilula__icone,
+.hc-tema .hc-pilula.p-button:disabled .hc-pilula__icone {
+  color: currentColor;
+}
+
+/* A contagem dentro da pílula: o selo de 6 px, no par da gravidade. */
+.hc-tema .hc-pilula__selo {
+  display: inline-grid;
+  min-width: 1.25rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.2;
+  place-items: center;
+}
+
+/* ------------------------------------------------------------------ rótulos e colunas
+ * Em caixa normal, como o rótulo de eixo da pauta ("Assunto", "Gravidade", "Onde"): a caixa alta
+ * espaçada era o rótulo do linho. `html` na frente porque o cabeçalho da tabela é CSS com escopo.
+ */
+
+html .hc-tema .clinic-label,
+html .hc-tema .tabela__th,
+html .hc-tema .campo__rotulo,
+html .hc-tema .stat__rotulo {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html .hc-tema .clinic-label,
+html .hc-tema .campo__rotulo,
+html .hc-tema .stat__rotulo {
+  color: var(--hc-tinta-2);
+}
+
+/* O rótulo do número é o título do cartão dele: sobe para a escala do título de cartão. */
+html .hc-tema .stat__rotulo {
+  font-size: 0.8125rem;
+}
+
+/* O rótulo de campo é lido antes de digitar: um degrau acima do rótulo de coluna. */
+html .hc-tema .campo__rotulo {
+  font-size: 0.8125rem;
+}
+
+/* ------------------------------------------------------------------ cartões
+ * O cartão é o `.hc` da Visão geral. O que mora dentro dele fica plano: a tabela e a linha do tempo
+ * perdem a moldura própria, senão seria cartão dentro de cartão.
+ */
+
+.hc-tema .hc .tabela,
+.hc-tema .atos .tabela {
+  border: 0;
+  border-radius: 0.75rem;
+  box-shadow: none;
+}
+
+.hc-tema .hc > .timeline {
+  width: auto;
+}
+
+.hc-tema .hc > .timeline > .historico {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* O título da linha do tempo vira o do cartão que a contém. */
+.hc-tema .hc > .timeline > .historico > .clinic-label {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hc-tema .hc-pilula,
+  .hc-tema .hc-pilula.p-button {
+    transition: none;
+  }
+}

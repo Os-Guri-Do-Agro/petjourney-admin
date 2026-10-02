@@ -19,6 +19,7 @@ onMounted(() => {
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     subtitle="Portal"
     title="Equipe"
     :loading="bootstrapping || (store.loadState === 'loading' && !store.dashboard)"

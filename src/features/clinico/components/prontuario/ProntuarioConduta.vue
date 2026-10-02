@@ -11,11 +11,13 @@
  * - **Retorno sem horário é pendência visível**, não um número esquecido no rodapé.
  */
 import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 import InputNumber from 'primevue/inputnumber'
 import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import { computed, ref } from 'vue'
+import ToggleButton from 'primevue/togglebutton'
+import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BularioPicker from '../bulario/BularioPicker.vue'
@@ -55,6 +57,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const idAceite = useId()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
 
@@ -113,14 +116,22 @@ function recalcular(prescricao: Prescription, mudanca: Partial<Prescription['cal
   })
 }
 
+type DoseSugerida = ReturnType<typeof sugestaoDePrescricao>
+
+/**
+ * Adicionar abre o bulário, e a linha só nasce com o remédio escolhido.
+ *
+ * Antes a linha nascia com o primeiro medicamento do catálogo e a dose dele já calculada: quem
+ * esquecesse de trocar emitia receita de um remédio que ninguém escolheu. Uma prescrição não
+ * tem estado "sem remédio" — por isso a escolha vem primeiro.
+ */
 function adicionarPrescricao() {
-  const medicamento = clinico.medicamentos[0]
+  prescricaoEmEdicao.value = null
+  pickerVisivel.value = true
+}
 
-  if (!medicamento) {
-    return
-  }
-
-  const sugestao = sugestaoDePrescricao(medicamento, props.pet)
+function criarPrescricao(medicamento: Medication, escolha?: Partial<DoseSugerida>) {
+  const sugestao = { ...sugestaoDePrescricao(medicamento, props.pet), ...escolha }
   const calculo = calcularDose({ medicamento, pesoKg: props.pesoKg, ...sugestao })
 
   aplicar({
@@ -244,7 +255,13 @@ function aplicarEscolhaDoBulario(escolha: {
 }) {
   const prescricaoId = prescricaoEmEdicao.value
 
+  // Sem linha em edição, a escolha veio de "Adicionar medicamento": é ela que cria a linha.
   if (!prescricaoId) {
+    criarPrescricao(escolha.medicamento, {
+      mgPorKg: escolha.mgPorKg,
+      frequenciaHoras: escolha.frequenciaHoras,
+      duracaoDias: escolha.duracaoDias,
+    })
     return
   }
 
@@ -528,16 +545,16 @@ function resumoDaDose(prescricao: Prescription) {
                   dias" faz a receita vencer sozinha e o lembrete do responsável parar num dia
                   arbitrário — e, num contínuo, parar é o efeito adverso.
                 -->
-                <button
-                  type="button"
-                  class="duracao__continuo clinic-focusable"
-                  :class="{ 'duracao__continuo--ativo': ehContinuo(prescricao) }"
-                  :aria-pressed="ehContinuo(prescricao)"
+                <ToggleButton
+                  class="duracao__continuo"
+                  :model-value="ehContinuo(prescricao)"
+                  :on-label="t('clinico.prontuario.conduta.usoContinuo')"
+                  :off-label="t('clinico.prontuario.conduta.usoContinuo')"
+                  on-icon="pi pi-check"
                   :disabled="somenteLeitura"
-                  @click="alternarContinuo(prescricao)"
-                >
-                  {{ t('clinico.prontuario.conduta.usoContinuo') }}
-                </button>
+                  size="small"
+                  @update:model-value="alternarContinuo(prescricao)"
+                />
               </div>
             </template>
           </ClinicField>
@@ -615,19 +632,20 @@ function resumoDaDose(prescricao: Prescription) {
               })
             }}
           </p>
-          <label class="alergia__aceite">
-            <input
-              type="checkbox"
-              :checked="prescricao.alergiaConfirmada"
+          <div class="alergia__aceite">
+            <Checkbox
+              binary
+              :input-id="`${idAceite}-${prescricao.id}`"
+              :model-value="prescricao.alergiaConfirmada"
               :disabled="somenteLeitura"
-              @change="
-                aplicarPrescricao(prescricao.id, {
-                  alergiaConfirmada: ($event.target as HTMLInputElement).checked,
-                })
+              @update:model-value="
+                aplicarPrescricao(prescricao.id, { alergiaConfirmada: Boolean($event) })
               "
             />
-            <span>{{ t('clinico.prontuario.conduta.alergiaConfirmar') }}</span>
-          </label>
+            <label :for="`${idAceite}-${prescricao.id}`">
+              {{ t('clinico.prontuario.conduta.alergiaConfirmar') }}
+            </label>
+          </div>
         </div>
       </article>
     </section>
@@ -748,27 +766,34 @@ function resumoDaDose(prescricao: Prescription) {
   gap: var(--clinic-space-2);
 }
 
-.duracao__continuo {
+/*
+ * Alternador do lado do número, com a altura do campo. Ligado, a moldura inteira vira sálvia: o
+ * estado precisa ler de longe, porque ele muda o sentido do número ao lado.
+ */
+.duracao__continuo.p-togglebutton {
   min-height: var(--clinic-hit-target);
-  padding: 0 var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
   color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
   font-weight: 700;
   white-space: nowrap;
 }
 
-.duracao__continuo--ativo {
+.duracao__continuo.p-togglebutton.p-togglebutton-checked {
   border-color: var(--clinic-accent-strong);
   background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
 }
 
-.duracao__continuo:disabled {
+.duracao__continuo.p-togglebutton-checked :deep(.p-togglebutton-content) {
+  background: transparent;
+  box-shadow: none;
+}
+
+.duracao__continuo.p-togglebutton-checked :deep(.p-togglebutton-icon) {
+  color: inherit;
+}
+
+.duracao__continuo.p-togglebutton:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -781,7 +806,8 @@ function resumoDaDose(prescricao: Prescription) {
   display: grid;
   gap: 0.1rem;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3) var(--clinic-space-2) var(--clinic-space-5);
+  padding-block: var(--clinic-space-2);
+  padding-inline: var(--clinic-space-5) var(--clinic-space-3);
   border: 1px dashed var(--clinic-line-strong);
   border-radius: var(--clinic-radius-control);
   background: var(--clinic-surface-soft);
@@ -845,8 +871,11 @@ function resumoDaDose(prescricao: Prescription) {
   display: flex;
   align-items: flex-start;
   gap: 0.4rem;
-  cursor: pointer;
   font-weight: 750;
+}
+
+.alergia__aceite label {
+  cursor: pointer;
 }
 
 .retorno {

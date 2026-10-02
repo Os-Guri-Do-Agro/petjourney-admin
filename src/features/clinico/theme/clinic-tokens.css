@@ -14,19 +14,69 @@
  */
 
 :root {
-  /* ---------------------------------------------------------------- superfícies */
-  --clinic-bg: #f3f7f5;
-  --clinic-surface: #ffffff;
-  --clinic-surface-soft: #f8faf9;
-  --clinic-surface-sunken: #eef3f1;
-  --clinic-line: #e6eeeb;
-  --clinic-line-soft: #eef4f2;
-  --clinic-line-strong: #d3e0dc;
+  /* ---------------------------------------------------------------- superfícies
+   *
+   * Espelha a escada de `theme/colors.ts` — o módulo tem tokens próprios, não paleta própria.
+   *
+   * Degraus iguais em OKLCH no matiz da família (178,5°), com o pico em 93,8% de luminância em
+   * vez dos 97,1% de antes. A versão original punha página, cartão e bloco interno dentro de
+   * três pontos um do outro, todos encostados no branco puro: a hierarquia só existia porque a
+   * sombra do cartão a desenhava, e para ser legível a tela tinha que ofuscar.
+   *
+   * Agora quem separa é a linha — `line` passou de 1,28:1 para 1,86:1 contra o cartão. Foi o
+   * que permitiu baixar o brilho sem perder a leitura.
+   */
+  /*
+   * O plano da página é o único degrau que sai da família sálvia.
+   *
+   * A queixa era "as telas estão muito verdes", e a medição desmentiu a explicação óbvia: o croma
+   * das superfícies é 0,005–0,015, elas mal são verdes em intensidade. O que satura a tela é o
+   * **matiz único** — 174–183° em superfície, linha, acento e texto. Nada escapava do teal.
+   *
+   * Então o que muda aqui é o matiz, não o valor: 178° → 74° com a luminância travada (93,4% nos
+   * dois) e o croma **caindo** de 0,0124 para 0,0080. Todas as quinze razões que dependem deste
+   * token ficam idênticas até a segunda casa — texto 11,59, muted 6,97, faint 5,14, cartão 1,14.
+   * Despintar o verde saiu de graça em contraste; o que ele custou foi decidir onde parar.
+   *
+   * E para aqui. Cartão, bloco e afundado **não** giram: o cartão é base de mistura de dezenas de
+   * `color-mix`, `--clinic-accent-tint` e `--clinic-heat-1/2` são misturas contra ele congeladas
+   * em hexadecimal, e o afundado é o fundo de campo desabilitado, que o comentário lá embaixo
+   * proíbe de ser bege — num formulário clínico, bege lê "atenção" e não "indisponível". O plano
+   * da página não é base de mistura de nada, e é a maior chapa da tela.
+   *
+   * O escuro não acompanha: a página escura é #0b1210, a 17% de luminância, onde girar matiz é
+   * invisível. Vale a assimetria para não mexer no que ninguém veria.
+   */
+  --clinic-bg: #f0eae3;
+  --clinic-surface: #fbf7f4;
+  --clinic-surface-soft: #f5f0ec;
+  /*
+   * O afundado é o único degrau que sai quase acromático (croma 0,0017), e de propósito: ele é o
+   * fundo de campo e de botão desabilitados, e o comentário lá embaixo já registrava que bege ali
+   * lê "atenção" em vez de "indisponível". Ficou 12,9× menos cromático que o fundo de atenção —
+   * indisponível não tem temperatura.
+   */
+  --clinic-surface-sunken: #e6dfd6;
+  --clinic-line: #c8b5a8;
+  --clinic-line-soft: #ddcdc4;
+  /*
+   * Sálvia médio, o degrau que faltava entre o acento e o sálvia forte. É a linha que precisa
+   * ser vista: tracejado de vaga vazia, hachura de bloqueio, régua de rodapé de diálogo,
+   * contorno de chip de atalho. O valor anterior (#c3d2cd) ficava em 1,5:1 contra o cartão —
+   * desenhava a intenção e não entregava a borda. Este fecha 2,6:1, que é borda de verdade e
+   * ainda longe de virar tinta: texto nunca sai daqui.
+   */
+  --clinic-line-strong: #84a59d;
 
-  /* ------------------------------------------------------------------- tipografia */
+  /* ------------------------------------------------------------------- tipografia
+   *
+   * `muted` e `faint` descem junto com as superfícies: contraste é razão, e escurecer o fundo
+   * derruba a razão do texto escuro. Os dois foram reescurecidos no mesmo matiz até recuperar a
+   * razão que tinham contra o fundo antigo.
+   */
   --clinic-text: #1f2f2b;
-  --clinic-muted: #485753;
-  --clinic-faint: #5c6b65;
+  --clinic-muted: #43504d;
+  --clinic-faint: #56645f;
 
   /* ------------------------------------------------------------------ acento sálvia */
   --clinic-accent: #84c1b4;
@@ -36,6 +86,40 @@
   --clinic-heat-ink: #1f2f2b;
   --clinic-accent-soft: #dcebe7;
   --clinic-on-accent: #ffffff;
+
+  /* ------------------------------------------------- o que não é do meu turno
+   *
+   * A regra de cor da casa tem duas gavetas: sálvia para o institucional positivo, quente para
+   * risco e pendência. Faltava a terceira coisa que esta tela diz o tempo todo e não tinha como
+   * dizer em cor: **o que é de outro**. O que fica para quem assume não é positivo nem urgente —
+   * é de outra pessoa, e é a única lacuna que a regra deixa aberta.
+   *
+   * O navy é `LightColors.primary`, que estava na paleta da casa com zero consumidores. Ele tem
+   * dois empregos, ambos na mesma tela e ambos dizendo a mesma frase: a fronteira que separa o
+   * meu turno do seguinte, e o botão de passar o turno. Dois usos é o que faz a cor se ensinar
+   * sozinha — um só vira enfeite inexplicado.
+   *
+   * Nunca preenche superfície. Se a urgência não pinta cartão, a entrega também não.
+   */
+  --clinic-outro-turno: #1d3557;
+  --clinic-outro-turno-line: #6982a4;
+
+  /* ------------------------------------------------- o que a máquina propôs
+   *
+   * A quarta gaveta: nem institucional, nem risco, nem de outro turno — **o que a máquina
+   * propôs e ninguém aprovou ainda**. É o periwinkle da paleta da casa (`LightColors.purple`,
+   * #BDB2FF), que estava sem consumidor nenhum, e ele só aparece onde essa frase é verdade: a
+   * moldura da anamnese por voz e o grifo do trecho da conversa que virou campo.
+   *
+   * O próprio #BDB2FF não serve de tinta — fica em 1,8:1 contra o cartão. A tinta é o mesmo
+   * matiz levado ao escuro até 6,7:1; o grifo é a mistura de 24% com o cartão (texto a 11,5:1
+   * por cima); e a linha fecha 3,2:1, que é borda de verdade.
+   *
+   * Nunca preenche superfície grande. Aprovado, o campo perde a cor: vira prontuário.
+   */
+  --clinic-maquina: #554aa8;
+  --clinic-maquina-bg: #ece6f7;
+  --clinic-maquina-line: #8c7fdc;
 
   /* ------------------------------------------------- degraus do mapa de calor
    *
@@ -48,10 +132,49 @@
    * `surface` no 4. Escurecer o degrau 3 até o branco fechar 4,5:1 fecharia junto a distância
    * para o 4, e um mapa de quatro degraus com dois iguais deixa de ser mapa.
    */
-  --clinic-heat-1: #e4f1ef;
-  --clinic-heat-2: #c8e3dd;
+  --clinic-heat-1: #dbede9;
+  --clinic-heat-2: #c2e0d9;
   --clinic-heat-3: #819a93;
   --clinic-heat-4: #456a60;
+
+  /* ------------------------------------------------- séries de gráfico (identidade)
+   *
+   * Seis cores para quando o gráfico precisa dizer **qual** — qual vacina saiu, qual
+   * item da pilha é qual. É o único lugar do módulo com paleta categórica, e ela existe
+   * porque a rampa de acento é uma cor só: seis tons do mesmo verde numa coluna
+   * empilhada não se distinguem, e a legenda deixa de responder o que foi perguntada.
+   *
+   * Três regras que a paleta obedece, e que qualquer troca precisa obedecer junto:
+   *
+   * - **A ordem é fixa e nunca circula.** O slot é atribuído pela posição da vacina no
+   *   catálogo, não pelo tamanho da fatia: um filtro que muda quem aparece não pode
+   *   repintar quem ficou, senão a leitura de uma semana não vale para a seguinte. Uma
+   *   sétima série não ganha cor gerada — ela vira "outras".
+   * - **Nenhuma delas mora na faixa de risco ou atenção.** Esses dois são estado, não
+   *   identidade; uma série cor de tijolo ao lado de um alerta cor de tijolo faz a
+   *   pessoa ler perigo onde só havia a terceira vacina da lista.
+   * - **Os degraus foram medidos, e conferidos par a par — todos os pares.** Não só os
+   *   vizinhos. Numa coluna empilhada a regra comum é conferir só quem se encosta, mas
+   *   aqui qualquer duas podem se encostar: basta a vacina do meio não ter saído naquele
+   *   mês para o primeiro segmento ficar colado no último. E a legenda põe as seis lado
+   *   a lado o tempo todo. A primeira versão desta paleta passava entre vizinhos e
+   *   reprovava entre todos os pares (ΔE 7,7 entre o slot 1 e o slot 6, na visão normal)
+   *   — e o defeito aparecia exatamente onde o teste não olhava: na legenda, onde os dois
+   *   verdes eram o mesmo ponto para qualquer leitor.
+   *
+   * Números do conjunto atual, entre todos os 15 pares: sob protanopia e deuteranopia,
+   * ΔE 9,4 no claro e 7,0 no escuro; sob visão normal, 16,6 e 15,0; contraste contra a
+   * superfície acima de 3:1 nos dois modos. O 7,0 do escuro fica na faixa que só vale
+   * acompanhada de codificação secundária, e ela está lá: respiro de 2 px entre os
+   * segmentos, total escrito no topo da coluna e o nome da vacina na dica — a cor nunca é
+   * o único jeito de ler o valor.
+   */
+  --clinic-series-1: #009962;
+  --clinic-series-2: #2389e2;
+  --clinic-series-3: #a067ac;
+  --clinic-series-4: #8d1c5f;
+  --clinic-series-5: #4640a7;
+  --clinic-series-6: #485d00;
 
   /* -------------------------------------------------- significado clínico (só risco) */
   --clinic-risk-text: #a2503a;
@@ -60,10 +183,10 @@
   --clinic-attention-text: #856112;
   --clinic-attention-bg: #f7f0e0;
   --clinic-attention-line: #ecdfc2;
-  --clinic-ok-text: #517d71;
+  --clinic-ok-text: #4b776b;
   --clinic-ok-bg: #eaf4f0;
   --clinic-ok-line: #d6e9e2;
-  --clinic-neutral-text: #8a8579;
+  --clinic-neutral-text: #716c61;
   --clinic-neutral-bg: #f0efec;
   --clinic-neutral-line: #e3e1dc;
 
@@ -116,7 +239,7 @@
    * Fonte: o design system pede DM Sans. O portal não carrega webfont — a pilha usa a família
    * quando ela existe na máquina e degrada para a do sistema, sem custo de rede.
    */
-  --clinic-font-sans: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --clinic-font-sans: 'DM Sans', 'PetJourney Arabic', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
   /* -------------------------------------------------------------------- densidade */
   /* Padrão: média. Os outros dois vêm dos seletores de densidade abaixo. */
@@ -124,6 +247,25 @@
   --clinic-font-value: 0.875rem; /* 14px — valor clínico, sempre tabular */
   --clinic-font-label: 0.6875rem;
   --clinic-font-title: 1.05rem;
+
+  /*
+   * O texto corrido de um componente, por nome.
+   *
+   * Existia como `var(--clinic-font-body)` em 28 declarações de 23 arquivos e **não era declarado
+   * em lugar nenhum**. Propriedade customizada sem valor torna a declaração inteira inválida no
+   * momento do cálculo, então todas elas caíam no tamanho herdado — e o efeito colateral era
+   * silencioso e caro: na rotina do turno, o nome da ronda e o nome do animal pediam tamanhos
+   * diferentes e saíam idênticos, porque os dois pediam este token. O degrau entre um nível e o
+   * seguinte nunca chegou a existir.
+   *
+   * Entra apontando para `--clinic-font-base`, que é o tamanho em que esses 28 usos já vinham
+   * caindo: declarar o token não muda um pixel hoje: só devolve às 28 declarações o direito de
+   * valer alguma coisa. Quem quiser um degrau agora tem onde pedi-lo.
+   *
+   * Mora aqui e não ao lado de cada uso porque as três densidades trocam `--clinic-font-base` no
+   * próprio `:root` — a substituição resolve no mesmo elemento, então uma declaração serve às três.
+   */
+  --clinic-font-body: var(--clinic-font-base);
   --clinic-row-height: 36px;
   --clinic-hit-target: 28px; /* alvo de mouse, não de toque */
   --clinic-cell-padding-y: 0.3rem;
@@ -189,10 +331,33 @@
   --clinic-accent-soft: #244139;
   --clinic-on-accent: #0f1714;
 
+  /* O mesmo papel, do outro lado: tinta clara o bastante para o painel escuro (8,6:1 no cartão). */
+  --clinic-outro-turno: #a3b9d8;
+  --clinic-outro-turno-line: #5b7395;
+
+  /* A proposta da máquina no escuro: tinta a 10,3:1 no painel, grifo com texto a 11,5:1. */
+  --clinic-maquina: #c9c1ff;
+  --clinic-maquina-bg: #2d353e;
+  --clinic-maquina-line: #6f64b8;
+
   --clinic-heat-1: #2b413b;
   --clinic-heat-2: #45675f;
   --clinic-heat-3: #88a49d;
   --clinic-heat-4: #bfe3db;
+
+  /*
+   * As mesmas seis matizes da paleta clara, re-degrauadas para o fundo escuro — não é a
+   * paleta clara invertida nem clareada por filtro. **A matiz de cada slot é a mesma nos
+   * dois modos**, senão a vacina trocaria de identidade ao alternar o tema, que é o pior
+   * jeito de gastar o canal da cor. Validada contra `--clinic-surface` deste modo, na
+   * faixa de luminosidade do escuro e par a par entre os seis.
+   */
+  --clinic-series-1: #00ab5c;
+  --clinic-series-2: #0071c7;
+  --clinic-series-3: #9649a7;
+  --clinic-series-4: #df5ba1;
+  --clinic-series-5: #898ed2;
+  --clinic-series-6: #5a7300;
 
   --clinic-risk-text: #f2ae9b;
   --clinic-risk-bg: #3a211c;
@@ -305,6 +470,123 @@
   color: var(--clinic-text);
   font-family: var(--clinic-font-sans);
   font-size: var(--clinic-font-base);
+}
+
+/*
+ * A caixa do segmento, escrita aqui e não só herdada do PrimeVue.
+ *
+ * O estilo dos componentes do PrimeVue 4 é **injetado em tempo de execução**, e não vem de folha
+ * estática: quando essa injeção falta, o `ToggleButton` perde padding e borda e o grupo inteiro
+ * colapsa numa tira de texto corrido — "TodasRefeiçãoMedicação…". Reproduzido em laboratório
+ * apagando as 23 regras do PrimeVue: o filtro caiu de 566 px para 360, exatamente o que a tela
+ * relatada mostrava.
+ *
+ * A regra abaixo repete os valores do próprio PrimeVue, então não muda nada quando ele está lá;
+ * o que ela compra é o controle continuar sendo um botão quando ele não está. Este arquivo já
+ * declarava cor de borda, raio e fundo do segmento — faltavam as medidas da caixa.
+ */
+.clinic-scope .p-togglebutton {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0.25rem;
+}
+
+.clinic-scope .p-togglebutton-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+}
+
+/*
+ * Dentro de um `SelectButton` os segmentos são uma peça só: o raio acima valeria para cada
+ * segmento e partiria o grupo em botões soltos. Só as pontas externas ficam arredondadas.
+ */
+.clinic-scope .p-selectbutton .p-togglebutton {
+  border-radius: 0;
+}
+
+/*
+ * Sem isto o segmento encolhe antes de o grupo quebrar linha, e some o padding recém-escrito.
+ *
+ * O `:not()` preserva o modo `fluid` do PrimeVue, que reparte a largura igualmente entre os
+ * segmentos e depende de `flex: 1 1 0`. Ninguém no projeto usa `fluid` hoje, mas esta regra tem
+ * especificidade maior que a dele e o desligaria em silêncio no dia em que alguém usar.
+ */
+.clinic-scope .p-selectbutton:not(.p-selectbutton-fluid) .p-togglebutton {
+  flex: 0 0 auto;
+}
+
+/*
+ * E o grupo quebra linha, que é o par obrigatório da regra acima: segmento que não encolhe dentro
+ * de contêiner que não quebra transborda — trocaria um defeito por outro em diálogo estreito.
+ * Vários grupos do projeto já declaravam isto localmente; aqui vira o padrão.
+ */
+.clinic-scope .p-selectbutton {
+  flex-wrap: wrap;
+}
+
+.clinic-scope .p-selectbutton .p-togglebutton:first-child {
+  border-start-start-radius: var(--clinic-radius-control);
+  border-end-start-radius: var(--clinic-radius-control);
+}
+
+.clinic-scope .p-selectbutton .p-togglebutton:last-child {
+  border-start-end-radius: var(--clinic-radius-control);
+  border-end-end-radius: var(--clinic-radius-control);
+}
+
+/*
+ * Os segmentos **dividem** a borda.
+ *
+ * Cada `togglebutton` desenha uma borda de 1 px em volta de si, então entre dois vizinhos o traço
+ * saía com 2 px — o dobro da moldura externa do próprio grupo. Era isso que fazia o controle
+ * parecer quebrado: não é um grupo com divisórias, são botões encostados. Puxar um pixel para trás
+ * faz as duas bordas ocuparem o mesmo pixel.
+ *
+ * `margin-inline-start` e não `margin-left`: em árabe o grupo inverte, e a sobreposição precisa
+ * acontecer do lado de dentro nos dois sentidos.
+ */
+.clinic-scope .p-selectbutton .p-togglebutton + .p-togglebutton {
+  margin-inline-start: -1px;
+}
+
+/*
+ * O selecionado, dito pela casa e não pelo tema base.
+ *
+ * Sem esta regra o estado caía no preset, que deriva `togglebutton` da escala `surface` — o
+ * segmento escolhido ficava com a borda de outra cor e parecia saltar para fora do grupo, que era
+ * a segunda metade do defeito.
+ *
+ * O `z-index` é obrigatório junto da borda compartilhada: com os segmentos sobrepostos, quem vem
+ * depois na ordem do documento cobre a borda de quem veio antes, e o selecionado perderia o
+ * próprio contorno do lado direito.
+ */
+.clinic-scope .p-selectbutton .p-togglebutton.p-togglebutton-checked {
+  position: relative;
+  z-index: 1;
+  border-color: var(--clinic-accent-deep);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+  font-weight: 750;
+}
+
+.clinic-scope .p-selectbutton .p-togglebutton:not(.p-togglebutton-checked) {
+  background: var(--clinic-surface);
+  color: var(--clinic-muted);
+}
+
+.clinic-scope
+  .p-selectbutton
+  .p-togglebutton:not(.p-togglebutton-checked):not(.p-disabled):hover {
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-text);
+}
+
+/* O foco também sobe: anel cortado pelo vizinho não é anel. */
+.clinic-scope .p-selectbutton .p-togglebutton:has(:focus-visible) {
+  position: relative;
+  z-index: 2;
 }
 
 .clinic-scope .p-inputtext::placeholder,
@@ -624,25 +906,87 @@
  * Aqui a cor vem sempre dos tokens da clínica, que já têm par claro/escuro.
  * ------------------------------------------------------------------------ */
 
+/*
+ * A segunda linha era um seletor morto: quem carrega `p-button-outlined` já satisfaz
+ * `[class*='p-button-']`, então a negação nunca podia ser verdadeira e o `outlined` sem severity
+ * jamais recebeu a cor da casa — ficava no Aura cru. A negação certa é das severidades, uma a uma.
+ */
 .clinic-scope .p-button.p-button-secondary.p-button-outlined,
-.clinic-scope .p-button.p-button-secondary.p-button-text,
-.clinic-scope .p-button.p-button-outlined:not([class*='p-button-']),
+.clinic-scope
+  .p-button.p-button-outlined:not(.p-button-primary):not(.p-button-success):not(.p-button-info):not(
+    .p-button-warn
+  ):not(.p-button-help):not(.p-button-danger):not(.p-button-contrast),
 .clinic-dialog .p-button.p-button-secondary.p-button-outlined,
-.clinic-dialog .p-button.p-button-secondary.p-button-text,
-.clinic-overlay .p-button.p-button-secondary.p-button-outlined,
-.clinic-overlay .p-button.p-button-secondary.p-button-text {
+.clinic-overlay .p-button.p-button-secondary.p-button-outlined {
   border-color: var(--clinic-line-strong);
   background: transparent;
   color: var(--clinic-text);
 }
 
 .clinic-scope .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
-.clinic-scope .p-button.p-button-secondary.p-button-text:not(:disabled):hover,
 .clinic-dialog .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
-.clinic-dialog .p-button.p-button-secondary.p-button-text:not(:disabled):hover,
-.clinic-overlay .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
-.clinic-overlay .p-button.p-button-secondary.p-button-text:not(:disabled):hover {
+.clinic-overlay .p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
   border-color: var(--clinic-accent);
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-accent-strong);
+}
+
+/*
+ * Passar o turno: a mesma cor que a fronteira da lista usa lá em cima, pelo mesmo motivo.
+ *
+ * Continua contornado, e isso é decisão e não descuido: verde cheio, nesta tela, significa "isto
+ * pede o polegar agora", e passar o turno às 14h não pede. O que faltava ao botão não era peso —
+ * era **significado** e **caixa**. A borda sai de 1,07:1, que é borda nenhuma, para 3,26:1.
+ *
+ * A especificidade é escrita para vencer: as regras de `secondary outlined` acima fecham (0,4,0)
+ * e (0,6,0), então uma regra `.clinic-scope .p-button.acao-turno` — (0,3,0) — perderia em
+ * silêncio, e ordem no arquivo não resolve empate de especificidade. Estas fecham (0,6,0) e
+ * (0,7,0). O `:not(:disabled)` existe para não passarem por cima do desabilitado, lá embaixo.
+ */
+.clinic-scope .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled),
+.clinic-dialog .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled),
+.clinic-overlay .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled) {
+  border-color: var(--clinic-outro-turno-line);
+  background: transparent;
+  color: var(--clinic-outro-turno);
+}
+
+.clinic-scope .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled):hover,
+.clinic-dialog .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled):hover,
+.clinic-overlay .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled):hover {
+  border-color: var(--clinic-outro-turno);
+  background: color-mix(in srgb, var(--clinic-outro-turno) 8%, transparent);
+  color: var(--clinic-outro-turno);
+}
+
+/*
+ * `text` é o botão sem caixa — e estava desenhando uma.
+ *
+ * Os seletores de `text` moravam no mesmo bloco que os de `outlined`, herdando com eles o
+ * `border-color: var(--clinic-line-strong)`. O resultado é que os dois níveis de ênfase que o
+ * PrimeVue oferece — contornado e sem contorno — saíam idênticos na tela, e a hierarquia que
+ * alguém escreveu escolhendo `text` num lugar e `outlined` no outro não chegava a existir.
+ *
+ * Onde isso mais custava: uma fileira de tarefa da rotina do turno tem "Pular" (`text`),
+ * "Recusou" (`outlined`) e "Feita" (cheio). Três pesos pedidos, dois desenhados. Multiplicado
+ * pelas tarefas de um dia, eram dezenas de molduras que só faziam ruído.
+ *
+ * O bloco é separado, e não uma correção pendurada no anterior, porque `text` não é um
+ * `outlined` com a borda apagada: é outro nível de ênfase, e vai querer divergir de novo.
+ */
+.clinic-scope .p-button.p-button-secondary.p-button-text,
+.clinic-dialog .p-button.p-button-secondary.p-button-text,
+.clinic-overlay .p-button.p-button-secondary.p-button-text {
+  border-color: transparent;
+  background: transparent;
+  color: var(--clinic-text);
+}
+
+/* No repouso não há caixa; no hover aparece o fundo, que é o que anuncia o alvo — nunca a borda. */
+.clinic-scope .p-button.p-button-secondary.p-button-text:not(:disabled):hover,
+.clinic-dialog .p-button.p-button-secondary.p-button-text:not(:disabled):hover,
+.clinic-overlay .p-button.p-button-secondary.p-button-text:not(:disabled):hover {
+  border-color: transparent;
   background: var(--clinic-surface-soft);
   color: var(--clinic-accent-strong);
 }
@@ -661,6 +1005,48 @@
   background: var(--clinic-surface-sunken);
   color: var(--clinic-muted);
   opacity: 1;
+}
+
+/*
+ * ...menos o `text`, que não tem preenchimento para perder.
+ *
+ * A regra acima existe para o botão cheio: tirar o sage dele é o que faz o desabilitado ser
+ * reconhecido antes de alguém tentar clicar. Aplicada a um botão sem caixa, ela faz o contrário —
+ * *cria* uma caixa no momento em que o botão fica indisponível.
+ *
+ * Isso é visível toda vez que se marca uma tarefa: a rotina desabilita a fileira inteira enquanto
+ * a gravação viaja (`:disabled="salvando"`), e sem esta regra o "Pular" e o "Marcar as N" piscam
+ * uma moldura a cada toque. Um piscar por tarefa, dezenas por turno. Aqui o desabilitado continua
+ * sendo dito só pela cor do texto, que é o único canal que este botão tem.
+ */
+.clinic-scope .p-button.p-button-text:disabled,
+.clinic-dialog .p-button.p-button-text:disabled,
+.clinic-overlay .p-button.p-button-text:disabled {
+  border-color: transparent;
+  background: transparent;
+}
+
+/*
+ * A ação principal de uma tela ou de um diálogo, cheia e legível.
+ *
+ * O primário do preset é o sage médio com texto branco — perto de 2:1, o botão que "quase não se
+ * vê" da rodada do migrador. Este é o mesmo verde escurecido até o texto passar de 4,5:1, e o
+ * texto sai do papel da clínica: no escuro, o `accent-strong` clareia e o papel escurece, e o
+ * contraste se mantém sem uma segunda regra.
+ */
+.clinic-scope .p-button.clinic-acao-principal:not(:disabled),
+.clinic-dialog .p-button.clinic-acao-principal:not(:disabled) {
+  border-color: var(--clinic-accent-strong);
+  background: var(--clinic-accent-strong);
+  color: var(--clinic-surface);
+}
+
+/* O hover se afasta do papel — mais escuro no claro, mais claro no escuro — e nunca perde contraste. */
+.clinic-scope .p-button.clinic-acao-principal:not(:disabled):hover,
+.clinic-dialog .p-button.clinic-acao-principal:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--clinic-accent-strong) 84%, var(--clinic-text));
+  background: color-mix(in srgb, var(--clinic-accent-strong) 84%, var(--clinic-text));
+  color: var(--clinic-surface);
 }
 
 /*
@@ -692,7 +1078,7 @@
 
  As regras vivem aqui, e não no `<style scoped>` de cada gráfico, por dois motivos. A dica é
  criada pela biblioteca depois da montagem, então não recebe o atributo de escopo do Vue; e os
- três gráficos do resumo precisariam repetir o mesmo bloco.
+ gráficos do resumo e do estoque precisariam repetir o mesmo bloco.
 
  Cor, tipografia e sombra saem dos tokens do módulo — o tema `light`/`dark` que a configuração
  do gráfico manda serve só para o Apex escolher o arranjo, não a tinta.
@@ -731,6 +1117,30 @@
   color: var(--clinic-text);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
+}
+
+/*
+ * Dica escrita à mão, para o gráfico cuja padrão não serve.
+ *
+ * A linha do tempo dos lotes é um `rangeBar`, e a dica que o Apex monta sozinho para esse tipo
+ * mostra o par de datas cru — quando o que a pessoa precisa é o lote, a vacina, o saldo e a
+ * situação. O componente devolve o HTML; o desenho dele mora aqui, junto com o resto da dica.
+ */
+.clinic-scope .apexcharts-tooltip .clinic-chart-dica {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.4rem 0.6rem;
+  font-size: var(--clinic-font-label);
+}
+
+.clinic-scope .apexcharts-tooltip .clinic-chart-dica > span:first-child {
+  color: var(--clinic-text);
+  font-weight: 750;
+}
+
+.clinic-scope .apexcharts-tooltip .clinic-chart-dica > span + span {
+  color: var(--clinic-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /** Número dentro do gráfico é valor clínico: mesma regra de tabular do resto do módulo. */

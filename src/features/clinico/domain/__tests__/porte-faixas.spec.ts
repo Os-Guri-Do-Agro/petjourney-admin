@@ -32,6 +32,7 @@ function pet(patch: Partial<Pet> = {}): Pet {
     tutorId: 'tutor-teste',
     alertas: [],
     iniciais: 'TE',
+    fotoUrl: '',
     ...patch,
   }
 }

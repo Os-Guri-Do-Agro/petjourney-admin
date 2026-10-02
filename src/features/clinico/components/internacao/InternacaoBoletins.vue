@@ -21,6 +21,7 @@ import BoletimNoApp from './BoletimNoApp.vue'
 import InternacaoGravidade from './InternacaoGravidade.vue'
 import ClinicField from '../base/ClinicField.vue'
 import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
+import type { ModeloDeBoletim } from '../../data/boletim-texto'
 import type {
   BoletimAoTutor,
   FrequenciaDeBoletim,
@@ -38,12 +39,22 @@ const props = defineProps<{
   pet: Pet | null
   tutor: Tutor | null
   salvando: boolean
+  /** Textos prontos, já com os dados deste paciente dentro. Vazio esconde a fileira. */
+  modelos: ModeloDeBoletim[]
 }>()
 
 const emit = defineEmits<{
   ligar: [boletimId: string]
   enviar: [boletimId: string]
-  compor: [observado: string]
+  /**
+   * O texto **final** da mensagem, não mais a observação do plantão.
+   *
+   * Antes o campo guardava só a nota do turno e o repositório a embrulhava numa moldura
+   * automática. Com o modelo pronto no campo, quem escreve está vendo a mensagem inteira — e
+   * embrulhá-la de novo repetiria o estado do paciente e a temperatura que o próprio modelo já
+   * traz. O que sai daqui é o que o responsável vai ler.
+   */
+  compor: [texto: string]
   preferencia: [preferencia: PreferenciaDeBoletim]
 }>()
 
@@ -52,6 +63,32 @@ const formato = useClinicFormat()
 const clinico = useClinicoStore()
 
 const rascunho = ref('')
+
+/**
+ * Qual modelo está no campo agora — e por que o estado é necessário.
+ *
+ * Marcar o botão escolhido responde à pergunta que surge depois de editar metade do texto: "de
+ * onde isto veio?". A marcação cai assim que a pessoa digita, porque a partir daí o texto é
+ * dela, e um botão aceso sobre um texto reescrito promete uma correspondência que não existe.
+ */
+const modeloEscolhido = ref('')
+
+/**
+ * Troca o texto do campo pelo do modelo, sem perguntar.
+ *
+ * Um "descartar o que você escreveu?" a cada clique transformaria a escolha de modelo numa
+ * decisão, quando ela é uma tentativa — o normal é experimentar dois e ficar com um. E o que se
+ * perde é sempre recuperável no mesmo clique: o modelo é gerado, não digitado.
+ */
+function usarModelo(modelo: ModeloDeBoletim) {
+  rascunho.value = modelo.texto
+  modeloEscolhido.value = modelo.id
+}
+
+function limpar() {
+  rascunho.value = ''
+  modeloEscolhido.value = ''
+}
 
 const FREQUENCIAS: FrequenciaDeBoletim[] = [1, 2, 4, 6, 8, 12, 24]
 
@@ -128,7 +165,7 @@ function compor() {
   }
 
   emit('compor', rascunho.value)
-  rascunho.value = ''
+  limpar()
 }
 </script>
 
@@ -197,29 +234,70 @@ function compor() {
         <h3 class="bloco__titulo">{{ t('clinico.internacao.boletim.composerTitulo') }}</h3>
         <p class="bloco__ajuda">{{ t('clinico.internacao.boletim.composerAjuda') }}</p>
 
+        <!--
+          Os modelos ficam **acima** do campo, e não dentro de um menu.
+
+          A ordem é a do trabalho: escolhe-se a situação e depois se ajusta o texto. Escondidos
+          atrás de um "inserir modelo", eles viram um recurso que existe para quem já sabe que
+          existe — e quem está com o paciente na mesa não vai procurar.
+        -->
+        <div v-if="modelos.length > 0" class="modelos">
+          <span class="modelos__rotulo clinic-label">
+            {{ t('clinico.internacao.boletim.modelosTitulo') }}
+          </span>
+          <div class="modelos__lista" role="group" :aria-label="t('clinico.internacao.boletim.modelosTitulo')">
+            <button
+              v-for="modelo in modelos"
+              :key="modelo.id"
+              type="button"
+              class="modelo"
+              :class="{ 'modelo--ativo': modeloEscolhido === modelo.id }"
+              :aria-pressed="modeloEscolhido === modelo.id"
+              @click="usarModelo(modelo)"
+            >
+              {{ modelo.rotulo }}
+            </button>
+          </div>
+        </div>
+
         <ClinicField
-          :rotulo="t('clinico.internacao.boletim.observado')"
-          :dica="t('clinico.internacao.boletim.observadoDica')"
+          :rotulo="t('clinico.internacao.boletim.mensagem')"
+          :dica="t('clinico.internacao.boletim.mensagemDica')"
         >
           <template #default="{ id }">
             <Textarea
               :id="id"
               v-model="rascunho"
-              :placeholder="t('clinico.internacao.boletim.observadoExemplo')"
-              rows="3"
+              :placeholder="t('clinico.internacao.boletim.mensagemExemplo')"
+              rows="5"
               auto-resize
               fluid
+              @input="modeloEscolhido = ''"
             />
           </template>
         </ClinicField>
 
-        <Button
-          :label="t('clinico.internacao.boletim.compor')"
-          icon="pi pi-pencil"
-          :disabled="!rascunho.trim() || salvando"
-          :loading="salvando"
-          @click="compor"
-        />
+        <div class="composer__acoes">
+          <Button
+            :label="t('clinico.internacao.boletim.compor')"
+            icon="pi pi-pencil"
+            :disabled="!rascunho.trim() || salvando"
+            :loading="salvando"
+            @click="compor"
+          />
+          <!--
+            Limpar só aparece com algo escrito. Um botão que não faz nada em metade das visitas
+            ensina a ignorá-lo justamente na metade em que ele faria.
+          -->
+          <Button
+            v-if="rascunho.trim()"
+            :label="t('clinico.internacao.boletim.limpar')"
+            severity="secondary"
+            text
+            :disabled="salvando"
+            @click="limpar"
+          />
+        </div>
       </section>
 
       <section v-if="prontos.length > 0" class="bloco">
@@ -273,9 +351,11 @@ function compor() {
 
         <p class="custo">
           {{
-            t('clinico.internacao.boletim.custoAtual', {
-              total: boletinsPorDia(preferencia.frequenciaHoras, preferencia.silencioNoturno),
-            })
+            t(
+              'clinico.internacao.boletim.custoAtual',
+              { total: boletinsPorDia(preferencia.frequenciaHoras, preferencia.silencioNoturno) },
+              boletinsPorDia(preferencia.frequenciaHoras, preferencia.silencioNoturno),
+            )
           }}
         </p>
 
@@ -351,6 +431,65 @@ function compor() {
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
   line-height: 1.5;
+}
+
+.modelos {
+  display: grid;
+  gap: var(--clinic-space-2);
+}
+
+.modelos__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clinic-space-2);
+}
+
+/*
+ * Ficha, e não botão cheio.
+ *
+ * São sete numa fileira, e sete botões com peso de ação competiriam com o "Compor" que de fato
+ * envia. A ficha diz "escolha", o botão diz "faça" — e aqui só um dos dois faz alguma coisa
+ * acontecer do lado do responsável.
+ */
+.modelo {
+  min-height: var(--clinic-hit-target);
+  padding: 0 var(--clinic-space-3);
+  border: 1px solid var(--clinic-line-strong);
+  border-radius: var(--clinic-radius-chip);
+  background: var(--clinic-surface);
+  color: var(--clinic-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--clinic-font-label);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.modelo:hover {
+  border-color: var(--clinic-accent);
+  background: var(--clinic-accent-tint);
+  color: var(--clinic-accent-strong);
+}
+
+.modelo:focus-visible {
+  outline: none;
+  box-shadow: var(--clinic-focus-ring);
+}
+
+/* Anel e peso, não só fundo: a marcação precisa sobreviver à escala de cinza. */
+.modelo--ativo {
+  border-color: var(--clinic-accent-strong);
+  background: var(--clinic-accent-tint);
+  box-shadow: inset 0 0 0 1px var(--clinic-accent-strong);
+  color: var(--clinic-accent-strong);
+  font-weight: 800;
+}
+
+.composer__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--clinic-space-2);
 }
 
 /* O retido é o único bloco com fundo quente da tela — e só há um por vez, quase sempre nenhum. */

@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
-import { useToast } from 'primevue/usetoast'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { useExportarQr } from '@/composables/useExportarQr'
 import { LightColors } from '@/theme/colors'
 import { currentColors } from '@/theme/color-mode'
-import {
-  downloadFromHtmlImage,
-  downloadImageFromUrl,
-  pickImageSaveTarget,
-} from '@/utils/parceiro/download-image'
 
 const props = withDefaults(
   defineProps<{
@@ -27,9 +22,15 @@ const props = withDefaults(
 )
 
 const { t } = useI18n()
-const toast = useToast()
-const exporting = ref(false)
 const imgRef = ref<HTMLImageElement | null>(null)
+
+/* Baixar o QR: a mesma lógica da janela de QR da visão geral — ver `useExportarQr`. */
+const { exportando: exporting, exportar: exportQr } = useExportarQr({
+  imageUrl: () => props.imageUrl,
+  code: () => props.code,
+  imgRef,
+  disabled: () => props.disabled,
+})
 
 /**
  * A URL do QR pode existir e mesmo assim não carregar: o backend cacheia
@@ -59,105 +60,10 @@ const blockStyle = computed(() => {
     '--iqr-primary': colors.vet.primary,
     '--iqr-primary-soft': colors.vet.secondary,
     '--iqr-primary-strong': colors.dashboard.primaryStrong,
-    '--iqr-img-bg': LightColors.auth.white,
+    /** Quiet zone do QR: branco puro, para não tirar contraste de leitor nenhum. */
+    '--iqr-img-bg': LightColors.text.inverse,
   }
 })
-
-const filename = computed(() => {
-  const safe = props.code.replace(/[^a-zA-Z0-9_-]/g, '') || 'indicacao'
-  return `petjourney-qr-${safe}.png`
-})
-
-function reserveFallbackWindow(): Window | null {
-  // Sem `noopener` nas features — senão `window.open` devolve null e não dá para
-  // navegar depois do await (CORS). Cortamos o opener manualmente.
-  const popup = window.open('about:blank', '_blank')
-  if (popup) {
-    popup.opener = null
-    try {
-      popup.document.title = t('divulgacao.shareKit.qrExport')
-      popup.document.body.innerHTML =
-        '<p style="font-family:system-ui,sans-serif;padding:1.5rem;color:#444">…</p>'
-    } catch {
-      // ignore
-    }
-  }
-  return popup
-}
-
-function toastExportOk(kind: 'saved' | 'downloaded') {
-  toast.add({
-    severity: 'success',
-    summary: t('divulgacao.shareKit.qrExportOk'),
-    detail:
-      kind === 'saved'
-        ? t('divulgacao.shareKit.qrExportSavedDetail')
-        : t('divulgacao.shareKit.qrExportOkDetail'),
-    life: 2800,
-  })
-}
-
-async function exportQr() {
-  if (props.disabled || exporting.value) {
-    return
-  }
-
-  exporting.value = true
-
-  try {
-    // “Salvar como…” precisa rodar no gesto do clique (antes do fetch).
-    const saveTarget = await pickImageSaveTarget(filename.value)
-    if (saveTarget === 'cancelled') {
-      return
-    }
-
-    if (imgRef.value) {
-      const fromImg = await downloadFromHtmlImage(imgRef.value, filename.value, saveTarget)
-      if (fromImg === 'cancelled') {
-        return
-      }
-      if (fromImg === 'saved' || fromImg === 'downloaded') {
-        toastExportOk(fromImg)
-        return
-      }
-    }
-
-    const fallbackWindow = reserveFallbackWindow()
-
-    try {
-      const result = await downloadImageFromUrl(props.imageUrl, filename.value, {
-        fallbackWindow,
-        saveTarget,
-      })
-
-      if (result === 'cancelled') {
-        return
-      }
-
-      if (result === 'saved' || result === 'downloaded') {
-        toastExportOk(result)
-        return
-      }
-
-      toast.add({
-        severity: 'info',
-        summary: t('divulgacao.shareKit.qrExportOpened'),
-        detail: t('divulgacao.shareKit.qrExportOpenedDetail'),
-        life: 2800,
-      })
-    } catch {
-      fallbackWindow?.close()
-      toast.add({
-        severity: 'error',
-        summary: t('divulgacao.shareKit.qrExportFail'),
-        detail: t('divulgacao.shareKit.qrExportFailDetail'),
-        life: 3600,
-      })
-    }
-  } finally {
-    exporting.value = false
-  }
-}
 </script>
 
 <template>

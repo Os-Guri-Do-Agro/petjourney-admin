@@ -40,12 +40,38 @@
 
 import { computed, ref, watch } from 'vue'
 
+import {
+  consultar,
+  criarReconferencia,
+  situacaoPelasFontes,
+  type SituacaoDaConferencia,
+} from '@/composables/conferencia'
+
 /** Gravidade do contador — a mesma escada de tom do resto do módulo. */
 export type TomDePendencia = 'neutro' | 'atencao' | 'risco'
+
+/**
+ * Um pedaço do total, com nome próprio: "1 boletim retido", "2 administrações atrasadas".
+ *
+ * O selo do menu mostra só o total; a visão geral mostra também de que ele é feito, porque "2 itens
+ * a resolver na internação · Urgente" obrigava a clicar para saber qual dos dois era urgente.
+ * `chave` é o nome da frase no catálogo (`inicio.pauta.parte.<chave>`), nunca texto pronto.
+ */
+export type ParteDePendencia = {
+  chave: string
+  total: number
+}
 
 export type ContagemDePendencia = {
   total: number
   tom: TomDePendencia
+  /** De que o total é feito. Só as partes que existem — zero não vira parte. */
+  partes?: ParteDePendencia[]
+}
+
+/** As partes que existem, na ordem em que foram dadas (a de maior gravidade primeiro). */
+export function partesQueExistem(partes: ParteDePendencia[]): ParteDePendencia[] {
+  return partes.filter((parte) => parte.total > 0)
 }
 
 const VAZIO: ContagemDePendencia = { total: 0, tom: 'neutro' }
@@ -54,16 +80,36 @@ const fila = ref<ContagemDePendencia>(VAZIO)
 const internacao = ref<ContagemDePendencia>(VAZIO)
 const atividades = ref<ContagemDePendencia>(VAZIO)
 const vacinas = ref<ContagemDePendencia>(VAZIO)
+/**
+ * Tratamentos críticos cuja adesão caiu em casa. Risco, e não atenção: do outro lado há um animal
+ * cardiopata sem o diurético há dois dias, e ninguém na clínica sabe — é o mesmo raciocínio do
+ * boletim retido.
+ */
+const tratamentos = ref<ContagemDePendencia>(VAZIO)
 
 const carregando = ref(false)
 const carregado = ref(false)
+/**
+ * Quando a última conferência que **deu certo** terminou — a visão geral diz "conferido às 8h12".
+ * Uma conferência que falhou inteira não mexe aqui: a hora continua dizendo de quando são os
+ * números que estão na tela.
+ */
+const conferidoEm = ref<Date | null>(null)
+/** Como foi a última conferência. `null` enquanto nenhuma terminou. */
+const situacao = ref<SituacaoDaConferencia | null>(null)
 
 /** Uma carga por vez. Sem isto, cinco páginas montando juntas disparariam cinco rondas. */
 let emVoo: Promise<void> | null = null
 
 async function apurar() {
   const [
-    { encounterRepository, internacaoRepository, vacinaRepository, waitlistRepository },
+    {
+      encounterRepository,
+      internacaoRepository,
+      tratamentoRepository,
+      vacinaRepository,
+      waitlistRepository,
+    },
     { retornosVencidos },
     { clinicClock },
   ] = await Promise.all([
@@ -72,41 +118,76 @@ async function apurar() {
     import('../stores/clinico'),
   ])
 
-  const [entradas, mapa, rascunhos, retornos, chamada] = await Promise.all([
-    waitlistRepository.listar().catch(() => []),
-    internacaoRepository.mapa().catch(() => null),
-    encounterRepository.listarRascunhos(null).catch(() => []),
-    encounterRepository.listarRetornosPendentes().catch(() => []),
-    vacinaRepository.listaDeChamada().catch(() => []),
+  const [entradas, mapa, rascunhos, retornos, chamada, emCasa] = await Promise.all([
+    consultar(() => waitlistRepository.listar()),
+    consultar(() => internacaoRepository.mapa()),
+    consultar(() => encounterRepository.listarRascunhos(null)),
+    consultar(() => encounterRepository.listarRetornosPendentes()),
+    consultar(() => vacinaRepository.listaDeChamada()),
+    consultar(() => tratamentoRepository.daClinica()),
   ])
 
-  const aguardando = entradas.filter((entrada) => entrada.status === 'aguardando').length
-  const ofertadas = entradas.filter((entrada) => entrada.status === 'ofertado').length
-
-  fila.value = { total: aguardando, tom: 'neutro' }
-
-  const atrasadas = (mapa?.leitos ?? []).reduce((soma, item) => soma + item.atrasadas, 0)
-  const retidos = mapa?.boletinsRetidos ?? 0
-
   /*
-   * Boletim retido é risco e dose atrasada é atenção — a ordem não é de gravidade clínica, é de
-   * quem está esperando. A dose atrasada espera a enfermagem, que está no corredor; o boletim
-   * retido espera uma ligação que **ninguém sabe que precisa dar**, e do outro lado há um
-   * responsável sem notícia do animal dele.
+   * Cada contador só é reescrito quando **todas** as fontes dele responderam. Os demais ficam com o
+   * último valor conhecido: Atividades depende da fila (vagas ofertadas), e uma fila que não
+   * respondeu não pode zerar a contagem de rascunhos que respondeu.
    */
-  internacao.value = {
-    total: atrasadas + retidos,
-    tom: retidos > 0 ? 'risco' : atrasadas > 0 ? 'atencao' : 'neutro',
+  if (entradas.ok) {
+    const aguardando = entradas.valor.filter((entrada) => entrada.status === 'aguardando').length
+    fila.value = { total: aguardando, tom: 'neutro' }
   }
 
-  const vencidos = retornosVencidos(retornos, clinicClock, clinicClock.today()).length
-  const pendencias = rascunhos.length + vencidos + ofertadas
+  if (mapa.ok) {
+    const atrasadas = (mapa.valor?.leitos ?? []).reduce((soma, item) => soma + item.atrasadas, 0)
+    const retidos = mapa.valor?.boletinsRetidos ?? 0
 
-  atividades.value = { total: pendencias, tom: pendencias > 0 ? 'atencao' : 'neutro' }
+    /*
+     * Boletim retido é risco e dose atrasada é atenção — a ordem não é de gravidade clínica, é de
+     * quem está esperando. A dose atrasada espera a enfermagem, que está no corredor; o boletim
+     * retido espera uma ligação que **ninguém sabe que precisa dar**, e do outro lado há um
+     * responsável sem notícia do animal dele.
+     */
+    internacao.value = {
+      total: atrasadas + retidos,
+      tom: retidos > 0 ? 'risco' : atrasadas > 0 ? 'atencao' : 'neutro',
+      partes: partesQueExistem([
+        { chave: 'boletinsRetidos', total: retidos },
+        { chave: 'administracoesAtrasadas', total: atrasadas },
+      ]),
+    }
+  }
 
-  const emAtraso = chamada.filter((linha) => linha.situacao === 'vencido').length
+  if (entradas.ok && rascunhos.ok && retornos.ok) {
+    const ofertadas = entradas.valor.filter((entrada) => entrada.status === 'ofertado').length
+    const vencidos = retornosVencidos(retornos.valor, clinicClock, clinicClock.today()).length
+    const pendencias = rascunhos.valor.length + vencidos + ofertadas
 
-  vacinas.value = { total: emAtraso, tom: emAtraso > 0 ? 'atencao' : 'neutro' }
+    atividades.value = {
+      total: pendencias,
+      tom: pendencias > 0 ? 'atencao' : 'neutro',
+      partes: partesQueExistem([
+        { chave: 'rascunhos', total: rascunhos.valor.length },
+        { chave: 'retornosVencidos', total: vencidos },
+        { chave: 'vagasOfertadas', total: ofertadas },
+      ]),
+    }
+  }
+
+  if (chamada.ok) {
+    const emAtraso = chamada.valor.filter((linha) => linha.situacao === 'vencido').length
+    vacinas.value = { total: emAtraso, tom: emAtraso > 0 ? 'atencao' : 'neutro' }
+  }
+
+  if (emCasa.ok) {
+    const emQueda = emCasa.valor.filter((linha) => linha.alerta !== null).length
+    tratamentos.value = { total: emQueda, tom: emQueda > 0 ? 'risco' : 'neutro' }
+  }
+
+  situacao.value = situacaoPelasFontes([entradas, mapa, rascunhos, retornos, chamada, emCasa])
+
+  if (situacao.value !== 'falhou') {
+    conferidoEm.value = new Date()
+  }
 }
 
 function carregar() {
@@ -119,10 +200,10 @@ function carregar() {
   emVoo = apurar()
     .catch(() => {
       /*
-       * Contador é acessório: a tela de destino continua sendo a fonte da verdade. Falhar aqui
-       * não pode derrubar o menu nem plantar uma faixa de erro no shell — o número simplesmente
-       * não aparece, e quem clica vê o mesmo de sempre.
+       * Nem os repositórios carregaram (o pedaço do módulo não baixou). O menu continua quieto — o
+       * selo simplesmente não aparece —, mas a visão geral precisa saber que não conferiu.
        */
+      situacao.value = 'falhou'
     })
     .finally(() => {
       carregando.value = false
@@ -149,6 +230,13 @@ export function invalidarPendenciasClinicas() {
   }
 }
 
+/** O relógio que refaz a contagem sozinho — ver `criarReconferencia`. */
+const reconferencia = criarReconferencia({
+  recarregar: carregar,
+  conferidoEm: () => conferidoEm.value,
+  carregado: () => carregado.value,
+})
+
 /**
  * Contagens do módulo clínico, carregadas sob demanda.
  *
@@ -167,12 +255,18 @@ export function useClinicoPendencias(ativo: () => boolean) {
     { immediate: true },
   )
 
+  reconferencia.assinar(ativo)
+
   return {
     fila: computed(() => (ativo() ? fila.value : VAZIO)),
     internacao: computed(() => (ativo() ? internacao.value : VAZIO)),
     atividades: computed(() => (ativo() ? atividades.value : VAZIO)),
     vacinas: computed(() => (ativo() ? vacinas.value : VAZIO)),
+    tratamentos: computed(() => (ativo() ? tratamentos.value : VAZIO)),
+    situacao: computed(() => (ativo() ? situacao.value : null)),
+    conferidoEm: computed(() => conferidoEm.value),
     carregando: computed(() => carregando.value),
+    carregado: computed(() => carregado.value),
     recarregar: carregar,
   }
 }
@@ -183,6 +277,9 @@ export function limparPendenciasClinicas() {
   internacao.value = VAZIO
   atividades.value = VAZIO
   vacinas.value = VAZIO
+  tratamentos.value = VAZIO
+  conferidoEm.value = null
+  situacao.value = null
   carregado.value = false
   carregando.value = false
   emVoo = null

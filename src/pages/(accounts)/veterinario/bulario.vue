@@ -10,6 +10,7 @@
  * a ficha passa a mostrar os avisos dele e a destacar a dose da espécie certa. Sem o parâmetro,
  * é um bulário de consulta comum.
  */
+import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -91,6 +92,7 @@ onMounted(carregar)
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.bulario.subtitulo')"
     :title="t('clinico.bulario.titulo')"
     :loading="carregando && clinico.medicamentos.length === 0"
@@ -101,10 +103,16 @@ onMounted(carregar)
     <div class="bulario clinic-scope">
       <div v-if="pet" class="bulario__paciente">
         <ClinicPatientHeader :pet="pet" :tutor="tutor" />
-        <button type="button" class="bulario__sair clinic-focusable" @click="limparPaciente">
-          <i class="pi pi-times" aria-hidden="true" />
-          {{ t('clinico.bulario.semPaciente') }}
-        </button>
+        <Button
+          type="button"
+          class="bulario__sair"
+          severity="secondary"
+          outlined
+          size="small"
+          icon="pi pi-times"
+          :label="t('clinico.bulario.semPaciente')"
+          @click="limparPaciente"
+        />
       </div>
 
       <div class="bulario__corpo">
@@ -141,25 +149,6 @@ onMounted(carregar)
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
-.bulario__sair {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.7rem;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
-}
-
-.bulario__sair:hover {
-  border-color: var(--clinic-line-strong);
-  color: var(--clinic-text);
-}
 
 .bulario__corpo {
   display: grid;

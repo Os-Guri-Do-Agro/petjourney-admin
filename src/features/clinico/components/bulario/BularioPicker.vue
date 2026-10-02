@@ -60,7 +60,12 @@ const proibido = computed(
     especieProibida(selecionado.value as Medication, (props.pet as Pet).especie),
 )
 
-/** Reabrir cai no medicamento em uso e na espécie do paciente, não no estado da vez passada. */
+/**
+ * Reabrir cai no medicamento em uso e na espécie do paciente, não no estado da vez passada.
+ *
+ * Sem medicamento em uso (uma prescrição nova), nada vem marcado. Abrir já no primeiro da lista
+ * fazia de "Adicionar" + "Usar na prescrição" uma receita de Amoxicilina que ninguém escolheu.
+ */
 watch(
   () => props.visivel,
   (aberto) => {
@@ -68,7 +73,7 @@ watch(
       return
     }
 
-    selecionadoId.value = props.atualId ?? props.medicamentos[0]?.id ?? null
+    selecionadoId.value = props.atualId
     filtro.value = { ...FILTRO_VAZIO, especie: props.pet?.especie ?? null }
   },
 )
@@ -89,7 +94,7 @@ function confirmar() {
   <Dialog
     :visible="visivel"
     modal
-    class="clinic-dialog picker"
+    class="clinic-dialog hc-tema picker"
     :style="{ width: 'min(62rem, 94vw)' }"
     @update:visible="emit('update:visivel', $event)"
   >
@@ -115,6 +120,10 @@ function confirmar() {
 
       <div class="picker__ficha">
         <BularioDetalhe v-if="selecionado" :medicamento="selecionado" :pet="pet" />
+        <p v-else class="picker__vazio">
+          <i class="pi pi-arrow-left" aria-hidden="true" />
+          {{ t('clinico.bulario.escolhaNaLista') }}
+        </p>
       </div>
     </div>
 
@@ -152,7 +161,20 @@ function confirmar() {
 .picker__ficha {
   max-height: 24rem;
   overflow-y: auto;
-  padding-right: var(--clinic-space-2);
+  padding-inline-end: var(--clinic-space-2);
+}
+
+.picker__vazio {
+  display: flex;
+  align-items: center;
+  gap: var(--clinic-space-2);
+  margin: 0;
+  padding: var(--clinic-space-4) 0;
+  color: var(--clinic-muted);
+}
+
+[dir='rtl'] .picker__vazio .pi-arrow-left {
+  transform: scaleX(-1);
 }
 
 .picker__rodape {
@@ -165,7 +187,7 @@ function confirmar() {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin-right: auto;
+  margin-inline-end: auto;
   color: var(--clinic-risk-text);
   font-size: var(--clinic-font-label);
   font-weight: 700;

@@ -470,9 +470,11 @@ onMounted(() => {
   <div v-else-if="sessionUser" class="settings-perfil">
     <PartnerFocusCard class="settings-perfil__hero">
       <div class="settings-perfil__hero-row">
-        <button
+        <Button
           type="button"
           class="settings-perfil__avatar"
+          text
+          severity="secondary"
           :class="{ 'settings-perfil__avatar--busy': uploadingPhoto }"
           :disabled="photoBusy"
           :aria-label="
@@ -501,8 +503,12 @@ onMounted(() => {
           <span class="settings-perfil__avatar-badge" aria-hidden="true">
             <i :class="uploadingPhoto ? 'pi pi-spin pi-spinner' : 'pi pi-pencil'" />
           </span>
-        </button>
+        </Button>
 
+        <!--
+          Segue nativo e escondido: o avatar é o gatilho. O `FileUpload` do PrimeVue traz o próprio
+          botão/área de soltar e trocaria o avatar clicável por um segundo controle.
+        -->
         <input
           ref="photoInputRef"
           class="settings-perfil__file"
@@ -662,18 +668,21 @@ onMounted(() => {
   gap: 1rem 1.35rem;
 }
 
-.settings-perfil__avatar {
+.settings-perfil__avatar.p-button,
+.settings-perfil__avatar.p-button:not(:disabled):hover,
+.settings-perfil__avatar.p-button:not(:disabled):active {
   position: relative;
   display: grid;
   flex-shrink: 0;
   width: 6.5rem;
   height: 6.5rem;
   place-items: center;
+  overflow: visible;
+  padding: 0;
   border: 0;
+  border-radius: 999px;
   background: transparent;
   color: var(--pf-on);
-  cursor: pointer;
-  padding: 0;
 }
 
 .settings-perfil__avatar-media {
@@ -710,7 +719,7 @@ onMounted(() => {
 
 .settings-perfil__avatar-badge {
   position: absolute;
-  right: 0.05rem;
+  inset-inline-end: 0.05rem;
   bottom: 0.05rem;
   z-index: 2;
   display: grid;
@@ -731,14 +740,15 @@ onMounted(() => {
   opacity: 1;
 }
 
-.settings-perfil__avatar:focus-visible {
+.settings-perfil__avatar.p-button:focus-visible {
+  box-shadow: none;
   outline: 2px solid var(--pf-on);
   outline-offset: 4px;
-  border-radius: 999px;
 }
 
-.settings-perfil__avatar:disabled {
+.settings-perfil__avatar.p-button:disabled {
   cursor: wait;
+  opacity: 1;
 }
 
 .settings-perfil__file {
@@ -789,7 +799,8 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  margin: 0 0 0 auto;
+  margin-block: 0;
+  margin-inline: auto 0;
   padding: 0;
   list-style: none;
 }
@@ -832,7 +843,7 @@ onMounted(() => {
 }
 
 .settings-perfil__group legend {
-  float: left;
+  float: inline-start;
   width: 100%;
   margin: 0 0 0.1rem;
   padding: 0;
@@ -906,7 +917,7 @@ onMounted(() => {
 
 @media (max-width: 640px) {
   .settings-perfil__roles {
-    margin-left: 0;
+    margin-inline-start: 0;
     width: 100%;
   }
 

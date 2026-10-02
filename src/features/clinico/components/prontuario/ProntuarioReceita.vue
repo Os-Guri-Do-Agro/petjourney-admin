@@ -15,7 +15,8 @@
  *   prescrição inteira é o que faz a clínica voltar para o bloco de papel.
  */
 import Button from 'primevue/button'
-import { computed } from 'vue'
+import ToggleSwitch from 'primevue/toggleswitch'
+import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicAlertChip from '../base/ClinicAlertChip.vue'
@@ -32,9 +33,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   repetir: [prescricoes: Prescription[]]
+  /** O vet marcou (ou desmarcou) o item como tratamento crítico. */
+  critico: [prescricaoId: string, valor: boolean]
 }>()
 
 const { t } = useI18n()
+const idBase = useId()
 const clinico = useClinicoStore()
 const receitas = useReceitasStore()
 const formato = useClinicFormat()
@@ -93,6 +97,7 @@ const vistaDoResponsavel = computed(() =>
         horas: prescricao.calculo.frequenciaHoras,
       }),
       dias: prescricao.calculo.duracaoDias,
+      critico: prescricao.critico ?? false,
     }
   }),
 )
@@ -178,7 +183,7 @@ function repetir() {
             <span class="responsavel__quando">
               {{ item.frequencia }}
               <template v-if="item.dias !== null">
-                · {{ t('clinico.prontuario.conduta.porDias', { dias: item.dias }) }}
+                · {{ t('clinico.prontuario.conduta.porDias', { dias: item.dias }, item.dias) }}
               </template>
             </span>
             <span class="responsavel__lembrete">
@@ -191,6 +196,19 @@ function repetir() {
                       frequencia: item.frequencia,
                     })
               }}
+            </span>
+            <!--
+              Crítico é decisão de quem prescreve, e mora aqui porque é aqui que ela é tomada: a
+              clínica passa a ser avisada se, em casa, a adesão deste item cair.
+            -->
+            <span class="responsavel__critico">
+              <ToggleSwitch
+                :model-value="item.critico"
+                :input-id="`${idBase}-${item.id}`"
+                :disabled="somenteLeitura"
+                @update:model-value="emit('critico', item.id, Boolean($event))"
+              />
+              <label :for="`${idBase}-${item.id}`">{{ t('clinico.receita.critico') }}</label>
             </span>
           </li>
         </ul>
@@ -323,6 +341,21 @@ function repetir() {
   color: var(--clinic-accent-strong);
   font-size: var(--clinic-font-label);
   font-weight: 700;
+}
+
+.responsavel__critico {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--clinic-line-soft);
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+}
+
+.responsavel__critico label {
+  cursor: pointer;
 }
 
 /* ------------------------------------------------------------------- emitida */

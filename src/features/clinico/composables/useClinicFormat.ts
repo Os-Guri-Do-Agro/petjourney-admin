@@ -9,17 +9,22 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { INTL_LOCALE, isLocale, DEFAULT_LOCALE } from '@/i18n/locales'
+
 import { minutesToClock } from '../domain/clinic-time'
 import type {
   AlertSeverity,
   AppointmentStatus,
   BlockReason,
+  CanalDeContato,
   CancelReason,
   Conflict,
   ISODate,
   ISODateTime,
   Measurement,
+  MotivoDeFalta,
   PetAlertKind,
+  PetSex,
   PetSpecies,
   RangeStatus,
   ReferenceRange,
@@ -34,9 +39,14 @@ const clock = createClinicClock(CLINIC_UTC_OFFSET)
 const PARAMS_DE_HORARIO = new Set(['hora', 'abre', 'fecha'])
 
 export function useClinicFormat() {
-  const { t, locale, n } = useI18n()
+  const { t, locale } = useI18n()
 
-  const localeIntl = computed(() => (locale.value === 'pt' ? 'pt-BR' : locale.value))
+  /**
+   * Tag do `Intl` pelo mapa do projeto, nunca o código cru do idioma: `sr` sozinho formata em
+   * cirílico e `ar` pode sair com dígitos ٠١٢. Pelo mesmo motivo números não passam pelo `n()` do
+   * vue-i18n, que entrega o código cru ao `Intl`.
+   */
+  const localeIntl = computed(() => INTL_LOCALE[isLocale(locale.value) ? locale.value : DEFAULT_LOCALE])
 
   function hora(iso: ISODateTime): string {
     return minutesToClock(clock.minutesOf(iso))
@@ -80,6 +90,21 @@ export function useClinicFormat() {
   }
 
   /**
+   * `27/10/2027` — a data curta com o ano, para o que cai fora do ano corrente.
+   *
+   * A carteira de vacina mistura as duas coisas na mesma coluna: a dose de hoje e o reforço do ano
+   * que vem. Sem o ano, "27/10" do reforço anual lê como daqui a quatro semanas.
+   */
+  function dataCurtaComAno(data: ISODate): string {
+    return new Intl.DateTimeFormat(localeIntl.value, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${data}T12:00:00Z`))
+  }
+
+  /**
    * Nome curto do dia a partir do **índice** (0 = domingo), sem precisar de uma data.
    *
    * A fila trabalha com dias da semana soltos — a janela que o responsável aceita não tem data
@@ -93,6 +118,31 @@ export function useClinicFormat() {
       weekday: 'short',
       timeZone: 'UTC',
     }).format(base)
+  }
+
+  /**
+   * Mês e ano curtos: `set/26`.
+   *
+   * O eixo do consumo tem doze colunas numa largura de cartão. "Setembro de 2026" não cabe em
+   * nenhuma delas, e só o mês — sem o ano — faria a coluna mais antiga e a mais nova de uma
+   * janela que atravessa o réveillon parecerem o mesmo mês.
+   *
+   * Montado por partes em vez de formatado direto: `month: 'short'` com `year: '2-digit'`
+   * devolve `mai. de 26` em português e `May 26` em inglês — a primeira não cabe na coluna e as
+   * duas juntas não dão uma régua só. As partes dão o nome do mês no idioma de quem lê, com a
+   * barra que o eixo precisa. O ponto abreviativo sai junto: `mai/26`, e não `mai./26`.
+   */
+  function mesCurto(data: ISODate): string {
+    const partes = new Intl.DateTimeFormat(localeIntl.value, {
+      month: 'short',
+      year: '2-digit',
+      timeZone: 'UTC',
+    }).formatToParts(new Date(`${data}T12:00:00Z`))
+
+    const mes = partes.find((parte) => parte.type === 'month')?.value.replace(/\.$/, '') ?? ''
+    const ano = partes.find((parte) => parte.type === 'year')?.value ?? ''
+
+    return `${mes}/${ano}`
   }
 
   function diaDaSemanaCurto(data: ISODate): string {
@@ -181,19 +231,39 @@ export function useClinicFormat() {
     }
 
     if (anos <= 0) {
-      return t('clinico.formato.meses', { valor: Math.max(meses, 0) })
+      return t('clinico.formato.meses', { valor: Math.max(meses, 0) }, Math.max(meses, 0))
     }
 
     return meses === 0
-      ? t('clinico.formato.anos', { valor: anos })
+      ? t('clinico.formato.anos', { valor: anos }, anos)
       : t('clinico.formato.anosMeses', { anos, meses })
   }
 
   function numero(valor: number, casas: number): string {
-    return n(valor, {
+    return new Intl.NumberFormat(localeIntl.value, {
       minimumFractionDigits: casas,
       maximumFractionDigits: casas,
-    })
+    }).format(valor)
+  }
+
+  /**
+   * Dinheiro, a partir de **centavos**.
+   *
+   * A entrada é inteira porque é assim que o valor é guardado: custo unitário em centavos, e a
+   * multiplicação por contagem de doses feita antes da divisão. Receber reais com casa decimal
+   * aqui devolveria o erro de ponto flutuante que guardar em centavos existe para evitar — o
+   * total do painel deixaria de bater com o da nota por alguns centavos, que é justamente o
+   * tipo de diferença que faz a clínica parar de confiar na tela.
+   *
+   * A moeda é do país da clínica e não do idioma de quem lê: o mesmo estoque vale os mesmos
+   * reais para quem abre a tela em inglês.
+   */
+  function moeda(centavos: number): string {
+    return new Intl.NumberFormat(localeIntl.value, {
+      style: 'currency',
+      currency: 'BRL',
+      maximumFractionDigits: 2,
+    }).format(centavos / 100)
   }
 
   function peso(valor: number | null): string {
@@ -240,7 +310,9 @@ export function useClinicFormat() {
   }
 
   function percentual(valor: number): string {
-    return n(valor, { style: 'percent', maximumFractionDigits: 0 })
+    return new Intl.NumberFormat(localeIntl.value, { style: 'percent', maximumFractionDigits: 0 }).format(
+      valor,
+    )
   }
 
   // ------------------------------------------------------------ traduções por `kind`
@@ -253,12 +325,28 @@ export function useClinicFormat() {
     return t(`clinico.especie.${valor}`)
   }
 
+  /**
+   * Sexo, ou "sexo não informado". O nulo existe desde que a base vem de outro sistema
+   * (ver `Pet.sexo`): escrever a chave crua no atestado seria pior que a lacuna.
+   */
+  function sexo(valor: PetSex | null): string {
+    return valor ? t(`clinico.sexo.${valor}`) : t('clinico.sexo.naoInformado')
+  }
+
   function motivoBloqueio(valor: BlockReason): string {
     return t(`clinico.bloqueio.${valor}`)
   }
 
   function motivoCancelamento(valor: CancelReason | null): string {
     return valor ? t(`clinico.cancelamento.${valor}`) : ''
+  }
+
+  function motivoFalta(valor: MotivoDeFalta | null): string {
+    return valor ? t(`clinico.faltas.motivo.${valor}`) : ''
+  }
+
+  function canalDeContato(valor: CanalDeContato | null): string {
+    return valor ? t(`clinico.faltas.canal.${valor}`) : ''
   }
 
   function alerta(valor: PetAlertKind): string {
@@ -300,20 +388,26 @@ export function useClinicFormat() {
     dataLonga,
     dataPorExtenso,
     dataCurta,
+    dataCurtaComAno,
+    mesCurto,
     diaDaSemanaCurto,
     diaDaSemanaCurtoPorIndice,
     duracao,
     relativo,
     idade,
     numero,
+    moeda,
     peso,
     medicao,
     faixaDeReferencia,
     percentual,
     status,
     especie,
+    sexo,
     motivoBloqueio,
     motivoCancelamento,
+    motivoFalta,
+    canalDeContato,
     alerta,
     severidade,
     prioridadeDaFila,

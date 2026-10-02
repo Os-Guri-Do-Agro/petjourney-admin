@@ -86,7 +86,7 @@ const descrito = computed(() =>
 }
 
 .campo__atalho {
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 0.05rem 0.3rem;
   border: 1px solid var(--clinic-line-strong);
   border-radius: 0.35rem;

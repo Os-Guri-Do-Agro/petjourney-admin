@@ -139,7 +139,7 @@ const itens = computed(() => {
 .tabela td {
   padding: 2mm;
   border: 0.25mm solid #000;
-  text-align: left;
+  text-align: start;
 }
 
 .tabela th {
@@ -154,7 +154,7 @@ const itens = computed(() => {
 }
 
 .numero {
-  text-align: right;
+  text-align: end;
 }
 
 .vazia {
@@ -163,7 +163,7 @@ const itens = computed(() => {
 
 .total {
   font-weight: 700;
-  text-align: right;
+  text-align: end;
   text-transform: uppercase;
 }
 

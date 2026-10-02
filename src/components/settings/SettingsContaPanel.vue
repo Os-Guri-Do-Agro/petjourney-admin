@@ -504,7 +504,7 @@ watch(showCustomReason, (allowed) => {
   color: var(--partner-faint);
   font-size: 0.76rem;
   line-height: 1.45;
-  text-align: right;
+  text-align: end;
 }
 
 .conta-session__logout :deep(.p-button),
@@ -607,13 +607,13 @@ watch(showCustomReason, (allowed) => {
 
 .conta-panel--prefs :deep(.language-switcher) {
   flex-shrink: 0;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 @media (max-width: 560px) {
   .conta-panel--prefs :deep(.language-switcher) {
     width: 100%;
-    margin-left: 0;
+    margin-inline-start: 0;
   }
 
   .conta-panel--prefs :deep(.language-switcher__trigger) {
@@ -777,7 +777,7 @@ watch(showCustomReason, (allowed) => {
   }
 
   .conta-session__hint {
-    text-align: left;
+    text-align: start;
   }
 
   .conta-risk__head {

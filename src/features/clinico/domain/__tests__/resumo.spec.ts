@@ -108,6 +108,7 @@ function atendimento(patch: {
     finalizadoEm: null,
     canceladoEm: null,
     motivoCancelamento: null,
+    justificativaDeFalta: null,
     encounterId: null,
     linkedGroupId: null,
     criadoEm: clock.toIso(patch.data, 8 * 60),

@@ -33,6 +33,26 @@ if (!('ResizeObserver' in globalThis)) {
  * A guarda testa `typeof`, e não `in`: o jsdom **declara** `matchMedia` e a deixa `undefined`, de
  * modo que `'matchMedia' in globalThis` é verdadeiro e o dublê nunca seria instalado.
  */
+/**
+ * O registro global de gráficos do ApexCharts.
+ *
+ * Mesma categoria dos dois dublês acima, por um caminho um pouco mais torto. O Apex mantém a
+ * lista de instâncias vivas em `window.Apex._chartInstances`, e só a **cria** dentro do
+ * `render()`, depois de conferir que o elemento existe no documento. Em jsdom, `mount()` monta
+ * fora do documento: a conferência falha, a lista nunca nasce — e a primeira reatividade que
+ * chegar ao gráfico chama `updateOptions`, que percorre essa lista para sincronizar gráficos
+ * agrupados e morre com `Cannot read properties of undefined (reading 'filter')`.
+ *
+ * O erro não tem relação com o que o teste afirma: ele vem de um recurso — gráficos em grupo —
+ * que nenhuma tela do módulo usa. A lista vazia é a resposta correta para "quais gráficos estão
+ * sincronizados com este": nenhum.
+ */
+if (typeof window !== 'undefined') {
+  const apex = ((window as { Apex?: Record<string, unknown> }).Apex ??= {})
+
+  apex._chartInstances ??= []
+}
+
 if (typeof globalThis.matchMedia !== 'function') {
   globalThis.matchMedia = ((query: string) => ({
     matches: false,

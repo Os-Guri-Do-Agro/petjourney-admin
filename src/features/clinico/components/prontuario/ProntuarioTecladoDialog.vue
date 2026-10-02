@@ -39,7 +39,7 @@ const linhas = computed(() => [
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(26rem, 94vw)' }"
     :header="t('clinico.prontuario.teclado.titulo')"
     :dismissable-mask="true"

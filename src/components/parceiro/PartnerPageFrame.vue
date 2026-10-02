@@ -37,6 +37,37 @@ const props = withDefaults(
      * ignorar o controle.
      */
     guidance?: boolean
+    /**
+     * A tela tem um tutorial guiado, e o botão de ajuda passa a abri-lo.
+     *
+     * O mesmo botão, outro comportamento: em vez de ligar parágrafos de apoio, ele percorre a
+     * tela passo a passo, apontando para cada parte. Onde há tutorial, a explicação mora ao lado
+     * do que explica — ler "a coluna de documentação é ordenável" não ajuda quem ainda não sabe
+     * qual é a coluna.
+     *
+     * Quem não declara continua com o botão de sempre. As duas formas convivem porque migrar
+     * todas as telas do portal de uma vez não é assunto de quem só precisava de tutorial numa.
+     */
+    tour?: boolean
+    /**
+     * Uma medida de leitura para a página inteira, por exemplo `60rem`. Vazio: a página ocupa a
+     * largura toda, que é o comportamento de sempre.
+     *
+     * Existe porque **constranger só o conteúdo não funciona**. A rotina do turno é uma lista de
+     * uma coluna só, e numa tela larga ela não tem o que fazer com 1500 px: as fileiras esticam,
+     * e o botão principal afasta-se do texto que ele marca. Mas quando só o corpo ganhava um
+     * teto, o cabeçalho continuava indo até a borda — e uma página cujo título vai até o fim
+     * enquanto o conteúdo para no meio não lê como coluna, lê como defeito de carregamento.
+     *
+     * Por isso a medida vale para **cabeçalho, ações, estados e corpo juntos**, e centraliza: o
+     * vazio deixa de ser uma sobra à direita e vira margem dos dois lados, que é a forma que
+     * anuncia "isto acaba aqui de propósito". As ações da tela passam a encostar na mesma borda
+     * que os cartões do conteúdo.
+     *
+     * É opcional e nenhuma tela a tem por padrão: as outras do portal são grades e tabelas, que
+     * usam bem a largura e não devem encolher por causa desta.
+     */
+    measure?: string
   }>(),
   {
     subtitle: '',
@@ -46,15 +77,18 @@ const props = withDefaults(
     blockWhenSuspended: false,
     empty: false,
     guidance: false,
+    tour: false,
     emptyTitle: '',
     emptyDescription: '',
     emptyActionLabel: '',
+    measure: '',
   },
 )
 
 const emit = defineEmits<{
   retry: []
   emptyAction: []
+  tour: []
 }>()
 
 const { t } = useI18n()
@@ -131,8 +165,8 @@ const pageStyle = computed(() => {
     '--partner-primary': colors.vet.primary,
     '--partner-primary-soft': colors.vet.secondary,
     '--partner-primary-strong': colors.dashboard.primaryStrong,
-    /** Sempre branco real — `auth.white` no dark é superfície escura. */
-    '--partner-on-primary': LightColors.auth.white,
+    /** Sempre branco real: `auth.white` é superfície (quebrada no claro, escura no dark). */
+    '--partner-on-primary': LightColors.text.inverse,
     '--partner-warm-bg': colors.dashboard.warmBg,
     '--partner-warm-text': colors.dashboard.warmText,
     '--partner-success-bg': colors.dashboard.successBg,
@@ -145,14 +179,25 @@ const pageStyle = computed(() => {
 </script>
 
 <template>
-  <section class="partner-page" :style="pageStyle">
+  <section
+    class="partner-page"
+    :class="{ 'partner-page--medida': !!measure }"
+    :style="[pageStyle, measure ? { '--partner-measure': measure } : {}]"
+  >
     <header class="partner-page__header">
-      <div>
-        <p v-if="subtitle" class="partner-page__subtitle">{{ subtitle }}</p>
-        <h1 class="partner-page__title">{{ title }}</h1>
-      </div>
+      <!--
+        `cabecalho` substitui só o bloco do título; o botão de explicações e as ações da tela
+        continuam no mesmo lugar. Existe para a visão geral, cuja saudação tem mais de uma linha.
+        Quem usa o slot fica responsável pelo `h1`.
+      -->
+      <slot name="cabecalho">
+        <div>
+          <p v-if="subtitle" class="partner-page__subtitle">{{ subtitle }}</p>
+          <h1 class="partner-page__title">{{ title }}</h1>
+        </div>
+      </slot>
       <div
-        v-if="(guidance || $slots.actions) && !noPartnerAccess && !showSuspended"
+        v-if="(guidance || tour || $slots.actions) && !noPartnerAccess && !showSuspended"
         class="partner-page__actions"
       >
         <!--
@@ -160,18 +205,35 @@ const pageStyle = computed(() => {
           fica sempre no mesmo lugar, encostado no título. Ação de tela muda de página para
           página; controle de leitura, não.
         -->
-        <button
-          v-if="guidance"
+        <Button
+          v-if="tour"
+          class="partner-page__guidance"
+          type="button"
+          icon="pi pi-question-circle"
+          :label="t('shell.guidance.tour')"
+          outlined
+          rounded
+          severity="secondary"
+          size="small"
+          :title="t('shell.guidance.tourTitulo')"
+          @click="emit('tour')"
+        />
+
+        <Button
+          v-else-if="guidance"
           class="partner-page__guidance"
           :class="{ 'partner-page__guidance--ativo': isGuidanceVisible }"
           type="button"
+          icon="pi pi-info-circle"
+          :label="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
+          outlined
+          rounded
+          severity="secondary"
+          size="small"
           :aria-pressed="isGuidanceVisible"
           :title="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
           @click="toggleGuidance"
-        >
-          <i class="pi pi-info-circle" aria-hidden="true" />
-          <span>{{ isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show') }}</span>
-        </button>
+        />
 
         <slot name="actions" />
       </div>
@@ -354,39 +416,42 @@ const pageStyle = computed(() => {
   gap: 0.5rem;
 }
 
-.partner-page__guidance {
-  display: inline-flex;
+/*
+ * Tinta secundária, não a apagada: em `faint` o rótulo ficava a 3,2:1 sobre a página, abaixo do
+ * piso AA para texto de 12px — e é o controle que existe em todas as telas do portal.
+ */
+.partner-page__guidance.p-button {
   min-height: 2.2rem;
-  align-items: center;
   gap: 0.4rem;
   padding: 0.35rem 0.75rem;
-  border: 1px solid var(--partner-line, transparent);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--partner-faint, inherit);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.76rem;
+  border-color: var(--partner-line, transparent);
+  color: var(--partner-muted, inherit);
+  font-size: 0.8125rem;
+}
+
+.partner-page__guidance.p-button :deep(.p-button-label) {
   font-weight: 650;
 }
 
-.partner-page__guidance:hover {
+.partner-page__guidance.p-button:not(:disabled):hover {
+  border-color: var(--partner-line, transparent);
   background: var(--partner-card, transparent);
-  color: var(--partner-muted, inherit);
+  color: var(--partner-text, inherit);
 }
 
-.partner-page__guidance--ativo {
+.partner-page__guidance--ativo.p-button,
+.partner-page__guidance--ativo.p-button:not(:disabled):hover {
   background: var(--partner-card, transparent);
   color: var(--partner-text, inherit);
 }
 
 /* No estreito sobra o ícone: o rótulo empurraria as ações da tela para outra linha. */
 @media (max-width: 720px) {
-  .partner-page__guidance {
+  .partner-page__guidance.p-button {
     padding-inline: 0.55rem;
   }
 
-  .partner-page__guidance span {
+  .partner-page__guidance.p-button :deep(.p-button-label) {
     display: none;
   }
 }
@@ -394,6 +459,28 @@ const pageStyle = computed(() => {
 .partner-page__body {
   display: grid;
   gap: 1rem;
+}
+
+/*
+ * A medida de leitura, quando a tela pede uma.
+ *
+ * Vale para as quatro faixas da página — cabeçalho, corpo e os estados de carregamento/vazio/erro
+ * — porque constranger uma só produz o defeito que isto existe para evitar: título e ações indo
+ * até a borda enquanto o conteúdo para no meio, com um vazio à direita que lê como bug.
+ *
+ * `margin-inline: auto` e não `0`: centralizado, a sobra vira margem simétrica, que é uma forma
+ * conhecida de dizer "a coluna acaba aqui". Encostada à esquerda, a mesma sobra vira um buraco.
+ */
+.partner-page--medida .partner-page__header,
+.partner-page--medida .partner-page__body,
+.partner-page--medida .partner-page__state {
+  max-inline-size: var(--partner-measure);
+  margin-inline: auto;
+}
+
+/* A margem de baixo do cabeçalho é dele, e `margin-inline` não pode apagá-la. */
+.partner-page--medida .partner-page__header {
+  margin-block-end: 1.35rem;
 }
 
 .partner-page__state {
@@ -446,7 +533,7 @@ const pageStyle = computed(() => {
   gap: 0.75rem;
   width: min(100%, 42rem);
   margin-top: 0.25rem;
-  text-align: left;
+  text-align: start;
 }
 
 .partner-page__support-lede {
@@ -542,7 +629,7 @@ const pageStyle = computed(() => {
   .partner-page__channel-arrow {
     display: block;
     flex: 0 0 auto;
-    margin-left: auto;
+    margin-inline-start: auto;
     color: var(--partner-faint);
     font-size: 0.75rem;
   }

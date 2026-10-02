@@ -263,7 +263,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
 
           <p class="item__rodape">
             {{
-              t('clinico.internacao.prescricao.feitas', { total: feitas(prescricao) })
+              t('clinico.internacao.prescricao.feitas', { total: feitas(prescricao) }, feitas(prescricao))
             }}
             ·
             {{
@@ -331,7 +331,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
     <Dialog
       v-model:visible="abrindo"
       modal
-      class="clinic-dialog"
+      class="clinic-dialog hc-tema"
       :style="{ width: 'min(42rem, 96vw)' }"
       :header="t('clinico.internacao.prescricao.novaTitulo')"
       dismissable-mask
@@ -471,7 +471,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
               })
             }}
             ·
-            {{ t('clinico.internacao.prescricao.feitas', { total: feitas(prescricao) }) }}
+            {{ t('clinico.internacao.prescricao.feitas', { total: feitas(prescricao) }, feitas(prescricao)) }}
           </p>
         </div>
       </article>

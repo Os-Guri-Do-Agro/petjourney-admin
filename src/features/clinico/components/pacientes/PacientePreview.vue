@@ -62,7 +62,7 @@ const meta = computed(() => {
     valor.raca.trim(),
     porte ? t(`clinico.paciente.porte.${porte}`) : '',
     valor.nascimento ? formato.idade(valor.nascimento) : '',
-    t(`clinico.sexo.${valor.sexo}`),
+    formato.sexo(valor.sexo),
     valor.castrado ? t('clinico.paciente.castrado') : t('clinico.paciente.inteiro'),
   ].filter(Boolean)
 })
@@ -223,11 +223,9 @@ const contato = computed(() => [
 
 .previa__selo {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--clinic-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 /* O valor ausente é traço, e o traço é apagado: ele marca lugar sem competir com o preenchido. */

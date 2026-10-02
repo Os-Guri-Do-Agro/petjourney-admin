@@ -19,7 +19,8 @@
  */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import ToggleSwitch from 'primevue/toggleswitch'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 
@@ -29,6 +30,9 @@ import ProntuarioAnamnese from '@/features/clinico/components/prontuario/Prontua
 import ProntuarioConduta from '@/features/clinico/components/prontuario/ProntuarioConduta.vue'
 import ProntuarioDiagnostico from '@/features/clinico/components/prontuario/ProntuarioDiagnostico.vue'
 import ProntuarioExameFisico from '@/features/clinico/components/prontuario/ProntuarioExameFisico.vue'
+import EscutaGatilho from '@/features/clinico/components/escuta/EscutaGatilho.vue'
+import EscutaIndicador from '@/features/clinico/components/escuta/EscutaIndicador.vue'
+import EscutaPainel from '@/features/clinico/components/escuta/EscutaPainel.vue'
 import DocumentoAtestado from '@/features/clinico/components/documentos/DocumentoAtestado.vue'
 import DocumentoEncaminhamento from '@/features/clinico/components/documentos/DocumentoEncaminhamento.vue'
 import DocumentoObito from '@/features/clinico/components/documentos/DocumentoObito.vue'
@@ -67,15 +71,15 @@ import {
   progressoDoAtendimento,
 } from '@/features/clinico/domain/encounter-progress'
 import { useClinicoStore } from '@/features/clinico/stores/clinico'
+import { useEscutaStore } from '@/features/clinico/stores/escuta'
 import { useProntuarioStore } from '@/features/clinico/stores/prontuario'
-import { useCronometroStore } from '@/features/cronometro/stores/cronometro'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const clinico = useClinicoStore()
 const prontuario = useProntuarioStore()
-const cronometro = useCronometroStore()
+const escuta = useEscutaStore()
 const formato = useClinicFormat()
 
 const assumirAberto = ref(false)
@@ -101,6 +105,7 @@ const modoTeclado = ref(
   typeof window === 'undefined' || window.localStorage.getItem(CHAVE_TECLADO) !== 'false',
 )
 
+const idModoTeclado = useId()
 const mapaAberto = ref(false)
 const corpoDaEtapa = ref<HTMLElement | null>(null)
 
@@ -210,9 +215,11 @@ const passos = computed<PassoProntuario[]>(() => {
         conduta?.estado === 'alerta'
           ? t('clinico.prontuario.conduta.alergiaConfirmar')
           : atual.conduta.prescricoes.length > 0
-            ? t('clinico.prontuario.passos.prescricoes', {
-                contagem: atual.conduta.prescricoes.length,
-              })
+            ? t(
+                'clinico.prontuario.passos.prescricoes',
+                { contagem: atual.conduta.prescricoes.length },
+                atual.conduta.prescricoes.length,
+              )
             : atual.conduta.orientacoes,
     },
     {
@@ -392,13 +399,14 @@ function salvarEmPdf() {
 /** Aplicações de vacina do paciente — o comprovante imprime a partir delas. */
 const aplicacoesDeVacina = ref<AplicacaoVacina[]>([])
 
-watch(
-  () => prontuario.pet?.id,
-  async (petId) => {
-    aplicacoesDeVacina.value = petId ? await vacinaRepository.doPaciente(petId) : []
-  },
-  { immediate: true },
-)
+async function recarregarVacinas() {
+  const petId = prontuario.pet?.id
+
+  aplicacoesDeVacina.value = petId ? await vacinaRepository.doPaciente(petId) : []
+}
+
+/* A dose aplicada nesta consulta precisa sair no comprovante impresso logo depois. */
+watch(() => prontuario.pet?.id, recarregarVacinas, { immediate: true })
 
 const retornoAberto = ref(false)
 
@@ -424,6 +432,24 @@ function repetirReceita(prescricoes: Prescription[]) {
   })
 }
 
+/** Crítico é da prescrição: vai com ela para a receita e, no app, para o tratamento de casa. */
+function marcarCritico(prescricaoId: string, critico: boolean) {
+  const atual = encounter.value
+
+  if (!atual) {
+    return
+  }
+
+  prontuario.atualizar({
+    conduta: {
+      ...atual.conduta,
+      prescricoes: atual.conduta.prescricoes.map((prescricao) =>
+        prescricao.id === prescricaoId ? { ...prescricao, critico } : prescricao,
+      ),
+    },
+  })
+}
+
 function agendarRetorno() {
   retornoAberto.value = true
   void prontuario.buscarSugestoesDeRetorno()
@@ -438,41 +464,45 @@ async function confirmarRetorno(slot: SlotSugestao) {
 }
 
 onMounted(carregar)
-watch(idDaRota, carregar)
 
 /**
- * Oferece este atendimento ao cronômetro do cabeçalho.
- *
- * Quem publica o contexto é a página, e não o cabeçalho: assim o cabeçalho — que vive no pacote
- * inicial da aplicação — não precisa importar o módulo clínico só para saber o nome do paciente.
- * A dependência aponta para a store genérica, que não conhece nenhum dos dois.
- *
- * O contexto é oferta, não comando: quem decide começar a contar é a pessoa. Um relógio que
- * dispara sozinho ao abrir o prontuário mede a tela aberta, não o atendimento — e num modelo em
- * que o tempo vira dinheiro, medir a coisa errada é o defeito grave.
+ * Trocar de atendimento pela mesma rota fecha o microfone: a autorização foi dada por outro
+ * responsável, para outro paciente.
+ */
+watch(idDaRota, () => {
+  escuta.suspender()
+  void carregar()
+})
+
+/**
+ * A gravação começou: o histórico recolhe. É contexto que o veterinário já leu antes de chamar o
+ * paciente, e a conversa ao lado do prontuário proposto precisa da largura inteira.
  */
 watch(
-  [() => encounter.value?.id, () => prontuario.pet?.nome],
-  ([id, nome]) => {
-    cronometro.definirContexto(id ? { encounterId: id, rotulo: nome ?? '' } : null)
+  () => escuta.fase,
+  (fase, anterior) => {
+    if (fase === 'gravando' && anterior === 'inativa') {
+      historicoAberto.value = false
+    }
   },
-  { immediate: true },
 )
 
 onBeforeRouteLeave(async () => {
-  cronometro.definirContexto(null)
+  /* Microfone aberto numa tela que ninguém olha é o que a autorização do responsável não cobre. */
+  escuta.suspender()
   await prontuario.descarregar()
   prontuario.$limpar()
 })
 
 onBeforeUnmount(() => {
-  cronometro.definirContexto(null)
+  escuta.suspender()
   void prontuario.descarregar()
 })
 </script>
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.prontuario.subtitulo')"
     :title="t('clinico.prontuario.titulo')"
     :loading="prontuario.carregando && !encounter"
@@ -573,20 +603,27 @@ onBeforeUnmount(() => {
         que `Alt + →` percorre. Escondido em ajustes, ninguém saberia que existe.
       -->
       <div class="teclado">
-        <label class="teclado__toggle">
-          <input v-model="modoTeclado" type="checkbox" />
-          <span>{{ t('clinico.prontuario.teclado.modo') }}</span>
-        </label>
+        <!-- A gravação segue fora da anamnese; fora dela, isto é o que diz que o microfone está aberto. -->
+        <EscutaIndicador
+          v-if="escuta.emCurso && escuta.encounterId === encounter.id && etapa !== 'anamnese'"
+          @voltar="irParaEtapa('anamnese')"
+        />
 
-        <button
+        <span class="teclado__toggle">
+          <ToggleSwitch v-model="modoTeclado" :input-id="idModoTeclado" />
+          <label :for="idModoTeclado">{{ t('clinico.prontuario.teclado.modo') }}</label>
+        </span>
+
+        <Button
           type="button"
           class="teclado__mapa clinic-focusable"
+          link
+          size="small"
+          icon="pi pi-question-circle"
+          :label="t('clinico.prontuario.teclado.verTeclas')"
           :title="t('clinico.prontuario.teclado.titulo')"
           @click="mapaAberto = true"
-        >
-          <i class="pi pi-question-circle" aria-hidden="true" />
-          {{ t('clinico.prontuario.teclado.verTeclas') }}
-        </button>
+        />
       </div>
 
       <div class="prontuario__corpo" :class="{ 'prontuario__corpo--com-aside': historicoAberto }">
@@ -603,6 +640,20 @@ onBeforeUnmount(() => {
               :somente-leitura="prontuario.somenteLeitura"
               @aplicar="prontuario.atualizar({ anamnese: { ...encounter.anamnese, ...$event } })"
             />
+
+            <!--
+              A conversa gravada fica entre a pré-consulta e o formulário: é depois de ler o que o
+              responsável respondeu no app, e antes de o campo ser preenchido.
+            -->
+            <EscutaPainel
+              :encounter-id="encounter.id"
+              :anamnese="encounter.anamnese"
+              :pet="prontuario.pet"
+              :tutor="prontuario.tutor"
+              :somente-leitura="prontuario.somenteLeitura"
+              :motivo-leitura="motivoLeitura"
+              @aplicar="prontuario.atualizar({ anamnese: { ...encounter.anamnese, ...$event } })"
+            />
           </template>
 
           <ProntuarioAnamnese
@@ -611,7 +662,15 @@ onBeforeUnmount(() => {
             :somente-leitura="prontuario.somenteLeitura"
             :motivo-leitura="motivoLeitura"
             @atualizar="prontuario.atualizar({ anamnese: { ...encounter.anamnese, ...$event } })"
-          />
+          >
+            <template #acoes>
+              <EscutaGatilho
+                :encounter-id="encounter.id"
+                :somente-leitura="prontuario.somenteLeitura"
+                :motivo-leitura="motivoLeitura"
+              />
+            </template>
+          </ProntuarioAnamnese>
 
           <ProntuarioExameFisico
             v-else-if="etapa === 'exame'"
@@ -655,6 +714,7 @@ onBeforeUnmount(() => {
             :encounter="encounter"
             :pet="prontuario.pet"
             :somente-leitura="prontuario.somenteLeitura"
+            @registrada="recarregarVacinas"
           />
 
           <ProntuarioReceita
@@ -662,14 +722,20 @@ onBeforeUnmount(() => {
             :encounter="encounter"
             :somente-leitura="prontuario.somenteLeitura"
             @repetir="repetirReceita"
+            @critico="marcarCritico"
           />
 
+          <!--
+            `v-if` e não `v-else`: o `else` ficava pendurado no `v-if` da receita, e o resumo
+            inteiro aparecia embaixo da anamnese, do exame e do diagnóstico.
+          -->
           <ProntuarioResumo
-            v-else
+            v-if="etapa === 'resumo'"
             :encounter="encounter"
             :pet="prontuario.pet"
             :tutor="prontuario.tutor"
             @emitir="emitirDocumento"
+            @liberar-resumo="prontuario.liberarResumo()"
           />
 
           <!--
@@ -718,7 +784,7 @@ onBeforeUnmount(() => {
     <Dialog
       v-model:visible="assumirAberto"
       modal
-      class="clinic-dialog"
+      class="clinic-dialog hc-tema"
       :style="{ width: 'min(30rem, 94vw)' }"
       :header="t('clinico.prontuario.assumirDialogo.titulo')"
       dismissable-mask
@@ -743,7 +809,7 @@ onBeforeUnmount(() => {
     <Dialog
       v-model:visible="finalizarAberto"
       modal
-      class="clinic-dialog"
+      class="clinic-dialog hc-tema"
       :style="{ width: 'min(30rem, 94vw)' }"
       :header="t('clinico.prontuario.finalizarDialogo.titulo')"
       dismissable-mask
@@ -888,29 +954,30 @@ onBeforeUnmount(() => {
 .teclado__toggle {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.45rem;
   color: var(--clinic-muted);
-  cursor: pointer;
   font-size: var(--clinic-font-label);
   font-weight: 700;
 }
 
-.teclado__mapa {
-  display: inline-flex;
-  align-items: center;
+.teclado__toggle label {
+  cursor: pointer;
+}
+
+.teclado__mapa.p-button {
   gap: 0.3rem;
   padding: 0;
-  border: 0;
-  background: none;
-  color: var(--clinic-accent-strong);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
-  font-weight: 700;
 }
 
-.teclado__mapa:hover {
-  text-decoration: underline;
+.teclado__mapa.p-button,
+.teclado__mapa.p-button:not(:disabled):hover,
+.teclado__mapa.p-button:not(:disabled):active {
+  color: var(--clinic-accent-strong);
+}
+
+.teclado__mapa :deep(.p-button-label) {
+  font-weight: 700;
   text-underline-offset: 2px;
 }
 
@@ -986,14 +1053,11 @@ onBeforeUnmount(() => {
   margin: 0;
 }
 
+/* O que falta é uma linha com ícone na tinta de atenção — a faixa pintada não volta. */
 .dialogo__pendencias {
   display: flex;
   align-items: flex-start;
   gap: 0.4rem;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-attention-bg);
   color: var(--clinic-attention-text);
   font-weight: 650;
 }

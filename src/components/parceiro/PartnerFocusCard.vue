@@ -62,7 +62,7 @@ const { focusSurfaceStyle } = usePartnerFocusSurface()
 .partner-focus__glow {
   position: absolute;
   top: -4rem;
-  right: 0;
+  inset-inline-end: 0;
   z-index: 0;
   width: 11rem;
   max-width: 55%;
@@ -71,6 +71,10 @@ const { focusSurfaceStyle } = usePartnerFocusSurface()
   background: rgb(var(--pf-glow-rgb) / 0.14);
   pointer-events: none;
   transform: translateX(30%);
+}
+
+[dir='rtl'] .partner-focus__glow {
+  transform: translateX(-30%);
 }
 
 .partner-focus > :not(.partner-focus__glow) {

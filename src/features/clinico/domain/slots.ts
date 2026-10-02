@@ -75,8 +75,19 @@ export function buscarAlternativas(
 
   const sugestoes: SlotSugestao[] = []
 
+  /*
+   * Hoje, só o que ainda não começou. "Mais perto do que a pessoa queria" mede para os dois
+   * lados, e às 17h30 isso sugeria 14:45 — um horário que a recepção não tem como oferecer.
+   */
+  const agora = context.clock.now()
+  const primeiroMinuto = agora.date === input.data ? agora.minutes : -1
+
   for (const professionalId of profissionais) {
     for (const minuto of slots) {
+      if (minuto < primeiroMinuto) {
+        continue
+      }
+
       const inicio: ISODateTime = context.clock.toIso(input.data, minuto)
       const fim: ISODateTime = context.clock.toIso(input.data, minuto + input.duracaoMinutos)
 

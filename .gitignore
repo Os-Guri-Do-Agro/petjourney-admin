@@ -50,5 +50,5 @@ __screenshots__/
 # Vite
 *.timestamp-*-*.mjs
 
-# Pasta de trabalho da tradução sr/ar (rascunho local, não versionada)
+# Pasta de trabalho da tradução sr/ar (lotes, saídas dos tradutores)
 .i18n-work/

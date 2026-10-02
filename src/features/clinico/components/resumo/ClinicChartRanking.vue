@@ -1,197 +1,133 @@
 <script setup lang="ts">
 /**
- * Ranking em barras horizontais, desenhado com ApexCharts.
+ * Ranking em linhas: nome, trilho com a barra, e o número com o peso no total — "70 (44%)".
  *
- * Barra horizontal em vez de rosca: comparar fatias de um donut é notoriamente impreciso, e o
- * nome de cada item — "Márcia Do Espírito Santo Albuquerque", "Doença mixomatosa da valva
- * mitral" — não cabe em legenda de gráfico circular sem virar sopa de cores.
+ * Era um gráfico do ApexCharts, e três coisas dele atrapalhavam a leitura:
  *
- * Três escolhas de leitura:
+ * - **A ordem saía de cabeça para baixo.** O componente invertia as fatias supondo que o Apex
+ *   desenhasse a primeira categoria embaixo; ele desenha em cima, e o primeiro colocado ia parar
+ *   no pé do cartão.
+ * - **O nome era cortado em 150 px** — "Doença mixomatosa da valv…", "Márcia Do Espírito Santo
+ *   A…" — e o nome inteiro só existia na dica do mouse, que tablet não tem.
+ * - **"70  44%" grudados** liam como um número só.
  *
- * - **O número fica fora da barra, não dentro.** Dentro, o primeiro colocado lê bem e o último
- *   — barra de dez pixels — esconde o próprio valor. Fora, todos leem igual, e é o último
- *   colocado que costuma ser a informação nova.
- * - **A escala é relativa ao primeiro colocado.** Comparar entre si é o ponto de um ranking; o
- *   percentual do total vai junto do número, para quem precisa do peso absoluto.
- * - **A altura acompanha a quantidade de itens.** Altura fixa com três itens desenha barras
- *   gordas e vazio embaixo; com dez, esmaga tudo.
+ * Em HTML o nome quebra em duas linhas quando precisa, a ordem é a da lista (maior primeiro, como
+ * as fatias já chegam do domínio) e o leitor de tela lê uma lista de verdade, sem tabela escondida.
+ * A escala continua relativa ao primeiro colocado: comparar entre si é o ponto de um ranking.
  */
-import type { ApexAxisChartSeries, ApexFormatterOpts, ApexOptions } from 'apexcharts'
 import { computed } from 'vue'
-import VueApexCharts from './apex'
 
-import { useClinicChartTheme } from '../../composables/useClinicChartTheme'
+import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { Fatia } from '../../domain/resumo'
 
 const props = withDefaults(
   defineProps<{
     fatias: Fatia[]
-    /** Sufixo do valor: "atendimentos", "casos". Vazio mostra só o número. */
+    /** Sufixo do valor: "doses", "casos". Vazio mostra só o número. */
     unidade?: string
+    /** `atencao` só onde a contagem é ruim por natureza (perdas de vacina); o resto é tinta da marca. */
     tom?: 'acento' | 'atencao'
     vazio?: string
   }>(),
   { unidade: '', tom: 'acento', vazio: '' },
 )
 
-const tema = useClinicChartTheme()
+const formato = useClinicFormat()
 
-const ALTURA_DA_LINHA = 34
-const ALTURA_DA_MOLDURA = 26
+const maior = computed(() => props.fatias.reduce((topo, fatia) => Math.max(topo, fatia.valor), 0))
 
-const altura = computed(() => props.fatias.length * ALTURA_DA_LINHA + ALTURA_DA_MOLDURA)
-
-/**
- * O Apex desenha a primeira categoria embaixo. Como as fatias já chegam do maior para o menor,
- * a ordem é invertida aqui para o primeiro colocado ficar no topo.
- */
-const ordenadas = computed(() => [...props.fatias].reverse())
-
-/**
- * Valores e categorias vão separados de propósito.
- *
- * A forma `{ x, y }` também funciona, mas em barra horizontal o Apex inverte os eixos por
- * dentro e passa a tratar o `x` do dado como valor. Com `xaxis.categories` a divisão é
- * explícita: a categoria é o nome, o número é o dado.
- */
-const series = computed<ApexAxisChartSeries>(() => [
-  { name: props.unidade, data: ordenadas.value.map((fatia) => fatia.valor) },
-])
-
-const categorias = computed(() => ordenadas.value.map((fatia) => fatia.rotulo))
-
-/**
- * O percentual vem do índice do ponto, não de uma busca pelo rótulo desenhado.
- *
- * Dois diagnósticos podem ter a mesma descrição vinda de bases diferentes, e o rótulo do eixo
- * chega truncado quando é longo — nos dois casos a busca por texto pegaria a fatia errada.
- */
-function porcentagem(indice: number): string {
-  return `${Math.round((ordenadas.value[indice]?.parte ?? 0) * 100)}%`
+function largura(fatia: Fatia) {
+  return maior.value > 0 ? (fatia.valor / maior.value) * 100 : 0
 }
-
-const opcoes = computed<ApexOptions>(() => {
-  const cor = tema.cor.value
-  const barra = props.tom === 'atencao' ? cor['attention-text'] : cor['accent-strong']
-
-  return {
-    chart: { ...tema.grafico.value, type: 'bar', height: altura.value, stacked: false },
-    colors: [barra],
-    grid: {
-      ...tema.grade.value,
-      /* Num ranking a grade vertical é ruído: o que se compara é comprimento, não valor exato. */
-      xaxis: { lines: { show: false } },
-      yaxis: { lines: { show: false } },
-      /*
-       * `left` **não** pode ser zero, por mais que não haja grade a afastar.
-       *
-       * É esta folga que abriga o rótulo do eixo. Zerada, o Apex encosta a coluna de nomes na
-       * borda do SVG e a primeira letra de cada rótulo longo fica do lado de fora — o corte
-       * aparecia só em inglês, porque em português os nomes cabiam antes do limite e nunca
-       * chegavam à borda ("Chronic kidney disease" virava "hronic kidney disease").
-       */
-      padding: { top: -14, right: 44, bottom: -14, left: 10 },
-    },
-    legend: { show: false },
-    states: tema.estados.value,
-    fill: { opacity: 1 },
-    plotOptions: {
-      bar: {
-        horizontal: true,
-        barHeight: '58%',
-        borderRadius: 4,
-        borderRadiusApplication: 'end',
-        colors: {
-          /* Trilho: sem ele a barra curta flutua e some contra o fundo do cartão. */
-          backgroundBarColors: [cor['surface-sunken']],
-          backgroundBarOpacity: 1,
-          backgroundBarRadius: 4,
-        },
-        /*
-         * `top`, em barra horizontal, é a ponta da barra. E `hideOverflowingLabels` precisa
-         * ficar desligado: o primeiro colocado ocupa a largura inteira e o Apex esconderia
-         * justamente o número dele — o recuo à direita na grade é que abre o espaço.
-         */
-        dataLabels: { position: 'top', hideOverflowingLabels: false },
-      },
-    },
-    dataLabels: {
-      enabled: true,
-      textAnchor: 'start',
-      offsetX: 8,
-      offsetY: 1,
-      style: {
-        fontFamily: tema.fonte.value.familia,
-        fontSize: tema.fonte.value.rotulo,
-        fontWeight: 800,
-        colors: [cor.text],
-      },
-      background: { enabled: false },
-      formatter: (valor: string | number | number[], opts?: ApexFormatterOpts) =>
-        `${valor}  ${porcentagem(opts?.dataPointIndex ?? 0)}`,
-    },
-    xaxis: {
-      type: 'category',
-      categories: categorias.value,
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-      /* O eixo de valor não aparece: o número já está na ponta de cada barra. */
-      labels: { show: false },
-      crosshairs: { show: false },
-      tooltip: { enabled: false },
-    },
-    yaxis: {
-      labels: {
-        /*
-         * Nome longo é a regra aqui, não a exceção. O corte em 150 px mantém a coluna de barras
-         * começando no mesmo lugar nos dois cartões lado a lado; o nome inteiro fica na dica.
-         */
-        maxWidth: 150,
-        align: 'left',
-        style: {
-          ...tema.rotuloDeEixo.value,
-          colors: cor.text,
-        },
-      },
-    },
-    tooltip: {
-      ...tema.dica.value,
-      shared: false,
-      intersect: true,
-      marker: { show: false },
-      x: { show: true },
-      y: {
-        formatter: (valor: number, opts?: ApexFormatterOpts) => {
-          const numero = props.unidade ? `${valor} ${props.unidade}` : String(valor)
-
-          return `${numero} · ${porcentagem(opts?.dataPointIndex ?? 0)}`
-        },
-        title: { formatter: () => '' },
-      },
-    },
-  }
-})
 </script>
 
 <template>
-  <div class="ranking">
-    <p v-if="fatias.length === 0" class="ranking__vazio">{{ vazio }}</p>
+  <p v-if="fatias.length === 0" class="ranking__vazio">{{ vazio }}</p>
 
-    <VueApexCharts
-      v-else
-      type="bar"
-      :height="altura"
-      :options="opcoes"
-      :series="series"
-      width="100%"
-    />
-  </div>
+  <ol v-else class="ranking" :class="`ranking--${tom}`">
+    <li v-for="fatia in fatias" :key="fatia.id" class="ranking__linha">
+      <span class="ranking__nome">{{ fatia.rotulo }}</span>
+      <span class="ranking__trilho" aria-hidden="true">
+        <span class="ranking__barra" :style="{ inlineSize: `${largura(fatia)}%` }" />
+      </span>
+      <span class="ranking__valor">
+        <strong>{{ unidade ? `${fatia.valor} ${unidade}` : fatia.valor }}</strong>
+        ({{ formato.percentual(fatia.parte) }})
+      </span>
+    </li>
+  </ol>
 </template>
 
 <style scoped>
+.ranking {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Três colunas que se repetem em toda linha: as barras começam no mesmo lugar. */
+.ranking__linha {
+  display: grid;
+  align-items: center;
+  gap: 0.85rem;
+  grid-template-columns: minmax(7rem, 12rem) minmax(0, 1fr) 5.75rem;
+}
+
+.ranking__nome {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--hc-tinta);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.ranking__trilho {
+  display: block;
+  height: 0.6rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--hc-linha);
+}
+
+.ranking__barra {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--hc-marca);
+  transition: inline-size 0.2s ease-out;
+}
+
+.ranking--atencao .ranking__barra {
+  background: var(--hc-pessego-tinta);
+}
+
+.ranking__valor {
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ranking__valor strong {
+  color: var(--hc-tinta);
+  font-weight: 700;
+}
+
 .ranking__vazio {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ranking__barra {
+    transition: none;
+  }
 }
 </style>

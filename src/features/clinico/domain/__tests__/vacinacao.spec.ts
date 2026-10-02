@@ -12,6 +12,7 @@ import type { AplicacaoVacina, Vacina } from '../../data/types'
 import { addDays } from '../clinic-time'
 import {
   JANELA_DE_AVISO_EM_DIAS,
+  CARENCIA_DE_ATRASO_EM_DIAS,
   listaDeChamada,
   proximaDose,
   reforcosDoPaciente,
@@ -26,8 +27,13 @@ const V10: Vacina = {
   fabricante: 'Zoetis',
   especies: ['canina'],
   dosesNaSerie: 3,
+  dosesAdultoSemHistorico: 2,
+  idadeMinimaDias: 42,
+  essencial: true,
+  vias: ['subcutanea'],
   intervaloReforcoDias: 365,
   obrigatoria: false,
+  estoqueMinimo: 10,
 }
 
 const ANTIRRABICA: Vacina = {
@@ -36,8 +42,13 @@ const ANTIRRABICA: Vacina = {
   fabricante: 'Boehringer',
   especies: ['canina', 'felina'],
   dosesNaSerie: 1,
+  dosesAdultoSemHistorico: 1,
+  idadeMinimaDias: 84,
+  essencial: true,
+  vias: ['subcutanea'],
   intervaloReforcoDias: 365,
   obrigatoria: true,
+  estoqueMinimo: 10,
 }
 
 function aplicacao(patch: Partial<AplicacaoVacina> = {}): AplicacaoVacina {
@@ -45,13 +56,18 @@ function aplicacao(patch: Partial<AplicacaoVacina> = {}): AplicacaoVacina {
     id: 'apl-1',
     petId: 'pet-luna',
     vacinaId: 'vac-v10',
+    origem: 'clinica',
     professionalId: 'prof-ana',
     aplicadaEm: `${HOJE}T10:00:00-04:00`,
     lote: 'L2026-A',
     validadeLote: '2027-06-30',
     dose: 1,
+    dosesNaSerie: 3,
     via: 'subcutanea',
     proximaDoseEm: addDays(HOJE, 28),
+    agendamentoDaProximaId: null,
+    encounterId: null,
+    externa: null,
     observacao: '',
     ...patch,
   }
@@ -68,14 +84,33 @@ describe('proximaDose', () => {
     expect(proximaDose(V10, 3, HOJE)).toBe(addDays(HOJE, 365))
   })
 
+  it('usa o tamanho da série do paciente, e não o do catálogo', () => {
+    /** Adulto sem histórico fecha a V10 com duas: a segunda já é a do reforço anual. */
+    expect(proximaDose(V10, 2, HOJE, 2)).toBe(addDays(HOJE, 365))
+  })
+
   it('vacina de dose única já nasce anual', () => {
     expect(proximaDose(ANTIRRABICA, 1, HOJE)).toBe(addDays(HOJE, 365))
   })
 })
 
 describe('situacaoDoReforco', () => {
-  it('marca vencido quando a data passou', () => {
-    expect(situacaoDoReforco(addDays(HOJE, -1), HOJE, false)).toBe('vencido')
+  it('marca vencido quando passa da carência', () => {
+    expect(situacaoDoReforco(addDays(HOJE, -CARENCIA_DE_ATRASO_EM_DIAS), HOJE, false)).toBe(
+      'vencido',
+    )
+  })
+
+  it('dentro da carência continua a vencer — é o mesmo relógio do app', () => {
+    /**
+     * O app só chama de atrasada depois de `VACINA_ATRASO_DIAS`, e é essa tela que o
+     * responsável vê ao lado da da clínica. Um dia vencido aqui e "próxima dose" lá seriam dois
+     * relógios para a mesma dose.
+     */
+    expect(situacaoDoReforco(addDays(HOJE, -1), HOJE, false)).toBe('proximo')
+    expect(situacaoDoReforco(addDays(HOJE, -(CARENCIA_DE_ATRASO_EM_DIAS - 1)), HOJE, false)).toBe(
+      'proximo',
+    )
   })
 
   it('avisa dentro da janela', () => {
@@ -142,6 +177,7 @@ describe('reforcosDoPaciente', () => {
           id: 'a2',
           vacinaId: 'vac-antirrabica-canina',
           dose: 1,
+          dosesNaSerie: 1,
           proximaDoseEm: addDays(HOJE, -40),
         }),
       ],

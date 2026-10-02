@@ -7,6 +7,12 @@ import {
   rotaPertenceAoModulo,
   useModuloClinico,
 } from '@/composables/useModuloClinico'
+import {
+  aplicarParametroDoHotel,
+  PARAMETRO_DO_HOTEL,
+  rotaPertenceAoHotel,
+  useModuloHotel,
+} from '@/composables/useModuloHotel'
 import { isAuthenticated } from '@/service/auth/auth-session'
 
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
@@ -85,10 +91,24 @@ router.beforeEach((to) => {
    * URL — `?clinico=on` colado na barra de endereço transforma o caminho oculto numa placa, e
    * qualquer captura de tela o entregaria.
    */
-  if (aplicarParametroDaUrl(to.query[PARAMETRO_DO_MODULO])) {
+  const clinicoDecidiu = aplicarParametroDaUrl(to.query[PARAMETRO_DO_MODULO])
+  const hotelDecidiu = aplicarParametroDoHotel(to.query[PARAMETRO_DO_HOTEL])
+
+  if (clinicoDecidiu || hotelDecidiu) {
     const query = { ...to.query }
 
-    delete query[PARAMETRO_DO_MODULO]
+    /*
+     * Os dois são aplicados antes de qualquer redirecionamento, e só então a query é limpa: um
+     * link com `?clinico=on&hotel=on` precisa ligar os dois, e sair cedo no primeiro deixaria o
+     * segundo para uma navegação que nunca acontece.
+     */
+    if (clinicoDecidiu) {
+      delete query[PARAMETRO_DO_MODULO]
+    }
+
+    if (hotelDecidiu) {
+      delete query[PARAMETRO_DO_HOTEL]
+    }
 
     return { path: to.path, query, hash: to.hash, replace: true }
   }
@@ -99,6 +119,10 @@ router.beforeEach((to) => {
    * encontrado" — a rota existe, só não é para ser alcançada assim.
    */
   if (hasActiveSession && rotaPertenceAoModulo(to.path) && !useModuloClinico().ativo.value) {
+    return getDefaultLandingPath()
+  }
+
+  if (hasActiveSession && rotaPertenceAoHotel(to.path) && !useModuloHotel().ativo.value) {
     return getDefaultLandingPath()
   }
 

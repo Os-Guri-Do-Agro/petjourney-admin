@@ -12,10 +12,12 @@
  *   na leitura é o que impede a agenda de encher de cópias.
  */
 import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
-import { computed, ref, watch } from 'vue'
+import SelectButton from 'primevue/selectbutton'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicField from '../base/ClinicField.vue'
@@ -71,10 +73,13 @@ const opcoesSala = computed(() => [
 
 const opcoesDias = computed(() =>
   DIAS.map((dia) => ({
-    valor: String(dia),
+    valor: dia,
     rotulo: formato.diaDaSemanaCurto(diaExemplo(dia)),
   })),
 )
+
+const idRepete = useId()
+const idDias = useId()
 
 /** Um dia real daquela semana só para o `Intl` nomear o dia — nada de tabela fixa de rótulos. */
 function diaExemplo(weekday: WeekdayIndex): ISODate {
@@ -110,14 +115,6 @@ watch(
   },
 )
 
-function alternarDia(dia: string) {
-  const valor = Number(dia) as WeekdayIndex
-
-  diasEscolhidos.value = diasEscolhidos.value.includes(valor)
-    ? diasEscolhidos.value.filter((item) => item !== valor)
-    : [...diasEscolhidos.value, valor]
-}
-
 async function confirmar() {
   if (!podeSalvar.value || enviando.value) {
     return
@@ -150,7 +147,7 @@ async function confirmar() {
   <Dialog
     :visible="visivel"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(34rem, 94vw)' }"
     @update:visible="emit('update:visivel', $event)"
   >
@@ -230,28 +227,30 @@ async function confirmar() {
         </template>
       </ClinicField>
 
-      <label class="bloquear__repete">
-        <input v-model="repete" type="checkbox" />
-        <span>{{ t('clinico.agenda.bloqueio.repetir') }}</span>
-      </label>
+      <div class="bloquear__repete">
+        <Checkbox v-model="repete" binary :input-id="idRepete" />
+        <label :for="idRepete">{{ t('clinico.agenda.bloqueio.repetir') }}</label>
+      </div>
 
-<!--
+      <!--
         Escolha múltipla, então não é o `ClinicToggleGroup` — aquele é de opção única e forçar
         um modo múltiplo nele mudaria o contrato de todos os outros seis lugares que o usam.
       -->
       <fieldset v-if="repete" class="dias">
-        <legend class="clinic-label">{{ t('clinico.agenda.bloqueio.diasDaSemana') }}</legend>
+        <legend :id="idDias" class="clinic-label">
+          {{ t('clinico.agenda.bloqueio.diasDaSemana') }}
+        </legend>
 
-        <div class="dias__lista">
-          <label v-for="opcao in opcoesDias" :key="opcao.valor" class="dia">
-            <input
-              type="checkbox"
-              :checked="diasEscolhidos.includes(Number(opcao.valor) as WeekdayIndex)"
-              @change="alternarDia(opcao.valor)"
-            />
-            <span>{{ opcao.rotulo }}</span>
-          </label>
-        </div>
+        <SelectButton
+          v-model="diasEscolhidos"
+          class="dias__lista"
+          :options="opcoesDias"
+          option-label="rotulo"
+          option-value="valor"
+          multiple
+          size="small"
+          :aria-labelledby="idDias"
+        />
       </fieldset>
     </form>
 
@@ -308,29 +307,14 @@ async function confirmar() {
   border: 0;
 }
 
-.dias__lista {
-  display: flex;
+.dias__lista.p-selectbutton {
   flex-wrap: wrap;
-  gap: var(--clinic-space-2);
   margin-top: var(--clinic-space-2);
 }
 
-.dia {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.6rem;
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  color: var(--clinic-text);
-  cursor: pointer;
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
-}
-
-.dia:has(input:checked) {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
+/* Dia marcado: anel e cor do acento, para o estado não depender só do fundo. */
+.dias__lista :deep(.p-togglebutton-checked .p-togglebutton-content) {
+  box-shadow: inset 0 0 0 1.5px var(--clinic-accent-strong);
   color: var(--clinic-accent-strong);
 }
 
@@ -339,7 +323,10 @@ async function confirmar() {
   align-items: center;
   gap: var(--clinic-space-2);
   color: var(--clinic-text);
-  cursor: pointer;
   font-size: var(--clinic-font-base);
+}
+
+.bloquear__repete label {
+  cursor: pointer;
 }
 </style>

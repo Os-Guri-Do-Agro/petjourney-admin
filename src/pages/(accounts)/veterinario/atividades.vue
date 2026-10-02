@@ -11,6 +11,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { encounterRepository } from '@/features/clinico/data/repositories'
@@ -30,9 +31,7 @@ const retornos = ref<RetornoPendente[]>([])
 const carregando = ref(false)
 const erro = ref('')
 
-const total = computed(
-  () => rascunhos.value.length + retornos.value.length + fila.ofertadas.length,
-)
+const total = computed(() => rascunhos.value.length + retornos.value.length + fila.ofertadas.length)
 
 const vazio = computed(() => !carregando.value && !erro.value && total.value === 0)
 
@@ -64,6 +63,7 @@ onMounted(carregar)
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('clinico.atividades.subtitulo')"
     :title="t('clinico.atividades.titulo')"
     :loading="carregando && total === 0"
@@ -74,6 +74,19 @@ onMounted(carregar)
     block-when-suspended
     @retry="carregar"
   >
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('clinico.faltas.subtitulo') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('clinico.atividades.titulo') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p v-if="!carregando || total > 0" class="hc-saudacao__resumo" aria-live="polite">
+            {{ t('clinico.atividades.saudacao', { n: total }, total) }}
+          </p>
+        </div>
+      </div>
+    </template>
+
     <div class="atividades clinic-scope">
       <section v-if="rascunhos.length > 0" class="pilha">
         <h2 class="pilha__titulo">
@@ -84,11 +97,20 @@ onMounted(carregar)
 
         <ul class="pilha__lista">
           <li v-for="encounter in rascunhos" :key="encounter.id">
-            <button
+            <Button
               type="button"
               class="item clinic-focusable"
+              text
               @click="router.push(`/veterinario/atendimento/${encounter.id}`)"
             >
+              <PetAvatar
+                class="item__avatar"
+                :nome="clinico.pet(encounter.petId)?.nome ?? ''"
+                :iniciais="clinico.pet(encounter.petId)?.iniciais ?? ''"
+                :especie="clinico.pet(encounter.petId)?.especie ?? null"
+                :foto-url="clinico.pet(encounter.petId)?.fotoUrl ?? ''"
+                tamanho="md"
+              />
               <span class="item__corpo">
                 <strong>{{ clinico.pet(encounter.petId)?.nome }}</strong>
                 <small>
@@ -97,7 +119,7 @@ onMounted(carregar)
                 </small>
               </span>
               <i class="pi pi-chevron-right" aria-hidden="true" />
-            </button>
+            </Button>
           </li>
         </ul>
       </section>
@@ -112,13 +134,25 @@ onMounted(carregar)
         <ul class="pilha__lista">
           <li v-for="item in retornos" :key="item.encounter.id">
             <div class="item item--estatico">
+              <PetAvatar
+                class="item__avatar"
+                :nome="clinico.pet(item.encounter.petId)?.nome ?? ''"
+                :iniciais="clinico.pet(item.encounter.petId)?.iniciais ?? ''"
+                :especie="clinico.pet(item.encounter.petId)?.especie ?? null"
+                :foto-url="clinico.pet(item.encounter.petId)?.fotoUrl ?? ''"
+                tamanho="md"
+              />
               <span class="item__corpo">
                 <strong>{{ clinico.pet(item.encounter.petId)?.nome }}</strong>
                 <small>
                   {{ clinico.diagnosticoPrincipal(item.encounter) || '—' }} ·
                   {{
                     t('clinico.formato.haTempo', {
-                      valor: t('clinico.formato.dias', { valor: item.diasDeAtraso }, item.diasDeAtraso),
+                      valor: t(
+                        'clinico.formato.dias',
+                        { valor: item.diasDeAtraso },
+                        item.diasDeAtraso,
+                      ),
                     })
                   }}
                 </small>
@@ -144,11 +178,20 @@ onMounted(carregar)
 
         <ul class="pilha__lista">
           <li v-for="entrada in fila.ofertadas" :key="entrada.id">
-            <button
+            <Button
               type="button"
               class="item clinic-focusable"
+              text
               @click="router.push('/veterinario/fila')"
             >
+              <PetAvatar
+                class="item__avatar"
+                :nome="clinico.pet(entrada.petId)?.nome ?? ''"
+                :iniciais="clinico.pet(entrada.petId)?.iniciais ?? ''"
+                :especie="clinico.pet(entrada.petId)?.especie ?? null"
+                :foto-url="clinico.pet(entrada.petId)?.fotoUrl ?? ''"
+                tamanho="md"
+              />
               <span class="item__corpo">
                 <strong>{{ clinico.pet(entrada.petId)?.nome }}</strong>
                 <small v-if="entrada.ofertaExpiraEm">
@@ -160,7 +203,7 @@ onMounted(carregar)
                 </small>
               </span>
               <i class="pi pi-chevron-right" aria-hidden="true" />
-            </button>
+            </Button>
           </li>
         </ul>
       </section>
@@ -169,24 +212,23 @@ onMounted(carregar)
 </template>
 
 <style scoped>
-/**
- * Três pilhas independentes, lado a lado enquanto couberem.
- *
- * Empilhadas numa coluna só, a tela larga jogava o botão "Marcar retorno" a um palmo do nome do
- * paciente — o olho perdia a ligação entre a linha e a ação dela. Em coluna estreita os dois
- * voltam a andar juntos, e as três pendências ficam visíveis de uma vez, sem rolagem.
+/*
+ * As três pendências empilhadas, cada uma na largura toda. Lado a lado, a coluna de retornos
+ * espremia o diagnóstico em "Doença do disco…" e o botão tomava metade da linha; empilhadas, a
+ * linha diz o que é e a ação fica na ponta, onde o olho termina de ler.
  */
 .atividades {
   display: grid;
   align-items: start;
   gap: var(--clinic-space-4);
-  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
+/* O cartão e o título dos cartões da Visão geral (`.hc`): título em caixa normal, na tinta. */
 .pilha {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-4);
+  gap: var(--clinic-space-3);
+  padding: 1.2rem 1.35rem 1.35rem;
   border: 1px solid var(--clinic-line);
   border-radius: var(--clinic-radius-card);
   background: var(--clinic-surface);
@@ -196,13 +238,12 @@ onMounted(carregar)
 .pilha__titulo {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 0.55rem;
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  color: var(--clinic-text);
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .pilha__marca {
@@ -233,10 +274,13 @@ onMounted(carregar)
   list-style: none;
 }
 
-.item {
+/* A linha clicável é `Button`; a de retorno (com ação própria) é `div`. As duas leem igual. */
+.item,
+.item.p-button {
   display: flex;
   width: 100%;
   align-items: center;
+  justify-content: flex-start;
   gap: var(--clinic-space-3);
   min-height: var(--clinic-row-height);
   padding: var(--clinic-cell-padding-y) var(--clinic-space-2);
@@ -244,21 +288,24 @@ onMounted(carregar)
   border-radius: var(--clinic-radius-control);
   background: transparent;
   color: inherit;
-  cursor: pointer;
   font: inherit;
-  text-align: left;
+  text-align: start;
 }
 
-.item:hover {
+.item.p-button:not(:disabled):hover,
+.item.p-button:not(:disabled):active {
+  border: none;
   background: var(--clinic-surface-soft);
+  color: inherit;
 }
 
-.item--estatico {
-  cursor: default;
+.item.p-button:focus-visible {
+  outline: none;
+  box-shadow: var(--clinic-focus-ring);
 }
 
-.item--estatico:hover {
-  background: transparent;
+.item__avatar {
+  flex-shrink: 0;
 }
 
 .item__corpo {
@@ -275,12 +322,16 @@ onMounted(carregar)
   white-space: nowrap;
 }
 
+/* Até duas linhas: o diagnóstico é o que decide a ordem do dia, e cortado em uma não se lia. */
 .item__corpo small {
+  display: -webkit-box;
   overflow: hidden;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .item i {

@@ -41,7 +41,7 @@ const dialogStyle = computed(() => {
     '--soon-primary': colors.vet.primary,
     '--soon-primary-soft': colors.vet.secondary,
     '--soon-primary-strong': colors.dashboard.primaryStrong,
-    '--soon-on-primary': LightColors.auth.white,
+    '--soon-on-primary': LightColors.text.inverse,
     '--soon-shadow-rgb': colors.auth.shadowRgb,
   }
 })
@@ -68,14 +68,15 @@ function close() {
   >
     <template #container="{ closeCallback }">
       <div class="soon-card" :style="dialogStyle" role="dialog" aria-modal="true" aria-labelledby="coming-soon-title">
-        <button
+        <Button
           type="button"
           class="soon-card__close"
+          text
+          severity="secondary"
+          icon="pi pi-times"
           :aria-label="t('comingSoon.cupom.closeAria')"
           @click="closeCallback"
-        >
-          <i class="pi pi-times" aria-hidden="true" />
-        </button>
+        />
 
         <div class="soon-card__hero" aria-hidden="true">
           <span class="soon-card__badge">{{ t('comingSoon.cupom.badge') }}</span>
@@ -118,27 +119,19 @@ function close() {
     0 22px 48px rgb(var(--soon-shadow-rgb) / 0.18);
 }
 
-.soon-card__close {
+.soon-card__close.p-button {
   position: absolute;
   top: 0.85rem;
-  right: 0.85rem;
-  display: grid;
+  inset-inline-end: 0.85rem;
   width: 2.1rem;
   height: 2.1rem;
-  place-items: center;
-  border: 0;
   border-radius: 0.7rem;
   background: color-mix(in srgb, var(--soon-surface) 80%, transparent);
   color: var(--soon-muted);
-  cursor: pointer;
-  transition:
-    background 140ms ease,
-    color 140ms ease;
 }
 
-.soon-card__close:hover,
-.soon-card__close:focus-visible {
-  outline: none;
+.soon-card__close.p-button:not(:disabled):hover,
+.soon-card__close.p-button:not(:disabled):active {
   background: var(--soon-surface);
   color: var(--soon-text);
 }
@@ -148,7 +141,7 @@ function close() {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.85rem;
-  padding-right: 2rem;
+  padding-inline-end: 2rem;
 }
 
 .soon-card__badge {

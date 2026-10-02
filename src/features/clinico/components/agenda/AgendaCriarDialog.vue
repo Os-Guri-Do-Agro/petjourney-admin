@@ -24,6 +24,8 @@ import Textarea from 'primevue/textarea'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+
 import ClinicAlertChip from '../base/ClinicAlertChip.vue'
 import ClinicField from '../base/ClinicField.vue'
 import PacienteNovoForm from '../pacientes/PacienteNovoForm.vue'
@@ -55,7 +57,7 @@ const emit = defineEmits<{
   ]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
@@ -82,6 +84,24 @@ const pet = computed(() => (petId.value ? clinico.pet(petId.value) : null))
 
 const duracao = computed(() => tipo.value?.duracaoMinutos ?? 30)
 
+/**
+ * O que a busca da lista também enxerga: o responsável e o telefone.
+ *
+ * A recepção procura como o telefone toca — "é o cachorro da Rita", "final 1188" —, e a busca
+ * global já achava assim. Só pelo nome do animal, o paciente certo parecia não existir.
+ */
+function textoDeBusca(tutorId: string): string {
+  const tutor = clinico.tutor(tutorId)
+
+  if (!tutor) {
+    return ''
+  }
+
+  return [tutor.nome, tutor.telefone, tutor.telefone?.replace(/\D/g, '')]
+    .filter(Boolean)
+    .join(' ')
+}
+
 const opcoesPacientes = computed(() =>
   clinico.pets
     .map((item) => ({
@@ -90,8 +110,9 @@ const opcoesPacientes = computed(() =>
       detalhe: [formato.especie(item.especie), clinico.tutor(item.tutorId)?.nome]
         .filter(Boolean)
         .join(' · '),
+      busca: textoDeBusca(item.tutorId),
     }))
-    .sort((a, b) => a.rotulo.localeCompare(b.rotulo)),
+    .sort((a, b) => a.rotulo.localeCompare(b.rotulo, INTL_LOCALE[locale.value as Locale])),
 )
 
 const opcoesTipos = computed(() =>
@@ -206,6 +227,24 @@ const rotuloDoBotao = computed(() =>
     : t('clinico.agenda.criar.agendarMesmoAssim'),
 )
 
+/**
+ * Onde a hora começa ao abrir: no início do expediente, ou — hoje, com o dia já andando — no
+ * próximo passo da agenda. Abrir às 17h30 com "08:00" preenchido marcava no passado quem não
+ * conferisse a hora.
+ */
+function primeiroHorario(): number {
+  const expediente = clockToMinutes(agenda.dia?.expediente?.inicio ?? '09:00')
+  const agora = clinicClock.now()
+
+  if (agora.date !== props.data) {
+    return expediente
+  }
+
+  const passo = clinico.clinic?.slotMinutos ?? 15
+
+  return Math.max(expediente, Math.ceil(agora.minutes / passo) * passo)
+}
+
 /** Reabrir precisa começar limpo — formulário que guarda a escolha da vez passada agenda errado. */
 watch(
   () => props.visivel,
@@ -220,8 +259,7 @@ watch(
     typeId.value = clinico.tipos[0]?.id ?? null
     professionalId.value = props.sugestaoProfissional ?? clinico.profissionais[0]?.id ?? null
 
-    const expediente = agenda.dia?.expediente?.inicio ?? '09:00'
-    hora.value = minutesToClock(props.minutoInicial ?? clockToMinutes(expediente))
+    hora.value = minutesToClock(props.minutoInicial ?? primeiroHorario())
   },
 )
 
@@ -282,7 +320,7 @@ async function confirmar() {
   <Dialog
     :visible="visivel"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(40rem, 94vw)' }"
     @update:visible="emit('update:visivel', $event)"
   >
@@ -315,6 +353,7 @@ async function confirmar() {
             option-label="rotulo"
             option-value="valor"
             :options="opcoesPacientes"
+            :filter-fields="['rotulo', 'busca']"
             :filter-placeholder="t('clinico.agenda.criar.buscarPaciente')"
             :placeholder="t('clinico.agenda.criar.escolhaPaciente')"
             :pt="{ overlay: { class: 'clinic-overlay' } }"
@@ -337,14 +376,14 @@ async function confirmar() {
               leva a algum lugar.
             -->
             <template #footer>
-              <button type="button" class="cadastrar" @click="cadastrandoPaciente = true">
+              <Button class="cadastrar" text fluid @click="cadastrandoPaciente = true">
                 <span class="cadastrar__marca" aria-hidden="true"><i class="pi pi-user-plus" /></span>
                 <span class="cadastrar__texto">
                   <strong>{{ t('clinico.paciente.novo.atalho') }}</strong>
                   <small>{{ t('clinico.paciente.novo.atalhoAjuda') }}</small>
                 </span>
                 <i class="pi pi-arrow-right cadastrar__seta" aria-hidden="true" />
-              </button>
+              </Button>
             </template>
           </Select>
         </template>
@@ -453,16 +492,18 @@ async function confirmar() {
       <section v-if="alternativas.length > 0" class="alternativas">
         <h4 class="clinic-label">{{ t('clinico.agenda.criar.alternativas') }}</h4>
         <div class="alternativas__lista">
-          <button
+          <Button
             v-for="sugestao in alternativas"
             :key="`${sugestao.professionalId}-${sugestao.inicio}`"
-            type="button"
-            class="alternativa clinic-focusable"
+            class="alternativa"
+            severity="secondary"
+            outlined
+            size="small"
             @click="usarAlternativa(sugestao.inicio, sugestao.professionalId)"
           >
             <strong class="clinic-value">{{ formato.hora(sugestao.inicio) }}</strong>
             <small>{{ clinico.profissional(sugestao.professionalId)?.nome }}</small>
-          </button>
+          </Button>
         </div>
       </section>
     </form>
@@ -536,23 +577,27 @@ async function confirmar() {
   gap: 0.05rem;
 }
 
-.cadastrar {
-  display: flex;
-  width: 100%;
-  align-items: center;
+/*
+ * Faixa própria no rodapé da lista, e não botão centralizado: o rótulo alinha à esquerda, a seta
+ * vai para a direita e o fundo inverte no hover. O seletor repete as classes do botão para vencer
+ * o estilo de botão de texto do tema.
+ */
+.cadastrar.p-button.p-button-text {
+  justify-content: flex-start;
   gap: var(--clinic-space-2);
   padding: var(--clinic-space-2) var(--clinic-space-3);
   border: 0;
   border-top: 1px solid var(--clinic-line-strong);
+  border-radius: 0;
   background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
-  cursor: pointer;
-  font: inherit;
+  font-size: var(--clinic-font-base);
+  font-weight: inherit;
   text-align: start;
 }
 
-.cadastrar:hover,
-.cadastrar:focus-visible {
+.cadastrar.p-button.p-button-text:not(:disabled):hover,
+.cadastrar.p-button.p-button-text:focus-visible {
   background: var(--clinic-accent-strong);
   color: var(--clinic-surface);
 }
@@ -595,7 +640,7 @@ async function confirmar() {
 }
 
 .cadastrar__seta {
-  margin-left: auto;
+  margin-inline-start: auto;
   font-size: 0.72rem;
 }
 
@@ -639,22 +684,14 @@ async function confirmar() {
   gap: var(--clinic-space-2);
 }
 
-.alternativa {
+/* Hora em cima, profissional embaixo: a sugestão lê como um horário, não como um rótulo. */
+.alternativa.p-button {
   display: grid;
+  justify-items: start;
   gap: 0.05rem;
   padding: 0.4rem 0.7rem;
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-text);
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
-}
-
-.alternativa:hover {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
+  font-weight: inherit;
+  text-align: start;
 }
 
 .alternativa small {

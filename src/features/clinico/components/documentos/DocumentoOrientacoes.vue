@@ -99,7 +99,7 @@ const retorno = computed(() => props.encounter.conduta.retorno.emDias)
           <span>
             <strong>{{ item.nome }}</strong> — {{ item.quantidade }}, {{ item.frequencia }}
             <template v-if="item.duracao !== null">
-              , {{ t('clinico.prontuario.conduta.porDias', { dias: item.duracao }) }}
+              , {{ t('clinico.prontuario.conduta.porDias', { dias: item.duracao }, item.duracao) }}
             </template>
             <template v-else>
               , {{ t('clinico.documentos.orientacoes.contInuo') }}
@@ -111,7 +111,7 @@ const retorno = computed(() => props.encounter.conduta.retorno.emDias)
 
     <section v-if="retorno !== null" class="bloco">
       <h2>{{ t('clinico.prontuario.conduta.retorno') }}</h2>
-      <p>{{ t('clinico.documentos.orientacoes.retornoEm', { dias: retorno }) }}</p>
+      <p>{{ t('clinico.documentos.orientacoes.retornoEm', { dias: retorno }, retorno) }}</p>
     </section>
 
     <!--
@@ -123,7 +123,7 @@ const retorno = computed(() => props.encounter.conduta.retorno.emDias)
       <h2>{{ t('clinico.documentos.orientacoes.procureTitulo') }}</h2>
       <p>{{ t('clinico.documentos.orientacoes.procureTexto') }}</p>
       <p class="contato">
-        {{ clinico.clinic?.nome }} · {{ clinico.clinic?.telefone }}
+        {{ clinico.clinic?.nome }} · <bdi dir="ltr">{{ clinico.clinic?.telefone }}</bdi>
       </p>
     </section>
   </DocumentoFolha>

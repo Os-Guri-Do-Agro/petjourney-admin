@@ -4,7 +4,9 @@
     "pt": "PT",
     "en": "EN",
     "en-GB": "UK",
-    "es": "ES"
+    "es": "ES",
+    "sr": "SR",
+    "ar": "AR"
   },
   "comingSoon": {
     "cupom": {
@@ -251,7 +253,8 @@
     "forgotPassword": "Olvidé mi contraseña",
     "signOut": "Cerrar sesión",
     "yes": "Sí",
-    "no": "No"
+    "no": "No",
+    "selectAll": "Todos"
   },
   "nav": {
     "sections": {
@@ -268,13 +271,13 @@
       "programas": "Programas",
       "divulgacao": "Divulgación",
       "acessos": "Accesos",
-      "financeiro": "Finanzas",
+      "financeiro": "Ganancias por referidos",
       "settings": "Configuración"
     },
     "pageLabels": {
       "overview": "Vista general",
       "saqueDetail": "Detalle del retiro",
-      "financeiro": "Finanzas",
+      "financeiro": "Ganancias por referidos",
       "programas": "Programas de participación",
       "divulgacao": "Divulgación",
       "acessos": "Accesos",
@@ -288,9 +291,6 @@
   "shell": {
     "logout": "Cerrar sesión",
     "telasNaSecao": "una pantalla | {contagem} pantallas",
-    "filterPlaceholder": "Filtrar pantallas...",
-    "filterEmpty": "No se encontró ninguna pantalla para “{q}”.",
-    "filterClear": "Limpiar filtro",
     "brand": {
       "badge": "Portal de socios"
     },
@@ -311,8 +311,8 @@
       "activateDark": "Activar tema oscuro",
       "lightTitle": "Tema claro",
       "darkTitle": "Tema oscuro",
-      "lightLabel": "Light",
-      "darkLabel": "Dark"
+      "lightLabel": "Claro",
+      "darkLabel": "Oscuro"
     },
     "user": {
       "fallbackName": "Veterinario",
@@ -390,7 +390,9 @@
     },
     "guidance": {
       "show": "Mostrar explicaciones",
-      "hide": "Ocultar explicaciones"
+      "hide": "Ocultar explicaciones",
+      "tour": "Cómo usar",
+      "tourTitulo": "Ver un tutorial de esta pantalla, parte por parte"
     }
   },
   "frame": {
@@ -531,6 +533,229 @@
       "filterPlaceholder": "Filtrar por pantalla o sección...",
       "clearFilterAria": "Limpiar filtro",
       "emptyFilter": "No se encontró ninguna pantalla para “{q}”."
+    },
+    "ledePauta": "Sus ganancias por referidos y lo que está pendiente en cada módulo. Cada línea lo lleva directo a la pantalla donde está el trabajo.",
+    "saldo": {
+      "total": "Saldo total",
+      "retido": "En la ventana de seguridad",
+      "sacado": "Retirado hasta hoy",
+      "nota": "Cada participación pasa 14 días en la ventana de seguridad antes de quedar disponible para retiro.",
+      "falhou": "No fue posible cargar el saldo.",
+      "tentar": "Intentar de nuevo",
+      "carregandoAria": "Cargando el saldo",
+      "verExtrato": "Ver extracto",
+      "liberado": "liberado",
+      "bloqueadoRotulo": "bloqueado para retiro",
+      "capacidade": {
+        "liberado": "Listo para retirar.",
+        "abaixoDoMinimo": "El retiro mínimo es {minimo}.",
+        "semChavePix": "Falta la clave PIX para retirar.",
+        "soDono": "Solo el dueño de la cuenta solicita el retiro.",
+        "bloqueado": "Los retiros de esta cuenta están bloqueados.",
+        "tudoRetido": "Todo el saldo sigue en la ventana de seguridad.",
+        "semSaldo": "Todavía no hay ganancias. La participación aparece aquí cuando un tutor se suscribe con su código."
+      },
+      "acao": {
+        "liberado": "Solicitar retiro",
+        "semChavePix": "Registrar clave PIX",
+        "bloqueado": "Ver el motivo"
+      },
+      "barraAria": "{liberado} liberados de {total}"
+    },
+    "programa": {
+      "titulo": "Programa de Afiliados",
+      "selo": {
+        "NAO_SOLICITADO": "No activo",
+        "SOLICITADO": "En análisis",
+        "REJEITADO": "Rechazado",
+        "SUSPENSO": "Suspendido",
+        "ATIVO": "Activo"
+      },
+      "texto": {
+        "NAO_SOLICITADO": "Active el programa para recibir participación por cada tutor que se suscriba con su código.",
+        "SOLICITADO": "Su solicitud está en análisis. El resultado aparecerá aquí en cuanto se decida.",
+        "REJEITADO": "Su solicitud no fue aprobada. En Programas puede ver cómo solicitarlo de nuevo.",
+        "SUSPENSO": "El programa está suspendido. En Programas puede ver cómo regularizarlo.",
+        "ATIVO": "El programa está activo."
+      },
+      "motivo": "Motivo informado: {motivo}",
+      "cta": "Ver programas"
+    },
+    "pauta": {
+      "titulo": "Lo que requiere acción",
+      "conferido": "Revisado a las {hora}",
+      "calma": "Nada requiere acción ahora",
+      "carregandoAria": "Revisando pendientes",
+      "fila": "{total} paciente esperando en la lista de espera | {total} pacientes esperando en la lista de espera",
+      "internacao": "{total} asunto por resolver en hospitalización | {total} asuntos por resolver en hospitalización",
+      "atividades": "{total} pendiente en Actividades | {total} pendientes en Actividades",
+      "vacinas": "{total} refuerzo de vacuna vencido | {total} refuerzos de vacuna vencidos",
+      "rotina": "{total} tarea atrasada en la rutina | {total} tareas atrasadas en la rutina",
+      "vespera": "{total} llegada bloqueada en los próximos 3 días | {total} llegadas bloqueadas en los próximos 3 días",
+      "conferindo": "Revisando…",
+      "reconferir": "Revisar de nuevo",
+      "falhou": "No fue posible revisar los pendientes.",
+      "falhouDeNovo": "No fue posible revisar de nuevo. Los números de abajo son de la revisión anterior.",
+      "parcial": "Parte de los pendientes no pudo revisarse.",
+      "tentar": "Intentar de nuevo",
+      "parte": {
+        "boletinsRetidos": "{total} parte retenido | {total} partes retenidos",
+        "administracoesAtrasadas": "{total} administración atrasada | {total} administraciones atrasadas",
+        "rascunhos": "{total} historia en borrador | {total} historias en borrador",
+        "retornosVencidos": "{total} control vencido | {total} controles vencidos",
+        "vagasOfertadas": "{total} cupo ofrecido sin respuesta | {total} cupos ofrecidos sin respuesta",
+        "medicacoesAtrasadas": "{total} medicación atrasada | {total} medicaciones atrasadas"
+      },
+      "coluna": {
+        "assunto": "Asunto",
+        "gravidade": "Gravedad",
+        "onde": "Dónde"
+      },
+      "gravidade": {
+        "risco": "Urgente",
+        "atencao": "Atención",
+        "neutro": "Normal"
+      },
+      "onde": {
+        "fila": "Lista de espera",
+        "internacao": "Internación",
+        "atividades": "Tareas",
+        "vacinas": "Vacunas",
+        "rotina": "Rutina",
+        "vespera": "Reservas",
+        "tratamentos": "Tratamientos"
+      },
+      "contagem": "{total} asunto | {total} asuntos",
+      "recolher": "Contraer {modulo}",
+      "expandir": "Expandir {modulo}",
+      "tratamentos": "{total} tratamiento crítico con la adherencia en caída | {total} tratamientos críticos con la adherencia en caída"
+    },
+    "resumo": {
+      "portal": "Siga sus ganancias y comparta su código.",
+      "conferindo": "Revisando lo que requiere su atención…",
+      "urgentes": "{total} asunto urgente requiere su atención hoy | {total} asuntos urgentes requieren su atención hoy",
+      "esperando": "{total} asunto lo espera hoy | {total} asuntos lo esperan hoy",
+      "falhou": "No fue posible revisar los pendientes ahora.",
+      "emDia": "Todo al día por aquí."
+    },
+    "acoes": {
+      "rotulo": "Acciones rápidas",
+      "agenda": "Agenda de hoy",
+      "mapa": "Mapa de disponibilidad",
+      "compartilhar": "Compartir código"
+    },
+    "indique": {
+      "titulo": "Recomiende y gane",
+      "abrir": "Abrir Divulgación",
+      "carregando": "Cargando el código…",
+      "falhou": "No fue posible cargar el código de referido.",
+      "descricao": "Cada tutor que se suscriba con su código le genera participación.",
+      "copiar": "Copiar código",
+      "ampliarQr": "Ampliar el código QR",
+      "janelaTitulo": "Código QR de referido",
+      "instrucao": "Apunte la cámara del celular aquí para suscribirse con este código.",
+      "baixar": "Descargar QR",
+      "imprimir": "Imprimir",
+      "impressaoBloqueada": "No fue posible abrir la impresión",
+      "impressaoBloqueadaDetalhe": "Permita las ventanas emergentes de este sitio en el navegador e intente de nuevo.",
+      "link": "Enlace de referido",
+      "linkCopiado": "Enlace copiado",
+      "comoFunciona": "Cómo funciona",
+      "seuCodigo": "Su código de indicación"
+    },
+    "dia": {
+      "titulo": "Hoy",
+      "abrirAgenda": "Agenda completa",
+      "atendimentos": "{total} consulta | {total} consultas",
+      "chegadas": "{total} llegada pendiente | {total} llegadas pendientes",
+      "saidas": "{total} salida pendiente | {total} salidas pendientes",
+      "estado": {
+        "feito": "{total} finalizada | {total} finalizadas",
+        "agora": "{total} en consulta | {total} en consulta",
+        "esperando": "{total} en espera | {total} en espera",
+        "marcado": "{total} agendada | {total} agendadas",
+        "falta": "{total} ausencia | {total} ausencias"
+      },
+      "estadoNome": {
+        "feito": "Finalizado",
+        "agora": "En consulta",
+        "esperando": "En espera en recepción",
+        "marcado": "Agendado",
+        "falta": "Ausencia"
+      },
+      "descricao": "Agenda de hoy, de {abre} a {fecha}: {estados}.",
+      "almoco": "Almuerzo",
+      "carregando": "Cargando el día…",
+      "falhouClinica": "No fue posible cargar la agenda de hoy.",
+      "falhouHotel": "No fue posible cargar las llegadas y salidas de hoy.",
+      "tentar": "Intentar de nuevo",
+      "fechada": "La clínica no abre hoy.",
+      "feriado": "Feriado: {nome}. La clínica no abre hoy.",
+      "semAtendimentos": "No hay consultas agendadas para hoy.",
+      "clinicaEncerrada": "No queda nada más en la agenda de la clínica hoy.",
+      "movimento": {
+        "chegada": "Llegada",
+        "saida": "Salida",
+        "chegadaAria": "Llegada de {pet} a las {hora}, {detalhe}",
+        "saidaAria": "Salida de {pet} a las {hora}, {detalhe}",
+        "travadoChegada": "Admisión pendiente",
+        "travadoSaida": "Pesaje de salida pendiente",
+        "atrasado": "Con retraso"
+      },
+      "destaque": {
+        "emAtendimento": "En consulta",
+        "aSeguir": "A continuación",
+        "proximaChegada": "Próxima llegada",
+        "proximaSaida": "Próxima salida",
+        "desde": "desde las {hora}",
+        "maisOutros": "y {total} más | y {total} más",
+        "aguardando": "en espera hace {tempo}",
+        "chegadaAtrasada": "Llegada con retraso",
+        "saidaAtrasada": "Salida con retraso"
+      },
+      "semMovimentoPendente": "No hay llegadas ni salidas pendientes."
+    },
+    "andamento": {
+      "titulo": "Avance del día",
+      "carregando": "Cargando el avance del día",
+      "vazio": "Aún no hay nada que medir hoy.",
+      "finalizados": "Consultas finalizadas",
+      "finalizadosDetalhe": "{modulo} • {feitos} de {total}",
+      "comparecimento": "Asistencia",
+      "comparecimentoDetalhe": "{modulo} • ninguna ausencia | {modulo} • {total} ausencia | {modulo} • {total} ausencias",
+      "rotina": "Rutina de los huéspedes",
+      "rotinaDetalhe": "{modulo} • {feitas} de {total}",
+      "ocupacao": "Ocupación",
+      "ocupacaoDetalhe": "{modulo} • {ocupadas} de {total}"
+    },
+    "modulos": {
+      "titulo": "Módulos",
+      "rotulo": "Acceso rápido",
+      "novoAgendamento": "Nueva cita",
+      "novoAgendamentoDetalhe": "Agendar en la clínica",
+      "atendimentosHoje": "Ninguna consulta hoy | {total} consulta hoy | {total} consultas hoy",
+      "hospedes": "Ningún huésped | {total} huésped | {total} huéspedes",
+      "divulgacaoDetalhe": "Código, QR y materiales",
+      "programasDetalhe": "Afiliado: {status}",
+      "acessosDetalhe": "Mascotas compartidas"
+    },
+    "agenda": {
+      "titulo": "Agenda",
+      "semana": "Días de la semana",
+      "anterior": "Semana anterior",
+      "proxima": "Próxima semana",
+      "carregando": "Cargando la agenda",
+      "falhou": "No se pudo cargar la agenda de este día.",
+      "fechada": "La clínica no abre este día.",
+      "vazio": "Nada agendado para este día.",
+      "hoje": "Hoy",
+      "aguardando": "En espera",
+      "pendencia": "Pendiente",
+      "chegadas": "{total} llegada | {total} llegadas",
+      "compromissos": "Compromisos del día",
+      "posicao": "{atual} de {total}",
+      "compromissoAnterior": "Compromiso anterior",
+      "proximoCompromisso": "Próximo compromiso"
     }
   },
   "programas": {
@@ -621,6 +846,21 @@
         "alreadyRequested": "Este programa ya fue solicitado o está activo.",
         "modoSuspenso": "Este programa está suspendido para su empresa. Hable con soporte para reactivarlo."
       }
+    },
+    "saudacao": {
+      "todosAtivos": "Los dos programas están activos",
+      "umAtivo": "{programa} activo",
+      "emAnalise": "Su solicitud está en análisis",
+      "nenhum": "Aún no hay programas activos",
+      "acoes": "Acciones de los programas"
+    },
+    "linha": {
+      "ativoDesde": "Activo desde {data}",
+      "irParaGanhos": "Ir a las ganancias",
+      "ativacaoRotulo": "Cómo se activa un programa:",
+      "ativacaoFrase": "el dueño de la cuenta lo solicita, PetJourney lo analiza y libera los beneficios.",
+      "verEtapas": "Ver etapas",
+      "ocultarEtapas": "Ocultar etapas"
     }
   },
   "parceiroCadastro": {
@@ -755,11 +995,11 @@
   "acessos": {
     "subtitle": "Portal",
     "title": "Accesos",
-    "lede": "Compartidos de mascotas vinculados a su empresa: snapshot, historial y notas autenticadas.",
+    "lede": "Mascotas que los tutores compartieron con su empresa: los datos liberados, el historial y las notas del equipo.",
     "tabs": {
       "ativos": {
         "label": "Activos",
-        "description": "Accesos vigentes, con snapshot y notas."
+        "description": "Accesos vigentes, con los datos liberados y las notas."
       },
       "historico": {
         "label": "Historial",
@@ -774,11 +1014,11 @@
       "emptyAtivosBody": "Pida el código de 6 dígitos al tutor y vincúlelo para ver los datos de la mascota aquí.",
       "emptyHistoricoTitle": "Sin historial todavía",
       "emptyHistoricoBody": "Los accesos cerrados aparecen aquí con las notas de su empresa.",
-      "anotacoes": "{n} notas",
+      "anotacoes": "{n} nota | {n} notas",
       "loadMore": "Cargar más",
       "emptyFiltroTitle": "Sin resultados para estos filtros",
       "emptyFiltroBody": "Ajuste la búsqueda o el período. La búsqueda alcanza solo el nombre de la mascota.",
-      "documentos": "{n} documentos",
+      "documentos": "{n} documento | {n} documentos",
       "diario": "Diario",
       "resumoAtualizado": "Resumen actualizado el {data}",
       "encerradoEm": "Finalizado el {data}",
@@ -821,7 +1061,8 @@
       "vinculadoDe": "Vinculado desde",
       "vinculadoAte": "Vinculado hasta",
       "limpar": "Limpiar filtros",
-      "comProntuario": "Con historial"
+      "comProntuario": "Con historial",
+      "botao": "Filtros"
     },
     "expira": {
       "expirado": "Vencido",
@@ -858,7 +1099,7 @@
       "tabs": {
         "resumo": {
           "label": "Resumen de la mascota",
-          "description": "Mensaje del tutor y snapshot autorizado al momento de compartir."
+          "description": "El mensaje del tutor y los datos que liberó al compartir."
         },
         "anotacoes": {
           "label": "Notas",
@@ -872,8 +1113,8 @@
     },
     "encerrado": {
       "title": "Acceso cerrado",
-      "expirado": "El compartido venció. El snapshot clínico ya no está disponible; quedan las notas de su empresa.",
-      "revogado": "El tutor revocó el acceso. El snapshot clínico ya no está disponible; quedan las notas de su empresa."
+      "expirado": "El compartido venció. Los datos clínicos ya no están disponibles; quedan las notas de su empresa.",
+      "revogado": "El tutor revocó el acceso. Los datos clínicos ya no están disponibles; quedan las notas de su empresa."
     },
     "snapshot": {
       "peso": "Peso",
@@ -884,7 +1125,7 @@
       "diagnosticos": "Diagnósticos",
       "observacoes": "Observaciones del tutor",
       "clinicalTitle": "Datos clínicos compartidos",
-      "clinicalLede": "Snapshot autorizado por el tutor. Toque para expandir cada lista.",
+      "clinicalLede": "Datos liberados por el tutor. Toque para abrir cada lista.",
       "sectionsCount": "{n} secciones",
       "itemsCount": "{n} ítems",
       "semItens": "Sin ítems",
@@ -1101,6 +1342,25 @@
       "removidoDetail": "El responsable quitó este documento del acceso. Actualizamos la lista.",
       "acessoEncerrado": "Acceso finalizado",
       "acessoEncerradoDetail": "El responsable finalizó este acceso, por lo que el historial ya no está disponible. Actualizamos la pantalla."
+    },
+    "saudacao": {
+      "acoes": "Acciones de los accesos",
+      "ativos": "Ningún acceso activo | 1 acceso activo | {n} accesos activos",
+      "ativosMais": "Más de {n} accesos activos",
+      "vencemLogo": "1 vence en menos de un día | {n} vencen en menos de un día",
+      "historico": "Ninguna mascota en el historial | 1 mascota en el historial | {n} mascotas en el historial",
+      "historicoRecente": "Accesos recientes de 1 mascota | Accesos recientes de {n} mascotas",
+      "encontrados": "Ninguna mascota encontrada | 1 mascota encontrada | {n} mascotas encontradas"
+    },
+    "grupo": {
+      "acessos": "{n} acceso | {n} accesos",
+      "proximo": "el próximo {prazo}",
+      "ultimoEncerrado": "el último finalizó el {data}",
+      "encerradoEm": "finalizado el {data}",
+      "venceLogo": "Un acceso vence en menos de un día",
+      "recolher": "Contraer",
+      "verAcessos": "Ver accesos",
+      "verOutros": "Ver el otro acceso de {pet} | Ver los otros {n} accesos de {pet}"
     }
   },
   "divulgacao": {
@@ -1255,11 +1515,30 @@
         "indisponivel": "Métricas no disponibles en este momento. Intente de nuevo en unos instantes.",
         "erro": "No fue posible cargar las lecturas."
       }
+    },
+    "kit": {
+      "titulo": "Tres formas de compartir",
+      "codigo": "Código, para decir en el mostrador",
+      "link": "Enlace, para WhatsApp e Instagram",
+      "qr": "QR, para imprimir en el mostrador",
+      "qrDica": "Quien lo escanea llega directo al registro con su código.",
+      "copiar": "Copiar"
+    },
+    "regras": {
+      "rotulo": "Cómo rinde la recomendación:",
+      "frase": "5% de cada suscripción recomendada, todos los meses, durante 18 meses. Requiere el programa de afiliados activo."
+    },
+    "saudacao": {
+      "resumo": "Su código es {codigo} · {leituras}",
+      "leituras": "ninguna lectura del QR todavía | {n} lectura del QR | {n} lecturas del QR",
+      "semCodigo": "El código aparece cuando el programa de afiliados esté activo",
+      "copiarLink": "Copiar enlace",
+      "acoes": "Acciones de difusión"
     }
   },
   "carteira": {
     "subtitle": "Portal",
-    "title": "Finanzas",
+    "title": "Ganancias por referidos",
     "tabs": {
       "ariaLabel": "Pestañas: {labels}",
       "visao": {
@@ -1267,7 +1546,7 @@
         "description": "Saldos, clave PIX y solicitud de retiro."
       },
       "extrato": {
-        "label": "Extracto",
+        "label": "Movimientos",
         "description": "Movimientos de participación y débitos."
       },
       "saques": {
@@ -1356,7 +1635,13 @@
       "emptyBody": "Los créditos de participación y los débitos de retiro aparecen aquí.",
       "loadMore": "Cargar más",
       "today": "Hoy",
-      "yesterday": "Ayer"
+      "yesterday": "Ayer",
+      "tipo": {
+        "CREDITO_COMISSAO": "Participación acreditada",
+        "ESTORNO": "Reverso",
+        "DEBITO_SAQUE": "Retiro",
+        "AJUSTE": "Ajuste"
+      }
     },
     "saques": {
       "loadingTitle": "Cargando retiros...",
@@ -1365,10 +1650,15 @@
       "retry": "Intentar de nuevo",
       "emptyTitle": "Ningún retiro solicitado",
       "emptyBody": "Solicite un retiro en la pestaña Vista general cuando tenga saldo retirable.",
-      "requestedAt": "Solicitado el {data}"
+      "requestedAt": "Solicitado el {data}",
+      "status": {
+        "PENDENTE": "En análisis",
+        "PAGO": "Pagado",
+        "FALHA": "Rechazado"
+      }
     },
     "detail": {
-      "subtitle": "Finanzas",
+      "subtitle": "Ganancias por referidos",
       "title": "Detalle del retiro",
       "back": "Volver",
       "loadingAria": "Cargando detalle del retiro",
@@ -1380,12 +1670,38 @@
       "timelineLabel": "Línea de tiempo",
       "awaitingLiquidation": "Pendiente de liquidación",
       "awaitingLiquidationHint": "El pago aún no ha sido confirmado.",
-      "pixSnapshot": "Clave PIX (snapshot)",
+      "pixSnapshot": "Clave PIX usada en el retiro",
       "pixCopied": "Clave PIX copiada.",
       "pixCopyError": "No fue posible copiar la clave PIX.",
       "failReason": "Motivo del fallo",
       "receipt": "Comprobante",
       "pendingHint": "Los pagos los liquida manualmente PetJourney. Ciclo orientativo: corte día 27, pago hasta el día 5."
+    },
+    "saudacao": {
+      "disponivel": "{valor} disponible para retirar",
+      "retido": "{valor} aún en la ventana de seguridad",
+      "semSaldo": "Aún no hay ganancias por recomendación",
+      "cadastrarPix": "Registrar clave PIX",
+      "acoes": "Acciones de la billetera"
+    },
+    "resumo": {
+      "aria": "Resumen de la billetera",
+      "retido": "Otros {valor} liberándose en la ventana de seguridad",
+      "jaSacados": "ya retirados",
+      "minimo": "Retiro mínimo",
+      "ciclo": "Corte el día 27, pago hasta el día 5",
+      "pix": "PIX"
+    },
+    "dialogo": {
+      "disponivel": "Disponible ahora: {valor}",
+      "paraPix": "El valor va a la clave PIX {chave}.",
+      "cancelar": "Cancelar"
+    },
+    "ajuda": {
+      "rotulo": "Cómo funciona la billetera:",
+      "frase": "lo que entra, cuándo se libera para retirar y cuándo llega a su cuenta.",
+      "abrir": "Abrir",
+      "fechar": "Cerrar"
     }
   },
   "parceiro": {
@@ -1755,7 +2071,8 @@
         "fila": "{total} paciente en la lista de espera | {total} pacientes en la lista de espera",
         "internacao": "{total} tarea por resolver en internación | {total} tareas por resolver en internación",
         "atividades": "{total} pendiente | {total} pendientes",
-        "vacinas": "{total} refuerzo vencido | {total} refuerzos vencidos"
+        "vacinas": "{total} refuerzo vencido | {total} refuerzos vencidos",
+        "tratamentos": "{total} tratamiento crítico con la adherencia en caída | {total} tratamientos críticos con la adherencia en caída"
       }
     },
     "busca": {
@@ -1776,8 +2093,8 @@
       "agora": "ahora",
       "haTempo": "hace {valor}",
       "emTempo": "en {valor}",
-      "anos": "{valor} años",
-      "meses": "{valor} meses",
+      "anos": "{valor} año | {valor} años",
+      "meses": "{valor} mes | {valor} meses",
       "anosMeses": "{anos}a {meses}m",
       "semvalor": "—",
       "dias": "{valor} día | {valor} días",
@@ -1786,7 +2103,8 @@
     },
     "sexo": {
       "macho": "Macho",
-      "femea": "Hembra"
+      "femea": "Hembra",
+      "naoInformado": "Sexo no informado"
     },
     "especie": {
       "canina": "Canina",
@@ -2020,10 +2338,11 @@
       }
     },
     "tabela": {
+      "abrir": "Ver detalles",
+      "acoes": "Acciones",
       "carregando": "Cargando…",
-      "vazio": "Nada por aquí",
       "tentarDeNovo": "Reintentar",
-      "acoes": "Acciones"
+      "vazio": "Nada por aquí"
     },
     "erros": {
       "catalogos": "No se pudieron cargar los datos de la clínica.",
@@ -2082,7 +2401,9 @@
         "cancelar": "Cita cancelada.",
         "falta": "Ausencia registrada.",
         "criar": "Cita creada.",
-        "status": "Estado actualizado."
+        "status": "Estado actualizado.",
+        "editar": "Cita actualizada.",
+        "justificar": "Motivo de la ausencia registrado."
       },
       "mover": {
         "titulo": "Confirmar reprogramación",
@@ -2094,6 +2415,16 @@
         "confirmar": "Reprogramar",
         "confirmarComAviso": "Reprogramar de todos modos",
         "cancelar": "Dejar como está"
+      },
+      "editar": {
+        "titulo": "Editar cita",
+        "pacienteFixo": "Para atender a otro paciente, cancela esta cita y crea una nueva.",
+        "mudancas": "Qué cambia",
+        "grupoLigado": "La cita vinculada sigue el nuevo horario.",
+        "salvar": "Guardar",
+        "salvarEAvisar": "Guardar y avisar",
+        "salvarMesmoAssim": "Guardar de todos modos",
+        "mensagemPadrao": "¡Hola! La cita de {paciente} ahora es el {data}, a las {hora}. Cualquier cosa, responde por aquí."
       },
       "encaixeDialogo": {
         "titulo": "Agregar sobrecupo",
@@ -2135,7 +2466,13 @@
         "ocupacao": "{valor} de ocupación",
         "melhoresAlternativas": "Mejores horarios",
         "semAlternativa": "Ningún horario libre en los próximos días.",
-        "detalhePessoa": "{nome} · mañana {manha}, tarde {tarde}"
+        "detalhePessoa": "{nome} · mañana {manha}, tarde {tarde}",
+        "legendaBarras": "Mañana y tarde",
+        "clinica": "Toda la clínica",
+        "fechada": "Cerrada",
+        "abrirDia": "Abrir la agenda del {dia}",
+        "linhaAgendados": "Agendados",
+        "linhaFaltas": "Ausencias"
       },
       "exibicao": "Visualización",
       "maisAcoes": "Más acciones",
@@ -2171,28 +2508,80 @@
       "legenda": {
         "titulo": "Leyenda",
         "filtrar": "Mostrar solo {tipo}"
+      },
+      "presenca": {
+        "titulo": "Asistencia",
+        "por": {
+          "app": "Confirmada en la app",
+          "recepcao": "Confirmada por recepción"
+        },
+        "confirmada": "Confirmada",
+        "semConfirmacao": "Aún sin confirmar",
+        "registrar": "Registrar confirmación"
+      },
+      "prazoApp": {
+        "titulo": "En la app",
+        "ate": "Puede cancelar o reprogramar hasta el {data}, {hora}",
+        "encerrado": "Plazo vencido: solo por teléfono"
+      },
+      "acoesRotulo": "Acciones de la agenda",
+      "frase": {
+        "atendimentos": "{total} consulta | {total} consultas",
+        "naRecepcao": "{total} en recepción",
+        "vazio": "Ninguna consulta agendada"
+      },
+      "proximoPasso": {
+        "aguardando": "Registrar llegada",
+        "em-atendimento": "Iniciar atención",
+        "finalizado": "Finalizar atención"
+      },
+      "conflitosTitulo": "Conflictos",
+      "tabela": {
+        "rotulo": "Agenda del día en tabla",
+        "horario": "Horario",
+        "ocupacao": "Ocupación del día",
+        "ate": "hasta {hora}",
+        "encaixe": "Sobreturno",
+        "marcarAs": "Agendar a las {hora} con {nome}",
+        "agora": "Ahora",
+        "dica": "Arrastre una atención a otro horario o profesional para reprogramar. Haga clic en un horario libre para agendar."
+      },
+      "formato": {
+        "titulo": "Formato",
+        "tabela": "Tabla",
+        "linhaDoTempo": "Línea de tiempo"
       }
     },
     "meuDia": {
       "titulo": "Hoy en la clínica",
-      "subtitulo": "Clínica",
       "agora": "Ahora",
       "aSeguir": "A continuación",
-      "semAtendimentoAgora": "Nada en consulta en este momento.",
       "semProximo": "Nada más agendado para hoy.",
       "esperando": "Ya llegaron",
-      "esperandoVazio": "Nadie esperando en recepción.",
-      "internados": "Internados que te reclaman",
-      "internadosVazio": "Ningún internado con dosis atrasada o parte retenido.",
       "esperaDe": "esperando {valor}",
-      "alertasDoDia": "Alertas que cambian la conducta hoy",
-      "alertasVazio": "Ningún alerta clínico entre los pacientes de hoy.",
-      "retornosSemHorario": "Controles sin horario asignado",
-      "retornosVazio": "Ningún control pendiente.",
       "marcarRetorno": "Agendar control",
-      "irParaAgenda": "Ver agenda completa",
-      "iniciarAtendimento": "Iniciar consulta",
-      "continuar": "Continuar"
+      "depois": "Después",
+      "continuarCom": "Continuar con {pet}",
+      "atenderCom": "Atender a {pet}",
+      "agendaCompleta": "Agenda completa",
+      "mapaDeLeitos": "Mapa de camas",
+      "acoesRotulo": "Acciones del día",
+      "resumo": {
+        "urgentes": "{total} asunto urgente requiere tu atención | {total} asuntos urgentes requieren tu atención",
+        "pendentes": "{total} asunto te espera | {total} asuntos te esperan",
+        "emDia": "Nada detenido. El resto del día está en la agenda."
+      },
+      "pauta": {
+        "boletim": "El parte de {pet} espera contacto con el responsable",
+        "doses": "{total} dosis atrasada | {total} dosis atrasadas",
+        "naRecepcao": "{pet} espera en recepción",
+        "alerta": "{pet} a las {hora}",
+        "retornos": "{total} control sin horario asignado | {total} controles sin horario asignado",
+        "eMais": "{nomes} y {total} más",
+        "mostrarMais": "Mostrar {total} más",
+        "mostrarMenos": "Mostrar menos",
+        "ondeAgenda": "Agenda"
+      }
     },
     "resumo": {
       "titulo": "Resumen de la clínica",
@@ -2224,7 +2613,7 @@
       },
       "grafico": {
         "porDia": "Movimiento por día",
-        "porDiaAjuda": "Las columnas suman las atenciones; la línea marca la ocupación de la agenda.",
+        "porDiaAjuda": "Concluidas, previstas y ausencias de cada día",
         "porTipo": "Por tipo de atención",
         "porProfissional": "Por profesional",
         "horarios": "Horarios de mayor movimiento",
@@ -2237,6 +2626,28 @@
         "faltas": "Ausencias",
         "ocupacao": "Ocupación",
         "fechado": "Cerrado"
+      },
+      "saudacao": {
+        "hoje": "Ninguna atención concluida hoy | 1 atención concluida hoy | {n} atenciones concluidas hoy",
+        "semana": "Ninguna atención concluida esta semana | 1 atención concluida esta semana | {n} atenciones concluidas esta semana",
+        "semana-passada": "Ninguna atención concluida la semana pasada | 1 atención concluida la semana pasada | {n} atenciones concluidas la semana pasada",
+        "trinta-dias": "Ninguna atención concluida en los últimos 30 días | 1 atención concluida en los últimos 30 días | {n} atenciones concluidas en los últimos 30 días"
+      },
+      "fatos": {
+        "aria": "Cifras del período",
+        "comparecimento": "de asistencia",
+        "comparecimentoBaixo": "Asistencia por debajo del 85%",
+        "horas": "de atención",
+        "ocupacao": "de ocupación media",
+        "novos": "paciente nuevo | pacientes nuevos",
+        "encaixes": "sobreturno | sobreturnos"
+      },
+      "ocupacao": {
+        "media": "Agenda ocupada al {media}, en promedio.",
+        "comPico": "Agenda ocupada al {media}, en promedio; el día más lleno fue {dia}, con {valor}."
+      },
+      "mapa": {
+        "hora": "Hora"
       }
     },
     "bulario": {
@@ -2298,7 +2709,8 @@
         "hepatico": "Condición hepática registrada: {detalhe}",
         "cardiaco": "Condición cardíaca registrada: {detalhe}",
         "gastrico": "Condición gástrica registrada: {detalhe}"
-      }
+      },
+      "escolhaNaLista": "Elija un medicamento de la lista para ver la dosis por especie."
     },
     "documentos": {
       "titulo": "Documentos de la atención",
@@ -2497,7 +2909,8 @@
         "lote": "Lote",
         "fabricante": "Fabricante",
         "proxima": "Próxima dose",
-        "ressalva": "Lote y fabricante según el registro de esta clínica. Las vacunas aplicadas en otro servicio deben verificarse en la libreta del animal."
+        "ressalva": "Lote y fabricante según el registro de esta clínica. Las vacunas aplicadas en otro servicio deben verificarse en la libreta del animal.",
+        "externa": "{local} (sin lote)"
       },
       "orcamento": {
         "titulo": "Presupuesto",
@@ -2543,6 +2956,7 @@
         "preferencial": "Preferente",
         "urgente": "Urgente"
       },
+      "prioridadeRotulo": "Prioridad",
       "situacao": {
         "aguardando": "En espera",
         "ofertado": "Cupo ofrecido",
@@ -2571,6 +2985,19 @@
       "oferta": {
         "prazo": "La oferta expira en {minutos} minutos. Pasado el plazo, el horario vuelve a la clínica.",
         "mensagemPadrao": "¡Hola! Se abrió un horario para {paciente} el {data} a las {hora}. ¿Confirmamos? Lo guardamos por {minutos} minutos."
+      },
+      "aceite": {
+        "marcado": "Turno de {paciente} agendado para el {data} a las {hora}, con {profissional}.",
+        "ofertaExpirada": "La oferta para {paciente} venció antes de aceptarse. El turno volvió a la clínica.",
+        "vagaPreenchida": "El turno ya fue ocupado. {paciente} volvió a la lista de espera, en la misma posición.",
+        "verNaAgenda": "Ver en la agenda",
+        "dispensar": "Descartar aviso"
+      },
+      "marcadoPara": "Agendado: {data} · {hora}",
+      "saudacao": {
+        "aguardando": "Nadie esperando turno | 1 esperando turno | {n} esperando turno",
+        "ofertas": "1 oferta esperando respuesta | {n} ofertas esperando respuesta",
+        "acoes": "Acciones de la lista"
       }
     },
     "faltas": {
@@ -2594,14 +3021,8 @@
       },
       "filtro": {
         "reincidentes": "Reincidentes",
-        "todas": "Todas"
-      },
-      "resumo": {
-        "total": "Ausencias del período",
-        "pacientes": "{contagem} paciente | {contagem} pacientes",
-        "agenda": "Agenda perdida",
-        "reincidentes": "Reincidentes",
-        "limite": "a partir de {limite} ausencias"
+        "todas": "Todas",
+        "pendentes": "Por justificar"
       },
       "marcar": "Marcar falta",
       "reagendar": {
@@ -2612,7 +3033,56 @@
       },
       "historico": {
         "titulo": "Faltas de {nome}",
-        "reagendado": "Reagendado para {data}"
+        "reagendado": "Reagendado para {data}",
+        "encerrado": "Caso cerrado"
+      },
+      "motivo": {
+        "esqueceu": "Se olvidó",
+        "imprevisto": "Imprevisto",
+        "transporte": "Sin transporte",
+        "paciente-melhorou": "El paciente mejoró",
+        "emergencia": "Fue a urgencias",
+        "custo": "Costo",
+        "insatisfacao": "Insatisfacción",
+        "outro": "Otro motivo",
+        "obito": "Fallecimiento del paciente"
+      },
+      "canal": {
+        "telefone": "Por teléfono",
+        "whatsapp": "Por WhatsApp",
+        "presencial": "En persona",
+        "sem-resposta": "Sin respuesta",
+        "app": "Por la app"
+      },
+      "justificativa": {
+        "titulo": "Justificación de la falta",
+        "acao": "Justificar",
+        "editar": "Cambiar la justificación",
+        "motivo": "Motivo de la falta",
+        "canal": "Cómo hablamos",
+        "observacao": "Observación",
+        "observacaoDica": "Solo lo que el motivo no dice.",
+        "confirmar": "Registrar motivo",
+        "adiar": "Dejar para después",
+        "pendente": "Aún sin contacto",
+        "whatsapp": "WhatsApp",
+        "semTelefone": "Sin teléfono registrado",
+        "registradaPor": "Registrado por {nome} · {quando}",
+        "mensagem": "¡Hola! Extrañamos a {paciente} en la consulta del {data}. ¿Está todo bien? ¿Reprogramamos?",
+        "mensagemObito": "Hola. Supimos del fallecimiento de {paciente} y lo sentimos mucho. Estamos a disposición para lo que necesite.",
+        "avisoObito": "Con el fallecimiento registrado, esta ausencia deja de recibir oferta de reprogramación.",
+        "motivoEscolha": "Elija el motivo"
+      },
+      "frase": {
+        "pendentes": "{total} falta por justificar | {total} faltas por justificar",
+        "emDia": "Todas las faltas tienen motivo",
+        "agenda": "{tempo} de agenda perdida",
+        "dePacientes": "de {total} paciente | de {total} pacientes",
+        "pendentesDe": "{faltas}, {pacientes}"
+      },
+      "acoes": {
+        "rotulo": "Acciones de ausencias",
+        "justificarProxima": "Justificar la siguiente"
       }
     },
     "prontuario": {
@@ -2810,7 +3280,8 @@
           "intramuscular": "Intramuscular",
           "intravenosa": "Intravenosa",
           "topica": "Tópica",
-          "otologica": "Ótica"
+          "otologica": "Ótica",
+          "intranasal": "Intranasal"
         },
         "retornoDialogo": {
           "titulo": "Agendar retorno",
@@ -2892,7 +3363,14 @@
         "descricao": "Revise lo registrado antes de emitir los documentos.",
         "vazio": "No registrado",
         "achados": "Hallazgos",
-        "alergiaPendente": "Prescripción de {medicamento} en conflicto con alergia registrada, sin aceptación."
+        "alergiaPendente": "Prescripción de {medicamento} en conflicto con alergia registrada, sin aceptación.",
+        "app": {
+          "titulo": "En la app del tutor",
+          "aberto": "El resumen se puede compartir después de finalizar la consulta.",
+          "pronto": "El tutor recibe el diagnóstico en palabras simples, las indicaciones, la receta, los estudios y el control. Sin mg/kg y sin el examen físico.",
+          "liberado": "Compartido el {data} a las {hora}. El tutor recibió el aviso en la app.",
+          "liberar": "Compartir con el tutor"
+        }
       },
       "preConsulta": {
         "titulo": "Respondido en la app",
@@ -2938,11 +3416,154 @@
         "semProximo": "Sin cita agendada"
       },
       "internadoAgora": "Internado ahora",
-      "verInternacao": "Abrir internación"
+      "verInternacao": "Abrir internación",
+      "semAtendimentos": "Aún no hay atenciones en esta clínica",
+      "saudacao": {
+        "total": "Ningún paciente | 1 paciente | {n} pacientes",
+        "encontrados": "Ningún paciente encontrado | 1 paciente encontrado | {n} pacientes encontrados",
+        "comRisco": "1 con alerta de riesgo | {n} con alerta de riesgo",
+        "acoes": "Acciones de pacientes"
+      }
+    },
+    "resumoDoPaciente": {
+      "titulo": "Esta mascota en 30 segundos",
+      "naoEncontrado": "Paciente no encontrado",
+      "abrirAtendimento": "Abrir consulta",
+      "abrirAtendimentoDica": "la consulta se abre con este resumen en la anamnesis",
+      "verHistorico": "Historial completo",
+      "verResumo": "Resumen en 30 s",
+      "hojeAs": "Hoy, {hora} · {tipo} · {profissional}",
+      "erroAoAbrir": "No se pudo abrir la consulta. Inténtalo de nuevo.",
+      "sinais": {
+        "titulo": "Lo que llama la atención",
+        "nadaFora": "Nada fuera de lo común desde la última consulta.",
+        "perdaContinua": "Pérdida de peso continua",
+        "perda": "Caída de peso",
+        "perdaDetalhe": "{de} → {para} kg ({percentual}) en {semanas} semanas",
+        "alarmeDetalhe": "registrado en casa el {data}, {quando}",
+        "recorrenteDetalhe": "{vezes}× desde la última consulta",
+        "mais": "y {total} más en el resumen",
+        "campoDetalhe": "en {alterados} de {total} registros",
+        "relato": "También informado: {relato}",
+        "adesao": "{medicamento}: la adherencia cayó en casa",
+        "polifarmacia": "{total} medicamentos en uso al mismo tiempo",
+        "polifarmaciaDetalhe": "Revise las interacciones antes de recetar otro."
+      },
+      "casa": {
+        "titulo": "En casa desde la última consulta",
+        "tituloSemConsulta": "En casa en los últimos 30 días",
+        "registros": "Registros en la app: {total}",
+        "semAlteracao": "sin cambios: {total}",
+        "vazioTitulo": "Nada registrado en la app en este período",
+        "vazioDescricao": "El tutor no usó el Diario de la mascota. Conviene preguntar en la consulta cómo ha estado en casa.",
+        "peso": "Peso en casa",
+        "semRegistro": "Sin registro",
+        "nenhum": "Ninguno",
+        "normalEmTodos": "Normal en el único registro | Normal en los {total} registros",
+        "ultimo": "último: {valor}, {quando}",
+        "notas": "En palabras del tutor",
+        "verRegistros": "Ver registros ({total})",
+        "esconder": "Ocultar registros",
+        "filtro": "Qué registros mostrar",
+        "filtroAlteracao": "Con cambios ({total})",
+        "filtroTodos": "Todos ({total})",
+        "semAlteracaoCurto": "Sin cambios",
+        "valorEm": "{valor} en el único registro | {valor} en {alterados} de {total} registros",
+        "naoLiberadoTitulo": "El tutor no compartió el diario con la clínica",
+        "naoLiberadoDescricao": "Compartirlo depende del tutor, en la app, en Mis clínicas. Sin eso, el resumen muestra solo los registros de la clínica."
+      },
+      "peso": {
+        "titulo": "Peso en los últimos 6 meses",
+        "serie": "Peso",
+        "legendaClinica": "Consulta (báscula de la clínica)",
+        "legendaCasa": "En casa (báscula del tutor)",
+        "origem": {
+          "clinica": "consulta",
+          "casa": "en casa"
+        },
+        "umPonto": "Una sola pesada en el período: {peso}, el {data}.",
+        "semPeso": "Ninguna pesada en los últimos 6 meses.",
+        "aria": "Peso de {de} kg a {para} kg en {semanas} semanas"
+      },
+      "essencial": {
+        "titulo": "Lo esencial",
+        "alertas": "Alertas",
+        "condicoes": "Condiciones activas",
+        "medicacao": "Medicación en uso",
+        "ultimaConsulta": "Última consulta",
+        "nenhum": "Ninguno registrado",
+        "nenhuma": "Ninguna registrada",
+        "usoContinuo": "uso continuo",
+        "ate": "hasta el {data}",
+        "primeiraVez": "Primera vez en la clínica",
+        "abrirProntuario": "Abrir historia clínica"
+      },
+      "primeira": {
+        "titulo": "Primera consulta",
+        "descricao": "Nada registrado todavía en la clínica ni en la app. Qué conviene averiguar hoy:",
+        "pesar": {
+          "titulo": "Pesar",
+          "detalhe": "No hay peso en la ficha, y toda dosis depende de él."
+        },
+        "vacinas": {
+          "titulo": "Vacunación y desparasitación",
+          "detalhe": "Qué se hizo, cuándo y dónde. Pedir la cartilla, si la hay."
+        },
+        "filhote": {
+          "titulo": "Origen y destete",
+          "detalhe": "Cachorro: de dónde vino, a qué edad se separó de la madre y qué come hoy."
+        },
+        "antecedentes": {
+          "titulo": "Antecedentes",
+          "detalhe": "Enfermedades, cirugías y alergias conocidas, incluso las tratadas en otro lugar."
+        },
+        "diario": {
+          "titulo": "Diario de la mascota",
+          "detalhe": "Invitar al tutor a registrar en la app. Es el diario lo que llena esta pantalla en la próxima consulta."
+        }
+      },
+      "anamnese": {
+        "cabecalho": "Del Diario de la mascota (registrado por el tutor en la app) desde el {data}, {total} registros:",
+        "perda": "pérdida de peso de {de} kg a {para} kg ({percentual}%) en {semanas} semanas, sumando consultas y báscula de casa",
+        "alarme": "{sintomas} el {data}: \"{nota}\"",
+        "pesoCasa": "peso en la báscula de casa: {de} → {para} kg",
+        "sintomas": "síntomas registrados: {lista}",
+        "semAlteracao": "Nada fuera de lo normal registrado.",
+        "prescricao": "{nome} (recetado, hasta el {data})",
+        "campo": "{campo}: {valor} en {alterados} de {total} registros",
+        "doencas": "enfermedades informadas por el tutor: {lista}",
+        "alarmeSemTexto": "{sintomas} el {data}",
+        "prescricaoComAdesao": "{prescricao} · en la app desde el {data}: {contagem}"
+      },
+      "verResumoComSinais": "Resumen en 30 s: {total} puntos de atención",
+      "preferencia": "Sugerir este resumen al abrir el historial del paciente",
+      "sugestao": {
+        "titulo": "{nome} en 30 segundos",
+        "texto": "Antes de recorrer el historial: el resumen reúne la historia clínica y lo que el tutor registró en la app desde la última consulta.",
+        "primeiraVez": "Primera vez en la clínica. El resumen enumera lo que conviene averiguar en esta consulta.",
+        "naoSugerir": "No sugerir más al abrir el historial",
+        "comoReativar": "El botón sigue en el historial. Puedes volver a activar la sugerencia en la pantalla del resumen.",
+        "agoraNao": "Ahora no",
+        "ver": "Ver resumen"
+      },
+      "tratamentos": {
+        "titulo": "Medicamento en casa",
+        "ajuda": "Según lo que la casa registró en la app desde la última consulta.",
+        "abrir": "Abrir tratamiento"
+      }
     },
     "atendimentos": {
       "titulo": "Atenciones",
-      "subtitulo": "Clínica"
+      "subtitulo": "Clínica",
+      "dia": {
+        "hoje": "Hoy",
+        "ontem": "Ayer"
+      },
+      "grupoRascunho": "En borrador · 1 para firmar | En borrador · {n} para firmar",
+      "saudacao": {
+        "rascunhos": "1 historia en borrador para firmar | {n} historias en borrador para firmar",
+        "todosAssinados": "Todas las historias firmadas"
+      }
     },
     "atividades": {
       "titulo": "Actividades",
@@ -2951,7 +3572,8 @@
       "vazioDescricao": "Las historias en borrador y los controles sin horario aparecen aquí.",
       "rascunhos": "Historias en borrador",
       "retornos": "Controles sin horario",
-      "ofertasDaFila": "Ofertas de la lista esperando respuesta"
+      "ofertasDaFila": "Ofertas de la lista esperando respuesta",
+      "saudacao": "Nada pendiente | 1 pendiente por resolver | {n} pendientes por resolver"
     },
     "atalhos": {
       "titulo": "Atajos de teclado",
@@ -3063,7 +3685,8 @@
       "semPrescricao": "Ninguna prescripción para emitir.",
       "vistaDoResponsavel": "Cómo lo ve el responsable",
       "lembrete": "Se convierte en recordatorio: {quantidade}, {frequencia}",
-      "lembreteContinuo": "Recordatorio continuo, sin fecha de fin"
+      "lembreteContinuo": "Recordatorio continuo, sin fecha de fin",
+      "critico": "Tratamiento crítico: avisar a la clínica si la adherencia cae en casa"
     },
     "vacinas": {
       "titulo": "Vacunas",
@@ -3097,7 +3720,8 @@
       "proximaEm": "Próxima dosis el {data}",
       "aba": {
         "aplicadas": "Aplicadas",
-        "atraso": "Atrasadas"
+        "atraso": "Atrasadas",
+        "estoque": "Existencias"
       },
       "buscar": "Paciente, responsable, vacuna o lote…",
       "aplicadasVazioTitulo": "Ninguna aplicación registrada",
@@ -3106,14 +3730,231 @@
       "filtro": {
         "quando": "Cuándo",
         "ultimosDias": "Últimos {dias} días"
-      }
+      },
+      "estoque": {
+        "doses": "dosis",
+        "saldo": "Existencias",
+        "minimo": "Mínimo",
+        "valorParado": "Valor inmovilizado",
+        "dosesEmEstoque": "Dosis en existencias",
+        "valorParadoDetalhe": "{valor} inmovilizados en la nevera",
+        "vencendo": "Vencen en {dias} d",
+        "emRisco": "{valor} en riesgo",
+        "abaixoDoMinimo": "Vacunas por comprar",
+        "perdaNoPeriodo": "{valor} de pérdida · {doses} dosis",
+        "cobertura": "cobertura de {dias} d",
+        "semCobertura": "sin salida en el período",
+        "recebidoEm": "recibido el {data} · {total} dosis",
+        "saidas": "{aplicadas} aplicadas · {perdidas} perdidas",
+        "custoUnitario": "{valor} por dosis",
+        "semConsumo": "Ninguna dosis aplicada en el período.",
+        "semLotes": "Ningún lote registrado",
+        "semPerdas": "Ninguna pérdida registrada.",
+        "situacaoSaldo": {
+          "zerado": "Agotada",
+          "abaixo": "Bajo el mínimo",
+          "ok": "En nivel"
+        },
+        "situacaoLote": {
+          "vencido": "Vencido",
+          "vencendo": "Por vencer",
+          "ativo": "Activo",
+          "esgotado": "Agotado"
+        },
+        "perda": {
+          "quebra": "Rotura",
+          "temperatura": "Temperatura",
+          "vencimento": "Vencimiento"
+        },
+        "grafico": {
+          "consumo": "Dosis aplicadas por mes",
+          "consumoAjuda": "La rotación de cada vacuna a lo largo del año. Es lo que dice cuánto comprar.",
+          "saldo": "Existencias frente al mínimo",
+          "saldoAjuda": "La marca de cada barra es el piso de esa vacuna. Barra por debajo es compra.",
+          "perdas": "Pérdidas por motivo",
+          "perdasAjuda": "La temperatura se lleva el lote entero; el vencimiento es comprar de más.",
+          "validade": "Vigencia de los lotes",
+          "validadeAjuda": "Cada barra va de la recepción al vencimiento. El número dentro son las existencias."
+        }
+      },
+      "via": {
+        "subcutanea": "Subcutánea",
+        "intramuscular": "Intramuscular",
+        "intranasal": "Intranasal",
+        "oral": "Oral",
+        "naoInformada": "Vía no informada"
+      },
+      "plano": {
+        "serie": {
+          "filhote": "Serie de cachorro",
+          "adulto": "Serie de adulto"
+        },
+        "reforco": "Refuerzo anual",
+        "doseUnica": "Dosis única",
+        "atrasadaHa": "Atrasada hace {dias} día | Atrasada hace {dias} días",
+        "hoje": "Hoy",
+        "venceuHa": "Venció hace {dias} día | Venció hace {dias} días",
+        "aPartirDe": "A partir del {data}",
+        "podeComecar": "Puede empezar hoy",
+        "emDias": "En {dias} día | En {dias} días",
+        "situacao": {
+          "em-dia": "Al día",
+          "a-vencer": "Por vencer",
+          "devida": "Para hoy",
+          "atrasada": "Atrasada",
+          "aguarda-idade": "Espera la edad",
+          "nao-iniciada": "Sin iniciar"
+        },
+        "serieCompleta": "{serie} completa · refuerzo anual",
+        "naoComecou": "{serie}, {total} dosis · sin iniciar",
+        "emAndamento": "{serie} · {feitas} de {total} aplicadas",
+        "sequencia": "Secuencia de dosis de {vacina}",
+        "agora": "Ahora",
+        "marcadaPara": "Agendada: {data} a las {hora}",
+        "opcionais": "Opcionales sin iniciar: {lista}. Entran en el protocolo cuando alguien las empiece.",
+        "unicaNaoComecou": "Dosis única · sin iniciar",
+        "unicaComReforco": "Dosis única · refuerzo anual"
+      },
+      "aplicar": {
+        "abrir": "Aplicar vacuna",
+        "atalho": "Aplicar",
+        "titulo": "Aplicar vacuna · {pet}",
+        "confirmar": "Aplicar y registrar",
+        "opcionalNaoIniciada": "Opcional, aún sin iniciar",
+        "serieDoPaciente": "{serie}: {total} dosis en esta vacuna.",
+        "via": "Vía",
+        "aplicador": "Quién aplica",
+        "observacao": "Observación",
+        "lote": {
+          "escolher": "Elija el lote",
+          "digitar": "Otro lote (escribir)",
+          "digitarDica": "Frasco que el inventario no conoce",
+          "codigo": "Código del lote",
+          "usarPrimeiro": "Usar primero",
+          "saldo": "{doses} dosis | {doses} dosis",
+          "vencido": "Lote vencido el {data}. No se puede aplicar: separe el frasco para descarte.",
+          "venceHoje": "El lote vence hoy. Todavía se puede aplicar.",
+          "vencendoPrimeiro": "Vence en {dias} día. Es el primero en vencer: úselo antes que los demás. | Vence en {dias} días. Es el primero en vencer: úselo antes que los demás.",
+          "vencendo": "Vence en {dias} día, aún vigente. | Vence en {dias} días, aún vigente.",
+          "foraDoEstoque": "Lote fuera del inventario: la aplicación vale, pero el saldo del refrigerador no baja.",
+          "travados": "{lotes} está vencido y sigue en el refrigerador. No aparece como opción. | {lotes} están vencidos y siguen en el refrigerador. No aparecen como opción."
+        },
+        "proxima": {
+          "titulo": "Próxima dosis",
+          "naSerie": "Dosis {dose} de {total} el {data}",
+          "reforco": "Refuerzo anual el {data}",
+          "marcar": "Agendar ahora",
+          "buscando": "Buscando horario…",
+          "sugestao": "{data} a las {hora} con {profissional}",
+          "semHorario": "No hay horario libre cerca de esa fecha. La recepción agenda después.",
+          "recall": "Demasiado lejos para agendar ahora. Entra en la lista de llamadas 30 días antes."
+        },
+        "erros": {
+          "lote": "Elija el lote o escriba el código del frasco.",
+          "validade": "Indique el vencimiento del lote.",
+          "salvar": "No se pudo registrar. Inténtelo de nuevo."
+        },
+        "recusa": {
+          "lote-vencido": "El lote está vencido. La aplicación no se registró.",
+          "sem-validade": "Sin el vencimiento del lote la aplicación no se puede registrar.",
+          "vacina-fora-da-especie": "Esta vacuna no es para la especie del paciente."
+        }
+      },
+      "externa": {
+        "abrir": "Registrar de otro lugar",
+        "titulo": "Vacuna aplicada en otro lugar",
+        "ajuda": "Dosis que {pet} recibió fuera de aquí: tienda de mascotas, campaña, otra clínica. Entra en el protocolo sin lote y queda marcada, aquí y en la app del responsable.",
+        "quando": "Fecha de aplicación",
+        "onde": "Dónde se aplicó",
+        "ondeDica": "Como figura en el papel: nombre de la tienda, clínica o campaña.",
+        "aplicador": "Quién la aplicó allí (si el papel lo dice)",
+        "quemRegistra": "Quién registra",
+        "procedencia": {
+          "titulo": "Cómo lo sabe la clínica",
+          "comprovante": "Vi el comprobante",
+          "relato": "Solo lo dice el responsable",
+          "consequencia": {
+            "comprovante": "Cuenta para el protocolo y aparece como dosis de otro lugar, verificada por la clínica.",
+            "relato": "Cuenta para el protocolo, pero aparece marcada como sin comprobante, aquí y en la app."
+          }
+        },
+        "semLoteExplicacao": "Sin lote ni vencimiento: la clínica no la aplicó y no sabe de qué frasco salió.",
+        "confirmar": "Registrar dosis",
+        "semLote": "Sin lote",
+        "naoAplicadaAqui": "no aplicada aquí",
+        "outroLocal": "Otro lugar",
+        "registradaPor": "Registrada por {nome}",
+        "procedenciaCurta": {
+          "comprovante": "Comprobante verificado por {nome}",
+          "relato": "Solo relato, sin comprobante · {nome}"
+        },
+        "erros": {
+          "data": "Indique la fecha de aplicación.",
+          "futuro": "La fecha no puede ser posterior a hoy.",
+          "local": "Indique dónde se aplicó."
+        }
+      },
+      "carteira": {
+        "verCarteira": "Cartilla y app",
+        "mesmoNoApp": "La app de {responsavel} muestra el mismo atraso.",
+        "protocolo": "Protocolo",
+        "protocoloAjuda": {
+          "filhote": "{especie}, {idade}. Una vacuna que empiece ahora sigue la serie de cachorro, con más dosis.",
+          "adulto": "{especie}, {idade}. Una vacuna que empiece ahora sigue la serie de adulto sin historial."
+        },
+        "semIdade": "edad no informada",
+        "historicoTitulo": "Historial de aplicaciones",
+        "historicoAjuda": "Quién aplicó y dónde. La dosis de otro lugar aparece sin lote.",
+        "historicoVazio": "Ninguna vacuna registrada",
+        "quemEOnde": "Quién y dónde",
+        "nestaClinica": "En esta clínica",
+        "noApp": "En la app de {responsavel}",
+        "noAppAjuda": "Lo que recibe el celular. Cambia en cuanto la clínica registra.",
+        "comAtraso": "Vacunas, {total} atrasada | Vacunas, {total} atrasadas",
+        "verProtocolo": "Ver protocolo",
+        "ocultarProtocolo": "Ocultar protocolo"
+      },
+      "app": {
+        "titulo": "Cartilla de vacunación",
+        "pushOrigem": "PetJourney · ahora",
+        "resumo": {
+          "vacinas": "Vacunas",
+          "proxima": "Próxima",
+          "atrasadas": "Atrasadas"
+        },
+        "protocolo": "Protocolo · {clinica}",
+        "opcionais": "Opcionales sin iniciar: {lista}",
+        "vazio": "Aún no hay vacunas registradas.",
+        "nova": "Nueva",
+        "aplicadaNa": "Aplicada · {clinica}",
+        "outroLocal": "Otro lugar · {local}",
+        "lote": "Lote {lote}",
+        "registradaPor": "Registrada por {clinica}",
+        "procedencia": {
+          "COMPROVANTE": "comprobante verificado",
+          "RELATO": "sin comprobante"
+        },
+        "atrasadaHa": "Atrasada hace {dias} día | Atrasada hace {dias} días",
+        "hoje": "Dosis para hoy",
+        "aPartirDe": "A partir del {data}",
+        "pendente": "Aún sin iniciar",
+        "proximaEm": "Próxima dosis {data}",
+        "marcada": "Agendada {data}, {hora}",
+        "fecharAviso": "Cerrar aviso"
+      },
+      "saudacao": {
+        "vencidas": "1 vacuna vencida para llamar hoy | {n} vacunas vencidas para llamar hoy",
+        "nenhumaVencida": "Ninguna vacuna vencida",
+        "aVencer": "1 por vencer en 30 días | {n} por vencer en 30 días"
+      },
+      "mostrarMais": "Mostrar {n} más (faltan {total})",
+      "potencialFrase": "Llamando a todos, se recuperan {duracao} de agenda (20 min por aplicación)."
     },
     "internacao": {
       "titulo": "Internación",
       "subtitulo": "Mapa de camas, prescripción por horario y el parte que recibe el responsable.",
       "vazioTitulo": "Ninguna cama registrada",
       "vazioDescricao": "Registra las camas de la clínica para seguir las internaciones desde aquí.",
-      "retidosAviso": "Partes a la espera de una llamada: {total}. Una mala noticia no sale por la aplicación antes de que alguien hable con el responsable.",
       "gravidade": {
         "estavel": "Estable",
         "atencao": "Vigilancia",
@@ -3154,16 +3995,6 @@
         "responsavel": "Turno de {nome}",
         "passar": "Pasar el turno"
       },
-      "stat": {
-        "ocupacao": "Ocupación de camas",
-        "vagas": "{total} libres",
-        "criticos": "En estado grave",
-        "criticosDetalhe": "pacientes críticos ahora",
-        "pendentes": "Por hacer ahora",
-        "atrasadas": "{total} atrasadas",
-        "boletins": "Partes retenidos",
-        "boletinsDetalhe": "esperando la llamada"
-      },
       "leito": {
         "livre": "Libre",
         "foraDeOperacao": "Fuera de servicio",
@@ -3173,8 +4004,8 @@
         "pendentes": "Por hacer",
         "atrasadas": "{total} atrasadas",
         "boletimRetido": "El parte espera una llamada",
-        "proximaMinutos": "Siguiente en {minutos} min",
-        "proximaHoras": "Siguiente en {horas} h"
+        "proximaMinutos": "Checklist: siguiente en {minutos} min",
+        "proximaHoras": "Checklist: siguiente en {horas} h"
       },
       "checklist": {
         "vazio": "Nada previsto para este período.",
@@ -3185,7 +4016,12 @@
         "atrasoMinutos": "{minutos} min de retraso",
         "conferencia": "control de la bomba",
         "naTroca": "Cae en el cambio de turno — acordad quién la aplica antes de pasar el turno.",
-        "checar": "Registrar"
+        "checar": "Registrar",
+        "antesDaHora": "Prevista para las {hora}. ¿Registrar ahora de todos modos?",
+        "registrarAgora": "Registrar ahora",
+        "registradas": "1 registrada desde las {desde} | {total} registradas desde las {desde}",
+        "verRegistradas": "Ver",
+        "ocultarRegistradas": "Ocultar"
       },
       "evolucao": {
         "registrarTitulo": "Evolución de este turno",
@@ -3214,9 +4050,7 @@
         "enviar": "Enviar al responsable",
         "bloqueadoErro": "Este parte exige la llamada antes del envío.",
         "composerTitulo": "Escribir un parte",
-        "composerAjuda": "El estado del paciente y lo hecho en el período se añaden solos. Escribe lo que solo sabe quien estuvo con el animal.",
-        "observado": "Qué contarle al responsable",
-        "observadoDica": "Una o dos frases. ¿Comió? ¿Durmió? ¿Se levantó?",
+        "composerAjuda": "Elija una plantilla lista, que ya trae los datos de este paciente, y ajuste lo que quiera antes de generar.",
         "compor": "Generar parte",
         "prontosTitulo": "Listos para enviar",
         "origem": {
@@ -3238,13 +4072,16 @@
         "appAjuda": "La misma conversación que el responsable abre en la aplicación.",
         "foto": "Foto en el parte",
         "fotoNunca": "Solo cuando el equipo la adjunte",
-        "observadoExemplo": "Durmió toda la tarde y comió solo."
+        "modelosTitulo": "Plantillas listas",
+        "mensagem": "Mensaje al responsable",
+        "mensagemDica": "Este es el texto que el responsable va a leer. Edítelo a voluntad.",
+        "mensagemExemplo": "Elija una plantilla arriba o escriba el mensaje.",
+        "limpar": "Limpiar"
       },
       "app": {
         "vazio": "Aún no ha recibido ningún parte.",
         "foto": "Foto enviada por la clínica",
-        "aposLigacao": "Enviado tras la llamada",
-        "retido": "{total} parte sigue en la clínica, esperando la llamada."
+        "aposLigacao": "Enviado tras la llamada"
       },
       "passagem": {
         "titulo": "Cambio de turno",
@@ -3374,22 +4211,19 @@
         "voltar": "Mapa de camas",
         "internadoHa": "Internado hace",
         "responsavelClinico": "Veterinario responsable",
-        "pendentes": "Por hacer ahora",
-        "pendentesDetalhe": "en hora o atrasadas",
         "abasRotulo": "Sección",
         "naTroca": "Hay {total} administración justo en el cambio de turno.",
         "naoEncontradoTitulo": "Internación no encontrada",
         "naoEncontradoDescricao": "Puede haber recibido el alta. Vuelve al mapa de camas.",
-        "estado": "Estado del paciente",
         "noLeito": "Cama {leito}",
         "diagnostico": "Diagnóstico de trabajo",
-        "altaEm": "alta prevista {data}",
-        "semPrevisaoDeAlta": "sin previsión de alta",
-        "verHistorico": "Historial del paciente"
+        "previsaoDeAlta": "Alta prevista",
+        "semPrevisao": "Sin previsión",
+        "observacao": "Observación al ingreso",
+        "encerradaFrase": "Internación cerrada"
       },
       "leitos": {
         "titulo": "Camas de la clínica",
-        "tituloGrade": "Camas · {total}",
         "gerenciar": "Gestionar camas",
         "ajuda": "La clínica registra las camas que tiene. Una cama fuera de servicio sigue en el mapa, marcada, y sale del recuento de plazas.",
         "conta": "{total} registradas · {ativos} en servicio",
@@ -3440,44 +4274,2029 @@
         "paginas": "Páginas de la lista de camas",
         "anterior": "Página anterior",
         "proxima": "Página siguiente"
+      },
+      "acoesRotulo": "Acciones de internación",
+      "grupo": "{ocupados} de {ativos} ocupadas",
+      "resumo": {
+        "ocupacao": "{ocupados} de {ativos} camas ocupadas",
+        "urgentes": "{total} urgente | {total} urgentes",
+        "proximaHora": "{total} paciente con dosis en la próxima hora | {total} pacientes con dosis en la próxima hora",
+        "emDia": "nada atrasado"
+      },
+      "pauta": {
+        "titulo": "Lo que requiere acción en el turno",
+        "boletim": "El parte de {pet} espera contacto con el responsable",
+        "responsavel": "Responsable: {nome}",
+        "atrasadas": "{pet}: {total} administración atrasada | {pet}: {total} administraciones atrasadas",
+        "proxima": "{pet}: próxima administración en {minutos} min",
+        "aFazer": "Pendiente en el turno: {total}",
+        "vazio": "Nada atrasado en el turno."
+      }
+    },
+    "diario": {
+      "campo": {
+        "alimentacao": "Alimentación",
+        "hidratacao": "Agua",
+        "vitalidade": "Ánimo",
+        "fezes": "Heces",
+        "urina": "Orina",
+        "sintomas": "Síntomas",
+        "doencas": "Enfermedades informadas"
+      },
+      "motivo": {
+        "CHECKUP": "Chequeo",
+        "SINTOMA": "Síntoma",
+        "RETORNO": "Control",
+        "EXAME": "Estudio",
+        "VACINA": "Vacuna",
+        "EMERGENCIA": "Emergencia",
+        "OUTRO": "Otro"
+      },
+      "vitalidade": {
+        "AGITADO": "Agitado",
+        "ATIVO": "Activo",
+        "NORMAL": "Normal",
+        "CALMO": "Tranquilo",
+        "SONOLENTO": "Somnoliento",
+        "DESANIMADO": "Desanimado",
+        "APATICO": "Apático",
+        "LETARGICO": "Letárgico"
+      },
+      "alimentacao": {
+        "MUITO": "Mucho",
+        "NORMAL": "Normal",
+        "POUCO": "Poco",
+        "NADA": "Nada",
+        "RECUSOU": "Rechazó",
+        "VOMITOU_APOS": "Vomitó después"
+      },
+      "hidratacao": {
+        "MUITO": "Mucho",
+        "NORMAL": "Normal",
+        "POUCO": "Poco",
+        "NADA": "Nada",
+        "RECUSOU": "Rechazó",
+        "VOMITOU_APOS": "Vomitó después"
+      },
+      "fezes": {
+        "NORMAL": "Normal",
+        "MOLE": "Blanda",
+        "PASTOSA": "Pastosa",
+        "DIARREIA": "Diarrea",
+        "RESSECADA": "Resecada",
+        "COM_SANGUE": "Con sangre",
+        "COM_MUCO": "Con mucosidad",
+        "COM_VERMES": "Con gusanos",
+        "ESCURA": "Oscura",
+        "CLARA": "Clara",
+        "NAO_DEFECOU": "No defecó"
+      },
+      "urina": {
+        "NORMAL": "Normal",
+        "MUITO": "Mucho",
+        "POUCO": "Poco",
+        "NADA": "Nada",
+        "COM_SANGUE": "Con sangre",
+        "ESCURA": "Oscura",
+        "COM_DIFICULDADE": "Con dificultad",
+        "COM_ODOR_FORTE": "Con olor fuerte"
+      },
+      "sintomas": {
+        "FEBRE": "Fiebre",
+        "VOMITO": "Vómito",
+        "DIARREIA": "Diarrea",
+        "FRAQUEZA": "Debilidad",
+        "LETARGIA": "Letargo",
+        "TREMORES": "Temblores",
+        "COCEIRA": "Picazón",
+        "ESPIRRO": "Estornudo",
+        "TOSSE": "Tos",
+        "CONVULSAO": "Convulsión",
+        "FALTA_DE_AR": "Falta de aire",
+        "SECRECAO_OCULAR": "Secreción ocular",
+        "SECRECAO_NASAL": "Secreción nasal",
+        "HALITOSE": "Mal aliento",
+        "CLAUDICACAO": "Cojea",
+        "SANGRAMENTO": "Sangrado",
+        "DESIDRATACAO": "Deshidratación",
+        "INCHACO": "Hinchazón",
+        "PERDA_DE_PESO": "Pérdida de peso",
+        "QUEDA_DE_PELO": "Caída de pelo",
+        "LAMBEDURA_EXCESSIVA": "Lamido excesivo"
+      },
+      "doencas": {
+        "GRIPE": "Gripe",
+        "ALERGIA": "Alergia",
+        "INFECCAO": "Infección",
+        "INFECCAO_URINARIA": "Infección urinaria",
+        "VIROSE": "Virosis",
+        "INTOXICACAO": "Intoxicación",
+        "VERMINOSE": "Parásitos",
+        "OTITE": "Otitis",
+        "CONJUNTIVITE": "Conjuntivitis",
+        "DERMATITE": "Dermatitis",
+        "GASTRITE": "Gastritis",
+        "COLICA": "Cólico",
+        "INDIGESTAO": "Indigestión"
+      }
+    },
+    "preConsulta": {
+      "motivo": "Motivo",
+      "desdeQuando": {
+        "HOJE": "Hoy",
+        "UM_A_DOIS_DIAS": "1 a 2 días",
+        "TRES_A_SETE_DIAS": "3 a 7 días",
+        "UMA_A_DUAS_SEMANAS": "1 a 2 semanas",
+        "MAIS_DE_DUAS_SEMANAS": "Más de 2 semanas"
+      },
+      "doDiario": "del diario",
+      "pesadoEm": "pesado el {data}",
+      "fotos": "Fotos adjuntas: {total}"
+    },
+    "escuta": {
+      "titulo": "Anamnesis por voz",
+      "gravar": "Grabar consulta",
+      "gravarDica": "La IA escucha la conversación y propone los campos de la anamnesis; usted revisa antes de guardar.",
+      "estado": {
+        "gravando": "Escuchando",
+        "pausada": "En pausa, micrófono cerrado",
+        "encerrando": "Terminando…",
+        "revisao": "Revise antes de guardar",
+        "aplicada": "Conversación grabada"
+      },
+      "autorizadaPor": "{responsavel} autorizó a las {hora}",
+      "acoes": {
+        "pausar": "Pausar",
+        "retomar": "Reanudar",
+        "encerrar": "Terminar y revisar",
+        "adiantar": "Adelantar la conversación",
+        "descartar": "Descartar grabación",
+        "aplicar": "Aplicar {total} campo al historial | Aplicar {total} campos al historial",
+        "aplicarNenhum": "Marque lo que va a entrar",
+        "gravarDeNovo": "Grabar de nuevo"
+      },
+      "fonte": {
+        "rotulo": "Escuchar",
+        "microfone": "Micrófono",
+        "demonstracao": "Consulta de demostración",
+        "semMicrofone": "Este navegador no transcribe voz. Use Chrome o Edge, o la consulta de demostración.",
+        "microfoneDica": "Transcripción del navegador; en Chrome, el audio pasa por el servicio de voz de Google. Al historial solo vuelve texto.",
+        "demonstracaoDica": "Una consulta de ejemplo, reproducida acelerada. La lee el mismo motor que el micrófono."
+      },
+      "aviso": {
+        "microfone": "Transcripción del navegador, sin distinguir quién habla. Los campos los propone un motor local de reglas, sin modelo de lenguaje: entiende portugués y poco más. Revise cada campo.",
+        "demonstracao": "Demostración: la conversación es una grabación de ejemplo. Los campos los propone un motor local de reglas, sin modelo de lenguaje y sin red."
+      },
+      "autorizacao": {
+        "titulo": "Grabar la consulta",
+        "pedido": "Antes de empezar, pida la autorización de {responsavel}.",
+        "paraLer": "Para leerle a {responsavel}",
+        "texto": "{responsavel}, ¿puedo grabar nuestra conversación? Solo sirve para completar el historial de {pet}. El audio no se guarda: queda el texto, que reviso antes de guardar. Si lo prefiere, no grabo, y se puede parar en cualquier momento.",
+        "oQueAcontece": "Qué sucede",
+        "passoEscuta": "La IA escucha y propone los campos de la anamnesis, cada uno con el fragmento de donde salió.",
+        "passoRevisao": "Nada entra al historial sin su revisión, campo por campo.",
+        "passoDecisao": "Diagnóstico y tratamiento no se completan por voz: la decisión clínica es suya.",
+        "autorizou": "{responsavel} autorizó, empezar",
+        "naoAutorizou": "No autorizó",
+        "responsavelGenerico": "Responsable"
+      },
+      "erro": {
+        "sem-suporte": "Este navegador no transcribe voz. Use Chrome o Edge, o la consulta de demostración.",
+        "permissao": "El navegador no dio acceso al micrófono. Habilítelo en el candado de la barra de direcciones, o use la consulta de demostración.",
+        "microfone": "No se encontró ningún micrófono en este equipo.",
+        "rede": "Sin conexión con el servicio de voz. Lo escuchado hasta aquí está abajo.",
+        "servico": "El servicio de voz dejó de responder. Lo escuchado hasta aquí está abajo."
+      },
+      "conversa": {
+        "titulo": "Conversación",
+        "voce": "Usted",
+        "acompanhante": "Acompañante",
+        "duasVozes": "Dos voces",
+        "incerto": "Escuchado con duda",
+        "esperando": "Esperando las primeras palabras…",
+        "vazia": "No se escuchó nada.",
+        "interferencia": {
+          "latido": "Ladrido",
+          "fala-sobreposta": "Voces superpuestas",
+          "ruido": "Ruido"
+        }
+      },
+      "proposta": {
+        "titulo": "Historial propuesto",
+        "aindaNao": "Todavía no apareció: {campos}",
+        "naoApareceu": "No apareció en la conversación: {campos}",
+        "antecedente": "Antecedente",
+        "noProntuario": "Hoy en el historial: {valor}. Aceptar lo reemplaza.",
+        "somaHistoria": "Se agrega al final de la historia clínica.",
+        "jaRegistrado": "Ya está en los antecedentes; no se agrega de nuevo.",
+        "corrigir": "Corregir",
+        "pronto": "Listo",
+        "cancelar": "Cancelar",
+        "desfazer": "Deshacer corrección",
+        "corrigido": "Corregido por usted",
+        "proposto": "Propuesto: {valor}",
+        "incluir": "Llevar {campo} al historial",
+        "verNaConversa": "Ver en la conversación",
+        "quando": "Cuándo",
+        "descricao": "Descripción",
+        "aplicado": "aplicado",
+        "deFora": "quedó afuera",
+        "nenhumAntecedente": "No apareció ningún antecedente en la conversación."
+      },
+      "alerta": {
+        "sem-origem": "Sin origen en la conversación",
+        "fala-sobreposta": "Dos voces en el fragmento",
+        "latido": "Ladrido en el fragmento",
+        "ruido": "Ruido en el fragmento",
+        "baixa-confianca": "Escuchado con duda",
+        "divergencia": "La conversación también dijo: {valor}",
+        "deduzido": "Deducido, no se dijo"
+      },
+      "notas": {
+        "titulo": "Escuchado y no completado",
+        "hipotese": "Hipótesis dicha en voz alta. El diagnóstico es decisión suya, en la etapa de diagnóstico.",
+        "peso-informado": "Peso dicho por el responsable: información de casa, no entra en los signos vitales. Confírmelo en la balanza.",
+        "medida": "Medida dicha en voz alta. Los signos vitales entran por el examen físico."
+      },
+      "rodape": {
+        "nadaSalvo": "Nada entró al historial todavía. Marque lo que va a entrar; corregir también marca.",
+        "decisao": "La IA ordena lo que se dijo. Lo que va al historial es decisión suya."
+      },
+      "resumo": {
+        "aplicados": "{total} campo aplicado | {total} campos aplicados",
+        "corrigidos": "{total} corregido por usted | {total} corregidos por usted",
+        "deFora": "{total} dejado afuera | {total} dejados afuera"
+      },
+      "indicador": {
+        "ouvindo": "Escuchando la consulta",
+        "pausada": "Grabación en pausa",
+        "voltar": "Volver a la anamnesis"
+      },
+      "vista": {
+        "mostrarConversa": "Mostrar conversación",
+        "ocultarConversa": "Ocultar conversación",
+        "expandir": "Mostrar la anamnesis por voz",
+        "recolher": "Contraer la anamnesis por voz",
+        "abrirPainel": "Abrir panel",
+        "fecharPainel": "Cerrar panel"
+      },
+      "meta": {
+        "campos": "{preenchidos} de {total} campos",
+        "conferir": "{total} por revisar",
+        "marcados": "Marcados: {marcados} de {total}"
+      },
+      "grupo": {
+        "queixa": "Lo que trajo al paciente"
+      }
+    },
+    "migracao": {
+      "titulo": "Traer pacientes de otro sistema",
+      "atalho": "Importar planilla",
+      "sobre": "Pacientes",
+      "lede": "Los datos de la clínica vienen de una planilla, sin volver a escribir nada.",
+      "trocar": "Cambiar archivo",
+      "arquivoLido": "{linhas} fila · {colunas} columnas | {linhas} filas · {colunas} columnas",
+      "origem": "exportación de {nome} reconocida",
+      "passos": {
+        "aria": "Etapas de la importación",
+        "arquivo": "Archivo",
+        "duvidas": "Dudas",
+        "semDuvidas": "Sin dudas",
+        "importar": "Importar"
+      },
+      "comum": {
+        "emBranco": "en blanco",
+        "linha": "Fila {n}",
+        "linhasLista": "Fila {lista} | Filas {lista}",
+        "linhasN": "{n} fila | {n} filas",
+        "linhasPalavra": "fila | filas",
+        "semEspecie": "especie desconocida",
+        "semNome": "sin nombre",
+        "semTelefone": "sin teléfono"
+      },
+      "arquivo": {
+        "titulo": "¿De dónde vienen los datos?",
+        "texto": "Una planilla de Excel o el archivo exportado del sistema que la clínica usa hoy. Reconocemos la exportación de SimplesVet y de Vetus, y una planilla hecha a mano también sirve.",
+        "soltar": "Arrastre el archivo aquí",
+        "ou": "o",
+        "lendo": "Leyendo el archivo…",
+        "escolher": "Elegir archivo",
+        "formatos": "Excel (.xlsx) o .csv, hasta {mb} MB",
+        "promessa": "No se guarda nada hasta que usted confirme, en el último paso.",
+        "exemplosTitulo": "¿No tiene un archivo ahora?",
+        "exemplosTexto": "Pruebe con uno de estos ejemplos.",
+        "usar": "Usar este",
+        "baixar": "Descargar",
+        "demo": {
+          "clinica": {
+            "titulo": "Planilla hecha en la clínica",
+            "descricao": "Desordenada a propósito: fechas en varios formatos, teléfonos sin un formato fijo, un animal sin responsable y clientes que ya están registrados aquí."
+          },
+          "simplesvet": {
+            "titulo": "Exportación de SimplesVet",
+            "descricao": "Archivo limpio de sistema. Las columnas se reconocen solas."
+          },
+          "vetus": {
+            "titulo": "Base grande de Vetus",
+            "descricao": "Para ver la importación en curso, pausarla a mitad de camino y continuar."
+          }
+        },
+        "erro": {
+          "vazio": "El archivo está vacío.",
+          "grande-demais": "El archivo supera el límite. Divida la planilla en partes e importe una a la vez.",
+          "xls-antigo": "Este es un .xls antiguo. Ábralo en Excel y guárdelo como .xlsx o .csv.",
+          "formato-desconhecido": "Este archivo no es una planilla. Use .xlsx o .csv.",
+          "corrompido": "No se pudo abrir el archivo. Intente guardarlo de nuevo desde Excel.",
+          "sem-linhas": "La planilla no tiene ninguna fila debajo del encabezado.",
+          "linhas-demais": "Demasiadas filas para una sola importación. Divida la planilla en partes."
+        }
+      },
+      "colunas": {
+        "titulo": "Columnas de la planilla",
+        "texto": "El sistema relacionó cada columna con un campo del registro por su cuenta. Cambie algo solo si una columna está en el lugar equivocado.",
+        "travado": "La importación ya empezó: las columnas quedan como están.",
+        "usadas": "{n} de {total} columnas usadas",
+        "faltam": "Sin esta columna no se puede importar: {campos}. Al cerrar el panel, le preguntaremos cuál es.",
+        "naoUsadasTitulo": "Esta columna no va al registro | Estas {n} columnas no van al registro",
+        "naoUsadasTexto": "Tiene contenido, pero no reconocimos qué es. Si tiene algo importante, indique a dónde va. | Tienen contenido, pero no reconocimos qué es. Si alguna tiene algo importante, indique a dónde va.",
+        "usadasTitulo": "Columna usada | {n} columnas usadas",
+        "coluna": "Columna {letra}",
+        "semTitulo": "Sin título",
+        "vazia": "columna vacía",
+        "voceEscolheu": "Usted eligió",
+        "sugestao": "Suposición: revísela",
+        "naoVem": "{n} celda con contenido no se va a importar | {n} celdas con contenido no se van a importar",
+        "vaiPara": "Va a",
+        "vaiParaAria": "A dónde va la columna {coluna}",
+        "naoTrazer": "No importar esta columna",
+        "grupoResponsavel": "Responsable",
+        "grupoAnimal": "Animal",
+        "grupoNenhum": "Ninguno",
+        "ver": "Ver columnas",
+        "nota": {
+          "todas": "Usamos la única columna de la planilla. | Usamos las {n} columnas de la planilla.",
+          "parte": "Usamos {n} de {total} columnas de la planilla.",
+          "fora": "Quedó fuera: {lista}. | Quedaron fuera: {lista}.",
+          "eMais": "{lista} y 1 más | {lista} y {n} más"
+        }
+      },
+      "campo": {
+        "responsavelNome": "Nombre del responsable",
+        "telefone": "Teléfono",
+        "telefone2": "Teléfono 2",
+        "email": "Correo",
+        "cpf": "CPF",
+        "cep": "CEP",
+        "endereco": "Dirección",
+        "numero": "Número",
+        "bairro": "Barrio",
+        "cidade": "Ciudad",
+        "uf": "UF",
+        "petNome": "Nombre del animal",
+        "especie": "Especie",
+        "raca": "Raza",
+        "sexo": "Sexo",
+        "castrado": "Castrado",
+        "nascimento": "Nacimiento",
+        "idade": "Edad",
+        "peso": "Peso",
+        "microchip": "Microchip",
+        "pelagem": "Pelaje",
+        "alergia": "Alergias",
+        "situacao": "Activo o fallecido"
+      },
+      "duvidas": {
+        "contador": "Pregunta {n} de {total}",
+        "nenhumaChip": "Todo en orden",
+        "nenhumaTitulo": "Ninguna duda",
+        "nenhumaTexto": "El sistema entendió todas las filas por sí solo. Continúe para ver el resumen.",
+        "anterior": "Pregunta anterior",
+        "proxima": "Pregunta siguiente",
+        "faltam": "Falta {n} respuesta | Faltan {n} respuestas",
+        "verResumo": "Ver el resumen",
+        "jaCadastrado": "Ya registrado aquí",
+        "oAnimal": "El animal · fila {n}",
+        "linhaDeCima": "La fila de arriba · fila {n}",
+        "semAnimal": "sin animal",
+        "coluna": {
+          "petNome": "¿Qué columna tiene el nombre del animal?",
+          "responsavelNome": "¿Qué columna tiene el nombre del responsable?",
+          "texto": "No encontramos esta columna por nuestra cuenta. Elija por el contenido: mostramos el comienzo de cada una.",
+          "hoje": "Ya se usa como: {campo}",
+          "semEla": "¿La planilla no tiene esta información? Sin ella no se puede importar: use un archivo que la tenga."
+        },
+        "especie": {
+          "pergunta": "¿Qué especie es “{valor}”?",
+          "perguntaBranco": "¿Cuál es la especie de estos animales?",
+          "perguntaBrancoUm": "¿Cuál es la especie de {nome}?",
+          "texto": "Está escrito así en la planilla y el sistema no lo reconoció. La especie define el rango de referencia, la dosis y la vacuna: sin ella, el animal no entra.",
+          "textoBranco": "La especie está en blanco y la raza no ayuda a deducirla. Sin especie, el animal no entra.",
+          "animais": "Animal que depende de esta respuesta | Animales que dependen de esta respuesta",
+          "deixarDeFora": "Dejar fuera por ahora"
+        },
+        "responsavel-existente": {
+          "pergunta": "¿{nome} ya es cliente de la clínica?",
+          "texto": "Ya hay alguien registrado aquí con ese nombre, pero el teléfono no coincide. Puede ser la misma persona con un número nuevo, o alguien con el mismo nombre.",
+          "sim": "Sí, es la misma persona",
+          "nao": "No, es otra persona",
+          "curta": "Pendiente: ¿ya es cliente?"
+        },
+        "mesma-pessoa": {
+          "pergunta": "{nome} aparece dos veces. ¿Es la misma persona?",
+          "texto": "El nombre se repite en la planilla con teléfonos distintos. Si es la misma persona, los animales quedan juntos en su registro.",
+          "sim": "Sí, es la misma persona",
+          "nao": "No, son personas distintas",
+          "curta": "Pendiente: ¿es la misma persona?"
+        },
+        "orfao": {
+          "pergunta": "¿De quién es {nome}?",
+          "texto": "La fila {linha} tiene el animal, pero el responsable está en blanco. Suele ser la continuación de la fila de arriba, cuando la celda estaba combinada en Excel.",
+          "sim": "Es de {outro}",
+          "nao": "Dejar fuera",
+          "curta": "Pendiente: ¿de quién es el animal?",
+          "todos": "Vincular a la fila de arriba | Vincular los {n} animales a la fila de arriba"
+        },
+        "animal-repetido": {
+          "pergunta": "{nome} aparece dos veces. ¿Es el mismo animal?",
+          "texto": "Mismo nombre, misma especie y mismo responsable.",
+          "sim": "Sí, es el mismo",
+          "nao": "No, son dos animales",
+          "curta": "Pendiente: ¿es el mismo animal?"
+        },
+        "animal-existente": {
+          "pergunta": "¿{nome} ya es paciente de la clínica?",
+          "texto": "Ya hay un animal con ese nombre y esa especie en el registro de este responsable.",
+          "sim": "Sí, unir al registro",
+          "nao": "No, registrar otro",
+          "curta": "Pendiente: ¿ya es paciente?"
+        }
+      },
+      "resumo": {
+        "titulo": "Listo para importar",
+        "texto": "Esto es lo que va a pasar. Todavía no se guardó nada.",
+        "verQuais": "Ver cuáles",
+        "voltar": "Volver a las preguntas",
+        "importar": "Importar {n} fila | Importar {n} filas",
+        "promessa": "Unir con un registro que ya existe nunca borra lo que la clínica ya tenía.",
+        "entram": {
+          "titulo": "Van a entrar",
+          "pacientesNovos": "{n} paciente nuevo | {n} pacientes nuevos",
+          "pacientesExistentes": "{n} paciente que ya existía recibe datos | {n} pacientes que ya existían reciben datos",
+          "responsaveisNovos": "{n} responsable nuevo | {n} responsables nuevos",
+          "responsaveisExistentes": "{n} responsable que ya era cliente | {n} responsables que ya eran clientes",
+          "soContato": "{n} responsable sin animal | {n} responsables sin animal"
+        },
+        "arrumamos": {
+          "titulo": "Corregido automáticamente",
+          "corrigidas": "Fechas, teléfonos y pesos leídos de la forma correcta",
+          "emBranco": "{n} valor erróneo queda en blanco | {n} valores erróneos quedan en blanco",
+          "semContato": "{n} responsable sin teléfono ni correo | {n} responsables sin teléfono ni correo",
+          "formatacao": "Formato unificado: {lista}"
+        },
+        "fora": {
+          "titulo": "No van a entrar",
+          "nenhuma": "Ninguna fila queda fuera."
+        }
+      },
+      "importacao": {
+        "titulo": {
+          "rodando": "Importando…",
+          "pausada": "Importación en pausa",
+          "falhou": "La importación se detuvo"
+        },
+        "progressoAria": "Progreso de la importación",
+        "feitas": "{feitas} de {total} filas",
+        "lote": "Lote {atual} de {total}",
+        "podeSair": "Puede salir de esta pantalla: la importación continúa, y la lista de pacientes muestra en qué punto está.",
+        "terminandoLote": "Terminando el lote que ya se estaba guardando…",
+        "continuaDoPonto": "Al continuar, sigue desde donde se detuvo. Ninguna fila se guarda dos veces.",
+        "falha": "El lote {lote} no llegó a guardarse, así que no entró nada de él. Intente de nuevo.",
+        "pausar": "Pausar",
+        "continuar": "Continuar",
+        "tentarDeNovo": "Intentar de nuevo"
+      },
+      "relatorio": {
+        "chip": "Importación completada",
+        "titulo": "Entraron {entraram} de {total} filas",
+        "texto": "{n} fila quedó fuera. El motivo y qué hacer están abajo. | {n} filas quedaron fuera. Los motivos y qué hacer están abajo.",
+        "textoTudo": "Entraron todas las filas.",
+        "entraram": "Entraron",
+        "completar": "Falta completar",
+        "emBranco": "{n} valor erróneo quedó en blanco | {n} valores erróneos quedaron en blanco",
+        "nadaACompletar": "No quedó nada pendiente.",
+        "ficaram": "Quedaron fuera",
+        "baixarFora": "Descargar para corregir",
+        "baixarCompletar": "Descargar la lista",
+        "verLinhas": "Ver fila por fila",
+        "outra": "Importar otra planilla",
+        "verPacientes": "Ver los pacientes",
+        "colunaLinha": "Fila",
+        "colunaOQueHouve": "Qué pasó",
+        "sufixoFora": "quedaron-fuera",
+        "sufixoCompletar": "para-completar"
+      },
+      "linhas": {
+        "titulo": "Fila por fila",
+        "filtroAria": "Mostrar solo",
+        "filtro": {
+          "todas": "Todas",
+          "entram": "Van a entrar",
+          "corrigidas": "Corregidas",
+          "fora": "No van a entrar"
+        },
+        "buscar": "Buscar por número de fila o por un nombre",
+        "vazio": "Ninguna fila con ese filtro.",
+        "mais": "Mostrar {n} más",
+        "abrirPaciente": "Abrir el paciente",
+        "naPlanilha": "Cómo estaba en la planilla",
+        "semNada": "Entró tal como estaba: no hubo que corregir nada.",
+        "soResponsavel": "Solo el responsable",
+        "semResponsavel": "Sin responsable",
+        "preenche": "{campo} estaba en blanco en el registro y vino de la planilla.",
+        "conflito": "{campo}: se mantuvo {mantido}, que ya estaba en el registro. La planilla decía {ignorado}.",
+        "semContato": "Sin teléfono ni correo: complete el registro para que la clínica pueda avisar.",
+        "correcoes": "{n} corrección | {n} correcciones",
+        "emBranco": "{n} valor en blanco | {n} valores en blanco"
+      },
+      "situacao": {
+        "entra": "Entra",
+        "junta": "Actualiza registro",
+        "contato": "Solo responsable",
+        "pendente": "Pendiente",
+        "fora": "No entra"
+      },
+      "acontece": {
+        "novo": "Paciente nuevo, con responsable nuevo.",
+        "novoDeExistente": "Paciente nuevo de {nome}, que ya es cliente.",
+        "animalExistente": "{nome} ya era paciente: el registro recibe lo que faltaba.",
+        "mesmaLinha": "Es el mismo animal de la fila {linha}: los datos se sumaron allí.",
+        "contato": "Entra solo el responsable, sin animal.",
+        "contatoExistente": "{nome} ya es cliente: el registro recibe lo que faltaba."
+      },
+      "motivo": {
+        "animal-sem-responsavel": {
+          "titulo": "Animal sin responsable",
+          "acao": "Complete quién responde por el animal e importe esas filas de nuevo."
+        },
+        "animal-sem-nome": {
+          "titulo": "Animal sin nombre",
+          "acao": "La fila tiene datos de un animal, pero no el nombre. Complételo e importe de nuevo."
+        },
+        "especie-desconhecida": {
+          "titulo": "Especie desconocida",
+          "acao": "Complete la especie en la planilla e importe esas filas de nuevo."
+        },
+        "responsavel-sem-nome": {
+          "titulo": "Responsable sin nombre",
+          "acao": "Tiene teléfono o CPF, pero ningún nombre. Complete el nombre e importe de nuevo."
+        },
+        "falecido": {
+          "titulo": "Animal fallecido",
+          "acao": "No entra como paciente, para que nadie reciba un recordatorio de vacuna de un animal que ya murió."
+        }
+      },
+      "ajuste": {
+        "data-ano-curto": "La fecha de nacimiento “{de}” tenía el año con dos dígitos: quedó como {para}.",
+        "data-da-planilha": "La fecha de nacimiento era un número de Excel (“{de}”): quedó como {para}.",
+        "data-americana": "La fecha de nacimiento “{de}” tenía el mes antes del día: quedó como {para}.",
+        "data-sem-dia": "La fecha de nacimiento “{de}” no tenía el día: quedó como {para}.",
+        "nascimento-pela-idade": "Tenía la edad (“{de}”) en lugar de la fecha: nacimiento estimado en {para}.",
+        "peso-em-gramas": "El peso “{de}” estaba en gramos: quedó como {para}.",
+        "telefone-nono-digito": "Al teléfono “{de}” le faltaba el 9 del celular: quedó como {para}.",
+        "telefone-ddd-da-clinica": "El teléfono “{de}” no tenía DDD: se le puso el de la clínica y quedó como {para}.",
+        "telefone-dividido": "Había dos teléfonos en la misma celda: {para} pasó a ser el teléfono 2.",
+        "cpf-zeros": "El CPF “{de}” perdió los ceros iniciales en Excel: quedó como {para}.",
+        "cep-zero": "El CEP “{de}” perdió el cero inicial en Excel: quedó como {para}.",
+        "especie-pela-raca": "Especie en blanco: por la raza ({de}), quedó como {para}.",
+        "especie-escolhida": "Especie “{de}”: quedó como {para}, según su respuesta.",
+        "especie-escolhida-branco": "Especie en blanco: quedó como {para}, según su respuesta.",
+        "celula-mesclada": "El responsable vino de la celda combinada de arriba: {para}.",
+        "responsavel-da-linha-anterior": "No tenía responsable: vinculado a {para}, de la fila de arriba, según su respuesta.",
+        "data-invalida": "La fecha de nacimiento “{de}” no existe en el calendario: quedó en blanco.",
+        "data-futura": "La fecha de nacimiento “{de}” está en el futuro: quedó en blanco.",
+        "idade-invalida": "No se pudo entender la edad “{de}”: quedó en blanco.",
+        "peso-invalido": "El peso “{de}” no es posible para el animal: quedó en blanco.",
+        "telefone-invalido": "El teléfono “{de}” no es un número válido: no se usó.",
+        "cpf-invalido": "El CPF “{de}” no es válido: quedó en blanco.",
+        "email-invalido": "El correo “{de}” está incompleto: quedó en blanco.",
+        "cep-invalido": "El CEP “{de}” está incompleto: quedó en blanco.",
+        "uf-invalida": "La UF “{de}” no existe: quedó en blanco.",
+        "microchip-invalido": "El microchip “{de}” está incompleto: quedó en blanco.",
+        "microchip-cientifico": "Microchip “{de}”: Excel lo mostró en notación científica y se perdieron los últimos dígitos. Exporte la columna como texto para recuperarlos.",
+        "nao-reconhecido": "{campo} “{de}” no se reconoció: quedó en blanco."
+      },
+      "padronizacao": {
+        "telefone": "{n} teléfono | {n} teléfonos",
+        "documento": "{n} CPF | {n} CPF",
+        "data": "{n} fecha | {n} fechas",
+        "peso": "{n} peso | {n} pesos",
+        "nome": "{n} nombre en mayúsculas | {n} nombres en mayúsculas",
+        "especie": "{n} especie | {n} especies",
+        "uf": "{n} UF | {n} UF"
+      },
+      "aviso": {
+        "lista": {
+          "rodando": "Importación en curso: {feitas} de {total} filas.",
+          "pausada": "Importación en pausa en {feitas} de {total} filas.",
+          "falhou": "La importación se detuvo en {feitas} de {total} filas.",
+          "ver": "Ver",
+          "continuar": "Continuar"
+        }
+      }
+    },
+    "ficha": {
+      "acoes": "Acciones de la ficha del paciente",
+      "peso": "Peso",
+      "vacinas": {
+        "semProtocolo": "Sin protocolo de vacunas para {especie}",
+        "atrasada": "{vacina} atrasada hace {dias} día | {vacina} atrasada hace {dias} días",
+        "atrasadas": "{total} vacuna atrasada | {total} vacunas atrasadas",
+        "hoje": "{vacina} para hoy",
+        "hojeVarias": "{total} vacuna para hoy | {total} vacunas para hoy",
+        "proxima": "Próxima dosis en {dias} día | Próxima dosis en {dias} días",
+        "emDia": "Vacunas al día",
+        "proximaHoje": "Próxima dosis hoy"
+      },
+      "historico": {
+        "internado": "En internación ahora · {leito}",
+        "hoje": "Atención hoy a las {hora}",
+        "ultimo": "Última atención hace {dias} día | Última atención hace {dias} días",
+        "ultimoHoje": "Última atención hoy",
+        "linhaDoTempo": "Línea de tiempo",
+        "titulo": "Historial",
+        "emTrintaSegundos": "En 30 segundos:",
+        "sinais": "1 señal para ver en el resumen. | {n} señales para ver en el resumen.",
+        "proximo": "Próximo:",
+        "quando": "{data} a las {hora}",
+        "verAgendados": "Ver todos los agendados ({n})",
+        "ocultarAgendados": "Ocultar agendados",
+        "filtroAria": "Filtrar el historial por tipo"
+      },
+      "resumo": {
+        "sinais": "{total} señal requiere atención | {total} señales requieren atención",
+        "primeiraVez": "Primera vez en esta clínica",
+        "nada": "Nada fuera de lo común desde la última consulta"
+      },
+      "tratamento": {
+        "pilula": "Tratamiento",
+        "alerta": "{medicamento}: la adherencia cayó",
+        "alertas": "{total} tratamiento con la adherencia en caída | {total} tratamientos con la adherencia en caída",
+        "umEmCurso": "{medicamento} en curso",
+        "emCurso": "{total} medicamento en curso | {total} medicamentos en curso",
+        "nenhumEmCurso": "Ningún medicamento en curso",
+        "semTratamento": "Sin medicamento en casa con recordatorio"
+      }
+    },
+    "adesao": {
+      "titulo": "Tratamientos en casa",
+      "subtitulo": "El medicamento que salió de la clínica, dosis a dosis, según lo que la casa registra en la app.",
+      "situacao": {
+        "dada": "Dada",
+        "pulada": "Omitida",
+        "sem-registro": "Sin registro",
+        "aberta": "Dosis de ahora",
+        "prevista": "Prevista"
+      },
+      "motivo": {
+        "esqueci": "Me olvidé",
+        "cuspiu": "La escupió",
+        "acabou": "Se acabó"
+      },
+      "motivoNaFrase": {
+        "esqueci": "olvido",
+        "cuspiu": "la mascota la escupió",
+        "acabou": "se acabó el medicamento"
+      },
+      "contagem": {
+        "dadas": "{total} dada | {total} dadas",
+        "puladas": "{total} omitida | {total} omitidas",
+        "semRegistro": "{total} sin registro | {total} sin registro",
+        "nenhuma": "Ninguna dosis registrada todavía"
+      },
+      "periodo": {
+        "desdeConsulta": "Desde la consulta del {data}",
+        "desdeInicio": "Desde el inicio, el {data}"
+      },
+      "dose": {
+        "ml": "{quantidade} mL",
+        "comprimido": "{quantidade} comprimido | {quantidade} comprimidos",
+        "meio": "medio comprimido",
+        "quarto": "un cuarto de comprimido",
+        "tres-quartos": "tres cuartos de comprimido",
+        "um-e-meio": "un comprimido y medio"
+      },
+      "posologia": {
+        "aCada": "cada {horas} h",
+        "continuo": "uso continuo",
+        "porDias": "por {dias} día | por {dias} días"
+      },
+      "faixa": {
+        "quando": "{data}, {hora}",
+        "dadaPor": "dada por {nome} a las {hora}",
+        "puladaPor": "omitida por {nome} · {motivo}",
+        "hoje": "hoy",
+        "marcoLegenda": "Última consulta",
+        "semRegistroNota": "Sin registro no quiere decir que no se dio: la dosis pudo darse sin marcarla en la app."
+      },
+      "quem": "Registrado por {lista}",
+      "horarioDestoante": "La dosis de las {horario} es la que menos aparece como dada: {dadas} de {fechadas}.",
+      "critico": {
+        "selo": "Crítico",
+        "alternar": "Crítico: avisar a la clínica si la adherencia cae"
+      },
+      "alerta": {
+        "selo": "La adherencia cayó",
+        "puladas": "{total} dosis omitida desde {quando} | {total} dosis omitidas desde {quando}",
+        "queda": "Solo {dadas} de {fechadas} dosis aparecen como dadas desde {quando}",
+        "motivos": "Motivo: {motivos}.",
+        "antes": "La semana anterior: {dadas} de {fechadas}.",
+        "registrarContato": "Registrar contacto",
+        "quemFalou": "Quién habló",
+        "nota": "Lo acordado",
+        "notaPlaceholder": "Ej.: se acabó la caja; receta nueva enviada",
+        "salvar": "Guardar contacto",
+        "cancelar": "Cancelar",
+        "contato": "Contacto registrado por {nome}, {quando}."
+      },
+      "registros": {
+        "ver": "Ver registros",
+        "esconder": "Ocultar registros",
+        "colunaQuando": "Dosis",
+        "colunaSituacao": "Estado",
+        "colunaQuem": "Quién registró",
+        "registradaAs": "registrado el {quando}",
+        "vazio": "Ninguna dosis en el período",
+        "rotulo": "Registros de {medicamento}"
+      },
+      "naoCompartilhado": "La casa no comparte los registros de este recordatorio.",
+      "naoCompartilhadoDetalhe": "El recordatorio existe en la app; lo que se registre queda con la familia.",
+      "ficha": {
+        "emCurso": "Medicamentos en curso",
+        "emCursoAjuda": "Lo que la casa registró en la app. La línea en la franja marca la última consulta, el {data}.",
+        "emCursoAjudaSemConsulta": "Lo que la casa registró en la app, desde la primera dosis.",
+        "encerrados": "Terminados",
+        "encerradosPeriodo": "del {inicio} al {fim}",
+        "vazioTitulo": "Ningún medicamento con recordatorio",
+        "vazioDescricao": "Cuando el tutor cree los recordatorios de la receta en la app, lo que la casa registre aparece aquí, dosis a dosis.",
+        "noApp": "En el celular de {responsavel}",
+        "noAppAjuda": "Lo que muestra la app. Toque como alguien de la casa: la ficha de al lado cambia al instante.",
+        "celularDe": "Celular de",
+        "papel": {
+          "dono": "tutor",
+          "familia": "familia",
+          "leitura": "solo lectura"
+        },
+        "emCursoAjudaSemFio": "Lo que la casa registró en la app. La última consulta fue el {data}.",
+        "comoVeNoApp": "Cómo lo ve {responsavel} en la app"
+      },
+      "lista": {
+        "stat": {
+          "alertas": "La adherencia cayó",
+          "alertasDetalhe": "Tratamientos críticos: llamar hoy",
+          "emCurso": "En curso",
+          "emCursoDetalhe": "Medicamentos con recordatorio en la app",
+          "criticos": "Críticos",
+          "criticosDetalhe": "Marcados por el veterinario al recetar"
+        },
+        "recorte": {
+          "atencao": "Requieren atención",
+          "emCurso": "En curso",
+          "encerrados": "Terminados"
+        },
+        "coluna": {
+          "paciente": "Paciente",
+          "remedio": "Medicamento",
+          "janela": "Últimos {dias} días",
+          "responsavel": "Tutor",
+          "situacao": "Estado"
+        },
+        "situacaoEmCurso": "En curso",
+        "situacaoEncerrado": "Terminado",
+        "vazioTitulo": "Todavía no hay tratamientos en casa",
+        "vazioDescricao": "Los medicamentos aparecen aquí cuando el tutor crea los recordatorios de la receta en la app.",
+        "vazioRecorte": {
+          "atencao": "Ningún tratamiento crítico con la adherencia en caída",
+          "emCurso": "Ningún tratamiento en curso",
+          "encerrados": "Ningún tratamiento terminado"
+        }
+      },
+      "app": {
+        "titulo": "Medicamentos",
+        "pushOrigem": "PetJourney · {hora}",
+        "dei": "Se la di",
+        "abrir": "Abrir",
+        "pulei": "No se la di",
+        "porQue": "¿Por qué?",
+        "voltar": "Volver",
+        "ontemAs": "Ayer, {hora}",
+        "dadaPorVoce": "Dada por ti a las {hora}",
+        "dadaPor": "Dada por {nome} a las {hora}",
+        "puladaPorVoce": "Omitida por ti · {motivo}",
+        "puladaPor": "Omitida por {nome} · {motivo}",
+        "desfazer": "Deshacer",
+        "jaRegistrada": "{nome} ya la registró a las {hora}. No hace falta darla de nuevo.",
+        "foraDaJanela": "Esta dosis ya cerró. La próxima aparece a su hora.",
+        "somenteLeitura": "Sigues los medicamentos de {pet}; solo quien tiene acceso de edición registra las dosis.",
+        "erro": "No se pudo registrar. Inténtalo de nuevo.",
+        "receitaNova": "Receta del {data}",
+        "receitaNovaDetalhe": "{total} medicamento todavía sin recordatorio | {total} medicamentos todavía sin recordatorio",
+        "primeiraDose": "Primera dosis",
+        "sugestaoDica": "Horario sugerido para que ninguna dosis caiga de madrugada.",
+        "compartilhar": "{clinica} ve lo que registren",
+        "criar": "Crear recordatorios",
+        "desde": "Desde el {data}:",
+        "encerrados": "Terminados",
+        "avisosTitulo": "Cómo funcionan los avisos",
+        "avisoUmPorHorario": "Un aviso por horario. Los medicamentos a menos de {minutos} min uno del otro llegan en el mismo aviso.",
+        "avisoSemReaviso": "Sin segundo aviso: la próxima dosis ya es el recordatorio.",
+        "avisoComReaviso": "Un segundo aviso solo para medicamentos cada {horas} h o más espaciados, y solo si nadie marca.",
+        "avisoSemCobranca": "Si pasa la hora, la dosis queda sin registro. Nadie recibe reclamos.",
+        "compartilhado": "{clinica} ve estos registros",
+        "naoCompartilhado": "Solo la familia ve estos registros",
+        "vazio": "Ningún medicamento con recordatorio para {pet}."
+      },
+      "saudacao": {
+        "atencao": "1 tratamiento con la adherencia en caída | {n} tratamientos con la adherencia en caída",
+        "semAtencao": "Ninguna adherencia en caída",
+        "emCurso": "Ninguno en curso | 1 en curso | {n} en curso",
+        "criticos": "1 crítico | {n} críticos"
       }
     }
   },
-  "cronometro": {
-    "titulo": "Cronómetro de consulta",
-    "iniciar": "Iniciar",
-    "ariaIniciar": "Iniciar el cronómetro de la consulta",
-    "ariaAbrir": "Cronómetro en {tempo} — {estado}. Abrir el panel.",
-    "abrirPainel": "Abrir el panel del cronómetro",
-    "pausar": "Pausar",
-    "retomar": "Reanudar",
-    "encerrar": "Finalizar",
-    "descartar": "Descartar",
-    "pausado": "En pausa",
-    "semSessao": "Ninguna consulta cronometrada",
-    "semPaciente": "Sin consulta vinculada",
-    "estado": {
-      "dentro": "Dentro del bloque",
-      "no-limite": "El bloque está por terminar",
-      "excedido": "Bloque superado"
+  "hotel": {
+    "acomodacoes": {
+      "aCasa": "La casa",
+      "abasRotulo": "Registros de la casa",
+      "acompanhante": "Acompañante",
+      "cabem": "cabe {total} | caben {total}",
+      "capacidade": "Capacidad",
+      "capacidadeDica": "Cuántos animales de la misma casa caben juntos.",
+      "corredor": {
+        "descer": "Mover abajo",
+        "desenho": "Símbolo",
+        "editar": "Editar pasillo",
+        "nome": "Nombre del pasillo",
+        "nomeDica": "Canil A, Gatera, Jardín…",
+        "nomeExplica": "El nombre es tuyo. Así aparece el pasillo en el mapa y en la rutina.",
+        "novo": "Nuevo pasillo",
+        "remover": "Eliminar pasillo",
+        "removerMesmo": "¿Eliminar este pasillo? No se puede deshacer.",
+        "rotulo": "Pasillo",
+        "subir": "Mover arriba",
+        "temVagas": "Tiene {total} alojamiento dentro. Muévelo o elimínalo antes. | Tiene {total} alojamientos dentro. Muévelos o elimínalos antes."
+      },
+      "desativar": "Sacar de servicio",
+      "detalhe": "Detalle",
+      "editar": "Editar alojamiento",
+      "especies": "Especies aceptadas",
+      "higienizacao": "Higienización",
+      "higienizacaoDica": "Tiempo entre una salida y la entrada siguiente.",
+      "lugares": "{total} plaza | {total} plazas",
+      "motivo": "Motivo",
+      "nome": "Nombre",
+      "nova": "Nuevo alojamiento",
+      "operacao": "Servicio",
+      "paradas": "{total} fuera de servicio",
+      "porteMaximo": "Tamaño máximo",
+      "preco": {
+        "acompanhante": "Segundo animal de la misma casa",
+        "acompanhanteDica": "Porcentaje de la tarifa completa. Porcentaje y no importe fijo porque la tarifa varía por tamaño.",
+        "daquiEmDiante": "Vale de ahora en adelante. Una reserva ya cerrada mantiene el precio al que se vendió.",
+        "diarias": "Tarifa diaria por tamaño",
+        "editar": "Editar tabla",
+        "emUso": "{total} alojamiento usa esta tabla. Cambia la suya antes. | {total} alojamientos usan esta tabla. Cambia la suya antes.",
+        "nome": "Nombre de la tabla",
+        "nomeDica": "Estándar, Suite, Gatera…",
+        "nova": "Nueva tabla",
+        "remover": "Eliminar tabla",
+        "removerMesmo": "¿Eliminar esta tabla de precios?",
+        "resumo": "Cuánto cuesta la noche, según el tamaño del animal.",
+        "usos": "en {total} plaza | en {total} plazas"
+      },
+      "reativar": "Devolver al servicio",
+      "recursos": "Recursos",
+      "remover": "Quitar del registro",
+      "removerConfirma": "Quitar es definitivo. ¿Confirmas?",
+      "removerSim": "Quitar",
+      "resumo": "{total} alojamiento registrado | {total} alojamientos registrados",
+      "secaoIdentidade": "Qué es",
+      "secaoPreco": "Preparación y precio",
+      "secaoQuemCabe": "Quién cabe",
+      "subtitulo": "Hotel",
+      "tarifa": "Tarifa",
+      "tarifas": "Tarifas",
+      "temporada": {
+        "acrescimo": "Recargo",
+        "acrescimoDica": "Porcentaje sobre la tarifa de la tabla, no una segunda tabla.",
+        "ate": "Hasta",
+        "atravessaOAno": "Este intervalo cruza el cambio de año.",
+        "de": "Desde",
+        "dia": "Día",
+        "editar": "Editar temporada",
+        "nome": "Nombre de la temporada",
+        "nomeDica": "Fin de año, Vacaciones de julio, Carnaval…",
+        "nova": "Nueva temporada",
+        "remover": "Eliminar temporada",
+        "removerMesmo": "¿Eliminar esta temporada?",
+        "resumo": "Cuándo sube la tarifa. Vale todos los años, sin volver a cargarla."
+      },
+      "temporadas": "Temporadas",
+      "tipo": {
+        "desenho": "Símbolo",
+        "editar": "Editar tipo",
+        "emUso": "{total} alojamiento usa este tipo. Cambia el suyo antes. | {total} alojamientos usan este tipo. Cambia el suyo antes.",
+        "nome": "Cómo lo llama la casa",
+        "nomeDica": "Box, Suite, Cabaña, Jaula, Aviario…",
+        "nomeExplica": "El nombre es tuyo. Es la etiqueta que aparece en todas las pantallas del hotel.",
+        "novo": "Nuevo tipo",
+        "remover": "Eliminar tipo",
+        "removerMesmo": "¿Eliminar este tipo?",
+        "resumo": "Cómo llama la casa a cada tipo de plaza. El nombre es tuyo; el símbolo lo eliges.",
+        "rotulo": "Tipo",
+        "usos": "en {total} plaza | en {total} plazas"
+      },
+      "tipos": "Tipos",
+      "titulo": "Alojamientos"
     },
-    "unidades": "{contagem} unidad | {contagem} unidades",
-    "decorrido": "Transcurrido",
-    "cobravel": "Facturable",
-    "minutos": "{valor} min",
-    "proximaUnidade": "próxima unidad en {valor}",
-    "excedente": "{valor} más allá del bloque",
-    "esquecidaTitulo": "El cronómetro lleva mucho tiempo corriendo",
-    "esquecidaDescricao": "Lleva más de cuatro horas corriendo. Si quedó abierto por error, descártalo: finalizar registraría el tiempo como atendido.",
-    "hoje": "Hoy",
-    "hojeResumo": "{contagem} consulta | {contagem} consultas",
-    "totalDecorrido": "En consulta",
-    "totalCobravel": "Total facturable",
-    "ultimaHa": "la última hace {valor}",
-    "semHistorico": "Ninguna consulta finalizada hoy.",
-    "limparHistorico": "Limpiar el día",
-    "bloco": "Bloque de la consulta",
-    "incremento": "Incremento de facturación",
-    "comoFunciona": "El tiempo se redondea hacia arriba hasta la siguiente unidad. El transcurrido real queda siempre a la vista, al lado."
+    "acrescentar": {
+      "acrescentar": "Añadir",
+      "ajusteCasaFaz": "la casa hace {horarios}",
+      "ajusteCasaNaoFaz": "la casa no hace este servicio",
+      "ajusteHorarios": "Horarios para este huésped",
+      "ajusteServico": "Servicio de la casa",
+      "ajusteVazio": "Deja vacío para suspender este servicio solo para él.",
+      "cancelar": "Cancelar",
+      "cuidadoIrParaMedicacao": "Registrar medicación",
+      "cuidadoNaoEhRemedio": "El medicamento no entra aquí. Dosis y receta viven en Medicación, y de ahí sale el respaldo para administrar el medicamento de otra persona.",
+      "cuidadoOQue": "Qué hacer",
+      "cuidadoOQueDica": "En palabras de quien lo ejecuta: cambiar el vendaje de la pata derecha",
+      "faltaMotivo": "Sin motivo, nadie sabrá cómo deshacer esto después.",
+      "motivo": "Motivo",
+      "motivoDica": "En diciembre es la única línea que explica por qué este huésped es distinto.",
+      "oQue": "Qué añadir",
+      "servicoCobra": "{preco} entran en la cuenta de la estancia.",
+      "servicoDia": "Día",
+      "servicoHora": "Hora",
+      "servicoQual": "Servicio",
+      "titulo": "Añadir a la rutina",
+      "viaAjuste": "Ajustar horarios de la casa",
+      "viaAjusteDica": "cambiar o suspender solo para este huésped",
+      "viaCuidado": "Cuidado del huésped",
+      "viaCuidadoDica": "vendaje, compresa, abrigo — sin dosis",
+      "viaMedicacao": "Medicación",
+      "viaMedicacaoDica": "medicamento con dosis y receta",
+      "viaServico": "Servicio extra",
+      "viaServicoDica": "baño, peluquería, paseo — se cobra"
+    },
+    "adaptacao": {
+      "em-adaptacao": "En adaptación",
+      "estressado": "Estresado",
+      "tranquilo": "Tranquilo"
+    },
+    "autorizacao": {
+      "atendimento-veterinario": "Atención veterinaria de urgencia",
+      "banho": "Baño",
+      "foto-em-rede-social": "Fotos en redes sociales",
+      "passeio-externo": "Paseo fuera del hotel",
+      "recreacao-em-grupo": "Juego en grupo",
+      "transporte": "Transporte"
+    },
+    "checkin": {
+      "acrescentar": "Añadir",
+      "acrescentarRemedio": "Agregar remedio",
+      "alimentacao": "Alimentación",
+      "autorizacoes": "Autorizaciones",
+      "bloqueado": "Falta documentación obligatoria: {itens}",
+      "chegada": "Llegada",
+      "confirmar": "Confirmar entrada",
+      "contato": "Contacto de emergencia",
+      "dose": "Dosis",
+      "doseDica": "1/2 comprimido",
+      "emergencia": "Emergencia",
+      "exigidaPelaVenda": "servicio vendido",
+      "horarios": "Horarios",
+      "inspecao": "Inspección de entrada",
+      "inspecaoDica": "Garrapatas, pulgas, heridas, cojera, estado del pelo.",
+      "marca": "Marca",
+      "medicacao": "Medicación que vino de casa",
+      "medicacaoLede": "El hotel no prescribe: registra lo que ya se daba, para seguir dándolo a la hora correcta.",
+      "medicacaoSemHorario": "Un remedio sin horario no se vuelve tarea alguna, y nadie será avisado de darlo.",
+      "novoPertence": "Añadir pertenencia",
+      "pertences": "Pertenencias",
+      "peso": "Peso en la balanza",
+      "pesoCadastro": "En la ficha: {valor}",
+      "petiscos": "Premios",
+      "porcao": "Ración",
+      "racaoPropria": "Comida traída de casa",
+      "recadoDaReserva": "En la reserva:",
+      "receita": "Receta",
+      "receitaDica": "Número y quién la firmó",
+      "remedio": "Remedio",
+      "remedioDica": "Benazepril 5 mg",
+      "removerPertence": "Quitar {item}",
+      "removerRemedio": "Quitar remedio",
+      "restricoes": "Restricciones",
+      "titulo": "Entrada de {pet}",
+      "vendaSemAutorizacao": "La reserva vendió un servicio que depende de: {itens}. Sin la autorización la casa no puede ejecutarlo, y la cuenta sigue cobrando.",
+      "veterinario": "Veterinario de confianza",
+      "via": "Vía"
+    },
+    "checkout": {
+      "comoChegou": "Cómo llegó",
+      "comoChegouLede": "Registrado en el check-in. Compruébalo antes de entregar: es lo que responde \"ya llegó así\".",
+      "confirmar": "Cerrar estancia",
+      "devolvido": "Devuelto",
+      "fechamento": "Cierre",
+      "foraDaLista": "Esta persona no estaba autorizada en la reserva. El nombre queda registrado en la estadía.",
+      "oQueHouve": "Qué pasó con este artículo",
+      "ocorrenciaTravada": "{total} incidencia grave aún sin aviso al responsable. | {total} incidencias graves aún sin aviso al responsable.",
+      "outraPessoa": "Otra persona",
+      "outraPessoaDica": "Nombre de quien vino a buscar",
+      "perdaRelevante": "Perdió peso suficiente para merecer una conversación con el responsable.",
+      "pertences": "Revisión de pertenencias",
+      "pesagem": "Pesaje de salida",
+      "pesoEntrada": "Entró con {valor}",
+      "pesoSaida": "Peso de salida",
+      "quemRetira": "Quién se lo lleva",
+      "registrarPeso": "Registrar peso",
+      "saidaTardia": "Salida después del horario: {percentual}% de noche extra.",
+      "saldo": "Saldo por cobrar",
+      "titulo": "Salida de {pet}",
+      "voltarALista": "Volver a la lista"
+    },
+    "comum": {
+      "cancelar": "Cancelar",
+      "fechar": "Cerrar",
+      "salvar": "Guardar"
+    },
+    "desenho": {
+      "arvore": "Árbol",
+      "cama": "Cama",
+      "cao": "Perro",
+      "casa": "Casa",
+      "coelho": "Conejo",
+      "escudo": "Escudo",
+      "gato": "Gato",
+      "grupo": "Grupo",
+      "passaro": "Pájaro"
+    },
+    "dev": {
+      "casos": "Casos preparados",
+      "dados": "Datos",
+      "fechar": "Cerrar panel",
+      "latencia": "Latencia: {valor} ms",
+      "offline": "Sin conexión",
+      "recriar": "Recrear datos",
+      "rede": "Red",
+      "semente": "Semilla",
+      "titulo": "Demostración"
+    },
+    "diario": {
+      "comFoto": "Con foto",
+      "oQue": "Qué pasó",
+      "registrar": "Registrar",
+      "texto": "Cómo fue",
+      "textoDica": "Lo que al responsable le gustaría leer sobre este momento.",
+      "titulo": "Registrar en el diario de {pet}"
+    },
+    "erros": {
+      "acao": "No se pudo completar. Inténtalo de nuevo.",
+      "admissao": "La documentación de admisión impide la entrada.",
+      "boletimRetido": "El parte solo sale después de la llamada al responsable.",
+      "cadastro": {
+        "em-uso": "Todavía hay algo apuntando a este elemento.",
+        "nao-encontrada": "Alojamiento no encontrado.",
+        "nome-repetido": "Ya existe un alojamiento con este nombre.",
+        "ocupada": "Hay un huésped en este alojamiento ahora.",
+        "tem-historico": "Este alojamiento ya ha hospedado: sácalo de servicio en vez de quitarlo.",
+        "tem-reserva": "Hay una reserva futura en este alojamiento.",
+        "ultimo": "Debe quedar al menos uno."
+      },
+      "catalogos": "No se pudieron cargar los datos del hotel.",
+      "estadia": "No se pudo cargar la estancia.",
+      "hospedes": "No se pudieron cargar los huéspedes.",
+      "mapa": "No se pudo cargar el mapa de alojamientos.",
+      "passagemTravada": "Hay una incidencia grave sin aviso: el turno no puede entregarse.",
+      "reservas": "No se pudieron cargar las reservas.",
+      "resumo": "No se pudo cargar el resumen.",
+      "rotina": "No se pudo cargar la rutina del turno.",
+      "rotinaPadrao": "No se pudo cargar la rutina estándar.",
+      "saida": {
+        "ocorrencia-sem-contato": "Hay una incidencia grave sin aviso al responsable.",
+        "pertences": "Hay pertenencias sin revisar.",
+        "peso-de-saida": "Falta registrar el peso de salida."
+      },
+      "vaga": {
+        "capacidade": "Este alojamiento no admite ese número de animales.",
+        "especie": "Este alojamiento no acepta la especie del animal.",
+        "higienizacao": "El alojamiento aún está en higienización a esa hora.",
+        "inativa": "Este alojamiento está fuera de servicio.",
+        "ocupada": "Ya hay una reserva en este alojamiento en ese período.",
+        "periodo-invalido": "La salida tiene que ser después de la entrada.",
+        "porte": "El tamaño del animal no cabe en este alojamiento."
+      }
+    },
+    "especie": {
+      "ave": "Ave",
+      "canina": "Perro",
+      "equina": "Equino",
+      "felina": "Gato",
+      "reptil": "Reptil",
+      "roedor": "Roedor"
+    },
+    "estadia": {
+      "alimentacao": "Alimentación",
+      "autorizacoes": "Autorizaciones",
+      "boletim": "Parte al responsable",
+      "boletimRetido": "Retenido: falta la llamada al responsable.",
+      "comoEstaSeAdaptando": "Cómo se está adaptando",
+      "comunicado": "Avisado a las {hora}",
+      "diario": "Diario del huésped",
+      "emergencia": "Emergencia",
+      "encerrada": "Cerrada",
+      "enviado": "Enviado",
+      "enviarBoletim": "Enviar",
+      "fazerCheckOut": "Hacer la salida",
+      "ficha": "Ficha de la estancia",
+      "gerarBoletim": "Generar",
+      "inspecao": "Inspección de entrada",
+      "medicacao": "Medicación",
+      "ocorrencias": "Incidencias",
+      "pertences": "Pertenencias",
+      "precisaLigar": "Llama a {nome} antes de que acabe el turno",
+      "racaoDaCasa": "Comida de la casa",
+      "registrar": "Registrar",
+      "registrarLigacao": "Registrar la llamada",
+      "registrarOcorrencia": "Registrar",
+      "rotinaHoje": "Rutina de hoy",
+      "semBoletim": "Ningún parte generado.",
+      "semContato": "Sin aviso",
+      "semDiario": "Nada registrado todavía.",
+      "semMedicacao": "Ninguna",
+      "semOcorrencias": "Ninguna incidencia.",
+      "semRotina": "Ninguna tarea para hoy.",
+      "stat": {
+        "entrada": "Entrada",
+        "peso": "Peso de entrada",
+        "prevista": "prevista",
+        "recebidoPor": "Recibido por {nome}",
+        "saida": "Salida",
+        "saidaPeso": "salió con {valor}",
+        "saiu": "salió",
+        "saldo": "Saldo",
+        "saldoDetalhe": "por cobrar a la salida",
+        "semPesagem": "sin pesaje de salida"
+      },
+      "subtitulo": "Hotel",
+      "titulo": "Estancia",
+      "voltar": "Huéspedes"
+    },
+    "exigencia": {
+      "antipulgas": "Antipulgas",
+      "exame-parasitologico": "Análisis parasitológico",
+      "termo-responsabilidade": "Contrato firmado",
+      "vacina-antirrabica": "Vacuna antirrábica",
+      "vacina-giardia": "Vacuna contra la giardia",
+      "vacina-polivalente": "Vacuna polivalente",
+      "vacina-tosse-canis": "Vacuna de la tos de las perreras",
+      "vermifugo": "Desparasitación"
+    },
+    "exigencias": {
+      "apresentacao": "Fecha de presentación",
+      "apresentadoEm": "Presentado el {data}",
+      "autorizadaPor": "Autorizada por",
+      "bloqueado": "{total} documento impide la entrada. | {total} documentos impiden la entrada.",
+      "comAviso": "{total} documento pide atención. | {total} documentos piden atención.",
+      "confirmarDispensa": "Dispensar de todos modos",
+      "confirmarRegistro": "Registrar comprobante",
+      "dispensaAviso": "La dispensa queda registrada con tu nombre y el motivo escrito.",
+      "dispensadaPor": "Dispensada por {nome}",
+      "dispensar": "Dispensar",
+      "dispensarTitulo": "Dispensar {item}",
+      "documento": "Identificación del documento",
+      "documentoDica": "Lote de la vacuna, número de receta, nombre del archivo.",
+      "motivo": "Motivo de la dispensa",
+      "motivoDica": "Por qué la casa acepta al huésped sin este documento.",
+      "registrar": "Registrar",
+      "registrarTitulo": "Registrar {item}",
+      "semComprovante": "Ningún comprobante presentado",
+      "semValidade": "Este documento no caduca.",
+      "tudoEmDia": "Documentación válida para toda la estancia.",
+      "valeAte": "Vale hasta el {data}",
+      "validadeCalculada": "Válido hasta el {data}",
+      "venceDurante": "Vence el {data}, {dias} día antes de la salida | Vence el {data}, {dias} días antes de la salida"
+    },
+    "formato": {
+      "agora": "ahora",
+      "dias": "{valor} día | {valor} días",
+      "emTempo": "en {valor}",
+      "haTempo": "hace {valor}",
+      "horas": "{valor} h",
+      "horasMinutos": "{horas} h {minutos} min",
+      "minutos": "{valor} min",
+      "semvalor": "—"
+    },
+    "gerenciar": {
+      "padrao": "Rutina estándar de la casa",
+      "padraoDica": "los horarios que valen para todos los huéspedes",
+      "propor": "Proponer rutina",
+      "proporDica": "sugerencia leída de la ficha, para revisar antes de aprobar",
+      "titulo": "Gestionar rutina",
+      "trocar": "Cambiar"
+    },
+    "grade": {
+      "acomodacao": "Alojamiento",
+      "barraTitulo": "{pet} · {tutor} · {periodo}",
+      "legenda": {
+        "atencao": "Documentación pendiente",
+        "confirmada": "Reserva confirmada",
+        "hospedado": "En la casa ahora",
+        "livre": "Libre",
+        "parada": "Fuera de servicio",
+        "pendente": "Sin seña pagada"
+      },
+      "legendaTabela": "Ocupación de los alojamientos, una columna por noche",
+      "reservarEm": "Reservar {acomodacao} a partir del {data}"
+    },
+    "gravidade": {
+      "grave": "Grave",
+      "leve": "Leve",
+      "moderada": "Moderada"
+    },
+    "hospedes": {
+      "acao": {
+        "abrir": "Abrir la estancia de {pet}",
+        "registrarContato": "Registrar contacto"
+      },
+      "banda": {
+        "emDia": "Al día",
+        "precisam": "Te necesitan",
+        "saem": "Salen hoy"
+      },
+      "busca": {
+        "dica": "Nombre de la mascota o del responsable",
+        "doTutor": "{total} huésped de {tutor} | {total} huéspedes de {tutor}",
+        "limpar": "Limpiar búsqueda",
+        "rotulo": "Buscar huésped",
+        "semResultado": "Ningún huésped encontrado para \"{termo}\"."
+      },
+      "cartao": {
+        "atrasadas": "{total} atrasada | {total} atrasadas",
+        "boletimRetido": "El recado al responsable está parado esperando una llamada",
+        "com": "con {pet}",
+        "faltaPesar": "Falta pesar antes de entregar",
+        "hojeAs": "hoy a las {hora}",
+        "noites": "{total} noche | {total} noches"
+      },
+      "dia": {
+        "contagem": "{feitas} de {total}",
+        "rotulo": "Rutina del día"
+      },
+      "foco": {
+        "agora": "ahora",
+        "atrasou": "{tempo} de retraso",
+        "em": "en {tempo}",
+        "nadaPendente": "Nada pendiente hoy",
+        "ocorrencia": "Incidente grave sin contacto con {tutor}"
+      },
+      "irParaRotina": "Abrir rutina del turno",
+      "ninguemPrecisa": "Nadie te necesita ahora. La casa está al día.",
+      "ninguemSai": "Hoy no sale nadie.",
+      "recorte": {
+        "precisam": "Me necesitan",
+        "saem": "Salen hoy",
+        "todos": "Todos"
+      },
+      "recorteRotulo": "Mostrar",
+      "resumo": "{precisam} de {total} te necesita | {precisam} de {total} te necesitan",
+      "resumoEmDia": "La casa está al día",
+      "subtitulo": "Hotel",
+      "titulo": "Huéspedes en la casa",
+      "vazioDescricao": "Los huéspedes aparecen aquí después de la entrada.",
+      "vazioTitulo": "Ningún huésped en la casa"
+    },
+    "impedimento": {
+      "capacidade": "Capacidad insuficiente",
+      "especie": "Especie no aceptada",
+      "higienizacao": "En higienización",
+      "inativa": "Fuera de servicio",
+      "ocupada": "Ocupado",
+      "porte": "El tamaño no cabe"
+    },
+    "linhaDoDia": {
+      "agora": "Ahora",
+      "rotulo": "Llegadas y salidas de hoy, hora a hora",
+      "semMovimento": "Ninguna llegada ni salida hoy."
+    },
+    "mapa": {
+      "especie": "Especie",
+      "foraDaGrade": "El período buscado está fuera de las tres semanas a la vista. Usa las flechas para llegar.",
+      "hoje": "Hoy",
+      "ocupantes": "Animales",
+      "periodo": "Fechas",
+      "porte": "Tamaño",
+      "procuraAnimais": "animal o más",
+      "procuraDe": "del",
+      "procuraInicio": "Tengo un",
+      "qualquerEspecie": "Cualquier especie",
+      "qualquerPorte": "Cualquier tamaño",
+      "respostaNao": "Ningún alojamiento libre para {noites} noche | Ningún alojamiento libre para {noites} noches",
+      "respostaSim": "{total} alojamiento sirve | {total} alojamientos sirven",
+      "semNenhumaReserva": "{total} alojamiento sin ninguna reserva en el período | {total} alojamientos sin ninguna reserva en el período",
+      "semanaAnterior": "Semana anterior",
+      "semanaSeguinte": "Semana siguiente",
+      "subtitulo": "Hotel",
+      "titulo": "Mapa de alojamientos",
+      "vazioDescricao": "Registra los alojamientos de la casa para empezar a vender noches.",
+      "vazioTitulo": "Ningún alojamiento registrado",
+      "verReservas": "Ver reservas"
+    },
+    "medicacaoNova": {
+      "cancelar": "Cancelar",
+      "descricao": "Medicamento",
+      "descricaoDica": "Nombre y concentración, como está en la caja",
+      "dose": "Dosis",
+      "doseDica": "1 comprimido, 20 gotas, 2 ml",
+      "escolherHospede": "Elige el huésped",
+      "faltaHorario": "Sin horario, el medicamento no se convierte en ninguna tarea.",
+      "horarios": "Horarios",
+      "horariosDica": "Como se dictan por teléfono: 8:00, 20:00",
+      "hospede": "Huésped",
+      "observacao": "Observación",
+      "receita": "Receta",
+      "receitaDica": "Colegiado y número. Sin ella el medicamento se da igual, y queda pendiente en la ficha.",
+      "registrada": "Medicación registrada. Las dosis por venir ya están en la planilla.",
+      "registrar": "Registrar",
+      "soDaquiParaFrente": "Las dosis nacen a partir de ahora. La de hoy que ya pasó no se crea: una dosis que nace atrasada es un registro falso de dosis perdida.",
+      "titulo": "Registrar medicación",
+      "via": "Vía"
+    },
+    "modulo": {
+      "oculto": "Módulo hotel oculto",
+      "visivel": "Módulo hotel visible"
+    },
+    "motivoCancelamento": {
+      "animal-doente": "Animal enfermo",
+      "hotel-indisponivel": "Hotel sin plaza",
+      "outro": "Otro motivo",
+      "preco": "Precio",
+      "responsavel-desistiu": "El responsable desistió",
+      "viagem-cancelada": "Viaje cancelado"
+    },
+    "motivoInativa": {
+      "desinfeccao": "Desinfección",
+      "equipamento": "Equipo",
+      "manutencao": "Mantenimiento",
+      "outro": "Otro motivo",
+      "reforma": "Reforma"
+    },
+    "navegacao": {
+      "casa": "La casa",
+      "dia": "2 · El día",
+      "secao": "Hotel",
+      "vender": "1 · Vender",
+      "selo": {
+        "rotina": "{total} tarea atrasada | {total} tareas atrasadas",
+        "vespera": "{total} llegada bloqueada | {total} llegadas bloqueadas"
+      }
+    },
+    "ocorrencia": {
+      "conduta": "Qué hizo la casa",
+      "condutaDica": "Una incidencia sin conducta no ayuda a quien lee mañana.",
+      "descricao": "Descripción",
+      "descricaoDica": "Qué se observó, cuándo y durante cuánto tiempo.",
+      "encaminhar": "Derivar al veterinario",
+      "gravidade": "Gravedad",
+      "oQue": "Qué pasó",
+      "registrar": "Registrar incidencia",
+      "titulo": "Incidencia con {pet}",
+      "vaiTravar": "Una incidencia grave exige llamar al responsable antes del fin del turno."
+    },
+    "ocorrenciaKind": {
+      "apatia": "Apatía",
+      "briga": "Pelea",
+      "destruicao": "Destrozos",
+      "diarreia": "Diarrea",
+      "estresse": "Estrés",
+      "lesao": "Lesión",
+      "outro": "Otro",
+      "recusa-alimentar": "Rechazo de comida",
+      "tentativa-de-fuga": "Intento de fuga",
+      "tosse": "Tos",
+      "vomito": "Vómito"
+    },
+    "orcamento": {
+      "item": "Concepto",
+      "linha": {
+        "acompanhante": "Noche del acompañante",
+        "desconto": "Descuento",
+        "diaria": "Noche",
+        "meia-diaria": "Salida tardía",
+        "servico": "Servicio",
+        "temporada": "Recargo de temporada"
+      },
+      "pago": "Ya pagado",
+      "quantidade": "Cant.",
+      "saldo": "Saldo por cobrar",
+      "sinalSugerido": "Seña sugerida",
+      "somaTotal": "Total de la estancia",
+      "titulo": "Presupuesto",
+      "total": "Total",
+      "unitario": "Unitario"
+    },
+    "origem": {
+      "app": "Aplicación",
+      "balcao": "Mostrador",
+      "indicacao": "Recomendación",
+      "retorno": "Regreso",
+      "telefone": "Teléfono",
+      "whatsapp": "WhatsApp"
+    },
+    "painel": {
+      "bemEstar": {
+        "titulo": "Bienestar en la casa",
+        "adaptacao": "Adaptación",
+        "medicacao": "Medicación de hoy",
+        "cuidados": "Cuidados pendientes",
+        "todosTranquilos": "{total} huésped, tranquilo | {total} huéspedes, todos tranquilos",
+        "demaisTranquilos": "y {total} más tranquilo | y {total} más tranquilos",
+        "dosesPendentes": "{total} pendiente | {total} pendientes",
+        "estado": {
+          "em-adaptacao": "en adaptación | en adaptación",
+          "estressado": "estresado | estresados"
+        }
+      },
+      "chegamHoje": "Llegan hoy ({total})",
+      "faltaPesar": "Falta pesar",
+      "irParaRotina": "Abrir rutina",
+      "podeEntrar": "Puede entrar",
+      "prontoParaSair": "Listo para salir",
+      "resumo": {
+        "atrasadas": "{total} atrasada | {total} atrasadas",
+        "chegam": "llega | llegan",
+        "naCasa": "en la casa",
+        "saem": "sale | salen",
+        "tarefas": "tarea para ahora | tareas para ahora"
+      },
+      "saemHoje": "Salen hoy ({total})",
+      "semChegadas": "No hay llegadas previstas para hoy.",
+      "semSaidas": "No hay salidas previstas para hoy.",
+      "titulo": "Panel del día",
+      "travaAdmissao": "{pet} llega hoy sin la documentación exigida.",
+      "travaAdmissaoAcao": "Pide el documento ahora, o dispénsalo con tu nombre.",
+      "vazioDescricao": "No hay huéspedes en la casa ni llegadas previstas para hoy.",
+      "vazioTitulo": "Nada que hacer hoy",
+      "acoesRotulo": "Acciones del panel",
+      "frase": {
+        "urgentes": "{total} urgente | {total} urgentes"
+      },
+      "pauta": {
+        "ocorrencia": "Incidente grave de {pet} sin contacto con el responsable",
+        "boletim": "El parte de {pet} está retenido hasta contactar al responsable",
+        "responsavel": "Responsable: {nome} · {telefone}"
+      },
+      "onde": {
+        "estadia": "Estadía",
+        "reserva": "Reserva"
+      },
+      "movimentoDoDia": "Movimiento del día"
+    },
+    "planoDaEstadia": {
+      "desde": "desde {data}",
+      "encerrar": "Finalizar",
+      "origemPessoa": "registrado a mano",
+      "origemProposta": "de una propuesta revisada",
+      "propor": "Proponer ajustes",
+      "semAjustes": "Este huésped sigue la rutina estándar de la casa.",
+      "suspenso": "suspendido",
+      "titulo": "Plan de la estancia"
+    },
+    "porte": {
+      "gigante": "Gigante",
+      "grande": "Grande",
+      "medio": "Mediano",
+      "mini": "Mini",
+      "pequeno": "Pequeño"
+    },
+    "proposta": {
+      "aprovada": "Ajustes guardados en la ficha del huésped.",
+      "aprovar": "Aprobar {total} cambio | Aprobar {total} cambios",
+      "aprovarNenhuma": "Aprobar",
+      "aviso": "En esta versión no hay modelo ni red: la propuesta viene de una simulación determinista sobre los datos de la casa. Lo real es el flujo de revisar y aprobar.",
+      "casaJaFaz": "La casa ya hace",
+      "daFicha": "De la ficha",
+      "descartadas": "{total} sugerencia descartada en la verificación | {total} sugerencias descartadas en la verificación",
+      "descartar": "Descartar",
+      "escolherHospede": "Elige el huésped",
+      "gerando": "Leyendo la ficha…",
+      "lidaEm": "leída de la ficha a las {hora}",
+      "motorLocal": "simulación local",
+      "nadaGravado": "no se guardó nada",
+      "naoEdita": "La casa no prescribe: para cambiar dosis u horario hace falta receta.",
+      "naoProponho": "Lo que no propongo",
+      "porqueAdaptacao": "el huésped fue recibido como {valor}",
+      "porqueCasa": "de la rutina estándar de la casa",
+      "porqueEstadiaLonga": "estancia de {valor} noches: el peso de salida sin un punto intermedio no dice cuándo adelgazó el animal",
+      "porqueInspecao": "inspección de entrada: \"{valor}\"",
+      "porqueMedicacao": "de la receta registrada: {valor}",
+      "porquePlano": "de los horarios de comida de la ficha",
+      "proponhoMudar": "Propongo cambiar",
+      "recusaMedicacao": "Medicación — no propongo medicamento ni dosis. El hotel no prescribe.",
+      "recusaRefeicao": "Comida — cambiar el horario de comida se acuerda con el responsable.",
+      "semMudancas": "Nada que proponer para este huésped: la rutina de la casa ya lo cubre.",
+      "titulo": "Propuesta de rutina",
+      "transcrita": "transcrita"
+    },
+    "recurso": {
+      "area-externa": "Zona exterior",
+      "camera": "Cámara",
+      "climatizacao": "Climatizado",
+      "janela": "Ventana",
+      "piso-aquecido": "Suelo radiante"
+    },
+    "registroKind": {
+      "banho": "Baño",
+      "brincadeira": "Juego",
+      "carinho": "Mimos",
+      "eliminacao": "Pipí y caca",
+      "observacao": "Observación",
+      "passeio": "Paseo",
+      "refeicao": "Comida",
+      "sono": "Sueño"
+    },
+    "reserva": {
+      "acompanhante": "Acompañante de la misma casa",
+      "acrescentarAutorizado": "Agregar autorizado",
+      "autorizados": "Quién más puede retirar",
+      "autorizadosDica": "Nombre de quien el responsable autoriza",
+      "avisoAdmissao": "Documentación por resolver antes de la entrada: {itens}",
+      "checkInBloqueado": "La entrada está bloqueada por documentación pendiente.",
+      "chegaAs": "llega a las",
+      "confirmarSinal": "Registrar seña y confirmar",
+      "criar": "Crear reserva",
+      "diarias": "{total} noche | {total} noches",
+      "escolhaHospede": "Elige el animal",
+      "exigencias": "Documentación de admisión",
+      "fazerCheckIn": "Hacer la entrada",
+      "hospede": "Huésped",
+      "irParaEstadia": "Abrir estancia",
+      "jaHospedado": "Este huésped ya está en la casa.",
+      "noitesAtalho": "{total} noche | {total} noches",
+      "novaTitulo": "Nueva reserva · {acomodacao}",
+      "observacao": "Observación del responsable",
+      "observacaoDica": "Miedos, manías, lo que ayuda a calmarlo.",
+      "origem": "Cómo llegó",
+      "periodo": "Fechas",
+      "porDiaria": " por noche",
+      "quantasNoites": "Noches",
+      "removerAutorizado": "Quitar {nome}",
+      "saiAs": "sale a las",
+      "saidaTardia": "La salida prevista es después del horario: {valor} más en la cuenta.",
+      "semAcompanhante": "Sin acompañante",
+      "semServico": "Ningún servicio",
+      "semVaga": "Este alojamiento no sirve para ese período: {motivo}",
+      "servicos": "Servicios",
+      "sinalDevolve": "Cancelar dentro de este plazo aún devuelve la seña.",
+      "sinalNaoDevolve": "Fuera de plazo: la cancelación no devuelve la seña.",
+      "subtitulo": "Hotel",
+      "titulo": "Reserva"
+    },
+    "reservaStatus": {
+      "cancelada": "Cancelada",
+      "confirmada": "Confirmada",
+      "encerrada": "Cerrada",
+      "hospedado": "En la casa",
+      "nao-compareceu": "No se presentó",
+      "pendente": "Pendiente"
+    },
+    "reservas": {
+      "buscar": "Buscar por huésped, responsable o alojamiento",
+      "chegaEm": "llega en {dias} día | llega en {dias} días",
+      "chegaHoje": "llega hoy",
+      "coluna": {
+        "acomodacao": "Alojamiento",
+        "admissao": "Documentación",
+        "diarias": "Noches",
+        "entrada": "Entrada",
+        "hospede": "Huésped",
+        "saldo": "Saldo",
+        "status": "Situación"
+      },
+      "espera": "Lista de espera ({total})",
+      "filtroAdmissao": "Documentación",
+      "filtroBloco": "Bloque",
+      "filtroStatus": "Situación",
+      "horizonte": "Mostrar",
+      "horizonteProximas": "A partir de hoy",
+      "horizonteTodas": "Todo, con historial",
+      "novaNoMapa": "Nueva reserva",
+      "semResultadoDescricao": "Ninguna reserva coincide con la búsqueda o los filtros.",
+      "semResultadoTitulo": "Nada encontrado",
+      "subtitulo": "Hotel",
+      "titulo": "Reservas",
+      "vazioDescricao": "Las reservas aparecen aquí en cuanto se cree la primera desde el mapa.",
+      "vazioTitulo": "Ninguna reserva",
+      "vesperaLede": "Llegan en los próximos tres días y aún no pueden entrar.",
+      "vesperaTitulo": "{total} llegada con documentación pendiente | {total} llegadas con documentación pendiente"
+    },
+    "resumo": {
+      "cancelamento": "Cancelación",
+      "graves": "{total} grave | {total} graves",
+      "naoComparecimento": "No presentación",
+      "naoComparecimentoDetalhe": "plaza perdida, sin aviso",
+      "ocorrencias": "Incidencias",
+      "ocupacaoAria": "Barras de ocupación diaria en el período elegido",
+      "ocupacaoPorDia": "Ocupación por día",
+      "perdas": "Pérdidas",
+      "periodo": "Período",
+      "porOrigem": "Ingresos por origen",
+      "porServico": "Ingresos por servicio",
+      "reservas": "{total} reserva | {total} reservas",
+      "semOcorrencias": "Ninguna incidencia en el período.",
+      "semServicos": "Ningún servicio contratado en el período.",
+      "stat": {
+        "diariaMedia": "Noche media",
+        "diariaMediaDetalhe": "ingreso por noche vendida",
+        "diarias": "{total} noche vendida | {total} noches vendidas",
+        "ocupacao": "Ocupación media",
+        "ocupacaoDetalhe": "en el período elegido",
+        "receita": "Ingresos",
+        "retorno": "Regreso",
+        "retornoDetalhe": "de responsables que ya vinieron"
+      },
+      "subtitulo": "Hotel",
+      "titulo": "Resumen",
+      "vazioDescricao": "Ninguna estancia facturada en el intervalo elegido.",
+      "vazioTitulo": "Nada en el período",
+      "vezes": "{total} vez | {total} veces"
+    },
+    "rotina": {
+      "animais": "{total} animal | {total} animales",
+      "atrasadas": "{total} atrasada | {total} atrasadas",
+      "de": "de {total} tarea del día | de {total} tareas del día",
+      "depoisDoTurno": "Tu turno termina a las {hora}. Lo que sigue queda para quien asume.",
+      "desfazer": "Deshacer",
+      "feita": "Hecha",
+      "filtroTipo": "Filtrar por tipo",
+      "jaPassou": "Ya resuelto ({total} horario) | Ya resuelto ({total} horarios)",
+      "jaResolvidas": "{total} ya resuelta | {total} ya resueltas",
+      "maisTarde": "Más tarde hoy",
+      "marcadaAs": "Marcada a las {hora}",
+      "marcarRonda": "Marcar la {total} como hecha | Marcar las {total} como hechas",
+      "paraAgora": "Para ahora",
+      "pular": "Omitir",
+      "recusou": "Rechazó",
+      "titulo": "Rutina del turno",
+      "todas": "Todas las tareas",
+      "tudoEmDia": "Nada pendiente en este momento. La próxima tarea aparece aquí a su hora.",
+      "umaAUma": "una a una",
+      "vazioDescricao": "La rutina nace con la entrada. Sin huéspedes no hay nada que hacer.",
+      "vazioTitulo": "Ninguna tarea hoy"
+    },
+    "rotinaPadrao": {
+      "aplicar": "Aplicar",
+      "ativo": "La casa hace esto",
+      "campoHorarios": "Horarios",
+      "campoHorariosDica": "Sepáralos con comas. Puedes escribir 8:00 o 08:00.",
+      "cancelar": "Cancelar",
+      "criadas": "{total} tarea nace | {total} tareas nacen",
+      "desfazer": "Deshacer",
+      "desligada": "apagada",
+      "desligadaDica": "Fuera del plan de la casa. Sigue disponible en la ficha de cada huésped.",
+      "editar": "Editar",
+      "editarTitulo": "Horarios de {servico}",
+      "exigeAutorizacao": "solo para quien tiene autorización del responsable",
+      "horarios": "{total} horario | {total} horarios",
+      "naoMexe": "Comida y medicación no se definen aquí: los horarios vienen de la ficha de cada huésped, y el hotel no prescribe.",
+      "noTurno": "{total} cae en el turno actual | {total} caen en el turno actual",
+      "porDia": "{total} tarea por huésped, por día | {total} tareas por huésped, por día",
+      "preservadas": "{total} tarea queda intacta | {total} tareas quedan intactas",
+      "preservadasDica": "Lo ya hecho, rechazado o saltado nunca se toca.",
+      "previsao": "Qué cambia esto",
+      "publicar": "Publicar cambios",
+      "publicarTitulo": "Publicar la rutina",
+      "rascunho": "Borrador sin publicar",
+      "retiradas": "{total} tarea sale | {total} tareas salen",
+      "semHorario": "sin horario",
+      "semHorarioDica": "Sin horario: la casa no genera esta tarea para nadie.",
+      "semMudanca": "Nada cambió.",
+      "subtitulo": "Lo que la casa hace por todos los huéspedes",
+      "titulo": "Rutina estándar",
+      "vazioDescricao": "La casa aún no declaró lo que hace por todos los huéspedes.",
+      "vazioTitulo": "Ningún servicio configurado",
+      "versao": "versión {versao} · por {pessoa}",
+      "vigencia": "A partir de cuándo",
+      "vigenciaAgora": "Ahora",
+      "vigenciaAmanha": "Mañana",
+      "vigenciaDica": "Empezar mañana no toca el turno de quien trabaja ahora."
+    },
+    "servico": {
+      "adestramento": "Adiestramiento",
+      "banho": "Baño",
+      "medicacao-assistida": "Medicación asistida",
+      "passeio-extra": "Paseo extra",
+      "recreacao-individual": "Juego individual",
+      "tosa": "Peluquería",
+      "transporte": "Transporte"
+    },
+    "situacaoExigencia": {
+      "ausente": "No presentado",
+      "dispensado": "Dispensado",
+      "ok": "Al día",
+      "vence-durante": "Vence durante",
+      "vencido": "Caducado"
+    },
+    "situacaoTarefa": {
+      "atrasada": "Atrasada",
+      "feita": "Hecha",
+      "futura": "Más tarde",
+      "na-janela": "Ahora",
+      "pulada": "Omitida",
+      "recusada": "Rechazó"
+    },
+    "tarefaKind": {
+      "adestramento": "Adiestramiento",
+      "agua": "Agua",
+      "banho": "Baño",
+      "cuidado": "Cuidado",
+      "higiene": "Limpieza",
+      "medicacao": "Medicación",
+      "passeio": "Paseo",
+      "pesagem": "Pesaje",
+      "recreacao": "Juego",
+      "refeicao": "Comida",
+      "tosa": "Corte de pelo"
+    },
+    "tour": {
+      "acomodacoes": {
+        "blocos": {
+          "texto": "Canil A, Canil B, Gatil, Jardín. Cada tarjeta dice el tipo, el tamaño que acepta, cuántos caben y qué tarifa cobra. Haz clic para editar.",
+          "titulo": "Agrupadas por bloque"
+        },
+        "parada": {
+          "texto": "Una jaula en reforma sale del mapa y no se puede vender. El \"hace cuántos días\" es la información: parada hace dos horas es mantenimiento; hace tres semanas, es plaza olvidada.",
+          "titulo": "Fuera de operación, con fecha"
+        },
+        "pergunta": {
+          "texto": "Cómo está montada la casa. El sistema no adivina cuántas jaulas tienes: quien las registra es la operación, el día en que la casa cambia.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "tarifas": {
+          "texto": "La casa son los pasillos y las plazas. Tarifas cruza tabla y tamaño, y el acompañante entra por un porcentaje. Las temporadas son recurrentes: valen todos los años en el mismo rango de fechas.",
+          "titulo": "Tres registros, tres pestañas"
+        }
+      },
+      "anterior": "Anterior",
+      "estadia": {
+        "checkout": {
+          "texto": "El check-out no cierra mientras cada pertenencia no sea verificada y el animal no sea pesado de nuevo. Es el reclamo más barato de evitar y el más caro de resolver.",
+          "titulo": "Lo que entró tiene que salir"
+        },
+        "ficha": {
+          "texto": "Lo que acordó el responsable: comida y horarios, medicación, lo que vino en la maleta, lo que autorizó y a quién llamar en una emergencia.",
+          "titulo": "La ficha de la estadía"
+        },
+        "ocorrencias": {
+          "texto": "La mala noticia no va por aplicación. Una ocurrencia grave retiene el boletín del responsable hasta que alguien de la casa llame, y el botón de registrar la llamada está al lado.",
+          "titulo": "Ocurrencias y el boletín"
+        },
+        "pergunta": {
+          "texto": "Cómo está pasando ese animal. Todo sobre el hospedaje en un lugar, y el check-out se hace desde aquí.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "rotina": {
+          "texto": "Las tareas nacen de la ficha de entrada: la comida que mandó el responsable, el remedio en el horario, el paseo. Se puede marcar desde aquí sin volver a la planilla del turno.",
+          "titulo": "La rutina de hoy, solo de él"
+        }
+      },
+      "hospedes": {
+        "cartao": {
+          "texto": "El disco muestra qué servicio y toma color cuando llega la hora: durazno si se atrasó, coral lleno solo cuando hay un incidente grave sin contacto con el responsable. El número al lado cuenta cuántas ya se atrasaron.",
+          "titulo": "La línea que pide acción"
+        },
+        "linhas": {
+          "texto": "Los tranquilos pasan a una lista fina al pie de la página, para que el espacio sea de quien te necesita. Haz clic en el título de la franja para abrirla y cerrarla.",
+          "titulo": "Quien está al día queda recogido"
+        },
+        "pergunta": {
+          "texto": "Cómo está cada animal en la casa. Una tarjeta por huésped, ordenadas por quien te necesita primero.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "recortes": {
+          "texto": "Todos, los que te necesitan, y los que salen hoy. El del medio se mira a mitad del turno; el de la derecha, al final de la mañana.",
+          "titulo": "Tres recortes"
+        }
+      },
+      "mapa": {
+        "grade": {
+          "texto": "Cada fila es un alojamiento, cada columna una noche. Las barras son lo ya vendido, y el vacío entre ellas es donde cabe la próxima reserva. Haz clic en un vacío para reservar desde ese día.",
+          "titulo": "El calendario de la casa"
+        },
+        "legenda": {
+          "texto": "Quién está en la casa ahora, qué está confirmado, qué aún no pagó seña y qué está fuera de operación. La barra rayada es un alojamiento detenido, y no se puede vender.",
+          "titulo": "Qué significa cada color"
+        },
+        "pergunta": {
+          "texto": "¿Hay lugar en ese período? Todo aquí existe para que respondas eso con el teléfono en la mano.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "procura": {
+          "texto": "Especie, tamaño, las fechas y cuántos animales. Es la misma frase que dice la persona al teléfono, en el mismo orden.",
+          "titulo": "Di lo que están buscando"
+        },
+        "resposta": {
+          "texto": "Cuántos alojamientos sirven para ese período. Verde significa que sí; rojo, que no hay lugar.",
+          "titulo": "La respuesta, en una frase"
+        }
+      },
+      "painel": {
+        "colunas": {
+          "texto": "La misma información de la línea, en lista, con el sello de lo que impide. Haz clic en cualquier fila para abrir la reserva o la estadía.",
+          "titulo": "Quién llega y quién sale"
+        },
+        "pergunta": {
+          "texto": "Qué pasa hoy. Es la primera pantalla del día: ábrela por la mañana y sabes qué viene primero.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "resumo": {
+          "texto": "Cuántos están en casa, cuántos llegan, cuántos salen y cuántos asuntos son urgentes, en una sola frase.",
+          "titulo": "El día en una línea"
+        },
+        "travas": {
+          "texto": "Abre la pantalla porque tiene plazo: una llamada pendiente, un boletín retenido detrás de ella, un animal que llega sin vacuna. Cada ítem es un botón que lleva al lugar donde se resuelve.",
+          "titulo": "Lo que te necesita ahora"
+        },
+        "trilho": {
+          "texto": "Llegadas arriba, salidas abajo, y una marca en \"ahora\". El triángulo al lado de un nombre significa que esa entrada o salida está trabada.",
+          "titulo": "La línea del tiempo del día"
+        }
+      },
+      "passo": "{atual} de {total}",
+      "proximo": "Siguiente",
+      "reserva": {
+        "checkin": {
+          "texto": "Hacer check-in queda bloqueado mientras haya documento que impida. No es recordatorio: es regla, y no se puede esquivar por esta ni por ninguna pantalla.",
+          "titulo": "El botón solo se enciende cuando se puede"
+        },
+        "exigencias": {
+          "texto": "La validez se comprueba contra el último día de la estadía, no contra hoy. Rojo impide la entrada; ámbar avisa que vence a mitad de la estadía y todavía da tiempo de renovar.",
+          "titulo": "La documentación de admisión"
+        },
+        "pergunta": {
+          "texto": "Cuánto cuesta, y si ese animal puede entrar. Es el contrato del hospedaje, y de aquí sale el check-in.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "periodo": {
+          "texto": "Entrada, salida, cuántas diarias y en qué alojamiento. Si la salida prevista pasa del horario de la casa, la media diaria ya aparece en el presupuesto, no es sorpresa en el mostrador.",
+          "titulo": "El período y la cuenta"
+        }
+      },
+      "reservas": {
+        "espera": {
+          "texto": "La lista de espera está al pie porque solo se consulta cuando cae una reserva, y en ese momento ya estás en esta pantalla.",
+          "titulo": "Quién se quedó sin lugar"
+        },
+        "horizonte": {
+          "texto": "La pantalla abre en lo que viene, que es la pregunta del día a día. El historial no desapareció: está en la otra opción, para cuando busques la estadía del mes pasado.",
+          "titulo": "Hasta dónde mira la lista"
+        },
+        "pergunta": {
+          "texto": "Qué está vendido y qué va a dar trabajo. Es la pantalla de la víspera: ábrela al final de la tarde para saber qué resolver antes de mañana.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "tabela": {
+          "texto": "Documentación es ordenable: un clic en el encabezado pone arriba todo lo que va a trabar en el mostrador. Por ahí se barre la semana.",
+          "titulo": "La columna que importa"
+        },
+        "vespera": {
+          "texto": "Quién llega en los próximos tres días y aún no puede entrar por falta de documento. Tres días porque es el plazo en que el responsable todavía puede traerlo.",
+          "titulo": "Lo que no puede esperar"
+        }
+      },
+      "resumo": {
+        "cartoes": {
+          "texto": "Ingreso por origen de la reserva y por servicio, las ocurrencias del período, y las pérdidas. Cancelación es aviso, se pudo revender; no comparecer es plaza quemada.",
+          "titulo": "De dónde viene, y qué se pierde"
+        },
+        "grafico": {
+          "texto": "Dibujada día a día, no como media: la media esconde justo lo que se quiere ver, que es la casa llenarse el fin de semana y vaciarse el martes.",
+          "titulo": "Ocupación día a día"
+        },
+        "numeros": {
+          "texto": "Ocupación media, ingreso, diaria media y retorno. El retorno cuenta responsables que ya habían venido antes: es fidelidad, no volumen.",
+          "titulo": "Los cuatro números"
+        },
+        "pergunta": {
+          "texto": "Valió la pena el mes. Es la única pantalla que mira hacia atrás, y sirve para decidir, no para operar.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "periodo": {
+          "texto": "Abre en los últimos treinta días. Todo número y toda tarjeta de esta pantalla responde por el período elegido aquí, y por ningún otro.",
+          "titulo": "Elige el período"
+        }
+      },
+      "rotina": {
+        "filtros": {
+          "texto": "Comida, medicación, paseo, higiene, agua. Quien va a servir la comida de todos filtra por comida y baja la lista.",
+          "titulo": "Un tipo de tarea por vez"
+        },
+        "marcar": {
+          "texto": "Hecha, rechazó o saltar, directo en la línea. \"Rechazó\" no es un error: es información clínica, y cuatro comidas rechazadas seguidas se vuelven una ocurrencia.",
+          "titulo": "Marcar cuesta un toque"
+        },
+        "passagem": {
+          "texto": "Al pie de la planilla: cuántas tareas quedan para quien asume y qué impide la entrega. Aparece desde el comienzo del turno, no solo a la hora de pasarlo — una incidencia sin contacto a las 22h ya no se resuelve.",
+          "titulo": "El turno acaba aquí"
+        },
+        "pergunta": {
+          "texto": "Qué hay que hacer ahora. Es la planilla del turno: déjala abierta en el celular mientras trabajas en el canil.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "progresso": {
+          "texto": "Cuántas tareas del día ya se marcaron, del total. Sirve para saber si el turno está al día sin contar línea por línea.",
+          "titulo": "Cuánto ya se hizo"
+        },
+        "ronda": {
+          "texto": "Las tareas del mismo servicio en el mismo horario forman una ronda — \"Comida, 20 animales\". La ronda corta ya viene abierta; la larga se abre con un toque. Se puede marcar la ronda entera de una vez, salvo la de medicación: el remedio se marca uno a uno.",
+          "titulo": "Una ronda, no veinte líneas"
+        },
+        "tempo": {
+          "texto": "Las tareas se agrupan en rondas, y cada ronda lleva la hora delante. Lo atrasado sube a \"Para ahora\", con la hora en rojo — no se pierde en medio de la lista.",
+          "titulo": "Ahora, más tarde, y lo que pasó"
+        }
+      },
+      "rotinaPadrao": {
+        "limite": {
+          "texto": "Comida y medicación no aparecen: los horarios vienen de la ficha de cada huésped. El hotel no prescribe, y ninguna configuración puede crear ni cambiar una dosis.",
+          "titulo": "Lo que no se configura aquí"
+        },
+        "pergunta": {
+          "texto": "Lo que la casa hace por todos los huéspedes, y a qué horas. Es la base que hereda la rutina de cada animal.",
+          "titulo": "La pregunta de esta pantalla"
+        },
+        "publicar": {
+          "texto": "Antes de guardar, la pantalla muestra cuántas tareas nacen, cuántas salen y cuántas quedan intactas. Lo ya hecho nunca se toca, y empezar mañana no toca el turno actual.",
+          "titulo": "Publicar dice antes lo que va a hacer"
+        },
+        "regua": {
+          "texto": "Cada banda es un servicio de la casa, con sus horarios marcados sobre las 24 horas. De lejos se ve si el día está bien repartido o si todo cae por la mañana.",
+          "titulo": "El día entero en una regla"
+        }
+      },
+      "sair": "Cerrar",
+      "terminar": "Entendido"
+    },
+    "turno": {
+      "assumeCom": "asume {turno} · {pessoa}",
+      "boletinsRetidos": "Partes retenidos",
+      "boletinsRetidosTexto": "{total} parte espera una llamada antes de salir. | {total} partes esperan una llamada antes de salir.",
+      "entra": "asume",
+      "entregar": "Entregar turno",
+      "ficam": "{total} tarea queda para quien asume | {total} tareas quedan para quien asume",
+      "fimDoTurno": "Fin del turno",
+      "manha": "Mañana",
+      "nadaTrava": "Nada impide la entrega",
+      "noite": "Noche",
+      "nota": "Nota de cambio",
+      "notaDica": "Lo que el turno siguiente necesita saber y la lista no dice.",
+      "passar": "Pasar turno",
+      "pendencias": "Queda pendiente ({total} tarea) | Queda pendiente ({total} tareas)",
+      "recebidoPor": "Quién asume",
+      "resolver": "Resolver",
+      "sai": "entrega",
+      "semPendencias": "Nada queda pendiente en este turno.",
+      "tarde": "Tarde",
+      "titulo": "Cambio de turno",
+      "travaEntrega": "{total} incidencia sin contacto impide la entrega | {total} incidencias sin contacto impiden la entrega",
+      "travado": "Esto impide el cambio"
+    },
+    "via": {
+      "oftalmica": "Oftálmica",
+      "oral": "Oral",
+      "otologica": "Ótica",
+      "subcutanea": "Subcutánea",
+      "topica": "Tópica"
+    }
+  },
+  "primevue": {
+    "today": "Hoy",
+    "clear": "Limpiar",
+    "weekHeader": "Sem",
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "emptyFilterMessage": "Sin resultados",
+    "emptyMessage": "Sin opciones",
+    "emptySearchMessage": "Sin resultados",
+    "emptySelectionMessage": "Nada seleccionado",
+    "searchMessage": "{0} resultados disponibles",
+    "selectionMessage": "{0} elementos seleccionados",
+    "aria": {
+      "close": "Cerrar",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "selectAll": "Seleccionar todo",
+      "unselectAll": "Deseleccionar todo",
+      "navigation": "Navegación"
+    }
   }
 }

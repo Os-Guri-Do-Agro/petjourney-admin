@@ -52,7 +52,7 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
         <h1 class="folha__clinica">{{ clinico.clinic?.nome }}</h1>
         <p class="folha__titulo">{{ titulo }}</p>
         <p v-if="mostrarEndereco && clinico.clinic" class="folha__endereco">
-          {{ clinico.clinic.endereco }} · {{ clinico.clinic.telefone }}
+          {{ clinico.clinic.endereco }} · <bdi dir="ltr">{{ clinico.clinic.telefone }}</bdi>
         </p>
       </div>
 
@@ -74,7 +74,7 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
         <p class="folha__destaque">{{ pet?.nome }}</p>
         <p>
           {{ pet ? formato.especie(pet.especie) : '' }} · {{ pet?.raca }} ·
-          {{ pet ? t(`clinico.sexo.${pet.sexo}`) : '' }} ·
+          {{ pet ? formato.sexo(pet.sexo) : '' }} ·
           {{ pet ? formato.idade(pet.nascimento) : '' }} ·
           {{ formato.peso(pet?.pesoKg ?? null) }}
         </p>
@@ -90,7 +90,7 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
       <div>
         <h2>{{ t('clinico.paciente.responsavel') }}</h2>
         <p class="folha__destaque">{{ tutor?.nome }}</p>
-        <p>{{ tutor?.telefone }}</p>
+        <p><bdi dir="ltr">{{ tutor?.telefone }}</bdi></p>
         <p v-if="tutor?.documento">
           {{ t('clinico.prontuario.impressao.documento') }} {{ tutor.documento }}
         </p>
@@ -131,7 +131,7 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
   flex-direction: column;
   margin: 0 auto;
   color: #000;
-  font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'DM Sans', 'PetJourney Arabic', 'Segoe UI', system-ui, sans-serif;
   font-size: 9.5pt;
   line-height: 1.45;
 }
@@ -184,7 +184,7 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
 
 .folha__meta {
   margin: 0;
-  text-align: right;
+  text-align: end;
 }
 
 .folha__meta div + div {
@@ -269,6 +269,6 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
 .folha__emissao {
   margin: 4mm 0 0;
   font-size: 8pt;
-  text-align: right;
+  text-align: end;
 }
 </style>

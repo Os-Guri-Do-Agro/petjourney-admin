@@ -31,6 +31,8 @@ import type {
   Block,
   BlockReason,
   CancelReason,
+  ConfirmacaoDePresenca,
+  JustificativaDeFalta,
   DiaCarga,
   Encounter,
   SlotSugestao,
@@ -41,6 +43,32 @@ import type {
 } from '../types'
 
 const clock = createClinicClock(CLINIC_UTC_OFFSET)
+
+/**
+ * O que a tela informa ao justificar uma falta.
+ *
+ * Quem registrou e quando **não** vêm daqui: são carimbados na gravação, como o `canceladoEm`
+ * do cancelamento. Deixar a tela mandar o instante seria deixá-la mandar um instante errado.
+ */
+export type EntradaDeJustificativa = {
+  motivo: JustificativaDeFalta['motivo']
+  canal: JustificativaDeFalta['canal']
+  observacao: string
+  professionalId: string
+}
+
+function montarJustificativa(
+  entrada: EntradaDeJustificativa,
+  agora: ISODateTime,
+): JustificativaDeFalta {
+  return {
+    motivo: entrada.motivo,
+    canal: entrada.canal,
+    observacao: entrada.observacao.trim(),
+    professionalId: entrada.professionalId,
+    registradaEm: agora,
+  }
+}
 
 /** Pilha de restauração do desfazer. Curta de propósito: 8 segundos não guardam história. */
 const desfazerPorToken = new Map<string, () => void>()
@@ -77,6 +105,53 @@ function atendimentosDoDia(data: ISODate): Appointment[] {
   return getDataset()
     .appointments.filter((appointment) => clock.dateOf(appointment.inicio) === data)
     .sort((a, b) => a.inicio.localeCompare(b.inicio))
+}
+
+export type NovoAtendimento = {
+  petId: string
+  tutorId: string
+  professionalId: string
+  roomIds: string[]
+  typeId: string
+  inicio: ISODateTime
+  fim: ISODateTime
+  encaixe: boolean
+  observacao: string
+  origem: Appointment['origem']
+}
+
+/**
+ * Um atendimento novo, no formato que `criar` grava.
+ *
+ * Exportado para quem marca horário **como consequência de outro registro** — a próxima dose
+ * da vacina, marcada na mesma gravação da aplicação. Chamar `criar` de dentro de outra chamada
+ * pagaria a latência duas vezes e deixaria uma janela em que a dose existe e o horário não.
+ */
+export function atendimentoNovo(input: NovoAtendimento, agora: ISODateTime): Appointment {
+  return {
+    id: novoId('apt'),
+    petId: input.petId,
+    tutorId: input.tutorId,
+    professionalId: input.professionalId,
+    roomIds: input.roomIds,
+    typeId: input.typeId,
+    inicio: input.inicio,
+    fim: input.fim,
+    status: 'agendado',
+    origem: input.origem,
+    encaixe: input.encaixe,
+    observacao: input.observacao,
+    chegadaEm: null,
+    iniciadoEm: null,
+    finalizadoEm: null,
+    canceladoEm: null,
+    motivoCancelamento: null,
+    justificativaDeFalta: null,
+    encounterId: null,
+    linkedGroupId: null,
+    criadoEm: agora,
+    atualizadoEm: agora,
+  }
 }
 
 export const agendaRepository = {
@@ -242,44 +317,10 @@ export const agendaRepository = {
     })
   },
 
-  criar(input: {
-    petId: string
-    tutorId: string
-    professionalId: string
-    roomIds: string[]
-    typeId: string
-    inicio: ISODateTime
-    fim: ISODateTime
-    encaixe: boolean
-    observacao: string
-    origem: Appointment['origem']
-  }): Promise<MutacaoAgenda> {
+  criar(input: NovoAtendimento): Promise<MutacaoAgenda> {
     return simularChamada('agenda.criar', () => {
       const dataset = getDataset()
-      const agora = agoraIso()
-      const novo: Appointment = {
-        id: novoId('apt'),
-        petId: input.petId,
-        tutorId: input.tutorId,
-        professionalId: input.professionalId,
-        roomIds: input.roomIds,
-        typeId: input.typeId,
-        inicio: input.inicio,
-        fim: input.fim,
-        status: 'agendado',
-        origem: input.origem,
-        encaixe: input.encaixe,
-        observacao: input.observacao,
-        chegadaEm: null,
-        iniciadoEm: null,
-        finalizadoEm: null,
-        canceladoEm: null,
-        motivoCancelamento: null,
-        encounterId: null,
-        linkedGroupId: null,
-        criadoEm: agora,
-        atualizadoEm: agora,
-      }
+      const novo = atendimentoNovo(input, agoraIso())
 
       /** Nada a restaurar: desfazer de uma criação é apagar. */
       const token = novoId('undo')
@@ -359,7 +400,90 @@ export const agendaRepository = {
     })
   },
 
-  alterarStatus(id: string, status: AppointmentStatus): Promise<MutacaoAgenda> {
+  /**
+   * Edição de um atendimento que já existe.
+   *
+   * Até aqui só dava para **mover** (arraste) e **cancelar**. Tipo, sala e observação eram
+   * imutáveis: marcou "Consulta" quando era "Retorno", o único caminho era cancelar e criar de
+   * novo — o que dispara aviso de cancelamento para quem não teve atendimento nenhum cancelado,
+   * e parte o histórico do paciente em dois registros para um atendimento só.
+   *
+   * O paciente fica de fora de propósito. Trocar quem é atendido não é editar este atendimento,
+   * é criar outro: o tutor é diferente, o histórico é de outro bicho e o aviso vai para outro
+   * telefone. Deixar isso num `Select` é convidar o engano que nenhuma tela desfaz depois.
+   *
+   * O grupo ligado acompanha o horário pelo mesmo delta de `mover`, e pela mesma razão: a
+   * cirurgia que ocupa centro e recuperação não pode ter as pernas separadas no tempo. Já tipo,
+   * sala e observação valem **só para o alvo** — é justamente por serem diferentes que as duas
+   * pernas existem.
+   */
+  editar(
+    id: string,
+    dados: {
+      typeId: string
+      professionalId: string
+      roomIds: string[]
+      inicio: ISODateTime
+      fim: ISODateTime
+      observacao: string
+    },
+  ): Promise<MutacaoAgenda> {
+    return simularChamada('agenda.editar', () => {
+      const dataset = getDataset()
+      const alvo = dataset.appointments.find((appointment) => appointment.id === id)
+
+      if (!alvo) {
+        throw new Error('agenda.editar: atendimento inexistente')
+      }
+
+      const grupo =
+        alvo.linkedGroupId === null
+          ? [alvo]
+          : dataset.appointments.filter(
+              (appointment) => appointment.linkedGroupId === alvo.linkedGroupId,
+            )
+
+      const token = registrarDesfazer(grupo)
+      const delta = Date.parse(dados.inicio) - Date.parse(alvo.inicio)
+      const agora = agoraIso()
+      const alterados: Appointment[] = []
+
+      for (const appointment of grupo) {
+        const ehAlvo = appointment.id === alvo.id
+
+        appointment.inicio = ehAlvo ? dados.inicio : deslocar(appointment.inicio, delta)
+        appointment.fim = ehAlvo ? dados.fim : deslocar(appointment.fim, delta)
+
+        if (ehAlvo) {
+          appointment.typeId = dados.typeId
+          appointment.professionalId = dados.professionalId
+          appointment.roomIds = [...dados.roomIds]
+          appointment.observacao = dados.observacao
+        }
+
+        appointment.atualizadoEm = agora
+        alterados.push({ ...appointment })
+      }
+
+      return { atendimentos: alterados, undoToken: token }
+    })
+  },
+
+  /**
+   * Muda o status. Com `justificativa`, a falta já nasce com o motivo vinculado.
+   *
+   * O motivo entra **na mesma mutação** e não numa chamada seguinte, por causa do desfazer: duas
+   * chamadas gerariam dois tokens, e o Z da recepção desfaria só o segundo — devolvendo um
+   * atendimento em falta sem motivo, que é um estado que ninguém pediu.
+   *
+   * Ele continua opcional porque marcar falta e saber o porquê acontecem em momentos
+   * diferentes: o horário passa às nove, a ligação sai à tarde. Ver `justificarFalta`.
+   */
+  alterarStatus(
+    id: string,
+    status: AppointmentStatus,
+    justificativa?: EntradaDeJustificativa | null,
+  ): Promise<MutacaoAgenda> {
     return simularChamada('agenda.status', () => {
       const dataset = getDataset()
       const alvo = dataset.appointments.find((appointment) => appointment.id === id)
@@ -374,6 +498,10 @@ export const agendaRepository = {
       alvo.status = status
       alvo.atualizadoEm = agora
 
+      if (status === 'falta' && justificativa) {
+        alvo.justificativaDeFalta = montarJustificativa(justificativa, agora)
+      }
+
       if (status === 'aguardando' && !alvo.chegadaEm) {
         alvo.chegadaEm = agora
       }
@@ -385,6 +513,72 @@ export const agendaRepository = {
       if (status === 'finalizado') {
         alvo.finalizadoEm = agora
       }
+
+      return { atendimentos: [{ ...alvo }], undoToken: token }
+    })
+  },
+
+  /**
+   * Presença confirmada — pela recepção, que ligou e ouviu "vou, sim", ou pelo app, quando o
+   * responsável toca "Confirmar" na véspera.
+   *
+   * O "por onde" viaja junto (`confirmacao.por`): confirmação dada no app às dez da noite e
+   * confirmação arrancada numa ligação pesam diferente na hora de decidir se vale ligar de novo.
+   * Só horário que ainda vai acontecer confirma; o resto é erro de quem chamou.
+   */
+  confirmarPresenca(id: string, por: ConfirmacaoDePresenca['por']): Promise<MutacaoAgenda> {
+    return simularChamada('agenda.status', () => {
+      const dataset = getDataset()
+      const alvo = dataset.appointments.find((appointment) => appointment.id === id)
+
+      if (!alvo) {
+        throw new Error('agenda.confirmar: atendimento inexistente')
+      }
+
+      if (alvo.status !== 'agendado' && alvo.status !== 'confirmado') {
+        throw new Error('agenda.confirmar: atendimento que já não vai acontecer')
+      }
+
+      const token = registrarDesfazer([alvo])
+      const agora = agoraIso()
+
+      alvo.status = 'confirmado'
+      alvo.confirmacao = { em: agora, por }
+      alvo.atualizadoEm = agora
+
+      return { atendimentos: [{ ...alvo }], undoToken: token }
+    })
+  },
+
+  /**
+   * Registra por que o paciente não veio, depois que a falta já existe.
+   *
+   * É o caminho normal, e não a exceção: quem marca a falta é o horário que passou, quem
+   * descobre o motivo é a ligação que sai depois. O status não é tocado aqui — justificar não
+   * desfaz a falta, e confundir as duas coisas apagaria da conta da clínica um horário que
+   * continua tendo sido queimado.
+   *
+   * Registrar de novo **sobrescreve**: a segunda ligação sabe mais que a primeira, e guardar as
+   * duas transformaria a linha do painel numa thread que ninguém vai ler.
+   */
+  justificarFalta(id: string, entrada: EntradaDeJustificativa): Promise<MutacaoAgenda> {
+    return simularChamada('agenda.status', () => {
+      const dataset = getDataset()
+      const alvo = dataset.appointments.find((appointment) => appointment.id === id)
+
+      if (!alvo) {
+        throw new Error('agenda.justificar: atendimento inexistente')
+      }
+
+      if (alvo.status !== 'falta') {
+        throw new Error('agenda.justificar: atendimento não está em falta')
+      }
+
+      const token = registrarDesfazer([alvo])
+      const agora = agoraIso()
+
+      alvo.justificativaDeFalta = montarJustificativa(entrada, agora)
+      alvo.atualizadoEm = agora
 
       return { atendimentos: [{ ...alvo }], undoToken: token }
     })

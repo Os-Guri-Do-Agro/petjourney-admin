@@ -10,6 +10,7 @@ export type MockOperation =
   | 'agenda.semana'
   | 'agenda.criar'
   | 'agenda.mover'
+  | 'agenda.editar'
   | 'agenda.status'
   | 'agenda.cancelar'
   | 'agenda.bloqueio'
@@ -39,6 +40,14 @@ export type MockOperation =
   | 'internacao.internar'
   /** Cadastro de leitos: configuração da clínica, não trabalho de plantão. */
   | 'internacao.leitos'
+  /** Um lote da importação. Falha sozinho: o lote seguinte espera, e nada do lote que falhou entra. */
+  | 'migracao.importar'
+  /*
+   * Adesão ao tratamento. Registrar a dose é o que o app faz em casa, no 4G de onde estiver; a
+   * falha dele não pode levar junto a leitura da ficha.
+   */
+  | 'tratamento.listar'
+  | 'tratamento.registrar'
 
 export class MockError extends Error {
   /** `kind` traduzível, nunca texto pronto de servidor. */

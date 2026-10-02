@@ -170,15 +170,43 @@ describe('checklist de enfermagem', () => {
     expect(executores[0]!.text()).toMatch(/\d{1,2}[:h]\d{2}/)
   })
 
-  it('marcar uma dose emite o registro que a store vai gravar', async () => {
+  it('marcar uma dose da vez emite o registro que a store vai gravar', async () => {
     const { wrapper } = await montar()
-    const pendente = wrapper.findAll('.item--na-janela, .item--atrasada, .item--futura')[0]!
+
+    // O dataset anda com o relógio: põe uma linha "na hora" para o teste não depender de quando roda.
+    const linhas = wrapper.props('linhas')
+    const indice = linhas.findIndex((linha) =>
+      ['futura', 'na-janela', 'atrasada'].includes(linha.situacao),
+    )
+
+    await wrapper.setProps({
+      linhas: linhas.map((linha, posicao) =>
+        posicao === indice ? { ...linha, situacao: 'na-janela' as const } : linha,
+      ),
+    })
+
+    const pendente = wrapper.findAll('.item--na-janela, .item--atrasada')[0]!
 
     await pendente.find('button.p-button').trigger('click')
 
     const evento = wrapper.emitted('registrar')?.[0]
 
     expect(evento?.[1]).toBe('feita')
+  })
+
+  /** Dose que ainda não chegou a hora não se registra num toque só. */
+  it('dose futura pede um segundo clique antes de registrar', async () => {
+    const { wrapper } = await montar()
+    const futura = wrapper.findAll('.item--futura')[0]!
+
+    await futura.find('button.p-button').trigger('click')
+
+    expect(wrapper.emitted('registrar')).toBeUndefined()
+    expect(futura.find('.item__confirmar').exists()).toBe(true)
+
+    await futura.findAll('button.p-button')[0]!.trigger('click')
+
+    expect(wrapper.emitted('registrar')?.[0]?.[1]).toBe('feita')
   })
 })
 
@@ -199,8 +227,12 @@ describe('celular do responsável', () => {
     })
 
     expect(wrapper.findAll('.balao')).toHaveLength(enviados.length)
-    /* O boletim retido não chegou ao celular — é essa ausência que explica a regra. */
-    expect(wrapper.find('.celular__retido').exists()).toBe(true)
+    /*
+     * O boletim retido não chegou ao celular, e o celular **não anuncia** que ele existe: um
+     * "1 boletim aguardando ligação" contaria a notícia antes da ligação. O contrato com o app
+     * não tem esse campo (`InternacaoNaClinica`), e a prévia mostra o que o app vai mostrar.
+     */
+    expect(wrapper.find('.celular__retido').exists()).toBe(false)
     /*
      * O texto precisa existir antes de se afirmar que ele não aparece: `toContain('')` é
      * verdadeiro para qualquer tela, e a asserção passaria sobre um boletim vazio.

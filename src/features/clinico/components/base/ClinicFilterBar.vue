@@ -12,6 +12,10 @@
  * 3. **Contagem por opção.** Saber que "Felina · 4" existe antes de clicar poupa o filtro que
  *    devolve lista vazia.
  */
+import Button from 'primevue/button'
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
+import InputText from 'primevue/inputtext'
 import Popover from 'primevue/popover'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -73,29 +77,32 @@ function limpar() {
 <template>
   <div class="filtro">
     <div class="filtro__linha">
-      <label class="filtro__busca">
-        <i class="pi pi-search" aria-hidden="true" />
-        <input
-          class="filtro__campo"
+      <IconField class="filtro__busca">
+        <InputIcon class="pi pi-search" />
+        <InputText
           type="search"
-          :value="busca"
+          size="small"
+          fluid
+          :model-value="busca"
           :placeholder="placeholderBusca"
           :aria-label="placeholderBusca"
-          @input="emit('update:busca', ($event.target as HTMLInputElement).value)"
+          @update:model-value="emit('update:busca', $event ?? '')"
         />
-      </label>
+      </IconField>
 
-      <button
+      <Button
         type="button"
-        class="filtro__botao clinic-focusable"
+        class="filtro__botao"
         :class="{ 'filtro__botao--ativo': total > 0 }"
+        severity="secondary"
+        outlined
+        size="small"
+        icon="pi pi-sliders-h"
+        :label="t('clinico.comum.filtros')"
+        :badge="total > 0 ? String(total) : undefined"
         :aria-label="t('clinico.comum.filtros')"
         @click="painel?.toggle($event)"
-      >
-        <i class="pi pi-sliders-h" aria-hidden="true" />
-        <span>{{ t('clinico.comum.filtros') }}</span>
-        <span v-if="total > 0" class="filtro__contagem">{{ total }}</span>
-      </button>
+      />
 
       <span v-if="resultado >= 0" class="filtro__resultado clinic-value">
         {{ t('clinico.comum.resultados', { contagem: resultado }, resultado) }}
@@ -104,34 +111,47 @@ function limpar() {
 
     <!-- O que está aplicado, sem precisar abrir o painel. -->
     <div v-if="aplicados.length > 0" class="filtro__aplicados">
-      <button
+      <Button
         v-for="ficha in aplicados"
         :key="`${ficha.grupo}-${ficha.valor}`"
         type="button"
-        class="ficha ficha--removivel clinic-focusable"
+        class="ficha ficha--removivel"
+        severity="secondary"
+        outlined
+        rounded
+        size="small"
+        :label="ficha.rotulo"
+        icon="pi pi-times"
+        icon-pos="right"
         @click="alternar(ficha.grupo, ficha.valor)"
-      >
-        {{ ficha.rotulo }}
-        <i class="pi pi-times" aria-hidden="true" />
-      </button>
+      />
 
-      <button type="button" class="filtro__limpar clinic-focusable" @click="limpar">
-        {{ t('clinico.agenda.limparFiltros') }}
-      </button>
+      <Button
+        type="button"
+        class="filtro__limpar"
+        link
+        size="small"
+        :label="t('clinico.agenda.limparFiltros')"
+        @click="limpar"
+      />
     </div>
 
-    <Popover ref="painel" class="clinic-overlay">
+    <Popover ref="painel" class="clinic-overlay hc-tema">
       <div class="painel clinic-scope">
         <section v-for="grupo in grupos" :key="grupo.id" class="painel__grupo">
           <h3 class="clinic-label">{{ grupo.rotulo }}</h3>
 
           <div class="painel__opcoes">
-            <button
+            <Button
               v-for="opcao in grupo.opcoes"
               :key="opcao.valor"
               type="button"
-              class="ficha clinic-focusable"
+              class="ficha"
               :class="{ 'ficha--ativa': (selecionados[grupo.id] ?? []).includes(opcao.valor) }"
+              severity="secondary"
+              outlined
+              rounded
+              size="small"
               :aria-pressed="(selecionados[grupo.id] ?? []).includes(opcao.valor)"
               @click="alternar(grupo.id, opcao.valor)"
             >
@@ -139,7 +159,7 @@ function limpar() {
               <span v-if="opcao.contagem !== undefined" class="ficha__contagem">
                 {{ opcao.contagem }}
               </span>
-            </button>
+            </Button>
           </div>
         </section>
       </div>
@@ -161,84 +181,19 @@ function limpar() {
 }
 
 .filtro__busca {
-  position: relative;
-  display: block;
   flex: 1 1 18rem;
   max-width: 28rem;
 }
 
-.filtro__busca i {
-  position: absolute;
-  top: 50%;
-  left: var(--clinic-space-3);
-  color: var(--clinic-faint);
-  font-size: 0.8rem;
-  pointer-events: none;
-  transform: translateY(-50%);
-}
-
-.filtro__campo {
-  width: 100%;
-  min-height: 2.3rem;
-  padding: 0 var(--clinic-space-3) 0 2.1rem;
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-text);
-  font: inherit;
-  font-size: var(--clinic-font-base);
-}
-
-.filtro__campo::placeholder {
-  color: var(--clinic-faint);
-}
-
-.filtro__campo:focus {
-  border-color: var(--clinic-accent-deep);
-  outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--clinic-accent) 35%, transparent);
-}
-
-.filtro__botao {
-  display: inline-flex;
-  min-height: 2.3rem;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0 var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.filtro__botao:hover {
-  border-color: var(--clinic-accent);
-  color: var(--clinic-accent-strong);
-}
-
-.filtro__botao--ativo {
+/* Com filtro aplicado o botão acende: é o aviso de que a lista não está inteira. */
+.filtro__botao--ativo.p-button.p-button-secondary.p-button-outlined {
   border-color: var(--clinic-accent);
   background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
 }
 
-.filtro__contagem {
-  min-width: 1.1rem;
-  padding: 0 0.25rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
-  font-size: 0.62rem;
-  font-weight: 800;
-  text-align: center;
-}
-
 .filtro__resultado {
-  margin-left: auto;
+  margin-inline-start: auto;
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
   font-weight: 700;
@@ -251,16 +206,9 @@ function limpar() {
   gap: var(--clinic-space-1);
 }
 
-.filtro__limpar {
-  border: none;
-  background: none;
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
+.filtro__limpar.p-button {
+  padding-inline: var(--clinic-space-2);
   font-size: var(--clinic-font-label);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 .painel {
@@ -281,40 +229,39 @@ function limpar() {
   gap: var(--clinic-space-1);
 }
 
-.ficha {
-  display: inline-flex;
+/*
+ * Ficha: botão pílula compacto. A especificidade passa a regra global da clínica para botão
+ * secundário contornado, que pintaria toda ficha com a borda forte e o texto cheio.
+ */
+.ficha.p-button {
   min-height: 1.8rem;
-  align-items: center;
   gap: 0.35rem;
   padding: 0 var(--clinic-space-2);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
   font-weight: 700;
 }
 
-.ficha:hover {
+.ficha.p-button.p-button-secondary.p-button-outlined {
+  border-color: var(--clinic-line);
+  color: var(--clinic-muted);
+}
+
+.ficha.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
   border-color: var(--clinic-accent);
+  background: var(--clinic-surface);
   color: var(--clinic-accent-strong);
 }
 
-.ficha--ativa {
+.ficha--ativa.p-button.p-button-secondary.p-button-outlined,
+.ficha--ativa.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
+.ficha--removivel.p-button.p-button-secondary.p-button-outlined,
+.ficha--removivel.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
   border-color: var(--clinic-accent);
   background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
 }
 
-.ficha--removivel {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.ficha--removivel i {
+.ficha--removivel.p-button :deep(.p-button-icon) {
   font-size: 0.55rem;
   opacity: 0.7;
 }

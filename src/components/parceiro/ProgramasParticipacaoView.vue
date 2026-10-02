@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import Button from 'primevue/button'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ProgramaParticipacaoCard from '@/components/parceiro/ProgramaParticipacaoCard.vue'
@@ -11,6 +12,9 @@ const { t } = useI18n()
 const { store } = useParceiroPortal()
 
 const isLoading = computed(() => store.loadState === 'loading' || store.loadState === 'idle')
+
+/** As etapas de ativação ficam recolhidas: com os programas já ativos, ninguém precisa delas. */
+const etapasAbertas = ref(false)
 
 const viewStyle = computed(() => {
   const colors = currentColors.value
@@ -58,31 +62,46 @@ const activationSteps = computed(() => [
 
 <template>
   <div class="programas-view" :style="viewStyle">
-    <section class="prog-zone" aria-labelledby="prog-cards-title">
-      <header class="prog-zone__head">
-        <h2 id="prog-cards-title">{{ t('programas.available.title') }}</h2>
-        <p v-if="isGuidanceVisible">{{ t('programas.available.lede') }}</p>
-      </header>
+    <p v-if="isGuidanceVisible" class="programas-view__lede">{{ t('programas.available.lede') }}</p>
 
-      <div
-        id="programas"
-        class="programas-view__grid"
-        :aria-busy="isLoading || undefined"
-        :aria-label="isLoading ? t('programas.available.loadingAria') : undefined"
-        :role="isLoading ? 'status' : undefined"
-      >
-        <ProgramaParticipacaoCard modo="afiliado" :skeleton="isLoading" />
-        <ProgramaParticipacaoCard modo="participativo" :skeleton="isLoading" />
-      </div>
+    <!-- O título "Programas disponíveis" saiu: a saudação da página já diz de que tela se trata. -->
+    <section
+      id="programas"
+      class="hc programas-view__lista"
+      :aria-label="
+        isLoading ? t('programas.available.loadingAria') : t('programas.available.title')
+      "
+      :aria-busy="isLoading || undefined"
+      :role="isLoading ? 'status' : undefined"
+    >
+      <ProgramaParticipacaoCard modo="afiliado" :skeleton="isLoading" />
+      <ProgramaParticipacaoCard modo="participativo" :skeleton="isLoading" />
     </section>
 
-    <section class="prog-zone" aria-labelledby="activation-title">
-      <header class="prog-zone__head">
-        <h2 id="activation-title">{{ t('programas.activation.title') }}</h2>
-        <p v-if="isGuidanceVisible">{{ t('programas.activation.lede') }}</p>
-      </header>
+    <section class="hc ativacao" aria-labelledby="activation-title">
+      <div class="ativacao__linha">
+        <p class="ativacao__frase">
+          <strong id="activation-title">{{ t('programas.linha.ativacaoRotulo') }}</strong>
+          {{ t('programas.linha.ativacaoFrase') }}
+        </p>
+        <Button
+          type="button"
+          :label="
+            etapasAbertas ? t('programas.linha.ocultarEtapas') : t('programas.linha.verEtapas')
+          "
+          :icon="etapasAbertas ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+          icon-pos="right"
+          severity="secondary"
+          text
+          size="small"
+          :aria-expanded="etapasAbertas"
+          aria-controls="programas-etapas"
+          @click="etapasAbertas = !etapasAbertas"
+        />
+      </div>
 
-      <div class="activation-panel">
+      <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
+      <div v-show="etapasAbertas" id="programas-etapas" class="activation-panel">
         <ol class="activation-panel__steps">
           <li
             v-for="step in activationSteps"
@@ -112,6 +131,42 @@ const activationSteps = computed(() => [
 </template>
 
 <style scoped>
+.programas-view__lede {
+  margin: 0;
+  color: var(--prog-muted);
+  font-size: 0.875rem;
+}
+
+.programas-view__lista {
+  display: grid;
+  padding-block: 0.25rem;
+}
+
+.ativacao {
+  display: grid;
+  gap: 0.85rem;
+  padding-block: 0.9rem;
+}
+
+.ativacao__linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.ativacao__frase {
+  margin: 0;
+  color: var(--prog-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ativacao__frase strong {
+  color: var(--prog-text);
+}
+
 .programas-view {
   display: grid;
   gap: 1.65rem;
@@ -120,58 +175,16 @@ const activationSteps = computed(() => [
   overflow-x: clip;
 }
 
-.prog-zone {
-  display: grid;
-  gap: 0.9rem;
-  width: 100%;
-}
-
-.prog-zone__head {
-  display: grid;
-  gap: 0.28rem;
-  padding-bottom: 0.55rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--prog-line) 85%, transparent);
-}
-
-.prog-zone__head h2 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--prog-text);
-}
-
-.prog-zone__head > p {
-  margin: 0;
-  color: var(--prog-muted);
-  font-size: 0.82rem;
-  line-height: 1.4;
-}
-
-.programas-view__grid {
-  display: grid;
-  gap: 0.9rem;
-  width: 100%;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: stretch;
-  scroll-margin-top: 5rem;
-}
-
+/* Dentro da linha de ativação, sem moldura própria: cartão dentro de cartão não volta. */
 .activation-panel {
   display: grid;
   gap: 1rem;
   width: 100%;
-  padding: 1.25rem 1.3rem 1.2rem;
-  border: 1px solid var(--prog-line);
-  border-radius: 1.2rem;
-  background: var(--prog-card);
-  box-shadow: 0 12px 28px rgb(var(--prog-shadow-rgb) / 0.04);
 }
 
 .activation-panel__steps {
   --activation-gap: 1.5rem;
-  --activation-number-size: 2.2rem;
-  --activation-pad-y: 1rem;
+  --activation-number-size: 2rem;
 
   display: grid;
   width: 100%;
@@ -182,28 +195,23 @@ const activationSteps = computed(() => [
   list-style: none;
 }
 
+/* Etapa sem moldura: número, linha tracejada até o próximo número, texto embaixo. */
 .activation-step {
   position: relative;
   display: grid;
-  gap: 0.65rem;
+  gap: 0.55rem;
   justify-items: start;
-  padding: var(--activation-pad-y) 1.05rem;
-  border: 1px solid var(--prog-line);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--prog-surface) 75%, var(--prog-card));
 }
 
 .activation-step:not(:last-child)::after {
   content: '';
   position: absolute;
-  top: calc(var(--activation-pad-y) + (var(--activation-number-size) / 2));
-  left: 100%;
-  width: var(--activation-gap);
+  top: calc(var(--activation-number-size) / 2);
+  inset-inline-start: calc(var(--activation-number-size) + 0.6rem);
+  inset-inline-end: calc(-1 * var(--activation-gap) + 0.6rem);
   height: 0;
-  border-top: 2px dashed color-mix(in srgb, var(--prog-primary) 45%, var(--prog-line));
-  transform: translateY(-50%);
+  border-top: 2px dashed var(--prog-line);
   pointer-events: none;
-  z-index: 1;
 }
 
 .activation-step__number {
@@ -215,7 +223,7 @@ const activationSteps = computed(() => [
   border-radius: 999px;
   background: var(--prog-card);
   color: var(--prog-muted);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
 }
 
@@ -252,10 +260,6 @@ const activationSteps = computed(() => [
 }
 
 @media (max-width: 900px) {
-  .programas-view__grid {
-    grid-template-columns: 1fr;
-  }
-
   .activation-panel__steps {
     grid-template-columns: 1fr;
   }

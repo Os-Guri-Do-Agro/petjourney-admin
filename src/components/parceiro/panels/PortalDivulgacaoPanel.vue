@@ -43,50 +43,19 @@ const { lastSuccessAt } = useCupomResgateModal()
 // const { open: openCupomComingSoon } = useCupomComingSoon()
 const cupomFeatureEnabled = CUPOM_FEATURE_ENABLED
 
-const indicacaoSteps = computed(() => [
-  {
-    icon: 'pi pi-share-alt',
-    title: t('divulgacao.howItWorks.steps.share.title'),
-    body: t('divulgacao.howItWorks.steps.share.body'),
-  },
-  {
-    icon: 'pi pi-user-plus',
-    title: t('divulgacao.howItWorks.steps.signup.title'),
-    body: t('divulgacao.howItWorks.steps.signup.body'),
-  },
-  {
-    icon: 'pi pi-link',
-    title: t('divulgacao.howItWorks.steps.link.title'),
-    body: t('divulgacao.howItWorks.steps.link.body'),
-  },
-  {
-    icon: 'pi pi-wallet',
-    title: t('divulgacao.howItWorks.steps.earn.title'),
-    body: t('divulgacao.howItWorks.steps.earn.body'),
-  },
-])
-
 /**
  * Termos concretos da participação, do jeito que o backend calcula
  * (`comissao.config.ts`): 5% do plano, a cada renovação paga, janela de 18 meses
  * desde a primeira assinatura paga do indicado, hold de 14 dias e saque mínimo
  * de R$ 50.
  *
- * Divulgação em dois níveis: os três números que definem o ganho ficam sempre à
- * vista; o detalhe completo (incluindo hold, saque e a condição de ativação) abre
- * sob demanda. Abrir tudo de uma vez virava parede de texto no meio da tela.
+ * Divulgação em dois níveis: o ganho numa frase sempre à vista (5%, todo mês, 18 meses); o
+ * detalhe completo (incluindo hold, saque e a condição de ativação) abre sob demanda. Abrir tudo
+ * de uma vez virava parede de texto no meio da tela.
  */
 const TERM_IDS = ['percent', 'recurring', 'window', 'hold', 'payout', 'requirement'] as const
 
 const termsOpen = ref(false)
-
-const indicacaoHighlights = computed(() =>
-  (['percent', 'recurring', 'window'] as const).map((id) => ({
-    id,
-    value: t(`divulgacao.terms.highlights.${id}.value`),
-    caption: t(`divulgacao.terms.highlights.${id}.caption`),
-  })),
-)
 
 const indicacaoTerms = computed(() =>
   TERM_IDS.map((id) => ({
@@ -141,7 +110,7 @@ const panelStyle = computed(() => {
     '--div-warm-bg': colors.dashboard.warmBg,
     '--div-warm-text': colors.dashboard.warmText,
     '--div-shadow-rgb': colors.auth.shadowRgb,
-    '--div-on-primary': LightColors.auth.white,
+    '--div-on-primary': LightColors.text.inverse,
   }
 })
 
@@ -326,6 +295,28 @@ function formatResgateDate(value: string) {
   })
 }
 
+/**
+ * O que a frase do topo da página precisa saber: o código, o link para a pílula de copiar e as
+ * leituras do QR. A página monta a saudação (é ela quem tem o slot do cabeçalho); o painel é
+ * quem carrega os dados.
+ */
+const emit = defineEmits<{
+  estado: [
+    estado: { codigo: string; link: string; leituras: number | null; podeIndicar: boolean },
+  ]
+}>()
+
+watch(
+  () => ({
+    codigo: codigoIndicacao.value,
+    link: linkIndicacao.value,
+    leituras: metricas.value?.scanCount ?? null,
+    podeIndicar: Boolean(indicacao.value?.podeIndicar),
+  }),
+  (estado) => emit('estado', estado),
+  { immediate: true },
+)
+
 onMounted(() => {
   void loadAll()
 })
@@ -499,11 +490,12 @@ watch(lastSuccessAt, (at) => {
     </template>
 
     <template v-else-if="indicacao">
-      <section id="indicacao" class="div-zone" aria-labelledby="div-indicacao-title">
-        <header class="div-zone__head">
-          <h2 id="div-indicacao-title">{{ t('divulgacao.indicacao.title') }}</h2>
-          <p v-if="isGuidanceVisible">{{ t('divulgacao.indicacao.lede') }}</p>
-        </header>
+      <!--
+        A frase do topo (código e leituras) fica na saudação da página; aqui, o kit e as leituras.
+        O título "Indicação" saiu: a saudação já diz de que tela se trata.
+      -->
+      <section id="indicacao" class="div-zone" :aria-label="t('divulgacao.indicacao.title')">
+        <p v-if="isGuidanceVisible" class="div-zone__lede">{{ t('divulgacao.indicacao.lede') }}</p>
 
         <div
           class="divulgacao__board"
@@ -512,23 +504,19 @@ watch(lastSuccessAt, (at) => {
             'divulgacao__board--with-soon': !cupomFeatureEnabled,
           }"
         >
-          <PartnerFocusCard class="share-kit share-kit--compact" :muted="!indicacao.podeIndicar">
-            <header class="share-kit__head">
-              <div>
-                <p class="share-kit__eyebrow">{{ t('divulgacao.shareKit.eyebrow') }}</p>
-                <h3>{{ t('divulgacao.shareKit.title') }}</h3>
-              </div>
-              <span v-if="!indicacao.podeIndicar" class="share-kit__pill">{{
-                t('divulgacao.shareKit.unavailable')
-              }}</span>
+          <!--
+            Os três jeitos de compartilhar, um por linha, cada um dizendo para que serve — o código
+            para falar no balcão, o link para o WhatsApp, o QR para imprimir. Antes era um cartão
+            verde com rótulos em caixa alta; a ação de cada um fica visível ao lado dele.
+          -->
+          <section class="hc kit" aria-labelledby="div-kit-title">
+            <header class="hc__cabeca">
+              <h2 id="div-kit-title" class="hc__titulo">
+                <i class="pi pi-share-alt hc__icone" aria-hidden="true" />
+                {{ t('divulgacao.kit.titulo') }}
+              </h2>
             </header>
 
-            <!-- Gate do kit: sem cadastro aprovado (2026-07-29) OU sem Programa de
-                 Afiliados ativo (2026-08-19) não existe código, link nem QR — a API
-                 devolve tudo null. Estado de espera com o `aviso` do backend, que
-                 já é específico por status; nada de copy própria aqui. A saída é
-                 sempre Programas: é de lá que sai tanto o reenvio do cadastro
-                 quanto a solicitação do programa. -->
             <div v-if="!indicacao.podeIndicar" class="share-kit__espera">
               <span class="share-kit__espera-icon" aria-hidden="true">
                 <i class="pi pi-hourglass" />
@@ -541,59 +529,56 @@ watch(lastSuccessAt, (at) => {
               </RouterLink>
             </div>
 
-            <div
-              v-else
-              class="share-kit__stage"
-              :class="{ 'share-kit__stage--with-qr': Boolean(indicacao.qrImageUrl) }"
-            >
-              <div class="share-kit__main">
-                <div class="share-kit__code-block">
-                  <span class="share-kit__label">{{ t('divulgacao.shareKit.codeLabel') }}</span>
-                  <div class="share-kit__code-row">
-                    <strong class="share-kit__code">{{ codigoIndicacao }}</strong>
-                    <button
-                      type="button"
-                      class="share-kit__icon-btn"
-                      :aria-label="t('divulgacao.shareKit.copyCodeAria')"
-                      :disabled="!indicacao.podeIndicar"
-                      @click="copyToClipboard(codigoIndicacao, t('divulgacao.shareKit.codeLabel'))"
-                    >
-                      <i class="pi pi-copy" aria-hidden="true" />
-                    </button>
+            <div v-else class="kit__corpo" :class="{ 'kit__corpo--com-qr': Boolean(indicacao.qrImageUrl) }">
+              <ul class="kit__jeitos">
+                <li class="kit__jeito">
+                  <div class="kit__texto">
+                    <span class="kit__rotulo">{{ t('divulgacao.kit.codigo') }}</span>
+                    <strong class="kit__codigo">{{ codigoIndicacao }}</strong>
                   </div>
-                </div>
-
-                <div class="share-kit__link">
-                  <span class="share-kit__label">{{ t('divulgacao.shareKit.linkLabel') }}</span>
-                  <div class="share-kit__link-field">
-                    <code>{{ linkIndicacao }}</code>
-                    <button
-                      type="button"
-                      class="share-kit__copy-cta"
-                      :disabled="!indicacao.podeIndicar"
-                      @click="copyToClipboard(linkIndicacao, t('divulgacao.shareKit.linkName'))"
-                    >
-                      <i class="pi pi-link" aria-hidden="true" />
-                      {{ t('divulgacao.shareKit.copyLink') }}
-                    </button>
+                  <Button
+                    type="button"
+                    icon="pi pi-copy"
+                    :label="t('divulgacao.kit.copiar')"
+                    :aria-label="t('divulgacao.shareKit.copyCodeAria')"
+                    severity="secondary"
+                    outlined
+                    @click="copyToClipboard(codigoIndicacao, t('divulgacao.shareKit.codeLabel'))"
+                  />
+                </li>
+                <li class="kit__jeito">
+                  <div class="kit__texto">
+                    <span class="kit__rotulo">{{ t('divulgacao.kit.link') }}</span>
+                    <code class="kit__link">{{ linkIndicacao }}</code>
                   </div>
-                </div>
-
-                <p class="share-kit__hint">
-                  {{ t('divulgacao.shareKit.hint') }}
-                </p>
-              </div>
+                  <Button
+                    type="button"
+                    icon="pi pi-copy"
+                    :label="t('divulgacao.kit.copiar')"
+                    :aria-label="t('divulgacao.shareKit.copyLink')"
+                    severity="secondary"
+                    outlined
+                    @click="copyToClipboard(linkIndicacao, t('divulgacao.shareKit.linkName'))"
+                  />
+                </li>
+                <li v-if="indicacao.qrImageUrl" class="kit__jeito">
+                  <div class="kit__texto">
+                    <span class="kit__rotulo">{{ t('divulgacao.kit.qr') }}</span>
+                    <span class="kit__dica">{{ t('divulgacao.kit.qrDica') }}</span>
+                  </div>
+                </li>
+              </ul>
 
               <IndicacaoQrBlock
                 v-if="indicacao.qrImageUrl"
-                class="share-kit__qr"
+                class="kit__qr"
                 :image-url="indicacao.qrImageUrl"
                 :code="codigoIndicacao"
                 :disabled="!indicacao.podeIndicar"
                 size="md"
               />
             </div>
-          </PartnerFocusCard>
+          </section>
 
           <!-- Leituras do QR: só faz sentido quando existe QR para ler. -->
           <IndicacaoMetricasCard
@@ -655,77 +640,39 @@ watch(lastSuccessAt, (at) => {
         </div>
       </section>
 
-      <section id="como-funciona" class="div-zone" aria-labelledby="div-how-title">
-        <article class="indicacao-pitch">
-          <header class="indicacao-pitch__hero">
-            <p class="indicacao-pitch__eyebrow">{{ t('divulgacao.howItWorks.eyebrow') }}</p>
-            <h2 id="div-how-title">{{ t('divulgacao.howItWorks.title') }}</h2>
-            <p class="indicacao-pitch__lede">{{ t('divulgacao.howItWorks.lede') }}</p>
-          </header>
+      <!--
+        As regras numa linha, e o detalhe sob demanda. O bloco de antes ("Indique. Vincule.
+        Cresça.", quatro passos e três números grandes) era propaganda dentro da tela de trabalho:
+        quem abre a Divulgação já é parceiro e só quer o código.
+      -->
+      <section id="como-funciona" class="hc regras" aria-labelledby="div-terms-title">
+        <div class="regras__linha">
+          <p class="regras__frase">
+            <strong id="div-terms-title">{{ t('divulgacao.regras.rotulo') }}</strong>
+            {{ t('divulgacao.regras.frase') }}
+          </p>
+          <Button
+            type="button"
+            class="regras__abrir"
+            :label="termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')"
+            :icon="termsOpen ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+            icon-pos="right"
+            severity="secondary"
+            text
+            size="small"
+            :aria-expanded="termsOpen"
+            aria-controls="div-terms-full"
+            @click="termsOpen = !termsOpen"
+          />
+        </div>
 
-          <ol class="indicacao-pitch__steps">
-            <li
-              v-for="(step, index) in indicacaoSteps"
-              :key="step.title"
-              class="indicacao-pitch__step"
-            >
-              <span class="indicacao-pitch__index" aria-hidden="true">{{
-                String(index + 1).padStart(2, '0')
-              }}</span>
-              <span class="indicacao-pitch__icon" aria-hidden="true">
-                <i :class="step.icon" />
-              </span>
-              <div>
-                <h3>{{ step.title }}</h3>
-                <p>{{ step.body }}</p>
-              </div>
-            </li>
-          </ol>
-
-          <section class="indicacao-terms" aria-labelledby="div-terms-title">
-            <header class="indicacao-terms__head">
-              <h3 id="div-terms-title">{{ t('divulgacao.terms.title') }}</h3>
-              <p>{{ t('divulgacao.terms.lede') }}</p>
-            </header>
-
-            <ul class="indicacao-terms__highlights">
-              <li v-for="item in indicacaoHighlights" :key="item.id">
-                <strong>{{ item.value }}</strong>
-                <span>{{ item.caption }}</span>
-              </li>
-            </ul>
-
-            <button
-              type="button"
-              class="indicacao-terms__toggle"
-              :aria-expanded="termsOpen"
-              aria-controls="div-terms-full"
-              @click="termsOpen = !termsOpen"
-            >
-              <span>{{
-                termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')
-              }}</span>
-              <i
-                class="pi"
-                :class="termsOpen ? 'pi-chevron-up' : 'pi-chevron-down'"
-                aria-hidden="true"
-              />
-            </button>
-
-            <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
-            <dl v-show="termsOpen" id="div-terms-full" class="indicacao-terms__grid">
-              <div v-for="term in indicacaoTerms" :key="term.id" class="indicacao-terms__item">
-                <dt>{{ term.title }}</dt>
-                <dd>{{ term.body }}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <div class="indicacao-pitch__close">
-            <p class="indicacao-pitch__promise">{{ t('divulgacao.howItWorks.promise') }}</p>
-            <p class="indicacao-pitch__note">{{ t('divulgacao.howItWorks.note') }}</p>
+        <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
+        <dl v-show="termsOpen" id="div-terms-full" class="indicacao-terms__grid">
+          <div v-for="term in indicacaoTerms" :key="term.id" class="indicacao-terms__item">
+            <dt>{{ term.title }}</dt>
+            <dd>{{ term.body }}</dd>
           </div>
-        </article>
+        </dl>
       </section>
 
       <section v-if="cupomFeatureEnabled" class="div-zone" aria-labelledby="div-movimentacao-title">
@@ -757,7 +704,7 @@ watch(lastSuccessAt, (at) => {
                 </div>
                 <div class="cupom-row__meta">
                   <span class="cupom-row__discount">{{ cupom.descontoPercentual }}%</span>
-                  <span>{{ t('divulgacao.cupons.usos', { n: cupom.totalResgates }) }}</span>
+                  <span>{{ t('divulgacao.cupons.usos', { n: cupom.totalResgates }, cupom.totalResgates) }}</span>
                   <PartnerStatusBadge :status="cupom.ativo ? 'ATIVO' : 'SUSPENSO'" />
                 </div>
               </li>
@@ -860,199 +807,8 @@ watch(lastSuccessAt, (at) => {
   line-height: 1.4;
 }
 
-.indicacao-pitch {
-  display: grid;
-  gap: 1.25rem;
-  padding: 1.35rem 1.4rem 1.4rem;
-  border: 1px solid color-mix(in srgb, var(--div-primary) 18%, var(--div-line));
-  border-radius: 1.25rem;
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--div-primary-soft) 42%, var(--div-card)) 0%,
-    var(--div-card) 48%
-  );
-  box-shadow: 0 14px 34px rgb(var(--div-shadow-rgb) / 0.05);
-}
-
-.indicacao-pitch__hero {
-  display: grid;
-  gap: 0.45rem;
-  max-width: 42rem;
-}
-
-.indicacao-pitch__eyebrow {
-  margin: 0;
-  color: var(--div-primary-strong);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.indicacao-pitch__hero h2 {
-  margin: 0;
-  color: var(--div-text);
-  font-size: clamp(1.45rem, 2.4vw, 1.85rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-}
-
-.indicacao-pitch__lede {
-  margin: 0;
-  color: var(--div-muted);
-  font-size: 0.98rem;
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-.indicacao-pitch__steps {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.indicacao-pitch__step {
-  display: grid;
-  gap: 0.65rem;
-  align-content: start;
-  min-height: 100%;
-  padding: 0.95rem 0.95rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--div-line) 90%, transparent);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--div-surface) 70%, var(--div-card));
-}
-
-.indicacao-pitch__index {
-  color: var(--div-faint);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-}
-
-.indicacao-pitch__icon {
-  display: grid;
-  width: 2.45rem;
-  height: 2.45rem;
-  place-items: center;
-  border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--div-primary) 18%, transparent);
-  color: var(--div-primary-strong);
-  font-size: 0.95rem;
-}
-
-.indicacao-pitch__step h3 {
-  margin: 0 0 0.28rem;
-  color: var(--div-text);
-  font-size: 0.95rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-}
-
-.indicacao-pitch__step p {
-  margin: 0;
-  color: var(--div-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.indicacao-terms {
-  display: grid;
-  gap: 0.65rem;
-  justify-items: stretch;
-  padding-top: 0.9rem;
-  border-top: 1px solid color-mix(in srgb, var(--div-line) 85%, transparent);
-}
-
-.indicacao-terms__head h3 {
-  margin: 0;
-  color: var(--div-text);
-  font-size: 0.95rem;
-  font-weight: 750;
-  letter-spacing: -0.01em;
-}
-
-.indicacao-terms__head p {
-  margin: 0.2rem 0 0;
-  color: var(--div-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
 /* Nível 1: os três números que definem o ganho. Hierarquia por tamanho do valor,
    não por cor decorativa. */
-.indicacao-terms__highlights {
-  display: grid;
-  gap: 0.55rem;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.indicacao-terms__highlights li {
-  display: grid;
-  gap: 0.1rem;
-  align-content: start;
-  min-width: 0;
-  padding: 0.75rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--div-primary) 22%, var(--div-line));
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--div-primary-soft) 22%, var(--div-card));
-}
-
-.indicacao-terms__highlights strong {
-  color: var(--div-primary-strong);
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-.indicacao-terms__highlights span {
-  color: var(--div-muted);
-  font-size: 0.76rem;
-  font-weight: 600;
-  line-height: 1.35;
-}
-
-.indicacao-terms__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  justify-self: start;
-  padding: 0.4rem 0.7rem;
-  border: 1px solid transparent;
-  border-radius: 0.6rem;
-  background: transparent;
-  color: var(--div-primary-strong);
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease;
-}
-
-.indicacao-terms__toggle:hover {
-  border-color: color-mix(in srgb, var(--div-primary) 28%, var(--div-line));
-  background: color-mix(in srgb, var(--div-primary-soft) 26%, transparent);
-}
-
-.indicacao-terms__toggle:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--div-primary) 55%, transparent);
-  outline-offset: 2px;
-}
-
-.indicacao-terms__toggle i {
-  font-size: 0.7rem;
-}
-
 /* Nível 2: o detalhe completo, incluindo o que não cabe no resumo. */
 .indicacao-terms__grid {
   display: grid;
@@ -1086,31 +842,105 @@ watch(lastSuccessAt, (at) => {
   line-height: 1.5;
 }
 
-.indicacao-pitch__close {
+/* ---------------------------------------------------------------- o kit e as regras */
+
+.div-zone__lede {
+  margin: 0;
+  color: var(--div-muted);
+  font-size: 0.875rem;
+}
+
+.kit__corpo {
   display: grid;
-  gap: 0.4rem;
-  padding-top: 0.15rem;
-  border-top: 1px solid color-mix(in srgb, var(--div-line) 85%, transparent);
+  gap: 1.5rem;
+  align-items: start;
 }
 
-.indicacao-pitch__promise {
+.kit__corpo--com-qr {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.kit__jeitos {
+  display: grid;
   margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kit__jeito {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0;
+}
+
+.kit__jeito + .kit__jeito {
+  border-top: 1px solid var(--div-line-soft);
+}
+
+.kit__texto {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+}
+
+.kit__rotulo {
+  color: var(--div-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.kit__codigo {
   color: var(--div-text);
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.4;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
 }
 
-.indicacao-pitch__note {
-  margin: 0;
-  color: var(--div-faint);
-  font-size: 0.8rem;
+.kit__link {
+  overflow: hidden;
+  color: var(--div-text);
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kit__dica {
+  color: var(--div-muted);
+  font-size: 0.8125rem;
   line-height: 1.45;
 }
 
-@media (max-width: 1100px) {
-  .indicacao-pitch__steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.regras {
+  display: grid;
+  gap: 0.75rem;
+  padding-block: 0.9rem;
+}
+
+.regras__linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.regras__frase {
+  margin: 0;
+  color: var(--div-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.regras__frase strong {
+  color: var(--div-text);
+}
+
+@media (max-width: 900px) {
+  .kit__corpo--com-qr {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1300,10 +1130,8 @@ watch(lastSuccessAt, (at) => {
 .share-kit__eyebrow {
   margin: 0 0 0.28rem;
   color: var(--pf-on-soft, var(--div-faint));
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
 }
 
 .share-kit__head h3 {
@@ -1320,8 +1148,6 @@ watch(lastSuccessAt, (at) => {
   color: var(--div-primary-strong);
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -1356,7 +1182,7 @@ watch(lastSuccessAt, (at) => {
   font-size: clamp(1.15rem, 2vw, 1.4rem);
 }
 
-.share-kit--compact .share-kit__icon-btn {
+.share-kit--compact .share-kit__icon-btn.p-button {
   width: 2.45rem;
   height: 2.45rem;
 }
@@ -1367,7 +1193,7 @@ watch(lastSuccessAt, (at) => {
   padding: 0.4rem;
 }
 
-.share-kit--compact .share-kit__copy-cta {
+.share-kit--compact .share-kit__copy-cta.p-button {
   width: 100%;
   min-height: 2.25rem;
 }
@@ -1383,8 +1209,6 @@ watch(lastSuccessAt, (at) => {
   color: var(--pf-on-soft, var(--div-faint));
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .share-kit__code-row {
@@ -1407,29 +1231,30 @@ watch(lastSuccessAt, (at) => {
   letter-spacing: 0.1em;
 }
 
-.share-kit__icon-btn {
-  display: grid;
+/* Botões sobre o cartão de foco (tinta --pf-*): o preset não conhece essa superfície. */
+.share-kit__icon-btn.p-button,
+.share-kit__icon-btn.p-button:not(:disabled):hover,
+.share-kit__icon-btn.p-button:not(:disabled):active {
   width: 2.75rem;
   height: 2.75rem;
-  place-items: center;
   border: 1px solid var(--pf-line, var(--div-line));
   border-radius: 0.85rem;
   background: var(--pf-field, var(--div-card));
   color: var(--pf-on, var(--div-muted));
-  cursor: pointer;
   transition:
     background 140ms ease,
     border-color 140ms ease,
     filter 140ms ease;
 }
 
-.share-kit__icon-btn:hover:not(:disabled),
-.share-kit__icon-btn:focus-visible:not(:disabled) {
+.share-kit__icon-btn.p-button:not(:disabled):hover,
+.share-kit__icon-btn.p-button:focus-visible:not(:disabled) {
   filter: brightness(1.08);
+  box-shadow: none;
   outline: none;
 }
 
-.share-kit__icon-btn:disabled {
+.share-kit__icon-btn.p-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
@@ -1457,10 +1282,9 @@ watch(lastSuccessAt, (at) => {
   opacity: 0.92;
 }
 
-.share-kit__copy-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.share-kit__copy-cta.p-button,
+.share-kit__copy-cta.p-button:not(:disabled):hover,
+.share-kit__copy-cta.p-button:not(:disabled):active {
   gap: 0.4rem;
   align-self: center;
   min-height: 2.45rem;
@@ -1470,22 +1294,25 @@ watch(lastSuccessAt, (at) => {
   background: var(--pf-cta-bg, color-mix(in srgb, var(--div-primary) 16%, var(--div-card)));
   color: var(--pf-cta-text, var(--div-primary-strong));
   font-size: 0.82rem;
-  font-weight: 700;
   white-space: nowrap;
-  cursor: pointer;
   transition:
     filter 140ms ease,
     transform 140ms ease;
 }
 
-.share-kit__copy-cta:hover:not(:disabled),
-.share-kit__copy-cta:focus-visible:not(:disabled) {
+.share-kit__copy-cta.p-button :deep(.p-button-label) {
+  font-weight: 700;
+}
+
+.share-kit__copy-cta.p-button:not(:disabled):hover,
+.share-kit__copy-cta.p-button:focus-visible:not(:disabled) {
   filter: brightness(1.04);
+  box-shadow: none;
   outline: none;
   transform: translateY(-1px);
 }
 
-.share-kit__copy-cta:disabled {
+.share-kit__copy-cta.p-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
@@ -1512,7 +1339,9 @@ watch(lastSuccessAt, (at) => {
   color: var(--div-primary-strong);
 }
 
-.share-kit.partner-focus--muted .share-kit__icon-btn {
+.share-kit.partner-focus--muted .share-kit__icon-btn.p-button,
+.share-kit.partner-focus--muted .share-kit__icon-btn.p-button:not(:disabled):hover,
+.share-kit.partner-focus--muted .share-kit__icon-btn.p-button:not(:disabled):active {
   border-color: var(--div-line);
   background: var(--div-card);
   color: var(--div-muted);
@@ -1523,7 +1352,9 @@ watch(lastSuccessAt, (at) => {
   background: color-mix(in srgb, var(--div-surface) 70%, var(--div-card));
 }
 
-.share-kit.partner-focus--muted .share-kit__copy-cta {
+.share-kit.partner-focus--muted .share-kit__copy-cta.p-button,
+.share-kit.partner-focus--muted .share-kit__copy-cta.p-button:not(:disabled):hover,
+.share-kit.partner-focus--muted .share-kit__copy-cta.p-button:not(:disabled):active {
   background: color-mix(in srgb, var(--div-primary) 16%, var(--div-card));
   color: var(--div-primary-strong);
 }
@@ -1830,10 +1661,6 @@ watch(lastSuccessAt, (at) => {
     grid-template-columns: 1fr;
   }
 
-  .indicacao-pitch__steps {
-    grid-template-columns: 1fr;
-  }
-
   .share-kit__stage,
   .share-kit__stage--with-qr {
     grid-template-columns: 1fr;
@@ -1848,7 +1675,7 @@ watch(lastSuccessAt, (at) => {
     grid-template-columns: 1fr;
   }
 
-  .share-kit__copy-cta {
+  .share-kit__copy-cta.p-button {
     width: 100%;
   }
 

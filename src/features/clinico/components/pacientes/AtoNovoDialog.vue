@@ -26,6 +26,9 @@ import Textarea from 'primevue/textarea'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+
+import ClinicDateField from '../base/ClinicDateField.vue'
 import ClinicField from '../base/ClinicField.vue'
 import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
 import type { AtoClinicoKind, ISODateTime, PrescriptionRoute } from '../../data/types'
@@ -61,7 +64,7 @@ const VIAS: PrescriptionRoute[] = [
   'otologica',
 ]
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const clinico = useClinicoStore()
 
 const kind = ref<AtoClinicoKind>('medicamento')
@@ -89,7 +92,7 @@ const opcoesMedicamento = computed(() =>
       rotulo: item.nome,
       detalhe: item.principioAtivo,
     }))
-    .sort((a, b) => a.rotulo.localeCompare(b.rotulo, 'pt-BR')),
+    .sort((a, b) => a.rotulo.localeCompare(b.rotulo, INTL_LOCALE[locale.value as Locale])),
 )
 
 const opcoesVia = computed(() => [
@@ -229,7 +232,7 @@ function salvar() {
   <Dialog
     :visible="visivel"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(38rem, 94vw)' }"
     :dismissable-mask="true"
     @update:visible="emit('update:visivel', $event)"
@@ -325,11 +328,10 @@ function salvar() {
           :erro="erroQuando"
         >
           <template #default="{ id, descrito }">
-            <InputText
-              :id="id"
+            <ClinicDateField
               v-model="quando"
-              type="datetime-local"
-              fluid
+              :input-id="id"
+              com-hora
               :max="agoraLocal"
               :aria-describedby="descrito"
             />

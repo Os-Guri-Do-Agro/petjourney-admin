@@ -16,6 +16,7 @@ Legenda: ⬜ pendente · 🔨 em andamento · ✅ feito · ✔️ validado
 | vue-i18n + locales + resolve | ✔️ | 2026-07-14 | `src/i18n/*`, `src/locales/*`, `main.ts` |
 | Script paridade | ✔️ | 2026-07-14 | `npm run check:i18n` — 642 chaves × 4 locales |
 | LanguageSwitcher | ✔️ | 2026-07-14 | Select no login; Select em Configurações → Conta; Select no menu do avatar |
+| Sérvio (sr) e Árabe (ar, RTL) | ✅ | 2026-09-17 | Catálogos traduzidos e revisados por agentes; aguardando revisão da equipe de tradução (`PetJourney-Portal-revisao-traducao-sr-ar.pdf`). Detalhes em `i18n-sr-ar-portal.md`. Gate `check:i18n` com 6 idiomas e regras de plural sr/ar |
 
 ---
 

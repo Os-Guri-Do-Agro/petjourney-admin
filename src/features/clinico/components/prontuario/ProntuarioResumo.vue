@@ -33,7 +33,7 @@ const props = defineProps<{
   tutor: Tutor | null
 }>()
 
-const emit = defineEmits<{ emitir: [documento: DocumentoId] }>()
+const emit = defineEmits<{ emitir: [documento: DocumentoId]; liberarResumo: [] }>()
 
 const { t } = useI18n()
 const clinico = useClinicoStore()
@@ -314,6 +314,30 @@ const outrosAbertos = ref(false)
 const dataDoAtendimento = computed(() =>
   clinicClock.dateOf(props.encounter.finalizadoEm ?? props.encounter.abertoEm),
 )
+
+/**
+ * O resumo no app do responsável: três estados, uma linha cada. Aberto não libera (o texto ainda
+ * muda); finalizado e não liberado é a ação; liberado diz quando.
+ */
+const noApp = computed(() => {
+  const liberadoEm = props.encounter.resumoLiberadoEm ?? null
+
+  if (props.encounter.status !== 'finalizado') {
+    return { estado: 'aberto' as const, texto: t('clinico.prontuario.resumo.app.aberto') }
+  }
+
+  if (!liberadoEm) {
+    return { estado: 'pronto' as const, texto: t('clinico.prontuario.resumo.app.pronto') }
+  }
+
+  return {
+    estado: 'liberado' as const,
+    texto: t('clinico.prontuario.resumo.app.liberado', {
+      data: formato.dataCurta(clinicClock.dateOf(liberadoEm)),
+      hora: formato.hora(liberadoEm),
+    }),
+  }
+})
 </script>
 
 <template>
@@ -404,6 +428,31 @@ const dataDoAtendimento = computed(() =>
       </div>
     </div>
 
+    <!--
+      O que o responsável recebe no app. Fica antes dos documentos porque é a entrega que não
+      depende de papel — e a única que o vet precisa decidir ativamente.
+    -->
+    <section class="app" :class="`app--${noApp.estado}`" aria-labelledby="resumo-app-titulo">
+      <i
+        class="pi app__icone"
+        :class="noApp.estado === 'liberado' ? 'pi-check-circle' : 'pi-mobile'"
+        aria-hidden="true"
+      />
+      <div class="app__corpo">
+        <h4 id="resumo-app-titulo" class="clinic-label">
+          {{ t('clinico.prontuario.resumo.app.titulo') }}
+        </h4>
+        <p>{{ noApp.texto }}</p>
+      </div>
+      <Button
+        v-if="noApp.estado === 'pronto'"
+        :label="t('clinico.prontuario.resumo.app.liberar')"
+        icon="pi pi-send"
+        size="small"
+        @click="emit('liberarResumo')"
+      />
+    </section>
+
     <section class="documentos">
       <header class="documentos__topo">
         <h4 class="clinic-label">{{ t('clinico.documentos.titulo') }}</h4>
@@ -442,19 +491,17 @@ const dataDoAtendimento = computed(() =>
         etapa existir.
       -->
       <div class="outros">
-        <button
+        <Button
           type="button"
-          class="outros__gatilho clinic-focusable"
+          class="outros__gatilho"
+          severity="secondary"
+          text
+          size="small"
+          :icon="outrosAbertos ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          :label="t('clinico.documentos.outros', { contagem: totalDeOutros })"
           :aria-expanded="outrosAbertos"
           @click="outrosAbertos = !outrosAbertos"
-        >
-          <i
-            class="pi"
-            :class="outrosAbertos ? 'pi-chevron-down' : 'pi-chevron-right'"
-            aria-hidden="true"
-          />
-          {{ t('clinico.documentos.outros', { contagem: totalDeOutros }) }}
-        </button>
+        />
 
         <div v-if="outrosAbertos" class="outros__grupos">
           <section v-for="bloco in outros" :key="bloco.grupo" class="grupo">
@@ -468,9 +515,11 @@ const dataDoAtendimento = computed(() =>
                   A linha inteira é o botão: o alvo é a largura da lista, não um ícone de
                   impressora no fim dela.
                 -->
-                <button
+                <Button
                   type="button"
-                  class="linha clinic-focusable"
+                  class="linha"
+                  text
+                  fluid
                   :disabled="!documento.disponivel"
                   @click="emit('emitir', documento.id)"
                 >
@@ -480,7 +529,7 @@ const dataDoAtendimento = computed(() =>
                     <small>{{ t(`clinico.documentos.cartao.${documento.id}.descricao`) }}</small>
                   </span>
                   <i class="pi pi-print linha__acao" aria-hidden="true" />
-                </button>
+                </Button>
               </li>
             </ul>
           </section>
@@ -496,6 +545,52 @@ const dataDoAtendimento = computed(() =>
 </template>
 
 <style scoped>
+/*
+ * A entrega no app é estado, não alerta: acento quando liberado, superfície neutra enquanto não.
+ * O botão é a única coisa com peso de ação na faixa.
+ */
+.app {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--clinic-space-3);
+  padding: var(--clinic-space-3);
+  border: 1px solid var(--clinic-line);
+  border-radius: var(--clinic-radius-control);
+  background: var(--clinic-surface);
+}
+
+.app--liberado {
+  border-color: var(--clinic-accent);
+  background: var(--clinic-accent-tint);
+}
+
+.app__icone {
+  color: var(--clinic-faint);
+  font-size: 1.1rem;
+}
+
+.app--liberado .app__icone {
+  color: var(--clinic-accent-strong);
+}
+
+.app__corpo {
+  display: grid;
+  flex: 1 1 18rem;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app__corpo h4,
+.app__corpo p {
+  margin: 0;
+}
+
+.app__corpo p {
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+}
+
 .resumo {
   display: grid;
   gap: var(--clinic-space-4);
@@ -667,28 +762,28 @@ const dataDoAtendimento = computed(() =>
   gap: var(--clinic-space-3);
 }
 
-.outros__gatilho {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+/*
+ * A dobra se lê como rótulo de seção (caixa alta, apagado), não como botão de ação. A
+ * especificidade passa a regra global da clínica para botão secundário de texto.
+ */
+.outros__gatilho.p-button {
   justify-self: start;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
+  gap: 0.35rem;
+  padding: 0.2rem 0.35rem;
   font-size: var(--clinic-font-label);
-  font-weight: 750;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
-.outros__gatilho:hover {
-  color: var(--clinic-text);
+.outros__gatilho.p-button.p-button-secondary.p-button-text {
+  color: var(--clinic-muted);
 }
 
-.outros__gatilho i {
+.outros__gatilho.p-button :deep(.p-button-label) {
+  font-weight: 750;
+}
+
+.outros__gatilho.p-button :deep(.p-button-icon) {
   font-size: 0.6rem;
 }
 
@@ -714,28 +809,31 @@ const dataDoAtendimento = computed(() =>
  * Linha densa: um documento ocupa a altura de duas linhas de texto, não a de um cartão. É o que
  * permite onze caberem sem rolagem e sem esconder o resumo.
  */
-.linha {
+.linha.p-button {
   display: grid;
-  width: 100%;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--clinic-space-3);
   padding: var(--clinic-space-2) var(--clinic-space-3);
   border: 1px solid transparent;
   border-radius: var(--clinic-radius-control);
-  background: none;
   color: inherit;
-  cursor: pointer;
   font: inherit;
-  text-align: left;
+  text-align: start;
 }
 
-.linha:hover:not(:disabled) {
+.linha.p-button:not(:disabled):hover,
+.linha.p-button:not(:disabled):active {
   border-color: var(--clinic-line);
   background: var(--clinic-surface-soft);
+  color: inherit;
 }
 
-.linha:disabled {
+/* Indisponível fica apagado no lugar, sem o fundo rebaixado que a camada global dá ao botão. */
+.linha.p-button:disabled {
+  border-color: transparent;
+  background: transparent;
+  color: inherit;
   cursor: not-allowed;
   opacity: 0.45;
 }

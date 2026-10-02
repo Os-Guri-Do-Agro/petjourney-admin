@@ -8,11 +8,19 @@
 
 import { historicoDeAtos } from '../../domain/atos'
 import { resumirFaltas } from '../../domain/load'
-import { createClinicClock, diffDays } from '../../domain/clinic-time'
+import { addDays, createClinicClock, diffDays } from '../../domain/clinic-time'
+import type { DiarioParaClinica } from '../../contrato/responsavel'
+import {
+  JANELA_DO_PESO_DIAS,
+  type ConsultaDoResumo,
+  type TratamentoNoResumo,
+} from '../../domain/resumo-do-paciente'
 import { CLINIC_UTC_OFFSET } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import { getDataset, novoId } from '../store'
 import { vacinasFixture } from '../fixtures/vacinas'
+
+import { tratamentosDoResumo } from './tratamento-repository'
 import type {
   AlertSeverity,
   Appointment,
@@ -51,7 +59,7 @@ export type FaltaDetalhada = {
 }
 
 /** Duas letras para o avatar: primeira do nome e primeira do segundo termo, quando existe. */
-function iniciaisDe(nome: string): string {
+export function iniciaisDe(nome: string): string {
   const partes = nome.trim().split(/\s+/).filter(Boolean)
   const primeira = partes[0]?.[0] ?? '?'
   const segunda = partes[1]?.[0] ?? partes[0]?.[1] ?? ''
@@ -153,6 +161,107 @@ export const patientRepository = {
         .appointments.filter((appointment) => appointment.petId === petId)
         .sort((a, b) => b.inicio.localeCompare(a.inicio)),
     )
+  },
+
+  /**
+   * O que o resumo "Este pet em 30 segundos" precisa, numa chamada só.
+   *
+   * O resumo é lido na porta da sala, com o paciente esperando: três chamadas em sequência
+   * seriam três esperas. A montagem em si (o que é sinal, o que é tendência) é do domínio —
+   * aqui só se junta o que existe e se resolve o fim de cada receita.
+   *
+   * `atendimentoDeHoje` é o horário ainda aberto do paciente no dia: é ele que o botão "abrir o
+   * atendimento" abre. Nulo quando o paciente não está na agenda de hoje.
+   *
+   * O diário vem como a API vai entregá-lo (`GET /parceiro/portal/pacientes/:petId/diario`, no
+   * contrato): **só com o consentimento do responsável**, a nota pessoal só se ele a liberou, e o
+   * peso de casa só se liberou o peso. Sem consentimento, `diario` é `null` — e o resumo diz
+   * "não liberou" em vez de parecer vazio. A janela cobre os seis meses do gráfico de peso; o
+   * recorte "desde a última consulta" é do domínio.
+   */
+  paraOResumo(petId: string): Promise<{
+    consultas: ConsultaDoResumo[]
+    diario: DiarioParaClinica | null
+    tratamentos: TratamentoNoResumo[]
+    atendimentoDeHoje: Appointment | null
+    agora: ISODateTime
+  }> {
+    return simularChamada('paciente.historico', () => {
+      const dataset = getDataset()
+      const agora = clock.nowIso()
+      const porAppointment = new Map(dataset.appointments.map((item) => [item.id, item]))
+
+      const consultas = dataset.encounters
+        .filter((encounter) => encounter.petId === petId && encounter.status === 'finalizado')
+        .map((encounter): ConsultaDoResumo => {
+          const em = encounter.finalizadoEm ?? encounter.abertoEm
+          /* O último dia de tratamento inteiro: receita de 14 dias termina à noite do 14º. */
+          const fimDoDia = (dias: number) =>
+            clock.toIso(addDays(clock.dateOf(em), dias), 23 * 60 + 59)
+
+          return {
+            encounterId: encounter.id,
+            appointmentId: encounter.appointmentId,
+            em,
+            typeId: porAppointment.get(encounter.appointmentId)?.typeId ?? '',
+            professionalId: encounter.professionalId,
+            diagnosticos: encounter.diagnosticos,
+            pesoKg: encounter.exameFisico.vitais.peso?.valor ?? null,
+            prescricoes: encounter.conduta.prescricoes.map((prescricao) => ({
+              medicamentoId: prescricao.medicamentoId,
+              /* Sem duração é receita contínua: não tem último dia. */
+              ate:
+                prescricao.calculo.duracaoDias === null
+                  ? null
+                  : fimDoDia(prescricao.calculo.duracaoDias),
+            })),
+          }
+        })
+
+      const hoje = clock.today()
+      const atendimentoDeHoje =
+        dataset.appointments
+          .filter(
+            (appointment) =>
+              appointment.petId === petId &&
+              clock.dateOf(appointment.inicio) >= hoje &&
+              !['cancelado', 'falta', 'finalizado'].includes(appointment.status),
+          )
+          .sort((a, b) => Date.parse(a.inicio) - Date.parse(b.inicio))
+          .find((appointment) => clock.dateOf(appointment.inicio) === dataset.ancora) ?? null
+
+      const tutorId = dataset.pets.find((pet) => pet.id === petId)?.tutorId
+      const consentimento = dataset.consentimentos.find((item) => item.tutorId === tutorId)
+      const desde = clock.toIso(addDays(hoje, -JANELA_DO_PESO_DIAS), 0)
+      const naJanela = (data: string) => Date.parse(data) >= Date.parse(desde)
+
+      const diario: DiarioParaClinica | null = consentimento?.diarioCompleto
+        ? {
+            petId,
+            desde,
+            entradas: dataset.diario
+              .filter((registro) => registro.petId === petId && naJanela(registro.data))
+              .map(({ petId: _pet, ...registro }) => ({
+                ...registro,
+                nota: consentimento.notas ? registro.nota : null,
+              })),
+            pesos: consentimento.peso
+              ? dataset.pesagensDeCasa
+                  .filter((pesagem) => pesagem.petId === petId && naJanela(pesagem.data))
+                  .map(({ petId: _pet, ...pesagem }) => pesagem)
+              : [],
+          }
+        : null
+
+      return {
+        consultas,
+        diario,
+        /* O remédio de casa: o que a casa registrou no app desde a última consulta. */
+        tratamentos: tratamentosDoResumo(petId),
+        atendimentoDeHoje,
+        agora,
+      }
+    })
   },
 
   /** Painel de faltas: quantas **e quanto** — minutos de agenda parados. */
@@ -413,6 +522,7 @@ export const patientRepository = {
             detalhe: alerta.detalhe.trim(),
           })),
         iniciais: iniciaisDe(input.nome),
+        fotoUrl: '',
       }
 
       dataset.pets.push(pet)

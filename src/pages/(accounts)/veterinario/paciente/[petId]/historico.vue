@@ -2,8 +2,15 @@
 /**
  * Histórico do paciente.
  *
- * Cabeçalho do paciente, linha do tempo e a lista de atendimentos com o que aconteceu em cada
- * um — inclusive as faltas, que fazem parte da história e costumam sumir das telas bonitas.
+ * Cabeçalho do paciente e o histórico numa lista só, do mais recente para trás — inclusive as
+ * faltas, que fazem parte da história e costumam sumir das telas bonitas. A tabela de atendimentos
+ * e a linha do tempo, que contavam os mesmos acontecimentos lado a lado, viraram
+ * `HistoricoLista`; o convite ao resumo em 30 segundos, que abria como diálogo por cima de tudo,
+ * virou uma linha que diz o veredito sem interromper.
+ *
+ * O acabamento é o da Visão geral, como o resto da ficha (`ficha/ficha.css`): o nome no lugar da
+ * saudação, a frase do momento do paciente em degradê, e o resumo em 30 segundos como pílula
+ * cheia — é o que se lê antes de rolar o histórico.
  *
  * E o que o animal **recebeu**, que é outra pergunta. Atendimento responde "quando esteve aqui";
  * ato responde "o que entrou nele, e quando" — a pergunta que se faz antes de prescrever e
@@ -12,18 +19,20 @@
  * no leito é linha na segunda e em nenhum atendimento.
  */
 import Button from 'primevue/button'
+import { PhBed, PhClockCounterClockwise, PhTimer, PhWarning } from '@phosphor-icons/vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
+import '@/components/home/home-card.css'
+import '@/features/clinico/components/pacientes/ficha/ficha.css'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
-import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
+import FichaCabeca from '@/features/clinico/components/pacientes/ficha/FichaCabeca.vue'
+import HistoricoLista from '@/features/clinico/components/pacientes/ficha/HistoricoLista.vue'
 import AtoNovoDialog from '@/features/clinico/components/pacientes/AtoNovoDialog.vue'
 import AtosDoPaciente from '@/features/clinico/components/pacientes/AtosDoPaciente.vue'
-import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
-import ProntuarioTimeline from '@/features/clinico/components/prontuario/ProntuarioTimeline.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
+import { useClinicPrefs } from '@/features/clinico/composables/useClinicPrefs'
 import {
   encounterRepository,
   internacaoRepository,
@@ -37,6 +46,11 @@ import type {
   TimelineEvent,
   Tutor,
 } from '@/features/clinico/data/types'
+import {
+  montarResumoDoPaciente,
+  type ResumoDoPaciente,
+} from '@/features/clinico/domain/resumo-do-paciente'
+import { diffDays } from '@/features/clinico/domain/clinic-time'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 
 const { t } = useI18n()
@@ -44,6 +58,7 @@ const route = useRoute()
 const router = useRouter()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
+const prefs = useClinicPrefs()
 
 const pet = ref<Pet | null>(null)
 const tutor = ref<Tutor | null>(null)
@@ -55,38 +70,23 @@ const registrandoAto = ref(false)
 const internacaoAberta = ref<LeitoNoMapa | null>(null)
 const carregando = ref(false)
 const erro = ref('')
+/** O resumo "Este pet em 30 segundos": alimenta o selo do botão e a linha do veredito. */
+const resumo = ref<ResumoDoPaciente | null>(null)
+/** Chegou pelo "Histórico completo" do resumo: acabou de lê-lo, o veredito não se repete. */
+const veioDoResumo = ref(false)
 
 const petId = computed(() => String(route.params.petId ?? ''))
 
-const colunas = computed<ColunaTabela[]>(() => [
-  { id: 'data', rotulo: t('clinico.pacientes.colunaUltimo'), largura: '10rem' },
-  { id: 'tipo', rotulo: t('clinico.pacientes.colunaAtendimento'), largura: 'minmax(0, 1.5fr)' },
-  {
-    id: 'profissional',
-    rotulo: t('clinico.agenda.mover.profissional'),
-    largura: 'minmax(0, 1fr)',
-    ocultarEmTelaEstreita: true,
-  },
-  { id: 'situacao', rotulo: '', largura: '9rem', alinharAoFim: true },
-])
-
 /**
- * O que foi encontrado em cada atendimento, indexado pelo atendimento.
+ * A página só fica vazia quando o paciente não existe.
  *
- * A coluna mostrava só "Consulta", "Retorno", "Consulta" — o tipo, que já se deduz do horário e
- * não diz nada de clínico. O diagnóstico é o que faz alguém abrir a linha, e ele vive na linha
- * do tempo, que esta página já carrega.
+ * Antes, "sem atendimento" apagava a página inteira — cabeçalho, linha do tempo, procedimentos e o
+ * botão das vacinas. Servia quando atendimento era a única coisa que um paciente podia ter; deixou
+ * de servir quando a vacina de fora passou a ser registrada sem consulta: o filhote que chega com
+ * a carteirinha do pet shop tinha duas doses no registro e uma tela dizendo que não havia nada.
+ * Cada seção tem o próprio vazio.
  */
-const diagnosticoDoAtendimento = computed(
-  () =>
-    new Map(
-      eventos.value
-        .filter((evento) => evento.appointmentId !== null && evento.titulo.length > 0)
-        .map((evento) => [evento.appointmentId, evento.titulo]),
-    ),
-)
-
-const vazio = computed(() => !carregando.value && !erro.value && atendimentos.value.length === 0)
+const vazio = computed(() => !carregando.value && !erro.value && !pet.value)
 
 async function carregar() {
   carregando.value = true
@@ -100,7 +100,7 @@ async function carregar() {
     pet.value = dados?.pet ?? null
     tutor.value = dados?.tutor ?? null
 
-    const [historico, lista, recebidos, mapa] = await Promise.all([
+    const [historico, lista, recebidos, mapa, paraOResumo] = await Promise.all([
       encounterRepository.historico(petId.value),
       patientRepository.atendimentosDoPet(petId.value),
       patientRepository.historicoDeAtos(petId.value),
@@ -109,6 +109,8 @@ async function carregar() {
        * o histórico continua sendo histórico, e o que se perde é apenas o atalho para o leito.
        */
       internacaoRepository.mapa().catch(() => null),
+      /* Mesma regra: sem resumo, o histórico abre igual, só sem selo e sem sugestão. */
+      patientRepository.paraOResumo(petId.value).catch(() => null),
     ])
 
     eventos.value = historico
@@ -118,6 +120,9 @@ async function carregar() {
       mapa?.leitos.find(
         (item) => item.internacao !== null && item.internacao.petId === petId.value,
       ) ?? null
+    resumo.value =
+      dados && paraOResumo ? montarResumoDoPaciente({ pet: dados.pet, ...paraOResumo }) : null
+    veioDoResumo.value = vindoDoResumo()
   } catch {
     erro.value = t('clinico.erros.prontuario')
   } finally {
@@ -125,13 +130,85 @@ async function carregar() {
   }
 }
 
-function abrir(appointment: Appointment) {
-  if (!appointment.encounterId) {
-    return
+/**
+ * Quem chegou aqui pelo "Histórico completo" do resumo acabou de lê-lo. Sugerir o resumo de
+ * volta seria o modal mandando a pessoa para a tela de onde ela saiu.
+ */
+function vindoDoResumo(): boolean {
+  const anterior = String(router.options.history.state.back ?? '')
+
+  return anterior.startsWith(`/veterinario/paciente/${petId.value}/resumo`)
+}
+
+/**
+ * O veredito do resumo numa linha, no lugar do diálogo que abria por cima do histórico.
+ *
+ * O diálogo pedia um clique antes de qualquer leitura; a linha diz o mesmo — "nada fora do comum"
+ * ou quantos sinais há — e a pílula cheia do cabeçalho continua sendo o caminho para o resumo.
+ * Respeita o "não sugerir mais", que se liga e desliga na tela do resumo.
+ */
+const veredito = computed(() => {
+  if (!resumo.value || veioDoResumo.value || !prefs.sugerirResumo.value) {
+    return null
   }
 
-  void router.push(`/veterinario/atendimento/${appointment.encounterId}`)
-}
+  if (resumo.value.primeiraVez) {
+    return { texto: t('clinico.resumoDoPaciente.sugestao.primeiraVez'), tom: 'neutro' as const }
+  }
+
+  const n = resumo.value.sinais.length
+
+  if (n === 0) {
+    return { texto: t('clinico.resumoDoPaciente.sinais.nadaFora'), tom: 'neutro' as const }
+  }
+
+  return {
+    texto: t('clinico.ficha.historico.sinais', { n }, n),
+    tom: resumo.value.sinais.some((sinal) => sinal.severidade === 'risco')
+      ? ('risco' as const)
+      : ('atencao' as const),
+  }
+})
+
+/**
+ * O momento do paciente numa frase, no lugar da saudação da Visão geral.
+ *
+ * Na ordem do que importa agora: em internação (e onde), atendimento hoje (e a que horas), o último
+ * atendimento feito, e só então "nenhum atendimento ainda" — o caso do filhote que chegou com a
+ * carteirinha do pet shop.
+ */
+const frase = computed(() => {
+  const leito = internacaoAberta.value
+
+  if (leito?.internacao) {
+    return t('clinico.ficha.historico.internado', { leito: leito.leito.nome })
+  }
+
+  const hoje = clinicClock.today()
+  const deHoje = atendimentos.value.find(
+    (item) =>
+      clinicClock.dateOf(item.inicio) === hoje &&
+      !['cancelado', 'falta', 'finalizado'].includes(item.status),
+  )
+
+  if (deHoje) {
+    return t('clinico.ficha.historico.hoje', { hora: formato.hora(deHoje.inicio) })
+  }
+
+  const ultimo = atendimentos.value
+    .filter((item) => item.status === 'finalizado')
+    .sort((a, b) => b.inicio.localeCompare(a.inicio))[0]
+
+  if (ultimo) {
+    const dias = diffDays(clinicClock.dateOf(ultimo.inicio), hoje)
+
+    return dias === 0
+      ? t('clinico.ficha.historico.ultimoHoje')
+      : t('clinico.ficha.historico.ultimo', { dias }, dias)
+  }
+
+  return t('clinico.pacientes.semAtendimentos')
+})
 
 /**
  * O ato lançado aqui não pertence a um atendimento.
@@ -141,7 +218,7 @@ function abrir(appointment: Appointment) {
  * O ato **da** consulta nasce no prontuário, com o elo já no lugar.
  */
 async function registrarAto(
-  valor: Omit<Parameters<typeof patientRepository.registrarAto>[0], "petId" | "encounterId">,
+  valor: Omit<Parameters<typeof patientRepository.registrarAto>[0], 'petId' | 'encounterId'>,
 ) {
   await patientRepository.registrarAto({ ...valor, petId: petId.value, encounterId: null })
 
@@ -167,7 +244,7 @@ watch(petId, carregar)
 
 <template>
   <PartnerPageFrame
-    :subtitle="t('clinico.pacientes.subtitulo')"
+    class="ficha-tema hc-tema"
     :title="pet?.nome ?? t('clinico.pacientes.titulo')"
     :loading="carregando && !pet"
     :error="erro"
@@ -176,90 +253,72 @@ watch(petId, carregar)
     block-when-suspended
     @retry="carregar"
   >
-    <div class="historico clinic-scope">
-      <ClinicPatientHeader :pet="pet" :tutor="tutor">
+    <template v-if="pet" #cabecalho>
+      <FichaCabeca :pet="pet" :tutor="tutor" atual="historico" :frase="frase" nav-cheia="resumo">
         <!--
           Quando o animal está internado **neste minuto**, o histórico diz isso e leva ao leito.
-
-          Sem esta linha, a página mais completa que a clínica tem sobre um paciente era a única
-          que não sabia que ele estava internado ali dentro: a internação aparecia na linha do
-          tempo como um evento entre outros, com data de entrada e nenhuma indicação de que ainda
-          está acontecendo.
+          Sem esta pílula, a página mais completa que a clínica tem sobre um paciente era a única
+          que não sabia que ele estava internado ali dentro.
         -->
         <template v-if="internacaoAberta" #acoes>
           <Button
+            class="hc-pilula"
             :label="t('clinico.pacientes.verInternacao')"
-            icon="pi pi-building"
-            severity="secondary"
-            outlined
-            size="small"
             @click="abrirInternacao"
-          />
+          >
+            <template #icon>
+              <PhBed class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
+            </template>
+          </Button>
         </template>
-      </ClinicPatientHeader>
+      </FichaCabeca>
+    </template>
 
-      <p v-if="internacaoAberta" class="historico__internado" role="status">
-        <i class="pi pi-building" aria-hidden="true" />
-        {{ t('clinico.pacientes.internadoAgora') }} ·
-        <strong>{{ internacaoAberta.leito.nome }}</strong>
-        <span>{{ internacaoAberta.internacao!.motivo }}</span>
+    <div v-if="pet" class="ficha-conteudo historico clinic-scope">
+      <p
+        v-if="veredito"
+        class="historico__veredito"
+        :class="`historico__veredito--${veredito.tom}`"
+      >
+        <PhWarning
+          v-if="veredito.tom !== 'neutro'"
+          class="historico__veredito-icone"
+          weight="fill"
+          aria-hidden="true"
+        />
+        <PhTimer v-else class="historico__veredito-icone" weight="duotone" aria-hidden="true" />
+        <strong>{{ t('clinico.ficha.historico.emTrintaSegundos') }}</strong>
+        {{ veredito.texto }}
       </p>
 
-      <div class="historico__corpo">
-        <ClinicDataTable
-          :colunas="colunas"
-          :linhas="atendimentos"
-          :chave="(item) => item.id"
+      <div class="ficha-grade historico__grade">
+        <section class="hc" aria-labelledby="historico-lista">
+          <header class="hc__cabeca">
+            <h2 id="historico-lista" class="hc__titulo">
+              <PhClockCounterClockwise class="hc__icone" weight="duotone" aria-hidden="true" />
+              {{ t('clinico.ficha.historico.titulo') }}
+            </h2>
+          </header>
+
+          <HistoricoLista
+            :eventos="eventos"
+            :atendimentos="atendimentos"
+            @abrir="abrirAtendimento"
+          />
+        </section>
+
+        <!-- O que o animal recebeu é outra pergunta ("o que entrou nele, e quando"): fica ao lado. -->
+        <AtosDoPaciente
+          :atos="atos"
           :carregando="carregando"
-          :rotulo="t('clinico.prontuario.timeline.titulo')"
-          @ativar="abrir"
-        >
-          <template #celula-data="{ linha }">
-            {{ formato.dataCurta(clinicClock.dateOf(linha.inicio)) }}
-            <span class="historico__meta clinic-value">{{ formato.hora(linha.inicio) }}</span>
-          </template>
-
-          <template #celula-tipo="{ linha }">
-            <strong class="historico__tipo">{{ clinico.tipo(linha.typeId)?.nome }}</strong>
-            <span
-              v-if="diagnosticoDoAtendimento.get(linha.id) ?? linha.observacao"
-              class="historico__meta"
-            >
-              {{ diagnosticoDoAtendimento.get(linha.id) ?? linha.observacao }}
-            </span>
-          </template>
-
-          <template #celula-profissional="{ linha }">
-            {{ clinico.profissional(linha.professionalId)?.nome }}
-          </template>
-
-          <template #celula-situacao="{ linha }">
-            <span
-              class="historico__situacao"
-              :class="{
-                'historico__situacao--risco': linha.status === 'falta',
-                'historico__situacao--fraco': linha.status === 'cancelado',
-              }"
-            >
-              {{ formato.status(linha.status) }}
-            </span>
-          </template>
-        </ClinicDataTable>
-
-        <!-- Aqui a lista completa é o ponto da página: nada de limite. -->
-        <ProntuarioTimeline :eventos="eventos" :anterior="null" :limite="eventos.length" />
+          @registrar="registrandoAto = true"
+          @abrir-atendimento="abrirAtendimento"
+        />
       </div>
-
-      <AtosDoPaciente
-        :atos="atos"
-        :carregando="carregando"
-        @registrar="registrandoAto = true"
-        @abrir-atendimento="abrirAtendimento"
-      />
 
       <AtoNovoDialog
         v-model:visivel="registrandoAto"
-        :pet-nome="pet?.nome ?? ''"
+        :pet-nome="pet.nome"
         @registrar="registrarAto"
       />
     </div>
@@ -267,74 +326,41 @@ watch(petId, carregar)
 </template>
 
 <style scoped>
-.historico {
-  display: grid;
-  gap: var(--clinic-space-3);
+/* O histórico manda; o que o animal recebeu fica ao lado, mais estreito. */
+@container (min-width: 62rem) {
+  .historico__grade {
+    grid-template-columns: minmax(0, 1.7fr) minmax(19rem, 1fr);
+  }
 }
 
-.historico__corpo {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: var(--clinic-space-3);
-}
-
-/*
- * "Internado agora" é estado, não alerta: o animal estar no leito não é problema nenhum. Por
- * isso a faixa usa o acento do módulo e não o tom de risco — pintá-la de vermelho faria a
- * página gritar sobre um pós-operatório que está correndo bem.
- */
-.historico__internado {
+/* O veredito do resumo: uma linha, não um cartão — o ícone carrega a urgência. */
+.historico__veredito {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
+  gap: 0.4rem;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-accent);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--hc-tinta-2);
+  font-size: 0.875rem;
 }
 
-.historico__internado span {
-  color: var(--clinic-muted);
-  font-weight: 500;
+.historico__veredito strong {
+  color: var(--hc-tinta);
+  font-weight: 650;
 }
 
-.historico__meta {
-  display: block;
-  overflow: hidden;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.historico__veredito-icone {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--hc-marca);
 }
 
-.historico__tipo {
-  display: block;
-  font-weight: 700;
+.historico__veredito--atencao .historico__veredito-icone {
+  color: var(--hc-pessego-tinta);
 }
 
-.historico__situacao {
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.historico__situacao--risco {
-  color: var(--clinic-risk-text);
-}
-
-.historico__situacao--fraco {
-  color: var(--clinic-faint);
-  text-decoration: line-through;
-}
-
-@media (max-width: 1200px) {
-  .historico__corpo {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.historico__veredito--risco .historico__veredito-icone {
+  color: var(--hc-coral-tinta);
 }
 </style>

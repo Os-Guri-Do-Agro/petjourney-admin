@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import PartnerPanelLoading from '@/components/parceiro/PartnerPanelLoading.vue'
-import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import PortalSaqueDetalheDrawer from '@/components/parceiro/PortalSaqueDetalheDrawer.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -39,10 +39,14 @@ const error = ref('')
 const drawerVisible = ref(false)
 const selectedSaqueId = ref<string | null>(null)
 
-const statusMap = {
-  PENDENTE: 'SOLICITADO',
-  PAGO: 'ATIVO',
-  FALHA: 'REJEITADO',
+/**
+ * O selo do saque, na cor do estado. O selo de status do programa dizia "Ativo ✓" para um saque
+ * pago — o nome certo para a parceria, e o errado para dinheiro que já caiu na conta.
+ */
+const TOM_DO_SAQUE = {
+  PENDENTE: 'hc--pessego',
+  PAGO: 'hc--verde',
+  FALHA: 'hc--coral',
 } as const
 
 function intlLocale() {
@@ -233,7 +237,15 @@ watch(drawerVisible, (open) => {
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadSaques">{{ t('carteira.saques.retry') }}</button>
+      <Button
+        type="button"
+        :label="t('carteira.saques.retry')"
+        icon="pi pi-refresh"
+        severity="secondary"
+        outlined
+        size="small"
+        @click="loadSaques"
+      />
     </div>
 
     <div v-else-if="saques.length === 0" class="portal-panel__empty">
@@ -257,7 +269,7 @@ watch(drawerVisible, (open) => {
           <h4 class="saques-day__head">{{ day.label }}</h4>
 
           <div class="saques-list">
-            <button
+            <Button
               v-for="saque in day.items"
               :key="saque.id"
               type="button"
@@ -265,14 +277,16 @@ watch(drawerVisible, (open) => {
               @click="openSaqueDetail(saque.id)"
             >
               <div>
-                <strong>{{ formatCentavosToBrl(saque.valorCentavos) }}</strong>
+                <strong>{{ formatCentavosToBrl(saque.valorCentavos, intlLocale()) }}</strong>
                 <p>
                   {{ t('carteira.saques.requestedAt', { data: formatTime(saque.createdAt) }) }}
                 </p>
                 <p v-if="saque.motivoFalha" class="saque-row__fail">{{ saque.motivoFalha }}</p>
               </div>
-              <PartnerStatusBadge :status="statusMap[saque.status]" />
-            </button>
+              <span class="hc-selo" :class="TOM_DO_SAQUE[saque.status]">
+                {{ t(`carteira.saques.status.${saque.status}`) }}
+              </span>
+            </Button>
           </div>
         </div>
       </section>
@@ -296,14 +310,6 @@ watch(drawerVisible, (open) => {
 .portal-panel__state--error p {
   margin: 0;
   color: var(--partner-warm-text);
-}
-
-.portal-panel__state button {
-  border: 1px solid var(--partner-line);
-  border-radius: 0.6rem;
-  padding: 0.45rem 0.85rem;
-  background: var(--partner-card);
-  cursor: pointer;
 }
 
 .portal-panel__empty strong {
@@ -332,7 +338,11 @@ watch(drawerVisible, (open) => {
   font-size: 0.95rem;
   font-weight: 750;
   letter-spacing: -0.01em;
-  text-transform: capitalize;
+}
+
+/* Só a primeira letra: `capitalize` fazia "Setembro De 2026" (e "Septembar" no sérvio). */
+.saques-month__head h3::first-letter {
+  text-transform: uppercase;
 }
 
 .saques-day {
@@ -344,39 +354,48 @@ watch(drawerVisible, (open) => {
   margin: 0;
   padding: 0.15rem 0.15rem 0.05rem;
   color: var(--partner-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
+/* Um cartão por dia, os saques como linhas dele — o mesmo desenho do extrato. */
 .saques-list {
   display: grid;
-  gap: 0.45rem;
-}
-
-.saque-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
-  padding: 0.85rem 1rem;
+  overflow: hidden;
   border: 1px solid var(--partner-line);
   border-radius: 0.85rem;
   background: var(--partner-card);
+}
+
+/* Linha clicável rica: Button com slot, sem o visual de CTA do preset nem a sombra de pílula. */
+.saque-row.p-button {
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s ease;
+  font-size: inherit;
+  text-align: start;
 }
 
-.saque-row:hover,
-.saque-row:focus-visible {
-  border-color: var(--partner-primary-strong);
+.saque-row.p-button + .saque-row.p-button {
+  border-top: 1px solid var(--partner-line);
 }
 
-.saque-row:focus-visible {
+.saque-row.p-button:not(:disabled):hover,
+.saque-row.p-button:not(:disabled):active,
+.saque-row.p-button:focus-visible {
+  background: color-mix(in srgb, var(--partner-line) 35%, transparent);
+  box-shadow: none;
+  color: inherit;
+}
+
+.saque-row.p-button:focus-visible {
+  box-shadow: none;
   outline: 2px solid var(--partner-primary);
   outline-offset: 2px;
 }

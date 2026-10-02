@@ -63,7 +63,7 @@ const pet = computed(() =>
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(28rem, 94vw)' }"
     :header="t('clinico.agenda.cancelarDialogo.titulo')"
     dismissable-mask

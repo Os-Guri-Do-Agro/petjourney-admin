@@ -41,6 +41,9 @@ import Select from 'primevue/select'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+
+import ClinicDateField from '../base/ClinicDateField.vue'
 import ClinicField from '../base/ClinicField.vue'
 import ClinicToggleGroup, { type TomDaOpcao } from '../base/ClinicToggleGroup.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
@@ -98,7 +101,7 @@ const emit = defineEmits<{
   rascunho: [valor: RascunhoDoPaciente]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
 
@@ -246,7 +249,7 @@ const opcoesResponsavel = computed(() =>
       rotulo: tutor.nome,
       detalhe: [tutor.telefone, tutor.documento].filter(Boolean).join(' · '),
     }))
-    .sort((a, b) => a.rotulo.localeCompare(b.rotulo, 'pt-BR')),
+    .sort((a, b) => a.rotulo.localeCompare(b.rotulo, INTL_LOCALE[locale.value as Locale])),
 )
 
 const usaResponsavelNovo = computed(() => origemResponsavel.value === 'novo')
@@ -469,6 +472,7 @@ const rascunho = computed<RascunhoDoPaciente>(() => {
       detalhe: alerta.detalhe.trim(),
     })),
     iniciais: iniciaisDe(nome.value),
+    fotoUrl: '',
   }
 
   return { pet, tutor }
@@ -582,11 +586,9 @@ async function salvar() {
     <div class="novo__linha">
       <ClinicField :rotulo="t('clinico.paciente.novo.nascimento')" :erro="erroDe('nascimento')">
         <template #default="{ id, descrito }">
-          <InputText
-            :id="id"
+          <ClinicDateField
             v-model="nascimento"
-            type="date"
-            fluid
+            :input-id="id"
             :max="clinicClock.today()"
             :aria-describedby="descrito"
           />
@@ -689,18 +691,21 @@ async function salvar() {
         <p class="bloco__ajuda">{{ t('clinico.paciente.novo.alertasAjuda') }}</p>
 
         <div class="fichas" role="group" :aria-label="t('clinico.paciente.novo.alertas')">
-          <button
+          <Button
             v-for="kind in ALERTAS_DO_CADASTRO"
             :key="kind"
             type="button"
             class="ficha"
             :class="{ 'ficha--ativa': alertaAtivo(kind) }"
+            severity="secondary"
+            outlined
+            rounded
+            size="small"
+            :icon="alertaAtivo(kind) ? 'pi pi-check' : 'pi pi-plus'"
+            :label="formato.alerta(kind)"
             :aria-pressed="alertaAtivo(kind)"
             @click="alternarAlerta(kind)"
-          >
-            <i :class="alertaAtivo(kind) ? 'pi pi-check' : 'pi pi-plus'" aria-hidden="true" />
-            {{ formato.alerta(kind) }}
-          </button>
+          />
         </div>
 
         <div v-for="alerta in alertas" :key="alerta.kind" class="alerta">
@@ -781,7 +786,7 @@ async function salvar() {
         <p v-if="responsavelEscolhido" class="escolhido">
           <i class="pi pi-check-circle" aria-hidden="true" />
           <span>
-            {{ responsavelEscolhido.telefone }}
+            <bdi dir="ltr">{{ responsavelEscolhido.telefone }}</bdi>
             <template v-if="responsavelEscolhido.documento">
               · {{ responsavelEscolhido.documento }}
             </template>
@@ -834,7 +839,10 @@ async function salvar() {
           <div v-for="item in semelhantes" :key="item.tutor.id" class="repetido__linha">
             <span class="repetido__quem">
               <strong>{{ item.tutor.nome }}</strong>
-              <small>{{ item.tutor.telefone }} · {{ motivoDaSemelhanca(item.motivo) }}</small>
+              <small
+                ><bdi dir="ltr">{{ item.tutor.telefone }}</bdi> ·
+                {{ motivoDaSemelhanca(item.motivo) }}</small
+              >
             </span>
             <Button
               size="small"
@@ -1055,31 +1063,34 @@ async function salvar() {
   gap: 0.35rem;
 }
 
-.ficha {
-  display: inline-flex;
-  align-items: center;
+/*
+ * Ficha de alerta: pílula contornada. A especificidade passa a regra global da clínica para botão
+ * secundário contornado, que daria a toda ficha o texto cheio de um botão comum.
+ */
+.ficha.p-button {
   gap: 0.3rem;
   padding: 0.28rem 0.6rem;
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: 999px;
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
-  font-weight: 650;
 }
 
-.ficha i {
+.ficha.p-button.p-button-secondary.p-button-outlined {
+  color: var(--clinic-muted);
+}
+
+.ficha.p-button :deep(.p-button-icon) {
   font-size: 0.6rem;
 }
 
 /* Escolhido ganha anel, peso e fundo: três sinais, nenhum dependente de enxergar cor. */
-.ficha--ativa {
+.ficha--ativa.p-button.p-button-secondary.p-button-outlined,
+.ficha--ativa.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
   border-color: var(--clinic-accent-strong);
   background: var(--clinic-accent-tint);
   color: var(--clinic-accent-strong);
   box-shadow: inset 0 0 0 1px var(--clinic-accent-strong);
+}
+
+.ficha--ativa.p-button :deep(.p-button-label) {
   font-weight: 750;
 }
 

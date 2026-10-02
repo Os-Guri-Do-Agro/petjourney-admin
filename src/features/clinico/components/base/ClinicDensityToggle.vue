@@ -6,6 +6,8 @@
  * do dia: a mesma pessoa quer o dia inteiro na tela de manhã e respiro à tarde. Persiste em
  * `localStorage` e vale para o módulo inteiro.
  */
+import SelectButton from 'primevue/selectbutton'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import {
@@ -32,48 +34,86 @@ const iconePorZoom: Record<ClinicZoom, string> = {
   medio: 'pi pi-search',
   ampliado: 'pi pi-search-plus',
 }
+
+const opcoesDeDensidade = computed(() =>
+  DENSIDADES.map((valor) => ({
+    valor,
+    rotulo: t(`clinico.densidade.${valor}`),
+    icone: iconePorDensidade[valor],
+  })),
+)
+
+const opcoesDeZoom = computed(() =>
+  ZOOMS.map((valor) => ({ valor, rotulo: t(`clinico.zoom.${valor}`), icone: iconePorZoom[valor] })),
+)
+
+/**
+ * Cada opção continua sendo um `radio` com `aria-checked`, como antes do `SelectButton` — o
+ * tema entregaria botões com `aria-pressed`, que anunciam "alternar" e não "escolher um de três".
+ * O botão só conhece o próprio rótulo, e é dele que sai o `title`.
+ */
+function passthrough(titulo: () => string) {
+  return {
+    pcToggleButton: {
+      root: ({
+        props: botao,
+        context,
+      }: {
+        props: { onLabel?: string }
+        context: { active: boolean }
+      }) => ({
+        class: 'prefs__botao',
+        role: 'radio',
+        'aria-checked': context.active,
+        'aria-pressed': undefined,
+        title: `${titulo()}: ${botao.onLabel ?? ''}`,
+      }),
+    },
+  }
+}
+
+const ptDensidade = passthrough(() => t('clinico.densidade.titulo'))
+const ptZoom = passthrough(() => t('clinico.zoom.titulo'))
 </script>
 
 <template>
   <div class="prefs">
-    <div class="prefs__grupo" role="radiogroup" :aria-label="t('clinico.densidade.titulo')">
-      <button
-        v-for="opcao in DENSIDADES"
-        :key="opcao"
-        type="button"
-        class="prefs__botao clinic-focusable"
-        :class="{ 'prefs__botao--ativo': densidade === opcao }"
-        role="radio"
-        :aria-checked="densidade === opcao"
-        :title="`${t('clinico.densidade.titulo')}: ${t(`clinico.densidade.${opcao}`)}`"
-        @click="definirDensidade(opcao)"
-      >
-        <i :class="iconePorDensidade[opcao]" aria-hidden="true" />
-        <span class="prefs__rotulo">{{ t(`clinico.densidade.${opcao}`) }}</span>
-      </button>
-    </div>
+    <SelectButton
+      class="prefs__grupo"
+      :model-value="densidade"
+      :options="opcoesDeDensidade"
+      option-label="rotulo"
+      option-value="valor"
+      :allow-empty="false"
+      role="radiogroup"
+      :aria-label="t('clinico.densidade.titulo')"
+      :pt="ptDensidade"
+      @update:model-value="definirDensidade"
+    >
+      <template #option="{ option }">
+        <i :class="option.icone" aria-hidden="true" />
+        <span class="prefs__rotulo">{{ option.rotulo }}</span>
+      </template>
+    </SelectButton>
 
-    <div
+    <SelectButton
       v-if="comZoom"
       class="prefs__grupo"
+      :model-value="zoom"
+      :options="opcoesDeZoom"
+      option-label="rotulo"
+      option-value="valor"
+      :allow-empty="false"
       role="radiogroup"
       :aria-label="t('clinico.zoom.titulo')"
+      :pt="ptZoom"
+      @update:model-value="definirZoom"
     >
-      <button
-        v-for="opcao in ZOOMS"
-        :key="opcao"
-        type="button"
-        class="prefs__botao prefs__botao--icone clinic-focusable"
-        :class="{ 'prefs__botao--ativo': zoom === opcao }"
-        role="radio"
-        :aria-checked="zoom === opcao"
-        :title="`${t('clinico.zoom.titulo')}: ${t(`clinico.zoom.${opcao}`)}`"
-        @click="definirZoom(opcao)"
-      >
-        <i :class="iconePorZoom[opcao]" aria-hidden="true" />
-        <span class="sr-only">{{ t(`clinico.zoom.${opcao}`) }}</span>
-      </button>
-    </div>
+      <template #option="{ option }">
+        <i :class="option.icone" aria-hidden="true" />
+        <span class="sr-only">{{ option.rotulo }}</span>
+      </template>
+    </SelectButton>
   </div>
 </template>
 
@@ -84,7 +124,12 @@ const iconePorZoom: Record<ClinicZoom, string> = {
   gap: var(--clinic-space-2);
 }
 
-.prefs__grupo {
+/*
+ * Trilho com as opções dentro, no lugar da fileira de botões colados do tema. `:deep` porque
+ * os botões são filhos do `SelectButton`; a especificidade dobrada passa a do tema e a da camada
+ * global da clínica (`.clinic-scope .p-togglebutton`).
+ */
+.prefs__grupo.p-selectbutton {
   display: inline-flex;
   padding: 2px;
   border: 1px solid var(--clinic-line);
@@ -92,42 +137,45 @@ const iconePorZoom: Record<ClinicZoom, string> = {
   background: var(--clinic-surface-soft);
 }
 
-.prefs__botao {
-  display: inline-flex;
+.prefs__grupo.p-selectbutton :deep(.p-togglebutton) {
   min-height: var(--clinic-hit-target);
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0 var(--clinic-space-3);
+  padding: 0;
   border: none;
   border-radius: calc(var(--clinic-radius-control) - 2px);
   background: transparent;
   color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
   font-size: var(--clinic-font-label);
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
-.prefs__botao--icone {
-  padding: 0 var(--clinic-space-2);
+.prefs__grupo.p-selectbutton :deep(.p-togglebutton-content) {
+  gap: 0.3rem;
+  padding: 0 var(--clinic-space-3);
+  border-radius: inherit;
 }
 
-.prefs__botao:hover {
+.prefs__grupo.p-selectbutton
+  :deep(.p-togglebutton:not(:disabled):not(.p-togglebutton-checked):hover) {
+  background: transparent;
   color: var(--clinic-text);
 }
 
 /* Anel + peso: a marcação precisa se ler antes da cor, e sobreviver à escala de cinza. */
-.prefs__botao--ativo {
-  background: var(--clinic-surface);
-  box-shadow:
-    var(--clinic-shadow-card),
-    inset 0 0 0 1.5px var(--clinic-accent-strong);
+.prefs__grupo.p-selectbutton :deep(.p-togglebutton-checked) {
+  background: transparent;
   color: var(--clinic-accent-strong);
   font-weight: 800;
 }
 
-.prefs__botao i {
+.prefs__grupo.p-selectbutton :deep(.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--clinic-surface);
+  box-shadow:
+    var(--clinic-shadow-card),
+    inset 0 0 0 1.5px var(--clinic-accent-strong);
+}
+
+.prefs__grupo.p-selectbutton :deep(.p-togglebutton-content i) {
   font-size: 0.72rem;
 }
 

@@ -28,10 +28,10 @@
  */
 import type { ApexAxisChartSeries, ApexOptions, ApexYAxis } from 'apexcharts'
 import { computed } from 'vue'
-import VueApexCharts from './apex'
+import VueApexCharts from '../charts/apex'
 
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import { useClinicChartTheme } from '../../composables/useClinicChartTheme'
+import { misturar, useClinicChartTheme } from '../../composables/useClinicChartTheme'
 import type { PontoDoDia } from '../../domain/resumo'
 
 const props = withDefaults(
@@ -63,8 +63,9 @@ const ALTURA = 300
 /**
  * Teto do eixo de contagem.
  *
- * Mínimo de 4 e sempre par: um dia com um atendimento não deve virar uma coluna de altura
- * inteira, e escala ímpar espalha os tiques em números quebrados.
+ * Mínimo de 4 e sempre múltiplo de 4: um dia com um atendimento não deve virar uma coluna de
+ * altura inteira, e com quatro intervalos o teto múltiplo de 4 dá marcas inteiras sem depender do
+ * formatador do eixo (que o Apex 7 ignora nas barras puras — "28.5" no eixo).
  */
 const maximo = computed(() => {
   const maior = props.pontos.reduce(
@@ -72,7 +73,7 @@ const maximo = computed(() => {
     0,
   )
 
-  return Math.max(4, Math.ceil(maior / 2) * 2)
+  return Math.max(4, Math.ceil(maior / 4) * 4)
 })
 
 /**
@@ -82,13 +83,23 @@ const maximo = computed(() => {
  * de hoje e o texto da dica precisam de uma chave que case com um dia só. O que a pessoa lê no
  * eixo continua vindo de `rotulos`, pelo formatador.
  */
-const categorias = computed(() => props.pontos.map((ponto) => ponto.data))
+const categorias = computed(() =>
+  /*
+   * Nas barras puras o rótulo vai pronto na categoria: o Apex 7 não aplica o formatador do eixo x
+   * quando o gráfico não tem série de linha, e o dia saía como "2026-09-28". A dica acha o dia
+   * pelo índice do ponto, então rótulo repetido ou vazio não atrapalha.
+   */
+  props.mostrarOcupacao ? props.pontos.map((ponto) => ponto.data) : props.rotulos,
+)
 
 const rotuloPorData = computed(
   () => new Map(props.pontos.map((ponto, indice) => [ponto.data, props.rotulos[indice] ?? ''])),
 )
 
 const pontoPorData = computed(() => new Map(props.pontos.map((ponto) => [ponto.data, ponto])))
+
+/** Misto (colunas + linha) só quando a ocupação entra; sem ela, barras puras. */
+const tipo = computed(() => (props.mostrarOcupacao ? 'line' : 'bar'))
 
 const series = computed<ApexAxisChartSeries>(() => {
   const contagens: ApexAxisChartSeries = [
@@ -109,8 +120,13 @@ const series = computed<ApexAxisChartSeries>(() => {
     },
   ]
 
+  /*
+   * Sem a linha, o gráfico é de barras puro e as séries não declaram tipo. Num gráfico misto sem
+   * nenhuma série de linha o Apex deixava de aplicar os formatadores dos dois eixos — o dia saía
+   * como "2026-09-28" e a escala como "28.5".
+   */
   if (!props.mostrarOcupacao) {
-    return contagens
+    return contagens.map(({ name, data }) => ({ name, data }))
   }
 
   return [
@@ -139,11 +155,7 @@ const opcoes = computed<ApexOptions>(() => {
     },
   }
 
-  const eixos: ApexYAxis[] = [
-    contagem,
-    { ...contagem, show: false },
-    { ...contagem, show: false },
-  ]
+  const eixos: ApexYAxis[] = [contagem, { ...contagem, show: false }, { ...contagem, show: false }]
 
   if (props.mostrarOcupacao) {
     eixos.push({
@@ -161,8 +173,14 @@ const opcoes = computed<ApexOptions>(() => {
   }
 
   return {
-    chart: { ...tema.grafico.value, type: 'line', height: ALTURA, stacked: true },
-    colors: [cor['accent-strong'], cor.accent, cor['risk-text'], cor['attention-text']],
+    chart: { ...tema.grafico.value, type: tipo.value, height: ALTURA, stacked: true },
+    /* Previsto é a marca meio apagada: o que ainda vai acontecer lê mais leve que o concluído. */
+    colors: [
+      cor['accent-strong'],
+      misturar(cor.accent, cor.surface, 0.45),
+      cor['risk-text'],
+      cor['attention-text'],
+    ],
     grid: tema.grade.value,
     legend: tema.legenda.value,
     states: tema.estados.value,
@@ -241,10 +259,14 @@ const opcoes = computed<ApexOptions>(() => {
       crosshairs: { show: true, stroke: { color: cor['line-strong'], width: 1, dashArray: 3 } },
       tooltip: { enabled: false },
     },
-    yaxis: eixos,
+    yaxis: props.mostrarOcupacao ? eixos : { ...contagem, seriesName: undefined },
     annotations: {
+      /*
+       * Nas barras puras o dia de hoje se marca só pelo rótulo na cor da marca: a anotação do Apex
+       * desenhava uma linha atravessando a coluna e o "Hoje" em pé, por cima dos números.
+       */
       xaxis:
-        props.destaque && pontoPorData.value.has(props.destaque)
+        props.mostrarOcupacao && props.destaque && pontoPorData.value.has(props.destaque)
           ? [
               {
                 x: props.destaque,
@@ -276,12 +298,17 @@ const opcoes = computed<ApexOptions>(() => {
       intersect: false,
       hideEmptySeries: false,
       x: {
-        formatter: (valor: string | number) => {
-          const data = String(valor)
-          const ponto = pontoPorData.value.get(data)
-          const titulo = formato.dataLonga(data)
+        formatter: (valor: string | number, opts?: { dataPointIndex?: number }) => {
+          const ponto = props.mostrarOcupacao
+            ? pontoPorData.value.get(String(valor))
+            : props.pontos[opts?.dataPointIndex ?? -1]
+          if (!ponto) {
+            return String(valor)
+          }
 
-          return ponto?.fechado ? `${titulo} · ${props.legenda.fechado}` : titulo
+          const titulo = formato.dataLonga(ponto.data)
+
+          return ponto.fechado ? `${titulo} · ${props.legenda.fechado}` : titulo
         },
       },
       y: props.mostrarOcupacao
@@ -299,13 +326,7 @@ const opcoes = computed<ApexOptions>(() => {
 
 <template>
   <figure class="colunas">
-    <VueApexCharts
-      type="line"
-      :height="ALTURA"
-      :options="opcoes"
-      :series="series"
-      width="100%"
-    />
+    <VueApexCharts :type="tipo" :height="ALTURA" :options="opcoes" :series="series" width="100%" />
   </figure>
 </template>
 

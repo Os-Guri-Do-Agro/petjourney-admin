@@ -64,7 +64,7 @@ const causa = computed(() => {
             paciente: pet?.nome ?? '',
             especie: pet ? formato.especie(pet.especie) : '',
             raca: pet?.raca ?? '',
-            sexo: pet ? t(`clinico.sexo.${pet.sexo}`) : '',
+            sexo: pet ? formato.sexo(pet.sexo) : '',
             idade: pet ? formato.idade(pet.nascimento) : '',
             responsavel: tutor?.nome ?? '',
           })

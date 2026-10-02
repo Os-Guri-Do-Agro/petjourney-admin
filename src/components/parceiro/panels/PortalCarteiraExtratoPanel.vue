@@ -182,7 +182,15 @@ onMounted(() => {
 
     <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
       <p>{{ error }}</p>
-      <button type="button" @click="loadExtrato()">{{ t('carteira.extrato.retry') }}</button>
+      <Button
+        type="button"
+        :label="t('carteira.extrato.retry')"
+        icon="pi pi-refresh"
+        severity="secondary"
+        outlined
+        size="small"
+        @click="loadExtrato()"
+      />
     </div>
 
     <div v-else-if="items.length === 0" class="portal-panel__empty">
@@ -213,7 +221,7 @@ onMounted(() => {
             <div class="extrato-list">
               <article v-for="item in day.items" :key="item.id" class="extrato-row">
                 <div>
-                  <strong>{{ item.tipo.replaceAll('_', ' ') }}</strong>
+                  <strong>{{ t(`carteira.extrato.tipo.${item.tipo}`) }}</strong>
                   <p>
                     <span v-if="item.origem">{{ item.origem }}</span>
                     <span v-if="item.periodicidade"> · {{ item.periodicidade }}</span>
@@ -221,7 +229,7 @@ onMounted(() => {
                 </div>
                 <div class="extrato-row__value">
                   <strong :class="{ 'is-negative': item.valorCentavos < 0 }">
-                    {{ formatCentavosToBrl(item.valorCentavos) }}
+                    {{ formatCentavosToBrl(item.valorCentavos, intlLocale()) }}
                   </strong>
                   <time :datetime="item.createdAt">{{ formatTime(item.createdAt) }}</time>
                 </div>
@@ -259,14 +267,6 @@ onMounted(() => {
   color: var(--partner-warm-text);
 }
 
-.portal-panel__state button {
-  border: 1px solid var(--partner-line);
-  border-radius: 0.6rem;
-  padding: 0.45rem 0.85rem;
-  background: var(--partner-card);
-  cursor: pointer;
-}
-
 .portal-panel__empty strong {
   color: var(--partner-text, inherit);
 }
@@ -293,7 +293,11 @@ onMounted(() => {
   font-size: 0.95rem;
   font-weight: 750;
   letter-spacing: -0.01em;
-  text-transform: capitalize;
+}
+
+/* Só a primeira letra: `capitalize` fazia "Setembro De 2026" (e "Septembar" no sérvio). */
+.extrato-month__head h3::first-letter {
+  text-transform: uppercase;
 }
 
 .extrato-day {
@@ -305,25 +309,31 @@ onMounted(() => {
   margin: 0;
   padding: 0.15rem 0.15rem 0.05rem;
   color: var(--partner-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
+/*
+ * Um cartão por dia, e os lançamentos como linhas dele — como num extrato. Um cartão por
+ * lançamento fazia uma tarde de três saques ocupar a tela inteira.
+ */
 .extrato-list {
   display: grid;
-  gap: 0.45rem;
+  overflow: hidden;
+  border: 1px solid var(--partner-line);
+  border-radius: 0.85rem;
+  background: var(--partner-card);
 }
 
 .extrato-row {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.85rem;
-  background: var(--partner-card);
+  padding: 0.75rem 1rem;
+}
+
+.extrato-row + .extrato-row {
+  border-top: 1px solid var(--partner-line);
 }
 
 .extrato-row p {

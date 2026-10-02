@@ -81,10 +81,10 @@ withDefaults(
 }
 
 .maquete--claro {
-  --maquete-fundo: #f3f7f5;
-  --maquete-superficie: #ffffff;
-  --maquete-linha: #dfeae6;
-  --maquete-traco: #c9d6d1;
+  --maquete-fundo: #e1ece9;
+  --maquete-superficie: #f4f9f8;
+  --maquete-linha: #c9d2d0;
+  --maquete-traco: #aebbb8;
   --maquete-trilho: #84c1b4;
   --maquete-acento: #3c7b6d;
   --maquete-acento-suave: #d8ebe5;
@@ -118,7 +118,7 @@ withDefaults(
 
 .maquete__pastilha--curta {
   width: 1.7em;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .maquete__corpo {
@@ -154,7 +154,7 @@ withDefaults(
   align-content: start;
   gap: 0.42em;
   padding: 0.6em 0.5em;
-  border-right: 1px solid var(--maquete-linha);
+  border-inline-end: 1px solid var(--maquete-linha);
   background: var(--maquete-superficie);
 }
 

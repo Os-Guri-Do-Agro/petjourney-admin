@@ -12,7 +12,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import { agendaRepository } from '../data/repositories'
+import { agendaRepository, type EntradaDeJustificativa } from '../data/repositories'
 import type {
   AgendaDia,
   Appointment,
@@ -45,7 +45,7 @@ export const DESFAZER_SEGUNDOS = 8
 export type AcaoDesfazivel = {
   token: string
   /** `kind` traduzível da ação — a faixa de desfazer nomeia o que aconteceu. */
-  kind: 'mover' | 'cancelar' | 'falta' | 'criar' | 'status'
+  kind: 'mover' | 'editar' | 'cancelar' | 'falta' | 'justificar' | 'criar' | 'status'
   expiraEm: number
 }
 
@@ -75,7 +75,10 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
   const atendimentos = computed(() => dia.value?.atendimentos ?? [])
   const bloqueios = computed<Block[]>(() => dia.value?.bloqueios ?? [])
   const clinicaFechada = computed(() => dia.value?.clinicaFechada ?? false)
-  const vazio = computed(() => !carregando.value && !erro.value && atendimentos.value.length === 0)
+  /* Antes do primeiro dia chegar não há o que dizer — "nenhum atendimento" piscava na abertura. */
+  const vazio = computed(
+    () => !carregando.value && !erro.value && dia.value !== null && atendimentos.value.length === 0,
+  )
 
   /** Contexto que o detector de conflitos precisa — montado uma vez, usado em toda checagem. */
   const contextoDeConflito = computed<ConflictContext | null>(() => {
@@ -128,7 +131,9 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
   }
 
   async function recarregar() {
-    await (visao.value === 'semana' ? Promise.all([carregarDia(), carregarSemana()]) : carregarDia())
+    await (visao.value === 'semana'
+      ? Promise.all([carregarDia(), carregarSemana()])
+      : carregarDia())
   }
 
   function registrarDesfazer(token: string, kind: AcaoDesfazivel['kind']) {
@@ -204,11 +209,66 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
     return resultado?.atendimentos ?? []
   }
 
-  async function alterarStatus(id: string, status: AppointmentStatus) {
-    const resultado = await comSalvamento(() => agendaRepository.alterarStatus(id, status))
+  /**
+   * Edita tipo, sala, profissional, horário e observação de um atendimento que já existe.
+   *
+   * Separada de `mover` porque as duas respondem a perguntas diferentes na faixa de desfazer:
+   * "atendimento remarcado" não descreve quem só corrigiu o tipo, e é essa frase que a recepção
+   * lê para decidir se aperta Z.
+   */
+  async function editar(
+    id: string,
+    dados: {
+      typeId: string
+      professionalId: string
+      roomIds: string[]
+      inicio: ISODateTime
+      fim: ISODateTime
+      observacao: string
+    },
+  ) {
+    const resultado = await comSalvamento(() => agendaRepository.editar(id, dados))
+
+    if (resultado) {
+      await depoisDeMutar(resultado.undoToken, 'editar')
+    }
+
+    return resultado?.atendimentos[0] ?? null
+  }
+
+  async function alterarStatus(
+    id: string,
+    status: AppointmentStatus,
+    justificativa?: EntradaDeJustificativa | null,
+  ) {
+    const resultado = await comSalvamento(() =>
+      agendaRepository.alterarStatus(id, status, justificativa),
+    )
 
     if (resultado) {
       await depoisDeMutar(resultado.undoToken, status === 'falta' ? 'falta' : 'status')
+    }
+
+    return resultado?.atendimentos[0] ?? null
+  }
+
+  /** A recepção ligou e o responsável confirmou. A confirmação do app chega pela API. */
+  async function confirmarPresenca(id: string) {
+    const resultado = await comSalvamento(() => agendaRepository.confirmarPresenca(id, 'recepcao'))
+
+    if (resultado) {
+      await depoisDeMutar(resultado.undoToken, 'status')
+    }
+
+    return resultado?.atendimentos[0] ?? null
+  }
+
+  /** Registra o motivo de uma falta que já existe. O status não muda — ver o repositório. */
+  async function justificarFalta(id: string, entrada: EntradaDeJustificativa) {
+    const resultado = await comSalvamento(() => agendaRepository.justificarFalta(id, entrada))
+
+    if (resultado) {
+      await depoisDeMutar(resultado.undoToken, 'justificar')
     }
 
     return resultado?.atendimentos[0] ?? null
@@ -332,7 +392,10 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
     recarregar,
     criar,
     mover,
+    editar,
     alterarStatus,
+    confirmarPresenca,
+    justificarFalta,
     cancelar,
     criarBloqueio,
     removerBloqueio,

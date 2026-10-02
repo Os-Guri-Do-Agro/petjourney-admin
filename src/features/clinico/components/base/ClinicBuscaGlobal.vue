@@ -27,6 +27,7 @@
  * **O paciente carrega o que o identifica.** Dois "Mel" no dataset, e é o nome de quem responde
  * por eles que os separa — nunca o `id`. Quem escolhe errado no balcão abre o prontuário errado.
  */
+import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import { computed, nextTick, ref, watch } from 'vue'
@@ -269,7 +270,7 @@ function aoTeclar(evento: KeyboardEvent) {
   <Dialog
     v-model:visible="visivel"
     modal
-    class="clinic-dialog busca"
+    class="clinic-dialog hc-tema busca"
     :style="{ width: 'min(34rem, 96vw)' }"
     :header="t('clinico.busca.titulo')"
     dismissable-mask
@@ -292,10 +293,14 @@ function aoTeclar(evento: KeyboardEvent) {
           {{ t('clinico.busca.semResultado', { termo: termo.trim() }) }}
         </p>
 
-        <button type="button" class="busca__cadastrar" @click="cadastrarPaciente">
-          <i class="pi pi-user-plus" aria-hidden="true" />
-          {{ t('clinico.paciente.novo.atalho') }}
-        </button>
+        <Button
+          type="button"
+          outlined
+          size="small"
+          icon="pi pi-user-plus"
+          :label="t('clinico.paciente.novo.atalho')"
+          @click="cadastrarPaciente"
+        />
       </div>
 
       <ul v-else class="busca__lista" role="listbox" :aria-label="t('clinico.busca.titulo')">
@@ -321,10 +326,12 @@ function aoTeclar(evento: KeyboardEvent) {
             {{ t('clinico.busca.pacientes') }}
           </p>
 
-          <button
+          <Button
             type="button"
-            class="busca__item clinic-focusable"
+            class="busca__item"
             :class="{ 'busca__item--ativo': posicao === indice }"
+            text
+            fluid
             @click="ir(destino)"
             @mouseenter="indice = posicao"
           >
@@ -334,7 +341,7 @@ function aoTeclar(evento: KeyboardEvent) {
               <small v-if="destino.detalhe">{{ destino.detalhe }}</small>
             </span>
             <i class="pi pi-arrow-right busca__seta" aria-hidden="true" />
-          </button>
+          </Button>
         </li>
 
         <li v-if="buscando" class="busca__carregando">
@@ -377,27 +384,37 @@ function aoTeclar(evento: KeyboardEvent) {
   text-transform: uppercase;
 }
 
-.busca__item {
-  display: flex;
-  width: 100%;
-  align-items: center;
+/*
+ * Linha de resultado: botão de texto com conteúdo próprio. O tema centraliza e pinta o texto de
+ * sálvia; aqui a linha alinha à esquerda, herda a cor da janela e troca o hover do tema pelo
+ * destaque único do item ativo (logo abaixo).
+ */
+.busca__item.p-button {
+  justify-content: flex-start;
   gap: var(--clinic-space-3);
   min-height: var(--clinic-row-height);
   padding: var(--clinic-cell-padding-y) var(--clinic-space-2);
   border: 1px solid transparent;
   border-radius: var(--clinic-radius-control);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+
+.busca__item.p-button:not(:disabled):hover,
+.busca__item.p-button:not(:disabled):active {
+  border-color: transparent;
   background: transparent;
   color: inherit;
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
 }
 
 /*
  * O item ativo é o do teclado **e** o do mouse: `mouseenter` move o índice em vez de acender um
  * segundo destaque. Com dois realces na tela, `Enter` vai para um lugar e o olho está no outro.
  */
-.busca__item--ativo {
+.busca__item--ativo.p-button,
+.busca__item--ativo.p-button:not(:disabled):hover,
+.busca__item--ativo.p-button:not(:disabled):active {
   border-color: var(--clinic-accent);
   background: var(--clinic-accent-tint);
 }
@@ -470,30 +487,5 @@ function aoTeclar(evento: KeyboardEvent) {
 
 .busca__vazio-frase {
   margin: 0;
-}
-
-.busca__cadastrar {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.7rem;
-  border: 1px solid var(--clinic-accent-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-}
-
-.busca__cadastrar:hover,
-.busca__cadastrar:focus-visible {
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
-}
-
-.busca__cadastrar i {
-  font-size: 0.72rem;
 }
 </style>

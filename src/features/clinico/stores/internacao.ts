@@ -14,6 +14,7 @@
 import { defineStore } from 'pinia'
 import { computed, onScopeDispose, ref } from 'vue'
 
+import type { ModeloDeBoletim } from '../data/boletim-texto'
 import {
   AltaSemAvisoError,
   BoletimBloqueadoError,
@@ -105,6 +106,14 @@ export const useInternacaoStore = defineStore('clinico-internacao', () => {
       await clinico.carregar()
       paciente.value = await internacaoRepository.doPaciente(internacaoId)
       agora.value = clinicClock.nowIso()
+
+      /*
+       * Os modelos vêm junto com o paciente, e voltam a vir a cada recarga. É o que mantém os
+       * números dentro deles vivos: uma medicação marcada como feita muda o "3 de 4" que o texto
+       * pronto carrega, e um modelo que envelhece na tela é pior que nenhum — ele manda um
+       * número errado com a assinatura da clínica.
+       */
+      await carregarModelosDeBoletim()
     } catch {
       erro.value = 'clinico.erros.internacao'
     } finally {
@@ -329,6 +338,34 @@ export const useInternacaoStore = defineStore('clinico-internacao', () => {
       return null
     } finally {
       salvando.value = false
+    }
+  }
+
+  /**
+   * Os textos prontos do paciente aberto.
+   *
+   * Guardados na store e não no componente porque a aba de boletim monta e desmonta a cada troca
+   * de aba, e buscar de novo a cada visita faria os botões aparecerem vazios por um instante —
+   * bem no momento em que a pessoa já decidiu qual deles quer.
+   */
+  const modelosDeBoletim = ref<ModeloDeBoletim[]>([])
+
+  async function carregarModelosDeBoletim() {
+    if (!paciente.value) {
+      return
+    }
+
+    try {
+      modelosDeBoletim.value = await internacaoRepository.modelosDeBoletim(
+        paciente.value.internacao.id,
+      )
+    } catch {
+      /*
+       * Falhar aqui não é erro de tela: sem modelo, o campo continua em branco e editável, que é
+       * exatamente como era antes deles existirem. Ocupar a faixa de erro com isso tiraria o
+       * lugar de um problema que impede trabalho.
+       */
+      modelosDeBoletim.value = []
     }
   }
 
@@ -635,6 +672,7 @@ export const useInternacaoStore = defineStore('clinico-internacao', () => {
     suspender,
     evoluir,
     gerarBoletim,
+    modelosDeBoletim,
     registrarLigacao,
     enviarBoletim,
     atualizarPreferencia,

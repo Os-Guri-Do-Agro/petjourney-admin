@@ -15,10 +15,14 @@
  * justamente a informação que faz o vet trocar a via.
  */
 import Button from 'primevue/button'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import type { AdministracaoAgendada, PrescricaoDeInternacao, SituacaoDaAdministracao } from '../../data/types'
+import type {
+  AdministracaoAgendada,
+  PrescricaoDeInternacao,
+  SituacaoDaAdministracao,
+} from '../../data/types'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { atrasoEmMinutos, atravessaAPassagem } from '../../domain/internacao'
 import { useClinicoStore } from '../../stores/clinico'
@@ -112,6 +116,29 @@ const grupos = computed<Grupo[]>(() => {
 /** Índice do primeiro grupo ainda por vir — é onde a linha do "agora" é desenhada. */
 const indiceDoAgora = computed(() => grupos.value.findIndex((grupo) => !grupo.passado))
 
+/**
+ * O que já foi registrado antes de agora recolhe numa linha.
+ *
+ * Abrir o checklist às 10h despejava cinco doses da madrugada, todas feitas, antes da primeira
+ * que cobra ação — e cada uma num cartão com borda própria. O registro continua a um clique ("5
+ * registradas desde 04:43"), e o que ficou para trás **sem** registro (atrasada) nunca recolhe:
+ * é exatamente o que precisa ser visto.
+ */
+const passadoAberto = ref(false)
+
+function grupoResolvido(grupo: Grupo) {
+  return grupo.passado && grupo.linhas.every((linha) => resolvida(linha.situacao))
+}
+
+const resolvidasAntes = computed(() => {
+  const recolhiveis = grupos.value.filter(grupoResolvido)
+
+  return {
+    total: recolhiveis.reduce((soma, grupo) => soma + grupo.linhas.length, 0),
+    desde: recolhiveis[0]?.rotulo ?? '',
+  }
+})
+
 function naTroca(administracao: AdministracaoAgendada): boolean {
   return props.fimDoPlantao ? atravessaAPassagem(administracao, props.fimDoPlantao) : false
 }
@@ -129,6 +156,14 @@ function executor(administracao: AdministracaoAgendada): string {
 function resolvida(situacao: SituacaoDaAdministracao): boolean {
   return situacao === 'feita' || situacao === 'recusada' || situacao === 'pulada'
 }
+
+/** A dose futura cujo registro antecipado está esperando o segundo clique. */
+const confirmando = ref<string | null>(null)
+
+function registrarAntes(administracaoId: string) {
+  confirmando.value = null
+  emit('registrar', administracaoId, 'feita')
+}
 </script>
 
 <template>
@@ -137,12 +172,45 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
       {{ t('clinico.internacao.checklist.vazio') }}
     </p>
 
+    <div v-if="resolvidasAntes.total > 0" class="checklist__recolhido">
+      <i class="pi pi-check-circle" aria-hidden="true" />
+      <span>
+        {{
+          t(
+            'clinico.internacao.checklist.registradas',
+            { total: resolvidasAntes.total, desde: resolvidasAntes.desde },
+            resolvidasAntes.total,
+          )
+        }}
+      </span>
+      <Button
+        type="button"
+        :label="
+          passadoAberto
+            ? t('clinico.internacao.checklist.ocultarRegistradas')
+            : t('clinico.internacao.checklist.verRegistradas')
+        "
+        :icon="passadoAberto ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+        icon-pos="right"
+        severity="secondary"
+        text
+        size="small"
+        :aria-expanded="passadoAberto"
+        @click="passadoAberto = !passadoAberto"
+      />
+    </div>
+
     <template v-for="(grupo, indice) in grupos" :key="grupo.horario">
       <p v-if="indice === indiceDoAgora" class="checklist__agora">
         <span>{{ t('clinico.internacao.checklist.agora', { hora: formato.hora(agora) }) }}</span>
       </p>
 
-      <section class="grupo" :class="{ 'grupo--passado': grupo.passado }">
+      <!-- v-show: o registro de quem deu cada dose continua na página, só recolhido. -->
+      <section
+        v-show="passadoAberto || !grupoResolvido(grupo)"
+        class="grupo"
+        :class="{ 'grupo--passado': grupo.passado }"
+      >
         <h4 class="grupo__hora clinic-value">{{ grupo.rotulo }}</h4>
 
         <ul class="grupo__itens">
@@ -152,7 +220,11 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
             class="item"
             :class="[`item--${linha.situacao}`, { 'item--troca': naTroca(linha.administracao) }]"
           >
-            <i class="item__icone" :class="ICONE[linha.prescricao?.kind ?? 'procedimento']" aria-hidden="true" />
+            <i
+              class="item__icone"
+              :class="ICONE[linha.prescricao?.kind ?? 'procedimento']"
+              aria-hidden="true"
+            />
 
             <div class="item__corpo">
               <p class="item__descricao">
@@ -218,6 +290,47 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
                 />
               </template>
 
+              <!--
+                Dose ainda por vir pede um segundo clique. Com o mesmo botão cheio da dose da vez,
+                um toque na linha errada registrava às 18h a dose das 21h — e o registro é o que o
+                próximo turno usa para não dar de novo.
+              -->
+              <template v-else-if="linha.situacao === 'futura'">
+                <template v-if="confirmando === linha.administracao.id">
+                  <span class="item__confirmar" role="status">
+                    {{
+                      t('clinico.internacao.checklist.antesDaHora', {
+                        hora: formato.hora(linha.administracao.previstaPara),
+                      })
+                    }}
+                  </span>
+                  <Button
+                    :label="t('clinico.internacao.checklist.registrarAgora')"
+                    icon="pi pi-check"
+                    size="small"
+                    :disabled="salvando"
+                    @click="registrarAntes(linha.administracao.id)"
+                  />
+                  <Button
+                    :label="t('clinico.comum.cancelar')"
+                    severity="secondary"
+                    text
+                    size="small"
+                    @click="confirmando = null"
+                  />
+                </template>
+                <Button
+                  v-else
+                  :label="t('clinico.internacao.checklist.checar')"
+                  icon="pi pi-check"
+                  severity="secondary"
+                  outlined
+                  size="small"
+                  :disabled="salvando"
+                  @click="confirmando = linha.administracao.id"
+                />
+              </template>
+
               <template v-else-if="linha.situacao !== 'suspensa'">
                 <Button
                   :label="t('clinico.internacao.checklist.checar')"
@@ -226,8 +339,8 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
                   :disabled="salvando"
                   @click="emit('registrar', linha.administracao.id, 'feita')"
                 />
+                <!-- A futura já saiu no ramo de cima: aqui toda linha pode ter sido recusada. -->
                 <Button
-                  v-if="linha.situacao !== 'futura'"
                   :label="t('clinico.internacao.checklist.recusou')"
                   severity="secondary"
                   outlined
@@ -276,11 +389,43 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
   opacity: 0.5;
 }
 
+/*
+ * O checklist é uma lista num cartão só: cada horário é um bloco separado por fio, e cada dose uma
+ * linha. Antes cada dose tinha a própria borda, e vinte cartões iguais não diziam qual importava.
+ */
+.checklist {
+  padding: 0.35rem 1.1rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1rem;
+  background: var(--hc-cartao);
+  box-shadow: var(--hc-sombra);
+}
+
+.checklist__recolhido {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--hc-linha);
+  color: var(--hc-tinta-2);
+  font-size: 0.875rem;
+}
+
+.checklist__recolhido .pi-check-circle {
+  color: var(--hc-verde-tinta);
+}
+
 .grupo {
   display: grid;
   align-items: start;
-  gap: var(--clinic-space-2) var(--clinic-space-4);
+  gap: 0 var(--clinic-space-4);
   grid-template-columns: 3.6rem minmax(0, 1fr);
+  padding-block: 0.25rem;
+}
+
+.grupo + .grupo {
+  border-top: 1px solid var(--hc-linha);
 }
 
 .grupo--passado {
@@ -299,7 +444,7 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
   display: grid;
   margin: 0;
   padding: 0;
-  gap: var(--clinic-space-2);
+  gap: 0;
   list-style: none;
 }
 
@@ -307,30 +452,34 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
   display: flex;
   min-width: 0;
   align-items: flex-start;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
+  padding: 0.6rem 0.35rem;
+  border-radius: 0.6rem;
   gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
 }
 
-.item--atrasada {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
+.grupo__itens > .item + .item {
+  border-top: 1px dashed var(--hc-linha);
+  border-radius: 0;
 }
 
-.item--na-janela {
-  border-color: var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
+/*
+ * A linha atrasada não se pinta: a situação dela vira selo coral, e o ícone vai junto. Uma coluna
+ * de linhas rosadas lia como alarme da tela inteira, e o texto clínico perdia contraste no fundo.
+ * A que está na janela, do mesmo jeito, em pêssego.
+ */
+.item--atrasada .item__icone {
+  color: var(--clinic-risk-text);
 }
 
-.item--feita {
-  background: var(--clinic-surface-soft);
+.item--na-janela .item__icone {
+  color: var(--clinic-attention-text);
 }
 
-.item--recusada,
-.item--pulada {
-  border-style: dashed;
+/* Registrada é história: o texto apaga, a linha continua legível. */
+.item--feita .item__descricao,
+.item--recusada .item__descricao,
+.item--pulada .item__descricao {
+  color: var(--hc-tinta-2);
 }
 
 .item--suspensa {
@@ -345,7 +494,7 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
  * frase que explica o que ele significa já vem logo abaixo, dentro da própria linha.
  */
 .item--troca {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--clinic-accent-strong) 45%, transparent);
+  background: color-mix(in srgb, var(--hc-marca-clara) 55%, transparent);
 }
 
 .item__icone {
@@ -399,7 +548,23 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
   font-weight: 700;
 }
 
+/* O selo de 6 px da Visão geral, no par da gravidade. */
 .item--atrasada .item__situacao,
+.item--na-janela .item__situacao {
+  padding: 0.05rem 0.45rem;
+  border-radius: 6px;
+}
+
+.item--atrasada .item__situacao {
+  background: var(--clinic-risk-bg);
+  color: var(--clinic-risk-text);
+}
+
+.item--na-janela .item__situacao {
+  background: var(--clinic-attention-bg);
+  color: var(--clinic-attention-text);
+}
+
 .item__atraso {
   color: var(--clinic-risk-text);
 }
@@ -427,7 +592,17 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
 .item__acoes {
   display: flex;
   flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
   gap: var(--clinic-space-2);
+}
+
+/* A pergunta do registro antecipado, na cor de atenção: é o único texto da linha que pede algo. */
+.item__confirmar {
+  color: var(--clinic-attention-text);
+  font-size: var(--clinic-font-label);
+  font-weight: 600;
 }
 
 @media (width <= 640px) {

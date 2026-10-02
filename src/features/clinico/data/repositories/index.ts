@@ -1,9 +1,15 @@
-export { agendaRepository, type MutacaoAgenda } from './agenda-repository'
 export {
-  encounterRepository,
-  EncounterLockedError,
-} from './encounter-repository'
-export { waitlistRepository, OFERTA_MINUTOS } from './waitlist-repository'
+  agendaRepository,
+  type EntradaDeJustificativa,
+  type MutacaoAgenda,
+} from './agenda-repository'
+export { encounterRepository, EncounterLockedError } from './encounter-repository'
+export {
+  waitlistRepository,
+  OFERTA_MINUTOS,
+  OfertaExpiradaError,
+  VagaJaPreenchidaError,
+} from './waitlist-repository'
 export {
   patientRepository,
   LIMITE_REINCIDENCIA,
@@ -11,7 +17,28 @@ export {
   type PacienteResumo,
 } from './patient-repository'
 export { catalogRepository, type CatalogosClinicos } from './catalog-repository'
-export { vacinaRepository, type AplicacaoNaLista, type ChamadaDeVacina } from './vacina-repository'
+export {
+  migracaoRepository,
+  type ResultadoDaLinha,
+  type VinculosDaImportacao,
+} from './migracao-repository'
+export {
+  vacinaRepository,
+  AplicacaoRecusadaError,
+  type AplicacaoNaLista,
+  type CarteirinhaNoApp,
+  type ChamadaDeVacina,
+  type ProximaNaAgenda,
+} from './vacina-repository'
+export {
+  tratamentoRepository,
+  DoseRecusadaError,
+  type AdesaoDoPaciente,
+  type LinhaDeTratamento,
+  type ReceitaSemLembrete,
+  type TratamentoNaFicha,
+  type TratamentosNoApp,
+} from './tratamento-repository'
 export {
   internacaoRepository,
   AltaSemAvisoError,

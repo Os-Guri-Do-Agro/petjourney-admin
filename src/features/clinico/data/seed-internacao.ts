@@ -22,6 +22,7 @@ import {
   plantaoAnterior,
   plantaoDe,
   plantaoSeguinte,
+  proximoBoletimEm,
 } from '../domain/internacao'
 import { createClinicClock } from '../domain/clinic-time'
 
@@ -387,7 +388,8 @@ const INTERNADOS: InternacaoPlantada[] = [
     observacao: 'Fezes já pastosas. Ganhou 20 g desde a entrada.',
     frequenciaBoletim: 12,
     silencioNoturno: true,
-    fotoSempre: false,
+    /* A Pipoca é a internação da demonstração do app: a conversa precisa ter foto. */
+    fotoSempre: true,
     itens: [
       {
         sufixo: 'metronidazol',
@@ -513,8 +515,18 @@ function montarEvolucao(input: {
     registradoEm: input.registradoEm,
     vitais,
     observado: doTurno(TEXTO_OBSERVADO, plantada.id, input.kind, 'Sem intercorrências no turno.'),
-    avaliacao: doTurno(TEXTO_AVALIACAO, plantada.id, input.kind, 'Mantém o quadro do turno anterior.'),
-    plano: doTurno(TEXTO_PLANO, plantada.id, input.kind, 'Manter prescrição e reavaliar no próximo plantão.'),
+    avaliacao: doTurno(
+      TEXTO_AVALIACAO,
+      plantada.id,
+      input.kind,
+      'Mantém o quadro do turno anterior.',
+    ),
+    plano: doTurno(
+      TEXTO_PLANO,
+      plantada.id,
+      input.kind,
+      'Manter prescrição e reavaliar no próximo plantão.',
+    ),
     gravidade: input.gravidade,
   }
 }
@@ -525,18 +537,27 @@ function montarEvolucao(input: {
  * Duas evoluções seguidas com a mesma frase denunciam dado inventado antes de qualquer outra
  * coisa: a tela põe os dois turnos lado a lado, e a plateia lê os dois. Cada paciente tem uma
  * variante por turno, e elas contam a mesma história avançando.
+ *
+ * Quem fica mais de um dia passa pelo mesmo turno de novo. Para esse, o turno é uma lista — a
+ * primeira noite, a segunda noite —, e a última frase vale dali em diante.
  */
-type TextoPorTurno = Record<string, Partial<Record<PlantaoKind, string>>>
+type TextoPorTurno = Record<string, Partial<Record<PlantaoKind, string | string[]>>>
 
 function doTurno(
   mapa: TextoPorTurno,
   internacaoId: string,
   kind: PlantaoKind,
   reserva: string,
+  vez = 0,
 ): string {
   const doPaciente = mapa[internacaoId]
+  const texto = doPaciente?.[kind] ?? doPaciente?.manha
 
-  return doPaciente?.[kind] ?? doPaciente?.manha ?? reserva
+  if (texto === undefined) {
+    return reserva
+  }
+
+  return Array.isArray(texto) ? (texto[Math.min(vez, texto.length - 1)] ?? reserva) : texto
 }
 
 const TEXTO_OBSERVADO: TextoPorTurno = {
@@ -561,9 +582,12 @@ const TEXTO_OBSERVADO: TextoPorTurno = {
     noite: 'Dormiu a noite toda. Recusou a oferta das 3h.',
   },
   'int-pipoca': {
-    manha: 'Fezes pastosas, sem sangue visível. Ativo na caixa.',
-    tarde: 'Comeu bem e explorou a caixa. Fezes formadas.',
-    noite: 'Dormiu no ninho a noite inteira. Sem novas evacuações.',
+    manha: 'Mais ativa pela manhã. Fezes pastosas, sem sangue visível.',
+    tarde: 'Explorou a caixa e comeu feno sozinha pela primeira vez. Fezes pastosas, sem sangue.',
+    noite: [
+      'Chegou prostrada e foi para o isolamento. Aceitou papinha na seringa. Fezes ainda líquidas, sem sangue desde a meia-noite.',
+      'Dormiu no ninho a noite inteira. Uma evacuação de madrugada, pastosa e sem sangue.',
+    ],
   },
 }
 
@@ -638,12 +662,13 @@ function montarBoletinsEnviados(input: {
   petNome: string
   petIniciais: string
   /**
-   * O que contar, conforme o turno em que o boletim sai.
+   * O que contar, conforme o turno do período que o boletim cobre, e quantas vezes esse turno
+   * já foi contado.
    *
    * É função, e não texto fixo: o boletim das 4 da manhã fala da noite, o das 10 fala da manhã.
    * Um texto só para o dia inteiro faria o responsável ler "comeu toda a ração" às 3h.
    */
-  observadoEm: (em: ISODateTime) => string
+  observado: (turno: PlantaoKind, vez: number) => string
   administracoes: AdministracaoAgendada[]
 }): BoletimAoTutor[] {
   const boletins: BoletimAoTutor[] = []
@@ -657,26 +682,33 @@ function montarBoletinsEnviados(input: {
    * Com o texto em todo boletim, três mensagens seguidas da madrugada saíam idênticas menos pelos
    * números — e uma coluna de mensagens repetidas é a primeira coisa que denuncia dado inventado
    * numa demonstração. Repetido é também o que o responsável para de ler.
+   *
+   * "Turno" é o plantão daquele dia, não o tipo: a noite de ontem e a de hoje são duas, e a de
+   * hoje tem o que contar.
    */
   let turnoDoUltimo = ''
-  const passo = input.preferencia.frequenciaHoras
-  const inicio = Date.parse(input.internacao.entradaEm)
+  const vezesDoTurno = new Map<PlantaoKind, number>()
   const fim = Date.parse(input.agora)
-  const totalHoras = (fim - inicio) / 3_600_000
 
-  for (let horas = passo, indice = 1; horas <= totalHoras; horas += passo, indice += 1) {
-    const em = maisHoras(input.internacao.entradaEm, horas)
+  /*
+   * O horário de cada boletim é o que `proximoBoletimEm` agenda — o mesmo que a tela anuncia
+   * como próximo. A madrugada em silêncio não some do histórico nem vira mensagem em branco:
+   * junta num boletim só, às 7h. Pular deixava nove horas sem notícia, e a Pipoca, de doze em
+   * doze horas, passava um dia e meio internada com um boletim só.
+   */
+  const proximo = (desdeDe: ISODateTime) =>
+    proximoBoletimEm({
+      frequenciaHoras: input.preferencia.frequenciaHoras,
+      silencioNoturno: input.preferencia.silencioNoturno,
+      desde: desdeDe,
+      clock,
+    })
 
-    /*
-     * O silêncio noturno some do histórico, não vira mensagem em branco: a tela do responsável
-     * precisa mostrar exatamente o que ele recebeu, e ele não recebeu nada às 3 da manhã.
-     */
-    const minutos = clock.minutesOf(em)
-
-    if (input.preferencia.silencioNoturno && (minutos >= 22 * 60 || minutos < 7 * 60)) {
-      continue
-    }
-
+  for (
+    let em = proximo(input.internacao.entradaEm), indice = 1;
+    Date.parse(em) <= fim;
+    em = proximo(em), indice += 1
+  ) {
     /*
      * O período do boletim é o intervalo desde o anterior — é o que dá sentido a "3 de 3
      * realizados no horário". Contar desde a entrada faria o número crescer o dia inteiro e
@@ -685,7 +717,21 @@ function montarBoletinsEnviados(input: {
     const doPeriodo = doPaciente.filter(
       (item) => item.previstaPara > desde && item.previstaPara <= em,
     )
-    const turnoDeste = plantaoDe(em, clock).kind
+    /*
+     * O turno é o do **meio do período** que o boletim cobre, não o da hora em que ele sai. O
+     * boletim que junta a madrugada sai às 7h, primeiro minuto da manhã — pelo horário de saída,
+     * contaria uma manhã que ainda não aconteceu; o das 19h diria "dormiu a noite inteira" com a
+     * noite por começar.
+     */
+    const meio = maisMinutos(desde, Math.round((Date.parse(em) - Date.parse(desde)) / 120_000))
+    const plantao = plantaoDe(meio, clock)
+    const turnoDeste = plantao.kind
+    const vez = vezesDoTurno.get(turnoDeste) ?? 0
+    const contaOTurno = `${plantao.kind}|${plantao.data}` !== turnoDoUltimo
+
+    if (contaOTurno) {
+      vezesDoTurno.set(turnoDeste, vez + 1)
+    }
 
     boletins.push({
       id: `bol-${input.internacao.id}-${indice}`,
@@ -700,11 +746,17 @@ function montarBoletinsEnviados(input: {
         previstas: doPeriodo.length,
         /* A temperatura entra num boletim sim, noutro não: toda mensagem com número vira ruído. */
         temperatura: indice % 2 === 0 ? Number((38.4 + (indice % 3) * 0.2).toFixed(1)) : null,
-        observado: turnoDeste === turnoDoUltimo ? '' : input.observadoEm(em),
+        observado: contaOTurno ? input.observado(turnoDeste, vez) : '',
         exigeLigacao: false,
       }),
-      foto: input.preferencia.fotoSempre && indice % 2 === 0 ? input.petIniciais : null,
-      fotoLegenda: input.preferencia.fotoSempre && indice % 2 === 0 ? FOTO_LEGENDA : '',
+      /*
+       * Foto em um boletim sim, outro não — contando os **enviados**, não os horários. Contando
+       * horários, o de número par podia cair na madrugada e sumir no silêncio noturno, e a
+       * internação passava o dia sem uma foto sequer, dependendo da hora em que a demonstração
+       * abriu.
+       */
+      foto: input.preferencia.fotoSempre && boletins.length % 2 === 0 ? input.petIniciais : null,
+      fotoLegenda: input.preferencia.fotoSempre && boletins.length % 2 === 0 ? FOTO_LEGENDA : '',
       geradoEm: em,
       autorId: null,
       enviadoEm: maisMinutos(em, 1),
@@ -714,7 +766,7 @@ function montarBoletinsEnviados(input: {
     })
 
     desde = em
-    turnoDoUltimo = turnoDeste
+    turnoDoUltimo = `${plantao.kind}|${plantao.data}`
   }
 
   return boletins
@@ -789,9 +841,7 @@ export function gerarInternacoes(semente: number): DatasetDeInternacao {
         }
 
         administracoes.push(
-          Date.parse(previstaPara) < Date.parse(agora)
-            ? executarPassado(base, agora, rng)
-            : base,
+          Date.parse(previstaPara) < Date.parse(agora) ? executarPassado(base, agora, rng) : base,
         )
       }
     }
@@ -805,7 +855,7 @@ export function gerarInternacoes(semente: number): DatasetDeInternacao {
         agora,
         petNome: pet?.nome ?? '',
         petIniciais: pet?.iniciais ?? '',
-        observadoEm: (em) => doTurno(TEXTO_OBSERVADO, plantada.id, plantaoDe(em, clock).kind, ''),
+        observado: (turno, vez) => doTurno(TEXTO_OBSERVADO, plantada.id, turno, '', vez),
         administracoes,
       }),
     )

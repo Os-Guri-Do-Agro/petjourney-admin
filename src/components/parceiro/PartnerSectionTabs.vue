@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import Tab from 'primevue/tab'
+import TabList from 'primevue/tablist'
+import Tabs from 'primevue/tabs'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -50,22 +53,33 @@ const resolvedAriaLabel = computed(
 
 <template>
   <div class="partner-tabs" :style="tabStyle">
-    <div class="partner-tabs__list" role="tablist" :aria-label="resolvedAriaLabel">
-      <button
-        v-for="tab in tabs"
-        :id="`partner-tab-${tab.id}`"
-        :key="tab.id"
-        class="partner-tabs__button"
-        :class="{ 'partner-tabs__button--active': activeTab === tab.id }"
-        type="button"
-        role="tab"
-        :aria-selected="activeTab === tab.id"
-        :aria-controls="`partner-panel-${tab.id}`"
-        @click="emit('select', tab.id)"
+    <!--
+      Tabs só controla a faixa de abas: os painéis ficam nas páginas (id "partner-panel-*"),
+      por isso id/aria-controls do Tab são sobrescritos para manter o vínculo a11y existente.
+    -->
+    <Tabs :value="activeTab" @update:value="(value) => emit('select', String(value))">
+      <TabList
+        class="partner-tabs__list"
+        :pt="{ tabList: { 'aria-label': resolvedAriaLabel } }"
       >
-        {{ tab.label }}
-      </button>
-    </div>
+        <Tab
+          v-for="tab in tabs"
+          :id="`partner-tab-${tab.id}`"
+          :key="tab.id"
+          class="partner-tabs__button"
+          :value="tab.id"
+          :aria-controls="`partner-panel-${tab.id}`"
+        >
+          <!--
+            O desenho entra por slot, e não por uma prop de ícone.
+            Assim este componente continua servindo às telas do portal sem carregar a biblioteca de
+            ícones de nenhum módulo — quem sabe qual glifo cabe em cada aba é a tela, não a faixa.
+          -->
+          <slot name="icone" :tab="tab" />
+          {{ tab.label }}
+        </Tab>
+      </TabList>
+    </Tabs>
     <p v-if="activeDescription" class="partner-tabs__description">{{ activeDescription }}</p>
   </div>
 </template>
@@ -77,8 +91,12 @@ const resolvedAriaLabel = computed(
   margin-bottom: 1rem;
 }
 
-.partner-tabs__list {
-  display: flex;
+.partner-tabs__list.p-tablist {
+  overflow: visible;
+  background: transparent;
+}
+
+.partner-tabs__list :deep(.p-tablist-tab-list) {
   flex-wrap: wrap;
   gap: 0.35rem;
   padding: 0.28rem;
@@ -87,32 +105,47 @@ const resolvedAriaLabel = computed(
   background: color-mix(in srgb, var(--tab-active-soft) 10%, transparent);
 }
 
-.partner-tabs__button {
+/* O destaque é a pílula da aba ativa — a barra deslizante do Aura não se aplica. */
+.partner-tabs__list :deep(.p-tablist-active-bar) {
+  display: none;
+}
+
+.partner-tabs__button.p-tab {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
   padding: 0.48rem 0.9rem;
   border: 1px solid transparent;
   border-radius: 0.62rem;
+  gap: 0.4rem;
   background: transparent;
   color: var(--tab-muted);
   font-size: 0.84rem;
   font-weight: 650;
-  cursor: pointer;
-  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
 }
 
-.partner-tabs__button:hover {
-  color: var(--tab-text);
+/* O desenho do slot mede pelo próprio quadro, e não pelo `em` como a fonte-ícone. */
+.partner-tabs__button.p-tab :deep(svg) {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+}
+
+.partner-tabs__button.p-tab:not(.p-tab-active):not(.p-disabled):hover {
+  border-color: transparent;
   background: color-mix(in srgb, var(--tab-active-soft) 35%, transparent);
+  color: var(--tab-text);
 }
 
-.partner-tabs__button--active {
+.partner-tabs__button.p-tab-active {
   border-color: color-mix(in srgb, var(--tab-active-strong) 35%, transparent);
   background: var(--tab-active);
   color: var(--tab-on-active);
 }
 
-.partner-tabs__button--active:hover {
-  color: var(--tab-on-active);
+.partner-tabs__button.p-tab-active:hover {
   background: var(--tab-active-strong);
+  color: var(--tab-on-active);
 }
 
 .partner-tabs__description {

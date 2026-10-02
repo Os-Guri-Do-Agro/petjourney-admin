@@ -70,7 +70,7 @@ const opcoes = computed(() =>
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog hc-tema"
     :style="{ width: 'min(32rem, 94vw)' }"
     :header="t('clinico.prontuario.conduta.retornoDialogo.titulo')"
     :dismissable-mask="true"
@@ -92,9 +92,12 @@ const opcoes = computed(() =>
 
       <ul v-else class="retorno__lista">
         <li v-for="opcao in opcoes" :key="opcao.slot.inicio">
-          <button
+          <Button
             type="button"
-            class="opcao clinic-focusable"
+            class="opcao"
+            severity="secondary"
+            outlined
+            fluid
             :disabled="salvando"
             @click="emit('escolher', opcao.slot)"
           >
@@ -119,7 +122,7 @@ const opcoes = computed(() =>
                 }}
               </span>
             </span>
-          </button>
+          </Button>
         </li>
       </ul>
     </div>
@@ -171,28 +174,37 @@ const opcoes = computed(() =>
   list-style: none;
 }
 
-.opcao {
+/*
+ * Opção de horário: botão contornado com layout em grade (data, hora, quem e quando). A
+ * especificidade passa a regra global da clínica para botão secundário contornado, que trocaria
+ * a moldura suave pela forte e o hover sálvia pelo cinza.
+ */
+.opcao.p-button {
   display: grid;
-  width: 100%;
   grid-template-columns: auto auto minmax(0, 1fr);
   align-items: center;
   gap: var(--clinic-space-3);
   padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
+  font: inherit;
+  text-align: start;
+}
+
+.opcao.p-button.p-button-secondary.p-button-outlined {
+  border-color: var(--clinic-line);
   background: var(--clinic-surface);
   color: inherit;
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
 }
 
-.opcao:hover:not(:disabled) {
+.opcao.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
   border-color: var(--clinic-accent);
   background: var(--clinic-accent-tint);
+  color: inherit;
 }
 
-.opcao:disabled {
+.opcao.p-button:disabled {
+  border-color: var(--clinic-line);
+  background: var(--clinic-surface);
+  color: inherit;
   cursor: progress;
   opacity: 0.6;
 }
@@ -226,7 +238,7 @@ const opcoes = computed(() =>
   justify-items: end;
   color: var(--clinic-muted);
   font-size: var(--clinic-font-label);
-  text-align: right;
+  text-align: end;
 }
 
 .opcao__dias {

@@ -163,10 +163,8 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
 
 .estv__fact dt {
   color: var(--partner-faint);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .estv__fact dd {
@@ -190,10 +188,8 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
   gap: 0.35rem;
   margin: 0;
   color: var(--partner-faint);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .estv__block h4 i {

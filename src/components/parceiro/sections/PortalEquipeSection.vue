@@ -130,7 +130,7 @@ async function handleRemoveMember() {
           <Button
             label="Enviar convite"
             size="small"
-            :disabled="!store.podeOperar"
+            :disabled="!store.podeOperar || inviting"
             :loading="inviting"
             @click="handleInvite"
           />
@@ -152,7 +152,7 @@ async function handleRemoveMember() {
             label="Remover"
             severity="danger"
             size="small"
-            :disabled="!store.podeOperar"
+            :disabled="!store.podeOperar || removing"
             :loading="removing"
             @click="requestRemoveMember"
           />

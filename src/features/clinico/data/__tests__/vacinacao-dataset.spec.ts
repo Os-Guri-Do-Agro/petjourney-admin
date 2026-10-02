@@ -69,11 +69,35 @@ describe('dataset de vacinação', () => {
     }
   })
 
-  it('toda aplicação tem lote e validade', () => {
+  it('toda aplicação da clínica tem lote e validade', () => {
     /** Sem os dois, o comprovante volta a não servir para viagem — que é para o que ele existe. */
-    for (const aplicacao of getDataset().aplicacoesDeVacina) {
-      expect(aplicacao.lote.length, aplicacao.id).toBeGreaterThan(0)
+    const daClinica = getDataset().aplicacoesDeVacina.filter((item) => item.origem === 'clinica')
+
+    for (const aplicacao of daClinica) {
+      expect(aplicacao.lote?.length ?? 0, aplicacao.id).toBeGreaterThan(0)
       expect(aplicacao.validadeLote, aplicacao.id).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    }
+  })
+
+  it('a dose externa não tem lote, e diz onde foi e como a clínica sabe', () => {
+    const externas = getDataset().aplicacoesDeVacina.filter((item) => item.origem === 'externa')
+    const procedencias = new Set(externas.map((item) => item.externa?.procedencia))
+
+    /* Os dois jeitos de saber precisam existir na demonstração: é a diferença que ela mostra. */
+    expect(procedencias.has('comprovante')).toBe(true)
+    expect(procedencias.has('relato')).toBe(true)
+
+    for (const aplicacao of externas) {
+      expect(aplicacao.lote, aplicacao.id).toBeNull()
+      expect(aplicacao.validadeLote, aplicacao.id).toBeNull()
+      expect(aplicacao.professionalId, aplicacao.id).toBe('')
+    }
+  })
+
+  it('o tamanho da série vai congelado em cada aplicação', () => {
+    for (const aplicacao of getDataset().aplicacoesDeVacina) {
+      expect(aplicacao.dosesNaSerie, aplicacao.id).toBeGreaterThanOrEqual(1)
+      expect(aplicacao.dose, aplicacao.id).toBeLessThanOrEqual(aplicacao.dosesNaSerie)
     }
   })
 

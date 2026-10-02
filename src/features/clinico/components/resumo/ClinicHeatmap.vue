@@ -5,20 +5,19 @@
  * É a pergunta que a agenda não responde por rolagem — "que horário está sempre cheio?" — e a
  * que decide contratação, escala de almoço e onde caber um encaixe.
  *
- * A intensidade **não** é só cor. Cada célula carrega o número, e a cor entra como reforço:
- * mapa de calor que só fala por cor exclui quem não distingue verde de âmbar e morre impresso
- * em preto e branco. Por isso também os degraus são quatro e discretos, e não um gradiente
- * contínuo — entre 3 e 4 atendimentos, gradiente vira ruído de cor.
+ * Uma tabela de verdade, e não um gráfico do ApexCharts. O gráfico escondia justamente a coluna
+ * das horas (a folga à esquerda era zero e o Apex cortava os rótulos), e a linha sem hora não diz
+ * nada; ainda exigia uma segunda tabela, escondida, para o leitor de tela. Aqui a mesma tabela
+ * serve aos dois: cabeçalho de linha é a hora, de coluna é o dia.
  *
- * A tabela escondida abaixo do gráfico não é redundância: o desenho do Apex é um monte de
- * `<rect>` sem relação de linha e coluna, e leitor de tela não navega retângulo. A tabela leva
- * cabeçalho de linha e de coluna e diz a mesma coisa em texto.
+ * A intensidade **não** é só cor. Cada célula carrega o número, e a cor entra como reforço; os
+ * degraus são quatro e discretos, e não um gradiente contínuo — entre 3 e 4 atendimentos,
+ * gradiente vira ruído de cor. O zero fica sem número: setenta zeros competiriam com os poucos
+ * números que importam.
  */
-import type { ApexAxisChartSeries, ApexOptions } from 'apexcharts'
 import { computed } from 'vue'
-import VueApexCharts from './apex'
+import { useI18n } from 'vue-i18n'
 
-import { useClinicChartTheme } from '../../composables/useClinicChartTheme'
 import type { CelulaDeHora } from '../../domain/resumo'
 
 const props = defineProps<{
@@ -29,10 +28,7 @@ const props = defineProps<{
   vazio: string
 }>()
 
-const tema = useClinicChartTheme()
-
-const ALTURA_DA_LINHA = 26
-const ALTURA_DA_MOLDURA = 74
+const { t } = useI18n()
 
 /** Segunda a domingo — mesma ordem de `inicioDaSemana`. */
 const ORDEM = [1, 2, 3, 4, 5, 6, 0]
@@ -65,23 +61,12 @@ const porChave = computed(
 const grade = computed(() =>
   horas.value.map((hora) => ({
     hora,
-    colunas: ORDEM.map((weekday, indice) => ({
+    colunas: ORDEM.map((weekday) => ({
       weekday,
-      dia: props.dias[indice] ?? '',
       valor: porChave.value.get(`${weekday}:${hora}`) ?? 0,
     })),
   })),
 )
-
-/** O Apex empilha a primeira série embaixo; invertido, o dia começa no topo, como num relógio. */
-const series = computed<ApexAxisChartSeries>(() =>
-  [...grade.value].reverse().map((linha) => ({
-    name: nomeDaHora(linha.hora),
-    data: linha.colunas.map((coluna) => ({ x: coluna.dia, y: coluna.valor })),
-  })),
-)
-
-const altura = computed(() => horas.value.length * ALTURA_DA_LINHA + ALTURA_DA_MOLDURA)
 
 /**
  * Quatro degraus proporcionais ao pico, mais a faixa do zero.
@@ -98,159 +83,169 @@ const degraus = computed(() => {
   return { d1, d2, d3, d4: Math.max(d3 + 1, pico) }
 })
 
+function degrau(valor: number): 0 | 1 | 2 | 3 | 4 {
+  const { d1, d2, d3 } = degraus.value
+
+  if (valor <= 0) return 0
+  if (valor <= d1) return 1
+  if (valor <= d2) return 2
+  if (valor <= d3) return 3
+  return 4
+}
+
 /** Nome da faixa na legenda: o intervalo em números, que não precisa de tradução. */
 function nomeDaFaixa(de: number, ate: number): string {
   return de === ate ? String(de) : `${de}–${ate}`
 }
 
-const opcoes = computed<ApexOptions>(() => {
-  const cor = tema.cor.value
+const legenda = computed(() => {
   const { d1, d2, d3, d4 } = degraus.value
 
-  return {
-    chart: {
-      ...tema.grafico.value,
-      type: 'heatmap',
-      height: altura.value,
-      /* Sem a animação escalonada, que num mapa de 70 células vira pisca-pisca. */
-      animations: { ...tema.grafico.value.animations, animateGradually: { enabled: false } },
-    },
-    colors: [cor.accent],
-    grid: { ...tema.grade.value, padding: { top: -18, right: 0, bottom: -8, left: 0 } },
-    states: tema.estados.value,
-    legend: {
-      ...tema.legenda.value,
-      markers: { size: 6, shape: 'square', strokeWidth: 0 },
-    },
-    stroke: { width: 2, colors: [cor.surface] },
-    plotOptions: {
-      heatmap: {
-        radius: 4,
-        enableShades: false,
-        useFillColorAsStroke: false,
-        colorScale: {
-          ranges: [
-            {
-              from: 0,
-              to: 0,
-              color: cor['surface-sunken'],
-              foreColor: cor['surface-sunken'],
-              name: '0',
-            },
-            {
-              from: 1,
-              to: d1,
-              color: cor['heat-1'],
-              foreColor: cor.text,
-              name: nomeDaFaixa(1, d1),
-            },
-            {
-              from: d1 + 1,
-              to: d2,
-              color: cor['heat-2'],
-              foreColor: cor.text,
-              name: nomeDaFaixa(d1 + 1, d2),
-            },
-            {
-              from: d2 + 1,
-              to: d3,
-              color: cor['heat-3'],
-              foreColor: cor['heat-ink'],
-              name: nomeDaFaixa(d2 + 1, d3),
-            },
-            {
-              from: d3 + 1,
-              to: d4,
-              color: cor['heat-4'],
-              foreColor: cor.surface,
-              name: nomeDaFaixa(d3 + 1, d4),
-            },
-          ],
-        },
-      },
-    },
-    dataLabels: {
-      enabled: true,
-      /*
-       * O zero fica sem número de propósito: setenta zeros desenhados competem com os poucos
-       * números que importam. A célula vazia já se lê pela cor rebaixada — e a tabela escondida
-       * guarda o valor para quem lê por leitor de tela.
-       */
-      formatter: (valor: string | number | number[]) => (Number(valor) > 0 ? String(valor) : ''),
-      style: {
-        fontFamily: tema.fonte.value.familia,
-        fontSize: tema.fonte.value.rotulo,
-        fontWeight: 750,
-      },
-    },
-    xaxis: {
-      type: 'category',
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-      labels: { style: tema.rotuloDeEixo.value },
-      tooltip: { enabled: false },
-      crosshairs: { show: false },
-    },
-    yaxis: {
-      labels: {
-        align: 'right',
-        style: { ...tema.rotuloDeEixo.value, colors: cor.muted, fontWeight: 700 },
-      },
-    },
-    tooltip: {
-      ...tema.dica.value,
-      marker: { show: false },
-      y: {
-        formatter: (valor: number) => String(valor ?? 0),
-        title: { formatter: (nome: string) => nome },
-      },
-    },
-  }
+  return [
+    { degrau: 0, nome: '0' },
+    { degrau: 1, nome: nomeDaFaixa(1, d1) },
+    { degrau: 2, nome: nomeDaFaixa(d1 + 1, d2) },
+    { degrau: 3, nome: nomeDaFaixa(d2 + 1, d3) },
+    { degrau: 4, nome: nomeDaFaixa(d3 + 1, d4) },
+  ]
 })
 </script>
 
 <template>
-  <div class="mapa">
-    <p v-if="grade.length === 0" class="mapa__vazio">{{ vazio }}</p>
+  <p v-if="grade.length === 0" class="mapa__vazio">{{ vazio }}</p>
 
-    <template v-else>
-      <VueApexCharts
-        type="heatmap"
-        :height="altura"
-        :options="opcoes"
-        :series="series"
-        width="100%"
-      />
+  <div v-else class="mapa">
+    <table class="mapa__tabela">
+      <thead>
+        <tr>
+          <th scope="col" class="mapa__canto">
+            <span class="mapa__sr">{{ t('clinico.resumo.mapa.hora') }}</span>
+          </th>
+          <th v-for="(dia, indice) in dias" :key="dia + indice" scope="col">{{ dia }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="linha in grade" :key="linha.hora">
+          <th scope="row">{{ nomeDaHora(linha.hora) }}</th>
+          <td
+            v-for="coluna in linha.colunas"
+            :key="`${linha.hora}-${coluna.weekday}`"
+            class="mapa__celula"
+            :class="`mapa__celula--${degrau(coluna.valor)}`"
+          >
+            <span v-if="coluna.valor > 0">{{ coluna.valor }}</span>
+            <span v-else class="mapa__sr">0</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-      <table class="mapa__leitura">
-        <thead>
-          <tr>
-            <th scope="col">h</th>
-            <th v-for="(dia, indice) in dias" :key="dia + indice" scope="col">{{ dia }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="linha in grade" :key="linha.hora">
-            <th scope="row">{{ nomeDaHora(linha.hora) }}</th>
-            <td v-for="coluna in linha.colunas" :key="`${linha.hora}-${coluna.weekday}`">
-              {{ coluna.valor }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </template>
+    <ul class="mapa__legenda" aria-hidden="true">
+      <li v-for="faixa in legenda" :key="faixa.degrau">
+        <span class="mapa__amostra" :class="`mapa__celula--${faixa.degrau}`" />
+        {{ faixa.nome }}
+      </li>
+    </ul>
   </div>
 </template>
 
 <style scoped>
-.mapa__vazio {
-  margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.mapa {
+  display: grid;
+  gap: 0.75rem;
 }
 
-/** Mesma informação do gráfico, só para leitor de tela. */
-.mapa__leitura {
+.mapa__tabela {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 3px;
+  table-layout: fixed;
+  font-variant-numeric: tabular-nums;
+}
+
+.mapa__tabela th {
+  color: var(--hc-tinta-2);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.mapa__tabela thead th {
+  padding-block-end: 0.15rem;
+}
+
+/* A coluna das horas: estreita, alinhada à célula. */
+.mapa__canto,
+.mapa__tabela tbody th {
+  width: 2.6rem;
+  padding-inline-end: 0.35rem;
+  text-align: end;
+}
+
+.mapa__celula {
+  height: 1.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.mapa__celula--0 {
+  background: var(--hc-linha);
+}
+
+.mapa__celula--1 {
+  background: var(--clinic-heat-1);
+  color: var(--hc-tinta);
+}
+
+.mapa__celula--2 {
+  background: var(--clinic-heat-2);
+  color: var(--hc-tinta);
+}
+
+.mapa__celula--3 {
+  background: var(--clinic-heat-3);
+  color: var(--clinic-heat-ink);
+}
+
+.mapa__celula--4 {
+  background: var(--clinic-heat-4);
+  color: var(--hc-cartao);
+}
+
+.mapa__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  margin: 0;
+  padding: 0;
+  padding-inline-start: 2.6rem;
+  color: var(--hc-tinta-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  list-style: none;
+}
+
+.mapa__legenda li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.mapa__amostra {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 3px;
+}
+
+.mapa__vazio {
+  margin: 0;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+}
+
+.mapa__sr {
   position: absolute;
   width: 1px;
   height: 1px;

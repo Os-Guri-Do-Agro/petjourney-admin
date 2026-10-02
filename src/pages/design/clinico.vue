@@ -10,10 +10,12 @@
  *
  * Confira em 1280, 1024 e 768 antes de dar por pronta.
  */
+import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import { computed, onMounted, ref } from 'vue'
+import ToggleSwitch from 'primevue/toggleswitch'
+import { computed, onMounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
@@ -39,9 +41,14 @@ const formato = useClinicFormat()
 
 const estado = ref<EstadoDemo>('pronto')
 const escalaDeCinza = ref(false)
+const idEscalaDeCinza = useId()
 const pacientes = ref<PacienteResumo[]>([])
 
 const ESTADOS: EstadoDemo[] = ['carregando', 'erro', 'vazio', 'pronto']
+
+const opcoesEstado = computed(() =>
+  ESTADOS.map((valor) => ({ valor, rotulo: t(`clinico.design.estado.${valor}`) })),
+)
 
 onMounted(async () => {
   await clinico.carregar()
@@ -191,15 +198,20 @@ const opcoesRisco = computed(() =>
       <div class="referencia__controles">
         <ClinicDensityToggle />
 
-        <label class="referencia__switch">
-          <input v-model="escalaDeCinza" type="checkbox" />
-          <span>{{ t('clinico.design.escalaDeCinza') }}</span>
-        </label>
+        <span class="referencia__switch">
+          <ToggleSwitch v-model="escalaDeCinza" :input-id="idEscalaDeCinza" />
+          <label :for="idEscalaDeCinza">{{ t('clinico.design.escalaDeCinza') }}</label>
+        </span>
 
-        <button type="button" class="referencia__botao clinic-focusable" @click="toggleColorMode">
-          <i :class="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'" aria-hidden="true" />
-          <span>{{ isDarkMode ? 'Claro' : 'Escuro' }}</span>
-        </button>
+        <Button
+          type="button"
+          class="referencia__botao"
+          severity="secondary"
+          outlined
+          :icon="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'"
+          :label="isDarkMode ? 'Claro' : 'Escuro'"
+          @click="toggleColorMode"
+        />
       </div>
     </header>
 
@@ -212,20 +224,11 @@ const opcoesRisco = computed(() =>
       <div class="secao__cabecalho">
         <h2 class="secao__titulo">{{ t('clinico.design.estados') }}</h2>
 
-        <div class="segmentado" role="radiogroup" :aria-label="t('clinico.design.estados')">
-          <button
-            v-for="opcao in ESTADOS"
-            :key="opcao"
-            type="button"
-            class="segmentado__botao clinic-focusable"
-            :class="{ 'segmentado__botao--ativo': estado === opcao }"
-            role="radio"
-            :aria-checked="estado === opcao"
-            @click="estado = opcao"
-          >
-            {{ t(`clinico.design.estado.${opcao}`) }}
-          </button>
-        </div>
+        <ClinicToggleGroup
+          v-model="estado"
+          :opcoes="opcoesEstado"
+          :rotulo="t('clinico.design.estados')"
+        />
       </div>
 
       <div class="vitrine">
@@ -423,9 +426,13 @@ const opcoesRisco = computed(() =>
           :tutor="clinico.tutor(pet.tutorId)"
         >
           <template #acoes>
-            <button type="button" class="referencia__botao clinic-focusable">
-              {{ t('clinico.paciente.abrirProntuario') }}
-            </button>
+            <Button
+              type="button"
+              class="referencia__botao"
+              severity="secondary"
+              outlined
+              :label="t('clinico.paciente.abrirProntuario')"
+            />
           </template>
         </ClinicPatientHeader>
       </div>
@@ -559,26 +566,19 @@ const opcoesRisco = computed(() =>
   border-radius: var(--clinic-radius-control);
   background: var(--clinic-surface);
   color: var(--clinic-muted);
-  cursor: pointer;
   font-size: var(--clinic-font-label);
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
-.referencia__botao {
-  display: inline-flex;
-  min-height: var(--clinic-hit-target);
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0 var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-text);
+.referencia__switch label {
   cursor: pointer;
-  font: inherit;
+}
+
+.referencia__botao.p-button {
+  min-height: var(--clinic-hit-target);
+  padding-block: 0;
   font-size: var(--clinic-font-label);
-  font-weight: 700;
 }
 
 .referencia__aviso {
@@ -615,39 +615,6 @@ const opcoesRisco = computed(() =>
   margin: 0.25rem 0 0;
   color: var(--clinic-muted);
   line-height: 1.55;
-}
-
-.segmentado {
-  display: inline-flex;
-  padding: 2px;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
-}
-
-.segmentado__botao {
-  min-height: var(--clinic-hit-target);
-  padding: 0 var(--clinic-space-4);
-  border: none;
-  border-radius: calc(var(--clinic-radius-control) - 2px);
-  background: transparent;
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-/* Anel + peso: a marcação precisa se ler antes da cor, e sobreviver à escala de cinza. */
-.segmentado__botao--ativo {
-  background: var(--clinic-surface);
-  box-shadow:
-    var(--clinic-shadow-card),
-    inset 0 0 0 1.5px var(--clinic-accent-strong);
-  color: var(--clinic-accent-strong);
-  font-weight: 800;
 }
 
 .vitrine {

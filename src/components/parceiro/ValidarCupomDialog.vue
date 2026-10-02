@@ -53,8 +53,8 @@ const dialogStyle = computed(() => {
     '--vc-warm-bg': colors.dashboard.warmBg,
     '--vc-warm-text': colors.dashboard.warmText,
     '--vc-shadow-rgb': colors.auth.shadowRgb,
-    /** Sempre branco real — `auth.white` no dark é superfície escura. */
-    '--vc-on-cta': LightColors.auth.white,
+    /** Sempre branco real: `auth.white` é superfície (quebrada no claro, escura no dark). */
+    '--vc-on-cta': LightColors.text.inverse,
   }
 })
 
@@ -221,7 +221,7 @@ async function handleValidar() {
     v-model:visible="visible"
     modal
     :draggable="false"
-    class="validar-cupom-dialog"
+    class="validar-cupom-dialog hc-tema"
     :pt="{ root: { class: 'validar-cupom-dialog' } }"
     @hide="closeDialog"
   >
@@ -233,15 +233,16 @@ async function handleValidar() {
             <span class="vc-hero__icon" aria-hidden="true">
               <i class="pi pi-ticket" />
             </span>
-            <button
+            <Button
               class="vc-close"
               type="button"
+              icon="pi pi-times"
+              severity="secondary"
+              outlined
               :aria-label="t('shell.cupom.close')"
               :disabled="submitting"
               @click="closeCallback"
-            >
-              <i class="pi pi-times" aria-hidden="true" />
-            </button>
+            />
           </div>
           <p class="vc-hero__eyebrow">{{ t('shell.cupom.eyebrow') }}</p>
           <h2 id="validar-cupom-title">{{ t('shell.cupom.title') }}</h2>
@@ -355,7 +356,7 @@ async function handleValidar() {
               type="button"
               size="large"
               :loading="submitting"
-              :disabled="!canSubmit"
+              :disabled="!canSubmit || submitting"
               @click="handleValidar"
             />
           </template>
@@ -428,7 +429,7 @@ async function handleValidar() {
 .vc-hero__glow {
   position: absolute;
   top: -3.5rem;
-  right: -2rem;
+  inset-inline-end: -2rem;
   width: 11rem;
   height: 11rem;
   border-radius: 999px;
@@ -468,10 +469,8 @@ async function handleValidar() {
 .vc-hero__eyebrow {
   margin: 0 0 0.35rem;
   color: var(--pf-on-soft);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .vc-hero h2 {
@@ -490,25 +489,25 @@ async function handleValidar() {
   line-height: 1.5;
 }
 
-.vc-close {
-  display: grid;
+/* Fechar sobre o hero de foco (tinta --pf-*). */
+.vc-close.p-button {
   width: 2.25rem;
   height: 2.25rem;
   flex-shrink: 0;
-  place-items: center;
-  border: 1px solid var(--pf-line);
+  border-color: var(--pf-line);
   border-radius: 0.7rem;
   background: var(--pf-field);
   color: var(--pf-on);
-  cursor: pointer;
-  transition: background 140ms ease;
 }
 
-.vc-close:hover {
+.vc-close.p-button:not(:disabled):hover,
+.vc-close.p-button:not(:disabled):active {
+  border-color: var(--pf-line);
   background: var(--pf-chip);
+  color: var(--pf-on);
 }
 
-.vc-close:disabled {
+.vc-close.p-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -564,8 +563,6 @@ async function handleValidar() {
   color: var(--vc-faint);
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .vc-counter {
@@ -696,10 +693,8 @@ async function handleValidar() {
 .vc-result__eyebrow {
   margin: 0;
   color: var(--vc-faint);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .vc-result h3 {
@@ -743,7 +738,7 @@ async function handleValidar() {
   border: 1px solid var(--vc-line);
   border-radius: 1.05rem;
   background: color-mix(in srgb, var(--vc-surface) 70%, var(--vc-bg));
-  text-align: left;
+  text-align: start;
 }
 
 .vc-result__card > div {
@@ -754,10 +749,8 @@ async function handleValidar() {
 
 .vc-result__k {
   color: var(--vc-faint);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .vc-result__card strong {
@@ -823,8 +816,7 @@ async function handleValidar() {
   .vc-hero,
   .vc-shell__body,
   .vc-shell__footer {
-    padding-left: 1.15rem;
-    padding-right: 1.15rem;
+    padding-inline: 1.15rem;
   }
 
   .vc-result__card {

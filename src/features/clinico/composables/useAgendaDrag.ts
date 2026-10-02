@@ -71,6 +71,18 @@ export function useAgendaDrag(opcoes: {
   colunaDoPonteiro: (evento: PointerEvent) => string | null
   destinoDaColuna: DestinoDaColuna
   aoPropor: (proposta: ArrasteProposta) => void
+  /**
+   * Fim de um gesto de ponteiro, tenha ele mudado alguma coisa ou não.
+   *
+   * O navegador ainda dispara um `click` depois do `pointerup`, e esse clique nasce no
+   * **ancestral comum** entre onde o ponteiro desceu (o card) e onde subiu (o fundo da
+   * coluna): a coluna. Quem monta a grade precisa saber que acabou de haver um gesto para
+   * não ler esse clique como clique no vazio.
+   *
+   * Cobre os três finais — soltar, soltar no mesmo lugar e cancelar com `Esc`. Os dois
+   * últimos não emitem proposta nenhuma e mesmo assim deixam o clique para trás.
+   */
+  aoTerminarGesto?: () => void
 }) {
   const estado = ref<EstadoArraste | null>(null)
   const arrastando = computed(() => estado.value !== null)
@@ -110,10 +122,16 @@ export function useAgendaDrag(opcoes: {
   })
 
   function limpar() {
+    const haviaGesto = estado.value !== null
+
     estado.value = null
     window.removeEventListener('pointermove', aoMover)
     window.removeEventListener('pointerup', aoSoltar)
     window.removeEventListener('keydown', aoTeclarDurante, true)
+
+    if (haviaGesto) {
+      opcoes.aoTerminarGesto?.()
+    }
   }
 
   function aoTeclarDurante(evento: KeyboardEvent) {

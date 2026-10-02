@@ -5,6 +5,7 @@
  * Tempo de perceber o engano, não de mudar de ideia. A barra nomeia o que aconteceu (não um
  * genérico "alteração salva") e some sozinha; `Z` faz o mesmo pelo teclado.
  */
+import Button from 'primevue/button'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -62,15 +63,17 @@ onBeforeUnmount(parar)
         {{ t(`clinico.agenda.desfeito.${agenda.desfazer.kind}`) }}
       </span>
 
-      <button
-        type="button"
-        class="desfazer__botao clinic-focusable"
+      <Button
+        class="desfazer__botao"
+        severity="secondary"
+        outlined
+        size="small"
         @click="agenda.desfazerUltima()"
       >
-        <i class="pi pi-undo" aria-hidden="true" />
-        <span>{{ t('clinico.agenda.desfazer') }}</span>
+        <i class="pi pi-undo p-button-icon" aria-hidden="true" />
+        <span class="p-button-label">{{ t('clinico.agenda.desfazer') }}</span>
         <kbd>Z</kbd>
-      </button>
+      </Button>
 
       <span class="desfazer__barra" aria-hidden="true">
         <span class="desfazer__progresso" :style="{ transform: `scaleX(${proporcao})` }" />
@@ -102,22 +105,6 @@ onBeforeUnmount(parar)
   font-weight: 650;
 }
 
-.desfazer__botao {
-  display: inline-flex;
-  min-height: var(--clinic-hit-target);
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0 var(--clinic-space-3);
-  border: 1px solid var(--clinic-accent);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-}
-
 .desfazer__botao kbd {
   padding: 0 0.25rem;
   border: 1px solid currentcolor;
@@ -141,6 +128,11 @@ onBeforeUnmount(parar)
   background: var(--clinic-accent-strong);
   transform-origin: left;
   transition: transform 100ms linear;
+}
+
+/* A barra esvazia rumo ao início da linha de leitura. */
+[dir='rtl'] .desfazer__progresso {
+  transform-origin: right;
 }
 
 .desfazer-enter-active,

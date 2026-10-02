@@ -1,13 +1,22 @@
 <script setup lang="ts">
 /**
- * Visão de semana: carga por dia.
+ * Visão de semana: quem tem horário, e quando.
  *
- * A ocupação aparece **como número, além da barra**. Barra sozinha some em escala de cinza e
- * não responde à pergunta que a semana existe para responder — "onde ainda cabe alguém?".
+ * Uma tabela num cartão só — profissionais nas linhas, dias nas colunas — no lugar dos sete
+ * cartões com iniciais coloridas. Nos cartões, "AR 38%" pedia para lembrar quem era AR, e a
+ * pergunta do balcão ("a Helena tem alguma coisa de manhã na quinta?") obrigava a correr os olhos
+ * por sete cartões atrás da mesma sigla. Na tabela, a linha é a pessoa e a coluna é o dia.
  *
- * Clicar num dia leva para a grade daquele dia; é a rota mais curta entre "a quinta está
- * vazia" e "marquei na quinta".
+ * Três escolhas que ficaram de antes, porque são de leitura:
+ *
+ * - **A ocupação aparece como número, além da barra.** Barra sozinha some em escala de cinza.
+ * - **Manhã e tarde em duas barrinhas**, porque ninguém pergunta pelo dia inteiro.
+ * - **Clicar no dia leva para a grade daquele dia** — a rota mais curta entre "a quinta está
+ *   vazia" e "marquei na quinta". Aqui, qualquer célula do dia faz isso.
+ *
+ * A cor é de estado e mora no número e na barra: cheio em pêssego, além da capacidade em coral.
  */
+import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -21,20 +30,6 @@ const emit = defineEmits<{ escolherDia: [data: string] }>()
 const { t } = useI18n()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
-
-/* A semana identifica o profissional pelas iniciais e pela cor da coluna dele na grade: é o
- * mesmo par que a pessoa já aprendeu olhando o dia, e o card não tem largura para nomes. */
-function nomeDe(professionalId: string) {
-  return clinico.profissional(professionalId)?.nome ?? ''
-}
-
-function iniciaisDe(professionalId: string) {
-  return clinico.profissional(professionalId)?.iniciais ?? '?'
-}
-
-function corDe(professionalId: string) {
-  return clinico.corDaColuna(professionalId)
-}
 const formato = useClinicFormat()
 
 const dias = computed(() =>
@@ -45,293 +40,419 @@ const dias = computed(() =>
     fechado: dia.capacidadeMinutos === 0,
   })),
 )
+
+/** Os profissionais que aparecem na semana, na ordem do cadastro (a mesma das colunas do dia). */
+const pessoas = computed(() => {
+  const presentes = new Set(
+    dias.value.flatMap((dia) => dia.porProfissional.map((pessoa) => pessoa.professionalId)),
+  )
+
+  return clinico.profissionais.filter((pessoa) => presentes.has(pessoa.id))
+})
+
+type Dia = (typeof dias.value)[number]
+
+function cargaDe(dia: Dia, professionalId: string) {
+  return dia.porProfissional.find((pessoa) => pessoa.professionalId === professionalId) ?? null
+}
+
+function rotuloDoDia(dia: Dia) {
+  return `${formato.diaDaSemanaCurto(dia.data)} ${formato.dataCurta(dia.data)}`
+}
 </script>
 
 <template>
-  <div class="semana">
-    <article
-      v-for="dia in dias"
-      :key="dia.data"
-      class="dia"
-      :class="[`dia--${dia.faixa}`, { 'dia--hoje': dia.ehHoje, 'dia--fechado': dia.fechado }]"
-    >
-      <button
-        type="button"
-        class="dia__botao clinic-focusable"
-        @click="emit('escolherDia', dia.data)"
-      >
-        <header class="dia__topo">
-          <span class="dia__semana">{{ formato.diaDaSemanaCurto(dia.data) }}</span>
-          <span class="dia__data clinic-value">{{ formato.dataCurta(dia.data) }}</span>
-        </header>
+  <section class="hc semana" :aria-label="t('clinico.agenda.semana.titulo')">
+    <div class="semana__rolagem">
+      <table class="semana__tabela">
+        <thead>
+          <tr>
+            <th scope="col" class="semana__canto">
+              <span class="semana__nota">
+                <span class="semana__amostra" aria-hidden="true"> <span /><span /> </span>
+                {{ t('clinico.agenda.semana.legendaBarras') }}
+              </span>
+            </th>
+            <th
+              v-for="dia in dias"
+              :key="dia.data"
+              scope="col"
+              :class="{ 'semana__col--hoje': dia.ehHoje, 'semana__col--fechado': dia.fechado }"
+            >
+              <Button
+                type="button"
+                class="semana__dia"
+                severity="secondary"
+                text
+                :aria-label="t('clinico.agenda.semana.abrirDia', { dia: rotuloDoDia(dia) })"
+                @click="emit('escolherDia', dia.data)"
+              >
+                <span class="semana__dia-nome">{{ formato.diaDaSemanaCurto(dia.data) }}</span>
+                <span class="semana__dia-data">{{ formato.dataCurta(dia.data) }}</span>
+              </Button>
+            </th>
+          </tr>
+        </thead>
 
-        <p v-if="dia.fechado" class="dia__fechado">{{ t('clinico.agenda.fechadaTitulo') }}</p>
-
-        <template v-else>
-          <p class="dia__ocupacao">
-            <strong class="clinic-value">{{ formato.percentual(dia.ocupacao) }}</strong>
-            <span>{{ t('clinico.agenda.semana.carga') }}</span>
-          </p>
-
-          <span class="dia__barra" aria-hidden="true">
-            <span
-              class="dia__preenchimento"
-              :style="{ width: `${Math.min(dia.ocupacao, 1) * 100}%` }"
-            />
-          </span>
-
-          <ul class="dia__numeros">
-            <li>{{ t('clinico.agenda.semana.agendados', { contagem: dia.agendados }, dia.agendados) }}</li>
-            <li v-if="dia.encaixes > 0">
-              {{ t('clinico.agenda.semana.encaixes', { contagem: dia.encaixes }, dia.encaixes) }}
-            </li>
-            <li v-if="dia.faltas > 0" class="dia__faltas">
-              {{ t('clinico.agenda.semana.faltas', { contagem: dia.faltas }, dia.faltas) }}
-            </li>
-          </ul>
+        <tbody>
+          <!-- A clínica inteira primeiro: o agregado, com agendados e faltas do dia. -->
+          <tr class="semana__clinica">
+            <th scope="row">{{ t('clinico.agenda.semana.clinica') }}</th>
+            <td
+              v-for="dia in dias"
+              :key="dia.data"
+              :class="{ 'semana__col--hoje': dia.ehHoje, 'semana__col--fechado': dia.fechado }"
+            >
+              <span v-if="dia.fechado" class="semana__fechado">
+                {{ t('clinico.agenda.semana.fechada') }}
+              </span>
+              <Button
+                v-else
+                type="button"
+                class="semana__celula"
+                severity="secondary"
+                text
+                :aria-label="t('clinico.agenda.semana.abrirDia', { dia: rotuloDoDia(dia) })"
+                @click="emit('escolherDia', dia.data)"
+              >
+                <span class="semana__pct" :class="`semana__pct--${dia.faixa}`">
+                  {{ formato.percentual(dia.ocupacao) }}
+                </span>
+              </Button>
+            </td>
+          </tr>
 
           <!--
-            A quebra por profissional é o que faz a semana responder a pergunta do balcão. O
-            agregado do dia diz 50% quando uma agenda está cheia e a outra vazia — e não diz a
-            quem oferecer. Manhã e tarde em barras separadas porque ninguém pergunta pelo dia
-            inteiro: pergunta "tem alguma coisa de manhã na terça?".
+            Agendados e faltas numa linha cada, só com o número: a palavra em toda célula não cabia
+            na coluna do tablet ("agendado:" cortado), e o título da linha já diz o que o número é.
           -->
-          <ul class="pessoas">
-            <li
-              v-for="pessoa in dia.porProfissional"
-              :key="pessoa.professionalId"
-              class="pessoa"
-              :title="
-                t('clinico.agenda.semana.detalhePessoa', {
-                  nome: nomeDe(pessoa.professionalId),
-                  manha: formato.percentual(pessoa.ocupacaoManha),
-                  tarde: formato.percentual(pessoa.ocupacaoTarde),
-                })
-              "
+          <tr class="semana__contagem">
+            <th scope="row">{{ t('clinico.agenda.semana.linhaAgendados') }}</th>
+            <td
+              v-for="dia in dias"
+              :key="dia.data"
+              :class="{ 'semana__col--hoje': dia.ehHoje, 'semana__col--fechado': dia.fechado }"
             >
-              <span class="pessoa__iniciais" :style="{ background: corDe(pessoa.professionalId) }">
-                {{ iniciaisDe(pessoa.professionalId) }}
-              </span>
+              <span class="semana__numero">{{ dia.fechado ? '—' : dia.agendados }}</span>
+            </td>
+          </tr>
 
-              <span class="pessoa__periodos" aria-hidden="true">
-                <span
-                  class="pessoa__periodo"
-                  :class="`pessoa__periodo--${faixaDeOcupacao(pessoa.ocupacaoManha)}`"
-                >
-                  <span :style="{ width: `${Math.min(pessoa.ocupacaoManha, 1) * 100}%` }" />
-                </span>
-                <span
-                  class="pessoa__periodo"
-                  :class="`pessoa__periodo--${faixaDeOcupacao(pessoa.ocupacaoTarde)}`"
-                >
-                  <span :style="{ width: `${Math.min(pessoa.ocupacaoTarde, 1) * 100}%` }" />
-                </span>
+          <tr class="semana__contagem semana__contagem--ultima">
+            <th scope="row">{{ t('clinico.agenda.semana.linhaFaltas') }}</th>
+            <td
+              v-for="dia in dias"
+              :key="dia.data"
+              :class="{ 'semana__col--hoje': dia.ehHoje, 'semana__col--fechado': dia.fechado }"
+            >
+              <span class="semana__numero" :class="{ 'semana__numero--faltas': dia.faltas > 0 }">
+                {{ dia.faltas > 0 ? dia.faltas : '—' }}
               </span>
+            </td>
+          </tr>
 
-              <span class="pessoa__valor clinic-value">
-                {{ formato.percentual(pessoa.ocupacao) }}
+          <tr v-for="pessoa in pessoas" :key="pessoa.id">
+            <th scope="row">
+              <span class="semana__pessoa">
+                <span
+                  class="semana__cor"
+                  :style="{ background: clinico.corDaColuna(pessoa.id) }"
+                  aria-hidden="true"
+                />
+                <span class="semana__nome">{{ pessoa.nome }}</span>
               </span>
-            </li>
-          </ul>
-        </template>
-      </button>
-    </article>
-  </div>
+            </th>
+            <td
+              v-for="dia in dias"
+              :key="dia.data"
+              :class="{ 'semana__col--hoje': dia.ehHoje, 'semana__col--fechado': dia.fechado }"
+            >
+              <template v-if="!dia.fechado && cargaDe(dia, pessoa.id)">
+                <Button
+                  type="button"
+                  class="semana__celula"
+                  severity="secondary"
+                  text
+                  :aria-label="
+                    t('clinico.agenda.semana.detalhePessoa', {
+                      nome: pessoa.nome,
+                      manha: formato.percentual(cargaDe(dia, pessoa.id)!.ocupacaoManha),
+                      tarde: formato.percentual(cargaDe(dia, pessoa.id)!.ocupacaoTarde),
+                    })
+                  "
+                  @click="emit('escolherDia', dia.data)"
+                >
+                  <span
+                    class="semana__pct"
+                    :class="`semana__pct--${faixaDeOcupacao(cargaDe(dia, pessoa.id)!.ocupacao)}`"
+                  >
+                    {{ formato.percentual(cargaDe(dia, pessoa.id)!.ocupacao) }}
+                  </span>
+                  <span class="semana__periodos" aria-hidden="true">
+                    <span
+                      v-for="(periodo, indice) in [
+                        cargaDe(dia, pessoa.id)!.ocupacaoManha,
+                        cargaDe(dia, pessoa.id)!.ocupacaoTarde,
+                      ]"
+                      :key="indice"
+                      class="semana__periodo"
+                      :class="`semana__periodo--${faixaDeOcupacao(periodo)}`"
+                    >
+                      <span :style="{ inlineSize: `${Math.min(periodo, 1) * 100}%` }" />
+                    </span>
+                  </span>
+                </Button>
+              </template>
+              <span v-else class="semana__vazio" aria-hidden="true">—</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </template>
 
 <style scoped>
 .semana {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: var(--clinic-space-2);
+  padding: 0.75rem 0.9rem 0.9rem;
 }
 
-.dia {
-  min-width: 0;
+/* No tablet em pé, a tabela rola dentro do cartão em vez de espremer os dias. */
+.semana__rolagem {
+  overflow-x: auto;
 }
 
-.dia__botao {
-  display: grid;
+.semana__tabela {
   width: 100%;
-  align-content: start;
-  gap: var(--clinic-space-2);
-  min-height: 9rem;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
-}
-
-.dia__botao:hover {
-  border-color: var(--clinic-accent);
-  box-shadow: var(--clinic-shadow-card);
-}
-
-.dia--hoje .dia__botao {
-  border-color: var(--clinic-accent-strong);
-  box-shadow: inset 0 2px 0 var(--clinic-accent-strong);
-}
-
-.dia--fechado .dia__botao {
-  background: var(--clinic-surface-sunken);
-}
-
-.dia__topo {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.3rem;
-}
-
-.dia__semana {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.dia__data {
-  color: var(--clinic-muted);
-  font-weight: 700;
-}
-
-.dia__ocupacao {
-  display: flex;
-  align-items: baseline;
-  gap: 0.3rem;
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-}
-
-.dia__ocupacao strong {
-  color: var(--clinic-text);
-  font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.dia__barra {
-  display: block;
-  height: 5px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--clinic-line);
-}
-
-.dia__preenchimento {
-  display: block;
-  height: 100%;
-  background: var(--clinic-accent);
-}
-
-.dia--cheio .dia__preenchimento {
-  background: var(--clinic-attention-text);
-}
-
-.dia--excedido .dia__preenchimento {
-  background: var(--clinic-risk-text);
-}
-
-.dia__numeros {
-  display: grid;
-  gap: 0.1rem;
-  margin: 0;
-  padding: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  list-style: none;
-}
-
-/* --------------------------------------------------------- carga por profissional */
-
-.pessoas {
-  display: grid;
-  gap: 0.2rem;
-  margin: 0.15rem 0 0;
-  padding: 0.35rem 0 0;
-  border-top: 1px solid var(--clinic-line);
-  list-style: none;
-}
-
-.pessoa {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.pessoa__iniciais {
-  display: grid;
-  width: 1.1rem;
-  height: 1.1rem;
-  place-items: center;
-  border-radius: 0.3rem;
-  color: var(--clinic-text);
-  font-size: 0.55rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-/* Duas barras por pessoa: manhã e tarde. Juntas, ocupam a mesma altura de uma. */
-.pessoa__periodos {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
-}
-
-.pessoa__periodo {
-  display: block;
-  height: 4px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--clinic-line);
-}
-
-.pessoa__periodo span {
-  display: block;
-  height: 100%;
-  background: var(--clinic-accent);
-}
-
-.pessoa__periodo--cheio span {
-  background: var(--clinic-attention-text);
-}
-
-.pessoa__periodo--excedido span {
-  background: var(--clinic-risk-text);
-}
-
-.pessoa__valor {
-  color: var(--clinic-faint);
-  font-size: 0.6rem;
-  font-weight: 700;
+  min-width: 38rem;
+  border-collapse: collapse;
+  table-layout: fixed;
   font-variant-numeric: tabular-nums;
 }
 
-.dia__faltas {
-  color: var(--clinic-risk-text);
-  font-weight: 700;
+.semana__tabela th,
+.semana__tabela td {
+  padding: 0;
+  border-bottom: 1px solid var(--hc-linha);
+  text-align: start;
+  vertical-align: middle;
 }
 
-.dia__fechado {
-  margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.05em;
+.semana__tabela tbody tr:last-child th,
+.semana__tabela tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.semana__canto {
+  width: 11rem;
+  padding: 0.4rem 0.5rem 0.6rem 0;
+}
+
+.semana__nota {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--hc-tinta-3);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.semana__amostra {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.semana__amostra span {
+  width: 0.9rem;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: var(--hc-marca);
+}
+
+/* O cabeçalho do dia é o atalho para a grade daquele dia. */
+.semana__dia.p-button {
+  display: grid;
+  justify-content: start;
+  justify-items: start;
+  gap: 0;
+  width: 100%;
+  padding: 0.35rem 0.6rem 0.55rem;
+  border-radius: 0.6rem;
+  color: var(--hc-tinta);
+  text-align: start;
+}
+
+.semana__dia-nome {
+  color: var(--hc-tinta-2);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.semana__dia-nome::first-letter {
   text-transform: uppercase;
 }
 
-@media (max-width: 1100px) {
-  .semana {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
-  }
+.semana__dia-data {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+/* Hoje: a coluna inteira num fundo de marca bem claro, e a data na tinta da marca. */
+.semana__col--hoje {
+  background: color-mix(in srgb, var(--hc-marca-clara) 40%, transparent);
+}
+
+.semana__col--hoje .semana__dia-data,
+.semana__col--hoje .semana__dia-nome {
+  color: var(--hc-marca-forte);
+}
+
+.semana__col--fechado {
+  background: color-mix(in srgb, var(--hc-linha) 60%, transparent);
+}
+
+.semana__tabela tbody th {
+  padding: 0.55rem 0.75rem 0.55rem 0;
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* As três linhas da clínica formam um bloco; a borda mais forte o separa das pessoas. */
+.semana__contagem--ultima th,
+.semana__contagem--ultima td {
+  border-bottom-color: var(--hc-borda);
+}
+
+.semana__contagem th {
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.semana__numero {
+  display: block;
+  padding: 0.4rem 0.6rem;
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.semana__numero--faltas {
+  color: var(--hc-coral-tinta);
+}
+
+.semana__pessoa {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+/* A cor do profissional é a mesma da coluna dele na grade do dia: liga as duas visões. */
+.semana__cor {
+  flex-shrink: 0;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+}
+
+.semana__nome {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.semana__celula.p-button {
+  display: grid;
+  justify-content: stretch;
+  justify-items: start;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.6rem;
+  color: var(--hc-tinta);
+  font-weight: inherit;
+  text-align: start;
+}
+
+.semana__celula.p-button:not(:disabled):hover {
+  background: color-mix(in srgb, var(--hc-marca-clara) 55%, transparent);
+}
+
+.semana__pct {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.semana__clinica .semana__pct {
+  font-size: 1rem;
+}
+
+.semana__pct--vazio {
+  color: var(--hc-tinta-3);
+  font-weight: 500;
+}
+
+.semana__pct--cheio {
+  color: var(--hc-pessego-tinta);
+}
+
+.semana__pct--excedido {
+  color: var(--hc-coral-tinta);
+}
+
+.semana__meta {
+  color: var(--hc-tinta-2);
+  font-size: 0.75rem;
+}
+
+.semana__meta--faltas {
+  color: var(--hc-coral-tinta);
+  font-weight: 600;
+}
+
+.semana__fechado {
+  display: block;
+  padding: 0.5rem 0.6rem;
+  color: var(--hc-tinta-3);
+  font-size: 0.8125rem;
+}
+
+.semana__vazio {
+  display: block;
+  padding: 0.5rem 0.6rem;
+  color: var(--hc-tinta-3);
+}
+
+/* Manhã e tarde: duas barrinhas lado a lado, cada uma com o próprio trilho. */
+.semana__periodos {
+  display: grid;
+  gap: 3px;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  max-width: 5.5rem;
+}
+
+.semana__periodo {
+  display: block;
+  height: 0.3rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--hc-linha);
+}
+
+.semana__periodo > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--hc-marca);
+}
+
+.semana__periodo--cheio > span {
+  background: var(--hc-pessego-tinta);
+}
+
+.semana__periodo--excedido > span {
+  background: var(--hc-coral-tinta);
 }
 </style>

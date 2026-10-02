@@ -1,8 +1,61 @@
 @import 'primeicons/primeicons.css';
 @import 'tailwindcss';
 
+/*
+ * Árabe: nenhuma fonte do portal (DM Sans / system-ui) garante glifos árabes iguais em todo
+ * sistema. A Readex Pro (a mesma do app) entra só para a faixa árabe via `unicode-range`: texto
+ * latino continua caindo na fonte seguinte da pilha, em qualquer idioma.
+ */
+@font-face {
+  font-family: 'PetJourney Arabic';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 160 700;
+  src: url('@fontsource-variable/readex-pro/files/readex-pro-arabic-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range:
+    U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF,
+    U+FE70-FE74, U+FE76-FEFC;
+}
+
+@theme {
+  --font-sans:
+    'PetJourney Arabic', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/*
+ * Ícone do PrimeIcons segue o tamanho de quem o contém.
+ *
+ * O tema do PrimeVue injeta `.pi { font-size: var(--p-icon-size) }` — 1rem fixo. Isso quebra o
+ * contrato de toda fonte de ícones, em que o ícone tem 1em do contexto: o CSS do portal inteiro foi
+ * escrito assim, com a forma dizendo o tamanho do ícone (`.linha__marca { font-size: 0.65rem }`,
+ * `.coluna__icone { font-size: 0.62rem }`), e o tema anulava todos. O resultado se repetia tela a
+ * tela: o visto de 16 px encostando na borda de um disco de 17 px, a seta de abrir linha ocupando
+ * dois terços do quadradinho dela, ícone de 16 px ao lado de rótulo de 11 px.
+ *
+ * `html .pi` (0,1,1) ganha do `.pi` do tema (0,1,0) qualquer que seja a ordem em que os dois
+ * carregam, e perde para toda regra escrita numa tela — de contexto (`.x .pi`) ou na classe do
+ * próprio ícone (`.x__icone`, com o escopo do Vue) —, que continua mandando. A exclusão fica dentro
+ * de `:where()` para não somar especificidade: com `:not()` solto a regra subia a (0,2,1) e passava
+ * por cima do tamanho que o ícone do interruptor de tema declara. Os ícones internos dos
+ * componentes do PrimeVue — de botão, campo, menu, todos com uma classe `p-*` no próprio
+ * elemento — ficam de fora e seguem o tamanho do tema, que é o que o preset espera.
+ *
+ * Regra para quem desenha daqui em diante: **o tamanho do ícone mora no contêiner**, em
+ * `font-size`. Numa forma (disco, bloco, marcador), o ícone fica entre metade e 60% do lado dela.
+ */
+html .pi:where(:not([class^='p-'], [class*=' p-'])) {
+  font-size: inherit;
+}
+
 html {
   overflow-x: clip;
+  /*
+   * Goteira da barra de rolagem sempre reservada. Sem ela, a trava de modal abaixo tira a
+   * barra e a página inteira alarga uns 15px no instante em que o diálogo abre.
+   */
+  scrollbar-gutter: stable;
 }
 
 body,
@@ -10,14 +63,101 @@ body,
   max-width: 100%;
   overflow-x: clip;
 }
+
+/*
+ * Trava de rolagem do modal.
+ *
+ * O PrimeVue põe `p-overflow-hidden` no `<body>` ao abrir um Dialog modal e conta com o tema
+ * para definir a regra — que esta versão não emite em lugar nenhum: a classe entra no DOM e
+ * não faz nada. Por isso a tela atrás do diálogo continuava rolando, e quem abria o painel de
+ * um `Select` e girava a roda via o fundo andar junto.
+ *
+ * Estilizar só o `<body>` não resolveria: com `overflow-x: clip` no `<html>`, o eixo vertical
+ * restante computa para `auto` e quem rola passa a ser o `<html>`. A partir daí o overflow do
+ * `<body>` deixa de ser propagado para a viewport — a trava precisa ir no elemento que de fato
+ * rola. `overflow-y` isolado preserva o `clip` horizontal, que existe por outro motivo.
+ */
+html:has(> body.p-overflow-hidden) {
+  overflow-y: hidden;
+}
+
+/*
+ * O "marcar todos" do MultiSelect ganha rótulo.
+ *
+ * O PrimeVue desenha essa linha só com a caixa de seleção. No topo de uma lista de serviços, uma
+ * linha em branco antes de "Banho · R$ 89,00" parece opção quebrada — foi assim que ela foi
+ * relatada. O componente não aceita rótulo por prop, e o slot `header` renderiza acima da linha.
+ *
+ * O texto vem de `--rotulo-marcar-todos`, publicada por `applyDocumentLocale` a cada troca de
+ * idioma. Sem ela a regra não escreve nada, que é o comportamento de hoje — nunca um `[object]`
+ * ou um nome de variável na tela.
+ */
+.p-multiselect-header:has(.p-checkbox):not(:has(.p-multiselect-filter-container))::after {
+  content: var(--rotulo-marcar-todos, '');
+  color: var(--p-multiselect-option-color, inherit);
+  font-size: 0.875rem;
+}
+
+/*
+ * Rolagem de overlay não encadeia para trás.
+ *
+ * Painel de Select, MultiSelect e afins é teleportado para fora da árvore da página, mas a
+ * rolagem dele encadeia normalmente: ao chegar no fim da lista, a roda continua no elemento
+ * rolável de trás — o corpo do diálogo. `contain` corta o encadeamento sem travar a lista.
+ */
+.p-select-list-container,
+.p-multiselect-list-container,
+.p-autocomplete-list-container,
+.p-cascadeselect-list-container,
+.p-listbox-list-container,
+.p-virtualscroller,
+.p-dialog-content,
+.p-drawer-content {
+  overscroll-behavior: contain;
+}
+
+/*
+ * RTL: ícones direcionais do PrimeIcons espelham na horizontal. Usa a propriedade individual
+ * `scale` (e não `transform`) para compor com rotações que os componentes já aplicam.
+ */
+[dir='rtl']
+  :is(
+    .pi-chevron-left,
+    .pi-chevron-right,
+    .pi-angle-left,
+    .pi-angle-right,
+    .pi-angle-double-left,
+    .pi-angle-double-right,
+    .pi-arrow-left,
+    .pi-arrow-right,
+    .pi-arrow-up-right,
+    .pi-arrow-up-left,
+    .pi-arrow-down-right,
+    .pi-arrow-down-left,
+    .pi-sign-in,
+    .pi-sign-out,
+    .pi-send,
+    .pi-reply,
+    .pi-step-forward,
+    .pi-step-backward,
+    .pi-step-forward-alt,
+    .pi-step-backward-alt,
+    .pi-caret-left,
+    .pi-caret-right,
+    .pi-forward,
+    .pi-backward,
+    .pi-external-link
+  ) {
+  scale: -1 1;
+}
 :root {
   --pj-shell-header-height: 4.25rem;
-  --pj-toast-card: #ffffff;
-  --pj-toast-surface: #f2f7f5;
-  --pj-toast-line: #d9e6e1;
+  --pj-toast-card: #fbf7f4;
+  --pj-toast-surface: #f5f0ec;
+  --pj-toast-line: #ddcdc4;
   --pj-toast-text: #1f2f2b;
   --pj-toast-muted: #5f716b;
-  --pj-toast-faint: #8a9a94;
+  --pj-toast-faint: #727b79;
   --pj-toast-shadow-rgb: 31 47 43;
   --pj-toast-success: #3e7355;
   --pj-toast-success-soft: #e4f0e9;
@@ -73,7 +213,8 @@ body,
   display: flex !important;
   align-items: flex-start !important;
   gap: 0.85rem !important;
-  padding: 0.9rem 0.85rem 0.9rem 1rem !important;
+  padding-block: 0.9rem !important;
+  padding-inline: 1rem 0.85rem !important;
   border: 0 !important;
   background: transparent !important;
 }

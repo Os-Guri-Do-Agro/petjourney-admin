@@ -42,12 +42,19 @@ const vacinas = computed(() =>
     .map((aplicacao) => {
       const vacina = catalogo.find((item) => item.id === aplicacao.vacinaId)
 
+      /*
+       * A dose de fora sai no papel, marcada: a clínica não assina lote que não viu. A célula do
+       * lote diz onde foi aplicada, e o fabricante fica vazio — o catálogo daqui não sabe qual
+       * marca o pet shop usou.
+       */
       return {
         id: aplicacao.id,
         data: clinicClock.dateOf(aplicacao.aplicadaEm),
         nome: vacina?.nome ?? aplicacao.vacinaId,
-        fabricante: vacina?.fabricante ?? '',
-        lote: aplicacao.lote,
+        fabricante: aplicacao.externa ? '' : (vacina?.fabricante ?? ''),
+        lote: aplicacao.externa
+          ? t('clinico.documentos.vacinacao.externa', { local: aplicacao.externa.local })
+          : (aplicacao.lote ?? ''),
         proxima: aplicacao.proximaDoseEm,
       }
     }),
@@ -126,7 +133,7 @@ const vacinas = computed(() =>
 .tabela td {
   padding: 2mm 2mm;
   border: 0.25mm solid #000;
-  text-align: left;
+  text-align: start;
 }
 
 .tabela th {

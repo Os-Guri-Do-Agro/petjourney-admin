@@ -199,6 +199,45 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     }
   }
 
+  /**
+   * Abre o atendimento e já grava na anamnese o que veio de fora — o resumo do paciente.
+   *
+   * `preencher` recebe a anamnese como está e devolve só o que acrescentar: quem chama decide
+   * não sobrescrever o que alguém já digitou. A gravação é **imediata**, não pelo autosave:
+   * quem chama navega em seguida, e a página do prontuário relê o registro do repositório — um
+   * patch ainda esperando o temporizador chegaria depois da leitura e sumiria da tela.
+   *
+   * Devolve o id do prontuário, ou `null` quando não abriu. Prontuário em leitura (finalizado,
+   * ou com outro dispositivo) abre sem preenchimento: o resumo não fura o bloqueio de edição.
+   */
+  async function abrirComAnamnese(
+    appointmentId: string,
+    preencher: (atual: Encounter['anamnese']) => Partial<Encounter['anamnese']>,
+  ): Promise<string | null> {
+    await abrirPorAppointment(appointmentId)
+
+    const aberto = encounter.value
+
+    if (!aberto || erro.value) {
+      return null
+    }
+
+    const acrescimo = preencher(aberto.anamnese)
+
+    if (!somenteLeitura.value && Object.keys(acrescimo).length > 0) {
+      atualizar({ anamnese: { ...aberto.anamnese, ...acrescimo } })
+
+      if (temporizador) {
+        clearTimeout(temporizador)
+        temporizador = null
+      }
+
+      await gravar()
+    }
+
+    return aberto.id
+  }
+
   async function abrirPorId(encounterId: string) {
     carregando.value = true
     erro.value = ''
@@ -441,6 +480,19 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     clinico.invalidarTudo()
   }
 
+  /** Entrega o resumo ao responsável, no app. Ver `encounterRepository.liberarResumo`. */
+  async function liberarResumo() {
+    if (!encounter.value || encounter.value.status !== 'finalizado') {
+      return
+    }
+
+    try {
+      encounter.value = await encounterRepository.liberarResumo(encounter.value.id)
+    } catch {
+      erro.value = 'clinico.erros.mutacao'
+    }
+  }
+
   /**
    * Simulação de segundo dispositivo, para o painel de desenvolvimento: injeta um lock alheio
    * sem precisar de outra máquina aberta.
@@ -494,6 +546,7 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     pet,
     tutor,
     abrirPorAppointment,
+    abrirComAnamnese,
     abrirPorId,
     atualizar,
     gravar,
@@ -502,6 +555,7 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     buscarSugestoesDeRetorno,
     agendarRetorno,
     finalizar,
+    liberarResumo,
     restaurarRascunho,
     descartarRascunho,
     alternarSegundoDispositivo,

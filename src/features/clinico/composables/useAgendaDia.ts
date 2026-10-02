@@ -152,7 +152,8 @@ export function useAgendaDia(scrollTop: Ref<number>, alturaVisivel: Ref<number>)
     if (virtualizado.value && alturaVisivel.value > 0) {
       const folga = alturaVisivel.value
       const minutoInicial = inicio + (scrollTop.value - folga) / pixelsPorMinuto.value
-      const minutoFinal = inicio + (scrollTop.value + alturaVisivel.value + folga) / pixelsPorMinuto.value
+      const minutoFinal =
+        inicio + (scrollTop.value + alturaVisivel.value + folga) / pixelsPorMinuto.value
 
       primeiro = Math.max(inicio, Math.floor(minutoInicial / passo) * passo)
       ultimo = Math.min(fim, Math.ceil(minutoFinal / passo) * passo)
@@ -178,10 +179,7 @@ export function useAgendaDia(scrollTop: Ref<number>, alturaVisivel: Ref<number>)
         return false
       }
 
-      if (
-        agenda.filtroStatus.length > 0 &&
-        !agenda.filtroStatus.includes(appointment.status)
-      ) {
+      if (agenda.filtroStatus.length > 0 && !agenda.filtroStatus.includes(appointment.status)) {
         return false
       }
 
@@ -218,38 +216,46 @@ export function useAgendaDia(scrollTop: Ref<number>, alturaVisivel: Ref<number>)
 
     const layouts = new Map(layoutSpans(spans).map((layout) => [layout.id, layout]))
 
-    return lista.map((appointment) => {
-      const layout = layouts.get(appointment.id)
-      const inicioMin = layout?.inicioMin ?? 0
-      const fimMin = layout?.fimMin ?? inicioMin + 30
-      const pet = clinico.pet(appointment.petId)
+    return (
+      lista
+        .map((appointment) => {
+          const layout = layouts.get(appointment.id)
+          const inicioMin = layout?.inicioMin ?? 0
+          const fimMin = layout?.fimMin ?? inicioMin + 30
+          const pet = clinico.pet(appointment.petId)
 
-      return {
-        id: appointment.id,
-        appointment,
-        pet,
-        tutor: clinico.tutor(appointment.tutorId),
-        tipo: clinico.tipo(appointment.typeId),
-        inicioMin,
-        fimMin,
-        topPx: paraTopo(inicioMin),
-        /** Piso de altura: consulta de 15 min ainda precisa caber nome e hora. */
-        alturaPx: Math.max((fimMin - inicioMin) * pixelsPorMinuto.value, 22),
-        lane: layout?.lane ?? 0,
-        lanes: layout?.lanes ?? 1,
-        conflitos: agenda.conflitosDe({
-          id: appointment.id,
-          petId: appointment.petId,
-          professionalId: appointment.professionalId,
-          roomIds: appointment.roomIds,
-          typeId: appointment.typeId,
-          inicio: appointment.inicio,
-          fim: appointment.fim,
-          linkedGroupId: appointment.linkedGroupId,
-        }),
-        liberouHorario: !ocupaHorario(appointment),
-      }
-    })
+          return {
+            id: appointment.id,
+            appointment,
+            pet,
+            tutor: clinico.tutor(appointment.tutorId),
+            tipo: clinico.tipo(appointment.typeId),
+            inicioMin,
+            fimMin,
+            topPx: paraTopo(inicioMin),
+            /** Piso de altura: consulta de 15 min ainda precisa caber nome e hora. */
+            alturaPx: Math.max((fimMin - inicioMin) * pixelsPorMinuto.value, 22),
+            lane: layout?.lane ?? 0,
+            lanes: layout?.lanes ?? 1,
+            conflitos: agenda.conflitosDe({
+              id: appointment.id,
+              petId: appointment.petId,
+              professionalId: appointment.professionalId,
+              roomIds: appointment.roomIds,
+              typeId: appointment.typeId,
+              inicio: appointment.inicio,
+              fim: appointment.fim,
+              linkedGroupId: appointment.linkedGroupId,
+            }),
+            liberouHorario: !ocupaHorario(appointment),
+          }
+        })
+        /*
+         * Por horário de início: na cascata da sobreposição, quem começa depois fica por cima pela
+         * ordem do documento, e o Tab percorre a coluna na ordem em que o dia acontece.
+         */
+        .sort((a, b) => a.inicioMin - b.inicioMin)
+    )
   }
 
   function montarFaixas(filtro: (bloqueio: Block) => boolean): FaixaBloqueio[] {

@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
+import ar from '@/locales/ar.json'
 import enGB from '@/locales/en-GB.json'
 import en from '@/locales/en.json'
 import es from '@/locales/es.json'
 import pt from '@/locales/pt.json'
+import sr from '@/locales/sr.json'
 import {
   ESPECIALIDADE_OUTRA,
   ESPECIALIDADES,
@@ -81,9 +83,11 @@ describe('copy da área de atuação', () => {
     ['en', en],
     ['en-GB', enGB],
     ['es', es],
+    ['sr', sr],
+    ['ar', ar],
   ]
 
-  it('toda área tem rótulo nos 4 locales, mais "Outra" e a copy do formulário', () => {
+  it('toda área tem rótulo em todos os locales, mais "Outra" e a copy do formulário', () => {
     for (const [nome, dicionario] of LOCALES) {
       const areas = dicionario.acessos.especialidade as Record<string, string>
       const anotacao = dicionario.acessos.anotacao as Record<string, string>

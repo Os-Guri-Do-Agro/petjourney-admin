@@ -1,0 +1,250 @@
+{
+  "geradoEm": "2026-09-30T07:30:00-04:00",
+  "hojeDaClinica": "2026-09-30",
+  "petId": "pet-biscoito",
+  "vacina": {
+    "id": "apl-1-20260930",
+    "petId": "pet-biscoito",
+    "clinica": {
+      "id": "clinic-petjourney",
+      "nome": "PetJourney Clínica Veterinária",
+      "telefone": "(11) 3555-0142",
+      "utcOffset": "-04:00"
+    },
+    "origem": "CLINICA",
+    "profissional": {
+      "id": "prof-ana",
+      "nome": "Ana Ribeiro",
+      "especialidade": "CLINICO_GERAL",
+      "fotoUrl": null
+    },
+    "vacina": {
+      "nome": "V10 (múltipla canina)",
+      "fabricante": "Zoetis",
+      "obrigatoria": false,
+      "essencial": true
+    },
+    "aplicadaEm": "2026-09-30T07:30:00-04:00",
+    "lote": "V10-2505",
+    "validadeLote": "2027-06-17",
+    "via": "SUBCUTANEA",
+    "dose": 2,
+    "dosesNaSerie": 3,
+    "proximaDoseEm": "2026-10-28",
+    "proximaDoseAgendada": {
+      "agendamentoId": "apt-2-20260930",
+      "inicio": "2026-10-28T08:00:00-04:00"
+    },
+    "situacao": "SERIE_INCOMPLETA",
+    "externa": null,
+    "vacinaDaCarteiraId": null
+  },
+  "plano": {
+    "petId": "pet-biscoito",
+    "clinica": {
+      "id": "clinic-petjourney",
+      "nome": "PetJourney Clínica Veterinária",
+      "telefone": "(11) 3555-0142",
+      "utcOffset": "-04:00"
+    },
+    "geradoEm": "2026-09-30T07:30:00-04:00",
+    "vacinas": [
+      {
+        "vacina": {
+          "nome": "V10 (múltipla canina)",
+          "fabricante": "Zoetis",
+          "obrigatoria": false,
+          "essencial": true
+        },
+        "tipoDeSerie": "FILHOTE",
+        "situacao": "A_VENCER",
+        "aplicadasNaSerie": 2,
+        "total": 3,
+        "doses": [
+          {
+            "numero": 1,
+            "total": 3,
+            "tipo": "SERIE",
+            "estado": "APLICADA",
+            "em": "2026-09-02",
+            "aplicacaoId": "aplic-biscoito-v10-1",
+            "agendamento": null
+          },
+          {
+            "numero": 2,
+            "total": 3,
+            "tipo": "SERIE",
+            "estado": "APLICADA",
+            "em": "2026-09-30",
+            "aplicacaoId": "apl-1-20260930",
+            "agendamento": null
+          },
+          {
+            "numero": 3,
+            "total": 3,
+            "tipo": "SERIE",
+            "estado": "PREVISTA",
+            "em": "2026-10-28",
+            "aplicacaoId": null,
+            "agendamento": {
+              "id": "apt-2-20260930",
+              "inicio": "2026-10-28T08:00:00-04:00"
+            }
+          },
+          {
+            "numero": 3,
+            "total": 3,
+            "tipo": "REFORCO",
+            "estado": "PREVISTA",
+            "em": "2027-10-28",
+            "aplicacaoId": null,
+            "agendamento": null
+          }
+        ]
+      },
+      {
+        "vacina": {
+          "nome": "Giárdia",
+          "fabricante": "Zoetis",
+          "obrigatoria": false,
+          "essencial": false
+        },
+        "tipoDeSerie": "FILHOTE",
+        "situacao": "A_VENCER",
+        "aplicadasNaSerie": 1,
+        "total": 2,
+        "doses": [
+          {
+            "numero": 1,
+            "total": 2,
+            "tipo": "SERIE",
+            "estado": "APLICADA",
+            "em": "2026-09-10",
+            "aplicacaoId": "aplic-biscoito-giardia-1",
+            "agendamento": null
+          },
+          {
+            "numero": 2,
+            "total": 2,
+            "tipo": "SERIE",
+            "estado": "PREVISTA",
+            "em": "2026-10-08",
+            "aplicacaoId": null,
+            "agendamento": null
+          },
+          {
+            "numero": 2,
+            "total": 2,
+            "tipo": "REFORCO",
+            "estado": "PREVISTA",
+            "em": "2027-10-08",
+            "aplicacaoId": null,
+            "agendamento": null
+          }
+        ]
+      },
+      {
+        "vacina": {
+          "nome": "Antirrábica",
+          "fabricante": "Boehringer",
+          "obrigatoria": true,
+          "essencial": true
+        },
+        "tipoDeSerie": "FILHOTE",
+        "situacao": "AGUARDA_IDADE",
+        "aplicadasNaSerie": 0,
+        "total": 1,
+        "doses": [
+          {
+            "numero": 1,
+            "total": 1,
+            "tipo": "SERIE",
+            "estado": "AGUARDA_IDADE",
+            "em": "2026-10-04",
+            "aplicacaoId": null,
+            "agendamento": null
+          },
+          {
+            "numero": 1,
+            "total": 1,
+            "tipo": "REFORCO",
+            "estado": "PREVISTA",
+            "em": "2027-10-04",
+            "aplicacaoId": null,
+            "agendamento": null
+          }
+        ]
+      }
+    ],
+    "opcionaisNaoIniciadas": [
+      {
+        "nome": "Traqueobronquite (gripe canina)",
+        "fabricante": "MSD"
+      }
+    ],
+    "atrasadas": 0
+  },
+  "notificacao": {
+    "id": "notif-vacina-registrada-apl-1-20260930",
+    "criadoEm": "2026-09-30T07:30:00-04:00",
+    "lidaEm": null,
+    "titulo": "Biscoito tomou V10 (múltipla canina) (dose 2 de 3)",
+    "corpo": "PetJourney Clínica Veterinária. A próxima já está marcada: 28/10 às 08:00.",
+    "dados": {
+      "tipo": "VACINA_REGISTRADA_PELA_CLINICA",
+      "url": "/screens/vacina/lista?petId=pet-biscoito&id=apl-1-20260930",
+      "aplicacaoId": "apl-1-20260930",
+      "petId": "pet-biscoito",
+      "petNome": "Biscoito",
+      "clinicaNome": "PetJourney Clínica Veterinária",
+      "vacinaNome": "V10 (múltipla canina)",
+      "origem": "CLINICA",
+      "dose": 2,
+      "dosesNaSerie": 3,
+      "proximaDoseEm": "2026-10-28",
+      "proximaDoseAgendadaPara": "2026-10-28T08:00:00-04:00"
+    }
+  },
+  "agendamento": {
+    "id": "apt-2-20260930",
+    "clinica": {
+      "id": "clinic-petjourney",
+      "nome": "PetJourney Clínica Veterinária",
+      "telefone": "(11) 3555-0142",
+      "utcOffset": "-04:00"
+    },
+    "pet": {
+      "id": "pet-biscoito",
+      "nome": "Biscoito",
+      "fotoUrl": null
+    },
+    "servico": {
+      "id": "tipo-vacina",
+      "nome": "Vacinação",
+      "tipo": "VACINA",
+      "duracaoMinutos": 15,
+      "temPreConsulta": false
+    },
+    "profissional": {
+      "id": "prof-ana",
+      "nome": "Ana Ribeiro",
+      "especialidade": "CLINICO_GERAL",
+      "fotoUrl": null
+    },
+    "inicio": "2026-10-28T08:00:00-04:00",
+    "fim": "2026-10-28T08:15:00-04:00",
+    "status": "AGENDADO",
+    "origem": "RETORNO",
+    "observacao": "",
+    "criadoEm": "2026-09-30T07:30:00-04:00",
+    "canceladoEm": null,
+    "motivoCancelamento": null,
+    "podeConfirmar": false,
+    "podeCancelar": true,
+    "podeRemarcar": true,
+    "cancelarAte": "2026-10-28T06:00:00-04:00",
+    "preConsulta": null,
+    "falta": null,
+    "atendimentoId": null
+  }
+}

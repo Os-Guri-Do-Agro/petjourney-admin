@@ -34,8 +34,13 @@ import {
   type ImpedimentoDeLeito,
   type OcupacaoDoLeito,
 } from '../../domain/internacao'
-import { createClinicClock } from '../../domain/clinic-time'
-import { montarTextoDeAlta, montarTextoDoBoletim } from '../boletim-texto'
+import { createClinicClock, diffDays } from '../../domain/clinic-time'
+import {
+  montarModelos,
+  montarTextoDeAlta,
+  montarTextoDoBoletim,
+  type ModeloDeBoletim,
+} from '../boletim-texto'
 import { CLINIC_UTC_OFFSET } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import { agoraIso, getDataset, novoId } from '../store'
@@ -215,6 +220,53 @@ function ultimoBoletim(internacaoId: string): BoletimAoTutor | null {
 }
 
 /**
+ * Os dados do paciente que todo texto de boletim usa, reunidos uma vez só.
+ *
+ * O boletim composto e os modelos prontos precisam exatamente dos mesmos números — quantas
+ * medicações do período saíram no horário, quanto tempo o animal está internado —, e duas
+ * contagens separadas divergiriam no primeiro ajuste de janela. O que muda entre os dois é o que
+ * se escreve com eles, não o que eles são.
+ */
+function fatosDoPaciente(internacao: Internacao) {
+  const dataset = base()
+  const agora = agoraIso()
+  const anterior = ultimoBoletim(internacao.id)
+
+  /* O período é desde o último boletim; no primeiro, desde a entrada. */
+  const desde = anterior?.geradoEm ?? internacao.entradaEm
+  const doPeriodo = dataset.administracoes.filter(
+    (item) =>
+      item.internacaoId === internacao.id &&
+      item.previstaPara >= desde &&
+      item.previstaPara <= agora,
+  )
+
+  return {
+    agora,
+    anterior,
+    petNome: getDataset().pets.find((pet) => pet.id === internacao.petId)?.nome ?? 'Seu pet',
+    feitas: doPeriodo.filter((item) => item.status === 'feita').length,
+    previstas: doPeriodo.length,
+    diasInternado: Math.max(0, diffDays(clock.dateOf(internacao.entradaEm), clock.dateOf(agora))),
+  }
+}
+
+/**
+ * A última temperatura aferida deste paciente.
+ *
+ * Sai da evolução mais recente, e não de um campo da internação: temperatura é medida, tem hora,
+ * e a que interessa ao boletim é a de agora há pouco. `null` quando ninguém aferiu ainda — e
+ * nesse caso o texto simplesmente não fala de temperatura, em vez de inventar um valor.
+ */
+function ultimaTemperatura(internacaoId: string): number | null {
+  const evolucoes = base()
+    .evolucoes.filter((item) => item.internacaoId === internacaoId)
+    .sort((a, b) => a.registradoEm.localeCompare(b.registradoEm))
+
+  return evolucoes[evolucoes.length - 1]?.vitais.temperatura?.valor ?? null
+}
+
+/**
  * Compõe um boletim e decide, sozinho, se ele pode sair.
  *
  * O `status` nasce de `exigeLigacaoAntes` — não de um parâmetro. Deixar quem chama escolher se o
@@ -230,21 +282,12 @@ function comporBoletim(input: {
   fotoLegenda: string
   textoManual?: string
 }): BoletimAoTutor {
-  const dataset = base()
-  const agora = agoraIso()
-  const anterior = ultimoBoletim(input.internacao.id)
-  const petNome =
-    getDataset().pets.find((pet) => pet.id === input.internacao.petId)?.nome ?? 'Seu pet'
-
-  const desde = anterior?.geradoEm ?? input.internacao.entradaEm
-  const doPeriodo = dataset.administracoes.filter(
-    (item) =>
-      item.internacaoId === input.internacao.id &&
-      item.previstaPara >= desde &&
-      item.previstaPara <= agora,
+  const fatos = fatosDoPaciente(input.internacao)
+  const { agora } = fatos
+  const exigeLigacao = exigeLigacaoAntes(
+    fatos.anterior?.gravidade ?? null,
+    input.internacao.gravidade,
   )
-
-  const exigeLigacao = exigeLigacaoAntes(anterior?.gravidade ?? null, input.internacao.gravidade)
 
   return {
     id: novoId('bol'),
@@ -255,10 +298,10 @@ function comporBoletim(input: {
     texto:
       input.textoManual?.trim() ||
       montarTextoDoBoletim({
-        petNome,
+        petNome: fatos.petNome,
         gravidade: input.internacao.gravidade,
-        feitas: doPeriodo.filter((item) => item.status === 'feita').length,
-        previstas: doPeriodo.length,
+        feitas: fatos.feitas,
+        previstas: fatos.previstas,
         temperatura: input.temperatura,
         observado: input.observado,
         exigeLigacao,
@@ -791,6 +834,37 @@ export const internacaoRepository = {
   // Boletim
   // -------------------------------------------------------------------------
 
+  /**
+   * Os textos prontos para este paciente, já com os dados dele dentro.
+   *
+   * Sai do repositório e não da tela porque os números são os mesmos que o boletim composto usa
+   * — medicações do período, última temperatura, tempo de internação — e a tela não tem nenhum
+   * deles em mãos. Buscá-los na apresentação significaria refazer ali a mesma contagem, e um dos
+   * dois lados ficaria para trás no primeiro ajuste.
+   *
+   * O resultado é texto pronto, não um gabarito: quem recebe edita à vontade antes de enviar.
+   */
+  modelosDeBoletim(internacaoId: string): Promise<ModeloDeBoletim[]> {
+    return simularChamada('internacao.boletim', () => {
+      const internacao = base().internacoes.find((item) => item.id === internacaoId)
+
+      if (!internacao) {
+        throw new Error(`internacao.modelosDeBoletim: ${internacaoId} não existe`)
+      }
+
+      const fatos = fatosDoPaciente(internacao)
+
+      return montarModelos({
+        petNome: fatos.petNome,
+        gravidade: internacao.gravidade,
+        feitas: fatos.feitas,
+        previstas: fatos.previstas,
+        temperatura: ultimaTemperatura(internacaoId),
+        diasInternado: fatos.diasInternado,
+      })
+    })
+  },
+
   gerarBoletim(input: {
     internacaoId: string
     autorId: string
@@ -1155,6 +1229,8 @@ export const internacaoRepository = {
         boletim = {
           id: novoId('bol'),
           internacaoId: internacao.id,
+          /* A mensagem que encerra a conversa: o app a mostra diferente das atualizações. */
+          tipo: 'alta',
           origem: 'manual',
           status: 'liberado',
           gravidade: internacao.gravidade,

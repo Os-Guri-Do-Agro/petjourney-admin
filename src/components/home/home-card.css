@@ -1,0 +1,194 @@
+/*
+ * O acabamento da visão geral, espelhado do Prodify na paleta da casa.
+ *
+ * Pedido do usuário, sem meio-termo: "quero um design bem parecido, mas com nossa paleta de cores",
+ * ignorando as regras de design anteriores. Então: fundo claro com grade fina e um brilho suave,
+ * cartões brancos de verdade com borda fina e sombra baixa, títulos com ícone de linha, chips
+ * pastel em caixa alta, selos de prioridade, barras de progresso e a marca em degradê. O roxo do
+ * Prodify vira a sálvia da casa, puxando para o ciano no fim do degradê.
+ *
+ * Global de propósito: os cartões da visão geral são componentes separados que dividem o mesmo
+ * acabamento. As variáveis `--hc-*` moram na raiz do app, em `src/theme/hc-tokens.css`.
+ */
+
+/* ------------------------------------------------------------------ cartão */
+
+.hc {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  min-width: 0;
+  padding: 1.2rem 1.35rem 1.35rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1rem;
+  background: var(--hc-cartao);
+  box-shadow: var(--hc-sombra);
+  color: var(--hc-tinta);
+}
+
+.hc__cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  min-height: 2rem;
+}
+
+.hc__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.hc__icone {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--hc-marca);
+}
+
+.hc__ferramentas {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--hc-tinta-3);
+  font-size: 0.8125rem;
+}
+
+/* O link discreto do canto, como o "Recents ▾" do Prodify. */
+.hc__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2rem;
+  padding-inline: 0.55rem;
+  border-radius: 0.6rem;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.hc__link:hover {
+  background: var(--hc-linha);
+  color: var(--hc-tinta);
+}
+
+.hc__link:focus-visible,
+.hc-foco:focus-visible {
+  outline: 2px solid var(--hc-marca);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ chips e selos */
+
+/* O chip de grupo: caixa alta, pastel, como o "IN PROGRESS" do Prodify. */
+.hc-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* O selo de prioridade: caixa normal, como o "High / Low / Normal" do Prodify. */
+.hc-selo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.hc--ciano {
+  background: var(--hc-ciano-fundo);
+  color: var(--hc-ciano-tinta);
+}
+
+.hc--lilas {
+  background: var(--hc-lilas-fundo);
+  color: var(--hc-lilas-tinta);
+}
+
+.hc--pessego {
+  background: var(--hc-pessego-fundo);
+  color: var(--hc-pessego-tinta);
+}
+
+.hc--coral {
+  background: var(--hc-coral-fundo);
+  color: var(--hc-coral-tinta);
+}
+
+.hc--verde {
+  background: var(--hc-verde-fundo);
+  color: var(--hc-verde-tinta);
+}
+
+.hc--cinza {
+  background: var(--hc-cinza-fundo);
+  color: var(--hc-cinza-tinta);
+}
+
+.hc--azul {
+  background: var(--hc-azul-fundo);
+  color: var(--hc-azul-tinta);
+}
+
+/* ------------------------------------------------------------------ barra de progresso */
+
+.hc-barra {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  inline-size: 5.5rem;
+  block-size: 0.4rem;
+  border-radius: 999px;
+  background: var(--hc-linha);
+}
+
+.hc-barra__cheia {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--barra-cor, var(--hc-marca));
+  transition: inline-size 400ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hc__link,
+  .hc-barra__cheia {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------ barras de rolagem
+ * A pedido, a visão geral rola sem barra à vista: a roda, o toque e o teclado continuam rolando.
+ * A classe vai na raiz do documento só enquanto a página está aberta (`inicio.vue`), para
+ * não mudar as outras telas do portal.
+ */
+html.sem-barra-de-rolagem {
+  scrollbar-width: none;
+}
+
+html.sem-barra-de-rolagem::-webkit-scrollbar {
+  display: none;
+}

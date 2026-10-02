@@ -127,11 +127,11 @@ const fieldStyle = computed(() => {
 }
 
 .auth-text-field__input--with-leading {
-  padding-left: 2.75rem;
+  padding-inline-start: 2.75rem;
 }
 
 .auth-text-field__input--with-trailing {
-  padding-right: 3rem;
+  padding-inline-end: 3rem;
 }
 
 .auth-text-field__leading,
@@ -145,11 +145,11 @@ const fieldStyle = computed(() => {
 }
 
 .auth-text-field__leading {
-  left: 1rem;
+  inset-inline-start: 1rem;
 }
 
 .auth-text-field__trailing {
-  right: 0.85rem;
+  inset-inline-end: 0.85rem;
 }
 
 .auth-text-field__input::placeholder {

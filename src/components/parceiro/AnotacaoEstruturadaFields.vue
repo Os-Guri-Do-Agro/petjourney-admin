@@ -452,13 +452,14 @@ function removeExame(indice: number) {
         <label for="est-dataResultado">
           {{ t('acessos.estruturada.campos.dataResultado') }}
         </label>
-        <input
+        <InputText
           id="est-dataResultado"
           v-model="form.dataResultado"
           class="est__date"
           type="date"
+          fluid
           :disabled="disabled"
-          :aria-invalid="Boolean(erroDe('dataResultado'))"
+          :invalid="Boolean(erroDe('dataResultado'))"
           :aria-describedby="describedBy('dataResultado')"
         />
         <small
@@ -550,13 +551,14 @@ function removeExame(indice: number) {
           <label for="est-dataEntrada">{{
             t('acessos.estruturada.campos.dataEntrada')
           }}</label>
-          <input
+          <InputText
             id="est-dataEntrada"
             v-model="form.dataEntrada"
             class="est__date"
             type="datetime-local"
+            fluid
             :disabled="disabled"
-            :aria-invalid="Boolean(erroDe('dataEntrada'))"
+            :invalid="Boolean(erroDe('dataEntrada'))"
             :aria-describedby="describedBy('dataEntrada')"
           />
           <small
@@ -571,14 +573,15 @@ function removeExame(indice: number) {
 
         <div class="est__field">
           <label for="est-dataSaida">{{ t('acessos.estruturada.campos.dataSaida') }}</label>
-          <input
+          <InputText
             id="est-dataSaida"
             v-model="form.dataSaida"
             class="est__date"
             type="datetime-local"
+            fluid
             :disabled="disabled"
             :min="form.dataEntrada || undefined"
-            :aria-invalid="Boolean(erroDe('dataSaida'))"
+            :invalid="Boolean(erroDe('dataSaida'))"
             :aria-describedby="describedBy('dataSaida')"
           />
           <small v-if="erroDe('dataSaida')" id="est-erro-dataSaida" class="est__error" role="alert">
@@ -745,37 +748,11 @@ function removeExame(indice: number) {
   line-height: 1.35;
 }
 
-.est__date {
-  width: 100%;
-  padding: 0.45rem 0.6rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.6rem;
-  background: var(--partner-card);
-  color: var(--partner-text);
-  font: inherit;
-  font-size: 0.84rem;
-}
-
-.est__date:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--partner-primary) 40%, var(--partner-line));
-}
-
-.est__date:focus-visible {
-  border-color: var(--partner-primary);
-  outline: 2px solid color-mix(in srgb, var(--partner-primary) 45%, transparent);
-  outline-offset: 1px;
-}
-
-.est__date:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.est__date[aria-invalid='true'] {
-  border-color: var(--partner-warm-text);
-}
-
-/* O ícone nativo do seletor some no escuro sem isto. */
+/*
+ * Data/hora: InputText do PrimeVue com type date/datetime-local (mesmo padrão do módulo
+ * clínico) — seletor localizado pelo navegador e o model continua string local.
+ * O ícone nativo do seletor some no escuro sem isto.
+ */
 .est__date::-webkit-calendar-picker-indicator {
   cursor: pointer;
   filter: invert(var(--est-picker-invert, 0));

@@ -6,11 +6,10 @@ import { useToast } from 'primevue/usetoast'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
-import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+import { INTL_LOCALE, isRTLLocale, type Locale } from '@/i18n/locales'
 import { getSaqueDetalhe } from '@/service/parceiro/parceiro-portal-service'
 import type { SaqueDetalhe } from '@/service/parceiro/types'
 import { LightColors } from '@/theme/colors'
@@ -35,10 +34,14 @@ const loading = ref(false)
 const error = ref('')
 const copyingPix = ref(false)
 
-const statusMap = {
-  PENDENTE: 'SOLICITADO',
-  PAGO: 'ATIVO',
-  FALHA: 'REJEITADO',
+/**
+ * O selo do saque, na cor do estado. O selo de status do programa dizia "Ativo ✓" para um saque
+ * pago — o nome certo para a parceria, e o errado para dinheiro que já caiu na conta.
+ */
+const TOM_DO_SAQUE = {
+  PENDENTE: 'hc--pessego',
+  PAGO: 'hc--verde',
+  FALHA: 'hc--coral',
 } as const
 
 const drawerStyle = computed(() => {
@@ -60,8 +63,8 @@ const drawerStyle = computed(() => {
     '--sd-success-bg': colors.dashboard.successBg,
     '--sd-success-text': colors.dashboard.successText,
     '--sd-shadow-rgb': colors.auth.shadowRgb,
-    /** Sempre branco real — `auth.white` no dark é superfície escura. */
-    '--sd-on-cta': LightColors.auth.white,
+    /** Sempre branco real: `auth.white` é superfície (quebrada no claro, escura no dark). */
+    '--sd-on-cta': LightColors.text.inverse,
   }
 })
 
@@ -70,6 +73,14 @@ const drawerPt = computed(() => ({
   header: { class: 'saque-drawer__header-shell' },
   content: { class: 'saque-drawer__content-shell' },
 }))
+
+/**
+ * O PrimeVue posiciona o Drawer pelo lado físico. O painel fica no fim da linha de leitura (à
+ * direita em LTR, à esquerda no árabe), do mesmo lado em que o `AppShell` abre espaço para ele.
+ */
+const drawerPosition = computed(() =>
+  isRTLLocale(locale.value as Locale) ? 'left' : 'right',
+)
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString(INTL_LOCALE[locale.value as Locale], {
@@ -141,11 +152,11 @@ watch(
 <template>
   <Drawer
     v-model:visible="visible"
-    position="right"
+    :position="drawerPosition"
     :modal="false"
     :dismissable="false"
     :block-scroll="false"
-    class="saque-drawer"
+    class="saque-drawer hc-tema"
     :pt="drawerPt"
     :style="drawerStyle"
     @hide="close"
@@ -196,9 +207,11 @@ watch(
         <section class="saque-drawer__hero" :data-status="saque.status">
           <p class="saque-drawer__hero-label">{{ t('carteira.detail.valorLabel') }}</p>
           <strong class="saque-drawer__hero-value">
-            {{ formatCentavosToBrl(saque.valorCentavos) }}
+            {{ formatCentavosToBrl(saque.valorCentavos, INTL_LOCALE[locale as Locale]) }}
           </strong>
-          <PartnerStatusBadge :status="statusMap[saque.status]" />
+          <span class="hc-selo" :class="TOM_DO_SAQUE[saque.status]">
+                {{ t(`carteira.saques.status.${saque.status}`) }}
+              </span>
         </section>
 
         <section class="saque-drawer__section" :aria-label="t('carteira.detail.timelineLabel')">
@@ -269,16 +282,14 @@ watch(
 .saque-drawer__header {
   display: grid;
   gap: 0.2rem;
-  padding-right: 0.5rem;
+  padding-inline-end: 0.5rem;
 }
 
 .saque-drawer__eyebrow {
   margin: 0;
   color: var(--sd-faint);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 
 .saque-drawer__header h2 {
@@ -363,10 +374,8 @@ watch(
 .saque-drawer__hero-label {
   margin: 0;
   color: var(--sd-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .saque-drawer__hero-value {
@@ -515,7 +524,7 @@ watch(
   height: calc(100% - var(--pj-shell-header-height, 4.25rem));
   margin-top: var(--pj-shell-header-height, 4.25rem);
   align-self: flex-start;
-  border-left: 1px solid color-mix(in srgb, var(--sd-line, #eaf0ee) 90%, transparent);
+  border-inline-start: 1px solid color-mix(in srgb, var(--sd-line, #eaf0ee) 90%, transparent);
   background: var(--sd-bg, #fff);
   box-shadow: none;
 }
