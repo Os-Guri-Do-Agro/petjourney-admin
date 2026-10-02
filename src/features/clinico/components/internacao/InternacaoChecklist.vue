@@ -15,7 +15,7 @@
  * justamente a informação que faz o vet trocar a via.
  */
 import Button from 'primevue/button'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import type { AdministracaoAgendada, PrescricaoDeInternacao, SituacaoDaAdministracao } from '../../data/types'
@@ -129,6 +129,14 @@ function executor(administracao: AdministracaoAgendada): string {
 function resolvida(situacao: SituacaoDaAdministracao): boolean {
   return situacao === 'feita' || situacao === 'recusada' || situacao === 'pulada'
 }
+
+/** A dose futura cujo registro antecipado está esperando o segundo clique. */
+const confirmando = ref<string | null>(null)
+
+function registrarAntes(administracaoId: string) {
+  confirmando.value = null
+  emit('registrar', administracaoId, 'feita')
+}
 </script>
 
 <template>
@@ -218,6 +226,47 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
                 />
               </template>
 
+              <!--
+                Dose ainda por vir pede um segundo clique. Com o mesmo botão cheio da dose da vez,
+                um toque na linha errada registrava às 18h a dose das 21h — e o registro é o que o
+                próximo turno usa para não dar de novo.
+              -->
+              <template v-else-if="linha.situacao === 'futura'">
+                <template v-if="confirmando === linha.administracao.id">
+                  <span class="item__confirmar" role="status">
+                    {{
+                      t('clinico.internacao.checklist.antesDaHora', {
+                        hora: formato.hora(linha.administracao.previstaPara),
+                      })
+                    }}
+                  </span>
+                  <Button
+                    :label="t('clinico.internacao.checklist.registrarAgora')"
+                    icon="pi pi-check"
+                    size="small"
+                    :disabled="salvando"
+                    @click="registrarAntes(linha.administracao.id)"
+                  />
+                  <Button
+                    :label="t('clinico.comum.cancelar')"
+                    severity="secondary"
+                    text
+                    size="small"
+                    @click="confirmando = null"
+                  />
+                </template>
+                <Button
+                  v-else
+                  :label="t('clinico.internacao.checklist.checar')"
+                  icon="pi pi-check"
+                  severity="secondary"
+                  outlined
+                  size="small"
+                  :disabled="salvando"
+                  @click="confirmando = linha.administracao.id"
+                />
+              </template>
+
               <template v-else-if="linha.situacao !== 'suspensa'">
                 <Button
                   :label="t('clinico.internacao.checklist.checar')"
@@ -226,8 +275,8 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
                   :disabled="salvando"
                   @click="emit('registrar', linha.administracao.id, 'feita')"
                 />
+                <!-- A futura já saiu no ramo de cima: aqui toda linha pode ter sido recusada. -->
                 <Button
-                  v-if="linha.situacao !== 'futura'"
                   :label="t('clinico.internacao.checklist.recusou')"
                   severity="secondary"
                   outlined
@@ -446,7 +495,17 @@ function resolvida(situacao: SituacaoDaAdministracao): boolean {
 .item__acoes {
   display: flex;
   flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
   gap: var(--clinic-space-2);
+}
+
+/* A pergunta do registro antecipado, na cor de atenção: é o único texto da linha que pede algo. */
+.item__confirmar {
+  color: var(--clinic-attention-text);
+  font-size: var(--clinic-font-label);
+  font-weight: 600;
 }
 
 @media (width <= 640px) {

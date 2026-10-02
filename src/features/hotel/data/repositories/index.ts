@@ -50,3 +50,4 @@ export {
   type PontoDeOcupacao,
   type ResumoDoHotel,
 } from './resumo-repository'
+export { tomDaRotinaAtrasada } from '../../domain/rotina'

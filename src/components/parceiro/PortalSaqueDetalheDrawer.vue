@@ -6,7 +6,6 @@ import { useToast } from 'primevue/usetoast'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
@@ -35,10 +34,14 @@ const loading = ref(false)
 const error = ref('')
 const copyingPix = ref(false)
 
-const statusMap = {
-  PENDENTE: 'SOLICITADO',
-  PAGO: 'ATIVO',
-  FALHA: 'REJEITADO',
+/**
+ * O selo do saque, na cor do estado. O selo de status do programa dizia "Ativo ✓" para um saque
+ * pago — o nome certo para a parceria, e o errado para dinheiro que já caiu na conta.
+ */
+const TOM_DO_SAQUE = {
+  PENDENTE: 'hc--pessego',
+  PAGO: 'hc--verde',
+  FALHA: 'hc--coral',
 } as const
 
 const drawerStyle = computed(() => {
@@ -153,7 +156,7 @@ watch(
     :modal="false"
     :dismissable="false"
     :block-scroll="false"
-    class="saque-drawer"
+    class="saque-drawer hc-tema"
     :pt="drawerPt"
     :style="drawerStyle"
     @hide="close"
@@ -206,7 +209,9 @@ watch(
           <strong class="saque-drawer__hero-value">
             {{ formatCentavosToBrl(saque.valorCentavos, INTL_LOCALE[locale as Locale]) }}
           </strong>
-          <PartnerStatusBadge :status="statusMap[saque.status]" />
+          <span class="hc-selo" :class="TOM_DO_SAQUE[saque.status]">
+                {{ t(`carteira.saques.status.${saque.status}`) }}
+              </span>
         </section>
 
         <section class="saque-drawer__section" :aria-label="t('carteira.detail.timelineLabel')">
@@ -283,10 +288,8 @@ watch(
 .saque-drawer__eyebrow {
   margin: 0;
   color: var(--sd-faint);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 
 .saque-drawer__header h2 {
@@ -371,10 +374,8 @@ watch(
 .saque-drawer__hero-label {
   margin: 0;
   color: var(--sd-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .saque-drawer__hero-value {

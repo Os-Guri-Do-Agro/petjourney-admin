@@ -74,6 +74,203 @@
   --partner-faint: var(--hc-tinta-2) !important;
 }
 
+/* ------------------------------------------------------------------ ponte do Portal
+ * Os componentes do Portal (programas, divulgação, QR, carteira, cupom, vínculo) calculam as
+ * cores da paleta antiga e as passam por `style`, cada um com o seu prefixo. Dentro de
+ * `.hc-tema` cada papel aponta para o token novo — `!important` porque o `style` venceria. O
+ * seletor pelo atributo pega o elemento que declara a família, onde quer que ele esteja.
+ */
+
+.hc-tema [style*='--prog-'],
+.hc-tema[style*='--prog-'] {
+  --prog-card: var(--hc-cartao) !important;
+  --prog-surface: var(--hc-fundo) !important;
+  --prog-line: var(--hc-borda) !important;
+  --prog-line-soft: var(--hc-linha) !important;
+  --prog-text: var(--hc-tinta) !important;
+  --prog-muted: var(--hc-tinta-2) !important;
+  --prog-faint: var(--hc-tinta-2) !important;
+  --prog-primary: var(--hc-marca) !important;
+  --prog-primary-soft: var(--hc-marca-clara) !important;
+  --prog-primary-strong: var(--hc-marca-forte) !important;
+  --prog-success-bg: var(--hc-verde-fundo) !important;
+  --prog-success-text: var(--hc-verde-tinta) !important;
+  --prog-amber-bg: var(--hc-pessego-fundo) !important;
+  --prog-amber-text: var(--hc-pessego-tinta) !important;
+  --prog-warm-bg: var(--hc-coral-fundo) !important;
+  --prog-warm-text: var(--hc-coral-tinta) !important;
+  --prog-shadow-rgb: 20 32 28 !important;
+}
+
+.hc-tema [style*='--div-'],
+.hc-tema[style*='--div-'] {
+  --div-card: var(--hc-cartao) !important;
+  --div-surface: var(--hc-fundo) !important;
+  --div-line: var(--hc-borda) !important;
+  --div-line-soft: var(--hc-linha) !important;
+  --div-text: var(--hc-tinta) !important;
+  --div-muted: var(--hc-tinta-2) !important;
+  --div-faint: var(--hc-tinta-2) !important;
+  --div-on-primary: #ffffff !important;
+  --div-primary: var(--hc-marca) !important;
+  --div-primary-soft: var(--hc-marca-clara) !important;
+  --div-primary-strong: var(--hc-marca-forte) !important;
+  --div-success-bg: var(--hc-verde-fundo) !important;
+  --div-success-text: var(--hc-verde-tinta) !important;
+  --div-amber-bg: var(--hc-pessego-fundo) !important;
+  --div-amber-text: var(--hc-pessego-tinta) !important;
+  --div-warm-bg: var(--hc-coral-fundo) !important;
+  --div-warm-text: var(--hc-coral-tinta) !important;
+  --div-shadow-rgb: 20 32 28 !important;
+}
+
+.hc-tema [style*='--iqr-'],
+.hc-tema[style*='--iqr-'] {
+  --iqr-card: var(--hc-cartao) !important;
+  --iqr-surface: var(--hc-fundo) !important;
+  --iqr-line: var(--hc-borda) !important;
+  --iqr-text: var(--hc-tinta) !important;
+  --iqr-muted: var(--hc-tinta-2) !important;
+  --iqr-primary: var(--hc-marca) !important;
+  --iqr-primary-soft: var(--hc-marca-clara) !important;
+  --iqr-primary-strong: var(--hc-marca-forte) !important;
+}
+
+.hc-tema [style*='--sd-'],
+.hc-tema[style*='--sd-'] {
+  --sd-bg: var(--hc-cartao) !important;
+  --sd-surface: var(--hc-fundo) !important;
+  --sd-line: var(--hc-borda) !important;
+  --sd-text: var(--hc-tinta) !important;
+  --sd-muted: var(--hc-tinta-2) !important;
+  --sd-faint: var(--hc-tinta-2) !important;
+  --sd-on-cta: #ffffff !important;
+  --sd-primary: var(--hc-marca) !important;
+  --sd-primary-soft: var(--hc-marca-clara) !important;
+  --sd-primary-strong: var(--hc-marca-forte) !important;
+  --sd-success-bg: var(--hc-verde-fundo) !important;
+  --sd-success-text: var(--hc-verde-tinta) !important;
+  --sd-warm-bg: var(--hc-coral-fundo) !important;
+  --sd-warm-text: var(--hc-coral-tinta) !important;
+  --sd-shadow-rgb: 20 32 28 !important;
+}
+
+.hc-tema [style*='--vc-'],
+.hc-tema[style*='--vc-'] {
+  --vc-bg: var(--hc-cartao) !important;
+  --vc-surface: var(--hc-fundo) !important;
+  --vc-line: var(--hc-borda) !important;
+  --vc-text: var(--hc-tinta) !important;
+  --vc-muted: var(--hc-tinta-2) !important;
+  --vc-faint: var(--hc-tinta-2) !important;
+  --vc-on-cta: #ffffff !important;
+  --vc-primary: var(--hc-marca) !important;
+  --vc-primary-soft: var(--hc-marca-clara) !important;
+  --vc-primary-strong: var(--hc-marca-forte) !important;
+  --vc-success-bg: var(--hc-verde-fundo) !important;
+  --vc-success-text: var(--hc-verde-tinta) !important;
+  --vc-warm-bg: var(--hc-coral-fundo) !important;
+  --vc-warm-text: var(--hc-coral-tinta) !important;
+  --vc-shadow-rgb: 20 32 28 !important;
+}
+
+.hc-tema [style*='--vk-'],
+.hc-tema[style*='--vk-'] {
+  --vk-bg: var(--hc-cartao) !important;
+  --vk-surface-soft: var(--hc-fundo) !important;
+  --vk-line: var(--hc-borda) !important;
+  --vk-text: var(--hc-tinta) !important;
+  --vk-muted: var(--hc-tinta-2) !important;
+  --vk-accent: var(--hc-marca-forte) !important;
+  --vk-accent-bg: var(--hc-marca-clara) !important;
+  --vk-warm: var(--hc-coral-tinta) !important;
+  --vk-warm-bg: var(--hc-coral-fundo) !important;
+  --vk-warm-text: var(--hc-coral-tinta) !important;
+  --vk-shadow-rgb: 20 32 28 !important;
+}
+
+/*
+ * O cartão em foco (`usePartnerFocusSurface`): era um gradiente verde de ponta a ponta. No design
+ * novo verde é tinta, não papel — o foco vira o cartão branco da Visão geral, com o número em
+ * tinta e a ação na pílula cheia em degradê.
+ */
+.hc-tema [style*='--pf-from'],
+.hc-tema[style*='--pf-from'] {
+  --pf-from: var(--hc-cartao) !important;
+  --pf-to: var(--hc-cartao) !important;
+  --pf-glow-rgb: 255 255 255 !important;
+  --pf-on: var(--hc-tinta) !important;
+  --pf-on-soft: var(--hc-tinta-2) !important;
+  --pf-cta-bg: var(--hc-degrade-botao) !important;
+  --pf-cta-text: #ffffff !important;
+  --pf-shadow-rgb: 20 32 28 !important;
+  --pf-chip: var(--hc-marca-clara) !important;
+  --pf-field: var(--hc-fundo) !important;
+  --pf-line: var(--hc-borda) !important;
+}
+
+/* O brilho do canto era enfeite do cartão verde; no cartão branco ele só aparece no escuro, como mancha. */
+.hc-tema .partner-focus__glow,
+.hc-tema .programa-card__glow {
+  display: none;
+}
+
+.app-dark .hc-tema [style*='--pf-from'],
+.app-dark .hc-tema[style*='--pf-from'] {
+  --pf-glow-rgb: 21 31 28 !important;
+}
+
+/* Branco, o cartão em foco precisa do fio dos outros cartões para não boiar na página. */
+.hc-tema .programa-card--focus {
+  border: 1px solid var(--hc-borda);
+}
+
+/*
+ * Os campos de formulário do login (`AuthTextField`, família `--auth-*`) também aparecem no
+ * Portal (PIX, equipe). Dentro de `.hc-tema` eles ficam brancos com o fio de campo; o login,
+ * fora da classe, segue como está.
+ */
+.hc-tema [style*='--auth-field-bg'],
+.hc-tema[style*='--auth-field-bg'] {
+  --auth-field-bg: var(--hc-cartao) !important;
+  --auth-border: color-mix(in srgb, var(--hc-marca) 40%, var(--hc-cartao)) !important;
+  --auth-line: var(--hc-borda) !important;
+  --auth-text: var(--hc-tinta) !important;
+  --auth-muted: var(--hc-tinta-2) !important;
+  --auth-soft: var(--hc-tinta-3) !important;
+  --auth-divider: var(--hc-tinta-3) !important;
+  --auth-sage: var(--hc-marca) !important;
+  --auth-sage-strong: var(--hc-marca-forte) !important;
+  --auth-sage-soft: var(--hc-marca) !important;
+  --auth-sage-tint: var(--hc-marca-clara) !important;
+  --auth-focus: var(--hc-marca) !important;
+  --auth-focus-ring: var(--hc-marca-clara) !important;
+  --auth-link: var(--hc-marca-forte) !important;
+  --auth-danger: var(--hc-coral-tinta) !important;
+}
+
+/* O menu da busca de acessos (o overlay leva a família `--atend-ov-*`). */
+.hc-tema [style*='--atend-ov-'],
+[style*='--atend-ov-'] {
+  --atend-ov-bg: var(--hc-cartao) !important;
+  --atend-ov-hover: var(--hc-fundo) !important;
+  --atend-ov-line: var(--hc-borda) !important;
+  --atend-ov-muted: var(--hc-tinta-2) !important;
+  --atend-ov-selected-bg: var(--hc-marca-clara) !important;
+  --atend-ov-selected-text: var(--hc-marca-forte) !important;
+  --atend-ov-text: var(--hc-tinta) !important;
+}
+
+.hc-tema [style*='--div-page-muted'],
+.hc-tema[style*='--div-page-muted'] {
+  --div-page-muted: var(--hc-tinta-2) !important;
+}
+
+.hc-tema [style*='--prog-page-muted'],
+.hc-tema[style*='--prog-page-muted'] {
+  --prog-page-muted: var(--hc-tinta-2) !important;
+}
+
 /* ------------------------------------------------------------------ overlays
  * O que o PrimeVue leva para o `body` (popover, diálogo) só herda o acabamento quando leva
  * `.hc-tema` — e aí a caixa dele é o branco dos cartões, e não o linho do preset.
@@ -90,6 +287,12 @@
   --p-dialog-background: var(--hc-cartao);
   --p-dialog-border-color: var(--hc-borda);
   --p-dialog-color: var(--hc-tinta);
+}
+
+.p-drawer.hc-tema {
+  --p-drawer-background: var(--hc-cartao);
+  --p-drawer-border-color: var(--hc-borda);
+  --p-drawer-color: var(--hc-tinta);
 }
 
 /* ------------------------------------------------------------------ fundo
@@ -251,6 +454,28 @@ html .inicio-pagina .partner-page__guidance.p-button {
   --p-button-text-primary-hover-background: var(--hc-marca-clara);
   --p-button-text-primary-active-background: var(--hc-marca-clara);
   --p-button-text-secondary-color: var(--hc-tinta-2);
+
+  /*
+   * O aviso (`severity="warn"`) no pêssego da casa. O do preset é o laranja do Tailwind
+   * (#f97316), fora da paleta e com branco abaixo de 3:1. Cheio, o fundo é a tinta do pêssego e o
+   * texto a cor do cartão — o par se inverte sozinho no escuro.
+   */
+  --p-button-warn-background: var(--hc-pessego-tinta);
+  --p-button-warn-hover-background: color-mix(in srgb, var(--hc-pessego-tinta) 88%, #000000);
+  --p-button-warn-active-background: color-mix(in srgb, var(--hc-pessego-tinta) 80%, #000000);
+  --p-button-warn-border-color: transparent;
+  --p-button-warn-hover-border-color: transparent;
+  --p-button-warn-active-border-color: transparent;
+  --p-button-warn-color: var(--hc-cartao);
+  --p-button-warn-hover-color: var(--hc-cartao);
+  --p-button-warn-active-color: var(--hc-cartao);
+  --p-button-outlined-warn-border-color: color-mix(in srgb, var(--hc-pessego-tinta) 45%, var(--hc-cartao));
+  --p-button-outlined-warn-color: var(--hc-pessego-tinta);
+  --p-button-outlined-warn-hover-background: var(--hc-pessego-fundo);
+  --p-button-outlined-warn-active-background: var(--hc-pessego-fundo);
+  --p-button-text-warn-color: var(--hc-pessego-tinta);
+  --p-button-text-warn-hover-background: var(--hc-pessego-fundo);
+  --p-button-text-warn-active-background: var(--hc-pessego-fundo);
 }
 
 /*
@@ -276,6 +501,19 @@ html .inicio-pagina .partner-page__guidance.p-button {
     :disabled
   ):hover {
   --hc-botao-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+}
+
+/*
+ * Linhas que são `Button` só para serem clicáveis (o cartão de acesso, a linha de saque) não são
+ * pílulas: ficam com a sombra baixa dos cartões, e não com o brilho verde da ação cheia.
+ */
+.hc-tema .atend-card.p-button,
+.hc-tema .saque-row.p-button {
+  --hc-botao-sombra: 0 1px 2px rgb(20 32 28 / 4%);
+}
+
+.hc-tema .atend-card.p-button:not(:disabled):hover {
+  --hc-botao-sombra: 0 6px 16px -10px rgb(20 32 28 / 22%);
 }
 
 .hc-tema .p-button.p-button-outlined:not(:disabled):hover {

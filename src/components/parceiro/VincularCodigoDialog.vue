@@ -151,7 +151,7 @@ async function handleVincular() {
     v-model:visible="visible"
     modal
     :draggable="false"
-    class="vincular-dialog"
+    class="vincular-dialog hc-tema"
     :pt="{ root: { class: 'vincular-dialog' } }"
     @show="focusPrimeiroDigito"
   >
@@ -306,8 +306,6 @@ async function handleVincular() {
   color: var(--vk-accent);
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .vincular-dialog__title {
@@ -385,7 +383,8 @@ async function handleVincular() {
   user-select: none;
 }
 
-.vincular-dialog__shell > :deep(.p-button) {
+/* O botão de largura total é o de vincular; o de fechar fica no canto. */
+.vincular-dialog__shell > :deep(.p-button:not(.vincular-dialog__close)) {
   width: 100%;
   margin-top: 1rem;
 }

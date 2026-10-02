@@ -17,8 +17,6 @@ import {
   resolveModoCta,
   resolveSolicitarModoError,
 } from '@/utils/parceiro/modo-participacao'
-import { usePartnerFocusSurface } from '@/composables/usePartnerFocusSurface'
-import { currentColors } from '@/theme/color-mode'
 
 const props = withDefaults(
   defineProps<{
@@ -33,43 +31,8 @@ const props = withDefaults(
 const { t, locale } = useI18n()
 const toast = useToast()
 const { store, parceiroQuery } = useParceiroPortal()
-const { focusSurfaceStyle } = usePartnerFocusSurface()
 const submitting = ref(false)
 const saldoSacavelCentavos = ref<number | null>(null)
-
-const isFocusCard = computed(() => props.modo === 'afiliado')
-
-const cardStyle = computed(() => {
-  const colors = currentColors.value
-  const base = {
-    '--prog-card': colors.dashboard.surface,
-    '--prog-surface': colors.dashboard.surfaceSoft,
-    '--prog-line': colors.dashboard.line,
-    '--prog-line-soft': colors.dashboard.lineSoft,
-    '--prog-text': colors.dashboard.text,
-    '--prog-muted': colors.dashboard.muted,
-    '--prog-faint': colors.dashboard.faint,
-    '--prog-primary': colors.vet.primary,
-    '--prog-primary-soft': colors.vet.secondary,
-    '--prog-primary-strong': colors.dashboard.primaryStrong,
-    '--prog-success-bg': colors.dashboard.successBg,
-    '--prog-success-text': colors.dashboard.successText,
-    '--prog-amber-bg': colors.dashboard.amberBg,
-    '--prog-amber-text': colors.dashboard.amberText,
-    '--prog-warm-bg': colors.dashboard.warmBg,
-    '--prog-warm-text': colors.dashboard.warmText,
-    '--prog-shadow-rgb': colors.auth.shadowRgb,
-  }
-
-  if (!isFocusCard.value) {
-    return base
-  }
-
-  return {
-    ...base,
-    ...focusSurfaceStyle.value,
-  }
-})
 
 const meta = computed(() => {
   const copy = getModoCardCopy(props.modo)
@@ -92,9 +55,7 @@ const canManageSolicitacao = computed(() =>
   canManageSolicitacaoModo(store.isDono, store.semAcessoParceiro),
 )
 
-const cta = computed(() =>
-  resolveModoCta(modoBloco.value, props.modo, canManageSolicitacao.value),
-)
+const cta = computed(() => resolveModoCta(modoBloco.value, props.modo, canManageSolicitacao.value))
 
 const showSolicitarButton = computed(
   () => cta.value.type === 'solicitar' || cta.value.type === 'solicitar-novamente',
@@ -137,6 +98,15 @@ const badge = computed(() => {
     icon: icons[modoStatus.value],
   }
 })
+
+/** O tom do selo de status: verde ativo, pêssego em análise, coral recusado ou suspenso. */
+const TOM_DO_STATUS: Record<StatusModoParceiro, string> = {
+  NAO_SOLICITADO: 'hc--cinza',
+  SOLICITADO: 'hc--pessego',
+  ATIVO: 'hc--verde',
+  REJEITADO: 'hc--coral',
+  SUSPENSO: 'hc--coral',
+}
 
 const ativoDesdeLabel = computed(() => {
   const raw = store.status?.auditadoEm
@@ -254,125 +224,74 @@ watch(modoStatus, () => {
 </script>
 
 <template>
-  <article
-    v-if="skeleton"
-    class="programa-card programa-card--skeleton"
-    :class="[`programa-card--${meta.tone}`, { 'programa-card--focus': isFocusCard }]"
-    :style="cardStyle"
-    aria-hidden="true"
-  >
-    <div v-if="isFocusCard" class="programa-card__glow" />
-    <header class="programa-card__head">
-      <div class="programa-card__identity">
-        <Skeleton width="2.75rem" height="2.75rem" border-radius="0.85rem" />
-        <div class="programa-card__skel-identity">
-          <Skeleton width="7.5rem" height="1.05rem" border-radius="4px" />
-          <Skeleton width="9rem" height="0.8rem" border-radius="4px" />
-        </div>
-      </div>
-      <Skeleton width="5rem" height="1.5rem" border-radius="999px" />
-    </header>
-
-    <div class="programa-card__skel-description">
-      <Skeleton width="100%" height="0.85rem" border-radius="4px" />
-      <Skeleton width="88%" height="0.85rem" border-radius="4px" />
+  <!--
+    Uma linha por programa, e não um cartão: ícone, nome com o selo de status, o benefício numa
+    frase e a ação à direita. Os dois programas cabem numa lista só; com os dois ativos, a tela é
+    de consulta, e um cartão verde de ponta a ponta para um deles gritava sem motivo.
+  -->
+  <article v-if="skeleton" class="programa-linha" aria-hidden="true">
+    <Skeleton width="2.6rem" height="2.6rem" border-radius="0.75rem" />
+    <div class="programa-linha__corpo">
+      <Skeleton width="12rem" height="1rem" border-radius="4px" />
+      <Skeleton width="80%" height="0.8rem" border-radius="4px" />
     </div>
-
-    <ul class="programa-card__features">
-      <li v-for="index in 3" :key="index">
-        <Skeleton width="0.9rem" height="0.9rem" border-radius="999px" />
-        <Skeleton width="70%" height="0.8rem" border-radius="4px" />
-      </li>
-    </ul>
-
-    <div class="programa-card__action">
-      <Skeleton width="100%" height="2.75rem" border-radius="0.85rem" />
-    </div>
+    <Skeleton width="8rem" height="2.25rem" border-radius="999px" />
   </article>
 
   <article
     v-else
     :id="modo === 'afiliado' ? 'programas-afiliado' : undefined"
-    class="programa-card"
-    :class="[`programa-card--${meta.tone}`, { 'programa-card--focus': isFocusCard }]"
+    class="programa-linha"
     :data-status="modoStatus"
-    :style="cardStyle"
   >
-    <div v-if="isFocusCard" class="programa-card__glow" aria-hidden="true" />
-    <header class="programa-card__head">
-      <div class="programa-card__identity">
-        <span class="programa-card__icon" aria-hidden="true">
-          <i :class="meta.icon" />
+    <span class="programa-linha__icone" aria-hidden="true">
+      <i :class="meta.icon" />
+    </span>
+
+    <div class="programa-linha__corpo">
+      <p class="programa-linha__nome">
+        <strong>{{ meta.title }}</strong>
+        <span class="hc-selo" :class="TOM_DO_STATUS[modoStatus]">
+          {{
+            modoStatus === 'ATIVO' && modo === 'afiliado' && ativoDesdeLabel
+              ? t('programas.linha.ativoDesde', { data: ativoDesdeLabel })
+              : badge.label
+          }}
         </span>
-        <div>
-          <h3>{{ meta.title }}</h3>
-          <p>{{ meta.subtitle }}</p>
-        </div>
-      </div>
-      <span class="programa-card__badge">
-        <i :class="badge.icon" aria-hidden="true" />
-        {{ badge.label }}
-      </span>
-    </header>
+      </p>
 
-    <p class="programa-card__description">
-      {{ meta.description }}
-      <span v-if="modo === 'participativo'" class="programa-card__soon">{{
-        t('programas.card.participativo.soon')
-      }}</span>
-    </p>
+      <p class="programa-linha__frase">{{ meta.description }}</p>
 
-    <ul class="programa-card__features">
-      <li v-for="feature in meta.features" :key="feature">
-        <i class="pi pi-check" aria-hidden="true" />
-        <span>{{ feature }}</span>
-      </li>
-    </ul>
+      <p v-if="modoStatus === 'ATIVO' && modo === 'participativo'" class="programa-linha__nota">
+        {{ t('programas.card.activeNoteParticipativo') }}
+      </p>
 
-    <div
-      v-if="modoStatus === 'ATIVO' && modo === 'afiliado'"
-      class="programa-card__info programa-card__info--success"
-    >
-      <div>
-        <span>{{ t('programas.card.info.saldo') }}</span>
-        <strong>{{ saldoLabel }}</strong>
-      </div>
-      <div v-if="ativoDesdeLabel">
-        <span>{{ t('programas.card.info.ativoDesde') }}</span>
-        <strong>{{ ativoDesdeLabel }}</strong>
-      </div>
-    </div>
+      <p v-else-if="modoStatus === 'SOLICITADO'" class="programa-linha__aviso">
+        <i class="pi pi-clock" aria-hidden="true" />
+        {{ t('programas.card.info.pending') }}
+      </p>
 
-    <div
-      v-else-if="modoStatus === 'SOLICITADO'"
-      class="programa-card__info programa-card__info--pending"
-    >
-      <i class="pi pi-clock" aria-hidden="true" />
-      <p>{{ t('programas.card.info.pending') }}</p>
-    </div>
-
-    <div
-      v-else-if="modoStatus === 'REJEITADO' || modoStatus === 'SUSPENSO'"
-      class="programa-card__info programa-card__info--warning"
-    >
-      <i class="pi pi-info-circle" aria-hidden="true" />
-      <div class="programa-card__decision">
-        <p>
+      <div
+        v-else-if="modoStatus === 'REJEITADO' || modoStatus === 'SUSPENSO'"
+        class="programa-linha__decisao"
+      >
+        <p class="programa-linha__aviso programa-linha__aviso--risco">
+          <i class="pi pi-info-circle" aria-hidden="true" />
           {{
             modoStatus === 'REJEITADO'
               ? t('programas.card.info.rejected')
               : t('programas.card.info.suspended')
           }}
         </p>
-        <p v-if="modoBloco.motivo" class="programa-card__motivo">
+        <p v-if="modoBloco.motivo" class="programa-linha__nota">
           <strong>{{ t('programas.card.info.motivoLabel') }}</strong> {{ modoBloco.motivo }}
         </p>
-        <p v-if="decididoEmLabel" class="programa-card__decidido">
+        <p v-if="decididoEmLabel" class="programa-linha__nota">
           {{ t('programas.card.info.decididoEm', { data: decididoEmLabel }) }}
         </p>
         <a
           v-if="modoStatus === 'SUSPENSO'"
-          class="programa-card__support"
+          class="programa-linha__suporte"
           href="mailto:atendimento@petjourney.health"
         >
           {{ t('programas.card.info.contactSupport') }}
@@ -380,466 +299,153 @@ watch(modoStatus, () => {
       </div>
     </div>
 
-    <div class="programa-card__action">
+    <div class="programa-linha__acao">
+      <span v-if="modoStatus === 'ATIVO' && modo === 'afiliado'" class="programa-linha__saldo">
+        <span>{{ t('programas.card.info.saldo') }}</span>
+        <strong>{{ saldoLabel }}</strong>
+      </span>
+
       <Button
         v-if="showSolicitarButton"
-        class="programa-card__button programa-card__button--primary"
         type="button"
         :label="ctaLabel"
         :loading="submitting"
+        size="small"
         @click="handleSolicitar"
       />
 
       <Button
         v-else-if="cta.type === 'carteira'"
         :as="RouterLink"
-        class="programa-card__button programa-card__button--primary"
         :to="cta.to"
-        :label="ctaLabel"
+        :label="t('programas.linha.irParaGanhos')"
         icon="pi pi-arrow-right"
         icon-pos="right"
+        severity="secondary"
+        outlined
+        size="small"
       />
 
       <Button
         v-else-if="cta.type === 'aguardando'"
-        class="programa-card__button programa-card__button--waiting"
         type="button"
         :label="ctaLabel"
+        severity="secondary"
+        outlined
+        size="small"
         disabled
       />
-
-      <p
-        v-else-if="modoStatus === 'ATIVO' && modo === 'participativo'"
-        class="programa-card__active-note"
-      >
-        {{ t('programas.card.activeNoteParticipativo') }}
-      </p>
     </div>
   </article>
 </template>
 
 <style scoped>
-.programa-card {
-  display: grid;
-  gap: 0.95rem;
-  align-content: start;
-  min-height: 100%;
-  padding: 1.25rem 1.3rem 1.25rem;
-  border: 1px solid var(--prog-line);
-  border-radius: 1.2rem;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--prog-surface) 82%, var(--prog-card)) 0%,
-      var(--prog-card) 48%
-    );
-  box-shadow: 0 14px 30px rgb(var(--prog-shadow-rgb) / 0.045);
-  transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.programa-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--prog-primary) 28%, var(--prog-line));
-  box-shadow: 0 18px 34px rgb(var(--prog-shadow-rgb) / 0.07);
-}
-
-.programa-card--focus {
-  position: relative;
-  overflow: hidden;
-  border: 0;
-  background:
-    radial-gradient(
-      circle at 88% -8%,
-      rgb(var(--pf-glow-rgb) / 0.28) 0%,
-      rgb(var(--pf-glow-rgb) / 0.08) 38%,
-      transparent 64%
-    ),
-    linear-gradient(152deg, var(--pf-from), var(--pf-to));
-  box-shadow: 0 18px 40px rgb(var(--pf-shadow-rgb) / 0.11);
-  color: var(--pf-on);
-}
-
-.programa-card--focus:hover {
-  border-color: transparent;
-  box-shadow: 0 20px 44px rgb(var(--pf-shadow-rgb) / 0.14);
-}
-
-.programa-card__glow {
-  position: absolute;
-  top: -4rem;
-  inset-inline-end: 0;
-  z-index: 0;
-  width: 11rem;
-  max-width: 55%;
-  height: 11rem;
-  border-radius: 999px;
-  background: rgb(var(--pf-glow-rgb) / 0.14);
-  pointer-events: none;
-  transform: translateX(30%);
-}
-
-[dir='rtl'] .programa-card__glow {
-  transform: translateX(-30%);
-}
-
-.programa-card--focus > :not(.programa-card__glow) {
-  position: relative;
-  z-index: 1;
-}
-
-.programa-card--focus .programa-card__identity p,
-.programa-card--focus .programa-card__description,
-.programa-card--focus .programa-card__features li {
-  color: var(--pf-on-soft);
-}
-
-.programa-card--focus .programa-card__icon {
-  background: var(--pf-chip);
-  color: var(--pf-on);
-}
-
-.programa-card--focus .programa-card__badge {
-  background: var(--pf-chip);
-  color: var(--pf-on);
-}
-
-.programa-card--focus .programa-card__info--success {
-  background: var(--pf-field);
-}
-
-.programa-card--focus .programa-card__info--success span {
-  color: var(--pf-on-soft);
-}
-
-.programa-card--focus .programa-card__button--primary.p-button,
-.programa-card--focus .programa-card__button--primary.p-button:not(:disabled):hover,
-.programa-card--focus .programa-card__button--primary.p-button:not(:disabled):active {
-  background: var(--pf-cta-bg);
-  color: var(--pf-cta-text);
-}
-
-.programa-card--focus .programa-card__button--waiting.p-button:disabled {
-  background: var(--pf-chip);
-  color: var(--pf-on);
-}
-
-.programa-card__head {
+.programa-linha {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
+  gap: 1rem;
+  padding: 1rem 0;
 }
 
-.programa-card__identity {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  min-width: 0;
+.programa-linha + .programa-linha {
+  border-top: 1px solid var(--hc-linha);
 }
 
-.programa-card__icon {
+.programa-linha__icone {
   display: grid;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.6rem;
+  height: 2.6rem;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 0.85rem;
+  border-radius: 0.75rem;
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
   font-size: 1.05rem;
 }
 
-.programa-card--afiliado .programa-card__icon {
-  background: color-mix(in srgb, var(--prog-primary) 20%, var(--prog-card));
-  color: var(--prog-primary-strong);
+.programa-linha__corpo {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 0.3rem;
 }
 
-.programa-card--participativo .programa-card__icon {
-  background: color-mix(in srgb, var(--prog-primary) 16%, var(--prog-card));
-  color: var(--prog-primary-strong);
-}
-
-.programa-card__identity h3 {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.programa-card__identity p {
-  margin: 0.15rem 0 0;
-  color: var(--prog-muted);
-  font-size: 0.8rem;
-}
-
-.programa-card__badge {
-  display: inline-flex;
+.programa-linha__nome {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.28rem 0.62rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.programa-card[data-status='ATIVO'] .programa-card__badge {
-  background: var(--prog-success-bg);
-  color: var(--prog-success-text);
-}
-
-.programa-card[data-status='SOLICITADO'] .programa-card__badge {
-  background: color-mix(in srgb, var(--prog-primary-soft) 32%, var(--prog-card));
-  color: var(--prog-primary-strong);
-}
-
-.programa-card[data-status='REJEITADO'] .programa-card__badge,
-.programa-card[data-status='SUSPENSO'] .programa-card__badge {
-  background: color-mix(in srgb, var(--prog-warm-text) 12%, var(--prog-card));
-  color: var(--prog-warm-text);
-}
-
-.programa-card[data-status='NAO_SOLICITADO'] .programa-card__badge {
-  background: var(--prog-surface);
-  color: var(--prog-muted);
-}
-
-.programa-card__description {
+  gap: 0.5rem;
   margin: 0;
-  color: var(--prog-muted);
-  font-size: 0.88rem;
-  line-height: 1.5;
+  color: var(--hc-tinta);
+  font-size: 0.9375rem;
 }
 
-.programa-card__soon {
-  color: var(--prog-muted);
+.programa-linha__frase,
+.programa-linha__nota {
+  margin: 0;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.programa-linha__nota strong {
+  color: var(--hc-tinta);
+}
+
+.programa-linha__aviso {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--hc-pessego-tinta);
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
-.programa-card__features {
-  display: grid;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.programa-linha__aviso--risco {
+  color: var(--hc-coral-tinta);
 }
 
-.programa-card__features li {
+.programa-linha__decisao {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.programa-linha__suporte {
+  color: var(--hc-marca-forte);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+.programa-linha__acao {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 0.55rem;
-  color: var(--prog-text);
-  font-size: 0.84rem;
+  gap: 1rem;
+  align-self: center;
 }
 
-.programa-card--afiliado:not(.programa-card--focus) .programa-card__features i {
-  color: var(--prog-success-text);
-}
-
-.programa-card--participativo .programa-card__features i {
-  color: var(--prog-primary-strong);
-}
-
-.programa-card--focus .programa-card__features i {
-  color: var(--pf-on);
-}
-
-.programa-card__info {
+.programa-linha__saldo {
   display: grid;
-  gap: 0.65rem;
-  padding: 0.9rem 0.95rem;
-  border-radius: 0.9rem;
+  justify-items: end;
+  gap: 0.1rem;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
 }
 
-.programa-card__info--success {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  background: color-mix(in srgb, var(--prog-success-bg) 55%, var(--prog-card));
+.programa-linha__saldo strong {
+  color: var(--hc-tinta);
+  font-size: 0.9375rem;
 }
 
-.programa-card__info--success span {
-  display: block;
-  color: var(--prog-muted);
-  font-size: 0.74rem;
-}
-
-.programa-card__info--success strong {
-  display: block;
-  margin-top: 0.15rem;
-  font-size: 1.08rem;
-  letter-spacing: -0.02em;
-}
-
-.programa-card__info--pending,
-.programa-card__info--warning {
-  grid-template-columns: auto 1fr;
-  align-items: start;
-}
-
-.programa-card__info--pending {
-  border: 1px solid color-mix(in srgb, var(--prog-primary) 22%, var(--prog-line));
-  background: var(--prog-surface);
-  color: var(--prog-text);
-}
-
-.programa-card__info--warning {
-  border: 1px solid color-mix(in srgb, var(--prog-warm-text) 22%, var(--prog-line));
-  background: var(--prog-surface);
-  color: var(--prog-text);
-}
-
-.programa-card__info p {
-  margin: 0;
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.programa-card__decision {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.programa-card__motivo strong {
-  font-weight: 700;
-}
-
-.programa-card__decidido {
-  opacity: 0.85;
-  font-size: 0.76rem !important;
-}
-
-.programa-card__support {
-  justify-self: start;
-  color: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.programa-card__action {
-  margin-top: auto;
-  padding-top: 0.25rem;
-}
-
-.programa-card__button.p-button {
-  width: 100%;
-  min-height: 2.75rem;
-  gap: 0.5rem;
-  border: 0;
-  border-radius: 0.85rem;
-  font-size: 0.88rem;
-  text-decoration: none;
-  transition:
-    background 140ms ease,
-    opacity 140ms ease,
-    transform 140ms ease;
-}
-
-.programa-card__button.p-button :deep(.p-button-label) {
-  font-weight: 700;
-}
-
-.programa-card__button.p-button :deep(.p-button-icon) {
-  transition: transform 140ms ease;
-}
-
-.programa-card__button--primary.p-button,
-.programa-card__button--primary.p-button:not(:disabled):hover,
-.programa-card__button--primary.p-button:not(:disabled):active {
-  border: 0;
-  background: var(--prog-primary);
-  color: color-mix(in srgb, white 96%, transparent);
-}
-
-.programa-card--participativo .programa-card__button--primary.p-button,
-.programa-card--participativo .programa-card__button--primary.p-button:not(:disabled):hover,
-.programa-card--participativo .programa-card__button--primary.p-button:not(:disabled):active {
-  background: color-mix(in srgb, var(--prog-primary) 88%, var(--prog-text));
-}
-
-.programa-card__button--primary.p-button:not(:disabled):hover,
-.programa-card__button--primary.p-button:focus-visible {
-  transform: translateY(-1px);
-  filter: brightness(1.03);
-}
-
-.programa-card__button--primary.p-button:not(:disabled):hover :deep(.p-button-icon),
-.programa-card__button--primary.p-button:focus-visible :deep(.p-button-icon) {
-  transform: translateX(2px);
-}
-
-.programa-card__button--primary.p-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
-  filter: none;
-}
-
-/* Estado informativo, não ação: sem a opacidade de desabilitado do preset. */
-.programa-card__button--waiting.p-button:disabled {
-  background: color-mix(in srgb, var(--prog-primary-soft) 28%, var(--prog-card));
-  color: var(--prog-muted);
-  cursor: default;
-  opacity: 1;
-}
-
-.programa-card__active-note {
-  margin: 0;
-  padding: 0.8rem 0.9rem;
-  border-radius: 0.85rem;
-  background: var(--prog-success-bg);
-  color: var(--prog-success-text);
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.programa-card--skeleton {
-  pointer-events: none;
-}
-
-.programa-card--skeleton:hover {
-  transform: none;
-  border-color: transparent;
-  box-shadow: 0 18px 40px rgb(var(--pf-shadow-rgb, var(--prog-shadow-rgb)) / 0.11);
-}
-
-.programa-card:not(.programa-card--focus).programa-card--skeleton:hover {
-  border-color: var(--prog-line);
-  box-shadow: 0 14px 30px rgb(var(--prog-shadow-rgb) / 0.045);
-}
-
-.programa-card__skel-identity,
-.programa-card__skel-description {
-  display: grid;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-.programa-card--focus.programa-card--skeleton :deep(.p-skeleton) {
-  --p-skeleton-background: color-mix(in srgb, white 30%, transparent);
-  --p-skeleton-animation-background: color-mix(in srgb, white 14%, transparent);
-}
-
-.programa-card--skeleton:not(.programa-card--focus) :deep(.p-skeleton) {
-  --p-skeleton-background: color-mix(in srgb, var(--prog-primary-soft) 42%, var(--prog-card));
-  --p-skeleton-animation-background: color-mix(
-    in srgb,
-    var(--prog-primary-soft) 18%,
-    transparent
-  );
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .programa-card:hover,
-  .programa-card__button--primary.p-button:not(:disabled):hover {
-    transform: none;
+@media (max-width: 900px) {
+  .programa-linha {
+    flex-wrap: wrap;
   }
-}
 
-@media (max-width: 720px) {
-  .programa-card__info--success {
-    grid-template-columns: 1fr;
+  .programa-linha__acao {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
 </style>

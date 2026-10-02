@@ -12,6 +12,7 @@ import ToastService from 'primevue/toastservice'
 
 import App from './App.vue'
 import i18n, { syncDocumentLang } from './i18n'
+import { sincronizarPrimeVue } from './i18n/primevue'
 import router from './router'
 import './theme/color-mode'
 import { PetJourneyPreset } from './theme/primevue'
@@ -30,6 +31,7 @@ app.use(ToastService)
 app.use(createPinia())
 app.use(router)
 app.use(i18n)
+sincronizarPrimeVue(app)
 
 syncDocumentLang()
 app.mount('#app')

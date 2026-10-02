@@ -207,7 +207,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
     </div>
 
     <!-- ------------------------------------------------------------------ filtros -->
-    <Popover ref="filtros" class="clinic-overlay">
+    <Popover ref="filtros" class="clinic-overlay hc-tema">
       <div class="painel clinic-scope">
         <section class="painel__secao">
           <h3 class="clinic-label">{{ t('clinico.agenda.agruparPorProfissional') }}</h3>
@@ -267,7 +267,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
     </Popover>
 
     <!-- ----------------------------------------------------------------- exibição -->
-    <Popover ref="exibicao" class="clinic-overlay">
+    <Popover ref="exibicao" class="clinic-overlay hc-tema">
       <div class="painel clinic-scope">
         <section v-if="agenda.visao === 'dia'" class="painel__secao">
           <h3 class="clinic-label">{{ t('clinico.agenda.exibicao') }}</h3>

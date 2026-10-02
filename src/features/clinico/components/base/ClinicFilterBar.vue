@@ -136,7 +136,7 @@ function limpar() {
       />
     </div>
 
-    <Popover ref="painel" class="clinic-overlay">
+    <Popover ref="painel" class="clinic-overlay hc-tema">
       <div class="painel clinic-scope">
         <section v-for="grupo in grupos" :key="grupo.id" class="painel__grupo">
           <h3 class="clinic-label">{{ grupo.rotulo }}</h3>

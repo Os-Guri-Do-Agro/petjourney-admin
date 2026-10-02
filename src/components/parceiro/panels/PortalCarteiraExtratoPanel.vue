@@ -221,7 +221,7 @@ onMounted(() => {
             <div class="extrato-list">
               <article v-for="item in day.items" :key="item.id" class="extrato-row">
                 <div>
-                  <strong>{{ item.tipo.replaceAll('_', ' ') }}</strong>
+                  <strong>{{ t(`carteira.extrato.tipo.${item.tipo}`) }}</strong>
                   <p>
                     <span v-if="item.origem">{{ item.origem }}</span>
                     <span v-if="item.periodicidade"> · {{ item.periodicidade }}</span>
@@ -309,25 +309,31 @@ onMounted(() => {
   margin: 0;
   padding: 0.15rem 0.15rem 0.05rem;
   color: var(--partner-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
+/*
+ * Um cartão por dia, e os lançamentos como linhas dele — como num extrato. Um cartão por
+ * lançamento fazia uma tarde de três saques ocupar a tela inteira.
+ */
 .extrato-list {
   display: grid;
-  gap: 0.45rem;
+  overflow: hidden;
+  border: 1px solid var(--partner-line);
+  border-radius: 0.85rem;
+  background: var(--partner-card);
 }
 
 .extrato-row {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.85rem;
-  background: var(--partner-card);
+  padding: 0.75rem 1rem;
+}
+
+.extrato-row + .extrato-row {
+  border-top: 1px solid var(--partner-line);
 }
 
 .extrato-row p {

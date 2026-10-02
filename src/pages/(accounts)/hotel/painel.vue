@@ -19,7 +19,8 @@
  *    rotina é a cheia, o próximo passo de quem abre o painel; passar o turno é contornada.
  * 2. **O que pede ação** — a pauta da Visão geral (`PautaTabela`). As faixas pintadas de ponta a
  *    ponta que abriam a tela viraram linhas com selo: ocorrência sem contato e chegada sem
- *    documento como urgentes, boletim retido e tarefas atrasadas como atenção. O contato com o
+ *    documento como urgentes, boletim retido como atenção, e a rotina atrasada pela mesma regra
+ *    da Visão geral (`tomDaRotinaAtrasada`: urgente se há medicação atrasada). O contato com o
  *    responsável se registra na estadia; a tela não liga.
  * 3. **O dia** — o trilho, e as chegadas e saídas por extenso.
  * 4. **Bem-estar na casa** — como os bichos estão, que não tem hora marcada.
@@ -43,6 +44,7 @@ import LinhaDoDia from '@/features/hotel/components/painel/LinhaDoDia.vue'
 import type { MarcaDoDia } from '@/features/hotel/components/painel/dia-types'
 import PassagemDialog from '@/features/hotel/components/rotina/PassagemDialog.vue'
 import { tomDaAdmissao, useHotelFormat } from '@/features/hotel/composables/useHotelFormat'
+import { tomDaRotinaAtrasada } from '@/features/hotel/domain/rotina'
 import { hotelClock, useHotelStore } from '@/features/hotel/stores/hotel'
 import { useHospedagemStore } from '@/features/hotel/stores/hospedagem'
 import { useReservasStore } from '@/features/hotel/stores/reservas'
@@ -173,13 +175,19 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
   }
 
   const atrasadas = hospedagem.atrasadasNaPrancheta
+  const medicacoes = hospedagem.medicacoesAtrasadasNaPrancheta
 
   if (atrasadas > 0) {
     linhas.push({
       id: 'rotina',
       to: '/hotel/rotina',
       frase: t('inicio.pauta.rotina', { total: atrasadas }, atrasadas),
-      tom: 'atencao',
+      detalhe:
+        medicacoes > 0
+          ? t('inicio.pauta.parte.medicacoesAtrasadas', { total: medicacoes }, medicacoes)
+          : undefined,
+      // A mesma regra da Visão geral: medicação atrasada torna a rotina urgente.
+      tom: tomDaRotinaAtrasada(atrasadas, medicacoes),
       onde: t('inicio.pauta.onde.rotina'),
     })
   }

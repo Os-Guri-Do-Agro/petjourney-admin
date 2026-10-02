@@ -80,7 +80,11 @@ const MOTIVOS: MotivoDeFalta[] = [
 
 const CANAIS: CanalDeContato[] = ['telefone', 'whatsapp', 'presencial', 'sem-resposta']
 
-const motivo = ref<MotivoDeFalta>('esqueceu')
+/**
+ * O motivo começa vazio. Vindo "Esqueceu" de fábrica, registrar sem perguntar gravava um motivo
+ * que ninguém disse — e é a contagem desses motivos que muda a política de lembretes.
+ */
+const motivo = ref<MotivoDeFalta | null>(null)
 const canal = ref<CanalDeContato>('telefone')
 const observacao = ref('')
 
@@ -98,7 +102,7 @@ const existente = computed<JustificativaDeFalta | null>(
 watch(
   () => props.appointment?.id,
   () => {
-    motivo.value = existente.value?.motivo ?? 'esqueceu'
+    motivo.value = existente.value?.motivo ?? null
     canal.value = existente.value?.canal ?? 'telefone'
     observacao.value = existente.value?.observacao ?? ''
   },
@@ -142,7 +146,13 @@ const telefoneLimpo = computed(() => {
 })
 
 /** Marcado óbito, a tela inteira muda de tom — e para de oferecer o que não se oferece mais. */
-const encerra = computed(() => motivoEncerraOCaso(motivo.value))
+const encerra = computed(() => (motivo.value ? motivoEncerraOCaso(motivo.value) : false))
+
+function confirmar() {
+  if (motivo.value) {
+    emit('confirmar', { motivo: motivo.value, canal: canal.value, observacao: observacao.value })
+  }
+}
 
 /**
  * A mensagem já aberta com o nome do paciente e o dia — ninguém deveria digitar isso de novo.
@@ -232,6 +242,7 @@ const linkDoWhatsapp = computed(() => {
             :options="opcoesMotivo"
             option-label="rotulo"
             option-value="valor"
+            :placeholder="t('clinico.faltas.justificativa.motivoEscolha')"
             fluid
             :pt="{ overlay: { class: 'clinic-overlay' } }"
           />
@@ -306,7 +317,8 @@ const linkDoWhatsapp = computed(() => {
         :label="t('clinico.faltas.justificativa.confirmar')"
         icon="pi pi-check"
         :loading="salvando"
-        @click="emit('confirmar', { motivo, canal, observacao })"
+        :disabled="!motivo"
+        @click="confirmar"
       />
     </template>
   </Dialog>

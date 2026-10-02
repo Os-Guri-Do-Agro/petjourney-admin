@@ -84,6 +84,24 @@ const pet = computed(() => (petId.value ? clinico.pet(petId.value) : null))
 
 const duracao = computed(() => tipo.value?.duracaoMinutos ?? 30)
 
+/**
+ * O que a busca da lista também enxerga: o responsável e o telefone.
+ *
+ * A recepção procura como o telefone toca — "é o cachorro da Rita", "final 1188" —, e a busca
+ * global já achava assim. Só pelo nome do animal, o paciente certo parecia não existir.
+ */
+function textoDeBusca(tutorId: string): string {
+  const tutor = clinico.tutor(tutorId)
+
+  if (!tutor) {
+    return ''
+  }
+
+  return [tutor.nome, tutor.telefone, tutor.telefone?.replace(/\D/g, '')]
+    .filter(Boolean)
+    .join(' ')
+}
+
 const opcoesPacientes = computed(() =>
   clinico.pets
     .map((item) => ({
@@ -92,6 +110,7 @@ const opcoesPacientes = computed(() =>
       detalhe: [formato.especie(item.especie), clinico.tutor(item.tutorId)?.nome]
         .filter(Boolean)
         .join(' · '),
+      busca: textoDeBusca(item.tutorId),
     }))
     .sort((a, b) => a.rotulo.localeCompare(b.rotulo, INTL_LOCALE[locale.value as Locale])),
 )
@@ -208,6 +227,24 @@ const rotuloDoBotao = computed(() =>
     : t('clinico.agenda.criar.agendarMesmoAssim'),
 )
 
+/**
+ * Onde a hora começa ao abrir: no início do expediente, ou — hoje, com o dia já andando — no
+ * próximo passo da agenda. Abrir às 17h30 com "08:00" preenchido marcava no passado quem não
+ * conferisse a hora.
+ */
+function primeiroHorario(): number {
+  const expediente = clockToMinutes(agenda.dia?.expediente?.inicio ?? '09:00')
+  const agora = clinicClock.now()
+
+  if (agora.date !== props.data) {
+    return expediente
+  }
+
+  const passo = clinico.clinic?.slotMinutos ?? 15
+
+  return Math.max(expediente, Math.ceil(agora.minutes / passo) * passo)
+}
+
 /** Reabrir precisa começar limpo — formulário que guarda a escolha da vez passada agenda errado. */
 watch(
   () => props.visivel,
@@ -222,8 +259,7 @@ watch(
     typeId.value = clinico.tipos[0]?.id ?? null
     professionalId.value = props.sugestaoProfissional ?? clinico.profissionais[0]?.id ?? null
 
-    const expediente = agenda.dia?.expediente?.inicio ?? '09:00'
-    hora.value = minutesToClock(props.minutoInicial ?? clockToMinutes(expediente))
+    hora.value = minutesToClock(props.minutoInicial ?? primeiroHorario())
   },
 )
 
@@ -317,6 +353,7 @@ async function confirmar() {
             option-label="rotulo"
             option-value="valor"
             :options="opcoesPacientes"
+            :filter-fields="['rotulo', 'busca']"
             :filter-placeholder="t('clinico.agenda.criar.buscarPaciente')"
             :placeholder="t('clinico.agenda.criar.escolhaPaciente')"
             :pt="{ overlay: { class: 'clinic-overlay' } }"

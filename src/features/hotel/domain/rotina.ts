@@ -67,6 +67,24 @@ export function situacaoDaTarefa(
   return minutos >= -JANELA_MINUTOS ? 'na-janela' : 'atrasada'
 }
 
+/**
+ * A gravidade da rotina atrasada, igual em toda tela que a mostra.
+ *
+ * Medicação atrasada é o que torna a rotina urgente; o resto atrasado é atenção. A Visão geral
+ * e o Painel do dia calculavam cada um a sua, e a mesma linha era Urgente numa e Atenção na
+ * outra — quem confere as duas passa a desconfiar das duas.
+ */
+export function tomDaRotinaAtrasada(
+  atrasadas: number,
+  medicacoesAtrasadas: number,
+): 'risco' | 'atencao' | 'neutro' {
+  if (medicacoesAtrasadas > 0) {
+    return 'risco'
+  }
+
+  return atrasadas > 0 ? 'atencao' : 'neutro'
+}
+
 /** Cobra ação agora: está na janela ou já passou dela. */
 export function cobraAcao(situacao: SituacaoDaTarefa): boolean {
   return situacao === 'na-janela' || situacao === 'atrasada'

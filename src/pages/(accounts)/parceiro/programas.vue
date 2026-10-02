@@ -27,6 +27,35 @@ const LEGACY_ABA_REDIRECTS: Record<string, { path: string; hash?: string; aba?: 
 }
 
 const { store, ensureContext } = useParceiroPortal()
+
+/**
+ * A frase da saudação: quantos programas estão valendo. Com os dois ativos, a tela é de consulta e
+ * a frase diz isso; com um pedido em análise, diz que está em análise.
+ */
+const fraseDoResumo = computed(() => {
+  if (store.loadState !== 'ready') {
+    return ''
+  }
+
+  const afiliado = store.modoBloco('afiliado').status
+  const participativo = store.modoBloco('participativo').status
+
+  if (afiliado === 'ATIVO' && participativo === 'ATIVO') {
+    return t('programas.saudacao.todosAtivos')
+  }
+
+  if (afiliado === 'ATIVO' || participativo === 'ATIVO') {
+    return t('programas.saudacao.umAtivo', {
+      programa: t(`programas.card.${afiliado === 'ATIVO' ? 'afiliado' : 'participativo'}.title`),
+    })
+  }
+
+  if (afiliado === 'SOLICITADO' || participativo === 'SOLICITADO') {
+    return t('programas.saudacao.emAnalise')
+  }
+
+  return t('programas.saudacao.nenhum')
+})
 const route = useRoute()
 const router = useRouter()
 
@@ -89,6 +118,7 @@ watch(
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('programas.subtitle')"
     :title="t('programas.title')"
     :loading="false"
@@ -98,13 +128,29 @@ watch(
     guidance
     @retry="ensureContext(true)"
   >
-    <template #actions>
-      <Button
-        :label="t('programas.cred.zoneTitle')"
-        icon="pi pi-id-card"
-        severity="secondary"
-        @click="router.push('/settings?aba=empresa')"
-      />
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('programas.subtitle') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('programas.title') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
+            {{ fraseDoResumo }}
+          </p>
+
+          <nav class="hc-acoes" :aria-label="t('programas.saudacao.acoes')">
+            <Button
+              type="button"
+              class="hc-pilula"
+              :label="t('programas.cred.zoneTitle')"
+              icon="pi pi-id-card"
+              severity="secondary"
+              outlined
+              @click="router.push('/settings?aba=empresa')"
+            />
+          </nav>
+        </div>
+      </div>
     </template>
 
     <div class="programas-page" :style="pageAtmosphere">

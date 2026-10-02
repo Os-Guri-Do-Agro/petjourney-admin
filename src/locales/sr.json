@@ -849,6 +849,21 @@
         "alreadyRequested": "Ovaj program je već zatražen ili je aktivan.",
         "modoSuspenso": "Ovaj program je suspendovan za Vašu firmu. Obratite se podršci da biste ga ponovo aktivirali."
       }
+    },
+    "saudacao": {
+      "todosAtivos": "Oba programa su aktivna",
+      "umAtivo": "{programa} je aktivan",
+      "emAnalise": "Vaš zahtev je na proveri",
+      "nenhum": "Još nijedan program nije aktivan",
+      "acoes": "Radnje programa"
+    },
+    "linha": {
+      "ativoDesde": "Aktivan od {data}",
+      "irParaGanhos": "Idi na zaradu",
+      "ativacaoRotulo": "Kako se program aktivira:",
+      "ativacaoFrase": "vlasnik naloga ga traži, PetJourney ga proverava i otključava pogodnosti.",
+      "verEtapas": "Prikaži korake",
+      "ocultarEtapas": "Sakrij korake"
     }
   },
   "parceiroCadastro": {
@@ -1049,7 +1064,8 @@
       "vinculadoDe": "Povezano od",
       "vinculadoAte": "Povezano do",
       "limpar": "Obrišite filtere",
-      "comProntuario": "Sa kartonom"
+      "comProntuario": "Sa kartonom",
+      "botao": "Filteri"
     },
     "expira": {
       "expirado": "Isteklo",
@@ -1329,6 +1345,25 @@
       "removidoDetail": "Staratelj je uklonio ovaj dokument iz pristupa. Osvežili smo listu.",
       "acessoEncerrado": "Pristup je završen",
       "acessoEncerradoDetail": "Staratelj je prekinuo ovaj pristup, pa karton više nije dostupan. Osvežili smo ekran."
+    },
+    "saudacao": {
+      "acoes": "Radnje pristupa",
+      "ativos": "Nema aktivnih pristupa | {n} aktivan pristup | {n} aktivna pristupa | {n} aktivnih pristupa",
+      "ativosMais": "Više od {n} aktivnih pristupa",
+      "vencemLogo": "{n} ističe za manje od jednog dana | {n} ističu za manje od jednog dana | {n} ističe za manje od jednog dana",
+      "historico": "Nema ljubimaca u istoriji | {n} ljubimac u istoriji | {n} ljubimca u istoriji | {n} ljubimaca u istoriji",
+      "historicoRecente": "Nedavni pristupi za {n} ljubimca | Nedavni pristupi za {n} ljubimca | Nedavni pristupi za {n} ljubimaca",
+      "encontrados": "Nije pronađen nijedan ljubimac | Pronađen je {n} ljubimac | Pronađena su {n} ljubimca | Pronađeno je {n} ljubimaca"
+    },
+    "grupo": {
+      "acessos": "{n} pristup | {n} pristupa | {n} pristupa",
+      "proximo": "sledeći {prazo}",
+      "ultimoEncerrado": "poslednji završen: {data}",
+      "encerradoEm": "završeno: {data}",
+      "venceLogo": "Jedan pristup ističe za manje od jednog dana",
+      "recolher": "Skupi",
+      "verAcessos": "Prikaži pristupe",
+      "verOutros": "Prikaži još {n} pristup za {pet} | Prikaži još {n} pristupa za {pet} | Prikaži još {n} pristupa za {pet}"
     }
   },
   "divulgacao": {
@@ -1483,6 +1518,25 @@
         "indisponivel": "Metrike trenutno nisu dostupne. Pokušajte ponovo za trenutak.",
         "erro": "Učitavanje skeniranja nije uspelo."
       }
+    },
+    "kit": {
+      "titulo": "Tri načina za deljenje",
+      "codigo": "Kod, da se kaže na pultu",
+      "link": "Link, za WhatsApp i Instagram",
+      "qr": "QR, za štampu na pultu",
+      "qrDica": "Ko ga skenira, odmah stiže na registraciju sa vašim kodom.",
+      "copiar": "Kopiraj"
+    },
+    "regras": {
+      "rotulo": "Kako se preporuka isplati:",
+      "frase": "5% od svake preporučene pretplate, svakog meseca, 18 meseci. Potreban je aktivan partnerski program."
+    },
+    "saudacao": {
+      "resumo": "Vaš kod je {codigo} · {leituras}",
+      "leituras": "još nijedno čitanje QR koda | {n} čitanje QR koda | {n} čitanja QR koda | {n} čitanja QR koda",
+      "semCodigo": "Kod se pojavljuje kada partnerski program bude aktivan",
+      "copiarLink": "Kopiraj link",
+      "acoes": "Radnje za deljenje"
     }
   },
   "carteira": {
@@ -1495,7 +1549,7 @@
         "description": "Stanja, PIX ključ i zahtev za isplatu."
       },
       "extrato": {
-        "label": "Izvod",
+        "label": "Promene",
         "description": "Prilivi od udela i odlivi."
       },
       "saques": {
@@ -1584,7 +1638,13 @@
       "emptyBody": "Ovde se prikazuju prilivi od udela i odlivi po isplatama.",
       "loadMore": "Učitajte još",
       "today": "Danas",
-      "yesterday": "Juče"
+      "yesterday": "Juče",
+      "tipo": {
+        "CREDITO_COMISSAO": "Pripisano učešće",
+        "ESTORNO": "Storno",
+        "DEBITO_SAQUE": "Isplata",
+        "AJUSTE": "Korekcija"
+      }
     },
     "saques": {
       "loadingTitle": "Učitavanje isplata...",
@@ -1593,7 +1653,12 @@
       "retry": "Pokušajte ponovo",
       "emptyTitle": "Nema zatraženih isplata",
       "emptyBody": "Zatražite isplatu na kartici „Sažetak“ kada budete imali stanje za isplatu.",
-      "requestedAt": "Zatraženo {data}"
+      "requestedAt": "Zatraženo {data}",
+      "status": {
+        "PENDENTE": "Na proveri",
+        "PAGO": "Isplaćeno",
+        "FALHA": "Odbijeno"
+      }
     },
     "detail": {
       "subtitle": "Zarada od preporuka",
@@ -1614,6 +1679,32 @@
       "failReason": "Razlog neuspeha",
       "receipt": "Dokaz o uplati",
       "pendingHint": "Isplate ručno realizuje PetJourney. Okvirni ciklus: presek 27. u mesecu, isplata do 5. u mesecu."
+    },
+    "saudacao": {
+      "disponivel": "{valor} dostupno za isplatu",
+      "retido": "{valor} je još u sigurnosnom periodu",
+      "semSaldo": "Još nema zarade od preporuka",
+      "cadastrarPix": "Dodajte PIX ključ",
+      "acoes": "Radnje novčanika"
+    },
+    "resumo": {
+      "aria": "Pregled novčanika",
+      "retido": "Još {valor} se oslobađa u sigurnosnom periodu",
+      "jaSacados": "već isplaćeno",
+      "minimo": "Minimalna isplata",
+      "ciclo": "Presek 27., isplata do 5.",
+      "pix": "PIX"
+    },
+    "dialogo": {
+      "disponivel": "Dostupno sada: {valor}",
+      "paraPix": "Iznos ide na PIX ključ {chave}.",
+      "cancelar": "Otkaži"
+    },
+    "ajuda": {
+      "rotulo": "Kako novčanik radi:",
+      "frase": "šta ulazi, kada se oslobađa za isplatu i kada stiže na račun.",
+      "abrir": "Otvori",
+      "fechar": "Zatvori"
     }
   },
   "parceiro": {
@@ -2435,7 +2526,13 @@
         "atendimentos": "{total} termin | {total} termina | {total} termina",
         "naRecepcao": "na recepciji: {total}",
         "vazio": "Nema zakazanih termina"
-      }
+      },
+      "proximoPasso": {
+        "aguardando": "Zabeležite dolazak",
+        "em-atendimento": "Započnite pregled",
+        "finalizado": "Završite pregled"
+      },
+      "conflitosTitulo": "Konflikti"
     },
     "meuDia": {
       "titulo": "Danas u klinici",
@@ -2572,7 +2669,8 @@
         "hepatico": "Zabeleženo oboljenje jetre: {detalhe}",
         "cardiaco": "Zabeleženo srčano oboljenje: {detalhe}",
         "gastrico": "Zabeleženo oboljenje želuca: {detalhe}"
-      }
+      },
+      "escolhaNaLista": "Izaberite lek sa liste da vidite dozu po vrsti."
     },
     "documentos": {
       "titulo": "Dokumenti pregleda",
@@ -2927,12 +3025,15 @@
         "registradaPor": "Uneo {nome} · {quando}",
         "mensagem": "Zdravo! Nedostajao nam je {paciente} na pregledu {data}. Da li je sve u redu? Da zakažemo novi termin?",
         "mensagemObito": "Zdravo. Saznali smo za gubitak ljubimca {paciente} i veoma nam je žao. Tu smo ako vam nešto zatreba.",
-        "avisoObito": "Kada se smrt zabeleži, ovaj izostanak više ne dobija ponudu novog termina."
+        "avisoObito": "Kada se smrt zabeleži, ovaj izostanak više ne dobija ponudu novog termina.",
+        "motivoEscolha": "Izaberite razlog"
       },
       "frase": {
         "pendentes": "{total} izostanak za obradu | {total} izostanka za obradu | {total} izostanaka za obradu",
         "emDia": "Svi izostanci imaju razlog",
-        "agenda": "{tempo} izgubljenog vremena"
+        "agenda": "{tempo} izgubljenog vremena",
+        "dePacientes": "od {total} pacijenta | od {total} pacijenta | od {total} pacijenata",
+        "pendentesDe": "{faltas}, {pacientes}"
       },
       "acoes": {
         "rotulo": "Akcije za nedolaske",
@@ -3831,8 +3932,8 @@
         "pendentes": "Na redu",
         "atrasadas": "{total} kasni | {total} kasne | {total} kasni",
         "boletimRetido": "Izveštaj čeka poziv",
-        "proximaMinutos": "Sledeća za {minutos} min",
-        "proximaHoras": "Sledeća za {horas} h"
+        "proximaMinutos": "Ček-lista: sledeće za {minutos} min",
+        "proximaHoras": "Ček-lista: sledeće za {horas} h"
       },
       "checklist": {
         "vazio": "Ništa nije planirano za ovaj period.",
@@ -3843,7 +3944,9 @@
         "atrasoMinutos": "{minutos} min kašnjenja",
         "conferencia": "provera pumpe",
         "naTroca": "Pada u vreme primopredaje smene: dogovorite ko je daje pre predaje smene.",
-        "checar": "Zabeležite"
+        "checar": "Zabeležite",
+        "antesDaHora": "Predviđeno za {hora}. Ipak zabeležiti sada?",
+        "registrarAgora": "Zabeležite sada"
       },
       "evolucao": {
         "registrarTitulo": "Tok lečenja u ovoj smeni",
@@ -6118,5 +6221,26 @@
     "bloco": "Blok pregleda",
     "incremento": "Obračunski korak",
     "comoFunciona": "Vreme se zaokružuje naviše do sledeće jedinice. Stvarno proteklo vreme uvek je vidljivo pored."
+  },
+  "primevue": {
+    "today": "Danas",
+    "clear": "Obriši",
+    "weekHeader": "Ned",
+    "prevMonth": "Prethodni mesec",
+    "nextMonth": "Sledeći mesec",
+    "emptyFilterMessage": "Nema rezultata",
+    "emptyMessage": "Nema opcija",
+    "emptySearchMessage": "Nema rezultata",
+    "emptySelectionMessage": "Ništa nije izabrano",
+    "searchMessage": "Dostupno rezultata: {0}",
+    "selectionMessage": "Izabrano stavki: {0}",
+    "aria": {
+      "close": "Zatvori",
+      "previous": "Prethodno",
+      "next": "Sledeće",
+      "selectAll": "Izaberi sve",
+      "unselectAll": "Poništi izbor",
+      "navigation": "Navigacija"
+    }
   }
 }

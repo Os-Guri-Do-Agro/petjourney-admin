@@ -807,7 +807,7 @@ onBeforeUnmount(() => {
     <Dialog
       v-model:visible="assumirAberto"
       modal
-      class="clinic-dialog"
+      class="clinic-dialog hc-tema"
       :style="{ width: 'min(30rem, 94vw)' }"
       :header="t('clinico.prontuario.assumirDialogo.titulo')"
       dismissable-mask
@@ -832,7 +832,7 @@ onBeforeUnmount(() => {
     <Dialog
       v-model:visible="finalizarAberto"
       modal
-      class="clinic-dialog"
+      class="clinic-dialog hc-tema"
       :style="{ width: 'min(30rem, 94vw)' }"
       :header="t('clinico.prontuario.finalizarDialogo.titulo')"
       dismissable-mask
@@ -1076,14 +1076,11 @@ onBeforeUnmount(() => {
   margin: 0;
 }
 
+/* O que falta é uma linha com ícone na tinta de atenção — a faixa pintada não volta. */
 .dialogo__pendencias {
   display: flex;
   align-items: flex-start;
   gap: 0.4rem;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-attention-bg);
   color: var(--clinic-attention-text);
   font-weight: 650;
 }

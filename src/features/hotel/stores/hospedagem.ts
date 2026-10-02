@@ -171,6 +171,14 @@ export const useHospedagemStore = defineStore('hotel-hospedagem', () => {
         .filter((linha) => linha.situacao === 'atrasada').length,
   )
 
+  const medicacoesAtrasadasNaPrancheta = computed(
+    () =>
+      blocosDaPrancheta.value
+        .flatMap((bloco) => bloco.linhas)
+        .filter((linha) => linha.situacao === 'atrasada' && linha.tarefa.kind === 'medicacao')
+        .length,
+  )
+
   /** O checklist só do animal aberto, do dia corrente e já contra o relógio. */
   const checklistDaEstadia = computed(() =>
     (estadia.value?.tarefas ?? [])
@@ -554,6 +562,7 @@ export const useHospedagemStore = defineStore('hotel-hospedagem', () => {
     blocosDaPrancheta,
     pendentesNaPrancheta,
     atrasadasNaPrancheta,
+    medicacoesAtrasadasNaPrancheta,
     checklistDaEstadia,
     ocorrenciasTravadasDaEstadia,
     carregarHospedes,

@@ -221,7 +221,7 @@ async function handleValidar() {
     v-model:visible="visible"
     modal
     :draggable="false"
-    class="validar-cupom-dialog"
+    class="validar-cupom-dialog hc-tema"
     :pt="{ root: { class: 'validar-cupom-dialog' } }"
     @hide="closeDialog"
   >
@@ -469,10 +469,8 @@ async function handleValidar() {
 .vc-hero__eyebrow {
   margin: 0 0 0.35rem;
   color: var(--pf-on-soft);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .vc-hero h2 {
@@ -565,8 +563,6 @@ async function handleValidar() {
   color: var(--vc-faint);
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .vc-counter {
@@ -697,10 +693,8 @@ async function handleValidar() {
 .vc-result__eyebrow {
   margin: 0;
   color: var(--vc-faint);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .vc-result h3 {
@@ -755,10 +749,8 @@ async function handleValidar() {
 
 .vc-result__k {
   color: var(--vc-faint);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .vc-result__card strong {

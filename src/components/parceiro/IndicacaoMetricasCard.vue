@@ -285,10 +285,8 @@ function barraAria(day: string, count: number) {
 .qrm__recent h4 {
   margin: 0;
   color: var(--div-faint);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .qrm__recent ul {

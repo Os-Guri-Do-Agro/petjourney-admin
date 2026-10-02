@@ -849,6 +849,21 @@
         "alreadyRequested": "Este programa ya fue solicitado o está activo.",
         "modoSuspenso": "Este programa está suspendido para su empresa. Hable con soporte para reactivarlo."
       }
+    },
+    "saudacao": {
+      "todosAtivos": "Los dos programas están activos",
+      "umAtivo": "{programa} activo",
+      "emAnalise": "Su solicitud está en análisis",
+      "nenhum": "Aún no hay programas activos",
+      "acoes": "Acciones de los programas"
+    },
+    "linha": {
+      "ativoDesde": "Activo desde {data}",
+      "irParaGanhos": "Ir a las ganancias",
+      "ativacaoRotulo": "Cómo se activa un programa:",
+      "ativacaoFrase": "el dueño de la cuenta lo solicita, PetJourney lo analiza y libera los beneficios.",
+      "verEtapas": "Ver etapas",
+      "ocultarEtapas": "Ocultar etapas"
     }
   },
   "parceiroCadastro": {
@@ -983,11 +998,11 @@
   "acessos": {
     "subtitle": "Portal",
     "title": "Accesos",
-    "lede": "Compartidos de mascotas vinculados a su empresa: snapshot, historial y notas autenticadas.",
+    "lede": "Mascotas que los tutores compartieron con su empresa: los datos liberados, el historial y las notas del equipo.",
     "tabs": {
       "ativos": {
         "label": "Activos",
-        "description": "Accesos vigentes, con snapshot y notas."
+        "description": "Accesos vigentes, con los datos liberados y las notas."
       },
       "historico": {
         "label": "Historial",
@@ -1002,11 +1017,11 @@
       "emptyAtivosBody": "Pida el código de 6 dígitos al tutor y vincúlelo para ver los datos de la mascota aquí.",
       "emptyHistoricoTitle": "Sin historial todavía",
       "emptyHistoricoBody": "Los accesos cerrados aparecen aquí con las notas de su empresa.",
-      "anotacoes": "{n} notas",
+      "anotacoes": "{n} nota | {n} notas",
       "loadMore": "Cargar más",
       "emptyFiltroTitle": "Sin resultados para estos filtros",
       "emptyFiltroBody": "Ajuste la búsqueda o el período. La búsqueda alcanza solo el nombre de la mascota.",
-      "documentos": "{n} documentos",
+      "documentos": "{n} documento | {n} documentos",
       "diario": "Diario",
       "resumoAtualizado": "Resumen actualizado el {data}",
       "encerradoEm": "Finalizado el {data}",
@@ -1049,7 +1064,8 @@
       "vinculadoDe": "Vinculado desde",
       "vinculadoAte": "Vinculado hasta",
       "limpar": "Limpiar filtros",
-      "comProntuario": "Con historial"
+      "comProntuario": "Con historial",
+      "botao": "Filtros"
     },
     "expira": {
       "expirado": "Vencido",
@@ -1086,7 +1102,7 @@
       "tabs": {
         "resumo": {
           "label": "Resumen de la mascota",
-          "description": "Mensaje del tutor y snapshot autorizado al momento de compartir."
+          "description": "El mensaje del tutor y los datos que liberó al compartir."
         },
         "anotacoes": {
           "label": "Notas",
@@ -1100,8 +1116,8 @@
     },
     "encerrado": {
       "title": "Acceso cerrado",
-      "expirado": "El compartido venció. El snapshot clínico ya no está disponible; quedan las notas de su empresa.",
-      "revogado": "El tutor revocó el acceso. El snapshot clínico ya no está disponible; quedan las notas de su empresa."
+      "expirado": "El compartido venció. Los datos clínicos ya no están disponibles; quedan las notas de su empresa.",
+      "revogado": "El tutor revocó el acceso. Los datos clínicos ya no están disponibles; quedan las notas de su empresa."
     },
     "snapshot": {
       "peso": "Peso",
@@ -1112,7 +1128,7 @@
       "diagnosticos": "Diagnósticos",
       "observacoes": "Observaciones del tutor",
       "clinicalTitle": "Datos clínicos compartidos",
-      "clinicalLede": "Snapshot autorizado por el tutor. Toque para expandir cada lista.",
+      "clinicalLede": "Datos liberados por el tutor. Toque para abrir cada lista.",
       "sectionsCount": "{n} secciones",
       "itemsCount": "{n} ítems",
       "semItens": "Sin ítems",
@@ -1329,6 +1345,25 @@
       "removidoDetail": "El responsable quitó este documento del acceso. Actualizamos la lista.",
       "acessoEncerrado": "Acceso finalizado",
       "acessoEncerradoDetail": "El responsable finalizó este acceso, por lo que el historial ya no está disponible. Actualizamos la pantalla."
+    },
+    "saudacao": {
+      "acoes": "Acciones de los accesos",
+      "ativos": "Ningún acceso activo | 1 acceso activo | {n} accesos activos",
+      "ativosMais": "Más de {n} accesos activos",
+      "vencemLogo": "1 vence en menos de un día | {n} vencen en menos de un día",
+      "historico": "Ninguna mascota en el historial | 1 mascota en el historial | {n} mascotas en el historial",
+      "historicoRecente": "Accesos recientes de 1 mascota | Accesos recientes de {n} mascotas",
+      "encontrados": "Ninguna mascota encontrada | 1 mascota encontrada | {n} mascotas encontradas"
+    },
+    "grupo": {
+      "acessos": "{n} acceso | {n} accesos",
+      "proximo": "el próximo {prazo}",
+      "ultimoEncerrado": "el último finalizó el {data}",
+      "encerradoEm": "finalizado el {data}",
+      "venceLogo": "Un acceso vence en menos de un día",
+      "recolher": "Contraer",
+      "verAcessos": "Ver accesos",
+      "verOutros": "Ver el otro acceso de {pet} | Ver los otros {n} accesos de {pet}"
     }
   },
   "divulgacao": {
@@ -1483,6 +1518,25 @@
         "indisponivel": "Métricas no disponibles en este momento. Intente de nuevo en unos instantes.",
         "erro": "No fue posible cargar las lecturas."
       }
+    },
+    "kit": {
+      "titulo": "Tres formas de compartir",
+      "codigo": "Código, para decir en el mostrador",
+      "link": "Enlace, para WhatsApp e Instagram",
+      "qr": "QR, para imprimir en el mostrador",
+      "qrDica": "Quien lo escanea llega directo al registro con su código.",
+      "copiar": "Copiar"
+    },
+    "regras": {
+      "rotulo": "Cómo rinde la recomendación:",
+      "frase": "5% de cada suscripción recomendada, todos los meses, durante 18 meses. Requiere el programa de afiliados activo."
+    },
+    "saudacao": {
+      "resumo": "Su código es {codigo} · {leituras}",
+      "leituras": "ninguna lectura del QR todavía | {n} lectura del QR | {n} lecturas del QR",
+      "semCodigo": "El código aparece cuando el programa de afiliados esté activo",
+      "copiarLink": "Copiar enlace",
+      "acoes": "Acciones de difusión"
     }
   },
   "carteira": {
@@ -1495,7 +1549,7 @@
         "description": "Saldos, clave PIX y solicitud de retiro."
       },
       "extrato": {
-        "label": "Extracto",
+        "label": "Movimientos",
         "description": "Movimientos de participación y débitos."
       },
       "saques": {
@@ -1584,7 +1638,13 @@
       "emptyBody": "Los créditos de participación y los débitos de retiro aparecen aquí.",
       "loadMore": "Cargar más",
       "today": "Hoy",
-      "yesterday": "Ayer"
+      "yesterday": "Ayer",
+      "tipo": {
+        "CREDITO_COMISSAO": "Participación acreditada",
+        "ESTORNO": "Reverso",
+        "DEBITO_SAQUE": "Retiro",
+        "AJUSTE": "Ajuste"
+      }
     },
     "saques": {
       "loadingTitle": "Cargando retiros...",
@@ -1593,7 +1653,12 @@
       "retry": "Intentar de nuevo",
       "emptyTitle": "Ningún retiro solicitado",
       "emptyBody": "Solicite un retiro en la pestaña Vista general cuando tenga saldo retirable.",
-      "requestedAt": "Solicitado el {data}"
+      "requestedAt": "Solicitado el {data}",
+      "status": {
+        "PENDENTE": "En análisis",
+        "PAGO": "Pagado",
+        "FALHA": "Rechazado"
+      }
     },
     "detail": {
       "subtitle": "Ganancias por referidos",
@@ -1608,12 +1673,38 @@
       "timelineLabel": "Línea de tiempo",
       "awaitingLiquidation": "Pendiente de liquidación",
       "awaitingLiquidationHint": "El pago aún no ha sido confirmado.",
-      "pixSnapshot": "Clave PIX (snapshot)",
+      "pixSnapshot": "Clave PIX usada en el retiro",
       "pixCopied": "Clave PIX copiada.",
       "pixCopyError": "No fue posible copiar la clave PIX.",
       "failReason": "Motivo del fallo",
       "receipt": "Comprobante",
       "pendingHint": "Los pagos los liquida manualmente PetJourney. Ciclo orientativo: corte día 27, pago hasta el día 5."
+    },
+    "saudacao": {
+      "disponivel": "{valor} disponible para retirar",
+      "retido": "{valor} aún en la ventana de seguridad",
+      "semSaldo": "Aún no hay ganancias por recomendación",
+      "cadastrarPix": "Registrar clave PIX",
+      "acoes": "Acciones de la billetera"
+    },
+    "resumo": {
+      "aria": "Resumen de la billetera",
+      "retido": "Otros {valor} liberándose en la ventana de seguridad",
+      "jaSacados": "ya retirados",
+      "minimo": "Retiro mínimo",
+      "ciclo": "Corte el día 27, pago hasta el día 5",
+      "pix": "PIX"
+    },
+    "dialogo": {
+      "disponivel": "Disponible ahora: {valor}",
+      "paraPix": "El valor va a la clave PIX {chave}.",
+      "cancelar": "Cancelar"
+    },
+    "ajuda": {
+      "rotulo": "Cómo funciona la billetera:",
+      "frase": "lo que entra, cuándo se libera para retirar y cuándo llega a su cuenta.",
+      "abrir": "Abrir",
+      "fechar": "Cerrar"
     }
   },
   "parceiro": {
@@ -2435,7 +2526,13 @@
         "atendimentos": "{total} consulta | {total} consultas",
         "naRecepcao": "{total} en recepción",
         "vazio": "Ninguna consulta agendada"
-      }
+      },
+      "proximoPasso": {
+        "aguardando": "Registrar llegada",
+        "em-atendimento": "Iniciar atención",
+        "finalizado": "Finalizar atención"
+      },
+      "conflitosTitulo": "Conflictos"
     },
     "meuDia": {
       "titulo": "Hoy en la clínica",
@@ -2572,7 +2669,8 @@
         "hepatico": "Condición hepática registrada: {detalhe}",
         "cardiaco": "Condición cardíaca registrada: {detalhe}",
         "gastrico": "Condición gástrica registrada: {detalhe}"
-      }
+      },
+      "escolhaNaLista": "Elija un medicamento de la lista para ver la dosis por especie."
     },
     "documentos": {
       "titulo": "Documentos de la atención",
@@ -2927,12 +3025,15 @@
         "registradaPor": "Registrado por {nome} · {quando}",
         "mensagem": "¡Hola! Extrañamos a {paciente} en la consulta del {data}. ¿Está todo bien? ¿Reprogramamos?",
         "mensagemObito": "Hola. Supimos del fallecimiento de {paciente} y lo sentimos mucho. Estamos a disposición para lo que necesite.",
-        "avisoObito": "Con el fallecimiento registrado, esta ausencia deja de recibir oferta de reprogramación."
+        "avisoObito": "Con el fallecimiento registrado, esta ausencia deja de recibir oferta de reprogramación.",
+        "motivoEscolha": "Elija el motivo"
       },
       "frase": {
         "pendentes": "{total} falta por justificar | {total} faltas por justificar",
         "emDia": "Todas las faltas tienen motivo",
-        "agenda": "{tempo} de agenda perdida"
+        "agenda": "{tempo} de agenda perdida",
+        "dePacientes": "de {total} paciente | de {total} pacientes",
+        "pendentesDe": "{faltas}, {pacientes}"
       },
       "acoes": {
         "rotulo": "Acciones de ausencias",
@@ -3831,8 +3932,8 @@
         "pendentes": "Por hacer",
         "atrasadas": "{total} atrasadas",
         "boletimRetido": "El parte espera una llamada",
-        "proximaMinutos": "Siguiente en {minutos} min",
-        "proximaHoras": "Siguiente en {horas} h"
+        "proximaMinutos": "Checklist: siguiente en {minutos} min",
+        "proximaHoras": "Checklist: siguiente en {horas} h"
       },
       "checklist": {
         "vazio": "Nada previsto para este período.",
@@ -3843,7 +3944,9 @@
         "atrasoMinutos": "{minutos} min de retraso",
         "conferencia": "control de la bomba",
         "naTroca": "Cae en el cambio de turno — acordad quién la aplica antes de pasar el turno.",
-        "checar": "Registrar"
+        "checar": "Registrar",
+        "antesDaHora": "Prevista para las {hora}. ¿Registrar ahora de todos modos?",
+        "registrarAgora": "Registrar ahora"
       },
       "evolucao": {
         "registrarTitulo": "Evolución de este turno",
@@ -6118,5 +6221,26 @@
     "bloco": "Bloque de la consulta",
     "incremento": "Incremento de facturación",
     "comoFunciona": "El tiempo se redondea hacia arriba hasta la siguiente unidad. El transcurrido real queda siempre a la vista, al lado."
+  },
+  "primevue": {
+    "today": "Hoy",
+    "clear": "Limpiar",
+    "weekHeader": "Sem",
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "emptyFilterMessage": "Sin resultados",
+    "emptyMessage": "Sin opciones",
+    "emptySearchMessage": "Sin resultados",
+    "emptySelectionMessage": "Nada seleccionado",
+    "searchMessage": "{0} resultados disponibles",
+    "selectionMessage": "{0} elementos seleccionados",
+    "aria": {
+      "close": "Cerrar",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "selectAll": "Seleccionar todo",
+      "unselectAll": "Deseleccionar todo",
+      "navigation": "Navegación"
+    }
   }
 }

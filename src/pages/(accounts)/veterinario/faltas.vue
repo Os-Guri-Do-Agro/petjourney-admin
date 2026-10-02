@@ -331,11 +331,24 @@ const totalPendentes = computed(() =>
   linhas.value.reduce((total, linha) => total + linha.semJustificativa, 0),
 )
 
-/** A frase da saudação: a fila de trabalho primeiro, depois o tamanho do problema. */
+/**
+ * A frase da saudação: a fila de trabalho primeiro, depois o tamanho do problema.
+ *
+ * Diz faltas **e** pacientes. A aba "A justificar" conta pacientes (as linhas da tabela); só com
+ * as faltas, a frase dizia 26 e a aba 14, e quem lia achava que uma das duas estava errada.
+ */
 const fraseDoResumo = computed(() => {
+  const pacientes = pendentes.value.length
   const fila =
     totalPendentes.value > 0
-      ? t('clinico.faltas.frase.pendentes', { total: totalPendentes.value }, totalPendentes.value)
+      ? t('clinico.faltas.frase.pendentesDe', {
+          faltas: t(
+            'clinico.faltas.frase.pendentes',
+            { total: totalPendentes.value },
+            totalPendentes.value,
+          ),
+          pacientes: t('clinico.faltas.frase.dePacientes', { total: pacientes }, pacientes),
+        })
       : t('clinico.faltas.frase.emDia')
 
   return `${fila} · ${t('clinico.faltas.frase.agenda', { tempo: formato.duracao(totalMinutos.value) })}`

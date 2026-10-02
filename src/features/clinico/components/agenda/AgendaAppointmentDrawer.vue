@@ -71,7 +71,12 @@ const conflitos = computed(() => {
   })
 })
 
-/** O próximo passo natural do atendimento, para virar botão primário. */
+/**
+ * O próximo passo natural do atendimento, para virar botão primário.
+ *
+ * O botão diz a ação ("Registrar chegada"), e não o estado em que o atendimento vai ficar: com
+ * o rótulo "Aguardando", a recepção lia o botão como o estado atual e não clicava.
+ */
 const proximoStatus = computed<AppointmentStatus | null>(() => {
   switch (props.appointment?.status) {
     case 'agendado':
@@ -267,7 +272,7 @@ const prazoDoApp = computed(() => {
     <p v-if="appointment.observacao" class="drawer__observacao">{{ appointment.observacao }}</p>
 
     <section v-if="conflitos.length > 0" class="drawer__secao">
-      <h3 class="clinic-label">{{ t('clinico.agenda.filtros') }}</h3>
+      <h3 class="clinic-label">{{ t('clinico.agenda.conflitosTitulo') }}</h3>
       <ul class="drawer__avisos">
         <li v-for="(conflito, indice) in conflitos" :key="indice">
           <ClinicAlertChip
@@ -300,7 +305,7 @@ const prazoDoApp = computed(() => {
     <div class="drawer__acoes">
       <Button
         v-if="proximoStatus"
-        :label="formato.status(proximoStatus)"
+        :label="t(`clinico.agenda.proximoPasso.${proximoStatus}`)"
         icon="pi pi-arrow-right"
         :loading="agenda.salvando"
         @click="emit('alterarStatus', proximoStatus)"

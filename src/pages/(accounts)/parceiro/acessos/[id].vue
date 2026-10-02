@@ -873,6 +873,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('acessos.detalhe.subtitle')"
     :title="detalhe?.petNome ?? t('acessos.detalhe.title')"
     :loading="loading"
@@ -1703,8 +1704,6 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   color: var(--partner-faint);
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .atd-hero__fact dd {
@@ -2362,10 +2361,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .atd-trat__grid dt,
 .atd-diario__grid dt {
   color: var(--partner-faint);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
 }
 
 .atd-trat__grid dd,
@@ -2380,10 +2377,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .atd-diario__text span {
   display: block;
   color: var(--partner-faint);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
 }
 
 .atd-trat__text p,
@@ -2657,10 +2652,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   gap: 0.4rem;
   margin: 0;
   color: var(--partner-faint);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .atd-note__files-label span {

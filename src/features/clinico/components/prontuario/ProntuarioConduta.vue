@@ -116,14 +116,22 @@ function recalcular(prescricao: Prescription, mudanca: Partial<Prescription['cal
   })
 }
 
+type DoseSugerida = ReturnType<typeof sugestaoDePrescricao>
+
+/**
+ * Adicionar abre o bulário, e a linha só nasce com o remédio escolhido.
+ *
+ * Antes a linha nascia com o primeiro medicamento do catálogo e a dose dele já calculada: quem
+ * esquecesse de trocar emitia receita de um remédio que ninguém escolheu. Uma prescrição não
+ * tem estado "sem remédio" — por isso a escolha vem primeiro.
+ */
 function adicionarPrescricao() {
-  const medicamento = clinico.medicamentos[0]
+  prescricaoEmEdicao.value = null
+  pickerVisivel.value = true
+}
 
-  if (!medicamento) {
-    return
-  }
-
-  const sugestao = sugestaoDePrescricao(medicamento, props.pet)
+function criarPrescricao(medicamento: Medication, escolha?: Partial<DoseSugerida>) {
+  const sugestao = { ...sugestaoDePrescricao(medicamento, props.pet), ...escolha }
   const calculo = calcularDose({ medicamento, pesoKg: props.pesoKg, ...sugestao })
 
   aplicar({
@@ -247,7 +255,13 @@ function aplicarEscolhaDoBulario(escolha: {
 }) {
   const prescricaoId = prescricaoEmEdicao.value
 
+  // Sem linha em edição, a escolha veio de "Adicionar medicamento": é ela que cria a linha.
   if (!prescricaoId) {
+    criarPrescricao(escolha.medicamento, {
+      mgPorKg: escolha.mgPorKg,
+      frequenciaHoras: escolha.frequenciaHoras,
+      duracaoDias: escolha.duracaoDias,
+    })
     return
   }
 

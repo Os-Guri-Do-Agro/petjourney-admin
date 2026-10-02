@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import Button from 'primevue/button'
+import { useToast } from 'primevue/usetoast'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -17,6 +19,46 @@ const ABA_TO_HASH: Record<string, string> = {
 }
 
 const { t } = useI18n()
+const toast = useToast()
+
+/** O que o painel carregou e a saudação precisa: código, link e leituras do QR. */
+const estado = ref({ codigo: '', link: '', leituras: null as number | null, podeIndicar: false })
+
+/**
+ * A frase da saudação: o código já à vista, e quantas leituras o QR teve. Sem programa de
+ * afiliados ativo não existe código, e a frase diz o que falta em vez de ficar em branco.
+ */
+const fraseDoResumo = computed(() => {
+  if (!estado.value.podeIndicar || !estado.value.codigo) {
+    return t('divulgacao.saudacao.semCodigo')
+  }
+
+  const leituras = estado.value.leituras ?? 0
+
+  return t('divulgacao.saudacao.resumo', {
+    codigo: estado.value.codigo,
+    leituras: t('divulgacao.saudacao.leituras', { n: leituras }, leituras),
+  })
+})
+
+async function copiarLink() {
+  try {
+    await navigator.clipboard.writeText(estado.value.link)
+    toast.add({
+      severity: 'success',
+      summary: t('divulgacao.toast.copied'),
+      detail: t('divulgacao.toast.copiedDetail', { label: t('divulgacao.shareKit.linkName') }),
+      life: 2400,
+    })
+  } catch {
+    toast.add({
+      severity: 'error',
+      summary: t('divulgacao.toast.copyFail'),
+      detail: t('divulgacao.toast.copyFailDetail'),
+      life: 4000,
+    })
+  }
+}
 const { store, ensureContext } = useParceiroPortal()
 const route = useRoute()
 const router = useRouter()
@@ -78,6 +120,7 @@ watch(
 
 <template>
   <PartnerPageFrame
+    class="hc-tema"
     :subtitle="t('divulgacao.subtitle')"
     :title="t('divulgacao.title')"
     :loading="false"
@@ -87,6 +130,27 @@ watch(
     guidance
     @retry="ensureContext(true)"
   >
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('divulgacao.subtitle') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('divulgacao.title') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p class="hc-saudacao__resumo" aria-live="polite">{{ fraseDoResumo }}</p>
+
+          <nav v-if="estado.podeIndicar && estado.link" class="hc-acoes" :aria-label="t('divulgacao.saudacao.acoes')">
+            <Button
+              type="button"
+              class="hc-pilula hc-pilula--cheia"
+              icon="pi pi-link"
+              :label="t('divulgacao.saudacao.copiarLink')"
+              @click="copiarLink"
+            />
+          </nav>
+        </div>
+      </div>
+    </template>
+
     <div class="divulgacao-page" :style="pageAtmosphere">
       <PartnerOperabilityBanner />
 
@@ -94,7 +158,7 @@ watch(
         {{ t('divulgacao.lede') }}
       </p>
 
-      <PortalDivulgacaoPanel />
+      <PortalDivulgacaoPanel @estado="estado = $event" />
     </div>
   </PartnerPageFrame>
 </template>

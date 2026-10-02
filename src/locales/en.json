@@ -849,6 +849,21 @@
         "alreadyRequested": "This program was already requested or is active.",
         "modoSuspenso": "This program is suspended for your company. Contact support to reactivate it."
       }
+    },
+    "saudacao": {
+      "todosAtivos": "Both programs are active",
+      "umAtivo": "{programa} active",
+      "emAnalise": "Your request is under review",
+      "nenhum": "No program active yet",
+      "acoes": "Program actions"
+    },
+    "linha": {
+      "ativoDesde": "Active since {data}",
+      "irParaGanhos": "Go to earnings",
+      "ativacaoRotulo": "How a program is activated:",
+      "ativacaoFrase": "the account owner requests it, PetJourney reviews it and releases the benefits.",
+      "verEtapas": "See steps",
+      "ocultarEtapas": "Hide steps"
     }
   },
   "parceiroCadastro": {
@@ -983,11 +998,11 @@
   "acessos": {
     "subtitle": "Portal",
     "title": "Access",
-    "lede": "Pet shares linked to your company: snapshot, history, and authenticated notes.",
+    "lede": "Pets that pet parents shared with your company: the data they released, history, and your team's notes.",
     "tabs": {
       "ativos": {
         "label": "Active",
-        "description": "Current accesses, with snapshot and notes."
+        "description": "Current accesses, with released data and notes."
       },
       "historico": {
         "label": "History",
@@ -1002,11 +1017,11 @@
       "emptyAtivosBody": "Ask the pet parent for the 6-digit code and link it to see the pet's data here.",
       "emptyHistoricoTitle": "No history yet",
       "emptyHistoricoBody": "Closed accesses show up here with your company's notes.",
-      "anotacoes": "{n} notes",
+      "anotacoes": "{n} note | {n} notes",
       "loadMore": "Load more",
       "emptyFiltroTitle": "No results for these filters",
       "emptyFiltroBody": "Adjust the search or the period. The search only covers the pet name.",
-      "documentos": "{n} documents",
+      "documentos": "{n} document | {n} documents",
       "diario": "Diary",
       "resumoAtualizado": "Summary updated on {data}",
       "encerradoEm": "Ended on {data}",
@@ -1049,7 +1064,8 @@
       "vinculadoDe": "Linked from",
       "vinculadoAte": "Linked until",
       "limpar": "Clear filters",
-      "comProntuario": "With records"
+      "comProntuario": "With records",
+      "botao": "Filters"
     },
     "expira": {
       "expirado": "Expired",
@@ -1086,7 +1102,7 @@
       "tabs": {
         "resumo": {
           "label": "Pet summary",
-          "description": "Pet parent's message and the snapshot authorized at share time."
+          "description": "The pet parent's message and the data they released when sharing."
         },
         "anotacoes": {
           "label": "Notes",
@@ -1100,8 +1116,8 @@
     },
     "encerrado": {
       "title": "Access closed",
-      "expirado": "The share expired. The clinical snapshot is no longer available; your company's notes remain.",
-      "revogado": "The pet parent revoked the access. The clinical snapshot is no longer available; your company's notes remain."
+      "expirado": "The share expired. The clinical data is no longer available; your company's notes remain.",
+      "revogado": "The pet parent revoked the access. The clinical data is no longer available; your company's notes remain."
     },
     "snapshot": {
       "peso": "Weight",
@@ -1112,7 +1128,7 @@
       "diagnosticos": "Diagnoses",
       "observacoes": "Pet parent's remarks",
       "clinicalTitle": "Shared clinical data",
-      "clinicalLede": "Snapshot authorized by the pet parent. Expand each list as needed.",
+      "clinicalLede": "Data released by the pet parent. Expand each list as needed.",
       "sectionsCount": "{n} sections",
       "itemsCount": "{n} items",
       "semItens": "No items",
@@ -1329,6 +1345,25 @@
       "removidoDetail": "The pet parent removed this document from the access. We refreshed the list.",
       "acessoEncerrado": "Access ended",
       "acessoEncerradoDetail": "The pet parent ended this access, so the record is no longer available. We refreshed the screen."
+    },
+    "saudacao": {
+      "acoes": "Access actions",
+      "ativos": "No active access | 1 active access | {n} active accesses",
+      "ativosMais": "More than {n} active accesses",
+      "vencemLogo": "1 ends in less than a day | {n} end in less than a day",
+      "historico": "No pets in the history | 1 pet in the history | {n} pets in the history",
+      "historicoRecente": "Recent accesses of 1 pet | Recent accesses of {n} pets",
+      "encontrados": "No pets found | 1 pet found | {n} pets found"
+    },
+    "grupo": {
+      "acessos": "{n} access | {n} accesses",
+      "proximo": "the next one {prazo}",
+      "ultimoEncerrado": "last one ended on {data}",
+      "encerradoEm": "ended on {data}",
+      "venceLogo": "An access ends in less than a day",
+      "recolher": "Collapse",
+      "verAcessos": "See accesses",
+      "verOutros": "See the other access of {pet} | See the other {n} accesses of {pet}"
     }
   },
   "divulgacao": {
@@ -1483,6 +1518,25 @@
         "indisponivel": "Metrics unavailable right now. Try again in a moment.",
         "erro": "Could not load the scans."
       }
+    },
+    "kit": {
+      "titulo": "Three ways to share",
+      "codigo": "Code, to say at the front desk",
+      "link": "Link, for WhatsApp and Instagram",
+      "qr": "QR, to print for the front desk",
+      "qrDica": "Whoever scans it lands right on sign-up with your code.",
+      "copiar": "Copy"
+    },
+    "regras": {
+      "rotulo": "How referrals pay:",
+      "frase": "5% of each referred subscription, every month, for 18 months. Requires the affiliate program to be active."
+    },
+    "saudacao": {
+      "resumo": "Your code is {codigo} · {leituras}",
+      "leituras": "no QR scans yet | {n} QR scan | {n} QR scans",
+      "semCodigo": "Your code shows up once the affiliate program is active",
+      "copiarLink": "Copy link",
+      "acoes": "Referral actions"
     }
   },
   "carteira": {
@@ -1495,7 +1549,7 @@
         "description": "Balances, PIX key, and withdrawal request."
       },
       "extrato": {
-        "label": "Statement",
+        "label": "Activity",
         "description": "Participation credits and debits."
       },
       "saques": {
@@ -1584,7 +1638,13 @@
       "emptyBody": "Participation credits and payout debits appear here.",
       "loadMore": "Load more",
       "today": "Today",
-      "yesterday": "Yesterday"
+      "yesterday": "Yesterday",
+      "tipo": {
+        "CREDITO_COMISSAO": "Commission credited",
+        "ESTORNO": "Reversal",
+        "DEBITO_SAQUE": "Withdrawal",
+        "AJUSTE": "Adjustment"
+      }
     },
     "saques": {
       "loadingTitle": "Loading payouts...",
@@ -1593,7 +1653,12 @@
       "retry": "Try again",
       "emptyTitle": "No payouts requested",
       "emptyBody": "Request a payout on the Overview tab when you have withdrawable balance.",
-      "requestedAt": "Requested on {data}"
+      "requestedAt": "Requested on {data}",
+      "status": {
+        "PENDENTE": "Under review",
+        "PAGO": "Paid",
+        "FALHA": "Declined"
+      }
     },
     "detail": {
       "subtitle": "Referral earnings",
@@ -1608,12 +1673,38 @@
       "timelineLabel": "Timeline",
       "awaitingLiquidation": "Awaiting settlement",
       "awaitingLiquidationHint": "Payment has not been confirmed yet.",
-      "pixSnapshot": "PIX key (snapshot)",
+      "pixSnapshot": "PIX key used for this withdrawal",
       "pixCopied": "PIX key copied.",
       "pixCopyError": "Could not copy the PIX key.",
       "failReason": "Failure reason",
       "receipt": "Receipt",
       "pendingHint": "Payments are settled manually by PetJourney. Indicative cycle: cut-off on the 27th, payment by the 5th."
+    },
+    "saudacao": {
+      "disponivel": "{valor} available to withdraw",
+      "retido": "{valor} still in the safety window",
+      "semSaldo": "No referral earnings yet",
+      "cadastrarPix": "Add PIX key",
+      "acoes": "Wallet actions"
+    },
+    "resumo": {
+      "aria": "Wallet summary",
+      "retido": "Another {valor} clearing the safety window",
+      "jaSacados": "withdrawn so far",
+      "minimo": "Minimum withdrawal",
+      "ciclo": "Cut-off on the 27th, paid by the 5th",
+      "pix": "PIX"
+    },
+    "dialogo": {
+      "disponivel": "Available now: {valor}",
+      "paraPix": "The amount goes to PIX key {chave}.",
+      "cancelar": "Cancel"
+    },
+    "ajuda": {
+      "rotulo": "How the wallet works:",
+      "frase": "what comes in, when it clears for withdrawal and when it reaches your account.",
+      "abrir": "Open",
+      "fechar": "Close"
     }
   },
   "parceiro": {
@@ -2435,7 +2526,13 @@
         "atendimentos": "{total} appointment | {total} appointments",
         "naRecepcao": "{total} at reception",
         "vazio": "No appointments booked"
-      }
+      },
+      "proximoPasso": {
+        "aguardando": "Check in",
+        "em-atendimento": "Start appointment",
+        "finalizado": "Finish appointment"
+      },
+      "conflitosTitulo": "Conflicts"
     },
     "meuDia": {
       "titulo": "Today at the clinic",
@@ -2572,7 +2669,8 @@
         "hepatico": "Recorded liver condition: {detalhe}",
         "cardiaco": "Recorded heart condition: {detalhe}",
         "gastrico": "Recorded gastric condition: {detalhe}"
-      }
+      },
+      "escolhaNaLista": "Pick a drug from the list to see the dose by species."
     },
     "documentos": {
       "titulo": "Visit documents",
@@ -2927,12 +3025,15 @@
         "registradaPor": "Recorded by {nome} · {quando}",
         "mensagem": "Hello! We missed {paciente} at the {data} appointment. Is everything alright? Shall we rebook?",
         "mensagemObito": "Hello. We heard about {paciente}'s passing and we are very sorry. We are here if you need anything.",
-        "avisoObito": "Once the death is recorded, this no-show stops being offered a new appointment."
+        "avisoObito": "Once the death is recorded, this no-show stops being offered a new appointment.",
+        "motivoEscolha": "Choose a reason"
       },
       "frase": {
         "pendentes": "{total} no-show to chase | {total} no-shows to chase",
         "emDia": "Every no-show has a reason",
-        "agenda": "{tempo} of idle schedule"
+        "agenda": "{tempo} of idle schedule",
+        "dePacientes": "from {total} patient | from {total} patients",
+        "pendentesDe": "{faltas}, {pacientes}"
       },
       "acoes": {
         "rotulo": "No-show actions",
@@ -3831,8 +3932,8 @@
         "pendentes": "Due",
         "atrasadas": "{total} overdue",
         "boletimRetido": "Update waiting on a call",
-        "proximaMinutos": "Next in {minutos} min",
-        "proximaHoras": "Next in {horas} h"
+        "proximaMinutos": "Checklist: next in {minutos} min",
+        "proximaHoras": "Checklist: next in {horas} h"
       },
       "checklist": {
         "vazio": "Nothing scheduled for this window.",
@@ -3843,7 +3944,9 @@
         "atrasoMinutos": "{minutos} min late",
         "conferencia": "pump check",
         "naTroca": "Falls on the shift handover — agree who gives it before handing over.",
-        "checar": "Record"
+        "checar": "Record",
+        "antesDaHora": "Due at {hora}. Record it now anyway?",
+        "registrarAgora": "Record now"
       },
       "evolucao": {
         "registrarTitulo": "Progress note for this shift",
@@ -6118,5 +6221,26 @@
     "bloco": "Consultation block",
     "incremento": "Billing increment",
     "comoFunciona": "Time is rounded up to the next unit. The real elapsed time always stays visible next to it."
+  },
+  "primevue": {
+    "today": "Today",
+    "clear": "Clear",
+    "weekHeader": "Wk",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "emptyFilterMessage": "No results found",
+    "emptyMessage": "No available options",
+    "emptySearchMessage": "No results found",
+    "emptySelectionMessage": "No selected item",
+    "searchMessage": "{0} results are available",
+    "selectionMessage": "{0} items selected",
+    "aria": {
+      "close": "Close",
+      "previous": "Previous",
+      "next": "Next",
+      "selectAll": "Select all",
+      "unselectAll": "Unselect all",
+      "navigation": "Navigation"
+    }
   }
 }

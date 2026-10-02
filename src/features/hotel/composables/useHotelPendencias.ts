@@ -76,7 +76,10 @@ let emVoo: Promise<void> | null = null
  * carrega não apaga a rotina atrasada, e também não vira "nenhuma chegada travada".
  */
 export async function apurarPendenciasDoHotel() {
-  const [{ hospedagemRepository, reservaRepository, situacaoDaTarefa }, { agoraIso }] =
+  const [
+    { hospedagemRepository, reservaRepository, situacaoDaTarefa, tomDaRotinaAtrasada },
+    { agoraIso },
+  ] =
     await Promise.all([import('../data/repositories'), import('../data/store')])
 
   const [prancheta, reservas, hospedes] = await Promise.all([
@@ -96,7 +99,7 @@ export async function apurarPendenciasDoHotel() {
 
     rotinaApurada = {
       total: atrasadas.length,
-      tom: medicacoes > 0 ? 'risco' : atrasadas.length > 0 ? 'atencao' : 'neutro',
+      tom: tomDaRotinaAtrasada(atrasadas.length, medicacoes),
       /* A medicação é o que torna a rotina urgente — é ela que a linha precisa nomear. */
       partes: partesQueExistem([{ chave: 'medicacoesAtrasadas', total: medicacoes }]),
     }

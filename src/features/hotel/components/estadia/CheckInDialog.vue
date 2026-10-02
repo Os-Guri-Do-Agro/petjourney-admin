@@ -204,8 +204,12 @@ watch(
       return
     }
 
-    /* O peso do cadastro entra como sugestão, e a balança confirma. Nunca como valor final. */
-    peso.value = props.pesoCadastroKg
+    /*
+     * O peso começa vazio: é o que a balança mostrou agora. O do cadastro fica embaixo do campo,
+     * como referência. Preenchido, ele virava o "peso de entrada" de quem não pesou — e é esse
+     * número que a saída compara para dizer se o animal perdeu peso na estadia.
+     */
+    peso.value = null
     inspecao.value = ''
     pertences.value = SUGESTOES.map((descricao) => ({ descricao, quantidade: 1 }))
     novoPertence.value = ''

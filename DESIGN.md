@@ -293,10 +293,17 @@ Como uma tela entra no design novo, e onde cada peça mora no código:
   verde-claro: verde é tinta, não papel.
 
 **Já migradas:** a moldura; a Visão geral; o módulo Clínico inteiro (as 15 telas, a ficha, o
-migrador e os diálogos); o módulo Hotel inteiro (as 10 telas e os diálogos). Redesenhadas além do
+migrador e os diálogos); o módulo Hotel inteiro (as 10 telas e os diálogos); o Portal do parceiro (Programas,
+Divulgação, Acessos e detalhe, Ganhos de indicação com Extrato e Saques, e os diálogos de vínculo, saque e cupom).
+Os componentes do Portal passam as cores por `style`,
+cada um com um prefixo (`--prog-*`, `--div-*`, `--pf-*`, `--auth-*`…); a "ponte do Portal" em `hc-tema.css` liga cada
+papel ao token novo, e o cartão em foco (`--pf-*`, antes um gradiente verde) vira cartão branco. Redesenhadas além do
 acabamento, com proposta aprovada: Hoje na clínica, Internação (mapa e internado), Agenda (bloco
 branco: o tipo só no ícone, a cor do fundo só para o estado), Faltas, Painel do dia, Hóspedes na
-casa e Rotina do turno.
+casa e Rotina do turno; no Portal, Divulgação (o kit de compartilhar primeiro, as regras recolhidas), Ganhos (o saldo
+na frase da saudação, sacar e PIX em diálogo, a ajuda recolhida), Programas (uma linha por programa num cartão só, as
+etapas de ativação recolhidas) e Acessos (um pet, uma linha: os acessos do mesmo pet se agrupam e abrem embaixo dele;
+abas, busca e filtros numa linha, os filtros finos recolhidos atrás de um botão com contagem).
 
 *Nota:* o código da Visão geral foi além do que esta variante descreve — fundo `#F5F7F6` com dois
 brilhos de sálvia e uma grade fina que some descendo, cartão branco com borda fina e sombra
