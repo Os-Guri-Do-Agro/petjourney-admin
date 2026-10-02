@@ -117,7 +117,7 @@ onMounted(() => {
   background:
     radial-gradient(52rem 26rem at 8% -6rem, rgb(120 196 178 / 30%), transparent 70%),
     radial-gradient(44rem 24rem at 96% -4rem, rgb(96 178 196 / 22%), transparent 70%),
-    var(--hc-fundo);
+    var(--hc-pagina);
 }
 
 .migracao-pagina.partner-page::before {
@@ -137,7 +137,7 @@ onMounted(() => {
   background:
     radial-gradient(52rem 26rem at 8% -6rem, rgb(108 201 181 / 13%), transparent 70%),
     radial-gradient(44rem 24rem at 96% -4rem, rgb(108 198 208 / 9%), transparent 70%),
-    var(--hc-fundo);
+    var(--hc-pagina);
 }
 
 .cabecalho {

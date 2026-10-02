@@ -20,7 +20,7 @@
 /* ------------------------------------------------------------------ ponte de tokens */
 
 .hc-tema {
-  --clinic-bg: var(--hc-fundo);
+  --clinic-bg: var(--hc-pagina);
   --clinic-surface: var(--hc-cartao);
   --clinic-surface-soft: var(--hc-fundo);
   --clinic-surface-sunken: var(--hc-linha);
@@ -65,7 +65,7 @@
  * venceria e o título, o subtítulo e o botão de explicações ficariam no linho.
  */
 .hc-tema.partner-page {
-  --partner-bg: var(--hc-fundo) !important;
+  --partner-bg: var(--hc-pagina) !important;
   --partner-card: var(--hc-cartao) !important;
   --partner-surface: var(--hc-cartao) !important;
   --partner-line: var(--hc-borda) !important;
@@ -349,7 +349,7 @@ html .hc-tema.partner-page {
   background:
     radial-gradient(52rem 26rem at 8% -6rem, rgb(120 196 178 / 30%), transparent 70%),
     radial-gradient(44rem 24rem at 96% -4rem, rgb(96 178 196 / 22%), transparent 70%),
-    var(--hc-fundo);
+    var(--hc-pagina);
 }
 
 html .hc-tema.partner-page::before {
@@ -369,7 +369,7 @@ html.app-dark .hc-tema.partner-page {
   background:
     radial-gradient(52rem 26rem at 8% -6rem, rgb(108 201 181 / 13%), transparent 70%),
     radial-gradient(44rem 24rem at 96% -4rem, rgb(108 198 208 / 9%), transparent 70%),
-    var(--hc-fundo);
+    var(--hc-pagina);
 }
 
 /* ------------------------------------------------------------------ cabeçalho da página

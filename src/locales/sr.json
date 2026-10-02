@@ -6278,43 +6278,6 @@
       "topica": "Lokalno"
     }
   },
-  "cronometro": {
-    "titulo": "Tajmer pregleda",
-    "iniciar": "Pokrenite",
-    "ariaIniciar": "Pokrenite tajmer pregleda",
-    "ariaAbrir": "Tajmer: {tempo}, {estado}. Otvorite panel.",
-    "abrirPainel": "Otvorite panel tajmera",
-    "pausar": "Pauzirajte",
-    "retomar": "Nastavite",
-    "encerrar": "Zaustavite",
-    "descartar": "Odbacite",
-    "pausado": "Pauzirano",
-    "semSessao": "Nijedan pregled se ne meri",
-    "semPaciente": "Nije povezan nijedan pregled",
-    "estado": {
-      "dentro": "U okviru bloka",
-      "no-limite": "Blok se bliži kraju",
-      "excedido": "Blok je prekoračen"
-    },
-    "unidades": "{contagem} jedinica | {contagem} jedinice | {contagem} jedinica",
-    "decorrido": "Proteklo",
-    "cobravel": "Za naplatu",
-    "minutos": "{valor} min",
-    "proximaUnidade": "sledeća jedinica za {valor}",
-    "excedente": "prekoračenje: {valor}",
-    "esquecidaTitulo": "Tajmer radi već dugo",
-    "esquecidaDescricao": "Radi duže od četiri sata. Ako je greškom ostao uključen, odbacite ga: zaustavljanje bi to vreme zabeležilo kao radno.",
-    "hoje": "Danas",
-    "hojeResumo": "{contagem} pregled | {contagem} pregleda | {contagem} pregleda",
-    "totalDecorrido": "Vreme na pregledima",
-    "totalCobravel": "Ukupno za naplatu",
-    "ultimaHa": "poslednji pre {valor}",
-    "semHistorico": "Danas nije završen nijedan pregled.",
-    "limparHistorico": "Obrišite današnje unose",
-    "bloco": "Blok pregleda",
-    "incremento": "Obračunski korak",
-    "comoFunciona": "Vreme se zaokružuje naviše do sledeće jedinice. Stvarno proteklo vreme uvek je vidljivo pored."
-  },
   "primevue": {
     "today": "Danas",
     "clear": "Obriši",

@@ -73,7 +73,6 @@ import {
 import { useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useEscutaStore } from '@/features/clinico/stores/escuta'
 import { useProntuarioStore } from '@/features/clinico/stores/prontuario'
-import { useCronometroStore } from '@/features/cronometro/stores/cronometro'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -81,7 +80,6 @@ const router = useRouter()
 const clinico = useClinicoStore()
 const prontuario = useProntuarioStore()
 const escuta = useEscutaStore()
-const cronometro = useCronometroStore()
 const formato = useClinicFormat()
 
 const assumirAberto = ref(false)
@@ -489,27 +487,7 @@ watch(
   },
 )
 
-/**
- * Oferece este atendimento ao cronômetro do cabeçalho.
- *
- * Quem publica o contexto é a página, e não o cabeçalho: assim o cabeçalho — que vive no pacote
- * inicial da aplicação — não precisa importar o módulo clínico só para saber o nome do paciente.
- * A dependência aponta para a store genérica, que não conhece nenhum dos dois.
- *
- * O contexto é oferta, não comando: quem decide começar a contar é a pessoa. Um relógio que
- * dispara sozinho ao abrir o prontuário mede a tela aberta, não o atendimento — e num modelo em
- * que o tempo vira dinheiro, medir a coisa errada é o defeito grave.
- */
-watch(
-  [() => encounter.value?.id, () => prontuario.pet?.nome],
-  ([id, nome]) => {
-    cronometro.definirContexto(id ? { encounterId: id, rotulo: nome ?? '' } : null)
-  },
-  { immediate: true },
-)
-
 onBeforeRouteLeave(async () => {
-  cronometro.definirContexto(null)
   /* Microfone aberto numa tela que ninguém olha é o que a autorização do responsável não cobre. */
   escuta.suspender()
   await prontuario.descarregar()
@@ -517,7 +495,6 @@ onBeforeRouteLeave(async () => {
 })
 
 onBeforeUnmount(() => {
-  cronometro.definirContexto(null)
   escuta.suspender()
   void prontuario.descarregar()
 })

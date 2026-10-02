@@ -256,8 +256,18 @@ Nas seções abaixo, o que a Visão geral inaugurou fica sob o subtítulo **Vari
 Como uma tela entra no design novo, e onde cada peça mora no código:
 
 - **Tokens** — `src/theme/hc-tokens.css`, na raiz (`:root` e `:root.app-dark`): os `--hc-*`
-  (fundo, cartão, borda, linha, três tintas, marca, marca forte, marca clara, degradês, sombras e
-  os pares de selo: ciano, lilás, pêssego, coral, verde, cinza, azul). Carregados no `main.ts`.
+  (página, fundo, cartão, borda, linha, três tintas, marca, marca forte, marca clara, degradês,
+  sombras e os pares de selo: ciano, lilás, pêssego, coral, verde, cinza, azul). Carregados no
+  `main.ts`.
+- **Página × fundo** — `--hc-pagina` (`#DEE5E1`, 77% de luminância) é o papel atrás de tudo: a
+  moldura (`--shell-bg`), o `PartnerPageFrame` e a regra de grade e brilho. `--hc-fundo`
+  (`#F5F7F6`) é a superfície afundada *dentro* do cartão — linha de tabela, chip, campo — e as
+  gavetas laterais. Até 02/10/2026 os dois eram o mesmo `#F5F7F6`, e cartão branco, moldura branca
+  e página quase branca liam como uma folha só ("lindas, mas com o fundo muito claro"). Não
+  escureça o `--hc-fundo` para resolver contraste de página: o miolo de todo cartão pesaria junto.
+  No escuro os dois são `#0E1613`. Com a página a 77%, `--hc-tinta-2` direto nela dá 4,85:1 e o
+  fim claro do degradê da saudação, 3,19:1. Em setembro, um greige a 69% foi recusado por escuro,
+  então não desça muito disso.
 - **Acabamento** — `src/theme/hc-tema.css`, preso a `.hc-tema`. A tela migra pondo
   `class="hc-tema"` no `PartnerPageFrame`, e ganha: a **ponte de tokens** (`--clinic-*` apontam
   para os `--hc-*`, então tabela, cartão, campo e gráfico trocam juntos), o fundo com grade e
@@ -748,7 +758,8 @@ nativo.
   compacta), grupos com label em caixa-alta; ativo na mesma pastilha verde-clara do trilho, peso
   750, com o ícone num ladrilho cheio. Os números de pendência são selos de 6px: cinza, pêssego
   (atenção) ou coral (risco).
-- **Cabeçalho:** branco com fio embaixo; cronômetro, busca, cupom e conta em pílulas contornadas.
+- **Cabeçalho:** branco com fio embaixo; busca, cupom e conta em pílulas contornadas. (O cronômetro
+  de atendimento que morava aqui saiu em 02/10/2026, a pedido do usuário.)
   O seletor claro/escuro saiu do cabeçalho e é um interruptor "Tema escuro" no menu da conta.
 - **Modo foco:** esconde a navegação e deixa a página inteira; header fica.
 - **Ícones:** Phosphor para domínio (animal, acomodação, turno), PrimeIcons para interface.

@@ -6278,43 +6278,6 @@
       "topica": "موضعي"
     }
   },
-  "cronometro": {
-    "titulo": "مؤقت الزيارة",
-    "iniciar": "بدء",
-    "ariaIniciar": "بدء مؤقت الزيارة",
-    "ariaAbrir": "المؤقت عند {tempo}، {estado}. فتح اللوحة.",
-    "abrirPainel": "فتح لوحة المؤقت",
-    "pausar": "إيقاف مؤقت",
-    "retomar": "استئناف",
-    "encerrar": "إنهاء",
-    "descartar": "تجاهل",
-    "pausado": "متوقف مؤقتًا",
-    "semSessao": "لا توجد زيارة قيد التوقيت",
-    "semPaciente": "لا توجد زيارة مرتبطة",
-    "estado": {
-      "dentro": "ضمن الفترة",
-      "no-limite": "الفترة على وشك الانتهاء",
-      "excedido": "تم تجاوز الفترة"
-    },
-    "unidades": "{contagem} وحدة | وحدة واحدة | وحدتان | {contagem} وحدات | {contagem} وحدة | {contagem} وحدة",
-    "decorrido": "الوقت المنقضي",
-    "cobravel": "المحتسب",
-    "minutos": "{valor} min",
-    "proximaUnidade": "الوحدة التالية بعد {valor}",
-    "excedente": "تجاوز الفترة بمقدار {valor}",
-    "esquecidaTitulo": "هذا المؤقت يعمل منذ وقت طويل",
-    "esquecidaDescricao": "يعمل هذا المؤقت منذ أكثر من أربع ساعات. إذا بقي مفتوحًا عن طريق الخطأ، يرجى تجاهله: فإنهاؤه سيسجل هذا الوقت كوقت عمل.",
-    "hoje": "اليوم",
-    "hojeResumo": "لا توجد زيارات | زيارة واحدة | زيارتان | {contagem} زيارات | {contagem} زيارة | {contagem} زيارة",
-    "totalDecorrido": "مدة الزيارات",
-    "totalCobravel": "إجمالي الوقت المحتسب",
-    "ultimaHa": "آخر زيارة قبل {valor}",
-    "semHistorico": "لم يتم إنهاء أي زيارة اليوم.",
-    "limparHistorico": "مسح سجل اليوم",
-    "bloco": "فترة الزيارة",
-    "incremento": "وحدة الاحتساب",
-    "comoFunciona": "يتم تقريب الوقت إلى الوحدة التالية. ويبقى الوقت الفعلي المنقضي ظاهرًا دائمًا بجانبه."
-  },
   "primevue": {
     "today": "اليوم",
     "clear": "مسح",

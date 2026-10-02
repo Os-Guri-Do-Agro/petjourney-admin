@@ -6278,43 +6278,6 @@
       "topica": "Tópica"
     }
   },
-  "cronometro": {
-    "titulo": "Cronómetro de consulta",
-    "iniciar": "Iniciar",
-    "ariaIniciar": "Iniciar el cronómetro de la consulta",
-    "ariaAbrir": "Cronómetro en {tempo} — {estado}. Abrir el panel.",
-    "abrirPainel": "Abrir el panel del cronómetro",
-    "pausar": "Pausar",
-    "retomar": "Reanudar",
-    "encerrar": "Finalizar",
-    "descartar": "Descartar",
-    "pausado": "En pausa",
-    "semSessao": "Ninguna consulta cronometrada",
-    "semPaciente": "Sin consulta vinculada",
-    "estado": {
-      "dentro": "Dentro del bloque",
-      "no-limite": "El bloque está por terminar",
-      "excedido": "Bloque superado"
-    },
-    "unidades": "{contagem} unidad | {contagem} unidades",
-    "decorrido": "Transcurrido",
-    "cobravel": "Facturable",
-    "minutos": "{valor} min",
-    "proximaUnidade": "próxima unidad en {valor}",
-    "excedente": "{valor} más allá del bloque",
-    "esquecidaTitulo": "El cronómetro lleva mucho tiempo corriendo",
-    "esquecidaDescricao": "Lleva más de cuatro horas corriendo. Si quedó abierto por error, descártalo: finalizar registraría el tiempo como atendido.",
-    "hoje": "Hoy",
-    "hojeResumo": "{contagem} consulta | {contagem} consultas",
-    "totalDecorrido": "En consulta",
-    "totalCobravel": "Total facturable",
-    "ultimaHa": "la última hace {valor}",
-    "semHistorico": "Ninguna consulta finalizada hoy.",
-    "limparHistorico": "Limpiar el día",
-    "bloco": "Bloque de la consulta",
-    "incremento": "Incremento de facturación",
-    "comoFunciona": "El tiempo se redondea hacia arriba hasta la siguiente unidad. El transcurrido real queda siempre a la vista, al lado."
-  },
   "primevue": {
     "today": "Hoy",
     "clear": "Limpiar",

@@ -10,6 +10,13 @@
  */
 
 :root {
+  /*
+   * O papel da página, separado do `--hc-fundo` (a superfície afundada *dentro* do cartão: linha de
+   * tabela, chip, campo). Com os dois no mesmo #F5F7F6, cartão branco, moldura branca e página
+   * quase branca viravam uma folha só — "lindas, mas com o fundo muito claro" (02/10/2026). A
+   * página desce um degrau; o miolo do cartão continua claro, senão o cartão inteiro pesava junto.
+   */
+  --hc-pagina: #dee5e1;
   --hc-fundo: #f5f7f6;
   --hc-grade: rgb(47 111 99 / 5.5%);
   --hc-cartao: #ffffff;
@@ -45,6 +52,7 @@
 }
 
 :root.app-dark {
+  --hc-pagina: #0e1613;
   --hc-fundo: #0e1613;
   --hc-grade: rgb(255 255 255 / 3.5%);
   --hc-cartao: #151f1c;

@@ -37,7 +37,6 @@ import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { isCompactDensity, isListNavigator } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
-import CronometroConsulta from '@/features/cronometro/components/CronometroConsulta.vue'
 import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
 import { getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
@@ -221,7 +220,7 @@ const shellStyle = computed(() => {
      * sobre o fundo das telas. As cores vêm dos tokens do portal (`theme/hc-tokens.css`), que já
      * trocam sozinhos no escuro. O verde fica no logotipo e no que está aberto.
      */
-    '--shell-bg': 'var(--hc-fundo)',
+    '--shell-bg': 'var(--hc-pagina)',
     '--shell-surface': 'var(--hc-cartao)',
     '--shell-surface-soft': 'var(--hc-fundo)',
     '--shell-line': 'var(--hc-borda)',
@@ -722,12 +721,6 @@ onUnmounted(() => {
       </div>
 
       <div class="app-header__right">
-        <!--
-          O cronômetro só existe para quem atende: é tempo clínico faturável, não um relógio de
-          ponto. Num perfil sem agenda ele seria um botão que não mede nada.
-        -->
-        <CronometroConsulta v-if="hasClinicalProfile" />
-
         <!--
           A busca do módulo clínico.
 
