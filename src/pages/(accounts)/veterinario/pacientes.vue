@@ -21,21 +21,35 @@
  * **Trazer a base de outro sistema também começa aqui**, pelo mesmo motivo: é outro jeito de
  * cadastrar, muitos de uma vez. Enquanto uma importação estiver em andamento ou pausada, a
  * lista avisa em cima — é por esse aviso que "continuar depois" é achável depois.
+ *
+ * **A coluna de alertas diz a condição, não a categoria.** Cada chip trazia "Condição crônica"
+ * e "Dermatite atópica" na mesma pílula, e os dois saíam cortados ("Condição … Dermatite …"). Agora
+ * a linha mostra o alerta mais grave pelo nome do que importa — a dermatite, a amoxicilina —, a
+ * categoria vira o ícone, a gravidade a cor do ícone, e os outros alertas viram "+1".
  */
+import {
+  PhBaby,
+  PhHandPalm,
+  PhHeartbeat,
+  PhPill,
+  PhShieldWarning,
+  PhWallet,
+  PhWarningDiamond,
+} from '@phosphor-icons/vue'
 import Button from 'primevue/button'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
+import ClinicPacienteCelula from '@/features/clinico/components/base/ClinicPacienteCelula.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicFilterBar from '@/features/clinico/components/base/ClinicFilterBar.vue'
 import type { GrupoDeFiltro } from '@/features/clinico/components/base/filter-types'
 import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { patientRepository, type PacienteResumo } from '@/features/clinico/data/repositories'
-import type { PetSpecies } from '@/features/clinico/data/types'
+import type { PetAlert, PetAlertKind, PetSpecies } from '@/features/clinico/data/types'
 import { useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useMigracaoStore } from '@/features/clinico/stores/migracao'
 
@@ -45,10 +59,47 @@ const clinico = useClinicoStore()
 const migracao = useMigracaoStore()
 const formato = useClinicFormat()
 
+/** A categoria do alerta vira ícone: a linha tem lugar para o nome da condição, não para os dois. */
+const ICONE_DO_ALERTA: Record<PetAlertKind, Component> = {
+  alergia: PhWarningDiamond,
+  agressivo: PhHandPalm,
+  cronico: PhHeartbeat,
+  'medicacao-continua': PhPill,
+  imunossuprimido: PhShieldWarning,
+  gestante: PhBaby,
+  inadimplente: PhWallet,
+}
+
+const PESO_DA_SEVERIDADE = { risco: 0, atencao: 1, info: 2 } as const
+
+/** O mais grave primeiro: é ele que a linha mostra por extenso. */
+function alertasOrdenados(alertas: PetAlert[]) {
+  return [...alertas].sort(
+    (a, b) => PESO_DA_SEVERIDADE[a.severidade] - PESO_DA_SEVERIDADE[b.severidade],
+  )
+}
+
+/** "Dermatite atópica" quando há detalhe; a categoria quando não há ("Pendência financeira"). */
+function textoDoAlerta(alerta: PetAlert) {
+  return alerta.detalhe || formato.alerta(alerta.kind)
+}
+
+/** A frase inteira, para a dica e o leitor de tela: "Condição crônica — Dermatite atópica". */
+function frasesDosAlertas(alertas: PetAlert[]) {
+  return alertasOrdenados(alertas)
+    .map((alerta) =>
+      alerta.detalhe
+        ? `${formato.alerta(alerta.kind)} — ${alerta.detalhe}`
+        : formato.alerta(alerta.kind),
+    )
+    .join(' · ')
+}
+
 const termo = ref('')
 const selecionados = ref<Record<string, string[]>>({})
 const linhas = ref<PacienteResumo[]>([])
-const carregando = ref(false)
+/* Começa carregando: a primeira busca sai no onMounted, e até lá "nenhum paciente" seria mentira. */
+const carregando = ref(true)
 const erro = ref('')
 
 const colunas = computed<ColunaTabela[]>(() => [
@@ -61,7 +112,7 @@ const colunas = computed<ColunaTabela[]>(() => [
   },
   { id: 'ultimo', rotulo: t('clinico.pacientes.colunaUltimo'), largura: '9rem' },
   { id: 'proximo', rotulo: t('clinico.pacientes.colunaProximo'), largura: '9rem' },
-  { id: 'alertas', rotulo: t('clinico.pacientes.colunaAlertas'), largura: 'minmax(0, 1fr)' },
+  { id: 'alertas', rotulo: t('clinico.pacientes.colunaAlertas'), largura: 'minmax(0, 1.35fr)' },
 ])
 
 /** Predicados nomeados: o filtro fica legível e a contagem usa exatamente a mesma regra. */
@@ -193,6 +244,28 @@ onMounted(async () => {
   await clinico.carregar()
   await buscar()
 })
+
+/** Quantos pacientes, e quantos pedem cuidado antes de entrar na sala. */
+const fraseDoResumo = computed(() => {
+  if (carregando.value && linhas.value.length === 0) {
+    return ''
+  }
+
+  const n = visiveis.value.length
+
+  if (termo.value.trim()) {
+    return t('clinico.pacientes.saudacao.encontrados', { n }, n)
+  }
+
+  const comRisco = visiveis.value.filter((item) =>
+    item.pet.alertas.some((alerta) => alerta.severidade === 'risco'),
+  ).length
+  const base = t('clinico.pacientes.saudacao.total', { n }, n)
+
+  return comRisco > 0
+    ? `${base} · ${t('clinico.pacientes.saudacao.comRisco', { n: comRisco }, comRisco)}`
+    : base
+})
 </script>
 
 <template>
@@ -205,20 +278,34 @@ onMounted(async () => {
     block-when-suspended
     @retry="buscar"
   >
-    <template #actions>
-      <Button
-        severity="secondary"
-        outlined
-        class="pacientes__importar"
-        icon="pi pi-file-import"
-        :label="t('clinico.migracao.atalho')"
-        @click="importar"
-      />
-      <Button
-        icon="pi pi-user-plus"
-        :label="t('clinico.paciente.novo.atalho')"
-        @click="cadastrar"
-      />
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('clinico.pacientes.subtitulo') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('clinico.pacientes.titulo') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
+            {{ fraseDoResumo }}
+          </p>
+
+          <nav class="hc-acoes" :aria-label="t('clinico.pacientes.saudacao.acoes')">
+            <Button
+              type="button"
+              class="hc-pilula hc-pilula--cheia"
+              icon="pi pi-user-plus"
+              :label="t('clinico.paciente.novo.atalho')"
+              @click="cadastrar"
+            />
+            <Button
+              type="button"
+              class="hc-pilula"
+              icon="pi pi-file-import"
+              :label="t('clinico.migracao.atalho')"
+              @click="importar"
+            />
+          </nav>
+        </div>
+      </div>
     </template>
 
     <div class="pacientes clinic-scope">
@@ -239,7 +326,13 @@ onMounted(async () => {
         <Button
           link
           size="small"
-          :label="t(migracao.estado === 'rodando' ? 'clinico.migracao.aviso.lista.ver' : 'clinico.migracao.aviso.lista.continuar')"
+          :label="
+            t(
+              migracao.estado === 'rodando'
+                ? 'clinico.migracao.aviso.lista.ver'
+                : 'clinico.migracao.aviso.lista.continuar',
+            )
+          "
           @click="importar"
         />
       </p>
@@ -272,16 +365,17 @@ onMounted(async () => {
         </template>
 
         <template #celula-paciente="{ linha }">
-          <strong class="pacientes__nome">{{ linha.pet.nome }}</strong>
-          <span class="pacientes__meta">
+          <ClinicPacienteCelula :pet="linha.pet">
             {{ formato.especie(linha.pet.especie) }} · {{ linha.pet.raca }} ·
             {{ formato.idade(linha.pet.nascimento) }} · {{ formato.peso(linha.pet.pesoKg) }}
-          </span>
+          </ClinicPacienteCelula>
         </template>
 
         <template #celula-responsavel="{ linha }">
           <span class="pacientes__nome">{{ linha.tutor?.nome }}</span>
-          <span class="pacientes__meta"><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span>
+          <span class="pacientes__meta"
+            ><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span
+          >
         </template>
 
         <template #celula-ultimo="{ linha }">
@@ -300,15 +394,30 @@ onMounted(async () => {
 
         <template #celula-alertas="{ linha }">
           <span v-if="linha.pet.alertas.length === 0" class="pacientes__meta">—</span>
-          <div v-else class="pacientes__alertas">
-            <ClinicAlertChip
-              v-for="alerta in linha.pet.alertas"
-              :key="alerta.id"
-              :severidade="alerta.severidade"
-              :rotulo="formato.alerta(alerta.kind)"
-              :detalhe="alerta.detalhe"
+          <span
+            v-else
+            class="pacientes__alerta"
+            :class="`pacientes__alerta--${alertasOrdenados(linha.pet.alertas)[0]!.severidade}`"
+            :title="frasesDosAlertas(linha.pet.alertas)"
+          >
+            <component
+              :is="ICONE_DO_ALERTA[alertasOrdenados(linha.pet.alertas)[0]!.kind]"
+              class="pacientes__alerta-icone"
+              weight="duotone"
+              aria-hidden="true"
             />
-          </div>
+            <span class="pacientes__alerta-texto" aria-hidden="true">
+              {{ textoDoAlerta(alertasOrdenados(linha.pet.alertas)[0]!) }}
+            </span>
+            <span
+              v-if="linha.pet.alertas.length > 1"
+              class="pacientes__alerta-mais"
+              aria-hidden="true"
+            >
+              +{{ linha.pet.alertas.length - 1 }}
+            </span>
+            <span class="pacientes__sr">{{ frasesDosAlertas(linha.pet.alertas) }}</span>
+          </span>
         </template>
       </ClinicDataTable>
     </div>
@@ -376,9 +485,55 @@ onMounted(async () => {
   font-weight: 700;
 }
 
-.pacientes__alertas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.2rem;
+/* Um alerta por linha, pelo nome; a categoria no ícone, a gravidade na cor do ícone. */
+.pacientes__alerta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--hc-tinta);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.pacientes__alerta-icone {
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--hc-tinta-2);
+}
+
+.pacientes__alerta--risco .pacientes__alerta-icone {
+  color: var(--hc-coral-tinta);
+}
+
+.pacientes__alerta--atencao .pacientes__alerta-icone {
+  color: var(--hc-pessego-tinta);
+}
+
+.pacientes__alerta-texto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pacientes__alerta-mais {
+  flex-shrink: 0;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--hc-cinza-fundo);
+  color: var(--hc-cinza-tinta);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.pacientes__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 </style>

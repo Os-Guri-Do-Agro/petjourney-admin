@@ -14,7 +14,14 @@
  * um e ver a dose aparecer "dada por Rafael" no do outro, sem botão.
  *
  * O acabamento é o da Visão geral, como o resto da ficha.
+ *
+ * O celular fica numa gaveta à direita, aberta pela pílula "Como … vê no app". Ele ocupava metade
+ * da tela, todo dia, para quem só queria ler a faixa — a auditoria marcou a tela como pesada por
+ * isso. A gaveta não tem máscara: aberta, a ficha continua à vista e o quadradinho aparece na mesma
+ * hora em que alguém toca "Dei", que é a demonstração que a tela existe para fazer.
  */
+import Button from 'primevue/button'
+import Drawer from 'primevue/drawer'
 import Select from 'primevue/select'
 import { PhDeviceMobile, PhPill, PhArchive } from '@phosphor-icons/vue'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -58,6 +65,8 @@ const noApp = ref<TratamentosNoApp | null>(null)
 const carregando = ref(false)
 const erro = ref('')
 const salvando = ref(false)
+/** A gaveta do celular de quem cuida. Fechada por padrão: a ficha é a tela de todo dia. */
+const celularAberto = ref(false)
 const recusa = ref<{ tratamentoId: string; numero: number; texto: string } | null>(null)
 
 /** De quem é o celular da prévia. Começa no responsável: é quem criou os lembretes. */
@@ -338,138 +347,147 @@ async function compartilhar(pedido: { tratamentoId: string; compartilhado: boole
     </template>
 
     <div v-if="pet && adesao" class="ficha-conteudo clinic-scope">
-      <div class="ficha-grade tratamento__grade">
-        <div class="ficha-coluna">
-          <section class="hc" :aria-labelledby="`${petId}-em-curso`">
-            <header class="hc__cabeca">
-              <h2 :id="`${petId}-em-curso`" class="hc__titulo">
-                <PhPill class="hc__icone" weight="duotone" aria-hidden="true" />
-                {{ t('clinico.adesao.ficha.emCurso') }}
-              </h2>
-            </header>
-            <p class="ficha-ajuda">
-              {{
-                !ultimaConsulta
-                  ? t('clinico.adesao.ficha.emCursoAjudaSemConsulta')
-                  : comFio
-                    ? t('clinico.adesao.ficha.emCursoAjuda', { data: ultimaConsulta })
-                    : t('clinico.adesao.ficha.emCursoAjudaSemFio', { data: ultimaConsulta })
-              }}
-            </p>
+      <section class="hc" :aria-labelledby="`${petId}-em-curso`">
+        <header class="hc__cabeca">
+          <h2 :id="`${petId}-em-curso`" class="hc__titulo">
+            <PhPill class="hc__icone" weight="duotone" aria-hidden="true" />
+            {{ t('clinico.adesao.ficha.emCurso') }}
+          </h2>
 
-            <template v-if="emCurso.length > 0">
-              <ul class="tratamento__lista">
-                <li v-for="lido in emCurso" :key="lido.tratamento.id">
-                  <TratamentoNaFicha
-                    :lido="lido"
-                    :ultima-consulta-em="adesao.ultimaConsultaEm"
-                    :nomes="nomes"
-                    :salvando="salvando"
-                    @critico="marcarCritico(lido.tratamento.id, $event)"
-                    @contato="registrarContato(lido.tratamento.id, $event)"
-                  />
-                </li>
-              </ul>
-              <LegendaDaFaixa :com-marco="comFio" />
+          <Button
+            v-if="noApp"
+            type="button"
+            class="hc-pilula"
+            :label="
+              t('clinico.adesao.ficha.comoVeNoApp', {
+                responsavel: rotulos.primeiroNome(donoDoCelular?.nome ?? ''),
+              })
+            "
+            :aria-expanded="celularAberto"
+            aria-haspopup="dialog"
+            @click="celularAberto = !celularAberto"
+          >
+            <template #icon>
+              <PhDeviceMobile class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
             </template>
+          </Button>
+        </header>
+        <p class="ficha-ajuda">
+          {{
+            !ultimaConsulta
+              ? t('clinico.adesao.ficha.emCursoAjudaSemConsulta')
+              : comFio
+                ? t('clinico.adesao.ficha.emCursoAjuda', { data: ultimaConsulta })
+                : t('clinico.adesao.ficha.emCursoAjudaSemFio', { data: ultimaConsulta })
+          }}
+        </p>
 
-            <div v-else class="tratamento__vazio">
-              <strong>{{ t('clinico.adesao.ficha.vazioTitulo') }}</strong>
-              <span>{{ t('clinico.adesao.ficha.vazioDescricao') }}</span>
-            </div>
-          </section>
-
-          <section v-if="encerrados.length > 0" class="hc" :aria-labelledby="`${petId}-encerrados`">
-            <header class="hc__cabeca">
-              <h2 :id="`${petId}-encerrados`" class="hc__titulo">
-                <PhArchive class="hc__icone" weight="duotone" aria-hidden="true" />
-                {{ t('clinico.adesao.ficha.encerrados') }}
-              </h2>
-            </header>
-
-            <ul class="tratamento__lista">
-              <li v-for="lido in encerrados" :key="lido.tratamento.id">
-                <TratamentoNaFicha
-                  :lido="lido"
-                  :ultima-consulta-em="adesao.ultimaConsultaEm"
-                  :nomes="nomes"
-                  encerrado
-                />
-              </li>
-            </ul>
-          </section>
-        </div>
-
-        <!--
-          O celular de quem cuida, preso ao topo como o da carteirinha: a demonstração é olhar os
-          dois ao mesmo tempo. Acima dele, de quem é o celular — é a troca que mostra a casa com
-          mais de uma pessoa.
-        -->
-        <div class="ficha-coluna tratamento__app">
-          <section class="hc" :aria-labelledby="`${petId}-app`">
-            <header class="hc__cabeca">
-              <h2 :id="`${petId}-app`" class="hc__titulo">
-                <PhDeviceMobile class="hc__icone" weight="duotone" aria-hidden="true" />
-                {{
-                  t('clinico.adesao.ficha.noApp', {
-                    responsavel: rotulos.primeiroNome(donoDoCelular?.nome ?? ''),
-                  })
-                }}
-              </h2>
-            </header>
-            <p class="ficha-ajuda">{{ t('clinico.adesao.ficha.noAppAjuda') }}</p>
-
-            <div v-if="celulares.length > 1" class="tratamento__celulares">
-              <label class="tratamento__celulares-rotulo" :for="`${petId}-celular-de`">{{
-                t('clinico.adesao.ficha.celularDe')
-              }}</label>
-              <!--
-                Lista, e não botões lado a lado: a família do app não tem tamanho fixo, e três nomes
-                com o papel já não cabiam na largura do cartão.
-              -->
-              <Select
-                v-model="cuidadorId"
-                class="tratamento__celular"
-                :input-id="`${petId}-celular-de`"
-                :options="celulares"
-                option-label="rotulo"
-                option-value="valor"
+        <template v-if="emCurso.length > 0">
+          <ul class="tratamento__lista">
+            <li v-for="lido in emCurso" :key="lido.tratamento.id">
+              <TratamentoNaFicha
+                :lido="lido"
+                :ultima-consulta-em="adesao.ultimaConsultaEm"
+                :nomes="nomes"
+                :salvando="salvando"
+                @critico="marcarCritico(lido.tratamento.id, $event)"
+                @contato="registrarContato(lido.tratamento.id, $event)"
               />
-            </div>
+            </li>
+          </ul>
+          <LegendaDaFaixa :com-marco="comFio" />
+        </template>
 
-            <TratamentoNoApp
-              v-if="noApp"
-              :dados="noApp"
-              :pet-iniciais="pet.iniciais"
-              :pet-foto-url="pet.fotoUrl"
-              :salvando="salvando"
-              :recusa="recusa"
-              @registrar="registrar"
-              @registrar-varias="registrarVarias"
-              @desfazer="desfazer"
-              @criar-lembretes="criarLembretes"
-              @compartilhar="compartilhar"
-            />
-          </section>
+        <div v-else class="tratamento__vazio">
+          <strong>{{ t('clinico.adesao.ficha.vazioTitulo') }}</strong>
+          <span>{{ t('clinico.adesao.ficha.vazioDescricao') }}</span>
         </div>
-      </div>
+      </section>
+
+      <section v-if="encerrados.length > 0" class="hc" :aria-labelledby="`${petId}-encerrados`">
+        <header class="hc__cabeca">
+          <h2 :id="`${petId}-encerrados`" class="hc__titulo">
+            <PhArchive class="hc__icone" weight="duotone" aria-hidden="true" />
+            {{ t('clinico.adesao.ficha.encerrados') }}
+          </h2>
+        </header>
+
+        <ul class="tratamento__lista">
+          <li v-for="lido in encerrados" :key="lido.tratamento.id">
+            <TratamentoNaFicha
+              :lido="lido"
+              :ultima-consulta-em="adesao.ultimaConsultaEm"
+              :nomes="nomes"
+              encerrado
+            />
+          </li>
+        </ul>
+      </section>
+
+      <!--
+        O celular de quem cuida, numa gaveta sem máscara: a ficha continua à vista e muda na hora.
+        Acima dele, de quem é o celular — é a troca que mostra a casa com mais de uma pessoa.
+      -->
+      <Drawer
+        v-model:visible="celularAberto"
+        position="right"
+        :modal="false"
+        class="hc-tema tratamento-gaveta"
+        :style="{ width: 'min(25rem, 92vw)' }"
+      >
+        <template #header>
+          <h2 class="tratamento-gaveta__titulo">
+            <PhDeviceMobile class="hc__icone" weight="duotone" aria-hidden="true" />
+            {{
+              t('clinico.adesao.ficha.noApp', {
+                responsavel: rotulos.primeiroNome(donoDoCelular?.nome ?? ''),
+              })
+            }}
+          </h2>
+        </template>
+
+        <div class="tratamento-gaveta__corpo clinic-scope">
+          <p class="ficha-ajuda">{{ t('clinico.adesao.ficha.noAppAjuda') }}</p>
+
+          <div v-if="celulares.length > 1" class="tratamento__celulares">
+            <label class="tratamento__celulares-rotulo" :for="`${petId}-celular-de`">{{
+              t('clinico.adesao.ficha.celularDe')
+            }}</label>
+            <!--
+              Lista, e não botões lado a lado: a família do app não tem tamanho fixo, e três nomes
+              com o papel já não cabiam na largura do cartão.
+            -->
+            <Select
+              v-model="cuidadorId"
+              class="tratamento__celular"
+              :input-id="`${petId}-celular-de`"
+              :options="celulares"
+              option-label="rotulo"
+              option-value="valor"
+              :pt="{ overlay: { class: 'clinic-overlay hc-tema' } }"
+            />
+          </div>
+
+          <TratamentoNoApp
+            v-if="noApp"
+            :dados="noApp"
+            :pet-iniciais="pet.iniciais"
+            :pet-foto-url="pet.fotoUrl"
+            :salvando="salvando"
+            :recusa="recusa"
+            @registrar="registrar"
+            @registrar-varias="registrarVarias"
+            @desfazer="desfazer"
+            @criar-lembretes="criarLembretes"
+            @compartilhar="compartilhar"
+          />
+        </div>
+      </Drawer>
     </div>
   </PartnerPageFrame>
 </template>
 
 <style scoped>
-/* A clínica mais larga, o celular do lado; em uma coluna, o celular desce. */
-@container (min-width: 62rem) {
-  .tratamento__grade {
-    grid-template-columns: minmax(0, 1.65fr) minmax(22rem, 1fr);
-  }
-
-  .tratamento__app {
-    position: sticky;
-    top: 1rem;
-  }
-}
-
 /* Os remédios em lista, separados por um fio — cartão dentro de cartão seria achatar tudo. */
 .tratamento__lista {
   display: grid;
@@ -519,5 +537,20 @@ async function compartilhar(pedido: { tratamentoId: string; compartilhado: boole
 .tratamento__celular {
   flex: 1 1 12rem;
   min-width: 0;
+}
+
+.tratamento-gaveta__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.tratamento-gaveta__corpo {
+  display: grid;
+  gap: 0.85rem;
 }
 </style>

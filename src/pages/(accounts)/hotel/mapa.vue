@@ -266,6 +266,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           <span class="procura__texto">{{ t('hotel.mapa.procuraDe') }}</span>
 
           <DatePicker
+            panel-class="hc-tema"
             v-model="intervalo"
             class="procura__datas"
             selection-mode="range"

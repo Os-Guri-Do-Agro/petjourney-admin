@@ -35,6 +35,14 @@
  * modelo de linguagem. Enquanto for verdade que a inteligência é pequena, a tela tem de dizer
  * isso sem ninguém precisar procurar. A mesma regra já vale na proposta de rotina do hotel.
  *
+ * ## O corpo mora numa gaveta à direita
+ *
+ * A conversa e o prontuário proposto abrem num painel lateral, sem máscara, e não mais por cima do
+ * formulário: na seção larga, a revisão empurrava a anamnese duas telas para baixo, e conferir um
+ * campo proposto contra o formulário era rolar para cima e para baixo. Na gaveta, o formulário
+ * continua inteiro à esquerda e editável, e na anamnese fica só a linha do cabeçalho — o estado,
+ * o relógio e o resumo —, que é o que diz que o microfone está aberto. Recolher é fechar a gaveta.
+ *
  * ## Teclado
  *
  * A seção é `data-fora-do-teclado`: o `Enter` que avança campo no modo de digitação rápida não
@@ -51,7 +59,8 @@ import {
   PhWaveform,
 } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
-import { computed, nextTick, ref, useId, type Component } from 'vue'
+import Drawer from 'primevue/drawer'
+import { computed, nextTick, onBeforeUnmount, ref, useId, watchEffect, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import EscutaAutorizacao from './EscutaAutorizacao.vue'
@@ -91,6 +100,21 @@ const conversa = ref<InstanceType<typeof EscutaConversa> | null>(null)
 const destacada = ref<string | null>(null)
 
 const visivel = computed(() => escuta.aberta && escuta.encounterId === props.encounterId)
+
+/**
+ * Com a gaveta aberta, a página abre espaço para ela em tela larga (`html.escuta-lateral`, em
+ * `hc-tema.css`): o prontuário estreita em vez de ficar por baixo — inclusive os botões de pausar e
+ * encerrar desta linha. No tablet a gaveta fica por cima, e leva esses botões no próprio cabeçalho.
+ */
+const gavetaAberta = computed(() => visivel.value && !escuta.recolhida)
+
+watchEffect(() => {
+  document.documentElement.classList.toggle('escuta-lateral', gavetaAberta.value)
+})
+
+onBeforeUnmount(() => {
+  document.documentElement.classList.remove('escuta-lateral')
+})
 const responsavel = computed(() => props.tutor?.nome.trim().split(/\s+/)[0] ?? '')
 
 const modoDoCampo = computed(() => {
@@ -102,6 +126,13 @@ const modoDoCampo = computed(() => {
 })
 
 const ouvindo = computed(() => escuta.fase === 'gravando' || escuta.fase === 'pausada')
+
+/** Fechar a gaveta pelo X ou pelo Esc é recolher a seção. */
+function aoMudarGaveta(aberta: boolean) {
+  if (!aberta && !escuta.recolhida) {
+    escuta.alternarRecolhida()
+  }
+}
 
 // ------------------------------------------------------------------ cabeçalho
 
@@ -590,46 +621,87 @@ const temAcoes = computed(
       <!-- Controles de vista, separados das ações: mudam o que se vê, nunca o que se grava. -->
       <div class="topo__vista">
         <Button
-          v-if="!escuta.recolhida"
-          :label="
-            escuta.conversaAberta
-              ? t('clinico.escuta.vista.ocultarConversa')
-              : t('clinico.escuta.vista.mostrarConversa')
-          "
-          :icon="escuta.conversaAberta ? 'pi pi-eye-slash' : 'pi pi-comments'"
-          severity="secondary"
-          text
-          size="small"
-          :aria-pressed="escuta.conversaAberta"
-          @click="escuta.alternarConversa()"
-        />
-        <Button
           class="topo__recolher"
-          :icon="escuta.recolhida ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"
+          :label="
+            escuta.recolhida
+              ? t('clinico.escuta.vista.abrirPainel')
+              : t('clinico.escuta.vista.fecharPainel')
+          "
+          :icon="escuta.recolhida ? 'pi pi-window-maximize' : 'pi pi-times'"
           severity="secondary"
-          text
-          rounded
+          outlined
           size="small"
           :aria-expanded="!escuta.recolhida"
           :aria-controls="idDoCorpo"
-          :aria-label="
-            escuta.recolhida
-              ? t('clinico.escuta.vista.expandir')
-              : t('clinico.escuta.vista.recolher')
-          "
-          :title="
-            escuta.recolhida
-              ? t('clinico.escuta.vista.expandir')
-              : t('clinico.escuta.vista.recolher')
-          "
           @click="escuta.alternarRecolhida()"
         />
       </div>
     </header>
 
-    <!-- ------------------------------------------------ corpo: recolhe -->
-    <Transition name="abre">
-      <div v-show="!escuta.recolhida" :id="idDoCorpo" class="corpo-da-secao">
+    <!-- ------------------------------------------------ corpo: na gaveta à direita -->
+    <Drawer
+      :visible="!escuta.recolhida"
+      position="right"
+      :modal="false"
+      class="hc-tema escuta-gaveta"
+      :style="{ width: 'min(30rem, 94vw)' }"
+      @update:visible="aoMudarGaveta"
+    >
+      <template #header>
+        <div class="gaveta__topo">
+          <span class="disco disco--pequeno" :class="`disco--${estado.tom}`" aria-hidden="true">
+            <component :is="estado.icone" v-if="estado.icone" weight="bold" />
+            <i v-else class="pi pi-spin pi-spinner" />
+          </span>
+          <h2 class="gaveta__titulo">{{ estado.rotulo }}</h2>
+          <span class="topo__relogio clinic-value" aria-hidden="true">{{
+            rotulos.relogio(escuta.tempoMs)
+          }}</span>
+          <!-- Só no tablet: em tela larga a linha da anamnese continua à vista com estes botões. -->
+          <span v-if="ouvindo" class="gaveta__acoes">
+            <Button
+              v-if="escuta.fase === 'gravando'"
+              :label="t('clinico.escuta.acoes.pausar')"
+              icon="pi pi-pause"
+              severity="secondary"
+              outlined
+              size="small"
+              @click="escuta.pausar()"
+            />
+            <Button
+              v-else
+              :label="t('clinico.escuta.acoes.retomar')"
+              icon="pi pi-play"
+              severity="secondary"
+              outlined
+              size="small"
+              @click="escuta.retomar()"
+            />
+            <Button
+              :label="t('clinico.escuta.acoes.encerrar')"
+              icon="pi pi-stop-circle"
+              size="small"
+              @click="escuta.encerrar()"
+            />
+          </span>
+          <Button
+            class="gaveta__conversa"
+            :label="
+              escuta.conversaAberta
+                ? t('clinico.escuta.vista.ocultarConversa')
+                : t('clinico.escuta.vista.mostrarConversa')
+            "
+            :icon="escuta.conversaAberta ? 'pi pi-eye-slash' : 'pi pi-comments'"
+            severity="secondary"
+            text
+            size="small"
+            :aria-pressed="escuta.conversaAberta"
+            @click="escuta.alternarConversa()"
+          />
+        </div>
+      </template>
+
+      <div :id="idDoCorpo" class="corpo-da-secao">
         <!-- A frase que não pode sumir enquanto for verdade: quem transcreve e quem propõe. -->
         <p class="aviso">
           <i class="pi pi-info-circle" aria-hidden="true" />
@@ -756,7 +828,7 @@ const temAcoes = computed(
           </span>
         </footer>
       </div>
-    </Transition>
+    </Drawer>
   </section>
 </template>
 
@@ -892,29 +964,68 @@ const temAcoes = computed(
 
 /* ------------------------------------------------------------------ corpo */
 
+/*
+ * Na gaveta a seção não é mais o contêiner: o corpo é. Com 40 rem, a conversa fica em cima e o
+ * prontuário proposto embaixo, numa coluna — as regras `@container escuta` já sabiam fazer isso.
+ */
 .corpo-da-secao {
+  container: escuta / inline-size;
   display: grid;
   gap: var(--clinic-space-4);
 }
 
-/* Abrir é mudança de estado, e ganha o movimento curto que a explica. Fechar só some. */
-.abre-enter-active {
-  transition:
-    opacity 180ms ease-out,
-    transform 180ms ease-out;
+/* Na anamnese fica só a linha do cabeçalho: compacta, sem o vão do corpo. */
+.escuta--recolhida,
+.escuta {
+  gap: 0;
 }
 
-.abre-leave-active {
-  transition: opacity 120ms ease-out;
+.gaveta__topo {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
-.abre-enter-from {
-  opacity: 0;
-  transform: translateY(-4px);
+.gaveta__titulo {
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 1rem;
+  font-weight: 650;
 }
 
-.abre-leave-to {
-  opacity: 0;
+.gaveta__acoes {
+  display: none;
+  gap: 0.4rem;
+}
+
+@media (max-width: 74.99rem) {
+  .gaveta__acoes {
+    display: inline-flex;
+  }
+}
+
+.gaveta__conversa.p-button {
+  margin-inline-start: auto;
+}
+
+.disco--pequeno {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.9rem;
+}
+
+/* O rodapé da revisão fica preso ao pé da gaveta: a decisão está sempre a um clique. */
+.rodape {
+  position: sticky;
+  /* O respiro de baixo da gaveta é 1,25 rem: o rodapé desce até a borda e nada rola por baixo dele. */
+  bottom: -1.25rem;
+  z-index: 1;
+  padding-bottom: 1.25rem;
+  margin-bottom: -1.25rem;
+  background: var(--hc-cartao);
 }
 
 /* Nota compacta, como a da proposta de rotina: diz o que é sem roubar o espaço dos campos. */

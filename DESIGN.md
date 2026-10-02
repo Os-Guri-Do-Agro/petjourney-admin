@@ -305,6 +305,32 @@ na frase da saudação, sacar e PIX em diálogo, a ajuda recolhida), Programas (
 etapas de ativação recolhidas) e Acessos (um pet, uma linha: os acessos do mesmo pet se agrupam e abrem embaixo dele;
 abas, busca e filtros numa linha, os filtros finos recolhidos atrás de um botão com contagem).
 
+No Clínico, a segunda passada (02/10, guiada pela auditoria de carga): Resumo da clínica (frase com os concluídos, os
+cartões de número viram linha de fatos, um gráfico por pergunta — a ocupação vira frase —, ranking em linhas HTML do
+maior para o menor com "70 (44%)", mapa de horários em tabela com a hora na lateral); Histórico da ficha (uma lista só,
+por mês, sem o diálogo de entrada — o veredito do resumo vira uma linha; o futuro sai da lista para "Próximo:");
+Tratamento e Vacinas da ficha (o celular do responsável numa gaveta sem máscara, aberta por "Como … vê no app");
+Agenda (sobreposição em cascata, alerta de risco escrito no card, texto de 12,5 px, legenda recolhida; a semana virou
+tabela pessoa × dia); Vacinas (abre em Em atraso quando há vencidas, um pet por linha, histórico de 20 em 20, estoque
+em linha de fatos); Pacientes (o alerta pelo nome da condição, a categoria no ícone, "+1"); Atendimentos (rascunhos no
+topo, blocos por dia); Fila (ofertas primeiro, pela que expira antes, com "Registrar aceite/recusa" escritos).
+Padrões que saíram daqui: **cartões de número viram frase + linha de fatos**; **o que se repete agrupa** (pet, dia,
+mês); **ação escrita fica sempre à vista** — o esconde-até-o-hover da `ClinicDataTable` vale só para ícone; datas pelo
+`ClinicDateField` (DatePicker com valor em texto), nunca o calendário do navegador; todo DatePicker passa
+`panel-class="hc-tema"`.
+
+Terceira passada no Clínico (02/10, depois do retorno do usuário — "a agenda vira uma bagunça
+visual quando tem muitos atendimentos", "listas de pacientes sem avatar", "a gravação poderia ser um
+modal lateral"): a **Agenda do dia virou tabela** (`AgendaTabelaDia`: uma linha por meia hora, uma
+coluna por profissional, cada atendimento uma linha do mesmo tamanho com avatar e nome; encaixes
+um embaixo do outro; o procedimento longo continua como faixa; risco é ícone por categoria; aviso
+de choque só no que ainda se decide; arrastar para outra célula remarca) — a grade proporcional
+continua em Exibição → "Linha do tempo"; **todo paciente em lista tem rosto** (`ClinicPacienteCelula`
+sobre o `PetAvatar` do hotel, e a pauta da `PautaTabela` aceita `pet`); a **revisão da gravação
+da consulta mora numa gaveta à direita** que, em tela larga, abre espaço na página
+(`html.escuta-lateral`); o **checklist da internação** é uma lista num cartão, com o que já foi
+registrado recolhido numa linha; Atividades empilhada na largura toda.
+
 *Nota:* o código da Visão geral foi além do que esta variante descreve — fundo `#F5F7F6` com dois
 brilhos de sálvia e uma grade fina que some descendo, cartão branco com borda fina e sombra
 baixa, resumo e pílula cheia em degradê (`home-card.css`, `inicio.vue`). Onde este documento e o

@@ -112,6 +112,16 @@ const linhas = computed(() =>
           citacao: '',
           complemento: '',
         }
+      case 'polifarmacia':
+        return {
+          chave: 'polifarmacia',
+          severidade: sinal.severidade,
+          titulo: t('clinico.resumoDoPaciente.sinais.polifarmacia', { total: sinal.total }),
+          detalhe: t('clinico.resumoDoPaciente.sinais.polifarmaciaDetalhe'),
+          relato: '',
+          citacao: '',
+          complemento: '',
+        }
       case 'adesao': {
         /*
          * O remédio crítico que perdeu o ritmo em casa. O motivo vai na linha de baixo, nas

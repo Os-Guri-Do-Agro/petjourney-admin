@@ -855,6 +855,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
           {{ t('acessos.filtros.periodo') }}
         </label>
         <DatePicker
+          panel-class="hc-tema"
           v-model="periodo"
           input-id="atend-periodo"
           selection-mode="range"

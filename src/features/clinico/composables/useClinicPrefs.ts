@@ -57,16 +57,32 @@ function lerArmazenado<T extends string>(chave: string, aceitos: readonly T[], p
 
 const densidade = ref<ClinicDensidade>(lerArmazenado(CHAVE_DENSIDADE, DENSIDADES, 'media'))
 const zoom = ref<ClinicZoom>(lerArmazenado(CHAVE_ZOOM, ZOOMS, 'medio'))
+/**
+ * Cancelado nasce oculto: o horário já foi devolvido, e numa agenda cheia a linha riscada só
+ * disputa espaço com quem vem. Falta continua à vista — é o que a recepção ainda precisa tratar.
+ */
 const ocultarCancelados = ref(
   typeof window === 'undefined'
-    ? false
-    : window.localStorage.getItem(CHAVE_OCULTAR_CANCELADOS) === 'true',
+    ? true
+    : window.localStorage.getItem(CHAVE_OCULTAR_CANCELADOS) !== 'false',
 )
 
+/** As duas vistas do dia: a tabela (padrão, aguenta o dia cheio) e a linha do tempo proporcional. */
+export const FORMATOS_DA_AGENDA = ['tabela', 'linha-do-tempo'] as const
+export type FormatoDaAgenda = (typeof FORMATOS_DA_AGENDA)[number]
+const CHAVE_FORMATO_DA_AGENDA = 'clinic.formatoDaAgenda'
+
+const formatoDaAgenda = ref<FormatoDaAgenda>(
+  lerArmazenado(CHAVE_FORMATO_DA_AGENDA, FORMATOS_DA_AGENDA, 'tabela'),
+)
+
+/**
+ * A legenda nasce recolhida: quem usa a agenda todo dia já sabe o que cada ícone quer dizer, e a
+ * faixa aberta era mais uma linha entre o cabeçalho e o primeiro atendimento. Quem abre uma vez,
+ * mantém aberta (a escolha fica guardada).
+ */
 const legendaAberta = ref(
-  typeof window === 'undefined'
-    ? true
-    : window.localStorage.getItem(CHAVE_LEGENDA) !== 'false',
+  typeof window === 'undefined' ? false : window.localStorage.getItem(CHAVE_LEGENDA) === 'true',
 )
 
 const sugerirResumo = ref(
@@ -98,6 +114,10 @@ watch(zoom, (valor) => {
   window.localStorage.setItem(CHAVE_ZOOM, valor)
 })
 
+watch(formatoDaAgenda, (valor) => {
+  window.localStorage.setItem(CHAVE_FORMATO_DA_AGENDA, valor)
+})
+
 watch(ocultarCancelados, (valor) => {
   window.localStorage.setItem(CHAVE_OCULTAR_CANCELADOS, String(valor))
 })
@@ -121,6 +141,7 @@ export function useClinicPrefs() {
     densidade,
     zoom,
     ocultarCancelados,
+    formatoDaAgenda,
     legendaAberta,
     sugerirResumo,
     alternarLegenda: () => {

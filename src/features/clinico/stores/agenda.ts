@@ -75,7 +75,10 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
   const atendimentos = computed(() => dia.value?.atendimentos ?? [])
   const bloqueios = computed<Block[]>(() => dia.value?.bloqueios ?? [])
   const clinicaFechada = computed(() => dia.value?.clinicaFechada ?? false)
-  const vazio = computed(() => !carregando.value && !erro.value && atendimentos.value.length === 0)
+  /* Antes do primeiro dia chegar não há o que dizer — "nenhum atendimento" piscava na abertura. */
+  const vazio = computed(
+    () => !carregando.value && !erro.value && dia.value !== null && atendimentos.value.length === 0,
+  )
 
   /** Contexto que o detector de conflitos precisa — montado uma vez, usado em toda checagem. */
   const contextoDeConflito = computed<ConflictContext | null>(() => {
@@ -128,7 +131,9 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
   }
 
   async function recarregar() {
-    await (visao.value === 'semana' ? Promise.all([carregarDia(), carregarSemana()]) : carregarDia())
+    await (visao.value === 'semana'
+      ? Promise.all([carregarDia(), carregarSemana()])
+      : carregarDia())
   }
 
   function registrarDesfazer(token: string, kind: AcaoDesfazivel['kind']) {
@@ -249,9 +254,7 @@ export const useAgendaStore = defineStore('clinico-agenda', () => {
 
   /** A recepção ligou e o responsável confirmou. A confirmação do app chega pela API. */
   async function confirmarPresenca(id: string) {
-    const resultado = await comSalvamento(() =>
-      agendaRepository.confirmarPresenca(id, 'recepcao'),
-    )
+    const resultado = await comSalvamento(() => agendaRepository.confirmarPresenca(id, 'recepcao'))
 
     if (resultado) {
       await depoisDeMutar(resultado.undoToken, 'status')

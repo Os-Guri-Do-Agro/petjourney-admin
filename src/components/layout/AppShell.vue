@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
-import IconField from 'primevue/iconfield'
-import InputIcon from 'primevue/inputicon'
-import InputText from 'primevue/inputtext'
 import Popover from 'primevue/popover'
 import ToggleSwitch from 'primevue/toggleswitch'
 import {
@@ -25,7 +22,6 @@ import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
 import {
-  filterNavigationGroups,
   getSectionLandingPath,
   navItemMatches,
   OVERVIEW_SECTION_ID,
@@ -176,7 +172,6 @@ function alternarTema(escuro: boolean) {
   }
 }
 // const searchQuery = ref('') // busca do header do portal (temporariamente desligada)
-const panelFilterQuery = ref('')
 
 /**
  * Busca global do módulo clínico, aberta por `Ctrl/⌘ + K` de qualquer tela.
@@ -299,7 +294,7 @@ function isNavItemActive(item: NavigationItem) {
   return navItemMatches(itemPath, route.path) && hashOk
 }
 
-/** No modo lista o filtro varre o menu inteiro; no modo seções, só a seção aberta. */
+/** No modo lista o painel mostra o menu inteiro; no modo seções, só a seção aberta. */
 const gruposDoPainel = computed<AppNavigationGroup[]>(() =>
   isListNavigator.value
     ? navigationGroups.value
@@ -311,23 +306,6 @@ const gruposDoPainel = computed<AppNavigationGroup[]>(() =>
           blocos: activeSection.value.blocos,
         },
       ],
-)
-
-const filteredNavigationGroups = computed(() =>
-  filterNavigationGroups(gruposDoPainel.value, panelFilterQuery.value),
-)
-
-/**
- * O filtro só se paga quando há lista para varrer. Com cinco links visíveis ele é mais um campo
- * ocupando altura do que um atalho.
- */
-const hasPanelFilter = computed(
-  () => gruposDoPainel.value.reduce((total, grupo) => total + grupo.items.length, 0) >= 8,
-)
-
-const panelFilterHasNoResults = computed(
-  () =>
-    panelFilterQuery.value.trim().length > 0 && filteredNavigationGroups.value.length === 0,
 )
 
 const activePageLabel = computed(() =>
@@ -355,7 +333,6 @@ function handleSectionChange(sectionId: string) {
     navigationSections.value.find((entry) => entry.id === sectionId) ?? fallbackSection.value
 
   painelSectionId.value = section.id
-  panelFilterQuery.value = ''
 
   if (!compactViewport.value) {
     setRailCollapsed(false)
@@ -651,48 +628,12 @@ onUnmounted(() => {
           @clique="closeCompactDrawer"
         />
 
-        <div v-if="hasPanelFilter" class="page-nav__filter">
-          <IconField class="page-nav__filter-field">
-            <InputIcon class="pi pi-search" />
-            <InputText
-              id="panel-nav-filter"
-              v-model="panelFilterQuery"
-              type="search"
-              size="small"
-              fluid
-              :placeholder="t('shell.filterPlaceholder')"
-              :aria-label="t('shell.filterPlaceholder')"
-              autocomplete="off"
-            />
-          </IconField>
-          <Button
-            v-if="panelFilterQuery"
-            class="page-nav__filter-clear"
-            type="button"
-            text
-            rounded
-            severity="secondary"
-            icon="pi pi-times"
-            :aria-label="t('shell.filterClear')"
-            :title="t('shell.filterClear')"
-            @click="panelFilterQuery = ''"
-          />
-        </div>
-
         <nav
           ref="listaDeNavegacao"
           class="page-nav"
           :aria-label="t('shell.aria.pagesOf', { label: activeSection.label })"
         >
-          <p v-if="panelFilterHasNoResults" class="page-nav__empty">
-            {{ t('shell.filterEmpty', { q: panelFilterQuery.trim() }) }}
-          </p>
-
-          <div
-            v-for="group in filteredNavigationGroups"
-            :key="group.id"
-            class="page-nav__group"
-          >
+          <div v-for="group in gruposDoPainel" :key="group.id" class="page-nav__group">
             <!--
               O rótulo do grupo só serve quando há mais de um. Numa seção só, ele repetiria o
               nome que o trilho e o cabeçalho já mostram.
@@ -1422,87 +1363,6 @@ onUnmounted(() => {
 .page-nav::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: color-mix(in srgb, var(--shell-muted) 28%, transparent);
-}
-
-.page-nav__filter {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
-  margin-bottom: 0.2rem;
-  padding-inline-end: 0.25rem;
-  border: 1px solid var(--shell-line);
-  border-radius: 0.75rem;
-  background: var(--shell-surface-soft);
-  color: var(--shell-soft);
-}
-
-.page-nav__filter:focus-within {
-  border-color: color-mix(in srgb, var(--shell-accent) 32%, var(--shell-line));
-  background: var(--shell-surface);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--shell-accent) 12%, transparent);
-}
-
-/*
- * O campo do PrimeVue perde a caixa própria: quem desenha a borda e o anel de foco é o
- * `.page-nav__filter`, que também abraça o botão de limpar.
- */
-.page-nav__filter-field {
-  min-width: 0;
-  flex: 1 1 auto;
-  color: var(--shell-soft);
-}
-
-.page-nav__filter-field :deep(.p-inputicon) {
-  color: inherit;
-  font-size: 0.8rem;
-}
-
-.page-nav__filter-field :deep(.p-inputtext),
-.page-nav__filter-field :deep(.p-inputtext:enabled:hover),
-.page-nav__filter-field :deep(.p-inputtext:enabled:focus) {
-  padding-block: 0.55rem;
-  padding-inline-end: 0.35rem;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  color: var(--shell-text);
-  font-size: 0.82rem;
-  outline: none;
-}
-
-.page-nav__filter-field :deep(.p-inputtext::-webkit-search-cancel-button) {
-  appearance: none;
-}
-
-.page-nav__filter-field :deep(.p-inputtext::placeholder) {
-  color: var(--shell-soft);
-}
-
-.page-nav__filter-clear.p-button {
-  width: 1.5rem;
-  height: 1.5rem;
-  flex: 0 0 auto;
-  padding: 0;
-  color: var(--shell-muted);
-  font-size: 0.68rem;
-}
-
-.page-nav__filter-clear.p-button:not(:disabled):hover,
-.page-nav__filter-clear.p-button:not(:disabled):active {
-  background: color-mix(in srgb, var(--shell-muted) 16%, transparent);
-  color: var(--shell-text);
-}
-
-.page-nav__filter-clear :deep(.p-button-icon) {
-  font-size: inherit;
-}
-
-.page-nav__empty {
-  margin: 0;
-  padding: 0.75rem 0.55rem;
-  color: var(--shell-muted);
-  font-size: 0.8rem;
-  line-height: 1.45;
 }
 
 .page-nav__group {

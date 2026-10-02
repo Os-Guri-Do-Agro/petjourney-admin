@@ -28,6 +28,7 @@ import { useI18n } from 'vue-i18n'
 
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 
+import ClinicDateField from '../base/ClinicDateField.vue'
 import ClinicField from '../base/ClinicField.vue'
 import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
 import type { AtoClinicoKind, ISODateTime, PrescriptionRoute } from '../../data/types'
@@ -327,11 +328,10 @@ function salvar() {
           :erro="erroQuando"
         >
           <template #default="{ id, descrito }">
-            <InputText
-              :id="id"
+            <ClinicDateField
               v-model="quando"
-              type="datetime-local"
-              fluid
+              :input-id="id"
+              com-hora
               :max="agoraLocal"
               :aria-describedby="descrito"
             />

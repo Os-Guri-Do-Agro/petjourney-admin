@@ -647,8 +647,11 @@ export function resolvePageLabel(path: string, hash: string, sections: AppNaviga
     return t('clinico.ficha.tratamento.pilula')
   }
 
-  /* O atendimento não é item de menu — sem esta linha o cabeçalho dizia 'Painel' no prontuário. */
-  if (path.startsWith('/veterinario/atendimento')) {
+  /*
+   * O atendimento não é item de menu — sem esta linha o cabeçalho dizia 'Painel' no prontuário.
+   * A barra no fim importa: sem ela, a lista `/veterinario/atendimentos` também virava 'Prontuário'.
+   */
+  if (path.startsWith('/veterinario/atendimento/')) {
     return t('clinico.prontuario.titulo')
   }
 

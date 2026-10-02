@@ -575,9 +575,13 @@ async function encerrar(entrada: {
   color: var(--hc-tinta-2);
 }
 
-/* A dose em cima da troca de plantão pede atenção: o par pêssego da pauta. */
+/*
+ * A dose em cima da troca de plantão pede atenção, e a atenção mora no ícone: linha, não tarja.
+ * A faixa pêssego de ponta a ponta disputava com o checklist logo abaixo.
+ */
 .troca {
-  background: var(--hc-pessego-fundo);
+  padding: 0.15rem 0;
+  background: transparent;
   color: var(--hc-tinta);
 }
 

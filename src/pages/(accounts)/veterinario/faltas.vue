@@ -30,6 +30,7 @@ import { useI18n } from 'vue-i18n'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
+import ClinicPacienteCelula from '@/features/clinico/components/base/ClinicPacienteCelula.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
 import AgendaFaltaDialog from '@/features/clinico/components/agenda/AgendaFaltaDialog.vue'
@@ -302,8 +303,7 @@ const colunas = computed<ColunaTabela<LinhaFalta>[]>(() => [
 
 /** Nome de quem está com o histórico aberto — o título do painel não pode dizer só um id. */
 const nomeDoResponsavelAberto = computed(
-  () =>
-    linhas.value.find((linha) => linha.tutorId === responsavelAberto.value)?.tutor?.nome ?? '',
+  () => linhas.value.find((linha) => linha.tutorId === responsavelAberto.value)?.tutor?.nome ?? '',
 )
 
 const reincidentes = computed(() => linhas.value.filter((linha) => linha.reincidente))
@@ -513,26 +513,28 @@ onMounted(carregar)
         @selecionar="alternarDetalhe"
       >
         <template #celula-paciente="{ linha }">
-          <strong class="faltas__nome">{{ linha.pet?.nome }}</strong>
-          <span class="faltas__linha-meta">
-            <span class="faltas__meta">
-              {{ linha.pet ? formato.especie(linha.pet.especie) : '' }}
-            </span>
-            <!--
+          <ClinicPacienteCelula :pet="linha.pet ?? null">
+            <template #selo>
+              <!--
               O rótulo de reincidência mora aqui, e não na coluna de contagem: naquele espaço
-              só cabia o ícone, e ícone sozinho não diz "reincidente".
+              só cabia o ícone, e ícone sozinho não diz "reincidente". Na aba Reincidentes ele some:
+              ali toda linha é reincidente, e o selo repetido dez vezes vira textura.
             -->
-            <ClinicAlertChip
-              v-if="linha.reincidente"
-              severidade="atencao"
-              :rotulo="t('clinico.faltas.reincidente')"
-            />
-          </span>
+              <ClinicAlertChip
+                v-if="linha.reincidente && recorte !== 'reincidentes'"
+                severidade="atencao"
+                :rotulo="t('clinico.faltas.reincidente')"
+              />
+            </template>
+            {{ linha.pet ? formato.especie(linha.pet.especie) : '' }}
+          </ClinicPacienteCelula>
         </template>
 
         <template #celula-responsavel="{ linha }">
           <span class="faltas__nome">{{ linha.tutor?.nome }}</span>
-          <span class="faltas__meta"><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span>
+          <span class="faltas__meta"
+            ><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span
+          >
         </template>
 
         <template #celula-faltas="{ linha }">
@@ -681,7 +683,6 @@ onMounted(carregar)
           </li>
         </ol>
       </section>
-
     </div>
 
     <!--

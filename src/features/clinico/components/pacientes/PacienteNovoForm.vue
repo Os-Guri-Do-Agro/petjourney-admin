@@ -43,6 +43,7 @@ import { useI18n } from 'vue-i18n'
 
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 
+import ClinicDateField from '../base/ClinicDateField.vue'
 import ClinicField from '../base/ClinicField.vue'
 import ClinicToggleGroup, { type TomDaOpcao } from '../base/ClinicToggleGroup.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
@@ -585,11 +586,9 @@ async function salvar() {
     <div class="novo__linha">
       <ClinicField :rotulo="t('clinico.paciente.novo.nascimento')" :erro="erroDe('nascimento')">
         <template #default="{ id, descrito }">
-          <InputText
-            :id="id"
+          <ClinicDateField
             v-model="nascimento"
-            type="date"
-            fluid
+            :input-id="id"
             :max="clinicClock.today()"
             :aria-describedby="descrito"
           />
@@ -840,7 +839,10 @@ async function salvar() {
           <div v-for="item in semelhantes" :key="item.tutor.id" class="repetido__linha">
             <span class="repetido__quem">
               <strong>{{ item.tutor.nome }}</strong>
-              <small><bdi dir="ltr">{{ item.tutor.telefone }}</bdi> · {{ motivoDaSemelhanca(item.motivo) }}</small>
+              <small
+                ><bdi dir="ltr">{{ item.tutor.telefone }}</bdi> ·
+                {{ motivoDaSemelhanca(item.motivo) }}</small
+              >
             </span>
             <Button
               size="small"

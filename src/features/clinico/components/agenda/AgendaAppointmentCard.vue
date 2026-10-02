@@ -43,16 +43,16 @@ const formato = useClinicFormat()
 const appointment = computed(() => props.card.appointment)
 
 /**
- * Três faixas de altura decidem o que cabe, medidas contra o que cada linha realmente ocupa:
- * hora e nome pedem ~16 px, o tipo mais ~14, o rodapé mais ~15, e ainda o padding. Os limites
- * anteriores eram otimistas e a segunda linha saía cortada ao meio.
+ * Três faixas de altura decidem o que cabe, medidas contra o que cada linha realmente ocupa: com o
+ * texto em 12,5 px, hora e nome pedem ~16 px, o tipo mais ~15, o rodapé mais ~15, e ainda o
+ * padding. Os limites acompanham o texto — com 11 px a grade cabia mais e não se lia.
  */
 const faixa = computed(() => {
-  if (props.card.alturaPx < 26) {
+  if (props.card.alturaPx < 30) {
     return 'minima'
   }
 
-  if (props.card.alturaPx < 54) {
+  if (props.card.alturaPx < 58) {
     return 'media'
   }
 
@@ -105,8 +105,19 @@ const podeMarcarFalta = computed(() => {
   return clinicClock.nowIso() > appointment.value.inicio
 })
 
-const alertaDeRisco = computed(() =>
-  props.card.pet?.alertas.find((alerta) => alerta.severidade === 'risco') ?? null,
+const alertaDeRisco = computed(
+  () => props.card.pet?.alertas.find((alerta) => alerta.severidade === 'risco') ?? null,
+)
+
+/**
+ * O alerta de risco escrito no card — "Alergia" —, e não só o triângulo.
+ *
+ * O triângulo dizia o que era apenas passando o mouse, e tablet não tem mouse: a recepção via o
+ * aviso e precisava abrir o atendimento para saber se era alergia ou temperamento. A palavra é
+ * curta; o detalhe (a que substância) continua na dica e no drawer.
+ */
+const palavraDoRisco = computed(() =>
+  alertaDeRisco.value ? formato.alerta(alertaDeRisco.value.kind) : '',
 )
 
 const rotuloAcessivel = computed(() => {
@@ -130,15 +141,28 @@ const rotuloAcessivel = computed(() => {
   return partes.filter(Boolean).join(' · ')
 })
 
+/** Recuo de cada degrau da cascata, em % da coluna. Três degraus no máximo. */
+const RECUO_DA_CASCATA = 16
+
+/**
+ * Sobreposição em cascata, e não em fatias.
+ *
+ * Dividir a coluna ao meio (ou em três) espremia cada card até "09:15 T…" — a hora e duas letras
+ * do nome, em 60 px. Na cascata, o card que começa depois entra **por cima**, recuado um degrau:
+ * como os horários de início diferem, a primeira linha de cada um (hora e nome) fica à vista no
+ * próprio topo, com quase a largura inteira. O de baixo continua clicável pela faixa da esquerda.
+ *
+ * Quem fica por cima é quem começa depois, e isso vem da ordem dos cards (por horário), sem
+ * z-index: pela faixa, o das 09:15 ficava por baixo do das 09:00 e sumia.
+ */
 const estilo = computed(() => {
-  /** Largura por faixa de sobreposição: dois no mesmo horário dividem a coluna ao meio. */
-  const largura = 100 / props.card.lanes
+  const recuo = Math.min(props.card.lane, 3) * RECUO_DA_CASCATA
 
   return {
     top: `${props.card.topPx}px`,
     height: `${props.card.alturaPx}px`,
-    insetInlineStart: `calc(${props.card.lane * largura}% + 1px)`,
-    width: `calc(${largura}% - 2px)`,
+    insetInlineStart: `calc(${recuo}% + 1px)`,
+    width: `calc(${100 - recuo}% - 2px)`,
     '--card-cor': props.cor,
     '--card-tipo': tipo.value.cor,
   }
@@ -157,6 +181,7 @@ const estilo = computed(() => {
         'card--liberado': cancelado || faltou,
         'card--encaixe': appointment.encaixe,
         'card--aviso': severidade === 'warning' || severidade === 'blocking',
+        'card--empilhado': card.lane > 0,
       },
     ]"
     :style="estilo"
@@ -181,11 +206,13 @@ const estilo = computed(() => {
       <span class="card__hora clinic-value">{{ formato.hora(appointment.inicio) }}</span>
       <span class="card__nome">{{ card.pet?.nome }}</span>
 
-      <i
+      <span
         v-if="alertaDeRisco"
-        class="pi pi-exclamation-triangle card__icone card__icone--risco"
-        :title="`${formato.alerta(alertaDeRisco.kind)} — ${alertaDeRisco.detalhe}`"
-      />
+        class="card__risco"
+        :title="`${palavraDoRisco} — ${alertaDeRisco.detalhe}`"
+      >
+        {{ palavraDoRisco }}
+      </span>
       <i
         v-if="avisosVisiveis.length > 0"
         class="pi pi-exclamation-circle card__icone card__icone--aviso"
@@ -298,17 +325,19 @@ const estilo = computed(() => {
   line-height: 1.25;
 }
 
+/* 12,5 px na primeira linha: com 11 px a agenda inteira era texto miúdo (138 trechos abaixo de 12). */
 .card__hora {
   flex: 0 0 auto;
-  font-size: var(--clinic-font-label);
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
 .card__nome {
-  min-width: 0;
+  /* O nome não cede tudo ao selo de risco: "Ni…" não identifica ninguém. */
+  min-width: min(2.75rem, 40%);
   overflow: hidden;
   flex: 1;
-  font-size: var(--clinic-font-label);
+  font-size: 0.78rem;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -316,7 +345,30 @@ const estilo = computed(() => {
 
 .card__icone {
   flex: 0 0 auto;
-  font-size: 0.62rem;
+  font-size: 0.7rem;
+}
+
+/* O alerta de risco por escrito: selo coral, curto, que não cede lugar ao nome. */
+.card__risco {
+  flex: 0 1 auto;
+  max-width: 6.5rem;
+  overflow: hidden;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  background: var(--hc-coral-fundo);
+  color: var(--hc-coral-tinta);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Degrau da cascata: um respiro de sombra separa o card de cima do de baixo. */
+.card--empilhado {
+  box-shadow:
+    -2px 0 0 var(--clinic-surface),
+    0 2px 6px rgb(20 32 28 / 12%);
 }
 
 .card__icone--risco {
@@ -329,13 +381,13 @@ const estilo = computed(() => {
 
 .card__linha--secundaria {
   color: var(--clinic-muted);
-  font-size: calc(var(--clinic-font-label) - 0.5px);
+  font-size: 0.72rem;
 }
 
 .card__tipo-icone {
   flex: 0 0 auto;
   color: var(--card-tipo);
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   /* Alinhado pela linha de base do texto ao lado, não pelo centro da caixa. */
   transform: translateY(0.5px);
 }
@@ -366,7 +418,7 @@ const estilo = computed(() => {
   gap: 0.3rem;
   padding-top: 2px;
   color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  font-size: 0.72rem;
   white-space: nowrap;
 }
 

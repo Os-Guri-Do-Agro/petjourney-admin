@@ -26,6 +26,7 @@ import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicAlertChip from '../base/ClinicAlertChip.vue'
+import ClinicDateField from '../base/ClinicDateField.vue'
 import ClinicField from '../base/ClinicField.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { useRotulosDaVacina } from '../../composables/useRotulosDaVacina'
@@ -567,7 +568,7 @@ const textoDaSugestao = computed(() => {
         </ClinicField>
         <ClinicField :rotulo="t('clinico.vacinas.validadeLote')" obrigatorio>
           <template #default="{ id }">
-            <InputText :id="id" v-model="validadeDigitada" type="date" fluid />
+            <ClinicDateField v-model="validadeDigitada" :input-id="id" />
           </template>
         </ClinicField>
       </div>

@@ -239,8 +239,9 @@ const ultimoDia = computed(() => colunas.value[colunas.value.length - 1]?.dia ??
 </template>
 
 <style scoped>
+/* 12 px por dose e horário em 11 px: com 10 px a faixa e as horas viravam textura, não leitura. */
 .faixa {
-  --faixa-celula: 0.625rem;
+  --faixa-celula: 0.75rem;
   --faixa-vao: 2px;
 
   display: flex;
@@ -258,7 +259,7 @@ const ultimoDia = computed(() => colunas.value[colunas.value.length - 1]?.dia ??
   gap: var(--faixa-vao);
   grid-template-rows: repeat(var(--faixa-linhas, 1), var(--faixa-celula));
   color: var(--clinic-muted);
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   font-variant-numeric: tabular-nums;
   line-height: var(--faixa-celula);
 }

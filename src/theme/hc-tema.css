@@ -295,6 +295,49 @@
   --p-drawer-color: var(--hc-tinta);
 }
 
+/*
+ * A gaveta da gravação da consulta (`EscutaPainel`) em tela larga: a área de conteúdo abre o espaço
+ * dela, e o prontuário estreita em vez de ficar escondido por baixo. A largura acompanha a gaveta.
+ */
+@media (min-width: 75rem) {
+  html.escuta-lateral .app-content {
+    padding-inline-end: min(30rem, 94vw);
+  }
+}
+
+/*
+ * O calendário do DatePicker é teleportado para o `body` e não herda a página: sem isto ele abria
+ * no linho antigo, com borda bege, no meio de um formulário branco. Quem o usa passa
+ * `panel-class="hc-tema"` (o `ClinicDateField` já passa).
+ */
+.p-datepicker-panel.hc-tema {
+  --p-datepicker-panel-background: var(--hc-cartao);
+  --p-datepicker-panel-border-color: var(--hc-borda);
+  --p-datepicker-panel-color: var(--hc-tinta);
+  --p-datepicker-panel-border-radius: 1rem;
+  --p-datepicker-panel-shadow: var(--hc-sombra-alta);
+  --p-datepicker-header-background: var(--hc-cartao);
+  --p-datepicker-header-border-color: var(--hc-linha);
+  --p-datepicker-header-color: var(--hc-tinta);
+  --p-datepicker-date-color: var(--hc-tinta);
+  --p-datepicker-week-day-color: var(--hc-tinta-2);
+  --p-datepicker-date-hover-background: var(--hc-marca-clara);
+  --p-datepicker-date-hover-color: var(--hc-marca-forte);
+  --p-datepicker-date-selected-background: var(--hc-marca);
+  --p-datepicker-date-selected-color: #fff;
+  --p-datepicker-date-range-selected-background: var(--hc-marca-clara);
+  --p-datepicker-date-range-selected-color: var(--hc-marca-forte);
+  --p-datepicker-date-focus-ring-color: var(--hc-marca);
+  --p-datepicker-today-background: var(--hc-linha);
+  --p-datepicker-today-color: var(--hc-tinta);
+  --p-datepicker-select-month-hover-background: var(--hc-marca-clara);
+  --p-datepicker-select-month-color: var(--hc-tinta);
+  --p-datepicker-select-month-hover-color: var(--hc-marca-forte);
+  --p-datepicker-select-year-hover-background: var(--hc-marca-clara);
+  --p-datepicker-select-year-color: var(--hc-tinta);
+  --p-datepicker-select-year-hover-color: var(--hc-marca-forte);
+}
+
 /* ------------------------------------------------------------------ fundo
  * Com `html` na frente: o `PartnerPageFrame` pinta o próprio fundo em CSS com escopo, que empata
  * com duas classes e carrega depois — o linho vencia e o fundo da Visão geral sumia.

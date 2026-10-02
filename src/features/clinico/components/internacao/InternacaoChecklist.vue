@@ -18,7 +18,11 @@ import Button from 'primevue/button'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import type { AdministracaoAgendada, PrescricaoDeInternacao, SituacaoDaAdministracao } from '../../data/types'
+import type {
+  AdministracaoAgendada,
+  PrescricaoDeInternacao,
+  SituacaoDaAdministracao,
+} from '../../data/types'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { atrasoEmMinutos, atravessaAPassagem } from '../../domain/internacao'
 import { useClinicoStore } from '../../stores/clinico'
@@ -112,6 +116,29 @@ const grupos = computed<Grupo[]>(() => {
 /** Índice do primeiro grupo ainda por vir — é onde a linha do "agora" é desenhada. */
 const indiceDoAgora = computed(() => grupos.value.findIndex((grupo) => !grupo.passado))
 
+/**
+ * O que já foi registrado antes de agora recolhe numa linha.
+ *
+ * Abrir o checklist às 10h despejava cinco doses da madrugada, todas feitas, antes da primeira
+ * que cobra ação — e cada uma num cartão com borda própria. O registro continua a um clique ("5
+ * registradas desde 04:43"), e o que ficou para trás **sem** registro (atrasada) nunca recolhe:
+ * é exatamente o que precisa ser visto.
+ */
+const passadoAberto = ref(false)
+
+function grupoResolvido(grupo: Grupo) {
+  return grupo.passado && grupo.linhas.every((linha) => resolvida(linha.situacao))
+}
+
+const resolvidasAntes = computed(() => {
+  const recolhiveis = grupos.value.filter(grupoResolvido)
+
+  return {
+    total: recolhiveis.reduce((soma, grupo) => soma + grupo.linhas.length, 0),
+    desde: recolhiveis[0]?.rotulo ?? '',
+  }
+})
+
 function naTroca(administracao: AdministracaoAgendada): boolean {
   return props.fimDoPlantao ? atravessaAPassagem(administracao, props.fimDoPlantao) : false
 }
@@ -145,12 +172,45 @@ function registrarAntes(administracaoId: string) {
       {{ t('clinico.internacao.checklist.vazio') }}
     </p>
 
+    <div v-if="resolvidasAntes.total > 0" class="checklist__recolhido">
+      <i class="pi pi-check-circle" aria-hidden="true" />
+      <span>
+        {{
+          t(
+            'clinico.internacao.checklist.registradas',
+            { total: resolvidasAntes.total, desde: resolvidasAntes.desde },
+            resolvidasAntes.total,
+          )
+        }}
+      </span>
+      <Button
+        type="button"
+        :label="
+          passadoAberto
+            ? t('clinico.internacao.checklist.ocultarRegistradas')
+            : t('clinico.internacao.checklist.verRegistradas')
+        "
+        :icon="passadoAberto ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+        icon-pos="right"
+        severity="secondary"
+        text
+        size="small"
+        :aria-expanded="passadoAberto"
+        @click="passadoAberto = !passadoAberto"
+      />
+    </div>
+
     <template v-for="(grupo, indice) in grupos" :key="grupo.horario">
       <p v-if="indice === indiceDoAgora" class="checklist__agora">
         <span>{{ t('clinico.internacao.checklist.agora', { hora: formato.hora(agora) }) }}</span>
       </p>
 
-      <section class="grupo" :class="{ 'grupo--passado': grupo.passado }">
+      <!-- v-show: o registro de quem deu cada dose continua na página, só recolhido. -->
+      <section
+        v-show="passadoAberto || !grupoResolvido(grupo)"
+        class="grupo"
+        :class="{ 'grupo--passado': grupo.passado }"
+      >
         <h4 class="grupo__hora clinic-value">{{ grupo.rotulo }}</h4>
 
         <ul class="grupo__itens">
@@ -160,7 +220,11 @@ function registrarAntes(administracaoId: string) {
             class="item"
             :class="[`item--${linha.situacao}`, { 'item--troca': naTroca(linha.administracao) }]"
           >
-            <i class="item__icone" :class="ICONE[linha.prescricao?.kind ?? 'procedimento']" aria-hidden="true" />
+            <i
+              class="item__icone"
+              :class="ICONE[linha.prescricao?.kind ?? 'procedimento']"
+              aria-hidden="true"
+            />
 
             <div class="item__corpo">
               <p class="item__descricao">
@@ -325,11 +389,43 @@ function registrarAntes(administracaoId: string) {
   opacity: 0.5;
 }
 
+/*
+ * O checklist é uma lista num cartão só: cada horário é um bloco separado por fio, e cada dose uma
+ * linha. Antes cada dose tinha a própria borda, e vinte cartões iguais não diziam qual importava.
+ */
+.checklist {
+  padding: 0.35rem 1.1rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1rem;
+  background: var(--hc-cartao);
+  box-shadow: var(--hc-sombra);
+}
+
+.checklist__recolhido {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--hc-linha);
+  color: var(--hc-tinta-2);
+  font-size: 0.875rem;
+}
+
+.checklist__recolhido .pi-check-circle {
+  color: var(--hc-verde-tinta);
+}
+
 .grupo {
   display: grid;
   align-items: start;
-  gap: var(--clinic-space-2) var(--clinic-space-4);
+  gap: 0 var(--clinic-space-4);
   grid-template-columns: 3.6rem minmax(0, 1fr);
+  padding-block: 0.25rem;
+}
+
+.grupo + .grupo {
+  border-top: 1px solid var(--hc-linha);
 }
 
 .grupo--passado {
@@ -348,7 +444,7 @@ function registrarAntes(administracaoId: string) {
   display: grid;
   margin: 0;
   padding: 0;
-  gap: var(--clinic-space-2);
+  gap: 0;
   list-style: none;
 }
 
@@ -356,11 +452,14 @@ function registrarAntes(administracaoId: string) {
   display: flex;
   min-width: 0;
   align-items: flex-start;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
+  padding: 0.6rem 0.35rem;
+  border-radius: 0.6rem;
   gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
+}
+
+.grupo__itens > .item + .item {
+  border-top: 1px dashed var(--hc-linha);
+  border-radius: 0;
 }
 
 /*
@@ -376,13 +475,11 @@ function registrarAntes(administracaoId: string) {
   color: var(--clinic-attention-text);
 }
 
-.item--feita {
-  background: var(--clinic-surface-soft);
-}
-
-.item--recusada,
-.item--pulada {
-  border-style: dashed;
+/* Registrada é história: o texto apaga, a linha continua legível. */
+.item--feita .item__descricao,
+.item--recusada .item__descricao,
+.item--pulada .item__descricao {
+  color: var(--hc-tinta-2);
 }
 
 .item--suspensa {
@@ -397,7 +494,7 @@ function registrarAntes(administracaoId: string) {
  * frase que explica o que ele significa já vem logo abaixo, dentro da própria linha.
  */
 .item--troca {
-  border-color: var(--clinic-accent);
+  background: color-mix(in srgb, var(--hc-marca-clara) 55%, transparent);
 }
 
 .item__icone {

@@ -10,6 +10,11 @@
  *
  * Quem aplica no atendimento é, por padrão, quem está atendendo; o diálogo deixa trocar, porque na
  * clínica cheia quem dá a vacina é muitas vezes outra pessoa.
+ *
+ * O protocolo nasce recolhido numa linha de estado ("1 vacina para hoje", "Vacinas em dia"), e o
+ * "Aplicar vacina" é contornado: a conduta já tem a ação cheia da etapa, e o protocolo aberto com
+ * uma segunda ação cheia era a parte da consulta que a auditoria marcou no limite. O que foi
+ * aplicado neste atendimento continua sempre à vista, para conferir antes de assinar.
  */
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -41,6 +46,30 @@ const plano = ref<PlanoVacinal | null>(null)
 const aplicadas = ref<AplicacaoVacina[]>([])
 const aplicando = ref(false)
 const vacinaDaLinha = ref<string | null>(null)
+const protocoloAberto = ref(false)
+
+/** O estado do protocolo numa frase curta, na ordem do que pede ação. */
+const estado = computed(() => {
+  const vacinas = plano.value?.vacinas ?? []
+  const atrasadas = vacinas.filter((item) => item.situacao === 'atrasada').length
+  const devidas = vacinas.filter((item) => item.situacao === 'devida').length
+
+  if (atrasadas > 0) {
+    return {
+      texto: t('clinico.ficha.vacinas.atrasadas', { total: atrasadas }, atrasadas),
+      tom: 'risco',
+    }
+  }
+
+  if (devidas > 0) {
+    return {
+      texto: t('clinico.ficha.vacinas.hojeVarias', { total: devidas }, devidas),
+      tom: 'atencao',
+    }
+  }
+
+  return { texto: t('clinico.ficha.vacinas.emDia'), tom: 'ok' }
+})
 
 /** Só as deste atendimento: o resto da carteira está no protocolo, logo acima. */
 const nesteAtendimento = computed(() =>
@@ -83,8 +112,36 @@ function abrirCarteira() {
 <template>
   <section class="vacinacao">
     <header class="vacinacao__topo">
-      <h4 class="clinic-label">{{ t('clinico.vacinas.carteira.protocolo') }}</h4>
+      <p class="vacinacao__estado" :class="`vacinacao__estado--${estado.tom}`">
+        <i
+          class="pi"
+          :class="estado.tom === 'ok' ? 'pi-check-circle' : 'pi-exclamation-circle'"
+          aria-hidden="true"
+        />
+        <span>
+          <strong>{{ t('clinico.vacinas.carteira.protocolo') }}:</strong>
+          {{ estado.texto }}
+        </span>
+      </p>
+
       <div class="vacinacao__acoes">
+        <Button
+          v-if="plano"
+          type="button"
+          :label="
+            protocoloAberto
+              ? t('clinico.vacinas.carteira.ocultarProtocolo')
+              : t('clinico.vacinas.carteira.verProtocolo')
+          "
+          :icon="protocoloAberto ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+          icon-pos="right"
+          severity="secondary"
+          text
+          size="small"
+          :aria-expanded="protocoloAberto"
+          :aria-controls="`protocolo-${encounter.id}`"
+          @click="protocoloAberto = !protocoloAberto"
+        />
         <Button
           :label="t('clinico.vacinas.carteira.verCarteira')"
           icon="pi pi-mobile"
@@ -97,19 +154,23 @@ function abrirCarteira() {
           v-if="!somenteLeitura && pet && plano"
           :label="t('clinico.vacinas.aplicar.abrir')"
           icon="pi pi-plus"
+          severity="secondary"
+          outlined
           size="small"
-          class="clinic-acao-principal"
           @click="abrir()"
         />
       </div>
     </header>
 
-    <PlanoVacinalLista
-      v-if="plano"
-      :plano="plano"
-      :somente-leitura="somenteLeitura"
-      @aplicar="abrir"
-    />
+    <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
+    <div v-show="protocoloAberto" :id="`protocolo-${encounter.id}`">
+      <PlanoVacinalLista
+        v-if="plano"
+        :plano="plano"
+        :somente-leitura="somenteLeitura"
+        @aplicar="abrir"
+      />
+    </div>
 
     <!-- O que saiu deste atendimento, para quem fecha a conduta conferir antes de assinar. -->
     <ul v-if="nesteAtendimento.length > 0" class="vacinacao__agora">
@@ -162,8 +223,31 @@ function abrirCarteira() {
   gap: var(--clinic-space-2);
 }
 
-.vacinacao__topo h4 {
+.vacinacao__estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   margin: 0;
+  color: var(--clinic-text);
+  font-size: 0.875rem;
+}
+
+.vacinacao__estado strong {
+  font-weight: 650;
+}
+
+/* A urgência mora no ícone: a frase continua na tinta do texto. */
+.vacinacao__estado .pi {
+  color: var(--clinic-ok-text);
+  font-size: 0.85rem;
+}
+
+.vacinacao__estado--atencao .pi {
+  color: var(--hc-pessego-tinta);
+}
+
+.vacinacao__estado--risco .pi {
+  color: var(--hc-coral-tinta);
 }
 
 .vacinacao__acoes {

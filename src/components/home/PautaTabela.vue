@@ -12,6 +12,8 @@
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
+
 import type { LinhaDaTabela } from './pauta-tabela'
 
 defineProps<{ linhas: LinhaDaTabela[] }>()
@@ -34,7 +36,16 @@ const COR_DO_TOM = { risco: 'coral', atencao: 'pessego', neutro: 'cinza' } as co
       <li v-for="item in linhas" :key="item.id" class="tabela__item">
         <RouterLink class="linha" :to="item.to">
           <span class="linha__assunto">
-            <span class="linha__ponto" aria-hidden="true" />
+            <PetAvatar
+              v-if="item.pet"
+              class="linha__avatar"
+              :nome="item.pet.nome"
+              :iniciais="item.pet.iniciais"
+              :especie="item.pet.especie ?? null"
+              :foto-url="item.pet.fotoUrl ?? ''"
+              tamanho="sm"
+            />
+            <span v-else class="linha__ponto" aria-hidden="true" />
             <Transition name="frase" mode="out-in">
               <span :key="`${item.frase}|${item.detalhe ?? ''}`" class="linha__texto">
                 <span class="linha__frase">{{ item.frase }}</span>
@@ -117,6 +128,11 @@ const COR_DO_TOM = { risco: 'coral', atencao: 'pessego', neutro: 'cinza' } as co
   align-items: baseline;
   gap: 0.7rem;
   min-width: 0;
+}
+
+.linha__avatar {
+  flex-shrink: 0;
+  align-self: center;
 }
 
 /* O quadradinho do Prodify, na cor de quem contém a tabela. */

@@ -19,6 +19,7 @@ import ClinicShortcutsDialog from '@/features/clinico/components/base/ClinicShor
 import AgendaAppointmentDrawer from '@/features/clinico/components/agenda/AgendaAppointmentDrawer.vue'
 import AgendaCancelDialog from '@/features/clinico/components/agenda/AgendaCancelDialog.vue'
 import AgendaDayGrid from '@/features/clinico/components/agenda/AgendaDayGrid.vue'
+import AgendaTabelaDia from '@/features/clinico/components/agenda/AgendaTabelaDia.vue'
 import AgendaEditarDialog from '@/features/clinico/components/agenda/AgendaEditarDialog.vue'
 import AgendaFaltaDialog from '@/features/clinico/components/agenda/AgendaFaltaDialog.vue'
 import AgendaLegenda from '@/features/clinico/components/agenda/AgendaLegenda.vue'
@@ -36,10 +37,7 @@ import { useAgendaUrlState } from '@/features/clinico/composables/useAgendaUrlSt
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { useClinicPrefs } from '@/features/clinico/composables/useClinicPrefs'
 import { useClinicShortcuts } from '@/features/clinico/composables/useClinicShortcuts'
-import {
-  agendaRepository,
-  type EntradaDeJustificativa,
-} from '@/features/clinico/data/repositories'
+import { agendaRepository, type EntradaDeJustificativa } from '@/features/clinico/data/repositories'
 import type {
   Appointment,
   AppointmentStatus,
@@ -61,7 +59,7 @@ const clinico = useClinicoStore()
 const fila = useFilaStore()
 const avisos = useAvisosStore()
 const formato = useClinicFormat()
-const { alternarDensidade } = useClinicPrefs()
+const { alternarDensidade, formatoDaAgenda } = useClinicPrefs()
 
 useAgendaUrlState()
 
@@ -119,9 +117,7 @@ const fraseDoDia = computed(() => {
  * Dia fechado não é vazio: existe agenda possível ali, só não deveria haver. O frame mostra o
  * estado vazio quando não há nada; o aviso de clínica fechada é conteúdo, não estado.
  */
-const vazio = computed(
-  () => agenda.visao === 'dia' && agenda.vazio && !agenda.clinicaFechada,
-)
+const vazio = computed(() => agenda.visao === 'dia' && agenda.vazio && !agenda.clinicaFechada)
 
 async function carregar() {
   await clinico.carregar()
@@ -130,7 +126,10 @@ async function carregar() {
 
 onMounted(carregar)
 
-watch(() => [agenda.data, agenda.visao], () => void agenda.recarregar())
+watch(
+  () => [agenda.data, agenda.visao],
+  () => void agenda.recarregar(),
+)
 watch(
   () => clinico.revisao,
   () => {
@@ -551,7 +550,7 @@ useClinicShortcuts({
     class="hc-tema"
     :subtitle="t('clinico.agenda.subtitulo')"
     :title="t('clinico.agenda.titulo')"
-    :loading="agenda.carregando && !agenda.dia"
+    :loading="!agenda.dia && !agenda.erro"
     :error="erroTraduzido"
     :empty="vazio"
     :empty-title="t('clinico.agenda.vazioTitulo')"
@@ -659,7 +658,16 @@ useClinicShortcuts({
       <AgendaLegenda v-if="agenda.visao === 'dia' && !agenda.clinicaFechada" />
 
       <div v-if="agenda.visao !== 'semana'" class="agenda__corpo">
+        <!-- A tabela é o padrão: aguenta o dia cheio. A linha do tempo fica no menu Exibição. -->
+        <AgendaTabelaDia
+          v-if="formatoDaAgenda === 'tabela'"
+          @abrir="abrir"
+          @propor="propostaDeMovimento = $event"
+          @marcar-falta="marcarFalta"
+          @criar-em="abrirCriacao(false, $event)"
+        />
         <AgendaDayGrid
+          v-else
           @abrir="abrir"
           @propor="propostaDeMovimento = $event"
           @marcar-falta="marcarFalta"

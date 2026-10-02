@@ -45,7 +45,16 @@ const { t } = useI18n()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
-const { ocultarCancelados } = useClinicPrefs()
+const { ocultarCancelados, formatoDaAgenda } = useClinicPrefs()
+
+const opcoesDeFormato = computed(() => [
+  { valor: 'tabela', rotulo: t('clinico.agenda.formato.tabela'), icone: 'pi pi-table' },
+  {
+    valor: 'linha-do-tempo',
+    rotulo: t('clinico.agenda.formato.linhaDoTempo'),
+    icone: 'pi pi-clock',
+  },
+])
 
 const exibicao = ref<InstanceType<typeof Popover> | null>(null)
 const filtros = ref<InstanceType<typeof Popover> | null>(null)
@@ -65,9 +74,7 @@ const STATUS_FILTRAVEIS: AppointmentStatus[] = [
   'cancelado',
 ]
 
-const filtrosAtivos = computed(
-  () => agenda.filtroProfissionais.length + agenda.filtroStatus.length,
-)
+const filtrosAtivos = computed(() => agenda.filtroProfissionais.length + agenda.filtroStatus.length)
 
 /** A tecla vai no `title` de cada opção: o atalho continua descobrível sem abrir a ajuda. */
 const opcoesVisao = computed(() => [
@@ -284,6 +291,28 @@ const itensAcoes = computed<MenuItem[]>(() => [
           >
             <template #option="{ option }">
               <span class="segmentado__opcao" :title="`${option.rotulo} (${option.atalho})`">
+                <i :class="option.icone" aria-hidden="true" />
+                <span>{{ option.rotulo }}</span>
+              </span>
+            </template>
+          </SelectButton>
+        </section>
+
+        <section v-if="agenda.visao === 'dia'" class="painel__secao">
+          <h3 class="clinic-label">{{ t('clinico.agenda.formato.titulo') }}</h3>
+          <SelectButton
+            v-model="formatoDaAgenda"
+            class="segmentado"
+            :options="opcoesDeFormato"
+            option-label="rotulo"
+            option-value="valor"
+            :allow-empty="false"
+            size="small"
+            fluid
+            :aria-label="t('clinico.agenda.formato.titulo')"
+          >
+            <template #option="{ option }">
+              <span class="segmentado__opcao">
                 <i :class="option.icone" aria-hidden="true" />
                 <span>{{ option.rotulo }}</span>
               </span>

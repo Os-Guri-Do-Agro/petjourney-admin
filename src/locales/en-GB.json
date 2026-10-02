@@ -291,9 +291,6 @@
   "shell": {
     "logout": "Sign out",
     "telasNaSecao": "one screen | {contagem} screens",
-    "filterPlaceholder": "Filter screens...",
-    "filterEmpty": "No screens found for “{q}”.",
-    "filterClear": "Clear filter",
     "brand": {
       "badge": "Partner portal"
     },
@@ -2469,7 +2466,13 @@
         "ocupacao": "{valor} booked",
         "melhoresAlternativas": "Best times",
         "semAlternativa": "No free slots in the coming days.",
-        "detalhePessoa": "{nome} · morning {manha}, afternoon {tarde}"
+        "detalhePessoa": "{nome} · morning {manha}, afternoon {tarde}",
+        "legendaBarras": "Morning and afternoon",
+        "clinica": "Whole practice",
+        "fechada": "Closed",
+        "abrirDia": "Open the diary for {dia}",
+        "linhaAgendados": "Booked",
+        "linhaFaltas": "No-shows"
       },
       "exibicao": "Display",
       "maisAcoes": "More actions",
@@ -2532,7 +2535,22 @@
         "em-atendimento": "Start appointment",
         "finalizado": "Finish appointment"
       },
-      "conflitosTitulo": "Conflicts"
+      "conflitosTitulo": "Conflicts",
+      "tabela": {
+        "rotulo": "Day diary as a table",
+        "horario": "Time",
+        "ocupacao": "Day occupancy",
+        "ate": "until {hora}",
+        "encaixe": "Walk-in",
+        "marcarAs": "Book at {hora} with {nome}",
+        "agora": "Now",
+        "dica": "Drag an appointment to another time or professional to rebook. Click a free slot to book."
+      },
+      "formato": {
+        "titulo": "Format",
+        "tabela": "Table",
+        "linhaDoTempo": "Timeline"
+      }
     },
     "meuDia": {
       "titulo": "Today at the clinic",
@@ -2595,7 +2613,7 @@
       },
       "grafico": {
         "porDia": "Daily activity",
-        "porDiaAjuda": "Columns add up the visits; the line tracks schedule occupancy.",
+        "porDiaAjuda": "Completed, scheduled and no-shows per day",
         "porTipo": "By visit type",
         "porProfissional": "By professional",
         "horarios": "Busiest hours",
@@ -2608,6 +2626,28 @@
         "faltas": "No-shows",
         "ocupacao": "Occupancy",
         "fechado": "Closed"
+      },
+      "saudacao": {
+        "hoje": "No visits completed today | 1 visit completed today | {n} visits completed today",
+        "semana": "No visits completed this week | 1 visit completed this week | {n} visits completed this week",
+        "semana-passada": "No visits completed last week | 1 visit completed last week | {n} visits completed last week",
+        "trinta-dias": "No visits completed in the last 30 days | 1 visit completed in the last 30 days | {n} visits completed in the last 30 days"
+      },
+      "fatos": {
+        "aria": "Figures for the period",
+        "comparecimento": "attendance",
+        "comparecimentoBaixo": "Attendance below 85%",
+        "horas": "of care",
+        "ocupacao": "average occupancy",
+        "novos": "new patient | new patients",
+        "encaixes": "walk-in | walk-ins"
+      },
+      "ocupacao": {
+        "media": "Diary {media} full on average.",
+        "comPico": "Diary {media} full on average; the busiest day was {dia}, at {valor}."
+      },
+      "mapa": {
+        "hora": "Hour"
       }
     },
     "bulario": {
@@ -2953,7 +2993,12 @@
         "verNaAgenda": "View in schedule",
         "dispensar": "Dismiss"
       },
-      "marcadoPara": "Booked: {data} · {hora}"
+      "marcadoPara": "Booked: {data} · {hora}",
+      "saudacao": {
+        "aguardando": "No one waiting for a slot | 1 waiting for a slot | {n} waiting for a slot",
+        "ofertas": "1 offer awaiting an answer | {n} offers awaiting an answer",
+        "acoes": "Waiting list actions"
+      }
     },
     "faltas": {
       "titulo": "No-shows",
@@ -3372,7 +3417,13 @@
       },
       "internadoAgora": "Admitted right now",
       "verInternacao": "Open admission",
-      "semAtendimentos": "No appointments at this clinic yet"
+      "semAtendimentos": "No appointments at this clinic yet",
+      "saudacao": {
+        "total": "No patients | 1 patient | {n} patients",
+        "encontrados": "No patients found | 1 patient found | {n} patients found",
+        "comRisco": "1 with a risk alert | {n} with a risk alert",
+        "acoes": "Patient actions"
+      }
     },
     "resumoDoPaciente": {
       "titulo": "This pet in 30 seconds",
@@ -3394,7 +3445,9 @@
         "mais": "and {total} more in the summary",
         "campoDetalhe": "in {alterados} of {total} entries",
         "relato": "Also reported: {relato}",
-        "adesao": "{medicamento}: adherence dropped at home"
+        "adesao": "{medicamento}: adherence dropped at home",
+        "polifarmacia": "{total} medicines in use at the same time",
+        "polifarmaciaDetalhe": "Check interactions before prescribing another."
       },
       "casa": {
         "titulo": "At home since the last visit",
@@ -3501,7 +3554,16 @@
     },
     "atendimentos": {
       "titulo": "Visits",
-      "subtitulo": "Clinic"
+      "subtitulo": "Clinic",
+      "dia": {
+        "hoje": "Today",
+        "ontem": "Yesterday"
+      },
+      "grupoRascunho": "Draft · 1 to sign | Drafts · {n} to sign",
+      "saudacao": {
+        "rascunhos": "1 draft record to sign | {n} draft records to sign",
+        "todosAssinados": "All records signed"
+      }
     },
     "atividades": {
       "titulo": "Activities",
@@ -3510,7 +3572,8 @@
       "vazioDescricao": "Draft records and follow-ups without a slot show up here.",
       "rascunhos": "Draft records",
       "retornos": "Follow-ups without a slot",
-      "ofertasDaFila": "Waitlist offers awaiting a reply"
+      "ofertasDaFila": "Waitlist offers awaiting a reply",
+      "saudacao": "Nothing pending | 1 item to resolve | {n} items to resolve"
     },
     "atalhos": {
       "titulo": "Keyboard shortcuts",
@@ -3847,7 +3910,9 @@
         "nestaClinica": "At this clinic",
         "noApp": "In {responsavel}’s app",
         "noAppAjuda": "What the phone receives. It changes the moment the clinic records.",
-        "comAtraso": "Vaccines, {total} overdue | Vaccines, {total} overdue"
+        "comAtraso": "Vaccines, {total} overdue | Vaccines, {total} overdue",
+        "verProtocolo": "See protocol",
+        "ocultarProtocolo": "Hide protocol"
       },
       "app": {
         "titulo": "Vaccination card",
@@ -3876,7 +3941,14 @@
         "proximaEm": "Next dose {data}",
         "marcada": "Booked {data}, {hora}",
         "fecharAviso": "Dismiss notification"
-      }
+      },
+      "saudacao": {
+        "vencidas": "1 overdue vaccine to call about today | {n} overdue vaccines to call about today",
+        "nenhumaVencida": "No overdue vaccines",
+        "aVencer": "1 due in 30 days | {n} due in 30 days"
+      },
+      "mostrarMais": "Show {n} more ({total} left)",
+      "potencialFrase": "Calling everyone recovers {duracao} of diary time (20 min per jab)."
     },
     "internacao": {
       "titulo": "Inpatients",
@@ -3946,7 +4018,10 @@
         "naTroca": "Falls on the shift handover — agree who gives it before handing over.",
         "checar": "Record",
         "antesDaHora": "Due at {hora}. Record it now anyway?",
-        "registrarAgora": "Record now"
+        "registrarAgora": "Record now",
+        "registradas": "1 recorded since {desde} | {total} recorded since {desde}",
+        "verRegistradas": "Show",
+        "ocultarRegistradas": "Hide"
       },
       "evolucao": {
         "registrarTitulo": "Progress note for this shift",
@@ -4461,7 +4536,9 @@
         "mostrarConversa": "Show conversation",
         "ocultarConversa": "Hide conversation",
         "expandir": "Show voice history-taking",
-        "recolher": "Collapse voice history-taking"
+        "recolher": "Collapse voice history-taking",
+        "abrirPainel": "Open panel",
+        "fecharPainel": "Close panel"
       },
       "meta": {
         "campos": "{preenchidos} of {total} fields",
@@ -4837,14 +4914,23 @@
         "hoje": "{vacina} due today",
         "hojeVarias": "{total} vaccine due today | {total} vaccines due today",
         "proxima": "Next dose in {dias} day | Next dose in {dias} days",
-        "emDia": "Vaccines up to date"
+        "emDia": "Vaccines up to date",
+        "proximaHoje": "Next dose today"
       },
       "historico": {
         "internado": "In hospital now · {leito}",
         "hoje": "Appointment today at {hora}",
         "ultimo": "Last appointment {dias} day ago | Last appointment {dias} days ago",
         "ultimoHoje": "Last appointment today",
-        "linhaDoTempo": "Timeline"
+        "linhaDoTempo": "Timeline",
+        "titulo": "History",
+        "emTrintaSegundos": "In 30 seconds:",
+        "sinais": "1 sign to check in the summary. | {n} signs to check in the summary.",
+        "proximo": "Next:",
+        "quando": "{data} at {hora}",
+        "verAgendados": "See all booked ({n})",
+        "ocultarAgendados": "Hide booked",
+        "filtroAria": "Filter the history by type"
       },
       "resumo": {
         "sinais": "{total} sign needs attention | {total} signs need attention",
@@ -4960,7 +5046,8 @@
           "familia": "family",
           "leitura": "view only"
         },
-        "emCursoAjudaSemFio": "What the household logged in the app. The last visit was on {data}."
+        "emCursoAjudaSemFio": "What the household logged in the app. The last visit was on {data}.",
+        "comoVeNoApp": "How {responsavel} sees it in the app"
       },
       "lista": {
         "stat": {
@@ -5027,6 +5114,12 @@
         "compartilhado": "{clinica} sees this log",
         "naoCompartilhado": "Only the family sees this log",
         "vazio": "No medication with a reminder for {pet}."
+      },
+      "saudacao": {
+        "atencao": "1 treatment with adherence dropping | {n} treatments with adherence dropping",
+        "semAtencao": "No adherence dropping",
+        "emCurso": "None ongoing | 1 ongoing | {n} ongoing",
+        "criticos": "1 critical | {n} critical"
       }
     }
   },

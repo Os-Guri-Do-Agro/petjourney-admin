@@ -136,6 +136,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <section class="periodo">
         <label for="resumo-periodo">{{ t('hotel.resumo.periodo') }}</label>
         <DatePicker
+          panel-class="hc-tema"
           id="resumo-periodo"
           v-model="intervalo"
           selection-mode="range"

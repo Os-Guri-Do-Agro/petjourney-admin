@@ -72,10 +72,15 @@ const ultima = computed(() => {
     </h2>
 
     <dl class="essencial__lista">
-      <div class="essencial__linha">
+      <!--
+        Alergia, manejo, gestação… Condição crônica e medicação contínua já têm linha própria logo
+        abaixo, então "Alertas: nenhum" aparecia ao lado de um cabeçalho com dois alertas. Sem outro
+        alerta, a linha some.
+      -->
+      <div v-if="resumo.alertas.length > 0" class="essencial__linha">
         <dt>{{ t('clinico.resumoDoPaciente.essencial.alertas') }}</dt>
         <dd>
-          <ul v-if="resumo.alertas.length > 0" class="essencial__chips">
+          <ul class="essencial__chips">
             <li v-for="alerta in resumo.alertas" :key="alerta.id">
               <ClinicAlertChip
                 :severidade="alerta.severidade"
@@ -84,9 +89,6 @@ const ultima = computed(() => {
               />
             </li>
           </ul>
-          <span v-else class="essencial__vazio">
-            {{ t('clinico.resumoDoPaciente.essencial.nenhum') }}
-          </span>
         </dd>
       </div>
 

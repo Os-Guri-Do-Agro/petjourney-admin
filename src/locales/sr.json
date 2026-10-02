@@ -291,9 +291,6 @@
   "shell": {
     "logout": "Odjavite se",
     "telasNaSecao": "{contagem} ekran | {contagem} ekrana | {contagem} ekrana",
-    "filterPlaceholder": "Filtrirajte ekrane...",
-    "filterEmpty": "Nema ekrana za „{q}“.",
-    "filterClear": "Obrišite filter",
     "brand": {
       "badge": "Partnerski portal"
     },
@@ -2469,7 +2466,13 @@
         "ocupacao": "Popunjenost: {valor}",
         "melhoresAlternativas": "Najbolji termini",
         "semAlternativa": "Narednih dana nema slobodnih termina.",
-        "detalhePessoa": "{nome} · pre podne {manha}, po podne {tarde}"
+        "detalhePessoa": "{nome} · pre podne {manha}, po podne {tarde}",
+        "legendaBarras": "Pre i posle podne",
+        "clinica": "Cela klinika",
+        "fechada": "Zatvoreno",
+        "abrirDia": "Otvori raspored za {dia}",
+        "linhaAgendados": "Zakazano",
+        "linhaFaltas": "Nedolasci"
       },
       "exibicao": "Prikaz",
       "maisAcoes": "Još radnji",
@@ -2532,7 +2535,22 @@
         "em-atendimento": "Započnite pregled",
         "finalizado": "Završite pregled"
       },
-      "conflitosTitulo": "Konflikti"
+      "conflitosTitulo": "Konflikti",
+      "tabela": {
+        "rotulo": "Dnevni raspored u tabeli",
+        "horario": "Vreme",
+        "ocupacao": "Popunjenost dana",
+        "ate": "do {hora}",
+        "encaixe": "Vanredni",
+        "marcarAs": "Zakaži u {hora} kod: {nome}",
+        "agora": "Sada",
+        "dica": "Prevucite pregled na drugo vreme ili kod drugog stručnjaka da biste ga pomerili. Kliknite slobodan termin da zakažete."
+      },
+      "formato": {
+        "titulo": "Format",
+        "tabela": "Tabela",
+        "linhaDoTempo": "Vremenska linija"
+      }
     },
     "meuDia": {
       "titulo": "Danas u klinici",
@@ -2595,7 +2613,7 @@
       },
       "grafico": {
         "porDia": "Aktivnost po danima",
-        "porDiaAjuda": "Kolone prikazuju zbir pregleda, a linija popunjenost rasporeda.",
+        "porDiaAjuda": "Obavljeni, zakazani i nedolasci po danu",
         "porTipo": "Po vrsti termina",
         "porProfissional": "Po stručnom licu",
         "horarios": "Najprometniji sati",
@@ -2608,6 +2626,28 @@
         "faltas": "Nedolasci",
         "ocupacao": "Popunjenost",
         "fechado": "Zatvoreno"
+      },
+      "saudacao": {
+        "hoje": "Danas nema obavljenih pregleda | Danas je obavljen {n} pregled | Danas su obavljena {n} pregleda | Danas je obavljeno {n} pregleda",
+        "semana": "Ove nedelje nema obavljenih pregleda | Ove nedelje je obavljen {n} pregled | Ove nedelje su obavljena {n} pregleda | Ove nedelje je obavljeno {n} pregleda",
+        "semana-passada": "Prošle nedelje nije bilo obavljenih pregleda | Prošle nedelje je obavljen {n} pregled | Prošle nedelje su obavljena {n} pregleda | Prošle nedelje je obavljeno {n} pregleda",
+        "trinta-dias": "U poslednjih 30 dana nema obavljenih pregleda | U poslednjih 30 dana obavljen je {n} pregled | U poslednjih 30 dana obavljena su {n} pregleda | U poslednjih 30 dana obavljeno je {n} pregleda"
+      },
+      "fatos": {
+        "aria": "Brojke za period",
+        "comparecimento": "dolaznosti",
+        "comparecimentoBaixo": "Dolaznost ispod 85%",
+        "horas": "pregleda",
+        "ocupacao": "prosečne popunjenosti",
+        "novos": "novi pacijent | nova pacijenta | novih pacijenata",
+        "encaixes": "vanredni termin | vanredna termina | vanrednih termina"
+      },
+      "ocupacao": {
+        "media": "Raspored je u proseku popunjen {media}.",
+        "comPico": "Raspored je u proseku popunjen {media}; najpuniji dan je bio {dia}, sa {valor}."
+      },
+      "mapa": {
+        "hora": "Sat"
       }
     },
     "bulario": {
@@ -2953,7 +2993,12 @@
         "verNaAgenda": "Pogledajte u rasporedu",
         "dispensar": "Odbacite obaveštenje"
       },
-      "marcadoPara": "Zakazano: {data} · {hora}"
+      "marcadoPara": "Zakazano: {data} · {hora}",
+      "saudacao": {
+        "aguardando": "Niko ne čeka termin | {n} čeka termin | {n} čekaju termin | {n} čeka termin",
+        "ofertas": "{n} ponuda čeka odgovor | {n} ponude čekaju odgovor | {n} ponuda čeka odgovor",
+        "acoes": "Radnje liste čekanja"
+      }
     },
     "faltas": {
       "titulo": "Nedolasci",
@@ -3372,7 +3417,13 @@
       },
       "internadoAgora": "Trenutno hospitalizovan",
       "verInternacao": "Otvorite hospitalizaciju",
-      "semAtendimentos": "Još nema pregleda u ovoj klinici"
+      "semAtendimentos": "Još nema pregleda u ovoj klinici",
+      "saudacao": {
+        "total": "Nema pacijenata | {n} pacijent | {n} pacijenta | {n} pacijenata",
+        "encontrados": "Nije pronađen nijedan pacijent | Pronađen je {n} pacijent | Pronađena su {n} pacijenta | Pronađeno je {n} pacijenata",
+        "comRisco": "{n} sa upozorenjem o riziku | {n} sa upozorenjem o riziku | {n} sa upozorenjem o riziku",
+        "acoes": "Radnje za pacijente"
+      }
     },
     "resumoDoPaciente": {
       "titulo": "Ovaj ljubimac za 30 sekundi",
@@ -3394,7 +3445,9 @@
         "mais": "još u rezimeu: {total}",
         "campoDetalhe": "u {alterados} od {total} unosa",
         "relato": "Takođe prijavljeno: {relato}",
-        "adesao": "{medicamento}: redovnost kod kuće je opala"
+        "adesao": "{medicamento}: redovnost kod kuće je opala",
+        "polifarmacia": "Istovremeno se koristi lekova: {total}",
+        "polifarmaciaDetalhe": "Proverite interakcije pre nego što prepišete još jedan."
       },
       "casa": {
         "titulo": "Kod kuće od poslednjeg pregleda",
@@ -3501,7 +3554,16 @@
     },
     "atendimentos": {
       "titulo": "Pregledi",
-      "subtitulo": "Klinika"
+      "subtitulo": "Klinika",
+      "dia": {
+        "hoje": "Danas",
+        "ontem": "Juče"
+      },
+      "grupoRascunho": "Nacrt · {n} za potpis | Nacrti · {n} za potpis | Nacrti · {n} za potpis",
+      "saudacao": {
+        "rascunhos": "{n} karton u nacrtu za potpis | {n} kartona u nacrtu za potpis | {n} kartona u nacrtu za potpis",
+        "todosAssinados": "Svi kartoni su potpisani"
+      }
     },
     "atividades": {
       "titulo": "Zadaci",
@@ -3510,7 +3572,8 @@
       "vazioDescricao": "Ovde se pojavljuju kartoni u nacrtu i kontrole bez termina.",
       "rascunhos": "Kartoni u nacrtu",
       "retornos": "Kontrole bez termina",
-      "ofertasDaFila": "Ponude sa liste čekanja bez odgovora"
+      "ofertasDaFila": "Ponude sa liste čekanja bez odgovora",
+      "saudacao": "Ništa na čekanju | {n} stavka za rešavanje | {n} stavke za rešavanje | {n} stavki za rešavanje"
     },
     "atalhos": {
       "titulo": "Prečice na tastaturi",
@@ -3847,7 +3910,9 @@
         "nestaClinica": "U ovoj klinici",
         "noApp": "U aplikaciji korisnika {responsavel}",
         "noAppAjuda": "Ono što telefon prima. Menja se čim klinika zabeleži.",
-        "comAtraso": "Vakcine, {total} kasni | Vakcine, {total} kasne | Vakcine, {total} kasni"
+        "comAtraso": "Vakcine, {total} kasni | Vakcine, {total} kasne | Vakcine, {total} kasni",
+        "verProtocolo": "Prikaži protokol",
+        "ocultarProtocolo": "Sakrij protokol"
       },
       "app": {
         "titulo": "Knjižica vakcinacije",
@@ -3876,7 +3941,14 @@
         "proximaEm": "Sledeća doza {data}",
         "marcada": "Zakazano {data}, {hora}",
         "fecharAviso": "Zatvori obaveštenje"
-      }
+      },
+      "saudacao": {
+        "vencidas": "{n} istekla vakcina za poziv danas | {n} istekle vakcine za poziv danas | {n} isteklih vakcina za poziv danas",
+        "nenhumaVencida": "Nema isteklih vakcina",
+        "aVencer": "{n} ističe za 30 dana | {n} ističu za 30 dana | {n} ističe za 30 dana"
+      },
+      "mostrarMais": "Prikaži još {n} (preostalo {total})",
+      "potencialFrase": "Ako pozovete sve, vraćate {duracao} rasporeda (20 min po davanju)."
     },
     "internacao": {
       "titulo": "Hospitalizacija",
@@ -3946,7 +4018,10 @@
         "naTroca": "Pada u vreme primopredaje smene: dogovorite ko je daje pre predaje smene.",
         "checar": "Zabeležite",
         "antesDaHora": "Predviđeno za {hora}. Ipak zabeležiti sada?",
-        "registrarAgora": "Zabeležite sada"
+        "registrarAgora": "Zabeležite sada",
+        "registradas": "{total} zabeleženo od {desde} | {total} zabeležene od {desde} | {total} zabeleženih od {desde}",
+        "verRegistradas": "Prikaži",
+        "ocultarRegistradas": "Sakrij"
       },
       "evolucao": {
         "registrarTitulo": "Tok lečenja u ovoj smeni",
@@ -4461,7 +4536,9 @@
         "mostrarConversa": "Prikaži razgovor",
         "ocultarConversa": "Sakrij razgovor",
         "expandir": "Prikaži anamnezu glasom",
-        "recolher": "Skupi anamnezu glasom"
+        "recolher": "Skupi anamnezu glasom",
+        "abrirPainel": "Otvori panel",
+        "fecharPainel": "Zatvori panel"
       },
       "meta": {
         "campos": "Polja: {preenchidos} od {total}",
@@ -4837,14 +4914,23 @@
         "hoje": "{vacina} za danas",
         "hojeVarias": "{total} vakcina za danas | {total} vakcine za danas | {total} vakcina za danas",
         "proxima": "Sledeća doza za {dias} dan | Sledeća doza za {dias} dana | Sledeća doza za {dias} dana",
-        "emDia": "Vakcine su ažurne"
+        "emDia": "Vakcine su ažurne",
+        "proximaHoje": "Sledeća doza danas"
       },
       "historico": {
         "internado": "Trenutno na hospitalizaciji · {leito}",
         "hoje": "Pregled danas u {hora}",
         "ultimo": "Poslednji pregled pre {dias} dan | Poslednji pregled pre {dias} dana | Poslednji pregled pre {dias} dana",
         "ultimoHoje": "Poslednji pregled danas",
-        "linhaDoTempo": "Vremenska linija"
+        "linhaDoTempo": "Vremenska linija",
+        "titulo": "Istorija",
+        "emTrintaSegundos": "Za 30 sekundi:",
+        "sinais": "{n} znak za proveru u rezimeu. | {n} znaka za proveru u rezimeu. | {n} znakova za proveru u rezimeu.",
+        "proximo": "Sledeći:",
+        "quando": "{data} u {hora}",
+        "verAgendados": "Prikaži sve zakazane ({n})",
+        "ocultarAgendados": "Sakrij zakazane",
+        "filtroAria": "Filtriraj istoriju po vrsti"
       },
       "resumo": {
         "sinais": "{total} znak traži pažnju | {total} znaka traže pažnju | {total} znakova traži pažnju",
@@ -4960,7 +5046,8 @@
           "familia": "porodica",
           "leitura": "samo pregled"
         },
-        "emCursoAjudaSemFio": "Šta su ukućani zabeležili u aplikaciji. Poslednji pregled je bio {data}."
+        "emCursoAjudaSemFio": "Šta su ukućani zabeležili u aplikaciji. Poslednji pregled je bio {data}.",
+        "comoVeNoApp": "Kako {responsavel} vidi u aplikaciji"
       },
       "lista": {
         "stat": {
@@ -5027,6 +5114,12 @@
         "compartilhado": "{clinica} vidi ove zapise",
         "naoCompartilhado": "Samo porodica vidi ove zapise",
         "vazio": "Nema leka sa podsetnikom za ljubimca {pet}."
+      },
+      "saudacao": {
+        "atencao": "{n} terapija sa padom pridržavanja | {n} terapije sa padom pridržavanja | {n} terapija sa padom pridržavanja",
+        "semAtencao": "Nema pada pridržavanja",
+        "emCurso": "Nijedna u toku | {n} u toku | {n} u toku | {n} u toku",
+        "criticos": "{n} kritična | {n} kritične | {n} kritičnih"
       }
     }
   },

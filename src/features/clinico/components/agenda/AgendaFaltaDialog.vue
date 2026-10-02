@@ -131,8 +131,8 @@ const pet = computed(() => (props.appointment ? clinico.pet(props.appointment.pe
 /**
  * Só dígitos, com o país na frente quando ele não veio.
  *
- * O telefone é cadastrado como a recepção digita — `(67) 98883-7848` — e tanto `tel:` quanto o
- * WhatsApp querem o número limpo. O `55` só entra quando falta: número já internacional não
+ * O telefone é cadastrado como a recepção digita — `(67) 98883-7848` — e o WhatsApp quer o
+ * número limpo. O `55` só entra quando falta: número já internacional não
  * pode ganhar um segundo país na frente.
  */
 const telefoneLimpo = computed(() => {
@@ -218,10 +218,11 @@ const linkDoWhatsapp = computed(() => {
         </div>
 
         <div v-if="telefoneLimpo" class="contato__acoes">
-          <a class="contato__botao" :href="`tel:${telefoneLimpo}`">
-            <i class="pi pi-phone" aria-hidden="true" />
-            {{ t('clinico.vacinas.ligar') }}
-          </a>
+          <!--
+            Sem "Ligar": a recepção liga pelo telefone escrito ao lado (regra da casa — a tela registra
+            o contato, não disca). O WhatsApp fica porque leva a mensagem pronta, e a mensagem muda
+            quando o motivo é óbito.
+          -->
           <a
             class="contato__botao"
             :href="linkDoWhatsapp"
@@ -384,10 +385,10 @@ const linkDoWhatsapp = computed(() => {
 }
 
 /*
- * Âncoras de verdade, e não botões com `@click`.
+ * Âncora de verdade, e não botão com `@click`.
  *
- * `tel:` e `wa.me` são navegação: o toque longo precisa oferecer "copiar número", e o
- * WhatsApp precisa abrir em outra aba sem levar a agenda junto. Um `Button` com script
+ * `wa.me` é navegação: o toque longo precisa oferecer "copiar link", e o WhatsApp precisa abrir
+ * em outra aba sem levar a agenda junto. Um `Button` com script
  * perderia as duas coisas em troca de nada.
  */
 .contato__botao {

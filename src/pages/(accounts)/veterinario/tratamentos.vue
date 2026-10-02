@@ -21,7 +21,6 @@ import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
-import ClinicStat from '@/features/clinico/components/base/ClinicStat.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
 import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
 import FaixaDeDoses from '@/features/clinico/components/tratamento/FaixaDeDoses.vue'
@@ -75,6 +74,31 @@ const porRecorte = computed(() => ({
   emCurso: linhas.value.filter((linha) => linha.emCurso),
   encerrados: linhas.value.filter((linha) => !linha.emCurso),
 }))
+
+/**
+ * A frase da saudação, no lugar dos três cartões que repetiam as abas logo abaixo: quantos
+ * tratamentos pedem atenção (a adesão caiu) e quantos estão em curso, com os críticos entre eles.
+ */
+const fraseDoResumo = computed(() => {
+  if (carregando.value && linhas.value.length === 0) {
+    return ''
+  }
+
+  const atencao = porRecorte.value.atencao.length
+  const emCurso = porRecorte.value.emCurso.length
+  const partes = [
+    atencao > 0
+      ? t('clinico.adesao.saudacao.atencao', { n: atencao }, atencao)
+      : t('clinico.adesao.saudacao.semAtencao'),
+    t('clinico.adesao.saudacao.emCurso', { n: emCurso }, emCurso),
+  ]
+
+  if (criticos.value > 0) {
+    partes.push(t('clinico.adesao.saudacao.criticos', { n: criticos.value }, criticos.value))
+  }
+
+  return partes.join(' · ')
+})
 
 const criticos = computed(
   () => porRecorte.value.emCurso.filter((linha) => linha.tratamento.critico).length,
@@ -179,29 +203,20 @@ function abrir(linha: LinhaDeTratamento) {
     block-when-suspended
     @retry="carregar"
   >
-    <div class="tratamentos clinic-scope">
-      <div class="resumo">
-        <ClinicStat
-          icone="pi pi-exclamation-triangle"
-          :tom="porRecorte.atencao.length > 0 ? 'risco' : 'neutro'"
-          :rotulo="t('clinico.adesao.lista.stat.alertas')"
-          :valor="String(porRecorte.atencao.length)"
-          :detalhe="t('clinico.adesao.lista.stat.alertasDetalhe')"
-        />
-        <ClinicStat
-          icone="pi pi-calendar-clock"
-          :rotulo="t('clinico.adesao.lista.stat.emCurso')"
-          :valor="String(porRecorte.emCurso.length)"
-          :detalhe="t('clinico.adesao.lista.stat.emCursoDetalhe')"
-        />
-        <ClinicStat
-          icone="pi pi-heart"
-          :rotulo="t('clinico.adesao.lista.stat.criticos')"
-          :valor="String(criticos)"
-          :detalhe="t('clinico.adesao.lista.stat.criticosDetalhe')"
-        />
-      </div>
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('clinico.faltas.subtitulo') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('clinico.adesao.titulo') }}</h1>
 
+        <div class="hc-saudacao__linha">
+          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
+            {{ fraseDoResumo }}
+          </p>
+        </div>
+      </div>
+    </template>
+
+    <div class="tratamentos clinic-scope">
       <div class="tratamentos__barra">
         <ClinicToggleGroup
           v-model="recorte"
@@ -290,12 +305,6 @@ function abrir(linha: LinhaDeTratamento) {
 <style scoped>
 .tratamentos {
   display: grid;
-  gap: var(--clinic-space-3);
-}
-
-.resumo {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
   gap: var(--clinic-space-3);
 }
 

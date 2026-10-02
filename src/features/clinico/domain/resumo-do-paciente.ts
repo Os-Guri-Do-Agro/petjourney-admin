@@ -191,6 +191,19 @@ export type AchadoDeAlarme =
   | { campo: 'fezes'; valor: AspectoFezes }
   | { campo: 'urina'; valor: EstadoUrina }
 
+/** A partir de quantos remédios diferentes em uso o resumo sinaliza polifarmácia. */
+export const LIMIAR_DE_POLIFARMACIA = 5
+
+/** Entre duas receitas do mesmo remédio, a que termina depois (ou não termina). */
+function vaiMaisLonge(a: MedicacaoEmUso, b: MedicacaoEmUso): boolean {
+  const fimDe = (item: MedicacaoEmUso) =>
+    item.origem === 'continua' || item.ate === null
+      ? Number.POSITIVE_INFINITY
+      : Date.parse(item.ate)
+
+  return fimDe(a) > fimDe(b)
+}
+
 export type SinalDoResumo =
   | {
       tipo: 'perda-de-peso'
@@ -233,6 +246,16 @@ export type SinalDoResumo =
       medicamentoId: string | null
       medicamento: string
       alerta: AlertaDeAdesao
+    }
+  /*
+   * Polifarmácia: cinco ou mais remédios diferentes em uso ao mesmo tempo. Não é alarme — é o
+   * lembrete de conferir interação antes de prescrever o sexto. Sem ele, o resumo dizia "nada fora
+   * do comum" para um paciente com sete remédios correndo.
+   */
+  | {
+      tipo: 'polifarmacia'
+      severidade: 'atencao'
+      total: number
     }
 
 export type ContagemDoCampo = {
@@ -618,7 +641,7 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
     }
   }
 
-  const medicacoes: MedicacaoEmUso[] = [
+  const receitadas: MedicacaoEmUso[] = [
     ...pet.alertas
       .filter((alerta) => alerta.kind === 'medicacao-continua')
       .map((alerta) => ({ origem: 'continua' as const, id: alerta.id, descricao: alerta.detalhe })),
@@ -633,6 +656,39 @@ export function montarResumoDoPaciente(entrada: EntradaDoResumoDoPaciente): Resu
         })),
     ),
   ]
+
+  /*
+   * Uma linha por remédio. A cefalexina receitada em três consultas aparecia três vezes na lista;
+   * fica a receita que vai mais longe (sem data de fim é uso contínuo, e ganha de qualquer data).
+   */
+  const porRemedio = new Map<string, MedicacaoEmUso>()
+
+  for (const item of receitadas) {
+    const chave =
+      item.origem === 'continua' ? `continua:${normalizar(item.descricao)}` : item.medicamentoId
+    const anterior = porRemedio.get(chave)
+
+    if (!anterior || vaiMaisLonge(item, anterior)) {
+      porRemedio.set(chave, item)
+    }
+  }
+
+  const medicacoes = [...porRemedio.values()]
+
+  /*
+   * O mesmo remédio receitado em duas consultas é um remédio só: a contagem é por medicamento (ou
+   * pela descrição, no uso contínuo), não por linha de receita.
+   */
+  const remediosDistintos = new Set(
+    medicacoes.map((item) =>
+      item.origem === 'continua' ? normalizar(item.descricao) : item.medicamentoId,
+    ),
+  ).size
+
+  if (remediosDistintos >= LIMIAR_DE_POLIFARMACIA) {
+    sinais.push({ tipo: 'polifarmacia', severidade: 'atencao', total: remediosDistintos })
+    sinais.sort((a, b) => ORDEM_DA_SEVERIDADE[a.severidade] - ORDEM_DA_SEVERIDADE[b.severidade])
+  }
 
   const alertas = pet.alertas
     .filter((alerta) => alerta.kind !== 'cronico' && alerta.kind !== 'medicacao-continua')

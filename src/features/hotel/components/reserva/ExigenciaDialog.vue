@@ -133,6 +133,7 @@ function confirmar() {
         <div class="campo">
           <label :for="`${idCampo}-data`">{{ t('hotel.exigencias.apresentacao') }}</label>
           <DatePicker
+            panel-class="hc-tema"
             :input-id="`${idCampo}-data`"
             v-model="apresentadoEm"
             date-format="dd/mm/yy"

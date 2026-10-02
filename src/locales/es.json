@@ -291,9 +291,6 @@
   "shell": {
     "logout": "Cerrar sesión",
     "telasNaSecao": "una pantalla | {contagem} pantallas",
-    "filterPlaceholder": "Filtrar pantallas...",
-    "filterEmpty": "No se encontró ninguna pantalla para “{q}”.",
-    "filterClear": "Limpiar filtro",
     "brand": {
       "badge": "Portal de socios"
     },
@@ -2469,7 +2466,13 @@
         "ocupacao": "{valor} de ocupación",
         "melhoresAlternativas": "Mejores horarios",
         "semAlternativa": "Ningún horario libre en los próximos días.",
-        "detalhePessoa": "{nome} · mañana {manha}, tarde {tarde}"
+        "detalhePessoa": "{nome} · mañana {manha}, tarde {tarde}",
+        "legendaBarras": "Mañana y tarde",
+        "clinica": "Toda la clínica",
+        "fechada": "Cerrada",
+        "abrirDia": "Abrir la agenda del {dia}",
+        "linhaAgendados": "Agendados",
+        "linhaFaltas": "Ausencias"
       },
       "exibicao": "Visualización",
       "maisAcoes": "Más acciones",
@@ -2532,7 +2535,22 @@
         "em-atendimento": "Iniciar atención",
         "finalizado": "Finalizar atención"
       },
-      "conflitosTitulo": "Conflictos"
+      "conflitosTitulo": "Conflictos",
+      "tabela": {
+        "rotulo": "Agenda del día en tabla",
+        "horario": "Horario",
+        "ocupacao": "Ocupación del día",
+        "ate": "hasta {hora}",
+        "encaixe": "Sobreturno",
+        "marcarAs": "Agendar a las {hora} con {nome}",
+        "agora": "Ahora",
+        "dica": "Arrastre una atención a otro horario o profesional para reprogramar. Haga clic en un horario libre para agendar."
+      },
+      "formato": {
+        "titulo": "Formato",
+        "tabela": "Tabla",
+        "linhaDoTempo": "Línea de tiempo"
+      }
     },
     "meuDia": {
       "titulo": "Hoy en la clínica",
@@ -2595,7 +2613,7 @@
       },
       "grafico": {
         "porDia": "Movimiento por día",
-        "porDiaAjuda": "Las columnas suman las atenciones; la línea marca la ocupación de la agenda.",
+        "porDiaAjuda": "Concluidas, previstas y ausencias de cada día",
         "porTipo": "Por tipo de atención",
         "porProfissional": "Por profesional",
         "horarios": "Horarios de mayor movimiento",
@@ -2608,6 +2626,28 @@
         "faltas": "Ausencias",
         "ocupacao": "Ocupación",
         "fechado": "Cerrado"
+      },
+      "saudacao": {
+        "hoje": "Ninguna atención concluida hoy | 1 atención concluida hoy | {n} atenciones concluidas hoy",
+        "semana": "Ninguna atención concluida esta semana | 1 atención concluida esta semana | {n} atenciones concluidas esta semana",
+        "semana-passada": "Ninguna atención concluida la semana pasada | 1 atención concluida la semana pasada | {n} atenciones concluidas la semana pasada",
+        "trinta-dias": "Ninguna atención concluida en los últimos 30 días | 1 atención concluida en los últimos 30 días | {n} atenciones concluidas en los últimos 30 días"
+      },
+      "fatos": {
+        "aria": "Cifras del período",
+        "comparecimento": "de asistencia",
+        "comparecimentoBaixo": "Asistencia por debajo del 85%",
+        "horas": "de atención",
+        "ocupacao": "de ocupación media",
+        "novos": "paciente nuevo | pacientes nuevos",
+        "encaixes": "sobreturno | sobreturnos"
+      },
+      "ocupacao": {
+        "media": "Agenda ocupada al {media}, en promedio.",
+        "comPico": "Agenda ocupada al {media}, en promedio; el día más lleno fue {dia}, con {valor}."
+      },
+      "mapa": {
+        "hora": "Hora"
       }
     },
     "bulario": {
@@ -2953,7 +2993,12 @@
         "verNaAgenda": "Ver en la agenda",
         "dispensar": "Descartar aviso"
       },
-      "marcadoPara": "Agendado: {data} · {hora}"
+      "marcadoPara": "Agendado: {data} · {hora}",
+      "saudacao": {
+        "aguardando": "Nadie esperando turno | 1 esperando turno | {n} esperando turno",
+        "ofertas": "1 oferta esperando respuesta | {n} ofertas esperando respuesta",
+        "acoes": "Acciones de la lista"
+      }
     },
     "faltas": {
       "titulo": "Ausencias",
@@ -3372,7 +3417,13 @@
       },
       "internadoAgora": "Internado ahora",
       "verInternacao": "Abrir internación",
-      "semAtendimentos": "Aún no hay atenciones en esta clínica"
+      "semAtendimentos": "Aún no hay atenciones en esta clínica",
+      "saudacao": {
+        "total": "Ningún paciente | 1 paciente | {n} pacientes",
+        "encontrados": "Ningún paciente encontrado | 1 paciente encontrado | {n} pacientes encontrados",
+        "comRisco": "1 con alerta de riesgo | {n} con alerta de riesgo",
+        "acoes": "Acciones de pacientes"
+      }
     },
     "resumoDoPaciente": {
       "titulo": "Esta mascota en 30 segundos",
@@ -3394,7 +3445,9 @@
         "mais": "y {total} más en el resumen",
         "campoDetalhe": "en {alterados} de {total} registros",
         "relato": "También informado: {relato}",
-        "adesao": "{medicamento}: la adherencia cayó en casa"
+        "adesao": "{medicamento}: la adherencia cayó en casa",
+        "polifarmacia": "{total} medicamentos en uso al mismo tiempo",
+        "polifarmaciaDetalhe": "Revise las interacciones antes de recetar otro."
       },
       "casa": {
         "titulo": "En casa desde la última consulta",
@@ -3501,7 +3554,16 @@
     },
     "atendimentos": {
       "titulo": "Atenciones",
-      "subtitulo": "Clínica"
+      "subtitulo": "Clínica",
+      "dia": {
+        "hoje": "Hoy",
+        "ontem": "Ayer"
+      },
+      "grupoRascunho": "En borrador · 1 para firmar | En borrador · {n} para firmar",
+      "saudacao": {
+        "rascunhos": "1 historia en borrador para firmar | {n} historias en borrador para firmar",
+        "todosAssinados": "Todas las historias firmadas"
+      }
     },
     "atividades": {
       "titulo": "Actividades",
@@ -3510,7 +3572,8 @@
       "vazioDescricao": "Las historias en borrador y los controles sin horario aparecen aquí.",
       "rascunhos": "Historias en borrador",
       "retornos": "Controles sin horario",
-      "ofertasDaFila": "Ofertas de la lista esperando respuesta"
+      "ofertasDaFila": "Ofertas de la lista esperando respuesta",
+      "saudacao": "Nada pendiente | 1 pendiente por resolver | {n} pendientes por resolver"
     },
     "atalhos": {
       "titulo": "Atajos de teclado",
@@ -3847,7 +3910,9 @@
         "nestaClinica": "En esta clínica",
         "noApp": "En la app de {responsavel}",
         "noAppAjuda": "Lo que recibe el celular. Cambia en cuanto la clínica registra.",
-        "comAtraso": "Vacunas, {total} atrasada | Vacunas, {total} atrasadas"
+        "comAtraso": "Vacunas, {total} atrasada | Vacunas, {total} atrasadas",
+        "verProtocolo": "Ver protocolo",
+        "ocultarProtocolo": "Ocultar protocolo"
       },
       "app": {
         "titulo": "Cartilla de vacunación",
@@ -3876,7 +3941,14 @@
         "proximaEm": "Próxima dosis {data}",
         "marcada": "Agendada {data}, {hora}",
         "fecharAviso": "Cerrar aviso"
-      }
+      },
+      "saudacao": {
+        "vencidas": "1 vacuna vencida para llamar hoy | {n} vacunas vencidas para llamar hoy",
+        "nenhumaVencida": "Ninguna vacuna vencida",
+        "aVencer": "1 por vencer en 30 días | {n} por vencer en 30 días"
+      },
+      "mostrarMais": "Mostrar {n} más (faltan {total})",
+      "potencialFrase": "Llamando a todos, se recuperan {duracao} de agenda (20 min por aplicación)."
     },
     "internacao": {
       "titulo": "Internación",
@@ -3946,7 +4018,10 @@
         "naTroca": "Cae en el cambio de turno — acordad quién la aplica antes de pasar el turno.",
         "checar": "Registrar",
         "antesDaHora": "Prevista para las {hora}. ¿Registrar ahora de todos modos?",
-        "registrarAgora": "Registrar ahora"
+        "registrarAgora": "Registrar ahora",
+        "registradas": "1 registrada desde las {desde} | {total} registradas desde las {desde}",
+        "verRegistradas": "Ver",
+        "ocultarRegistradas": "Ocultar"
       },
       "evolucao": {
         "registrarTitulo": "Evolución de este turno",
@@ -4461,7 +4536,9 @@
         "mostrarConversa": "Mostrar conversación",
         "ocultarConversa": "Ocultar conversación",
         "expandir": "Mostrar la anamnesis por voz",
-        "recolher": "Contraer la anamnesis por voz"
+        "recolher": "Contraer la anamnesis por voz",
+        "abrirPainel": "Abrir panel",
+        "fecharPainel": "Cerrar panel"
       },
       "meta": {
         "campos": "{preenchidos} de {total} campos",
@@ -4837,14 +4914,23 @@
         "hoje": "{vacina} para hoy",
         "hojeVarias": "{total} vacuna para hoy | {total} vacunas para hoy",
         "proxima": "Próxima dosis en {dias} día | Próxima dosis en {dias} días",
-        "emDia": "Vacunas al día"
+        "emDia": "Vacunas al día",
+        "proximaHoje": "Próxima dosis hoy"
       },
       "historico": {
         "internado": "En internación ahora · {leito}",
         "hoje": "Atención hoy a las {hora}",
         "ultimo": "Última atención hace {dias} día | Última atención hace {dias} días",
         "ultimoHoje": "Última atención hoy",
-        "linhaDoTempo": "Línea de tiempo"
+        "linhaDoTempo": "Línea de tiempo",
+        "titulo": "Historial",
+        "emTrintaSegundos": "En 30 segundos:",
+        "sinais": "1 señal para ver en el resumen. | {n} señales para ver en el resumen.",
+        "proximo": "Próximo:",
+        "quando": "{data} a las {hora}",
+        "verAgendados": "Ver todos los agendados ({n})",
+        "ocultarAgendados": "Ocultar agendados",
+        "filtroAria": "Filtrar el historial por tipo"
       },
       "resumo": {
         "sinais": "{total} señal requiere atención | {total} señales requieren atención",
@@ -4960,7 +5046,8 @@
           "familia": "familia",
           "leitura": "solo lectura"
         },
-        "emCursoAjudaSemFio": "Lo que la casa registró en la app. La última consulta fue el {data}."
+        "emCursoAjudaSemFio": "Lo que la casa registró en la app. La última consulta fue el {data}.",
+        "comoVeNoApp": "Cómo lo ve {responsavel} en la app"
       },
       "lista": {
         "stat": {
@@ -5027,6 +5114,12 @@
         "compartilhado": "{clinica} ve estos registros",
         "naoCompartilhado": "Solo la familia ve estos registros",
         "vazio": "Ningún medicamento con recordatorio para {pet}."
+      },
+      "saudacao": {
+        "atencao": "1 tratamiento con la adherencia en caída | {n} tratamientos con la adherencia en caída",
+        "semAtencao": "Ninguna adherencia en caída",
+        "emCurso": "Ninguno en curso | 1 en curso | {n} en curso",
+        "criticos": "1 crítico | {n} críticos"
       }
     }
   },

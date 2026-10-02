@@ -47,6 +47,7 @@ import { computed, onMounted, ref, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter, type RouteLocationRaw } from 'vue-router'
 
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import PautaTabela from '@/components/home/PautaTabela.vue'
 import { porGravidade, type LinhaDaTabela } from '@/components/home/pauta-tabela'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
@@ -187,6 +188,13 @@ function nomesComResto(nomes: string[], mostrar = 2) {
   return resto > 0 ? t('clinico.meuDia.pauta.eMais', { nomes: visiveis, total: resto }) : visiveis
 }
 
+/** O rosto do paciente para a linha da pauta, quando ele está no catálogo. */
+function rostoDe(pet: ReturnType<typeof clinico.pet>): LinhaDaTabela['pet'] {
+  return pet
+    ? { nome: pet.nome, iniciais: pet.iniciais, especie: pet.especie, fotoUrl: pet.fotoUrl }
+    : undefined
+}
+
 const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
   const linhas: LinhaDaTabela[] = []
   const ondeInternacao = t('inicio.pauta.onde.internacao')
@@ -204,6 +212,7 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
         detalhe: [item.leito.nome, item.atrasadas > 0 ? doses : ''].filter(Boolean).join(' · '),
         tom: 'risco',
         onde: ondeInternacao,
+        pet: rostoDe(clinico.pet(item.internacao!.petId)),
       })
     } else {
       linhas.push({
@@ -213,6 +222,7 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
         detalhe: item.leito.nome,
         tom: 'risco',
         onde: ondeInternacao,
+        pet: rostoDe(clinico.pet(item.internacao!.petId)),
       })
     }
   }
@@ -234,6 +244,7 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
       detalhe: partes.filter(Boolean).join(' · '),
       tom: 'atencao',
       onde: ondeAgenda,
+      pet: rostoDe(pet),
     })
   }
 
@@ -248,6 +259,7 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
       detalhe: alertas.map(textoDoAlerta).join(' · '),
       tom: 'atencao',
       onde: ondeAgenda,
+      pet: rostoDe(pet),
     })
   }
 
@@ -496,6 +508,13 @@ onMounted(carregar)
             <li v-for="item in proximos" :key="item.id">
               <RouterLink class="seguir__item" :to="focoNaAgenda(item.id)">
                 <span class="seguir__hora">{{ formato.hora(item.inicio) }}</span>
+                <PetAvatar
+                  :nome="clinico.pet(item.petId)?.nome ?? ''"
+                  :iniciais="clinico.pet(item.petId)?.iniciais ?? ''"
+                  :especie="clinico.pet(item.petId)?.especie ?? null"
+                  :foto-url="clinico.pet(item.petId)?.fotoUrl ?? ''"
+                  tamanho="md"
+                />
                 <span class="seguir__corpo">
                   <strong>{{ clinico.pet(item.petId)?.nome }}</strong>
                   <small>

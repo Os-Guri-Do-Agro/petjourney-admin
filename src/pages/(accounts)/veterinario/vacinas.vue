@@ -29,7 +29,13 @@
  *
  * A aba vive na URL, como a da internação: é o que permite mandar "olha a lista de atrasados"
  * por mensagem sem mandar junto a instrução de qual aba abrir.
+ *
+ * Sem aba na URL, a tela abre em **Em atraso** quando há vencidas — é a lista que vira consulta —
+ * e em **Aplicadas** quando não há. Os cartões de número do topo saíram: o atraso está na frase da
+ * saudação, a agenda a recuperar mora dentro de Em atraso, e o estoque tem a própria linha de fatos.
+ * O histórico de aplicações mostra vinte por vez: abria com 98 linhas e 5,8 telas de rolagem.
  */
+import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -37,9 +43,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
+import ClinicPacienteCelula from '@/features/clinico/components/base/ClinicPacienteCelula.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicFilterBar from '@/features/clinico/components/base/ClinicFilterBar.vue'
-import ClinicStat from '@/features/clinico/components/base/ClinicStat.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
 import type { GrupoDeFiltro } from '@/features/clinico/components/base/filter-types'
 import type { AcaoDeLinha, ColunaTabela } from '@/features/clinico/components/base/table-types'
@@ -114,6 +120,11 @@ async function carregar() {
     if (porSituacao.value.vencido.length === 0) {
       recorte.value = 'todos'
     }
+
+    /* Sem aba pedida na URL, quem tem vencida para chamar abre na lista de chamada. */
+    if (!abaPedida && porSituacao.value.vencido.length > 0) {
+      aba.value = 'atraso'
+    }
   } catch {
     erro.value = t('clinico.erros.agenda')
   } finally {
@@ -121,11 +132,15 @@ async function carregar() {
   }
 }
 
+/** A URL pediu uma aba: aí ela manda, e o "abrir em Em atraso" não se aplica. */
+let abaPedida = false
+
 onMounted(() => {
   const daUrl = String(route.query.aba ?? '')
 
   if ((ABAS as string[]).includes(daUrl)) {
     aba.value = daUrl as Aba
+    abaPedida = true
   }
 
   void carregar()
@@ -294,6 +309,12 @@ const aplicadasVisiveis = computed(() => {
   })
 })
 
+const aplicadasDaPagina = computed(() => aplicadasVisiveis.value.slice(0, limiteDoHistorico.value))
+
+const restamNoHistorico = computed(
+  () => aplicadasVisiveis.value.length - aplicadasDaPagina.value.length,
+)
+
 const colunasAplicadas = computed<ColunaTabela<AplicacaoNaLista>[]>(() => [
   {
     id: 'quando',
@@ -336,18 +357,67 @@ function abrirPaciente(linha: { petId: string }) {
 
 // --------------------------------------------------------------------- em atraso
 
-const colunas = computed<ColunaTabela<ChamadaDeVacina>[]>(() => [
+/**
+ * Um pet, uma linha: as vacinas atrasadas do mesmo animal viajam juntas.
+ *
+ * A Nina aparecia três vezes — traqueobronquite, V10 e antirrábica — e é uma ligação só para a
+ * Camila. A linha leva todas as vacinas do pet no recorte, e o prazo dela é o da mais urgente.
+ */
+type ChamadaDoPet = {
+  petId: string
+  petNome: string
+  tutorNome: string
+  tutorTelefone: string
+  vacinas: ChamadaDeVacina[]
+  diasParaVencer: number
+  proximaDoseEm: string
+  situacao: ChamadaDeVacina['situacao']
+}
+
+const chamadasPorPet = computed<ChamadaDoPet[]>(() => {
+  const mapa = new Map<string, ChamadaDoPet>()
+
+  for (const linha of visiveis.value) {
+    const grupo = mapa.get(linha.petId)
+
+    if (!grupo) {
+      mapa.set(linha.petId, {
+        petId: linha.petId,
+        petNome: linha.petNome,
+        tutorNome: linha.tutorNome,
+        tutorTelefone: linha.tutorTelefone,
+        vacinas: [linha],
+        diasParaVencer: linha.diasParaVencer,
+        proximaDoseEm: linha.proximaDoseEm,
+        situacao: linha.situacao,
+      })
+      continue
+    }
+
+    grupo.vacinas.push(linha)
+
+    if (linha.diasParaVencer < grupo.diasParaVencer) {
+      grupo.diasParaVencer = linha.diasParaVencer
+      grupo.proximaDoseEm = linha.proximaDoseEm
+      grupo.situacao = linha.situacao
+    }
+  }
+
+  return [...mapa.values()]
+})
+
+const colunas = computed<ColunaTabela<ChamadaDoPet>[]>(() => [
   {
     id: 'paciente',
     rotulo: t('clinico.pacientes.colunaPaciente'),
-    largura: 'minmax(0, 1.4fr)',
+    largura: 'minmax(0, 1fr)',
     ordenarPor: (linha) => linha.petNome,
   },
   {
     id: 'vacina',
     rotulo: t('clinico.vacinas.colunaVacina'),
-    largura: 'minmax(0, 1.4fr)',
-    ordenarPor: (linha) => linha.vacinaNome,
+    largura: 'minmax(0, 1.8fr)',
+    ordenarPor: (linha) => linha.vacinas[0]?.vacinaNome ?? '',
   },
   {
     id: 'responsavel',
@@ -373,13 +443,11 @@ const colunas = computed<ColunaTabela<ChamadaDeVacina>[]>(() => [
  * Ligar é o que a pessoa vai fazer em nove de dez linhas; agendar é o desfecho. Qualquer coisa
  * além disso transforma uma fila de trabalho num painel de administração.
  */
-const acoes = computed<AcaoDeLinha<ChamadaDeVacina>[]>(() => [
-  {
-    id: 'ligar',
-    rotulo: t('clinico.vacinas.ligar'),
-    icone: 'pi pi-phone',
-    visivel: (linha) => Boolean(linha.tutorTelefone),
-  },
+/*
+ * Sem "Ligar": a clínica liga pelo telefone do cadastro, que está escrito na linha. A tela não
+ * disca — registra e agenda.
+ */
+const acoes = computed<AcaoDeLinha<ChamadaDoPet>[]>(() => [
   {
     id: 'agendar',
     rotulo: t('clinico.vacinas.agendar'),
@@ -387,20 +455,12 @@ const acoes = computed<AcaoDeLinha<ChamadaDeVacina>[]>(() => [
   },
 ])
 
-function executarAcao({
-  acao,
-  linha,
-}: {
-  acao: AcaoDeLinha<ChamadaDeVacina>
-  linha: ChamadaDeVacina
-}) {
-  if (acao.id === 'ligar') {
-    window.location.href = `tel:${linha.tutorTelefone}`
-
+function executarAcao({ acao }: { acao: AcaoDeLinha<ChamadaDoPet>; linha: ChamadaDoPet }) {
+  if (acao.id !== 'agendar') {
     return
   }
 
-  /* Leva à agenda já no paciente: a recepção escolhe o horário olhando a grade. */
+  /* Leva à agenda: a recepção escolhe o horário olhando a grade. */
   void router.push({ path: '/veterinario/agenda' })
 }
 
@@ -423,6 +483,39 @@ const vazio = computed(
 
 /** Minutos de agenda que a chamada pode recuperar, a 20 min por aplicação. */
 const potencial = computed(() => linhas.value.length * 20)
+
+/**
+ * A frase da saudação: quantas vencidas há para chamar hoje e quantas vencem no mês. É o número
+ * que fazia a pessoa trocar de aba; agora é a primeira coisa lida na tela.
+ */
+const fraseDoResumo = computed(() => {
+  if (carregando.value && linhas.value.length === 0) {
+    return ''
+  }
+
+  const vencidas = porSituacao.value.vencido.length
+  const aVencer = porSituacao.value.proximo.length
+  const partes = [
+    vencidas > 0
+      ? t('clinico.vacinas.saudacao.vencidas', { n: vencidas }, vencidas)
+      : t('clinico.vacinas.saudacao.nenhumaVencida'),
+  ]
+
+  if (aVencer > 0) {
+    partes.push(t('clinico.vacinas.saudacao.aVencer', { n: aVencer }, aVencer))
+  }
+
+  return partes.join(' · ')
+})
+
+/** Quantas aplicações o histórico mostra por vez. */
+const PASSO_DO_HISTORICO = 20
+const limiteDoHistorico = ref(PASSO_DO_HISTORICO)
+
+/* Trocar a busca ou o filtro recomeça do topo: o "mostrar mais" é da lista de agora. */
+watch([busca, filtros], () => {
+  limiteDoHistorico.value = PASSO_DO_HISTORICO
+})
 
 // --------------------------------------------------------------------- estoque
 
@@ -545,86 +638,26 @@ function textoDeCobertura(dias: number | null): string {
     block-when-suspended
     @retry="carregar"
   >
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('clinico.faltas.subtitulo') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('clinico.vacinas.titulo') }}</h1>
+
+        <div class="hc-saudacao__linha">
+          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
+            {{ fraseDoResumo }}
+          </p>
+        </div>
+      </div>
+    </template>
+
     <div class="vacinas clinic-scope">
-      <!--
-        Os três números que dizem o tamanho da oportunidade antes de a tabela ser lida.
-
-        Eles **trocam com a aba**, e essa é a mudança que o estoque trouxe. Atrasados e agenda a
-        recuperar respondem a pergunta do recall; na geladeira a pergunta é outra — quanto tem,
-        quanto vence e quanto já virou prejuízo — e repetir a contagem de ligações em cima de um
-        gráfico de validade seria três números que ninguém veio buscar.
-      -->
-      <div v-if="aba !== 'estoque'" class="resumo">
-        <ClinicStat
-          icone="pi pi-exclamation-circle"
-          tom="risco"
-          :rotulo="t('clinico.vacinas.situacao.vencido')"
-          :valor="String(porSituacao.vencido.length)"
-          :detalhe="t('clinico.vacinas.ligarHoje')"
-        />
-        <ClinicStat
-          icone="pi pi-clock"
-          tom="atencao"
-          :rotulo="t('clinico.vacinas.situacao.proximo')"
-          :valor="String(porSituacao.proximo.length)"
-          :detalhe="t('clinico.vacinas.proximosDias')"
-        />
-        <ClinicStat
-          icone="pi pi-calendar-plus"
-          :rotulo="t('clinico.vacinas.potencial')"
-          :valor="formato.duracao(potencial)"
-          :detalhe="t('clinico.vacinas.potencialDetalhe')"
-        />
-      </div>
-
-      <div v-else-if="estoque" class="resumo">
-        <ClinicStat
-          icone="pi pi-box"
-          :rotulo="t('clinico.vacinas.estoque.dosesEmEstoque')"
-          :valor="String(estoque.indicadores.dosesEmEstoque)"
-          :detalhe="
-            t('clinico.vacinas.estoque.valorParadoDetalhe', {
-              valor: formato.moeda(estoque.indicadores.valorParado),
-            })
-          "
-        />
-        <!--
-          O valor em risco, e não só a contagem de doses.
-
-          "11 doses a vencer" não move ninguém; o mesmo fato em dinheiro é o que faz a clínica
-          abrir a geladeira hoje — e ainda dá para faturar, porque a dose ainda vale.
-        -->
-        <ClinicStat
-          icone="pi pi-hourglass"
-          :tom="estoque.indicadores.dosesVencendo > 0 ? 'atencao' : 'neutro'"
-          :rotulo="t('clinico.vacinas.estoque.vencendo', { dias: JANELA_DE_VALIDADE_EM_DIAS })"
-          :valor="String(estoque.indicadores.dosesVencendo)"
-          :detalhe="
-            t('clinico.vacinas.estoque.emRisco', {
-              valor: formato.moeda(estoque.indicadores.valorEmRisco),
-            })
-          "
-        />
-        <ClinicStat
-          icone="pi pi-shopping-cart"
-          :tom="faltando > 0 ? 'risco' : 'neutro'"
-          :rotulo="t('clinico.vacinas.estoque.abaixoDoMinimo')"
-          :valor="String(faltando)"
-          :detalhe="
-            t('clinico.vacinas.estoque.perdaNoPeriodo', {
-              valor: formato.percentual(estoque.indicadores.perdaPercentual),
-              doses: estoque.indicadores.dosesPerdidas,
-            })
-          "
-        />
-      </div>
-
       <!--
         As duas perguntas da tela, lado a lado.
 
-        "Aplicadas" abre primeiro porque é a que se faz o dia inteiro — conferir, comprovar,
-        rastrear lote. "Em atraso" carrega a contagem no rótulo: é o número que faz alguém
-        trocar de aba, e ele precisa ser lido antes do clique, não depois.
+        Com vencidas para chamar, a tela abre em "Em atraso"; sem elas, em "Aplicadas". "Em
+        atraso" carrega a contagem no rótulo: é o número que faz alguém trocar de aba, e ele
+        precisa ser lido antes do clique, não depois.
       -->
       <div class="vacinas__abas">
         <ClinicToggleGroup
@@ -645,7 +678,7 @@ function textoDeCobertura(dias: number | null): string {
 
         <ClinicDataTable
           :colunas="colunasAplicadas"
-          :linhas="aplicadasVisiveis"
+          :linhas="aplicadasDaPagina"
           :chave="(linha) => linha.id"
           :carregando="carregando"
           :vazio-titulo="t('clinico.vacinas.aplicadasVazioTitulo')"
@@ -663,10 +696,9 @@ function textoDeCobertura(dias: number | null): string {
           </template>
 
           <template #celula-paciente="{ linha }">
-            <strong class="vacinas__nome">{{ linha.petNome }}</strong>
-            <span class="vacinas__meta">
+            <ClinicPacienteCelula :pet="clinico.pet(linha.petId)" :nome="linha.petNome">
               {{ formato.especie(linha.especie) }} · {{ linha.tutorNome }}
-            </span>
+            </ClinicPacienteCelula>
           </template>
 
           <template #celula-vacina="{ linha }">
@@ -727,9 +759,78 @@ function textoDeCobertura(dias: number | null): string {
             </template>
           </template>
         </ClinicDataTable>
+
+        <div v-if="restamNoHistorico > 0" class="vacinas__mais">
+          <Button
+            type="button"
+            severity="secondary"
+            outlined
+            :label="
+              t('clinico.vacinas.mostrarMais', {
+                n: Math.min(PASSO_DO_HISTORICO, restamNoHistorico),
+                total: restamNoHistorico,
+              })
+            "
+            @click="limiteDoHistorico += PASSO_DO_HISTORICO"
+          />
+        </div>
       </template>
 
       <template v-else-if="aba === 'estoque'">
+        <!--
+          Os números da geladeira numa linha, e não em três cartões: quanto tem, quanto vence e o
+          que falta comprar. O valor em risco vai junto da contagem — "11 doses a vencer" não move
+          ninguém; o mesmo fato em dinheiro é o que faz a clínica abrir a geladeira hoje.
+        -->
+        <section
+          v-if="estoque"
+          class="hc vacinas-fatos"
+          :aria-label="t('clinico.vacinas.aba.estoque')"
+        >
+          <ul class="vacinas-fatos__lista">
+            <li>
+              <strong>{{ estoque.indicadores.dosesEmEstoque }}</strong>
+              {{ t('clinico.vacinas.estoque.dosesEmEstoque') }}
+              <span class="vacinas-fatos__nota">
+                ({{
+                  t('clinico.vacinas.estoque.valorParadoDetalhe', {
+                    valor: formato.moeda(estoque.indicadores.valorParado),
+                  })
+                }})
+              </span>
+            </li>
+            <li :class="{ 'vacinas-fatos__item--atencao': estoque.indicadores.dosesVencendo > 0 }">
+              <i
+                v-if="estoque.indicadores.dosesVencendo > 0"
+                class="pi pi-hourglass"
+                aria-hidden="true"
+              />
+              <strong>{{ estoque.indicadores.dosesVencendo }}</strong>
+              {{ t('clinico.vacinas.estoque.vencendo', { dias: JANELA_DE_VALIDADE_EM_DIAS }) }}
+              <span class="vacinas-fatos__nota">
+                ({{
+                  t('clinico.vacinas.estoque.emRisco', {
+                    valor: formato.moeda(estoque.indicadores.valorEmRisco),
+                  })
+                }})
+              </span>
+            </li>
+            <li :class="{ 'vacinas-fatos__item--risco': faltando > 0 }">
+              <i v-if="faltando > 0" class="pi pi-shopping-cart" aria-hidden="true" />
+              <strong>{{ faltando }}</strong>
+              {{ t('clinico.vacinas.estoque.abaixoDoMinimo') }}
+            </li>
+            <li>
+              {{
+                t('clinico.vacinas.estoque.perdaNoPeriodo', {
+                  valor: formato.percentual(estoque.indicadores.perdaPercentual),
+                  doses: estoque.indicadores.dosesPerdidas,
+                })
+              }}
+            </li>
+          </ul>
+        </section>
+
         <template v-if="estoque">
           <!--
             O giro primeiro. É ele que dá escala a tudo o que vem depois: sem saber que a
@@ -909,12 +1010,18 @@ function textoDeCobertura(dias: number | null): string {
             :opcoes="opcoesRecorte"
             :rotulo="t('clinico.agenda.filtros')"
           />
+
+          <!-- O tamanho da oportunidade, onde ela é trabalhada: era um cartão de número no topo. -->
+          <p v-if="linhas.length > 0" class="vacinas__potencial">
+            <i class="pi pi-calendar-plus" aria-hidden="true" />
+            {{ t('clinico.vacinas.potencialFrase', { duracao: formato.duracao(potencial) }) }}
+          </p>
         </div>
 
         <ClinicDataTable
           :colunas="colunas"
-          :linhas="visiveis"
-          :chave="(linha) => `${linha.petId}-${linha.vacinaId}`"
+          :linhas="chamadasPorPet"
+          :chave="(linha) => linha.petId"
           :acoes="acoes"
           :vazio-titulo="t('clinico.vacinas.vazioTitulo')"
           :rotulo="t('clinico.vacinas.titulo')"
@@ -922,27 +1029,30 @@ function textoDeCobertura(dias: number | null): string {
           @ativar="abrirPaciente"
         >
           <template #celula-paciente="{ linha }">
-            <strong class="vacinas__nome">{{ linha.petNome }}</strong>
-            <span class="vacinas__meta">
+            <ClinicPacienteCelula :pet="clinico.pet(linha.petId)" :nome="linha.petNome">
               {{
                 clinico.pet(linha.petId) ? formato.especie(clinico.pet(linha.petId)!.especie) : ''
               }}
-            </span>
+            </ClinicPacienteCelula>
           </template>
 
           <template #celula-vacina="{ linha }">
-            <span class="vacinas__titulo">
-              <span class="vacinas__nome">{{ linha.vacinaNome }}</span>
-              <!-- Obrigatória muda o tom da conversa: é exigência legal, não sugestão. -->
-              <ClinicAlertChip
-                v-if="linha.obrigatoria"
-                severidade="atencao"
-                :rotulo="t('clinico.vacinas.obrigatoria')"
-              />
-            </span>
-            <span v-if="linha.doseSeguinte" class="vacinas__meta">
-              {{ t('clinico.vacinas.doseSeguinte', { dose: linha.doseSeguinte }) }}
-            </span>
+            <ul class="vacinas__do-pet">
+              <li v-for="vacina in linha.vacinas" :key="vacina.vacinaId">
+                <span class="vacinas__titulo">
+                  <span class="vacinas__nome">{{ vacina.vacinaNome }}</span>
+                  <!-- Obrigatória muda o tom da conversa: é exigência legal, não sugestão. -->
+                  <ClinicAlertChip
+                    v-if="vacina.obrigatoria"
+                    severidade="atencao"
+                    :rotulo="t('clinico.vacinas.obrigatoria')"
+                  />
+                </span>
+                <span v-if="vacina.doseSeguinte" class="vacinas__meta">
+                  {{ t('clinico.vacinas.doseSeguinte', { dose: vacina.doseSeguinte }) }}
+                </span>
+              </li>
+            </ul>
           </template>
 
           <template #celula-responsavel="{ linha }">
@@ -970,6 +1080,79 @@ function textoDeCobertura(dias: number | null): string {
 </template>
 
 <style scoped>
+.vacinas__do-pet {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vacinas__mais {
+  display: flex;
+  justify-content: center;
+}
+
+.vacinas__potencial {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+}
+
+.vacinas__potencial i {
+  color: var(--hc-marca);
+  font-size: 0.8rem;
+}
+
+.vacinas-fatos {
+  padding-block: 0.85rem;
+}
+
+.vacinas-fatos__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.75rem;
+  margin: 0;
+  padding: 0;
+  color: var(--hc-tinta-2);
+  font-size: 0.875rem;
+  list-style: none;
+}
+
+.vacinas-fatos__lista li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.vacinas-fatos__lista strong {
+  color: var(--hc-tinta);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.vacinas-fatos__nota {
+  color: var(--hc-tinta-3);
+}
+
+/* A urgência mora no ícone: vencendo em pêssego, faltando em coral. */
+.vacinas-fatos__lista i {
+  align-self: center;
+  font-size: 0.8rem;
+}
+
+.vacinas-fatos__item--atencao i {
+  color: var(--hc-pessego-tinta);
+}
+
+.vacinas-fatos__item--risco i {
+  color: var(--hc-coral-tinta);
+}
+
 .vacinas {
   display: grid;
   gap: var(--clinic-space-3);

@@ -526,6 +526,7 @@ function gravar() {
           <div class="campo">
             <label :for="`${idCampo}-dia`">{{ t('hotel.acrescentar.servicoDia') }}</label>
             <DatePicker
+              panel-class="hc-tema"
               :input-id="`${idCampo}-dia`"
               v-model="servicoDia"
               :min-date="primeiroDia"

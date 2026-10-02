@@ -22,6 +22,7 @@ import Select from 'primevue/select'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import ClinicDateField from '../base/ClinicDateField.vue'
 import ClinicField from '../base/ClinicField.vue'
 import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
 import { useRotulosDaVacina } from '../../composables/useRotulosDaVacina'
@@ -267,12 +268,10 @@ async function registrar() {
       <div class="externa__linha">
         <ClinicField :rotulo="t('clinico.vacinas.externa.quando')" obrigatorio :erro="erroData">
           <template #default="{ id, descrito }">
-            <InputText
-              :id="id"
+            <ClinicDateField
               v-model="aplicadaEm"
-              type="date"
+              :input-id="id"
               :max="hoje"
-              fluid
               :aria-describedby="descrito"
             />
           </template>

@@ -184,7 +184,19 @@ function aoSelecionar(linha: T) {
  * Sai do número de ações em vez de ser fixa: uma tabela com uma ação não deve reservar a
  * largura de três, e três ações não podem espremer-se na largura de uma.
  */
-const larguraDasAcoes = computed(() => `${Math.max(props.acoes.length, 1) * 2.2 + 0.6}rem`)
+/**
+ * Largura da coluna de ações: 2,2 rem por ícone, e o tamanho do rótulo para a ação escrita. A ação
+ * principal de uma linha (o "Registrar aceite" da fila) vai por extenso — ícone de ✓ sozinho não
+ * diz aceite de quê.
+ */
+const larguraDasAcoes = computed(() => {
+  const soma = props.acoes.reduce(
+    (total, acao) => total + (acao.icone ? 2.2 : 1.2 + acao.rotulo.length * 0.48),
+    0,
+  )
+
+  return `${Math.max(soma, 2.2) + 0.6}rem`
+})
 
 /**
  * A trilha da seta é fixa e estreita: ela não é uma coluna de dado, é a borda da linha ganhando
@@ -410,8 +422,12 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
                 :key="acao.id"
                 type="button"
                 class="tabela__acao"
-                :class="{ 'tabela__acao--perigo': acao.perigo }"
-                text
+                :class="{
+                  'tabela__acao--perigo': acao.perigo,
+                  'tabela__acao--escrita': !acao.icone,
+                }"
+                :text="Boolean(acao.icone)"
+                :outlined="!acao.icone"
                 :severity="acao.perigo ? 'danger' : 'secondary'"
                 size="small"
                 :icon="acao.icone"
@@ -688,6 +704,16 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 .tabela__linha--selecionada .tabela__acao,
 .tabela__acao.p-button:focus-visible {
   opacity: 1;
+}
+
+/*
+ * A ação escrita é a principal da linha ("Registrar aceite"): fica sempre à vista, contornada. O
+ * esconde-até-o-hover vale para fileira de ícones, que viraria textura; uma ação por extenso que só
+ * aparece com o mouse em cima é a ação que ninguém encontra.
+ */
+.tabela__acao--escrita.p-button {
+  opacity: 1;
+  font-size: 0.8125rem;
 }
 
 .tabela__acao.p-button-icon-only {

@@ -8,6 +8,10 @@
  *
  * A oferta tem prazo. Passado o prazo ela expira sozinha e a vaga volta a ser da clínica —
  * senão a fila vira lista de promessas que ninguém cobra.
+ *
+ * A ordem da lista é a ordem do trabalho: primeiro as ofertas esperando resposta (têm prazo
+ * correndo), depois a fila pela posição, e por último o que já se resolveu. Antes as três vinham
+ * misturadas, e a resposta da oferta era um ✓ e um ✗ soltos no fim da linha — agora vão por extenso.
  */
 import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'
@@ -16,6 +20,7 @@ import { RouterLink } from 'vue-router'
 
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
+import ClinicPacienteCelula from '@/features/clinico/components/base/ClinicPacienteCelula.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import FilaAdicionarDialog from '@/features/clinico/components/agenda/FilaAdicionarDialog.vue'
 import FilaOfertaDialog from '@/features/clinico/components/agenda/FilaOfertaDialog.vue'
@@ -97,13 +102,13 @@ const colunas = computed<ColunaTabela<WaitlistEntry>[]>(() => [
   {
     id: 'paciente',
     rotulo: t('clinico.pacientes.colunaPaciente'),
-    largura: 'minmax(0, 1.6fr)',
+    largura: 'minmax(0, 2.1fr)',
     ordenarPor: (linha) => clinico.pet(linha.petId)?.nome ?? null,
   },
   {
     id: 'responsavel',
     rotulo: t('clinico.pacientes.colunaResponsavel'),
-    largura: 'minmax(0, 1.3fr)',
+    largura: 'minmax(0, 1.1fr)',
     ocultarEmTelaEstreita: true,
     ordenarPor: (linha) => clinico.tutor(linha.tutorId)?.nome ?? null,
   },
@@ -133,13 +138,11 @@ const acoes = computed<AcaoDeLinha<WaitlistEntry>[]>(() => [
   {
     id: 'aceitar',
     rotulo: t('clinico.fila.aceitar'),
-    icone: 'pi pi-check',
     visivel: (linha) => linha.status === 'ofertado',
   },
   {
     id: 'recusar',
     rotulo: t('clinico.fila.recusar'),
-    icone: 'pi pi-times',
     visivel: (linha) => linha.status === 'ofertado',
   },
   {
@@ -215,6 +218,52 @@ async function confirmarOferta({ mensagem }: { mensagem: string }) {
 
 const erroTraduzido = computed(() => (fila.erro ? t(fila.erro) : ''))
 
+/** Peso de cada situação na ordem da lista: o que tem prazo correndo vem primeiro. */
+const ORDEM_DA_SITUACAO: Record<string, number> = {
+  ofertado: 0,
+  aguardando: 1,
+  aceito: 2,
+  expirado: 3,
+}
+
+const linhasOrdenadas = computed(() =>
+  [...fila.ativas].sort((a, b) => {
+    const porSituacao = (ORDEM_DA_SITUACAO[a.status] ?? 9) - (ORDEM_DA_SITUACAO[b.status] ?? 9)
+
+    if (porSituacao !== 0) {
+      return porSituacao
+    }
+
+    if (a.status === 'aguardando') {
+      return (fila.posicaoDe(a.id) ?? 0) - (fila.posicaoDe(b.id) ?? 0)
+    }
+
+    /* Entre as ofertas, a que expira primeiro vem antes: é a que se perde se ninguém ligar. */
+    if (a.status === 'ofertado') {
+      return (a.ofertaExpiraEm ?? '').localeCompare(b.ofertaExpiraEm ?? '')
+    }
+
+    return a.criadoEm.localeCompare(b.criadoEm)
+  }),
+)
+
+/** Quantos esperam vaga e quantas ofertas esperam resposta. */
+const fraseDoResumo = computed(() => {
+  if (fila.carregando && fila.entradas.length === 0) {
+    return ''
+  }
+
+  const aguardando = fila.ativas.filter((item) => item.status === 'aguardando').length
+  const ofertas = fila.ofertadas.length
+  const partes = [t('clinico.fila.saudacao.aguardando', { n: aguardando }, aguardando)]
+
+  if (ofertas > 0) {
+    partes.push(t('clinico.fila.saudacao.ofertas', { n: ofertas }, ofertas))
+  }
+
+  return partes.join(' · ')
+})
+
 async function carregar() {
   await clinico.carregar()
   await fila.carregar()
@@ -236,20 +285,34 @@ onMounted(carregar)
     block-when-suspended
     @retry="carregar"
   >
-    <div class="fila clinic-scope">
-      <!--
-        A entrada na fila fica no topo, ao lado da lista: é a ação que a recepção dispara
-        quando acaba de dizer "não tenho horário essa semana".
-      -->
-      <div class="fila__barra">
-        <Button
-          :label="t('clinico.fila.adicionar')"
-          icon="pi pi-plus"
-          size="small"
-          @click="adicionarAberto = true"
-        />
-      </div>
+    <!--
+      A entrada na fila é a pílula cheia da saudação: é a ação que a recepção dispara quando acaba
+      de dizer "não tenho horário essa semana".
+    -->
+    <template #cabecalho>
+      <div class="hc-saudacao">
+        <p class="hc-saudacao__data">{{ t('clinico.fila.subtitulo') }}</p>
+        <h1 class="hc-saudacao__titulo">{{ t('clinico.fila.titulo') }}</h1>
 
+        <div class="hc-saudacao__linha">
+          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
+            {{ fraseDoResumo }}
+          </p>
+
+          <nav class="hc-acoes" :aria-label="t('clinico.fila.saudacao.acoes')">
+            <Button
+              type="button"
+              class="hc-pilula hc-pilula--cheia"
+              icon="pi pi-plus"
+              :label="t('clinico.fila.adicionar')"
+              @click="adicionarAberto = true"
+            />
+          </nav>
+        </div>
+      </div>
+    </template>
+
+    <div class="fila clinic-scope">
       <p v-if="aceite" class="aceite" :class="`aceite--${aceite.tipo}`" role="status">
         <i
           class="pi"
@@ -274,7 +337,7 @@ onMounted(carregar)
 
       <ClinicDataTable
         :colunas="colunas"
-        :linhas="fila.ativas"
+        :linhas="linhasOrdenadas"
         :chave="(entrada) => entrada.id"
         :acoes="acoes"
         :rotulo="t('clinico.fila.titulo')"
@@ -288,24 +351,23 @@ onMounted(carregar)
         </template>
 
         <template #celula-paciente="{ linha }">
-          <span class="fila__titulo">
-            <strong class="fila__nome">{{ clinico.pet(linha.petId)?.nome }}</strong>
+          <ClinicPacienteCelula :pet="clinico.pet(linha.petId)">
             <!--
               "Normal" é o padrão e não precisa ser dito: uma ficha em toda linha treina o olho
               a ignorar as fichas, inclusive as que importam.
             -->
-            <ClinicAlertChip
-              v-if="linha.prioridade !== 'normal'"
-              :severidade="severidadePorPrioridade[linha.prioridade]"
-              :rotulo="formato.prioridadeDaFila(linha.prioridade)"
-            />
-          </span>
-          <span class="fila__meta">
+            <template #selo>
+              <ClinicAlertChip
+                v-if="linha.prioridade !== 'normal'"
+                :severidade="severidadePorPrioridade[linha.prioridade]"
+                :rotulo="formato.prioridadeDaFila(linha.prioridade)"
+              />
+            </template>
             {{ clinico.tipo(linha.typeId)?.nome }}
             <template v-if="linha.professionalId">
               · {{ clinico.profissional(linha.professionalId)?.nome }}
             </template>
-          </span>
+          </ClinicPacienteCelula>
         </template>
 
         <template #celula-responsavel="{ linha }">

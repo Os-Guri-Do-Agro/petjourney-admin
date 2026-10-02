@@ -138,6 +138,13 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
 
     const pet = item.petNome
     const aFazer = t('clinico.internacao.pauta.aFazer', { total: item.pendentes })
+    const doCadastro = clinico.pet(item.internacao.petId)
+    const rosto = {
+      nome: item.petNome,
+      iniciais: item.petIniciais,
+      especie: doCadastro?.especie ?? null,
+      fotoUrl: doCadastro?.fotoUrl ?? '',
+    }
 
     if (item.boletimRetido) {
       boletins.push({
@@ -147,6 +154,7 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
         detalhe: t('clinico.internacao.pauta.responsavel', { nome: item.tutorNome }),
         tom: 'risco',
         onde: item.leito.nome,
+        pet: rosto,
       })
     }
 
@@ -162,6 +170,7 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
         detalhe: aFazer,
         tom: 'risco',
         onde: item.leito.nome,
+        pet: rosto,
       })
     } else if (item.proximaEmMinutos !== null && item.proximaEmMinutos <= JANELA_DA_PROXIMA_MIN) {
       linhas.push({
@@ -171,6 +180,7 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
         detalhe: aFazer,
         tom: 'atencao',
         onde: item.leito.nome,
+        pet: rosto,
       })
     }
   }
@@ -204,7 +214,10 @@ const fraseDoResumo = computed(() => {
 
 type GrupoDeLeitos = { kind: LeitoKind; leitos: LeitoNoMapa[]; ocupados: number; ativos: number }
 
-/** Os leitos por tipo, na ordem em que a clínica os cadastrou. */
+/**
+ * Os leitos por tipo, na ordem em que a clínica os cadastrou — com a UTI na frente. É onde está o
+ * paciente mais grave do plantão, e no fim do mapa ela ficava abaixo da dobra.
+ */
 const grupos = computed<GrupoDeLeitos[]>(() => {
   const porTipo = new Map<LeitoKind, GrupoDeLeitos>()
 
@@ -218,7 +231,8 @@ const grupos = computed<GrupoDeLeitos[]>(() => {
     porTipo.set(kind, grupo)
   }
 
-  return [...porTipo.values()]
+  /* `sort` estável: tirada a UTI, o resto continua na ordem do cadastro. */
+  return [...porTipo.values()].sort((a, b) => Number(b.kind === 'uti') - Number(a.kind === 'uti'))
 })
 
 // ---------------------------------------------------------------------------- ações

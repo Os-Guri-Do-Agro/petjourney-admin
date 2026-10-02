@@ -14,10 +14,16 @@
  * que se faz uma vez por paciente, na primeira visita, com a carteirinha do pet shop na mão.
  *
  * O atraso aparece nos dois lados com a mesma regra (a carência de três dias da API e do app), e o
- * cartão do celular diz isso em voz alta: quem liga para o responsável precisa saber que ele está
- * vendo o mesmo aviso.
+ * protocolo diz isso em voz alta: quem liga para o responsável precisa saber que ele está vendo o
+ * mesmo aviso.
+ *
+ * A carteirinha do celular mora numa gaveta sem máscara, aberta pela pílula "Como … vê no app".
+ * Lado a lado, ela repetia o protocolo e o histórico pela terceira vez na mesma tela e apertava a
+ * tabela de aplicações até cortar o nome da vacina. Aberta, a ficha continua à vista e a
+ * carteirinha muda na hora em que alguém aplica — a demonstração continua cabendo em cinco segundos.
  */
 import Button from 'primevue/button'
+import Drawer from 'primevue/drawer'
 import {
   PhClockCounterClockwise,
   PhDeviceMobile,
@@ -123,6 +129,9 @@ function abrirAplicar(vacinaId: string | null = null) {
   aplicando.value = true
 }
 
+/** A gaveta da carteirinha do celular. Fechada por padrão: a ficha é a tela de todo dia. */
+const appAberto = ref(false)
+
 // ------------------------------------------------------------------ a frase de cima
 
 const atrasadas = computed(() =>
@@ -186,7 +195,9 @@ const frase = computed(() => {
   if (proxima) {
     const dias = diffDays(clinicClock.today(), proxima.em)
 
-    return t('clinico.ficha.vacinas.proxima', { dias }, dias)
+    return dias === 0
+      ? t('clinico.ficha.vacinas.proximaHoje')
+      : t('clinico.ficha.vacinas.proxima', { dias }, dias)
   }
 
   return t('clinico.ficha.vacinas.emDia')
@@ -275,7 +286,25 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
                   <PhListChecks class="hc__icone" weight="duotone" aria-hidden="true" />
                   {{ t('clinico.vacinas.carteira.protocolo') }}
                 </h2>
+
+                <Button
+                  v-if="carteirinha"
+                  type="button"
+                  class="hc-pilula"
+                  :label="t('clinico.adesao.ficha.comoVeNoApp', { responsavel: tutor?.nome ?? '' })"
+                  :aria-expanded="appAberto"
+                  aria-haspopup="dialog"
+                  @click="appAberto = !appAberto"
+                >
+                  <template #icon>
+                    <PhDeviceMobile class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
+                  </template>
+                </Button>
               </header>
+              <p v-if="atrasadas.length > 0" class="carteira__mesmo-aviso">
+                <PhDeviceMobile class="carteira__lugar" weight="duotone" aria-hidden="true" />
+                {{ t('clinico.vacinas.carteira.mesmoNoApp', { responsavel: tutor?.nome ?? '' }) }}
+              </p>
               <p class="ficha-ajuda">
                 {{
                   t(`clinico.vacinas.carteira.protocoloAjuda.${plano.faixa}`, {
@@ -372,32 +401,28 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
               </ClinicDataTable>
             </section>
           </div>
-
-          <!--
-            O celular do responsável. Fica preso ao topo ao rolar a coluna da clínica: a
-            demonstração é olhar os dois ao mesmo tempo, e um celular que sobe junto com a tabela
-            some justamente quando alguém aplica.
-          -->
-          <div class="ficha-coluna carteira__app">
-            <section class="hc" :aria-labelledby="`${petId}-app`">
-              <header class="hc__cabeca">
-                <h2 :id="`${petId}-app`" class="hc__titulo">
-                  <PhDeviceMobile class="hc__icone" weight="duotone" aria-hidden="true" />
-                  {{ t('clinico.vacinas.carteira.noApp', { responsavel: tutor?.nome ?? '' }) }}
-                </h2>
-              </header>
-              <p class="ficha-ajuda">
-                {{
-                  atrasadas.length > 0
-                    ? t('clinico.vacinas.carteira.mesmoNoApp', { responsavel: tutor?.nome ?? '' })
-                    : t('clinico.vacinas.carteira.noAppAjuda')
-                }}
-              </p>
-
-              <CarteirinhaNoApp v-if="carteirinha" :carteirinha="carteirinha" />
-            </section>
-          </div>
         </div>
+
+        <!-- A carteirinha do celular numa gaveta sem máscara: a ficha continua à vista e muda na hora. -->
+        <Drawer
+          v-model:visible="appAberto"
+          position="right"
+          :modal="false"
+          class="hc-tema carteira-gaveta"
+          :style="{ width: 'min(25rem, 92vw)' }"
+        >
+          <template #header>
+            <h2 class="carteira-gaveta__titulo">
+              <PhDeviceMobile class="hc__icone" weight="duotone" aria-hidden="true" />
+              {{ t('clinico.vacinas.carteira.noApp', { responsavel: tutor?.nome ?? '' }) }}
+            </h2>
+          </template>
+
+          <div class="carteira-gaveta__corpo clinic-scope">
+            <p class="ficha-ajuda">{{ t('clinico.vacinas.carteira.noAppAjuda') }}</p>
+            <CarteirinhaNoApp v-if="carteirinha" :carteirinha="carteirinha" />
+          </div>
+        </Drawer>
 
         <AplicarVacinaDialog
           v-model:visivel="aplicando"
@@ -421,18 +446,6 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
 </template>
 
 <style scoped>
-/* A clínica mais larga, o celular do lado; em uma coluna, o celular desce. */
-@container (min-width: 62rem) {
-  .carteira__grade {
-    grid-template-columns: minmax(0, 1.65fr) minmax(22rem, 1fr);
-  }
-
-  .carteira__app {
-    position: sticky;
-    top: 1rem;
-  }
-}
-
 .carteira__nome {
   display: flex;
   overflow: hidden;
@@ -454,6 +467,31 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
   display: block;
   color: var(--hc-tinta-2);
   font-size: 0.8125rem;
+}
+
+/* "O app de Ana mostra o mesmo atraso": quem liga para o responsável precisa saber disso. */
+.carteira__mesmo-aviso {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+}
+
+.carteira-gaveta__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.carteira-gaveta__corpo {
+  display: grid;
+  gap: 0.85rem;
 }
 
 .carteira__meta--relato {
