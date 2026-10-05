@@ -22,7 +22,6 @@ import {
   CadastroRecusadoError,
   hospedagemRepository,
   rotinaPadraoRepository,
-  amanhaNaCasa,
   PassagemTravadaError,
   reservaRepository,
   SaidaBloqueadaError,
@@ -392,7 +391,7 @@ describe('cadastro da casa', () => {
     const nova = await acomodacaoRepository.criar({
       nome: 'Baia A9',
       blocoId: 'bloco-canil-a',
-      kind: 'baia',
+      tipoId: 'tipo-baia',
       capacidade: 1,
       porteMaximo: 'grande',
       especiesAceitas: ['canina'],
@@ -424,7 +423,7 @@ describe('cadastro da casa', () => {
       acomodacaoRepository.criar({
         nome: 'Baia A1',
         blocoId: 'bloco-canil-a',
-        kind: 'baia',
+        tipoId: 'tipo-baia',
         capacidade: 1,
         porteMaximo: 'grande',
         especiesAceitas: ['canina'],
