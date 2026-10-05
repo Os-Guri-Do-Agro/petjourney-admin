@@ -55,10 +55,9 @@ Norte detalhado: `docs/NOVAS_IMPLEMENTAÇÕES/visao-produto-e-auditoria.md`.
 - Ferramenta densa, usada horas seguidas: movimento e ornamento competem com o trabalho.
 - Dispositivos: **desktop e tablet** são os cenários que as telas devem priorizar (estação na
   clínica/recepção; tablet no canil, internação e recepção). Celular não é alvo principal.
-- Demonstração é um ritual real do produto: `docs/hotel/apresentacao/` e
-  `docs/clinico/apresentacao/` geram PDF, PowerPoint e roteiro a partir do sistema rodando
-  (`capturar.mjs` e scripts irmãos). Mudou uma tela do fluxo, as apresentações precisam ser
-  revistas.
+- Demonstração é um ritual real do produto: `docs/apresentacao/` (o roteiro do portal inteiro)
+  e `docs/hotel/apresentacao/` geram PDF a partir do sistema rodando (`capturar.mjs` em cada
+  pasta). Mudou uma tela do fluxo, as apresentações precisam ser revistas.
 - Módulo hotel liga com `?hotel=on`; telas do hotel têm botão **Como usar**.
 
 ## Capabilities and Constraints
@@ -90,8 +89,8 @@ Norte detalhado: `docs/NOVAS_IMPLEMENTAÇÕES/visao-produto-e-auditoria.md`.
 
 ## Evidence on Hand
 
-- Apresentações geradas do sistema rodando: `docs/hotel/apresentacao/Passeio-Pelo-Hotel.pdf`,
-  `docs/clinico/apresentacao/` (PowerPoint, roteiro em Word/PDF), `docs/clinico/relatorio/`.
+- Apresentações geradas do sistema rodando: `docs/apresentacao/Roteiro-de-Apresentacao.pdf`
+  (o portal de ponta a ponta, 30 min) e `docs/hotel/apresentacao/Passeio-Pelo-Hotel.pdf`.
 - Requisitos e auditorias por módulo em `docs/clinico/` e `docs/hotel/`.
 - **Não existe ainda:** clientes nomeados, depoimentos, métricas de uso ou casos reais dos
   módulos Clínico e Hotel. Os dados das telas são mocados; não apresentar números de demo
