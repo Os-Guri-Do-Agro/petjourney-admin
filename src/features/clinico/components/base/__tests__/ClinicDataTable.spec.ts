@@ -47,7 +47,8 @@ const i18n = createI18n({
 })
 
 function montar(ouvintes: Record<string, unknown> = {}) {
-  return mount(ClinicDataTable, {
+  /* O `T` da tabela não é inferido pelas props no `mount`: sem fixá-lo aqui, ele cai em `unknown`. */
+  return mount(ClinicDataTable<Linha>, {
     props: { colunas: COLUNAS, linhas: LINHAS, chave: (linha: Linha) => linha.id, ...ouvintes },
     global: { plugins: [i18n] },
   })
@@ -71,7 +72,7 @@ describe('a seta que anuncia que a linha abre', () => {
   it('emite ativar com a linha que foi apontada, e não com a primeira', async () => {
     const wrapper = montar({ onAtivar: () => {} })
 
-    await wrapper.findAll(SETA)[1].trigger('click')
+    await wrapper.findAll(SETA)[1]!.trigger('click')
 
     expect(wrapper.emitted('ativar')?.[0]).toEqual([LINHAS[1]])
   })
@@ -83,7 +84,7 @@ describe('a seta que anuncia que a linha abre', () => {
   it('não seleciona a linha ao abrir pela seta', async () => {
     const wrapper = montar({ onAtivar: () => {} })
 
-    await wrapper.findAll(SETA)[0].trigger('click')
+    await wrapper.findAll(SETA)[0]!.trigger('click')
 
     expect(wrapper.emitted('selecionar')).toBeUndefined()
   })
