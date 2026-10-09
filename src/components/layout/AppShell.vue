@@ -20,6 +20,7 @@ import ComingSoonFeatureDialog from '@/components/common/ComingSoonFeatureDialog
 import AppNavLink from '@/components/layout/AppNavLink.vue'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
+import FeedbackSaqueDialog from '@/components/parceiro/FeedbackSaqueDialog.vue'
 import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
 import {
   getSectionLandingPath,
@@ -870,6 +871,12 @@ onUnmounted(() => {
 
     <ValidarCupomDialog v-if="cupomFeatureEnabled" />
     <ComingSoonFeatureDialog v-model:visible="cupomComingSoonVisible" />
+
+    <!--
+      O questionário pós-saque mora no shell, e não na carteira: lá ele morria no meio da resposta
+      ao trocar de rota. Quem abre é a carteira, depois de um saque concluído.
+    -->
+    <FeedbackSaqueDialog />
 
     <!--
       A busca do módulo clínico vive no shell porque o valor dela é não depender de onde se

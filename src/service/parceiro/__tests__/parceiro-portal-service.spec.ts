@@ -148,3 +148,74 @@ describe('getPortalStatus — blocos por programa', () => {
     expect(status.participativo).toEqual(bloco('ATIVO', false))
   })
 })
+
+describe('questionário pós-saque', () => {
+  it('consulta a elegibilidade com o parceiro do contexto', async () => {
+    const { getFeedbackElegibilidade } = await loadService()
+    const fetchMock = mockFetch({ exibir: true })
+
+    await expect(getFeedbackElegibilidade({ parceiroId: 'p1' })).resolves.toEqual({ exibir: true })
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      'https://api.exemplo.test/parceiro/portal/feedback/elegibilidade?parceiroId=p1',
+    )
+  })
+
+  it('só abre com `exibir: true` literal', async () => {
+    const { getFeedbackElegibilidade } = await loadService()
+    mockFetch({ exibir: 'true' })
+
+    await expect(getFeedbackElegibilidade()).resolves.toEqual({ exibir: false })
+  })
+
+  it('grava a resposta com POST no corpo e o parceiro na query', async () => {
+    const { registrarFeedbackSaque } = await loadService()
+    const fetchMock = mockFetch({ id: 'f1', status: 'RESPONDIDO', createdAt: '2026-10-09' })
+
+    const registro = await registrarFeedbackSaque(
+      {
+        saqueId: 's1',
+        status: 'RESPONDIDO',
+        versaoQuestionario: 1,
+        notaRecomendacao: 9,
+        pontosPositivos: ['RAPIDEZ_SAQUE'],
+        incentivos: [],
+      },
+      { parceiroId: 'p1' },
+    )
+
+    expect(registro.id).toBe('f1')
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      'https://api.exemplo.test/parceiro/portal/feedback?parceiroId=p1',
+    )
+    expect(fetchMock.mock.calls[0]?.[1]?.method).toBe('POST')
+    expect(corpoEnviado(fetchMock)).toEqual({
+      saqueId: 's1',
+      status: 'RESPONDIDO',
+      versaoQuestionario: 1,
+      notaRecomendacao: 9,
+      pontosPositivos: ['RAPIDEZ_SAQUE'],
+      incentivos: [],
+    })
+  })
+
+  it('devolve o `reason` do 409 para a tela decidir', async () => {
+    const { registrarFeedbackSaque } = await loadService()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            statusCode: 409,
+            message: 'Fora do prazo.',
+            reason: 'FEEDBACK_FORA_DO_PRAZO',
+          }),
+          { status: 409, headers: JSON_HEADERS },
+        ),
+      ),
+    )
+
+    await expect(
+      registrarFeedbackSaque({ saqueId: 's1', status: 'DISPENSADO', versaoQuestionario: 1 }),
+    ).rejects.toMatchObject({ statusCode: 409, reason: 'FEEDBACK_FORA_DO_PRAZO' })
+  })
+})

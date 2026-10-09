@@ -1702,6 +1702,49 @@
       "frase": "ما يدخل، ومتى يصبح متاحًا للسحب، ومتى يصل إلى حسابك.",
       "abrir": "فتح",
       "fechar": "إغلاق"
+    },
+    "feedbackSaque": {
+      "titulo": "تم طلب السحب",
+      "intro": "بينما نعالج طلبك، أخبرنا كيف تسير الأمور. يستغرق ذلك أقل من دقيقة.",
+      "nps": {
+        "pergunta": "من 0 إلى 10، ما مدى احتمال أن توصي ببرنامج الإحالة من PetJourney لأحد زملائك؟",
+        "legenda": "0 = غير محتمل إطلاقًا، 10 = محتمل جدًا",
+        "a11y": "التقييم {nota}"
+      },
+      "multiplaEscolha": "اختياري. يمكنك اختيار أكثر من خيار.",
+      "pontos": {
+        "pergunta": "ما أكثر ما أعجبك؟",
+        "opcoes": {
+          "FACILIDADE_INDICAR": "سهولة الإحالة (رمز QR والرابط)",
+          "ACOMPANHAR_INDICADOS": "معرفة من انضم عبر رمزي",
+          "CLAREZA_CARTEIRA": "وضوح المحفظة والرصيد",
+          "RAPIDEZ_SAQUE": "سرعة السحب",
+          "VALOR_PARTICIPACAO": "قيمة الحصة",
+          "APP_GERAL": "المنصة بشكل عام"
+        }
+      },
+      "incentivos": {
+        "pergunta": "ما الذي سيجعلك تُحيل أكثر؟",
+        "opcoes": {
+          "MATERIAL_DIVULGACAO": "مواد ترويجية جاهزة",
+          "PARTICIPACAO_MAIOR": "حصة أكبر",
+          "TUTORES_ENGAJADOS": "مربون أكثر اهتمامًا بالتطبيق",
+          "FERRAMENTAS_NEGOCIO": "أدوات أكثر لنشاطي التجاري",
+          "ENTENDER_PROGRAMA": "فهم أفضل لطريقة عمل البرنامج"
+        }
+      },
+      "sugestao": {
+        "label": "هل تود اقتراح أي تحسين؟",
+        "placeholder": "اكتب هنا (اختياري)",
+        "contador": "{atual}/{max}"
+      },
+      "notaObrigatoria": "اختر تقييمًا من 0 إلى 10 للإرسال.",
+      "agoraNao": "ليس الآن",
+      "erroEnvio": "تعذّر الإرسال الآن. حاول مرة أخرى.",
+      "obrigado": {
+        "titulo": "شكرًا على ملاحظاتك!",
+        "texto": "تساعدنا إجابتك على تحسين PetJourney."
+      }
     }
   },
   "parceiro": {

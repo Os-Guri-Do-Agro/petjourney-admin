@@ -13,11 +13,13 @@
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Skeleton from 'primevue/skeleton'
+import type { ToastMessageOptions } from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
+import { useFeedbackSaque } from '@/composables/useFeedbackSaque'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
@@ -54,6 +56,15 @@ const emit = defineEmits<{
 const { t, locale } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
+const feedbackSaque = useFeedbackSaque()
+
+/**
+ * O questionário pós-saque só entra depois que o diálogo do saque termina de sair. Dois `Dialog`
+ * modais ao mesmo tempo brigam: o que sai solta a trava de rolagem do `body` e devolve o foco à
+ * página por baixo do que entra. O `after-hide` do saque resolve esta promessa.
+ */
+let avisarSaqueFechado: () => void = () => {}
+let montado = true
 
 /** Valores em BRL escritos no formato do idioma da tela. */
 function formatBrl(centavos: number) {
@@ -244,15 +255,30 @@ async function requestWithdraw() {
   requestingSaque.value = true
 
   try {
-    await solicitarSaque(centavos, parceiroQuery())
-    toast.add({
+    const query = parceiroQuery()
+    const saque = await solicitarSaque(centavos, query)
+    const avisoDoSaque: ToastMessageOptions = {
       severity: 'success',
       summary: t('carteira.toast.withdrawRequested'),
       detail: t('carteira.toast.withdrawRequestedDetail'),
       life: 4000,
-    })
+    }
+    toast.add(avisoDoSaque)
     valorSaque.value = ''
+
+    const saqueFechado = new Promise<void>((resolver) => {
+      avisarSaqueFechado = resolver
+    })
     saqueAberto.value = false
+
+    // Sem await: a carteira recarrega sem esperar o questionário, e nada dele chega aqui.
+    void feedbackSaque.oferecer(saque.id, query?.parceiroId ?? null, {
+      depoisDe: saqueFechado,
+      aindaNaTela: () => montado,
+      // O título do questionário já confirma o saque, com o check. O toast vira eco e, por ficar
+      // acima da máscara, tapava o X do diálogo em tablet.
+      aoAbrir: () => toast.remove(avisoDoSaque),
+    })
     await loadCarteira()
   } catch (err) {
     toast.add({
@@ -269,6 +295,10 @@ async function requestWithdraw() {
 
 onMounted(() => {
   void loadCarteira()
+})
+
+onBeforeUnmount(() => {
+  montado = false
 })
 </script>
 
@@ -336,6 +366,7 @@ onMounted(() => {
       :style="{ width: 'min(28rem, 94vw)' }"
       :header="t('carteira.visao.saque.title')"
       dismissable-mask
+      @after-hide="avisarSaqueFechado()"
     >
       <div v-if="carteira" class="carteira-dialogo">
         <p class="carteira-dialogo__saldo">

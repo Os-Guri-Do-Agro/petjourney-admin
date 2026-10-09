@@ -1702,6 +1702,49 @@
       "frase": "šta ulazi, kada se oslobađa za isplatu i kada stiže na račun.",
       "abrir": "Otvori",
       "fechar": "Zatvori"
+    },
+    "feedbackSaque": {
+      "titulo": "Isplata je zatražena",
+      "intro": "Dok je obrađujemo, recite nam kako Vam ide. Traje manje od 1 minuta.",
+      "nps": {
+        "pergunta": "Na skali od 0 do 10, koliko je verovatno da biste program preporuka PetJourney preporučili kolegi?",
+        "legenda": "0 = nimalo verovatno, 10 = veoma verovatno",
+        "a11y": "Ocena {nota}"
+      },
+      "multiplaEscolha": "Opciono. Možete izabrati više opcija.",
+      "pontos": {
+        "pergunta": "Šta Vam se najviše dopalo?",
+        "opcoes": {
+          "FACILIDADE_INDICAR": "Lako preporučivanje (QR kod i link)",
+          "ACOMPANHAR_INDICADOS": "Uvid u to ko se prijavio preko mog koda",
+          "CLAREZA_CARTEIRA": "Jasan novčanik i stanje",
+          "RAPIDEZ_SAQUE": "Brzina isplate",
+          "VALOR_PARTICIPACAO": "Visina udela",
+          "APP_GERAL": "Platforma u celini"
+        }
+      },
+      "incentivos": {
+        "pergunta": "Šta bi Vas podstaklo da preporučujete više?",
+        "opcoes": {
+          "MATERIAL_DIVULGACAO": "Gotov promotivni materijal",
+          "PARTICIPACAO_MAIOR": "Veći udeo",
+          "TUTORES_ENGAJADOS": "Staratelji zainteresovaniji za aplikaciju",
+          "FERRAMENTAS_NEGOCIO": "Više alata za moje poslovanje",
+          "ENTENDER_PROGRAMA": "Bolje razumevanje kako program funkcioniše"
+        }
+      },
+      "sugestao": {
+        "label": "Želite li da predložite neko poboljšanje?",
+        "placeholder": "Pišite ovde (opciono)",
+        "contador": "{atual}/{max}"
+      },
+      "notaObrigatoria": "Izaberite ocenu od 0 do 10 da biste poslali.",
+      "agoraNao": "Ne sada",
+      "erroEnvio": "Trenutno nije moguće poslati. Pokušajte ponovo.",
+      "obrigado": {
+        "titulo": "Hvala na povratnim informacijama!",
+        "texto": "Vaš odgovor nam pomaže da unapredimo PetJourney."
+      }
     }
   },
   "parceiro": {

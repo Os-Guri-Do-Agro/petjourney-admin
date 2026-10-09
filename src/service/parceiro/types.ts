@@ -227,6 +227,50 @@ export type SaqueDetalhe = SaqueResumo & {
   comprovante: string | null
 }
 
+// ---- Questionário depois do saque ----
+// Spec da API: docs/specs/2026/q4/q4-1/questionario-feedback-saque-parceiro.md.
+// Os enums espelham o backend e só ganham valores, nunca perdem.
+
+export type StatusFeedbackSaque = 'RESPONDIDO' | 'DISPENSADO'
+
+export type PontoPositivoFeedback =
+  | 'FACILIDADE_INDICAR'
+  | 'ACOMPANHAR_INDICADOS'
+  | 'CLAREZA_CARTEIRA'
+  | 'RAPIDEZ_SAQUE'
+  | 'VALOR_PARTICIPACAO'
+  | 'APP_GERAL'
+
+export type IncentivoIndicacaoFeedback =
+  | 'MATERIAL_DIVULGACAO'
+  | 'PARTICIPACAO_MAIOR'
+  | 'TUTORES_ENGAJADOS'
+  | 'FERRAMENTAS_NEGOCIO'
+  | 'ENTENDER_PROGRAMA'
+
+export type FeedbackSaqueElegibilidade = {
+  exibir: boolean
+}
+
+/** Em `DISPENSADO` bastam `saqueId`, `status` e `versaoQuestionario`; a API ignora o resto. */
+export type RegistrarFeedbackSaquePayload = {
+  saqueId: string
+  status: StatusFeedbackSaque
+  versaoQuestionario: number
+  /** Obrigatória em `RESPONDIDO`, de 0 a 10. */
+  notaRecomendacao?: number
+  pontosPositivos?: PontoPositivoFeedback[]
+  incentivos?: IncentivoIndicacaoFeedback[]
+  /** Até 1000 caracteres; a API faz o trim. */
+  sugestao?: string
+}
+
+export type FeedbackSaqueRegistrado = {
+  id: string
+  status: StatusFeedbackSaque
+  createdAt: string
+}
+
 // ---- Compartilhamentos vinculados (Parte 8: prestador com conta) ----
 
 export type StatusCompartilhamento = 'ATIVO' | 'EXPIRADO' | 'REVOGADO'

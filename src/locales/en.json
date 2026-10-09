@@ -1702,6 +1702,49 @@
       "frase": "what comes in, when it clears for withdrawal and when it reaches your account.",
       "abrir": "Open",
       "fechar": "Close"
+    },
+    "feedbackSaque": {
+      "titulo": "Payout requested",
+      "intro": "While we process it, tell us how things are going. It takes less than a minute.",
+      "nps": {
+        "pergunta": "From 0 to 10, how likely are you to recommend the PetJourney referral program to a colleague?",
+        "legenda": "0 = not at all likely, 10 = extremely likely",
+        "a11y": "Score {nota}"
+      },
+      "multiplaEscolha": "Optional. You can pick more than one.",
+      "pontos": {
+        "pergunta": "What did you like most?",
+        "opcoes": {
+          "FACILIDADE_INDICAR": "Easy to refer (QR and link)",
+          "ACOMPANHAR_INDICADOS": "Seeing who joined with my code",
+          "CLAREZA_CARTEIRA": "Clear wallet and balance",
+          "RAPIDEZ_SAQUE": "Speed of payouts",
+          "VALOR_PARTICIPACAO": "Participation amount",
+          "APP_GERAL": "The platform overall"
+        }
+      },
+      "incentivos": {
+        "pergunta": "What would make you refer more?",
+        "opcoes": {
+          "MATERIAL_DIVULGACAO": "Ready-made promotional material",
+          "PARTICIPACAO_MAIOR": "Higher participation",
+          "TUTORES_ENGAJADOS": "Pet parents more interested in the app",
+          "FERRAMENTAS_NEGOCIO": "More tools for my business",
+          "ENTENDER_PROGRAMA": "Understanding better how the program works"
+        }
+      },
+      "sugestao": {
+        "label": "Any suggestions for improvement?",
+        "placeholder": "Write here (optional)",
+        "contador": "{atual}/{max}"
+      },
+      "notaObrigatoria": "Choose a score from 0 to 10 to send.",
+      "agoraNao": "Not now",
+      "erroEnvio": "We could not send it right now. Please try again.",
+      "obrigado": {
+        "titulo": "Thanks for your feedback!",
+        "texto": "Your answer helps us improve PetJourney."
+      }
     }
   },
   "parceiro": {

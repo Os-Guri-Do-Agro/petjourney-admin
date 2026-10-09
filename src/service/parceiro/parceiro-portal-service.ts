@@ -4,6 +4,8 @@ import { updateAccessToken } from '../auth/auth-session'
 import type {
   Carteira,
   CupomParceiro,
+  FeedbackSaqueElegibilidade,
+  FeedbackSaqueRegistrado,
   IndicacaoMetricas,
   ModoParticipacao,
   ModoStatusBloco,
@@ -12,6 +14,7 @@ import type {
   ParceiroCadastroPatchPayload,
   ParceiroCadastroPayload,
   PortalDashboard,
+  RegistrarFeedbackSaquePayload,
   PortalIndicacao,
   PortalStatus,
   ResgateParceiro,
@@ -306,6 +309,42 @@ export function getSaqueDetalhe(id: string, params?: ParceiroQuery) {
   return unwrap(
     apiFetch<ApiEnvelope<SaqueDetalhe>>(
       `/parceiro/portal/saques/${id}${buildParceiroQuery(params)}`,
+    ),
+  )
+}
+
+/**
+ * Se o questionário pós-saque deve aparecer agora; quem decide (90 dias, 2 dispensas) é a API.
+ * Chame só depois de o saque dar certo: quem chama engole qualquer erro, porque nada aqui pode
+ * parecer falha do saque. Só `exibir: true` literal abre.
+ */
+export async function getFeedbackElegibilidade(
+  params?: ParceiroQuery,
+): Promise<FeedbackSaqueElegibilidade> {
+  const data = await unwrap(
+    apiFetch<ApiEnvelope<FeedbackSaqueElegibilidade>>(
+      `/parceiro/portal/feedback/elegibilidade${buildParceiroQuery(params)}`,
+    ),
+  )
+
+  return { exibir: data?.exibir === true }
+}
+
+/**
+ * Grava a resposta (`RESPONDIDO`) ou a dispensa (`DISPENSADO`) do questionário de um saque. Um
+ * registro por saque: o segundo volta `409 FEEDBACK_JA_REGISTRADO`.
+ */
+export function registrarFeedbackSaque(
+  payload: RegistrarFeedbackSaquePayload,
+  params?: ParceiroQuery,
+) {
+  return unwrap(
+    apiFetch<ApiEnvelope<FeedbackSaqueRegistrado>>(
+      `/parceiro/portal/feedback${buildParceiroQuery(params)}`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
     ),
   )
 }

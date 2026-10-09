@@ -1702,6 +1702,49 @@
       "frase": "lo que entra, cuándo se libera para retirar y cuándo llega a su cuenta.",
       "abrir": "Abrir",
       "fechar": "Cerrar"
+    },
+    "feedbackSaque": {
+      "titulo": "Retiro solicitado",
+      "intro": "Mientras lo procesamos, cuéntenos cómo le va. Toma menos de 1 minuto.",
+      "nps": {
+        "pergunta": "Del 0 al 10, ¿qué tan probable es que recomiende el programa de indicación de PetJourney a un colega?",
+        "legenda": "0 = nada probable, 10 = muy probable",
+        "a11y": "Nota {nota}"
+      },
+      "multiplaEscolha": "Opcional. Puede marcar más de una opción.",
+      "pontos": {
+        "pergunta": "¿Qué fue lo que más le gustó?",
+        "opcoes": {
+          "FACILIDADE_INDICAR": "Facilidad para indicar (QR y enlace)",
+          "ACOMPANHAR_INDICADOS": "Ver quién entró con mi código",
+          "CLAREZA_CARTEIRA": "Claridad de la billetera y del saldo",
+          "RAPIDEZ_SAQUE": "Rapidez del retiro",
+          "VALOR_PARTICIPACAO": "Valor de la participación",
+          "APP_GERAL": "La plataforma en general"
+        }
+      },
+      "incentivos": {
+        "pergunta": "¿Qué lo motivaría a indicar más?",
+        "opcoes": {
+          "MATERIAL_DIVULGACAO": "Material de difusión listo",
+          "PARTICIPACAO_MAIOR": "Una participación mayor",
+          "TUTORES_ENGAJADOS": "Tutores más interesados en la app",
+          "FERRAMENTAS_NEGOCIO": "Más herramientas para mi negocio",
+          "ENTENDER_PROGRAMA": "Entender mejor cómo funciona el programa"
+        }
+      },
+      "sugestao": {
+        "label": "¿Quiere sugerir alguna mejora?",
+        "placeholder": "Escriba aquí (opcional)",
+        "contador": "{atual}/{max}"
+      },
+      "notaObrigatoria": "Elija una nota del 0 al 10 para enviar.",
+      "agoraNao": "Ahora no",
+      "erroEnvio": "No pudimos enviarlo ahora. Intente de nuevo.",
+      "obrigado": {
+        "titulo": "¡Gracias por su opinión!",
+        "texto": "Su respuesta nos ayuda a mejorar PetJourney."
+      }
     }
   },
   "parceiro": {
