@@ -145,6 +145,20 @@ export function useClinicFormat() {
     return `${mes}/${ano}`
   }
 
+  /**
+   * `2026-11` → "novembro". Com `comAno`, "novembro de 2026".
+   *
+   * É o nome que as metas de estoque usam em toda frase — "planejar novembro", "meta de outubro". O
+   * `mesCurto` do eixo de gráfico ("nov/26") lê como código de lote no meio de uma frase.
+   */
+  function mesPorExtenso(mes: string, comAno = false): string {
+    return new Intl.DateTimeFormat(localeIntl.value, {
+      month: 'long',
+      ...(comAno ? { year: 'numeric' as const } : {}),
+      timeZone: 'UTC',
+    }).format(new Date(`${mes}-15T12:00:00Z`))
+  }
+
   function diaDaSemanaCurto(data: ISODate): string {
     return new Intl.DateTimeFormat(localeIntl.value, {
       weekday: 'short',
@@ -390,6 +404,7 @@ export function useClinicFormat() {
     dataCurta,
     dataCurtaComAno,
     mesCurto,
+    mesPorExtenso,
     diaDaSemanaCurto,
     diaDaSemanaCurtoPorIndice,
     duracao,

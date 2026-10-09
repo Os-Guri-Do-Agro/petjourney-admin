@@ -23,6 +23,15 @@ export {
   type VinculosDaImportacao,
 } from './migracao-repository'
 export {
+  estoqueRepository,
+  diasDeValidade,
+  EstoqueRecusadoError,
+  LIMITE_DE_DOSES,
+  type MesDoPlano,
+  type MetaNova,
+  type PainelDeMetas,
+} from './estoque-repository'
+export {
   vacinaRepository,
   AplicacaoRecusadaError,
   type AplicacaoNaLista,

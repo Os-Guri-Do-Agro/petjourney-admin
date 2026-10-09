@@ -1,8 +1,12 @@
 <script setup lang="ts">
 /**
- * Vacinas — o que foi aplicado, quem falta chamar, e o que tem na geladeira.
+ * Vacinas — o que foi aplicado e quem falta chamar.
  *
- * São três perguntas, e elas não se respondem na mesma lista. **Aplicadas** é registro: o que
+ * O estoque morava aqui, como terceira aba, e saiu para a própria tela (`/veterinario/estoque`)
+ * quando ganhou trabalho próprio — receber lote, dar baixa, metas do mês. O endereço antigo
+ * (`?aba=estoque`) leva para lá, para o link guardado não cair numa aba que não existe mais.
+ *
+ * Eram três perguntas, e elas não se respondem na mesma lista. **Aplicadas** é registro: o que
  * saiu da geladeira, em quem, por quem e de que lote — a pergunta que aparece quando alguém
  * emite comprovante ou a farmacovigilância pergunta por um lote. **Em atraso** é fila de
  * trabalho: quem chamar hoje. **Estoque** é a terceira, e é a única que a clínica costuma
@@ -35,6 +39,7 @@
  * saudação, a agenda a recuperar mora dentro de Em atraso, e o estoque tem a própria linha de fatos.
  * O histórico de aplicações mostra vinte por vez: abria com 98 linhas e 5,8 telas de rolagem.
  */
+import { PhPackage } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -49,30 +54,19 @@ import ClinicFilterBar from '@/features/clinico/components/base/ClinicFilterBar.
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
 import type { GrupoDeFiltro } from '@/features/clinico/components/base/filter-types'
 import type { AcaoDeLinha, ColunaTabela } from '@/features/clinico/components/base/table-types'
-import EstoqueChartConsumo from '@/features/clinico/components/estoque/EstoqueChartConsumo.vue'
-import EstoqueChartSaldo from '@/features/clinico/components/estoque/EstoqueChartSaldo.vue'
-import EstoqueChartValidade from '@/features/clinico/components/estoque/EstoqueChartValidade.vue'
-import ClinicChartRanking from '@/features/clinico/components/resumo/ClinicChartRanking.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import {
   vacinaRepository,
   type AplicacaoNaLista,
   type ChamadaDeVacina,
 } from '@/features/clinico/data/repositories'
-import type { AlertSeverity } from '@/features/clinico/data/types'
 import { diffDays } from '@/features/clinico/domain/clinic-time'
-import {
-  JANELA_DE_VALIDADE_EM_DIAS,
-  type LoteNoEstoque,
-  type ResumoDoEstoque,
-} from '@/features/clinico/domain/estoque-vacinas'
-import type { Fatia } from '@/features/clinico/domain/resumo'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 
 type Recorte = 'todos' | 'vencido' | 'proximo' | 'serie-incompleta'
-type Aba = 'aplicadas' | 'atraso' | 'estoque'
+type Aba = 'aplicadas' | 'atraso'
 
-const ABAS: Aba[] = ['aplicadas', 'atraso', 'estoque']
+const ABAS: Aba[] = ['aplicadas', 'atraso']
 
 /**
  * As janelas de tempo do filtro de aplicadas.
@@ -92,7 +86,6 @@ const formato = useClinicFormat()
 const aba = ref<Aba>('aplicadas')
 const linhas = ref<ChamadaDeVacina[]>([])
 const aplicacoes = ref<AplicacaoNaLista[]>([])
-const estoque = ref<ResumoDoEstoque | null>(null)
 const carregando = ref(false)
 const erro = ref('')
 const recorte = ref<Recorte>('vencido')
@@ -106,15 +99,13 @@ async function carregar() {
   try {
     await clinico.carregar()
 
-    const [chamada, historico, geladeira] = await Promise.all([
+    const [chamada, historico] = await Promise.all([
       vacinaRepository.listaDeChamada(),
       vacinaRepository.aplicadas(),
-      vacinaRepository.estoque(),
     ])
 
     linhas.value = chamada
     aplicacoes.value = historico
-    estoque.value = geladeira
 
     /** Sem nenhum vencido, abrir no recorte vazio esconderia o que existe. */
     if (porSituacao.value.vencido.length === 0) {
@@ -137,6 +128,11 @@ let abaPedida = false
 
 onMounted(() => {
   const daUrl = String(route.query.aba ?? '')
+
+  if (daUrl === 'estoque') {
+    void router.replace('/veterinario/estoque')
+    return
+  }
 
   if ((ABAS as string[]).includes(daUrl)) {
     aba.value = daUrl as Aba
@@ -207,22 +203,7 @@ const opcoesAba = computed(() => [
     contagem: porSituacao.value.vencido.length,
     tom: porSituacao.value.vencido.length > 0 ? ('risco' as const) : ('neutro' as const),
   },
-  {
-    /*
-     * A contagem do estoque é o que **falta comprar**, e não o que tem na geladeira.
-     *
-     * "Estoque · 59" seria um número grande e tranquilizador ao lado de duas vacinas que
-     * acabaram — e o rótulo da aba existe para provocar o clique de quem precisa comprar, não
-     * para dar boas notícias a quem não ia clicar mesmo.
-     */
-    valor: 'estoque' as Aba,
-    rotulo: t('clinico.vacinas.aba.estoque'),
-    contagem: faltando.value,
-    tom: faltando.value > 0 ? ('atencao' as const) : ('neutro' as const),
-  },
 ])
-
-const faltando = computed(() => estoque.value?.indicadores.vacinasAbaixoDoMinimo ?? 0)
 
 function semAcento(texto: string): string {
   return texto
@@ -465,20 +446,15 @@ function executarAcao({ acao }: { acao: AcaoDeLinha<ChamadaDoPet>; linha: Chamad
 }
 
 /*
- * Vazio é vazio nas **três** listas.
+ * Vazio é vazio nas **duas** listas.
  *
  * Antes, sem ninguém para chamar, a tela inteira virava o estado vazio — e escondia junto o
  * registro do que a clínica aplicou, que continua existindo. Uma clínica em dia com os reforços
- * é a melhor notícia possível, e não pode apagar a própria carteira. O estoque entrou na mesma
- * conta pelo mesmo motivo: uma geladeira cheia não é razão para esconder a tela.
+ * é a melhor notícia possível, e não pode apagar a própria carteira.
  */
 const vazio = computed(
   () =>
-    !carregando.value &&
-    !erro.value &&
-    linhas.value.length === 0 &&
-    aplicacoes.value.length === 0 &&
-    (estoque.value?.lotes.length ?? 0) === 0,
+    !carregando.value && !erro.value && linhas.value.length === 0 && aplicacoes.value.length === 0,
 )
 
 /** Minutos de agenda que a chamada pode recuperar, a 20 min por aplicação. */
@@ -516,113 +492,6 @@ const limiteDoHistorico = ref(PASSO_DO_HISTORICO)
 watch([busca, filtros], () => {
   limiteDoHistorico.value = PASSO_DO_HISTORICO
 })
-
-// --------------------------------------------------------------------- estoque
-
-/**
- * O catálogo na ordem do catálogo — é ela que fixa a cor de cada vacina no gráfico de consumo.
- *
- * Vem do repositório e não das vacinas que aparecem no período: uma vacina que não saiu em
- * março não pode empurrar a cor das outras para o slot ao lado em abril.
- */
-const catalogo = computed(() => vacinaRepository.catalogo())
-
-/** `2026-03` → `mar/26`. O eixo tem doze colunas; mês por extenso não cabe em nenhuma. */
-function rotuloDoMes(mes: string): string {
-  return formato.mesCurto(`${mes}-01`)
-}
-
-const rotulosDosMeses = computed(() =>
-  (estoque.value?.consumo ?? []).map((ponto) => rotuloDoMes(ponto.mes)),
-)
-
-/**
- * As perdas viram fatias para o ranking que o resumo já desenha.
- *
- * Três motivos é pouco para um gráfico próprio, e é exatamente o formato que `ClinicChartRanking`
- * resolve — com a mesma barra, a mesma escala e o mesmo comportamento de dica do resto do
- * módulo. Um quarto componente aqui seria um jeito novo de desenhar a mesma coisa.
- */
-const fatiasDePerda = computed<Fatia[]>(() => {
-  const perdas = estoque.value?.perdasPorMotivo ?? []
-  const total = perdas.reduce((soma, item) => soma + item.doses, 0)
-
-  return perdas.map((item) => ({
-    id: item.motivo,
-    rotulo: t(`clinico.vacinas.estoque.perda.${item.motivo}`),
-    valor: item.doses,
-    parte: total > 0 ? item.doses / total : 0,
-  }))
-})
-
-/**
- * A tabela de lotes mostra **tudo**, inclusive o esgotado.
- *
- * O lote vazio não pede ação nenhuma, e é justamente ele que a farmacovigilância procura quando
- * liga: o código que gerou a reação costuma ser de um frasco que acabou meses atrás. Esconder o
- * esgotado deixaria a tela limpa e a pergunta sem resposta.
- */
-const lotesVisiveis = computed(() => estoque.value?.lotes ?? [])
-
-const colunasLotes = computed<ColunaTabela<LoteNoEstoque>[]>(() => [
-  {
-    id: 'lote',
-    rotulo: t('clinico.vacinas.lote'),
-    largura: 'minmax(0, 1fr)',
-    ordenarPor: (linha) => linha.codigo,
-  },
-  {
-    id: 'vacina',
-    rotulo: t('clinico.vacinas.colunaVacina'),
-    largura: 'minmax(0, 1.4fr)',
-    ordenarPor: (linha) => linha.vacinaNome,
-  },
-  {
-    id: 'saldo',
-    rotulo: t('clinico.vacinas.estoque.saldo'),
-    largura: '9rem',
-    numerico: true,
-    ordenarPor: (linha) => linha.saldo,
-  },
-  {
-    id: 'validade',
-    rotulo: t('clinico.vacinas.validadeLote'),
-    largura: '10rem',
-    numerico: true,
-    /** Ordena pelo prazo real, não pelo texto "vence em 45 d" que a célula escreve. */
-    ordenarPor: (linha) => linha.diasParaVencer,
-    ordemInicial: 'asc',
-  },
-  {
-    id: 'valor',
-    rotulo: t('clinico.vacinas.estoque.valorParado'),
-    largura: '9rem',
-    numerico: true,
-    ocultarEmTelaEstreita: true,
-    ordenarPor: (linha) => linha.valorParado,
-  },
-])
-
-/**
- * Tom do selo de situação do lote — a mesma escala de severidade das outras listas do módulo.
- *
- * `esgotado` fica em `info` e não em `atencao`: o frasco vazio não pede nada de ninguém, e
- * pintá-lo de alerta faria a tabela abrir com metade das linhas gritando.
- */
-function tomDoLote(situacao: LoteNoEstoque['situacao']): AlertSeverity {
-  if (situacao === 'vencido') {
-    return 'risco'
-  }
-
-  return situacao === 'vencendo' ? 'atencao' : 'info'
-}
-
-/** "cobertura de 84 d", ou o traço quando não houve consumo de onde tirar o ritmo. */
-function textoDeCobertura(dias: number | null): string {
-  return dias === null
-    ? t('clinico.vacinas.estoque.semCobertura')
-    : t('clinico.vacinas.estoque.cobertura', { dias })
-}
 </script>
 
 <template>
@@ -647,6 +516,20 @@ function textoDeCobertura(dias: number | null): string {
           <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
             {{ fraseDoResumo }}
           </p>
+
+          <!-- O estoque saiu daqui para a própria tela; o caminho para ele fica onde a aba estava. -->
+          <nav class="hc-acoes" :aria-label="t('clinico.estoque.titulo')">
+            <Button
+              type="button"
+              class="hc-pilula"
+              :label="t('clinico.estoque.titulo')"
+              @click="router.push('/veterinario/estoque')"
+            >
+              <template #icon>
+                <PhPackage class="hc-pilula__icone" aria-hidden="true" />
+              </template>
+            </Button>
+          </nav>
         </div>
       </div>
     </template>
@@ -776,233 +659,6 @@ function textoDeCobertura(dias: number | null): string {
         </div>
       </template>
 
-      <template v-else-if="aba === 'estoque'">
-        <!--
-          Os números da geladeira numa linha, e não em três cartões: quanto tem, quanto vence e o
-          que falta comprar. O valor em risco vai junto da contagem — "11 doses a vencer" não move
-          ninguém; o mesmo fato em dinheiro é o que faz a clínica abrir a geladeira hoje.
-        -->
-        <section
-          v-if="estoque"
-          class="hc vacinas-fatos"
-          :aria-label="t('clinico.vacinas.aba.estoque')"
-        >
-          <ul class="vacinas-fatos__lista">
-            <li>
-              <strong>{{ estoque.indicadores.dosesEmEstoque }}</strong>
-              {{ t('clinico.vacinas.estoque.dosesEmEstoque') }}
-              <span class="vacinas-fatos__nota">
-                ({{
-                  t('clinico.vacinas.estoque.valorParadoDetalhe', {
-                    valor: formato.moeda(estoque.indicadores.valorParado),
-                  })
-                }})
-              </span>
-            </li>
-            <li :class="{ 'vacinas-fatos__item--atencao': estoque.indicadores.dosesVencendo > 0 }">
-              <i
-                v-if="estoque.indicadores.dosesVencendo > 0"
-                class="pi pi-hourglass"
-                aria-hidden="true"
-              />
-              <strong>{{ estoque.indicadores.dosesVencendo }}</strong>
-              {{ t('clinico.vacinas.estoque.vencendo', { dias: JANELA_DE_VALIDADE_EM_DIAS }) }}
-              <span class="vacinas-fatos__nota">
-                ({{
-                  t('clinico.vacinas.estoque.emRisco', {
-                    valor: formato.moeda(estoque.indicadores.valorEmRisco),
-                  })
-                }})
-              </span>
-            </li>
-            <li :class="{ 'vacinas-fatos__item--risco': faltando > 0 }">
-              <i v-if="faltando > 0" class="pi pi-shopping-cart" aria-hidden="true" />
-              <strong>{{ faltando }}</strong>
-              {{ t('clinico.vacinas.estoque.abaixoDoMinimo') }}
-            </li>
-            <li>
-              {{
-                t('clinico.vacinas.estoque.perdaNoPeriodo', {
-                  valor: formato.percentual(estoque.indicadores.perdaPercentual),
-                  doses: estoque.indicadores.dosesPerdidas,
-                })
-              }}
-            </li>
-          </ul>
-        </section>
-
-        <template v-if="estoque">
-          <!--
-            O giro primeiro. É ele que dá escala a tudo o que vem depois: sem saber que a
-            clínica aplica sete doses por mês, "59 doses em estoque" não é nem muito nem pouco.
-          -->
-          <section class="cartao">
-            <header class="cartao__topo">
-              <span class="cartao__marca" aria-hidden="true"><i class="pi pi-chart-bar" /></span>
-              <h2>{{ t('clinico.vacinas.estoque.grafico.consumo') }}</h2>
-              <p>{{ t('clinico.vacinas.estoque.grafico.consumoAjuda') }}</p>
-            </header>
-
-            <EstoqueChartConsumo
-              :meses="estoque.consumo"
-              :vacinas="catalogo"
-              :rotulos="rotulosDosMeses"
-              :unidade="t('clinico.vacinas.estoque.doses')"
-              :vazio="t('clinico.vacinas.estoque.semConsumo')"
-            />
-          </section>
-
-          <div class="vacinas__par">
-            <section class="cartao">
-              <header class="cartao__topo">
-                <span class="cartao__marca" aria-hidden="true">
-                  <i class="pi pi-shopping-cart" />
-                </span>
-                <h2>{{ t('clinico.vacinas.estoque.grafico.saldo') }}</h2>
-                <p>{{ t('clinico.vacinas.estoque.grafico.saldoAjuda') }}</p>
-              </header>
-
-              <EstoqueChartSaldo
-                :saldos="estoque.saldos"
-                :legenda="{
-                  minimo: t('clinico.vacinas.estoque.minimo'),
-                  doses: t('clinico.vacinas.estoque.doses'),
-                  zerado: t('clinico.vacinas.estoque.situacaoSaldo.zerado'),
-                  abaixo: t('clinico.vacinas.estoque.situacaoSaldo.abaixo'),
-                  ok: t('clinico.vacinas.estoque.situacaoSaldo.ok'),
-                  cobertura: textoDeCobertura,
-                }"
-                :vazio="t('clinico.vacinas.estoque.semLotes')"
-              />
-            </section>
-
-            <section class="cartao">
-              <header class="cartao__topo">
-                <span class="cartao__marca" aria-hidden="true">
-                  <i class="pi pi-exclamation-triangle" />
-                </span>
-                <h2>{{ t('clinico.vacinas.estoque.grafico.perdas') }}</h2>
-                <p>{{ t('clinico.vacinas.estoque.grafico.perdasAjuda') }}</p>
-              </header>
-
-              <ClinicChartRanking
-                tom="atencao"
-                :fatias="fatiasDePerda"
-                :unidade="t('clinico.vacinas.estoque.doses')"
-                :vazio="t('clinico.vacinas.estoque.semPerdas')"
-              />
-            </section>
-          </div>
-
-          <section class="cartao">
-            <header class="cartao__topo">
-              <span class="cartao__marca" aria-hidden="true"><i class="pi pi-calendar" /></span>
-              <h2>{{ t('clinico.vacinas.estoque.grafico.validade') }}</h2>
-              <p>{{ t('clinico.vacinas.estoque.grafico.validadeAjuda') }}</p>
-            </header>
-
-            <EstoqueChartValidade
-              :lotes="estoque.lotes"
-              :hoje="clinicClock.today()"
-              :legenda="{
-                hoje: t('clinico.resumo.periodo.hoje'),
-                doses: t('clinico.vacinas.estoque.doses'),
-                situacao: {
-                  vencido: t('clinico.vacinas.estoque.situacaoLote.vencido'),
-                  vencendo: t('clinico.vacinas.estoque.situacaoLote.vencendo'),
-                  ativo: t('clinico.vacinas.estoque.situacaoLote.ativo'),
-                  esgotado: t('clinico.vacinas.estoque.situacaoLote.esgotado'),
-                },
-              }"
-              :vazio="t('clinico.vacinas.estoque.semLotes')"
-            />
-          </section>
-
-          <!--
-            A tabela fecha a aba, e não abre.
-
-            Gráfico responde "tem problema?"; tabela responde "qual, quanto e de quem" — que é o
-            que vai no pedido de compra e o que a farmacovigilância pede pelo telefone. Invertida
-            a ordem, a tela voltaria a ser a parede de números que os gráficos vieram resolver.
-          -->
-          <ClinicDataTable
-            :colunas="colunasLotes"
-            :linhas="lotesVisiveis"
-            :chave="(linha) => linha.id"
-            :carregando="carregando"
-            :vazio-titulo="t('clinico.vacinas.estoque.semLotes')"
-            :rotulo="t('clinico.vacinas.aba.estoque')"
-          >
-            <template #celula-lote="{ linha }">
-              <span class="vacinas__titulo">
-                <span class="vacinas__nome clinic-value">{{ linha.codigo }}</span>
-                <ClinicAlertChip
-                  v-if="linha.situacao !== 'ativo'"
-                  :severidade="tomDoLote(linha.situacao)"
-                  :rotulo="t(`clinico.vacinas.estoque.situacaoLote.${linha.situacao}`)"
-                />
-              </span>
-              <span class="vacinas__meta">{{ linha.fornecedor }}</span>
-            </template>
-
-            <template #celula-vacina="{ linha }">
-              <span class="vacinas__nome">{{ linha.vacinaNome }}</span>
-              <span class="vacinas__meta">
-                {{
-                  t('clinico.vacinas.estoque.recebidoEm', {
-                    data: formato.dataCurta(linha.recebidoEm),
-                    total: linha.quantidadeRecebida,
-                  })
-                }}
-              </span>
-            </template>
-
-            <!--
-              Saldo com o que saiu ao lado, e nunca só o saldo.
-
-              "4 doses" não diz se o lote girou; "4 · 13 aplicadas, 3 perdidas" conta a história
-              inteira do frasco numa linha — e é a perda que muda a próxima compra.
-            -->
-            <template #celula-saldo="{ linha }">
-              <strong class="vacinas__prazo clinic-value">{{ linha.saldo }}</strong>
-              <span class="vacinas__meta">
-                {{
-                  t('clinico.vacinas.estoque.saidas', {
-                    aplicadas: linha.aplicadas,
-                    perdidas: linha.perdidas,
-                  })
-                }}
-              </span>
-            </template>
-
-            <template #celula-validade="{ linha }">
-              <strong
-                class="vacinas__prazo clinic-value"
-                :class="`vacinas__prazo--${tomDoLote(linha.situacao)}`"
-              >
-                {{
-                  linha.diasParaVencer < 0
-                    ? t('clinico.vacinas.atrasadoDias', { dias: Math.abs(linha.diasParaVencer) })
-                    : t('clinico.vacinas.emDias', { dias: linha.diasParaVencer })
-                }}
-              </strong>
-              <span class="vacinas__meta">{{ formato.dataCurta(linha.validade) }}</span>
-            </template>
-
-            <template #celula-valor="{ linha }">
-              <span class="vacinas__nome clinic-value">{{ formato.moeda(linha.valorParado) }}</span>
-              <span class="vacinas__meta">
-                {{
-                  t('clinico.vacinas.estoque.custoUnitario', {
-                    valor: formato.moeda(linha.custoUnitario),
-                  })
-                }}
-              </span>
-            </template>
-          </ClinicDataTable>
-        </template>
-      </template>
-
       <template v-else>
         <div class="vacinas__recorte">
           <ClinicToggleGroup
@@ -1107,52 +763,6 @@ function textoDeCobertura(dias: number | null): string {
   font-size: 0.8rem;
 }
 
-.vacinas-fatos {
-  padding-block: 0.85rem;
-}
-
-.vacinas-fatos__lista {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.75rem;
-  margin: 0;
-  padding: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-  list-style: none;
-}
-
-.vacinas-fatos__lista li {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.3rem;
-}
-
-.vacinas-fatos__lista strong {
-  color: var(--hc-tinta);
-  font-size: 1rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-}
-
-.vacinas-fatos__nota {
-  color: var(--hc-tinta-3);
-}
-
-/* A urgência mora no ícone: vencendo em pêssego, faltando em coral. */
-.vacinas-fatos__lista i {
-  align-self: center;
-  font-size: 0.8rem;
-}
-
-.vacinas-fatos__item--atencao i {
-  color: var(--hc-pessego-tinta);
-}
-
-.vacinas-fatos__item--risco i {
-  color: var(--hc-coral-tinta);
-}
-
 .vacinas {
   display: grid;
   gap: var(--clinic-space-3);
@@ -1198,81 +808,11 @@ function textoDeCobertura(dias: number | null): string {
 }
 
 /* O prazo carrega a urgência: vencido em risco, a vencer em atenção. Cor com a palavra ao lado. */
-.vacinas__prazo--vencido,
-.vacinas__prazo--risco {
+.vacinas__prazo--vencido {
   color: var(--clinic-risk-text);
 }
 
-.vacinas__prazo--proximo,
-.vacinas__prazo--atencao {
+.vacinas__prazo--proximo {
   color: var(--clinic-attention-text);
-}
-
-/* ------------------------------------------------------------------ estoque */
-
-.vacinas__par {
-  display: grid;
-  align-items: start;
-  gap: var(--clinic-space-4);
-  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
-}
-
-/*
- * O cartão de gráfico, igual ao do resumo.
- *
- * É a mesma moldura de propósito: as duas telas mostram gráfico da mesma família, e um cartão
- * com outra borda ou outro respiro faria o estoque parecer um módulo comprado de fora.
- */
-.cartao {
-  display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-}
-
-/*
- * Ladrilho à esquerda, título e ajuda empilhados à direita — em áreas nomeadas, porque com
- * `grid-row: 1 / -1` o ladrilho colapsa para uma linha só quando não há grade explícita.
- */
-.cartao__topo {
-  display: grid;
-  align-items: center;
-  gap: 0 var(--clinic-space-3);
-  grid-template-areas:
-    'marca titulo'
-    'marca ajuda';
-  grid-template-columns: auto minmax(0, 1fr);
-}
-
-.cartao__marca {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  grid-area: marca;
-  place-items: center;
-  border-radius: 0.65rem;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: 0.8rem;
-}
-
-.cartao__topo h2 {
-  margin: 0;
-  grid-area: titulo;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-value);
-  font-weight: 750;
-  letter-spacing: -0.015em;
-}
-
-.cartao__topo p {
-  margin: 0;
-  grid-area: ajuda;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  line-height: 1.4;
 }
 </style>

@@ -86,6 +86,11 @@ const vacinas = ref<ContagemDePendencia>(VAZIO)
  * boletim retido.
  */
 const tratamentos = ref<ContagemDePendencia>(VAZIO)
+/**
+ * Vacinas abaixo do mínimo — o que falta comprar. Atenção, e não risco: a geladeira vazia cancela a
+ * consulta de amanhã, não a de agora, e a compra ainda dá tempo.
+ */
+const estoque = ref<ContagemDePendencia>(VAZIO)
 
 const carregando = ref(false)
 const carregado = ref(false)
@@ -118,13 +123,14 @@ async function apurar() {
     import('../stores/clinico'),
   ])
 
-  const [entradas, mapa, rascunhos, retornos, chamada, emCasa] = await Promise.all([
+  const [entradas, mapa, rascunhos, retornos, chamada, emCasa, geladeira] = await Promise.all([
     consultar(() => waitlistRepository.listar()),
     consultar(() => internacaoRepository.mapa()),
     consultar(() => encounterRepository.listarRascunhos(null)),
     consultar(() => encounterRepository.listarRetornosPendentes()),
     consultar(() => vacinaRepository.listaDeChamada()),
     consultar(() => tratamentoRepository.daClinica()),
+    consultar(() => vacinaRepository.estoque()),
   ])
 
   /*
@@ -183,7 +189,20 @@ async function apurar() {
     tratamentos.value = { total: emQueda, tom: emQueda > 0 ? 'risco' : 'neutro' }
   }
 
-  situacao.value = situacaoPelasFontes([entradas, mapa, rascunhos, retornos, chamada, emCasa])
+  if (geladeira.ok) {
+    const aComprar = geladeira.valor.indicadores.vacinasAbaixoDoMinimo
+    estoque.value = { total: aComprar, tom: aComprar > 0 ? 'atencao' : 'neutro' }
+  }
+
+  situacao.value = situacaoPelasFontes([
+    entradas,
+    mapa,
+    rascunhos,
+    retornos,
+    chamada,
+    emCasa,
+    geladeira,
+  ])
 
   if (situacao.value !== 'falhou') {
     conferidoEm.value = new Date()
@@ -263,6 +282,7 @@ export function useClinicoPendencias(ativo: () => boolean) {
     atividades: computed(() => (ativo() ? atividades.value : VAZIO)),
     vacinas: computed(() => (ativo() ? vacinas.value : VAZIO)),
     tratamentos: computed(() => (ativo() ? tratamentos.value : VAZIO)),
+    estoque: computed(() => (ativo() ? estoque.value : VAZIO)),
     situacao: computed(() => (ativo() ? situacao.value : null)),
     conferidoEm: computed(() => conferidoEm.value),
     carregando: computed(() => carregando.value),
@@ -278,6 +298,7 @@ export function limparPendenciasClinicas() {
   atividades.value = VAZIO
   vacinas.value = VAZIO
   tratamentos.value = VAZIO
+  estoque.value = VAZIO
   conferidoEm.value = null
   situacao.value = null
   carregado.value = false

@@ -69,6 +69,7 @@ import {
   gerarDiario,
   petsDoResumo,
 } from './seed-resumo'
+import { planosDeEstoquePlantados } from './seed-estoque'
 import { aplicacoesDaVacinacao, eventosDaVacinacao, petsDaVacinacao } from './seed-vacinacao'
 import type {
   Anamnese,
@@ -92,6 +93,7 @@ import type {
   MotivoDePerda,
   PesagemDeCasa,
   Pet,
+  PlanoDeEstoque,
   Prescription,
   Professional,
   RegistroDoDiario,
@@ -188,6 +190,15 @@ export type SeedResult = {
    * código do lote. Ver `domain/estoque-vacinas.ts`.
    */
   lotesDeVacina: LoteDeVacina[]
+  /**
+   * O piso de estoque que a clínica ajustou, por vacina.
+   *
+   * O catálogo traz o piso de fábrica; o que a clínica muda pela tela fica aqui, por cima dele. Mudar
+   * o catálogo em si faria a mudança vazar entre regenerações do seed — ele é constante de módulo.
+   */
+  estoqueMinimo: Record<string, number>
+  /** O que a clínica combinou para cada mês — ver `domain/metas-de-estoque.ts`. */
+  planosDeEstoque: PlanoDeEstoque[]
   /**
    * Procedimentos realizados e medicação aplicada na clínica.
    *
@@ -2018,6 +2029,9 @@ function lotesDeVacinaPlantados(hoje: ISODate): LoteDeVacina[] {
         quantidade: perda.quantidade,
         motivo: perda.motivo,
       })),
+      /* Numeração de nota inventada, mas estável: a mesma semente, a mesma nota. */
+      notaFiscal: String(48_210 + indice * 37),
+      recebidoPor: '',
     }
   })
 }
@@ -2296,6 +2310,42 @@ function rotinaDeVacinacao(
           dose,
           caso: 'série inicial',
         })
+      }
+    }
+  }
+
+  /*
+   * O mês corrente ganha o ritmo dos outros.
+   *
+   * O sorteio começa cinco dias atrás, e com isso o começo do mês corrente nunca tinha dose: no dia
+   * 7, o mês aparecia zerado no gráfico de consumo e as metas de estoque diziam "abaixo do ritmo,
+   * fecha em 0" para uma clínica que aplica sete doses por mês. Alguns pares já sorteados mudam
+   * de data — o reforço e a série junto, com o mesmo espaçamento — para dentro do mês, um a cada
+   * quatro dias corridos. Nenhuma dose é criada, e o reforço continua sendo o último do par: a
+   * lista de chamada não muda.
+   */
+  const corridos = Number(hoje.slice(8, 10)) - 1
+  const reforcos = saidas.filter((saida) => saida.caso === 'reforço anual')
+  const faltam =
+    Math.ceil(corridos / 4) - reforcos.filter((saida) => saida.diasAtras <= corridos).length
+
+  if (faltam > 0) {
+    const passo = Math.max(1, Math.floor(reforcos.length / faltam))
+    const espaco = Math.max(1, Math.floor(corridos / faltam))
+
+    for (let indice = 0; indice < faltam; indice += 1) {
+      const escolhido = reforcos[indice * passo]
+
+      if (!escolhido) {
+        break
+      }
+
+      const desloca = escolhido.diasAtras - (corridos - ((indice * espaco) % corridos))
+
+      for (const saida of saidas) {
+        if (saida.petId === escolhido.petId && saida.vacinaId === escolhido.vacinaId) {
+          saida.diasAtras -= desloca
+        }
       }
     }
   }
@@ -2979,6 +3029,11 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
   /* Os lotes vêm antes das aplicações: é deles que sai o código que cada dose cita. */
   const lotesDeVacina = lotesDeVacinaPlantados(clock.today())
   const daCarteirinha = aplicacoesDaVacinacao(clock.today(), iso)
+  const aplicacoesDeVacina = [
+    ...aplicacoesDeVacinaPlantadas(clock.today(), lotesDeVacina),
+    vacinaDaPerola(clock.today(), iso),
+    ...daCarteirinha,
+  ]
 
   return {
     semente,
@@ -2993,12 +3048,15 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
       ...eventosDasInternacoesAbertas(internacao),
       ...eventosDaVacinacao(daCarteirinha),
     ].sort((a, b) => b.em.localeCompare(a.em)),
-    aplicacoesDeVacina: [
-      ...aplicacoesDeVacinaPlantadas(clock.today(), lotesDeVacina),
-      vacinaDaPerola(clock.today(), iso),
-      ...daCarteirinha,
-    ],
+    aplicacoesDeVacina,
     lotesDeVacina,
+    estoqueMinimo: {},
+    planosDeEstoque: planosDeEstoquePlantados({
+      hoje: clock.today(),
+      lotes: lotesDeVacina,
+      aplicacoes: aplicacoesDeVacina,
+      iso,
+    }),
     atos: atosPlantados(encounters, clock.today()),
     internacao,
     casos: [...casos, ...casosDaInternacao(internacao), ...casosDaAdesao()],

@@ -947,12 +947,24 @@ export type Vacina = {
  * `temperatura` é equipamento — a mais cara, porque leva o lote inteiro junto — e `vencimento` é
  * compra mal dimensionada. Um número só de "perdas" não diz qual conversa ter.
  */
-export type MotivoDePerda = 'quebra' | 'temperatura' | 'vencimento'
+export type MotivoDePerda = 'quebra' | 'temperatura' | 'vencimento' | 'contagem'
 
+/**
+ * Uma baixa de estoque que não foi aplicação.
+ *
+ * `contagem` é a quarta conversa, e a mais incômoda: a geladeira tem menos doses do que o sistema
+ * diz. Sem um motivo próprio, a diferença do inventário entrava como "quebra" — e a clínica passava
+ * a discutir manuseio quando o problema era registro de aplicação que não aconteceu.
+ *
+ * `registradaPor` e `observacao` são opcionais porque as perdas de antes deste registro não têm
+ * nome de ninguém; a baixa feita pela tela sempre tem.
+ */
 export type PerdaDeLote = {
   em: ISODate
   quantidade: number
   motivo: MotivoDePerda
+  registradaPor?: string
+  observacao?: string
 }
 
 /**
@@ -975,6 +987,52 @@ export type LoteDeVacina = {
   /** Custo unitário em **centavos**. Dinheiro em inteiro, nunca em ponto flutuante. */
   custoUnitario: number
   perdas: PerdaDeLote[]
+  /** Número da nota de entrada, quando a recepção anotou. É o que o fornecedor pede na troca. */
+  notaFiscal?: string
+  /** Quem conferiu a caixa na chegada. Vazio nos lotes de antes da entrada pela tela. */
+  recebidoPor?: string
+}
+
+// ---------------------------------------------------------------------------
+// Metas de estoque
+// ---------------------------------------------------------------------------
+
+/**
+ * O que uma meta mede.
+ *
+ * - `aplicacoes` — doses aplicadas no mês. É **piso**: passar é bom. Por vacina, ou da clínica
+ *   inteira quando `vacinaId` é nulo.
+ * - `perdas` — doses que saíram sem entrar em paciente. É **teto**: passar é ruim.
+ * - `compras` — dinheiro gasto em lote recebido no mês, em centavos. Também teto: é o orçamento.
+ *
+ * Três e não mais, de propósito: são as três alavancas que a clínica mexe sozinha. Faturamento e
+ * margem dependem de preço e de agenda, que esta tela não controla.
+ */
+export type TipoDeMeta = 'aplicacoes' | 'perdas' | 'compras'
+
+export type MetaDeEstoque = {
+  id: string
+  tipo: TipoDeMeta
+  /** A vacina da meta. Nulo é a clínica inteira — e é o único valor aceito em perdas e compras. */
+  vacinaId: string | null
+  /** Doses em `aplicacoes` e `perdas`; centavos em `compras`. */
+  alvo: number
+}
+
+/**
+ * As metas de um mês.
+ *
+ * Um plano por mês, e não metas soltas com data: a conversa da clínica é "o que combinamos para
+ * novembro", e é o mês fechado que se compara com o combinado. `baseadoEm` guarda de que mês saíram
+ * as sugestões — sem ele, ninguém lembra em março por que a meta de V10 era 14.
+ */
+export type PlanoDeEstoque = {
+  /** `YYYY-MM`. */
+  mes: string
+  metas: MetaDeEstoque[]
+  baseadoEm: string | null
+  criadoPor: string
+  atualizadoEm: ISODateTime
 }
 
 /**

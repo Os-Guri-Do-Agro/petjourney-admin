@@ -48,6 +48,12 @@ export type MockOperation =
    */
   | 'tratamento.listar'
   | 'tratamento.registrar'
+  /*
+   * Estoque de vacinas. Receber lote, dar baixa e salvar metas é escrita de balcão e de gerência; a
+   * falha dela não pode apagar a geladeira da tela.
+   */
+  | 'estoque.listar'
+  | 'estoque.registrar'
 
 export class MockError extends Error {
   /** `kind` traduzível, nunca texto pronto de servidor. */

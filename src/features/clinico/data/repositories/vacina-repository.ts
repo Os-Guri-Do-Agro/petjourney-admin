@@ -112,9 +112,26 @@ export type AplicacaoNaLista = AplicacaoVacina & {
   obrigatoria: boolean
 }
 
+/**
+ * O catálogo com o piso que a clínica ajustou.
+ *
+ * O piso de fábrica vem da fixture; o ajustado pela tela mora no dataset, por cima. Toda conta de
+ * estoque passa por aqui — o gráfico que lesse a fixture e o pedido que lesse o ajuste discordariam
+ * sobre o que falta comprar.
+ */
+export function catalogoComPiso(): Vacina[] {
+  const pisos = getDataset().estoqueMinimo
+
+  return vacinasFixture.map((vacina) =>
+    pisos[vacina.id] === undefined
+      ? { ...vacina }
+      : { ...vacina, estoqueMinimo: pisos[vacina.id]! },
+  )
+}
+
 export const vacinaRepository = {
   catalogo(): Vacina[] {
-    return [...vacinasFixture]
+    return catalogoComPiso()
   },
 
   /** Carteira do paciente: da aplicação mais recente para a mais antiga. */
@@ -181,7 +198,7 @@ export const vacinaRepository = {
 
       return resumirEstoque({
         lotes: dataset.lotesDeVacina,
-        vacinas: vacinasFixture,
+        vacinas: catalogoComPiso(),
         aplicacoes: dataset.aplicacoesDeVacina,
         hoje: clock.today(),
       })

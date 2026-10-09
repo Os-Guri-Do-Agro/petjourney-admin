@@ -21,7 +21,14 @@
  *    decimal por contagem de doses acumula erro e o total do painel deixa de bater com o da nota.
  */
 
-import type { AplicacaoVacina, ISODate, LoteDeVacina, MotivoDePerda, Vacina } from '../data/types'
+import type {
+  AplicacaoVacina,
+  ISODate,
+  LoteDeVacina,
+  MotivoDePerda,
+  PerdaDeLote,
+  Vacina,
+} from '../data/types'
 
 import { addDays, diffDays } from './clinic-time'
 
@@ -360,4 +367,104 @@ export function resumirEstoque(entrada: EntradaDoEstoque): ResumoDoEstoque {
     consumo,
     perdasPorMotivo,
   }
+}
+
+// ---------------------------------------------------------------------- movimentos
+
+/**
+ * Um movimento da geladeira que **não** é aplicação: a caixa que chegou e a dose que saiu sem
+ * entrar em paciente.
+ *
+ * A aplicação fica de fora de propósito. Ela já tem lista própria (Vacinas → Aplicadas), e são
+ * noventa linhas que afogariam as seis que pedem conferência — o recebimento sem nota e a baixa
+ * sem explicação são o que a gerência abre esta lista para achar.
+ */
+export type MovimentoDeEstoque = {
+  id: string
+  tipo: 'entrada' | 'baixa'
+  em: ISODate
+  loteId: string
+  codigo: string
+  vacinaId: string
+  vacinaNome: string
+  /** Sempre positivo: o sentido é o `tipo`. */
+  quantidade: number
+  /** O motivo da baixa; nulo na entrada. */
+  motivo: MotivoDePerda | null
+  /** Centavos que o movimento representa: custo da caixa na entrada, prejuízo na baixa. */
+  valor: number
+  /** Profissional que registrou. Vazio no que veio de antes do registro por pessoa. */
+  quem: string
+  /** Nota fiscal na entrada, observação na baixa. */
+  detalhe: string
+  fornecedor: string
+}
+
+function baixaComoMovimento(
+  lote: LoteDeVacina,
+  perda: PerdaDeLote,
+  indice: number,
+  vacinaNome: string,
+): MovimentoDeEstoque {
+  return {
+    id: `${lote.id}-baixa-${indice}`,
+    tipo: 'baixa',
+    em: perda.em,
+    loteId: lote.id,
+    codigo: lote.codigo,
+    vacinaId: lote.vacinaId,
+    vacinaNome,
+    quantidade: perda.quantidade,
+    motivo: perda.motivo,
+    valor: perda.quantidade * lote.custoUnitario,
+    quem: perda.registradaPor ?? '',
+    detalhe: perda.observacao ?? '',
+    fornecedor: lote.fornecedor,
+  }
+}
+
+/**
+ * Entradas e baixas, do mais recente para o mais antigo.
+ *
+ * Baixa de quantidade zero não entra: é registro vazio (a semente tem um, de propósito, para o
+ * gráfico de perdas aprender a ignorá-lo), e uma linha "0 doses" na conferência só ensina a pular
+ * linhas.
+ */
+export function movimentosDoEstoque(
+  lotes: LoteDeVacina[],
+  vacinas: Vacina[],
+): MovimentoDeEstoque[] {
+  const nomePorId = new Map(vacinas.map((vacina) => [vacina.id, vacina.nome]))
+  const movimentos: MovimentoDeEstoque[] = []
+
+  for (const lote of lotes) {
+    const vacinaNome = nomePorId.get(lote.vacinaId) ?? lote.vacinaId
+
+    movimentos.push({
+      id: `${lote.id}-entrada`,
+      tipo: 'entrada',
+      em: lote.recebidoEm,
+      loteId: lote.id,
+      codigo: lote.codigo,
+      vacinaId: lote.vacinaId,
+      vacinaNome,
+      quantidade: lote.quantidadeRecebida,
+      motivo: null,
+      valor: lote.quantidadeRecebida * lote.custoUnitario,
+      quem: lote.recebidoPor ?? '',
+      detalhe: lote.notaFiscal ?? '',
+      fornecedor: lote.fornecedor,
+    })
+
+    lote.perdas.forEach((perda, indice) => {
+      if (perda.quantidade > 0) {
+        movimentos.push(baixaComoMovimento(lote, perda, indice, vacinaNome))
+      }
+    })
+  }
+
+  /* Mesmo dia: a baixa antes da entrada, porque a ordem é decrescente e a caixa chegou primeiro. */
+  return movimentos.sort(
+    (a, b) => b.em.localeCompare(a.em) || (a.tipo === b.tipo ? 0 : a.tipo === 'baixa' ? -1 : 1),
+  )
 }

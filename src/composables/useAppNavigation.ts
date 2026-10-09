@@ -236,6 +236,11 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
       { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'pi pi-user-minus' },
       /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
       { key: 'clinico.vacinas.titulo', to: '/veterinario/vacinas', icon: 'pi pi-shield' },
+      /*
+       * Logo abaixo de Vacinas: é a geladeira das mesmas vacinas, e o selo é o que falta comprar —
+       * pendência de verdade, que cancela a consulta que a lista de chamada trouxe de volta.
+       */
+      { key: 'clinico.estoque.titulo', to: '/veterinario/estoque', icon: 'pi pi-box' },
       /* Pelo mesmo motivo: é onde mora o alerta de adesão — para quem a clínica precisa ligar. */
       {
         key: 'clinico.adesao.titulo',
@@ -365,6 +370,10 @@ export function useAppNavigation() {
     '/veterinario/vacinas': {
       contagem: pendencias.vacinas.value,
       frase: 'clinico.navegacao.selo.vacinas',
+    },
+    '/veterinario/estoque': {
+      contagem: pendencias.estoque.value,
+      frase: 'clinico.navegacao.selo.estoque',
     },
     '/veterinario/tratamentos': {
       contagem: pendencias.tratamentos.value,

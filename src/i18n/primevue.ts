@@ -49,6 +49,24 @@ function nomes(tag: string) {
   }
 }
 
+/**
+ * A ordem da data digitada, no formato do PrimeVue (`yy` é o ano com quatro dígitos).
+ *
+ * Sem isto o calendário ficava no `mm/dd/yy` de fábrica em todo idioma: 7 de outubro aparecia
+ * como "10/07/2026" numa tela em português, e a validade de um lote digitada como se lê no frasco
+ * entrava trocada — o "válido até 10/07" de julho virava outubro, três meses a mais de prateleira
+ * para um frasco que já devia estar no descarte. Fixo por idioma, e não deduzido do `Intl`, porque
+ * o árabe devolve marcas de direção no meio dos separadores, e o campo precisa digitar o que mostra.
+ */
+const FORMATO_DE_DATA: Record<Locale, string> = {
+  pt: 'dd/mm/yy',
+  en: 'mm/dd/yy',
+  'en-GB': 'dd/mm/yy',
+  es: 'dd/mm/yy',
+  sr: 'dd.mm.yy',
+  ar: 'dd/mm/yy',
+}
+
 export function textosDoPrimeVue(locale: Locale) {
   const { t } = i18n.global
   /* O `{0}` é do PrimeVue, não do vue-i18n: passa de volta como argumento de lista. */
@@ -56,6 +74,7 @@ export function textosDoPrimeVue(locale: Locale) {
 
   return {
     ...nomes(INTL_LOCALE[locale]),
+    dateFormat: FORMATO_DE_DATA[locale],
     today: t('primevue.today'),
     clear: t('primevue.clear'),
     weekHeader: t('primevue.weekHeader'),

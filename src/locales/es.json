@@ -2115,7 +2115,8 @@
         "internacao": "{total} tarea por resolver en internación | {total} tareas por resolver en internación",
         "atividades": "{total} pendiente | {total} pendientes",
         "vacinas": "{total} refuerzo vencido | {total} refuerzos vencidos",
-        "tratamentos": "{total} tratamiento crítico con la adherencia en caída | {total} tratamientos críticos con la adherencia en caída"
+        "tratamentos": "{total} tratamiento crítico con la adherencia en caída | {total} tratamientos críticos con la adherencia en caída",
+        "estoque": "{total} vacuna bajo el mínimo | {total} vacunas bajo el mínimo"
       }
     },
     "busca": {
@@ -3807,7 +3808,8 @@
         "perda": {
           "quebra": "Rotura",
           "temperatura": "Temperatura",
-          "vencimento": "Vencimiento"
+          "vencimento": "Vencimiento",
+          "contagem": "Recuento"
         },
         "grafico": {
           "consumo": "Dosis aplicadas por mes",
@@ -5163,6 +5165,200 @@
         "semAtencao": "Ninguna adherencia en caída",
         "emCurso": "Ninguno en curso | 1 en curso | {n} en curso",
         "criticos": "1 crítico | {n} críticos"
+      }
+    },
+    "estoque": {
+      "titulo": "Stock de vacunas",
+      "subtitulo": "Lo que hay en la nevera, lo que entra y sale, y las metas del mes.",
+      "erroAoCarregar": "No se pudo cargar el stock.",
+      "erroAoSalvar": "No se pudo guardar. Inténtalo de nuevo.",
+      "acoesRotulo": "Acciones del stock",
+      "aba": {
+        "geladeira": "Nevera",
+        "metas": "Metas",
+        "movimentos": "Movimientos",
+        "analise": "Análisis"
+      },
+      "saudacao": {
+        "doses": "{n} en la nevera",
+        "comprar": "{n} vacuna por comprar | {n} vacunas por comprar",
+        "nadaAComprar": "nada por comprar",
+        "metas": "metas de {mes}: {bem} de {total} al ritmo"
+      },
+      "porVacina": "Por vacuna",
+      "lotes": "Lotes en la nevera",
+      "colunaCobertura": "Cobertura",
+      "colunaSituacao": "Situación",
+      "giroMensal": "salen {n} por mes",
+      "minimoDe": "mínimo {n}",
+      "vencendoNaVacina": "{n} para usar primero",
+      "receber": {
+        "acao": "Recibir lote",
+        "titulo": "Recibir lote",
+        "codigoDica": "Tal como está impreso en el frasco.",
+        "quantidade": "Cantidad (dosis)",
+        "custo": "Costo por dosis",
+        "fornecedor": "Proveedor",
+        "notaFiscal": "Factura",
+        "recebidoEm": "Recibido el",
+        "quemConferiu": "Revisado por",
+        "validadeCurta": "Caducidad corta: vence en {dias} días. El lote entra directo en la lista de usar primero.",
+        "total": "{doses} · {valor} en la factura",
+        "confirmar": "Dar entrada",
+        "erros": {
+          "codigo": "Escribe el código del lote.",
+          "validade": "Indica la caducidad.",
+          "quantidade": "Indica cuántas dosis llegaron."
+        }
+      },
+      "recusa": {
+        "vacina-desconhecida": "Esta vacuna no está en el catálogo de la clínica.",
+        "lote-desconhecido": "Este lote ya no está en la nevera. Recarga la pantalla.",
+        "codigo-repetido": "Ya existe un lote con este código. El código une la dosis al frasco y no puede repetirse.",
+        "codigo-vazio": "Escribe el código del lote.",
+        "validade-passada": "Caducado: el frasco caducado vuelve al proveedor, no entra en la nevera.",
+        "recebido-no-futuro": "La fecha de recepción no puede ser posterior a hoy.",
+        "quantidade-invalida": "Cantidad no válida.",
+        "custo-invalido": "Costo no válido.",
+        "acima-do-saldo": "El lote no tiene tantas dosis en el sistema.",
+        "contagem-acima-do-saldo": "Contaste más dosis de las que tiene el sistema. Revisa si alguna aplicación se registró con el lote equivocado.",
+        "contagem-sem-diferenca": "El recuento coincide con el sistema. Nada que dar de baja.",
+        "data-invalida": "La fecha debe estar entre la recepción del lote y hoy.",
+        "minimo-invalido": "Mínimo no válido.",
+        "meta-invalida": "Una de las metas tiene un valor no válido.",
+        "meta-repetida": "Hay dos metas iguales en el plan.",
+        "mes-fechado": "Este mes ya cerró: una meta escrita después del resultado no es una meta."
+      },
+      "baixa": {
+        "titulo": "Baja en el lote {lote}",
+        "acao": "Dar de baja",
+        "descartar": "Descartar",
+        "saldoAgora": "· {saldo} en el sistema · caduca {validade}",
+        "motivo": "Motivo",
+        "explica": {
+          "quebra": "Frasco que se cayó, se rajó o se contaminó al manipularlo.",
+          "temperatura": "Nevera fuera de rango: suele llevarse el lote entero, no una dosis.",
+          "vencimento": "Caducó con dosis dentro. Descartar es sacarlo de la nevera y del sistema.",
+          "contagem": "Indica cuántas dosis encontraste en la nevera. La diferencia con el sistema se da de baja."
+        },
+        "contadas": "Dosis encontradas en la nevera",
+        "quantidade": "Dosis que salieron",
+        "quando": "Cuándo",
+        "confere": "El recuento coincide con el sistema. Nada que dar de baja.",
+        "resultado": "Baja de {doses} ({valor}). El lote queda con {saldo}.",
+        "quem": "Registrado por",
+        "observacao": "Observación",
+        "observacaoDica": {
+          "quebra": "Se cayó en la mesa de la sala 2",
+          "temperatura": "El termómetro marcó 11 °C el sábado",
+          "vencimento": "Descartado como residuo biológico",
+          "contagem": "Recuento de fin de mes"
+        },
+        "confirmar": "Registrar baja"
+      },
+      "minimo": {
+        "acao": "Ajustar mínimo",
+        "titulo": "Mínimo de {vacina}",
+        "saldoHoje": "Stock hoy",
+        "giro": "Salen por mes",
+        "dica": "Un mes de consumo son {doses}: aguanta el retraso de una entrega.",
+        "dicaSemGiro": "Sin salidas en los últimos 12 meses. Se acepta cero: la clínica deja de mantener esta vacuna.",
+        "salvar": "Guardar mínimo",
+        "campo": "Mínimo (dosis)"
+      },
+      "metas": {
+        "tipo": {
+          "aplicacoes": "Aplicaciones",
+          "perdas": "Pérdidas",
+          "compras": "Compras"
+        },
+        "todasAsVacinas": "Todas las vacunas",
+        "mede": {
+          "aplicacoes": "dosis aplicadas en el mes",
+          "perdas": "tope de dosis perdidas en el mes",
+          "compras": "presupuesto de compra del mes"
+        },
+        "doses": "{n} dosis | {n} dosis",
+        "situacao": {
+          "piso": {
+            "cumprida": "Cumplida",
+            "no-ritmo": "Al ritmo",
+            "atencao": "Por debajo del ritmo",
+            "falhou": "No cumplida"
+          },
+          "teto": {
+            "cumprida": "Dentro del límite",
+            "no-ritmo": "Dentro del límite",
+            "atencao": "Cerca del límite",
+            "falhou": "Superado"
+          }
+        },
+        "de": "de {alvo}",
+        "ritmo": "al ritmo de hoy, cierra en {n}",
+        "planejar": "Planificar {mes}",
+        "doMes": "Metas de {mes}",
+        "emCurso": "En curso · último día | En curso · falta {n} día | En curso · faltan {n} días",
+        "placar": "{bem} de {total} metas cumplidas o al ritmo",
+        "editar": "Editar metas",
+        "semPlanoAtual": "Este mes todavía no tiene metas acordadas.",
+        "combinar": "Acordar metas de {mes}",
+        "planejadoEm": "Acordado el {data} por {quem}.",
+        "semPlanoProximo": "Todavía sin metas. La sugerencia sale de los números de {base} hasta hoy.",
+        "historico": "Meses anteriores",
+        "placarFechado": "{bem} de {total} metas cumplidas"
+      },
+      "pedido": {
+        "titulo": "Pedido de compra para {mes}",
+        "peloPlano": "Por las metas acordadas: el mes cierra en el mínimo de cada vacuna después de aplicar la meta.",
+        "pelaSugestao": "Por la sugerencia, mientras el mes no tenga metas acordadas.",
+        "copiar": "Copiar pedido",
+        "copiado": "Copiado",
+        "conta": "Cálculo",
+        "contaTexto": "meta {meta} + mínimo {minimo} − sobrante {sobra}",
+        "comprar": "Comprar",
+        "custo": "Costo estimado",
+        "vazio": "Nada que comprar para {mes}: la nevera cubre las metas y el mínimo.",
+        "total": "{doses} · {valor} estimados",
+        "semFornecedor": "Sin proveedor",
+        "cabecalhoTexto": "Pedido de vacunas — {mes}",
+        "linhaTexto": "• {vacina}: {doses}",
+        "totalTexto": "Total estimado: {valor}"
+      },
+      "plano": {
+        "titulo": "Planificar {mes}",
+        "tituloEditar": "Metas de {mes}",
+        "lede": "Sugeridas con los números de {base} hasta hoy. Ajusta lo que quieras: el pedido de compra de {mes} se recalcula con cada número.",
+        "aplicacoes": "Aplicaciones",
+        "noRitmo": "{mes}, al ritmo",
+        "media": "Promedio de 3 meses",
+        "reforcos": "Refuerzos en {mes}",
+        "meta": "Meta (dosis)",
+        "metaDe": "Meta de {vacina}",
+        "removerMeta": "Quitar la meta {meta}",
+        "daClinica": "Pérdidas y compras",
+        "perdasDica": "En {base}: {n} perdidas hasta hoy; promedio de {media} por mes.",
+        "comprasDica": "El pedido de estas metas cuesta {valor}.",
+        "noMaximo": "como máximo",
+        "acrescentar": "Añadir meta",
+        "novaAplicacao": "Aplicaciones de {vacina}",
+        "novaTotal": "Aplicaciones de todas las vacunas",
+        "novaPerdas": "Tope de pérdidas",
+        "novaCompras": "Presupuesto de compra",
+        "quemCombina": "Acordado por",
+        "pedido": "Con estas metas, el pedido de {mes} suma {doses} · {valor}.",
+        "semPedido": "Con estas metas, la nevera cubre {mes} sin comprar.",
+        "salvar": "Acordar metas de {mes}",
+        "tetoDePerdas": "Tope de pérdidas (dosis)"
+      },
+      "movimentos": {
+        "entradas": "Entradas",
+        "baixas": "Bajas",
+        "colunaMovimento": "Movimiento",
+        "colunaValor": "Valor",
+        "entrada": "Entrada",
+        "vazio": "No hay entradas ni bajas registradas.",
+        "nota": "Factura {nota}",
+        "colunaDoses": "Dosis"
       }
     }
   },

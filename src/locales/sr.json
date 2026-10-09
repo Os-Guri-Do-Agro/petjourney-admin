@@ -2115,7 +2115,8 @@
         "internacao": "{total} stavka za rešavanje na hospitalizaciji | {total} stavke za rešavanje na hospitalizaciji | {total} stavki za rešavanje na hospitalizaciji",
         "atividades": "{total} otvoren zadatak | {total} otvorena zadatka | {total} otvorenih zadataka",
         "vacinas": "{total} revakcinacija kasni | {total} revakcinacije kasne | {total} revakcinacija kasni",
-        "tratamentos": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}"
+        "tratamentos": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}",
+        "estoque": "{total} vakcina ispod minimuma | {total} vakcine ispod minimuma | {total} vakcina ispod minimuma"
       }
     },
     "busca": {
@@ -3807,7 +3808,8 @@
         "perda": {
           "quebra": "Lom",
           "temperatura": "Temperatura",
-          "vencimento": "Istek roka"
+          "vencimento": "Istek roka",
+          "contagem": "Popis"
         },
         "grafico": {
           "consumo": "Primenjene doze po mesecu",
@@ -5163,6 +5165,200 @@
         "semAtencao": "Nema pada pridržavanja",
         "emCurso": "Nijedna u toku | {n} u toku | {n} u toku | {n} u toku",
         "criticos": "{n} kritična | {n} kritične | {n} kritičnih"
+      }
+    },
+    "estoque": {
+      "titulo": "Zalihe vakcina",
+      "subtitulo": "Šta je u frižideru, šta ulazi i izlazi, i ciljevi za mesec.",
+      "erroAoCarregar": "Nije moguće učitati zalihe.",
+      "erroAoSalvar": "Nije moguće sačuvati. Pokušajte ponovo.",
+      "acoesRotulo": "Radnje sa zalihama",
+      "aba": {
+        "geladeira": "Frižider",
+        "metas": "Ciljevi",
+        "movimentos": "Promet",
+        "analise": "Analiza"
+      },
+      "saudacao": {
+        "doses": "u frižideru: {n}",
+        "comprar": "{n} vakcina za nabavku | {n} vakcine za nabavku | {n} vakcina za nabavku",
+        "nadaAComprar": "ništa za nabavku",
+        "metas": "ciljevi za {mes}: {bem} od {total} u ritmu"
+      },
+      "porVacina": "Po vakcini",
+      "lotes": "Serije u frižideru",
+      "colunaCobertura": "Pokrivenost",
+      "colunaSituacao": "Stanje",
+      "giroMensal": "mesečna potrošnja: {n}",
+      "minimoDe": "minimum: {n}",
+      "vencendoNaVacina": "prvo iskoristiti: {n}",
+      "receber": {
+        "acao": "Primi seriju",
+        "titulo": "Prijem serije",
+        "codigoDica": "Kako piše na bočici.",
+        "quantidade": "Količina (doze)",
+        "custo": "Cena po dozi",
+        "fornecedor": "Dobavljač",
+        "notaFiscal": "Račun",
+        "recebidoEm": "Primljeno",
+        "quemConferiu": "Proverio/la",
+        "validadeCurta": "Kratak rok: dana do isteka: {dias}. Serija odmah ulazi na listu za prvo korišćenje.",
+        "total": "{doses} · na računu: {valor}",
+        "confirmar": "Unesi u zalihe",
+        "erros": {
+          "codigo": "Unesite šifru serije.",
+          "validade": "Unesite rok trajanja.",
+          "quantidade": "Unesite koliko je doza stiglo."
+        }
+      },
+      "recusa": {
+        "vacina-desconhecida": "Ova vakcina nije u katalogu klinike.",
+        "lote-desconhecido": "Ova serija više nije u frižideru. Osvežite stranicu.",
+        "codigo-repetido": "Serija sa ovom šifrom već postoji. Šifra povezuje dozu sa bočicom i ne sme da se ponavlja.",
+        "codigo-vazio": "Unesite šifru serije.",
+        "validade-passada": "Rok je istekao: istekla bočica se vraća dobavljaču, ne ulazi u frižider.",
+        "recebido-no-futuro": "Datum prijema ne može biti posle današnjeg.",
+        "quantidade-invalida": "Neispravna količina.",
+        "custo-invalido": "Neispravna cena.",
+        "acima-do-saldo": "Serija nema toliko doza u sistemu.",
+        "contagem-acima-do-saldo": "Izbrojali ste više doza nego što sistem ima. Proverite da li je neka primena upisana pod pogrešnom serijom.",
+        "contagem-sem-diferenca": "Popis se slaže sa sistemom. Nema šta da se otpiše.",
+        "data-invalida": "Datum mora biti između prijema serije i danas.",
+        "minimo-invalido": "Neispravan minimum.",
+        "meta-invalida": "Jedan od ciljeva ima neispravnu vrednost.",
+        "meta-repetida": "Plan ima dva ista cilja.",
+        "mes-fechado": "Ovaj mesec je zatvoren: cilj napisan posle rezultata nije cilj."
+      },
+      "baixa": {
+        "titulo": "Otpis iz serije {lote}",
+        "acao": "Otpiši",
+        "descartar": "Odbaci",
+        "saldoAgora": "· u sistemu: {saldo} · rok: {validade}",
+        "motivo": "Razlog",
+        "explica": {
+          "quebra": "Bočica koja je pala, pukla ili se kontaminirala pri rukovanju.",
+          "temperatura": "Frižider van opsega: obično odnese celu seriju, ne jednu dozu.",
+          "vencimento": "Istekla sa dozama unutra. Odbacivanje je uklanja iz frižidera i iz sistema.",
+          "contagem": "Unesite koliko ste doza našli u frižideru. Razlika u odnosu na sistem postaje otpis."
+        },
+        "contadas": "Doze nađene u frižideru",
+        "quantidade": "Doze koje su izašle",
+        "quando": "Kada",
+        "confere": "Popis se slaže sa sistemom. Nema šta da se otpiše.",
+        "resultado": "Otpis: {doses} ({valor}). U seriji ostaje: {saldo}.",
+        "quem": "Upisao/la",
+        "observacao": "Napomena",
+        "observacaoDica": {
+          "quebra": "Pala na pult u sobi 2",
+          "temperatura": "Termometar je u subotu pokazao 11 °C",
+          "vencimento": "Odbačeno kao biološki otpad",
+          "contagem": "Popis na kraju meseca"
+        },
+        "confirmar": "Upiši otpis"
+      },
+      "minimo": {
+        "acao": "Podesi minimum",
+        "titulo": "Minimum za {vacina}",
+        "saldoHoje": "Danas na stanju",
+        "giro": "Mesečna potrošnja",
+        "dica": "Mesec dana potrošnje: {doses}. Dovoljno da se izdrži kašnjenje isporuke.",
+        "dicaSemGiro": "Bez potrošnje u poslednjih 12 meseci. Nula je dozvoljena: klinika prestaje da drži ovu vakcinu.",
+        "salvar": "Sačuvaj minimum",
+        "campo": "Minimum (doze)"
+      },
+      "metas": {
+        "tipo": {
+          "aplicacoes": "Primene",
+          "perdas": "Gubici",
+          "compras": "Nabavka"
+        },
+        "todasAsVacinas": "Sve vakcine",
+        "mede": {
+          "aplicacoes": "primenjene doze u mesecu",
+          "perdas": "gornja granica izgubljenih doza u mesecu",
+          "compras": "budžet nabavke za mesec"
+        },
+        "doses": "{n} doza | {n} doze | {n} doza",
+        "situacao": {
+          "piso": {
+            "cumprida": "Ostvaren",
+            "no-ritmo": "U ritmu",
+            "atencao": "Ispod ritma",
+            "falhou": "Nije ostvaren"
+          },
+          "teto": {
+            "cumprida": "U granici",
+            "no-ritmo": "U granici",
+            "atencao": "Blizu granice",
+            "falhou": "Prekoračen"
+          }
+        },
+        "de": "od {alvo}",
+        "ritmo": "po današnjem ritmu, završava na: {n}",
+        "planejar": "Planiraj {mes}",
+        "doMes": "Ciljevi za {mes}",
+        "emCurso": "U toku · poslednji dan | U toku · ostao je {n} dan | U toku · ostala su {n} dana | U toku · ostalo je {n} dana",
+        "placar": "ostvareno ili u ritmu: {bem} od {total}",
+        "editar": "Izmeni ciljeve",
+        "semPlanoAtual": "Ovaj mesec još nema dogovorene ciljeve.",
+        "combinar": "Dogovori ciljeve za {mes}",
+        "planejadoEm": "Dogovoreno {data}, dogovorio/la: {quem}.",
+        "semPlanoProximo": "Još nema ciljeva. Predlog dolazi iz brojeva za {base} do danas.",
+        "historico": "Prethodni meseci",
+        "placarFechado": "ostvareno: {bem} od {total}"
+      },
+      "pedido": {
+        "titulo": "Porudžbina za {mes}",
+        "peloPlano": "Po dogovorenim ciljevima: mesec se završava na minimumu svake vakcine posle primene cilja.",
+        "pelaSugestao": "Po predlogu, dok mesec nema dogovorene ciljeve.",
+        "copiar": "Kopiraj porudžbinu",
+        "copiado": "Kopirano",
+        "conta": "Računica",
+        "contaTexto": "cilj {meta} + minimum {minimo} − ostatak {sobra}",
+        "comprar": "Nabaviti",
+        "custo": "Procenjena cena",
+        "vazio": "Ništa za nabavku za {mes}: frižider pokriva ciljeve i minimum.",
+        "total": "{doses} · procena: {valor}",
+        "semFornecedor": "Bez dobavljača",
+        "cabecalhoTexto": "Porudžbina vakcina: {mes}",
+        "linhaTexto": "• {vacina}: {doses}",
+        "totalTexto": "Procenjeni ukupan iznos: {valor}"
+      },
+      "plano": {
+        "titulo": "Planiraj {mes}",
+        "tituloEditar": "Ciljevi za {mes}",
+        "lede": "Predloženo na osnovu brojeva za {base} do danas. Menjajte šta želite: porudžbina za {mes} se preračunava sa svakim brojem.",
+        "aplicacoes": "Primene",
+        "noRitmo": "{mes}, u ritmu",
+        "media": "Prosek 3 meseca",
+        "reforcos": "Revakcinacije u: {mes}",
+        "meta": "Cilj (doze)",
+        "metaDe": "Cilj za {vacina}",
+        "removerMeta": "Ukloni cilj {meta}",
+        "daClinica": "Gubici i nabavka",
+        "perdasDica": "{base}: izgubljeno do danas: {n}; mesečni prosek: {media}.",
+        "comprasDica": "Porudžbina za ove ciljeve košta {valor}.",
+        "noMaximo": "najviše",
+        "acrescentar": "Dodaj cilj",
+        "novaAplicacao": "Primene: {vacina}",
+        "novaTotal": "Primene svih vakcina",
+        "novaPerdas": "Granica gubitaka",
+        "novaCompras": "Budžet nabavke",
+        "quemCombina": "Dogovara",
+        "pedido": "Sa ovim ciljevima, porudžbina za {mes}: {doses} · {valor}.",
+        "semPedido": "Sa ovim ciljevima, frižider pokriva {mes} bez nabavke.",
+        "salvar": "Dogovori ciljeve za {mes}",
+        "tetoDePerdas": "Granica gubitaka (doze)"
+      },
+      "movimentos": {
+        "entradas": "Prijemi",
+        "baixas": "Otpisi",
+        "colunaMovimento": "Promena",
+        "colunaValor": "Vrednost",
+        "entrada": "Prijem",
+        "vazio": "Nema upisanih prijema ni otpisa.",
+        "nota": "Račun {nota}",
+        "colunaDoses": "Doze"
       }
     }
   },

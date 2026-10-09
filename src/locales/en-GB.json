@@ -2115,7 +2115,8 @@
         "internacao": "{total} item to handle in inpatients | {total} items to handle in inpatients",
         "atividades": "{total} open task | {total} open tasks",
         "vacinas": "{total} overdue booster | {total} overdue boosters",
-        "tratamentos": "{total} critical treatment with dropping adherence | {total} critical treatments with dropping adherence"
+        "tratamentos": "{total} critical treatment with dropping adherence | {total} critical treatments with dropping adherence",
+        "estoque": "{total} vaccine below minimum | {total} vaccines below minimum"
       }
     },
     "busca": {
@@ -3807,7 +3808,8 @@
         "perda": {
           "quebra": "Breakage",
           "temperatura": "Temperature",
-          "vencimento": "Expiry"
+          "vencimento": "Expiry",
+          "contagem": "Count"
         },
         "grafico": {
           "consumo": "Doses given per month",
@@ -5163,6 +5165,200 @@
         "semAtencao": "No adherence dropping",
         "emCurso": "None ongoing | 1 ongoing | {n} ongoing",
         "criticos": "1 critical | {n} critical"
+      }
+    },
+    "estoque": {
+      "titulo": "Vaccine stock",
+      "subtitulo": "What's in the fridge, what comes in and out, and the month's targets.",
+      "erroAoCarregar": "Couldn't load the stock.",
+      "erroAoSalvar": "Couldn't save. Try again.",
+      "acoesRotulo": "Stock actions",
+      "aba": {
+        "geladeira": "Fridge",
+        "metas": "Targets",
+        "movimentos": "Movements",
+        "analise": "Analysis"
+      },
+      "saudacao": {
+        "doses": "{n} in the fridge",
+        "comprar": "{n} vaccine to buy | {n} vaccines to buy",
+        "nadaAComprar": "nothing to buy",
+        "metas": "{mes} targets: {bem} of {total} on pace"
+      },
+      "porVacina": "By vaccine",
+      "lotes": "Batches in the fridge",
+      "colunaCobertura": "Coverage",
+      "colunaSituacao": "Status",
+      "giroMensal": "{n} used per month",
+      "minimoDe": "minimum {n}",
+      "vencendoNaVacina": "{n} to use first",
+      "receber": {
+        "acao": "Receive batch",
+        "titulo": "Receive batch",
+        "codigoDica": "As printed on the vial.",
+        "quantidade": "Quantity (doses)",
+        "custo": "Cost per dose",
+        "fornecedor": "Supplier",
+        "notaFiscal": "Invoice",
+        "recebidoEm": "Received on",
+        "quemConferiu": "Checked by",
+        "validadeCurta": "Short expiry: expires in {dias} days. The batch goes straight onto the use-first list.",
+        "total": "{doses} · {valor} on the invoice",
+        "confirmar": "Add to stock",
+        "erros": {
+          "codigo": "Enter the batch code.",
+          "validade": "Enter the expiry date.",
+          "quantidade": "Enter how many doses arrived."
+        }
+      },
+      "recusa": {
+        "vacina-desconhecida": "This vaccine isn't in the clinic's catalogue.",
+        "lote-desconhecido": "This batch is no longer in the fridge. Reload the page.",
+        "codigo-repetido": "A batch with this code already exists. The code links the dose to the vial and cannot repeat.",
+        "codigo-vazio": "Enter the batch code.",
+        "validade-passada": "Expired: an expired vial goes back to the supplier, not into the fridge.",
+        "recebido-no-futuro": "The receiving date can't be after today.",
+        "quantidade-invalida": "Invalid quantity.",
+        "custo-invalido": "Invalid cost.",
+        "acima-do-saldo": "The batch doesn't have that many doses in the system.",
+        "contagem-acima-do-saldo": "You counted more doses than the system has. Check whether a dose was recorded against the wrong batch.",
+        "contagem-sem-diferenca": "The count matches the system. Nothing to write off.",
+        "data-invalida": "The date must be between the batch arrival and today.",
+        "minimo-invalido": "Invalid minimum.",
+        "meta-invalida": "One of the targets has an invalid value.",
+        "meta-repetida": "The plan has two identical targets.",
+        "mes-fechado": "This month is closed: a target written after the result is not a target."
+      },
+      "baixa": {
+        "titulo": "Write-off for batch {lote}",
+        "acao": "Write off",
+        "descartar": "Discard",
+        "saldoAgora": "· {saldo} in the system · expires {validade}",
+        "motivo": "Reason",
+        "explica": {
+          "quebra": "A vial that fell, cracked or was contaminated while handled.",
+          "temperatura": "Fridge out of range: it usually takes the whole batch, not one dose.",
+          "vencimento": "Expired with doses left. Discarding takes it out of the fridge and the system.",
+          "contagem": "Say how many doses you found in the fridge. The difference from the system becomes the write-off."
+        },
+        "contadas": "Doses found in the fridge",
+        "quantidade": "Doses out",
+        "quando": "When",
+        "confere": "The count matches the system. Nothing to write off.",
+        "resultado": "Write-off of {doses} ({valor}). The batch keeps {saldo}.",
+        "quem": "Recorded by",
+        "observacao": "Note",
+        "observacaoDica": {
+          "quebra": "Dropped on the counter in room 2",
+          "temperatura": "Thermometer read 11 °C on Saturday",
+          "vencimento": "Disposed of as biological waste",
+          "contagem": "End-of-month count"
+        },
+        "confirmar": "Record write-off"
+      },
+      "minimo": {
+        "acao": "Adjust minimum",
+        "titulo": "Minimum for {vacina}",
+        "saldoHoje": "In stock today",
+        "giro": "Used per month",
+        "dica": "One month of use is {doses}: enough to absorb a late delivery.",
+        "dicaSemGiro": "Not used in the last 12 months. Zero is allowed: the clinic stops keeping this vaccine.",
+        "salvar": "Save minimum",
+        "campo": "Minimum (doses)"
+      },
+      "metas": {
+        "tipo": {
+          "aplicacoes": "Doses given",
+          "perdas": "Losses",
+          "compras": "Purchases"
+        },
+        "todasAsVacinas": "All vaccines",
+        "mede": {
+          "aplicacoes": "doses given in the month",
+          "perdas": "cap on doses lost in the month",
+          "compras": "month's purchasing budget"
+        },
+        "doses": "{n} dose | {n} doses",
+        "situacao": {
+          "piso": {
+            "cumprida": "Met",
+            "no-ritmo": "On pace",
+            "atencao": "Behind pace",
+            "falhou": "Missed"
+          },
+          "teto": {
+            "cumprida": "Within limit",
+            "no-ritmo": "Within limit",
+            "atencao": "Near limit",
+            "falhou": "Over limit"
+          }
+        },
+        "de": "of {alvo}",
+        "ritmo": "at today's pace, ends at {n}",
+        "planejar": "Plan {mes}",
+        "doMes": "{mes} targets",
+        "emCurso": "In progress · last day | In progress · {n} day left | In progress · {n} days left",
+        "placar": "{bem} of {total} targets met or on pace",
+        "editar": "Edit targets",
+        "semPlanoAtual": "This month has no agreed targets yet.",
+        "combinar": "Set {mes} targets",
+        "planejadoEm": "Agreed on {data} by {quem}.",
+        "semPlanoProximo": "No targets yet. The suggestion comes from {base} numbers so far.",
+        "historico": "Previous months",
+        "placarFechado": "{bem} of {total} targets met"
+      },
+      "pedido": {
+        "titulo": "Purchase order for {mes}",
+        "peloPlano": "From the agreed targets: the month ends at each vaccine minimum after giving the target doses.",
+        "pelaSugestao": "From the suggestion, while the month has no agreed targets.",
+        "copiar": "Copy order",
+        "copiado": "Copied",
+        "conta": "Calculation",
+        "contaTexto": "target {meta} + minimum {minimo} − left over {sobra}",
+        "comprar": "Buy",
+        "custo": "Estimated cost",
+        "vazio": "Nothing to buy for {mes}: the fridge covers the targets and the minimum.",
+        "total": "{doses} · {valor} estimated",
+        "semFornecedor": "No supplier",
+        "cabecalhoTexto": "Vaccine order — {mes}",
+        "linhaTexto": "• {vacina}: {doses}",
+        "totalTexto": "Estimated total: {valor}"
+      },
+      "plano": {
+        "titulo": "Plan {mes}",
+        "tituloEditar": "{mes} targets",
+        "lede": "Suggested from {base} numbers so far. Adjust anything: the {mes} purchase order is recalculated with every number.",
+        "aplicacoes": "Doses given",
+        "noRitmo": "{mes}, on pace",
+        "media": "3-month average",
+        "reforcos": "Boosters due in {mes}",
+        "meta": "Target (doses)",
+        "metaDe": "Target for {vacina}",
+        "removerMeta": "Remove the {meta} target",
+        "daClinica": "Losses and purchases",
+        "perdasDica": "In {base}: {n} lost so far; average of {media} per month.",
+        "comprasDica": "The order for these targets costs {valor}.",
+        "noMaximo": "at most",
+        "acrescentar": "Add target",
+        "novaAplicacao": "Doses of {vacina}",
+        "novaTotal": "Doses of all vaccines",
+        "novaPerdas": "Loss cap",
+        "novaCompras": "Purchasing budget",
+        "quemCombina": "Agreed by",
+        "pedido": "With these targets, the {mes} order comes to {doses} · {valor}.",
+        "semPedido": "With these targets, the fridge covers {mes} without buying.",
+        "salvar": "Set {mes} targets",
+        "tetoDePerdas": "Loss cap (doses)"
+      },
+      "movimentos": {
+        "entradas": "Arrivals",
+        "baixas": "Write-offs",
+        "colunaMovimento": "Movement",
+        "colunaValor": "Value",
+        "entrada": "Arrival",
+        "vazio": "No arrivals or write-offs recorded.",
+        "nota": "Invoice {nota}",
+        "colunaDoses": "Doses"
       }
     }
   },
