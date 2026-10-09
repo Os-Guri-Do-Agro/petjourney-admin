@@ -146,7 +146,8 @@ describe('admissão: o que entra e o que não', () => {
         },
         autorizacoes: [],
         contatoEmergencia: '',
-        veterinarioDeConfianca: '',
+        veterinario: null,
+        autorizadosARetirar: [],
         recebidoPor: 'eq-bruna',
       }),
     ).rejects.toThrow(AdmissaoBloqueadaError)
@@ -224,7 +225,12 @@ describe('a estadia, de ponta a ponta', () => {
         },
       ],
       contatoEmergencia: '(11) 99999-0000',
-      veterinarioDeConfianca: 'Clínica PetJourney',
+      veterinario: {
+        nome: 'Dra. Helena Vasconcelos Prado',
+        clinica: 'Clínica PetJourney',
+        telefone: '(11) 3555-0142',
+      },
+      autorizadosARetirar: [],
       recebidoPor: 'eq-bruna',
     })
   }
@@ -627,8 +633,8 @@ describe('a casa cadastra a própria rotina', () => {
       atual.itens.find((item) => item.kind === 'agua')!.horarios,
     )
 
-    expect(
-      getDataset().tarefas.filter((item) => item.previstaPara.includes('23:45')),
-    ).toHaveLength(0)
+    expect(getDataset().tarefas.filter((item) => item.previstaPara.includes('23:45'))).toHaveLength(
+      0,
+    )
   })
 })

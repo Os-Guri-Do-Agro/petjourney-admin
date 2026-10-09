@@ -46,7 +46,8 @@ import { cobrancaDaSaida, montarOrcamento } from '../../domain/tarifas'
 import { HOTEL_UTC_OFFSET } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import { agoraIso, getDataset, hojeIso, novoId } from '../store'
-import { AdmissaoBloqueadaError } from './reserva-repository'
+import { veterinarioInformado } from '../../domain/contatos'
+import { AdmissaoBloqueadaError, registrarAutorizados } from './reserva-repository'
 import type {
   Adaptacao,
   Autorizacao,
@@ -60,6 +61,7 @@ import type {
   Ocorrencia,
   OcorrenciaKind,
   Pertence,
+  PessoaAutorizada,
   PetSpecies,
   PlanoAlimentar,
   RegistroDoDiario,
@@ -67,6 +69,7 @@ import type {
   TarefaDeRotina,
   TarefaKind,
   TarefaStatus,
+  VeterinarioDoPet,
   ViaDeMedicacao,
   Turno,
 } from '../types'
@@ -260,8 +263,11 @@ export type EstadiaDetalhada = {
    * Vem junto do detalhe e não de uma segunda chamada: a conferência acontece no check-out, que é
    * feito **desta** tela, e buscar a reserva inteira só para ler uma lista de nomes seria uma
    * requisição para responder a uma pergunta que já estava respondida.
+   *
+   * Com telefone e documento: o check-out mostra o documento de quem foi escolhido, para a
+   * recepção conferir antes de entregar.
    */
-  autorizadosARetirar: string[]
+  autorizadosARetirar: PessoaAutorizada[]
 }
 
 /** Uma linha da prancheta do turno, com o hóspede resolvido. */
@@ -561,7 +567,14 @@ export const hospedagemRepository = {
     planoAlimentar: PlanoAlimentar
     autorizacoes: Autorizacao[]
     contatoEmergencia: string
-    veterinarioDeConfianca: string
+    /** `null`, ou os três campos vazios, é "não informado". */
+    veterinario: VeterinarioDoPet | null
+    /**
+     * Quem pode buscar, como ficou combinado **no balcão** — substitui a lista da reserva.
+     *
+     * Quem chega sem id conhecido é cadastrado na família, como na reserva.
+     */
+    autorizadosARetirar: PessoaAutorizada[]
     recebidoPor: string
     medicacoes?: Omit<MedicacaoDaEstadia, 'id' | 'hospedagemId'>[]
   }): Promise<Hospedagem> {
@@ -592,6 +605,30 @@ export const hospedagemRepository = {
       const agora = agoraIso()
       const hospedagemId = novoId('hosp')
 
+      /*
+       * Quem pode buscar é decidido de novo aqui, com o responsável na frente: a reserva feita por
+       * telefone três semanas antes não sabia que a irmã estaria viajando. A lista confirmada
+       * **substitui** a da reserva — é dela que o check-out lê —, e quem é novo entra no cadastro
+       * da família para a próxima estadia.
+       */
+      reserva.autorizadosARetirar = registrarAutorizados(
+        reserva.tutorId,
+        entrada.autorizadosARetirar,
+      )
+
+      /*
+       * O veterinário informado vira o conhecido do animal. O que **não** foi informado agora não
+       * apaga o de antes: "não lembro o telefone" no balcão não é "ele não tem mais veterinário".
+       */
+      const veterinario = veterinarioInformado(entrada.veterinario)
+
+      if (veterinario) {
+        dataset.veterinariosDosPets = [
+          ...dataset.veterinariosDosPets.filter((item) => item.petId !== reserva.petId),
+          { petId: reserva.petId, ...veterinario },
+        ]
+      }
+
       const hospedagem: Hospedagem = {
         id: hospedagemId,
         reservaId: reserva.id,
@@ -619,8 +656,8 @@ export const hospedagemRepository = {
         })),
         planoAlimentar: entrada.planoAlimentar,
         autorizacoes: entrada.autorizacoes,
-        contatoEmergencia: entrada.contatoEmergencia,
-        veterinarioDeConfianca: entrada.veterinarioDeConfianca,
+        contatoEmergencia: entrada.contatoEmergencia.trim(),
+        veterinario,
         adaptacao: 'em-adaptacao',
         observacao: reserva.observacao,
         recebidoPor: entrada.recebidoPor,

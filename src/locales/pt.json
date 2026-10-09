@@ -5537,8 +5537,17 @@
       "restricoes": "Restrições",
       "titulo": "Check-in de {pet}",
       "vendaSemAutorizacao": "A reserva vendeu serviço que depende de: {itens}. Sem a autorização, a casa não pode executar — e a conta continua cobrando.",
-      "veterinario": "Veterinário de confiança",
-      "via": "Via"
+      "veterinario": "Veterinário do pet",
+      "via": "Via",
+      "quemBusca": "Quem pode buscar {pet}",
+      "quemBuscaLede": "Marque quem vale para esta estadia. Na saída, a recepção confere o nome e o documento.",
+      "vetNome": "Nome",
+      "vetClinica": "Clínica",
+      "vetTelefone": "Telefone",
+      "vetDica": "Opcional. É para quem a casa liga antes do plantão.",
+      "vetDaUltimaVez": "Veio da última estadia. Confirme com o responsável.",
+      "vetSemTelefone": "Com o veterinário informado, falta o telefone.",
+      "vetTelefoneInvalido": "Telefone incompleto. Confira o DDD e o número."
     },
     "checkout": {
       "comoChegou": "Como ele chegou",
@@ -5561,7 +5570,9 @@
       "saidaTardia": "Saída depois do horário: {percentual}% de diária a mais.",
       "saldo": "Saldo a receber",
       "titulo": "Check-out de {pet}",
-      "voltarALista": "Voltar à lista"
+      "voltarALista": "Voltar à lista",
+      "confiraDocumento": "Confira o documento: {documento}",
+      "semDocumento": "Sem documento no cadastro. Peça um com foto."
     },
     "comum": {
       "cancelar": "Cancelar",
@@ -5688,7 +5699,8 @@
       },
       "subtitulo": "Hotel",
       "titulo": "Estadia",
-      "voltar": "Hóspedes"
+      "voltar": "Hóspedes",
+      "quemBusca": "Quem pode buscar"
     },
     "exigencia": {
       "antipulgas": "Antipulgas",
@@ -6065,9 +6077,7 @@
     },
     "reserva": {
       "acompanhante": "Acompanhante da mesma casa",
-      "acrescentarAutorizado": "Acrescentar autorizado",
-      "autorizados": "Quem mais pode retirar",
-      "autorizadosDica": "Nome de quem o responsável autoriza",
+      "autorizados": "Quem pode buscar",
       "avisoAdmissao": "Documentação a resolver antes da entrada: {itens}",
       "checkInBloqueado": "O check-in está bloqueado pela documentação pendente.",
       "chegaAs": "chega às",
@@ -6088,7 +6098,6 @@
       "periodo": "Período",
       "porDiaria": " por diária",
       "quantasNoites": "Noites",
-      "removerAutorizado": "Remover {nome}",
       "saiAs": "sai às",
       "saidaTardia": "A saída prevista é depois do horário: {valor} a mais na conta.",
       "semAcompanhante": "Sem acompanhante",
@@ -6515,6 +6524,25 @@
       "otologica": "Otológica",
       "subcutanea": "Subcutânea",
       "topica": "Tópica"
+    },
+    "quemBusca": {
+      "responsavel": "Responsável",
+      "sempre": "O responsável sempre pode buscar",
+      "ninguemMais": "Ninguém mais da família cadastrado.",
+      "cadastrar": "Cadastrar outra pessoa",
+      "novaPessoa": "Nova pessoa",
+      "nome": "Nome",
+      "telefone": "Telefone",
+      "relacao": "Relação",
+      "relacaoDica": "Irmã, motorista, vizinho",
+      "documento": "Documento",
+      "documentoDica": "RG ou CPF, se tiver",
+      "adicionar": "Adicionar",
+      "pendente": "Adicione ou cancele esta pessoa antes de confirmar.",
+      "erroNome": "Falta o nome.",
+      "erroTelefone": "Falta o telefone.",
+      "erroTelefoneInvalido": "Telefone incompleto. Confira o DDD e o número.",
+      "erroTelefoneRepetido": "Este telefone já é de {nome}."
     }
   },
   "primevue": {

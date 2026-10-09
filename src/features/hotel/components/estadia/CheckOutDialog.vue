@@ -23,7 +23,7 @@ import { useI18n } from 'vue-i18n'
 import HotelSelo from '../base/HotelSelo.vue'
 import { useHotelFormat } from '../../composables/useHotelFormat'
 import { variacaoDePeso } from '../../domain/estadia'
-import type { Hospedagem, Ocorrencia } from '../../data/types'
+import type { Hospedagem, Ocorrencia, PessoaAutorizada } from '../../data/types'
 
 const props = defineProps<{
   aberto: boolean
@@ -35,8 +35,11 @@ const props = defineProps<{
   ocorrenciasTravadas: Ocorrencia[]
   /** O responsável, sempre autorizado — é dele o animal. */
   responsavelNome: string
-  /** Quem mais o responsável autorizou na reserva. Vazio significa "só ele". */
-  autorizadosARetirar: string[]
+  responsavelTelefone: string
+  /** O documento do cadastro do responsável. Vazio quando a clínica não tem. */
+  responsavelDocumento: string
+  /** Quem mais pode retirar nesta estadia, com telefone e documento. Vazio significa "só ele". */
+  autorizadosARetirar: PessoaAutorizada[]
   salvando: boolean
   erro: string
 }>()
@@ -62,20 +65,50 @@ const observacoes = ref<Record<string, string>>({})
  * aparecer é o erro que não tem desfazer, e o momento de conferir é este, com o animal ainda na
  * coleira do hotel.
  *
- * A lista vem da reserva; "outra pessoa" continua possível, porque a vida acontece — mas então o
+ * A lista vem da estadia; "outra pessoa" continua possível, porque a vida acontece — mas então o
  * nome é digitado, e fica gravado que não era ninguém da lista.
+ *
+ * A escolha é guardada pela **chave** da pessoa e não pelo nome: o que se grava é o nome, mas o
+ * que a tela mostra embaixo — telefone e documento a conferir — é da pessoa escolhida, e dois
+ * "Marcos" na mesma família não podem trocar de documento.
  */
-const retiradoPor = ref('')
+const escolhida = ref('responsavel')
+const nomeDeOutraPessoa = ref('')
 const outraPessoa = ref(false)
 
-const quemPodeRetirar = computed(() => [props.responsavelNome, ...props.autorizadosARetirar])
+const quemPodeRetirar = computed(() => [
+  {
+    chave: 'responsavel',
+    nome: props.responsavelNome,
+    rotulo: `${props.responsavelNome} · ${t('hotel.quemBusca.responsavel')}`,
+    telefone: props.responsavelTelefone,
+    documento: props.responsavelDocumento,
+  },
+  ...props.autorizadosARetirar.map((pessoa) => ({
+    chave: pessoa.id,
+    nome: pessoa.nome,
+    rotulo: pessoa.relacao ? `${pessoa.nome} · ${pessoa.relacao}` : pessoa.nome,
+    telefone: pessoa.telefone,
+    documento: pessoa.documento,
+  })),
+])
+
+const pessoaEscolhida = computed(
+  () => quemPodeRetirar.value.find((item) => item.chave === escolhida.value) ?? null,
+)
+
+/** O nome que fica gravado na estadia. É texto, de propósito: é o que o balcão viu e conferiu. */
+const retiradoPor = computed(() =>
+  outraPessoa.value ? nomeDeOutraPessoa.value.trim() : (pessoaEscolhida.value?.nome ?? ''),
+)
 
 watch(
   () => props.aberto,
   (aberto) => {
     if (aberto) {
       peso.value = props.hospedagem?.pesoSaidaKg ?? null
-      retiradoPor.value = props.responsavelNome
+      escolhida.value = 'responsavel'
+      nomeDeOutraPessoa.value = ''
       outraPessoa.value = false
       observacoes.value = Object.fromEntries(
         (props.hospedagem?.pertences ?? []).map((item) => [item.id, item.observacao]),
@@ -132,7 +165,8 @@ function anotar(pertenceId: string) {
  */
 function alternarQuemRetira() {
   outraPessoa.value = !outraPessoa.value
-  retiradoPor.value = outraPessoa.value ? '' : props.responsavelNome
+  nomeDeOutraPessoa.value = ''
+  escolhida.value = 'responsavel'
 }
 
 function pesar() {
@@ -278,17 +312,18 @@ function pesar() {
         <div class="retirada">
           <Select
             v-if="!outraPessoa"
-            v-model="retiradoPor"
-            :options="quemPodeRetirar.map((nome) => ({ valor: nome, rotulo: nome }))"
+            v-model="escolhida"
+            :options="quemPodeRetirar"
             option-label="rotulo"
-            option-value="valor"
+            option-value="chave"
             :aria-label="t('hotel.checkout.quemRetira')"
+            :aria-describedby="pessoaEscolhida ? `${idCampo}-conferir` : undefined"
             fluid
           />
 
           <InputText
             v-else
-            v-model="retiradoPor"
+            v-model="nomeDeOutraPessoa"
             :placeholder="t('hotel.checkout.outraPessoaDica')"
             :aria-label="t('hotel.checkout.quemRetira')"
             fluid
@@ -304,6 +339,22 @@ function pesar() {
             @click="alternarQuemRetira"
           />
         </div>
+
+        <!--
+          O que conferir, embaixo de quem foi escolhido: o documento é a diferença entre "disse
+          que era a Clara" e "era a Clara". Sem documento no cadastro, a tela pede um com foto em
+          vez de calar — e o ícone carrega o aviso, não a cor da linha.
+        -->
+        <p v-if="!outraPessoa && pessoaEscolhida" :id="`${idCampo}-conferir`" class="conferir">
+          <i class="pi pi-id-card" aria-hidden="true" />
+          <span>
+            <template v-if="pessoaEscolhida.telefone">{{ pessoaEscolhida.telefone }} · </template>
+            <strong v-if="pessoaEscolhida.documento">
+              {{ t('hotel.checkout.confiraDocumento', { documento: pessoaEscolhida.documento }) }}
+            </strong>
+            <template v-else>{{ t('hotel.checkout.semDocumento') }}</template>
+          </span>
+        </p>
 
         <!-- Entregar a quem não está na lista é decisão de quem atende, e ela fica registrada. -->
         <Message v-if="outraPessoa" severity="warn" :closable="false">
@@ -326,7 +377,7 @@ function pesar() {
         icon="pi pi-sign-out"
         :loading="salvando"
         :disabled="!podeFechar"
-        @click="emit('confirmar', retiradoPor.trim())"
+        @click="emit('confirmar', retiradoPor)"
       />
     </template>
   </Dialog>
@@ -443,6 +494,25 @@ function pesar() {
 .retirada :deep(.p-select),
 .retirada :deep(.p-inputtext) {
   flex: 1;
+}
+
+.conferir {
+  display: flex;
+  align-items: flex-start;
+  margin: 0;
+  gap: var(--clinic-space-2);
+  color: var(--clinic-muted);
+  font-size: var(--clinic-font-label);
+}
+
+.conferir i {
+  margin-top: 0.1rem;
+  color: var(--clinic-faint);
+}
+
+.conferir strong {
+  color: var(--clinic-text);
+  font-weight: 650;
 }
 
 .entrada {

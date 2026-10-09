@@ -5537,8 +5537,17 @@
       "restricoes": "القيود",
       "titulo": "تسجيل دخول {pet}",
       "vendaSemAutorizacao": "باع الحجز خدمة تعتمد على: {itens}. بدون الإذن لا تستطيع المنشأة تنفيذها، والحساب يستمر في احتسابها.",
-      "veterinario": "الطبيب البيطري المعتاد",
-      "via": "طريقة الإعطاء"
+      "veterinario": "الطبيب البيطري للحيوان",
+      "via": "طريقة الإعطاء",
+      "quemBusca": "من يمكنه استلام {pet}",
+      "quemBuscaLede": "حدِّد من يُسمح له في هذه الإقامة. عند المغادرة، يتحقق الاستقبال من الاسم والوثيقة.",
+      "vetNome": "الاسم",
+      "vetClinica": "العيادة",
+      "vetTelefone": "الهاتف",
+      "vetDica": "اختياري. هو من تتصل به المنشأة قبل طبيب المناوبة.",
+      "vetDaUltimaVez": "من الإقامة السابقة. تأكَّد مع المسؤول.",
+      "vetSemTelefone": "أُدخِل طبيب بيطري، فيلزم رقم الهاتف.",
+      "vetTelefoneInvalido": "رقم الهاتف غير مكتمل. تحقَّق من رمز المنطقة والرقم."
     },
     "checkout": {
       "comoChegou": "كيف وصل",
@@ -5561,7 +5570,9 @@
       "saidaTardia": "مغادرة بعد الموعد: {percentual}% إضافية من الليلة.",
       "saldo": "الرصيد المستحق",
       "titulo": "تسجيل خروج {pet}",
-      "voltarALista": "العودة إلى القائمة"
+      "voltarALista": "العودة إلى القائمة",
+      "confiraDocumento": "تحقَّق من الوثيقة: {documento}",
+      "semDocumento": "لا توجد وثيقة في السجل. اطلب وثيقة تحمل صورة."
     },
     "comum": {
       "cancelar": "إلغاء",
@@ -5688,7 +5699,8 @@
       },
       "subtitulo": "الفندق",
       "titulo": "الإقامة",
-      "voltar": "النزلاء"
+      "voltar": "النزلاء",
+      "quemBusca": "من يمكنه الاستلام"
     },
     "exigencia": {
       "antipulgas": "علاج البراغيث",
@@ -6065,9 +6077,7 @@
     },
     "reserva": {
       "acompanhante": "مرافق من المنزل نفسه",
-      "acrescentarAutorizado": "إضافة مفوَّض",
-      "autorizados": "من يمكنه الاستلام أيضًا",
-      "autorizadosDica": "اسم من يفوّضه المسؤول",
+      "autorizados": "من يمكنه الاستلام",
       "avisoAdmissao": "مستندات يجب تسويتها قبل الوصول: {itens}",
       "checkInBloqueado": "تسجيل الدخول متوقف بسبب مستندات ناقصة.",
       "chegaAs": "يصل في",
@@ -6088,7 +6098,6 @@
       "periodo": "الفترة",
       "porDiaria": " لكل ليلة",
       "quantasNoites": "الليالي",
-      "removerAutorizado": "إزالة {nome}",
       "saiAs": "يغادر في",
       "saidaTardia": "المغادرة المتوقعة بعد الموعد: {valor} إضافية على الحساب.",
       "semAcompanhante": "بدون مرافق",
@@ -6515,6 +6524,25 @@
       "otologica": "أذني",
       "subcutanea": "تحت الجلد",
       "topica": "موضعي"
+    },
+    "quemBusca": {
+      "responsavel": "المسؤول",
+      "sempre": "يمكن للمسؤول الاستلام دائمًا",
+      "ninguemMais": "لا أحد آخر من العائلة مسجَّل.",
+      "cadastrar": "تسجيل شخص آخر",
+      "novaPessoa": "شخص جديد",
+      "nome": "الاسم",
+      "telefone": "الهاتف",
+      "relacao": "صلة القرابة",
+      "relacaoDica": "أخت، سائق، جار",
+      "documento": "الوثيقة",
+      "documentoDica": "بطاقة الهوية أو CPF، إن وُجدت",
+      "adicionar": "إضافة",
+      "pendente": "أضِف هذا الشخص أو ألغِه قبل التأكيد.",
+      "erroNome": "الاسم ناقص.",
+      "erroTelefone": "الهاتف ناقص.",
+      "erroTelefoneInvalido": "رقم الهاتف غير مكتمل. تحقَّق من رمز المنطقة والرقم.",
+      "erroTelefoneRepetido": "هذا الهاتف مسجَّل باسم {nome}."
     }
   },
   "primevue": {

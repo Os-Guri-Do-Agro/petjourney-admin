@@ -26,6 +26,7 @@ import type {
   ISODate,
   ISODateTime,
   MotivoDeCancelamento,
+  PessoaAutorizada,
   PetPorte,
   PetSpecies,
   ReservaOrigem,
@@ -218,7 +219,7 @@ export const useReservasStore = defineStore('hotel-reservas', () => {
     origem: ReservaOrigem
     servicos?: ServicoContratado[]
     observacao?: string
-    autorizadosARetirar?: string[]
+    autorizadosARetirar?: PessoaAutorizada[]
   }) {
     const reserva = await mutar(() =>
       reservaRepository.criar({

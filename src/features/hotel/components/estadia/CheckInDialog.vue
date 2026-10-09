@@ -27,14 +27,20 @@ import ToggleSwitch from 'primevue/toggleswitch'
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { formatarTelefone } from '@/features/clinico/domain/cadastro'
+
+import QuemPodeBuscar from '../reserva/QuemPodeBuscar.vue'
 import { useHotelFormat } from '../../composables/useHotelFormat'
 import type { AvaliacaoDeAdmissao } from '../../domain/admissao'
+import { problemaDoVeterinario, veterinarioInformado } from '../../domain/contatos'
 import { lerHorarios } from '../../domain/rotina-padrao'
 import type {
   Autorizacao,
   AutorizacaoKind,
+  PessoaAutorizada,
   PlanoAlimentar,
   ServicoKind,
+  VeterinarioDoPet,
   ViaDeMedicacao,
 } from '../../data/types'
 
@@ -42,7 +48,20 @@ const props = defineProps<{
   aberto: boolean
   petNome: string
   pesoCadastroKg: number | null
+  /** O responsável: sempre pode buscar, e é a primeira linha da lista de quem busca. */
+  responsavelNome: string
   telefoneResponsavel: string
+  /** O cadastro da família — quem já foi autorizado a buscar alguma vez. */
+  contatosConhecidos: PessoaAutorizada[]
+  /** Quem a reserva autorizou. Chega marcado; o balcão confirma ou corrige com o responsável. */
+  autorizadosDaReserva: PessoaAutorizada[]
+  /**
+   * O último veterinário conhecido do animal.
+   *
+   * Vem preenchido para ser **confirmado**, não redigitado: perguntar "ainda é a Dra. Helena?" leva
+   * dois segundos, e ditar um telefone de clínica de cabeça é onde o número sai errado.
+   */
+  veterinarioConhecido: VeterinarioDoPet | null
   admissao: AvaliacaoDeAdmissao | null
   /**
    * O que foi vendido na reserva.
@@ -69,7 +88,10 @@ const emit = defineEmits<{
       planoAlimentar: PlanoAlimentar
       autorizacoes: Autorizacao[]
       contatoEmergencia: string
-      veterinarioDeConfianca: string
+      /** `null` quando os três campos ficaram vazios. */
+      veterinario: VeterinarioDoPet | null
+      /** Quem vale para esta estadia. Gente nova vai com id provisório — ver `QuemPodeBuscar`. */
+      autorizadosARetirar: PessoaAutorizada[]
       medicacoes: MedicacaoNoCheckIn[]
     },
   ]
@@ -112,7 +134,56 @@ const inspecao = ref('')
 const pertences = ref<{ descricao: string; quantidade: number }[]>([])
 const novoPertence = ref('')
 const contatoEmergencia = ref('')
-const veterinario = ref('')
+
+/** Quem pode buscar nesta estadia, além do responsável. */
+const autorizados = ref<PessoaAutorizada[]>([])
+/** Uma pessoa digitada e não acrescentada. Trava a confirmação — ver `QuemPodeBuscar`. */
+const cadastroPendente = ref(false)
+
+const veterinario = ref<VeterinarioDoPet>({ nome: '', clinica: '', telefone: '' })
+/** O erro de telefone incompleto só depois de sair do campo: no meio da digitação, todo número é. */
+const telefoneDoVetTocado = ref(false)
+
+watch(
+  () => veterinario.value.telefone,
+  (valor) => {
+    const formatado = formatarTelefone(valor)
+
+    if (formatado !== valor) {
+      veterinario.value.telefone = formatado
+    }
+  },
+)
+
+const problemaDoVet = computed(() => problemaDoVeterinario(veterinario.value))
+
+/**
+ * Por que o veterinário trava a confirmação, em palavras.
+ *
+ * "Falta o telefone" aparece na hora, porque é a próxima coisa a perguntar ao responsável. O
+ * telefone incompleto espera o campo perder o foco — até o último dígito, todo número é incompleto.
+ */
+const erroDoVet = computed(() => {
+  if (problemaDoVet.value === 'sem-telefone') {
+    return t('hotel.checkin.vetSemTelefone')
+  }
+
+  return problemaDoVet.value === 'telefone-invalido' && telefoneDoVetTocado.value
+    ? t('hotel.checkin.vetTelefoneInvalido')
+    : ''
+})
+
+/** O preenchido ainda é o da última estadia: a tela pede confirmação em vez de fingir certeza. */
+const vetDaUltimaVez = computed(() => {
+  const conhecido = props.veterinarioConhecido
+
+  return (
+    conhecido !== null &&
+    conhecido.nome === veterinario.value.nome &&
+    conhecido.clinica === veterinario.value.clinica &&
+    conhecido.telefone === veterinario.value.telefone
+  )
+})
 
 const racaoPropria = ref(true)
 const marca = ref('')
@@ -148,7 +219,6 @@ function removerMedicacao(indice: number) {
 
 /** Os horários são digitados como se ditam ao telefone: "8:00, 20:00". */
 const horariosPorMedicacao = ref<string[]>([])
-
 
 /**
  * Medicação registrada sem horário não vira tarefa nenhuma — e some.
@@ -194,7 +264,12 @@ const negadasComServicoVendido = computed(() =>
 )
 
 const podeConfirmar = computed(
-  () => !bloqueado.value && (peso.value ?? 0) > 0 && !medicacaoIncompleta.value,
+  () =>
+    !bloqueado.value &&
+    (peso.value ?? 0) > 0 &&
+    !medicacaoIncompleta.value &&
+    !cadastroPendente.value &&
+    problemaDoVet.value === null,
 )
 
 watch(
@@ -214,7 +289,13 @@ watch(
     pertences.value = SUGESTOES.map((descricao) => ({ descricao, quantidade: 1 }))
     novoPertence.value = ''
     contatoEmergencia.value = props.telefoneResponsavel
-    veterinario.value = ''
+    /* Cópias: desmarcar alguém aqui não pode mexer na reserva antes de o check-in ser gravado. */
+    autorizados.value = props.autorizadosDaReserva.map((pessoa) => ({ ...pessoa }))
+    cadastroPendente.value = false
+    veterinario.value = props.veterinarioConhecido
+      ? { ...props.veterinarioConhecido }
+      : { nome: '', clinica: '', telefone: '' }
+    telefoneDoVetTocado.value = false
     racaoPropria.value = true
     marca.value = ''
     porcao.value = null
@@ -281,7 +362,8 @@ function confirmar() {
       registradaEm: agora,
     })),
     contatoEmergencia: contatoEmergencia.value,
-    veterinarioDeConfianca: veterinario.value,
+    veterinario: veterinarioInformado(veterinario.value),
+    autorizadosARetirar: autorizados.value,
     medicacoes: medicacoes.value
       .filter((item) => item.descricao.trim() !== '')
       .map((item, indice) => ({
@@ -572,20 +654,89 @@ function confirmar() {
         />
       </section>
 
+      <!--
+        Quem pode buscar vem no fim do roteiro, colado à emergência, de propósito: as duas são
+        perguntas sobre **gente**, e o responsável responde as duas com o celular na mão, abrindo
+        os contatos uma vez só. O que é do animal — peso, pertences, comida, remédio — vem antes,
+        enquanto ele ainda está no colo de alguém.
+      -->
+      <section class="bloco">
+        <h3 :id="`${idCampo}-quem`" class="bloco__titulo">
+          {{ t('hotel.checkin.quemBusca', { pet: petNome }) }}
+        </h3>
+
+        <p class="bloco__lede">{{ t('hotel.checkin.quemBuscaLede') }}</p>
+
+        <QuemPodeBuscar
+          v-model="autorizados"
+          v-model:pendente="cadastroPendente"
+          :responsavel="{ nome: responsavelNome, telefone: telefoneResponsavel }"
+          :conhecidos="contatosConhecidos"
+          :aria-labelledby="`${idCampo}-quem`"
+        />
+      </section>
+
       <section class="bloco">
         <h3 class="bloco__titulo">{{ t('hotel.checkin.emergencia') }}</h3>
 
-        <div class="grade">
+        <div class="grade grade--colunas-fixas">
           <div class="campo">
             <label :for="`${idCampo}-contato`">{{ t('hotel.checkin.contato') }}</label>
             <InputText :id="`${idCampo}-contato`" v-model="contatoEmergencia" fluid />
           </div>
-
-          <div class="campo">
-            <label :for="`${idCampo}-vet`">{{ t('hotel.checkin.veterinario') }}</label>
-            <InputText :id="`${idCampo}-vet`" v-model="veterinario" fluid />
-          </div>
         </div>
+
+        <!--
+          O veterinário em três campos, e não numa linha de texto livre. A linha aceitava "Clínica
+          do bairro" sem número, e a ficha parecia completa até a madrugada em que alguém precisou
+          ligar. Opcional, mas com nome e sem telefone não passa — ver `problemaDoVeterinario`.
+        -->
+        <fieldset class="vet" :aria-describedby="`${idCampo}-vet-dica`">
+          <legend class="vet__titulo">{{ t('hotel.checkin.veterinario') }}</legend>
+
+          <div class="grade">
+            <div class="campo">
+              <label :for="`${idCampo}-vet-nome`">{{ t('hotel.checkin.vetNome') }}</label>
+              <InputText
+                :id="`${idCampo}-vet-nome`"
+                v-model="veterinario.nome"
+                autocomplete="off"
+                fluid
+              />
+            </div>
+
+            <div class="campo">
+              <label :for="`${idCampo}-vet-clinica`">{{ t('hotel.checkin.vetClinica') }}</label>
+              <InputText
+                :id="`${idCampo}-vet-clinica`"
+                v-model="veterinario.clinica"
+                autocomplete="off"
+                fluid
+              />
+            </div>
+
+            <div class="campo">
+              <label :for="`${idCampo}-vet-telefone`">{{ t('hotel.checkin.vetTelefone') }}</label>
+              <InputText
+                :id="`${idCampo}-vet-telefone`"
+                v-model="veterinario.telefone"
+                inputmode="tel"
+                autocomplete="off"
+                :invalid="Boolean(erroDoVet)"
+                :aria-describedby="erroDoVet ? `${idCampo}-vet-erro` : undefined"
+                fluid
+                @blur="telefoneDoVetTocado = true"
+              />
+              <small v-if="erroDoVet" :id="`${idCampo}-vet-erro`" class="campo__erro" role="alert">
+                {{ erroDoVet }}
+              </small>
+            </div>
+          </div>
+
+          <small :id="`${idCampo}-vet-dica`" class="campo__dica">
+            {{ vetDaUltimaVez ? t('hotel.checkin.vetDaUltimaVez') : t('hotel.checkin.vetDica') }}
+          </small>
+        </fieldset>
       </section>
 
       <Message v-if="erro" severity="error" :closable="false">{{ t(erro) }}</Message>
@@ -635,10 +786,43 @@ function confirmar() {
   letter-spacing: -0.01em;
 }
 
+.bloco__lede {
+  margin: 0;
+  color: var(--clinic-faint);
+  font-size: var(--clinic-font-label);
+}
+
+/* O grupo do veterinário é um subtítulo dentro da emergência, não uma caixa dentro da seção. */
+.vet {
+  display: grid;
+  gap: var(--clinic-space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.vet__titulo {
+  margin-block-end: var(--clinic-space-2);
+  padding: 0;
+  color: var(--clinic-text);
+  font-size: var(--clinic-font-body);
+  font-weight: 650;
+}
+
 .grade {
   display: grid;
   gap: var(--clinic-space-3);
   grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
+/*
+ * Um campo sozinho numa fileira não estica: com `auto-fit`, o contato de emergência ocuparia a
+ * largura do diálogo inteiro para guardar um telefone. Com `auto-fill`, ele fica na primeira
+ * coluna, alinhado ao nome do veterinário logo abaixo.
+ */
+.grade--colunas-fixas {
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
 }
 
 .campo {
@@ -668,6 +852,13 @@ function confirmar() {
 .campo__dica {
   color: var(--clinic-faint);
   font-size: 0.7rem;
+}
+
+.campo__erro {
+  color: var(--clinic-risk-text);
+  font-size: var(--clinic-font-label);
+  font-weight: 650;
+  line-height: 1.4;
 }
 
 .pertences {

@@ -16,7 +16,6 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputMask from 'primevue/inputmask'
 import InputNumber from 'primevue/inputnumber'
-import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
@@ -26,6 +25,7 @@ import { useI18n } from 'vue-i18n'
 
 import HotelSelo from '../base/HotelSelo.vue'
 import OrcamentoTabela from './OrcamentoTabela.vue'
+import QuemPodeBuscar from './QuemPodeBuscar.vue'
 import { tomDaAdmissao, useHotelFormat } from '../../composables/useHotelFormat'
 import { avaliarAdmissao, situacaoParaSelo } from '../../domain/admissao'
 import { addDays, contarDiarias, dataDe, horaDe, instante } from '../../domain/hotel-time'
@@ -36,6 +36,7 @@ import type {
   ClockTime,
   ISODateTime,
   Orcamento,
+  PessoaAutorizada,
   ReservaOrigem,
   ServicoContratado,
 } from '../../data/types'
@@ -66,7 +67,8 @@ const emit = defineEmits<{
       origem: ReservaOrigem
       servicos: ServicoContratado[]
       observacao: string
-      autorizadosARetirar: string[]
+      /** Gente nova vai com id provisório; o repositório dá o definitivo. */
+      autorizadosARetirar: PessoaAutorizada[]
     },
   ]
 }>()
@@ -131,23 +133,29 @@ function trocarHora(iso: ISODateTime, hora: string): ISODateTime {
  * Combinado aqui porque é quando o responsável está disponível para dizer. Descobrir no balcão que
  * quem veio buscar não é o responsável, com o animal já pronto na coleira, é a conversa que ninguém
  * quer ter — e a alternativa que a recepção inventa é entregar assim mesmo.
+ *
+ * A lista oferece quem a família já cadastrou em outras estadias, desmarcado: estar no cadastro
+ * não autoriza, e a pergunta "a Clara pode buscar desta vez?" é a que o telefone precisa fazer.
  */
-const autorizados = ref<string[]>([])
-const novoAutorizado = ref('')
+const autorizados = ref<PessoaAutorizada[]>([])
+/** Uma pessoa digitada e não acrescentada trava a venda — ver `QuemPodeBuscar`. */
+const cadastroPendente = ref(false)
 
-function acrescentarAutorizado() {
-  const nome = novoAutorizado.value.trim()
+/** O responsável do hóspede escolhido. Sem hóspede, não há de quem perguntar. */
+const responsavel = computed(() => {
+  const pet = hotelStore.pet(petId.value)
+  const tutor = pet ? hotelStore.tutor(pet.tutorId) : null
 
-  if (nome && !autorizados.value.includes(nome)) {
-    autorizados.value = [...autorizados.value, nome]
-  }
+  return tutor ? { id: tutor.id, nome: tutor.nome, telefone: tutor.telefone } : null
+})
 
-  novoAutorizado.value = ''
-}
-
-function removerAutorizado(nome: string) {
-  autorizados.value = autorizados.value.filter((item) => item !== nome)
-}
+/*
+ * Lido do repositório na hora, e não da store: o cadastro cresce a cada reserva e a cada
+ * check-in, e uma cópia carregada na abertura do mapa já estaria velha na segunda venda.
+ */
+const contatosConhecidos = computed(() =>
+  responsavel.value ? reservaRepository.contatosDaFamilia(responsavel.value.id) : [],
+)
 
 const aberto = computed(() => props.acomodacao !== null)
 
@@ -249,7 +257,7 @@ function limpar() {
   servicosEscolhidos.value = []
   observacao.value = ''
   autorizados.value = []
-  novoAutorizado.value = ''
+  cadastroPendente.value = false
   /* As horas nascem na política da casa, que é o caso comum — e mudam com um toque. */
   horaEntrada.value = horaDe(props.inicio)
   horaSaida.value = horaDe(props.fim)
@@ -315,13 +323,18 @@ watch(
   },
 )
 
-/** O acompanhante escolhido some quando o hóspede principal muda — ele era de outra casa. */
+/**
+ * O acompanhante escolhido some quando o hóspede principal muda — ele era de outra casa. E quem
+ * pode buscar recomeça junto: a irmã autorizada para o Thor não é da família da Luna.
+ */
 watch(petId, () => {
   acompanhanteId.value = null
+  autorizados.value = []
+  cadastroPendente.value = false
 })
 
 function confirmar() {
-  if (!props.acomodacao || !petId.value || semVaga.value) {
+  if (!props.acomodacao || !petId.value || semVaga.value || cadastroPendente.value) {
     return
   }
 
@@ -495,43 +508,26 @@ function confirmar() {
         </div>
 
         <!--
-          Quem mais pode buscar o animal. Vazio significa "só o responsável", que é o caso comum —
-          por isso a lista não é obrigatória e não trava a venda.
+          Quem pode buscar o animal. Nada marcado significa "só o responsável", que é o caso comum
+          — por isso a lista não é obrigatória e não trava a venda. Só aparece com o hóspede
+          escolhido: antes dele não há família de quem perguntar.
+
+          A chave é o hóspede: trocá-lo recomeça a lista, inclusive quem foi cadastrado agora e
+          ainda não foi gravado — era de outra família.
         -->
-        <div class="campo campo--largo">
-          <label :for="`${idCampo}-autorizado`">{{ t('hotel.reserva.autorizados') }}</label>
+        <div v-if="responsavel" class="campo campo--largo">
+          <span :id="`${idCampo}-autorizados`" class="campo__rotulo">
+            {{ t('hotel.reserva.autorizados') }}
+          </span>
 
-          <ul v-if="autorizados.length > 0" class="autorizados">
-            <li v-for="nome in autorizados" :key="nome">
-              <span>{{ nome }}</span>
-              <Button
-                icon="pi pi-times"
-                severity="secondary"
-                text
-                rounded
-                size="small"
-                :aria-label="t('hotel.reserva.removerAutorizado', { nome })"
-                @click="removerAutorizado(nome)"
-              />
-            </li>
-          </ul>
-
-          <div class="autorizados__novo">
-            <InputText
-              :id="`${idCampo}-autorizado`"
-              v-model="novoAutorizado"
-              :placeholder="t('hotel.reserva.autorizadosDica')"
-              fluid
-              @keyup.enter="acrescentarAutorizado"
-            />
-            <Button
-              icon="pi pi-plus"
-              severity="secondary"
-              outlined
-              :aria-label="t('hotel.reserva.acrescentarAutorizado')"
-              @click="acrescentarAutorizado"
-            />
-          </div>
+          <QuemPodeBuscar
+            :key="petId"
+            v-model="autorizados"
+            v-model:pendente="cadastroPendente"
+            :responsavel="responsavel"
+            :conhecidos="contatosConhecidos"
+            :aria-labelledby="`${idCampo}-autorizados`"
+          />
         </div>
       </div>
 
@@ -572,7 +568,7 @@ function confirmar() {
         :label="t('hotel.reserva.criar')"
         icon="pi pi-check"
         :loading="salvando"
-        :disabled="!petId"
+        :disabled="!petId || cadastroPendente"
         @click="confirmar"
       />
     </template>
@@ -602,7 +598,8 @@ function confirmar() {
   grid-column: 1 / -1;
 }
 
-.campo label {
+.campo label,
+.campo__rotulo {
   color: var(--clinic-faint);
   font-size: var(--clinic-font-label);
   font-weight: 700;
@@ -617,30 +614,7 @@ function confirmar() {
   color: var(--clinic-muted);
   font-size: var(--clinic-font-label);
 }
-.autorizados {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
-  gap: 0.35rem;
-  list-style: none;
-}
 
-.autorizados li {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
-  padding: 0.1rem 0.15rem 0.1rem 0.6rem;
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: 99rem;
-  background: var(--clinic-surface-sunken, transparent);
-  font-size: var(--clinic-font-label);
-}
-
-.autorizados__novo {
-  display: flex;
-  gap: var(--clinic-space-2);
-}
 .quando {
   display: grid;
   gap: var(--clinic-space-2);

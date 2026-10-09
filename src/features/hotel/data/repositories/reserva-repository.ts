@@ -22,6 +22,7 @@ import {
   taxaDeOcupacao,
   type VagaNoPeriodo,
 } from '../../domain/disponibilidade'
+import { contatosDe, incorporarAoCadastro } from '../../domain/contatos'
 import { contarDiarias, dataDe, datasEntre } from '../../domain/hotel-time'
 import { montarOrcamento, sinalReembolsavel } from '../../domain/tarifas'
 import { simularChamada } from '../mock-runtime'
@@ -34,16 +35,48 @@ import type {
   ISODate,
   ISODateTime,
   MotivoDeCancelamento,
+  PessoaAutorizada,
   PetPorte,
   PetSpecies,
   Reserva,
   ReservaOrigem,
   ServicoContratado,
   SituacaoDaExigencia,
+  VeterinarioDoPet,
 } from '../types'
 
 function base() {
   return getDataset()
+}
+
+/**
+ * Grava no cadastro da família quem acabou de ser autorizado, e devolve a lista com os ids finais.
+ *
+ * Mora aqui, e não em cada repositório que autoriza, porque **reserva e check-in gravam o mesmo
+ * cadastro**: duas cópias desta função discordariam sobre quando duas pessoas são a mesma, e a
+ * vizinha cadastrada na reserva reapareceria em dobro no check-in.
+ */
+export function registrarAutorizados(tutorId: string, pessoas: PessoaAutorizada[]) {
+  const dataset = base()
+  const { cadastro, confirmadas } = incorporarAoCadastro({
+    cadastro: dataset.contatosDaFamilia,
+    tutorId,
+    pessoas,
+    novoId: () => novoId('pessoa'),
+  })
+
+  dataset.contatosDaFamilia = cadastro
+
+  return confirmadas
+}
+
+/** O último veterinário conhecido do animal, como cópia — a tela edita sem mexer no cadastro. */
+function veterinarioConhecido(petId: string): VeterinarioDoPet | null {
+  const conhecido = base().veterinariosDosPets.find((item) => item.petId === petId)
+
+  return conhecido
+    ? { nome: conhecido.nome, clinica: conhecido.clinica, telefone: conhecido.telefone }
+    : null
 }
 
 // ---------------------------------------------------------------------------
@@ -110,6 +143,16 @@ export type ReservaDetalhada = {
   /** `null` quando a reserva ainda não virou estadia. */
   hospedagemId: string | null
   sinalDevolve: boolean
+  /**
+   * Quem a família já cadastrou para buscar, autorizado ou não nesta estadia.
+   *
+   * Vem com o detalhe porque o check-in é feito **desta** tela, e é lá que a recepção marca quem
+   * vale desta vez. Sem o cadastro, ela só veria os autorizados da reserva e teria de redigitar o
+   * vizinho que buscou da última vez.
+   */
+  contatosDaFamilia: PessoaAutorizada[]
+  /** O último veterinário conhecido do animal. Preenche o check-in; `null` se nunca informado. */
+  veterinarioDoPet: VeterinarioDoPet | null
 }
 
 /**
@@ -295,6 +338,8 @@ export const reservaRepository = {
           hojeIso(),
           dataset.hotel.politica,
         ),
+        contatosDaFamilia: contatosDe(dataset.contatosDaFamilia, reserva.tutorId),
+        veterinarioDoPet: veterinarioConhecido(reserva.petId),
       }
     })
   },
@@ -412,6 +457,22 @@ export const reservaRepository = {
     })
   },
 
+  /**
+   * Quem a família já cadastrou para buscar.
+   *
+   * Síncrona como a `vaga`, e pela mesma razão: a lista aparece no instante em que o hóspede é
+   * escolhido na reserva nova, e um carregamento ali faria a recepção começar a ditar nomes que já
+   * estão no cadastro.
+   */
+  contatosDaFamilia(tutorId: string): PessoaAutorizada[] {
+    return contatosDe(base().contatosDaFamilia, tutorId)
+  },
+
+  /** O último veterinário conhecido do animal. `null` quando ninguém nunca informou. */
+  veterinarioDoPet(petId: string): VeterinarioDoPet | null {
+    return veterinarioConhecido(petId)
+  },
+
   // -------------------------------------------------------------------------
   // Escrita
   // -------------------------------------------------------------------------
@@ -431,8 +492,13 @@ export const reservaRepository = {
     origem: ReservaOrigem
     servicos?: ServicoContratado[]
     observacao?: string
-    /** Quem, além do responsável, pode retirar o animal. Conferido no check-out. */
-    autorizadosARetirar?: string[]
+    /**
+     * Quem, além do responsável, pode retirar o animal. Conferido no check-out.
+     *
+     * Quem vem com id vazio — ou com um id que o cadastro da família não conhece — é gente nova:
+     * ganha id aqui e entra no cadastro, para a próxima estadia já oferecê-la.
+     */
+    autorizadosARetirar?: PessoaAutorizada[]
   }): Promise<Reserva> {
     return simularChamada('reserva.criar', () => {
       const dataset = base()
@@ -478,6 +544,12 @@ export const reservaRepository = {
         politica: dataset.hotel.politica,
       })
 
+      /*
+       * O cadastro da família só cresce **depois** de a vaga passar: uma venda recusada não pode
+       * deixar para trás uma pessoa autorizada a buscar um animal que nem tem reserva.
+       */
+      const autorizados = registrarAutorizados(pet.tutorId, entrada.autorizadosARetirar ?? [])
+
       const agora = agoraIso()
       const reserva: Reserva = {
         id: novoId('res'),
@@ -498,7 +570,7 @@ export const reservaRepository = {
         orcamento,
         pagoCentavos: 0,
         observacao: entrada.observacao ?? '',
-        autorizadosARetirar: entrada.autorizadosARetirar ?? [],
+        autorizadosARetirar: autorizados,
         dispensas: [],
         criadoEm: agora,
         atualizadoEm: agora,

@@ -469,6 +469,41 @@ export type Orcamento = {
   saldoCentavos: number
 }
 
+/**
+ * Alguém da família que pode buscar o animal.
+ *
+ * Era só um nome, e um nome não basta no balcão: a recepção que recebe "a Clara veio buscar" não
+ * tem como ligar para confirmar nem como conferir que é a Clara. Telefone e documento são o que
+ * transforma a lista de autorizados numa conferência, e não numa formalidade.
+ */
+export type PessoaAutorizada = {
+  id: string
+  nome: string
+  telefone: string
+  /** "Irmã", "Motorista", "Vizinho" — o que a recepção diz em voz alta ao conferir. */
+  relacao: string
+  /** RG ou CPF conferido no balcão; vazio se não informado. */
+  documento: string
+}
+
+/**
+ * Uma pessoa no cadastro da família — quem já foi autorizado alguma vez.
+ *
+ * Existe para que a família não dite os mesmos três nomes e telefones a cada estadia. O cadastro é
+ * do **responsável**, e não do animal: quem busca o Thor é a mesma vizinha que busca a Mel.
+ *
+ * Estar aqui não autoriza nada. A autorização é de cada estadia (`Reserva.autorizadosARetirar`);
+ * o cadastro só oferece de novo quem já existe.
+ */
+export type ContatoDaFamilia = PessoaAutorizada & { tutorId: string }
+
+/** O veterinário do animal, com o que é preciso para ligar. */
+export type VeterinarioDoPet = {
+  nome: string
+  clinica: string
+  telefone: string
+}
+
 export type Reserva = {
   id: string
   petId: string
@@ -494,15 +529,20 @@ export type Reserva = {
   /** O que o responsável contou e não cabe em campo: "tem medo de trovão". */
   observacao: string
   /**
-   * Quem, além do responsável, pode retirar o animal.
+   * Quem, além do responsável, pode retirar o animal **nesta estadia**.
    *
    * Combinado na reserva porque é quando a pessoa está disponível para dizer — descobrir no balcão
    * que quem veio buscar não é o responsável, com o animal já pronto, é a conversa que ninguém
-   * quer ter. A conferência acontece no check-out, e o nome de quem retirou fica gravado.
+   * quer ter. O check-in confirma ou corrige a lista, e a conferência acontece no check-out, onde
+   * o nome de quem retirou fica gravado.
+   *
+   * É uma **cópia** tirada do cadastro da família, e não uma referência a ele: a irmã autorizada
+   * em julho não fica autorizada para sempre só porque está cadastrada. Cada estadia diz quem vale
+   * para ela.
    *
    * Lista vazia significa "só o responsável".
    */
-  autorizadosARetirar: string[]
+  autorizadosARetirar: PessoaAutorizada[]
   dispensas: DispensaDeExigencia[]
   criadoEm: ISODateTime
   atualizadoEm: ISODateTime
@@ -670,8 +710,14 @@ export type Hospedagem = {
   planoAlimentar: PlanoAlimentar
   autorizacoes: Autorizacao[]
   contatoEmergencia: string
-  /** Veterinário de confiança do responsável — quem se liga antes do plantão desconhecido. */
-  veterinarioDeConfianca: string
+  /**
+   * O veterinário do animal — quem se liga antes do plantão desconhecido.
+   *
+   * Era um texto livre, e o texto livre guardava "Clínica do bairro" sem telefone: na madrugada em
+   * que o animal passa mal, um nome sem número não serve para nada. `null` quando o responsável
+   * não informou.
+   */
+  veterinario: VeterinarioDoPet | null
   adaptacao: Adaptacao
   observacao: string
   /** Quem fez o check-in, e quem fez o check-out. São pessoas **do hotel**. */
@@ -741,10 +787,7 @@ export type TarefaKind =
  * `pesagem` entra, e é a primeira vez que este `kind` fica alcançável: ele já tinha ícone e nunca
  * teve gerador.
  */
-export type TarefaDaCasaKind = Extract<
-  TarefaKind,
-  'agua' | 'higiene' | 'passeio' | 'pesagem'
->
+export type TarefaDaCasaKind = Extract<TarefaKind, 'agua' | 'higiene' | 'passeio' | 'pesagem'>
 
 /** Os quatro, em ordem de leitura. A tela não inventa a própria ordem. */
 export const TAREFAS_DA_CASA: TarefaDaCasaKind[] = ['agua', 'higiene', 'passeio', 'pesagem']

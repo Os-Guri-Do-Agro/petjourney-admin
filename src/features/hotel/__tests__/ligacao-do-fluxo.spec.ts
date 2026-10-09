@@ -142,7 +142,8 @@ describe('o check-in registra a medicação que veio de casa', () => {
       },
       autorizacoes: [],
       contatoEmergencia: '',
-      veterinarioDeConfianca: '',
+      veterinario: null,
+      autorizadosARetirar: [],
       recebidoPor: 'eq-bruna',
       medicacoes: [
         {
@@ -238,11 +239,20 @@ describe('o detalhe da estadia carrega quem pode retirar', () => {
     const hospedagem = dataset.hospedagens.find((item) => item.status === 'hospedado')!
     const reserva = dataset.reservas.find((item) => item.id === hospedagem.reservaId)!
 
-    reserva.autorizadosARetirar = ['Vovó Sueli']
+    const sueli = {
+      id: 'pessoa-teste',
+      nome: 'Sueli Prado',
+      telefone: '(11) 98760-3318',
+      relacao: 'Mãe',
+      documento: 'RG 9.884.120-3',
+    }
+
+    reserva.autorizadosARetirar = [sueli]
 
     const detalhe = await hospedagemRepository.abrir(hospedagem.id)
 
-    expect(detalhe?.autorizadosARetirar).toEqual(['Vovó Sueli'])
+    /* Com telefone e documento: é o que o check-out mostra para a recepção conferir. */
+    expect(detalhe?.autorizadosARetirar).toEqual([sueli])
   })
 })
 

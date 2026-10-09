@@ -36,10 +36,12 @@ import type {
   ISODateTime,
   MedicacaoDaEstadia,
   OcorrenciaKind,
+  PessoaAutorizada,
   PlanoAlimentar,
   RegistroKind,
   TarefaDaCasaKind,
   TarefaStatus,
+  VeterinarioDoPet,
   ViaDeMedicacao,
 } from '../data/types'
 import { agruparPorHorario } from '../domain/rotina'
@@ -238,7 +240,8 @@ export const useHospedagemStore = defineStore('hotel-hospedagem', () => {
     planoAlimentar: PlanoAlimentar
     autorizacoes: Autorizacao[]
     contatoEmergencia: string
-    veterinarioDeConfianca: string
+    veterinario: VeterinarioDoPet | null
+    autorizadosARetirar: PessoaAutorizada[]
     medicacoes?: Omit<MedicacaoDaEstadia, 'id' | 'hospedagemId'>[]
   }) {
     return mutar(() =>

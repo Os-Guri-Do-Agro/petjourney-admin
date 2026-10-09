@@ -515,14 +515,45 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 </span>
               </dd>
 
+              <!--
+                Quem pode buscar fica na ficha, e não só no check-out: é a pergunta que chega por
+                telefone no meio da estadia — "minha irmã pode passar aí amanhã?" — e quem atende
+                precisa da resposta sem abrir a saída.
+              -->
+              <dt>{{ t('hotel.estadia.quemBusca') }}</dt>
+              <dd>
+                <span class="ficha__linha">
+                  {{
+                    [tutor?.nome, t('hotel.quemBusca.responsavel'), tutor?.telefone]
+                      .filter(Boolean)
+                      .join(' · ')
+                  }}
+                </span>
+                <span
+                  v-for="pessoa in estadia.autorizadosARetirar"
+                  :key="pessoa.id"
+                  class="ficha__linha"
+                >
+                  {{ [pessoa.nome, pessoa.relacao, pessoa.telefone].filter(Boolean).join(' · ') }}
+                </span>
+              </dd>
+
               <dt>{{ t('hotel.estadia.emergencia') }}</dt>
               <!-- Uma linha por contato: sem o do responsável, o veterinário sobe para a primeira. -->
               <dd>
                 <span v-if="registro.contatoEmergencia" class="ficha__linha">
                   {{ registro.contatoEmergencia }}
                 </span>
-                <span v-if="registro.veterinarioDeConfianca" class="ficha__linha">
-                  {{ registro.veterinarioDeConfianca }}
+                <span v-if="registro.veterinario" class="ficha__linha">
+                  {{
+                    [
+                      registro.veterinario.nome,
+                      registro.veterinario.clinica,
+                      registro.veterinario.telefone,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')
+                  }}
                 </span>
               </dd>
 
@@ -584,6 +615,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       :acrescimo-de-saida="estadia?.acrescimoDeSaida ?? 0"
       :ocorrencias-travadas="hospedagem.ocorrenciasTravadasDaEstadia"
       :responsavel-nome="tutor?.nome ?? ''"
+      :responsavel-telefone="tutor?.telefone ?? ''"
+      :responsavel-documento="tutor?.documento ?? ''"
       :autorizados-a-retirar="estadia?.autorizadosARetirar ?? []"
       :salvando="hospedagem.salvando"
       :erro="hospedagem.erroDeAcao"

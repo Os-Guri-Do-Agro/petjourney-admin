@@ -5537,8 +5537,17 @@
       "restricoes": "Ograničenja",
       "titulo": "Prijava gosta {pet}",
       "vendaSemAutorizacao": "Rezervacija je prodala uslugu koja zavisi od: {itens}. Bez odobrenja kuća ne može da je izvrši, a račun i dalje naplaćuje.",
-      "veterinario": "Veterinar od poverenja",
-      "via": "Način"
+      "veterinario": "Veterinar ljubimca",
+      "via": "Način",
+      "quemBusca": "Ko može da preuzme gosta {pet}",
+      "quemBuscaLede": "Označite ko važi za ovaj boravak. Pri odlasku recepcija proverava ime i dokument.",
+      "vetNome": "Ime",
+      "vetClinica": "Klinika",
+      "vetTelefone": "Telefon",
+      "vetDica": "Nije obavezno. To je onaj koga kuća zove pre dežurnog veterinara.",
+      "vetDaUltimaVez": "Iz prošlog boravka. Potvrdite sa vlasnikom.",
+      "vetSemTelefone": "Uz navedenog veterinara nedostaje telefon.",
+      "vetTelefoneInvalido": "Telefon nije potpun. Proverite pozivni broj i broj."
     },
     "checkout": {
       "comoChegou": "Kako je stigao",
@@ -5561,7 +5570,9 @@
       "saidaTardia": "Odlazak posle termina: dodatnih {percentual}% noćenja.",
       "saldo": "Saldo za naplatu",
       "titulo": "Odjava gosta {pet}",
-      "voltarALista": "Nazad na listu"
+      "voltarALista": "Nazad na listu",
+      "confiraDocumento": "Proverite dokument: {documento}",
+      "semDocumento": "Nema dokumenta u evidenciji. Tražite neki sa fotografijom."
     },
     "comum": {
       "cancelar": "Otkaži",
@@ -5688,7 +5699,8 @@
       },
       "subtitulo": "Hotel",
       "titulo": "Boravak",
-      "voltar": "Gosti"
+      "voltar": "Gosti",
+      "quemBusca": "Ko može da preuzme"
     },
     "exigencia": {
       "antipulgas": "Tretman protiv buva",
@@ -6065,9 +6077,7 @@
     },
     "reserva": {
       "acompanhante": "Pratilac iz istog doma",
-      "acrescentarAutorizado": "Dodaj ovlašćenog",
-      "autorizados": "Ko još može da preuzme",
-      "autorizadosDica": "Ime osobe koju vlasnik ovlašćuje",
+      "autorizados": "Ko može da preuzme",
       "avisoAdmissao": "Dokumentacija koju treba rešiti pre dolaska: {itens}",
       "checkInBloqueado": "Prijava je blokirana zbog dokumentacije koja nedostaje.",
       "chegaAs": "stiže u",
@@ -6088,7 +6098,6 @@
       "periodo": "Period",
       "porDiaria": " po noćenju",
       "quantasNoites": "Noćenja",
-      "removerAutorizado": "Ukloni {nome}",
       "saiAs": "odlazi u",
       "saidaTardia": "Predviđeni odlazak je posle termina: {valor} dodatno na računu.",
       "semAcompanhante": "Bez pratioca",
@@ -6515,6 +6524,25 @@
       "otologica": "U uvo",
       "subcutanea": "Potkožno",
       "topica": "Lokalno"
+    },
+    "quemBusca": {
+      "responsavel": "Vlasnik",
+      "sempre": "Vlasnik uvek može da preuzme",
+      "ninguemMais": "Niko drugi iz porodice nije upisan.",
+      "cadastrar": "Upišite drugu osobu",
+      "novaPessoa": "Nova osoba",
+      "nome": "Ime",
+      "telefone": "Telefon",
+      "relacao": "Odnos",
+      "relacaoDica": "Sestra, vozač, komšija",
+      "documento": "Dokument",
+      "documentoDica": "Lična karta ili CPF, ako ima",
+      "adicionar": "Dodaj",
+      "pendente": "Dodajte ili otkažite ovu osobu pre potvrde.",
+      "erroNome": "Nedostaje ime.",
+      "erroTelefone": "Nedostaje telefon.",
+      "erroTelefoneInvalido": "Telefon nije potpun. Proverite pozivni broj i broj.",
+      "erroTelefoneRepetido": "Ovaj telefon već pripada osobi {nome}."
     }
   },
   "primevue": {

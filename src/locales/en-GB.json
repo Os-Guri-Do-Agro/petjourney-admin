@@ -5537,8 +5537,17 @@
       "restricoes": "Restrictions",
       "titulo": "Check-in for {pet}",
       "vendaSemAutorizacao": "The booking sold a service that depends on: {itens}. Without the authorisation the house cannot do it, and the bill still charges for it.",
-      "veterinario": "Owner's vet",
-      "via": "Route"
+      "veterinario": "Pet's vet",
+      "via": "Route",
+      "quemBusca": "Who can collect {pet}",
+      "quemBuscaLede": "Mark who is allowed for this stay. At check-out, reception checks the name and the ID.",
+      "vetNome": "Name",
+      "vetClinica": "Clinic",
+      "vetTelefone": "Phone",
+      "vetDica": "Optional. This is who the house calls before the on-call vet.",
+      "vetDaUltimaVez": "From the last stay. Confirm with the owner.",
+      "vetSemTelefone": "A vet was entered, so the phone is needed.",
+      "vetTelefoneInvalido": "Incomplete phone number. Check the area code and the number."
     },
     "checkout": {
       "comoChegou": "How they arrived",
@@ -5561,7 +5570,9 @@
       "saidaTardia": "Departure after check-out time: {percentual}% of a night extra.",
       "saldo": "Balance due",
       "titulo": "Check-out for {pet}",
-      "voltarALista": "Back to the list"
+      "voltarALista": "Back to the list",
+      "confiraDocumento": "Check the ID: {documento}",
+      "semDocumento": "No ID on file. Ask for one with a photo."
     },
     "comum": {
       "cancelar": "Cancel",
@@ -5688,7 +5699,8 @@
       },
       "subtitulo": "Hotel",
       "titulo": "Stay",
-      "voltar": "Guests"
+      "voltar": "Guests",
+      "quemBusca": "Who can collect"
     },
     "exigencia": {
       "antipulgas": "Flea treatment",
@@ -6065,9 +6077,7 @@
     },
     "reserva": {
       "acompanhante": "Companion from the same home",
-      "acrescentarAutorizado": "Add authorised person",
-      "autorizados": "Who else may collect",
-      "autorizadosDica": "Name of someone the owner authorises",
+      "autorizados": "Who can collect",
       "avisoAdmissao": "Paperwork to sort out before arrival: {itens}",
       "checkInBloqueado": "Check-in is blocked by missing paperwork.",
       "chegaAs": "arrives at",
@@ -6088,7 +6098,6 @@
       "periodo": "Dates",
       "porDiaria": " per night",
       "quantasNoites": "Nights",
-      "removerAutorizado": "Remove {nome}",
       "saiAs": "leaves at",
       "saidaTardia": "The planned departure is after check-out time: {valor} extra.",
       "semAcompanhante": "No companion",
@@ -6515,6 +6524,25 @@
       "otologica": "Ear",
       "subcutanea": "Subcutaneous",
       "topica": "Topical"
+    },
+    "quemBusca": {
+      "responsavel": "Owner",
+      "sempre": "The owner can always collect",
+      "ninguemMais": "No one else from the family on file.",
+      "cadastrar": "Register someone else",
+      "novaPessoa": "New person",
+      "nome": "Name",
+      "telefone": "Phone",
+      "relacao": "Relationship",
+      "relacaoDica": "Sister, driver, neighbour",
+      "documento": "ID",
+      "documentoDica": "ID card or CPF, if they have one",
+      "adicionar": "Add",
+      "pendente": "Add or cancel this person before confirming.",
+      "erroNome": "Name is missing.",
+      "erroTelefone": "Phone is missing.",
+      "erroTelefoneInvalido": "Incomplete phone number. Check the area code and the number.",
+      "erroTelefoneRepetido": "This phone already belongs to {nome}."
     }
   },
   "primevue": {

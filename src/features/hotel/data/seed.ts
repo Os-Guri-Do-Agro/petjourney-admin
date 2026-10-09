@@ -25,6 +25,7 @@
 import { addDays, createClinicClock, diffDays } from '@/features/clinico/domain/clinic-time'
 import type { Pet, Tutor } from '@/features/clinico/data/types'
 
+import { contatosDe } from '../domain/contatos'
 import { porteCabe } from '../domain/disponibilidade'
 import { instante } from '../domain/hotel-time'
 import { planejarDia, ROTINA_PADRAO_INICIAL } from '../domain/rotina'
@@ -51,6 +52,7 @@ import type {
   Bloco,
   Boletim,
   Comprovante,
+  ContatoDaFamilia,
   Cuidador,
   EntradaDeEspera,
   Exigencia,
@@ -73,6 +75,7 @@ import type {
   Temporada,
   TipoDeAcomodacao,
   Turno,
+  VeterinarioDoPet,
 } from './types'
 
 export const SEMENTE_PADRAO = 0x40_7e_15
@@ -143,6 +146,21 @@ export type SeedResult = {
    */
   pets: Pet[]
   tutores: Tutor[]
+  /**
+   * O cadastro das famílias: quem cada responsável já autorizou a buscar, alguma vez.
+   *
+   * Oferecido de novo na estadia seguinte, para a família não ditar os mesmos nomes e telefones a
+   * cada reserva. Estar aqui não autoriza — ver `ContatoDaFamilia`.
+   */
+  contatosDaFamilia: ContatoDaFamilia[]
+  /**
+   * O último veterinário conhecido de cada animal.
+   *
+   * Vem preenchido no check-in seguinte. A recepção confirma em vez de perguntar do zero, e o
+   * número que a casa liga de madrugada é o que a família deu da última vez — não o que alguém
+   * lembrou de cabeça.
+   */
+  veterinariosDosPets: Array<VeterinarioDoPet & { petId: string }>
   casos: CasoDoHotel[]
 }
 
@@ -219,6 +237,156 @@ type RoteiroDeReserva = {
   observacao?: string
   /** Percentual já pago. 0 é reserva sem sinal; 100 é quitada. */
   pagoPercentual: number
+  /**
+   * Quem da família pode buscar, por id do cadastro — escrito à mão onde a tela precisa mostrar.
+   *
+   * Sem ele, a lista sai do sorteio de sempre. Ver `CONTATOS_DAS_FAMILIAS`.
+   */
+  autorizados?: string[]
+}
+
+/**
+ * O cadastro das famílias: quem cada responsável já autorizou a buscar.
+ *
+ * Escrito à mão, e não sorteado, pela mesma razão do roteiro: o par "a irmã com documento" e "o
+ * vizinho cadastrado que **não** está autorizado desta vez" precisa existir em toda semente, senão
+ * o check-in nunca mostra uma caixa desmarcada e o check-out nunca mostra o documento a conferir.
+ *
+ * Telefones em formato de celular de São Paulo, como os do cadastro da clínica. Documento só para
+ * parte deles — é o normal: quem já buscou uma vez mostrou o RG; quem nunca veio, não.
+ */
+const CONTATOS_DAS_FAMILIAS: ContatoDaFamilia[] = [
+  {
+    id: 'pessoa-marina-1',
+    tutorId: 'tutor-marina',
+    nome: 'Paulo Alves',
+    telefone: '(11) 98134-2207',
+    relacao: 'Marido',
+    documento: 'RG 27.318.440-6',
+  },
+  {
+    id: 'pessoa-bartholomeu-1',
+    tutorId: 'tutor-bartholomeu',
+    nome: 'Severino Batista',
+    telefone: '(11) 97520-6614',
+    relacao: 'Motorista',
+    documento: 'RG 18.902.335-1',
+  },
+  {
+    id: 'pessoa-ana-lu-1',
+    tutorId: 'tutor-ana-lu',
+    nome: 'Beatriz Lu',
+    telefone: '(11) 96402-7781',
+    relacao: 'Irmã',
+    documento: '',
+  },
+  {
+    id: 'pessoa-joao-1',
+    tutorId: 'tutor-joao',
+    nome: 'Larissa Camargo',
+    telefone: '(11) 99218-3305',
+    relacao: 'Esposa',
+    documento: 'RG 34.120.887-2',
+  },
+  {
+    id: 'pessoa-rita-1',
+    tutorId: 'tutor-rita',
+    nome: 'Kenji Nakamura',
+    telefone: '(11) 98551-0472',
+    relacao: 'Filho',
+    documento: '',
+  },
+  {
+    id: 'pessoa-sergio-1',
+    tutorId: 'tutor-sergio',
+    nome: 'Marcos Fontenelle',
+    telefone: '(11) 97283-1196',
+    relacao: 'Filho',
+    documento: 'RG 41.556.203-9',
+  },
+  {
+    id: 'pessoa-luciana-1',
+    tutorId: 'tutor-luciana',
+    nome: 'Sueli Prado',
+    telefone: '(11) 98760-3318',
+    relacao: 'Mãe',
+    documento: '',
+  },
+  {
+    id: 'pessoa-daniel-1',
+    tutorId: 'tutor-daniel',
+    nome: 'Clara Okamoto',
+    telefone: '(11) 99671-2284',
+    relacao: 'Irmã',
+    documento: 'RG 23.456.789-0',
+  },
+  {
+    /* O cadastrado que a reserva do Sushi **não** autoriza: é a caixa desmarcada do check-in. */
+    id: 'pessoa-daniel-2',
+    tutorId: 'tutor-daniel',
+    nome: 'Rogério Lima',
+    telefone: '(11) 98345-9012',
+    relacao: 'Vizinho',
+    documento: '',
+  },
+  {
+    id: 'pessoa-fatima-1',
+    tutorId: 'tutor-fatima',
+    nome: 'Joana Gonçalves',
+    telefone: '(11) 96117-4420',
+    relacao: 'Filha',
+    documento: 'RG 52.093.118-4',
+  },
+  {
+    id: 'pessoa-eduardo-1',
+    tutorId: 'tutor-eduardo',
+    nome: 'Patrícia Bittencourt',
+    telefone: '(11) 98402-5531',
+    relacao: 'Esposa',
+    documento: 'RG 30.771.284-5',
+  },
+  {
+    id: 'pessoa-camila-1',
+    tutorId: 'tutor-camila',
+    nome: 'André Ferraz',
+    telefone: '(11) 97046-1289',
+    relacao: 'Irmão',
+    documento: '',
+  },
+  {
+    id: 'pessoa-heitor-1',
+    tutorId: 'tutor-heitor',
+    nome: 'Lúcia Sampaio',
+    telefone: '(11) 99380-7716',
+    relacao: 'Mãe',
+    documento: '',
+  },
+]
+
+/** O veterinário da casa: quem atende a maior parte dos hóspedes também na clínica. */
+const VETERINARIA_DA_CASA: VeterinarioDoPet = {
+  nome: 'Dra. Helena Vasconcelos Prado',
+  clinica: 'Clínica PetJourney',
+  telefone: '(11) 3555-0142',
+}
+
+/**
+ * Quem tem veterinário de fora.
+ *
+ * O do Tofu é a mesma Dra. Paula Ramos que assina a receita do Benazepril — a ficha que diz uma
+ * coisa e a receita que diz outra seria o primeiro detalhe que um veterinário de verdade notaria.
+ */
+const VETERINARIOS_DE_FORA: Record<string, VeterinarioDoPet> = {
+  'pet-tofu': {
+    nome: 'Dra. Paula Ramos',
+    clinica: 'Clínica Felina Vila Mariana',
+    telefone: '(11) 5084-2290',
+  },
+  'pet-sushi': {
+    nome: 'Dr. Fábio Teixeira',
+    clinica: 'Gato & Cia Clínica Felina',
+    telefone: '(11) 3062-4418',
+  },
 }
 
 /**
@@ -259,6 +427,8 @@ const ROTEIRO: RoteiroDeReserva[] = [
     status: 'hospedado',
     origem: 'telefone',
     pagoPercentual: 30,
+    /* Sai hoje, e quem pode buscar é a esposa: o check-out mostra o documento a conferir. */
+    autorizados: ['pessoa-joao-1'],
   },
   {
     /* Caso C2 · ocorrência grave sem contato registrado — trava a passagem de turno. */
@@ -301,6 +471,8 @@ const ROTEIRO: RoteiroDeReserva[] = [
     origem: 'whatsapp',
     servicos: [{ servicoId: 'servico-passeio', quantidade: 1 }],
     pagoPercentual: 30,
+    /* Autorizada sem documento no cadastro: o check-out pede um com foto. */
+    autorizados: ['pessoa-luciana-1'],
   },
 
   // --------------------------------------------------------------- chegam hoje
@@ -328,6 +500,8 @@ const ROTEIRO: RoteiroDeReserva[] = [
     status: 'confirmada',
     origem: 'app',
     pagoPercentual: 30,
+    /* A irmã autorizada e o vizinho não: o check-in mostra uma caixa marcada e outra vazia. */
+    autorizados: ['pessoa-daniel-1'],
   },
 
   // --------------------------------------------------------------- futuras
@@ -482,6 +656,8 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
   const pets = petsFixture.map((pet) => ({ ...pet }))
   const tutores = tutorsFixture.map((tutor) => ({ ...tutor }))
   const petPorId = new Map(pets.map((pet) => [pet.id, pet]))
+  /* Copiado pelo mesmo motivo de `pets`: o cadastro cresce no check-in, e a constante não pode. */
+  const contatosDaFamilia = CONTATOS_DAS_FAMILIAS.map((contato) => ({ ...contato }))
 
   const temporadas = materializarTemporadas(temporadasFixture, ancora)
 
@@ -666,6 +842,22 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
       '10:20',
     )
 
+    /*
+     * Uma parte das reservas combina quem mais pode buscar — é o caso comum da família —, e a
+     * pessoa sai do cadastro **desta** família, não de uma lista solta de nomes.
+     *
+     * O sorteio consome o gerador sempre que a regra do hash manda, mesmo quando o roteiro escolhe
+     * à mão ou a família não tem ninguém cadastrado. Pular a chamada deslocaria `rngCasa`, e o
+     * recheio do mapa inteiro mudaria por causa de uma lista de autorizados.
+     */
+    const daFamilia = contatosDe(contatosDaFamilia, pet.tutorId)
+    const sorteio = hashSeed(roteiro.id) % 3 === 0 ? rngCasa() : null
+    const escolhidos = roteiro.autorizados
+      ? daFamilia.filter((contato) => roteiro.autorizados?.includes(contato.id))
+      : sorteio !== null && daFamilia.length > 0
+        ? [daFamilia[Math.floor(sorteio * daFamilia.length)]!]
+        : []
+
     return {
       id: roteiro.id,
       petId: pet.id,
@@ -684,17 +876,8 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
       orcamento: { ...orcamento, saldoCentavos: orcamento.totalCentavos - pagoCentavos },
       pagoCentavos,
       observacao: roteiro.observacao ?? '',
-      /* Uma parte das reservas combina quem mais pode buscar — é o caso comum da família. */
-      autorizadosARetirar:
-        hashSeed(roteiro.id) % 3 === 0
-          ? [
-              pickFrom(
-                rngCasa,
-                ['Marcos Fontenelle', 'Clara Okamoto', 'Vovó Sueli'],
-                'Clara Okamoto',
-              ),
-            ]
-          : [],
+      /* Uma cópia de cada pessoa, e não a ficha do cadastro: é o que a estadia guarda. */
+      autorizadosARetirar: escolhidos.map((pessoa) => ({ ...pessoa })),
       dispensas: [],
       criadoEm,
       atualizadoEm: criadoEm,
@@ -864,6 +1047,41 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
   }
 
   // -------------------------------------------------------------------------
+  // Veterinário de cada animal
+  // -------------------------------------------------------------------------
+
+  /*
+   * Quem já passou pela casa tem veterinário conhecido: foi perguntado no check-in daquela estadia.
+   * Quem nunca entrou não tem, e o primeiro check-in pergunta do zero — que é o caso real. Sem
+   * sorteio: é a mesma lista em toda semente.
+   */
+  const jaEstiveram = new Set(
+    reservas
+      .filter((reserva) => reserva.status === 'hospedado' || reserva.status === 'encerrada')
+      .flatMap((reserva) =>
+        reserva.acompanhantePetId ? [reserva.petId, reserva.acompanhantePetId] : [reserva.petId],
+      ),
+  )
+
+  /*
+   * O Sushi chega hoje e precisa do veterinário vindo preenchido: é o check-in que a demonstração
+   * abre. Ele entra pela lista dos de fora mesmo que o recheio não o tenha hospedado antes —
+   * gato que tem veterinário próprio é exatamente o cliente que já veio.
+   */
+  const veterinariosDosPets = pets
+    .filter((pet) => jaEstiveram.has(pet.id) || pet.id in VETERINARIOS_DE_FORA)
+    .map((pet) => ({ petId: pet.id, ...(VETERINARIOS_DE_FORA[pet.id] ?? VETERINARIA_DA_CASA) }))
+
+  /** O veterinário que a estadia guarda: uma cópia, sem o `petId` do cadastro. */
+  function veterinarioDe(petId: string): VeterinarioDoPet {
+    const conhecido = veterinariosDosPets.find((item) => item.petId === petId)
+
+    return conhecido
+      ? { nome: conhecido.nome, clinica: conhecido.clinica, telefone: conhecido.telefone }
+      : { ...VETERINARIA_DA_CASA }
+  }
+
+  // -------------------------------------------------------------------------
   // Hospedagens
   // -------------------------------------------------------------------------
 
@@ -937,7 +1155,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
         },
       ],
       contatoEmergencia: tutores.find((item) => item.id === pet.tutorId)?.telefoneSecundario ?? '',
-      veterinarioDeConfianca: 'Clínica PetJourney — (11) 3555-0142',
+      veterinario: veterinarioDe(pet.id),
       adaptacao:
         pet.id === 'pet-tofu' ? 'estressado' : pet.id === 'pet-nina' ? 'em-adaptacao' : 'tranquilo',
       observacao: reserva.observacao,
@@ -1325,6 +1543,8 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     espera,
     pets,
     tutores,
+    contatosDaFamilia,
+    veterinariosDosPets,
     casos: CASOS,
   }
 }

@@ -5537,8 +5537,17 @@
       "restricoes": "Restricciones",
       "titulo": "Entrada de {pet}",
       "vendaSemAutorizacao": "La reserva vendió un servicio que depende de: {itens}. Sin la autorización la casa no puede ejecutarlo, y la cuenta sigue cobrando.",
-      "veterinario": "Veterinario de confianza",
-      "via": "Vía"
+      "veterinario": "Veterinario de la mascota",
+      "via": "Vía",
+      "quemBusca": "Quién puede retirar a {pet}",
+      "quemBuscaLede": "Marca quién vale para esta estancia. A la salida, recepción revisa el nombre y el documento.",
+      "vetNome": "Nombre",
+      "vetClinica": "Clínica",
+      "vetTelefone": "Teléfono",
+      "vetDica": "Opcional. Es a quien la casa llama antes que a la guardia.",
+      "vetDaUltimaVez": "Viene de la última estancia. Confírmalo con el responsable.",
+      "vetSemTelefone": "Con el veterinario indicado, falta el teléfono.",
+      "vetTelefoneInvalido": "Teléfono incompleto. Revisa el prefijo y el número."
     },
     "checkout": {
       "comoChegou": "Cómo llegó",
@@ -5561,7 +5570,9 @@
       "saidaTardia": "Salida después del horario: {percentual}% de noche extra.",
       "saldo": "Saldo por cobrar",
       "titulo": "Salida de {pet}",
-      "voltarALista": "Volver a la lista"
+      "voltarALista": "Volver a la lista",
+      "confiraDocumento": "Revisa el documento: {documento}",
+      "semDocumento": "Sin documento registrado. Pide uno con foto."
     },
     "comum": {
       "cancelar": "Cancelar",
@@ -5688,7 +5699,8 @@
       },
       "subtitulo": "Hotel",
       "titulo": "Estancia",
-      "voltar": "Huéspedes"
+      "voltar": "Huéspedes",
+      "quemBusca": "Quién puede retirar"
     },
     "exigencia": {
       "antipulgas": "Antipulgas",
@@ -6065,9 +6077,7 @@
     },
     "reserva": {
       "acompanhante": "Acompañante de la misma casa",
-      "acrescentarAutorizado": "Agregar autorizado",
-      "autorizados": "Quién más puede retirar",
-      "autorizadosDica": "Nombre de quien el responsable autoriza",
+      "autorizados": "Quién puede retirar",
       "avisoAdmissao": "Documentación por resolver antes de la entrada: {itens}",
       "checkInBloqueado": "La entrada está bloqueada por documentación pendiente.",
       "chegaAs": "llega a las",
@@ -6088,7 +6098,6 @@
       "periodo": "Fechas",
       "porDiaria": " por noche",
       "quantasNoites": "Noches",
-      "removerAutorizado": "Quitar {nome}",
       "saiAs": "sale a las",
       "saidaTardia": "La salida prevista es después del horario: {valor} más en la cuenta.",
       "semAcompanhante": "Sin acompañante",
@@ -6515,6 +6524,25 @@
       "otologica": "Ótica",
       "subcutanea": "Subcutánea",
       "topica": "Tópica"
+    },
+    "quemBusca": {
+      "responsavel": "Responsable",
+      "sempre": "El responsable siempre puede retirar",
+      "ninguemMais": "Nadie más de la familia registrado.",
+      "cadastrar": "Registrar a otra persona",
+      "novaPessoa": "Persona nueva",
+      "nome": "Nombre",
+      "telefone": "Teléfono",
+      "relacao": "Relación",
+      "relacaoDica": "Hermana, chófer, vecino",
+      "documento": "Documento",
+      "documentoDica": "RG o CPF, si lo tiene",
+      "adicionar": "Añadir",
+      "pendente": "Añade o cancela a esta persona antes de confirmar.",
+      "erroNome": "Falta el nombre.",
+      "erroTelefone": "Falta el teléfono.",
+      "erroTelefoneInvalido": "Teléfono incompleto. Revisa el prefijo y el número.",
+      "erroTelefoneRepetido": "Este teléfono ya es de {nome}."
     }
   },
   "primevue": {
