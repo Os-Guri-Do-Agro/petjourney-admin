@@ -140,7 +140,7 @@ function repetir() {
         <Button
           v-if="podeRepetir"
           :label="t('clinico.receita.repetir')"
-          icon="pi pi-replay"
+          icon="ph ph-arrow-counter-clockwise"
           size="small"
           severity="secondary"
           outlined
@@ -154,7 +154,7 @@ function repetir() {
 
         <Button
           :label="t('clinico.receita.emitir')"
-          icon="pi pi-verified"
+          icon="ph ph-seal-check"
           size="small"
           :disabled="!podeEmitir"
           :loading="receitas.salvando"
@@ -187,7 +187,7 @@ function repetir() {
               </template>
             </span>
             <span class="responsavel__lembrete">
-              <i class="pi pi-bell" aria-hidden="true" />
+              <i class="ph ph-bell" aria-hidden="true" />
               {{
                 item.continuo
                   ? t('clinico.receita.lembreteContinuo')
@@ -220,7 +220,7 @@ function repetir() {
       <header class="emitida__topo">
         <div>
           <strong class="emitida__assinatura">
-            <i class="pi pi-verified" aria-hidden="true" />
+            <i class="ph ph-seal-check" aria-hidden="true" />
             {{ t('clinico.receita.assinadaPor', { nome: doc.assinatura?.nome ?? '' }) }}
           </strong>
           <p class="emitida__conselho">{{ doc.assinatura?.conselho }}</p>
@@ -248,14 +248,14 @@ function repetir() {
 
       <div class="emitida__rodape">
         <span v-if="doc.enviadaEm" class="emitida__enviada">
-          <i class="pi pi-check" aria-hidden="true" />
+          <i class="ph ph-check" aria-hidden="true" />
           {{ t('clinico.receita.enviada') }} · {{ formato.relativo(doc.enviadaEm) }}
         </span>
 
         <Button
           v-else
           :label="t('clinico.receita.enviar')"
-          icon="pi pi-send"
+          icon="ph ph-paper-plane-tilt"
           size="small"
           severity="secondary"
           outlined

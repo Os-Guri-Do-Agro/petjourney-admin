@@ -411,7 +411,7 @@ function resumoDaDose(prescricao: Prescription) {
         <Button
           v-if="!somenteLeitura"
           :label="t('clinico.prontuario.conduta.adicionarPrescricao')"
-          icon="pi pi-plus"
+          icon="ph ph-plus"
           size="small"
           severity="secondary"
           outlined
@@ -456,7 +456,7 @@ function resumoDaDose(prescricao: Prescription) {
                 -->
                 <Button
                   v-if="!somenteLeitura"
-                  icon="pi pi-book"
+                  icon="ph ph-book-open"
                   severity="secondary"
                   outlined
                   :aria-label="t('clinico.bulario.escolherTitulo')"
@@ -491,7 +491,7 @@ function resumoDaDose(prescricao: Prescription) {
           -->
           <Button
             v-if="!somenteLeitura"
-            icon="pi pi-trash"
+            icon="ph ph-trash"
             severity="danger"
             text
             class="prescricao__remover"
@@ -550,7 +550,7 @@ function resumoDaDose(prescricao: Prescription) {
                   :model-value="ehContinuo(prescricao)"
                   :on-label="t('clinico.prontuario.conduta.usoContinuo')"
                   :off-label="t('clinico.prontuario.conduta.usoContinuo')"
-                  on-icon="pi pi-check"
+                  on-icon="ph ph-check"
                   :disabled="somenteLeitura"
                   size="small"
                   @update:model-value="alternarContinuo(prescricao)"
@@ -580,7 +580,7 @@ function resumoDaDose(prescricao: Prescription) {
         -->
         <p v-if="fracionamentoDe(prescricao)" class="fracao" :class="{ 'fracao--aproximada': fracionamentoDe(prescricao)!.aproximado }">
           <i
-            :class="fracionamentoDe(prescricao)!.aproximado ? 'pi pi-exclamation-circle' : 'pi pi-check-circle'"
+            :class="fracionamentoDe(prescricao)!.aproximado ? 'ph ph-warning-circle' : 'ph ph-check-circle'"
             aria-hidden="true"
           />
           <span>
@@ -691,7 +691,7 @@ function resumoDaDose(prescricao: Prescription) {
         <Button
           v-if="valor.retorno.emDias !== null && !valor.retorno.appointmentId"
           :label="t('clinico.prontuario.conduta.retornoAgendar')"
-          icon="pi pi-calendar-plus"
+          icon="ph ph-calendar-plus"
           size="small"
           :disabled="somenteLeitura"
           @click="emit('agendarRetorno')"
@@ -699,7 +699,7 @@ function resumoDaDose(prescricao: Prescription) {
       </div>
 
       <p v-if="valor.retorno.emDias !== null && !valor.retorno.appointmentId" class="retorno__aviso">
-        <i class="pi pi-exclamation-circle" aria-hidden="true" />
+        <i class="ph ph-warning-circle" aria-hidden="true" />
         {{ t('clinico.prontuario.conduta.retornoPendente') }}
       </p>
     </section>

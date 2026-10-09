@@ -49,8 +49,8 @@ const copyKey = computed(() => {
 <template>
   <aside v-if="visible" class="operability-banner" :data-tone="copyKey" role="status">
     <i
-      class="pi"
-      :class="copyKey === 'rejected' ? 'pi-times-circle' : 'pi-lock'"
+      class="ph"
+      :class="copyKey === 'rejected' ? 'ph-x-circle' : 'ph-lock'"
       aria-hidden="true"
     />
     <div>

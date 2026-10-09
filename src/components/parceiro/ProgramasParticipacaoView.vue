@@ -89,7 +89,7 @@ const activationSteps = computed(() => [
           :label="
             etapasAbertas ? t('programas.linha.ocultarEtapas') : t('programas.linha.verEtapas')
           "
-          :icon="etapasAbertas ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+          :icon="etapasAbertas ? 'ph ph-caret-up' : 'ph ph-caret-down'"
           icon-pos="right"
           severity="secondary"
           text

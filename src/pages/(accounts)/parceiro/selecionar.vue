@@ -129,7 +129,7 @@ onMounted(() => {
             @click="selecionar(opcao.parceiroId, opcao.ativo)"
           >
             <span class="select__icon" aria-hidden="true">
-              <i :class="opcao.equipe ? 'pi pi-users' : 'pi pi-building'" />
+              <i :class="opcao.equipe ? 'ph ph-users' : 'ph ph-building'" />
             </span>
 
             <span class="select__copy">
@@ -150,10 +150,10 @@ onMounted(() => {
               </span>
               <i
                 v-else-if="trocandoId === opcao.parceiroId"
-                class="pi pi-spin pi-spinner"
+                class="ph ph-spin ph-circle-notch"
                 aria-hidden="true"
               />
-              <i v-else class="pi pi-angle-right" aria-hidden="true" />
+              <i v-else class="ph ph-caret-right" aria-hidden="true" />
             </span>
           </Button>
         </li>

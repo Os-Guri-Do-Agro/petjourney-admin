@@ -127,7 +127,7 @@ function passou(marca: MarcaDoDia): boolean {
               :foto-url="marca.petFotoUrl"
               tamanho="xs"
             />
-            <i v-if="marca.travado" class="pi pi-exclamation-triangle" aria-hidden="true" />
+            <i v-if="marca.travado" class="ph ph-warning" aria-hidden="true" />
           </span>
           <span class="marca__haste" aria-hidden="true" />
         </button>
@@ -181,7 +181,7 @@ function passou(marca: MarcaDoDia): boolean {
               :foto-url="marca.petFotoUrl"
               tamanho="xs"
             />
-            <i v-if="marca.travado" class="pi pi-exclamation-triangle" aria-hidden="true" />
+            <i v-if="marca.travado" class="ph ph-warning" aria-hidden="true" />
           </span>
         </button>
       </div>

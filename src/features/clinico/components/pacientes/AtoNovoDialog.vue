@@ -239,7 +239,7 @@ function salvar() {
   >
     <template #header>
       <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i class="pi pi-briefcase" /></span>
+        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-briefcase" /></span>
         {{ t('clinico.paciente.atos.novo.titulo') }}
       </h2>
     </template>

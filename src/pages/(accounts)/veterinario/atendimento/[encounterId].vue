@@ -513,18 +513,18 @@ onBeforeUnmount(() => {
     <template #actions>
       <span class="clinic-scope clinic-acoes">
         <span v-if="prontuario.salvando" class="salvando clinic-value">
-          <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+          <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
           {{ t('clinico.prontuario.salvandoAgora') }}
         </span>
         <span v-else-if="prontuario.salvoEm" class="salvando clinic-value">
-          <i class="pi pi-check" aria-hidden="true" />
+          <i class="ph ph-check" aria-hidden="true" />
           {{ t('clinico.prontuario.salvoEm', { valor: formato.hora(prontuario.salvoEm) }) }}
         </span>
   
         <Button
           v-if="encounter"
           :label="t('clinico.prontuario.imprimir')"
-          icon="pi pi-file-pdf"
+          icon="ph ph-file-pdf"
           severity="secondary"
           outlined
           :title="t('clinico.prontuario.impressao.dica')"
@@ -534,7 +534,7 @@ onBeforeUnmount(() => {
         <Button
           v-if="encounter && encounter.status === 'rascunho' && !prontuario.somenteLeitura"
           :label="t('clinico.prontuario.finalizar')"
-          icon="pi pi-check-circle"
+          icon="ph ph-check-circle"
           @click="finalizarAberto = true"
         />
       </span>
@@ -543,7 +543,7 @@ onBeforeUnmount(() => {
     <div v-if="encounter" class="prontuario clinic-scope">
       <!-- Rascunho encontrado no navegador. Oferta, nunca sobrescrita silenciosa. -->
       <p v-if="prontuario.rascunhoPendente" class="faixa faixa--rascunho" role="status">
-        <i class="pi pi-history" aria-hidden="true" />
+        <i class="ph ph-clock-counter-clockwise" aria-hidden="true" />
         <span>
           {{ t('clinico.prontuario.rascunhoLocal') }} ·
           {{ formato.relativo(prontuario.rascunhoPendente.salvoEm) }}
@@ -568,7 +568,7 @@ onBeforeUnmount(() => {
         class="faixa faixa--leitura"
         role="status"
       >
-        <i class="pi pi-lock" aria-hidden="true" />
+        <i class="ph ph-lock" aria-hidden="true" />
         <span>{{ motivoLeitura }}</span>
         <Button
           :label="t('clinico.prontuario.assumirEdicao')"
@@ -586,7 +586,7 @@ onBeforeUnmount(() => {
                 ? t('clinico.prontuario.timeline.ocultar')
                 : t('clinico.prontuario.timeline.mostrar')
             "
-            :icon="historicoAberto ? 'pi pi-chevron-right' : 'pi pi-history'"
+            :icon="historicoAberto ? 'ph ph-caret-right' : 'ph ph-clock-counter-clockwise'"
             severity="secondary"
             :outlined="!historicoAberto"
             :text="historicoAberto"
@@ -619,7 +619,7 @@ onBeforeUnmount(() => {
           class="teclado__mapa clinic-focusable"
           link
           size="small"
-          icon="pi pi-question-circle"
+          icon="ph ph-question"
           :label="t('clinico.prontuario.teclado.verTeclas')"
           :title="t('clinico.prontuario.teclado.titulo')"
           @click="mapaAberto = true"
@@ -746,7 +746,7 @@ onBeforeUnmount(() => {
             <Button
               v-if="etapaAnterior"
               :label="etapaAnterior.rotulo"
-              icon="pi pi-arrow-left"
+              icon="ph ph-arrow-left"
               severity="secondary"
               text
               @click="irParaEtapa(etapaAnterior.id)"
@@ -756,7 +756,7 @@ onBeforeUnmount(() => {
             <Button
               v-if="proximaEtapa"
               :label="proximaEtapa.rotulo"
-              icon="pi pi-arrow-right"
+              icon="ph ph-arrow-right"
               icon-pos="right"
               severity="secondary"
               outlined
@@ -765,7 +765,7 @@ onBeforeUnmount(() => {
             <Button
               v-else-if="encounter.status === 'rascunho' && !prontuario.somenteLeitura"
               :label="t('clinico.prontuario.finalizar')"
-              icon="pi pi-check-circle"
+              icon="ph ph-check-circle"
               @click="finalizarAberto = true"
             />
           </footer>
@@ -817,7 +817,7 @@ onBeforeUnmount(() => {
       <div class="dialogo clinic-scope">
         <p>{{ t('clinico.prontuario.finalizarDialogo.descricao') }}</p>
         <p v-if="pendencias.length > 0" class="dialogo__pendencias">
-          <i class="pi pi-exclamation-circle" aria-hidden="true" />
+          <i class="ph ph-warning-circle" aria-hidden="true" />
           {{ t('clinico.prontuario.finalizarDialogo.pendencias', { itens: pendencias.join(', ') }) }}
         </p>
       </div>

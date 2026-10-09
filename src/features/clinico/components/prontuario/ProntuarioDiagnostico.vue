@@ -102,7 +102,7 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
         />
 
         <Button
-          icon="pi pi-times"
+          icon="ph ph-x"
           severity="secondary"
           text
           rounded
@@ -118,7 +118,7 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
 
     <div v-if="!somenteLeitura" class="busca">
       <IconField>
-        <InputIcon class="pi pi-search" />
+        <InputIcon class="ph ph-magnifying-glass" />
         <InputText
           v-model="termo"
           :placeholder="t('clinico.prontuario.diagnostico.buscar')"
@@ -144,7 +144,7 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
             <span class="codigo">{{ sugestao.codigo }}</span>
             <span class="sugestoes__descricao">{{ sugestao.descricao }}</span>
             <span class="sugestoes__acao">
-              <i class="pi pi-plus" aria-hidden="true" />
+              <i class="ph ph-plus" aria-hidden="true" />
               {{ t('clinico.prontuario.diagnostico.adicionar') }}
             </span>
           </Button>

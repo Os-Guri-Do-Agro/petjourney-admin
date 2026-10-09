@@ -229,7 +229,7 @@ const linkDoWhatsapp = computed(() => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <i class="pi pi-whatsapp" aria-hidden="true" />
+            <i class="ph ph-whatsapp-logo" aria-hidden="true" />
             {{ t('clinico.faltas.justificativa.whatsapp') }}
           </a>
         </div>
@@ -281,7 +281,7 @@ const linkDoWhatsapp = computed(() => {
         suporte. O aviso também serve de segunda confirmação para o clique errado no `Select`.
       -->
       <p v-if="encerra" class="falta__obito" role="status">
-        <i class="pi pi-info-circle" aria-hidden="true" />
+        <i class="ph ph-info" aria-hidden="true" />
         {{ t('clinico.faltas.justificativa.avisoObito') }}
       </p>
 
@@ -316,7 +316,7 @@ const linkDoWhatsapp = computed(() => {
       />
       <Button
         :label="t('clinico.faltas.justificativa.confirmar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         :loading="salvando"
         :disabled="!motivo"
         @click="confirmar"

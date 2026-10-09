@@ -136,7 +136,7 @@ const contato = computed(() => [
         aria-hidden="true"
       >
         <span v-if="iniciais">{{ iniciais }}</span>
-        <i v-else class="pi pi-user" />
+        <i v-else class="ph ph-user" />
       </div>
 
       <div class="perfil__corpo">
@@ -196,7 +196,7 @@ const contato = computed(() => [
         ninguém consegue avisar.
       -->
       <p v-else class="quadro__falta">
-        <i class="pi pi-exclamation-circle" aria-hidden="true" />
+        <i class="ph ph-warning-circle" aria-hidden="true" />
         {{ t('clinico.paciente.novo.previa.semResponsavel') }}
       </p>
 

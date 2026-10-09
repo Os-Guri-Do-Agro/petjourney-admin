@@ -482,7 +482,7 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
                         />
                         <i
                           v-if="temAviso(card)"
-                          class="pi pi-exclamation-circle atendimento__aviso"
+                          class="ph ph-warning-circle atendimento__aviso"
                           aria-hidden="true"
                         />
                       </Button>
@@ -491,7 +491,7 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
                         v-if="podeMarcarFalta(card)"
                         type="button"
                         class="atendimento__falta"
-                        icon="pi pi-user-minus"
+                        icon="ph ph-user-minus"
                         severity="secondary"
                         text
                         size="small"
@@ -513,7 +513,7 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
                   "
                   type="button"
                   class="tabela__marcar"
-                  icon="pi pi-plus"
+                  icon="ph ph-plus"
                   text
                   :aria-label="
                     t('clinico.agenda.tabela.marcarAs', { hora: linha.rotulo, nome: coluna.titulo })
@@ -528,7 +528,7 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
     </div>
 
     <p class="tabela__dica">
-      <i class="pi pi-arrows-alt" aria-hidden="true" />
+      <i class="ph ph-arrows-out-cardinal" aria-hidden="true" />
       {{ t('clinico.agenda.tabela.dica') }}
     </p>
   </section>

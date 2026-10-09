@@ -48,11 +48,11 @@ const formato = useClinicFormat()
 const { ocultarCancelados, formatoDaAgenda } = useClinicPrefs()
 
 const opcoesDeFormato = computed(() => [
-  { valor: 'tabela', rotulo: t('clinico.agenda.formato.tabela'), icone: 'pi pi-table' },
+  { valor: 'tabela', rotulo: t('clinico.agenda.formato.tabela'), icone: 'ph ph-table' },
   {
     valor: 'linha-do-tempo',
     rotulo: t('clinico.agenda.formato.linhaDoTempo'),
-    icone: 'pi pi-clock',
+    icone: 'ph ph-clock',
   },
 ])
 
@@ -86,13 +86,13 @@ const opcoesAgrupamento = computed(() => [
   {
     valor: 'profissional',
     rotulo: t('clinico.agenda.agruparPorProfissional'),
-    icone: 'pi pi-user',
+    icone: 'ph ph-user',
     atalho: 'P',
   },
   {
     valor: 'sala',
     rotulo: t('clinico.agenda.agruparPorSala'),
-    icone: 'pi pi-building',
+    icone: 'ph ph-building',
     atalho: 'R',
   },
 ])
@@ -100,19 +100,19 @@ const opcoesAgrupamento = computed(() => [
 const itensAcoes = computed<MenuItem[]>(() => [
   {
     label: t('clinico.agenda.encaixar'),
-    icon: 'pi pi-bolt',
+    icon: 'ph ph-lightning',
     atalho: 'E',
     command: () => emit('encaixar'),
   },
   {
     label: t('clinico.agenda.bloquear'),
-    icon: 'pi pi-ban',
+    icon: 'ph ph-prohibit',
     atalho: 'B',
     command: () => emit('bloquear'),
   },
   {
     label: t('clinico.atalhos.abrir'),
-    icon: 'pi pi-question-circle',
+    icon: 'ph ph-question',
     atalho: '?',
     command: () => emit('ajuda'),
   },
@@ -124,7 +124,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
     <!-- onde estou -->
     <div class="barra__data">
       <Button
-        icon="pi pi-chevron-left"
+        icon="ph ph-caret-left"
         severity="secondary"
         outlined
         size="small"
@@ -148,7 +148,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
       </div>
 
       <Button
-        icon="pi pi-chevron-right"
+        icon="ph ph-caret-right"
         severity="secondary"
         outlined
         size="small"
@@ -179,7 +179,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
       <Button
         class="painel-botao"
         :class="{ 'painel-botao--ativo': filtrosAtivos > 0 }"
-        icon="pi pi-filter"
+        icon="ph ph-funnel"
         severity="secondary"
         outlined
         size="small"
@@ -191,7 +191,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
       />
 
       <Button
-        icon="pi pi-sliders-h"
+        icon="ph ph-sliders-horizontal"
         severity="secondary"
         outlined
         size="small"
@@ -202,7 +202,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
       />
 
       <Button
-        icon="pi pi-ellipsis-v"
+        icon="ph ph-dots-three-vertical"
         severity="secondary"
         outlined
         size="small"
@@ -264,7 +264,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
           v-if="filtrosAtivos > 0"
           class="painel__limpar"
           :label="t('clinico.agenda.limparFiltros')"
-          icon="pi pi-times"
+          icon="ph ph-x"
           severity="secondary"
           text
           size="small"

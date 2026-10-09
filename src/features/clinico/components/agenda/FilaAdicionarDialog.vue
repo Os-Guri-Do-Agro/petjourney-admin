@@ -204,12 +204,12 @@ async function salvar() {
         >
           <template #footer>
             <Button class="cadastrar" text fluid @click="cadastrandoPaciente = true">
-              <span class="cadastrar__marca" aria-hidden="true"><i class="pi pi-user-plus" /></span>
+              <span class="cadastrar__marca" aria-hidden="true"><i class="ph ph-user-plus" /></span>
               <span class="cadastrar__texto">
                 <strong>{{ t('clinico.paciente.novo.atalho') }}</strong>
                 <small>{{ t('clinico.paciente.novo.atalhoAjuda') }}</small>
               </span>
-              <i class="pi pi-arrow-right cadastrar__seta" aria-hidden="true" />
+              <i class="ph ph-arrow-right cadastrar__seta" aria-hidden="true" />
             </Button>
           </template>
         </Select>
@@ -287,7 +287,7 @@ async function salvar() {
       />
       <Button
         :label="t('clinico.fila.adicionar')"
-        icon="pi pi-plus"
+        icon="ph ph-plus"
         :disabled="!podeSalvar"
         :loading="fila.salvando"
         @click="salvar"

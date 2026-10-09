@@ -181,7 +181,7 @@ function registrar() {
       <header class="registro__topo">
         <h3 class="registro__titulo">{{ t('clinico.internacao.evolucao.registrarTitulo') }}</h3>
         <p v-if="jaRegistrouNoTurno" class="registro__jaFeita">
-          <i class="pi pi-check-circle" aria-hidden="true" />
+          <i class="ph ph-check-circle" aria-hidden="true" />
           {{ t('clinico.internacao.evolucao.jaRegistrada') }}
         </p>
       </header>
@@ -276,13 +276,13 @@ function registrar() {
       />
 
       <p v-if="vaiPiorar" class="registro__aviso" role="status">
-        <i class="pi pi-info-circle" aria-hidden="true" />
+        <i class="ph ph-info" aria-hidden="true" />
         {{ t('clinico.internacao.evolucao.avisoPiora') }}
       </p>
 
       <Button
         :label="t('clinico.internacao.evolucao.registrar')"
-        icon="pi pi-save"
+        icon="ph ph-floppy-disk"
         :disabled="!podeRegistrar || salvando"
         :loading="salvando"
         @click="registrar"

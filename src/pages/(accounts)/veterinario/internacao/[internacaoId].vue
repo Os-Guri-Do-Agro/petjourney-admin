@@ -306,7 +306,7 @@ async function encerrar(entrada: {
       <div class="internado__topo">
         <!-- A volta ao mapa é navegação, não conteúdo: fica sozinha acima, como migalha. -->
         <RouterLink class="hc__link internado__voltar" to="/veterinario/internacao">
-          <i class="pi pi-arrow-left" aria-hidden="true" />
+          <i class="ph ph-arrow-left" aria-hidden="true" />
           {{ t('clinico.internacao.paciente.voltar') }}
         </RouterLink>
 
@@ -335,7 +335,7 @@ async function encerrar(entrada: {
         está no leito — e alguém marca uma dose numa internação que acabou ontem.
       -->
       <p v-if="desfechoRegistrado" class="encerrada" role="status">
-        <i class="pi pi-check-circle" aria-hidden="true" />
+        <i class="ph ph-check-circle" aria-hidden="true" />
         {{ t(`clinico.internacao.alta.encerrada.${desfechoRegistrado}`, { quando: encerradaEm }) }}
       </p>
 
@@ -360,7 +360,7 @@ async function encerrar(entrada: {
             v-if="!encerrada"
             type="button"
             :label="t('clinico.internacao.alta.abrir')"
-            icon="pi pi-sign-out"
+            icon="ph ph-sign-out"
             severity="secondary"
             outlined
             size="small"
@@ -398,7 +398,7 @@ async function encerrar(entrada: {
         depois de trocar de aba.
       -->
       <p v-if="internacao.naTrocaDePlantao.length > 0" class="troca" role="status">
-        <i class="pi pi-arrow-right-arrow-left" aria-hidden="true" />
+        <i class="ph ph-arrows-left-right" aria-hidden="true" />
         {{
           t(
             'clinico.internacao.paciente.naTroca',
@@ -497,11 +497,11 @@ async function encerrar(entrada: {
   margin-inline-start: -0.55rem;
 }
 
-.internado__voltar .pi {
+.internado__voltar .ph {
   font-size: 0.75rem;
 }
 
-[dir='rtl'] .internado__voltar .pi {
+[dir='rtl'] .internado__voltar .ph {
   scale: -1 1;
 }
 

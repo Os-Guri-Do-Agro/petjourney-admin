@@ -262,7 +262,7 @@ function criar(receita: ReceitaSemLembrete) {
       -->
       <Transition name="aviso">
         <div v-if="aviso" :key="aviso.chave" class="push" role="status">
-          <span class="push__marca" aria-hidden="true"><i class="pi pi-bell" /></span>
+          <span class="push__marca" aria-hidden="true"><i class="ph ph-bell" /></span>
           <span class="push__texto">
             <small>{{
               t('clinico.adesao.app.pushOrigem', { hora: formato.hora(aviso.chave) })
@@ -302,7 +302,7 @@ function criar(receita: ReceitaSemLembrete) {
 
       <div class="rolagem">
         <p v-if="!edita" class="leitura">
-          <i class="pi pi-eye" aria-hidden="true" />
+          <i class="ph ph-eye" aria-hidden="true" />
           {{ t('clinico.adesao.app.somenteLeitura', { pet: contrato.pet.nome }) }}
         </p>
 
@@ -413,7 +413,7 @@ function criar(receita: ReceitaSemLembrete) {
                       size="small"
                       severity="secondary"
                       outlined
-                      icon="pi pi-times"
+                      icon="ph ph-x"
                       :aria-label="t('clinico.adesao.app.voltar')"
                       :title="t('clinico.adesao.app.voltar')"
                       @click="pulando = null"
@@ -448,7 +448,7 @@ function criar(receita: ReceitaSemLembrete) {
                 <span v-else class="dose__estado">
                   <i
                     v-if="dose.situacao === 'DADA'"
-                    class="pi pi-check-circle dose__icone"
+                    class="ph ph-check-circle dose__icone"
                     aria-hidden="true"
                   />
                   {{ estado(dose) }}

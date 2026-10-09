@@ -437,7 +437,7 @@ watch(() => agenda.data, medir)
               :style="{ top: `${previaVisual.card.topPx + previaVisual.card.alturaPx + 2}px` }"
               role="status"
             >
-              <i class="pi pi-exclamation-circle" aria-hidden="true" />
+              <i class="ph ph-warning-circle" aria-hidden="true" />
               <span>
                 {{
                   previaVisual.conflitos
@@ -485,7 +485,7 @@ watch(() => agenda.data, medir)
     </div>
 
     <p class="grade__dica">
-      <i class="pi pi-arrows-alt" aria-hidden="true" />
+      <i class="ph ph-arrows-out-cardinal" aria-hidden="true" />
       {{ t('clinico.agenda.arrastarDica') }}
     </p>
   </div>

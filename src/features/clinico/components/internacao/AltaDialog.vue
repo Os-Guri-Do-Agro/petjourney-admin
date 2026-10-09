@@ -206,7 +206,7 @@ function confirmar() {
         </dl>
 
         <p v-for="aviso in avisos" :key="aviso" class="alta__aviso" role="status">
-          <i class="pi pi-exclamation-circle" aria-hidden="true" />
+          <i class="ph ph-warning-circle" aria-hidden="true" />
           <span>
             {{
               t(
@@ -242,7 +242,7 @@ function confirmar() {
         pergunta "então ele já sabe?" depois de o botão ter sido apertado.
       -->
       <p class="alta__canal" :class="{ 'alta__canal--grave': !porMensagem }">
-        <i :class="porMensagem ? 'pi pi-comment' : 'pi pi-phone'" aria-hidden="true" />
+        <i :class="porMensagem ? 'ph ph-chat-circle' : 'ph ph-phone'" aria-hidden="true" />
         <span>{{ t(`clinico.internacao.alta.canal.${desfecho}`) }}</span>
       </p>
 
@@ -263,7 +263,7 @@ function confirmar() {
       />
       <Button
         :label="t(`clinico.internacao.alta.confirmar.${desfecho}`)"
-        :icon="porMensagem ? 'pi pi-check' : 'pi pi-exclamation-triangle'"
+        :icon="porMensagem ? 'ph ph-check' : 'ph ph-warning'"
         :severity="porMensagem ? undefined : 'danger'"
         :disabled="!podeConfirmar"
         :loading="salvando"

@@ -165,7 +165,7 @@ async function handleVincular() {
         <Button
           class="vincular-dialog__close"
           type="button"
-          icon="pi pi-times"
+          icon="ph ph-x"
           severity="secondary"
           outlined
           :aria-label="t('common.close')"
@@ -174,7 +174,7 @@ async function handleVincular() {
         />
 
         <div class="vincular-dialog__badge" aria-hidden="true">
-          <i class="pi pi-key" />
+          <i class="ph ph-key" />
         </div>
 
         <p class="vincular-dialog__eyebrow">{{ t('acessos.vincular.eyebrow') }}</p>

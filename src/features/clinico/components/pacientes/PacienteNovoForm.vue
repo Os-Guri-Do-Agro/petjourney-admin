@@ -701,7 +701,7 @@ async function salvar() {
             outlined
             rounded
             size="small"
-            :icon="alertaAtivo(kind) ? 'pi pi-check' : 'pi pi-plus'"
+            :icon="alertaAtivo(kind) ? 'ph ph-check' : 'ph ph-plus'"
             :label="formato.alerta(kind)"
             :aria-pressed="alertaAtivo(kind)"
             @click="alternarAlerta(kind)"
@@ -784,7 +784,7 @@ async function salvar() {
           conferir em voz alta.
         -->
         <p v-if="responsavelEscolhido" class="escolhido">
-          <i class="pi pi-check-circle" aria-hidden="true" />
+          <i class="ph ph-check-circle" aria-hidden="true" />
           <span>
             <bdi dir="ltr">{{ responsavelEscolhido.telefone }}</bdi>
             <template v-if="responsavelEscolhido.documento">
@@ -832,7 +832,7 @@ async function salvar() {
         -->
         <div v-if="semelhantes.length > 0" class="repetido" role="status">
           <p class="repetido__titulo">
-            <i class="pi pi-exclamation-triangle" aria-hidden="true" />
+            <i class="ph ph-warning" aria-hidden="true" />
             {{ t('clinico.paciente.novo.semelhanteTitulo') }}
           </p>
 

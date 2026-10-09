@@ -135,7 +135,7 @@ const ultima = computed(() => {
               :to="`/veterinario/atendimento/${ultima.encounterId}`"
             >
               {{ t('clinico.resumoDoPaciente.essencial.abrirProntuario') }}
-              <i class="pi pi-arrow-right" aria-hidden="true" />
+              <i class="ph ph-arrow-right" aria-hidden="true" />
             </RouterLink>
           </template>
           <span v-else class="essencial__vazio">

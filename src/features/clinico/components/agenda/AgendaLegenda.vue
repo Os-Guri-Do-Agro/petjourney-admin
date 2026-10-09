@@ -104,7 +104,7 @@ const itens = computed<ItemDaLegenda[]>(() =>
       severity="secondary"
       text
       size="small"
-      :icon="legendaAberta ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+      :icon="legendaAberta ? 'ph ph-caret-down' : 'ph ph-caret-right'"
       :label="t('clinico.agenda.legenda.titulo')"
       :badge="temFiltro ? String(agenda.filtroTipos.length) : undefined"
       :aria-expanded="legendaAberta"

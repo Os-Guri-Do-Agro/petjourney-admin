@@ -90,7 +90,7 @@ onMounted(carregar)
     <div class="atividades clinic-scope">
       <section v-if="rascunhos.length > 0" class="pilha">
         <h2 class="pilha__titulo">
-          <span class="pilha__marca" aria-hidden="true"><i class="pi pi-file-edit" /></span>
+          <span class="pilha__marca" aria-hidden="true"><i class="ph ph-note-pencil" /></span>
           {{ t('clinico.atividades.rascunhos') }}
           <span class="pilha__contagem clinic-value">{{ rascunhos.length }}</span>
         </h2>
@@ -118,7 +118,7 @@ onMounted(carregar)
                   {{ formato.relativo(encounter.abertoEm) }}
                 </small>
               </span>
-              <i class="pi pi-chevron-right" aria-hidden="true" />
+              <i class="ph ph-caret-right" aria-hidden="true" />
             </Button>
           </li>
         </ul>
@@ -126,7 +126,7 @@ onMounted(carregar)
 
       <section v-if="retornos.length > 0" class="pilha">
         <h2 class="pilha__titulo">
-          <span class="pilha__marca" aria-hidden="true"><i class="pi pi-history" /></span>
+          <span class="pilha__marca" aria-hidden="true"><i class="ph ph-clock-counter-clockwise" /></span>
           {{ t('clinico.atividades.retornos') }}
           <span class="pilha__contagem clinic-value">{{ retornos.length }}</span>
         </h2>
@@ -171,7 +171,7 @@ onMounted(carregar)
 
       <section v-if="fila.ofertadas.length > 0" class="pilha">
         <h2 class="pilha__titulo">
-          <span class="pilha__marca" aria-hidden="true"><i class="pi pi-hourglass" /></span>
+          <span class="pilha__marca" aria-hidden="true"><i class="ph ph-hourglass" /></span>
           {{ t('clinico.atividades.ofertasDaFila') }}
           <span class="pilha__contagem clinic-value">{{ fila.ofertadas.length }}</span>
         </h2>
@@ -202,7 +202,7 @@ onMounted(carregar)
                   }}
                 </small>
               </span>
-              <i class="pi pi-chevron-right" aria-hidden="true" />
+              <i class="ph ph-caret-right" aria-hidden="true" />
             </Button>
           </li>
         </ul>

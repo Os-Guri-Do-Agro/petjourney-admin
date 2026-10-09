@@ -210,7 +210,7 @@ function confirmar() {
             ? t('hotel.exigencias.confirmarDispensa')
             : t('hotel.exigencias.confirmarRegistro')
         "
-        icon="pi pi-check"
+        icon="ph ph-check"
         :severity="alvo?.modo === 'dispensar' ? 'warn' : undefined"
         :loading="salvando"
         :disabled="!podeSalvar"

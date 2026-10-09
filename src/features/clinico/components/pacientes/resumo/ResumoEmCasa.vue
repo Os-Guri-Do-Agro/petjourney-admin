@@ -146,7 +146,7 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
       Cadeado e não celular: o diário existe, só não é da clínica.
     -->
     <div v-if="!diario.liberado" class="casa__vazio">
-      <i class="pi pi-lock" aria-hidden="true" />
+      <i class="ph ph-lock" aria-hidden="true" />
       <p>
         <strong>{{ t('clinico.resumoDoPaciente.casa.naoLiberadoTitulo') }}</strong>
         {{ t('clinico.resumoDoPaciente.casa.naoLiberadoDescricao') }}
@@ -154,7 +154,7 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
     </div>
 
     <div v-else-if="total === 0 && !diario.peso" class="casa__vazio">
-      <i class="pi pi-mobile" aria-hidden="true" />
+      <i class="ph ph-device-mobile" aria-hidden="true" />
       <p>
         <strong>{{ t('clinico.resumoDoPaciente.casa.vazioTitulo') }}</strong>
         {{ t('clinico.resumoDoPaciente.casa.vazioDescricao') }}
@@ -193,7 +193,7 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
                 :key="item.sintoma"
                 :class="{ 'casa__sintoma--alarme': item.alarme }"
               >
-                <i v-if="item.alarme" class="pi pi-exclamation-triangle" aria-hidden="true" />
+                <i v-if="item.alarme" class="ph ph-warning" aria-hidden="true" />
                 {{ rotulos.sintoma(item.sintoma) }}
                 <span class="clinic-value casa__vezes">×{{ item.vezes }}</span>
               </li>
@@ -231,7 +231,7 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
               ? t('clinico.resumoDoPaciente.casa.esconder')
               : t('clinico.resumoDoPaciente.casa.verRegistros', { total })
           "
-          :icon="aberto ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+          :icon="aberto ? 'ph ph-caret-up' : 'ph ph-caret-down'"
           severity="secondary"
           text
           size="small"
@@ -392,7 +392,7 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
   color: var(--clinic-risk-text);
 }
 
-.casa__sintoma--alarme .pi {
+.casa__sintoma--alarme .ph {
   font-size: 0.8rem;
 }
 
@@ -442,7 +442,7 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
   color: var(--clinic-text);
 }
 
-.casa__vazio .pi {
+.casa__vazio .ph {
   margin-top: 0.2em;
   color: var(--clinic-faint);
 }

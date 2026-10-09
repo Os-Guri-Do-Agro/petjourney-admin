@@ -185,7 +185,7 @@ onMounted(() => {
       <Button
         type="button"
         :label="t('carteira.extrato.retry')"
-        icon="pi pi-refresh"
+        icon="ph ph-arrow-clockwise"
         severity="secondary"
         outlined
         size="small"
@@ -194,7 +194,7 @@ onMounted(() => {
     </div>
 
     <div v-else-if="items.length === 0" class="portal-panel__empty">
-      <i class="pi pi-list" aria-hidden="true" />
+      <i class="ph ph-list-bullets" aria-hidden="true" />
       <strong>{{ t('carteira.extrato.emptyTitle') }}</strong>
       <p>{{ t('carteira.extrato.emptyBody') }}</p>
     </div>

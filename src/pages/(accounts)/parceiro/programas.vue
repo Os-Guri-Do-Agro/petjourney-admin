@@ -143,7 +143,7 @@ watch(
               type="button"
               class="hc-pilula"
               :label="t('programas.cred.zoneTitle')"
-              icon="pi pi-id-card"
+              icon="ph ph-identification-card"
               severity="secondary"
               outlined
               @click="router.push('/settings?aba=empresa')"

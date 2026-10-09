@@ -135,7 +135,7 @@ onMounted(() => {
               v-if="acaoCheia === 'sacar'"
               type="button"
               class="hc-pilula hc-pilula--cheia"
-              icon="pi pi-wallet"
+              icon="ph ph-wallet"
               :label="t('carteira.visao.saque.submit')"
               @click="resumo?.abrirSaque()"
             />
@@ -143,7 +143,7 @@ onMounted(() => {
               v-if="acaoCheia === 'cadastrarPix'"
               type="button"
               class="hc-pilula hc-pilula--cheia"
-              icon="pi pi-key"
+              icon="ph ph-key"
               :label="t('carteira.saudacao.cadastrarPix')"
               @click="resumo?.abrirPix()"
             />
@@ -151,7 +151,7 @@ onMounted(() => {
               v-else
               type="button"
               class="hc-pilula"
-              icon="pi pi-key"
+              icon="ph ph-key"
               :label="t('carteira.visao.pix.title')"
               severity="secondary"
               outlined

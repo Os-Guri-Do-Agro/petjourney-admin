@@ -568,14 +568,14 @@ onMounted(carregar)
             class="detalhe__fechar"
             text
             severity="secondary"
-            icon="pi pi-times"
+            icon="ph ph-x"
             :aria-label="t('clinico.atalhos.fechar')"
             @click="responsavelAberto = null"
           />
         </header>
 
         <p v-if="carregandoDetalhe" class="detalhe__estado" role="status">
-          <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+          <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
           {{ t('clinico.tabela.carregando') }}
         </p>
 
@@ -610,7 +610,7 @@ onMounted(carregar)
                 :title="t('clinico.faltas.justificativa.editar')"
                 @click.stop="faltaParaJustificar = falta"
               >
-                <i class="pi pi-comment" aria-hidden="true" />
+                <i class="ph ph-chat-circle" aria-hidden="true" />
                 <span>
                   {{ formato.motivoFalta(falta.appointment.justificativaDeFalta.motivo) }}
                   <span class="falta__canal">
@@ -638,7 +638,7 @@ onMounted(carregar)
               <Button
                 v-if="!falta.appointment.justificativaDeFalta"
                 :label="t('clinico.faltas.justificativa.acao')"
-                icon="pi pi-phone"
+                icon="ph ph-phone"
                 size="small"
                 severity="warn"
                 outlined
@@ -673,7 +673,7 @@ onMounted(carregar)
               <Button
                 v-else
                 :label="t('clinico.faltas.reagendar.titulo')"
-                icon="pi pi-calendar-plus"
+                icon="ph ph-calendar-plus"
                 size="small"
                 severity="secondary"
                 outlined

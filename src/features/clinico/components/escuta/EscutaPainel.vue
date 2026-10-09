@@ -523,7 +523,7 @@ const temAcoes = computed(
     <header class="topo">
       <span class="disco" :class="`disco--${estado.tom}`" aria-hidden="true">
         <component :is="estado.icone" v-if="estado.icone" weight="bold" />
-        <i v-else class="pi pi-spin pi-spinner" />
+        <i v-else class="ph ph-spin ph-circle-notch" />
       </span>
 
       <div class="topo__textos">
@@ -561,7 +561,7 @@ const temAcoes = computed(
           <Button
             v-if="escuta.fonte === 'demonstracao' && escuta.fase === 'gravando'"
             :label="t('clinico.escuta.acoes.adiantar')"
-            icon="pi pi-forward"
+            icon="ph ph-fast-forward"
             severity="secondary"
             text
             size="small"
@@ -570,7 +570,7 @@ const temAcoes = computed(
           <Button
             v-if="escuta.fase === 'gravando'"
             :label="t('clinico.escuta.acoes.pausar')"
-            icon="pi pi-pause"
+            icon="ph ph-pause"
             severity="secondary"
             outlined
             size="small"
@@ -594,7 +594,7 @@ const temAcoes = computed(
           </Button>
           <Button
             :label="t('clinico.escuta.acoes.encerrar')"
-            icon="pi pi-stop-circle"
+            icon="ph ph-stop-circle"
             size="small"
             @click="escuta.encerrar()"
           />
@@ -627,7 +627,7 @@ const temAcoes = computed(
               ? t('clinico.escuta.vista.abrirPainel')
               : t('clinico.escuta.vista.fecharPainel')
           "
-          :icon="escuta.recolhida ? 'pi pi-window-maximize' : 'pi pi-times'"
+          :icon="escuta.recolhida ? 'ph ph-corners-out' : 'ph ph-x'"
           severity="secondary"
           outlined
           size="small"
@@ -651,7 +651,7 @@ const temAcoes = computed(
         <div class="gaveta__topo">
           <span class="disco disco--pequeno" :class="`disco--${estado.tom}`" aria-hidden="true">
             <component :is="estado.icone" v-if="estado.icone" weight="bold" />
-            <i v-else class="pi pi-spin pi-spinner" />
+            <i v-else class="ph ph-spin ph-circle-notch" />
           </span>
           <h2 class="gaveta__titulo">{{ estado.rotulo }}</h2>
           <span class="topo__relogio clinic-value" aria-hidden="true">{{
@@ -662,7 +662,7 @@ const temAcoes = computed(
             <Button
               v-if="escuta.fase === 'gravando'"
               :label="t('clinico.escuta.acoes.pausar')"
-              icon="pi pi-pause"
+              icon="ph ph-pause"
               severity="secondary"
               outlined
               size="small"
@@ -671,7 +671,7 @@ const temAcoes = computed(
             <Button
               v-else
               :label="t('clinico.escuta.acoes.retomar')"
-              icon="pi pi-play"
+              icon="ph ph-play"
               severity="secondary"
               outlined
               size="small"
@@ -679,7 +679,7 @@ const temAcoes = computed(
             />
             <Button
               :label="t('clinico.escuta.acoes.encerrar')"
-              icon="pi pi-stop-circle"
+              icon="ph ph-stop-circle"
               size="small"
               @click="escuta.encerrar()"
             />
@@ -691,7 +691,7 @@ const temAcoes = computed(
                 ? t('clinico.escuta.vista.ocultarConversa')
                 : t('clinico.escuta.vista.mostrarConversa')
             "
-            :icon="escuta.conversaAberta ? 'pi pi-eye-slash' : 'pi pi-comments'"
+            :icon="escuta.conversaAberta ? 'ph ph-eye-slash' : 'ph ph-chats-circle'"
             severity="secondary"
             text
             size="small"
@@ -704,12 +704,12 @@ const temAcoes = computed(
       <div :id="idDoCorpo" class="corpo-da-secao">
         <!-- A frase que não pode sumir enquanto for verdade: quem transcreve e quem propõe. -->
         <p class="aviso">
-          <i class="pi pi-info-circle" aria-hidden="true" />
+          <i class="ph ph-info" aria-hidden="true" />
           {{ t(`clinico.escuta.aviso.${escuta.fonte}`) }}
         </p>
 
         <p v-if="escuta.erro && escuta.fase !== 'inativa'" class="falha" role="alert">
-          <i class="pi pi-exclamation-circle" aria-hidden="true" />
+          <i class="ph ph-warning-circle" aria-hidden="true" />
           {{ t(`clinico.escuta.erro.${escuta.erro}`) }}
         </p>
 
@@ -821,7 +821,7 @@ const temAcoes = computed(
                   ? t('clinico.escuta.acoes.aplicar', { total: totalMarcado }, totalMarcado)
                   : t('clinico.escuta.acoes.aplicarNenhum')
               "
-              icon="pi pi-check"
+              icon="ph ph-check"
               :disabled="totalMarcado === 0 || somenteLeitura"
               @click="aplicar"
             />
@@ -1046,8 +1046,8 @@ const temAcoes = computed(
   color: var(--clinic-muted);
 }
 
-.aviso .pi,
-.falha .pi {
+.aviso .ph,
+.falha .ph {
   margin-top: 0.15rem;
   font-size: 0.7rem;
 }

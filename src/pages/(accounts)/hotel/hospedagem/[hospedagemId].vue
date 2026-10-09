@@ -190,7 +190,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       >
         <div class="trava__texto">
           <strong>
-            <i class="pi pi-phone" aria-hidden="true" />
+            <i class="ph ph-phone" aria-hidden="true" />
             {{ t('hotel.estadia.precisaLigar', { nome: tutor?.nome ?? '' }) }}
           </strong>
           <span> {{ formato.ocorrenciaKind(ocorrencia.kind) }} · {{ ocorrencia.descricao }} </span>
@@ -199,7 +199,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
         <Button
           :label="t('hotel.estadia.registrarLigacao')"
-          icon="pi pi-check"
+          icon="ph ph-check"
           :loading="hospedagem.salvando"
           @click="registrarContato(ocorrencia.id)"
         />
@@ -253,7 +253,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             v-if="encerrada"
             :rotulo="t('hotel.estadia.encerrada')"
             tom="neutro"
-            icone="pi pi-check"
+            icone="ph ph-check"
           />
         </div>
       </section>
@@ -267,7 +267,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               nome: hotelStore.cuidador(registro.recebidoPor)?.nome ?? '',
             })
           "
-          icone="pi pi-sign-in"
+          icone="ph ph-sign-in"
         />
         <ClinicStat
           :rotulo="t('hotel.estadia.stat.saida')"
@@ -275,7 +275,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           :detalhe="
             registro.saidaEm ? t('hotel.estadia.stat.saiu') : t('hotel.estadia.stat.prevista')
           "
-          icone="pi pi-sign-out"
+          icone="ph ph-sign-out"
           :tom="estadia.acrescimoDeSaida > 0 ? 'atencao' : 'neutro'"
         />
         <ClinicStat
@@ -286,13 +286,13 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               ? t('hotel.estadia.stat.semPesagem')
               : t('hotel.estadia.stat.saidaPeso', { valor: formato.peso(registro.pesoSaidaKg) })
           "
-          icone="pi pi-chart-bar"
+          icone="ph ph-chart-bar"
         />
         <ClinicStat
           :rotulo="t('hotel.estadia.stat.saldo')"
           :valor="formato.moeda(estadia.saldoCentavos)"
           :detalhe="t('hotel.estadia.stat.saldoDetalhe')"
-          icone="pi pi-wallet"
+          icone="ph ph-wallet"
         />
       </section>
 
@@ -336,7 +336,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               <Button
                 v-if="!encerrada"
                 :label="t('hotel.estadia.registrar')"
-                icon="pi pi-plus"
+                icon="ph ph-plus"
                 severity="secondary"
                 outlined
                 size="small"
@@ -373,7 +373,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               <Button
                 v-if="!encerrada"
                 :label="t('hotel.estadia.registrarOcorrencia')"
-                icon="pi pi-flag"
+                icon="ph ph-flag"
                 severity="secondary"
                 outlined
                 size="small"
@@ -401,7 +401,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                         : t('hotel.estadia.semContato')
                     "
                     :tom="item.contatoEm ? 'positivo' : 'risco'"
-                    icone="pi pi-phone"
+                    icone="ph ph-phone"
                   />
                 </div>
 
@@ -421,7 +421,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               <Button
                 v-if="!encerrada"
                 :label="t('hotel.estadia.gerarBoletim')"
-                icon="pi pi-comment"
+                icon="ph ph-chat-circle"
                 severity="secondary"
                 outlined
                 size="small"
@@ -435,7 +435,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               precisa entender que **falta uma ligação** — não que o sistema quebrou.
             -->
             <p v-if="boletimRetido" class="aviso aviso--risco">
-              <i class="pi pi-lock" aria-hidden="true" />
+              <i class="ph ph-lock" aria-hidden="true" />
               {{ t('hotel.estadia.boletimRetido') }}
             </p>
 
@@ -446,7 +446,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 <Button
                   v-if="ultimoBoletim.status !== 'enviado'"
                   :label="t('hotel.estadia.enviarBoletim')"
-                  icon="pi pi-send"
+                  icon="ph ph-paper-plane-tilt"
                   size="small"
                   :disabled="Boolean(boletimRetido)"
                   :loading="hospedagem.salvando"
@@ -456,7 +456,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                   v-else
                   :rotulo="t('hotel.estadia.enviado')"
                   tom="positivo"
-                  icone="pi pi-check"
+                  icone="ph ph-check"
                 />
               </footer>
             </article>
@@ -564,13 +564,13 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
           <section v-if="!encerrada" class="cartao cartao--acao">
             <p v-if="estadia.impedimentos.length > 0" class="aviso aviso--atencao">
-              <i class="pi pi-exclamation-triangle" aria-hidden="true" />
+              <i class="ph ph-warning" aria-hidden="true" />
               {{ t(`hotel.erros.saida.${estadia.impedimentos[0]}`) }}
             </p>
 
             <Button
               :label="t('hotel.estadia.fazerCheckOut')"
-              icon="pi pi-sign-out"
+              icon="ph ph-sign-out"
               @click="checkOutAberto = true"
             />
           </section>
@@ -646,7 +646,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <span class="clinic-scope clinic-acoes">
         <Button
           :label="t('hotel.estadia.voltar')"
-          icon="pi pi-arrow-left"
+          icon="ph ph-arrow-left"
           severity="secondary"
           outlined
           size="small"

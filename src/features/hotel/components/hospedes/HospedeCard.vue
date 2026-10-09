@@ -230,7 +230,7 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
             <PhHouseLine weight="duotone" aria-hidden="true" />{{ blocoNome }}
           </span>
           <span class="dado">
-            <i class="pi pi-user" aria-hidden="true" />{{ hospede.tutorNome }}
+            <i class="ph ph-user" aria-hidden="true" />{{ hospede.tutorNome }}
           </span>
         </p>
       </div>
@@ -338,7 +338,7 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
         <Button
           type="button"
           :label="t('hotel.hospedes.acao.registrarContato')"
-          icon="pi pi-pen-to-square"
+          icon="ph ph-note-pencil"
           severity="secondary"
           outlined
           size="small"
@@ -711,7 +711,7 @@ const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
 }
 
 .dado :deep(svg),
-.dado .pi {
+.dado .ph {
   flex: 0 0 auto;
   color: var(--clinic-faint);
   font-size: 0.85em;

@@ -45,11 +45,11 @@ const desvio = computed(() =>
 
 const seta = computed(() => {
   if (status.value === 'acima') {
-    return 'pi pi-arrow-up-right'
+    return 'ph ph-arrow-up-right'
   }
 
   if (status.value === 'abaixo') {
-    return 'pi pi-arrow-down-right'
+    return 'ph ph-arrow-down-right'
   }
 
   return ''

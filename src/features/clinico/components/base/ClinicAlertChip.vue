@@ -23,9 +23,9 @@ const props = withDefaults(
 )
 
 const iconePorSeveridade: Record<AlertSeverity, string> = {
-  risco: 'pi pi-exclamation-triangle',
-  atencao: 'pi pi-exclamation-circle',
-  info: 'pi pi-info-circle',
+  risco: 'ph ph-warning',
+  atencao: 'ph ph-warning-circle',
+  info: 'ph ph-info',
 }
 
 const icone = computed(() => props.icone || iconePorSeveridade[props.severidade])

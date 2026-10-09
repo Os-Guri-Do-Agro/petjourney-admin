@@ -102,11 +102,11 @@ watch([filtro, busca], () => {
 })
 
 const ICONE_DO_TOM: Record<TomDaFrase, string> = {
-  ok: 'pi pi-check',
-  corrigido: 'pi pi-pencil',
-  perdido: 'pi pi-eraser',
-  fora: 'pi pi-arrow-right',
-  aviso: 'pi pi-exclamation-circle',
+  ok: 'ph ph-check',
+  corrigido: 'ph ph-pencil-simple',
+  perdido: 'ph ph-eraser',
+  fora: 'ph ph-arrow-right',
+  aviso: 'ph ph-warning-circle',
 }
 
 function contas(item: ItemDoPlano) {
@@ -179,7 +179,7 @@ function acompanhar(elemento: Element) {
           {{ t('clinico.migracao.linhas.titulo') }}
         </h2>
         <p v-if="migracao.planilha" class="cabeca__arquivo">
-          <i class="pi pi-file" aria-hidden="true" />
+          <i class="ph ph-file" aria-hidden="true" />
           <bdi>{{ migracao.planilha.arquivo }}</bdi>
           <span>·</span>
           <span>
@@ -212,7 +212,7 @@ function acompanhar(elemento: Element) {
         </div>
 
         <IconField class="busca">
-          <InputIcon class="pi pi-search" />
+          <InputIcon class="ph ph-magnifying-glass" />
           <InputText
             v-model="busca"
             fluid
@@ -223,7 +223,7 @@ function acompanhar(elemento: Element) {
       </div>
 
       <p v-if="filtradas.length === 0" class="vazio">
-        <i class="pi pi-search" aria-hidden="true" />
+        <i class="ph ph-magnifying-glass" aria-hidden="true" />
         {{ t('clinico.migracao.linhas.vazio') }}
       </p>
 
@@ -283,7 +283,7 @@ function acompanhar(elemento: Element) {
             <span class="linha__numero">
               {{ t('clinico.migracao.comum.linha', { n: item.linha }) }}
             </span>
-            <i class="pi pi-chevron-down linha__seta" aria-hidden="true" />
+            <i class="ph ph-caret-down linha__seta" aria-hidden="true" />
           </Button>
 
           <Transition name="abre" @after-enter="acompanhar">
@@ -304,14 +304,14 @@ function acompanhar(elemento: Element) {
                     </li>
                   </ul>
                   <p v-else class="frase frase--ok">
-                    <span class="frase__marca" aria-hidden="true"><i class="pi pi-check" /></span>
+                    <span class="frase__marca" aria-hidden="true"><i class="ph ph-check" /></span>
                     <span>{{ t('clinico.migracao.linhas.semNada') }}</span>
                   </p>
 
                   <div class="detalhe__acoes">
                     <Button
                       class="mg-pilula mg-pilula--pequena"
-                      :icon="crusAbertos ? 'pi pi-chevron-up' : 'pi pi-table'"
+                      :icon="crusAbertos ? 'ph ph-caret-up' : 'ph ph-table'"
                       :label="t('clinico.migracao.linhas.naPlanilha')"
                       :aria-expanded="crusAbertos"
                       @click="crusAbertos = !crusAbertos"
@@ -319,7 +319,7 @@ function acompanhar(elemento: Element) {
                     <Button
                       v-if="migracao.resultadoPorLinha.get(item.linha)?.petId"
                       class="mg-pilula mg-pilula--pequena mg-pilula--cheia"
-                      icon="pi pi-external-link"
+                      icon="ph ph-arrow-square-out"
                       :label="t('clinico.migracao.linhas.abrirPaciente')"
                       @click="emit('abrir', migracao.resultadoPorLinha.get(item.linha)!.petId!)"
                     />
@@ -352,7 +352,7 @@ function acompanhar(elemento: Element) {
       <Button
         v-if="filtradas.length > visiveis.length"
         class="mg-pilula mais"
-        icon="pi pi-chevron-down"
+        icon="ph ph-caret-down"
         :label="
           t('clinico.migracao.linhas.mais', {
             n: Math.min(POR_VEZ, filtradas.length - visiveis.length),
@@ -393,7 +393,7 @@ function acompanhar(elemento: Element) {
   gap: 0.4rem;
 }
 
-.cabeca__arquivo .pi {
+.cabeca__arquivo .ph {
   color: var(--hc-marca);
   font-size: 0.8rem;
 }

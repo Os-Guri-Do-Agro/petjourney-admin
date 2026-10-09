@@ -29,22 +29,22 @@ const SECOES: AppNavigationSection[] = [
   {
     id: 'clinical',
     label: 'Clínica',
-    icon: 'pi pi-calendar',
+    icon: 'ph ph-calendar-blank',
     items: [
-      { label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'pi pi-sun' },
-      { label: 'Internação', to: '/veterinario/internacao', icon: 'pi pi-building' },
+      { label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'ph ph-sun' },
+      { label: 'Internação', to: '/veterinario/internacao', icon: 'ph ph-building' },
     ],
     blocos: [
       {
         id: 'agora',
         label: 'Agora',
-        items: [{ label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'pi pi-sun' }],
+        items: [{ label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'ph ph-sun' }],
       },
       {
         id: 'em-curso',
         label: 'Em curso',
         items: [
-          { label: 'Internação', to: '/veterinario/internacao', icon: 'pi pi-building' },
+          { label: 'Internação', to: '/veterinario/internacao', icon: 'ph ph-building' },
         ],
       },
     ],
@@ -52,8 +52,8 @@ const SECOES: AppNavigationSection[] = [
   {
     id: 'portal',
     label: 'Portal',
-    icon: 'pi pi-briefcase',
-    items: [{ label: 'Programas', to: '/parceiro/programas', icon: 'pi pi-th-large' }],
+    icon: 'ph ph-briefcase',
+    items: [{ label: 'Programas', to: '/parceiro/programas', icon: 'ph ph-squares-four' }],
   },
 ]
 

@@ -133,7 +133,7 @@ function entregar() {
         <span>
           {{ clinico.profissional(passagem.plantao.responsavelId)?.nome }}
           <!-- Ícone, e não o caractere "→": seta de texto não espelha no árabe. -->
-          <i class="pi pi-arrow-right passagem__seta" aria-hidden="true" />
+          <i class="ph ph-arrow-right passagem__seta" aria-hidden="true" />
           {{ t(`clinico.internacao.plantao.${passagem.seguinte.kind}`) }}
         </span>
       </p>
@@ -141,7 +141,7 @@ function entregar() {
       <!-- A lista que trava a entrega vem primeiro, e diz por que trava. -->
       <section v-if="naTroca.length > 0" class="lista lista--troca">
         <h4 class="lista__titulo">
-          <i class="pi pi-arrow-right-arrow-left" aria-hidden="true" />
+          <i class="ph ph-arrows-left-right" aria-hidden="true" />
           {{ t('clinico.internacao.passagem.emCimaDaTroca') }}
         </h4>
         <p class="lista__ajuda">{{ t('clinico.internacao.passagem.emCimaDaTrocaAjuda') }}</p>
@@ -176,7 +176,7 @@ function entregar() {
 
       <section v-if="atrasadas.length > 0" class="lista">
         <h4 class="lista__titulo">
-          <i class="pi pi-clock" aria-hidden="true" />
+          <i class="ph ph-clock" aria-hidden="true" />
           {{ t('clinico.internacao.passagem.atrasadas') }}
         </h4>
 
@@ -202,7 +202,7 @@ function entregar() {
 
       <section v-if="semEvolucao.length > 0" class="lista">
         <h4 class="lista__titulo">
-          <i class="pi pi-file-edit" aria-hidden="true" />
+          <i class="ph ph-note-pencil" aria-hidden="true" />
           {{ t('clinico.internacao.passagem.semEvolucao') }}
         </h4>
 
@@ -221,7 +221,7 @@ function entregar() {
       </section>
 
       <p v-if="nada" class="passagem__limpo">
-        <i class="pi pi-check-circle" aria-hidden="true" />
+        <i class="ph ph-check-circle" aria-hidden="true" />
         {{ t('clinico.internacao.passagem.nada') }}
       </p>
 
@@ -269,7 +269,7 @@ function entregar() {
       />
       <Button
         :label="t('clinico.internacao.passagem.entregar')"
-        icon="pi pi-sign-out"
+        icon="ph ph-sign-out"
         :disabled="!podeEntregar"
         :loading="salvando"
         @click="entregar"

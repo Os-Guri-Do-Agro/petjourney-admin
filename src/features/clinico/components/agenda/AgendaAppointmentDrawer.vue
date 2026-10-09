@@ -178,7 +178,7 @@ const prazoDoApp = computed(() => {
         -->
         <Button
           v-if="!encerrado"
-          icon="pi pi-pencil"
+          icon="ph ph-pencil-simple"
           severity="secondary"
           text
           rounded
@@ -189,7 +189,7 @@ const prazoDoApp = computed(() => {
         />
 
         <Button
-          icon="pi pi-times"
+          icon="ph ph-x"
           severity="secondary"
           text
           rounded
@@ -229,7 +229,7 @@ const prazoDoApp = computed(() => {
         <dd v-if="appointment.status === 'agendado'" class="drawer__acao-linha">
           <Button
             :label="t('clinico.agenda.presenca.registrar')"
-            icon="pi pi-check"
+            icon="ph ph-check"
             severity="secondary"
             text
             size="small"
@@ -306,14 +306,14 @@ const prazoDoApp = computed(() => {
       <Button
         v-if="proximoStatus"
         :label="t(`clinico.agenda.proximoPasso.${proximoStatus}`)"
-        icon="pi pi-arrow-right"
+        icon="ph ph-arrow-right"
         :loading="agenda.salvando"
         @click="emit('alterarStatus', proximoStatus)"
       />
 
       <Button
         :label="t('clinico.paciente.abrirProntuario')"
-        icon="pi pi-file-edit"
+        icon="ph ph-note-pencil"
         severity="secondary"
         outlined
         @click="emit('abrirProntuario')"
@@ -322,7 +322,7 @@ const prazoDoApp = computed(() => {
       <!-- O resumo vem antes do histórico: é o que se lê na porta da sala. -->
       <Button
         :label="t('clinico.resumoDoPaciente.verResumo')"
-        icon="pi pi-stopwatch"
+        icon="ph ph-timer"
         severity="secondary"
         outlined
         @click="emit('verResumo')"
@@ -330,7 +330,7 @@ const prazoDoApp = computed(() => {
 
       <Button
         :label="t('clinico.paciente.verHistorico')"
-        icon="pi pi-history"
+        icon="ph ph-clock-counter-clockwise"
         severity="secondary"
         text
         @click="emit('verHistorico')"
@@ -339,7 +339,7 @@ const prazoDoApp = computed(() => {
       <div v-if="!encerrado" class="drawer__acoes-risco">
         <Button
           :label="t('clinico.faltas.marcar')"
-          icon="pi pi-user-minus"
+          icon="ph ph-user-minus"
           severity="warn"
           text
           :loading="agenda.salvando"
@@ -347,7 +347,7 @@ const prazoDoApp = computed(() => {
         />
         <Button
           :label="t('clinico.agenda.cancelarDialogo.confirmar')"
-          icon="pi pi-times-circle"
+          icon="ph ph-x-circle"
           severity="danger"
           text
           @click="emit('cancelar')"

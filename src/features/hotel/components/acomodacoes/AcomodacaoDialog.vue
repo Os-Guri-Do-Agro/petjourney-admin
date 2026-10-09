@@ -335,7 +335,7 @@ function salvar() {
           <Button
             class="secao__acao"
             :label="t('hotel.acomodacoes.desativar')"
-            icon="pi pi-power-off"
+            icon="ph ph-power"
             severity="secondary"
             outlined
             :loading="salvando"
@@ -354,7 +354,7 @@ function salvar() {
           <Button
             class="secao__acao"
             :label="t('hotel.acomodacoes.reativar')"
-            icon="pi pi-check-circle"
+            icon="ph ph-check-circle"
             severity="secondary"
             outlined
             :loading="salvando"
@@ -408,7 +408,7 @@ function salvar() {
       />
       <Button
         :label="t('hotel.comum.salvar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         :loading="salvando"
         :disabled="!podeSalvar"
         @click="salvar"

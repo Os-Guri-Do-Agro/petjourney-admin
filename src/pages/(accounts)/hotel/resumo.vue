@@ -151,7 +151,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           :rotulo="t('hotel.resumo.stat.ocupacao')"
           :valor="formato.percentual(resumo.ocupacaoMedia)"
           :detalhe="t('hotel.resumo.stat.ocupacaoDetalhe')"
-          icone="pi pi-chart-pie"
+          icone="ph ph-chart-pie-slice"
         />
         <ClinicStat
           :rotulo="t('hotel.resumo.stat.receita')"
@@ -163,20 +163,20 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               resumo.diariasVendidas,
             )
           "
-          icone="pi pi-wallet"
+          icone="ph ph-wallet"
           tom="acento"
         />
         <ClinicStat
           :rotulo="t('hotel.resumo.stat.diariaMedia')"
           :valor="formato.moeda(resumo.diariaMediaCentavos)"
           :detalhe="t('hotel.resumo.stat.diariaMediaDetalhe')"
-          icone="pi pi-calculator"
+          icone="ph ph-calculator"
         />
         <ClinicStat
           :rotulo="t('hotel.resumo.stat.retorno')"
           :valor="formato.percentual(resumo.taxaDeRetorno)"
           :detalhe="t('hotel.resumo.stat.retornoDetalhe')"
-          icone="pi pi-replay"
+          icone="ph ph-arrow-counter-clockwise"
         />
       </section>
 

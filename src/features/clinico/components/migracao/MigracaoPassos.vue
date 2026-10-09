@@ -36,7 +36,7 @@ const atual = computed(() => ETAPAS.indexOf(props.etapa))
       <span class="passo__trilho" aria-hidden="true" />
       <span class="passo__rotulo">
         <span class="passo__numero" aria-hidden="true">
-          <i v-if="indice < atual" class="pi pi-check" />
+          <i v-if="indice < atual" class="ph ph-check" />
           <template v-else>{{ indice + 1 }}</template>
         </span>
         {{
@@ -120,7 +120,7 @@ const atual = computed(() => ETAPAS.indexOf(props.etapa))
   color: #ffffff;
 }
 
-.passo__numero .pi {
+.passo__numero .ph {
   font-size: 0.6rem;
 }
 </style>

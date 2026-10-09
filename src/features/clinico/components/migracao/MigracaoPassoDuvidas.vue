@@ -161,7 +161,7 @@ const respondidas = computed(
     <template v-if="!atual">
       <header class="cabeca">
         <span class="mg-chip hc--verde"
-          ><i class="pi pi-check" aria-hidden="true" />{{
+          ><i class="ph ph-check" aria-hidden="true" />{{
             t('clinico.migracao.duvidas.nenhumaChip')
           }}</span
         >
@@ -235,14 +235,14 @@ const respondidas = computed(
                 :key="especie"
                 class="mg-pilula mg-pilula--grande"
                 :class="{ 'mg-pilula--escolhida': atual.resposta === especie }"
-                :icon="atual.resposta === especie ? 'pi pi-check' : undefined"
+                :icon="atual.resposta === especie ? 'ph ph-check' : undefined"
                 :label="formato.especie(especie)"
                 @click="responderEspecie(atual.chave, especie)"
               />
               <Button
                 class="mg-pilula mg-pilula--grande respostas__fora"
                 :class="{ 'mg-pilula--escolhida': atual.resposta === 'fora' }"
-                :icon="atual.resposta === 'fora' ? 'pi pi-check' : 'pi pi-times'"
+                :icon="atual.resposta === 'fora' ? 'ph ph-check' : 'ph ph-x'"
                 :label="t('clinico.migracao.duvidas.especie.deixarDeFora')"
                 @click="responderEspecie(atual.chave, 'fora')"
               />
@@ -274,7 +274,7 @@ const respondidas = computed(
                   >
                   <i
                     v-if="atual.resposta === coluna.coluna"
-                    class="pi pi-check-circle opcao__marca"
+                    class="ph ph-check-circle opcao__marca"
                     aria-hidden="true"
                   />
                 </span>
@@ -298,12 +298,12 @@ const respondidas = computed(
 
             <div class="sem-ela">
               <p class="sem-ela__texto">
-                <i class="pi pi-info-circle" aria-hidden="true" />
+                <i class="ph ph-info" aria-hidden="true" />
                 {{ t('clinico.migracao.duvidas.coluna.semEla') }}
               </p>
               <Button
                 class="mg-pilula mg-pilula--pequena"
-                icon="pi pi-refresh"
+                icon="ph ph-arrow-clockwise"
                 :label="t('clinico.migracao.trocar')"
                 @click="migracao.recomecar()"
               />
@@ -350,7 +350,7 @@ const respondidas = computed(
                 </span>
                 <template v-else>
                   <span class="lado__dado">
-                    <i class="pi pi-phone" aria-hidden="true" />
+                    <i class="ph ph-phone" aria-hidden="true" />
                     <bdi dir="ltr">{{
                       atual.decisao.daPlanilha.telefone || t('clinico.migracao.comum.semTelefone')
                     }}</bdi>
@@ -359,14 +359,14 @@ const respondidas = computed(
                     CPF <bdi dir="ltr">{{ atual.decisao.daPlanilha.documento }}</bdi>
                   </span>
                   <span v-if="atual.decisao.tipo === 'mesma-pessoa'" class="lado__dado">
-                    <i class="pi pi-heart" aria-hidden="true" />
+                    <i class="ph ph-heart" aria-hidden="true" />
                     {{ animalDaLinha(atual.decisao.linhas[0]) }}
                   </span>
                 </template>
               </div>
 
               <span class="comparar__meio" aria-hidden="true">
-                <i :class="atual.decisao.tipo === 'orfao' ? 'pi pi-arrow-up' : 'pi pi-arrows-h'" />
+                <i :class="atual.decisao.tipo === 'orfao' ? 'ph ph-arrow-up' : 'ph ph-arrows-horizontal'" />
               </span>
 
               <div class="lado">
@@ -389,7 +389,7 @@ const respondidas = computed(
                 </span>
                 <template v-else>
                   <span class="lado__dado">
-                    <i class="pi pi-phone" aria-hidden="true" />
+                    <i class="ph ph-phone" aria-hidden="true" />
                     <bdi dir="ltr">{{
                       atual.decisao.outro.telefone || t('clinico.migracao.comum.semTelefone')
                     }}</bdi>
@@ -398,7 +398,7 @@ const respondidas = computed(
                     CPF <bdi dir="ltr">{{ atual.decisao.outro.documento }}</bdi>
                   </span>
                   <span v-if="atual.decisao.tipo === 'mesma-pessoa'" class="lado__dado">
-                    <i class="pi pi-heart" aria-hidden="true" />
+                    <i class="ph ph-heart" aria-hidden="true" />
                     {{ animalDaLinha(atual.decisao.outro.linhas[0]) }}
                   </span>
                 </template>
@@ -409,7 +409,7 @@ const respondidas = computed(
               <Button
                 class="mg-pilula mg-pilula--grande"
                 :class="{ 'mg-pilula--escolhida': atual.resposta === 'juntar' }"
-                :icon="atual.resposta === 'juntar' ? 'pi pi-check' : 'pi pi-link'"
+                :icon="atual.resposta === 'juntar' ? 'ph ph-check' : 'ph ph-link'"
                 :label="
                   t(`clinico.migracao.duvidas.${atual.decisao.tipo}.sim`, {
                     outro: atual.decisao.outro.nome,
@@ -422,10 +422,10 @@ const respondidas = computed(
                 :class="{ 'mg-pilula--escolhida': atual.resposta === 'manter' }"
                 :icon="
                   atual.resposta === 'manter'
-                    ? 'pi pi-check'
+                    ? 'ph ph-check'
                     : atual.decisao.tipo === 'orfao'
-                      ? 'pi pi-times'
-                      : 'pi pi-clone'
+                      ? 'ph ph-x'
+                      : 'ph ph-copy-simple'
                 "
                 :label="t(`clinico.migracao.duvidas.${atual.decisao.tipo}.nao`)"
                 @click="responderDecisao(atual.decisao, 'manter')"
@@ -435,7 +435,7 @@ const respondidas = computed(
             <Button
               v-if="atual.decisao.tipo === 'orfao' && atual.resposta === null && outrosOrfaos > 0"
               class="mg-pilula mg-pilula--pequena todos"
-              icon="pi pi-check-square"
+              icon="ph ph-check-square"
               :label="
                 t('clinico.migracao.duvidas.orfao.todos', { n: outrosOrfaos + 1 }, outrosOrfaos + 1)
               "
@@ -450,7 +450,7 @@ const respondidas = computed(
       <Button
         v-if="atual && indice > 0"
         class="mg-pilula"
-        icon="pi pi-arrow-left"
+        icon="ph ph-arrow-left"
         :label="t('clinico.migracao.duvidas.anterior')"
         @click="indice -= 1"
       />
@@ -469,7 +469,7 @@ const respondidas = computed(
             atual.resposta !== null
           "
           class="mg-pilula"
-          icon="pi pi-arrow-right"
+          icon="ph ph-arrow-right"
           icon-pos="right"
           :label="t('clinico.migracao.duvidas.proxima')"
           @click="indice += 1"
@@ -477,7 +477,7 @@ const respondidas = computed(
         <Button
           v-if="migracao.semResposta === 0"
           class="mg-pilula mg-pilula--cheia mg-pilula--grande"
-          icon="pi pi-arrow-right"
+          icon="ph ph-arrow-right"
           icon-pos="right"
           :label="t('clinico.migracao.duvidas.verResumo', { n: respondidas }, respondidas)"
           @click="migracao.abrirResumo()"
@@ -580,7 +580,7 @@ const respondidas = computed(
   gap: 0.4rem;
 }
 
-.lado__dado .pi {
+.lado__dado .ph {
   color: var(--hc-tinta-3);
   font-size: 0.8rem;
 }
@@ -731,7 +731,7 @@ const respondidas = computed(
   gap: 0.45rem;
 }
 
-.sem-ela__texto .pi {
+.sem-ela__texto .ph {
   margin-top: 0.15rem;
   color: var(--hc-tinta-3);
 }

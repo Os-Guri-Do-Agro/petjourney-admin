@@ -30,9 +30,9 @@ const SEVERIDADE: Record<GravidadeClinica, AlertSeverity> = {
 }
 
 const ICONE: Record<GravidadeClinica, string> = {
-  estavel: 'pi pi-check-circle',
-  atencao: 'pi pi-eye',
-  critico: 'pi pi-exclamation-triangle',
+  estavel: 'ph ph-check-circle',
+  atencao: 'ph ph-eye',
+  critico: 'ph ph-warning',
 }
 
 const severidade = computed(() => SEVERIDADE[props.gravidade])

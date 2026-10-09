@@ -72,25 +72,25 @@ const sections: SectionItem[] = [
     id: 'empresa',
     label: 'Empresa',
     detail: 'Dados da clínica, unidades e responsável técnico',
-    icon: 'pi pi-building',
+    icon: 'ph ph-building',
   },
   {
     id: 'equipe',
     label: 'Equipe',
     detail: 'Profissionais, permissões e convites',
-    icon: 'pi pi-id-card',
+    icon: 'ph ph-identification-card',
   },
   {
     id: 'integracoes',
     label: 'Integrações',
     detail: 'Canais externos e sincronizações',
-    icon: 'pi pi-link',
+    icon: 'ph ph-link',
   },
   {
     id: 'seguranca',
     label: 'Segurança',
     detail: 'Sessões, auditoria e acesso autorizado',
-    icon: 'pi pi-shield',
+    icon: 'ph ph-shield',
   },
 ]
 
@@ -126,25 +126,25 @@ const accessOptions: SelectOption[] = [
     value: 'Admin clínica',
     label: 'Admin clínica',
     detail: 'Gerencia empresa, equipe e permissões',
-    icon: 'pi pi-shield',
+    icon: 'ph ph-shield',
   },
   {
     value: 'Prontuário e agenda',
     label: 'Prontuário e agenda',
     detail: 'Acessa histórico clínico e agenda',
-    icon: 'pi pi-file-edit',
+    icon: 'ph ph-note-pencil',
   },
   {
     value: 'Agenda e pacientes',
     label: 'Agenda e pacientes',
     detail: 'Opera agenda e cadastro clínico',
-    icon: 'pi pi-calendar',
+    icon: 'ph ph-calendar-blank',
   },
   {
     value: 'Somente leitura',
     label: 'Somente leitura',
     detail: 'Consulta dados sem editar registros',
-    icon: 'pi pi-eye',
+    icon: 'ph ph-eye',
   },
 ]
 const fallbackAccessOption = accessOptions[0] as SelectOption
@@ -154,19 +154,19 @@ const integrations: Integration[] = [
     name: 'WhatsApp da clínica',
     detail: 'Confirmações de agenda e retornos para tutores.',
     status: 'connected',
-    icon: 'pi pi-comments',
+    icon: 'ph ph-chats-circle',
   },
   {
     name: 'Calendário externo',
     detail: 'Sincronização de atendimentos com Google Calendar.',
     status: 'pending',
-    icon: 'pi pi-calendar-clock',
+    icon: 'ph ph-calendar-check',
   },
   {
     name: 'API PetJourney',
     detail: 'Acesso futuro para integrações autorizadas da clínica.',
     status: 'disabled',
-    icon: 'pi pi-code',
+    icon: 'ph ph-code',
   },
 ]
 
@@ -319,7 +319,7 @@ function retrySettings() {
         <span class="settings-avatar-wrap">
           <span class="settings-avatar">{{ user?.nome?.slice(0, 1) ?? 'V' }}</span>
           <span class="settings-avatar-edit">
-            <i class="pi pi-pencil" aria-hidden="true" />
+            <i class="ph ph-pencil-simple" aria-hidden="true" />
           </span>
         </span>
         <div>
@@ -336,7 +336,7 @@ function retrySettings() {
     </section>
 
     <section v-else-if="pageState === 'error'" class="settings-state settings-state--error" role="alert">
-      <i class="pi pi-exclamation-triangle" aria-hidden="true" />
+      <i class="ph ph-warning" aria-hidden="true" />
       <strong>Não foi possível carregar as configurações</strong>
       <p>Confira sessão e permissões administrativas antes de tentar novamente.</p>
       <button class="settings-button settings-button--primary" type="button" @click="retrySettings">
@@ -373,7 +373,7 @@ function retrySettings() {
           </div>
 
           <button class="settings-button settings-button--primary" type="button" @click="saveSettings(activeSectionData.label)">
-            <i class="pi pi-save" aria-hidden="true" />
+            <i class="ph ph-floppy-disk" aria-hidden="true" />
             Salvar alterações
           </button>
         </header>
@@ -505,7 +505,7 @@ function retrySettings() {
                   title="Remover usuário"
                   @click="requestRemoveTeamMember(member)"
                 >
-                  <i class="pi pi-trash" aria-hidden="true" />
+                  <i class="ph ph-trash" aria-hidden="true" />
                 </button>
               </article>
             </div>

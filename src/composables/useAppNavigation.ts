@@ -129,8 +129,8 @@ const HOTEL_BLOCKS: readonly BlocoDeModulo[] = [
     id: 'hotel-vender',
     key: 'hotel.navegacao.vender',
     rotas: [
-      { key: 'hotel.mapa.titulo', to: '/hotel/mapa', icon: 'pi pi-th-large' },
-      { key: 'hotel.reservas.titulo', to: '/hotel/reservas', icon: 'pi pi-calendar' },
+      { key: 'hotel.mapa.titulo', to: '/hotel/mapa', icon: 'ph ph-squares-four' },
+      { key: 'hotel.reservas.titulo', to: '/hotel/reservas', icon: 'ph ph-calendar-blank' },
     ],
   },
   {
@@ -138,24 +138,24 @@ const HOTEL_BLOCKS: readonly BlocoDeModulo[] = [
     id: 'hotel-dia',
     key: 'hotel.navegacao.dia',
     rotas: [
-      { key: 'hotel.painel.titulo', to: '/hotel/painel', icon: 'pi pi-sun' },
-      { key: 'hotel.rotina.titulo', to: '/hotel/rotina', icon: 'pi pi-list-check' },
-      { key: 'hotel.hospedes.titulo', to: '/hotel/hospedes', icon: 'pi pi-heart' },
+      { key: 'hotel.painel.titulo', to: '/hotel/painel', icon: 'ph ph-sun' },
+      { key: 'hotel.rotina.titulo', to: '/hotel/rotina', icon: 'ph ph-list-checks' },
+      { key: 'hotel.hospedes.titulo', to: '/hotel/hospedes', icon: 'ph ph-heart' },
     ],
   },
   {
     id: 'hotel-casa',
     key: 'hotel.navegacao.casa',
     rotas: [
-      { key: 'hotel.acomodacoes.titulo', to: '/hotel/acomodacoes', icon: 'pi pi-building' },
+      { key: 'hotel.acomodacoes.titulo', to: '/hotel/acomodacoes', icon: 'ph ph-building' },
       /*
        * Fica ao lado de Acomodações porque é a mesma classe de trabalho: configuração que se abre
        * no dia da mudança, e não um painel que se consulta todo dia. A rota é `rotina-padrao` e
        * não `rotinas` — `/hotel/rotina` já é a prancheta do turno, e "Rotina" ao lado de "Rotinas"
        * no menu é a armadilha que `rotas-do-hotel.spec.ts` existe para evitar do lado do código.
        */
-      { key: 'hotel.rotinaPadrao.titulo', to: '/hotel/rotina-padrao', icon: 'pi pi-stopwatch' },
-      { key: 'hotel.resumo.titulo', to: '/hotel/resumo', icon: 'pi pi-chart-bar' },
+      { key: 'hotel.rotinaPadrao.titulo', to: '/hotel/rotina-padrao', icon: 'ph ph-timer' },
+      { key: 'hotel.resumo.titulo', to: '/hotel/resumo', icon: 'ph ph-chart-bar' },
     ],
   },
 ]
@@ -206,9 +206,9 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
     id: 'agora',
     key: 'clinico.navegacao.agora',
     rotas: [
-      { key: 'clinico.meuDia.titulo', to: '/veterinario/meu-dia', icon: 'pi pi-sun' },
-      { key: 'clinico.agenda.titulo', to: '/veterinario/agenda', icon: 'pi pi-calendar' },
-      { key: 'clinico.fila.titulo', to: '/veterinario/fila', icon: 'pi pi-hourglass' },
+      { key: 'clinico.meuDia.titulo', to: '/veterinario/meu-dia', icon: 'ph ph-sun' },
+      { key: 'clinico.agenda.titulo', to: '/veterinario/agenda', icon: 'ph ph-calendar-blank' },
+      { key: 'clinico.fila.titulo', to: '/veterinario/fila', icon: 'ph ph-hourglass' },
     ],
   },
   {
@@ -223,42 +223,42 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
       {
         key: 'clinico.atendimentos.titulo',
         to: '/veterinario/atendimentos',
-        icon: 'pi pi-file-edit',
+        icon: 'ph ph-note-pencil',
       },
-      { key: 'clinico.internacao.titulo', to: '/veterinario/internacao', icon: 'pi pi-building' },
+      { key: 'clinico.internacao.titulo', to: '/veterinario/internacao', icon: 'ph ph-building' },
     ],
   },
   {
     id: 'pendencias',
     key: 'clinico.navegacao.pendencias',
     rotas: [
-      { key: 'clinico.atividades.titulo', to: '/veterinario/atividades', icon: 'pi pi-list' },
-      { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'pi pi-user-minus' },
+      { key: 'clinico.atividades.titulo', to: '/veterinario/atividades', icon: 'ph ph-list-bullets' },
+      { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'ph ph-user-minus' },
       /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
-      { key: 'clinico.vacinas.titulo', to: '/veterinario/vacinas', icon: 'pi pi-shield' },
+      { key: 'clinico.vacinas.titulo', to: '/veterinario/vacinas', icon: 'ph ph-shield' },
       /*
        * Logo abaixo de Vacinas: é a geladeira das mesmas vacinas, e o selo é o que falta comprar —
        * pendência de verdade, que cancela a consulta que a lista de chamada trouxe de volta.
        */
-      { key: 'clinico.estoque.titulo', to: '/veterinario/estoque', icon: 'pi pi-box' },
+      { key: 'clinico.estoque.titulo', to: '/veterinario/estoque', icon: 'ph ph-package' },
       /* Pelo mesmo motivo: é onde mora o alerta de adesão — para quem a clínica precisa ligar. */
       {
         key: 'clinico.adesao.titulo',
         to: '/veterinario/tratamentos',
-        icon: 'pi pi-calendar-clock',
+        icon: 'ph ph-calendar-check',
       },
     ],
   },
   {
     id: 'analise',
     key: 'clinico.navegacao.analise',
-    rotas: [{ key: 'clinico.resumo.titulo', to: '/veterinario/resumo', icon: 'pi pi-chart-bar' }],
+    rotas: [{ key: 'clinico.resumo.titulo', to: '/veterinario/resumo', icon: 'ph ph-chart-bar' }],
   },
 ]
 
 const PATIENT_ROUTES = [
-  { key: 'clinico.pacientes.titulo', to: '/veterinario/pacientes', icon: 'pi pi-users' },
-  { key: 'clinico.bulario.titulo', to: '/veterinario/bulario', icon: 'pi pi-book' },
+  { key: 'clinico.pacientes.titulo', to: '/veterinario/pacientes', icon: 'ph ph-users' },
+  { key: 'clinico.bulario.titulo', to: '/veterinario/bulario', icon: 'ph ph-book-open' },
 ] as const
 
 export function parseNavTarget(to: string) {
@@ -331,7 +331,7 @@ export function useAppNavigation() {
 
   const accountItems = computed<AppNavigationItem[]>(() => {
     void locale.value
-    return [{ label: t('nav.items.settings'), to: '/settings', icon: 'pi pi-cog' }]
+    return [{ label: t('nav.items.settings'), to: '/settings', icon: 'ph ph-gear' }]
   })
 
   /**
@@ -426,12 +426,12 @@ export function useAppNavigation() {
   const portalItems = computed<AppNavigationItem[]>(() => {
     void locale.value
     const items: AppNavigationItem[] = [
-      { label: t('nav.items.programas'), to: '/parceiro/programas', icon: 'pi pi-th-large' },
-      { label: t('nav.items.divulgacao'), to: '/parceiro/divulgacao', icon: 'pi pi-share-alt' },
+      { label: t('nav.items.programas'), to: '/parceiro/programas', icon: 'ph ph-squares-four' },
+      { label: t('nav.items.divulgacao'), to: '/parceiro/divulgacao', icon: 'ph ph-share-network' },
       {
         label: t('nav.items.acessos'),
         to: '/parceiro/acessos',
-        icon: 'pi pi-clipboard',
+        icon: 'ph ph-clipboard-text',
       },
     ]
 
@@ -439,12 +439,12 @@ export function useAppNavigation() {
       items.push({
         label: t('nav.items.financeiro'),
         to: '/parceiro/carteira',
-        icon: 'pi pi-wallet',
+        icon: 'ph ph-wallet',
       })
     }
 
     if (EQUIPE_MENU_ENABLED) {
-      items.push({ label: 'Equipe', to: '/parceiro/equipe', icon: 'pi pi-users' })
+      items.push({ label: 'Equipe', to: '/parceiro/equipe', icon: 'ph ph-users' })
     }
 
     if (parceiroStore.cadastroSuspenso) {
@@ -457,7 +457,7 @@ export function useAppNavigation() {
   /** A visão geral não é seção: é um destino só, e aparece como link no topo do trilho. */
   const overviewItem = computed<AppNavigationItem>(() => {
     void locale.value
-    return { label: t('nav.items.overview'), to: '/inicio', icon: 'pi pi-home' }
+    return { label: t('nav.items.overview'), to: '/inicio', icon: 'ph ph-house' }
   })
 
   const navigationSections = computed<AppNavigationSection[]>(() => {
@@ -466,7 +466,7 @@ export function useAppNavigation() {
       {
         id: 'portal',
         label: t('nav.sections.portal'),
-        icon: 'pi pi-briefcase',
+        icon: 'ph ph-briefcase',
         items: portalItems.value,
       },
     ]
@@ -481,14 +481,14 @@ export function useAppNavigation() {
            * a seção clínica se chamava **"clinico.modulo"** no trilho e no cabeçalho da página.
            */
           label: t('clinico.navegacao.secao'),
-          icon: 'pi pi-calendar',
+          icon: 'ph ph-calendar-blank',
           items: clinicalItems.value,
           blocos: clinicalBlocos.value,
         },
         {
           id: 'patients',
           label: t('nav.groups.pets'),
-          icon: 'pi pi-heart',
+          icon: 'ph ph-heart',
           items: patientItems.value,
         },
       )
@@ -498,7 +498,7 @@ export function useAppNavigation() {
       sections.push({
         id: 'hotel',
         label: t('hotel.navegacao.secao'),
-        icon: 'pi pi-building',
+        icon: 'ph ph-building',
         items: hotelItems.value,
         blocos: hotelBlocos.value,
       })
@@ -507,7 +507,7 @@ export function useAppNavigation() {
     sections.push({
       id: 'account',
       label: t('nav.sections.account'),
-      icon: 'pi pi-user',
+      icon: 'ph ph-user',
       items: accountItems.value,
     })
 

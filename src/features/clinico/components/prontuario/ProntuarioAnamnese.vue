@@ -357,7 +357,7 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
               v-if="!somenteLeitura"
               type="button"
               class="antecedentes__remover"
-              icon="pi pi-times"
+              icon="ph ph-x"
               severity="secondary"
               text
               rounded
@@ -394,7 +394,7 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
             @keydown.enter.prevent="adicionarAntecedente"
           />
           <Button
-            icon="pi pi-plus"
+            icon="ph ph-plus"
             size="small"
             :disabled="!podeAdicionar"
             :aria-label="t('clinico.comum.adicionar')"

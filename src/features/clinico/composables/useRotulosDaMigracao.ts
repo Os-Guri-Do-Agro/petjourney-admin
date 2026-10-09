@@ -27,11 +27,11 @@ import { useClinicFormat } from './useClinicFormat'
 
 /** O ícone de cada situação. É ele, e não a cor, que carrega o estado em escala de cinza. */
 export const ICONE_DA_SITUACAO: Record<SituacaoDaLinha, string> = {
-  entra: 'pi pi-check-circle',
-  junta: 'pi pi-link',
-  contato: 'pi pi-user',
-  pendente: 'pi pi-question-circle',
-  fora: 'pi pi-times-circle',
+  entra: 'ph ph-check-circle',
+  junta: 'ph ph-link',
+  contato: 'ph ph-user',
+  pendente: 'ph ph-question',
+  fora: 'ph ph-x-circle',
 }
 
 export type TomDaFrase = 'ok' | 'corrigido' | 'perdido' | 'fora' | 'aviso'

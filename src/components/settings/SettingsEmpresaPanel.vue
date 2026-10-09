@@ -21,7 +21,7 @@ onMounted(() => {
       class="empresa-panel__error"
       role="alert"
     >
-      <i class="pi pi-exclamation-circle" aria-hidden="true" />
+      <i class="ph ph-warning-circle" aria-hidden="true" />
       <p>{{ store.errorMessage }}</p>
       <Button :label="t('common.retry')" severity="secondary" @click="ensureContext(true)" />
     </div>

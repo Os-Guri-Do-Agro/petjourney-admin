@@ -407,7 +407,7 @@ function confirmar() {
         porta.
       -->
       <p v-if="observacaoDaReserva" class="recado">
-        <i class="pi pi-comment" aria-hidden="true" />
+        <i class="ph ph-chat-circle" aria-hidden="true" />
         <span>
           <strong>{{ t('hotel.checkin.recadoDaReserva') }}</strong>
           {{ observacaoDaReserva }}
@@ -454,7 +454,7 @@ function confirmar() {
           <li v-for="(item, indice) in pertences" :key="`${item.descricao}-${indice}`">
             <span>{{ item.descricao }}</span>
             <Button
-              icon="pi pi-times"
+              icon="ph ph-x"
               severity="secondary"
               text
               rounded
@@ -474,7 +474,7 @@ function confirmar() {
             @keyup.enter="acrescentarPertence"
           />
           <Button
-            icon="pi pi-plus"
+            icon="ph ph-plus"
             severity="secondary"
             outlined
             :aria-label="t('hotel.checkin.acrescentar')"
@@ -628,7 +628,7 @@ function confirmar() {
             </div>
 
             <Button
-              icon="pi pi-times"
+              icon="ph ph-x"
               severity="secondary"
               text
               rounded
@@ -645,7 +645,7 @@ function confirmar() {
 
         <Button
           :label="t('hotel.checkin.acrescentarRemedio')"
-          icon="pi pi-plus"
+          icon="ph ph-plus"
           severity="secondary"
           outlined
           size="small"
@@ -751,7 +751,7 @@ function confirmar() {
       />
       <Button
         :label="t('hotel.checkin.confirmar')"
-        icon="pi pi-sign-in"
+        icon="ph ph-sign-in"
         :loading="salvando"
         :disabled="!podeConfirmar"
         @click="confirmar"

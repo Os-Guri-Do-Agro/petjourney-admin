@@ -81,12 +81,12 @@ const opcoes = computed(() =>
       </p>
 
       <p v-if="buscando" class="retorno__estado" role="status">
-        <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+        <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
         {{ t('clinico.tabela.carregando') }}
       </p>
 
       <p v-else-if="opcoes.length === 0" class="retorno__estado retorno__estado--vazio">
-        <i class="pi pi-calendar-times" aria-hidden="true" />
+        <i class="ph ph-calendar-x" aria-hidden="true" />
         {{ t('clinico.agenda.semana.semAlternativa') }}
       </p>
 

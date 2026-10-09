@@ -240,7 +240,7 @@ watch(drawerVisible, (open) => {
       <Button
         type="button"
         :label="t('carteira.saques.retry')"
-        icon="pi pi-refresh"
+        icon="ph ph-arrow-clockwise"
         severity="secondary"
         outlined
         size="small"
@@ -249,7 +249,7 @@ watch(drawerVisible, (open) => {
     </div>
 
     <div v-else-if="saques.length === 0" class="portal-panel__empty">
-      <i class="pi pi-wallet" aria-hidden="true" />
+      <i class="ph ph-wallet" aria-hidden="true" />
       <strong>{{ t('carteira.saques.emptyTitle') }}</strong>
       <p>{{ t('carteira.saques.emptyBody') }}</p>
     </div>

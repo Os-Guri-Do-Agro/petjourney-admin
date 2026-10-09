@@ -248,7 +248,7 @@ function aprovar() {
     </div>
 
     <p v-else-if="gerando" class="estado">
-      <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+      <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
       {{ t('hotel.proposta.gerando') }}
     </p>
 
@@ -279,7 +279,7 @@ function aprovar() {
 
         <!-- A frase que não pode sumir enquanto for verdade: não há modelo e não há rede. -->
         <p class="aviso">
-          <i class="pi pi-info-circle" aria-hidden="true" />
+          <i class="ph ph-info" aria-hidden="true" />
           {{ t('hotel.proposta.aviso') }}
         </p>
       </div>
@@ -403,7 +403,7 @@ function aprovar() {
         <section class="secao">
           <button type="button" class="recolhido" @click="mostrarRecusas = !mostrarRecusas">
             <i
-              :class="mostrarRecusas ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+              :class="mostrarRecusas ? 'ph ph-caret-down' : 'ph ph-caret-right'"
               aria-hidden="true"
             />
             {{ t('hotel.proposta.naoProponho') }}
@@ -418,7 +418,7 @@ function aprovar() {
 
         <!-- A prova de que o validador da volta funcionou: o motor tentou, e não passou. -->
         <p v-if="proposta.descartadas > 0" class="descartadas">
-          <i class="pi pi-shield" aria-hidden="true" />
+          <i class="ph ph-shield" aria-hidden="true" />
           {{
             t('hotel.proposta.descartadas', { total: proposta.descartadas }, proposta.descartadas)
           }}
@@ -448,7 +448,7 @@ function aprovar() {
             ? t('hotel.proposta.aprovar', { total }, total)
             : t('hotel.proposta.aprovarNenhuma')
         "
-        icon="pi pi-check"
+        icon="ph ph-check"
         size="small"
         :loading="salvando"
         :disabled="total === 0"
@@ -513,7 +513,7 @@ function aprovar() {
   font-size: var(--clinic-font-label);
 }
 
-.aviso .pi {
+.aviso .ph {
   margin-block-start: 0.1rem;
   color: var(--clinic-faint);
   font-size: 0.7rem;

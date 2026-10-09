@@ -64,7 +64,7 @@ onMounted(() => {
       <MigracaoPassos :etapa="migracao.etapa" :sem-duvidas="migracao.perguntas.length === 0" />
 
       <div v-if="migracao.planilha && migracao.etapa !== 'arquivo'" class="arquivo">
-        <span class="arquivo__icone" aria-hidden="true"><i class="pi pi-file" /></span>
+        <span class="arquivo__icone" aria-hidden="true"><i class="ph ph-file" /></span>
         <span class="arquivo__texto">
           <strong
             ><bdi>{{ migracao.planilha.arquivo }}</bdi></strong
@@ -87,14 +87,14 @@ onMounted(() => {
         </span>
         <Button
           class="mg-pilula mg-pilula--pequena"
-          icon="pi pi-table"
+          icon="ph ph-table"
           :label="t('clinico.migracao.colunas.ver')"
           @click="colunasAbertas = true"
         />
         <Button
           v-if="!migracao.emAndamento"
           class="mg-pilula mg-pilula--pequena"
-          icon="pi pi-refresh"
+          icon="ph ph-arrow-clockwise"
           :label="t('clinico.migracao.trocar')"
           @click="migracao.recomecar()"
         />

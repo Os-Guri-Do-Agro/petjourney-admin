@@ -184,7 +184,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
     <article v-else-if="state === 'sem-parceiro'" class="funil__card" data-tone="brand">
       <header class="funil__head">
         <span class="funil__icon funil__icon--brand" aria-hidden="true">
-          <i class="pi pi-building" />
+          <i class="ph ph-building" />
         </span>
         <div>
           <h3 id="funil-title">{{ t('parceiroCadastro.wizard.title') }}</h3>
@@ -223,7 +223,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
     <article v-else-if="state === 'PENDENTE'" class="funil__card" data-tone="pending">
       <header class="funil__head">
         <span class="funil__icon funil__icon--pending" aria-hidden="true">
-          <i class="pi pi-clock" />
+          <i class="ph ph-clock" />
         </span>
         <div>
           <h3 id="funil-title">{{ t('parceiroCadastro.pendente.title') }}</h3>
@@ -237,7 +237,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
         <span class="funil__analise-label">{{ t('parceiroCadastro.pendente.analiseLabel') }}</span>
         <ul class="funil__analise-list">
           <li v-for="item in itensEmAnalise" :key="item.id">
-            <i class="pi pi-hourglass" aria-hidden="true" />
+            <i class="ph ph-hourglass" aria-hidden="true" />
             <span>{{ item.label }}</span>
           </li>
         </ul>
@@ -249,7 +249,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
     <article v-else-if="state === 'REJEITADO'" class="funil__card" data-tone="warm">
       <header class="funil__head">
         <span class="funil__icon funil__icon--warm" aria-hidden="true">
-          <i class="pi pi-times-circle" />
+          <i class="ph ph-x-circle" />
         </span>
         <div>
           <h3 id="funil-title">{{ t('parceiroCadastro.rejeitado.title') }}</h3>
@@ -265,7 +265,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 
       <template v-if="canEditCadastro">
         <p class="funil__hint funil__hint--note">
-          <i class="pi pi-info-circle" aria-hidden="true" />
+          <i class="ph ph-info" aria-hidden="true" />
           {{ t('parceiroCadastro.rejeitado.programasHint') }}
         </p>
         <p v-if="submitError" class="funil__submit-error" role="alert">{{ submitError }}</p>
@@ -291,7 +291,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
     <article v-else-if="state === 'SUSPENSO'" class="funil__card" data-tone="warm">
       <header class="funil__head">
         <span class="funil__icon funil__icon--warm" aria-hidden="true">
-          <i class="pi pi-ban" />
+          <i class="ph ph-prohibit" />
         </span>
         <div>
           <h3 id="funil-title">{{ t('parceiroCadastro.suspenso.title') }}</h3>
@@ -309,7 +309,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
       <ul class="funil__channels">
         <li>
           <a :href="SUPPORT_CONTACTS.whatsappHref" target="_blank" rel="noopener noreferrer">
-            <i class="pi pi-whatsapp" aria-hidden="true" />
+            <i class="ph ph-whatsapp-logo" aria-hidden="true" />
             <span>
               <strong>{{ t('frame.suspended.channels.whatsapp') }}</strong>
               <small>{{ SUPPORT_CONTACTS.whatsappDisplay }}</small>
@@ -318,7 +318,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
         </li>
         <li>
           <a :href="SUPPORT_CONTACTS.instagramHref" target="_blank" rel="noopener noreferrer">
-            <i class="pi pi-instagram" aria-hidden="true" />
+            <i class="ph ph-instagram-logo" aria-hidden="true" />
             <span>
               <strong>{{ t('frame.suspended.channels.instagram') }}</strong>
               <small>{{ SUPPORT_CONTACTS.instagramHandle }}</small>
@@ -327,7 +327,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
         </li>
         <li>
           <a :href="SUPPORT_CONTACTS.facebookHref" target="_blank" rel="noopener noreferrer">
-            <i class="pi pi-facebook" aria-hidden="true" />
+            <i class="ph ph-facebook-logo" aria-hidden="true" />
             <span>
               <strong>{{ t('frame.suspended.channels.facebook') }}</strong>
               <small>{{ SUPPORT_CONTACTS.facebookHandle }}</small>
@@ -336,7 +336,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
         </li>
         <li>
           <a :href="`mailto:${SUPPORT_CONTACTS.email}`">
-            <i class="pi pi-envelope" aria-hidden="true" />
+            <i class="ph ph-envelope-simple" aria-hidden="true" />
             <span>
               <strong>{{ t('frame.suspended.channels.email') }}</strong>
               <small>{{ SUPPORT_CONTACTS.email }}</small>
@@ -349,7 +349,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
     <!-- APROVADO: linha compacta de status -->
     <article v-else class="funil__card funil__card--compact" data-tone="success">
       <span class="funil__icon funil__icon--success" aria-hidden="true">
-        <i class="pi pi-verified" />
+        <i class="ph ph-seal-check" />
       </span>
 
       <div class="funil__compact-main">
@@ -361,7 +361,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
           </template>
         </p>
         <p v-if="canEditCadastro && cadastroIncompleto" class="funil__incomplete">
-          <i class="pi pi-info-circle" aria-hidden="true" />
+          <i class="ph ph-info" aria-hidden="true" />
           {{ t('parceiroCadastro.aprovado.incomplete') }}
         </p>
       </div>

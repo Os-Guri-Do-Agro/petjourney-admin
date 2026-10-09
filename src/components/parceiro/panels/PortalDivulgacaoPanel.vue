@@ -122,21 +122,21 @@ const metrics = computed(() => {
       id: 'cupons',
       label: t('divulgacao.metrics.cuponsAtivos'),
       value: totais?.cuponsAtivos ?? cupons.value.filter((c) => c.ativo).length,
-      icon: 'pi pi-ticket',
+      icon: 'ph ph-ticket',
       tone: 'primary' as const,
     },
     {
       id: 'total',
       label: t('divulgacao.metrics.resgatesTotais'),
       value: totais?.resgatesTotal ?? resgates.value.length,
-      icon: 'pi pi-check-circle',
+      icon: 'ph ph-check-circle',
       tone: 'success' as const,
     },
     {
       id: 'recentes',
       label: t('divulgacao.metrics.ultimos30d'),
       value: totais?.resgatesUltimos30d ?? 0,
-      icon: 'pi pi-chart-line',
+      icon: 'ph ph-chart-line',
       tone: 'primary' as const,
     },
   ]
@@ -334,7 +334,7 @@ watch(lastSuccessAt, (at) => {
 <template>
   <div class="divulgacao" :style="panelStyle">
     <div v-if="error" class="divulgacao__error" role="alert">
-      <i class="pi pi-exclamation-circle" aria-hidden="true" />
+      <i class="ph ph-warning-circle" aria-hidden="true" />
       <p>{{ error }}</p>
       <Button :label="t('divulgacao.retry')" severity="secondary" size="small" @click="loadAll" />
     </div>
@@ -512,20 +512,20 @@ watch(lastSuccessAt, (at) => {
           <section class="hc kit" aria-labelledby="div-kit-title">
             <header class="hc__cabeca">
               <h2 id="div-kit-title" class="hc__titulo">
-                <i class="pi pi-share-alt hc__icone" aria-hidden="true" />
+                <i class="ph ph-share-network hc__icone" aria-hidden="true" />
                 {{ t('divulgacao.kit.titulo') }}
               </h2>
             </header>
 
             <div v-if="!indicacao.podeIndicar" class="share-kit__espera">
               <span class="share-kit__espera-icon" aria-hidden="true">
-                <i class="pi pi-hourglass" />
+                <i class="ph ph-hourglass" />
               </span>
               <p v-if="indicacao.aviso" class="share-kit__espera-aviso">{{ indicacao.aviso }}</p>
               <p class="share-kit__espera-hint">{{ t('divulgacao.shareKit.esperaHint') }}</p>
               <RouterLink class="share-kit__espera-cta" :to="PROGRAMAS_ROUTE">
                 {{ t('divulgacao.shareKit.esperaCta') }}
-                <i class="pi pi-arrow-right" aria-hidden="true" />
+                <i class="ph ph-arrow-right" aria-hidden="true" />
               </RouterLink>
             </div>
 
@@ -538,7 +538,7 @@ watch(lastSuccessAt, (at) => {
                   </div>
                   <Button
                     type="button"
-                    icon="pi pi-copy"
+                    icon="ph ph-copy"
                     :label="t('divulgacao.kit.copiar')"
                     :aria-label="t('divulgacao.shareKit.copyCodeAria')"
                     severity="secondary"
@@ -553,7 +553,7 @@ watch(lastSuccessAt, (at) => {
                   </div>
                   <Button
                     type="button"
-                    icon="pi pi-copy"
+                    icon="ph ph-copy"
                     :label="t('divulgacao.kit.copiar')"
                     :aria-label="t('divulgacao.shareKit.copyLink')"
                     severity="secondary"
@@ -625,7 +625,7 @@ watch(lastSuccessAt, (at) => {
             <div id="resgates" class="cupom-soon__anchor">
               <span class="cupom-soon__badge">{{ t('comingSoon.cupom.badge') }}</span>
               <span class="cupom-soon__icon" aria-hidden="true">
-                <i class="pi pi-ticket" />
+                <i class="ph ph-ticket" />
               </span>
               <h2 id="div-cupom-soon-title">{{ t('comingSoon.cupom.title') }}</h2>
               <p class="cupom-soon__lede">{{ t('comingSoon.cupom.lede') }}</p>
@@ -655,7 +655,7 @@ watch(lastSuccessAt, (at) => {
             type="button"
             class="regras__abrir"
             :label="termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')"
-            :icon="termsOpen ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+            :icon="termsOpen ? 'ph ph-caret-up' : 'ph ph-caret-down'"
             icon-pos="right"
             severity="secondary"
             text
@@ -692,7 +692,7 @@ watch(lastSuccessAt, (at) => {
             </header>
 
             <div v-if="cupons.length === 0" class="list-panel__empty">
-              <i class="pi pi-ticket" aria-hidden="true" />
+              <i class="ph ph-ticket" aria-hidden="true" />
               <span>{{ t('divulgacao.cupons.empty') }}</span>
             </div>
 
@@ -731,7 +731,7 @@ watch(lastSuccessAt, (at) => {
             </header>
 
             <div v-if="resgates.length === 0" class="list-panel__empty">
-              <i class="pi pi-chart-line" aria-hidden="true" />
+              <i class="ph ph-chart-line" aria-hidden="true" />
               <span>{{ t('divulgacao.resgates.empty') }}</span>
             </div>
 

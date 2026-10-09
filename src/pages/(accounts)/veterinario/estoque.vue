@@ -268,7 +268,7 @@ const colunasVacinas = computed<ColunaTabela<SaldoDaVacina>[]>(() => [
  */
 const acoesVacinas = computed<AcaoDeLinha<SaldoDaVacina>[]>(() => [
   { id: 'receber', rotulo: t('clinico.estoque.receber.acao') },
-  { id: 'minimo', rotulo: t('clinico.estoque.minimo.acao'), icone: 'pi pi-sliders-h' },
+  { id: 'minimo', rotulo: t('clinico.estoque.minimo.acao'), icone: 'ph ph-sliders-horizontal' },
 ])
 
 function acaoNaVacina({ acao, linha }: { acao: AcaoDeLinha<SaldoDaVacina>; linha: SaldoDaVacina }) {
@@ -624,7 +624,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
             <li :class="{ 'estoque-fatos__item--atencao': estoque.indicadores.dosesVencendo > 0 }">
               <i
                 v-if="estoque.indicadores.dosesVencendo > 0"
-                class="pi pi-hourglass"
+                class="ph ph-hourglass"
                 aria-hidden="true"
               />
               <strong>{{ estoque.indicadores.dosesVencendo }}</strong>
@@ -638,7 +638,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
               </span>
             </li>
             <li :class="{ 'estoque-fatos__item--risco': faltando > 0 }">
-              <i v-if="faltando > 0" class="pi pi-shopping-cart" aria-hidden="true" />
+              <i v-if="faltando > 0" class="ph ph-shopping-cart" aria-hidden="true" />
               <strong>{{ faltando }}</strong>
               {{ t('clinico.vacinas.estoque.abaixoDoMinimo') }}
             </li>
@@ -807,7 +807,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
             <Button
               v-if="painel.atual.plano"
               :label="t('clinico.estoque.metas.editar')"
-              icon="pi pi-pencil"
+              icon="ph ph-pencil-simple"
               severity="secondary"
               outlined
               size="small"
@@ -830,7 +830,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
                   mes: formato.mesPorExtenso(painel.atual.mes),
                 })
               "
-              icon="pi pi-flag"
+              icon="ph ph-flag"
               class="clinic-acao-principal"
               @click="abrirPlano(painel.atual.mes)"
             />
@@ -865,7 +865,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
             <Button
               v-if="painel.proximo.plano"
               :label="t('clinico.estoque.metas.editar')"
-              icon="pi pi-pencil"
+              icon="ph ph-pencil-simple"
               severity="secondary"
               outlined
               size="small"
@@ -878,7 +878,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
                   mes: formato.mesPorExtenso(painel.proximo.mes),
                 })
               "
-              icon="pi pi-flag"
+              icon="ph ph-flag"
               class="clinic-acao-principal"
               @click="abrirPlano(painel.proximo.mes)"
             />
@@ -920,7 +920,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
                 :label="
                   copiado ? t('clinico.estoque.pedido.copiado') : t('clinico.estoque.pedido.copiar')
                 "
-                :icon="copiado ? 'pi pi-check' : 'pi pi-copy'"
+                :icon="copiado ? 'ph ph-check' : 'ph ph-copy'"
                 severity="secondary"
                 outlined
                 size="small"
@@ -1011,7 +1011,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
               >
                 <i
                   :class="
-                    historicoAberto === mes.mes ? 'pi pi-chevron-down' : 'pi pi-chevron-right'
+                    historicoAberto === mes.mes ? 'ph ph-caret-down' : 'ph ph-caret-right'
                   "
                   aria-hidden="true"
                 />
@@ -1062,14 +1062,14 @@ const fatiasDePerda = computed<Fatia[]>(() => {
 
           <template #celula-movimento="{ linha }">
             <span v-if="linha.tipo === 'entrada'" class="estoque__movimento">
-              <i class="pi pi-arrow-down" aria-hidden="true" />
+              <i class="ph ph-arrow-down" aria-hidden="true" />
               {{ t('clinico.estoque.movimentos.entrada') }}
             </span>
             <ClinicAlertChip
               v-else
               :severidade="linha.motivo === 'contagem' ? 'info' : 'atencao'"
               :rotulo="t(`clinico.vacinas.estoque.perda.${linha.motivo}`)"
-              icone="pi pi-arrow-up"
+              icone="ph ph-arrow-up"
             />
           </template>
 
@@ -1107,7 +1107,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
       <template v-else-if="aba === 'analise' && estoque">
         <section class="cartao">
           <header class="cartao__topo">
-            <span class="cartao__marca" aria-hidden="true"><i class="pi pi-chart-bar" /></span>
+            <span class="cartao__marca" aria-hidden="true"><i class="ph ph-chart-bar" /></span>
             <h2>{{ t('clinico.vacinas.estoque.grafico.consumo') }}</h2>
             <p>{{ t('clinico.vacinas.estoque.grafico.consumoAjuda') }}</p>
           </header>
@@ -1125,7 +1125,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
           <section class="cartao">
             <header class="cartao__topo">
               <span class="cartao__marca" aria-hidden="true"
-                ><i class="pi pi-shopping-cart"
+                ><i class="ph ph-shopping-cart"
               /></span>
               <h2>{{ t('clinico.vacinas.estoque.grafico.saldo') }}</h2>
               <p>{{ t('clinico.vacinas.estoque.grafico.saldoAjuda') }}</p>
@@ -1148,7 +1148,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
           <section class="cartao">
             <header class="cartao__topo">
               <span class="cartao__marca" aria-hidden="true">
-                <i class="pi pi-exclamation-triangle" />
+                <i class="ph ph-warning" />
               </span>
               <h2>{{ t('clinico.vacinas.estoque.grafico.perdas') }}</h2>
               <p>{{ t('clinico.vacinas.estoque.grafico.perdasAjuda') }}</p>
@@ -1165,7 +1165,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
 
         <section class="cartao">
           <header class="cartao__topo">
-            <span class="cartao__marca" aria-hidden="true"><i class="pi pi-calendar" /></span>
+            <span class="cartao__marca" aria-hidden="true"><i class="ph ph-calendar-blank" /></span>
             <h2>{{ t('clinico.vacinas.estoque.grafico.validade') }}</h2>
             <p>{{ t('clinico.vacinas.estoque.grafico.validadeAjuda') }}</p>
           </header>

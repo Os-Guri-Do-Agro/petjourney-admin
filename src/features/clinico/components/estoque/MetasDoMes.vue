@@ -65,9 +65,9 @@ function preenchido(item: ProgressoDaMeta): number {
           :rotulo="rotulos.situacao(item.sentido, item.situacao)"
           :icone="
             item.situacao === 'cumprida'
-              ? 'pi pi-check'
+              ? 'ph ph-check'
               : item.situacao === 'no-ritmo'
-                ? 'pi pi-arrow-right'
+                ? 'ph ph-arrow-right'
                 : ''
           "
         />

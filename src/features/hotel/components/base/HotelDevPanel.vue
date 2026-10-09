@@ -110,7 +110,7 @@ async function irPara(rota: string) {
     <Button
       type="button"
       class="dev__gatilho"
-      icon="pi pi-wrench"
+      icon="ph ph-wrench"
       :label="t('hotel.dev.titulo')"
       severity="secondary"
       outlined
@@ -124,7 +124,7 @@ async function irPara(rota: string) {
         <strong>{{ t('hotel.dev.titulo') }}</strong>
         <Button
           type="button"
-          icon="pi pi-times"
+          icon="ph ph-x"
           severity="secondary"
           text
           rounded
@@ -202,7 +202,7 @@ async function irPara(rota: string) {
         <Button
           type="button"
           :label="t('hotel.dev.recriar')"
-          icon="pi pi-refresh"
+          icon="ph ph-arrow-clockwise"
           severity="secondary"
           size="small"
           @click="recriar"

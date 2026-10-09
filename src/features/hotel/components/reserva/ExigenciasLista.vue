@@ -94,7 +94,7 @@ function detalhe(item: ExigenciaAvaliada): string {
       class="exig__resumo exig__resumo--risco"
       role="alert"
     >
-      <i class="pi pi-ban" aria-hidden="true" />
+      <i class="ph ph-prohibit" aria-hidden="true" />
       {{
         t(
           'hotel.exigencias.bloqueado',
@@ -105,14 +105,14 @@ function detalhe(item: ExigenciaAvaliada): string {
     </p>
 
     <p v-else-if="admissao.avisos.length > 0" class="exig__resumo exig__resumo--atencao">
-      <i class="pi pi-exclamation-triangle" aria-hidden="true" />
+      <i class="ph ph-warning" aria-hidden="true" />
       {{
         t('hotel.exigencias.comAviso', { total: admissao.avisos.length }, admissao.avisos.length)
       }}
     </p>
 
     <p v-else class="exig__resumo exig__resumo--ok">
-      <i class="pi pi-check-circle" aria-hidden="true" />
+      <i class="ph ph-check-circle" aria-hidden="true" />
       {{ t('hotel.exigencias.tudoEmDia') }}
     </p>
 
@@ -132,7 +132,7 @@ function detalhe(item: ExigenciaAvaliada): string {
           <Button
             v-if="item.situacao !== 'ok' && item.situacao !== 'dispensado'"
             :label="t('hotel.exigencias.registrar')"
-            icon="pi pi-file-plus"
+            icon="ph ph-file-plus"
             severity="secondary"
             outlined
             size="small"

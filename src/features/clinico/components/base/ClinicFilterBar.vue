@@ -78,7 +78,7 @@ function limpar() {
   <div class="filtro">
     <div class="filtro__linha">
       <IconField class="filtro__busca">
-        <InputIcon class="pi pi-search" />
+        <InputIcon class="ph ph-magnifying-glass" />
         <InputText
           type="search"
           size="small"
@@ -97,7 +97,7 @@ function limpar() {
         severity="secondary"
         outlined
         size="small"
-        icon="pi pi-sliders-h"
+        icon="ph ph-sliders-horizontal"
         :label="t('clinico.comum.filtros')"
         :badge="total > 0 ? String(total) : undefined"
         :aria-label="t('clinico.comum.filtros')"
@@ -121,7 +121,7 @@ function limpar() {
         rounded
         size="small"
         :label="ficha.rotulo"
-        icon="pi pi-times"
+        icon="ph ph-x"
         icon-pos="right"
         @click="alternar(ficha.grupo, ficha.valor)"
       />

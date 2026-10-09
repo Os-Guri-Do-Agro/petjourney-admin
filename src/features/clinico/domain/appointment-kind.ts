@@ -16,7 +16,7 @@
 import type { AppointmentTypeKind } from '../data/types'
 
 export type AparenciaDoTipo = {
-  /** Classe PrimeIcons. Verificada contra `primeicons@7`. */
+  /** Classe do Phosphor (fonte `@phosphor-icons/web`, peso regular). */
   icone: string
   /** Token CSS do acento — `var(...)` pronto para ir ao `style`. */
   cor: string
@@ -28,13 +28,13 @@ export type AparenciaDoTipo = {
  * duas salas. Tipo de atendimento não pode usar nenhum dos três.
  */
 const APARENCIA: Record<AppointmentTypeKind, AparenciaDoTipo> = {
-  consulta: { icone: 'pi pi-heart', cor: 'var(--clinic-tipo-consulta)' },
-  retorno: { icone: 'pi pi-replay', cor: 'var(--clinic-tipo-retorno)' },
-  vacina: { icone: 'pi pi-shield', cor: 'var(--clinic-tipo-vacina)' },
-  exame: { icone: 'pi pi-search', cor: 'var(--clinic-tipo-exame)' },
-  cirurgia: { icone: 'pi pi-plus-circle', cor: 'var(--clinic-tipo-cirurgia)' },
-  banho: { icone: 'pi pi-sparkles', cor: 'var(--clinic-tipo-banho)' },
-  emergencia: { icone: 'pi pi-bolt', cor: 'var(--clinic-tipo-emergencia)' },
+  consulta: { icone: 'ph ph-heart', cor: 'var(--clinic-tipo-consulta)' },
+  retorno: { icone: 'ph ph-arrow-counter-clockwise', cor: 'var(--clinic-tipo-retorno)' },
+  vacina: { icone: 'ph ph-shield', cor: 'var(--clinic-tipo-vacina)' },
+  exame: { icone: 'ph ph-magnifying-glass', cor: 'var(--clinic-tipo-exame)' },
+  cirurgia: { icone: 'ph ph-plus-circle', cor: 'var(--clinic-tipo-cirurgia)' },
+  banho: { icone: 'ph ph-sparkle', cor: 'var(--clinic-tipo-banho)' },
+  emergencia: { icone: 'ph ph-lightning', cor: 'var(--clinic-tipo-emergencia)' },
 }
 
 /** Ordem da legenda: rotina primeiro, procedimento depois, emergência por último. */

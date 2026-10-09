@@ -246,7 +246,7 @@ function salvar() {
             />
             <Button
               :label="t('hotel.acomodacoes.temporada.remover')"
-              icon="pi pi-trash"
+              icon="ph ph-trash"
               severity="danger"
               size="small"
               :loading="salvando"
@@ -258,7 +258,7 @@ function salvar() {
         <Button
           v-else
           :label="t('hotel.acomodacoes.temporada.remover')"
-          icon="pi pi-trash"
+          icon="ph ph-trash"
           severity="danger"
           text
           size="small"
@@ -271,7 +271,7 @@ function salvar() {
       <Button :label="t('hotel.comum.cancelar')" severity="secondary" text @click="emit('fechar')" />
       <Button
         :label="t('hotel.comum.salvar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         :disabled="!podeSalvar"
         :loading="salvando"
         @click="salvar"

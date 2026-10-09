@@ -34,10 +34,10 @@ const emit = defineEmits<{ ir: [id: string] }>()
 const { t } = useI18n()
 
 const ICONE: Record<EstadoDaEtapa, string> = {
-  vazio: 'pi pi-circle',
-  parcial: 'pi pi-clock',
-  completo: 'pi pi-check-circle',
-  alerta: 'pi pi-exclamation-circle',
+  vazio: 'ph ph-circle',
+  parcial: 'ph ph-clock',
+  completo: 'ph ph-check-circle',
+  alerta: 'ph ph-warning-circle',
 }
 
 const indiceAtivo = computed(() => props.passos.findIndex((passo) => passo.id === props.ativo))

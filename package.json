@@ -20,12 +20,12 @@
   "dependencies": {
     "@fontsource-variable/readex-pro": "^5.3.0",
     "@phosphor-icons/vue": "^2.2.1",
+    "@phosphor-icons/web": "^2.1.2",
     "@primeuix/themes": "^2.0.3",
     "@tailwindcss/vite": "^4.3.1",
     "apexcharts": "^7.0.0",
     "country-flag-icons": "^1.6.20",
     "pinia": "^3.0.4",
-    "primeicons": "^7.0.0",
     "primevue": "^4.5.5",
     "tailwindcss": "^4.3.1",
     "vue": "^3.5.38",

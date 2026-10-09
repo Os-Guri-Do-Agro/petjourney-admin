@@ -139,7 +139,7 @@ const pacientesEncontrados = computed<Destino[]>(() =>
     tipo: 'paciente' as const,
     rotulo: linha.pet.nome,
     detalhe: [linha.tutor?.nome, linha.tutor?.telefone].filter(Boolean).join(' · '),
-    icone: linha.pet.especie === 'felina' ? 'pi pi-heart' : 'pi pi-user',
+    icone: linha.pet.especie === 'felina' ? 'ph ph-heart' : 'ph ph-user',
     para: `/veterinario/paciente/${linha.pet.id}/historico`,
   })),
 )
@@ -297,7 +297,7 @@ function aoTeclar(evento: KeyboardEvent) {
           type="button"
           outlined
           size="small"
-          icon="pi pi-user-plus"
+          icon="ph ph-user-plus"
           :label="t('clinico.paciente.novo.atalho')"
           @click="cadastrarPaciente"
         />
@@ -340,12 +340,12 @@ function aoTeclar(evento: KeyboardEvent) {
               <strong>{{ destino.rotulo }}</strong>
               <small v-if="destino.detalhe">{{ destino.detalhe }}</small>
             </span>
-            <i class="pi pi-arrow-right busca__seta" aria-hidden="true" />
+            <i class="ph ph-arrow-right busca__seta" aria-hidden="true" />
           </Button>
         </li>
 
         <li v-if="buscando" class="busca__carregando">
-          <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+          <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
           {{ t('clinico.busca.buscando') }}
         </li>
       </ul>

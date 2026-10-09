@@ -73,7 +73,7 @@ const formato = useHotelFormat()
       <span class="clinic-value">{{ formato.quando(hospede.hospedagem.saidaPrevistaEm) }}</span>
     </span>
 
-    <i class="pi pi-angle-right fileira__seta" aria-hidden="true" />
+    <i class="ph ph-caret-right fileira__seta" aria-hidden="true" />
   </li>
 </template>
 

@@ -96,7 +96,7 @@ const LINHAS: Record<DemonstracaoId, number> = { clinica: 39, simplesvet: 120, v
       @drop.prevent="aoSoltar"
     >
       <span class="soltar__icone" aria-hidden="true">
-        <i :class="migracao.lendo ? 'pi pi-spin pi-spinner' : 'pi pi-upload'" />
+        <i :class="migracao.lendo ? 'ph ph-spin ph-circle-notch' : 'ph ph-upload-simple'" />
       </span>
       <strong class="soltar__frase">
         {{
@@ -112,7 +112,7 @@ const LINHAS: Record<DemonstracaoId, number> = { clinica: 39, simplesvet: 120, v
         accept=".xlsx,.csv,.txt,.xls"
         auto
         custom-upload
-        choose-icon="pi pi-folder-open"
+        choose-icon="ph ph-folder-open"
         :choose-label="t('clinico.migracao.arquivo.escolher')"
         :choose-button-props="{ class: 'mg-pilula mg-pilula--cheia mg-pilula--grande' }"
         :disabled="migracao.lendo || migracao.emAndamento"
@@ -124,12 +124,12 @@ const LINHAS: Record<DemonstracaoId, number> = { clinica: 39, simplesvet: 120, v
     </div>
 
     <p v-if="migracao.erroDeLeitura" class="mg-caixa mg-caixa--coral erro" role="alert">
-      <i class="pi pi-exclamation-circle" aria-hidden="true" />
+      <i class="ph ph-warning-circle" aria-hidden="true" />
       <span>{{ t(`clinico.migracao.arquivo.erro.${migracao.erroDeLeitura}`) }}</span>
     </p>
 
     <p class="promessa">
-      <i class="pi pi-lock" aria-hidden="true" />
+      <i class="ph ph-lock" aria-hidden="true" />
       {{ t('clinico.migracao.arquivo.promessa') }}
     </p>
   </section>
@@ -162,7 +162,7 @@ const LINHAS: Record<DemonstracaoId, number> = { clinica: 39, simplesvet: 120, v
         <div class="exemplo__acoes">
           <Button
             class="mg-pilula mg-pilula--pequena"
-            icon="pi pi-play"
+            icon="ph ph-play"
             :label="t('clinico.migracao.arquivo.usar')"
             :disabled="migracao.emAndamento"
             @click="migracao.usarDemonstracao(demonstracao.id)"
@@ -170,7 +170,7 @@ const LINHAS: Record<DemonstracaoId, number> = { clinica: 39, simplesvet: 120, v
           <Button
             v-if="demonstracao.id === 'clinica'"
             class="mg-pilula mg-pilula--pequena"
-            icon="pi pi-download"
+            icon="ph ph-download-simple"
             :label="t('clinico.migracao.arquivo.baixar')"
             @click="baixar(demonstracao.id)"
           />
@@ -241,7 +241,7 @@ const LINHAS: Record<DemonstracaoId, number> = { clinica: 39, simplesvet: 120, v
   gap: 0.6rem;
 }
 
-.erro .pi {
+.erro .ph {
   margin-top: 0.2rem;
 }
 

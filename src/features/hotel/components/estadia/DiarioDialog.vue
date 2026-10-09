@@ -119,7 +119,7 @@ watch(
       />
       <Button
         :label="t('hotel.diario.registrar')"
-        icon="pi pi-camera"
+        icon="ph ph-camera"
         :loading="salvando"
         :disabled="!podeSalvar"
         @click="

@@ -160,9 +160,9 @@ const linhas = computed(() =>
         :class="`sinal--${linha.severidade}`"
       >
         <i
-          class="sinal__icone pi"
+          class="sinal__icone ph"
           :class="
-            linha.severidade === 'risco' ? 'pi-exclamation-triangle' : 'pi-exclamation-circle'
+            linha.severidade === 'risco' ? 'ph-warning' : 'ph-warning-circle'
           "
           aria-hidden="true"
         />
@@ -186,7 +186,7 @@ const linhas = computed(() =>
     </p>
 
     <p v-if="linhas.length === 0" class="sinais__nada">
-      <i class="pi pi-check-circle" aria-hidden="true" />
+      <i class="ph ph-check-circle" aria-hidden="true" />
       {{ t('clinico.resumoDoPaciente.sinais.nadaFora') }}
     </p>
   </section>
@@ -299,7 +299,7 @@ const linhas = computed(() =>
   font-weight: 600;
 }
 
-.sinais__nada .pi {
+.sinais__nada .ph {
   color: var(--clinic-ok-text);
 }
 </style>

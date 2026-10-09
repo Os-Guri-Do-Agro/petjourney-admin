@@ -74,7 +74,7 @@ defineEmits<{ (evento: 'clique', payload: MouseEvent): void }>()
       :title="rotuloBloqueado"
       aria-hidden="true"
     >
-      <i class="pi pi-lock" />
+      <i class="ph ph-lock" />
     </span>
   </RouterLink>
 </template>

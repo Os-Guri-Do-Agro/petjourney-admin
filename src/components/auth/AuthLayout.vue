@@ -75,15 +75,15 @@ const authArtStyle = computed(() => ({
             <slot name="aside">
               <ul class="auth-benefits">
                 <li>
-                  <i class="pi pi-check" aria-hidden="true" />
+                  <i class="ph ph-check" aria-hidden="true" />
                   {{ t('auth.layout.benefits.programs') }}
                 </li>
                 <li>
-                  <i class="pi pi-check" aria-hidden="true" />
+                  <i class="ph ph-check" aria-hidden="true" />
                   {{ t('auth.layout.benefits.indicacao') }}
                 </li>
                 <li>
-                  <i class="pi pi-check" aria-hidden="true" />
+                  <i class="ph ph-check" aria-hidden="true" />
                   {{ t('auth.layout.benefits.results') }}
                 </li>
               </ul>
@@ -291,7 +291,7 @@ const authArtStyle = computed(() => ({
   font-weight: 650;
 }
 
-.auth-benefits .pi {
+.auth-benefits .ph {
   display: grid;
   width: 1.4rem;
   height: 1.4rem;

@@ -111,7 +111,7 @@
 }
 
 .mg-tema .mg-pilula .p-button-icon,
-.mg-tema .mg-pilula > .pi {
+.mg-tema .mg-pilula > .ph {
   color: var(--hc-marca);
   font-size: 0.95rem;
 }
@@ -246,7 +246,7 @@
   white-space: nowrap;
 }
 
-.mg-tema .mg-chip .pi {
+.mg-tema .mg-chip .ph {
   font-size: 0.7rem;
 }
 

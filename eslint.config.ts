@@ -37,6 +37,15 @@ export default defineConfigWithVueTs(
   },
 
   {
+    // O nome é o do módulo do PrimeVue que o arquivo substitui (`vite.config.ts`).
+    name: 'app/primevue-icon-substitutes',
+    files: ['src/icons/primevue/*.vue'],
+    rules: {
+      'vue/multi-word-component-names': 'off',
+    },
+  },
+
+  {
     ...pluginVitest.configs.recommended,
     files: ['src/**/__tests__/*'],
   },

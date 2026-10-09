@@ -100,7 +100,7 @@ watch(
 
       <!-- O prazo é a regra que faz a fila funcionar: dito antes do texto, não depois. -->
       <p class="oferta__prazo">
-        <i class="pi pi-clock" aria-hidden="true" />
+        <i class="ph ph-clock" aria-hidden="true" />
         {{ t('clinico.fila.oferta.prazo', { minutos: OFERTA_MINUTOS }, OFERTA_MINUTOS) }}
       </p>
 
@@ -119,7 +119,7 @@ watch(
       />
       <Button
         :label="t('clinico.fila.ofertarVaga')"
-        icon="pi pi-send"
+        icon="ph ph-paper-plane-tilt"
         :loading="fila.salvando"
         @click="emit('confirmar', { mensagem })"
       />

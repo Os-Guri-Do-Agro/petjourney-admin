@@ -84,7 +84,7 @@ function barraAria(day: string, count: number) {
       <Button
         v-if="erro === 'indisponivel' || erro === 'erro'"
         :label="t('common.retry')"
-        icon="pi pi-refresh"
+        icon="ph ph-arrow-clockwise"
         severity="secondary"
         text
         size="small"
@@ -98,12 +98,12 @@ function barraAria(day: string, count: number) {
     </div>
 
     <p v-else-if="erro" class="qrm__aviso" role="status">
-      <i class="pi pi-info-circle" aria-hidden="true" />
+      <i class="ph ph-info" aria-hidden="true" />
       {{ t(`divulgacao.metricas.erro.${erro}`) }}
     </p>
 
     <p v-else-if="semLeitura" class="qrm__aviso" role="status">
-      <i class="pi pi-qrcode" aria-hidden="true" />
+      <i class="ph ph-qr-code" aria-hidden="true" />
       {{ t('divulgacao.metricas.vazio') }}
     </p>
 

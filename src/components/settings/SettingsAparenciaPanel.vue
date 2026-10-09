@@ -92,7 +92,7 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
   <div class="aparencia">
     <section class="bloco">
       <header class="bloco__topo">
-        <span class="bloco__marca" aria-hidden="true"><i class="pi pi-palette" /></span>
+        <span class="bloco__marca" aria-hidden="true"><i class="ph ph-palette" /></span>
         <span class="bloco__texto">
           <h3>{{ t('settings.aparencia.tema.titulo') }}</h3>
           <p>{{ t('settings.aparencia.tema.descricao') }}</p>
@@ -126,7 +126,7 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
 
     <section class="bloco">
       <header class="bloco__topo">
-        <span class="bloco__marca" aria-hidden="true"><i class="pi pi-bars" /></span>
+        <span class="bloco__marca" aria-hidden="true"><i class="ph ph-list" /></span>
         <span class="bloco__texto">
           <h3>{{ t('settings.aparencia.menu.titulo') }}</h3>
           <p>{{ t('settings.aparencia.menu.descricao') }}</p>
@@ -161,7 +161,7 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
 
     <section class="bloco">
       <header class="bloco__topo">
-        <span class="bloco__marca" aria-hidden="true"><i class="pi pi-arrows-v" /></span>
+        <span class="bloco__marca" aria-hidden="true"><i class="ph ph-arrows-vertical" /></span>
         <span class="bloco__texto">
           <h3>{{ t('settings.aparencia.densidade.titulo') }}</h3>
           <p>{{ t('settings.aparencia.densidade.descricao') }}</p>
@@ -195,7 +195,7 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
     </section>
 
     <p class="aparencia__nota">
-      <i class="pi pi-info-circle" aria-hidden="true" />
+      <i class="ph ph-info" aria-hidden="true" />
       {{ t('settings.aparencia.nota') }}
     </p>
   </div>

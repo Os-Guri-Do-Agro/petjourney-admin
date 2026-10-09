@@ -272,7 +272,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       -->
       <section v-if="vespera.length > 0" class="vespera">
         <h2 class="vespera__titulo">
-          <i class="pi pi-exclamation-triangle" aria-hidden="true" />
+          <i class="ph ph-warning" aria-hidden="true" />
           {{ t('hotel.reservas.vesperaTitulo', { total: vespera.length }, vespera.length) }}
         </h2>
 
@@ -304,7 +304,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 :rotulo="formato.situacaoDaExigencia(linha.admissao)"
                 :tom="tomDaAdmissao(linha.admissao)"
               />
-              <i class="pi pi-arrow-right" aria-hidden="true" />
+              <i class="ph ph-arrow-right" aria-hidden="true" />
             </RouterLink>
           </li>
         </ul>
@@ -419,7 +419,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             <HotelSelo
               :rotulo="formato.haDias(item.esperandoHaDias)"
               :tom="item.esperandoHaDias > 7 ? 'atencao' : 'neutro'"
-              icone="pi pi-hourglass"
+              icone="ph ph-hourglass"
             />
           </li>
         </ul>
@@ -433,7 +433,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     <template #actions>
       <Button
         :label="t('hotel.reservas.novaNoMapa')"
-        icon="pi pi-plus"
+        icon="ph ph-plus"
         size="small"
         @click="router.push('/hotel/mapa')"
       />

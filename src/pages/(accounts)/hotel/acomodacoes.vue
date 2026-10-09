@@ -425,7 +425,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         <div class="painel__acoes">
           <Button
             :label="t('hotel.acomodacoes.corredor.novo')"
-            icon="pi pi-plus"
+            icon="ph ph-plus"
             severity="secondary"
             outlined
             size="small"
@@ -452,7 +452,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             -->
             <span class="corredor__acoes">
               <Button
-                icon="pi pi-arrow-up"
+                icon="ph ph-arrow-up"
                 severity="secondary"
                 text
                 rounded
@@ -463,7 +463,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 @click="moverCorredor(grupo.bloco.id, 'sobe')"
               />
               <Button
-                icon="pi pi-arrow-down"
+                icon="ph ph-arrow-down"
                 severity="secondary"
                 text
                 rounded
@@ -474,7 +474,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 @click="moverCorredor(grupo.bloco.id, 'desce')"
               />
               <Button
-                icon="pi pi-pencil"
+                icon="ph ph-pencil-simple"
                 severity="secondary"
                 text
                 rounded
@@ -557,7 +557,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 class="vaga vaga--nova"
                 @click="abrirAcomodacao(null, grupo.bloco.id)"
               >
-                <i class="pi pi-plus" aria-hidden="true" />
+                <i class="ph ph-plus" aria-hidden="true" />
                 {{ t('hotel.acomodacoes.nova') }}
               </button>
             </li>
@@ -588,7 +588,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
             <span class="tipo__acoes">
               <Button
-                icon="pi pi-arrow-up"
+                icon="ph ph-arrow-up"
                 severity="secondary"
                 text
                 rounded
@@ -599,7 +599,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 @click="moverTipo(tipo.id, 'sobe')"
               />
               <Button
-                icon="pi pi-arrow-down"
+                icon="ph ph-arrow-down"
                 severity="secondary"
                 text
                 rounded
@@ -610,7 +610,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 @click="moverTipo(tipo.id, 'desce')"
               />
               <Button
-                icon="pi pi-pencil"
+                icon="ph ph-pencil-simple"
                 severity="secondary"
                 text
                 rounded
@@ -664,7 +664,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 <td class="tabela__num clinic-value">{{ tarifa.acompanhantePercentual }}%</td>
                 <td class="tabela__acao">
                   <Button
-                    icon="pi pi-pencil"
+                    icon="ph ph-pencil-simple"
                     severity="secondary"
                     text
                     rounded
@@ -878,7 +878,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <span class="clinic-scope clinic-acoes">
         <Button
           :label="acaoDaAba.rotulo"
-          icon="pi pi-plus"
+          icon="ph ph-plus"
           size="small"
           @click="acaoDaAba.abrir()"
         />

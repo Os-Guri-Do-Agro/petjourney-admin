@@ -329,7 +329,7 @@ async function handleSubmit() {
                 "
                 class="register-password-toggle"
                 :disabled="isBusy"
-                :icon="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                :icon="showPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
                 rounded
                 severity="secondary"
                 text
@@ -361,7 +361,7 @@ async function handleSubmit() {
                 "
                 class="register-password-toggle"
                 :disabled="isBusy"
-                :icon="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                :icon="showConfirmPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
                 rounded
                 severity="secondary"
                 text

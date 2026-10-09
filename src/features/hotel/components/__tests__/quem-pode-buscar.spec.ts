@@ -73,7 +73,7 @@ describe('quem pode buscar', () => {
 
     /* Duas caixas para dois conhecidos — o responsável é a linha do cadeado. */
     expect(caixas).toHaveLength(2)
-    expect(wrapper.find('.pi-lock').exists()).toBe(true)
+    expect(wrapper.find('.ph-lock').exists()).toBe(true)
     expect((caixas[0]!.element as HTMLInputElement).checked).toBe(true)
     expect((caixas[1]!.element as HTMLInputElement).checked).toBe(false)
     expect(wrapper.text()).toContain('Irmã · (11) 99671-2284 · RG 23.456.789-0')

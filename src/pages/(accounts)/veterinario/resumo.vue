@@ -299,7 +299,7 @@ function trocarPeriodo(periodo: PeriodoId) {
             <li :class="{ 'resumo-fatos__item--atencao': comparecimentoBaixo }">
               <i
                 v-if="comparecimentoBaixo"
-                class="pi pi-exclamation-triangle"
+                class="ph ph-warning"
                 :title="t('clinico.resumo.fatos.comparecimentoBaixo')"
                 :aria-label="t('clinico.resumo.fatos.comparecimentoBaixo')"
               />

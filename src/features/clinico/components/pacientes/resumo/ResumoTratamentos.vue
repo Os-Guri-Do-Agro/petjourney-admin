@@ -39,7 +39,7 @@ const rotulos = useRotulosDoTratamento()
       </h2>
       <RouterLink class="hc__link" :to="`/veterinario/paciente/${petId}/tratamento`">
         {{ t('clinico.resumoDoPaciente.tratamentos.abrir') }}
-        <i class="pi pi-arrow-right" aria-hidden="true" />
+        <i class="ph ph-arrow-right" aria-hidden="true" />
       </RouterLink>
     </header>
     <p class="ficha-ajuda">{{ t('clinico.resumoDoPaciente.tratamentos.ajuda') }}</p>

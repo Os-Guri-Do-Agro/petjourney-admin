@@ -70,7 +70,7 @@ onBeforeUnmount(parar)
         size="small"
         @click="agenda.desfazerUltima()"
       >
-        <i class="pi pi-undo p-button-icon" aria-hidden="true" />
+        <i class="ph ph-arrow-u-up-left p-button-icon" aria-hidden="true" />
         <span class="p-button-label">{{ t('clinico.agenda.desfazer') }}</span>
         <kbd>Z</kbd>
       </Button>

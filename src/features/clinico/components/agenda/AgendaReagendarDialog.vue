@@ -150,18 +150,18 @@ function confirmar() {
 
         <!-- O telefone fica clicável: a ligação acontece agora, não depois. -->
         <a v-if="tutor" class="reagendar__telefone clinic-value" :href="`tel:${tutor.telefone}`">
-          <i class="pi pi-phone" aria-hidden="true" />
+          <i class="ph ph-phone" aria-hidden="true" />
           <bdi dir="ltr">{{ tutor.telefone }}</bdi>
         </a>
       </header>
 
       <p v-if="buscando" class="reagendar__estado" role="status">
-        <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+        <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
         {{ t('clinico.tabela.carregando') }}
       </p>
 
       <p v-else-if="opcoes.length === 0" class="reagendar__estado reagendar__estado--vazio">
-        <i class="pi pi-calendar-times" aria-hidden="true" />
+        <i class="ph ph-calendar-x" aria-hidden="true" />
         {{ t('clinico.agenda.semana.semAlternativa') }}
       </p>
 
@@ -214,7 +214,7 @@ function confirmar() {
       />
       <Button
         :label="t('clinico.faltas.reagendar.confirmar')"
-        icon="pi pi-calendar-plus"
+        icon="ph ph-calendar-plus"
         :disabled="!escolhido"
         :loading="salvando"
         @click="confirmar"

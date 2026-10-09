@@ -72,14 +72,14 @@ const visiveis = computed(() => filtrados.value.slice(0, props.limite))
 const restantes = computed(() => Math.max(filtrados.value.length - props.limite, 0))
 
 const ICONE: Record<TimelineEvent['kind'], string> = {
-  consulta: 'pi pi-file',
-  vacina: 'pi pi-shield',
-  exame: 'pi pi-search',
-  cirurgia: 'pi pi-heart',
-  internacao: 'pi pi-home',
-  prescricao: 'pi pi-book',
-  falta: 'pi pi-user-minus',
-  observacao: 'pi pi-comment',
+  consulta: 'ph ph-file',
+  vacina: 'ph ph-shield',
+  exame: 'ph ph-magnifying-glass',
+  cirurgia: 'ph ph-heart',
+  internacao: 'ph ph-house',
+  prescricao: 'ph ph-book-open',
+  falta: 'ph ph-user-minus',
+  observacao: 'ph ph-chat-circle',
 }
 
 /**
@@ -177,7 +177,7 @@ const prescricoesAnteriores = computed(() =>
 
       <RouterLink v-if="restantes > 0 && rotaCompleta" class="historico__mais" :to="rotaCompleta">
         {{ t('clinico.comum.verTodos', { contagem: eventos.length }) }}
-        <i class="pi pi-arrow-right" aria-hidden="true" />
+        <i class="ph ph-arrow-right" aria-hidden="true" />
       </RouterLink>
     </section>
   </aside>

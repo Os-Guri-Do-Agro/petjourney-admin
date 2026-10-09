@@ -104,7 +104,7 @@ function comecar() {
 
     <div class="autorizacao clinic-scope">
       <p v-if="escuta.erro" class="autorizacao__erro" role="alert">
-        <i class="pi pi-exclamation-circle" aria-hidden="true" />
+        <i class="ph ph-warning-circle" aria-hidden="true" />
         {{ t(`clinico.escuta.erro.${escuta.erro}`) }}
       </p>
 
@@ -204,7 +204,7 @@ function comecar() {
   font-weight: 650;
 }
 
-.autorizacao__erro .pi {
+.autorizacao__erro .ph {
   margin-top: 0.2rem;
 }
 

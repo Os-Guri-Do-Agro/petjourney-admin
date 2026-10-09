@@ -226,7 +226,7 @@ async function fecharEditor() {
       :class="incluida ? 'marca--aplicado' : 'marca--fora'"
       aria-hidden="true"
     >
-      <i :class="incluida ? 'pi pi-check' : 'pi pi-minus'" />
+      <i :class="incluida ? 'ph ph-check' : 'ph ph-minus'" />
     </span>
 
     <!-- ------------------------------------------------ o corpo -->
@@ -311,7 +311,7 @@ async function fecharEditor() {
         <span class="editor__acoes">
           <Button
             :label="t('clinico.escuta.proposta.pronto')"
-            icon="pi pi-check"
+            icon="ph ph-check"
             size="small"
             :disabled="!podeConfirmar"
             @click="confirmar"
@@ -385,7 +385,7 @@ async function fecharEditor() {
       />
       <Button
         v-else
-        icon="pi pi-pencil"
+        icon="ph ph-pencil-simple"
         rounded
         :aria-label="`${t('clinico.escuta.proposta.corrigir')}: ${rotulo}`"
         :title="t('clinico.escuta.proposta.corrigir')"

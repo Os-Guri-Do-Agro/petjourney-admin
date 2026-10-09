@@ -284,8 +284,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             :max="4"
             show-buttons
             button-layout="horizontal"
-            increment-button-icon="pi pi-plus"
-            decrement-button-icon="pi pi-minus"
+            increment-button-icon="ph ph-plus"
+            decrement-button-icon="ph ph-minus"
             size="small"
             :aria-label="t('hotel.mapa.ocupantes')"
           />
@@ -298,7 +298,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           lembrar do que era a pergunta; "8 acomodações servem para 3 noites" não.
         -->
         <p class="resposta" :class="servem > 0 ? 'resposta--sim' : 'resposta--nao'">
-          <i :class="servem > 0 ? 'pi pi-check-circle' : 'pi pi-times-circle'" aria-hidden="true" />
+          <i :class="servem > 0 ? 'ph ph-check-circle' : 'ph ph-x-circle'" aria-hidden="true" />
           <strong>
             {{
               servem > 0
@@ -313,7 +313,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       </section>
 
       <p v-if="procuraForaDaGrade" class="fora">
-        <i class="pi pi-info-circle" aria-hidden="true" />
+        <i class="ph ph-info" aria-hidden="true" />
         {{ t('hotel.mapa.foraDaGrade') }}
       </p>
 
@@ -321,7 +321,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <section class="navegacao">
         <div class="navegacao__botoes">
           <Button
-            icon="pi pi-angle-left"
+            icon="ph ph-caret-left"
             severity="secondary"
             outlined
             size="small"
@@ -336,7 +336,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             @click="voltarParaHoje"
           />
           <Button
-            icon="pi pi-angle-right"
+            icon="ph ph-caret-right"
             severity="secondary"
             outlined
             size="small"
@@ -391,7 +391,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <span class="clinic-scope clinic-acoes">
         <Button
           :label="t('hotel.mapa.verReservas')"
-          icon="pi pi-list"
+          icon="ph ph-list-bullets"
           severity="secondary"
           outlined
           size="small"

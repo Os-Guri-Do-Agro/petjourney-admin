@@ -114,7 +114,7 @@ watch(
                 teve — não como a forma pela qual ele ficou sabendo.
               -->
               <span v-if="boletim.ligacaoEm" class="balao__ligacao">
-                <i class="pi pi-phone" aria-hidden="true" />
+                <i class="ph ph-phone" aria-hidden="true" />
                 {{ t('clinico.internacao.app.aposLigacao') }}
               </span>
             </footer>

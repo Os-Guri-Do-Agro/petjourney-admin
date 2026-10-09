@@ -567,7 +567,7 @@ alvos, e a densidade confortável leva o alvo mínimo a 34px. A densidade média
 mouse (28px), não de dedo.
 
 Todo layout funciona espelhado em RTL (`ar`): propriedades lógicas (`padding-inline`,
-`inset-inline`) e ícones direcionais do PrimeIcons espelhados globalmente.
+`inset-inline`) e ícones direcionais do Phosphor espelhados globalmente.
 
 Cada tela tem forma própria, derivada do que ela faz — grade de ocupação, linha do tempo do
 dia, eixo de horários, régua de relógio. Uma fileira de quatro cartões de número com lista
@@ -762,16 +762,19 @@ nativo.
   de atendimento que morava aqui saiu em 02/10/2026, a pedido do usuário.)
   O seletor claro/escuro saiu do cabeçalho e é um interruptor "Tema escuro" no menu da conta.
 - **Modo foco:** esconde a navegação e deixa a página inteira; header fica.
-- **Ícones:** Phosphor para domínio (animal, acomodação, turno), PrimeIcons para interface.
-  Nunca SVG desenhado à mão.
+- **Ícones:** só Phosphor. Interface (fechar, expandir, filtrar) pela fonte
+  `@phosphor-icons/web`, classe `ph ph-*`, peso regular — é o que cabe no `icon` de Button e de
+  item de menu. Domínio (animal, acomodação, turno) por componente, `PhDog`, com o peso que pedir
+  (`duotone` nos discos de serviço, `fill` em silhueta). Os ícones internos dos componentes do
+  PrimeVue (seta do Select, X do Dialog, visto do Checkbox) também são Phosphor: cada arquivo de
+  `src/icons/primevue/` substitui o módulo de mesmo nome de `@primevue/icons`, por alias no
+  `vite.config.ts`. Nunca SVG desenhado à mão.
 - **Tamanho do ícone mora no contêiner.** O ícone tem 1em de quem o contém, como em qualquer fonte
   de ícones: a forma (disco, bloco, marcador) ou a linha de texto declara `font-size`, e o ícone
-  segue. Numa forma, o ícone fica entre metade e 60% do lado dela. O tema do PrimeVue fixava
-  `.pi` em 1rem e anulava isso em todo o portal — o visto de 16 px num disco de 17 px, a seta de
-  abrir linha ocupando dois terços do quadradinho, ícone de 16 px ao lado de rótulo de 11 px. A
-  regra `html .pi` em `src/assets/main.css` devolve o contrato; os ícones internos dos
-  componentes do PrimeVue (classe `p-*` no elemento) seguem o tamanho do tema. O Phosphor já nasce
-  em 1em.
+  segue. Numa forma, o ícone fica entre metade e 60% do lado dela. Os ícones internos dos
+  componentes do PrimeVue (classe `p-*` no elemento) seguem o tamanho do tema. O glifo da fonte
+  cresce 25% dentro da própria caixa (`.ph::before`), porque o desenho do Phosphor deixa margem e
+  os tamanhos do portal foram acertados com o PrimeIcons, que enchia a caixa.
 
 ### Toast
 

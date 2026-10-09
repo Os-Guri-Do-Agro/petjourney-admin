@@ -336,7 +336,7 @@ defineExpose({ voltarParaLista })
         <Button
           v-if="painel === 'lista'"
           :label="t('clinico.internacao.leitos.adicionar')"
-          icon="pi pi-plus"
+          icon="ph ph-plus"
           size="small"
           severity="secondary"
           outlined
@@ -402,7 +402,7 @@ defineExpose({ voltarParaLista })
           />
           <Button
             :label="t('clinico.internacao.leitos.criar')"
-            icon="pi pi-check"
+            icon="ph ph-check"
             size="small"
             :disabled="!nomeValido || salvando"
             :loading="salvando"
@@ -469,7 +469,7 @@ defineExpose({ voltarParaLista })
                 />
                 <Button
                   :label="t('clinico.internacao.leitos.salvar')"
-                  icon="pi pi-check"
+                  icon="ph ph-check"
                   size="small"
                   :disabled="!nomeValido || salvando"
                   :loading="salvando"
@@ -523,7 +523,7 @@ defineExpose({ voltarParaLista })
                 />
                 <Button
                   :label="t('clinico.internacao.leitos.confirmarDesativacao')"
-                  icon="pi pi-power-off"
+                  icon="ph ph-power"
                   severity="danger"
                   size="small"
                   :loading="salvando"
@@ -543,7 +543,7 @@ defineExpose({ voltarParaLista })
               </span>
 
               <p v-if="!leito.ativo" class="linha__parado">
-                <i class="pi pi-power-off" aria-hidden="true" />
+                <i class="ph ph-power" aria-hidden="true" />
                 {{ t(`clinico.internacao.leitos.motivo.${leito.motivoInativo ?? 'outro'}`) }}
                 <span v-if="leito.detalheInativo">· {{ leito.detalheInativo }}</span>
                 <span v-if="leito.inativoDesde" class="linha__desde">
@@ -573,7 +573,7 @@ defineExpose({ voltarParaLista })
                 leitor de tela — e um controle inerte sem motivo à vista é lido como defeito.
               -->
               <span v-if="leito.ativo && !podeDesativar(leito)" class="linha__travado">
-                <i class="pi pi-user" aria-hidden="true" />
+                <i class="ph ph-user" aria-hidden="true" />
                 {{ t('clinico.internacao.leitos.ocupadoCurto') }}
               </span>
               <Button
@@ -588,7 +588,7 @@ defineExpose({ voltarParaLista })
               <Button
                 v-else
                 :label="t('clinico.internacao.leitos.reativar')"
-                icon="pi pi-check"
+                icon="ph ph-check"
                 text
                 size="small"
                 :disabled="salvando"
@@ -616,7 +616,7 @@ defineExpose({ voltarParaLista })
       <!-- Paginador só onde há mais de uma página; senão é enfeite que ocupa linha. -->
       <nav v-if="totalDePaginas > 1" class="paginas" :aria-label="t('clinico.internacao.leitos.paginas')">
         <Button
-          icon="pi pi-chevron-left"
+          icon="ph ph-caret-left"
           severity="secondary"
           text
           size="small"
@@ -636,7 +636,7 @@ defineExpose({ voltarParaLista })
         </span>
 
         <Button
-          icon="pi pi-chevron-right"
+          icon="ph ph-caret-right"
           severity="secondary"
           text
           size="small"

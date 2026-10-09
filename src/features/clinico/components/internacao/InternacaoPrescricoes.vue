@@ -219,7 +219,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
         <Button
           v-if="!encerrada"
           :label="t('clinico.internacao.prescricao.nova')"
-          icon="pi pi-plus"
+          icon="ph ph-plus"
           size="small"
           severity="secondary"
           outlined
@@ -447,7 +447,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
         />
         <Button
           :label="t('clinico.internacao.prescricao.criar')"
-          icon="pi pi-check"
+          icon="ph ph-check"
           :disabled="!podeCriar"
           :loading="salvando"
           @click="criar"

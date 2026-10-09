@@ -92,7 +92,7 @@ const totalShortcuts = computed(() =>
         <!-- A busca cabe ao lado do título: com quinze telas ela é conveniência, não estrutura. -->
         <div class="home-shortcuts__filter">
           <IconField class="home-shortcuts__filter-field">
-            <InputIcon class="pi pi-search" />
+            <InputIcon class="ph ph-magnifying-glass" />
             <InputText
               id="home-shortcuts-filter"
               v-model="filterQuery"
@@ -110,7 +110,7 @@ const totalShortcuts = computed(() =>
             type="button"
             text
             severity="secondary"
-            icon="pi pi-times"
+            icon="ph ph-x"
             :aria-label="t('inicio.shortcuts.clearFilterAria')"
             @click="filterQuery = ''"
           />
@@ -160,7 +160,7 @@ const totalShortcuts = computed(() =>
               <i
                 v-else
                 class="shortcut-card__arrow"
-                :class="item.locked ? 'pi pi-lock' : 'pi pi-arrow-right'"
+                :class="item.locked ? 'ph ph-lock' : 'ph ph-arrow-right'"
                 aria-hidden="true"
               />
             </RouterLink>

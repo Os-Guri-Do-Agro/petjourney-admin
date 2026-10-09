@@ -442,7 +442,7 @@ const textoDaSugestao = computed(() => {
   >
     <template #header>
       <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i class="pi pi-shield" /></span>
+        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-shield" /></span>
         {{ t('clinico.vacinas.aplicar.titulo', { pet: pet.nome }) }}
       </h2>
     </template>
@@ -587,10 +587,10 @@ const textoDaSugestao = computed(() => {
         <i
           :class="
             avisoDoLote.tom === 'risco'
-              ? 'pi pi-ban'
+              ? 'ph ph-prohibit'
               : avisoDoLote.tom === 'atencao'
-                ? 'pi pi-hourglass'
-                : 'pi pi-info-circle'
+                ? 'ph ph-hourglass'
+                : 'ph ph-info'
           "
           aria-hidden="true"
         />
@@ -598,7 +598,7 @@ const textoDaSugestao = computed(() => {
       </p>
 
       <p v-if="travados.length > 0 && loteEscolhido !== LOTE_DIGITADO" class="aplicar__travados">
-        <i class="pi pi-lock" aria-hidden="true" />
+        <i class="ph ph-lock" aria-hidden="true" />
         {{
           t(
             'clinico.vacinas.aplicar.lote.travados',
@@ -648,7 +648,7 @@ const textoDaSugestao = computed(() => {
         :aria-label="t('clinico.vacinas.aplicar.proxima.titulo')"
       >
         <div class="proxima__data">
-          <i class="pi pi-calendar" aria-hidden="true" />
+          <i class="ph ph-calendar-blank" aria-hidden="true" />
           <span>
             <strong>
               {{
@@ -698,7 +698,7 @@ const textoDaSugestao = computed(() => {
       />
       <Button
         :label="t('clinico.vacinas.aplicar.confirmar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         :class="ficha ? 'hc-pilula hc-pilula--cheia' : 'clinic-acao-principal'"
         :loading="salvando"
         :disabled="!completo"

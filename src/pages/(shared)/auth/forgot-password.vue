@@ -340,7 +340,7 @@ function closePinDialog() {
               "
               class="forgot-password-toggle"
               :disabled="resetting"
-              :icon="showNewPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+              :icon="showNewPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
               rounded
               severity="secondary"
               text
@@ -372,7 +372,7 @@ function closePinDialog() {
               "
               class="forgot-password-toggle"
               :disabled="resetting"
-              :icon="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+              :icon="showConfirmPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
               rounded
               severity="secondary"
               text
@@ -426,7 +426,7 @@ function closePinDialog() {
         <Button
           class="forgot-pin__close"
           type="button"
-          icon="pi pi-times"
+          icon="ph ph-x"
           severity="secondary"
           text
           :aria-label="t('common.close')"
@@ -436,13 +436,13 @@ function closePinDialog() {
 
         <div class="forgot-pin__hero">
           <span class="forgot-pin__icon" aria-hidden="true">
-            <i class="pi pi-envelope" />
+            <i class="ph ph-envelope-simple" />
           </span>
           <p class="forgot-pin__eyebrow">{{ t('auth.forgot.pin.eyebrow') }}</p>
           <h2 id="forgot-pin-title">{{ t('auth.forgot.pin.title') }}</h2>
           <p class="forgot-pin__lede">{{ t('auth.forgot.pin.lede') }}</p>
           <p class="forgot-pin__email" :title="email.trim()">
-            <i class="pi pi-envelope" aria-hidden="true" />
+            <i class="ph ph-envelope-simple" aria-hidden="true" />
             <span>{{ email.trim() }}</span>
           </p>
         </div>
@@ -612,7 +612,7 @@ function closePinDialog() {
   white-space: nowrap;
 }
 
-.forgot-pin__email .pi {
+.forgot-pin__email .ph {
   flex-shrink: 0;
   color: var(--auth-sage-strong);
   font-size: 0.78rem;

@@ -195,14 +195,14 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
           class="push"
           role="status"
         >
-          <span class="push__marca" aria-hidden="true"><i class="pi pi-bell" /></span>
+          <span class="push__marca" aria-hidden="true"><i class="ph ph-bell" /></span>
           <span class="push__texto">
             <small>{{ t('clinico.vacinas.app.pushOrigem') }}</small>
             <strong>{{ avisoRecente.titulo }}</strong>
             <span>{{ avisoRecente.corpo }}</span>
           </span>
           <Button
-            icon="pi pi-times"
+            icon="ph ph-x"
             severity="secondary"
             text
             rounded
@@ -246,7 +246,7 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
         <div v-if="plano.atrasadas > 0" class="resumo--risco">
           <dt>{{ t('clinico.vacinas.app.resumo.atrasadas') }}</dt>
           <dd>
-            <i class="pi pi-exclamation-circle" aria-hidden="true" />
+            <i class="ph ph-warning-circle" aria-hidden="true" />
             {{ plano.atrasadas }}
           </dd>
         </div>
@@ -289,7 +289,7 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
                 {{ fraseDaProxima(item) }}
               </span>
               <span v-if="proximaDaVacina(item)?.agendamento" class="protocolo__marcada">
-                <i class="pi pi-calendar" aria-hidden="true" />
+                <i class="ph ph-calendar-blank" aria-hidden="true" />
                 {{
                   t('clinico.vacinas.app.marcada', {
                     data: rotulos.data(proximaDaVacina(item)!.agendamento!.inicio.slice(0, 10)),
@@ -323,7 +323,7 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
               class="cartao"
               :class="{ 'cartao--nova': vacina.id === idDaNova }"
             >
-              <span class="cartao__icone" aria-hidden="true"><i class="pi pi-shield" /></span>
+              <span class="cartao__icone" aria-hidden="true"><i class="ph ph-shield" /></span>
 
               <span class="cartao__corpo">
                 <span class="cartao__titulo">
@@ -341,11 +341,11 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
                   fora diz onde foi e quem registrou — a clínica não assina o que não aplicou.
                 -->
                 <span v-if="vacina.origem === 'CLINICA'" class="selo">
-                  <i class="pi pi-verified" aria-hidden="true" />
+                  <i class="ph ph-seal-check" aria-hidden="true" />
                   {{ t('clinico.vacinas.app.aplicadaNa', { clinica: vacina.clinica.nome }) }}
                 </span>
                 <span v-else-if="vacina.externa" class="selo selo--externa">
-                  <i class="pi pi-map-marker" aria-hidden="true" />
+                  <i class="ph ph-map-pin" aria-hidden="true" />
                   {{ t('clinico.vacinas.app.outroLocal', { local: vacina.externa.local }) }}
                 </span>
 
@@ -377,10 +377,10 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
                   <i
                     :class="
                       lembrete(vacina)!.tom === 'risco'
-                        ? 'pi pi-exclamation-circle'
+                        ? 'ph ph-warning-circle'
                         : lembrete(vacina)!.tom === 'marcada'
-                          ? 'pi pi-calendar'
-                          : 'pi pi-clock'
+                          ? 'ph ph-calendar-blank'
+                          : 'ph ph-clock'
                     "
                     aria-hidden="true"
                   />

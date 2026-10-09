@@ -316,13 +316,13 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
                 que dá para ordenar. Sete setas cinzas no cabeçalho ensinam a ignorar todas.
               -->
               <i
-                class="pi tabela__seta"
+                class="ph tabela__seta"
                 :class="
                   ordenacao.coluna === coluna.id
                     ? ordenacao.direcao === 'asc'
-                      ? 'pi-sort-amount-up-alt'
-                      : 'pi-sort-amount-down'
-                    : 'pi-sort-alt tabela__seta--fantasma'
+                      ? 'ph-sort-ascending'
+                      : 'ph-sort-descending'
+                    : 'ph-arrows-down-up tabela__seta--fantasma'
                 "
                 aria-hidden="true"
               />
@@ -345,17 +345,17 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
           clique parece quebrada; com o motivo, é uma regra.
         -->
         <p v-if="somenteLeitura && motivoSomenteLeitura" class="tabela__leitura" role="status">
-          <i class="pi pi-lock" aria-hidden="true" />
+          <i class="ph ph-lock" aria-hidden="true" />
           <span>{{ motivoSomenteLeitura }}</span>
         </p>
 
         <div v-if="carregando" class="tabela__estado" role="status" aria-live="polite">
-          <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+          <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
           <span>{{ t('clinico.tabela.carregando') }}</span>
         </div>
 
         <div v-else-if="erro" class="tabela__estado tabela__estado--erro" role="alert">
-          <i class="pi pi-exclamation-circle" aria-hidden="true" />
+          <i class="ph ph-warning-circle" aria-hidden="true" />
           <span>{{ erro }}</span>
           <Button
             type="button"
@@ -363,14 +363,14 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
             severity="secondary"
             outlined
             size="small"
-            icon="pi pi-refresh"
+            icon="ph ph-arrow-clockwise"
             :label="t('clinico.tabela.tentarDeNovo')"
             @click="emit('tentarDeNovo')"
           />
         </div>
 
         <div v-else-if="vazia" class="tabela__estado tabela__estado--vazio">
-          <i class="pi pi-inbox" aria-hidden="true" />
+          <i class="ph ph-tray" aria-hidden="true" />
           <strong>{{ vazioTitulo || t('clinico.tabela.vazio') }}</strong>
           <span v-if="vazioDescricao">{{ vazioDescricao }}</span>
 
@@ -452,7 +452,7 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
                 :title="t('clinico.tabela.abrir')"
                 @click.stop="emit('ativar', linha)"
               >
-                <i class="pi pi-chevron-right" aria-hidden="true" />
+                <i class="ph ph-caret-right" aria-hidden="true" />
               </button>
             </div>
           </div>

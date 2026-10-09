@@ -197,7 +197,7 @@ async function selectLocale(code: Locale | null) {
         <span class="language-switcher__code">{{ selectedOption.short }}</span>
       </template>
       <template #dropdownicon>
-        <i class="pi pi-chevron-down language-switcher__chevron" aria-hidden="true" />
+        <i class="ph ph-caret-down language-switcher__chevron" aria-hidden="true" />
       </template>
       <template #option="{ option, selected }">
         <span class="language-switcher__flag" aria-hidden="true" v-html="option.flagSvg" />
@@ -205,7 +205,7 @@ async function selectLocale(code: Locale | null) {
           <span class="language-switcher__name" dir="auto">{{ option.name }}</span>
           <span class="language-switcher__short">{{ option.short }}</span>
         </span>
-        <i v-if="selected" class="pi pi-check language-switcher__check" aria-hidden="true" />
+        <i v-if="selected" class="ph ph-check language-switcher__check" aria-hidden="true" />
       </template>
     </Select>
   </div>

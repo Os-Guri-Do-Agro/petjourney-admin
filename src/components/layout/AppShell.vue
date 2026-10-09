@@ -564,7 +564,7 @@ onUnmounted(() => {
             type="button"
             text
             severity="secondary"
-            icon="pi pi-angle-double-left"
+            icon="ph ph-caret-double-left"
             :aria-label="railCollapsed ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
             :title="railCollapsed ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
             :aria-expanded="!railCollapsed"
@@ -576,7 +576,7 @@ onUnmounted(() => {
             type="button"
             text
             severity="secondary"
-            icon="pi pi-sign-out"
+            icon="ph ph-sign-out"
             :aria-label="t('shell.logout')"
             :title="t('shell.logout')"
             @click="requestLogout"
@@ -686,7 +686,7 @@ onUnmounted(() => {
             type="button"
             text
             severity="secondary"
-            icon="pi pi-sign-out"
+            icon="ph ph-sign-out"
             :label="t('shell.logout')"
             @click="requestLogout"
           />
@@ -711,7 +711,7 @@ onUnmounted(() => {
                 : t('shell.drawer.expand')
           "
           :aria-expanded="drawerOpen"
-          icon="pi pi-bars"
+          icon="ph ph-list"
           @click="toggleNavigator"
         />
 
@@ -742,7 +742,7 @@ onUnmounted(() => {
           :aria-label="t('clinico.busca.abrir')"
           @click="buscaAberta = true"
         >
-          <i class="pi pi-search" aria-hidden="true" />
+          <i class="ph ph-magnifying-glass" aria-hidden="true" />
           <span class="header-search__texto">{{ t('clinico.busca.abrirCurto') }}</span>
           <kbd class="header-search__tecla">{{ atalhoDaBusca }}</kbd>
         </Button>
@@ -770,7 +770,7 @@ onUnmounted(() => {
           @click="handleHeaderCupomClick"
         >
           <span class="header-resgate__icon" aria-hidden="true">
-            <i class="pi pi-ticket" />
+            <i class="ph ph-ticket" />
           </span>
           <span class="header-resgate__label">{{ t('shell.cupom.cta') }}</span>
           <span v-if="!cupomFeatureEnabled" class="header-resgate__soon">{{
@@ -797,7 +797,7 @@ onUnmounted(() => {
               <strong>{{ headerDisplayName }}</strong>
               <small>{{ t('shell.user.role') }}</small>
             </span>
-            <i class="pi pi-angle-down" aria-hidden="true" />
+            <i class="ph ph-caret-down" aria-hidden="true" />
           </Button>
 
           <!--
@@ -813,15 +813,15 @@ onUnmounted(() => {
           >
             <div id="user-menu-dropdown" class="user-menu__dropdown" role="menu">
               <RouterLink role="menuitem" to="/settings?aba=perfil" @click="closeUserMenu">
-                <i class="pi pi-user" aria-hidden="true" />
+                <i class="ph ph-user" aria-hidden="true" />
                 {{ t('shell.user.perfil') }}
               </RouterLink>
               <RouterLink role="menuitem" to="/settings" @click="closeUserMenu">
-                <i class="pi pi-cog" aria-hidden="true" />
+                <i class="ph ph-gear" aria-hidden="true" />
                 {{ t('shell.user.settings') }}
               </RouterLink>
               <RouterLink role="menuitem" to="/parceiro/selecionar" @click="closeUserMenu">
-                <i class="pi pi-building" aria-hidden="true" />
+                <i class="ph ph-building" aria-hidden="true" />
                 {{ t('shell.user.trocarEmpresa') }}
               </RouterLink>
               <div class="user-menu__locale" role="none">
@@ -829,7 +829,7 @@ onUnmounted(() => {
                 <LanguageSwitcher variant="menu" />
               </div>
               <div class="user-menu__tema" role="none">
-                <i class="pi pi-moon" aria-hidden="true" />
+                <i class="ph ph-moon" aria-hidden="true" />
                 <label class="user-menu__tema-rotulo" for="user-menu-tema">
                   {{ t('shell.theme.darkTitle') }}
                 </label>
@@ -845,7 +845,7 @@ onUnmounted(() => {
                 role="menuitem"
                 text
                 severity="danger"
-                icon="pi pi-sign-out"
+                icon="ph ph-sign-out"
                 :label="t('shell.user.logout')"
                 @click="requestLogout"
               />
@@ -1525,7 +1525,7 @@ onUnmounted(() => {
   line-height: 1;
 }
 
-.header-search .pi {
+.header-search .ph {
   display: block;
   flex: 0 0 auto;
   font-size: 0.86rem;
@@ -1847,7 +1847,7 @@ onUnmounted(() => {
   color: var(--shell-text);
 }
 
-.user-menu__tema > .pi {
+.user-menu__tema > .ph {
   color: var(--shell-muted);
 }
 

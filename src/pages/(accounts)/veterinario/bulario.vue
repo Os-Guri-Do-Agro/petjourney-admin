@@ -109,7 +109,7 @@ onMounted(carregar)
           severity="secondary"
           outlined
           size="small"
-          icon="pi pi-times"
+          icon="ph ph-x"
           :label="t('clinico.bulario.semPaciente')"
           @click="limparPaciente"
         />

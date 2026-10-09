@@ -1,4 +1,4 @@
-@import 'primeicons/primeicons.css';
+@import '@phosphor-icons/web/regular';
 @import 'tailwindcss';
 
 /*
@@ -25,28 +25,65 @@
 }
 
 /*
- * Ícone do PrimeIcons segue o tamanho de quem o contém.
+ * Ícones: Phosphor em todo o portal.
  *
- * O tema do PrimeVue injeta `.pi { font-size: var(--p-icon-size) }` — 1rem fixo. Isso quebra o
- * contrato de toda fonte de ícones, em que o ícone tem 1em do contexto: o CSS do portal inteiro foi
+ * Duas portas para a mesma biblioteca. A fonte (`@phosphor-icons/web`, classes `ph ph-*`) serve
+ * onde o PrimeVue pede ícone como texto — `icon` de Button, item de menu, `<i>` solto. O
+ * componente (`@phosphor-icons/vue`, `PhDog`, `PhPill`) serve onde o ícone precisa de outro peso
+ * (`duotone`, `fill`): a fonte carrega só o regular. Os ícones internos dos componentes do
+ * PrimeVue (seta do Select, X do Dialog) também viram Phosphor — ver `src/icons/primevue/`.
+ *
+ * O ícone segue o tamanho de quem o contém: tem 1em do contexto, e o CSS do portal inteiro foi
  * escrito assim, com a forma dizendo o tamanho do ícone (`.linha__marca { font-size: 0.65rem }`,
- * `.coluna__icone { font-size: 0.62rem }`), e o tema anulava todos. O resultado se repetia tela a
- * tela: o visto de 16 px encostando na borda de um disco de 17 px, a seta de abrir linha ocupando
- * dois terços do quadradinho dela, ícone de 16 px ao lado de rótulo de 11 px.
+ * `.coluna__icone { font-size: 0.62rem }`). A exceção são os ícones que o PrimeVue põe dentro dos
+ * próprios componentes — de botão, campo, menu, todos com uma classe `p-*` no elemento —, que
+ * seguem o tamanho do tema (`--p-icon-size`), que é o que o preset espera. A condição fica dentro
+ * de `:where()` para não somar especificidade: toda regra escrita numa tela — de contexto
+ * (`.x .ph`) ou na classe do próprio ícone (`.x__icone`, com o escopo do Vue) — continua mandando.
  *
- * `html .pi` (0,1,1) ganha do `.pi` do tema (0,1,0) qualquer que seja a ordem em que os dois
- * carregam, e perde para toda regra escrita numa tela — de contexto (`.x .pi`) ou na classe do
- * próprio ícone (`.x__icone`, com o escopo do Vue) —, que continua mandando. A exclusão fica dentro
- * de `:where()` para não somar especificidade: com `:not()` solto a regra subia a (0,2,1) e passava
- * por cima do tamanho que o ícone do interruptor de tema declara. Os ícones internos dos
- * componentes do PrimeVue — de botão, campo, menu, todos com uma classe `p-*` no próprio
- * elemento — ficam de fora e seguem o tamanho do tema, que é o que o preset espera.
+ * `inline-block` é o que deixa o ícone girar e espelhar (`scale`, `animation`): transformação não
+ * pega em caixa inline.
+ *
+ * O glifo cresce 25% dentro da própria caixa. O Phosphor desenha com margem interna — a tinta
+ * ocupa ~80% do `em` —, enquanto o PrimeIcons, que veio antes, enchia a caixa inteira; medido
+ * glifo a glifo, a razão fica entre 1,13 e 1,29. Todo tamanho do portal foi acertado com o
+ * PrimeIcons, e sem a compensação cada ícone encolheria um quinto no dia da troca. A escala mora no
+ * `::before` e não no ícone: assim não ocupa espaço a mais e deixa o `scale` do elemento livre para
+ * quem espelha no RTL ou gira. Os ícones internos do PrimeVue levam a mesma compensação pelo
+ * `viewBox` (`src/icons/icone-do-primevue.ts`).
  *
  * Regra para quem desenha daqui em diante: **o tamanho do ícone mora no contêiner**, em
  * `font-size`. Numa forma (disco, bloco, marcador), o ícone fica entre metade e 60% do lado dela.
  */
-html .pi:where(:not([class^='p-'], [class*=' p-'])) {
-  font-size: inherit;
+.ph {
+  display: inline-block;
+}
+
+.ph::before {
+  display: inline-block;
+  scale: 1.25;
+}
+
+.ph:where([class^='p-'], [class*=' p-']) {
+  font-size: var(--p-icon-size);
+}
+
+/* Carregando. Com movimento reduzido o giro continua — é o sinal de que algo está acontecendo —,
+ * só mais lento. */
+.ph-spin {
+  animation: ph-giro 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-spin {
+    animation-duration: 3s;
+  }
+}
+
+@keyframes ph-giro {
+  to {
+    rotate: 1turn;
+  }
 }
 
 html {
@@ -117,36 +154,30 @@ html:has(> body.p-overflow-hidden) {
 }
 
 /*
- * RTL: ícones direcionais do PrimeIcons espelham na horizontal. Usa a propriedade individual
- * `scale` (e não `transform`) para compor com rotações que os componentes já aplicam.
+ * RTL: ícones direcionais espelham na horizontal. Usa a propriedade individual `scale` (e não
+ * `transform`) para compor com rotações que os componentes já aplicam.
  */
 [dir='rtl']
   :is(
-    .pi-chevron-left,
-    .pi-chevron-right,
-    .pi-angle-left,
-    .pi-angle-right,
-    .pi-angle-double-left,
-    .pi-angle-double-right,
-    .pi-arrow-left,
-    .pi-arrow-right,
-    .pi-arrow-up-right,
-    .pi-arrow-up-left,
-    .pi-arrow-down-right,
-    .pi-arrow-down-left,
-    .pi-sign-in,
-    .pi-sign-out,
-    .pi-send,
-    .pi-reply,
-    .pi-step-forward,
-    .pi-step-backward,
-    .pi-step-forward-alt,
-    .pi-step-backward-alt,
-    .pi-caret-left,
-    .pi-caret-right,
-    .pi-forward,
-    .pi-backward,
-    .pi-external-link
+    .ph-caret-left,
+    .ph-caret-right,
+    .ph-caret-double-left,
+    .ph-caret-double-right,
+    .ph-arrow-left,
+    .ph-arrow-right,
+    .ph-arrow-up-right,
+    .ph-arrow-up-left,
+    .ph-arrow-down-right,
+    .ph-arrow-down-left,
+    .ph-arrow-bend-up-left,
+    .ph-arrow-square-out,
+    .ph-sign-in,
+    .ph-sign-out,
+    .ph-paper-plane-tilt,
+    .ph-skip-forward,
+    .ph-skip-back,
+    .ph-fast-forward,
+    .ph-rewind
   ) {
   scale: -1 1;
 }

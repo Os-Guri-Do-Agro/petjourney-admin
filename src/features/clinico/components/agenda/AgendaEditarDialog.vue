@@ -379,7 +379,7 @@ function confirmar() {
   >
     <template #header>
       <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i class="pi pi-pencil" /></span>
+        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-pencil-simple" /></span>
         {{ t('clinico.agenda.editar.titulo') }}
       </h2>
     </template>
@@ -506,7 +506,7 @@ function confirmar() {
             <span class="clinic-label">{{ linha.rotulo }}</span>
             <span class="mudanca__valores">
               <s>{{ linha.de }}</s>
-              <i class="pi pi-arrow-right" aria-hidden="true" />
+              <i class="ph ph-arrow-right" aria-hidden="true" />
               <strong>{{ linha.para }}</strong>
             </span>
           </li>
@@ -514,7 +514,7 @@ function confirmar() {
       </section>
 
       <p v-if="appointment.linkedGroupId" class="editar__ligado">
-        <i class="pi pi-link" aria-hidden="true" />
+        <i class="ph ph-link" aria-hidden="true" />
         {{ t('clinico.agenda.editar.grupoLigado') }}
       </p>
 

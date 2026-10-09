@@ -292,14 +292,14 @@ const fraseDoResumo = computed(() => {
             <Button
               type="button"
               class="hc-pilula hc-pilula--cheia"
-              icon="pi pi-user-plus"
+              icon="ph ph-user-plus"
               :label="t('clinico.paciente.novo.atalho')"
               @click="cadastrar"
             />
             <Button
               type="button"
               class="hc-pilula"
-              icon="pi pi-file-import"
+              icon="ph ph-file-arrow-up"
               :label="t('clinico.migracao.atalho')"
               @click="importar"
             />
@@ -311,8 +311,8 @@ const fraseDoResumo = computed(() => {
     <div class="pacientes clinic-scope">
       <p v-if="migracao.emAndamento" class="pacientes__importacao" role="status">
         <i
-          class="pi"
-          :class="migracao.estado === 'rodando' ? 'pi-spin pi-spinner' : 'pi-pause-circle'"
+          class="ph"
+          :class="migracao.estado === 'rodando' ? 'ph-spin ph-circle-notch' : 'ph-pause-circle'"
           aria-hidden="true"
         />
         <span>
@@ -356,7 +356,7 @@ const fraseDoResumo = computed(() => {
       >
         <template #vazio-acao>
           <Button
-            icon="pi pi-user-plus"
+            icon="ph ph-user-plus"
             severity="secondary"
             outlined
             :label="t('clinico.paciente.novo.atalho')"
@@ -456,7 +456,7 @@ const fraseDoResumo = computed(() => {
   gap: var(--clinic-space-2);
 }
 
-.pacientes__importacao .pi {
+.pacientes__importacao .ph {
   color: var(--clinic-accent-strong);
 }
 

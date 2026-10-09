@@ -106,9 +106,9 @@ const temProposta = computed(
         <p class="bloco__dica">{{ t('hotel.gerenciar.padraoDica') }}</p>
 
         <RouterLink class="atalho" to="/hotel/rotina-padrao">
-          <i class="pi pi-stopwatch" aria-hidden="true" />
+          <i class="ph ph-timer" aria-hidden="true" />
           {{ t('hotel.rotinaPadrao.titulo') }}
-          <i class="pi pi-arrow-right atalho__seta" aria-hidden="true" />
+          <i class="ph ph-arrow-right atalho__seta" aria-hidden="true" />
         </RouterLink>
       </section>
 
@@ -217,7 +217,7 @@ const temProposta = computed(
           -->
           <Button
             :label="t('hotel.acrescentar.titulo')"
-            icon="pi pi-plus-circle"
+            icon="ph ph-plus-circle"
             severity="secondary"
             outlined
             size="small"

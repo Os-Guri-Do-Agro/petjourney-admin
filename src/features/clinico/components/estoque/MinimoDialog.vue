@@ -88,7 +88,7 @@ async function salvar() {
   >
     <template #header>
       <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i class="pi pi-sliders-h" /></span>
+        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-sliders-horizontal" /></span>
         {{ t('clinico.estoque.minimo.titulo', { vacina: saldo?.nome ?? '' }) }}
       </h2>
     </template>
@@ -138,7 +138,7 @@ async function salvar() {
       />
       <Button
         :label="t('clinico.estoque.minimo.salvar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         class="clinic-acao-principal"
         :loading="salvando"
         :disabled="!mudou"

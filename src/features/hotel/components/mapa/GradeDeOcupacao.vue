@@ -248,7 +248,7 @@ function inicioDeMes(data: ISODate, indice: number): string {
                 >
                   <i
                     v-if="faixa.admissao !== 'ok' && faixa.admissao !== 'dispensado'"
-                    class="pi pi-exclamation-triangle"
+                    class="ph ph-warning"
                     aria-hidden="true"
                   />
                   <PetAvatar

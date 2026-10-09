@@ -219,7 +219,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             :rotulo="formato.statusDaReserva(reserva.status)"
             :tom="reserva.status === 'hospedado' ? 'positivo' : 'neutro'"
           />
-          <HotelSelo :rotulo="formato.origem(reserva.origem)" tom="neutro" icone="pi pi-tag" />
+          <HotelSelo :rotulo="formato.origem(reserva.origem)" tom="neutro" icone="ph ph-tag" />
         </div>
       </section>
 
@@ -230,7 +230,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
             <p class="periodo">
               <strong class="clinic-value">{{ formato.quando(reserva.entradaPrevista) }}</strong>
-              <i class="pi pi-arrow-right" aria-hidden="true" />
+              <i class="ph ph-arrow-right" aria-hidden="true" />
               <strong class="clinic-value">{{ formato.quando(reserva.saidaPrevista) }}</strong>
             </p>
 
@@ -247,7 +247,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               discussão — e discussão de balcão se resolve mostrando a regra antes.
             -->
             <p v-if="acrescimoDeSaida > 0" class="aviso aviso--atencao">
-              <i class="pi pi-clock" aria-hidden="true" />
+              <i class="ph ph-clock" aria-hidden="true" />
               {{ t('hotel.reserva.saidaTardia', { valor: formato.moeda(acrescimoDeSaida) }) }}
             </p>
 
@@ -256,12 +256,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               e descobrir isso no dia da chegada é descobrir tarde.
             -->
             <p v-if="detalhe.vaga.impedimentos.length > 0" class="aviso aviso--risco">
-              <i class="pi pi-exclamation-triangle" aria-hidden="true" />
+              <i class="ph ph-warning" aria-hidden="true" />
               {{ t(`hotel.impedimento.${detalhe.vaga.impedimentos[0]}`) }}
             </p>
 
             <p v-if="reserva.observacao" class="observacao">
-              <i class="pi pi-comment" aria-hidden="true" />
+              <i class="ph ph-chat-circle" aria-hidden="true" />
               {{ reserva.observacao }}
             </p>
           </section>
@@ -285,7 +285,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               <Button
                 v-if="reserva.status === 'pendente'"
                 :label="t('hotel.reserva.confirmarSinal')"
-                icon="pi pi-check"
+                icon="ph ph-check"
                 :loading="reservas.salvando"
                 @click="reservas.confirmar(reserva.id, reserva.orcamento.sinalCentavos)"
               />
@@ -304,7 +304,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             <p>{{ t('hotel.reserva.jaHospedado') }}</p>
             <Button
               :label="t('hotel.reserva.irParaEstadia')"
-              icon="pi pi-arrow-right"
+              icon="ph ph-arrow-right"
               icon-pos="right"
               @click="router.push(`/hotel/hospedagem/${detalhe.hospedagemId}`)"
             />
@@ -317,7 +317,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
             <Button
               :label="t('hotel.reserva.fazerCheckIn')"
-              icon="pi pi-sign-in"
+              icon="ph ph-sign-in"
               :disabled="!detalhe.admissao.liberada"
               @click="checkInAberto = true"
             />

@@ -94,8 +94,8 @@ const categoriaOptions = computed(() =>
 )
 
 const tabs = computed(() => [
-  { id: 'dados' as const, label: t('parceiroCadastro.tabs.dados'), icon: 'pi pi-building' },
-  { id: 'programas' as const, label: t('parceiroCadastro.tabs.programas'), icon: 'pi pi-sparkles' },
+  { id: 'dados' as const, label: t('parceiroCadastro.tabs.dados'), icon: 'ph ph-building' },
+  { id: 'programas' as const, label: t('parceiroCadastro.tabs.programas'), icon: 'ph ph-sparkle' },
 ])
 
 /** Resumo do que a submissão leva: o parceiro precisa ver isso sem abrir a outra aba. */
@@ -321,7 +321,7 @@ function handleSubmit() {
       <span class="cad-resumo__label">{{ t('parceiroCadastro.resumo.label') }}</span>
       <ul class="cad-resumo__list">
         <li v-for="item in resumoEnvio" :key="item">
-          <i class="pi pi-check" aria-hidden="true" />
+          <i class="ph ph-check" aria-hidden="true" />
           {{ item }}
         </li>
       </ul>

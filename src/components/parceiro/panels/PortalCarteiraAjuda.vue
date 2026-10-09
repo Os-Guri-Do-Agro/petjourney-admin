@@ -21,25 +21,25 @@ const aberta = ref(false)
 const itens = computed(() => [
   {
     id: 'comissao',
-    icon: 'pi pi-share-alt',
+    icon: 'ph ph-share-network',
     title: t('carteira.help.comissao.title'),
     description: t('carteira.help.comissao.body'),
   },
   {
     id: 'saldos',
-    icon: 'pi pi-wallet',
+    icon: 'ph ph-wallet',
     title: t('carteira.help.saldos.title'),
     description: t('carteira.help.saldos.body'),
   },
   {
     id: 'pix',
-    icon: 'pi pi-qrcode',
+    icon: 'ph ph-qr-code',
     title: t('carteira.help.pix.title'),
     description: t('carteira.help.pix.body'),
   },
   {
     id: 'ciclo',
-    icon: 'pi pi-calendar',
+    icon: 'ph ph-calendar-blank',
     title: t('carteira.help.ciclo.title'),
     description: t('carteira.help.ciclo.body'),
   },
@@ -56,7 +56,7 @@ const itens = computed(() => [
       <Button
         type="button"
         :label="aberta ? t('carteira.ajuda.fechar') : t('carteira.ajuda.abrir')"
-        :icon="aberta ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+        :icon="aberta ? 'ph ph-caret-up' : 'ph ph-caret-down'"
         icon-pos="right"
         severity="secondary"
         text

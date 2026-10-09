@@ -190,7 +190,7 @@ function confirmar() {
       />
       <Button
         :label="t('hotel.ocorrencia.registrar')"
-        icon="pi pi-flag"
+        icon="ph ph-flag"
         :loading="salvando"
         :disabled="!podeSalvar"
         @click="confirmar"

@@ -242,7 +242,7 @@ async function receber() {
   >
     <template #header>
       <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i class="pi pi-box" /></span>
+        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-package" /></span>
         {{ t('clinico.estoque.receber.titulo') }}
       </h2>
     </template>
@@ -333,7 +333,7 @@ async function receber() {
         "usar primeiro", e quem recebe pode recusar a caixa enquanto o entregador está na porta.
       -->
       <p v-if="validadeCurta !== null" class="receber__aviso" role="status">
-        <i class="pi pi-hourglass" aria-hidden="true" />
+        <i class="ph ph-hourglass" aria-hidden="true" />
         {{ t('clinico.estoque.receber.validadeCurta', { dias: validadeCurta }) }}
       </p>
 
@@ -407,7 +407,7 @@ async function receber() {
       />
       <Button
         :label="t('clinico.estoque.receber.confirmar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         class="clinic-acao-principal"
         :loading="salvando"
         @click="receber"

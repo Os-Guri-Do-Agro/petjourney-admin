@@ -160,7 +160,7 @@ function irPara(rota: string) {
       :title="t('clinico.painel.abrir')"
       @click="aberto = !aberto"
     >
-      <i class="pi pi-wrench" aria-hidden="true" />
+      <i class="ph ph-wrench" aria-hidden="true" />
       <span class="dev__contagem clinic-value">
         {{ resumo.atendimentos }}<template v-if="resumo.atendimentos !== resumo.esperado">
           /{{ resumo.esperado }}</template>
@@ -172,7 +172,7 @@ function irPara(rota: string) {
         <strong>{{ t('clinico.painel.titulo') }}</strong>
         <Button
           type="button"
-          icon="pi pi-times"
+          icon="ph ph-x"
           severity="secondary"
           text
           rounded
@@ -293,7 +293,7 @@ function irPara(rota: string) {
               size="small"
               fluid
               :label="caso.id"
-              icon="pi pi-arrow-right"
+              icon="ph ph-arrow-right"
               icon-pos="right"
               @click="irPara(caso.rota)"
             />
@@ -307,7 +307,7 @@ function irPara(rota: string) {
         outlined
         size="small"
         fluid
-        icon="pi pi-refresh"
+        icon="ph ph-arrow-clockwise"
         :label="t('clinico.tabela.tentarDeNovo')"
         @click="restaurar"
       />

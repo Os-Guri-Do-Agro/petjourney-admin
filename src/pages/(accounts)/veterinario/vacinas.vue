@@ -432,7 +432,7 @@ const acoes = computed<AcaoDeLinha<ChamadaDoPet>[]>(() => [
   {
     id: 'agendar',
     rotulo: t('clinico.vacinas.agendar'),
-    icone: 'pi pi-calendar-plus',
+    icone: 'ph ph-calendar-plus',
   },
 ])
 
@@ -669,7 +669,7 @@ watch([busca, filtros], () => {
 
           <!-- O tamanho da oportunidade, onde ela é trabalhada: era um cartão de número no topo. -->
           <p v-if="linhas.length > 0" class="vacinas__potencial">
-            <i class="pi pi-calendar-plus" aria-hidden="true" />
+            <i class="ph ph-calendar-plus" aria-hidden="true" />
             {{ t('clinico.vacinas.potencialFrase', { duracao: formato.duracao(potencial) }) }}
           </p>
         </div>

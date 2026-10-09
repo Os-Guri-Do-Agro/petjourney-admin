@@ -552,7 +552,7 @@ function gravar() {
           precisa saber quanto está combinando, e o responsável vai ver esse valor na saída.
         -->
         <p v-if="servicoEscolhido" class="cobra">
-          <i class="pi pi-tag" aria-hidden="true" />
+          <i class="ph ph-tag" aria-hidden="true" />
           {{
             t('hotel.acrescentar.servicoCobra', {
               preco: formato.moeda(servicoEscolhido.precoCentavos),
@@ -592,7 +592,7 @@ function gravar() {
           — a dose e a receita — e deixar o caminho certo a um clique.
         -->
         <p class="parede">
-          <i class="pi pi-info-circle" aria-hidden="true" />
+          <i class="ph ph-info" aria-hidden="true" />
           <span>
             {{ t('hotel.acrescentar.cuidadoNaoEhRemedio') }}
             <Button
@@ -622,7 +622,7 @@ function gravar() {
       />
       <Button
         :label="t('hotel.acrescentar.acrescentar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         size="small"
         :loading="salvando"
         :disabled="!podeGravar"
@@ -807,8 +807,8 @@ function gravar() {
   font-size: var(--clinic-font-label);
 }
 
-.parede .pi,
-.cobra .pi {
+.parede .ph,
+.cobra .ph {
   margin-block-start: 0.1rem;
   font-size: 0.7rem;
 }

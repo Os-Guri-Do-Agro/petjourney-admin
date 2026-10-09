@@ -380,7 +380,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             está mostrando vários — dois animais diferentes lado a lado parecem erro de busca.
           -->
           <span v-if="tutorEncontrado" class="barra__tutor">
-            <i class="pi pi-user" aria-hidden="true" />
+            <i class="ph ph-user" aria-hidden="true" />
             {{
               t(
                 'hotel.hospedes.busca.doTutor',
@@ -424,7 +424,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         <Button
           v-if="termo"
           :label="t('hotel.hospedes.busca.limpar')"
-          icon="pi pi-times"
+          icon="ph ph-x"
           severity="secondary"
           outlined
           size="small"
@@ -483,8 +483,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             {{ t('hotel.hospedes.banda.emDia') }}
             <span class="banda__conta clinic-value">{{ emDia.length }}</span>
             <i
-              class="pi banda__chevron"
-              :class="emDiaAberta ? 'pi-chevron-down' : 'pi-chevron-right'"
+              class="ph banda__chevron"
+              :class="emDiaAberta ? 'ph-caret-down' : 'ph-caret-right'"
               aria-hidden="true"
             />
           </button>
@@ -685,7 +685,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   font-weight: 700;
 }
 
-.barra__tutor .pi {
+.barra__tutor .ph {
   font-size: 0.7em;
 }
 
@@ -782,7 +782,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 /* O chevron de "fechado" é direcional: em árabe ele aponta para o outro lado. */
-[dir='rtl'] .pi-chevron-right {
+[dir='rtl'] .ph-caret-right {
   transform: scaleX(-1);
 }
 

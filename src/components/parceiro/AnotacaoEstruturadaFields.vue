@@ -88,7 +88,7 @@ function removeExame(indice: number) {
   <section class="est" aria-labelledby="est-title">
     <header class="est__head">
       <span class="est__badge" aria-hidden="true">
-        <i class="pi pi-list-check" />
+        <i class="ph ph-list-checks" />
       </span>
       <div>
         <h4 id="est-title">{{ t(`acessos.estruturada.title.${tipoServico}`) }}</h4>
@@ -169,7 +169,7 @@ function removeExame(indice: number) {
           </span>
           <Button
             :label="t('acessos.estruturada.prescricao.add')"
-            icon="pi pi-plus"
+            icon="ph ph-plus"
             size="small"
             severity="secondary"
             text
@@ -189,7 +189,7 @@ function removeExame(indice: number) {
                 {{ t('acessos.estruturada.prescricao.item', { n: index + 1 }) }}
               </span>
               <Button
-                icon="pi pi-times"
+                icon="ph ph-x"
                 severity="secondary"
                 text
                 rounded
@@ -335,7 +335,7 @@ function removeExame(indice: number) {
           </span>
           <Button
             :label="t('acessos.estruturada.exames.add')"
-            icon="pi pi-plus"
+            icon="ph ph-plus"
             size="small"
             severity="secondary"
             text
@@ -355,7 +355,7 @@ function removeExame(indice: number) {
                 {{ t('acessos.estruturada.exames.item', { n: index + 1 }) }}
               </span>
               <Button
-                icon="pi pi-times"
+                icon="ph ph-x"
                 severity="secondary"
                 text
                 rounded

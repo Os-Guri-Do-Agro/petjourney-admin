@@ -565,7 +565,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <!-- ------------------------------------------------------------ para agora -->
       <section v-if="agora.length > 0" class="tempo tempo--agora">
         <h2 class="tempo__titulo">
-          <i class="pi pi-clock" aria-hidden="true" />
+          <i class="ph ph-clock" aria-hidden="true" />
           {{ t('hotel.rotina.paraAgora') }}
         </h2>
 
@@ -602,7 +602,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <!-- ------------------------------------------------------------ mais tarde -->
       <section v-if="adiante.length > 0" class="tempo">
         <h2 class="tempo__titulo tempo__titulo--calmo">
-          <i class="pi pi-forward" aria-hidden="true" />
+          <i class="ph ph-fast-forward" aria-hidden="true" />
           {{ t('hotel.rotina.maisTarde') }}
         </h2>
 
@@ -611,7 +611,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             <!-- Onde o turno acaba. Daqui para baixo a lista é de quem assume, e isso muda o que
                  quem está lendo agora precisa planejar. -->
             <li v-if="bloco.hora === primeiroDepoisDoTurno" class="fronteira">
-              <i class="pi pi-sign-out" aria-hidden="true" />
+              <i class="ph ph-sign-out" aria-hidden="true" />
               {{ t('hotel.rotina.depoisDoTurno', { hora: fimDoTurno }) }}
             </li>
 
@@ -638,7 +638,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <section v-if="passado.length > 0" class="tempo">
         <button type="button" class="recolhido" @click="mostrarPassado = !mostrarPassado">
           <i
-            :class="mostrarPassado ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+            :class="mostrarPassado ? 'ph ph-caret-down' : 'ph ph-caret-right'"
             aria-hidden="true"
           />
           {{ t('hotel.rotina.jaPassou', { total: passado.length }, passado.length) }}

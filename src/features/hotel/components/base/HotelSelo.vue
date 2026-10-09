@@ -10,8 +10,9 @@
  * O ícone é opcional e sempre decorativo: a palavra é a informação, e um selo que dependa do
  * ícone para ser lido é um selo que o leitor de tela não entrega.
  *
- * Ele entra por dois caminhos. A prop `icone` recebe uma classe do PrimeIcons, que é o que serve
- * para glifo de interface; o slot `#icone` recebe um componente, que é o que o Phosphor entrega.
+ * Ele entra por dois caminhos. A prop `icone` recebe uma classe da fonte do Phosphor (`ph ph-*`),
+ * que é o que serve para glifo de interface; o slot `#icone` recebe um componente do Phosphor,
+ * que é o que dá o peso `duotone` do domínio.
  * Sem o slot, a regra da casa de que o desenho do domínio vem do Phosphor simplesmente não
  * alcançaria nenhum selo — e "falta pesar" sem a balança é a palavra sozinha outra vez.
  */

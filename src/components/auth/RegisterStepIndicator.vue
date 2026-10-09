@@ -42,7 +42,7 @@ const indicatorStyle = computed(() => {
       :aria-current="currentStep === index + 1 ? 'step' : undefined"
     >
       <span class="register-steps__marker">
-        <i v-if="currentStep > index + 1" class="pi pi-check" aria-hidden="true" />
+        <i v-if="currentStep > index + 1" class="ph ph-check" aria-hidden="true" />
         <span v-else>{{ index + 1 }}</span>
       </span>
       <span class="register-steps__label">{{ label }}</span>

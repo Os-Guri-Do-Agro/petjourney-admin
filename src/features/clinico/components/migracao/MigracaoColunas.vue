@@ -105,7 +105,7 @@ function estadoDa(
   if (coluna.destino === null && coluna.preenchidas > 0) {
     return {
       classe: 'hc--pessego',
-      icone: 'pi pi-exclamation-circle',
+      icone: 'ph ph-warning-circle',
       texto: t(
         'clinico.migracao.colunas.naoVem',
         { n: formato.numero(coluna.preenchidas, 0) },
@@ -117,7 +117,7 @@ function estadoDa(
   if (coluna.como === 'pessoa') {
     return {
       classe: 'hc--verde',
-      icone: 'pi pi-check',
+      icone: 'ph ph-check',
       texto: t('clinico.migracao.colunas.voceEscolheu'),
     }
   }
@@ -125,7 +125,7 @@ function estadoDa(
   if (coluna.destino !== null && coluna.confianca === 'provavel') {
     return {
       classe: 'hc--lilas',
-      icone: 'pi pi-sparkles',
+      icone: 'ph ph-sparkle',
       texto: t('clinico.migracao.colunas.sugestao'),
     }
   }
@@ -150,7 +150,7 @@ function estadoDa(
           {{ t('clinico.migracao.colunas.titulo') }}
         </h2>
         <p v-if="migracao.planilha" class="cabeca__arquivo">
-          <i class="pi pi-file" aria-hidden="true" />
+          <i class="ph ph-file" aria-hidden="true" />
           <bdi>{{ migracao.planilha.arquivo }}</bdi>
           <span>·</span>
           <span>
@@ -171,7 +171,7 @@ function estadoDa(
       </p>
 
       <p v-if="faltam.length" class="mg-caixa mg-caixa--coral aviso" role="status">
-        <i class="pi pi-exclamation-circle" aria-hidden="true" />
+        <i class="ph ph-warning-circle" aria-hidden="true" />
         <span>{{ t('clinico.migracao.colunas.faltam', { campos: faltam.join(', ') }) }}</span>
       </p>
 
@@ -277,7 +277,7 @@ function estadoDa(
   gap: 0.4rem;
 }
 
-.cabeca__arquivo .pi {
+.cabeca__arquivo .ph {
   color: var(--hc-marca);
   font-size: 0.8rem;
 }
@@ -300,7 +300,7 @@ function estadoDa(
   gap: 0.6rem;
 }
 
-.aviso .pi {
+.aviso .ph {
   color: var(--hc-coral-tinta);
 }
 

@@ -227,7 +227,7 @@ async function registrar() {
   >
     <template #header>
       <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i class="pi pi-map-marker" /></span>
+        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-map-pin" /></span>
         {{ t('clinico.vacinas.externa.titulo') }}
       </h2>
     </template>
@@ -299,7 +299,7 @@ async function registrar() {
 
       <p class="externa__consequencia">
         <i
-          :class="procedencia === 'relato' ? 'pi pi-exclamation-circle' : 'pi pi-verified'"
+          :class="procedencia === 'relato' ? 'ph ph-warning-circle' : 'ph ph-seal-check'"
           aria-hidden="true"
         />
         {{ t(`clinico.vacinas.externa.procedencia.consequencia.${procedencia}`) }}
@@ -334,7 +334,7 @@ async function registrar() {
       </ClinicField>
 
       <p class="externa__semLote">
-        <i class="pi pi-info-circle" aria-hidden="true" />
+        <i class="ph ph-info" aria-hidden="true" />
         {{ t('clinico.vacinas.externa.semLoteExplicacao') }}
       </p>
 
@@ -352,7 +352,7 @@ async function registrar() {
       />
       <Button
         :label="t('clinico.vacinas.externa.confirmar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         :class="ficha ? 'hc-pilula hc-pilula--cheia' : 'clinic-acao-principal'"
         :loading="salvando"
         :disabled="!completo"

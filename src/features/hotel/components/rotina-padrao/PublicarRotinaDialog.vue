@@ -77,7 +77,7 @@ const nadaMuda = computed(
         <h3 class="previsao__titulo">{{ t('hotel.rotinaPadrao.previsao') }}</h3>
 
         <p v-if="calculando" class="previsao__estado">
-          <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+          <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
         </p>
 
         <p v-else-if="nadaMuda" class="previsao__estado">
@@ -86,17 +86,17 @@ const nadaMuda = computed(
 
         <ul v-else-if="previsao" class="numeros">
           <li v-if="previsao.criadas > 0" class="numero numero--cria">
-            <i class="pi pi-plus-circle" aria-hidden="true" />
+            <i class="ph ph-plus-circle" aria-hidden="true" />
             {{ t('hotel.rotinaPadrao.criadas', { total: previsao.criadas }, previsao.criadas) }}
           </li>
 
           <li v-if="previsao.retiradas > 0" class="numero numero--retira">
-            <i class="pi pi-minus-circle" aria-hidden="true" />
+            <i class="ph ph-minus-circle" aria-hidden="true" />
             {{ t('hotel.rotinaPadrao.retiradas', { total: previsao.retiradas }, previsao.retiradas) }}
           </li>
 
           <li class="numero">
-            <i class="pi pi-lock" aria-hidden="true" />
+            <i class="ph ph-lock" aria-hidden="true" />
             {{
               t(
                 'hotel.rotinaPadrao.preservadas',
@@ -111,7 +111,7 @@ const nadaMuda = computed(
             trabalhando agora fazem a lista mudar debaixo da mão dele.
           -->
           <li v-if="previsao.hoje > 0" class="numero numero--turno">
-            <i class="pi pi-exclamation-circle" aria-hidden="true" />
+            <i class="ph ph-warning-circle" aria-hidden="true" />
             {{ t('hotel.rotinaPadrao.noTurno', { total: previsao.hoje }, previsao.hoje) }}
           </li>
         </ul>
@@ -132,7 +132,7 @@ const nadaMuda = computed(
       />
       <Button
         :label="t('hotel.rotinaPadrao.publicar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         size="small"
         :loading="salvando"
         :disabled="calculando"
@@ -211,7 +211,7 @@ const nadaMuda = computed(
   font-variant-numeric: tabular-nums;
 }
 
-.numero .pi {
+.numero .ph {
   font-size: 0.75rem;
 }
 

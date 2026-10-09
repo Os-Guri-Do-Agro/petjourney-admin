@@ -203,7 +203,7 @@ function cancelReactivate() {
   >
     <div v-if="showReactivatePanel" class="login-reactivate" :style="loginStyle" role="status">
       <div class="login-reactivate__icon" aria-hidden="true">
-        <i class="pi pi-user-minus" />
+        <i class="ph ph-user-minus" />
       </div>
       <h2>{{ t('auth.login.reactivate.title') }}</h2>
       <p>{{ reactivateCopy }}</p>
@@ -260,7 +260,7 @@ function cancelReactivate() {
         type="email"
       >
         <template #leading>
-          <i class="pi pi-envelope login-field-icon" aria-hidden="true" />
+          <i class="ph ph-envelope-simple login-field-icon" aria-hidden="true" />
         </template>
       </AuthTextField>
 
@@ -283,7 +283,7 @@ function cancelReactivate() {
           :type="passwordInputType"
         >
           <template #leading>
-            <i class="pi pi-lock login-field-icon" aria-hidden="true" />
+            <i class="ph ph-lock login-field-icon" aria-hidden="true" />
           </template>
 
           <template #trailing>
@@ -293,7 +293,7 @@ function cancelReactivate() {
               "
               class="login-password-toggle"
               :disabled="loading"
-              :icon="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+              :icon="showPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
               rounded
               severity="secondary"
               text
@@ -317,7 +317,7 @@ function cancelReactivate() {
 
       <AuthButton :loading="loading" full-width type="submit">
         {{ loading ? t('auth.login.submitting') : t('auth.login.submit') }}
-        <i v-if="!loading" class="pi pi-arrow-right ms-2" aria-hidden="true" />
+        <i v-if="!loading" class="ph ph-arrow-right ms-2" aria-hidden="true" />
       </AuthButton>
 
       <!-- Conta da clínica: ocultado por enquanto
@@ -326,7 +326,7 @@ function cancelReactivate() {
       </div>
 
       <AuthButton full-width variant="secondary">
-        <i class="pi pi-building me-2" aria-hidden="true" />
+        <i class="ph ph-building me-2" aria-hidden="true" />
         Acessar com conta da clínica
       </AuthButton>
       -->

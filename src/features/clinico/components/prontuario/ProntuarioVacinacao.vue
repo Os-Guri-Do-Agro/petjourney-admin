@@ -114,8 +114,8 @@ function abrirCarteira() {
     <header class="vacinacao__topo">
       <p class="vacinacao__estado" :class="`vacinacao__estado--${estado.tom}`">
         <i
-          class="pi"
-          :class="estado.tom === 'ok' ? 'pi-check-circle' : 'pi-exclamation-circle'"
+          class="ph"
+          :class="estado.tom === 'ok' ? 'ph-check-circle' : 'ph-warning-circle'"
           aria-hidden="true"
         />
         <span>
@@ -133,7 +133,7 @@ function abrirCarteira() {
               ? t('clinico.vacinas.carteira.ocultarProtocolo')
               : t('clinico.vacinas.carteira.verProtocolo')
           "
-          :icon="protocoloAberto ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+          :icon="protocoloAberto ? 'ph ph-caret-up' : 'ph ph-caret-down'"
           icon-pos="right"
           severity="secondary"
           text
@@ -144,7 +144,7 @@ function abrirCarteira() {
         />
         <Button
           :label="t('clinico.vacinas.carteira.verCarteira')"
-          icon="pi pi-mobile"
+          icon="ph ph-device-mobile"
           severity="secondary"
           outlined
           size="small"
@@ -153,7 +153,7 @@ function abrirCarteira() {
         <Button
           v-if="!somenteLeitura && pet && plano"
           :label="t('clinico.vacinas.aplicar.abrir')"
-          icon="pi pi-plus"
+          icon="ph ph-plus"
           severity="secondary"
           outlined
           size="small"
@@ -175,7 +175,7 @@ function abrirCarteira() {
     <!-- O que saiu deste atendimento, para quem fecha a conduta conferir antes de assinar. -->
     <ul v-if="nesteAtendimento.length > 0" class="vacinacao__agora">
       <li v-for="aplicacao in nesteAtendimento" :key="aplicacao.id">
-        <i class="pi pi-check-circle" aria-hidden="true" />
+        <i class="ph ph-check-circle" aria-hidden="true" />
         <span>
           <strong>{{ nomeDaVacina(aplicacao.vacinaId) }}</strong>
           ·
@@ -237,16 +237,16 @@ function abrirCarteira() {
 }
 
 /* A urgência mora no ícone: a frase continua na tinta do texto. */
-.vacinacao__estado .pi {
+.vacinacao__estado .ph {
   color: var(--clinic-ok-text);
   font-size: 0.85rem;
 }
 
-.vacinacao__estado--atencao .pi {
+.vacinacao__estado--atencao .ph {
   color: var(--hc-pessego-tinta);
 }
 
-.vacinacao__estado--risco .pi {
+.vacinacao__estado--risco .ph {
   color: var(--hc-coral-tinta);
 }
 
@@ -272,7 +272,7 @@ function abrirCarteira() {
   font-size: var(--clinic-font-label);
 }
 
-.vacinacao__agora .pi {
+.vacinacao__agora .ph {
   color: var(--clinic-ok-text);
 }
 </style>

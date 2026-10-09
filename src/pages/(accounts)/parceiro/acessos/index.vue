@@ -438,27 +438,27 @@ function fatosDoAcesso(item: CompartilhamentoResumo): FatoDoAcesso[] {
 
   if (atualizado) {
     const rotulo = t('acessos.list.resumoAtualizado', { data: atualizado })
-    fatos.push({ id: 'resumo', icone: 'pi pi-refresh', texto: rotulo, rotulo, tom: 'alerta' })
+    fatos.push({ id: 'resumo', icone: 'ph ph-arrow-clockwise', texto: rotulo, rotulo, tom: 'alerta' })
   }
 
   fatos.push(
     {
       id: 'anotacoes',
-      icone: 'pi pi-comment',
+      icone: 'ph ph-chat-circle',
       texto: String(item.totalAnotacoes),
       rotulo: t('acessos.list.anotacoes', { n: item.totalAnotacoes }, item.totalAnotacoes),
       tom: item.totalAnotacoes ? undefined : 'vazio',
     },
     {
       id: 'documentos',
-      icone: 'pi pi-file',
+      icone: 'ph ph-file',
       texto: String(item.totalDocumentos),
       rotulo: t('acessos.list.documentos', { n: item.totalDocumentos }, item.totalDocumentos),
       tom: item.totalDocumentos ? undefined : 'oculto',
     },
     {
       id: 'diario',
-      icone: 'pi pi-book',
+      icone: 'ph ph-book-open',
       texto: '',
       rotulo: t('acessos.list.diario'),
       tom: item.temDiario ? undefined : 'oculto',
@@ -714,7 +714,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
               type="button"
               class="hc-pilula hc-pilula--cheia"
               :label="t('acessos.vincular.cta')"
-              icon="pi pi-link"
+              icon="ph ph-link"
               :disabled="!store.podeOperar"
               :title="!store.podeOperar ? t('acessos.vincular.bloqueado') : undefined"
               @click="vincularVisible = true"
@@ -744,7 +744,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 
       <label class="atend-filtros__sr" for="atend-q">{{ t('acessos.filtros.q') }}</label>
       <span class="atend-barra__busca">
-        <i class="pi pi-search" aria-hidden="true" />
+        <i class="ph ph-magnifying-glass" aria-hidden="true" />
         <InputText
           id="atend-q"
           v-model="filtros.q"
@@ -758,7 +758,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
         type="button"
         class="atend-barra__filtros"
         :label="t('acessos.filtros.botao')"
-        icon="pi pi-sliders-h"
+        icon="ph ph-sliders-horizontal"
         severity="secondary"
         outlined
         :badge="filtrosLigados ? String(filtrosLigados) : undefined"
@@ -826,7 +826,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
              o ícone é o que diz que aquele controle é a ordem da lista. -->
         <template #value>
           <span class="atend-filtros__ordem">
-            <i class="pi pi-sort-alt" aria-hidden="true" />
+            <i class="ph ph-arrows-down-up" aria-hidden="true" />
             {{ ordenacaoLabel }}
           </span>
         </template>
@@ -839,7 +839,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
         type="button"
         class="atend-filtros__toggle"
         :class="{ 'atend-filtros__toggle--on': filtros.comProntuario }"
-        icon="pi pi-folder-open"
+        icon="ph ph-folder-open"
         :label="t('acessos.filtros.comProntuario')"
         severity="secondary"
         outlined
@@ -871,7 +871,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
         v-if="temFiltroAtivo"
         class="atend-filtros__limpar"
         :label="t('acessos.filtros.limpar')"
-        icon="pi pi-filter-slash"
+        icon="ph ph-funnel-x"
         severity="secondary"
         text
         size="small"
@@ -902,12 +902,12 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
         v-else-if="items.length === 0 && temFiltroAtivo"
         class="hc atend-state atend-state--empty"
       >
-        <i class="pi pi-filter-slash" aria-hidden="true" />
+        <i class="ph ph-funnel-x" aria-hidden="true" />
         <strong>{{ t('acessos.list.emptyFiltroTitle') }}</strong>
         <p>{{ t('acessos.list.emptyFiltroBody') }}</p>
         <Button
           :label="t('acessos.filtros.limpar')"
-          icon="pi pi-filter-slash"
+          icon="ph ph-funnel-x"
           severity="secondary"
           @click="limparFiltros"
         />
@@ -915,7 +915,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 
       <!-- Sem título: a saudação já diz "Nenhum acesso ativo"; aqui fica só o que fazer. -->
       <div v-else-if="items.length === 0" class="hc atend-state atend-state--empty">
-        <i class="pi pi-inbox" aria-hidden="true" />
+        <i class="ph ph-tray" aria-hidden="true" />
         <p>
           {{
             activeTab === 'ativos'
@@ -966,7 +966,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
                 <span class="hc-selo" :class="seloDoAcesso(grupo.acessos[0]!).tom">
                   {{ seloDoAcesso(grupo.acessos[0]!).texto }}
                 </span>
-                <i class="pi pi-chevron-right atend-linha__seta" aria-hidden="true" />
+                <i class="ph ph-caret-right atend-linha__seta" aria-hidden="true" />
               </span>
             </Button>
 
@@ -990,7 +990,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
                     <span class="atend-linha__especie">· {{ grupo.especieLabel }}</span>
                     <i
                       v-if="grupoUrgente(grupo)"
-                      class="pi pi-clock atend-linha__urgente"
+                      class="ph ph-clock atend-linha__urgente"
                       :title="t('acessos.grupo.venceLogo')"
                       :aria-label="t('acessos.grupo.venceLogo')"
                     />
@@ -1005,8 +1005,8 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
                       : t('acessos.grupo.verAcessos')
                   }}
                   <i
-                    class="pi"
-                    :class="gruposAbertos.has(grupo.chave) ? 'pi-chevron-up' : 'pi-chevron-down'"
+                    class="ph"
+                    :class="gruposAbertos.has(grupo.chave) ? 'ph-caret-up' : 'ph-caret-down'"
                     aria-hidden="true"
                   />
                 </span>
@@ -1049,7 +1049,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
                         <span class="hc-selo" :class="seloDoAcesso(item).tom">
                           {{ seloDoAcesso(item).texto }}
                         </span>
-                        <i class="pi pi-chevron-right atend-linha__seta" aria-hidden="true" />
+                        <i class="ph ph-caret-right atend-linha__seta" aria-hidden="true" />
                       </span>
                     </Button>
                   </li>

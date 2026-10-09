@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { PhCheck, PhCircle } from '@phosphor-icons/vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -49,10 +50,12 @@ const listStyle = computed(() => {
       class="password-requirements__item"
       :class="{ 'password-requirements__item--met': requirements[item.key] }"
     >
-      <i
-        :class="requirements[item.key] ? 'pi pi-check' : 'pi pi-circle-fill'"
+      <PhCheck
+        v-if="requirements[item.key]"
+        class="password-requirements__icone"
         aria-hidden="true"
       />
+      <PhCircle v-else class="password-requirements__icone" weight="fill" aria-hidden="true" />
       {{ item.label }}
     </li>
   </ul>
@@ -76,8 +79,10 @@ const listStyle = computed(() => {
   font-weight: 600;
 }
 
-.password-requirements__item .pi {
-  font-size: 0.62rem;
+/* Componente do Phosphor, não a fonte: os 25% que o `.ph::before` compensa vão no tamanho. */
+.password-requirements__icone {
+  flex: none;
+  font-size: 0.78rem;
   color: var(--req-pending);
 }
 
@@ -85,8 +90,8 @@ const listStyle = computed(() => {
   color: var(--req-success);
 }
 
-.password-requirements__item--met .pi {
-  font-size: 0.72rem;
+.password-requirements__item--met .password-requirements__icone {
+  font-size: 0.9rem;
   color: var(--req-success);
 }
 </style>

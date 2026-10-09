@@ -86,11 +86,11 @@ const STATUS_I18N_KEYS: Record<StatusModoParceiro, string> = {
 
 const badge = computed(() => {
   const icons: Record<StatusModoParceiro, string> = {
-    NAO_SOLICITADO: 'pi pi-minus-circle',
-    SOLICITADO: 'pi pi-clock',
-    ATIVO: 'pi pi-check',
-    REJEITADO: 'pi pi-times',
-    SUSPENSO: 'pi pi-ban',
+    NAO_SOLICITADO: 'ph ph-minus-circle',
+    SOLICITADO: 'ph ph-clock',
+    ATIVO: 'ph ph-check',
+    REJEITADO: 'ph ph-x',
+    SUSPENSO: 'ph ph-prohibit',
   }
 
   return {
@@ -267,7 +267,7 @@ watch(modoStatus, () => {
       </p>
 
       <p v-else-if="modoStatus === 'SOLICITADO'" class="programa-linha__aviso">
-        <i class="pi pi-clock" aria-hidden="true" />
+        <i class="ph ph-clock" aria-hidden="true" />
         {{ t('programas.card.info.pending') }}
       </p>
 
@@ -276,7 +276,7 @@ watch(modoStatus, () => {
         class="programa-linha__decisao"
       >
         <p class="programa-linha__aviso programa-linha__aviso--risco">
-          <i class="pi pi-info-circle" aria-hidden="true" />
+          <i class="ph ph-info" aria-hidden="true" />
           {{
             modoStatus === 'REJEITADO'
               ? t('programas.card.info.rejected')
@@ -319,7 +319,7 @@ watch(modoStatus, () => {
         :as="RouterLink"
         :to="cta.to"
         :label="t('programas.linha.irParaGanhos')"
-        icon="pi pi-arrow-right"
+        icon="ph ph-arrow-right"
         icon-pos="right"
         severity="secondary"
         outlined

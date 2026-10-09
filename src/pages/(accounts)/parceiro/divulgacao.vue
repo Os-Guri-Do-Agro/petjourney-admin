@@ -142,7 +142,7 @@ watch(
             <Button
               type="button"
               class="hc-pilula hc-pilula--cheia"
-              icon="pi pi-link"
+              icon="ph ph-link"
               :label="t('divulgacao.saudacao.copiarLink')"
               @click="copiarLink"
             />

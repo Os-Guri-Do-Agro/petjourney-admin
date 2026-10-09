@@ -100,7 +100,7 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
 
     <div v-if="anotacao.prescricaoItens?.length" class="estv__block">
       <h4>
-        <i class="pi pi-inbox" aria-hidden="true" />
+        <i class="ph ph-tray" aria-hidden="true" />
         {{ t('acessos.estruturada.prescricao.title') }}
       </h4>
       <ul class="estv__items">
@@ -110,7 +110,7 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
             {{ detalhesPrescricao(item).join(' · ') }}
           </span>
           <span v-if="!item.frequencia" class="estv__warn">
-            <i class="pi pi-info-circle" aria-hidden="true" />
+            <i class="ph ph-info" aria-hidden="true" />
             {{ t('acessos.estruturada.view.semFrequencia') }}
           </span>
           <p v-if="item.instrucoes" class="estv__note">{{ item.instrucoes }}</p>
@@ -120,7 +120,7 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
 
     <div v-if="anotacao.examesSolicitados?.length" class="estv__block">
       <h4>
-        <i class="pi pi-search" aria-hidden="true" />
+        <i class="ph ph-magnifying-glass" aria-hidden="true" />
         {{ t('acessos.estruturada.exames.title') }}
       </h4>
       <ul class="estv__items">

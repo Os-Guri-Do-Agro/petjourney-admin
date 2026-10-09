@@ -81,7 +81,7 @@ const metrics = computed(() => [
     label: t('inicio.dash.metrics.cuponsAtivos'),
     value: totais.value?.cuponsAtivos ?? 0,
     hint: t('inicio.dash.metrics.cuponsHint'),
-    icon: 'pi pi-ticket',
+    icon: 'ph ph-ticket',
     tone: 'sage' as const,
   },
   {
@@ -89,7 +89,7 @@ const metrics = computed(() => [
     label: t('inicio.dash.metrics.resgatesTotal'),
     value: totais.value?.resgatesTotal ?? 0,
     hint: t('inicio.dash.metrics.resgatesTotalHint'),
-    icon: 'pi pi-check-circle',
+    icon: 'ph ph-check-circle',
     tone: 'success' as const,
   },
   {
@@ -97,7 +97,7 @@ const metrics = computed(() => [
     label: t('inicio.dash.metrics.resgates30d'),
     value: totais.value?.resgatesUltimos30d ?? 0,
     hint: t('inicio.dash.metrics.resgates30dHint'),
-    icon: 'pi pi-chart-line',
+    icon: 'ph ph-chart-line',
     tone: 'deep' as const,
   },
 ])
@@ -183,7 +183,7 @@ watch(lastSuccessAt, (at) => {
       <Button
         type="button"
         :label="t('inicio.dash.retry')"
-        icon="pi pi-refresh"
+        icon="ph ph-arrow-clockwise"
         severity="secondary"
         outlined
         size="small"
@@ -265,7 +265,7 @@ watch(lastSuccessAt, (at) => {
                 {{ t('inicio.dash.commission.eyebrowActive') }}
               </p>
               <span class="commission-card__badge">
-                <i class="pi pi-wallet" aria-hidden="true" />
+                <i class="ph ph-wallet" aria-hidden="true" />
                 {{ t('inicio.dash.commission.badge') }}
               </span>
             </div>
@@ -278,7 +278,7 @@ watch(lastSuccessAt, (at) => {
             </p>
             <RouterLink class="commission-card__cta" to="/parceiro/carteira">
               {{ t('inicio.dash.commission.openWallet') }}
-              <i class="pi pi-arrow-right" aria-hidden="true" />
+              <i class="ph ph-arrow-right" aria-hidden="true" />
             </RouterLink>
           </article>
 
@@ -300,7 +300,7 @@ watch(lastSuccessAt, (at) => {
               to="/parceiro/programas"
             >
               {{ t('inicio.dash.commission.seePrograms') }}
-              <i class="pi pi-arrow-right" aria-hidden="true" />
+              <i class="ph ph-arrow-right" aria-hidden="true" />
             </RouterLink>
           </article>
 
@@ -313,7 +313,7 @@ watch(lastSuccessAt, (at) => {
                    aviso do backend em vez de um traço que parece código vazio. -->
               <template v-if="!podeIndicar">
                 <p class="referral-card__espera">
-                  <i class="pi pi-hourglass" aria-hidden="true" />
+                  <i class="ph ph-hourglass" aria-hidden="true" />
                   <span>{{ avisoIndicacao || t('inicio.dash.referral.esperaFallback') }}</span>
                 </p>
                 <RouterLink
@@ -321,7 +321,7 @@ watch(lastSuccessAt, (at) => {
                   :to="{ path: '/parceiro/programas', hash: '#programas' }"
                 >
                   {{ t('inicio.dash.referral.esperaCta') }}
-                  <i class="pi pi-arrow-right" aria-hidden="true" />
+                  <i class="ph ph-arrow-right" aria-hidden="true" />
                 </RouterLink>
               </template>
 
@@ -332,7 +332,7 @@ watch(lastSuccessAt, (at) => {
                     v-if="codigoIndicacao"
                     class="referral-card__copy"
                     type="button"
-                    icon="pi pi-copy"
+                    icon="ph ph-copy"
                     severity="secondary"
                     outlined
                     :aria-label="t('inicio.dash.referral.copyAria')"
@@ -345,7 +345,7 @@ watch(lastSuccessAt, (at) => {
                 </p>
                 <RouterLink class="referral-card__cta" to="/parceiro/divulgacao">
                   {{ t('inicio.dash.referral.cta') }}
-                  <i class="pi pi-arrow-right" aria-hidden="true" />
+                  <i class="ph ph-arrow-right" aria-hidden="true" />
                 </RouterLink>
               </template>
             </div>

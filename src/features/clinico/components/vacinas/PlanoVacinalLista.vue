@@ -157,9 +157,9 @@ const linhas = computed(() =>
             :aria-current="dose === proxima ? 'step' : undefined"
           >
             <span class="sequencia__marca" aria-hidden="true">
-              <i v-if="dose.estado === 'aplicada'" class="pi pi-check" />
-              <i v-else-if="dose.estado === 'aguarda-idade'" class="pi pi-hourglass" />
-              <i v-else-if="dose.tipo === 'reforco'" class="pi pi-replay" />
+              <i v-if="dose.estado === 'aplicada'" class="ph ph-check" />
+              <i v-else-if="dose.estado === 'aguarda-idade'" class="ph ph-hourglass" />
+              <i v-else-if="dose.tipo === 'reforco'" class="ph ph-arrow-counter-clockwise" />
             </span>
             <span class="sequencia__rotulo">
               <strong>{{ rotulos.numero(dose) }}</strong>
@@ -171,7 +171,7 @@ const linhas = computed(() =>
                 v-else-if="dose.estado === 'aplicada' && localExterno(item, dose.numero)"
                 class="sequencia__fora"
               >
-                <i class="pi pi-map-marker" aria-hidden="true" />
+                <i class="ph ph-map-pin" aria-hidden="true" />
                 {{ localExterno(item, dose.numero) }}
               </span>
             </span>
@@ -183,7 +183,7 @@ const linhas = computed(() =>
         <strong :class="`plano__quando--${item.situacao}`">{{ rotulos.quando(proxima) }}</strong>
         <span>{{ rotulos.numero(proxima) }} · {{ rotulos.data(proxima.em) }}</span>
         <span v-if="proxima.agendamento" class="plano__marcada">
-          <i class="pi pi-calendar" aria-hidden="true" />
+          <i class="ph ph-calendar-blank" aria-hidden="true" />
           {{
             t('clinico.vacinas.plano.marcadaPara', {
               data: rotulos.data(proxima.agendamento.inicio.slice(0, 10)),
@@ -206,7 +206,7 @@ const linhas = computed(() =>
     </li>
 
     <li v-if="plano.opcionaisNaoIniciadas.length > 0" class="plano__opcionais">
-      <i class="pi pi-info-circle" aria-hidden="true" />
+      <i class="ph ph-info" aria-hidden="true" />
       <span>
         {{
           t('clinico.vacinas.plano.opcionais', {
@@ -467,7 +467,7 @@ const linhas = computed(() =>
   gap: 0.2rem;
 }
 
-.sequencia__fora .pi {
+.sequencia__fora .ph {
   font-size: 0.6rem;
 }
 

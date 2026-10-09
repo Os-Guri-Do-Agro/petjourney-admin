@@ -104,19 +104,19 @@ const dialogStyle = computed(() => {
 const deactivatePoints = computed(() => [
   {
     id: 'soft',
-    icon: 'pi pi-replay',
+    icon: 'ph ph-arrow-counter-clockwise',
     title: t('settings.conta.risk.points.soft.title'),
     text: t('settings.conta.risk.points.soft.text'),
   },
   {
     id: 'scope',
-    icon: 'pi pi-shield',
+    icon: 'ph ph-shield',
     title: t('settings.conta.risk.points.scope.title'),
     text: t('settings.conta.risk.points.scope.text'),
   },
   {
     id: 'not-delete',
-    icon: 'pi pi-ban',
+    icon: 'ph ph-prohibit',
     title: t('settings.conta.risk.points.notDelete.title'),
     text: t('settings.conta.risk.points.notDelete.text'),
   },
@@ -245,7 +245,7 @@ watch(showCustomReason, (allowed) => {
           <h2 id="conta-session-title">{{ displayName }}</h2>
           <p class="conta-session__email">{{ sessionEmail }}</p>
           <p v-if="partnerLabel" class="conta-session__meta">
-            <i class="pi pi-building" aria-hidden="true" />
+            <i class="ph ph-building" aria-hidden="true" />
             {{ partnerLabel }}
           </p>
         </div>
@@ -265,7 +265,7 @@ watch(showCustomReason, (allowed) => {
           severity="danger"
           outlined
           type="button"
-          icon="pi pi-sign-out"
+          icon="ph ph-sign-out"
           @click="handleLogout"
         />
         <p class="conta-session__hint">{{ t('settings.conta.session.logoutHint') }}</p>
@@ -276,7 +276,7 @@ watch(showCustomReason, (allowed) => {
       <div class="conta-panel__copy">
         <header class="conta-panel__head">
           <span class="conta-panel__icon" aria-hidden="true">
-            <i class="pi pi-language" />
+            <i class="ph ph-translate" />
           </span>
           <div>
             <h3>{{ t('settings.conta.prefs.title') }}</h3>
@@ -299,7 +299,7 @@ watch(showCustomReason, (allowed) => {
           :label="t('settings.conta.risk.actions.deactivate')"
           severity="danger"
           type="button"
-          icon="pi pi-user-minus"
+          icon="ph ph-user-minus"
           @click="openInactivateDialog"
         />
       </header>
@@ -334,7 +334,7 @@ watch(showCustomReason, (allowed) => {
       </p>
 
       <div v-if="loadingReasons" class="inativ-dialog__loading" role="status">
-        <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+        <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
         {{ t('settings.conta.inactivate.loading') }}
       </div>
 
@@ -390,7 +390,7 @@ watch(showCustomReason, (allowed) => {
         :label="t('settings.conta.inactivate.actions.confirm')"
         severity="danger"
         type="button"
-        icon="pi pi-user-minus"
+        icon="ph ph-user-minus"
         :loading="submitting"
         :disabled="loadingReasons || reasons.length === 0"
         @click="handleInactivate"

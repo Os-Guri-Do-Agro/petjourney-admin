@@ -120,7 +120,7 @@ const supportChannels = [
   {
     id: 'whatsapp',
     href: SUPPORT_CONTACTS.whatsappHref,
-    icon: 'pi pi-whatsapp',
+    icon: 'ph ph-whatsapp-logo',
     labelKey: 'frame.suspended.channels.whatsapp',
     value: SUPPORT_CONTACTS.whatsappDisplay,
     external: true,
@@ -128,7 +128,7 @@ const supportChannels = [
   {
     id: 'instagram',
     href: SUPPORT_CONTACTS.instagramHref,
-    icon: 'pi pi-instagram',
+    icon: 'ph ph-instagram-logo',
     labelKey: 'frame.suspended.channels.instagram',
     value: SUPPORT_CONTACTS.instagramHandle,
     external: true,
@@ -136,7 +136,7 @@ const supportChannels = [
   {
     id: 'facebook',
     href: SUPPORT_CONTACTS.facebookHref,
-    icon: 'pi pi-facebook',
+    icon: 'ph ph-facebook-logo',
     labelKey: 'frame.suspended.channels.facebook',
     value: SUPPORT_CONTACTS.facebookHandle,
     external: true,
@@ -144,7 +144,7 @@ const supportChannels = [
   {
     id: 'email',
     href: `mailto:${SUPPORT_CONTACTS.email}`,
-    icon: 'pi pi-envelope',
+    icon: 'ph ph-envelope-simple',
     labelKey: 'frame.suspended.channels.email',
     value: SUPPORT_CONTACTS.email,
     external: false,
@@ -209,7 +209,7 @@ const pageStyle = computed(() => {
           v-if="tour"
           class="partner-page__guidance"
           type="button"
-          icon="pi pi-question-circle"
+          icon="ph ph-question"
           :label="t('shell.guidance.tour')"
           outlined
           rounded
@@ -224,7 +224,7 @@ const pageStyle = computed(() => {
           class="partner-page__guidance"
           :class="{ 'partner-page__guidance--ativo': isGuidanceVisible }"
           type="button"
-          icon="pi pi-info-circle"
+          icon="ph ph-info"
           :label="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
           outlined
           rounded
@@ -240,7 +240,7 @@ const pageStyle = computed(() => {
     </header>
 
     <div v-if="loading" class="partner-page__state" role="status" aria-live="polite">
-      <i class="pi pi-spin pi-spinner" aria-hidden="true" />
+      <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
       <span>{{ t('frame.loading') }}</span>
     </div>
 
@@ -249,7 +249,7 @@ const pageStyle = computed(() => {
       class="partner-page__state partner-page__state--revoked"
       role="status"
     >
-      <i class="pi pi-lock" aria-hidden="true" />
+      <i class="ph ph-lock" aria-hidden="true" />
       <div>
         <strong>{{ t('frame.accessRevoked.title') }}</strong>
         <p>{{ t('frame.accessRevoked.body') }}</p>
@@ -282,7 +282,7 @@ const pageStyle = computed(() => {
       class="partner-page__state partner-page__state--blocked"
       role="status"
     >
-      <i class="pi pi-building" aria-hidden="true" />
+      <i class="ph ph-building" aria-hidden="true" />
       <div>
         <strong>{{ t('frame.noAccess.title') }}</strong>
         <p>
@@ -314,7 +314,7 @@ const pageStyle = computed(() => {
     </div>
 
     <div v-else-if="error" class="partner-page__state partner-page__state--error" role="alert">
-      <i class="pi pi-exclamation-circle" aria-hidden="true" />
+      <i class="ph ph-warning-circle" aria-hidden="true" />
       <div>
         <strong>{{ t('frame.error.title') }}</strong>
         <p>{{ error }}</p>
@@ -327,7 +327,7 @@ const pageStyle = computed(() => {
       class="partner-page__state partner-page__state--suspended"
       role="alert"
     >
-      <i class="pi pi-ban" aria-hidden="true" />
+      <i class="ph ph-prohibit" aria-hidden="true" />
       <div>
         <strong>{{ t('frame.suspended.title') }}</strong>
         <p>{{ t('frame.suspended.body') }}</p>
@@ -353,7 +353,7 @@ const pageStyle = computed(() => {
                 <strong>{{ t(channel.labelKey) }}</strong>
                 <small>{{ channel.value }}</small>
               </span>
-              <i class="pi pi-external-link partner-page__channel-arrow" aria-hidden="true" />
+              <i class="ph ph-arrow-square-out partner-page__channel-arrow" aria-hidden="true" />
             </a>
           </li>
         </ul>
@@ -361,7 +361,7 @@ const pageStyle = computed(() => {
     </div>
 
     <div v-else-if="empty" class="partner-page__state partner-page__state--empty">
-      <i class="pi pi-inbox" aria-hidden="true" />
+      <i class="ph ph-tray" aria-hidden="true" />
       <div>
         <strong>{{ resolvedEmptyTitle }}</strong>
         <p v-if="emptyDescription">{{ emptyDescription }}</p>

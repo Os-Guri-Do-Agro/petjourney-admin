@@ -52,25 +52,25 @@ const roleOptions: SelectOption[] = [
     value: 'Veterinária clínica',
     label: 'Veterinária clínica',
     detail: 'Atendimento, prontuários e acompanhamento',
-    icon: 'pi pi-heart',
+    icon: 'ph ph-heart',
   },
   {
     value: 'Responsável técnica',
     label: 'Responsável técnica',
     detail: 'Supervisão clínica e permissões elevadas',
-    icon: 'pi pi-shield',
+    icon: 'ph ph-shield',
   },
   {
     value: 'Veterinário cirurgião',
     label: 'Veterinário cirurgião',
     detail: 'Procedimentos, retornos e documentos',
-    icon: 'pi pi-briefcase',
+    icon: 'ph ph-briefcase',
   },
   {
     value: 'Gestor parceiro',
     label: 'Gestor parceiro',
     detail: 'Operação da clínica e equipe',
-    icon: 'pi pi-building',
+    icon: 'ph ph-building',
   },
 ]
 
@@ -79,31 +79,31 @@ const specialtyOptions: SelectOption[] = [
     value: 'Clínica médica e dermatologia',
     label: 'Clínica médica e dermatologia',
     detail: 'Rotina clínica e pele',
-    icon: 'pi pi-sparkles',
+    icon: 'ph ph-sparkle',
   },
   {
     value: 'Clínica médica geral',
     label: 'Clínica médica geral',
     detail: 'Consulta, retorno e prevenção',
-    icon: 'pi pi-heart',
+    icon: 'ph ph-heart',
   },
   {
     value: 'Cirurgia',
     label: 'Cirurgia',
     detail: 'Procedimentos e pós-operatório',
-    icon: 'pi pi-briefcase',
+    icon: 'ph ph-briefcase',
   },
   {
     value: 'Felinos',
     label: 'Felinos',
     detail: 'Atendimento especializado em gatos',
-    icon: 'pi pi-star',
+    icon: 'ph ph-star',
   },
   {
     value: 'Animais exóticos',
     label: 'Animais exóticos',
     detail: 'Aves, coelhos, répteis e outros',
-    icon: 'pi pi-send',
+    icon: 'ph ph-paper-plane-tilt',
   },
 ]
 
@@ -241,7 +241,7 @@ function retryProfile() {
       <div class="profile-hero__actions">
         <Button
           class="profile-action profile-action--ghost"
-          icon="pi pi-camera"
+          icon="ph ph-camera"
           label="Atualizar foto"
           severity="secondary"
           outlined
@@ -250,7 +250,7 @@ function retryProfile() {
         />
         <Button
           class="profile-action profile-action--primary"
-          icon="pi pi-save"
+          icon="ph ph-floppy-disk"
           label="Salvar perfil"
           type="button"
           @click="saveProfile()"
@@ -265,7 +265,7 @@ function retryProfile() {
     </section>
 
     <section v-else-if="pageState === 'error'" class="profile-state profile-state--error" role="alert">
-      <i class="pi pi-exclamation-triangle" aria-hidden="true" />
+      <i class="ph ph-warning" aria-hidden="true" />
       <strong>Não foi possível carregar o perfil</strong>
       <p>Confira sua sessão e tente novamente.</p>
       <Button label="Tentar novamente" type="button" @click="retryProfile" />
@@ -275,7 +275,7 @@ function retryProfile() {
       <Card class="profile-card profile-card--main">
         <template #title>
           <span class="card-title">
-            <i class="pi pi-user" aria-hidden="true" />
+            <i class="ph ph-user" aria-hidden="true" />
             Dados principais
           </span>
         </template>
@@ -388,7 +388,7 @@ function retryProfile() {
         <Card class="profile-card">
           <template #title>
             <span class="card-title">
-              <i class="pi pi-building" aria-hidden="true" />
+              <i class="ph ph-building" aria-hidden="true" />
               Vínculo parceiro
             </span>
           </template>
@@ -413,7 +413,7 @@ function retryProfile() {
         <Card class="profile-card">
           <template #title>
             <span class="card-title">
-              <i class="pi pi-shield" aria-hidden="true" />
+              <i class="ph ph-shield" aria-hidden="true" />
               Segurança
             </span>
           </template>
@@ -442,7 +442,7 @@ function retryProfile() {
           <template #footer>
             <Button
               class="profile-card__button profile-action profile-action--ghost"
-              icon="pi pi-key"
+              icon="ph ph-key"
               label="Alterar senha"
               severity="secondary"
               outlined

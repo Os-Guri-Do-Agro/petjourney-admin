@@ -119,7 +119,7 @@ async function handleChangePassword() {
             class="settings-seguranca__eye"
             text
             severity="secondary"
-            :icon="showCurrentPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+            :icon="showCurrentPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
             :aria-label="
               showCurrentPassword
                 ? t('settings.seguranca.aria.hidePassword')
@@ -146,7 +146,7 @@ async function handleChangePassword() {
             class="settings-seguranca__eye"
             text
             severity="secondary"
-            :icon="showNewPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+            :icon="showNewPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
             :aria-label="
               showNewPassword
                 ? t('settings.seguranca.aria.hidePassword')
@@ -175,7 +175,7 @@ async function handleChangePassword() {
             class="settings-seguranca__eye"
             text
             severity="secondary"
-            :icon="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+            :icon="showConfirmPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
             :aria-label="
               showConfirmPassword
                 ? t('settings.seguranca.aria.hidePassword')
@@ -190,7 +190,7 @@ async function handleChangePassword() {
         <Button
           type="submit"
           :label="t('settings.seguranca.actions.change')"
-          icon="pi pi-lock"
+          icon="ph ph-lock"
           :loading="savingPassword"
         />
       </footer>

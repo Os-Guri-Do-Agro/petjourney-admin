@@ -256,7 +256,7 @@ function confirmar() {
       />
 
       <p v-if="aviso" class="internar__aviso" role="status">
-        <i class="pi pi-exclamation-circle" aria-hidden="true" />
+        <i class="ph ph-warning-circle" aria-hidden="true" />
         {{ aviso }}
       </p>
     </div>
@@ -270,7 +270,7 @@ function confirmar() {
       />
       <Button
         :label="t('clinico.internacao.internar.confirmar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         :disabled="!podeConfirmar"
         :loading="salvando"
         @click="confirmar"

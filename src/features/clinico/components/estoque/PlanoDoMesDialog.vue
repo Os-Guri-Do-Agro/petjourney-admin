@@ -263,7 +263,7 @@ async function salvar() {
   >
     <template #header>
       <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i class="pi pi-flag" /></span>
+        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-flag" /></span>
         {{ titulo }}
       </h2>
     </template>
@@ -343,7 +343,7 @@ async function salvar() {
             </span>
             <span role="cell">
               <Button
-                icon="pi pi-times"
+                icon="ph ph-x"
                 severity="secondary"
                 text
                 rounded
@@ -407,7 +407,7 @@ async function salvar() {
                     @input="orcamentoTocado = true"
                   />
                   <Button
-                    icon="pi pi-times"
+                    icon="ph ph-x"
                     severity="secondary"
                     text
                     rounded
@@ -438,7 +438,7 @@ async function salvar() {
           :pt="ptDoOverlay"
         >
           <template #dropdownicon>
-            <i class="pi pi-plus" aria-hidden="true" />
+            <i class="ph ph-plus" aria-hidden="true" />
           </template>
         </Select>
 
@@ -459,7 +459,7 @@ async function salvar() {
 
       <!-- O custo da meta, visto antes de combinar. -->
       <p class="plano__pedido" role="status">
-        <i class="pi pi-shopping-cart" aria-hidden="true" />
+        <i class="ph ph-shopping-cart" aria-hidden="true" />
         <span v-if="dosesDoPedido > 0">
           {{
             t('clinico.estoque.plano.pedido', {
@@ -487,7 +487,7 @@ async function salvar() {
       />
       <Button
         :label="t('clinico.estoque.plano.salvar', { mes: formato.mesPorExtenso(mes) })"
-        icon="pi pi-check"
+        icon="ph ph-check"
         class="clinic-acao-principal"
         :loading="salvando"
         :disabled="metas.length === 0 || !criadoPor"

@@ -228,7 +228,7 @@ const horaFora = computed(() => {
         -->
         <Button
           :label="t('hotel.rotina.feita')"
-          icon="pi pi-check"
+          icon="ph ph-check"
           size="small"
           :class="['tarefa__feita', { 'tarefa__feita--adiante': situacao === 'futura' }]"
           :loading="salvando"
@@ -240,7 +240,7 @@ const horaFora = computed(() => {
       <Button
         v-else
         :label="t('hotel.rotina.desfazer')"
-        icon="pi pi-undo"
+        icon="ph ph-arrow-u-up-left"
         severity="secondary"
         text
         size="small"

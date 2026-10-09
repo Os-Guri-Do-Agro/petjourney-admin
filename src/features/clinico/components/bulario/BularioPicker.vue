@@ -100,7 +100,7 @@ function confirmar() {
   >
     <template #header>
       <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i :class="'pi pi-book'" /></span>
+        <span class="clinic-dialog__marca" aria-hidden="true"><i :class="'ph ph-book-open'" /></span>
         {{ t('clinico.bulario.escolherTitulo') }}
       </h2>
     </template>
@@ -121,7 +121,7 @@ function confirmar() {
       <div class="picker__ficha">
         <BularioDetalhe v-if="selecionado" :medicamento="selecionado" :pet="pet" />
         <p v-else class="picker__vazio">
-          <i class="pi pi-arrow-left" aria-hidden="true" />
+          <i class="ph ph-arrow-left" aria-hidden="true" />
           {{ t('clinico.bulario.escolhaNaLista') }}
         </p>
       </div>
@@ -130,7 +130,7 @@ function confirmar() {
     <template #footer>
       <div class="picker__rodape">
         <span v-if="proibido" class="picker__alerta">
-          <i class="pi pi-exclamation-triangle" aria-hidden="true" />
+          <i class="ph ph-warning" aria-hidden="true" />
           {{ t('clinico.bulario.proibidoRodape') }}
         </span>
 
@@ -173,7 +173,7 @@ function confirmar() {
   color: var(--clinic-muted);
 }
 
-[dir='rtl'] .picker__vazio .pi-arrow-left {
+[dir='rtl'] .picker__vazio .ph-arrow-left {
   transform: scaleX(-1);
 }
 

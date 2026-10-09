@@ -594,7 +594,7 @@ useClinicShortcuts({
       />
 
       <p v-if="feriado?.fechado" class="agenda__fechada" role="status">
-        <i class="pi pi-calendar-times" aria-hidden="true" />
+        <i class="ph ph-calendar-x" aria-hidden="true" />
         <span>
           <strong>{{ t('clinico.agenda.fechadaTitulo') }}</strong>
           {{ t('clinico.agenda.fechadaDescricao', { feriado: feriado.nome }) }}

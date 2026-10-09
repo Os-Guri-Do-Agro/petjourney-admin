@@ -7,14 +7,14 @@ const sampleGroups: AppNavigationGroup[] = [
     id: 'portal',
     label: 'Portal',
     items: [
-      { label: 'Programas', to: '/parceiro/programas', icon: 'pi pi-th-large' },
-      { label: 'Divulgação', to: '/parceiro/divulgacao', icon: 'pi pi-share-alt' },
+      { label: 'Programas', to: '/parceiro/programas', icon: 'ph ph-squares-four' },
+      { label: 'Divulgação', to: '/parceiro/divulgacao', icon: 'ph ph-share-network' },
     ],
   },
   {
     id: 'account',
     label: 'Conta',
-    items: [{ label: 'Configurações', to: '/settings', icon: 'pi pi-cog' }],
+    items: [{ label: 'Configurações', to: '/settings', icon: 'ph ph-gear' }],
   },
 ]
 
@@ -28,7 +28,7 @@ describe('filterNavigationGroups', () => {
       {
         id: 'portal',
         label: 'Portal',
-        items: [{ label: 'Divulgação', to: '/parceiro/divulgacao', icon: 'pi pi-share-alt' }],
+        items: [{ label: 'Divulgação', to: '/parceiro/divulgacao', icon: 'ph ph-share-network' }],
       },
     ])
   })
@@ -38,7 +38,7 @@ describe('filterNavigationGroups', () => {
       {
         id: 'account',
         label: 'Conta',
-        items: [{ label: 'Configurações', to: '/settings', icon: 'pi pi-cog' }],
+        items: [{ label: 'Configurações', to: '/settings', icon: 'ph ph-gear' }],
       },
     ])
   })
@@ -57,23 +57,23 @@ const clinicalGroup: AppNavigationGroup = {
   id: 'clinical',
   label: 'Clínica',
   items: [
-    { label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'pi pi-sun' },
-    { label: 'Fila de espera', to: '/veterinario/fila', icon: 'pi pi-hourglass' },
-    { label: 'Faltas', to: '/veterinario/faltas', icon: 'pi pi-user-minus' },
+    { label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'ph ph-sun' },
+    { label: 'Fila de espera', to: '/veterinario/fila', icon: 'ph ph-hourglass' },
+    { label: 'Faltas', to: '/veterinario/faltas', icon: 'ph ph-user-minus' },
   ],
   blocos: [
     {
       id: 'agora',
       label: 'Agora',
       items: [
-        { label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'pi pi-sun' },
-        { label: 'Fila de espera', to: '/veterinario/fila', icon: 'pi pi-hourglass' },
+        { label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'ph ph-sun' },
+        { label: 'Fila de espera', to: '/veterinario/fila', icon: 'ph ph-hourglass' },
       ],
     },
     {
       id: 'pendencias',
       label: 'Pendências',
-      items: [{ label: 'Faltas', to: '/veterinario/faltas', icon: 'pi pi-user-minus' }],
+      items: [{ label: 'Faltas', to: '/veterinario/faltas', icon: 'ph ph-user-minus' }],
     },
   ],
 }
@@ -92,7 +92,7 @@ describe('filterNavigationGroups com blocos', () => {
     expect(grupo.blocos).toHaveLength(1)
     expect(grupo.blocos?.[0]?.id).toBe('agora')
     expect(grupo.items).toEqual([
-      { label: 'Fila de espera', to: '/veterinario/fila', icon: 'pi pi-hourglass' },
+      { label: 'Fila de espera', to: '/veterinario/fila', icon: 'ph ph-hourglass' },
     ])
   })
 

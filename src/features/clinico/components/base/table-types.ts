@@ -58,7 +58,7 @@ export type OrdenacaoTabela = {
 export type AcaoDeLinha<T = unknown> = {
   id: string
   rotulo: string
-  /** Classe PrimeIcons. */
+  /** Classe do Phosphor (`ph ph-*`). */
   icone?: string
   /** Ação destrutiva ganha tratamento próprio e nunca é a primeira da fila. */
   perigo?: boolean

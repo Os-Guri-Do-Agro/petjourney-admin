@@ -148,7 +148,7 @@ const acoes = computed<AcaoDeLinha<WaitlistEntry>[]>(() => [
   {
     id: 'remover',
     rotulo: t('clinico.fila.remover'),
-    icone: 'pi pi-trash',
+    icone: 'ph ph-trash',
     perigo: true,
     visivel: (linha) => linha.status === 'aguardando',
   },
@@ -303,7 +303,7 @@ onMounted(carregar)
             <Button
               type="button"
               class="hc-pilula hc-pilula--cheia"
-              icon="pi pi-plus"
+              icon="ph ph-plus"
               :label="t('clinico.fila.adicionar')"
               @click="adicionarAberto = true"
             />
@@ -315,17 +315,17 @@ onMounted(carregar)
     <div class="fila clinic-scope">
       <p v-if="aceite" class="aceite" :class="`aceite--${aceite.tipo}`" role="status">
         <i
-          class="pi"
-          :class="aceite.tipo === 'marcado' ? 'pi-check-circle' : 'pi-info-circle'"
+          class="ph"
+          :class="aceite.tipo === 'marcado' ? 'ph-check-circle' : 'ph-info'"
           aria-hidden="true"
         />
         <span class="aceite__texto">{{ aceite.texto }}</span>
         <RouterLink v-if="aceite.rota" class="aceite__link clinic-focusable" :to="aceite.rota">
           {{ t('clinico.fila.aceite.verNaAgenda') }}
-          <i class="pi pi-arrow-right" aria-hidden="true" />
+          <i class="ph ph-arrow-right" aria-hidden="true" />
         </RouterLink>
         <Button
-          icon="pi pi-times"
+          icon="ph ph-x"
           severity="secondary"
           text
           rounded

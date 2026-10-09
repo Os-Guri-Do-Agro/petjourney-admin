@@ -7,7 +7,7 @@ withDefaults(
   }>(),
   {
     description: '',
-    icon: 'pi pi-spin pi-spinner',
+    icon: 'ph ph-spin ph-circle-notch',
   },
 )
 </script>

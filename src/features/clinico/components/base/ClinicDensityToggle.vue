@@ -24,15 +24,15 @@ const { t } = useI18n()
 const { densidade, zoom, definirDensidade, definirZoom } = useClinicPrefs()
 
 const iconePorDensidade: Record<ClinicDensidade, string> = {
-  compacta: 'pi pi-bars',
-  media: 'pi pi-align-justify',
-  confortavel: 'pi pi-align-left',
+  compacta: 'ph ph-list',
+  media: 'ph ph-text-align-justify',
+  confortavel: 'ph ph-text-align-left',
 }
 
 const iconePorZoom: Record<ClinicZoom, string> = {
-  reduzido: 'pi pi-search-minus',
-  medio: 'pi pi-search',
-  ampliado: 'pi pi-search-plus',
+  reduzido: 'ph ph-magnifying-glass-minus',
+  medio: 'ph ph-magnifying-glass',
+  ampliado: 'ph ph-magnifying-glass-plus',
 }
 
 const opcoesDeDensidade = computed(() =>

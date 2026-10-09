@@ -190,7 +190,7 @@ const opcoesRisco = computed(() =>
         <h1 class="referencia__titulo">{{ t('clinico.design.titulo') }}</h1>
         <p class="referencia__lede">{{ t('clinico.design.descricao') }}</p>
         <p class="referencia__nota">
-          <i class="pi pi-desktop" aria-hidden="true" />
+          <i class="ph ph-desktop" aria-hidden="true" />
           {{ t('clinico.design.larguras') }}
         </p>
       </div>
@@ -208,7 +208,7 @@ const opcoesRisco = computed(() =>
           class="referencia__botao"
           severity="secondary"
           outlined
-          :icon="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'"
+          :icon="isDarkMode ? 'ph ph-sun' : 'ph ph-moon'"
           :label="isDarkMode ? 'Claro' : 'Escuro'"
           @click="toggleColorMode"
         />
@@ -238,11 +238,11 @@ const opcoesRisco = computed(() =>
 
           <div v-if="estado === 'carregando'" class="esqueleto esqueleto--alto" aria-hidden="true" />
           <p v-else-if="estado === 'erro'" class="estado-erro" role="alert">
-            <i class="pi pi-exclamation-circle" aria-hidden="true" />
+            <i class="ph ph-warning-circle" aria-hidden="true" />
             {{ erroDemo }}
           </p>
           <p v-else-if="estado === 'vazio'" class="estado-vazio">
-            <i class="pi pi-user" aria-hidden="true" />
+            <i class="ph ph-user" aria-hidden="true" />
             {{ t('clinico.pacientes.vazioTitulo') }}
           </p>
           <ClinicPatientHeader v-else :pet="pacienteExemplo" :tutor="tutorExemplo" />
@@ -254,11 +254,11 @@ const opcoesRisco = computed(() =>
 
           <div v-if="estado === 'carregando'" class="esqueleto" aria-hidden="true" />
           <p v-else-if="estado === 'erro'" class="estado-erro" role="alert">
-            <i class="pi pi-exclamation-circle" aria-hidden="true" />
+            <i class="ph ph-warning-circle" aria-hidden="true" />
             {{ erroDemo }}
           </p>
           <p v-else-if="estado === 'vazio'" class="estado-vazio">
-            <i class="pi pi-check-circle" aria-hidden="true" />
+            <i class="ph ph-check-circle" aria-hidden="true" />
             Nenhum alerta neste paciente
           </p>
           <div v-else class="vitrine__linha">
@@ -279,11 +279,11 @@ const opcoesRisco = computed(() =>
 
           <div v-if="estado === 'carregando'" class="esqueleto" aria-hidden="true" />
           <p v-else-if="estado === 'erro'" class="estado-erro" role="alert">
-            <i class="pi pi-exclamation-circle" aria-hidden="true" />
+            <i class="ph ph-warning-circle" aria-hidden="true" />
             {{ erroDemo }}
           </p>
           <p v-else-if="estado === 'vazio'" class="estado-vazio">
-            <i class="pi pi-minus-circle" aria-hidden="true" />
+            <i class="ph ph-minus-circle" aria-hidden="true" />
             Exame físico ainda não preenchido
           </p>
           <div v-else class="vitrine__grade">
@@ -304,11 +304,11 @@ const opcoesRisco = computed(() =>
 
           <div v-if="estado === 'carregando'" class="esqueleto" aria-hidden="true" />
           <p v-else-if="estado === 'erro'" class="estado-erro" role="alert">
-            <i class="pi pi-exclamation-circle" aria-hidden="true" />
+            <i class="ph ph-warning-circle" aria-hidden="true" />
             {{ erroDemo }}
           </p>
           <p v-else-if="estado === 'vazio'" class="estado-vazio">
-            <i class="pi pi-minus-circle" aria-hidden="true" />
+            <i class="ph ph-minus-circle" aria-hidden="true" />
             Nada escolhido ainda
           </p>
           <!--

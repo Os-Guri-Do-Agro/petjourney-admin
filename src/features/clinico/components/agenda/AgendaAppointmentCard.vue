@@ -215,12 +215,12 @@ const estilo = computed(() => {
       </span>
       <i
         v-if="avisosVisiveis.length > 0"
-        class="pi pi-exclamation-circle card__icone card__icone--aviso"
+        class="ph ph-warning-circle card__icone card__icone--aviso"
         :title="avisosVisiveis.map(formato.conflito).join(' · ')"
       />
       <i
         v-if="appointment.linkedGroupId"
-        class="pi pi-link card__icone"
+        class="ph ph-link card__icone"
         :title="t('clinico.agenda.duasSalas')"
       />
     </div>
@@ -255,7 +255,7 @@ const estilo = computed(() => {
     <Button
       v-if="podeMarcarFalta"
       class="card__falta"
-      icon="pi pi-user-minus"
+      icon="ph ph-user-minus"
       severity="warn"
       outlined
       size="small"

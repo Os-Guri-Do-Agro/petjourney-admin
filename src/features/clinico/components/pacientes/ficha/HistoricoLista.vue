@@ -235,7 +235,7 @@ const meses = computed(() => {
               ? t('clinico.ficha.historico.ocultarAgendados')
               : t('clinico.ficha.historico.verAgendados', { n: proximos.length }, proximos.length)
           "
-          :icon="proximosAbertos ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+          :icon="proximosAbertos ? 'ph ph-caret-up' : 'ph ph-caret-down'"
           icon-pos="right"
           severity="secondary"
           text
@@ -331,7 +331,7 @@ const meses = computed(() => {
               </span>
               <i
                 v-if="item.encounterId"
-                class="pi pi-chevron-right historico-linha__seta"
+                class="ph ph-caret-right historico-linha__seta"
                 aria-hidden="true"
               />
             </span>

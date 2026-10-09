@@ -500,7 +500,7 @@ onMounted(carregar)
             </h2>
             <RouterLink class="hc__link" to="/veterinario/agenda">
               {{ t('clinico.meuDia.agendaCompleta') }}
-              <i class="pi pi-arrow-right hoje__seta" aria-hidden="true" />
+              <i class="ph ph-arrow-right hoje__seta" aria-hidden="true" />
             </RouterLink>
           </header>
 

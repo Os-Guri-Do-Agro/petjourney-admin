@@ -105,7 +105,7 @@ watch(
           </span>
         </span>
 
-        <i class="pi pi-arrow-right" aria-hidden="true" />
+        <i class="ph ph-arrow-right" aria-hidden="true" />
 
         <span class="turno__lado">
           <span class="turno__rotulo">{{ t('hotel.turno.entra') }}</span>
@@ -124,13 +124,13 @@ watch(
       -->
       <section v-if="travadas.length > 0" class="bloco bloco--trava">
         <h3 class="bloco__titulo bloco__titulo--trava">
-          <i class="pi pi-lock" aria-hidden="true" />
+          <i class="ph ph-lock" aria-hidden="true" />
           {{ t('hotel.turno.travado') }}
         </h3>
 
         <ul class="lista">
           <li v-for="ocorrencia in travadas" :key="ocorrencia.id" class="trava">
-            <i class="pi pi-exclamation-circle" aria-hidden="true" />
+            <i class="ph ph-warning-circle" aria-hidden="true" />
 
             <div class="lista__texto">
               <strong>{{ formato.ocorrenciaKind(ocorrencia.kind) }}</strong>
@@ -139,7 +139,7 @@ watch(
 
             <Button
               :label="t('hotel.turno.resolver')"
-              icon="pi pi-phone"
+              icon="ph ph-phone"
               size="small"
               @click="emit('irPara', ocorrencia.hospedagemId)"
             />
@@ -245,7 +245,7 @@ watch(
       <Button :label="t('hotel.comum.fechar')" severity="secondary" text @click="emit('fechar')" />
       <Button
         :label="t('hotel.turno.entregar')"
-        icon="pi pi-sign-out"
+        icon="ph ph-sign-out"
         :loading="salvando"
         :disabled="!podeEntregar"
         @click="emit('entregar', { nota, recebidoPor })"
@@ -296,7 +296,7 @@ watch(
   font-variant-numeric: tabular-nums;
 }
 
-.turno > .pi-arrow-right {
+.turno > .ph-arrow-right {
   color: var(--clinic-accent-strong);
   font-size: 0.75rem;
 }
@@ -320,7 +320,7 @@ watch(
   color: var(--clinic-risk-text);
 }
 
-.bloco__titulo--trava .pi {
+.bloco__titulo--trava .ph {
   font-size: 0.7rem;
 }
 
@@ -331,7 +331,7 @@ watch(
   background: var(--clinic-surface);
 }
 
-.trava > .pi-exclamation-circle {
+.trava > .ph-warning-circle {
   display: grid;
   width: 1.6rem;
   height: 1.6rem;

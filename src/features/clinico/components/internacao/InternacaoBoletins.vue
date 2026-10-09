@@ -184,7 +184,7 @@ function compor() {
       >
         <header class="retido__topo">
           <h3 class="retido__titulo">
-            <i class="pi pi-lock" aria-hidden="true" />
+            <i class="ph ph-lock" aria-hidden="true" />
             {{ t('clinico.internacao.boletim.retidoTitulo') }}
           </h3>
           <InternacaoGravidade :gravidade="boletim.gravidade" />
@@ -196,7 +196,7 @@ function compor() {
 
         <p class="retido__passos">
           <span class="retido__passo" :class="{ 'retido__passo--feito': boletim.ligacaoEm }">
-            <i :class="boletim.ligacaoEm ? 'pi pi-check-circle' : 'pi pi-phone'" aria-hidden="true" />
+            <i :class="boletim.ligacaoEm ? 'ph ph-check-circle' : 'ph ph-phone'" aria-hidden="true" />
             {{
               boletim.ligacaoEm
                 ? t('clinico.internacao.boletim.ligacaoFeita', {
@@ -215,13 +215,13 @@ function compor() {
           <Button
             v-if="!boletim.ligacaoEm"
             :label="t('clinico.internacao.boletim.registrarLigacao')"
-            icon="pi pi-phone"
+            icon="ph ph-phone"
             :loading="salvando"
             @click="emit('ligar', boletim.id)"
           />
           <Button
             :label="t('clinico.internacao.boletim.enviar')"
-            icon="pi pi-send"
+            icon="ph ph-paper-plane-tilt"
             severity="secondary"
             :outlined="!boletim.ligacaoEm"
             :disabled="!boletim.ligacaoEm || salvando"
@@ -280,7 +280,7 @@ function compor() {
         <div class="composer__acoes">
           <Button
             :label="t('clinico.internacao.boletim.compor')"
-            icon="pi pi-pencil"
+            icon="ph ph-pencil-simple"
             :disabled="!rascunho.trim() || salvando"
             :loading="salvando"
             @click="compor"
@@ -312,7 +312,7 @@ function compor() {
             </span>
             <Button
               :label="t('clinico.internacao.boletim.enviar')"
-              icon="pi pi-send"
+              icon="ph ph-paper-plane-tilt"
               size="small"
               :loading="salvando"
               @click="emit('enviar', boletim.id)"

@@ -190,7 +190,7 @@ function marcarPendentes() {
 
         <i
           class="ronda__seta"
-          :class="aberta ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          :class="aberta ? 'ph ph-caret-down' : 'ph ph-caret-right'"
           aria-hidden="true"
         />
       </button>
@@ -201,7 +201,7 @@ function marcarPendentes() {
           v-if="aceitaLote"
           class="ronda__lote"
           :label="t('hotel.rotina.marcarRonda', { total: pendentes.length }, pendentes.length)"
-          icon="pi pi-check-circle"
+          icon="ph ph-check-circle"
           severity="secondary"
           outlined
           size="small"
@@ -246,7 +246,7 @@ function marcarPendentes() {
         v-if="aceitaLote"
         class="ronda__lote"
         :label="t('hotel.rotina.marcarRonda', { total: pendentes.length }, pendentes.length)"
-        icon="pi pi-check-circle"
+        icon="ph ph-check-circle"
         :severity="adiante ? 'secondary' : undefined"
         :outlined="adiante"
         size="small"

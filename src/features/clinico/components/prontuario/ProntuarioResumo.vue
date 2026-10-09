@@ -135,7 +135,7 @@ const exames = computed(() =>
 const catalogo = computed(() => [
   {
     id: 'prontuario' as DocumentoId,
-    icone: 'pi pi-file',
+    icone: 'ph ph-file',
     grupo: 'atendimento' as const,
     disponivel: true,
     /* O registro em si: sempre pertinente. */
@@ -144,7 +144,7 @@ const catalogo = computed(() => [
   },
   {
     id: 'receituario' as DocumentoId,
-    icone: 'pi pi-book',
+    icone: 'ph ph-book-open',
     grupo: 'atendimento' as const,
     disponivel: prescricoes.value.length > 0,
     sugerido: prescricoes.value.length > 0,
@@ -152,7 +152,7 @@ const catalogo = computed(() => [
   },
   {
     id: 'atestado-saude' as DocumentoId,
-    icone: 'pi pi-verified',
+    icone: 'ph ph-seal-check',
     grupo: 'declaracoes' as const,
     disponivel: true,
     /* Atestado sai a pedido do responsável, não por implicação do atendimento. */
@@ -161,7 +161,7 @@ const catalogo = computed(() => [
   },
   {
     id: 'atestado-comparecimento' as DocumentoId,
-    icone: 'pi pi-clock',
+    icone: 'ph ph-clock',
     grupo: 'declaracoes' as const,
     disponivel: true,
     sugerido: false,
@@ -174,7 +174,7 @@ const catalogo = computed(() => [
   // ------------------------------------------------ recortes do prontuário
   {
     id: 'pedido-exame' as DocumentoId,
-    icone: 'pi pi-search',
+    icone: 'ph ph-magnifying-glass',
     grupo: 'atendimento' as const,
     /* Sem exame pedido, a folha sairia com uma lista vazia — pior que botão ausente. */
     disponivel: props.encounter.conduta.examesSolicitados.length > 0,
@@ -183,7 +183,7 @@ const catalogo = computed(() => [
   },
   {
     id: 'orientacoes' as DocumentoId,
-    icone: 'pi pi-home',
+    icone: 'ph ph-house',
     grupo: 'atendimento' as const,
     disponivel:
       Boolean(props.encounter.conduta.orientacoes.trim()) || prescricoes.value.length > 0,
@@ -193,7 +193,7 @@ const catalogo = computed(() => [
   },
   {
     id: 'encaminhamento' as DocumentoId,
-    icone: 'pi pi-send',
+    icone: 'ph ph-paper-plane-tilt',
     grupo: 'terceiros' as const,
     disponivel: true,
     sugerido: false,
@@ -201,7 +201,7 @@ const catalogo = computed(() => [
   },
   {
     id: 'relatorio-plano' as DocumentoId,
-    icone: 'pi pi-shield',
+    icone: 'ph ph-shield',
     grupo: 'terceiros' as const,
     disponivel: true,
     sugerido: false,
@@ -211,7 +211,7 @@ const catalogo = computed(() => [
   // ------------------------------------------------ declarações
   {
     id: 'atestado-viagem' as DocumentoId,
-    icone: 'pi pi-globe',
+    icone: 'ph ph-globe',
     grupo: 'declaracoes' as const,
     disponivel: true,
     sugerido: false,
@@ -219,7 +219,7 @@ const catalogo = computed(() => [
   },
   {
     id: 'comprovante-vacinacao' as DocumentoId,
-    icone: 'pi pi-shield',
+    icone: 'ph ph-shield',
     grupo: 'declaracoes' as const,
     disponivel: true,
     /*
@@ -231,7 +231,7 @@ const catalogo = computed(() => [
   },
   {
     id: 'declaracao-obito' as DocumentoId,
-    icone: 'pi pi-heart',
+    icone: 'ph ph-heart',
     grupo: 'termos' as const,
     disponivel: true,
     /* Nunca sugerido. Oferecer isto numa consulta de rotina é indelicado e assustador. */
@@ -242,7 +242,7 @@ const catalogo = computed(() => [
   // ------------------------------------------------ termos do responsável
   {
     id: 'termo-consentimento' as DocumentoId,
-    icone: 'pi pi-check-square',
+    icone: 'ph ph-check-square',
     grupo: 'termos' as const,
     disponivel: true,
     /*
@@ -254,7 +254,7 @@ const catalogo = computed(() => [
   },
   {
     id: 'termo-recusa' as DocumentoId,
-    icone: 'pi pi-times-circle',
+    icone: 'ph ph-x-circle',
     grupo: 'termos' as const,
     disponivel: true,
     sugerido: false,
@@ -262,7 +262,7 @@ const catalogo = computed(() => [
   },
   {
     id: 'termo-eutanasia' as DocumentoId,
-    icone: 'pi pi-file-edit',
+    icone: 'ph ph-note-pencil',
     grupo: 'termos' as const,
     disponivel: true,
     sugerido: false,
@@ -272,7 +272,7 @@ const catalogo = computed(() => [
   // ------------------------------------------------ administrativo
   {
     id: 'orcamento' as DocumentoId,
-    icone: 'pi pi-dollar',
+    icone: 'ph ph-currency-dollar',
     grupo: 'terceiros' as const,
     disponivel: true,
     sugerido: false,
@@ -434,8 +434,8 @@ const noApp = computed(() => {
     -->
     <section class="app" :class="`app--${noApp.estado}`" aria-labelledby="resumo-app-titulo">
       <i
-        class="pi app__icone"
-        :class="noApp.estado === 'liberado' ? 'pi-check-circle' : 'pi-mobile'"
+        class="ph app__icone"
+        :class="noApp.estado === 'liberado' ? 'ph-check-circle' : 'ph-device-mobile'"
         aria-hidden="true"
       />
       <div class="app__corpo">
@@ -447,7 +447,7 @@ const noApp = computed(() => {
       <Button
         v-if="noApp.estado === 'pronto'"
         :label="t('clinico.prontuario.resumo.app.liberar')"
-        icon="pi pi-send"
+        icon="ph ph-paper-plane-tilt"
         size="small"
         @click="emit('liberarResumo')"
       />
@@ -475,7 +475,7 @@ const noApp = computed(() => {
 
           <Button
             fluid
-            icon="pi pi-print"
+            icon="ph ph-printer"
             size="small"
             severity="secondary"
             outlined
@@ -497,7 +497,7 @@ const noApp = computed(() => {
           severity="secondary"
           text
           size="small"
-          :icon="outrosAbertos ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          :icon="outrosAbertos ? 'ph ph-caret-down' : 'ph ph-caret-right'"
           :label="t('clinico.documentos.outros', { contagem: totalDeOutros })"
           :aria-expanded="outrosAbertos"
           @click="outrosAbertos = !outrosAbertos"
@@ -528,7 +528,7 @@ const noApp = computed(() => {
                     <strong>{{ t(`clinico.documentos.cartao.${documento.id}.titulo`) }}</strong>
                     <small>{{ t(`clinico.documentos.cartao.${documento.id}.descricao`) }}</small>
                   </span>
-                  <i class="pi pi-print linha__acao" aria-hidden="true" />
+                  <i class="ph ph-printer linha__acao" aria-hidden="true" />
                 </Button>
               </li>
             </ul>
@@ -537,7 +537,7 @@ const noApp = computed(() => {
       </div>
 
       <p class="documentos__nota">
-        <i class="pi pi-info-circle" aria-hidden="true" />
+        <i class="ph ph-info" aria-hidden="true" />
         {{ t('clinico.documentos.notaImpressao') }}
       </p>
     </section>

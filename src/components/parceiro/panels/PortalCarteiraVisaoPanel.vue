@@ -320,7 +320,7 @@ onBeforeUnmount(() => {
       <Button
         type="button"
         :label="t('carteira.visao.retry')"
-        icon="pi pi-refresh"
+        icon="ph ph-arrow-clockwise"
         severity="secondary"
         outlined
         size="small"
@@ -331,7 +331,7 @@ onBeforeUnmount(() => {
     <template v-else-if="carteira">
       <section class="hc carteira-fatos" :aria-label="t('carteira.resumo.aria')">
         <p v-if="motivo" class="carteira-fatos__motivo">
-          <i class="pi pi-info-circle" aria-hidden="true" />
+          <i class="ph ph-info" aria-hidden="true" />
           {{ motivo }}
         </p>
 
@@ -354,7 +354,7 @@ onBeforeUnmount(() => {
       </section>
 
       <p v-if="showComissaoDisabledNotice" class="carteira-fatos__motivo">
-        <i class="pi pi-info-circle" aria-hidden="true" />
+        <i class="ph ph-info" aria-hidden="true" />
         {{ t('carteira.visao.alertComissaoDisabled') }}
       </p>
     </template>
@@ -401,7 +401,7 @@ onBeforeUnmount(() => {
         />
         <Button
           :label="t('carteira.visao.saque.submit')"
-          icon="pi pi-arrow-right"
+          icon="ph ph-arrow-right"
           :loading="requestingSaque"
           :disabled="capacidade !== 'liberado'"
           @click="requestWithdraw"
@@ -437,7 +437,7 @@ onBeforeUnmount(() => {
         />
         <Button
           :label="t('carteira.visao.pix.save')"
-          icon="pi pi-check"
+          icon="ph ph-check"
           :disabled="!store.isDono || !chavePix.trim()"
           :loading="savingPix"
           @click="savePix"

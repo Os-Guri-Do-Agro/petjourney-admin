@@ -455,7 +455,7 @@ onMounted(() => {
   </div>
 
   <div v-else-if="pageState === 'error'" class="settings-perfil__error" role="alert">
-    <i class="pi pi-exclamation-circle" aria-hidden="true" />
+    <i class="ph ph-warning-circle" aria-hidden="true" />
     <div>
       <strong>{{ t('settings.perfil.errors.loadTitle') }}</strong>
       <p>{{ loadError }}</p>
@@ -492,7 +492,7 @@ onMounted(() => {
               class="settings-perfil__avatar-overlay"
               aria-hidden="true"
             >
-              <i class="pi pi-camera" />
+              <i class="ph ph-camera" />
             </span>
             <span
               v-else
@@ -501,7 +501,7 @@ onMounted(() => {
             />
           </span>
           <span class="settings-perfil__avatar-badge" aria-hidden="true">
-            <i :class="uploadingPhoto ? 'pi pi-spin pi-spinner' : 'pi pi-pencil'" />
+            <i :class="uploadingPhoto ? 'ph ph-spin ph-circle-notch' : 'ph ph-pencil-simple'" />
           </span>
         </Button>
 
@@ -523,7 +523,7 @@ onMounted(() => {
           <p>{{ sessionUser.email }}</p>
           <p class="settings-perfil__photo-hint">{{ t('settings.perfil.photoHint') }}</p>
           <p v-if="partnerContextLabel" class="settings-perfil__meta">
-            <i class="pi pi-building" aria-hidden="true" />
+            <i class="ph ph-building" aria-hidden="true" />
             {{ partnerContextLabel }}
           </p>
         </div>
@@ -645,7 +645,7 @@ onMounted(() => {
         <Button
           type="submit"
           :label="t('settings.perfil.actions.save')"
-          icon="pi pi-check"
+          icon="ph ph-check"
           :loading="savingProfile"
           :disabled="uploadingPhoto"
         />

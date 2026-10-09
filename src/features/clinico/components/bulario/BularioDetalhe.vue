@@ -72,7 +72,7 @@ function faixa(minimo: number, maximo: number) {
       <div class="ficha__marcas">
         <span class="marca">{{ t(`clinico.bulario.classe.${medicamento.classe}`) }}</span>
         <span v-if="medicamento.controlado" class="marca marca--controle">
-          <i class="pi pi-lock" aria-hidden="true" />
+          <i class="ph ph-lock" aria-hidden="true" />
           {{ t('clinico.bulario.controlado') }}
         </span>
       </div>
@@ -95,8 +95,8 @@ function faixa(minimo: number, maximo: number) {
         <i
           :class="
             aviso.kind === 'especie-proibida' || aviso.kind === 'alergia'
-              ? 'pi pi-exclamation-triangle'
-              : 'pi pi-info-circle'
+              ? 'ph ph-warning'
+              : 'ph ph-info'
           "
           aria-hidden="true"
         />
@@ -159,7 +159,7 @@ function faixa(minimo: number, maximo: number) {
     </section>
 
     <p v-if="medicamento.observacao" class="ficha__observacao">
-      <i class="pi pi-comment" aria-hidden="true" />
+      <i class="ph ph-chat-circle" aria-hidden="true" />
       {{ medicamento.observacao }}
     </p>
 

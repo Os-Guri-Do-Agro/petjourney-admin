@@ -187,7 +187,7 @@ function adicionar() {
     <TransitionGroup tag="ul" name="quem-linha" class="quem__lista">
       <li key="responsavel" class="pessoa">
         <i
-          class="pi pi-lock pessoa__marca"
+          class="ph ph-lock pessoa__marca"
           role="img"
           :aria-label="t('hotel.quemBusca.sempre')"
           :title="t('hotel.quemBusca.sempre')"
@@ -224,7 +224,7 @@ function adicionar() {
       v-if="!cadastrando"
       :id="`${idCampo}-abrir`"
       :label="t('hotel.quemBusca.cadastrar')"
-      icon="pi pi-user-plus"
+      icon="ph ph-user-plus"
       severity="secondary"
       outlined
       class="quem__cadastrar"
@@ -311,7 +311,7 @@ function adicionar() {
         <div class="nova__acoes">
           <!-- A trava de fora tem um motivo, e ele fica escrito ao lado dos dois botões que a soltam. -->
           <small v-if="pendente" class="nova__lembrete">
-            <i class="pi pi-info-circle" aria-hidden="true" />
+            <i class="ph ph-info" aria-hidden="true" />
             {{ t('hotel.quemBusca.pendente') }}
           </small>
 
@@ -321,7 +321,7 @@ function adicionar() {
             outlined
             @click="fecharCadastro"
           />
-          <Button :label="t('hotel.quemBusca.adicionar')" icon="pi pi-check" @click="adicionar" />
+          <Button :label="t('hotel.quemBusca.adicionar')" icon="ph ph-check" @click="adicionar" />
         </div>
       </div>
     </Transition>

@@ -3,6 +3,7 @@ import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
+import { PhHeart } from '@phosphor-icons/vue'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -235,11 +236,11 @@ const showObservacoesTutor = computed(() => {
 })
 
 const APARENCIA_BLOCO: Record<BlocoLista, { icon: string; tone: 'warm' | 'default' }> = {
-  alergias: { icon: 'pi pi-exclamation-triangle', tone: 'warm' },
-  vacinas: { icon: 'pi pi-shield', tone: 'default' },
-  medicamentos: { icon: 'pi pi-inbox', tone: 'default' },
-  comportamento: { icon: 'pi pi-eye', tone: 'default' },
-  diagnosticos: { icon: 'pi pi-file-edit', tone: 'default' },
+  alergias: { icon: 'ph ph-warning', tone: 'warm' },
+  vacinas: { icon: 'ph ph-shield', tone: 'default' },
+  medicamentos: { icon: 'ph ph-tray', tone: 'default' },
+  comportamento: { icon: 'ph ph-eye', tone: 'default' },
+  diagnosticos: { icon: 'ph ph-note-pencil', tone: 'default' },
 }
 
 /** Entrada das regras da Parte 15: status manda tanto quanto o snapshot. */
@@ -885,7 +886,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
     <template #actions>
       <Button
         :label="t('acessos.detalhe.back')"
-        icon="pi pi-arrow-left"
+        icon="ph ph-arrow-left"
         severity="secondary"
         @click="voltar"
       />
@@ -907,7 +908,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
             class="atd-hero__foto"
           />
           <span v-else class="atd-hero__foto atd-hero__foto--empty" aria-hidden="true">
-            <i class="pi pi-heart" />
+            <i class="ph ph-heart" />
           </span>
 
           <div class="atd-hero__identity">
@@ -926,11 +927,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
             <div class="atd-hero__tags" :aria-label="t('acessos.detalhe.metaAria')">
               <span class="atd-hero__tag atd-hero__tag--service">
-                <i class="pi pi-briefcase" aria-hidden="true" />
+                <i class="ph ph-briefcase" aria-hidden="true" />
                 {{ servicoLabel }}
               </span>
               <span v-if="isAtivo" class="atd-hero__tag atd-hero__tag--expiry">
-                <i class="pi pi-clock" aria-hidden="true" />
+                <i class="ph ph-clock" aria-hidden="true" />
                 {{ expiraLabel(detalhe.expiraEm) }}
               </span>
             </div>
@@ -947,7 +948,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
       <!-- Encerrado -->
       <section v-if="!isAtivo" class="atd-closed" role="status">
-        <i class="pi pi-lock" aria-hidden="true" />
+        <i class="ph ph-lock" aria-hidden="true" />
         <div>
           <strong>{{ t('acessos.encerrado.title') }}</strong>
           <p>
@@ -977,7 +978,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           class="atd-stamp"
           :data-atualizado="carimbo.atualizado ? 'true' : 'false'"
         >
-          <i :class="carimbo.atualizado ? 'pi pi-history' : 'pi pi-clock'" aria-hidden="true" />
+          <i :class="carimbo.atualizado ? 'ph ph-clock-counter-clockwise' : 'ph ph-clock'" aria-hidden="true" />
           <span>{{
             carimbo.atualizado
               ? t('acessos.snapshot.carimboAtualizado', {
@@ -991,13 +992,13 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
              e não tem o que mostrar. Explica o porquê e empurra para a ação útil. -->
         <section v-if="resumoVazio" class="atd-empty">
           <span class="atd-empty__icon" aria-hidden="true">
-            <i class="pi pi-lock-open" />
+            <i class="ph ph-lock-open" />
           </span>
           <strong>{{ t('acessos.snapshot.emptyTitle') }}</strong>
           <p>{{ t('acessos.snapshot.emptyBody', { pet: detalhe.petNome }) }}</p>
           <Button
             :label="t('acessos.snapshot.emptyCta')"
-            icon="pi pi-pencil"
+            icon="ph ph-pencil-simple"
             size="small"
             @click="setTab('anotacoes')"
           />
@@ -1007,7 +1008,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           <section v-if="mensagemTutor" class="atd-callout">
             <header class="atd-callout__head">
               <span class="atd-callout__icon" aria-hidden="true">
-                <i class="pi pi-comment" />
+                <i class="ph ph-chat-circle" />
               </span>
               <h3>{{ t('acessos.detalhe.mensagemTutor') }}</h3>
             </header>
@@ -1017,7 +1018,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           <section v-if="showObservacoesTutor" class="atd-callout atd-callout--soft">
             <header class="atd-callout__head">
               <span class="atd-callout__icon" aria-hidden="true">
-                <i class="pi pi-info-circle" />
+                <i class="ph ph-info" />
               </span>
               <h3>{{ t('acessos.snapshot.observacoes') }}</h3>
             </header>
@@ -1048,7 +1049,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           <ul v-else class="atd-trat__list">
             <li v-for="item in tratamentosContinuos" :key="item.key" class="atd-trat__entry">
               <header class="atd-trat__head">
-                <i class="pi pi-heart-fill" aria-hidden="true" />
+                <PhHeart weight="fill" aria-hidden="true" />
                 <strong>{{ item.titulo }}</strong>
               </header>
 
@@ -1112,8 +1113,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     }}</small>
                   </span>
                   <i
-                    class="pi atd-fold__chevron"
-                    :class="isSectionOpen(section.id) ? 'pi-chevron-up' : 'pi-chevron-down'"
+                    class="ph atd-fold__chevron"
+                    :class="isSectionOpen(section.id) ? 'ph-caret-up' : 'ph-caret-down'"
                     aria-hidden="true"
                   />
                 </Button>
@@ -1167,7 +1168,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           <ul v-else class="atd-docs__list">
             <li v-for="doc in documentos" :key="doc.key" class="atd-doc">
               <span class="atd-doc__icon" aria-hidden="true">
-                <i class="pi pi-file" />
+                <i class="ph ph-file" />
               </span>
 
               <div class="atd-doc__copy">
@@ -1194,7 +1195,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   </span>
                   <Button
                     :label="t('acessos.documentos.abrir')"
-                    icon="pi pi-external-link"
+                    icon="ph ph-arrow-square-out"
                     severity="secondary"
                     outlined
                     size="small"
@@ -1204,7 +1205,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   />
                   <Button
                     :label="t('acessos.documentos.baixar')"
-                    icon="pi pi-download"
+                    icon="ph ph-download-simple"
                     size="small"
                     :loading="arquivoOcupado === `baixar:${arquivo.id}`"
                     :aria-label="`${t('acessos.documentos.baixar')}: ${doc.nome}`"
@@ -1238,7 +1239,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           <ul v-else class="atd-diario__list">
             <li v-for="entrada in diario" :key="entrada.key" class="atd-diario__entry">
               <header class="atd-diario__head">
-                <i class="pi pi-calendar" aria-hidden="true" />
+                <i class="ph ph-calendar-blank" aria-hidden="true" />
                 <strong>{{ entrada.data }}</strong>
               </header>
 
@@ -1282,7 +1283,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   v-for="(fotoId, index) in entrada.fotoIds"
                   :key="fotoId"
                   :label="t('acessos.diario.abrirFoto', { n: index + 1 })"
-                  icon="pi pi-image"
+                  icon="ph ph-image"
                   severity="secondary"
                   outlined
                   size="small"
@@ -1317,7 +1318,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
             <div v-if="anotacoesOrdenadas.length === 0" class="atd-empty">
               <span class="atd-empty__icon" aria-hidden="true">
-                <i class="pi pi-pencil" />
+                <i class="ph ph-pencil-simple" />
               </span>
               <strong>{{ t('acessos.anotacoes.empty') }}</strong>
               <p>
@@ -1348,11 +1349,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                       }}</time>
                     </div>
                     <p class="atd-note__byline">
-                      <i class="pi pi-building" aria-hidden="true" />
+                      <i class="ph ph-building" aria-hidden="true" />
                       <span>{{ anotacao.empresaNome }}</span>
                       <template v-if="autorDaAnotacao(anotacao)">
                         <span class="atd-note__sep" aria-hidden="true">·</span>
-                        <i class="pi pi-user" aria-hidden="true" />
+                        <i class="ph ph-user" aria-hidden="true" />
                         <span>{{ autorDaAnotacao(anotacao) }}</span>
                       </template>
                     </p>
@@ -1380,8 +1381,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                             <i
                               :class="
                                 abrindoAnexoId === anexo.id
-                                  ? 'pi pi-spin pi-spinner'
-                                  : 'pi pi-paperclip'
+                                  ? 'ph ph-spin ph-circle-notch'
+                                  : 'ph ph-paperclip'
                               "
                             />
                           </span>
@@ -1394,7 +1395,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                               {{ formatBytes(anexo.tamanhoBytes) }}
                             </small>
                           </span>
-                          <i class="pi pi-external-link atd-note__file-go" aria-hidden="true" />
+                          <i class="ph ph-arrow-square-out atd-note__file-go" aria-hidden="true" />
                         </Button>
                       </li>
                     </ul>
@@ -1405,7 +1406,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           </section>
 
           <aside v-if="somenteLeitura" class="atd-readonly" role="status">
-            <i class="pi pi-eye" aria-hidden="true" />
+            <i class="ph ph-eye" aria-hidden="true" />
             <div>
               <strong>{{ t('acessos.anotacao.somenteLeitura.title') }}</strong>
               <p>{{ t('acessos.anotacao.somenteLeitura.body') }}</p>
@@ -1415,7 +1416,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           <aside v-if="podeAnotar" class="atd-composer" aria-labelledby="atd-composer-title">
             <header class="atd-composer__head">
               <span class="atd-composer__badge" aria-hidden="true">
-                <i class="pi pi-plus" />
+                <i class="ph ph-plus" />
               </span>
               <div>
                 <h3 id="atd-composer-title">{{ t('acessos.anotacao.title') }}</h3>
@@ -1508,12 +1509,12 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   <li v-for="(anexo, index) in anexosForm" :key="`${anexo.file.name}-${index}`">
                     <div class="atd-anexo-list__top">
                       <div class="atd-anexo-list__info">
-                        <i class="pi pi-file" aria-hidden="true" />
+                        <i class="ph ph-file" aria-hidden="true" />
                         <span>{{ anexo.file.name }}</span>
                         <small>{{ formatBytes(anexo.file.size) }}</small>
                       </div>
                       <Button
-                        icon="pi pi-times"
+                        icon="ph ph-x"
                         severity="secondary"
                         text
                         rounded
@@ -1549,7 +1550,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
                     @change="onAnexosSelected"
                   />
-                  <i class="pi pi-paperclip" aria-hidden="true" />
+                  <i class="ph ph-paperclip" aria-hidden="true" />
                   {{ t('acessos.anotacao.adicionarAnexo') }}
                 </label>
                 <small class="atd-file-hint">
@@ -1561,7 +1562,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
             <footer class="atd-composer__footer">
               <Button
                 :label="t('acessos.anotacao.enviar')"
-                icon="pi pi-check"
+                icon="ph ph-check"
                 :loading="submittingAnotacao"
                 @click="submitAnotacao"
               />
@@ -2277,10 +2278,16 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   font-size: 0.86rem;
 }
 
-.atd-trat__head i,
+.atd-trat__head svg,
 .atd-diario__head i {
   color: var(--partner-primary-strong);
   font-size: 0.8rem;
+}
+
+/* O coração é componente do Phosphor (peso `fill`), não a fonte: os 25% que o `.ph::before`
+ * compensa vão no tamanho. */
+.atd-trat__head svg {
+  font-size: 1rem;
 }
 
 .atd-trat__posologia {

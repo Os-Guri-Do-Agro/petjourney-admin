@@ -267,7 +267,7 @@ function pesar() {
             v-if="hospedagem.pesoSaidaKg !== null"
             :rotulo="formato.variacao(variacao)"
             :tom="perdaRelevante ? 'atencao' : 'neutro'"
-            icone="pi pi-chart-line"
+            icone="ph ph-chart-line"
           />
         </div>
 
@@ -285,7 +285,7 @@ function pesar() {
         <h3 class="bloco__titulo">{{ t('hotel.checkout.comoChegou') }}</h3>
 
         <p class="entrada">
-          <i class="pi pi-eye" aria-hidden="true" />
+          <i class="ph ph-eye" aria-hidden="true" />
           <span>{{ hospedagem.inspecaoDeEntrada }}</span>
         </p>
 
@@ -296,7 +296,7 @@ function pesar() {
         <h3 class="bloco__titulo">{{ t('hotel.checkout.fechamento') }}</h3>
 
         <p v-if="acrescimoDeSaida > 0" class="saida__tardia">
-          <i class="pi pi-clock" aria-hidden="true" />
+          <i class="ph ph-clock" aria-hidden="true" />
           {{ t('hotel.checkout.saidaTardia', { percentual: acrescimoDeSaida }) }}
         </p>
 
@@ -346,7 +346,7 @@ function pesar() {
           vez de calar — e o ícone carrega o aviso, não a cor da linha.
         -->
         <p v-if="!outraPessoa && pessoaEscolhida" :id="`${idCampo}-conferir`" class="conferir">
-          <i class="pi pi-id-card" aria-hidden="true" />
+          <i class="ph ph-identification-card" aria-hidden="true" />
           <span>
             <template v-if="pessoaEscolhida.telefone">{{ pessoaEscolhida.telefone }} · </template>
             <strong v-if="pessoaEscolhida.documento">
@@ -374,7 +374,7 @@ function pesar() {
       />
       <Button
         :label="t('hotel.checkout.confirmar')"
-        icon="pi pi-sign-out"
+        icon="ph ph-sign-out"
         :loading="salvando"
         :disabled="!podeFechar"
         @click="emit('confirmar', retiradoPor)"

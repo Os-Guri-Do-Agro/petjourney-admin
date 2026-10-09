@@ -94,7 +94,7 @@ export function getModoCardCopy(modo: ModoParticipacao): ModoCardCopy {
         'Extrato e saldo em tempo real',
         'Saque via PIX',
       ],
-      icon: 'pi pi-wallet',
+      icon: 'ph ph-wallet',
       tone: 'afiliado',
     }
   }
@@ -108,7 +108,7 @@ export function getModoCardCopy(modo: ModoParticipacao): ModoCardCopy {
       'Perks e benefícios exclusivos',
       'Convites para collabs da rede',
     ],
-    icon: 'pi pi-star',
+    icon: 'ph ph-star',
     tone: 'participativo',
   }
 }

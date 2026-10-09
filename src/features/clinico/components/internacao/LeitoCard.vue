@@ -117,11 +117,11 @@ const estado = computed(() => {
       -->
       <p v-if="item.atrasadas > 0 || item.boletimRetido" class="leito__cobrancas">
         <span v-if="item.boletimRetido" class="hc-selo leito__selo leito__selo--boletim">
-          <i class="pi pi-phone" aria-hidden="true" />
+          <i class="ph ph-phone" aria-hidden="true" />
           {{ t('clinico.internacao.leito.boletimRetido') }}
         </span>
         <span v-if="item.atrasadas > 0" class="hc-selo hc--coral leito__selo">
-          <i class="pi pi-exclamation-circle" aria-hidden="true" />
+          <i class="ph ph-warning-circle" aria-hidden="true" />
           {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }, item.atrasadas) }}
         </span>
       </p>
@@ -151,7 +151,7 @@ const estado = computed(() => {
         v-if="!indisponivel"
         class="leito__internar"
         :label="t('clinico.internacao.leito.internar')"
-        icon="pi pi-plus"
+        icon="ph ph-plus"
         severity="secondary"
         outlined
         size="small"

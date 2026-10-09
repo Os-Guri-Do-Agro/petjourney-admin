@@ -364,7 +364,7 @@ function confirmar() {
     <div class="nova">
       <section class="quando">
         <p class="quando__frase">
-          <i class="pi pi-calendar" aria-hidden="true" />
+          <i class="ph ph-calendar-blank" aria-hidden="true" />
           <strong>{{ formato.periodo(inicioEscolhido, fimEscolhido) }}</strong>
           <span class="quando__diarias">
             {{ t('hotel.reserva.diarias', { total: noites }, noites) }}
@@ -385,8 +385,8 @@ function confirmar() {
             :max="120"
             show-buttons
             button-layout="horizontal"
-            increment-button-icon="pi pi-plus"
-            decrement-button-icon="pi pi-minus"
+            increment-button-icon="ph ph-plus"
+            decrement-button-icon="ph ph-minus"
             size="small"
             class="quando__contador"
           />
@@ -539,7 +539,7 @@ function confirmar() {
         <HotelSelo
           :rotulo="formato.situacaoDaExigencia(situacaoParaSelo(admissao))"
           :tom="tomDaAdmissao(situacaoParaSelo(admissao))"
-          icone="pi pi-id-card"
+          icone="ph ph-identification-card"
         />
         <span>
           {{
@@ -566,7 +566,7 @@ function confirmar() {
       />
       <Button
         :label="t('hotel.reserva.criar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         :loading="salvando"
         :disabled="!petId || cadastroPendente"
         @click="confirmar"

@@ -467,13 +467,13 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                   v-if="hospede.hospedagem.pesoSaidaKg === null"
                   :rotulo="t('hotel.painel.faltaPesar')"
                   tom="atencao"
-                  icone="pi pi-exclamation-triangle"
+                  icone="ph ph-warning"
                 />
                 <HotelSelo
                   v-else
                   :rotulo="t('hotel.painel.prontoParaSair')"
                   tom="positivo"
-                  icone="pi pi-check"
+                  icone="ph ph-check"
                 />
               </RouterLink>
             </li>

@@ -83,7 +83,7 @@ const cabecalho = computed(() => {
   <section v-if="passagem" class="fim">
     <div class="fim__texto">
       <p class="fim__topo">
-        <i class="pi pi-sign-out" aria-hidden="true" />
+        <i class="ph ph-sign-out" aria-hidden="true" />
         <strong class="fim__rotulo">{{ t('hotel.turno.fimDoTurno') }}</strong>
         <span class="fim__quando">{{ cabecalho }}</span>
       </p>
@@ -98,12 +98,12 @@ const cabecalho = computed(() => {
         descobrir onde é esse lugar.
       -->
       <button v-if="travadas > 0" type="button" class="fim__trava" @click="emit('passar')">
-        <i class="pi pi-exclamation-circle" aria-hidden="true" />
+        <i class="ph ph-warning-circle" aria-hidden="true" />
         {{ t('hotel.turno.travaEntrega', { total: travadas }, travadas) }}
       </button>
 
       <p v-else class="fim__linha fim__linha--livre">
-        <i class="pi pi-check" aria-hidden="true" />
+        <i class="ph ph-check" aria-hidden="true" />
         {{ t('hotel.turno.nadaTrava') }}
       </p>
     </div>
@@ -111,7 +111,7 @@ const cabecalho = computed(() => {
     <Button
       :label="t('hotel.turno.passar')"
       class="acao-turno"
-      icon="pi pi-sign-out"
+      icon="ph ph-sign-out"
       severity="secondary"
       outlined
       size="small"
@@ -156,7 +156,7 @@ const cabecalho = computed(() => {
   color: var(--clinic-muted);
 }
 
-.fim__topo .pi {
+.fim__topo .ph {
   color: var(--clinic-faint);
   font-size: 0.75rem;
 }

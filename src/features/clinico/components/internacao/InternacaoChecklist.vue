@@ -55,11 +55,11 @@ const clinico = useClinicoStore()
 
 /** Ícone por tipo de item: medicamento, fluido e monitoramento se distinguem de relance. */
 const ICONE: Record<PrescricaoDeInternacao['kind'], string> = {
-  medicamento: 'pi pi-inbox',
-  fluido: 'pi pi-filter',
-  monitoramento: 'pi pi-heart',
-  alimentacao: 'pi pi-apple',
-  procedimento: 'pi pi-wrench',
+  medicamento: 'ph ph-tray',
+  fluido: 'ph ph-funnel',
+  monitoramento: 'ph ph-heart',
+  alimentacao: 'ph ph-apple-logo',
+  procedimento: 'ph ph-wrench',
 }
 
 /**
@@ -173,7 +173,7 @@ function registrarAntes(administracaoId: string) {
     </p>
 
     <div v-if="resolvidasAntes.total > 0" class="checklist__recolhido">
-      <i class="pi pi-check-circle" aria-hidden="true" />
+      <i class="ph ph-check-circle" aria-hidden="true" />
       <span>
         {{
           t(
@@ -190,7 +190,7 @@ function registrarAntes(administracaoId: string) {
             ? t('clinico.internacao.checklist.ocultarRegistradas')
             : t('clinico.internacao.checklist.verRegistradas')
         "
-        :icon="passadoAberto ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+        :icon="passadoAberto ? 'ph ph-caret-up' : 'ph ph-caret-down'"
         icon-pos="right"
         severity="secondary"
         text
@@ -269,7 +269,7 @@ function registrarAntes(administracaoId: string) {
                 rodapé: quem está com a seringa na mão não vai procurar legenda.
               -->
               <p v-if="naTroca(linha.administracao)" class="item__troca">
-                <i class="pi pi-arrow-right-arrow-left" aria-hidden="true" />
+                <i class="ph ph-arrows-left-right" aria-hidden="true" />
                 {{ t('clinico.internacao.checklist.naTroca') }}
               </p>
 
@@ -306,7 +306,7 @@ function registrarAntes(administracaoId: string) {
                   </span>
                   <Button
                     :label="t('clinico.internacao.checklist.registrarAgora')"
-                    icon="pi pi-check"
+                    icon="ph ph-check"
                     size="small"
                     :disabled="salvando"
                     @click="registrarAntes(linha.administracao.id)"
@@ -322,7 +322,7 @@ function registrarAntes(administracaoId: string) {
                 <Button
                   v-else
                   :label="t('clinico.internacao.checklist.checar')"
-                  icon="pi pi-check"
+                  icon="ph ph-check"
                   severity="secondary"
                   outlined
                   size="small"
@@ -334,7 +334,7 @@ function registrarAntes(administracaoId: string) {
               <template v-else-if="linha.situacao !== 'suspensa'">
                 <Button
                   :label="t('clinico.internacao.checklist.checar')"
-                  icon="pi pi-check"
+                  icon="ph ph-check"
                   size="small"
                   :disabled="salvando"
                   @click="emit('registrar', linha.administracao.id, 'feita')"
@@ -412,7 +412,7 @@ function registrarAntes(administracaoId: string) {
   font-size: 0.875rem;
 }
 
-.checklist__recolhido .pi-check-circle {
+.checklist__recolhido .ph-check-circle {
   color: var(--hc-verde-tinta);
 }
 

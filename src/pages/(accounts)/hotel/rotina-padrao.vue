@@ -257,7 +257,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         </div>
 
         <span v-if="sujo" class="topo__rascunho">
-          <i class="pi pi-pencil" aria-hidden="true" />
+          <i class="ph ph-pencil-simple" aria-hidden="true" />
           {{ t('hotel.rotinaPadrao.rascunho') }}
         </span>
       </header>
@@ -305,7 +305,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
             <Button
               :label="t('hotel.rotinaPadrao.editar')"
-              icon="pi pi-pencil"
+              icon="ph ph-pencil-simple"
               severity="secondary"
               outlined
               size="small"
@@ -364,14 +364,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           </div>
 
           <p v-if="item.exigeAutorizacao" class="servico__nota">
-            <i class="pi pi-shield" aria-hidden="true" />
+            <i class="ph ph-shield" aria-hidden="true" />
             {{ t('hotel.rotinaPadrao.exigeAutorizacao') }}
           </p>
         </li>
       </ul>
 
       <p class="limite">
-        <i class="pi pi-lock" aria-hidden="true" />
+        <i class="ph ph-lock" aria-hidden="true" />
         {{ t('hotel.rotinaPadrao.naoMexe') }}
       </p>
 
@@ -379,7 +379,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         <Button
           v-if="temDesfazer && !sujo"
           :label="t('hotel.rotinaPadrao.desfazer')"
-          icon="pi pi-undo"
+          icon="ph ph-arrow-u-up-left"
           severity="secondary"
           text
           size="small"
@@ -391,7 +391,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           v-if="sujo"
           class="rodape__publicar"
           :label="t('hotel.rotinaPadrao.publicar')"
-          icon="pi pi-send"
+          icon="ph ph-paper-plane-tilt"
           size="small"
           @click="abrirPublicacao"
         />
@@ -706,7 +706,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   font-size: var(--clinic-font-label);
 }
 
-.servico__nota .pi {
+.servico__nota .ph {
   color: var(--clinic-faint);
   font-size: 0.75rem;
 }
@@ -730,7 +730,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   font-size: var(--clinic-font-label);
 }
 
-.limite .pi {
+.limite .ph {
   color: var(--clinic-faint);
 }
 

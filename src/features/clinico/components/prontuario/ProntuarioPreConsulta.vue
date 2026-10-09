@@ -162,7 +162,7 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
   <section class="pre" :aria-label="t('clinico.prontuario.preConsulta.titulo')">
     <header class="pre__topo">
       <div class="pre__identidade">
-        <i class="pi pi-mobile pre__icone" aria-hidden="true" />
+        <i class="ph ph-device-mobile pre__icone" aria-hidden="true" />
         <div>
           <strong class="pre__titulo">{{ t('clinico.prontuario.preConsulta.titulo') }}</strong>
           <p class="pre__origem">
@@ -178,7 +178,7 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
       <Button
         v-if="podeAplicar"
         :label="t('clinico.prontuario.preConsulta.aplicar')"
-        icon="pi pi-arrow-down"
+        icon="ph ph-arrow-down"
         size="small"
         severity="secondary"
         outlined
@@ -205,7 +205,7 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
       aparece na receita impressa.
     -->
     <p v-if="preConsulta.pesoKg !== null" class="pre__peso">
-      <i class="pi pi-info-circle" aria-hidden="true" />
+      <i class="ph ph-info" aria-hidden="true" />
       {{
         t('clinico.prontuario.preConsulta.pesoInformado', {
           valor: formato.peso(preConsulta.pesoKg),
@@ -222,7 +222,7 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
     </blockquote>
 
     <p v-if="preConsulta.fotoIds.length > 0" class="pre__fotos">
-      <i class="pi pi-images" aria-hidden="true" />
+      <i class="ph ph-images" aria-hidden="true" />
       {{ t('clinico.preConsulta.fotos', { total: preConsulta.fotoIds.length }) }}
     </p>
   </section>

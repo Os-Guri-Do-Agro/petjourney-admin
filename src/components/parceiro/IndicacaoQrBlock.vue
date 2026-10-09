@@ -86,7 +86,7 @@ const blockStyle = computed(() => {
         @load="imagemFalhou = false"
       />
       <span v-if="imagemFalhou" class="indicacao-qr__fallback" aria-hidden="true">
-        <i class="pi pi-image" />
+        <i class="ph ph-image" />
       </span>
     </div>
     <figcaption>
@@ -101,7 +101,7 @@ const blockStyle = computed(() => {
       class="indicacao-qr__export"
       size="small"
       severity="secondary"
-      icon="pi pi-download"
+      icon="ph ph-download-simple"
       :label="t('divulgacao.shareKit.qrExport')"
       :disabled="props.disabled"
       :loading="exporting"

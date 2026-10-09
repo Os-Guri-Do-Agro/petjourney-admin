@@ -31,7 +31,7 @@ const styleVars = computed(() => {
 <template>
   <article class="clinical-placeholder" :style="styleVars" role="status">
     <span class="clinical-placeholder__icon" aria-hidden="true">
-      <i class="pi pi-inbox" />
+      <i class="ph ph-tray" />
     </span>
     <h2>{{ title }}</h2>
     <p>{{ description }}</p>

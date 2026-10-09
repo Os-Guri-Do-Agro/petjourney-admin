@@ -153,7 +153,7 @@ async function confirmar() {
   >
     <template #header>
       <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i :class="'pi pi-lock'" /></span>
+        <span class="clinic-dialog__marca" aria-hidden="true"><i :class="'ph ph-lock'" /></span>
         {{ t('clinico.agenda.bloqueio.titulo') }}
       </h2>
     </template>

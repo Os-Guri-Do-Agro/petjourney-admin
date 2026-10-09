@@ -172,7 +172,7 @@ async function registrar() {
     <template #header>
       <h2 class="clinic-dialog__titulo">
         <span class="clinic-dialog__marca" aria-hidden="true"
-          ><i class="pi pi-minus-circle"
+          ><i class="ph ph-minus-circle"
         /></span>
         {{ t('clinico.estoque.baixa.titulo', { lote: lote?.codigo ?? '' }) }}
       </h2>
@@ -198,7 +198,7 @@ async function registrar() {
       </ClinicField>
 
       <p class="baixa__explica">
-        <i class="pi pi-info-circle" aria-hidden="true" />
+        <i class="ph ph-info" aria-hidden="true" />
         {{ t(`clinico.estoque.baixa.explica.${motivo}`) }}
       </p>
 
@@ -252,7 +252,7 @@ async function registrar() {
         class="baixa__resultado baixa__resultado--ok"
         role="status"
       >
-        <i class="pi pi-check" aria-hidden="true" />
+        <i class="ph ph-check" aria-hidden="true" />
         {{ avisoDaContagem }}
       </p>
 
@@ -296,7 +296,7 @@ async function registrar() {
       />
       <Button
         :label="t('clinico.estoque.baixa.confirmar')"
-        icon="pi pi-check"
+        icon="ph ph-check"
         class="clinic-acao-principal"
         :loading="salvando"
         :disabled="!pode"

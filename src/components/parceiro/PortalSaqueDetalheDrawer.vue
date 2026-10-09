@@ -191,7 +191,7 @@ watch(
 
       <div v-else-if="error" class="saque-drawer__error" role="alert">
         <span class="saque-drawer__error-icon" aria-hidden="true">
-          <i class="pi pi-exclamation-circle" />
+          <i class="ph ph-warning-circle" />
         </span>
         <strong>{{ t('carteira.detail.errorLoad') }}</strong>
         <p>{{ error }}</p>
@@ -247,7 +247,7 @@ watch(
             <code>{{ saque.chavePixSnapshot }}</code>
             <Button
               type="button"
-              icon="pi pi-copy"
+              icon="ph ph-copy"
               :label="t('common.copy')"
               severity="secondary"
               size="small"
@@ -258,7 +258,7 @@ watch(
         </section>
 
         <section v-if="saque.motivoFalha" class="saque-drawer__alert" role="alert">
-          <span aria-hidden="true"><i class="pi pi-info-circle" /></span>
+          <span aria-hidden="true"><i class="ph ph-info" /></span>
           <div>
             <strong>{{ t('carteira.detail.failReason') }}</strong>
             <p>{{ saque.motivoFalha }}</p>

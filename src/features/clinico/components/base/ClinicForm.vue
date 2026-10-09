@@ -38,7 +38,7 @@ withDefaults(
     </header>
 
     <p v-if="somenteLeitura && motivoSomenteLeitura" class="bloco__leitura" role="status">
-      <i class="pi pi-lock" aria-hidden="true" />
+      <i class="ph ph-lock" aria-hidden="true" />
       <span>{{ motivoSomenteLeitura }}</span>
     </p>
 

@@ -26,8 +26,8 @@ const selecionados = defineModel<ModoParticipacao[]>({ default: () => [] })
 const { t } = useI18n()
 
 const ICONES: Record<ModoParticipacao, string> = {
-  afiliado: 'pi pi-wallet',
-  participativo: 'pi pi-star',
+  afiliado: 'ph ph-wallet',
+  participativo: 'ph ph-star',
 }
 
 type CardEstado = 'editavel' | 'ativo' | 'suspenso'
@@ -131,7 +131,7 @@ function toggle(modo: ModoParticipacao) {
 
         <ul class="prog-card__features">
           <li v-for="n in 3" :key="n">
-            <i class="pi pi-check-circle" aria-hidden="true" />
+            <i class="ph ph-check-circle" aria-hidden="true" />
             <span>{{ t(`parceiroCadastro.programas.${card.modo}.feature${n}`) }}</span>
           </li>
         </ul>

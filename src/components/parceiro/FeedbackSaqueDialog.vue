@@ -103,7 +103,7 @@ async function aoEnviar() {
   >
     <template #header>
       <h2 id="feedback-saque-titulo" class="feedback-saque__titulo">
-        <i class="pi pi-check-circle" aria-hidden="true" />
+        <i class="ph ph-check-circle" aria-hidden="true" />
         {{ t('carteira.feedbackSaque.titulo') }}
       </h2>
     </template>
@@ -196,7 +196,7 @@ async function aoEnviar() {
     <template #footer>
       <div class="feedback-saque__rodape">
         <p v-if="aviso" class="feedback-saque__aviso feedback-saque__aviso--erro" role="alert">
-          <i class="pi pi-exclamation-circle" aria-hidden="true" />
+          <i class="ph ph-warning-circle" aria-hidden="true" />
           {{ aviso }}
         </p>
         <p v-else-if="pedeNota" id="feedback-saque-pede-nota" class="feedback-saque__aviso">
@@ -214,7 +214,7 @@ async function aoEnviar() {
           <Button
             type="button"
             :label="t('common.send')"
-            icon="pi pi-send"
+            icon="ph ph-paper-plane-tilt"
             :loading="enviando"
             :disabled="nota === null || enviando || encerrado"
             :aria-describedby="pedeNota ? 'feedback-saque-pede-nota' : undefined"
@@ -238,7 +238,7 @@ async function aoEnviar() {
   font-weight: 700;
 }
 
-.feedback-saque__titulo .pi {
+.feedback-saque__titulo .ph {
   color: var(--hc-verde-tinta);
   font-size: 1.15rem;
 }
@@ -349,7 +349,7 @@ async function aoEnviar() {
 }
 
 /* O avião aponta para onde a leitura vai: em árabe, para a esquerda. */
-[dir='rtl'] .feedback-saque__acoes :deep(.pi-send) {
+[dir='rtl'] .feedback-saque__acoes :deep(.ph-paper-plane-tilt) {
   transform: scaleX(-1);
 }
 

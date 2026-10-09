@@ -167,7 +167,7 @@ function gravidade(medicamento: Medication) {
             </small>
           </span>
 
-          <i class="pi pi-chevron-right" aria-hidden="true" />
+          <i class="ph ph-caret-right" aria-hidden="true" />
         </Button>
       </li>
     </ul>

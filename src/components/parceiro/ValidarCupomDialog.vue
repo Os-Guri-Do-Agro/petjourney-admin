@@ -231,12 +231,12 @@ async function handleValidar() {
           <div class="vc-hero__glow" aria-hidden="true" />
           <div class="vc-hero__top">
             <span class="vc-hero__icon" aria-hidden="true">
-              <i class="pi pi-ticket" />
+              <i class="ph ph-ticket" />
             </span>
             <Button
               class="vc-close"
               type="button"
-              icon="pi pi-times"
+              icon="ph ph-x"
               severity="secondary"
               outlined
               :aria-label="t('shell.cupom.close')"
@@ -290,7 +290,7 @@ async function handleValidar() {
           <template v-else-if="step === 'success' && resultado">
             <div class="vc-result vc-result--success" role="status">
               <span class="vc-result__badge" aria-hidden="true">
-                <i class="pi pi-check" />
+                <i class="ph ph-check" />
               </span>
               <p class="vc-result__eyebrow">{{ t('shell.cupom.successEyebrow') }}</p>
               <h3>{{ t('shell.cupom.successTitle') }}</h3>
@@ -323,7 +323,7 @@ async function handleValidar() {
           <template v-else-if="step === 'error' && errorView">
             <div class="vc-result vc-result--fail" role="alert">
               <span class="vc-result__badge" aria-hidden="true">
-                <i class="pi pi-exclamation-circle" />
+                <i class="ph ph-warning-circle" />
               </span>
               <p class="vc-result__eyebrow">{{ t('shell.cupom.errorEyebrow') }}</p>
               <h3>{{ errorView.title }}</h3>
@@ -352,7 +352,7 @@ async function handleValidar() {
             <Button
               class="vc-cta"
               :label="t('shell.cupom.submit')"
-              icon="pi pi-check"
+              icon="ph ph-check"
               type="button"
               size="large"
               :loading="submitting"
@@ -372,7 +372,7 @@ async function handleValidar() {
             <Button
               class="vc-cta"
               :label="t('shell.cupom.applyOk')"
-              icon="pi pi-check"
+              icon="ph ph-check"
               type="button"
               size="large"
               @click="closeDialog"
@@ -390,7 +390,7 @@ async function handleValidar() {
             <Button
               class="vc-cta"
               :label="t('common.tryAgain')"
-              icon="pi pi-refresh"
+              icon="ph ph-arrow-clockwise"
               type="button"
               size="large"
               @click="backToInput"

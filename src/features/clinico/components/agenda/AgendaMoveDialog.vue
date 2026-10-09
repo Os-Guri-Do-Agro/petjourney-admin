@@ -138,7 +138,7 @@ watch(
           </span>
         </div>
 
-        <i class="pi pi-arrow-right mover__seta" aria-hidden="true" />
+        <i class="ph ph-arrow-right mover__seta" aria-hidden="true" />
 
         <div class="mover__lado mover__lado--destino">
           <span class="clinic-label">{{ t('clinico.agenda.mover.para') }}</span>
@@ -151,16 +151,16 @@ watch(
 
       <!-- Troca de sala: só aparece quando houve, e nomeia as duas pontas. -->
       <p v-if="salasMudaram" class="mover__salas">
-        <i class="pi pi-home" aria-hidden="true" />
+        <i class="ph ph-house" aria-hidden="true" />
         <span>
           {{ nomesDasSalas(proposta.appointment.roomIds) || '—' }}
-          <i class="pi pi-arrow-right mover__salas-seta" aria-hidden="true" />
+          <i class="ph ph-arrow-right mover__salas-seta" aria-hidden="true" />
           <strong>{{ nomesDasSalas(proposta.roomIds) || '—' }}</strong>
         </span>
       </p>
 
       <p v-if="grupoLigado" class="mover__ligado">
-        <i class="pi pi-link" aria-hidden="true" />
+        <i class="ph ph-link" aria-hidden="true" />
         {{ t('clinico.agenda.duasSalas') }}
       </p>
 
@@ -170,7 +170,7 @@ watch(
           :key="indice"
           :class="`mover__aviso mover__aviso--${conflito.severity}`"
         >
-          <i class="pi pi-exclamation-circle" aria-hidden="true" />
+          <i class="ph ph-warning-circle" aria-hidden="true" />
           <span>{{ formato.conflito(conflito) }}</span>
         </li>
       </ul>

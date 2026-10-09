@@ -22,7 +22,7 @@ const props = withDefaults(
     lede: '',
     body: '',
     ctaLabel: '',
-    icon: 'pi pi-bolt',
+    icon: 'ph ph-lightning',
   },
 )
 
@@ -73,7 +73,7 @@ function close() {
           class="soon-card__close"
           text
           severity="secondary"
-          icon="pi pi-times"
+          icon="ph ph-x"
           :aria-label="t('comingSoon.cupom.closeAria')"
           @click="closeCallback"
         />

@@ -253,7 +253,7 @@ onMounted(carregar)
           :aria-label="bloco.titulo"
         >
           <h2 class="prontuarios__dia" :class="{ 'prontuarios__dia--rascunho': bloco.rascunho }">
-            <i v-if="bloco.rascunho" class="pi pi-pencil" aria-hidden="true" />
+            <i v-if="bloco.rascunho" class="ph ph-pencil-simple" aria-hidden="true" />
             {{ bloco.titulo }}
           </h2>
 
@@ -287,7 +287,7 @@ onMounted(carregar)
                   {{ clinico.profissional(item.professionalId)?.nome }}
                 </span>
 
-                <i class="pi pi-chevron-right prontuario-linha__seta" aria-hidden="true" />
+                <i class="ph ph-caret-right prontuario-linha__seta" aria-hidden="true" />
               </Button>
             </li>
           </ol>

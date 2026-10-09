@@ -234,7 +234,7 @@ function abrirPaciente(petId: string) {
 
       <template v-else-if="migracao.estado === 'concluida'">
         <span class="mg-chip hc--verde"
-          ><i class="pi pi-check" aria-hidden="true" />{{
+          ><i class="ph ph-check" aria-hidden="true" />{{
             t('clinico.migracao.relatorio.chip')
           }}</span
         >
@@ -287,7 +287,7 @@ function abrirPaciente(petId: string) {
         <span class="progresso__cheia" :style="{ inlineSize: `${percentual}%` }" />
       </div>
       <p v-if="migracao.estado === 'falhou'" class="mg-caixa mg-caixa--coral falha" role="alert">
-        <i class="pi pi-exclamation-triangle" aria-hidden="true" />
+        <i class="ph ph-warning" aria-hidden="true" />
         <span>{{ t('clinico.migracao.importacao.falha', { lote: lote.atual }) }}</span>
       </p>
       <p class="mg-texto">
@@ -305,7 +305,7 @@ function abrirPaciente(petId: string) {
     <div v-else class="caixas">
       <div class="mg-caixa mg-caixa--verde">
         <span class="mg-caixa__rotulo">
-          <i class="pi pi-check-circle" aria-hidden="true" />
+          <i class="ph ph-check-circle" aria-hidden="true" />
           {{
             migracao.estado === 'concluida'
               ? t('clinico.migracao.relatorio.entraram')
@@ -319,7 +319,7 @@ function abrirPaciente(petId: string) {
         </ul>
         <Button
           class="mg-pilula mg-pilula--pequena caixa__ver"
-          icon="pi pi-list"
+          icon="ph ph-list-bullets"
           :label="t('clinico.migracao.resumo.verQuais')"
           @click="verLinhas('entram')"
         />
@@ -331,7 +331,7 @@ function abrirPaciente(petId: string) {
         :class="paraCompletar.length ? 'mg-caixa--pessego' : 'mg-caixa--cinza'"
       >
         <span class="mg-caixa__rotulo">
-          <i class="pi pi-pencil" aria-hidden="true" />
+          <i class="ph ph-pencil-simple" aria-hidden="true" />
           {{ t('clinico.migracao.relatorio.completar') }}
         </span>
         <strong class="mg-caixa__numero">{{ formato.numero(paraCompletar.length, 0) }}</strong>
@@ -352,7 +352,7 @@ function abrirPaciente(petId: string) {
         <Button
           v-if="paraCompletar.length"
           class="mg-pilula mg-pilula--pequena caixa__ver"
-          icon="pi pi-download"
+          icon="ph ph-download-simple"
           :label="t('clinico.migracao.relatorio.baixarCompletar')"
           @click="baixarCompletar"
         />
@@ -360,7 +360,7 @@ function abrirPaciente(petId: string) {
 
       <div v-else class="mg-caixa mg-caixa--azul">
         <span class="mg-caixa__rotulo">
-          <i class="pi pi-pencil" aria-hidden="true" />
+          <i class="ph ph-pencil-simple" aria-hidden="true" />
           {{ t('clinico.migracao.resumo.arrumamos.titulo') }}
         </span>
         <strong class="mg-caixa__numero">{{ formato.numero(corrigidas, 0) }}</strong>
@@ -385,7 +385,7 @@ function abrirPaciente(petId: string) {
         <Button
           v-if="corrigidas"
           class="mg-pilula mg-pilula--pequena caixa__ver"
-          icon="pi pi-list"
+          icon="ph ph-list-bullets"
           :label="t('clinico.migracao.resumo.verQuais')"
           @click="verLinhas('corrigidas')"
         />
@@ -393,7 +393,7 @@ function abrirPaciente(petId: string) {
 
       <div class="mg-caixa" :class="fora.length ? 'mg-caixa--coral' : 'mg-caixa--cinza'">
         <span class="mg-caixa__rotulo">
-          <i class="pi pi-times-circle" aria-hidden="true" />
+          <i class="ph ph-x-circle" aria-hidden="true" />
           {{
             migracao.estado === 'concluida'
               ? t('clinico.migracao.relatorio.ficaram')
@@ -413,13 +413,13 @@ function abrirPaciente(petId: string) {
         <div v-if="fora.length" class="caixa__acoes">
           <Button
             class="mg-pilula mg-pilula--pequena caixa__ver"
-            icon="pi pi-list"
+            icon="ph ph-list-bullets"
             :label="t('clinico.migracao.resumo.verQuais')"
             @click="verLinhas('fora')"
           />
           <Button
             class="mg-pilula mg-pilula--pequena caixa__ver"
-            icon="pi pi-download"
+            icon="ph ph-download-simple"
             :label="t('clinico.migracao.relatorio.baixarFora')"
             @click="baixarFora"
           />
@@ -428,7 +428,7 @@ function abrirPaciente(petId: string) {
     </div>
 
     <div v-if="migracao.estado === 'parada' || migracao.estado === 'concluida'" class="colunas">
-      <span class="colunas__icone" aria-hidden="true"><i class="pi pi-table" /></span>
+      <span class="colunas__icone" aria-hidden="true"><i class="ph ph-table" /></span>
       <p class="colunas__texto">
         <strong>{{ notaDasColunas.inicio }}</strong>
         <template v-if="notaDasColunas.fora">{{ ` ${notaDasColunas.fora}` }}</template>
@@ -436,14 +436,14 @@ function abrirPaciente(petId: string) {
       <Button
         v-if="notaDasColunas.fora"
         class="mg-pilula mg-pilula--pequena"
-        icon="pi pi-table"
+        icon="ph ph-table"
         :label="t('clinico.migracao.colunas.ver')"
         @click="emit('colunas')"
       />
     </div>
 
     <p v-if="migracao.estado === 'parada'" class="promessa">
-      <i class="pi pi-lock" aria-hidden="true" />
+      <i class="ph ph-lock" aria-hidden="true" />
       {{ t('clinico.migracao.resumo.promessa') }}
     </p>
 
@@ -453,14 +453,14 @@ function abrirPaciente(petId: string) {
         <Button
           v-if="migracao.perguntas.length > 0"
           class="mg-pilula"
-          icon="pi pi-arrow-left"
+          icon="ph ph-arrow-left"
           :label="t('clinico.migracao.resumo.voltar')"
           @click="migracao.irPara('duvidas')"
         />
         <div class="mg-rodape__direita">
           <Button
             class="mg-pilula mg-pilula--cheia mg-pilula--grande"
-            icon="pi pi-file-import"
+            icon="ph ph-file-arrow-up"
             :label="t('clinico.migracao.resumo.importar', { n: formato.numero(entram, 0) }, entram)"
             @click="migracao.importar()"
           />
@@ -470,20 +470,20 @@ function abrirPaciente(petId: string) {
       <template v-else-if="migracao.estado === 'concluida'">
         <Button
           class="mg-pilula"
-          icon="pi pi-list"
+          icon="ph ph-list-bullets"
           :label="t('clinico.migracao.relatorio.verLinhas')"
           @click="verLinhas('todas')"
         />
         <div class="mg-rodape__direita">
           <Button
             class="mg-pilula"
-            icon="pi pi-refresh"
+            icon="ph ph-arrow-clockwise"
             :label="t('clinico.migracao.relatorio.outra')"
             @click="migracao.recomecar()"
           />
           <Button
             class="mg-pilula mg-pilula--cheia mg-pilula--grande"
-            icon="pi pi-users"
+            icon="ph ph-users"
             :label="t('clinico.migracao.relatorio.verPacientes')"
             @click="router.push('/veterinario/pacientes')"
           />
@@ -498,14 +498,14 @@ function abrirPaciente(petId: string) {
           <Button
             v-if="migracao.estado === 'rodando'"
             class="mg-pilula mg-pilula--grande"
-            icon="pi pi-pause"
+            icon="ph ph-pause"
             :label="t('clinico.migracao.importacao.pausar')"
             @click="migracao.pausar()"
           />
           <Button
             v-else
             class="mg-pilula mg-pilula--cheia mg-pilula--grande"
-            :icon="migracao.estado === 'falhou' ? 'pi pi-replay' : 'pi pi-play'"
+            :icon="migracao.estado === 'falhou' ? 'ph ph-arrow-counter-clockwise' : 'ph ph-play'"
             :label="
               migracao.estado === 'falhou'
                 ? t('clinico.migracao.importacao.tentarDeNovo')

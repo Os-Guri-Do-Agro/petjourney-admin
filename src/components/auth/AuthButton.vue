@@ -51,7 +51,7 @@ const buttonStyle = useAuthThemeVars()
     :type="type"
   >
     <!-- O slot default substitui o conteúdo do Button; o spinner de loading vem daqui. -->
-    <i v-if="loading" class="pi pi-spinner pi-spin auth-button__spinner" aria-hidden="true" />
+    <i v-if="loading" class="ph ph-circle-notch ph-spin auth-button__spinner" aria-hidden="true" />
     <slot />
   </Button>
 </template>
