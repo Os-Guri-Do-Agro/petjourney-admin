@@ -141,11 +141,9 @@ watch(
           <nav class="hc-acoes" :aria-label="t('programas.saudacao.acoes')">
             <Button
               type="button"
-              class="hc-pilula"
+              class="hc-pilula hc-pilula--cheia"
               :label="t('programas.cred.zoneTitle')"
               icon="ph ph-identification-card"
-              severity="secondary"
-              outlined
               @click="router.push('/settings?aba=empresa')"
             />
           </nav>

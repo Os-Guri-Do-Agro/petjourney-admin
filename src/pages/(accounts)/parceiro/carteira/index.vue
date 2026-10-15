@@ -86,7 +86,8 @@ const fraseDoResumo = computed(() => {
 
 /**
  * As pílulas seguem a situação: liberado, sacar é a cheia; faltando a chave, cadastrá-la é que é a
- * cheia. Quem não é dono não vê nenhuma das duas — o saque e a chave são do dono da conta.
+ * cheia. Sem nenhuma das duas, a da chave fica sozinha e vira a cheia: a clara só existe ao lado de
+ * uma cheia. Quem não é dono não vê nenhuma — o saque e a chave são do dono da conta.
  */
 const acaoCheia = computed<'sacar' | 'cadastrarPix' | null>(() => {
   if (!estado.value?.ehDono) {
@@ -151,10 +152,11 @@ onMounted(() => {
               v-else
               type="button"
               class="hc-pilula"
+              :class="{ 'hc-pilula--cheia': !acaoCheia }"
               icon="ph ph-key"
               :label="t('carteira.visao.pix.title')"
-              severity="secondary"
-              outlined
+              :severity="acaoCheia ? 'secondary' : undefined"
+              :outlined="Boolean(acaoCheia)"
               @click="resumo?.abrirPix()"
             />
           </nav>

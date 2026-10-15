@@ -706,6 +706,8 @@ html .hc-tema .partner-tabs__description {
 /* ------------------------------------------------------------------ pílulas à mão
  * As ações da saudação da Visão geral (`.acao` em `inicio.vue`): contornada no fundo do cartão,
  * cheia no degradê para o próximo passo natural. Nenhuma ação sem fundo ou borda à vista.
+ * A clara só existe ao lado de uma cheia: ação sozinha na saudação é a cheia, senão a branca se
+ * confunde com os cartões logo abaixo.
  */
 
 .hc-tema .hc-pilula,
