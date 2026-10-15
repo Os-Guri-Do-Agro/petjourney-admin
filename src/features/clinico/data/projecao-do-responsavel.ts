@@ -297,9 +297,10 @@ export type ContextoDaProjecao = {
 
 /**
  * Da chave do portal para a lista do app (`consultaForm.especialidades`). O que não está na lista
- * vai por extenso, no idioma da clínica — é a regra do contrato para `especialidade`.
+ * vai por extenso, no idioma da clínica — é a regra do contrato para `especialidade`. Exportado
+ * porque o portal mostra a especialidade com os mesmos rótulos do app.
  */
-const ESPECIALIDADE: Record<string, string> = {
+export const ESPECIALIDADE_NO_APP: Record<string, string> = {
   clinicaGeral: 'CLINICO_GERAL',
   cirurgia: 'CIRURGIA',
   dermatologia: 'DERMATOLOGIA',
@@ -314,7 +315,7 @@ function profissional(id: string): ProfissionalResumo {
   return {
     id,
     nome: encontrado?.nome ?? '',
-    especialidade: especialidade ? (ESPECIALIDADE[especialidade] ?? especialidade) : null,
+    especialidade: especialidade ? (ESPECIALIDADE_NO_APP[especialidade] ?? especialidade) : null,
     fotoUrl: null,
   }
 }
