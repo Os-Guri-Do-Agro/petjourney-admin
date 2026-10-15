@@ -1,0 +1,607 @@
+/*
+ * O fluxo do responsável — as mesmas peças no celular do app e na página pública.
+ *
+ * Global e com prefixo próprio (`fx-`) porque as etapas são componentes separados que dividem o
+ * mesmo acabamento, como os cartões da visão geral. É tela de celular: alvo de toque de 44 px,
+ * uma coluna, a ação principal cheia no pé.
+ *
+ * Escolha é linha de lista, não cartão: um botão com o rosto ou o ícone à esquerda e a seta à
+ * direita. Quando tudo vira cartão, nada tem hierarquia — e o celular é pequeno demais para isso.
+ */
+
+.fx {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.85rem;
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
+}
+
+/* ------------------------------------------------------------------ topo da etapa */
+
+.fx-topo {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  gap: 0.35rem;
+}
+
+.fx-topo__titulo {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.fx-topo__voltar.p-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
+  margin-inline-start: -0.6rem;
+  color: var(--hc-tinta);
+}
+
+/* O conteúdo rola; o pé com a ação fica parado. */
+.fx-corpo {
+  display: grid;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* A coluna não cresce com o conteúdo: a faixa de dias rola dentro dela, não a etapa inteira. */
+  grid-template-columns: minmax(0, 1fr);
+  /* Linha que rola por dentro (a faixa de dias) tem mínimo zero na grade: sem isto, ela encolhe. */
+  grid-auto-rows: max-content;
+  flex: 1;
+  align-content: start;
+  gap: 0.85rem;
+  overscroll-behavior: contain;
+  padding-block-end: 0.25rem;
+}
+
+.fx-rodape {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.fx-rodape .p-button {
+  min-height: 2.9rem;
+}
+
+.fx-ajuda {
+  margin: 0;
+  color: var(--hc-tinta-2);
+  line-height: 1.45;
+}
+
+.fx-rotulo {
+  margin: 0;
+  color: var(--hc-tinta-3);
+  font-size: 0.6875rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------ a linha de escolha */
+
+.fx-lista {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--hc-borda);
+  border-radius: 0.9rem;
+  background: var(--hc-cartao);
+  list-style: none;
+}
+
+.fx-lista > li + li {
+  border-top: 1px solid var(--hc-linha);
+}
+
+.fx-opcao,
+.fx-opcao.p-button {
+  display: flex;
+  height: auto;
+  align-items: center;
+  width: 100%;
+  min-height: 3.25rem;
+  justify-content: flex-start;
+  padding: 0.6rem 0.8rem;
+  border: 0;
+  border-radius: 0;
+  gap: 0.7rem;
+  background: transparent;
+  color: var(--hc-tinta);
+  font-weight: 500;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+
+.fx-opcao.p-button:not(:disabled):hover,
+label.fx-opcao:hover {
+  background: var(--hc-fundo);
+  color: var(--hc-tinta);
+}
+
+.fx-opcao.p-button:focus-visible {
+  outline: 2px solid var(--hc-marca);
+  outline-offset: -2px;
+}
+
+.fx-opcao.p-button:disabled,
+.fx-opcao--apagada {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.fx-opcao--escolhida {
+  background: var(--hc-marca-clara);
+}
+
+.fx-opcao__icone {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  border-radius: 0.65rem;
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
+  font-size: 1.1rem;
+  place-items: center;
+}
+
+.fx-opcao__icone--emergencia {
+  background: var(--hc-coral-fundo);
+  color: var(--hc-coral-tinta);
+}
+
+.fx-opcao__texto {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 0.1rem;
+}
+
+.fx-opcao__texto strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.fx-opcao__texto > span {
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.fx-opcao__fim {
+  flex: 0 0 auto;
+  color: var(--hc-tinta-3);
+}
+
+/* ------------------------------------------------------------------ bloco de texto */
+
+.fx-bloco {
+  display: grid;
+  padding: 0.85rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 0.9rem;
+  gap: 0.5rem;
+  background: var(--hc-cartao);
+}
+
+.fx-linha {
+  display: flex;
+  align-items: baseline;
+  margin: 0;
+  gap: 0.5rem;
+  line-height: 1.45;
+}
+
+.fx-linha > i {
+  flex: 0 0 auto;
+  color: var(--hc-marca);
+  transform: translateY(0.12rem);
+}
+
+.fx-linha--atencao,
+.fx-linha--atencao > i {
+  color: var(--clinic-attention-text);
+}
+
+.fx-linha--risco,
+.fx-linha--risco > i {
+  color: var(--clinic-risk-text);
+}
+
+.fx-linha--suave {
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+}
+
+.fx-campo {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.fx-campo > span:first-child {
+  color: var(--hc-tinta-2);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+/* ------------------------------------------------------------------ escolhas em cartão */
+
+/*
+ * Escolha curta e de toque — sexo, espécie, período, atalho de dias: cada opção é um cartão, com o
+ * ícone em cima e o nome embaixo, e não um trilho de texto. O ícone diz antes da leitura, e o alvo
+ * do toque é o cartão inteiro. Vai no `SelectButton` com `class="grupo fx-escolhas"` (o `grupo`
+ * tira o trilho do tema) e, quando tem ícone, o `#option` com `.fx-escolha`. As colunas vêm de
+ * `--fx-colunas` (duas, se nada disser).
+ *
+ * `.fx` na frente porque o PrimeVue injeta o estilo dele depois, sem camada.
+ */
+.fx .fx-escolhas {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(var(--fx-colunas, 2), minmax(0, 1fr));
+}
+
+.fx .fx-escolhas .p-togglebutton {
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--hc-borda);
+  border-radius: 0.75rem;
+  background: var(--hc-cartao);
+  color: var(--hc-tinta);
+  transition:
+    background-color 150ms ease-out,
+    border-color 150ms ease-out;
+}
+
+.fx .fx-escolhas .p-togglebutton:not(.p-togglebutton-checked):not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--hc-marca) 45%, var(--hc-borda));
+  background: var(--hc-cartao);
+}
+
+.fx .fx-escolhas .p-togglebutton.p-togglebutton-checked {
+  border-color: var(--hc-marca);
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
+}
+
+.fx .fx-escolhas .p-togglebutton-content {
+  width: 100%;
+  padding: 0.65rem 0.35rem;
+  background: none;
+  box-shadow: none;
+  justify-content: center;
+}
+
+/* Sem ícone (os atalhos de dias): só o nome, centrado. */
+.fx .fx-escolhas .p-togglebutton-label {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.fx-escolha {
+  display: grid;
+  width: 100%;
+  justify-items: center;
+  gap: 0.15rem;
+  text-align: center;
+}
+
+.fx-escolha svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-bottom: 0.1rem;
+  color: var(--hc-marca);
+}
+
+.fx-escolha strong {
+  color: var(--hc-tinta);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.fx-escolha > span {
+  color: var(--hc-tinta-2);
+  font-size: 0.75rem;
+}
+
+.p-togglebutton-checked .fx-escolha strong {
+  color: var(--hc-marca-forte);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx .fx-escolhas .p-togglebutton {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------ faixa de dias e horários */
+
+.fx-dias {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  margin-inline: -0.25rem;
+  padding: 0.15rem 0.25rem 0.35rem;
+  gap: 0.4rem;
+  scrollbar-width: thin;
+}
+
+.fx-dia.p-button {
+  display: grid;
+  height: auto;
+  min-width: 3.6rem;
+  flex: 0 0 auto;
+  padding: 0.45rem 0.35rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 0.75rem;
+  gap: 0.05rem;
+  background: var(--hc-cartao);
+  color: var(--hc-tinta);
+  font-weight: 600;
+  justify-items: center;
+}
+
+.fx-dia.p-button:not(:disabled):hover {
+  border-color: var(--hc-marca);
+  background: var(--hc-cartao);
+  color: var(--hc-tinta);
+}
+
+.fx-dia__semana {
+  color: var(--hc-tinta-3);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.fx-dia__numero {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
+
+.fx-dia__estado {
+  color: var(--hc-tinta-3);
+  font-size: 0.625rem;
+  font-weight: 650;
+}
+
+.fx-dia--escolhido.p-button,
+.fx-dia--escolhido.p-button:not(:disabled):hover {
+  border-color: var(--hc-marca-forte);
+  background: var(--hc-marca-forte);
+  color: #ffffff;
+}
+
+.fx-dia--escolhido .fx-dia__semana,
+.fx-dia--escolhido .fx-dia__estado {
+  color: rgb(255 255 255 / 85%);
+}
+
+.fx-dia--fechado.p-button {
+  background: var(--hc-fundo);
+  color: var(--hc-tinta-3);
+}
+
+.fx-horarios {
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fill, minmax(4.6rem, 1fr));
+}
+
+.fx-horario.p-button {
+  display: grid;
+  height: auto;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.3rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 0.7rem;
+  gap: 0;
+  background: var(--hc-cartao);
+  color: var(--hc-tinta);
+  justify-items: center;
+}
+
+.fx-horario.p-button:not(:disabled):hover {
+  border-color: var(--hc-marca);
+  background: var(--hc-marca-clara);
+  color: var(--hc-tinta);
+}
+
+.fx-horario__hora {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
+
+.fx-horario__quem {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--hc-tinta-3);
+  font-size: 0.625rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ resumo do pedido */
+
+.fx-resumo {
+  display: grid;
+  margin: 0;
+  gap: 0.6rem;
+}
+
+.fx-resumo > div {
+  display: grid;
+  gap: 0.05rem;
+}
+
+.fx-resumo dt {
+  color: var(--hc-tinta-3);
+  font-size: 0.6875rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fx-resumo dd {
+  margin: 0;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+/* ------------------------------------------------------------------ o aviso que chega */
+
+.fx-push {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.55rem 0.55rem 0.55rem 0.7rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1rem;
+  gap: 0.55rem;
+  background: var(--hc-cartao);
+  box-shadow: var(--hc-sombra-alta);
+}
+
+.fx-push__marca {
+  display: grid;
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: 0 0 auto;
+  border-radius: 0.45rem;
+  background: var(--hc-marca-forte);
+  color: #ffffff;
+  font-size: 0.75rem;
+  place-items: center;
+}
+
+.fx-push__texto {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 0.05rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.fx-push__texto small {
+  color: var(--hc-tinta-3);
+  font-size: 0.625rem;
+}
+
+.fx-push__texto span {
+  color: var(--hc-tinta-2);
+}
+
+/* ------------------------------------------------------------------ selos */
+
+.fx-selo {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05rem 0.45rem;
+  border-radius: 6px;
+  gap: 0.25rem;
+  background: var(--hc-cinza-fundo);
+  color: var(--hc-cinza-tinta);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.fx-selo--marca {
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
+}
+
+.fx-selo--atencao {
+  background: var(--hc-pessego-fundo);
+  color: var(--hc-pessego-tinta);
+}
+
+.fx-selo--novo {
+  background: var(--hc-ciano-fundo);
+  color: var(--hc-ciano-tinta);
+}
+
+/* ------------------------------------------------------------------ movimento */
+
+.fx-etapa-enter-active,
+.fx-etapa-leave-active {
+  transition:
+    opacity 160ms ease-out,
+    transform 160ms ease-out;
+}
+
+.fx-etapa-enter-from {
+  opacity: 0;
+  transform: translateX(0.75rem);
+}
+
+.fx-etapa-leave-to {
+  opacity: 0;
+  transform: translateX(-0.75rem);
+}
+
+[dir='rtl'] .fx-etapa-enter-from {
+  transform: translateX(-0.75rem);
+}
+
+[dir='rtl'] .fx-etapa-leave-to {
+  transform: translateX(0.75rem);
+}
+
+.fx-aviso-enter-active,
+.fx-aviso-leave-active {
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.fx-aviso-enter-from,
+.fx-aviso-leave-to {
+  opacity: 0;
+  transform: translateY(-0.5rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-etapa-enter-active,
+  .fx-etapa-leave-active,
+  .fx-aviso-enter-active,
+  .fx-aviso-leave-active,
+  .fx-opcao,
+  .fx-opcao.p-button {
+    transition: none;
+  }
+}
+
+/* Cada etapa é um bloco só — é ele que entra e sai na transição. */
+.fx-etapa {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/*
+ * Dia, horário e linha de escolha são `Button` para serem clicáveis, não pílulas: sem o brilho
+ * verde da ação cheia que o `hc-tema` dá a todo botão com fundo.
+ */
+.hc-tema .fx-dia.p-button,
+.hc-tema .fx-horario.p-button,
+.hc-tema .fx-opcao.p-button {
+  --hc-botao-sombra: none;
+}

@@ -355,7 +355,17 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             />
             <span class="celula__quem">
               <strong>{{ linha.petNome }}</strong>
-              <small>{{ linha.tutorNome }}</small>
+              <small>
+                {{ linha.tutorNome }}
+                <!-- Pedida pelo responsável, no app ou no link: a origem à vista, como na agenda. -->
+                <i
+                  v-if="linha.reserva.origem === 'app' || linha.reserva.origem === 'link'"
+                  class="ph celula__origem"
+                  :class="linha.reserva.origem === 'app' ? 'ph-device-mobile' : 'ph-globe-simple'"
+                  :title="t(`hotel.origem.${linha.reserva.origem}`)"
+                  :aria-label="t(`hotel.origem.${linha.reserva.origem}`)"
+                />
+              </small>
             </span>
           </span>
         </template>
@@ -546,6 +556,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   display: grid;
   gap: 0;
   min-width: 0;
+}
+
+.celula__origem {
+  margin-inline-start: 0.25rem;
+  color: var(--hc-tinta-3);
 }
 
 .celula__pet strong {

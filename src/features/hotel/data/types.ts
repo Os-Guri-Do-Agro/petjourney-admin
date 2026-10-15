@@ -435,7 +435,18 @@ export type ReservaStatus =
   | 'cancelada'
   | 'nao-compareceu'
 
-export type ReservaOrigem = 'balcao' | 'telefone' | 'whatsapp' | 'app' | 'retorno' | 'indicacao'
+/**
+ * `link` é a página pública de reserva do hotel: quem pediu ainda não tem o app. Separado de `app`
+ * pelo mesmo motivo da agenda clínica — a confirmação vai por mensagem, não por push.
+ */
+export type ReservaOrigem =
+  | 'balcao'
+  | 'telefone'
+  | 'whatsapp'
+  | 'app'
+  | 'link'
+  | 'retorno'
+  | 'indicacao'
 
 export type MotivoDeCancelamento =
   | 'responsavel-desistiu'
@@ -572,6 +583,103 @@ export type EntradaDeEspera = {
   ofertadaEm: ISODateTime | null
   ofertaExpiraEm: ISODateTime | null
   observacao: string
+}
+
+// ---------------------------------------------------------------------------
+// Reserva online — o pedido que chega do app ou do link do hotel
+// ---------------------------------------------------------------------------
+
+/** Por onde o pedido chegou. `link` é a página pública: quem ainda não tem o app. */
+export type CanalDoPedidoDeReserva = 'app' | 'link'
+
+/**
+ * Os dois caminhos, iguais aos da clínica.
+ *
+ * - `acomodacao-escolhida`: o responsável viu o que está livre nas datas e escolheu o tipo
+ *   (suíte, baia…). O hotel aceita e aloca uma unidade daquele tipo — ou oferece outra.
+ * - `hotel-escolhe`: o responsável dá as datas e o hotel aloca a melhor acomodação que tiver
+ *   para o porte e a espécie, podendo mexer um dia nas datas se a pessoa deixou.
+ */
+export type ModoDoPedidoDeReserva = 'acomodacao-escolhida' | 'hotel-escolhe'
+
+export type StatusDoPedidoDeReserva = 'pendente' | 'aceito' | 'recusado' | 'desistiu' | 'expirado'
+
+export type MotivoDaRecusaDaReserva = 'sem-vaga' | 'exigencias' | 'perfil' | 'outro'
+
+/** O cadastro mínimo de quem não tem o app, como na clínica — com o porte, que decide a vaga. */
+export type CadastroMinimoDaReserva = {
+  nome: string
+  telefone: string
+  petNome: string
+  especie: PetSpecies
+  porte: PetPorte | null
+}
+
+export type PedidoDeReserva = {
+  id: string
+  canal: CanalDoPedidoDeReserva
+  modo: ModoDoPedidoDeReserva
+  /** O pet principal. `null` na primeira vez pelo link: quem é está em `novoCadastro`. */
+  petId: string | null
+  /** O segundo pet da mesma casa, na mesma acomodação. */
+  acompanhantePetId: string | null
+  tutorId: string | null
+  novoCadastro: CadastroMinimoDaReserva | null
+  entrada: ISODateTime
+  saida: ISODateTime
+  /** O tipo escolhido — só em `acomodacao-escolhida`. */
+  tipoId: string | null
+  /** No `hotel-escolhe`: aceita entrar um dia antes ou depois se a casa estiver cheia. */
+  aceitaMudarUmDia: boolean
+  servicos: ServicoKind[]
+  observacao: string
+  status: StatusDoPedidoDeReserva
+  criadoEm: ISODateTime
+  responderAte: ISODateTime
+  respondidoEm: ISODateTime | null
+  respondidoPor: 'recepcao' | 'automatico' | null
+  /** A reserva que o aceite criou, com origem `app` ou `link` e status `pendente` (falta o sinal). */
+  reservaId: string | null
+  recusa: { motivo: MotivoDaRecusaDaReserva; mensagem: string } | null
+}
+
+/** O contato para o que não espera: a hospedagem de hoje ou de amanhã. */
+export type ContatoDeUrgenciaDoHotel = {
+  telefone: string
+  whatsapp: string | null
+  /** Texto do hotel. Vai como está, no idioma em que foi escrito. */
+  orientacao: string
+}
+
+/** Como o hotel recebe pedidos pela internet. Configuração da casa, como a da clínica. */
+export type ReservaOnline = {
+  ativo: boolean
+  permiteEscolherAcomodacao: boolean
+  permiteHotelEscolhe: boolean
+  /** Tipos que aparecem para escolha. Isolamento nunca: é decisão da casa, não do cliente. */
+  tipoIds: string[]
+  /** Pedido para entrar antes disto é urgência: vai por telefone. */
+  antecedenciaMinimaHoras: number
+  /** Até quantos dias à frente se pede. */
+  horizonteDias: number
+  /** O que o hotel promete: "respondemos em até 3 h", contando o horário do balcão. */
+  prazoDeRespostaHoras: number
+  balcao: { abre: ClockTime; fecha: ClockTime }
+  slug: string
+  urgencia: ContatoDeUrgenciaDoHotel
+}
+
+/** O aviso que saiu para quem pediu: push no app, mensagem para quem veio pelo link. */
+export type AvisoDoPedidoDeReserva = {
+  id: string
+  pedidoId: string
+  tutorId: string | null
+  canal: CanalDoPedidoDeReserva
+  telefone: string
+  tipo: 'aceito' | 'alocado' | 'recusado'
+  criadoEm: ISODateTime
+  titulo: string
+  corpo: string
 }
 
 // ---------------------------------------------------------------------------

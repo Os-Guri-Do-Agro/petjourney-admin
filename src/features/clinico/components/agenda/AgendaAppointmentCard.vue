@@ -205,6 +205,13 @@ const estilo = computed(() => {
     <div class="card__linha">
       <span class="card__hora clinic-value">{{ formato.hora(appointment.inicio) }}</span>
       <span class="card__nome">{{ card.pet?.nome }}</span>
+      <!-- Marcado pelo responsável, no app ou no link: a mesma marca da tabela do dia. -->
+      <i
+        v-if="appointment.origem === 'app' || appointment.origem === 'link'"
+        class="ph card__icone"
+        :class="appointment.origem === 'app' ? 'ph-device-mobile' : 'ph-globe-simple'"
+        :title="t(`clinico.origem.${appointment.origem}`)"
+      />
 
       <span
         v-if="alertaDeRisco"

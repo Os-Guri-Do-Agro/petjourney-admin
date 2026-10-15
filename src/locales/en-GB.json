@@ -604,7 +604,9 @@
         "rascunhos": "{total} draft record | {total} draft records",
         "retornosVencidos": "{total} overdue follow-up | {total} overdue follow-ups",
         "vagasOfertadas": "{total} offered slot without a reply | {total} offered slots without a reply",
-        "medicacoesAtrasadas": "{total} overdue medication | {total} overdue medications"
+        "medicacoesAtrasadas": "{total} overdue medication | {total} overdue medications",
+        "pedidosAtrasados": "{total} overdue | {total} overdue",
+        "pedidosNoPrazo": "{total} on time | {total} on time"
       },
       "coluna": {
         "assunto": "Matter",
@@ -628,7 +630,9 @@
       "contagem": "{total} matter | {total} matters",
       "recolher": "Collapse {modulo}",
       "expandir": "Expand {modulo}",
-      "tratamentos": "{total} critical treatment with dropping adherence | {total} critical treatments with dropping adherence"
+      "tratamentos": "{total} critical treatment with dropping adherence | {total} critical treatments with dropping adherence",
+      "pedidos": "{total} appointment request awaiting a reply | {total} appointment requests awaiting a reply",
+      "pedidosDeReserva": "{total} booking request awaiting a reply | {total} booking requests awaiting a reply"
     },
     "resumo": {
       "portal": "Track your earnings and share your code.",
@@ -2116,7 +2120,8 @@
         "atividades": "{total} open task | {total} open tasks",
         "vacinas": "{total} overdue booster | {total} overdue boosters",
         "tratamentos": "{total} critical treatment with dropping adherence | {total} critical treatments with dropping adherence",
-        "estoque": "{total} vaccine below minimum | {total} vaccines below minimum"
+        "estoque": "{total} vaccine below minimum | {total} vaccines below minimum",
+        "pedidos": "{total} appointment request awaiting a reply | {total} appointment requests awaiting a reply"
       }
     },
     "busca": {
@@ -2173,7 +2178,8 @@
       "telefone": "Phone",
       "encaixe": "Squeeze-in",
       "retorno": "Follow-up",
-      "fila": "Waitlist"
+      "fila": "Waitlist",
+      "link": "Clinic link"
     },
     "bloqueio": {
       "almoco": "Lunch",
@@ -5360,6 +5366,413 @@
         "nota": "Invoice {nota}",
         "colunaDoses": "Doses"
       }
+    },
+    "pedidos": {
+      "titulo": "Appointment requests",
+      "subtitulo": "Clinic",
+      "resumo": {
+        "nenhum": "No requests awaiting a reply",
+        "abertos": "1 request awaiting a reply | {n} requests awaiting a reply",
+        "atrasados": "1 overdue | {n} overdue",
+        "proximo": "next one due by {quando}"
+      },
+      "acoes": {
+        "rotulo": "Request actions",
+        "verNoApp": "How pet parents request",
+        "link": "Clinic link",
+        "configurar": "How we receive requests"
+      },
+      "secao": {
+        "abertos": "Awaiting a reply",
+        "ordem": "By reply deadline",
+        "respondidos": "Answered ({n})"
+      },
+      "vazio": {
+        "titulo": "No requests waiting",
+        "descricao": "When someone requests a slot in the app or through the clinic link, the request shows up here for the front desk to answer."
+      },
+      "desligado": "Online booking is paused: the app and the clinic link don't offer any slots.",
+      "religar": "Start receiving again",
+      "canal": {
+        "app": "Via the app",
+        "link": "Via the clinic link"
+      },
+      "motivo": {
+        "checkup": "Check-up",
+        "vacina": "Vaccine",
+        "sintoma": "Symptom",
+        "retorno": "Follow-up",
+        "exame": "Test",
+        "banho": "Bath and grooming",
+        "outro": "Other reason"
+      },
+      "primeiraVez": "First visit",
+      "jaCliente": "Existing client",
+      "escolheu": "Chose {quando} with {profissional}",
+      "escolheuSeguidos": "Chose {dia} · {horas}, back to back, with {profissional}",
+      "pode": "Available {janela} · {quem}",
+      "janela": "{de} to {ate}",
+      "periodo": {
+        "manha": "in the morning",
+        "tarde": "in the afternoon",
+        "qualquer": "any time"
+      },
+      "periodoTitulo": {
+        "manha": "Morning",
+        "tarde": "Afternoon"
+      },
+      "comProfissional": "with {nome}",
+      "qualquerProfissional": "any professional",
+      "ocupado": "The chosen slot was taken after the request",
+      "semSugestao": "Nothing free in the coming weeks",
+      "historicoLiberado": "Shared their app history with the clinic",
+      "remarcacao": "Wants to reschedule an existing appointment",
+      "prazo": {
+        "ate": "Reply by {quando}",
+        "atrasado": "Deadline passed {valor}"
+      },
+      "aceitar": "Accept",
+      "marcarEm": "Book {hora}",
+      "recusar": "Decline",
+      "resultado": {
+        "marcado": "{pets}: booked for {quando} with {profissional}. The pet parent has been notified.",
+        "recusado": "Decline sent to the pet parent.",
+        "horario-ocupado": "That slot is no longer free. Pick another one under \"Another time\".",
+        "ja-respondido": "This request had already been answered.",
+        "verNaAgenda": "View in schedule",
+        "dispensar": "Dismiss"
+      },
+      "respondido": {
+        "aceito": "Booked: {quando} with {profissional}",
+        "automatico": "Auto-accepted: {quando} with {profissional}",
+        "recusado": "Declined — {motivo}",
+        "desistiu": "The pet parent withdrew",
+        "expirado": "Deadline passed with no reply",
+        "pendente": "Awaiting a reply"
+      },
+      "horario": {
+        "procurando": "Looking for free slots…",
+        "foraDaJanela": "outside what they asked for",
+        "avisoPorPush": "{nome} gets it in the app",
+        "avisoPorMensagem": "{nome} gets it by text message",
+        "aviso": "{pets}: appointment booked for {quando} with {profissional}."
+      },
+      "recusa": {
+        "titulo": "Decline the request for {pets}",
+        "porque": "Why",
+        "mensagemPara": "Message to {nome}",
+        "enviar": "Send decline",
+        "notaApp": "The message arrives in the app, with a button to request another time.",
+        "notaLink": "The message arrives by text, with the link to request again.",
+        "motivo": {
+          "sem-horario": "No slots",
+          "precisa-avaliar": "Needs a chat first",
+          "servico-indisponivel": "Service unavailable",
+          "emergencia": "It's an emergency",
+          "outro": "Other"
+        },
+        "mensagem": {
+          "sem-horario": "Hi, {nome}! We don't have a slot in that period for {pets}. If another day works for you, request again — or call {telefone} and we'll fit you in.",
+          "precisa-avaliar": "Hi, {nome}! For {pets}, we need to talk before booking. Could you call {telefone}? It'll only take a minute.",
+          "servico-indisponivel": "Hi, {nome}! That service isn't available right now. Call {telefone} and we'll suggest the best option for {pets}.",
+          "emergencia": "Hi, {nome}! From what you told us, {pets} needs to be seen now. Come straight in or call {telefone} on the way.",
+          "outro": "Hi, {nome}! We couldn't book the appointment for {pets}."
+        }
+      },
+      "config": {
+        "titulo": "How the clinic receives requests",
+        "ativo": "Receive requests via the app and the link",
+        "ativoAjuda": "While paused, the app and the clinic page show only the phone number.",
+        "caminhos": "Request options",
+        "escolherHorario": "The pet parent picks the day, time and professional",
+        "escolherHorarioAjuda": "They see the open schedule and choose. The front desk accepts that slot or offers another.",
+        "melhorHorario": "The pet parent says when they can come, and the clinic books",
+        "melhorHorarioAjuda": "They pick the week and the time of day. The front desk books the best slot available.",
+        "aceitarSozinho": "Auto-accept the chosen slot",
+        "aceitarSozinhoAjuda": "If the slot is still free, the request becomes an appointment right away, without going through the front desk.",
+        "oQueEQuem": "What and with whom",
+        "servicos": "Services that can be requested",
+        "profissionais": "Professionals who take requests",
+        "prazo": "Reply within",
+        "antecedencia": "Minimum notice",
+        "horizonte": "Show the schedule for",
+        "horas": "h",
+        "dias": "days",
+        "emergencia": "Emergency",
+        "emergenciaAjuda": "This is what people see when they choose \"It's an emergency\". It doesn't become a request: it shows the clinic's contact details.",
+        "telefone": "Phone",
+        "whatsapp": "WhatsApp",
+        "plantao": "On-call phone",
+        "semPlantao": "No on-call service",
+        "orientacao": "Message for after hours",
+        "salvar": "Save"
+      },
+      "link": {
+        "titulo": "Booking link",
+        "ajuda": "For people who don't have the app yet: pet parents request a slot from their phone, no account needed. Put it on Instagram, on WhatsApp and on the card at the front desk.",
+        "copiar": "Copy link",
+        "copiado": "Link copied",
+        "abrir": "Open the page",
+        "whatsapp": "Send via WhatsApp",
+        "textoParaCompartilhar": "Book an appointment at {clinica} from your phone: {endereco}",
+        "demo": "Clinic public page (demo)",
+        "voltarAoPortal": "Back to the portal",
+        "naoEncontrada": "Clinic not found",
+        "naoEncontradaAjuda": "Check the address the clinic sent you.",
+        "seuPedido": "Your request",
+        "pedidoNaoEncontrado": "We couldn't find this request.",
+        "outroPedido": "Make another request",
+        "situacao": {
+          "AGUARDANDO_CLINICA": "Waiting for the clinic to reply",
+          "ACEITO": "Appointment confirmed",
+          "RECUSADO": "The clinic couldn't book it",
+          "CANCELADO_PELO_RESPONSAVEL": "You withdrew this request",
+          "EXPIRADO": "The request expired"
+        },
+        "dadosAjuda": "So the clinic can confirm with you. You don't need the app.",
+        "nome": "Your name",
+        "telefone": "Mobile number with area code",
+        "telefoneExemplo": "(11) 98765-4321",
+        "petNome": "Pet's name",
+        "especie": "Species",
+        "nascimento": "Pet's date of birth (if you know it)",
+        "sexo": "Pet's sex (if you know it)",
+        "confirmacaoPor": "The confirmation will arrive by text message at {telefone}.",
+        "acompanhe": "Track or withdraw your request at this address",
+        "baixeOApp": "With the PetJourney app, the reply arrives instantly and your pet's history stays with you.",
+        "rodape": "Online booking by PetJourney",
+        "promessa": "Request an appointment in a minute, no app needed. The clinic replies within {horas} h.",
+        "passos": {
+          "rotulo": "Request steps",
+          "motivo": "Reason",
+          "modo": "How to book",
+          "quando": "When",
+          "dados": "Your details",
+          "feito": "done",
+          "contagem": "Step {atual} of {total}"
+        },
+        "equipe": "Our team",
+        "contato": "Contact",
+        "telefoneDaClinica": "Phone",
+        "whatsappRotulo": "WhatsApp",
+        "regraCancelar": "Until the clinic replies, you can withdraw using the link in the message. After that, to change or cancel, call {telefone}."
+      },
+      "ensaio": {
+        "quem": "On the phone of",
+        "fatima": "Fátima · several pets",
+        "renata": "Renata · first visit",
+        "disputa": "On the next chosen slot, someone else gets there first"
+      },
+      "erros": {
+        "carregar": "We couldn't load the requests.",
+        "responder": "We couldn't send the reply. Please try again.",
+        "configuracao": "We couldn't save the settings.",
+        "sugestoes": "We couldn't look up free slots."
+      },
+      "app": {
+        "etapa": {
+          "inicio": "Clinic",
+          "pets": "Who is it for?",
+          "completar": "Complete {nome}'s profile",
+          "motivo": "What's going on?",
+          "clinica": "Which clinic?",
+          "modo": "How would you like to book?",
+          "profissional": "With whom?",
+          "horario": "Choose a time",
+          "preferencia": "When can you come?",
+          "seus-dados": "Your details",
+          "revisar": "Check and send",
+          "enviado": "Request sent",
+          "emergencia": "Emergency"
+        },
+        "voltar": "Back",
+        "continuar": "Continue",
+        "pushOrigem": "PetJourney · now",
+        "fecharAviso": "Close notification",
+        "abertaAte": "Open now, until {hora}",
+        "fechadaAbre": "Closed now · opens {quando}",
+        "proximos": "Upcoming appointments",
+        "nadaMarcado": "No appointments booked.",
+        "pedidos": "Requests",
+        "status": {
+          "AGENDADO": "Booked",
+          "CONFIRMADO": "Confirmed",
+          "AGUARDANDO": "Checked in",
+          "EM_ATENDIMENTO": "In consult",
+          "FINALIZADO": "Completed",
+          "FALTA": "No-show",
+          "CANCELADO": "Cancelled"
+        },
+        "remarcar": "Reschedule",
+        "cancelar": "Cancel",
+        "cancelarPorTelefone": "In the app, only up to {horas} h before. To change it now, call {telefone}.",
+        "aguardando": "Waiting for the clinic · reply by {quando}",
+        "recusado": "The clinic couldn't book it",
+        "desistir": "Withdraw request",
+        "pedirDeNovo": "Request another time",
+        "pedirHorario": "Request an appointment",
+        "ehEmergencia": "It's an emergency",
+        "petsAjuda": "Choose up to three. With more than one, the clinic books back-to-back slots with the same professional.",
+        "internado": "Hospitalised at this clinic",
+        "faltaCadastro": "Profile incomplete",
+        "primeiraVez": "First time at this clinic",
+        "seguidosAjuda": "The slots are back to back: you only make one trip.",
+        "completarAjuda": "The clinic needs {nome}'s age and sex to prepare for the visit.",
+        "completarSalva": "It's saved to {nome}'s profile in the app.",
+        "nascimento": "Date of birth",
+        "sexoRotulo": "Sex",
+        "sexo": {
+          "macho": "Male",
+          "femea": "Female"
+        },
+        "salvarContinuar": "Save and continue",
+        "motivo": {
+          "EMERGENCIA": "It's an emergency",
+          "CHECKUP": "Routine check-up",
+          "SINTOMA": "Showing a symptom",
+          "VACINA": "Vaccine",
+          "RETORNO": "Follow-up",
+          "EXAME": "Test",
+          "BANHO": "Bath and grooming",
+          "OUTRO": "Other reason"
+        },
+        "motivoAjuda": {
+          "EMERGENCIA": "Trouble breathing, seizure, bleeding, poisoning",
+          "CHECKUP": "Routine visit, no complaints",
+          "SINTOMA": "Itching, vomiting, diarrhoea, pain, coughing…",
+          "VACINA": "A dose from the vaccination card or a booster",
+          "RETORNO": "Back to the professional who saw your pet",
+          "EXAME": "Imaging test requested by the clinic",
+          "BANHO": "Bath, grooming and hygiene",
+          "OUTRO": "Tell us in the next step"
+        },
+        "sinaisTitulo": "Any of these right now?",
+        "sinal": {
+          "FALTA_DE_AR": "Struggling to breathe or breathing with the mouth open",
+          "CONVULSAO": "Seizure or severe shaking",
+          "SANGRAMENTO": "Bleeding that won't stop",
+          "ENVENENAMENTO": "Ate poison, medicine or a toxic plant",
+          "TRAUMA": "Hit by a car, a fall or a bad fight",
+          "NAO_LEVANTA": "Can't get up or walk"
+        },
+        "queixa": "Tell us what's going on (optional)",
+        "verEmergencia": "See the emergency contact",
+        "jaAtende": "Already sees {nomes}",
+        "primeiraVezAqui": "First time here",
+        "pausada": "Not taking requests right now. Call {telefone}.",
+        "naoRecebe": "Doesn't take requests in the app yet. Call {telefone}.",
+        "remarcando": "Rescheduling {pet}: was {quando}",
+        "modo": {
+          "HORARIO_ESCOLHIDO": "Pick a day and time",
+          "MELHOR_HORARIO": "Ask for the best time"
+        },
+        "modoAjuda": {
+          "HORARIO_ESCOLHIDO": "You see the open schedule and choose who with. The clinic confirms.",
+          "MELHOR_HORARIO": "Tell us when you can come. The clinic books the best slot and lets you know."
+        },
+        "prazoDaClinica": "The clinic replies within {horas} h, during opening hours.",
+        "qualquerProfissional": "Any professional",
+        "qualquerAjuda": "Shows more times",
+        "especialidade": {
+          "CLINICO_GERAL": "General practice",
+          "CIRURGIA": "Surgery",
+          "DERMATOLOGIA": "Dermatology",
+          "CARDIOLOGIA": "Cardiology"
+        },
+        "seguidosPara": "back-to-back slots for {nomes}",
+        "dias": "Days",
+        "procurando": "Looking for times…",
+        "horarioSumiu": "Someone requested the {hora} slot before you. It's been removed from the list — pick another one.",
+        "reservaVenceu": "We held the slot for 5 minutes and the time ran out. Please choose again.",
+        "fechadaFeriado": "The clinic is closed on this day ({feriado}).",
+        "fechadaNoDia": "The clinic is closed on this day.",
+        "semHorarioNoDia": "No free times on this day.",
+        "irParaDia": "See {dia}",
+        "nadaNaQuinzena": "No free times in the next month. Ask for the best time: the clinic will fit you in and let you know.",
+        "trocarParaMelhor": "Ask for the best time instead",
+        "quando": {
+          "amanha": "Tomorrow",
+          "semana": "This week",
+          "proxima": "Next week"
+        },
+        "quandoRotulo": "When",
+        "periodoRotulo": "Time of day",
+        "periodoAjuda": "If you don't choose, the clinic books at any time.",
+        "comQuem": "With whom",
+        "segurado": "We're holding this slot for {tempo}",
+        "resumo": {
+          "horario": "Requested time",
+          "quando": "When you can come",
+          "comQuem": "With whom"
+        },
+        "contarAlgo": "Anything you'd like to tell the clinic? (optional)",
+        "compartilhar": "Share {nomes}'s history with the clinic",
+        "compartilharAjuda": "Diary, weight and vaccines from the app. You can turn this off later in the pet's profile.",
+        "regraCancelar": "You can cancel in the app up to {horas} h before the appointment.",
+        "enviar": "Send request",
+        "erro": {
+          "FALHA": "We couldn't send it. Check your internet connection and try again.",
+          "CLINICA_NAO_RECEBE_PEDIDOS": "The clinic has paused online requests for now. Call to book.",
+          "MODO_INDISPONIVEL": "The clinic isn't taking this type of request right now.",
+          "CADASTRO_INCOMPLETO": "Some of your or your pet's details are missing.",
+          "PEDIDO_JA_RESPONDIDO": "The clinic has already answered this request.",
+          "HORARIO_INDISPONIVEL": "That time is no longer free.",
+          "AGENDAMENTO_ENCERRADO": "This appointment can no longer be changed.",
+          "FORA_DO_PRAZO_DE_CANCELAMENTO": "It's too late to cancel in the app. Please call the clinic."
+        },
+        "enviadoTitulo": "Request sent",
+        "enviadoLide": "The clinic replies by {quando}.",
+        "confirmadoLide": "It is in the clinic's schedule. A reminder arrives the day before so you can confirm.",
+        "respostaNoApp": "The answer arrives as a notification in the app.",
+        "agoraTitulo": "What happens next",
+        "confirmadoTitulo": "Appointment confirmed",
+        "passoEnviado": "You requested",
+        "passoClinica": "The clinic confirms the time",
+        "passoMarcado": "Appointment booked",
+        "ate": "By {quando}",
+        "passoLembrete": "Reminder the day before",
+        "passoLembreteAjuda": "To confirm you're coming, or to cancel in time.",
+        "verMeusHorarios": "See my appointments",
+        "ligueParaClinica": "Call the clinic",
+        "plantao": "On call",
+        "ligarAgora": "Call now",
+        "whatsapp": "WhatsApp message",
+        "comoChegar": "Directions",
+        "mensagemDaClinica": "Message from the clinic",
+        "sinaisVaDireto": "Come straight in if you see any of these",
+        "naoEEmergencia": "Not an emergency, I want to book an appointment",
+        "legenda": {
+          "livre": "Available",
+          "fechado": "Closed"
+        },
+        "quandoAjuda": "Now tap the last day you can come.",
+        "faixa": {
+          "manha": "before 12 pm",
+          "tarde": "after 12 pm"
+        }
+      },
+      "linha": {
+        "qualquerHora": "any time",
+        "ate": "by {quando}",
+        "ocupado": "Requested slot was taken",
+        "responder": "Reply"
+      },
+      "gaveta": {
+        "titulo": "Request for {pets}",
+        "oPedido": "The request",
+        "primeiraVez": "First visit to the clinic: the record is created when you accept",
+        "quando": "When to book",
+        "legendaPedido": "Requested day",
+        "legendaJanela": "When they can",
+        "profissional": "Professional",
+        "profissionalComVagas": "{nome} ({n})",
+        "tambemLivre": "Also available:",
+        "pedido": "requested",
+        "escolhaUmHorario": "Choose a slot",
+        "aceitarEm": "Accept {hora}",
+        "marcarEm": "Book {dia} · {hora}",
+        "voltar": "Back to the request"
+      }
     }
   },
   "hotel": {
@@ -5908,7 +6321,8 @@
       "vender": "1 · Sell",
       "selo": {
         "rotina": "{total} overdue task | {total} overdue tasks",
-        "vespera": "{total} blocked arrival | {total} blocked arrivals"
+        "vespera": "{total} blocked arrival | {total} blocked arrivals",
+        "pedidos": "{total} booking request awaiting a reply | {total} booking requests awaiting a reply"
       }
     },
     "ocorrencia": {
@@ -5961,7 +6375,8 @@
       "indicacao": "Referral",
       "retorno": "Returning",
       "telefone": "Phone",
-      "whatsapp": "WhatsApp"
+      "whatsapp": "WhatsApp",
+      "link": "Hotel link"
     },
     "painel": {
       "bemEstar": {
@@ -6492,7 +6907,25 @@
         }
       },
       "sair": "Close",
-      "terminar": "Got it"
+      "terminar": "Got it",
+      "pedidos": {
+        "pergunta": {
+          "titulo": "Who wants to stay?",
+          "texto": "Requests that come in through the app and the hotel link. The front desk answers each one: book it into a room, or decline and say why."
+        },
+        "caixa": {
+          "titulo": "In deadline order",
+          "texto": "The request due first sits at the top. The deadline only counts front desk hours: a request sent at night is due mid-morning."
+        },
+        "resposta": {
+          "titulo": "The button says where",
+          "texto": "\"Book Suite S1\" saves the booking in that unit and notifies whoever asked. To pick a different one, use \"Another room\"."
+        },
+        "celular": {
+          "titulo": "The other side",
+          "texto": "Open the phone and request the way a pet parent does — then watch the row arrive here, or the notification arrive there."
+        }
+      }
     },
     "turno": {
       "assumeCom": "{turno} takes over · {pessoa}",
@@ -6543,6 +6976,295 @@
       "erroTelefone": "Phone is missing.",
       "erroTelefoneInvalido": "Incomplete phone number. Check the area code and the number.",
       "erroTelefoneRepetido": "This phone already belongs to {nome}."
+    },
+    "pedidos": {
+      "titulo": "Booking requests",
+      "subtitulo": "Hotel",
+      "resumo": {
+        "nenhum": "No requests awaiting a reply",
+        "abertos": "1 request awaiting a reply | {n} requests awaiting a reply",
+        "atrasados": "1 overdue | {n} overdue",
+        "proximo": "next one due by {quando}"
+      },
+      "acoes": {
+        "verNoApp": "How pet parents request",
+        "link": "Hotel link",
+        "configurar": "How we receive requests"
+      },
+      "secao": {
+        "abertos": "Awaiting a reply",
+        "ordem": "By reply deadline",
+        "respondidos": "Answered ({n})"
+      },
+      "vazio": {
+        "titulo": "No requests waiting",
+        "descricao": "When someone requests a stay in the app or through the hotel link, the request shows up here for the front desk to answer."
+      },
+      "desligado": "Online booking is paused: the app and the hotel link don't offer any rooms.",
+      "religar": "Start receiving again",
+      "canal": {
+        "app": "Via the app",
+        "link": "Via the hotel link"
+      },
+      "primeiraVez": "First time",
+      "diarias": "1 night | {n} nights",
+      "escolheuTipo": "Chose: {tipo}",
+      "hotelEscolhe": "Asked the hotel to choose the room",
+      "aceitaMudar": "open to shifting a day",
+      "mesmaAcomodacao": "In the same room — they live together",
+      "semVagaNoTipo": "No {tipo} left after earlier requests",
+      "semSugestao": "No suitable room free",
+      "prazo": {
+        "ate": "Reply by {quando}",
+        "atrasado": "Deadline passed {valor}"
+      },
+      "recusar": "Decline",
+      "reservarEm": "Book {acomodacao}",
+      "voltar": "Back",
+      "resultado": {
+        "reservado": "{nomes}: booked in {acomodacao}, {periodo}. The pet parent has been notified; the deposit is still due.",
+        "recusado": "Decline sent to the pet parent.",
+        "sem-vaga": "That room is no longer free. Pick another one under \"Another room\".",
+        "ja-respondido": "This request had already been answered.",
+        "verReserva": "View the booking",
+        "dispensar": "Dismiss"
+      },
+      "respondido": {
+        "aceito": "Booked: {acomodacao} · {valor}",
+        "recusado": "Declined — {motivo}",
+        "desistiu": "The pet parent withdrew",
+        "expirado": "Deadline passed with no reply",
+        "pendente": "Awaiting a reply"
+      },
+      "acomodacao": {
+        "procurando": "Looking for free rooms…",
+        "nenhuma": "No suitable room free on these dates. Decline with a message or offer the waiting list.",
+        "avisoPorPush": "The requester gets it in the app",
+        "avisoPorMensagem": "The requester gets it by text message",
+        "aviso": "{nomes}: booked in {acomodacao}, {periodo}. The deposit is needed to confirm."
+      },
+      "recusa": {
+        "titulo": "Decline the request for {nomes}",
+        "porque": "Why",
+        "mensagemPara": "Message to {nome}",
+        "enviar": "Send decline",
+        "motivo": {
+          "sem-vaga": "No vacancy",
+          "exigencias": "Vaccine or paperwork",
+          "perfil": "Not the right fit for us",
+          "outro": "Other"
+        },
+        "mensagem": {
+          "sem-vaga": "Hi, {nome}! We're fully booked on those dates for {nomes}. If you can change the dates, request again — or call {telefone} and we'll put you on the waiting list.",
+          "exigencias": "Hi, {nome}! To welcome {nomes}, the vaccination card must be up to date at check-in. Once the doses are up to date, just request again. Questions: {telefone}.",
+          "perfil": "Hi, {nome}! From what you told us, we're not the best place for {nomes}. Call {telefone} and we'll point you in the right direction.",
+          "outro": "Hi, {nome}! We couldn't book a stay for {nomes}."
+        }
+      },
+      "config": {
+        "titulo": "How the hotel receives requests",
+        "ativo": "Receive requests via the app and the link",
+        "ativoAjuda": "While paused, the app and the hotel page show only the phone number.",
+        "caminhos": "Request options",
+        "escolherAcomodacao": "The pet parent picks the room type",
+        "escolherAcomodacaoAjuda": "They see what's free on their dates, with an estimate. The front desk assigns a unit of that type or offers another.",
+        "hotelEscolhe": "The pet parent gives the dates, and the hotel chooses",
+        "hotelEscolheAjuda": "The front desk assigns the best room for the size and species. If the person allows it, the dates can shift by a day.",
+        "tipos": "Room types that can be chosen",
+        "prazo": "Reply within",
+        "antecedencia": "Minimum notice",
+        "balcaoAbre": "Front desk opens",
+        "balcaoFecha": "Front desk closes",
+        "urgencia": "For today or tomorrow",
+        "urgenciaAjuda": "An arrival within the minimum notice doesn't become a request: the app shows this contact instead.",
+        "telefone": "Phone",
+        "whatsapp": "WhatsApp",
+        "orientacao": "Message for anyone who needs a room urgently",
+        "salvar": "Save"
+      },
+      "link": {
+        "titulo": "Booking link",
+        "ajuda": "For people who don't have the app yet: pet parents request a stay from their phone, no account needed. Put it on Instagram, on WhatsApp and at the front desk.",
+        "copiar": "Copy link",
+        "copiado": "Link copied",
+        "abrir": "Open the page",
+        "whatsapp": "Send via WhatsApp",
+        "textoParaCompartilhar": "Request a stay at {hotel} from your phone: {endereco}",
+        "demo": "Hotel public page (demo)",
+        "voltarAoPortal": "Back to the portal",
+        "naoEncontrado": "Hotel not found",
+        "naoEncontradoAjuda": "Check the address the hotel sent you.",
+        "seuPedido": "Your request",
+        "pedidoNaoEncontrado": "We couldn't find this request.",
+        "outroPedido": "Make another request",
+        "situacao": {
+          "AGUARDANDO_HOTEL": "Waiting for the hotel to reply",
+          "ACEITO": "Booked — deposit still due",
+          "RECUSADO": "The hotel couldn't book it",
+          "CANCELADO_PELO_RESPONSAVEL": "You withdrew this request",
+          "EXPIRADO": "The request expired"
+        },
+        "sinal": "To confirm, the hotel asks for a {valor} deposit. Instructions will come by text message.",
+        "petAjuda": "Size decides which room your pet fits in. We'll ask for their name at the end.",
+        "dadosAjuda": "So the hotel can confirm with you. You don't need the app.",
+        "nome": "Your name",
+        "telefone": "Mobile number with area code",
+        "petNome": "Pet's name",
+        "carteira": "Bring the vaccination card at check-in: the hotel checks it before welcoming your pet.",
+        "confirmacaoPor": "The confirmation will arrive by text message at {telefone}.",
+        "acompanhe": "Track or withdraw your request at this address",
+        "rodape": "Online booking by PetJourney"
+      },
+      "ensaio": {
+        "quem": "On the phone of",
+        "luciana": "Luciana · Mel and Amora",
+        "renata": "Renata · first time",
+        "disputa": "On the next send, other people request the chosen type first"
+      },
+      "erros": {
+        "carregar": "We couldn't load the requests.",
+        "responder": "We couldn't send the reply. Please try again.",
+        "configuracao": "We couldn't save the settings."
+      },
+      "app": {
+        "etapa": {
+          "inicio": "Hotel",
+          "pets": "Who's staying?",
+          "porte": "What size is {nome}?",
+          "pet-do-link": "Who's staying?",
+          "datas": "When?",
+          "modo": "How would you like to book?",
+          "acomodacao": "Choose the room",
+          "extras": "Anything else?",
+          "seus-dados": "Your details",
+          "revisar": "Check and send",
+          "enviado": "Request sent",
+          "urgente": "For today or tomorrow"
+        },
+        "voltar": "Back",
+        "continuar": "Continue",
+        "pushOrigem": "PetJourney · now",
+        "fecharAviso": "Close notification",
+        "balcao": "Front desk replies from {abre} to {fecha}",
+        "proximas": "Upcoming stays",
+        "nadaMarcado": "No stays booked.",
+        "faltaSinal": "Deposit due · {valor}",
+        "confirmada": "Confirmed",
+        "pedidos": "Requests",
+        "aguardando": "Waiting for the hotel · reply by {quando}",
+        "recusado": "The hotel couldn't book it",
+        "desistir": "Withdraw request",
+        "pedirDeNovo": "Request other dates",
+        "pedirHospedagem": "Request a stay",
+        "paraHoje": "Is it for today or tomorrow?",
+        "petsAjuda": "Choose one, or two from the same home — they stay together in the same room.",
+        "faltaPorte": "Size missing",
+        "hospedadoAgora": "Staying here now",
+        "primeiraEstadia": "First stay here",
+        "naoDividem": "Dogs and cats don't share a room. Request one at a time.",
+        "juntos": "The two stay together, in the same room.",
+        "porteAjuda": "Size decides which room {nome} fits in.",
+        "porteSalva": "It's saved to {nome}'s profile in the app.",
+        "pesoDoPorte": {
+          "mini": "Up to 5 kg",
+          "pequeno": "5 to 10 kg",
+          "medio": "10 to 25 kg",
+          "grande": "25 to 45 kg",
+          "gigante": "Over 45 kg"
+        },
+        "especie": "Species",
+        "porte": "Size",
+        "cao": "Dog",
+        "gato": "Cat",
+        "entrada": "Arrival",
+        "saida": "Departure",
+        "datasInvalidas": "Departure must be after arrival.",
+        "regraSaida": "Arrival from {entrada}. Departure by {saida} at no extra cost.",
+        "urgenteAviso": "Arrivals less than {horas} h away can't be requested in the app: contact the hotel directly.",
+        "verContato": "See the hotel's contact details",
+        "verVagas": "See what's free",
+        "modo": {
+          "ACOMODACAO_ESCOLHIDA": "Choose the room",
+          "HOTEL_ESCOLHE": "Let the hotel pick the best one"
+        },
+        "modoAjuda": {
+          "ACOMODACAO_ESCOLHIDA": "You see what's free on your dates, with prices. The hotel confirms.",
+          "HOTEL_ESCOLHE": "The hotel assigns the best room for your pet's size and lets you know."
+        },
+        "prazoDoHotel": "The hotel replies within {horas} h, during front desk hours.",
+        "tipoSumiu": "Someone else requested {tipo} before you. Choose another room, or let the hotel choose.",
+        "esgotado": "Fully booked on these dates",
+        "livres": "1 available | {n} available",
+        "estimativaDe": "about {valor}",
+        "tudoEsgotado": "Nothing free on these dates. Let the hotel choose: it can shift your dates by a day, if you agree.",
+        "deixarHotelEscolher": "Let the hotel choose",
+        "aceitaMudar": "I'm OK with shifting by a day if it's full",
+        "aceitaMudarAjuda": "Arriving a day earlier or later, if that's what frees up a room. The hotel will let you know first.",
+        "extras": "Extras",
+        "porDiaria": "per night",
+        "observacao": "Anything the hotel should know? Medication, food, fears (optional)",
+        "resumo": {
+          "extras": "Extras",
+          "estimativa": "Estimate"
+        },
+        "sinal": "To confirm, the hotel asks for a {percentual}% deposit: {valor}.",
+        "carteira": "The vaccination card",
+        "carteiraAjuda": "Bring the card at check-in: the hotel checks it before welcoming your pet.",
+        "regraCancelar": "Free cancellation up to {dias} days before arrival.",
+        "enviar": "Send request",
+        "erro": {
+          "FALHA": "We couldn't send it. Check your internet connection and try again.",
+          "HOTEL_NAO_RECEBE_PEDIDOS": "The hotel has paused online requests for now. Call to book.",
+          "MODO_INDISPONIVEL": "The hotel isn't taking this type of request right now.",
+          "FORA_DA_ANTECEDENCIA": "That arrival is too soon. Contact the hotel directly.",
+          "PERIODO_INVALIDO": "Check the dates: departure must be after arrival.",
+          "CADASTRO_INCOMPLETO": "Some of your or your pet's details are missing.",
+          "NAO_DIVIDEM_ACOMODACAO": "These pets can't share a room. Request one at a time.",
+          "PEDIDO_JA_RESPONDIDO": "The hotel has already answered this request."
+        },
+        "enviadoTitulo": "Request sent",
+        "aceitoTitulo": "Booked",
+        "passoPediu": "You requested",
+        "passoHotel": "The hotel chooses the room",
+        "ate": "By {quando}",
+        "passoSinal": "Deposit to confirm",
+        "passoSinalAjuda": "Instructions come with the hotel's reply.",
+        "verMinhas": "See my stays",
+        "urgenteAjuda": "Online requests need {horas} h notice. For right now, contact the hotel: the front desk can see straight away if there's a room.",
+        "ligueParaHotel": "Call the hotel",
+        "ligarAgora": "Call now",
+        "whatsapp": "WhatsApp message",
+        "mensagemDoHotel": "Message from the hotel",
+        "outraData": "Choose other dates",
+        "passoHotelConfirma": "The hotel confirms: {tipo}",
+        "estadia": "Stay",
+        "toqueSaida": "Now tap the departure day."
+      },
+      "linha": {
+        "responder": "Reply",
+        "ate": "by {quando}",
+        "juntos": "Together, in the same room",
+        "semExtras": "No extras",
+        "hotelEscolhe": "The hotel chooses",
+        "semVaga": "No {tipo} left"
+      },
+      "gaveta": {
+        "titulo": "Request for {nomes}",
+        "oPedido": "The request",
+        "primeiraVez": "First stay here: the record is created when you accept",
+        "aceitaMudar": "Open to arriving or leaving a day earlier or later",
+        "datas": "Dates",
+        "legendaVaga": "Available",
+        "legendaPedido": "Requested dates",
+        "toqueSaida": "Now tap the departure day.",
+        "outrasDatas": "Different dates: the requester is told about the change.",
+        "voltarDatas": "Back to requested dates",
+        "onde": "Where they'll stay",
+        "ate": "up to {porte}",
+        "pedido": "requested",
+        "escolha": "Choose a room",
+        "voltar": "Back to the request"
+      }
     }
   },
   "primevue": {

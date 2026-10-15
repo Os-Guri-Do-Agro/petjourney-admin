@@ -172,6 +172,7 @@ const STATUS: Record<AppointmentStatus, StatusDeAgendamento> = {
 const ORIGEM: Record<AppointmentOrigin, OrigemDeAgendamento> = {
   recepcao: 'RECEPCAO',
   app: 'APP',
+  link: 'LINK_PUBLICO',
   telefone: 'TELEFONE',
   encaixe: 'ENCAIXE',
   retorno: 'RETORNO',
@@ -1649,4 +1650,14 @@ export function montarDemoDoResponsavel(ctx: ContextoDaProjecao): DemoDoResponsa
       .filter((item) => item.tratamentos.length > 0),
     avisosDeDose: projetarAvisosDeDose(ctx.tutorId, ctx, ctx.agora, fimDoDia(ctx.agora)),
   }
+}
+
+/**
+ * Os resumos que o agendamento online também entrega (`agendamento-online.ts`). A mesma forma,
+ * dita num lugar só: o profissional do pedido e o do agendamento não podem divergir na especialidade.
+ */
+export {
+  clinicaResumo as resumoDaClinica,
+  profissional as resumoDoProfissional,
+  servico as servicoDoTipo,
 }

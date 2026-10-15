@@ -55,6 +55,8 @@ export const DIAS_DE_VESPERA = 3
 
 const rotina = ref<ContagemDePendencia>(VAZIO)
 const vespera = ref<ContagemDePendencia>(VAZIO)
+/** Pedidos de reserva do app e do link esperando o balcão — a mesma régua da clínica. */
+const pedidos = ref<ContagemDePendencia>(VAZIO)
 const hoje = ref<HojeNoHotel>(HOJE_VAZIO)
 
 const carregando = ref(false)
@@ -79,14 +81,39 @@ export async function apurarPendenciasDoHotel() {
   const [
     { hospedagemRepository, reservaRepository, situacaoDaTarefa, tomDaRotinaAtrasada },
     { agoraIso },
-  ] =
-    await Promise.all([import('../data/repositories'), import('../data/store')])
+    { pedidoDeReservaRepository },
+    { situacaoDoPrazoDaReserva },
+  ] = await Promise.all([
+    import('../data/repositories'),
+    import('../data/store'),
+    import('../data/reserva-online'),
+    import('../domain/pedidos-de-reserva'),
+  ])
 
-  const [prancheta, reservas, hospedes] = await Promise.all([
+  const [prancheta, reservas, hospedes, abertos] = await Promise.all([
     consultar(() => hospedagemRepository.rotina()),
     consultar(() => reservaRepository.listar()),
     consultar(() => hospedagemRepository.listar()),
+    consultar(() => pedidoDeReservaRepository.pendentes()),
   ])
+
+  let pedidosApurados: ContagemDePendencia | null = null
+
+  if (abertos.ok) {
+    const agora = agoraIso()
+    const atrasados = abertos.valor.filter(
+      (pedido) => situacaoDoPrazoDaReserva(pedido, agora) === 'atrasado',
+    ).length
+
+    pedidosApurados = {
+      total: abertos.valor.length,
+      tom: atrasados > 0 ? 'risco' : abertos.valor.length > 0 ? 'atencao' : 'neutro',
+      partes: partesQueExistem([
+        { chave: 'pedidosAtrasados', total: atrasados },
+        { chave: 'pedidosNoPrazo', total: abertos.valor.length - atrasados },
+      ]),
+    }
+  }
 
   let rotinaApurada: ContagemDePendencia | null = null
 
@@ -126,7 +153,8 @@ export async function apurarPendenciasDoHotel() {
   }
 
   return {
-    situacao: situacaoPelasFontes([prancheta, reservas, hospedes]),
+    situacao: situacaoPelasFontes([prancheta, reservas, hospedes, abertos]),
+    pedidos: pedidosApurados,
     rotina: rotinaApurada,
     vespera: vesperaApurada,
     chegadas,
@@ -146,6 +174,7 @@ function carregar() {
       /* Só reescreve o que foi de fato apurado; o resto fica com o último valor conhecido. */
       if (resultado.rotina) rotina.value = resultado.rotina
       if (resultado.vespera) vespera.value = resultado.vespera
+      if (resultado.pedidos) pedidos.value = resultado.pedidos
 
       hoje.value = {
         chegadas: resultado.chegadas ?? hoje.value.chegadas,
@@ -212,6 +241,7 @@ export function useHotelPendencias(ativo: () => boolean) {
   return {
     rotina: computed(() => (ativo() ? rotina.value : VAZIO)),
     vespera: computed(() => (ativo() ? vespera.value : VAZIO)),
+    pedidos: computed(() => (ativo() ? pedidos.value : VAZIO)),
     hoje: computed(() => (ativo() ? hoje.value : HOJE_VAZIO)),
     situacao: computed(() => (ativo() ? situacao.value : null)),
     conferidoEm: computed(() => conferidoEm.value),
@@ -225,6 +255,7 @@ export function useHotelPendencias(ativo: () => boolean) {
 export function limparPendenciasDoHotel() {
   rotina.value = VAZIO
   vespera.value = VAZIO
+  pedidos.value = VAZIO
   hoje.value = HOJE_VAZIO
   conferidoEm.value = null
   situacao.value = null

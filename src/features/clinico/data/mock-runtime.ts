@@ -54,6 +54,14 @@ export type MockOperation =
    */
   | 'estoque.listar'
   | 'estoque.registrar'
+  /*
+   * Agendamento online. A busca de horários é do celular do responsável; a resposta é da
+   * recepção. Falham separadas: o 4G de quem pede não derruba a caixa de pedidos da clínica.
+   */
+  | 'pedido.horarios'
+  | 'pedido.enviar'
+  | 'pedido.listar'
+  | 'pedido.responder'
 
 export class MockError extends Error {
   /** `kind` traduzível, nunca texto pronto de servidor. */

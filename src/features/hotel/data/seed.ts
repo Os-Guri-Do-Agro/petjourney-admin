@@ -32,6 +32,12 @@ import { planejarDia, ROTINA_PADRAO_INICIAL } from '../domain/rotina'
 import { montarOrcamento } from '../domain/tarifas'
 
 import {
+  contasSoNoAppDoHotel,
+  reservaOnlinePadrao,
+  semearPedidosDeReserva,
+} from './seed-pedidos-de-reserva'
+
+import {
   HOTEL_UTC_OFFSET,
   acomodacoesFixture,
   blocosFixture,
@@ -49,6 +55,7 @@ import {
 import { createPrng, hashSeed, intBetween, pickFrom } from './mock-runtime'
 import type {
   Acomodacao,
+  AvisoDoPedidoDeReserva,
   Bloco,
   Boletim,
   Comprovante,
@@ -62,9 +69,11 @@ import type {
   ISODateTime,
   MedicacaoDaEstadia,
   Ocorrencia,
+  PedidoDeReserva,
   PreferenciaDeBoletim,
   RegistroDoDiario,
   Reserva,
+  ReservaOnline,
   Servico,
   AjusteDeRotina,
   CuidadoDaEstadia,
@@ -162,6 +171,14 @@ export type SeedResult = {
    */
   veterinariosDosPets: Array<VeterinarioDoPet & { petId: string }>
   casos: CasoDoHotel[]
+  /** Pedidos de reserva do app e do link — ver `seed-pedidos-de-reserva.ts`. */
+  pedidosDeReserva: PedidoDeReserva[]
+  reservaOnline: ReservaOnline
+  /** Contas do app que o hotel ainda não conhece. Entram no cadastro no aceite. */
+  contasSoNoApp: Array<{ tutor: Tutor; pets: Pet[] }>
+  /** Código de acompanhamento de cada pedido do link, por id do pedido. */
+  tokensDoLink: Record<string, string>
+  avisosDoPedido: AvisoDoPedidoDeReserva[]
 }
 
 function iso(data: ISODate, hora: string): ISODateTime {
@@ -1505,6 +1522,22 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     },
   ]
 
+  /* Os pedidos vêm por último: a vaga que eles disputam é a do mapa já montado. */
+  const reservaOnline = reservaOnlinePadrao()
+  const dosPedidos = semearPedidosDeReserva({
+    ancora,
+    agora,
+    hotel: hotelFixture,
+    configuracao: reservaOnline,
+    acomodacoes,
+    tarifas: tarifasFixture,
+    temporadas,
+    servicos: servicosFixture,
+    pets,
+  })
+
+  reservas.push(...dosPedidos.reservas)
+
   return {
     semente,
     ancora,
@@ -1546,6 +1579,11 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     contatosDaFamilia,
     veterinariosDosPets,
     casos: CASOS,
+    pedidosDeReserva: dosPedidos.pedidos,
+    reservaOnline,
+    contasSoNoApp: contasSoNoAppDoHotel(),
+    tokensDoLink: dosPedidos.tokens,
+    avisosDoPedido: [],
   }
 }
 

@@ -233,6 +233,8 @@ export type StatusDeAgendamento = (typeof STATUS_DE_AGENDAMENTO)[number]
 
 export const ORIGENS_DE_AGENDAMENTO = [
   'APP',
+  /** A página pública da clínica (`docs/clinico/18-*.md`). Quem marcou ainda não tinha o app. */
+  'LINK_PUBLICO',
   'RECEPCAO',
   'TELEFONE',
   'ENCAIXE',
@@ -1860,4 +1862,335 @@ export function quantidadeEmTexto(dose: {
     default:
       return `${numero} ${dose.quantidade === 1 ? 'comprimido' : 'comprimidos'}`
   }
+}
+
+// ---------------------------------------------------------------------------
+// Agendamento online — o pedido do responsável (docs/clinico/18-*.md)
+// ---------------------------------------------------------------------------
+
+/*
+ * Até aqui o app **marcava**: reservava o horário e gravava o agendamento na mesma hora
+ * (`reservar` + `agendar`). A clínica pediu o contrário — o responsável **pede**, e a clínica
+ * responde. Dois caminhos:
+ *
+ * - `HORARIO_ESCOLHIDO`: o app mostra a agenda, a pessoa escolhe o profissional (ou qualquer um) e
+ *   o horário, e a clínica aceita aquele horário (ou oferece outro, se ele não serve mais).
+ * - `MELHOR_HORARIO`: a pessoa diz quando pode, e a clínica marca no melhor horário que tiver.
+ *
+ * Emergência **não** é pedido: o app mostra o contato da clínica (`EmergenciaDaClinica`) e para.
+ *
+ * O mesmo pedido chega pela página pública da clínica, de quem ainda não tem o app, com um
+ * cadastro mínimo no lugar do pet (`CriarPedidoPeloLink`).
+ *
+ * Os tipos de notificação e os erros desta seção ficam **fora** de `TIPOS_DE_NOTIFICACAO_CLINICA` e
+ * de `CodigoDeErroClinico`, pelo mesmo motivo do vínculo: aquele `Record` é fechado no app, e o que
+ * é novo entra lá junto com a tela, sem quebrar o build de quem recopiar este arquivo.
+ */
+
+export const MODOS_DO_PEDIDO = ['HORARIO_ESCOLHIDO', 'MELHOR_HORARIO'] as const
+export type ModoDoPedidoNoContrato = (typeof MODOS_DO_PEDIDO)[number]
+
+export const CANAIS_DO_PEDIDO = ['APP', 'LINK_PUBLICO'] as const
+export type CanalDoPedidoNoContrato = (typeof CANAIS_DO_PEDIDO)[number]
+
+export const PERIODOS_DO_DIA = ['MANHA', 'TARDE'] as const
+export type PeriodoDoDiaNoContrato = (typeof PERIODOS_DO_DIA)[number]
+
+export const STATUS_DO_PEDIDO = [
+  'AGUARDANDO_CLINICA',
+  'ACEITO',
+  'RECUSADO',
+  'CANCELADO_PELO_RESPONSAVEL',
+  /** O horário escolhido passou, ou a janela da preferência acabou, sem resposta. */
+  'EXPIRADO',
+] as const
+export type StatusDoPedidoNoContrato = (typeof STATUS_DO_PEDIDO)[number]
+
+export const MOTIVOS_DE_RECUSA_DO_PEDIDO = [
+  'SEM_HORARIO',
+  'SERVICO_INDISPONIVEL',
+  'PRECISA_AVALIAR',
+  'EMERGENCIA',
+  'OUTRO',
+] as const
+export type MotivoDeRecusaDoPedido = (typeof MOTIVOS_DE_RECUSA_DO_PEDIDO)[number]
+
+/**
+ * Sinais que tiram o caso do pedido online: o app pergunta, e qualquer um marcado leva ao contato
+ * de emergência em vez de seguir para o horário. A lista é do app, não da clínica — é a mesma para
+ * todas, como a dos sintomas do diário.
+ */
+export const SINAIS_DE_EMERGENCIA = [
+  'FALTA_DE_AR',
+  'CONVULSAO',
+  'SANGRAMENTO',
+  'ENVENENAMENTO',
+  'TRAUMA',
+  'NAO_LEVANTA',
+] as const
+export type SinalDeEmergencia = (typeof SINAIS_DE_EMERGENCIA)[number]
+
+export type CodigoDeErroDoPedido =
+  | 'HORARIO_INDISPONIVEL'
+  | 'RESERVA_EXPIRADA'
+  /** A clínica desligou o agendamento online, ou o modo pedido. */
+  | 'CLINICA_NAO_RECEBE_PEDIDOS'
+  | 'MODO_INDISPONIVEL'
+  /** Faltam dados do pet que a clínica precisa (`CAMPOS_DO_PET_PARA_PEDIDO`). */
+  | 'CADASTRO_INCOMPLETO'
+  | 'PEDIDO_JA_RESPONDIDO'
+
+/**
+ * O que o app pede antes de seguir quando o pet não tem: o mínimo para a clínica preparar a
+ * consulta. Idade e sexo mudam a dose, a vacina e a pergunta que o veterinário faz primeiro.
+ */
+export const CAMPOS_DO_PET_PARA_PEDIDO = ['NASCIMENTO', 'SEXO'] as const
+export type CampoDoPetParaPedido = (typeof CAMPOS_DO_PET_PARA_PEDIDO)[number]
+
+/**
+ * O contato de emergência, com o estado de agora calculado no servidor — o app não sabe o
+ * expediente da clínica, e "aberta" decidida pelo relógio do aparelho erra no feriado.
+ */
+export type EmergenciaDaClinica = {
+  telefone: string
+  whatsapp: string | null
+  /** Plantão fora do expediente. `null`: a clínica não tem. */
+  telefoneDePlantao: string | null
+  endereco: string
+  abertaAgora: boolean
+  /** Hoje, quando fecha. `null` com a clínica fechada. */
+  fechaAs: HoraDoDia | null
+  /** Quando abre de novo. `null` com a clínica aberta. */
+  abreEm: DataHoraIso | null
+  /** Texto da clínica para fora do horário, no idioma em que foi escrito. */
+  orientacao: string | null
+  idiomaDaOrientacao: IdiomaDoTexto | null
+}
+
+/** Como esta clínica recebe pedidos. É o que decide quais caminhos o app oferece. */
+export type AgendamentoOnlineDaClinica = {
+  clinica: ClinicaResumo
+  enderecoResumo: string
+  recebePedidos: boolean
+  modos: ModoDoPedidoNoContrato[]
+  /** "A clínica responde em até 4 h." O app mostra, não calcula. */
+  prazoDeRespostaHoras: number
+  antecedenciaMinimaHoras: number
+  horizonteDias: number
+  politica: PoliticaDaClinica
+  servicos: ServicoAgendavel[]
+  profissionais: ProfissionalResumo[]
+  emergencia: EmergenciaDaClinica
+}
+
+export type BuscarDiasParaPedido = {
+  servicoId: Cuid
+  /** 1 a 3. Mais de um é o mesmo profissional, um horário depois do outro. */
+  petIds: Cuid[]
+  de: DataIso
+  ate: DataIso
+  /** Ausente = qualquer profissional. */
+  profissionalId?: Cuid
+}
+
+/** Um horário que o app pode oferecer. Com dois pets, são dois horários seguidos. */
+export type OpcaoDeHorario = {
+  profissional: ProfissionalResumo
+  inicio: DataHoraIso
+  fim: DataHoraIso
+  /** Um por pet, na ordem pedida. Com um pet só, é o próprio horário. */
+  porPet: Array<{ petId: Cuid; inicio: DataHoraIso; fim: DataHoraIso }>
+}
+
+/** O dia da faixa de datas do app: tem horário, está cheio ou a clínica não abre. */
+export type DiaParaPedido = {
+  data: DataIso
+  situacao: 'COM_HORARIO' | 'SEM_HORARIO' | 'FECHADA'
+  /** Nome do feriado, quando é por isso que fecha. */
+  feriado: string | null
+  horarios: OpcaoDeHorario[]
+}
+
+export type ReservarParaPedido = {
+  clinicaId: Cuid
+  servicoId: Cuid
+  petIds: Cuid[]
+  profissionalId: Cuid
+  inicio: DataHoraIso
+}
+
+/** O horário segurado enquanto a pessoa revisa. Some sozinho em `expiraEm`. */
+export type ReservaDoPedido = {
+  id: Cuid
+  opcao: OpcaoDeHorario
+  expiraEm: DataHoraIso
+}
+
+export type PreferenciaDoPedidoNoContrato = {
+  de: DataIso
+  ate: DataIso
+  /** Vazio = qualquer período. */
+  periodos: PeriodoDoDiaNoContrato[]
+  profissionalId: Cuid | null
+}
+
+export type CriarPedidoDeAgendamento = {
+  clinicaId: Cuid
+  servicoId: Cuid
+  motivo: MotivoVisita
+  /** Até `LIMITES_CLINICOS.observacaoDoAgendamento`. */
+  queixa?: string
+  modo: ModoDoPedidoNoContrato
+  petIds: Cuid[]
+  /** Obrigatório em `HORARIO_ESCOLHIDO`. */
+  reservaId?: Cuid
+  /** Obrigatório em `MELHOR_HORARIO`. */
+  preferencia?: PreferenciaDoPedidoNoContrato
+  /**
+   * Primeira vez na clínica: a pessoa liberou o histórico do app. Ausente ou `false`, a clínica
+   * recebe só o pedido — o consentimento continua sendo o de `ConsentimentoDaClinica`.
+   */
+  compartilharHistorico?: boolean
+  /** Remarcação: o agendamento que muda de horário quando a clínica aceitar. */
+  remarcaAgendamentoId?: Cuid
+}
+
+/** Quem ainda não tem o app: o cadastro mínimo, no lugar do pet da conta. */
+export type VisitanteDoLink = {
+  nome: string
+  /** Só dígitos, com DDD. É por ele que a confirmação chega. */
+  telefone: string
+  petNome: string
+  especie: EspecieNaClinica
+  nascimento?: DataIso
+  sexo?: SexoNaClinica
+}
+
+export type CriarPedidoPeloLink = Omit<
+  CriarPedidoDeAgendamento,
+  'clinicaId' | 'petIds' | 'compartilharHistorico' | 'remarcaAgendamentoId'
+> & {
+  visitante: VisitanteDoLink
+}
+
+export type PedidoDeAgendamento = {
+  id: Cuid
+  canal: CanalDoPedidoNoContrato
+  modo: ModoDoPedidoNoContrato
+  clinica: ClinicaResumo
+  pets: PetResumo[]
+  servico: ServicoAgendavel
+  motivo: MotivoVisita
+  queixa: string
+  /** O horário escolhido. `null` em `MELHOR_HORARIO`. */
+  horarioPedido: OpcaoDeHorario | null
+  preferencia: PreferenciaDoPedidoNoContrato | null
+  status: StatusDoPedidoNoContrato
+  criadoEm: DataHoraIso
+  responderAte: DataHoraIso
+  respondidoEm: DataHoraIso | null
+  /** Os horários que nasceram do aceite, um por pet. */
+  agendamentoIds: Cuid[]
+  /** O horário marcado, quando a clínica aceitou ou escolheu. */
+  horarioMarcado: OpcaoDeHorario | null
+  recusa: {
+    motivo: MotivoDeRecusaDoPedido
+    mensagemDaClinica: string
+    idiomaDaMensagem: IdiomaDoTexto
+  } | null
+  remarcaAgendamentoId: Cuid | null
+  /** Enquanto a clínica não respondeu, a pessoa desiste sem precisar ligar. */
+  podeCancelar: boolean
+}
+
+/** O que o link devolve: o pedido e o código curto para acompanhar sem conta. */
+export type PedidoPeloLink = PedidoDeAgendamento & {
+  /** Vai na mensagem de confirmação: `/agendar/<slug>?pedido=<token>`. */
+  token: string
+}
+
+export const ROTAS_DO_PEDIDO = {
+  agendamentoOnline: 'GET /tutor/clinica/clinicas/:clinicaId/agendamento-online', // AgendamentoOnlineDaClinica
+  dias: 'GET /tutor/clinica/clinicas/:clinicaId/dias-para-pedido', // BuscarDiasParaPedido → DiaParaPedido[]
+  reservar: 'POST /tutor/clinica/pedidos/reservas', // ReservarParaPedido → ReservaDoPedido [HORARIO_INDISPONIVEL]
+  liberar: 'DELETE /tutor/clinica/pedidos/reservas/:id', // 204
+  pedir: 'POST /tutor/clinica/pedidos', // CriarPedidoDeAgendamento → PedidoDeAgendamento [RESERVA_EXPIRADA, CADASTRO_INCOMPLETO, MODO_INDISPONIVEL]
+  pedidos: 'GET /tutor/clinica/pedidos', // PedidoDeAgendamento[], os abertos e os dos últimos 30 dias
+  cancelarPedido: 'POST /tutor/clinica/pedidos/:id/cancelar', // PedidoDeAgendamento [PEDIDO_JA_RESPONDIDO]
+  // A página pública, sem conta:
+  clinicaPublica: 'GET /publico/clinicas/:slug', // AgendamentoOnlineDaClinica
+  diasPublicos: 'GET /publico/clinicas/:slug/dias-para-pedido', // BuscarDiasParaPedido sem petIds → DiaParaPedido[]
+  reservarPublico: 'POST /publico/clinicas/:slug/reservas', // ReservarParaPedido sem petIds → ReservaDoPedido
+  pedirPublico: 'POST /publico/clinicas/:slug/pedidos', // CriarPedidoPeloLink → PedidoPeloLink
+  pedidoPublico: 'GET /publico/pedidos/:token', // PedidoPeloLink
+  cancelarPedidoPublico: 'POST /publico/pedidos/:token/cancelar', // PedidoPeloLink [PEDIDO_JA_RESPONDIDO]
+} as const
+
+/**
+ * As notificações do pedido. A véspera, a remarcação e o cancelamento continuam sendo as do
+ * agendamento (`AGENDAMENTO_LEMBRETE_VESPERA`...): depois do aceite, o pedido virou agendamento.
+ */
+export const TIPOS_DE_NOTIFICACAO_DO_PEDIDO = [
+  /** Horário escolhido, aceito como estava. */
+  'PEDIDO_ACEITO',
+  /** A clínica marcou: melhor horário, ou outro horário no lugar do escolhido. */
+  'PEDIDO_MARCADO_PELA_CLINICA',
+  'PEDIDO_RECUSADO',
+] as const
+export type TipoDeNotificacaoDoPedido = (typeof TIPOS_DE_NOTIFICACAO_DO_PEDIDO)[number]
+
+export const ROTA_DA_NOTIFICACAO_DO_PEDIDO = '/screens/clinica/pedido'
+
+export type DadosDaNotificacaoDoPedido = BaseDaNotificacaoClinica &
+  ComMensagemDaClinica & {
+    tipo: TipoDeNotificacaoDoPedido
+    pedidoId: Cuid
+    petNomes: string[]
+    clinicaNome: string
+    /** O horário marcado. `null` na recusa. */
+    inicio: DataHoraIso | null
+    profissionalNome: string | null
+  }
+
+/** "Pérola e Brunilda", "Thor". */
+function nomesDosPets(nomes: string[]): string {
+  if (nomes.length <= 1) {
+    return nomes[0] ?? ''
+  }
+
+  return `${nomes.slice(0, -1).join(', ')} e ${nomes[nomes.length - 1]}`
+}
+
+/**
+ * Texto do push, em português. Para quem veio pelo link, o mesmo texto vai por mensagem no
+ * celular, com o endereço do pedido no fim (`textoPtDaMensagemDoLink`).
+ */
+export const TEXTOS_PT_DO_PEDIDO: Record<
+  TipoDeNotificacaoDoPedido,
+  (dados: DadosDaNotificacaoDoPedido) => { titulo: string; corpo: string }
+> = {
+  PEDIDO_ACEITO: (dados) => ({
+    titulo: `Horário confirmado: ${nomesDosPets(dados.petNomes)}`,
+    corpo: `${dados.inicio ? diaEHora(dados.inicio) : ''} · ${dados.clinicaNome}`,
+  }),
+  PEDIDO_MARCADO_PELA_CLINICA: (dados) => ({
+    titulo: `A clínica marcou o horário de ${nomesDosPets(dados.petNomes)}`,
+    corpo: `${dados.inicio ? diaEHora(dados.inicio) : ''}${
+      dados.profissionalNome ? ` com ${dados.profissionalNome}` : ''
+    } · ${dados.clinicaNome}`,
+  }),
+  PEDIDO_RECUSADO: (dados) => ({
+    titulo: `A clínica não conseguiu marcar para ${nomesDosPets(dados.petNomes)}`,
+    corpo: `${dados.clinicaNome}. Toque para ver a mensagem e pedir outro horário.`,
+  }),
+}
+
+/** A mensagem no celular de quem não tem o app: o push, mais o endereço para acompanhar. */
+export function textoPtDaMensagemDoLink(
+  dados: DadosDaNotificacaoDoPedido,
+  endereco: string,
+): string {
+  const { titulo, corpo } = TEXTOS_PT_DO_PEDIDO[dados.tipo](dados)
+
+  return `${titulo}. ${corpo}. Acompanhe ou cancele: ${endereco}`
 }

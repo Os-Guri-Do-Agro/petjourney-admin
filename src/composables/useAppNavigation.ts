@@ -131,6 +131,8 @@ const HOTEL_BLOCKS: readonly BlocoDeModulo[] = [
     rotas: [
       { key: 'hotel.mapa.titulo', to: '/hotel/mapa', icon: 'ph ph-squares-four' },
       { key: 'hotel.reservas.titulo', to: '/hotel/reservas', icon: 'ph ph-calendar-blank' },
+      /* O pedido do app e do link é venda esperando o balcão dizer sim: mora junto da reserva. */
+      { key: 'hotel.pedidos.titulo', to: '/hotel/pedidos', icon: 'ph ph-calendar-plus' },
     ],
   },
   {
@@ -208,6 +210,15 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
     rotas: [
       { key: 'clinico.meuDia.titulo', to: '/veterinario/meu-dia', icon: 'ph ph-sun' },
       { key: 'clinico.agenda.titulo', to: '/veterinario/agenda', icon: 'ph ph-calendar-blank' },
+      /*
+       * Logo depois da agenda: o pedido do app e do link é horário esperando alguém da recepção
+       * dizer sim — trabalho de agora, com prazo prometido a quem pediu.
+       */
+      {
+        key: 'clinico.pedidos.titulo',
+        to: '/veterinario/pedidos',
+        icon: 'ph ph-calendar-plus',
+      },
       { key: 'clinico.fila.titulo', to: '/veterinario/fila', icon: 'ph ph-hourglass' },
     ],
   },
@@ -358,6 +369,10 @@ export function useAppNavigation() {
   const contagemPorRota = computed<
     Record<string, { contagem: ContagemDePendencia; frase: string } | undefined>
   >(() => ({
+    '/veterinario/pedidos': {
+      contagem: pendencias.pedidos.value,
+      frase: 'clinico.navegacao.selo.pedidos',
+    },
     '/veterinario/fila': { contagem: pendencias.fila.value, frase: 'clinico.navegacao.selo.fila' },
     '/veterinario/internacao': {
       contagem: pendencias.internacao.value,
@@ -382,6 +397,10 @@ export function useAppNavigation() {
     '/hotel/rotina': {
       contagem: pendenciasDoHotel.rotina.value,
       frase: 'hotel.navegacao.selo.rotina',
+    },
+    '/hotel/pedidos': {
+      contagem: pendenciasDoHotel.pedidos.value,
+      frase: 'hotel.navegacao.selo.pedidos',
     },
     '/hotel/reservas': {
       contagem: pendenciasDoHotel.vespera.value,

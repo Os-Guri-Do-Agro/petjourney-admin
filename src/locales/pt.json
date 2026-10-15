@@ -604,7 +604,9 @@
         "rascunhos": "{total} prontuário em rascunho | {total} prontuários em rascunho",
         "retornosVencidos": "{total} retorno vencido | {total} retornos vencidos",
         "vagasOfertadas": "{total} vaga ofertada sem resposta | {total} vagas ofertadas sem resposta",
-        "medicacoesAtrasadas": "{total} medicação atrasada | {total} medicações atrasadas"
+        "medicacoesAtrasadas": "{total} medicação atrasada | {total} medicações atrasadas",
+        "pedidosAtrasados": "{total} passou do prazo | {total} passaram do prazo",
+        "pedidosNoPrazo": "{total} no prazo | {total} no prazo"
       },
       "coluna": {
         "assunto": "Assunto",
@@ -628,7 +630,9 @@
       "contagem": "{total} assunto | {total} assuntos",
       "recolher": "Recolher {modulo}",
       "expandir": "Expandir {modulo}",
-      "tratamentos": "{total} tratamento crítico com a adesão em queda | {total} tratamentos críticos com a adesão em queda"
+      "tratamentos": "{total} tratamento crítico com a adesão em queda | {total} tratamentos críticos com a adesão em queda",
+      "pedidos": "{total} pedido de horário esperando resposta | {total} pedidos de horário esperando resposta",
+      "pedidosDeReserva": "{total} pedido de reserva esperando resposta | {total} pedidos de reserva esperando resposta"
     },
     "resumo": {
       "portal": "Acompanhe seus ganhos e compartilhe seu código.",
@@ -2116,7 +2120,8 @@
         "atividades": "{total} pendência | {total} pendências",
         "vacinas": "{total} reforço vencido | {total} reforços vencidos",
         "tratamentos": "{total} tratamento crítico com a adesão em queda | {total} tratamentos críticos com a adesão em queda",
-        "estoque": "{total} vacina abaixo do mínimo | {total} vacinas abaixo do mínimo"
+        "estoque": "{total} vacina abaixo do mínimo | {total} vacinas abaixo do mínimo",
+        "pedidos": "{total} pedido de horário esperando resposta | {total} pedidos de horário esperando resposta"
       }
     },
     "busca": {
@@ -2173,7 +2178,8 @@
       "telefone": "Telefone",
       "encaixe": "Encaixe",
       "retorno": "Retorno",
-      "fila": "Fila de espera"
+      "fila": "Fila de espera",
+      "link": "Link da clínica"
     },
     "bloqueio": {
       "almoco": "Almoço",
@@ -5360,6 +5366,413 @@
         "nota": "NF {nota}",
         "colunaDoses": "Doses"
       }
+    },
+    "pedidos": {
+      "titulo": "Pedidos de horário",
+      "subtitulo": "Clínica",
+      "resumo": {
+        "nenhum": "Nenhum pedido esperando resposta",
+        "abertos": "1 pedido esperando resposta | {n} pedidos esperando resposta",
+        "atrasados": "1 passou do prazo | {n} passaram do prazo",
+        "proximo": "o próximo vence {quando}"
+      },
+      "acoes": {
+        "rotulo": "Ações dos pedidos",
+        "verNoApp": "Como o responsável pede",
+        "link": "Link da clínica",
+        "configurar": "Como recebemos pedidos"
+      },
+      "secao": {
+        "abertos": "Esperando resposta",
+        "ordem": "Pelo prazo de resposta",
+        "respondidos": "Respondidos ({n})"
+      },
+      "vazio": {
+        "titulo": "Nenhum pedido esperando",
+        "descricao": "Quando alguém pedir horário pelo app ou pelo link da clínica, o pedido aparece aqui para a recepção responder."
+      },
+      "desligado": "O agendamento online está pausado: o app e o link da clínica não oferecem horário.",
+      "religar": "Voltar a receber",
+      "canal": {
+        "app": "Pelo app",
+        "link": "Pelo link da clínica"
+      },
+      "motivo": {
+        "checkup": "Check-up",
+        "vacina": "Vacina",
+        "sintoma": "Sintoma",
+        "retorno": "Retorno",
+        "exame": "Exame",
+        "banho": "Banho e tosa",
+        "outro": "Outro motivo"
+      },
+      "primeiraVez": "Primeira vez",
+      "jaCliente": "Já é cliente",
+      "escolheu": "Escolheu {quando} com {profissional}",
+      "escolheuSeguidos": "Escolheu {dia} · {horas}, seguidos, com {profissional}",
+      "pode": "Pode {janela} · {quem}",
+      "janela": "{de} a {ate}",
+      "periodo": {
+        "manha": "de manhã",
+        "tarde": "à tarde",
+        "qualquer": "a qualquer hora"
+      },
+      "periodoTitulo": {
+        "manha": "Manhã",
+        "tarde": "Tarde"
+      },
+      "comProfissional": "com {nome}",
+      "qualquerProfissional": "qualquer profissional",
+      "ocupado": "O horário escolhido foi ocupado depois do pedido",
+      "semSugestao": "Nada livre nas próximas semanas",
+      "historicoLiberado": "Liberou o histórico do app para a clínica",
+      "remarcacao": "Quer remarcar um horário que já tem",
+      "prazo": {
+        "ate": "Responder até {quando}",
+        "atrasado": "Prazo passou {valor}"
+      },
+      "aceitar": "Aceitar",
+      "marcarEm": "Marcar {hora}",
+      "recusar": "Recusar",
+      "resultado": {
+        "marcado": "{pets}: marcado para {quando} com {profissional}. O responsável já foi avisado.",
+        "recusado": "Recusa enviada ao responsável.",
+        "horario-ocupado": "O horário não está mais livre. Escolha outro em \"Outro horário\".",
+        "ja-respondido": "Este pedido já tinha sido respondido.",
+        "verNaAgenda": "Ver na agenda",
+        "dispensar": "Dispensar"
+      },
+      "respondido": {
+        "aceito": "Marcado: {quando} com {profissional}",
+        "automatico": "Aceito sozinho: {quando} com {profissional}",
+        "recusado": "Recusado — {motivo}",
+        "desistiu": "O responsável desistiu",
+        "expirado": "Perdeu o prazo sem resposta",
+        "pendente": "Esperando resposta"
+      },
+      "horario": {
+        "procurando": "Procurando horários livres…",
+        "foraDaJanela": "fora do que pediu",
+        "avisoPorPush": "{nome} recebe no app",
+        "avisoPorMensagem": "{nome} recebe por mensagem no celular",
+        "aviso": "{pets}: horário marcado para {quando} com {profissional}."
+      },
+      "recusa": {
+        "titulo": "Recusar o pedido de {pets}",
+        "porque": "Por quê",
+        "mensagemPara": "Mensagem para {nome}",
+        "enviar": "Enviar recusa",
+        "notaApp": "A mensagem chega no app, com o botão para pedir outro horário.",
+        "notaLink": "A mensagem chega por mensagem no celular, com o endereço para pedir de novo.",
+        "motivo": {
+          "sem-horario": "Sem horário",
+          "precisa-avaliar": "Precisa conversar antes",
+          "servico-indisponivel": "Serviço indisponível",
+          "emergencia": "É emergência",
+          "outro": "Outro"
+        },
+        "mensagem": {
+          "sem-horario": "Oi, {nome}! Não temos horário nesse período para {pets}. Se puder outro dia, peça de novo — ou ligue {telefone} que a gente encaixa.",
+          "precisa-avaliar": "Oi, {nome}! Para {pets}, precisamos conversar antes de marcar. Pode ligar {telefone}? É rapidinho.",
+          "servico-indisponivel": "Oi, {nome}! Esse serviço está indisponível no momento. Ligue {telefone} que indicamos o melhor caminho para {pets}.",
+          "emergencia": "Oi, {nome}! Pelo que você contou, {pets} precisa ser visto agora. Venha direto ou ligue {telefone} no caminho.",
+          "outro": "Oi, {nome}! Não conseguimos marcar o horário de {pets}."
+        }
+      },
+      "config": {
+        "titulo": "Como a clínica recebe pedidos",
+        "ativo": "Receber pedidos pelo app e pelo link",
+        "ativoAjuda": "Pausado, o app e a página da clínica mostram só o telefone.",
+        "caminhos": "Caminhos do pedido",
+        "escolherHorario": "O responsável escolhe dia, horário e profissional",
+        "escolherHorarioAjuda": "Ele vê a agenda livre e escolhe. A recepção aceita aquele horário ou oferece outro.",
+        "melhorHorario": "O responsável diz quando pode, e a clínica marca",
+        "melhorHorarioAjuda": "Ele escolhe a semana e o período. A recepção marca no melhor horário que tiver.",
+        "aceitarSozinho": "Aceitar sozinho o horário escolhido",
+        "aceitarSozinhoAjuda": "Com o horário ainda livre, o pedido vira atendimento na hora, sem passar pela recepção.",
+        "oQueEQuem": "O que e com quem",
+        "servicos": "Serviços que podem ser pedidos",
+        "profissionais": "Profissionais que recebem pedidos",
+        "prazo": "Responder em até",
+        "antecedencia": "Primeiro horário a partir de",
+        "horizonte": "Mostrar a agenda por",
+        "horas": "h",
+        "dias": "dias",
+        "emergencia": "Emergência",
+        "emergenciaAjuda": "É o que aparece para quem marca \"é uma emergência\". Não vira pedido: vira o contato da clínica.",
+        "telefone": "Telefone",
+        "whatsapp": "WhatsApp",
+        "plantao": "Telefone do plantão",
+        "semPlantao": "Sem plantão",
+        "orientacao": "Mensagem para fora do horário",
+        "salvar": "Salvar"
+      },
+      "link": {
+        "titulo": "Link de agendamento",
+        "ajuda": "Para quem ainda não tem o app: o responsável pede horário pelo celular, sem criar conta. Ponha no Instagram, no WhatsApp e no cartão do balcão.",
+        "copiar": "Copiar o link",
+        "copiado": "Link copiado",
+        "abrir": "Abrir a página",
+        "whatsapp": "Enviar pelo WhatsApp",
+        "textoParaCompartilhar": "Agende um horário na {clinica} pelo celular: {endereco}",
+        "demo": "Página pública da clínica (demonstração)",
+        "voltarAoPortal": "Voltar ao portal",
+        "naoEncontrada": "Clínica não encontrada",
+        "naoEncontradaAjuda": "Confira o endereço que a clínica enviou.",
+        "seuPedido": "Seu pedido",
+        "pedidoNaoEncontrado": "Não encontramos este pedido.",
+        "outroPedido": "Fazer outro pedido",
+        "situacao": {
+          "AGUARDANDO_CLINICA": "Esperando a clínica responder",
+          "ACEITO": "Horário confirmado",
+          "RECUSADO": "A clínica não conseguiu marcar",
+          "CANCELADO_PELO_RESPONSAVEL": "Você desistiu deste pedido",
+          "EXPIRADO": "O pedido perdeu o prazo"
+        },
+        "dadosAjuda": "Para a clínica confirmar com você. Não precisa ter o app.",
+        "nome": "Seu nome",
+        "telefone": "Celular com DDD",
+        "telefoneExemplo": "(11) 98765-4321",
+        "petNome": "Nome do pet",
+        "especie": "Espécie",
+        "nascimento": "Data de nascimento do pet (se souber)",
+        "sexo": "Sexo do pet (se souber)",
+        "confirmacaoPor": "A confirmação chega por mensagem no {telefone}.",
+        "acompanhe": "Acompanhe ou desista por este endereço",
+        "baixeOApp": "Com o app PetJourney, a resposta chega na hora e o histórico do pet fica com você.",
+        "rodape": "Agendamento online por PetJourney",
+        "promessa": "Peça seu horário em um minuto, sem baixar app. A clínica responde em até {horas} h.",
+        "passos": {
+          "rotulo": "Passos do pedido",
+          "motivo": "Motivo",
+          "modo": "Como marcar",
+          "quando": "Quando",
+          "dados": "Seus dados",
+          "feito": "feito",
+          "contagem": "Passo {atual} de {total}"
+        },
+        "equipe": "Quem atende",
+        "contato": "Contato",
+        "telefoneDaClinica": "Telefone",
+        "whatsappRotulo": "WhatsApp",
+        "regraCancelar": "Enquanto a clínica não responde, dá para desistir pelo endereço que chega na mensagem. Depois, para mudar ou cancelar, ligue {telefone}."
+      },
+      "ensaio": {
+        "quem": "No celular de",
+        "fatima": "Fátima · vários pets",
+        "renata": "Renata · primeira vez",
+        "disputa": "No próximo horário escolhido, outra pessoa chega antes"
+      },
+      "erros": {
+        "carregar": "Não foi possível carregar os pedidos.",
+        "responder": "Não foi possível responder. Tente de novo.",
+        "configuracao": "Não foi possível salvar a configuração.",
+        "sugestoes": "Não foi possível buscar horários livres."
+      },
+      "app": {
+        "etapa": {
+          "inicio": "Clínica",
+          "pets": "Para quem é?",
+          "completar": "Complete o cadastro de {nome}",
+          "motivo": "O que está acontecendo?",
+          "clinica": "Em qual clínica?",
+          "modo": "Como prefere marcar?",
+          "profissional": "Com quem?",
+          "horario": "Escolha o horário",
+          "preferencia": "Quando você pode?",
+          "seus-dados": "Seus dados",
+          "revisar": "Confira e envie",
+          "enviado": "Pedido enviado",
+          "emergencia": "Emergência"
+        },
+        "voltar": "Voltar",
+        "continuar": "Continuar",
+        "pushOrigem": "PetJourney · agora",
+        "fecharAviso": "Fechar aviso",
+        "abertaAte": "Aberta agora, até {hora}",
+        "fechadaAbre": "Fechada agora · abre {quando}",
+        "proximos": "Próximos horários",
+        "nadaMarcado": "Nenhum horário marcado.",
+        "pedidos": "Pedidos",
+        "status": {
+          "AGENDADO": "Marcado",
+          "CONFIRMADO": "Confirmado",
+          "AGUARDANDO": "Na recepção",
+          "EM_ATENDIMENTO": "Em atendimento",
+          "FINALIZADO": "Finalizado",
+          "FALTA": "Falta",
+          "CANCELADO": "Cancelado"
+        },
+        "remarcar": "Remarcar",
+        "cancelar": "Cancelar",
+        "cancelarPorTelefone": "Pelo app, só até {horas} h antes. Para mudar agora, ligue {telefone}.",
+        "aguardando": "Esperando a clínica · responde até {quando}",
+        "recusado": "A clínica não conseguiu marcar",
+        "desistir": "Desistir do pedido",
+        "pedirDeNovo": "Pedir outro horário",
+        "pedirHorario": "Pedir horário",
+        "ehEmergencia": "É uma emergência",
+        "petsAjuda": "Escolha até três. Mais de um, a clínica marca seguidos, com o mesmo profissional.",
+        "internado": "Em internação nesta clínica",
+        "faltaCadastro": "Falta completar o cadastro",
+        "primeiraVez": "Primeira vez nesta clínica",
+        "seguidosAjuda": "Os horários ficam seguidos: você vai uma vez só.",
+        "completarAjuda": "A clínica precisa da idade e do sexo de {nome} para preparar a consulta.",
+        "completarSalva": "Fica salvo no perfil de {nome}, no app.",
+        "nascimento": "Data de nascimento",
+        "sexoRotulo": "Sexo",
+        "sexo": {
+          "macho": "Macho",
+          "femea": "Fêmea"
+        },
+        "salvarContinuar": "Salvar e continuar",
+        "motivo": {
+          "EMERGENCIA": "É uma emergência",
+          "CHECKUP": "Check-up de rotina",
+          "SINTOMA": "Está com algum sintoma",
+          "VACINA": "Vacina",
+          "RETORNO": "Retorno",
+          "EXAME": "Exame",
+          "BANHO": "Banho e tosa",
+          "OUTRO": "Outro motivo"
+        },
+        "motivoAjuda": {
+          "EMERGENCIA": "Falta de ar, convulsão, sangramento, envenenamento",
+          "CHECKUP": "Consulta de rotina, sem queixa",
+          "SINTOMA": "Coceira, vômito, diarreia, dor, tosse…",
+          "VACINA": "Dose da carteirinha ou reforço",
+          "RETORNO": "Voltar ao profissional que atendeu",
+          "EXAME": "Exame de imagem pedido pela clínica",
+          "BANHO": "Banho, tosa e higiene",
+          "OUTRO": "Conte no próximo passo"
+        },
+        "sinaisTitulo": "Algum destes agora?",
+        "sinal": {
+          "FALTA_DE_AR": "Respira com dificuldade ou de boca aberta",
+          "CONVULSAO": "Convulsão ou tremores fortes",
+          "SANGRAMENTO": "Sangramento que não para",
+          "ENVENENAMENTO": "Comeu veneno, remédio ou planta tóxica",
+          "TRAUMA": "Atropelamento, queda ou briga feia",
+          "NAO_LEVANTA": "Não consegue levantar ou andar"
+        },
+        "queixa": "Conte o que está acontecendo (opcional)",
+        "verEmergencia": "Ver o contato de emergência",
+        "jaAtende": "Já atende {nomes}",
+        "primeiraVezAqui": "Primeira vez aqui",
+        "pausada": "Não está recebendo pedidos agora. Ligue {telefone}.",
+        "naoRecebe": "Ainda não recebe pedidos pelo app. Ligue {telefone}.",
+        "remarcando": "Remarcando {pet}: era {quando}",
+        "modo": {
+          "HORARIO_ESCOLHIDO": "Escolher dia e horário",
+          "MELHOR_HORARIO": "Pedir o melhor horário"
+        },
+        "modoAjuda": {
+          "HORARIO_ESCOLHIDO": "Você vê a agenda livre e escolhe com quem. A clínica confirma.",
+          "MELHOR_HORARIO": "Diga quando pode. A clínica marca no melhor horário e avisa."
+        },
+        "prazoDaClinica": "A clínica responde em até {horas} h, no horário de atendimento.",
+        "qualquerProfissional": "Qualquer profissional",
+        "qualquerAjuda": "Mostra mais horários",
+        "especialidade": {
+          "CLINICO_GERAL": "Clínica geral",
+          "CIRURGIA": "Cirurgia",
+          "DERMATOLOGIA": "Dermatologia",
+          "CARDIOLOGIA": "Cardiologia"
+        },
+        "seguidosPara": "horários seguidos para {nomes}",
+        "dias": "Dias",
+        "procurando": "Procurando horários…",
+        "horarioSumiu": "Alguém pediu o horário das {hora} antes de você. Ele saiu da lista — escolha outro.",
+        "reservaVenceu": "Seguramos o horário por 5 minutos e o tempo acabou. Escolha de novo.",
+        "fechadaFeriado": "A clínica não abre neste dia ({feriado}).",
+        "fechadaNoDia": "A clínica não abre neste dia.",
+        "semHorarioNoDia": "Sem horário livre neste dia.",
+        "irParaDia": "Ver {dia}",
+        "nadaNaQuinzena": "Nenhum horário livre no próximo mês. Peça o melhor horário: a clínica encaixa e avisa.",
+        "trocarParaMelhor": "Pedir o melhor horário em vez disso",
+        "quando": {
+          "amanha": "Amanhã",
+          "semana": "Esta semana",
+          "proxima": "Próxima semana"
+        },
+        "quandoRotulo": "Quando",
+        "periodoRotulo": "Período",
+        "periodoAjuda": "Sem escolher, a clínica marca a qualquer hora.",
+        "comQuem": "Com quem",
+        "segurado": "Seguramos este horário por {tempo}",
+        "resumo": {
+          "horario": "Horário pedido",
+          "quando": "Quando pode",
+          "comQuem": "Com quem"
+        },
+        "contarAlgo": "Quer contar algo para a clínica? (opcional)",
+        "compartilhar": "Liberar o histórico de {nomes} para a clínica",
+        "compartilharAjuda": "Diário, peso e vacinas do app. Você pode desligar depois, no perfil do pet.",
+        "regraCancelar": "Dá para cancelar pelo app até {horas} h antes do horário.",
+        "enviar": "Enviar pedido",
+        "erro": {
+          "FALHA": "Não foi possível enviar. Confira a internet e tente de novo.",
+          "CLINICA_NAO_RECEBE_PEDIDOS": "A clínica pausou os pedidos online agora. Ligue para marcar.",
+          "MODO_INDISPONIVEL": "A clínica não recebe esse tipo de pedido agora.",
+          "CADASTRO_INCOMPLETO": "Faltam dados do pet ou seus para enviar.",
+          "PEDIDO_JA_RESPONDIDO": "A clínica já respondeu este pedido.",
+          "HORARIO_INDISPONIVEL": "Esse horário não está mais livre.",
+          "AGENDAMENTO_ENCERRADO": "Este horário já não pode ser mudado.",
+          "FORA_DO_PRAZO_DE_CANCELAMENTO": "Passou o prazo para cancelar pelo app. Ligue para a clínica."
+        },
+        "enviadoTitulo": "Pedido enviado",
+        "enviadoLide": "A clínica responde até {quando}.",
+        "confirmadoLide": "Está na agenda da clínica. Na véspera chega um lembrete para confirmar presença.",
+        "respostaNoApp": "A resposta chega como notificação no app.",
+        "agoraTitulo": "O que acontece agora",
+        "confirmadoTitulo": "Horário confirmado",
+        "passoEnviado": "Você pediu",
+        "passoClinica": "A clínica confirma o horário",
+        "passoMarcado": "Horário marcado",
+        "ate": "Até {quando}",
+        "passoLembrete": "Lembrete na véspera",
+        "passoLembreteAjuda": "Para confirmar presença, ou cancelar a tempo.",
+        "verMeusHorarios": "Ver meus horários",
+        "ligueParaClinica": "Ligue para a clínica",
+        "plantao": "Plantão",
+        "ligarAgora": "Ligar agora",
+        "whatsapp": "Mensagem no WhatsApp",
+        "comoChegar": "Como chegar",
+        "mensagemDaClinica": "Mensagem da clínica",
+        "sinaisVaDireto": "Vá direto se o pet tiver",
+        "naoEEmergencia": "Não é emergência, quero marcar horário",
+        "legenda": {
+          "livre": "Tem horário",
+          "fechado": "Fechada"
+        },
+        "quandoAjuda": "Agora toque no último dia em que pode.",
+        "faixa": {
+          "manha": "até 12h",
+          "tarde": "depois das 12h"
+        }
+      },
+      "linha": {
+        "qualquerHora": "qualquer hora",
+        "ate": "até {quando}",
+        "ocupado": "Horário pedido foi ocupado",
+        "responder": "Responder"
+      },
+      "gaveta": {
+        "titulo": "Pedido de {pets}",
+        "oPedido": "O pedido",
+        "primeiraVez": "Primeira vez na clínica: o cadastro é criado no aceite",
+        "quando": "Quando marcar",
+        "legendaPedido": "Dia pedido",
+        "legendaJanela": "Quando pode",
+        "profissional": "Profissional",
+        "profissionalComVagas": "{nome} ({n})",
+        "tambemLivre": "Também com vaga:",
+        "pedido": "pedido",
+        "escolhaUmHorario": "Escolha um horário",
+        "aceitarEm": "Aceitar {hora}",
+        "marcarEm": "Marcar {dia} · {hora}",
+        "voltar": "Voltar ao pedido"
+      }
     }
   },
   "hotel": {
@@ -5908,7 +6321,8 @@
       "vender": "1 · Vender",
       "selo": {
         "rotina": "{total} tarefa atrasada | {total} tarefas atrasadas",
-        "vespera": "{total} chegada travada | {total} chegadas travadas"
+        "vespera": "{total} chegada travada | {total} chegadas travadas",
+        "pedidos": "{total} pedido de reserva esperando resposta | {total} pedidos de reserva esperando resposta"
       }
     },
     "ocorrencia": {
@@ -5961,7 +6375,8 @@
       "indicacao": "Indicação",
       "retorno": "Retorno",
       "telefone": "Telefone",
-      "whatsapp": "WhatsApp"
+      "whatsapp": "WhatsApp",
+      "link": "Link do hotel"
     },
     "painel": {
       "bemEstar": {
@@ -6492,7 +6907,25 @@
         }
       },
       "sair": "Fechar",
-      "terminar": "Entendi"
+      "terminar": "Entendi",
+      "pedidos": {
+        "pergunta": {
+          "titulo": "Quem quer se hospedar?",
+          "texto": "Os pedidos que chegam pelo app e pelo link do hotel. A recepção responde cada um: reserva numa acomodação ou recusa dizendo por quê."
+        },
+        "caixa": {
+          "titulo": "Na ordem do prazo",
+          "texto": "O pedido que vence primeiro fica em cima. O prazo conta só o horário do balcão: o pedido da noite vence no meio da manhã."
+        },
+        "resposta": {
+          "titulo": "O botão diz onde",
+          "texto": "\"Reservar Suíte S1\" grava a reserva naquela unidade e avisa quem pediu. Para escolher outra, use \"Outra acomodação\"."
+        },
+        "celular": {
+          "titulo": "O outro lado",
+          "texto": "Abra o celular para pedir como o responsável pede — e veja a linha chegar aqui, ou o aviso chegar lá."
+        }
+      }
     },
     "turno": {
       "assumeCom": "assume {turno} · {pessoa}",
@@ -6543,6 +6976,295 @@
       "erroTelefone": "Falta o telefone.",
       "erroTelefoneInvalido": "Telefone incompleto. Confira o DDD e o número.",
       "erroTelefoneRepetido": "Este telefone já é de {nome}."
+    },
+    "pedidos": {
+      "titulo": "Pedidos de reserva",
+      "subtitulo": "Hotel",
+      "resumo": {
+        "nenhum": "Nenhum pedido esperando resposta",
+        "abertos": "1 pedido esperando resposta | {n} pedidos esperando resposta",
+        "atrasados": "1 passou do prazo | {n} passaram do prazo",
+        "proximo": "o próximo vence {quando}"
+      },
+      "acoes": {
+        "verNoApp": "Como o responsável pede",
+        "link": "Link do hotel",
+        "configurar": "Como recebemos pedidos"
+      },
+      "secao": {
+        "abertos": "Esperando resposta",
+        "ordem": "Pelo prazo de resposta",
+        "respondidos": "Respondidos ({n})"
+      },
+      "vazio": {
+        "titulo": "Nenhum pedido esperando",
+        "descricao": "Quando alguém pedir hospedagem pelo app ou pelo link do hotel, o pedido aparece aqui para o balcão responder."
+      },
+      "desligado": "A reserva online está pausada: o app e o link do hotel não oferecem vaga.",
+      "religar": "Voltar a receber",
+      "canal": {
+        "app": "Pelo app",
+        "link": "Pelo link do hotel"
+      },
+      "primeiraVez": "Primeira vez",
+      "diarias": "1 diária | {n} diárias",
+      "escolheuTipo": "Escolheu: {tipo}",
+      "hotelEscolhe": "Pediu que o hotel escolha a acomodação",
+      "aceitaMudar": "aceita mudar um dia",
+      "mesmaAcomodacao": "Na mesma acomodação — são da mesma casa",
+      "semVagaNoTipo": "Sem {tipo} livre para quem pediu antes",
+      "semSugestao": "Nenhuma acomodação livre que sirva",
+      "prazo": {
+        "ate": "Responder até {quando}",
+        "atrasado": "Prazo passou {valor}"
+      },
+      "recusar": "Recusar",
+      "reservarEm": "Reservar {acomodacao}",
+      "voltar": "Voltar",
+      "resultado": {
+        "reservado": "{nomes}: reservado em {acomodacao}, {periodo}. O responsável já foi avisado e falta o sinal.",
+        "recusado": "Recusa enviada ao responsável.",
+        "sem-vaga": "A acomodação não está mais livre. Escolha outra em \"Outra acomodação\".",
+        "ja-respondido": "Este pedido já tinha sido respondido.",
+        "verReserva": "Ver a reserva",
+        "dispensar": "Dispensar"
+      },
+      "respondido": {
+        "aceito": "Reservado: {acomodacao} · {valor}",
+        "recusado": "Recusado — {motivo}",
+        "desistiu": "O responsável desistiu",
+        "expirado": "Perdeu o prazo sem resposta",
+        "pendente": "Esperando resposta"
+      },
+      "acomodacao": {
+        "procurando": "Procurando acomodações livres…",
+        "nenhuma": "Nenhuma acomodação livre que sirva nestas datas. Recuse com uma mensagem ou ofereça a lista de espera.",
+        "avisoPorPush": "Quem pediu recebe no app",
+        "avisoPorMensagem": "Quem pediu recebe por mensagem no celular",
+        "aviso": "{nomes}: reservado em {acomodacao}, {periodo}. Para confirmar, falta o sinal."
+      },
+      "recusa": {
+        "titulo": "Recusar o pedido de {nomes}",
+        "porque": "Por quê",
+        "mensagemPara": "Mensagem para {nome}",
+        "enviar": "Enviar recusa",
+        "motivo": {
+          "sem-vaga": "Sem vaga",
+          "exigencias": "Vacina ou documento",
+          "perfil": "Não é o perfil da casa",
+          "outro": "Outro"
+        },
+        "mensagem": {
+          "sem-vaga": "Oi, {nome}! Estamos lotados nessas datas para {nomes}. Se puder mudar a data, peça de novo — ou ligue {telefone} que colocamos na lista de espera.",
+          "exigencias": "Oi, {nome}! Para receber {nomes}, a carteira de vacinação precisa estar em dia na entrada. Com a dose em dia, é só pedir de novo. Dúvidas: {telefone}.",
+          "perfil": "Oi, {nome}! Pelo que você contou, a nossa casa não é a melhor para {nomes}. Ligue {telefone} que indicamos um caminho.",
+          "outro": "Oi, {nome}! Não conseguimos reservar para {nomes}."
+        }
+      },
+      "config": {
+        "titulo": "Como o hotel recebe pedidos",
+        "ativo": "Receber pedidos pelo app e pelo link",
+        "ativoAjuda": "Pausado, o app e a página do hotel mostram só o telefone.",
+        "caminhos": "Caminhos do pedido",
+        "escolherAcomodacao": "O responsável escolhe o tipo de acomodação",
+        "escolherAcomodacaoAjuda": "Ele vê o que está livre nas datas, com a estimativa. O balcão aloca uma unidade daquele tipo ou oferece outra.",
+        "hotelEscolhe": "O responsável dá as datas, e o hotel escolhe",
+        "hotelEscolheAjuda": "O balcão aloca a melhor acomodação para o porte e a espécie. Se a pessoa deixar, pode mudar um dia.",
+        "tipos": "Tipos que podem ser escolhidos",
+        "prazo": "Responder em até",
+        "antecedencia": "Pedido a partir de",
+        "balcaoAbre": "Balcão abre",
+        "balcaoFecha": "Balcão fecha",
+        "urgencia": "Para hoje ou amanhã",
+        "urgenciaAjuda": "Entrada antes da antecedência não vira pedido: o app mostra este contato.",
+        "telefone": "Telefone",
+        "whatsapp": "WhatsApp",
+        "orientacao": "Mensagem para quem precisa com urgência",
+        "salvar": "Salvar"
+      },
+      "link": {
+        "titulo": "Link de reserva",
+        "ajuda": "Para quem ainda não tem o app: o responsável pede hospedagem pelo celular, sem criar conta. Ponha no Instagram, no WhatsApp e no balcão.",
+        "copiar": "Copiar o link",
+        "copiado": "Link copiado",
+        "abrir": "Abrir a página",
+        "whatsapp": "Enviar pelo WhatsApp",
+        "textoParaCompartilhar": "Peça hospedagem no {hotel} pelo celular: {endereco}",
+        "demo": "Página pública do hotel (demonstração)",
+        "voltarAoPortal": "Voltar ao portal",
+        "naoEncontrado": "Hotel não encontrado",
+        "naoEncontradoAjuda": "Confira o endereço que o hotel enviou.",
+        "seuPedido": "Seu pedido",
+        "pedidoNaoEncontrado": "Não encontramos este pedido.",
+        "outroPedido": "Fazer outro pedido",
+        "situacao": {
+          "AGUARDANDO_HOTEL": "Esperando o hotel responder",
+          "ACEITO": "Reservado — falta o sinal",
+          "RECUSADO": "O hotel não conseguiu reservar",
+          "CANCELADO_PELO_RESPONSAVEL": "Você desistiu deste pedido",
+          "EXPIRADO": "O pedido perdeu o prazo"
+        },
+        "sinal": "Para confirmar, o hotel pede o sinal de {valor}. As instruções vão por mensagem.",
+        "petAjuda": "O porte decide em que acomodação o pet cabe. O nome dele a gente pede no fim.",
+        "dadosAjuda": "Para o hotel confirmar com você. Não precisa ter o app.",
+        "nome": "Seu nome",
+        "telefone": "Celular com DDD",
+        "petNome": "Nome do pet",
+        "carteira": "Leve a carteira de vacinação na entrada: o hotel confere antes de receber.",
+        "confirmacaoPor": "A confirmação chega por mensagem no {telefone}.",
+        "acompanhe": "Acompanhe ou desista por este endereço",
+        "rodape": "Reserva online por PetJourney"
+      },
+      "ensaio": {
+        "quem": "No celular de",
+        "luciana": "Luciana · Mel e Amora",
+        "renata": "Renata · primeira vez",
+        "disputa": "No próximo envio, outras pessoas pedem antes o tipo escolhido"
+      },
+      "erros": {
+        "carregar": "Não foi possível carregar os pedidos.",
+        "responder": "Não foi possível responder. Tente de novo.",
+        "configuracao": "Não foi possível salvar a configuração."
+      },
+      "app": {
+        "etapa": {
+          "inicio": "Hotel",
+          "pets": "Quem vai se hospedar?",
+          "porte": "Qual o porte de {nome}?",
+          "pet-do-link": "Quem vai se hospedar?",
+          "datas": "Quando?",
+          "modo": "Como prefere reservar?",
+          "acomodacao": "Escolha a acomodação",
+          "extras": "Algo mais?",
+          "seus-dados": "Seus dados",
+          "revisar": "Confira e envie",
+          "enviado": "Pedido enviado",
+          "urgente": "Para hoje ou amanhã"
+        },
+        "voltar": "Voltar",
+        "continuar": "Continuar",
+        "pushOrigem": "PetJourney · agora",
+        "fecharAviso": "Fechar aviso",
+        "balcao": "Recepção responde das {abre} às {fecha}",
+        "proximas": "Próximas hospedagens",
+        "nadaMarcado": "Nenhuma hospedagem marcada.",
+        "faltaSinal": "Falta o sinal · {valor}",
+        "confirmada": "Confirmada",
+        "pedidos": "Pedidos",
+        "aguardando": "Esperando o hotel · responde até {quando}",
+        "recusado": "O hotel não conseguiu reservar",
+        "desistir": "Desistir do pedido",
+        "pedirDeNovo": "Pedir outra data",
+        "pedirHospedagem": "Pedir hospedagem",
+        "paraHoje": "É para hoje ou amanhã?",
+        "petsAjuda": "Escolha um, ou dois da mesma casa — eles ficam juntos na mesma acomodação.",
+        "faltaPorte": "Falta o porte",
+        "hospedadoAgora": "Hospedado agora",
+        "primeiraEstadia": "Primeira estadia aqui",
+        "naoDividem": "Cão e gato não dividem acomodação. Peça um de cada vez.",
+        "juntos": "Os dois ficam juntos, na mesma acomodação.",
+        "porteAjuda": "O porte decide em que acomodação {nome} cabe.",
+        "porteSalva": "Fica salvo no perfil de {nome}, no app.",
+        "pesoDoPorte": {
+          "mini": "Até 5 kg",
+          "pequeno": "De 5 a 10 kg",
+          "medio": "De 10 a 25 kg",
+          "grande": "De 25 a 45 kg",
+          "gigante": "Mais de 45 kg"
+        },
+        "especie": "Espécie",
+        "porte": "Porte",
+        "cao": "Cão",
+        "gato": "Gato",
+        "entrada": "Entrada",
+        "saida": "Saída",
+        "datasInvalidas": "A saída precisa ser depois da entrada.",
+        "regraSaida": "Entrada a partir das {entrada}. Saída até as {saida} sem custo extra.",
+        "urgenteAviso": "Entrada em menos de {horas} h não dá para pedir pelo app: fale direto com o hotel.",
+        "verContato": "Ver o contato do hotel",
+        "verVagas": "Ver o que está livre",
+        "modo": {
+          "ACOMODACAO_ESCOLHIDA": "Escolher a acomodação",
+          "HOTEL_ESCOLHE": "O hotel escolhe a melhor"
+        },
+        "modoAjuda": {
+          "ACOMODACAO_ESCOLHIDA": "Você vê o que está livre nas datas, com o preço. O hotel confirma.",
+          "HOTEL_ESCOLHE": "O hotel aloca a melhor acomodação para o porte e avisa."
+        },
+        "prazoDoHotel": "O hotel responde em até {horas} h, no horário do balcão.",
+        "tipoSumiu": "Outra pessoa pediu {tipo} antes de você. Escolha outra acomodação, ou deixe o hotel escolher.",
+        "esgotado": "Esgotado nestas datas",
+        "livres": "1 livre | {n} livres",
+        "estimativaDe": "cerca de {valor}",
+        "tudoEsgotado": "Nada livre nestas datas. Deixe o hotel escolher: ele pode mudar um dia, se você aceitar.",
+        "deixarHotelEscolher": "Deixar o hotel escolher",
+        "aceitaMudar": "Aceito mudar um dia se estiver cheio",
+        "aceitaMudarAjuda": "Entrar um dia antes ou depois, se for o que abre vaga. O hotel avisa antes.",
+        "extras": "Extras",
+        "porDiaria": "por diária",
+        "observacao": "Algo que o hotel precisa saber? Medicação, ração, medos (opcional)",
+        "resumo": {
+          "extras": "Extras",
+          "estimativa": "Estimativa"
+        },
+        "sinal": "Para confirmar, o hotel pede {percentual}% de sinal: {valor}.",
+        "carteira": "A carteira de vacinação",
+        "carteiraAjuda": "Leve a carteira na entrada: o hotel confere antes de receber.",
+        "regraCancelar": "Cancelamento sem custo até {dias} dias antes da entrada.",
+        "enviar": "Enviar pedido",
+        "erro": {
+          "FALHA": "Não foi possível enviar. Confira a internet e tente de novo.",
+          "HOTEL_NAO_RECEBE_PEDIDOS": "O hotel pausou os pedidos online agora. Ligue para reservar.",
+          "MODO_INDISPONIVEL": "O hotel não recebe esse tipo de pedido agora.",
+          "FORA_DA_ANTECEDENCIA": "Essa entrada é muito em cima. Fale direto com o hotel.",
+          "PERIODO_INVALIDO": "Confira as datas: a saída precisa ser depois da entrada.",
+          "CADASTRO_INCOMPLETO": "Faltam dados do pet ou seus para enviar.",
+          "NAO_DIVIDEM_ACOMODACAO": "Esses pets não dividem acomodação. Peça um de cada vez.",
+          "PEDIDO_JA_RESPONDIDO": "O hotel já respondeu este pedido."
+        },
+        "enviadoTitulo": "Pedido enviado",
+        "aceitoTitulo": "Reservado",
+        "passoPediu": "Você pediu",
+        "passoHotel": "O hotel escolhe a acomodação",
+        "ate": "Até {quando}",
+        "passoSinal": "Sinal para confirmar",
+        "passoSinalAjuda": "As instruções chegam com a resposta do hotel.",
+        "verMinhas": "Ver minhas hospedagens",
+        "urgenteAjuda": "Pedido online precisa de {horas} h de antecedência. Para agora, fale com o hotel: a recepção vê na hora se há vaga.",
+        "ligueParaHotel": "Ligue para o hotel",
+        "ligarAgora": "Ligar agora",
+        "whatsapp": "Mensagem no WhatsApp",
+        "mensagemDoHotel": "Mensagem do hotel",
+        "outraData": "Escolher outra data",
+        "passoHotelConfirma": "O hotel confirma: {tipo}",
+        "estadia": "Estadia",
+        "toqueSaida": "Agora toque no dia da saída."
+      },
+      "linha": {
+        "responder": "Responder",
+        "ate": "até {quando}",
+        "juntos": "Juntos, na mesma acomodação",
+        "semExtras": "Sem extras",
+        "hotelEscolhe": "O hotel escolhe",
+        "semVaga": "Sem {tipo} livre"
+      },
+      "gaveta": {
+        "titulo": "Pedido de {nomes}",
+        "oPedido": "O pedido",
+        "primeiraVez": "Primeira estadia aqui: o cadastro é criado no aceite",
+        "aceitaMudar": "Aceita entrar ou sair um dia antes ou depois",
+        "datas": "Datas",
+        "legendaVaga": "Tem vaga",
+        "legendaPedido": "Datas pedidas",
+        "toqueSaida": "Agora toque no dia da saída.",
+        "outrasDatas": "Outras datas: quem pediu é avisado da mudança.",
+        "voltarDatas": "Voltar às pedidas",
+        "onde": "Onde vai ficar",
+        "ate": "até {porte}",
+        "pedido": "pedido",
+        "escolha": "Escolha uma acomodação",
+        "voltar": "Voltar ao pedido"
+      }
     }
   },
   "primevue": {

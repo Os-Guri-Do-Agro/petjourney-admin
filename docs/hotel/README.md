@@ -22,6 +22,7 @@ mesma assinatura. Nenhum componente conhece `fixtures`.
 |---|-----------|-----------|----------|
 | 01 | O que um hotel para animais precisa | [01-requisitos-do-hotel.md](./01-requisitos-do-hotel.md) | Levantamento completo; as 4 regras implementadas e cobertas por teste |
 | 02 | Fluxo de telas do hotel | [02-fluxo-de-telas.md](./02-fluxo-de-telas.md) | **Nove telas entregues** |
+| 03 | Reserva online pelo responsável — app e link público | [03-reserva-online.md](./03-reserva-online.md) | Protótipo funcionando, coberto por teste — escolher a acomodação ou o hotel escolher, urgência com o contato do hotel, caixa de pedidos do balcão, link público com cadastro mínimo, origem em Reservas |
 | — | **Passeio pelo hotel** (PDF) | [apresentacao/](./apresentacao/) | O documento visual, com capturas do sistema em execução |
 
 ## A segunda rodada, e por que ela existiu

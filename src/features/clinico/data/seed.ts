@@ -70,11 +70,14 @@ import {
   petsDoResumo,
 } from './seed-resumo'
 import { planosDeEstoquePlantados } from './seed-estoque'
+import { agendamentoOnlinePadrao, contasSoNoApp, semearPedidos } from './seed-pedidos'
 import { aplicacoesDaVacinacao, eventosDaVacinacao, petsDaVacinacao } from './seed-vacinacao'
 import type {
+  AgendamentoOnline,
   Anamnese,
   AplicacaoVacina,
   Appointment,
+  AvisoDoPedido,
   AppointmentStatus,
   AppointmentType,
   Block,
@@ -91,6 +94,7 @@ import type {
   Measurement,
   Medication,
   MotivoDePerda,
+  PedidoDeHorario,
   PesagemDeCasa,
   Pet,
   PlanoDeEstoque,
@@ -238,6 +242,17 @@ export type SeedResult = {
    * **ausência** de linha aqui, e a grade a deduz — ver `domain/adesao.ts`.
    */
   registrosDeDose: RegistroDeDose[]
+  /** Pedidos de horário do app e do link — ver `seed-pedidos.ts`. */
+  pedidos: PedidoDeHorario[]
+  agendamentoOnline: AgendamentoOnline
+  /**
+   * Contas do app que a clínica ainda não conhece. Entram em `tutores` e `pets` no aceite do
+   * primeiro pedido — é aí que nasce o vínculo.
+   */
+  contasSoNoApp: Array<{ tutor: Tutor; pets: Pet[] }>
+  /** Código de acompanhamento de cada pedido que veio pelo link, por id do pedido. */
+  tokensDoLink: Record<string, string>
+  avisosDoPedido: AvisoDoPedido[]
 }
 
 function iso(date: ISODate, minutes: number) {
@@ -3035,11 +3050,25 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     ...daCarteirinha,
   ]
 
+  /* Os pedidos vêm por último: o horário que eles escolhem precisa estar livre na agenda pronta. */
+  const agendamentoOnline = agendamentoOnlinePadrao()
+  const dosPedidos = semearPedidos({
+    hoje,
+    agora: clock.nowIso(),
+    clinic,
+    appointments: comStatus,
+    blocks,
+    pets,
+    configuracao: agendamentoOnline,
+  })
+
   return {
     semente,
     ancora,
     clinic,
-    appointments: comStatus.sort((a, b) => a.inicio.localeCompare(b.inicio)),
+    appointments: [...comStatus, ...dosPedidos.atendimentos].sort((a, b) =>
+      a.inicio.localeCompare(b.inicio),
+    ),
     blocks,
     encounters,
     waitlist: fila,
@@ -3070,6 +3099,11 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     cuidadores: cuidadoresDoDataset(tutores, pets),
     tratamentos: adesao.tratamentos,
     registrosDeDose: adesao.registrosDeDose,
+    pedidos: dosPedidos.pedidos,
+    agendamentoOnline,
+    contasSoNoApp: contasSoNoApp(),
+    tokensDoLink: dosPedidos.tokens,
+    avisosDoPedido: [],
   }
 }
 

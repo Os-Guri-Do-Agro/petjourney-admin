@@ -604,7 +604,9 @@
         "rascunhos": "{total} karton u nacrtu | {total} kartona u nacrtu | {total} kartona u nacrtu",
         "retornosVencidos": "{total} zakasnela kontrola | {total} zakasnele kontrole | {total} zakasnelih kontrola",
         "vagasOfertadas": "{total} ponuđen termin bez odgovora | {total} ponuđena termina bez odgovora | {total} ponuđenih termina bez odgovora",
-        "medicacoesAtrasadas": "{total} zakasneli lek | {total} zakasnela leka | {total} zakasnelih lekova"
+        "medicacoesAtrasadas": "{total} zakasneli lek | {total} zakasnela leka | {total} zakasnelih lekova",
+        "pedidosAtrasados": "{total} kasni | {total} kasne | {total} kasni",
+        "pedidosNoPrazo": "{total} u roku | {total} u roku | {total} u roku"
       },
       "coluna": {
         "assunto": "Predmet",
@@ -628,7 +630,9 @@
       "contagem": "{total} predmet | {total} predmeta | {total} predmeta",
       "recolher": "Skupi {modulo}",
       "expandir": "Proširi {modulo}",
-      "tratamentos": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}"
+      "tratamentos": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}",
+      "pedidos": "{total} zahtev za termin čeka odgovor | {total} zahteva za termin čekaju odgovor | {total} zahteva za termin čeka odgovor",
+      "pedidosDeReserva": "{total} zahtev za rezervaciju čeka odgovor | {total} zahteva za rezervaciju čekaju odgovor | {total} zahteva za rezervaciju čeka odgovor"
     },
     "resumo": {
       "portal": "Pratite zaradu i podelite svoj kod.",
@@ -2116,7 +2120,8 @@
         "atividades": "{total} otvoren zadatak | {total} otvorena zadatka | {total} otvorenih zadataka",
         "vacinas": "{total} revakcinacija kasni | {total} revakcinacije kasne | {total} revakcinacija kasni",
         "tratamentos": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}",
-        "estoque": "{total} vakcina ispod minimuma | {total} vakcine ispod minimuma | {total} vakcina ispod minimuma"
+        "estoque": "{total} vakcina ispod minimuma | {total} vakcine ispod minimuma | {total} vakcina ispod minimuma",
+        "pedidos": "{total} zahtev za termin čeka odgovor | {total} zahteva za termin čekaju odgovor | {total} zahteva za termin čeka odgovor"
       }
     },
     "busca": {
@@ -2173,7 +2178,8 @@
       "telefone": "Telefon",
       "encaixe": "Vanredni termin",
       "retorno": "Kontrola",
-      "fila": "Lista čekanja"
+      "fila": "Lista čekanja",
+      "link": "Link klinike"
     },
     "bloqueio": {
       "almoco": "Ručak",
@@ -5360,6 +5366,413 @@
         "nota": "Račun {nota}",
         "colunaDoses": "Doze"
       }
+    },
+    "pedidos": {
+      "titulo": "Zahtevi za termin",
+      "subtitulo": "Klinika",
+      "resumo": {
+        "nenhum": "Nema zahteva koji čekaju odgovor",
+        "abertos": "{n} zahtev čeka odgovor | {n} zahteva čekaju odgovor | {n} zahteva čeka odgovor",
+        "atrasados": "{n} kasni | {n} kasne | {n} kasni",
+        "proximo": "rok za sledeći: {quando}"
+      },
+      "acoes": {
+        "rotulo": "Radnje za zahteve",
+        "verNoApp": "Kako staratelj šalje zahtev",
+        "link": "Link klinike",
+        "configurar": "Kako primamo zahteve"
+      },
+      "secao": {
+        "abertos": "Čeka odgovor",
+        "ordem": "Po roku za odgovor",
+        "respondidos": "Odgovoreno ({n})"
+      },
+      "vazio": {
+        "titulo": "Nema zahteva na čekanju",
+        "descricao": "Kada neko zatraži termin preko aplikacije ili linka klinike, zahtev se pojavljuje ovde kako bi recepcija odgovorila."
+      },
+      "desligado": "Online zakazivanje je pauzirano: aplikacija i link klinike ne nude termine.",
+      "religar": "Ponovo primajte zahteve",
+      "canal": {
+        "app": "Preko aplikacije",
+        "link": "Preko linka klinike"
+      },
+      "motivo": {
+        "checkup": "Opšti pregled",
+        "vacina": "Vakcina",
+        "sintoma": "Simptom",
+        "retorno": "Kontrola",
+        "exame": "Analiza",
+        "banho": "Kupanje i šišanje",
+        "outro": "Drugi razlog"
+      },
+      "primeiraVez": "Prvi put",
+      "jaCliente": "Postojeći klijent",
+      "escolheu": "Izabran termin: {quando}, kod: {profissional}",
+      "escolheuSeguidos": "Izabrani uzastopni termini: {dia} · {horas}, kod: {profissional}",
+      "pode": "Odgovara: {janela} · {quem}",
+      "janela": "{de} do {ate}",
+      "periodo": {
+        "manha": "pre podne",
+        "tarde": "po podne",
+        "qualquer": "u bilo koje vreme"
+      },
+      "periodoTitulo": {
+        "manha": "Pre podne",
+        "tarde": "Po podne"
+      },
+      "comProfissional": "kod: {nome}",
+      "qualquerProfissional": "bilo koje stručno lice",
+      "ocupado": "Izabrani termin je zauzet posle slanja zahteva",
+      "semSugestao": "Narednih nedelja nema slobodnih termina",
+      "historicoLiberado": "Istorija iz aplikacije je podeljena sa klinikom",
+      "remarcacao": "Želi da pomeri postojeći termin",
+      "prazo": {
+        "ate": "Odgovorite do {quando}",
+        "atrasado": "Rok je istekao {valor}"
+      },
+      "aceitar": "Prihvatite",
+      "marcarEm": "Zakažite u {hora}",
+      "recusar": "Odbijte",
+      "resultado": {
+        "marcado": "{pets}: termin zakazan za {quando}, kod: {profissional}. Staratelj je obavešten.",
+        "recusado": "Odbijanje je poslato staratelju.",
+        "horario-ocupado": "Termin više nije slobodan. Izaberite drugi pod „Drugi termin“.",
+        "ja-respondido": "Na ovaj zahtev je već odgovoreno.",
+        "verNaAgenda": "Pogledajte u rasporedu",
+        "dispensar": "Odbacite"
+      },
+      "respondido": {
+        "aceito": "Zakazano: {quando}, kod: {profissional}",
+        "automatico": "Automatski prihvaćeno: {quando}, kod: {profissional}",
+        "recusado": "Odbijeno: {motivo}",
+        "desistiu": "Staratelj je odustao",
+        "expirado": "Rok je istekao bez odgovora",
+        "pendente": "Čeka odgovor"
+      },
+      "horario": {
+        "procurando": "Traženje slobodnih termina…",
+        "foraDaJanela": "van traženog",
+        "avisoPorPush": "{nome} dobija obaveštenje u aplikaciji",
+        "avisoPorMensagem": "{nome} dobija poruku na mobilni telefon",
+        "aviso": "{pets}: termin zakazan za {quando}, kod: {profissional}."
+      },
+      "recusa": {
+        "titulo": "Odbijanje zahteva: {pets}",
+        "porque": "Razlog",
+        "mensagemPara": "Poruka za: {nome}",
+        "enviar": "Pošaljite odbijanje",
+        "notaApp": "Poruka stiže u aplikaciju, sa dugmetom za novi zahtev.",
+        "notaLink": "Poruka stiže na mobilni telefon, sa linkom za novi zahtev.",
+        "motivo": {
+          "sem-horario": "Nema termina",
+          "precisa-avaliar": "Potreban je razgovor",
+          "servico-indisponivel": "Usluga nije dostupna",
+          "emergencia": "Hitan slučaj",
+          "outro": "Drugo"
+        },
+        "mensagem": {
+          "sem-horario": "Dobar dan, {nome}! U tom periodu nemamo slobodan termin ({pets}). Ako Vam odgovara drugi dan, pošaljite novi zahtev ili pozovite {telefone} i naći ćemo termin.",
+          "precisa-avaliar": "Dobar dan, {nome}! Pre zakazivanja ({pets}) potrebno je da razgovaramo. Možete li da pozovete {telefone}? Biće brzo.",
+          "servico-indisponivel": "Dobar dan, {nome}! Ta usluga trenutno nije dostupna. Pozovite {telefone} i predložićemo najbolje rešenje ({pets}).",
+          "emergencia": "Dobar dan, {nome}! Prema Vašem opisu, potreban je hitan pregled ({pets}). Dođite odmah ili pozovite {telefone} usput.",
+          "outro": "Dobar dan, {nome}! Nismo uspeli da zakažemo termin ({pets})."
+        }
+      },
+      "config": {
+        "titulo": "Kako klinika prima zahteve",
+        "ativo": "Primajte zahteve preko aplikacije i linka",
+        "ativoAjuda": "Dok je pauzirano, aplikacija i stranica klinike prikazuju samo telefon.",
+        "caminhos": "Načini slanja zahteva",
+        "escolherHorario": "Staratelj bira dan, vreme i stručno lice",
+        "escolherHorarioAjuda": "Vidi slobodne termine i bira. Recepcija prihvata taj termin ili nudi drugi.",
+        "melhorHorario": "Staratelj navodi kada može, a klinika zakazuje",
+        "melhorHorarioAjuda": "Bira nedelju i deo dana. Recepcija zakazuje najbolji slobodan termin.",
+        "aceitarSozinho": "Automatski prihvatite izabrani termin",
+        "aceitarSozinhoAjuda": "Ako je termin još slobodan, zahtev odmah postaje zakazan termin, bez recepcije.",
+        "oQueEQuem": "Šta i kod koga",
+        "servicos": "Usluge koje mogu da se zatraže",
+        "profissionais": "Stručna lica koja primaju zahteve",
+        "prazo": "Rok za odgovor",
+        "antecedencia": "Prvi termin najranije za",
+        "horizonte": "Raspored vidljiv unapred",
+        "horas": "h",
+        "dias": "d",
+        "emergencia": "Hitan slučaj",
+        "emergenciaAjuda": "Ovo se prikazuje kada neko označi „U pitanju je hitan slučaj“. Ne postaje zahtev, već prikazuje kontakt klinike.",
+        "telefone": "Telefon",
+        "whatsapp": "WhatsApp",
+        "plantao": "Dežurni telefon",
+        "semPlantao": "Bez dežurstva",
+        "orientacao": "Poruka van radnog vremena",
+        "salvar": "Sačuvajte"
+      },
+      "link": {
+        "titulo": "Link za zakazivanje",
+        "ajuda": "Za one koji još nemaju aplikaciju: staratelj šalje zahtev za termin sa mobilnog telefona, bez otvaranja naloga. Postavite ga na Instagram, WhatsApp i na karticu na pultu.",
+        "copiar": "Kopirajte link",
+        "copiado": "Link je kopiran",
+        "abrir": "Otvorite stranicu",
+        "whatsapp": "Pošaljite preko WhatsApp-a",
+        "textoParaCompartilhar": "Zakažite termin u klinici {clinica} preko mobilnog telefona: {endereco}",
+        "demo": "Javna stranica klinike (demonstracija)",
+        "voltarAoPortal": "Nazad na portal",
+        "naoEncontrada": "Klinika nije pronađena",
+        "naoEncontradaAjuda": "Proverite adresu koju Vam je klinika poslala.",
+        "seuPedido": "Vaš zahtev",
+        "pedidoNaoEncontrado": "Nismo pronašli ovaj zahtev.",
+        "outroPedido": "Pošaljite novi zahtev",
+        "situacao": {
+          "AGUARDANDO_CLINICA": "Čeka se odgovor klinike",
+          "ACEITO": "Termin je potvrđen",
+          "RECUSADO": "Klinika nije mogla da zakaže termin",
+          "CANCELADO_PELO_RESPONSAVEL": "Odustali ste od ovog zahteva",
+          "EXPIRADO": "Rok za zahtev je istekao"
+        },
+        "dadosAjuda": "Da bi klinika mogla da Vam potvrdi termin. Aplikacija nije potrebna.",
+        "nome": "Vaše ime",
+        "telefone": "Broj mobilnog telefona sa pozivnim brojem",
+        "telefoneExemplo": "(11) 98765-4321",
+        "petNome": "Ime ljubimca",
+        "especie": "Vrsta",
+        "nascimento": "Datum rođenja ljubimca (ako znate)",
+        "sexo": "Pol ljubimca (ako znate)",
+        "confirmacaoPor": "Potvrda stiže porukom na broj {telefone}.",
+        "acompanhe": "Pratite zahtev ili odustanite na ovoj adresi",
+        "baixeOApp": "Uz aplikaciju PetJourney odgovor stiže odmah, a istorija ljubimca ostaje kod Vas.",
+        "rodape": "Online zakazivanje omogućava PetJourney",
+        "promessa": "Zatražite termin za minut, bez preuzimanja aplikacije. Klinika odgovara u roku od {horas} h.",
+        "passos": {
+          "rotulo": "Koraci zahteva",
+          "motivo": "Razlog",
+          "modo": "Način zakazivanja",
+          "quando": "Kada",
+          "dados": "Vaši podaci",
+          "feito": "završeno",
+          "contagem": "Korak {atual} od {total}"
+        },
+        "equipe": "Ko radi",
+        "contato": "Kontakt",
+        "telefoneDaClinica": "Telefon",
+        "whatsappRotulo": "WhatsApp",
+        "regraCancelar": "Dok klinika ne odgovori, možete da odustanete preko adrese iz poruke. Posle toga, za izmenu ili otkazivanje pozovite {telefone}."
+      },
+      "ensaio": {
+        "quem": "Telefon korisnika",
+        "fatima": "Fátima · više ljubimaca",
+        "renata": "Renata · prvi put",
+        "disputa": "Za sledeći izabrani termin, neko drugi stiže prvi"
+      },
+      "erros": {
+        "carregar": "Zahteve nije bilo moguće učitati.",
+        "responder": "Odgovor nije bilo moguće poslati. Pokušajte ponovo.",
+        "configuracao": "Podešavanja nije bilo moguće sačuvati.",
+        "sugestoes": "Slobodne termine nije bilo moguće pronaći."
+      },
+      "app": {
+        "etapa": {
+          "inicio": "Klinika",
+          "pets": "Za koga je termin?",
+          "completar": "Dopunite profil: {nome}",
+          "motivo": "Šta se dešava?",
+          "clinica": "Koja klinika?",
+          "modo": "Kako želite da zakažete?",
+          "profissional": "Kod koga?",
+          "horario": "Izaberite termin",
+          "preferencia": "Kada možete?",
+          "seus-dados": "Vaši podaci",
+          "revisar": "Proverite i pošaljite",
+          "enviado": "Zahtev je poslat",
+          "emergencia": "Hitan slučaj"
+        },
+        "voltar": "Nazad",
+        "continuar": "Nastavite",
+        "pushOrigem": "PetJourney · sada",
+        "fecharAviso": "Zatvorite obaveštenje",
+        "abertaAte": "Sada radi, do {hora}",
+        "fechadaAbre": "Sada ne radi · otvara se {quando}",
+        "proximos": "Predstojeći termini",
+        "nadaMarcado": "Nema zakazanih termina.",
+        "pedidos": "Zahtevi",
+        "status": {
+          "AGENDADO": "Zakazano",
+          "CONFIRMADO": "Potvrđeno",
+          "AGUARDANDO": "Na recepciji",
+          "EM_ATENDIMENTO": "Na pregledu",
+          "FINALIZADO": "Završeno",
+          "FALTA": "Nedolazak",
+          "CANCELADO": "Otkazano"
+        },
+        "remarcar": "Pomerite",
+        "cancelar": "Otkažite",
+        "cancelarPorTelefone": "Preko aplikacije samo do {horas} h pre termina. Za izmenu sada pozovite {telefone}.",
+        "aguardando": "Čeka se klinika · odgovor do {quando}",
+        "recusado": "Klinika nije mogla da zakaže termin",
+        "desistir": "Odustanite od zahteva",
+        "pedirDeNovo": "Zatražite drugi termin",
+        "pedirHorario": "Zatražite termin",
+        "ehEmergencia": "U pitanju je hitan slučaj",
+        "petsAjuda": "Izaberite do tri. Ako ih je više, klinika zakazuje uzastopne termine kod istog stručnog lica.",
+        "internado": "Na hospitalizaciji u ovoj klinici",
+        "faltaCadastro": "Profil nije dopunjen",
+        "primeiraVez": "Prvi put u ovoj klinici",
+        "seguidosAjuda": "Termini su uzastopni: dolazite samo jednom.",
+        "completarAjuda": "Za pripremu pregleda klinici su potrebni starost i pol ljubimca ({nome}).",
+        "completarSalva": "Čuva se u profilu ljubimca ({nome}) u aplikaciji.",
+        "nascimento": "Datum rođenja",
+        "sexoRotulo": "Pol",
+        "sexo": {
+          "macho": "Mužjak",
+          "femea": "Ženka"
+        },
+        "salvarContinuar": "Sačuvajte i nastavite",
+        "motivo": {
+          "EMERGENCIA": "U pitanju je hitan slučaj",
+          "CHECKUP": "Redovan opšti pregled",
+          "SINTOMA": "Ima neki simptom",
+          "VACINA": "Vakcina",
+          "RETORNO": "Kontrola",
+          "EXAME": "Analiza",
+          "BANHO": "Kupanje i šišanje",
+          "OUTRO": "Drugi razlog"
+        },
+        "motivoAjuda": {
+          "EMERGENCIA": "Otežano disanje, konvulzije, krvarenje, trovanje",
+          "CHECKUP": "Redovan pregled, bez tegoba",
+          "SINTOMA": "Svrab, povraćanje, proliv, bol, kašalj…",
+          "VACINA": "Doza iz vakcinalnog kartona ili revakcinacija",
+          "RETORNO": "Ponovo kod stručnog lica koje je obavilo pregled",
+          "EXAME": "Snimanje koje je tražila klinika",
+          "BANHO": "Kupanje, šišanje i higijena",
+          "OUTRO": "Opišite u sledećem koraku"
+        },
+        "sinaisTitulo": "Da li se nešto od ovoga dešava sada?",
+        "sinal": {
+          "FALTA_DE_AR": "Teško diše ili diše otvorenih usta",
+          "CONVULSAO": "Konvulzije ili jako drhtanje",
+          "SANGRAMENTO": "Krvarenje koje ne prestaje",
+          "ENVENENAMENTO": "Gutanje otrova, leka ili otrovne biljke",
+          "TRAUMA": "Udar vozila, pad ili ozbiljna tuča",
+          "NAO_LEVANTA": "Ne može da ustane ili da hoda"
+        },
+        "queixa": "Opišite šta se dešava (opciono)",
+        "verEmergencia": "Pogledajte kontakt za hitne slučajeve",
+        "jaAtende": "Već leči: {nomes}",
+        "primeiraVezAqui": "Prvi put ovde",
+        "pausada": "Trenutno ne prima zahteve. Pozovite {telefone}.",
+        "naoRecebe": "Još ne prima zahteve preko aplikacije. Pozovite {telefone}.",
+        "remarcando": "Pomeranje termina za: {pet}. Prethodni termin: {quando}",
+        "modo": {
+          "HORARIO_ESCOLHIDO": "Izaberite dan i vreme",
+          "MELHOR_HORARIO": "Zatražite najbolji termin"
+        },
+        "modoAjuda": {
+          "HORARIO_ESCOLHIDO": "Vidite slobodne termine i birate kod koga. Klinika potvrđuje.",
+          "MELHOR_HORARIO": "Recite kada možete. Klinika zakazuje najbolji termin i obaveštava Vas."
+        },
+        "prazoDaClinica": "Klinika odgovara u roku od {horas} h, tokom radnog vremena.",
+        "qualquerProfissional": "Bilo koje stručno lice",
+        "qualquerAjuda": "Prikazuje više termina",
+        "especialidade": {
+          "CLINICO_GERAL": "Opšta praksa",
+          "CIRURGIA": "Hirurgija",
+          "DERMATOLOGIA": "Dermatologija",
+          "CARDIOLOGIA": "Kardiologija"
+        },
+        "seguidosPara": "uzastopni termini za: {nomes}",
+        "dias": "Dani",
+        "procurando": "Traženje termina…",
+        "horarioSumiu": "Neko je zatražio termin u {hora} pre Vas. Uklonjen je sa liste, izaberite drugi.",
+        "reservaVenceu": "Termin smo čuvali 5 minuta i vreme je isteklo. Izaberite ponovo.",
+        "fechadaFeriado": "Klinika ne radi ovog dana ({feriado}).",
+        "fechadaNoDia": "Klinika ne radi ovog dana.",
+        "semHorarioNoDia": "Ovog dana nema slobodnih termina.",
+        "irParaDia": "Pogledajte: {dia}",
+        "nadaNaQuinzena": "Narednih mesec dana nema slobodnih termina. Zatražite najbolji termin: klinika će naći mesto i obavestiti Vas.",
+        "trocarParaMelhor": "Umesto toga zatražite najbolji termin",
+        "quando": {
+          "amanha": "Sutra",
+          "semana": "Ove nedelje",
+          "proxima": "Sledeće nedelje"
+        },
+        "quandoRotulo": "Kada",
+        "periodoRotulo": "Deo dana",
+        "periodoAjuda": "Ako ne izaberete, klinika zakazuje u bilo koje vreme.",
+        "comQuem": "Kod koga",
+        "segurado": "Čuvamo ovaj termin još {tempo}",
+        "resumo": {
+          "horario": "Traženi termin",
+          "quando": "Kada možete",
+          "comQuem": "Kod koga"
+        },
+        "contarAlgo": "Želite li nešto da poručite klinici? (opciono)",
+        "compartilhar": "Podelite istoriju sa klinikom ({nomes})",
+        "compartilharAjuda": "Dnevnik, težina i vakcine iz aplikacije. Kasnije možete da isključite deljenje u profilu ljubimca.",
+        "regraCancelar": "Preko aplikacije možete da otkažete najkasnije {horas} h pre termina.",
+        "enviar": "Pošaljite zahtev",
+        "erro": {
+          "FALHA": "Slanje nije uspelo. Proverite internet vezu i pokušajte ponovo.",
+          "CLINICA_NAO_RECEBE_PEDIDOS": "Klinika je trenutno pauzirala online zahteve. Pozovite da zakažete.",
+          "MODO_INDISPONIVEL": "Klinika trenutno ne prima ovu vrstu zahteva.",
+          "CADASTRO_INCOMPLETO": "Za slanje nedostaju podaci o ljubimcu ili o Vama.",
+          "PEDIDO_JA_RESPONDIDO": "Klinika je već odgovorila na ovaj zahtev.",
+          "HORARIO_INDISPONIVEL": "Taj termin više nije slobodan.",
+          "AGENDAMENTO_ENCERRADO": "Ovaj termin više ne može da se menja.",
+          "FORA_DO_PRAZO_DE_CANCELAMENTO": "Rok za otkazivanje preko aplikacije je istekao. Pozovite kliniku."
+        },
+        "enviadoTitulo": "Zahtev je poslat",
+        "enviadoLide": "Klinika odgovara do {quando}.",
+        "confirmadoLide": "Termin je u rasporedu klinike. Dan ranije stiže podsetnik da potvrdite dolazak.",
+        "respostaNoApp": "Odgovor stiže kao obaveštenje u aplikaciji.",
+        "agoraTitulo": "Šta sledi",
+        "confirmadoTitulo": "Termin je potvrđen",
+        "passoEnviado": "Poslali ste zahtev",
+        "passoClinica": "Klinika potvrđuje termin",
+        "passoMarcado": "Termin je zakazan",
+        "ate": "Do {quando}",
+        "passoLembrete": "Podsetnik dan ranije",
+        "passoLembreteAjuda": "Da potvrdite dolazak ili otkažete na vreme.",
+        "verMeusHorarios": "Pogledajte moje termine",
+        "ligueParaClinica": "Pozovite kliniku",
+        "plantao": "Dežurstvo",
+        "ligarAgora": "Pozovite odmah",
+        "whatsapp": "Poruka na WhatsApp-u",
+        "comoChegar": "Kako stići",
+        "mensagemDaClinica": "Poruka klinike",
+        "sinaisVaDireto": "Dođite odmah ako primetite nešto od ovoga",
+        "naoEEmergencia": "Nije hitno, želim da zakažem termin",
+        "legenda": {
+          "livre": "Ima termina",
+          "fechado": "Ne radi"
+        },
+        "quandoAjuda": "Sada dodirnite poslednji dan kada možete.",
+        "faixa": {
+          "manha": "do 12 h",
+          "tarde": "posle 12 h"
+        }
+      },
+      "linha": {
+        "qualquerHora": "bilo koje vreme",
+        "ate": "do {quando}",
+        "ocupado": "Traženi termin je zauzet",
+        "responder": "Odgovorite"
+      },
+      "gaveta": {
+        "titulo": "Zahtev za: {pets}",
+        "oPedido": "Zahtev",
+        "primeiraVez": "Prvi put u klinici: zapis se pravi pri prihvatanju",
+        "quando": "Kada zakazati",
+        "legendaPedido": "Traženi dan",
+        "legendaJanela": "Kada može",
+        "profissional": "Stručno lice",
+        "profissionalComVagas": "{nome} ({n})",
+        "tambemLivre": "Slobodno i kod:",
+        "pedido": "traženo",
+        "escolhaUmHorario": "Izaberite termin",
+        "aceitarEm": "Prihvatite {hora}",
+        "marcarEm": "Zakažite {dia} · {hora}",
+        "voltar": "Nazad na zahtev"
+      }
     }
   },
   "hotel": {
@@ -5908,7 +6321,8 @@
       "vender": "1 · Prodaja",
       "selo": {
         "rotina": "{total} zakasneli zadatak | {total} zakasnela zadatka | {total} zakasnelih zadataka",
-        "vespera": "{total} blokiran dolazak | {total} blokirana dolaska | {total} blokiranih dolazaka"
+        "vespera": "{total} blokiran dolazak | {total} blokirana dolaska | {total} blokiranih dolazaka",
+        "pedidos": "{total} zahtev za rezervaciju čeka odgovor | {total} zahteva za rezervaciju čekaju odgovor | {total} zahteva za rezervaciju čeka odgovor"
       }
     },
     "ocorrencia": {
@@ -5961,7 +6375,8 @@
       "indicacao": "Preporuka",
       "retorno": "Povratak",
       "telefone": "Telefon",
-      "whatsapp": "WhatsApp"
+      "whatsapp": "WhatsApp",
+      "link": "Link hotela"
     },
     "painel": {
       "bemEstar": {
@@ -6492,7 +6907,25 @@
         }
       },
       "sair": "Zatvori",
-      "terminar": "Razumem"
+      "terminar": "Razumem",
+      "pedidos": {
+        "pergunta": {
+          "titulo": "Ko želi da odsedne?",
+          "texto": "Zahtevi koji stižu preko aplikacije i linka hotela. Recepcija odgovara na svaki: rezerviše smeštaj ili odbija zahtev uz obrazloženje."
+        },
+        "caixa": {
+          "titulo": "Po redosledu roka",
+          "texto": "Zahtev kome rok prvi ističe stoji na vrhu. Rok se računa samo tokom radnog vremena recepcije: zahtevu poslatom noću rok ističe sredinom prepodneva."
+        },
+        "resposta": {
+          "titulo": "Dugme kaže gde",
+          "texto": "„Rezervišite Apartman S1“ upisuje rezervaciju u tu jedinicu i obaveštava podnosioca zahteva. Za drugi izbor koristite „Drugi smeštaj“."
+        },
+        "celular": {
+          "titulo": "Druga strana",
+          "texto": "Otvorite telefon i pošaljite zahtev kao staratelj, pa pogledajte kako red stiže ovde ili obaveštenje stiže tamo."
+        }
+      }
     },
     "turno": {
       "assumeCom": "preuzima {turno} · {pessoa}",
@@ -6543,6 +6976,295 @@
       "erroTelefone": "Nedostaje telefon.",
       "erroTelefoneInvalido": "Telefon nije potpun. Proverite pozivni broj i broj.",
       "erroTelefoneRepetido": "Ovaj telefon već pripada osobi {nome}."
+    },
+    "pedidos": {
+      "titulo": "Zahtevi za rezervaciju",
+      "subtitulo": "Hotel",
+      "resumo": {
+        "nenhum": "Nema zahteva koji čekaju odgovor",
+        "abertos": "{n} zahtev čeka odgovor | {n} zahteva čekaju odgovor | {n} zahteva čeka odgovor",
+        "atrasados": "{n} kasni | {n} kasne | {n} kasni",
+        "proximo": "rok za sledeći: {quando}"
+      },
+      "acoes": {
+        "verNoApp": "Kako staratelj šalje zahtev",
+        "link": "Link hotela",
+        "configurar": "Kako primamo zahteve"
+      },
+      "secao": {
+        "abertos": "Čeka odgovor",
+        "ordem": "Po roku za odgovor",
+        "respondidos": "Odgovoreno ({n})"
+      },
+      "vazio": {
+        "titulo": "Nema zahteva na čekanju",
+        "descricao": "Kada neko zatraži smeštaj preko aplikacije ili linka hotela, zahtev se pojavljuje ovde kako bi recepcija odgovorila."
+      },
+      "desligado": "Online rezervacija je pauzirana: aplikacija i link hotela ne nude smeštaj.",
+      "religar": "Ponovo primajte zahteve",
+      "canal": {
+        "app": "Preko aplikacije",
+        "link": "Preko linka hotela"
+      },
+      "primeiraVez": "Prvi put",
+      "diarias": "{n} noćenje | {n} noćenja | {n} noćenja",
+      "escolheuTipo": "Izabrano: {tipo}",
+      "hotelEscolhe": "Traži da hotel izabere smeštaj",
+      "aceitaMudar": "prihvata pomeranje za jedan dan",
+      "mesmaAcomodacao": "U istom smeštaju, iz istog su doma",
+      "semVagaNoTipo": "{tipo}: nema slobodnih posle ranijih zahteva",
+      "semSugestao": "Nema slobodnog odgovarajućeg smeštaja",
+      "prazo": {
+        "ate": "Odgovorite do {quando}",
+        "atrasado": "Rok je istekao {valor}"
+      },
+      "recusar": "Odbijte",
+      "reservarEm": "Rezervišite {acomodacao}",
+      "voltar": "Nazad",
+      "resultado": {
+        "reservado": "{nomes}: rezervisano u smeštaju {acomodacao}, {periodo}. Staratelj je obavešten, a kapara još nije plaćena.",
+        "recusado": "Odbijanje je poslato staratelju.",
+        "sem-vaga": "Smeštaj više nije slobodan. Izaberite drugi pod „Drugi smeštaj“.",
+        "ja-respondido": "Na ovaj zahtev je već odgovoreno.",
+        "verReserva": "Pogledajte rezervaciju",
+        "dispensar": "Odbacite"
+      },
+      "respondido": {
+        "aceito": "Rezervisano: {acomodacao} · {valor}",
+        "recusado": "Odbijeno: {motivo}",
+        "desistiu": "Staratelj je odustao",
+        "expirado": "Rok je istekao bez odgovora",
+        "pendente": "Čeka odgovor"
+      },
+      "acomodacao": {
+        "procurando": "Traženje slobodnog smeštaja…",
+        "nenhuma": "Za ove datume nema slobodnog odgovarajućeg smeštaja. Odbijte zahtev uz poruku ili ponudite listu čekanja.",
+        "avisoPorPush": "Podnosilac zahteva dobija obaveštenje u aplikaciji",
+        "avisoPorMensagem": "Podnosilac zahteva dobija poruku na mobilni telefon",
+        "aviso": "{nomes}: rezervisano u smeštaju {acomodacao}, {periodo}. Za potvrdu je potrebna kapara."
+      },
+      "recusa": {
+        "titulo": "Odbijanje zahteva: {nomes}",
+        "porque": "Razlog",
+        "mensagemPara": "Poruka za: {nome}",
+        "enviar": "Pošaljite odbijanje",
+        "motivo": {
+          "sem-vaga": "Nema mesta",
+          "exigencias": "Vakcina ili dokument",
+          "perfil": "Nije za naš hotel",
+          "outro": "Drugo"
+        },
+        "mensagem": {
+          "sem-vaga": "Dobar dan, {nome}! Za te datume smo popunjeni ({nomes}). Ako možete da promenite datum, pošaljite novi zahtev ili pozovite {telefone} i upisaćemo Vas na listu čekanja.",
+          "exigencias": "Dobar dan, {nome}! Za prijem ({nomes}) vakcinalni karton mora biti ažuran pri dolasku. Kada vakcine budu ažurne, samo pošaljite novi zahtev. Pitanja: {telefone}.",
+          "perfil": "Dobar dan, {nome}! Prema Vašem opisu, naš hotel nije najbolji izbor ({nomes}). Pozovite {telefone} i uputićemo Vas dalje.",
+          "outro": "Dobar dan, {nome}! Nismo uspeli da napravimo rezervaciju ({nomes})."
+        }
+      },
+      "config": {
+        "titulo": "Kako hotel prima zahteve",
+        "ativo": "Primajte zahteve preko aplikacije i linka",
+        "ativoAjuda": "Dok je pauzirano, aplikacija i stranica hotela prikazuju samo telefon.",
+        "caminhos": "Načini slanja zahteva",
+        "escolherAcomodacao": "Staratelj bira tip smeštaja",
+        "escolherAcomodacaoAjuda": "Vidi šta je slobodno za te datume, uz procenu cene. Recepcija dodeljuje jedinicu tog tipa ili nudi drugu.",
+        "hotelEscolhe": "Staratelj navodi datume, a hotel bira",
+        "hotelEscolheAjuda": "Recepcija dodeljuje najbolji smeštaj prema veličini i vrsti životinje. Ako osoba dozvoli, datum može da se pomeri za jedan dan.",
+        "tipos": "Tipovi smeštaja koji mogu da se izaberu",
+        "prazo": "Rok za odgovor",
+        "antecedencia": "Dolazak najranije za",
+        "balcaoAbre": "Početak rada recepcije",
+        "balcaoFecha": "Kraj rada recepcije",
+        "urgencia": "Za danas ili sutra",
+        "urgenciaAjuda": "Dolazak pre minimalnog roka ne postaje zahtev, već aplikacija prikazuje ovaj kontakt.",
+        "telefone": "Telefon",
+        "whatsapp": "WhatsApp",
+        "orientacao": "Poruka za one kojima je smeštaj hitno potreban",
+        "salvar": "Sačuvajte"
+      },
+      "link": {
+        "titulo": "Link za rezervaciju",
+        "ajuda": "Za one koji još nemaju aplikaciju: staratelj traži smeštaj sa mobilnog telefona, bez otvaranja naloga. Postavite ga na Instagram, WhatsApp i na pult.",
+        "copiar": "Kopirajte link",
+        "copiado": "Link je kopiran",
+        "abrir": "Otvorite stranicu",
+        "whatsapp": "Pošaljite preko WhatsApp-a",
+        "textoParaCompartilhar": "Zatražite smeštaj u hotelu {hotel} preko mobilnog telefona: {endereco}",
+        "demo": "Javna stranica hotela (demonstracija)",
+        "voltarAoPortal": "Nazad na portal",
+        "naoEncontrado": "Hotel nije pronađen",
+        "naoEncontradoAjuda": "Proverite adresu koju Vam je hotel poslao.",
+        "seuPedido": "Vaš zahtev",
+        "pedidoNaoEncontrado": "Nismo pronašli ovaj zahtev.",
+        "outroPedido": "Pošaljite novi zahtev",
+        "situacao": {
+          "AGUARDANDO_HOTEL": "Čeka se odgovor hotela",
+          "ACEITO": "Rezervisano, čeka se kapara",
+          "RECUSADO": "Hotel nije mogao da napravi rezervaciju",
+          "CANCELADO_PELO_RESPONSAVEL": "Odustali ste od ovog zahteva",
+          "EXPIRADO": "Rok za zahtev je istekao"
+        },
+        "sinal": "Za potvrdu hotel traži kaparu od {valor}. Uputstva stižu porukom.",
+        "petAjuda": "Veličina određuje koji smeštaj odgovara ljubimcu. Ime ljubimca tražimo na kraju.",
+        "dadosAjuda": "Da bi hotel mogao da Vam potvrdi rezervaciju. Aplikacija nije potrebna.",
+        "nome": "Vaše ime",
+        "telefone": "Broj mobilnog telefona sa pozivnim brojem",
+        "petNome": "Ime ljubimca",
+        "carteira": "Ponesite vakcinalni karton pri dolasku: hotel ga proverava pre prijema.",
+        "confirmacaoPor": "Potvrda stiže porukom na broj {telefone}.",
+        "acompanhe": "Pratite zahtev ili odustanite na ovoj adresi",
+        "rodape": "Online rezervaciju omogućava PetJourney"
+      },
+      "ensaio": {
+        "quem": "Telefon korisnika",
+        "luciana": "Luciana · Mel i Amora",
+        "renata": "Renata · prvi put",
+        "disputa": "Pri sledećem slanju, drugi pre Vas zatraže izabrani tip"
+      },
+      "erros": {
+        "carregar": "Zahteve nije bilo moguće učitati.",
+        "responder": "Odgovor nije bilo moguće poslati. Pokušajte ponovo.",
+        "configuracao": "Podešavanja nije bilo moguće sačuvati."
+      },
+      "app": {
+        "etapa": {
+          "inicio": "Hotel",
+          "pets": "Ko će odsesti?",
+          "porte": "Koje je veličine {nome}?",
+          "pet-do-link": "Ko će odsesti?",
+          "datas": "Kada?",
+          "modo": "Kako želite da rezervišete?",
+          "acomodacao": "Izaberite smeštaj",
+          "extras": "Još nešto?",
+          "seus-dados": "Vaši podaci",
+          "revisar": "Proverite i pošaljite",
+          "enviado": "Zahtev je poslat",
+          "urgente": "Za danas ili sutra"
+        },
+        "voltar": "Nazad",
+        "continuar": "Nastavite",
+        "pushOrigem": "PetJourney · sada",
+        "fecharAviso": "Zatvorite obaveštenje",
+        "balcao": "Recepcija odgovara od {abre} do {fecha}",
+        "proximas": "Predstojeći boravci",
+        "nadaMarcado": "Nema rezervisanih boravaka.",
+        "faltaSinal": "Čeka se kapara · {valor}",
+        "confirmada": "Potvrđeno",
+        "pedidos": "Zahtevi",
+        "aguardando": "Čeka se hotel · odgovor do {quando}",
+        "recusado": "Hotel nije mogao da napravi rezervaciju",
+        "desistir": "Odustanite od zahteva",
+        "pedirDeNovo": "Zatražite druge datume",
+        "pedirHospedagem": "Zatražite smeštaj",
+        "paraHoje": "Da li je za danas ili sutra?",
+        "petsAjuda": "Izaberite jednog ljubimca, ili dva iz istog doma: biće zajedno u istom smeštaju.",
+        "faltaPorte": "Nedostaje veličina",
+        "hospedadoAgora": "Trenutno u hotelu",
+        "primeiraEstadia": "Prvi boravak ovde",
+        "naoDividem": "Pas i mačka ne dele smeštaj. Pošaljite zahtev za svakog posebno.",
+        "juntos": "Oba ljubimca su zajedno, u istom smeštaju.",
+        "porteAjuda": "Veličina određuje koji smeštaj odgovara ljubimcu ({nome}).",
+        "porteSalva": "Čuva se u profilu ljubimca ({nome}) u aplikaciji.",
+        "pesoDoPorte": {
+          "mini": "Do 5 kg",
+          "pequeno": "Od 5 do 10 kg",
+          "medio": "Od 10 do 25 kg",
+          "grande": "Od 25 do 45 kg",
+          "gigante": "Preko 45 kg"
+        },
+        "especie": "Vrsta",
+        "porte": "Veličina",
+        "cao": "Pas",
+        "gato": "Mačka",
+        "entrada": "Dolazak",
+        "saida": "Odlazak",
+        "datasInvalidas": "Odlazak mora biti posle dolaska.",
+        "regraSaida": "Dolazak od {entrada}. Odlazak do {saida} bez doplate.",
+        "urgenteAviso": "Dolazak za manje od {horas} h ne može da se zatraži preko aplikacije: obratite se direktno hotelu.",
+        "verContato": "Pogledajte kontakt hotela",
+        "verVagas": "Pogledajte šta je slobodno",
+        "modo": {
+          "ACOMODACAO_ESCOLHIDA": "Izaberite smeštaj",
+          "HOTEL_ESCOLHE": "Hotel bira najbolji"
+        },
+        "modoAjuda": {
+          "ACOMODACAO_ESCOLHIDA": "Vidite šta je slobodno za te datume, sa cenom. Hotel potvrđuje.",
+          "HOTEL_ESCOLHE": "Hotel dodeljuje najbolji smeštaj prema veličini i obaveštava Vas."
+        },
+        "prazoDoHotel": "Hotel odgovara u roku od {horas} h, tokom radnog vremena recepcije.",
+        "tipoSumiu": "Neko je pre Vas zatražio: {tipo}. Izaberite drugi smeštaj ili prepustite izbor hotelu.",
+        "esgotado": "Popunjeno za ove datume",
+        "livres": "{n} slobodno mesto | {n} slobodna mesta | {n} slobodnih mesta",
+        "estimativaDe": "oko {valor}",
+        "tudoEsgotado": "Za ove datume nema slobodnih mesta. Prepustite izbor hotelu: može da pomeri datum za jedan dan, ako se slažete.",
+        "deixarHotelEscolher": "Prepustite izbor hotelu",
+        "aceitaMudar": "Prihvatam pomeranje za jedan dan ako je popunjeno",
+        "aceitaMudarAjuda": "Dolazak dan ranije ili kasnije, ako se tako oslobodi mesto. Hotel Vas prethodno obaveštava.",
+        "extras": "Dodatno",
+        "porDiaria": "po noćenju",
+        "observacao": "Nešto što hotel treba da zna? Lekovi, hrana, strahovi (opciono)",
+        "resumo": {
+          "extras": "Dodatno",
+          "estimativa": "Procena"
+        },
+        "sinal": "Za potvrdu hotel traži kaparu od {percentual}%: {valor}.",
+        "carteira": "Vakcinalni karton",
+        "carteiraAjuda": "Ponesite karton pri dolasku: hotel ga proverava pre prijema.",
+        "regraCancelar": "Besplatno otkazivanje najkasnije {dias} d pre dolaska.",
+        "enviar": "Pošaljite zahtev",
+        "erro": {
+          "FALHA": "Slanje nije uspelo. Proverite internet vezu i pokušajte ponovo.",
+          "HOTEL_NAO_RECEBE_PEDIDOS": "Hotel je trenutno pauzirao online zahteve. Pozovite da rezervišete.",
+          "MODO_INDISPONIVEL": "Hotel trenutno ne prima ovu vrstu zahteva.",
+          "FORA_DA_ANTECEDENCIA": "Taj dolazak je prerano. Obratite se direktno hotelu.",
+          "PERIODO_INVALIDO": "Proverite datume: odlazak mora biti posle dolaska.",
+          "CADASTRO_INCOMPLETO": "Za slanje nedostaju podaci o ljubimcu ili o Vama.",
+          "NAO_DIVIDEM_ACOMODACAO": "Ovi ljubimci ne dele smeštaj. Pošaljite zahtev za svakog posebno.",
+          "PEDIDO_JA_RESPONDIDO": "Hotel je već odgovorio na ovaj zahtev."
+        },
+        "enviadoTitulo": "Zahtev je poslat",
+        "aceitoTitulo": "Rezervisano",
+        "passoPediu": "Poslali ste zahtev",
+        "passoHotel": "Hotel bira smeštaj",
+        "ate": "Do {quando}",
+        "passoSinal": "Kapara za potvrdu",
+        "passoSinalAjuda": "Uputstva stižu uz odgovor hotela.",
+        "verMinhas": "Pogledajte moje boravke",
+        "urgenteAjuda": "Za online zahtev potrebno je {horas} h unapred. Za odmah se obratite hotelu: recepcija odmah vidi ima li mesta.",
+        "ligueParaHotel": "Pozovite hotel",
+        "ligarAgora": "Pozovite odmah",
+        "whatsapp": "Poruka na WhatsApp-u",
+        "mensagemDoHotel": "Poruka hotela",
+        "outraData": "Izaberite druge datume",
+        "passoHotelConfirma": "Hotel potvrđuje: {tipo}",
+        "estadia": "Boravak",
+        "toqueSaida": "Sada dodirnite dan odlaska."
+      },
+      "linha": {
+        "responder": "Odgovorite",
+        "ate": "do {quando}",
+        "juntos": "Zajedno, u istom smeštaju",
+        "semExtras": "Bez dodataka",
+        "hotelEscolhe": "Hotel bira",
+        "semVaga": "{tipo}: nema slobodnih"
+      },
+      "gaveta": {
+        "titulo": "Zahtev za: {nomes}",
+        "oPedido": "Zahtev",
+        "primeiraVez": "Prvi boravak ovde: zapis se pravi pri prihvatanju",
+        "aceitaMudar": "Prihvata dolazak ili odlazak dan ranije ili kasnije",
+        "datas": "Datumi",
+        "legendaVaga": "Ima mesta",
+        "legendaPedido": "Traženi datumi",
+        "toqueSaida": "Sada dodirnite dan odlaska.",
+        "outrasDatas": "Drugi datumi: podnosilac zahteva dobija obaveštenje o promeni.",
+        "voltarDatas": "Nazad na tražene datume",
+        "onde": "Gde će boraviti",
+        "ate": "veličina do: {porte}",
+        "pedido": "traženo",
+        "escolha": "Izaberite smeštaj",
+        "voltar": "Nazad na zahtev"
+      }
     }
   },
   "primevue": {

@@ -18,6 +18,7 @@ import { isAuthenticated } from '@/service/auth/auth-session'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 import { routes } from './file-routes'
+import { moduloDaPaginaAberta } from './paginas-abertas'
 
 const partnerLegacyRedirects: RouteRecordRaw[] = [
   { path: '/parceiro', redirect: '/inicio' },
@@ -124,6 +125,23 @@ router.beforeEach((to) => {
 
   if (hasActiveSession && rotaPertenceAoHotel(to.path) && !useModuloHotel().ativo.value) {
     return getDefaultLandingPath()
+  }
+
+  /*
+   * A página de agendamento da clínica e a de reserva do hotel: de quem não tem conta. Abrem com e
+   * sem sessão, desde que o módulo esteja ligado — ver `paginas-abertas.ts`.
+   */
+  const moduloAberto = moduloDaPaginaAberta(to.path)
+
+  if (moduloAberto) {
+    const ligado =
+      moduloAberto === 'clinico' ? useModuloClinico().ativo.value : useModuloHotel().ativo.value
+
+    if (ligado) {
+      return true
+    }
+
+    return hasActiveSession ? getDefaultLandingPath() : { path: '/auth/login' }
   }
 
   if (to.path === '/' || to.path === '/tutor') {

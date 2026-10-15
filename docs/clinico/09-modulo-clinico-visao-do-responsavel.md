@@ -185,6 +185,14 @@ que o app já tem.
 
 ## 4. Agendar pelo app
 
+> **Mudou (13/10/2026): o app pede, a clínica aceita.** O agendamento online virou pedido — o
+> responsável escolhe dia e horário ou pede o melhor horário, e a recepção responde. O passo 6
+> abaixo ("sem aprovação da clínica") não vale mais para quem pede pelo app; vale para o aceite
+> automático, que a clínica liga se quiser. O fluxo novo, as rotas (`ROTAS_DO_PEDIDO`) e as
+> notificações estão no [doc 18](./18-agendamento-online.md#para-o-petjourney-app). Os estados,
+> o prazo de cancelamento e a remarcação desta seção continuam valendo para o agendamento que
+> nasce do pedido aceito.
+
 **Hoje:** não existe. O portal mostra `origem: 'APP'` e ninguém produz esse valor.
 
 ### Fluxo

@@ -43,7 +43,7 @@ import type { CardAgenda, ColunaAgenda, FaixaBloqueio } from '../../composables/
 import { useAgendaDia } from '../../composables/useAgendaDia'
 import type { ArrasteProposta } from '../../composables/useAgendaDrag'
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import type { PetAlertKind } from '../../data/types'
+import type { Appointment, PetAlertKind } from '../../data/types'
 import { aparenciaDoTipo } from '../../domain/appointment-kind'
 import { severidadeMaxima } from '../../domain/conflicts'
 import { useAgendaStore } from '../../stores/agenda'
@@ -175,6 +175,15 @@ const ICONE_DO_ALERTA: Record<PetAlertKind, Component> = {
   inadimplente: PhWallet,
 }
 
+/**
+ * A origem que vira ícone: só a de quem marcou sozinho, pelo app ou pelo link da clínica. As
+ * outras são a própria recepção, e marcá-las em toda linha seria textura.
+ */
+const ICONE_DA_ORIGEM: Partial<Record<Appointment['origem'], string>> = {
+  app: 'ph ph-device-mobile',
+  link: 'ph ph-globe-simple',
+}
+
 /** Só o que é risco vira ícone na agenda: o resto mora na ficha e no drawer. */
 function alertasDeRisco(card: CardAgenda) {
   return (card.pet?.alertas ?? []).filter((alerta) => alerta.severidade === 'risco')
@@ -203,6 +212,7 @@ function rotuloDoCard(card: CardAgenda) {
     card.pet?.nome ?? '',
     card.tipo?.nome ?? '',
     formato.status(card.appointment.status),
+    ICONE_DA_ORIGEM[card.appointment.origem] ? t(`clinico.origem.${card.appointment.origem}`) : '',
     ...alertasDeRisco(card).map((alerta) =>
       alerta.detalhe
         ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}`
@@ -453,6 +463,13 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
                           formato.hora(card.appointment.inicio)
                         }}</span>
                         <span class="atendimento__nome">{{ card.pet?.nome }}</span>
+                        <!-- Marcado pelo responsável, no app ou no link: a origem à vista na linha. -->
+                        <i
+                          v-if="ICONE_DA_ORIGEM[card.appointment.origem]"
+                          :class="['atendimento__origem', ICONE_DA_ORIGEM[card.appointment.origem]]"
+                          :title="t(`clinico.origem.${card.appointment.origem}`)"
+                          aria-hidden="true"
+                        />
                         <i
                           v-if="aparenciaDoTipo(card.tipo?.kind).icone"
                           :class="['atendimento__tipo', aparenciaDoTipo(card.tipo?.kind).icone]"
@@ -848,6 +865,13 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
 
 .atendimento__tipo {
   flex-shrink: 0;
+  font-size: 0.8rem;
+}
+
+/* A origem online, na tinta neutra: diz de onde veio sem competir com o tipo nem com o risco. */
+.atendimento__origem {
+  flex-shrink: 0;
+  color: var(--hc-tinta-3);
   font-size: 0.8rem;
 }
 

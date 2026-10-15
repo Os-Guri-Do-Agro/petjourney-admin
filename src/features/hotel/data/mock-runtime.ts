@@ -55,6 +55,14 @@ export type HotelOperation =
   | 'acomodacao.salvar'
   | 'espera.listar'
   | 'resumo.carregar'
+  /*
+   * Reserva online. A disponibilidade é do celular do responsável; a resposta é do balcão. Falham
+   * separadas, como na clínica.
+   */
+  | 'pedido.disponibilidade'
+  | 'pedido.enviar'
+  | 'pedido.listar'
+  | 'pedido.responder'
 
 /**
  * Erro da camada mocada.

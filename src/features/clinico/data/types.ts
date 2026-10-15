@@ -282,7 +282,22 @@ export type AppointmentStatus =
   | 'falta'
   | 'cancelado'
 
-export type AppointmentOrigin = 'recepcao' | 'app' | 'telefone' | 'encaixe' | 'retorno' | 'fila'
+/**
+ * Por onde o horário nasceu.
+ *
+ * `link` é a página pública de agendamento da clínica — quem marcou ainda não tem o app. Fica
+ * separado de `app` porque são conversas diferentes depois: quem veio pelo app recebe push e
+ * remarca sozinho; quem veio pelo link recebe mensagem no celular e é o cliente que a clínica
+ * ainda pode trazer para o app.
+ */
+export type AppointmentOrigin =
+  | 'recepcao'
+  | 'app'
+  | 'link'
+  | 'telefone'
+  | 'encaixe'
+  | 'retorno'
+  | 'fila'
 
 export type CancelReason =
   | 'responsavel-desmarcou'
@@ -505,6 +520,184 @@ export type WaitlistEntry = {
   observacao: string
   /** O atendimento que o aceite criou. É o que fecha a fila: aceitar vira horário marcado. */
   appointmentId?: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Agendamento online — o pedido que chega do app ou do link da clínica
+// ---------------------------------------------------------------------------
+
+/** Por onde o pedido chegou. `link` é a página pública: quem ainda não tem o app. */
+export type CanalDoPedido = 'app' | 'link'
+
+/**
+ * Os dois caminhos de um pedido.
+ *
+ * - `horario-escolhido`: o responsável viu a agenda, escolheu o profissional (ou qualquer um) e o
+ *   horário. A clínica aceita **aquele** horário — ou, se ele não serve mais, oferece outro.
+ * - `melhor-horario`: o responsável disse quando pode, e a clínica marca no melhor horário que
+ *   tiver. É o caminho de quem não quer escolher, e o da clínica que não abre a agenda inteira.
+ *
+ * Nos dois a clínica responde: nenhum pedido vira horário sem alguém da casa ter visto, a não ser
+ * que a clínica ligue o aceite automático (`AgendamentoOnline.aceitarSozinho`).
+ */
+export type ModoDoPedido = 'horario-escolhido' | 'melhor-horario'
+
+/** O que o responsável disse que é. Emergência não vira pedido: vira o contato da clínica. */
+export type MotivoDoPedido = 'checkup' | 'vacina' | 'sintoma' | 'retorno' | 'exame' | 'banho' | 'outro'
+
+export type PeriodoDoDia = 'manha' | 'tarde'
+
+/** Quando o responsável pode, no pedido de melhor horário. */
+export type PreferenciaDoPedido = {
+  de: ISODate
+  ate: ISODate
+  /** Vazio é qualquer período. */
+  periodos: PeriodoDoDia[]
+  /** `null` é qualquer profissional. */
+  professionalId: string | null
+}
+
+/**
+ * `expirado` é o pedido que perdeu o sentido sem resposta: o horário escolhido passou, ou a
+ * janela da preferência acabou. Pedido atrasado **não** expira sozinho — atraso é da clínica, e
+ * sumir com ele esconderia o atraso.
+ */
+export type StatusDoPedido = 'pendente' | 'aceito' | 'recusado' | 'desistiu' | 'expirado'
+
+export type MotivoDaRecusaDoPedido =
+  | 'sem-horario'
+  | 'servico-indisponivel'
+  /** O caso pede conversa antes de marcar: cirurgia, comportamento, orçamento. */
+  | 'precisa-avaliar'
+  /** O que foi descrito é emergência: a clínica orienta a vir ou ligar agora. */
+  | 'emergencia'
+  | 'outro'
+
+/**
+ * Quem a clínica ainda não conhece.
+ *
+ * Vem do link público (a pessoa digitou) ou do app, quando o pet nunca passou pela clínica (o app
+ * mandou o que sabe). É o mínimo para marcar e ligar — o resto do cadastro a recepção completa
+ * no balcão, como sempre fez com quem liga pela primeira vez.
+ */
+export type CadastroMinimo = {
+  nome: string
+  telefone: string
+  petNome: string
+  especie: PetSpecies
+  /** Só o que a pessoa souber: nula é "não informou", nunca um palpite. */
+  nascimento: ISODate | null
+  sexo: PetSex | null
+}
+
+export type RecusaDoPedido = {
+  motivo: MotivoDaRecusaDoPedido
+  /** O texto que saiu para o responsável, como a recepção deixou. */
+  mensagem: string
+}
+
+export type PedidoDeHorario = {
+  id: string
+  canal: CanalDoPedido
+  modo: ModoDoPedido
+  /** Paciente da clínica. `null` na primeira vez: quem é está em `novoCadastro`. */
+  petId: string | null
+  tutorId: string | null
+  /** Preenchido quando a clínica ainda não conhece o pet. Some no aceite, que cria o cadastro. */
+  novoCadastro: CadastroMinimo | null
+  typeId: string
+  motivo: MotivoDoPedido
+  /** O que o responsável escreveu. Nunca resumido: a clínica lê como chegou. */
+  queixa: string
+  /** Horário escolhido — preenchidos só em `horario-escolhido`. */
+  professionalId: string | null
+  inicio: ISODateTime | null
+  fim: ISODateTime | null
+  preferencia: PreferenciaDoPedido | null
+  /**
+   * Pedidos do mesmo envio: dois pets da mesma casa, seguidos, com o mesmo profissional. A clínica
+   * responde o grupo de uma vez — aceitar um e recusar o outro deixaria alguém indo à clínica com
+   * um cachorro e voltando com dois.
+   */
+  grupoId: string | null
+  /** Remarcação: o atendimento que este pedido quer mudar de horário. */
+  remarcaAppointmentId: string | null
+  status: StatusDoPedido
+  criadoEm: ISODateTime
+  /** Até quando a clínica prometeu responder. É o que o responsável lê ao enviar. */
+  responderAte: ISODateTime
+  respondidoEm: ISODateTime | null
+  respondidoPor: 'recepcao' | 'automatico' | null
+  /** O atendimento que o aceite criou ou moveu. */
+  appointmentId: string | null
+  recusa: RecusaDoPedido | null
+  /** Na primeira vez, o responsável liberou o histórico do app para a clínica ler. */
+  compartilhaHistorico: boolean
+}
+
+/**
+ * O aviso que saiu para o responsável quando a clínica respondeu.
+ *
+ * Push para quem tem o app, mensagem no celular para quem veio pelo link — o texto é o mesmo, e
+ * fica guardado como saiu: é o comprovante do que a clínica disse.
+ */
+export type AvisoDoPedido = {
+  id: string
+  /** O primeiro pedido do grupo. */
+  pedidoId: string
+  /** `null` para quem veio pelo link: o aviso vai para o telefone do cadastro mínimo. */
+  tutorId: string | null
+  canal: CanalDoPedido
+  telefone: string
+  tipo: 'aceito' | 'marcado' | 'recusado'
+  criadoEm: ISODateTime
+  titulo: string
+  corpo: string
+}
+
+/**
+ * O que a clínica atende fora do agendamento — o "é emergência?" do fluxo.
+ *
+ * O app não marca emergência: mostra isto. É a regra que tira do pedido online o caso que não
+ * pode esperar a recepção responder.
+ */
+export type ContatoDeEmergencia = {
+  telefone: string
+  whatsapp: string | null
+  /** Número de plantão para fora do expediente. `null`: a clínica não tem plantão. */
+  telefoneDePlantao: string | null
+  /** Texto da clínica para fora do horário. Vai como está, no idioma em que foi escrito. */
+  orientacao: string
+}
+
+/**
+ * Como a clínica recebe pedidos pela internet.
+ *
+ * Configuração da clínica, e não constante: é ela que sabe quanto da agenda quer mostrar, quanto
+ * tempo leva para responder e o que dá para marcar sem conversa.
+ */
+export type AgendamentoOnline = {
+  ativo: boolean
+  permiteEscolherHorario: boolean
+  permiteMelhorHorario: boolean
+  /**
+   * Pedido de horário escolhido, com o horário ainda livre, vira atendimento na hora. Desligado
+   * por padrão: a clínica começa vendo tudo e liga quando confiar.
+   */
+  aceitarSozinho: boolean
+  /** Serviços que o responsável pode pedir. Cirurgia e emergência nunca entram. */
+  typeIds: string[]
+  /** Quem aparece para escolha. Fora daqui, o profissional não recebe pedido online. */
+  professionalIds: string[]
+  /** O primeiro horário oferecido fica pelo menos isto à frente de agora. */
+  antecedenciaMinimaHoras: number
+  /** Até quantos dias à frente a agenda aparece. */
+  horizonteDias: number
+  /** O que a clínica promete: "respondemos em até 4 h". */
+  prazoDeRespostaHoras: number
+  /** O endereço da página pública: `/agendar/<slug>`. */
+  slug: string
+  emergencia: ContatoDeEmergencia
 }
 
 // ---------------------------------------------------------------------------

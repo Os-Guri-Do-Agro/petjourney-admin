@@ -77,6 +77,12 @@ export function partesQueExistem(partes: ParteDePendencia[]): ParteDePendencia[]
 const VAZIO: ContagemDePendencia = { total: 0, tom: 'neutro' }
 
 const fila = ref<ContagemDePendencia>(VAZIO)
+/**
+ * Pedidos de horário do app e do link esperando a recepção. Atenção enquanto estão no prazo;
+ * risco quando o prazo prometido ao responsável passou — do outro lado alguém leu "respondemos em
+ * até 4 h" e está esperando.
+ */
+const pedidos = ref<ContagemDePendencia>(VAZIO)
 const internacao = ref<ContagemDePendencia>(VAZIO)
 const atividades = ref<ContagemDePendencia>(VAZIO)
 const vacinas = ref<ContagemDePendencia>(VAZIO)
@@ -117,21 +123,27 @@ async function apurar() {
     },
     { retornosVencidos },
     { clinicClock },
+    { pedidoRepository },
+    { agruparPedidos, situacaoDoPrazo },
   ] = await Promise.all([
     import('../data/repositories'),
     import('../domain/follow-up'),
     import('../stores/clinico'),
+    import('../data/agendamento-online'),
+    import('../domain/pedidos'),
   ])
 
-  const [entradas, mapa, rascunhos, retornos, chamada, emCasa, geladeira] = await Promise.all([
-    consultar(() => waitlistRepository.listar()),
-    consultar(() => internacaoRepository.mapa()),
-    consultar(() => encounterRepository.listarRascunhos(null)),
-    consultar(() => encounterRepository.listarRetornosPendentes()),
-    consultar(() => vacinaRepository.listaDeChamada()),
-    consultar(() => tratamentoRepository.daClinica()),
-    consultar(() => vacinaRepository.estoque()),
-  ])
+  const [entradas, mapa, rascunhos, retornos, chamada, emCasa, geladeira, abertos] =
+    await Promise.all([
+      consultar(() => waitlistRepository.listar()),
+      consultar(() => internacaoRepository.mapa()),
+      consultar(() => encounterRepository.listarRascunhos(null)),
+      consultar(() => encounterRepository.listarRetornosPendentes()),
+      consultar(() => vacinaRepository.listaDeChamada()),
+      consultar(() => tratamentoRepository.daClinica()),
+      consultar(() => vacinaRepository.estoque()),
+      consultar(() => pedidoRepository.pendentes()),
+    ])
 
   /*
    * Cada contador só é reescrito quando **todas** as fontes dele responderam. Os demais ficam com o
@@ -141,6 +153,24 @@ async function apurar() {
   if (entradas.ok) {
     const aguardando = entradas.valor.filter((entrada) => entrada.status === 'aguardando').length
     fila.value = { total: aguardando, tom: 'neutro' }
+  }
+
+  if (abertos.ok) {
+    /* Conta o envio, não o pet: os dois pets da mesma casa são um pedido só para quem responde. */
+    const grupos = agruparPedidos(abertos.valor)
+    const agora = clinicClock.nowIso()
+    const atrasados = grupos.filter(
+      (grupo) => situacaoDoPrazo(grupo[0]!, agora) === 'atrasado',
+    ).length
+
+    pedidos.value = {
+      total: grupos.length,
+      tom: atrasados > 0 ? 'risco' : grupos.length > 0 ? 'atencao' : 'neutro',
+      partes: partesQueExistem([
+        { chave: 'pedidosAtrasados', total: atrasados },
+        { chave: 'pedidosNoPrazo', total: grupos.length - atrasados },
+      ]),
+    }
   }
 
   if (mapa.ok) {
@@ -202,6 +232,7 @@ async function apurar() {
     chamada,
     emCasa,
     geladeira,
+    abertos,
   ])
 
   if (situacao.value !== 'falhou') {
@@ -278,6 +309,7 @@ export function useClinicoPendencias(ativo: () => boolean) {
 
   return {
     fila: computed(() => (ativo() ? fila.value : VAZIO)),
+    pedidos: computed(() => (ativo() ? pedidos.value : VAZIO)),
     internacao: computed(() => (ativo() ? internacao.value : VAZIO)),
     atividades: computed(() => (ativo() ? atividades.value : VAZIO)),
     vacinas: computed(() => (ativo() ? vacinas.value : VAZIO)),
@@ -294,6 +326,7 @@ export function useClinicoPendencias(ativo: () => boolean) {
 /** Zera o singleton. Existe para o teste, e para o logout não deixar contagem de outra conta. */
 export function limparPendenciasClinicas() {
   fila.value = VAZIO
+  pedidos.value = VAZIO
   internacao.value = VAZIO
   atividades.value = VAZIO
   vacinas.value = VAZIO

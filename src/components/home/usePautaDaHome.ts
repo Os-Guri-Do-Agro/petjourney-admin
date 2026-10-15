@@ -9,6 +9,7 @@
 
 import {
   PhBed,
+  PhCalendarPlus,
   PhCalendarX,
   PhClipboardText,
   PhHourglassMedium,
@@ -114,6 +115,12 @@ export function usePautaDaHome() {
         recarregar: pendenciasClinicas.recarregar,
         linhas: porGravidade(
           [
+            linha(
+              'pedidos',
+              '/veterinario/pedidos',
+              PhCalendarPlus,
+              pendenciasClinicas.pedidos.value,
+            ),
             linha('fila', '/veterinario/fila', PhHourglassMedium, pendenciasClinicas.fila.value),
             linha(
               'internacao',
@@ -153,6 +160,12 @@ export function usePautaDaHome() {
           [
             linha('rotina', '/hotel/rotina', PhListChecks, pendenciasDoHotel.rotina.value),
             linha('vespera', '/hotel/reservas', PhCalendarX, pendenciasDoHotel.vespera.value),
+            linha(
+              'pedidosDeReserva',
+              '/hotel/pedidos',
+              PhCalendarPlus,
+              pendenciasDoHotel.pedidos.value,
+            ),
           ].filter((item) => item.total > 0),
         ),
       })

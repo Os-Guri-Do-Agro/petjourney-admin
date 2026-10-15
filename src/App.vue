@@ -10,6 +10,7 @@ import { moduloClinico, rotaPertenceAoModulo } from '@/composables/useModuloClin
 import { moduloHotel, rotaPertenceAoHotel } from '@/composables/useModuloHotel'
 import { instalarSequenciasSecretas } from '@/composables/useModuloOculto'
 import { isRTLLocale, type Locale } from '@/i18n/locales'
+import { moduloDaPaginaAberta } from '@/router/paginas-abertas'
 import { authSessionVersion, isAuthenticated } from '@/service/auth/auth-session'
 
 const { t, locale } = useI18n()
@@ -34,6 +35,8 @@ const shouldUseShell = computed(() => {
     hasSessionVersion &&
     isAuthenticated() &&
     !publicRoutes.has(route.path) &&
+    /* A página de agendamento é do responsável: sem o menu do parceiro, mesmo com sessão. */
+    !moduloDaPaginaAberta(route.path) &&
     !isNotFoundRoute()
   )
 })
