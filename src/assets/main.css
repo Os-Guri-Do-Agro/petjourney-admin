@@ -154,6 +154,46 @@ html:has(> body.p-overflow-hidden) {
 }
 
 /*
+ * Barra de rolagem: nunca a do sistema, cinza e com setas, que no Windows come 15 px e fura o
+ * acabamento. Por padrão ela é fina, na tinta da casa e sem trilho; nas gavetas, nos diálogos e
+ * no celular da demonstração ela some — a rolagem continua (roda, toque, teclado), só a barra não
+ * aparece. Quem desenha a própria (o menu lateral) continua desenhando.
+ */
+* {
+  scrollbar-color: color-mix(in srgb, var(--hc-tinta) 22%, transparent) transparent;
+  scrollbar-width: thin;
+}
+
+.p-drawer-content,
+.p-dialog-content,
+.fx-corpo {
+  scrollbar-width: none;
+}
+
+.p-drawer-content::-webkit-scrollbar,
+.p-dialog-content::-webkit-scrollbar,
+.fx-corpo::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * A gaveta lateral com os cantos de dentro arredondados: ela desliza por cima da página, e o canto
+ * vivo a fazia parecer um pedaço cortado da janela. Os de fora encostam na borda e ficam retos.
+ * Lado lógico, como a borda que o PrimeVue já põe: no árabe a gaveta espelha, e o canto junto.
+ */
+.p-drawer-right .p-drawer {
+  overflow: hidden;
+  border-end-start-radius: 1.25rem;
+  border-start-start-radius: 1.25rem;
+}
+
+.p-drawer-left .p-drawer {
+  overflow: hidden;
+  border-end-end-radius: 1.25rem;
+  border-start-end-radius: 1.25rem;
+}
+
+/*
  * RTL: ícones direcionais espelham na horizontal. Usa a propriedade individual `scale` (e não
  * `transform`) para compor com rotações que os componentes já aplicam.
  */
