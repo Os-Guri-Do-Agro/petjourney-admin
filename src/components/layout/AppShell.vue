@@ -14,7 +14,6 @@ import {
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
-import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
 import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
 import ComingSoonFeatureDialog from '@/components/common/ComingSoonFeatureDialog.vue'
 import AppNavLink from '@/components/layout/AppNavLink.vue'
@@ -201,7 +200,8 @@ const atalhoDaBusca = computed(() =>
 )
 const authUser = computed(() => getAuthUser())
 const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
-const logoHeaderUrl = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
+/* A moldura é escura nos dois modos (ver `molduraStyle`): o logotipo é sempre o do fundo escuro. */
+const logoHeaderUrl = logoDarkUrl
 
 type NavigationItem = AppNavigationItem
 
@@ -237,8 +237,12 @@ const shellStyle = computed(() => {
     '--shell-accent-soft': 'var(--hc-marca-clara)',
     /** Teal da marca escurecido: superfície cheia com ícone branco por cima, nos dois modos. */
     '--shell-accent-deep': '#1f6457',
+    /** O ícone dentro do ladrilho `--shell-accent-deep` do item aberto. */
+    '--shell-on-accent-deep': '#ffffff',
     '--shell-nav-active-text': 'var(--hc-marca-forte)',
     '--shell-cream': 'var(--hc-marca-clara)',
+    /** O fundo do botão do trilho sob o cursor. */
+    '--shell-hover': 'var(--hc-linha)',
     '--shell-shadow-rgb': isDark ? '0 0 0' : '20 32 28',
     /*
      * Tons do selo de pendência do menu: o par pêssego que diz "atenção" nas telas, para o número do
@@ -249,12 +253,60 @@ const shellStyle = computed(() => {
     '--shell-attention-line': 'var(--hc-pessego-fundo)',
     /** Só tinge o chip; quem carrega o significado legível é a tinta abaixo. */
     '--rail-logout-red': 'var(--hc-coral-tinta)',
+    /** O chip de sair no trilho. */
+    '--rail-logout-bg': 'var(--hc-coral-fundo)',
     /** Ícone sobre o chip tingido do trilho. */
     '--rail-logout-icon': 'var(--hc-coral-tinta)',
     /** "Sair" escrito sobre superfície clara (painel e menu da conta). */
     '--rail-logout-text': colors.dashboard.warmText,
   }
 })
+
+/*
+ * A moldura verde-azulada (15/10/2026, em teste): no claro, menu e cabeçalho saem do branco dos
+ * cartões e vão para o teal da pílula cheia — "o tema claro está claro demais". O escuro fica como
+ * está. Só a moldura troca de tokens: o conteúdo continua na paleta clara, e o menu da conta, que
+ * sai para o `body`, também.
+ *
+ * Mesma lógica do escuro: texto claro, o que está aberto num chip translúcido, controles
+ * contornados. Contrastes sobre #1F6457: texto 6,9:1, apagado 5:1; sobre o trilho, mais.
+ */
+const molduraStyle = computed(() =>
+  isDarkMode.value
+    ? {}
+    : {
+        '--shell-surface': '#1f6457',
+        '--shell-surface-soft': 'rgb(255 255 255 / 8%)',
+        '--shell-brand': '#1a574c',
+        '--shell-line': 'rgb(255 255 255 / 16%)',
+        /*
+         * Quase branco, e não o sálvia apagado: o #C8E0D9 passava de 5:1 no papel e sumia na tela —
+         * o traço fino do Phosphor regular sobre o teal pede tinta forte. Texto 6,4:1; rótulo 5,5:1.
+         */
+        '--shell-text': '#ffffff',
+        '--shell-muted': '#ecf6f2',
+        '--shell-soft': '#d4e9e2',
+        '--shell-on-brand': '#ecf6f2',
+        '--shell-hover': 'rgb(255 255 255 / 10%)',
+        '--shell-nav-hover': 'rgb(255 255 255 / 10%)',
+        /* Ícone um degrau maior: o traço fino lê melhor com mais corpo. */
+        '--shell-nav-icone': '1rem',
+        '--shell-rail-icone': '1.15rem',
+        '--shell-accent': '#8fd9c8',
+        '--shell-accent-strong': '#effaf6',
+        '--shell-accent-soft': 'rgb(255 255 255 / 14%)',
+        '--shell-cream': 'rgb(255 255 255 / 14%)',
+        '--shell-rail-active-bg': 'rgb(255 255 255 / 14%)',
+        '--shell-nav-active-text': '#ffffff',
+        /* No item aberto o ladrilho inverte: branco, com o ícone no teal da moldura. */
+        '--shell-accent-deep': '#ffffff',
+        '--shell-on-accent-deep': '#1f6457',
+        '--rail-logout-red': '#ff9c9c',
+        '--rail-logout-bg': 'rgb(255 171 171 / 14%)',
+        '--rail-logout-icon': '#ffc4c4',
+        '--rail-logout-text': '#ffc4c4',
+      },
+)
 
 /**
  * Seção com uma tela só não abre painel: vira link direto no trilho.
@@ -487,7 +539,7 @@ onUnmounted(() => {
       @click="closeCompactDrawer"
     />
 
-    <aside class="app-navigator" :inert="navigatorHidden || undefined">
+    <aside class="app-navigator" :style="molduraStyle" :inert="navigatorHidden || undefined">
       <nav
         v-if="!isListNavigator"
         class="section-rail"
@@ -694,7 +746,7 @@ onUnmounted(() => {
       </section>
     </aside>
 
-    <header class="app-header">
+    <header class="app-header" :style="molduraStyle">
       <div class="app-header__left">
         <Button
           class="header-icon-button"
@@ -1058,7 +1110,7 @@ onUnmounted(() => {
 }
 
 .rail-button__icon i {
-  font-size: 1.06rem;
+  font-size: var(--shell-rail-icone, 1.06rem);
   line-height: 1;
 }
 
@@ -1077,7 +1129,7 @@ onUnmounted(() => {
 .rail-button.p-button:not(:disabled):hover,
 .rail-button.p-button:not(:disabled):active {
   border: 0;
-  background: var(--hc-linha);
+  background: var(--shell-hover);
   color: var(--shell-text);
 }
 
@@ -1160,14 +1212,14 @@ onUnmounted(() => {
  */
 .rail-action--danger.p-button {
   border-color: transparent;
-  background: var(--hc-coral-fundo);
+  background: var(--rail-logout-bg);
   color: var(--rail-logout-icon);
 }
 
 .rail-action--danger.p-button:not(:disabled):hover,
 .rail-action--danger.p-button:not(:disabled):active {
   border-color: color-mix(in srgb, var(--rail-logout-red) 45%, transparent);
-  background: var(--hc-coral-fundo);
+  background: var(--rail-logout-bg);
   color: var(--rail-logout-icon);
 }
 

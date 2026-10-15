@@ -178,13 +178,16 @@ defineEmits<{ (evento: 'clique', payload: MouseEvent): void }>()
 }
 
 .page-nav__icon i {
-  font-size: 0.88rem;
+  font-size: var(--shell-nav-icone, 0.88rem);
   line-height: 1;
 }
 
 /** Hover é convite; ativo é estado — pesos visuais distintos de propósito. */
 .page-nav__link:hover {
-  background: color-mix(in srgb, var(--shell-accent) 7%, var(--shell-surface));
+  background: var(
+    --shell-nav-hover,
+    color-mix(in srgb, var(--shell-accent) 7%, var(--shell-surface))
+  );
   color: var(--shell-text);
 }
 
@@ -213,7 +216,7 @@ defineEmits<{ (evento: 'clique', payload: MouseEvent): void }>()
 .page-nav__link.router-link-active .page-nav__icon {
   background: var(--shell-accent-deep);
   box-shadow: 0 1px 4px color-mix(in srgb, var(--shell-accent-deep) 45%, transparent);
-  color: #ffffff;
+  color: var(--shell-on-accent-deep);
 }
 
 /* ---------------------------------------------------------------- selo de pendência */
