@@ -11,11 +11,13 @@ import { useRoute, useRouter } from 'vue-router'
 
 import AnotacaoEstruturadaFields from '@/components/parceiro/AnotacaoEstruturadaFields.vue'
 import AnotacaoEstruturadaView from '@/components/parceiro/AnotacaoEstruturadaView.vue'
+import LerReceitaComIA from '@/components/parceiro/LerReceitaComIA.vue'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useAgora } from '@/composables/useAgora'
+import { useLeituraReceitaParceiro } from '@/composables/useLeituraReceitaParceiro'
 import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -52,6 +54,7 @@ import {
   tipoAceitaEstruturado,
   validarAnotacaoEstruturada,
 } from '@/utils/parceiro/anotacao-estruturada'
+import { mesclarPrescricaoLida, temCampoAConferir } from '@/utils/parceiro/leitura-receita'
 import type {
   BlocoLista,
   FonteSnapshot,
@@ -168,6 +171,44 @@ const somenteLeitura = computed(() => isAtivo.value && !store.podeOperar)
 const temCamposEstruturados = computed(() =>
   detalhe.value ? tipoAceitaEstruturado(detalhe.value.tipoServico) : false,
 )
+
+/**
+ * Ler receita com IA: só em acesso de CONSULTA (a API recusa os outros com 400) e enquanto o
+ * recurso não respondeu 503. Toda a equipe pode (DONO e OPERADOR).
+ */
+const leituraReceita = useLeituraReceitaParceiro({
+  compartilhamentoId,
+  parceiroQuery,
+  anexosDoFormulario: () => anexosForm.value.length,
+  aoLer: (leitura) => {
+    const mescla = mesclarPrescricaoLida(estruturadaForm.value.prescricaoItens, leitura)
+    estruturadaForm.value.prescricaoItens = mescla.itens
+
+    return {
+      aplicados: mescla.aplicados,
+      cortados: mescla.cortados,
+      temConferir: temCampoAConferir(mescla.itens.slice(mescla.itens.length - mescla.aplicados)),
+    }
+  },
+  aoEncerrarAcesso: () => {
+    formError.value = t('acessos.anotacao.encerrado')
+    void loadDetalhe(true)
+  },
+  aoFicarIndisponivel: (mensagem) => {
+    toast.add({
+      severity: 'warn',
+      summary: mensagem || t('acessos.leituraReceita.indisponivel'),
+      life: 6000,
+    })
+  },
+})
+
+const mostrarLeituraReceita = computed(
+  () => detalhe.value?.tipoServico === 'CONSULTA' && leituraReceita.disponivel,
+)
+
+/** Lugar ocupado no teto de anexos: os do formulário mais os arquivos da receita. */
+const anexosOcupados = computed(() => anexosForm.value.length + leituraReceita.reservados)
 
 const anotacoesOrdenadas = computed(() =>
   [...(detalhe.value?.anotacoes ?? [])].sort(
@@ -515,6 +556,7 @@ function resetAnotacaoForm() {
   estruturadaErros.value = {}
   anexosForm.value = []
   formError.value = ''
+  leituraReceita.limpar()
 
   if (fileInput.value) {
     fileInput.value.value = ''
@@ -571,7 +613,8 @@ function onAnexosSelected(event: Event) {
   formError.value = ''
 
   for (const file of files) {
-    if (anexosForm.value.length >= MAX_ANEXOS) {
+    // A receita lida (ou em leitura) também ocupa lugar: a API a copia como anexo.
+    if (anexosOcupados.value >= MAX_ANEXOS) {
       formError.value = t('acessos.anotacao.maxAnexos', { n: MAX_ANEXOS }, MAX_ANEXOS)
       break
     }
@@ -644,6 +687,14 @@ async function submitAnotacao() {
     return
   }
 
+  // Receita escolhida ou ainda em leitura: mandar agora perderia a leitura.
+  if (leituraReceita.ocupada) {
+    formError.value = t('acessos.leituraReceita.enviarAntes')
+    return
+  }
+
+  const leituraReceitaId = leituraReceita.leituraReceitaId ?? undefined
+
   const areaEnviada = valorEspecialidade(
     anotacaoForm.especialidade,
     anotacaoForm.especialidadeOutra,
@@ -666,6 +717,7 @@ async function submitAnotacao() {
           montarAnotacaoEstruturada(detalhe.value.tipoServico, estruturadaForm.value) ?? undefined,
         anexos: anexosForm.value.map((a) => a.file),
         tiposDocumento: anexosForm.value.map((a) => a.tipoDocumento),
+        leituraReceitaId,
       },
       parceiroQuery(),
     )
@@ -697,7 +749,22 @@ async function submitAnotacao() {
   } catch (err) {
     if (err instanceof ApiError && err.statusCode === 409) {
       formError.value = t('acessos.anotacao.encerrado')
+    } else if (leituraReceitaId && err instanceof ApiError && err.statusCode === 503) {
+      // Leitura desligada no meio do caminho: sai o vínculo e o botão; os remédios ficam.
+      leituraReceita.marcarIndisponivel()
+      formError.value = err.message || t('acessos.leituraReceita.indisponivel')
+    } else if (
+      leituraReceitaId &&
+      err instanceof ApiError &&
+      err.statusCode === 400 &&
+      ['OUTRO_ACESSO', 'JA_VINCULADA', 'STATUS'].includes(err.reason ?? '')
+    ) {
+      // A leitura não serve mais (outra anotação usou, falhou, é de outro acesso): sai o
+      // vínculo, ficam os remédios, e o próximo envio vai sem ela.
+      leituraReceita.limpar()
+      formError.value = err.message || t('acessos.leituraReceita.vinculoPerdido')
     } else {
+      // ANEXOS_ACIMA_DO_LIMITE e o resto: a mensagem da API diz o que fazer.
       formError.value = err instanceof Error ? err.message : t('acessos.anotacao.erro')
     }
   } finally {
@@ -978,7 +1045,10 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           class="atd-stamp"
           :data-atualizado="carimbo.atualizado ? 'true' : 'false'"
         >
-          <i :class="carimbo.atualizado ? 'ph ph-clock-counter-clockwise' : 'ph ph-clock'" aria-hidden="true" />
+          <i
+            :class="carimbo.atualizado ? 'ph ph-clock-counter-clockwise' : 'ph ph-clock'"
+            aria-hidden="true"
+          />
           <span>{{
             carimbo.atualizado
               ? t('acessos.snapshot.carimboAtualizado', {
@@ -1040,7 +1110,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               <p v-if="isGuidanceVisible">{{ t('acessos.tratamentos.lede') }}</p>
             </div>
             <span v-if="tratamentosContinuos.length" class="atd-docs__count">{{
-              t('acessos.tratamentos.count', { n: tratamentosContinuos.length }, tratamentosContinuos.length)
+              t(
+                'acessos.tratamentos.count',
+                { n: tratamentosContinuos.length },
+                tratamentosContinuos.length,
+              )
             }}</span>
           </header>
 
@@ -1081,7 +1155,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               <p>{{ t('acessos.snapshot.clinicalLede') }}</p>
             </div>
             <span class="atd-clinical__count">{{
-              t('acessos.snapshot.sectionsCount', { n: snapshotListSections.length }, snapshotListSections.length)
+              t(
+                'acessos.snapshot.sectionsCount',
+                { n: snapshotListSections.length },
+                snapshotListSections.length,
+              )
             }}</span>
           </header>
 
@@ -1108,7 +1186,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     <strong>{{ section.title }}</strong>
                     <small>{{
                       section.items.length
-                        ? t('acessos.snapshot.itemsCount', { n: section.items.length }, section.items.length)
+                        ? t(
+                            'acessos.snapshot.itemsCount',
+                            { n: section.items.length },
+                            section.items.length,
+                          )
                         : t('acessos.snapshot.semItens')
                     }}</small>
                   </span>
@@ -1277,7 +1359,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
               <div v-if="entrada.fotoIds.length" class="atd-diario__fotos">
                 <span class="atd-diario__fotos-label">
-                  {{ t('acessos.diario.fotos', { n: entrada.fotoIds.length }, entrada.fotoIds.length) }}
+                  {{
+                    t('acessos.diario.fotos', { n: entrada.fotoIds.length }, entrada.fotoIds.length)
+                  }}
                 </span>
                 <Button
                   v-for="(fotoId, index) in entrada.fotoIds"
@@ -1312,7 +1396,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 <p v-if="isGuidanceVisible">{{ t('acessos.anotacoes.lede') }}</p>
               </div>
               <span v-if="anotacoesOrdenadas.length" class="atd-notes__count">{{
-                t('acessos.anotacoes.count', { n: anotacoesOrdenadas.length }, anotacoesOrdenadas.length)
+                t(
+                  'acessos.anotacoes.count',
+                  { n: anotacoesOrdenadas.length },
+                  anotacoesOrdenadas.length,
+                )
               }}</span>
             </header>
 
@@ -1455,7 +1543,15 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 :tipo-servico="detalhe.tipoServico"
                 :erros="estruturadaErros"
                 :disabled="submittingAnotacao"
-              />
+              >
+                <template v-if="mostrarLeituraReceita" #prescricao-topo>
+                  <LerReceitaComIA
+                    :leitura="leituraReceita"
+                    :anexos-do-formulario="anexosForm.length"
+                    :disabled="submittingAnotacao"
+                  />
+                </template>
+              </AnotacaoEstruturadaFields>
 
               <div class="atd-field">
                 <label for="anot-profissional">{{ t('acessos.anotacao.profissional') }}</label>
@@ -1542,7 +1638,17 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   </li>
                 </ul>
 
-                <label v-if="anexosForm.length < MAX_ANEXOS" class="atd-file-cta">
+                <small v-if="leituraReceita.reservados > 0" class="atd-file-hint">
+                  {{
+                    t(
+                      'acessos.leituraReceita.anexosDaReceita',
+                      { n: leituraReceita.reservados },
+                      leituraReceita.reservados,
+                    )
+                  }}
+                </small>
+
+                <label v-if="anexosOcupados < MAX_ANEXOS" class="atd-file-cta">
                   <input
                     ref="fileInput"
                     type="file"

@@ -620,4 +620,57 @@ export type NovaAnotacaoPayload = {
   anexos?: File[]
   /** Mesmo length de `anexos`; `null` = sem classificação. */
   tiposDocumento?: (TipoDocumentoAnexo | null)[]
+  /**
+   * Leitura de receita com IA usada nesta anotação. A API copia os arquivos dela como anexo
+   * "Receita Médica" (contam no limite de 3): o arquivo da receita não vai de novo em `anexos`.
+   */
+  leituraReceitaId?: string
+}
+
+// ------------------------------------------------------------- leitura de receita com IA
+
+export type StatusLeituraReceita =
+  | 'PROCESSANDO'
+  | 'AGUARDANDO_CONFIRMACAO'
+  | 'CONFIRMADA'
+  | 'DESCARTADA'
+  | 'DESFEITA'
+  | 'FALHOU'
+
+/** Confiança da IA em cada campo de um item; `null` = não leu o campo. */
+export type ConfiancaLeitura = 'ALTA' | 'MEDIA' | 'BAIXA'
+
+export type ConfiancaItemLido = Partial<
+  Record<'nome' | 'dose' | 'frequencia' | 'duracaoDias', ConfiancaLeitura | null>
+>
+
+/** Remédio lido, já no formato do formulário de prescrição (`unidade` e via no idioma do pedido). */
+export type ItemFormularioLeitura = {
+  nome: string
+  dose: string | null
+  unidade: string | null
+  frequencia: string | null
+  duracaoDias: number | null
+  instrucoes: string | null
+}
+
+/** `POST .../leitura-receita`: 201 nova, ou 200 com `reaproveitada` (mesmo arquivo, mesmo acesso). */
+export type LeituraReceitaCriada = {
+  id: string
+  status: StatusLeituraReceita
+  reaproveitada?: boolean
+}
+
+/** `GET .../leitura-receita/:leituraId`. Texto lido de imagem: sempre texto puro, nunca HTML. */
+export type LeituraReceitaParceiro = {
+  id: string
+  status: StatusLeituraReceita
+  anotacaoId: string | null
+  motivoFalha: string | null
+  mensagemFalha: string | null
+  itensFormulario: ItemFormularioLeitura[]
+  /** Mesmo índice de `itensFormulario`. */
+  confianca: (ConfiancaItemLido | null)[]
+  avisos: { codigo: string; mensagem: string }[]
+  arquivos: { ordem: number; mimetype: string; url: string }[]
 }

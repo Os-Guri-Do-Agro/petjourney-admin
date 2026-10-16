@@ -7,6 +7,8 @@ import type {
   CompartilhamentoDetalhe,
   CompartilhamentoResumo,
   CompartilhamentosQuery,
+  LeituraReceitaCriada,
+  LeituraReceitaParceiro,
   NovaAnotacaoPayload,
 } from './types'
 
@@ -149,6 +151,11 @@ export function criarAnotacao(id: string, payload: NovaAnotacaoPayload, params?:
     }
   }
 
+  // A API copia os arquivos da leitura como anexo "Receita Médica"; eles não vão de novo aqui.
+  if (payload.leituraReceitaId) {
+    form.set('leituraReceitaId', payload.leituraReceitaId)
+  }
+
   return unwrap(
     apiFetch<ApiEnvelope<Anotacao>>(
       `${BASE}/${id}/anotacoes${buildQuery({ parceiroId: params?.parceiroId })}`,
@@ -156,6 +163,38 @@ export function criarAnotacao(id: string, payload: NovaAnotacaoPayload, params?:
         method: 'POST',
         body: form,
       },
+    ),
+  )
+}
+
+/**
+ * Manda a receita para a IA ler (só acesso de CONSULTA). Multipart com `arquivos`: 1 a 3
+ * imagens (JPEG, PNG, WebP) ou 1 PDF. O mesmo arquivo no mesmo acesso, ainda em leitura ou
+ * esperando o envio da anotação, volta 200 com `reaproveitada` e o mesmo id.
+ */
+export function criarLeituraReceita(id: string, arquivos: File[], params?: ParceiroQuery) {
+  const form = new FormData()
+
+  for (const arquivo of arquivos) {
+    form.append('arquivos', arquivo)
+  }
+
+  return unwrap(
+    apiFetch<ApiEnvelope<LeituraReceitaCriada>>(
+      `${BASE}/${id}/leitura-receita${buildQuery({ parceiroId: params?.parceiroId })}`,
+      {
+        method: 'POST',
+        body: form,
+      },
+    ),
+  )
+}
+
+/** Situação da leitura; em `AGUARDANDO_CONFIRMACAO`, os remédios no formato do formulário. */
+export function getLeituraReceita(id: string, leituraId: string, params?: ParceiroQuery) {
+  return unwrap(
+    apiFetch<ApiEnvelope<LeituraReceitaParceiro>>(
+      `${BASE}/${id}/leitura-receita/${leituraId}${buildQuery({ parceiroId: params?.parceiroId })}`,
     ),
   )
 }

@@ -21,6 +21,8 @@ import {
   PESO_MIN_KG,
   tipoAceitaCampo,
   type AnotacaoEstruturadaForm,
+  type CampoPrescricaoConferivel,
+  type PrescricaoItemForm,
 } from '@/utils/parceiro/anotacao-estruturada'
 
 /**
@@ -71,6 +73,26 @@ function addPrescricao() {
 
 function removePrescricao(indice: number) {
   form.value.prescricaoItens.splice(indice, 1)
+}
+
+/** Campo vindo da leitura com IA sem confiança alta, ainda não mexido pelo profissional. */
+function aConferir(item: PrescricaoItemForm, campo: CampoPrescricaoConferivel) {
+  return Boolean(item.conferir?.[campo])
+}
+
+/**
+ * Campo marcado que a leitura deixou vazio não mostra o exemplo: dentro do destaque, "1x ao dia"
+ * parece valor lido, e o profissional deixaria passar a frequência em branco.
+ */
+function semExemplo(item: PrescricaoItemForm, campo: CampoPrescricaoConferivel, exemplo: string) {
+  return aConferir(item, campo) ? undefined : exemplo
+}
+
+/** Editar o campo é conferir: a marca sai, como na anamnese por voz aprovada. */
+function conferido(item: PrescricaoItemForm, campo: CampoPrescricaoConferivel) {
+  if (item.conferir?.[campo]) {
+    item.conferir[campo] = false
+  }
 }
 
 function addExame() {
@@ -178,6 +200,9 @@ function removeExame(indice: number) {
           />
         </div>
 
+        <!-- Ler receita com IA (só consulta, no portal): quem decide é a tela. -->
+        <slot name="prescricao-topo" />
+
         <p v-if="!form.prescricaoItens.length" class="est__list-empty">
           {{ t('acessos.estruturada.prescricao.empty') }}
         </p>
@@ -200,19 +225,30 @@ function removeExame(indice: number) {
               />
             </div>
 
-            <div class="est__field">
+            <div class="est__field" :class="{ 'est__field--conferir': aConferir(item, 'nome') }">
               <label :for="`est-presc-nome-${index}`">
                 {{ t('acessos.estruturada.prescricao.nome') }}
+                <span
+                  v-if="aConferir(item, 'nome')"
+                  class="est__conferir"
+                  :title="t('acessos.leituraReceita.conferirTitulo')"
+                >
+                  <i class="ph ph-eye" aria-hidden="true" />
+                  {{ t('acessos.leituraReceita.confira') }}
+                </span>
               </label>
               <InputText
                 :id="`est-presc-nome-${index}`"
                 v-model="item.nome"
                 size="small"
+                @update:model-value="conferido(item, 'nome')"
                 :disabled="disabled"
                 :maxlength="LIMITES_PRESCRICAO.nome"
                 :invalid="Boolean(erroDe(`prescricaoItens.${index}.nome`))"
                 :aria-describedby="describedBy(`prescricaoItens.${index}.nome`)"
-                :placeholder="t('acessos.estruturada.prescricao.nomePlaceholder')"
+                :placeholder="
+                  semExemplo(item, 'nome', t('acessos.estruturada.prescricao.nomePlaceholder'))
+                "
               />
               <small
                 v-if="erroDe(`prescricaoItens.${index}.nome`)"
@@ -225,17 +261,26 @@ function removeExame(indice: number) {
             </div>
 
             <div class="est__row">
-              <div class="est__field">
+              <div class="est__field" :class="{ 'est__field--conferir': aConferir(item, 'dose') }">
                 <label :for="`est-presc-dose-${index}`">
                   {{ t('acessos.estruturada.prescricao.dose') }}
+                  <span
+                    v-if="aConferir(item, 'dose')"
+                    class="est__conferir"
+                    :title="t('acessos.leituraReceita.conferirTitulo')"
+                  >
+                    <i class="ph ph-eye" aria-hidden="true" />
+                    {{ t('acessos.leituraReceita.confira') }}
+                  </span>
                 </label>
                 <InputText
                   :id="`est-presc-dose-${index}`"
                   v-model="item.dose"
                   size="small"
+                  @update:model-value="conferido(item, 'dose')"
                   :disabled="disabled"
                   :maxlength="LIMITES_PRESCRICAO.dose"
-                  placeholder="10"
+                  :placeholder="semExemplo(item, 'dose', '10')"
                 />
               </div>
 
@@ -255,41 +300,71 @@ function removeExame(indice: number) {
             </div>
 
             <div class="est__row">
-              <div class="est__field">
+              <div
+                class="est__field"
+                :class="{ 'est__field--conferir': aConferir(item, 'frequencia') }"
+              >
                 <label :for="`est-presc-freq-${index}`">
                   {{ t('acessos.estruturada.prescricao.frequencia') }}
+                  <span
+                    v-if="aConferir(item, 'frequencia')"
+                    class="est__conferir"
+                    :title="t('acessos.leituraReceita.conferirTitulo')"
+                  >
+                    <i class="ph ph-eye" aria-hidden="true" />
+                    {{ t('acessos.leituraReceita.confira') }}
+                  </span>
                 </label>
                 <InputText
                   :id="`est-presc-freq-${index}`"
                   v-model="item.frequencia"
                   size="small"
+                  @update:model-value="conferido(item, 'frequencia')"
                   :disabled="disabled"
                   :maxlength="LIMITES_PRESCRICAO.frequencia"
                   :aria-describedby="
                     describedBy(`prescricaoItens.${index}.frequencia`, `est-freq-hint-${index}`)
                   "
-                  :placeholder="t('acessos.estruturada.prescricao.frequenciaPlaceholder')"
+                  :placeholder="
+                    semExemplo(
+                      item,
+                      'frequencia',
+                      t('acessos.estruturada.prescricao.frequenciaPlaceholder'),
+                    )
+                  "
                 />
                 <small :id="`est-freq-hint-${index}`" class="est__hint">
                   {{ t('acessos.estruturada.prescricao.frequenciaHint') }}
                 </small>
               </div>
 
-              <div class="est__field">
+              <div
+                class="est__field"
+                :class="{ 'est__field--conferir': aConferir(item, 'duracaoDias') }"
+              >
                 <label :for="`est-presc-duracao-${index}`">
                   {{ t('acessos.estruturada.prescricao.duracaoDias') }}
+                  <span
+                    v-if="aConferir(item, 'duracaoDias')"
+                    class="est__conferir"
+                    :title="t('acessos.leituraReceita.conferirTitulo')"
+                  >
+                    <i class="ph ph-eye" aria-hidden="true" />
+                    {{ t('acessos.leituraReceita.confira') }}
+                  </span>
                 </label>
                 <InputNumber
                   v-model="item.duracaoDias"
                   :input-id="`est-presc-duracao-${index}`"
                   size="small"
+                  @update:model-value="conferido(item, 'duracaoDias')"
                   :disabled="disabled"
                   :locale="numberLocale"
                   :min="DURACAO_MIN_DIAS"
                   :max="DURACAO_MAX_DIAS"
                   :invalid="Boolean(erroDe(`prescricaoItens.${index}.duracaoDias`))"
                   :aria-describedby="describedBy(`prescricaoItens.${index}.duracaoDias`)"
-                  placeholder="7"
+                  :placeholder="semExemplo(item, 'duracaoDias', '7')"
                 />
                 <small
                   v-if="erroDe(`prescricaoItens.${index}.duracaoDias`)"
@@ -548,9 +623,7 @@ function removeExame(indice: number) {
     <template v-else-if="isHotel">
       <div class="est__row">
         <div class="est__field">
-          <label for="est-dataEntrada">{{
-            t('acessos.estruturada.campos.dataEntrada')
-          }}</label>
+          <label for="est-dataEntrada">{{ t('acessos.estruturada.campos.dataEntrada') }}</label>
           <InputText
             id="est-dataEntrada"
             v-model="form.dataEntrada"
@@ -722,6 +795,27 @@ function removeExame(indice: number) {
 .est__field label {
   color: var(--partner-text);
   font-size: 0.76rem;
+  font-weight: 700;
+}
+
+/*
+ * Campo que a leitura com IA propôs sem confiança alta: a pervinca da casa, "a máquina propôs
+ * e ninguém aprovou ainda" (DESIGN.md, Secondary). Editado, perde a cor e vira anotação.
+ */
+.est__field--conferir :deep(.p-inputtext) {
+  border-color: var(--clinic-maquina-line);
+  background: var(--clinic-maquina-bg);
+  /* No escuro o campo comum nasce claro (preset do PrimeVue); o da pervinca não: a tinta acompanha. */
+  color: var(--partner-text);
+}
+
+.est__conferir {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-inline-start: 0.35rem;
+  color: var(--clinic-maquina);
+  font-size: 0.68rem;
   font-weight: 700;
 }
 

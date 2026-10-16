@@ -121,6 +121,9 @@ export function tipoAceitaEstruturado(tipo: TipoServicoPrestador): boolean {
 
 // ------------------------------------------------------------------ formulário
 
+/** Campos que a leitura de receita com IA marca para conferir quando não leu com confiança alta. */
+export type CampoPrescricaoConferivel = 'nome' | 'dose' | 'frequencia' | 'duracaoDias'
+
 export type PrescricaoItemForm = {
   nome: string
   dose: string
@@ -128,6 +131,11 @@ export type PrescricaoItemForm = {
   frequencia: string
   duracaoDias: number | null
   instrucoes: string
+  /**
+   * Item vindo da leitura com IA: campos que a máquina propôs sem confiança alta. Editar o
+   * campo tira a marca (o profissional conferiu). Nunca vai para o payload.
+   */
+  conferir?: Partial<Record<CampoPrescricaoConferivel, boolean>>
 }
 
 export type ExameSolicitadoForm = {
@@ -380,7 +388,7 @@ export function validarAnotacaoEstruturada(
 }
 
 /** Item em branco é linha que o prestador abriu e não usou: descartada, não é erro. */
-function itemPrescricaoPreenchido(item: PrescricaoItemForm): boolean {
+export function itemPrescricaoPreenchido(item: PrescricaoItemForm): boolean {
   return Boolean(
     item.nome.trim() ||
     item.dose.trim() ||
