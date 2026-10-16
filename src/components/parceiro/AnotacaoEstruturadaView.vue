@@ -100,33 +100,37 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
 
     <div v-if="anotacao.prescricaoItens?.length" class="estv__block">
       <h4>
-        <i class="ph ph-tray" aria-hidden="true" />
+        <i class="ph ph-pill" aria-hidden="true" />
         {{ t('acessos.estruturada.prescricao.title') }}
       </h4>
       <ul class="estv__items">
         <li v-for="item in anotacao.prescricaoItens" :key="item.id">
-          <strong>{{ item.nome }}</strong>
-          <span v-if="detalhesPrescricao(item).length" class="estv__meta">
-            {{ detalhesPrescricao(item).join(' · ') }}
-          </span>
+          <div class="estv__linha">
+            <strong>{{ item.nome }}</strong>
+            <span v-if="detalhesPrescricao(item).length" class="estv__meta">
+              {{ detalhesPrescricao(item).join(' · ') }}
+            </span>
+          </div>
+          <p v-if="item.instrucoes" class="estv__note">{{ item.instrucoes }}</p>
           <span v-if="!item.frequencia" class="estv__warn">
-            <i class="ph ph-info" aria-hidden="true" />
+            <i class="ph ph-warning" aria-hidden="true" />
             {{ t('acessos.estruturada.view.semFrequencia') }}
           </span>
-          <p v-if="item.instrucoes" class="estv__note">{{ item.instrucoes }}</p>
         </li>
       </ul>
     </div>
 
     <div v-if="anotacao.examesSolicitados?.length" class="estv__block">
       <h4>
-        <i class="ph ph-magnifying-glass" aria-hidden="true" />
+        <i class="ph ph-flask" aria-hidden="true" />
         {{ t('acessos.estruturada.exames.title') }}
       </h4>
       <ul class="estv__items">
         <li v-for="item in anotacao.examesSolicitados" :key="item.id">
-          <strong>{{ item.nome }}</strong>
-          <p v-if="item.observacao" class="estv__note">{{ item.observacao }}</p>
+          <div class="estv__linha">
+            <strong>{{ item.nome }}</strong>
+            <span v-if="item.observacao" class="estv__meta">{{ item.observacao }}</span>
+          </div>
         </li>
       </ul>
     </div>
@@ -134,44 +138,45 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
 </template>
 
 <style scoped>
+/* Lido, não preenchido: rótulo pequeno em cima, valor embaixo, sem caixa em volta. */
 .estv {
+  container: estv / inline-size;
   display: grid;
-  gap: 0.65rem;
-  padding-top: 0.65rem;
-  border-top: 1px solid color-mix(in srgb, var(--partner-line) 88%, transparent);
+  gap: 1rem;
 }
 
+/* Rótulo à esquerda, valor à direita, como numa ficha: lê em coluna sem empilhar altura. */
 .estv__facts {
   display: grid;
   gap: 0.45rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 0;
 }
 
 .estv__fact {
   display: grid;
-  gap: 0.15rem;
+  grid-template-columns: 10.5rem minmax(0, 1fr);
+  gap: 1rem;
   min-width: 0;
-  padding: 0.5rem 0.65rem;
-  border-radius: 0.7rem;
-  background: color-mix(in srgb, var(--partner-surface) 72%, var(--partner-card));
-}
-
-.estv__fact--wide {
-  grid-column: 1 / -1;
 }
 
 .estv__fact dt {
-  color: var(--partner-faint);
-  font-size: 0.75rem;
-  font-weight: 750;
+  padding-top: 0.1rem;
+  color: color-mix(in srgb, var(--hc-tinta) 55%, var(--hc-cartao));
+  font-size: 0.76rem;
+  font-weight: 650;
+}
+
+@container estv (max-width: 30rem) {
+  .estv__fact {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.1rem;
+  }
 }
 
 .estv__fact dd {
   margin: 0;
-  color: var(--partner-text);
-  font-size: 0.86rem;
-  font-weight: 550;
+  color: var(--hc-tinta);
+  font-size: 0.88rem;
   line-height: 1.5;
   white-space: pre-line;
   overflow-wrap: anywhere;
@@ -179,78 +184,78 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
 
 .estv__block {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.4rem;
 }
 
 .estv__block h4 {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   margin: 0;
-  color: var(--partner-faint);
-  font-size: 0.75rem;
-  font-weight: 750;
+  color: color-mix(in srgb, var(--hc-tinta) 55%, var(--hc-cartao));
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .estv__block h4 i {
-  color: var(--partner-primary-strong);
-  font-size: 0.68rem;
+  color: var(--hc-marca);
+  font-size: 0.85rem;
 }
 
 .estv__items {
   display: grid;
-  gap: 0.35rem;
   margin: 0;
   padding: 0;
+  border: 1px solid var(--hc-borda);
+  border-radius: 0.7rem;
   list-style: none;
 }
 
 .estv__items li {
   display: grid;
   gap: 0.2rem;
-  padding: 0.5rem 0.65rem;
-  border: 1px solid color-mix(in srgb, var(--partner-line) 90%, transparent);
-  border-radius: 0.7rem;
-  background: var(--partner-card);
+  padding: 0.6rem 0.8rem;
 }
 
-.estv__items strong {
-  color: var(--partner-text);
-  font-size: 0.84rem;
+.estv__items li + li {
+  border-top: 1px solid var(--hc-linha);
+}
+
+.estv__linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.75rem;
+}
+
+.estv__linha strong {
+  color: var(--hc-tinta);
+  font-size: 0.88rem;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .estv__meta {
-  color: var(--partner-muted);
-  font-size: 0.76rem;
-  font-weight: 600;
+  color: color-mix(in srgb, var(--hc-tinta) 68%, var(--hc-cartao));
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .estv__warn {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  color: var(--partner-amber-text);
+  color: var(--hc-pessego-tinta);
   font-size: 0.74rem;
-  font-weight: 650;
-}
-
-.estv__warn i {
-  font-size: 0.7rem;
+  font-weight: 600;
 }
 
 .estv__note {
-  margin: 0.1rem 0 0;
-  color: var(--partner-muted);
-  font-size: 0.78rem;
+  margin: 0;
+  color: color-mix(in srgb, var(--hc-tinta) 68%, var(--hc-cartao));
+  font-size: 0.8rem;
   line-height: 1.45;
   white-space: pre-line;
-}
-
-@media (max-width: 640px) {
-  .estv__facts {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 </style>

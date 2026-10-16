@@ -5,7 +5,7 @@ import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
 import { PhHeart } from '@phosphor-icons/vue'
 import { useToast } from 'primevue/usetoast'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -15,7 +15,6 @@ import LerReceitaComIA from '@/components/parceiro/LerReceitaComIA.vue'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
 import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
-import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import { useAgora } from '@/composables/useAgora'
 import { useLeituraReceitaParceiro } from '@/composables/useLeituraReceitaParceiro'
 import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
@@ -34,7 +33,6 @@ import type {
   Anotacao,
   BlocoSnapshot,
   CompartilhamentoDetalhe,
-  StatusCompartilhamento,
   TipoDocumentoAnexo,
 } from '@/service/parceiro/types'
 import { calcularTempoRestante } from '@/utils/format/expiracao'
@@ -111,12 +109,20 @@ const anotacaoForm = reactive({
 /** Prefixo das chaves de rotulo de area, usado no chip e na linha do autor. */
 const SUFIXO_ESPECIALIDADE = 'acessos.especialidade.'
 
-/** A lista fechada mais "Outra": fora dela, o valor e texto livre do parceiro. */
-const opcoesEspecialidade = [...ESPECIALIDADES, ESPECIALIDADE_OUTRA] as const
+/**
+ * A lista fechada mais "Outra": fora dela, o valor e texto livre do parceiro. Num Select, e nao
+ * em treze chips: o campo e opcional e os chips ocupavam quatro linhas da folha.
+ */
+const opcoesEspecialidade = computed(() =>
+  [...ESPECIALIDADES, ESPECIALIDADE_OUTRA].map((value) => ({
+    value,
+    label: t(SUFIXO_ESPECIALIDADE + value),
+  })),
+)
 
-/** Clicar de novo limpa: o campo e opcional e sem isso nao ha como desfazer a escolha. */
-function selecionarEspecialidade(opcao: (typeof opcoesEspecialidade)[number]) {
-  anotacaoForm.especialidade = anotacaoForm.especialidade === opcao ? null : opcao
+/** O X do Select limpa: o campo e opcional e precisa de volta ao vazio. */
+function escolherEspecialidade(valor: EscolhaEspecialidade) {
+  anotacaoForm.especialidade = valor ?? null
 
   if (anotacaoForm.especialidade !== ESPECIALIDADE_OUTRA) {
     anotacaoForm.especialidadeOutra = ''
@@ -311,17 +317,24 @@ function textoMotivo(bloco: BlocoSnapshot, motivo: MotivoVazioRender) {
 
 /** Categoria compartilhada com bloco vazio continua rendendo seção — com o motivo. */
 const snapshotListSections = computed(() =>
-  montarBlocosLista(fonteSnapshot.value).map((bloco) => ({
-    id: bloco.id,
-    title: t(`acessos.snapshot.${bloco.id}`),
-    icon: APARENCIA_BLOCO[bloco.id].icon,
-    tone: APARENCIA_BLOCO[bloco.id].tone,
-    items: bloco.items.map((item) => ({
+  montarBlocosLista(fonteSnapshot.value).map((bloco) => {
+    const items = bloco.items.map((item) => ({
       ...rotuloItem(item),
       destaque: item.destaque,
-    })),
-    vazioTexto: bloco.motivo ? textoMotivo(bloco.id, bloco.motivo) : '',
-  })),
+    }))
+
+    return {
+      id: bloco.id,
+      title: t(`acessos.snapshot.${bloco.id}`),
+      icon: APARENCIA_BLOCO[bloco.id].icon,
+      // Alergia sem nenhuma registrada não é alerta: o tom quente só com item na lista.
+      tone: items.length ? APARENCIA_BLOCO[bloco.id].tone : 'default',
+      items,
+      /** Linha recolhida mostra os primeiros nomes: dá para ler sem abrir. */
+      resumo: items.map((item) => item.titulo).join(', '),
+      vazioTexto: bloco.motivo ? textoMotivo(bloco.id, bloco.motivo) : '',
+    }
+  }),
 )
 
 /**
@@ -508,16 +521,6 @@ const tiposDocumentoOptions = computed(() =>
   TIPOS_DOCUMENTO.map((value) => ({ value, label: value })),
 )
 
-function statusBadge(status: StatusCompartilhamento) {
-  const map: Record<StatusCompartilhamento, 'ATIVO' | 'SUSPENSO' | 'REJEITADO'> = {
-    ATIVO: 'ATIVO',
-    EXPIRADO: 'SUSPENSO',
-    REVOGADO: 'REJEITADO',
-  }
-
-  return map[status]
-}
-
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString(INTL_LOCALE[locale.value as Locale], {
     dateStyle: 'medium',
@@ -605,6 +608,16 @@ async function loadDetalhe(silencioso = false) {
 
 function voltar() {
   void router.push('/parceiro/acessos')
+}
+
+/**
+ * Do resumo vazio para a folha. Na tela estreita troca de aba; na larga a folha já está ao
+ * lado, e a troca sozinha não faria nada visível: o foco no primeiro campo é que leva até ela.
+ */
+async function irParaFolha() {
+  setTab('anotacoes')
+  await nextTick()
+  document.getElementById('anot-servico')?.focus()
 }
 
 function onAnexosSelected(event: Event) {
@@ -950,6 +963,52 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
     guidance
     @retry="loadDetalhe()"
   >
+    <!-- A identidade do pet é o título da página: antes ela aparecia duas vezes, no título e
+         num cartão logo abaixo, e o cartão empurrava o trabalho para baixo da dobra. -->
+    <template #cabecalho>
+      <div v-if="detalhe" class="atd-id" :data-status="detalhe.status">
+        <span class="atd-id__foto">
+          <img v-if="detalhe.petFoto" :src="detalhe.petFoto" :alt="detalhe.petNome" />
+          <i v-else class="ph ph-paw-print" aria-hidden="true" />
+        </span>
+
+        <div class="atd-id__texto">
+          <p class="atd-id__sobre">
+            {{ t('acessos.detalhe.subtitle') }}
+            <span aria-hidden="true">·</span>
+            {{ servicoLabel }}
+          </p>
+          <div class="atd-id__linha">
+            <h1 class="atd-id__nome">{{ detalhe.petNome }}</h1>
+            <span class="atd-id__status" :data-status="detalhe.status">
+              <i :class="isAtivo ? 'ph ph-check-circle' : 'ph ph-lock-simple'" aria-hidden="true" />
+              {{ t(`acessos.list.status.${detalhe.status}`) }}
+            </span>
+            <span v-if="isAtivo" class="atd-id__prazo">
+              <i class="ph ph-hourglass-medium" aria-hidden="true" />
+              {{ expiraLabel(detalhe.expiraEm) }}
+            </span>
+          </div>
+          <p class="atd-id__meta" :aria-label="t('acessos.detalhe.metaAria')">
+            <span>{{ detalhe.especieLabel }}</span>
+            <span v-if="isAtivo && detalhe.petCastrado != null">
+              {{ detalhe.petCastrado ? t('acessos.pet.castrado') : t('acessos.pet.naoCastrado') }}
+            </span>
+            <span v-if="pesoKg != null" :title="t('acessos.snapshot.peso')">
+              {{ pesoKgLegivel }} kg
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div v-else class="atd-id atd-id--carregando">
+        <div class="atd-id__texto">
+          <p class="atd-id__sobre">{{ t('acessos.detalhe.subtitle') }}</p>
+          <h1 class="atd-id__nome">{{ t('acessos.detalhe.title') }}</h1>
+        </div>
+      </div>
+    </template>
+
     <template #actions>
       <Button
         :label="t('acessos.detalhe.back')"
@@ -965,57 +1024,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
     <PartnerOperabilityBanner cover-suspended />
 
     <template v-if="detalhe">
-      <!-- Identidade do pet -->
-      <section class="atd-hero" :data-status="detalhe.status">
-        <div class="atd-hero__pet">
-          <img
-            v-if="detalhe.petFoto"
-            :src="detalhe.petFoto"
-            :alt="detalhe.petNome"
-            class="atd-hero__foto"
-          />
-          <span v-else class="atd-hero__foto atd-hero__foto--empty" aria-hidden="true">
-            <i class="ph ph-heart" />
-          </span>
-
-          <div class="atd-hero__identity">
-            <div class="atd-hero__title-row">
-              <strong>{{ detalhe.petNome }}</strong>
-              <PartnerStatusBadge :status="statusBadge(detalhe.status)" />
-            </div>
-
-            <p class="atd-hero__subtitle">
-              {{ detalhe.especieLabel }}
-              <template v-if="isAtivo && detalhe.petCastrado != null">
-                ·
-                {{ detalhe.petCastrado ? t('acessos.pet.castrado') : t('acessos.pet.naoCastrado') }}
-              </template>
-            </p>
-
-            <div class="atd-hero__tags" :aria-label="t('acessos.detalhe.metaAria')">
-              <span class="atd-hero__tag atd-hero__tag--service">
-                <i class="ph ph-briefcase" aria-hidden="true" />
-                {{ servicoLabel }}
-              </span>
-              <span v-if="isAtivo" class="atd-hero__tag atd-hero__tag--expiry">
-                <i class="ph ph-clock" aria-hidden="true" />
-                {{ expiraLabel(detalhe.expiraEm) }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <dl v-if="pesoKg != null" class="atd-hero__facts">
-          <div class="atd-hero__fact">
-            <dt>{{ t('acessos.snapshot.peso') }}</dt>
-            <dd>{{ pesoKgLegivel }} kg</dd>
-          </div>
-        </dl>
-      </section>
-
-      <!-- Encerrado -->
-      <section v-if="!isAtivo" class="atd-closed" role="status">
-        <i class="ph ph-lock" aria-hidden="true" />
+      <section v-if="!isAtivo" class="atd-encerrado" role="status">
+        <i class="ph ph-lock-simple" aria-hidden="true" />
         <div>
           <strong>{{ t('acessos.encerrado.title') }}</strong>
           <p>
@@ -1028,513 +1038,389 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
         </div>
       </section>
 
-      <PartnerSectionTabs
-        :tabs="tabs"
-        :active-tab="displayTab"
-        :aria-label="tabsAriaLabel"
-        @select="setTab($event as DetalheTab)"
-      />
+      <!--
+        A mesa: a ficha do pet ao lado da folha de anotação. Antes eram duas abas, e quem
+        prescrevia escrevia o remédio sem ver a alergia, que ficava na outra aba. Na largura que
+        cabe as duas colunas (container, não viewport: o menu lateral aberto ou fechado muda
+        a conta), as abas somem; na estreita voltam, com as mesmas duas metades.
+      -->
+      <div class="atd-mesa" :data-aba="displayTab" :data-ficha="isAtivo ? 'sim' : 'nao'">
+        <PartnerSectionTabs
+          v-if="isAtivo"
+          class="atd-mesa__abas"
+          :tabs="tabs"
+          :active-tab="displayTab"
+          :aria-label="tabsAriaLabel"
+          @select="setTab($event as DetalheTab)"
+        />
 
-      <!-- Aba: resumo do pet -->
-      <div v-if="displayTab === 'resumo'" class="atd-panel atd-resumo" role="tabpanel">
-        <!-- Em atendimento com estadia o quadro muda no meio: saber que o responsável
-             mexeu no resumo depois de entregar é o que avisa que a leitura de ontem
-             pode não valer mais. -->
-        <p
-          v-if="carimbo"
-          class="atd-stamp"
-          :data-atualizado="carimbo.atualizado ? 'true' : 'false'"
-        >
-          <i
-            :class="carimbo.atualizado ? 'ph ph-clock-counter-clockwise' : 'ph ph-clock'"
-            aria-hidden="true"
-          />
-          <span>{{
-            carimbo.atualizado
-              ? t('acessos.snapshot.carimboAtualizado', {
-                  data: formatDateTime(carimbo.data),
-                })
-              : t('acessos.snapshot.carimbo', { data: formatDateTime(carimbo.data) })
-          }}</span>
-        </p>
-
-        <!-- Responsável pode liberar o acesso sem marcar nenhuma categoria: a aba existe
-             e não tem o que mostrar. Explica o porquê e empurra para a ação útil. -->
-        <section v-if="resumoVazio" class="atd-empty">
-          <span class="atd-empty__icon" aria-hidden="true">
-            <i class="ph ph-lock-open" />
-          </span>
-          <strong>{{ t('acessos.snapshot.emptyTitle') }}</strong>
-          <p>{{ t('acessos.snapshot.emptyBody', { pet: detalhe.petNome }) }}</p>
-          <Button
-            :label="t('acessos.snapshot.emptyCta')"
-            icon="ph ph-pencil-simple"
-            size="small"
-            @click="setTab('anotacoes')"
-          />
-        </section>
-
-        <div v-if="mensagemTutor || showObservacoesTutor" class="atd-resumo__context">
-          <section v-if="mensagemTutor" class="atd-callout">
-            <header class="atd-callout__head">
-              <span class="atd-callout__icon" aria-hidden="true">
-                <i class="ph ph-chat-circle" />
-              </span>
-              <h3>{{ t('acessos.detalhe.mensagemTutor') }}</h3>
-            </header>
-            <p>{{ mensagemTutor }}</p>
-          </section>
-
-          <section v-if="showObservacoesTutor" class="atd-callout atd-callout--soft">
-            <header class="atd-callout__head">
-              <span class="atd-callout__icon" aria-hidden="true">
-                <i class="ph ph-info" />
-              </span>
-              <h3>{{ t('acessos.snapshot.observacoes') }}</h3>
-            </header>
-            <p>{{ observacoesTutor }}</p>
-          </section>
-        </div>
-
-        <!-- Tratamento contínuo (Parte 16), ACIMA das listas clínicas: é o remédio de
-             todo dia, e o item cuja falha tem dano imediato para quem vai cuidar do pet
-             sem conviver com ele. -->
-        <section
-          v-if="tratamentosEstado !== 'OCULTO'"
-          class="atd-diario"
-          aria-labelledby="atd-trat-title"
-        >
-          <header class="atd-docs__head">
-            <div>
-              <h2 id="atd-trat-title">{{ t('acessos.tratamentos.title') }}</h2>
-              <p v-if="isGuidanceVisible">{{ t('acessos.tratamentos.lede') }}</p>
-            </div>
-            <span v-if="tratamentosContinuos.length" class="atd-docs__count">{{
-              t(
-                'acessos.tratamentos.count',
-                { n: tratamentosContinuos.length },
-                tratamentosContinuos.length,
-              )
-            }}</span>
-          </header>
-
-          <p v-if="tratamentosVazioTexto" class="atd-bloco-vazio">{{ tratamentosVazioTexto }}</p>
-
-          <ul v-else class="atd-trat__list">
-            <li v-for="item in tratamentosContinuos" :key="item.key" class="atd-trat__entry">
-              <header class="atd-trat__head">
-                <PhHeart weight="fill" aria-hidden="true" />
-                <strong>{{ item.titulo }}</strong>
-              </header>
-
-              <p v-if="item.posologia" class="atd-trat__posologia">{{ item.posologia }}</p>
-
-              <dl v-if="item.campos.length" class="atd-trat__grid">
-                <div v-for="campo in item.campos" :key="campo.chave">
-                  <dt>{{ campo.label }}</dt>
-                  <dd>{{ campo.valor }}</dd>
-                </div>
-              </dl>
-
-              <div v-if="item.observacoes" class="atd-trat__text">
-                <span>{{ t('acessos.tratamentos.campos.observacoes') }}</span>
-                <p>{{ item.observacoes }}</p>
-              </div>
-            </li>
-          </ul>
-        </section>
-
-        <section
-          v-if="snapshotListSections.length"
-          class="atd-clinical"
-          aria-labelledby="atd-clinical-title"
-        >
-          <header class="atd-clinical__head">
-            <div>
-              <h2 id="atd-clinical-title">{{ t('acessos.snapshot.clinicalTitle') }}</h2>
-              <p>{{ t('acessos.snapshot.clinicalLede') }}</p>
-            </div>
-            <span class="atd-clinical__count">{{
-              t(
-                'acessos.snapshot.sectionsCount',
-                { n: snapshotListSections.length },
-                snapshotListSections.length,
-              )
-            }}</span>
-          </header>
-
-          <div class="atd-folds">
-            <section
-              v-for="section in snapshotListSections"
-              :key="section.id"
-              class="atd-fold"
-              :data-tone="section.tone"
-              :data-open="isSectionOpen(section.id) ? 'true' : 'false'"
-            >
-              <h3 class="atd-fold__heading">
-                <Button
-                  type="button"
-                  class="atd-fold__trigger"
-                  :aria-expanded="isSectionOpen(section.id)"
-                  :aria-controls="`atd-fold-${section.id}`"
-                  @click="toggleSection(section.id)"
-                >
-                  <span class="atd-fold__icon" aria-hidden="true">
-                    <i :class="section.icon" />
-                  </span>
-                  <span class="atd-fold__copy">
-                    <strong>{{ section.title }}</strong>
-                    <small>{{
-                      section.items.length
-                        ? t(
-                            'acessos.snapshot.itemsCount',
-                            { n: section.items.length },
-                            section.items.length,
-                          )
-                        : t('acessos.snapshot.semItens')
-                    }}</small>
-                  </span>
-                  <i
-                    class="ph atd-fold__chevron"
-                    :class="isSectionOpen(section.id) ? 'ph-caret-up' : 'ph-caret-down'"
-                    aria-hidden="true"
-                  />
-                </Button>
-              </h3>
-
-              <div
-                v-show="isSectionOpen(section.id)"
-                :id="`atd-fold-${section.id}`"
-                class="atd-fold__body"
+        <div class="atd-mesa__grade">
+          <!-- Ficha do pet -->
+          <aside v-if="isAtivo" class="atd-ficha" aria-labelledby="atd-ficha-titulo">
+            <header class="atd-ficha__cab">
+              <h2 id="atd-ficha-titulo">{{ t('acessos.detalhe.tabs.resumo.label') }}</h2>
+              <!-- Em atendimento com estadia o quadro muda no meio: saber que o responsável
+                   mexeu no resumo depois de entregar é o que avisa que a leitura de ontem
+                   pode não valer mais. -->
+              <p
+                v-if="carimbo"
+                class="atd-carimbo"
+                :data-atualizado="carimbo.atualizado ? 'true' : 'false'"
               >
-                <p v-if="!section.items.length" class="atd-fold__vazio">
-                  {{ section.vazioTexto }}
-                </p>
+                <i
+                  :class="carimbo.atualizado ? 'ph ph-clock-counter-clockwise' : 'ph ph-clock'"
+                  aria-hidden="true"
+                />
+                <span>{{
+                  carimbo.atualizado
+                    ? t('acessos.snapshot.carimboAtualizado', {
+                        data: formatDateTime(carimbo.data),
+                      })
+                    : t('acessos.snapshot.carimbo', { data: formatDateTime(carimbo.data) })
+                }}</span>
+              </p>
+            </header>
 
-                <div v-else class="atd-fold__scroll" tabindex="0">
-                  <ul class="atd-items">
-                    <li
-                      v-for="(item, index) in section.items"
-                      :key="`${section.id}-${index}`"
-                      :class="{ 'atd-item--destaque': item.destaque }"
-                    >
-                      <strong>{{ item.titulo }}</strong>
-                      <span v-if="item.detalhe" class="atd-item__meta">{{ item.detalhe }}</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+            <!-- Responsável pode liberar o acesso sem marcar nenhuma categoria: a ficha existe
+                 e não tem o que mostrar. Explica o porquê e empurra para a ação útil. -->
+            <section v-if="resumoVazio" class="atd-ficha__vazio">
+              <i class="ph ph-lock-simple-open" aria-hidden="true" />
+              <strong>{{ t('acessos.snapshot.emptyTitle') }}</strong>
+              <p>{{ t('acessos.snapshot.emptyBody', { pet: detalhe.petNome }) }}</p>
+              <Button
+                v-if="podeAnotar"
+                :label="t('acessos.snapshot.emptyCta')"
+                icon="ph ph-pencil-simple"
+                size="small"
+                severity="secondary"
+                outlined
+                @click="irParaFolha"
+              />
             </section>
-          </div>
-        </section>
 
-        <!-- Documentos liberados item a item: o snapshot traz ids do cofre, a URL
-             de leitura nasce no clique e vale por poucos minutos. -->
-        <section
-          v-if="documentosEstado !== 'OCULTO'"
-          class="atd-docs"
-          aria-labelledby="atd-docs-title"
-        >
-          <header class="atd-docs__head">
-            <div>
-              <h2 id="atd-docs-title">{{ t('acessos.documentos.title') }}</h2>
-              <p v-if="isGuidanceVisible">{{ t('acessos.documentos.lede') }}</p>
-            </div>
-            <span v-if="documentos.length" class="atd-docs__count">{{
-              t('acessos.documentos.count', { n: documentos.length }, documentos.length)
-            }}</span>
-          </header>
+            <section v-if="mensagemTutor" class="atd-ficha__secao">
+              <h3 class="atd-ficha__titulo">
+                <i class="ph ph-chat-circle-text" aria-hidden="true" />
+                {{ t('acessos.detalhe.mensagemTutor') }}
+              </h3>
+              <blockquote class="atd-recado">{{ mensagemTutor }}</blockquote>
+            </section>
 
-          <p v-if="documentosVazioTexto" class="atd-bloco-vazio">{{ documentosVazioTexto }}</p>
+            <section v-if="showObservacoesTutor" class="atd-ficha__secao">
+              <h3 class="atd-ficha__titulo">
+                <i class="ph ph-info" aria-hidden="true" />
+                {{ t('acessos.snapshot.observacoes') }}
+              </h3>
+              <p class="atd-ficha__texto">{{ observacoesTutor }}</p>
+            </section>
 
-          <ul v-else class="atd-docs__list">
-            <li v-for="doc in documentos" :key="doc.key" class="atd-doc">
-              <span class="atd-doc__icon" aria-hidden="true">
-                <i class="ph ph-file" />
-              </span>
-
-              <div class="atd-doc__copy">
-                <strong :title="doc.nome">{{ doc.nome }}</strong>
-                <small class="atd-doc__meta">
-                  <span class="atd-doc__tipo">{{ doc.tipo }}</span>
-                  <template v-if="doc.emissao">
-                    {{ t('acessos.documentos.emissao', { data: doc.emissao }) }}
-                  </template>
-                  <template v-if="doc.expiracao">
-                    {{ t('acessos.documentos.expiracao', { data: doc.expiracao }) }}
-                  </template>
-                </small>
-              </div>
-
-              <p v-if="!doc.arquivos.length" class="atd-doc__empty">
-                {{ t('acessos.documentos.semArquivo') }}
+            <!-- Tratamento contínuo (Parte 16), ACIMA das listas clínicas: é o remédio de
+                 todo dia, e o item cuja falha tem dano imediato para quem vai cuidar do pet
+                 sem conviver com ele. -->
+            <section
+              v-if="tratamentosEstado !== 'OCULTO'"
+              class="atd-ficha__secao"
+              aria-labelledby="atd-trat-title"
+            >
+              <h3 id="atd-trat-title" class="atd-ficha__titulo">
+                <i class="ph ph-heartbeat" aria-hidden="true" />
+                {{ t('acessos.tratamentos.title') }}
+                <span v-if="tratamentosContinuos.length" class="atd-ficha__conta">
+                  {{ tratamentosContinuos.length }}
+                </span>
+              </h3>
+              <p v-if="isGuidanceVisible" class="atd-ficha__lede">
+                {{ t('acessos.tratamentos.lede') }}
               </p>
 
-              <ul v-else class="atd-doc__files">
-                <li v-for="(arquivo, index) in doc.arquivos" :key="arquivo.id">
-                  <span v-if="doc.arquivos.length > 1" class="atd-doc__file-label">
-                    {{ t('acessos.documentos.arquivoN', { n: index + 1 }) }}
-                  </span>
-                  <Button
-                    :label="t('acessos.documentos.abrir')"
-                    icon="ph ph-arrow-square-out"
-                    severity="secondary"
-                    outlined
-                    size="small"
-                    :loading="arquivoOcupado === `abrir:${arquivo.id}`"
-                    :aria-label="`${t('acessos.documentos.abrir')}: ${doc.nome}`"
-                    @click="abrirArquivo(arquivo.id)"
-                  />
-                  <Button
-                    :label="t('acessos.documentos.baixar')"
-                    icon="ph ph-download-simple"
-                    size="small"
-                    :loading="arquivoOcupado === `baixar:${arquivo.id}`"
-                    :aria-label="`${t('acessos.documentos.baixar')}: ${doc.nome}`"
-                    @click="baixarArquivo(arquivo.id, arquivo.nome)"
-                  />
+              <p v-if="tratamentosVazioTexto" class="atd-ficha__nada">
+                {{ tratamentosVazioTexto }}
+              </p>
+
+              <ul v-else class="atd-trat">
+                <li v-for="item in tratamentosContinuos" :key="item.key" class="atd-trat__item">
+                  <PhHeart class="atd-trat__icone" weight="fill" aria-hidden="true" />
+                  <div class="atd-trat__corpo">
+                    <strong>{{ item.titulo }}</strong>
+                    <p v-if="item.posologia" class="atd-trat__posologia">{{ item.posologia }}</p>
+                    <dl v-if="item.campos.length" class="atd-par">
+                      <div v-for="campo in item.campos" :key="campo.chave">
+                        <dt>{{ campo.label }}</dt>
+                        <dd>{{ campo.valor }}</dd>
+                      </div>
+                    </dl>
+                    <p v-if="item.observacoes" class="atd-trat__obs">
+                      <span>{{ t('acessos.tratamentos.campos.observacoes') }}:</span>
+                      {{ item.observacoes }}
+                    </p>
+                  </div>
                 </li>
               </ul>
-            </li>
-          </ul>
-        </section>
+            </section>
 
-        <!-- Diário: só entram os dias com anormalidade registrada, dentro da janela
-             que o responsável liberou. Enum já chega traduzido do backend. -->
-        <section
-          v-if="diarioEstado !== 'OCULTO'"
-          class="atd-diario"
-          aria-labelledby="atd-diario-title"
-        >
-          <header class="atd-docs__head">
-            <div>
-              <h2 id="atd-diario-title">{{ t('acessos.diario.title') }}</h2>
-              <p v-if="isGuidanceVisible">{{ t('acessos.diario.lede') }}</p>
-            </div>
-            <span v-if="diario.length" class="atd-docs__count">{{
-              t('acessos.diario.count', { n: diario.length }, diario.length)
-            }}</span>
-          </header>
+            <section
+              v-if="snapshotListSections.length"
+              class="atd-ficha__secao atd-ficha__secao--lista"
+              aria-labelledby="atd-clinical-title"
+            >
+              <h3 id="atd-clinical-title" class="atd-ficha__titulo">
+                <i class="ph ph-first-aid-kit" aria-hidden="true" />
+                {{ t('acessos.snapshot.clinicalTitle') }}
+              </h3>
 
-          <p v-if="diarioVazioTexto" class="atd-bloco-vazio">{{ diarioVazioTexto }}</p>
-
-          <ul v-else class="atd-diario__list">
-            <li v-for="entrada in diario" :key="entrada.key" class="atd-diario__entry">
-              <header class="atd-diario__head">
-                <i class="ph ph-calendar-blank" aria-hidden="true" />
-                <strong>{{ entrada.data }}</strong>
-              </header>
-
-              <div
-                v-if="entrada.sintomas.length || entrada.doencas.length"
-                class="atd-diario__tags"
-              >
-                <span
-                  v-for="(sintoma, index) in entrada.sintomas"
-                  :key="`s-${index}`"
-                  class="atd-diario__tag atd-diario__tag--sintoma"
+              <!-- Uma linha por categoria. Vazia: a frase do motivo é o conteúdo. Com itens:
+                   recolhe e mostra os primeiros nomes, para ler sem abrir. -->
+              <ul class="atd-folds">
+                <li
+                  v-for="section in snapshotListSections"
+                  :key="section.id"
+                  class="atd-fold"
+                  :data-tone="section.tone"
+                  :data-vazio="section.items.length ? 'false' : 'true'"
                 >
-                  {{ sintoma }}
-                </span>
-                <span
-                  v-for="(doenca, index) in entrada.doencas"
-                  :key="`d-${index}`"
-                  class="atd-diario__tag atd-diario__tag--doenca"
-                >
-                  {{ doenca }}
-                </span>
-              </div>
-
-              <dl v-if="entrada.campos.length" class="atd-diario__grid">
-                <div v-for="campo in entrada.campos" :key="campo.chave">
-                  <dt>{{ campo.label }}</dt>
-                  <dd>{{ campo.valor }}</dd>
-                </div>
-              </dl>
-
-              <div v-for="texto in entrada.textos" :key="texto.chave" class="atd-diario__text">
-                <span>{{ texto.label }}</span>
-                <p>{{ texto.valor }}</p>
-              </div>
-
-              <div v-if="entrada.fotoIds.length" class="atd-diario__fotos">
-                <span class="atd-diario__fotos-label">
-                  {{
-                    t('acessos.diario.fotos', { n: entrada.fotoIds.length }, entrada.fotoIds.length)
-                  }}
-                </span>
-                <Button
-                  v-for="(fotoId, index) in entrada.fotoIds"
-                  :key="fotoId"
-                  :label="t('acessos.diario.abrirFoto', { n: index + 1 })"
-                  icon="ph ph-image"
-                  severity="secondary"
-                  outlined
-                  size="small"
-                  :loading="arquivoOcupado === `abrir:${fotoId}`"
-                  @click="abrirArquivo(fotoId)"
-                />
-              </div>
-            </li>
-          </ul>
-        </section>
-      </div>
-
-      <!-- Aba: anotações -->
-      <div v-else class="atd-panel atd-notes" role="tabpanel">
-        <div
-          class="atd-notes__layout"
-          :class="{
-            'atd-notes__layout--with-form': podeAnotar,
-            'atd-notes__layout--structured': podeAnotar && temCamposEstruturados,
-          }"
-        >
-          <section class="atd-notes__feed" aria-labelledby="atd-notes-title">
-            <header class="atd-notes__head">
-              <div>
-                <h2 id="atd-notes-title">{{ t('acessos.anotacoes.title') }}</h2>
-                <p v-if="isGuidanceVisible">{{ t('acessos.anotacoes.lede') }}</p>
-              </div>
-              <span v-if="anotacoesOrdenadas.length" class="atd-notes__count">{{
-                t(
-                  'acessos.anotacoes.count',
-                  { n: anotacoesOrdenadas.length },
-                  anotacoesOrdenadas.length,
-                )
-              }}</span>
-            </header>
-
-            <div v-if="anotacoesOrdenadas.length === 0" class="atd-empty">
-              <span class="atd-empty__icon" aria-hidden="true">
-                <i class="ph ph-pencil-simple" />
-              </span>
-              <strong>{{ t('acessos.anotacoes.empty') }}</strong>
-              <p>
-                {{
-                  isAtivo
-                    ? t('acessos.anotacoes.emptyHint')
-                    : t('acessos.anotacoes.emptyHintClosed')
-                }}
-              </p>
-            </div>
-
-            <ol v-else class="atd-timeline">
-              <li
-                v-for="anotacao in anotacoesOrdenadas"
-                :key="anotacao.id"
-                class="atd-timeline__item"
-              >
-                <span class="atd-timeline__rail" aria-hidden="true">
-                  <span class="atd-timeline__dot" />
-                </span>
-
-                <article class="atd-note">
-                  <header class="atd-note__head">
-                    <div class="atd-note__title">
-                      <span class="atd-note__service">{{ anotacao.servicoRealizado }}</span>
-                      <time class="atd-note__time" :datetime="anotacao.criadaEm">{{
-                        formatDateTime(anotacao.criadaEm)
-                      }}</time>
+                  <div v-if="!section.items.length" class="atd-fold__row">
+                    <span class="atd-fold__icon" aria-hidden="true">
+                      <i :class="section.icon" />
+                    </span>
+                    <div class="atd-fold__copy">
+                      <h4 class="atd-fold__title">{{ section.title }}</h4>
+                      <p class="atd-fold__sub">{{ section.vazioTexto }}</p>
                     </div>
-                    <p class="atd-note__byline">
-                      <i class="ph ph-building" aria-hidden="true" />
-                      <span>{{ anotacao.empresaNome }}</span>
-                      <template v-if="autorDaAnotacao(anotacao)">
-                        <span class="atd-note__sep" aria-hidden="true">·</span>
-                        <i class="ph ph-user" aria-hidden="true" />
-                        <span>{{ autorDaAnotacao(anotacao) }}</span>
-                      </template>
-                    </p>
-                  </header>
+                  </div>
 
-                  <p class="atd-note__body">{{ anotacao.texto }}</p>
-
-                  <AnotacaoEstruturadaView :anotacao="anotacao" />
-
-                  <div v-if="anotacao.anexos.length" class="atd-note__files">
-                    <p class="atd-note__files-label">
-                      {{ t('acessos.anotacoes.anexosLabel') }}
-                      <span>{{ anotacao.anexos.length }}</span>
-                    </p>
-                    <ul class="atd-note__attachments">
-                      <li v-for="anexo in anotacao.anexos" :key="anexo.id">
-                        <Button
-                          type="button"
-                          class="atd-note__file"
-                          :disabled="abrindoAnexoId === anexo.id"
-                          :aria-label="`${t('acessos.anotacoes.abrirAnexo')}: ${anexo.nome}`"
-                          @click="abrirAnexo(anexo.id)"
-                        >
-                          <span class="atd-note__file-icon" aria-hidden="true">
-                            <i
-                              :class="
-                                abrindoAnexoId === anexo.id
-                                  ? 'ph ph-spin ph-circle-notch'
-                                  : 'ph ph-paperclip'
-                              "
-                            />
+                  <template v-else>
+                    <h4 class="atd-fold__heading">
+                      <Button
+                        type="button"
+                        class="atd-fold__row atd-fold__trigger"
+                        :aria-expanded="isSectionOpen(section.id)"
+                        :aria-controls="`atd-fold-${section.id}`"
+                        @click="toggleSection(section.id)"
+                      >
+                        <span class="atd-fold__icon" aria-hidden="true">
+                          <i :class="section.icon" />
+                        </span>
+                        <span class="atd-fold__copy">
+                          <span class="atd-fold__title">{{ section.title }}</span>
+                          <span class="atd-fold__sub">
+                            {{
+                              t(
+                                'acessos.snapshot.itemsCount',
+                                { n: section.items.length },
+                                section.items.length,
+                              )
+                            }}<template v-if="!isSectionOpen(section.id)">
+                              · {{ section.resumo }}</template
+                            >
                           </span>
-                          <span class="atd-note__file-copy">
-                            <strong>{{ anexo.nome }}</strong>
-                            <small>
-                              <template v-if="anexo.tipoDocumento">
-                                {{ anexo.tipoDocumento }} ·
-                              </template>
-                              {{ formatBytes(anexo.tamanhoBytes) }}
-                            </small>
-                          </span>
-                          <i class="ph ph-arrow-square-out atd-note__file-go" aria-hidden="true" />
-                        </Button>
+                        </span>
+                        <i
+                          class="ph atd-fold__chevron"
+                          :class="isSectionOpen(section.id) ? 'ph-caret-up' : 'ph-caret-down'"
+                          aria-hidden="true"
+                        />
+                      </Button>
+                    </h4>
+
+                    <ul
+                      v-show="isSectionOpen(section.id)"
+                      :id="`atd-fold-${section.id}`"
+                      class="atd-items"
+                    >
+                      <li
+                        v-for="(item, index) in section.items"
+                        :key="`${section.id}-${index}`"
+                        :class="{ 'atd-item--destaque': item.destaque }"
+                      >
+                        <strong>{{ item.titulo }}</strong>
+                        <span v-if="item.detalhe" class="atd-item__meta">{{ item.detalhe }}</span>
                       </li>
                     </ul>
-                  </div>
-                </article>
-              </li>
-            </ol>
-          </section>
+                  </template>
+                </li>
+              </ul>
+            </section>
 
-          <aside v-if="somenteLeitura" class="atd-readonly" role="status">
-            <i class="ph ph-eye" aria-hidden="true" />
-            <div>
-              <strong>{{ t('acessos.anotacao.somenteLeitura.title') }}</strong>
-              <p>{{ t('acessos.anotacao.somenteLeitura.body') }}</p>
-            </div>
+            <!-- Documentos liberados item a item: o snapshot traz ids do cofre, a URL
+                 de leitura nasce no clique e vale por poucos minutos. -->
+            <section
+              v-if="documentosEstado !== 'OCULTO'"
+              class="atd-ficha__secao"
+              aria-labelledby="atd-docs-title"
+            >
+              <h3 id="atd-docs-title" class="atd-ficha__titulo">
+                <i class="ph ph-folder-simple" aria-hidden="true" />
+                {{ t('acessos.documentos.title') }}
+                <span v-if="documentos.length" class="atd-ficha__conta">
+                  {{ documentos.length }}
+                </span>
+              </h3>
+              <p v-if="isGuidanceVisible" class="atd-ficha__lede">
+                {{ t('acessos.documentos.lede') }}
+              </p>
+
+              <p v-if="documentosVazioTexto" class="atd-ficha__nada">{{ documentosVazioTexto }}</p>
+
+              <ul v-else class="atd-docs">
+                <li v-for="doc in documentos" :key="doc.key" class="atd-doc">
+                  <i class="ph ph-file-text atd-doc__icone" aria-hidden="true" />
+
+                  <div class="atd-doc__texto">
+                    <strong :title="doc.nome">{{ doc.nome }}</strong>
+                    <small>
+                      {{ doc.tipo }}
+                      <template v-if="doc.emissao">
+                        · {{ t('acessos.documentos.emissao', { data: doc.emissao }) }}
+                      </template>
+                      <template v-if="doc.expiracao">
+                        · {{ t('acessos.documentos.expiracao', { data: doc.expiracao }) }}
+                      </template>
+                    </small>
+                    <span v-if="!doc.arquivos.length" class="atd-doc__sem">
+                      {{ t('acessos.documentos.semArquivo') }}
+                    </span>
+                  </div>
+
+                  <div v-if="doc.arquivos.length" class="atd-doc__acoes">
+                    <template v-for="(arquivo, index) in doc.arquivos" :key="arquivo.id">
+                      <span v-if="doc.arquivos.length > 1" class="atd-doc__n">
+                        {{ t('acessos.documentos.arquivoN', { n: index + 1 }) }}
+                      </span>
+                      <Button
+                        icon="ph ph-arrow-square-out"
+                        severity="secondary"
+                        outlined
+                        size="small"
+                        :loading="arquivoOcupado === `abrir:${arquivo.id}`"
+                        :aria-label="`${t('acessos.documentos.abrir')}: ${doc.nome}`"
+                        :title="t('acessos.documentos.abrir')"
+                        @click="abrirArquivo(arquivo.id)"
+                      />
+                      <Button
+                        icon="ph ph-download-simple"
+                        severity="secondary"
+                        outlined
+                        size="small"
+                        :loading="arquivoOcupado === `baixar:${arquivo.id}`"
+                        :aria-label="`${t('acessos.documentos.baixar')}: ${doc.nome}`"
+                        :title="t('acessos.documentos.baixar')"
+                        @click="baixarArquivo(arquivo.id, arquivo.nome)"
+                      />
+                    </template>
+                  </div>
+                </li>
+              </ul>
+            </section>
+
+            <!-- Diário: só entram os dias com anormalidade registrada, dentro da janela
+                 que o responsável liberou. Enum já chega traduzido do backend. -->
+            <section
+              v-if="diarioEstado !== 'OCULTO'"
+              class="atd-ficha__secao"
+              aria-labelledby="atd-diario-title"
+            >
+              <h3 id="atd-diario-title" class="atd-ficha__titulo">
+                <i class="ph ph-notebook" aria-hidden="true" />
+                {{ t('acessos.diario.title') }}
+                <span v-if="diario.length" class="atd-ficha__conta">{{ diario.length }}</span>
+              </h3>
+              <p v-if="isGuidanceVisible" class="atd-ficha__lede">
+                {{ t('acessos.diario.lede') }}
+              </p>
+
+              <p v-if="diarioVazioTexto" class="atd-ficha__nada">{{ diarioVazioTexto }}</p>
+
+              <ol v-else class="atd-diario">
+                <li v-for="entrada in diario" :key="entrada.key" class="atd-diario__dia">
+                  <strong class="atd-diario__data">{{ entrada.data }}</strong>
+
+                  <div
+                    v-if="entrada.sintomas.length || entrada.doencas.length"
+                    class="atd-diario__tags"
+                  >
+                    <span
+                      v-for="(sintoma, index) in entrada.sintomas"
+                      :key="`s-${index}`"
+                      class="atd-diario__tag atd-diario__tag--sintoma"
+                    >
+                      {{ sintoma }}
+                    </span>
+                    <span
+                      v-for="(doenca, index) in entrada.doencas"
+                      :key="`d-${index}`"
+                      class="atd-diario__tag atd-diario__tag--doenca"
+                    >
+                      {{ doenca }}
+                    </span>
+                  </div>
+
+                  <dl v-if="entrada.campos.length" class="atd-par">
+                    <div v-for="campo in entrada.campos" :key="campo.chave">
+                      <dt>{{ campo.label }}</dt>
+                      <dd>{{ campo.valor }}</dd>
+                    </div>
+                  </dl>
+
+                  <p v-for="texto in entrada.textos" :key="texto.chave" class="atd-diario__texto">
+                    <span>{{ texto.label }}:</span> {{ texto.valor }}
+                  </p>
+
+                  <div v-if="entrada.fotoIds.length" class="atd-diario__fotos">
+                    <Button
+                      v-for="(fotoId, index) in entrada.fotoIds"
+                      :key="fotoId"
+                      :label="t('acessos.diario.abrirFoto', { n: index + 1 })"
+                      icon="ph ph-image"
+                      severity="secondary"
+                      outlined
+                      size="small"
+                      :loading="arquivoOcupado === `abrir:${fotoId}`"
+                      @click="abrirArquivo(fotoId)"
+                    />
+                  </div>
+                </li>
+              </ol>
+            </section>
           </aside>
 
-          <aside v-if="podeAnotar" class="atd-composer" aria-labelledby="atd-composer-title">
-            <header class="atd-composer__head">
-              <span class="atd-composer__badge" aria-hidden="true">
-                <i class="ph ph-plus" />
-              </span>
+          <!-- Trabalho: a folha da anotação e o histórico -->
+          <div class="atd-trabalho">
+            <aside v-if="somenteLeitura" class="atd-aviso" role="status">
+              <i class="ph ph-eye" aria-hidden="true" />
               <div>
-                <h3 id="atd-composer-title">{{ t('acessos.anotacao.title') }}</h3>
+                <strong>{{ t('acessos.anotacao.somenteLeitura.title') }}</strong>
+                <p>{{ t('acessos.anotacao.somenteLeitura.body') }}</p>
+              </div>
+            </aside>
+
+            <section v-if="podeAnotar" class="atd-folha" aria-labelledby="atd-folha-titulo">
+              <header class="atd-folha__cab">
+                <h2 id="atd-folha-titulo">{{ t('acessos.anotacao.title') }}</h2>
                 <p>{{ t('acessos.anotacao.lede') }}</p>
-              </div>
-            </header>
+              </header>
 
-            <p v-if="formError" class="atd-composer__error" role="alert">{{ formError }}</p>
+              <div class="atd-folha__secao">
+                <div class="atd-campo">
+                  <label for="anot-servico">{{ t('acessos.anotacao.servico') }}</label>
+                  <InputText
+                    id="anot-servico"
+                    v-model="anotacaoForm.servicoRealizado"
+                    :maxlength="LIMITES_CAMPOS_LIVRES.servicoRealizado"
+                    :placeholder="t('acessos.anotacao.servicoPlaceholder')"
+                  />
+                </div>
 
-            <div class="atd-composer__fields">
-              <div class="atd-field">
-                <label for="anot-servico">{{ t('acessos.anotacao.servico') }}</label>
-                <InputText
-                  id="anot-servico"
-                  v-model="anotacaoForm.servicoRealizado"
-                  :maxlength="LIMITES_CAMPOS_LIVRES.servicoRealizado"
-                  :placeholder="t('acessos.anotacao.servicoPlaceholder')"
-                />
-              </div>
-
-              <div class="atd-field">
-                <label for="anot-texto">{{ t('acessos.anotacao.texto') }}</label>
-                <Textarea
-                  id="anot-texto"
-                  v-model="anotacaoForm.texto"
-                  rows="5"
-                  auto-resize
-                  :maxlength="LIMITES_CAMPOS_LIVRES.texto"
-                  :placeholder="t('acessos.anotacao.textoPlaceholder')"
-                />
+                <div class="atd-campo">
+                  <label for="anot-texto">{{ t('acessos.anotacao.texto') }}</label>
+                  <Textarea
+                    id="anot-texto"
+                    v-model="anotacaoForm.texto"
+                    rows="4"
+                    auto-resize
+                    :maxlength="LIMITES_CAMPOS_LIVRES.texto"
+                    :placeholder="t('acessos.anotacao.textoPlaceholder')"
+                  />
+                </div>
               </div>
 
               <AnotacaoEstruturadaFields
@@ -1543,6 +1429,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 :tipo-servico="detalhe.tipoServico"
                 :erros="estruturadaErros"
                 :disabled="submittingAnotacao"
+                :lendo-receita="
+                  leituraReceita.etapa === 'enviando' || leituraReceita.etapa === 'lendo'
+                "
               >
                 <template v-if="mostrarLeituraReceita" #prescricao-topo>
                   <LerReceitaComIA
@@ -1553,92 +1442,104 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 </template>
               </AnotacaoEstruturadaFields>
 
-              <div class="atd-field">
-                <label for="anot-profissional">{{ t('acessos.anotacao.profissional') }}</label>
-                <InputText
-                  id="anot-profissional"
-                  v-model="anotacaoForm.profissionalNome"
-                  :maxlength="LIMITES_CAMPOS_LIVRES.profissionalNome"
-                  :placeholder="t('acessos.anotacao.profissionalPlaceholder')"
-                />
-              </div>
+              <!-- Quem atendeu: nome e área lado a lado, os dois opcionais. A área viaja como
+                   CHAVE quando é uma das opções; "Fisioterapia" e "Acupuntura" são casos
+                   legítimos de "Outra" e um enum fechado viraria 400. -->
+              <div class="atd-folha__secao">
+                <div class="atd-folha__duas">
+                  <div class="atd-campo">
+                    <label for="anot-profissional">{{ t('acessos.anotacao.profissional') }}</label>
+                    <InputText
+                      id="anot-profissional"
+                      v-model="anotacaoForm.profissionalNome"
+                      :maxlength="LIMITES_CAMPOS_LIVRES.profissionalNome"
+                      :placeholder="t('acessos.anotacao.profissionalPlaceholder')"
+                    />
+                  </div>
 
-              <!-- Area de atuacao: lista fechada em chips mais "Outra" com texto livre.
-                   O que viaja e a CHAVE quando e uma das opcoes; "Fisioterapia" e
-                   "Acupuntura" sao casos legitimos e um enum fechado viraria 400. -->
-              <div class="atd-field">
-                <span class="atd-field__label">{{ t('acessos.anotacao.especialidade') }}</span>
-                <div class="atd-chips">
-                  <!-- Chips que quebram linha, com desmarcar ao clicar de novo: Button com
-                       aria-pressed em vez de SelectButton (grupo colado, sem quebra). -->
-                  <Button
-                    v-for="opcao in opcoesEspecialidade"
-                    :key="opcao"
-                    type="button"
-                    class="atd-chip"
-                    :class="{ 'atd-chip--on': anotacaoForm.especialidade === opcao }"
-                    :label="t(SUFIXO_ESPECIALIDADE + opcao)"
-                    severity="secondary"
-                    outlined
-                    rounded
-                    size="small"
-                    :aria-pressed="anotacaoForm.especialidade === opcao"
+                  <div class="atd-campo">
+                    <label for="anot-especialidade">
+                      {{ t('acessos.anotacao.especialidade') }}
+                    </label>
+                    <Select
+                      input-id="anot-especialidade"
+                      :model-value="anotacaoForm.especialidade"
+                      :options="opcoesEspecialidade"
+                      option-label="label"
+                      option-value="value"
+                      :placeholder="t('acessos.anotacao.especialidadePlaceholder')"
+                      show-clear
+                      :disabled="submittingAnotacao"
+                      @update:model-value="escolherEspecialidade"
+                    />
+                  </div>
+                </div>
+
+                <div v-if="anotacaoForm.especialidade === ESPECIALIDADE_OUTRA" class="atd-campo">
+                  <InputText
+                    v-model="anotacaoForm.especialidadeOutra"
+                    :maxlength="LIMITES_CAMPOS_LIVRES.profissionalEspecialidade"
+                    :placeholder="t('acessos.anotacao.especialidadeOutraPlaceholder')"
+                    :aria-label="t('acessos.anotacao.especialidade')"
                     :disabled="submittingAnotacao"
-                    @click="selecionarEspecialidade(opcao)"
                   />
                 </div>
-                <InputText
-                  v-if="anotacaoForm.especialidade === ESPECIALIDADE_OUTRA"
-                  v-model="anotacaoForm.especialidadeOutra"
-                  :maxlength="LIMITES_CAMPOS_LIVRES.profissionalEspecialidade"
-                  :placeholder="t('acessos.anotacao.especialidadeOutraPlaceholder')"
-                  :disabled="submittingAnotacao"
-                />
               </div>
 
-              <div class="atd-field atd-field--files">
-                <span class="atd-field__label">
-                  {{ t('acessos.anotacao.anexos', { n: MAX_ANEXOS }) }}
-                </span>
+              <div class="atd-folha__secao">
+                <div class="atd-folha__secao-cab">
+                  <h3>
+                    <i class="ph ph-paperclip" aria-hidden="true" />
+                    {{ t('acessos.anotacao.anexos', { n: MAX_ANEXOS }) }}
+                  </h3>
+                  <label v-if="anexosOcupados < MAX_ANEXOS" class="atd-anexar">
+                    <input
+                      ref="fileInput"
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
+                      @change="onAnexosSelected"
+                    />
+                    <i class="ph ph-upload-simple" aria-hidden="true" />
+                    {{ t('acessos.anotacao.adicionarAnexo') }}
+                  </label>
+                </div>
 
-                <ul v-if="anexosForm.length" class="atd-anexo-list">
+                <ul v-if="anexosForm.length" class="atd-anexos">
                   <li v-for="(anexo, index) in anexosForm" :key="`${anexo.file.name}-${index}`">
-                    <div class="atd-anexo-list__top">
-                      <div class="atd-anexo-list__info">
-                        <i class="ph ph-file" aria-hidden="true" />
-                        <span>{{ anexo.file.name }}</span>
-                        <small>{{ formatBytes(anexo.file.size) }}</small>
-                      </div>
-                      <Button
-                        icon="ph ph-x"
-                        severity="secondary"
-                        text
-                        rounded
-                        :aria-label="t('acessos.anotacao.removerAnexo')"
-                        @click="removeAnexo(index)"
-                      />
-                    </div>
-
-                    <div class="atd-anexo-list__type">
-                      <label :for="`anexo-tipo-${index}`">{{
-                        t('acessos.anotacao.tipoDocumento')
-                      }}</label>
-                      <Select
-                        :id="`anexo-tipo-${index}`"
-                        v-model="anexo.tipoDocumento"
-                        class="atd-anexo-list__select"
-                        :options="tiposDocumentoOptions"
-                        option-label="label"
-                        option-value="value"
-                        :placeholder="t('acessos.anotacao.tipoDocumentoPlaceholder')"
-                        show-clear
-                        size="small"
-                      />
-                    </div>
+                    <i class="ph ph-file atd-anexos__icone" aria-hidden="true" />
+                    <span class="atd-anexos__nome">
+                      <strong :title="anexo.file.name">{{ anexo.file.name }}</strong>
+                      <small>{{ formatBytes(anexo.file.size) }}</small>
+                    </span>
+                    <label class="atd-sr" :for="`anexo-tipo-${index}`">
+                      {{ t('acessos.anotacao.tipoDocumento') }}
+                    </label>
+                    <Select
+                      v-model="anexo.tipoDocumento"
+                      class="atd-anexos__tipo"
+                      :input-id="`anexo-tipo-${index}`"
+                      :options="tiposDocumentoOptions"
+                      option-label="label"
+                      option-value="value"
+                      :placeholder="t('acessos.anotacao.tipoDocumentoPlaceholder')"
+                      show-clear
+                    />
+                    <Button
+                      icon="ph ph-trash"
+                      severity="secondary"
+                      text
+                      rounded
+                      class="atd-anexos__remover"
+                      :aria-label="t('acessos.anotacao.removerAnexo')"
+                      :title="t('acessos.anotacao.removerAnexo')"
+                      @click="removeAnexo(index)"
+                    />
                   </li>
                 </ul>
 
-                <small v-if="leituraReceita.reservados > 0" class="atd-file-hint">
+                <small v-if="leituraReceita.reservados > 0" class="atd-folha__nota">
+                  <i class="ph ph-sparkle" aria-hidden="true" />
                   {{
                     t(
                       'acessos.leituraReceita.anexosDaReceita',
@@ -1647,33 +1548,114 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     )
                   }}
                 </small>
-
-                <label v-if="anexosOcupados < MAX_ANEXOS" class="atd-file-cta">
-                  <input
-                    ref="fileInput"
-                    type="file"
-                    multiple
-                    accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
-                    @change="onAnexosSelected"
-                  />
-                  <i class="ph ph-paperclip" aria-hidden="true" />
-                  {{ t('acessos.anotacao.adicionarAnexo') }}
-                </label>
-                <small class="atd-file-hint">
-                  {{ t('acessos.anotacao.anexoHint') }}
-                </small>
+                <small class="atd-folha__nota">{{ t('acessos.anotacao.anexoHint') }}</small>
               </div>
-            </div>
 
-            <footer class="atd-composer__footer">
-              <Button
-                :label="t('acessos.anotacao.enviar')"
-                icon="ph ph-check"
-                :loading="submittingAnotacao"
-                @click="submitAnotacao"
-              />
-            </footer>
-          </aside>
+              <!-- Rodapé preso à tela enquanto a folha estiver nela: o erro aparece do lado do
+                   botão que o causou, e não lá no topo, fora da vista de quem clicou. -->
+              <footer class="atd-folha__rodape">
+                <p v-if="formError" class="atd-folha__erro" role="alert">
+                  <i class="ph ph-warning-circle" aria-hidden="true" />
+                  {{ formError }}
+                </p>
+                <Button
+                  class="atd-folha__enviar"
+                  :label="t('acessos.anotacao.enviar')"
+                  icon="ph ph-check"
+                  :loading="submittingAnotacao"
+                  @click="submitAnotacao"
+                />
+              </footer>
+            </section>
+
+            <section class="atd-hist" aria-labelledby="atd-notes-title">
+              <header class="atd-hist__cab">
+                <h2 id="atd-notes-title">{{ t('acessos.anotacoes.title') }}</h2>
+                <span v-if="anotacoesOrdenadas.length" class="atd-hist__conta">{{
+                  t(
+                    'acessos.anotacoes.count',
+                    { n: anotacoesOrdenadas.length },
+                    anotacoesOrdenadas.length,
+                  )
+                }}</span>
+              </header>
+              <p v-if="isGuidanceVisible" class="atd-hist__lede">
+                {{ t('acessos.anotacoes.lede') }}
+              </p>
+
+              <div v-if="anotacoesOrdenadas.length === 0" class="atd-hist__vazio">
+                <i class="ph ph-clock-counter-clockwise" aria-hidden="true" />
+                <div>
+                  <strong>{{ t('acessos.anotacoes.empty') }}</strong>
+                  <p>
+                    {{
+                      podeAnotar
+                        ? t('acessos.anotacoes.emptyHint')
+                        : t('acessos.anotacoes.emptyHintClosed')
+                    }}
+                  </p>
+                </div>
+              </div>
+
+              <ol v-else class="atd-hist__lista">
+                <li v-for="anotacao in anotacoesOrdenadas" :key="anotacao.id">
+                  <article class="atd-nota">
+                    <header class="atd-nota__cab">
+                      <div class="atd-nota__quem">
+                        <h3>{{ anotacao.servicoRealizado }}</h3>
+                        <p>
+                          <span>{{ anotacao.empresaNome }}</span>
+                          <template v-if="autorDaAnotacao(anotacao)">
+                            <span aria-hidden="true">·</span>
+                            <span>{{ autorDaAnotacao(anotacao) }}</span>
+                          </template>
+                        </p>
+                      </div>
+                      <time class="atd-nota__quando" :datetime="anotacao.criadaEm">{{
+                        formatDateTime(anotacao.criadaEm)
+                      }}</time>
+                    </header>
+
+                    <p class="atd-nota__texto">{{ anotacao.texto }}</p>
+
+                    <AnotacaoEstruturadaView :anotacao="anotacao" />
+
+                    <ul
+                      v-if="anotacao.anexos.length"
+                      class="atd-nota__anexos"
+                      :aria-label="t('acessos.anotacoes.anexosLabel')"
+                    >
+                      <li v-for="anexo in anotacao.anexos" :key="anexo.id">
+                        <Button
+                          type="button"
+                          class="atd-nota__anexo"
+                          :disabled="abrindoAnexoId === anexo.id"
+                          :aria-label="`${t('acessos.anotacoes.abrirAnexo')}: ${anexo.nome}`"
+                          @click="abrirAnexo(anexo.id)"
+                        >
+                          <i
+                            :class="
+                              abrindoAnexoId === anexo.id
+                                ? 'ph ph-spin ph-circle-notch'
+                                : 'ph ph-file-text'
+                            "
+                            aria-hidden="true"
+                          />
+                          <span class="atd-nota__anexo-nome">{{ anexo.nome }}</span>
+                          <small>
+                            <template v-if="anexo.tipoDocumento">
+                              {{ anexo.tipoDocumento }} ·
+                            </template>
+                            {{ formatBytes(anexo.tamanhoBytes) }}
+                          </small>
+                        </Button>
+                      </li>
+                    </ul>
+                  </article>
+                </li>
+              </ol>
+            </section>
+          </div>
         </div>
       </div>
     </template>
@@ -1681,333 +1663,558 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 </template>
 
 <style scoped>
-.atd-hero {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.85rem 1.5rem;
-  padding: 1.1rem 1.2rem;
-  border: 1px solid color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
-  border-radius: 1.1rem;
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--partner-primary-soft) 35%, var(--partner-card)),
-    var(--partner-card) 62%
-  );
+/* ------------------------------------------------------------------ tokens da tela */
+
+/*
+ * Tudo sai dos tokens `--hc-*`, que já trazem o claro e o escuro. Os campos deixam o linho do
+ * preset (#FBF7F4 com borda #DDCDC4): sobre o cartão branco ele lia como pêssego desbotado e
+ * brigava com o verde. Aqui o campo é do papel do cartão, com borda cinza e anel de foco na marca.
+ */
+.atd-id,
+.atd-mesa,
+.atd-encerrado {
+  --atd-suave: color-mix(in srgb, var(--hc-tinta) 64%, var(--hc-cartao));
+  --atd-fraco: color-mix(in srgb, var(--hc-tinta) 50%, var(--hc-cartao));
 }
 
-.atd-hero[data-status='EXPIRADO'],
-.atd-hero[data-status='REVOGADO'] {
-  border-color: var(--partner-line);
-  background: var(--partner-surface);
+.atd-mesa {
+  --folha-pad-x: 1.5rem;
+  --folha-fio: var(--hc-linha);
+  --folha-suave: var(--atd-suave);
+  --atd-campo-fundo: var(--hc-cartao);
+  --atd-campo-borda: color-mix(in srgb, var(--hc-tinta) 17%, var(--hc-cartao));
+  --atd-campo-borda-hover: color-mix(in srgb, var(--hc-tinta) 32%, var(--hc-cartao));
+  --atd-campo-apagado: color-mix(in srgb, var(--hc-tinta) 5%, var(--hc-cartao));
+  --atd-anel: 0 0 0 3px color-mix(in srgb, var(--hc-marca) 22%, transparent);
+
+  --p-inputtext-background: var(--atd-campo-fundo);
+  --p-inputtext-disabled-background: var(--atd-campo-apagado);
+  --p-inputtext-border-color: var(--atd-campo-borda);
+  --p-inputtext-hover-border-color: var(--atd-campo-borda-hover);
+  --p-inputtext-focus-border-color: var(--hc-marca);
+  --p-inputtext-color: var(--hc-tinta);
+  --p-inputtext-placeholder-color: var(--atd-fraco);
+  --p-inputtext-shadow: none;
+  --p-inputtext-border-radius: 0.6rem;
+  --p-inputtext-padding-x: 0.75rem;
+  --p-inputtext-padding-y: 0.55rem;
+  --p-inputtext-focus-ring-shadow: var(--atd-anel);
+
+  --p-textarea-background: var(--atd-campo-fundo);
+  --p-textarea-disabled-background: var(--atd-campo-apagado);
+  --p-textarea-border-color: var(--atd-campo-borda);
+  --p-textarea-hover-border-color: var(--atd-campo-borda-hover);
+  --p-textarea-focus-border-color: var(--hc-marca);
+  --p-textarea-color: var(--hc-tinta);
+  --p-textarea-placeholder-color: var(--atd-fraco);
+  --p-textarea-shadow: none;
+  --p-textarea-border-radius: 0.6rem;
+  --p-textarea-padding-x: 0.75rem;
+  --p-textarea-padding-y: 0.55rem;
+  --p-textarea-focus-ring-shadow: var(--atd-anel);
+
+  --p-select-background: var(--atd-campo-fundo);
+  --p-select-disabled-background: var(--atd-campo-apagado);
+  --p-select-border-color: var(--atd-campo-borda);
+  --p-select-hover-border-color: var(--atd-campo-borda-hover);
+  --p-select-focus-border-color: var(--hc-marca);
+  --p-select-color: var(--hc-tinta);
+  --p-select-placeholder-color: var(--atd-fraco);
+  --p-select-shadow: none;
+  --p-select-border-radius: 0.6rem;
+  --p-select-padding-x: 0.75rem;
+  --p-select-padding-y: 0.55rem;
+  --p-select-focus-ring-shadow: var(--atd-anel);
+  --p-select-dropdown-color: var(--atd-suave);
+
+  container: mesa / inline-size;
+  display: grid;
+  gap: 1rem;
 }
 
-.atd-hero__pet {
+/* No escuro o campo afunda um degrau abaixo do cartão, senão some dentro dele. */
+.app-dark .atd-mesa {
+  --atd-campo-fundo: color-mix(in srgb, var(--hc-pagina) 60%, var(--hc-cartao));
+  --atd-campo-borda: color-mix(in srgb, var(--hc-tinta) 20%, var(--hc-cartao));
+}
+
+/* Um corpo de letra para todo campo da tela: o preset deixava 16 px num, 14 px noutro. */
+.atd-mesa :deep(.p-inputtext),
+.atd-mesa :deep(.p-textarea),
+.atd-mesa :deep(.p-select-label) {
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.atd-mesa :deep(.p-textarea) {
+  resize: none;
+}
+
+/* O InputNumber nasce com a largura do atributo size do input interno e vazava da coluna. */
+.atd-mesa :deep(.p-inputnumber) {
   display: flex;
-  flex: 1 1 22rem;
-  align-items: flex-start;
-  gap: 0.95rem;
+  width: 100%;
+}
+
+.atd-mesa :deep(.p-inputnumber-input) {
+  width: 100%;
   min-width: 0;
 }
 
-.atd-hero__foto {
-  width: 4.35rem;
-  height: 4.35rem;
+.atd-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ identidade */
+
+.atd-id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  min-width: 0;
+}
+
+.atd-id__foto {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
   flex: 0 0 auto;
-  border-radius: 1.1rem;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1rem;
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
+  font-size: 1.65rem;
+}
+
+.atd-id__foto img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-.atd-hero__foto--empty {
+.atd-id__texto {
   display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--partner-primary) 16%, var(--partner-card));
-  color: var(--partner-primary-strong);
-  font-size: 1.35rem;
-}
-
-.atd-hero__identity {
-  display: grid;
-  gap: 0.35rem;
+  gap: 0.15rem;
   min-width: 0;
-  flex: 1;
 }
 
-.atd-hero__title-row {
+.atd-id__sobre {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.55rem 0.7rem;
-}
-
-.atd-hero__title-row strong {
-  color: var(--partner-text);
-  font-size: 1.3rem;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
-
-.atd-hero__subtitle {
+  gap: 0.35rem;
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.88rem;
-  line-height: 1.35;
+  color: var(--atd-suave);
+  font-size: 0.78rem;
+  font-weight: 650;
 }
 
-.atd-hero__tags {
+.atd-id__nome {
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.atd-id__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0;
+  margin: 0.1rem 0 0;
+  color: var(--atd-suave);
+  font-size: 0.86rem;
+}
+
+.atd-id__meta span + span::before {
+  content: '·';
+  margin-inline: 0.45rem;
+  color: var(--atd-fraco);
+}
+
+.atd-id__linha {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.2rem;
+  gap: 0.35rem 0.6rem;
 }
 
-.atd-hero__tag {
+.atd-id__linha .atd-id__nome {
+  margin-inline-end: 0.15rem;
+}
+
+/* Status com o nome do próprio acesso: "Suspenso" para um acesso que só expirou enganava. */
+.atd-id__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: var(--hc-verde-fundo);
+  color: var(--hc-verde-tinta);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.atd-id__status:not([data-status='ATIVO']) {
+  background: var(--hc-cinza-fundo);
+  color: var(--hc-cinza-tinta);
+}
+
+.atd-id__prazo {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  min-height: 1.7rem;
-  padding: 0.28rem 0.65rem;
-  border: 1px solid transparent;
+  padding: 0.25rem 0.65rem;
   border-radius: 999px;
+  background: var(--hc-pessego-fundo);
+  color: var(--hc-pessego-tinta);
   font-size: 0.76rem;
   font-weight: 700;
-  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
 }
 
-.atd-hero__tag i {
-  font-size: 0.72rem;
+.atd-id[data-status='EXPIRADO'] .atd-id__foto,
+.atd-id[data-status='REVOGADO'] .atd-id__foto {
+  background: var(--hc-cinza-fundo);
+  color: var(--hc-cinza-tinta);
+  filter: grayscale(0.6);
 }
 
-.atd-hero__tag--service {
-  border-color: color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
-  background: color-mix(in srgb, var(--partner-primary) 14%, var(--partner-card));
-  color: var(--partner-primary-strong);
-}
-
-.atd-hero__tag--expiry {
-  border-color: color-mix(in srgb, var(--partner-amber-text) 28%, var(--partner-line));
-  background: color-mix(in srgb, var(--partner-amber-bg) 70%, var(--partner-card));
-  color: var(--partner-amber-text);
-}
-
-.atd-hero__facts {
+.atd-encerrado {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0;
-}
-
-.atd-hero__fact {
-  min-width: 7.5rem;
-  padding: 0.6rem 0.9rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.9rem;
-  background: color-mix(in srgb, var(--partner-card) 82%, transparent);
-}
-
-.atd-hero__fact dt {
-  color: var(--partner-faint);
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.atd-hero__fact dd {
-  margin: 0.1rem 0 0;
-  color: var(--partner-text);
-  font-size: 1.25rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-.atd-closed {
-  display: grid;
-  grid-template-columns: auto 1fr;
+  align-items: flex-start;
   gap: 0.75rem;
-  padding: 0.95rem 1.1rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.95rem;
-  background: var(--partner-surface);
-  color: var(--partner-muted);
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 0.9rem;
+  background: var(--hc-cinza-fundo);
+  color: var(--atd-suave);
 }
 
-.atd-closed i {
-  margin-top: 0.15rem;
+.atd-encerrado i {
+  margin-top: 0.1rem;
+  font-size: 1.1rem;
 }
 
-.atd-closed strong {
+.atd-encerrado strong {
   display: block;
-  margin-bottom: 0.2rem;
-  color: var(--partner-text);
+  margin-bottom: 0.15rem;
+  color: var(--hc-tinta);
   font-size: 0.9rem;
 }
 
-.atd-closed p {
+.atd-encerrado p {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   line-height: 1.5;
 }
 
-.atd-panel {
+/* ------------------------------------------------------------------ a mesa */
+
+.atd-mesa__grade {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
   grid-template-columns: minmax(0, 1fr);
-}
-
-.atd-resumo {
-  gap: 1.15rem;
-}
-
-/* Um recado só ocupa a linha inteira; recado + observações dividem a largura. */
-.atd-resumo__context {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
   align-items: start;
 }
 
-.atd-callout {
-  display: grid;
-  gap: 0.55rem;
+/* Estreita: as abas escolhem a metade. */
+.atd-mesa[data-aba='resumo'] .atd-trabalho,
+.atd-mesa[data-aba='anotacoes'] .atd-ficha {
+  display: none;
+}
+
+/* Larga: as duas metades lado a lado, a ficha presa abaixo do cabeçalho do app. */
+@container mesa (min-width: 56rem) {
+  .atd-mesa__abas {
+    display: none;
+  }
+
+  .atd-mesa[data-ficha='sim'] .atd-mesa__grade {
+    grid-template-columns: clamp(18.5rem, 30%, 21.5rem) minmax(0, 1fr);
+  }
+
+  .atd-mesa .atd-ficha__cab h2 {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  .atd-mesa[data-aba] .atd-ficha {
+    position: sticky;
+    top: calc(var(--pj-shell-header-height, 4.25rem) + 1rem);
+    display: flex;
+    max-height: calc(100dvh - var(--pj-shell-header-height, 4.25rem) - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .atd-mesa[data-aba] .atd-trabalho {
+    display: grid;
+  }
+}
+
+/* ------------------------------------------------------------------ ficha do pet */
+
+.atd-ficha {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  padding: 0.95rem 1.05rem;
-  border: 1px solid color-mix(in srgb, var(--partner-primary) 18%, var(--partner-line));
+  border: 1px solid var(--hc-borda);
   border-radius: 1rem;
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--partner-primary-soft) 28%, var(--partner-card)),
-    var(--partner-card) 70%
-  );
+  background: var(--hc-cartao);
+  box-shadow: var(--hc-sombra);
 }
 
-.atd-callout--soft {
-  border-color: var(--partner-line);
-  background: var(--partner-card);
+.atd-ficha__cab {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem 1.15rem 0.9rem;
 }
 
-.atd-callout__head {
+/* Na tela estreita a aba já diz "Resumo do pet": o título fica só para o leitor de tela. */
+.atd-ficha__cab h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+.atd-carimbo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--atd-suave);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+/* Resumo mexido depois da entrega: o que o parceiro leu antes pode estar velho. */
+.atd-carimbo[data-atualizado='true'] {
+  color: var(--hc-pessego-tinta);
+  font-weight: 650;
+}
+
+.atd-ficha__secao {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.95rem 1.15rem 1.05rem;
+  border-top: 1px solid var(--hc-linha);
+}
+
+.atd-ficha__secao--lista {
+  gap: 0.35rem;
+  padding-inline: 0;
+  padding-bottom: 0.25rem;
+}
+
+.atd-ficha__titulo {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-}
-
-.atd-callout__icon {
-  display: grid;
-  width: 1.85rem;
-  height: 1.85rem;
-  place-items: center;
-  border-radius: 0.65rem;
-  background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.85rem;
-}
-
-.atd-callout h3 {
+  gap: 0.45rem;
   margin: 0;
-  color: var(--partner-text);
-  font-size: 0.84rem;
+  color: var(--atd-suave);
+  font-size: 0.72rem;
   font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.atd-callout p {
-  margin: 0;
-  color: var(--partner-text);
+.atd-ficha__titulo i {
+  color: var(--hc-marca);
   font-size: 0.95rem;
-  font-weight: 500;
+}
+
+.atd-ficha__secao--lista .atd-ficha__titulo {
+  padding-inline: 1.15rem;
+}
+
+.atd-ficha__conta {
+  margin-inline-start: auto;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--hc-cinza-fundo);
+  color: var(--hc-cinza-tinta);
+  font-size: 0.7rem;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.atd-ficha__lede,
+.atd-ficha__nada,
+.atd-ficha__texto {
+  margin: 0;
+  color: var(--atd-suave);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.atd-ficha__texto {
+  color: var(--hc-tinta);
+  white-space: pre-line;
+}
+
+.atd-recado {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  background: var(--hc-marca-clara);
+  color: var(--hc-tinta);
+  font-size: 0.9rem;
   line-height: 1.55;
   white-space: pre-line;
 }
 
-.atd-clinical {
+.atd-ficha__vazio {
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 1.15rem 1.6rem;
+  border-top: 1px solid var(--hc-linha);
+  text-align: center;
+}
+
+.atd-ficha__vazio > i {
+  color: var(--hc-marca);
+  font-size: 1.5rem;
+}
+
+.atd-ficha__vazio strong {
+  color: var(--hc-tinta);
+  font-size: 0.92rem;
+}
+
+.atd-ficha__vazio p {
+  margin: 0;
+  color: var(--atd-suave);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.atd-ficha__vazio :deep(.p-button) {
+  margin-top: 0.4rem;
+}
+
+/* Pares rótulo/valor: tratamento contínuo e diário. */
+.atd-par {
+  display: grid;
+  gap: 0.4rem 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  margin: 0;
+}
+
+.atd-par dt {
+  color: var(--atd-suave);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.atd-par dd {
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Tratamento contínuo */
+.atd-trat {
   display: grid;
   gap: 0.75rem;
-}
-
-.atd-clinical__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.65rem;
-  padding-bottom: 0.55rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--partner-line) 85%, transparent);
-}
-
-.atd-clinical__head h2 {
   margin: 0;
-  color: var(--partner-text);
-  font-size: 1rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  padding: 0;
+  list-style: none;
 }
 
-.atd-clinical__head p {
-  margin: 0.2rem 0 0;
-  color: var(--partner-muted);
-  font-size: 0.82rem;
-  line-height: 1.4;
-}
-
-.atd-clinical__count {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.7rem;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 14%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.72rem;
-  font-weight: 750;
-}
-
-/* Cinco listas empilhadas viravam uma página só de rolagem: em telas largas elas
-   dividem a largura, e a lista crítica (alergias) fica sozinha na primeira linha. */
-.atd-folds {
+.atd-trat__item {
   display: grid;
-  gap: 0.55rem;
-  align-items: start;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.6rem;
 }
 
-@media (min-width: 1100px) {
-  .atd-folds {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .atd-fold[data-tone='warm'] {
-    grid-column: 1 / -1;
-  }
+.atd-trat__icone {
+  margin-top: 0.15rem;
+  color: var(--hc-coral-tinta);
+  font-size: 0.95rem;
 }
 
-.atd-fold {
-  border: 1px solid var(--partner-line);
-  border-radius: 1rem;
-  background: var(--partner-card);
-  overflow: clip;
+.atd-trat__corpo {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
 }
 
-.atd-fold[data-tone='warm'] {
-  border-color: color-mix(in srgb, var(--partner-warm-text) 28%, var(--partner-line));
+.atd-trat__corpo strong {
+  color: var(--hc-tinta);
+  font-size: 0.88rem;
 }
 
-.atd-fold[data-open='true'] {
-  box-shadow: 0 10px 24px rgb(var(--partner-shadow-rgb) / 0.04);
+.atd-trat__posologia,
+.atd-trat__obs {
+  margin: 0;
+  color: var(--atd-suave);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.atd-trat__obs span {
+  font-weight: 700;
+}
+
+/* Dados clínicos: uma linha por categoria, sem cartão dentro da ficha. */
+.atd-folds {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.atd-fold + .atd-fold {
+  border-top: 1px solid var(--hc-linha);
 }
 
 .atd-fold__heading {
   margin: 0;
 }
 
-/* Gatilho de seção recolhível: Button com slot, sem o visual de CTA do preset. */
+.atd-fold__row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.7rem;
+  padding: 0.65rem 1.15rem;
+}
+
+/* Gatilho de seção recolhível: Button com slot, sem o visual de CTA do preset (nem a
+   sombra que o hc-tema dá ao botão cheio, que descolava o cabeçalho do corpo). */
 .atd-fold__trigger.p-button {
+  --hc-botao-sombra: none;
   justify-content: flex-start;
   width: 100%;
-  gap: 0.75rem;
-  padding: 0.85rem 0.95rem;
+  gap: 0.7rem;
+  padding: 0.65rem 1.15rem;
   border: 0;
   border-radius: 0;
   background: transparent;
+  box-shadow: none;
   color: inherit;
   font-size: inherit;
   text-align: start;
@@ -2016,427 +2223,194 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .atd-fold__trigger.p-button:not(:disabled):hover,
 .atd-fold__trigger.p-button:not(:disabled):active,
 .atd-fold__trigger.p-button:focus-visible {
+  --hc-botao-sombra: none;
   border: 0;
-  background: color-mix(in srgb, var(--partner-surface) 70%, transparent);
+  background: var(--hc-fundo);
+  box-shadow: none;
   color: inherit;
   outline: none;
 }
 
 .atd-fold__trigger.p-button:focus-visible {
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--partner-primary) 45%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--hc-marca) 50%, transparent);
 }
 
 .atd-fold__icon {
   display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2rem;
+  height: 2rem;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 0.7rem;
-  background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.9rem;
+  border-radius: 0.6rem;
+  background: var(--hc-marca-clara);
+  color: var(--hc-marca-forte);
+  font-size: 0.95rem;
 }
 
+/* Alergia registrada: a urgência mora no ícone. */
 .atd-fold[data-tone='warm'] .atd-fold__icon {
-  background: color-mix(in srgb, var(--partner-warm-text) 16%, transparent);
-  color: var(--partner-warm-text);
+  background: var(--hc-coral-fundo);
+  color: var(--hc-coral-tinta);
+}
+
+/* Categoria vazia recua: ícone apagado, sem nada a abrir. */
+.atd-fold[data-vazio='true'] .atd-fold__icon {
+  background: var(--hc-fundo);
+  color: var(--atd-fraco);
 }
 
 .atd-fold__copy {
   display: grid;
-  gap: 0.1rem;
+  gap: 0.05rem;
   min-width: 0;
   flex: 1;
 }
 
-.atd-fold__copy strong {
-  color: var(--partner-text);
-  font-size: 0.92rem;
-  font-weight: 750;
-  letter-spacing: -0.01em;
-}
-
-.atd-fold__copy small {
-  color: var(--partner-faint);
-  font-size: 0.74rem;
-  font-weight: 600;
-}
-
-.atd-fold__chevron {
-  color: var(--partner-faint);
-  font-size: 0.78rem;
-}
-
-.atd-fold__body {
-  padding-block: 0 0.75rem;
-  padding-inline: 0.85rem 0.55rem;
-}
-
-.atd-fold__scroll {
-  max-height: min(14.5rem, 42vh);
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding-block: 0.1rem 0.15rem;
-  padding-inline: 0 0.45rem;
-  border-radius: 0.75rem;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--partner-primary) 42%, transparent) transparent;
-}
-
-.atd-fold__scroll:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--partner-primary) 45%, transparent);
-  outline-offset: 2px;
-}
-
-.atd-fold__scroll::-webkit-scrollbar {
-  width: 0.4rem;
-}
-
-.atd-fold__scroll::-webkit-scrollbar-track {
-  margin: 0.2rem 0;
-  background: transparent;
-}
-
-.atd-fold__scroll::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 38%, var(--partner-line));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--partner-card) 55%, transparent);
-}
-
-.atd-fold__scroll::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--partner-primary-strong) 55%, var(--partner-line));
-}
-
-.atd-fold__scroll::-webkit-scrollbar-corner {
-  background: transparent;
-}
-
-.atd-items {
-  display: grid;
-  gap: 0.4rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+.atd-fold__title {
   margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Alergia tem texto mais longo e ocupa a linha inteira: menos colunas, mais leitura. */
-.atd-fold[data-tone='warm'] .atd-items {
-  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
-}
-
-.atd-items li {
-  display: grid;
-  gap: 0.28rem;
-  align-content: start;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--partner-line) 90%, transparent);
-  border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--partner-surface) 72%, var(--partner-card));
-}
-
-.atd-items strong {
-  color: var(--partner-text);
-  font-size: 0.86rem;
+  color: var(--hc-tinta);
+  font-size: 0.88rem;
   font-weight: 700;
   line-height: 1.3;
 }
 
-.atd-item__meta {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  padding: 0.18rem 0.45rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 12%, transparent);
-  color: var(--partner-muted);
-  font-size: 0.72rem;
+.atd-fold__sub {
+  overflow: hidden;
+  margin: 0;
+  color: var(--atd-suave);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A frase do motivo é o conteúdo: lê inteira, quebra se precisar. */
+.atd-fold[data-vazio='true'] .atd-fold__sub {
+  white-space: normal;
+}
+
+.atd-fold__chevron {
+  color: var(--atd-fraco);
+  font-size: 0.78rem;
+}
+
+/* Itens alinhados ao título, não à borda; sem rolagem por dentro: quem acha longa, recolhe. */
+.atd-items {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding-block: 0 0.8rem;
+  padding-inline: calc(1.15rem + 2rem + 0.7rem) 1.15rem;
+  list-style: none;
+}
+
+.atd-items li {
+  display: grid;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.atd-items strong {
+  color: var(--hc-tinta);
+  font-size: 0.84rem;
   font-weight: 650;
   line-height: 1.35;
+}
+
+.atd-item__meta {
+  color: var(--atd-suave);
+  font-size: 0.76rem;
+  line-height: 1.4;
   overflow-wrap: anywhere;
 }
 
-.atd-item--destaque {
-  border-color: color-mix(in srgb, var(--partner-warm-text) 35%, var(--partner-line));
-  background: color-mix(in srgb, var(--partner-warm-bg) 55%, var(--partner-card));
-}
-
 .atd-item--destaque strong {
-  color: var(--partner-warm-text);
+  color: var(--hc-coral-tinta);
 }
 
-.atd-item--destaque .atd-item__meta {
-  background: color-mix(in srgb, var(--partner-warm-text) 14%, transparent);
-  color: var(--partner-warm-text);
-}
-
-.atd-stamp {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin: 0;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--partner-surface) 70%, var(--partner-card));
-  color: var(--partner-muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.atd-stamp i {
-  color: var(--partner-faint);
-  font-size: 0.75rem;
-}
-
-/* Resumo mexido depois da entrega: o que o parceiro leu antes pode estar velho. */
-.atd-stamp[data-atualizado='true'] {
-  border-color: color-mix(in srgb, var(--partner-amber-text) 30%, var(--partner-line));
-  background: color-mix(in srgb, var(--partner-amber-bg) 60%, var(--partner-card));
-  color: var(--partner-amber-text);
-}
-
-.atd-stamp[data-atualizado='true'] i {
-  color: inherit;
-}
-
-/* Bloco de categoria compartilhada que veio vazio: a frase é o conteúdo. */
-.atd-bloco-vazio,
-.atd-fold__vazio {
-  margin: 0;
-  padding: 0.7rem 0.85rem;
-  border: 1px dashed color-mix(in srgb, var(--partner-line) 92%, transparent);
-  border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--partner-surface) 55%, transparent);
-  color: var(--partner-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.atd-docs,
-.atd-diario {
+/* Documentos */
+.atd-docs {
   display: grid;
-  gap: 0.75rem;
-}
-
-.atd-docs__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.65rem;
-  padding-bottom: 0.55rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--partner-line) 85%, transparent);
-}
-
-.atd-docs__head h2 {
-  margin: 0;
-  color: var(--partner-text);
-  font-size: 1rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-}
-
-.atd-docs__head p {
-  margin: 0.2rem 0 0;
-  color: var(--partner-muted);
-  font-size: 0.82rem;
-  line-height: 1.4;
-}
-
-.atd-docs__count {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.7rem;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 14%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.72rem;
-  font-weight: 750;
-}
-
-.atd-docs__list {
-  display: grid;
-  gap: 0.5rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .atd-doc {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.6rem 0.75rem;
-  padding: 0.75rem 0.85rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.95rem;
-  background: var(--partner-card);
+  gap: 0.6rem;
+  padding-block: 0.5rem;
 }
 
-.atd-doc__icon {
-  display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.7rem;
-  background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.9rem;
+.atd-doc + .atd-doc {
+  border-top: 1px solid var(--hc-linha);
 }
 
-.atd-doc__copy {
+.atd-doc__icone {
+  color: var(--hc-marca);
+  font-size: 1.15rem;
+}
+
+.atd-doc__texto {
   display: grid;
-  gap: 0.15rem;
-  flex: 1 1 14rem;
+  gap: 0.05rem;
   min-width: 0;
 }
 
-.atd-doc__copy strong {
+.atd-doc__texto strong {
   overflow: hidden;
-  color: var(--partner-text);
-  font-size: 0.9rem;
-  font-weight: 700;
+  color: var(--hc-tinta);
+  font-size: 0.84rem;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.atd-doc__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.3rem 0.45rem;
-  color: var(--partner-muted);
-  font-size: 0.74rem;
-  font-weight: 600;
+.atd-doc__texto small,
+.atd-doc__sem {
+  color: var(--atd-suave);
+  font-size: 0.72rem;
+  line-height: 1.4;
 }
 
-.atd-doc__tipo {
-  display: inline-flex;
-  padding: 0.12rem 0.45rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 12%, transparent);
-  color: var(--partner-primary-strong);
-}
-
-.atd-doc__empty {
-  margin: 0;
-  color: var(--partner-faint);
-  font-size: 0.76rem;
-  font-weight: 600;
-}
-
-.atd-doc__files {
-  display: grid;
-  gap: 0.4rem;
-  margin-block: 0;
-  margin-inline: auto 0;
-  padding: 0;
-  list-style: none;
-}
-
-.atd-doc__files li {
+.atd-doc__acoes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.4rem;
+  gap: 0.3rem;
 }
 
-.atd-doc__file-label {
-  margin-inline-end: 0.15rem;
-  color: var(--partner-faint);
-  font-size: 0.72rem;
+.atd-doc__n {
+  color: var(--atd-suave);
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
-.atd-trat__list,
-.atd-diario__list {
+/* Diário */
+.atd-diario {
   display: grid;
-  gap: 0.55rem;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 0.85rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.atd-trat__entry,
-.atd-diario__entry {
+.atd-diario__dia {
   display: grid;
-  gap: 0.55rem;
-  align-content: start;
-  padding: 0.85rem 0.95rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.95rem;
-  background: var(--partner-card);
-}
-
-.atd-trat__head,
-.atd-diario__head {
-  display: flex;
-  align-items: center;
   gap: 0.45rem;
-  color: var(--partner-text);
-  font-size: 0.86rem;
 }
 
-.atd-trat__head svg,
-.atd-diario__head i {
-  color: var(--partner-primary-strong);
-  font-size: 0.8rem;
+.atd-diario__dia + .atd-diario__dia {
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--hc-linha);
 }
 
-/* O coração é componente do Phosphor (peso `fill`), não a fonte: os 25% que o `.ph::before`
- * compensa vão no tamanho. */
-.atd-trat__head svg {
-  font-size: 1rem;
-}
-
-.atd-trat__posologia {
-  margin: 0;
-  color: var(--partner-amber-text);
+.atd-diario__data {
+  color: var(--hc-tinta);
   font-size: 0.84rem;
-  font-weight: 650;
-}
-
-.atd-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.atd-chip.p-button {
-  padding: 0.3rem 0.65rem;
-  border-color: var(--partner-line);
-  background: var(--partner-card);
-  color: var(--partner-muted);
-  font-size: 0.76rem;
-}
-
-.atd-chip.p-button :deep(.p-button-label) {
-  font-weight: 650;
-}
-
-.atd-chip.p-button:not(:disabled):hover {
-  border-color: var(--partner-primary-strong);
-  background: var(--partner-card);
-  color: var(--partner-text);
-}
-
-.atd-chip--on.p-button,
-.atd-chip--on.p-button:not(:disabled):hover {
-  border-color: var(--partner-primary-strong);
-  background: color-mix(in srgb, var(--partner-primary-strong) 12%, var(--partner-card));
-  color: var(--partner-primary-strong);
-}
-
-.atd-chip.p-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .atd-diario__tags {
@@ -2446,626 +2420,198 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 }
 
 .atd-diario__tag {
-  display: inline-flex;
-  padding: 0.18rem 0.5rem;
+  padding: 0.12rem 0.5rem;
   border-radius: 999px;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 650;
 }
 
 .atd-diario__tag--sintoma {
-  background: color-mix(in srgb, var(--partner-warm-bg) 65%, var(--partner-card));
-  color: var(--partner-warm-text);
+  background: var(--hc-coral-fundo);
+  color: var(--hc-coral-tinta);
 }
 
 .atd-diario__tag--doenca {
-  background: color-mix(in srgb, var(--partner-amber-bg) 70%, var(--partner-card));
-  color: var(--partner-amber-text);
+  background: var(--hc-pessego-fundo);
+  color: var(--hc-pessego-tinta);
 }
 
-.atd-trat__grid,
-.atd-diario__grid {
-  display: grid;
-  gap: 0.35rem;
-  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+.atd-diario__texto {
   margin: 0;
-}
-
-.atd-trat__grid dt,
-.atd-diario__grid dt {
-  color: var(--partner-faint);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.atd-trat__grid dd,
-.atd-diario__grid dd {
-  margin: 0.1rem 0 0;
-  color: var(--partner-text);
-  font-size: 0.82rem;
-  font-weight: 650;
-}
-
-.atd-trat__text span,
-.atd-diario__text span {
-  display: block;
-  color: var(--partner-faint);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.atd-trat__text p,
-.atd-diario__text p {
-  margin: 0.15rem 0 0;
-  color: var(--partner-text);
-  font-size: 0.85rem;
+  color: var(--hc-tinta);
+  font-size: 0.8rem;
   line-height: 1.5;
   white-space: pre-line;
+}
+
+.atd-diario__texto span {
+  color: var(--atd-suave);
+  font-weight: 700;
 }
 
 .atd-diario__fotos {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-  padding-top: 0.15rem;
-  border-top: 1px solid color-mix(in srgb, var(--partner-line) 88%, transparent);
-}
-
-.atd-diario__fotos-label {
-  color: var(--partner-faint);
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-.atd-notes__layout {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-}
-
-.atd-notes__layout--with-form {
-  grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.85fr);
-}
-
-/* Prescrição e exames solicitados não cabem numa coluna de 18rem. */
-.atd-notes__layout--structured {
-  grid-template-columns: minmax(0, 1fr) minmax(23rem, 1fr);
-}
-
-/* Formulário por tipo passa da altura da viewport: preso no topo, o botão de
-   registrar ficaria fora da tela. Aqui ele rola junto com a página. */
-.atd-notes__layout--structured .atd-composer {
-  position: static;
-}
-
-.atd-notes__feed,
-.atd-composer {
-  min-width: 0;
-}
-
-.atd-notes__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.65rem;
-  margin-bottom: 0.85rem;
-  padding-bottom: 0.65rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--partner-line) 85%, transparent);
-}
-
-.atd-notes__head h2 {
-  margin: 0;
-  color: var(--partner-text);
-  font-size: 1rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-}
-
-.atd-notes__head p {
-  margin: 0.2rem 0 0;
-  color: var(--partner-muted);
-  font-size: 0.82rem;
-  line-height: 1.4;
-}
-
-.atd-notes__count {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.7rem;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 14%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.72rem;
-  font-weight: 750;
-}
-
-/* Vazio da página: serve tanto a aba de resumo quanto o feed de anotações. */
-.atd-empty {
-  display: grid;
-  justify-items: center;
-  gap: 0.4rem;
-  padding: 2.2rem 1.25rem;
-  border: 1px dashed color-mix(in srgb, var(--partner-primary) 28%, var(--partner-line));
-  border-radius: 1.1rem;
-  background: color-mix(in srgb, var(--partner-surface) 55%, var(--partner-card));
-  text-align: center;
-}
-
-.atd-empty__icon {
-  display: grid;
-  width: 2.6rem;
-  height: 2.6rem;
-  margin-bottom: 0.25rem;
-  place-items: center;
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 1.05rem;
-}
-
-.atd-empty strong {
-  color: var(--partner-text);
-  font-size: 0.95rem;
-}
-
-.atd-empty p {
-  margin: 0;
-  max-width: 26rem;
-  color: var(--partner-muted);
-  font-size: 0.84rem;
-  line-height: 1.45;
-}
-
-.atd-empty :deep(.p-button) {
-  margin-top: 0.55rem;
-}
-
-.atd-timeline {
-  display: grid;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.atd-timeline__item {
-  display: grid;
-  grid-template-columns: 1.25rem minmax(0, 1fr);
-  gap: 0.75rem;
-  align-items: stretch;
-}
-
-.atd-timeline__rail {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  padding-top: 1.15rem;
-}
-
-.atd-timeline__rail::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  transform: translateX(-50%);
-  background: color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
-}
-
-.atd-timeline__item:first-child .atd-timeline__rail::before {
-  top: 1.15rem;
-}
-
-.atd-timeline__item:last-child .atd-timeline__rail::before {
-  bottom: calc(100% - 1.35rem);
-}
-
-.atd-timeline__dot {
-  position: relative;
-  z-index: 1;
-  width: 0.7rem;
-  height: 0.7rem;
-  border: 2px solid var(--partner-card);
-  border-radius: 999px;
-  background: var(--partner-primary-strong);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--partner-primary) 28%, transparent);
-}
-
-.atd-note {
-  display: grid;
-  gap: 0.7rem;
-  margin-bottom: 0.75rem;
-  padding: 1rem 1.05rem 1.05rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 1.05rem;
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--partner-primary-soft) 18%, var(--partner-card)),
-    var(--partner-card) 42%
-  );
-  box-shadow: 0 10px 22px rgb(var(--partner-shadow-rgb) / 0.04);
-}
-
-.atd-note__head {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.atd-note__title {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.45rem 0.75rem;
-}
-
-.atd-note__service {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.7rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.78rem;
-  font-weight: 750;
-}
-
-.atd-note__time {
-  color: var(--partner-faint);
-  font-size: 0.76rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.atd-note__byline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.3rem 0.4rem;
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.atd-note__byline i {
-  color: var(--partner-primary-strong);
-  font-size: 0.72rem;
-}
-
-.atd-note__sep {
-  color: var(--partner-faint);
-}
-
-.atd-note__body {
-  margin: 0;
-  color: var(--partner-text);
-  font-size: 0.92rem;
-  font-weight: 500;
-  line-height: 1.55;
-  white-space: pre-line;
-}
-
-.atd-note__files {
-  display: grid;
-  gap: 0.45rem;
-  padding-top: 0.15rem;
-  border-top: 1px solid color-mix(in srgb, var(--partner-line) 88%, transparent);
-}
-
-.atd-note__files-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin: 0;
-  color: var(--partner-faint);
-  font-size: 0.75rem;
-  font-weight: 750;
-}
-
-.atd-note__files-label span {
-  display: inline-flex;
-  min-width: 1.2rem;
-  justify-content: center;
-  padding: 0.08rem 0.35rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 14%, transparent);
-  color: var(--partner-primary-strong);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.atd-note__attachments {
-  display: grid;
-  gap: 0.4rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Anexo clicável: Button com slot (ícone + nome + tamanho), sem o visual de CTA do preset. */
-.atd-note__file.p-button {
-  justify-content: flex-start;
-  width: 100%;
-  gap: 0.65rem;
-  padding: 0.55rem 0.7rem;
-  border: 1px solid color-mix(in srgb, var(--partner-line) 90%, transparent);
-  border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--partner-surface) 70%, var(--partner-card));
-  color: inherit;
-  font-size: inherit;
-  text-align: start;
-  transition:
-    border-color 150ms ease,
-    background 150ms ease;
-}
-
-.atd-note__file.p-button:not(:disabled):hover,
-.atd-note__file.p-button:not(:disabled):active,
-.atd-note__file.p-button:focus-visible {
-  border-color: color-mix(in srgb, var(--partner-primary) 36%, var(--partner-line));
-  background: color-mix(in srgb, var(--partner-primary-soft) 22%, var(--partner-card));
-  color: inherit;
-  outline: none;
-}
-
-.atd-note__file.p-button:disabled {
-  cursor: wait;
-  opacity: 0.72;
-}
-
-.atd-note__file-icon {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.65rem;
-  background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.85rem;
-}
-
-.atd-note__file-copy {
-  display: grid;
-  gap: 0.1rem;
-  min-width: 0;
-  flex: 1;
-}
-
-.atd-note__file-copy strong {
-  overflow: hidden;
-  color: var(--partner-text);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.atd-note__file-copy small {
-  color: var(--partner-muted);
-  font-size: 0.72rem;
-}
-
-.atd-note__file-go {
-  color: var(--partner-faint);
-  font-size: 0.72rem;
-}
-
-/* Mesma coluna do composer, tom neutro: é aviso de escopo, não de erro. */
-.atd-readonly {
-  display: flex;
-  gap: 0.7rem;
-  align-items: flex-start;
-  padding: 0.95rem 1rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--partner-surface) 55%, var(--partner-card));
-}
-
-.atd-readonly i {
-  margin-top: 0.1rem;
-  color: var(--partner-muted);
-}
-
-.atd-readonly strong {
-  display: block;
-  margin-bottom: 0.2rem;
-  font-size: 0.92rem;
-}
-
-.atd-readonly p {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.86rem;
-  line-height: 1.5;
-}
-
-.atd-composer {
-  position: sticky;
-  top: calc(var(--pj-shell-header-height, 4.25rem) + 1rem);
-  display: grid;
-  gap: 0.9rem;
-  padding: 1.1rem 1.1rem 1.15rem;
-  border: 1px solid color-mix(in srgb, var(--partner-primary) 20%, var(--partner-line));
-  border-radius: 1.15rem;
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--partner-primary-soft) 32%, var(--partner-card)),
-    var(--partner-card) 48%
-  );
-  box-shadow: 0 14px 28px rgb(var(--partner-shadow-rgb) / 0.05);
-}
-
-.atd-composer__head {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.atd-composer__badge {
-  display: grid;
-  width: 2.35rem;
-  height: 2.35rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--partner-primary) 18%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.95rem;
-}
-
-.atd-composer__head h3 {
-  margin: 0;
-  color: var(--partner-text);
-  font-size: 0.98rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-}
-
-.atd-composer__head p {
-  margin: 0.25rem 0 0;
-  color: var(--partner-muted);
-  font-size: 0.8rem;
-  line-height: 1.4;
-}
-
-.atd-composer__error {
-  margin: 0;
-  padding: 0.7rem 0.85rem;
-  border-radius: 0.75rem;
-  background: var(--partner-warm-bg);
-  color: var(--partner-warm-text);
-  font-size: 0.82rem;
-}
-
-.atd-composer__fields {
-  display: grid;
-  gap: 0.8rem;
-}
-
-.atd-composer__footer :deep(.p-button) {
-  width: 100%;
-}
-
-.atd-field {
-  display: grid;
   gap: 0.35rem;
 }
 
-.atd-field label,
-.atd-field__label {
-  color: var(--partner-text);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
+/* ------------------------------------------------------------------ trabalho */
 
-.atd-anexo-list {
+.atd-trabalho {
   display: grid;
-  gap: 0.45rem;
-  grid-template-columns: minmax(0, 1fr);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 1.5rem;
+  align-content: start;
+  min-width: 0;
 }
 
-.atd-anexo-list li {
-  display: grid;
-  gap: 0.55rem;
-  padding: 0.7rem 0.75rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.85rem;
-  background: var(--partner-card);
-}
-
-.atd-anexo-list__top {
+/* Tom neutro: é aviso de escopo, não de erro. */
+.atd-aviso {
   display: flex;
   align-items: flex-start;
-  gap: 0.45rem;
+  gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 0.9rem;
+  background: var(--hc-cartao);
 }
 
-.atd-anexo-list__info {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 0.45rem;
+.atd-aviso i {
+  margin-top: 0.15rem;
+  color: var(--atd-suave);
+}
+
+.atd-aviso strong {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--hc-tinta);
+  font-size: 0.9rem;
+}
+
+.atd-aviso p {
+  margin: 0;
+  color: var(--atd-suave);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* A folha da anotação: um cartão, seções separadas por fio, nenhum cartão dentro. */
+.atd-folha {
   min-width: 0;
-  color: var(--partner-text);
+  border: 1px solid var(--hc-borda);
+  border-radius: 1rem;
+  background: var(--hc-cartao);
+  box-shadow: var(--hc-sombra);
+}
+
+.atd-folha__cab {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.25rem var(--folha-pad-x) 0;
+}
+
+.atd-folha__cab h2 {
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.atd-folha__cab p {
+  margin: 0;
+  color: var(--atd-suave);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.atd-folha__secao {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.25rem var(--folha-pad-x);
+  border-top: 1px solid var(--folha-fio);
+}
+
+.atd-folha__cab + .atd-folha__secao {
+  padding-top: 1rem;
+  border-top: 0;
+}
+
+.atd-campo {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.atd-campo label {
+  color: var(--hc-tinta);
   font-size: 0.8rem;
-}
-
-.atd-anexo-list__info span {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-weight: 650;
 }
 
-.atd-anexo-list__info small {
-  color: var(--partner-muted);
-  font-weight: 600;
-  white-space: nowrap;
+.atd-campo :deep(.p-select) {
+  width: 100%;
 }
 
-.atd-anexo-list__type {
+.atd-folha__duas {
   display: grid;
-  gap: 0.28rem;
+  gap: 0.9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.atd-anexo-list__type label {
-  color: var(--partner-muted);
-  font-size: 0.72rem;
-  font-weight: 700;
+.atd-folha__secao-cab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
 }
 
-.atd-anexo-list__select {
-  width: 100%;
+.atd-folha__secao-cab h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
 }
 
-.atd-anexo-list__type :deep(.atd-anexo-list__select.p-select) {
-  width: 100%;
-  border-color: color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
-  background: color-mix(in srgb, var(--partner-surface) 70%, var(--partner-card));
+.atd-folha__secao-cab h3 i {
+  color: var(--hc-marca);
+  font-size: 1.05rem;
 }
 
-.atd-anexo-list__type :deep(.atd-anexo-list__select .p-select-label) {
-  color: var(--partner-text);
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-.atd-anexo-list__type :deep(.atd-anexo-list__select .p-select-label.p-placeholder) {
-  color: var(--partner-muted);
-  font-weight: 500;
-}
-
-.atd-anexo-list__type :deep(.atd-anexo-list__select .p-select-dropdown) {
-  color: var(--partner-primary-strong);
-}
-
-.atd-file-cta {
+/* Rótulo que abre o seletor de arquivo, com a mesma cara dos botões contornados da folha. */
+.atd-anexar {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  justify-self: start;
-  padding: 0.5rem 0.85rem;
-  border: 1px dashed color-mix(in srgb, var(--partner-primary) 45%, var(--partner-line));
-  border-radius: 0.75rem;
-  color: var(--partner-primary-strong);
-  font-size: 0.8rem;
+  min-height: 2.1rem;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--atd-campo-borda);
+  border-radius: 999px;
+  background: var(--hc-cartao);
+  color: var(--hc-tinta);
+  font-size: 0.82rem;
   font-weight: 650;
   cursor: pointer;
+  transition:
+    border-color 150ms ease-out,
+    background 150ms ease-out;
 }
 
-.atd-file-cta input {
+.atd-anexar:hover {
+  border-color: var(--atd-campo-borda-hover);
+  background: var(--hc-fundo);
+}
+
+.atd-anexar:focus-within {
+  outline: 2px solid var(--hc-marca);
+  outline-offset: 2px;
+}
+
+.atd-anexar input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -3074,48 +2620,317 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   white-space: nowrap;
 }
 
-.atd-file-cta:hover {
-  background: color-mix(in srgb, var(--partner-primary-soft) 28%, transparent);
+.atd-anexar i {
+  color: var(--hc-marca);
 }
 
-.atd-file-cta:focus-within {
-  outline: 2px solid var(--partner-primary);
-  outline-offset: 2px;
+.atd-anexos {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.atd-file-hint {
-  color: var(--partner-faint);
+.atd-anexos li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(11rem, 14rem) auto;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.45rem 0.45rem 0.8rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 0.75rem;
+  background: var(--hc-fundo);
+}
+
+.atd-anexos__icone {
+  color: var(--hc-marca);
+  font-size: 1.1rem;
+}
+
+.atd-anexos__nome {
+  display: grid;
+  min-width: 0;
+}
+
+.atd-anexos__nome strong {
+  overflow: hidden;
+  color: var(--hc-tinta);
+  font-size: 0.84rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.atd-anexos__nome small {
+  color: var(--atd-suave);
   font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.atd-anexos__tipo {
+  width: 100%;
+}
+
+.atd-anexos__remover.p-button {
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--atd-suave);
+}
+
+.atd-anexos__remover.p-button:not(:disabled):hover {
+  background: var(--hc-coral-fundo);
+  color: var(--hc-coral-tinta);
+}
+
+.atd-folha__nota {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  color: var(--atd-suave);
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
-@media (max-width: 1180px) {
-  .atd-notes__layout--structured {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.atd-folha__nota i {
+  color: var(--hc-lilas-tinta);
 }
 
-@media (max-width: 960px) {
-  .atd-notes__layout--with-form {
-    grid-template-columns: minmax(0, 1fr);
-  }
+/* Preso ao pé da tela enquanto a folha estiver nela: registrar nunca fica a um scroll de
+   distância, e o erro aparece ao lado de quem clicou. */
+.atd-folha__rodape {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem 1rem;
+  padding: 0.85rem var(--folha-pad-x);
+  border-top: 1px solid var(--hc-borda);
+  border-radius: 0 0 1rem 1rem;
+  background: var(--hc-cartao);
+  box-shadow: 0 -10px 24px -18px rgb(20 32 28 / 35%);
+}
 
-  .atd-composer {
-    position: static;
-    order: -1;
-  }
+.atd-folha__erro {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex: 1 1 16rem;
+  margin: 0;
+  color: var(--hc-coral-tinta);
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
 
-  .atd-notes__layout--with-form {
-    display: flex;
-    flex-direction: column;
+.atd-folha__enviar.p-button {
+  min-width: 12rem;
+}
+
+/* ------------------------------------------------------------------ histórico */
+
+.atd-hist {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.atd-hist__cab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.atd-hist__cab h2 {
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.atd-hist__conta {
+  color: var(--atd-suave);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.atd-hist__lede {
+  margin: -0.35rem 0 0;
+  color: var(--atd-suave);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.atd-hist__vazio {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem;
+  border: 1px dashed var(--atd-campo-borda);
+  border-radius: 1rem;
+  color: var(--atd-suave);
+}
+
+.atd-hist__vazio i {
+  margin-top: 0.1rem;
+  font-size: 1.15rem;
+}
+
+.atd-hist__vazio strong {
+  display: block;
+  color: var(--hc-tinta);
+  font-size: 0.9rem;
+}
+
+.atd-hist__vazio p {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.atd-hist__lista {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.atd-nota {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.15rem var(--folha-pad-x) 1.25rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 1rem;
+  background: var(--hc-cartao);
+}
+
+.atd-nota__cab {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.atd-nota__quem {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.atd-nota__quem h3 {
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+.atd-nota__quem p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  color: var(--atd-suave);
+  font-size: 0.8rem;
+}
+
+.atd-nota__quando {
+  flex: 0 0 auto;
+  color: var(--atd-suave);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.atd-nota__texto {
+  margin: 0;
+  color: var(--hc-tinta);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.atd-nota__anexos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Anexo clicável: Button com slot (ícone + nome + tamanho), sem o visual de CTA do preset. */
+.atd-nota__anexo.p-button {
+  --hc-botao-sombra: none;
+  gap: 0.5rem;
+  max-width: 100%;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--hc-borda);
+  border-radius: 0.65rem;
+  background: var(--hc-fundo);
+  box-shadow: none;
+  color: var(--hc-tinta);
+  font-size: 0.82rem;
+  text-align: start;
+  transition: border-color 150ms ease-out;
+}
+
+.atd-nota__anexo.p-button:not(:disabled):hover,
+.atd-nota__anexo.p-button:focus-visible {
+  --hc-botao-sombra: none;
+  border-color: var(--hc-marca);
+  background: var(--hc-fundo);
+  box-shadow: none;
+  color: var(--hc-tinta);
+}
+
+.atd-nota__anexo.p-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.atd-nota__anexo i {
+  color: var(--hc-marca);
+}
+
+.atd-nota__anexo-nome {
+  overflow: hidden;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.atd-nota__anexo small {
+  color: var(--atd-suave);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atd-anexar,
+  .atd-nota__anexo.p-button {
+    transition: none;
   }
 }
 
 @media (max-width: 640px) {
-  .atd-hero__facts,
-  .atd-hero__fact {
-    flex: 1 1 auto;
-    width: 100%;
+  .atd-folha__duas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .atd-anexos li {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .atd-anexos__tipo {
+    grid-column: 1 / -1;
   }
 }
 </style>
