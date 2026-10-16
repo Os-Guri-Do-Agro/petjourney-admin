@@ -2,15 +2,7 @@
 import Button from 'primevue/button'
 import Popover from 'primevue/popover'
 import ToggleSwitch from 'primevue/toggleswitch'
-import {
-  computed,
-  defineAsyncComponent,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  ref,
-  watch,
-} from 'vue'
+import { computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
@@ -60,10 +52,7 @@ const logoutConfirmVisible = ref(false)
 const parceiroStore = useParceiroStore()
 const usuarioPerfilStore = useUsuarioPerfilStore()
 const { open: openCupomResgate, canOpen: canOpenCupomResgate } = useCupomResgateModal()
-const {
-  visible: cupomComingSoonVisible,
-  open: openCupomComingSoon,
-} = useCupomComingSoon()
+const { visible: cupomComingSoonVisible, open: openCupomComingSoon } = useCupomComingSoon()
 const { navigationSections, navigationGroups, overviewItem, hasClinicalProfile } =
   useAppNavigation()
 const { logout } = useLogout()
@@ -94,9 +83,7 @@ const drawerOpen = computed(() =>
 )
 
 const navigatorHidden = computed(() =>
-  compactViewport.value
-    ? !compactDrawerOpen.value
-    : isListNavigator.value && railCollapsed.value,
+  compactViewport.value ? !compactDrawerOpen.value : isListNavigator.value && railCollapsed.value,
 )
 
 const panelHidden = computed(() => !compactViewport.value && railCollapsed.value)
@@ -194,13 +181,15 @@ const ClinicBuscaGlobal = defineAsyncComponent(
 
 /** O rótulo da tecla segue a máquina: num Mac, `Ctrl` é a combinação errada e ninguém a usa. */
 const atalhoDaBusca = computed(() =>
-  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
-    ? '⌘K'
-    : 'Ctrl+K',
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl+K',
 )
 const authUser = computed(() => getAuthUser())
-const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
-/* A moldura é escura nos dois modos (ver `molduraStyle`): o logotipo é sempre o do fundo escuro. */
+/*
+ * A pata do trilho: no claro, a pata sálvia num ladrilho branco (sobre a moldura sálvia, a pata
+ * sálvia num ladrilho sálvia sumia); no escuro, a pata clara sobre o ladrilho sálvia da ação cheia.
+ */
+const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-clara.png' : '/pata-escura.png'))
+/* O logotipo de letra clara; na moldura sálvia ele escurece por filtro (`--shell-wordmark-filtro`). */
 const logoHeaderUrl = logoDarkUrl
 
 type NavigationItem = AppNavigationItem
@@ -263,48 +252,51 @@ const shellStyle = computed(() => {
 })
 
 /*
- * A moldura verde-azulada (15/10/2026, em teste): no claro, menu e cabeçalho saem do branco dos
- * cartões e vão para o teal da pílula cheia — "o tema claro está claro demais". O escuro fica como
- * está. Só a moldura troca de tokens: o conteúdo continua na paleta clara, e o menu da conta, que
- * sai para o `body`, também.
+ * A moldura sálvia (16/10/2026): no claro, menu e cabeçalho na Folha de Sálvia (#84C1B4), a cor da
+ * casa. Antes era o teal escuro da pílula cheia (#1F6457, 15/10), e o usuário pediu a sálvia de
+ * volta. O escuro fica como está. Só a moldura troca de tokens: o conteúdo continua na paleta clara,
+ * e o menu da conta, que sai para o `body`, também.
  *
- * Mesma lógica do escuro: texto claro, o que está aberto num chip translúcido, controles
- * contornados. Contrastes sobre #1F6457: texto 6,9:1, apagado 5:1; sobre o trilho, mais.
+ * Branco sobre #84C1B4 fica em 2:1, então a tinta da moldura é escura: #10302A dá 7,6:1 no painel
+ * e 6,4:1 no trilho, um degrau mais fundo; o apagado #1D4038, 6,1:1 e 5:1 — acima de 4,5:1 nos
+ * rótulos de 11 px. O que está aberto ganha um chip branco translúcido.
  */
 const molduraStyle = computed(() =>
   isDarkMode.value
     ? {}
     : {
-        '--shell-surface': '#1f6457',
-        '--shell-surface-soft': 'rgb(255 255 255 / 8%)',
-        '--shell-brand': '#1a574c',
-        '--shell-line': 'rgb(255 255 255 / 16%)',
-        /*
-         * Quase branco, e não o sálvia apagado: o #C8E0D9 passava de 5:1 no papel e sumia na tela —
-         * o traço fino do Phosphor regular sobre o teal pede tinta forte. Texto 6,4:1; rótulo 5,5:1.
-         */
-        '--shell-text': '#ffffff',
-        '--shell-muted': '#ecf6f2',
-        '--shell-soft': '#d4e9e2',
-        '--shell-on-brand': '#ecf6f2',
-        '--shell-hover': 'rgb(255 255 255 / 10%)',
-        '--shell-nav-hover': 'rgb(255 255 255 / 10%)',
+        '--shell-surface': '#84c1b4',
+        '--shell-surface-soft': 'rgb(255 255 255 / 30%)',
+        '--shell-brand': '#78b8aa',
+        '--shell-line': 'rgb(16 48 42 / 14%)',
+        '--shell-text': '#10302a',
+        '--shell-muted': '#1d4038',
+        '--shell-soft': '#1d4038',
+        '--shell-on-brand': '#1d4038',
+        '--shell-hover': 'rgb(255 255 255 / 30%)',
+        '--shell-nav-hover': 'rgb(255 255 255 / 30%)',
         /* Ícone um degrau maior: o traço fino lê melhor com mais corpo. */
         '--shell-nav-icone': '1rem',
         '--shell-rail-icone': '1.15rem',
-        '--shell-accent': '#8fd9c8',
-        '--shell-accent-strong': '#effaf6',
-        '--shell-accent-soft': 'rgb(255 255 255 / 14%)',
-        '--shell-cream': 'rgb(255 255 255 / 14%)',
-        '--shell-rail-active-bg': 'rgb(255 255 255 / 14%)',
-        '--shell-nav-active-text': '#ffffff',
-        /* No item aberto o ladrilho inverte: branco, com o ícone no teal da moldura. */
+        '--shell-accent': '#10302a',
+        '--shell-accent-strong': '#10302a',
+        '--shell-accent-soft': 'rgb(255 255 255 / 45%)',
+        '--shell-cream': 'rgb(255 255 255 / 45%)',
+        '--shell-rail-active-bg': 'rgb(255 255 255 / 55%)',
+        '--shell-nav-active-text': '#10302a',
+        /* No item aberto o ladrilho é branco, com o ícone na tinta da moldura. */
         '--shell-accent-deep': '#ffffff',
-        '--shell-on-accent-deep': '#1f6457',
-        '--rail-logout-red': '#ff9c9c',
-        '--rail-logout-bg': 'rgb(255 171 171 / 14%)',
-        '--rail-logout-icon': '#ffc4c4',
-        '--rail-logout-text': '#ffc4c4',
+        '--shell-on-accent-deep': '#10302a',
+        '--shell-wordmark-filtro': 'brightness(0) opacity(0.82)',
+        /* A pata num ladrilho branco: a sálvia dela some num ladrilho sálvia. */
+        '--rail-marca-fundo': '#ffffff',
+        '--rail-marca-sombra': '0 1px 2px rgb(16 48 42 / 12%), 0 6px 14px -8px rgb(16 48 42 / 35%)',
+        '--rail-marca-sombra-forte':
+          '0 1px 2px rgb(16 48 42 / 14%), 0 10px 20px -8px rgb(16 48 42 / 42%)',
+        '--rail-logout-red': '#9b1c1c',
+        '--rail-logout-bg': 'rgb(255 255 255 / 40%)',
+        '--rail-logout-icon': '#9b1c1c',
+        '--rail-logout-text': '#9b1c1c',
       },
 )
 
@@ -320,8 +312,7 @@ function temPainel(section: NavigationSection) {
 
 const fallbackSection = computed(
   () =>
-    (navigationSections.value.find(temPainel) ??
-      navigationSections.value[0]) as NavigationSection,
+    (navigationSections.value.find(temPainel) ?? navigationSections.value[0]) as NavigationSection,
 )
 
 /**
@@ -407,10 +398,7 @@ function handleSectionChange(sectionId: string) {
 const initials = computed(() => usuarioPerfilStore.initials)
 
 const headerDisplayName = computed(
-  () =>
-    usuarioPerfilStore.displayName ||
-    authUser.value?.nome ||
-    t('shell.user.fallbackName'),
+  () => usuarioPerfilStore.displayName || authUser.value?.nome || t('shell.user.fallbackName'),
 )
 
 const headerAvatarUrl = computed(() => usuarioPerfilStore.avatarUrl)
@@ -428,9 +416,7 @@ watch(
   () => {
     activeSectionId.value = resolveActiveSectionId(route.path, hasClinicalProfile.value)
 
-    const secao = navigationSections.value.find(
-      (entry) => entry.id === activeSectionId.value,
-    )
+    const secao = navigationSections.value.find((entry) => entry.id === activeSectionId.value)
 
     if (secao && temPainel(secao)) {
       painelSectionId.value = secao.id
@@ -540,11 +526,7 @@ onUnmounted(() => {
     />
 
     <aside class="app-navigator" :style="molduraStyle" :inert="navigatorHidden || undefined">
-      <nav
-        v-if="!isListNavigator"
-        class="section-rail"
-        :aria-label="t('shell.aria.sections')"
-      >
+      <nav v-if="!isListNavigator" class="section-rail" :aria-label="t('shell.aria.sections')">
         <RouterLink
           class="rail-brand"
           :to="defaultLandingPath"
@@ -665,7 +647,13 @@ onUnmounted(() => {
           <span class="navigator-section-heading__texto">
             <strong>{{ activeSection.label }}</strong>
             <small>
-              {{ t('shell.telasNaSecao', { contagem: activeSection.items.length }, activeSection.items.length) }}
+              {{
+                t(
+                  'shell.telasNaSecao',
+                  { contagem: activeSection.items.length },
+                  activeSection.items.length,
+                )
+              }}
             </small>
           </span>
         </header>
@@ -1057,9 +1045,9 @@ onUnmounted(() => {
   background: var(--shell-brand);
 }
 
-/* O logotipo é a única superfície verde da moldura: a pata clara sobre o degradê da pílula cheia. */
+/* O ladrilho da pata: o degradê da ação cheia no escuro; branco na moldura sálvia do claro. */
 .rail-brand {
-  --marca-sombra: 0 6px 16px -8px rgb(31 100 87 / 70%);
+  --marca-sombra: var(--rail-marca-sombra, 0 6px 16px -8px var(--hc-marca-sombra));
 
   display: grid;
   width: 2.6rem;
@@ -1067,13 +1055,13 @@ onUnmounted(() => {
   margin: 0 auto 0.9rem;
   place-items: center;
   border-radius: 0.85rem;
-  background: var(--hc-degrade-botao);
+  background: var(--rail-marca-fundo, var(--hc-degrade-botao));
   box-shadow: var(--marca-sombra);
   transition: box-shadow 160ms ease-out;
 }
 
 .rail-brand:hover {
-  --marca-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+  --marca-sombra: var(--rail-marca-sombra-forte, 0 10px 22px -8px var(--hc-marca-sombra-forte));
 }
 
 .rail-brand img {
@@ -1317,6 +1305,7 @@ onUnmounted(() => {
 
 .navigator-brand__wordmark {
   display: block;
+  filter: var(--shell-wordmark-filtro, none);
   width: min(100%, 9.25rem);
   max-height: 1.7rem;
   object-fit: contain;

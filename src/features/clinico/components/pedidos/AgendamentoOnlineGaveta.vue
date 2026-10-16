@@ -437,7 +437,7 @@ function salvar() {
 
 .config__mestre--ligado .config__mestre-icone {
   background: var(--hc-degrade-botao);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
 }
 
 /* ------------------------------------------------------------------ as seções */

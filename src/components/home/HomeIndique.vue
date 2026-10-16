@@ -416,7 +416,7 @@ defineExpose({ abrirQr, temQr })
   border-radius: 999px;
   background: var(--hc-degrade-botao);
   box-shadow: 0 0 0 2px var(--hc-fundo);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
   font-size: 0.625rem;
   pointer-events: none;
 }
@@ -605,15 +605,15 @@ defineExpose({ abrirQr, temQr })
 .qr-pilula--cheia.p-button:not(:disabled):hover {
   border-color: transparent;
   background: var(--hc-degrade-botao);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
 }
 
 .qr-pilula--cheia.p-button {
-  --qr-pilula-sombra: 0 6px 16px -8px rgb(31 100 87 / 70%);
+  --qr-pilula-sombra: 0 6px 16px -8px var(--hc-marca-sombra);
 }
 
 .qr-pilula--cheia.p-button:not(:disabled):hover {
-  --qr-pilula-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+  --qr-pilula-sombra: 0 10px 22px -8px var(--hc-marca-sombra-forte);
 }
 
 .qr-pilula__icone {

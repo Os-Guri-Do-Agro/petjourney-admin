@@ -410,21 +410,21 @@ onUnmounted(() => {
 /* A primeira pílula, cheia e em degradê: o "✦ Ask AI" de lá. */
 .acao--cheia,
 .acao--cheia.p-button {
-  --acao-sombra: 0 6px 16px -8px rgb(31 100 87 / 70%);
+  --acao-sombra: 0 6px 16px -8px var(--hc-marca-sombra);
 
   border-color: transparent;
   background: var(--hc-degrade-botao);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
   font-weight: 600;
 }
 
 .acao--cheia:hover,
 .acao--cheia.p-button:not(:disabled):hover {
-  --acao-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+  --acao-sombra: 0 10px 22px -8px var(--hc-marca-sombra-forte);
 
   border-color: transparent;
   background: var(--hc-degrade-botao);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
 }
 
 .acao:focus-visible,

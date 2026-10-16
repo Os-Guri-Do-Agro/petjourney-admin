@@ -117,7 +117,7 @@ const atual = computed(() => ETAPAS.indexOf(props.etapa))
 .passo--atual .passo__numero {
   border-color: transparent;
   background: var(--hc-degrade-botao);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
 }
 
 .passo__numero .ph {

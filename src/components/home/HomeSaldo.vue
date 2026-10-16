@@ -471,7 +471,7 @@ const tomDoPrograma = computed(() => {
   border-color: transparent;
   background: var(--hc-degrade-botao);
   box-shadow: 0 6px 14px -8px rgb(37 111 98 / 60%);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
 }
 
 .pilula--cheia:hover {

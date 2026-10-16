@@ -678,8 +678,8 @@ label.fx-opcao:hover {
   background: var(--hc-degrade-botao);
   box-shadow:
     0 0 0 6px var(--hc-marca-clara),
-    0 10px 24px -10px rgb(31 100 87 / 70%);
-  color: #ffffff;
+    0 10px 24px -10px var(--hc-marca-sombra);
+  color: var(--hc-sobre-marca);
   font-size: 1.45rem;
   animation: enviado-selo 420ms var(--hc-mov-assenta) 60ms both;
 }

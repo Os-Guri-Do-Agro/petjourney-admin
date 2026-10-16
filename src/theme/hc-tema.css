@@ -202,7 +202,7 @@
   --pf-on: var(--hc-tinta) !important;
   --pf-on-soft: var(--hc-tinta-2) !important;
   --pf-cta-bg: var(--hc-degrade-botao) !important;
-  --pf-cta-text: #ffffff !important;
+  --pf-cta-text: var(--hc-sobre-marca) !important;
   --pf-shadow-rgb: 20 32 28 !important;
   --pf-chip: var(--hc-marca-clara) !important;
   --pf-field: var(--hc-fundo) !important;
@@ -465,14 +465,14 @@ html .inicio-pagina .partner-page__guidance.p-button {
   --p-button-rounded-border-radius: 999px;
 
   --p-button-primary-background: var(--hc-degrade-botao);
-  --p-button-primary-hover-background: linear-gradient(120deg, #1a574c 0%, #287a6b 100%);
-  --p-button-primary-active-background: linear-gradient(120deg, #164a41 0%, #236b5e 100%);
+  --p-button-primary-hover-background: var(--hc-degrade-botao-hover);
+  --p-button-primary-active-background: var(--hc-degrade-botao-ativo);
   --p-button-primary-border-color: transparent;
   --p-button-primary-hover-border-color: transparent;
   --p-button-primary-active-border-color: transparent;
-  --p-button-primary-color: #ffffff;
-  --p-button-primary-hover-color: #ffffff;
-  --p-button-primary-active-color: #ffffff;
+  --p-button-primary-color: var(--hc-sobre-marca);
+  --p-button-primary-hover-color: var(--hc-sobre-marca);
+  --p-button-primary-active-color: var(--hc-sobre-marca);
 
   --p-button-secondary-background: var(--hc-cartao);
   --p-button-secondary-hover-background: var(--hc-cartao);
@@ -512,7 +512,11 @@ html .inicio-pagina .partner-page__guidance.p-button {
   --p-button-warn-color: var(--hc-cartao);
   --p-button-warn-hover-color: var(--hc-cartao);
   --p-button-warn-active-color: var(--hc-cartao);
-  --p-button-outlined-warn-border-color: color-mix(in srgb, var(--hc-pessego-tinta) 45%, var(--hc-cartao));
+  --p-button-outlined-warn-border-color: color-mix(
+    in srgb,
+    var(--hc-pessego-tinta) 45%,
+    var(--hc-cartao)
+  );
   --p-button-outlined-warn-color: var(--hc-pessego-tinta);
   --p-button-outlined-warn-hover-background: var(--hc-pessego-fundo);
   --p-button-outlined-warn-active-background: var(--hc-pessego-fundo);
@@ -536,14 +540,14 @@ html .inicio-pagina .partner-page__guidance.p-button {
 }
 
 .hc-tema .p-button:not(.p-button-secondary, .p-button-outlined, .p-button-text, .p-button-link) {
-  --hc-botao-sombra: 0 6px 16px -8px rgb(31 100 87 / 70%);
+  --hc-botao-sombra: 0 6px 16px -8px var(--hc-marca-sombra);
 }
 
 .hc-tema
   .p-button:not(.p-button-secondary, .p-button-outlined, .p-button-text, .p-button-link):not(
     :disabled
   ):hover {
-  --hc-botao-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+  --hc-botao-sombra: 0 10px 22px -8px var(--hc-marca-sombra-forte);
 }
 
 /*
@@ -755,21 +759,21 @@ html .hc-tema .partner-tabs__description {
 
 .hc-tema .hc-pilula--cheia,
 .hc-tema .hc-pilula--cheia.p-button {
-  --pilula-sombra: 0 6px 16px -8px rgb(31 100 87 / 70%);
+  --pilula-sombra: 0 6px 16px -8px var(--hc-marca-sombra);
 
   border-color: transparent;
   background: var(--hc-degrade-botao);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
   font-weight: 600;
 }
 
 .hc-tema .hc-pilula--cheia:hover,
 .hc-tema .hc-pilula--cheia.p-button:not(:disabled):hover {
-  --pilula-sombra: 0 10px 22px -8px rgb(31 100 87 / 80%);
+  --pilula-sombra: 0 10px 22px -8px var(--hc-marca-sombra-forte);
 
   border-color: transparent;
   background: var(--hc-degrade-botao);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
 }
 
 /* Desabilitada continua lendo como pílula: perde a sombra e a cor, não a borda. */

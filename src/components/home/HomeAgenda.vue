@@ -606,12 +606,12 @@ const vazio = computed(
 .semana__dia--escolhido.p-button:not(:disabled):hover {
   background: var(--hc-degrade-botao);
   box-shadow: 0 6px 14px -6px rgb(37 111 98 / 55%);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
 }
 
 .semana__dia--escolhido .semana__nome,
 .semana__dia--escolhido .semana__numero {
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
 }
 
 /* ------------------------------------------------------------------ o dia */
@@ -841,7 +841,7 @@ const vazio = computed(
   border-radius: 999px;
   background: var(--hc-degrade-botao);
   box-shadow: 0 0 0 2px var(--hc-cartao);
-  color: #ffffff;
+  color: var(--hc-sobre-marca);
   font-size: 0.6875rem;
   font-weight: 700;
 }

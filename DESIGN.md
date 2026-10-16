@@ -285,9 +285,11 @@ Como uma tela entra no design novo, e onde cada peça mora no código:
 - **Pauta** — `src/components/home/PautaTabela.vue`: a lista "o que pede ação" (assunto, gravidade
   em selo, onde se resolve), usada na Visão geral, em Hoje na clínica e na Internação. No lugar da
   fileira de quatro cartões de número, que o redesenho tirou de Hoje na clínica, Internação e Faltas.
-- **Moldura** — trilho, painel e cabeçalho brancos com fio (`AppShell.vue`, variáveis `--shell-*`
-  apontando para os `--hc-*`), seção e página abertas em pastilha verde-clara, logotipo numa
-  pastilha no degradê, controles do cabeçalho em pílula e o tema (claro/escuro) no menu da conta.
+- **Moldura** — no claro, trilho, painel e cabeçalho na Folha de Sálvia (#84C1B4) com tinta
+  escura (#10302A, 7,6:1; trilho um degrau mais fundo, #78B8AA), desde 16/10/2026; no escuro, os
+  `--hc-*` escuros (`AppShell.vue`, `molduraStyle` e variáveis `--shell-*`). Seção e página
+  abertas num chip branco translúcido, logotipo (a pata sálvia) numa pastilha branca, controles do
+  cabeçalho em pílula e o tema (claro/escuro) no menu da conta.
   O título da página no cabeçalho nunca quebra: com o cabeçalho abaixo de 66rem (container query,
   segue o painel aberto ou recolhido), quem cede é a busca, que vira botão de ícone. Interruptor
   (`ToggleSwitch`): trilho cinza, ligado na marca, alça branca — nunca o linho do preset.
@@ -683,9 +685,10 @@ nativo.
 ### Buttons
 
 - **Shape:** controle macio (0.7rem).
-- **Primary:** Folha de Sálvia com texto branco. *Contraste:* branco sobre #84C1B4 fica em
-  ~2:1; o rótulo depende de peso 700 e ícone. Em ação crítica, preferir texto em Sálvia de
-  Tinta sobre Véu de Sálvia até o preset ser revisto.
+- **Primary:** Folha de Sálvia (`--hc-degrade-botao`, #84C1B4 → #98CDC1) com a tinta
+  `--hc-sobre-marca` (#10302A), 7,6:1. Branco sobre #84C1B4 fica em ~2:1 e não se usa mais: de
+  30/09 a 16/10/2026 a pílula cheia foi um teal escuro (#1F6457) para caber o branco, e o usuário
+  pediu a sálvia de volta. O mesmo par nos dois temas.
 - **Hover / Active:** Sálvia Fosca / Sálvia de Tinta, 140–160 ms `ease`. Sem escala, sem
   levantar.
 - **Exceção da Visão geral:** sobre a faixa de sálvia, a pílula Copiar e o quadro do QR não
@@ -748,12 +751,11 @@ nativo.
 
 ### Navigation
 
-- **Trilho (moldura clara, 30/09/2026):** faixa branca de 4.6rem com fio à direita, ícone +
-  label de 0.58rem na tinta de apoio; hover no cinza da linha; seção ativa em pastilha verde-clara
-  (`--hc-marca-clara`) com a tinta forte da marca. O logotipo é a única superfície verde da
-  moldura: a pata clara numa pastilha no degradê da pílula cheia. Sair e recolher são pílulas
-  contornadas. Sem barrinha lateral. (O trilho Folha de Sálvia com texto branco foi substituído;
-  as direções "trilho verde-escuro" e "moldura fundida no fundo" foram prototipadas e recusadas.)
+- **Trilho (moldura sálvia, 16/10/2026):** faixa de 4.6rem em #78B8AA, um degrau abaixo do
+  painel #84C1B4, ícone + label de 0.58rem na tinta escura (#1D4038, 5:1); hover e seção ativa em
+  branco translúcido. O logotipo é a pata sálvia numa pastilha branca. Sair e recolher são pílulas
+  contornadas. Sem barrinha lateral. (Histórico: trilho Folha de Sálvia com texto branco, depois
+  moldura branca em 30/09, teal escuro em 15/10 e de volta à sálvia, agora com tinta escura.)
 - **Painel:** lista de links sobre o branco do cartão, linha de 2.4rem (2rem na densidade
   compacta), grupos com label em caixa-alta; ativo na mesma pastilha verde-clara do trilho, peso
   750, com o ícone num ladrilho cheio. Os números de pendência são selos de 6px: cinza, pêssego

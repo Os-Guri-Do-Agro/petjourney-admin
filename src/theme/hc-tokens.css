@@ -30,8 +30,17 @@
   --hc-marca-clara: #e7f4f0;
   /* O texto em degradê da saudação: do fim mais claro ao fundo da página ainda passa de 3:1. */
   --hc-degrade: linear-gradient(90deg, #22695c 0%, #2a8d7c 45%, #2b87a8 100%);
-  /* A pílula cheia: o rótulo branco fica no meio do degradê, acima de 5:1. */
-  --hc-degrade-botao: linear-gradient(120deg, #1f6457 0%, #2f8a79 100%);
+  /*
+   * A ação cheia é a Folha de Sálvia (#84C1B4), a cor da casa (DESIGN.md, Primary). Até 16/10/2026
+   * ela era um teal escuro (#1F6457) com branco por cima; o usuário pediu a sálvia de volta. Branco
+   * sobre #84C1B4 fica em 2:1, então quem escreve sobre ela é a tinta `--hc-sobre-marca` (7,6:1).
+   */
+  --hc-degrade-botao: linear-gradient(120deg, #84c1b4 0%, #98cdc1 100%);
+  --hc-degrade-botao-hover: linear-gradient(120deg, #78b8aa 0%, #8cc5b8 100%);
+  --hc-degrade-botao-ativo: linear-gradient(120deg, #6cab9d 0%, #80baad 100%);
+  --hc-sobre-marca: #10302a;
+  --hc-marca-sombra: rgb(64 128 113 / 50%);
+  --hc-marca-sombra-forte: rgb(64 128 113 / 62%);
   --hc-sombra: 0 1px 2px rgb(20 32 28 / 4%), 0 12px 30px -16px rgb(20 32 28 / 14%);
   --hc-sombra-alta: 0 1px 2px rgb(20 32 28 / 6%), 0 18px 40px -18px rgb(20 32 28 / 22%);
 
@@ -74,8 +83,13 @@
   --hc-marca-forte: #8fd9c8;
   --hc-marca-clara: #1b322c;
   --hc-degrade: linear-gradient(90deg, #8fd9c8 0%, #6cc9b5 45%, #6cc6d0 100%);
-  /* O mesmo do claro: texto branco sobre um degradê claro caía para ~2,5:1. */
-  --hc-degrade-botao: linear-gradient(120deg, #1f6457 0%, #2f8a79 100%);
+  /* A mesma sálvia no escuro: sobre o papel fundo ela já lê, e a tinta escura segue por cima. */
+  --hc-degrade-botao: linear-gradient(120deg, #84c1b4 0%, #98cdc1 100%);
+  --hc-degrade-botao-hover: linear-gradient(120deg, #92cabe 0%, #a6d6cb 100%);
+  --hc-degrade-botao-ativo: linear-gradient(120deg, #78b8aa 0%, #8cc5b8 100%);
+  --hc-sobre-marca: #10302a;
+  --hc-marca-sombra: rgb(0 0 0 / 45%);
+  --hc-marca-sombra-forte: rgb(0 0 0 / 55%);
   --hc-sombra: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 30px -16px rgb(0 0 0 / 50%);
   --hc-sombra-alta: 0 1px 2px rgb(0 0 0 / 35%), 0 18px 40px -18px rgb(0 0 0 / 60%);
 
