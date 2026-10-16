@@ -35,6 +35,15 @@
   --hc-sombra: 0 1px 2px rgb(20 32 28 / 4%), 0 12px 30px -16px rgb(20 32 28 / 14%);
   --hc-sombra-alta: 0 1px 2px rgb(20 32 28 / 6%), 0 18px 40px -18px rgb(20 32 28 / 22%);
 
+  /*
+   * O movimento da casa, em três curvas — uma sensação só em vez de cinco. `chega`: o que entra
+   * desacelera até parar (quase tudo). `sai`: o que vai embora acelera e some, mais rápido do que
+   * chegou. `assenta`: o que confirma uma ação passa 3% do lugar e volta — sentido, não visto.
+   */
+  --hc-mov-chega: cubic-bezier(0.22, 1, 0.36, 1);
+  --hc-mov-sai: cubic-bezier(0.4, 0, 1, 1);
+  --hc-mov-assenta: cubic-bezier(0.3, 1.25, 0.5, 1);
+
   --hc-ciano-fundo: #d3f1ee;
   --hc-ciano-tinta: #0e6b66;
   --hc-lilas-fundo: #ebe7fd;

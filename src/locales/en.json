@@ -7116,7 +7116,17 @@
         "carteira": "Bring the vaccination card at check-in: the hotel checks it before welcoming your pet.",
         "confirmacaoPor": "The confirmation will arrive by text message at {telefone}.",
         "acompanhe": "Track or withdraw your request at this address",
-        "rodape": "Online booking by PetJourney"
+        "rodape": "Online booking by PetJourney",
+        "promessa": "Request a stay in a minute, no app needed. The hotel replies within {horas} h.",
+        "passos": {
+          "pet": "Your pet",
+          "datas": "Dates",
+          "acomodacao": "Room",
+          "extras": "Extras"
+        },
+        "regras": "How the stay works",
+        "regraSinal": "To confirm, the hotel asks for a {percentual}% deposit.",
+        "semExtras": "No extras"
       },
       "ensaio": {
         "quem": "On the phone of",
@@ -7226,6 +7236,9 @@
           "PEDIDO_JA_RESPONDIDO": "The hotel has already answered this request."
         },
         "enviadoTitulo": "Request sent",
+        "enviadoLide": "The hotel replies by {quando}.",
+        "aceitoLide": "The hotel accepted the stay. The deposit is what is left to confirm it: the instructions come with the reply.",
+        "respostaNoApp": "The answer arrives as a notification in the app.",
         "aceitoTitulo": "Booked",
         "passoPediu": "You requested",
         "passoHotel": "The hotel chooses the room",

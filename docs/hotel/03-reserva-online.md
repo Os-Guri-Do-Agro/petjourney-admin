@@ -60,7 +60,7 @@ Para a primeira estadia, troque para **Renata · primeira vez**.
 | Semente | `src/features/hotel/data/seed-pedidos-de-reserva.ts` |
 | Caixa do balcão | `src/pages/(accounts)/hotel/pedidos.vue`; a linha em `PedidoDeReservaLinha.vue`, a resposta em `PedidoDeReservaGaveta.vue`, a configuração em `ReservaOnlineGaveta.vue` |
 | Fluxo do responsável | `components/pedidos/fluxo/FluxoDaReserva.vue` (o mesmo no celular e no link; reaproveita o CSS do fluxo da clínica) |
-| Página pública | `src/pages/reservar/[hotel].vue` |
+| Página pública | `src/pages/reservar/[hotel].vue`, na moldura `src/components/publico/PaginaPublica.vue` |
 | Reservas | ícone da origem na lista de `reservas.vue` |
 | Menu e visão geral | selo em `useHotelPendencias` (`pedidos`), linha na pauta da visão geral |
 
@@ -74,6 +74,12 @@ Para a primeira estadia, troque para **Renata · primeira vez**.
   estimativa.
 - **No celular, a estadia é um calendário de período**: o primeiro toque é a entrada, o segundo a
   saída, e as noites aparecem pintadas entre os dois.
+- **A página pública é a mesma da clínica, por construção** (15/10/2026): as duas usam
+  `components/publico/PaginaPublica.vue`, a tela dividida como num checkout. No hotel, os passos ao
+  lado são seis (o pet, as datas, a acomodação, os extras, os dados, a revisão) e a urgência sai em
+  coral nas datas; no pé, no lugar da equipe, as regras da estadia (entrada e saída, sinal,
+  cancelamento). O "Pedido enviado" é o comprovante da clínica (estilos em `fluxo.css`), com o
+  sinal como último passo da linha do tempo.
 
 - **O pedido de tipo escolhido segura uma unidade daquele tipo** enquanto o balcão não responde, e
   só para quem pede depois (`pedidosQueSeguram`, por `criadoEm`). Quem pediu primeiro leva.

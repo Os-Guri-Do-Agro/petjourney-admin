@@ -7116,7 +7116,17 @@
         "carteira": "Leve a carteira de vacinação na entrada: o hotel confere antes de receber.",
         "confirmacaoPor": "A confirmação chega por mensagem no {telefone}.",
         "acompanhe": "Acompanhe ou desista por este endereço",
-        "rodape": "Reserva online por PetJourney"
+        "rodape": "Reserva online por PetJourney",
+        "promessa": "Peça a hospedagem em um minuto, sem baixar app. O hotel responde em até {horas} h.",
+        "passos": {
+          "pet": "Seu pet",
+          "datas": "Datas",
+          "acomodacao": "Acomodação",
+          "extras": "Extras"
+        },
+        "regras": "Como funciona a estadia",
+        "regraSinal": "Para confirmar, o hotel pede {percentual}% de sinal.",
+        "semExtras": "Sem extras"
       },
       "ensaio": {
         "quem": "No celular de",
@@ -7226,6 +7236,9 @@
           "PEDIDO_JA_RESPONDIDO": "O hotel já respondeu este pedido."
         },
         "enviadoTitulo": "Pedido enviado",
+        "enviadoLide": "O hotel responde até {quando}.",
+        "aceitoLide": "O hotel aceitou a estadia. Falta o sinal para confirmar: as instruções chegam com a resposta.",
+        "respostaNoApp": "A resposta chega como notificação no app.",
         "aceitoTitulo": "Reservado",
         "passoPediu": "Você pediu",
         "passoHotel": "O hotel escolhe a acomodação",

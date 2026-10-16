@@ -71,7 +71,7 @@ Fubá, histórico, "Primeira vez" na linha).
 | Caixa da recepção | `src/pages/(accounts)/veterinario/pedidos.vue`; a linha em `PedidoLinha.vue`, a resposta em `PedidoGaveta.vue`, a configuração em `AgendamentoOnlineGaveta.vue` |
 | Peças de calendário | `CalendarioDoPedido.vue` (o mês com os dias livres, no celular, na gaveta e no hotel) e `FolhaDoDia.vue` (a folhinha do dia na linha, na revisão e na confirmação) |
 | Fluxo do responsável | `components/pedidos/fluxo/*` (o mesmo no celular e no link) |
-| Página pública | `src/pages/agendar/[clinica].vue` → `/agendar/petjourney-vila-madalena` |
+| Página pública | `src/pages/agendar/[clinica].vue` → `/agendar/petjourney-vila-madalena`, na moldura `src/components/publico/PaginaPublica.vue` (a mesma do hotel) |
 | Agenda | ícone da origem em `AgendaTabelaDia.vue` e `AgendaAppointmentCard.vue` |
 | Menu e visão geral | selo em `useClinicoPendencias` (`pedidos`), linha na pauta da visão geral |
 

@@ -102,6 +102,8 @@ export function criarFluxoDaReserva(opcoes: {
   const inicial: EtapaDaReserva = opcoes.canal === 'app' ? 'inicio' : 'pet-do-link'
   const etapa = ref<EtapaDaReserva>(inicial)
   const historico = ref<EtapaDaReserva[]>([])
+  /** Para onde a última troca foi — a transição desliza para a frente ou para trás (ver a clínica). */
+  const direcao = ref<'frente' | 'volta'>('frente')
 
   const hotel = ref<ReservaOnlineDoHotel | null>(null)
   const carregando = ref(false)
@@ -217,6 +219,7 @@ export function criarFluxoDaReserva(opcoes: {
 
   function irPara(proxima: EtapaDaReserva) {
     historico.value.push(etapa.value)
+    direcao.value = 'frente'
     etapa.value = proxima
     erro.value = null
   }
@@ -227,6 +230,7 @@ export function criarFluxoDaReserva(opcoes: {
     erro.value = null
 
     if (anterior) {
+      direcao.value = 'volta'
       etapa.value = anterior
     }
   }
@@ -296,6 +300,7 @@ export function criarFluxoDaReserva(opcoes: {
     tipoSumiu.value = null
     enviado.value = null
     historico.value = []
+    direcao.value = 'volta'
     etapa.value = inicial
     await iniciar()
   }
@@ -332,6 +337,7 @@ export function criarFluxoDaReserva(opcoes: {
 
       if (!petSemPorte.value) {
         historico.value.pop()
+        direcao.value = 'frente'
         etapa.value = 'datas'
         historico.value.push('pets')
       }
@@ -453,6 +459,7 @@ export function criarFluxoDaReserva(opcoes: {
             })
 
       historico.value = []
+      direcao.value = 'frente'
       etapa.value = 'enviado'
       opcoes.aoMudar?.()
       await recarregarConta()
@@ -467,6 +474,7 @@ export function criarFluxoDaReserva(opcoes: {
         historico.value = historico.value.filter(
           (item) => item !== 'extras' && item !== 'seus-dados',
         )
+        direcao.value = 'volta'
         etapa.value = 'acomodacao'
         await carregarDisponibilidade()
       } else {
@@ -504,6 +512,7 @@ export function criarFluxoDaReserva(opcoes: {
   return {
     canal: opcoes.canal,
     etapa,
+    direcao,
     podeVoltar,
     hotel,
     carregando,

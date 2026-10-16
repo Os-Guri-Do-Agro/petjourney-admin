@@ -7116,7 +7116,17 @@
         "carteira": "Ponesite vakcinalni karton pri dolasku: hotel ga proverava pre prijema.",
         "confirmacaoPor": "Potvrda stiže porukom na broj {telefone}.",
         "acompanhe": "Pratite zahtev ili odustanite na ovoj adresi",
-        "rodape": "Online rezervaciju omogućava PetJourney"
+        "rodape": "Online rezervaciju omogućava PetJourney",
+        "promessa": "Zatražite smeštaj za minut, bez preuzimanja aplikacije. Hotel odgovara u roku od {horas} h.",
+        "passos": {
+          "pet": "Vaš ljubimac",
+          "datas": "Datumi",
+          "acomodacao": "Smeštaj",
+          "extras": "Dodaci"
+        },
+        "regras": "Kako funkcioniše boravak",
+        "regraSinal": "Za potvrdu, hotel traži depozit od {percentual}%.",
+        "semExtras": "Bez dodataka"
       },
       "ensaio": {
         "quem": "Telefon korisnika",
@@ -7226,6 +7236,9 @@
           "PEDIDO_JA_RESPONDIDO": "Hotel je već odgovorio na ovaj zahtev."
         },
         "enviadoTitulo": "Zahtev je poslat",
+        "enviadoLide": "Hotel odgovara do {quando}.",
+        "aceitoLide": "Hotel je prihvatio boravak. Za potvrdu ostaje depozit: uputstva stižu uz odgovor.",
+        "respostaNoApp": "Odgovor stiže kao obaveštenje u aplikaciji.",
         "aceitoTitulo": "Rezervisano",
         "passoPediu": "Poslali ste zahtev",
         "passoHotel": "Hotel bira smeštaj",

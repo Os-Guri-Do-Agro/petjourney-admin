@@ -7,17 +7,18 @@
  * O acabamento é o mesmo do fluxo da clínica (`fluxo.css`): quem usa os dois no mesmo app não pode
  * sentir que trocou de produto.
  */
+import { PhCat, PhDog } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import SelectButton from 'primevue/selectbutton'
 import Textarea from 'primevue/textarea'
-import { useToast } from 'primevue/usetoast'
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import CalendarioDoPedido from '@/features/clinico/components/pedidos/CalendarioDoPedido.vue'
+import ConfeteDePatas from '@/features/clinico/components/pedidos/ConfeteDePatas.vue'
 import FolhaDoDia from '@/features/clinico/components/pedidos/FolhaDoDia.vue'
 import '@/features/clinico/components/pedidos/fluxo/fluxo.css'
 import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
@@ -37,7 +38,6 @@ const props = defineProps<{
 const { t, locale } = useI18n()
 const fluxo = useFluxoDaReserva()
 const formato = useHotelFormat()
-const toast = useToast()
 
 const etapa = computed<EtapaDaReserva>(() => fluxo.etapa.value)
 
@@ -101,9 +101,10 @@ const portesDoLink = computed(() =>
   PORTES.map((porte) => ({ valor: fluxo.PORTE_NO_FIO[porte], rotulo: t(`hotel.porte.${porte}`) })),
 )
 
+/* Em cartão com o bicho, como a espécie e o sexo da página da clínica. */
 const especies = computed(() => [
-  { valor: 'CANINA', rotulo: t('hotel.pedidos.app.cao') },
-  { valor: 'FELINA', rotulo: t('hotel.pedidos.app.gato') },
+  { valor: 'CANINA', rotulo: t('hotel.pedidos.app.cao'), icone: PhDog },
+  { valor: 'FELINA', rotulo: t('hotel.pedidos.app.gato'), icone: PhCat },
 ])
 
 const RECURSO: Record<string, string> = {
@@ -157,14 +158,22 @@ const acompanhar = computed(() =>
     : '',
 )
 
+/** Copiou: o próprio botão diz "copiado" com o visto por 2 s — a resposta fica onde o dedo está. */
+const copiado = ref(false)
+let relogioDoCopiado: ReturnType<typeof setTimeout> | undefined
+
 async function copiar() {
   try {
     await navigator.clipboard.writeText(acompanhar.value)
-    toast.add({ severity: 'success', summary: t('hotel.pedidos.link.copiado'), life: 2000 })
+    copiado.value = true
+    clearTimeout(relogioDoCopiado)
+    relogioDoCopiado = setTimeout(() => (copiado.value = false), 2000)
   } catch {
     /* Sem área de transferência: o endereço continua à vista. */
   }
 }
+
+onBeforeUnmount(() => clearTimeout(relogioDoCopiado))
 
 function soDigitos(valor: string) {
   return valor.replace(/\D/g, '')
@@ -178,6 +187,59 @@ const sinal = computed(() =>
   fluxo.estimativa.value !== null && fluxo.hotel.value
     ? Math.round((fluxo.estimativa.value * fluxo.hotel.value.sinalPercentual) / 100)
     : null,
+)
+
+// ------------------------------------------------------------------ o pedido enviado
+
+/*
+ * O mesmo comprovante da clínica (`EtapaEnviado`, estilos em `fluxo.css`): a notícia, o bilhete
+ * com a folhinha das noites e o canhoto do link, e a linha do tempo — no hotel o terceiro passo é
+ * o sinal, que é o que falta para a estadia valer.
+ */
+const enviado = computed(() => fluxo.enviado.value)
+const aceito = computed(() => enviado.value?.status === 'ACEITO')
+
+const folhaDoEnviado = computed(() => {
+  const atual = enviado.value
+
+  if (!atual) {
+    return null
+  }
+
+  const entrada = atual.reserva?.entrada ?? atual.entrada
+  const saida = atual.reserva?.saida ?? atual.saida
+
+  return {
+    dia: entrada.slice(0, 10),
+    ate: saida.slice(0, 10),
+    rodape: t('hotel.pedidos.diarias', { n: atual.diarias }, atual.diarias),
+    periodo: formato.periodo(entrada, saida),
+  }
+})
+
+const ondeDoEnviado = computed(() => {
+  const atual = enviado.value
+
+  return (
+    atual?.reserva?.acomodacao ??
+    atual?.tipoPedido?.nome ??
+    t('hotel.pedidos.app.modo.HOTEL_ESCOLHE')
+  )
+})
+
+/** O total da reserva aceita, ou a estimativa de quando pediu. */
+const totalDoEnviado = computed(() => {
+  const total = enviado.value?.reserva?.totalCentavos ?? fluxo.estimativa.value
+
+  return total !== null && total !== undefined
+    ? `${t('hotel.pedidos.app.resumo.estimativa')}: ${formato.moeda(total)}`
+    : ''
+})
+
+const porOndeDoEnviado = computed(() =>
+  fluxo.canal === 'link'
+    ? t('hotel.pedidos.link.confirmacaoPor', { telefone: fluxo.pedido.visitante.telefone })
+    : t('hotel.pedidos.app.respostaNoApp'),
 )
 
 function trocarParaHotelEscolhe() {
@@ -211,7 +273,10 @@ function trocarParaHotelEscolhe() {
       {{ t(`hotel.pedidos.app.erro.${fluxo.erro.value}`) }}
     </p>
 
-    <Transition name="fx-etapa" mode="out-in">
+    <Transition
+      :name="fluxo.direcao.value === 'volta' ? 'fx-etapa-volta' : 'fx-etapa'"
+      mode="out-in"
+    >
       <!-- ============================================================ início (app) -->
       <div v-if="etapa === 'inicio'" key="inicio" class="fx-etapa">
         <div class="fx-corpo">
@@ -432,7 +497,15 @@ function trocarParaHotelEscolhe() {
               option-value="valor"
               :allow-empty="false"
               aria-labelledby="link-especie"
-            />
+              class="grupo fx-escolhas"
+            >
+              <template #option="{ option }">
+                <span class="fx-escolha">
+                  <component :is="option.icone" weight="duotone" aria-hidden="true" />
+                  <strong>{{ option.rotulo }}</strong>
+                </span>
+              </template>
+            </SelectButton>
           </div>
           <div v-if="fluxo.pedido.visitante.especie === 'CANINA'" class="fx-campo">
             <span id="link-porte">{{ t('hotel.pedidos.app.porte') }}</span>
@@ -865,95 +938,154 @@ function trocarParaHotelEscolhe() {
       </div>
 
       <!-- ============================================================ enviado -->
-      <div v-else-if="etapa === 'enviado' && fluxo.enviado.value" key="enviado" class="fx-etapa">
+      <div v-else-if="etapa === 'enviado' && enviado" key="enviado" class="fx-etapa enviado">
         <div class="fx-corpo">
-          <div class="reserva__selo" aria-hidden="true">
-            <i
-              class="ph"
-              :class="
-                fluxo.enviado.value.status === 'ACEITO'
-                  ? 'ph-calendar-check'
-                  : 'ph-paper-plane-tilt'
-              "
-            />
-          </div>
-          <h4 class="reserva__titulo">
-            {{
-              fluxo.enviado.value.status === 'ACEITO'
-                ? t('hotel.pedidos.app.aceitoTitulo')
-                : t('hotel.pedidos.app.enviadoTitulo')
-            }}
-          </h4>
-          <ol class="reserva__passos">
-            <li class="reserva__passo reserva__passo--feito">
-              <i class="ph ph-check-circle" aria-hidden="true" />
-              <span>
-                <strong>{{ t('hotel.pedidos.app.passoPediu') }}</strong>
-                <span>{{ formato.quando(fluxo.enviado.value.criadoEm) }}</span>
-              </span>
-            </li>
-            <li
-              class="reserva__passo"
-              :class="{ 'reserva__passo--feito': fluxo.enviado.value.reserva !== null }"
-            >
-              <i
-                class="ph"
-                :class="fluxo.enviado.value.reserva ? 'ph-check-circle' : 'ph-circle-dashed'"
-                aria-hidden="true"
-              />
-              <span v-if="fluxo.enviado.value.reserva">
-                <strong>{{ fluxo.enviado.value.reserva.acomodacao }}</strong>
-                <span>{{
-                  formato.periodo(
-                    fluxo.enviado.value.reserva.entrada,
-                    fluxo.enviado.value.reserva.saida,
-                  )
-                }}</span>
-              </span>
-              <span v-else>
-                <strong>
-                  {{
-                    fluxo.enviado.value.tipoPedido
-                      ? t('hotel.pedidos.app.passoHotelConfirma', {
-                          tipo: fluxo.enviado.value.tipoPedido.nome,
-                        })
-                      : t('hotel.pedidos.app.passoHotel')
-                  }}
-                </strong>
-                <span>{{
-                  t('hotel.pedidos.app.ate', {
-                    quando: formato.quando(fluxo.enviado.value.responderAte),
+          <!-- A notícia: enviado (ou já aceito), até quando o hotel responde e por onde. -->
+          <header class="enviado__cabeca">
+            <span class="enviado__selo" :class="{ 'enviado__selo--ok': aceito }" aria-hidden="true">
+              <i class="ph" :class="aceito ? 'ph-check' : 'ph-paper-plane-tilt'" />
+              <ConfeteDePatas />
+            </span>
+            <h4 class="enviado__titulo">
+              {{
+                aceito ? t('hotel.pedidos.app.aceitoTitulo') : t('hotel.pedidos.app.enviadoTitulo')
+              }}
+            </h4>
+            <p class="enviado__lide">
+              <template v-if="aceito">{{ t('hotel.pedidos.app.aceitoLide') }}</template>
+              <template v-else>
+                {{
+                  t('hotel.pedidos.app.enviadoLide', {
+                    quando: formato.quando(enviado.responderAte),
                   })
-                }}</span>
-              </span>
-            </li>
-            <li class="reserva__passo">
-              <i class="ph ph-currency-circle-dollar" aria-hidden="true" />
-              <span>
-                <strong>{{ t('hotel.pedidos.app.passoSinal') }}</strong>
-                <span>{{ t('hotel.pedidos.app.passoSinalAjuda') }}</span>
-              </span>
-            </li>
-          </ol>
+                }}
+                {{ porOndeDoEnviado }}
+              </template>
+            </p>
+          </header>
 
-          <section v-if="acompanhar" class="fx-bloco">
-            <p class="fx-rotulo">{{ t('hotel.pedidos.link.acompanhe') }}</p>
-            <div class="reserva__link">
-              <InputText
-                :model-value="acompanhar"
-                readonly
-                fluid
-                :aria-label="t('hotel.pedidos.link.acompanhe')"
+          <!-- O bilhete: a estadia inteira de relance, com o canhoto do acompanhamento no link. -->
+          <article class="enviado__bilhete">
+            <div class="enviado__miolo">
+              <span class="enviado__situacao" :class="{ 'enviado__situacao--ok': aceito }">
+                <i
+                  class="ph"
+                  :class="aceito ? 'ph-calendar-check' : 'ph-hourglass-medium'"
+                  aria-hidden="true"
+                />
+                {{ t(`hotel.pedidos.link.situacao.${enviado.status}`) }}
+              </span>
+              <FolhaDoDia
+                v-if="folhaDoEnviado"
+                class="enviado__folha"
+                tamanho="lg"
+                :dia="folhaDoEnviado.dia"
+                :ate="folhaDoEnviado.ate"
+                :rodape="folhaDoEnviado.rodape"
               />
-              <Button
-                severity="secondary"
-                outlined
-                icon="ph ph-copy"
-                :aria-label="t('hotel.pedidos.link.copiar')"
-                @click="copiar"
-              />
+              <div class="enviado__oque">
+                <strong>{{ ondeDoEnviado }}</strong>
+                <span>{{ enviado.pets.map((pet) => pet.nome).join(' · ') || nomesDosPets }}</span>
+                <span v-if="folhaDoEnviado" class="enviado__detalhe">
+                  <i class="ph ph-clock" aria-hidden="true" />
+                  {{ folhaDoEnviado.periodo }}
+                </span>
+                <span v-if="enviado.servicos.length > 0" class="enviado__detalhe">
+                  <i class="ph ph-sparkle" aria-hidden="true" />
+                  {{
+                    enviado.servicos
+                      .map((servico) => t(`hotel.servico.${SERVICO[servico]}`))
+                      .join(', ')
+                  }}
+                </span>
+                <span v-if="totalDoEnviado" class="enviado__detalhe">
+                  <i class="ph ph-receipt" aria-hidden="true" />
+                  {{ totalDoEnviado }}
+                </span>
+                <span class="enviado__detalhe">
+                  <i class="ph ph-map-pin" aria-hidden="true" />
+                  {{ fluxo.hotel.value?.hotel.nome }}
+                </span>
+              </div>
             </div>
+
+            <div v-if="acompanhar" class="enviado__canhoto">
+              <p class="fx-rotulo">{{ t('hotel.pedidos.link.acompanhe') }}</p>
+              <div class="enviado__link">
+                <InputText
+                  :model-value="acompanhar"
+                  readonly
+                  fluid
+                  :aria-label="t('hotel.pedidos.link.acompanhe')"
+                />
+                <Button
+                  class="enviado__copiar"
+                  :class="{ 'enviado__copiar--feito': copiado }"
+                  severity="secondary"
+                  outlined
+                  :icon="copiado ? 'ph ph-check' : 'ph ph-copy'"
+                  :label="
+                    copiado ? t('hotel.pedidos.link.copiado') : t('hotel.pedidos.link.copiar')
+                  "
+                  @click="copiar"
+                />
+              </div>
+            </div>
+          </article>
+
+          <!-- O que falta: três passos com hora, deitados quando há largura. O último é o sinal. -->
+          <section class="enviado__agora" aria-labelledby="reserva-agora">
+            <p id="reserva-agora" class="fx-rotulo">{{ t('clinico.pedidos.app.agoraTitulo') }}</p>
+            <ol class="enviado__passos">
+              <li class="enviado__passo enviado__passo--feito">
+                <span class="enviado__marca" aria-hidden="true"><i class="ph ph-check" /></span>
+                <span class="enviado__texto">
+                  <strong>{{ t('hotel.pedidos.app.passoPediu') }}</strong>
+                  <span>{{ formato.quando(enviado.criadoEm) }}</span>
+                </span>
+              </li>
+              <li
+                class="enviado__passo"
+                :class="enviado.reserva ? 'enviado__passo--feito' : 'enviado__passo--agora'"
+              >
+                <span class="enviado__marca" aria-hidden="true">
+                  <i class="ph" :class="enviado.reserva ? 'ph-check' : 'ph-hourglass-medium'" />
+                </span>
+                <span v-if="enviado.reserva" class="enviado__texto">
+                  <strong>{{ enviado.reserva.acomodacao }}</strong>
+                  <span>{{ formato.periodo(enviado.reserva.entrada, enviado.reserva.saida) }}</span>
+                </span>
+                <span v-else class="enviado__texto">
+                  <strong>
+                    {{
+                      enviado.tipoPedido
+                        ? t('hotel.pedidos.app.passoHotelConfirma', {
+                            tipo: enviado.tipoPedido.nome,
+                          })
+                        : t('hotel.pedidos.app.passoHotel')
+                    }}
+                  </strong>
+                  <span>{{
+                    t('hotel.pedidos.app.ate', { quando: formato.quando(enviado.responderAte) })
+                  }}</span>
+                </span>
+              </li>
+              <li class="enviado__passo" :class="{ 'enviado__passo--agora': enviado.reserva }">
+                <span class="enviado__marca" aria-hidden="true">
+                  <i class="ph ph-currency-circle-dollar" />
+                </span>
+                <span class="enviado__texto">
+                  <strong>{{ t('hotel.pedidos.app.passoSinal') }}</strong>
+                  <span>{{ t('hotel.pedidos.app.passoSinalAjuda') }}</span>
+                </span>
+              </li>
+            </ol>
           </section>
+
+          <p v-if="acompanhar" class="fx-linha fx-linha--suave">
+            <i class="ph ph-device-mobile" aria-hidden="true" />
+            {{ t('clinico.pedidos.link.baixeOApp') }}
+          </p>
         </div>
         <div class="fx-rodape">
           <Button
@@ -1156,61 +1288,6 @@ function trocarParaHotelEscolhe() {
   padding: 0;
   gap: 0.35rem;
   list-style: none;
-}
-
-.reserva__selo {
-  display: grid;
-  width: 3rem;
-  height: 3rem;
-  margin-top: 0.5rem;
-  border-radius: 50%;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-  font-size: 1.4rem;
-  place-items: center;
-}
-
-.reserva__titulo {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 750;
-}
-
-.reserva__passos {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  gap: 0.75rem;
-  list-style: none;
-}
-
-.reserva__passo {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  color: var(--hc-tinta-2);
-}
-
-.reserva__passo > i {
-  font-size: 1.1rem;
-}
-
-.reserva__passo > span {
-  display: grid;
-  gap: 0.05rem;
-}
-
-.reserva__passo strong {
-  color: var(--hc-tinta);
-}
-
-.reserva__passo--feito > i {
-  color: var(--hc-marca);
-}
-
-.reserva__link {
-  display: flex;
-  gap: 0.4rem;
 }
 
 .reserva__numero {

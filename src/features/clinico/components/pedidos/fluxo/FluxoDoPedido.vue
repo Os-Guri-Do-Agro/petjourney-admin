@@ -87,7 +87,10 @@ const titulo = computed(() => {
       {{ t(`clinico.pedidos.app.erro.${fluxo.erro.value}`) }}
     </p>
 
-    <Transition name="fx-etapa" mode="out-in">
+    <Transition
+      :name="fluxo.direcao.value === 'volta' ? 'fx-etapa-volta' : 'fx-etapa'"
+      mode="out-in"
+    >
       <component
         :is="ETAPAS[etapa]"
         :key="etapa"

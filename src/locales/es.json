@@ -7116,7 +7116,17 @@
         "carteira": "Lleve la cartilla de vacunación a la entrada: el hotel la revisa antes de recibir a su mascota.",
         "confirmacaoPor": "La confirmación llegará por mensaje al {telefone}.",
         "acompanhe": "Siga o cancele su solicitud en esta dirección",
-        "rodape": "Reserva en línea por PetJourney"
+        "rodape": "Reserva en línea por PetJourney",
+        "promessa": "Pida el hospedaje en un minuto, sin descargar la app. El hotel responde en hasta {horas} h.",
+        "passos": {
+          "pet": "Su mascota",
+          "datas": "Fechas",
+          "acomodacao": "Alojamiento",
+          "extras": "Extras"
+        },
+        "regras": "Cómo funciona la estadía",
+        "regraSinal": "Para confirmar, el hotel pide una seña del {percentual}%.",
+        "semExtras": "Sin extras"
       },
       "ensaio": {
         "quem": "En el celular de",
@@ -7226,6 +7236,9 @@
           "PEDIDO_JA_RESPONDIDO": "El hotel ya respondió esta solicitud."
         },
         "enviadoTitulo": "Solicitud enviada",
+        "enviadoLide": "El hotel responde hasta {quando}.",
+        "aceitoLide": "El hotel aceptó la estadía. Falta la seña para confirmar: las instrucciones llegan con la respuesta.",
+        "respostaNoApp": "La respuesta llega como notificación en la app.",
         "aceitoTitulo": "Reservado",
         "passoPediu": "Usted solicitó",
         "passoHotel": "El hotel elige el alojamiento",

@@ -124,6 +124,11 @@ export function criarFluxoDoPedido(opcoes: {
 }) {
   const etapa = ref<EtapaDoFluxo>(opcoes.canal === 'app' ? 'inicio' : 'motivo')
   const historico = ref<EtapaDoFluxo[]>([])
+  /**
+   * Para onde a última troca de etapa foi: a transição desliza para a frente ao avançar e para trás
+   * ao voltar. Sem isto, o "voltar" andava para a frente, e o movimento contava o contrário.
+   */
+  const direcao = ref<'frente' | 'volta'>('frente')
 
   const clinica = ref<AgendamentoOnlineDaClinica | null>(null)
   const carregando = ref(false)
@@ -268,6 +273,7 @@ export function criarFluxoDoPedido(opcoes: {
 
   function irPara(proxima: EtapaDoFluxo) {
     historico.value.push(etapa.value)
+    direcao.value = 'frente'
     etapa.value = proxima
     erro.value = null
   }
@@ -283,6 +289,7 @@ export function criarFluxoDoPedido(opcoes: {
     erro.value = null
 
     if (anterior) {
+      direcao.value = 'volta'
       etapa.value = anterior
     }
   }
@@ -367,6 +374,7 @@ export function criarFluxoDoPedido(opcoes: {
     horarioSumiu.value = null
     enviado.value = null
     historico.value = []
+    direcao.value = 'volta'
     etapa.value = opcoes.canal === 'app' ? 'inicio' : 'motivo'
     await iniciar()
   }
@@ -407,6 +415,7 @@ export function criarFluxoDoPedido(opcoes: {
       /* Dois pets incompletos: a etapa se repete para o segundo. */
       if (!petIncompleto.value) {
         historico.value.pop()
+        direcao.value = 'frente'
         etapa.value = 'motivo'
         historico.value.push('pets')
       }
@@ -550,6 +559,7 @@ export function criarFluxoDoPedido(opcoes: {
     reserva.value = null
     erro.value = 'RESERVA_EXPIRADA'
     historico.value.pop()
+    direcao.value = 'volta'
     etapa.value = 'horario'
     await carregarDias()
     erro.value = 'RESERVA_EXPIRADA'
@@ -570,6 +580,7 @@ export function criarFluxoDoPedido(opcoes: {
     pedido.quando = 'semana'
     pedido.periodoEscolhido = null
     historico.value.pop()
+    direcao.value = 'frente'
     etapa.value = 'preferencia'
   }
 
@@ -635,6 +646,7 @@ export function criarFluxoDoPedido(opcoes: {
       /* A reserva virou pedido no servidor: não há o que liberar. */
       reserva.value = null
       historico.value = []
+      direcao.value = 'frente'
       etapa.value = 'enviado'
       opcoes.aoMudar?.()
       await recarregarConta()
@@ -710,6 +722,7 @@ export function criarFluxoDoPedido(opcoes: {
     canal: opcoes.canal,
     tutorId: opcoes.tutorId,
     etapa,
+    direcao,
     podeVoltar,
     clinica,
     carregando,
