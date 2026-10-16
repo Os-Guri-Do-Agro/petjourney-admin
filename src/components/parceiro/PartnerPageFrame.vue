@@ -417,15 +417,17 @@ const pageStyle = computed(() => {
 }
 
 /*
- * Tinta secundária, não a apagada: em `faint` o rótulo ficava a 3,2:1 sobre a página, abaixo do
- * piso AA para texto de 12px — e é o controle que existe em todas as telas do portal.
+ * A pílula clara das ações da tela, e não um contorno no fio da página: com a borda da página e a
+ * tinta secundária ele sumia no cinza — e é o controle que existe em todas as telas do portal. Nas
+ * telas migradas o fio é o da pílula; nas que ainda não migraram, o da página.
  */
 .partner-page__guidance.p-button {
   min-height: 2.2rem;
   gap: 0.4rem;
   padding: 0.35rem 0.75rem;
-  border-color: var(--partner-line, transparent);
-  color: var(--partner-muted, inherit);
+  border-color: var(--hc-pilula-borda, var(--partner-line, transparent));
+  background: var(--partner-card, transparent);
+  color: var(--partner-text, inherit);
   font-size: 0.8125rem;
 }
 
@@ -434,7 +436,7 @@ const pageStyle = computed(() => {
 }
 
 .partner-page__guidance.p-button:not(:disabled):hover {
-  border-color: var(--partner-line, transparent);
+  border-color: var(--hc-marca, var(--partner-line, transparent));
   background: var(--partner-card, transparent);
   color: var(--partner-text, inherit);
 }

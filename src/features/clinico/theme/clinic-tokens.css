@@ -919,7 +919,12 @@
 .clinic-dialog .p-button.p-button-secondary.p-button-outlined,
 .clinic-overlay .p-button.p-button-secondary.p-button-outlined {
   border-color: var(--clinic-line-strong);
-  background: transparent;
+  /*
+   * O fundo do cartão, e não transparente: sobre a página cinza ("Filtros", "Hoje", "Internar",
+   * "Novo corredor") o transparente pegava o cinza por dentro e o botão lia como desligado.
+   * Dentro do cartão não muda nada — o fundo dele é o mesmo.
+   */
+  background: var(--clinic-surface);
   color: var(--clinic-text);
 }
 
@@ -947,7 +952,7 @@
 .clinic-dialog .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled),
 .clinic-overlay .p-button.p-button-secondary.p-button-outlined.acao-turno:not(:disabled) {
   border-color: var(--clinic-outro-turno-line);
-  background: transparent;
+  background: var(--clinic-surface);
   color: var(--clinic-outro-turno);
 }
 

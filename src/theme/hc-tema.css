@@ -563,6 +563,16 @@ html .inicio-pagina .partner-page__guidance.p-button {
   border-color: var(--hc-marca);
 }
 
+/*
+ * O contornado tem o fundo do cartão, como a pílula clara. O do PrimeVue é transparente: sobre a
+ * página cinza ele ficava com o cinza dela por dentro e o fio claro por fora, e lia como desligado
+ * — "Como o responsável pede", "Link do hotel" e afins, no topo de várias telas. Dentro de cartão
+ * não muda nada; o hover e o pressionado continuam vindo dos tokens.
+ */
+.hc-tema .p-button.p-button-outlined {
+  background: var(--hc-cartao);
+}
+
 /* ------------------------------------------------------------------ segmentos
  * Os `SelectButton` crus (Dia/Semana da agenda, densidade, escolhas de diálogo) na mesma pílula do
  * `ClinicToggleGroup`: trilho branco de fio fino, e a escolhida numa pílula verde-clara. O
