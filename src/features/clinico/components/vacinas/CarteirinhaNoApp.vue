@@ -13,7 +13,8 @@
  * protocolo com a próxima dose já marcada. A especificação para o app está em
  * `docs/clinico/14-*.md`.
  *
- * Moldura sóbria, como a do boletim: o que se julga aqui é o conteúdo.
+ * Moldura sóbria, como a do celular dos remédios: o que se julga aqui é o conteúdo. Só tokens do
+ * Trilha, para a prévia acompanhar o tema da clínica (claro e escuro) sem cor própria.
  */
 import Button from 'primevue/button'
 import { computed, ref } from 'vue'
@@ -237,15 +238,15 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
       <dl class="resumo">
         <div>
           <dt>{{ t('clinico.vacinas.app.resumo.vacinas') }}</dt>
-          <dd>{{ carteirinha.vacinas.length }}</dd>
+          <dd class="ui-num">{{ carteirinha.vacinas.length }}</dd>
         </div>
         <div>
           <dt>{{ t('clinico.vacinas.app.resumo.proxima') }}</dt>
-          <dd>{{ proximaDose ? rotulos.data(proximaDose.em) : '–' }}</dd>
+          <dd class="ui-num">{{ proximaDose ? rotulos.data(proximaDose.em) : '–' }}</dd>
         </div>
         <div v-if="plano.atrasadas > 0" class="resumo--risco">
           <dt>{{ t('clinico.vacinas.app.resumo.atrasadas') }}</dt>
-          <dd>
+          <dd class="ui-num">
             <i class="ph ph-warning-circle" aria-hidden="true" />
             {{ plano.atrasadas }}
           </dd>
@@ -332,7 +333,7 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
                     {{ t('clinico.vacinas.app.nova') }}
                   </span>
                 </span>
-                <span class="cartao__meta">
+                <span class="cartao__meta ui-num">
                   {{ numeroDaDose(vacina) }} · {{ rotulos.data(vacina.aplicadaEm.slice(0, 10)) }}
                 </span>
 
@@ -401,20 +402,20 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
   justify-content: center;
 }
 
+/* O aparelho: borda de controle, cantos de celular e o fundo afundado da casa. */
 .celular__moldura {
   position: relative;
   display: flex;
   overflow: hidden;
-  width: min(21rem, 100%);
-  height: min(44rem, calc(100vh - 9rem));
+  width: min(22rem, 100%);
+  height: min(44rem, calc(100vh - 11rem));
   min-height: 30rem;
   flex-direction: column;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: 1.6rem;
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface-sunken);
-  box-shadow: var(--clinic-shadow-card);
+  padding: 14px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 28px;
+  gap: 12px;
+  background: var(--superficie-3);
 }
 
 /* ------------------------------------------------------------------ aviso */
@@ -423,12 +424,12 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
   display: flex;
   flex: 0 0 auto;
   align-items: flex-start;
-  padding: var(--clinic-space-2) var(--clinic-space-2) var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: 1rem;
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-float);
-  gap: var(--clinic-space-2);
+  padding: 10px 8px 10px 12px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-2);
+  gap: 10px;
 }
 
 .push__fechar {
@@ -438,31 +439,32 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
 
 .push__marca {
   display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 28px;
+  height: 28px;
   flex: 0 0 auto;
-  border-radius: 0.45rem;
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
-  font-size: 0.7rem;
+  border-radius: 8px;
+  background: var(--musgo);
+  color: var(--sobre-musgo);
+  font-size: 14px;
   place-items: center;
 }
 
 .push__texto {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
-  font-size: var(--clinic-font-label);
+  gap: 1px;
+  color: var(--tinta);
+  font-size: 13px;
   line-height: 1.35;
 }
 
 .push__texto small {
-  color: var(--clinic-faint);
-  font-size: 0.625rem;
+  color: var(--tinta-3);
+  font-size: 11.5px;
 }
 
 .push__texto span {
-  color: var(--clinic-muted);
+  color: var(--tinta-2);
 }
 
 .aviso-enter-active,
@@ -475,7 +477,7 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
 .aviso-enter-from,
 .aviso-leave-to {
   opacity: 0;
-  transform: translateY(-0.5rem);
+  transform: translateY(-8px);
 }
 
 /* ------------------------------------------------------------------ topo e resumo */
@@ -483,19 +485,20 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
 .topo {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-3);
+  gap: 12px;
+  padding: 2px 4px;
 }
 
 .topo__avatar {
   display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 38px;
+  height: 38px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+  background: var(--pets-fundo);
+  color: var(--pets-tinta);
+  font-size: 13px;
+  font-weight: 650;
   place-items: center;
 }
 
@@ -516,21 +519,22 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
 }
 
 .topo__identidade strong {
-  font-size: var(--clinic-font-value);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 650;
 }
 
 .topo__identidade span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .resumo {
   display: grid;
   margin: 0;
-  padding: var(--clinic-space-2) 0;
-  border-radius: 0.9rem;
-  background: var(--clinic-surface);
+  padding: 10px 0;
+  border-radius: 16px;
+  background: var(--superficie);
   grid-auto-columns: minmax(0, 1fr);
   grid-auto-flow: column;
 }
@@ -538,33 +542,31 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
 .resumo > div {
   display: grid;
   justify-items: center;
-  gap: 0.05rem;
+  gap: 1px;
 }
 
 .resumo > div + div {
-  border-inline-start: 1px solid var(--clinic-line-soft);
+  border-inline-start: 1px solid var(--linha);
 }
 
 .resumo dt {
-  color: var(--clinic-faint);
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--tinta-2);
+  font-size: 12px;
+  font-weight: 550;
 }
 
 .resumo dd {
   display: inline-flex;
   align-items: center;
   margin: 0;
-  gap: 0.25rem;
-  font-size: var(--clinic-font-value);
-  font-variant-numeric: tabular-nums;
-  font-weight: 750;
+  gap: 4px;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 650;
 }
 
 .resumo--risco dd {
-  color: var(--clinic-risk-text);
+  color: var(--risco-tinta);
 }
 
 /* ------------------------------------------------------------------ rolagem */
@@ -574,231 +576,234 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
   overflow-y: auto;
   flex: 1;
   align-content: start;
-  gap: var(--clinic-space-3);
+  gap: 10px;
   overscroll-behavior: contain;
 }
 
 .protocolo {
   display: grid;
-  padding: var(--clinic-space-3);
-  border-radius: 0.9rem;
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface);
+  padding: 12px 14px;
+  border-radius: 16px;
+  gap: 8px;
+  background: var(--superficie);
 }
 
 .protocolo h4 {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: 0.625rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .protocolo ul {
   display: grid;
   margin: 0;
   padding: 0;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   list-style: none;
 }
 
 .protocolo__linha {
   display: grid;
-  gap: 0.1rem;
+  gap: 2px;
 }
 
 .protocolo__linha + .protocolo__linha {
-  padding-top: var(--clinic-space-2);
-  border-top: 1px solid var(--clinic-line-soft);
+  padding-top: 8px;
+  border-top: 1px solid var(--linha);
 }
 
 .protocolo__nome {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
-  font-size: var(--clinic-font-label);
+  gap: 8px;
+  color: var(--tinta);
+  font-size: 13px;
+}
+
+.protocolo__nome strong {
+  font-weight: 600;
 }
 
 .protocolo__quando,
 .protocolo__marcada {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .protocolo__quando--ATRASADA {
-  color: var(--clinic-risk-text);
-  font-weight: 700;
+  color: var(--risco-tinta);
+  font-weight: 600;
 }
 
 .protocolo__quando--DEVIDA,
 .protocolo__quando--A_VENCER {
-  color: var(--clinic-attention-text);
-  font-weight: 700;
+  color: var(--atencao-tinta);
+  font-weight: 600;
 }
 
 .protocolo__marcada {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
+  gap: 5px;
+  color: var(--musgo);
+  font-weight: 600;
 }
 
 .protocolo__opcionais {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: 0.625rem;
+  color: var(--tinta-2);
+  font-size: 12px;
   line-height: 1.4;
 }
 
 .pontos {
   display: inline-flex;
-  gap: 0.2rem;
+  gap: 3px;
 }
 
 .pontos__ponto {
-  width: 0.5rem;
-  height: 0.5rem;
-  border: 1.5px solid var(--clinic-line);
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--linha-forte);
   border-radius: 50%;
 }
 
 .pontos__ponto--cheio {
-  border-color: var(--clinic-accent-strong);
-  background: var(--clinic-accent-strong);
+  border-color: var(--musgo);
+  background: var(--musgo);
 }
 
 .pontos__ponto--agora {
-  border-color: var(--clinic-accent-strong);
+  border-color: var(--clinica);
 }
 
 .vazio {
-  margin: var(--clinic-space-4) 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  margin: 16px 0;
+  color: var(--tinta-2);
+  font-size: 13px;
   text-align: center;
 }
 
 .ano {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .ano h5 {
-  margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+  margin: 4px 4px 0;
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .ano__lista {
   display: grid;
   margin: 0;
   padding: 0;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   list-style: none;
 }
 
 .cartao {
   display: grid;
-  padding: var(--clinic-space-3);
+  padding: 12px;
   border: 1px solid transparent;
-  border-radius: 0.9rem;
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface);
+  border-radius: 16px;
+  gap: 10px;
+  background: var(--superficie);
   grid-template-columns: auto minmax(0, 1fr);
 }
 
-/* A linha nova ganha a borda do acento: é o que a plateia procura, sem pintar o cartão. */
+/* A linha nova ganha a borda da clínica: é o que a plateia procura, sem pintar o cartão. */
 .cartao--nova {
-  border-color: var(--clinic-accent-strong);
+  border-color: var(--clinica);
 }
 
 .cartao__icone {
   display: grid;
-  width: 1.8rem;
-  height: 1.8rem;
-  border-radius: 0.55rem;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: 0.75rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  font-size: 15px;
   place-items: center;
 }
 
 .cartao__corpo {
   display: grid;
   min-width: 0;
-  gap: 0.15rem;
-  font-size: var(--clinic-font-label);
+  gap: 2px;
+  color: var(--tinta);
+  font-size: 12.5px;
 }
 
 .cartao__titulo {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .cartao__titulo strong {
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
+  font-size: 14px;
+  font-weight: 650;
 }
 
 .cartao__nova {
-  padding: 0 0.4rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
-  font-size: 0.625rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-size: 11.5px;
+  font-weight: 600;
 }
 
 .cartao__meta,
 .cartao__lote {
-  color: var(--clinic-faint);
+  color: var(--tinta-2);
 }
 
 .selo {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
+  gap: 5px;
+  color: var(--musgo);
+  font-weight: 600;
 }
 
 .selo--externa {
-  color: var(--clinic-muted);
+  color: var(--tinta-2);
 }
 
 .cartao__relato {
-  color: var(--clinic-attention-text);
-  font-weight: 700;
+  color: var(--atencao-tinta);
+  font-weight: 600;
 }
 
 .cartao__lembrete {
   display: inline-flex;
   align-items: center;
-  margin-top: 0.2rem;
-  gap: 0.3rem;
-  color: var(--clinic-muted);
-  font-weight: 600;
+  margin-top: 3px;
+  gap: 5px;
+  color: var(--tinta-2);
+  font-weight: 550;
 }
 
 .cartao__lembrete--risco {
-  color: var(--clinic-risk-text);
-  font-weight: 750;
+  color: var(--risco-tinta);
+  font-weight: 650;
 }
 
 .cartao__lembrete--atencao {
-  color: var(--clinic-attention-text);
+  color: var(--atencao-tinta);
 }
 
 .cartao__lembrete--marcada {
-  color: var(--clinic-accent-strong);
+  color: var(--musgo);
 }
 
 /* A linha que entra na lista: o movimento diz o que mudou, e só isso. */
@@ -810,7 +815,7 @@ function via(valor: VacinaAplicadaNaClinica['via']): string {
 
 .linha-enter-from {
   opacity: 0;
-  transform: translateY(-0.4rem);
+  transform: translateY(-6px);
 }
 
 .linha-move {

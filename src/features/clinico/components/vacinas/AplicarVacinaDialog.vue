@@ -25,7 +25,6 @@ import ToggleSwitch from 'primevue/toggleswitch'
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import ClinicAlertChip from '../base/ClinicAlertChip.vue'
 import ClinicDateField from '../base/ClinicDateField.vue'
 import ClinicField from '../base/ClinicField.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
@@ -53,7 +52,10 @@ const props = withDefaults(
     /** Quem aplica, quando a tela sabe (o profissional do atendimento). */
     profissionalInicial?: string | null
     encounterId?: string | null
-    /** Aberto da ficha do paciente: leva o acabamento da Visão geral (`ficha/ficha.css`). */
+    /**
+     * Aberto da ficha do paciente. Hoje o diálogo tem um desenho só (o do Trilha) nos dois
+     * lugares; a prop fica para quem já a passa.
+     */
     ficha?: boolean
   }>(),
   { vacinaInicial: null, profissionalInicial: null, encounterId: null, ficha: false },
@@ -64,14 +66,8 @@ const emit = defineEmits<{
   aplicada: [aplicacao: AplicacaoVacina]
 }>()
 
-/*
- * Na ficha, o diálogo e as listas que ele abre (teleportadas para o `body`) levam os tokens da
- * Visão geral; no atendimento, os do módulo. As ações viram pílula lá, e ficam como estão aqui.
- */
-const classeDoTema = computed(() => (props.ficha ? 'hc-tema ficha-tema' : ''))
-const ptDoOverlay = computed(() => ({
-  overlay: { class: ['clinic-overlay', classeDoTema.value].filter(Boolean).join(' ') },
-}))
+/* As listas que o diálogo abre vão para o `body`: levam a classe dos painéis da clínica. */
+const ptDoOverlay = { overlay: { class: 'clinic-overlay' } }
 
 /** "Outro lote": o frasco que o estoque não conhece. */
 const LOTE_DIGITADO = '__digitado__'
@@ -84,6 +80,7 @@ const formato = useClinicFormat()
 const rotulos = useRotulosDaVacina()
 const clinico = useClinicoStore()
 const idDoAviso = useId()
+const idDoTitulo = useId()
 
 const vacinaId = ref<string | null>(null)
 const dose = ref(1)
@@ -417,6 +414,16 @@ async function aplicar() {
   }
 }
 
+/**
+ * A linha de baixo do título: o que o protocolo diz da vacina escolhida — "V10 · 2 de 3 · hoje".
+ * É o "sobre o quê" do diálogo, que muda quando alguém troca a vacina.
+ */
+const subtitulo = computed(() => {
+  const escolhida = opcoesVacina.value.find((item) => item.valor === vacinaId.value)
+
+  return escolhida ? `${escolhida.rotulo} · ${escolhida.detalhe}` : ''
+})
+
 const textoDaSugestao = computed(() => {
   if (!sugestao.value) {
     return ''
@@ -435,16 +442,21 @@ const textoDaSugestao = computed(() => {
     :visible="visivel"
     modal
     class="clinic-dialog hc-tema"
-    :class="classeDoTema"
     :style="{ width: 'min(40rem, 94vw)' }"
+    :aria-labelledby="idDoTitulo"
     :dismissable-mask="!salvando"
     @update:visible="emit('update:visivel', $event)"
   >
     <template #header>
-      <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-shield" /></span>
-        {{ t('clinico.vacinas.aplicar.titulo', { pet: pet.nome }) }}
-      </h2>
+      <div class="topo">
+        <span class="topo__icone" aria-hidden="true"><i class="ph ph-syringe" /></span>
+        <span class="topo__texto">
+          <h2 :id="idDoTitulo" class="topo__titulo">
+            {{ t('clinico.vacinas.aplicar.titulo', { pet: pet.nome }) }}
+          </h2>
+          <span v-if="subtitulo" class="topo__sub">{{ subtitulo }}</span>
+        </span>
+      </div>
     </template>
 
     <form class="aplicar clinic-scope" @submit.prevent="aplicar">
@@ -514,7 +526,7 @@ const textoDaSugestao = computed(() => {
                 t('clinico.vacinas.aplicar.lote.digitar')
               }}</span>
               <span v-else-if="loteDoEstoque" class="lote__valor">
-                <strong class="clinic-value">{{ loteDoEstoque.codigo }}</strong>
+                <strong class="ui-num">{{ loteDoEstoque.codigo }}</strong>
                 <span>{{
                   t('clinico.vacinas.validade', { data: rotulos.data(loteDoEstoque.validade) })
                 }}</span>
@@ -527,17 +539,15 @@ const textoDaSugestao = computed(() => {
             <template #option="{ option }">
               <span v-if="option.lote" class="lote">
                 <span class="lote__codigo">
-                  <strong class="clinic-value">{{ option.lote.codigo }}</strong>
-                  <ClinicAlertChip
-                    v-if="!option.lote.avaliacao.pode"
-                    severidade="risco"
-                    :rotulo="t('clinico.vacinas.estoque.situacaoLote.vencido')"
-                  />
-                  <ClinicAlertChip
-                    v-else-if="option.lote.sugerido"
-                    severidade="info"
-                    :rotulo="t('clinico.vacinas.aplicar.lote.usarPrimeiro')"
-                  />
+                  <strong class="ui-num">{{ option.lote.codigo }}</strong>
+                  <span v-if="!option.lote.avaliacao.pode" class="ui-selo ui-selo--risco lote__selo">
+                    <i class="ph ph-prohibit" aria-hidden="true" />
+                    {{ t('clinico.vacinas.estoque.situacaoLote.vencido') }}
+                  </span>
+                  <span v-else-if="option.lote.sugerido" class="ui-selo ui-selo--ok lote__selo">
+                    <i class="ph ph-arrow-circle-up" aria-hidden="true" />
+                    {{ t('clinico.vacinas.aplicar.lote.usarPrimeiro') }}
+                  </span>
                 </span>
                 <small>
                   {{ t('clinico.vacinas.validade', { data: rotulos.data(option.lote.validade) }) }}
@@ -648,7 +658,7 @@ const textoDaSugestao = computed(() => {
         :aria-label="t('clinico.vacinas.aplicar.proxima.titulo')"
       >
         <div class="proxima__data">
-          <i class="ph ph-calendar-blank" aria-hidden="true" />
+          <span class="proxima__icone" aria-hidden="true"><i class="ph ph-calendar-blank" /></span>
           <span>
             <strong>
               {{
@@ -689,17 +699,17 @@ const textoDaSugestao = computed(() => {
 
     <template #footer>
       <Button
+        type="button"
         :label="t('clinico.comum.cancelar')"
-        :severity="ficha ? undefined : 'secondary'"
-        :outlined="!ficha"
-        :class="{ 'hc-pilula': ficha }"
+        severity="secondary"
+        text
         :disabled="salvando"
         @click="emit('update:visivel', false)"
       />
       <Button
+        type="button"
         :label="t('clinico.vacinas.aplicar.confirmar')"
         icon="ph ph-check"
-        :class="ficha ? 'hc-pilula hc-pilula--cheia' : 'clinic-acao-principal'"
         :loading="salvando"
         :disabled="!completo"
         @click="aplicar"
@@ -709,14 +719,58 @@ const textoDaSugestao = computed(() => {
 </template>
 
 <style scoped>
+/* ------------------------------------------------------------------ alto */
+
+.topo {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.topo__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-size: 20px;
+}
+
+.topo__texto {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.topo__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.topo__sub {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+
+/* ------------------------------------------------------------------ formulário */
+
 .aplicar {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 16px;
 }
 
 .aplicar__linha {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 14px;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
@@ -728,10 +782,11 @@ const textoDaSugestao = computed(() => {
 .aplicar__travados {
   display: flex;
   align-items: baseline;
-  margin: calc(var(--clinic-space-2) * -1) 0 0;
-  gap: 0.35rem;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  margin: -8px 0 0;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .aplicar__travados {
@@ -740,108 +795,137 @@ const textoDaSugestao = computed(() => {
 
 .opcao {
   display: grid;
-  gap: 0.05rem;
+  gap: 1px;
 }
 
 .opcao small {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .opcao small.opcao--atrasada {
-  color: var(--clinic-risk-text);
-  font-weight: 700;
+  color: var(--risco-tinta);
+  font-weight: 600;
 }
 
 .opcao small.opcao--devida {
-  color: var(--clinic-attention-text);
-  font-weight: 700;
+  color: var(--atencao-tinta);
+  font-weight: 600;
 }
 
 .lote {
   display: grid;
-  gap: 0.1rem;
+  gap: 2px;
 }
 
 .lote__codigo {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+}
+
+.lote__selo.ui-selo {
+  height: 20px;
+  padding-inline: 7px;
+  font-size: 11.5px;
 }
 
 .lote small {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .lote__valor {
   display: inline-flex;
   align-items: baseline;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .lote__valor span,
 .lote__vazio {
-  color: var(--clinic-faint);
+  color: var(--tinta-2);
 }
 
 .aviso {
   display: flex;
   align-items: baseline;
-  margin: calc(var(--clinic-space-2) * -1) 0 0;
-  gap: 0.4rem;
-  font-size: var(--clinic-font-label);
+  margin: -8px 0 0;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.45;
 }
 
 .aviso--risco {
-  color: var(--clinic-risk-text);
+  color: var(--risco-tinta);
 }
 
 .aviso--atencao {
-  color: var(--clinic-attention-text);
+  color: var(--atencao-tinta);
 }
 
 .aviso--info {
-  color: var(--clinic-muted);
+  color: var(--tinta-2);
 }
 
+/* A próxima dose, numa faixa tingida: é a data que vai para a carteira, conferida antes. */
 .proxima {
   display: grid;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface-soft);
+  padding: 14px 16px;
+  border-radius: 14px;
+  gap: 12px;
+  background: var(--superficie-2);
 }
 
 .proxima__data {
   display: flex;
-  align-items: baseline;
-  gap: 0.45rem;
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-value);
+  align-items: center;
+  gap: 10px;
+  color: var(--tinta);
+  font-size: 15px;
+}
+
+.proxima__data strong {
+  font-weight: 600;
+}
+
+.proxima__icone {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--musgo);
+  font-size: 17px;
 }
 
 .proxima__marcar {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-3);
+  gap: 12px;
   cursor: pointer;
 }
 
 .proxima__marcar span {
   display: grid;
-  gap: 0.05rem;
+  gap: 1px;
+  color: var(--tinta);
+  font-size: 14px;
+}
+
+.proxima__marcar strong {
+  font-weight: 600;
 }
 
 .proxima__marcar small,
 .proxima__recall {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 @media (max-width: 620px) {

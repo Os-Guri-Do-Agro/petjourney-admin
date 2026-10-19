@@ -9,15 +9,18 @@
  *
  * O desenho tem uma regra só: **não julgar.**
  *
- * - **Dada** é a tinta sálvia do módulo. **Pulada** é pêssego — é o que a casa disse que não deu,
- *   com motivo, e merece ser vista; não é vermelho, porque não é erro de ninguém.
+ * - **Dada** é o musgo da casa. **Pulada** é âmbar — é o que a casa disse que não deu, com
+ *   motivo, e merece ser vista; não é vermelho, porque não é erro de ninguém.
  * - **Sem registro** é o cinza do trilho vazio, a mesma cor de "não se sabe". Ele não usa a cor
  *   da pulada nem nenhuma cor de aviso: a dose pode ter sido dada sem ser marcada.
  * - **A dose da vez** é só um contorno. **Prevista** é quase nada.
  *
- * O par sálvia × pêssego foi conferido para daltonismo (ΔE ≥ 12 no claro e ≥ 14 no escuro, com o
- * pêssego escurecido no tema escuro). O leitor de tela recebe a frase inteira pelo `rotulo`; a
- * tabela de registros, ao lado, é a versão sem cor desta faixa.
+ * As cores moram em `faixa-cores.css`, só com tokens do Trilha. O leitor de tela recebe a frase
+ * inteira pelo `rotulo`; a tabela de registros, na ficha, é a versão sem cor desta faixa.
+ *
+ * O tamanho é de quem usa: a célula sai de `--faixa-celula` e o vão de `--faixa-vao`, e cada tela
+ * os ajusta na própria folha. Com `dias-no-eixo`, cada coluna leva o número do dia embaixo — é a
+ * faixa grande da ficha, onde "qual dia foi" é a pergunta seguinte.
  */
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -43,8 +46,10 @@ const props = withDefaults(
     marco?: ISODateTime | null
     /** Quem registrou, pelo id — para a leitura ao passar o ponteiro. */
     nomes?: Record<string, string>
+    /** O número do dia embaixo de cada coluna, no lugar do primeiro e do último dia. */
+    diasNoEixo?: boolean
   }>(),
-  { dias: 42, compacta: false, marco: null, nomes: () => ({}) },
+  { dias: 42, compacta: false, marco: null, nomes: () => ({}), diasNoEixo: false },
 )
 
 const { t } = useI18n()
@@ -182,6 +187,11 @@ function mostrar(evento: PointerEvent) {
 
 const primeiroDia = computed(() => colunas.value[0]?.dia ?? null)
 const ultimoDia = computed(() => colunas.value[colunas.value.length - 1]?.dia ?? null)
+
+/** O dia do mês, sem zero à esquerda: "7", "13". O mês está no rótulo de cima da faixa. */
+function diaDoMes(dia: ISODate): string {
+  return String(Number(dia.slice(8, 10)))
+}
 </script>
 
 <template>
@@ -226,7 +236,26 @@ const ultimoDia = computed(() => colunas.value[colunas.value.length - 1]?.dia ??
         </span>
       </div>
 
-      <div v-if="!compacta && primeiroDia && ultimoDia" class="faixa__eixo" aria-hidden="true">
+      <div
+        v-if="!compacta && diasNoEixo && colunas.length"
+        class="faixa__eixo faixa__eixo--dias"
+        :style="{ '--faixa-dias': colunas.length }"
+        aria-hidden="true"
+      >
+        <span
+          v-for="coluna in colunas"
+          :key="coluna.dia"
+          :class="{ 'faixa__dia--hoje': coluna.dia === clinicClock.today() }"
+        >
+          {{ diaDoMes(coluna.dia) }}
+        </span>
+      </div>
+
+      <div
+        v-else-if="!compacta && primeiroDia && ultimoDia"
+        class="faixa__eixo"
+        aria-hidden="true"
+      >
         <span>{{ formato.dataCurta(primeiroDia) }}</span>
         <span>{{
           ultimoDia === clinicClock.today()
@@ -239,27 +268,28 @@ const ultimoDia = computed(() => colunas.value[colunas.value.length - 1]?.dia ??
 </template>
 
 <style scoped>
-/* 12 px por dose e horário em 11 px: com 10 px a faixa e as horas viravam textura, não leitura. */
+/* 12 px por dose e horário em 11,5 px: com 10 px a faixa e as horas viravam textura, não leitura. */
 .faixa {
-  --faixa-celula: 0.75rem;
+  --faixa-celula: 12px;
   --faixa-vao: 2px;
 
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 8px;
   min-width: 0;
 }
 
 .faixa--compacta {
-  --faixa-celula: 0.5rem;
+  --faixa-celula: 8px;
 }
 
 .faixa__horarios {
   display: grid;
   gap: var(--faixa-vao);
   grid-template-rows: repeat(var(--faixa-linhas, 1), var(--faixa-celula));
-  color: var(--clinic-muted);
-  font-size: 0.6875rem;
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 11.5px;
   font-variant-numeric: tabular-nums;
   line-height: var(--faixa-celula);
 }
@@ -272,7 +302,7 @@ const ultimoDia = computed(() => colunas.value[colunas.value.length - 1]?.dia ??
 
 .faixa__corpo {
   display: grid;
-  gap: 0.3rem;
+  gap: 5px;
   min-width: 0;
 }
 
@@ -281,18 +311,18 @@ const ultimoDia = computed(() => colunas.value[colunas.value.length - 1]?.dia ??
   display: grid;
   gap: var(--faixa-vao);
   grid-auto-flow: column;
-  /* Estreita demais, a coluna afina até 2 px em vez de vazar do cartão: vira barra, continua lida. */
+  /* Estreita demais, a coluna afina até 2 px em vez de vazar da folha: vira barra, continua lida. */
   grid-template-columns: repeat(var(--faixa-dias, 1), minmax(2px, var(--faixa-celula)));
   grid-template-rows: repeat(var(--faixa-linhas, 1), var(--faixa-celula));
   justify-content: start;
 }
 
 .faixa__dose {
-  border-radius: 2px;
+  border-radius: max(2px, calc(var(--faixa-celula) / 5));
   background: transparent;
   transition:
-    background-color 160ms ease-out,
-    box-shadow 160ms ease-out;
+    background-color var(--pj-tempo-medio, 200ms) ease-out,
+    box-shadow var(--pj-tempo-medio, 200ms) ease-out;
 }
 
 .faixa__dose--dada {
@@ -313,7 +343,7 @@ const ultimoDia = computed(() => colunas.value[colunas.value.length - 1]?.dia ??
 
 /* A dose da vez: só o contorno, por dentro — ainda não é nada, e pode virar qualquer coisa. */
 .faixa__dose--aberta {
-  box-shadow: inset 0 0 0 1.5px var(--faixa-agora);
+  box-shadow: inset 0 0 0 2px var(--faixa-agora);
 }
 
 /* A última consulta: um fio no vão, antes do primeiro dia depois dela. */
@@ -323,51 +353,72 @@ const ultimoDia = computed(() => colunas.value[colunas.value.length - 1]?.dia ??
 
 .faixa__dose--depois-do-marco::before {
   position: absolute;
-  top: -0.2rem;
-  bottom: calc(-1 * (var(--faixa-linhas) - 1) * (var(--faixa-celula) + var(--faixa-vao)) - 0.2rem);
+  top: -3px;
+  bottom: calc(-1 * (var(--faixa-linhas) - 1) * (var(--faixa-celula) + var(--faixa-vao)) - 3px);
   inset-inline-start: calc(-1 * var(--faixa-vao) / 2 - 0.5px);
   width: 1px;
-  background: var(--clinic-muted);
+  background: var(--faixa-fio);
   content: '';
 }
 
 .faixa__dose[data-dose]:hover {
   box-shadow:
-    0 0 0 1.5px var(--clinic-surface),
-    0 0 0 3px var(--clinic-text);
+    0 0 0 1.5px var(--superficie),
+    0 0 0 3px var(--tinta);
 }
 
 .faixa__leitura {
   position: absolute;
   z-index: 2;
-  padding: 0.3rem 0.5rem;
-  border-radius: 0.45rem;
-  background: var(--clinic-text);
-  color: var(--clinic-surface);
-  font-size: 0.75rem;
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: var(--tinta);
+  box-shadow: var(--sombra-2);
+  color: var(--superficie);
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.3;
   pointer-events: none;
-  transform: translate(-50%, calc(-100% - 0.4rem));
+  transform: translate(-50%, calc(-100% - 6px));
   white-space: nowrap;
 }
 
 /* A âncora é física, como o `left` calculado da caixa: vale igual em árabe. */
 .faixa__leitura--inicio {
-  transform: translate(-0.6rem, calc(-100% - 0.4rem));
+  transform: translate(-10px, calc(-100% - 6px));
 }
 
 .faixa__leitura--fim {
-  transform: translate(calc(-100% + 0.6rem), calc(-100% - 0.4rem));
+  transform: translate(calc(-100% + 10px), calc(-100% - 6px));
 }
 
 .faixa__eixo {
   display: flex;
   justify-content: space-between;
-  gap: 0.75rem;
-  color: var(--clinic-muted);
-  font-size: 0.6875rem;
+  gap: 12px;
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 11.5px;
   font-variant-numeric: tabular-nums;
+}
+
+/* Um número por coluna, na mesma grade da faixa: o dia cai exatamente embaixo das doses dele. */
+.faixa__eixo--dias {
+  display: grid;
+  gap: var(--faixa-vao);
+  grid-template-columns: repeat(var(--faixa-dias, 1), minmax(2px, var(--faixa-celula)));
+  justify-content: start;
+  text-align: center;
+}
+
+.faixa__eixo--dias span {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.faixa__dia--hoje {
+  color: var(--tinta);
+  font-weight: 700;
 }
 
 @media (prefers-reduced-motion: reduce) {

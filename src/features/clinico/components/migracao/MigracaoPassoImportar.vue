@@ -314,7 +314,9 @@ function abrirPaciente(petId: string) {
         </span>
         <span class="caixa__conta">
           <strong class="caixa__numero ui-num">{{ formato.numero(entram, 0) }}</strong>
-          <span class="caixa__unidade">{{ t('clinico.migracao.comum.linhasPalavra', entram) }}</span>
+          <span class="caixa__unidade">{{
+            t('clinico.migracao.comum.linhasPalavra', entram)
+          }}</span>
         </span>
         <ul class="caixa__lista">
           <li v-for="linha in oQueEntra" :key="linha">{{ linha }}</li>
@@ -342,7 +344,9 @@ function abrirPaciente(petId: string) {
           {{ t('clinico.migracao.relatorio.completar') }}
         </span>
         <span class="caixa__conta">
-          <strong class="caixa__numero ui-num">{{ formato.numero(paraCompletar.length, 0) }}</strong>
+          <strong class="caixa__numero ui-num">{{
+            formato.numero(paraCompletar.length, 0)
+          }}</strong>
           <span class="caixa__unidade">{{
             t('clinico.migracao.comum.linhasPalavra', paraCompletar.length)
           }}</span>

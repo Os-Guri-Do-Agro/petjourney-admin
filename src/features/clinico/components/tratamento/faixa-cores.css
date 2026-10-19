@@ -4,24 +4,29 @@
  * Global de propósito, presa à classe `.faixa-cores`: o escopo do Vue daria a cada componente a
  * sua cópia, e a legenda que diverge da faixa no primeiro ajuste de tom ensina a cor errada.
  *
- * O par sálvia × pêssego passou na conferência de daltonismo (ΔE 12 no claro, 14,4 no escuro — o
- * pêssego da Visão geral, `#ffc39f`, dava 5,1 contra a sálvia escura e foi escurecido aqui). O
- * cinza de "sem registro" é o do trilho vazio, e fica abaixo de 3:1 contra o cartão de propósito:
- * é ausência, não série. A frase ao lado e a tabela de registros carregam o número.
+ * Só tokens do Trilha, para os dois temas andarem juntos:
+ *
+ * - **Dada** é o musgo, a tinta da casa. Não é o verde de "ok": dar o remédio não é nota.
+ * - **Pulada** é o âmbar de atenção — o que a casa disse que não deu, com motivo. Nunca o vermelho
+ *   de risco: não é erro de ninguém. No claro ele desce meio tom para a célula passar de 3:1 contra
+ *   a folha; no escuro o âmbar puro já passa, e escurecer o aproximaria do musgo.
+ * - **Sem registro** é o cinza da borda, diluído na folha: ausência, não série. Fica abaixo de
+ *   3:1 de propósito; a conta ao lado e a tabela de registros carregam o número.
+ * - **A dose da vez** é só um contorno, no azul da Clínica — a mesma cor do "agora" da fita do dia.
+ *
+ * Musgo × âmbar: ΔL 28 no claro e 13 no escuro, além do eixo azul–amarelo, que é o que sobra para
+ * quem não distingue verde de vermelho.
  */
 
 .faixa-cores {
-  --faixa-dada: #2f8c7c;
-  --faixa-pulada: #ad4a13;
-  --faixa-sem-registro: #bcc7c3;
-  --faixa-prevista: #e8edea;
-  --faixa-agora: #256f62;
+  --faixa-dada: var(--musgo);
+  --faixa-pulada: color-mix(in oklab, var(--atencao) 70%, var(--atencao-tinta));
+  --faixa-sem-registro: color-mix(in oklab, var(--linha-forte) 40%, var(--superficie));
+  --faixa-prevista: var(--superficie-3);
+  --faixa-agora: var(--clinica);
+  --faixa-fio: var(--tinta-2);
 }
 
 .app-dark .faixa-cores {
-  --faixa-dada: #6cc9b5;
-  --faixa-pulada: #e07b3c;
-  --faixa-sem-registro: #3a4a44;
-  --faixa-prevista: #22302b;
-  --faixa-agora: #8fd9c8;
+  --faixa-pulada: var(--atencao);
 }

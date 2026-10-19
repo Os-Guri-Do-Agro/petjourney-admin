@@ -11,7 +11,9 @@
  * - **A linha fechada já responde.** Ícone da situação (a cor ajuda; o formato decide), o animal e
  *   o responsável, e embaixo a frase do que acontece com ela e quantas correções houve. Abrir é
  *   para o detalhe, não para descobrir o básico.
- * - **Filtros e busca presos no topo**, com o número de cada filtro — o painel rola por baixo.
+ * - **Filtros e busca presos no topo**, com o número de cada filtro — o painel rola por baixo. O
+ *   filtro é o controle segmentado da casa (`ClinicToggleGroup`): uma escolha por vez, com a
+ *   contagem em pílula.
  * - **Abrir desliza.** A altura cresce em 200 ms, a seta gira junto, e se a linha abriu perto do
  *   fim do painel ele acompanha até ela caber. Sem movimento para quem pediu menos movimento.
  */
@@ -23,6 +25,7 @@ import InputText from 'primevue/inputtext'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import {
   ICONE_DA_SITUACAO,
@@ -68,6 +71,17 @@ const FILTROS: FiltroDasLinhas[] = ['todas', 'entram', 'corrigidas', 'fora']
 
 const contagem = computed(() =>
   Object.fromEntries(FILTROS.map((nome) => [nome, itens.value.filter(REGRAS[nome]).length])),
+)
+
+/** "Não vão entrar" acende em risco quando tem alguém: é o filtro que pede atenção. */
+const opcoesDoFiltro = computed(() =>
+  FILTROS.map((nome) => ({
+    valor: nome,
+    rotulo: t(`clinico.migracao.linhas.filtro.${nome}`),
+    contagem: contagem.value[nome] ?? 0,
+    tom:
+      nome === 'fora' && (contagem.value[nome] ?? 0) > 0 ? ('risco' as const) : ('neutro' as const),
+  })),
 )
 
 const filtradas = computed(() => {
@@ -167,22 +181,22 @@ function acompanhar(elemento: Element) {
   <Drawer
     v-model:visible="visivel"
     position="right"
-    class="mg-tema hc-tema mg-painel"
-    :close-button-props="{ severity: 'secondary', text: false, rounded: true }"
+    class="mg-tema mg-painel clinic-scope pj-lugar--clinica"
+    :close-button-props="{ severity: 'secondary', text: false, rounded: false }"
     :pt="{ root: { style: 'width: min(46rem, 100vw)' } }"
   >
     <template #header>
-      <div class="cabeca">
+      <div class="mg-painel__cabeca">
         <!-- O foco de abertura vem para o título, não para o fechar: o anel no X, sem ninguém ter
              usado o teclado, fazia do fechar a coisa mais chamativa do painel. -->
-        <h2 class="cabeca__titulo" tabindex="-1" autofocus>
+        <h2 class="mg-painel__titulo" tabindex="-1" autofocus>
           {{ t('clinico.migracao.linhas.titulo') }}
         </h2>
-        <p v-if="migracao.planilha" class="cabeca__arquivo">
-          <i class="ph ph-file" aria-hidden="true" />
+        <p v-if="migracao.planilha" class="mg-painel__arquivo">
+          <i class="ph ph-file-text" aria-hidden="true" />
           <bdi>{{ migracao.planilha.arquivo }}</bdi>
-          <span>·</span>
-          <span>
+          <span aria-hidden="true">·</span>
+          <span class="ui-num">
             {{
               t(
                 'clinico.migracao.comum.linhasN',
@@ -197,24 +211,18 @@ function acompanhar(elemento: Element) {
 
     <div class="corpo">
       <div class="ferramentas">
-        <div class="filtros" role="group" :aria-label="t('clinico.migracao.linhas.filtroAria')">
-          <Button
-            v-for="nome in FILTROS"
-            :key="nome"
-            class="mg-pilula mg-pilula--pequena filtro"
-            :class="{ 'mg-pilula--escolhida': filtro === nome }"
-            :aria-pressed="filtro === nome"
-            @click="filtro = nome"
-          >
-            <span>{{ t(`clinico.migracao.linhas.filtro.${nome}`) }}</span>
-            <span class="filtro__numero">{{ formato.numero(contagem[nome] ?? 0, 0) }}</span>
-          </Button>
-        </div>
+        <ClinicToggleGroup
+          v-model="filtro"
+          class="filtros"
+          :opcoes="opcoesDoFiltro"
+          :rotulo="t('clinico.migracao.linhas.filtroAria')"
+        />
 
         <IconField class="busca">
           <InputIcon class="ph ph-magnifying-glass" />
           <InputText
             v-model="busca"
+            type="search"
             fluid
             :placeholder="t('clinico.migracao.linhas.buscar')"
             :aria-label="t('clinico.migracao.linhas.buscar')"
@@ -227,14 +235,15 @@ function acompanhar(elemento: Element) {
         {{ t('clinico.migracao.linhas.vazio') }}
       </p>
 
-      <ul v-else class="lista">
+      <ul v-else class="lista ui-folha">
         <li
           v-for="item in visiveis"
           :key="item.linha"
           class="linha"
           :class="{ 'linha--aberta': aberta === item.linha }"
         >
-          <Button
+          <button
+            type="button"
             class="linha__cabeca"
             :aria-expanded="aberta === item.linha"
             @click="alternar(item.linha)"
@@ -259,7 +268,7 @@ function acompanhar(elemento: Element) {
               </span>
               <span class="linha__resumo">
                 <span>{{ rotulos.oQueAcontece(item, decisoes) }}</span>
-                <span v-if="contas(item).correcoes" class="linha__conta linha__conta--azul">
+                <span v-if="contas(item).correcoes" class="ui-selo ui-selo--lugar linha__conta">
                   {{
                     t(
                       'clinico.migracao.linhas.correcoes',
@@ -268,7 +277,7 @@ function acompanhar(elemento: Element) {
                     )
                   }}
                 </span>
-                <span v-if="contas(item).emBranco" class="linha__conta linha__conta--pessego">
+                <span v-if="contas(item).emBranco" class="ui-selo ui-selo--atencao linha__conta">
                   {{
                     t(
                       'clinico.migracao.linhas.emBranco',
@@ -280,11 +289,11 @@ function acompanhar(elemento: Element) {
               </span>
             </span>
 
-            <span class="linha__numero">
+            <span class="linha__numero ui-num">
               {{ t('clinico.migracao.comum.linha', { n: item.linha }) }}
             </span>
             <i class="ph ph-caret-down linha__seta" aria-hidden="true" />
-          </Button>
+          </button>
 
           <Transition name="abre" @after-enter="acompanhar">
             <div v-if="aberta === item.linha" class="envelope">
@@ -310,7 +319,10 @@ function acompanhar(elemento: Element) {
 
                   <div class="detalhe__acoes">
                     <Button
-                      class="mg-pilula mg-pilula--pequena"
+                      type="button"
+                      size="small"
+                      severity="secondary"
+                      outlined
                       :icon="crusAbertos ? 'ph ph-caret-up' : 'ph ph-table'"
                       :label="t('clinico.migracao.linhas.naPlanilha')"
                       :aria-expanded="crusAbertos"
@@ -318,7 +330,10 @@ function acompanhar(elemento: Element) {
                     />
                     <Button
                       v-if="migracao.resultadoPorLinha.get(item.linha)?.petId"
-                      class="mg-pilula mg-pilula--pequena mg-pilula--cheia"
+                      type="button"
+                      size="small"
+                      severity="secondary"
+                      outlined
                       icon="ph ph-arrow-square-out"
                       :label="t('clinico.migracao.linhas.abrirPaciente')"
                       @click="emit('abrir', migracao.resultadoPorLinha.get(item.linha)!.petId!)"
@@ -331,7 +346,7 @@ function acompanhar(elemento: Element) {
                         <dl class="crus">
                           <template v-for="celula in celulasDe(item)" :key="celula.letra">
                             <dt>
-                              <span class="crus__letra">{{ celula.letra }}</span>
+                              <span class="mg-letra">{{ celula.letra }}</span>
                               {{ celula.rotulo }}
                             </dt>
                             <dd>
@@ -351,7 +366,10 @@ function acompanhar(elemento: Element) {
 
       <Button
         v-if="filtradas.length > visiveis.length"
-        class="mg-pilula mais"
+        type="button"
+        class="mais"
+        severity="secondary"
+        outlined
         icon="ph ph-caret-down"
         :label="
           t('clinico.migracao.linhas.mais', {
@@ -365,43 +383,10 @@ function acompanhar(elemento: Element) {
 </template>
 
 <style scoped>
-.cabeca {
-  display: grid;
-  min-width: 0;
-  gap: 0.2rem;
-}
-
-.cabeca__titulo:focus {
-  outline: none;
-}
-
-.cabeca__titulo {
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.cabeca__arquivo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-  gap: 0.4rem;
-}
-
-.cabeca__arquivo .ph {
-  color: var(--hc-marca);
-  font-size: 0.8rem;
-}
-
 .corpo {
   display: grid;
   align-content: start;
-  gap: 1rem;
+  gap: 14px;
 }
 
 /* Presos no topo: o painel rola por baixo, e o filtro continua à mão. */
@@ -410,173 +395,148 @@ function acompanhar(elemento: Element) {
   z-index: 1;
   top: 0;
   display: grid;
-  padding: 0.25rem 0 0.75rem;
-  margin-bottom: -0.75rem;
-  background: var(--hc-fundo);
-  box-shadow: 0 10px 12px -12px rgb(20 32 28 / 18%);
-  gap: 0.75rem;
+  gap: 10px;
+  margin-bottom: -2px;
+  padding: 2px 0 12px;
+  background: var(--fundo);
 }
 
 .filtros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.filtro__numero {
-  padding: 0.05rem 0.45rem;
-  border-radius: 999px;
-  background: var(--hc-linha);
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-}
-
-.mg-pilula--escolhida .filtro__numero {
-  background: var(--hc-cartao);
-  color: var(--hc-marca-forte);
+  justify-self: start;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .busca :deep(.p-inputtext) {
-  height: 2.6rem;
-  border-color: #b7d6cc;
-  border-radius: 999px;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
-}
-
-/* No escuro, a borda clara do claro vira um contorno aceso: a mesma borda escura das pílulas. */
-.app-dark .busca :deep(.p-inputtext) {
-  border-color: #2f5249;
+  min-height: 42px;
+  padding-inline-start: 40px;
+  border-color: var(--linha-forte);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font-size: 14.5px;
 }
 
 .busca :deep(.p-inputtext:enabled:focus) {
-  border-color: var(--hc-marca);
-  box-shadow: 0 0 0 3px var(--hc-marca-clara);
+  border-color: var(--musgo);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--musgo) 22%, transparent);
 }
 
 .busca :deep(.p-inputicon) {
-  color: var(--hc-tinta-3);
+  inset-inline-start: 14px;
+  color: var(--tinta-3);
+  font-size: 16px;
 }
 
 .vazio {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   margin: 0;
-  padding: 2rem 1rem;
-  border: 1px dashed var(--hc-borda);
-  border-radius: 1rem;
-  color: var(--hc-tinta-2);
-  gap: 0.5rem;
+  padding: 32px 16px;
+  border: 1px dashed var(--linha-forte);
+  border-radius: 16px;
+  color: var(--tinta-2);
 }
 
-/* Um cartão só, com fio entre as linhas. */
 .lista {
   overflow: hidden;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--hc-borda);
-  border-radius: 1rem;
-  background: var(--hc-cartao);
-  box-shadow: var(--hc-sombra);
   list-style: none;
 }
 
 .linha + .linha {
-  border-top: 1px solid var(--hc-linha);
+  border-top: 1px solid var(--linha);
 }
 
-.linha__cabeca.p-button {
+.linha__cabeca {
   display: grid;
-  align-items: center;
   width: 100%;
-  padding: 0.8rem 1rem;
-  border: none;
-  border-radius: 0;
+  min-height: 64px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  border: 0;
   background: transparent;
-  color: var(--hc-tinta);
-  gap: 0.85rem;
-  grid-template-columns: 2rem minmax(0, 1fr) auto auto;
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  grid-template-columns: 34px minmax(0, 1fr) auto auto;
   text-align: start;
-  transition: background-color 150ms ease-out;
+  transition: background-color var(--pj-tempo-curto, 140ms) ease;
 }
 
-.linha__cabeca.p-button:not(:disabled):hover {
-  border: none;
-  background: var(--hc-fundo);
-  color: var(--hc-tinta);
+.linha__cabeca:hover {
+  background: var(--superficie-2);
 }
 
-.linha--aberta .linha__cabeca.p-button,
-.linha--aberta .linha__cabeca.p-button:not(:disabled):hover {
-  background: var(--hc-marca-clara);
+.linha--aberta .linha__cabeca,
+.linha--aberta .linha__cabeca:hover {
+  background: var(--musgo-fundo);
 }
 
-.linha__cabeca.p-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
+.linha__cabeca:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
   outline-offset: -2px;
 }
 
 /* A situação no ícone: formato próprio para cada uma, a cor só confirma. */
 .linha__icone {
-  display: inline-grid;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
+  display: grid;
+  width: 34px;
+  height: 34px;
   place-items: center;
+  border-radius: 50%;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-size: 16px;
 }
 
 .linha__icone--entra,
 .linha__icone--junta {
-  background: var(--hc-verde-fundo);
-  color: var(--hc-verde-tinta);
-}
-
-.linha__icone--contato {
-  background: var(--hc-cinza-fundo);
-  color: var(--hc-cinza-tinta);
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
 }
 
 .linha__icone--pendente {
-  background: var(--hc-pessego-fundo);
-  color: var(--hc-pessego-tinta);
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .linha__icone--fora {
-  background: var(--hc-coral-fundo);
-  color: var(--hc-coral-tinta);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .linha__texto {
   display: grid;
   min-width: 0;
-  gap: 0.15rem;
+  gap: 3px;
 }
 
 .linha__quem {
   display: flex;
-  align-items: baseline;
   min-width: 0;
-  gap: 0.5rem;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .linha__quem strong {
   overflow: hidden;
-  flex-shrink: 0;
   max-width: 55%;
-  font-size: 0.9375rem;
+  flex-shrink: 0;
+  font-size: 14.5px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .linha__dono {
   overflow: hidden;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -585,44 +545,31 @@ function acompanhar(elemento: Element) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  gap: 0.2rem 0.5rem;
+  gap: 4px 8px;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .linha__conta {
-  padding: 0.05rem 0.45rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.linha__conta--azul {
-  background: var(--hc-azul-fundo);
-  color: var(--hc-azul-tinta);
-}
-
-.linha__conta--pessego {
-  background: var(--hc-pessego-fundo);
-  color: var(--hc-pessego-tinta);
+  height: 20px;
+  padding-inline: 7px;
+  font-size: 11.5px;
 }
 
 .linha__numero {
-  color: var(--hc-tinta-3);
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  color: var(--tinta-2);
+  font-size: 13px;
   white-space: nowrap;
 }
 
 .linha__seta {
-  color: var(--hc-tinta-3);
-  font-size: 0.8rem;
-  transition: transform 200ms ease-out;
+  color: var(--tinta-3);
+  font-size: 15px;
+  transition: transform var(--pj-tempo-medio, 200ms) ease-out;
 }
 
 .linha--aberta .linha__seta {
-  color: var(--hc-marca);
+  color: var(--musgo);
   transform: rotate(180deg);
 }
 
@@ -643,8 +590,8 @@ function acompanhar(elemento: Element) {
 .abre-enter-active,
 .abre-leave-active {
   transition:
-    grid-template-rows 200ms ease-out,
-    opacity 200ms ease-out;
+    grid-template-rows var(--pj-tempo-medio, 200ms) ease-out,
+    opacity var(--pj-tempo-medio, 200ms) ease-out;
 }
 
 .abre-enter-from,
@@ -655,103 +602,101 @@ function acompanhar(elemento: Element) {
 
 .detalhe {
   display: grid;
-  padding: 0.25rem 1rem 1.1rem 3.85rem;
-  gap: 0.85rem;
+  gap: 12px;
+  padding: 6px 16px 18px 64px;
 }
 
 .frases {
   display: grid;
+  gap: 8px;
   margin: 0;
   padding: 0;
-  gap: 0.55rem;
   list-style: none;
 }
 
 .frase {
   display: grid;
   align-items: start;
+  gap: 10px;
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.9rem;
-  gap: 0.6rem;
-  grid-template-columns: 1.35rem minmax(0, 1fr);
-  line-height: 1.45;
+  color: var(--tinta);
+  font-size: 14px;
+  grid-template-columns: 22px minmax(0, 1fr);
+  line-height: 1.5;
 }
 
 .frase__marca {
-  display: inline-grid;
-  width: 1.35rem;
-  height: 1.35rem;
-  margin-top: 0.05rem;
-  border-radius: 999px;
-  font-size: 0.65rem;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
   place-items: center;
+  border-radius: 50%;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-size: 12px;
 }
 
 .frase--ok .frase__marca {
-  background: var(--hc-verde-fundo);
-  color: var(--hc-verde-tinta);
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
 }
 
 .frase--corrigido .frase__marca {
-  background: var(--hc-azul-fundo);
-  color: var(--hc-azul-tinta);
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
 }
 
 .frase--perdido .frase__marca,
 .frase--aviso .frase__marca {
-  background: var(--hc-pessego-fundo);
-  color: var(--hc-pessego-tinta);
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .frase--fora .frase__marca {
-  background: var(--hc-coral-fundo);
-  color: var(--hc-coral-tinta);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .detalhe__acoes {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 8px;
+}
+
+.detalhe__acoes :deep(.p-button) {
+  min-height: 36px;
 }
 
 .crus {
   display: grid;
+  gap: 6px 14px;
   margin: 0;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.8rem;
-  background: var(--hc-fundo);
-  gap: 0.4rem 0.9rem;
+  padding: 14px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  background: var(--superficie-2);
   grid-template-columns: minmax(8rem, auto) minmax(0, 1fr);
 }
 
 .crus dt {
   display: inline-flex;
   align-items: center;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  gap: 0.4rem;
-}
-
-.crus__letra {
-  display: inline-grid;
-  min-width: 1.4rem;
-  height: 1.3rem;
-  padding: 0 0.25rem;
-  border-radius: 0.35rem;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta-3);
-  font-size: 0.7rem;
-  font-weight: 700;
-  place-items: center;
+  gap: 7px;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .crus dd {
+  min-width: 0;
   margin: 0;
 }
 
-.mais {
+.crus .mg-celula {
+  background: var(--superficie);
+}
+
+.mais.p-button {
   justify-self: center;
 }
 
@@ -760,7 +705,7 @@ function acompanhar(elemento: Element) {
   overflow: hidden;
   width: 1px;
   height: 1px;
-  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
@@ -768,14 +713,14 @@ function acompanhar(elemento: Element) {
   .abre-enter-active,
   .abre-leave-active,
   .linha__seta,
-  .linha__cabeca.p-button {
+  .linha__cabeca {
     transition: none;
   }
 }
 
 @media (max-width: 560px) {
-  .linha__cabeca.p-button {
-    grid-template-columns: 2rem minmax(0, 1fr) auto;
+  .linha__cabeca {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
   }
 
   .linha__numero {
@@ -783,7 +728,7 @@ function acompanhar(elemento: Element) {
   }
 
   .detalhe {
-    padding-inline-start: 1rem;
+    padding-inline-start: 16px;
   }
 }
 </style>

@@ -18,7 +18,8 @@
  *   aviso por horário, os do mesmo horário juntos, sem segundo aviso quando a próxima dose já vem
  *   em horas, e a dose que passa sem registro não cobra ninguém.
  *
- * Moldura sóbria, como a do boletim e a da carteirinha: o que se julga aqui é o conteúdo.
+ * Moldura sóbria, como a da carteirinha: o que se julga aqui é o conteúdo. Só tokens do Trilha,
+ * para o celular acompanhar o tema da clínica (claro e escuro) sem cor própria.
  */
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
@@ -273,7 +274,6 @@ function criar(receita: ReceitaSemLembrete) {
           <span class="push__acoes">
             <Button
               size="small"
-              class="clinic-acao-principal"
               :label="t('clinico.adesao.app.dei')"
               :loading="salvando"
               @click="deiPeloAviso"
@@ -368,7 +368,7 @@ function criar(receita: ReceitaSemLembrete) {
           </div>
 
           <Button
-            class="receita__criar clinic-acao-principal"
+            class="receita__criar"
             size="small"
             :label="t('clinico.adesao.app.criar')"
             :loading="salvando"
@@ -382,8 +382,11 @@ function criar(receita: ReceitaSemLembrete) {
 
         <section v-for="tratamento in emCurso" :key="tratamento.id" class="bloco remedio">
           <header class="remedio__cabeca">
-            <strong>{{ tratamento.medicamento }}</strong>
-            <span>{{ posologia(tratamento) }}</span>
+            <span class="remedio__icone" aria-hidden="true"><i class="ph ph-pill" /></span>
+            <span class="remedio__nome">
+              <strong>{{ tratamento.medicamento }}</strong>
+              <span>{{ posologia(tratamento) }}</span>
+            </span>
           </header>
 
           <TransitionGroup tag="ul" name="linha" class="doses">
@@ -393,7 +396,7 @@ function criar(receita: ReceitaSemLembrete) {
               class="dose"
               :class="`dose--${dose.situacao}`"
             >
-              <span class="dose__hora">{{ horario(dose) }}</span>
+              <span class="dose__hora ui-num">{{ horario(dose) }}</span>
 
               <span class="dose__corpo">
                 <template v-if="dose.podeRegistrar">
@@ -422,7 +425,6 @@ function criar(receita: ReceitaSemLembrete) {
                   <span v-else class="dose__acoes">
                     <Button
                       size="small"
-                      class="clinic-acao-principal"
                       :label="t('clinico.adesao.app.dei')"
                       :loading="salvando"
                       @click="
@@ -551,20 +553,20 @@ function criar(receita: ReceitaSemLembrete) {
   justify-content: center;
 }
 
+/* O aparelho: borda de controle, cantos de celular e o fundo afundado da casa. */
 .celular__moldura {
   position: relative;
   display: flex;
   overflow: hidden;
-  width: min(21rem, 100%);
-  height: min(44rem, calc(100vh - 9rem));
+  width: min(22rem, 100%);
+  height: min(44rem, calc(100vh - 11rem));
   min-height: 30rem;
   flex-direction: column;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: 1.6rem;
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface-sunken);
-  box-shadow: var(--clinic-shadow-card);
+  padding: 14px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 28px;
+  gap: 12px;
+  background: var(--superficie-3);
 }
 
 /* ------------------------------------------------------------------ aviso */
@@ -572,47 +574,48 @@ function criar(receita: ReceitaSemLembrete) {
 .push {
   display: grid;
   flex: 0 0 auto;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: 1rem;
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-float);
-  gap: var(--clinic-space-2);
+  padding: 10px 12px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-2);
+  gap: 8px 10px;
   grid-template-columns: auto minmax(0, 1fr);
 }
 
 .push__marca {
   display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 0.45rem;
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
-  font-size: 0.7rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--musgo);
+  color: var(--sobre-musgo);
+  font-size: 14px;
   place-items: center;
 }
 
 .push__texto {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
-  font-size: var(--clinic-font-label);
+  gap: 1px;
+  color: var(--tinta);
+  font-size: 13px;
   line-height: 1.35;
 }
 
 .push__texto small {
-  color: var(--clinic-faint);
-  font-size: 0.625rem;
+  color: var(--tinta-3);
+  font-size: 11.5px;
 }
 
 .push__texto span {
-  color: var(--clinic-muted);
+  color: var(--tinta-2);
 }
 
 .push__acoes {
   display: flex;
   grid-column: 2;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .aviso-enter-active,
@@ -625,7 +628,7 @@ function criar(receita: ReceitaSemLembrete) {
 .aviso-enter-from,
 .aviso-leave-to {
   opacity: 0;
-  transform: translateY(-0.5rem);
+  transform: translateY(-8px);
 }
 
 /* ------------------------------------------------------------------ topo */
@@ -633,19 +636,20 @@ function criar(receita: ReceitaSemLembrete) {
 .topo {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-3);
+  gap: 12px;
+  padding: 2px 4px;
 }
 
 .topo__avatar {
   display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 38px;
+  height: 38px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+  background: var(--pets-fundo);
+  color: var(--pets-tinta);
+  font-size: 13px;
+  font-weight: 650;
   place-items: center;
 }
 
@@ -666,13 +670,14 @@ function criar(receita: ReceitaSemLembrete) {
 }
 
 .topo__identidade strong {
-  font-size: var(--clinic-font-value);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 650;
 }
 
 .topo__identidade span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 /* ------------------------------------------------------------------ rolagem */
@@ -682,7 +687,7 @@ function criar(receita: ReceitaSemLembrete) {
   overflow-y: auto;
   flex: 1;
   align-content: start;
-  gap: var(--clinic-space-3);
+  gap: 10px;
   overscroll-behavior: contain;
 }
 
@@ -690,33 +695,34 @@ function criar(receita: ReceitaSemLembrete) {
   display: flex;
   align-items: flex-start;
   margin: 0;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  padding: 10px 12px;
+  border-radius: 14px;
+  gap: 8px;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.4;
 }
 
 .bloco {
   display: grid;
-  padding: var(--clinic-space-3);
-  border-radius: 0.9rem;
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface);
+  padding: 12px 14px;
+  border-radius: 16px;
+  gap: 8px;
+  background: var(--superficie);
 }
 
 .bloco__titulo {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: 0.625rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .vazio {
-  margin: var(--clinic-space-4) 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  margin: 16px 0;
+  color: var(--tinta-2);
+  font-size: 13px;
   text-align: center;
 }
 
@@ -727,34 +733,37 @@ function criar(receita: ReceitaSemLembrete) {
 .receita__dica,
 .receita__rotulo {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.4;
 }
 
 .receita__item {
   display: grid;
-  padding-top: var(--clinic-space-2);
-  border-top: 1px solid var(--clinic-line-soft);
-  gap: 0.25rem;
-  font-size: var(--clinic-font-label);
+  padding-top: 8px;
+  border-top: 1px solid var(--linha);
+  gap: 4px;
+  color: var(--tinta);
+  font-size: 13px;
 }
 
 .receita__rotulo {
-  margin-top: 0.2rem;
-  font-weight: 700;
+  margin-top: 4px;
+  color: var(--tinta);
+  font-weight: 600;
 }
 
 .receita__dica {
-  font-size: 0.625rem;
+  font-size: 12px;
 }
 
 .receita__compartilhar,
 .remedio__compartilhado {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
   line-height: 1.35;
 }
 
@@ -770,25 +779,45 @@ function criar(receita: ReceitaSemLembrete) {
 /* ------------------------------------------------------------------ remédio */
 
 .remedio__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.remedio__icone {
   display: grid;
-  gap: 0.05rem;
-  font-size: var(--clinic-font-label);
+  width: 30px;
+  height: 30px;
+  flex: none;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  font-size: 16px;
 }
 
-.remedio__cabeca strong {
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
+.remedio__nome {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+  font-size: 12.5px;
 }
 
-.remedio__cabeca span,
+.remedio__nome strong {
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 650;
+}
+
+.remedio__nome span,
 .remedio__historico,
 .encerrado span {
-  color: var(--clinic-muted);
+  color: var(--tinta-2);
 }
 
 .remedio__historico {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: 12px;
 }
 
 .doses {
@@ -802,61 +831,62 @@ function criar(receita: ReceitaSemLembrete) {
 .dose {
   display: grid;
   align-items: center;
-  padding-block: var(--clinic-space-2);
-  gap: var(--clinic-space-2);
-  grid-template-columns: 4.2rem minmax(0, 1fr);
-  font-size: var(--clinic-font-label);
+  padding-block: 8px;
+  gap: 8px;
+  grid-template-columns: 4.4rem minmax(0, 1fr);
+  color: var(--tinta);
+  font-size: 13px;
 }
 
 .dose + .dose {
-  border-top: 1px solid var(--clinic-line-soft);
+  border-top: 1px solid var(--linha);
 }
 
 .dose__hora {
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  font-weight: 650;
 }
 
 .dose--PREVISTA .dose__hora,
 .dose--SEM_REGISTRO .dose__hora {
-  color: var(--clinic-faint);
-  font-weight: 600;
+  color: var(--tinta-3);
+  font-weight: 550;
 }
 
 .dose__corpo {
   display: grid;
   min-width: 0;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
 .dose__acoes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
+  gap: 6px;
 }
 
 .dose__pergunta {
   flex-basis: 100%;
-  color: var(--clinic-muted);
-  font-weight: 700;
+  color: var(--tinta);
+  font-weight: 600;
 }
 
 .dose__estado {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
-  color: var(--clinic-muted);
+  gap: 6px;
+  color: var(--tinta-2);
 }
 
 .dose--DADA .dose__estado {
-  color: var(--clinic-text);
-  font-weight: 600;
+  color: var(--tinta);
+  font-weight: 550;
 }
 
 .dose__icone {
-  color: var(--clinic-accent-strong);
+  color: var(--musgo);
+  font-size: 16px;
 }
 
 .dose__desfazer {
@@ -864,26 +894,27 @@ function criar(receita: ReceitaSemLembrete) {
 }
 
 .dose__recusa {
-  color: var(--clinic-attention-text);
-  font-weight: 700;
+  color: var(--atencao-tinta);
+  font-weight: 600;
   line-height: 1.35;
 }
 
 .encerrado {
   display: grid;
   margin: 0;
-  gap: 0.05rem;
-  font-size: var(--clinic-font-label);
+  gap: 1px;
+  color: var(--tinta);
+  font-size: 13px;
 }
 
 .avisos ul {
   display: grid;
   margin: 0;
-  padding-inline-start: 1rem;
-  gap: 0.3rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  line-height: 1.4;
+  padding-inline-start: 18px;
+  gap: 5px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.45;
 }
 
 /* A dose que muda de estado: o movimento diz o que mudou, e só isso. */

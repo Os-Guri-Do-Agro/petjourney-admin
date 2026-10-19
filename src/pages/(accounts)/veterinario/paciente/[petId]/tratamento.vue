@@ -13,24 +13,31 @@
  * que só acompanha. É assim que "mais de uma pessoa cuidando" se demonstra: marcar no celular de
  * um e ver a dose aparecer "dada por Rafael" no do outro, sem botão.
  *
- * O acabamento é o da Visão geral, como o resto da ficha.
+ * ## A forma (redesenho de 19/10/2026)
  *
- * O celular fica numa gaveta à direita, aberta pela pílula "Como … vê no app". Ele ocupava metade
- * da tela, todo dia, para quem só queria ler a faixa — a auditoria marcou a tela como pesada por
- * isso. A gaveta não tem máscara: aberta, a ficha continua à vista e o quadradinho aparece na mesma
- * hora em que alguém toca "Dei", que é a demonstração que a tela existe para fazer.
+ * A capa do paciente no alto (`FichaCabeca`, com as abas da ficha) e, embaixo, **um bloco por
+ * remédio** (`TratamentoNaFicha`): o nome e como dar (dose, via, intervalo, duração), a faixa das
+ * últimas duas semanas em tamanho de leitura, a conta desde a última consulta em número grande, e
+ * os botões do bloco — registrar a dose da vez, registrar o contato, marcar como crítico. Os
+ * encerrados vêm depois, uma linha cada.
+ *
+ * A dose da vez se registra daqui **em nome de quem cuida** — quem está com o celular na gaveta,
+ * ou o responsável quando essa pessoa só acompanha. É a mesma dose e a mesma regra do celular; a
+ * gaveta mostra a dose mudar de lado na mesma hora.
+ *
+ * O celular é a ação secundária do alto, "Como … vê no app": uma gaveta sem máscara. Aberta, a
+ * ficha continua à vista e o quadradinho aparece na mesma hora em que alguém toca "Dei", que é a
+ * demonstração que a tela existe para fazer.
  */
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
 import Select from 'primevue/select'
-import { PhDeviceMobile, PhPill, PhArchive } from '@phosphor-icons/vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 
-import '@/components/home/home-card.css'
-import '@/features/clinico/components/pacientes/ficha/ficha.css'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
 import FichaCabeca from '@/features/clinico/components/pacientes/ficha/FichaCabeca.vue'
 import LegendaDaFaixa from '@/features/clinico/components/tratamento/LegendaDaFaixa.vue'
 import TratamentoNaFicha from '@/features/clinico/components/tratamento/TratamentoNaFicha.vue'
@@ -225,6 +232,40 @@ const donoDoCelular = computed(
 )
 
 /**
+ * Em nome de quem a ficha registra a dose da vez: quem está com o celular na gaveta — o mesmo
+ * "Dei" que essa pessoa tocaria. Se ela só acompanha, o registro vai para o responsável, que é
+ * quem a clínica atende ao telefone.
+ */
+const quemRegistraNaFicha = computed(() => {
+  const cuidadores = adesao.value?.cuidadores ?? []
+  const escolhido = donoDoCelular.value
+
+  if (escolhido && escolhido.acesso === 'edicao') {
+    return { id: escolhido.id, nome: escolhido.nome }
+  }
+
+  const quemEdita =
+    cuidadores.find((item) => item.papel === 'dono' && item.acesso === 'edicao') ??
+    cuidadores.find((item) => item.acesso === 'edicao')
+
+  return quemEdita ? { id: quemEdita.id, nome: quemEdita.nome } : null
+})
+
+/** O primeiro nome de quem está com o celular — é o que a ação do alto e a gaveta dizem. */
+const responsavelNoApp = computed(() => rotulos.primeiroNome(donoDoCelular.value?.nome ?? ''))
+
+/** A receita que ainda não virou lembrete: é por ela que o tratamento nasce, no celular. */
+const receitaPendente = computed(() => noApp.value?.receitasSemLembrete[0] ?? null)
+
+const ajudaDosRemedios = computed(() =>
+  !ultimaConsulta.value
+    ? t('clinico.adesao.ficha.emCursoAjudaSemConsulta')
+    : comFio.value
+      ? t('clinico.adesao.ficha.emCursoAjuda', { data: ultimaConsulta.value })
+      : t('clinico.adesao.ficha.emCursoAjudaSemFio', { data: ultimaConsulta.value }),
+)
+
+/**
  * Toda escrita passa por aqui: recarrega os dois lados e avisa o resto do módulo — o selo do menu
  * e a Visão geral contam os alertas, e um alerta resolvido que continua no menu mente.
  */
@@ -254,16 +295,17 @@ function textoDaRecusa(erroDaDose: DoseRecusadaError): string {
     : t('clinico.adesao.app.foraDaJanela')
 }
 
-async function registrar(dose: {
-  tratamentoId: string
-  numero: number
-  situacao: 'dada' | 'pulada'
-  motivo: MotivoDaDosePulada | null
-}) {
+async function registrar(
+  dose: {
+    tratamentoId: string
+    numero: number
+    situacao: 'dada' | 'pulada'
+    motivo: MotivoDaDosePulada | null
+  },
+  quem: string = cuidadorId.value,
+) {
   try {
-    await salvar(() =>
-      tratamentoRepository.registrarDose({ ...dose, cuidadorId: cuidadorId.value }),
-    )
+    await salvar(() => tratamentoRepository.registrarDose({ ...dose, cuidadorId: quem }))
   } catch (falha) {
     recusa.value = {
       tratamentoId: dose.tratamentoId,
@@ -299,15 +341,31 @@ async function registrarVarias(doses: Array<{ tratamentoId: string; numero: numb
   })
 }
 
-async function desfazer(dose: { tratamentoId: string; numero: number }) {
+async function desfazer(
+  dose: { tratamentoId: string; numero: number },
+  quem: string = cuidadorId.value,
+) {
   try {
-    await salvar(() => tratamentoRepository.desfazerDose({ ...dose, cuidadorId: cuidadorId.value }))
+    await salvar(() => tratamentoRepository.desfazerDose({ ...dose, cuidadorId: quem }))
   } catch (falha) {
     recusa.value = {
       ...dose,
       texto:
         falha instanceof DoseRecusadaError ? textoDaRecusa(falha) : t('clinico.adesao.app.erro'),
     }
+  }
+}
+
+/** A dose da vez registrada no bloco da ficha, em nome de quem cuida. */
+function registrarNaFicha(dose: Parameters<typeof registrar>[0]) {
+  if (quemRegistraNaFicha.value) {
+    void registrar(dose, quemRegistraNaFicha.value.id)
+  }
+}
+
+function desfazerNaFicha(dose: { tratamentoId: string; numero: number }) {
+  if (quemRegistraNaFicha.value) {
+    void desfazer(dose, quemRegistraNaFicha.value.id)
   }
 }
 
@@ -334,85 +392,112 @@ async function compartilhar(pedido: { tratamentoId: string; compartilhado: boole
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="ficha-tema hc-tema"
-    :title="pet?.nome ?? t('clinico.ficha.tratamento.pilula')"
-    :loading="carregando && !pet"
-    :error="erro"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    class="tela-ficha"
+    :titulo="pet?.nome ?? t('clinico.ficha.tratamento.pilula')"
+    :carregando="carregando && !pet"
+    :erro="erro"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
-    <template v-if="pet" #cabecalho>
-      <FichaCabeca :pet="pet" :tutor="tutor" atual="tratamento" :frase="frase" />
+    <template #voltar>
+      <RouterLink to="/veterinario/pacientes">
+        <i class="ph ph-arrow-left" aria-hidden="true" />
+        {{ t('clinico.pacientes.titulo') }}
+      </RouterLink>
     </template>
 
-    <div v-if="pet && adesao" class="ficha-conteudo clinic-scope">
-      <section class="hc" :aria-labelledby="`${petId}-em-curso`">
-        <header class="hc__cabeca">
-          <h2 :id="`${petId}-em-curso`" class="hc__titulo">
-            <PhPill class="hc__icone" weight="duotone" aria-hidden="true" />
-            {{ t('clinico.adesao.ficha.emCurso') }}
-          </h2>
-
+    <template v-if="pet" #cabecalho>
+      <FichaCabeca :pet="pet" :tutor="tutor" atual="tratamento" :frase="frase">
+        <!-- O celular de quem cuida é a ação da capa, e secundária: a ficha é a tela de todo dia. -->
+        <template v-if="noApp" #acoes>
           <Button
-            v-if="noApp"
             type="button"
-            class="hc-pilula"
-            :label="
-              t('clinico.adesao.ficha.comoVeNoApp', {
-                responsavel: rotulos.primeiroNome(donoDoCelular?.nome ?? ''),
-              })
-            "
+            icon="ph ph-device-mobile"
+            :label="t('clinico.adesao.ficha.comoVeNoApp', { responsavel: responsavelNoApp })"
+            severity="secondary"
+            outlined
             :aria-expanded="celularAberto"
             aria-haspopup="dialog"
             @click="celularAberto = !celularAberto"
-          >
-            <template #icon>
-              <PhDeviceMobile class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
-            </template>
-          </Button>
-        </header>
-        <p class="ficha-ajuda">
-          {{
-            !ultimaConsulta
-              ? t('clinico.adesao.ficha.emCursoAjudaSemConsulta')
-              : comFio
-                ? t('clinico.adesao.ficha.emCursoAjuda', { data: ultimaConsulta })
-                : t('clinico.adesao.ficha.emCursoAjudaSemFio', { data: ultimaConsulta })
-          }}
-        </p>
+          />
+        </template>
+      </FichaCabeca>
+    </template>
 
-        <template v-if="emCurso.length > 0">
-          <ul class="tratamento__lista">
-            <li v-for="lido in emCurso" :key="lido.tratamento.id">
-              <TratamentoNaFicha
-                :lido="lido"
-                :ultima-consulta-em="adesao.ultimaConsultaEm"
-                :nomes="nomes"
-                :salvando="salvando"
-                @critico="marcarCritico(lido.tratamento.id, $event)"
-                @contato="registrarContato(lido.tratamento.id, $event)"
-              />
-            </li>
-          </ul>
-          <LegendaDaFaixa :com-marco="comFio" />
+    <div v-if="pet && adesao" class="ficha-tratamento">
+      <UiSecao
+        :id="`${petId}-em-curso`"
+        :titulo="t('clinico.adesao.ficha.emCurso')"
+        :contagem="emCurso.length"
+        :descricao="ajudaDosRemedios"
+        icone="ph ph-pill"
+      >
+        <template v-if="emCurso.length > 0" #acoes>
+          <LegendaDaFaixa class="ficha-tratamento__legenda" :com-marco="comFio" />
         </template>
 
-        <div v-else class="tratamento__vazio">
-          <strong>{{ t('clinico.adesao.ficha.vazioTitulo') }}</strong>
-          <span>{{ t('clinico.adesao.ficha.vazioDescricao') }}</span>
+        <ul v-if="emCurso.length > 0" class="ficha-tratamento__lista">
+          <li v-for="lido in emCurso" :key="lido.tratamento.id">
+            <TratamentoNaFicha
+              :lido="lido"
+              :ultima-consulta-em="adesao.ultimaConsultaEm"
+              :nomes="nomes"
+              :salvando="salvando"
+              :quem-registra="quemRegistraNaFicha"
+              :recusa="recusa"
+              @critico="marcarCritico(lido.tratamento.id, $event)"
+              @contato="registrarContato(lido.tratamento.id, $event)"
+              @registrar="registrarNaFicha"
+              @desfazer="desfazerNaFicha"
+            />
+          </li>
+        </ul>
+
+        <!--
+          Sem remédio com lembrete. Se a receita já chegou ao celular e ainda não virou lembrete,
+          a tela diz isso e leva até lá: é no celular, com "Criar lembretes", que o tratamento nasce.
+        -->
+        <div v-else class="ui-folha ficha-tratamento__vazio">
+          <span class="ficha-tratamento__vazio-icone" aria-hidden="true">
+            <i class="ph ph-pill" />
+          </span>
+          <div class="ficha-tratamento__vazio-texto">
+            <strong>{{ t('clinico.adesao.ficha.vazioTitulo') }}</strong>
+            <span v-if="receitaPendente">
+              {{
+                t(
+                  'clinico.ficha.tratamento.receitaSemLembrete',
+                  {
+                    data: formato.dataCurta(clinicClock.dateOf(receitaPendente.liberadaEm)),
+                    total: receitaPendente.itens.length,
+                  },
+                  receitaPendente.itens.length,
+                )
+              }}
+            </span>
+            <span v-else>{{ t('clinico.adesao.ficha.vazioDescricao') }}</span>
+          </div>
+          <Button
+            v-if="receitaPendente"
+            type="button"
+            icon="ph ph-device-mobile"
+            :label="t('clinico.adesao.ficha.comoVeNoApp', { responsavel: responsavelNoApp })"
+            severity="secondary"
+            outlined
+            size="small"
+            @click="celularAberto = true"
+          />
         </div>
-      </section>
+      </UiSecao>
 
-      <section v-if="encerrados.length > 0" class="hc" :aria-labelledby="`${petId}-encerrados`">
-        <header class="hc__cabeca">
-          <h2 :id="`${petId}-encerrados`" class="hc__titulo">
-            <PhArchive class="hc__icone" weight="duotone" aria-hidden="true" />
-            {{ t('clinico.adesao.ficha.encerrados') }}
-          </h2>
-        </header>
-
-        <ul class="tratamento__lista">
+      <UiSecao
+        v-if="encerrados.length > 0"
+        :id="`${petId}-encerrados`"
+        :titulo="t('clinico.adesao.ficha.encerrados')"
+        :contagem="encerrados.length"
+      >
+        <ul class="ui-folha ui-lista">
           <li v-for="lido in encerrados" :key="lido.tratamento.id">
             <TratamentoNaFicha
               :lido="lido"
@@ -422,49 +507,49 @@ async function compartilhar(pedido: { tratamentoId: string; compartilhado: boole
             />
           </li>
         </ul>
-      </section>
+      </UiSecao>
+    </div>
 
+    <template #sempre>
       <!--
         O celular de quem cuida, numa gaveta sem máscara: a ficha continua à vista e muda na hora.
         Acima dele, de quem é o celular — é a troca que mostra a casa com mais de uma pessoa.
       -->
       <Drawer
+        v-if="pet"
         v-model:visible="celularAberto"
         position="right"
         :modal="false"
-        class="hc-tema tratamento-gaveta"
-        :style="{ width: 'min(25rem, 92vw)' }"
+        class="gaveta-celular clinic-overlay"
+        :style="{ width: 'min(26rem, 94vw)' }"
       >
         <template #header>
-          <h2 class="tratamento-gaveta__titulo">
-            <PhDeviceMobile class="hc__icone" weight="duotone" aria-hidden="true" />
-            {{
-              t('clinico.adesao.ficha.noApp', {
-                responsavel: rotulos.primeiroNome(donoDoCelular?.nome ?? ''),
-              })
-            }}
-          </h2>
+          <div class="gaveta__cabeca">
+            <span class="gaveta__icone" aria-hidden="true"><i class="ph ph-device-mobile" /></span>
+            <span class="gaveta__texto">
+              <h2 class="gaveta__titulo">
+                {{ t('clinico.adesao.ficha.noApp', { responsavel: responsavelNoApp }) }}
+              </h2>
+              <span class="gaveta__meta">{{ t('clinico.adesao.ficha.noAppAjuda') }}</span>
+            </span>
+          </div>
         </template>
 
-        <div class="tratamento-gaveta__corpo clinic-scope">
-          <p class="ficha-ajuda">{{ t('clinico.adesao.ficha.noAppAjuda') }}</p>
-
-          <div v-if="celulares.length > 1" class="tratamento__celulares">
-            <label class="tratamento__celulares-rotulo" :for="`${petId}-celular-de`">{{
-              t('clinico.adesao.ficha.celularDe')
-            }}</label>
+        <div class="gaveta__corpo clinic-scope">
+          <div v-if="celulares.length > 1" class="gaveta__de-quem">
+            <label :for="`${petId}-celular-de`">{{ t('clinico.adesao.ficha.celularDe') }}</label>
             <!--
               Lista, e não botões lado a lado: a família do app não tem tamanho fixo, e três nomes
-              com o papel já não cabiam na largura do cartão.
+              com o papel não cabem lado a lado na largura da gaveta.
             -->
             <Select
               v-model="cuidadorId"
-              class="tratamento__celular"
+              class="gaveta__celular"
               :input-id="`${petId}-celular-de`"
               :options="celulares"
               option-label="rotulo"
               option-value="valor"
-              :pt="{ overlay: { class: 'clinic-overlay hc-tema' } }"
+              :pt="{ overlay: { class: 'clinic-overlay' } }"
             />
           </div>
 
@@ -483,74 +568,137 @@ async function compartilhar(pedido: { tratamentoId: string; compartilhado: boole
           />
         </div>
       </Drawer>
-    </div>
-  </PartnerPageFrame>
+    </template>
+  </UiPagina>
 </template>
 
 <style scoped>
-/* Os remédios em lista, separados por um fio — cartão dentro de cartão seria achatar tudo. */
-.tratamento__lista {
+/*
+ * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
+ * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como em Tratamentos.
+ */
+.tela-ficha {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+}
+
+.ficha-tratamento {
   display: grid;
+  gap: 32px;
+}
+
+.ficha-tratamento__legenda {
+  max-width: 36rem;
+}
+
+.ficha-tratamento__lista {
+  display: grid;
+  gap: 16px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.tratamento__lista > li {
-  padding-block: 1.1rem;
-}
-
-.tratamento__lista > li:first-child {
-  padding-top: 0.25rem;
-}
-
-.tratamento__lista > li + li {
-  border-top: 1px solid var(--hc-linha);
-}
-
-.tratamento__vazio {
-  display: grid;
-  gap: 0.25rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-  line-height: 1.45;
-}
-
-.tratamento__vazio strong {
-  color: var(--hc-tinta);
-  font-weight: 600;
-}
-
-.tratamento__celulares {
+.ficha-tratamento__vazio {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem 0.6rem;
+  gap: 14px 18px;
+  padding: 20px 22px;
 }
 
-.tratamento__celulares-rotulo {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+.ficha-tratamento__vazio-icone {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 22px;
+}
+
+.ficha-tratamento__vazio-texto {
+  display: grid;
+  flex: 1 1 20rem;
+  min-width: 0;
+  gap: 3px;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ficha-tratamento__vazio-texto strong {
+  color: var(--tinta);
+  font-size: 15px;
   font-weight: 600;
 }
 
-.tratamento__celular {
-  flex: 1 1 12rem;
+/* ------------------------------------------------------------------ gaveta */
+
+.gaveta__cabeca {
+  display: flex;
   min-width: 0;
-}
-
-.tratamento-gaveta__titulo {
-  display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1rem;
-  font-weight: 650;
+  gap: 12px;
 }
 
-.tratamento-gaveta__corpo {
+.gaveta__icone {
   display: grid;
-  gap: 0.85rem;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-size: 20px;
+}
+
+.gaveta__texto {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.gaveta__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.gaveta__meta {
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.gaveta__corpo {
+  display: grid;
+  gap: 14px;
+}
+
+.gaveta__de-quem {
+  display: grid;
+  gap: 6px;
+}
+
+.gaveta__de-quem label {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.gaveta__celular {
+  width: 100%;
 }
 </style>

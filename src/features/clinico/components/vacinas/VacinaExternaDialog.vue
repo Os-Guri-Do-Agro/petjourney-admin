@@ -19,7 +19,7 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import Select from 'primevue/select'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicDateField from '../base/ClinicDateField.vue'
@@ -37,7 +37,10 @@ const props = withDefaults(
     visivel: boolean
     pet: Pet
     plano: PlanoVacinal
-    /** Aberto da ficha do paciente: leva o acabamento da Visão geral (`ficha/ficha.css`). */
+    /**
+     * Aberto da ficha do paciente. Hoje o diálogo tem um desenho só (o do Trilha) nos dois
+     * lugares; a prop fica para quem já a passa.
+     */
     ficha?: boolean
   }>(),
   { ficha: false },
@@ -52,11 +55,9 @@ const { t } = useI18n()
 const rotulos = useRotulosDaVacina()
 const clinico = useClinicoStore()
 
-/* Na ficha, o diálogo e as listas teleportadas levam os tokens da Visão geral. */
-const classeDoTema = computed(() => (props.ficha ? 'hc-tema ficha-tema' : ''))
-const ptDoOverlay = computed(() => ({
-  overlay: { class: ['clinic-overlay', classeDoTema.value].filter(Boolean).join(' ') },
-}))
+/* As listas que o diálogo abre vão para o `body`: levam a classe dos painéis da clínica. */
+const ptDoOverlay = { overlay: { class: 'clinic-overlay' } }
+const idDoTitulo = useId()
 
 const vacinaId = ref<string | null>(null)
 const aplicadaEm = ref<ISODate>('')
@@ -220,20 +221,22 @@ async function registrar() {
     :visible="visivel"
     modal
     class="clinic-dialog hc-tema"
-    :class="classeDoTema"
     :style="{ width: 'min(38rem, 94vw)' }"
+    :aria-labelledby="idDoTitulo"
     :dismissable-mask="!salvando"
     @update:visible="emit('update:visivel', $event)"
   >
     <template #header>
-      <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-map-pin" /></span>
-        {{ t('clinico.vacinas.externa.titulo') }}
-      </h2>
+      <div class="topo">
+        <span class="topo__icone" aria-hidden="true"><i class="ph ph-map-pin" /></span>
+        <span class="topo__texto">
+          <h2 :id="idDoTitulo" class="topo__titulo">{{ t('clinico.vacinas.externa.titulo') }}</h2>
+          <span class="topo__sub">{{ t('clinico.vacinas.externa.ajuda', { pet: pet.nome }) }}</span>
+        </span>
+      </div>
     </template>
 
     <form class="externa clinic-scope" @submit.prevent="registrar">
-      <p class="externa__ajuda">{{ t('clinico.vacinas.externa.ajuda', { pet: pet.nome }) }}</p>
 
       <div class="externa__linha externa__linha--vacina">
         <ClinicField :rotulo="t('clinico.vacinas.colunaVacina')" obrigatorio>
@@ -297,7 +300,7 @@ async function registrar() {
         />
       </ClinicField>
 
-      <p class="externa__consequencia">
+      <p class="externa__consequencia" :class="`externa__consequencia--${procedencia}`">
         <i
           :class="procedencia === 'relato' ? 'ph ph-warning-circle' : 'ph ph-seal-check'"
           aria-hidden="true"
@@ -343,17 +346,17 @@ async function registrar() {
 
     <template #footer>
       <Button
+        type="button"
         :label="t('clinico.comum.cancelar')"
-        :severity="ficha ? undefined : 'secondary'"
-        :outlined="!ficha"
-        :class="{ 'hc-pilula': ficha }"
+        severity="secondary"
+        text
         :disabled="salvando"
         @click="emit('update:visivel', false)"
       />
       <Button
+        type="button"
         :label="t('clinico.vacinas.externa.confirmar')"
         icon="ph ph-check"
-        :class="ficha ? 'hc-pilula hc-pilula--cheia' : 'clinic-acao-principal'"
         :loading="salvando"
         :disabled="!completo"
         @click="registrar"
@@ -363,21 +366,59 @@ async function registrar() {
 </template>
 
 <style scoped>
-.externa {
-  display: grid;
-  gap: var(--clinic-space-3);
+/* ------------------------------------------------------------------ alto */
+
+.topo {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
 }
 
-.externa__ajuda {
+.topo__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie-3);
+  color: var(--tinta-2);
+  font-size: 20px;
+}
+
+.topo__texto {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.topo__titulo {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  line-height: 1.45;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.topo__sub {
+  max-width: 52ch;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+/* ------------------------------------------------------------------ formulário */
+
+.externa {
+  display: grid;
+  gap: 16px;
 }
 
 .externa__linha {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 14px;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
@@ -390,14 +431,25 @@ async function registrar() {
   display: flex;
   align-items: baseline;
   margin: 0;
-  gap: 0.4rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.45;
 }
 
 .externa__consequencia {
-  margin-top: calc(var(--clinic-space-2) * -1);
+  margin-top: -8px;
+}
+
+.externa__consequencia--relato {
+  color: var(--atencao-tinta);
+  font-weight: 600;
+}
+
+.externa__semLote {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
 @media (max-width: 620px) {

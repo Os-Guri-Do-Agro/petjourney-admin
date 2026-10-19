@@ -550,7 +550,6 @@ async function salvar() {
 }
 </script>
 
-
 <template>
   <form class="novo clinic-scope" :class="`novo--${modo}`" novalidate @submit.prevent="salvar">
     <header v-if="mostraTitulo" class="novo__topo">
@@ -1151,7 +1150,7 @@ async function salvar() {
 
   display: grid;
   min-width: 0;
-  gap: 18px;
+  gap: 16px;
   color: var(--tinta);
 }
 
@@ -1159,9 +1158,18 @@ async function salvar() {
   gap: 28px;
 }
 
-/* Caixa de texto e seletor com a mesma altura: lado a lado, "Espécie" e "Raça" são um par. */
+/*
+ * Caixa de texto e seletor com a mesma altura e a mesma letra: lado a lado, "Espécie" e "Raça" são
+ * um par. Na página os campos ganham a altura de 42 px; no diálogo ficam como estão, para os seis
+ * campos do balcão caberem sem rolar.
+ */
 .novo :deep(.p-inputtext),
-.novo :deep(.p-select) {
+.novo :deep(.p-select-label) {
+  font-size: 14.5px;
+}
+
+.novo--completo :deep(.p-inputtext),
+.novo--completo :deep(.p-select) {
   min-height: 42px;
 }
 

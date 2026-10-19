@@ -266,7 +266,11 @@ const contato = computed(() => [
   align-items: center;
   gap: 14px;
   padding: 20px 20px 18px;
-  background: color-mix(in oklab, var(--pj-lugar-fundo, var(--clinica-fundo)) 45%, var(--superficie));
+  background: color-mix(
+    in oklab,
+    var(--pj-lugar-fundo, var(--clinica-fundo)) 45%,
+    var(--superficie)
+  );
 }
 
 .perfil__avatar {

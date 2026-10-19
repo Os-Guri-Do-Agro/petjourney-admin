@@ -511,6 +511,20 @@ const fraseDoResumo = computed(() => {
 
         <template #celula-paciente="{ linha }">
           <ClinicPacienteCelula :pet="linha.pet">
+            <!--
+              No celular a coluna de alertas fica fora da vista (a tabela rola de lado): o alerta
+              mais grave sobe para o lado do nome, para ninguém precisar rolar para saber dele.
+            -->
+            <template v-if="linha.pet.alertas.length > 0" #selo>
+              <span
+                class="ui-selo alertas__estreito"
+                :class="TOM_DO_ALERTA[alertasOrdenados(linha.pet.alertas)[0]!.severidade]"
+                aria-hidden="true"
+              >
+                <i :class="ICONE_DO_ALERTA[alertasOrdenados(linha.pet.alertas)[0]!.kind]" />
+                {{ formato.alerta(alertasOrdenados(linha.pet.alertas)[0]!.kind) }}
+              </span>
+            </template>
             {{ metaDoPaciente(linha) }}
           </ClinicPacienteCelula>
         </template>
@@ -803,6 +817,10 @@ const fraseDoResumo = computed(() => {
   padding-inline: 7px;
 }
 
+.alertas__estreito {
+  display: none;
+}
+
 .sr-only {
   position: absolute;
   overflow: hidden;
@@ -819,6 +837,17 @@ const fraseDoResumo = computed(() => {
 }
 
 @media (max-width: 640px) {
+  /* O nome é o último a ceder (a célula garante isso): o selo encolhe antes dele. */
+  .alertas__estreito {
+    display: inline-flex;
+    min-width: 0;
+    flex: 0 1 auto;
+    overflow: hidden;
+    height: 20px;
+    padding-inline: 6px;
+    font-size: 11.5px;
+  }
+
   .procura :deep(.filtro__busca .p-inputtext) {
     min-height: 46px;
     font-size: 15px;

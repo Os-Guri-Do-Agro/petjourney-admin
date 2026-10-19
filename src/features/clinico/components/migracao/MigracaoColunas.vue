@@ -138,7 +138,7 @@ function estadoDa(
   <Drawer
     v-model:visible="visivel"
     position="right"
-    class="mg-tema mg-painel clinic-scope"
+    class="mg-tema mg-painel clinic-scope pj-lugar--clinica"
     :close-button-props="{ severity: 'secondary', text: false, rounded: false }"
     :pt="{ root: { style: 'width: min(46rem, 100vw)' } }"
   >
@@ -333,7 +333,14 @@ function estadoDa(
 
 .coluna__destino {
   display: grid;
+  min-width: 0;
   gap: 5px;
+}
+
+/* O seletor ocupa a trilha inteira, e não a largura do texto escolhido: os destinos se alinham. */
+.coluna__destino :deep(.p-select) {
+  width: 100%;
+  min-width: 0;
 }
 
 .coluna__rotulo {

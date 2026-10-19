@@ -25,7 +25,7 @@ const ITENS = ['dada', 'pulada', 'sem-registro', 'aberta'] as const
 
 <template>
   <div class="legenda faixa-cores">
-    <ul class="legenda__itens">
+    <ul class="legenda__itens" :aria-label="t('clinico.ficha.tratamento.legenda')">
       <li v-for="item in ITENS" :key="item" class="legenda__item">
         <span class="legenda__amostra" :class="`legenda__amostra--${item}`" aria-hidden="true" />
         {{ t(`clinico.adesao.situacao.${item}`) }}
@@ -42,7 +42,7 @@ const ITENS = ['dada', 'pulada', 'sem-registro', 'aberta'] as const
 <style scoped>
 .legenda {
   display: grid;
-  gap: 0.25rem;
+  gap: 6px;
 }
 
 .legenda__itens {
@@ -50,24 +50,25 @@ const ITENS = ['dada', 'pulada', 'sem-registro', 'aberta'] as const
   flex-wrap: wrap;
   margin: 0;
   padding: 0;
-  gap: 0.35rem 1rem;
+  gap: 6px 16px;
   list-style: none;
 }
 
 .legenda__item {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  color: var(--clinic-muted);
-  font-size: 0.75rem;
+  gap: 7px;
+  color: var(--tinta-2);
+  font-size: 13px;
   font-weight: 500;
 }
 
+/* A amostra no tamanho da célula da ficha: a legenda ensina a mesma forma que a faixa desenha. */
 .legenda__amostra {
-  width: 0.625rem;
-  height: 0.625rem;
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
 .legenda__amostra--dada {
@@ -83,19 +84,19 @@ const ITENS = ['dada', 'pulada', 'sem-registro', 'aberta'] as const
 }
 
 .legenda__amostra--aberta {
-  box-shadow: inset 0 0 0 1.5px var(--faixa-agora);
+  box-shadow: inset 0 0 0 2px var(--faixa-agora);
 }
 
 .legenda__fio {
   width: 1px;
-  height: 0.8rem;
-  background: var(--clinic-muted);
+  height: 14px;
+  background: var(--faixa-fio);
 }
 
 .legenda__nota {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: 0.75rem;
-  line-height: 1.4;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 </style>

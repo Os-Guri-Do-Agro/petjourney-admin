@@ -2,34 +2,38 @@
 /**
  * O protocolo do paciente, na ordem em que pede ação.
  *
- * Uma linha por vacina, e a urgência mora no **disco do ícone** e na frase ao lado dele — nunca
- * na linha inteira pintada. A sequência de doses só abre onde ela é a informação: série em
- * andamento, e filhote que ainda não começou. O adulto em dia é uma linha, com a data do
- * reforço; desenhar para ele três bolinhas já cheias seria enfeite.
+ * Uma linha por vacina: o ícone no bloco, o nome (com "obrigatória" quando é lei), a série em que
+ * ele está e, à direita, **o estado em selo com palavra** — "Atrasada há 16 dias", "Vence em 25
+ * dias", "Série aberta", "Em dia". Na folha da ficha, a linha leva também a marca de gravidade na
+ * borda: o atrasado salta da lista sem que a linha inteira vire vermelha.
  *
- * "Onde ele está" é a dose marcada como **agora** na sequência: a primeira que não foi dada. É o
- * que o vet confere antes de aplicar e o que o responsável do filhote pergunta no balcão.
+ * A sequência de doses só abre onde ela é a informação: série em andamento, e filhote que ainda
+ * não começou. O adulto em dia é uma linha, com a data do reforço; desenhar para ele três bolinhas
+ * já cheias seria enfeite. "Onde ele está" é a dose marcada como **agora** — a primeira que não foi
+ * dada. É o que o vet confere antes de aplicar.
  */
 import Button from 'primevue/button'
-import {
-  PhCheckCircle,
-  PhClock,
-  PhHourglass,
-  PhSyringe,
-  PhWarningCircle,
-} from '@phosphor-icons/vue'
-import { computed, type Component } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import ClinicAlertChip from '../base/ClinicAlertChip.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { useRotulosDaVacina } from '../../composables/useRotulosDaVacina'
+import { diffDays } from '../../domain/clinic-time'
 import type { PlanoVacinal, SituacaoNoPlano, VacinaNoPlano } from '../../domain/protocolo-vacinal'
+import { clinicClock } from '../../stores/clinico'
 
-const props = defineProps<{
-  plano: PlanoVacinal
-  somenteLeitura?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    plano: PlanoVacinal
+    somenteLeitura?: boolean
+    /**
+     * A lista mora numa folha (a ficha): as linhas ganham recuo lateral e a marca de gravidade na
+     * borda. Sem isso (o prontuário), a lista encosta no cartão de quem a usa.
+     */
+    folha?: boolean
+  }>(),
+  { somenteLeitura: false, folha: false },
+)
 
 const emit = defineEmits<{
   aplicar: [vacinaId: string]
@@ -39,18 +43,20 @@ const { t } = useI18n()
 const rotulos = useRotulosDaVacina()
 const formato = useClinicFormat()
 
+type Tom = 'risco' | 'atencao' | 'ok' | 'neutro'
+
 /**
- * O bloco do ícone, como o da pauta da Visão geral: o desenho da coisa (a seringa) e a gravidade no
- * bloco. Só o atrasado é cheio; numa lista de seis, seis blocos cheios seriam uma parede e o
- * atrasado deixaria de saltar. Quem aguarda idade leva a ampulheta, quem está em dia, o visto.
+ * O tom e o ícone de cada situação. Só o atrasado é risco; o que vence ou pode começar hoje é
+ * atenção; quem aguarda a idade é neutro; em dia é ok. O ícone repete o tom em forma, para a
+ * diferença sobreviver sem cor.
  */
-const ICONE_DO_BLOCO: Record<SituacaoNoPlano, { icone: Component; peso: 'fill' | 'duotone' }> = {
-  atrasada: { icone: PhWarningCircle, peso: 'fill' },
-  devida: { icone: PhSyringe, peso: 'duotone' },
-  'a-vencer': { icone: PhClock, peso: 'duotone' },
-  'nao-iniciada': { icone: PhSyringe, peso: 'duotone' },
-  'aguarda-idade': { icone: PhHourglass, peso: 'duotone' },
-  'em-dia': { icone: PhCheckCircle, peso: 'duotone' },
+const APARENCIA: Record<SituacaoNoPlano, { tom: Tom; icone: string }> = {
+  atrasada: { tom: 'risco', icone: 'ph-warning-circle' },
+  devida: { tom: 'atencao', icone: 'ph-syringe' },
+  'a-vencer': { tom: 'atencao', icone: 'ph-clock' },
+  'nao-iniciada': { tom: 'atencao', icone: 'ph-syringe' },
+  'aguarda-idade': { tom: 'neutro', icone: 'ph-hourglass' },
+  'em-dia': { tom: 'ok', icone: 'ph-check-circle' },
 }
 
 /** A sequência abre onde ela responde alguma coisa. */
@@ -60,6 +66,11 @@ function mostrarSequencia(item: VacinaNoPlano): boolean {
   }
 
   return !item.serieCompleta
+}
+
+/** Série começada e ainda aberta, sem prazo vencendo: é o "Série aberta" do selo. */
+function serieAberta(item: VacinaNoPlano): boolean {
+  return item.total > 1 && item.aplicadasNaSerie > 0 && !item.serieCompleta
 }
 
 /** Onde a dose foi dada, quando não foi aqui. */
@@ -74,15 +85,45 @@ function pedeAplicacao(item: VacinaNoPlano): boolean {
   return ['atrasada', 'devida', 'nao-iniciada'].includes(item.situacao)
 }
 
+/** O estado em palavra, no selo: o prazo quando há prazo, a situação quando não há. */
+function textoDoSelo(item: VacinaNoPlano): string {
+  const proxima = item.proxima
+
+  switch (item.situacao) {
+    case 'atrasada':
+    case 'nao-iniciada':
+    case 'aguarda-idade':
+      return proxima ? rotulos.quando(proxima) : rotulos.situacao(item.situacao)
+    case 'devida':
+      return proxima && diffDays(clinicClock.today(), proxima.em) < 0
+        ? rotulos.quando(proxima)
+        : rotulos.situacao('devida')
+    case 'a-vencer': {
+      const dias = proxima ? diffDays(clinicClock.today(), proxima.em) : 0
+
+      return t('clinico.vacinas.plano.venceEm', { dias }, dias)
+    }
+    default:
+      return serieAberta(item)
+        ? t('clinico.vacinas.situacao.serie-incompleta')
+        : rotulos.situacao('em-dia')
+  }
+}
+
 const linhas = computed(() =>
   props.plano.vacinas.map((item) => {
     const proxima = item.proxima
+    const aparencia =
+      item.situacao === 'em-dia' && serieAberta(item)
+        ? { tom: 'neutro' as Tom, icone: 'ph-syringe' }
+        : APARENCIA[item.situacao]
 
     /* Dose única não é série: "série de filhote, 1 doses" dizia duas coisas erradas de uma vez. */
     if (item.total === 1) {
       return {
         item,
         proxima,
+        aparencia,
         meta:
           item.aplicadasNaSerie === 0
             ? t('clinico.vacinas.plano.unicaNaoComecou')
@@ -93,6 +134,7 @@ const linhas = computed(() =>
     return {
       item,
       proxima,
+      aparencia,
       meta: item.serieCompleta
         ? t('clinico.vacinas.plano.serieCompleta', { serie: rotulos.serie(item.tipoDeSerie) })
         : item.aplicadasNaSerie === 0
@@ -111,29 +153,28 @@ const linhas = computed(() =>
 </script>
 
 <template>
-  <ul class="plano">
+  <ul class="plano" :class="{ 'plano--folha': folha }">
     <li
-      v-for="{ item, proxima, meta } in linhas"
+      v-for="{ item, proxima, meta, aparencia } in linhas"
       :key="item.vacina.id"
       class="plano__linha"
+      :class="
+        folha && (aparencia.tom === 'risco' || aparencia.tom === 'atencao')
+          ? ['ui-marca', `ui-marca--${aparencia.tom}`]
+          : []
+      "
       :data-situacao="item.situacao"
     >
-      <span class="plano__bloco" :class="`plano__bloco--${item.situacao}`" aria-hidden="true">
-        <component
-          :is="ICONE_DO_BLOCO[item.situacao].icone"
-          class="plano__bloco-icone"
-          :weight="ICONE_DO_BLOCO[item.situacao].peso"
-        />
+      <span class="plano__bloco" :class="`plano__bloco--${aparencia.tom}`" aria-hidden="true">
+        <i class="ph" :class="aparencia.icone" />
       </span>
 
       <div class="plano__corpo">
         <p class="plano__titulo">
           <strong>{{ item.vacina.nome }}</strong>
-          <ClinicAlertChip
-            v-if="item.vacina.obrigatoria"
-            severidade="atencao"
-            :rotulo="t('clinico.vacinas.obrigatoria')"
-          />
+          <span v-if="item.vacina.obrigatoria" class="ui-selo ui-selo--contorno plano__obrigatoria">
+            {{ t('clinico.vacinas.obrigatoria') }}
+          </span>
         </p>
         <p class="plano__meta">{{ meta }}</p>
 
@@ -163,7 +204,7 @@ const linhas = computed(() =>
             </span>
             <span class="sequencia__rotulo">
               <strong>{{ rotulos.numero(dose) }}</strong>
-              <span>{{ rotulos.quando(dose) }}</span>
+              <span class="ui-num">{{ rotulos.quando(dose) }}</span>
               <span v-if="dose === proxima" class="sequencia__agora">
                 {{ t('clinico.vacinas.plano.agora') }}
               </span>
@@ -179,11 +220,16 @@ const linhas = computed(() =>
         </ol>
       </div>
 
-      <div v-if="proxima" class="plano__proxima">
-        <strong :class="`plano__quando--${item.situacao}`">{{ rotulos.quando(proxima) }}</strong>
-        <span>{{ rotulos.numero(proxima) }} · {{ rotulos.data(proxima.em) }}</span>
-        <span v-if="proxima.agendamento" class="plano__marcada">
-          <i class="ph ph-calendar-blank" aria-hidden="true" />
+      <div class="plano__estado">
+        <span class="ui-selo" :class="`ui-selo--${aparencia.tom}`">
+          <i class="ph" :class="aparencia.icone" aria-hidden="true" />
+          {{ textoDoSelo(item) }}
+        </span>
+        <span v-if="proxima" class="plano__quando">
+          {{ rotulos.numero(proxima) }} · <span class="ui-num">{{ rotulos.data(proxima.em) }}</span>
+        </span>
+        <span v-if="proxima?.agendamento" class="plano__marcada">
+          <i class="ph ph-calendar-check" aria-hidden="true" />
           {{
             t('clinico.vacinas.plano.marcadaPara', {
               data: rotulos.data(proxima.agendamento.inicio.slice(0, 10)),
@@ -191,13 +237,21 @@ const linhas = computed(() =>
             })
           }}
         </span>
-        <!--
-          Contornado, não cheio: a ação principal da tela é o "Aplicar vacina" do topo. Este é o
-          atalho que já chega com a vacina da linha escolhida.
-        -->
+      </div>
+
+      <!--
+        Contornado, não cheio: a ação principal da tela é o "Aplicar vacina" do alto. Este é o
+        atalho que já chega com a vacina da linha escolhida.
+      -->
+      <div class="plano__acao">
         <Button
           v-if="!somenteLeitura && pedeAplicacao(item)"
+          type="button"
+          icon="ph ph-syringe"
           :label="t('clinico.vacinas.aplicar.atalho')"
+          :aria-label="`${t('clinico.vacinas.aplicar.atalho')}: ${item.vacina.nome}`"
+          severity="secondary"
+          outlined
           size="small"
           class="plano__aplicar"
           @click="emit('aplicar', item.vacina.id)"
@@ -210,7 +264,7 @@ const linhas = computed(() =>
       <span>
         {{
           t('clinico.vacinas.plano.opcionais', {
-            lista: plano.opcionaisNaoIniciadas.map((vacina) => vacina.nome).join(' · '),
+            lista: plano.opcionaisNaoIniciadas.map((vacina) => vacina.nome).join(', '),
           })
         }}
       </span>
@@ -220,62 +274,64 @@ const linhas = computed(() =>
 
 <style scoped>
 .plano {
+  --plano-recuo: 0px;
+
   display: grid;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.plano--folha {
+  --plano-recuo: 20px;
+}
+
+.plano > li + li {
+  border-top: 1px solid var(--linha);
+}
+
 .plano__linha {
+  position: relative;
   display: grid;
-  align-items: start;
-  padding: var(--clinic-space-3) 0;
-  border-bottom: 1px solid var(--clinic-line-soft);
-  gap: var(--clinic-space-3);
-  grid-template-columns: auto minmax(0, 1fr) minmax(9rem, auto);
+  align-items: center;
+  gap: 8px 16px;
+  grid-template-columns: auto minmax(0, 1fr) minmax(11rem, auto) minmax(6.5rem, auto);
+  min-height: 72px;
+  padding: 14px var(--plano-recuo);
 }
 
-.plano__linha:first-child {
-  padding-top: 0;
-}
-
-/* O bloco carrega a urgência. A linha continua da cor do papel. */
+/* O bloco do ícone, no tom da situação. Só o atrasado é cheio: numa lista de seis, seis blocos
+   cheios seriam uma parede e o atrasado deixaria de saltar. */
 .plano__bloco {
   display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.7rem;
-  background: var(--clinic-neutral-bg);
-  color: var(--clinic-neutral-text);
+  width: 40px;
+  height: 40px;
   place-items: center;
+  border-radius: 12px;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-size: 21px;
 }
 
-.plano__bloco-icone {
-  width: 1.3rem;
-  height: 1.3rem;
+.plano__bloco--risco {
+  background: var(--risco);
+  color: var(--superficie);
 }
 
-/* O atrasado invertido: o fundo na tinta e o ícone no fundo do selo. */
-.plano__bloco--atrasada {
-  background: var(--clinic-risk-text);
-  color: var(--clinic-risk-bg);
+.plano__bloco--atencao {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
-.plano__bloco--devida,
-.plano__bloco--a-vencer {
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-}
-
-.plano__bloco--em-dia {
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
+.plano__bloco--ok {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
 }
 
 .plano__corpo {
   display: grid;
   min-width: 0;
-  gap: 0.2rem;
+  gap: 2px;
 }
 
 .plano__titulo {
@@ -283,89 +339,67 @@ const linhas = computed(() =>
   flex-wrap: wrap;
   align-items: center;
   margin: 0;
-  gap: var(--clinic-space-2);
-  font-size: var(--clinic-font-value);
+  gap: 4px 8px;
+  color: var(--tinta);
+  font-size: 15px;
+}
+
+.plano__titulo strong {
+  font-weight: 600;
+}
+
+.plano__obrigatoria.ui-selo {
+  height: 20px;
+  padding-inline: 7px;
+  font-size: 11.5px;
 }
 
 .plano__meta {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
-.plano__proxima {
+.plano__estado {
   display: grid;
   justify-items: end;
-  gap: 0.15rem;
+  gap: 4px;
   text-align: end;
 }
 
-.plano__proxima strong {
-  font-size: var(--clinic-font-value);
-  font-weight: 750;
-}
-
-.plano__proxima > span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.plano__quando--atrasada {
-  color: var(--clinic-risk-text);
-}
-
-.plano__quando--devida,
-.plano__quando--a-vencer {
-  color: var(--clinic-attention-text);
+.plano__quando {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .plano__marcada {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-accent-strong) !important;
-  font-weight: 700;
-}
-
-/*
- * Contornado, em pílula, como as ações da Visão geral. Sem `severity`: as regras do botão
- * secundário da clínica venceriam estas, e o atalho voltaria a ser o botão de caixa reta.
- */
-.plano__aplicar.p-button {
-  min-height: 2rem;
-  margin-top: 0.35rem;
-  padding: 0 0.85rem;
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: 999px;
-  background: var(--clinic-surface);
-  color: var(--clinic-accent-strong);
-  font-size: 0.8125rem;
+  gap: 5px;
+  color: var(--musgo);
+  font-size: 13px;
   font-weight: 600;
-  transition:
-    border-color 150ms ease-out,
-    box-shadow 150ms ease-out;
 }
 
-.plano__aplicar.p-button:not(:disabled):hover {
-  border-color: var(--clinic-accent-strong);
-  background: var(--clinic-surface);
-  box-shadow: 0 4px 12px -6px rgb(20 32 28 / 25%);
-  color: var(--clinic-accent-strong);
+.plano__acao {
+  display: flex;
+  justify-content: flex-end;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .plano__aplicar.p-button {
-    transition: none;
-  }
+.plano__aplicar.p-button {
+  min-height: 36px;
+  white-space: nowrap;
 }
 
 .plano__opcionais {
   display: flex;
   align-items: baseline;
-  padding-top: var(--clinic-space-3);
-  gap: var(--clinic-space-2);
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  padding: 12px var(--plano-recuo) 14px;
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 /* ------------------------------------------------------------------ sequência */
@@ -373,113 +407,133 @@ const linhas = computed(() =>
 .sequencia {
   display: flex;
   flex-wrap: wrap;
-  margin: var(--clinic-space-2) 0 0;
+  margin: 10px 0 2px;
   padding: 0;
-  gap: var(--clinic-space-2) 0;
+  gap: 10px 0;
   list-style: none;
 }
 
 .sequencia__passo {
   position: relative;
   display: grid;
-  min-width: 6.5rem;
+  min-width: 7.5rem;
   align-items: start;
-  padding-inline-end: var(--clinic-space-3);
-  gap: 0.35rem;
+  padding-inline-end: 16px;
+  gap: 8px;
   grid-template-columns: auto minmax(0, 1fr);
 }
 
 /* O fio entre um passo e o seguinte. */
 .sequencia__passo:not(:last-child)::after {
   position: absolute;
-  top: 0.55rem;
-  width: var(--clinic-space-3);
-  height: 1px;
-  background: var(--clinic-line);
+  top: 10px;
+  width: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--linha);
   content: '';
-  inset-inline-end: 0;
+  inset-inline-end: 2px;
 }
 
 .sequencia__marca {
   display: grid;
-  width: 1.1rem;
-  height: 1.1rem;
-  margin-top: 0.05rem;
-  border: 1.5px solid var(--clinic-line);
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--linha-forte);
   border-radius: 50%;
-  background: var(--clinic-surface);
-  color: var(--clinic-faint);
-  font-size: 0.55rem;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-size: 11px;
   place-items: center;
 }
 
 .sequencia__passo--aplicada .sequencia__marca {
-  border-color: var(--clinic-accent-strong);
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
+  border-color: var(--musgo);
+  background: var(--musgo);
+  color: var(--sobre-musgo);
 }
 
 .sequencia__passo--agora .sequencia__marca {
-  border-width: 2px;
-  border-color: var(--clinic-accent-strong);
-  box-shadow: 0 0 0 3px var(--clinic-accent-tint);
+  border-color: var(--clinica);
+  box-shadow: 0 0 0 3px var(--clinica-fundo);
 }
 
 .sequencia__passo--atrasada.sequencia__passo--agora .sequencia__marca {
-  border-color: var(--clinic-risk-text);
-  box-shadow: 0 0 0 3px var(--clinic-risk-bg);
+  border-color: var(--risco);
+  box-shadow: 0 0 0 3px var(--risco-fundo);
 }
 
 .sequencia__rotulo {
   display: grid;
-  gap: 0.05rem;
-  font-size: var(--clinic-font-label);
+  gap: 1px;
+  color: var(--tinta);
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 .sequencia__rotulo strong {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .sequencia__rotulo > span {
-  color: var(--clinic-faint);
+  color: var(--tinta-2);
 }
 
 .sequencia__passo--agora .sequencia__rotulo > span:first-of-type {
-  color: var(--clinic-text);
-  font-weight: 600;
+  color: var(--tinta);
+  font-weight: 550;
 }
 
 .sequencia__agora {
   width: fit-content;
-  padding: 0 0.4rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong) !important;
-  font-size: 0.625rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin-top: 2px;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta) !important;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.sequencia__passo--atrasada .sequencia__agora {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta) !important;
 }
 
 .sequencia__fora {
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 3px;
 }
 
-.sequencia__fora .ph {
-  font-size: 0.6rem;
+@media (max-width: 860px) {
+  .plano__linha {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .plano__estado {
+    grid-column: 2;
+    grid-row: 2;
+    justify-items: start;
+    text-align: start;
+  }
+
+  .plano__acao {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    align-self: center;
+  }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 560px) {
   .plano__linha {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .plano__proxima {
-    justify-items: start;
+  .plano__acao {
     grid-column: 2;
-    text-align: start;
+    grid-row: auto;
+    justify-content: flex-start;
   }
 }
 </style>
