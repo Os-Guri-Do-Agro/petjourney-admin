@@ -296,16 +296,6 @@
 }
 
 /*
- * A gaveta da gravação da consulta (`EscutaPainel`) em tela larga: a área de conteúdo abre o espaço
- * dela, e o prontuário estreita em vez de ficar escondido por baixo. A largura acompanha a gaveta.
- */
-@media (min-width: 75rem) {
-  html.escuta-lateral .app-content {
-    padding-inline-end: min(30rem, 94vw);
-  }
-}
-
-/*
  * O calendário do DatePicker é teleportado para o `body` e não herda a página: sem isto ele abria
  * no linho antigo, com borda bege, no meio de um formulário branco. Quem o usa passa
  * `panel-class="hc-tema"` (o `ClinicDateField` já passa).

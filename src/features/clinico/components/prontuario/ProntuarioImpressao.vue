@@ -578,6 +578,11 @@ function nomeDoExame(id: string) {
   text-align: start;
 }
 
+/* Rótulo de coluna começa em maiúscula, como frase ("referência" é chave de texto corrido). */
+.tabela th::first-letter {
+  text-transform: uppercase;
+}
+
 .tabela th {
   border-bottom-width: 0.8pt;
   font-size: 8pt;

@@ -583,6 +583,7 @@ const noApp = computed(() => {
 <style scoped>
 .resumo {
   display: grid;
+  min-width: 0;
   gap: 20px;
 }
 
@@ -619,11 +620,22 @@ const noApp = computed(() => {
   list-style: none;
 }
 
-.pendencias :deep(.ui-selo) {
+/* A pendência não se corta em reticências: é a frase que impede o papel de circular. */
+.pendencias li {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.pendencias :deep(.chip) {
   height: auto;
   min-height: 26px;
+  align-items: flex-start;
   padding-block: 4px;
   white-space: normal;
+}
+
+.pendencias :deep(.chip__texto) {
+  overflow: visible;
 }
 
 .ficha {
@@ -910,8 +922,17 @@ const noApp = computed(() => {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* O botão desce para baixo do texto, alinhado com ele: espremido ao lado, o título quebrava letra a letra. */
   .documento {
     flex-wrap: wrap;
+  }
+
+  .documento .ui-linha__texto {
+    flex-basis: calc(100% - 52px);
+  }
+
+  .documento :deep(.p-button) {
+    margin-inline-start: 52px;
   }
 }
 </style>

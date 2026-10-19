@@ -601,9 +601,13 @@ const temAcoes = computed(
               />
             </template>
           </Button>
+          <!-- Contornado: a ação cheia da tela é "Finalizar atendimento"; o parar tem o ícone em risco. -->
           <Button
+            class="encerrar"
             :label="t('clinico.escuta.acoes.encerrar')"
             icon="ph ph-stop-circle"
+            severity="secondary"
+            outlined
             size="small"
             @click="escuta.encerrar()"
           />
@@ -988,6 +992,10 @@ const temAcoes = computed(
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+}
+
+.encerrar :deep(.p-button-icon) {
+  color: var(--risco);
 }
 
 /* Entre o que muda a gravação e o que muda a vista, uma régua fina. */

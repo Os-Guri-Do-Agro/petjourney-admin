@@ -970,12 +970,16 @@ function resumoDaDose(prescricao: Prescription) {
   gap: 6px;
 }
 
-.avisos :deep(.ui-selo),
 .avisos > * {
   height: auto;
   min-height: 24px;
+  align-items: flex-start;
   padding-block: 3px;
   white-space: normal;
+}
+
+.avisos :deep(.chip__texto) {
+  overflow: visible;
 }
 
 .alergia {

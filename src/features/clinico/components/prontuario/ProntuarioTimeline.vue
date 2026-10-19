@@ -36,8 +36,13 @@ const props = withDefaults(
     limite?: number
     /** Rota do histórico completo. Sem ela, o "ver todos" não aparece. */
     rotaCompleta?: string
+    /**
+     * Tela estreita: a coluna vem **acima** da folha, e ali ela mostra só a consulta anterior e o
+     * caminho para o histórico completo. A lista inteira empurraria o formulário uma tela abaixo.
+     */
+    compacto?: boolean
   }>(),
-  { limite: 5, rotaCompleta: '' },
+  { limite: 5, rotaCompleta: '', compacto: false },
 )
 
 const emit = defineEmits<{ fechar: [] }>()
@@ -159,7 +164,11 @@ const dataDaAnterior = computed(() =>
       </ul>
     </section>
 
-    <section class="historico" :aria-label="t('clinico.prontuario.timeline.titulo')">
+    <section
+      v-if="!compacto"
+      class="historico"
+      :aria-label="t('clinico.prontuario.timeline.titulo')"
+    >
       <!--
         Fichas de filtro com a contagem: além de filtrar, respondem "o que já foi feito neste pet"
         antes de qualquer clique — que é a pergunta que traz o vet a esta lista.
@@ -212,6 +221,11 @@ const dataDaAnterior = computed(() =>
         <i class="ph ph-arrow-right" aria-hidden="true" />
       </RouterLink>
     </section>
+
+    <RouterLink v-else-if="rotaCompleta && eventos.length > 0" class="ui-mais" :to="rotaCompleta">
+      {{ t('clinico.comum.verTodos', { contagem: eventos.length }) }}
+      <i class="ph ph-arrow-right" aria-hidden="true" />
+    </RouterLink>
   </aside>
 </template>
 

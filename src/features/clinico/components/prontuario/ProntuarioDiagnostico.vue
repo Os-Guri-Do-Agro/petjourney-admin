@@ -156,7 +156,9 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
             <span class="sugestao__descricao">{{ sugestao.descricao }}</span>
             <span class="sugestao__acao">
               <i class="ph ph-plus" aria-hidden="true" />
-              {{ t('clinico.prontuario.diagnostico.adicionar') }}
+              <span class="sugestao__acao-texto">
+                {{ t('clinico.prontuario.diagnostico.adicionar') }}
+              </span>
             </span>
           </button>
         </li>
@@ -308,6 +310,12 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
 @media (hover: none) {
   .sugestao__acao {
     opacity: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .sugestao__acao-texto {
+    display: none;
   }
 }
 

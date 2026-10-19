@@ -184,6 +184,12 @@ const motivoLeitura = computed(() => {
     : ''
 })
 
+/**
+ * O motivo da leitura dentro da folha. Com a faixa do alto já dizendo "somente leitura" (ou
+ * "finalizado"), repetir a frase no topo de cada folha seria a mesma notícia duas vezes.
+ */
+const motivoDaFolha = ''
+
 const progresso = computed(() => {
   const atual = encounter.value
 
@@ -421,6 +427,14 @@ function textoDoAlerta(alerta: PetAlert) {
   return alerta.detalhe ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}` : formato.alerta(alerta.kind)
 }
 
+/**
+ * Na barra fixa o alerta vai curto — o nome dele —, menos a alergia, que leva o princípio: é o
+ * detalhe que decide a receita. O texto inteiro fica no `title` e na capa.
+ */
+function textoCurtoDoAlerta(alerta: PetAlert) {
+  return alerta.kind === 'alergia' ? textoDoAlerta(alerta) : formato.alerta(alerta.kind)
+}
+
 const metaDaBarra = computed(() => {
   const pet = prontuario.pet
 
@@ -451,6 +465,7 @@ const pacienteFora = ref(false)
 
 let quadroPendente = 0
 let observador: ResizeObserver | null = null
+let observadas: HTMLElement[] = []
 
 function faixasFixas() {
   return [...document.querySelectorAll<HTMLElement>('.palco__fita, .palco > .topo')].filter(
@@ -458,11 +473,30 @@ function faixasFixas() {
   )
 }
 
+/**
+ * Mede a faixa fixa do alto e passa a acompanhar o tamanho dela. Chamada na montagem, depois de
+ * carregar e, se ainda não achou nada, na primeira rolagem: a moldura pode terminar de montar
+ * depois da tela (a rota é carregada sob demanda).
+ */
 function medirTopo() {
+  const fixas = faixasFixas()
+
   alturaDoTopo.value = Math.max(
     0,
-    ...faixasFixas().map((elemento) => Math.round(elemento.getBoundingClientRect().bottom)),
+    ...fixas.map((elemento) => Math.round(elemento.getBoundingClientRect().bottom)),
   )
+
+  if (typeof ResizeObserver === 'undefined') {
+    return
+  }
+
+  const novas = fixas.filter((elemento) => !observadas.includes(elemento))
+
+  if (novas.length > 0) {
+    observador ??= new ResizeObserver(() => medirTopo())
+    novas.forEach((elemento) => observador?.observe(elemento))
+    observadas = [...observadas, ...novas]
+  }
 }
 
 function acompanharRolagem() {
@@ -472,6 +506,10 @@ function acompanharRolagem() {
 
   quadroPendente = requestAnimationFrame(() => {
     quadroPendente = 0
+
+    if (observadas.length === 0) {
+      medirTopo()
+    }
 
     const cabeca = cabecaDoPaciente.value
 
@@ -490,11 +528,6 @@ onMounted(() => {
   medirTopo()
   window.addEventListener('scroll', acompanharRolagem, { passive: true })
   window.addEventListener('resize', aoRedimensionar, { passive: true })
-
-  if (typeof ResizeObserver !== 'undefined') {
-    observador = new ResizeObserver(aoRedimensionar)
-    faixasFixas().forEach((elemento) => observador?.observe(elemento))
-  }
 })
 
 onBeforeUnmount(() => {
@@ -580,6 +613,16 @@ async function carregar() {
 
   etapa.value = pendente?.id ?? 'anamnese'
 }
+
+/* Depois de carregar, a moldura já está de pé: mede de novo a faixa do alto. */
+watch(
+  () => Boolean(encounter.value),
+  (aberto) => {
+    if (aberto) {
+      void nextTick(aoRedimensionar)
+    }
+  },
+)
 
 async function finalizar() {
   await prontuario.finalizar()
@@ -853,7 +896,7 @@ onBeforeUnmount(() => {
                 :class="alerta.severidade === 'risco' ? 'ph ph-warning' : 'ph ph-warning-circle'"
                 aria-hidden="true"
               />
-              <span>{{ textoDoAlerta(alerta) }}</span>
+              <span>{{ textoCurtoDoAlerta(alerta) }}</span>
             </li>
           </ul>
 
@@ -1061,7 +1104,7 @@ onBeforeUnmount(() => {
             v-if="etapa === 'anamnese'"
             :valor="encounter.anamnese"
             :somente-leitura="prontuario.somenteLeitura"
-            :motivo-leitura="motivoLeitura"
+            :motivo-leitura="motivoDaFolha"
             @atualizar="prontuario.atualizar({ anamnese: { ...encounter.anamnese, ...$event } })"
           >
             <template #acoes>
@@ -1078,7 +1121,7 @@ onBeforeUnmount(() => {
             :valor="encounter.exameFisico"
             :pet="prontuario.pet"
             :somente-leitura="prontuario.somenteLeitura"
-            :motivo-leitura="motivoLeitura"
+            :motivo-leitura="motivoDaFolha"
             @atualizar="prontuario.atualizar($event)"
           />
 
@@ -1086,7 +1129,7 @@ onBeforeUnmount(() => {
             v-else-if="etapa === 'diagnostico'"
             :valor="encounter.diagnosticos"
             :somente-leitura="prontuario.somenteLeitura"
-            :motivo-leitura="motivoLeitura"
+            :motivo-leitura="motivoDaFolha"
             @atualizar="prontuario.atualizar($event)"
           />
 
@@ -1096,7 +1139,7 @@ onBeforeUnmount(() => {
             :pet="prontuario.pet"
             :peso-kg="pesoVigente"
             :somente-leitura="prontuario.somenteLeitura"
-            :motivo-leitura="motivoLeitura"
+            :motivo-leitura="motivoDaFolha"
             @atualizar="prontuario.atualizar($event)"
             @agendar-retorno="agendarRetorno"
           />
@@ -1184,6 +1227,7 @@ onBeforeUnmount(() => {
           :eventos="prontuario.timeline"
           :anterior="prontuario.consultaAnterior"
           :rota-completa="`/veterinario/paciente/${encounter.petId}/historico`"
+          :compacto="!telaLarga"
           @fechar="historicoAberto = false"
         />
       </div>
@@ -1214,7 +1258,7 @@ onBeforeUnmount(() => {
         <template #footer>
           <Button
             type="button"
-            :label="t('clinico.agenda.mover.cancelar')"
+            :label="t('clinico.comum.cancelar')"
             severity="secondary"
             text
             @click="assumirAberto = false"
@@ -1273,7 +1317,7 @@ onBeforeUnmount(() => {
         <template #footer>
           <Button
             type="button"
-            :label="t('clinico.agenda.mover.cancelar')"
+            :label="t('clinico.prontuario.nova.finalizar.voltar')"
             severity="secondary"
             text
             @click="finalizarAberto = false"
@@ -1527,7 +1571,8 @@ onBeforeUnmount(() => {
 .fixo__quem {
   display: grid;
   min-width: 0;
-  flex: 0 1 auto;
+  max-width: 240px;
+  flex: 0 0 auto;
   gap: 1px;
   line-height: 1.25;
 }
@@ -1975,9 +2020,14 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 560px) {
-  .fixo__alertas,
+  /* No celular fica o alerta mais grave — é o que muda a dose —, e só ele. */
+  .fixo__alertas li:not(:first-child),
   .fixo__escuta span.ui-num {
     display: none;
+  }
+
+  .fixo__alertas .ui-selo span {
+    display: inline;
   }
 
   .fixo__finalizar :deep(.p-button-label) {

@@ -147,7 +147,7 @@ const opcoes = computed(() =>
     <template #footer>
       <Button
         type="button"
-        :label="t('clinico.agenda.mover.cancelar')"
+        :label="t('clinico.comum.cancelar')"
         severity="secondary"
         text
         @click="aberto = false"
