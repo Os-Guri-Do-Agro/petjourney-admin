@@ -315,7 +315,7 @@ async function registrar() {
 .baixa__lote {
   margin: 0;
   color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  font-size: 13px;
 }
 
 .baixa__lote strong {
@@ -335,7 +335,7 @@ async function registrar() {
   margin: 0;
   gap: 0.4rem;
   color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  font-size: 13px;
   line-height: 1.45;
 }
 

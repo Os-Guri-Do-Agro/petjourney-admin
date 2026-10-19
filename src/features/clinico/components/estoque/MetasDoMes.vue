@@ -4,18 +4,16 @@
  *
  * Uma linha e não um cartão por meta: são de seis a dez metas, e dez cartões iguais lado a lado é a
  * parede que não diz qual importa. A ordem já vem do domínio — o que falhou e o que pede atenção
- * primeiro — e o selo carrega a urgência; a barra só mostra o quanto.
+ * primeiro — e o selo carrega a urgência em palavra; a barra só mostra o quanto.
  *
  * No mês em curso, a meta de aplicação ganha o ritmo ao lado do número: "8 de 12" no dia 10 é ótimo,
  * no dia 28 é péssimo, e só o ritmo diz qual dos dois.
  */
-import ProgressBar from 'primevue/progressbar'
 import { useI18n } from 'vue-i18n'
 
-import ClinicAlertChip from '../base/ClinicAlertChip.vue'
 import { useRotulosDoEstoque } from '../../composables/useRotulosDoEstoque'
 import type { Vacina } from '../../data/types'
-import type { ProgressoDaMeta } from '../../domain/metas-de-estoque'
+import type { ProgressoDaMeta, SituacaoDaMeta } from '../../domain/metas-de-estoque'
 
 defineProps<{
   progresso: ProgressoDaMeta[]
@@ -30,6 +28,24 @@ const rotulos = useRotulosDoEstoque()
 function preenchido(item: ProgressoDaMeta): number {
   return Math.min(100, Math.round((Number.isFinite(item.parte) ? item.parte : 1) * 100))
 }
+
+/*
+ * O tom do selo e da barra. A meta batida ganha o verde; a que está no ritmo fica neutra — não
+ * pede nada de ninguém, e pintá-la faria a lista inteira competir com o que pede atenção.
+ */
+const TOM: Record<SituacaoDaMeta, 'risco' | 'atencao' | 'ok' | 'neutro'> = {
+  falhou: 'risco',
+  atencao: 'atencao',
+  cumprida: 'ok',
+  'no-ritmo': 'neutro',
+}
+
+const ICONE: Record<SituacaoDaMeta, string> = {
+  falhou: 'ph ph-x-circle',
+  atencao: 'ph ph-warning',
+  cumprida: 'ph ph-check',
+  'no-ritmo': 'ph ph-arrow-right',
+}
 </script>
 
 <template>
@@ -40,17 +56,28 @@ function preenchido(item: ProgressoDaMeta): number {
         <span class="meta__mede">{{ rotulos.oQueMede(item.meta.tipo) }}</span>
       </span>
 
-      <ProgressBar
-        class="meta__barra"
-        :class="`meta__barra--${item.situacao}`"
-        :value="preenchido(item)"
-        :show-value="false"
+      <span
+        class="meta__trilho"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        :aria-valuenow="preenchido(item)"
         :aria-label="rotulos.nomeDaMeta(item.meta, vacinas)"
-      />
+      >
+        <span
+          class="meta__barra"
+          :class="`meta__barra--${TOM[item.situacao]}`"
+          :style="{ inlineSize: `${preenchido(item)}%` }"
+        />
+      </span>
 
       <span class="meta__numeros">
-        <strong class="clinic-value">{{ rotulos.valor(item.meta.tipo, item.realizado) }}</strong>
-        {{ t('clinico.estoque.metas.de', { alvo: rotulos.valor(item.meta.tipo, item.meta.alvo) }) }}
+        <span>
+          <strong class="ui-num">{{ rotulos.valor(item.meta.tipo, item.realizado) }}</strong>
+          {{
+            t('clinico.estoque.metas.de', { alvo: rotulos.valor(item.meta.tipo, item.meta.alvo) })
+          }}
+        </span>
         <span
           v-if="emCurso && item.sentido === 'piso' && item.situacao !== 'cumprida'"
           class="meta__ritmo"
@@ -60,17 +87,10 @@ function preenchido(item: ProgressoDaMeta): number {
       </span>
 
       <span class="meta__selo">
-        <ClinicAlertChip
-          :severidade="rotulos.tom(item.situacao)"
-          :rotulo="rotulos.situacao(item.sentido, item.situacao)"
-          :icone="
-            item.situacao === 'cumprida'
-              ? 'ph ph-check'
-              : item.situacao === 'no-ritmo'
-                ? 'ph ph-arrow-right'
-                : ''
-          "
-        />
+        <span class="ui-selo" :class="`ui-selo--${TOM[item.situacao]}`">
+          <i :class="ICONE[item.situacao]" aria-hidden="true" />
+          {{ rotulos.situacao(item.sentido, item.situacao) }}
+        </span>
       </span>
     </li>
   </ul>
@@ -91,10 +111,11 @@ function preenchido(item: ProgressoDaMeta): number {
 .meta {
   display: grid;
   align-items: center;
-  gap: var(--clinic-space-2) var(--clinic-space-4);
-  grid-template-columns: minmax(0, 1.4fr) minmax(6rem, 1fr) minmax(0, 1.2fr) 9.5rem;
-  padding-block: 0.7rem;
-  border-top: 1px solid var(--clinic-line-soft);
+  gap: 8px 20px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(6rem, 1fr) minmax(0, 1.2fr) 10.5rem;
+  min-height: 60px;
+  padding-block: 12px;
+  border-top: 1px solid var(--linha);
 }
 
 .meta:first-child {
@@ -104,36 +125,35 @@ function preenchido(item: ProgressoDaMeta): number {
 .meta__nome {
   display: grid;
   min-width: 0;
+  gap: 2px;
 }
 
 .meta__nome strong {
   overflow: hidden;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-body);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .meta__mede,
 .meta__ritmo {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .meta__numeros {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  display: grid;
+  gap: 2px;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .meta__numeros strong {
-  color: var(--clinic-text);
-  font-size: 0.95rem;
-  font-weight: 800;
-}
-
-.meta__ritmo {
-  display: block;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 650;
 }
 
 .meta__selo {
@@ -141,28 +161,37 @@ function preenchido(item: ProgressoDaMeta): number {
   justify-content: flex-end;
 }
 
-.meta__barra {
-  height: 0.4rem;
-  --p-progressbar-background: var(--clinic-surface-sunken);
-  --p-progressbar-border-radius: 99rem;
+.meta__trilho {
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--superficie-3);
 }
 
 /* A cor da barra repete a do selo: o mesmo estado, a mesma tinta. Nunca sozinha — o selo escreve. */
-.meta__barra--cumprida,
-.meta__barra--no-ritmo {
-  --p-progressbar-value-background: var(--clinic-accent-strong);
+.meta__barra {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--musgo);
+  transition: inline-size var(--pj-tempo-medio) var(--pj-curva-chega);
+}
+
+.meta__barra--ok {
+  background: var(--ok);
 }
 
 .meta__barra--atencao {
-  --p-progressbar-value-background: var(--clinic-attention-text);
+  background: var(--atencao);
 }
 
-.meta__barra--falhou {
-  --p-progressbar-value-background: var(--clinic-risk-text);
+.meta__barra--risco {
+  background: var(--risco);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .meta__barra :deep(.p-progressbar-value) {
+  .meta__barra {
     transition: none;
   }
 }
@@ -172,9 +201,13 @@ function preenchido(item: ProgressoDaMeta): number {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .meta__barra {
+  .meta__trilho {
     grid-column: 1 / -1;
     grid-row: 2;
+  }
+
+  .meta__numeros {
+    grid-column: 1 / -1;
   }
 }
 </style>

@@ -197,7 +197,8 @@ const opcoes = computed<ApexOptions>(() => {
 
 .consumo__vazio {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  padding: 8px 0;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 </style>

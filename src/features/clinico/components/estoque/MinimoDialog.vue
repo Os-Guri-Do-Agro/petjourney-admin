@@ -161,7 +161,7 @@ async function salvar() {
   padding: 0;
   gap: 0.35rem 1.5rem;
   color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  font-size: 13px;
   list-style: none;
 }
 

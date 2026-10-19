@@ -506,7 +506,7 @@ async function salvar() {
 .plano__lede {
   margin: 0;
   color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  font-size: 13px;
   line-height: 1.45;
 }
 
@@ -546,9 +546,9 @@ async function salvar() {
 .tabela__linha--cabeca {
   padding-block: 0 0.35rem;
   border-top: none;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .tabela__nome {
@@ -601,7 +601,7 @@ async function salvar() {
   border-top: 1px solid var(--clinic-line-soft);
   gap: 0.45rem;
   color: var(--clinic-text);
-  font-size: var(--clinic-font-label);
+  font-size: 13px;
   font-weight: 650;
 }
 
