@@ -253,11 +253,24 @@ onMounted(carregar)
     grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
   }
 
-  .bulario__ficha {
+  /*
+   * A ficha rola dentro de si. A sombra no pé só aparece quando ainda há conteúdo embaixo: a capa
+   * de fundo rola junto com o texto (`local`) e cobre a sombra (`scroll`) quando se chega ao fim.
+   */
+  .bulario__corpo > .bulario__ficha {
     position: sticky;
     top: 80px;
     max-height: calc(100vh - 100px);
     overflow-y: auto;
+    background:
+      linear-gradient(transparent, var(--superficie) 70%) center bottom / 100% 36px no-repeat local,
+      radial-gradient(
+          farthest-side at 50% 100%,
+          color-mix(in oklab, var(--tinta) 16%, transparent),
+          transparent
+        )
+        center bottom / 100% 14px no-repeat scroll,
+      var(--superficie);
     overscroll-behavior: contain;
   }
 }

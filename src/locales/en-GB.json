@@ -2816,7 +2816,7 @@
     "bulario": {
       "titulo": "Drug formulary",
       "subtitulo": "Clinic",
-      "buscaPlaceholder": "Search by drug, active ingredient or indication",
+      "buscaPlaceholder": "Drug, ingredient or indication",
       "semResultado": "No medication matches these filters.",
       "escolha": "Pick a medication from the list.",
       "semPaciente": "Leave patient",
@@ -3638,7 +3638,8 @@
           "alergia": "Confirm the prescription despite the allergy",
           "ir": "Go to {etapa}",
           "tudoCerto": "Complaint, diagnosis and plan are recorded. Nothing pending.",
-          "depois": "Once completed, the record becomes read only and you go back to the schedule. Documents and the app summary stay available."
+          "depois": "Once completed, the record becomes read only and you go back to the schedule. Documents and the app summary stay available.",
+          "voltar": "Keep working"
         },
         "passos": {
           "estado": {

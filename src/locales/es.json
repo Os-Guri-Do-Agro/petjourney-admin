@@ -2816,7 +2816,7 @@
     "bulario": {
       "titulo": "Vademécum",
       "subtitulo": "Clínica",
-      "buscaPlaceholder": "Buscar por fármaco, principio activo o indicación",
+      "buscaPlaceholder": "Fármaco, principio o indicación",
       "semResultado": "Ningún medicamento con esos filtros.",
       "escolha": "Elija un medicamento en la lista.",
       "semPaciente": "Salir del paciente",
@@ -3638,7 +3638,8 @@
           "alergia": "Confirmar la receta pese a la alergia",
           "ir": "Ir al paso {etapa}",
           "tudoCerto": "Motivo, diagnóstico y conducta están registrados. Nada pendiente.",
-          "depois": "Al finalizar, la historia queda solo para lectura y usted vuelve a la agenda. Los documentos y el resumen de la app siguen disponibles."
+          "depois": "Al finalizar, la historia queda solo para lectura y usted vuelve a la agenda. Los documentos y el resumen de la app siguen disponibles.",
+          "voltar": "Seguir con la consulta"
         },
         "passos": {
           "estado": {

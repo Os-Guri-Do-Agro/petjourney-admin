@@ -381,7 +381,7 @@ onMounted(carregar)
                 <span class="registro__tutor">{{ clinico.tutor(item.tutorId)?.nome }}</span>
               </span>
 
-              <span class="registro__oque" :title="todosOsDiagnosticos(item) || undefined">
+              <span class="registro__oque" :title="todosOsDiagnosticos(item) || oQueFoi(item) || undefined">
                 <span v-if="oQueFoi(item)" class="registro__texto">{{ oQueFoi(item) }}</span>
                 <span v-else class="registro__texto registro__texto--vazio">
                   {{ t('clinico.atividades.semQueixa') }}
@@ -453,7 +453,7 @@ onMounted(carregar)
                     <span class="registro__tutor">{{ clinico.tutor(item.tutorId)?.nome }}</span>
                   </span>
 
-                  <span class="registro__oque" :title="todosOsDiagnosticos(item) || undefined">
+                  <span class="registro__oque" :title="todosOsDiagnosticos(item) || oQueFoi(item) || undefined">
                     <span v-if="oQueFoi(item)" class="registro__texto">{{ oQueFoi(item) }}</span>
                     <span v-else class="registro__texto registro__texto--vazio">
                       {{ t('clinico.atividades.semDiagnostico') }}

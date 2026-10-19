@@ -2816,7 +2816,7 @@
     "bulario": {
       "titulo": "Bulário",
       "subtitulo": "Clínica",
-      "buscaPlaceholder": "Buscar por remédio, princípio ativo ou indicação",
+      "buscaPlaceholder": "Remédio, princípio ativo ou indicação",
       "semResultado": "Nenhum medicamento com esses filtros.",
       "escolha": "Escolha um medicamento na lista.",
       "semPaciente": "Sair do paciente",
@@ -3638,7 +3638,8 @@
           "alergia": "Confirmar a prescrição apesar da alergia",
           "ir": "Ir à etapa {etapa}",
           "tudoCerto": "Queixa, diagnóstico e conduta estão registrados. Nada pendente.",
-          "depois": "Depois de finalizar, o prontuário fica só para leitura e você volta para a agenda. Documentos e o resumo do app continuam disponíveis."
+          "depois": "Depois de finalizar, o prontuário fica só para leitura e você volta para a agenda. Documentos e o resumo do app continuam disponíveis.",
+          "voltar": "Continuar o atendimento"
         },
         "passos": {
           "estado": {

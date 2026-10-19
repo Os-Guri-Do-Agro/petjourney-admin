@@ -383,6 +383,7 @@ const doseDoPeso = computed(() => {
   min-width: 0;
   align-content: start;
   gap: 24px;
+  grid-template-columns: minmax(0, 1fr);
   color: var(--tinta);
   container-type: inline-size;
 }
@@ -848,11 +849,10 @@ const doseDoPeso = computed(() => {
   }
 
   .doses__linha {
-    display: grid;
-    gap: 2px 14px;
-    grid-template-columns: repeat(3, auto);
-    justify-content: start;
-    padding: 10px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    padding: 10px;
   }
 
   .doses__tabela .doses__linha > th,
@@ -865,9 +865,10 @@ const doseDoPeso = computed(() => {
     box-shadow: none;
   }
 
-  .doses__linha > th {
-    grid-column: 1 / -1;
-    margin-bottom: 4px;
+  .doses__tabela .doses__linha > th {
+    flex-basis: 100%;
+    margin-bottom: 2px;
+    white-space: normal;
   }
 
   .doses__linha > td[data-rotulo]::before {
@@ -880,7 +881,7 @@ const doseDoPeso = computed(() => {
   }
 
   .doses__proibido {
-    grid-column: 1 / -1;
+    flex-basis: 100%;
   }
 
   .doses__linha--paciente {
@@ -894,7 +895,7 @@ const doseDoPeso = computed(() => {
   }
 
   .doses__nota > td {
-    padding: 0 12px 10px;
+    padding: 0 10px 10px;
     border-bottom: 0;
     box-shadow: none;
   }

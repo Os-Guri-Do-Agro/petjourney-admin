@@ -2816,7 +2816,7 @@
     "bulario": {
       "titulo": "Vodič za lekove",
       "subtitulo": "Klinika",
-      "buscaPlaceholder": "Pretražite po leku, aktivnoj supstanci ili indikaciji",
+      "buscaPlaceholder": "Lek, supstanca ili indikacija",
       "semResultado": "Nijedan lek ne odgovara ovim filterima.",
       "escolha": "Izaberite lek sa liste.",
       "semPaciente": "Uklonite pacijenta",
@@ -3638,7 +3638,8 @@
           "alergia": "Potvrdite propisani lek uprkos alergiji",
           "ir": "Idite na korak {etapa}",
           "tudoCerto": "Tegoba, dijagnoza i terapija su upisane. Ništa nije na čekanju.",
-          "depois": "Posle završetka karton je samo za čitanje i vraćate se u raspored. Dokumenti i rezime za aplikaciju ostaju dostupni."
+          "depois": "Posle završetka karton je samo za čitanje i vraćate se u raspored. Dokumenti i rezime za aplikaciju ostaju dostupni.",
+          "voltar": "Nastavite pregled"
         },
         "passos": {
           "estado": {
