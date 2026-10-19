@@ -17,13 +17,17 @@
  * - **Quem executou pode ficar vazio, e isso tem nome.** Sem profissional, o ato nasce
  *   `avulso` — relatado, não presenciado. É a diferença entre "a clínica aplicou" e "alguém
  *   disse que aplicaram", e ela precisa sobreviver até a terceira leitura do dia.
+ *
+ * Redesenho (19/10/2026): o alto do diálogo diz o que se faz e em quem (ícone, título e o nome do
+ * paciente), e os campos "Via" e "Quem executou" mostram o valor vazio por extenso ("Não se
+ * aplica", "Ninguém da clínica") em vez de uma caixa em branco.
  */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -66,6 +70,8 @@ const VIAS: PrescriptionRoute[] = [
 
 const { t, locale } = useI18n()
 const clinico = useClinicoStore()
+/** O título do diálogo nomeia a caixa: com o cabeçalho em slot, o `Dialog` precisa do id. */
+const idTitulo = useId()
 
 const kind = ref<AtoClinicoKind>('medicamento')
 const medicamentoId = ref<string | null>(null)
@@ -235,13 +241,18 @@ function salvar() {
     class="clinic-dialog hc-tema"
     :style="{ width: 'min(38rem, 94vw)' }"
     :dismissable-mask="true"
+    :aria-labelledby="idTitulo"
     @update:visible="emit('update:visivel', $event)"
   >
+    <!-- O "onde estou" do diálogo: o que se está fazendo, e em quem. -->
     <template #header>
-      <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-briefcase" /></span>
-        {{ t('clinico.paciente.atos.novo.titulo') }}
-      </h2>
+      <div class="topo">
+        <span class="topo__icone" aria-hidden="true"><i class="ph ph-first-aid-kit" /></span>
+        <span class="topo__texto">
+          <h2 :id="idTitulo" class="topo__titulo">{{ t('clinico.paciente.atos.novo.titulo') }}</h2>
+          <span class="topo__sub">{{ petNome }}</span>
+        </span>
+      </div>
     </template>
 
     <form class="ato clinic-scope" @submit.prevent="salvar">
@@ -305,6 +316,7 @@ function salvar() {
               option-label="rotulo"
               option-value="valor"
               :options="opcoesVia"
+              :placeholder="t('clinico.paciente.atos.novo.semVia')"
               :pt="{ overlay: { class: 'clinic-overlay' } }"
             />
           </template>
@@ -350,6 +362,7 @@ function salvar() {
               option-label="rotulo"
               option-value="valor"
               :options="opcoesProfissional"
+              :placeholder="t('clinico.paciente.atos.novo.quemNinguem')"
               :aria-describedby="descrito"
               :pt="{ overlay: { class: 'clinic-overlay' } }"
             />
@@ -371,38 +384,79 @@ function salvar() {
         :label="t('clinico.comum.cancelar')"
         @click="emit('update:visivel', false)"
       />
-      <Button :label="t('clinico.paciente.atos.novo.salvar')" @click="salvar" />
+      <Button icon="ph ph-check" :label="t('clinico.paciente.atos.novo.salvar')" @click="salvar" />
     </template>
   </Dialog>
 </template>
 
 <style scoped>
+.topo {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.topo__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-size: 20px;
+}
+
+.topo__texto {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.topo__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-family: var(--font-texto);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.topo__sub {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
 .ato {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 16px;
 }
 
 .ato__quem {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  line-height: 1.45;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
 }
 
 .ato__linha {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 16px;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .opcao {
   display: grid;
-  gap: 0.05rem;
+  gap: 1px;
 }
 
 .opcao small {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 @media (max-width: 620px) {

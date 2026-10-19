@@ -3622,6 +3622,11 @@
       "nadaMarcado": "Ništa zakazano",
       "resumo": {
         "comRisco": "{total}, {risco}."
+      },
+      "quando": {
+        "hoje": "danas, {hora}",
+        "amanha": "sutra, {hora}",
+        "ontem": "juče"
       }
     },
     "resumoDoPaciente": {
@@ -4037,7 +4042,8 @@
         "marcadaPara": "Zakazano: {data} u {hora}",
         "opcionais": "Neobavezne, nisu započete: {lista}. Ulaze u protokol kada neko počne.",
         "unicaNaoComecou": "Jedna doza · nije započeta",
-        "unicaComReforco": "Jedna doza · godišnja revakcinacija"
+        "unicaComReforco": "Jedna doza · godišnja revakcinacija",
+        "venceEm": "Ističe za {dias} dan | Ističe za {dias} dana | Ističe za {dias} dana"
       },
       "aplicar": {
         "abrir": "Daj vakcinu",
@@ -5201,7 +5207,16 @@
         "hojeVarias": "{total} vakcina za danas | {total} vakcine za danas | {total} vakcina za danas",
         "proxima": "Sledeća doza za {dias} dan | Sledeća doza za {dias} dana | Sledeća doza za {dias} dana",
         "emDia": "Vakcine su ažurne",
-        "proximaHoje": "Sledeća doza danas"
+        "proximaHoje": "Sledeća doza danas",
+        "agora": {
+          "rotulo": "Šta vakcine traže sada",
+          "linha": "{vacina}: {prazo}",
+          "depois": "Zatim: {vacina}, {prazo}",
+          "proxima": "Sledeća doza: {vacina}, {prazo}",
+          "eraPara": "planirana za {data}",
+          "aplicar": "Daj sada"
+        },
+        "carteirinha": "Knjižica u aplikaciji"
       },
       "historico": {
         "internado": "Trenutno na hospitalizaciji · {leito}",
@@ -5221,7 +5236,11 @@
       "resumo": {
         "sinais": "{total} znak traži pažnju | {total} znaka traže pažnju | {total} znakova traži pažnju",
         "primeiraVez": "Prvi put u ovoj klinici",
-        "nada": "Ništa neuobičajeno od poslednjeg pregleda"
+        "nada": "Ništa neuobičajeno od poslednjeg pregleda",
+        "consultaDeHoje": "Današnji termin",
+        "hoje": "danas",
+        "dica": "Pregled se otvara sa ovim rezimeom već unetim u anamnezu.",
+        "variacao": "{percentual} za {semanas} nedelju | {percentual} za {semanas} nedelje | {percentual} za {semanas} nedelja"
       },
       "tratamento": {
         "pilula": "Terapija",
@@ -5230,7 +5249,35 @@
         "umEmCurso": "{medicamento} u toku",
         "emCurso": "{total} lek u toku | {total} leka u toku | {total} lekova u toku",
         "nenhumEmCurso": "Nijedan lek nije u toku",
-        "semTratamento": "Nema kućnog leka sa podsetnikom"
+        "semTratamento": "Nema kućnog leka sa podsetnikom",
+        "legenda": "Legenda trake doza",
+        "como": {
+          "duracao": "Trajanje",
+          "dias": "{dias} dan | {dias} dana | {dias} dana",
+          "ate": "do {data}"
+        },
+        "conta": {
+          "numero": "{dadas} od {fechadas}",
+          "legenda": "data doza | date doze | datih doza",
+          "todasDadas": "Sve date"
+        },
+        "vez": {
+          "titulo": "Doza u {hora}",
+          "tituloDia": "Doza od {quando}",
+          "emNomeDe": "Beleži se u ime osobe {nome}, kao u aplikaciji",
+          "registrar": "Zabeleži dozu",
+          "pular": "Zabeleži kao preskočenu"
+        },
+        "semQuem": "Niko nije zabeležio",
+        "receitaSemLembrete": "Recept od {data} je stigao u aplikaciju, a {total} lek još čeka podsetnik. | Recept od {data} je stigao u aplikaciju, a {total} leka još čekaju podsetnik. | Recept od {data} je stigao u aplikaciju, a {total} lekova još čeka podsetnik."
+      },
+      "abas": {
+        "resumo": "Rezime",
+        "aria": "Karton: {nome}",
+        "noHistorico": "{total} zapis u istoriji | {total} zapisa u istoriji | {total} zapisa u istoriji"
+      },
+      "capa": {
+        "ligar": "Pozovi: {nome}, {telefone}"
       }
     },
     "adesao": {

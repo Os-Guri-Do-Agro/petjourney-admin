@@ -166,7 +166,10 @@ const linhas = computed(() =>
         :class="[`sinal--${linha.severidade}`, `ui-marca--${tomDe(linha.severidade)}`]"
       >
         <span class="sinal__icone" aria-hidden="true">
-          <i class="ph" :class="linha.severidade === 'risco' ? 'ph-warning' : 'ph-warning-circle'" />
+          <i
+            class="ph"
+            :class="linha.severidade === 'risco' ? 'ph-warning' : 'ph-warning-circle'"
+          />
         </span>
         <span class="sinal__texto">
           <strong class="sinal__titulo">{{ linha.titulo }}</strong>

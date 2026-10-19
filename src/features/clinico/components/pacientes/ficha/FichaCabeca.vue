@@ -249,68 +249,72 @@ function destino(vista: VistaDaFicha): string {
   <div class="ficha-capa" :class="{ 'ficha-capa--solta': atual === null }">
     <div class="capa">
       <div class="capa__corpo">
-        <!--
-          O rosto ao lado do nome: quem está na recepção reconhece o animal antes de ler. Sem foto,
-          o avatar desenhado (iniciais, silhueta da espécie e cor fixa) — o mesmo do hotel.
-        -->
-        <div class="capa__quem">
-          <PetAvatar
-            class="capa__rosto"
-            :nome="pet.nome"
-            :iniciais="pet.iniciais"
-            :especie="pet.especie"
-            :foto-url="pet.fotoUrl"
-            tamanho="xl"
-          />
-          <div class="capa__identidade">
-            <h1 class="capa__nome">{{ pet.nome }}</h1>
-            <p class="capa__meta">{{ meta }}</p>
-            <ul
-              v-if="alertas.length"
-              class="capa__alertas"
-              :aria-label="t('clinico.resumoDoPaciente.essencial.alertas')"
-            >
-              <li
-                v-for="alerta in alertas"
-                :key="alerta.id"
-                class="ui-selo capa__alerta"
-                :class="`ui-selo--${TOM_DO_ALERTA[alerta.severidade]}`"
+        <div class="capa__linha">
+          <!--
+            O rosto ao lado do nome: quem está na recepção reconhece o animal antes de ler. Sem
+            foto, o avatar desenhado (iniciais, silhueta da espécie e cor fixa) — o mesmo do hotel.
+          -->
+          <div class="capa__quem">
+            <PetAvatar
+              class="capa__rosto"
+              :nome="pet.nome"
+              :iniciais="pet.iniciais"
+              :especie="pet.especie"
+              :foto-url="pet.fotoUrl"
+              tamanho="xl"
+            />
+            <div class="capa__identidade">
+              <h1 class="capa__nome">{{ pet.nome }}</h1>
+              <p class="capa__meta">{{ meta }}</p>
+              <ul
+                v-if="alertas.length"
+                class="capa__alertas"
+                :aria-label="t('clinico.resumoDoPaciente.essencial.alertas')"
               >
-                <i :class="ICONE_DO_ALERTA[alerta.severidade]" aria-hidden="true" />
-                <span>{{ textoDoAlerta(alerta) }}</span>
-                <span class="sr-only">({{ formato.severidade(alerta.severidade) }})</span>
-              </li>
-            </ul>
+                <li
+                  v-for="alerta in alertas"
+                  :key="alerta.id"
+                  class="ui-selo capa__alerta"
+                  :class="`ui-selo--${TOM_DO_ALERTA[alerta.severidade]}`"
+                >
+                  <i :class="ICONE_DO_ALERTA[alerta.severidade]" aria-hidden="true" />
+                  <span>{{ textoDoAlerta(alerta) }}</span>
+                  <span class="sr-only">({{ formato.severidade(alerta.severidade) }})</span>
+                </li>
+              </ul>
+            </div>
           </div>
+
+          <!-- O peso de que toda dose sai, e quem responde pelo animal, com o telefone que disca. -->
+          <dl class="capa__dados">
+            <div class="capa__dado">
+              <dt>{{ t('clinico.ficha.peso') }}</dt>
+              <dd v-if="peso !== null" class="capa__peso">
+                <strong class="ui-num">{{ formato.numero(peso, 1) }}</strong>
+                <span>{{ t('clinico.formato.kg') }}</span>
+              </dd>
+              <dd v-else class="capa__sem">{{ t('clinico.resumoDoPaciente.casa.semRegistro') }}</dd>
+            </div>
+
+            <div v-if="tutor" class="capa__dado">
+              <dt>{{ t('clinico.paciente.responsavel') }}</dt>
+              <dd class="capa__tutor">
+                <strong>{{ tutor.nome }}</strong>
+                <a
+                  v-if="telefoneDiscavel"
+                  class="capa__telefone ui-num"
+                  :href="`tel:${telefoneDiscavel}`"
+                  :aria-label="
+                    t('clinico.ficha.capa.ligar', { nome: tutor.nome, telefone: tutor.telefone })
+                  "
+                >
+                  <i class="ph ph-phone" aria-hidden="true" />
+                  <bdi dir="ltr">{{ tutor.telefone }}</bdi>
+                </a>
+              </dd>
+            </div>
+          </dl>
         </div>
-
-        <!-- O peso de que toda dose sai, e quem responde pelo animal, com o telefone que disca. -->
-        <dl class="capa__dados">
-          <div class="capa__dado">
-            <dt>{{ t('clinico.ficha.peso') }}</dt>
-            <dd v-if="peso !== null" class="capa__peso">
-              <strong class="ui-num">{{ formato.numero(peso, 1) }}</strong>
-              <span>{{ t('clinico.formato.kg') }}</span>
-            </dd>
-            <dd v-else class="capa__sem">{{ t('clinico.resumoDoPaciente.casa.semRegistro') }}</dd>
-          </div>
-
-          <div v-if="tutor" class="capa__dado">
-            <dt>{{ t('clinico.paciente.responsavel') }}</dt>
-            <dd class="capa__tutor">
-              <strong>{{ tutor.nome }}</strong>
-              <a
-                v-if="telefoneDiscavel"
-                class="capa__telefone ui-num"
-                :href="`tel:${telefoneDiscavel}`"
-                :aria-label="t('clinico.ficha.capa.ligar', { nome: tutor.nome, telefone: tutor.telefone })"
-              >
-                <i class="ph ph-phone" aria-hidden="true" />
-                <bdi dir="ltr">{{ tutor.telefone }}</bdi>
-              </a>
-            </dd>
-          </div>
-        </dl>
       </div>
 
       <div v-if="$slots.acoes" class="capa__acoes">
@@ -352,7 +356,11 @@ function destino(vista: VistaDaFicha): string {
     <p v-if="frase" class="capa__frase" aria-live="polite">{{ frase }}</p>
 
     <!-- Fora da ficha (o internado): as vistas viram saídas, numa linha só. -->
-    <nav v-if="!atual" class="capa__saidas" :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })">
+    <nav
+      v-if="!atual"
+      class="capa__saidas"
+      :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })"
+    >
       <RouterLink
         v-for="item in vistas"
         :key="item.vista"
@@ -385,7 +393,7 @@ function destino(vista: VistaDaFicha): string {
   display: grid;
   min-width: 0;
   flex: 1 1 100%;
-  container-type: inline-size;
+  container: ficha-capa / inline-size;
 }
 
 .capa {
@@ -395,19 +403,26 @@ function destino(vista: VistaDaFicha): string {
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
-/* Quem é e os dois dados dividem a linha; sem espaço, os dados descem para baixo do nome. */
+/*
+ * Quem é, e os dois dados. Com espaço, os dados ficam à direita do nome, separados por um fio;
+ * sem espaço, descem para baixo dele, alinhados com o texto — e o primeiro perde o fio, que à
+ * esquerda de tudo não separaria nada.
+ */
 .capa__corpo {
-  display: flex;
   min-width: 0;
-  flex-wrap: wrap;
+  container: capa-corpo / inline-size;
+}
+
+.capa__linha {
+  display: grid;
   align-items: center;
-  gap: 18px 32px;
+  gap: 16px 32px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .capa__quem {
   display: flex;
   min-width: 0;
-  flex: 1 1 340px;
   align-items: center;
   gap: 18px;
 }
@@ -465,11 +480,11 @@ function destino(vista: VistaDaFicha): string {
 
 .capa__dados {
   display: flex;
-  flex: none;
   flex-wrap: wrap;
   align-items: stretch;
   gap: 12px 0;
   margin: 0;
+  padding-inline-start: 90px;
 }
 
 .capa__dado {
@@ -479,6 +494,26 @@ function destino(vista: VistaDaFicha): string {
   gap: 4px;
   padding-inline: 24px;
   border-inline-start: 1px solid var(--linha);
+}
+
+.capa__dado:first-child {
+  padding-inline-start: 0;
+  border-inline-start: 0;
+}
+
+@container capa-corpo (min-width: 800px) {
+  .capa__linha {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .capa__dados {
+    padding-inline-start: 0;
+  }
+
+  .capa__dado:first-child {
+    padding-inline-start: 24px;
+    border-inline-start: 1px solid var(--linha);
+  }
 }
 
 .capa__dado dt {
@@ -721,7 +756,8 @@ function destino(vista: VistaDaFicha): string {
 
 /* ------------------------------------------------------------------ estreito */
 
-@container (max-width: 620px) {
+/* Capa de largura média: a ação desce para baixo de quem é, em vez de espremer o nome. */
+@container ficha-capa (max-width: 900px) {
   .capa {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -729,7 +765,9 @@ function destino(vista: VistaDaFicha): string {
   .capa__acoes {
     justify-content: flex-start;
   }
+}
 
+@container ficha-capa (max-width: 620px) {
   .ficha-capa .capa__rosto {
     width: 56px;
     height: 56px;
@@ -744,13 +782,27 @@ function destino(vista: VistaDaFicha): string {
     font-size: 24px;
   }
 
-  .capa__dado:first-child {
+  .capa__dados {
     padding-inline-start: 0;
-    border-inline-start: 0;
   }
 
   .capa__peso strong {
     font-size: 24px;
+  }
+
+  /* As quatro abas cabem numa linha sem os ícones: a palavra é o que se lê. */
+  .capa__aba {
+    gap: 6px;
+    padding-inline: 10px;
+  }
+
+  .capa__aba i {
+    display: none;
+  }
+
+  .capa__aba--atual::after {
+    right: 10px;
+    left: 10px;
   }
 }
 </style>

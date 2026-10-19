@@ -113,7 +113,10 @@ const ultima = computed(() => {
               }}<template v-if="ultima.diagnostico">: {{ ultima.diagnostico }}</template>
             </span>
             <span class="essencial__meta">{{ ultima.profissional }}</span>
-            <RouterLink class="ui-mais essencial__link" :to="`/veterinario/atendimento/${ultima.encounterId}`">
+            <RouterLink
+              class="ui-mais essencial__link"
+              :to="`/veterinario/atendimento/${ultima.encounterId}`"
+            >
               {{ t('clinico.resumoDoPaciente.essencial.abrirProntuario') }}
               <i class="ph ph-arrow-right" aria-hidden="true" />
             </RouterLink>

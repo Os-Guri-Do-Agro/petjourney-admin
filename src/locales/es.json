@@ -3622,6 +3622,11 @@
       "nadaMarcado": "Nada agendado",
       "resumo": {
         "comRisco": "{total}, {risco}."
+      },
+      "quando": {
+        "hoje": "hoy, {hora}",
+        "amanha": "mañana, {hora}",
+        "ontem": "ayer"
       }
     },
     "resumoDoPaciente": {
@@ -4037,7 +4042,8 @@
         "marcadaPara": "Agendada: {data} a las {hora}",
         "opcionais": "Opcionales sin iniciar: {lista}. Entran en el protocolo cuando alguien las empiece.",
         "unicaNaoComecou": "Dosis única · sin iniciar",
-        "unicaComReforco": "Dosis única · refuerzo anual"
+        "unicaComReforco": "Dosis única · refuerzo anual",
+        "venceEm": "Vence en {dias} día | Vence en {dias} días"
       },
       "aplicar": {
         "abrir": "Aplicar vacuna",
@@ -5201,7 +5207,16 @@
         "hojeVarias": "{total} vacuna para hoy | {total} vacunas para hoy",
         "proxima": "Próxima dosis en {dias} día | Próxima dosis en {dias} días",
         "emDia": "Vacunas al día",
-        "proximaHoje": "Próxima dosis hoy"
+        "proximaHoje": "Próxima dosis hoy",
+        "agora": {
+          "rotulo": "Lo que las vacunas piden ahora",
+          "linha": "{vacina}: {prazo}",
+          "depois": "Después: {vacina}, {prazo}",
+          "proxima": "Próxima dosis: {vacina}, {prazo}",
+          "eraPara": "prevista para el {data}",
+          "aplicar": "Aplicar ahora"
+        },
+        "carteirinha": "Cartilla en la app"
       },
       "historico": {
         "internado": "En internación ahora · {leito}",
@@ -5221,7 +5236,11 @@
       "resumo": {
         "sinais": "{total} señal requiere atención | {total} señales requieren atención",
         "primeiraVez": "Primera vez en esta clínica",
-        "nada": "Nada fuera de lo común desde la última consulta"
+        "nada": "Nada fuera de lo común desde la última consulta",
+        "consultaDeHoje": "Cita de hoy",
+        "hoje": "hoy",
+        "dica": "La consulta se abre con este resumen ya en la anamnesis.",
+        "variacao": "{percentual} en {semanas} semana | {percentual} en {semanas} semanas"
       },
       "tratamento": {
         "pilula": "Tratamiento",
@@ -5230,7 +5249,35 @@
         "umEmCurso": "{medicamento} en curso",
         "emCurso": "{total} medicamento en curso | {total} medicamentos en curso",
         "nenhumEmCurso": "Ningún medicamento en curso",
-        "semTratamento": "Sin medicamento en casa con recordatorio"
+        "semTratamento": "Sin medicamento en casa con recordatorio",
+        "legenda": "Leyenda de la franja de dosis",
+        "como": {
+          "duracao": "Duración",
+          "dias": "{dias} día | {dias} días",
+          "ate": "hasta el {data}"
+        },
+        "conta": {
+          "numero": "{dadas} de {fechadas}",
+          "legenda": "dosis dada | dosis dadas",
+          "todasDadas": "Todas dadas"
+        },
+        "vez": {
+          "titulo": "Dosis de las {hora}",
+          "tituloDia": "Dosis del {quando}",
+          "emNomeDe": "Registrar en nombre de {nome}, como en la app",
+          "registrar": "Registrar dosis",
+          "pular": "Registrar como omitida"
+        },
+        "semQuem": "Nadie la registró",
+        "receitaSemLembrete": "La receta del {data} llegó a la app y {total} medicamento todavía espera el recordatorio. | La receta del {data} llegó a la app y {total} medicamentos todavía esperan el recordatorio."
+      },
+      "abas": {
+        "resumo": "Resumen",
+        "aria": "Ficha de {nome}",
+        "noHistorico": "{total} registro en el historial | {total} registros en el historial"
+      },
+      "capa": {
+        "ligar": "Llamar a {nome}, {telefone}"
       }
     },
     "adesao": {

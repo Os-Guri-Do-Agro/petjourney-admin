@@ -1,8 +1,12 @@
 /*
- * A grade das vistas da ficha do paciente — Este pet em 30 s, Histórico, Tratamento e Vacinas.
+ * A grade das vistas da ficha do paciente — Resumo, Histórico, Tratamento e Vacinas.
  *
- * O acabamento (ponte de tokens, fundo, pílulas, cartões) mora em `src/theme/hc-tema.css` e vale
- * em toda tela que leva `.hc-tema`. Aqui fica só o que é da ficha, preso a `.ficha-tema`.
+ * A capa e as abas do paciente moram no `FichaCabeca` (estilo próprio, nos tokens do Trilha). Aqui
+ * fica só a grade de duas colunas que as vistas compartilham e a linha de ajuda sob um título.
+ *
+ * Redesenho total (19/10/2026): as regras deixaram de depender do `.hc-tema` — valem com ou sem
+ * `.ficha-tema` na raiz, nos tokens do Trilha (`--tinta-2`...), para as vistas que já saíram do
+ * acabamento da Visão geral e para as que ainda não saíram.
  */
 
 /*
@@ -10,30 +14,29 @@
  * não da janela — por isso quem contém a grade declara `container-type` (a consulta de contêiner
  * estiliza os descendentes, nunca o próprio contêiner).
  */
-.ficha-tema .ficha-conteudo {
+.ficha-conteudo {
   display: grid;
-  gap: 1.25rem;
+  gap: 24px;
   container-type: inline-size;
 }
 
-.ficha-tema .ficha-grade {
+.ficha-grade {
   display: grid;
   align-items: start;
-  gap: 1.25rem;
+  gap: 24px;
 }
 
-.ficha-tema .ficha-coluna {
+.ficha-coluna {
   display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
   min-width: 0;
+  flex-direction: column;
+  gap: 24px;
 }
 
-/* A ajuda sob o título do cartão, como o "O que este paciente recebeu" de lá. */
-.ficha-tema .ficha-ajuda {
+/* A ajuda sob o título de uma seção: uma frase em tinta secundária, colada ao título. */
+.ficha-ajuda {
   margin: -0.65rem 0 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.45;
 }
-

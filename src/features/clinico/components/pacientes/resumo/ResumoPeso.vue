@@ -174,6 +174,13 @@ const variacao = computed(() => {
   )
 })
 
+/** A seta diz o sentido; peso parado não sobe nem desce. */
+const iconeDaVariacao = computed(() => {
+  const percentual = Math.round((props.peso.variacao?.percentual ?? 0) * 10)
+
+  return percentual < 0 ? 'ph-trend-down' : percentual > 0 ? 'ph-trend-up' : 'ph-equals'
+})
+
 const descricao = computed(() => {
   const variacao = props.peso.variacao
 
@@ -188,7 +195,11 @@ const descricao = computed(() => {
 </script>
 
 <template>
-  <UiSecao id="resumo-peso" :titulo="t('clinico.resumoDoPaciente.peso.titulo')" icone="ph ph-scales">
+  <UiSecao
+    id="resumo-peso"
+    :titulo="t('clinico.resumoDoPaciente.peso.titulo')"
+    icone="ph ph-scales"
+  >
     <div class="peso ui-folha">
       <!-- A resposta antes do gráfico: quanto pesa agora e para onde foi no período. -->
       <div v-if="ultimo" class="peso__agora">
@@ -201,11 +212,7 @@ const descricao = computed(() => {
           class="ui-selo ui-num"
           :class="emRisco ? 'ui-selo--risco' : 'ui-selo--contorno'"
         >
-          <i
-            class="ph"
-            :class="(peso.variacao?.percentual ?? 0) < 0 ? 'ph-trend-down' : 'ph-trend-up'"
-            aria-hidden="true"
-          />
+          <i class="ph" :class="iconeDaVariacao" aria-hidden="true" />
           {{ variacao }}
         </span>
         <span class="peso__quando ui-num">
@@ -265,7 +272,11 @@ const descricao = computed(() => {
       <p v-else class="peso__unico">{{ t('clinico.resumoDoPaciente.peso.semPeso') }}</p>
 
       <!-- A legenda é da forma do marcador, não da cor: a linha tem uma cor só. -->
-      <ul v-if="pontos.length >= 2" class="peso__legenda" :class="{ 'peso__legenda--risco': emRisco }">
+      <ul
+        v-if="pontos.length >= 2"
+        class="peso__legenda"
+        :class="{ 'peso__legenda--risco': emRisco }"
+      >
         <li>
           <span class="marca marca--clinica" aria-hidden="true" />
           {{ t('clinico.resumoDoPaciente.peso.legendaClinica') }}

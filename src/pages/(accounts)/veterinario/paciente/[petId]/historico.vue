@@ -8,9 +8,11 @@
  * `HistoricoLista`; o convite ao resumo em 30 segundos, que abria como diálogo por cima de tudo,
  * virou uma linha que diz o veredito sem interromper.
  *
- * O acabamento é o da Visão geral, como o resto da ficha (`ficha/ficha.css`): o nome no lugar da
- * saudação, a frase do momento do paciente em degradê, e o resumo em 30 segundos como pílula
- * cheia — é o que se lê antes de rolar o histórico.
+ * Redesenho total (19/10/2026): a página saiu do `PartnerPageFrame` para o `UiPagina`, volta a
+ * "Pacientes" pelo `#voltar`, e a capa da ficha (`FichaCabeca`) traz as abas do paciente — a do
+ * Resumo com a contagem de sinais, que é o "leia isto antes" de antes. Embaixo, à esquerda, o
+ * próximo agendado e a linha do tempo; à direita, em tela larga, o que o animal recebeu. Quando
+ * ele está internado neste minuto, "Abrir internação" é a ação da capa.
  *
  * E o que o animal **recebeu**, que é outra pergunta. Atendimento responde "quando esteve aqui";
  * ato responde "o que entrou nele, e quando" — a pergunta que se faz antes de prescrever e
@@ -19,14 +21,11 @@
  * no leito é linha na segunda e em nenhum atendimento.
  */
 import Button from 'primevue/button'
-import { PhBed, PhClockCounterClockwise, PhTimer, PhWarning } from '@phosphor-icons/vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
-import '@/components/home/home-card.css'
-import '@/features/clinico/components/pacientes/ficha/ficha.css'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import FichaCabeca from '@/features/clinico/components/pacientes/ficha/FichaCabeca.vue'
 import HistoricoLista from '@/features/clinico/components/pacientes/ficha/HistoricoLista.vue'
 import AtoNovoDialog from '@/features/clinico/components/pacientes/AtoNovoDialog.vue'
@@ -144,7 +143,7 @@ function vindoDoResumo(): boolean {
  * O veredito do resumo numa linha, no lugar do diálogo que abria por cima do histórico.
  *
  * O diálogo pedia um clique antes de qualquer leitura; a linha diz o mesmo — "nada fora do comum"
- * ou quantos sinais há — e a pílula cheia do cabeçalho continua sendo o caminho para o resumo.
+ * ou quantos sinais há — e leva ao resumo, como a aba dele na capa.
  * Respeita o "não sugerir mais", que se liga e desliga na tela do resumo.
  */
 const veredito = computed(() => {
@@ -243,69 +242,63 @@ watch(petId, carregar)
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="ficha-tema hc-tema"
-    :title="pet?.nome ?? t('clinico.pacientes.titulo')"
-    :loading="carregando && !pet"
-    :error="erro"
-    :empty="vazio"
-    :empty-title="t('clinico.prontuario.timeline.vazio')"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    :titulo="pet?.nome ?? t('clinico.pacientes.titulo')"
+    :carregando="carregando && !pet"
+    :erro="erro"
+    :vazio="vazio"
+    :vazio-titulo="t('clinico.prontuario.timeline.vazio')"
+    vazio-icone="ph ph-paw-print"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
+    <template #voltar>
+      <RouterLink to="/veterinario/pacientes" class="voltar">
+        <i class="ph ph-arrow-left" aria-hidden="true" />
+        {{ t('clinico.pacientes.titulo') }}
+      </RouterLink>
+    </template>
+
     <template v-if="pet" #cabecalho>
       <FichaCabeca :pet="pet" :tutor="tutor" atual="historico" :frase="frase" nav-cheia="resumo">
         <!--
           Quando o animal está internado **neste minuto**, o histórico diz isso e leva ao leito.
-          Sem esta pílula, a página mais completa que a clínica tem sobre um paciente era a única
+          Sem esta ação, a página mais completa que a clínica tem sobre um paciente era a única
           que não sabia que ele estava internado ali dentro.
         -->
         <template v-if="internacaoAberta" #acoes>
           <Button
-            class="hc-pilula"
+            type="button"
+            icon="ph ph-bed"
             :label="t('clinico.pacientes.verInternacao')"
             @click="abrirInternacao"
-          >
-            <template #icon>
-              <PhBed class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
-            </template>
-          </Button>
+          />
         </template>
       </FichaCabeca>
     </template>
 
-    <div v-if="pet" class="ficha-conteudo historico clinic-scope">
+    <div v-if="pet" class="historico">
       <p
         v-if="veredito"
         class="historico__veredito"
         :class="`historico__veredito--${veredito.tom}`"
       >
-        <PhWarning
-          v-if="veredito.tom !== 'neutro'"
-          class="historico__veredito-icone"
-          weight="fill"
+        <i
+          class="ph historico__veredito-icone"
+          :class="veredito.tom !== 'neutro' ? 'ph-warning' : 'ph-timer'"
           aria-hidden="true"
         />
-        <PhTimer v-else class="historico__veredito-icone" weight="duotone" aria-hidden="true" />
-        <strong>{{ t('clinico.ficha.historico.emTrintaSegundos') }}</strong>
-        {{ veredito.texto }}
+        <span>
+          <strong>{{ t('clinico.ficha.historico.emTrintaSegundos') }}</strong>
+          {{ veredito.texto }}
+        </span>
+        <RouterLink class="ui-mais" :to="`/veterinario/paciente/${pet.id}/resumo`">
+          {{ t('clinico.resumoDoPaciente.sugestao.ver') }}
+        </RouterLink>
       </p>
 
-      <div class="ficha-grade historico__grade">
-        <section class="hc" aria-labelledby="historico-lista">
-          <header class="hc__cabeca">
-            <h2 id="historico-lista" class="hc__titulo">
-              <PhClockCounterClockwise class="hc__icone" weight="duotone" aria-hidden="true" />
-              {{ t('clinico.ficha.historico.titulo') }}
-            </h2>
-          </header>
-
-          <HistoricoLista
-            :eventos="eventos"
-            :atendimentos="atendimentos"
-            @abrir="abrirAtendimento"
-          />
-        </section>
+      <div class="historico__grade">
+        <HistoricoLista :eventos="eventos" :atendimentos="atendimentos" @abrir="abrirAtendimento" />
 
         <!-- O que o animal recebeu é outra pergunta ("o que entrou nele, e quando"): fica ao lado. -->
         <AtosDoPaciente
@@ -315,21 +308,44 @@ watch(petId, carregar)
           @abrir-atendimento="abrirAtendimento"
         />
       </div>
+    </div>
 
+    <template #sempre>
       <AtoNovoDialog
+        v-if="pet"
         v-model:visivel="registrandoAto"
         :pet-nome="pet.nome"
         @registrar="registrarAto"
       />
-    </div>
-  </PartnerPageFrame>
+    </template>
+  </UiPagina>
 </template>
 
 <style scoped>
+.voltar .ph {
+  font-size: 13px;
+}
+
+[dir='rtl'] .voltar .ph {
+  scale: -1 1;
+}
+
+.historico {
+  display: grid;
+  gap: 24px;
+  container-type: inline-size;
+}
+
 /* O histórico manda; o que o animal recebeu fica ao lado, mais estreito. */
-@container (min-width: 62rem) {
+.historico__grade {
+  display: grid;
+  align-items: start;
+  gap: 28px;
+}
+
+@container (min-width: 900px) {
   .historico__grade {
-    grid-template-columns: minmax(0, 1.7fr) minmax(19rem, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
   }
 }
 
@@ -338,29 +354,28 @@ watch(petId, carregar)
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
+  gap: 6px 10px;
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 .historico__veredito strong {
-  color: var(--hc-tinta);
-  font-weight: 650;
+  color: var(--tinta);
+  font-weight: 600;
 }
 
 .historico__veredito-icone {
-  flex-shrink: 0;
-  width: 1.1rem;
-  height: 1.1rem;
-  color: var(--hc-marca);
+  flex: none;
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-size: 18px;
 }
 
 .historico__veredito--atencao .historico__veredito-icone {
-  color: var(--hc-pessego-tinta);
+  color: var(--atencao-tinta);
 }
 
 .historico__veredito--risco .historico__veredito-icone {
-  color: var(--hc-coral-tinta);
+  color: var(--risco-tinta);
 }
 </style>

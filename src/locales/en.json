@@ -3622,6 +3622,11 @@
       "nadaMarcado": "Nothing booked",
       "resumo": {
         "comRisco": "{total}, {risco}."
+      },
+      "quando": {
+        "hoje": "today, {hora}",
+        "amanha": "tomorrow, {hora}",
+        "ontem": "yesterday"
       }
     },
     "resumoDoPaciente": {
@@ -4037,7 +4042,8 @@
         "marcadaPara": "Booked: {data} at {hora}",
         "opcionais": "Optional, not started: {lista}. They join the protocol once someone starts them.",
         "unicaNaoComecou": "Single dose · not started",
-        "unicaComReforco": "Single dose · annual booster"
+        "unicaComReforco": "Single dose · annual booster",
+        "venceEm": "Due in {dias} day | Due in {dias} days"
       },
       "aplicar": {
         "abrir": "Give vaccine",
@@ -5201,7 +5207,16 @@
         "hojeVarias": "{total} vaccine due today | {total} vaccines due today",
         "proxima": "Next dose in {dias} day | Next dose in {dias} days",
         "emDia": "Vaccines up to date",
-        "proximaHoje": "Next dose today"
+        "proximaHoje": "Next dose today",
+        "agora": {
+          "rotulo": "What the vaccines need now",
+          "linha": "{vacina}: {prazo}",
+          "depois": "After that: {vacina}, {prazo}",
+          "proxima": "Next dose: {vacina}, {prazo}",
+          "eraPara": "due {data}",
+          "aplicar": "Give now"
+        },
+        "carteirinha": "Card in the app"
       },
       "historico": {
         "internado": "In hospital now · {leito}",
@@ -5221,7 +5236,11 @@
       "resumo": {
         "sinais": "{total} sign needs attention | {total} signs need attention",
         "primeiraVez": "First time at this clinic",
-        "nada": "Nothing out of the ordinary since the last appointment"
+        "nada": "Nothing out of the ordinary since the last appointment",
+        "consultaDeHoje": "Today's appointment",
+        "hoje": "today",
+        "dica": "The visit opens with this summary already in the history-taking.",
+        "variacao": "{percentual} in {semanas} week | {percentual} in {semanas} weeks"
       },
       "tratamento": {
         "pilula": "Treatment",
@@ -5230,7 +5249,35 @@
         "umEmCurso": "{medicamento} ongoing",
         "emCurso": "{total} medication ongoing | {total} medications ongoing",
         "nenhumEmCurso": "No medication ongoing",
-        "semTratamento": "No home medication with a reminder"
+        "semTratamento": "No home medication with a reminder",
+        "legenda": "Dose strip legend",
+        "como": {
+          "duracao": "Duration",
+          "dias": "{dias} day | {dias} days",
+          "ate": "until {data}"
+        },
+        "conta": {
+          "numero": "{dadas} of {fechadas}",
+          "legenda": "dose given | doses given",
+          "todasDadas": "All given"
+        },
+        "vez": {
+          "titulo": "{hora} dose",
+          "tituloDia": "Dose of {quando}",
+          "emNomeDe": "Record on behalf of {nome}, as in the app",
+          "registrar": "Record dose",
+          "pular": "Record as skipped"
+        },
+        "semQuem": "Nobody recorded it",
+        "receitaSemLembrete": "The {data} prescription reached the app, and {total} medication is still waiting for a reminder. | The {data} prescription reached the app, and {total} medications are still waiting for reminders."
+      },
+      "abas": {
+        "resumo": "Summary",
+        "aria": "{nome}'s record",
+        "noHistorico": "{total} entry in the history | {total} entries in the history"
+      },
+      "capa": {
+        "ligar": "Call {nome}, {telefone}"
       }
     },
     "adesao": {
