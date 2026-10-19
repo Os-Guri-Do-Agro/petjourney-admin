@@ -74,8 +74,13 @@ const { logout } = useLogout()
 
 const tituloDaTela = computed(() => props.titulo || aqui.value.destino?.rotulo || '')
 
+/*
+ * As abas aparecem quando se está numa delas. Tela de detalhe (a ficha, o prontuário, o leito)
+ * mora no destino mas não é aba: ela tem a navegação dela, e uma fileira de abas sem nenhuma
+ * acesa só confundiria.
+ */
 const abas = computed(() =>
-  !props.semAbas && aqui.value.destino && aqui.value.destino.abas.length > 1
+  !props.semAbas && aqui.value.aba && aqui.value.destino && aqui.value.destino.abas.length > 1
     ? aqui.value.destino.abas
     : [],
 )
