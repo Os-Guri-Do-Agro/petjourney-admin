@@ -291,6 +291,9 @@
   "shell": {
     "logout": "Cerrar sesión",
     "telasNaSecao": "una pantalla | {contagem} pantallas",
+    "trilha": {
+      "rotulo": "Usted está en"
+    },
     "brand": {
       "badge": "Portal de socios"
     },

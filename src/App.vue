@@ -12,6 +12,7 @@ import { instalarSequenciasSecretas } from '@/composables/useModuloOculto'
 import { isRTLLocale, type Locale } from '@/i18n/locales'
 import { moduloDaPaginaAberta } from '@/router/paginas-abertas'
 import { authSessionVersion, isAuthenticated } from '@/service/auth/auth-session'
+import { useClasseDoDesignTrilha } from '@/theme/trilha/rotas'
 
 const { t, locale } = useI18n()
 
@@ -23,6 +24,9 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const publicRoutes = new Set(['/auth/login', '/auth/register', '/auth/forgot-password'])
+
+/* As telas já no design Trilha levam `trilha` na raiz — ver `theme/trilha/rotas.ts`. */
+useClasseDoDesignTrilha()
 
 function isNotFoundRoute() {
   return route.matched.some((record) => record.path.includes('(.*)*'))

@@ -1,0 +1,547 @@
+/*
+ * Trilha — o acabamento.
+ *
+ * Três camadas, todas presas a `:root.trilha` (a raiz só leva a classe nas rotas de `rotas.ts`):
+ *
+ * 1. A ponte. Os `--hc-*` (design do portal), os `--clinic-*` que não passam por eles e os tokens
+ *    semânticos do PrimeVue apontam para os tokens do Trilha. Tabela, cartão, campo, diálogo e
+ *    selo que já existem trocam juntos, sem uma linha a mais nos componentes.
+ * 2. As peças novas do design system, com o prefixo `pj-`: lugar, trilha, selo, contagem, dado.
+ * 3. O que a ponte não alcança: o fundo com grade e brilho, a saudação em degradê, as pílulas.
+ *
+ * Cada seletor leva `:root.trilha` e, quando o PrimeVue declara o mesmo token no escuro, também
+ * `:root.trilha.app-dark`: o tema dele entra depois desta folha e empataria em especificidade.
+ */
+
+@import '@fontsource-variable/readex-pro/wght.css';
+@import '@fontsource-variable/instrument-sans/wght.css';
+
+/* ------------------------------------------------------------------------------------- ponte */
+
+:root.trilha,
+:root.trilha.app-dark {
+  --hc-pagina: var(--fundo);
+  --hc-fundo: var(--superficie-2);
+  --hc-grade: transparent;
+  --hc-cartao: var(--superficie);
+  --hc-borda: var(--linha);
+  --hc-linha: var(--linha);
+  --hc-tinta: var(--tinta);
+  --hc-tinta-2: var(--tinta-2);
+  --hc-tinta-3: var(--tinta-3);
+  --hc-marca: var(--musgo);
+  --hc-marca-forte: var(--musgo);
+  --hc-marca-clara: var(--musgo-fundo);
+  --hc-degrade: linear-gradient(var(--tinta-2), var(--tinta-2));
+  --hc-degrade-botao: linear-gradient(var(--musgo), var(--musgo));
+  --hc-degrade-botao-hover: linear-gradient(
+    color-mix(in oklab, var(--musgo) 86%, var(--tinta)),
+    color-mix(in oklab, var(--musgo) 86%, var(--tinta))
+  );
+  --hc-degrade-botao-ativo: linear-gradient(
+    color-mix(in oklab, var(--musgo) 74%, var(--tinta)),
+    color-mix(in oklab, var(--musgo) 74%, var(--tinta))
+  );
+  --hc-sobre-marca: var(--sobre-musgo);
+  --hc-marca-sombra: transparent;
+  --hc-marca-sombra-forte: transparent;
+  --hc-sombra: var(--sombra-1);
+  --hc-sombra-alta: var(--sombra-2);
+
+  /* Os pares de selo: cor de lugar para o que é módulo, cor de estado para o que é estado. */
+  --hc-ciano-fundo: var(--clinica-fundo);
+  --hc-ciano-tinta: var(--clinica-tinta);
+  --hc-azul-fundo: var(--clinica-fundo);
+  --hc-azul-tinta: var(--clinica-tinta);
+  --hc-lilas-fundo: var(--hotel-fundo);
+  --hc-lilas-tinta: var(--hotel-tinta);
+  --hc-pessego-fundo: var(--atencao-fundo);
+  --hc-pessego-tinta: var(--atencao-tinta);
+  --hc-coral-fundo: var(--risco-fundo);
+  --hc-coral-tinta: var(--risco-tinta);
+  --hc-verde-fundo: var(--ok-fundo);
+  --hc-verde-tinta: var(--ok-tinta);
+  --hc-cinza-fundo: var(--neutro-fundo);
+  --hc-cinza-tinta: var(--neutro-tinta);
+
+  /* O que do módulo clínico não passa pelos `--hc-*`. */
+  --clinic-font-sans: var(--font-texto);
+  --clinic-radius-control: var(--raio-controle);
+  --clinic-radius-card: var(--raio-cartao);
+  --clinic-shadow-float: var(--sombra-2);
+  --clinic-on-accent: var(--sobre-musgo);
+  --clinic-heat-ink: var(--tinta);
+
+  --font-sans: var(--font-texto);
+
+  /* PrimeVue: os tokens semânticos, que os de cada componente leem. */
+  --p-primary-color: var(--musgo);
+  --p-primary-contrast-color: var(--sobre-musgo);
+  --p-primary-hover-color: color-mix(in oklab, var(--musgo) 86%, var(--tinta));
+  --p-primary-active-color: color-mix(in oklab, var(--musgo) 74%, var(--tinta));
+  --p-highlight-background: var(--musgo-fundo);
+  --p-highlight-focus-background: var(--musgo-fundo);
+  --p-highlight-color: var(--musgo);
+  --p-highlight-focus-color: var(--musgo);
+  --p-text-color: var(--tinta);
+  --p-text-hover-color: var(--tinta);
+  --p-text-muted-color: var(--tinta-2);
+  --p-text-hover-muted-color: var(--tinta);
+  --p-content-background: var(--superficie);
+  --p-content-hover-background: var(--superficie-2);
+  --p-content-border-color: var(--linha);
+  --p-content-color: var(--tinta);
+  --p-content-hover-color: var(--tinta);
+  --p-content-border-radius: var(--raio-controle);
+  --p-form-field-background: var(--superficie);
+  --p-form-field-disabled-background: var(--superficie-2);
+  --p-form-field-filled-background: var(--superficie-2);
+  --p-form-field-border-color: var(--linha-forte);
+  --p-form-field-hover-border-color: var(--tinta-3);
+  --p-form-field-focus-border-color: var(--musgo);
+  --p-form-field-invalid-border-color: var(--risco);
+  --p-form-field-color: var(--tinta);
+  --p-form-field-disabled-color: var(--tinta-3);
+  --p-form-field-placeholder-color: var(--tinta-3);
+  --p-form-field-icon-color: var(--tinta-2);
+  --p-form-field-border-radius: var(--raio-controle);
+  --p-overlay-select-background: var(--superficie);
+  --p-overlay-select-border-color: var(--linha);
+  --p-overlay-select-color: var(--tinta);
+  --p-overlay-popover-background: var(--superficie);
+  --p-overlay-popover-border-color: var(--linha);
+  --p-overlay-popover-color: var(--tinta);
+  --p-overlay-modal-background: var(--superficie);
+  --p-overlay-modal-border-color: var(--linha);
+  --p-overlay-modal-color: var(--tinta);
+  --p-list-option-focus-background: var(--superficie-2);
+  --p-list-option-selected-background: var(--musgo-fundo);
+  --p-list-option-selected-focus-background: var(--musgo-fundo);
+  --p-list-option-color: var(--tinta);
+  --p-list-option-selected-color: var(--musgo);
+  --p-focus-ring-color: var(--musgo);
+
+  color-scheme: light;
+}
+
+:root.trilha.app-dark {
+  color-scheme: dark;
+}
+
+:root.trilha body {
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: var(--font-texto);
+}
+
+/* ------------------------------------------------------------------------------------- lugar
+ * A cor do lugar: o módulo onde a pessoa está. Rail, painel, trilha e traço de aba leem estes
+ * quatro, e quem decide qual é o lugar é a classe `pj-lugar--*` mais próxima.
+ */
+
+:root.trilha {
+  --pj-lugar: var(--tinta-2);
+  --pj-lugar-tinta: var(--tinta);
+  --pj-lugar-fundo: var(--superficie-3);
+  --pj-lugar-claro: var(--sobre-rail);
+}
+
+:root.trilha .pj-lugar--clinica {
+  --pj-lugar: var(--clinica);
+  --pj-lugar-tinta: var(--clinica-tinta);
+  --pj-lugar-fundo: var(--clinica-fundo);
+  --pj-lugar-claro: var(--clinica-claro);
+}
+:root.trilha .pj-lugar--hotel {
+  --pj-lugar: var(--hotel);
+  --pj-lugar-tinta: var(--hotel-tinta);
+  --pj-lugar-fundo: var(--hotel-fundo);
+  --pj-lugar-claro: var(--hotel-claro);
+}
+:root.trilha .pj-lugar--portal {
+  --pj-lugar: var(--portal);
+  --pj-lugar-tinta: var(--portal-tinta);
+  --pj-lugar-fundo: var(--portal-fundo);
+  --pj-lugar-claro: var(--portal-claro);
+}
+:root.trilha .pj-lugar--pets {
+  --pj-lugar: var(--pets);
+  --pj-lugar-tinta: var(--pets-tinta);
+  --pj-lugar-fundo: var(--pets-fundo);
+  --pj-lugar-claro: var(--pets-claro);
+}
+:root.trilha .pj-lugar--inicio,
+:root.trilha .pj-lugar--conta {
+  --pj-lugar: var(--tinta-2);
+  --pj-lugar-tinta: var(--tinta);
+  --pj-lugar-fundo: var(--superficie-3);
+  --pj-lugar-claro: var(--sobre-rail);
+}
+
+/* ------------------------------------------------------------------------------------ trilha
+ * Onde estou: o lugar (com o ícone num disco) e a tela, como nós ligados na cor do lugar.
+ */
+
+.pj-trilha ol {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pj-trilha li {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.pj-trilha li + li::before {
+  flex: none;
+  width: 1.375rem;
+  height: 2px;
+  margin-inline: 0.375rem;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--pj-lugar) 45%, transparent);
+  content: '';
+}
+
+.pj-trilha__passo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.1875rem 0.375rem 0.1875rem 0.1875rem;
+  border-radius: 999px;
+  color: var(--tinta-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.125rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--pj-tempo-curto) ease,
+    color var(--pj-tempo-curto) ease;
+}
+
+a.pj-trilha__passo:hover {
+  background: var(--superficie-2);
+  color: var(--tinta);
+}
+
+a.pj-trilha__passo:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--anel-foco);
+}
+
+.pj-trilha__no {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--pj-lugar);
+}
+
+.pj-trilha__passo--lugar {
+  color: var(--pj-lugar-tinta);
+  font-weight: 600;
+}
+
+.pj-trilha__passo--lugar .pj-trilha__no {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 0.875rem;
+}
+
+.pj-trilha__passo[aria-current='page'] {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.pj-trilha__passo[aria-current='page'] .pj-trilha__no {
+  width: 0.625rem;
+  height: 0.625rem;
+  box-shadow: 0 0 0 3px var(--pj-lugar-fundo);
+}
+
+.pj-trilha__rotulo {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------------------------- dado, selo */
+
+:root.trilha .pj-dado,
+:root.trilha .pj-num {
+  font-family: var(--font-dados);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------- o que a ponte não alcança
+ * Fundo da página: o Trilha é plano, névoa de sálvia sem grade e sem brilho.
+ */
+
+html.trilha .hc-tema.partner-page,
+html.trilha.app-dark .hc-tema.partner-page {
+  background: var(--fundo);
+}
+
+html.trilha .hc-tema.partner-page::before {
+  display: none;
+}
+
+:root.trilha .hc-tema {
+  --hc-pilula-borda: var(--linha-forte);
+  --clinic-focus-ring: var(--anel-foco);
+
+  /* Botões: controle macio de 10px, não pílula. A ação cheia é musgo, com a tinta própria. */
+  --p-button-border-radius: var(--raio-controle);
+  --p-button-rounded-border-radius: 999px;
+  --p-button-primary-background: var(--musgo);
+  --p-button-primary-hover-background: color-mix(in oklab, var(--musgo) 86%, var(--tinta));
+  --p-button-primary-active-background: color-mix(in oklab, var(--musgo) 74%, var(--tinta));
+  --p-button-primary-border-color: var(--musgo);
+  --p-button-primary-hover-border-color: color-mix(in oklab, var(--musgo) 86%, var(--tinta));
+  --p-button-primary-active-border-color: color-mix(in oklab, var(--musgo) 74%, var(--tinta));
+  --p-button-primary-color: var(--sobre-musgo);
+  --p-button-primary-hover-color: var(--sobre-musgo);
+  --p-button-primary-active-color: var(--sobre-musgo);
+  --p-button-secondary-background: var(--superficie);
+  --p-button-secondary-hover-background: var(--superficie-2);
+  --p-button-secondary-active-background: var(--superficie-3);
+  --p-button-secondary-border-color: var(--linha-forte);
+  --p-button-secondary-hover-border-color: var(--linha-forte);
+  --p-button-secondary-active-border-color: var(--linha-forte);
+  --p-button-secondary-color: var(--tinta);
+  --p-button-secondary-hover-color: var(--tinta);
+  --p-button-secondary-active-color: var(--tinta);
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-outlined-primary-border-color: var(--linha-forte);
+  --p-button-outlined-primary-color: var(--musgo);
+  --p-button-outlined-primary-hover-background: var(--musgo-fundo);
+  --p-button-outlined-primary-active-background: var(--musgo-fundo);
+  --p-button-text-primary-color: var(--musgo);
+  --p-button-text-primary-hover-background: var(--musgo-fundo);
+  --p-button-text-primary-active-background: var(--musgo-fundo);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+}
+
+/* As pílulas à mão (`.hc-pilula`) viram botões do Trilha: sem sombra, raio de controle. */
+:root.trilha .hc-tema .hc-pilula,
+:root.trilha .hc-tema .hc-pilula.p-button {
+  --pilula-sombra: none;
+
+  min-height: var(--altura-controle);
+  padding: 0 1rem;
+  border-color: var(--linha-forte);
+  border-radius: var(--raio-controle);
+  background: var(--superficie);
+  font-weight: 500;
+}
+
+:root.trilha .hc-tema .hc-pilula:hover,
+:root.trilha .hc-tema .hc-pilula.p-button:not(:disabled):hover {
+  --pilula-sombra: none;
+
+  border-color: var(--linha-forte);
+  background: var(--superficie-2);
+}
+
+:root.trilha .hc-tema .hc-pilula--cheia,
+:root.trilha .hc-tema .hc-pilula--cheia.p-button,
+:root.trilha .hc-tema .hc-pilula--cheia:hover,
+:root.trilha .hc-tema .hc-pilula--cheia.p-button:not(:disabled):hover {
+  --pilula-sombra: none;
+
+  border-color: transparent;
+  color: var(--sobre-musgo);
+  font-weight: 500;
+}
+
+:root.trilha .hc-tema .hc-pilula--cheia,
+:root.trilha .hc-tema .hc-pilula--cheia.p-button {
+  background: var(--musgo);
+}
+
+:root.trilha .hc-tema .hc-pilula--cheia:hover,
+:root.trilha .hc-tema .hc-pilula--cheia.p-button:not(:disabled):hover {
+  background: color-mix(in oklab, var(--musgo) 86%, var(--tinta));
+}
+
+:root.trilha .hc-tema .hc-pilula:focus-visible,
+:root.trilha .hc-tema .hc-pilula.p-button:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--anel-foco);
+}
+
+/*
+ * O cabeçalho da página: o título diz o que a tela faz, a frase embaixo diz como está agora.
+ * A linha pequena acima do título sai — o lugar já está na trilha do cabeçalho, logo acima.
+ */
+/*
+ * Título e frase à esquerda, ações à direita na altura deles: a linha da frase vira parte da
+ * grade (`display: contents`) para a ação subir ao lado do título.
+ */
+:root.trilha .hc-tema .hc-saudacao {
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 2rem;
+  align-items: end;
+}
+
+:root.trilha .hc-tema .hc-saudacao > * {
+  grid-column: 1;
+}
+
+:root.trilha .hc-tema .hc-saudacao .hc-acoes {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: end;
+}
+
+:root.trilha .hc-tema .hc-saudacao__data {
+  display: none;
+}
+
+:root.trilha .hc-tema .hc-saudacao__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 1.625rem;
+  font-weight: 600;
+  line-height: 2rem;
+  letter-spacing: -0.012em;
+}
+
+:root.trilha .hc-tema .hc-saudacao__linha {
+  display: contents;
+}
+
+:root.trilha .hc-tema .hc-saudacao__linha > * {
+  grid-column: 1;
+}
+
+:root.trilha .hc-tema .hc-saudacao__resumo {
+  max-width: 62ch;
+  background: none;
+  color: var(--tinta-2);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.375rem;
+  letter-spacing: 0;
+  -webkit-text-fill-color: currentColor;
+}
+
+:root.trilha .hc-tema .partner-page__title {
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  line-height: 2rem;
+}
+
+/* ------------------------------------------------------------------------------- segmentos
+ * O `SelectButton` no Trilha: trilho afundado (`superficie-3`) e a escolhida em papel, com
+ * `sombra-1` — a escolha sobe, em vez de ganhar cor.
+ */
+
+html.trilha .hc-tema .p-selectbutton:not(.grupo) {
+  border: 0;
+  border-radius: 0.75rem;
+  background: var(--superficie-3);
+}
+
+html.trilha .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton,
+html.trilha .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton:first-child,
+html.trilha .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton:last-child,
+html.trilha .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton .p-togglebutton-content {
+  border-radius: 0.5625rem;
+}
+
+html.trilha .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton .p-togglebutton-content {
+  padding: 0.3rem 0.85rem;
+}
+
+html.trilha
+  .hc-tema
+  .p-selectbutton:not(.grupo)
+  .p-togglebutton:not(.p-togglebutton-checked):not(.p-disabled):hover {
+  background: transparent;
+  color: var(--tinta);
+}
+
+html.trilha .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton.p-togglebutton-checked {
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------------- agenda
+ * O que a ponte não alcança na Agenda (`veterinario/agenda.vue` e `components/agenda/`).
+ */
+
+/* Plano por padrão: cartão em repouso tem fio, não sombra. */
+:root.trilha .hc-tema {
+  --clinic-shadow-card: none;
+}
+
+/* Rótulos em caixa normal: "Hoje", "Legenda", "Almoço" e os títulos dos painéis de filtro. */
+:root.trilha .agenda .barra__marca,
+:root.trilha .agenda .legenda__alternar.p-button,
+:root.trilha .agenda .tabela__faixa,
+:root.trilha .clinic-label {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root.trilha .agenda .barra__marca {
+  color: var(--tinta-2);
+  font-weight: 500;
+}
+
+:root.trilha .agenda .barra__titulo {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* Hora e ocupação são dado: Instrument Sans, algarismos tabulares. */
+:root.trilha .agenda .tabela__hora,
+:root.trilha .agenda .tabela__ocupacao,
+:root.trilha .agenda .atendimento__hora {
+  font-family: var(--font-dados);
+  font-variant-numeric: tabular-nums;
+}
+
+/* O agora é lugar, não alarme: o fio e a hora na cor da Clínica. */
+:root.trilha .agenda .tabela__agora {
+  color: var(--clinica-tinta);
+}
+
+:root.trilha .agenda .tabela__linha--agora > * {
+  border-top-color: var(--clinica);
+}
+
+/* O atendimento: sem sombra; em atendimento, na cor do lugar (Clínica). */
+:root.trilha .agenda .atendimento {
+  box-shadow: none;
+}
+
+:root.trilha .agenda .atendimento--em-atendimento {
+  border-color: color-mix(in oklab, var(--clinica) 55%, transparent);
+  background: var(--clinica-fundo);
+}
+
+:root.trilha .agenda .atendimento--selecionado {
+  border-color: var(--musgo);
+  box-shadow: 0 0 0 2px var(--musgo-fundo);
+}

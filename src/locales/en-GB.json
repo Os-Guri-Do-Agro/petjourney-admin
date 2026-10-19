@@ -291,6 +291,9 @@
   "shell": {
     "logout": "Sign out",
     "telasNaSecao": "one screen | {contagem} screens",
+    "trilha": {
+      "rotulo": "You are here"
+    },
     "brand": {
       "badge": "Partner portal"
     },

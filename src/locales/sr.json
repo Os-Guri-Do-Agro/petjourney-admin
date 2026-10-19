@@ -291,6 +291,9 @@
   "shell": {
     "logout": "Odjavite se",
     "telasNaSecao": "{contagem} ekran | {contagem} ekrana | {contagem} ekrana",
+    "trilha": {
+      "rotulo": "Nalazite se ovde"
+    },
     "brand": {
       "badge": "Partnerski portal"
     },

@@ -1,0 +1,142 @@
+/*
+ * Trilha — os tokens do design system "PetJourney Admin" (artefato Design System, 19/10/2026).
+ *
+ * Valem só onde a raiz leva `.trilha`: quem liga é `useClasseDoDesignTrilha` (App.vue), pela rota
+ * aberta (`rotas.ts`). Fora dessas telas nada aqui se aplica — o portal continua no design atual e
+ * as telas migram uma a uma, como foi com o `.hc-tema`.
+ *
+ * Os valores são os do design system; mudou lá, muda aqui. Contraste conferido: texto 4,5:1 ou mais
+ * em todas as superfícies, nos dois temas; bordas de controle e anel de foco, 3:1 ou mais.
+ */
+
+:root.trilha {
+  --fundo: #e7f0ed;
+  --superficie: #fbfbf8;
+  --superficie-2: #eef6f3;
+  --superficie-3: #dbe7e3;
+  --linha: #d5dfdb;
+  --linha-forte: #798983;
+  --tinta: #142721;
+  --tinta-2: #40524b;
+  --tinta-3: #5e6d67;
+  --salvia: #84a59d;
+  --sobre-salvia: #142721;
+  --musgo: #2b5f51;
+  --musgo-fundo: #d8eee6;
+  --sobre-musgo: #fbfbf8;
+  --rail: #16312a;
+  --rail-ativo: #25443b;
+  --sobre-rail: #f6f4ee;
+  --sobre-rail-2: #b0c3bc;
+  --clinica: #1c7db0;
+  --clinica-tinta: #005982;
+  --clinica-fundo: #dcf0fe;
+  --clinica-claro: #7dc0ec;
+  --hotel: #7766b4;
+  --hotel-tinta: #554588;
+  --hotel-fundo: #edeaff;
+  --hotel-claro: #b8acf0;
+  --portal: #aa7d2d;
+  --portal-tinta: #6e4b02;
+  --portal-fundo: #f7ebd9;
+  --portal-claro: #d7b176;
+  --pets: #458270;
+  --pets-tinta: #285e4e;
+  --pets-fundo: #cdece1;
+  --pets-claro: #93c4b3;
+  --risco: #c54e45;
+  --risco-tinta: #9d2e29;
+  --risco-fundo: #fee9e6;
+  --atencao: #d78a3f;
+  --atencao-tinta: #905204;
+  --atencao-fundo: #fdebdc;
+  --ok: #4a925c;
+  --ok-tinta: #266b3a;
+  --ok-fundo: #d8f2dc;
+  --neutro-tinta: #4f5854;
+  --neutro-fundo: #dde4e1;
+  --sombra-1: 0 1px 2px rgb(20 39 33 / 6%), 0 2px 6px -2px rgb(20 39 33 / 10%);
+  --sombra-2: 0 2px 4px rgb(20 39 33 / 6%), 0 14px 30px -10px rgb(20 39 33 / 22%);
+  --sombra-3: 0 28px 64px -18px rgb(20 39 33 / 34%);
+  --anel-foco: 0 0 0 2px #fbfbf8, 0 0 0 4px #2b5f51;
+
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 16px;
+  --espaco-5: 20px;
+  --espaco-6: 24px;
+  --espaco-8: 32px;
+  --espaco-12: 48px;
+  --raio-pequeno: 6px;
+  --raio-controle: 10px;
+  --raio-cartao: 16px;
+  --raio-painel: 24px;
+  --raio-total: 999px;
+  --altura-controle: 38px;
+  --altura-toque: 44px;
+  --linha-tabela: 44px;
+  --rail-largura: 76px;
+  --painel-largura: 240px;
+  --cabecalho-altura: 60px;
+
+  --font-texto: 'Readex Pro Variable', 'PetJourney Arabic', system-ui, sans-serif;
+  --font-dados: 'Instrument Sans Variable', 'Readex Pro Variable', system-ui, sans-serif;
+
+  --pj-curva-chega: cubic-bezier(0.22, 1, 0.36, 1);
+  --pj-curva-sai: cubic-bezier(0.4, 0, 1, 1);
+  --pj-tempo-curto: 140ms;
+  --pj-tempo-medio: 200ms;
+}
+
+:root.trilha.app-dark {
+  --fundo: #0d1412;
+  --superficie: #161e1c;
+  --superficie-2: #1e2724;
+  --superficie-3: #26302d;
+  --linha: #2e3834;
+  --linha-forte: #697873;
+  --tinta: #ebf2ef;
+  --tinta-2: #bac8c3;
+  --tinta-3: #95a49f;
+  --salvia: #84c1b4;
+  --sobre-salvia: #081e18;
+  --musgo: #96dbc7;
+  --musgo-fundo: #16342c;
+  --sobre-musgo: #081e18;
+  --rail: #060d0a;
+  --rail-ativo: #15211d;
+  --sobre-rail: #f6f4ee;
+  --sobre-rail-2: #a5b5af;
+  --clinica: #6cb4e1;
+  --clinica-tinta: #a8d5f3;
+  --clinica-fundo: #1a3241;
+  --clinica-claro: #7dc0ec;
+  --hotel: #ac9fe6;
+  --hotel-tinta: #cec7f6;
+  --hotel-fundo: #2f2b43;
+  --hotel-claro: #b8acf0;
+  --portal: #cba465;
+  --portal-tinta: #e4caa2;
+  --portal-fundo: #3a2d18;
+  --portal-claro: #d7b176;
+  --pets: #84b8a6;
+  --pets-tinta: #b5d6cb;
+  --pets-fundo: #203730;
+  --pets-claro: #93c4b3;
+  --risco: #ef8b80;
+  --risco-tinta: #ffbfb6;
+  --risco-fundo: #45221f;
+  --atencao: #da9c64;
+  --atencao-tinta: #f1c8a6;
+  --atencao-fundo: #3e2815;
+  --ok: #82bb8d;
+  --ok-tinta: #b8dcbe;
+  --ok-fundo: #1f3323;
+  --neutro-tinta: #bdc7c3;
+  --neutro-fundo: #292f2d;
+  --sombra-1: 0 1px 2px rgb(0 0 0 / 45%);
+  --sombra-2: 0 14px 30px -10px rgb(0 0 0 / 65%);
+  --sombra-3: 0 28px 64px -14px rgb(0 0 0 / 75%);
+  --anel-foco: 0 0 0 2px #161e1c, 0 0 0 4px #96dbc7;
+}

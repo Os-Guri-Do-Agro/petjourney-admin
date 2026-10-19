@@ -3,6 +3,8 @@ import './features/clinico/theme/clinic-tokens.css'
 import './theme/hc-tokens.css'
 import './theme/hc-tema.css'
 import './components/home/home-card.css'
+import './theme/trilha/trilha-tokens.css'
+import './theme/trilha/trilha-tema.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

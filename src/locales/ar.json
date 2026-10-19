@@ -291,6 +291,9 @@
   "shell": {
     "logout": "تسجيل الخروج",
     "telasNaSecao": "لا توجد شاشات | شاشة واحدة | شاشتان | {contagem} شاشات | {contagem} شاشة | {contagem} شاشة",
+    "trilha": {
+      "rotulo": "أنت هنا"
+    },
     "brand": {
       "badge": "بوابة الشركاء"
     },

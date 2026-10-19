@@ -34,6 +34,7 @@ import { getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { currentColors, isDarkMode, toggleColorMode } from '@/theme/color-mode'
+import { lugarDaSecao, useDesignTrilha } from '@/theme/trilha/rotas'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 /** Preferência de layout (não é sessão): recolhido deixa só o rail de seções. */
@@ -59,6 +60,12 @@ const { logout } = useLogout()
 const cupomFeatureEnabled = CUPOM_FEATURE_ENABLED
 const activeSectionId = ref(OVERVIEW_SECTION_ID)
 const defaultLandingPath = computed(() => getDefaultLandingPath())
+/**
+ * A tela aberta está no design Trilha (`theme/trilha/rotas.ts`)? Então a moldura veste a pele dele:
+ * trilho escuro com o lugar aceso, painel na cor do lugar e, no cabeçalho, a trilha no lugar do
+ * rótulo. O comportamento é o mesmo; muda só o que se vê.
+ */
+const trilhaAtiva = useDesignTrilha()
 let compactQuery: MediaQueryList | undefined
 
 function matchesCompactViewport() {
@@ -188,7 +195,9 @@ const authUser = computed(() => getAuthUser())
  * A pata do trilho: no claro, a pata sálvia num ladrilho branco (sobre a moldura sálvia, a pata
  * sálvia num ladrilho sálvia sumia); no escuro, a pata clara sobre o ladrilho sálvia da ação cheia.
  */
-const logoMarkUrl = computed(() => (isDarkMode.value ? '/pata-clara.png' : '/pata-escura.png'))
+const logoMarkUrl = computed(() =>
+  trilhaAtiva.value || !isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png',
+)
 /* O logotipo de letra clara; na moldura sálvia ele escurece por filtro (`--shell-wordmark-filtro`). */
 const logoHeaderUrl = logoDarkUrl
 
@@ -200,7 +209,7 @@ const shellStyle = computed(() => {
   const colors = currentColors.value
   const isDark = isDarkMode.value
 
-  return {
+  const estilo = {
     '--brand-navy': colors.auth.text,
     '--profile-primary': colors.vet.primary,
     '--profile-secondary': colors.vet.secondary,
@@ -249,7 +258,42 @@ const shellStyle = computed(() => {
     /** "Sair" escrito sobre superfície clara (painel e menu da conta). */
     '--rail-logout-text': colors.dashboard.warmText,
   }
+
+  return trilhaAtiva.value ? { ...estilo, ...trilhaShellStyle } : estilo
 })
+
+/**
+ * A moldura no Trilha: as mesmas variáveis `--shell-*`, apontadas para os tokens do Trilha
+ * (`theme/trilha/trilha-tokens.css`), que já trocam sozinhos no escuro. O que está aberto pinta na
+ * cor do lugar: essas variáveis moram no CSS do painel e do cabeçalho (fim do `<style>`), porque
+ * `--pj-lugar-*` só tem valor onde a classe `pj-lugar--*` está.
+ */
+const trilhaShellStyle = {
+  '--shell-bg': 'var(--fundo)',
+  '--shell-surface': 'var(--superficie)',
+  '--shell-surface-soft': 'var(--superficie-2)',
+  '--shell-line': 'var(--linha)',
+  '--shell-text': 'var(--tinta)',
+  '--shell-muted': 'var(--tinta-2)',
+  '--shell-soft': 'var(--tinta-3)',
+  '--shell-brand': 'var(--rail)',
+  '--shell-on-brand': 'var(--sobre-rail-2)',
+  '--shell-hover': 'var(--superficie-2)',
+  '--shell-nav-hover': 'var(--superficie-2)',
+  '--shell-accent': 'var(--musgo)',
+  '--shell-accent-strong': 'var(--musgo)',
+  '--shell-on-accent-deep': 'var(--superficie)',
+  '--shell-rail-active-bg': 'transparent',
+  '--shell-nav-icone': '1.0625rem',
+  '--shell-rail-icone': '1.1875rem',
+  '--shell-attention': 'var(--atencao-tinta)',
+  '--shell-attention-bg': 'var(--atencao-fundo)',
+  '--shell-attention-line': 'var(--atencao-fundo)',
+  '--rail-logout-red': 'var(--risco-tinta)',
+  '--rail-logout-bg': 'transparent',
+  '--rail-logout-icon': 'var(--sobre-rail-2)',
+  '--rail-logout-text': 'var(--risco-tinta)',
+} as const
 
 /*
  * A moldura sálvia (16/10/2026): no claro, menu e cabeçalho na Folha de Sálvia (#84C1B4), a cor da
@@ -262,7 +306,7 @@ const shellStyle = computed(() => {
  * rótulos de 11 px. O que está aberto ganha um chip branco translúcido.
  */
 const molduraStyle = computed(() =>
-  isDarkMode.value
+  trilhaAtiva.value || isDarkMode.value
     ? {}
     : {
         '--shell-surface': '#84c1b4',
@@ -351,6 +395,29 @@ const gruposDoPainel = computed<AppNavigationGroup[]>(() =>
       ],
 )
 
+/** O lugar da tela aberta e o do painel: no Trilha, cada um pinta na própria cor. */
+const lugarDaPagina = computed(() => lugarDaSecao(activeSectionId.value))
+const lugarDoPainel = computed(() => lugarDaSecao(activeSection.value.id))
+
+/** A seção da tela aberta, para a trilha do cabeçalho: ícone, nome e para onde o nó leva. */
+const secaoDaPagina = computed(() =>
+  navigationSections.value.find((entry) => entry.id === activeSectionId.value),
+)
+const iconeDoLugar = computed(() =>
+  naVisaoGeral.value
+    ? overviewItem.value.icon
+    : (secaoDaPagina.value?.icon ?? activeSection.value.icon),
+)
+const destinoDoLugar = computed(() => {
+  if (naVisaoGeral.value) {
+    return overviewItem.value.to
+  }
+
+  return (
+    (secaoDaPagina.value && getSectionLandingPath(secaoDaPagina.value)) ?? defaultLandingPath.value
+  )
+})
+
 const activePageLabel = computed(() =>
   resolvePageLabel(route.path, route.hash, navigationSections.value),
 )
@@ -409,6 +476,7 @@ const shellClasses = computed(() => ({
   'app-shell--navigator-overlay': compactViewport.value && compactDrawerOpen.value,
   'app-shell--list-nav': isListNavigator.value,
   'app-shell--dense': isCompactDensity.value,
+  'app-shell--trilha': trilhaAtiva.value,
 }))
 
 watch(
@@ -542,7 +610,7 @@ onUnmounted(() => {
         -->
         <RouterLink
           class="rail-button"
-          :class="{ 'rail-button--active': naVisaoGeral }"
+          :class="[{ 'rail-button--active': naVisaoGeral }, trilhaAtiva && 'pj-lugar--inicio']"
           :to="overviewItem.to"
           :aria-current="naVisaoGeral ? 'page' : undefined"
           :title="overviewItem.label"
@@ -561,7 +629,10 @@ onUnmounted(() => {
           <Button
             v-if="temPainel(section)"
             class="rail-button"
-            :class="{ 'rail-button--active': activeSectionId === section.id }"
+            :class="[
+              { 'rail-button--active': activeSectionId === section.id },
+              trilhaAtiva && `pj-lugar--${lugarDaSecao(section.id)}`,
+            ]"
             type="button"
             text
             severity="secondary"
@@ -578,7 +649,10 @@ onUnmounted(() => {
           <RouterLink
             v-else
             class="rail-button"
-            :class="{ 'rail-button--active': activeSectionId === section.id }"
+            :class="[
+              { 'rail-button--active': activeSectionId === section.id },
+              trilhaAtiva && `pj-lugar--${lugarDaSecao(section.id)}`,
+            ]"
             :to="section.items[0]?.to ?? '/'"
             :aria-current="activeSectionId === section.id ? 'page' : undefined"
             :title="section.label"
@@ -618,7 +692,11 @@ onUnmounted(() => {
         </div>
       </nav>
 
-      <section class="navigator-panel" :inert="panelHidden || undefined">
+      <section
+        class="navigator-panel"
+        :class="trilhaAtiva && `pj-lugar--${lugarDoPainel}`"
+        :inert="panelHidden || undefined"
+      >
         <!--
           A marca só aparece aqui quando não há trilho: com os dois, o mesmo logotipo nascia
           duas vezes lado a lado.
@@ -734,7 +812,11 @@ onUnmounted(() => {
       </section>
     </aside>
 
-    <header class="app-header" :style="molduraStyle">
+    <header
+      class="app-header"
+      :class="trilhaAtiva && `pj-lugar--${lugarDaPagina}`"
+      :style="molduraStyle"
+    >
       <div class="app-header__left">
         <Button
           class="header-icon-button"
@@ -755,7 +837,32 @@ onUnmounted(() => {
           @click="toggleNavigator"
         />
 
-        <div class="header-context">
+        <!--
+          No Trilha, o rótulo vira a trilha: o lugar (com o ícone, que leva ao início da seção) e a
+          tela aberta, ligados na cor do lugar. Diz onde se está antes de qualquer leitura.
+        -->
+        <nav
+          v-if="trilhaAtiva"
+          class="pj-trilha shell-trilha"
+          :aria-label="t('shell.trilha.rotulo')"
+        >
+          <ol>
+            <li>
+              <RouterLink class="pj-trilha__passo pj-trilha__passo--lugar" :to="destinoDoLugar">
+                <span class="pj-trilha__no" aria-hidden="true"><i :class="iconeDoLugar" /></span>
+                {{ activeSectionLabel }}
+              </RouterLink>
+            </li>
+            <li v-if="activePageLabel && activePageLabel !== activeSectionLabel">
+              <span class="pj-trilha__passo" aria-current="page">
+                <span class="pj-trilha__no" aria-hidden="true" />
+                <span class="pj-trilha__rotulo">{{ activePageLabel }}</span>
+              </span>
+            </li>
+          </ol>
+        </nav>
+
+        <div v-else class="header-context">
           <span>{{ activeSectionLabel }}</span>
           <strong>{{ activePageLabel }}</strong>
         </div>
@@ -1950,5 +2057,175 @@ onUnmounted(() => {
     padding: 0;
     justify-content: center;
   }
+}
+/* ===================================================================================== Trilha
+ * A pele do design Trilha (`theme/trilha/`), só nas telas da lista de `rotas.ts`. O trilho é
+ * escuro nos dois temas, para o lugar aberto acender: o ícone dele ganha um nó na cor do lugar
+ * (`--pj-lugar-claro`). O painel e o cabeçalho pintam o que está aberto na mesma cor.
+ */
+
+.app-shell--trilha:not(.app-shell--list-nav) {
+  --navigator-rail: 4.85rem;
+}
+
+/* O que está aberto, na cor do lugar: declarado onde a classe `pj-lugar--*` está. */
+.app-shell--trilha .navigator-panel,
+.app-shell--trilha .app-header {
+  --shell-accent-soft: var(--pj-lugar-fundo);
+  --shell-cream: var(--pj-lugar-fundo);
+  --shell-nav-active-text: var(--pj-lugar-tinta);
+  --shell-accent-deep: var(--pj-lugar);
+}
+
+.app-shell--trilha .section-rail {
+  gap: 0.25rem;
+  padding: 0.85rem 0.45rem 0.7rem;
+  border-inline-end: 0;
+  background: var(--rail);
+}
+
+.app-shell--trilha .app-navigator {
+  border-inline-end-color: var(--linha);
+}
+
+.app-shell--trilha .rail-brand,
+.app-shell--trilha .rail-brand:hover {
+  --marca-sombra: none;
+
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.app-shell--trilha .rail-brand img {
+  width: 2.05rem;
+  height: 2.05rem;
+}
+
+.app-shell--trilha .rail-button,
+.app-shell--trilha .rail-button.p-button {
+  gap: 0.25rem;
+  padding: 0.3rem 0.1rem 0.4rem;
+  border-radius: 0.875rem;
+  color: var(--sobre-rail-2);
+}
+
+.app-shell--trilha .rail-button__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  transition:
+    background-color var(--pj-tempo-medio) var(--pj-curva-chega),
+    color var(--pj-tempo-curto) ease;
+}
+
+.app-shell--trilha .rail-button__label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.app-shell--trilha .rail-button:hover,
+.app-shell--trilha .rail-button.p-button:not(:disabled):hover,
+.app-shell--trilha .rail-button.p-button:not(:disabled):active {
+  background: var(--rail-ativo);
+  color: var(--sobre-rail);
+}
+
+.app-shell--trilha .rail-button:hover .rail-button__icon {
+  color: var(--pj-lugar-claro);
+}
+
+.app-shell--trilha .rail-button--active,
+.app-shell--trilha .rail-button--active:hover,
+.app-shell--trilha .rail-button--active.p-button,
+.app-shell--trilha .rail-button--active.p-button:not(:disabled):hover,
+.app-shell--trilha .rail-button--active.p-button:not(:disabled):active {
+  background: transparent;
+  color: var(--sobre-rail);
+}
+
+.app-shell--trilha .rail-button--active .rail-button__icon,
+.app-shell--trilha .rail-button--active:hover .rail-button__icon {
+  background: var(--pj-lugar-claro);
+  color: var(--rail);
+}
+
+.app-shell--trilha .rail-divider {
+  background: color-mix(in oklab, var(--sobre-rail) 16%, transparent);
+}
+
+.app-shell--trilha .rail-action.p-button,
+.app-shell--trilha .rail-action--danger.p-button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--sobre-rail-2);
+}
+
+.app-shell--trilha .rail-action.p-button:not(:disabled):hover,
+.app-shell--trilha .rail-action.p-button:not(:disabled):active {
+  border-color: transparent;
+  background: var(--rail-ativo);
+  color: var(--sobre-rail);
+}
+
+.app-shell--trilha .rail-button:focus-visible,
+.app-shell--trilha .rail-action:focus-visible,
+.app-shell--trilha .rail-brand:focus-visible {
+  outline: 2px solid var(--sobre-rail);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* Painel: o disco do lugar ao lado do nome, como na trilha; rótulos de grupo em caixa normal. */
+.app-shell--trilha .navigator-section-heading {
+  margin-bottom: 0.5rem;
+}
+
+.app-shell--trilha .navigator-section-heading__icone {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 1rem;
+}
+
+.app-shell--trilha .navigator-section-heading__texto strong {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.app-shell--trilha .page-nav__group-label {
+  color: var(--tinta-3);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Cabeçalho: mais próximo do chão do que do cartão, com a trilha ocupando o lado de início. */
+.app-shell--trilha .app-header {
+  background: color-mix(in oklab, var(--fundo) 70%, var(--superficie));
+  box-shadow: 0 1px 0 var(--linha);
+  backdrop-filter: none;
+}
+
+.app-shell--trilha .app-header__left {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.shell-trilha {
+  min-width: 0;
+}
+
+.app-shell--trilha .header-icon-button,
+.app-shell--trilha .header-search,
+.app-shell--trilha .header-resgate.p-button,
+.app-shell--trilha .user-menu__trigger.p-button {
+  --controle-sombra: none;
 }
 </style>
