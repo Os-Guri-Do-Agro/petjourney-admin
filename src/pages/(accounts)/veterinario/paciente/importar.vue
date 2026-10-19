@@ -165,7 +165,7 @@ onMounted(() => {
   gap: 8px;
   margin: 0;
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: 12px;
   background: var(--ok-fundo);
   color: var(--ok-tinta);
   font-size: 13.5px;

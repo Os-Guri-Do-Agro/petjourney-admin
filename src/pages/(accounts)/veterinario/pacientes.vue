@@ -837,11 +837,15 @@ const fraseDoResumo = computed(() => {
 }
 
 @media (max-width: 640px) {
-  /* O nome é o último a ceder (a célula garante isso): o selo encolhe antes dele. */
+  /* Nome comprido empurra o selo para a linha de baixo, em vez de espremê-lo até sumir. */
+  .tela-pacientes :deep(.paciente__linha) {
+    flex-wrap: wrap;
+    row-gap: 3px;
+  }
+
   .alertas__estreito {
     display: inline-flex;
-    min-width: 0;
-    flex: 0 1 auto;
+    max-width: 100%;
     overflow: hidden;
     height: 20px;
     padding-inline: 6px;

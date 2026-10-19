@@ -134,9 +134,10 @@ function cancelar() {
     grid-template-columns: minmax(0, 46rem) minmax(20rem, 24rem);
   }
 
+  /* Abaixo da fita do dia, que também fica presa no alto da tela. */
   .cadastro__previa {
     position: sticky;
-    top: 24px;
+    top: 84px;
   }
 }
 </style>

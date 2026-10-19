@@ -295,7 +295,7 @@ function estadoDa(
   align-items: center;
   gap: 12px 20px;
   padding: 14px 18px;
-  grid-template-columns: minmax(0, 1fr) 14rem;
+  grid-template-columns: minmax(0, 1fr) 16rem;
 }
 
 .coluna__planilha {
