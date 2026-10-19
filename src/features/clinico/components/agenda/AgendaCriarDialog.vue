@@ -47,6 +47,10 @@ const props = defineProps<{
   /** Sugestão de partida; a escolha do formulário vive em `professionalId`. */
   sugestaoProfissional?: string | null
   minutoInicial?: number | null
+  /** Paciente já escolhido (ex.: "Marcar retorno" de Atividades). */
+  sugestaoPaciente?: string | null
+  /** Tipo já escolhido, pelo `id` do tipo de atendimento. */
+  sugestaoTipo?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -263,10 +267,10 @@ watch(
       return
     }
 
-    petId.value = null
+    petId.value = props.sugestaoPaciente ?? null
     observacao.value = ''
     cadastrandoPaciente.value = false
-    typeId.value = clinico.tipos[0]?.id ?? null
+    typeId.value = props.sugestaoTipo ?? clinico.tipos[0]?.id ?? null
     professionalId.value = props.sugestaoProfissional ?? clinico.profissionais[0]?.id ?? null
 
     hora.value = minutesToClock(props.minutoInicial ?? primeiroHorario())

@@ -106,16 +106,18 @@ function linhaDoRascunho(encounter: Encounter): LinhaDeAtividade {
 }
 
 /**
- * "Marcar retorno" leva à agenda de hoje. A agenda não recebe paciente pela URL (só data, visão,
- * filtros e foco num atendimento que já existe), e o formulário de criação nasce vazio: o
- * paciente se escolhe lá.
+ * "Marcar retorno" abre o formulário da agenda já com o paciente e o tipo "retorno" escolhidos
+ * (`?novo=1&paciente=…&tipo=retorno`): quem clicou já disse de quem e o quê, falta só o horário.
  */
 function linhaDoRetorno(item: RetornoPendente): LinhaDeAtividade {
   const dias = item.diasDeAtraso
 
   return {
     id: `retorno-${item.encounter.id}`,
-    to: '/veterinario/agenda',
+    to: {
+      path: '/veterinario/agenda',
+      query: { novo: '1', paciente: item.encounter.petId, tipo: 'retorno' },
+    },
     pet: clinico.pet(item.encounter.petId),
     meta: juntar([
       clinico.diagnosticoPrincipal(item.encounter) || t('clinico.atividades.semDiagnostico'),

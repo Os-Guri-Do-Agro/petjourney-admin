@@ -490,11 +490,20 @@ function abrirEntradaNaFila(sugestao: {
 const criarProfissional = ref<string | null>(null)
 const criarMinuto = ref<number | null>(null)
 
-function abrirCriacao(encaixe: boolean, alvo?: { professionalId: string; minuto: number }) {
+const criarPaciente = ref<string | null>(null)
+const criarTipo = ref<string | null>(null)
+
+function abrirCriacao(
+  encaixe: boolean,
+  alvo?: { professionalId: string; minuto: number },
+  sugestao?: { petId: string | null; typeId: string | null },
+) {
   ajudaAberta.value = false
   criarComoEncaixe.value = encaixe
   criarProfissional.value = alvo?.professionalId ?? null
   criarMinuto.value = alvo?.minuto ?? null
+  criarPaciente.value = sugestao?.petId ?? null
+  criarTipo.value = sugestao?.typeId ?? null
   criarAberto.value = true
 }
 
@@ -509,17 +518,27 @@ function abrirBloqueio() {
  */
 watch(
   () => route.query.novo,
-  (novo) => {
+  async (novo) => {
     if (novo !== '1') {
       return
     }
 
-    abrirCriacao(false)
-
+    const paciente = typeof route.query.paciente === 'string' ? route.query.paciente : null
+    const tipo = typeof route.query.tipo === 'string' ? route.query.tipo : null
     const query = { ...route.query }
 
     delete query.novo
+    delete query.paciente
+    delete query.tipo
     void router.replace({ path: route.path, query })
+
+    /* O tipo chega pelo nome ("retorno"); o formulário quer o id, que vem do catálogo. */
+    await clinico.carregar()
+
+    abrirCriacao(false, undefined, {
+      petId: paciente,
+      typeId: tipo ? (clinico.tipos.find((item) => item.kind === tipo)?.id ?? null) : null,
+    })
   },
   { immediate: true },
 )
@@ -728,6 +747,8 @@ useClinicShortcuts({
       :data="agenda.data"
       :sugestao-profissional="criarProfissional"
       :minuto-inicial="criarMinuto"
+      :sugestao-paciente="criarPaciente"
+      :sugestao-tipo="criarTipo"
       @criado="agenda.recarregar()"
       @entrar-na-fila="abrirEntradaNaFila"
     />
