@@ -64,6 +64,40 @@
   --hc-cinza-fundo: var(--neutro-fundo);
   --hc-cinza-tinta: var(--neutro-tinta);
 
+  /*
+   * O módulo clínico fora do `.hc-tema` lê os `--clinic-*` direto da raiz (o linho): eles também
+   * apontam para o Trilha. Dentro do `.hc-tema` passam pelos `--hc-*`, que dão no mesmo.
+   */
+  --clinic-bg: var(--fundo);
+  --clinic-surface: var(--superficie);
+  --clinic-surface-soft: var(--superficie-2);
+  --clinic-surface-sunken: var(--superficie-3);
+  --clinic-line: var(--linha);
+  --clinic-line-soft: var(--linha);
+  --clinic-line-strong: var(--linha-forte);
+  --clinic-text: var(--tinta);
+  --clinic-muted: var(--tinta-2);
+  --clinic-faint: var(--tinta-3);
+  --clinic-accent: var(--musgo);
+  --clinic-accent-strong: var(--musgo);
+  --clinic-accent-deep: var(--musgo);
+  --clinic-accent-tint: var(--musgo-fundo);
+  --clinic-accent-soft: var(--musgo-fundo);
+  --clinic-risk-text: var(--risco-tinta);
+  --clinic-risk-bg: var(--risco-fundo);
+  --clinic-risk-line: var(--risco-fundo);
+  --clinic-attention-text: var(--atencao-tinta);
+  --clinic-attention-bg: var(--atencao-fundo);
+  --clinic-attention-line: var(--atencao-fundo);
+  --clinic-ok-text: var(--ok-tinta);
+  --clinic-ok-bg: var(--ok-fundo);
+  --clinic-ok-line: var(--ok-fundo);
+  --clinic-neutral-text: var(--neutro-tinta);
+  --clinic-neutral-bg: var(--neutro-fundo);
+  --clinic-neutral-line: var(--neutro-fundo);
+  --clinic-shadow-card: none;
+  --clinic-focus-ring: var(--anel-foco);
+
   /* O que do módulo clínico não passa pelos `--hc-*`. */
   --clinic-font-sans: var(--font-texto);
   --clinic-radius-control: var(--raio-controle);
@@ -73,6 +107,23 @@
   --clinic-heat-ink: var(--tinta);
 
   --font-sans: var(--font-texto);
+
+  /* O toast (`assets/main.css`): o cartão e os quatro estados nos tokens do Trilha. */
+  --pj-toast-card: var(--superficie);
+  --pj-toast-surface: var(--superficie-2);
+  --pj-toast-line: var(--linha);
+  --pj-toast-text: var(--tinta);
+  --pj-toast-muted: var(--tinta-2);
+  --pj-toast-faint: var(--tinta-3);
+  --pj-toast-success: var(--ok-tinta);
+  --pj-toast-success-soft: var(--ok-fundo);
+  --pj-toast-success-strong: var(--ok);
+  --pj-toast-info: var(--clinica-tinta);
+  --pj-toast-info-soft: var(--clinica-fundo);
+  --pj-toast-warn: var(--atencao-tinta);
+  --pj-toast-warn-soft: var(--atencao-fundo);
+  --pj-toast-error: var(--risco-tinta);
+  --pj-toast-error-soft: var(--risco-fundo);
 
   /* PrimeVue: os tokens semânticos, que os de cada componente leem. */
   --p-primary-color: var(--musgo);
@@ -124,7 +175,13 @@
   color-scheme: light;
 }
 
+:root.trilha {
+  --pj-toast-shadow-rgb: 20 39 33;
+}
+
 :root.trilha.app-dark {
+  --pj-toast-shadow-rgb: 0 0 0;
+
   color-scheme: dark;
 }
 
@@ -544,4 +601,348 @@ html.trilha .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton.p-togglebutton-
 :root.trilha .agenda .atendimento--selecionado {
   border-color: var(--musgo);
   box-shadow: 0 0 0 2px var(--musgo-fundo);
+}
+
+/* ------------------------------------------------------------------------- portal inteiro
+ * O que se repete em várias telas e a ponte não alcança.
+ */
+
+/* O fundo é plano em toda página: sem os brilhos de sálvia da Visão geral e do 404. */
+:root.trilha .inicio-pagina.partner-page.partner-page {
+  background: var(--fundo);
+}
+
+:root.trilha .inicio-pagina.partner-page.partner-page::before {
+  display: none;
+}
+
+:root.trilha .not-found.not-found {
+  background: var(--fundo);
+}
+
+:root.trilha .not-found .not-found__glow {
+  display: none;
+}
+
+/* A linha pequena acima do título e os rótulos de seção: caixa normal, nunca caixa-alta. */
+html.trilha body .partner-page__subtitle,
+html.trilha body .auth-eyebrow,
+html.trilha body .publica__rotulo,
+html.trilha body .publica__contagem,
+html.trilha body .hc-chip,
+html.trilha body .settings-perfil__group legend,
+html.trilha body .conta-session__eyebrow,
+html.trilha body .conta-risk__eyebrow,
+html.trilha body .inativ-dialog__label,
+html.trilha body .atd-ficha__titulo {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html.trilha body .partner-page__subtitle {
+  margin-bottom: 0.25rem;
+  color: var(--tinta-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+html.trilha body .hc-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* "Mostrar explicações", "Como usar": botões como os outros, não pílulas. */
+html.trilha body .partner-page__guidance.p-button {
+  border-radius: var(--raio-controle);
+}
+
+/*
+ * Os ícones de módulo da Visão geral: a cor do lugar, em disco suave, e não degradês por área.
+ * Clínica é maré, Hotel é lavanda, e o que é do Portal (divulgação, programas, acessos) é mel.
+ */
+:root.trilha .modulos .bloco__icone--ciano {
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+}
+
+:root.trilha .modulos .bloco__icone--lilas {
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+}
+
+:root.trilha .modulos .bloco__icone--pessego,
+:root.trilha .modulos .bloco__icone--verde,
+:root.trilha .modulos .bloco__icone--azul {
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
+}
+
+/*
+ * Segmentos e abas de seção: o mesmo trilho do Trilha em todo lugar — afundado, com a escolhida
+ * em papel e `sombra-1`. O tom (risco, atenção) fica na contagem, que é quem diz o número.
+ */
+html.trilha body .grupo.p-selectbutton,
+html.trilha body .partner-tabs .partner-tabs__list .p-tablist-tab-list {
+  gap: 2px;
+  padding: 3px;
+  border: 0;
+  border-radius: 0.75rem;
+  background: var(--superficie-3);
+}
+
+html.trilha body .grupo.p-selectbutton .p-togglebutton,
+html.trilha body .grupo.p-selectbutton .p-togglebutton .p-togglebutton-content,
+html.trilha body .partner-tabs .partner-tabs__button.p-tab {
+  border-radius: 0.5625rem;
+}
+
+html.trilha body .grupo.p-selectbutton .p-togglebutton,
+html.trilha body .partner-tabs .partner-tabs__button.p-tab {
+  color: var(--tinta-2);
+  font-weight: 500;
+}
+
+html.trilha
+  body
+  .grupo.p-selectbutton
+  .p-togglebutton:not(:disabled):not(.p-togglebutton-checked):hover,
+html.trilha
+  body
+  .partner-tabs
+  .partner-tabs__button.p-tab:not(.p-tab-active):not(.p-disabled):hover {
+  background: transparent;
+  color: var(--tinta);
+}
+
+html.trilha
+  body
+  .grupo.p-selectbutton
+  .p-togglebutton:not(:disabled):not(.p-togglebutton-checked):hover
+  .p-togglebutton-content {
+  background: transparent;
+}
+
+html.trilha body .grupo.p-selectbutton .p-togglebutton.p-togglebutton-checked,
+html.trilha body .partner-tabs .partner-tabs__button.p-tab.p-tab-active,
+html.trilha body .partner-tabs .partner-tabs__button.p-tab.p-tab-active:hover {
+  border-color: transparent;
+  background: transparent;
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+html.trilha
+  body
+  .grupo.p-selectbutton
+  .p-togglebutton.p-togglebutton-checked
+  .p-togglebutton-content,
+html.trilha body .partner-tabs .partner-tabs__button.p-tab.p-tab-active,
+html.trilha body .partner-tabs .partner-tabs__button.p-tab.p-tab-active:hover {
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+}
+
+/*
+ * Entrada (login, cadastro, senha): a arte da marca continua; o texto do lado dela ganha um
+ * cartão nítido em `rail`, no lugar do véu desfocado — legível sobre a sálvia e sobre a pata.
+ */
+:root.trilha .auth-visual-panel__center::before {
+  inset: -2rem -2.25rem;
+  border-radius: var(--raio-painel);
+  background: var(--rail);
+  filter: none;
+}
+
+:root.trilha .auth-visual-panel__content {
+  --auth-on-brand: var(--sobre-rail);
+}
+
+:root.trilha .auth-visual-panel h2 {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+/* -------------------------------------------------------------------- ponte do Portal
+ * As famílias que os componentes do Portal passam por `style` (`--prog-*`, `--div-*`, `--pf-*`,
+ * `--auth-field-*`…), ligadas aos tokens novos em qualquer tela, e não só dentro do `.hc-tema`:
+ * a mesma ponte de `hc-tema.css`, com o seletor do Trilha. O `!important` é o que passa por cima
+ * do `style` inline — é a única forma de uma folha vencer uma variável declarada no elemento.
+ */
+html.trilha [style*='--prog-'] {
+  --prog-card: var(--hc-cartao) !important;
+  --prog-surface: var(--hc-fundo) !important;
+  --prog-line: var(--hc-borda) !important;
+  --prog-line-soft: var(--hc-linha) !important;
+  --prog-text: var(--hc-tinta) !important;
+  --prog-muted: var(--hc-tinta-2) !important;
+  --prog-faint: var(--hc-tinta-2) !important;
+  --prog-primary: var(--hc-marca) !important;
+  --prog-primary-soft: var(--hc-marca-clara) !important;
+  --prog-primary-strong: var(--hc-marca-forte) !important;
+  --prog-success-bg: var(--hc-verde-fundo) !important;
+  --prog-success-text: var(--hc-verde-tinta) !important;
+  --prog-amber-bg: var(--hc-pessego-fundo) !important;
+  --prog-amber-text: var(--hc-pessego-tinta) !important;
+  --prog-warm-bg: var(--hc-coral-fundo) !important;
+  --prog-warm-text: var(--hc-coral-tinta) !important;
+  --prog-shadow-rgb: 20 32 28 !important;
+}
+
+html.trilha [style*='--div-'] {
+  --div-card: var(--hc-cartao) !important;
+  --div-surface: var(--hc-fundo) !important;
+  --div-line: var(--hc-borda) !important;
+  --div-line-soft: var(--hc-linha) !important;
+  --div-text: var(--hc-tinta) !important;
+  --div-muted: var(--hc-tinta-2) !important;
+  --div-faint: var(--hc-tinta-2) !important;
+  --div-on-primary: #ffffff !important;
+  --div-primary: var(--hc-marca) !important;
+  --div-primary-soft: var(--hc-marca-clara) !important;
+  --div-primary-strong: var(--hc-marca-forte) !important;
+  --div-success-bg: var(--hc-verde-fundo) !important;
+  --div-success-text: var(--hc-verde-tinta) !important;
+  --div-amber-bg: var(--hc-pessego-fundo) !important;
+  --div-amber-text: var(--hc-pessego-tinta) !important;
+  --div-warm-bg: var(--hc-coral-fundo) !important;
+  --div-warm-text: var(--hc-coral-tinta) !important;
+  --div-shadow-rgb: 20 32 28 !important;
+}
+
+html.trilha [style*='--iqr-'] {
+  --iqr-card: var(--hc-cartao) !important;
+  --iqr-surface: var(--hc-fundo) !important;
+  --iqr-line: var(--hc-borda) !important;
+  --iqr-text: var(--hc-tinta) !important;
+  --iqr-muted: var(--hc-tinta-2) !important;
+  --iqr-primary: var(--hc-marca) !important;
+  --iqr-primary-soft: var(--hc-marca-clara) !important;
+  --iqr-primary-strong: var(--hc-marca-forte) !important;
+}
+
+html.trilha [style*='--sd-'] {
+  --sd-bg: var(--hc-cartao) !important;
+  --sd-surface: var(--hc-fundo) !important;
+  --sd-line: var(--hc-borda) !important;
+  --sd-text: var(--hc-tinta) !important;
+  --sd-muted: var(--hc-tinta-2) !important;
+  --sd-faint: var(--hc-tinta-2) !important;
+  --sd-on-cta: #ffffff !important;
+  --sd-primary: var(--hc-marca) !important;
+  --sd-primary-soft: var(--hc-marca-clara) !important;
+  --sd-primary-strong: var(--hc-marca-forte) !important;
+  --sd-success-bg: var(--hc-verde-fundo) !important;
+  --sd-success-text: var(--hc-verde-tinta) !important;
+  --sd-warm-bg: var(--hc-coral-fundo) !important;
+  --sd-warm-text: var(--hc-coral-tinta) !important;
+  --sd-shadow-rgb: 20 32 28 !important;
+}
+
+html.trilha [style*='--vc-'] {
+  --vc-bg: var(--hc-cartao) !important;
+  --vc-surface: var(--hc-fundo) !important;
+  --vc-line: var(--hc-borda) !important;
+  --vc-text: var(--hc-tinta) !important;
+  --vc-muted: var(--hc-tinta-2) !important;
+  --vc-faint: var(--hc-tinta-2) !important;
+  --vc-on-cta: #ffffff !important;
+  --vc-primary: var(--hc-marca) !important;
+  --vc-primary-soft: var(--hc-marca-clara) !important;
+  --vc-primary-strong: var(--hc-marca-forte) !important;
+  --vc-success-bg: var(--hc-verde-fundo) !important;
+  --vc-success-text: var(--hc-verde-tinta) !important;
+  --vc-warm-bg: var(--hc-coral-fundo) !important;
+  --vc-warm-text: var(--hc-coral-tinta) !important;
+  --vc-shadow-rgb: 20 32 28 !important;
+}
+
+html.trilha [style*='--vk-'] {
+  --vk-bg: var(--hc-cartao) !important;
+  --vk-surface-soft: var(--hc-fundo) !important;
+  --vk-line: var(--hc-borda) !important;
+  --vk-text: var(--hc-tinta) !important;
+  --vk-muted: var(--hc-tinta-2) !important;
+  --vk-accent: var(--hc-marca-forte) !important;
+  --vk-accent-bg: var(--hc-marca-clara) !important;
+  --vk-warm: var(--hc-coral-tinta) !important;
+  --vk-warm-bg: var(--hc-coral-fundo) !important;
+  --vk-warm-text: var(--hc-coral-tinta) !important;
+  --vk-shadow-rgb: 20 32 28 !important;
+}
+
+/*
+ * O cartão em foco (`usePartnerFocusSurface`): era um gradiente verde de ponta a ponta. No design
+ * novo verde é tinta, não papel — o foco vira o cartão branco da Visão geral, com o número em
+ * tinta e a ação na pílula cheia em degradê.
+ */
+html.trilha [style*='--pf-from'] {
+  --pf-from: var(--hc-cartao) !important;
+  --pf-to: var(--hc-cartao) !important;
+  --pf-glow-rgb: 255 255 255 !important;
+  --pf-on: var(--hc-tinta) !important;
+  --pf-on-soft: var(--hc-tinta-2) !important;
+  --pf-cta-bg: var(--hc-degrade-botao) !important;
+  --pf-cta-text: var(--hc-sobre-marca) !important;
+  --pf-shadow-rgb: 20 32 28 !important;
+  --pf-chip: var(--hc-marca-clara) !important;
+  --pf-field: var(--hc-fundo) !important;
+  --pf-line: var(--hc-borda) !important;
+}
+
+/* O brilho do canto era enfeite do cartão verde; no cartão branco ele só aparece no escuro, como mancha. */
+html.trilha .partner-focus__glow,
+html.trilha .programa-card__glow {
+  display: none;
+}
+
+html.trilha.app-dark [style*='--pf-from'] {
+  --pf-glow-rgb: 21 31 28 !important;
+}
+
+/* Branco, o cartão em foco precisa do fio dos outros cartões para não boiar na página. */
+html.trilha .programa-card--focus {
+  border: 1px solid var(--hc-borda);
+}
+
+/*
+ * Os campos de formulário do login (`AuthTextField`, família `--auth-*`) também aparecem no
+ * Portal (PIX, equipe). Dentro de `.hc-tema` eles ficam brancos com o fio de campo; o login,
+ * fora da classe, segue como está.
+ */
+html.trilha [style*='--auth-field-bg'] {
+  --auth-field-bg: var(--hc-cartao) !important;
+  --auth-border: color-mix(in srgb, var(--hc-marca) 40%, var(--hc-cartao)) !important;
+  --auth-line: var(--hc-borda) !important;
+  --auth-text: var(--hc-tinta) !important;
+  --auth-muted: var(--hc-tinta-2) !important;
+  --auth-soft: var(--hc-tinta-3) !important;
+  --auth-divider: var(--hc-tinta-3) !important;
+  --auth-sage: var(--hc-marca) !important;
+  --auth-sage-strong: var(--hc-marca-forte) !important;
+  --auth-sage-soft: var(--hc-marca) !important;
+  --auth-sage-tint: var(--hc-marca-clara) !important;
+  --auth-focus: var(--hc-marca) !important;
+  --auth-focus-ring: var(--hc-marca-clara) !important;
+  --auth-link: var(--hc-marca-forte) !important;
+  --auth-danger: var(--hc-coral-tinta) !important;
+}
+
+/* O menu da busca de acessos (o overlay leva a família `--atend-ov-*`). */
+html.trilha [style*='--atend-ov-'],
+[style*='--atend-ov-'] {
+  --atend-ov-bg: var(--hc-cartao) !important;
+  --atend-ov-hover: var(--hc-fundo) !important;
+  --atend-ov-line: var(--hc-borda) !important;
+  --atend-ov-muted: var(--hc-tinta-2) !important;
+  --atend-ov-selected-bg: var(--hc-marca-clara) !important;
+  --atend-ov-selected-text: var(--hc-marca-forte) !important;
+  --atend-ov-text: var(--hc-tinta) !important;
+}
+
+html.trilha [style*='--div-page-muted'] {
+  --div-page-muted: var(--hc-tinta-2) !important;
+}
+
+html.trilha [style*='--prog-page-muted'] {
+  --prog-page-muted: var(--hc-tinta-2) !important;
 }

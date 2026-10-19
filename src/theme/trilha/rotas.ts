@@ -2,16 +2,16 @@ import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 /**
- * As telas que já estão no design Trilha.
+ * O Trilha vale no portal inteiro.
  *
- * O Trilha entra tela a tela, como entrou o `.hc-tema`: a tela da lista leva a raiz para
- * `html.trilha` e a moldura veste a pele nova; as outras seguem como estão. Para migrar mais uma,
- * acrescente o caminho aqui e confira-a no claro e no escuro.
+ * Entrou primeiro na Agenda, como o `.hc-tema` entrou tela a tela, e de lá passou para todas. A raiz
+ * leva `html.trilha` e a moldura veste a pele dele. Esta lista são as exceções: uma tela posta aqui
+ * volta ao design anterior inteira, moldura incluída. Hoje não há nenhuma.
  */
-export const ROTAS_DO_TRILHA = ['/veterinario/agenda'] as const
+export const ROTAS_FORA_DO_TRILHA: readonly string[] = []
 
 export function rotaUsaTrilha(caminho: string) {
-  return ROTAS_DO_TRILHA.some((rota) => caminho === rota || caminho.startsWith(`${rota}/`))
+  return !ROTAS_FORA_DO_TRILHA.some((rota) => caminho === rota || caminho.startsWith(`${rota}/`))
 }
 
 /** O lugar de cada seção do menu: é ele que escolhe a cor (`pj-lugar--*`). */

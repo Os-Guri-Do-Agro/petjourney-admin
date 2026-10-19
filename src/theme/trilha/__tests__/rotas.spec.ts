@@ -3,15 +3,12 @@ import { describe, expect, it } from 'vitest'
 import { lugarDaSecao, rotaUsaTrilha } from '../rotas'
 
 describe('rotaUsaTrilha', () => {
-  it('liga o Trilha na Agenda e no que mora embaixo dela', () => {
+  it('liga o Trilha em todas as telas do portal', () => {
     expect(rotaUsaTrilha('/veterinario/agenda')).toBe(true)
-    expect(rotaUsaTrilha('/veterinario/agenda/semana')).toBe(true)
-  })
-
-  it('deixa as outras telas no design atual', () => {
-    expect(rotaUsaTrilha('/veterinario/meu-dia')).toBe(false)
-    expect(rotaUsaTrilha('/veterinario/agendamentos')).toBe(false)
-    expect(rotaUsaTrilha('/inicio')).toBe(false)
+    expect(rotaUsaTrilha('/veterinario/paciente/pet-mel/resumo')).toBe(true)
+    expect(rotaUsaTrilha('/hotel/mapa')).toBe(true)
+    expect(rotaUsaTrilha('/parceiro/carteira')).toBe(true)
+    expect(rotaUsaTrilha('/auth/login')).toBe(true)
   })
 })
 

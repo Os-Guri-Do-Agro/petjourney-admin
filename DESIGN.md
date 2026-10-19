@@ -350,23 +350,29 @@ código divergem, a ficha segue o código, que é o que o usuário vê e aprovou
 [src/pages/(accounts)/inicio.vue](<src/pages/(accounts)/inicio.vue>) e `src/components/home/`,
 e a composição da tela, no brief `.impeccable/surfaces/src-pages-accounts-inicio-vue.md`.
 
-### Trilha (em teste, 19/10/2026)
+### Trilha (19/10/2026)
 
-Um design autoral, em teste na branch `design/trilha-agenda`, só na **Agenda** (`/veterinario/agenda`).
-Os nós ligados da pata do logo viram a linguagem de orientação: cada lugar do menu tem uma cor
-(Clínica maré, Hotel lavanda, Portal mel, Pets sálvia; Início e Conta neutros), o trilho é escuro
-nos dois temas e acende o lugar aberto, e o cabeçalho mostra a trilha (lugar, tela) no lugar do
-rótulo. Texto em Readex Pro (a do app do responsável), números em Instrument Sans tabular; névoa de
-sálvia no chão, papel quase branco, tinta verde-noite, ação em musgo.
+O design do portal inteiro desde 19/10/2026, testado primeiro na Agenda (branch
+`design/trilha-agenda`). Os nós ligados da pata do logo viram a linguagem de orientação: cada lugar
+do menu tem uma cor (Clínica maré, Hotel lavanda, Portal mel, Pets sálvia; Início e Conta neutros),
+o trilho é escuro nos dois temas e acende o lugar aberto, e o cabeçalho mostra a trilha (lugar,
+tela) no lugar do rótulo. Texto em Readex Pro (a do app do responsável), números em Instrument Sans
+tabular; névoa de sálvia no chão, papel quase branco, tinta verde-noite, ação em musgo. As telas
+mantêm a estrutura e o conteúdo; o que mudou é o acabamento.
 
 - **Tokens** — `src/theme/trilha/trilha-tokens.css`, em `:root.trilha` e `:root.trilha.app-dark`;
-  os valores vêm do design system "PetJourney Admin".
-- **Ponte e acabamento** — `src/theme/trilha/trilha-tema.css`: os `--hc-*`, os `--clinic-*` que
-  não passam por eles e os tokens semânticos do PrimeVue apontam para os do Trilha; mais as peças
-  `pj-*` (lugar, trilha) e o que a ponte não alcança.
-- **Quais telas** — `src/theme/trilha/rotas.ts` (`ROTAS_DO_TRILHA`). Na rota da lista, a raiz leva
-  `trilha` e o `AppShell` veste a pele nova (`app-shell--trilha`). Para testar mais uma tela,
-  acrescente o caminho e confira no claro e no escuro.
+  os valores vêm do design system "PetJourney Admin". A paleta em JS (`src/theme/colors.ts`,
+  `LightColors`/`DarkColors`) espelha os mesmos tokens em hex, para `style` inline, preset do
+  PrimeVue e gráficos; o linho segue lá como `LinhoLightColors`/`LinhoDarkColors`.
+- **Ponte e acabamento** — `src/theme/trilha/trilha-tema.css`: os `--hc-*`, os `--clinic-*`, os
+  tokens semânticos do PrimeVue, as famílias do Portal passadas por `style` e o toast apontam para os
+  do Trilha; mais as peças `pj-*` (lugar, trilha) e o que a ponte não alcança (fundos com brilho,
+  rótulos em caixa-alta, segmentos, entrada).
+- **Onde vale** — `src/theme/trilha/rotas.ts`: a raiz leva `trilha` em todas as rotas e o
+  `AppShell` veste a pele nova (`app-shell--trilha`). `ROTAS_FORA_DO_TRILHA` lista exceções; hoje
+  nenhuma.
+- **Ao criar tela nova** — use os tokens do Trilha (`--superficie`, `--tinta`, `--musgo`, a cor do
+  lugar) direto; os `--hc-*` e `--clinic-*` continuam funcionando pela ponte.
 
 **Key Characteristics:**
 
