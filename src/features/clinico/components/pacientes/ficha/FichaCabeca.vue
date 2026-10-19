@@ -805,4 +805,26 @@ function destino(vista: VistaDaFicha): string {
     left: 10px;
   }
 }
+
+/* No celular as quatro dividem a largura: a aba acesa nunca fica escondida fora da tela. */
+@media (max-width: 480px) {
+  .capa__abas {
+    gap: 0;
+  }
+
+  .capa__aba,
+  .capa__aba:first-child {
+    flex: 1 1 auto;
+    justify-content: center;
+    gap: 4px;
+    padding-inline: 4px;
+    font-size: 13.5px;
+  }
+
+  .capa__aba--atual::after,
+  .capa__aba--atual:first-child::after {
+    right: 4px;
+    left: 4px;
+  }
+}
 </style>
