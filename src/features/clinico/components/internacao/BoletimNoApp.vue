@@ -138,53 +138,55 @@ watch(
  */
 .celular__moldura {
   display: flex;
-  width: min(20rem, 100%);
-  max-height: 34rem;
+  width: min(330px, 100%);
+  max-height: 560px;
   flex-direction: column;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: 1.6rem;
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface-sunken);
-  box-shadow: var(--clinic-shadow-card);
+  gap: 12px;
+  padding: 14px 12px 12px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 30px;
+  background: var(--superficie-3);
+  box-shadow: var(--sombra-1);
 }
 
 .celular__topo {
   display: flex;
   align-items: center;
-  padding-bottom: var(--clinic-space-3);
-  border-bottom: 1px solid var(--clinic-line);
-  gap: var(--clinic-space-3);
+  gap: 10px;
+  padding: 4px 6px 12px;
+  border-bottom: 1px solid var(--linha);
 }
 
 .celular__avatar {
   display: grid;
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+  width: 34px;
+  height: 34px;
+  flex: none;
   place-items: center;
+  border-radius: 50%;
+  background: var(--pj-lugar-fundo, var(--musgo-fundo));
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-family: var(--font-dados);
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .celular__identidade {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
+  gap: 1px;
 }
 
 .celular__identidade strong {
   overflow-wrap: anywhere;
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 .celular__identidade span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .celular__conversa {
@@ -192,76 +194,89 @@ watch(
   overflow-y: auto;
   flex: 1;
   align-content: start;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+  padding: 0 2px 2px;
 }
 
 .celular__vazio {
   margin: auto 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  padding: 24px 8px;
+  color: var(--tinta-2);
+  font-size: 13px;
   text-align: center;
 }
 
 .celular__dia {
-  margin: var(--clinic-space-2) 0 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  text-align: center;
+  justify-self: center;
+  margin: 8px 0 2px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 12px;
 }
 
 .balao {
-  padding: var(--clinic-space-3);
-  border-radius: 0.9rem;
-  border-end-start-radius: 0.2rem;
-  background: var(--clinic-surface);
+  max-width: 92%;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border-end-start-radius: 4px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
 }
 
 .balao__texto {
   margin: 0;
-  font-size: var(--clinic-font-label);
+  color: var(--tinta);
+  font-size: 13.5px;
   line-height: 1.5;
+  white-space: pre-line;
 }
 
 .balao__foto {
   display: grid;
-  margin: var(--clinic-space-2) 0 0;
-  gap: 0.2rem;
+  gap: 4px;
   justify-items: center;
+  margin: 8px 0 0;
 }
 
 /* Sem foto de verdade no protótipo: um retângulo honesto com as iniciais do paciente. */
 .balao__fotoMarca {
   display: grid;
   width: 100%;
-  height: 5rem;
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
+  height: 84px;
   place-items: center;
+  border-radius: 10px;
+  background: var(--pj-lugar-fundo, var(--musgo-fundo));
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-family: var(--font-dados);
+  font-size: 20px;
+  font-weight: 650;
 }
 
 .balao__foto figcaption {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12px;
 }
 
 .balao__rodape {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  margin-top: var(--clinic-space-2);
-  gap: var(--clinic-space-2);
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  gap: 8px;
+  margin-top: 6px;
+  color: var(--tinta-3);
+  font-family: var(--font-dados);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .balao__ligacao {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
+  gap: 4px;
+  color: var(--musgo);
+  font-family: var(--font-texto);
+  font-weight: 600;
 }
 </style>

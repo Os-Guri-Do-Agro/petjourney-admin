@@ -25,13 +25,14 @@ import type { MenuItem } from 'primevue/menuitem'
 import Popover from 'primevue/popover'
 import SelectButton from 'primevue/selectbutton'
 import ToggleSwitch from 'primevue/toggleswitch'
-import { computed, ref, useId } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicDensityToggle from '../base/ClinicDensityToggle.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { useClinicPrefs } from '../../composables/useClinicPrefs'
 import type { AppointmentStatus } from '../../data/types'
+import { addDays } from '../../domain/clinic-time'
 import { useAgendaStore } from '../../stores/agenda'
 import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
@@ -63,6 +64,35 @@ const acoes = ref<InstanceType<typeof Menu> | null>(null)
 const idOcultarCancelados = useId()
 
 const ehHoje = computed(() => agenda.data === clinicClock.today())
+
+/*
+ * A carga da semana vem do mesmo repositório da visão "Semana". Carrega quando a semana muda e
+ * quando qualquer tela mexe na agenda (`clinico.revisao`): a fita precisa contar o encaixe que
+ * acabou de entrar.
+ */
+watch(
+  () => [agenda.inicioDaSemana, clinico.revisao],
+  () => void agenda.carregarSemana(),
+  { immediate: true },
+)
+
+const diasDaSemana = computed(() =>
+  Array.from({ length: 7 }, (_, indice) => {
+    const data = addDays(agenda.inicioDaSemana, indice)
+    const carga = agenda.semanaDias.find((dia) => dia.data === data)
+
+    return {
+      data,
+      semana: formato.diaDaSemanaCurto(data),
+      numero: Number(data.slice(8, 10)),
+      rotuloLongo: formato.dataLonga(data),
+      hoje: data === clinicClock.today(),
+      ocupacao: carga?.ocupacao ?? 0,
+      agendados: carga?.agendados ?? 0,
+      fechado: carga ? carga.capacidadeMinutos === 0 : false,
+    }
+  }),
+)
 
 /** Situações que valem virar filtro: as que a recepção procura, não as sete do domínio. */
 const STATUS_FILTRAVEIS: AppointmentStatus[] = [
@@ -121,68 +151,88 @@ const itensAcoes = computed<MenuItem[]>(() => [
 
 <template>
   <div class="barra">
-    <!-- onde estou -->
-    <div class="barra__data">
+    <!--
+      A semana em fita: cada dia com a carga dele. Andar de dia em dia é o caso comum, e ver de
+      relance qual dia está cheio é o que a recepção precisa para oferecer um horário por telefone.
+    -->
+    <div class="semana" role="group" :aria-label="t('clinico.agenda.semanaRotulo')">
       <Button
+        class="semana__seta"
         icon="ph ph-caret-left"
         severity="secondary"
-        outlined
-        size="small"
+        text
         :title="`${t('clinico.agenda.diaAnterior')} (←)`"
         :aria-label="t('clinico.agenda.diaAnterior')"
         @click="agenda.avancar(-1)"
       />
 
-      <div class="barra__hoje">
-        <strong class="barra__titulo">{{ formato.dataLonga(agenda.data) }}</strong>
-        <Button
-          v-if="!ehHoje"
-          class="barra__link"
-          link
-          size="small"
-          :label="t('clinico.agenda.hoje')"
-          :title="`${t('clinico.agenda.hoje')} (T)`"
-          @click="agenda.hoje()"
-        />
-        <span v-else class="barra__marca">{{ t('clinico.agenda.hoje') }}</span>
-      </div>
+      <ol class="semana__dias">
+        <li v-for="dia in diasDaSemana" :key="dia.data">
+          <button
+            type="button"
+            class="dia"
+            :class="{
+              'dia--escolhido': dia.data === agenda.data,
+              'dia--hoje': dia.hoje,
+              'dia--fechado': dia.fechado,
+            }"
+            :aria-pressed="dia.data === agenda.data"
+            :aria-label="dia.rotuloLongo"
+            @click="agenda.irPara(dia.data)"
+          >
+            <span class="dia__semana">{{ dia.semana }}</span>
+            <span class="dia__numero ui-num">{{ dia.numero }}</span>
+            <span class="dia__carga" aria-hidden="true">
+              <span :style="{ width: `${Math.round(dia.ocupacao * 100)}%` }" />
+            </span>
+            <span class="dia__total ui-num">{{ dia.fechado ? '–' : dia.agendados }}</span>
+          </button>
+        </li>
+      </ol>
 
       <Button
+        class="semana__seta"
         icon="ph ph-caret-right"
         severity="secondary"
-        outlined
-        size="small"
+        text
         :title="`${t('clinico.agenda.proximoDia')} (→)`"
         :aria-label="t('clinico.agenda.proximoDia')"
         @click="agenda.avancar(1)"
       />
+
+      <Button
+        v-if="!ehHoje"
+        class="semana__hoje"
+        severity="secondary"
+        size="small"
+        icon="ph ph-arrow-u-up-left"
+        :label="t('clinico.agenda.hoje')"
+        :title="`${t('clinico.agenda.hoje')} (T)`"
+        @click="agenda.hoje()"
+      />
     </div>
 
-    <!-- o que estou vendo -->
-    <SelectButton
-      v-model="agenda.visao"
-      class="segmentado"
-      :options="opcoesVisao"
-      option-label="rotulo"
-      option-value="valor"
-      :allow-empty="false"
-      size="small"
-      :aria-label="t('clinico.agenda.visaoDia')"
-    >
-      <template #option="{ option }">
-        <span :title="`${option.rotulo} (${option.atalho})`">{{ option.rotulo }}</span>
-      </template>
-    </SelectButton>
-
-    <!-- ações -->
     <div class="barra__acoes">
+      <SelectButton
+        v-model="agenda.visao"
+        class="segmentado"
+        :options="opcoesVisao"
+        option-label="rotulo"
+        option-value="valor"
+        :allow-empty="false"
+        :aria-label="t('clinico.agenda.visaoDia')"
+      >
+        <template #option="{ option }">
+          <span :title="`${option.rotulo} (${option.atalho})`">{{ option.rotulo }}</span>
+        </template>
+      </SelectButton>
+
       <Button
         class="painel-botao"
         :class="{ 'painel-botao--ativo': filtrosAtivos > 0 }"
-        icon="ph ph-funnel"
+        icon="ph ph-funnel-simple"
         severity="secondary"
         outlined
-        size="small"
         :label="t('clinico.agenda.filtros')"
         :badge="filtrosAtivos > 0 ? String(filtrosAtivos) : undefined"
         :aria-label="t('clinico.agenda.filtros')"
@@ -194,7 +244,6 @@ const itensAcoes = computed<MenuItem[]>(() => [
         icon="ph ph-sliders-horizontal"
         severity="secondary"
         outlined
-        size="small"
         :label="t('clinico.agenda.exibicao')"
         :aria-label="t('clinico.agenda.exibicao')"
         aria-haspopup="true"
@@ -202,10 +251,9 @@ const itensAcoes = computed<MenuItem[]>(() => [
       />
 
       <Button
-        icon="ph ph-dots-three-vertical"
+        icon="ph ph-dots-three"
         severity="secondary"
         outlined
-        size="small"
         :aria-label="t('clinico.agenda.maisAcoes')"
         :title="t('clinico.agenda.maisAcoes')"
         aria-haspopup="true"
@@ -214,10 +262,10 @@ const itensAcoes = computed<MenuItem[]>(() => [
     </div>
 
     <!-- ------------------------------------------------------------------ filtros -->
-    <Popover ref="filtros" class="clinic-overlay hc-tema">
+    <Popover ref="filtros" class="clinic-overlay">
       <div class="painel clinic-scope">
         <section class="painel__secao">
-          <h3 class="clinic-label">{{ t('clinico.agenda.agruparPorProfissional') }}</h3>
+          <h3 class="painel__titulo">{{ t('clinico.agenda.filtroProfissionais') }}</h3>
           <div class="fichas">
             <Button
               v-for="profissional in clinico.profissionais"
@@ -242,7 +290,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
         </section>
 
         <section class="painel__secao">
-          <h3 class="clinic-label">{{ t('clinico.status.agendado') }}</h3>
+          <h3 class="painel__titulo">{{ t('clinico.agenda.filtroSituacao') }}</h3>
           <div class="fichas">
             <Button
               v-for="status in STATUS_FILTRAVEIS"
@@ -274,10 +322,10 @@ const itensAcoes = computed<MenuItem[]>(() => [
     </Popover>
 
     <!-- ----------------------------------------------------------------- exibição -->
-    <Popover ref="exibicao" class="clinic-overlay hc-tema">
+    <Popover ref="exibicao" class="clinic-overlay">
       <div class="painel clinic-scope">
         <section v-if="agenda.visao === 'dia'" class="painel__secao">
-          <h3 class="clinic-label">{{ t('clinico.agenda.exibicao') }}</h3>
+          <h3 class="painel__titulo">{{ t('clinico.agenda.exibicao') }}</h3>
           <SelectButton
             v-model="agenda.agrupamento"
             class="segmentado"
@@ -299,7 +347,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
         </section>
 
         <section v-if="agenda.visao === 'dia'" class="painel__secao">
-          <h3 class="clinic-label">{{ t('clinico.agenda.formato.titulo') }}</h3>
+          <h3 class="painel__titulo">{{ t('clinico.agenda.formato.titulo') }}</h3>
           <SelectButton
             v-model="formatoDaAgenda"
             class="segmentado"
@@ -321,7 +369,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
         </section>
 
         <section class="painel__secao">
-          <h3 class="clinic-label">{{ t('clinico.densidade.titulo') }}</h3>
+          <h3 class="painel__titulo">{{ t('clinico.densidade.titulo') }}</h3>
           <ClinicDensityToggle />
         </section>
 
@@ -350,107 +398,179 @@ const itensAcoes = computed<MenuItem[]>(() => [
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+  justify-content: space-between;
+  gap: 12px 20px;
 }
 
-.barra__data {
+/* ------------------------------------------------------------------------- a semana em fita */
+
+.semana {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 4px;
 }
 
-.barra__hoje {
-  display: grid;
-  gap: 0.1rem;
-  min-width: 11rem;
-}
-
-.barra__titulo {
-  font-size: var(--clinic-font-value);
-  font-weight: 750;
-  letter-spacing: -0.01em;
-}
-
-/*
- * `capitalize` transformava "sexta-feira, 21 de agosto" em "Sexta-Feira, 21 De Agosto".
- * Em português só a primeira letra sobe.
- */
-.barra__titulo::first-letter {
-  text-transform: uppercase;
-}
-
-/* "Hoje" é um link sob a data: sem o recuo de botão, alinhado à esquerda do título. */
-.barra__link.p-button {
-  justify-self: start;
+.semana__dias {
+  display: flex;
+  gap: 4px;
+  margin: 0;
   padding: 0;
-  font-size: var(--clinic-font-label);
+  list-style: none;
 }
 
-.barra__marca {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.dia {
+  position: relative;
+  display: grid;
+  width: 58px;
+  justify-items: center;
+  gap: 2px;
+  padding: 6px 4px 7px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--tinta-2);
+  cursor: pointer;
+  font: inherit;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
-/* As ações vão para a direita; a barra respira no meio. */
+.dia:hover {
+  background: var(--superficie-2);
+  color: var(--tinta);
+}
+
+.dia:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: 1px;
+}
+
+.dia__semana {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dia__numero {
+  color: var(--tinta);
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+/* A barrinha de carga: quanto do expediente já está marcado. */
+.dia__carga {
+  display: block;
+  width: 30px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--superficie-3);
+}
+
+.dia__carga span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--clinica);
+}
+
+.dia__total {
+  color: var(--tinta-3);
+  font-size: 11px;
+}
+
+.dia--hoje .dia__semana {
+  color: var(--clinica-tinta);
+  font-weight: 650;
+}
+
+.dia--hoje::after {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--clinica);
+  content: '';
+}
+
+.dia--escolhido {
+  border-color: color-mix(in oklab, var(--clinica) 45%, transparent);
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+}
+
+.dia--escolhido:hover {
+  background: var(--clinica-fundo);
+}
+
+.dia--escolhido .dia__numero {
+  color: var(--clinica-tinta);
+}
+
+.dia--escolhido .dia__carga {
+  background: color-mix(in oklab, var(--clinica) 20%, var(--superficie));
+}
+
+.dia--fechado .dia__numero {
+  color: var(--tinta-3);
+}
+
+.semana__hoje.p-button {
+  margin-left: 6px;
+}
+
+/* --------------------------------------------------------------------------------- ações */
+
 .barra__acoes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-2);
-  margin-inline-start: auto;
+  gap: 8px;
 }
 
-/* Anel + peso: a marcação precisa se ler antes da cor, e sobreviver à escala de cinza. */
 .segmentado :deep(.p-togglebutton-checked .p-togglebutton-content) {
-  box-shadow:
-    var(--clinic-shadow-card),
-    inset 0 0 0 1.5px var(--clinic-accent-strong);
-  color: var(--clinic-accent-strong);
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .segmentado__opcao {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 6px;
   white-space: nowrap;
 }
 
 .segmentado__opcao i {
-  font-size: 0.7rem;
+  font-size: 14px;
 }
 
-/*
- * Filtro ativo se anuncia: contorno e fundo no acento, além do contador na etiqueta — evita
- * "a agenda sumiu". O seletor repete as classes do botão para vencer a regra do módulo.
- */
+/* Filtro ativo se anuncia: contorno e fundo no lugar, além do contador — evita "a agenda sumiu". */
 .painel-botao--ativo.p-button.p-button-secondary.p-button-outlined,
 .painel-botao--ativo.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover,
 .ficha--ativa.p-button.p-button-secondary.p-button-outlined,
 .ficha--ativa.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
+  border-color: var(--clinica);
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
 }
 
 .painel {
   display: grid;
-  gap: var(--clinic-space-4);
-  width: min(22rem, 90vw);
-  padding: var(--clinic-space-2);
+  gap: 18px;
+  width: min(23rem, 90vw);
+  padding: 6px;
 }
 
 .painel__secao {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+}
+
+.painel__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .painel__limpar.p-button {
@@ -460,10 +580,9 @@ const itensAcoes = computed<MenuItem[]>(() => [
 .painel__switch {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-base);
-  font-weight: 650;
+  gap: 10px;
+  color: var(--tinta);
+  font-size: 14px;
 }
 
 .painel__switch label {
@@ -473,21 +592,21 @@ const itensAcoes = computed<MenuItem[]>(() => [
 .fichas {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clinic-space-1);
+  gap: 6px;
 }
 
 .ficha.p-button {
-  gap: 0.35rem;
+  gap: 6px;
 }
 
 .ficha__cor {
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 9px;
+  height: 9px;
   border-radius: 999px;
 }
 
 .menu__item {
-  gap: var(--clinic-space-2);
+  gap: 10px;
 }
 
 .menu__rotulo {
@@ -495,18 +614,28 @@ const itensAcoes = computed<MenuItem[]>(() => [
 }
 
 .menu__item kbd {
-  padding: 0 0.3rem;
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: 0.3rem;
-  color: var(--clinic-faint);
-  font-family: inherit;
-  font-size: 0.62rem;
+  padding: 1px 6px;
+  border: 1px solid var(--linha);
+  border-radius: 5px;
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 11px;
 }
 
-@media (max-width: 900px) {
-  .barra__acoes {
+@media (max-width: 1100px) {
+  .dia {
+    width: 48px;
+  }
+}
+
+@media (max-width: 720px) {
+  .semana {
     width: 100%;
-    margin-inline-start: 0;
+    overflow-x: auto;
+  }
+
+  .dia__total {
+    display: none;
   }
 }
 </style>

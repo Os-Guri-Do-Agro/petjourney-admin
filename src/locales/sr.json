@@ -396,6 +396,20 @@
       "hide": "Sakrijte opise",
       "tour": "Kako se koristi",
       "tourTitulo": "Vodič kroz ovaj ekran, deo po deo"
+    },
+    "barra": {
+      "pular": "Preskoči na sadržaj",
+      "navegacao": "Glavna navigacija",
+      "inicio": "Početna",
+      "criarTitulo": "Napravi novo",
+      "criarItens": {
+        "agendamento": "Termin",
+        "agendamentoDica": "Zakaži termin u rasporedu",
+        "paciente": "Pacijent",
+        "pacienteDica": "Registruj ljubimca i vlasnika",
+        "fila": "Čekanje na termin",
+        "filaDica": "Dodaj nekoga na listu čekanja"
+      }
     }
   },
   "frame": {
@@ -2187,7 +2201,12 @@
       "telas": "Ekrani",
       "pacientes": "Pacijenti",
       "buscando": "Pretraga…",
-      "semResultado": "Nema rezultata za „{termo}“."
+      "semResultado": "Nema rezultata za „{termo}“.",
+      "teclas": {
+        "percorrer": "kretanje",
+        "abrir": "otvaranje",
+        "fechar": "zatvaranje"
+      }
     },
     "formato": {
       "minutos": "{valor} min",
@@ -2439,7 +2458,8 @@
             "futuro": "Postupak ne može biti u budućnosti."
           }
         }
-      }
+      },
+      "pesadoHoje": "Izmereno danas"
     },
     "tabela": {
       "abrir": "Prikaži detalje",
@@ -2632,7 +2652,8 @@
       "frase": {
         "atendimentos": "{total} termin | {total} termina | {total} termina",
         "naRecepcao": "na recepciji: {total}",
-        "vazio": "Nema zakazanih termina"
+        "vazio": "Nema zakazanih termina",
+        "comRecepcao": "{atendimentos}, {recepcao}"
       },
       "proximoPasso": {
         "aguardando": "Zabeležite dolazak",
@@ -2654,6 +2675,24 @@
         "titulo": "Format",
         "tabela": "Tabela",
         "linhaDoTempo": "Vremenska linija"
+      },
+      "semanaRotulo": "Dani u nedelji",
+      "filtroProfissionais": "Stručnjaci",
+      "filtroSituacao": "Status",
+      "semExpediente": "Klinika ne radi ovog dana.",
+      "drawer": {
+        "irPara": "Otvori"
+      },
+      "aviso": {
+        "professional-overlap": "Termin zauzet",
+        "room-overlap": "Sala zauzeta",
+        "pet-double-book": "Pacijent već zakazan",
+        "block-invasion": "Blokirano vreme",
+        "outside-hours": "Van radnog vremena",
+        "lunch-overlap": "Pauza za ručak",
+        "holiday-closed": "Klinika zatvorena",
+        "over-capacity": "Pun dan",
+        "type-room-mismatch": "Neodgovarajuća sala"
       }
     },
     "meuDia": {
@@ -2722,7 +2761,8 @@
         "porProfissional": "Po stručnom licu",
         "horarios": "Najprometniji sati",
         "horariosAjuda": "Koliko pregleda počinje u svakom satu.",
-        "diagnosticos": "Najčešće dijagnoze"
+        "diagnosticos": "Najčešće dijagnoze",
+        "porOrigem": "Odakle dolaze termini"
       },
       "legenda": {
         "finalizados": "Obavljeni",
@@ -2752,6 +2792,10 @@
       },
       "mapa": {
         "hora": "Sat"
+      },
+      "numero": {
+        "horas": "Vreme pregleda",
+        "horasNota": "zbir završenih pregleda"
       }
     },
     "bulario": {
@@ -3102,6 +3146,17 @@
         "aguardando": "Niko ne čeka termin | {n} čeka termin | {n} čekaju termin | {n} čeka termin",
         "ofertas": "{n} ponuda čeka odgovor | {n} ponude čekaju odgovor | {n} ponuda čeka odgovor",
         "acoes": "Radnje liste čekanja"
+      },
+      "tela": {
+        "resumo": "{aguardando}, {ofertas}",
+        "ofertas": "Ponude koje čekaju odgovor",
+        "ofertasDescricao": "Termin se čuva do roka. Posle toga se vraća klinici.",
+        "esperando": "Čekaju termin",
+        "esperandoDescricao": "Prvo hitni, zatim po redosledu dolaska.",
+        "resolvidas": "Rešeno",
+        "paraResponder": "za odgovor, do {hora}",
+        "naFila": "u redu čekanja",
+        "vagaPara": "Ponuđeni termin"
       }
     },
     "faltas": {
@@ -3187,6 +3242,26 @@
       "acoes": {
         "rotulo": "Akcije za nedolaske",
         "justificarProxima": "Obradite sledeći"
+      },
+      "resumo": {
+        "pendentes": "{total} pacijent ima izostanak bez razloga. | {total} pacijenta imaju izostanke bez razloga. | {total} pacijenata ima izostanke bez razloga.",
+        "comecePor": "Počnite od pacijenta {pet}, poslednji izostanak {quando}.",
+        "emDia": "Svi izostanci imaju razlog. Niko ne čeka poziv."
+      },
+      "numeros": {
+        "rotulo": "Izostanci u brojkama",
+        "pendentes": "izostanak za obradu | izostanka za obradu | izostanaka za obradu",
+        "reincidentes": "pacijent koji često izostaje | pacijenta koji često izostaju | pacijenata koji često izostaju",
+        "limite": "{total} izostanak ili više | {total} izostanka ili više | {total} izostanaka ili više",
+        "agenda": "izgubljenog vremena",
+        "emFaltas": "u {total} izostanku | u {total} izostanka | u {total} izostanaka"
+      },
+      "detalhe": {
+        "convite": "Izaberite pacijenta sa liste",
+        "conviteTexto": "Izostanci vlasnika pojavljuju se ovde, jedan po jedan, sa datumom, razlogom i sledećim korakom: obrada ili novi termin.",
+        "contagem": "{total} izostanak | {total} izostanka | {total} izostanaka",
+        "semMotivo": "{total} bez razloga | {total} bez razloga | {total} bez razloga",
+        "ligar": "Pozovi {telefone}"
       }
     },
     "prontuario": {
@@ -3677,7 +3752,30 @@
       "rascunhos": "Kartoni u nacrtu",
       "retornos": "Kontrole bez termina",
       "ofertasDaFila": "Ponude sa liste čekanja bez odgovora",
-      "saudacao": "Ništa na čekanju | {n} stavka za rešavanje | {n} stavke za rešavanje | {n} stavki za rešavanje"
+      "saudacao": "Ništa na čekanju | {n} stavka za rešavanje | {n} stavke za rešavanje | {n} stavki za rešavanje",
+      "resumo": {
+        "rascunhos": "{total} karton u nacrtu | {total} kartona u nacrtu | {total} kartona u nacrtu",
+        "retornos": "{total} kontrola bez termina | {total} kontrole bez termina | {total} kontrola bez termina",
+        "ofertas": "{total} ponuda sa liste čekanja bez odgovora | {total} ponude sa liste čekanja bez odgovora | {total} ponuda sa liste čekanja bez odgovora",
+        "frase": "{lista}.",
+        "emDia": "Ništa nije zaostalo: nema nacrta, kontrola ni ponuda na čekanju."
+      },
+      "porque": {
+        "rascunhos": "Pregledi koji su počeli, a nisu završeni. Dok se karton ne zatvori, sažetak ne stiže do vlasnika.",
+        "retornos": "Veterinar je na pregledu tražio kontrolu, a rok je stigao bez termina u rasporedu.",
+        "ofertas": "Termin je ponuđen nekome sa liste čekanja. Kad rok istekne, termin se vraća klinici."
+      },
+      "semQueixa": "Bez zabeleženog razloga dolaska",
+      "semDiagnostico": "Bez zabeležene dijagnoze",
+      "abertoHoje": "Otvoren danas u {hora}",
+      "abertoHa": "Otvoren {total} dan | Otvoren {total} dana | Otvoren {total} dana",
+      "venceHoje": "Rok je danas",
+      "atraso": "{total} dan kašnjenja | {total} dana kašnjenja | {total} dana kašnjenja",
+      "vaga": "Termin {data} u {hora}",
+      "acao": {
+        "continuar": "Nastavi karton",
+        "verNaFila": "Pogledaj na listi"
+      }
     },
     "atalhos": {
       "titulo": "Prečice na tastaturi",
@@ -3825,7 +3923,8 @@
       "aba": {
         "aplicadas": "Primenjene",
         "atraso": "Kasne",
-        "estoque": "Zalihe"
+        "estoque": "Zalihe",
+        "chamada": "Lista za pozive"
       },
       "buscar": "Pacijent, vlasnik, vakcina ili serija…",
       "aplicadasVazioTitulo": "Nema zabeleženih vakcinacija",
@@ -4053,7 +4152,26 @@
         "aVencer": "{n} ističe za 30 dana | {n} ističu za 30 dana | {n} ističe za 30 dana"
       },
       "mostrarMais": "Prikaži još {n} (preostalo {total})",
-      "potencialFrase": "Ako pozovete sve, vraćate {duracao} rasporeda (20 min po davanju)."
+      "potencialFrase": "Ako pozovete sve, vraćate {duracao} rasporeda (20 min po davanju).",
+      "par": "{a}, {b}",
+      "placar": {
+        "vencido": "istekla vakcina | istekle vakcine | isteklih vakcina",
+        "proximo": "ističe za 30 dana | ističu za 30 dana | ističe za 30 dana",
+        "serie-incompleta": "otvorena serija | otvorene serije | otvorenih serija",
+        "todos": "ukupno",
+        "dica": {
+          "vencido": "Pozvati danas",
+          "proximo": "Ulaze u raspored ove nedelje",
+          "serie-incompleta": "Stalo usred serije",
+          "todos": "Cela lista"
+        }
+      },
+      "chamada": {
+        "titulo": "Koga pozvati",
+        "atrasada": "kasni {dias} d",
+        "venceHoje": "ističe danas",
+        "venceEm": "ističe za {dias} d"
+      }
     },
     "internacao": {
       "titulo": "Hospitalizacija",
@@ -4396,6 +4514,49 @@
         "proxima": "{pet}: sledeća primena za {minutos} min",
         "aFazer": "Za uraditi u smeni: {total}",
         "vazio": "Ništa ne kasni u ovoj smeni."
+      },
+      "nova": {
+        "resumo": {
+          "plantaoCom": "{turno}, {horario}, dežura {nome}.",
+          "plantao": "{turno}, {horario}.",
+          "pedemAcao": "{total} pacijent traži intervenciju | {total} pacijenta traže intervenciju | {total} pacijenata traži intervenciju",
+          "criticos": "{total} u kritičnom stanju | {total} u kritičnom stanju | {total} u kritičnom stanju",
+          "frase": "{texto}.",
+          "lista": "{a}, {b}"
+        },
+        "planta": {
+          "descricao": "Jedan blok po odeljenju. Kliknite na zauzet ležaj da otvorite pacijenta.",
+          "vagas": "{total} slobodan | {total} slobodna | {total} slobodnih",
+          "semVaga": "Popunjeno"
+        },
+        "leito": {
+          "aFazerAgora": "treba uraditi sada",
+          "ateOProximo": "do sledeće stavke",
+          "deInternacao": "hospitalizacije"
+        },
+        "frase": {
+          "boletimRetido": "Zadržani izveštaj čeka poziv vlasniku",
+          "atrasadas": "{total} stavka kasni na listi | {total} stavke kasne na listi | {total} stavki kasni na listi",
+          "naHora": "{total} stavka za sada | {total} stavke za sada | {total} stavki za sada",
+          "proximo": "Sledeća stavka u {hora}"
+        },
+        "acao": {
+          "boletimRetido": "Reši zadržani izveštaj",
+          "enviarRetido": "Pošalji zadržani izveštaj",
+          "checar": "Potvrdi {item} u {hora}",
+          "evoluir": "Upiši tok smene"
+        },
+        "quadro": {
+          "rotulo": "Podaci o hospitalizaciji",
+          "leito": "Ležaj",
+          "desde": "od {quando}"
+        },
+        "boletim": {
+          "mensagensPorDia": "poruka dnevno | poruke dnevno | poruka dnevno"
+        },
+        "checklist": {
+          "atraso": "kasni {tempo}"
+        }
       }
     },
     "diario": {
@@ -5183,7 +5344,9 @@
           "atencao": "Nema kritične terapije sa opadanjem redovnosti",
           "emCurso": "Nema terapije u toku",
           "encerrados": "Nema završene terapije"
-        }
+        },
+        "ligarPara": "Pozovi: {nome}, {telefone}",
+        "abrirFicha": "Otvori karton"
       },
       "app": {
         "titulo": "Lekovi",
@@ -5225,6 +5388,11 @@
         "semAtencao": "Nema pada pridržavanja",
         "emCurso": "Nijedna u toku | {n} u toku | {n} u toku | {n} u toku",
         "criticos": "{n} kritična | {n} kritične | {n} kritičnih"
+      },
+      "resumo": {
+        "atencao": "{total} kritična terapija sa padom pridržavanja traži poziv danas. | {total} kritične terapije sa padom pridržavanja traže poziv danas. | {total} kritičnih terapija sa padom pridržavanja traži poziv danas.",
+        "semAtencao": "Nijedna kritična terapija nema pad pridržavanja.",
+        "emCurso": "{total} terapija u toku. | {total} terapije u toku. | {total} terapija u toku."
       }
     },
     "estoque": {
@@ -5418,7 +5586,19 @@
         "entrada": "Prijem",
         "vazio": "Nema upisanih prijema ni otpisa.",
         "nota": "Račun {nota}",
-        "colunaDoses": "Doze"
+        "colunaDoses": "Doze",
+        "descricao": "Svaki prijem i svaki otpis, ko ga je uneo i kada."
+      },
+      "par": "{a}, {b}",
+      "geladeira": {
+        "dias": "{n} dan | {n} dana | {n} dana",
+        "vencendo": "{doses} ističe u narednih {dias} dana, {valor} u riziku | {doses} ističu u narednih {dias} dana, {valor} u riziku | {doses} ističe u narednih {dias} dana, {valor} u riziku",
+        "nadaVencendo": "Nijedna serija ne ističe u narednih {dias} dana"
+      },
+      "lote": {
+        "venceuHa": "istekla pre {dias} d",
+        "venceHoje": "ističe danas",
+        "venceEm": "ističe za {dias} d"
       }
     },
     "pedidos": {
@@ -5829,7 +6009,40 @@
         "aceitarEm": "Prihvatite {hora}",
         "marcarEm": "Zakažite {dia} · {hora}",
         "voltar": "Nazad na zahtev"
+      },
+      "tela": {
+        "resumo": "{abertos}, {depois}",
+        "configurar": "Podešavanja",
+        "verComoPede": "Pogledajte kako vlasnik traži termin",
+        "descricao": "Ono čiji rok prvi ističe je na vrhu.",
+        "prazoNoTempo": "za odgovor, do {quando}",
+        "prazoPassou": "kašnjenja, rok je bio {quando}",
+        "respondidos": "Odgovoreni",
+        "recusado": "Odbijeno: {motivo}",
+        "horarioOcupado": "Termin više nije slobodan. Izaberite drugi preko dugmeta \"Odgovorite\".",
+        "horaPedida": "Traženo",
+        "qualquerHora": "Bilo koje vreme"
       }
+    },
+    "fita": {
+      "rotulo": "Dan klinike",
+      "contas": "Trenutno u klinici",
+      "traco": "{hora} {pet}: {estado}",
+      "resumo": "Završeno: {feitos}, preostalo: {restantes}, u čekaonici: {recepcao}. Otvori raspored.",
+      "fechada": "Klinika je danas zatvorena",
+      "recepcao": "{n} u čekaonici | {n} u čekaonici | {n} u čekaonici",
+      "sala": "{n} na pregledu | {n} na pregledu | {n} na pregledu",
+      "internados": "{n} hospitalizovan | {n} hospitalizovana | {n} hospitalizovanih"
+    },
+    "hoje": {
+      "recepcao": "Čekaonica",
+      "emConsulta": "Na pregledu",
+      "minEsperando": "min čeka",
+      "minNaSala": "min u sali",
+      "alertas": "Upozorenja",
+      "chamar": "Započni pregled",
+      "recepcaoVazia": "Niko ne čeka u čekaonici.",
+      "salaVazia": "Nijedan pregled nije u toku."
     }
   },
   "hotel": {
@@ -7357,5 +7570,48 @@
       "unselectAll": "Poništi izbor",
       "navigation": "Navigacija"
     }
+  },
+  "espacos": {
+    "clinica": {
+      "rotulo": "Klinika",
+      "hoje": "Danas",
+      "agenda": "Raspored",
+      "pacientes": "Pacijenti",
+      "internacao": "Hospitalizacija",
+      "pendencias": "Zaostali poslovi",
+      "relatorios": "Izveštaji"
+    },
+    "hotel": {
+      "rotulo": "Hotel",
+      "hoje": "Danas",
+      "reservas": "Rezervacije",
+      "casa": "Objekat",
+      "relatorios": "Izveštaji"
+    },
+    "portal": {
+      "rotulo": "Portal"
+    },
+    "abas": {
+      "agenda": "Raspored",
+      "pedidos": "Zahtevi",
+      "fila": "Lista čekanja",
+      "pacientes": "Pacijenti",
+      "atendimentos": "Pregledi",
+      "bulario": "Priručnik lekova",
+      "atividades": "Zadaci",
+      "faltas": "Nedolasci",
+      "vacinas": "Vakcine",
+      "tratamentos": "Kućna terapija",
+      "estoque": "Zalihe vakcina",
+      "painel": "Pregled dana",
+      "rotina": "Rutina",
+      "hospedes": "Gosti",
+      "mapa": "Mapa",
+      "reservas": "Rezervacije",
+      "pedidosDeReserva": "Zahtevi",
+      "acomodacoes": "Smeštaj",
+      "rotinaPadrao": "Standardna rutina"
+    },
+    "abasAria": "Ekrani: {destino}"
   }
 }

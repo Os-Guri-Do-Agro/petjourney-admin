@@ -7,22 +7,23 @@
  * no recorte "Pedem atenção" — os tratamentos críticos cuja adesão caiu —, e o selo do menu e a
  * Visão geral contam o mesmo número.
  *
- * Cada linha traz a faixa dos últimos 14 dias, e a conta da mesma janela ao lado: um olhar diz se
- * o tratamento vai bem, e o clique leva à ficha, onde estão o histórico inteiro, quem registrou e
- * o registro da conversa.
+ * ## A forma (redesenho de 19/10/2026)
  *
- * Acabamento do módulo clínico, não o da Visão geral: a variante só vale onde o usuário aprovou.
+ * Uma lista **por paciente**, não por remédio: a ligação é para uma casa, e a casa responde por
+ * todos os remédios do bicho. Cada paciente abre com o rosto, quem cuida e o telefone, e as duas
+ * ações — ligar e abrir a ficha. Embaixo, um remédio por linha, com a faixa dos últimos 14 dias
+ * em tamanho de leitura (horários à esquerda, datas embaixo), a conta da mesma janela e, quando a
+ * adesão caiu, o selo e a frase do alerta: o que aconteceu, o motivo que a casa deu, e como era
+ * antes. É o que a clínica precisa saber antes de discar.
  */
+import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
-import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
-import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
-import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
 import FaixaDeDoses from '@/features/clinico/components/tratamento/FaixaDeDoses.vue'
 import LegendaDaFaixa from '@/features/clinico/components/tratamento/LegendaDaFaixa.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
@@ -38,7 +39,6 @@ type Recorte = 'atencao' | 'emCurso' | 'encerrados'
 const JANELA_DIAS = 14
 
 const { t } = useI18n()
-const router = useRouter()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
 const rotulos = useRotulosDoTratamento()
@@ -76,8 +76,8 @@ const porRecorte = computed(() => ({
 }))
 
 /**
- * A frase da saudação, no lugar dos três cartões que repetiam as abas logo abaixo: quantos
- * tratamentos pedem atenção (a adesão caiu) e quantos estão em curso, com os críticos entre eles.
+ * A frase de estado: quantos tratamentos pedem uma ligação hoje, e quantos estão em curso. O
+ * número de críticos fica no selo de cada remédio — na frase, era o terceiro número de três.
  */
 const fraseDoResumo = computed(() => {
   if (carregando.value && linhas.value.length === 0) {
@@ -86,23 +86,14 @@ const fraseDoResumo = computed(() => {
 
   const atencao = porRecorte.value.atencao.length
   const emCurso = porRecorte.value.emCurso.length
-  const partes = [
+
+  return [
     atencao > 0
-      ? t('clinico.adesao.saudacao.atencao', { n: atencao }, atencao)
-      : t('clinico.adesao.saudacao.semAtencao'),
-    t('clinico.adesao.saudacao.emCurso', { n: emCurso }, emCurso),
-  ]
-
-  if (criticos.value > 0) {
-    partes.push(t('clinico.adesao.saudacao.criticos', { n: criticos.value }, criticos.value))
-  }
-
-  return partes.join(' · ')
+      ? t('clinico.adesao.resumo.atencao', { total: atencao }, atencao)
+      : t('clinico.adesao.resumo.semAtencao'),
+    t('clinico.adesao.resumo.emCurso', { total: emCurso }, emCurso),
+  ].join(' ')
 })
-
-const criticos = computed(
-  () => porRecorte.value.emCurso.filter((linha) => linha.tratamento.critico).length,
-)
 
 const opcoesDoRecorte = computed(() => [
   {
@@ -124,6 +115,29 @@ const opcoesDoRecorte = computed(() => [
 ])
 
 const visiveis = computed(() => porRecorte.value[recorte.value])
+
+/**
+ * Os tratamentos do recorte, juntos por paciente. Quem tem alerta vem antes; dentro do paciente,
+ * o remédio com alerta vem antes dos outros. Fora isso, a ordem do repositório.
+ */
+const pacientes = computed(() => {
+  const grupos = new Map<string, LinhaDeTratamento[]>()
+
+  for (const linha of visiveis.value) {
+    grupos.set(linha.tratamento.petId, [...(grupos.get(linha.tratamento.petId) ?? []), linha])
+  }
+
+  return [...grupos.entries()]
+    .map(([petId, tratamentos]) => ({
+      petId,
+      primeira: tratamentos[0]!,
+      alerta: tratamentos.some((linha) => linha.alerta !== null),
+      tratamentos: [...tratamentos].sort(
+        (uma, outra) => Number(outra.alerta !== null) - Number(uma.alerta !== null),
+      ),
+    }))
+    .sort((um, outro) => Number(outro.alerta) - Number(um.alerta))
+})
 
 // ------------------------------------------------------------------ a janela da faixa
 
@@ -152,160 +166,177 @@ const janelas = computed(
   () => new Map(visiveis.value.map((linha) => [linha.tratamento.id, daJanela(linha)])),
 )
 
-// ------------------------------------------------------------------ tabela
+function rotaDaFicha(petId: string) {
+  return `/veterinario/paciente/${petId}/tratamento`
+}
 
-const colunas = computed<ColunaTabela<LinhaDeTratamento>[]>(() => [
-  {
-    id: 'paciente',
-    rotulo: t('clinico.adesao.lista.coluna.paciente'),
-    largura: 'minmax(8.5rem, 1.1fr)',
-    ordenarPor: (linha) => linha.petNome,
-  },
-  {
-    id: 'remedio',
-    rotulo: t('clinico.adesao.lista.coluna.remedio'),
-    largura: 'minmax(0, 1.4fr)',
-    ordenarPor: (linha) => rotulos.nome(linha.tratamento),
-  },
-  {
-    id: 'janela',
-    rotulo: t('clinico.adesao.lista.coluna.janela', { dias: JANELA_DIAS }),
-    largura: 'minmax(0, 1.3fr)',
-  },
-  {
-    id: 'responsavel',
-    rotulo: t('clinico.adesao.lista.coluna.responsavel'),
-    largura: 'minmax(0, 1fr)',
-    ocultarEmTelaEstreita: true,
-  },
-  {
-    id: 'situacao',
-    rotulo: t('clinico.adesao.lista.coluna.situacao'),
-    largura: '9.5rem',
-  },
-])
-
-function abrir(linha: LinhaDeTratamento) {
-  void router.push(`/veterinario/paciente/${linha.tratamento.petId}/tratamento`)
+function hrefDoTelefone(telefone: string) {
+  return `tel:${telefone.replace(/[^\d+]/g, '')}`
 }
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :title="t('clinico.adesao.titulo')"
-    :subtitle="t('clinico.adesao.subtitulo')"
-    :loading="carregando && linhas.length === 0"
-    :error="erro"
-    :empty="!carregando && !erro && linhas.length === 0"
-    :empty-title="t('clinico.adesao.lista.vazioTitulo')"
-    :empty-description="t('clinico.adesao.lista.vazioDescricao')"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    class="tela-tratamentos"
+    :resumo="fraseDoResumo"
+    :carregando="carregando && linhas.length === 0"
+    :erro="erro"
+    :vazio="!carregando && !erro && linhas.length === 0"
+    :vazio-titulo="t('clinico.adesao.lista.vazioTitulo')"
+    :vazio-descricao="t('clinico.adesao.lista.vazioDescricao')"
+    vazio-icone="ph ph-pill"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('clinico.faltas.subtitulo') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('clinico.adesao.titulo') }}</h1>
-
-        <div class="hc-saudacao__linha">
-          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
-            {{ fraseDoResumo }}
-          </p>
-        </div>
-      </div>
-    </template>
-
-    <div class="tratamentos clinic-scope">
+    <div class="tratamentos">
       <div class="tratamentos__barra">
         <ClinicToggleGroup
           v-model="recorte"
           :opcoes="opcoesDoRecorte"
           :rotulo="t('clinico.adesao.titulo')"
         />
-        <LegendaDaFaixa />
+        <LegendaDaFaixa class="tratamentos__legenda" />
       </div>
 
-      <ClinicDataTable
-        :colunas="colunas"
-        :linhas="visiveis"
-        :chave="(linha) => linha.tratamento.id"
-        :carregando="carregando"
-        :vazio-titulo="t(`clinico.adesao.lista.vazioRecorte.${recorte}`)"
-        :rotulo="t('clinico.adesao.titulo')"
-        @ativar="abrir"
-      >
-        <template #celula-paciente="{ linha }">
-          <span class="tratamentos__paciente">
-            <PetAvatar
-              :nome="linha.petNome"
-              :iniciais="linha.petIniciais"
-              :especie="linha.especie"
-              :foto-url="linha.petFotoUrl"
-              tamanho="md"
-            />
-            <span class="tratamentos__quem">
-              <strong class="tratamentos__nome">{{ linha.petNome }}</strong>
-              <span class="tratamentos__meta">{{ formato.especie(linha.especie) }}</span>
-            </span>
-          </span>
-        </template>
+      <p v-if="pacientes.length === 0" class="ui-folha ui-vazio">
+        <strong>{{ t(`clinico.adesao.lista.vazioRecorte.${recorte}`) }}</strong>
+      </p>
 
-        <template #celula-remedio="{ linha }">
-          <span class="tratamentos__nome">{{ rotulos.nome(linha.tratamento) }}</span>
-          <span class="tratamentos__meta">{{ rotulos.posologia(linha.tratamento) }}</span>
-        </template>
+      <ul v-else class="tratamentos__lista">
+        <li v-for="paciente in pacientes" :key="paciente.petId">
+          <article
+            class="paciente ui-folha"
+            :aria-labelledby="`tratamentos-${paciente.petId}`"
+          >
+            <header class="paciente__cabeca">
+              <PetAvatar
+                :nome="paciente.primeira.petNome"
+                :iniciais="paciente.primeira.petIniciais"
+                :especie="paciente.primeira.especie"
+                :foto-url="paciente.primeira.petFotoUrl"
+                tamanho="lg"
+              />
 
-        <template #celula-janela="{ linha }">
-          <template v-if="linha.compartilhado && janelas.get(linha.tratamento.id)">
-            <FaixaDeDoses
-              :doses="janelas.get(linha.tratamento.id)!.doses"
-              :frequencia-horas="linha.tratamento.frequenciaHoras"
-              :dias="JANELA_DIAS"
-              :nomes="linha.nomes"
-              :rotulo="`${rotulos.nome(linha.tratamento)}: ${rotulos.contagem(janelas.get(linha.tratamento.id)!.resumo)}`"
-              compacta
-            />
-            <span class="tratamentos__meta tratamentos__contagem">
-              {{ rotulos.contagem(janelas.get(linha.tratamento.id)!.resumo) }}
-            </span>
-          </template>
-          <span v-else class="tratamentos__meta">{{ t('clinico.adesao.naoCompartilhado') }}</span>
-        </template>
+              <div class="paciente__quem">
+                <h2 :id="`tratamentos-${paciente.petId}`" class="paciente__nome">
+                  {{ paciente.primeira.petNome }}
+                </h2>
+                <p class="paciente__meta">
+                  {{ formato.especie(paciente.primeira.especie) }} ·
+                  {{ paciente.primeira.tutorNome }}
+                  <template v-if="paciente.primeira.tutorTelefone">
+                    ·
+                    <bdi dir="ltr" class="ui-num">{{ paciente.primeira.tutorTelefone }}</bdi>
+                  </template>
+                </p>
+              </div>
 
-        <template #celula-responsavel="{ linha }">
-          <span class="tratamentos__nome">{{ linha.tutorNome }}</span>
-          <span class="tratamentos__meta clinic-value">{{ linha.tutorTelefone }}</span>
-        </template>
+              <div class="paciente__acoes">
+                <Button
+                  v-if="paciente.primeira.tutorTelefone"
+                  as="a"
+                  :href="hrefDoTelefone(paciente.primeira.tutorTelefone)"
+                  icon="ph ph-phone"
+                  :label="t('clinico.vacinas.ligar')"
+                  :aria-label="
+                    t('clinico.adesao.lista.ligarPara', {
+                      nome: paciente.primeira.tutorNome,
+                      telefone: paciente.primeira.tutorTelefone,
+                    })
+                  "
+                  severity="secondary"
+                  outlined
+                  size="small"
+                />
+                <RouterLink class="ui-mais paciente__ficha" :to="rotaDaFicha(paciente.petId)">
+                  <i class="ph ph-clipboard-text" aria-hidden="true" />
+                  {{ t('clinico.adesao.lista.abrirFicha') }}
+                </RouterLink>
+              </div>
+            </header>
 
-        <template #celula-situacao="{ linha }">
-          <ClinicAlertChip
-            v-if="linha.alerta"
-            severidade="risco"
-            :rotulo="t('clinico.adesao.alerta.selo')"
-          />
-          <ClinicAlertChip
-            v-else-if="linha.tratamento.critico && linha.emCurso"
-            severidade="info"
-            :rotulo="t('clinico.adesao.critico.selo')"
-          />
-          <span v-else class="tratamentos__meta">
-            {{
-              linha.emCurso
-                ? t('clinico.adesao.lista.situacaoEmCurso')
-                : t('clinico.adesao.lista.situacaoEncerrado')
-            }}
-          </span>
-        </template>
-      </ClinicDataTable>
+            <ul class="ui-lista paciente__tratamentos">
+              <li
+                v-for="linha in paciente.tratamentos"
+                :key="linha.tratamento.id"
+                class="tratamento"
+                :class="{ 'ui-marca ui-marca--risco': linha.alerta }"
+              >
+                <div class="tratamento__remedio">
+                  <span class="tratamento__titulo">
+                    <strong>{{ rotulos.nome(linha.tratamento) }}</strong>
+                    <span v-if="linha.alerta" class="ui-selo ui-selo--risco">
+                      <i class="ph ph-warning" aria-hidden="true" />
+                      {{ t('clinico.adesao.alerta.selo') }}
+                    </span>
+                    <span
+                      v-else-if="linha.tratamento.critico && linha.emCurso"
+                      class="ui-selo ui-selo--atencao"
+                    >
+                      <i class="ph ph-first-aid" aria-hidden="true" />
+                      {{ t('clinico.adesao.critico.selo') }}
+                    </span>
+                    <!-- "Em curso" é o normal da lista: só o encerrado ganha selo. -->
+                    <span v-else-if="!linha.emCurso" class="ui-selo">
+                      {{ t('clinico.adesao.lista.situacaoEncerrado') }}
+                    </span>
+                  </span>
+                  <span class="tratamento__posologia">{{ rotulos.posologia(linha.tratamento) }}</span>
+
+                  <p v-if="linha.alerta" class="tratamento__alerta">
+                    <strong>{{ rotulos.alerta(linha.alerta).titulo }}.</strong>
+                    {{ rotulos.alerta(linha.alerta).detalhe }}
+                  </p>
+                </div>
+
+                <div class="tratamento__janela">
+                  <template v-if="linha.compartilhado && janelas.get(linha.tratamento.id)">
+                    <span class="tratamento__rotulo">
+                      {{ t('clinico.adesao.lista.coluna.janela', { dias: JANELA_DIAS }) }}
+                    </span>
+                    <FaixaDeDoses
+                      :doses="janelas.get(linha.tratamento.id)!.doses"
+                      :frequencia-horas="linha.tratamento.frequenciaHoras"
+                      :dias="JANELA_DIAS"
+                      :nomes="linha.nomes"
+                      :rotulo="`${rotulos.nome(linha.tratamento)}: ${rotulos.contagem(janelas.get(linha.tratamento.id)!.resumo)}`"
+                    />
+                    <span class="tratamento__contagem">
+                      {{ rotulos.contagem(janelas.get(linha.tratamento.id)!.resumo) }}
+                    </span>
+                  </template>
+                  <span v-else class="tratamento__sem-registro">
+                    <i class="ph ph-eye-slash" aria-hidden="true" />
+                    {{ t('clinico.adesao.naoCompartilhado') }}
+                  </span>
+                </div>
+              </li>
+            </ul>
+          </article>
+        </li>
+      </ul>
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
+/*
+ * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
+ * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como na Internação.
+ */
+.tela-tratamentos {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+}
+
 .tratamentos {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 20px;
 }
 
 .tratamentos__barra {
@@ -313,47 +344,168 @@ function abrir(linha: LinhaDeTratamento) {
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
+  gap: 12px 24px;
 }
 
-.tratamentos__barra > :last-child {
+.tratamentos__legenda {
   max-width: 34rem;
 }
 
-.tratamentos__paciente {
-  display: flex;
-  align-items: center;
-  gap: var(--clinic-space-2);
-  min-width: 0;
+.tratamentos__lista {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.tratamentos__quem {
+/* ------------------------------------------------------------------------------ o paciente */
+
+.paciente__cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--linha);
+}
+
+.paciente__quem {
   display: grid;
   min-width: 0;
+  flex: 1 1 12rem;
+  gap: 2px;
 }
 
-.tratamentos__quem .tratamentos__meta {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.paciente__nome {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-.tratamentos__nome {
-  display: block;
-  overflow: hidden;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.paciente__meta {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
-.tratamentos__meta {
-  display: block;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.paciente__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
 }
 
-.tratamentos__contagem {
-  margin-top: 0.3rem;
+.paciente__acoes :deep(a.p-button) {
+  text-decoration: none;
+}
+
+/* --------------------------------------------------------------------------- o remédio */
+
+/* A faixa numa trilha de largura fixa: de um paciente para o outro, os dias caem no mesmo lugar. */
+.tratamento {
+  position: relative;
+  display: grid;
+  align-items: start;
+  gap: 16px 32px;
+  grid-template-columns: minmax(0, 1fr) 312px;
+  padding: 16px 18px 18px;
+}
+
+.tratamento__remedio {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 4px;
+}
+
+.tratamento__titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.tratamento__titulo strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tratamento__posologia {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.tratamento__alerta {
+  max-width: 62ch;
+  margin: 6px 0 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.tratamento__alerta strong {
+  color: var(--risco-tinta);
+  font-weight: 600;
+}
+
+/* A faixa em tamanho de leitura: horários à esquerda, datas embaixo, a conta logo abaixo. */
+.tratamento__janela {
+  display: grid;
+  min-width: 0;
+  justify-items: start;
+  gap: 6px;
+}
+
+/*
+ * A faixa é compartilhada com a ficha; aqui ela cresce para o tamanho de leitura de uma lista que
+ * se percorre de longe: 15 px por dose, 3 px de vão, horários e datas em 12 px.
+ */
+.tratamento__janela :deep(.faixa) {
+  --faixa-celula: 15px;
+  --faixa-vao: 3px;
+}
+
+.tratamento__janela :deep(.faixa__horarios),
+.tratamento__janela :deep(.faixa__eixo) {
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 12px;
+}
+
+.tratamento__rotulo {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.tratamento__contagem {
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
+  line-height: 1.45;
+}
+
+.tratamento__sem-registro {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.tratamento__sem-registro i {
+  margin-top: 2px;
+  font-size: 15px;
+}
+
+@media (max-width: 760px) {
+  .tratamento {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

@@ -5,23 +5,35 @@
  * Três pilhas que costumam ficar invisíveis até virarem problema: prontuário em rascunho,
  * retorno indicado sem horário e oferta da fila esperando resposta. Nenhuma delas aparece na
  * grade do dia, e é justamente por isso que envelhecem.
+ *
+ * ## A forma (redesenho de 19/10/2026)
+ *
+ * Uma seção por pilha, com a contagem e uma frase do **porquê** — "rascunho" sozinho não diz que
+ * o resumo está preso. Cada linha é o paciente (rosto e nome), o que falta, há quanto tempo, e a
+ * ação certa na ponta: continuar o prontuário, marcar o retorno, ver a oferta na fila. A linha
+ * inteira leva ao lugar da ação; o botão desenhado na ponta só diz qual é.
+ *
+ * O tempo vira selo âmbar quando passa do razoável (rascunho de outro dia, retorno com uma semana
+ * de atraso, oferta a menos de meia hora do prazo), com a marca na borda da linha: o olho acha o
+ * que envelheceu sem ler a lista inteira.
  */
-import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
+import UiPagina from '@/components/ui/UiPagina.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { encounterRepository } from '@/features/clinico/data/repositories'
-import type { Encounter } from '@/features/clinico/data/types'
+import type { Encounter, Pet, WaitlistEntry } from '@/features/clinico/data/types'
+import { diffDays } from '@/features/clinico/domain/clinic-time'
 import { retornosVencidos, type RetornoPendente } from '@/features/clinico/domain/follow-up'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useFilaStore } from '@/features/clinico/stores/fila'
+import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
 
-const { t } = useI18n()
-const router = useRouter()
+const { t, locale } = useI18n()
 const clinico = useClinicoStore()
 const fila = useFilaStore()
 const formato = useClinicFormat()
@@ -34,6 +46,178 @@ const erro = ref('')
 const total = computed(() => rascunhos.value.length + retornos.value.length + fila.ofertadas.length)
 
 const vazio = computed(() => !carregando.value && !erro.value && total.value === 0)
+
+/** Uma semana depois do prazo, o retorno já perdeu a janela que o vet pediu. */
+const ATRASO_QUE_PESA_DIAS = 7
+
+/** Meia hora: o tempo de uma ligação e de o responsável conseguir responder. */
+const PRAZO_CURTO_MIN = 30
+
+type LinhaDeAtividade = {
+  id: string
+  to: RouteLocationRaw
+  pet: Pet | null
+  /** O que falta, e de quem é. */
+  meta: string
+  /** Há quanto tempo, ou quanto falta. */
+  quando: string
+  /** Passou do razoável: selo âmbar e marca na borda. */
+  pesa: boolean
+  acao: string
+  icone: string
+}
+
+type Pilha = {
+  id: 'rascunhos' | 'retornos' | 'ofertas'
+  titulo: string
+  porque: string
+  icone: string
+  linhas: LinhaDeAtividade[]
+}
+
+function juntar(partes: Array<string | null | undefined>) {
+  return partes.filter(Boolean).join(' · ')
+}
+
+function nomeDoProfissional(id: string | null | undefined) {
+  return id ? (clinico.profissional(id)?.nome ?? '') : ''
+}
+
+function linhaDoRascunho(encounter: Encounter): LinhaDeAtividade {
+  const hoje = clinicClock.today()
+  const dias = diffDays(clinicClock.dateOf(encounter.abertoEm), hoje)
+
+  return {
+    id: `rascunho-${encounter.id}`,
+    to: `/veterinario/atendimento/${encounter.id}`,
+    pet: clinico.pet(encounter.petId),
+    meta: juntar([
+      encounter.anamnese.queixaPrincipal || t('clinico.atividades.semQueixa'),
+      nomeDoProfissional(encounter.professionalId),
+    ]),
+    quando:
+      dias > 0
+        ? t('clinico.atividades.abertoHa', { total: dias }, dias)
+        : t('clinico.atividades.abertoHoje', { hora: formato.hora(encounter.abertoEm) }),
+    pesa: dias > 0,
+    acao: t('clinico.atividades.acao.continuar'),
+    icone: 'ph ph-note-pencil',
+  }
+}
+
+/**
+ * "Marcar retorno" leva à agenda de hoje. A agenda não recebe paciente pela URL (só data, visão,
+ * filtros e foco num atendimento que já existe), e o formulário de criação nasce vazio: o
+ * paciente se escolhe lá.
+ */
+function linhaDoRetorno(item: RetornoPendente): LinhaDeAtividade {
+  const dias = item.diasDeAtraso
+
+  return {
+    id: `retorno-${item.encounter.id}`,
+    to: '/veterinario/agenda',
+    pet: clinico.pet(item.encounter.petId),
+    meta: juntar([
+      clinico.diagnosticoPrincipal(item.encounter) || t('clinico.atividades.semDiagnostico'),
+      nomeDoProfissional(item.encounter.professionalId),
+    ]),
+    quando:
+      dias > 0
+        ? t('clinico.atividades.atraso', { total: dias }, dias)
+        : t('clinico.atividades.venceHoje'),
+    pesa: dias >= ATRASO_QUE_PESA_DIAS,
+    acao: t('clinico.meuDia.marcarRetorno'),
+    icone: 'ph ph-calendar-plus',
+  }
+}
+
+function linhaDaOferta(entrada: WaitlistEntry): LinhaDeAtividade {
+  const expira = entrada.ofertaExpiraEm
+  const minutos = expira
+    ? Math.round((Date.parse(expira) - Date.parse(clinicClock.nowIso())) / 60_000)
+    : null
+  const vaga = entrada.ofertaSlotInicio
+    ? t('clinico.atividades.vaga', {
+        data: formato.dataCurta(clinicClock.dateOf(entrada.ofertaSlotInicio)),
+        hora: formato.hora(entrada.ofertaSlotInicio),
+      })
+    : ''
+
+  return {
+    id: `oferta-${entrada.id}`,
+    to: '/veterinario/fila',
+    pet: clinico.pet(entrada.petId),
+    meta: juntar([
+      clinico.tipo(entrada.typeId)?.nome,
+      vaga,
+      nomeDoProfissional(entrada.ofertaProfessionalId ?? entrada.professionalId),
+    ]),
+    quando:
+      minutos === null
+        ? ''
+        : minutos < 0
+          ? t('clinico.fila.situacao.expirado')
+          : t('clinico.fila.ofertaExpiraEm', { valor: formato.relativo(expira!) }),
+    pesa: minutos !== null && minutos < PRAZO_CURTO_MIN,
+    acao: t('clinico.atividades.acao.verNaFila'),
+    icone: 'ph ph-hourglass',
+  }
+}
+
+/** Pilha vazia não aparece: uma seção para dizer "nada aqui" é ruído entre as que pedem ação. */
+const pilhas = computed<Pilha[]>(() => {
+  const todas: Pilha[] = [
+    {
+      id: 'rascunhos',
+      titulo: t('clinico.atividades.rascunhos'),
+      porque: t('clinico.atividades.porque.rascunhos'),
+      icone: 'ph ph-note-pencil',
+      linhas: rascunhos.value.map(linhaDoRascunho),
+    },
+    {
+      id: 'retornos',
+      titulo: t('clinico.atividades.retornos'),
+      porque: t('clinico.atividades.porque.retornos'),
+      icone: 'ph ph-clock-counter-clockwise',
+      linhas: retornos.value.map(linhaDoRetorno),
+    },
+    {
+      id: 'ofertas',
+      titulo: t('clinico.atividades.ofertasDaFila'),
+      porque: t('clinico.atividades.porque.ofertas'),
+      icone: 'ph ph-hourglass',
+      linhas: fila.ofertadas.map(linhaDaOferta),
+    },
+  ]
+
+  return todas.filter((pilha) => pilha.linhas.length > 0)
+})
+
+/** "3 prontuários em rascunho, 6 retornos sem horário e 3 ofertas da fila esperando resposta." */
+const fraseDoResumo = computed(() => {
+  if (carregando.value && total.value === 0) {
+    return ''
+  }
+
+  const contagens = [
+    ['clinico.atividades.resumo.rascunhos', rascunhos.value.length],
+    ['clinico.atividades.resumo.retornos', retornos.value.length],
+    ['clinico.atividades.resumo.ofertas', fila.ofertadas.length],
+  ] as const
+  const partes = contagens
+    .filter(([, quantos]) => quantos > 0)
+    .map(([chave, quantos]) => t(chave, { total: quantos }, quantos))
+
+  if (partes.length === 0) {
+    return t('clinico.atividades.resumo.emDia')
+  }
+
+  const tag = INTL_LOCALE[isLocale(locale.value) ? locale.value : DEFAULT_LOCALE]
+
+  return t('clinico.atividades.resumo.frase', {
+    lista: new Intl.ListFormat(tag, { type: 'conjunction' }).format(partes),
+  })
+})
 
 async function carregar() {
   carregando.value = true
@@ -62,280 +246,169 @@ onMounted(carregar)
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('clinico.atividades.subtitulo')"
-    :title="t('clinico.atividades.titulo')"
-    :loading="carregando && total === 0"
-    :error="erro"
-    :empty="vazio"
-    :empty-title="t('clinico.atividades.vazioTitulo')"
-    :empty-description="t('clinico.atividades.vazioDescricao')"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    :resumo="fraseDoResumo"
+    :carregando="carregando && total === 0"
+    :erro="erro"
+    :vazio="vazio"
+    :vazio-titulo="t('clinico.atividades.vazioTitulo')"
+    :vazio-descricao="t('clinico.atividades.vazioDescricao')"
+    vazio-icone="ph ph-check-circle"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('clinico.faltas.subtitulo') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('clinico.atividades.titulo') }}</h1>
-
-        <div class="hc-saudacao__linha">
-          <p v-if="!carregando || total > 0" class="hc-saudacao__resumo" aria-live="polite">
-            {{ t('clinico.atividades.saudacao', { n: total }, total) }}
-          </p>
-        </div>
-      </div>
-    </template>
-
-    <div class="atividades clinic-scope">
-      <section v-if="rascunhos.length > 0" class="pilha">
-        <h2 class="pilha__titulo">
-          <span class="pilha__marca" aria-hidden="true"><i class="ph ph-note-pencil" /></span>
-          {{ t('clinico.atividades.rascunhos') }}
-          <span class="pilha__contagem clinic-value">{{ rascunhos.length }}</span>
-        </h2>
-
-        <ul class="pilha__lista">
-          <li v-for="encounter in rascunhos" :key="encounter.id">
-            <Button
-              type="button"
-              class="item clinic-focusable"
-              text
-              @click="router.push(`/veterinario/atendimento/${encounter.id}`)"
+    <div class="atividades">
+      <UiSecao
+        v-for="pilha in pilhas"
+        :id="`atividades-${pilha.id}`"
+        :key="pilha.id"
+        :titulo="pilha.titulo"
+        :contagem="pilha.linhas.length"
+        :descricao="pilha.porque"
+        :icone="pilha.icone"
+      >
+        <ul class="ui-folha ui-lista">
+          <li v-for="linha in pilha.linhas" :key="linha.id">
+            <RouterLink
+              class="ui-linha atividade"
+              :class="{ 'ui-marca ui-marca--atencao': linha.pesa }"
+              :to="linha.to"
             >
               <PetAvatar
-                class="item__avatar"
-                :nome="clinico.pet(encounter.petId)?.nome ?? ''"
-                :iniciais="clinico.pet(encounter.petId)?.iniciais ?? ''"
-                :especie="clinico.pet(encounter.petId)?.especie ?? null"
-                :foto-url="clinico.pet(encounter.petId)?.fotoUrl ?? ''"
+                :nome="linha.pet?.nome ?? ''"
+                :iniciais="linha.pet?.iniciais ?? ''"
+                :especie="linha.pet?.especie ?? null"
+                :foto-url="linha.pet?.fotoUrl ?? ''"
                 tamanho="md"
               />
-              <span class="item__corpo">
-                <strong>{{ clinico.pet(encounter.petId)?.nome }}</strong>
-                <small>
-                  {{ encounter.anamnese.queixaPrincipal || '—' }} ·
-                  {{ formato.relativo(encounter.abertoEm) }}
-                </small>
+
+              <span class="ui-linha__texto">
+                <strong class="ui-linha__titulo">{{ linha.pet?.nome }}</strong>
+                <span class="ui-linha__meta atividade__meta">{{ linha.meta }}</span>
               </span>
-              <i class="ph ph-caret-right" aria-hidden="true" />
-            </Button>
+
+              <span class="ui-linha__fim atividade__fim">
+                <span class="atividade__quando">
+                  <span v-if="linha.pesa" class="ui-selo ui-selo--atencao">
+                    <i class="ph ph-clock" aria-hidden="true" />
+                    {{ linha.quando }}
+                  </span>
+                  <span v-else-if="linha.quando" class="atividade__tempo">{{ linha.quando }}</span>
+                </span>
+
+                <!-- Desenho de botão, não botão: quem age é a linha inteira (um link só). -->
+                <span class="atividade__acao">
+                  <i :class="linha.icone" aria-hidden="true" />
+                  {{ linha.acao }}
+                </span>
+              </span>
+            </RouterLink>
           </li>
         </ul>
-      </section>
-
-      <section v-if="retornos.length > 0" class="pilha">
-        <h2 class="pilha__titulo">
-          <span class="pilha__marca" aria-hidden="true"><i class="ph ph-clock-counter-clockwise" /></span>
-          {{ t('clinico.atividades.retornos') }}
-          <span class="pilha__contagem clinic-value">{{ retornos.length }}</span>
-        </h2>
-
-        <ul class="pilha__lista">
-          <li v-for="item in retornos" :key="item.encounter.id">
-            <div class="item item--estatico">
-              <PetAvatar
-                class="item__avatar"
-                :nome="clinico.pet(item.encounter.petId)?.nome ?? ''"
-                :iniciais="clinico.pet(item.encounter.petId)?.iniciais ?? ''"
-                :especie="clinico.pet(item.encounter.petId)?.especie ?? null"
-                :foto-url="clinico.pet(item.encounter.petId)?.fotoUrl ?? ''"
-                tamanho="md"
-              />
-              <span class="item__corpo">
-                <strong>{{ clinico.pet(item.encounter.petId)?.nome }}</strong>
-                <small>
-                  {{ clinico.diagnosticoPrincipal(item.encounter) || '—' }} ·
-                  {{
-                    t('clinico.formato.haTempo', {
-                      valor: t(
-                        'clinico.formato.dias',
-                        { valor: item.diasDeAtraso },
-                        item.diasDeAtraso,
-                      ),
-                    })
-                  }}
-                </small>
-              </span>
-              <Button
-                :label="t('clinico.meuDia.marcarRetorno')"
-                size="small"
-                severity="secondary"
-                outlined
-                @click="router.push('/veterinario/agenda')"
-              />
-            </div>
-          </li>
-        </ul>
-      </section>
-
-      <section v-if="fila.ofertadas.length > 0" class="pilha">
-        <h2 class="pilha__titulo">
-          <span class="pilha__marca" aria-hidden="true"><i class="ph ph-hourglass" /></span>
-          {{ t('clinico.atividades.ofertasDaFila') }}
-          <span class="pilha__contagem clinic-value">{{ fila.ofertadas.length }}</span>
-        </h2>
-
-        <ul class="pilha__lista">
-          <li v-for="entrada in fila.ofertadas" :key="entrada.id">
-            <Button
-              type="button"
-              class="item clinic-focusable"
-              text
-              @click="router.push('/veterinario/fila')"
-            >
-              <PetAvatar
-                class="item__avatar"
-                :nome="clinico.pet(entrada.petId)?.nome ?? ''"
-                :iniciais="clinico.pet(entrada.petId)?.iniciais ?? ''"
-                :especie="clinico.pet(entrada.petId)?.especie ?? null"
-                :foto-url="clinico.pet(entrada.petId)?.fotoUrl ?? ''"
-                tamanho="md"
-              />
-              <span class="item__corpo">
-                <strong>{{ clinico.pet(entrada.petId)?.nome }}</strong>
-                <small v-if="entrada.ofertaExpiraEm">
-                  {{
-                    t('clinico.fila.ofertaExpiraEm', {
-                      valor: formato.relativo(entrada.ofertaExpiraEm),
-                    })
-                  }}
-                </small>
-              </span>
-              <i class="ph ph-caret-right" aria-hidden="true" />
-            </Button>
-          </li>
-        </ul>
-      </section>
+      </UiSecao>
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
-/*
- * As três pendências empilhadas, cada uma na largura toda. Lado a lado, a coluna de retornos
- * espremia o diagnóstico em "Doença do disco…" e o botão tomava metade da linha; empilhadas, a
- * linha diz o que é e a ação fica na ponta, onde o olho termina de ler.
- */
 .atividades {
   display: grid;
-  align-items: start;
-  gap: var(--clinic-space-4);
-  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
 }
 
-/* O cartão e o título dos cartões da Visão geral (`.hc`): título em caixa normal, na tinta. */
-.pilha {
-  display: grid;
-  gap: var(--clinic-space-3);
-  padding: 1.2rem 1.35rem 1.35rem;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+.atividade {
+  padding-block: 12px;
 }
 
-.pilha__titulo {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin: 0;
-  color: var(--clinic-text);
-  font-size: 1rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.pilha__marca {
-  display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  place-items: center;
-  border-radius: 0.6rem;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: 0.72rem;
-}
-
-.pilha__contagem {
-  padding: 0 0.4rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-weight: 800;
-  letter-spacing: 0;
-}
-
-.pilha__lista {
-  display: grid;
-  gap: 0.15rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* A linha clicável é `Button`; a de retorno (com ação própria) é `div`. As duas leem igual. */
-.item,
-.item.p-button {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: flex-start;
-  gap: var(--clinic-space-3);
-  min-height: var(--clinic-row-height);
-  padding: var(--clinic-cell-padding-y) var(--clinic-space-2);
-  border: none;
-  border-radius: var(--clinic-radius-control);
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: start;
-}
-
-.item.p-button:not(:disabled):hover,
-.item.p-button:not(:disabled):active {
-  border: none;
-  background: var(--clinic-surface-soft);
-  color: inherit;
-}
-
-.item.p-button:focus-visible {
-  outline: none;
-  box-shadow: var(--clinic-focus-ring);
-}
-
-.item__avatar {
-  flex-shrink: 0;
-}
-
-.item__corpo {
-  display: grid;
-  min-width: 0;
-  flex: 1;
-  gap: 0.1rem;
-}
-
-.item__corpo strong {
-  overflow: hidden;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Até duas linhas: o diagnóstico é o que decide a ordem do dia, e cortado em uma não se lia. */
-.item__corpo small {
+.atividade__meta {
   display: -webkit-box;
   overflow: hidden;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  line-height: 1.4;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
 }
 
-.item i {
-  color: var(--clinic-faint);
-  font-size: 0.7rem;
+.atividade__fim {
+  gap: 16px;
+}
+
+/* A coluna do tempo tem largura própria: selo e texto alinham numa linha só, de cima a baixo. */
+.atividade__quando {
+  display: flex;
+  min-width: 152px;
+  justify-content: flex-end;
+}
+
+.atividade__tempo {
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.atividade__acao {
+  display: inline-flex;
+  min-width: 200px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 550;
+  white-space: nowrap;
+  transition:
+    background-color var(--pj-tempo-curto) ease,
+    border-color var(--pj-tempo-curto) ease;
+}
+
+.atividade__acao i {
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-size: 16px;
+}
+
+.atividade:hover .atividade__acao {
+  border-color: var(--tinta-3);
+  background: var(--superficie-3);
+}
+
+/* Em tela estreita o tempo e a ação descem para baixo do nome, alinhados ao texto. */
+@media (max-width: 760px) {
+  .atividade {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  .atividade .ui-linha__texto {
+    flex: 1 1 0;
+  }
+
+  .atividade__fim {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 12px;
+    padding-inline-start: 54px;
+  }
+
+  .atividade__quando {
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .atividade__acao {
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atividade__acao {
+    transition: none;
+  }
 }
 </style>

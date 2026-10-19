@@ -19,6 +19,8 @@ import Select from 'primevue/select'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import UiSecao from '@/components/ui/UiSecao.vue'
+
 import ClinicField from '../base/ClinicField.vue'
 import type {
   AdministracaoAgendada,
@@ -83,6 +85,15 @@ const VIAS: PrescriptionRoute[] = [
   'topica',
   'otologica',
 ]
+
+/** O mesmo ícone por tipo que o checklist usa: o item se reconhece nas duas abas. */
+const ICONE: Record<ItemDePrescricaoKind, string> = {
+  medicamento: 'ph ph-pill',
+  fluido: 'ph ph-drop',
+  monitoramento: 'ph ph-heartbeat',
+  alimentacao: 'ph ph-bowl-food',
+  procedimento: 'ph ph-first-aid-kit',
+}
 
 /** Frequências de internação. Não é campo livre: 7 em 7 horas não existe em plantão nenhum. */
 const FREQUENCIAS = [1, 2, 4, 6, 8, 12, 24]
@@ -213,11 +224,15 @@ function aoEscolherMedicamento(medicamentoId: string) {
 
 <template>
   <div class="prescricoes">
-    <section class="bloco">
-      <header class="bloco__topo">
-        <h3 class="bloco__titulo">{{ t('clinico.internacao.prescricao.ativasTitulo') }}</h3>
+    <UiSecao
+      id="prescricao-ativas"
+      :titulo="t('clinico.internacao.prescricao.ativasTitulo')"
+      :contagem="ativas.length || null"
+      folha
+    >
+      <template v-if="!encerrada" #acoes>
         <Button
-          v-if="!encerrada"
+          type="button"
           :label="t('clinico.internacao.prescricao.nova')"
           icon="ph ph-plus"
           size="small"
@@ -225,108 +240,135 @@ function aoEscolherMedicamento(medicamentoId: string) {
           outlined
           @click="abrindo = true"
         />
-      </header>
+      </template>
 
-      <p v-if="ativas.length === 0" class="bloco__vazio">
+      <p v-if="ativas.length === 0" class="ui-vazio">
         {{ t('clinico.internacao.prescricao.semAtivas') }}
       </p>
 
-      <article v-for="prescricao in ativas" :key="prescricao.id" class="item">
-        <div class="item__corpo">
-          <p class="item__nome">
-            <strong>{{ prescricao.descricao }}</strong>
-            <span class="item__tag">{{ t(`clinico.internacao.itemKind.${prescricao.kind}`) }}</span>
-          </p>
+      <ul v-else class="ui-lista">
+        <li v-for="prescricao in ativas" :key="prescricao.id" class="item">
+          <div class="item__linha">
+            <span class="item__icone" aria-hidden="true"><i :class="ICONE[prescricao.kind]" /></span>
 
-          <p class="item__linha">
-            <span v-if="prescricao.doseTexto" class="clinic-value">{{ prescricao.doseTexto }}</span>
-            <span v-if="prescricao.via">
-              {{ t(`clinico.prontuario.conduta.via_.${prescricao.via}`) }}
-            </span>
-            <span>
-              {{
-                prescricao.continuo
-                  ? t('clinico.internacao.prescricao.continuo', {
-                      horas: prescricao.frequenciaHoras,
+            <div class="item__corpo">
+              <p class="item__nome">
+                <strong>{{ prescricao.descricao }}</strong>
+                <span class="ui-selo ui-selo--contorno item__tipo">
+                  {{ t(`clinico.internacao.itemKind.${prescricao.kind}`) }}
+                </span>
+              </p>
+
+              <p class="item__meta">
+                <span v-if="prescricao.doseTexto" class="item__dose ui-num">
+                  {{ prescricao.doseTexto }}
+                </span>
+                <span v-if="prescricao.via">
+                  {{ t(`clinico.prontuario.conduta.via_.${prescricao.via}`) }}
+                </span>
+                <span class="ui-num">
+                  {{
+                    prescricao.continuo
+                      ? t('clinico.internacao.prescricao.continuo', {
+                          horas: prescricao.frequenciaHoras,
+                        })
+                      : t('clinico.internacao.prescricao.aCada', {
+                          horas: prescricao.frequenciaHoras,
+                        })
+                  }}
+                </span>
+              </p>
+
+              <p class="item__rodape">
+                <span class="ui-num">
+                  {{
+                    t(
+                      'clinico.internacao.prescricao.feitas',
+                      { total: feitas(prescricao) },
+                      feitas(prescricao),
+                    )
+                  }}
+                </span>
+                <span>
+                  {{
+                    t('clinico.internacao.prescricao.por', {
+                      nome: clinico.profissional(prescricao.prescritoPor)?.nome ?? '',
                     })
-                  : t('clinico.internacao.prescricao.aCada', {
-                      horas: prescricao.frequenciaHoras,
-                    })
-              }}
-            </span>
-            <span v-if="proximoHorario(prescricao)" class="item__proxima">
+                  }}
+                </span>
+              </p>
+
+              <p v-if="prescricao.observacao" class="item__observacao">
+                {{ prescricao.observacao }}
+              </p>
+            </div>
+
+            <div class="item__fim">
+              <span v-if="proximoHorario(prescricao)" class="item__proxima ui-num">
+                <i class="ph ph-clock" aria-hidden="true" />
+                {{
+                  t('clinico.internacao.prescricao.proxima', { hora: proximoHorario(prescricao) })
+                }}
+              </span>
+              <Button
+                type="button"
+                :label="t('clinico.internacao.prescricao.suspender')"
+                icon="ph ph-prohibit"
+                severity="secondary"
+                text
+                size="small"
+                :disabled="salvando"
+                @click="suspendendo = prescricao"
+              />
+            </div>
+          </div>
+
+          <!-- Confirmação em linha: pede o motivo onde o item está, sem tirar o contexto da tela. -->
+          <div v-if="suspendendo?.id === prescricao.id" class="suspender">
+            <p class="suspender__alvo">
               {{
-                t('clinico.internacao.prescricao.proxima', { hora: proximoHorario(prescricao) })
+                t('clinico.internacao.prescricao.suspenderAlvo', { item: suspendendo.descricao })
               }}
-            </span>
-          </p>
+            </p>
 
-          <p class="item__rodape">
-            {{
-              t('clinico.internacao.prescricao.feitas', { total: feitas(prescricao) }, feitas(prescricao))
-            }}
-            ·
-            {{
-              t('clinico.internacao.prescricao.por', {
-                nome: clinico.profissional(prescricao.prescritoPor)?.nome ?? '',
-              })
-            }}
-          </p>
+            <ClinicField :rotulo="t('clinico.internacao.prescricao.motivo')" obrigatorio>
+              <template #default="{ id }">
+                <InputText
+                  :id="id"
+                  v-model="motivo"
+                  :placeholder="t('clinico.internacao.prescricao.motivoExemplo')"
+                  fluid
+                />
+              </template>
+            </ClinicField>
 
-          <p v-if="prescricao.observacao" class="item__observacao">{{ prescricao.observacao }}</p>
-        </div>
+            <div class="suspender__acoes">
+              <Button
+                type="button"
+                :label="t('clinico.internacao.prescricao.cancelar')"
+                severity="secondary"
+                text
+                size="small"
+                @click="suspendendo = null"
+              />
+              <Button
+                type="button"
+                :label="t('clinico.internacao.prescricao.confirmarSuspensao')"
+                icon="ph ph-prohibit"
+                severity="danger"
+                size="small"
+                :disabled="!motivo.trim() || salvando"
+                @click="confirmarSuspensao"
+              />
+            </div>
+          </div>
+        </li>
+      </ul>
+    </UiSecao>
 
-        <Button
-          :label="t('clinico.internacao.prescricao.suspender')"
-          severity="secondary"
-          text
-          size="small"
-          :disabled="salvando"
-          @click="suspendendo = prescricao"
-        />
-      </article>
-
-      <!-- Confirmação em linha: pede o motivo onde o item está, sem tirar o contexto da tela. -->
-      <div v-if="suspendendo" class="suspender">
-        <p class="suspender__alvo">
-          {{ t('clinico.internacao.prescricao.suspenderAlvo', { item: suspendendo.descricao }) }}
-        </p>
-
-        <ClinicField :rotulo="t('clinico.internacao.prescricao.motivo')" obrigatorio>
-          <template #default="{ id }">
-            <InputText
-              :id="id"
-              v-model="motivo"
-              :placeholder="t('clinico.internacao.prescricao.motivoExemplo')"
-              fluid
-            />
-          </template>
-        </ClinicField>
-
-        <div class="suspender__acoes">
-          <Button
-            :label="t('clinico.internacao.prescricao.cancelar')"
-            severity="secondary"
-            text
-            size="small"
-            @click="suspendendo = null"
-          />
-          <Button
-            :label="t('clinico.internacao.prescricao.confirmarSuspensao')"
-            severity="danger"
-            size="small"
-            :disabled="!motivo.trim() || salvando"
-            @click="confirmarSuspensao"
-          />
-        </div>
-      </div>
-    </section>
-
-<!--
-      Prescrever é uma tarefa à parte, não um trecho a mais da lista.
-      Como bloco solto abaixo dos itens em curso, o formulário empurrava a lista para cima, abria
-      fora do campo de visão em telas cheias e deixava ambíguo se os campos descreviam um item já
-      prescrito ou um novo. Em diálogo, a tarefa tem começo, fim e um lugar só.
+    <!--
+      Prescrever é uma tarefa à parte, não um trecho a mais da lista: em diálogo, a tarefa tem
+      começo, fim e um lugar só, e não fica ambíguo se os campos descrevem um item já prescrito.
     -->
     <Dialog
       v-model:visible="abrindo"
@@ -440,12 +482,14 @@ function aoEscolherMedicamento(medicamentoId: string) {
 
       <template #footer>
         <Button
+          type="button"
           :label="t('clinico.internacao.prescricao.cancelar')"
           severity="secondary"
           text
           @click="abrindo = false"
         />
         <Button
+          type="button"
           :label="t('clinico.internacao.prescricao.criar')"
           icon="ph ph-check"
           :disabled="!podeCriar"
@@ -455,173 +499,211 @@ function aoEscolherMedicamento(medicamentoId: string) {
       </template>
     </Dialog>
 
-    <section v-if="suspensas.length > 0" class="bloco">
-      <h3 class="bloco__titulo">{{ t('clinico.internacao.prescricao.suspensasTitulo') }}</h3>
-
-      <article v-for="prescricao in suspensas" :key="prescricao.id" class="item item--suspensa">
-        <div class="item__corpo">
-          <p class="item__nome">
-            <strong>{{ prescricao.descricao }}</strong>
-          </p>
-          <p class="item__rodape">
-            {{
-              t('clinico.internacao.prescricao.suspensaEm', {
-                hora: formato.hora(prescricao.suspensaEm ?? ''),
-                motivo: prescricao.motivoSuspensao,
-              })
-            }}
-            ·
-            {{ t('clinico.internacao.prescricao.feitas', { total: feitas(prescricao) }, feitas(prescricao)) }}
-          </p>
-        </div>
-      </article>
-    </section>
+    <UiSecao
+      v-if="suspensas.length > 0"
+      id="prescricao-suspensas"
+      :titulo="t('clinico.internacao.prescricao.suspensasTitulo')"
+      :contagem="suspensas.length"
+      folha
+    >
+      <ul class="ui-lista">
+        <li v-for="prescricao in suspensas" :key="prescricao.id" class="item item--suspensa">
+          <div class="item__linha">
+            <span class="item__icone" aria-hidden="true"><i :class="ICONE[prescricao.kind]" /></span>
+            <div class="item__corpo">
+              <p class="item__nome">
+                <strong>{{ prescricao.descricao }}</strong>
+              </p>
+              <p class="item__rodape">
+                <span>
+                  {{
+                    t('clinico.internacao.prescricao.suspensaEm', {
+                      hora: formato.hora(prescricao.suspensaEm ?? ''),
+                      motivo: prescricao.motivoSuspensao,
+                    })
+                  }}
+                </span>
+                <span class="ui-num">
+                  {{
+                    t(
+                      'clinico.internacao.prescricao.feitas',
+                      { total: feitas(prescricao) },
+                      feitas(prescricao),
+                    )
+                  }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </UiSecao>
   </div>
 </template>
 
 <style scoped>
 .prescricoes {
   display: grid;
-  gap: var(--clinic-space-4);
-}
-
-.bloco {
-  display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-}
-
-.bloco__topo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-2);
-}
-
-.bloco__titulo {
-  margin: 0;
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
-}
-
-.bloco__vazio {
-  margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  gap: 28px;
 }
 
 .item {
+  display: grid;
+}
+
+.item__linha {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface-soft);
+  gap: 14px;
+  padding: 14px 18px;
 }
 
-.item--suspensa {
-  border-style: dashed;
-  opacity: 0.75;
-}
-
-.item--suspensa .item__nome strong {
-  text-decoration: line-through;
+.item__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 18px;
 }
 
 .item__corpo {
   display: grid;
   min-width: 0;
-  gap: 0.15rem;
+  flex: 1;
+  gap: 4px;
 }
 
 .item__nome {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
+  gap: 4px 10px;
   margin: 0;
-  gap: var(--clinic-space-2);
 }
 
 .item__nome strong {
   overflow-wrap: anywhere;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.item__tag {
-  padding: 0.05rem 0.4rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-neutral-bg);
-  color: var(--clinic-neutral-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+.item__tipo.ui-selo {
+  height: 22px;
+  font-size: 12px;
 }
 
-.item__linha {
+.item__meta {
   display: flex;
   flex-wrap: wrap;
+  gap: 2px 14px;
   margin: 0;
-  gap: var(--clinic-space-3);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.item__dose {
+  color: var(--tinta);
+  font-weight: 550;
+}
+
+.item__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin: 0;
+  color: var(--tinta-3);
+  font-size: 13px;
+}
+
+.item__observacao {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.item__fim {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px 10px;
 }
 
 .item__proxima {
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--musgo);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.item__rodape,
-.item__observacao {
-  margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.item--suspensa .item__nome strong {
+  color: var(--tinta-2);
+  text-decoration: line-through;
 }
+
+.item--suspensa .item__icone {
+  opacity: 0.6;
+}
+
+/* ----------------------------------------------------------------- suspender */
 
 .suspender {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-risk-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-risk-bg);
+  gap: 12px;
+  margin: 0 18px 16px 68px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
 }
 
 .suspender__alvo {
   margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .suspender__acoes {
   display: flex;
   justify-content: flex-end;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 /*
- * Duas colunas de verdade, e não `auto-fit`.
- *
- * Com `minmax` automático a largura de cada campo mudava conforme o tipo escolhido: some o
- * campo de medicamento e os vizinhos se esticam. Duas colunas fixas mantêm a forma estável
- * enquanto o formulário troca de campos, e a descrição atravessa as duas por ser a linha que a
- * enfermagem lê no checklist.
+ * Duas colunas de verdade, e não `auto-fit`: some o campo de medicamento e os vizinhos não se
+ * esticam. A descrição atravessa as duas por ser a linha que a enfermagem lê no checklist.
  */
 .formulario {
   display: grid;
-  gap: var(--clinic-space-4) var(--clinic-space-3);
+  gap: 16px 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 @media (width <= 640px) {
   .formulario {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .item__linha {
+    flex-wrap: wrap;
+  }
+
+  .item__fim {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .suspender {
+    margin-inline: 12px;
   }
 }
 </style>

@@ -17,6 +17,8 @@ import Textarea from 'primevue/textarea'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import UiSecao from '@/components/ui/UiSecao.vue'
+
 import BoletimNoApp from './BoletimNoApp.vue'
 import InternacaoGravidade from './InternacaoGravidade.vue'
 import ClinicField from '../base/ClinicField.vue'
@@ -173,30 +175,32 @@ function compor() {
   <div class="boletins">
     <div class="boletins__coluna">
       <!--
-        O bloqueio, quando existe, é a primeira coisa da tela — e explica a regra na própria
-        caixa. Um botão desabilitado sem motivo escrito parece defeito, e defeito se contorna.
+        O bloqueio, quando existe, é a primeira coisa da aba — e explica a regra na própria
+        folha. Um botão desabilitado sem motivo escrito parece defeito, e defeito se contorna.
       -->
       <section
         v-for="boletim in retidos"
         :key="boletim.id"
-        class="retido"
+        class="retido ui-folha ui-marca ui-marca--risco"
         role="alert"
       >
         <header class="retido__topo">
-          <h3 class="retido__titulo">
-            <i class="ph ph-lock" aria-hidden="true" />
-            {{ t('clinico.internacao.boletim.retidoTitulo') }}
-          </h3>
+          <span class="retido__icone" aria-hidden="true"><i class="ph ph-lock-simple" /></span>
+          <div class="retido__titulos">
+            <h3 class="retido__titulo">{{ t('clinico.internacao.boletim.retidoTitulo') }}</h3>
+            <p class="retido__regra">{{ t('clinico.internacao.boletim.retidoRegra') }}</p>
+          </div>
           <InternacaoGravidade :gravidade="boletim.gravidade" />
         </header>
 
-        <p class="retido__regra">{{ t('clinico.internacao.boletim.retidoRegra') }}</p>
-
         <blockquote class="retido__texto">{{ boletim.texto }}</blockquote>
 
-        <p class="retido__passos">
-          <span class="retido__passo" :class="{ 'retido__passo--feito': boletim.ligacaoEm }">
-            <i :class="boletim.ligacaoEm ? 'ph ph-check-circle' : 'ph ph-phone'" aria-hidden="true" />
+        <footer class="retido__pe">
+          <p class="retido__passo" :class="{ 'retido__passo--feito': boletim.ligacaoEm }">
+            <i
+              :class="boletim.ligacaoEm ? 'ph ph-check-circle' : 'ph ph-phone-call'"
+              aria-hidden="true"
+            />
             {{
               boletim.ligacaoEm
                 ? t('clinico.internacao.boletim.ligacaoFeita', {
@@ -208,187 +212,222 @@ function compor() {
                     telefone: tutor?.telefone ?? '',
                   })
             }}
-          </span>
-        </p>
+          </p>
 
-        <footer class="retido__acoes">
-          <Button
-            v-if="!boletim.ligacaoEm"
-            :label="t('clinico.internacao.boletim.registrarLigacao')"
-            icon="ph ph-phone"
-            :loading="salvando"
-            @click="emit('ligar', boletim.id)"
-          />
-          <Button
-            :label="t('clinico.internacao.boletim.enviar')"
-            icon="ph ph-paper-plane-tilt"
-            severity="secondary"
-            :outlined="!boletim.ligacaoEm"
-            :disabled="!boletim.ligacaoEm || salvando"
-            @click="emit('enviar', boletim.id)"
-          />
+          <div class="retido__acoes">
+            <Button
+              v-if="!boletim.ligacaoEm"
+              type="button"
+              :label="t('clinico.internacao.boletim.registrarLigacao')"
+              icon="ph ph-phone"
+              :loading="salvando"
+              @click="emit('ligar', boletim.id)"
+            />
+            <Button
+              type="button"
+              :label="t('clinico.internacao.boletim.enviar')"
+              icon="ph ph-paper-plane-tilt"
+              :severity="boletim.ligacaoEm ? undefined : 'secondary'"
+              :outlined="!boletim.ligacaoEm"
+              :disabled="!boletim.ligacaoEm || salvando"
+              @click="emit('enviar', boletim.id)"
+            />
+          </div>
         </footer>
       </section>
 
-      <section class="bloco">
-        <h3 class="bloco__titulo">{{ t('clinico.internacao.boletim.composerTitulo') }}</h3>
-        <p class="bloco__ajuda">{{ t('clinico.internacao.boletim.composerAjuda') }}</p>
+      <UiSecao
+        v-if="prontos.length > 0"
+        id="boletim-prontos"
+        :titulo="t('clinico.internacao.boletim.prontosTitulo')"
+        :contagem="prontos.length"
+        folha
+      >
+        <ul class="ui-lista">
+          <li v-for="boletim in prontos" :key="boletim.id" class="pronto">
+            <p class="pronto__texto">{{ boletim.texto }}</p>
+            <footer class="pronto__pe">
+              <span class="pronto__meta">
+                <span class="ui-hora">{{ formato.hora(boletim.geradoEm) }}</span>
+                {{ t(`clinico.internacao.boletim.origem.${boletim.origem}`) }}
+              </span>
+              <Button
+                type="button"
+                :label="t('clinico.internacao.boletim.enviar')"
+                icon="ph ph-paper-plane-tilt"
+                size="small"
+                :loading="salvando"
+                @click="emit('enviar', boletim.id)"
+              />
+            </footer>
+          </li>
+        </ul>
+      </UiSecao>
 
-        <!--
-          Os modelos ficam **acima** do campo, e não dentro de um menu.
-
-          A ordem é a do trabalho: escolhe-se a situação e depois se ajusta o texto. Escondidos
-          atrás de um "inserir modelo", eles viram um recurso que existe para quem já sabe que
-          existe — e quem está com o paciente na mesa não vai procurar.
-        -->
-        <div v-if="modelos.length > 0" class="modelos">
-          <span class="modelos__rotulo clinic-label">
-            {{ t('clinico.internacao.boletim.modelosTitulo') }}
-          </span>
-          <div class="modelos__lista" role="group" :aria-label="t('clinico.internacao.boletim.modelosTitulo')">
-            <button
-              v-for="modelo in modelos"
-              :key="modelo.id"
-              type="button"
-              class="modelo"
-              :class="{ 'modelo--ativo': modeloEscolhido === modelo.id }"
-              :aria-pressed="modeloEscolhido === modelo.id"
-              @click="usarModelo(modelo)"
+      <UiSecao
+        id="boletim-compor"
+        :titulo="t('clinico.internacao.boletim.composerTitulo')"
+        :descricao="t('clinico.internacao.boletim.composerAjuda')"
+        folha
+      >
+        <div class="compor">
+          <!--
+            Os modelos ficam **acima** do campo, e não dentro de um menu: escolhe-se a situação e
+            depois se ajusta o texto. Escondidos atrás de um "inserir modelo", eles viram um
+            recurso que existe só para quem já sabe que existe.
+          -->
+          <div v-if="modelos.length > 0" class="modelos">
+            <span class="modelos__rotulo">{{ t('clinico.internacao.boletim.modelosTitulo') }}</span>
+            <div
+              class="modelos__lista"
+              role="group"
+              :aria-label="t('clinico.internacao.boletim.modelosTitulo')"
             >
-              {{ modelo.rotulo }}
-            </button>
+              <button
+                v-for="modelo in modelos"
+                :key="modelo.id"
+                type="button"
+                class="modelo"
+                :class="{ 'modelo--ativo': modeloEscolhido === modelo.id }"
+                :aria-pressed="modeloEscolhido === modelo.id"
+                @click="usarModelo(modelo)"
+              >
+                <i
+                  v-if="modeloEscolhido === modelo.id"
+                  class="ph ph-check"
+                  aria-hidden="true"
+                />
+                {{ modelo.rotulo }}
+              </button>
+            </div>
+          </div>
+
+          <ClinicField
+            :rotulo="t('clinico.internacao.boletim.mensagem')"
+            :dica="t('clinico.internacao.boletim.mensagemDica')"
+          >
+            <template #default="{ id }">
+              <Textarea
+                :id="id"
+                v-model="rascunho"
+                :placeholder="t('clinico.internacao.boletim.mensagemExemplo')"
+                rows="5"
+                auto-resize
+                fluid
+                @input="modeloEscolhido = ''"
+              />
+            </template>
+          </ClinicField>
+
+          <div class="compor__acoes">
+            <!--
+              Limpar só aparece com algo escrito. Um botão que não faz nada em metade das visitas
+              ensina a ignorá-lo justamente na metade em que ele faria.
+            -->
+            <Button
+              v-if="rascunho.trim()"
+              type="button"
+              :label="t('clinico.internacao.boletim.limpar')"
+              severity="secondary"
+              text
+              :disabled="salvando"
+              @click="limpar"
+            />
+            <Button
+              type="button"
+              :label="t('clinico.internacao.boletim.compor')"
+              icon="ph ph-pencil-simple"
+              :disabled="!rascunho.trim() || salvando"
+              :loading="salvando"
+              @click="compor"
+            />
           </div>
         </div>
+      </UiSecao>
 
-        <ClinicField
-          :rotulo="t('clinico.internacao.boletim.mensagem')"
-          :dica="t('clinico.internacao.boletim.mensagemDica')"
-        >
-          <template #default="{ id }">
-            <Textarea
-              :id="id"
-              v-model="rascunho"
-              :placeholder="t('clinico.internacao.boletim.mensagemExemplo')"
-              rows="5"
-              auto-resize
-              fluid
-              @input="modeloEscolhido = ''"
-            />
-          </template>
-        </ClinicField>
-
-        <div class="composer__acoes">
-          <Button
-            :label="t('clinico.internacao.boletim.compor')"
-            icon="ph ph-pencil-simple"
-            :disabled="!rascunho.trim() || salvando"
-            :loading="salvando"
-            @click="compor"
-          />
-          <!--
-            Limpar só aparece com algo escrito. Um botão que não faz nada em metade das visitas
-            ensina a ignorá-lo justamente na metade em que ele faria.
-          -->
-          <Button
-            v-if="rascunho.trim()"
-            :label="t('clinico.internacao.boletim.limpar')"
-            severity="secondary"
-            text
-            :disabled="salvando"
-            @click="limpar"
-          />
-        </div>
-      </section>
-
-      <section v-if="prontos.length > 0" class="bloco">
-        <h3 class="bloco__titulo">{{ t('clinico.internacao.boletim.prontosTitulo') }}</h3>
-
-        <article v-for="boletim in prontos" :key="boletim.id" class="pronto">
-          <p class="pronto__texto">{{ boletim.texto }}</p>
-          <footer class="pronto__acoes">
-            <span class="pronto__meta">
-              {{ formato.hora(boletim.geradoEm) }} ·
-              {{ t(`clinico.internacao.boletim.origem.${boletim.origem}`) }}
-            </span>
-            <Button
-              :label="t('clinico.internacao.boletim.enviar')"
-              icon="ph ph-paper-plane-tilt"
-              size="small"
-              :loading="salvando"
-              @click="emit('enviar', boletim.id)"
-            />
-          </footer>
-        </article>
-      </section>
-
-      <section class="bloco">
-        <h3 class="bloco__titulo">{{ t('clinico.internacao.boletim.frequenciaTitulo') }}</h3>
-        <p class="bloco__ajuda">{{ t('clinico.internacao.boletim.frequenciaAjuda') }}</p>
-
-        <ClinicField :rotulo="t('clinico.internacao.boletim.frequencia')">
-          <template #default="{ id }">
-            <Select
-              :id="id"
-              :model-value="preferencia.frequenciaHoras"
-              :options="opcoesDeFrequencia"
-              option-label="rotulo"
-              option-value="valor"
-              fluid
-              :pt="{ overlay: { class: 'clinic-overlay' } }"
-              @update:model-value="mudarFrequencia"
-            >
-              <template #option="{ option }">
-                <span class="opcao">
-                  <span>{{ option.rotulo }}</span>
-                  <span class="opcao__custo">
-                    {{ t('clinico.internacao.boletim.porDia', { total: option.porDia }) }}
-                  </span>
-                </span>
+      <UiSecao
+        id="boletim-frequencia"
+        :titulo="t('clinico.internacao.boletim.frequenciaTitulo')"
+        :descricao="t('clinico.internacao.boletim.frequenciaAjuda')"
+        folha
+      >
+        <div class="frequencia">
+          <div class="frequencia__linha">
+            <ClinicField :rotulo="t('clinico.internacao.boletim.frequencia')">
+              <template #default="{ id }">
+                <Select
+                  :id="id"
+                  :model-value="preferencia.frequenciaHoras"
+                  :options="opcoesDeFrequencia"
+                  option-label="rotulo"
+                  option-value="valor"
+                  fluid
+                  :pt="{ overlay: { class: 'clinic-overlay' } }"
+                  @update:model-value="mudarFrequencia"
+                >
+                  <template #option="{ option }">
+                    <span class="opcao">
+                      <span>{{ option.rotulo }}</span>
+                      <span class="opcao__custo">
+                        {{ t('clinico.internacao.boletim.porDia', { total: option.porDia }) }}
+                      </span>
+                    </span>
+                  </template>
+                </Select>
               </template>
-            </Select>
-          </template>
-        </ClinicField>
+            </ClinicField>
 
-        <p class="custo">
-          {{
-            t(
-              'clinico.internacao.boletim.custoAtual',
-              { total: boletinsPorDia(preferencia.frequenciaHoras, preferencia.silencioNoturno) },
-              boletinsPorDia(preferencia.frequenciaHoras, preferencia.silencioNoturno),
-            )
-          }}
-        </p>
+            <p class="custo">
+              <strong class="ui-num">
+                {{ boletinsPorDia(preferencia.frequenciaHoras, preferencia.silencioNoturno) }}
+              </strong>
+              <span>
+                {{
+                  t(
+                    'clinico.internacao.nova.boletim.mensagensPorDia',
+                    {},
+                    boletinsPorDia(preferencia.frequenciaHoras, preferencia.silencioNoturno),
+                  )
+                }}
+              </span>
+            </p>
+          </div>
 
-        <ClinicToggleGroup
-          :model-value="preferencia.silencioNoturno"
-          :opcoes="opcoesDeSilencio"
-          :rotulo="t('clinico.internacao.boletim.silencio')"
-          @update:model-value="mudarSilencio"
-        />
+          <ClinicToggleGroup
+            :model-value="preferencia.silencioNoturno"
+            :opcoes="opcoesDeSilencio"
+            :rotulo="t('clinico.internacao.boletim.silencio')"
+            @update:model-value="mudarSilencio"
+          />
 
-        <ClinicToggleGroup
-          :model-value="preferencia.fotoSempre"
-          :opcoes="opcoesDeFoto"
-          :rotulo="t('clinico.internacao.boletim.foto')"
-          @update:model-value="mudarFoto"
-        />
+          <ClinicToggleGroup
+            :model-value="preferencia.fotoSempre"
+            :opcoes="opcoesDeFoto"
+            :rotulo="t('clinico.internacao.boletim.foto')"
+            @update:model-value="mudarFoto"
+          />
 
-        <p v-if="proximo" class="custo">
-          {{ t('clinico.internacao.boletim.proximo', { hora: formato.hora(proximo) }) }}
-        </p>
-      </section>
+          <p v-if="proximo" class="proximo">
+            <i class="ph ph-clock" aria-hidden="true" />
+            {{ t('clinico.internacao.boletim.proximo', { hora: formato.hora(proximo) }) }}
+          </p>
+        </div>
+      </UiSecao>
     </div>
 
     <div class="boletins__coluna boletins__coluna--app">
-      <h3 class="bloco__titulo">{{ t('clinico.internacao.boletim.appTitulo') }}</h3>
-      <p class="bloco__ajuda">{{ t('clinico.internacao.boletim.appAjuda') }}</p>
-
-      <BoletimNoApp
-        :boletins="boletins"
-        :pet-nome="pet?.nome ?? ''"
-        :pet-iniciais="pet?.iniciais ?? ''"
-        :clinica-nome="clinico.clinic?.nome ?? ''"
-      />
+      <UiSecao
+        id="boletim-app"
+        :titulo="t('clinico.internacao.boletim.appTitulo')"
+        :descricao="t('clinico.internacao.boletim.appAjuda')"
+      >
+        <BoletimNoApp
+          :boletins="boletins"
+          :pet-nome="pet?.nome ?? ''"
+          :pet-iniciais="pet?.iniciais ?? ''"
+          :clinica-nome="clinico.clinic?.nome ?? ''"
+        />
+      </UiSecao>
     </div>
   </div>
 </template>
@@ -397,199 +436,240 @@ function compor() {
 .boletins {
   display: grid;
   align-items: start;
-  gap: var(--clinic-space-5);
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
 }
 
 .boletins__coluna {
   display: grid;
-  gap: var(--clinic-space-4);
+  min-width: 0;
+  gap: 28px;
 }
 
 .boletins__coluna--app {
   position: sticky;
-  top: var(--clinic-space-4);
+  top: 16px;
 }
 
-.bloco {
-  display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-}
-
-.bloco__titulo {
-  margin: 0;
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
-}
-
-.bloco__ajuda {
-  margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  line-height: 1.5;
-}
-
-.modelos {
-  display: grid;
-  gap: var(--clinic-space-2);
-}
-
-.modelos__lista {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--clinic-space-2);
-}
-
-/*
- * Ficha, e não botão cheio.
- *
- * São sete numa fileira, e sete botões com peso de ação competiriam com o "Compor" que de fato
- * envia. A ficha diz "escolha", o botão diz "faça" — e aqui só um dos dois faz alguma coisa
- * acontecer do lado do responsável.
+/* ----------------------------------------------------------------- retido
+ * O único bloco de risco da aba — e só há um por vez, quase sempre nenhum.
  */
-.modelo {
-  min-height: var(--clinic-hit-target);
-  padding: 0 var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.modelo:hover {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.modelo:focus-visible {
-  outline: none;
-  box-shadow: var(--clinic-focus-ring);
-}
-
-/* Anel e peso, não só fundo: a marcação precisa sobreviver à escala de cinza. */
-.modelo--ativo {
-  border-color: var(--clinic-accent-strong);
-  background: var(--clinic-accent-tint);
-  box-shadow: inset 0 0 0 1px var(--clinic-accent-strong);
-  color: var(--clinic-accent-strong);
-  font-weight: 800;
-}
-
-.composer__acoes {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--clinic-space-2);
-}
-
-/* O retido é o único bloco com fundo quente da tela — e só há um por vez, quase sempre nenhum. */
 .retido {
+  position: relative;
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-risk-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-risk-bg);
+  gap: 14px;
+  padding: 18px 20px 18px 22px;
+  border-color: color-mix(in oklab, var(--risco) 45%, var(--linha));
 }
 
 .retido__topo {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-2);
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.retido__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 18px;
+}
+
+.retido__titulos {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
 }
 
 .retido__titulo {
-  display: flex;
-  align-items: center;
   margin: 0;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
+  color: var(--risco-tinta);
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .retido__regra {
   margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.5;
 }
 
-/*
- * O que o responsável vai ler aparece como painel fechado sobre o fundo quente da caixa retida —
- * o contraste entre os dois já separa a mensagem do aviso da clínica, sem precisar de filete.
- */
+/* O que o responsável vai ler: citação, não caixa — o fio separa a mensagem do aviso. */
 .retido__texto {
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-risk-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  font-size: var(--clinic-font-label);
-  line-height: 1.5;
+  padding: 2px 0 2px 14px;
+  border-inline-start: 3px solid var(--linha-forte);
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-line;
 }
 
-.retido__passos {
-  margin: 0;
+.retido__pe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--linha);
 }
 
 .retido__passo {
   display: inline-flex;
   align-items: center;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  gap: 8px;
+  margin: 0;
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.retido__passo i {
+  font-size: 18px;
 }
 
 .retido__passo--feito {
-  color: var(--clinic-ok-text);
+  color: var(--ok-tinta);
 }
 
 .retido__acoes {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
+
+/* ----------------------------------------------------------------- prontos */
 
 .pronto {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
+  gap: 10px;
+  padding: 14px 18px;
 }
 
 .pronto__texto {
   margin: 0;
-  font-size: var(--clinic-font-label);
-  line-height: 1.5;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-line;
 }
 
-.pronto__acoes {
+.pronto__pe {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .pronto__meta {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.pronto__meta .ui-hora {
+  font-size: 14px;
+}
+
+/* ----------------------------------------------------------------- compor */
+
+.compor {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.modelos {
+  display: grid;
+  gap: 8px;
+}
+
+.modelos__rotulo {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.modelos__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/*
+ * Ficha, e não botão cheio: são sete numa fileira, e sete botões com peso de ação competiriam com
+ * o "Gerar boletim", que é o único que faz alguma coisa acontecer do lado do responsável.
+ */
+.modelo {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--pj-tempo-curto) ease,
+    border-color var(--pj-tempo-curto) ease;
+}
+
+.modelo:hover {
+  background: var(--superficie-2);
+}
+
+.modelo:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: 2px;
+}
+
+/* Anel, ícone e peso, não só fundo: a marcação precisa sobreviver à escala de cinza. */
+.modelo--ativo {
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
+  box-shadow: inset 0 0 0 1px var(--musgo);
+  color: var(--musgo);
+  font-weight: 600;
+}
+
+.compor__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ----------------------------------------------------------------- frequência */
+
+.frequencia {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.frequencia__linha {
+  display: grid;
+  align-items: end;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .opcao {
@@ -597,27 +677,66 @@ function compor() {
   width: 100%;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
+  gap: 12px;
 }
 
 .opcao__custo {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
+/* O custo da escolha, em número grande: "24 mensagens por dia" se lê antes de confirmar. */
 .custo {
+  display: grid;
+  justify-items: end;
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  padding-bottom: 2px;
+  line-height: 1.1;
+  text-align: end;
 }
 
-@media (width <= 1024px) {
+.custo strong {
+  color: var(--tinta);
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.custo span {
+  max-width: 18ch;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.proximo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+@media (width <= 1100px) {
   .boletins {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .boletins__coluna--app {
     position: static;
+  }
+}
+
+@media (width <= 520px) {
+  .frequencia__linha {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .custo {
+    justify-items: start;
+    text-align: start;
   }
 }
 </style>

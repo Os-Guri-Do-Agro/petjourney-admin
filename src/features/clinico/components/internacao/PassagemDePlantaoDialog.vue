@@ -119,22 +119,28 @@ function entregar() {
     v-model:visible="visivel"
     modal
     class="clinic-dialog hc-tema"
-    :style="{ width: 'min(44rem, 96vw)' }"
+    :style="{ width: 'min(46rem, 96vw)' }"
     :content-style="{ maxHeight: '68vh', overflowY: 'auto' }"
     :header="t('clinico.internacao.passagem.titulo')"
     dismissable-mask
   >
     <div v-if="passagem" class="passagem clinic-scope">
+      <!-- Quem entrega e para quem: o turno que sai, a hora, e o turno que entra. -->
       <p class="passagem__turno">
-        <strong>
-          {{ t(`clinico.internacao.plantao.${passagem.plantao.kind}`) }}
-          {{ formato.intervalo(passagem.plantao.inicio, passagem.plantao.fim) }}
-        </strong>
-        <span>
-          {{ clinico.profissional(passagem.plantao.responsavelId)?.nome }}
-          <!-- Ícone, e não o caractere "→": seta de texto não espelha no árabe. -->
-          <i class="ph ph-arrow-right passagem__seta" aria-hidden="true" />
-          {{ t(`clinico.internacao.plantao.${passagem.seguinte.kind}`) }}
+        <span class="passagem__icone" aria-hidden="true"><i class="ph ph-arrows-left-right" /></span>
+        <span class="passagem__turno-texto">
+          <strong>
+            {{ t(`clinico.internacao.plantao.${passagem.plantao.kind}`) }}
+            <span class="ui-num">
+              {{ formato.intervalo(passagem.plantao.inicio, passagem.plantao.fim) }}
+            </span>
+          </strong>
+          <span>
+            {{ clinico.profissional(passagem.plantao.responsavelId)?.nome }}
+            <!-- Ícone, e não o caractere "→": seta de texto não espelha no árabe. -->
+            <i class="ph ph-arrow-right passagem__seta" aria-hidden="true" />
+            {{ t(`clinico.internacao.plantao.${passagem.seguinte.kind}`) }}
+          </span>
         </span>
       </p>
 
@@ -143,11 +149,17 @@ function entregar() {
         <h4 class="lista__titulo">
           <i class="ph ph-arrows-left-right" aria-hidden="true" />
           {{ t('clinico.internacao.passagem.emCimaDaTroca') }}
+          <span class="ui-contagem">{{ naTroca.length }}</span>
         </h4>
         <p class="lista__ajuda">{{ t('clinico.internacao.passagem.emCimaDaTrocaAjuda') }}</p>
 
-        <ul class="lista__itens">
-          <li v-for="item in naTroca" :key="item.administracao.id" class="linha">
+        <ul class="ui-lista lista__itens">
+          <li
+            v-for="item in naTroca"
+            :key="item.administracao.id"
+            class="linha"
+            :class="{ 'linha--decidida': decididas.has(item.administracao.id) }"
+          >
             <div class="linha__decisao">
               <Checkbox
                 binary
@@ -156,15 +168,17 @@ function entregar() {
                 @update:model-value="alternarDecisao(item.administracao.id)"
               />
               <label class="linha__texto" :for="`${idDecisao}-${item.administracao.id}`">
-                <strong class="clinic-value">
-                  {{ formato.hora(item.administracao.previstaPara) }}
-                </strong>
-                {{ item.descricao }}
-                <em>{{ item.petNome }} · {{ item.leitoNome }}</em>
+                <span class="linha__principal">
+                  <strong class="ui-hora">{{ formato.hora(item.administracao.previstaPara) }}</strong>
+                  {{ item.descricao }}
+                </span>
+                <span class="linha__meta">{{ item.petNome }} · {{ item.leitoNome }}</span>
               </label>
             </div>
             <Button
+              type="button"
               :label="t('clinico.internacao.passagem.abrir')"
+              icon="ph ph-arrow-square-out"
               severity="secondary"
               text
               size="small"
@@ -176,21 +190,24 @@ function entregar() {
 
       <section v-if="atrasadas.length > 0" class="lista">
         <h4 class="lista__titulo">
-          <i class="ph ph-clock" aria-hidden="true" />
+          <i class="ph ph-clock-countdown" aria-hidden="true" />
           {{ t('clinico.internacao.passagem.atrasadas') }}
+          <span class="ui-contagem">{{ atrasadas.length }}</span>
         </h4>
 
-        <ul class="lista__itens">
+        <ul class="ui-lista lista__itens">
           <li v-for="item in atrasadas" :key="item.administracao.id" class="linha">
             <span class="linha__texto">
-              <strong class="clinic-value">
-                {{ formato.hora(item.administracao.previstaPara) }}
-              </strong>
-              {{ item.descricao }}
-              <em>{{ item.petNome }} · {{ item.leitoNome }}</em>
+              <span class="linha__principal">
+                <strong class="ui-hora">{{ formato.hora(item.administracao.previstaPara) }}</strong>
+                {{ item.descricao }}
+              </span>
+              <span class="linha__meta">{{ item.petNome }} · {{ item.leitoNome }}</span>
             </span>
             <Button
+              type="button"
               :label="t('clinico.internacao.passagem.abrir')"
+              icon="ph ph-arrow-square-out"
               severity="secondary"
               text
               size="small"
@@ -204,13 +221,21 @@ function entregar() {
         <h4 class="lista__titulo">
           <i class="ph ph-note-pencil" aria-hidden="true" />
           {{ t('clinico.internacao.passagem.semEvolucao') }}
+          <span class="ui-contagem">{{ semEvolucao.length }}</span>
         </h4>
 
-        <ul class="lista__itens">
+        <ul class="ui-lista lista__itens">
           <li v-for="item in semEvolucao" :key="item.internacaoId" class="linha">
-            <span class="linha__texto">{{ item.petNome }} · {{ item.leitoNome }}</span>
+            <span class="linha__texto">
+              <span class="linha__principal">
+                <strong>{{ item.petNome }}</strong>
+              </span>
+              <span class="linha__meta">{{ item.leitoNome }}</span>
+            </span>
             <Button
+              type="button"
               :label="t('clinico.internacao.passagem.abrir')"
+              icon="ph ph-arrow-square-out"
               severity="secondary"
               text
               size="small"
@@ -257,17 +282,26 @@ function entregar() {
     </div>
 
     <template #footer>
-      <span v-if="faltaDecidir.length > 0" class="trava">
-        {{ t('clinico.internacao.passagem.trava', { total: faltaDecidir.length }, faltaDecidir.length) }}
+      <span v-if="faltaDecidir.length > 0" class="trava" role="status">
+        <i class="ph ph-lock-simple" aria-hidden="true" />
+        {{
+          t(
+            'clinico.internacao.passagem.trava',
+            { total: faltaDecidir.length },
+            faltaDecidir.length,
+          )
+        }}
       </span>
 
       <Button
+        type="button"
         :label="t('clinico.internacao.passagem.cancelar')"
         severity="secondary"
         text
         @click="emit('fechar')"
       />
       <Button
+        type="button"
         :label="t('clinico.internacao.passagem.entregar')"
         icon="ph ph-sign-out"
         :disabled="!podeEntregar"
@@ -281,90 +315,129 @@ function entregar() {
 <style scoped>
 .passagem {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 20px;
 }
 
 .passagem__turno {
-  display: grid;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin: 0;
-  gap: 0.1rem;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
-.passagem__turno strong {
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
+.passagem__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-size: 20px;
 }
 
-.passagem__turno span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.passagem__turno-texto {
+  display: grid;
+  gap: 2px;
+}
+
+.passagem__turno-texto strong {
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.passagem__turno-texto > span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 .passagem__seta {
-  font-size: 0.7em;
-  margin-inline: 0.2rem;
+  margin-inline: 4px;
+  font-size: 12px;
 }
+
+[dir='rtl'] .passagem__seta {
+  scale: -1 1;
+}
+
+/* ----------------------------------------------------------------- listas */
 
 .lista {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
-}
-
-/* A lista que trava a entrega é a única com tratamento de atenção. */
-.lista--troca {
-  border-color: var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
+  gap: 8px;
 }
 
 .lista__titulo {
   display: flex;
   align-items: center;
+  gap: 8px;
   margin: 0;
-  gap: var(--clinic-space-2);
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.lista__titulo i {
+  color: var(--tinta-2);
+  font-size: 18px;
+}
+
+/* A lista que trava a entrega é a única com tratamento de atenção. */
+.lista--troca .lista__titulo i {
+  color: var(--atencao-tinta);
 }
 
 .lista__ajuda {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.5;
 }
 
 .lista__itens {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  gap: var(--clinic-space-1);
-  list-style: none;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+}
+
+.lista--troca .lista__itens {
+  border-color: color-mix(in oklab, var(--atencao) 45%, var(--linha));
 }
 
 .linha {
   display: flex;
+  min-height: 56px;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
+  gap: 12px;
+  padding: 8px 8px 8px 14px;
+}
+
+.lista--troca .linha:not(.linha--decidida) {
+  background: color-mix(in oklab, var(--atencao-fundo) 45%, transparent);
+}
+
+.lista--troca .linha:first-child {
+  border-radius: 11px 11px 0 0;
+}
+
+.lista--troca .linha:last-child {
+  border-radius: 0 0 11px 11px;
+}
+
+.lista--troca .linha:only-child {
+  border-radius: 11px;
 }
 
 .linha__decisao {
   display: flex;
   min-width: 0;
-  align-items: flex-start;
-  gap: var(--clinic-space-2);
-}
-
-/*
- * Caixa do PrimeVue, e não `ClinicToggleGroup`: aqui a escolha é múltipla, e o grupo do módulo é
- * de escolha única. A cor sálvia vem da camada global (`.clinic-scope .p-checkbox-box`); aqui só
- * o alinhamento com a primeira linha do texto.
- */
-.linha__decisao .p-checkbox {
-  margin-top: 0.1rem;
+  align-items: center;
+  gap: 12px;
 }
 
 .linha__decisao label {
@@ -372,42 +445,52 @@ function entregar() {
 }
 
 .linha__texto {
+  display: grid;
   min-width: 0;
-  font-size: var(--clinic-font-label);
-  line-height: 1.5;
+  gap: 2px;
 }
 
-.linha__texto strong {
-  margin-inline-end: var(--clinic-space-2);
-  font-weight: 750;
+.linha__principal {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
-.linha__texto em {
-  color: var(--clinic-faint);
-  font-style: normal;
+.linha__principal .ui-hora {
+  margin-inline-end: 8px;
+  font-size: 14px;
 }
 
-.linha__texto em::before {
-  content: ' · ';
+.linha__principal strong:not(.ui-hora) {
+  font-weight: 600;
+}
+
+.linha__meta {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .passagem__limpo {
   display: flex;
   align-items: center;
+  gap: 10px;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-ok-bg);
-  color: var(--clinic-ok-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .trava {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-inline-end: auto;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 </style>

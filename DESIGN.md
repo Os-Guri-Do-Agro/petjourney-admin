@@ -350,6 +350,31 @@ código divergem, a ficha segue o código, que é o que o usuário vê e aprovou
 [src/pages/(accounts)/inicio.vue](<src/pages/(accounts)/inicio.vue>) e `src/components/home/`,
 e a composição da tela, no brief `.impeccable/surfaces/src-pages-accounts-inicio-vue.md`.
 
+### Redesenho total (branch `redesign/portal`, 19/10/2026)
+
+O pedido: ignorar as regras de design anteriores e refazer o portal por inteiro — visual, uso e
+fluxo —, mantendo só a paleta do Trilha e os ícones Phosphor. Entra por módulo (base + Clínica,
+depois Pets, Hotel, Portal e Conta). O que vale daqui para a frente, e substitui o resto deste
+documento onde houver conflito:
+
+- **Moldura** (`src/components/layout/AppShell.vue` + `Shell*.vue`): uma barra só, verde-floresta,
+  com a empresa, a busca (Ctrl/⌘ K), o "Criar", o mapa e a conta. Não há cabeçalho: a tela começa
+  no título. Até 900 px a barra vira gaveta e um topo fino toma o lugar dela.
+- **Mapa** (`src/navegacao/espacos.ts`): **espaços** (Clínica, Hotel, Portal) com **destinos**; telas
+  que respondem à mesma pergunta viram um destino com abas (Agenda = Agenda | Pedidos | Fila de
+  espera; Pendências = Atividades | Faltas | Vacinas | Tratamentos em casa | Estoque de vacinas;
+  Pacientes = Pacientes | Atendimentos | Bulário). As URLs não mudaram — cada aba é a rota antiga.
+  Os destinos penduram numa linha na cor do espaço, e o atual é o ponto aceso nela.
+- **Fita do dia** (`FitaDoDia.vue`): o expediente da clínica numa faixa presa no alto de toda tela
+  da Clínica (menos a Agenda), um traço por atendimento na cor do estado e a agulha em agora, com
+  recepção, sala e internados à direita.
+- **Tela** (`src/components/ui/UiPagina.vue`): título = nome do destino, uma frase de estado, uma
+  ação primária, as abas do destino; carregando, erro, vazio e suspenso no lugar do conteúdo; o
+  slot `sempre` para diálogos. Peças: `UiSecao`, `UiPauta`, `UiAbas` e as classes `ui-*` de
+  `src/theme/trilha/trilha-ui.css` (folha, lista, linha, marca de gravidade, selo, hora, número).
+- **Regras**: estado em cor **e** palavra; números em Instrument Sans tabular; folha só onde agrupa;
+  nada de caixa alta, sobretítulo ou cartão dentro de cartão; uma ação primária por tela.
+
 ### Trilha (19/10/2026)
 
 O design do portal inteiro desde 19/10/2026, testado primeiro na Agenda (branch

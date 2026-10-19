@@ -2,19 +2,19 @@
 /**
  * Agenda da clínica.
  *
- * A página traduz o estado do store nas props do `PartnerPageFrame` e não escreve estado de
- * carga próprio — carregando, erro e vazio já vêm resolvidos pelo shell do portal.
+ * A página traduz o estado do store nas props do `UiPagina` (carregando, erro). O dia vazio não é
+ * estado da página: a barra com a semana continua de pé — sem ela não haveria como ir para o dia
+ * seguinte — e o vazio aparece no lugar da grade, com o botão de marcar.
  *
  * O estado de visualização mora na URL (`useAgendaUrlState`): recarregar devolve exatamente a
  * mesma visão, e o link que a recepção manda para o veterinário abre onde deveria.
  */
-import { PhCalendarPlus } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import ClinicShortcutsDialog from '@/features/clinico/components/base/ClinicShortcutsDialog.vue'
 import AgendaAppointmentDrawer from '@/features/clinico/components/agenda/AgendaAppointmentDrawer.vue'
 import AgendaCancelDialog from '@/features/clinico/components/agenda/AgendaCancelDialog.vue'
@@ -54,6 +54,7 @@ import { useFilaStore } from '@/features/clinico/stores/fila'
 
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
 const fila = useFilaStore()
@@ -109,15 +110,28 @@ const fraseDoDia = computed(() => {
   const naRecepcao = ativos.filter((item) => item.status === 'aguardando').length
 
   return naRecepcao > 0
-    ? `${total} · ${t('clinico.agenda.frase.naRecepcao', { total: naRecepcao })}`
+    ? t('clinico.agenda.frase.comRecepcao', {
+        atendimentos: total,
+        recepcao: t('clinico.agenda.frase.naRecepcao', { total: naRecepcao }),
+      })
     : total
 })
 
 /**
- * Dia fechado não é vazio: existe agenda possível ali, só não deveria haver. O frame mostra o
- * estado vazio quando não há nada; o aviso de clínica fechada é conteúdo, não estado.
+ * Dia fechado não é vazio: existe agenda possível ali, só não deveria haver. O vazio aparece no
+ * lugar da grade; o aviso de clínica fechada é conteúdo, não estado.
  */
 const vazio = computed(() => agenda.visao === 'dia' && agenda.vazio && !agenda.clinicaFechada)
+
+/** A frase entra depois da data e dos dois-pontos: começa em minúscula, como no meio de uma frase. */
+function minusculaInicial(texto: string) {
+  return texto.charAt(0).toLocaleLowerCase() + texto.slice(1)
+}
+
+/** Dia sem expediente que não é feriado (domingo, folga da casa): a grade fica, com o aviso. */
+const semExpediente = computed(
+  () => agenda.visao === 'dia' && agenda.clinicaFechada && !feriado.value?.fechado,
+)
 
 async function carregar() {
   await clinico.carregar()
@@ -489,6 +503,27 @@ function abrirBloqueio() {
   bloquearAberto.value = true
 }
 
+/*
+ * `?novo=1` é o pedido do "Criar → Agendamento" da barra lateral: abre o formulário e tira o
+ * pedido da URL, para que voltar no navegador não abra o formulário de novo.
+ */
+watch(
+  () => route.query.novo,
+  (novo) => {
+    if (novo !== '1') {
+      return
+    }
+
+    abrirCriacao(false)
+
+    const query = { ...route.query }
+
+    delete query.novo
+    void router.replace({ path: route.path, query })
+  },
+  { immediate: true },
+)
+
 useClinicShortcuts({
   visaoDia: () => {
     agenda.visao = 'dia'
@@ -546,44 +581,25 @@ useClinicShortcuts({
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('clinico.agenda.subtitulo')"
-    :title="t('clinico.agenda.titulo')"
-    :loading="!agenda.dia && !agenda.erro"
-    :error="erroTraduzido"
-    :empty="vazio"
-    :empty-title="t('clinico.agenda.vazioTitulo')"
-    :empty-description="t('clinico.agenda.vazioDescricao')"
-    :empty-action-label="t('clinico.agenda.novoAtendimento')"
-    block-when-suspended
-    @retry="carregar"
-    @empty-action="abrirCriacao(false)"
+  <UiPagina
+    :carregando="!agenda.dia && !agenda.erro"
+    :erro="erroTraduzido"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('clinico.agenda.subtitulo') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('clinico.agenda.titulo') }}</h1>
+    <template #resumo>
+      <span class="agenda__data">{{ formato.dataLonga(agenda.data) }}</span>
+      <template v-if="agenda.dia">{{ ': ' }}<span aria-live="polite">{{ minusculaInicial(fraseDoDia) }}</span></template>
+    </template>
 
-        <div class="hc-saudacao__linha">
-          <p v-if="agenda.dia" class="hc-saudacao__resumo" aria-live="polite">{{ fraseDoDia }}</p>
-
-          <!-- A ação principal sobe da barra da grade: a barra ficou só com o que mexe na grade. -->
-          <nav class="hc-acoes" :aria-label="t('clinico.agenda.acoesRotulo')">
-            <Button
-              type="button"
-              class="hc-pilula hc-pilula--cheia"
-              :label="t('clinico.agenda.novoAtendimento')"
-              :title="`${t('clinico.agenda.novoAtendimento')} (N)`"
-              @click="abrirCriacao(false)"
-            >
-              <template #icon>
-                <PhCalendarPlus class="hc-pilula__icone" weight="fill" aria-hidden="true" />
-              </template>
-            </Button>
-          </nav>
-        </div>
-      </div>
+    <template #acoes>
+      <Button
+        type="button"
+        icon="ph ph-calendar-plus"
+        :label="t('clinico.agenda.novoAtendimento')"
+        :title="`${t('clinico.agenda.novoAtendimento')} (N)`"
+        @click="abrirCriacao(false)"
+      />
     </template>
 
     <div class="agenda clinic-scope">
@@ -592,6 +608,11 @@ useClinicShortcuts({
         @bloquear="abrirBloqueio"
         @ajuda="ajudaAberta = true"
       />
+
+      <p v-if="semExpediente" class="agenda__fechada" role="status">
+        <i class="ph ph-moon" aria-hidden="true" />
+        <span>{{ t('clinico.agenda.semExpediente') }}</span>
+      </p>
 
       <p v-if="feriado?.fechado" class="agenda__fechada" role="status">
         <i class="ph ph-calendar-x" aria-hidden="true" />
@@ -657,7 +678,19 @@ useClinicShortcuts({
       -->
       <AgendaLegenda v-if="agenda.visao === 'dia' && !agenda.clinicaFechada" />
 
-      <div v-if="agenda.visao !== 'semana'" class="agenda__corpo">
+      <div v-if="vazio" class="agenda__vazio ui-folha">
+        <span class="agenda__vazio-icone" aria-hidden="true"><i class="ph ph-calendar-blank" /></span>
+        <h2>{{ t('clinico.agenda.vazioTitulo') }}</h2>
+        <p>{{ t('clinico.agenda.vazioDescricao') }}</p>
+        <Button
+          type="button"
+          icon="ph ph-calendar-plus"
+          :label="t('clinico.agenda.novoAtendimento')"
+          @click="abrirCriacao(false)"
+        />
+      </div>
+
+      <div v-else-if="agenda.visao !== 'semana'" class="agenda__corpo">
         <!-- A tabela é o padrão: aguenta o dia cheio. A linha do tempo fica no menu Exibição. -->
         <AgendaTabelaDia
           v-if="formatoDaAgenda === 'tabela'"
@@ -688,6 +721,7 @@ useClinicShortcuts({
       </div>
     </div>
 
+    <template #sempre>
     <AgendaCriarDialog
       v-model:visivel="criarAberto"
       :encaixe="criarComoEncaixe"
@@ -759,80 +793,129 @@ useClinicShortcuts({
     <ClinicShortcutsDialog v-model:visible="ajudaAberta" />
     <AgendaUndoBar />
     <ClinicDevPanel />
-  </PartnerPageFrame>
+    </template>
+  </UiPagina>
 </template>
 
 <style scoped>
 .agenda {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 16px;
 }
 
+.agenda__data {
+  display: inline-block;
+}
+
+.agenda__data::first-letter {
+  text-transform: uppercase;
+}
+
+/*
+ * A grade ocupa a altura que sobra da janela e rola por dentro: a semana, as abas e o título
+ * ficam à vista enquanto se percorre a tarde.
+ */
 .agenda__corpo {
+  --altura-da-grade: max(28rem, calc(100dvh - 19.5rem));
+
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  gap: var(--clinic-space-3);
-  /* A grade ocupa a altura útil da janela e rola por dentro; a página não rola junto. */
-  min-height: min(70vh, 44rem);
+  gap: 16px;
+  min-height: var(--altura-da-grade);
 }
 
 .agenda__corpo > :first-child {
-  height: min(70vh, 44rem);
+  height: var(--altura-da-grade);
+}
+
+.agenda__vazio {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.agenda__vazio h2 {
+  margin: 8px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.agenda__vazio p {
+  max-width: 46ch;
+  margin: 0 0 12px;
+  color: var(--tinta-2);
+  line-height: 1.5;
+}
+
+.agenda__vazio-icone {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-size: 24px;
 }
 
 .agenda__fechada {
   display: flex;
   align-items: flex-start;
-  gap: var(--clinic-space-2);
+  gap: 10px;
   margin: 0;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
   line-height: 1.5;
 }
 
-.agenda__fechada strong {
-  margin-inline-end: 0.3rem;
+.agenda__fechada i {
+  font-size: 20px;
 }
 
+.agenda__fechada strong {
+  margin-inline-end: 4px;
+}
+
+/* A vaga que acabou de abrir: a oferta nasce onde a vaga nasceu. */
 .vaga {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-accent);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
+  gap: 12px 20px;
+  padding: 14px 18px;
+  border: 1px solid color-mix(in oklab, var(--ok) 40%, transparent);
+  border-radius: 14px;
+  background: var(--ok-fundo);
 }
 
 .vaga__texto strong {
-  font-weight: 750;
+  color: var(--ok-tinta);
+  font-weight: 650;
 }
 
 .vaga__texto p {
-  margin: 0.15rem 0 0;
-  color: var(--clinic-muted);
+  margin: 2px 0 0;
+  color: var(--tinta);
   line-height: 1.45;
 }
 
 .vaga__acoes {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 @media (max-width: 1100px) {
   .agenda__corpo {
-    grid-template-columns: minmax(0, 1fr);
-  }
+    --altura-da-grade: min(64vh, 36rem);
 
-  .agenda__corpo > :first-child {
-    height: min(60vh, 34rem);
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

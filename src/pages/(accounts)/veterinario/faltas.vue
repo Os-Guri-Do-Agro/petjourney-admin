@@ -13,23 +13,23 @@
  * A política de reincidência é **sugestão**, e o toggle diz isso em voz alta. Regra que
  * proíbe vira regra contornada no papel.
  *
- * ## A forma (redesenho de 30/09/2026)
+ * ## A forma (redesenho de 19/10/2026)
  *
- * A saudação da Visão geral. A fileira de quatro cartões de número saiu: o que é fila de trabalho
- * (faltas a justificar) e o tamanho do problema (agenda parada) viraram a frase de estado, e
- * reincidentes e "a justificar" já estão no recorte, com o número em selo. A pílula cheia é a fila
- * de trabalho — justificar a próxima falta sem motivo —, e a política, que é configuração e muda
- * uma vez, recolheu num popover atrás de uma pílula contornada.
+ * No alto, três números grandes: faltas a justificar (a fila de trabalho), reincidentes (com quem
+ * conversar sobre a política) e horas de agenda paradas (o tamanho do problema). A frase de estado
+ * diz por onde começar, e a ação principal é exatamente essa — justificar a próxima.
+ *
+ * Embaixo, lista e detalhe: a tabela à esquerda e, ao lado, as faltas do responsável escolhido,
+ * uma a uma, com o motivo e o que fazer. Em tela estreita o detalhe desce para baixo da tabela.
+ * A política, que é configuração e muda uma vez, mora num popover atrás de um botão secundário.
  */
-import { PhPhoneCall, PhSlidersHorizontal } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import Popover from 'primevue/popover'
 import ToggleSwitch from 'primevue/toggleswitch'
-import { computed, onMounted, ref, useId } from 'vue'
+import { computed, nextTick, onMounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import ClinicPacienteCelula from '@/features/clinico/components/base/ClinicPacienteCelula.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
@@ -69,6 +69,7 @@ const carregando = ref(false)
 const erro = ref('')
 const politicaAtiva = ref(true)
 const idPolitica = useId()
+const idDetalhe = useId()
 const recorte = ref<Recorte>('reincidentes')
 
 /**
@@ -83,6 +84,28 @@ const recorte = ref<Recorte>('reincidentes')
 const responsavelAberto = ref<string | null>(null)
 const detalhe = ref<FaltaDetalhada[]>([])
 const carregandoDetalhe = ref(false)
+const painel = ref<HTMLElement | null>(null)
+
+/**
+ * Lista e detalhe lado a lado quando a área tem largura para os dois (a mesma régua do
+ * `@container` do estilo). A tabela precisa saber, porque ao lado do detalhe ela perde uma coluna.
+ */
+const LARGURA_LADO_A_LADO = 1040
+const area = ref<HTMLElement | null>(null)
+const ladoALado = ref(false)
+
+watch(area, (elemento, _antes, aoLimpar) => {
+  if (!elemento || typeof ResizeObserver === 'undefined') {
+    return
+  }
+
+  const observador = new ResizeObserver(([entrada]) => {
+    ladoALado.value = (entrada?.contentRect.width ?? 0) >= LARGURA_LADO_A_LADO
+  })
+
+  observador.observe(elemento)
+  aoLimpar(() => observador.disconnect())
+})
 
 async function alternarDetalhe(linha: LinhaFalta) {
   if (responsavelAberto.value === linha.tutorId) {
@@ -94,6 +117,7 @@ async function alternarDetalhe(linha: LinhaFalta) {
   responsavelAberto.value = linha.tutorId
   carregandoDetalhe.value = true
   detalhe.value = []
+  void mostrarPainel()
 
   try {
     detalhe.value = await patientRepository.faltasDoResponsavel(linha.tutorId)
@@ -102,6 +126,31 @@ async function alternarDetalhe(linha: LinhaFalta) {
   } finally {
     carregandoDetalhe.value = false
   }
+}
+
+/** `Enter` na linha (e o duplo clique) abre — nunca fecha o que já está aberto. */
+function abrirDetalhe(linha: LinhaFalta) {
+  if (responsavelAberto.value !== linha.tutorId) {
+    void alternarDetalhe(linha)
+  }
+}
+
+/**
+ * Em tela estreita o detalhe fica embaixo da tabela, fora da vista de quem clicou na linha: a
+ * página desce até ele. Ao lado da tabela ele já está à vista, e nada se mexe.
+ */
+async function mostrarPainel() {
+  await nextTick()
+
+  const alvo = painel.value
+
+  if (!alvo || alvo.getBoundingClientRect().top < window.innerHeight - 120) {
+    return
+  }
+
+  const calmo = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
+  alvo.scrollIntoView({ behavior: calmo ? 'auto' : 'smooth', block: 'start' })
 }
 
 // ------------------------------------------------------------------ justificativa
@@ -147,8 +196,8 @@ async function registrarJustificativa(entrada: {
     faltaParaJustificar.value = null
 
     /*
-     * As duas listas precisam refletir na hora: a de baixo perde o botão de justificar, e a de
-     * cima perde a linha da fila de pendências. Recarregar só uma deixaria a tela contradizendo
+     * As duas listas precisam refletir na hora: a do detalhe perde o botão de justificar, e a
+     * tabela perde a linha da fila de pendências. Recarregar só uma deixaria a tela contradizendo
      * a si mesma até o próximo F5.
      */
     linhas.value = await patientRepository.resumoDeFaltas()
@@ -259,26 +308,37 @@ async function confirmarReagendamento({
  * ordenaria por acaso de composição.
  *
  * As três numéricas abrem em decrescente (padrão da tabela): a pergunta que se faz aqui é
- * "quem falta mais", não "quem falta menos".
+ * "quem falta mais", não "quem falta menos". As larguras são as de uma tabela que divide a linha
+ * com o detalhe: as colunas de número só do tamanho do número.
  */
 const colunas = computed<ColunaTabela<LinhaFalta>[]>(() => [
   {
     id: 'paciente',
     rotulo: t('clinico.faltas.colunaPaciente'),
-    largura: 'minmax(0, 1.5fr)',
+    /* Nunca abaixo do nome: em tela de celular a tabela rola dentro de si, e o nome fica. */
+    largura: 'minmax(11rem, 1.3fr)',
     ordenarPor: (linha) => linha.pet?.nome ?? null,
   },
-  {
-    id: 'responsavel',
-    rotulo: t('clinico.faltas.colunaResponsavel'),
-    largura: 'minmax(0, 1.5fr)',
-    ocultarEmTelaEstreita: true,
-    ordenarPor: (linha) => linha.tutor?.nome ?? null,
-  },
+  /*
+   * Com o detalhe ao lado, a coluna do responsável sai e o nome dele desce para a linha de apoio
+   * do paciente: o telefone e o resto estão no detalhe, e duas colunas de nome espremidas viravam
+   * "Eduardo Bitten…" e "Açaí Nho…".
+   */
+  ...(ladoALado.value
+    ? []
+    : [
+        {
+          id: 'responsavel',
+          rotulo: t('clinico.faltas.colunaResponsavel'),
+          largura: 'minmax(0, 1.2fr)',
+          ocultarEmTelaEstreita: true,
+          ordenarPor: (linha: LinhaFalta) => linha.tutor?.nome ?? null,
+        },
+      ]),
   {
     id: 'faltas',
     rotulo: t('clinico.faltas.colunaFaltas'),
-    largura: '6rem',
+    largura: '6.5rem',
     numerico: true,
     alinharAoFim: true,
     ordenarPor: (linha) => linha.faltas,
@@ -286,7 +346,7 @@ const colunas = computed<ColunaTabela<LinhaFalta>[]>(() => [
   {
     id: 'minutos',
     rotulo: t('clinico.faltas.colunaMinutos'),
-    largura: '9rem',
+    largura: '8rem',
     numerico: true,
     alinharAoFim: true,
     ordenarPor: (linha) => linha.minutosPerdidos,
@@ -294,7 +354,7 @@ const colunas = computed<ColunaTabela<LinhaFalta>[]>(() => [
   {
     id: 'ultima',
     rotulo: t('clinico.faltas.colunaUltima'),
-    largura: '9rem',
+    largura: '7.5rem',
     /** Ordena pelo instante real, não pelo "há 3 dias" que a célula escreve. */
     ordenarPor: (linha) => linha.ultimaFaltaEm,
     ordemInicial: 'desc',
@@ -305,6 +365,29 @@ const colunas = computed<ColunaTabela<LinhaFalta>[]>(() => [
 const nomeDoResponsavelAberto = computed(
   () => linhas.value.find((linha) => linha.tutorId === responsavelAberto.value)?.tutor?.nome ?? '',
 )
+
+/** As contas do responsável aberto, somando os pacientes dele: o cabeçalho do detalhe. */
+const doResponsavelAberto = computed(() => {
+  const dele = linhas.value.filter((linha) => linha.tutorId === responsavelAberto.value)
+
+  return {
+    telefone: dele[0]?.tutor?.telefone ?? '',
+    faltas: dele.reduce((total, linha) => total + linha.faltas, 0),
+    minutos: dele.reduce((total, linha) => total + linha.minutosPerdidos, 0),
+    semMotivo: dele.reduce((total, linha) => total + linha.semJustificativa, 0),
+  }
+})
+
+/** A linha da tabela que corresponde ao responsável aberto (a primeira, se ele tiver mais pets). */
+const chaveSelecionada = computed(() => {
+  const linha = visiveis.value.find((item) => item.tutorId === responsavelAberto.value)
+
+  return linha ? `${linha.tutorId}-${linha.petId}` : null
+})
+
+function hrefDoTelefone(telefone: string) {
+  return `tel:${telefone.replace(/[^\d+]/g, '')}`
+}
 
 const reincidentes = computed(() => linhas.value.filter((linha) => linha.reincidente))
 
@@ -326,32 +409,50 @@ const visiveis = computed(() => {
   return recorte.value === 'reincidentes' ? reincidentes.value : linhas.value
 })
 
-/** Faltas sem motivo, somadas — o número do cartão, e não a contagem de responsáveis. */
+/** Faltas sem motivo, somadas — o número grande, e não a contagem de responsáveis. */
 const totalPendentes = computed(() =>
   linhas.value.reduce((total, linha) => total + linha.semJustificativa, 0),
 )
 
+const totalFaltas = computed(() => linhas.value.reduce((total, linha) => total + linha.faltas, 0))
+
 /**
- * A frase da saudação: a fila de trabalho primeiro, depois o tamanho do problema.
+ * Por onde a fila começa: o paciente com falta sem motivo há mais tempo. É o mesmo que
+ * "Justificar a próxima" abre, e o mesmo que a frase de estado nomeia.
+ */
+const proximaLinha = computed(
+  () =>
+    [...pendentes.value].sort((uma, outra) =>
+      (uma.ultimaFaltaEm ?? '').localeCompare(outra.ultimaFaltaEm ?? ''),
+    )[0] ?? null,
+)
+
+/**
+ * A frase de estado: quantos ainda esperam uma ligação, e por quem começar.
  *
- * Diz faltas **e** pacientes. A aba "A justificar" conta pacientes (as linhas da tabela); só com
- * as faltas, a frase dizia 26 e a aba 14, e quem lia achava que uma das duas estava errada.
+ * Os números do alto já dizem quanto; a frase diz o que fazer agora — e nomeia o mesmo paciente
+ * que a ação principal abre.
  */
 const fraseDoResumo = computed(() => {
-  const pacientes = pendentes.value.length
-  const fila =
-    totalPendentes.value > 0
-      ? t('clinico.faltas.frase.pendentesDe', {
-          faltas: t(
-            'clinico.faltas.frase.pendentes',
-            { total: totalPendentes.value },
-            totalPendentes.value,
-          ),
-          pacientes: t('clinico.faltas.frase.dePacientes', { total: pacientes }, pacientes),
-        })
-      : t('clinico.faltas.frase.emDia')
+  if (linhas.value.length === 0) {
+    return ''
+  }
 
-  return `${fila} · ${t('clinico.faltas.frase.agenda', { tempo: formato.duracao(totalMinutos.value) })}`
+  const linha = proximaLinha.value
+
+  if (!linha) {
+    return t('clinico.faltas.resumo.emDia')
+  }
+
+  const pacientes = pendentes.value.length
+  const quantos = t('clinico.faltas.resumo.pendentes', { total: pacientes }, pacientes)
+
+  return linha.ultimaFaltaEm && linha.pet
+    ? `${quantos} ${t('clinico.faltas.resumo.comecePor', {
+        pet: linha.pet.nome,
+        quando: formato.relativo(linha.ultimaFaltaEm),
+      })}`
+    : quantos
 })
 
 const politica = ref<InstanceType<typeof Popover> | null>(null)
@@ -362,9 +463,7 @@ const buscandoProxima = ref(false)
  * por vez. O histórico do responsável abre junto, para quem liga ter o resto das faltas à vista.
  */
 async function justificarProxima() {
-  const linha = [...pendentes.value].sort((uma, outra) =>
-    (uma.ultimaFaltaEm ?? '').localeCompare(outra.ultimaFaltaEm ?? ''),
-  )[0]
+  const linha = proximaLinha.value
 
   if (!linha) {
     return
@@ -439,538 +538,818 @@ onMounted(carregar)
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('clinico.faltas.subtitulo')"
-    :title="t('clinico.faltas.titulo')"
-    :loading="carregando && linhas.length === 0"
-    :error="erro"
-    :empty="vazio"
-    :empty-title="t('clinico.faltas.vazioTitulo')"
-    :empty-description="t('clinico.faltas.vazioDescricao')"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    class="tela-faltas"
+    :resumo="fraseDoResumo"
+    :carregando="carregando && linhas.length === 0"
+    :erro="erro"
+    :vazio="vazio"
+    :vazio-titulo="t('clinico.faltas.vazioTitulo')"
+    :vazio-descricao="t('clinico.faltas.vazioDescricao')"
+    vazio-icone="ph ph-calendar-check"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('clinico.faltas.subtitulo') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('clinico.faltas.titulo') }}</h1>
-
-        <div class="hc-saudacao__linha">
-          <p v-if="linhas.length > 0" class="hc-saudacao__resumo" aria-live="polite">
-            {{ fraseDoResumo }}
-          </p>
-
-          <nav class="hc-acoes" :aria-label="t('clinico.faltas.acoes.rotulo')">
-            <Button
-              v-if="totalPendentes > 0"
-              type="button"
-              class="hc-pilula hc-pilula--cheia"
-              :label="t('clinico.faltas.acoes.justificarProxima')"
-              :loading="buscandoProxima"
-              @click="justificarProxima"
-            >
-              <template #icon>
-                <PhPhoneCall class="hc-pilula__icone" weight="fill" aria-hidden="true" />
-              </template>
-            </Button>
-            <Button
-              type="button"
-              class="hc-pilula"
-              :label="t('clinico.faltas.politica.titulo')"
-              aria-haspopup="dialog"
-              @click="politica?.toggle($event)"
-            >
-              <template #icon>
-                <PhSlidersHorizontal class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
-              </template>
-            </Button>
-          </nav>
-        </div>
-      </div>
+    <template #acoes>
+      <Button
+        v-if="totalPendentes > 0"
+        type="button"
+        icon="ph ph-phone-call"
+        :label="t('clinico.faltas.acoes.justificarProxima')"
+        :loading="buscandoProxima"
+        @click="justificarProxima"
+      />
     </template>
 
-    <div class="faltas clinic-scope">
-      <div class="faltas__recorte">
+    <div class="faltas">
+      <!-- Os três números do período: a fila de trabalho, com quem conversar, e quanto custou. -->
+      <section class="numeros ui-folha" :aria-label="t('clinico.faltas.numeros.rotulo')">
+        <div class="numero" :class="{ 'numero--atencao': totalPendentes > 0 }">
+          <strong class="ui-num">{{ totalPendentes }}</strong>
+          <span class="numero__rotulo">
+            {{ t('clinico.faltas.numeros.pendentes', totalPendentes) }}
+          </span>
+          <small>
+            {{ t('clinico.faltas.frase.dePacientes', { total: pendentes.length }, pendentes.length) }}
+          </small>
+        </div>
+
+        <div class="numero">
+          <strong class="ui-num">{{ reincidentes.length }}</strong>
+          <span class="numero__rotulo">
+            {{ t('clinico.faltas.numeros.reincidentes', reincidentes.length) }}
+          </span>
+          <small>
+            {{
+              t('clinico.faltas.numeros.limite', { total: LIMITE_REINCIDENCIA }, LIMITE_REINCIDENCIA)
+            }}
+          </small>
+        </div>
+
+        <div class="numero">
+          <strong class="ui-num">{{ formato.duracao(totalMinutos) }}</strong>
+          <span class="numero__rotulo">{{ t('clinico.faltas.numeros.agenda') }}</span>
+          <small>
+            {{ t('clinico.faltas.numeros.emFaltas', { total: totalFaltas }, totalFaltas) }}
+          </small>
+        </div>
+      </section>
+
+      <div class="faltas__barra">
         <ClinicToggleGroup
           v-model="recorte"
           :opcoes="opcoesRecorte"
           :rotulo="t('clinico.agenda.filtros')"
         />
+
+        <!-- A política mora ao lado do recorte: é dela que sai quem conta como reincidente. -->
+        <Button
+          type="button"
+          class="faltas__politica"
+          icon="ph ph-sliders-horizontal"
+          :label="t('clinico.faltas.politica.titulo')"
+          severity="secondary"
+          text
+          aria-haspopup="dialog"
+          @click="politica?.toggle($event)"
+        />
       </div>
 
-      <ClinicDataTable
-        :colunas="colunas"
-        :linhas="visiveis"
-        :chave="(linha) => `${linha.tutorId}-${linha.petId}`"
-        :selecionada-id="
-          visiveis.find((linha) => linha.tutorId === responsavelAberto)
-            ? `${responsavelAberto}-${visiveis.find((linha) => linha.tutorId === responsavelAberto)?.petId}`
-            : null
-        "
-        :vazio-titulo="t('clinico.faltas.vazioTitulo')"
-        :rotulo="t('clinico.faltas.titulo')"
-        @selecionar="alternarDetalhe"
-      >
-        <template #celula-paciente="{ linha }">
-          <ClinicPacienteCelula :pet="linha.pet ?? null">
-            <template #selo>
-              <!--
-              O rótulo de reincidência mora aqui, e não na coluna de contagem: naquele espaço
-              só cabia o ícone, e ícone sozinho não diz "reincidente". Na aba Reincidentes ele some:
-              ali toda linha é reincidente, e o selo repetido dez vezes vira textura.
-            -->
-              <ClinicAlertChip
-                v-if="linha.reincidente && recorte !== 'reincidentes'"
-                severidade="atencao"
-                :rotulo="t('clinico.faltas.reincidente')"
-              />
-            </template>
-            {{ linha.pet ? formato.especie(linha.pet.especie) : '' }}
-          </ClinicPacienteCelula>
-        </template>
-
-        <template #celula-responsavel="{ linha }">
-          <span class="faltas__nome">{{ linha.tutor?.nome }}</span>
-          <span class="faltas__meta"
-            ><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span
+      <div ref="area" class="faltas__area">
+        <div class="faltas__lado" :class="{ 'faltas__lado--aberto': responsavelAberto }">
+          <ClinicDataTable
+            class="faltas__tabela"
+            :colunas="colunas"
+            :linhas="visiveis"
+            :chave="(linha) => `${linha.tutorId}-${linha.petId}`"
+            :selecionada-id="chaveSelecionada"
+            :vazio-titulo="t('clinico.faltas.vazioTitulo')"
+            :rotulo="t('clinico.faltas.titulo')"
+            @selecionar="alternarDetalhe"
+            @ativar="abrirDetalhe"
           >
-        </template>
-
-        <template #celula-faltas="{ linha }">
-          <strong class="faltas__contagem">{{ linha.faltas }}</strong>
-        </template>
-
-        <template #celula-minutos="{ linha }">
-          {{ formato.duracao(linha.minutosPerdidos) }}
-        </template>
-
-        <template #celula-ultima="{ linha }">
-          <span v-if="linha.ultimaFaltaEm" class="clinic-value">
-            {{ formato.relativo(linha.ultimaFaltaEm) }}
-          </span>
-          <span v-else class="faltas__meta">—</span>
-        </template>
-      </ClinicDataTable>
-
-      <!--
-        Histórico do responsável selecionado. Fica **fora** da tabela, e não como linha
-        expandida: dentro dela, o detalhe herdaria as colunas e a data de cada falta cairia na
-        trilha de "minutos perdidos".
-      -->
-      <section v-if="responsavelAberto" class="detalhe">
-        <header class="detalhe__topo">
-          <h2 class="detalhe__titulo">
-            {{ t('clinico.faltas.historico.titulo', { nome: nomeDoResponsavelAberto }) }}
-          </h2>
-          <Button
-            type="button"
-            class="detalhe__fechar"
-            text
-            severity="secondary"
-            icon="ph ph-x"
-            :aria-label="t('clinico.atalhos.fechar')"
-            @click="responsavelAberto = null"
-          />
-        </header>
-
-        <p v-if="carregandoDetalhe" class="detalhe__estado" role="status">
-          <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
-          {{ t('clinico.tabela.carregando') }}
-        </p>
-
-        <ol v-else class="detalhe__lista">
-          <li v-for="falta in detalhe" :key="falta.appointment.id" class="falta">
-            <div class="falta__quando">
-              <strong class="clinic-value">
-                {{ formato.dataCurta(clinicClock.dateOf(falta.appointment.inicio)) }}
-              </strong>
-              <span class="falta__hora clinic-value">
-                {{ formato.hora(falta.appointment.inicio) }}
-              </span>
-            </div>
-
-            <div class="falta__corpo">
-              <span class="falta__paciente">{{ falta.pet?.nome }}</span>
-              <span class="falta__meta">
-                {{ clinico.tipo(falta.appointment.typeId)?.nome }} ·
-                {{ formato.duracao(falta.minutosPerdidos) }}
-              </span>
-
-              <!--
-                O motivo, quando existe, vem embaixo do paciente e não numa coluna própria: é
-                texto de tamanho variável, e o que se lê aqui é a frase inteira — "transporte,
-                por WhatsApp" — não um campo a ser comparado linha a linha.
-              -->
-              <Button
-                v-if="falta.appointment.justificativaDeFalta"
-                type="button"
-                class="falta__motivo"
-                text
-                :title="t('clinico.faltas.justificativa.editar')"
-                @click.stop="faltaParaJustificar = falta"
-              >
-                <i class="ph ph-chat-circle" aria-hidden="true" />
-                <span>
-                  {{ formato.motivoFalta(falta.appointment.justificativaDeFalta.motivo) }}
-                  <span class="falta__canal">
-                    · {{ formato.canalDeContato(falta.appointment.justificativaDeFalta.canal) }}
+            <template #celula-paciente="{ linha }">
+              <ClinicPacienteCelula :pet="linha.pet ?? null">
+                <template #selo>
+                  <!--
+                    O rótulo de reincidência mora aqui, e não na coluna de contagem: ali só cabia o
+                    ícone, e ícone sozinho não diz "reincidente". Na aba Reincidentes ele some: ali
+                    toda linha é reincidente, e o selo repetido dez vezes vira textura.
+                  -->
+                  <span
+                    v-if="linha.reincidente && recorte !== 'reincidentes'"
+                    class="ui-selo ui-selo--contorno faltas__selo"
+                  >
+                    <i class="ph ph-repeat" aria-hidden="true" />
+                    {{ t('clinico.faltas.reincidente') }}
                   </span>
-                </span>
-              </Button>
-              <span
-                v-if="falta.appointment.justificativaDeFalta?.observacao"
-                class="falta__observacao"
+                </template>
+                {{
+                  [
+                    linha.pet ? formato.especie(linha.pet.especie) : '',
+                    ladoALado ? (linha.tutor?.nome ?? '') : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')
+                }}
+              </ClinicPacienteCelula>
+            </template>
+
+            <template #celula-responsavel="{ linha }">
+              <span class="faltas__nome">{{ linha.tutor?.nome }}</span>
+              <span class="faltas__meta ui-num"
+                ><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span
               >
-                {{ falta.appointment.justificativaDeFalta.observacao }}
+            </template>
+
+            <template #celula-faltas="{ linha }">
+              <strong class="faltas__contagem ui-num">{{ linha.faltas }}</strong>
+              <span v-if="linha.semJustificativa > 0" class="faltas__sem-motivo">
+                {{
+                  t(
+                    'clinico.faltas.detalhe.semMotivo',
+                    { total: linha.semJustificativa },
+                    linha.semJustificativa,
+                  )
+                }}
               </span>
-            </div>
+            </template>
 
-            <!--
-              Duas ações, e a ordem importa: **apurar vem antes de reagendar**.
+            <template #celula-minutos="{ linha }">
+              <span class="ui-num">{{ formato.duracao(linha.minutosPerdidos) }}</span>
+            </template>
 
-              Sem motivo, a recepção não sabe o que oferecer — quem faltou por transporte quer
-              outro horário, quem faltou por custo quer outra conversa. Por isso a falta sem
-              justificativa mostra "Justificar" em destaque, e o reagendamento fica para depois
-              de se saber o porquê.
-            -->
-            <div class="falta__acoes">
-              <Button
-                v-if="!falta.appointment.justificativaDeFalta"
-                :label="t('clinico.faltas.justificativa.acao')"
-                icon="ph ph-phone"
-                size="small"
-                severity="warn"
-                outlined
-                @click.stop="faltaParaJustificar = falta"
-              />
+            <template #celula-ultima="{ linha }">
+              <span v-if="linha.ultimaFaltaEm" class="ui-num">
+                {{ formato.relativo(linha.ultimaFaltaEm) }}
+              </span>
+              <span v-else class="faltas__meta">{{ t('clinico.formato.semvalor') }}</span>
+            </template>
+          </ClinicDataTable>
 
-              <!--
-                Óbito registrado: o botão de reagendar **some**, e não fica desabilitado.
+          <!--
+            O detalhe do responsável escolhido. Fica **fora** da tabela, e não como linha
+            expandida: dentro dela, o detalhe herdaria as colunas e a data de cada falta cairia na
+            trilha de "minutos perdidos".
+          -->
+          <section
+            ref="painel"
+            class="detalhe ui-folha"
+            :class="{ 'detalhe--convite': !responsavelAberto }"
+            :aria-labelledby="responsavelAberto ? idDetalhe : undefined"
+          >
+            <template v-if="responsavelAberto">
+              <header class="detalhe__topo">
+                <div class="detalhe__quem">
+                  <h2 :id="idDetalhe" class="detalhe__titulo">
+                    {{ t('clinico.faltas.historico.titulo', { nome: nomeDoResponsavelAberto }) }}
+                  </h2>
+                  <a
+                    v-if="doResponsavelAberto.telefone"
+                    class="ui-mais detalhe__telefone"
+                    :href="hrefDoTelefone(doResponsavelAberto.telefone)"
+                    :title="
+                      t('clinico.faltas.detalhe.ligar', { telefone: doResponsavelAberto.telefone })
+                    "
+                  >
+                    <i class="ph ph-phone" aria-hidden="true" />
+                    <bdi dir="ltr" class="ui-num">{{ doResponsavelAberto.telefone }}</bdi>
+                  </a>
+                </div>
+                <Button
+                  type="button"
+                  class="detalhe__fechar"
+                  text
+                  severity="secondary"
+                  icon="ph ph-x"
+                  :aria-label="t('clinico.atalhos.fechar')"
+                  @click="responsavelAberto = null"
+                />
+              </header>
 
-                Botão cinza ainda é um convite — alguém passa o mouse, lê "Reagendar" e procura
-                por que não dá. Aqui não há o que explicar nem o que tentar: o caso acabou, e a
-                única coisa que a linha precisa dizer é isso.
-
-                E vem **antes** da ficha de reagendado, de propósito. Se o dado disser as duas
-                coisas — o que só acontece com histórico inconsistente —, a que a tela precisa
-                mostrar é a que encerra.
-              -->
-              <ClinicAlertChip
-                v-if="!aceitaReagendamento(falta.appointment)"
-                severidade="info"
-                :rotulo="t('clinico.faltas.historico.encerrado')"
-              />
-              <ClinicAlertChip
-                v-else-if="falta.reagendadoPara"
-                severidade="info"
-                :rotulo="
-                  t('clinico.faltas.historico.reagendado', {
-                    data: formato.dataCurta(clinicClock.dateOf(falta.reagendadoPara)),
+              <p class="detalhe__contas">
+                <span class="ui-num">{{
+                  t(
+                    'clinico.faltas.detalhe.contagem',
+                    { total: doResponsavelAberto.faltas },
+                    doResponsavelAberto.faltas,
+                  )
+                }}</span>
+                <span aria-hidden="true">·</span>
+                <span class="ui-num">{{
+                  t('clinico.faltas.frase.agenda', {
+                    tempo: formato.duracao(doResponsavelAberto.minutos),
                   })
-                "
-              />
-              <Button
-                v-else
-                :label="t('clinico.faltas.reagendar.titulo')"
-                icon="ph ph-calendar-plus"
-                size="small"
-                severity="secondary"
-                outlined
-                @click="abrirReagendamento(falta)"
-              />
+                }}</span>
+                <template v-if="doResponsavelAberto.semMotivo > 0">
+                  <span aria-hidden="true">·</span>
+                  <span class="ui-num detalhe__pendentes">{{
+                    t(
+                      'clinico.faltas.detalhe.semMotivo',
+                      { total: doResponsavelAberto.semMotivo },
+                      doResponsavelAberto.semMotivo,
+                    )
+                  }}</span>
+                </template>
+              </p>
+
+              <p v-if="carregandoDetalhe" class="detalhe__estado" role="status">
+                <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
+                {{ t('clinico.tabela.carregando') }}
+              </p>
+
+              <ol v-else class="ui-lista detalhe__lista">
+                <li
+                  v-for="falta in detalhe"
+                  :key="falta.appointment.id"
+                  class="falta"
+                  :class="{
+                    'ui-marca ui-marca--atencao': !falta.appointment.justificativaDeFalta,
+                  }"
+                >
+                  <div class="falta__quando">
+                    <strong class="ui-num">
+                      {{ formato.dataCurta(clinicClock.dateOf(falta.appointment.inicio)) }}
+                    </strong>
+                    <span class="ui-hora falta__hora">
+                      {{ formato.hora(falta.appointment.inicio) }}
+                    </span>
+                  </div>
+
+                  <div class="falta__corpo">
+                    <span class="falta__linha">
+                      <span class="falta__paciente">{{ falta.pet?.nome }}</span>
+                      <span
+                        v-if="!falta.appointment.justificativaDeFalta"
+                        class="ui-selo ui-selo--atencao falta__selo"
+                      >
+                        <i class="ph ph-phone-x" aria-hidden="true" />
+                        {{ t('clinico.faltas.justificativa.pendente') }}
+                      </span>
+                    </span>
+                    <span class="falta__meta">
+                      {{ clinico.tipo(falta.appointment.typeId)?.nome }} ·
+                      <span class="ui-num">{{ formato.duracao(falta.minutosPerdidos) }}</span>
+                    </span>
+
+                    <!--
+                      O motivo, quando existe, vem embaixo do paciente: é texto de tamanho
+                      variável, e o que se lê aqui é a frase inteira — "transporte, por WhatsApp".
+
+                      E é um botão, e não um selo: quem lê "transporte" é quem pode querer corrigir
+                      para "custo" depois de uma segunda ligação. O próprio motivo é o caminho de
+                      volta ao diálogo.
+                    -->
+                    <button
+                      v-if="falta.appointment.justificativaDeFalta"
+                      type="button"
+                      class="falta__motivo"
+                      :title="t('clinico.faltas.justificativa.editar')"
+                      @click.stop="faltaParaJustificar = falta"
+                    >
+                      <i class="ph ph-chat-circle-text" aria-hidden="true" />
+                      <span>
+                        {{ formato.motivoFalta(falta.appointment.justificativaDeFalta.motivo) }}
+                        <span class="falta__canal">
+                          ·
+                          {{
+                            formato.canalDeContato(falta.appointment.justificativaDeFalta.canal)
+                          }}
+                        </span>
+                      </span>
+                    </button>
+
+                    <span
+                      v-if="falta.appointment.justificativaDeFalta?.observacao"
+                      class="falta__observacao"
+                    >
+                      {{ falta.appointment.justificativaDeFalta.observacao }}
+                    </span>
+
+                    <!--
+                      Duas ações, e a ordem importa: **apurar vem antes de reagendar**. Sem motivo,
+                      a recepção não sabe o que oferecer — quem faltou por transporte quer outro
+                      horário, quem faltou por custo quer outra conversa.
+
+                      Óbito registrado: o botão de reagendar **some**, e não fica desabilitado.
+                      Botão cinza ainda é um convite. E vem **antes** do selo de reagendado: se o
+                      dado disser as duas coisas, a que a tela mostra é a que encerra.
+                    -->
+                    <div class="falta__acoes">
+                      <Button
+                        v-if="!falta.appointment.justificativaDeFalta"
+                        type="button"
+                        :label="t('clinico.faltas.justificativa.acao')"
+                        icon="ph ph-phone"
+                        size="small"
+                        severity="secondary"
+                        outlined
+                        @click.stop="faltaParaJustificar = falta"
+                      />
+
+                      <span
+                        v-if="!aceitaReagendamento(falta.appointment)"
+                        class="ui-selo falta__selo"
+                      >
+                        {{ t('clinico.faltas.historico.encerrado') }}
+                      </span>
+                      <span v-else-if="falta.reagendadoPara" class="ui-selo ui-selo--ok falta__selo">
+                        <i class="ph ph-calendar-check" aria-hidden="true" />
+                        {{
+                          t('clinico.faltas.historico.reagendado', {
+                            data: formato.dataCurta(clinicClock.dateOf(falta.reagendadoPara)),
+                          })
+                        }}
+                      </span>
+                      <Button
+                        v-else
+                        type="button"
+                        :label="t('clinico.faltas.reagendar.titulo')"
+                        icon="ph ph-calendar-plus"
+                        size="small"
+                        severity="secondary"
+                        outlined
+                        @click="abrirReagendamento(falta)"
+                      />
+                    </div>
+                  </div>
+                </li>
+              </ol>
+            </template>
+
+            <div v-else class="detalhe__convite">
+              <span class="detalhe__convite-icone" aria-hidden="true">
+                <i class="ph ph-cursor-click" />
+              </span>
+              <strong>{{ t('clinico.faltas.detalhe.convite') }}</strong>
+              <p>{{ t('clinico.faltas.detalhe.conviteTexto') }}</p>
             </div>
-          </li>
-        </ol>
-      </section>
+          </section>
+        </div>
+      </div>
     </div>
 
-    <!--
-      A política é configuração: muda uma vez, e ocupava uma seção inteira no pé da tela. Recolhida
-      atrás da pílula do topo, continua a um clique e diz em voz alta que é sugestão.
-    -->
-    <Popover ref="politica" class="hc-tema">
-      <section class="politica" :aria-label="t('clinico.faltas.politica.titulo')">
-        <div class="politica__texto">
-          <h2 class="politica__titulo">{{ t('clinico.faltas.politica.titulo') }}</h2>
-          <p>{{ t('clinico.faltas.politica.descricao', { limite: LIMITE_REINCIDENCIA }) }}</p>
-        </div>
+    <template #sempre>
+      <!--
+        A política é configuração: muda uma vez. Recolhida atrás do botão do topo, continua a um
+        clique e diz em voz alta que é sugestão.
+      -->
+      <Popover ref="politica">
+        <section class="politica" :aria-label="t('clinico.faltas.politica.titulo')">
+          <div class="politica__texto">
+            <h2 class="politica__titulo">{{ t('clinico.faltas.politica.titulo') }}</h2>
+            <p>{{ t('clinico.faltas.politica.descricao', { limite: LIMITE_REINCIDENCIA }) }}</p>
+          </div>
 
-        <div class="politica__toggle">
-          <ToggleSwitch v-model="politicaAtiva" :input-id="idPolitica" />
-          <label :for="idPolitica">
-            <strong>{{ t('clinico.faltas.politica.ativar') }}</strong>
-            <small>
-              {{
-                politicaAtiva
-                  ? t('clinico.faltas.politica.ativo')
-                  : t('clinico.faltas.politica.inativo')
-              }}
-            </small>
-          </label>
-        </div>
-      </section>
-    </Popover>
+          <div class="politica__toggle">
+            <ToggleSwitch v-model="politicaAtiva" :input-id="idPolitica" />
+            <label :for="idPolitica">
+              <strong>{{ t('clinico.faltas.politica.ativar') }}</strong>
+              <small>
+                {{
+                  politicaAtiva
+                    ? t('clinico.faltas.politica.ativo')
+                    : t('clinico.faltas.politica.inativo')
+                }}
+              </small>
+            </label>
+          </div>
+        </section>
+      </Popover>
 
-    <AgendaReagendarDialog
-      :appointment="paraReagendar"
-      :sugestoes="sugestoes"
-      :buscando="buscando"
-      :salvando="salvando"
-      @confirmar="confirmarReagendamento"
-      @fechar="paraReagendar = null"
-    />
+      <AgendaReagendarDialog
+        :appointment="paraReagendar"
+        :sugestoes="sugestoes"
+        :buscando="buscando"
+        :salvando="salvando"
+        @confirmar="confirmarReagendamento"
+        @fechar="paraReagendar = null"
+      />
 
-    <!--
-      O mesmo diálogo da agenda. Aqui ele nunca adia — a falta já existe e o painel é exatamente
-      o lugar de apurar —, então fechar é desistir, não "deixar para depois".
-    -->
-    <AgendaFaltaDialog
-      :appointment="faltaParaJustificar?.appointment ?? null"
-      :tutor="tutorDaJustificativa"
-      :salvando="justificando"
-      @confirmar="registrarJustificativa"
-      @adiar="faltaParaJustificar = null"
-      @fechar="faltaParaJustificar = null"
-    />
-  </PartnerPageFrame>
+      <!--
+        O mesmo diálogo da agenda. Aqui ele nunca adia — a falta já existe e o painel é exatamente
+        o lugar de apurar —, então fechar é desistir, não "deixar para depois".
+      -->
+      <AgendaFaltaDialog
+        :appointment="faltaParaJustificar?.appointment ?? null"
+        :tutor="tutorDaJustificativa"
+        :salvando="justificando"
+        @confirmar="registrarJustificativa"
+        @adiar="faltaParaJustificar = null"
+        @fechar="faltaParaJustificar = null"
+      />
+    </template>
+  </UiPagina>
 </template>
 
 <style scoped>
-.faltas {
-  display: grid;
-  gap: var(--clinic-space-3);
+/*
+ * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
+ * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como na Internação.
+ */
+.tela-faltas {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
 }
 
-.faltas__recorte {
+.faltas {
+  display: grid;
+  gap: 20px;
+}
+
+/* ----------------------------------------------------------------------------- os três números */
+
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.numero {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: 18px 22px 20px;
+}
+
+.numero + .numero {
+  border-inline-start: 1px solid var(--linha);
+}
+
+.numero strong {
+  color: var(--tinta);
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.numero--atencao strong {
+  color: var(--atencao-tinta);
+}
+
+.numero__rotulo {
+  margin-top: 2px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.numero small {
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------------------------- lista e detalhe */
+
+.faltas__barra {
   display: flex;
-  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.faltas__area {
+  container: faltas / inline-size;
+}
+
+.faltas__lado {
+  display: grid;
+  align-items: start;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .faltas__nome {
   display: block;
   overflow: hidden;
-  font-weight: 700;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.faltas__linha-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--clinic-space-2);
-}
-
 .faltas__meta {
   display: block;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.faltas__selo {
+  height: 22px;
+  padding-inline: 7px;
+  font-size: 12px;
 }
 
 .faltas__contagem {
   display: block;
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 650;
 }
 
+.faltas__sem-motivo {
+  display: block;
+  color: var(--atencao-tinta);
+  font-size: 12px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+/* O detalhe: em tela estreita, embaixo da tabela, e só quando há alguém escolhido. */
 .detalhe {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-accent);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+  min-width: 0;
+  align-content: start;
+}
+
+.detalhe--convite {
+  display: none;
 }
 
 .detalhe__topo {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
+  gap: 12px;
+  padding: 16px 12px 4px 18px;
+}
+
+.detalhe__quem {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
 }
 
 .detalhe__titulo {
   margin: 0;
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.detalhe__telefone {
+  justify-self: start;
+  font-size: 14px;
 }
 
 .detalhe__fechar.p-button {
-  width: var(--clinic-hit-target);
-  height: var(--clinic-hit-target);
-  border-radius: var(--clinic-radius-control);
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 10px;
+}
+
+.detalhe__contas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 0;
+  padding: 6px 18px 14px;
+  border-bottom: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.detalhe__pendentes {
+  color: var(--atencao-tinta);
+  font-weight: 600;
 }
 
 .detalhe__estado {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   margin: 0;
-  color: var(--clinic-muted);
-}
-
-.detalhe__lista {
-  display: grid;
-  gap: var(--clinic-space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  padding: 22px 18px;
+  color: var(--tinta-2);
 }
 
 .falta {
+  position: relative;
   display: grid;
-  grid-template-columns: 6rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
+  align-items: start;
+  gap: 14px;
+  grid-template-columns: 56px minmax(0, 1fr);
+  padding: 14px 18px;
 }
 
 .falta__quando {
-  display: flex;
-  align-items: baseline;
-  gap: 0.35rem;
+  display: grid;
+  gap: 2px;
+  padding-top: 1px;
 }
 
 .falta__quando strong {
-  font-weight: 800;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
 }
 
 .falta__hora {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .falta__corpo {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
+  justify-items: start;
+  gap: 3px;
+}
+
+.falta__linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  max-width: 100%;
 }
 
 .falta__paciente {
   overflow: hidden;
-  font-weight: 700;
+  max-width: 100%;
+  font-size: 14.5px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .falta__meta {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
-/*
- * O motivo é um botão, e não um chip.
- *
- * Quem lê "transporte" numa falta é exatamente quem pode querer corrigir para "custo" depois de
- * uma segunda ligação. Deixar o texto inerte obrigaria a inventar um segundo ponto de entrada
- * para a correção; assim o próprio motivo é o caminho de volta ao diálogo.
- */
-/* Botão de texto do PrimeVue com a cara de link do motivo: sem o respiro nem o fundo do tema. */
-.falta__motivo.p-button {
+.falta__selo {
+  height: 22px;
+  padding-inline: 7px;
+  font-size: 12px;
+}
+
+/* O motivo é um link para o diálogo: corrige-se clicando no que está escrito. */
+.falta__motivo {
   display: inline-flex;
-  align-items: center;
-  justify-self: start;
-  gap: 0.3rem;
-  min-height: 0;
-  margin-top: 0.15rem;
-  padding: 0;
-  border: none;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 4px;
   background: none;
-  color: var(--clinic-accent-strong);
+  color: var(--pj-lugar-tinta, var(--musgo));
+  cursor: pointer;
   font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 600;
   text-align: start;
 }
 
-.falta__motivo.p-button:not(:disabled):hover {
-  background: none;
-  color: var(--clinic-accent-strong);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.falta__motivo i {
+  margin-top: 1px;
+  font-size: 16px;
 }
 
 .falta__motivo:hover {
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .falta__motivo:focus-visible {
-  border-radius: var(--clinic-radius-chip);
-  outline: none;
-  box-shadow: var(--clinic-focus-ring);
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
 }
 
 .falta__canal {
-  color: var(--clinic-faint);
-  font-weight: 600;
+  color: var(--tinta-2);
+  font-weight: 500;
 }
 
 .falta__observacao {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  line-height: 1.4;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .falta__acoes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+  margin-top: 8px;
 }
 
-@media (max-width: 640px) {
-  .falta {
-    grid-template-columns: minmax(0, 1fr);
+/* Lado a lado quando cabe: a tabela à esquerda, o detalhe preso ao lado enquanto a lista rola. */
+@container faltas (min-width: 1040px) {
+  .faltas__lado {
+    grid-template-columns: minmax(0, 1fr) 330px;
+  }
+
+  .detalhe {
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  .detalhe--convite {
+    display: grid;
   }
 }
 
-/* Dentro do popover da pílula "Política de reincidência": sem moldura própria, o popover já é a caixa. */
-.politica {
+.detalhe__convite {
   display: grid;
-  gap: 0.9rem;
-  max-width: 24rem;
-  padding: 0.35rem 0.25rem;
+  justify-items: start;
+  gap: 6px;
+  padding: 22px 20px 24px;
 }
 
-.politica__texto {
-  max-width: 46ch;
+.detalhe__convite-icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 6px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 20px;
+}
+
+.detalhe__convite strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.detalhe__convite p {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------------------- política */
+
+.politica {
+  display: grid;
+  gap: 14px;
+  max-width: 24rem;
+  padding: 4px;
 }
 
 .politica__titulo {
-  margin: 0 0 0.3rem;
-  font-size: 1rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .politica__texto p {
   margin: 0;
-  color: var(--clinic-muted);
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.55;
 }
 
 .politica__toggle {
   display: flex;
   align-items: flex-start;
-  gap: var(--clinic-space-2);
+  gap: 10px;
 }
 
 .politica__toggle label {
   display: grid;
-  gap: 0.1rem;
+  gap: 2px;
   cursor: pointer;
 }
 
-.politica__toggle small {
-  color: var(--clinic-faint);
-  font-size: 0.75rem;
+.politica__toggle strong {
+  font-size: 14px;
   font-weight: 600;
+}
+
+.politica__toggle small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+@media (max-width: 760px) {
+  .numeros {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .numero + .numero {
+    border-top: 1px solid var(--linha);
+    border-inline-start: 0;
+  }
+
+  .numero {
+    padding: 14px 18px;
+  }
 }
 </style>

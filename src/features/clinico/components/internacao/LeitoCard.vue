@@ -1,23 +1,25 @@
 <script setup lang="ts">
 /**
- * Um leito no mapa.
+ * Um leito na planta da ala.
  *
- * O cartão vazio é tão importante quanto o ocupado, e por isso ocupa o mesmo espaço: o mapa
- * responde "onde há vaga", e uma grade em que os livres encolhem obriga a contar em vez de
- * olhar. O leito fora de operação fica visível e apagado pela mesma razão — some da conta de
- * vagas sem sumir do lugar, para que quem lê o mapa por posição não perca a referência.
+ * O ladrilho vazio é tão importante quanto o ocupado, e por isso ocupa o mesmo espaço: a planta
+ * responde "onde há vaga", e uma grade em que os livres encolhem obriga a contar em vez de olhar.
+ * O leito fora de operação fica no lugar, hachurado e calado, pela mesma razão — some da conta de
+ * vagas sem sumir da planta, para que quem lê por posição não perca a referência.
  *
- * A informação numérica do cartão é escolhida a dedo: **o que cobra ação agora** e **quanto
- * falta para a próxima**. Peso, diagnóstico e previsão de alta cabem na tela do paciente; num
- * cartão de mapa eles disputariam espaço com a única linha que decide para onde a enfermagem
- * anda em seguida.
+ * ## O ocupado
  *
- * ## A forma (redesenho de 30/09/2026)
+ * Rosto, nome e o motivo curto, e embaixo dois números com legenda (como o "46 min esperando" do
+ * Hoje): **há quanto tempo está internado** e **o que o checklist cobra** — quantos itens a fazer
+ * agora ou quanto falta para o próximo. A gravidade aparece como selo com palavra e como marca na
+ * borda esquerda; o crítico ganha também a borda tingida, para ser achado de longe.
  *
- * O cartão da Visão geral, neutro. A urgência deixou de contornar o cartão inteiro com um anel
- * coral ou areia — o mapa de oito leitos virava um mosaico de molduras — e mora em selos de 6 px:
- * a gravidade no alto (estável, atenção, crítico), e o atraso e o boletim retido embaixo, cada um
- * com ícone e palavra. O tipo do leito saiu do cartão: o mapa agrupa por tipo.
+ * O que cobra alguém (atraso e boletim retido) vem em selo, com ícone e palavra: são dois pedidos
+ * diferentes — o atraso chama a enfermagem; o boletim, alguém ao telefone.
+ *
+ * O ladrilho inteiro abre o paciente: o alvo é o botão com o nome, estendido por um `::after`
+ * sobre toda a superfície. Continua sendo um botão de verdade (teclado, foco e leitor de tela),
+ * em vez de um `role="button"` no `<article>`.
  */
 import Button from 'primevue/button'
 import { computed } from 'vue'
@@ -25,6 +27,7 @@ import { useI18n } from 'vue-i18n'
 
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
+import InternacaoGravidade from './InternacaoGravidade.vue'
 import type { LeitoNoMapa } from '../../data/repositories'
 import type { GravidadeClinica } from '../../data/types'
 import { useClinicoStore } from '../../stores/clinico'
@@ -46,24 +49,12 @@ const pet = computed(() =>
   props.item.internacao ? clinico.pet(props.item.internacao.petId) : null,
 )
 
-/** A gravidade no par de selo da Visão geral: verde, pêssego, coral. */
-const COR_DA_GRAVIDADE: Record<GravidadeClinica, string> = {
-  estavel: 'verde',
-  atencao: 'pessego',
-  critico: 'coral',
+/** A marca da borda na cor da gravidade: verde, âmbar, vermelho. */
+const MARCA: Record<GravidadeClinica, 'ok' | 'atencao' | 'risco'> = {
+  estavel: 'ok',
+  atencao: 'atencao',
+  critico: 'risco',
 }
-
-const proxima = computed(() => {
-  const minutos = props.item.proximaEmMinutos
-
-  if (minutos === null) {
-    return ''
-  }
-
-  return minutos < 60
-    ? t('clinico.internacao.leito.proximaMinutos', { minutos })
-    : t('clinico.internacao.leito.proximaHoras', { horas: Math.round(minutos / 60) })
-})
 
 const estado = computed(() => {
   if (ocupado.value) {
@@ -72,30 +63,67 @@ const estado = computed(() => {
 
   return indisponivel.value ? 'inativo' : 'livre'
 })
+
+/**
+ * O segundo número do ladrilho: o que o checklist cobra.
+ *
+ * Havendo item na hora (ou atrasado), é quantos — a enfermagem anda para esse leito. Não havendo,
+ * é quanto falta para o próximo, que é o que decide a ordem da ronda.
+ */
+const checklist = computed(() => {
+  if (!props.item.internacao) {
+    return null
+  }
+
+  if (props.item.pendentes > 0) {
+    return {
+      valor: String(props.item.pendentes),
+      legenda: t('clinico.internacao.nova.leito.aFazerAgora'),
+      tom: props.item.atrasadas > 0 ? 'risco' : 'atencao',
+    }
+  }
+
+  const minutos = props.item.proximaEmMinutos
+
+  if (minutos === null) {
+    return null
+  }
+
+  return {
+    valor:
+      minutos < 60
+        ? t('clinico.formato.minutos', { valor: minutos })
+        : t('clinico.formato.horas', { valor: Math.round(minutos / 60) }),
+    legenda: t('clinico.internacao.nova.leito.ateOProximo'),
+    tom: 'neutro',
+  }
+})
+
+const motivoInativo = computed(() =>
+  t(`clinico.internacao.leitos.motivo.${props.item.leito.motivoInativo ?? 'outro'}`),
+)
 </script>
 
 <template>
-  <article class="leito" :class="[`leito--${estado}`, { 'leito--clicavel': ocupado }]">
+  <article
+    class="leito"
+    :class="[
+      `leito--${estado}`,
+      item.internacao ? ['ui-marca', `ui-marca--${MARCA[item.internacao.gravidade]}`] : [],
+      item.internacao ? `leito--${item.internacao.gravidade}` : '',
+      { 'leito--clicavel': ocupado },
+    ]"
+  >
     <header class="leito__topo">
-      <span class="leito__nome">{{ item.leito.nome }}</span>
-      <span
-        v-if="item.internacao"
-        class="hc-selo"
-        :class="`hc--${COR_DA_GRAVIDADE[item.internacao.gravidade]}`"
-      >
-        {{ t(`clinico.internacao.gravidade.${item.internacao.gravidade}`) }}
+      <span class="leito__nome ui-num">{{ item.leito.nome }}</span>
+      <InternacaoGravidade v-if="item.internacao" :gravidade="item.internacao.gravidade" />
+      <span v-else-if="!indisponivel" class="leito__estado">
+        {{ t('clinico.internacao.leito.livre') }}
       </span>
     </header>
 
     <template v-if="item.internacao">
-      <!--
-        O botão é o nome do paciente, mas o **alvo do clique é o cartão inteiro**: o `::after`
-        dele se estende por toda a superfície (ver o CSS). Continua sendo um botão de verdade —
-        teclado, foco e leitor de tela nativos, com o nome do paciente como rótulo — em vez de um
-        `role="button"` no `<article>`, que leria o cartão inteiro em voz alta para dizer "abrir o
-        Bento".
-      -->
-      <Button type="button" class="leito__paciente" text @click="emit('abrir', item.internacao.id)">
+      <button type="button" class="leito__paciente" @click="emit('abrir', item.internacao.id)">
         <PetAvatar
           class="leito__avatar"
           :nome="item.petNome"
@@ -108,47 +136,50 @@ const estado = computed(() => {
           <strong class="leito__pet">{{ item.petNome }}</strong>
           <span class="leito__motivo">{{ item.internacao.motivo }}</span>
         </span>
-      </Button>
+      </button>
 
-      <!--
-        O que cobra ação, em selo: ícone, forma e palavra, três canais que sobrevivem à escala de
-        cinza. O do boletim é cheio e o do atraso, contornado: os dois podem aparecer juntos, e são
-        dois pedidos diferentes — o atraso chama a enfermagem; o boletim, alguém ao telefone.
-      -->
       <p v-if="item.atrasadas > 0 || item.boletimRetido" class="leito__cobrancas">
-        <span v-if="item.boletimRetido" class="hc-selo leito__selo leito__selo--boletim">
+        <span v-if="item.boletimRetido" class="ui-selo ui-selo--risco leito__selo-forte">
           <i class="ph ph-phone" aria-hidden="true" />
           {{ t('clinico.internacao.leito.boletimRetido') }}
         </span>
-        <span v-if="item.atrasadas > 0" class="hc-selo hc--coral leito__selo">
-          <i class="ph ph-warning-circle" aria-hidden="true" />
+        <span v-if="item.atrasadas > 0" class="ui-selo ui-selo--risco">
+          <i class="ph ph-clock-countdown" aria-hidden="true" />
           {{ t('clinico.internacao.leito.atrasadas', { total: item.atrasadas }, item.atrasadas) }}
         </span>
       </p>
 
-      <p class="leito__rodape">
+      <div class="leito__numeros">
+        <p class="numero">
+          <strong class="ui-num">
+            {{ t('clinico.internacao.leito.horas', { horas: item.horasInternado }) }}
+          </strong>
+          <small>{{ t('clinico.internacao.nova.leito.deInternacao') }}</small>
+        </p>
+        <p v-if="checklist" class="numero numero--fim" :class="`numero--${checklist.tom}`">
+          <strong class="ui-num">{{ checklist.valor }}</strong>
+          <small>{{ checklist.legenda }}</small>
+        </p>
+      </div>
+    </template>
+
+    <template v-else-if="indisponivel">
+      <p class="leito__parado">
+        <i class="ph ph-wrench" aria-hidden="true" />
         <span>
-          {{ t('clinico.internacao.leito.internadoHa') }}
-          <strong>{{ t('clinico.internacao.leito.horas', { horas: item.horasInternado }) }}</strong>
+          <strong>{{ t('clinico.internacao.leito.foraDeOperacao') }}</strong>
+          <small :title="item.leito.detalheInativo || undefined">{{ motivoInativo }}</small>
         </span>
-        <span v-if="item.pendentes > 0">
-          {{ t('clinico.internacao.leito.pendentes') }} <strong>{{ item.pendentes }}</strong>
-        </span>
-        <span v-if="proxima">{{ proxima }}</span>
       </p>
     </template>
 
     <template v-else>
-      <p class="leito__vazio">
-        {{
-          indisponivel
-            ? t('clinico.internacao.leito.foraDeOperacao')
-            : t('clinico.internacao.leito.livre')
-        }}
+      <p class="leito__vago" aria-hidden="true">
+        <i class="ph ph-bed" />
       </p>
 
       <Button
-        v-if="!indisponivel"
+        type="button"
         class="leito__internar"
         :label="t('clinico.internacao.leito.internar')"
         icon="ph ph-plus"
@@ -163,199 +194,296 @@ const estado = computed(() => {
 
 <style scoped>
 .leito {
-  --leito-sombra: var(--hc-sombra);
-
-  /* Âncora do alvo estendido do botão do paciente. */
+  /* Âncora do alvo estendido do botão do paciente e da marca de gravidade. */
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 11.5rem;
+  min-height: 196px;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem 1.1rem 1.05rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 1rem;
-  background: var(--hc-cartao);
-  box-shadow: var(--leito-sombra);
-  color: var(--hc-tinta);
+  gap: 12px;
+  padding: 14px 16px 14px 18px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie);
+  color: var(--tinta);
   transition:
-    border-color 150ms ease-out,
-    box-shadow 150ms ease-out;
+    border-color var(--pj-tempo-curto) ease,
+    box-shadow var(--pj-tempo-curto) ease,
+    transform var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 /*
- * O cartão ocupado inteiro abre o paciente. Ele sobe pela sombra, como as pílulas: trocar o fundo
- * de um cartão branco não se vê.
- *
- * O leito **livre** fica de fora de propósito: ali a ação é internar alguém, e abrir um formulário
- * porque o dedo encostou no cartão vazio é o tipo de surpresa que ensina a ter medo da tela.
+ * O ocupado inteiro abre o paciente: ele sobe um pouco no hover, como coisa que se pega. O livre
+ * fica parado de propósito — ali a ação é internar alguém, e abrir um formulário porque o dedo
+ * encostou no ladrilho vazio é o tipo de surpresa que ensina a ter medo da tela.
  */
 .leito--clicavel {
   cursor: pointer;
 }
 
 .leito--clicavel:hover {
-  --leito-sombra: var(--hc-sombra-alta);
+  border-color: var(--linha-forte);
+  box-shadow: var(--sombra-2);
+  transform: translateY(-1px);
+}
 
-  border-color: color-mix(in srgb, var(--hc-marca) 40%, var(--hc-borda));
+/* O crítico se acha de longe: borda tingida, além da marca e do selo. */
+.leito--critico {
+  border-color: color-mix(in oklab, var(--risco) 55%, var(--linha));
+}
+
+.leito--critico.leito--clicavel:hover {
+  border-color: var(--risco);
 }
 
 .leito--livre,
 .leito--inativo {
-  justify-content: space-between;
   border-style: dashed;
-  border-color: color-mix(in srgb, var(--hc-tinta-3) 45%, transparent);
+  border-color: var(--linha-forte);
   background: transparent;
-  box-shadow: none;
 }
 
-.leito--inativo {
-  background: var(--hc-linha);
-  opacity: 0.7;
+.leito--livre {
+  border-color: color-mix(in oklab, var(--linha-forte) 60%, transparent);
 }
+
+/* Fora de operação: hachurado e calado, mas no lugar. */
+.leito--inativo {
+  border-color: var(--linha);
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 9px,
+    color-mix(in oklab, var(--linha) 70%, transparent) 9px 10px
+  );
+}
+
+/* ----------------------------------------------------------------- topo */
 
 .leito__topo {
   display: flex;
+  min-height: 24px;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .leito__nome {
-  color: var(--hc-tinta);
-  font-size: 1rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.005em;
 }
 
-/*
- * `position: static` e `overflow: visible` desfazem dois padrões do `.p-button`: com eles o
- * `::after` abaixo se ancoraria no próprio botão e seria recortado por ele, e o alvo estendido
- * voltaria a ser só o nome.
- */
-.leito__paciente.p-button {
-  position: static;
+.leito--livre .leito__nome,
+.leito--inativo .leito__nome {
+  color: var(--tinta-2);
+}
+
+.leito__estado {
+  color: var(--ok-tinta);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------------------- paciente */
+
+.leito__paciente {
+  display: flex;
   min-width: 0;
-  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
   padding: 0;
   border: 0;
-  overflow: visible;
-  gap: 0.75rem;
+  background: none;
   color: inherit;
+  cursor: pointer;
+  font: inherit;
   text-align: start;
 }
 
-/* O hover é do cartão inteiro (`.leito--clicavel:hover`); o fundo do botão de texto sobraria. */
-.leito__paciente.p-button:not(:disabled):hover,
-.leito__paciente.p-button:not(:disabled):active {
-  background: transparent;
-  color: inherit;
-}
-
 /*
- * O `::after` estende o botão por todo o cartão — a superfície inteira vira alvo sem duplicar o
+ * O `::after` estende o botão por todo o ladrilho — a superfície inteira vira alvo sem duplicar o
  * `@click` no `<article>`, que dispararia duas vezes no clique sobre o nome.
  */
 .leito__paciente::after {
   position: absolute;
-  border-radius: 1rem;
+  border-radius: 14px;
   content: '';
   inset: 0;
 }
 
-.leito__paciente.p-button:focus-visible {
+.leito__paciente:focus-visible {
   outline: none;
-  box-shadow: none;
 }
 
-/* O foco contorna o cartão, que é o que o clique de fato aciona — não só o nome. */
+/* O foco contorna o ladrilho, que é o que o clique de fato aciona — não só o nome. */
 .leito__paciente:focus-visible::after {
-  outline: 2px solid var(--hc-marca);
+  outline: 2px solid var(--pj-lugar, var(--musgo));
   outline-offset: 2px;
 }
 
 .leito__avatar {
-  flex-shrink: 0;
+  flex: none;
 }
 
 .leito__identidade {
   display: grid;
   min-width: 0;
-  gap: 0.15rem;
+  gap: 2px;
 }
 
 .leito__pet {
   overflow-wrap: anywhere;
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
-  font-weight: 650;
-  line-height: 1.25;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .leito__motivo {
   display: -webkit-box;
   overflow: hidden;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  line-height: 1.35;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.4;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
+/* ----------------------------------------------------------------- cobranças */
+
 .leito__cobrancas {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 6px;
   margin: 0;
 }
 
-.leito__selo {
-  gap: 0.3rem;
+.leito__cobrancas .ui-selo {
+  max-width: 100%;
+  white-space: normal;
 }
 
-.leito__selo i {
-  font-size: 0.72rem;
+/* O boletim é o selo cheio: há uma pessoa do outro lado esperando um telefonema. */
+.leito__selo-forte.ui-selo {
+  background: var(--risco-tinta);
+  color: var(--superficie);
 }
 
-/* O boletim é o selo cheio: o coral invertido do bloco urgente da pauta. */
-.leito__selo--boletim {
-  background: var(--hc-coral-tinta);
-  color: var(--hc-cartao);
-  font-weight: 700;
-}
+/* ----------------------------------------------------------------- números */
 
-.leito__rodape {
+.leito__numeros {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.9rem;
-  margin: auto 0 0;
-  padding-block-start: 0.7rem;
-  border-block-start: 1px solid var(--hc-linha);
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--linha);
 }
 
-.leito__rodape strong {
-  color: var(--hc-tinta);
+.numero {
+  display: grid;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.numero--fim {
+  justify-items: end;
+  text-align: end;
+}
+
+.numero strong {
+  color: var(--tinta);
+  font-size: 20px;
   font-weight: 650;
+  letter-spacing: -0.02em;
 }
 
-.leito__vazio {
-  margin: auto 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-  text-align: center;
+.numero small {
+  margin-top: 3px;
+  color: var(--tinta-2);
+  font-size: 12px;
+}
+
+.numero--atencao strong {
+  color: var(--atencao-tinta);
+}
+
+.numero--risco strong,
+.numero--risco small {
+  color: var(--risco-tinta);
+}
+
+/* ----------------------------------------------------------------- livre e parado */
+
+.leito__vago {
+  display: grid;
+  flex: 1;
+  margin: 0;
+  place-items: center;
+  color: var(--tinta-3);
+  font-size: 30px;
+  opacity: 0.55;
 }
 
 .leito__internar {
-  align-self: center;
+  align-self: stretch;
+}
+
+.leito__parado {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--tinta-2);
+  text-align: start;
+}
+
+.leito__parado > i {
+  font-size: 20px;
+}
+
+.leito__parado span {
+  display: grid;
+  gap: 2px;
+}
+
+.leito__parado strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.leito__parado small {
+  font-size: 12.5px;
+}
+
+/* Estreito, um ladrilho por linha: o vazio não precisa da altura do ocupado para ser visto. */
+@media (width <= 640px) {
+  .leito--livre,
+  .leito--inativo {
+    min-height: 132px;
+  }
+
+  .leito__vago {
+    display: none;
+  }
+
+  .leito--livre .leito__internar {
+    margin-top: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .leito {
     transition: none;
+  }
+
+  .leito--clicavel:hover {
+    transform: none;
   }
 }
 </style>

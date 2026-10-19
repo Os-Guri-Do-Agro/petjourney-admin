@@ -78,9 +78,9 @@ function largura(fatia: Fatia) {
 .ranking__nome {
   display: -webkit-box;
   overflow: hidden;
-  color: var(--hc-tinta);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  color: var(--tinta);
+  font-size: 0.84375rem;
+  font-weight: 550;
   line-height: 1.3;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -89,39 +89,40 @@ function largura(fatia: Fatia) {
 
 .ranking__trilho {
   display: block;
-  height: 0.6rem;
+  height: 0.5rem;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--hc-linha);
+  background: var(--superficie-3);
 }
 
 .ranking__barra {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--hc-marca);
+  background: var(--musgo);
   transition: inline-size 0.2s ease-out;
 }
 
 .ranking--atencao .ranking__barra {
-  background: var(--hc-pessego-tinta);
+  background: var(--atencao);
 }
 
 .ranking__valor {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .ranking__valor strong {
-  color: var(--hc-tinta);
+  color: var(--tinta);
   font-weight: 700;
 }
 
 .ranking__vazio {
   margin: 0;
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.8125rem;
 }
 

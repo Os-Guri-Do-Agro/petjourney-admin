@@ -5,6 +5,7 @@ import './theme/hc-tema.css'
 import './components/home/home-card.css'
 import './theme/trilha/trilha-tokens.css'
 import './theme/trilha/trilha-tema.css'
+import './theme/trilha/trilha-ui.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

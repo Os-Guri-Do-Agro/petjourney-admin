@@ -1,0 +1,335 @@
+/*
+ * Trilha — o kit das telas redesenhadas.
+ *
+ * Classes `ui-*`, globais de propósito: são as peças que toda tela usa do mesmo jeito (folha,
+ * lista, linha, selo, hora, marca de gravidade), e uma peça só garante que "urgente" tenha a
+ * mesma cara na Agenda, na Internação e nas Pendências.
+ *
+ * Regras de uso, em uma linha cada:
+ * - Folha (`ui-folha`) só para agrupar o que se lê junto: lista, tabela, formulário. Texto solto e
+ *   títulos de seção ficam no fundo, sem caixa.
+ * - Estado se diz em cor **e** em palavra: a marca lateral e o selo andam juntos.
+ * - Hora, peso, dose e contagem usam `ui-num` (Instrument Sans, algarismos de mesma largura).
+ * - Nada em caixa alta; rótulo é frase.
+ */
+
+:root.trilha {
+  --ui-raio-folha: 16px;
+  --ui-linha-altura: 60px;
+}
+
+:root.trilha body {
+  background: var(--fundo);
+  font-family: var(--font-texto);
+}
+
+/* ------------------------------------------------------------------------------------- folha */
+
+.trilha .ui-folha {
+  border: 1px solid var(--linha);
+  border-radius: var(--ui-raio-folha);
+  background: var(--superficie);
+}
+
+.trilha .ui-folha--recheio {
+  padding: 20px;
+}
+
+/* ---------------------------------------------------------------------------------- números */
+
+.trilha .ui-num {
+  font-family: var(--font-dados);
+  font-feature-settings: 'tnum' 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.trilha .ui-hora {
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+}
+
+/* ----------------------------------------------------------------------------- lista e linha */
+
+.trilha .ui-lista {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trilha .ui-lista > li + li {
+  border-top: 1px solid var(--linha);
+}
+
+.trilha .ui-linha {
+  position: relative;
+  display: flex;
+  min-height: var(--ui-linha-altura);
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.trilha a.ui-linha:hover,
+.trilha button.ui-linha:hover,
+.trilha .ui-linha--clicavel:hover {
+  background: var(--superficie-2);
+}
+
+.trilha a.ui-linha:focus-visible,
+.trilha button.ui-linha:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: -2px;
+}
+
+.trilha button.ui-linha {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.trilha .ui-lista > li:first-child > .ui-linha {
+  border-top-left-radius: calc(var(--ui-raio-folha) - 1px);
+  border-top-right-radius: calc(var(--ui-raio-folha) - 1px);
+}
+
+.trilha .ui-lista > li:last-child > .ui-linha {
+  border-bottom-left-radius: calc(var(--ui-raio-folha) - 1px);
+  border-bottom-right-radius: calc(var(--ui-raio-folha) - 1px);
+}
+
+.trilha .ui-linha__texto {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.trilha .ui-linha__titulo {
+  overflow: hidden;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+}
+
+.trilha .ui-linha__meta {
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+}
+
+.trilha .ui-linha__fim {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.trilha .ui-linha__seta {
+  color: var(--tinta-3);
+  font-size: 16px;
+}
+
+/*
+ * A marca de gravidade: um traço na borda esquerda da linha. Sozinha ela não diz nada a quem não
+ * vê a cor — por isso nunca vem sem o selo com a palavra.
+ */
+.trilha .ui-marca::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 0;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: var(--ui-marca, var(--linha-forte));
+  content: '';
+}
+
+.trilha .ui-marca--risco {
+  --ui-marca: var(--risco);
+}
+
+.trilha .ui-marca--atencao {
+  --ui-marca: var(--atencao);
+}
+
+.trilha .ui-marca--ok {
+  --ui-marca: var(--ok);
+}
+
+.trilha .ui-marca--neutro {
+  --ui-marca: var(--linha-forte);
+}
+
+.trilha .ui-marca--lugar {
+  --ui-marca: var(--pj-lugar);
+}
+
+/* ---------------------------------------------------------------------------------------- selo */
+
+.trilha .ui-selo {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 7px;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.trilha .ui-selo i {
+  font-size: 14px;
+}
+
+.trilha .ui-selo--risco {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+.trilha .ui-selo--atencao {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+}
+
+.trilha .ui-selo--ok {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+}
+
+.trilha .ui-selo--lugar {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+}
+
+.trilha .ui-selo--clinica {
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+}
+
+.trilha .ui-selo--contorno {
+  border: 1px solid var(--linha);
+  background: transparent;
+  color: var(--tinta-2);
+}
+
+/* ------------------------------------------------------------------------------- contagem */
+
+.trilha .ui-contagem {
+  display: inline-grid;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 7px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--superficie-3);
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+/* -------------------------------------------------------------------------------- vazio */
+
+.trilha .ui-vazio {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: 22px 18px;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.trilha .ui-vazio strong {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------------- link de mais */
+
+.trilha .ui-mais {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: none;
+  color: var(--pj-lugar-tinta, var(--musgo));
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.trilha .ui-mais:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.trilha .ui-mais:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------------- tabelas */
+
+.trilha .ui-tabela {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.trilha .ui-tabela th {
+  height: 40px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.trilha .ui-tabela td {
+  height: 58px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--linha);
+  vertical-align: middle;
+}
+
+.trilha .ui-tabela tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.trilha .ui-tabela tbody tr:hover td {
+  background: var(--superficie-2);
+}
+
+/* -------------------------------------------------------------------------- grade de colunas */
+
+.trilha .ui-colunas {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}

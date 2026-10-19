@@ -396,6 +396,20 @@
       "hide": "Ocultar explicações",
       "tour": "Como usar",
       "tourTitulo": "Ver um tutorial desta tela, parte por parte"
+    },
+    "barra": {
+      "pular": "Pular para o conteúdo",
+      "navegacao": "Navegação principal",
+      "inicio": "Início",
+      "criarTitulo": "Criar novo",
+      "criarItens": {
+        "agendamento": "Agendamento",
+        "agendamentoDica": "Marcar um horário na agenda",
+        "paciente": "Paciente",
+        "pacienteDica": "Cadastrar um pet e o responsável",
+        "fila": "Espera por vaga",
+        "filaDica": "Pôr alguém na fila de espera"
+      }
     }
   },
   "frame": {
@@ -2187,7 +2201,12 @@
       "telas": "Telas",
       "pacientes": "Pacientes",
       "buscando": "Buscando…",
-      "semResultado": "Nada encontrado para “{termo}”."
+      "semResultado": "Nada encontrado para “{termo}”.",
+      "teclas": {
+        "percorrer": "percorrer",
+        "abrir": "abrir",
+        "fechar": "fechar"
+      }
     },
     "formato": {
       "minutos": "{valor} min",
@@ -2439,7 +2458,8 @@
             "futuro": "O ato não pode estar no futuro."
           }
         }
-      }
+      },
+      "pesadoHoje": "Pesado hoje"
     },
     "tabela": {
       "abrir": "Ver detalhes",
@@ -2632,7 +2652,8 @@
       "frase": {
         "atendimentos": "{total} atendimento | {total} atendimentos",
         "naRecepcao": "{total} na recepção",
-        "vazio": "Nenhum atendimento marcado"
+        "vazio": "Nenhum atendimento marcado",
+        "comRecepcao": "{atendimentos}, {recepcao}"
       },
       "proximoPasso": {
         "aguardando": "Registrar chegada",
@@ -2654,6 +2675,24 @@
         "titulo": "Formato",
         "tabela": "Tabela",
         "linhaDoTempo": "Linha do tempo"
+      },
+      "semanaRotulo": "Dias da semana",
+      "filtroProfissionais": "Profissionais",
+      "filtroSituacao": "Situação",
+      "semExpediente": "A clínica não abre neste dia.",
+      "drawer": {
+        "irPara": "Abrir"
+      },
+      "aviso": {
+        "professional-overlap": "Horário ocupado",
+        "room-overlap": "Sala ocupada",
+        "pet-double-book": "Paciente já marcado",
+        "block-invasion": "Horário bloqueado",
+        "outside-hours": "Fora do expediente",
+        "lunch-overlap": "Almoço",
+        "holiday-closed": "Clínica fechada",
+        "over-capacity": "Dia cheio",
+        "type-room-mismatch": "Sala não indicada"
       }
     },
     "meuDia": {
@@ -2722,7 +2761,8 @@
         "porProfissional": "Por profissional",
         "horarios": "Horários de maior movimento",
         "horariosAjuda": "Quantos atendimentos começam em cada faixa de hora.",
-        "diagnosticos": "Diagnósticos mais frequentes"
+        "diagnosticos": "Diagnósticos mais frequentes",
+        "porOrigem": "De onde vêm os atendimentos"
       },
       "legenda": {
         "finalizados": "Concluídos",
@@ -2752,6 +2792,10 @@
       },
       "mapa": {
         "hora": "Hora"
+      },
+      "numero": {
+        "horas": "Tempo de atendimento",
+        "horasNota": "somando os atendimentos concluídos"
       }
     },
     "bulario": {
@@ -3102,6 +3146,17 @@
         "aguardando": "Ninguém aguardando vaga | 1 aguardando vaga | {n} aguardando vaga",
         "ofertas": "1 oferta esperando resposta | {n} ofertas esperando resposta",
         "acoes": "Ações da fila"
+      },
+      "tela": {
+        "resumo": "{aguardando}, {ofertas}",
+        "ofertas": "Ofertas esperando resposta",
+        "ofertasDescricao": "A vaga fica guardada até o prazo. Depois, volta para a clínica.",
+        "esperando": "Esperando vaga",
+        "esperandoDescricao": "Urgentes primeiro, depois por ordem de chegada.",
+        "resolvidas": "Já resolvidas",
+        "paraResponder": "para responder, até {hora}",
+        "naFila": "na fila",
+        "vagaPara": "Vaga oferecida"
       }
     },
     "faltas": {
@@ -3187,6 +3242,26 @@
       "acoes": {
         "rotulo": "Ações das faltas",
         "justificarProxima": "Justificar a próxima"
+      },
+      "resumo": {
+        "pendentes": "{total} paciente com falta sem motivo. | {total} pacientes com falta sem motivo.",
+        "comecePor": "Comece por {pet}, que faltou {quando}.",
+        "emDia": "Todas as faltas têm motivo. Ninguém esperando ligação."
+      },
+      "numeros": {
+        "rotulo": "Faltas em números",
+        "pendentes": "falta a justificar | faltas a justificar",
+        "reincidentes": "reincidente | reincidentes",
+        "limite": "{total} falta ou mais | {total} faltas ou mais",
+        "agenda": "de agenda parada",
+        "emFaltas": "em {total} falta | em {total} faltas"
+      },
+      "detalhe": {
+        "convite": "Escolha um paciente na lista",
+        "conviteTexto": "As faltas do responsável aparecem aqui, uma a uma, com a data, o motivo e o próximo passo: justificar ou reagendar.",
+        "contagem": "{total} falta | {total} faltas",
+        "semMotivo": "{total} sem motivo | {total} sem motivo",
+        "ligar": "Ligar para {telefone}"
       }
     },
     "prontuario": {
@@ -3677,7 +3752,30 @@
       "rascunhos": "Prontuários em rascunho",
       "retornos": "Retornos sem horário",
       "ofertasDaFila": "Ofertas da fila aguardando resposta",
-      "saudacao": "Nada pendente | 1 pendência para resolver | {n} pendências para resolver"
+      "saudacao": "Nada pendente | 1 pendência para resolver | {n} pendências para resolver",
+      "resumo": {
+        "rascunhos": "{total} prontuário em rascunho | {total} prontuários em rascunho",
+        "retornos": "{total} retorno sem horário | {total} retornos sem horário",
+        "ofertas": "{total} oferta da fila esperando resposta | {total} ofertas da fila esperando resposta",
+        "frase": "{lista}.",
+        "emDia": "Nada ficou para trás: nenhum rascunho, retorno ou oferta pendente."
+      },
+      "porque": {
+        "rascunhos": "Consulta começada e não finalizada. Enquanto o prontuário não fecha, o resumo não vai para o responsável.",
+        "retornos": "O vet indicou retorno na consulta, e o prazo chegou sem horário na agenda.",
+        "ofertas": "Uma vaga foi oferecida a quem esperava na fila. Passado o prazo, a vaga volta para a clínica."
+      },
+      "semQueixa": "Sem queixa registrada",
+      "semDiagnostico": "Sem diagnóstico registrado",
+      "abertoHoje": "Aberto hoje às {hora}",
+      "abertoHa": "Aberto há {total} dia | Aberto há {total} dias",
+      "venceHoje": "Vence hoje",
+      "atraso": "{total} dia de atraso | {total} dias de atraso",
+      "vaga": "Vaga de {data} às {hora}",
+      "acao": {
+        "continuar": "Continuar prontuário",
+        "verNaFila": "Ver na fila"
+      }
     },
     "atalhos": {
       "titulo": "Atalhos de teclado",
@@ -3825,7 +3923,8 @@
       "aba": {
         "aplicadas": "Aplicadas",
         "atraso": "Em atraso",
-        "estoque": "Estoque"
+        "estoque": "Estoque",
+        "chamada": "Lista de chamada"
       },
       "buscar": "Paciente, responsável, vacina ou lote…",
       "aplicadasVazioTitulo": "Nenhuma aplicação registrada",
@@ -4053,7 +4152,26 @@
         "aVencer": "1 a vencer em 30 dias | {n} a vencer em 30 dias"
       },
       "mostrarMais": "Mostrar mais {n} (faltam {total})",
-      "potencialFrase": "Chamando todos, são {duracao} de agenda a recuperar (20 min por aplicação)."
+      "potencialFrase": "Chamando todos, são {duracao} de agenda a recuperar (20 min por aplicação).",
+      "par": "{a}, {b}",
+      "placar": {
+        "vencido": "vacina vencida | vacinas vencidas",
+        "proximo": "vence em 30 dias | vencem em 30 dias",
+        "serie-incompleta": "série aberta | séries abertas",
+        "todos": "no total",
+        "dica": {
+          "vencido": "Ligar hoje",
+          "proximo": "Entram na agenda da semana",
+          "serie-incompleta": "Parou no meio da série",
+          "todos": "A lista inteira"
+        }
+      },
+      "chamada": {
+        "titulo": "Quem chamar",
+        "atrasada": "{dias} d atrasada",
+        "venceHoje": "vence hoje",
+        "venceEm": "vence em {dias} d"
+      }
     },
     "internacao": {
       "titulo": "Internação",
@@ -4317,7 +4435,7 @@
         "internadoHa": "Internado há",
         "responsavelClinico": "Veterinário responsável",
         "abasRotulo": "Seção",
-        "naTroca": "Há {total} administração em cima da troca de plantão.",
+        "naTroca": "Há {total} administração em cima da troca de plantão. | Há {total} administrações em cima da troca de plantão.",
         "naoEncontradoTitulo": "Internação não encontrada",
         "naoEncontradoDescricao": "Ela pode ter recebido alta. Volte ao mapa de leitos.",
         "noLeito": "Leito {leito}",
@@ -4396,6 +4514,49 @@
         "proxima": "{pet}: próxima administração em {minutos} min",
         "aFazer": "A fazer no plantão: {total}",
         "vazio": "Nada atrasado no plantão."
+      },
+      "nova": {
+        "resumo": {
+          "plantaoCom": "{turno}, {horario}, com {nome}.",
+          "plantao": "{turno}, {horario}.",
+          "pedemAcao": "{total} paciente pede ação | {total} pacientes pedem ação",
+          "criticos": "{total} em estado crítico | {total} em estado crítico",
+          "frase": "{texto}.",
+          "lista": "{a}, {b}"
+        },
+        "planta": {
+          "descricao": "Um bloco por setor. Clique num leito ocupado para abrir o paciente.",
+          "vagas": "{total} vaga | {total} vagas",
+          "semVaga": "Sem vaga"
+        },
+        "leito": {
+          "aFazerAgora": "a fazer agora",
+          "ateOProximo": "até o próximo item",
+          "deInternacao": "de internação"
+        },
+        "frase": {
+          "boletimRetido": "Boletim retido aguarda ligação ao responsável",
+          "atrasadas": "{total} item atrasado no checklist | {total} itens atrasados no checklist",
+          "naHora": "{total} item para fazer agora | {total} itens para fazer agora",
+          "proximo": "Próximo item às {hora}"
+        },
+        "acao": {
+          "boletimRetido": "Resolver boletim retido",
+          "enviarRetido": "Enviar boletim retido",
+          "checar": "Checar {item} das {hora}",
+          "evoluir": "Registrar evolução do turno"
+        },
+        "quadro": {
+          "rotulo": "Dados da internação",
+          "leito": "Leito",
+          "desde": "desde {quando}"
+        },
+        "boletim": {
+          "mensagensPorDia": "mensagem por dia | mensagens por dia"
+        },
+        "checklist": {
+          "atraso": "{tempo} de atraso"
+        }
       }
     },
     "diario": {
@@ -5183,7 +5344,9 @@
           "atencao": "Nenhum tratamento crítico com a adesão em queda",
           "emCurso": "Nenhum tratamento em curso",
           "encerrados": "Nenhum tratamento encerrado"
-        }
+        },
+        "ligarPara": "Ligar para {nome}, {telefone}",
+        "abrirFicha": "Abrir a ficha"
       },
       "app": {
         "titulo": "Remédios",
@@ -5225,6 +5388,11 @@
         "semAtencao": "Nenhuma adesão em queda",
         "emCurso": "Nenhum em curso | 1 em curso | {n} em curso",
         "criticos": "1 crítico | {n} críticos"
+      },
+      "resumo": {
+        "atencao": "{total} tratamento crítico com a adesão em queda pede uma ligação hoje. | {total} tratamentos críticos com a adesão em queda pedem uma ligação hoje.",
+        "semAtencao": "Nenhum tratamento crítico com a adesão em queda.",
+        "emCurso": "{total} tratamento em curso. | {total} tratamentos em curso."
       }
     },
     "estoque": {
@@ -5418,7 +5586,19 @@
         "entrada": "Entrada",
         "vazio": "Nenhuma entrada ou baixa registrada.",
         "nota": "NF {nota}",
-        "colunaDoses": "Doses"
+        "colunaDoses": "Doses",
+        "descricao": "Toda entrada e toda baixa, com quem registrou e quando."
+      },
+      "par": "{a}, {b}",
+      "geladeira": {
+        "dias": "{n} dia | {n} dias",
+        "vencendo": "{doses} vence em até {dias} dias, {valor} em risco | {doses} vencem em até {dias} dias, {valor} em risco",
+        "nadaVencendo": "Nenhum lote vence nos próximos {dias} dias"
+      },
+      "lote": {
+        "venceuHa": "venceu há {dias} d",
+        "venceHoje": "vence hoje",
+        "venceEm": "vence em {dias} d"
       }
     },
     "pedidos": {
@@ -5829,7 +6009,40 @@
         "aceitarEm": "Aceitar {hora}",
         "marcarEm": "Marcar {dia} · {hora}",
         "voltar": "Voltar ao pedido"
+      },
+      "tela": {
+        "resumo": "{abertos}, {depois}",
+        "configurar": "Configurar",
+        "verComoPede": "Ver como o responsável pede",
+        "descricao": "O que vence primeiro fica em cima.",
+        "prazoNoTempo": "para responder, até {quando}",
+        "prazoPassou": "de atraso, venceu {quando}",
+        "respondidos": "Respondidos",
+        "recusado": "Recusado: {motivo}",
+        "horarioOcupado": "O horário não está mais livre. Em \"Responder\", escolha outro.",
+        "horaPedida": "Pedido",
+        "qualquerHora": "Qualquer hora"
       }
+    },
+    "fita": {
+      "rotulo": "O dia da clínica",
+      "contas": "Agora na clínica",
+      "traco": "{hora} {pet}: {estado}",
+      "resumo": "{feitos} atendimentos feitos, {restantes} por vir e {recepcao} na recepção. Abrir a agenda.",
+      "fechada": "Clínica fechada hoje",
+      "recepcao": "{n} na recepção | {n} na recepção",
+      "sala": "{n} em consulta | {n} em consulta",
+      "internados": "{n} internado | {n} internados"
+    },
+    "hoje": {
+      "recepcao": "Recepção",
+      "emConsulta": "Em consulta",
+      "minEsperando": "min esperando",
+      "minNaSala": "min na sala",
+      "alertas": "Alertas",
+      "chamar": "Iniciar consulta",
+      "recepcaoVazia": "Ninguém esperando na recepção.",
+      "salaVazia": "Nenhuma consulta em andamento."
     }
   },
   "hotel": {
@@ -7357,5 +7570,48 @@
       "unselectAll": "Desmarcar tudo",
       "navigation": "Navegação"
     }
+  },
+  "espacos": {
+    "clinica": {
+      "rotulo": "Clínica",
+      "hoje": "Hoje",
+      "agenda": "Agenda",
+      "pacientes": "Pacientes",
+      "internacao": "Internação",
+      "pendencias": "Pendências",
+      "relatorios": "Relatórios"
+    },
+    "hotel": {
+      "rotulo": "Hotel",
+      "hoje": "Hoje",
+      "reservas": "Reservas",
+      "casa": "A casa",
+      "relatorios": "Relatórios"
+    },
+    "portal": {
+      "rotulo": "Portal"
+    },
+    "abas": {
+      "agenda": "Agenda",
+      "pedidos": "Pedidos",
+      "fila": "Fila de espera",
+      "pacientes": "Pacientes",
+      "atendimentos": "Atendimentos",
+      "bulario": "Bulário",
+      "atividades": "Atividades",
+      "faltas": "Faltas",
+      "vacinas": "Vacinas",
+      "tratamentos": "Tratamentos em casa",
+      "estoque": "Estoque de vacinas",
+      "painel": "Painel do dia",
+      "rotina": "Rotina",
+      "hospedes": "Hóspedes",
+      "mapa": "Mapa",
+      "reservas": "Reservas",
+      "pedidosDeReserva": "Pedidos",
+      "acomodacoes": "Acomodações",
+      "rotinaPadrao": "Rotina padrão"
+    },
+    "abasAria": "Telas de {destino}"
   }
 }

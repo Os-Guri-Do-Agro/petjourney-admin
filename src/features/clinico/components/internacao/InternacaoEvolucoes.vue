@@ -2,6 +2,9 @@
 /**
  * Evolução por plantão: o que aconteceu no turno e o que o próximo precisa fazer.
  *
+ * Duas colunas: à esquerda, a evolução **deste** plantão (o formulário, numa folha); à direita, as
+ * evoluções anteriores como uma linha do tempo, da mais recente para a mais antiga.
+ *
  * O formulário abre com os **vitais do turno anterior à vista**, e não em branco. Evolução de
  * internação é comparação: 38,5 °C não quer dizer nada sozinho, e quer dizer muito se o turno
  * passado registrou 39,4. Um formulário vazio obriga a abrir a evolução anterior noutra aba,
@@ -17,6 +20,8 @@ import InputNumber from 'primevue/inputnumber'
 import Textarea from 'primevue/textarea'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import UiSecao from '@/components/ui/UiSecao.vue'
 
 import InternacaoGravidade from './InternacaoGravidade.vue'
 import ClinicField from '../base/ClinicField.vue'
@@ -177,165 +182,175 @@ function registrar() {
 
 <template>
   <div class="evolucoes">
-    <section class="registro">
-      <header class="registro__topo">
-        <h3 class="registro__titulo">{{ t('clinico.internacao.evolucao.registrarTitulo') }}</h3>
-        <p v-if="jaRegistrouNoTurno" class="registro__jaFeita">
+    <UiSecao
+      id="evolucao-registro"
+      :titulo="t('clinico.internacao.evolucao.registrarTitulo')"
+      folha
+    >
+      <template v-if="jaRegistrouNoTurno" #acoes>
+        <span class="ui-selo ui-selo--ok">
           <i class="ph ph-check-circle" aria-hidden="true" />
           {{ t('clinico.internacao.evolucao.jaRegistrada') }}
-        </p>
-      </header>
+        </span>
+      </template>
 
-      <div class="vitais">
+      <div class="registro">
+        <!--
+          O turno anterior fica **embaixo de cada campo**, enquanto se digita o atual. É comparação,
+          não histórico: sem ela, cada número é lido como se fosse o primeiro.
+        -->
+        <div class="vitais">
+          <div v-for="vital in VITAIS_DO_TURNO" :key="vital" class="vital">
+            <ClinicField :rotulo="t(`clinico.prontuario.exameFisico.${vital}`)">
+              <template #default="{ id }">
+                <InputNumber
+                  :id="id"
+                  :model-value="rascunho.vitais[vital].valor"
+                  :placeholder="faixaDoVital(vital)"
+                  :min-fraction-digits="0"
+                  :max-fraction-digits="1"
+                  fluid
+                  @update:model-value="
+                    rascunho.vitais[vital] = { valor: $event ?? null, naoAferido: false }
+                  "
+                />
+              </template>
+            </ClinicField>
+
+            <div v-if="anterior" class="vital__antes">
+              <span>{{ t('clinico.internacao.evolucao.turnoAnterior') }}</span>
+              <ClinicRefValue
+                :rotulo="t(`clinico.prontuario.exameFisico.${vital}`)"
+                :valor="anterior.vitais[vital]"
+                :faixa="clinico.faixaDoPaciente(vital, pet)"
+                variante="linha"
+                compacto
+              />
+            </div>
+          </div>
+        </div>
+
         <ClinicField
-          v-for="vital in VITAIS_DO_TURNO"
-          :key="vital"
-          :rotulo="t(`clinico.prontuario.exameFisico.${vital}`)"
+          :rotulo="t('clinico.internacao.evolucao.observado')"
+          :dica="t('clinico.internacao.evolucao.observadoDica')"
         >
           <template #default="{ id }">
-            <InputNumber
+            <Textarea
               :id="id"
-              :model-value="rascunho.vitais[vital].valor"
-              :placeholder="faixaDoVital(vital)"
-              :min-fraction-digits="0"
-              :max-fraction-digits="1"
+              v-model="rascunho.observado"
+              :placeholder="t('clinico.internacao.evolucao.observadoExemplo')"
+              rows="2"
+              auto-resize
               fluid
-              @update:model-value="
-                rascunho.vitais[vital] = { valor: $event ?? null, naoAferido: false }
-              "
             />
           </template>
         </ClinicField>
-      </div>
 
-      <!--
-        O turno anterior fica à vista enquanto se digita o atual. É comparação, não histórico:
-        sem ela, cada número é lido como se fosse o primeiro.
-      -->
-      <div v-if="anterior" class="anteriores">
-        <span class="anteriores__rotulo">{{ t('clinico.internacao.evolucao.turnoAnterior') }}</span>
-        <ClinicRefValue
-          v-for="vital in VITAIS_DO_TURNO"
-          :key="vital"
-          :rotulo="t(`clinico.prontuario.exameFisico.${vital}`)"
-          :valor="anterior.vitais[vital]"
-          :faixa="clinico.faixaDoPaciente(vital, pet)"
-          compacto
+        <ClinicField :rotulo="t('clinico.internacao.evolucao.avaliacao')">
+          <template #default="{ id }">
+            <Textarea
+              :id="id"
+              v-model="rascunho.avaliacao"
+              :placeholder="t('clinico.internacao.evolucao.avaliacaoExemplo')"
+              rows="2"
+              auto-resize
+              fluid
+            />
+          </template>
+        </ClinicField>
+
+        <ClinicField
+          :rotulo="t('clinico.internacao.evolucao.plano')"
+          :dica="t('clinico.internacao.evolucao.planoDica')"
+        >
+          <template #default="{ id }">
+            <Textarea
+              :id="id"
+              v-model="rascunho.plano"
+              :placeholder="t('clinico.internacao.evolucao.planoExemplo')"
+              rows="2"
+              auto-resize
+              fluid
+            />
+          </template>
+        </ClinicField>
+
+        <ClinicToggleGroup
+          v-model="rascunho.gravidade"
+          :opcoes="opcoesDeGravidade"
+          :rotulo="t('clinico.internacao.evolucao.gravidade')"
         />
+
+        <p v-if="vaiPiorar" class="registro__aviso" role="status">
+          <i class="ph ph-phone" aria-hidden="true" />
+          {{ t('clinico.internacao.evolucao.avisoPiora') }}
+        </p>
+
+        <div class="registro__acoes">
+          <Button
+            type="button"
+            :label="t('clinico.internacao.evolucao.registrar')"
+            icon="ph ph-floppy-disk"
+            :disabled="!podeRegistrar || salvando"
+            :loading="salvando"
+            @click="registrar"
+          />
+        </div>
       </div>
+    </UiSecao>
 
-      <ClinicField
-        :rotulo="t('clinico.internacao.evolucao.observado')"
-        :dica="t('clinico.internacao.evolucao.observadoDica')"
-      >
-        <template #default="{ id }">
-          <Textarea
-            :id="id"
-            v-model="rascunho.observado"
-            :placeholder="t('clinico.internacao.evolucao.observadoExemplo')"
-            rows="2"
-            auto-resize
-            fluid
-          />
-        </template>
-      </ClinicField>
-
-      <ClinicField :rotulo="t('clinico.internacao.evolucao.avaliacao')">
-        <template #default="{ id }">
-          <Textarea
-            :id="id"
-            v-model="rascunho.avaliacao"
-            :placeholder="t('clinico.internacao.evolucao.avaliacaoExemplo')"
-            rows="2"
-            auto-resize
-            fluid
-          />
-        </template>
-      </ClinicField>
-
-      <ClinicField
-        :rotulo="t('clinico.internacao.evolucao.plano')"
-        :dica="t('clinico.internacao.evolucao.planoDica')"
-      >
-        <template #default="{ id }">
-          <Textarea
-            :id="id"
-            v-model="rascunho.plano"
-            :placeholder="t('clinico.internacao.evolucao.planoExemplo')"
-            rows="2"
-            auto-resize
-            fluid
-          />
-        </template>
-      </ClinicField>
-
-      <ClinicToggleGroup
-        v-model="rascunho.gravidade"
-        :opcoes="opcoesDeGravidade"
-        :rotulo="t('clinico.internacao.evolucao.gravidade')"
-      />
-
-      <p v-if="vaiPiorar" class="registro__aviso" role="status">
-        <i class="ph ph-info" aria-hidden="true" />
-        {{ t('clinico.internacao.evolucao.avisoPiora') }}
-      </p>
-
-      <Button
-        :label="t('clinico.internacao.evolucao.registrar')"
-        icon="ph ph-floppy-disk"
-        :disabled="!podeRegistrar || salvando"
-        :loading="salvando"
-        @click="registrar"
-      />
-    </section>
-
-    <section class="historico">
-      <h3 class="registro__titulo">{{ t('clinico.internacao.evolucao.historicoTitulo') }}</h3>
-
-      <p v-if="evolucoes.length === 0" class="historico__vazio">
+    <UiSecao
+      id="evolucao-historico"
+      :titulo="t('clinico.internacao.evolucao.historicoTitulo')"
+      :contagem="evolucoes.length || null"
+      folha
+    >
+      <p v-if="evolucoes.length === 0" class="ui-vazio">
         {{ t('clinico.internacao.evolucao.semEvolucao') }}
       </p>
 
-      <article v-for="evolucao in evolucoes" :key="evolucao.id" class="turno">
-        <header class="turno__topo">
-          <div class="turno__quem">
-            <strong>{{ nomeDoPlantao(evolucao) }}</strong>
-            <span>
-              {{ formato.dataCurta(evolucao.registradoEm.slice(0, 10)) }} ·
-              {{ formato.hora(evolucao.registradoEm) }} ·
-              {{ clinico.profissional(evolucao.professionalId)?.nome }}
-            </span>
+      <ol v-else class="ui-lista historico">
+        <li v-for="evolucao in evolucoes" :key="evolucao.id" class="turno">
+          <header class="turno__topo">
+            <div class="turno__quem">
+              <strong>{{ nomeDoPlantao(evolucao) }}</strong>
+              <span class="ui-num">
+                {{ formato.dataCurta(evolucao.registradoEm.slice(0, 10)) }},
+                {{ formato.hora(evolucao.registradoEm) }} ·
+                {{ clinico.profissional(evolucao.professionalId)?.nome }}
+              </span>
+            </div>
+            <InternacaoGravidade :gravidade="evolucao.gravidade" />
+          </header>
+
+          <div class="turno__vitais">
+            <ClinicRefValue
+              v-for="vital in VITAIS_DO_TURNO"
+              :key="vital"
+              :rotulo="t(`clinico.prontuario.exameFisico.${vital}`)"
+              :valor="evolucao.vitais[vital]"
+              :faixa="clinico.faixaDoPaciente(vital, pet)"
+              compacto
+            />
           </div>
-          <InternacaoGravidade :gravidade="evolucao.gravidade" />
-        </header>
 
-        <div class="turno__vitais">
-          <ClinicRefValue
-            v-for="vital in VITAIS_DO_TURNO"
-            :key="vital"
-            :rotulo="t(`clinico.prontuario.exameFisico.${vital}`)"
-            :valor="evolucao.vitais[vital]"
-            :faixa="clinico.faixaDoPaciente(vital, pet)"
-            compacto
-          />
-        </div>
-
-        <dl class="turno__notas">
-          <template v-if="evolucao.observado">
-            <dt>{{ t('clinico.internacao.evolucao.observado') }}</dt>
-            <dd>{{ evolucao.observado }}</dd>
-          </template>
-          <template v-if="evolucao.avaliacao">
-            <dt>{{ t('clinico.internacao.evolucao.avaliacao') }}</dt>
-            <dd>{{ evolucao.avaliacao }}</dd>
-          </template>
-          <template v-if="evolucao.plano">
-            <dt>{{ t('clinico.internacao.evolucao.plano') }}</dt>
-            <dd>{{ evolucao.plano }}</dd>
-          </template>
-        </dl>
-      </article>
-    </section>
+          <dl class="turno__notas">
+            <div v-if="evolucao.observado">
+              <dt>{{ t('clinico.internacao.evolucao.observado') }}</dt>
+              <dd>{{ evolucao.observado }}</dd>
+            </div>
+            <div v-if="evolucao.avaliacao">
+              <dt>{{ t('clinico.internacao.evolucao.avaliacao') }}</dt>
+              <dd>{{ evolucao.avaliacao }}</dd>
+            </div>
+            <div v-if="evolucao.plano">
+              <dt>{{ t('clinico.internacao.evolucao.plano') }}</dt>
+              <dd>{{ evolucao.plano }}</dd>
+            </div>
+          </dl>
+        </li>
+      </ol>
+    </UiSecao>
   </div>
 </template>
 
@@ -343,101 +358,75 @@ function registrar() {
 .evolucoes {
   display: grid;
   align-items: start;
-  gap: var(--clinic-space-5);
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 28px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
 }
 
-.registro,
-.historico {
+/* ----------------------------------------------------------------- registro */
+
+.registro {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-}
-
-.registro__topo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-2);
-}
-
-.registro__titulo {
-  margin: 0;
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
-}
-
-.registro__jaFeita {
-  display: inline-flex;
-  align-items: center;
-  margin: 0;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-ok-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  gap: 16px;
+  padding: 18px;
 }
 
 /*
- * Os campos alinham pela **base**, não pelo topo.
- *
- * "Frequência respiratória" quebra em duas linhas e "Temperatura" não; alinhados pelo topo, o
- * campo mais longo empurrava o próprio input meia linha abaixo dos vizinhos e a fileira ficava
- * em degraus. Alinhados pelo fim, os quatro inputs ficam na mesma altura seja qual for o rótulo.
+ * Dois campos por linha na coluna do formulário, quatro quando ele ocupa a largura toda. Cada
+ * campo carrega embaixo o valor do turno anterior, alinhado com ele.
  */
 .vitais {
   display: grid;
-  align-items: end;
-  gap: var(--clinic-space-3);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
+  gap: 14px 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
 }
 
-.anteriores {
+.vital {
+  display: grid;
+  align-content: end;
+  gap: 6px;
+}
+
+.vital__antes {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface-sunken);
-}
-
-.anteriores__rotulo {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .registro__aviso {
   display: flex;
   align-items: flex-start;
+  gap: 10px;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
   line-height: 1.5;
 }
 
-.historico__vazio {
-  margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.registro__aviso i {
+  margin-top: 2px;
+  font-size: 16px;
 }
+
+.registro__acoes {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+/* ----------------------------------------------------------------- histórico */
 
 .turno {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
+  gap: 12px;
+  padding: 16px 18px;
+  container-type: inline-size;
 }
 
 .turno__topo {
@@ -445,48 +434,63 @@ function registrar() {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .turno__quem {
   display: grid;
-  gap: 0.05rem;
+  gap: 2px;
 }
 
 .turno__quem strong {
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .turno__quem span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
+/* Dois por linha na coluna estreita (o rótulo cabe inteiro), quatro quando a coluna é larga. */
 .turno__vitais {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--clinic-space-3);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@container (width >= 640px) {
+  .turno__vitais {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .turno__notas {
   display: grid;
+  gap: 8px;
   margin: 0;
-  gap: 0.15rem;
+}
+
+.turno__notas div {
+  display: grid;
+  gap: 2px;
 }
 
 .turno__notas dt {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .turno__notas dd {
-  margin: 0 0 var(--clinic-space-2);
-  font-size: var(--clinic-font-label);
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
   line-height: 1.5;
 }
 
-@media (width <= 1024px) {
+@media (width <= 1100px) {
   .evolucoes {
     grid-template-columns: minmax(0, 1fr);
   }

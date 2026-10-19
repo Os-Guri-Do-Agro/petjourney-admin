@@ -396,6 +396,20 @@
       "hide": "Hide descriptions",
       "tour": "How to use",
       "tourTitulo": "Walk through this screen, part by part"
+    },
+    "barra": {
+      "pular": "Skip to content",
+      "navegacao": "Main navigation",
+      "inicio": "Home",
+      "criarTitulo": "Create new",
+      "criarItens": {
+        "agendamento": "Appointment",
+        "agendamentoDica": "Book a time on the schedule",
+        "paciente": "Patient",
+        "pacienteDica": "Register a pet and its owner",
+        "fila": "Waitlist entry",
+        "filaDica": "Add someone to the waitlist"
+      }
     }
   },
   "frame": {
@@ -2187,7 +2201,12 @@
       "telas": "Screens",
       "pacientes": "Patients",
       "buscando": "Searching…",
-      "semResultado": "Nothing found for “{termo}”."
+      "semResultado": "Nothing found for “{termo}”.",
+      "teclas": {
+        "percorrer": "to move",
+        "abrir": "to open",
+        "fechar": "to close"
+      }
     },
     "formato": {
       "minutos": "{valor} min",
@@ -2439,7 +2458,8 @@
             "futuro": "The act cannot be in the future."
           }
         }
-      }
+      },
+      "pesadoHoje": "Weighed today"
     },
     "tabela": {
       "abrir": "View details",
@@ -2632,7 +2652,8 @@
       "frase": {
         "atendimentos": "{total} appointment | {total} appointments",
         "naRecepcao": "{total} at reception",
-        "vazio": "No appointments booked"
+        "vazio": "No appointments booked",
+        "comRecepcao": "{atendimentos}, {recepcao}"
       },
       "proximoPasso": {
         "aguardando": "Check in",
@@ -2654,6 +2675,24 @@
         "titulo": "Format",
         "tabela": "Table",
         "linhaDoTempo": "Timeline"
+      },
+      "semanaRotulo": "Days of the week",
+      "filtroProfissionais": "Professionals",
+      "filtroSituacao": "Status",
+      "semExpediente": "The clinic is closed on this day.",
+      "drawer": {
+        "irPara": "Open"
+      },
+      "aviso": {
+        "professional-overlap": "Time taken",
+        "room-overlap": "Room taken",
+        "pet-double-book": "Patient already booked",
+        "block-invasion": "Blocked time",
+        "outside-hours": "Outside opening hours",
+        "lunch-overlap": "Lunch break",
+        "holiday-closed": "Clinic closed",
+        "over-capacity": "Fully booked",
+        "type-room-mismatch": "Unsuitable room"
       }
     },
     "meuDia": {
@@ -2722,7 +2761,8 @@
         "porProfissional": "By professional",
         "horarios": "Busiest hours",
         "horariosAjuda": "How many visits start in each hour slot.",
-        "diagnosticos": "Most frequent diagnoses"
+        "diagnosticos": "Most frequent diagnoses",
+        "porOrigem": "Where bookings come from"
       },
       "legenda": {
         "finalizados": "Completed",
@@ -2752,6 +2792,10 @@
       },
       "mapa": {
         "hora": "Hour"
+      },
+      "numero": {
+        "horas": "Time with patients",
+        "horasNota": "across completed visits"
       }
     },
     "bulario": {
@@ -3102,6 +3146,17 @@
         "aguardando": "No one waiting for a slot | 1 waiting for a slot | {n} waiting for a slot",
         "ofertas": "1 offer awaiting an answer | {n} offers awaiting an answer",
         "acoes": "Waitlist actions"
+      },
+      "tela": {
+        "resumo": "{aguardando}, {ofertas}",
+        "ofertas": "Offers awaiting a reply",
+        "ofertasDescricao": "The slot is held until the deadline. After that, it goes back to the clinic.",
+        "esperando": "Waiting for a slot",
+        "esperandoDescricao": "Urgent first, then in order of arrival.",
+        "resolvidas": "Resolved",
+        "paraResponder": "to reply, by {hora}",
+        "naFila": "in the queue",
+        "vagaPara": "Offered slot"
       }
     },
     "faltas": {
@@ -3187,6 +3242,26 @@
       "acoes": {
         "rotulo": "No-show actions",
         "justificarProxima": "Chase the next one"
+      },
+      "resumo": {
+        "pendentes": "{total} patient with an unexplained no-show. | {total} patients with unexplained no-shows.",
+        "comecePor": "Start with {pet}, last no-show {quando}.",
+        "emDia": "Every no-show has a reason. No one waiting for a call."
+      },
+      "numeros": {
+        "rotulo": "No-shows at a glance",
+        "pendentes": "no-show to chase | no-shows to chase",
+        "reincidentes": "repeat case | repeat cases",
+        "limite": "{total} no-show or more | {total} no-shows or more",
+        "agenda": "of idle schedule",
+        "emFaltas": "across {total} no-show | across {total} no-shows"
+      },
+      "detalhe": {
+        "convite": "Pick a patient from the list",
+        "conviteTexto": "The owner's no-shows appear here one by one, with the date, the reason and the next step: record a reason or rebook.",
+        "contagem": "{total} no-show | {total} no-shows",
+        "semMotivo": "{total} without a reason | {total} without a reason",
+        "ligar": "Call {telefone}"
       }
     },
     "prontuario": {
@@ -3677,7 +3752,30 @@
       "rascunhos": "Draft records",
       "retornos": "Follow-ups without a slot",
       "ofertasDaFila": "Waitlist offers awaiting a reply",
-      "saudacao": "Nothing pending | 1 item to resolve | {n} items to resolve"
+      "saudacao": "Nothing pending | 1 item to resolve | {n} items to resolve",
+      "resumo": {
+        "rascunhos": "{total} draft record | {total} draft records",
+        "retornos": "{total} follow-up without a slot | {total} follow-ups without a slot",
+        "ofertas": "{total} waitlist offer awaiting a reply | {total} waitlist offers awaiting a reply",
+        "frase": "{lista}.",
+        "emDia": "Nothing left behind: no drafts, follow-ups or offers pending."
+      },
+      "porque": {
+        "rascunhos": "Consults started but not finished. Until the record is closed, the summary doesn't reach the owner.",
+        "retornos": "The vet asked for a follow-up, and the date arrived with nothing booked.",
+        "ofertas": "A slot was offered to someone on the waitlist. Once the deadline passes, the slot goes back to the clinic."
+      },
+      "semQueixa": "No complaint recorded",
+      "semDiagnostico": "No diagnosis recorded",
+      "abertoHoje": "Opened today at {hora}",
+      "abertoHa": "Open for {total} day | Open for {total} days",
+      "venceHoje": "Due today",
+      "atraso": "{total} day overdue | {total} days overdue",
+      "vaga": "Slot on {data} at {hora}",
+      "acao": {
+        "continuar": "Continue record",
+        "verNaFila": "View in waitlist"
+      }
     },
     "atalhos": {
       "titulo": "Keyboard shortcuts",
@@ -3825,7 +3923,8 @@
       "aba": {
         "aplicadas": "Given",
         "atraso": "Overdue",
-        "estoque": "Stock"
+        "estoque": "Stock",
+        "chamada": "Call list"
       },
       "buscar": "Patient, owner, vaccine or batch…",
       "aplicadasVazioTitulo": "No vaccinations recorded",
@@ -4053,7 +4152,26 @@
         "aVencer": "1 due in 30 days | {n} due in 30 days"
       },
       "mostrarMais": "Show {n} more ({total} left)",
-      "potencialFrase": "Calling everyone recovers {duracao} of schedule (20 min per shot)."
+      "potencialFrase": "Calling everyone recovers {duracao} of schedule (20 min per shot).",
+      "par": "{a}, {b}",
+      "placar": {
+        "vencido": "overdue vaccine | overdue vaccines",
+        "proximo": "due in 30 days | due in 30 days",
+        "serie-incompleta": "open series | open series",
+        "todos": "in total",
+        "dica": {
+          "vencido": "Call today",
+          "proximo": "Book them this week",
+          "serie-incompleta": "Stopped mid-series",
+          "todos": "The whole list"
+        }
+      },
+      "chamada": {
+        "titulo": "Who to call",
+        "atrasada": "{dias} d overdue",
+        "venceHoje": "due today",
+        "venceEm": "due in {dias} d"
+      }
     },
     "internacao": {
       "titulo": "Inpatients",
@@ -4317,7 +4435,7 @@
         "internadoHa": "Admitted for",
         "responsavelClinico": "Attending vet",
         "abasRotulo": "Section",
-        "naTroca": "{total} administration falls on the shift handover.",
+        "naTroca": "{total} administration falls on the shift handover. | {total} administrations fall on the shift handover.",
         "naoEncontradoTitulo": "Admission not found",
         "naoEncontradoDescricao": "It may have been discharged. Go back to the bed map.",
         "noLeito": "Bed {leito}",
@@ -4396,6 +4514,49 @@
         "proxima": "{pet}: next administration in {minutos} min",
         "aFazer": "To do this shift: {total}",
         "vazio": "Nothing overdue this shift."
+      },
+      "nova": {
+        "resumo": {
+          "plantaoCom": "{turno}, {horario}, with {nome}.",
+          "plantao": "{turno}, {horario}.",
+          "pedemAcao": "{total} patient needs action | {total} patients need action",
+          "criticos": "{total} in critical condition | {total} in critical condition",
+          "frase": "{texto}.",
+          "lista": "{a}, {b}"
+        },
+        "planta": {
+          "descricao": "One block per ward. Click an occupied bed to open the patient.",
+          "vagas": "{total} free | {total} free",
+          "semVaga": "Full"
+        },
+        "leito": {
+          "aFazerAgora": "to do now",
+          "ateOProximo": "until the next item",
+          "deInternacao": "in hospital"
+        },
+        "frase": {
+          "boletimRetido": "Held update waiting for a call to the owner",
+          "atrasadas": "{total} overdue checklist item | {total} overdue checklist items",
+          "naHora": "{total} item due now | {total} items due now",
+          "proximo": "Next item at {hora}"
+        },
+        "acao": {
+          "boletimRetido": "Resolve held update",
+          "enviarRetido": "Send held update",
+          "checar": "Check {item} at {hora}",
+          "evoluir": "Record shift progress note"
+        },
+        "quadro": {
+          "rotulo": "Hospitalization details",
+          "leito": "Bed",
+          "desde": "since {quando}"
+        },
+        "boletim": {
+          "mensagensPorDia": "message a day | messages a day"
+        },
+        "checklist": {
+          "atraso": "{tempo} overdue"
+        }
       }
     },
     "diario": {
@@ -5183,7 +5344,9 @@
           "atencao": "No critical treatment with dropping adherence",
           "emCurso": "No ongoing treatment",
           "encerrados": "No finished treatment"
-        }
+        },
+        "ligarPara": "Call {nome}, {telefone}",
+        "abrirFicha": "Open patient file"
       },
       "app": {
         "titulo": "Medication",
@@ -5225,6 +5388,11 @@
         "semAtencao": "No adherence dropping",
         "emCurso": "None ongoing | 1 ongoing | {n} ongoing",
         "criticos": "1 critical | {n} critical"
+      },
+      "resumo": {
+        "atencao": "{total} critical treatment with dropping adherence needs a call today. | {total} critical treatments with dropping adherence need a call today.",
+        "semAtencao": "No critical treatment with dropping adherence.",
+        "emCurso": "{total} treatment ongoing. | {total} treatments ongoing."
       }
     },
     "estoque": {
@@ -5418,7 +5586,19 @@
         "entrada": "Arrival",
         "vazio": "No arrivals or write-offs recorded.",
         "nota": "Invoice {nota}",
-        "colunaDoses": "Doses"
+        "colunaDoses": "Doses",
+        "descricao": "Every receipt and every write-off, with who recorded it and when."
+      },
+      "par": "{a}, {b}",
+      "geladeira": {
+        "dias": "{n} day | {n} days",
+        "vencendo": "{doses} expires within {dias} days, {valor} at risk | {doses} expire within {dias} days, {valor} at risk",
+        "nadaVencendo": "No batch expires in the next {dias} days"
+      },
+      "lote": {
+        "venceuHa": "expired {dias} d ago",
+        "venceHoje": "expires today",
+        "venceEm": "expires in {dias} d"
       }
     },
     "pedidos": {
@@ -5829,7 +6009,40 @@
         "aceitarEm": "Accept {hora}",
         "marcarEm": "Book {dia} · {hora}",
         "voltar": "Back to the request"
+      },
+      "tela": {
+        "resumo": "{abertos}, {depois}",
+        "configurar": "Settings",
+        "verComoPede": "See how pet parents request",
+        "descricao": "Whatever is due first sits at the top.",
+        "prazoNoTempo": "to reply, by {quando}",
+        "prazoPassou": "overdue, was due {quando}",
+        "respondidos": "Answered",
+        "recusado": "Declined: {motivo}",
+        "horarioOcupado": "That time is no longer free. Choose another one in \"Reply\".",
+        "horaPedida": "Requested",
+        "qualquerHora": "Any time"
       }
+    },
+    "fita": {
+      "rotulo": "The clinic's day",
+      "contas": "In the clinic now",
+      "traco": "{hora} {pet}: {estado}",
+      "resumo": "{feitos} visits done, {restantes} to come and {recepcao} in reception. Open the schedule.",
+      "fechada": "Clinic closed today",
+      "recepcao": "{n} in reception | {n} in reception",
+      "sala": "{n} in consult | {n} in consult",
+      "internados": "{n} inpatient | {n} inpatients"
+    },
+    "hoje": {
+      "recepcao": "Reception",
+      "emConsulta": "In consult",
+      "minEsperando": "min waiting",
+      "minNaSala": "min in the room",
+      "alertas": "Alerts",
+      "chamar": "Start consult",
+      "recepcaoVazia": "No one waiting in reception.",
+      "salaVazia": "No consult in progress."
     }
   },
   "hotel": {
@@ -7357,5 +7570,48 @@
       "unselectAll": "Unselect all",
       "navigation": "Navigation"
     }
+  },
+  "espacos": {
+    "clinica": {
+      "rotulo": "Clinic",
+      "hoje": "Today",
+      "agenda": "Schedule",
+      "pacientes": "Patients",
+      "internacao": "Inpatients",
+      "pendencias": "Follow-ups",
+      "relatorios": "Reports"
+    },
+    "hotel": {
+      "rotulo": "Hotel",
+      "hoje": "Today",
+      "reservas": "Bookings",
+      "casa": "The house",
+      "relatorios": "Reports"
+    },
+    "portal": {
+      "rotulo": "Portal"
+    },
+    "abas": {
+      "agenda": "Schedule",
+      "pedidos": "Requests",
+      "fila": "Waitlist",
+      "pacientes": "Patients",
+      "atendimentos": "Visits",
+      "bulario": "Formulary",
+      "atividades": "Tasks",
+      "faltas": "No-shows",
+      "vacinas": "Vaccines",
+      "tratamentos": "Home treatments",
+      "estoque": "Vaccine stock",
+      "painel": "Day board",
+      "rotina": "Routine",
+      "hospedes": "Guests",
+      "mapa": "Map",
+      "reservas": "Bookings",
+      "pedidosDeReserva": "Requests",
+      "acomodacoes": "Rooms",
+      "rotinaPadrao": "Standard routine"
+    },
+    "abasAria": "{destino} screens"
   }
 }

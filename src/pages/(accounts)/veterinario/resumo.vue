@@ -16,19 +16,12 @@
  * - **Ocupação é média dos dias abertos.** Incluir feriado e domingo no divisor derruba a média
  *   e faz a semana cheia parecer folgada.
  */
-import {
-  PhCalendarCheck,
-  PhChartBar,
-  PhClock,
-  PhHeartbeat,
-  PhTag,
-  PhUsersThree,
-} from '@phosphor-icons/vue'
 import Select from 'primevue/select'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
 import ClinicChartColumns from '@/features/clinico/components/resumo/ClinicChartColumns.vue'
 import ClinicChartRanking from '@/features/clinico/components/resumo/ClinicChartRanking.vue'
@@ -223,36 +216,71 @@ watch(() => filtro.value.periodo, carregar)
 
 onMounted(carregar)
 
+/** De onde vêm os atendimentos — app, link, telefone, balcão —, com o nome de cada canal. */
+const porOrigem = computed(() =>
+  resumo.value.porOrigem.map((fatia) => ({ ...fatia, rotulo: t(`clinico.origem.${fatia.id}`) })),
+)
+
+/** Os números do período, na ordem em que o dono da clínica os lê. */
+const numeros = computed(() => {
+  const indicadores = resumo.value.indicadores
+  const lista = [
+    {
+      id: 'comparecimento',
+      valor: formato.percentual(indicadores.comparecimento),
+      rotulo: t('clinico.resumo.indicador.comparecimento'),
+      nota: t(
+        'clinico.resumo.indicador.faltasNoPeriodo',
+        { contagem: indicadores.faltas },
+        indicadores.faltas,
+      ),
+      atencao: comparecimentoBaixo.value,
+    },
+    {
+      id: 'horas',
+      valor: `${formato.numero(indicadores.horasAtendidas, 1)} h`,
+      rotulo: t('clinico.resumo.numero.horas'),
+      nota: t('clinico.resumo.numero.horasNota'),
+      atencao: false,
+    },
+    {
+      id: 'ocupacao',
+      valor: formato.percentual(indicadores.ocupacaoMedia),
+      rotulo: t('clinico.resumo.indicador.ocupacao'),
+      nota: t('clinico.resumo.indicador.ocupacaoDetalhe'),
+      atencao: false,
+    },
+    {
+      id: 'novos',
+      valor: String(indicadores.novosPacientes),
+      rotulo: t('clinico.resumo.indicador.novos'),
+      nota: t(
+        'clinico.resumo.indicador.encaixes',
+        { contagem: indicadores.encaixes },
+        indicadores.encaixes,
+      ),
+      atencao: false,
+    },
+  ]
+
+  return lista
+})
+
 function trocarPeriodo(periodo: PeriodoId) {
   filtro.value = { ...filtro.value, periodo }
 }
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('clinico.resumo.subtitulo')"
-    :title="t('clinico.resumo.titulo')"
-    :loading="carregando && atendimentos.length === 0"
-    :error="erro"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    :resumo="fraseDoResumo"
+    :carregando="carregando && atendimentos.length === 0"
+    :erro="erro"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('clinico.resumo.subtitulo') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('clinico.resumo.titulo') }}</h1>
-
-        <div class="hc-saudacao__linha">
-          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
-            {{ fraseDoResumo }}
-          </p>
-        </div>
-      </div>
-    </template>
-
-    <div class="resumo clinic-scope">
-      <header class="resumo__filtros">
+    <div class="relatorio clinic-scope">
+      <div class="relatorio__filtros">
         <ClinicToggleGroup
           :model-value="filtro.periodo"
           :opcoes="opcoesPeriodo"
@@ -260,283 +288,303 @@ function trocarPeriodo(periodo: PeriodoId) {
           @update:model-value="trocarPeriodo($event as PeriodoId)"
         />
 
-        <span class="resumo__intervalo">{{ intervaloLegivel }}</span>
+        <span class="relatorio__intervalo">{{ intervaloLegivel }}</span>
 
-        <div class="resumo__selects">
+        <div class="relatorio__selects">
           <Select
             v-model="filtro.professionalId"
-            class="resumo__select"
             option-label="rotulo"
             option-value="valor"
-            size="small"
             :options="opcoesProfissional"
             :placeholder="t('clinico.resumo.filtro.todosProfissionais')"
             :aria-label="t('clinico.resumo.filtro.todosProfissionais')"
-            :pt="{ overlay: { class: 'clinic-overlay hc-tema' } }"
+            :pt="{ overlay: { class: 'clinic-overlay' } }"
           />
           <Select
             v-model="filtro.typeId"
-            class="resumo__select"
             option-label="rotulo"
             option-value="valor"
-            size="small"
             :options="opcoesTipo"
             :placeholder="t('clinico.resumo.filtro.todosTipos')"
             :aria-label="t('clinico.resumo.filtro.todosTipos')"
-            :pt="{ overlay: { class: 'clinic-overlay hc-tema' } }"
+            :pt="{ overlay: { class: 'clinic-overlay' } }"
           />
         </div>
-      </header>
+      </div>
 
-      <p v-if="semMovimento" class="hc resumo__vazio">
-        {{ t('clinico.resumo.semMovimento') }}
+      <p v-if="semMovimento" class="ui-folha ui-vazio relatorio__vazio">
+        <strong>{{ t('clinico.resumo.semMovimento') }}</strong>
       </p>
 
       <template v-else>
-        <!-- Os quatro cartões de número viraram uma linha de fatos: o principal já está na frase. -->
-        <section class="hc resumo-fatos" :aria-label="t('clinico.resumo.fatos.aria')">
-          <ul class="resumo-fatos__lista">
-            <li :class="{ 'resumo-fatos__item--atencao': comparecimentoBaixo }">
+        <!-- Os quatro números do período, numa régua só: o principal já está na frase do alto. -->
+        <ul class="numeros ui-folha" :aria-label="t('clinico.resumo.fatos.aria')">
+          <li
+            v-for="numero in numeros"
+            :key="numero.id"
+            class="numero"
+            :class="{ 'numero--atencao': numero.atencao }"
+          >
+            <span class="numero__rotulo">{{ numero.rotulo }}</span>
+            <strong class="numero__valor ui-num">
               <i
-                v-if="comparecimentoBaixo"
+                v-if="numero.atencao"
                 class="ph ph-warning"
                 :title="t('clinico.resumo.fatos.comparecimentoBaixo')"
                 :aria-label="t('clinico.resumo.fatos.comparecimentoBaixo')"
               />
-              <strong>{{ formato.percentual(resumo.indicadores.comparecimento) }}</strong>
-              {{ t('clinico.resumo.fatos.comparecimento') }}
-              <span class="resumo-fatos__nota">
-                ({{
-                  t(
-                    'clinico.resumo.indicador.faltasNoPeriodo',
-                    { contagem: resumo.indicadores.faltas },
-                    resumo.indicadores.faltas,
-                  )
-                }})
-              </span>
-            </li>
-            <li>
-              <strong>{{ formato.numero(resumo.indicadores.horasAtendidas, 1) }} h</strong>
-              {{ t('clinico.resumo.fatos.horas') }}
-            </li>
-            <li>
-              <strong>{{ formato.percentual(resumo.indicadores.ocupacaoMedia) }}</strong>
-              {{ t('clinico.resumo.fatos.ocupacao') }}
-            </li>
-            <li>
-              <strong>{{ resumo.indicadores.novosPacientes }}</strong>
-              {{ t('clinico.resumo.fatos.novos', resumo.indicadores.novosPacientes) }}
-            </li>
-            <li v-if="resumo.indicadores.encaixes > 0">
-              <strong>{{ resumo.indicadores.encaixes }}</strong>
-              {{ t('clinico.resumo.fatos.encaixes', resumo.indicadores.encaixes) }}
-            </li>
-          </ul>
-        </section>
+              {{ numero.valor }}
+            </strong>
+            <span class="numero__nota">{{ numero.nota }}</span>
+          </li>
+        </ul>
 
-        <section class="hc" aria-labelledby="resumo-por-dia">
-          <header class="hc__cabeca">
-            <h2 id="resumo-por-dia" class="hc__titulo">
-              <PhChartBar class="hc__icone" weight="duotone" aria-hidden="true" />
-              {{ t('clinico.resumo.grafico.porDia') }}
-            </h2>
-            <span class="hc__ferramentas">{{ t('clinico.resumo.grafico.porDiaAjuda') }}</span>
-          </header>
-
-          <ClinicChartColumns
-            :pontos="resumo.porDia"
-            :rotulos="rotulosDosDias"
-            :destaque="hoje"
-            :rotulo-destaque="t('clinico.resumo.periodo.hoje')"
-            :mostrar-ocupacao="false"
-            :legenda="{
-              finalizados: t('clinico.resumo.legenda.finalizados'),
-              previstos: t('clinico.resumo.legenda.previstos'),
-              faltas: t('clinico.resumo.legenda.faltas'),
-              ocupacao: t('clinico.resumo.legenda.ocupacao'),
-              fechado: t('clinico.resumo.legenda.fechado'),
-            }"
-          />
-
-          <!-- A ocupação é uma taxa, não uma contagem: vira frase, e o gráfico fica com uma pergunta só. -->
-          <p v-if="fraseDaOcupacao" class="resumo__ocupacao">
-            <PhCalendarCheck class="resumo__ocupacao-icone" weight="duotone" aria-hidden="true" />
-            {{ fraseDaOcupacao }}
-          </p>
-        </section>
-
-        <div class="resumo__par">
-          <section class="hc" aria-labelledby="resumo-por-tipo">
-            <header class="hc__cabeca">
-              <h2 id="resumo-por-tipo" class="hc__titulo">
-                <PhTag class="hc__icone" weight="duotone" aria-hidden="true" />
-                {{ t('clinico.resumo.grafico.porTipo') }}
-              </h2>
-            </header>
-            <ClinicChartRanking :fatias="resumo.porTipo" :vazio="t('clinico.resumo.semDados')" />
-          </section>
-
-          <section class="hc" aria-labelledby="resumo-por-profissional">
-            <header class="hc__cabeca">
-              <h2 id="resumo-por-profissional" class="hc__titulo">
-                <PhUsersThree class="hc__icone" weight="duotone" aria-hidden="true" />
-                {{ t('clinico.resumo.grafico.porProfissional') }}
-              </h2>
-            </header>
-            <ClinicChartRanking
-              :fatias="resumo.porProfissional"
-              :vazio="t('clinico.resumo.semDados')"
+        <UiSecao
+          id="resumo-por-dia"
+          :titulo="t('clinico.resumo.grafico.porDia')"
+          :descricao="t('clinico.resumo.grafico.porDiaAjuda')"
+          folha
+        >
+          <div class="relatorio__grafico">
+            <ClinicChartColumns
+              :pontos="resumo.porDia"
+              :rotulos="rotulosDosDias"
+              :destaque="hoje"
+              :rotulo-destaque="t('clinico.resumo.periodo.hoje')"
+              :mostrar-ocupacao="false"
+              :legenda="{
+                finalizados: t('clinico.resumo.legenda.finalizados'),
+                previstos: t('clinico.resumo.legenda.previstos'),
+                faltas: t('clinico.resumo.legenda.faltas'),
+                ocupacao: t('clinico.resumo.legenda.ocupacao'),
+                fechado: t('clinico.resumo.legenda.fechado'),
+              }"
             />
-          </section>
+
+            <!-- A ocupação é uma taxa, não uma contagem: vira frase, e o gráfico fica com uma pergunta só. -->
+            <p v-if="fraseDaOcupacao" class="relatorio__ocupacao">
+              <i class="ph ph-calendar-check" aria-hidden="true" />
+              {{ fraseDaOcupacao }}
+            </p>
+          </div>
+        </UiSecao>
+
+        <div class="relatorio__par">
+          <UiSecao id="resumo-por-tipo" :titulo="t('clinico.resumo.grafico.porTipo')" folha>
+            <div class="relatorio__recheio">
+              <ClinicChartRanking :fatias="resumo.porTipo" :vazio="t('clinico.resumo.semDados')" />
+            </div>
+          </UiSecao>
+
+          <UiSecao
+            id="resumo-por-profissional"
+            :titulo="t('clinico.resumo.grafico.porProfissional')"
+            folha
+          >
+            <div class="relatorio__recheio">
+              <ClinicChartRanking
+                :fatias="resumo.porProfissional"
+                :vazio="t('clinico.resumo.semDados')"
+              />
+            </div>
+          </UiSecao>
         </div>
 
-        <div class="resumo__par">
-          <section class="hc" aria-labelledby="resumo-horarios">
-            <header class="hc__cabeca">
-              <h2 id="resumo-horarios" class="hc__titulo">
-                <PhClock class="hc__icone" weight="duotone" aria-hidden="true" />
-                {{ t('clinico.resumo.grafico.horarios') }}
-              </h2>
-              <span class="hc__ferramentas">{{ t('clinico.resumo.grafico.horariosAjuda') }}</span>
-            </header>
-            <ClinicHeatmap
-              :celulas="resumo.porHora"
-              :pico="resumo.picoDaHora"
-              :dias="diasDaSemana"
-              :vazio="t('clinico.resumo.semDados')"
-            />
-          </section>
+        <div class="relatorio__par">
+          <UiSecao
+            id="resumo-horarios"
+            :titulo="t('clinico.resumo.grafico.horarios')"
+            :descricao="t('clinico.resumo.grafico.horariosAjuda')"
+            folha
+          >
+            <div class="relatorio__recheio">
+              <ClinicHeatmap
+                :celulas="resumo.porHora"
+                :pico="resumo.picoDaHora"
+                :dias="diasDaSemana"
+                :vazio="t('clinico.resumo.semDados')"
+              />
+            </div>
+          </UiSecao>
 
-          <section class="hc" aria-labelledby="resumo-diagnosticos">
-            <header class="hc__cabeca">
-              <h2 id="resumo-diagnosticos" class="hc__titulo">
-                <PhHeartbeat class="hc__icone" weight="duotone" aria-hidden="true" />
-                {{ t('clinico.resumo.grafico.diagnosticos') }}
-              </h2>
-            </header>
-            <!-- Na tinta da marca: diagnóstico frequente não é alerta, e o laranja dizia que era. -->
-            <ClinicChartRanking
-              :fatias="resumo.diagnosticos"
-              :vazio="t('clinico.resumo.semProntuario')"
-            />
-          </section>
+          <div class="relatorio__coluna">
+            <UiSecao id="resumo-origem" :titulo="t('clinico.resumo.grafico.porOrigem')" folha>
+              <div class="relatorio__recheio">
+                <ClinicChartRanking :fatias="porOrigem" :vazio="t('clinico.resumo.semDados')" />
+              </div>
+            </UiSecao>
+
+            <UiSecao
+              id="resumo-diagnosticos"
+              :titulo="t('clinico.resumo.grafico.diagnosticos')"
+              folha
+            >
+              <div class="relatorio__recheio">
+                <ClinicChartRanking
+                  :fatias="resumo.diagnosticos"
+                  :vazio="t('clinico.resumo.semProntuario')"
+                />
+              </div>
+            </UiSecao>
+          </div>
         </div>
       </template>
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
-.resumo {
+.relatorio {
   display: grid;
-  gap: 1.1rem;
+  gap: 28px;
 }
 
-.resumo__filtros {
+.relatorio__filtros {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.65rem 1rem;
+  gap: 12px 16px;
 }
 
-.resumo__intervalo {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  font-weight: 650;
+.relatorio__intervalo {
+  display: inline-block;
+  color: var(--tinta-2);
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.resumo__intervalo::first-letter {
+.relatorio__intervalo::first-letter {
   text-transform: uppercase;
 }
 
-.resumo__selects {
+.relatorio__selects {
   display: flex;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-inline-start: auto;
 }
 
-.resumo__select {
-  min-width: 11rem;
+.relatorio__selects :deep(.p-select) {
+  min-width: 13rem;
 }
 
-.resumo-fatos {
-  padding-block: 0.85rem;
+.relatorio__vazio {
+  padding: 32px 24px;
 }
 
-.resumo-fatos__lista {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.75rem;
+/* A régua de números: quatro colunas com fio entre elas, número grande e legenda embaixo. */
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 0;
   padding: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
   list-style: none;
 }
 
-.resumo-fatos__lista li {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.3rem;
-}
-
-.resumo-fatos__lista strong {
-  color: var(--hc-tinta);
-  font-size: 1rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-}
-
-.resumo-fatos__nota {
-  color: var(--hc-tinta-3);
-}
-
-/* Comparecimento abaixo de 85%: a urgência mora no ícone, a linha não muda de cor. */
-.resumo-fatos__item--atencao i {
-  align-self: center;
-  color: var(--hc-pessego-tinta);
-  font-size: 0.85rem;
-}
-
-.resumo__par {
+.numero {
   display: grid;
-  align-items: start;
-  gap: 1.1rem;
-  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
+  align-content: start;
+  gap: 4px;
+  padding: 18px 22px 20px;
 }
 
-.resumo__ocupacao {
+.numero + .numero {
+  border-left: 1px solid var(--linha);
+}
+
+.numero__rotulo {
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.numero__valor {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  margin: 0;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--hc-linha);
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  gap: 8px;
+  color: var(--tinta);
+  font-size: 32px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
-.resumo__ocupacao-icone {
-  flex-shrink: 0;
-  width: 1rem;
-  height: 1rem;
-  color: var(--hc-marca);
+.numero__valor i {
+  font-size: 22px;
 }
 
-.resumo__vazio {
+.numero__nota {
+  color: var(--tinta-3);
+  font-size: 12.5px;
+}
+
+.numero--atencao .numero__valor {
+  color: var(--atencao-tinta);
+}
+
+.relatorio__grafico {
+  display: grid;
+  gap: 8px;
+  padding: 12px 16px 18px;
+}
+
+.relatorio__ocupacao {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
-  color: var(--hc-tinta-2);
-  text-align: center;
+  padding: 0 6px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.relatorio__ocupacao i {
+  color: var(--clinica);
+  font-size: 18px;
+}
+
+.relatorio__par {
+  display: grid;
+  align-items: start;
+  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.relatorio__coluna {
+  display: grid;
+  gap: 28px;
+}
+
+.relatorio__recheio {
+  padding: 18px 20px;
+}
+
+@media (max-width: 1100px) {
+  .numeros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .numero:nth-child(3) {
+    border-left: 0;
+  }
+
+  .numero:nth-child(n + 3) {
+    border-top: 1px solid var(--linha);
+  }
+
+  .relatorio__par {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 720px) {
-  .resumo__selects {
+  .relatorio__selects {
     width: 100%;
     margin-inline-start: 0;
   }
 
-  .resumo__select {
-    flex: 1 1 auto;
+  .relatorio__selects :deep(.p-select) {
+    flex: 1;
     min-width: 0;
   }
 }

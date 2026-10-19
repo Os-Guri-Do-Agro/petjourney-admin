@@ -1,43 +1,33 @@
 <script setup lang="ts">
 /**
- * Internação — o mapa de leitos.
+ * Internação — o plantão e a planta da ala.
  *
  * É a tela que responde às duas perguntas que a clínica faz o dia inteiro sobre internação:
- * **quem precisa de mim agora** e **onde há vaga**. Por isso ela tem duas partes, nessa ordem:
- * a lista do que pede ação no plantão, e o mapa — onde o leito vazio ocupa espaço na grade,
- * porque a vaga é informação.
+ * **quem precisa de mim agora** e **onde há vaga**. Por isso ela tem duas partes, nessa ordem.
  *
- * ## A forma (redesenho de 30/09/2026)
+ * ## A forma (redesenho total, 19/10/2026)
  *
- * A da Visão geral. Saíram a fileira de quatro cartões de número e a faixa vermelha do boletim:
+ * - **O cabeçalho** diz o plantão (turno, horário, quem está de plantão) e o estado da ala numa
+ *   frase: ocupação, quantos pacientes pedem ação e quantos estão críticos. A ação cheia é
+ *   "Passar plantão" — o rito desta tela; "Gerenciar leitos" é configuração, contornada.
+ * - **O que pede ação no plantão** é a pauta do sistema (`UiPauta`): boletim retido primeiro,
+ *   depois atraso, depois o que vence na próxima hora. Cada linha abre o paciente.
+ * - **A planta da ala**: um bloco por setor (UTI, Geral, Felino, Isolamento), com "x de y
+ *   ocupados" e quantas vagas sobram — "tem vaga para um gato?" se responde sem contar ladrilho.
+ *   Cada leito é um ladrilho (`LeitoCard`): o ocupado com rosto, gravidade, tempo de internação e
+ *   o que o checklist cobra; o livre, tracejado e calmo, com "Internar".
  *
- * - **A saudação** leva o plantão na linha pequena (turno, horário, quem está de plantão), a
- *   ocupação na frase de estado e "Passar plantão" como a pílula cheia — o rito desta tela.
- * - **O que pede ação no plantão** é a pauta (`PautaTabela`): boletim retido e administração
- *   atrasada como urgentes, e a administração da próxima hora como atenção, para a enfermagem ver
- *   o que vem antes de atrasar. Cada linha abre o paciente.
- * - **O mapa** agrupa os leitos por tipo (Geral, Felino, UTI, Isolamento), com a ocupação de cada
- *   grupo: "tem vaga para um gato?" se responde sem contar cartão. O cartão é neutro; a urgência
- *   mora nos selos dele (`LeitoCard`).
- *
- * O boletim retido continua vindo antes de tudo — agora como a primeira linha da lista, com o selo
- * de urgente. É a única coisa desta tela que não pode esperar o fim do turno.
+ * `?passagem=1` abre a passagem de plantão direto (o painel de casos difíceis entra por aí).
  */
-import {
-  PhArrowsLeftRight,
-  PhBed,
-  PhClipboardText,
-  PhCheckCircle,
-  PhGearSix,
-} from '@phosphor-icons/vue'
 import Button from 'primevue/button'
-import { computed, onMounted, ref, watch, type Component } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
-import PautaTabela from '@/components/home/PautaTabela.vue'
 import { porGravidade, type LinhaDaTabela } from '@/components/home/pauta-tabela'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
+import UiPauta from '@/components/ui/UiPauta.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
 import ClinicDevPanel from '@/features/clinico/components/base/ClinicDevPanel.vue'
 import GerenciarLeitosDialog from '@/features/clinico/components/internacao/GerenciarLeitosDialog.vue'
 import InternarDialog from '@/features/clinico/components/internacao/InternarDialog.vue'
@@ -64,10 +54,14 @@ const gerenciador = ref<InstanceType<typeof GerenciarLeitosDialog> | null>(null)
 /** Até quantos minutos à frente uma administração no prazo entra na lista, como atenção. */
 const JANELA_DA_PROXIMA_MIN = 60
 
-onMounted(async () => {
+async function carregar() {
   await internacao.carregarMapa()
   await internacao.carregarPassagem()
   await internacao.carregarLeitos()
+}
+
+onMounted(async () => {
+  await carregar()
 
   /* O painel de casos difíceis entra direto na passagem — a rota abre a conversa, não a explica. */
   if (route.query.passagem === '1') {
@@ -91,19 +85,20 @@ const plantonista = computed(() =>
   plantao.value ? clinico.profissional(plantao.value.responsavelId) : null,
 )
 
-/** A linha pequena da saudação: o turno, o horário e quem está de plantão. */
-const linhaDoPlantao = computed(() => {
+/** O plantão em uma frase: o turno, o horário e quem está nele. */
+const fraseDoPlantao = computed(() => {
   if (!plantao.value) {
-    return t('clinico.internacao.subtitulo')
+    return ''
   }
 
-  return [
-    t(`clinico.internacao.plantao.${plantao.value.kind}`),
-    formato.intervalo(plantao.value.inicio, plantao.value.fim),
-    plantonista.value?.nome ?? '',
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  const partes = {
+    turno: t(`clinico.internacao.plantao.${plantao.value.kind}`),
+    horario: formato.intervalo(plantao.value.inicio, plantao.value.fim),
+  }
+
+  return plantonista.value
+    ? t('clinico.internacao.nova.resumo.plantaoCom', { ...partes, nome: plantonista.value.nome })
+    : t('clinico.internacao.nova.resumo.plantao', partes)
 })
 
 const jaInternados = computed(() =>
@@ -123,9 +118,8 @@ function paraOPaciente(item: LeitoNoMapa) {
 }
 
 /**
- * Boletim retido primeiro, atraso depois, a próxima hora por último. As três ficam em listas
- * separadas porque o selo não basta: boletim e atraso são os dois urgentes, e o boletim — uma
- * pessoa sem notícia do animal — vem antes em qualquer ordem de leitos.
+ * Boletim retido primeiro, atraso depois, a próxima hora por último. O boletim — uma pessoa sem
+ * notícia do animal — vem antes em qualquer ordem de leitos.
  */
 const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
   const boletins: LinhaDaTabela[] = []
@@ -188,79 +182,88 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
   return [...boletins, ...porGravidade(linhas)]
 })
 
-const urgentes = computed(() => linhasDaPauta.value.filter((linha) => linha.tom === 'risco').length)
+/** Quantos **pacientes** pedem ação — um paciente com boletim e atraso é um só a visitar. */
+const pacientesComAcao = computed(
+  () => new Set(linhasDaPauta.value.map((linha) => String(linha.to))).size,
+)
 
-/** A frase da saudação: a ocupação, e o que pede ação — ou que nada está atrasado. */
+/** O estado da ala numa frase: ocupação, quem pede ação e quem está crítico. */
 const fraseDoResumo = computed(() => {
-  const ocupacao = t('clinico.internacao.resumo.ocupacao', {
-    ocupados: mapa.value?.ocupados ?? 0,
-    ativos: mapa.value?.ativos ?? 0,
+  const partes = [
+    t('clinico.internacao.resumo.ocupacao', {
+      ocupados: mapa.value?.ocupados ?? 0,
+      ativos: mapa.value?.ativos ?? 0,
+    }),
+  ]
+  const criticos = mapa.value?.criticos ?? 0
+
+  if (pacientesComAcao.value > 0) {
+    partes.push(
+      t(
+        'clinico.internacao.nova.resumo.pedemAcao',
+        { total: pacientesComAcao.value },
+        pacientesComAcao.value,
+      ),
+    )
+  }
+
+  if (criticos > 0) {
+    partes.push(t('clinico.internacao.nova.resumo.criticos', { total: criticos }, criticos))
+  }
+
+  if (partes.length === 1) {
+    partes.push(t('clinico.internacao.resumo.emDia'))
+  }
+
+  return t('clinico.internacao.nova.resumo.frase', {
+    texto: partes.reduce((frase, parte) =>
+      t('clinico.internacao.nova.resumo.lista', { a: frase, b: parte }),
+    ),
   })
-
-  if (urgentes.value > 0) {
-    return `${ocupacao} · ${t('clinico.internacao.resumo.urgentes', { total: urgentes.value }, urgentes.value)}`
-  }
-
-  const total = linhasDaPauta.value.length
-
-  if (total > 0) {
-    return `${ocupacao} · ${t('clinico.internacao.resumo.proximaHora', { total }, total)}`
-  }
-
-  return `${ocupacao} · ${t('clinico.internacao.resumo.emDia')}`
 })
 
-// ---------------------------------------------------------------------------- o mapa
+// ---------------------------------------------------------------------------- a planta da ala
 
-type GrupoDeLeitos = { kind: LeitoKind; leitos: LeitoNoMapa[]; ocupados: number; ativos: number }
+type Setor = {
+  kind: LeitoKind
+  leitos: LeitoNoMapa[]
+  ocupados: number
+  ativos: number
+}
+
+const ICONE_DO_SETOR: Record<LeitoKind, string> = {
+  uti: 'ph ph-heartbeat',
+  geral: 'ph ph-bed',
+  felino: 'ph ph-cat',
+  isolamento: 'ph ph-virus',
+}
 
 /**
- * Os leitos por tipo, na ordem em que a clínica os cadastrou — com a UTI na frente. É onde está o
- * paciente mais grave do plantão, e no fim do mapa ela ficava abaixo da dobra.
+ * Os leitos por setor, na ordem em que a clínica os cadastrou — com a UTI na frente. É onde está
+ * o paciente mais grave do plantão, e no fim da planta ela ficava abaixo da dobra.
  */
-const grupos = computed<GrupoDeLeitos[]>(() => {
-  const porTipo = new Map<LeitoKind, GrupoDeLeitos>()
+const setores = computed<Setor[]>(() => {
+  const porTipo = new Map<LeitoKind, Setor>()
 
   for (const item of mapa.value?.leitos ?? []) {
     const kind = item.leito.kind
-    const grupo = porTipo.get(kind) ?? { kind, leitos: [], ocupados: 0, ativos: 0 }
+    const setor = porTipo.get(kind) ?? { kind, leitos: [], ocupados: 0, ativos: 0 }
 
-    grupo.leitos.push(item)
-    grupo.ocupados += item.internacao ? 1 : 0
-    grupo.ativos += item.leito.ativo ? 1 : 0
-    porTipo.set(kind, grupo)
+    setor.leitos.push(item)
+    setor.ocupados += item.internacao ? 1 : 0
+    setor.ativos += item.leito.ativo ? 1 : 0
+    porTipo.set(kind, setor)
   }
 
   /* `sort` estável: tirada a UTI, o resto continua na ordem do cadastro. */
   return [...porTipo.values()].sort((a, b) => Number(b.kind === 'uti') - Number(a.kind === 'uti'))
 })
 
+function vagasDo(setor: Setor) {
+  return Math.max(0, setor.ativos - setor.ocupados)
+}
+
 // ---------------------------------------------------------------------------- ações
-
-type Acao = { id: string; rotulo: string; icone: Component; executar: () => void }
-
-/** A cheia é passar o plantão: o rito desta tela. Gerenciar leitos é configuração, contornada. */
-const acoes = computed<Acao[]>(() => {
-  const lista: Acao[] = []
-
-  if (plantao.value) {
-    lista.push({
-      id: 'plantao',
-      rotulo: t('clinico.internacao.plantao.passar'),
-      icone: PhArrowsLeftRight,
-      executar: () => (passagemAberta.value = true),
-    })
-  }
-
-  lista.push({
-    id: 'leitos',
-    rotulo: t('clinico.internacao.leitos.gerenciar'),
-    icone: PhGearSix,
-    executar: () => (cadastroAberto.value = true),
-  })
-
-  return lista
-})
 
 function abrir(internacaoId: string) {
   void router.push(`/veterinario/internacao/${internacaoId}`)
@@ -326,91 +329,106 @@ function abrirLeito(leitoId: string) {
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :title="t('clinico.internacao.titulo')"
-    :loading="internacao.carregando && !mapa"
-    :error="internacao.erro ? t(internacao.erro) : ''"
-    :empty="vazio"
-    :empty-title="t('clinico.internacao.vazioTitulo')"
-    :empty-description="t('clinico.internacao.vazioDescricao')"
+  <UiPagina
+    class="tela"
+    :carregando="internacao.carregando && !mapa"
+    :erro="internacao.erro ? t(internacao.erro) : ''"
+    :vazio="vazio"
+    :vazio-titulo="t('clinico.internacao.vazioTitulo')"
+    :vazio-descricao="t('clinico.internacao.vazioDescricao')"
+    :vazio-acao="t('clinico.internacao.leitos.adicionar')"
+    vazio-icone="ph ph-bed"
+    @tentar-de-novo="carregar"
+    @acao-do-vazio="cadastroAberto = true"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ linhaDoPlantao }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('clinico.internacao.titulo') }}</h1>
-
-        <div class="hc-saudacao__linha">
-          <p v-if="mapa" class="hc-saudacao__resumo" aria-live="polite">{{ fraseDoResumo }}</p>
-
-          <nav class="hc-acoes" :aria-label="t('clinico.internacao.acoesRotulo')">
-            <Button
-              v-for="(acao, indice) in acoes"
-              :key="acao.id"
-              type="button"
-              class="hc-pilula"
-              :class="{ 'hc-pilula--cheia': indice === 0 && acao.id === 'plantao' }"
-              :label="acao.rotulo"
-              @click="acao.executar()"
-            >
-              <template #icon>
-                <component
-                  :is="acao.icone"
-                  class="hc-pilula__icone"
-                  :weight="indice === 0 && acao.id === 'plantao' ? 'fill' : 'duotone'"
-                  aria-hidden="true"
-                />
-              </template>
-            </Button>
-          </nav>
-        </div>
-      </div>
+    <template v-if="mapa" #resumo>
+      <template v-if="fraseDoPlantao">{{ fraseDoPlantao }}{{ ' ' }}</template>
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
     </template>
 
-    <div v-if="mapa" class="internacao clinic-scope">
+    <template #acoes>
+      <Button
+        type="button"
+        icon="ph ph-gear-six"
+        :label="t('clinico.internacao.leitos.gerenciar')"
+        severity="secondary"
+        outlined
+        @click="cadastroAberto = true"
+      />
+      <Button
+        v-if="plantao"
+        type="button"
+        icon="ph ph-arrows-left-right"
+        :label="t('clinico.internacao.plantao.passar')"
+        @click="passagemAberta = true"
+      />
+    </template>
+
+    <div v-if="mapa" class="internacao">
       <!-- 1. quem precisa de mim agora -->
-      <section class="hc pauta" aria-labelledby="internacao-pauta">
-        <header class="hc__cabeca">
-          <h2 id="internacao-pauta" class="hc__titulo">
-            <PhClipboardText class="hc__icone" weight="duotone" aria-hidden="true" />
-            {{ t('clinico.internacao.pauta.titulo') }}
-          </h2>
-        </header>
-
-        <PautaTabela v-if="linhasDaPauta.length > 0" :linhas="linhasDaPauta" />
-
-        <p v-else class="pauta__calma">
-          <PhCheckCircle class="pauta__calma-icone" weight="fill" aria-hidden="true" />
-          {{ t('clinico.internacao.pauta.vazio') }}
+      <UiSecao
+        id="internacao-pauta"
+        :titulo="t('clinico.internacao.pauta.titulo')"
+        :contagem="linhasDaPauta.length || null"
+      >
+        <UiPauta v-if="linhasDaPauta.length" :linhas="linhasDaPauta" />
+        <p v-else class="ui-folha ui-vazio calma">
+          <i class="ph ph-check-circle" aria-hidden="true" />
+          <strong>{{ t('clinico.internacao.pauta.vazio') }}</strong>
         </p>
-      </section>
+      </UiSecao>
 
-      <!-- 2. onde há vaga -->
-      <section class="mapa" aria-labelledby="internacao-mapa">
-        <h2 id="internacao-mapa" class="mapa__titulo">
-          <PhBed class="mapa__icone" weight="duotone" aria-hidden="true" />
-          {{ t('clinico.internacao.leitos.titulo') }}
-        </h2>
-
-        <div class="mapa__grupos">
+      <!-- 2. onde há vaga: a planta da ala, um bloco por setor -->
+      <UiSecao
+        id="internacao-planta"
+        :titulo="t('clinico.internacao.leitos.titulo')"
+        :descricao="t('clinico.internacao.nova.planta.descricao')"
+      >
+        <div class="planta">
           <section
-            v-for="grupo in grupos"
-            :key="grupo.kind"
-            class="grupo"
-            :aria-labelledby="`internacao-grupo-${grupo.kind}`"
+            v-for="setor in setores"
+            :key="setor.kind"
+            class="setor"
+            :class="`setor--${setor.kind}`"
+            :style="{ '--setor-leitos': setor.leitos.length }"
+            :aria-labelledby="`internacao-setor-${setor.kind}`"
           >
-            <h3 :id="`internacao-grupo-${grupo.kind}`" class="grupo__titulo">
-              {{ t(`clinico.internacao.leitoKind.${grupo.kind}`) }}
-              <span class="grupo__conta">
+            <header class="setor__cabeca">
+              <span class="setor__icone" aria-hidden="true">
+                <i :class="ICONE_DO_SETOR[setor.kind]" />
+              </span>
+              <span class="setor__titulos">
+                <h3 :id="`internacao-setor-${setor.kind}`" class="setor__nome">
+                  {{ t(`clinico.internacao.leitoKind.${setor.kind}`) }}
+                </h3>
+                <span class="setor__conta ui-num">
+                  {{
+                    t('clinico.internacao.grupo', {
+                      ocupados: setor.ocupados,
+                      ativos: setor.ativos,
+                    })
+                  }}
+                </span>
+              </span>
+              <span
+                class="ui-selo setor__vagas"
+                :class="vagasDo(setor) > 0 ? 'ui-selo--ok' : 'ui-selo--contorno'"
+              >
                 {{
-                  t('clinico.internacao.grupo', { ocupados: grupo.ocupados, ativos: grupo.ativos })
+                  vagasDo(setor) > 0
+                    ? t(
+                        'clinico.internacao.nova.planta.vagas',
+                        { total: vagasDo(setor) },
+                        vagasDo(setor),
+                      )
+                    : t('clinico.internacao.nova.planta.semVaga')
                 }}
               </span>
-            </h3>
+            </header>
 
-            <div class="grade">
+            <div class="setor__leitos">
               <LeitoCard
-                v-for="item in grupo.leitos"
+                v-for="item in setor.leitos"
                 :key="item.leito.id"
                 :item="item"
                 @abrir="abrir"
@@ -419,162 +437,176 @@ function abrirLeito(leitoId: string) {
             </div>
           </section>
         </div>
-      </section>
+      </UiSecao>
     </div>
 
-    <InternarDialog
-      :leito="leitoParaInternar"
-      :salvando="internacao.salvando"
-      :ja-internados="jaInternados"
-      @fechar="leitoParaInternar = null"
-      @confirmar="internarPaciente"
-    />
+    <template #sempre>
+      <InternarDialog
+        :leito="leitoParaInternar"
+        :salvando="internacao.salvando"
+        :ja-internados="jaInternados"
+        @fechar="leitoParaInternar = null"
+        @confirmar="internarPaciente"
+      />
 
-    <GerenciarLeitosDialog
-      ref="gerenciador"
-      :aberto="cadastroAberto"
-      :leitos="internacao.leitos"
-      :internacoes="internacoesConhecidas"
-      :salvando="internacao.salvando"
-      :erro="internacao.erroDeAcao"
-      @fechar="cadastroAberto = false"
-      @criar="
-        (entrada: { nome: string; roomId: string; kind: LeitoKind }) =>
-          aoMudarCadastro(internacao.criarLeito(entrada))
-      "
-      @editar="
-        (entrada: { leitoId: string; nome: string; kind: LeitoKind }) =>
-          aoMudarCadastro(internacao.editarLeito(entrada))
-      "
-      @desativar="
-        (entrada: { leitoId: string; motivo: LeitoInativoMotivo; detalhe: string }) =>
-          aoMudarCadastro(internacao.desativarLeito(entrada))
-      "
-      @reativar="(leitoId: string) => aoMudarCadastro(internacao.reativarLeito(leitoId))"
-      @remover="(leitoId: string) => aoMudarCadastro(internacao.removerLeito(leitoId))"
-    />
+      <GerenciarLeitosDialog
+        ref="gerenciador"
+        :aberto="cadastroAberto"
+        :leitos="internacao.leitos"
+        :internacoes="internacoesConhecidas"
+        :salvando="internacao.salvando"
+        :erro="internacao.erroDeAcao"
+        @fechar="cadastroAberto = false"
+        @criar="
+          (entrada: { nome: string; roomId: string; kind: LeitoKind }) =>
+            aoMudarCadastro(internacao.criarLeito(entrada))
+        "
+        @editar="
+          (entrada: { leitoId: string; nome: string; kind: LeitoKind }) =>
+            aoMudarCadastro(internacao.editarLeito(entrada))
+        "
+        @desativar="
+          (entrada: { leitoId: string; motivo: LeitoInativoMotivo; detalhe: string }) =>
+            aoMudarCadastro(internacao.desativarLeito(entrada))
+        "
+        @reativar="(leitoId: string) => aoMudarCadastro(internacao.reativarLeito(leitoId))"
+        @remover="(leitoId: string) => aoMudarCadastro(internacao.removerLeito(leitoId))"
+      />
 
-    <PassagemDePlantaoDialog
-      :aberto="passagemAberta"
-      :passagem="internacao.passagem"
-      :salvando="internacao.salvando"
-      @fechar="passagemAberta = false"
-      @entregar="entregarPlantao"
-      @ir-para="abrir"
-    />
+      <PassagemDePlantaoDialog
+        :aberto="passagemAberta"
+        :passagem="internacao.passagem"
+        :salvando="internacao.salvando"
+        @fechar="passagemAberta = false"
+        @entregar="entregarPlantao"
+        @ir-para="abrir"
+      />
 
-    <!--
-      O painel de casos difíceis também mora aqui: os casos plantados da internação — a piora com
-      boletim travado, a dose em cima da troca de plantão — precisam estar à mão de quem demonstra
-      a internação.
-    -->
-    <ClinicDevPanel />
-  </PartnerPageFrame>
+      <!--
+        O painel de casos difíceis também mora aqui: os casos plantados da internação — a piora com
+        boletim travado, a dose em cima da troca de plantão — precisam estar à mão de quem demonstra
+        a internação.
+      -->
+      <ClinicDevPanel />
+    </template>
+  </UiPagina>
 </template>
 
 <style scoped>
+/*
+ * Os botões contornado e de texto no padrão do Trilha (contorno forte, tinta cheia). Fora do
+ * `.hc-tema` o PrimeVue usa o cinza do preset, que some sobre o fundo — no escuro, quase some.
+ */
+.tela {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+}
+
 .internacao {
   display: grid;
-  gap: 1.75rem;
+  gap: 36px;
 }
 
-/* ------------------------------------------------------------------ o que pede ação */
-
-.pauta {
-  gap: 0.75rem;
-}
-
-.pauta__calma {
-  display: inline-flex;
+.calma {
+  grid-auto-flow: column;
+  justify-content: start;
   align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0.4rem 0.25rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
+  gap: 10px;
 }
 
-.pauta__calma-icone {
-  width: 1.05rem;
-  height: 1.05rem;
-  color: var(--hc-verde-tinta);
+.calma i {
+  color: var(--ok-tinta);
+  font-size: 20px;
 }
 
-/* ------------------------------------------------------------------ o mapa
- * Os grupos vivem direto sobre o plano, sem cartão em volta: o cartão já é o leito, e uma caixa
- * por grupo seria cartão dentro de cartão.
+/* ------------------------------------------------------------------ a planta da ala
+ * Cada setor é um cômodo: chão levemente mais claro que o fundo, parede fina, o nome na porta. Os
+ * leitos são os únicos objetos com papel — o cômodo não é cartão, é lugar.
+ *
+ * Os setores correm lado a lado, cada um tão largo quanto os próprios leitos pedem
+ * (`--setor-leitos`), e quebram de linha quando não cabem.
  */
-
-.mapa {
-  display: grid;
-  gap: 1.25rem;
-}
-
-.mapa__titulo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.mapa__icone {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: var(--hc-marca);
-}
-
-/*
- * Os grupos correm lado a lado, cada um da largura dos próprios leitos, e quebram de linha quando
- * não cabem: um grupo de um leito só não reserva uma faixa inteira da tela.
- */
-.mapa__grupos {
+.planta {
   display: flex;
   flex-wrap: wrap;
-  align-items: start;
-  gap: 1.5rem 2.25rem;
+  align-items: stretch;
+  gap: 20px;
 }
 
-/* Sem encolher: o grupo guarda a largura dos leitos lado a lado e só quebra se não couber inteiro. */
-.grupo {
+.setor {
+  --ladrilho: 216px;
+  --vao: 12px;
+
   display: grid;
-  flex: 0 0 auto;
-  max-width: 100%;
-  gap: 0.65rem;
+  min-width: min(100%, 260px);
+  flex: var(--setor-leitos) 1 calc(var(--setor-leitos) * (var(--ladrilho) + var(--vao)) + 20px);
+  align-content: start;
+  gap: 14px;
+  padding: 14px 14px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--superficie) 45%, transparent);
 }
 
-.grupo__titulo {
+.setor__cabeca {
   display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 2px;
+}
+
+.setor__titulos {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 1px;
+}
+
+.setor__icone {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 17px;
+}
+
+/* A UTI leva a cor do risco no ícone: é onde está quem pode piorar a qualquer minuto. */
+.setor--uti .setor__icone {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+.setor__nome {
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.grupo__conta {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 500;
+.setor__conta {
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
-.grade {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+
+.setor__leitos {
+  display: grid;
+  gap: var(--vao);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--ladrilho)), 1fr));
 }
 
-/*
- * Largura fixa, e não `min(100%, …)`: a porcentagem é cíclica no cálculo da largura do grupo, e o
- * navegador media o grupo pelo texto mais comprido de um cartão.
- */
-.grade > * {
-  width: 14rem;
-  max-width: 100%;
+@media (max-width: 900px) {
+  .setor {
+    flex-basis: 100%;
+  }
 }
 </style>

@@ -164,7 +164,7 @@ const legenda = computed(() => {
 }
 
 .mapa__tabela th {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.75rem;
   font-weight: 650;
 }
@@ -182,35 +182,36 @@ const legenda = computed(() => {
 }
 
 .mapa__celula {
-  height: 1.6rem;
-  border-radius: 4px;
+  height: 1.75rem;
+  border-radius: 6px;
+  font-family: var(--font-dados);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 650;
   text-align: center;
 }
 
 .mapa__celula--0 {
-  background: var(--hc-linha);
+  background: var(--superficie-2);
 }
 
 .mapa__celula--1 {
-  background: var(--clinic-heat-1);
-  color: var(--hc-tinta);
+  background: color-mix(in oklab, var(--musgo) 16%, var(--superficie));
+  color: var(--tinta);
 }
 
 .mapa__celula--2 {
-  background: var(--clinic-heat-2);
-  color: var(--hc-tinta);
+  background: color-mix(in oklab, var(--musgo) 34%, var(--superficie));
+  color: var(--tinta);
 }
 
 .mapa__celula--3 {
-  background: var(--clinic-heat-3);
-  color: var(--clinic-heat-ink);
+  background: color-mix(in oklab, var(--musgo) 66%, var(--superficie));
+  color: var(--superficie);
 }
 
 .mapa__celula--4 {
-  background: var(--clinic-heat-4);
-  color: var(--hc-cartao);
+  background: var(--musgo);
+  color: var(--sobre-musgo);
 }
 
 .mapa__legenda {
@@ -220,7 +221,7 @@ const legenda = computed(() => {
   margin: 0;
   padding: 0;
   padding-inline-start: 2.6rem;
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.75rem;
   font-weight: 600;
   list-style: none;
@@ -241,7 +242,7 @@ const legenda = computed(() => {
 
 .mapa__vazio {
   margin: 0;
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.8125rem;
 }
 

@@ -182,26 +182,26 @@ function confirmar() {
         o que falta é a pergunta "ficou alguma coisa?" antes de um registro que não se desfaz.
       -->
       <section v-if="resumo" class="alta__resumo">
-        <h3 class="clinic-label">{{ t('clinico.internacao.alta.resumoTitulo') }}</h3>
+        <h3 class="alta__resumo-titulo">{{ t('clinico.internacao.alta.resumoTitulo') }}</h3>
 
         <dl class="alta__numeros">
           <div>
             <dt>{{ t('clinico.internacao.alta.permanencia') }}</dt>
-            <dd class="clinic-value">
+            <dd class="ui-num">
               {{ t('clinico.internacao.leito.horas', { horas: resumo.horas }) }}
             </dd>
           </div>
           <div>
             <dt>{{ t('clinico.internacao.alta.dosesFeitas') }}</dt>
-            <dd class="clinic-value">{{ resumo.feitas }}</dd>
+            <dd class="ui-num">{{ resumo.feitas }}</dd>
           </div>
           <div v-if="resumo.naoFeitas > 0">
             <dt>{{ t('clinico.internacao.alta.dosesNaoFeitas') }}</dt>
-            <dd class="clinic-value">{{ resumo.naoFeitas }}</dd>
+            <dd class="ui-num">{{ resumo.naoFeitas }}</dd>
           </div>
           <div>
             <dt>{{ t('clinico.internacao.alta.boletinsEnviados') }}</dt>
-            <dd class="clinic-value">{{ resumo.boletinsEnviados }}</dd>
+            <dd class="ui-num">{{ resumo.boletinsEnviados }}</dd>
           </div>
         </dl>
 
@@ -276,64 +276,73 @@ function confirmar() {
 <style scoped>
 .alta {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 18px;
 }
 
 .alta__quem {
   margin: 0;
-  color: var(--clinic-muted);
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.5;
 }
 
+/* A conferência de última hora: números grandes com legenda, numa faixa afundada. */
 .alta__resumo {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
-.alta__resumo h3 {
+.alta__resumo-titulo {
   margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .alta__numeros {
   display: grid;
+  gap: 12px;
   margin: 0;
-  gap: var(--clinic-space-3);
-  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
 }
 
 .alta__numeros div {
   display: grid;
-  gap: 0.1rem;
+  gap: 2px;
 }
 
 .alta__numeros dt {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .alta__numeros dd {
   margin: 0;
-  font-size: var(--clinic-font-title);
-  font-weight: 800;
+  color: var(--tinta);
+  font-size: 22px;
+  font-weight: 650;
   letter-spacing: -0.02em;
 }
 
 .alta__aviso {
   display: flex;
   align-items: flex-start;
+  gap: 10px;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px dashed var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
   line-height: 1.5;
+}
+
+.alta__aviso i {
+  margin-top: 2px;
+  font-size: 16px;
 }
 
 /*
@@ -343,39 +352,45 @@ function confirmar() {
 .alta__canal {
   display: flex;
   align-items: center;
+  gap: 12px;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  padding: 12px 14px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.5;
 }
 
+.alta__canal i {
+  flex: none;
+  font-size: 18px;
+}
+
 .alta__canal--grave {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
-  font-weight: 700;
+  border-color: transparent;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-weight: 600;
 }
 
 .alta__ligacao {
   display: flex;
   align-items: flex-start;
-  gap: var(--clinic-space-3);
+  gap: 12px;
+  color: var(--tinta);
   cursor: pointer;
+  font-size: 14px;
   line-height: 1.5;
 }
 
 .alta__erro {
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-risk-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
-  font-weight: 700;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 </style>

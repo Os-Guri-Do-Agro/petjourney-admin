@@ -59,6 +59,14 @@ const formato = useClinicFormat()
 const clinico = useClinicoStore()
 
 const KINDS: LeitoKind[] = ['geral', 'felino', 'isolamento', 'uti']
+
+/** O mesmo ícone por setor da planta da ala: o leito se reconhece nas duas telas. */
+const ICONE_DO_TIPO: Record<LeitoKind, string> = {
+  uti: 'ph ph-heartbeat',
+  geral: 'ph ph-bed',
+  felino: 'ph ph-cat',
+  isolamento: 'ph ph-virus',
+}
 const MOTIVOS: LeitoInativoMotivo[] = [
   'manutencao',
   'desinfeccao',
@@ -435,7 +443,7 @@ defineExpose({ voltarParaLista })
         {{ t('clinico.internacao.leitos.semResultado', { termo: busca }) }}
       </p>
 
-      <ul class="lista">
+      <ul v-if="visiveis.length > 0" class="lista ui-lista">
         <li v-for="leito in visiveis" :key="leito.id" class="linha">
           <template v-if="editando === leito.id">
             <div class="linha__edicao">
@@ -534,8 +542,11 @@ defineExpose({ voltarParaLista })
           </template>
 
           <template v-else>
+            <span class="linha__icone" :class="{ 'linha__icone--parado': !leito.ativo }" aria-hidden="true">
+              <i :class="leito.ativo ? ICONE_DO_TIPO[leito.kind] : 'ph ph-wrench'" />
+            </span>
             <div class="linha__identidade">
-              <strong class="linha__nome clinic-value">{{ leito.nome }}</strong>
+              <strong class="linha__nome ui-num">{{ leito.nome }}</strong>
               <span class="linha__meta">
                 {{ t(`clinico.internacao.leitoKind.${leito.kind}`) }}
                 ·
@@ -625,7 +636,7 @@ defineExpose({ voltarParaLista })
           @click="pagina -= 1"
         />
 
-        <span class="paginas__conta clinic-value">
+        <span class="paginas__conta ui-num">
           {{
             t('clinico.internacao.leitos.intervalo', {
               de: primeiroDaPagina,
@@ -660,7 +671,7 @@ defineExpose({ voltarParaLista })
 <style scoped>
 .leitos {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 14px;
 }
 
 .leitos__topo {
@@ -668,65 +679,65 @@ defineExpose({ voltarParaLista })
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
+  gap: 12px;
 }
 
 .leitos__conta {
   margin: 0;
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .leitos__ajuda {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.5;
 }
 
 .leitos__erro {
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-risk-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .formulario {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-accent-soft);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
+  gap: 14px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
 .formulario__titulo {
   margin: 0;
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .formulario__campos {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 12px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .formulario__acoes {
   display: flex;
   justify-content: flex-end;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .busca {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-3);
+  gap: 12px;
 }
 
 .busca__campo {
@@ -736,11 +747,11 @@ defineExpose({ voltarParaLista })
 
 .lista__vazia {
   margin: 0;
-  padding: var(--clinic-space-5);
-  border: 1px dashed var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  padding: 20px;
+  border: 1px dashed var(--linha-forte);
+  border-radius: 12px;
+  color: var(--tinta-2);
+  font-size: 14px;
   text-align: center;
 }
 
@@ -748,89 +759,103 @@ defineExpose({ voltarParaLista })
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .paginas__conta {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
+/* A lista dos leitos: uma folha com divisórias, uma linha por leito. */
 .lista {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  gap: var(--clinic-space-2);
-  list-style: none;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
 }
 
 .linha {
   display: flex;
+  min-height: 60px;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
+  gap: 12px;
+  padding: 10px 10px 10px 14px;
+}
+
+.linha__icone {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-size: 17px;
+}
+
+.linha__icone--parado {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .linha__identidade {
   display: grid;
   min-width: 0;
-  gap: 0.1rem;
+  flex: 1;
+  gap: 2px;
 }
 
 .linha__nome {
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
 }
 
 .linha__meta {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .linha__parado {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  margin: 0.15rem 0 0;
-  gap: 0.3rem;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+  gap: 4px;
+  margin: 2px 0 0;
+  color: var(--atencao-tinta);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .linha__desde {
-  font-weight: 550;
-  opacity: 0.85;
+  font-weight: 500;
 }
 
 .linha__acoes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-1);
+  gap: 2px;
 }
 
 .linha__travado {
   display: inline-flex;
   align-items: center;
-  padding: 0 var(--clinic-space-2);
-  gap: 0.3rem;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+  gap: 5px;
+  padding: 0 10px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 /* Em edição a linha vira formulário e ocupa a largura toda. */
 .linha__edicao {
   display: grid;
   width: 100%;
-  gap: var(--clinic-space-3);
+  gap: 12px;
+  padding: 6px 4px 4px 0;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -841,8 +866,9 @@ defineExpose({ voltarParaLista })
 
 .linha__alvo {
   margin: 0;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 @media (width <= 640px) {

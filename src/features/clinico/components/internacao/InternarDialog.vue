@@ -175,8 +175,11 @@ function confirmar() {
   >
     <div v-if="leito" class="internar clinic-scope">
       <p class="internar__leito">
-        <strong class="clinic-value">{{ leito.nome }}</strong>
-        <span>{{ t(`clinico.internacao.leitoKind.${leito.kind}`) }}</span>
+        <span class="internar__icone" aria-hidden="true"><i class="ph ph-bed" /></span>
+        <span class="internar__leito-texto">
+          <strong class="ui-num">{{ leito.nome }}</strong>
+          <span>{{ t(`clinico.internacao.leitoKind.${leito.kind}`) }}</span>
+        </span>
       </p>
 
       <ClinicField :rotulo="t('clinico.internacao.internar.paciente')" obrigatorio>
@@ -282,39 +285,64 @@ function confirmar() {
 <style scoped>
 .internar {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 16px;
 }
 
+/* O leito já vem escolhido: ele abre o formulário como o lugar para onde o paciente vai. */
 .internar__leito {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  gap: 12px;
   margin: 0;
-  gap: var(--clinic-space-3);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
+}
+
+.internar__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-size: 20px;
+}
+
+.internar__leito-texto {
+  display: grid;
+  gap: 1px;
 }
 
 .internar__leito strong {
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 20px;
+  font-weight: 650;
+  line-height: 1.1;
 }
 
-.internar__leito span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+.internar__leito-texto span {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .internar__aviso {
   display: flex;
   align-items: flex-start;
+  gap: 10px;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px dashed var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
   line-height: 1.5;
+}
+
+.internar__aviso i {
+  margin-top: 2px;
+  font-size: 16px;
 }
 </style>
