@@ -12,9 +12,11 @@
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import AgendaDialogoTopo from './AgendaDialogoTopo.vue'
+import ClinicField from '../base/ClinicField.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { Appointment, SlotSugestao } from '../../data/types'
 import { diffDays } from '../../domain/clinic-time'
@@ -34,6 +36,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const idTitulo = useId()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
 
@@ -57,6 +60,10 @@ const tutor = computed(() =>
   props.appointment ? clinico.tutor(props.appointment.tutorId) : null,
 )
 
+function comInicial(texto: string) {
+  return texto.charAt(0).toLocaleUpperCase() + texto.slice(1)
+}
+
 const opcoes = computed(() =>
   props.sugestoes.map((slot) => {
     const data = clinicClock.dateOf(slot.inicio)
@@ -69,6 +76,7 @@ const opcoes = computed(() =>
         : 0,
       profissional: clinico.profissional(slot.professionalId)?.nome ?? '',
       ehHoje: data === clinicClock.today(),
+      semana: comInicial(formato.diaDaSemanaCurto(data)),
     }
   }),
 )
@@ -132,76 +140,92 @@ function confirmar() {
     v-model:visible="aberto"
     modal
     class="clinic-dialog hc-tema"
-    :style="{ width: 'min(36rem, 94vw)' }"
-    :header="t('clinico.faltas.reagendar.titulo')"
+    :style="{ width: 'min(38rem, 94vw)' }"
+    :aria-labelledby="idTitulo"
     :dismissable-mask="true"
   >
+    <template #header>
+      <AgendaDialogoTopo
+        :id="idTitulo"
+        :titulo="t('clinico.faltas.reagendar.titulo')"
+        :subtitulo="pet?.nome ?? ''"
+        icone="ph ph-calendar-plus"
+      />
+    </template>
+
     <div v-if="appointment" class="reagendar clinic-scope">
-      <header class="reagendar__topo">
-        <div>
-          <strong class="reagendar__paciente">{{ pet?.nome }}</strong>
-          <p class="reagendar__meta">
-            {{ t('clinico.faltas.reagendar.faltouEm', {
+      <div class="reagendar__topo">
+        <span class="ui-selo ui-selo--risco">
+          <i class="ph ph-user-minus" aria-hidden="true" />
+          {{
+            t('clinico.faltas.reagendar.faltouEm', {
               data: formato.dataCurta(clinicClock.dateOf(appointment.inicio)),
               hora: formato.hora(appointment.inicio),
-            }) }}
-          </p>
-        </div>
+            })
+          }}
+        </span>
 
         <!-- O telefone fica clicável: a ligação acontece agora, não depois. -->
-        <a v-if="tutor" class="reagendar__telefone clinic-value" :href="`tel:${tutor.telefone}`">
+        <a v-if="tutor" class="reagendar__telefone" :href="`tel:${tutor.telefone}`">
           <i class="ph ph-phone" aria-hidden="true" />
-          <bdi dir="ltr">{{ tutor.telefone }}</bdi>
+          <bdi dir="ltr" class="ui-num">{{ tutor.telefone }}</bdi>
         </a>
-      </header>
+      </div>
 
       <p v-if="buscando" class="reagendar__estado" role="status">
         <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
         {{ t('clinico.tabela.carregando') }}
       </p>
 
-      <p v-else-if="opcoes.length === 0" class="reagendar__estado reagendar__estado--vazio">
+      <p v-else-if="opcoes.length === 0" class="reagendar__estado">
         <i class="ph ph-calendar-x" aria-hidden="true" />
         {{ t('clinico.agenda.semana.semAlternativa') }}
       </p>
 
       <template v-else>
-        <ul class="reagendar__lista" role="radiogroup" :aria-label="t('clinico.faltas.reagendar.titulo')">
+        <ul
+          class="reagendar__lista"
+          role="radiogroup"
+          :aria-label="t('clinico.faltas.reagendar.titulo')"
+        >
           <li v-for="opcao in opcoes" :key="opcao.slot.inicio">
-            <Button
+            <button
+              type="button"
               class="opcao"
               :class="{ 'opcao--ativa': escolhido?.inicio === opcao.slot.inicio }"
-              severity="secondary"
-              outlined
-              fluid
               role="radio"
               :aria-checked="escolhido?.inicio === opcao.slot.inicio"
               @click="escolher(opcao.slot)"
             >
+              <span class="opcao__marca" aria-hidden="true">
+                <i v-if="escolhido?.inicio === opcao.slot.inicio" class="ph ph-check" />
+              </span>
               <span class="opcao__data">
-                <strong class="clinic-value">{{ formato.dataCurta(opcao.data) }}</strong>
+                <strong class="ui-num">{{ formato.dataCurta(opcao.data) }}</strong>
                 <span class="opcao__semana">
-                  {{ opcao.ehHoje ? t('clinico.agenda.hoje') : formato.diaDaSemanaCurto(opcao.data) }}
+                  {{ opcao.ehHoje ? t('clinico.agenda.hoje') : opcao.semana }}
                 </span>
               </span>
-              <span class="opcao__hora clinic-value">
+              <span class="opcao__hora ui-hora">
                 {{ formato.intervalo(opcao.slot.inicio, opcao.slot.fim) }}
               </span>
               <span class="opcao__prof">{{ opcao.profissional }}</span>
-            </Button>
+            </button>
           </li>
         </ul>
 
-        <label class="reagendar__campo">
-          <span class="clinic-label">{{ t('clinico.agenda.mover.mensagem') }}</span>
-          <Textarea
-            v-model="mensagem"
-            rows="3"
-            auto-resize
-            fluid
-            @input="editouAMao = true"
-          />
-        </label>
+        <ClinicField :rotulo="t('clinico.agenda.mover.mensagem')">
+          <template #default="{ id }">
+            <Textarea
+              :id="id"
+              v-model="mensagem"
+              rows="3"
+              auto-resize
+              fluid
+              @input="editouAMao = true"
+            />
+          </template>
+        </ClinicField>
       </template>
     </div>
 
@@ -226,131 +250,155 @@ function confirmar() {
 <style scoped>
 .reagendar {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 18px;
 }
 
 .reagendar__topo {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
-}
-
-.reagendar__paciente {
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
-  letter-spacing: -0.02em;
-}
-
-.reagendar__meta {
-  margin: 0.1rem 0 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  gap: 10px 14px;
 }
 
 .reagendar__telefone {
   display: inline-flex;
+  min-height: 36px;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.6rem;
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-chip);
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 10px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
   text-decoration: none;
   white-space: nowrap;
 }
 
+.reagendar__telefone i {
+  color: var(--clinica-tinta);
+  font-size: 16px;
+}
+
 .reagendar__telefone:hover {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
+  background: var(--superficie-2);
+}
+
+.reagendar__telefone:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: 2px;
 }
 
 .reagendar__estado {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   margin: 0;
-  padding: var(--clinic-space-5);
-  border: 1px dashed var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  color: var(--clinic-muted);
+  padding: 22px;
+  border: 1px dashed var(--linha-forte);
+  border-radius: 12px;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
-.reagendar__estado--vazio {
-  color: var(--clinic-faint);
-}
-
+/* Os horários numa lista de linhas: data, hora e quem atende, lidos da esquerda para a direita. */
 .reagendar__lista {
   display: grid;
-  gap: var(--clinic-space-2);
-  max-height: 15rem;
-  overflow-y: auto;
+  max-height: 17rem;
   margin: 0;
   padding: 0;
+  overflow-y: auto;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
   list-style: none;
 }
 
-/* Cada horário é uma linha de três colunas, não um botão de rótulo centralizado. */
-.opcao.p-button {
+.reagendar__lista > li + li {
+  border-top: 1px solid var(--linha);
+}
+
+.opcao {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
-  justify-content: stretch;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  font-size: var(--clinic-font-base);
-  font-weight: inherit;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  grid-template-columns: 22px 4.5rem auto minmax(0, 1fr);
   text-align: start;
 }
 
-/*
- * Escolhido ganha contorno e fundo, não só cor de texto: o estado precisa sobreviver ao cinza.
- * O seletor repete as classes do botão para vencer a regra de botão contornado do módulo.
- */
-.opcao--ativa.p-button.p-button-secondary.p-button-outlined,
-.opcao--ativa.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
-  border-color: var(--clinic-accent-strong);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-text);
-  font-weight: 700;
+.opcao:hover {
+  background: var(--superficie-2);
+}
+
+.opcao:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: -2px;
+}
+
+/* Escolhido: fundo, marca com o visto e contorno — o estado precisa sobreviver ao cinza. */
+.opcao--ativa,
+.opcao--ativa:hover {
+  background: var(--clinica-fundo);
+}
+
+.opcao__marca {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 1.5px solid var(--linha-forte);
+  border-radius: 50%;
+  color: var(--superficie);
+  font-size: 12px;
+}
+
+.opcao--ativa .opcao__marca {
+  border-color: var(--clinica-tinta);
+  background: var(--clinica-tinta);
 }
 
 .opcao__data {
   display: grid;
-  gap: 0.05rem;
+  gap: 1px;
 }
 
 .opcao__data strong {
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 650;
 }
 
 .opcao__semana {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.opcao__hora {
-  font-weight: 750;
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .opcao__prof {
   min-width: 0;
   overflow: hidden;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
   text-align: end;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.reagendar__campo {
-  display: grid;
-  gap: 0.25rem;
+@media (max-width: 520px) {
+  .opcao {
+    grid-template-columns: 22px auto minmax(0, 1fr);
+  }
+
+  .opcao__prof {
+    grid-column: 2 / -1;
+    text-align: start;
+  }
 }
 </style>

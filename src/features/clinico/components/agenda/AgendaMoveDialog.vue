@@ -11,9 +11,12 @@
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import AgendaAvisos from './AgendaAvisos.vue'
+import AgendaDialogoTopo from './AgendaDialogoTopo.vue'
+import ClinicField from '../base/ClinicField.vue'
 import type { ArrasteProposta } from '../../composables/useAgendaDrag'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { useAgendaStore } from '../../stores/agenda'
@@ -28,6 +31,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const idTitulo = useId()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
@@ -120,20 +124,28 @@ watch(
     v-model:visible="aberto"
     modal
     class="clinic-dialog hc-tema"
-    :style="{ width: 'min(34rem, 94vw)' }"
-    :header="t('clinico.agenda.mover.titulo')"
+    :style="{ width: 'min(36rem, 94vw)' }"
+    :aria-labelledby="idTitulo"
     :dismissable-mask="true"
   >
-    <div v-if="proposta" class="mover clinic-scope">
-      <p class="mover__paciente">{{ pet?.nome }}</p>
+    <template #header>
+      <AgendaDialogoTopo
+        :id="idTitulo"
+        :titulo="t('clinico.agenda.mover.titulo')"
+        :subtitulo="pet?.nome ?? ''"
+        icone="ph ph-arrows-down-up"
+      />
+    </template>
 
+    <div v-if="proposta" class="mover clinic-scope">
       <div class="mover__comparacao">
         <div class="mover__lado">
-          <span class="clinic-label">{{ t('clinico.agenda.mover.de') }}</span>
-          <strong class="clinic-value">
+          <span class="mover__rotulo">{{ t('clinico.agenda.mover.de') }}</span>
+          <s class="mover__hora ui-hora">
             {{ formato.intervalo(proposta.appointment.inicio, proposta.appointment.fim) }}
-          </strong>
+          </s>
           <span class="mover__meta">
+            {{ formato.dataCurta(clinicClock.dateOf(proposta.appointment.inicio)) }} ·
             {{ clinico.profissional(proposta.appointment.professionalId)?.nome }}
           </span>
         </div>
@@ -141,44 +153,39 @@ watch(
         <i class="ph ph-arrow-right mover__seta" aria-hidden="true" />
 
         <div class="mover__lado mover__lado--destino">
-          <span class="clinic-label">{{ t('clinico.agenda.mover.para') }}</span>
-          <strong class="clinic-value">
+          <span class="mover__rotulo">{{ t('clinico.agenda.mover.para') }}</span>
+          <strong class="mover__hora ui-hora">
             {{ formato.intervalo(proposta.inicio, proposta.fim) }}
           </strong>
-          <span class="mover__meta">{{ profissionalDestino?.nome }}</span>
+          <span class="mover__meta">
+            {{ formato.dataCurta(clinicClock.dateOf(proposta.inicio)) }} ·
+            {{ profissionalDestino?.nome }}
+          </span>
         </div>
       </div>
 
       <!-- Troca de sala: só aparece quando houve, e nomeia as duas pontas. -->
-      <p v-if="salasMudaram" class="mover__salas">
-        <i class="ph ph-house" aria-hidden="true" />
+      <p v-if="salasMudaram" class="mover__nota">
+        <i class="ph ph-door" aria-hidden="true" />
         <span>
-          {{ nomesDasSalas(proposta.appointment.roomIds) || '—' }}
-          <i class="ph ph-arrow-right mover__salas-seta" aria-hidden="true" />
-          <strong>{{ nomesDasSalas(proposta.roomIds) || '—' }}</strong>
+          {{ nomesDasSalas(proposta.appointment.roomIds) || '–' }}
+          <i class="ph ph-arrow-right mover__nota-seta" aria-hidden="true" />
+          <strong>{{ nomesDasSalas(proposta.roomIds) || '–' }}</strong>
         </span>
       </p>
 
-      <p v-if="grupoLigado" class="mover__ligado">
+      <p v-if="grupoLigado" class="mover__nota">
         <i class="ph ph-link" aria-hidden="true" />
         {{ t('clinico.agenda.duasSalas') }}
       </p>
 
-      <ul v-if="temAviso" class="mover__avisos">
-        <li
-          v-for="(conflito, indice) in conflitos"
-          :key="indice"
-          :class="`mover__aviso mover__aviso--${conflito.severity}`"
-        >
-          <i class="ph ph-warning-circle" aria-hidden="true" />
-          <span>{{ formato.conflito(conflito) }}</span>
-        </li>
-      </ul>
+      <AgendaAvisos v-if="temAviso" :conflitos="conflitos" />
 
-      <label class="mover__campo">
-        <span class="clinic-label">{{ t('clinico.agenda.mover.mensagem') }}</span>
-        <Textarea v-model="mensagem" rows="3" auto-resize fluid />
-      </label>
+      <ClinicField :rotulo="t('clinico.agenda.mover.mensagem')">
+        <template #default="{ id }">
+          <Textarea :id="id" v-model="mensagem" rows="3" auto-resize fluid />
+        </template>
+      </ClinicField>
     </div>
 
     <template #footer>
@@ -205,129 +212,94 @@ watch(
 <style scoped>
 .mover {
   display: grid;
-  gap: var(--clinic-space-4);
-}
-
-.mover__paciente {
-  margin: 0;
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  gap: 18px;
 }
 
 .mover__comparacao {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: var(--clinic-space-3);
+  align-items: stretch;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 }
 
 .mover__lado {
   display: grid;
-  gap: 0.15rem;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
+  min-width: 0;
+  align-content: start;
+  gap: 3px;
+  padding: 12px 14px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
+/* O destino é o que se está decidindo: na cor da Clínica, com a borda acesa. */
 .mover__lado--destino {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
+  border-color: var(--clinica);
+  background: var(--clinica-fundo);
 }
 
-.mover__lado strong {
-  font-size: 1.05rem;
-  font-weight: 800;
+.mover__rotulo {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.mover__hora {
+  font-size: 18px;
+}
+
+s.mover__hora {
+  color: var(--tinta-2);
+  font-weight: 550;
+  text-decoration-thickness: 1px;
 }
 
 .mover__meta {
   overflow: hidden;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .mover__seta {
-  color: var(--clinic-faint);
+  align-self: center;
+  color: var(--tinta-3);
+  font-size: 18px;
 }
 
-.mover__salas {
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-}
-
-.mover__salas strong {
-  color: var(--clinic-text);
-  font-weight: 750;
-}
-
-.mover__salas-seta {
-  margin: 0 0.2rem;
-  font-size: 0.6rem;
-}
-
-.mover__ligado {
+.mover__nota {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 8px;
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
-.mover__avisos {
-  display: grid;
-  gap: var(--clinic-space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.mover__nota > i {
+  font-size: 16px;
 }
 
-.mover__aviso {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.4rem;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-base);
-  line-height: 1.45;
+.mover__nota strong {
+  color: var(--tinta);
+  font-weight: 600;
 }
 
-.mover__aviso--blocking {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
-}
-
-.mover__aviso--info {
-  border-color: var(--clinic-line);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-}
-
-.mover__campo {
-  display: grid;
-  gap: 0.25rem;
+.mover__nota-seta {
+  margin: 0 4px;
+  font-size: 12px;
 }
 
 @media (max-width: 560px) {
   .mover__comparacao {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .mover__seta {
-    transform: rotate(90deg);
     justify-self: center;
+    transform: rotate(90deg);
   }
 }
 </style>

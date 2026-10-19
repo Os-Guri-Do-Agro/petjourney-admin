@@ -11,9 +11,11 @@
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Select from 'primevue/select'
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import AgendaDialogoTopo from './AgendaDialogoTopo.vue'
+import ClinicField from '../base/ClinicField.vue'
 import type { Appointment, CancelReason } from '../../data/types'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { useAgendaStore } from '../../stores/agenda'
@@ -27,6 +29,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const idTitulo = useId()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
@@ -57,6 +60,13 @@ const aberto = computed({
 const pet = computed(() =>
   props.appointment ? clinico.pet(props.appointment.petId) : null,
 )
+
+/** Em quem se está mexendo: o paciente e o horário, que é o que a caixa cobre na grade. */
+const alvo = computed(() =>
+  props.appointment
+    ? `${pet.value?.nome ?? ''} · ${formato.intervalo(props.appointment.inicio, props.appointment.fim)}`
+    : '',
+)
 </script>
 
 <template>
@@ -64,31 +74,40 @@ const pet = computed(() =>
     v-model:visible="aberto"
     modal
     class="clinic-dialog hc-tema"
-    :style="{ width: 'min(28rem, 94vw)' }"
-    :header="t('clinico.agenda.cancelarDialogo.titulo')"
+    :style="{ width: 'min(30rem, 94vw)' }"
+    :aria-labelledby="idTitulo"
     dismissable-mask
   >
+    <template #header>
+      <AgendaDialogoTopo
+        :id="idTitulo"
+        :titulo="t('clinico.agenda.cancelarDialogo.titulo')"
+        :subtitulo="alvo"
+        icone="ph ph-x-circle"
+        tom="risco"
+      />
+    </template>
+
     <div v-if="appointment" class="cancelar clinic-scope">
-      <p class="cancelar__alvo">
-        <strong>{{ pet?.nome }}</strong>
-        <span class="clinic-value">
-          {{ formato.intervalo(appointment.inicio, appointment.fim) }}
-        </span>
+      <ClinicField :rotulo="t('clinico.agenda.cancelarDialogo.motivo')">
+        <template #default="{ id }">
+          <Select
+            v-model="motivo"
+            :input-id="id"
+            :options="opcoes"
+            option-label="rotulo"
+            option-value="valor"
+            fluid
+            :pt="{ overlay: { class: 'clinic-overlay' } }"
+          />
+        </template>
+      </ClinicField>
+
+      <!-- O que acontece, dito antes: o horário vaga, mas o atendimento continua à vista. -->
+      <p class="cancelar__nota">
+        <i class="ph ph-info" aria-hidden="true" />
+        <span>{{ t('clinico.agenda.cancelarDialogo.descricao') }}</span>
       </p>
-
-      <label class="cancelar__campo">
-        <span class="clinic-label">{{ t('clinico.agenda.cancelarDialogo.motivo') }}</span>
-        <Select
-          v-model="motivo"
-          :options="opcoes"
-          option-label="rotulo"
-          option-value="valor"
-          fluid
-          :pt="{ overlay: { class: 'clinic-overlay' } }"
-        />
-      </label>
-
-      <p class="cancelar__nota">{{ t('clinico.agenda.cancelarDialogo.descricao') }}</p>
     </div>
 
     <template #footer>
@@ -100,6 +119,7 @@ const pet = computed(() =>
       />
       <Button
         :label="t('clinico.agenda.cancelarDialogo.confirmar')"
+        icon="ph ph-x-circle"
         severity="danger"
         :loading="agenda.salvando"
         @click="emit('confirmar', motivo)"
@@ -111,35 +131,24 @@ const pet = computed(() =>
 <style scoped>
 .cancelar {
   display: grid;
-  gap: var(--clinic-space-4);
-}
-
-.cancelar__alvo {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--clinic-space-3);
-  margin: 0;
-}
-
-.cancelar__alvo strong {
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
-  overflow-wrap: anywhere;
-}
-
-.cancelar__campo {
-  display: grid;
-  gap: 0.25rem;
+  gap: 18px;
 }
 
 .cancelar__nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.5;
+}
+
+.cancelar__nota i {
+  margin-top: 2px;
+  font-size: 16px;
 }
 </style>

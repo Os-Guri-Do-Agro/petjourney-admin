@@ -19,8 +19,7 @@
  * - **Clicar filtra.** A legenda já é a lista de tipos do dia; obrigar a abrir outro painel
  *   para filtrar por tipo seria pedir duas vezes a mesma informação.
  */
-import Button from 'primevue/button'
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useClinicPrefs } from '../../composables/useClinicPrefs'
@@ -42,6 +41,7 @@ type ItemDaLegenda = {
 }
 
 const { t } = useI18n()
+const idDaLista = useId()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
 const { legendaAberta, alternarLegenda } = useClinicPrefs()
@@ -98,55 +98,53 @@ const itens = computed<ItemDaLegenda[]>(() =>
 </script>
 
 <template>
-  <section v-if="itens.length > 0" class="legenda">
-    <Button
+  <section v-if="itens.length > 0" class="legenda clinic-scope">
+    <button
+      type="button"
       class="legenda__alternar"
-      severity="secondary"
-      text
-      size="small"
-      :icon="legendaAberta ? 'ph ph-caret-down' : 'ph ph-caret-right'"
-      :label="t('clinico.agenda.legenda.titulo')"
-      :badge="temFiltro ? String(agenda.filtroTipos.length) : undefined"
       :aria-expanded="legendaAberta"
+      :aria-controls="idDaLista"
       @click="alternarLegenda()"
-    />
+    >
+      <i
+        class="ph"
+        :class="legendaAberta ? 'ph-caret-down' : 'ph-caret-right'"
+        aria-hidden="true"
+      />
+      {{ t('clinico.agenda.legenda.titulo') }}
+      <span v-if="temFiltro" class="ui-contagem legenda__contagem">
+        {{ agenda.filtroTipos.length }}
+      </span>
+    </button>
 
-    <ul v-if="legendaAberta" class="legenda__lista">
+    <ul v-if="legendaAberta" :id="idDaLista" class="legenda__lista">
       <li v-for="item in itens" :key="item.kind">
-        <Button
+        <button
+          type="button"
           class="chave"
           :class="{ 'chave--ativa': item.ativo, 'chave--ausente': item.ausente }"
-          severity="secondary"
-          text
-          rounded
-          size="small"
           :aria-pressed="item.ativo"
           :title="t('clinico.agenda.legenda.filtrar', { tipo: item.nome })"
           :style="{ '--chave-cor': item.cor }"
           @click="agenda.alternarFiltroTipo(item.kind)"
         >
           <!--
-            Amostra e ícone juntos. A amostra sozinha seria a codificação por cor que o
-            requisito proíbe; o ícone sozinho perderia o vínculo com a faixa do card.
+            Amostra e ícone juntos: a cor sozinha seria a codificação que não se lê em escala de
+            cinza; o ícone sozinho perderia o vínculo com o cartão.
           -->
           <span class="chave__amostra" aria-hidden="true">
             <i v-if="item.icone" :class="item.icone" />
           </span>
           <span class="chave__nome">{{ item.nome }}</span>
-          <span v-if="!item.ausente" class="chave__contagem clinic-value">
-            {{ item.contagem }}
-          </span>
-        </Button>
+          <span v-if="!item.ausente" class="chave__contagem ui-num">{{ item.contagem }}</span>
+        </button>
       </li>
 
       <li v-if="temFiltro">
-        <Button
-          link
-          size="small"
-          class="legenda__limpar"
-          :label="t('clinico.agenda.limparFiltros')"
-          @click="agenda.filtroTipos = []"
-        />
+        <button type="button" class="ui-mais legenda__limpar" @click="agenda.filtroTipos = []">
+          <i class="ph ph-x" aria-hidden="true" />
+          {{ t('clinico.agenda.limparFiltros') }}
+        </button>
       </li>
     </ul>
   </section>
@@ -157,70 +155,100 @@ const itens = computed<ItemDaLegenda[]>(() =>
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-2) var(--clinic-space-3);
+  gap: 8px 12px;
 }
 
-/* Rótulo de seção, não ação principal: caixa alta e corpo de etiqueta, como os títulos do módulo. */
-.legenda__alternar.p-button {
-  gap: 0.3rem;
-  padding-inline: var(--clinic-space-1);
-  font-size: var(--clinic-font-label);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.legenda__alternar {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px 0 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--tinta-2);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 550;
 }
 
-.legenda__alternar :deep(.p-button-icon) {
-  font-size: 0.6rem;
+.legenda__alternar:hover {
+  background: var(--superficie-2);
+  color: var(--tinta);
+}
+
+.legenda__alternar i {
+  font-size: 13px;
+}
+
+.legenda__contagem {
+  height: 20px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
 }
 
 .legenda__lista {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.chave.p-button {
-  gap: 0.35rem;
-  padding-block: 0.15rem;
-  padding-inline: 0.25rem 0.5rem;
-  border: 1px solid transparent;
-  font-size: var(--clinic-font-label);
-  font-weight: 400;
+.chave {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px 0 4px;
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+
+.chave:hover {
+  border-color: var(--linha-forte);
+}
+
+.legenda__alternar:focus-visible,
+.chave:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: 2px;
 }
 
 /*
- * Filtro ligado é estado, não ênfase: ganha contorno e fundo, e não só uma cor mais forte.
- * Quem olha a barra precisa ver que **há um filtro** antes de descobrir qual.
- * O seletor repete as classes do botão para vencer a regra de botão de texto do módulo.
+ * Filtro ligado é estado, não ênfase: ganha contorno e fundo, e não só uma cor mais forte. Quem
+ * olha a barra precisa ver que **há um filtro** antes de descobrir qual.
  */
-.chave--ativa.p-button.p-button-secondary.p-button-text,
-.chave--ativa.p-button.p-button-secondary.p-button-text:not(:disabled):hover {
-  border-color: color-mix(in srgb, var(--chave-cor) 60%, var(--clinic-line));
-  background: color-mix(in srgb, var(--chave-cor) 16%, var(--clinic-surface));
-  color: var(--clinic-text);
-  font-weight: 700;
+.chave--ativa {
+  border-color: var(--clinica);
+  background: var(--clinica-fundo);
+  font-weight: 600;
 }
 
 /* Tipo sem atendimento no dia: continua clicável, mas não disputa atenção. */
-.chave--ausente.p-button {
-  opacity: 0.45;
+.chave--ausente {
+  opacity: 0.5;
 }
 
 .chave__amostra {
   display: inline-grid;
-  width: 1.15rem;
-  height: 1.15rem;
-  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  flex: none;
   place-items: center;
-  border-radius: 0.35rem;
-  background: color-mix(in srgb, var(--chave-cor) 24%, var(--clinic-surface));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--chave-cor) 70%, transparent);
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--chave-cor) 22%, var(--superficie));
   color: var(--chave-cor);
-  font-size: 0.62rem;
+  font-size: 13px;
 }
 
 .chave__nome {
@@ -228,16 +256,16 @@ const itens = computed<ItemDaLegenda[]>(() =>
 }
 
 .chave__contagem {
-  color: var(--clinic-faint);
-  font-weight: 750;
+  color: var(--tinta-3);
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
 .chave--ativa .chave__contagem {
-  color: var(--clinic-muted);
+  color: var(--clinica-tinta);
 }
 
-.legenda__limpar.p-button {
-  padding: 0.15rem 0.4rem;
-  font-size: var(--clinic-font-label);
+.legenda__limpar {
+  padding: 0 6px;
 }
 </style>

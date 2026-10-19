@@ -21,12 +21,13 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 
-import ClinicAlertChip from '../base/ClinicAlertChip.vue'
+import AgendaAvisos from './AgendaAvisos.vue'
+import AgendaDialogoTopo from './AgendaDialogoTopo.vue'
 import ClinicField from '../base/ClinicField.vue'
 import PacienteNovoForm from '../pacientes/PacienteNovoForm.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
@@ -70,6 +71,8 @@ const formato = useClinicFormat()
  * passos em vez de um.
  */
 const cadastrandoPaciente = ref(false)
+
+const idTitulo = useId()
 
 const petId = ref<string | null>(null)
 const typeId = ref<string | null>(null)
@@ -221,6 +224,13 @@ const alternativas = computed(() => {
   )
 })
 
+/** A janela por extenso, embaixo da hora: é o que a recepção lê em voz alta no telefone. */
+const janela = computed(() =>
+  completo.value
+    ? `${t('clinico.agenda.tabela.ate', { hora: formato.hora(fimIso.value) })} · ${formato.duracao(duracao.value)}`
+    : '',
+)
+
 const rotuloDoBotao = computed(() =>
   gravidade.value === null
     ? t('clinico.agenda.criar.agendar')
@@ -322,13 +332,21 @@ async function confirmar() {
     modal
     class="clinic-dialog hc-tema"
     :style="{ width: 'min(40rem, 94vw)' }"
+    :aria-labelledby="idTitulo"
     @update:visible="emit('update:visivel', $event)"
   >
     <template #header>
-      <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i :class="encaixe ? 'ph ph-lightning' : 'ph ph-calendar-plus'" /></span>
-        {{ encaixe ? t('clinico.agenda.criar.tituloEncaixe') : t('clinico.agenda.criar.titulo') }}
-      </h2>
+      <AgendaDialogoTopo
+        :id="idTitulo"
+        :titulo="encaixe ? t('clinico.agenda.criar.tituloEncaixe') : t('clinico.agenda.criar.titulo')"
+        :subtitulo="formato.dataLonga(data)"
+        :icone="encaixe ? 'ph ph-lightning' : 'ph ph-calendar-plus'"
+        :tom="encaixe ? 'atencao' : 'clinica'"
+      >
+        <span v-if="encaixe" class="ui-selo ui-selo--atencao">
+          {{ t('clinico.agenda.criar.encaixe') }}
+        </span>
+      </AgendaDialogoTopo>
     </template>
 
     <PacienteNovoForm
@@ -337,17 +355,12 @@ async function confirmar() {
       @cancelar="cadastrandoPaciente = false"
     />
 
-    <form v-else class="criar clinic-scope" @submit.prevent="confirmar">
-      <p class="criar__dia">
-        {{ formato.dataLonga(data) }}
-        <span v-if="encaixe" class="criar__marca">{{ t('clinico.agenda.criar.encaixe') }}</span>
-      </p>
-
-      <ClinicField :rotulo="t('clinico.agenda.criar.paciente')">
+    <form v-else class="formulario clinic-scope" @submit.prevent="confirmar">
+      <ClinicField :rotulo="t('clinico.agenda.criar.paciente')" largo>
         <template #default="{ id }">
           <Select
-            :input-id="id"
             v-model="petId"
+            :input-id="id"
             filter
             fluid
             option-label="rotulo"
@@ -366,116 +379,97 @@ async function confirmar() {
             </template>
 
             <!--
-              O atalho fica no rodapé da lista aberta: é exatamente onde o olho está no momento
-              em que a busca não devolve o paciente.
-
-              **E parece um botão.** Na primeira versão era texto em cor de acento sobre fundo
-              transparente, no fim de uma lista de sessenta nomes — a mesma forma de um rodapé
-              decorativo. Quem não sabia que ele existia não o encontrava, e quem sabia ainda
-              precisava procurar. Agora tem faixa própria, ícone em disco e a seta que diz que
-              leva a algum lugar.
+              O atalho fica no rodapé da lista aberta: é exatamente onde o olho está no momento em
+              que a busca não devolve o paciente. Tem faixa própria e parece um botão — texto solto
+              no fim de sessenta nomes não se encontra.
             -->
             <template #footer>
-              <Button class="cadastrar" text fluid @click="cadastrandoPaciente = true">
+              <button type="button" class="cadastrar" @click="cadastrandoPaciente = true">
                 <span class="cadastrar__marca" aria-hidden="true"><i class="ph ph-user-plus" /></span>
                 <span class="cadastrar__texto">
                   <strong>{{ t('clinico.paciente.novo.atalho') }}</strong>
                   <small>{{ t('clinico.paciente.novo.atalhoAjuda') }}</small>
                 </span>
-                <i class="ph ph-arrow-right cadastrar__seta" aria-hidden="true" />
-              </Button>
+                <i class="ph ph-caret-right cadastrar__seta" aria-hidden="true" />
+              </button>
             </template>
           </Select>
         </template>
       </ClinicField>
 
-      <div class="criar__linha">
-        <ClinicField :rotulo="t('clinico.agenda.criar.tipo')">
-          <template #default="{ id }">
-            <Select
-              :input-id="id"
-              v-model="typeId"
-              fluid
-              option-label="rotulo"
-              option-value="valor"
-              :options="opcoesTipos"
-              :pt="{ overlay: { class: 'clinic-overlay' } }"
-            >
-              <template #option="{ option }">
-                <span class="opcao">
-                  <strong>{{ option.rotulo }}</strong>
-                  <small>{{ option.detalhe }}</small>
-                </span>
-              </template>
-            </Select>
-          </template>
-        </ClinicField>
+      <ClinicField :rotulo="t('clinico.agenda.criar.tipo')">
+        <template #default="{ id }">
+          <Select
+            v-model="typeId"
+            :input-id="id"
+            fluid
+            option-label="rotulo"
+            option-value="valor"
+            :options="opcoesTipos"
+            :pt="{ overlay: { class: 'clinic-overlay' } }"
+          >
+            <template #option="{ option }">
+              <span class="opcao">
+                <strong>{{ option.rotulo }}</strong>
+                <small>{{ option.detalhe }}</small>
+              </span>
+            </template>
+          </Select>
+        </template>
+      </ClinicField>
 
-        <ClinicField :rotulo="t('clinico.agenda.criar.hora')">
-          <template #default="{ id }">
-            <InputText :id="id" v-model="hora" type="time" fluid />
-          </template>
-        </ClinicField>
-      </div>
+      <ClinicField :rotulo="t('clinico.agenda.criar.hora')" :dica="janela">
+        <template #default="{ id, descrito }">
+          <InputText :id="id" v-model="hora" type="time" fluid :aria-describedby="descrito" />
+        </template>
+      </ClinicField>
 
-      <div class="criar__linha">
-        <ClinicField :rotulo="t('clinico.agenda.mover.profissional')">
-          <template #default="{ id }">
-            <Select
-              :input-id="id"
-              v-model="professionalId"
-              fluid
-              option-label="rotulo"
-              option-value="valor"
-              :options="opcoesProfissionais"
-              :pt="{ overlay: { class: 'clinic-overlay' } }"
-            />
-          </template>
-        </ClinicField>
+      <ClinicField :rotulo="t('clinico.agenda.mover.profissional')">
+        <template #default="{ id }">
+          <Select
+            v-model="professionalId"
+            :input-id="id"
+            fluid
+            option-label="rotulo"
+            option-value="valor"
+            :options="opcoesProfissionais"
+            :pt="{ overlay: { class: 'clinic-overlay' } }"
+          />
+        </template>
+      </ClinicField>
 
-        <ClinicField :rotulo="t('clinico.agenda.criar.sala')">
-          <template #default="{ id }">
-            <Select
-              :input-id="id"
-              v-model="roomId"
-              fluid
-              show-clear
-              option-label="rotulo"
-              option-value="valor"
-              :options="opcoesSalas"
-              :placeholder="t('clinico.agenda.criar.semSala')"
-              :pt="{ overlay: { class: 'clinic-overlay' } }"
-            />
-          </template>
-        </ClinicField>
-      </div>
+      <ClinicField :rotulo="t('clinico.agenda.criar.sala')">
+        <template #default="{ id }">
+          <Select
+            v-model="roomId"
+            :input-id="id"
+            fluid
+            show-clear
+            option-label="rotulo"
+            option-value="valor"
+            :options="opcoesSalas"
+            :placeholder="t('clinico.agenda.criar.semSala')"
+            :pt="{ overlay: { class: 'clinic-overlay' } }"
+          />
+        </template>
+      </ClinicField>
 
-      <!-- A janela por extenso: é o que a recepção lê em voz alta no telefone. -->
-      <p v-if="completo" class="criar__janela clinic-value">
-        {{ formato.intervalo(inicioIso, fimIso) }} · {{ formato.duracao(duracao) }}
-      </p>
-
-      <ClinicField :rotulo="t('clinico.prontuario.conduta.observacao')">
+      <ClinicField :rotulo="t('clinico.prontuario.conduta.observacao')" largo>
         <template #default="{ id }">
           <Textarea :id="id" v-model="observacao" auto-resize rows="2" fluid />
         </template>
       </ClinicField>
 
-      <ClinicAlertChip
-        v-for="(conflito, indice) in conflitos"
-        :key="`${conflito.kind}-${indice}`"
-        :severidade="conflito.severity === 'blocking' ? 'risco' : 'atencao'"
-        :rotulo="formato.conflito(conflito)"
-      />
+      <!-- O conflito aparece enquanto se escolhe, não ao salvar. -->
+      <AgendaAvisos v-if="conflitos.length > 0" class="formulario__largo" :conflitos="conflitos" />
 
       <!--
         Sem horário que sirva, a fila de espera é a saída — e ela precisa estar **aqui**, no
-        momento em que a recepção descobre que não tem vaga. Mandar procurar outra tela é como
-        o fluxo se perdia: a pessoa desligava o telefone com um "eu te aviso" que não virava
-        registro nenhum.
+        momento em que a recepção descobre que não tem vaga. Mandar procurar outra tela é como o
+        fluxo se perdia: a pessoa desligava o telefone com um "eu te aviso" que não virava registro.
       -->
-      <section v-if="semHorarioBom" class="sem-vaga">
-        <div>
+      <section v-if="semHorarioBom" class="sem-vaga formulario__largo">
+        <div class="sem-vaga__texto">
           <strong>{{ t('clinico.agenda.criar.semVagaTitulo') }}</strong>
           <p>{{ t('clinico.agenda.criar.semVagaDescricao') }}</p>
         </div>
@@ -489,21 +483,19 @@ async function confirmar() {
         />
       </section>
 
-      <section v-if="alternativas.length > 0" class="alternativas">
-        <h4 class="clinic-label">{{ t('clinico.agenda.criar.alternativas') }}</h4>
+      <section v-if="alternativas.length > 0" class="alternativas formulario__largo">
+        <h3 class="alternativas__titulo">{{ t('clinico.agenda.criar.alternativas') }}</h3>
         <div class="alternativas__lista">
-          <Button
+          <button
             v-for="sugestao in alternativas"
             :key="`${sugestao.professionalId}-${sugestao.inicio}`"
+            type="button"
             class="alternativa"
-            severity="secondary"
-            outlined
-            size="small"
             @click="usarAlternativa(sugestao.inicio, sugestao.professionalId)"
           >
-            <strong class="clinic-value">{{ formato.hora(sugestao.inicio) }}</strong>
+            <strong class="ui-hora">{{ formato.hora(sugestao.inicio) }}</strong>
             <small>{{ clinico.profissional(sugestao.professionalId)?.nome }}</small>
-          </Button>
+          </button>
         </div>
       </section>
     </form>
@@ -527,126 +519,86 @@ async function confirmar() {
 </template>
 
 <style scoped>
-.criar {
+/* Os campos em duas colunas, com respiro: paciente e observação ocupam a linha inteira. */
+.formulario {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 18px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.criar__dia {
-  display: flex;
-  align-items: center;
-  gap: var(--clinic-space-2);
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
-}
-
-.criar__dia::first-letter {
-  text-transform: uppercase;
-}
-
-.criar__marca {
-  padding: 0.1rem 0.45rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.criar__linha {
-  display: grid;
-  gap: var(--clinic-space-3);
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-}
-
-.criar__janela {
-  margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-sunken);
-  color: var(--clinic-text);
-  font-weight: 700;
+.formulario__largo {
+  grid-column: 1 / -1;
 }
 
 .opcao {
   display: grid;
-  gap: 0.05rem;
+  gap: 1px;
+}
+
+.opcao small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 /*
- * Faixa própria no rodapé da lista, e não botão centralizado: o rótulo alinha à esquerda, a seta
- * vai para a direita e o fundo inverte no hover. O seletor repete as classes do botão para vencer
- * o estilo de botão de texto do tema.
+ * O atalho do rodapé da lista de pacientes: faixa própria, rótulo à esquerda, seta à direita e o
+ * fundo que acende no hover — é uma porta, e precisa parecer uma.
  */
-.cadastrar.p-button.p-button-text {
-  justify-content: flex-start;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-2) var(--clinic-space-3);
+.cadastrar {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
   border: 0;
-  border-top: 1px solid var(--clinic-line-strong);
-  border-radius: 0;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-base);
-  font-weight: inherit;
+  border-top: 1px solid var(--linha);
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  cursor: pointer;
+  font: inherit;
   text-align: start;
 }
 
-.cadastrar.p-button.p-button-text:not(:disabled):hover,
-.cadastrar.p-button.p-button-text:focus-visible {
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
+.cadastrar:hover {
+  background: color-mix(in oklab, var(--musgo-fundo) 70%, var(--musgo));
+}
+
+.cadastrar:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: -2px;
 }
 
 .cadastrar__marca {
   display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 30px;
+  height: 30px;
   flex: none;
-  border-radius: 999px;
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
   place-items: center;
-}
-
-.cadastrar:hover .cadastrar__marca,
-.cadastrar:focus-visible .cadastrar__marca {
-  background: var(--clinic-surface);
-  color: var(--clinic-accent-strong);
-}
-
-.cadastrar__marca i {
-  font-size: 0.78rem;
+  border-radius: 50%;
+  background: var(--musgo);
+  color: var(--sobre-musgo);
+  font-size: 15px;
 }
 
 .cadastrar__texto {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
+  gap: 1px;
 }
 
 .cadastrar__texto strong {
-  font-size: var(--clinic-font-base);
-  font-weight: 750;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .cadastrar__texto small {
-  font-size: var(--clinic-font-label);
-  opacity: 0.8;
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .cadastrar__seta {
   margin-inline-start: auto;
-  font-size: 0.72rem;
-}
-
-.opcao small {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  font-size: 14px;
 }
 
 .sem-vaga {
@@ -654,53 +606,80 @@ async function confirmar() {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-attention-bg);
+  gap: 12px 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+}
+
+.sem-vaga__texto {
+  flex: 1 1 16rem;
 }
 
 .sem-vaga strong {
-  color: var(--clinic-attention-text);
-  font-weight: 750;
+  color: var(--atencao-tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .sem-vaga p {
-  margin: 0.15rem 0 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  margin: 2px 0 0;
+  color: var(--tinta);
+  font-size: 13.5px;
   line-height: 1.45;
 }
 
 .alternativas {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+}
+
+.alternativas__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .alternativas__lista {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 /* Hora em cima, profissional embaixo: a sugestão lê como um horário, não como um rótulo. */
-.alternativa.p-button {
+.alternativa {
   display: grid;
+  min-height: 44px;
   justify-items: start;
-  gap: 0.05rem;
-  padding: 0.4rem 0.7rem;
-  font-weight: inherit;
+  gap: 1px;
+  padding: 6px 14px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
   text-align: start;
 }
 
+.alternativa:hover {
+  border-color: var(--clinica);
+  background: var(--clinica-fundo);
+}
+
+.alternativa:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: 2px;
+}
+
 .alternativa small {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 @media (max-width: 620px) {
-  .criar__linha {
+  .formulario {
     grid-template-columns: minmax(0, 1fr);
   }
 }

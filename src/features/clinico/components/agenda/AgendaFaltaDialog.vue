@@ -26,9 +26,11 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import AgendaDialogoTopo from './AgendaDialogoTopo.vue'
+import ClinicField from '../base/ClinicField.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type {
   Appointment,
@@ -55,6 +57,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const idTitulo = useId()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
 
@@ -128,6 +131,17 @@ const aberto = computed({
 
 const pet = computed(() => (props.appointment ? clinico.pet(props.appointment.petId) : null))
 
+/** De quem é a falta e de quando: o paciente, o dia e a hora em que não veio. */
+const alvo = computed(() =>
+  props.appointment
+    ? [
+        pet.value?.nome ?? '',
+        formato.dataCurta(props.appointment.inicio.slice(0, 10)),
+        formato.hora(props.appointment.inicio),
+      ].join(' · ')
+    : '',
+)
+
 /**
  * Só dígitos, com o país na frente quando ele não veio.
  *
@@ -185,31 +199,32 @@ const linkDoWhatsapp = computed(() => {
     v-model:visible="aberto"
     modal
     class="clinic-dialog hc-tema"
-    :style="{ width: 'min(32rem, 94vw)' }"
-    :header="t('clinico.faltas.justificativa.titulo')"
+    :style="{ width: 'min(34rem, 94vw)' }"
+    :aria-labelledby="idTitulo"
     dismissable-mask
   >
+    <template #header>
+      <AgendaDialogoTopo
+        :id="idTitulo"
+        :titulo="t('clinico.faltas.justificativa.titulo')"
+        :subtitulo="alvo"
+        icone="ph ph-user-minus"
+        tom="atencao"
+      />
+    </template>
+
     <div v-if="appointment" class="falta clinic-scope">
-      <p class="falta__alvo">
-        <strong>{{ pet?.nome }}</strong>
-        <span class="clinic-value">
-          {{ formato.dataCurta(appointment.inicio.slice(0, 10)) }} ·
-          {{ formato.hora(appointment.inicio) }}
-        </span>
-      </p>
-
       <!--
-        O contato fica no topo, antes dos campos.
-
-        A ordem é a da tarefa: primeiro se fala com a pessoa, depois se anota o que ela disse.
-        Com os campos em cima, o telefone viraria rodapé de formulário — e formulário com o
-        contato escondido no fim é formulário preenchido com "outro".
+        O contato fica no topo, antes dos campos. A ordem é a da tarefa: primeiro se fala com a
+        pessoa, depois se anota o que ela disse. Com os campos em cima, o telefone viraria rodapé
+        de formulário — e formulário com o contato escondido no fim é preenchido com "outro".
       -->
       <section v-if="tutor" class="contato">
+        <span class="contato__icone" aria-hidden="true"><i class="ph ph-user" /></span>
         <div class="contato__quem">
-          <span class="clinic-label">{{ t('clinico.faltas.colunaResponsavel') }}</span>
+          <span class="contato__rotulo">{{ t('clinico.faltas.colunaResponsavel') }}</span>
           <strong class="contato__nome">{{ tutor.nome }}</strong>
-          <span v-if="tutor.telefone" class="contato__telefone clinic-value">
+          <span v-if="tutor.telefone" class="contato__telefone ui-num">
             <bdi dir="ltr">{{ tutor.telefone }}</bdi>
           </span>
           <span v-else class="contato__sem">{{
@@ -217,75 +232,79 @@ const linkDoWhatsapp = computed(() => {
           }}</span>
         </div>
 
-        <div v-if="telefoneLimpo" class="contato__acoes">
-          <!--
-            Sem "Ligar": a recepção liga pelo telefone escrito ao lado (regra da casa — a tela registra
-            o contato, não disca). O WhatsApp fica porque leva a mensagem pronta, e a mensagem muda
-            quando o motivo é óbito.
-          -->
-          <a
-            class="contato__botao"
-            :href="linkDoWhatsapp"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <i class="ph ph-whatsapp-logo" aria-hidden="true" />
-            {{ t('clinico.faltas.justificativa.whatsapp') }}
-          </a>
-        </div>
+        <!--
+          Sem "Ligar": a recepção liga pelo telefone escrito ao lado (regra da casa — a tela registra
+          o contato, não disca). O WhatsApp fica porque leva a mensagem pronta, e a mensagem muda
+          quando o motivo é óbito. Âncora de verdade: `wa.me` é navegação, e o toque longo precisa
+          oferecer "copiar link".
+        -->
+        <a
+          v-if="telefoneLimpo"
+          class="contato__botao"
+          :href="linkDoWhatsapp"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <i class="ph ph-whatsapp-logo" aria-hidden="true" />
+          {{ t('clinico.faltas.justificativa.whatsapp') }}
+        </a>
       </section>
 
       <div class="falta__campos">
-        <label class="falta__campo">
-          <span class="clinic-label">{{ t('clinico.faltas.justificativa.motivo') }}</span>
-          <Select
-            v-model="motivo"
-            :options="opcoesMotivo"
-            option-label="rotulo"
-            option-value="valor"
-            :placeholder="t('clinico.faltas.justificativa.motivoEscolha')"
-            fluid
-            :pt="{ overlay: { class: 'clinic-overlay' } }"
-          />
-        </label>
+        <ClinicField :rotulo="t('clinico.faltas.justificativa.motivo')">
+          <template #default="{ id }">
+            <Select
+              v-model="motivo"
+              :input-id="id"
+              :options="opcoesMotivo"
+              option-label="rotulo"
+              option-value="valor"
+              :placeholder="t('clinico.faltas.justificativa.motivoEscolha')"
+              fluid
+              :pt="{ overlay: { class: 'clinic-overlay' } }"
+            />
+          </template>
+        </ClinicField>
 
-        <label class="falta__campo">
-          <span class="clinic-label">{{ t('clinico.faltas.justificativa.canal') }}</span>
-          <Select
-            v-model="canal"
-            :options="opcoesCanal"
-            option-label="rotulo"
-            option-value="valor"
-            fluid
-            :pt="{ overlay: { class: 'clinic-overlay' } }"
-          />
-        </label>
+        <ClinicField :rotulo="t('clinico.faltas.justificativa.canal')">
+          <template #default="{ id }">
+            <Select
+              v-model="canal"
+              :input-id="id"
+              :options="opcoesCanal"
+              option-label="rotulo"
+              option-value="valor"
+              fluid
+              :pt="{ overlay: { class: 'clinic-overlay' } }"
+            />
+          </template>
+        </ClinicField>
+
+        <ClinicField :rotulo="t('clinico.faltas.justificativa.observacao')" largo>
+          <template #default="{ id }">
+            <Textarea
+              :id="id"
+              v-model="observacao"
+              rows="2"
+              auto-resize
+              fluid
+              :placeholder="t('clinico.faltas.justificativa.observacaoDica')"
+            />
+          </template>
+        </ClinicField>
       </div>
 
-      <label class="falta__campo">
-        <span class="clinic-label">{{ t('clinico.faltas.justificativa.observacao') }}</span>
-        <Textarea
-          v-model="observacao"
-          rows="2"
-          auto-resize
-          fluid
-          :placeholder="t('clinico.faltas.justificativa.observacaoDica')"
-        />
-      </label>
-
       <!--
-        O que o óbito desliga, dito antes de salvar.
-
-        A consequência é grande e invisível — some a oferta de remarcação daquela falta —, e
-        escolha que muda o comportamento do sistema sem avisar é escolha que alguém desfaz pelo
-        suporte. O aviso também serve de segunda confirmação para o clique errado no `Select`.
+        O que o óbito desliga, dito antes de salvar: some a oferta de remarcação daquela falta.
+        Tom de atenção, não de risco — não há nada errado em registrar um óbito, há algo importante.
       -->
       <p v-if="encerra" class="falta__obito" role="status">
         <i class="ph ph-info" aria-hidden="true" />
-        {{ t('clinico.faltas.justificativa.avisoObito') }}
+        <span>{{ t('clinico.faltas.justificativa.avisoObito') }}</span>
       </p>
 
       <p v-if="existente" class="falta__nota">
+        <i class="ph ph-clock-counter-clockwise" aria-hidden="true" />
         {{
           t('clinico.faltas.justificativa.registradaPor', {
             nome: clinico.profissional(existente.professionalId)?.nome ?? '',
@@ -328,128 +347,124 @@ const linkDoWhatsapp = computed(() => {
 <style scoped>
 .falta {
   display: grid;
-  gap: var(--clinic-space-4);
-}
-
-.falta__alvo {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--clinic-space-3);
-  margin: 0;
-}
-
-.falta__alvo strong {
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
-  overflow-wrap: anywhere;
+  gap: 20px;
 }
 
 .contato {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-sunken);
+  gap: 12px 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--superficie-2);
+}
+
+.contato__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-size: 18px;
 }
 
 .contato__quem {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
+  flex: 1 1 10rem;
+  gap: 1px;
+}
+
+.contato__rotulo {
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .contato__nome {
-  font-weight: 750;
+  font-size: 15px;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
 .contato__telefone {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta);
+  font-size: 14px;
 }
 
 .contato__sem {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 13px;
 }
 
-.contato__acoes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--clinic-space-2);
-}
-
-/*
- * Âncora de verdade, e não botão com `@click`.
- *
- * `wa.me` é navegação: o toque longo precisa oferecer "copiar link", e o WhatsApp precisa abrir
- * em outra aba sem levar a agenda junto. Um `Button` com script
- * perderia as duas coisas em troca de nada.
- */
 .contato__botao {
   display: inline-flex;
-  min-height: var(--clinic-hit-target);
+  min-height: 38px;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0 var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-base);
-  font-weight: 700;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
   text-decoration: none;
 }
 
+.contato__botao i {
+  color: var(--ok-tinta);
+  font-size: 18px;
+}
+
 .contato__botao:hover {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
+  background: var(--superficie-2);
 }
 
 .contato__botao:focus-visible {
-  outline: none;
-  box-shadow: var(--clinic-focus-ring);
+  outline: 2px solid var(--clinica);
+  outline-offset: 2px;
 }
 
 .falta__campos {
   display: grid;
-  gap: var(--clinic-space-3);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 18px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.falta__campo {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.falta__nota {
-  margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-/*
- * Tom de atenção, não de risco.
- *
- * Risco é para o que está errado, e não há nada errado em registrar um óbito — há algo
- * importante. Vermelho aqui leria como repreensão a quem está fazendo a coisa certa.
- */
 .falta__obito {
   display: flex;
   align-items: flex-start;
-  gap: var(--clinic-space-2);
+  gap: 10px;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
   line-height: 1.45;
+}
+
+.falta__obito i {
+  margin-top: 2px;
+  font-size: 16px;
+}
+
+.falta__nota {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--tinta-3);
+  font-size: 12.5px;
+}
+
+@media (max-width: 560px) {
+  .falta__campos {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

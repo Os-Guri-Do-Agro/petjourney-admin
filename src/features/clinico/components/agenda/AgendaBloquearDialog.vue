@@ -16,10 +16,11 @@ import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
-import SelectButton from 'primevue/selectbutton'
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import AgendaDialogoTopo from './AgendaDialogoTopo.vue'
+import { ICONE_DO_BLOQUEIO } from './agenda-icones'
 import ClinicField from '../base/ClinicField.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { BlockReason, ISODate, WeekdayIndex } from '../../data/types'
@@ -58,7 +59,11 @@ const diasEscolhidos = ref<WeekdayIndex[]>([])
 const enviando = ref(false)
 
 const opcoesMotivo = computed(() =>
-  MOTIVOS.map((valor) => ({ valor, rotulo: formato.motivoBloqueio(valor) })),
+  MOTIVOS.map((valor) => ({
+    valor,
+    rotulo: formato.motivoBloqueio(valor),
+    icone: ICONE_DO_BLOQUEIO[valor],
+  })),
 )
 
 const opcoesProfissional = computed(() => [
@@ -72,14 +77,23 @@ const opcoesSala = computed(() => [
 ])
 
 const opcoesDias = computed(() =>
-  DIAS.map((dia) => ({
-    valor: dia,
-    rotulo: formato.diaDaSemanaCurto(diaExemplo(dia)),
-  })),
+  DIAS.map((dia) => {
+    const rotulo = formato.diaDaSemanaCurto(diaExemplo(dia))
+
+    return { valor: dia, rotulo: rotulo.charAt(0).toLocaleUpperCase() + rotulo.slice(1) }
+  }),
 )
 
 const idRepete = useId()
 const idDias = useId()
+const idTitulo = useId()
+
+/** Dia marcado entra e sai da lista; a ordem é a da semana, que é como a recorrência se lê. */
+function alternarDia(dia: WeekdayIndex) {
+  diasEscolhidos.value = diasEscolhidos.value.includes(dia)
+    ? diasEscolhidos.value.filter((item) => item !== dia)
+    : DIAS.filter((item) => item === dia || diasEscolhidos.value.includes(item))
+}
 
 /** Um dia real daquela semana só para o `Intl` nomear o dia — nada de tabela fixa de rótulos. */
 function diaExemplo(weekday: WeekdayIndex): ISODate {
@@ -148,60 +162,73 @@ async function confirmar() {
     :visible="visivel"
     modal
     class="clinic-dialog hc-tema"
-    :style="{ width: 'min(34rem, 94vw)' }"
+    :style="{ width: 'min(36rem, 94vw)' }"
+    :aria-labelledby="idTitulo"
     @update:visible="emit('update:visivel', $event)"
   >
     <template #header>
-      <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i :class="'ph ph-lock'" /></span>
-        {{ t('clinico.agenda.bloqueio.titulo') }}
-      </h2>
+      <AgendaDialogoTopo
+        :id="idTitulo"
+        :titulo="t('clinico.agenda.bloqueio.titulo')"
+        :subtitulo="formato.dataLonga(data)"
+        icone="ph ph-prohibit"
+      />
     </template>
 
-    <form class="bloquear clinic-scope" @submit.prevent="confirmar">
-      <p class="bloquear__dia">{{ formato.dataLonga(data) }}</p>
-
-      <ClinicField :rotulo="t('clinico.agenda.bloqueio.motivo')">
+    <form class="formulario clinic-scope" @submit.prevent="confirmar">
+      <ClinicField :rotulo="t('clinico.agenda.bloqueio.motivo')" largo>
         <template #default="{ id }">
           <Select
-            :input-id="id"
             v-model="motivo"
+            :input-id="id"
             fluid
             option-label="rotulo"
             option-value="valor"
             :options="opcoesMotivo"
             :pt="{ overlay: { class: 'clinic-overlay' } }"
+          >
+            <template #option="{ option }">
+              <span class="opcao">
+                <i :class="option.icone" aria-hidden="true" />
+                {{ option.rotulo }}
+              </span>
+            </template>
+          </Select>
+        </template>
+      </ClinicField>
+
+      <ClinicField :rotulo="t('clinico.agenda.criar.hora')">
+        <template #default="{ id }">
+          <InputText :id="id" v-model="inicio" type="time" fluid />
+        </template>
+      </ClinicField>
+
+      <ClinicField
+        :rotulo="t('clinico.agenda.bloqueio.ate')"
+        :erro="janelaValida ? '' : t('clinico.agenda.bloqueio.janelaInvalida')"
+      >
+        <template #default="{ id, descrito }">
+          <InputText
+            :id="id"
+            v-model="fim"
+            type="time"
+            fluid
+            :invalid="!janelaValida"
+            :aria-describedby="descrito"
           />
         </template>
       </ClinicField>
 
-      <div class="bloquear__linha">
-        <ClinicField :rotulo="t('clinico.agenda.criar.hora')">
-          <template #default="{ id }">
-            <InputText :id="id" v-model="inicio" type="time" fluid />
-          </template>
-        </ClinicField>
-
-        <ClinicField :rotulo="t('clinico.agenda.bloqueio.ate')">
-          <template #default="{ id }">
-            <InputText :id="id" v-model="fim" type="time" fluid :invalid="!janelaValida" />
-          </template>
-        </ClinicField>
-      </div>
-
-      <p v-if="!janelaValida" class="bloquear__erro">
-        {{ t('clinico.agenda.bloqueio.janelaInvalida') }}
-      </p>
-
       <ClinicField :rotulo="t('clinico.agenda.mover.profissional')">
         <template #default="{ id }">
           <Select
-            :input-id="id"
             v-model="professionalId"
+            :input-id="id"
             fluid
             option-label="rotulo"
             option-value="valor"
             :options="opcoesProfissional"
+            :placeholder="t('clinico.agenda.bloqueio.clinicaInteira')"
             :pt="{ overlay: { class: 'clinic-overlay' } }"
           />
         </template>
@@ -210,47 +237,52 @@ async function confirmar() {
       <ClinicField :rotulo="t('clinico.agenda.criar.sala')">
         <template #default="{ id }">
           <Select
-            :input-id="id"
             v-model="roomId"
+            :input-id="id"
             fluid
             option-label="rotulo"
             option-value="valor"
             :options="opcoesSala"
+            :placeholder="t('clinico.agenda.bloqueio.semSala')"
             :pt="{ overlay: { class: 'clinic-overlay' } }"
           />
         </template>
       </ClinicField>
 
-      <ClinicField :rotulo="t('clinico.agenda.bloqueio.detalhe')">
+      <ClinicField :rotulo="t('clinico.agenda.bloqueio.detalhe')" largo>
         <template #default="{ id }">
           <InputText :id="id" v-model="detalhe" fluid />
         </template>
       </ClinicField>
 
-      <div class="bloquear__repete">
+      <div class="repete formulario__largo">
         <Checkbox v-model="repete" binary :input-id="idRepete" />
         <label :for="idRepete">{{ t('clinico.agenda.bloqueio.repetir') }}</label>
       </div>
 
       <!--
-        Escolha múltipla, então não é o `ClinicToggleGroup` — aquele é de opção única e forçar
-        um modo múltiplo nele mudaria o contrato de todos os outros seis lugares que o usam.
+        Escolha múltipla: cada dia é um botão que liga e desliga, com o estado dito pelo
+        `aria-pressed` e por contorno e fundo — não só pela cor.
       -->
-      <fieldset v-if="repete" class="dias">
-        <legend :id="idDias" class="clinic-label">
+      <fieldset v-if="repete" class="dias formulario__largo">
+        <legend :id="idDias" class="dias__titulo">
           {{ t('clinico.agenda.bloqueio.diasDaSemana') }}
         </legend>
 
-        <SelectButton
-          v-model="diasEscolhidos"
-          class="dias__lista"
-          :options="opcoesDias"
-          option-label="rotulo"
-          option-value="valor"
-          multiple
-          size="small"
-          :aria-labelledby="idDias"
-        />
+        <div class="dias__lista" role="group" :aria-labelledby="idDias">
+          <button
+            v-for="dia in opcoesDias"
+            :key="dia.valor"
+            type="button"
+            class="dia"
+            :class="{ 'dia--ligado': diasEscolhidos.includes(dia.valor) }"
+            :aria-pressed="diasEscolhidos.includes(dia.valor)"
+            @click="alternarDia(dia.valor)"
+          >
+            <i v-if="diasEscolhidos.includes(dia.valor)" class="ph ph-check" aria-hidden="true" />
+            {{ dia.rotulo }}
+          </button>
+        </div>
       </fieldset>
     </form>
 
@@ -262,6 +294,7 @@ async function confirmar() {
         @click="emit('update:visivel', false)"
       />
       <Button
+        icon="ph ph-prohibit"
         :disabled="!podeSalvar || enviando"
         :loading="enviando"
         :label="t('clinico.agenda.bloqueio.salvar')"
@@ -272,61 +305,99 @@ async function confirmar() {
 </template>
 
 <style scoped>
-.bloquear {
+.formulario {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 18px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.bloquear__dia {
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+.formulario__largo {
+  grid-column: 1 / -1;
 }
 
-.bloquear__dia::first-letter {
-  text-transform: uppercase;
+.opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.bloquear__linha {
-  display: grid;
-  gap: var(--clinic-space-3);
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+.opcao i {
+  color: var(--tinta-2);
+  font-size: 16px;
 }
 
-.bloquear__erro {
-  margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+.repete {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--tinta);
+  font-size: 14px;
+}
+
+.repete label {
+  cursor: pointer;
 }
 
 .dias {
+  display: grid;
+  gap: 8px;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
-.dias__lista.p-selectbutton {
-  flex-wrap: wrap;
-  margin-top: var(--clinic-space-2);
+.dias__titulo {
+  margin-bottom: 8px;
+  padding: 0;
+  color: var(--tinta);
+  font-size: 13px;
+  font-weight: 550;
 }
 
-/* Dia marcado: anel e cor do acento, para o estado não depender só do fundo. */
-.dias__lista :deep(.p-togglebutton-checked .p-togglebutton-content) {
-  box-shadow: inset 0 0 0 1.5px var(--clinic-accent-strong);
-  color: var(--clinic-accent-strong);
-}
-
-.bloquear__repete {
+.dias__lista {
   display: flex;
-  align-items: center;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-base);
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.bloquear__repete label {
+.dia {
+  display: inline-flex;
+  min-width: 52px;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 12px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--tinta);
   cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+}
+
+.dia:hover {
+  background: var(--superficie-2);
+}
+
+.dia:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: 2px;
+}
+
+/* Dia ligado: contorno, fundo e o visto — o estado sobrevive ao cinza. */
+.dia--ligado,
+.dia--ligado:hover {
+  border-color: var(--clinica);
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-weight: 600;
+}
+
+@media (max-width: 620px) {
+  .formulario {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

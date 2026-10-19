@@ -14,10 +14,12 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import AgendaAppointmentCard from './AgendaAppointmentCard.vue'
-import { useAgendaDia } from '../../composables/useAgendaDia'
+import { ICONE_DO_BLOQUEIO } from './agenda-icones'
+import { useAgendaDia, type FaixaBloqueio } from '../../composables/useAgendaDia'
 import { useAgendaDrag, type ArrasteProposta } from '../../composables/useAgendaDrag'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { Appointment } from '../../data/types'
+import { minutesToClock } from '../../domain/clinic-time'
 import { useAgendaStore } from '../../stores/agenda'
 import { clinicClock } from '../../stores/clinico'
 
@@ -52,6 +54,12 @@ const {
 } = grade
 
 const idsDasColunas = computed(() => colunas.value.map((coluna) => coluna.id))
+
+/**
+ * O eixo e as linhas só nas meias horas: a hora cheia com fio e rótulo cheios, a meia hora com os
+ * sutis. As marcas de 15 minutos continuam valendo para o arraste — só não são desenhadas.
+ */
+const marcasDeMeiaHora = computed(() => marcas.value.filter((marca) => marca.minuto % 30 === 0))
 
 const template = computed(
   () => `var(--clinic-time-axis-width) repeat(${Math.max(colunas.value.length, 1)}, minmax(0, 1fr))`,
@@ -219,8 +227,9 @@ function medir() {
  * Clique no vazio da coluna já sabe onde: o horário sai da posição do clique, arredondado
  * para a grade. Poupa a recepção de reescrever o que acabou de apontar.
  */
-function aoClicarNoVazio(evento: MouseEvent, professionalId: string) {
-  if (rastroDeGesto()) {
+function aoClicarNoVazio(evento: MouseEvent, professionalId: string | null) {
+  /* Por sala, a coluna não diz quem atende: marcar dali abriria o formulário sem profissional. */
+  if (!professionalId || rastroDeGesto()) {
     return
   }
 
@@ -276,12 +285,40 @@ function aoTeclarNoCard(evento: KeyboardEvent, appointmentId: string) {
   )
 }
 
+/** A hora no rótulo do fio do agora: "14:37", e não só "Agora" — é a hora que se confere. */
+const horaDoAgora = ref(minutesToClock(clinicClock.now().minutes))
+
+function tique() {
+  atualizarAgora()
+  horaDoAgora.value = minutesToClock(clinicClock.now().minutes)
+}
+
+/** A hora do eixo que cairia por baixo do rótulo do agora some, em vez de aparecer pela metade. */
+function marcaCobertaPeloAgora(topo: number) {
+  return mostrarLinhaDoAgora.value && Math.abs(topo - topoDaLinhaDoAgora.value) < 14
+}
+
+/** Ocupação acima de 85% é dia apertado; acima de 100%, vendido além do expediente. */
+function tomDaOcupacao(ocupacao: number) {
+  if (ocupacao > 1) {
+    return 'risco'
+  }
+
+  return ocupacao >= 0.85 ? 'atencao' : 'normal'
+}
+
+function tituloDoBloqueio(faixa: FaixaBloqueio) {
+  const motivo = formato.motivoBloqueio(faixa.bloqueio.motivo)
+
+  return faixa.bloqueio.detalhe ? `${motivo}: ${faixa.bloqueio.detalhe}` : motivo
+}
+
 let relogio: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
   medir()
-  atualizarAgora()
-  relogio = setInterval(atualizarAgora, 30_000)
+  tique()
+  relogio = setInterval(tique, 30_000)
   window.addEventListener('resize', medir)
 
   /** Abre já no horário útil, não à meia-noite da grade. */
@@ -304,57 +341,70 @@ watch(() => agenda.data, medir)
 </script>
 
 <template>
-  <div class="grade" :class="{ 'grade--arrastando': arraste.arrastando.value }">
-    <header class="grade__cabecalho" :style="{ '--template': template }">
-      <div class="grade__canto">
-        <span class="clinic-label">{{ formato.dataCurta(agenda.data) }}</span>
-      </div>
-
-      <div v-for="coluna in colunas" :key="coluna.id" class="grade__coluna-topo">
-        <span class="grade__titulo" :title="coluna.titulo">{{ coluna.titulo }}</span>
-
-        <!--
-          A carga era "275 min ocupados", repetido em cada coluna. O número em minutos não se
-          compara de relance entre profissionais e ocupava uma linha inteira; a proporção sim.
-          Os minutos continuam no `title`, para quem precisa do número exato.
-        -->
-        <span
-          class="grade__carga"
-          :title="t('clinico.agenda.ocupacao', { minutos: coluna.ocupacaoMinutos })"
-        >
-          <span class="grade__barra" aria-hidden="true">
-            <span
-              class="grade__preenchimento"
-              :class="{ 'grade__preenchimento--cheio': coluna.ocupacao > 0.85 }"
-              :style="{
-                width: `${Math.min(coluna.ocupacao, 1) * 100}%`,
-                background: coluna.cor,
-              }"
-            />
-          </span>
-          <span class="grade__percentual clinic-value">
-            {{ formato.percentual(coluna.ocupacao) }}
-          </span>
-        </span>
-      </div>
-    </header>
-
+  <div
+    class="grade ui-folha clinic-scope"
+    :class="{ 'grade--arrastando': arraste.arrastando.value }"
+    :style="{ '--colunas': Math.max(colunas.length, 1) }"
+  >
     <div ref="rolagem" class="grade__rolagem" @scroll.passive="aoRolar">
+      <header class="grade__cabecalho" :style="{ '--template': template }">
+        <div class="grade__canto">
+          <span class="ui-num">{{ formato.dataCurta(agenda.data) }}</span>
+        </div>
+
+        <div v-for="coluna in colunas" :key="coluna.id" class="grade__coluna-topo">
+          <span class="grade__titulo" :title="coluna.titulo">
+            <span class="grade__cor" :style="{ background: coluna.cor }" aria-hidden="true" />
+            <span class="grade__nome">{{ coluna.titulo }}</span>
+          </span>
+
+          <!--
+            A carga em proporção, e não em minutos: "62%" compara colunas de relance. Os minutos
+            continuam no `title`, para quem precisa do número exato.
+          -->
+          <span
+            class="grade__carga"
+            :class="`grade__carga--${tomDaOcupacao(coluna.ocupacao)}`"
+            :title="t('clinico.agenda.ocupacao', { minutos: coluna.ocupacaoMinutos })"
+          >
+            <span class="grade__barra" aria-hidden="true">
+              <span
+                class="grade__preenchimento"
+                :style="{ width: `${Math.min(coluna.ocupacao, 1) * 100}%` }"
+              />
+            </span>
+            <span class="ui-num">{{ formato.percentual(coluna.ocupacao) }}</span>
+          </span>
+        </div>
+      </header>
+
       <div
         ref="conteudo"
         class="grade__conteudo"
         :style="{ '--template': template, height: `${alturaTotalPx}px` }"
       >
-        <!-- eixo de tempo -->
+        <!-- eixo de tempo: preso à esquerda quando a grade rola de lado -->
         <div class="eixo">
           <span
-            v-for="marca in marcas"
+            v-for="marca in marcasDeMeiaHora"
             :key="marca.minuto"
             class="eixo__marca"
-            :class="{ 'eixo__marca--principal': marca.principal }"
+            :class="[
+              marca.principal ? 'eixo__marca--principal' : 'eixo__marca--meia',
+              { 'eixo__marca--coberta': marcaCobertaPeloAgora(marca.topPx) },
+            ]"
             :style="{ top: `${marca.topPx}px` }"
           >
-            <template v-if="marca.principal">{{ marca.rotulo }}</template>
+            {{ marca.rotulo }}
+          </span>
+
+          <span
+            v-if="mostrarLinhaDoAgora"
+            class="eixo__agora ui-num"
+            :style="{ top: `${topoDaLinhaDoAgora}px` }"
+          >
+            <span class="grade__sr">{{ t('clinico.agenda.linhaDoAgora') }}</span>
+            {{ horaDoAgora }}
           </span>
         </div>
 
@@ -364,10 +414,10 @@ watch(() => agenda.data, medir)
           :key="coluna.id"
           class="coluna"
           :data-coluna="coluna.id"
-          @click.self="aoClicarNoVazio($event, coluna.id)"
+          @click.self="aoClicarNoVazio($event, coluna.professionalId)"
         >
           <span
-            v-for="marca in marcas"
+            v-for="marca in marcasDeMeiaHora"
             :key="`linha-${marca.minuto}`"
             class="coluna__linha"
             :class="{ 'coluna__linha--principal': marca.principal }"
@@ -379,11 +429,11 @@ watch(() => agenda.data, medir)
             v-for="faixa in coluna.faixas"
             :key="faixa.bloqueio.id"
             class="bloqueio"
-            :class="`bloqueio--${faixa.bloqueio.motivo}`"
             :style="{ top: `${faixa.topPx}px`, height: `${faixa.alturaPx}px` }"
-            :title="`${formato.motivoBloqueio(faixa.bloqueio.motivo)}${faixa.bloqueio.detalhe ? ` — ${faixa.bloqueio.detalhe}` : ''}`"
+            :title="tituloDoBloqueio(faixa)"
           >
-            <span class="bloqueio__rotulo">
+            <span class="etiqueta">
+              <i :class="ICONE_DO_BLOQUEIO[faixa.bloqueio.motivo]" aria-hidden="true" />
               {{ formato.motivoBloqueio(faixa.bloqueio.motivo) }}
             </span>
           </div>
@@ -404,7 +454,7 @@ watch(() => agenda.data, medir)
           />
 
           <!--
-            Faixa do destino. Marca a fatia de tempo onde o card vai cair, atravessando a
+            Faixa do destino. Marca a fatia de tempo onde o cartão vai cair, atravessando a
             largura da coluna — o fantasma sozinho não mostra o alcance quando ele é estreito
             por dividir a faixa com outro atendimento. Muda de tom quando há sobreposição.
           -->
@@ -434,7 +484,7 @@ watch(() => agenda.data, medir)
             <p
               v-if="previaVisual.alerta"
               class="destino__aviso"
-              :style="{ top: `${previaVisual.card.topPx + previaVisual.card.alturaPx + 2}px` }"
+              :style="{ top: `${previaVisual.card.topPx + previaVisual.card.alturaPx + 4}px` }"
               role="status"
             >
               <i class="ph ph-warning-circle" aria-hidden="true" />
@@ -455,37 +505,35 @@ watch(() => agenda.data, medir)
         </div>
 
         <!--
-          Bloqueio da clínica inteira: uma faixa só, atravessando a grade, com o rótulo à
-          esquerda no eixo. Repetido por coluna, "ALMOÇO" aparecia cinco vezes na mesma altura.
+          Bloqueio da clínica inteira: uma faixa só, atravessando as colunas, com o motivo numa
+          etiqueta. Repetido por coluna, "Almoço" aparecia cinco vezes na mesma altura.
         -->
         <div
           v-for="faixa in faixasDaClinica"
           :key="faixa.bloqueio.id"
           class="faixa-clinica"
-          :class="`faixa-clinica--${faixa.bloqueio.motivo}`"
           :style="{ top: `${faixa.topPx}px`, height: `${faixa.alturaPx}px` }"
-          :title="formato.motivoBloqueio(faixa.bloqueio.motivo)"
+          :title="tituloDoBloqueio(faixa)"
           aria-hidden="true"
         >
-          <span class="faixa-clinica__rotulo">
+          <span class="etiqueta">
+            <i :class="ICONE_DO_BLOQUEIO[faixa.bloqueio.motivo]" />
             {{ formato.motivoBloqueio(faixa.bloqueio.motivo) }}
           </span>
         </div>
 
-        <!-- linha do agora -->
+        <!-- o fio do agora, por trás dos cartões; a hora mora no eixo -->
         <div
           v-if="mostrarLinhaDoAgora"
           class="agora"
           :style="{ top: `${topoDaLinhaDoAgora}px` }"
           role="presentation"
-        >
-          <span class="agora__rotulo clinic-value">{{ t('clinico.agenda.linhaDoAgora') }}</span>
-        </div>
+        />
       </div>
     </div>
 
     <p class="grade__dica">
-      <i class="ph ph-arrows-out-cardinal" aria-hidden="true" />
+      <i class="ph ph-hand-grabbing" aria-hidden="true" />
       {{ t('clinico.agenda.arrastarDica') }}
     </p>
   </div>
@@ -493,14 +541,13 @@ watch(() => agenda.data, medir)
 
 <style scoped>
 .grade {
+  --coluna-minima: 7.5rem;
+
   display: grid;
   overflow: hidden;
-  grid-template-rows: auto 1fr auto;
+  height: 100%;
   min-height: 0;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .grade--arrastando {
@@ -508,88 +555,74 @@ watch(() => agenda.data, medir)
   user-select: none;
 }
 
-/*
- * Destino do arraste: faixa larga por trás do fantasma, atravessando a coluna inteira.
- *
- * Fica **atrás** dos cards (z-index baixo) de propósito — precisa mostrar contra o que o
- * horário está batendo, e não cobrir justamente isso.
- */
-.destino {
-  position: absolute;
-  inset-inline-start: 0;
-  width: 100%;
-  z-index: 1;
-  border: 1px dashed var(--clinic-accent-strong);
-  border-radius: 0.5rem;
-  background: var(--clinic-accent-tint);
-  pointer-events: none;
+.grade__rolagem {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
-.destino--conflito {
-  border-color: var(--clinic-attention-text);
-  background: var(--clinic-attention-bg);
-}
-
-/*
- * O aviso acompanha o fantasma e some com ele. Largura mínima maior que a coluna: um choque
- * de sala tem nome comprido, e cortá-lo em "Sala ocupa…" devolve o problema de não saber
- * contra o quê se está batendo.
- */
-.destino__aviso {
-  position: absolute;
-  inset-inline-start: 0;
-  z-index: 7;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.3rem;
-  min-width: max(100%, 12rem);
-  max-width: 20rem;
-  margin: 0;
-  padding: 0.25rem 0.45rem;
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-attention-bg);
-  box-shadow: var(--clinic-shadow-float);
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  line-height: 1.3;
-  pointer-events: none;
-}
-
-.grade__cabecalho {
+.grade__cabecalho,
+.grade__conteudo {
   display: grid;
+  min-width: calc(var(--clinic-time-axis-width) + var(--colunas) * var(--coluna-minima));
   grid-template-columns: var(--template);
-  border-bottom: 1px solid var(--clinic-line);
-  background: var(--clinic-surface-soft);
+}
+
+/* O cabeçalho rola junto na horizontal e fica preso no alto: colunas e nomes nunca desalinham. */
+.grade__cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  border-bottom: 1px solid var(--linha);
+  background: var(--superficie);
 }
 
 .grade__canto {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   display: grid;
-  align-items: center;
-  padding: var(--clinic-space-2);
-  border-inline-end: 1px solid var(--clinic-line);
-  text-align: center;
+  align-items: end;
+  padding: 0 10px 12px;
+  border-inline-end: 1px solid var(--linha);
+  background: var(--superficie);
+  color: var(--tinta-3);
+  font-size: 12px;
+  text-align: end;
 }
 
 .grade__coluna-topo {
   display: grid;
   min-width: 0;
-  align-content: center;
-  gap: 0.1rem;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-inline-end: 1px solid var(--clinic-line-soft);
+  align-content: end;
+  gap: 8px;
+  padding: 14px 14px 12px;
 }
 
-.grade__coluna-topo:last-child {
-  border-inline-end: none;
+.grade__coluna-topo + .grade__coluna-topo {
+  border-inline-start: 1px solid var(--linha);
 }
 
 .grade__titulo {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.grade__cor {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.grade__nome {
   overflow: hidden;
-  font-size: var(--clinic-font-base);
-  font-weight: 750;
-  letter-spacing: -0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -597,7 +630,10 @@ watch(() => agenda.data, medir)
 .grade__carga {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
 .grade__barra {
@@ -607,82 +643,117 @@ watch(() => agenda.data, medir)
   min-width: 1.5rem;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--clinic-line);
+  background: var(--superficie-3);
 }
 
 .grade__preenchimento {
   display: block;
   height: 100%;
+  border-radius: inherit;
+  background: var(--clinica);
 }
 
-.grade__preenchimento--cheio {
-  background: var(--clinic-attention-text) !important;
+.grade__carga--atencao {
+  color: var(--atencao-tinta);
 }
 
-.grade__percentual {
-  flex: 0 0 auto;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+.grade__carga--atencao .grade__preenchimento {
+  background: var(--atencao);
 }
 
-.grade__rolagem {
-  overflow: auto;
-  min-height: 0;
+.grade__carga--risco {
+  color: var(--risco-tinta);
+}
+
+.grade__carga--risco .grade__preenchimento {
+  background: var(--risco);
 }
 
 .grade__conteudo {
   position: relative;
-  display: grid;
-  grid-template-columns: var(--template);
 }
 
+/* ------------------------------------------------------------------------------- eixo */
+
 .eixo {
-  position: relative;
-  border-inline-end: 1px solid var(--clinic-line);
-  background: var(--clinic-surface-soft);
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  border-inline-end: 1px solid var(--linha);
+  background: var(--superficie);
 }
 
 .eixo__marca {
   position: absolute;
-  inset-inline-end: var(--clinic-space-2);
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  inset-inline-end: 10px;
+  font-family: var(--font-dados);
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  line-height: 1;
   transform: translateY(-50%);
 }
 
 .eixo__marca--principal {
-  color: var(--clinic-muted);
+  color: var(--tinta);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.eixo__marca--meia {
+  color: var(--tinta-3);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.eixo__marca--coberta {
+  visibility: hidden;
+}
+
+/* No zoom reduzido a meia hora fica a 20 px da hora: o rótulo dela vira ruído. */
+:root[data-clinic-zoom='reduzido'] .eixo__marca--meia {
+  display: none;
 }
 
 /* A primeira marca não sobe metade da altura para fora da área visível. */
 .eixo__marca:first-child {
-  transform: none;
+  transform: translateY(2px);
 }
+
+.eixo__agora {
+  position: absolute;
+  inset-inline-end: 4px;
+  z-index: 1;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--clinica-tinta);
+  color: var(--superficie);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.3;
+  transform: translateY(-50%);
+}
+
+/* ----------------------------------------------------------------------------- colunas */
 
 .coluna {
   position: relative;
   z-index: 1;
   min-width: 0;
-  border-inline-end: 1px solid var(--clinic-line-soft);
 }
 
-.coluna:last-child {
-  border-inline-end: none;
+.coluna + .coluna {
+  border-inline-start: 1px solid var(--linha);
 }
 
 .coluna__linha {
   position: absolute;
   inset-inline-start: 0;
   width: 100%;
-  border-top: 1px solid var(--clinic-line-soft);
+  border-top: 1px solid color-mix(in oklab, var(--linha) 55%, transparent);
   pointer-events: none;
 }
 
 .coluna__linha--principal {
-  border-top-color: var(--clinic-line);
+  border-top-color: var(--linha);
 }
 
 .coluna__vazia {
@@ -691,130 +762,169 @@ watch(() => agenda.data, medir)
   inset-inline-start: 0;
   width: 100%;
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 12.5px;
   pointer-events: none;
   text-align: center;
 }
 
-/* Bloqueio é fundo, não card: fica atrás e não recebe clique. */
-.bloqueio {
-  position: absolute;
-  inset-inline-start: 0;
-  width: 100%;
-  overflow: hidden;
-  padding: 2px 6px;
-  background-image: repeating-linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--clinic-muted) 10%, transparent) 0 5px,
-    transparent 5px 10px
-  );
-  border-block: 1px dashed var(--clinic-line-strong);
-  pointer-events: none;
-}
-
-.bloqueio__rotulo {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.bloqueio--almoco {
-  background-color: color-mix(in srgb, var(--clinic-surface-sunken) 70%, transparent);
-}
-
-.bloqueio--feriado,
-.bloqueio--manutencao {
-  background-image: repeating-linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--clinic-attention-text) 16%, transparent) 0 5px,
-    transparent 5px 10px
-  );
-}
-
-/*
- * Faixa da clínica: atravessa a grade inteira, atrás dos cards. Fica no fundo de propósito —
- * é contexto do dia, não um item da agenda.
- */
+/* Bloqueio é fundo, não cartão: hachurado discreto, atrás, sem receber clique. */
+.bloqueio,
 .faixa-clinica {
   position: absolute;
-  inset-inline-start: 0;
-  z-index: 0;
-  display: flex;
-  width: 100%;
-  align-items: center;
   overflow: hidden;
-  border-block: 1px dashed var(--clinic-line-strong);
-  background-color: color-mix(in srgb, var(--clinic-surface-sunken) 70%, transparent);
+  background-color: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
   background-image: repeating-linear-gradient(
     135deg,
-    color-mix(in srgb, var(--clinic-muted) 7%, transparent) 0 6px,
-    transparent 6px 12px
+    transparent 0 7px,
+    color-mix(in oklab, var(--linha) 85%, transparent) 7px 8px
   );
   pointer-events: none;
 }
 
-.faixa-clinica--feriado {
-  background-image: repeating-linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--clinic-attention-text) 14%, transparent) 0 6px,
-    transparent 6px 12px
-  );
-}
-
-.faixa-clinica__rotulo {
-  width: var(--clinic-time-axis-width);
-  padding-inline-end: var(--clinic-space-2);
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-  letter-spacing: 0.08em;
-  text-align: end;
-  text-transform: uppercase;
+.bloqueio {
+  inset-inline-start: 0;
+  width: 100%;
+  padding: 4px 6px;
 }
 
 /*
- * Linha do agora: atravessa todas as colunas, **por trás dos cards**.
- *
- * Por cima, ela caía no meio da segunda linha de texto de qualquer atendimento em curso e o
- * nome do serviço aparecia tachado — a marca de "cancelado" na única consulta que está
- * acontecendo. O selo fica no eixo, acima de tudo, e é ele que diz onde é agora.
+ * Faixa da clínica: atravessa as colunas, atrás dos cartões. Fica no fundo de propósito — é
+ * contexto do dia, não um item da agenda.
+ */
+.faixa-clinica {
+  inset-inline: var(--clinic-time-axis-width) 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+/* O motivo numa etiqueta de papel, legível por cima do hachurado. */
+.etiqueta {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  overflow: hidden;
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.etiqueta i {
+  flex: none;
+  font-size: 14px;
+}
+
+/*
+ * O fio do agora: atravessa as colunas **por trás dos cartões**. Por cima, ele caía no meio da
+ * segunda linha de texto de qualquer atendimento em curso e o nome aparecia riscado — a marca de
+ * "cancelado" na única consulta que está acontecendo. A hora fica no eixo, acima de tudo.
  */
 .agora {
   position: absolute;
-  inset-inline-start: 0;
+  inset-inline: var(--clinic-time-axis-width) 0;
   z-index: 0;
-  width: 100%;
-  border-top: 2px solid var(--clinic-risk-text);
+  border-top: 2px solid var(--clinica);
   pointer-events: none;
 }
 
-.agora__rotulo {
+.agora::before {
   position: absolute;
-  z-index: 5;
-  top: -0.75rem;
-  inset-inline-start: 2px;
-  padding: 0 0.3rem;
-  border-radius: 0.3rem;
-  background: var(--clinic-risk-text);
-  color: var(--clinic-surface);
-  font-size: 0.6rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  top: -5px;
+  inset-inline-start: -5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--clinica);
+  content: '';
 }
+
+/* ----------------------------------------------------------------------------- arraste */
+
+/*
+ * Destino do arraste: faixa larga por trás do fantasma, atravessando a coluna inteira. Fica
+ * **atrás** dos cartões de propósito — mostra contra o que o horário está batendo, sem cobrir.
+ */
+.destino {
+  position: absolute;
+  inset-inline-start: 0;
+  z-index: 1;
+  width: 100%;
+  border: 1px dashed var(--clinica);
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--clinica-fundo) 70%, transparent);
+  pointer-events: none;
+}
+
+.destino--conflito {
+  border-color: var(--atencao);
+  background: color-mix(in oklab, var(--atencao-fundo) 80%, transparent);
+}
+
+/*
+ * O aviso acompanha o fantasma e some com ele. Largura mínima maior que a coluna: um choque de
+ * sala tem nome comprido, e cortá-lo devolve o problema de não saber contra o quê se bate.
+ */
+.destino__aviso {
+  position: absolute;
+  inset-inline-start: 0;
+  z-index: 7;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: max(100%, 12rem);
+  max-width: 20rem;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in oklab, var(--atencao) 45%, transparent);
+  border-radius: 10px;
+  background: var(--atencao-fundo);
+  box-shadow: var(--sombra-2);
+  color: var(--atencao-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+.destino__aviso i {
+  margin-top: 1px;
+  font-size: 15px;
+}
+
+/* ------------------------------------------------------------------------------ rodapé */
 
 .grade__dica {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 8px;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-4);
-  border-top: 1px solid var(--clinic-line);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  padding: 10px 16px;
+  border-top: 1px solid var(--linha);
+  color: var(--tinta-3);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.grade__dica i {
+  flex: none;
+  font-size: 16px;
+}
+
+.grade__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 </style>

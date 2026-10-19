@@ -4,46 +4,35 @@
  *
  * A grade proporcional — o bloco do tamanho da duração — desenha bem um dia folgado e desmancha um
  * dia cheio: dois atendimentos no mesmo horário dividiam a coluna ou se empilhavam um sobre o
- * outro, a consulta de 15 minutos virava uma tira de 10 px com o nome cortado, e cada aviso de
- * risco escrito em vermelho em cada bloco transformava a tela numa parede de alertas. Clínica cheia
- * é o caso normal, e é para ele que esta vista existe:
+ * outro, a consulta de 15 minutos virava uma tira de 10 px com o nome cortado. Clínica cheia é o
+ * caso normal, e é para ele que esta vista existe:
  *
- * - **Cada atendimento é uma linha**, sempre da mesma altura: avatar, hora, paciente, o ícone do
- *   tipo. Dois no mesmo horário ficam um embaixo do outro e a linha da tabela cresce — nada se
- *   sobrepõe, nada é cortado.
- * - **A duração aparece onde importa.** O procedimento que atravessa a meia hora inteira seguinte
- *   continua como uma faixa clara nela ("Bento · até 15:30"): o horário está ocupado e se lê.
- * - **Risco é ícone, por categoria**, como na lista de pacientes — losango para alergia, mão para
- *   manejo —, na cor da gravidade, com a palavra no rótulo acessível. Uma vez por linha, não em
- *   letras vermelhas.
- * - **O estado pinta a linha**: chegou (pêssego), em atendimento (marca), finalizado (apagado),
- *   falta (riscado). É a única cor de fundo, e é o que muda ao longo do dia.
+ * - **Cada atendimento é uma linha**, sempre da mesma altura: rosto, nome, e os ícones de origem e
+ *   de alerta à direita. Dois no mesmo horário ficam um embaixo do outro e a linha da tabela
+ *   cresce — nada se sobrepõe, nada é cortado.
+ * - **O estado é a faixa da esquerda e o fundo**: agendado neutro, confirmado em azul claro, na
+ *   recepção em âmbar, em atendimento no azul da Clínica, finalizado esmaecido, falta em vermelho,
+ *   cancelado riscado. É a única cor de fundo da tabela, e é o que muda ao longo do dia.
+ * - **A duração aparece onde importa.** O procedimento que atravessa a meia hora seguinte continua
+ *   como uma faixa na cor do estado ("Bento até 15:30"): o horário está ocupado e se lê.
+ * - **O agora é um fio** na cor da Clínica, na altura exata do minuto, com a hora num rótulo.
  * - **Horário vazio é alvo**: clicar marca ali; arrastar um atendimento para outra célula propõe a
- *   remarcação, que passa pela mesma confirmação da grade.
+ *   remarcação, que passa pela mesma confirmação da linha do tempo.
  *
- * Os dados são os mesmos da grade (`useAgendaDia`): filtros, agrupamento por sala, conflitos e
- * bloqueios valem igual nas duas vistas.
+ * Os dados são os mesmos da linha do tempo (`useAgendaDia`): filtros, agrupamento por sala,
+ * conflitos e bloqueios valem igual nas duas vistas.
  */
-import {
-  PhBaby,
-  PhHandPalm,
-  PhHeartbeat,
-  PhPill,
-  PhShieldWarning,
-  PhWallet,
-  PhWarningDiamond,
-} from '@phosphor-icons/vue'
-import Button from 'primevue/button'
-import { computed, nextTick, onMounted, ref, type Component } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
+import { ICONE_DA_ORIGEM, ICONE_DO_ALERTA, ICONE_DO_BLOQUEIO } from './agenda-icones'
 import type { CardAgenda, ColunaAgenda, FaixaBloqueio } from '../../composables/useAgendaDia'
 import { useAgendaDia } from '../../composables/useAgendaDia'
 import type { ArrasteProposta } from '../../composables/useAgendaDrag'
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import type { Appointment, PetAlertKind } from '../../data/types'
+import type { Pet } from '../../data/types'
 import { aparenciaDoTipo } from '../../domain/appointment-kind'
 import { severidadeMaxima } from '../../domain/conflicts'
 import { useAgendaStore } from '../../stores/agenda'
@@ -72,7 +61,11 @@ type Linha = {
   rotulo: string
   cheia: boolean
   /** Bloqueio da clínica inteira que cobre esta linha e as seguintes: vira uma linha só. */
-  fechada: { motivo: FaixaBloqueio['bloqueio']['motivo']; ate: string } | null
+  fechada: {
+    motivo: FaixaBloqueio['bloqueio']['motivo']
+    detalhe: string
+    ate: string
+  } | null
 }
 
 const linhas = computed<Linha[]>(() => {
@@ -84,7 +77,7 @@ const linhas = computed<Linha[]>(() => {
     const bloqueio = bloqueioDaClinica(minuto)
     const anterior = lista.at(-1)
 
-    /* Almoço das 12h às 13h é uma linha, não duas com "ALMOÇO" repetido. */
+    /* Almoço das 12h às 13h é uma linha, não duas com "Almoço" repetido. */
     if (bloqueio && anterior?.fechada && anterior.fechada.motivo === bloqueio.bloqueio.motivo) {
       continue
     }
@@ -96,6 +89,7 @@ const linhas = computed<Linha[]>(() => {
       fechada: bloqueio
         ? {
             motivo: bloqueio.bloqueio.motivo,
+            detalhe: bloqueio.bloqueio.detalhe,
             ate: rotuloDoMinuto(clinicClock.minutesFrom(bloqueio.bloqueio.fim, agenda.data)),
           }
         : null,
@@ -104,6 +98,11 @@ const linhas = computed<Linha[]>(() => {
 
   return lista
 })
+
+/** Onde a tabela termina, em minutos: o fim da última linha. */
+const fimDaTabela = computed(
+  () => Math.ceil(limites.value.fim / LINHA_EM_MINUTOS) * LINHA_EM_MINUTOS,
+)
 
 function rotuloDoMinuto(minuto: number) {
   return `${String(Math.floor(minuto / 60)).padStart(2, '0')}:${String(minuto % 60).padStart(2, '0')}`
@@ -137,6 +136,23 @@ function bloqueioDaColuna(coluna: ColunaAgenda, minuto: number) {
   )
 }
 
+/**
+ * O motivo do bloqueio é escrito uma vez, na meia hora em que ele começa: a folga da tarde inteira
+ * repetindo "Bloqueio pessoal" em seis linhas virava parede de texto. As outras ficam só com o
+ * hachurado, que já diz "fechado".
+ */
+function bloqueioComecaAqui(faixa: FaixaBloqueio, minuto: number) {
+  const { inicio } = minutosDaFaixa(faixa)
+
+  return inicio >= minuto || minuto === linhas.value[0]?.minuto
+}
+
+function tituloDoBloqueio(faixa: FaixaBloqueio) {
+  const motivo = formato.motivoBloqueio(faixa.bloqueio.motivo)
+
+  return faixa.bloqueio.detalhe ? `${motivo}: ${faixa.bloqueio.detalhe}` : motivo
+}
+
 /** Os atendimentos que começam nesta meia hora, nesta coluna, na ordem do horário. */
 function queComecam(coluna: ColunaAgenda, minuto: number): CardAgenda[] {
   return coluna.cards.filter(
@@ -165,28 +181,15 @@ function primeiraContinuacao(card: CardAgenda, minuto: number) {
 
 // ------------------------------------------------------------------ a linha de cada atendimento
 
-const ICONE_DO_ALERTA: Record<PetAlertKind, Component> = {
-  alergia: PhWarningDiamond,
-  agressivo: PhHandPalm,
-  cronico: PhHeartbeat,
-  'medicacao-continua': PhPill,
-  imunossuprimido: PhShieldWarning,
-  gestante: PhBaby,
-  inadimplente: PhWallet,
-}
-
-/**
- * A origem que vira ícone: só a de quem marcou sozinho, pelo app ou pelo link da clínica. As
- * outras são a própria recepção, e marcá-las em toda linha seria textura.
- */
-const ICONE_DA_ORIGEM: Partial<Record<Appointment['origem'], string>> = {
-  app: 'ph ph-device-mobile',
-  link: 'ph ph-globe-simple',
-}
-
-/** Só o que é risco vira ícone na agenda: o resto mora na ficha e no drawer. */
+/** Só o que é risco vira ícone na agenda: o resto mora na ficha e no painel do atendimento. */
 function alertasDeRisco(card: CardAgenda) {
   return (card.pet?.alertas ?? []).filter((alerta) => alerta.severidade === 'risco')
+}
+
+function textoDoAlerta(alerta: Pet['alertas'][number]) {
+  return alerta.detalhe
+    ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}`
+    : formato.alerta(alerta.kind)
 }
 
 /**
@@ -206,33 +209,32 @@ function temAviso(card: CardAgenda) {
   return severidade === 'warning' || severidade === 'blocking'
 }
 
+function textoDosAvisos(card: CardAgenda) {
+  return card.conflitos
+    .filter((conflito) => conflito.severity !== 'info')
+    .map(formato.conflito)
+    .join(' · ')
+}
+
 function rotuloDoCard(card: CardAgenda) {
   const partes = [
     formato.intervalo(card.appointment.inicio, card.appointment.fim),
     card.pet?.nome ?? '',
     card.tipo?.nome ?? '',
     formato.status(card.appointment.status),
+    card.appointment.encaixe ? t('clinico.agenda.tabela.encaixe') : '',
     ICONE_DA_ORIGEM[card.appointment.origem] ? t(`clinico.origem.${card.appointment.origem}`) : '',
-    ...alertasDeRisco(card).map((alerta) =>
-      alerta.detalhe
-        ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}`
-        : formato.alerta(alerta.kind),
-    ),
+    ...alertasDeRisco(card).map(textoDoAlerta),
   ]
 
   if (temAviso(card)) {
-    partes.push(
-      card.conflitos
-        .filter((conflito) => conflito.severity !== 'info')
-        .map(formato.conflito)
-        .join(' · '),
-    )
+    partes.push(textoDosAvisos(card))
   }
 
   return partes.filter(Boolean).join(' · ')
 }
 
-/** Falta a um clique, para quem já devia ter chegado — como no card da grade. */
+/** Falta a um clique, para quem já devia ter chegado — como no cartão da linha do tempo. */
 function podeMarcarFalta(card: CardAgenda) {
   return (
     ['agendado', 'confirmado'].includes(card.appointment.status) &&
@@ -245,27 +247,69 @@ function podeMarcarFalta(card: CardAgenda) {
 const agoraMinuto = ref(clinicClock.now().minutes)
 const ehHoje = computed(() => agenda.data === clinicClock.today())
 
+/**
+ * A linha da tabela onde o agora cai, e a que altura dela: o fio é desenhado na proporção exata
+ * do minuto dentro da meia hora (ou dentro da faixa do almoço, que ocupa uma linha só).
+ */
+const agora = computed(() => {
+  if (!ehHoje.value) {
+    return null
+  }
+
+  const lista = linhas.value
+
+  for (const [indice, linha] of lista.entries()) {
+    const fim = lista[indice + 1]?.minuto ?? fimDaTabela.value
+
+    if (agoraMinuto.value >= linha.minuto && agoraMinuto.value < fim) {
+      return {
+        minuto: linha.minuto,
+        fracao: (agoraMinuto.value - linha.minuto) / Math.max(fim - linha.minuto, 1),
+        rotulo: rotuloDoMinuto(agoraMinuto.value),
+      }
+    }
+  }
+
+  return null
+})
+
 function ehLinhaDoAgora(minuto: number) {
-  return (
-    ehHoje.value && agoraMinuto.value >= minuto && agoraMinuto.value < minuto + LINHA_EM_MINUTOS
-  )
+  return agora.value?.minuto === minuto
+}
+
+/**
+ * Quando o agora cai no começo da meia hora, o rótulo dele ficaria por cima da hora da linha e as
+ * duas apareceriam pela metade. A hora da linha sai: o rótulo do agora já diz em que hora se está.
+ */
+function rotuloCoberto(minuto: number) {
+  return ehLinhaDoAgora(minuto) && (agora.value?.fracao ?? 1) < 0.45
 }
 
 const rolagem = ref<HTMLElement | null>(null)
+let relogio: ReturnType<typeof setInterval> | null = null
 
 /* Hoje, a tabela abre na meia hora de agora — e não às 8h, quando já são 15h. */
 onMounted(async () => {
   agoraMinuto.value = clinicClock.now().minutes
+  relogio = setInterval(() => {
+    agoraMinuto.value = clinicClock.now().minutes
+  }, 30_000)
 
   if (!ehHoje.value) {
     return
   }
 
   await nextTick()
-  const linha = rolagem.value?.querySelector<HTMLElement>('.tabela__linha--agora')
+  const linha = rolagem.value?.querySelector<HTMLElement>('.tabela__linha--atual')
 
   if (linha && rolagem.value) {
     rolagem.value.scrollTop = Math.max(linha.offsetTop - rolagem.value.clientHeight / 3, 0)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (relogio) {
+    clearInterval(relogio)
   }
 })
 
@@ -275,6 +319,15 @@ function criarEm(coluna: ColunaAgenda, minuto: number) {
   if (coluna.professionalId) {
     emit('criarEm', { professionalId: coluna.professionalId, minuto })
   }
+}
+
+function celulaLivre(coluna: ColunaAgenda, minuto: number) {
+  return (
+    Boolean(coluna.professionalId) &&
+    !bloqueioDaColuna(coluna, minuto) &&
+    queComecam(coluna, minuto).length === 0 &&
+    queContinuam(coluna, minuto).length === 0
+  )
 }
 
 const arrastando = ref<CardAgenda | null>(null)
@@ -338,10 +391,23 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
     redimensionou: false,
   })
 }
+
+/** Ocupação acima de 85% é dia apertado; acima de 100%, vendido além do expediente. */
+function tomDaOcupacao(ocupacao: number) {
+  if (ocupacao > 1) {
+    return 'risco'
+  }
+
+  return ocupacao >= 0.85 ? 'atencao' : 'normal'
+}
 </script>
 
 <template>
-  <section class="hc tabela clinic-scope" :aria-label="t('clinico.agenda.tabela.rotulo')">
+  <section
+    class="tabela ui-folha clinic-scope"
+    :aria-label="t('clinico.agenda.tabela.rotulo')"
+    :style="{ '--colunas': Math.max(colunas.length, 1) }"
+  >
     <div ref="rolagem" class="tabela__rolagem">
       <table class="tabela__grade">
         <thead>
@@ -350,7 +416,7 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
               <span class="tabela__sr">{{ t('clinico.agenda.tabela.horario') }}</span>
             </th>
             <th v-for="coluna in colunas" :key="coluna.id" scope="col" class="tabela__coluna">
-              <span class="tabela__coluna-nome">
+              <span class="tabela__coluna-nome" :title="coluna.titulo">
                 <span
                   class="tabela__coluna-cor"
                   :style="{ background: coluna.cor }"
@@ -358,11 +424,15 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
                 />
                 <span class="tabela__coluna-titulo">{{ coluna.titulo }}</span>
               </span>
-              <span class="tabela__ocupacao" :title="t('clinico.agenda.tabela.ocupacao')">
+              <span
+                class="tabela__ocupacao"
+                :class="`tabela__ocupacao--${tomDaOcupacao(coluna.ocupacao)}`"
+                :title="`${t('clinico.agenda.tabela.ocupacao')}: ${formato.percentual(coluna.ocupacao)}`"
+              >
                 <span class="tabela__ocupacao-trilho" aria-hidden="true">
                   <span :style="{ inlineSize: `${Math.min(coluna.ocupacao, 1) * 100}%` }" />
                 </span>
-                {{ formato.percentual(coluna.ocupacao) }}
+                <span class="ui-num">{{ formato.percentual(coluna.ocupacao) }}</span>
               </span>
             </th>
           </tr>
@@ -371,15 +441,38 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
         <tbody>
           <template v-for="linha in linhas" :key="linha.minuto">
             <!-- Almoço e bloqueio da clínica inteira: uma faixa só, atravessando as colunas. -->
-            <tr v-if="linha.fechada" class="tabela__linha tabela__linha--fechada">
-              <th scope="row" class="tabela__hora" :class="{ 'tabela__hora--cheia': linha.cheia }">
-                {{ linha.rotulo }}
+            <tr
+              v-if="linha.fechada"
+              class="tabela__linha tabela__linha--fechada"
+              :class="{
+                'tabela__linha--cheia': linha.cheia,
+                'tabela__linha--atual': ehLinhaDoAgora(linha.minuto),
+              }"
+              :style="ehLinhaDoAgora(linha.minuto) ? { '--agora': agora!.fracao } : undefined"
+            >
+              <th scope="row" class="tabela__hora">
+                <span
+                  class="tabela__hora-rotulo"
+                  :class="{ 'tabela__hora-rotulo--coberto': rotuloCoberto(linha.minuto) }"
+                >
+                  {{ linha.rotulo }}
+                </span>
+                <span v-if="ehLinhaDoAgora(linha.minuto)" class="tabela__agora-rotulo ui-num">
+                  <span class="tabela__sr">{{ t('clinico.agenda.tabela.agora') }}</span>
+                  {{ agora!.rotulo }}
+                </span>
               </th>
               <td :colspan="colunas.length" class="tabela__faixa">
-                {{ formato.motivoBloqueio(linha.fechada.motivo) }}
-                <span class="tabela__faixa-ate">{{
-                  t('clinico.agenda.tabela.ate', { hora: linha.fechada.ate })
-                }}</span>
+                <span class="tabela__etiqueta">
+                  <i :class="ICONE_DO_BLOQUEIO[linha.fechada.motivo]" aria-hidden="true" />
+                  <strong>{{ formato.motivoBloqueio(linha.fechada.motivo) }}</strong>
+                  <span v-if="linha.fechada.detalhe" class="tabela__etiqueta-detalhe">
+                    {{ linha.fechada.detalhe }}
+                  </span>
+                  <span class="tabela__etiqueta-ate ui-num">
+                    {{ t('clinico.agenda.tabela.ate', { hora: linha.fechada.ate }) }}
+                  </span>
+                </span>
               </td>
             </tr>
 
@@ -387,14 +480,21 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
               v-else
               class="tabela__linha"
               :class="{
-                'tabela__linha--agora': ehLinhaDoAgora(linha.minuto),
+                'tabela__linha--atual': ehLinhaDoAgora(linha.minuto),
                 'tabela__linha--cheia': linha.cheia,
               }"
+              :style="ehLinhaDoAgora(linha.minuto) ? { '--agora': agora!.fracao } : undefined"
             >
-              <th scope="row" class="tabela__hora" :class="{ 'tabela__hora--cheia': linha.cheia }">
-                {{ linha.rotulo }}
-                <span v-if="ehLinhaDoAgora(linha.minuto)" class="tabela__agora">
-                  {{ t('clinico.agenda.tabela.agora') }}
+              <th scope="row" class="tabela__hora">
+                <span
+                  class="tabela__hora-rotulo"
+                  :class="{ 'tabela__hora-rotulo--coberto': rotuloCoberto(linha.minuto) }"
+                >
+                  {{ linha.rotulo }}
+                </span>
+                <span v-if="ehLinhaDoAgora(linha.minuto)" class="tabela__agora-rotulo ui-num">
+                  <span class="tabela__sr">{{ t('clinico.agenda.tabela.agora') }}</span>
+                  {{ agora!.rotulo }}
                 </span>
               </th>
 
@@ -410,133 +510,169 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
                 @dragleave="alvo === chaveDaCelula(coluna, linha.minuto) && (alvo = null)"
                 @drop.prevent="aoSoltar($event, coluna, linha.minuto)"
               >
-                <span v-if="bloqueioDaColuna(coluna, linha.minuto)" class="tabela__bloqueio">
-                  {{
-                    formato.motivoBloqueio(bloqueioDaColuna(coluna, linha.minuto)!.bloqueio.motivo)
-                  }}
-                </span>
+                <!--
+                  O que vem de antes e ainda ocupa esta meia hora: a célula inteira na cor clara do
+                  estado, com a faixa da esquerda — horário tomado, sem repetir o atendimento.
+                -->
+                <span
+                  v-if="queContinuam(coluna, linha.minuto).length > 0"
+                  class="continua-fundo"
+                  :class="`estado--${queContinuam(coluna, linha.minuto)[0]!.appointment.status}`"
+                  aria-hidden="true"
+                />
 
                 <ul class="tabela__lista">
-                  <!-- O que vem de antes e ainda ocupa esta meia hora: faixa clara, sem repetir o card. -->
-                  <!-- O nome só na primeira meia hora da continuação; nas seguintes, a faixa basta. -->
                   <li
-                    v-for="card in queContinuam(coluna, linha.minuto)"
-                    :key="`continua-${card.id}`"
-                    class="tabela__continua"
-                    :class="{ 'tabela__continua--muda': !primeiraContinuacao(card, linha.minuto) }"
+                    v-if="
+                      bloqueioDaColuna(coluna, linha.minuto) &&
+                      bloqueioComecaAqui(bloqueioDaColuna(coluna, linha.minuto)!, linha.minuto)
+                    "
+                    class="tabela__bloqueio"
                   >
-                    <template v-if="primeiraContinuacao(card, linha.minuto)">
-                      <span class="tabela__continua-nome">{{ card.pet?.nome }}</span>
-                      {{
-                        t('clinico.agenda.tabela.ate', { hora: formato.hora(card.appointment.fim) })
-                      }}
-                    </template>
+                    <span
+                      class="tabela__etiqueta"
+                      :title="tituloDoBloqueio(bloqueioDaColuna(coluna, linha.minuto)!)"
+                    >
+                      <i
+                        :class="ICONE_DO_BLOQUEIO[bloqueioDaColuna(coluna, linha.minuto)!.bloqueio.motivo]"
+                        aria-hidden="true"
+                      />
+                      <strong>{{
+                        formato.motivoBloqueio(bloqueioDaColuna(coluna, linha.minuto)!.bloqueio.motivo)
+                      }}</strong>
+                      <span class="tabela__etiqueta-ate ui-num">
+                        {{
+                          t('clinico.agenda.tabela.ate', {
+                            hora: formato.hora(bloqueioDaColuna(coluna, linha.minuto)!.bloqueio.fim),
+                          })
+                        }}
+                      </span>
+                    </span>
+                  </li>
+
+                  <!-- O nome só na primeira meia hora da continuação; nas seguintes, o fundo basta. -->
+                  <li
+                    v-for="card in queContinuam(coluna, linha.minuto).filter((item) =>
+                      primeiraContinuacao(item, linha.minuto),
+                    )"
+                    :key="`continua-${card.id}`"
+                    class="continua"
+                    :class="`estado--${card.appointment.status}`"
+                  >
+                    <span class="continua__nome">{{ card.pet?.nome }}</span>
+                    <span class="ui-num">{{
+                      t('clinico.agenda.tabela.ate', { hora: formato.hora(card.appointment.fim) })
+                    }}</span>
                   </li>
 
                   <li v-for="card in queComecam(coluna, linha.minuto)" :key="card.id">
                     <div
-                      class="atendimento"
+                      class="marcacao"
                       :class="[
-                        `atendimento--${card.appointment.status}`,
-                        { 'atendimento--selecionado': agenda.focoId === card.id },
+                        `estado--${card.appointment.status}`,
+                        { 'marcacao--selecionada': agenda.focoId === card.id },
                       ]"
                       draggable="true"
                       @dragstart="aoComecarArraste($event, card)"
                       @dragend="aoTerminarArraste"
                     >
-                      <Button
+                      <button
                         type="button"
-                        class="atendimento__abrir"
-                        text
+                        class="marcacao__abrir"
                         :aria-label="rotuloDoCard(card)"
+                        :title="rotuloDoCard(card)"
                         @click="emit('abrir', card.id)"
                       >
                         <PetAvatar
+                          class="marcacao__rosto"
                           :nome="card.pet?.nome ?? ''"
                           :iniciais="card.pet?.iniciais ?? ''"
                           :especie="card.pet?.especie ?? null"
                           :foto-url="card.pet?.fotoUrl ?? ''"
                           tamanho="sm"
                         />
-                        <!-- A linha da tabela já diz a hora cheia: o card só repete quando foge dela (09:15). -->
-                        <span v-if="card.inicioMin !== linha.minuto" class="atendimento__hora">{{
-                          formato.hora(card.appointment.inicio)
-                        }}</span>
-                        <span class="atendimento__nome">{{ card.pet?.nome }}</span>
-                        <!-- Marcado pelo responsável, no app ou no link: a origem à vista na linha. -->
-                        <i
-                          v-if="ICONE_DA_ORIGEM[card.appointment.origem]"
-                          :class="['atendimento__origem', ICONE_DA_ORIGEM[card.appointment.origem]]"
-                          :title="t(`clinico.origem.${card.appointment.origem}`)"
-                          aria-hidden="true"
-                        />
-                        <i
-                          v-if="aparenciaDoTipo(card.tipo?.kind).icone"
-                          :class="['atendimento__tipo', aparenciaDoTipo(card.tipo?.kind).icone]"
-                          :style="{ color: aparenciaDoTipo(card.tipo?.kind).cor }"
-                          :title="card.tipo?.nome"
-                          aria-hidden="true"
-                        />
+                        <!--
+                          A linha da tabela já diz a hora cheia: o cartão só repete quando foge dela
+                          (09:15). O encaixe mostra sempre a hora, num selo âmbar: é a marca dele
+                          que cabe até na coluna estreita.
+                        -->
                         <span
-                          v-if="card.appointment.encaixe"
-                          class="atendimento__encaixe"
-                          aria-hidden="true"
+                          v-if="card.inicioMin !== linha.minuto || card.appointment.encaixe"
+                          class="marcacao__hora ui-num"
+                          :class="{ 'marcacao__hora--encaixe': card.appointment.encaixe }"
+                          :title="card.appointment.encaixe ? t('clinico.agenda.tabela.encaixe') : undefined"
                         >
-                          {{ t('clinico.agenda.tabela.encaixe') }}
+                          {{ formato.hora(card.appointment.inicio) }}
                         </span>
-                        <component
-                          :is="ICONE_DO_ALERTA[alerta.kind]"
-                          v-for="alerta in alertasDeRisco(card)"
-                          :key="alerta.id"
-                          class="atendimento__risco"
-                          weight="fill"
-                          :title="
-                            alerta.detalhe
-                              ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}`
-                              : formato.alerta(alerta.kind)
-                          "
-                          aria-hidden="true"
-                        />
-                        <i
-                          v-if="temAviso(card)"
-                          class="ph ph-warning-circle atendimento__aviso"
-                          aria-hidden="true"
-                        />
-                      </Button>
+                        <span class="marcacao__nome">{{ card.pet?.nome }}</span>
 
-                      <Button
+                        <!-- Os ícones em ordem de importância: o que não couber sai pela direita. -->
+                        <span class="marcacao__icones" aria-hidden="true">
+                          <component
+                            :is="ICONE_DO_ALERTA[alerta.kind]"
+                            v-for="alerta in alertasDeRisco(card)"
+                            :key="alerta.id"
+                            class="marcacao__risco"
+                            weight="fill"
+                            :title="textoDoAlerta(alerta)"
+                          />
+                          <i
+                            v-if="temAviso(card)"
+                            class="ph ph-warning-circle marcacao__aviso"
+                            :title="textoDosAvisos(card)"
+                          />
+                          <i
+                            v-if="card.appointment.status === 'falta'"
+                            class="ph ph-user-minus marcacao__falta-icone"
+                            :title="formato.status('falta')"
+                          />
+                          <span v-if="card.appointment.encaixe" class="marcacao__encaixe">
+                            {{ t('clinico.agenda.tabela.encaixe') }}
+                          </span>
+                          <!-- Marcado pelo responsável, no app ou no link: a origem à vista. -->
+                          <i
+                            v-if="ICONE_DA_ORIGEM[card.appointment.origem]"
+                            :class="['marcacao__origem', ICONE_DA_ORIGEM[card.appointment.origem]]"
+                            :title="t(`clinico.origem.${card.appointment.origem}`)"
+                          />
+                          <i
+                            v-if="aparenciaDoTipo(card.tipo?.kind).icone"
+                            :class="['marcacao__tipo', aparenciaDoTipo(card.tipo?.kind).icone]"
+                            :style="{ color: aparenciaDoTipo(card.tipo?.kind).cor }"
+                            :title="card.tipo?.nome"
+                          />
+                        </span>
+                      </button>
+
+                      <button
                         v-if="podeMarcarFalta(card)"
                         type="button"
-                        class="atendimento__falta"
-                        icon="ph ph-user-minus"
-                        severity="secondary"
-                        text
-                        size="small"
+                        class="marcacao__falta"
                         :title="t('clinico.faltas.marcar')"
-                        :aria-label="`${t('clinico.faltas.marcar')} — ${card.pet?.nome ?? ''}`"
+                        :aria-label="`${t('clinico.faltas.marcar')}: ${card.pet?.nome ?? ''}`"
                         @click.stop="emit('marcarFalta', card.id)"
-                      />
+                      >
+                        <i class="ph ph-user-minus" aria-hidden="true" />
+                      </button>
                     </div>
                   </li>
                 </ul>
 
                 <!-- Horário livre é alvo: a recepção marca clicando onde vê o vazio. -->
-                <Button
-                  v-if="
-                    coluna.professionalId &&
-                    !bloqueioDaColuna(coluna, linha.minuto) &&
-                    queComecam(coluna, linha.minuto).length === 0 &&
-                    queContinuam(coluna, linha.minuto).length === 0
-                  "
+                <button
+                  v-if="celulaLivre(coluna, linha.minuto)"
                   type="button"
                   class="tabela__marcar"
-                  icon="ph ph-plus"
-                  text
                   :aria-label="
                     t('clinico.agenda.tabela.marcarAs', { hora: linha.rotulo, nome: coluna.titulo })
                   "
                   @click="criarEm(coluna, linha.minuto)"
-                />
+                >
+                  <span class="tabela__marcar-rotulo" aria-hidden="true">
+                    <i class="ph ph-plus" />
+                    <span class="ui-num">{{ linha.rotulo }}</span>
+                  </span>
+                </button>
               </td>
             </tr>
           </template>
@@ -545,434 +681,675 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
     </div>
 
     <p class="tabela__dica">
-      <i class="ph ph-arrows-out-cardinal" aria-hidden="true" />
+      <i class="ph ph-hand-grabbing" aria-hidden="true" />
       {{ t('clinico.agenda.tabela.dica') }}
     </p>
   </section>
 </template>
 
 <style scoped>
+/*
+ * A altura da linha acompanha a densidade escolhida no menu Exibição: a recepção que quer o dia
+ * inteiro na tela escolhe "compacta"; quem prefere respiro, "confortável".
+ */
 .tabela {
-  --tabela-eixo: 4.5rem;
+  --tabela-eixo: 4.75rem;
+  --tabela-linha: 46px;
+  --tabela-coluna-minima: 7.5rem;
+  --linha-de-meia-hora: color-mix(in oklab, var(--linha) 55%, transparent);
 
-  gap: 0;
-  padding: 0;
+  display: grid;
   overflow: hidden;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+:root[data-clinic-density='compacta'] .tabela {
+  --tabela-linha: 38px;
+}
+
+:root[data-clinic-density='confortavel'] .tabela {
+  --tabela-linha: 56px;
 }
 
 .tabela__rolagem {
-  max-height: calc(100vh - 15rem);
-  min-height: 24rem;
+  min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .tabela__grade {
   width: 100%;
-  min-width: 40rem;
+  min-width: calc(var(--tabela-eixo) + var(--colunas) * var(--tabela-coluna-minima));
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
 }
 
-/* ---------------------------------------------------------------- cabeçalho */
+/* --------------------------------------------------------------------------- cabeçalho */
 
 .tabela__grade thead th {
   position: sticky;
   top: 0;
-  z-index: 3;
-  padding: 0.7rem 0.6rem 0.55rem;
-  border-bottom: 1px solid var(--hc-borda);
-  background: var(--hc-cartao);
+  z-index: 4;
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--linha);
+  background: var(--superficie);
   text-align: start;
   vertical-align: bottom;
 }
 
+.tabela__grade thead th + th {
+  border-inline-start: 1px solid var(--linha);
+}
+
 .tabela__eixo-cabeca {
   left: 0;
-  z-index: 4 !important;
+  z-index: 5 !important;
   width: var(--tabela-eixo);
 }
 
 .tabela__coluna-nome {
   display: flex;
+  min-width: 0;
   align-items: center;
-  gap: 0.4rem;
-  overflow: hidden;
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  font-weight: 650;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  gap: 8px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .tabela__coluna-titulo {
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.tabela__continua--muda {
-  min-height: 0.6rem;
-  padding-block: 0;
+  white-space: nowrap;
 }
 
 .tabela__coluna-cor {
-  flex-shrink: 0;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 999px;
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 50%;
 }
 
+/* A ocupação: barrinha fina e o número — a barra localiza, o número compara. */
 .tabela__ocupacao {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.3rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
   font-weight: 600;
 }
 
 .tabela__ocupacao-trilho {
   display: block;
+  height: 4px;
   flex: 1;
-  height: 0.25rem;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--hc-linha);
+  background: var(--superficie-3);
 }
 
 .tabela__ocupacao-trilho > span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--hc-marca);
+  background: var(--clinica);
 }
 
-/* ---------------------------------------------------------------- linhas */
+.tabela__ocupacao--atencao {
+  color: var(--atencao-tinta);
+}
+
+.tabela__ocupacao--atencao .tabela__ocupacao-trilho > span {
+  background: var(--atencao);
+}
+
+.tabela__ocupacao--risco {
+  color: var(--risco-tinta);
+}
+
+.tabela__ocupacao--risco .tabela__ocupacao-trilho > span {
+  background: var(--risco);
+}
+
+/* ------------------------------------------------------------------------------ linhas */
+
+.tabela__linha > * {
+  border-top: 1px solid var(--linha-de-meia-hora);
+}
+
+/* A hora cheia tem o fio cheio; a meia hora, o sutil. O olho acha "as 14h" sem ler cada linha. */
+.tabela__linha--cheia > * {
+  border-top-color: var(--linha);
+}
+
+tbody > .tabela__linha:first-child > * {
+  border-top-color: transparent;
+}
 
 .tabela__hora {
   position: sticky;
   left: 0;
-  z-index: 2;
-  padding: 0.5rem 0.6rem 0.4rem 0.75rem;
-  border-bottom: 1px solid var(--hc-linha);
-  background: var(--hc-cartao);
-  color: var(--hc-tinta-3);
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  z-index: 3;
+  padding: 7px 10px 0 16px;
+  border-inline-end: 1px solid var(--linha);
+  background: var(--superficie);
   text-align: start;
   vertical-align: top;
 }
 
-/* A hora cheia pesa mais que a meia: o olho acha "as 14h" sem ler cada linha. */
-.tabela__hora--cheia {
-  color: var(--hc-tinta);
-  font-size: 0.8125rem;
-}
-
-.tabela__agora {
+.tabela__hora-rotulo {
   display: block;
-  margin-top: 0.15rem;
-  color: var(--hc-coral-tinta);
-  font-size: 0.6875rem;
-  font-weight: 700;
+  color: var(--tinta-3);
+  font-family: var(--font-dados);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
-/* A meia hora de agora ganha um fio coral na borda de cima — é onde o dia está. */
-.tabela__linha--agora > * {
-  border-top: 2px solid var(--hc-coral-tinta);
+.tabela__hora-rotulo--coberto {
+  visibility: hidden;
+}
+
+.tabela__linha--cheia .tabela__hora-rotulo {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 650;
 }
 
 .tabela__celula {
   position: relative;
   min-width: 0;
-  height: 2.5rem;
-  padding: 0.25rem 0.35rem;
-  border-bottom: 1px solid var(--hc-linha);
-  border-inline-start: 1px solid var(--hc-linha);
+  height: var(--tabela-linha);
+  padding: 5px 6px;
+  border-inline-start: 1px solid var(--linha);
   vertical-align: top;
 }
 
+.tabela__hora + .tabela__celula {
+  border-inline-start: 0;
+}
+
 .tabela__celula--alvo {
-  background: var(--hc-marca-clara);
-  outline: 2px dashed var(--hc-marca);
+  background: color-mix(in oklab, var(--clinica-fundo) 70%, transparent);
+  outline: 2px dashed var(--clinica);
   outline-offset: -3px;
 }
 
-.tabela__celula--bloqueada {
-  background: repeating-linear-gradient(
+/* Bloqueio é hachurado discreto: fechado, mas sem gritar. */
+.tabela__celula--bloqueada,
+.tabela__faixa {
+  background-color: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+  background-image: repeating-linear-gradient(
     135deg,
-    transparent 0 6px,
-    color-mix(in srgb, var(--hc-linha) 80%, transparent) 6px 12px
+    transparent 0 7px,
+    color-mix(in oklab, var(--linha) 85%, transparent) 7px 8px
   );
-}
-
-.tabela__bloqueio {
-  display: block;
-  padding: 0.15rem 0.25rem;
-  color: var(--hc-tinta-3);
-  font-size: 0.75rem;
-}
-
-.tabela__linha--fechada .tabela__hora {
-  color: var(--hc-tinta-3);
-}
-
-.tabela__faixa-ate {
-  margin-inline-start: 0.4rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 .tabela__faixa {
-  padding: 0.4rem 0.75rem;
-  border-bottom: 1px solid var(--hc-linha);
-  background: repeating-linear-gradient(
-    135deg,
-    transparent 0 6px,
-    color-mix(in srgb, var(--hc-linha) 80%, transparent) 6px 12px
-  );
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
-  font-weight: 650;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  height: 40px;
+  padding: 0 12px;
+  vertical-align: middle;
 }
 
-/* A lista é o contêiner das regras de coluna estreita: célula de tabela não vira contêiner. */
+.tabela__linha--fechada .tabela__hora {
+  padding-top: 0;
+  vertical-align: middle;
+}
+
+/* O motivo do bloqueio numa etiqueta de papel: legível por cima do hachurado. */
+.tabela__etiqueta {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 0 10px;
+  overflow: hidden;
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.tabela__etiqueta i {
+  flex: none;
+  font-size: 14px;
+}
+
+.tabela__etiqueta strong {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.tabela__etiqueta-detalhe {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabela__etiqueta-ate {
+  color: var(--tinta-3);
+}
+
+.tabela__bloqueio {
+  min-width: 0;
+}
+
+/* ----------------------------------------------------------------------- o agora */
+
+/*
+ * O fio do agora atravessa a linha inteira, na altura do minuto. Cada célula desenha o seu trecho
+ * e, como todas têm a mesma altura, os trechos se emendam num fio só. Fica por trás dos
+ * atendimentos: por cima, riscaria justamente a consulta que está acontecendo.
+ */
+.tabela__linha--atual > *::after {
+  position: absolute;
+  top: calc(var(--agora, 0) * 100%);
+  right: 0;
+  left: 0;
+  z-index: 1;
+  border-top: 2px solid var(--clinica);
+  content: '';
+  pointer-events: none;
+}
+
+.tabela__agora-rotulo {
+  position: absolute;
+  top: calc(var(--agora, 0) * 100%);
+  left: 8px;
+  z-index: 2;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--clinica-tinta);
+  color: var(--superficie);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.3;
+  transform: translateY(-50%);
+}
+
+/* A lista fica acima do fio e abaixo das etiquetas: é ela que recebe o olho. */
 .tabela__lista {
+  position: relative;
+  z-index: 2;
   container-type: inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 0.2rem;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.tabela__continua {
-  overflow: hidden;
-  padding: 0.2rem 0.45rem;
-  border-inline-start: 3px solid var(--hc-borda);
-  border-radius: 0.35rem;
-  background: color-mix(in srgb, var(--hc-linha) 70%, transparent);
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+/* --------------------------------------------------------------------- horário livre */
 
-.tabela__continua-nome {
-  color: var(--hc-tinta);
-  font-weight: 600;
-}
-
-/* O "+" do horário livre: aparece ao passar o mouse; no toque, fica sempre. */
-.tabela__celula .tabela__marcar.p-button {
+.tabela__marcar {
   position: absolute;
-  inset: 0;
-  width: auto;
-  height: auto;
-  border: 0;
-  border-radius: 0;
+  inset: 3px;
+  z-index: 1;
+  display: grid;
+  padding: 0;
+  border: 1px dashed transparent;
+  border-radius: 8px;
   background: transparent;
-  box-shadow: none;
-  color: var(--hc-marca-forte);
-  opacity: 0;
-  transition: opacity 0.15s ease-out;
+  color: var(--clinica-tinta);
+  cursor: pointer;
+  font: inherit;
+  place-items: center;
 }
 
-.tabela__celula .tabela__marcar.p-button:not(:disabled):hover,
-.tabela__celula .tabela__marcar.p-button:focus-visible {
-  background: color-mix(in srgb, var(--hc-marca-clara) 60%, transparent);
+.tabela__marcar-rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.tabela__marcar:hover,
+.tabela__marcar:focus-visible {
+  border-color: color-mix(in oklab, var(--clinica) 55%, transparent);
+  background: color-mix(in oklab, var(--clinica-fundo) 65%, transparent);
+}
+
+.tabela__marcar:hover .tabela__marcar-rotulo,
+.tabela__marcar:focus-visible .tabela__marcar-rotulo {
   opacity: 1;
 }
 
-.tabela__celula .tabela__marcar.p-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
-  outline-offset: -2px;
+.tabela__marcar:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: 0;
 }
 
+/* Dedo não tem hover: no toque, o "+" fica à vista, baixinho. */
 @media (hover: none) {
-  .tabela__celula .tabela__marcar.p-button {
-    opacity: 0.45;
+  .tabela__marcar-rotulo {
+    opacity: 0.5;
   }
 }
 
-/* ---------------------------------------------------------------- atendimento */
+/* ------------------------------------------------------------------------ o estado */
 
-.atendimento {
+/*
+ * A cor do estado num lugar só: a faixa da esquerda (`--estado`), o fundo (`--estado-fundo`) e a
+ * borda (`--estado-borda`). O atendimento e a sua continuação leem as mesmas três.
+ */
+.estado--agendado {
+  --estado: var(--linha-forte);
+  --estado-fundo: var(--superficie);
+}
+
+.estado--confirmado {
+  --estado: color-mix(in oklab, var(--clinica) 55%, var(--superficie));
+  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 45%, var(--superficie));
+}
+
+.estado--aguardando {
+  --estado: var(--atencao);
+  --estado-fundo: color-mix(in oklab, var(--atencao-fundo) 80%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--atencao) 35%, var(--linha));
+}
+
+.estado--em-atendimento {
+  --estado: var(--clinica);
+  --estado-fundo: var(--clinica-fundo);
+  --estado-borda: color-mix(in oklab, var(--clinica) 40%, var(--linha));
+}
+
+.estado--finalizado {
+  --estado: var(--linha);
+  --estado-fundo: var(--superficie-2);
+}
+
+.estado--falta {
+  --estado: var(--risco);
+  --estado-fundo: color-mix(in oklab, var(--risco-fundo) 55%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--risco) 30%, var(--linha));
+}
+
+.estado--cancelado {
+  --estado: var(--linha-forte);
+  --estado-fundo: transparent;
+}
+
+/* ------------------------------------------------------------------- o atendimento */
+
+.marcacao {
   position: relative;
   display: flex;
-  align-items: center;
   min-width: 0;
-  overflow: hidden;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.55rem;
-  background: var(--hc-cartao);
-  box-shadow: 0 1px 2px rgb(20 32 28 / 5%);
+  align-items: center;
+  border: 1px solid var(--estado-borda, var(--linha));
+  border-inline-start: 3px solid var(--estado);
+  border-radius: 8px;
+  background: var(--estado-fundo);
+  color: var(--tinta);
   cursor: grab;
 }
 
-.atendimento .atendimento__abrir.p-button {
+.marcacao__abrir {
   display: flex;
-  flex: 1;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 0.4rem;
   min-width: 0;
-  padding: 0.18rem 0.4rem 0.18rem 0.2rem;
+  min-height: 34px;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 5px;
   border: 0;
-  border-radius: inherit;
+  border-radius: 6px;
   background: transparent;
-  box-shadow: none;
-  color: var(--hc-tinta);
-  font-size: inherit;
-  font-weight: inherit;
+  color: inherit;
+  cursor: inherit;
+  font: inherit;
+  overflow: hidden;
   text-align: start;
 }
 
-.atendimento .atendimento__abrir.p-button:not(:disabled):hover {
-  background: color-mix(in srgb, var(--hc-marca-clara) 40%, transparent);
-  color: var(--hc-tinta);
+.marcacao__abrir:hover {
+  background: color-mix(in oklab, var(--tinta) 5%, transparent);
 }
 
-.atendimento .atendimento__abrir.p-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
+.marcacao__abrir:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: 2px;
+}
+
+.marcacao--selecionada {
+  outline: 2px solid var(--clinica);
   outline-offset: 1px;
-  box-shadow: none;
 }
 
-.atendimento__hora {
-  flex-shrink: 0;
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 750;
+.marcacao__rosto {
+  flex: none;
 }
 
-.atendimento__nome {
-  overflow: hidden;
-  flex: 1;
+.marcacao__hora {
+  flex: none;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.marcacao__hora--encaixe {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+}
+
+.marcacao__nome {
   min-width: 2.5rem;
-  font-size: 0.8125rem;
+  flex: 1;
+  overflow: hidden;
+  font-size: 13.5px;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.atendimento__tipo {
-  flex-shrink: 0;
-  font-size: 0.8rem;
+.marcacao__icones {
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  font-size: 15px;
 }
 
-/* A origem online, na tinta neutra: diz de onde veio sem competir com o tipo nem com o risco. */
-.atendimento__origem {
-  flex-shrink: 0;
-  color: var(--hc-tinta-3);
-  font-size: 0.8rem;
+.marcacao__icones > * {
+  flex: none;
 }
 
-.atendimento__encaixe {
-  flex-shrink: 0;
-  padding: 0 0.3rem;
-  border-radius: 4px;
-  background: var(--hc-pessego-fundo);
-  color: var(--hc-pessego-tinta);
-  font-size: 0.6875rem;
-  font-weight: 700;
+.marcacao__origem {
+  color: var(--tinta-3);
 }
 
-.atendimento__risco {
-  flex-shrink: 0;
-  width: 0.95rem;
-  height: 0.95rem;
-  color: var(--hc-coral-tinta);
+.marcacao__risco {
+  width: 15px;
+  height: 15px;
+  color: var(--risco-tinta);
 }
 
-.atendimento__aviso {
-  flex-shrink: 0;
-  color: var(--hc-pessego-tinta);
-  font-size: 0.8rem;
+.marcacao__aviso {
+  color: var(--atencao-tinta);
 }
 
-.atendimento__falta.p-button {
-  flex-shrink: 0;
-  width: 1.75rem;
-  height: 1.75rem;
-  margin-inline-end: 0.15rem;
+.marcacao__falta-icone {
+  color: var(--risco-tinta);
+}
+
+.marcacao__encaixe {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.marcacao__falta {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  margin-inline-end: 3px;
   padding: 0;
-  color: var(--hc-pessego-tinta);
-}
-
-/*
- * Coluna estreita (tablet com o menu aberto, cinco profissionais): o nome e o risco ficam; o ícone
- * do tipo, o selo de encaixe e o atalho de falta saem — os três continuam no drawer do atendimento.
- */
-@container (max-width: 10rem) {
-  .atendimento__tipo,
-  .atendimento__encaixe,
-  .atendimento__aviso,
-  .atendimento__falta.p-button {
-    display: none;
-  }
-
-  .atendimento .atendimento__abrir.p-button {
-    gap: 0.3rem;
-  }
-}
-
-/* O estado pinta a linha: é a única cor de fundo da tabela, e o que muda ao longo do dia. */
-.atendimento--aguardando {
-  border-color: color-mix(in srgb, var(--hc-pessego-tinta) 45%, transparent);
-  background: var(--hc-pessego-fundo);
-}
-
-.atendimento--em-atendimento {
-  border-color: color-mix(in srgb, var(--hc-marca) 55%, transparent);
-  background: var(--hc-marca-clara);
-}
-
-.atendimento--finalizado {
-  background: var(--hc-cinza-fundo);
-  box-shadow: none;
-}
-
-.atendimento--finalizado .atendimento__abrir.p-button {
-  color: var(--hc-tinta-2);
-}
-
-.atendimento--falta,
-.atendimento--cancelado {
-  border-style: dashed;
+  border: 0;
+  border-radius: 8px;
   background: transparent;
-  box-shadow: none;
-  opacity: 0.6;
+  color: var(--atencao-tinta);
+  cursor: pointer;
+  font-size: 16px;
+  place-items: center;
 }
 
-.atendimento--falta .atendimento__nome,
-.atendimento--falta .atendimento__hora,
-.atendimento--cancelado .atendimento__nome,
-.atendimento--cancelado .atendimento__hora {
+.marcacao__falta:hover {
+  background: var(--atencao-fundo);
+}
+
+.marcacao__falta:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: 1px;
+}
+
+/* Finalizado é história do dia: perde peso, continua legível. */
+.estado--finalizado.marcacao {
+  color: var(--tinta-2);
+}
+
+.estado--finalizado .marcacao__rosto {
+  opacity: 0.7;
+}
+
+/* Cancelado: riscado e apagado, mas presente — o horário vagou e isso é informação. */
+.estado--cancelado.marcacao {
+  border-style: dashed;
+  border-inline-start-style: solid;
+  color: var(--tinta-2);
+  opacity: 0.65;
+}
+
+.estado--cancelado .marcacao__nome,
+.estado--cancelado .marcacao__hora {
   text-decoration: line-through;
 }
 
-.atendimento--selecionado {
-  border-color: var(--hc-marca);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--hc-marca) 35%, transparent);
+.estado--falta .marcacao__nome {
+  color: var(--tinta-2);
 }
+
+/*
+ * Coluna estreita (o painel do atendimento aberto, cinco profissionais): o nome, o risco e o aviso
+ * ficam; o ícone do tipo e a marca de encaixe saem — os dois continuam no painel do atendimento.
+ */
+@container (max-width: 14rem) {
+  .marcacao__tipo,
+  .marcacao__origem,
+  .marcacao__encaixe {
+    display: none;
+  }
+}
+
+@container (max-width: 12.5rem) {
+  .marcacao .marcacao__rosto {
+    width: 22px;
+    height: 22px;
+    font-size: 0.55rem;
+  }
+}
+
+@container (max-width: 11rem) {
+  .tabela__etiqueta-ate {
+    display: none;
+  }
+
+  .marcacao__abrir {
+    gap: 6px;
+  }
+}
+
+/* Coluna bem estreita: o rosto encolhe em vez de sumir, e o "até" da continuação sai. */
+@container (max-width: 9rem) {
+  .marcacao .marcacao__rosto {
+    width: 20px;
+    height: 20px;
+    font-size: 0.5rem;
+  }
+
+  .continua .ui-num {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------- a continuação */
+
+/*
+ * O horário tomado por quem começou antes: a célula inteira na cor clara do estado, com a faixa
+ * da esquerda. Cobre também o fio da linha de cima, para as meias horas se emendarem num bloco.
+ */
+.continua-fundo {
+  position: absolute;
+  top: -1px;
+  right: 6px;
+  bottom: 0;
+  left: 6px;
+  border-inline-start: 3px solid var(--estado);
+  background: color-mix(in oklab, var(--estado) 13%, var(--superficie));
+  pointer-events: none;
+}
+
+/* O rótulo leva o mesmo fundo do bloco: o fio do agora passa por trás, sem riscar o nome. */
+.continua {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 6px;
+  overflow: hidden;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--estado) 13%, var(--superficie));
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.continua__nome {
+  overflow: hidden;
+  color: var(--tinta);
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------------------- rodapé */
 
 .tabela__dica {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 8px;
   margin: 0;
-  padding: 0.5rem 0.9rem;
-  border-top: 1px solid var(--hc-linha);
-  color: var(--hc-tinta-3);
-  font-size: 0.75rem;
+  padding: 10px 16px;
+  border-top: 1px solid var(--linha);
+  color: var(--tinta-3);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.tabela__dica i {
+  flex: none;
+  font-size: 16px;
 }
 
 .tabela__sr {
@@ -985,7 +1362,7 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tabela__marcar {
+  .tabela__marcar-rotulo {
     transition: none;
   }
 }

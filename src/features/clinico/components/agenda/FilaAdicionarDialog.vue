@@ -18,10 +18,10 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
-import SelectButton from 'primevue/selectbutton'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import AgendaDialogoTopo from './AgendaDialogoTopo.vue'
 import ClinicField from '../base/ClinicField.vue'
 import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
 import PacienteNovoForm from '../pacientes/PacienteNovoForm.vue'
@@ -47,6 +47,8 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const idTitulo = useId()
+const idJanela = useId()
 const clinico = useClinicoStore()
 const fila = useFilaStore()
 const formato = useClinicFormat()
@@ -105,8 +107,21 @@ const opcoesPrioridade = computed(() =>
 const NOMES_DOS_DIAS: WeekdayIndex[] = [0, 1, 2, 3, 4, 5, 6]
 
 const opcoesDias = computed(() =>
-  NOMES_DOS_DIAS.map((valor) => ({ valor, rotulo: formato.diaDaSemanaCurtoPorIndice(valor) })),
+  NOMES_DOS_DIAS.map((valor) => {
+    const rotulo = formato.diaDaSemanaCurtoPorIndice(valor)
+
+    return { valor, rotulo: rotulo.charAt(0).toLocaleUpperCase() + rotulo.slice(1) }
+  }),
 )
+
+/** O dia aceito entra e sai da janela com um clique; `definirDias` mantém a ordem da semana. */
+function alternarDia(dia: WeekdayIndex) {
+  definirDias(
+    diasAceitos.value.includes(dia)
+      ? diasAceitos.value.filter((item) => item !== dia)
+      : [...diasAceitos.value, dia],
+  )
+}
 
 /** Guardados em ordem de semana, não de clique: é a ordem em que as janelas são lidas depois. */
 function definirDias(dias: WeekdayIndex[]) {
@@ -179,67 +194,84 @@ async function salvar() {
     v-model:visible="aberto"
     modal
     class="clinic-dialog hc-tema"
-    :style="{ width: 'min(34rem, 94vw)' }"
-    :header="t('clinico.fila.adicionar')"
+    :style="{ width: 'min(36rem, 94vw)' }"
+    :aria-labelledby="idTitulo"
     :dismissable-mask="true"
     :pt="{ footer: cadastrandoPaciente ? { style: { display: 'none' } } : {} }"
   >
+    <template #header>
+      <AgendaDialogoTopo
+        :id="idTitulo"
+        :titulo="t('clinico.fila.adicionar')"
+        :subtitulo="petEscolhido?.nome ?? ''"
+        icone="ph ph-users"
+      />
+    </template>
+
     <PacienteNovoForm
       v-if="cadastrandoPaciente"
       @criado="aoCriarPaciente"
       @cancelar="cadastrandoPaciente = false"
     />
 
-    <div v-else class="entrada clinic-scope">
-      <ClinicField :rotulo="t('clinico.pacientes.colunaPaciente')">
-        <Select
-          v-model="petEscolhidoId"
-          :options="opcoesPet"
-          option-label="label"
-          option-value="value"
-          filter
-          fluid
-          :placeholder="t('clinico.pacientes.buscar')"
-          :pt="{ overlay: { class: 'clinic-overlay' } }"
-        >
-          <template #footer>
-            <Button class="cadastrar" text fluid @click="cadastrandoPaciente = true">
-              <span class="cadastrar__marca" aria-hidden="true"><i class="ph ph-user-plus" /></span>
-              <span class="cadastrar__texto">
-                <strong>{{ t('clinico.paciente.novo.atalho') }}</strong>
-                <small>{{ t('clinico.paciente.novo.atalhoAjuda') }}</small>
-              </span>
-              <i class="ph ph-arrow-right cadastrar__seta" aria-hidden="true" />
-            </Button>
-          </template>
-        </Select>
+    <div v-else class="formulario clinic-scope">
+      <ClinicField :rotulo="t('clinico.pacientes.colunaPaciente')" largo>
+        <template #default="{ id }">
+          <Select
+            v-model="petEscolhidoId"
+            :input-id="id"
+            :options="opcoesPet"
+            option-label="label"
+            option-value="value"
+            filter
+            fluid
+            :placeholder="t('clinico.pacientes.buscar')"
+            :pt="{ overlay: { class: 'clinic-overlay' } }"
+          >
+            <template #footer>
+              <button type="button" class="cadastrar" @click="cadastrandoPaciente = true">
+                <span class="cadastrar__marca" aria-hidden="true"><i class="ph ph-user-plus" /></span>
+                <span class="cadastrar__texto">
+                  <strong>{{ t('clinico.paciente.novo.atalho') }}</strong>
+                  <small>{{ t('clinico.paciente.novo.atalhoAjuda') }}</small>
+                </span>
+                <i class="ph ph-caret-right cadastrar__seta" aria-hidden="true" />
+              </button>
+            </template>
+          </Select>
+        </template>
       </ClinicField>
 
-      <div class="entrada__par">
-        <ClinicField :rotulo="t('clinico.agenda.criar.tipo')">
+      <ClinicField :rotulo="t('clinico.agenda.criar.tipo')">
+        <template #default="{ id }">
           <Select
             v-model="tipoEscolhidoId"
+            :input-id="id"
             :options="opcoesTipo"
             option-label="label"
             option-value="value"
             fluid
             :pt="{ overlay: { class: 'clinic-overlay' } }"
           />
-        </ClinicField>
+        </template>
+      </ClinicField>
 
-        <ClinicField :rotulo="t('clinico.agenda.mover.profissional')">
+      <ClinicField :rotulo="t('clinico.agenda.mover.profissional')">
+        <template #default="{ id }">
           <Select
             v-model="profissionalEscolhidoId"
+            :input-id="id"
             :options="opcoesProfissional"
             option-label="label"
             option-value="value"
+            :placeholder="t('clinico.fila.qualquerProfissional')"
             fluid
             :pt="{ overlay: { class: 'clinic-overlay' } }"
           />
-        </ClinicField>
-      </div>
+        </template>
+      </ClinicField>
 
-      <ClinicField :rotulo="t('clinico.fila.prioridadeRotulo')">
+      <ClinicField :rotulo="t('clinico.fila.prioridadeRotulo')" largo>
         <ClinicToggleGroup
           v-model="prioridade"
           :opcoes="opcoesPrioridade"
@@ -251,30 +283,45 @@ async function salvar() {
         A janela é o campo que faz a fila funcionar: é por ela que a vaga encontra o candidato.
         Nasce em segunda a sexta, horário comercial — o caso comum não deve custar dez cliques.
       -->
-      <ClinicField :rotulo="t('clinico.fila.janelas')">
-        <div class="janela">
-          <SelectButton
-            class="janela__dias"
-            :model-value="diasAceitos"
-            :options="opcoesDias"
-            option-label="rotulo"
-            option-value="valor"
-            multiple
-            size="small"
-            :aria-label="t('clinico.fila.janelas')"
-            @update:model-value="definirDias"
-          />
+      <fieldset class="janela formulario__largo">
+        <legend :id="idJanela" class="janela__titulo">{{ t('clinico.fila.janelas') }}</legend>
 
-          <div class="janela__horas">
-            <InputText v-model="inicio" type="time" class="janela__hora" />
-            <span aria-hidden="true">–</span>
-            <InputText v-model="fim" type="time" class="janela__hora" />
-          </div>
+        <div class="janela__dias" role="group" :aria-labelledby="idJanela">
+          <button
+            v-for="dia in opcoesDias"
+            :key="dia.valor"
+            type="button"
+            class="dia"
+            :class="{ 'dia--ligado': diasAceitos.includes(dia.valor) }"
+            :aria-pressed="diasAceitos.includes(dia.valor)"
+            @click="alternarDia(dia.valor)"
+          >
+            <i v-if="diasAceitos.includes(dia.valor)" class="ph ph-check" aria-hidden="true" />
+            {{ dia.rotulo }}
+          </button>
         </div>
-      </ClinicField>
 
-      <ClinicField :rotulo="t('clinico.prontuario.conduta.observacao')">
-        <InputText v-model="observacao" fluid />
+        <div class="janela__horas">
+          <InputText
+            v-model="inicio"
+            type="time"
+            class="janela__hora"
+            :aria-label="t('clinico.agenda.criar.hora')"
+          />
+          <span aria-hidden="true">–</span>
+          <InputText
+            v-model="fim"
+            type="time"
+            class="janela__hora"
+            :aria-label="t('clinico.agenda.bloqueio.ate')"
+          />
+        </div>
+      </fieldset>
+
+      <ClinicField :rotulo="t('clinico.prontuario.conduta.observacao')" largo>
+        <template #default="{ id }">
+          <InputText :id="id" v-model="observacao" fluid />
+        </template>
       </ClinicField>
     </div>
 
@@ -297,113 +344,148 @@ async function salvar() {
 </template>
 
 <style scoped>
+.formulario {
+  display: grid;
+  gap: 18px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.formulario__largo {
+  grid-column: 1 / -1;
+}
+
 /*
- * O atalho do rodapé da lista.
- *
- * Mesma forma da criação de atendimento, e de propósito: é o mesmo gesto, e duas aparências para
- * a mesma porta fariam parecer que são coisas diferentes.
+ * O atalho do rodapé da lista. Mesma forma da criação de atendimento, e de propósito: é o mesmo
+ * gesto, e duas aparências para a mesma porta fariam parecer que são coisas diferentes.
  */
-.cadastrar.p-button.p-button-text {
-  justify-content: flex-start;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-2) var(--clinic-space-3);
+.cadastrar {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
   border: 0;
-  border-top: 1px solid var(--clinic-line-strong);
-  border-radius: 0;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-base);
-  font-weight: inherit;
+  border-top: 1px solid var(--linha);
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  cursor: pointer;
+  font: inherit;
   text-align: start;
 }
 
-.cadastrar.p-button.p-button-text:not(:disabled):hover,
-.cadastrar.p-button.p-button-text:focus-visible {
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
+.cadastrar:hover {
+  background: color-mix(in oklab, var(--musgo-fundo) 70%, var(--musgo));
+}
+
+.cadastrar:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: -2px;
 }
 
 .cadastrar__marca {
   display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 30px;
+  height: 30px;
   flex: none;
-  border-radius: 999px;
-  background: var(--clinic-accent-strong);
-  color: var(--clinic-surface);
   place-items: center;
-}
-
-.cadastrar:hover .cadastrar__marca,
-.cadastrar:focus-visible .cadastrar__marca {
-  background: var(--clinic-surface);
-  color: var(--clinic-accent-strong);
-}
-
-.cadastrar__marca i {
-  font-size: 0.78rem;
+  border-radius: 50%;
+  background: var(--musgo);
+  color: var(--sobre-musgo);
+  font-size: 15px;
 }
 
 .cadastrar__texto {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
+  gap: 1px;
 }
 
 .cadastrar__texto strong {
-  font-size: var(--clinic-font-base);
-  font-weight: 750;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .cadastrar__texto small {
-  font-size: var(--clinic-font-label);
-  opacity: 0.8;
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .cadastrar__seta {
   margin-inline-start: auto;
-  font-size: 0.72rem;
-}
-
-.entrada {
-  display: grid;
-  gap: var(--clinic-space-3);
-}
-
-.entrada__par {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
-  gap: var(--clinic-space-3);
+  font-size: 14px;
 }
 
 .janela {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
-.janela__dias.p-selectbutton {
+.janela__titulo {
+  margin-bottom: 7px;
+  padding: 0;
+  color: var(--tinta);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.janela__dias {
+  display: flex;
   flex-wrap: wrap;
+  gap: 6px;
 }
 
-/* Dia aceito ganha anel e cor do acento: o estado precisa sobreviver à escala de cinza. */
-.janela__dias :deep(.p-togglebutton) {
-  min-width: 2.6rem;
-  text-transform: capitalize;
+.dia {
+  display: inline-flex;
+  min-width: 52px;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 12px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
 }
 
-.janela__dias :deep(.p-togglebutton-checked .p-togglebutton-content) {
-  box-shadow: inset 0 0 0 1.5px var(--clinic-accent-strong);
-  color: var(--clinic-accent-strong);
+.dia:hover {
+  background: var(--superficie-2);
+}
+
+.dia:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: 2px;
+}
+
+/* Dia aceito: contorno, fundo e o visto — o estado sobrevive à escala de cinza. */
+.dia--ligado,
+.dia--ligado:hover {
+  border-color: var(--clinica);
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-weight: 600;
 }
 
 .janela__horas {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-faint);
+  gap: 10px;
+  color: var(--tinta-3);
 }
 
 .janela__hora {
-  max-width: 8rem;
+  max-width: 9rem;
+}
+
+@media (max-width: 620px) {
+  .formulario {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

@@ -59,6 +59,7 @@ onBeforeUnmount(parar)
 <template>
   <Transition name="desfazer">
     <div v-if="agenda.desfazer && restante > 0" class="desfazer clinic-scope" role="status">
+      <span class="desfazer__icone" aria-hidden="true"><i class="ph ph-check" /></span>
       <span class="desfazer__texto">
         {{ t(`clinico.agenda.desfeito.${agenda.desfazer.kind}`) }}
       </span>
@@ -85,47 +86,65 @@ onBeforeUnmount(parar)
 <style scoped>
 .desfazer {
   position: fixed;
-  bottom: var(--clinic-space-5);
+  bottom: 24px;
   left: 50%;
   z-index: 60;
   display: grid;
-  grid-template-columns: 1fr auto;
+  overflow: hidden;
+  min-width: min(26rem, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
   align-items: center;
-  gap: var(--clinic-space-3);
-  min-width: min(24rem, 90vw);
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-float);
+  gap: 12px;
+  padding: 12px 12px 14px 14px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-2);
+  color: var(--tinta);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   transform: translateX(-50%);
 }
 
+.desfazer__icone {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 15px;
+}
+
 .desfazer__texto {
-  font-weight: 650;
+  font-size: 14px;
+  font-weight: 550;
 }
 
 .desfazer__botao kbd {
-  padding: 0 0.25rem;
-  border: 1px solid currentcolor;
-  border-radius: 0.25rem;
-  font-family: inherit;
-  font-size: 0.62rem;
-  opacity: 0.75;
+  padding: 0 5px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 5px;
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 11px;
+  line-height: 1.4;
 }
 
+/* O tempo que resta: um fio que esvazia no pé da faixa. */
 .desfazer__barra {
-  grid-column: 1 / -1;
-  height: 2px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--clinic-line);
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--superficie-3);
 }
 
 .desfazer__progresso {
   display: block;
   height: 100%;
-  background: var(--clinic-accent-strong);
+  background: var(--clinica);
   transform-origin: left;
   transition: transform 100ms linear;
 }
@@ -138,13 +157,21 @@ onBeforeUnmount(parar)
 .desfazer-enter-active,
 .desfazer-leave-active {
   transition:
-    opacity 160ms ease,
-    transform 160ms ease;
+    opacity var(--pj-tempo-medio) var(--pj-curva-chega),
+    transform var(--pj-tempo-medio) var(--pj-curva-chega);
 }
 
 .desfazer-enter-from,
 .desfazer-leave-to {
   opacity: 0;
-  transform: translate(-50%, 0.5rem);
+  transform: translate(-50%, 8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desfazer-enter-active,
+  .desfazer-leave-active,
+  .desfazer__progresso {
+    transition: none;
+  }
 }
 </style>
