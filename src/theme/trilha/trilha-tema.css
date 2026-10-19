@@ -301,6 +301,28 @@ html:root.trilha,
   --p-button-text-secondary-color: var(--tinta-2);
   --p-button-text-secondary-hover-background: var(--superficie-2);
   --p-button-text-secondary-active-background: var(--superficie-3);
+  --p-button-danger-background: var(--risco);
+  --p-button-danger-hover-background: color-mix(in oklab, var(--risco) 86%, var(--tinta));
+  --p-button-danger-active-background: color-mix(in oklab, var(--risco) 74%, var(--tinta));
+  --p-button-danger-border-color: var(--risco);
+  --p-button-danger-hover-border-color: color-mix(in oklab, var(--risco) 86%, var(--tinta));
+  --p-button-danger-active-border-color: color-mix(in oklab, var(--risco) 74%, var(--tinta));
+  --p-button-danger-color: var(--superficie);
+  --p-button-danger-hover-color: var(--superficie);
+  --p-button-danger-active-color: var(--superficie);
+  --p-button-outlined-danger-border-color: color-mix(in oklab, var(--risco) 55%, transparent);
+  --p-button-outlined-danger-color: var(--risco-tinta);
+  --p-button-outlined-danger-hover-background: var(--risco-fundo);
+  --p-button-outlined-danger-active-background: var(--risco-fundo);
+  --p-button-text-danger-color: var(--risco-tinta);
+  --p-button-text-danger-hover-background: var(--risco-fundo);
+  --p-button-text-danger-active-background: var(--risco-fundo);
+  --p-button-warn-background: var(--atencao);
+  --p-button-warn-border-color: var(--atencao);
+  --p-button-warn-color: var(--tinta);
+  --p-button-text-warn-color: var(--atencao-tinta);
+  --p-button-text-warn-hover-background: var(--atencao-fundo);
+  --p-button-text-warn-active-background: var(--atencao-fundo);
 }
 
 /* As pílulas à mão (`.hc-pilula`) viram botões do Trilha: sem sombra, raio de controle. */
@@ -461,55 +483,10 @@ html.trilha .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton.p-togglebutton-
   --clinic-shadow-card: none;
 }
 
-/* Rótulos em caixa normal: "Hoje", "Legenda", "Almoço" e os títulos dos painéis de filtro. */
-:root.trilha .agenda .barra__marca,
-:root.trilha .agenda .legenda__alternar.p-button,
-:root.trilha .agenda .tabela__faixa,
+/* Rótulos em caixa normal nos painéis que ainda usam `clinic-label`. */
 :root.trilha .clinic-label {
   letter-spacing: 0;
   text-transform: none;
-}
-
-:root.trilha .agenda .barra__marca {
-  color: var(--tinta-2);
-  font-weight: 500;
-}
-
-:root.trilha .agenda .barra__titulo {
-  font-weight: 600;
-  letter-spacing: 0;
-}
-
-/* Hora e ocupação são dado: Instrument Sans, algarismos tabulares. */
-:root.trilha .agenda .tabela__hora,
-:root.trilha .agenda .tabela__ocupacao,
-:root.trilha .agenda .atendimento__hora {
-  font-family: var(--font-dados);
-  font-variant-numeric: tabular-nums;
-}
-
-/* O agora é lugar, não alarme: o fio e a hora na cor da Clínica. */
-:root.trilha .agenda .tabela__agora {
-  color: var(--clinica-tinta);
-}
-
-:root.trilha .agenda .tabela__linha--agora > * {
-  border-top-color: var(--clinica);
-}
-
-/* O atendimento: sem sombra; em atendimento, na cor do lugar (Clínica). */
-:root.trilha .agenda .atendimento {
-  box-shadow: none;
-}
-
-:root.trilha .agenda .atendimento--em-atendimento {
-  border-color: color-mix(in oklab, var(--clinica) 55%, transparent);
-  background: var(--clinica-fundo);
-}
-
-:root.trilha .agenda .atendimento--selecionado {
-  border-color: var(--musgo);
-  box-shadow: 0 0 0 2px var(--musgo-fundo);
 }
 
 /* ------------------------------------------------------------------------- portal inteiro

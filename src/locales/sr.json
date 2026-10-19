@@ -2391,7 +2391,22 @@
           "semResponsavel": "Bez vlasnika: nema koga da se pozove.",
           "nomeVazio": "Ime pacijenta",
           "semAlertas": "Nema označenih upozorenja"
-        }
+        },
+        "secao": {
+          "pet": {
+            "titulo": "Ljubimac",
+            "descricao": "Ko dolazi na pregled. Ovde je obavezno samo ime."
+          },
+          "identificacao": {
+            "descricao": "Ono po čemu se ova životinja razlikuje na potvrdi, u pretrazi ili na vratima klinike."
+          },
+          "responsavel": {
+            "descricao": "Koga klinika obaveštava, kome naplaćuje i koga proziva na recepciji."
+          }
+        },
+        "enderecoDica": "Nije obavezno. Recept za kontrolisane lekove zahteva adresu vlasnika.",
+        "obrigatorios": "Obavezna polja",
+        "resumoPagina": "Obavezni su samo ime ljubimca i ko je za njega odgovoran. Ostalo se unosi kada postoji."
       },
       "porte": {
         "mini": "Patuljasti",
@@ -3602,6 +3617,11 @@
         "encontrados": "Nije pronađen nijedan pacijent | Pronađen je {n} pacijent | Pronađena su {n} pacijenta | Pronađeno je {n} pacijenata",
         "comRisco": "{n} sa upozorenjem o riziku | {n} sa upozorenjem o riziku | {n} sa upozorenjem o riziku",
         "acoes": "Radnje za pacijente"
+      },
+      "procurar": "Ime ljubimca, vlasnika ili telefon",
+      "nadaMarcado": "Ništa zakazano",
+      "resumo": {
+        "comRisco": "{total}, {risco}."
       }
     },
     "resumoDoPaciente": {

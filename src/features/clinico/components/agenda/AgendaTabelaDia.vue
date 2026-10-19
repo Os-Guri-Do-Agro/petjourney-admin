@@ -278,11 +278,12 @@ function ehLinhaDoAgora(minuto: number) {
 }
 
 /**
- * Quando o agora cai no começo da meia hora, o rótulo dele ficaria por cima da hora da linha e as
- * duas apareceriam pela metade. A hora da linha sai: o rótulo do agora já diz em que hora se está.
+ * Numa linha de altura normal, o rótulo do agora ficaria por cima da hora da linha em quase toda a
+ * meia hora, e as duas apareceriam pela metade. A hora da linha sai: o rótulo do agora já diz em
+ * que hora se está.
  */
 function rotuloCoberto(minuto: number) {
-  return ehLinhaDoAgora(minuto) && (agora.value?.fracao ?? 1) < 0.45
+  return ehLinhaDoAgora(minuto) && (agora.value?.fracao ?? 1) < 0.8
 }
 
 const rolagem = ref<HTMLElement | null>(null)

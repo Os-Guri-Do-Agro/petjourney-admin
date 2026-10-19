@@ -2391,7 +2391,22 @@
           "semResponsavel": "No owner: nobody to call.",
           "nomeVazio": "Patient name",
           "semAlertas": "No alerts flagged"
-        }
+        },
+        "secao": {
+          "pet": {
+            "titulo": "The pet",
+            "descricao": "Who is being seen. Only the name is required here."
+          },
+          "identificacao": {
+            "descricao": "What tells this animal apart on a certificate, in a search or at the clinic door."
+          },
+          "responsavel": {
+            "descricao": "Who the clinic notifies, bills and calls at reception."
+          }
+        },
+        "enderecoDica": "Optional. Controlled-drug prescriptions require the owner's address.",
+        "obrigatorios": "Required fields",
+        "resumoPagina": "Only the pet's name and who is responsible for it are required. The rest goes in when it exists."
       },
       "porte": {
         "mini": "Toy",
@@ -3602,6 +3617,11 @@
         "encontrados": "No patients found | 1 patient found | {n} patients found",
         "comRisco": "1 with a risk alert | {n} with a risk alert",
         "acoes": "Patient actions"
+      },
+      "procurar": "Pet name, owner name or phone",
+      "nadaMarcado": "Nothing booked",
+      "resumo": {
+        "comRisco": "{total}, {risco}."
       }
     },
     "resumoDoPaciente": {

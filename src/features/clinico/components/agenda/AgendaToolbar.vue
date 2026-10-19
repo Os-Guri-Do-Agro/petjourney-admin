@@ -207,6 +207,7 @@ const itensAcoes = computed<MenuItem[]>(() => [
         size="small"
         icon="ph ph-arrow-u-up-left"
         :label="t('clinico.agenda.hoje')"
+        :aria-label="t('clinico.agenda.hoje')"
         :title="`${t('clinico.agenda.hoje')} (T)`"
         @click="agenda.hoje()"
       />
@@ -628,13 +629,72 @@ const itensAcoes = computed<MenuItem[]>(() => [
   }
 }
 
+/*
+ * No celular a semana ocupa a linha inteira e encolhe os dias; as ações descem para a linha de
+ * baixo e Filtros/Exibição ficam só com o ícone (o nome continua no `aria-label`).
+ */
 @media (max-width: 720px) {
+  .barra {
+    gap: 12px;
+  }
+
   .semana {
     width: 100%;
-    overflow-x: auto;
+    min-width: 0;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .semana__dias {
+    flex: 1;
+    justify-content: space-between;
+    gap: 2px;
+  }
+
+  .semana__dias li {
+    flex: 1;
+  }
+
+  .dia {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 0;
+  }
+
+  .dia--hoje::after {
+    right: 4px;
   }
 
   .dia__total {
+    display: none;
+  }
+
+  .semana__seta.p-button {
+    width: 32px;
+    flex: none;
+  }
+
+  .semana__hoje.p-button {
+    flex: none;
+    margin-left: 2px;
+    padding-inline: 8px;
+  }
+
+  .semana__hoje :deep(.p-button-label) {
+    display: none;
+  }
+
+  .barra__acoes {
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+
+  .barra__acoes .segmentado {
+    flex: 1;
+  }
+
+  .painel-botao :deep(.p-button-label),
+  .barra__acoes > .p-button:not(.painel-botao) :deep(.p-button-label) {
     display: none;
   }
 }

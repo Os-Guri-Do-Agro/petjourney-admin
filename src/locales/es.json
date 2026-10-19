@@ -2391,7 +2391,22 @@
           "semResponsavel": "Sin responsable: nadie a quien avisar.",
           "nomeVazio": "Nombre del paciente",
           "semAlertas": "Ninguna alerta marcada"
-        }
+        },
+        "secao": {
+          "pet": {
+            "titulo": "La mascota",
+            "descricao": "Quién será atendido. Aquí solo el nombre es obligatorio."
+          },
+          "identificacao": {
+            "descricao": "Lo que distingue a este animal en un certificado, en una búsqueda o en la puerta de la clínica."
+          },
+          "responsavel": {
+            "descricao": "A quién la clínica avisa, cobra y llama en recepción."
+          }
+        },
+        "enderecoDica": "Opcional. La receta de control especial exige la dirección del responsable.",
+        "obrigatorios": "Campos obligatorios",
+        "resumoPagina": "Solo el nombre de la mascota y quién responde por ella son obligatorios. El resto entra cuando exista."
       },
       "porte": {
         "mini": "Mini",
@@ -3602,6 +3617,11 @@
         "encontrados": "Ningún paciente encontrado | 1 paciente encontrado | {n} pacientes encontrados",
         "comRisco": "1 con alerta de riesgo | {n} con alerta de riesgo",
         "acoes": "Acciones de pacientes"
+      },
+      "procurar": "Nombre de la mascota, del responsable o teléfono",
+      "nadaMarcado": "Nada agendado",
+      "resumo": {
+        "comRisco": "{total}, {risco}."
       }
     },
     "resumoDoPaciente": {
