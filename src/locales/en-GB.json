@@ -7705,6 +7705,18 @@
         "escolha": "Choose a room",
         "voltar": "Back to the request"
       }
+    },
+    "fita": {
+      "rotulo": "The day at the house",
+      "contas": "In the house now",
+      "tarefa": "{hora} {pet}: {tarefa}",
+      "chega": "{hora} {pet} arrives",
+      "sai": "{hora} {pet} leaves",
+      "resumo": "{feitas} of {total} routine tasks done, {atrasadas} overdue. Open the routine.",
+      "naCasa": "{n} in the house | {n} in the house",
+      "chegam": "{n} arriving | {n} arriving",
+      "saem": "{n} leaving | {n} leaving",
+      "atrasadas": "{n} overdue task | {n} overdue tasks"
     }
   },
   "primevue": {

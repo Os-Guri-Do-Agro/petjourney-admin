@@ -7705,6 +7705,18 @@
         "escolha": "Izaberite smeštaj",
         "voltar": "Nazad na zahtev"
       }
+    },
+    "fita": {
+      "rotulo": "Dan u objektu",
+      "contas": "Trenutno u objektu",
+      "tarefa": "{hora} {pet}: {tarefa}",
+      "chega": "{hora} dolazi {pet}",
+      "sai": "{hora} odlazi {pet}",
+      "resumo": "Urađeno {feitas} od {total} zadataka, kasni {atrasadas}. Otvori rutinu.",
+      "naCasa": "{n} u objektu | {n} u objektu | {n} u objektu",
+      "chegam": "{n} dolazi | {n} dolaze | {n} dolazi",
+      "saem": "{n} odlazi | {n} odlaze | {n} odlazi",
+      "atrasadas": "{n} zadatak kasni | {n} zadatka kasne | {n} zadataka kasni"
     }
   },
   "primevue": {

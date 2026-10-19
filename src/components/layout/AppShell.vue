@@ -37,7 +37,8 @@ const { t } = useI18n()
 const route = useRoute()
 const parceiroStore = useParceiroStore()
 const usuarioPerfilStore = useUsuarioPerfilStore()
-const { espacos, aqui, lugar, navigationSections, hasClinicalProfile } = oferecerEspacos()
+const { espacos, aqui, lugar, navigationSections, hasClinicalProfile, hasHotelProfile } =
+  oferecerEspacos()
 const { open: abrirResgate, canOpen: podeResgatar } = useCupomResgateModal()
 const { visible: cupomEmBreveVisivel, open: abrirCupomEmBreve } = useCupomComingSoon()
 const cupomLigado = CUPOM_FEATURE_ENABLED
@@ -107,6 +108,9 @@ const ClinicBuscaGlobal = defineAsyncComponent(
 const FitaDoDia = defineAsyncComponent(
   () => import('@/features/clinico/components/base/FitaDoDia.vue'),
 )
+const FitaDaCasa = defineAsyncComponent(
+  () => import('@/features/hotel/components/base/FitaDaCasa.vue'),
+)
 
 const atalhoDaBusca = computed(() =>
   typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K',
@@ -121,6 +125,12 @@ const mostrarFita = computed(
     hasClinicalProfile.value &&
     lugar.value === 'clinica' &&
     !route.path.startsWith('/veterinario/agenda'),
+)
+
+/** No Hotel, a fita da casa; menos na Rotina, que já é a prancheta do dia hora a hora. */
+const mostrarFitaDaCasa = computed(
+  () =>
+    hasHotelProfile.value && lugar.value === 'hotel' && !route.path.startsWith('/hotel/rotina'),
 )
 
 /** No topo do celular: o nome do destino, ou do espaço, ou da tela solta. */
@@ -290,6 +300,7 @@ onUnmounted(() => {
       </header>
 
       <FitaDoDia v-if="mostrarFita" class="palco__fita" />
+      <FitaDaCasa v-else-if="mostrarFitaDaCasa" class="palco__fita" />
 
       <main id="conteudo" class="palco__conteudo" tabindex="-1">
         <slot />

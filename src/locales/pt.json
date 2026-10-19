@@ -7705,6 +7705,18 @@
         "escolha": "Escolha uma acomodação",
         "voltar": "Voltar ao pedido"
       }
+    },
+    "fita": {
+      "rotulo": "O dia da casa",
+      "contas": "Agora na casa",
+      "tarefa": "{hora} {pet}: {tarefa}",
+      "chega": "{hora} chega {pet}",
+      "sai": "{hora} sai {pet}",
+      "resumo": "{feitas} de {total} tarefas da rotina feitas, {atrasadas} atrasadas. Abrir a rotina.",
+      "naCasa": "{n} na casa | {n} na casa",
+      "chegam": "{n} chega | {n} chegam",
+      "saem": "{n} sai | {n} saem",
+      "atrasadas": "{n} tarefa atrasada | {n} tarefas atrasadas"
     }
   },
   "primevue": {
