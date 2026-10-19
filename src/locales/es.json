@@ -2873,7 +2873,26 @@
         "cardiaco": "Condición cardíaca registrada: {detalhe}",
         "gastrico": "Condición gástrica registrada: {detalhe}"
       },
-      "escolhaNaLista": "Elija un medicamento de la lista para ver la dosis por especie."
+      "escolhaNaLista": "Elija un medicamento de la lista para ver la dosis por especie.",
+      "resumo": {
+        "geral": "{total} medicamento, con la dosis de cada especie. Busque por nombre, principio activo o indicación. | {total} medicamentos, con la dosis de cada especie. Busque por nombre, principio activo o indicación.",
+        "paciente": "Consulta para {pet}: la lista abre con lo que tiene dosis para la especie del paciente, y la ficha trae la dosis calculada para {peso}.",
+        "pacienteSemPeso": "Consulta para {pet}: la lista abre con lo que tiene dosis para la especie del paciente. Sin peso en el registro, la dosis no se calcula."
+      },
+      "sinal": {
+        "contraindicado": "Contraindicado",
+        "alergia": "Alergia",
+        "cautela": "Precaución"
+      },
+      "dosePeso": {
+        "titulo": "Dosis para {pet}, {peso}",
+        "porAdministracao": "por administración",
+        "daApresentacao": "de la presentación, por vez",
+        "horas": "h",
+        "dias": "día | días",
+        "conta": "Rango usual de la especie ({faixa} mg/kg) × {peso}, el peso del registro. Confirme el peso del día antes de prescribir."
+      },
+      "escolherPara": "Para {pet}"
     },
     "documentos": {
       "titulo": "Documentos de la atención",
@@ -3586,6 +3605,66 @@
           "focarPrimeiro": "Volver al primer campo",
           "ajuda": "Este mapa"
         }
+      },
+      "nova": {
+        "titulo": "Consulta",
+        "voltarFicha": "Ficha de {pet}",
+        "resumo": {
+          "aberto": "Abierta a las {hora} con {profissional}",
+          "finalizado": "Finalizada el {data} a las {hora} por {profissional}",
+          "etapas": "{feitas} de {total} pasos completos"
+        },
+        "salvoAs": "Guardado a las {hora}",
+        "autosave": "Se guarda solo mientras escribe",
+        "imprimir": "Imprimir o guardar PDF",
+        "fixoRotulo": "Paciente en consulta",
+        "mostrarHistorico": "Mostrar historial",
+        "faixa": {
+          "rascunhoTitulo": "Hay texto sin guardar en este navegador",
+          "rascunhoTexto": "Escrito {quando} y aún no guardado en la historia. Restáurelo para seguir donde lo dejó.",
+          "leituraTitulo": "Solo lectura",
+          "finalizadoTitulo": "Consulta finalizada",
+          "finalizadoTexto": "La historia queda solo para lectura. Los documentos y el resumen de la app siguen en el paso Resumen.",
+          "verResumo": "Ir al resumen"
+        },
+        "rodape": {
+          "anterior": "Paso anterior",
+          "proxima": "Siguiente paso"
+        },
+        "finalizar": {
+          "faltam": "Todavía falta registrar",
+          "queixa": "El motivo de consulta",
+          "diagnostico": "Al menos un diagnóstico",
+          "alergia": "Confirmar la receta pese a la alergia",
+          "ir": "Ir al paso {etapa}",
+          "tudoCerto": "Motivo, diagnóstico y conducta están registrados. Nada pendiente.",
+          "depois": "Al finalizar, la historia queda solo para lectura y usted vuelve a la agenda. Los documentos y el resumen de la app siguen disponibles."
+        },
+        "passos": {
+          "estado": {
+            "vazio": "Por hacer",
+            "parcial": "En curso",
+            "completo": "Hecho",
+            "alerta": "Requiere atención"
+          },
+          "numero": "Paso {numero} de {total}"
+        },
+        "contexto": {
+          "titulo": "Historial del paciente"
+        },
+        "anamnese": {
+          "tipoDoAntecedente": "Tipo de antecedente",
+          "descricaoDoAntecedente": "Descripción del antecedente"
+        },
+        "diagnostico": {
+          "tipo": "Tipo de diagnóstico"
+        },
+        "conduta": {
+          "retornoMarcado": "Control agendado."
+        },
+        "documentos": {
+          "imprimir": "Imprimir"
+        }
       }
     },
     "pacientes": {
@@ -3767,6 +3846,16 @@
       "saudacao": {
         "rascunhos": "1 historia en borrador para firmar | {n} historias en borrador para firmar",
         "todosAssinados": "Todas las historias firmadas"
+      },
+      "paraAssinar": "Para firmar",
+      "assinados": "Firmadas",
+      "assinadosDescricao": "Del más reciente al más antiguo. Toda la fila abre la historia.",
+      "continuarRascunho": "Continuar borrador de {pet}",
+      "resumo": {
+        "rascunhos": "{total} historia para firmar. | {total} historias para firmar.",
+        "rascunhosAntigo": "{total} historia para firmar, abierta el {data}. | {total} historias para firmar, la más antigua abierta el {data}.",
+        "emDia": "Ninguna historia esperando firma.",
+        "assinados": "{total} firmada desde el {data}. | {total} firmadas desde el {data}."
       }
     },
     "atividades": {

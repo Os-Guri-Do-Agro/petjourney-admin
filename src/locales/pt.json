@@ -2873,7 +2873,26 @@
         "cardiaco": "Condição cardíaca registrada: {detalhe}",
         "gastrico": "Condição gástrica registrada: {detalhe}"
       },
-      "escolhaNaLista": "Escolha um remédio na lista para ver a dose por espécie."
+      "escolhaNaLista": "Escolha um remédio na lista para ver a dose por espécie.",
+      "resumo": {
+        "geral": "{total} medicamento, com a dose de cada espécie. Busque pelo nome, pelo princípio ativo ou pela indicação. | {total} medicamentos, com a dose de cada espécie. Busque pelo nome, pelo princípio ativo ou pela indicação.",
+        "paciente": "Consulta para {pet}: a lista abre com o que tem dose para a espécie do paciente, e a ficha traz a dose calculada para {peso}.",
+        "pacienteSemPeso": "Consulta para {pet}: a lista abre com o que tem dose para a espécie do paciente. Sem peso no cadastro, a dose não é calculada."
+      },
+      "sinal": {
+        "contraindicado": "Contraindicado",
+        "alergia": "Alergia",
+        "cautela": "Cautela"
+      },
+      "dosePeso": {
+        "titulo": "Dose para {pet}, {peso}",
+        "porAdministracao": "por administração",
+        "daApresentacao": "da apresentação, por vez",
+        "horas": "h",
+        "dias": "dia | dias",
+        "conta": "Faixa usual da espécie ({faixa} mg/kg) × {peso}, o peso do cadastro. Confira o peso do dia antes de prescrever."
+      },
+      "escolherPara": "Para {pet}"
     },
     "documentos": {
       "titulo": "Documentos do atendimento",
@@ -3586,6 +3605,66 @@
           "focarPrimeiro": "Voltar ao primeiro campo",
           "ajuda": "Este mapa"
         }
+      },
+      "nova": {
+        "titulo": "Atendimento",
+        "voltarFicha": "Ficha de {pet}",
+        "resumo": {
+          "aberto": "Aberto às {hora} com {profissional}",
+          "finalizado": "Finalizado em {data}, às {hora}, por {profissional}",
+          "etapas": "{feitas} de {total} etapas completas"
+        },
+        "salvoAs": "Salvo às {hora}",
+        "autosave": "Salva sozinho enquanto você escreve",
+        "imprimir": "Imprimir ou salvar PDF",
+        "fixoRotulo": "Paciente em atendimento",
+        "mostrarHistorico": "Mostrar histórico",
+        "faixa": {
+          "rascunhoTitulo": "Há texto não salvo neste navegador",
+          "rascunhoTexto": "Digitado {quando} e ainda não gravado no prontuário. Restaure para continuar de onde parou.",
+          "leituraTitulo": "Somente leitura",
+          "finalizadoTitulo": "Atendimento finalizado",
+          "finalizadoTexto": "O prontuário fica só para leitura. Os documentos e o resumo do app continuam na etapa Resumo.",
+          "verResumo": "Ir para o resumo"
+        },
+        "rodape": {
+          "anterior": "Etapa anterior",
+          "proxima": "Próxima etapa"
+        },
+        "finalizar": {
+          "faltam": "Ainda falta registrar",
+          "queixa": "A queixa principal",
+          "diagnostico": "Pelo menos um diagnóstico",
+          "alergia": "Confirmar a prescrição apesar da alergia",
+          "ir": "Ir à etapa {etapa}",
+          "tudoCerto": "Queixa, diagnóstico e conduta estão registrados. Nada pendente.",
+          "depois": "Depois de finalizar, o prontuário fica só para leitura e você volta para a agenda. Documentos e o resumo do app continuam disponíveis."
+        },
+        "passos": {
+          "estado": {
+            "vazio": "A fazer",
+            "parcial": "Em andamento",
+            "completo": "Feito",
+            "alerta": "Pede atenção"
+          },
+          "numero": "Etapa {numero} de {total}"
+        },
+        "contexto": {
+          "titulo": "Histórico do paciente"
+        },
+        "anamnese": {
+          "tipoDoAntecedente": "Tipo do antecedente",
+          "descricaoDoAntecedente": "Descrição do antecedente"
+        },
+        "diagnostico": {
+          "tipo": "Tipo do diagnóstico"
+        },
+        "conduta": {
+          "retornoMarcado": "Retorno marcado na agenda."
+        },
+        "documentos": {
+          "imprimir": "Imprimir"
+        }
       }
     },
     "pacientes": {
@@ -3767,6 +3846,16 @@
       "saudacao": {
         "rascunhos": "1 prontuário em rascunho para assinar | {n} prontuários em rascunho para assinar",
         "todosAssinados": "Todos os prontuários assinados"
+      },
+      "paraAssinar": "Para assinar",
+      "assinados": "Assinados",
+      "assinadosDescricao": "Do mais recente para o mais antigo. A linha inteira abre o prontuário.",
+      "continuarRascunho": "Continuar rascunho de {pet}",
+      "resumo": {
+        "rascunhos": "{total} prontuário para assinar. | {total} prontuários para assinar.",
+        "rascunhosAntigo": "{total} prontuário para assinar, aberto em {data}. | {total} prontuários para assinar, o mais antigo aberto em {data}.",
+        "emDia": "Nenhum prontuário esperando assinatura.",
+        "assinados": "{total} assinado desde {data}. | {total} assinados desde {data}."
       }
     },
     "atividades": {

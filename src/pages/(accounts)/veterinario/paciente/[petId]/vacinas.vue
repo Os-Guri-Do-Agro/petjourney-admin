@@ -869,6 +869,10 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
     padding: 14px 16px;
   }
 
+  .agora__texto {
+    flex-basis: calc(100% - 60px);
+  }
+
   .agora__titulo {
     font-size: 17px;
   }

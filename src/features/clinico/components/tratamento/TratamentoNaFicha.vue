@@ -1181,6 +1181,12 @@ function textoDaSituacao(dose: DoseNaGrade): string {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* No estreito, os botões da dose descem para baixo da frase, alinhados com ela. */
+  .trat__vez-acoes {
+    width: 100%;
+    padding-inline-start: 48px;
+  }
+
   .trat__registros {
     margin-inline-start: 0;
   }

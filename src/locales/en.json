@@ -2873,7 +2873,26 @@
         "cardiaco": "Recorded heart condition: {detalhe}",
         "gastrico": "Recorded gastric condition: {detalhe}"
       },
-      "escolhaNaLista": "Pick a drug from the list to see the dose by species."
+      "escolhaNaLista": "Pick a drug from the list to see the dose by species.",
+      "resumo": {
+        "geral": "{total} medication, with the dose for each species. Search by name, active ingredient or indication. | {total} medications, with the dose for each species. Search by name, active ingredient or indication.",
+        "paciente": "Looking up for {pet}: the list opens with what has a dose for the patient's species, and each entry shows the dose worked out for {peso}.",
+        "pacienteSemPeso": "Looking up for {pet}: the list opens with what has a dose for the patient's species. With no weight on file, the dose is not worked out."
+      },
+      "sinal": {
+        "contraindicado": "Contraindicated",
+        "alergia": "Allergy",
+        "cautela": "Caution"
+      },
+      "dosePeso": {
+        "titulo": "Dose for {pet}, {peso}",
+        "porAdministracao": "per dose",
+        "daApresentacao": "of the product, each time",
+        "horas": "h",
+        "dias": "day | days",
+        "conta": "Usual range for the species ({faixa} mg/kg) × {peso}, the weight on file. Check today's weight before prescribing."
+      },
+      "escolherPara": "For {pet}"
     },
     "documentos": {
       "titulo": "Visit documents",
@@ -3586,6 +3605,66 @@
           "focarPrimeiro": "Back to first field",
           "ajuda": "This map"
         }
+      },
+      "nova": {
+        "titulo": "Appointment",
+        "voltarFicha": "{pet}'s record",
+        "resumo": {
+          "aberto": "Opened at {hora} with {profissional}",
+          "finalizado": "Completed on {data} at {hora} by {profissional}",
+          "etapas": "{feitas} of {total} steps complete"
+        },
+        "salvoAs": "Saved at {hora}",
+        "autosave": "Saves on its own as you type",
+        "imprimir": "Print or save PDF",
+        "fixoRotulo": "Patient being seen",
+        "mostrarHistorico": "Show history",
+        "faixa": {
+          "rascunhoTitulo": "There is unsaved text in this browser",
+          "rascunhoTexto": "Typed {quando} and not yet saved to the record. Restore it to pick up where you left off.",
+          "leituraTitulo": "Read only",
+          "finalizadoTitulo": "Appointment completed",
+          "finalizadoTexto": "The record is now read only. Documents and the app summary are still in the Summary step.",
+          "verResumo": "Go to summary"
+        },
+        "rodape": {
+          "anterior": "Previous step",
+          "proxima": "Next step"
+        },
+        "finalizar": {
+          "faltam": "Still to be recorded",
+          "queixa": "The chief complaint",
+          "diagnostico": "At least one diagnosis",
+          "alergia": "Confirm the prescription despite the allergy",
+          "ir": "Go to {etapa}",
+          "tudoCerto": "Complaint, diagnosis and plan are recorded. Nothing pending.",
+          "depois": "Once completed, the record becomes read only and you go back to the schedule. Documents and the app summary stay available."
+        },
+        "passos": {
+          "estado": {
+            "vazio": "To do",
+            "parcial": "In progress",
+            "completo": "Done",
+            "alerta": "Needs attention"
+          },
+          "numero": "Step {numero} of {total}"
+        },
+        "contexto": {
+          "titulo": "Patient history"
+        },
+        "anamnese": {
+          "tipoDoAntecedente": "History type",
+          "descricaoDoAntecedente": "History description"
+        },
+        "diagnostico": {
+          "tipo": "Diagnosis type"
+        },
+        "conduta": {
+          "retornoMarcado": "Follow-up booked in the schedule."
+        },
+        "documentos": {
+          "imprimir": "Print"
+        }
       }
     },
     "pacientes": {
@@ -3767,6 +3846,16 @@
       "saudacao": {
         "rascunhos": "1 draft record to sign | {n} draft records to sign",
         "todosAssinados": "All records signed"
+      },
+      "paraAssinar": "To sign",
+      "assinados": "Signed",
+      "assinadosDescricao": "Newest first. Click anywhere on a row to open the record.",
+      "continuarRascunho": "Continue {pet}'s draft",
+      "resumo": {
+        "rascunhos": "{total} record to sign. | {total} records to sign.",
+        "rascunhosAntigo": "{total} record to sign, opened on {data}. | {total} records to sign, the oldest opened on {data}.",
+        "emDia": "No records waiting to be signed.",
+        "assinados": "{total} signed since {data}. | {total} signed since {data}."
       }
     },
     "atividades": {

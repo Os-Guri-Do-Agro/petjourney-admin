@@ -2873,7 +2873,26 @@
         "cardiaco": "Zabeleženo srčano oboljenje: {detalhe}",
         "gastrico": "Zabeleženo oboljenje želuca: {detalhe}"
       },
-      "escolhaNaLista": "Izaberite lek sa liste da vidite dozu po vrsti."
+      "escolhaNaLista": "Izaberite lek sa liste da vidite dozu po vrsti.",
+      "resumo": {
+        "geral": "{total} lek, sa dozom za svaku vrstu. Tražite po nazivu, aktivnoj supstanci ili indikaciji. | {total} leka, sa dozom za svaku vrstu. Tražite po nazivu, aktivnoj supstanci ili indikaciji. | {total} lekova, sa dozom za svaku vrstu. Tražite po nazivu, aktivnoj supstanci ili indikaciji.",
+        "paciente": "Pretraga za pacijenta {pet}: lista prikazuje lekove sa dozom za vrstu pacijenta, a kartica leka daje dozu izračunatu za {peso}.",
+        "pacienteSemPeso": "Pretraga za pacijenta {pet}: lista prikazuje lekove sa dozom za vrstu pacijenta. Bez upisane težine doza se ne računa."
+      },
+      "sinal": {
+        "contraindicado": "Kontraindikovan",
+        "alergia": "Alergija",
+        "cautela": "Oprez"
+      },
+      "dosePeso": {
+        "titulo": "Doza za {pet}, {peso}",
+        "porAdministracao": "po davanju",
+        "daApresentacao": "od pakovanja, po davanju",
+        "horas": "h",
+        "dias": "dan | dana | dana",
+        "conta": "Uobičajeni raspon za vrstu ({faixa} mg/kg) × {peso}, upisana težina. Proverite današnju težinu pre propisivanja."
+      },
+      "escolherPara": "Za pacijenta {pet}"
     },
     "documentos": {
       "titulo": "Dokumenti pregleda",
@@ -3586,6 +3605,66 @@
           "focarPrimeiro": "Povratak na prvo polje",
           "ajuda": "Ova lista"
         }
+      },
+      "nova": {
+        "titulo": "Pregled",
+        "voltarFicha": "Karton: {pet}",
+        "resumo": {
+          "aberto": "Otvoreno u {hora}, {profissional}",
+          "finalizado": "Završeno {data} u {hora}, {profissional}",
+          "etapas": "Završeno koraka: {feitas} od {total}"
+        },
+        "salvoAs": "Sačuvano u {hora}",
+        "autosave": "Čuva se samo dok kucate",
+        "imprimir": "Odštampajte ili sačuvajte PDF",
+        "fixoRotulo": "Pacijent na pregledu",
+        "mostrarHistorico": "Prikažite istoriju",
+        "faixa": {
+          "rascunhoTitulo": "U ovom pregledaču postoji nesačuvan tekst",
+          "rascunhoTexto": "Uneto {quando} i još nije upisano u karton. Vratite ga da nastavite gde ste stali.",
+          "leituraTitulo": "Samo za čitanje",
+          "finalizadoTitulo": "Pregled je završen",
+          "finalizadoTexto": "Karton je sada samo za čitanje. Dokumenti i rezime za aplikaciju su i dalje u koraku Rezime.",
+          "verResumo": "Idite na rezime"
+        },
+        "rodape": {
+          "anterior": "Prethodni korak",
+          "proxima": "Sledeći korak"
+        },
+        "finalizar": {
+          "faltam": "Još treba upisati",
+          "queixa": "Glavna tegoba",
+          "diagnostico": "Bar jedna dijagnoza",
+          "alergia": "Potvrdite propisani lek uprkos alergiji",
+          "ir": "Idite na korak {etapa}",
+          "tudoCerto": "Tegoba, dijagnoza i terapija su upisane. Ništa nije na čekanju.",
+          "depois": "Posle završetka karton je samo za čitanje i vraćate se u raspored. Dokumenti i rezime za aplikaciju ostaju dostupni."
+        },
+        "passos": {
+          "estado": {
+            "vazio": "Za uraditi",
+            "parcial": "U toku",
+            "completo": "Završeno",
+            "alerta": "Traži pažnju"
+          },
+          "numero": "Korak {numero} od {total}"
+        },
+        "contexto": {
+          "titulo": "Istorija pacijenta"
+        },
+        "anamnese": {
+          "tipoDoAntecedente": "Vrsta anamnestičkog podatka",
+          "descricaoDoAntecedente": "Opis anamnestičkog podatka"
+        },
+        "diagnostico": {
+          "tipo": "Vrsta dijagnoze"
+        },
+        "conduta": {
+          "retornoMarcado": "Kontrola je zakazana u rasporedu."
+        },
+        "documentos": {
+          "imprimir": "Odštampajte"
+        }
       }
     },
     "pacientes": {
@@ -3767,6 +3846,16 @@
       "saudacao": {
         "rascunhos": "{n} karton u nacrtu za potpis | {n} kartona u nacrtu za potpis | {n} kartona u nacrtu za potpis",
         "todosAssinados": "Svi kartoni su potpisani"
+      },
+      "paraAssinar": "Za potpis",
+      "assinados": "Potpisani",
+      "assinadosDescricao": "Od najnovijeg ka najstarijem. Ceo red otvara karton.",
+      "continuarRascunho": "Nastavite nacrt: {pet}",
+      "resumo": {
+        "rascunhos": "{total} karton za potpis. | {total} kartona za potpis. | {total} kartona za potpis.",
+        "rascunhosAntigo": "{total} karton za potpis, otvoren {data}. | {total} kartona za potpis, najstariji otvoren {data}. | {total} kartona za potpis, najstariji otvoren {data}.",
+        "emDia": "Nijedan karton ne čeka potpis.",
+        "assinados": "{total} potpisan od {data}. | {total} potpisana od {data}. | {total} potpisanih od {data}."
       }
     },
     "atividades": {
