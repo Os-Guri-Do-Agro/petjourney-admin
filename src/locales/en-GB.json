@@ -2887,7 +2887,7 @@
       "dosePeso": {
         "titulo": "Dose for {pet}, {peso}",
         "porAdministracao": "per dose",
-        "daApresentacao": "of the product, each time",
+        "daApresentacao": "of the product",
         "horas": "h",
         "dias": "day | days",
         "conta": "Usual range for the species ({faixa} mg/kg) × {peso}, the weight on file. Check today's weight before prescribing."
@@ -3610,8 +3610,8 @@
         "titulo": "Appointment",
         "voltarFicha": "{pet}'s record",
         "resumo": {
-          "aberto": "Opened at {hora} with {profissional}",
-          "finalizado": "Completed on {data} at {hora} by {profissional}",
+          "aberto": "Appointment opened at {hora} with {profissional}",
+          "finalizado": "Appointment completed on {data} at {hora} by {profissional}",
           "etapas": "{feitas} of {total} steps complete"
         },
         "salvoAs": "Saved at {hora}",

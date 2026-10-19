@@ -43,6 +43,14 @@
  * continua inteiro à esquerda e editável, e na anamnese fica só a linha do cabeçalho — o estado,
  * o relógio e o resumo —, que é o que diz que o microfone está aberto. Recolher é fechar a gaveta.
  *
+ * ## A forma (redesenho total, 19/10/2026)
+ *
+ * Na anamnese, a escuta é uma faixa tracejada no tom da máquina, com o disco do estado, o relógio,
+ * quem autorizou e as ações (pausar, encerrar). Ouvindo, o disco é o único vermelho da faixa e
+ * pulsa — discreta, porque é uma linha só; óbvia, porque é a única coisa que se mexe na folha. A
+ * gaveta empurra o prontuário em tela larga (`useSidePanelOffset`, o mesmo das outras gavetas
+ * não-modais) em vez de cobri-lo.
+ *
  * ## Teclado
  *
  * A seção é `data-fora-do-teclado`: o `Enter` que avança campo no modo de digitação rápida não
@@ -60,8 +68,11 @@ import {
 } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
-import { computed, nextTick, onBeforeUnmount, ref, useId, watchEffect, type Component } from 'vue'
+import { computed, nextTick, ref, useId, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
+import { useTelaLarga } from '@/composables/useTelaLarga'
 
 import EscutaAutorizacao from './EscutaAutorizacao.vue'
 import EscutaCampo, { type CitacaoVisivel } from './EscutaCampo.vue'
@@ -102,19 +113,17 @@ const destacada = ref<string | null>(null)
 const visivel = computed(() => escuta.aberta && escuta.encounterId === props.encounterId)
 
 /**
- * Com a gaveta aberta, a página abre espaço para ela em tela larga (`html.escuta-lateral`, em
- * `hc-tema.css`): o prontuário estreita em vez de ficar por baixo — inclusive os botões de pausar e
- * encerrar desta linha. No tablet a gaveta fica por cima, e leva esses botões no próprio cabeçalho.
+ * Com a gaveta aberta, a página abre espaço para ela em tela larga: o prontuário estreita em vez
+ * de ficar por baixo — inclusive os botões de pausar e encerrar desta linha. No tablet a gaveta
+ * fica por cima, e leva esses botões no próprio cabeçalho.
  */
 const gavetaAberta = computed(() => visivel.value && !escuta.recolhida)
+const telaLarga = useTelaLarga(1200)
 
-watchEffect(() => {
-  document.documentElement.classList.toggle('escuta-lateral', gavetaAberta.value)
-})
-
-onBeforeUnmount(() => {
-  document.documentElement.classList.remove('escuta-lateral')
-})
+useSidePanelOffset(
+  computed(() => gavetaAberta.value && telaLarga.value),
+  'min(30rem, 94vw)',
+)
 const responsavel = computed(() => props.tutor?.nome.trim().split(/\s+/)[0] ?? '')
 
 const modoDoCampo = computed(() => {
@@ -530,7 +539,7 @@ const temAcoes = computed(
         <p class="topo__linha">
           <!-- Só o estado é anunciado; o relógio, não: sessenta anúncios por minuto falariam por cima da consulta. -->
           <strong class="topo__estado" role="status">{{ estado.rotulo }}</strong>
-          <span class="topo__relogio clinic-value" role="timer" aria-live="off">{{
+          <span class="topo__relogio ui-num" role="timer" aria-live="off">{{
             rotulos.relogio(escuta.tempoMs)
           }}</span>
           <EscutaNivel v-if="escuta.fase === 'gravando'" :nivel="escuta.nivel" />
@@ -654,7 +663,7 @@ const temAcoes = computed(
             <i v-else class="ph ph-spin ph-circle-notch" />
           </span>
           <h2 class="gaveta__titulo">{{ estado.rotulo }}</h2>
-          <span class="topo__relogio clinic-value" aria-hidden="true">{{
+          <span class="topo__relogio ui-num" aria-hidden="true">{{
             rotulos.relogio(escuta.tempoMs)
           }}</span>
           <!-- Só no tablet: em tela larga a linha da anamnese continua à vista com estes botões. -->
@@ -783,7 +792,7 @@ const temAcoes = computed(
                           @click="verNaConversa(item.citacao.trechoId)"
                         >
                           <span class="nota__texto">“{{ item.texto }}”</span>
-                          <span class="nota__hora clinic-value">{{ item.hora }}</span>
+                          <span class="nota__hora ui-num">{{ item.hora }}</span>
                         </Button>
                         <p class="nota__porque">{{ t(`clinico.escuta.notas.${item.kind}`) }}</p>
                       </div>
@@ -834,24 +843,41 @@ const temAcoes = computed(
 
 <style scoped>
 /*
+ * Os tons da escuta. A "máquina" (o periwinkle de "a máquina propôs e ninguém aprovou") vem do
+ * token do módulo, com contraste conferido nos dois temas; o resto é do kit.
+ */
+.escuta,
+.corpo-da-secao,
+.gaveta__topo {
+  --maquina: var(--clinic-maquina);
+  --maquina-fundo: var(--clinic-maquina-bg);
+  --maquina-linha: var(--clinic-maquina-line);
+}
+
+/*
  * Moldura tracejada, como a da pré-consulta, e pelo mesmo motivo: a seção é informação de fora,
- * ainda não incorporada — um cartão igual aos outros faria parecer preenchido. A linha é a da
- * máquina; o fundo é o do cartão, e não uma chapa de cor.
+ * ainda não incorporada. A linha é a da máquina; o fundo é o da folha.
  */
 .escuta {
   container: escuta / inline-size;
   display: grid;
-  gap: var(--clinic-space-4);
-  padding: var(--clinic-space-4) var(--clinic-space-5);
-  border: 1px dashed var(--clinic-maquina-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
+  gap: 0;
+  padding: 12px 14px 12px 12px;
+  border: 1.5px dashed var(--maquina-linha);
+  border-radius: 16px;
+  background: var(--superficie);
 }
 
-/* Aplicada já é prontuário: a moldura da máquina sai e fica a linha comum de qualquer bloco. */
+/* Ouvindo, a faixa toma o tom do microfone aberto — sem virar alarme. */
+.escuta--gravando {
+  border-color: color-mix(in oklab, var(--risco) 55%, var(--linha));
+  background: color-mix(in oklab, var(--risco-fundo) 35%, var(--superficie));
+}
+
+/* Aplicada já é prontuário: a moldura da máquina sai e fica a linha comum de qualquer folha. */
 .escuta--aplicada {
   border-style: solid;
-  border-color: var(--clinic-line);
+  border-color: var(--linha);
 }
 
 /* ------------------------------------------------------------------ cabeçalho */
@@ -860,71 +886,79 @@ const temAcoes = computed(
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-3);
+  gap: 10px 14px;
 }
 
 .disco {
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 999px;
-  font-size: 1rem;
+  border-radius: 50%;
+  font-size: 19px;
 }
 
-/* Ouvindo é o único vermelho da seção: microfone aberto numa sala com gente é o estado que não pode passar despercebido. */
+/* Ouvindo é o único vermelho da seção: microfone aberto numa sala com gente não pode passar despercebido. */
 .disco--ouvindo {
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  animation: pulsar 1.8s ease-in-out infinite;
+}
+
+@keyframes pulsar {
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in oklab, var(--risco) 22%, transparent);
+  }
 }
 
 .disco--pausado {
-  background: var(--clinic-neutral-bg);
-  color: var(--clinic-neutral-text);
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
 }
 
 .disco--maquina {
-  background: var(--clinic-maquina-bg);
-  color: var(--clinic-maquina);
+  background: var(--maquina-fundo);
+  color: var(--maquina);
 }
 
 .disco--aplicado {
-  background: var(--clinic-ok-bg);
-  color: var(--clinic-ok-text);
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
 }
 
 .topo__textos {
   display: grid;
-  flex: 1 1 18rem;
-  gap: 0.1rem;
   min-width: 0;
+  flex: 1 1 18rem;
+  gap: 2px;
 }
 
 .topo__linha {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-3);
+  gap: 10px;
   margin: 0;
 }
 
 .topo__estado {
-  font-size: var(--clinic-font-value);
-  font-weight: 750;
-  letter-spacing: -0.01em;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .topo__relogio {
-  color: var(--clinic-muted);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 14px;
+  font-weight: 650;
 }
 
 /* A linha de baixo é o resumo: quem autorizou e as contas da fase, em texto corrido. */
 .topo__meta {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  line-height: 1.6;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 /* Cada item inteiro numa linha: a quebra só acontece no espaço depois do ponto. */
@@ -935,17 +969,17 @@ const temAcoes = computed(
 /* O preflight do Tailwind faz todo `svg` virar bloco; aqui o ícone anda junto do texto. */
 .topo__icone {
   display: inline-block;
-  margin-inline-end: 0.25rem;
+  margin-inline-end: 4px;
   vertical-align: -0.125em;
 }
 
 .topo__ponto {
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
 }
 
 .topo__item--conferir {
-  color: var(--clinic-attention-text);
-  font-weight: 700;
+  color: var(--atencao-tinta);
+  font-weight: 600;
 }
 
 .topo__acoes,
@@ -953,52 +987,46 @@ const temAcoes = computed(
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 6px;
 }
 
 /* Entre o que muda a gravação e o que muda a vista, uma régua fina. */
 .topo__acoes + .topo__vista {
-  padding-inline-start: var(--clinic-space-2);
-  border-inline-start: 1px solid var(--clinic-line-soft);
+  padding-inline-start: 8px;
+  border-inline-start: 1px solid var(--linha);
 }
 
-/* ------------------------------------------------------------------ corpo */
+/* ------------------------------------------------------------------ gaveta */
 
 /*
- * Na gaveta a seção não é mais o contêiner: o corpo é. Com 40 rem, a conversa fica em cima e o
+ * Na gaveta a seção não é mais o contêiner: o corpo é. Com 30 rem, a conversa fica em cima e o
  * prontuário proposto embaixo, numa coluna — as regras `@container escuta` já sabiam fazer isso.
  */
 .corpo-da-secao {
   container: escuta / inline-size;
   display: grid;
-  gap: var(--clinic-space-4);
-}
-
-/* Na anamnese fica só a linha do cabeçalho: compacta, sem o vão do corpo. */
-.escuta--recolhida,
-.escuta {
-  gap: 0;
+  gap: 16px;
 }
 
 .gaveta__topo {
   display: flex;
+  min-width: 0;
   flex: 1;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
+  gap: 8px;
 }
 
 .gaveta__titulo {
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .gaveta__acoes {
   display: none;
-  gap: 0.4rem;
+  gap: 6px;
 }
 
 @media (max-width: 74.99rem) {
@@ -1012,20 +1040,10 @@ const temAcoes = computed(
 }
 
 .disco--pequeno {
-  width: 1.75rem;
-  height: 1.75rem;
-  font-size: 0.9rem;
-}
-
-/* O rodapé da revisão fica preso ao pé da gaveta: a decisão está sempre a um clique. */
-.rodape {
-  position: sticky;
-  /* O respiro de baixo da gaveta é 1,25 rem: o rodapé desce até a borda e nada rola por baixo dele. */
-  bottom: -1.25rem;
-  z-index: 1;
-  padding-bottom: 1.25rem;
-  margin-bottom: -1.25rem;
-  background: var(--hc-cartao);
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+  animation: none;
 }
 
 /* Nota compacta, como a da proposta de rotina: diz o que é sem roubar o espaço dos campos. */
@@ -1033,37 +1051,36 @@ const temAcoes = computed(
 .falha {
   display: flex;
   align-items: flex-start;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
-  font-size: var(--clinic-font-label);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
   line-height: 1.45;
 }
 
 .aviso {
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
+  background: var(--superficie-2);
+  color: var(--tinta-2);
 }
 
 .aviso .ph,
 .falha .ph {
-  margin-top: 0.15rem;
-  font-size: 0.7rem;
+  margin-top: 2px;
+  font-size: 15px;
 }
 
 .falha {
-  border: 1px solid var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-weight: 650;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-weight: 550;
 }
 
 .corpo {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   align-items: start;
-  gap: var(--clinic-space-5);
+  gap: 20px;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
 }
 
 .corpo--so-proposta {
@@ -1076,9 +1093,9 @@ const temAcoes = computed(
  */
 .corpo__conversa {
   position: sticky;
-  top: var(--clinic-space-4);
-  padding-inline-end: var(--clinic-space-5);
-  border-inline-end: 1px solid var(--clinic-line-soft);
+  top: 16px;
+  padding-inline-end: 20px;
+  border-inline-end: 1px solid var(--linha);
 }
 
 @container escuta (max-width: 52rem) {
@@ -1089,9 +1106,9 @@ const temAcoes = computed(
   .corpo__conversa {
     position: static;
     padding-inline-end: 0;
-    padding-bottom: var(--clinic-space-4);
+    padding-bottom: 16px;
     border-inline-end: 0;
-    border-bottom: 1px solid var(--clinic-line-soft);
+    border-bottom: 1px solid var(--linha);
   }
 
   .corpo__conversa :deep(.conversa__lista) {
@@ -1104,22 +1121,22 @@ const temAcoes = computed(
 .proposta {
   container: proposta / inline-size;
   display: grid;
-  gap: var(--clinic-space-3);
   min-width: 0;
+  gap: 12px;
 }
 
-/* Título de área em caixa normal: acima dele só o cabeçalho; abaixo, os grupos em versalete. */
 .proposta__titulo {
   margin: 0;
-  font-size: var(--clinic-font-base);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .grupos {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: var(--clinic-space-5) var(--clinic-space-6);
+  gap: 20px 24px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /* Com largura — a conversa oculta, ou tela muito larga —, os grupos se dividem em duas colunas. */
@@ -1131,33 +1148,31 @@ const temAcoes = computed(
 
 .grupos__coluna {
   display: grid;
-  align-content: start;
-  gap: var(--clinic-space-5);
   min-width: 0;
+  align-content: start;
+  gap: 20px;
 }
 
 .grupo {
   display: grid;
-  gap: var(--clinic-space-1);
+  gap: 4px;
 }
 
-/* O título do grupo é o da legenda do formulário embaixo, com uma régua até a margem. */
+/* O título do grupo é o da folha da anamnese: frase, com um fio até a margem. */
 .grupo__titulo {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .grupo__titulo::after {
-  flex: 1;
   height: 1px;
-  background: var(--clinic-line-soft);
+  flex: 1;
+  background: var(--linha);
   content: '';
 }
 
@@ -1170,17 +1185,17 @@ const temAcoes = computed(
 
 .grupo__falta {
   margin: 0;
-  padding-top: var(--clinic-space-1);
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  padding-top: 4px;
+  color: var(--tinta-3);
+  font-size: 13px;
   line-height: 1.45;
 }
 
 /* Linha que entra na lista: é a única animação dos campos, e diz "este acabou de ser ouvido". */
 .entra-enter-active {
   transition:
-    opacity 180ms ease-out,
-    transform 180ms ease-out;
+    opacity var(--pj-tempo-medio) ease-out,
+    transform var(--pj-tempo-medio) ease-out;
 }
 
 .entra-enter-from {
@@ -1192,30 +1207,30 @@ const temAcoes = computed(
 
 .notas {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 12px;
   margin: 0;
-  padding: var(--clinic-space-2) 0 0;
+  padding: 8px 0 0;
   list-style: none;
 }
 
 .nota {
   display: grid;
-  grid-template-columns: 1.5rem minmax(0, 1fr);
-  gap: var(--clinic-space-3);
+  gap: 12px;
+  grid-template-columns: 22px minmax(0, 1fr);
 }
 
 .nota__icone {
   justify-self: center;
-  margin-top: 0.1rem;
-  color: var(--clinic-muted);
-  font-size: 1.05rem;
+  margin-top: 2px;
+  color: var(--tinta-2);
+  font-size: 18px;
 }
 
 .nota__citacao.p-button {
-  gap: 0.35rem;
+  gap: 6px;
   padding: 0;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-base);
+  color: var(--tinta);
+  font-size: 14px;
 }
 
 .nota__texto {
@@ -1224,50 +1239,64 @@ const temAcoes = computed(
 }
 
 .nota__hora {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 12.5px;
 }
 
 .nota__porque {
-  margin: 0.1rem 0 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  margin: 2px 0 0;
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.45;
 }
 
 /* ------------------------------------------------------------------ rodapé */
 
+/* O rodapé da revisão fica preso ao pé da gaveta: a decisão está sempre a um clique. */
 .rodape {
+  position: sticky;
+  z-index: 1;
+  bottom: -1.25rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
-  padding-top: var(--clinic-space-4);
-  border-top: 1px solid var(--clinic-line);
+  gap: 12px;
+  margin-bottom: -1.25rem;
+  padding: 16px 0 1.25rem;
+  border-top: 1px solid var(--linha);
+  background: var(--superficie);
 }
 
 .rodape__textos {
   display: grid;
-  gap: 0.15rem;
+  gap: 2px;
 }
 
 .rodape__nada {
   margin: 0;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .rodape__decisao {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 6px;
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .rodape__acoes {
   display: flex;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disco--ouvindo {
+    animation: none;
+  }
 }
 </style>

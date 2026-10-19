@@ -6,6 +6,12 @@
  * "gastroenterite" estão procurando a mesma coisa. O tipo (presuntivo, definitivo,
  * diferencial) fica editável depois de adicionado: o diagnóstico muda de estatuto ao longo da
  * consulta, e obrigar a remover e readicionar seria fricção sem motivo.
+ *
+ * ## A forma (redesenho total, 19/10/2026)
+ *
+ * Em cima, o que já foi registrado: uma lista do kit, uma linha por diagnóstico — o código em
+ * selo de algarismos iguais, a descrição em destaque, o tipo e o remover na ponta. Embaixo, a
+ * busca e as sugestões como linhas inteiras clicáveis, com "Adicionar" escrito.
  */
 import Button from 'primevue/button'
 import IconField from 'primevue/iconfield'
@@ -84,37 +90,44 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
     :somente-leitura="somenteLeitura"
     :motivo-somente-leitura="motivoLeitura"
   >
-    <ul v-if="valor.length > 0" class="lista">
-      <li v-for="diagnostico in valor" :key="diagnostico.id" class="lista__item">
-        <span class="codigo codigo--forte">{{ diagnostico.codigo }}</span>
-        <span class="lista__descricao">{{ clinico.descricaoDoDiagnostico(diagnostico) }}</span>
+    <ul v-if="valor.length > 0" class="registrados">
+      <li v-for="diagnostico in valor" :key="diagnostico.id" class="registrado">
+        <span class="codigo ui-num">{{ diagnostico.codigo }}</span>
+        <span class="registrado__descricao">{{ clinico.descricaoDoDiagnostico(diagnostico) }}</span>
 
         <Select
+          class="registrado__tipo"
           :model-value="diagnostico.kind"
           :options="opcoesTipo"
           option-label="rotulo"
           option-value="valor"
           size="small"
           :disabled="somenteLeitura"
-          :aria-label="t('clinico.prontuario.diagnostico.titulo')"
+          :aria-label="`${t('clinico.prontuario.nova.diagnostico.tipo')}: ${diagnostico.descricao}`"
           :pt="{ overlay: { class: 'clinic-overlay' } }"
           @update:model-value="alterarTipo(diagnostico.id, $event)"
         />
 
         <Button
+          type="button"
+          class="registrado__remover"
           icon="ph ph-x"
           severity="secondary"
           text
           rounded
           size="small"
           :disabled="somenteLeitura"
-          :aria-label="t('clinico.prontuario.diagnostico.remover')"
+          :aria-label="`${t('clinico.prontuario.diagnostico.remover')}: ${diagnostico.descricao}`"
+          :title="t('clinico.prontuario.diagnostico.remover')"
           @click="remover(diagnostico.id)"
         />
       </li>
     </ul>
 
-    <p v-else class="vazio">{{ t('clinico.prontuario.diagnostico.vazio') }}</p>
+    <p v-else class="vazio">
+      <i class="ph ph-clipboard-text" aria-hidden="true" />
+      {{ t('clinico.prontuario.diagnostico.vazio') }}
+    </p>
 
     <div v-if="!somenteLeitura" class="busca">
       <IconField>
@@ -129,25 +142,23 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
 
       <!--
         A sugestão é uma linha inteira clicável, com respiro suficiente para o olho separar uma
-        da outra. Antes eram linhas coladas com um "+" minúsculo na ponta: parecia índice, não
-        lista de escolha.
+        da outra, e a ação escrita na ponta: "+" sozinho obriga a adivinhar se adiciona, expande
+        ou cria.
       -->
       <ul v-if="sugestoes.length > 0" class="sugestoes">
         <li v-for="sugestao in sugestoes" :key="sugestao.codigo">
-          <Button
+          <button
             type="button"
-            class="sugestoes__item"
-            text
-            fluid
+            class="sugestao"
             @click="adicionar(sugestao.codigo, sugestao.descricao)"
           >
-            <span class="codigo">{{ sugestao.codigo }}</span>
-            <span class="sugestoes__descricao">{{ sugestao.descricao }}</span>
-            <span class="sugestoes__acao">
+            <span class="codigo codigo--suave ui-num">{{ sugestao.codigo }}</span>
+            <span class="sugestao__descricao">{{ sugestao.descricao }}</span>
+            <span class="sugestao__acao">
               <i class="ph ph-plus" aria-hidden="true" />
               {{ t('clinico.prontuario.diagnostico.adicionar') }}
             </span>
-          </Button>
+          </button>
         </li>
       </ul>
 
@@ -157,136 +168,157 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
 </template>
 
 <style scoped>
-.lista {
+/* ------------------------------------------------------------------ registrados */
+
+.registrados {
   display: grid;
-  gap: var(--clinic-space-2);
   margin: 0;
   padding: 0;
+  border: 1px solid color-mix(in oklab, var(--pj-lugar) 30%, var(--linha));
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 35%, var(--superficie));
   list-style: none;
 }
 
-.lista__item {
+.registrado {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) 9.5rem auto;
+  min-height: 56px;
   align-items: center;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-accent-soft);
-  border-radius: var(--clinic-radius-control);
-  background: color-mix(in srgb, var(--clinic-accent-tint) 55%, var(--clinic-surface));
+  gap: 12px;
+  padding: 8px 8px 8px 14px;
+  grid-template-columns: auto minmax(0, 1fr) 10rem auto;
 }
 
-.lista__descricao {
+.registrado + .registrado {
+  border-top: 1px solid color-mix(in oklab, var(--pj-lugar) 18%, var(--linha));
+}
+
+.registrado__descricao {
   overflow: hidden;
-  font-size: var(--clinic-font-value);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
   text-overflow: ellipsis;
 }
 
-/* O código é etiqueta de catálogo: largura fixa, tabular, para as linhas alinharem. */
-.codigo {
-  min-width: 3.6rem;
-  padding: 0.1rem 0.4rem;
-  border-radius: 0.35rem;
-  background: var(--clinic-surface-sunken);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  text-align: center;
+.registrado__remover.p-button.p-button-secondary.p-button-text:not(:disabled):hover {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
-.codigo--forte {
-  background: var(--clinic-accent);
-  color: var(--clinic-on-accent);
+/* O código é etiqueta de catálogo: algarismos de mesma largura, para as linhas alinharem. */
+.codigo {
+  display: inline-grid;
+  min-width: 56px;
+  height: 26px;
+  padding: 0 8px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--pj-lugar-tinta);
+  color: var(--superficie);
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+.codigo--suave {
+  background: var(--superficie-3);
+  color: var(--tinta-2);
 }
 
 .vazio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
-  padding: var(--clinic-space-3) 0;
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
+  font-size: 14px;
 }
+
+.vazio .ph {
+  font-size: 18px;
+}
+
+/* ------------------------------------------------------------------ busca */
 
 .busca {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .sugestoes {
   display: grid;
-  gap: 0.2rem;
   margin: 0;
-  padding: var(--clinic-space-2);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
+  padding: 4px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
   list-style: none;
 }
 
-/*
- * Linha de sugestão: botão de texto com layout próprio em grade (código, descrição, ação). O
- * tema o faria flex centralizado e sálvia; a linha herda a cor e ganha moldura no hover.
- */
-.sugestoes__item.p-button {
+.sugestao {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  width: 100%;
+  min-height: 48px;
   align-items: center;
-  gap: var(--clinic-space-3);
-  min-height: calc(var(--clinic-row-height) + 4px);
-  padding: 0 var(--clinic-space-2);
-  border: 1px solid transparent;
-  border-radius: var(--clinic-radius-control);
-  color: inherit;
+  gap: 12px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--tinta);
+  cursor: pointer;
   font: inherit;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   text-align: start;
 }
 
-.sugestoes__item.p-button:not(:disabled):hover,
-.sugestoes__item.p-button:not(:disabled):active {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-surface);
-  color: inherit;
+.sugestao:hover {
+  background: var(--superficie-2);
 }
 
-.sugestoes__descricao {
+.sugestao:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: -2px;
+}
+
+.sugestao__descricao {
   overflow: hidden;
-  font-weight: 650;
+  font-size: 14.5px;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/*
- * A ação fica escrita, não só um "+". O sinal sozinho obriga a adivinhar se adiciona, expande
- * ou cria; ela aparece por inteiro quando o cursor chega na linha.
- */
-.sugestoes__acao {
+/* A ação aparece por inteiro quando o cursor ou o foco chega na linha. */
+.sugestao__acao {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+  gap: 5px;
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-size: 13.5px;
+  font-weight: 600;
   opacity: 0;
   white-space: nowrap;
 }
 
-.sugestoes__item:hover .sugestoes__acao,
-.sugestoes__item:focus-visible .sugestoes__acao {
+.sugestao:hover .sugestao__acao,
+.sugestao:focus-visible .sugestao__acao {
   opacity: 1;
 }
 
-.sugestoes__acao i {
-  font-size: 0.62rem;
+@media (hover: none) {
+  .sugestao__acao {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 760px) {
-  .lista__item {
+  .registrado {
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
-  .lista__item > :nth-child(3) {
-    grid-column: 1 / -1;
+  .registrado__tipo {
+    grid-column: 2 / -1;
+    grid-row: 2;
   }
 }
 </style>

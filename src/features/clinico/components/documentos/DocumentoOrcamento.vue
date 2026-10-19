@@ -145,8 +145,6 @@ const itens = computed(() => {
 .tabela th {
   font-size: 8.5pt;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .estreita {
@@ -164,7 +162,6 @@ const itens = computed(() => {
 .total {
   font-weight: 700;
   text-align: end;
-  text-transform: uppercase;
 }
 
 .bloco {

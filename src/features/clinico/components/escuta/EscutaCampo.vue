@@ -348,7 +348,7 @@ async function fecharEditor() {
           @click="emit('verNaConversa', citacao.trechoId)"
         >
           <span class="citacao__texto">“{{ citacao.texto }}”</span>
-          <span class="citacao__hora clinic-value">{{ citacao.hora }}</span>
+          <span class="citacao__hora ui-num">{{ citacao.hora }}</span>
         </Button>
       </p>
 
@@ -401,12 +401,15 @@ async function fecharEditor() {
 
 <style scoped>
 .campo {
+  --maquina: var(--clinic-maquina);
+  --maquina-fundo: var(--clinic-maquina-bg);
+
   display: grid;
-  grid-template-columns: 1.5rem minmax(0, 1fr) auto;
   align-items: start;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3) 0;
-  border-top: 1px solid var(--clinic-line-soft);
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--linha);
+  grid-template-columns: 24px minmax(0, 1fr) auto;
 }
 
 .campo:first-child {
@@ -415,99 +418,94 @@ async function fecharEditor() {
 
 .marca {
   display: grid;
-  width: 1.4rem;
-  height: 1.4rem;
-  margin-top: 0.05rem;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
   place-items: center;
-  border-radius: 999px;
-  font-size: 0.75rem;
+  border-radius: 50%;
+  font-size: 13px;
 }
 
 .marca--maquina {
-  background: var(--clinic-maquina-bg);
-  color: var(--clinic-maquina);
+  background: var(--maquina-fundo);
+  color: var(--maquina);
 }
 
 .marca--aplicado {
-  background: var(--clinic-ok-bg);
-  color: var(--clinic-ok-text);
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
 }
 
 .marca--fora {
-  background: var(--clinic-surface-sunken);
-  color: var(--clinic-faint);
+  background: var(--superficie-3);
+  color: var(--tinta-3);
 }
 
 .campo__corpo {
   display: grid;
-  gap: 0.2rem;
   min-width: 0;
+  gap: 3px;
 }
 
+/* O rótulo do campo, como o rótulo do formulário: frase pequena em peso, não versalete. */
 .campo__rotulo {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .campo--revisao .campo__rotulo {
   cursor: pointer;
 }
 
-.campo__situacao {
-  letter-spacing: 0;
-  text-transform: none;
-}
-
 .campo__valor {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0 var(--clinic-space-2);
+  gap: 0 8px;
   margin: 0;
-  font-size: var(--clinic-font-value);
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
 
 /* Ficou de fora: continua legível — é rastro —, mas recua. */
 .campo--fora .campo__valor {
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
   font-weight: 500;
 }
 
 .campo__corrigido {
-  color: var(--clinic-ok-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+  color: var(--ok-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
 .campo__proposto {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 12.5px;
   font-weight: 500;
 }
 
 .campo__citacoes {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 var(--clinic-space-3);
+  gap: 0 12px;
   margin: 0;
 }
 
 /* A citação é link, e fala baixo: itálico no tom do texto secundário, com a hora ao lado. */
 .citacao.p-button {
-  gap: 0.35rem;
+  gap: 6px;
   padding: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .citacao.p-button:not(:disabled):hover {
-  color: var(--clinic-maquina);
+  color: var(--maquina);
 }
 
 .citacao__texto {
@@ -516,15 +514,15 @@ async function fecharEditor() {
 }
 
 .citacao__hora {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 12.5px;
   font-style: normal;
 }
 
 .campo__alertas {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.1rem var(--clinic-space-3);
+  gap: 2px 12px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -533,20 +531,20 @@ async function fecharEditor() {
 .alerta {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  gap: 5px;
+  color: var(--atencao-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
 .alerta--grave {
-  color: var(--clinic-risk-text);
+  color: var(--risco-tinta);
 }
 
 .campo__nota {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 12.5px;
 }
 
 .campo__acoes {
@@ -556,19 +554,19 @@ async function fecharEditor() {
 
 .editor {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding-top: 0.15rem;
+  gap: 8px;
+  padding-top: 2px;
 }
 
 .editor__antecedente {
   display: grid;
+  gap: 8px;
   grid-template-columns: 10rem minmax(0, 1fr) 8rem;
-  gap: var(--clinic-space-2);
 }
 
 .editor__acoes {
   display: flex;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 @media (max-width: 720px) {

@@ -15,6 +15,9 @@
  * "Aplicar vacina" é contornado: a conduta já tem a ação cheia da etapa, e o protocolo aberto com
  * uma segunda ação cheia era a parte da consulta que a auditoria marcou no limite. O que foi
  * aplicado neste atendimento continua sempre à vista, para conferir antes de assinar.
+ *
+ * Na tela nova é uma folha própria embaixo da conduta, com o estado do protocolo em selo (cor e
+ * palavra) logo abaixo do título.
  */
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -110,19 +113,24 @@ function abrirCarteira() {
 </script>
 
 <template>
-  <section class="vacinacao">
+  <section class="vacinacao ui-folha" :aria-labelledby="`vacinacao-${encounter.id}`">
     <header class="vacinacao__topo">
-      <p class="vacinacao__estado" :class="`vacinacao__estado--${estado.tom}`">
-        <i
-          class="ph"
-          :class="estado.tom === 'ok' ? 'ph-check-circle' : 'ph-warning-circle'"
-          aria-hidden="true"
-        />
-        <span>
-          <strong>{{ t('clinico.vacinas.carteira.protocolo') }}:</strong>
-          {{ estado.texto }}
-        </span>
-      </p>
+      <span class="vacinacao__icone" aria-hidden="true"><i class="ph ph-syringe" /></span>
+
+      <div class="vacinacao__titulos">
+        <h3 :id="`vacinacao-${encounter.id}`" class="vacinacao__titulo">
+          {{ t('clinico.prontuario.timeline.kind.vacina') }}
+        </h3>
+        <p class="vacinacao__estado">
+          <span class="ui-selo" :class="`ui-selo--${estado.tom}`">
+            <i
+              :class="estado.tom === 'ok' ? 'ph ph-check-circle' : 'ph ph-warning-circle'"
+              aria-hidden="true"
+            />
+            {{ t('clinico.vacinas.carteira.protocolo') }}: {{ estado.texto }}
+          </span>
+        </p>
+      </div>
 
       <div class="vacinacao__acoes">
         <Button
@@ -143,6 +151,7 @@ function abrirCarteira() {
           @click="protocoloAberto = !protocoloAberto"
         />
         <Button
+          type="button"
           :label="t('clinico.vacinas.carteira.verCarteira')"
           icon="ph ph-device-mobile"
           severity="secondary"
@@ -152,6 +161,7 @@ function abrirCarteira() {
         />
         <Button
           v-if="!somenteLeitura && pet && plano"
+          type="button"
           :label="t('clinico.vacinas.aplicar.abrir')"
           icon="ph ph-plus"
           severity="secondary"
@@ -163,7 +173,7 @@ function abrirCarteira() {
     </header>
 
     <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
-    <div v-show="protocoloAberto" :id="`protocolo-${encounter.id}`">
+    <div v-show="protocoloAberto" :id="`protocolo-${encounter.id}`" class="vacinacao__protocolo">
       <PlanoVacinalLista
         v-if="plano"
         :plano="plano"
@@ -178,16 +188,20 @@ function abrirCarteira() {
         <i class="ph ph-check-circle" aria-hidden="true" />
         <span>
           <strong>{{ nomeDaVacina(aplicacao.vacinaId) }}</strong>
-          ·
-          {{
-            aplicacao.dosesNaSerie > 1
-              ? t('clinico.vacinas.doseDeTotal', {
-                  dose: aplicacao.dose,
-                  total: aplicacao.dosesNaSerie,
-                })
-              : t('clinico.vacinas.plano.doseUnica')
-          }}
-          · {{ t('clinico.vacinas.lote') }} {{ aplicacao.lote }} · {{ rotulos.via(aplicacao.via) }}
+          <span class="vacinacao__dados">
+            {{
+              [
+                aplicacao.dosesNaSerie > 1
+                  ? t('clinico.vacinas.doseDeTotal', {
+                      dose: aplicacao.dose,
+                      total: aplicacao.dosesNaSerie,
+                    })
+                  : t('clinico.vacinas.plano.doseUnica'),
+                `${t('clinico.vacinas.lote')} ${aplicacao.lote}`,
+                rotulos.via(aplicacao.via),
+              ].join(' · ')
+            }}
+          </span>
         </span>
       </li>
     </ul>
@@ -208,71 +222,97 @@ function abrirCarteira() {
 <style scoped>
 .vacinacao {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
+  gap: 14px;
+  padding: 18px 20px;
 }
 
 .vacinacao__topo {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 12px 14px;
+}
+
+.vacinacao__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 20px;
+}
+
+.vacinacao__titulos {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 220px;
+  gap: 4px;
+}
+
+.vacinacao__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
 }
 
 .vacinacao__estado {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
   margin: 0;
-  color: var(--clinic-text);
-  font-size: 0.875rem;
 }
 
-.vacinacao__estado strong {
-  font-weight: 650;
-}
-
-/* A urgência mora no ícone: a frase continua na tinta do texto. */
-.vacinacao__estado .ph {
-  color: var(--clinic-ok-text);
-  font-size: 0.85rem;
-}
-
-.vacinacao__estado--atencao .ph {
-  color: var(--hc-pessego-tinta);
-}
-
-.vacinacao__estado--risco .ph {
-  color: var(--hc-coral-tinta);
+.vacinacao__estado .ui-selo {
+  height: auto;
+  min-height: 24px;
+  padding-block: 3px;
+  white-space: normal;
 }
 
 .vacinacao__acoes {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clinic-space-2);
+  align-items: center;
+  gap: 6px;
+}
+
+.vacinacao__protocolo {
+  min-width: 0;
 }
 
 .vacinacao__agora {
   display: grid;
+  gap: 8px;
   margin: 0;
-  padding: var(--clinic-space-3) 0 0;
-  border-top: 1px solid var(--clinic-line-soft);
-  gap: 0.3rem;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--linha);
   list-style: none;
 }
 
 .vacinacao__agora li {
   display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  font-size: var(--clinic-font-label);
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
-.vacinacao__agora .ph {
-  color: var(--clinic-ok-text);
+.vacinacao__agora li > .ph {
+  margin-top: 2px;
+  color: var(--ok-tinta);
+  font-size: 16px;
+}
+
+.vacinacao__agora strong {
+  margin-inline-end: 8px;
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.vacinacao__dados {
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 </style>

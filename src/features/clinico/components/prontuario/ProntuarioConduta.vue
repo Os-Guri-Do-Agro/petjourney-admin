@@ -9,6 +9,14 @@
  * - **Alergia registrada exige confirmação explícita.** Prescrever segue possível — proibir
  *   empurraria a prescrição para fora do sistema —, mas com um aceite nomeado.
  * - **Retorno sem horário é pendência visível**, não um número esquecido no rodapé.
+ *
+ * ## A forma (redesenho total, 19/10/2026)
+ *
+ * Uma folha com três partes separadas por fio: o que se diz ao responsável (orientações e
+ * exames), a prescrição e o retorno. Cada medicamento é um bloco marcado por um traço à esquerda
+ * — musgo, ou risco quando bate com uma alergia — e não um cartão dentro da folha. Dentro dele,
+ * na ordem em que se confere: o remédio e a via, os três números, a conta aberta, a dose por
+ * extenso (em destaque, é o que se lê em voz alta) e o que pede atenção.
  */
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
@@ -405,11 +413,17 @@ function resumoDaDose(prescricao: Prescription) {
     </ClinicField>
 
     <!-- ------------------------------------------------------------- prescrição -->
-    <section class="prescricoes">
-      <header class="prescricoes__topo">
-        <h4 class="clinic-label">{{ t('clinico.prontuario.conduta.prescricoes') }}</h4>
+    <section class="grupo" :aria-labelledby="`${idAceite}-prescricao`">
+      <header class="grupo__cabeca">
+        <h4 :id="`${idAceite}-prescricao`" class="grupo__titulo">
+          {{ t('clinico.prontuario.conduta.prescricoes') }}
+          <span v-if="valor.prescricoes.length > 0" class="ui-contagem">
+            {{ valor.prescricoes.length }}
+          </span>
+        </h4>
         <Button
           v-if="!somenteLeitura"
+          type="button"
           :label="t('clinico.prontuario.conduta.adicionarPrescricao')"
           icon="ph ph-plus"
           size="small"
@@ -420,6 +434,7 @@ function resumoDaDose(prescricao: Prescription) {
       </header>
 
       <p v-if="valor.prescricoes.length === 0" class="vazio">
+        <i class="ph ph-pill" aria-hidden="true" />
         {{ t('clinico.prontuario.conduta.semPrescricao') }}
       </p>
 
@@ -456,7 +471,8 @@ function resumoDaDose(prescricao: Prescription) {
                 -->
                 <Button
                   v-if="!somenteLeitura"
-                  icon="ph ph-book-open"
+                  type="button"
+                  icon="ph ph-book-open-text"
                   severity="secondary"
                   outlined
                   :aria-label="t('clinico.bulario.escolherTitulo')"
@@ -483,19 +499,15 @@ function resumoDaDose(prescricao: Prescription) {
             </template>
           </ClinicField>
 
-          <!--
-            Remover mora **na linha**, não flutuando sobre ela.
-            Antes era `position: absolute` no canto do cartão: caía por cima do rótulo "Via" e
-            encostava no seletor. Como terceira coluna, ele ganha a própria faixa e desce até a
-            altura dos campos, alinhado com eles.
-          -->
+          <!-- Remover mora na linha, alinhado com os campos — não flutuando sobre o rótulo. -->
           <Button
             v-if="!somenteLeitura"
+            type="button"
             icon="ph ph-trash"
-            severity="danger"
+            severity="secondary"
             text
             class="prescricao__remover"
-            :aria-label="t('clinico.prontuario.diagnostico.remover')"
+            :aria-label="`${t('clinico.prontuario.diagnostico.remover')}: ${clinico.medicamento(prescricao.medicamentoId)?.nome ?? ''}`"
             :title="t('clinico.prontuario.diagnostico.remover')"
             @click="removerPrescricao(prescricao.id)"
           />
@@ -506,6 +518,7 @@ function resumoDaDose(prescricao: Prescription) {
             <template #default="{ id }">
               <InputNumber
                 :input-id="id"
+                class="numero"
                 :model-value="prescricao.calculo.mgPorKg"
                 :min-fraction-digits="1"
                 :max-fraction-digits="2"
@@ -520,6 +533,7 @@ function resumoDaDose(prescricao: Prescription) {
             <template #default="{ id }">
               <InputNumber
                 :input-id="id"
+                class="numero"
                 :model-value="prescricao.calculo.frequenciaHoras"
                 :disabled="somenteLeitura"
                 fluid
@@ -533,6 +547,7 @@ function resumoDaDose(prescricao: Prescription) {
               <div class="duracao">
                 <InputNumber
                   :input-id="id"
+                  class="numero"
                   :model-value="prescricao.calculo.duracaoDias"
                   :disabled="somenteLeitura || ehContinuo(prescricao)"
                   :placeholder="ehContinuo(prescricao) ? '—' : undefined"
@@ -552,7 +567,6 @@ function resumoDaDose(prescricao: Prescription) {
                   :off-label="t('clinico.prontuario.conduta.usoContinuo')"
                   on-icon="ph ph-check"
                   :disabled="somenteLeitura"
-                  size="small"
                   @update:model-value="alternarContinuo(prescricao)"
                 />
               </div>
@@ -564,23 +578,32 @@ function resumoDaDose(prescricao: Prescription) {
           A conta, aberta. Cada linha é um passo que o vet confere de cabeça; é aqui que um erro
           de concentração aparece antes de a receita sair impressa.
         -->
-        <ol v-if="contaDaPrescricao(prescricao).length > 0" class="conta">
+        <ol v-if="contaDaPrescricao(prescricao).length > 0" class="conta ui-num">
           <li v-for="(passo, indice) in contaDaPrescricao(prescricao)" :key="indice">
             {{ textoDoPasso(passo) }}
           </li>
         </ol>
 
         <!-- A dose por extenso: é isto que se lê em voz alta para o responsável. -->
-        <p class="prescricao__resumo clinic-value">{{ resumoDaDose(prescricao) }}</p>
+        <p class="extenso">
+          <i class="ph ph-speaker-simple-high" aria-hidden="true" />
+          <span class="ui-num">{{ resumoDaDose(prescricao) }}</span>
+        </p>
 
         <!--
           Fracionamento em palavra, não em decimal. E quando a conta não cai numa fração
           partível, a tela diz — em vez de imprimir 0,37 comprimido e deixar a decisão para
           quem está segurando o animal.
         -->
-        <p v-if="fracionamentoDe(prescricao)" class="fracao" :class="{ 'fracao--aproximada': fracionamentoDe(prescricao)!.aproximado }">
+        <p
+          v-if="fracionamentoDe(prescricao)"
+          class="fracao"
+          :class="{ 'fracao--aproximada': fracionamentoDe(prescricao)!.aproximado }"
+        >
           <i
-            :class="fracionamentoDe(prescricao)!.aproximado ? 'ph ph-warning-circle' : 'ph ph-check-circle'"
+            :class="
+              fracionamentoDe(prescricao)!.aproximado ? 'ph ph-warning-circle' : 'ph ph-check-circle'
+            "
             aria-hidden="true"
           />
           <span>
@@ -591,74 +614,89 @@ function resumoDaDose(prescricao: Prescription) {
               })
             }}
             <template v-if="fracionamentoDe(prescricao)!.aproximado">
-              — {{ t('clinico.prontuario.conduta.fracao.arredondado', {
-                calculado: formato.numero(prescricao.calculo.quantidadeApresentacao, 2),
-              }) }}
+              ({{
+                t('clinico.prontuario.conduta.fracao.arredondado', {
+                  calculado: formato.numero(prescricao.calculo.quantidadeApresentacao, 2),
+                })
+              }})
             </template>
           </span>
         </p>
 
-        <ClinicAlertChip
-          v-if="avisoDaDose(prescricao)"
-          severidade="atencao"
-          :rotulo="
-            t(`clinico.prontuario.conduta.avisoDose.${avisoDaDose(prescricao)}`, {
-              min: faixaDoAviso(prescricao).min,
-              max: faixaDoAviso(prescricao).max,
-            })
-          "
-        />
+        <div
+          v-if="avisoDaDose(prescricao) || avisosDoBulario(prescricao).length > 0"
+          class="avisos"
+        >
+          <ClinicAlertChip
+            v-if="avisoDaDose(prescricao)"
+            severidade="atencao"
+            :rotulo="
+              t(`clinico.prontuario.conduta.avisoDose.${avisoDaDose(prescricao)}`, {
+                min: faixaDoAviso(prescricao).min,
+                max: faixaDoAviso(prescricao).max,
+              })
+            "
+          />
 
-        <ClinicAlertChip
-          v-for="(aviso, indice) in avisosDoBulario(prescricao)"
-          :key="`${prescricao.id}-${aviso.kind}-${aviso.cuidado ?? indice}`"
-          :severidade="aviso.kind === 'especie-proibida' ? 'risco' : 'atencao'"
-          :rotulo="textoDoAviso(aviso.kind, aviso.cuidado, aviso.detalhe)"
-        />
+          <ClinicAlertChip
+            v-for="(aviso, indice) in avisosDoBulario(prescricao)"
+            :key="`${prescricao.id}-${aviso.kind}-${aviso.cuidado ?? indice}`"
+            :severidade="aviso.kind === 'especie-proibida' ? 'risco' : 'atencao'"
+            :rotulo="textoDoAviso(aviso.kind, aviso.cuidado, aviso.detalhe)"
+          />
+        </div>
 
         <!-- Alergia: confirmação explícita, não bloqueio. -->
-        <div v-if="alergiaDe(prescricao)" class="alergia">
-          <strong>
-            {{
-              t('clinico.prontuario.conduta.alergiaTitulo', {
-                principio: alergiaDe(prescricao)?.detalhe,
-              })
-            }}
-          </strong>
-          <p>
-            {{
-              t('clinico.prontuario.conduta.alergiaDescricao', {
-                principio: alergiaDe(prescricao)?.detalhe,
-              })
-            }}
-          </p>
-          <div class="alergia__aceite">
-            <Checkbox
-              binary
-              :input-id="`${idAceite}-${prescricao.id}`"
-              :model-value="prescricao.alergiaConfirmada"
-              :disabled="somenteLeitura"
-              @update:model-value="
-                aplicarPrescricao(prescricao.id, { alergiaConfirmada: Boolean($event) })
-              "
-            />
-            <label :for="`${idAceite}-${prescricao.id}`">
-              {{ t('clinico.prontuario.conduta.alergiaConfirmar') }}
-            </label>
+        <div v-if="alergiaDe(prescricao)" class="alergia" role="alert">
+          <i class="ph ph-warning alergia__icone" aria-hidden="true" />
+          <div class="alergia__corpo">
+            <strong>
+              {{
+                t('clinico.prontuario.conduta.alergiaTitulo', {
+                  principio: alergiaDe(prescricao)?.detalhe,
+                })
+              }}
+            </strong>
+            <p>
+              {{
+                t('clinico.prontuario.conduta.alergiaDescricao', {
+                  principio: alergiaDe(prescricao)?.detalhe,
+                })
+              }}
+            </p>
+            <div class="alergia__aceite">
+              <Checkbox
+                binary
+                :input-id="`${idAceite}-${prescricao.id}`"
+                :model-value="prescricao.alergiaConfirmada"
+                :disabled="somenteLeitura"
+                @update:model-value="
+                  aplicarPrescricao(prescricao.id, { alergiaConfirmada: Boolean($event) })
+                "
+              />
+              <label :for="`${idAceite}-${prescricao.id}`">
+                {{ t('clinico.prontuario.conduta.alergiaConfirmar') }}
+              </label>
+            </div>
           </div>
         </div>
       </article>
     </section>
 
     <!-- ---------------------------------------------------------------- retorno -->
-    <section class="retorno">
-      <h4 class="clinic-label">{{ t('clinico.prontuario.conduta.retorno') }}</h4>
+    <section class="grupo" :aria-labelledby="`${idAceite}-retorno`">
+      <header class="grupo__cabeca">
+        <h4 :id="`${idAceite}-retorno`" class="grupo__titulo">
+          {{ t('clinico.prontuario.conduta.retorno') }}
+        </h4>
+      </header>
 
-      <div class="retorno__linha">
+      <div class="retorno">
         <ClinicField :rotulo="t('clinico.prontuario.conduta.retornoEmDias')">
           <template #default="{ id }">
             <InputNumber
               :input-id="id"
+              class="numero"
               :model-value="valor.retorno.emDias"
               :disabled="somenteLeitura"
               fluid
@@ -690,19 +728,30 @@ function resumoDaDose(prescricao: Prescription) {
 
         <Button
           v-if="valor.retorno.emDias !== null && !valor.retorno.appointmentId"
+          type="button"
+          class="retorno__agendar"
           :label="t('clinico.prontuario.conduta.retornoAgendar')"
           icon="ph ph-calendar-plus"
-          size="small"
+          severity="secondary"
+          outlined
           :disabled="somenteLeitura"
           @click="emit('agendarRetorno')"
         />
       </div>
 
-      <p v-if="valor.retorno.emDias !== null && !valor.retorno.appointmentId" class="retorno__aviso">
-        <i class="ph ph-warning-circle" aria-hidden="true" />
+      <p
+        v-if="valor.retorno.emDias !== null && !valor.retorno.appointmentId"
+        class="retorno__aviso"
+      >
+        <i class="ph ph-calendar-x" aria-hidden="true" />
         {{ t('clinico.prontuario.conduta.retornoPendente') }}
       </p>
+      <p v-else-if="valor.retorno.appointmentId" class="retorno__marcado">
+        <i class="ph ph-calendar-check" aria-hidden="true" />
+        {{ t('clinico.prontuario.nova.conduta.retornoMarcado') }}
+      </p>
     </section>
+
     <BularioPicker
       v-model:visivel="pickerVisivel"
       :medicamentos="clinico.medicamentos"
@@ -716,42 +765,74 @@ function resumoDaDose(prescricao: Prescription) {
 </template>
 
 <style scoped>
-/* Campo e atalho do bulário na mesma linha: o botão não deve empurrar o Select para baixo. */
-.prescricao__medicamento {
+/* Grupo da folha: um fio em cima, o título em frase e, quando há, a ação dele na ponta. */
+.grupo {
   display: grid;
-  gap: var(--clinic-space-2);
-  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
+  gap: 14px;
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid var(--linha);
 }
 
-.prescricoes {
-  display: grid;
-  gap: var(--clinic-space-3);
-}
-
-.prescricoes__topo {
+.grupo__cabeca {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
+  gap: 8px 16px;
 }
 
+.grupo__titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.vazio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta-3);
+  font-size: 14px;
+}
+
+.vazio .ph {
+  font-size: 18px;
+}
+
+/* ------------------------------------------------------------------ prescrição */
+
+/*
+ * Cada remédio é um bloco marcado por um traço à esquerda, e não um cartão dentro da folha: o
+ * traço agrupa sem empilhar moldura sobre moldura. Bate com alergia, o traço vira risco.
+ */
 .prescricao {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
+  min-width: 0;
+  gap: 14px;
+  padding: 4px 0 4px 18px;
+  border-inline-start: 3px solid var(--musgo);
+}
+
+.prescricao + .prescricao {
+  margin-top: 10px;
 }
 
 .prescricao--alerta {
-  border-color: var(--clinic-risk-line);
+  border-inline-start-color: var(--risco);
 }
 
 .prescricao__linha {
   display: grid;
+  align-items: end;
+  gap: 16px;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
-  gap: var(--clinic-space-3);
 }
 
 /* A linha de números não tem o botão de remover: três colunas iguais e nada mais. */
@@ -759,34 +840,62 @@ function resumoDaDose(prescricao: Prescription) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+/* Campo e atalho do bulário na mesma linha: o botão não empurra o Select para baixo. */
+.prescricao__medicamento {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.prescricao__medicamento :deep(.p-button) {
+  height: 100%;
+  min-height: 44px;
+}
+
+.prescricao__remover {
+  min-height: 44px;
+}
+
+.prescricao__remover.p-button.p-button-secondary.p-button-text:not(:disabled):hover {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+.numero :deep(input) {
+  font-family: var(--font-dados);
+  font-variant-numeric: tabular-nums;
+}
+
 .duracao {
   display: grid;
+  align-items: stretch;
+  gap: 8px;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--clinic-space-2);
 }
 
 /*
- * Alternador do lado do número, com a altura do campo. Ligado, a moldura inteira vira sálvia: o
- * estado precisa ler de longe, porque ele muda o sentido do número ao lado.
+ * Alternador do lado do número, com a altura do campo. Ligado, ganha o fundo e o contorno do
+ * musgo: o estado precisa ler de longe, porque muda o sentido do número ao lado.
  */
 .duracao__continuo.p-togglebutton {
-  min-height: var(--clinic-hit-target);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  border: 1px solid var(--linha-forte);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 550;
   white-space: nowrap;
 }
 
-.duracao__continuo.p-togglebutton.p-togglebutton-checked {
-  border-color: var(--clinic-accent-strong);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.duracao__continuo.p-togglebutton-checked :deep(.p-togglebutton-content) {
+.duracao__continuo :deep(.p-togglebutton-content) {
   background: transparent;
   box-shadow: none;
+}
+
+.duracao__continuo.p-togglebutton.p-togglebutton-checked {
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
+  color: var(--musgo);
 }
 
 .duracao__continuo.p-togglebutton-checked :deep(.p-togglebutton-icon) {
@@ -795,7 +904,7 @@ function resumoDaDose(prescricao: Prescription) {
 
 .duracao__continuo.p-togglebutton:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.55;
 }
 
 /*
@@ -804,115 +913,162 @@ function resumoDaDose(prescricao: Prescription) {
  */
 .conta {
   display: grid;
-  gap: 0.1rem;
+  gap: 2px;
   margin: 0;
-  padding-block: var(--clinic-space-2);
-  padding-inline: var(--clinic-space-5) var(--clinic-space-3);
-  border: 1px dashed var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-variant-numeric: tabular-nums;
+  padding: 10px 14px 10px 34px;
+  border-radius: 10px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.extenso {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--musgo-fundo);
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1.5;
+}
+
+.extenso .ph {
+  margin-top: 3px;
+  color: var(--musgo);
+  font-size: 17px;
 }
 
 .fracao {
   display: flex;
   align-items: flex-start;
-  gap: 0.4rem;
+  gap: 8px;
   margin: 0;
-  color: var(--clinic-ok-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--ok-tinta);
+  font-size: 13.5px;
+  font-weight: 550;
   line-height: 1.45;
+}
+
+.fracao .ph {
+  margin-top: 1px;
+  font-size: 16px;
 }
 
 /* Arredondamento é decisão do vet: aparece em tom de atenção, não como confirmação. */
 .fracao--aproximada {
-  color: var(--clinic-attention-text);
+  color: var(--atencao-tinta);
 }
 
-.prescricao__resumo {
-  margin: 0;
-  padding: var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
-  line-height: 1.5;
+.avisos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-/*
- * Alinhado com os campos, não com os rótulos: `end` desce o botão até a base da linha, que é
- * onde os seletores estão. Alinhado ao topo, ele ficaria na altura do texto "Via".
- */
-.prescricao__remover {
-  align-self: end;
-  margin-bottom: 1px;
+.avisos :deep(.ui-selo),
+.avisos > * {
+  height: auto;
+  min-height: 24px;
+  padding-block: 3px;
+  white-space: normal;
 }
 
 .alergia {
-  display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-risk-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in oklab, var(--risco) 40%, var(--linha));
+  border-radius: 12px;
+  background: var(--risco-fundo);
 }
 
-.alergia p {
+.alergia__icone {
+  margin-top: 1px;
+  color: var(--risco-tinta);
+  font-size: 20px;
+}
+
+.alergia__corpo {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.alergia__corpo strong {
+  color: var(--risco-tinta);
+  font-size: 14.5px;
+  font-weight: 650;
+}
+
+.alergia__corpo p {
   margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
   line-height: 1.5;
 }
 
 .alergia__aceite {
   display: flex;
-  align-items: flex-start;
-  gap: 0.4rem;
-  font-weight: 750;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .alergia__aceite label {
   cursor: pointer;
 }
 
+/* ------------------------------------------------------------------ retorno */
+
 .retorno {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-}
-
-.retorno__linha {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) auto;
   align-items: end;
-  gap: var(--clinic-space-3);
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) auto;
 }
 
-.retorno__aviso {
+.retorno__agendar {
+  min-height: 44px;
+}
+
+.retorno__aviso,
+.retorno__marcado {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 8px;
   margin: 0;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
+  font-weight: 550;
 }
 
-.vazio {
-  margin: 0;
-  color: var(--clinic-faint);
+.retorno__marcado {
+  color: var(--ok-tinta);
+}
+
+.retorno__aviso .ph,
+.retorno__marcado .ph {
+  font-size: 17px;
 }
 
 @media (max-width: 860px) {
   .prescricao__linha,
   .prescricao__linha--numeros,
-  .retorno__linha {
-    grid-template-columns: 1fr;
+  .retorno {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .prescricao__remover {
+    justify-self: end;
   }
 }
 </style>

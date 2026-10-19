@@ -341,7 +341,7 @@ function nomeDoExame(id: string) {
                 `clinico.prontuario.exameFisico.achado.${encounter.exameFisico.sistemas[sistema]?.status}`,
               )
             }}<template v-if="encounter.exameFisico.sistemas[sistema]?.nota">
-              — {{ encounter.exameFisico.sistemas[sistema]?.nota }}</template>
+              ({{ encounter.exameFisico.sistemas[sistema]?.nota }})</template>
           </template>
         </span>
       </p>
@@ -358,8 +358,8 @@ function nomeDoExame(id: string) {
 
       <ul v-if="encounter.diagnosticos.length > 0" class="itens">
         <li v-for="diagnostico in encounter.diagnosticos" :key="diagnostico.id">
-          <strong>{{ diagnostico.codigo }}</strong> {{ clinico.descricaoDoDiagnostico(diagnostico) }} —
-          {{ t(`clinico.prontuario.diagnostico.tipo.${diagnostico.kind}`) }}
+          <strong>{{ diagnostico.codigo }}</strong> {{ clinico.descricaoDoDiagnostico(diagnostico) }}
+          ({{ t(`clinico.prontuario.diagnostico.tipo.${diagnostico.kind}`) }})
         </li>
       </ul>
 
@@ -379,8 +379,8 @@ function nomeDoExame(id: string) {
         <h3>{{ t('clinico.prontuario.conduta.prescricoes') }}</h3>
         <ol class="itens itens--numerada">
           <li v-for="prescricao in encounter.conduta.prescricoes" :key="prescricao.id">
-            <strong>{{ clinico.medicamento(prescricao.medicamentoId)?.nome }}</strong>
-            — {{ t(`clinico.prontuario.conduta.via_.${prescricao.via}`) }}
+            <strong>{{ clinico.medicamento(prescricao.medicamentoId)?.nome }}</strong>,
+            {{ t(`clinico.prontuario.conduta.via_.${prescricao.via}`) }}
             <br />
             <span class="itens__dose">{{ resumoDaDose(prescricao.id) }}</span>
             <template v-if="prescricao.observacao">
@@ -432,7 +432,8 @@ function nomeDoExame(id: string) {
 /*
  * A folha é desenhada em milímetros e em preto sobre branco: as unidades da tela (rem que
  * seguem a densidade escolhida, tokens que mudam com o modo escuro) não têm significado no
- * papel. Nada aqui usa `--clinic-*` de propósito.
+ * papel. Do sistema ela leva só as famílias de letra — a mesma voz da tela, sem caixa alta e sem
+ * letra espaçada; rótulo é texto pequeno em peso, não versalete.
  */
 .folha {
   position: relative;
@@ -440,8 +441,9 @@ function nomeDoExame(id: string) {
   max-width: 180mm;
   margin: 0 auto;
   color: #000;
-  font-family: 'DM Sans', 'PetJourney Arabic', 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--font-texto, 'PetJourney Arabic', system-ui, sans-serif);
   font-size: 9.5pt;
+  font-variant-numeric: tabular-nums;
   line-height: 1.45;
 }
 
@@ -461,11 +463,9 @@ function nomeDoExame(id: string) {
   margin: 0 0 4mm;
   padding: 1.5mm 3mm;
   border: 1pt dashed #000;
-  font-size: 8pt;
-  font-weight: 800;
-  letter-spacing: 0.25em;
+  font-size: 9pt;
+  font-weight: 700;
   text-align: center;
-  text-transform: uppercase;
 }
 
 .folha__topo {
@@ -486,9 +486,8 @@ function nomeDoExame(id: string) {
 
 .folha__titulo {
   margin: 0.5mm 0 0;
-  font-size: 9pt;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 10pt;
+  font-weight: 500;
 }
 
 .folha__meta {
@@ -501,9 +500,8 @@ function nomeDoExame(id: string) {
 }
 
 .folha__meta dt {
-  font-size: 7pt;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 7.5pt;
+  font-weight: 500;
 }
 
 .folha__meta dd {
@@ -527,10 +525,8 @@ function nomeDoExame(id: string) {
 
 .bloco h2 {
   margin: 0 0 1.5mm;
-  font-size: 8pt;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 10pt;
+  font-weight: 700;
 }
 
 .bloco h3 {
@@ -566,10 +562,8 @@ function nomeDoExame(id: string) {
 }
 
 .campo__rotulo {
-  font-size: 7.5pt;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 8.5pt;
+  font-weight: 600;
 }
 
 .tabela {
@@ -586,12 +580,13 @@ function nomeDoExame(id: string) {
 
 .tabela th {
   border-bottom-width: 0.8pt;
-  font-size: 7.5pt;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 8pt;
+  font-weight: 600;
 }
 
-.tabela__numero {
+/* Número alinha pela direita, para as casas decimais caírem uma embaixo da outra. */
+.tabela .tabela__numero {
+  font-family: var(--font-dados, var(--font-texto, system-ui));
   font-variant-numeric: tabular-nums;
   text-align: end;
 }

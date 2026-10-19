@@ -2887,7 +2887,7 @@
       "dosePeso": {
         "titulo": "Doza za {pet}, {peso}",
         "porAdministracao": "po davanju",
-        "daApresentacao": "od pakovanja, po davanju",
+        "daApresentacao": "od pakovanja",
         "horas": "h",
         "dias": "dan | dana | dana",
         "conta": "Uobičajeni raspon za vrstu ({faixa} mg/kg) × {peso}, upisana težina. Proverite današnju težinu pre propisivanja."
@@ -3610,8 +3610,8 @@
         "titulo": "Pregled",
         "voltarFicha": "Karton: {pet}",
         "resumo": {
-          "aberto": "Otvoreno u {hora}, {profissional}",
-          "finalizado": "Završeno {data} u {hora}, {profissional}",
+          "aberto": "Pregled otvoren u {hora}, {profissional}",
+          "finalizado": "Pregled završen {data} u {hora}, {profissional}",
           "etapas": "Završeno koraka: {feitas} od {total}"
         },
         "salvoAs": "Sačuvano u {hora}",

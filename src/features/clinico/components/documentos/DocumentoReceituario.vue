@@ -268,8 +268,6 @@ const orientacoes = computed(() => props.encounter.conduta.orientacoes.trim())
   margin: 0 0 1mm;
   font-size: 7.5pt;
   font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .orientacoes p {
@@ -292,8 +290,6 @@ const orientacoes = computed(() => props.encounter.conduta.orientacoes.trim())
   margin: 0 0 2mm;
   font-size: 7pt;
   font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .controle__linha {

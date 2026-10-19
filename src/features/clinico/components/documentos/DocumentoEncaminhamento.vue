@@ -179,8 +179,6 @@ const medicacoes = computed(() =>
   margin: 0 0 1.5mm;
   font-size: 9.5pt;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .bloco p {
@@ -202,8 +200,7 @@ const medicacoes = computed(() =>
 
 .kind {
   font-size: 8.5pt;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: 600;
 }
 
 /* Linha para preencher à caneta: o destinatário e o pedido mudam a cada encaminhamento. */

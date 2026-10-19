@@ -21,6 +21,13 @@
  * As respostas chegam nos enums do Diário Pet (o contrato com o app). O que tem tradução
  * clínica direta é aplicável na anamnese (`domain/pre-consulta.ts`); o que é achado — fezes com
  * sangue, urina escura — aparece para o vet ler, e fica com ele.
+ *
+ * ## A forma (redesenho total, 19/10/2026)
+ *
+ * Uma folha de borda tracejada na cor do lugar, acima da anamnese: a moldura diz "veio de fora,
+ * ainda não é prontuário". No alto, de quem veio e quando, com "Usar respostas" na ponta; embaixo
+ * as respostas numa grade de rótulo e valor, o peso informado em casa (que não é medição) e o
+ * texto do responsável como citação.
  */
 import Button from 'primevue/button'
 import { computed } from 'vue'
@@ -161,22 +168,21 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
 <template>
   <section class="pre" :aria-label="t('clinico.prontuario.preConsulta.titulo')">
     <header class="pre__topo">
-      <div class="pre__identidade">
-        <i class="ph ph-device-mobile pre__icone" aria-hidden="true" />
-        <div>
-          <strong class="pre__titulo">{{ t('clinico.prontuario.preConsulta.titulo') }}</strong>
-          <p class="pre__origem">
-            {{
-              t('clinico.prontuario.preConsulta.origem', {
-                quando: formato.relativo(preConsulta.respondidoEm),
-              })
-            }}
-          </p>
-        </div>
+      <span class="pre__icone" aria-hidden="true"><i class="ph ph-device-mobile" /></span>
+      <div class="pre__titulos">
+        <h3 class="pre__titulo">{{ t('clinico.prontuario.preConsulta.titulo') }}</h3>
+        <p class="pre__origem">
+          {{
+            t('clinico.prontuario.preConsulta.origem', {
+              quando: formato.relativo(preConsulta.respondidoEm),
+            })
+          }}
+        </p>
       </div>
 
       <Button
         v-if="podeAplicar"
+        type="button"
         :label="t('clinico.prontuario.preConsulta.aplicar')"
         icon="ph ph-arrow-down"
         size="small"
@@ -187,11 +193,11 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
     </header>
 
     <dl class="pre__respostas">
-      <div v-for="resposta in respostas" :key="resposta.chave">
-        <dt class="clinic-label">
+      <div v-for="resposta in respostas" :key="resposta.chave" class="resposta">
+        <dt>
           {{ resposta.rotulo }}
           <!-- O app puxou do diário e o responsável não mexeu: é leitura de casa, não resposta. -->
-          <span v-if="resposta.doDiario" class="pre__procedencia">
+          <span v-if="resposta.doDiario" class="resposta__procedencia">
             {{ t('clinico.preConsulta.doDiario') }}
           </span>
         </dt>
@@ -204,15 +210,17 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
       dose antes de a balança confirmar, e confundi-lo com medição é o tipo de engano que só
       aparece na receita impressa.
     -->
-    <p v-if="preConsulta.pesoKg !== null" class="pre__peso">
-      <i class="ph ph-info" aria-hidden="true" />
-      {{
-        t('clinico.prontuario.preConsulta.pesoInformado', {
-          valor: formato.peso(preConsulta.pesoKg),
-        })
-      }}
-      <span v-if="preConsulta.pesadoEm" class="pre__quando">
-        {{ t('clinico.preConsulta.pesadoEm', { data: formato.dataCurta(preConsulta.pesadoEm) }) }}
+    <p v-if="preConsulta.pesoKg !== null" class="pre__nota">
+      <i class="ph ph-scales" aria-hidden="true" />
+      <span>
+        {{
+          t('clinico.prontuario.preConsulta.pesoInformado', {
+            valor: formato.peso(preConsulta.pesoKg),
+          })
+        }}
+        <span v-if="preConsulta.pesadoEm" class="pre__quando">
+          {{ t('clinico.preConsulta.pesadoEm', { data: formato.dataCurta(preConsulta.pesadoEm) }) }}
+        </span>
       </span>
     </p>
 
@@ -221,7 +229,7 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
       {{ preConsulta.observacao }}
     </blockquote>
 
-    <p v-if="preConsulta.fotoIds.length > 0" class="pre__fotos">
+    <p v-if="preConsulta.fotoIds.length > 0" class="pre__nota">
       <i class="ph ph-images" aria-hidden="true" />
       {{ t('clinico.preConsulta.fotos', { total: preConsulta.fotoIds.length }) }}
     </p>
@@ -230,105 +238,124 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
 
 <style scoped>
 /*
- * Moldura própria e tracejada: o bloco precisa parecer o que é — informação **de fora**,
- * ainda não incorporada ao prontuário. Um cartão igual aos demais faria parecer preenchido.
+ * Moldura tracejada na cor do lugar: o bloco precisa parecer o que é — informação **de fora**,
+ * ainda não incorporada ao prontuário. Uma folha igual às outras faria parecer preenchido.
  */
 .pre {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px dashed var(--clinic-accent);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-accent-tint);
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1.5px dashed color-mix(in oklab, var(--pj-lugar) 55%, var(--linha));
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 40%, var(--superficie));
 }
 
 .pre__topo {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-3);
-}
-
-.pre__identidade {
-  display: flex;
-  align-items: center;
-  gap: var(--clinic-space-3);
+  gap: 10px 14px;
 }
 
 .pre__icone {
-  color: var(--clinic-accent-strong);
-  font-size: 1.1rem;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--pj-lugar-tinta);
+  font-size: 20px;
+}
+
+.pre__titulos {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 200px;
+  gap: 2px;
 }
 
 .pre__titulo {
-  font-size: var(--clinic-font-value);
-  font-weight: 750;
-  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
 }
 
 .pre__origem {
-  margin: 0.05rem 0 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 .pre__respostas {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
-  gap: var(--clinic-space-3);
+  gap: 14px 20px;
   margin: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr));
 }
 
-.pre__respostas div {
+.resposta {
   display: grid;
-  gap: 0.1rem;
   min-width: 0;
+  align-content: start;
+  gap: 2px;
 }
 
-.pre__respostas dd {
+.resposta dt {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.resposta dd {
   margin: 0;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 550;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
 
-/* A marca "do diário" é procedência, não destaque: o mesmo tom discreto do rótulo, sem caixa alta. */
-.pre__procedencia {
-  margin-inline-start: var(--clinic-space-1);
-  color: var(--clinic-accent-strong);
+/* "Do diário" é procedência, não destaque: o tom do lugar, discreto, ao lado do rótulo. */
+.resposta__procedencia {
+  margin-inline-start: 4px;
+  color: var(--pj-lugar-tinta);
   font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
 }
 
-.pre__peso,
-.pre__fotos {
+.pre__nota {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
+  gap: 8px;
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.pre__nota .ph {
+  font-size: 17px;
 }
 
 .pre__quando {
-  color: var(--clinic-faint);
-  font-weight: 500;
+  margin-inline-start: 4px;
+  color: var(--tinta-3);
 }
 
 .pre__citacao {
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-inline-start: 3px solid var(--clinic-accent);
-  background: var(--clinic-surface);
-  border-radius: 0;
-  border-start-end-radius: var(--clinic-radius-control);
-  border-end-end-radius: var(--clinic-radius-control);
-  color: var(--clinic-muted);
+  padding: 10px 14px;
+  border-inline-start: 3px solid var(--pj-lugar);
+  border-start-end-radius: 10px;
+  border-end-end-radius: 10px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font-size: 14.5px;
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 </style>

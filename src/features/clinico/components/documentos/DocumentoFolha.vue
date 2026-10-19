@@ -10,7 +10,9 @@
  *
  * Tudo aqui é desenhado em milímetros e em preto sobre branco. As unidades da tela — `rem` que
  * seguem a densidade escolhida, tokens que mudam no modo escuro — não têm significado no papel,
- * e nenhuma variável `--clinic-*` atravessa para cá de propósito.
+ * e nenhuma cor da interface atravessa para cá de propósito. Do sistema, a folha leva só as duas
+ * famílias de letra (Readex Pro no texto, Instrument Sans nos números): o papel que sai da
+ * clínica tem a mesma voz da tela, sem caixa alta e sem letra espaçada.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -131,8 +133,9 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
   flex-direction: column;
   margin: 0 auto;
   color: #000;
-  font-family: 'DM Sans', 'PetJourney Arabic', 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--font-texto, 'PetJourney Arabic', system-ui, sans-serif);
   font-size: 9.5pt;
+  font-variant-numeric: tabular-nums;
   line-height: 1.45;
 }
 
@@ -147,11 +150,9 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
   margin: 0 0 4mm;
   padding: 1.5mm 3mm;
   border: 1pt dashed #000;
-  font-size: 8pt;
-  font-weight: 800;
-  letter-spacing: 0.25em;
+  font-size: 9pt;
+  font-weight: 700;
   text-align: center;
-  text-transform: uppercase;
 }
 
 .folha__topo {
@@ -172,9 +173,8 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
 
 .folha__titulo {
   margin: 0.5mm 0 0;
-  font-size: 9pt;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 10pt;
+  font-weight: 500;
 }
 
 .folha__endereco {
@@ -192,9 +192,8 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
 }
 
 .folha__meta dt {
-  font-size: 7pt;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 7.5pt;
+  font-weight: 500;
 }
 
 .folha__meta dd {
@@ -213,10 +212,8 @@ const profissional = computed(() => clinico.profissional(props.professionalId))
 
 .folha__identificacao h2 {
   margin: 0 0 1mm;
-  font-size: 7.5pt;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: 8pt;
+  font-weight: 600;
 }
 
 .folha__identificacao p {

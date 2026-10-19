@@ -22,9 +22,10 @@ import { PhMicrophone, PhShieldCheck, PhStethoscope, PhWaveform } from '@phospho
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import SelectButton from 'primevue/selectbutton'
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import ProntuarioDialogoTopo from '../prontuario/ProntuarioDialogoTopo.vue'
 import type { PetSex } from '../../data/types'
 import { useEscutaStore, type FonteDaEscutaId } from '../../stores/escuta'
 
@@ -38,6 +39,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const escuta = useEscutaStore()
+const idTitulo = useId()
 
 const nome = computed(
   () => props.responsavel || t('clinico.escuta.autorizacao.responsavelGenerico'),
@@ -92,28 +94,29 @@ function comecar() {
     v-model:visible="escuta.autorizacaoAberta"
     modal
     class="clinic-dialog hc-tema"
-    :style="{ width: 'min(34rem, 94vw)' }"
+    :style="{ width: 'min(36rem, 94vw)' }"
+    :aria-labelledby="idTitulo"
     dismissable-mask
   >
     <template #header>
-      <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca"><PhMicrophone weight="bold" aria-hidden="true" /></span>
-        {{ t('clinico.escuta.autorizacao.titulo') }}
-      </h2>
+      <ProntuarioDialogoTopo
+        :id="idTitulo"
+        :titulo="t('clinico.escuta.autorizacao.titulo')"
+        :subtitulo="t('clinico.escuta.autorizacao.pedido', { responsavel: nome })"
+        icone="ph ph-microphone"
+        tom="risco"
+      />
     </template>
 
-    <div class="autorizacao clinic-scope">
+    <div class="autorizacao">
       <p v-if="escuta.erro" class="autorizacao__erro" role="alert">
         <i class="ph ph-warning-circle" aria-hidden="true" />
         {{ t(`clinico.escuta.erro.${escuta.erro}`) }}
       </p>
 
-      <p class="autorizacao__pedido">
-        {{ t('clinico.escuta.autorizacao.pedido', { responsavel: nome }) }}
-      </p>
-
+      <!-- A fala para o responsável: o único texto grande, para ser lido em voz alta. -->
       <section class="fala">
-        <h3 class="clinic-label">
+        <h3 class="autorizacao__titulo">
           {{ t('clinico.escuta.autorizacao.paraLer', { responsavel: nome }) }}
         </h3>
         <blockquote class="fala__texto">
@@ -122,7 +125,7 @@ function comecar() {
       </section>
 
       <section class="passos">
-        <h3 class="clinic-label">{{ t('clinico.escuta.autorizacao.oQueAcontece') }}</h3>
+        <h3 class="autorizacao__titulo">{{ t('clinico.escuta.autorizacao.oQueAcontece') }}</h3>
         <ul>
           <li>
             <PhWaveform weight="duotone" aria-hidden="true" />
@@ -140,7 +143,7 @@ function comecar() {
       </section>
 
       <section class="fonte">
-        <h3 class="clinic-label">{{ t('clinico.escuta.fonte.rotulo') }}</h3>
+        <h3 class="autorizacao__titulo">{{ t('clinico.escuta.fonte.rotulo') }}</h3>
         <SelectButton
           :model-value="escuta.fonte"
           :options="opcoesDeFonte"
@@ -157,12 +160,14 @@ function comecar() {
 
     <template #footer>
       <Button
+        type="button"
         :label="t('clinico.escuta.autorizacao.naoAutorizou')"
         severity="secondary"
         text
         @click="escuta.autorizacaoAberta = false"
       />
       <Button
+        type="button"
         :label="t('clinico.escuta.autorizacao.autorizou', { responsavel: nome })"
         :disabled="!podeComecar"
         @click="comecar"
@@ -178,34 +183,33 @@ function comecar() {
 <style scoped>
 .autorizacao {
   display: grid;
-  gap: var(--clinic-space-5);
+  gap: 20px;
+  color: var(--tinta);
+  font-size: 14px;
   line-height: 1.5;
 }
 
-.autorizacao h3 {
-  margin: 0 0 var(--clinic-space-2);
-}
-
-.autorizacao__pedido {
-  margin: 0;
-  color: var(--clinic-muted);
+.autorizacao__titulo {
+  margin: 0 0 8px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .autorizacao__erro {
   display: flex;
   align-items: flex-start;
-  gap: 0.4rem;
+  gap: 8px;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-weight: 650;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-weight: 550;
 }
 
 .autorizacao__erro .ph {
-  margin-top: 0.2rem;
+  margin-top: 3px;
 }
 
 /*
@@ -214,17 +218,18 @@ function comecar() {
  */
 .fala__texto {
   margin: 0;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
-  font-size: var(--clinic-font-value);
+  padding: 14px 16px;
+  border-inline-start: 3px solid var(--clinica);
+  border-radius: 0 12px 12px 0;
+  background: var(--superficie-2);
+  color: var(--tinta);
+  font-size: 16px;
   line-height: 1.6;
 }
 
 .passos ul {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -232,20 +237,21 @@ function comecar() {
 
 .passos li {
   display: grid;
-  grid-template-columns: 1.2rem minmax(0, 1fr);
   align-items: start;
-  gap: var(--clinic-space-2);
+  gap: 10px;
+  color: var(--tinta-2);
+  grid-template-columns: 20px minmax(0, 1fr);
 }
 
 .passos li svg {
-  margin-top: 0.15rem;
-  color: var(--clinic-accent-strong);
-  font-size: 1.05rem;
+  margin-top: 2px;
+  color: var(--clinica-tinta);
+  font-size: 18px;
 }
 
 .fonte__dica {
-  margin: var(--clinic-space-2) 0 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  margin: 8px 0 0;
+  color: var(--tinta-3);
+  font-size: 13px;
 }
 </style>

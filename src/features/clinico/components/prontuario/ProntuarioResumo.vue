@@ -14,6 +14,13 @@
  * - **Documento que não faz sentido não aparece habilitado.** Sem prescrição não há receituário,
  *   e um botão que gera folha em branco é pior que um botão ausente — o responsável descobre na
  *   farmácia.
+ *
+ * ## A forma (redesenho total, 19/10/2026)
+ *
+ * Três folhas, na ordem em que se fecha uma consulta: o **registro** (uma ficha de leitura,
+ * rótulo à esquerda e valor à direita), a **entrega no app** (uma linha de estado com a única
+ * decisão ativa) e os **documentos** — os que este atendimento implica numa lista do kit, cada um
+ * com "Imprimir" na ponta; o resto atrás de uma dobra, agrupado por quem recebe o papel.
  */
 import Button from 'primevue/button'
 import { computed, ref } from 'vue'
@@ -341,195 +348,224 @@ const noApp = computed(() => {
 </script>
 
 <template>
-  <section class="resumo clinic-scope">
-    <header class="resumo__topo">
-      <h3>{{ t('clinico.prontuario.resumo.titulo') }}</h3>
-      <p>{{ t('clinico.prontuario.resumo.descricao') }}</p>
-    </header>
+  <section class="resumo">
+    <!-- ------------------------------------------------------------- o registro -->
+    <article class="registro ui-folha" aria-labelledby="resumo-registro-titulo">
+      <header class="registro__topo">
+        <h3 id="resumo-registro-titulo" class="titulo">
+          {{ t('clinico.prontuario.resumo.titulo') }}
+        </h3>
+        <p class="descricao">{{ t('clinico.prontuario.resumo.descricao') }}</p>
+      </header>
 
-    <!-- Pendência que impede um documento de circular vem antes do documento. -->
-    <ClinicAlertChip
-      v-for="item in pendencias"
-      :key="`pendencia-${item.id}`"
-      severidade="risco"
-      :rotulo="t('clinico.prontuario.resumo.alergiaPendente', { medicamento: item.nome })"
-    />
+      <!-- Pendência que impede um documento de circular vem antes do documento. -->
+      <ul v-if="pendencias.length > 0" class="pendencias">
+        <li v-for="item in pendencias" :key="`pendencia-${item.id}`">
+          <ClinicAlertChip
+            severidade="risco"
+            :rotulo="t('clinico.prontuario.resumo.alergiaPendente', { medicamento: item.nome })"
+          />
+        </li>
+      </ul>
 
-    <div class="ficha">
-      <div class="ficha__linha">
-        <span class="clinic-label">{{ t('clinico.prontuario.impressao.dataAtendimento') }}</span>
-        <span>{{ formato.dataLonga(dataDoAtendimento) }}</span>
-      </div>
+      <dl class="ficha">
+        <div class="ficha__linha">
+          <dt>{{ t('clinico.prontuario.impressao.dataAtendimento') }}</dt>
+          <dd>{{ formato.dataLonga(dataDoAtendimento) }}</dd>
+        </div>
 
-      <div class="ficha__linha">
-        <span class="clinic-label">{{ t('clinico.prontuario.anamnese.queixaPrincipal') }}</span>
-        <span>{{ encounter.anamnese.queixaPrincipal || t('clinico.prontuario.resumo.vazio') }}</span>
-      </div>
+        <div class="ficha__linha">
+          <dt>{{ t('clinico.prontuario.anamnese.queixaPrincipal') }}</dt>
+          <dd :class="{ 'ficha__vazio': !encounter.anamnese.queixaPrincipal }">
+            {{ encounter.anamnese.queixaPrincipal || t('clinico.prontuario.resumo.vazio') }}
+          </dd>
+        </div>
 
-      <div class="ficha__linha">
-        <span class="clinic-label">{{ t('clinico.prontuario.diagnostico.titulo') }}</span>
-        <span v-if="encounter.diagnosticos.length > 0">
-          <span v-for="(item, indice) in encounter.diagnosticos" :key="item.codigo">
-            <template v-if="indice > 0"> · </template>
-            {{ clinico.descricaoDoDiagnostico(item) }}
-            <small>({{ t(`clinico.prontuario.diagnostico.tipo.${item.kind}`) }})</small>
-          </span>
-        </span>
-        <span v-else class="ficha__vazio">{{ t('clinico.prontuario.resumo.vazio') }}</span>
-      </div>
+        <div class="ficha__linha">
+          <dt>{{ t('clinico.prontuario.diagnostico.titulo') }}</dt>
+          <dd v-if="encounter.diagnosticos.length > 0" class="ficha__lista">
+            <span v-for="item in encounter.diagnosticos" :key="item.codigo" class="diagnostico">
+              <strong>{{ clinico.descricaoDoDiagnostico(item) }}</strong>
+              <span class="ui-selo ui-selo--contorno">
+                {{ t(`clinico.prontuario.diagnostico.tipo.${item.kind}`) }}
+              </span>
+            </span>
+          </dd>
+          <dd v-else class="ficha__vazio">{{ t('clinico.prontuario.resumo.vazio') }}</dd>
+        </div>
 
-      <div v-if="vitaisAlterados.length > 0 || sistemasAlterados.length > 0" class="ficha__linha">
-        <span class="clinic-label">{{ t('clinico.prontuario.resumo.achados') }}</span>
-        <span class="ficha__achados">
-          <span
-            v-for="vital in vitaisAlterados"
-            :key="vital.vital"
-            class="achado"
-            :class="`achado--${vital.status}`"
-          >
-            {{ vital.rotulo }} {{ vital.valor }}
-          </span>
-          <span v-for="sistema in sistemasAlterados" :key="sistema.chave" class="achado achado--sistema">
-            {{ sistema.rotulo }}<template v-if="sistema.nota">: {{ sistema.nota }}</template>
-          </span>
-        </span>
-      </div>
+        <div v-if="vitaisAlterados.length > 0 || sistemasAlterados.length > 0" class="ficha__linha">
+          <dt>{{ t('clinico.prontuario.resumo.achados') }}</dt>
+          <dd class="ficha__achados">
+            <span
+              v-for="vital in vitaisAlterados"
+              :key="vital.vital"
+              class="ui-selo ui-selo--risco"
+            >
+              <i
+                :class="vital.status === 'acima' ? 'ph ph-arrow-up' : 'ph ph-arrow-down'"
+                aria-hidden="true"
+              />
+              {{ vital.rotulo }} <span class="ui-num">{{ vital.valor }}</span>
+            </span>
+            <span
+              v-for="sistema in sistemasAlterados"
+              :key="sistema.chave"
+              class="ui-selo ui-selo--atencao achado"
+            >
+              {{ sistema.rotulo }}<template v-if="sistema.nota">: {{ sistema.nota }}</template>
+            </span>
+          </dd>
+        </div>
 
-      <div class="ficha__linha">
-        <span class="clinic-label">{{ t('clinico.prontuario.conduta.prescricoes') }}</span>
-        <span v-if="prescricoes.length > 0" class="ficha__prescricoes">
-          <span v-for="item in prescricoes" :key="item.id" class="prescricao">
-            <strong>{{ item.nome }}</strong>
-            <small v-if="item.controlado" class="prescricao__controle">
-              {{ t('clinico.bulario.controlado') }}
-            </small>
-            <span class="clinic-value">{{ item.resumo }}</span>
-          </span>
-        </span>
-        <span v-else class="ficha__vazio">{{ t('clinico.prontuario.resumo.vazio') }}</span>
-      </div>
+        <div class="ficha__linha">
+          <dt>{{ t('clinico.prontuario.conduta.prescricoes') }}</dt>
+          <dd v-if="prescricoes.length > 0" class="ficha__lista">
+            <span v-for="item in prescricoes" :key="item.id" class="prescricao">
+              <span class="prescricao__nome">
+                <strong>{{ item.nome }}</strong>
+                <span v-if="item.controlado" class="ui-selo ui-selo--atencao">
+                  {{ t('clinico.bulario.controlado') }}
+                </span>
+              </span>
+              <span class="prescricao__dose ui-num">{{ item.resumo }}</span>
+            </span>
+          </dd>
+          <dd v-else class="ficha__vazio">{{ t('clinico.prontuario.resumo.vazio') }}</dd>
+        </div>
 
-      <div v-if="exames.length > 0" class="ficha__linha">
-        <span class="clinic-label">{{ t('clinico.prontuario.conduta.exames') }}</span>
-        <span>{{ exames.join(' · ') }}</span>
-      </div>
+        <div v-if="exames.length > 0" class="ficha__linha">
+          <dt>{{ t('clinico.prontuario.conduta.exames') }}</dt>
+          <dd>{{ exames.join(' · ') }}</dd>
+        </div>
 
-      <div v-if="encounter.conduta.retorno.emDias !== null" class="ficha__linha">
-        <span class="clinic-label">{{ t('clinico.prontuario.conduta.retorno') }}</span>
-        <span>
-          {{
-            t(
-              'clinico.formato.dias',
-              { valor: encounter.conduta.retorno.emDias },
-              encounter.conduta.retorno.emDias,
-            )
-          }}
-        </span>
-      </div>
-    </div>
+        <div v-if="encounter.conduta.retorno.emDias !== null" class="ficha__linha">
+          <dt>{{ t('clinico.prontuario.conduta.retorno') }}</dt>
+          <dd class="ui-num">
+            {{
+              t(
+                'clinico.formato.dias',
+                { valor: encounter.conduta.retorno.emDias },
+                encounter.conduta.retorno.emDias,
+              )
+            }}
+          </dd>
+        </div>
+      </dl>
+    </article>
 
     <!--
       O que o responsável recebe no app. Fica antes dos documentos porque é a entrega que não
       depende de papel — e a única que o vet precisa decidir ativamente.
     -->
-    <section class="app" :class="`app--${noApp.estado}`" aria-labelledby="resumo-app-titulo">
-      <i
-        class="ph app__icone"
-        :class="noApp.estado === 'liberado' ? 'ph-check-circle' : 'ph-device-mobile'"
-        aria-hidden="true"
-      />
+    <section class="app ui-folha" :class="`app--${noApp.estado}`" aria-labelledby="resumo-app-titulo">
+      <span class="app__icone" aria-hidden="true">
+        <i :class="noApp.estado === 'liberado' ? 'ph ph-check-circle' : 'ph ph-device-mobile'" />
+      </span>
       <div class="app__corpo">
-        <h4 id="resumo-app-titulo" class="clinic-label">
+        <h3 id="resumo-app-titulo" class="app__titulo">
           {{ t('clinico.prontuario.resumo.app.titulo') }}
-        </h4>
+        </h3>
         <p>{{ noApp.texto }}</p>
       </div>
       <Button
         v-if="noApp.estado === 'pronto'"
+        type="button"
         :label="t('clinico.prontuario.resumo.app.liberar')"
         icon="ph ph-paper-plane-tilt"
         size="small"
+        severity="secondary"
+        outlined
         @click="emit('liberarResumo')"
       />
     </section>
 
-    <section class="documentos">
+    <!-- --------------------------------------------------------------- documentos -->
+    <section class="documentos" aria-labelledby="resumo-documentos-titulo">
       <header class="documentos__topo">
-        <h4 class="clinic-label">{{ t('clinico.documentos.titulo') }}</h4>
-        <p>{{ t('clinico.documentos.ajuda') }}</p>
+        <h3 id="resumo-documentos-titulo" class="titulo">
+          {{ t('clinico.documentos.titulo') }}
+        </h3>
+        <p class="descricao">{{ t('clinico.documentos.ajuda') }}</p>
       </header>
 
       <!--
-        Sugeridos: o que **este** atendimento implica. Três ou quatro, em cartão, porque é o
-        caminho de nove em cada dez vezes e não pode custar um clique a mais.
+        Sugeridos: o que **este** atendimento implica. Três ou quatro, porque é o caminho de nove
+        em cada dez vezes e não pode custar um clique a mais.
       -->
-      <div class="documentos__grade">
-        <article v-for="documento in sugeridos" :key="documento.id" class="documento">
+      <ul class="ui-folha ui-lista">
+        <li v-for="documento in sugeridos" :key="documento.id" class="documento">
           <span class="documento__icone" aria-hidden="true"><i :class="documento.icone" /></span>
 
-          <div class="documento__corpo">
-            <strong>{{ t(`clinico.documentos.cartao.${documento.id}.titulo`) }}</strong>
-            <small>{{ t(`clinico.documentos.cartao.${documento.id}.descricao`) }}</small>
-            <small v-if="documento.detalhe" class="documento__detalhe">{{ documento.detalhe }}</small>
-          </div>
+          <span class="ui-linha__texto">
+            <strong class="ui-linha__titulo">
+              {{ t(`clinico.documentos.cartao.${documento.id}.titulo`) }}
+            </strong>
+            <span class="ui-linha__meta documento__meta">
+              {{ t(`clinico.documentos.cartao.${documento.id}.descricao`) }}
+            </span>
+            <span v-if="documento.detalhe" class="documento__detalhe">
+              {{ documento.detalhe }}
+            </span>
+          </span>
 
           <Button
-            fluid
+            type="button"
             icon="ph ph-printer"
             size="small"
             severity="secondary"
             outlined
-            :label="t('clinico.documentos.emitir')"
+            :label="t('clinico.prontuario.nova.documentos.imprimir')"
+            :aria-label="`${t('clinico.prontuario.nova.documentos.imprimir')}: ${t(`clinico.documentos.cartao.${documento.id}.titulo`)}`"
             @click="emit('emitir', documento.id)"
           />
-        </article>
-      </div>
+        </li>
+      </ul>
 
       <!--
-        O resto atrás de uma dobra. Lista densa em vez de cartão: são onze, e onze cartões
-        empurram o resumo do atendimento para fora da tela — sendo que o resumo é o motivo de a
-        etapa existir.
+        O resto atrás de uma dobra, agrupado por quem recebe o papel. São onze; à vista, eles
+        empurrariam o resumo do atendimento para fora da tela — sendo que o resumo é o motivo de
+        a etapa existir.
       -->
       <div class="outros">
-        <Button
+        <button
           type="button"
           class="outros__gatilho"
-          severity="secondary"
-          text
-          size="small"
-          :icon="outrosAbertos ? 'ph ph-caret-down' : 'ph ph-caret-right'"
-          :label="t('clinico.documentos.outros', { contagem: totalDeOutros })"
           :aria-expanded="outrosAbertos"
+          aria-controls="resumo-outros-documentos"
           @click="outrosAbertos = !outrosAbertos"
-        />
+        >
+          <i :class="outrosAbertos ? 'ph ph-caret-down' : 'ph ph-caret-right'" aria-hidden="true" />
+          {{ t('clinico.documentos.outros', { contagem: totalDeOutros }) }}
+        </button>
 
-        <div v-if="outrosAbertos" class="outros__grupos">
+        <div v-show="outrosAbertos" id="resumo-outros-documentos" class="outros__grupos">
           <section v-for="bloco in outros" :key="bloco.grupo" class="grupo">
-            <h5 class="grupo__titulo clinic-label">
-              {{ t(`clinico.documentos.grupo.${bloco.grupo}`) }}
-            </h5>
+            <h4 class="grupo__titulo">{{ t(`clinico.documentos.grupo.${bloco.grupo}`) }}</h4>
 
-            <ul class="grupo__lista">
+            <ul class="ui-folha ui-lista">
               <li v-for="documento in bloco.documentos" :key="documento.id">
                 <!--
                   A linha inteira é o botão: o alvo é a largura da lista, não um ícone de
                   impressora no fim dela.
                 -->
-                <Button
+                <button
                   type="button"
-                  class="linha"
-                  text
-                  fluid
+                  class="ui-linha linha"
                   :disabled="!documento.disponivel"
                   @click="emit('emitir', documento.id)"
                 >
                   <i :class="documento.icone" class="linha__icone" aria-hidden="true" />
-                  <span class="linha__corpo">
-                    <strong>{{ t(`clinico.documentos.cartao.${documento.id}.titulo`) }}</strong>
-                    <small>{{ t(`clinico.documentos.cartao.${documento.id}.descricao`) }}</small>
+                  <span class="ui-linha__texto">
+                    <strong class="ui-linha__titulo">
+                      {{ t(`clinico.documentos.cartao.${documento.id}.titulo`) }}
+                    </strong>
+                    <span class="ui-linha__meta linha__meta">
+                      {{ t(`clinico.documentos.cartao.${documento.id}.descricao`) }}
+                    </span>
                   </span>
                   <i class="ph ph-printer linha__acao" aria-hidden="true" />
-                </Button>
+                </button>
               </li>
             </ul>
           </section>
@@ -545,327 +581,299 @@ const noApp = computed(() => {
 </template>
 
 <style scoped>
-/*
- * A entrega no app é estado, não alerta: acento quando liberado, superfície neutra enquanto não.
- * O botão é a única coisa com peso de ação na faixa.
- */
-.app {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-}
-
-.app--liberado {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
-}
-
-.app__icone {
-  color: var(--clinic-faint);
-  font-size: 1.1rem;
-}
-
-.app--liberado .app__icone {
-  color: var(--clinic-accent-strong);
-}
-
-.app__corpo {
-  display: grid;
-  flex: 1 1 18rem;
-  gap: 2px;
-  min-width: 0;
-}
-
-.app__corpo h4,
-.app__corpo p {
-  margin: 0;
-}
-
-.app__corpo p {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-}
-
 .resumo {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 20px;
 }
 
-.resumo__topo h3 {
+.titulo {
   margin: 0;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-value);
-  font-weight: 750;
-  letter-spacing: -0.015em;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
 }
 
-.resumo__topo p {
-  margin: 0.15rem 0 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+.descricao {
+  max-width: 72ch;
+  margin: 2px 0 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
 }
 
-.ficha {
+/* ------------------------------------------------------------------ registro */
+
+.registro {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface-soft);
+  gap: 14px;
+  padding: 22px 24px 10px;
 }
 
-.ficha__linha {
-  display: grid;
-  align-items: baseline;
-  gap: var(--clinic-space-3);
-  grid-template-columns: 9.5rem minmax(0, 1fr);
-}
-
-.ficha__linha + .ficha__linha {
-  padding-top: var(--clinic-space-3);
-  border-top: 1px solid var(--clinic-line-soft);
-}
-
-.ficha__vazio {
-  color: var(--clinic-faint);
-}
-
-.ficha__achados,
-.ficha__prescricoes {
+.pendencias {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.ficha__prescricoes {
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.achado {
-  padding: 0.1rem 0.45rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.achado--acima,
-.achado--abaixo {
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
-}
-
-.prescricao {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.4rem;
-}
-
-.prescricao__controle {
-  padding: 0 0.35rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-size: 0.62rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.documentos {
-  display: grid;
-  gap: var(--clinic-space-3);
-}
-
-.documentos__topo p {
-  margin: 0.2rem 0 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.documentos__grade {
-  display: grid;
-  gap: var(--clinic-space-3);
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-}
-
-/*
- * Cartão em coluna: ícone e título no topo, botão ocupando a base.
- *
- * Em linha, com o botão ao lado, "Atestado de comparecimento" quebrava em duas linhas e a
- * descrição em quatro — quatro cartões de alturas diferentes e nenhum confortável.
- */
-.documento {
-  display: grid;
-  align-content: start;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-  grid-template-rows: auto 1fr auto;
-}
-
-.documento--indisponivel {
-  opacity: 0.62;
-}
-
-.documento__icone {
-  display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
-  place-items: center;
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.documento__corpo {
-  display: grid;
-  min-width: 0;
-  gap: 0.1rem;
-}
-
-.documento__corpo strong {
-  font-size: var(--clinic-font-base);
-  font-weight: 700;
-}
-
-.documento__corpo small {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  line-height: 1.4;
-}
-
-.documento__detalhe {
-  color: var(--clinic-muted) !important;
-  font-weight: 650;
-}
-
-.documento__bloqueio {
-  color: var(--clinic-attention-text) !important;
-  font-weight: 650;
-}
-
-/* ------------------------------------------------------------- outros documentos */
-
-.outros {
-  display: grid;
-  gap: var(--clinic-space-3);
-}
-
-/*
- * A dobra se lê como rótulo de seção (caixa alta, apagado), não como botão de ação. A
- * especificidade passa a regra global da clínica para botão secundário de texto.
- */
-.outros__gatilho.p-button {
-  justify-self: start;
-  gap: 0.35rem;
-  padding: 0.2rem 0.35rem;
-  font-size: var(--clinic-font-label);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.outros__gatilho.p-button.p-button-secondary.p-button-text {
-  color: var(--clinic-muted);
-}
-
-.outros__gatilho.p-button :deep(.p-button-label) {
-  font-weight: 750;
-}
-
-.outros__gatilho.p-button :deep(.p-button-icon) {
-  font-size: 0.6rem;
-}
-
-.outros__grupos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
-  gap: var(--clinic-space-4);
-}
-
-.grupo__titulo {
-  margin: 0 0 var(--clinic-space-2);
-}
-
-.grupo__lista {
-  display: grid;
-  gap: 0.15rem;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/*
- * Linha densa: um documento ocupa a altura de duas linhas de texto, não a de um cartão. É o que
- * permite onze caberem sem rolagem e sem esconder o resumo.
- */
-.linha.p-button {
+.pendencias :deep(.ui-selo) {
+  height: auto;
+  min-height: 26px;
+  padding-block: 4px;
+  white-space: normal;
+}
+
+.ficha {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  margin: 0;
+}
+
+.ficha__linha {
+  display: grid;
+  align-items: baseline;
+  gap: 4px 20px;
+  padding: 12px 0;
+  grid-template-columns: 11rem minmax(0, 1fr);
+}
+
+.ficha__linha + .ficha__linha {
+  border-top: 1px solid var(--linha);
+}
+
+.ficha__linha dt {
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.ficha__linha dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.ficha__vazio {
+  color: var(--tinta-3) !important;
+}
+
+.ficha__lista {
+  display: grid;
+  gap: 8px;
+}
+
+.diagnostico,
+.prescricao__nome {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid transparent;
-  border-radius: var(--clinic-radius-control);
-  color: inherit;
+  gap: 4px 8px;
+}
+
+.diagnostico strong,
+.prescricao__nome strong {
+  font-weight: 600;
+}
+
+.prescricao {
+  display: grid;
+  gap: 2px;
+}
+
+.prescricao__dose {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.ficha__achados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.achado {
+  height: auto;
+  min-height: 24px;
+  padding-block: 3px;
+  white-space: normal;
+}
+
+/* ------------------------------------------------------------------ app */
+
+/*
+ * A entrega no app é estado, não alerta: neutra enquanto não sai, na cor do "pronto" quando
+ * liberada. O botão é a única coisa com peso de ação na linha.
+ */
+.app {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 14px;
+  padding: 14px 16px;
+}
+
+.app--liberado {
+  border-color: color-mix(in oklab, var(--ok) 35%, var(--linha));
+  background: color-mix(in oklab, var(--ok-fundo) 55%, var(--superficie));
+}
+
+.app__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 20px;
+}
+
+.app--liberado .app__icone {
+  background: var(--superficie);
+  color: var(--ok-tinta);
+}
+
+.app__corpo {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 18rem;
+  gap: 2px;
+}
+
+.app__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.app__corpo p {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+/* ------------------------------------------------------------------ documentos */
+
+.documentos {
+  display: grid;
+  gap: 12px;
+}
+
+.documento {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px 10px 16px;
+}
+
+.documento__icone {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 19px;
+}
+
+.documento__meta,
+.linha__meta {
+  white-space: normal;
+}
+
+.documento__detalhe {
+  color: var(--atencao-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.outros {
+  display: grid;
+  gap: 14px;
+}
+
+.outros__gatilho {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  padding: 0 10px 0 6px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--tinta-2);
+  cursor: pointer;
   font: inherit;
-  text-align: start;
+  font-size: 14px;
+  font-weight: 550;
 }
 
-.linha.p-button:not(:disabled):hover,
-.linha.p-button:not(:disabled):active {
-  border-color: var(--clinic-line);
-  background: var(--clinic-surface-soft);
-  color: inherit;
+.outros__gatilho:hover {
+  background: var(--superficie-2);
+  color: var(--tinta);
 }
 
-/* Indisponível fica apagado no lugar, sem o fundo rebaixado que a camada global dá ao botão. */
-.linha.p-button:disabled {
-  border-color: transparent;
-  background: transparent;
-  color: inherit;
+.outros__gatilho:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
+}
+
+.outros__grupos {
+  display: grid;
+  align-items: start;
+  gap: 18px 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+}
+
+.grupo {
+  display: grid;
+  gap: 8px;
+}
+
+.grupo__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.linha {
+  min-height: 56px;
+  gap: 12px;
+  padding-inline: 14px;
+}
+
+.linha:disabled {
   cursor: not-allowed;
-  opacity: 0.45;
+  opacity: 0.5;
+}
+
+.linha:disabled:hover {
+  background: transparent;
 }
 
 .linha__icone {
-  color: var(--clinic-accent-strong);
-  font-size: 0.8rem;
+  color: var(--tinta-2);
+  font-size: 18px;
 }
 
-.linha__corpo {
-  display: grid;
-  min-width: 0;
-  gap: 0.05rem;
-}
-
-.linha__corpo strong {
-  font-size: var(--clinic-font-base);
-  font-weight: 700;
-}
-
-.linha__corpo small {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  line-height: 1.35;
-}
-
-/* O ícone de impressora só aparece no alvo focado: em onze linhas viraria textura. */
+/* A impressora só aparece no alvo da vez: em onze linhas viraria textura. */
 .linha__acao {
-  color: var(--clinic-faint);
-  font-size: 0.75rem;
+  color: var(--tinta-3);
+  font-size: 16px;
   opacity: 0;
-  transition: opacity 120ms ease;
+  transition: opacity var(--pj-tempo-curto) ease;
 }
 
 .linha:hover .linha__acao,
@@ -881,17 +889,29 @@ const noApp = computed(() => {
 
 .documentos__nota {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  align-items: flex-start;
+  gap: 8px;
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.documentos__nota .ph {
+  margin-top: 2px;
 }
 
 @media (max-width: 640px) {
+  .registro {
+    padding: 18px 16px 6px;
+  }
+
   .ficha__linha {
     grid-template-columns: minmax(0, 1fr);
-    gap: 0.2rem;
+  }
+
+  .documento {
+    flex-wrap: wrap;
   }
 }
 </style>

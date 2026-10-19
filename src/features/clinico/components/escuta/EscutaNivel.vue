@@ -44,7 +44,7 @@ const alturas = computed(() =>
 .nivel__barra {
   width: 3px;
   border-radius: 2px;
-  background: var(--clinic-muted);
+  background: var(--risco);
   transition: height 90ms linear;
 }
 

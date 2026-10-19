@@ -2887,7 +2887,7 @@
       "dosePeso": {
         "titulo": "الجرعة لـ {pet}، {peso}",
         "porAdministracao": "لكل جرعة",
-        "daApresentacao": "من المستحضر، في كل مرة",
+        "daApresentacao": "من المستحضر",
         "horas": "h",
         "dias": "يوم | يوم | يومان | أيام | يومًا | يوم",
         "conta": "النطاق المعتاد للنوع ({faixa} mg/kg) × {peso}، وهو الوزن المسجل. تحقق من وزن اليوم قبل الوصف."
@@ -3610,8 +3610,8 @@
         "titulo": "الزيارة",
         "voltarFicha": "ملف {pet}",
         "resumo": {
-          "aberto": "فُتحت الساعة {hora} مع {profissional}",
-          "finalizado": "أُنهيت في {data} الساعة {hora} بواسطة {profissional}",
+          "aberto": "فُتحت الزيارة الساعة {hora} مع {profissional}",
+          "finalizado": "أُنهيت الزيارة في {data} الساعة {hora} بواسطة {profissional}",
           "etapas": "اكتملت {feitas} من {total} خطوات"
         },
         "salvoAs": "حُفظ الساعة {hora}",

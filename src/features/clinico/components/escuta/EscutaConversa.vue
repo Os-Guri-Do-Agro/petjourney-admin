@@ -189,7 +189,7 @@ defineExpose({ mostrar })
         }"
         :data-trecho="trecho.id"
       >
-        <span class="fala__hora clinic-value">{{ rotulos.relogio(trecho.emMs) }}</span>
+        <span class="fala__hora ui-num">{{ rotulos.relogio(trecho.emMs) }}</span>
 
         <!-- Trecho só de som: o latido da recepção, sem fala por cima. -->
         <span v-if="!trecho.texto && trecho.interferencia" class="fala__som">
@@ -252,90 +252,96 @@ defineExpose({ mostrar })
 
 <style scoped>
 .conversa {
+  --maquina-fundo: var(--clinic-maquina-bg);
+  --maquina-linha: var(--clinic-maquina-line);
+
   display: grid;
   min-width: 0;
   min-height: 0;
+  gap: 8px;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: var(--clinic-space-2);
 }
 
-/* Título de área, no mesmo nível do "Prontuário proposto" ao lado: caixa normal, não versalete. */
+/* Título de área, no mesmo nível do "Prontuário proposto" ao lado. */
 .conversa__titulo {
   margin: 0;
-  font-size: var(--clinic-font-base);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .conversa__lista {
   display: grid;
-  align-content: start;
-  gap: var(--clinic-space-3);
   max-height: 30rem;
+  align-content: start;
+  gap: 12px;
   margin: 0;
-  padding: 0 var(--clinic-space-2) 0 0;
+  padding: 0 8px 0 0;
   overflow-y: auto;
   list-style: none;
   overscroll-behavior: contain;
 }
 
 .conversa__vazia {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 13.5px;
 }
 
 .fala {
   display: grid;
-  grid-template-columns: 2.6rem minmax(0, 1fr);
-  gap: var(--clinic-space-2);
-  padding: 0.15rem 0.25rem;
-  border-radius: var(--clinic-radius-control);
-  transition: background-color 180ms ease-out;
+  gap: 8px;
+  padding: 2px 4px;
+  border-radius: 8px;
+  grid-template-columns: 2.8rem minmax(0, 1fr);
+  transition: background-color var(--pj-tempo-medio) ease-out;
 }
 
 /* "De onde veio isto?": a fala acende por um instante e apaga sozinha. */
 .fala--foco {
-  background: var(--clinic-maquina-bg);
+  background: var(--maquina-fundo);
 }
 
 .fala__hora {
-  padding-top: 0.1rem;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  padding-top: 2px;
+  color: var(--tinta-3);
+  font-size: 12.5px;
 }
 
 .fala__corpo {
   display: grid;
-  gap: 0.1rem;
   min-width: 0;
+  gap: 2px;
 }
 
 .fala__quem {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+  gap: 5px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.fala__quem--atrapalho {
+  color: var(--atencao-tinta);
 }
 
 /* As falas do veterinário recuam de tom: numa anamnese, quem relata é o responsável. */
-.fala__quem--atrapalho {
-  color: var(--clinic-attention-text);
-}
-
 .fala__quem--voce {
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
 }
 
 .fala__texto {
   margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
 /* Ouvido com dúvida: o texto continua legível, e o sublinhado pontilhado diz "não confie cego". */
 .fala__texto--incerto {
-  text-decoration: underline dotted var(--clinic-attention-text);
+  text-decoration: underline dotted var(--atencao-tinta);
   text-underline-offset: 3px;
 }
 
@@ -343,25 +349,25 @@ defineExpose({ mostrar })
 .fala__atrapalho {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  gap: 5px;
+  color: var(--atencao-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
 .fala--interina .fala__texto {
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
 }
 
 .grifo {
-  padding: 0 0.1rem;
-  border-radius: 0.2rem;
-  background: var(--clinic-maquina-bg);
+  padding: 0 2px;
+  border-radius: 3px;
+  background: var(--maquina-fundo);
   color: inherit;
-  transition: box-shadow 150ms ease-out;
+  transition: box-shadow var(--pj-tempo-curto) ease-out;
 }
 
 .grifo--aceso {
-  box-shadow: 0 0 0 1.5px var(--clinic-maquina-line);
+  box-shadow: 0 0 0 1.5px var(--maquina-linha);
 }
 </style>

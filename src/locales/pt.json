@@ -2887,7 +2887,7 @@
       "dosePeso": {
         "titulo": "Dose para {pet}, {peso}",
         "porAdministracao": "por administração",
-        "daApresentacao": "da apresentação, por vez",
+        "daApresentacao": "da apresentação",
         "horas": "h",
         "dias": "dia | dias",
         "conta": "Faixa usual da espécie ({faixa} mg/kg) × {peso}, o peso do cadastro. Confira o peso do dia antes de prescrever."
@@ -3610,8 +3610,8 @@
         "titulo": "Atendimento",
         "voltarFicha": "Ficha de {pet}",
         "resumo": {
-          "aberto": "Aberto às {hora} com {profissional}",
-          "finalizado": "Finalizado em {data}, às {hora}, por {profissional}",
+          "aberto": "Atendimento aberto às {hora} com {profissional}",
+          "finalizado": "Atendimento finalizado em {data}, às {hora}, por {profissional}",
           "etapas": "{feitas} de {total} etapas completas"
         },
         "salvoAs": "Salvo às {hora}",

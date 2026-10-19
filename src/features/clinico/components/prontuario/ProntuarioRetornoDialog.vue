@@ -17,9 +17,10 @@
  */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import ProntuarioDialogoTopo from './ProntuarioDialogoTopo.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { ISODate, SlotSugestao } from '../../data/types'
 import { diffDays } from '../../domain/clinic-time'
@@ -43,6 +44,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
+const idTitulo = useId()
 
 const aberto = computed({
   get: () => props.visivel,
@@ -71,11 +73,24 @@ const opcoes = computed(() =>
     v-model:visible="aberto"
     modal
     class="clinic-dialog hc-tema"
-    :style="{ width: 'min(32rem, 94vw)' }"
-    :header="t('clinico.prontuario.conduta.retornoDialogo.titulo')"
+    :style="{ width: 'min(34rem, 94vw)' }"
+    :aria-labelledby="idTitulo"
     :dismissable-mask="true"
   >
-    <div class="retorno clinic-scope">
+    <template #header>
+      <ProntuarioDialogoTopo
+        :id="idTitulo"
+        :titulo="t('clinico.prontuario.conduta.retornoDialogo.titulo')"
+        :subtitulo="
+          emDias !== null
+            ? t('clinico.prontuario.conduta.retornoDialogo.emDias', { contagem: emDias }, emDias)
+            : ''
+        "
+        icone="ph ph-calendar-plus"
+      />
+    </template>
+
+    <div class="retorno">
       <p class="retorno__lede">
         {{ t('clinico.prontuario.conduta.retornoDialogo.descricao') }}
       </p>
@@ -85,34 +100,34 @@ const opcoes = computed(() =>
         {{ t('clinico.tabela.carregando') }}
       </p>
 
-      <p v-else-if="opcoes.length === 0" class="retorno__estado retorno__estado--vazio">
+      <p v-else-if="opcoes.length === 0" class="retorno__estado">
         <i class="ph ph-calendar-x" aria-hidden="true" />
         {{ t('clinico.agenda.semana.semAlternativa') }}
       </p>
 
       <ul v-else class="retorno__lista">
         <li v-for="opcao in opcoes" :key="opcao.slot.inicio">
-          <Button
+          <button
             type="button"
             class="opcao"
-            severity="secondary"
-            outlined
-            fluid
             :disabled="salvando"
             @click="emit('escolher', opcao.slot)"
           >
             <span class="opcao__data">
-              <strong class="clinic-value">{{ formato.dataCurta(opcao.data) }}</strong>
-              <span class="opcao__semana">{{ formato.diaDaSemanaCurto(opcao.data) }}</span>
+              <strong class="ui-num">{{ formato.dataCurta(opcao.data) }}</strong>
+              <span>{{ formato.diaDaSemanaCurto(opcao.data) }}</span>
             </span>
 
-            <span class="opcao__hora clinic-value">
+            <span class="opcao__hora ui-hora">
               {{ formato.intervalo(opcao.slot.inicio, opcao.slot.fim) }}
             </span>
 
             <span class="opcao__meta">
               <span>{{ opcao.profissional }}</span>
-              <span class="opcao__dias" :class="{ 'opcao__dias--adiado': opcao.adiado }">
+              <span
+                class="opcao__dias ui-num"
+                :class="{ 'opcao__dias--adiado': opcao.adiado }"
+              >
                 {{
                   t(
                     'clinico.prontuario.conduta.retornoDialogo.emDias',
@@ -122,13 +137,16 @@ const opcoes = computed(() =>
                 }}
               </span>
             </span>
-          </Button>
+
+            <i class="ph ph-caret-right opcao__seta" aria-hidden="true" />
+          </button>
         </li>
       </ul>
     </div>
 
     <template #footer>
       <Button
+        type="button"
         :label="t('clinico.agenda.mover.cancelar')"
         severity="secondary"
         text
@@ -141,113 +159,122 @@ const opcoes = computed(() =>
 <style scoped>
 .retorno {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 14px;
 }
 
 .retorno__lede {
   margin: 0;
-  color: var(--clinic-muted);
-  line-height: 1.5;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .retorno__estado {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   margin: 0;
-  padding: var(--clinic-space-5);
-  border: 1px dashed var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-control);
-  color: var(--clinic-muted);
-}
-
-.retorno__estado--vazio {
-  color: var(--clinic-faint);
+  padding: 24px;
+  border: 1px dashed var(--linha-forte);
+  border-radius: 12px;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 .retorno__lista {
   display: grid;
-  gap: var(--clinic-space-2);
   margin: 0;
   padding: 0;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
   list-style: none;
 }
 
-/*
- * Opção de horário: botão contornado com layout em grade (data, hora, quem e quando). A
- * especificidade passa a regra global da clínica para botão secundário contornado, que trocaria
- * a moldura suave pela forte e o hover sálvia pelo cinza.
- */
-.opcao.p-button {
+.retorno__lista li + li {
+  border-top: 1px solid var(--linha);
+}
+
+/* Cada horário é uma linha inteira clicável: data, hora, com quem e a quantos dias. */
+.opcao {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
+  width: 100%;
+  min-height: 60px;
   align-items: center;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3);
+  gap: 16px;
+  padding: 10px 14px;
+  border: 0;
+  background: none;
+  color: var(--tinta);
+  cursor: pointer;
   font: inherit;
+  grid-template-columns: 4.5rem auto minmax(0, 1fr) auto;
   text-align: start;
 }
 
-.opcao.p-button.p-button-secondary.p-button-outlined {
-  border-color: var(--clinic-line);
-  background: var(--clinic-surface);
-  color: inherit;
+.retorno__lista li:first-child .opcao {
+  border-radius: 11px 11px 0 0;
 }
 
-.opcao.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
-  color: inherit;
+.retorno__lista li:last-child .opcao {
+  border-radius: 0 0 11px 11px;
 }
 
-.opcao.p-button:disabled {
-  border-color: var(--clinic-line);
-  background: var(--clinic-surface);
-  color: inherit;
+.opcao:hover:not(:disabled) {
+  background: var(--superficie-2);
+}
+
+.opcao:focus-visible {
+  outline: 2px solid var(--clinica);
+  outline-offset: -2px;
+}
+
+.opcao:disabled {
   cursor: progress;
   opacity: 0.6;
 }
 
 .opcao__data {
   display: grid;
-  gap: 0.05rem;
+  line-height: 1.2;
 }
 
 .opcao__data strong {
-  font-size: 1rem;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 650;
 }
 
-.opcao__semana {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.opcao__hora {
-  font-weight: 750;
+.opcao__data span {
+  color: var(--tinta-3);
+  font-size: 12.5px;
 }
 
 .opcao__meta {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
   justify-items: end;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  gap: 1px;
+  color: var(--tinta-2);
+  font-size: 13px;
   text-align: end;
 }
 
 .opcao__dias {
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
 }
 
 /* Adiado por falta de vaga: o desvio da data pedida é dado, não detalhe. */
 .opcao__dias--adiado {
-  color: var(--clinic-attention-text);
-  font-weight: 700;
+  color: var(--atencao-tinta);
+  font-weight: 600;
+}
+
+.opcao__seta {
+  color: var(--tinta-3);
+  font-size: 16px;
+}
+
+[dir='rtl'] .opcao__seta {
+  scale: -1 1;
 }
 </style>

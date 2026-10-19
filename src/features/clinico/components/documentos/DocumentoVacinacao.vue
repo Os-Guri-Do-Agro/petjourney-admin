@@ -139,8 +139,6 @@ const vacinas = computed(() =>
 .tabela th {
   font-size: 8.5pt;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 /* Célula sem dado tem altura de escrita à mão, não altura de texto. */

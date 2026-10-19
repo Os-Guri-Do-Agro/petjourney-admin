@@ -6,10 +6,12 @@
  *
  * É tela de trabalho concentrado, e se organiza em torno de três perguntas:
  *
- * 1. **Com quem** — o paciente no alto, com o rosto, os alertas que mudam a conduta e o peso de
- *    que sai toda dose. Ao rolar, ele não some: uma barra compacta desce e fica presa no alto,
- *    com o nome, os alertas, os passos e "Finalizar". Quem está no meio da prescrição não sobe a
- *    página para conferir a alergia.
+ * 1. **Com quem** — a capa do paciente (`FichaCabeca`, a mesma da ficha e do internado): o rosto,
+ *    o nome como título, os alertas que mudam a conduta, o peso de que sai toda dose e o
+ *    responsável com o telefone; embaixo, a frase do atendimento (aberto quando, com quem, quantos
+ *    passos prontos) e as saídas para a ficha. Ao rolar, o paciente não some: uma barra compacta
+ *    desce e fica presa no alto, com o nome, os alertas, os passos e "Finalizar". Quem está no
+ *    meio da prescrição não sobe a página para conferir a alergia.
  * 2. **Onde estou** — o trilho dos cinco passos (anamnese, exame, diagnóstico, conduta, resumo),
  *    com o feito, o atual e o que falta, e o resumo de cada um embaixo do nome.
  * 3. **O que escrevo agora** — a etapa atual numa folha larga, com campos generosos e o rótulo
@@ -17,8 +19,8 @@
  *    o histórico do paciente. Contexto, não tarefa — some com um clique, e recolhe sozinho
  *    quando a gravação da consulta começa e precisa da largura.
  *
- * "Finalizar atendimento" é a ação cheia, no alto; "Imprimir ou salvar PDF" fica contornada ao
- * lado. As faixas (rascunho encontrado no navegador, leitura por outro dispositivo, atendimento
+ * "Finalizar atendimento" é a ação cheia, à direita da capa; "Imprimir ou salvar PDF" fica
+ * contornada ao lado. O estado da gravação automática mora na linha de ferramentas da etapa. As faixas (rascunho encontrado no navegador, leitura por outro dispositivo, atendimento
  * finalizado) entram entre o trilho e a folha, cada uma com o tom e a saída dela.
  *
  * ## O que não mudou
@@ -39,7 +41,6 @@ import { onBeforeRouteLeave, RouterLink, useRoute, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useTelaLarga } from '@/composables/useTelaLarga'
-import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
 import DocumentoAtestado from '@/features/clinico/components/documentos/DocumentoAtestado.vue'
 import DocumentoEncaminhamento from '@/features/clinico/components/documentos/DocumentoEncaminhamento.vue'
 import DocumentoObito from '@/features/clinico/components/documentos/DocumentoObito.vue'
@@ -57,6 +58,7 @@ import type {
 import EscutaGatilho from '@/features/clinico/components/escuta/EscutaGatilho.vue'
 import EscutaIndicador from '@/features/clinico/components/escuta/EscutaIndicador.vue'
 import EscutaPainel from '@/features/clinico/components/escuta/EscutaPainel.vue'
+import FichaCabeca from '@/features/clinico/components/pacientes/ficha/FichaCabeca.vue'
 import ProntuarioAnamnese from '@/features/clinico/components/prontuario/ProntuarioAnamnese.vue'
 import ProntuarioConduta from '@/features/clinico/components/prontuario/ProntuarioConduta.vue'
 import ProntuarioDiagnostico from '@/features/clinico/components/prontuario/ProntuarioDiagnostico.vue'
@@ -778,34 +780,41 @@ onBeforeUnmount(() => {
       </RouterLink>
     </template>
 
-    <template v-if="encounter" #resumo>
-      <span>{{ fraseDoResumo }}</span>
-      <span v-if="estadoDaGravacao" class="gravacao" aria-live="polite">
-        <i
-          :class="prontuario.salvando ? 'ph ph-circle-notch ph-spin' : 'ph ph-cloud-check'"
-          aria-hidden="true"
-        />
-        {{ estadoDaGravacao }}
-      </span>
-    </template>
-
-    <template v-if="encounter" #acoes>
-      <Button
-        type="button"
-        :label="t('clinico.prontuario.nova.imprimir')"
-        icon="ph ph-printer"
-        severity="secondary"
-        outlined
-        :title="t('clinico.prontuario.impressao.dica')"
-        @click="salvarEmPdf"
-      />
-      <Button
-        v-if="podeFinalizar"
-        type="button"
-        :label="t('clinico.prontuario.finalizar')"
-        icon="ph ph-check-circle"
-        @click="finalizarAberto = true"
-      />
+    <template #cabecalho>
+      <!--
+        A capa do paciente, a mesma da ficha e do internado: o paciente é o título desta tela. A
+        frase dela diz o estado do atendimento, e as ações ficam à direita, na própria capa.
+      -->
+      <div ref="cabecaDoPaciente" class="cabeca">
+        <FichaCabeca
+          v-if="prontuario.pet && encounter"
+          :pet="prontuario.pet"
+          :tutor="prontuario.tutor"
+          :atual="null"
+          :frase="fraseDoResumo"
+          :peso-kg="pesoVigente"
+        >
+          <template #acoes>
+            <Button
+              type="button"
+              :label="t('clinico.prontuario.nova.imprimir')"
+              icon="ph ph-printer"
+              severity="secondary"
+              outlined
+              :title="t('clinico.prontuario.impressao.dica')"
+              @click="salvarEmPdf"
+            />
+            <Button
+              v-if="podeFinalizar"
+              type="button"
+              :label="t('clinico.prontuario.finalizar')"
+              icon="ph ph-check-circle"
+              @click="finalizarAberto = true"
+            />
+          </template>
+        </FichaCabeca>
+        <h1 v-else class="cabeca__reserva">{{ t('clinico.prontuario.nova.titulo') }}</h1>
+      </div>
     </template>
 
     <div v-if="encounter" class="corpo">
@@ -876,14 +885,6 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div ref="cabecaDoPaciente" class="paciente">
-        <ClinicPatientHeader
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-          :peso-kg="pesoVigente"
-        />
-      </div>
-
       <ProntuarioStepper
         id="atendimento-trilho"
         class="trilho"
@@ -894,6 +895,14 @@ onBeforeUnmount(() => {
 
       <!-- As ferramentas da etapa: o microfone fora da anamnese, o teclado, o contexto. -->
       <div class="ferramentas">
+        <span v-if="estadoDaGravacao" class="gravacao" aria-live="polite">
+          <i
+            :class="prontuario.salvando ? 'ph ph-circle-notch ph-spin' : 'ph ph-cloud-check'"
+            aria-hidden="true"
+          />
+          {{ estadoDaGravacao }}
+        </span>
+
         <EscutaIndicador
           v-if="gravandoAqui && etapa !== 'anamnese'"
           @voltar="irParaEtapa('anamnese')"
@@ -1439,18 +1448,32 @@ onBeforeUnmount(() => {
   scale: -1 1;
 }
 
+/* A capa ocupa a linha inteira do alto; as ações moram nela. */
+.cabeca {
+  min-width: 0;
+  flex: 1 1 100%;
+}
+
+.cabeca__reserva {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 .gravacao {
   display: inline-flex;
+  min-height: 36px;
   align-items: center;
-  gap: 5px;
-  margin-inline-start: 10px;
+  gap: 6px;
   color: var(--tinta-3);
   font-size: 13.5px;
   white-space: nowrap;
 }
 
 .gravacao .ph {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .corpo {
@@ -1590,11 +1613,7 @@ onBeforeUnmount(() => {
   flex: none;
 }
 
-/* ------------------------------------------------------------------ paciente e trilho */
-
-.paciente {
-  min-width: 0;
-}
+/* ------------------------------------------------------------------ trilho */
 
 .trilho {
   margin-top: 2px;

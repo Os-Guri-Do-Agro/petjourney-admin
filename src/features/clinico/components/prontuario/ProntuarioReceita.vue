@@ -13,6 +13,10 @@
  *   vai ler — em palavra, não em decimal.
  * - **Repetir é um toque.** Medicação contínua se repete todo mês, e obrigar a remontar a
  *   prescrição inteira é o que faz a clínica voltar para o bloco de papel.
+ *
+ * Na tela nova é uma folha própria, embaixo da vacinação: o título com as duas ações (repetir e
+ * assinar), a prévia do app do responsável num painel afundado — é outra tela, a do celular — e
+ * cada receita já assinada numa linha em tom de "pronto", com o código que a farmácia confere.
  */
 import Button from 'primevue/button'
 import ToggleSwitch from 'primevue/toggleswitch'
@@ -127,9 +131,27 @@ function repetir() {
 </script>
 
 <template>
-  <section class="receita">
+  <section class="receita ui-folha" :aria-labelledby="`receita-${encounter.id}`">
     <header class="receita__topo">
-      <h4 class="clinic-label">{{ t('clinico.receita.titulo') }}</h4>
+      <span class="receita__icone" aria-hidden="true"><i class="ph ph-prescription" /></span>
+
+      <div class="receita__titulos">
+        <h3 :id="`receita-${encounter.id}`" class="receita__titulo">
+          {{ t('clinico.receita.titulo') }}
+        </h3>
+        <p v-if="prescricoes.length === 0" class="receita__sub">
+          {{ t('clinico.receita.semPrescricao') }}
+        </p>
+        <p v-else class="receita__sub">
+          {{
+            t(
+              'clinico.prontuario.passos.prescricoes',
+              { contagem: prescricoes.length },
+              prescricoes.length,
+            )
+          }}
+        </p>
+      </div>
 
       <div class="receita__acoes">
         <!--
@@ -139,11 +161,12 @@ function repetir() {
         -->
         <Button
           v-if="podeRepetir"
+          type="button"
           :label="t('clinico.receita.repetir')"
           icon="ph ph-arrow-counter-clockwise"
           size="small"
           severity="secondary"
-          outlined
+          text
           :title="
             t('clinico.receita.repetirDica', {
               data: formato.dataCurta(clinicClock.dateOf(anterior!.emitidaEm)),
@@ -153,9 +176,12 @@ function repetir() {
         />
 
         <Button
+          type="button"
           :label="t('clinico.receita.emitir')"
           icon="ph ph-seal-check"
           size="small"
+          severity="secondary"
+          outlined
           :disabled="!podeEmitir"
           :loading="receitas.salvando"
           @click="emitir"
@@ -163,97 +189,93 @@ function repetir() {
       </div>
     </header>
 
-    <p v-if="prescricoes.length === 0" class="receita__vazio">
-      {{ t('clinico.receita.semPrescricao') }}
-    </p>
+    <!--
+      O que o responsável recebe, ao lado do que o vet prescreveu. É assim que "sem redigitação"
+      deixa de ser promessa: as duas leituras saem do mesmo dado, e o vet vê as duas antes de
+      assinar.
+    -->
+    <section v-if="prescricoes.length > 0" class="responsavel">
+      <h4 class="responsavel__titulo">
+        <i class="ph ph-device-mobile" aria-hidden="true" />
+        {{ t('clinico.receita.vistaDoResponsavel') }}
+      </h4>
 
-    <template v-else>
-      <!--
-        O que o responsável recebe, ao lado do que o vet prescreveu. É assim que "sem
-        redigitação" deixa de ser promessa: as duas leituras saem do mesmo dado, e o vet vê as
-        duas antes de assinar.
-      -->
-      <section class="responsavel">
-        <span class="clinic-label">{{ t('clinico.receita.vistaDoResponsavel') }}</span>
-
-        <ul class="responsavel__lista">
-          <li v-for="item in vistaDoResponsavel" :key="item.id">
-            <strong>{{ item.nome }}</strong>
-            <span class="responsavel__instrucao">{{ item.quantidade }}</span>
-            <span class="responsavel__quando">
-              {{ item.frequencia }}
-              <template v-if="item.dias !== null">
-                · {{ t('clinico.prontuario.conduta.porDias', { dias: item.dias }, item.dias) }}
-              </template>
-            </span>
-            <span class="responsavel__lembrete">
-              <i class="ph ph-bell" aria-hidden="true" />
-              {{
-                item.continuo
-                  ? t('clinico.receita.lembreteContinuo')
-                  : t('clinico.receita.lembrete', {
-                      quantidade: item.quantidade,
-                      frequencia: item.frequencia,
-                    })
-              }}
-            </span>
-            <!--
-              Crítico é decisão de quem prescreve, e mora aqui porque é aqui que ela é tomada: a
-              clínica passa a ser avisada se, em casa, a adesão deste item cair.
-            -->
-            <span class="responsavel__critico">
-              <ToggleSwitch
-                :model-value="item.critico"
-                :input-id="`${idBase}-${item.id}`"
-                :disabled="somenteLeitura"
-                @update:model-value="emit('critico', item.id, Boolean($event))"
-              />
-              <label :for="`${idBase}-${item.id}`">{{ t('clinico.receita.critico') }}</label>
-            </span>
-          </li>
-        </ul>
-      </section>
-    </template>
+      <ul class="responsavel__lista">
+        <li v-for="item in vistaDoResponsavel" :key="item.id" class="item">
+          <span class="item__nome">{{ item.nome }}</span>
+          <span class="item__instrucao">{{ item.quantidade }}</span>
+          <span class="item__quando ui-num">
+            {{ item.frequencia }}
+            <template v-if="item.dias !== null">
+              · {{ t('clinico.prontuario.conduta.porDias', { dias: item.dias }, item.dias) }}
+            </template>
+          </span>
+          <span class="item__lembrete">
+            <i class="ph ph-bell" aria-hidden="true" />
+            {{
+              item.continuo
+                ? t('clinico.receita.lembreteContinuo')
+                : t('clinico.receita.lembrete', {
+                    quantidade: item.quantidade,
+                    frequencia: item.frequencia,
+                  })
+            }}
+          </span>
+          <!--
+            Crítico é decisão de quem prescreve, e mora aqui porque é aqui que ela é tomada: a
+            clínica passa a ser avisada se, em casa, a adesão deste item cair.
+          -->
+          <span class="item__critico">
+            <ToggleSwitch
+              :model-value="item.critico"
+              :input-id="`${idBase}-${item.id}`"
+              :disabled="somenteLeitura"
+              @update:model-value="emit('critico', item.id, Boolean($event))"
+            />
+            <label :for="`${idBase}-${item.id}`">{{ t('clinico.receita.critico') }}</label>
+          </span>
+        </li>
+      </ul>
+    </section>
 
     <!-- Receitas já assinadas neste atendimento, com o código que a farmácia confere. -->
-    <article v-for="doc in emitidas" :key="doc.id" class="emitida">
-      <header class="emitida__topo">
-        <div>
-          <strong class="emitida__assinatura">
-            <i class="ph ph-seal-check" aria-hidden="true" />
-            {{ t('clinico.receita.assinadaPor', { nome: doc.assinatura?.nome ?? '' }) }}
-          </strong>
-          <p class="emitida__conselho">{{ doc.assinatura?.conselho }}</p>
+    <ul v-if="emitidas.length > 0" class="emitidas">
+      <li v-for="doc in emitidas" :key="doc.id" class="emitida">
+        <i class="ph ph-seal-check emitida__icone" aria-hidden="true" />
+
+        <div class="emitida__corpo">
+          <p class="emitida__assinatura">
+            <strong>
+              {{ t('clinico.receita.assinadaPor', { nome: doc.assinatura?.nome ?? '' }) }}
+            </strong>
+            <span>{{ doc.assinatura?.conselho }}</span>
+          </p>
+
+          <p class="emitida__dados">
+            <span>
+              {{ t('clinico.receita.codigo') }}
+              <strong class="emitida__codigo ui-num">{{ doc.assinatura?.codigo }}</strong>
+            </span>
+            <span class="ui-num">
+              {{ t('clinico.receita.validaAte', { data: formato.dataCurta(doc.validaAte) }) }}
+            </span>
+          </p>
+
+          <ClinicAlertChip
+            v-if="doc.controlada"
+            severidade="atencao"
+            :rotulo="t('clinico.receita.controlada')"
+          />
         </div>
 
-        <ClinicAlertChip
-          v-if="doc.controlada"
-          severidade="atencao"
-          :rotulo="t('clinico.receita.controlada')"
-        />
-      </header>
-
-      <dl class="emitida__dados">
-        <div>
-          <dt class="clinic-label">{{ t('clinico.receita.codigo') }}</dt>
-          <dd class="emitida__codigo clinic-value">{{ doc.assinatura?.codigo }}</dd>
-        </div>
-        <div>
-          <dt class="clinic-label">{{ t('clinico.agenda.mover.para') }}</dt>
-          <dd class="clinic-value">
-            {{ t('clinico.receita.validaAte', { data: formato.dataCurta(doc.validaAte) }) }}
-          </dd>
-        </div>
-      </dl>
-
-      <div class="emitida__rodape">
         <span v-if="doc.enviadaEm" class="emitida__enviada">
           <i class="ph ph-check" aria-hidden="true" />
-          {{ t('clinico.receita.enviada') }} · {{ formato.relativo(doc.enviadaEm) }}
+          {{ t('clinico.receita.enviada') }}, {{ formato.relativo(doc.enviadaEm) }}
         </span>
 
         <Button
           v-else
+          type="button"
           :label="t('clinico.receita.enviar')"
           icon="ph ph-paper-plane-tilt"
           size="small"
@@ -261,174 +283,220 @@ function repetir() {
           outlined
           @click="receitas.enviar(doc.id)"
         />
-      </div>
-    </article>
+      </li>
+    </ul>
   </section>
 </template>
 
 <style scoped>
 .receita {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
+  gap: 14px;
+  padding: 18px 20px;
 }
 
 .receita__topo {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-3);
+  gap: 12px 14px;
+}
+
+.receita__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 20px;
+}
+
+.receita__titulos {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 220px;
+  gap: 2px;
+}
+
+.receita__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.receita__sub {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 .receita__acoes {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clinic-space-2);
-}
-
-.receita__vazio {
-  margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  align-items: center;
+  gap: 6px;
 }
 
 /* --------------------------------------------------------- visão do responsável */
 
+/* A prévia do celular: um painel afundado, porque é outra tela — a do app. */
 .responsavel {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-3);
-  border: 1px dashed var(--clinic-accent);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-accent-tint);
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
+}
+
+.responsavel__titulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.responsavel__titulo .ph {
+  font-size: 16px;
 }
 
 .responsavel__lista {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.responsavel__lista li {
+.item {
   display: grid;
-  gap: 0.1rem;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  background: var(--superficie);
 }
 
-.responsavel__instrucao {
-  font-weight: 700;
+.item__nome {
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
-.responsavel__quando {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+.item__instrucao {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.item__quando {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 /* O lembrete é o elo com o app: dizer que ele nasce daqui é metade do valor da tela. */
-.responsavel__lembrete {
+.item__lembrete {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.15rem;
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  gap: 6px;
+  margin-top: 4px;
+  color: var(--musgo);
+  font-size: 13px;
+  font-weight: 550;
 }
 
-.responsavel__critico {
+.item__critico {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  margin-top: 0.35rem;
-  padding-top: 0.45rem;
-  border-top: 1px solid var(--clinic-line-soft);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
-.responsavel__critico label {
+.item__critico label {
   cursor: pointer;
 }
 
-/* ------------------------------------------------------------------- emitida */
+/* ------------------------------------------------------------------- emitidas */
+
+.emitidas {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 
 .emitida {
-  display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-ok-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-ok-bg);
-}
-
-.emitida__topo {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--clinic-space-2);
-}
-
-.emitida__assinatura {
-  display: flex;
   align-items: center;
-  gap: 0.35rem;
-  color: var(--clinic-ok-text);
-  font-weight: 750;
+  gap: 10px 14px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in oklab, var(--ok) 35%, var(--linha));
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--ok-fundo) 60%, var(--superficie));
 }
 
-.emitida__conselho {
-  margin: 0.05rem 0 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+.emitida__icone {
+  align-self: flex-start;
+  margin-top: 1px;
+  color: var(--ok-tinta);
+  font-size: 20px;
 }
 
+.emitida__corpo {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 260px;
+  gap: 4px;
+}
+
+.emitida__assinatura,
 .emitida__dados {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
-  gap: var(--clinic-space-3);
-  margin: 0;
-}
-
-.emitida__dados div {
-  display: grid;
-  gap: 0.1rem;
-}
-
-.emitida__dados dd {
-  margin: 0;
-  font-weight: 700;
-}
-
-/*
- * O código é ditado ao telefone e conferido na farmácia: monoespaçado e com folga entre
- * caracteres, porque é assim que se lê em voz alta sem errar.
- */
-.emitida__codigo {
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: 0.95rem;
-  letter-spacing: 0.06em;
-}
-
-.emitida__rodape {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin: 0;
+  font-size: 13.5px;
+}
+
+.emitida__assinatura strong {
+  color: var(--ok-tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.emitida__assinatura span,
+.emitida__dados {
+  color: var(--tinta-2);
+}
+
+/* O código é ditado ao telefone e conferido na farmácia: algarismos de mesma largura. */
+.emitida__codigo {
+  margin-inline-start: 4px;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 650;
 }
 
 .emitida__enviada {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-ok-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  gap: 6px;
+  color: var(--ok-tinta);
+  font-size: 13px;
+  font-weight: 600;
 }
 </style>

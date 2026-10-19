@@ -8,6 +8,9 @@
  *
  * Em somente leitura ele continua visível, desligado e com o motivo: sumir faria a pessoa
  * procurar por um recurso que existe.
+ *
+ * Discreto e óbvio ao mesmo tempo: contornado, como toda ação que não é a da tela, mas com o
+ * microfone desenhado e o nome dizendo o que faz — e com altura de alvo de toque.
  */
 import { PhMicrophone } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
@@ -33,9 +36,9 @@ function gravar() {
   <Button
     v-if="escuta.fase === 'inativa' || escuta.encounterId !== encounterId"
     :label="t('clinico.escuta.gravar')"
+    class="gatilho"
     severity="secondary"
     outlined
-    size="small"
     :disabled="somenteLeitura"
     :title="somenteLeitura ? motivoLeitura : t('clinico.escuta.gravarDica')"
     data-fora-do-teclado
@@ -46,3 +49,18 @@ function gravar() {
     </template>
   </Button>
 </template>
+
+<style scoped>
+.gatilho.p-button {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+
+  min-height: 38px;
+  font-size: 14px;
+}
+
+.gatilho :deep(svg) {
+  color: var(--risco);
+}
+</style>

@@ -10,21 +10,24 @@
  * 2. **O status vem do cálculo, nunca do que foi digitado.** Editar o peso reavalia tudo na
  *    hora; nada de status congelado no registro.
  *
- * Sobre a forma: cada vital ocupava dois blocos empilhados — o campo e um cartão repetindo o
- * rótulo para mostrar a faixa. Agora é um bloco só, com o julgamento numa linha discreta sob o
- * campo. E os oito sistemas viraram escolhas em linha: o campo de observação **só aparece
- * quando o achado é "alterado"**, porque é o único caso em que há o que escrever.
+ * ## A forma (redesenho total, 19/10/2026)
+ *
+ * Os sete vitais são campos de verdade, numa grade: o rótulo em cima, o número grande e alinhado
+ * à direita com a unidade dentro, e embaixo a faixa da espécie, o julgamento e "não medir — "acima" em selo de risco com a seta, "na faixa" com o visto. O número fora da faixa
+ * pinta a borda do campo: o olho acha antes de ler.
+ *
+ * Os oito sistemas são uma lista de linhas, uma por sistema, com a escolha logo depois do nome. A
+ * linha alterada ganha a marca de atenção na borda e o campo da nota — **só ela**, porque é o
+ * único caso em que há o que escrever.
  */
-import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicField from '../base/ClinicField.vue'
 import ClinicForm from '../base/ClinicForm.vue'
-import ClinicRefValue from '../base/ClinicRefValue.vue'
 import ClinicToggleGroup from '../base/ClinicToggleGroup.vue'
 import type {
   ExameFisico,
@@ -37,7 +40,7 @@ import type {
   VitalKey,
 } from '../../data/types'
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import { medicaoPreenchida } from '../../domain/ranges'
+import { medicaoPreenchida, statusDaMedicao } from '../../domain/ranges'
 import { useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{
@@ -59,6 +62,7 @@ const emit = defineEmits<{ atualizar: [patch: { exameFisico: ExameFisico }] }>()
 const { t } = useI18n()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
+const idBase = useId()
 
 const VITAIS: VitalKey[] = [
   'peso',
@@ -201,6 +205,17 @@ function casasDe(vital: VitalKey) {
 function unidadeDe(vital: VitalKey) {
   return vital === 'peso' ? 'kg' : (faixaDe(vital)?.unidade ?? '')
 }
+
+/** O julgamento do valor digitado contra a faixa do paciente; vazio enquanto não há número. */
+function situacaoDe(vital: VitalKey) {
+  const atual = medicao(vital)
+
+  if (atual.naoAferido || atual.valor === null) {
+    return null
+  }
+
+  return statusDaMedicao(atual, faixaDe(vital))
+}
 </script>
 
 <template>
@@ -213,87 +228,96 @@ function unidadeDe(vital: VitalKey) {
     :motivo-somente-leitura="motivoLeitura"
   >
     <template #acoes>
-      <span class="contador clinic-value">
-        {{
-          t('clinico.prontuario.passos.vitaisAferidos', {
-            preenchidos: aferidos,
-            total: VITAIS.length,
-          })
-        }}
+      <span class="contador">
+        <i class="ph ph-heartbeat" aria-hidden="true" />
+        <span class="ui-num">
+          {{
+            t('clinico.prontuario.passos.vitaisAferidos', {
+              preenchidos: aferidos,
+              total: VITAIS.length,
+            })
+          }}
+        </span>
       </span>
     </template>
 
-    <div class="vitais">
-      <!--
-        Cada vital é uma ficha de medição, não um campo solto: rótulo curto (a unidade mora
-        dentro do campo, o que evita "Frequência respiratória · mpm" quebrando em duas linhas),
-        número grande e tabular, e o rodapé com a faixa — ou com o julgamento, assim que houver
-        valor. A decisão de não medir fica no rodapé, escrita, e apaga a ficha inteira.
-      -->
-      <label
-        v-for="vital in VITAIS"
-        :key="vital"
-        class="vital"
-        :class="{
-          'vital--nao-aferido': medicao(vital).naoAferido,
-          'vital--preenchido': medicaoPreenchida(medicao(vital)) && !medicao(vital).naoAferido,
-        }"
-      >
-        <span class="vital__rotulo">{{ t(`clinico.prontuario.exameFisico.${vital}`) }}</span>
+    <fieldset class="grupo grupo--primeiro">
+      <legend class="grupo__titulo">{{ t('clinico.prontuario.exameFisico.vitais') }}</legend>
 
-        <InputNumber
-          class="vital__campo"
-          :model-value="medicao(vital).valor"
-          :min-fraction-digits="casasDe(vital)"
-          :max-fraction-digits="casasDe(vital)"
-          :suffix="unidadeDe(vital) ? ` ${unidadeDe(vital)}` : undefined"
-          :placeholder="medicao(vital).naoAferido ? t('clinico.prontuario.naoAferido') : '—'"
-          :disabled="somenteLeitura || medicao(vital).naoAferido"
-          :aria-label="t(`clinico.prontuario.exameFisico.${vital}`)"
-          fluid
-          @update:model-value="aplicarVital(vital, { valor: $event ?? null })"
-        />
+      <div class="vitais">
+        <!--
+          Cada vital: o rótulo curto (a unidade mora dentro do campo, o que evita "Frequência
+          respiratória · mpm" quebrando em duas linhas), o número tabular, e embaixo a faixa e o
+          julgamento. A decisão de não medir fica escrita no fim dessa linha, e apaga o campo.
+        -->
+        <div
+          v-for="vital in VITAIS"
+          :key="vital"
+          class="vital"
+          :class="[
+            situacaoDe(vital) ? `vital--${situacaoDe(vital)}` : '',
+            { 'vital--nao-aferido': medicao(vital).naoAferido },
+          ]"
+        >
+          <label class="vital__rotulo" :for="`${idBase}-${vital}`">
+            {{ t(`clinico.prontuario.exameFisico.${vital}`) }}
+          </label>
 
-        <span class="vital__rodape">
-          <ClinicRefValue
-            v-if="medicaoPreenchida(medicao(vital)) && !medicao(vital).naoAferido"
-            variante="linha"
-            :rotulo="t(`clinico.prontuario.exameFisico.${vital}`)"
-            :valor="medicao(vital)"
-            :faixa="faixaDe(vital)"
-            compacto
+          <InputNumber
+            class="vital__campo"
+            :input-id="`${idBase}-${vital}`"
+            :model-value="medicao(vital).valor"
+            :min-fraction-digits="casasDe(vital)"
+            :max-fraction-digits="casasDe(vital)"
+            :suffix="unidadeDe(vital) ? ` ${unidadeDe(vital)}` : undefined"
+            :placeholder="medicao(vital).naoAferido ? t('clinico.prontuario.naoAferido') : ''"
+            :disabled="somenteLeitura || medicao(vital).naoAferido"
+            fluid
+            @update:model-value="aplicarVital(vital, { valor: $event ?? null })"
           />
-          <span v-else-if="faixaDe(vital)" class="vital__faixa">
-            {{ formato.faixaDeReferencia(faixaDe(vital)) }}
+
+          <span class="vital__rodape">
+            <span
+              v-if="situacaoDe(vital) === 'acima' || situacaoDe(vital) === 'abaixo'"
+              class="ui-selo ui-selo--risco vital__situacao"
+            >
+              <i
+                :class="situacaoDe(vital) === 'acima' ? 'ph ph-arrow-up' : 'ph ph-arrow-down'"
+                aria-hidden="true"
+              />
+              {{ formato.statusDeFaixa(situacaoDe(vital)!) }}
+            </span>
+            <span v-else-if="situacaoDe(vital) === 'dentro'" class="vital__ok">
+              <i class="ph ph-check" aria-hidden="true" />
+              {{ formato.statusDeFaixa('dentro') }}
+            </span>
+            <span v-if="faixaDe(vital)" class="vital__faixa ui-num">
+              {{ formato.faixaDeReferencia(faixaDe(vital)) }}
+            </span>
+
+            <!-- Depois do campo, no DOM e na tela: o Tab e o Enter passam pelo número primeiro. -->
+            <button
+              type="button"
+              class="vital__marcar"
+              :aria-pressed="medicao(vital).naoAferido"
+              :disabled="somenteLeitura"
+              @click="
+                aplicarVital(vital, {
+                  naoAferido: !medicao(vital).naoAferido,
+                  valor: medicao(vital).naoAferido ? medicao(vital).valor : null,
+                })
+              "
+            >
+              {{
+                medicao(vital).naoAferido
+                  ? t('clinico.prontuario.naoAferido')
+                  : t('clinico.prontuario.naoMedir')
+              }}
+            </button>
           </span>
-          <span v-else />
-
-          <!-- `.prevent`: o botão mora dentro do `<label>` do vital, que focaria o campo. -->
-          <Button
-            type="button"
-            class="vital__marcar"
-            :class="{ 'vital__marcar--ativo': medicao(vital).naoAferido }"
-            severity="secondary"
-            text
-            rounded
-            size="small"
-            :label="
-              medicao(vital).naoAferido
-                ? t('clinico.prontuario.naoAferido')
-                : t('clinico.prontuario.naoMedir')
-            "
-            :aria-pressed="medicao(vital).naoAferido"
-            :disabled="somenteLeitura"
-            @click.prevent="
-              aplicarVital(vital, {
-                naoAferido: !medicao(vital).naoAferido,
-                valor: medicao(vital).naoAferido ? medicao(vital).valor : null,
-              })
-            "
-          />
-        </span>
-      </label>
-    </div>
+        </div>
+      </div>
+    </fieldset>
 
     <!--
       Mucosas e hidratação ficam **entre** os vitais e os sistemas, e não dentro de nenhum dos
@@ -301,69 +325,75 @@ function unidadeDe(vital: VitalKey) {
       São a leitura de perfusão que o vet faz assim que põe a mão no paciente, e é nessa ordem
       que ela acontece.
     -->
-    <div class="perfusao">
-      <ClinicField :rotulo="t('clinico.prontuario.exameFisico.mucosas')">
-        <ClinicToggleGroup
-          :model-value="valor.mucosas"
-          :opcoes="opcoesMucosas"
-          :desabilitado="somenteLeitura"
-          :rotulo="t('clinico.prontuario.exameFisico.mucosas')"
-          @update:model-value="aplicarMucosas($event as MucosaStatus)"
-        />
-      </ClinicField>
+    <fieldset class="grupo">
+      <legend class="grupo__titulo">{{ t('clinico.prontuario.exameFisico.perfusao') }}</legend>
 
-      <ClinicField :rotulo="t('clinico.prontuario.exameFisico.hidratacaoRotulo')">
-        <ClinicToggleGroup
-          :model-value="valor.hidratacao"
-          :opcoes="opcoesHidratacao"
-          :desabilitado="somenteLeitura"
-          :rotulo="t('clinico.prontuario.exameFisico.hidratacaoRotulo')"
-          @update:model-value="aplicarHidratacao($event as HidratacaoGrau)"
-        />
-      </ClinicField>
-    </div>
+      <div class="perfusao">
+        <ClinicField :rotulo="t('clinico.prontuario.exameFisico.mucosas')">
+          <ClinicToggleGroup
+            :model-value="valor.mucosas"
+            :opcoes="opcoesMucosas"
+            :desabilitado="somenteLeitura"
+            :rotulo="t('clinico.prontuario.exameFisico.mucosas')"
+            @update:model-value="aplicarMucosas($event as MucosaStatus)"
+          />
+        </ClinicField>
 
-    <fieldset class="sistemas">
-      <legend class="clinic-label">
+        <ClinicField :rotulo="t('clinico.prontuario.exameFisico.hidratacaoRotulo')">
+          <ClinicToggleGroup
+            :model-value="valor.hidratacao"
+            :opcoes="opcoesHidratacao"
+            :desabilitado="somenteLeitura"
+            :rotulo="t('clinico.prontuario.exameFisico.hidratacaoRotulo')"
+            @update:model-value="aplicarHidratacao($event as HidratacaoGrau)"
+          />
+        </ClinicField>
+      </div>
+    </fieldset>
+
+    <fieldset class="grupo">
+      <legend class="grupo__titulo">
         {{ t('clinico.prontuario.exameFisico.sistemas') }}
-        <span v-if="alterados > 0" class="sistemas__contagem">
+        <span v-if="alterados > 0" class="ui-selo ui-selo--atencao">
           {{ t('clinico.prontuario.passos.sistemasAlterados', { contagem: alterados }, alterados) }}
         </span>
       </legend>
 
-      <div
-        v-for="sistema in SISTEMAS"
-        :key="sistema"
-        class="sistema"
-        :class="[
-          `sistema--${achado(sistema).status}`,
-          { 'sistema--alterado': achado(sistema).status === 'alterado' },
-        ]"
-      >
-        <span class="sistema__nome">
-          {{ t(`clinico.prontuario.exameFisico.sistema.${sistema}`) }}
-        </span>
+      <ul class="sistemas">
+        <li
+          v-for="sistema in SISTEMAS"
+          :key="sistema"
+          class="sistema"
+          :class="[
+            `sistema--${achado(sistema).status}`,
+            { 'ui-marca ui-marca--atencao': achado(sistema).status === 'alterado' },
+          ]"
+        >
+          <span class="sistema__nome">
+            {{ t(`clinico.prontuario.exameFisico.sistema.${sistema}`) }}
+          </span>
 
-        <ClinicToggleGroup
-          :model-value="achado(sistema).status"
-          :opcoes="opcoesAchado"
-          :rotulo="t(`clinico.prontuario.exameFisico.sistema.${sistema}`)"
-          :desabilitado="somenteLeitura"
-          @update:model-value="aplicarSistema(sistema, { status: $event })"
-        />
+          <ClinicToggleGroup
+            :model-value="achado(sistema).status"
+            :opcoes="opcoesAchado"
+            :rotulo="t(`clinico.prontuario.exameFisico.sistema.${sistema}`)"
+            :desabilitado="somenteLeitura"
+            @update:model-value="aplicarSistema(sistema, { status: $event })"
+          />
 
-        <!-- A nota só existe quando há alteração para descrever. -->
-        <InputText
-          v-if="achado(sistema).status === 'alterado'"
-          :model-value="achado(sistema).nota"
-          :placeholder="t('clinico.prontuario.exameFisico.notaAlterado')"
-          :aria-label="t('clinico.prontuario.exameFisico.notaAlterado')"
-          :disabled="somenteLeitura"
-          fluid
-          @update:model-value="aplicarSistema(sistema, { nota: $event ?? '' })"
-        />
-        <span v-else />
-      </div>
+          <!-- A nota só existe quando há alteração para descrever. -->
+          <InputText
+            v-if="achado(sistema).status === 'alterado'"
+            class="sistema__nota"
+            :model-value="achado(sistema).nota"
+            :placeholder="t('clinico.prontuario.exameFisico.notaAlterado')"
+            :aria-label="`${t(`clinico.prontuario.exameFisico.sistema.${sistema}`)}: ${t('clinico.prontuario.exameFisico.notaAlterado')}`"
+            :disabled="somenteLeitura"
+            fluid
+            @update:model-value="aplicarSistema(sistema, { nota: $event ?? '' })"
+          />
+        </li>
+      </ul>
     </fieldset>
 
     <ClinicField :rotulo="t('clinico.prontuario.exameFisico.observacao')" largo>
@@ -386,200 +416,241 @@ function unidadeDe(vital: VitalKey) {
 
 <style scoped>
 .contador {
-  color: var(--clinic-faint);
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
 }
+
+.contador .ph {
+  font-size: 15px;
+}
+
+/* Grupo da folha: um fio em cima e o título em frase, sem caixa dentro da caixa. */
+.grupo {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+  margin: 4px 0 0;
+  padding: 18px 0 0;
+  border: 0;
+  border-top: 1px solid var(--linha);
+}
+
+.grupo--primeiro {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* A legenda flutua para virar linha da grade: no lugar padrão ela cortaria o fio ao meio. */
+.grupo__titulo {
+  display: flex;
+  float: left;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ vitais */
 
 .vitais {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr));
-  gap: var(--clinic-space-3);
+  gap: 18px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 1fr));
 }
 
 .vital {
   display: grid;
-  align-content: start;
-  gap: var(--clinic-space-2);
   min-width: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  cursor: text;
-  transition:
-    border-color 120ms ease,
-    background 120ms ease;
-}
-
-.vital:hover {
-  border-color: var(--clinic-line-strong);
-}
-
-/* Ficha preenchida ganha corpo: numa fileira de sete, o que já foi medido salta. */
-.vital--preenchido {
-  border-color: var(--clinic-accent);
-  background: color-mix(in srgb, var(--clinic-accent-tint) 45%, var(--clinic-surface));
-}
-
-/* Não medir é decisão registrada, não campo vazio: a ficha apaga, mas continua legível. */
-.vital--nao-aferido {
-  background: var(--clinic-surface-sunken);
-  cursor: default;
+  align-content: start;
+  gap: 7px;
 }
 
 .vital__rotulo {
+  display: block;
   overflow: hidden;
-  color: var(--clinic-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
+  color: var(--tinta);
+  font-size: 13px;
+  font-weight: 550;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* O número é o conteúdo da ficha: maior, tabular e alinhado à direita, como em prontuário. */
+/*
+ * "Não medir" é texto, não ícone de proibido: o ícone dizia "bloqueado" quando o que se quer
+ * dizer é "decidi não aferir". Discreto enquanto é oferta, em selo quando é registro.
+ */
+.vital__marcar {
+  flex: none;
+  margin-inline-start: auto;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--tinta-3);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.vital__marcar:hover:not(:disabled) {
+  background: var(--superficie-2);
+  color: var(--tinta);
+}
+
+.vital__marcar[aria-pressed='true'] {
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-weight: 600;
+}
+
+.vital__marcar:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.vital__marcar:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 1px;
+}
+
+/* O número é o conteúdo do campo: maior, tabular e alinhado à direita, como em prontuário. */
 .vital__campo :deep(input) {
-  padding-inline: var(--clinic-space-2);
-  font-size: 1.05rem;
+  font-family: var(--font-dados);
+  font-size: 18px !important;
   font-variant-numeric: tabular-nums;
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   text-align: end;
+}
+
+.vital--acima .vital__campo :deep(input),
+.vital--abaixo .vital__campo :deep(input) {
+  border-color: var(--risco);
+  color: var(--risco-tinta);
+}
+
+.vital--dentro .vital__campo :deep(input) {
+  border-color: color-mix(in oklab, var(--ok) 60%, var(--linha-forte));
 }
 
 .vital__rodape {
   display: flex;
+  min-height: 22px;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-2);
-  min-height: 1.15rem;
+  gap: 4px 8px;
+}
+
+.vital__situacao {
+  height: 22px;
+  padding: 0 7px;
+  font-size: 12px;
+}
+
+.vital__ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--ok-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
 .vital__faixa {
-  overflow: hidden;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-variant-numeric: tabular-nums;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--tinta-3);
+  font-size: 12.5px;
 }
 
-/*
- * "Não medir" é texto, não um ícone de proibido: o ícone dizia "bloqueado" quando o que se
- * quer dizer é "decidi não aferir". Discreto enquanto é oferta, marcado quando é registro.
- */
-/*
- * Ação discreta no rodapé do vital: pílula de texto apagado, que só ganha fundo no hover. A
- * especificidade passa a regra global da clínica para botão secundário de texto, que daria a
- * ela o peso de uma ação principal do cartão.
- */
-.vital__marcar.p-button {
-  flex: 0 0 auto;
-  padding: 0.1rem 0.4rem;
-  border: 1px solid transparent;
-  font-size: var(--clinic-font-label);
-  white-space: nowrap;
-}
-
-.vital__marcar.p-button.p-button-secondary.p-button-text {
-  color: var(--clinic-faint);
-}
-
-.vital__marcar.p-button.p-button-secondary.p-button-text:not(:disabled):hover {
-  border-color: transparent;
-  background: var(--clinic-surface-sunken);
-  color: var(--clinic-muted);
-}
-
-.vital__marcar--ativo.p-button.p-button-secondary.p-button-text,
-.vital__marcar--ativo.p-button.p-button-secondary.p-button-text:not(:disabled):hover {
-  border-color: var(--clinic-neutral-line);
-  background: var(--clinic-neutral-bg);
-  color: var(--clinic-neutral-text);
-}
-
-.vital__marcar.p-button:disabled {
-  border-color: transparent;
-  background: transparent;
-  cursor: not-allowed;
-  opacity: 0.5;
-}
+/* ------------------------------------------------------------------ perfusão e sistemas */
 
 /*
  * Mucosas e hidratação lado a lado. Em tela estreita empilham — são duas escolhas com seis e
- * quatro opções, e espremê-las na mesma linha quebraria as fichas ao meio.
+ * quatro opções, e espremê-las na mesma linha quebraria os botões ao meio.
  */
 .perfusao {
   display: grid;
+  gap: 16px 32px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  gap: var(--clinic-space-3) var(--clinic-space-5);
 }
 
 .sistemas {
   display: grid;
-  gap: 0.15rem;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
-}
-
-.sistemas legend {
-  display: flex;
-  align-items: center;
-  gap: var(--clinic-space-2);
-  padding-inline: var(--clinic-space-2);
-}
-
-.sistemas__contagem {
-  padding: 0 0.35rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  letter-spacing: 0;
-  text-transform: none;
+  padding: 0;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  list-style: none;
 }
 
 /*
- * O controle fica logo depois do nome, não na outra ponta da linha. Com o nome à esquerda e a
- * escolha encostada na borda direita, o olho percorria sessenta por cento de vazio a cada uma
- * das oito linhas — e comparar sistemas virava trabalho.
+ * O controle fica logo depois do nome, não na outra ponta da linha: comparar oito sistemas não
+ * pode custar ao olho sessenta por cento de vazio a cada linha.
  */
 .sistema {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(6rem, 9rem) auto minmax(0, 1fr);
+  min-height: 52px;
   align-items: center;
-  gap: var(--clinic-space-2) var(--clinic-space-3);
-  padding: 0.25rem var(--clinic-space-2);
-  border-bottom: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-control);
+  gap: 8px 16px;
+  padding: 7px 12px 7px 16px;
+  grid-template-columns: minmax(7rem, 10rem) auto minmax(0, 1fr);
 }
 
-.sistema:last-of-type {
-  border-bottom: none;
+.sistema + .sistema {
+  border-top: 1px solid var(--linha);
 }
 
-/* Sistema alterado é onde a consulta tem conteúdo: ganha fundo e marca na lateral. */
+/* Sistema alterado é onde a consulta tem conteúdo: ganha o fundo e a marca de atenção. */
 .sistema--alterado {
-  background: color-mix(in srgb, var(--clinic-attention-bg) 55%, var(--clinic-surface));
+  background: color-mix(in oklab, var(--atencao-fundo) 45%, var(--superficie));
 }
 
-/* Sem avaliação ainda, o nome recua — a linha existe, mas não pede leitura. */
-.sistema--nao-avaliado .sistema__nome {
-  color: var(--clinic-muted);
-  font-weight: 600;
+.sistema:first-child {
+  border-radius: 11px 11px 0 0;
+}
+
+.sistema:last-child {
+  border-radius: 0 0 11px 11px;
 }
 
 .sistema__nome {
   overflow: hidden;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* Sem avaliação ainda, o nome recua — a linha existe, mas não pede leitura. */
+.sistema--nao-avaliado .sistema__nome {
+  color: var(--tinta-2);
+  font-weight: 500;
+}
+
+.sistema__nota.p-inputtext {
+  width: 100%;
+  padding-block: 7px;
+}
+
 @media (max-width: 900px) {
   .sistema {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

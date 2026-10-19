@@ -107,8 +107,6 @@ const pedeJejum = computed(() =>
   margin: 0 0 2mm;
   font-size: 10pt;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .bloco p {

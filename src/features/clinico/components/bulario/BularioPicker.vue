@@ -9,14 +9,22 @@
  *
  * A escolha nunca é bloqueada — nem quando a espécie é proibida. O que a tela faz é mostrar o
  * aviso e mudar o texto do botão: prescrever assim vira ato consciente, não descuido.
+ *
+ * ## A forma (redesenho de 19/10/2026)
+ *
+ * O alto diz o que se está fazendo e **para quem** (o paciente e a espécie), como os
+ * diálogos da Agenda. Embaixo, a mesma lista e a mesma ficha da tela do bulário, lado a lado; a
+ * ficha rola dentro de si. No pé, o aviso de espécie contraindicada à esquerda, com a palavra, e
+ * o botão que muda de cor e de texto quando a escolha vai contra ele.
  */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import BularioDetalhe from './BularioDetalhe.vue'
 import BularioLista from './BularioLista.vue'
+import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { Medication, Pet } from '../../data/types'
 import {
   FILTRO_VAZIO,
@@ -46,6 +54,19 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const formato = useClinicFormat()
+const idTitulo = useId()
+
+/**
+ * "Para Cacau · Canina": o diálogo cobre o prontuário, e a escolha é para alguém. O peso fica de
+ * fora de propósito: o que vale na receita é o aferido na consulta, que o prontuário conhece e
+ * este diálogo não.
+ */
+const paraQuem = computed(() =>
+  props.pet
+    ? `${t('clinico.bulario.escolherPara', { pet: props.pet.nome })} · ${formato.especie(props.pet.especie)}`
+    : '',
+)
 
 const filtro = ref<BularioFiltro>({ ...FILTRO_VAZIO })
 const selecionadoId = ref<string | null>(props.atualId)
@@ -95,17 +116,21 @@ function confirmar() {
     :visible="visivel"
     modal
     class="clinic-dialog hc-tema picker"
-    :style="{ width: 'min(62rem, 94vw)' }"
+    :style="{ width: 'min(64rem, 94vw)' }"
+    :aria-labelledby="idTitulo"
     @update:visible="emit('update:visivel', $event)"
   >
     <template #header>
-      <h2 class="clinic-dialog__titulo">
-        <span class="clinic-dialog__marca" aria-hidden="true"><i :class="'ph ph-book-open'" /></span>
-        {{ t('clinico.bulario.escolherTitulo') }}
-      </h2>
+      <div class="picker__topo">
+        <span class="picker__icone" aria-hidden="true"><i class="ph ph-book-open-text" /></span>
+        <span class="picker__titulos">
+          <h2 :id="idTitulo" class="picker__titulo">{{ t('clinico.bulario.escolherTitulo') }}</h2>
+          <span v-if="paraQuem" class="picker__para">{{ paraQuem }}</span>
+        </span>
+      </div>
     </template>
 
-    <div class="picker__corpo clinic-scope">
+    <div class="picker__corpo">
       <div class="picker__lista">
         <BularioLista
           compacta
@@ -120,28 +145,33 @@ function confirmar() {
 
       <div class="picker__ficha">
         <BularioDetalhe v-if="selecionado" :medicamento="selecionado" :pet="pet" />
-        <p v-else class="picker__vazio">
-          <i class="ph ph-arrow-left" aria-hidden="true" />
-          {{ t('clinico.bulario.escolhaNaLista') }}
-        </p>
+        <div v-else class="picker__vazio">
+          <span class="picker__vazio-icone" aria-hidden="true">
+            <i class="ph ph-arrow-left" />
+          </span>
+          <p>{{ t('clinico.bulario.escolhaNaLista') }}</p>
+        </div>
       </div>
     </div>
 
     <template #footer>
       <div class="picker__rodape">
-        <span v-if="proibido" class="picker__alerta">
-          <i class="ph ph-warning" aria-hidden="true" />
+        <span v-if="proibido" class="ui-selo ui-selo--risco picker__alerta" role="status">
+          <i class="ph ph-prohibit" aria-hidden="true" />
           {{ t('clinico.bulario.proibidoRodape') }}
         </span>
 
         <Button
+          type="button"
           severity="secondary"
           text
           :label="t('clinico.comum.cancelar')"
           @click="emit('update:visivel', false)"
         />
         <Button
+          type="button"
           :severity="proibido ? 'danger' : 'primary'"
+          :icon="proibido ? 'ph ph-warning' : 'ph ph-check'"
           :disabled="!selecionado"
           :label="proibido ? t('clinico.bulario.usarMesmoAssim') : t('clinico.bulario.usar')"
           @click="confirmar"
@@ -152,45 +182,120 @@ function confirmar() {
 </template>
 
 <style scoped>
-.picker__corpo {
-  display: grid;
-  gap: var(--clinic-space-4);
-  grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr);
+/* ------------------------------------------------------------------------------------ o alto */
+
+.picker__topo {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
 }
 
+.picker__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-size: 20px;
+}
+
+.picker__titulos {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.picker__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.picker__para {
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------------- o corpo */
+
+.picker__corpo {
+  display: grid;
+  align-items: start;
+  gap: 20px;
+  grid-template-columns: minmax(16rem, 21rem) minmax(0, 1fr);
+}
+
+.picker__lista {
+  min-width: 0;
+}
+
+/* A ficha rola dentro de si: a lista fica parada ao lado, como na tela do bulário. */
 .picker__ficha {
-  max-height: 24rem;
+  min-width: 0;
+  max-height: min(30rem, 62vh);
   overflow-y: auto;
-  padding-inline-end: var(--clinic-space-2);
+  padding: 18px 20px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
+  overscroll-behavior: contain;
 }
 
 .picker__vazio {
-  display: flex;
-  align-items: center;
-  gap: var(--clinic-space-2);
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.picker__vazio-icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 20px;
+}
+
+.picker__vazio p {
   margin: 0;
-  padding: var(--clinic-space-4) 0;
-  color: var(--clinic-muted);
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 [dir='rtl'] .picker__vazio .ph-arrow-left {
   transform: scaleX(-1);
 }
 
+/* ------------------------------------------------------------------------------------- o pé */
+
 .picker__rodape {
   display: flex;
+  width: 100%;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-3);
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .picker__alerta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  height: auto;
+  min-height: 28px;
   margin-inline-end: auto;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  padding-block: 4px;
+  font-size: 13px;
+  white-space: normal;
 }
 
 @media (max-width: 820px) {
@@ -199,7 +304,11 @@ function confirmar() {
   }
 
   .picker__ficha {
-    max-height: 16rem;
+    max-height: 18rem;
+  }
+
+  .picker__para {
+    white-space: normal;
   }
 }
 </style>

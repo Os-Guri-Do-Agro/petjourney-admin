@@ -9,16 +9,28 @@
  * A tela aceita `?paciente=` na URL. Aberta a partir de um atendimento, ela carrega o paciente e
  * a ficha passa a mostrar os avisos dele e a destacar a dose da espécie certa. Sem o parâmetro,
  * é um bulário de consulta comum.
+ *
+ * ## A forma (redesenho de 19/10/2026)
+ *
+ * A frase de estado diz o que esta consulta é: o bulário inteiro, ou a consulta **para um
+ * paciente** — e, nesse caso, que a lista abriu filtrada pela espécie dele e que a ficha traz a
+ * dose calculada para o peso. O paciente aparece logo abaixo, na capa compacta da casa, com a
+ * saída ("Sair do paciente") ao lado do peso, que é de onde sai a dose.
+ *
+ * Embaixo, duas colunas: a lista com a busca grande e os filtros, e a ficha, presa ao lado
+ * enquanto a lista rola. Em tela estreita a ficha desce para baixo da lista, e escolher um
+ * remédio leva a página até ela.
  */
 import Button from 'primevue/button'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
 import BularioDetalhe from '@/features/clinico/components/bulario/BularioDetalhe.vue'
 import BularioLista from '@/features/clinico/components/bulario/BularioLista.vue'
+import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { patientRepository } from '@/features/clinico/data/repositories'
 import type { Medication, Pet, Tutor } from '@/features/clinico/data/types'
 import { FILTRO_VAZIO, type BularioFiltro } from '@/features/clinico/domain/bulario'
@@ -28,6 +40,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const clinico = useClinicoStore()
+const formato = useClinicFormat()
 
 const filtro = ref<BularioFiltro>({ ...FILTRO_VAZIO })
 const selecionadoId = ref<string | null>(null)
@@ -35,6 +48,7 @@ const pet = ref<Pet | null>(null)
 const tutor = ref<Tutor | null>(null)
 const carregando = ref(false)
 const erro = ref('')
+const ficha = ref<HTMLElement | null>(null)
 
 const petIdDaRota = computed(() => {
   const valor = route.query.paciente
@@ -45,6 +59,26 @@ const petIdDaRota = computed(() => {
 const selecionado = computed(
   () => clinico.medicamentos.find((item) => item.id === selecionadoId.value) ?? null,
 )
+
+/** O que esta consulta é: o bulário inteiro, ou a consulta para um paciente — com ou sem peso. */
+const fraseDoResumo = computed(() => {
+  if (carregando.value && clinico.medicamentos.length === 0) {
+    return ''
+  }
+
+  if (pet.value) {
+    return pet.value.pesoKg !== null && pet.value.pesoKg > 0
+      ? t('clinico.bulario.resumo.paciente', {
+          pet: pet.value.nome,
+          peso: formato.peso(pet.value.pesoKg),
+        })
+      : t('clinico.bulario.resumo.pacienteSemPeso', { pet: pet.value.nome })
+  }
+
+  const total = clinico.medicamentos.length
+
+  return t('clinico.bulario.resumo.geral', { total }, total)
+})
 
 async function carregar() {
   carregando.value = true
@@ -77,8 +111,34 @@ async function carregar() {
   }
 }
 
+/**
+ * Em tela estreita a ficha fica embaixo da lista, fora da vista de quem tocou no remédio: a página
+ * desce até ela. Lado a lado ela já está à vista, e nada se mexe.
+ */
+async function mostrarFicha() {
+  await nextTick()
+
+  const alvo = ficha.value
+
+  if (!alvo) {
+    return
+  }
+
+  /* Presa ao lado da lista, a ficha rola dentro de si: o remédio novo começa do nome. */
+  alvo.scrollTop = 0
+
+  if (alvo.getBoundingClientRect().top < window.innerHeight - 160) {
+    return
+  }
+
+  const calmo = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
+  alvo.scrollIntoView({ behavior: calmo ? 'auto' : 'smooth', block: 'start' })
+}
+
 function selecionar(medicamento: Medication) {
   selecionadoId.value = medicamento.id
+  void mostrarFicha()
 }
 
 function limparPaciente() {
@@ -91,32 +151,35 @@ onMounted(carregar)
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('clinico.bulario.subtitulo')"
-    :title="t('clinico.bulario.titulo')"
-    :loading="carregando && clinico.medicamentos.length === 0"
-    :error="erro"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    class="tela-bulario"
+    :carregando="carregando && clinico.medicamentos.length === 0"
+    :erro="erro"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
-    <div class="bulario clinic-scope">
-      <div v-if="pet" class="bulario__paciente">
-        <ClinicPatientHeader :pet="pet" :tutor="tutor" />
-        <Button
-          type="button"
-          class="bulario__sair"
-          severity="secondary"
-          outlined
-          size="small"
-          icon="ph ph-x"
-          :label="t('clinico.bulario.semPaciente')"
-          @click="limparPaciente"
-        />
-      </div>
+    <template v-if="fraseDoResumo" #resumo>
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
+    </template>
+
+    <div class="bulario">
+      <!-- O paciente da consulta: é dele a espécie da lista e o peso da dose. -->
+      <ClinicPatientHeader v-if="pet" class="bulario__paciente" :pet="pet" :tutor="tutor">
+        <template #acoes>
+          <Button
+            type="button"
+            severity="secondary"
+            outlined
+            size="small"
+            icon="ph ph-x"
+            :label="t('clinico.bulario.semPaciente')"
+            @click="limparPaciente"
+          />
+        </template>
+      </ClinicPatientHeader>
 
       <div class="bulario__corpo">
-        <section class="bulario__coluna">
+        <section class="bulario__lista" :aria-label="t('clinico.bulario.titulo')">
           <BularioLista
             :medicamentos="clinico.medicamentos"
             :filtro="filtro"
@@ -127,62 +190,105 @@ onMounted(carregar)
           />
         </section>
 
-        <section class="bulario__ficha">
-          <BularioDetalhe v-if="selecionado" :medicamento="selecionado" :pet="pet" />
-          <p v-else class="bulario__vazio">{{ t('clinico.bulario.escolha') }}</p>
+        <section ref="ficha" class="bulario__ficha ui-folha">
+          <BularioDetalhe
+            v-if="selecionado"
+            :medicamento="selecionado"
+            :pet="pet"
+            com-dose-do-peso
+          />
+          <div v-else class="bulario__vazio">
+            <span class="bulario__vazio-icone" aria-hidden="true">
+              <i class="ph ph-book-open" />
+            </span>
+            <p>{{ t('clinico.bulario.escolha') }}</p>
+          </div>
         </section>
       </div>
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
+/*
+ * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
+ * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como nas Faltas.
+ */
+.tela-bulario {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+}
+
 .bulario {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 20px;
+  container: bulario / inline-size;
 }
-
-.bulario__paciente {
-  display: grid;
-  align-items: center;
-  gap: var(--clinic-space-3);
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
 
 .bulario__corpo {
   display: grid;
   align-items: start;
-  gap: var(--clinic-space-4);
-  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
-.bulario__coluna,
+.bulario__lista {
+  min-width: 0;
+}
+
 .bulario__ficha {
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+  min-width: 0;
+  padding: 24px 26px 22px;
+  scroll-margin-top: 80px;
+}
+
+/* Lado a lado quando cabe: a lista à esquerda, a ficha presa ao lado enquanto a lista rola. */
+@container bulario (min-width: 860px) {
+  .bulario__corpo {
+    grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
+  }
+
+  .bulario__ficha {
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
 }
 
 .bulario__vazio {
-  margin: 0;
-  color: var(--clinic-faint);
-  text-align: center;
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding: 8px 0;
 }
 
-@media (max-width: 900px) {
-  .bulario__corpo {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.bulario__vazio-icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 20px;
+}
 
-  .bulario__paciente {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.bulario__vazio p {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
+}
 
-  .bulario__sair {
-    justify-self: start;
+@media (max-width: 760px) {
+  .bulario__ficha {
+    padding: 18px 16px;
   }
 }
 </style>

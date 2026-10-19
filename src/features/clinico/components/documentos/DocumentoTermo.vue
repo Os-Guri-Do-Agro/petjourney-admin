@@ -148,8 +148,6 @@ const itens = computed<string[]>(() => {
   margin: 0 0 2mm;
   font-size: 9.5pt;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .declaracao {

@@ -162,8 +162,7 @@ const observacoes = computed(() => props.encounter.conduta.orientacoes.trim())
 
 .viagem__rotulo {
   font-size: 8.5pt;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .viagem__linha {

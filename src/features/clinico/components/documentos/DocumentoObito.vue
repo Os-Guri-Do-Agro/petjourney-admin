@@ -142,8 +142,6 @@ const causa = computed(() => {
   margin: 0 0 2mm;
   font-size: 9.5pt;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .bloco p {
@@ -170,8 +168,7 @@ const causa = computed(() => {
 .campo__rotulo {
   display: block;
   font-size: 8.5pt;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .campo__linha {
