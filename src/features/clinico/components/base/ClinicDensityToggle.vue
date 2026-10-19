@@ -79,7 +79,7 @@ const ptZoom = passthrough(() => t('clinico.zoom.titulo'))
 <template>
   <div class="prefs">
     <SelectButton
-      class="prefs__grupo"
+      class="prefs__grupo prefs__trilho"
       :model-value="densidade"
       :options="opcoesDeDensidade"
       option-label="rotulo"
@@ -98,7 +98,7 @@ const ptZoom = passthrough(() => t('clinico.zoom.titulo'))
 
     <SelectButton
       v-if="comZoom"
-      class="prefs__grupo"
+      class="prefs__grupo prefs__trilho"
       :model-value="zoom"
       :options="opcoesDeZoom"
       option-label="rotulo"
@@ -121,62 +121,76 @@ const ptZoom = passthrough(() => t('clinico.zoom.titulo'))
 .prefs {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 /*
- * Trilho com as opções dentro, no lugar da fileira de botões colados do tema. `:deep` porque
- * os botões são filhos do `SelectButton`; a especificidade dobrada passa a do tema e a da camada
- * global da clínica (`.clinic-scope .p-togglebutton`).
+ * O mesmo controle segmentado do `ClinicToggleGroup`: trilho afundado e a escolhida em papel, com
+ * `--sombra-1`. `:deep` porque os botões são filhos do `SelectButton`; a especificidade
+ * (`.prefs .prefs__grupo.prefs__trilho`) passa a do tema (`html.trilha .hc-tema .p-selectbutton`)
+ * e a da camada global da clínica (`.clinic-scope .p-togglebutton`).
  */
-.prefs__grupo.p-selectbutton {
+.prefs .prefs__grupo.prefs__trilho.p-selectbutton {
   display: inline-flex;
-  padding: 2px;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
+  flex-wrap: nowrap;
+  gap: 2px;
+  padding: 3px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--superficie-3);
 }
 
-.prefs__grupo.p-selectbutton :deep(.p-togglebutton) {
-  min-height: var(--clinic-hit-target);
+.prefs .prefs__grupo.prefs__trilho.p-selectbutton :deep(.p-togglebutton) {
+  min-height: 34px;
+  flex: 0 0 auto;
+  margin: 0;
   padding: 0;
-  border: none;
-  border-radius: calc(var(--clinic-radius-control) - 2px);
+  border: 0;
+  border-radius: 8px;
   background: transparent;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  color: var(--tinta-2);
+  font-family: var(--font-texto);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
-.prefs__grupo.p-selectbutton :deep(.p-togglebutton-content) {
-  gap: 0.3rem;
-  padding: 0 var(--clinic-space-3);
-  border-radius: inherit;
+.prefs .prefs__grupo.prefs__trilho.p-selectbutton :deep(.p-togglebutton .p-togglebutton-content) {
+  gap: 6px;
+  height: 100%;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
 }
 
-.prefs__grupo.p-selectbutton
+.prefs
+  .prefs__grupo.prefs__trilho.p-selectbutton
   :deep(.p-togglebutton:not(:disabled):not(.p-togglebutton-checked):hover) {
   background: transparent;
-  color: var(--clinic-text);
+  color: var(--tinta);
 }
 
-/* Anel + peso: a marcação precisa se ler antes da cor, e sobreviver à escala de cinza. */
-.prefs__grupo.p-selectbutton :deep(.p-togglebutton-checked) {
+.prefs .prefs__grupo.prefs__trilho.p-selectbutton :deep(.p-togglebutton.p-togglebutton-checked) {
   background: transparent;
-  color: var(--clinic-accent-strong);
-  font-weight: 800;
+  color: var(--tinta);
+  font-weight: 600;
 }
 
-.prefs__grupo.p-selectbutton :deep(.p-togglebutton-checked .p-togglebutton-content) {
-  background: var(--clinic-surface);
-  box-shadow:
-    var(--clinic-shadow-card),
-    inset 0 0 0 1.5px var(--clinic-accent-strong);
+.prefs
+  .prefs__grupo.prefs__trilho.p-selectbutton
+  :deep(.p-togglebutton.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
 }
 
-.prefs__grupo.p-selectbutton :deep(.p-togglebutton-content i) {
-  font-size: 0.72rem;
+.prefs .prefs__grupo.prefs__trilho.p-selectbutton :deep(.p-togglebutton:focus-visible) {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 1px;
+}
+
+.prefs .prefs__grupo.prefs__trilho.p-selectbutton :deep(.p-togglebutton-content i) {
+  font-size: 15px;
 }
 
 @media (max-width: 900px) {

@@ -1,20 +1,21 @@
 <script setup lang="ts">
 /**
- * Uma linha da caixa de pedidos: para quando, quem, o quê — e a resposta a um clique.
+ * Uma linha da caixa de pedidos: para quando, quem, o quê, quanto falta — e a resposta a um clique.
  *
- * A linha tem o que decide a triagem, e só isso. A folhinha à esquerda responde "para quando?"
- * antes de qualquer leitura; depois vêm o pet e quem pede, o serviço e com quem, o prazo e os
- * botões. A queixa, o histórico liberado, o telefone de quem veio pelo link e a escolha de outro
- * horário moram na gaveta que "Responder" abre — a versão anterior empilhava cinco linhas de ícone
- * e texto por pedido e três botões, e a caixa virava parede.
+ * A linha tem o que decide a triagem, e só isso. À esquerda, grande, o dia e a hora pedidos
+ * ("para quando?" antes de qualquer leitura); depois o pet e quem pede, o serviço e com quem, o
+ * prazo de resposta como contagem regressiva e os botões. A queixa, o histórico liberado, o
+ * telefone de quem veio pelo link e a escolha de outro horário moram na gaveta que "Responder"
+ * abre.
  *
  * A ação cheia é o próximo passo natural, e ela muda com o caso: "Aceitar" quando o horário
  * escolhido continua livre; "Marcar 13:00" quando a clínica precisa escolher — o melhor horário,
  * ou a alternativa ao escolhido que sumiu. Assim a pessoa nunca aceita às cegas um horário que já
  * não existe: o botão diz o horário que vai gravar.
  *
- * A urgência mora no ícone, não na superfície: o horário que sumiu aparece riscado na folha e com
- * o ícone de atenção na coluna do pedido; o prazo que vence muda a tinta do relógio.
+ * O prazo tem tom: risco quando passou ou falta meia hora, atenção nas duas horas seguintes,
+ * neutro no resto. O tom pinta a contagem e a marca na borda; a palavra ("para responder", "de
+ * atraso") diz o mesmo para quem não vê a cor.
  */
 import Button from 'primevue/button'
 import { computed } from 'vue'
@@ -29,7 +30,7 @@ import { aparenciaDoTipo } from '../../domain/appointment-kind'
 import { situacaoDoPrazo, TIPO_DO_MOTIVO } from '../../domain/pedidos'
 import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
-import FolhaDoDia from './FolhaDoDia.vue'
+import PedidoQuando from './PedidoQuando.vue'
 
 const props = defineProps<{
   linha: PedidoNaCaixa
@@ -49,6 +50,9 @@ const { t } = useI18n()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
 const rotulos = useRotulosDoPedido()
+
+/** Até duas horas para vencer, o prazo pede atenção: é a manhã de quem abriu a caixa agora. */
+const MINUTOS_DE_ATENCAO = 120
 
 const primeiro = computed(() => props.linha.pedidos[0]!)
 const tipo = computed(() => clinico.tipo(primeiro.value.typeId))
@@ -85,17 +89,17 @@ const primeiraVez = computed(() =>
 
 const escolheu = computed(() => primeiro.value.modo === 'horario-escolhido')
 
-/** A folhinha: o dia escolhido com a hora, ou a janela em que pode com o período. */
-const folha = computed(() => {
+/** Para quando: o dia escolhido com a hora, ou a janela em que pode com o período. */
+const quando = computed(() => {
   const pedido = primeiro.value
 
   if (escolheu.value && pedido.inicio) {
-    const hora = formato.hora(pedido.inicio)
-
     return {
       dia: clinicClock.dateOf(pedido.inicio),
       ate: null,
-      rodape: props.linha.pedidos.length > 1 ? `${hora} +${props.linha.pedidos.length - 1}` : hora,
+      principal: formato.hora(pedido.inicio),
+      hora: true,
+      extra: props.linha.pedidos.length > 1 ? `+${props.linha.pedidos.length - 1}` : '',
       riscada: !props.linha.horarioLivre,
     }
   }
@@ -106,10 +110,12 @@ const folha = computed(() => {
     return {
       dia: pedido.preferencia.de,
       ate: pedido.preferencia.ate,
-      rodape:
+      principal:
         periodos.length === 1
           ? t(`clinico.pedidos.periodoTitulo.${periodos[0]}`)
-          : t('clinico.pedidos.linha.qualquerHora'),
+          : t('clinico.pedidos.tela.qualquerHora'),
+      hora: false,
+      extra: '',
       riscada: false,
     }
   }
@@ -129,21 +135,35 @@ const comQuem = computed(() => {
 
 const sugestao = computed(() => props.linha.sugestao)
 
+// ------------------------------------------------------------------ o prazo
+
 const prazo = computed(() => situacaoDoPrazo(primeiro.value, clinicClock.nowIso()))
 
-const fraseDoPrazo = computed(() => {
-  const ate = primeiro.value.responderAte
+const minutosAteOPrazo = computed(() =>
+  Math.round(
+    (Date.parse(primeiro.value.responderAte) - Date.parse(clinicClock.nowIso())) / 60_000,
+  ),
+)
 
-  if (prazo.value === 'atrasado') {
-    return t('clinico.pedidos.prazo.atrasado', { valor: formato.relativo(ate) })
+const tom = computed(() => {
+  if (prazo.value !== 'no-prazo') {
+    return 'risco'
   }
 
-  /* Prazo de outro dia diz o dia: "até 08:26" lido às 18h parece daqui a pouco. */
-  const hoje = clinicClock.dateOf(ate) === clinicClock.today()
+  return minutosAteOPrazo.value <= MINUTOS_DE_ATENCAO ? 'atencao' : 'neutro'
+})
 
-  return t('clinico.pedidos.linha.ate', {
-    quando: hoje ? formato.hora(ate) : rotulos.quando(ate),
-  })
+/** O número grande: quanto falta, ou quanto passou. */
+const contagem = computed(() => formato.distancia(minutosAteOPrazo.value))
+
+const legendaDoPrazo = computed(() => {
+  const ate = primeiro.value.responderAte
+  /* Prazo de outro dia diz o dia: "até 08:26" lido às 18h parece daqui a pouco. */
+  const quandoVence = clinicClock.dateOf(ate) === clinicClock.today() ? formato.hora(ate) : rotulos.quando(ate)
+
+  return prazo.value === 'atrasado'
+    ? t('clinico.pedidos.tela.prazoPassou', { quando: quandoVence })
+    : t('clinico.pedidos.tela.prazoNoTempo', { quando: quandoVence })
 })
 
 /** O botão cheio: aceita o escolhido, ou marca o melhor horário que a clínica tem. */
@@ -168,18 +188,24 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
 <template>
   <li
     class="pedido"
-    :class="{ 'pedido--respondendo': respondendo, 'pedido--aberta': aberta }"
+    :class="[
+      tom !== 'neutro' ? `ui-marca ui-marca--${tom}` : '',
+      { 'pedido--respondendo': respondendo, 'pedido--aberta': aberta },
+    ]"
     :aria-busy="respondendo"
     @click="emit('abrir')"
   >
-    <FolhaDoDia
-      v-if="folha"
-      class="pedido__folha"
-      :dia="folha.dia"
-      :ate="folha.ate"
-      :rodape="folha.rodape"
-      :riscada="folha.riscada"
+    <PedidoQuando
+      v-if="quando"
+      class="pedido__quando"
+      :dia="quando.dia"
+      :ate="quando.ate"
+      :principal="quando.principal"
+      :hora="quando.hora"
+      :extra="quando.extra"
+      :riscada="quando.riscada"
     />
+    <span v-else class="pedido__quando" />
 
     <!-- Quem -->
     <div class="pedido__quem">
@@ -191,14 +217,14 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
           :iniciais="pet.iniciais"
           :especie="pet.especie"
           :foto-url="pet.fotoUrl"
-          tamanho="sm"
+          tamanho="md"
         />
       </span>
 
       <span class="pedido__identidade">
         <span class="pedido__nomes">
           <strong>{{ rotulos.nomes(pets.map((pet) => pet.nome)) }}</strong>
-          <span v-if="primeiraVez" class="pedido__selo">
+          <span v-if="primeiraVez" class="ui-selo ui-selo--clinica">
             <i class="ph ph-sparkle" aria-hidden="true" />
             {{ t('clinico.pedidos.primeiraVez') }}
           </span>
@@ -226,7 +252,7 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
           aria-hidden="true"
         />
         <strong>{{ tipo?.nome }}</strong>
-        <!-- O motivo só quando diz mais que o serviço: "Consulta · Sintoma", nunca "Retorno · Retorno". -->
+        <!-- O motivo só quando diz mais que o serviço: "Consulta, sintoma", nunca "Retorno, retorno". -->
         <span v-if="TIPO_DO_MOTIVO[primeiro.motivo] === 'consulta'" class="pedido__motivo">
           · {{ t(`clinico.pedidos.motivo.${primeiro.motivo}`) }}
         </span>
@@ -238,7 +264,7 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
         />
       </span>
 
-      <!-- O horário que sumiu: o ícone de atenção no lugar de "com quem". O botão já oferece outro. -->
+      <!-- O horário que sumiu: dito em palavra, no lugar de "com quem". O botão já oferece outro. -->
       <span v-if="escolheu && !linha.horarioLivre" class="pedido__detalhe pedido__detalhe--atencao">
         <i class="ph ph-warning-circle" aria-hidden="true" />
         {{ t('clinico.pedidos.linha.ocupado') }}
@@ -250,22 +276,25 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
       <span v-else class="pedido__detalhe">{{ comQuem }}</span>
     </div>
 
-    <!-- A resposta -->
-    <p class="pedido__prazo" :class="`pedido__prazo--${prazo}`">
-      <i
-        class="ph"
-        :class="prazo === 'no-prazo' ? 'ph-clock' : 'ph-clock-countdown'"
-        aria-hidden="true"
-      />
-      {{ fraseDoPrazo }}
+    <!-- O prazo, contando -->
+    <p class="pedido__prazo" :class="`pedido__prazo--${tom}`">
+      <strong class="ui-num">
+        <i
+          class="ph"
+          :class="tom === 'neutro' ? 'ph-clock' : 'ph-clock-countdown'"
+          aria-hidden="true"
+        />
+        {{ contagem }}
+      </strong>
+      <small>{{ legendaDoPrazo }}</small>
     </p>
 
     <div class="pedido__botoes">
       <Button
         type="button"
         size="small"
-        severity="secondary"
-        outlined
+        :severity="acaoPrincipal ? 'secondary' : undefined"
+        :outlined="Boolean(acaoPrincipal)"
         :label="t('clinico.pedidos.linha.responder')"
         :aria-expanded="aberta"
         :disabled="ocupado && !aberta"
@@ -287,36 +316,27 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
 
 <style scoped>
 .pedido {
+  position: relative;
   display: grid;
+  min-height: 76px;
   align-items: center;
-  margin-inline: -0.75rem;
-  padding: 0.8rem 0.75rem;
-  border-radius: 0.8rem;
-  gap: 0.5rem 1.25rem;
-  /* Larguras fixas no prazo e nos botões: cada linha é uma grade própria, e colunas medidas pelo
-     conteúdo desalinhavam "Retorno" e "Consulta" de uma linha para a outra. */
-  grid-template-columns: 4.25rem minmax(0, 1.1fr) minmax(0, 1fr) 10.75rem 14.5rem;
+  gap: 10px 20px;
+  /* Larguras fixas no começo e no fim: cada linha é uma grade própria, e colunas medidas pelo
+     conteúdo desalinhavam as horas e os botões de uma linha para a outra. */
+  grid-template-columns: 6.25rem minmax(0, 1.15fr) minmax(0, 1fr) 11.5rem 15rem;
+  padding: 12px 18px 12px 22px;
   cursor: pointer;
-  transition: background-color 150ms ease-out;
-}
-
-.pedido + .pedido {
-  box-shadow: 0 -1px 0 var(--hc-linha);
+  transition: background-color var(--pj-tempo-curto) ease-out;
 }
 
 .pedido:hover {
-  background: color-mix(in srgb, var(--hc-marca-clara) 45%, transparent);
+  background: var(--superficie-2);
 }
 
-/* A linha que está na gaveta: tingida, para o olho voltar a ela ao fechar. */
+/* A linha que está na gaveta: tingida na cor da clínica, para o olho voltar a ela ao fechar. */
 .pedido--aberta,
 .pedido--aberta:hover {
-  background: var(--hc-marca-clara);
-  box-shadow: none;
-}
-
-.pedido--aberta + .pedido {
-  box-shadow: none;
+  background: color-mix(in oklab, var(--clinica-fundo) 70%, var(--superficie));
 }
 
 .pedido--respondendo {
@@ -327,68 +347,62 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
 
 .pedido__quem {
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
   min-width: 0;
+  align-items: center;
+  gap: 12px;
 }
 
 .pedido__rostos {
   display: inline-flex;
-  flex: 0 0 auto;
+  flex: none;
 }
 
 /* Dois pets da mesma casa: os rostos se sobrepõem, como uma ficha só. */
 .pedido__rostos--grupo > * + * {
-  margin-inline-start: -0.6rem;
-  box-shadow: 0 0 0 2px var(--hc-cartao);
+  margin-inline-start: -12px;
   border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--superficie);
 }
 
 .pedido__identidade,
 .pedido__oque {
   display: grid;
   min-width: 0;
-  gap: 0.15rem;
+  gap: 3px;
 }
 
 .pedido__nomes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.2rem 0.45rem;
+  gap: 4px 8px;
 }
 
 .pedido__nomes strong {
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
-.pedido__selo {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.05rem 0.45rem;
-  border-radius: 6px;
-  gap: 0.25rem;
-  /* Ciano: "cliente novo" é categoria própria — o lilás da casa é o do que a máquina propôs. */
-  background: var(--hc-ciano-fundo);
-  color: var(--hc-ciano-tinta);
-  font-size: 0.6875rem;
-  font-weight: 700;
+.pedido__nomes .ui-selo {
+  height: 22px;
+  font-size: 12px;
 }
 
 .pedido__meta {
   display: flex;
-  align-items: center;
-  gap: 0.35rem;
   min-width: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .pedido__meta > i {
-  flex: 0 0 auto;
-  color: var(--hc-tinta-3);
+  flex: none;
+  color: var(--tinta-3);
+  font-size: 15px;
 }
 
 .pedido__responsavel {
@@ -401,29 +415,36 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
 
 .pedido__servico {
   display: flex;
-  align-items: baseline;
-  gap: 0.35rem;
   min-width: 0;
-  font-size: 0.875rem;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 14px;
 }
 
 .pedido__servico strong {
-  color: var(--hc-tinta);
-  font-weight: 650;
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.pedido__tipo {
+  font-size: 15px;
 }
 
 .pedido__motivo {
-  color: var(--hc-tinta-2);
+  overflow: hidden;
+  color: var(--tinta-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pedido__remarca {
-  color: var(--hc-tinta-3);
+  color: var(--tinta-3);
 }
 
 .pedido__detalhe {
   overflow: hidden;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  color: var(--tinta-2);
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -431,52 +452,81 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
 .pedido__detalhe--atencao {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-attention-text);
-  font-weight: 650;
+  gap: 5px;
+  color: var(--atencao-tinta);
+  font-weight: 550;
 }
 
-/* ------------------------------------------------------------------ resposta */
+/* ------------------------------------------------------------------ o prazo */
 
 .pedido__prazo {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.pedido__prazo strong {
   display: inline-flex;
   align-items: center;
-  margin: 0;
-  gap: 0.35rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  gap: 6px;
+  color: var(--tinta);
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   white-space: nowrap;
 }
 
-.pedido__prazo--vencendo i {
-  color: var(--clinic-attention-text);
+.pedido__prazo strong i {
+  color: var(--tinta-3);
+  font-size: 17px;
 }
 
-.pedido__prazo--atrasado {
-  color: var(--clinic-risk-text);
+.pedido__prazo small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.35;
 }
+
+.pedido__prazo--risco strong,
+.pedido__prazo--risco strong i {
+  color: var(--risco-tinta);
+}
+
+.pedido__prazo--atencao strong,
+.pedido__prazo--atencao strong i {
+  color: var(--atencao-tinta);
+}
+
+/* ------------------------------------------------------------------ botões */
 
 .pedido__botoes {
   display: flex;
   justify-content: flex-end;
-  gap: 0.4rem;
+  gap: 8px;
+}
+
+/* Botão de linha no tamanho pequeno, mas com o alvo de toque de 36 px. */
+.pedido__botoes :deep(.p-button) {
+  min-height: 36px;
+  white-space: nowrap;
 }
 
 /*
  * Pela largura da lista, não da janela: com a gaveta aberta a página perde 30 rem, e uma linha
  * medida pela janela continuava em cinco colunas espremidas. O pedido desce para baixo de quem, e
- * a resposta para baixo dos dois — a folha fica à esquerda, ocupando a altura.
+ * a resposta para baixo do prazo — o "quando" fica à esquerda, ocupando a altura.
  */
-@container (max-width: 60rem) {
+@container (max-width: 62rem) {
   .pedido {
     align-items: start;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: 5.75rem minmax(0, 1fr) auto;
   }
 
-  .pedido__folha {
+  .pedido__quando {
     grid-row: span 2;
+    align-self: center;
   }
 
   .pedido__oque {
@@ -486,7 +536,8 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
   .pedido__prazo {
     grid-column: 3;
     grid-row: 1;
-    justify-self: end;
+    justify-items: end;
+    text-align: end;
   }
 
   .pedido__botoes {
@@ -494,28 +545,34 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
     grid-row: 2;
     align-self: end;
   }
+
+  .pedido__detalhe {
+    white-space: normal;
+  }
 }
 
-@container (max-width: 34rem) {
+@container (max-width: 36rem) {
   .pedido {
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: 5rem minmax(0, 1fr);
+    padding-inline: 14px 14px;
   }
 
-  .pedido__folha {
-    grid-row: span 3;
+  .pedido__quando {
+    grid-row: span 4;
+    align-self: start;
   }
 
   .pedido__prazo,
   .pedido__botoes {
     grid-column: 2;
     grid-row: auto;
-    justify-self: start;
+    justify-items: start;
+    justify-content: flex-start;
+    text-align: start;
   }
-}
 
-@media (pointer: coarse) {
-  .pedido__botoes :deep(.p-button) {
-    min-height: 2.5rem;
+  .pedido__botoes {
+    flex-wrap: wrap;
   }
 }
 

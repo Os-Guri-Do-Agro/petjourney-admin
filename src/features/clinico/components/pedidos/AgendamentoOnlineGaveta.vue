@@ -113,7 +113,7 @@ function salvar() {
   <Drawer
     v-model:visible="aberto"
     position="right"
-    class="hc-tema config-gaveta"
+    class="config-gaveta clinic-overlay"
     :style="{ width: 'min(36rem, 96vw)' }"
     :header="t('clinico.pedidos.config.titulo')"
   >
@@ -385,15 +385,15 @@ function salvar() {
 }
 
 .config__texto strong {
-  color: var(--hc-tinta);
+  color: var(--tinta);
   font-size: 0.875rem;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.35;
 }
 
 .config__texto > span,
 .config__ajuda {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.8125rem;
   line-height: 1.45;
 }
@@ -408,9 +408,9 @@ function salvar() {
   display: grid;
   align-items: center;
   padding: 1rem 1.1rem;
-  border: 1px solid var(--hc-borda);
+  border: 1px solid var(--linha);
   border-radius: 1rem;
-  background: var(--hc-fundo);
+  background: var(--superficie-2);
   cursor: pointer;
   gap: 0.9rem;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -420,8 +420,8 @@ function salvar() {
 }
 
 .config__mestre--ligado {
-  border-color: color-mix(in srgb, var(--hc-marca) 35%, var(--hc-borda));
-  background: var(--hc-marca-clara);
+  border-color: color-mix(in srgb, var(--musgo) 35%, var(--linha));
+  background: var(--musgo-fundo);
 }
 
 .config__mestre-icone {
@@ -430,14 +430,14 @@ function salvar() {
   height: 2.5rem;
   place-items: center;
   border-radius: 0.75rem;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta-2);
+  background: var(--superficie);
+  color: var(--tinta-2);
   font-size: 1.2rem;
 }
 
 .config__mestre--ligado .config__mestre-icone {
-  background: var(--hc-degrade-botao);
-  color: var(--hc-sobre-marca);
+  background: var(--musgo);
+  color: var(--sobre-musgo);
 }
 
 /* ------------------------------------------------------------------ as seções */
@@ -459,7 +459,7 @@ function salvar() {
 .config__secao {
   display: grid;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--hc-linha);
+  border-top: 1px solid var(--linha);
   gap: 0.85rem;
 }
 
@@ -473,13 +473,14 @@ function salvar() {
   align-items: center;
   margin: 0;
   gap: 0.5rem;
-  color: var(--hc-tinta);
+  color: var(--tinta);
   font-size: 0.9375rem;
-  font-weight: 750;
+  font-weight: 600;
+  letter-spacing: -0.005em;
 }
 
 .config__titulo .ph {
-  color: var(--hc-marca);
+  color: var(--clinica-tinta);
   font-size: 1.1rem;
 }
 
@@ -494,9 +495,9 @@ function salvar() {
   display: grid;
   align-content: start;
   padding: 0.85rem 0.9rem 0.95rem;
-  border: 1px solid var(--hc-borda);
+  border: 1px solid var(--linha);
   border-radius: 0.9rem;
-  background: var(--hc-cartao);
+  background: var(--superficie);
   cursor: pointer;
   gap: 0.3rem;
   transition:
@@ -505,8 +506,8 @@ function salvar() {
 }
 
 .config__caminho--ligado {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
 }
 
 .config__caminho-topo {
@@ -517,19 +518,19 @@ function salvar() {
 }
 
 .config__caminho-topo .ph {
-  color: var(--hc-marca);
+  color: var(--musgo);
   font-size: 1.4rem;
 }
 
 .config__caminho strong {
-  color: var(--hc-tinta);
+  color: var(--tinta);
   font-size: 0.875rem;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.35;
 }
 
 .config__caminho > span:last-child {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.8125rem;
   line-height: 1.45;
 }
@@ -553,10 +554,10 @@ function salvar() {
   display: inline-flex;
   align-items: center;
   padding: 0.45rem 0.85rem 0.45rem 0.6rem;
-  border: 1px solid var(--hc-borda);
+  border: 1px solid var(--linha);
   border-radius: 999px;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
+  background: var(--superficie);
+  color: var(--tinta);
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 600;
@@ -567,9 +568,9 @@ function salvar() {
 }
 
 .config__ficha--ligada {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
+  color: var(--musgo);
 }
 
 /* As pessoas: uma lista, para o nome inteiro caber; a marca fica na ponta. */
@@ -578,13 +579,13 @@ function salvar() {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  border: 1px solid var(--hc-borda);
+  border: 1px solid var(--linha);
   border-radius: 0.9rem;
   list-style: none;
 }
 
 .config__pessoas li + li {
-  border-top: 1px solid var(--hc-linha);
+  border-top: 1px solid var(--linha);
 }
 
 .config__pessoa {
@@ -598,7 +599,7 @@ function salvar() {
 }
 
 .config__pessoa:hover {
-  background: var(--hc-fundo);
+  background: var(--superficie-2);
 }
 
 .config__rosto {
@@ -607,10 +608,10 @@ function salvar() {
   height: 2.1rem;
   place-items: center;
   border-radius: 999px;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
+  background: var(--musgo-fundo);
+  color: var(--musgo);
   font-size: 0.75rem;
-  font-weight: 750;
+  font-weight: 600;
 }
 
 /* Os prazos: o que é à esquerda, o número com − e + à direita, todos na mesma coluna. */
@@ -630,17 +631,17 @@ function salvar() {
 .config__passo {
   display: flex;
   overflow: hidden;
-  border: 1px solid var(--hc-borda);
+  border: 1px solid var(--linha);
   border-radius: 0.75rem;
-  background: var(--hc-cartao);
+  background: var(--superficie);
   transition:
     border-color 150ms ease-out,
     box-shadow 150ms ease-out;
 }
 
 .config__passo:focus-within {
-  border-color: var(--hc-marca);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hc-marca) 20%, transparent);
+  border-color: var(--musgo);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--musgo) 20%, transparent);
 }
 
 .config__passo :deep(.p-inputnumber-input) {
@@ -651,7 +652,7 @@ function salvar() {
   background: transparent;
   box-shadow: none;
   font-variant-numeric: tabular-nums;
-  font-weight: 650;
+  font-weight: 600;
   text-align: center;
 }
 
@@ -660,13 +661,13 @@ function salvar() {
   flex: 0 0 auto;
   border: 0;
   border-radius: 0;
-  background: var(--hc-fundo);
-  color: var(--hc-tinta);
+  background: var(--superficie-2);
+  color: var(--tinta);
 }
 
 .config__passo :deep(.p-inputnumber-button:not(:disabled):hover) {
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
+  background: var(--musgo-fundo);
+  color: var(--musgo);
 }
 
 /* A emergência: os três números nas mesmas linhas dos prazos, com o ícone dentro do campo. */
@@ -675,7 +676,7 @@ function salvar() {
 }
 
 .config__prazo--contato :deep(.p-inputicon) {
-  color: var(--hc-marca);
+  color: var(--tinta-2);
 }
 
 /* A mensagem, na largura toda. */
@@ -685,9 +686,9 @@ function salvar() {
 }
 
 .config__campo > span {
-  color: var(--hc-tinta);
+  color: var(--tinta);
   font-size: 0.875rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 @media (prefers-reduced-motion: reduce) {

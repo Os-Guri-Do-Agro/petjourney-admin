@@ -378,6 +378,7 @@ const prazoDoApp = computed(() => {
 <style scoped>
 .drawer {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: 16px;
   width: 340px;
@@ -551,6 +552,7 @@ const prazoDoApp = computed(() => {
 .drawer__avisos,
 .drawer__avisos-enviados {
   display: grid;
+  min-width: 0;
   gap: 6px;
   margin: 0;
   padding: 0;

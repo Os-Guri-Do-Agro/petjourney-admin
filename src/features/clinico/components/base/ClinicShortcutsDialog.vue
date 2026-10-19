@@ -88,6 +88,14 @@ function teclaDe(acao: AcaoAtalho): string {
   return item.comShift ? `Shift + ${base}` : base
 }
 
+/**
+ * "Shift + ↑ ↓" vira duas teclas desenhadas com um "+" entre elas: lida de relance, a combinação
+ * é a forma das teclas, não a frase.
+ */
+function partesDe(teclas: string) {
+  return teclas.split(' + ').filter(Boolean)
+}
+
 const grupos = computed(() =>
   Object.entries(GRUPOS).map(([id, acoes]) => ({
     id,
@@ -105,28 +113,38 @@ const grupos = computed(() =>
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog hc-tema"
-    :style="{ width: 'min(40rem, 94vw)' }"
+    class="clinic-dialog hc-tema atalhos-dialogo"
+    :style="{ width: 'min(44rem, 94vw)' }"
     :header="t('clinico.atalhos.titulo')"
     dismissable-mask
   >
     <div class="atalhos clinic-scope">
       <section v-for="grupo in grupos" :key="grupo.id" class="atalhos__grupo">
-        <h3 class="clinic-label">{{ grupo.titulo }}</h3>
+        <h3 class="atalhos__titulo">{{ grupo.titulo }}</h3>
         <dl class="atalhos__lista">
-          <div v-for="item in grupo.itens" :key="item.acao">
+          <div v-for="item in grupo.itens" :key="item.acao" class="atalhos__item">
             <dt>{{ item.rotulo }}</dt>
-            <dd><kbd>{{ item.tecla }}</kbd></dd>
+            <dd>
+              <template v-for="(parte, indice) in partesDe(item.tecla)" :key="indice">
+                <span v-if="indice > 0" class="atalhos__mais" aria-hidden="true">+</span>
+                <kbd>{{ parte }}</kbd>
+              </template>
+            </dd>
           </div>
         </dl>
       </section>
 
       <section class="atalhos__grupo">
-        <h3 class="clinic-label">{{ t('clinico.atalhos.grupo.prontuario') }}</h3>
+        <h3 class="atalhos__titulo">{{ t('clinico.atalhos.grupo.prontuario') }}</h3>
         <dl class="atalhos__lista">
-          <div v-for="item in CONTEXTUAIS" :key="item.chave">
+          <div v-for="item in CONTEXTUAIS" :key="item.chave" class="atalhos__item">
             <dt>{{ t(`clinico.atalhos.${item.chave}`) }}</dt>
-            <dd><kbd>{{ item.teclas }}</kbd></dd>
+            <dd>
+              <template v-for="(parte, indice) in partesDe(item.teclas)" :key="indice">
+                <span v-if="indice > 0" class="atalhos__mais" aria-hidden="true">+</span>
+                <kbd>{{ parte }}</kbd>
+              </template>
+            </dd>
           </div>
         </dl>
       </section>
@@ -137,48 +155,79 @@ const grupos = computed(() =>
 <style scoped>
 .atalhos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-  gap: var(--clinic-space-5);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 24px 32px;
+  color: var(--tinta);
+  font-family: var(--font-texto);
 }
 
 .atalhos__grupo {
   display: grid;
   align-content: start;
-  gap: var(--clinic-space-2);
+  gap: 6px;
+}
+
+.atalhos__titulo {
+  margin: 0 0 2px;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 .atalhos__lista {
   display: grid;
-  gap: 0.3rem;
   margin: 0;
 }
 
-.atalhos__lista div {
+.atalhos__item {
   display: flex;
-  align-items: baseline;
+  min-height: 40px;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
-  padding-block: 0.15rem;
-  border-bottom: 1px dotted var(--clinic-line);
+  gap: 12px;
+  border-bottom: 1px solid var(--linha);
 }
 
-.atalhos__lista dt {
-  color: var(--clinic-muted);
+.atalhos__item:last-child {
+  border-bottom: 0;
 }
 
-.atalhos__lista dd {
+.atalhos__item dt {
+  min-width: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.atalhos__item dd {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
   margin: 0;
 }
 
+.atalhos__mais {
+  color: var(--tinta-3);
+  font-size: 12px;
+}
+
+/* A tecla desenhada: papel afundado, fio fino e a sombra de baixo que faz dela uma tecla. */
 kbd {
-  padding: 0.1rem 0.4rem;
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: 0.35rem;
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-text);
-  font-family: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  display: inline-grid;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  place-items: center;
+  border: 1px solid var(--linha);
+  border-radius: 7px;
+  background: var(--superficie-2);
+  box-shadow: inset 0 -2px 0 var(--linha);
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
   white-space: nowrap;
 }
 </style>

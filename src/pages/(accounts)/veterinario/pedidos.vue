@@ -13,7 +13,9 @@
  *
  * Responder mora numa gaveta ao lado da caixa, não num diálogo no meio dela: a linha aberta fica
  * tingida, o calendário do pedido aparece na gaveta, e a lista continua à vista. A linha só tem o
- * que decide a triagem — a folhinha do dia, quem, o quê, o prazo e o botão.
+ * que decide a triagem — o dia e a hora pedidos em destaque, quem, o quê, o prazo contando e o
+ * botão. Em cima, a frase de estado diz quantos esperam e quando vence o próximo; as ações do
+ * cabeçalho são só configuração (o link e o "Configurar") e a prévia do celular.
  *
  * O celular do responsável abre numa gaveta que empurra a página: dá para pedir lá e ver a linha
  * chegar aqui, ou responder aqui e ver o aviso chegar lá. É a demonstração inteira em meio minuto.
@@ -26,19 +28,12 @@ import Popover from 'primevue/popover'
 import SelectButton from 'primevue/selectbutton'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { useToast } from 'primevue/usetoast'
-import {
-  PhCalendarPlus,
-  PhClockCounterClockwise,
-  PhDeviceMobile,
-  PhLink,
-  PhTray,
-} from '@phosphor-icons/vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
-import '@/components/home/home-card.css'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { useTelaLarga } from '@/composables/useTelaLarga'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
@@ -89,24 +84,26 @@ const fraseDoResumo = computed(() => {
     return t('clinico.pedidos.resumo.nenhum')
   }
 
-  const partes = [t('clinico.pedidos.resumo.abertos', { n: total }, total)]
+  const abertos = t('clinico.pedidos.resumo.abertos', { n: total }, total)
 
   if (pedidos.atrasadas > 0) {
-    partes.push(t('clinico.pedidos.resumo.atrasados', { n: pedidos.atrasadas }, pedidos.atrasadas))
-  } else {
-    const proximo = pedidos.abertas[0]!.pedidos[0]!.responderAte
-
-    partes.push(
-      t('clinico.pedidos.resumo.proximo', {
-        quando:
-          clinicClock.dateOf(proximo) === clinicClock.today()
-            ? formato.hora(proximo)
-            : rotulos.quando(proximo),
-      }),
-    )
+    return t('clinico.pedidos.tela.resumo', {
+      abertos,
+      depois: t('clinico.pedidos.resumo.atrasados', { n: pedidos.atrasadas }, pedidos.atrasadas),
+    })
   }
 
-  return partes.join(' · ')
+  const proximo = pedidos.abertas[0]!.pedidos[0]!.responderAte
+
+  return t('clinico.pedidos.tela.resumo', {
+    abertos,
+    depois: t('clinico.pedidos.resumo.proximo', {
+      quando:
+        clinicClock.dateOf(proximo) === clinicClock.today()
+          ? formato.hora(proximo)
+          : rotulos.quando(proximo),
+    }),
+  })
 })
 
 const desligado = computed(() => pedidos.configuracao !== null && !pedidos.configuracao.ativo)
@@ -199,7 +196,11 @@ const resultado = computed(() => {
 
   return {
     tipo: atual.tipo,
-    texto: t(`clinico.pedidos.resultado.${atual.tipo}`),
+    /* O texto antigo do horário ocupado mandava a um botão "Outro horário" que não existe mais. */
+    texto:
+      atual.tipo === 'horario-ocupado'
+        ? t('clinico.pedidos.tela.horarioOcupado')
+        : t(`clinico.pedidos.resultado.${atual.tipo}`),
     rota: null,
   }
 })
@@ -225,11 +226,25 @@ function fraseDoRespondido(linha: PedidoNaCaixa) {
         : t('clinico.pedidos.respondido.aceito', parametros)
     }
     case 'recusado':
-      return t('clinico.pedidos.respondido.recusado', {
+      return t('clinico.pedidos.tela.recusado', {
         motivo: t(`clinico.pedidos.recusa.motivo.${pedido.recusa?.motivo ?? 'outro'}`),
       })
     default:
       return t(`clinico.pedidos.respondido.${pedido.status}`)
+  }
+}
+
+/** O desfecho em cor e ícone: marcado é ok; perder o prazo sem resposta pede atenção. */
+function tomDoRespondido(linha: PedidoNaCaixa) {
+  switch (linha.pedidos[0]!.status) {
+    case 'aceito':
+      return { tom: 'ok', icone: 'ph-check-circle' }
+    case 'recusado':
+      return { tom: 'neutro', icone: 'ph-x-circle' }
+    case 'expirado':
+      return { tom: 'atencao', icone: 'ph-clock-countdown' }
+    default:
+      return { tom: 'neutro', icone: 'ph-arrow-u-up-left' }
   }
 }
 
@@ -349,70 +364,69 @@ async function celularMudou() {
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('clinico.pedidos.subtitulo')"
-    :title="t('clinico.pedidos.titulo')"
-    :loading="!pedidos.carregado && !pedidos.erro"
-    :error="pedidos.erro && !pedidos.carregado ? t(pedidos.erro) : ''"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    class="tela-pedidos"
+    :carregando="!pedidos.carregado && !pedidos.erro"
+    :erro="pedidos.erro && !pedidos.carregado ? t(pedidos.erro) : ''"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('clinico.pedidos.subtitulo') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('clinico.pedidos.titulo') }}</h1>
+    <template v-if="fraseDoResumo" #resumo>
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
+    </template>
 
-        <div class="hc-saudacao__linha">
-          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
-            {{ fraseDoResumo }}
-          </p>
-
-          <nav class="hc-acoes" :aria-label="t('clinico.pedidos.acoes.rotulo')">
-            <Button
-              type="button"
-              class="hc-pilula"
-              :label="t('clinico.pedidos.acoes.verNoApp')"
-              :aria-expanded="appAberto"
-              @click="appAberto = !appAberto"
-            >
-              <template #icon>
-                <PhDeviceMobile class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
-              </template>
-            </Button>
-            <Button
-              type="button"
-              class="hc-pilula"
-              :label="t('clinico.pedidos.acoes.link')"
-              aria-haspopup="dialog"
-              @click="popoverDoLink?.toggle($event)"
-            >
-              <template #icon>
-                <PhLink class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
-              </template>
-            </Button>
-            <Button
-              type="button"
-              class="hc-pilula"
-              icon="ph ph-sliders-horizontal"
-              :label="t('clinico.pedidos.acoes.configurar')"
-              aria-haspopup="dialog"
-              @click="configAberta = true"
-            />
-          </nav>
-        </div>
+    <!--
+      Nenhuma ação cheia no alto: a ação desta tela é responder, e ela mora em cada linha. Em cima
+      ficam as duas portas da configuração e, mais leve, a prévia do celular.
+    -->
+    <template #acoes>
+      <!--
+        Os botões de contorno e de texto ganham o acabamento do módulo dentro de `clinic-scope`;
+        fora dele, no escuro, o tema base os deixava apagados como se estivessem desabilitados.
+      -->
+      <div class="topo-acoes clinic-scope">
+        <Button
+          type="button"
+          severity="secondary"
+          text
+          icon="ph ph-device-mobile"
+          :label="t('clinico.pedidos.tela.verComoPede')"
+          :aria-expanded="appAberto"
+          @click="appAberto = !appAberto"
+        />
+        <Button
+          type="button"
+          severity="secondary"
+          outlined
+          icon="ph ph-link"
+          :label="t('clinico.pedidos.acoes.link')"
+          aria-haspopup="dialog"
+          @click="popoverDoLink?.toggle($event)"
+        />
+        <Button
+          type="button"
+          severity="secondary"
+          outlined
+          icon="ph ph-sliders-horizontal"
+          :label="t('clinico.pedidos.tela.configurar')"
+          :title="t('clinico.pedidos.acoes.configurar')"
+          aria-haspopup="dialog"
+          @click="configAberta = true"
+        />
       </div>
     </template>
 
     <div class="pedidos clinic-scope">
       <!-- Desligado: dito na primeira linha, com o jeito de religar. -->
-      <p v-if="desligado" class="pedidos__desligado" role="status">
-        <i class="ph ph-pause-circle" aria-hidden="true" />
-        <span>{{ t('clinico.pedidos.desligado') }}</span>
+      <p v-if="desligado" class="aviso aviso--atencao" role="status">
+        <i class="ph ph-pause-circle aviso__icone" aria-hidden="true" />
+        <span class="aviso__texto">{{ t('clinico.pedidos.desligado') }}</span>
         <Button
+          type="button"
           size="small"
           severity="secondary"
           outlined
+          icon="ph ph-play"
           :label="t('clinico.pedidos.religar')"
           @click="ligarDeNovo"
         />
@@ -420,25 +434,22 @@ async function celularMudou() {
 
       <p
         v-if="resultado"
-        class="pedidos__resultado"
-        :class="`pedidos__resultado--${resultado.tipo}`"
+        class="aviso"
+        :class="resultado.tipo === 'marcado' ? 'aviso--ok' : 'aviso--neutro'"
         role="status"
       >
         <i
-          class="ph"
+          class="ph aviso__icone"
           :class="resultado.tipo === 'marcado' ? 'ph-check-circle' : 'ph-info'"
           aria-hidden="true"
         />
-        <span class="pedidos__resultado-texto">{{ resultado.texto }}</span>
-        <RouterLink
-          v-if="resultado.rota"
-          class="pedidos__resultado-link clinic-focusable"
-          :to="resultado.rota"
-        >
+        <span class="aviso__texto">{{ resultado.texto }}</span>
+        <RouterLink v-if="resultado.rota" class="ui-mais" :to="resultado.rota">
           {{ t('clinico.pedidos.resultado.verNaAgenda') }}
           <i class="ph ph-arrow-right" aria-hidden="true" />
         </RouterLink>
         <Button
+          type="button"
           icon="ph ph-x"
           severity="secondary"
           text
@@ -449,59 +460,65 @@ async function celularMudou() {
         />
       </p>
 
-      <p v-if="pedidos.erro && pedidos.carregado" class="pedidos__erro" role="alert">
-        <i class="ph ph-warning-circle" aria-hidden="true" />
-        {{ t(pedidos.erro) }}
+      <p v-if="pedidos.erro && pedidos.carregado" class="aviso aviso--risco" role="alert">
+        <i class="ph ph-warning-circle aviso__icone" aria-hidden="true" />
+        <span class="aviso__texto">{{ t(pedidos.erro) }}</span>
       </p>
 
-      <section class="hc pedidos__caixa">
-        <header class="hc__cabeca">
-          <h2 class="hc__titulo">
-            <PhTray class="hc__icone" weight="duotone" aria-hidden="true" />
-            {{ t('clinico.pedidos.secao.abertos') }}
-          </h2>
-          <span class="hc__ferramentas">{{ t('clinico.pedidos.secao.ordem') }}</span>
-        </header>
+      <UiSecao
+        id="pedidos-abertos"
+        :titulo="t('clinico.pedidos.secao.abertos')"
+        :contagem="pedidos.abertas.length"
+        :descricao="pedidos.abertas.length > 1 ? t('clinico.pedidos.tela.descricao') : ''"
+      >
+        <div class="caixa ui-folha">
+          <TransitionGroup
+            v-if="pedidos.abertas.length > 0"
+            tag="ul"
+            name="linha"
+            class="ui-lista caixa__lista"
+          >
+            <PedidoLinha
+              v-for="linha in pedidos.abertas"
+              :key="linha.chave"
+              :linha="linha"
+              :respondendo="pedidos.respondendo === linha.chave"
+              :ocupado="pedidos.respondendo !== null"
+              :aberta="chaveEmResposta === linha.chave"
+              @aceitar="aceitar(linha, $event)"
+              @abrir="abrirResposta(linha)"
+            />
+          </TransitionGroup>
 
-        <TransitionGroup
-          v-if="pedidos.abertas.length > 0"
-          tag="ul"
-          name="linha"
-          class="pedidos__lista"
-        >
-          <PedidoLinha
-            v-for="linha in pedidos.abertas"
-            :key="linha.chave"
-            :linha="linha"
-            :respondendo="pedidos.respondendo === linha.chave"
-            :ocupado="pedidos.respondendo !== null"
-            :aberta="chaveEmResposta === linha.chave"
-            @aceitar="aceitar(linha, $event)"
-            @abrir="abrirResposta(linha)"
-          />
-        </TransitionGroup>
-
-        <div v-else class="pedidos__vazio">
-          <PhCalendarPlus class="pedidos__vazio-icone" weight="duotone" aria-hidden="true" />
-          <strong>{{ t('clinico.pedidos.vazio.titulo') }}</strong>
-          <p>{{ t('clinico.pedidos.vazio.descricao') }}</p>
+          <div v-else class="caixa__vazio">
+            <span class="caixa__vazio-icone" aria-hidden="true">
+              <i class="ph ph-calendar-check" />
+            </span>
+            <strong>{{ t('clinico.pedidos.vazio.titulo') }}</strong>
+            <p>{{ t('clinico.pedidos.vazio.descricao') }}</p>
+          </div>
         </div>
-      </section>
+      </UiSecao>
 
-      <!-- O respondido é histórico: recolhido, uma linha por pedido. -->
-      <section v-if="pedidos.respondidas.length > 0" class="pedidos__historico">
-        <Button
-          class="pedidos__alternar"
-          severity="secondary"
-          text
-          size="small"
-          :icon="historicoAberto ? 'ph ph-caret-down' : 'ph ph-caret-right'"
-          :label="t('clinico.pedidos.secao.respondidos', { n: pedidos.respondidas.length })"
+      <!-- O respondido é histórico: recolhido no fim, uma linha por pedido. -->
+      <section v-if="pedidos.respondidas.length > 0" class="historico">
+        <button
+          type="button"
+          class="historico__alternar"
           :aria-expanded="historicoAberto"
+          aria-controls="pedidos-respondidos"
           @click="historicoAberto = !historicoAberto"
-        />
+        >
+          <i
+            class="ph"
+            :class="historicoAberto ? 'ph-caret-down' : 'ph-caret-right'"
+            aria-hidden="true"
+          />
+          {{ t('clinico.pedidos.tela.respondidos') }}
+          <span class="ui-contagem">{{ pedidos.respondidas.length }}</span>
+        </button>
 
-        <ul v-if="historicoAberto" class="hc pedidos__respondidos">
+        <ul v-if="historicoAberto" id="pedidos-respondidos" class="ui-folha ui-lista">
           <li v-for="linha in pedidos.respondidas" :key="linha.chave" class="respondido">
             <span class="respondido__rostos">
               <PetAvatar
@@ -514,9 +531,11 @@ async function celularMudou() {
                 tamanho="sm"
               />
             </span>
-            <span class="respondido__texto">
-              <strong>{{ rotulos.nomes(petsDa(linha).map((pet) => pet.nome)) }}</strong>
-              <span>
+            <span class="ui-linha__texto">
+              <strong class="ui-linha__titulo">
+                {{ rotulos.nomes(petsDa(linha).map((pet) => pet.nome)) }}
+              </strong>
+              <span class="ui-linha__meta respondido__meta">
                 {{ clinico.tipo(linha.pedidos[0]!.typeId)?.nome }} ·
                 <i
                   class="ph"
@@ -528,11 +547,14 @@ async function celularMudou() {
                 {{ t(`clinico.pedidos.canal.${linha.pedidos[0]!.canal}`) }}
               </span>
             </span>
-            <span class="respondido__como" :class="`respondido__como--${linha.pedidos[0]!.status}`">
+            <span
+              class="respondido__como"
+              :class="`respondido__como--${tomDoRespondido(linha).tom}`"
+            >
+              <i class="ph" :class="tomDoRespondido(linha).icone" aria-hidden="true" />
               {{ fraseDoRespondido(linha) }}
             </span>
-            <span class="respondido__quando">
-              <PhClockCounterClockwise aria-hidden="true" />
+            <span class="respondido__quando ui-num">
               {{ formato.relativo(linha.pedidos[0]!.respondidoEm ?? linha.pedidos[0]!.criadoEm) }}
             </span>
           </li>
@@ -540,227 +562,264 @@ async function celularMudou() {
       </section>
     </div>
 
-    <PedidoGaveta
-      :linha="emResposta"
-      :salvando="pedidos.respondendo !== null"
-      @marcar="emResposta && aceitar(emResposta, $event)"
-      @recusar="recusar"
-      @fechar="fecharResposta"
-    />
+    <template #sempre>
+      <PedidoGaveta
+        :linha="emResposta"
+        :salvando="pedidos.respondendo !== null"
+        @marcar="emResposta && aceitar(emResposta, $event)"
+        @recusar="recusar"
+        @fechar="fecharResposta"
+      />
 
-    <AgendamentoOnlineGaveta
-      v-model:visivel="configAberta"
-      :configuracao="pedidos.configuracao"
-      :salvando="salvandoConfig"
-      @salvar="salvarConfiguracao"
-    />
+      <AgendamentoOnlineGaveta
+        v-model:visivel="configAberta"
+        :configuracao="pedidos.configuracao"
+        :salvando="salvandoConfig"
+        @salvar="salvarConfiguracao"
+      />
 
-    <Popover ref="popoverDoLink" class="hc-tema">
-      <div class="link clinic-scope">
-        <p class="link__titulo">{{ t('clinico.pedidos.link.titulo') }}</p>
-        <p class="link__ajuda">{{ t('clinico.pedidos.link.ajuda') }}</p>
-        <div class="link__campo">
-          <InputText
-            :model-value="enderecoDoLink"
-            readonly
-            fluid
-            :aria-label="t('clinico.pedidos.link.titulo')"
-          />
-          <Button
-            severity="secondary"
-            outlined
-            icon="ph ph-copy"
-            :aria-label="t('clinico.pedidos.link.copiar')"
-            @click="copiarLink"
-          />
+      <Popover ref="popoverDoLink" class="clinic-overlay">
+        <div class="link clinic-scope">
+          <p class="link__titulo">{{ t('clinico.pedidos.link.titulo') }}</p>
+          <p class="link__ajuda">{{ t('clinico.pedidos.link.ajuda') }}</p>
+          <div class="link__campo">
+            <InputText
+              :model-value="enderecoDoLink"
+              readonly
+              fluid
+              :aria-label="t('clinico.pedidos.link.titulo')"
+            />
+            <Button
+              type="button"
+              severity="secondary"
+              outlined
+              icon="ph ph-copy"
+              :aria-label="t('clinico.pedidos.link.copiar')"
+              :title="t('clinico.pedidos.link.copiar')"
+              @click="copiarLink"
+            />
+          </div>
+          <div class="link__acoes">
+            <Button
+              type="button"
+              size="small"
+              icon="ph ph-arrow-square-out"
+              :label="t('clinico.pedidos.link.abrir')"
+              @click="abrirPagina"
+            />
+            <Button
+              as="a"
+              :href="compartilharNoWhatsapp"
+              target="_blank"
+              rel="noopener"
+              size="small"
+              severity="secondary"
+              outlined
+              icon="ph ph-whatsapp-logo"
+              :label="t('clinico.pedidos.link.whatsapp')"
+            />
+          </div>
         </div>
-        <div class="link__acoes">
-          <Button
-            size="small"
-            icon="ph ph-arrow-square-out"
-            :label="t('clinico.pedidos.link.abrir')"
-            @click="abrirPagina"
-          />
-          <Button
-            as="a"
-            :href="compartilharNoWhatsapp"
-            target="_blank"
-            rel="noopener"
-            size="small"
-            severity="secondary"
-            outlined
-            icon="ph ph-whatsapp-logo"
-            :label="t('clinico.pedidos.link.whatsapp')"
-          />
+      </Popover>
+
+      <!--
+        O celular do responsável, numa gaveta que empurra a página: os dois lados à vista. Clicar na
+        página não fecha a gaveta — responder aqui e ver o aviso chegar lá é a demonstração.
+      -->
+      <Drawer
+        v-model:visible="appAberto"
+        position="right"
+        :modal="false"
+        :dismissable="false"
+        class="pedidos-gaveta clinic-overlay"
+        :style="{ width: 'min(27rem, 94vw)' }"
+      >
+        <template #header>
+          <h2 class="pedidos-gaveta__titulo">
+            <i class="ph ph-device-mobile" aria-hidden="true" />
+            {{ t('clinico.pedidos.acoes.verNoApp') }}
+          </h2>
+        </template>
+
+        <div class="pedidos-gaveta__corpo clinic-scope">
+          <div class="ensaio">
+            <span id="ensaio-pessoa" class="ensaio__rotulo">{{ t('clinico.pedidos.ensaio.quem') }}</span>
+            <SelectButton
+              v-model="pessoa"
+              :options="pessoas"
+              option-label="rotulo"
+              option-value="valor"
+              :allow-empty="false"
+              aria-labelledby="ensaio-pessoa"
+            />
+            <label class="ensaio__chave">
+              <ToggleSwitch :model-value="disputa" @update:model-value="alternarDisputa" />
+              <span>{{ t('clinico.pedidos.ensaio.disputa') }}</span>
+            </label>
+          </div>
+
+          <AgendarNoApp :tutor-id="pessoa" @mudou="celularMudou" />
         </div>
-      </div>
-    </Popover>
-
-    <!--
-      O celular do responsável, numa gaveta que empurra a página: os dois lados à vista. Clicar na
-      página não fecha a gaveta — responder aqui e ver o aviso chegar lá é a demonstração.
-    -->
-    <Drawer
-      v-model:visible="appAberto"
-      position="right"
-      :modal="false"
-      :dismissable="false"
-      class="hc-tema pedidos-gaveta"
-      :style="{ width: 'min(27rem, 94vw)' }"
-    >
-      <template #header>
-        <h2 class="pedidos-gaveta__titulo">
-          <PhDeviceMobile class="hc__icone" weight="duotone" aria-hidden="true" />
-          {{ t('clinico.pedidos.acoes.verNoApp') }}
-        </h2>
-      </template>
-
-      <div class="pedidos-gaveta__corpo clinic-scope">
-        <div class="ensaio">
-          <span id="ensaio-pessoa" class="clinic-label">{{
-            t('clinico.pedidos.ensaio.quem')
-          }}</span>
-          <SelectButton
-            v-model="pessoa"
-            :options="pessoas"
-            option-label="rotulo"
-            option-value="valor"
-            :allow-empty="false"
-            aria-labelledby="ensaio-pessoa"
-          />
-          <label class="ensaio__chave">
-            <ToggleSwitch :model-value="disputa" @update:model-value="alternarDisputa" />
-            <span>{{ t('clinico.pedidos.ensaio.disputa') }}</span>
-          </label>
-        </div>
-
-        <AgendarNoApp :tutor-id="pessoa" @mudou="celularMudou" />
-      </div>
-    </Drawer>
-  </PartnerPageFrame>
+      </Drawer>
+    </template>
+  </UiPagina>
 </template>
 
 <style scoped>
 .pedidos {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 28px;
 }
 
-.pedidos__lista {
-  display: grid;
-  container-type: inline-size;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+/* As ações do alto continuam itens da linha de ações da moldura. */
+.topo-acoes {
+  display: contents;
 }
 
-.pedidos__desligado,
-.pedidos__resultado,
-.pedidos__erro {
+/* ------------------------------------------------------------------ avisos de estado */
+
+.aviso {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 8px 12px;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--hc-borda);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--hc-cartao);
-  font-size: var(--clinic-font-label);
-  font-weight: 600;
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
-.pedidos__desligado > span,
-.pedidos__resultado-texto {
-  flex: 1 1 16rem;
+.aviso__icone {
+  flex: none;
+  font-size: 20px;
+}
+
+.aviso__texto {
+  flex: 1 1 18rem;
   min-width: 0;
 }
 
-.pedidos__desligado > i {
-  color: var(--clinic-attention-text);
+.aviso--ok {
+  border-color: color-mix(in oklab, var(--ok) 35%, transparent);
+  background: var(--ok-fundo);
 }
 
-.pedidos__resultado--marcado {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
+.aviso--ok .aviso__icone {
+  color: var(--ok-tinta);
 }
 
-.pedidos__resultado-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--clinic-space-1);
-  border-radius: var(--clinic-radius-control);
-  color: var(--hc-marca-forte);
-  font-weight: 700;
-  text-decoration: none;
+.aviso--atencao {
+  border-color: color-mix(in oklab, var(--atencao) 35%, transparent);
+  background: var(--atencao-fundo);
 }
 
-.pedidos__resultado-link:hover {
-  text-decoration: underline;
+.aviso--atencao .aviso__icone {
+  color: var(--atencao-tinta);
 }
 
-.pedidos__erro {
-  color: var(--clinic-risk-text);
+.aviso--risco {
+  border-color: color-mix(in oklab, var(--risco) 35%, transparent);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
-.pedidos__caixa {
-  gap: 0.25rem;
+.aviso--neutro .aviso__icone {
+  color: var(--tinta-2);
 }
 
-.pedidos__vazio {
+/* ------------------------------------------------------------------ a caixa */
+
+.caixa {
+  overflow: hidden;
+}
+
+.caixa__lista {
+  container-type: inline-size;
+}
+
+.caixa__vazio {
   display: grid;
-  padding: 2rem 1rem;
-  gap: 0.35rem;
-  color: var(--hc-tinta-2);
   justify-items: center;
+  gap: 6px;
+  padding: 44px 24px;
   text-align: center;
 }
 
-.pedidos__vazio strong {
-  color: var(--hc-tinta);
+.caixa__vazio-icone {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  margin-bottom: 6px;
+  border-radius: 14px;
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+  font-size: 24px;
 }
 
-.pedidos__vazio p {
-  max-width: 34rem;
+.caixa__vazio strong {
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.caixa__vazio p {
+  max-width: 46ch;
   margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.5;
 }
 
-.pedidos__vazio-icone {
-  width: 2rem;
-  height: 2rem;
-  color: var(--hc-marca);
-}
+/* ------------------------------------------------------------------ respondidos */
 
-.pedidos__historico {
+.historico {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 12px;
 }
 
-.pedidos__alternar.p-button {
+.historico__alternar {
+  display: inline-flex;
+  min-height: 36px;
   justify-self: start;
-  color: var(--hc-tinta-2);
-  font-weight: 700;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 0 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.pedidos__respondidos {
-  margin: 0;
-  padding-block: 0.4rem;
-  gap: 0;
-  list-style: none;
+.historico__alternar:hover {
+  background: var(--superficie-2);
+}
+
+.historico__alternar:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
+}
+
+.historico__alternar > i {
+  color: var(--tinta-2);
+  font-size: 16px;
 }
 
 .respondido {
   display: grid;
+  min-height: 60px;
   align-items: center;
-  padding: 0.6rem 0;
-  gap: 0.75rem;
-  grid-template-columns: auto minmax(10rem, 1fr) minmax(0, 1.4fr) auto;
-}
-
-.respondido + .respondido {
-  border-top: 1px solid var(--hc-linha);
+  gap: 6px 16px;
+  grid-template-columns: 3rem minmax(10rem, 1fr) minmax(0, 1.5fr) 7rem;
+  padding: 10px 18px;
 }
 
 .respondido__rostos {
@@ -768,38 +827,46 @@ async function celularMudou() {
 }
 
 .respondido__rostos > * + * {
-  margin-inline-start: -0.55rem;
-  box-shadow: 0 0 0 2px var(--hc-cartao);
+  margin-inline-start: -10px;
   border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--superficie);
 }
 
-.respondido__texto {
-  display: grid;
-  min-width: 0;
-  font-size: 0.875rem;
-}
-
-.respondido__texto > span {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+.respondido__meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .respondido__como {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 550;
+  line-height: 1.4;
 }
 
-.respondido__como--aceito {
-  color: var(--hc-marca-forte);
+.respondido__como i {
+  flex: none;
+  font-size: 15px;
+  transform: translateY(2px);
+}
+
+.respondido__como--ok {
+  color: var(--ok-tinta);
+}
+
+.respondido__como--atencao {
+  color: var(--atencao-tinta);
 }
 
 .respondido__quando {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  color: var(--hc-tinta-3);
-  font-size: 0.75rem;
+  color: var(--tinta-3);
+  font-size: 13px;
+  text-align: end;
   white-space: nowrap;
 }
 
@@ -813,12 +880,12 @@ async function celularMudou() {
 
 .linha-enter-from {
   opacity: 0;
-  transform: translateY(-0.4rem);
+  transform: translateY(-6px);
 }
 
 .linha-leave-to {
   opacity: 0;
-  transform: translateY(0.4rem);
+  transform: translateY(6px);
 }
 
 .linha-move {
@@ -826,6 +893,7 @@ async function celularMudou() {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .tela-pedidos.tela-pedidos,
   .linha-enter-active,
   .linha-leave-active,
   .linha-move {
@@ -841,6 +909,7 @@ async function celularMudou() {
   .respondido__como,
   .respondido__quando {
     grid-column: 2;
+    text-align: start;
   }
 }
 
@@ -849,18 +918,20 @@ async function celularMudou() {
 .link {
   display: grid;
   width: min(24rem, 86vw);
-  gap: 0.55rem;
+  gap: 10px;
 }
 
 .link__titulo {
   margin: 0;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .link__ajuda {
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.45;
 }
 
@@ -868,7 +939,7 @@ async function celularMudou() {
 .link__acoes {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 8px;
 }
 
 .link__campo > :first-child {
@@ -880,32 +951,51 @@ async function celularMudou() {
 .pedidos-gaveta__titulo {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   margin: 0;
-  gap: 0.55rem;
-  color: var(--hc-tinta);
-  font-size: 1rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.pedidos-gaveta__titulo i {
+  color: var(--clinica-tinta);
+  font-size: 20px;
 }
 
 .pedidos-gaveta__corpo {
   display: grid;
-  gap: 0.85rem;
+  gap: 14px;
 }
 
+/* O ensaio da demonstração: quem está com o celular, e a disputa pelo próximo horário. */
 .ensaio {
   display: grid;
-  padding: 0.75rem;
-  border: 1px dashed var(--hc-borda);
-  border-radius: 0.75rem;
-  gap: 0.45rem;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--superficie-2);
+}
+
+.ensaio__rotulo {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+/* O segmento escolhido: superfície e tinta, legível nos dois temas. */
+.ensaio :deep(.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--superficie);
+  color: var(--tinta);
 }
 
 .ensaio__chave {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  color: var(--hc-tinta-2);
-  font-size: var(--clinic-font-label);
+  gap: 10px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.4;
   cursor: pointer;
 }
 </style>

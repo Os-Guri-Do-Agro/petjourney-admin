@@ -9,30 +9,39 @@
  * A oferta tem prazo. Passado o prazo ela expira sozinha e a vaga volta a ser da clínica —
  * senão a fila vira lista de promessas que ninguém cobra.
  *
- * A ordem da lista é a ordem do trabalho: primeiro as ofertas esperando resposta (têm prazo
- * correndo), depois a fila pela posição, e por último o que já se resolveu. Antes as três vinham
- * misturadas, e a resposta da oferta era um ✓ e um ✗ soltos no fim da linha — agora vão por extenso.
+ * A tela segue a ordem do trabalho, em seções separadas:
+ *
+ * 1. **A vaga que acabou de abrir** — aviso verde no alto, com quem cabe nela. É a única coisa da
+ *    tela que pede ação agora mesmo.
+ * 2. **Ofertas esperando resposta** — o prazo correndo em contagem regressiva, com o aceite e a
+ *    recusa por extenso na própria linha.
+ * 3. **Esperando vaga** — a fila pela posição: quem, quem é o responsável (com o telefone, que é
+ *    o que se usa daqui), quando pode, há quanto tempo espera e a prioridade.
+ * 4. **Já resolvidas** — aceitas e vencidas, recolhidas no fim: histórico, não trabalho.
+ *
+ * `?adicionar=1` é o pedido do "Criar → Espera por vaga" da barra lateral: abre o formulário e
+ * sai da URL, como o `?novo=1` da agenda.
  */
 import Button from 'primevue/button'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import ClinicAlertChip from '@/features/clinico/components/base/ClinicAlertChip.vue'
-import ClinicPacienteCelula from '@/features/clinico/components/base/ClinicPacienteCelula.vue'
-import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
 import FilaAdicionarDialog from '@/features/clinico/components/agenda/FilaAdicionarDialog.vue'
 import FilaOfertaDialog from '@/features/clinico/components/agenda/FilaOfertaDialog.vue'
-import type { AcaoDeLinha, ColunaTabela } from '@/features/clinico/components/base/table-types'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import type { WaitlistEntry } from '@/features/clinico/data/types'
 import { agruparJanelas } from '@/features/clinico/domain/waitlist'
 import { useAvisosStore } from '@/features/clinico/stores/avisos'
 import { useFilaStore } from '@/features/clinico/stores/fila'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const clinico = useClinicoStore()
 const fila = useFilaStore()
 const avisos = useAvisosStore()
@@ -77,108 +86,48 @@ const aceite = computed(() => {
   }
 })
 
-/**
- * A coluna de ações saiu daqui.
- *
- * Antes era uma coluna `acoes` de 13 rem com os botões montados à mão no slot, e cada tela que
- * fazia isso reinventava largura, alinhamento e o `@click.stop` que impede o clique na ação de
- * também selecionar a linha. Agora as ações são contrato da tabela (`:acoes`), e a coluna
- * nasce do número delas.
- */
-const colunas = computed<ColunaTabela<WaitlistEntry>[]>(() => [
-  {
-    /*
-     * A posição é a primeira coluna porque é a primeira pergunta: "sou o quantos?". Quem já
-     * recebeu oferta não tem posição — o horário dele está reservado, e contá-lo empurraria a
-     * fila inteira para trás por algo já resolvido.
-     */
-    id: 'posicao',
-    rotulo: t('clinico.fila.colunaPosicao'),
-    largura: '4.5rem',
-    numerico: true,
-    ordenarPor: (linha) => fila.posicaoDe(linha.id),
-    ordemInicial: 'asc',
-  },
-  {
-    id: 'paciente',
-    rotulo: t('clinico.pacientes.colunaPaciente'),
-    largura: 'minmax(0, 2.1fr)',
-    ordenarPor: (linha) => clinico.pet(linha.petId)?.nome ?? null,
-  },
-  {
-    id: 'responsavel',
-    rotulo: t('clinico.pacientes.colunaResponsavel'),
-    largura: 'minmax(0, 1.1fr)',
-    ocultarEmTelaEstreita: true,
-    ordenarPor: (linha) => clinico.tutor(linha.tutorId)?.nome ?? null,
-  },
-  {
-    id: 'janelas',
-    rotulo: t('clinico.fila.janelas'),
-    largura: 'minmax(0, 1.4fr)',
-    /** Ordena pela espera, que é o que a coluna realmente comunica. */
-    ordenarPor: (linha) => linha.criadoEm,
-  },
-  {
-    id: 'situacao',
-    rotulo: t('clinico.fila.colunaSituacao'),
-    largura: '9rem',
-    ordenarPor: (linha) => linha.status,
-  },
-])
-
-/**
- * As três ações da fila.
- *
- * Aceitar e recusar só existem para quem recebeu oferta; remover, só para quem ainda aguarda.
- * Elas **somem** quando não cabem, em vez de aparecerem apagadas: ícone desabilitado numa
- * tabela de vinte linhas é ruído que não vira ação nunca.
- */
-const acoes = computed<AcaoDeLinha<WaitlistEntry>[]>(() => [
-  {
-    id: 'aceitar',
-    rotulo: t('clinico.fila.aceitar'),
-    visivel: (linha) => linha.status === 'ofertado',
-  },
-  {
-    id: 'recusar',
-    rotulo: t('clinico.fila.recusar'),
-    visivel: (linha) => linha.status === 'ofertado',
-  },
-  {
-    id: 'remover',
-    rotulo: t('clinico.fila.remover'),
-    icone: 'ph ph-trash',
-    perigo: true,
-    visivel: (linha) => linha.status === 'aguardando',
-  },
-])
-
 const paraOfertar = ref<WaitlistEntry | null>(null)
 const adicionarAberto = ref(false)
 
-function executarAcao({ acao, linha }: { acao: AcaoDeLinha<WaitlistEntry>; linha: WaitlistEntry }) {
-  if (acao.id === 'aceitar') {
-    void fila.responder(linha.id, true)
+/*
+ * `?adicionar=1` é o pedido do "Criar → Espera por vaga" da barra lateral: abre o formulário e
+ * tira o pedido da URL, para que voltar no navegador não o abra de novo. Vale também quando a
+ * fila já está aberta — a barra só troca a query.
+ */
+watch(
+  () => route.query.adicionar,
+  (adicionar) => {
+    if (adicionar !== '1') {
+      return
+    }
 
-    return
-  }
+    adicionarAberto.value = true
 
-  if (acao.id === 'recusar') {
-    void fila.responder(linha.id, false)
+    const query = { ...route.query }
 
-    return
-  }
+    delete query.adicionar
+    void router.replace({ path: route.path, query })
+  },
+  { immediate: true },
+)
 
-  if (acao.id === 'remover') {
-    void fila.remover(linha.id)
-  }
+/*
+ * As três ações da fila. Aceitar e recusar só existem para quem recebeu oferta; remover, só para
+ * quem ainda aguarda — cada seção mostra só as dela, em vez de botões apagados.
+ */
+function registrarResposta(entrada: WaitlistEntry, aceitou: boolean) {
+  void fila.responder(entrada.id, aceitou)
 }
 
-const severidadePorPrioridade = {
+function remover(entrada: WaitlistEntry) {
+  void fila.remover(entrada.id)
+}
+
+/** A prioridade que precisa ser dita: "normal" é o padrão e não ganha selo. */
+const TOM_DA_PRIORIDADE = {
   urgente: 'risco',
   preferencial: 'atencao',
-  normal: 'info',
+  normal: '',
 } as const
 
 /**
@@ -191,8 +140,60 @@ function janelasLegiveis(entrada: WaitlistEntry) {
     const dias =
       faixa.de === faixa.ate ? de : `${de}–${formato.diaDaSemanaCurtoPorIndice(faixa.ate)}`
 
-    return `${dias} ${faixa.inicio}–${faixa.fim}`
+    return { dias, horas: `${faixa.inicio}–${faixa.fim}` }
   })
+}
+
+function minutosDesde(iso: string) {
+  return Math.max(0, Math.round((Date.parse(clinicClock.nowIso()) - Date.parse(iso)) / 60_000))
+}
+
+/** "qual tipo · com quem": o que a entrada espera, na linha de baixo do nome. */
+function oQueEspera(entrada: WaitlistEntry, professionalId: string | null = entrada.professionalId) {
+  return [
+    clinico.tipo(entrada.typeId)?.nome,
+    professionalId ? clinico.profissional(professionalId)?.nome : t('clinico.fila.qualquerProfissional'),
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
+// ------------------------------------------------------------------ as seções
+
+/** Entre as ofertas, a que expira primeiro vem antes: é a que se perde se ninguém ligar. */
+const ofertas = computed(() =>
+  fila.ativas
+    .filter((entrada) => entrada.status === 'ofertado')
+    .sort((a, b) => (a.ofertaExpiraEm ?? '').localeCompare(b.ofertaExpiraEm ?? '')),
+)
+
+const esperando = computed(() =>
+  fila.ativas
+    .filter((entrada) => entrada.status === 'aguardando')
+    .sort((a, b) => (fila.posicaoDe(a.id) ?? 0) - (fila.posicaoDe(b.id) ?? 0)),
+)
+
+const resolvidas = computed(() =>
+  fila.ativas
+    .filter((entrada) => entrada.status !== 'ofertado' && entrada.status !== 'aguardando')
+    .sort((a, b) => b.criadoEm.localeCompare(a.criadoEm)),
+)
+
+const resolvidasAbertas = ref(false)
+
+/** O prazo da oferta em tom: cinco minutos é risco, meia hora é atenção. */
+function tomDaOferta(entrada: WaitlistEntry) {
+  const minutos = fila.minutosParaExpirar(entrada) ?? 0
+
+  if (minutos <= 5) {
+    return 'risco'
+  }
+
+  return minutos <= 30 ? 'atencao' : 'neutro'
+}
+
+function contagemDaOferta(entrada: WaitlistEntry) {
+  return formato.distancia(Math.max(0, fila.minutosParaExpirar(entrada) ?? 0))
 }
 
 async function confirmarOferta({ mensagem }: { mensagem: string }) {
@@ -218,50 +219,26 @@ async function confirmarOferta({ mensagem }: { mensagem: string }) {
 
 const erroTraduzido = computed(() => (fila.erro ? t(fila.erro) : ''))
 
-/** Peso de cada situação na ordem da lista: o que tem prazo correndo vem primeiro. */
-const ORDEM_DA_SITUACAO: Record<string, number> = {
-  ofertado: 0,
-  aguardando: 1,
-  aceito: 2,
-  expirado: 3,
-}
-
-const linhasOrdenadas = computed(() =>
-  [...fila.ativas].sort((a, b) => {
-    const porSituacao = (ORDEM_DA_SITUACAO[a.status] ?? 9) - (ORDEM_DA_SITUACAO[b.status] ?? 9)
-
-    if (porSituacao !== 0) {
-      return porSituacao
-    }
-
-    if (a.status === 'aguardando') {
-      return (fila.posicaoDe(a.id) ?? 0) - (fila.posicaoDe(b.id) ?? 0)
-    }
-
-    /* Entre as ofertas, a que expira primeiro vem antes: é a que se perde se ninguém ligar. */
-    if (a.status === 'ofertado') {
-      return (a.ofertaExpiraEm ?? '').localeCompare(b.ofertaExpiraEm ?? '')
-    }
-
-    return a.criadoEm.localeCompare(b.criadoEm)
-  }),
-)
-
 /** Quantos esperam vaga e quantas ofertas esperam resposta. */
 const fraseDoResumo = computed(() => {
   if (fila.carregando && fila.entradas.length === 0) {
     return ''
   }
 
-  const aguardando = fila.ativas.filter((item) => item.status === 'aguardando').length
-  const ofertas = fila.ofertadas.length
-  const partes = [t('clinico.fila.saudacao.aguardando', { n: aguardando }, aguardando)]
+  const aguardando = t(
+    'clinico.fila.saudacao.aguardando',
+    { n: esperando.value.length },
+    esperando.value.length,
+  )
 
-  if (ofertas > 0) {
-    partes.push(t('clinico.fila.saudacao.ofertas', { n: ofertas }, ofertas))
+  if (ofertas.value.length === 0) {
+    return aguardando
   }
 
-  return partes.join(' · ')
+  return t('clinico.fila.tela.resumo', {
+    aguardando,
+    ofertas: t('clinico.fila.saudacao.ofertas', { n: ofertas.value.length }, ofertas.value.length),
+  })
 })
 
 async function carregar() {
@@ -273,58 +250,121 @@ onMounted(carregar)
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('clinico.fila.subtitulo')"
-    :title="t('clinico.fila.titulo')"
-    :loading="fila.carregando && fila.entradas.length === 0"
-    :error="erroTraduzido"
-    :empty="fila.vazio"
-    :empty-title="t('clinico.fila.vazioTitulo')"
-    :empty-description="t('clinico.fila.vazioDescricao')"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    :carregando="fila.carregando && fila.entradas.length === 0"
+    :erro="erroTraduzido"
+    :vazio="fila.vazio"
+    :vazio-titulo="t('clinico.fila.vazioTitulo')"
+    :vazio-descricao="t('clinico.fila.vazioDescricao')"
+    :vazio-acao="t('clinico.fila.adicionar')"
+    vazio-icone="ph ph-hourglass-medium"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
+    @acao-do-vazio="adicionarAberto = true"
   >
-    <!--
-      A entrada na fila é a pílula cheia da saudação: é a ação que a recepção dispara quando acaba
-      de dizer "não tenho horário essa semana".
-    -->
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('clinico.fila.subtitulo') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('clinico.fila.titulo') }}</h1>
+    <template v-if="fraseDoResumo" #resumo>
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
+    </template>
 
-        <div class="hc-saudacao__linha">
-          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
-            {{ fraseDoResumo }}
-          </p>
-
-          <nav class="hc-acoes" :aria-label="t('clinico.fila.saudacao.acoes')">
-            <Button
-              type="button"
-              class="hc-pilula hc-pilula--cheia"
-              icon="ph ph-plus"
-              :label="t('clinico.fila.adicionar')"
-              @click="adicionarAberto = true"
-            />
-          </nav>
-        </div>
-      </div>
+    <!-- A entrada na fila é a ação que a recepção dispara quando acaba de dizer "não tenho horário". -->
+    <template #acoes>
+      <Button
+        type="button"
+        icon="ph ph-plus"
+        :label="t('clinico.fila.adicionar')"
+        @click="adicionarAberto = true"
+      />
     </template>
 
     <div class="fila clinic-scope">
-      <p v-if="aceite" class="aceite" :class="`aceite--${aceite.tipo}`" role="status">
+      <!--
+        A vaga que acabou de abrir: no alto, porque é a única coisa da tela que vence em minutos.
+        Nasce na agenda (cancelamento, falta) e aparece aqui também.
+      -->
+      <section v-if="fila.vagaAberta" class="vaga" role="status" aria-labelledby="vaga-titulo">
+        <div class="vaga__cabeca">
+          <span class="vaga__icone" aria-hidden="true"><i class="ph ph-calendar-plus" /></span>
+          <div class="vaga__texto">
+            <strong id="vaga-titulo">{{ t('clinico.fila.vagaAberta.titulo') }}</strong>
+            <p>
+              {{
+                t('clinico.fila.vagaAberta.descricao', {
+                  hora: formato.hora(fila.vagaAberta.inicio),
+                  profissional: clinico.profissional(fila.vagaAberta.professionalId)?.nome ?? '',
+                })
+              }}
+            </p>
+          </div>
+          <span class="vaga__quando">
+            <small>{{ formato.diaDaSemanaCurto(clinicClock.dateOf(fila.vagaAberta.inicio)) }},
+              {{ formato.dataCurta(clinicClock.dateOf(fila.vagaAberta.inicio)) }}</small>
+            <strong class="ui-hora">{{ formato.hora(fila.vagaAberta.inicio) }}</strong>
+          </span>
+        </div>
+
+        <ul class="vaga__candidatos">
+          <li v-for="candidato in fila.vagaAberta.candidatos" :key="candidato.id" class="vaga__candidato">
+            <PetAvatar
+              :nome="clinico.pet(candidato.petId)?.nome ?? ''"
+              :iniciais="clinico.pet(candidato.petId)?.iniciais ?? ''"
+              :especie="clinico.pet(candidato.petId)?.especie ?? null"
+              :foto-url="clinico.pet(candidato.petId)?.fotoUrl ?? ''"
+              tamanho="sm"
+            />
+            <span class="ui-linha__texto">
+              <strong class="ui-linha__titulo">{{ clinico.pet(candidato.petId)?.nome }}</strong>
+              <span class="ui-linha__meta">
+                <template v-if="fila.posicaoDe(candidato.id)">
+                  {{ t('clinico.fila.posicaoNaFila', { posicao: fila.posicaoDe(candidato.id) }) }} ·
+                </template>
+                {{ clinico.tipo(candidato.typeId)?.nome }}
+              </span>
+            </span>
+            <Button
+              type="button"
+              size="small"
+              icon="ph ph-paper-plane-tilt"
+              :label="t('clinico.fila.ofertarVaga')"
+              :aria-label="
+                t('clinico.fila.vagaAberta.oferecer', {
+                  paciente: clinico.pet(candidato.petId)?.nome ?? '',
+                })
+              "
+              :loading="fila.salvando"
+              @click="paraOfertar = candidato"
+            />
+          </li>
+        </ul>
+
+        <Button
+          type="button"
+          class="vaga__depois"
+          :label="t('clinico.fila.vagaAberta.depois')"
+          severity="secondary"
+          text
+          size="small"
+          @click="fila.dispensarVaga()"
+        />
+      </section>
+
+      <p
+        v-if="aceite"
+        class="aviso"
+        :class="aceite.tipo === 'marcado' ? 'aviso--ok' : 'aviso--neutro'"
+        role="status"
+      >
         <i
-          class="ph"
+          class="ph aviso__icone"
           :class="aceite.tipo === 'marcado' ? 'ph-check-circle' : 'ph-info'"
           aria-hidden="true"
         />
-        <span class="aceite__texto">{{ aceite.texto }}</span>
-        <RouterLink v-if="aceite.rota" class="aceite__link clinic-focusable" :to="aceite.rota">
+        <span class="aviso__texto">{{ aceite.texto }}</span>
+        <RouterLink v-if="aceite.rota" class="ui-mais" :to="aceite.rota">
           {{ t('clinico.fila.aceite.verNaAgenda') }}
           <i class="ph ph-arrow-right" aria-hidden="true" />
         </RouterLink>
         <Button
+          type="button"
           icon="ph ph-x"
           severity="secondary"
           text
@@ -335,297 +375,819 @@ onMounted(carregar)
         />
       </p>
 
-      <ClinicDataTable
-        :colunas="colunas"
-        :linhas="linhasOrdenadas"
-        :chave="(entrada) => entrada.id"
-        :acoes="acoes"
-        :rotulo="t('clinico.fila.titulo')"
-        @acao="executarAcao"
+      <!-- ============================================================ ofertas -->
+      <UiSecao
+        v-if="ofertas.length > 0"
+        id="fila-ofertas"
+        :titulo="t('clinico.fila.tela.ofertas')"
+        :contagem="ofertas.length"
+        :descricao="t('clinico.fila.tela.ofertasDescricao')"
       >
-        <template #celula-posicao="{ linha }">
-          <strong v-if="fila.posicaoDe(linha.id)" class="fila__posicao">
-            {{ fila.posicaoDe(linha.id) }}
-          </strong>
-          <span v-else class="fila__meta">—</span>
-        </template>
+        <ul class="ui-folha ui-lista lista">
+          <li
+            v-for="entrada in ofertas"
+            :key="entrada.id"
+            class="oferta"
+            :class="tomDaOferta(entrada) !== 'neutro' ? `ui-marca ui-marca--${tomDaOferta(entrada)}` : ''"
+          >
+            <span class="quando">
+              <template v-if="entrada.ofertaSlotInicio">
+                <small>
+                  {{ formato.diaDaSemanaCurto(clinicClock.dateOf(entrada.ofertaSlotInicio)) }},
+                  {{ formato.dataCurta(clinicClock.dateOf(entrada.ofertaSlotInicio)) }}
+                </small>
+                <strong class="ui-hora">{{ formato.hora(entrada.ofertaSlotInicio) }}</strong>
+                <span class="sr-only">{{ t('clinico.fila.tela.vagaPara') }}</span>
+              </template>
+            </span>
 
-        <template #celula-paciente="{ linha }">
-          <ClinicPacienteCelula :pet="clinico.pet(linha.petId)">
-            <!--
-              "Normal" é o padrão e não precisa ser dito: uma ficha em toda linha treina o olho
-              a ignorar as fichas, inclusive as que importam.
-            -->
-            <template #selo>
-              <ClinicAlertChip
-                v-if="linha.prioridade !== 'normal'"
-                :severidade="severidadePorPrioridade[linha.prioridade]"
-                :rotulo="formato.prioridadeDaFila(linha.prioridade)"
+            <span class="quem">
+              <PetAvatar
+                :nome="clinico.pet(entrada.petId)?.nome ?? ''"
+                :iniciais="clinico.pet(entrada.petId)?.iniciais ?? ''"
+                :especie="clinico.pet(entrada.petId)?.especie ?? null"
+                :foto-url="clinico.pet(entrada.petId)?.fotoUrl ?? ''"
+                tamanho="md"
               />
-            </template>
-            {{ clinico.tipo(linha.typeId)?.nome }}
-            <template v-if="linha.professionalId">
-              · {{ clinico.profissional(linha.professionalId)?.nome }}
-            </template>
-          </ClinicPacienteCelula>
-        </template>
+              <span class="ui-linha__texto">
+                <span class="quem__nome">
+                  <strong class="ui-linha__titulo">{{ clinico.pet(entrada.petId)?.nome }}</strong>
+                  <span
+                    v-if="TOM_DA_PRIORIDADE[entrada.prioridade]"
+                    class="ui-selo"
+                    :class="`ui-selo--${TOM_DA_PRIORIDADE[entrada.prioridade]}`"
+                  >
+                    <i class="ph ph-warning" aria-hidden="true" />
+                    {{ formato.prioridadeDaFila(entrada.prioridade) }}
+                  </span>
+                </span>
+                <span class="ui-linha__meta">
+                  {{ oQueEspera(entrada, entrada.ofertaProfessionalId ?? entrada.professionalId) }}
+                </span>
+              </span>
+            </span>
 
-        <template #celula-responsavel="{ linha }">
-          <span class="fila__nome">{{ clinico.tutor(linha.tutorId)?.nome }}</span>
-          <span class="fila__meta"
-            ><bdi dir="ltr">{{ clinico.tutor(linha.tutorId)?.telefone }}</bdi></span
-          >
-        </template>
+            <span class="tutor">
+              <span class="tutor__nome">{{ clinico.tutor(entrada.tutorId)?.nome }}</span>
+              <span class="tutor__telefone ui-num">
+                <i class="ph ph-phone" aria-hidden="true" />
+                <bdi dir="ltr">{{ clinico.tutor(entrada.tutorId)?.telefone }}</bdi>
+              </span>
+            </span>
 
-        <template #celula-janelas="{ linha }">
-          <!-- Quebra só entre janelas: "qua." numa linha e "14:00–18:00" na outra não se lê. -->
-          <span class="fila__janela">
-            <template v-for="(faixa, indice) in janelasLegiveis(linha)" :key="indice">
-              <template v-if="indice > 0"> · </template>
-              <span class="fila__faixa">{{ faixa }}</span>
-            </template>
-          </span>
-          <span class="fila__meta">
-            {{ t('clinico.fila.esperaDesde', { valor: formato.relativo(linha.criadoEm) }) }}
-          </span>
-        </template>
+            <p class="prazo" :class="`prazo--${tomDaOferta(entrada)}`">
+              <strong class="ui-num">
+                <i
+                  class="ph"
+                  :class="tomDaOferta(entrada) === 'neutro' ? 'ph-clock' : 'ph-clock-countdown'"
+                  aria-hidden="true"
+                />
+                {{ contagemDaOferta(entrada) }}
+              </strong>
+              <small v-if="entrada.ofertaExpiraEm">
+                {{
+                  t('clinico.fila.tela.paraResponder', { hora: formato.hora(entrada.ofertaExpiraEm) })
+                }}
+              </small>
+            </p>
 
-        <template #celula-situacao="{ linha }">
-          <span class="fila__situacao" :class="`fila__situacao--${linha.status}`">
-            {{ t(`clinico.fila.situacao.${linha.status}`) }}
-          </span>
-          <span
-            v-if="linha.status === 'ofertado' && linha.ofertaExpiraEm"
-            class="fila__prazo clinic-value"
-            :class="{ 'fila__prazo--curto': (fila.minutosParaExpirar(linha) ?? 0) <= 5 }"
-          >
-            {{
-              t('clinico.fila.ofertaExpiraEm', {
-                valor: formato.relativo(linha.ofertaExpiraEm),
-              })
-            }}
-          </span>
-          <!-- Aceito é horário marcado: a linha diz qual, para ninguém precisar abrir a agenda. -->
-          <span
-            v-else-if="linha.status === 'aceito' && linha.ofertaSlotInicio"
-            class="fila__prazo fila__prazo--marcado clinic-value"
-          >
-            {{
-              t('clinico.fila.marcadoPara', {
-                data: formato.dataCurta(clinicClock.dateOf(linha.ofertaSlotInicio)),
-                hora: formato.hora(linha.ofertaSlotInicio),
-              })
-            }}
-          </span>
-        </template>
-      </ClinicDataTable>
-
-      <!--
-        Oferta de vaga aparece quando a agenda avisa que um horário vagou. Fica na própria
-        página da fila e também sobre a agenda, porque é lá que a vaga costuma nascer.
-      -->
-      <section v-if="fila.vagaAberta" class="vaga" role="status">
-        <div>
-          <strong>{{ t('clinico.fila.vagaAberta.titulo') }}</strong>
-          <p>
-            {{
-              t('clinico.fila.vagaAberta.descricao', {
-                hora: formato.hora(fila.vagaAberta.inicio),
-                profissional: clinico.profissional(fila.vagaAberta.professionalId)?.nome ?? '',
-              })
-            }}
-          </p>
-        </div>
-
-        <ul class="vaga__candidatos">
-          <li v-for="candidato in fila.vagaAberta.candidatos" :key="candidato.id">
-            <Button
-              :label="
-                t('clinico.fila.vagaAberta.oferecer', {
-                  paciente: clinico.pet(candidato.petId)?.nome ?? '',
-                })
-              "
-              size="small"
-              :loading="fila.salvando"
-              @click="paraOfertar = candidato"
-            />
+            <span class="acoes">
+              <Button
+                type="button"
+                size="small"
+                severity="secondary"
+                outlined
+                :label="t('clinico.fila.recusar')"
+                :disabled="fila.salvando"
+                @click="registrarResposta(entrada, false)"
+              />
+              <Button
+                type="button"
+                size="small"
+                icon="ph ph-check"
+                :label="t('clinico.fila.aceitar')"
+                :disabled="fila.salvando"
+                @click="registrarResposta(entrada, true)"
+              />
+            </span>
           </li>
         </ul>
+      </UiSecao>
 
-        <Button
-          :label="t('clinico.fila.vagaAberta.depois')"
-          severity="secondary"
-          text
-          size="small"
-          @click="fila.dispensarVaga()"
-        />
+      <!-- ============================================================ esperando -->
+      <UiSecao
+        id="fila-esperando"
+        :titulo="t('clinico.fila.tela.esperando')"
+        :contagem="esperando.length"
+        :descricao="esperando.length > 1 ? t('clinico.fila.tela.esperandoDescricao') : ''"
+      >
+        <ul v-if="esperando.length > 0" class="ui-folha ui-lista lista">
+          <li
+            v-for="entrada in esperando"
+            :key="entrada.id"
+            class="espera"
+            :class="
+              TOM_DA_PRIORIDADE[entrada.prioridade]
+                ? `ui-marca ui-marca--${TOM_DA_PRIORIDADE[entrada.prioridade]}`
+                : ''
+            "
+          >
+            <span
+              class="posicao ui-num"
+              :class="{ 'posicao--primeira': fila.posicaoDe(entrada.id) === 1 }"
+              :title="t('clinico.fila.posicaoNaFila', { posicao: fila.posicaoDe(entrada.id) ?? '' })"
+            >
+              <span aria-hidden="true">{{ fila.posicaoDe(entrada.id) }}</span>
+              <span class="sr-only">
+                {{ t('clinico.fila.posicaoNaFila', { posicao: fila.posicaoDe(entrada.id) ?? '' }) }}
+              </span>
+            </span>
+
+            <span class="quem">
+              <PetAvatar
+                :nome="clinico.pet(entrada.petId)?.nome ?? ''"
+                :iniciais="clinico.pet(entrada.petId)?.iniciais ?? ''"
+                :especie="clinico.pet(entrada.petId)?.especie ?? null"
+                :foto-url="clinico.pet(entrada.petId)?.fotoUrl ?? ''"
+                tamanho="md"
+              />
+              <span class="ui-linha__texto">
+                <span class="quem__nome">
+                  <strong class="ui-linha__titulo">{{ clinico.pet(entrada.petId)?.nome }}</strong>
+                  <span
+                    v-if="TOM_DA_PRIORIDADE[entrada.prioridade]"
+                    class="ui-selo"
+                    :class="`ui-selo--${TOM_DA_PRIORIDADE[entrada.prioridade]}`"
+                  >
+                    <i class="ph ph-warning" aria-hidden="true" />
+                    {{ formato.prioridadeDaFila(entrada.prioridade) }}
+                  </span>
+                </span>
+                <span class="ui-linha__meta">{{ oQueEspera(entrada) }}</span>
+              </span>
+            </span>
+
+            <span class="tutor">
+              <span class="tutor__nome">{{ clinico.tutor(entrada.tutorId)?.nome }}</span>
+              <span class="tutor__telefone ui-num">
+                <i class="ph ph-phone" aria-hidden="true" />
+                <bdi dir="ltr">{{ clinico.tutor(entrada.tutorId)?.telefone }}</bdi>
+              </span>
+            </span>
+
+            <!-- Quebra só entre janelas: "qua." numa linha e "14:00–18:00" na outra não se lê. -->
+            <span class="janelas" :aria-label="t('clinico.fila.janelas')">
+              <span v-for="(faixa, indice) in janelasLegiveis(entrada)" :key="indice" class="janela">
+                <span class="janela__dias">{{ faixa.dias }}</span>
+                <span class="janela__horas ui-num">{{ faixa.horas }}</span>
+              </span>
+            </span>
+
+            <span class="tempo">
+              <strong class="ui-num">{{ formato.distancia(minutosDesde(entrada.criadoEm)) }}</strong>
+              <small>{{ t('clinico.fila.tela.naFila') }}</small>
+            </span>
+
+            <span class="acoes">
+              <Button
+                type="button"
+                size="small"
+                icon="ph ph-trash"
+                severity="danger"
+                text
+                :label="t('clinico.comum.remover')"
+                :title="t('clinico.fila.remover')"
+                :disabled="fila.salvando"
+                @click="remover(entrada)"
+              />
+            </span>
+
+            <p v-if="entrada.observacao" class="nota">
+              <i class="ph ph-chat-text" aria-hidden="true" />
+              {{ entrada.observacao }}
+            </p>
+          </li>
+        </ul>
+        <p v-else class="ui-folha ui-vazio">{{ t('clinico.fila.saudacao.aguardando', { n: 0 }, 0) }}</p>
+      </UiSecao>
+
+      <!-- ============================================================ resolvidas -->
+      <section v-if="resolvidas.length > 0" class="historico">
+        <button
+          type="button"
+          class="historico__alternar"
+          :aria-expanded="resolvidasAbertas"
+          aria-controls="fila-resolvidas"
+          @click="resolvidasAbertas = !resolvidasAbertas"
+        >
+          <i
+            class="ph"
+            :class="resolvidasAbertas ? 'ph-caret-down' : 'ph-caret-right'"
+            aria-hidden="true"
+          />
+          {{ t('clinico.fila.tela.resolvidas') }}
+          <span class="ui-contagem">{{ resolvidas.length }}</span>
+        </button>
+
+        <ul v-if="resolvidasAbertas" id="fila-resolvidas" class="ui-folha ui-lista">
+          <li v-for="entrada in resolvidas" :key="entrada.id" class="resolvida">
+            <span class="quem">
+              <PetAvatar
+                :nome="clinico.pet(entrada.petId)?.nome ?? ''"
+                :iniciais="clinico.pet(entrada.petId)?.iniciais ?? ''"
+                :especie="clinico.pet(entrada.petId)?.especie ?? null"
+                :foto-url="clinico.pet(entrada.petId)?.fotoUrl ?? ''"
+                tamanho="sm"
+              />
+              <span class="ui-linha__texto">
+                <strong class="ui-linha__titulo">{{ clinico.pet(entrada.petId)?.nome }}</strong>
+                <span class="ui-linha__meta">
+                  {{ oQueEspera(entrada) }} · {{ clinico.tutor(entrada.tutorId)?.nome }}
+                </span>
+              </span>
+            </span>
+            <span class="resolvida__como">
+              <span
+                class="ui-selo"
+                :class="entrada.status === 'aceito' ? 'ui-selo--ok' : ''"
+              >
+                <i
+                  class="ph"
+                  :class="entrada.status === 'aceito' ? 'ph-check-circle' : 'ph-clock-countdown'"
+                  aria-hidden="true"
+                />
+                {{ t(`clinico.fila.situacao.${entrada.status}`) }}
+              </span>
+              <!-- Aceito é horário marcado: a linha diz qual, para ninguém precisar abrir a agenda. -->
+              <span
+                v-if="entrada.status === 'aceito' && entrada.ofertaSlotInicio"
+                class="resolvida__marcado ui-num"
+              >
+                {{
+                  t('clinico.fila.marcadoPara', {
+                    data: formato.dataCurta(clinicClock.dateOf(entrada.ofertaSlotInicio)),
+                    hora: formato.hora(entrada.ofertaSlotInicio),
+                  })
+                }}
+              </span>
+            </span>
+          </li>
+        </ul>
       </section>
     </div>
 
-    <FilaAdicionarDialog v-model:visivel="adicionarAberto" @adicionado="fila.carregar()" />
+    <template #sempre>
+      <FilaAdicionarDialog v-model:visivel="adicionarAberto" @adicionado="fila.carregar()" />
 
-    <!--
-      A oferta passa por uma prévia, no mesmo padrão da remarcação: o requisito pede "a
-      mensagem que sai", e disparar sem mostrar o texto é o que faz ninguém saber o que foi dito.
-    -->
-    <FilaOfertaDialog
-      :entrada="paraOfertar"
-      :slot-inicio="fila.vagaAberta?.inicio ?? null"
-      @confirmar="confirmarOferta"
-      @fechar="paraOfertar = null"
-    />
-  </PartnerPageFrame>
+      <!--
+        A oferta passa por uma prévia, no mesmo padrão da remarcação: o requisito pede "a
+        mensagem que sai", e disparar sem mostrar o texto é o que faz ninguém saber o que foi dito.
+      -->
+      <FilaOfertaDialog
+        :entrada="paraOfertar"
+        :slot-inicio="fila.vagaAberta?.inicio ?? null"
+        @confirmar="confirmarOferta"
+        @fechar="paraOfertar = null"
+      />
+    </template>
+  </UiPagina>
 </template>
 
 <style scoped>
 .fila {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 28px;
 }
 
-.fila__barra {
+/* ------------------------------------------------------------------ a vaga que abriu */
+
+.vaga {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in oklab, var(--ok) 40%, transparent);
+  border-radius: 16px;
+  background: var(--ok-fundo);
+}
+
+.vaga__cabeca {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
 }
 
-/* A posição é número de leitura rápida: peso e tabular, para comparar linhas de relance. */
-.fila__posicao {
-  display: block;
-  font-size: 1.05rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
+.vaga__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--ok-tinta);
+  font-size: 20px;
 }
 
-.fila__nome {
-  display: block;
+.vaga__texto {
+  flex: 1;
+  min-width: 0;
+}
+
+.vaga__texto strong {
+  color: var(--ok-tinta);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.vaga__texto p {
+  margin: 2px 0 0;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.vaga__quando {
+  display: grid;
+  flex: none;
+  justify-items: end;
+  line-height: 1.1;
+}
+
+.vaga__quando small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.vaga__quando strong {
+  color: var(--ok-tinta);
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+
+.vaga__candidatos {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+.vaga__candidato {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 12px;
+  border: 1px solid color-mix(in oklab, var(--ok) 25%, var(--linha));
+  border-radius: 12px;
+  background: var(--superficie);
+}
+
+.vaga__depois.p-button {
+  justify-self: start;
+}
+
+/* ------------------------------------------------------------------ avisos */
+
+.aviso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0;
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.aviso__icone {
+  flex: none;
+  color: var(--tinta-2);
+  font-size: 20px;
+}
+
+.aviso__texto {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.aviso--ok {
+  border-color: color-mix(in oklab, var(--ok) 35%, transparent);
+  background: var(--ok-fundo);
+}
+
+.aviso--ok .aviso__icone {
+  color: var(--ok-tinta);
+}
+
+/* ------------------------------------------------------------------ as listas */
+
+.lista {
   overflow: hidden;
-  font-weight: 700;
+  container-type: inline-size;
+}
+
+.lista > li {
+  position: relative;
+  display: grid;
+  min-height: 76px;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 12px 18px 12px 22px;
+}
+
+.oferta {
+  grid-template-columns: 6.25rem minmax(0, 1.3fr) minmax(0, 1fr) 11rem auto;
+}
+
+.espera {
+  grid-template-columns: 2.5rem minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) 5.5rem auto;
+}
+
+/* Para quando é a vaga oferecida: a data pequena e a hora grande, como nos pedidos. */
+.quando {
+  display: grid;
+  gap: 1px;
+  line-height: 1.15;
+}
+
+.quando small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.quando .ui-hora {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+
+.quem {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.quem__nome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.quem__nome .ui-linha__titulo {
+  font-size: 15px;
+}
+
+.quem__nome .ui-selo {
+  height: 22px;
+  font-size: 12px;
+}
+
+.tutor {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.tutor__nome {
+  overflow: hidden;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.fila__titulo {
-  display: flex;
-  flex-wrap: wrap;
+.tutor__telefone {
+  display: inline-flex;
   align-items: center;
-  gap: var(--clinic-space-2);
-}
-
-.fila__meta {
-  display: block;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.fila__situacao {
-  display: block;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-}
-
-.fila__situacao--ofertado {
-  color: var(--clinic-accent-strong);
-}
-
-.fila__situacao--expirado,
-.fila__situacao--removido {
-  color: var(--clinic-faint);
-}
-
-.fila__janela {
-  display: block;
-  font-weight: 650;
-}
-
-.fila__faixa {
+  gap: 5px;
+  color: var(--tinta-2);
+  font-size: 13px;
   white-space: nowrap;
 }
 
-.fila__prazo {
-  display: block;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+.tutor__telefone i {
+  color: var(--tinta-3);
 }
 
-.fila__prazo--curto {
-  color: var(--clinic-risk-text);
+/* O prazo da oferta, contando: o número grande com o tom, a hora-limite embaixo. */
+.prazo {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  line-height: 1.15;
 }
 
-.fila__prazo--marcado {
-  color: var(--clinic-ok-text);
+.prazo strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta);
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
-/*
- * O resultado do aceite é estado, não alerta: uma linha com borda de acento quando deu certo,
- * neutra quando a vaga escapou. Nenhum dos dois pede cor de risco — ninguém errou.
- */
-.aceite {
+.prazo strong i {
+  color: var(--tinta-3);
+  font-size: 17px;
+}
+
+.prazo small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.prazo--risco strong,
+.prazo--risco strong i {
+  color: var(--risco-tinta);
+}
+
+.prazo--atencao strong,
+.prazo--atencao strong i {
+  color: var(--atencao-tinta);
+}
+
+.acoes {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Botão de linha no tamanho pequeno, mas com o alvo de toque de 36 px. */
+.acoes :deep(.p-button),
+.vaga__candidato :deep(.p-button) {
+  min-height: 36px;
+  white-space: nowrap;
+}
+
+/* A posição: o número que responde "sou o quantos?". O primeiro, na cor da clínica. */
+.posicao {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--superficie-3);
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.posicao--primeira {
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+}
+
+.janelas {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.janela {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.janela__dias {
+  min-width: 3.5em;
+  color: var(--tinta);
+  font-weight: 550;
+}
+
+.janela__horas {
+  color: var(--tinta-2);
+}
+
+/* Há quanto tempo espera: número com a legenda embaixo, como o "min esperando" do Hoje. */
+.tempo {
+  display: grid;
+  justify-items: end;
+  line-height: 1.1;
+}
+
+.tempo strong {
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.tempo small {
+  color: var(--tinta-3);
+  font-size: 12px;
+}
+
+.nota {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: -2px 0 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+  grid-column: 2 / -1;
+}
+
+.nota i {
+  flex: none;
+  color: var(--tinta-3);
+  transform: translateY(2px);
+}
+
+/* ------------------------------------------------------------------ resolvidas */
+
+.historico {
+  display: grid;
+  gap: 12px;
+}
+
+.historico__alternar {
+  display: inline-flex;
+  min-height: 36px;
+  justify-self: start;
   align-items: center;
-  margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface);
-  font-size: var(--clinic-font-label);
+  gap: 8px;
+  padding: 0 10px 0 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
   font-weight: 600;
 }
 
-.aceite--marcado {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
+.historico__alternar:hover {
+  background: var(--superficie-2);
 }
 
-.aceite__texto {
-  flex: 1 1 16rem;
-  min-width: 0;
+.historico__alternar:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
 }
 
-.aceite__link {
-  display: inline-flex;
+.historico__alternar > i {
+  color: var(--tinta-2);
+  font-size: 16px;
+}
+
+.resolvida {
+  display: flex;
+  min-height: 60px;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-1);
-  border-radius: var(--clinic-radius-control);
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
-  text-decoration: none;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 10px 18px;
 }
 
-.aceite__link:hover {
-  text-decoration: underline;
-}
-
-.vaga {
-  display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-accent);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-accent-tint);
-}
-
-.vaga strong {
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
-}
-
-.vaga p {
-  margin: 0.2rem 0 0;
-  color: var(--clinic-muted);
-  line-height: 1.5;
-}
-
-.vaga__candidatos {
+.resolvida__como {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clinic-space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.resolvida__marcado {
+  color: var(--ok-tinta);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ larguras */
+
+/* Pela largura da lista: a linha desce em duas, o "quando"/posição à esquerda ocupando a altura. */
+@container (max-width: 64rem) {
+  .oferta {
+    grid-template-columns: 5.75rem minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .oferta .quando {
+    grid-row: span 2;
+    align-self: center;
+  }
+
+  .oferta .tutor {
+    grid-column: 2;
+  }
+
+  .oferta .prazo {
+    grid-column: 3;
+    grid-row: 1;
+    justify-items: end;
+    text-align: end;
+  }
+
+  .oferta .acoes {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  .espera {
+    grid-template-columns: 2.5rem minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .espera .posicao {
+    grid-row: span 2;
+    align-self: center;
+  }
+
+  .espera .tutor {
+    grid-column: 2;
+  }
+
+  .espera .janelas {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+
+  .espera .tempo {
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  .espera .acoes {
+    grid-column: 4;
+    grid-row: 2;
+  }
+}
+
+@container (max-width: 36rem) {
+  .lista > li {
+    padding-inline: 14px;
+  }
+
+  .oferta {
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+  }
+
+  .oferta .quando {
+    grid-row: span 4;
+    align-self: start;
+  }
+
+  .oferta .prazo,
+  .oferta .acoes {
+    grid-column: 2;
+    grid-row: auto;
+    justify-items: start;
+    justify-content: flex-start;
+    text-align: start;
+  }
+
+  .espera {
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  }
+
+  .espera .posicao {
+    grid-row: span 3;
+    align-self: start;
+  }
+
+  .espera .tutor,
+  .espera .janelas {
+    grid-column: 2 / -1;
+    grid-row: auto;
+  }
+
+  .espera .tempo {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .espera .acoes {
+    grid-column: 2 / -1;
+    grid-row: auto;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .vaga__cabeca {
+    flex-wrap: wrap;
+  }
+
+  .vaga__quando {
+    justify-items: start;
+  }
 }
 </style>

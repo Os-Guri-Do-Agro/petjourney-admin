@@ -8,9 +8,16 @@
  * ponto; tudo o mais tem `min-width: 0` para que o flex não estoure a largura da coluna.
  *
  * Terminologia: em português a linha diz "responsável". `tutorId` continua sendo o campo.
+ *
+ * Na pele do Trilha: o rosto grande (`PetAvatar`, o mesmo de toda linha que fala do paciente), o
+ * nome em 20 px, a linha de identificação em tinta secundária, o responsável com o telefone que
+ * liga, os alertas em selo — e, à direita, o peso como número grande com a legenda embaixo,
+ * porque é dele que sai toda dose.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
 import ClinicAlertChip from './ClinicAlertChip.vue'
 import type { Pet, Tutor } from '../../data/types'
@@ -41,6 +48,22 @@ const props = withDefaults(
 const { t } = useI18n()
 const formato = useClinicFormat()
 
+/**
+ * O peso que a tela mostra: o informado por quem chama, e o do cadastro como reserva.
+ *
+ * `aferidoHoje` marca quando ele vem da balança desta consulta e **difere** do cadastro — é o
+ * que explica a diferença em vez de deixá-la parecer erro.
+ */
+const peso = computed(() => {
+  const doCadastro = props.pet?.pesoKg ?? null
+  const vigente = props.pesoKg === undefined ? doCadastro : props.pesoKg
+
+  return {
+    valor: vigente,
+    aferidoHoje: vigente !== null && doCadastro !== null && vigente !== doCadastro,
+  }
+})
+
 const meta = computed(() => {
   const pet = props.pet
 
@@ -65,23 +88,13 @@ const meta = computed(() => {
     formato.idade(pet.nascimento),
     formato.sexo(pet.sexo),
     pet.castrado ? t('clinico.paciente.castrado') : t('clinico.paciente.inteiro'),
+    /*
+     * No compacto (gaveta da agenda, diálogo) não há trilho para o número grande: o peso entra
+     * na linha de identificação, como mais um dado. Sem ele, quem abre a gaveta para encaixar
+     * uma vacina teria de abrir a ficha só para saber quanto o animal pesa.
+     */
+    props.compacto && peso.value.valor !== null ? formato.peso(peso.value.valor) : '',
   ].filter(Boolean)
-})
-
-/**
- * O peso que a tela mostra: o informado por quem chama, e o do cadastro como reserva.
- *
- * `aferidoHoje` marca quando ele vem da balança desta consulta e **difere** do cadastro — é o
- * que explica a diferença em vez de deixá-la parecer erro.
- */
-const peso = computed(() => {
-  const doCadastro = props.pet?.pesoKg ?? null
-  const vigente = props.pesoKg === undefined ? doCadastro : props.pesoKg
-
-  return {
-    valor: vigente,
-    aferidoHoje: vigente !== null && doCadastro !== null && vigente !== doCadastro,
-  }
 })
 
 /** Alerta de risco vem primeiro: é o que muda conduta antes de a consulta começar. */
@@ -94,32 +107,31 @@ const alertasOrdenados = computed(() => {
 
 <template>
   <header v-if="pet" class="paciente" :class="{ 'paciente--compacto': compacto }">
-    <!--
-      O quadro é o que estica; o avatar dentro dele tira a largura da própria altura.
-      Duas camadas porque `aspect-ratio` precisa de uma dimensão **definida** para derivar a
-      outra — e a altura de um item de flex esticado só fica definida depois do layout. Com o
-      quadro assumindo o esticamento, o avatar recebe uma altura concreta e vira quadrado.
-    -->
-    <div class="paciente__quadro">
-      <div class="paciente__avatar" :aria-hidden="true">
-        <img v-if="pet.fotoUrl" class="paciente__foto" :src="pet.fotoUrl" alt="" />
-        <template v-else>{{ pet.iniciais }}</template>
-      </div>
-    </div>
+    <PetAvatar
+      class="paciente__rosto"
+      :nome="pet.nome"
+      :iniciais="pet.iniciais"
+      :especie="pet.especie"
+      :foto-url="pet.fotoUrl"
+      :tamanho="compacto ? 'lg' : 'xl'"
+    />
 
     <div class="paciente__corpo">
       <h2 class="paciente__nome" :title="pet.nome">{{ pet.nome }}</h2>
 
       <p class="paciente__meta">
-        <span v-for="(item, indice) in meta" :key="item">
-          <span v-if="indice > 0" class="paciente__sep" aria-hidden="true">·</span>{{ item }}
+        <span class="paciente__dados">
+          <span v-for="(item, indice) in meta" :key="`${indice}-${item}`" class="paciente__dado">
+            <span class="paciente__sep" aria-hidden="true">·</span>{{ item }}
+          </span>
         </span>
       </p>
 
       <p v-if="tutor" class="paciente__tutor">
-        <span class="clinic-label">{{ t('clinico.paciente.responsavel') }}</span>
+        <span class="paciente__tutor-rotulo">{{ t('clinico.paciente.responsavel') }}</span>
         <span class="paciente__tutor-nome" :title="tutor.nome">{{ tutor.nome }}</span>
-        <a class="paciente__telefone clinic-value" :href="`tel:${tutor.telefone}`">
+        <a v-if="tutor.telefone" class="paciente__telefone" :href="`tel:${tutor.telefone}`">
+          <i class="ph ph-phone" aria-hidden="true" />
           <bdi dir="ltr">{{ tutor.telefone }}</bdi>
         </a>
       </p>
@@ -127,6 +139,7 @@ const alertasOrdenados = computed(() => {
       <ul v-if="!semAlertas && alertasOrdenados.length > 0" class="paciente__alertas">
         <li v-for="alerta in alertasOrdenados" :key="alerta.id">
           <ClinicAlertChip
+            class="paciente__chip"
             :severidade="alerta.severidade"
             :rotulo="formato.alerta(alerta.kind)"
             :detalhe="alerta.detalhe"
@@ -136,18 +149,21 @@ const alertasOrdenados = computed(() => {
     </div>
 
     <!--
-      Trilho da direita: **dado em cima, ação embaixo**, com uma divisória entre os dois.
-      Antes o peso morava na linha do nome, mas o nome tem `flex: 1 1 auto` e cresce — o
-      resultado era "6,4 kg" empurrado até a borda direita, encostado no botão. Peso é o
-      número mais consultado do cabeçalho (toda dose sai dele) e estava com o peso visual de
-      uma legenda, colado numa ação.
+      Trilho da direita: **dado em cima, ação embaixo**. O peso é o número mais consultado do
+      cabeçalho (toda dose sai dele): número grande, unidade ao lado e a legenda embaixo, como o
+      "46 min esperando" do Hoje. No compacto ele mora na linha de identificação.
     -->
-    <div v-if="!compacto || $slots.acoes" class="paciente__trilho">
-      <div v-if="peso.valor !== null" class="peso">
-        <span class="peso__valor clinic-value">{{ formato.numero(peso.valor, 1) }}</span>
-        <span class="peso__unidade">{{ t('clinico.formato.kg') }}</span>
-        <!-- Pesado hoje e diferente do cadastro: a marca explica a diferença. -->
-        <span v-if="peso.aferidoHoje" class="peso__hoje">{{ t('clinico.paciente.pesoHoje') }}</span>
+    <div v-if="(!compacto && peso.valor !== null) || $slots.acoes" class="paciente__trilho">
+      <div v-if="!compacto && peso.valor !== null" class="peso">
+        <span class="peso__numero">
+          <strong class="peso__valor ui-num">{{ formato.numero(peso.valor, 1) }}</strong>
+          <span class="peso__unidade">{{ t('clinico.formato.kg') }}</span>
+        </span>
+        <!-- Pesado hoje e diferente do cadastro: a legenda explica a diferença. -->
+        <small class="peso__legenda" :class="{ 'peso__legenda--hoje': peso.aferidoHoje }">
+          <i v-if="peso.aferidoHoje" class="ph ph-scales" aria-hidden="true" />
+          {{ peso.aferidoHoje ? t('clinico.paciente.pesadoHoje') : t('clinico.ficha.peso') }}
+        </small>
       </div>
 
       <div v-if="$slots.acoes" class="paciente__acoes">
@@ -158,111 +174,43 @@ const alertasOrdenados = computed(() => {
 </template>
 
 <style scoped>
+/*
+ * Uma folha do kit com três colunas: o rosto, o que identifica o paciente e o trilho do peso.
+ *
+ * O cabeçalho decide o próprio arranjo pela largura que **recebeu** (`container-type`), não pela
+ * da janela: ele aparece no prontuário em coluna larga e na gaveta de 360 px da agenda. A consulta
+ * de contêiner estiliza só descendentes, nunca o próprio contêiner — por isso a grade fica aqui,
+ * fixa, e o que muda no estreito é o lugar do trilho (um filho), lá embaixo.
+ */
 .paciente {
-  display: flex;
-  /*
-   * A quebra fica **fora** da consulta de contêiner, e é o que faz o modo estreito funcionar.
-   *
-   * `container-type` está neste mesmo elemento, e uma `@container` estiliza os **descendentes**
-   * do contêiner, nunca o contêiner em si — a regra `flex-wrap` que morava lá dentro jamais
-   * chegou a valer. O `width: 100%` do trilho valia (ele é descendente), então num cartão
-   * estreito o trilho tomava a linha inteira sem poder quebrar: o corpo era espremido a 0px e o
-   * peso caía por cima do nome do paciente. Na largura folgada nada muda — os itens cabem numa
-   * linha e a quebra nunca é exercida.
-   */
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--clinic-space-4);
+  display: grid;
   min-width: 0;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-  /* O cabeçalho decide o próprio arranjo pela largura que recebeu, não pela da janela. */
+  align-items: start;
+  gap: 4px 18px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 18px 20px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
+  color: var(--tinta);
   container-type: inline-size;
 }
 
 .paciente--compacto {
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
+  gap: 4px 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
 }
 
-/*
- * O avatar **acompanha a altura do bloco de informação** ao lado.
- *
- * Quadrado fixo, ele flutuava alinhado ao topo enquanto o corpo do cartão descia por quatro
- * linhas — nome, meta, responsável e alertas —, e a borda inferior do cartão não encontrava
- * nada do lado esquerdo. Esticado, ele fecha a coluna: o olho lê um bloco, não um marcador
- * solto acima de um vazio.
- *
- * `align-self: stretch` só funciona sem altura declarada; o piso fica no `min-height`, para o
- * caso de o cartão ter uma linha só.
- */
-/*
- * O avatar é **quadrado**, com as duas medidas declaradas.
- *
- * Já foi tentado tirar a largura da altura (`aspect-ratio` sobre `height: 100%`, o quadro
- * esticado dando a altura). A dependência é circular — a largura intrínseca de um filho medido
- * pela altura é zero —, o quadro nascia com 0px e o avatar transbordava 73px por cima do nome do
- * paciente, em toda tela que usa este cabeçalho. Declarar só a largura corrigiu o transbordo mas
- * deixou o bloco esticar na vertical: virava um retângulo alto sempre que o cartão passava de
- * duas linhas.
- *
- * Com lado fixo o quadrado é quadrado em qualquer altura de cartão. Fica **centrado**, e não
- * colado no topo, porque era isso que o esticamento resolvia: alinhado ao nome, ele deixava a
- * coluna esquerda vazia embaixo enquanto o corpo descia por quatro linhas. Centrado, o olho lê
- * um bloco só, sem o vão.
- */
-.paciente__quadro {
-  flex: 0 0 3.6rem;
-  align-self: center;
-  height: 3.6rem;
-}
-
-.paciente__avatar {
-  display: grid;
-  width: 100%;
-  height: 100%;
-  place-items: center;
-  border-radius: 1.1rem;
-  background: var(--clinic-accent-tint);
-  /* Contorno interno: dá borda ao bloco sem escurecer o fundo nem inventar outra cor. */
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--clinic-accent-strong) 22%, transparent);
-  color: var(--clinic-accent-strong);
-  font-size: 1.2rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-/* A foto ocupa o quadrado inteiro, com o mesmo raio; sem ela, as iniciais. */
-.paciente__avatar:has(.paciente__foto) {
-  overflow: hidden;
-}
-
-.paciente__foto {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* No drawer o cartão tem menos linhas, e o quadrado encolhe junto — sem deixar de ser quadrado. */
-.paciente--compacto .paciente__quadro {
-  flex-basis: 2.6rem;
-  height: 2.6rem;
-}
-
-.paciente--compacto .paciente__avatar {
-  border-radius: 0.8rem;
-  font-size: var(--clinic-font-value);
+.paciente__rosto {
+  align-self: start;
 }
 
 .paciente__corpo {
   display: grid;
   min-width: 0;
-  flex: 1;
-  gap: 0.2rem;
+  align-content: start;
+  gap: 4px;
 }
 
 /*
@@ -271,15 +219,16 @@ const alertasOrdenados = computed(() => {
  */
 .paciente__nome {
   display: -webkit-box;
-  overflow: hidden;
   min-width: 0;
+  overflow: hidden;
   margin: 0;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  color: var(--tinta);
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
   line-height: 1.25;
   overflow-wrap: anywhere;
 }
@@ -287,75 +236,43 @@ const alertasOrdenados = computed(() => {
 .paciente--compacto .paciente__nome {
   -webkit-line-clamp: 1;
   line-clamp: 1;
-  font-size: var(--clinic-font-value);
-}
-
-/* ------------------------------------------------------------------- trilho direito */
-
-.paciente__trilho {
-  display: flex;
-  /*
-   * O teto em 100% deixa as ações quebrarem linha dentro do cartão. Sem ele, o trilho media a
-   * fileira inteira de botões numa linha só e, com três ações num cartão de 450 px, o último botão
-   * passava por cima da borda.
-   */
-  max-width: 100%;
-  flex: 0 1 auto;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--clinic-space-2);
+  font-size: 16px;
 }
 
 /*
- * O peso como valor clínico, não como legenda: número grande e unidade pequena ao lado, no
- * mesmo tratamento que o módulo dá a qualquer medição. É dele que sai toda dose.
+ * A linha de identificação quebra **entre** dados, nunca dentro de um ("Shih Tzu" não vira
+ * "Shih / Tzu"), e nenhuma linha começa com o ponto: cada dado leva o ponto à frente, a lista
+ * entra 14 px para a esquerda, e o ponto do primeiro dado de cada linha cai fora da caixa, cortado.
  */
-.peso {
-  display: flex;
-  align-items: baseline;
-  gap: 0.2rem;
-  white-space: nowrap;
-}
-
-.peso__valor {
-  font-size: 1.35rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.peso__unidade {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-/* A marca de "hoje" é ficha, não texto solto: precisa ser lida como qualificador do número. */
-.peso__hoje {
-  padding: 0.05rem 0.3rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: 0.6rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.paciente--compacto .peso__valor {
-  font-size: 1.05rem;
-}
-
 .paciente__meta {
+  overflow: hidden;
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-base);
-  line-height: 1.45;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.paciente--compacto .paciente__meta {
+  font-size: 13px;
+}
+
+.paciente__dados {
+  display: flex;
+  flex-wrap: wrap;
+  margin-inline-start: -14px;
+}
+
+/* Item de flex que quebra linha: o dado desce inteiro, e só o que não cabe numa linha se parte. */
+.paciente__dado {
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 
 .paciente__sep {
-  padding: 0 0.35rem;
-  color: var(--clinic-faint);
+  display: inline-block;
+  width: 14px;
+  color: var(--tinta-3);
+  text-align: center;
 }
 
 .paciente__tutor {
@@ -363,90 +280,179 @@ const alertasOrdenados = computed(() => {
   min-width: 0;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.35rem;
-  margin: 0.15rem 0 0;
+  gap: 2px 8px;
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+.paciente__tutor-rotulo {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .paciente__tutor-nome {
   min-width: 0;
   overflow: hidden;
-  color: var(--clinic-text);
-  font-weight: 650;
+  color: var(--tinta);
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .paciente__telefone {
-  color: var(--clinic-accent-strong);
-  font-weight: 650;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 6px;
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-family: var(--font-dados);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
 }
 
-.paciente__telefone:hover,
-.paciente__telefone:focus-visible {
+.paciente__telefone i {
+  align-self: center;
+  font-size: 15px;
+}
+
+.paciente__telefone:hover {
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
+}
+
+.paciente__telefone:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
 }
 
 .paciente__alertas {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
-  gap: var(--clinic-space-1);
-  margin: 0.3rem 0 0;
+  gap: 6px;
+  margin: 8px 0 0;
   padding: 0;
   list-style: none;
 }
 
-/* A divisória separa o que se lê do que se clica. Sem ela os dois viram um bloco só. */
+.paciente__alertas li {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/*
+ * Aqui o alerta não se corta em reticências: "Alergia: Dipi…" esconde justo a palavra que muda a
+ * receita. No cartão estreito o selo cresce para duas linhas, como os alertas da recepção no Hoje:
+ * o ícone fica no alto e o texto do selo (rótulo e detalhe, uma frase só) quebra ao lado dele.
+ */
+.paciente__alertas .paciente__chip {
+  height: auto;
+  min-height: 24px;
+  align-items: flex-start;
+  padding-block: 3px;
+  white-space: normal;
+}
+
+.paciente__chip :deep(i) {
+  margin-top: 1px;
+}
+
+.paciente__chip :deep(.chip__texto) {
+  overflow: visible;
+}
+
+/* ------------------------------------------------------------------- trilho direito */
+
+.paciente__trilho {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.peso {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.peso__numero {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.peso__valor {
+  color: var(--tinta);
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.peso__unidade {
+  color: var(--tinta-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.peso__legenda {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--tinta-3);
+  font-size: 12px;
+}
+
+/* Pesado nesta consulta e diferente do cadastro: a legenda vira um aviso discreto, na cor do lugar. */
+.peso__legenda--hoje {
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-weight: 600;
+}
+
 .paciente__acoes {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: var(--clinic-space-2);
-  padding-top: var(--clinic-space-2);
-  border-top: 1px solid var(--clinic-line);
-}
-
-/* Sem peso não há o que separar: a divisória sobraria como um traço solto. */
-.paciente__trilho > .paciente__acoes:first-child {
-  padding-top: 0;
-  border-top: 0;
+  gap: 8px;
 }
 
 /*
- * Cartão estreito — coluna de painel, item de lista — manda o peso para a linha de baixo. Sem
- * este corte, o cálculo do flex deixava nome e peso "quase" cabendo na mesma linha e o "kg"
- * saía cortado pela borda. Largura de contêiner é determinística; largura de janela não diz
- * nada sobre o espaço que este cartão realmente recebeu.
- *
- * Fica no fim da folha de propósito: precisa vencer o `flex: 1 1 auto` declarado acima, e as
- * duas regras têm a mesma especificidade.
- */
-/*
- * Estreito: o trilho desce e vira uma faixa horizontal — peso à esquerda, ações à direita.
- *
- * Empilhado à direita numa coluna de 26 rem ele espremia o corpo do cartão e o nome quebrava
- * em três linhas. Como faixa, os dois continuam legíveis e a divisória passa a separar o
- * trilho do resto do cartão — que é a mesma leitura, na horizontal.
- *
- * A consulta é de **contêiner**, não de janela: o cabeçalho aparece no prontuário em coluna
- * larga e no drawer de 320 px, e é a largura recebida que decide, não o tamanho da tela.
+ * Estreito (coluna de painel, gaveta): o trilho desce para uma faixa embaixo, peso à esquerda e
+ * ações à direita, separada por um fio. Empilhado à direita numa coluna estreita ele espremia o
+ * corpo do cartão e o nome quebrava em três linhas.
  */
 @container (max-width: 26rem) {
+  .paciente .paciente__rosto {
+    width: 52px;
+    height: 52px;
+    font-size: 1.05rem;
+  }
+}
+
+@container (max-width: 32rem) {
   .paciente__trilho {
-    width: 100%;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    padding-top: var(--clinic-space-2);
-    border-top: 1px solid var(--clinic-line);
+    grid-column: 1 / -1;
+    margin-top: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--linha);
   }
 
-  /* A divisória subiu para o trilho: repeti-la nas ações desenharia duas linhas. */
-  .paciente__acoes {
-    padding-top: 0;
-    border-top: 0;
+  .peso {
+    justify-items: start;
+  }
+
+  .peso__valor {
+    font-size: 24px;
   }
 }
 </style>

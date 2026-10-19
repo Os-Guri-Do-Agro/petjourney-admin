@@ -7,7 +7,8 @@
  * uma fileira de oito volta a ser a mesma parede que a tabela era.
  *
  * O tom é escolha de significado, não de decoração: `risco` e `atencao` só entram quando o
- * número é, de fato, um problema.
+ * número é, de fato, um problema — e aí pintam o número e o disco do ícone, nunca a borda: a
+ * folha continua igual às outras, e o que muda é o que se lê.
  */
 withDefaults(
   defineProps<{
@@ -27,7 +28,7 @@ withDefaults(
 
     <span class="stat__corpo">
       <span class="stat__rotulo">{{ rotulo }}</span>
-      <strong class="stat__valor clinic-value">{{ valor }}</strong>
+      <strong class="stat__valor ui-num clinic-value">{{ valor }}</strong>
       <span v-if="detalhe" class="stat__detalhe">{{ detalhe }}</span>
     </span>
   </div>
@@ -36,90 +37,80 @@ withDefaults(
 <style scoped>
 .stat {
   display: flex;
-  align-items: center;
-  gap: var(--clinic-space-3);
   min-width: 0;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
+  color: var(--tinta);
 }
 
 .stat__icone {
   display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 0.7rem;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-muted);
-  font-size: 0.85rem;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 20px;
 }
 
 .stat__corpo {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
+  gap: 4px;
 }
 
-.stat__rotulo {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+/* `.stat .stat__rotulo` vence a regra global antiga de `.hc-tema .stat__rotulo`. */
+.stat .stat__rotulo {
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.35;
+  text-transform: none;
 }
 
-.stat__valor {
-  font-size: 1.4rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+.stat .stat__valor {
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .stat__detalhe {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-}
-
-.stat--acento {
-  border-color: var(--clinic-accent-soft);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.4;
 }
 
 .stat--acento .stat__icone {
-  background: var(--clinic-accent-soft);
-  color: var(--clinic-accent-strong);
-}
-
-.stat--acento .stat__valor {
-  color: var(--clinic-accent-strong);
-}
-
-.stat--atencao {
-  border-color: var(--clinic-attention-line);
+  background: var(--pj-lugar-fundo, var(--musgo-fundo));
+  color: var(--pj-lugar-tinta, var(--musgo));
 }
 
 .stat--atencao .stat__icone {
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .stat--atencao .stat__valor {
-  color: var(--clinic-attention-text);
-}
-
-.stat--risco {
-  border-color: var(--clinic-risk-line);
+  color: var(--atencao-tinta);
 }
 
 .stat--risco .stat__icone {
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .stat--risco .stat__valor {
-  color: var(--clinic-risk-text);
+  color: var(--risco-tinta);
 }
 </style>

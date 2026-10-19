@@ -8,6 +8,9 @@
  * 2. `não aferido` é diferente de vazio. Um traço para "ninguém preencheu"; a palavra por
  *    extenso para "o profissional decidiu não medir".
  * 3. Fora da faixa não se anuncia só por cor: ganha seta de direção e a palavra.
+ *
+ * O número usa a fonte de dados (algarismos de mesma largura) e a faixa de referência vem logo
+ * abaixo, em tinta terciária: quem lê compara o valor com a faixa sem mudar de linha.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -39,9 +42,7 @@ const formato = useClinicFormat()
 const status = computed(() => statusDaMedicao(props.valor, props.faixa))
 const texto = computed(() => formato.medicao(props.valor, props.faixa))
 const faixaTexto = computed(() => formato.faixaDeReferencia(props.faixa))
-const desvio = computed(() =>
-  props.valor ? desvioRelativo(props.valor, props.faixa) : 0,
-)
+const desvio = computed(() => (props.valor ? desvioRelativo(props.valor, props.faixa) : 0))
 
 const seta = computed(() => {
   if (status.value === 'acima') {
@@ -59,7 +60,8 @@ const seta = computed(() => {
 const intenso = computed(() => desvio.value >= 0.5)
 
 const titulo = computed(
-  () => `${props.rotulo}: ${texto.value} · ${t('clinico.prontuario.referencia')} ${faixaTexto.value}`,
+  () =>
+    `${props.rotulo}: ${texto.value} · ${t('clinico.prontuario.referencia')} ${faixaTexto.value}`,
 )
 </script>
 
@@ -72,9 +74,9 @@ const titulo = computed(
     <span v-if="variante === 'cartao'" class="ref__rotulo">{{ rotulo }}</span>
 
     <span class="ref__linha">
-      <span class="ref__valor clinic-value">{{ texto }}</span>
-      <i v-if="seta" :class="seta" class="ref__seta" aria-hidden="true" />
+      <span class="ref__valor ui-num clinic-value">{{ texto }}</span>
       <span v-if="status === 'acima' || status === 'abaixo'" class="ref__status">
+        <i v-if="seta" :class="seta" class="ref__seta" aria-hidden="true" />
         {{ formato.statusDeFaixa(status) }}
       </span>
       <span v-if="variante === 'linha' && !compacto" class="ref__faixa">{{ faixaTexto }}</span>
@@ -87,101 +89,107 @@ const titulo = computed(
 <style scoped>
 .ref {
   display: grid;
-  gap: 0.1rem;
   min-width: 0;
+  align-content: start;
+  gap: 3px;
 }
 
 .ref--cartao {
-  padding: var(--clinic-cell-padding-y) var(--clinic-cell-padding-x);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-}
-
-/* Variante de linha: sem moldura, sem rótulo, sem fundo. Só o valor e o que ele significa. */
-.ref--linha .ref__linha {
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-
-.ref--linha .ref__valor {
-  font-size: var(--clinic-font-base);
+  padding: 10px 12px 11px;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  background: var(--superficie);
 }
 
 .ref__rotulo {
-  color: var(--clinic-faint);
-  font-size: 0.75rem;
-  font-weight: 600;
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ref__linha {
   display: flex;
   min-width: 0;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.3rem;
+  gap: 4px 8px;
 }
 
-.ref__valor {
+.ref .ref__valor {
   min-width: 0;
   overflow: hidden;
-  font-weight: 700;
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.ref__seta {
-  font-size: 0.65rem;
+/* Variante de linha: sem moldura, sem rótulo, sem fundo. Só o valor e o que ele significa. */
+.ref--linha .ref__valor {
+  font-size: 14.5px;
 }
 
+/* A palavra do julgamento, com a seta de direção: um selo de risco, da família do kit. */
 .ref__status {
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ref__seta {
+  font-size: 12px;
 }
 
 .ref__faixa {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-family: var(--font-dados);
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
-.ref--dentro .ref__valor {
-  color: var(--clinic-text);
-}
-
 /*
- * Fora da faixa se anuncia pelo conjunto — moldura, fundo, seta e a palavra —, não por um
- * filete na borda esquerda. Filete colorido é decoração barata: some em qualquer recorte e
- * não sobrevive à leitura por voz.
+ * Fora da faixa se anuncia pelo conjunto — a moldura, o número na tinta de risco e o selo com a
+ * seta e a palavra —, não por um filete na borda. Filete colorido some em qualquer recorte e não
+ * sobrevive à leitura por voz.
  */
 .ref--acima.ref--cartao,
 .ref--abaixo.ref--cartao {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
+  border-color: color-mix(in oklab, var(--risco) 45%, var(--linha));
+  background: color-mix(in oklab, var(--risco-fundo) 55%, var(--superficie));
 }
 
 .ref--acima .ref__valor,
-.ref--abaixo .ref__valor,
-.ref--acima .ref__seta,
-.ref--abaixo .ref__seta,
-.ref--acima .ref__status,
-.ref--abaixo .ref__status {
-  color: var(--clinic-risk-text);
+.ref--abaixo .ref__valor {
+  color: var(--risco-tinta);
 }
 
 /* Desvio grande engrossa a moldura inteira, não um lado dela. */
 .ref--intenso.ref--cartao {
   border-width: 2px;
-}
-
-.ref--intenso .ref__valor {
-  font-weight: 800;
+  border-color: var(--risco);
+  padding: 9px 11px 10px;
 }
 
 .ref--nao-aferido .ref__valor {
-  color: var(--clinic-muted);
-  font-style: italic;
-  font-weight: 600;
+  color: var(--tinta-2);
+  font-family: var(--font-texto);
+  font-size: 14.5px;
+  font-weight: 500;
 }
 </style>

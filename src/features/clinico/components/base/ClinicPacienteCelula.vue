@@ -49,42 +49,46 @@ function iniciaisDe(nome: string) {
 </template>
 
 <style scoped>
+/* A linha de lista do kit (`ui-linha`), em miniatura: rosto, nome em 600 e a meta em tinta 2. */
 .paciente {
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
   min-width: 0;
+  align-items: center;
+  gap: 12px;
 }
 
 .paciente__texto {
   display: grid;
-  gap: 0.1rem;
   min-width: 0;
+  gap: 2px;
 }
 
 .paciente__linha {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
   min-width: 0;
+  align-items: center;
+  gap: 8px;
 }
 
 /* O nome é o último a ceder: o selo ao lado encolhe antes de "Amora" virar "Am…". */
 .paciente__nome {
-  flex-shrink: 0;
   max-width: 100%;
+  flex-shrink: 0;
   overflow: hidden;
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .paciente__meta {
   overflow: hidden;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

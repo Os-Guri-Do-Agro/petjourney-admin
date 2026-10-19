@@ -4,6 +4,10 @@
  *
  * Uma seção com título, descrição opcional e grade de campos. Serve de âncora de navegação
  * por teclado: cada seção tem `id`, e o modo teclado do prontuário salta entre elas.
+ *
+ * É uma folha do Trilha (formulário é o que se lê junto): fio fino, raio 16, sem sombra, e
+ * espaço confortável entre os campos — o prontuário é preenchido com pressa, e campo apertado é
+ * onde o dedo erra.
  */
 withDefaults(
   defineProps<{
@@ -38,7 +42,7 @@ withDefaults(
     </header>
 
     <p v-if="somenteLeitura && motivoSomenteLeitura" class="bloco__leitura" role="status">
-      <i class="ph ph-lock" aria-hidden="true" />
+      <i class="ph ph-lock-simple" aria-hidden="true" />
       <span>{{ motivoSomenteLeitura }}</span>
     </p>
 
@@ -51,70 +55,87 @@ withDefaults(
 <style scoped>
 .bloco {
   display: grid;
-  gap: var(--clinic-space-4);
-  padding: var(--clinic-space-5);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+  gap: 18px;
+  padding: 22px 24px 24px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
+  color: var(--tinta);
 }
 
+/* Somente leitura: a folha afunda um degrau. Continua legível — é para ler, não para mexer. */
 .bloco--leitura {
-  background: var(--clinic-surface-soft);
+  background: var(--superficie-2);
 }
 
 .bloco__cabecalho {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--clinic-space-3);
+  gap: 12px;
 }
 
 .bloco__titulos {
+  display: grid;
   min-width: 0;
+  gap: 4px;
 }
 
 .bloco__titulo {
   margin: 0;
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
 }
 
 .bloco__descricao {
-  margin: 0.2rem 0 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-base);
+  max-width: 72ch;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.5;
 }
 
 .bloco__acoes {
   display: flex;
   flex: 0 0 auto;
-  gap: var(--clinic-space-2);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 
 .bloco__leitura {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 10px;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-base);
-  font-weight: 650;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.bloco__leitura i {
+  flex: none;
+  font-size: 16px;
 }
 
 .bloco__grade {
   display: grid;
   grid-template-columns: repeat(var(--grade-colunas), minmax(0, 1fr));
-  gap: var(--clinic-space-4);
+  gap: 18px 20px;
 }
 
 @media (max-width: 900px) {
+  .bloco {
+    padding: 18px 16px 20px;
+  }
+
   .bloco__grade {
     grid-template-columns: 1fr;
   }

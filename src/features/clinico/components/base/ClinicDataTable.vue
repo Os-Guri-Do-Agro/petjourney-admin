@@ -1,8 +1,11 @@
 <script setup lang="ts" generic="T">
 /**
- * Tabela densa do módulo clínico.
+ * Tabela do módulo clínico, na folha do Trilha.
  *
- * Densidade vem dos tokens (32/36/44 px de linha), não de prop: duas tabelas com alturas
+ * Uma folha (`--superficie`, fio `--linha`, raio 16, sem sombra) com o rótulo das colunas em
+ * caixa normal e linhas de 58 px — a mesma altura das linhas de lista (`ui-linha`), para que a
+ * tabela de faltas e a pauta do Hoje leiam como a mesma família. A densidade escolhida na Agenda
+ * ainda vale aqui (46/58/64 px), mas vem da raiz, não de prop: duas tabelas com alturas
  * diferentes na mesma tela seria ruído. Coluna numérica é tabular por padrão — coluna de
  * número que dança na vertical obriga a reler linha a linha, e reler número é onde o erro
  * entra.
@@ -302,15 +305,13 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
               Coluna ordenável é um botão de verdade, não um `div` com `@click`: é o que dá
               foco por teclado e ativação por `Enter` de graça.
             -->
-            <Button
+            <button
               v-if="coluna.ordenarPor"
               type="button"
               class="tabela__ordenar"
-              text
-              size="small"
               @click="alternarOrdenacao(coluna)"
             >
-              <span>{{ coluna.rotulo }}</span>
+              <span class="tabela__ordenar-rotulo">{{ coluna.rotulo }}</span>
               <!--
                 A seta só aparece na coluna ativa; nas demais, um traço discreto no hover diz
                 que dá para ordenar. Sete setas cinzas no cabeçalho ensinam a ignorar todas.
@@ -320,13 +321,13 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
                 :class="
                   ordenacao.coluna === coluna.id
                     ? ordenacao.direcao === 'asc'
-                      ? 'ph-sort-ascending'
-                      : 'ph-sort-descending'
+                      ? 'ph-arrow-up'
+                      : 'ph-arrow-down'
                     : 'ph-arrows-down-up tabela__seta--fantasma'
                 "
                 aria-hidden="true"
               />
-            </Button>
+            </button>
 
             <template v-else>{{ coluna.rotulo }}</template>
           </div>
@@ -345,24 +346,30 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
           clique parece quebrada; com o motivo, é uma regra.
         -->
         <p v-if="somenteLeitura && motivoSomenteLeitura" class="tabela__leitura" role="status">
-          <i class="ph ph-lock" aria-hidden="true" />
+          <i class="ph ph-lock-simple" aria-hidden="true" />
           <span>{{ motivoSomenteLeitura }}</span>
         </p>
 
+        <!--
+          Os três estados têm a cara dos estados da página (`UiPagina`): o sinal num disco, uma
+          frase e, quando existe, a saída. A tabela que carrega, falha ou volta vazia continua
+          sendo a mesma folha — o cabeçalho das colunas fica, e diz o que vai aparecer ali.
+        -->
         <div v-if="carregando" class="tabela__estado" role="status" aria-live="polite">
-          <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
-          <span>{{ t('clinico.tabela.carregando') }}</span>
+          <span class="tabela__girando" aria-hidden="true" />
+          <p class="tabela__estado-frase">{{ t('clinico.tabela.carregando') }}</p>
         </div>
 
         <div v-else-if="erro" class="tabela__estado tabela__estado--erro" role="alert">
-          <i class="ph ph-warning-circle" aria-hidden="true" />
-          <span>{{ erro }}</span>
+          <span class="tabela__estado-icone" aria-hidden="true">
+            <i class="ph ph-warning-circle" />
+          </span>
+          <p class="tabela__estado-frase">{{ erro }}</p>
           <Button
             type="button"
             class="tabela__retry"
             severity="secondary"
             outlined
-            size="small"
             icon="ph ph-arrow-clockwise"
             :label="t('clinico.tabela.tentarDeNovo')"
             @click="emit('tentarDeNovo')"
@@ -370,9 +377,11 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
         </div>
 
         <div v-else-if="vazia" class="tabela__estado tabela__estado--vazio">
-          <i class="ph ph-tray" aria-hidden="true" />
-          <strong>{{ vazioTitulo || t('clinico.tabela.vazio') }}</strong>
-          <span v-if="vazioDescricao">{{ vazioDescricao }}</span>
+          <span class="tabela__estado-icone" aria-hidden="true"><i class="ph ph-tray" /></span>
+          <strong class="tabela__estado-titulo">{{
+            vazioTitulo || t('clinico.tabela.vazio')
+          }}</strong>
+          <p v-if="vazioDescricao" class="tabela__estado-frase">{{ vazioDescricao }}</p>
 
           <!--
             A saída do vazio.
@@ -398,6 +407,7 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
             :data-linha="chave(linha)"
             role="row"
             tabindex="0"
+            :aria-selected="selecionadaId === chave(linha) ? true : undefined"
             @click="aoSelecionar(linha)"
             @dblclick="emit('ativar', linha)"
             @keydown="aoTeclar($event, indice, linha)"
@@ -463,12 +473,25 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 </template>
 
 <style scoped>
+/*
+ * A folha. Plana: no Trilha a sombra é só do que flutua, e a tabela não flutua — ela é o chão
+ * da tela. O fio `--linha` é quem separa a folha do fundo.
+ */
 .tabela {
+  /*
+   * 58 px na densidade média, e a escolha da Agenda vale aqui também (52 na compacta, 70 na
+   * confortável): o token da densidade é a linha antiga de 32/36/44 px, e a régua nova sai dele.
+   */
+  --tabela-linha: calc(var(--clinic-row-height, 36px) * 1.5 + 4px);
+  --tabela-recuo: 18px;
+
   overflow: hidden;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font-family: var(--font-texto);
+  font-size: 14px;
 }
 
 /* Tabela larga rola dentro de si mesma; a página nunca rola na horizontal. */
@@ -485,59 +508,95 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
   display: grid;
   grid-template-columns: var(--colunas);
   align-items: center;
-  gap: var(--clinic-space-3);
-  padding: 0 var(--clinic-space-4);
+  gap: 16px;
+  padding: 0 var(--tabela-recuo);
 }
 
+/* ---------------------------------------------------------------------- cabeçalho */
+
+/*
+ * O rótulo das colunas é frase, como o resto do sistema: 12.5 px, peso 550, tinta secundária.
+ * A caixa alta espaçada era o rótulo do design anterior — gritava mais alto que o dado.
+ */
 .tabela__cabecalho {
   position: sticky;
   top: 0;
   z-index: 1;
-  min-height: var(--clinic-hit-target);
-  padding-block: 0.35rem;
-  border-bottom: 1px solid var(--clinic-line);
-  background: var(--clinic-surface-soft);
+  min-height: 44px;
+  border-bottom: 1px solid var(--linha);
+  background: var(--superficie);
 }
 
-.tabela__th {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+/* `.tabela .tabela__th` vence a regra global antiga de `.hc-tema .tabela__th`. */
+.tabela .tabela__th {
+  min-width: 0;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+  letter-spacing: 0;
+  line-height: 1.3;
+  text-transform: none;
 }
 
 /* ------------------------------------------------------------------------- ordenação */
 
 /*
- * O botão herda a tipografia do cabeçalho (caixa alta, espaçamento, cor apagada): ele é o
- * rótulo da coluna, só que clicável. O fundo de hover do tema num rótulo de 11 px vira uma
- * pílula maior que a palavra — fica só a mudança de cor.
+ * O botão é o próprio rótulo da coluna, só que clicável: herda a tipografia do cabeçalho e
+ * troca o fundo de hover por uma mudança de tinta. Um fundo de botão atrás de uma palavra de
+ * 12 px vira uma pílula maior que a palavra.
  */
-.tabela__ordenar.p-button {
+.tabela__ordenar {
+  position: relative;
+  display: inline-flex;
   max-width: 100%;
-  gap: 0.3rem;
+  min-height: 28px;
+  align-items: center;
   padding: 0;
-  border-radius: 0.3rem;
+  border: 0;
+  border-radius: 4px;
+  background: none;
   color: inherit;
+  cursor: pointer;
   font: inherit;
   letter-spacing: inherit;
-  text-transform: inherit;
+  text-align: inherit;
 }
 
-.tabela__ordenar.p-button:not(:disabled):hover,
-.tabela__ordenar.p-button:not(:disabled):active {
-  background: transparent;
-  color: var(--clinic-text);
+.tabela__ordenar-rotulo {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.tabela__th--ativa {
-  color: var(--clinic-text);
+.tabela__ordenar:hover {
+  color: var(--tinta);
 }
 
+.tabela__ordenar:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 3px;
+}
+
+.tabela .tabela__th--ativa {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+/*
+ * A seta mora **fora** do rótulo, no vão entre as colunas (16 px): dentro dele ela tomava a
+ * largura de uma coluna estreita mesmo invisível, e "Faltas" virava "Fa…". Na coluna alinhada ao
+ * fim ela passa para o lado de dentro, à esquerda do rótulo.
+ */
 .tabela__seta {
-  flex: 0 0 auto;
-  font-size: 0.62rem;
+  position: absolute;
+  top: 50%;
+  inset-inline-start: calc(100% + 2px);
+  font-size: 13px;
+  transform: translateY(-50%);
+}
+
+.tabela__celula--fim .tabela__seta {
+  inset-inline: auto calc(100% + 2px);
 }
 
 /*
@@ -546,13 +605,14 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
  * a que marca a ordenação em vigor.
  */
 .tabela__seta--fantasma {
+  color: var(--tinta-3);
   opacity: 0;
-  transition: opacity 120ms ease;
+  transition: opacity var(--pj-tempo-curto, 140ms) ease;
 }
 
 .tabela__ordenar:hover .tabela__seta--fantasma,
 .tabela__ordenar:focus-visible .tabela__seta--fantasma {
-  opacity: 0.55;
+  opacity: 1;
 }
 
 /* -------------------------------------------------------------------- somente leitura */
@@ -560,21 +620,65 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 .tabela__leitura {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   margin: 0;
-  padding: var(--clinic-cell-padding-y) var(--clinic-space-4);
-  border-bottom: 1px solid var(--clinic-line);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  padding: 10px var(--tabela-recuo);
+  border-bottom: 1px solid var(--linha);
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 500;
 }
 
+.tabela__leitura i {
+  font-size: 15px;
+}
+
+/* --------------------------------------------------------------------------- linhas */
+
 .tabela__linha {
-  min-height: var(--clinic-row-height);
-  border-bottom: 1px solid var(--clinic-line-soft);
+  position: relative;
+  min-height: var(--tabela-linha);
+  border-bottom: 1px solid var(--linha);
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background-color var(--pj-tempo-curto, 140ms) ease;
+}
+
+.tabela__linha:last-child {
+  border-bottom: none;
+}
+
+.tabela__linha:hover {
+  background: var(--superficie-2);
+}
+
+/*
+ * A linha escolhida: o fundo de musgo e o traço do lugar na borda esquerda — o mesmo traço das
+ * linhas de lista (`ui-marca`), aqui dizendo "é esta" e não uma gravidade. O texto não muda de
+ * peso: negrito numa linha inteira faz a coluna saltar de largura.
+ */
+.tabela__linha--selecionada,
+.tabela__linha--selecionada:hover {
+  background: var(--musgo-fundo);
+}
+
+.tabela__linha--selecionada::before {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  inset-inline-start: 0;
+  width: 4px;
+  border-start-end-radius: 4px;
+  border-end-end-radius: 4px;
+  background: var(--pj-lugar, var(--musgo));
+  content: '';
+}
+
+/* O foco do teclado é um contorno por dentro: a folha corta qualquer anel que saia dela. */
+.tabela__linha.clinic-focusable:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: -2px;
+  box-shadow: none;
 }
 
 /* Leitura não é "desabilitada": o texto continua com contraste cheio, só não é clicável. */
@@ -586,31 +690,23 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
   background: transparent;
 }
 
-.tabela__linha:last-child {
-  border-bottom: none;
-}
-
-.tabela__linha:hover {
-  background: var(--clinic-surface-soft);
-}
-
-.tabela__linha--selecionada {
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
-}
-
 .tabela__td {
   min-width: 0;
-  padding-block: var(--clinic-cell-padding-y);
+  padding-block: 8px;
+  line-height: 1.4;
   overflow-wrap: anywhere;
 }
 
 /*
- * Valor clínico não quebra. Sem isto, uma coluna estreita transforma "7,8 kg" numa coluna de
- * caracteres empilhados — e número ilegível numa tabela clínica é pior que número cortado.
+ * Valor clínico não quebra e usa a fonte de dados. Sem isto, uma coluna estreita transforma
+ * "7,8 kg" numa coluna de caracteres empilhados — e número ilegível numa tabela clínica é pior
+ * que número cortado.
  */
 .tabela__td.clinic-value {
+  font-family: var(--font-dados);
+  font-feature-settings: 'tnum' 1;
+  font-size: 14.5px;
+  font-variant-numeric: tabular-nums;
   overflow-wrap: normal;
   white-space: nowrap;
 }
@@ -625,7 +721,7 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 .tabela__acoes {
   display: flex;
   justify-content: flex-end;
-  gap: 0.15rem;
+  gap: 4px;
 }
 
 /*
@@ -638,8 +734,8 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
  * carrega o seu chevron sempre aceso.
  *
  * Fraca é o que a mantém honesta: ela informa que a linha leva a algum lugar sem competir com o
- * dado, que é o que a pessoa veio ler. No `:hover` e no foco ela ganha cor e contraste, e aí sim
- * responde "esta aqui".
+ * dado, que é o que a pessoa veio ler. No `:hover` e no foco ela ganha tinta, e aí sim responde
+ * "esta aqui".
  */
 .tabela__abrir {
   display: flex;
@@ -648,30 +744,39 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
 .tabela__seta-abrir {
   display: grid;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 0;
-  border-radius: var(--clinic-radius-chip);
+  border-radius: 8px;
   background: none;
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: 16px;
   place-items: center;
   transition:
-    color 150ms ease-out,
-    background 150ms ease-out;
+    color var(--pj-tempo-curto, 140ms) ease-out,
+    background-color var(--pj-tempo-curto, 140ms) ease-out;
 }
 
 .tabela__linha:hover .tabela__seta-abrir,
 .tabela__linha:focus-within .tabela__seta-abrir {
-  color: var(--clinic-accent-strong);
+  color: var(--tinta);
 }
 
-.tabela__seta-abrir:hover,
+.tabela__seta-abrir:hover {
+  background: var(--superficie-3);
+  color: var(--tinta);
+}
+
 .tabela__seta-abrir:focus-visible {
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 0;
+}
+
+/* RTL: a seta aponta para onde a leitura avança. */
+[dir='rtl'] .tabela__seta-abrir i {
+  transform: scaleX(-1);
 }
 
 /* Linha só de leitura não leva a lugar nenhum: a seta seria uma promessa falsa. */
@@ -679,28 +784,33 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
   display: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .tabela__seta-abrir {
-    transition: none;
-  }
-}
-
 /*
- * As ações só aparecem no hover, no foco de dentro delas ou na linha selecionada. Uma fileira
- * de ícones em todas as linhas de uma tabela de duzentas transforma a coluna num padrão
+ * As ações de ícone só aparecem no hover, no foco de dentro delas ou na linha selecionada. Uma
+ * fileira de ícones em todas as linhas de uma tabela de duzentas transforma a coluna num padrão
  * visual que compete com o dado — e a tabela clínica existe para ler dado.
  */
 .tabela__acao.p-button {
-  min-height: var(--clinic-hit-target);
+  min-width: 36px;
+  min-height: 36px;
   flex: 0 0 auto;
-  border-radius: var(--clinic-radius-control);
+  border-radius: 10px;
   opacity: 0;
   transition:
-    opacity 120ms ease,
-    background 120ms ease;
+    opacity var(--pj-tempo-curto, 140ms) ease,
+    background-color var(--pj-tempo-curto, 140ms) ease;
+}
+
+.tabela__acao.p-button.p-button-text {
+  color: var(--tinta-2);
+}
+
+.tabela__acao.p-button.p-button-text:not(:disabled):hover {
+  background: var(--superficie-3);
+  color: var(--tinta);
 }
 
 .tabela__linha:hover .tabela__acao,
+.tabela__linha:focus-within .tabela__acao,
 .tabela__linha--selecionada .tabela__acao,
 .tabela__acao.p-button:focus-visible {
   opacity: 1;
@@ -712,24 +822,46 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
  * aparece com o mouse em cima é a ação que ninguém encontra.
  */
 .tabela__acao--escrita.p-button {
+  padding-inline: 12px;
+  border-color: var(--linha-forte);
+  background: var(--superficie);
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 550;
   opacity: 1;
-  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.tabela__acao--escrita.p-button:not(:disabled):hover {
+  border-color: var(--tinta-3);
+  background: var(--superficie-2);
+  color: var(--tinta);
 }
 
 .tabela__acao.p-button-icon-only {
-  width: var(--clinic-hit-target);
+  width: 36px;
 }
 
-.tabela__acao--perigo.p-button:not(:disabled):hover {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
+.tabela__acao.p-button :deep(.p-button-icon) {
+  font-size: 16px;
+}
+
+.tabela__acao--perigo.p-button.p-button-text,
+.tabela__acao--perigo.p-button.p-button-outlined {
+  color: var(--risco-tinta);
+}
+
+.tabela__acao--perigo.p-button:not(:disabled):hover,
+.tabela__acao--perigo.p-button.p-button-text:not(:disabled):hover {
+  border-color: var(--risco-fundo);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .tabela__linha:hover .tabela__acao.p-button:disabled,
 .tabela__linha--selecionada .tabela__acao.p-button:disabled {
   cursor: not-allowed;
-  opacity: 0.4;
+  opacity: 0.45;
 }
 
 /*
@@ -752,39 +884,84 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
   white-space: nowrap;
 }
 
+/* --------------------------------------------------------------------------- estados */
+
 .tabela__estado {
   display: grid;
-  gap: var(--clinic-space-2);
   justify-items: center;
-  padding: var(--clinic-space-6) var(--clinic-space-4);
-  color: var(--clinic-muted);
+  gap: 8px;
+  padding: 44px 24px 48px;
   text-align: center;
 }
 
-.tabela__estado i {
-  color: var(--clinic-accent-strong);
-  font-size: 1.15rem;
+.tabela__estado-icone {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 4px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 24px;
 }
 
-.tabela__estado--erro {
-  color: var(--clinic-risk-text);
+.tabela__estado--erro .tabela__estado-icone {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
-.tabela__estado--erro i {
-  color: var(--clinic-risk-text);
+.tabela__estado-titulo {
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.tabela__estado-acao {
-  margin-top: var(--clinic-space-2);
+.tabela__estado-frase {
+  max-width: 48ch;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-.tabela__estado--vazio strong {
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-value);
+.tabela__estado--erro .tabela__estado-frase {
+  color: var(--tinta);
 }
 
+.tabela__estado-acao,
 .tabela__retry.p-button {
-  min-height: var(--clinic-hit-target);
+  margin-top: 10px;
+}
+
+/* O mesmo anel que gira no carregando da página. */
+.tabela__girando {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
+  border: 3px solid var(--superficie-3);
+  border-top-color: var(--pj-lugar, var(--musgo));
+  border-radius: 50%;
+  animation: tabela-girar 0.9s linear infinite;
+}
+
+@keyframes tabela-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabela__linha,
+  .tabela__seta-abrir,
+  .tabela__acao.p-button,
+  .tabela__seta--fantasma {
+    transition: none;
+  }
+
+  .tabela__girando {
+    animation-duration: 2.4s;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -795,6 +972,12 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
   .tabela__celula--oculta {
     display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .tabela {
+    --tabela-recuo: 14px;
   }
 }
 </style>

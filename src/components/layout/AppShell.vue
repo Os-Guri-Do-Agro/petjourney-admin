@@ -592,9 +592,15 @@ onUnmounted(() => {
   top: 0;
 }
 
+/*
+ * Gaveta lateral que não é modal (resposta de pedido, detalhe de saque) empurra a tela em vez de
+ * cobri-la: `useSidePanelOffset` põe a largura dela em `--pj-side-panel-offset`.
+ */
 .palco__conteudo {
   flex: 1;
   min-width: 0;
+  padding-inline-end: var(--pj-side-panel-offset, 0px);
+  transition: padding-inline-end 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .palco__conteudo:focus {
@@ -686,7 +692,8 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shell--compacto .barra {
+  .shell--compacto .barra,
+  .palco__conteudo {
     transition: none;
   }
 }

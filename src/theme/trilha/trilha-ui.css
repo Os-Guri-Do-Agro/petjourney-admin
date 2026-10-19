@@ -333,3 +333,65 @@
   gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
 }
+
+/* ------------------------------------------------------------------- controle segmentado
+ * O `SelectButton` do PrimeVue em toda tela: trilho afundado e a opção escolhida em papel, com
+ * sombra baixa — a escolha sobe, em vez de ganhar cor. Vence as regras de `.clinic-scope` (que
+ * pintavam o escolhido em tom de acento e, no escuro, deixavam a palavra clara sobre fundo claro).
+ * O `.grupo` (Programas, abas do Portal) tem desenho próprio e fica de fora.
+ */
+
+html.trilha .p-selectbutton:not(.grupo) {
+  gap: 2px;
+  padding: 3px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--superficie-3);
+}
+
+html.trilha .p-selectbutton:not(.grupo) .p-togglebutton,
+html.trilha .p-selectbutton:not(.grupo) .p-togglebutton:first-child,
+html.trilha .p-selectbutton:not(.grupo) .p-togglebutton:last-child {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--tinta-2);
+}
+
+html.trilha .p-selectbutton:not(.grupo) .p-togglebutton .p-togglebutton-content {
+  padding: 6px 14px;
+  border-radius: 9px;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-weight: 500;
+}
+
+html.trilha
+  .p-selectbutton:not(.grupo)
+  .p-togglebutton:not(.p-togglebutton-checked):not(.p-disabled):hover {
+  background: transparent;
+  color: var(--tinta);
+}
+
+html.trilha .p-selectbutton:not(.grupo) .p-togglebutton.p-togglebutton-checked {
+  background: transparent;
+  color: var(--tinta);
+}
+
+html.trilha
+  .p-selectbutton:not(.grupo)
+  .p-togglebutton.p-togglebutton-checked
+  .p-togglebutton-content {
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+html.trilha .p-selectbutton:not(.grupo) .p-togglebutton:has(:focus-visible) {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 1px;
+}

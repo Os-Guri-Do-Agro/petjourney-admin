@@ -1,10 +1,11 @@
 <script setup lang="ts">
 /**
- * Chip de alerta clínico.
+ * Chip de alerta clínico — da família do selo do kit (`ui-selo`).
  *
- * Cor sozinha não carrega informação aqui: cada severidade tem ícone próprio e tratamento de
- * borda distinto, para que em escala de cinza — ou para quem não distingue vermelho de verde —
- * "risco" continue diferente de "atenção". O texto sempre acompanha; chip sem rótulo é enfeite.
+ * Mesma peça que diz "Urgente" na pauta: 24 px, raio 7, ícone e palavra, no par de cor do estado
+ * (risco, atenção, neutro). Cor sozinha não carrega informação aqui: cada severidade tem ícone
+ * próprio, para que em escala de cinza — ou para quem não distingue vermelho de verde — "risco"
+ * continue diferente de "atenção". O texto sempre acompanha; chip sem rótulo é enfeite.
  */
 import { computed } from 'vue'
 
@@ -28,22 +29,36 @@ const iconePorSeveridade: Record<AlertSeverity, string> = {
   info: 'ph ph-info',
 }
 
+/** O par de cor do selo: informação é o neutro do kit. */
+const TOM: Record<AlertSeverity, 'risco' | 'atencao' | 'neutro'> = {
+  risco: 'risco',
+  atencao: 'atencao',
+  info: 'neutro',
+}
+
 const icone = computed(() => props.icone || iconePorSeveridade[props.severidade])
-const titulo = computed(() =>
-  props.detalhe ? `${props.rotulo} — ${props.detalhe}` : props.rotulo,
-)
+const titulo = computed(() => (props.detalhe ? `${props.rotulo}: ${props.detalhe}` : props.rotulo))
 </script>
 
 <template>
   <span
     class="chip"
-    :class="[`chip--${severidade}`, { 'chip--compacto': compacto }]"
+    :class="[`chip--${severidade}`, `chip--tom-${TOM[severidade]}`, { 'chip--compacto': compacto }]"
     :title="titulo"
   >
     <i :class="icone" aria-hidden="true" />
-    <span v-if="!compacto" class="chip__rotulo">{{ rotulo }}</span>
-    <span v-if="!compacto && detalhe" class="chip__detalhe">{{ detalhe }}</span>
-    <span v-if="compacto" class="sr-only">{{ titulo }}</span>
+    <!--
+      Rótulo e detalhe são **um texto só**: a reticência, quando falta espaço, corta o fim da
+      frase (e não a frase inteira), e quem precisa do selo inteiro (o cabeçalho do paciente)
+      deixa esse texto quebrar linha ao lado do ícone.
+    -->
+    <span v-if="!compacto" class="chip__texto">
+      <span class="chip__rotulo">{{ rotulo }}<template v-if="detalhe">:</template></span>
+      <template v-if="detalhe">
+        {{ ' ' }}<span class="chip__detalhe">{{ detalhe }}</span>
+      </template>
+    </span>
+    <span v-else class="sr-only">{{ titulo }}</span>
   </span>
 </template>
 
@@ -52,60 +67,58 @@ const titulo = computed(() =>
   display: inline-flex;
   min-width: 0;
   max-width: 100%;
+  height: 24px;
+  flex: none;
   align-items: center;
-  gap: var(--clinic-space-1);
-  padding: 0.15rem 0.5rem;
-  border: 1px solid transparent;
-  border-radius: var(--clinic-radius-chip);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  line-height: 1.5;
-}
-
-.chip--compacto {
-  padding: 0.15rem 0.3rem;
+  gap: 5px;
+  padding: 0 9px;
+  border-radius: 7px;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-family: var(--font-texto);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .chip i {
   flex: 0 0 auto;
-  font-size: 0.7rem;
+  font-size: 14px;
 }
 
-.chip__rotulo {
+.chip--compacto {
+  width: 24px;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Altura de linha cheia: o corte do `overflow` não pode comer a perna do "p" de "Dipirona". */
+.chip__texto {
+  min-width: 0;
   overflow: hidden;
+  line-height: 1.4;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
+/* O detalhe é o nome do que se trata ("Dipirona"): um peso abaixo do rótulo. */
 .chip__detalhe {
-  overflow: hidden;
-  font-weight: 550;
-  opacity: 0.85;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight: 500;
 }
 
-/* Risco: borda cheia e fundo quente — o único lugar onde o quente é permitido. */
-.chip--risco {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
+.chip--tom-risco {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
-/* Atenção: borda tracejada, distinguível de risco sem depender do matiz. */
-.chip--atencao {
-  border-color: var(--clinic-attention-line);
-  border-style: dashed;
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
+.chip--tom-atencao {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
-/* Informação: sem borda, o mais silencioso dos três. */
-.chip--info {
-  border-color: transparent;
-  background: var(--clinic-neutral-bg);
-  color: var(--clinic-neutral-text);
+.chip--tom-neutro {
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
 }
 
 .sr-only {
