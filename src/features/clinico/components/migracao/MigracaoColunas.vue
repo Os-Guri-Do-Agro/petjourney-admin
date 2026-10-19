@@ -104,7 +104,7 @@ function estadoDa(
 ): { classe: string; icone: string; texto: string } | null {
   if (coluna.destino === null && coluna.preenchidas > 0) {
     return {
-      classe: 'hc--pessego',
+      classe: 'ui-selo--atencao',
       icone: 'ph ph-warning-circle',
       texto: t(
         'clinico.migracao.colunas.naoVem',
@@ -116,7 +116,7 @@ function estadoDa(
 
   if (coluna.como === 'pessoa') {
     return {
-      classe: 'hc--verde',
+      classe: 'ui-selo--ok',
       icone: 'ph ph-check',
       texto: t('clinico.migracao.colunas.voceEscolheu'),
     }
@@ -124,7 +124,7 @@ function estadoDa(
 
   if (coluna.destino !== null && coluna.confianca === 'provavel') {
     return {
-      classe: 'hc--lilas',
+      classe: 'ui-selo--lugar',
       icone: 'ph ph-sparkle',
       texto: t('clinico.migracao.colunas.sugestao'),
     }
@@ -138,22 +138,22 @@ function estadoDa(
   <Drawer
     v-model:visible="visivel"
     position="right"
-    class="mg-tema hc-tema mg-painel"
-    :close-button-props="{ severity: 'secondary', text: false, rounded: true }"
+    class="mg-tema mg-painel clinic-scope"
+    :close-button-props="{ severity: 'secondary', text: false, rounded: false }"
     :pt="{ root: { style: 'width: min(46rem, 100vw)' } }"
   >
     <template #header>
-      <div class="cabeca">
+      <div class="mg-painel__cabeca">
         <!-- O foco de abertura vem para o título, não para o fechar: o anel no X, sem ninguém ter
              usado o teclado, fazia do fechar a coisa mais chamativa do painel. -->
-        <h2 class="cabeca__titulo" tabindex="-1" autofocus>
+        <h2 class="mg-painel__titulo" tabindex="-1" autofocus>
           {{ t('clinico.migracao.colunas.titulo') }}
         </h2>
-        <p v-if="migracao.planilha" class="cabeca__arquivo">
-          <i class="ph ph-file" aria-hidden="true" />
+        <p v-if="migracao.planilha" class="mg-painel__arquivo">
+          <i class="ph ph-file-text" aria-hidden="true" />
           <bdi>{{ migracao.planilha.arquivo }}</bdi>
-          <span>·</span>
-          <span>
+          <span aria-hidden="true">·</span>
+          <span class="ui-num">
             {{
               t('clinico.migracao.colunas.usadas', {
                 n: comConteudo.length - deFora.length,
@@ -170,7 +170,7 @@ function estadoDa(
         {{ travado ? t('clinico.migracao.colunas.travado') : t('clinico.migracao.colunas.texto') }}
       </p>
 
-      <p v-if="faltam.length" class="mg-caixa mg-caixa--coral aviso" role="status">
+      <p v-if="faltam.length" class="mg-aviso mg-aviso--risco" role="status">
         <i class="ph ph-warning-circle" aria-hidden="true" />
         <span>{{ t('clinico.migracao.colunas.faltam', { campos: faltam.join(', ') }) }}</span>
       </p>
@@ -196,11 +196,16 @@ function estadoDa(
           </p>
         </header>
 
-        <ul class="lista">
-          <li v-for="coluna in secao.lista" :key="coluna.coluna" class="coluna">
+        <ul class="ui-folha ui-lista">
+          <li
+            v-for="coluna in secao.lista"
+            :key="coluna.coluna"
+            class="coluna"
+            :class="{ 'ui-marca ui-marca--atencao': secao.id === 'fora' }"
+          >
             <div class="coluna__planilha">
               <span class="coluna__nome">
-                <span class="mg-chip hc--cinza">{{
+                <span class="mg-letra">{{
                   t('clinico.migracao.colunas.coluna', { letra: coluna.letra })
                 }}</span>
                 <strong
@@ -215,11 +220,7 @@ function estadoDa(
                   {{ t('clinico.migracao.colunas.vazia') }}
                 </em>
               </span>
-              <span
-                v-if="estadoDa(coluna)"
-                class="mg-chip coluna__estado"
-                :class="estadoDa(coluna)!.classe"
-              >
+              <span v-if="estadoDa(coluna)" class="ui-selo" :class="estadoDa(coluna)!.classe">
                 <i :class="estadoDa(coluna)!.icone" aria-hidden="true" />
                 {{ estadoDa(coluna)!.texto }}
               </span>
@@ -249,95 +250,39 @@ function estadoDa(
 </template>
 
 <style scoped>
-.cabeca {
-  display: grid;
-  min-width: 0;
-  gap: 0.2rem;
-}
-
-.cabeca__titulo:focus {
-  outline: none;
-}
-
-.cabeca__titulo {
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.cabeca__arquivo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-  gap: 0.4rem;
-}
-
-.cabeca__arquivo .ph {
-  color: var(--hc-marca);
-  font-size: 0.8rem;
-}
-
 .corpo {
   display: grid;
   align-content: start;
-  padding-top: 0.25rem;
-  gap: 1.5rem;
+  gap: 24px;
+  padding-top: 2px;
   container-type: inline-size;
-}
-
-.aviso {
-  display: flex;
-  align-items: center;
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  gap: 0.6rem;
-}
-
-.aviso .ph {
-  color: var(--hc-coral-tinta);
 }
 
 .secao {
   display: grid;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
 .secao__cabeca {
   display: grid;
-  gap: 0.25rem;
+  gap: 3px;
 }
 
 .secao__titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1.0625rem;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .secao__texto {
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.9375rem;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.5;
-}
-
-/* Um cartão só, com fio entre as colunas — o mesmo ritmo do painel de linhas. */
-.lista {
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--hc-borda);
-  border-radius: 1rem;
-  background: var(--hc-cartao);
-  box-shadow: var(--hc-sombra);
-  list-style: none;
 }
 
 /*
@@ -345,54 +290,56 @@ function estadoDa(
  * o olho liga um ao outro sem descer. No estreito, o destino desce para baixo da coluna.
  */
 .coluna {
+  position: relative;
   display: grid;
   align-items: center;
-  padding: 0.9rem 1rem;
-  gap: 0.75rem 1.25rem;
+  gap: 12px 20px;
+  padding: 14px 18px;
   grid-template-columns: minmax(0, 1fr) 14rem;
-}
-
-.coluna + .coluna {
-  border-top: 1px solid var(--hc-linha);
 }
 
 .coluna__planilha {
   display: grid;
-  justify-items: start;
   min-width: 0;
-  gap: 0.45rem;
+  justify-items: start;
+  gap: 7px;
 }
 
 .coluna__nome {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
-  gap: 0.5rem;
+  gap: 8px;
+  color: var(--tinta);
+  font-size: 14.5px;
+}
+
+.coluna__nome strong {
+  font-weight: 600;
 }
 
 .coluna__exemplos {
   display: flex;
   flex-wrap: wrap;
   min-width: 0;
-  gap: 0.35rem;
+  max-width: 100%;
+  gap: 5px;
 }
 
 .coluna__vazia {
-  color: var(--hc-tinta-3);
-  font-size: 0.875rem;
+  color: var(--tinta-3);
+  font-size: 13px;
 }
 
 .coluna__destino {
   display: grid;
-  gap: 0.3rem;
+  gap: 5px;
 }
 
 .coluna__rotulo {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 @container (max-width: 34rem) {

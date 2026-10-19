@@ -1,11 +1,12 @@
 <script setup lang="ts">
 /**
- * O que precisa ser visto antes de tudo — a primeira coisa abaixo do nome do paciente.
+ * O que precisa ser visto antes de tudo — a primeira coisa abaixo da capa do paciente.
  *
- * "Saltar aos olhos" aqui é **ordem e tinta**, não superfície: o sinal de risco é a primeira
- * linha da página, com ícone e texto no tom de risco, e nada mais na tela usa esse tom. Uma
- * faixa vermelha cheia gritaria igual para a perda de peso de 16% e para a tosse de ontem, e a
- * pessoa aprende a não ler faixa.
+ * Uma faixa de avisos: uma linha por sinal, risco primeiro, cada uma com a marca de gravidade na
+ * borda **e** o selo com a palavra (Risco, Atenção) — a cor nunca diz sozinha. "Saltar aos olhos"
+ * continua sendo ordem e tinta, não superfície: a linha não é pintada de vermelho inteira, porque
+ * uma faixa cheia gritaria igual para a perda de peso de 16% e para a tosse de ontem, e a pessoa
+ * aprende a não ler faixa.
  *
  * Sem sinal nenhum, a linha diz isso — "nada fora do comum" também é resposta, e é a que o vet
  * mais quer ler.
@@ -46,6 +47,11 @@ function kg(valor: number): string {
 function percentual(valor: number): string {
   /* Sinal de menos tipográfico: o hífen some ao lado do parêntese. */
   return `${valor > 0 ? '+' : valor < 0 ? '−' : ''}${formato.numero(Math.abs(valor), 1)}%`
+}
+
+/** A gravidade do sinal no vocabulário do kit: o `info` do cadastro é o neutro. */
+function tomDe(severidade: SinalDoResumo['severidade']): 'risco' | 'atencao' | 'neutro' {
+  return severidade === 'info' ? 'neutro' : severidade
 }
 
 const restantes = computed(() => Math.max(0, props.sinais.length - props.limite))
@@ -152,23 +158,19 @@ const linhas = computed(() =>
     :class="{ 'sinais--sem-moldura': semMoldura }"
     :aria-label="t('clinico.resumoDoPaciente.sinais.titulo')"
   >
-    <ul v-if="linhas.length > 0" class="sinais__lista">
+    <ul v-if="linhas.length > 0" class="sinais__lista ui-lista">
       <li
         v-for="linha in linhas"
         :key="linha.chave"
-        class="sinal"
-        :class="`sinal--${linha.severidade}`"
+        class="sinal ui-marca"
+        :class="[`sinal--${linha.severidade}`, `ui-marca--${tomDe(linha.severidade)}`]"
       >
-        <i
-          class="sinal__icone ph"
-          :class="
-            linha.severidade === 'risco' ? 'ph-warning' : 'ph-warning-circle'
-          "
-          aria-hidden="true"
-        />
+        <span class="sinal__icone" aria-hidden="true">
+          <i class="ph" :class="linha.severidade === 'risco' ? 'ph-warning' : 'ph-warning-circle'" />
+        </span>
         <span class="sinal__texto">
           <strong class="sinal__titulo">{{ linha.titulo }}</strong>
-          <span class="sinal__detalhe clinic-value">{{ linha.detalhe }}</span>
+          <span class="sinal__detalhe">{{ linha.detalhe }}</span>
           <span v-if="linha.relato" class="sinal__relato">
             {{ t('clinico.resumoDoPaciente.sinais.relato', { relato: linha.relato }) }}
           </span>
@@ -177,7 +179,9 @@ const linhas = computed(() =>
           </span>
           <q v-if="linha.citacao" class="sinal__citacao">{{ linha.citacao }}</q>
         </span>
-        <span class="sr-only">{{ formato.severidade(linha.severidade) }}</span>
+        <span class="ui-selo sinal__selo" :class="`ui-selo--${tomDe(linha.severidade)}`">
+          {{ formato.severidade(linha.severidade) }}
+        </span>
       </li>
     </ul>
 
@@ -194,112 +198,140 @@ const linhas = computed(() =>
 
 <style scoped>
 .sinais {
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
+  overflow: hidden;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
 }
 
 .sinais--sem-moldura {
-  padding: 0;
+  overflow: visible;
   border: 0;
+  border-radius: 0;
   background: transparent;
 }
 
-.sinais__mais {
-  margin: var(--clinic-space-2) 0 0;
-  padding-inline-start: calc(1rem + var(--clinic-space-2));
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 600;
-}
-
-.sinais__lista {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  gap: var(--clinic-space-3);
-  list-style: none;
-}
-
 .sinal {
+  position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
-  gap: var(--clinic-space-2);
+  gap: 4px 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 14px 18px 14px 22px;
 }
 
 .sinal__icone {
-  margin-top: 0.15em;
-  font-size: 1rem;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-size: 18px;
 }
 
-.sinal--risco .sinal__icone,
-.sinal--risco .sinal__titulo {
-  color: var(--clinic-risk-text);
+.sinal--risco .sinal__icone {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .sinal--atencao .sinal__icone {
-  color: var(--clinic-attention-text);
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .sinal__texto {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
   align-items: baseline;
-  column-gap: var(--clinic-space-2);
-  row-gap: var(--clinic-space-1);
-  min-width: 0;
+  gap: 2px 10px;
+  padding-top: 5px;
 }
 
 .sinal__titulo {
-  font-size: var(--clinic-font-body);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 .sinal--risco .sinal__titulo {
-  font-size: var(--clinic-font-title);
+  color: var(--risco-tinta);
 }
 
 .sinal__detalhe {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-body);
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* O relato fica na linha de baixo, em peso de texto: é a palavra que o enum não tinha. */
 .sinal__relato {
   flex-basis: 100%;
-  font-size: var(--clinic-font-body);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* O motivo e o padrão de antes, numa linha própria, em tinta de texto. */
 .sinal__complemento {
   flex-basis: 100%;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-body);
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 /* A fala do responsável, na íntegra: é o contexto que o número não dá. */
 .sinal__citacao {
   flex-basis: 100%;
-  padding-inline-start: var(--clinic-space-3);
-  border-inline-start: 2px solid var(--clinic-risk-line);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-body);
+  margin-top: 4px;
+  padding-inline-start: 12px;
+  border-inline-start: 2px solid var(--linha-forte);
+  color: var(--tinta-2);
+  font-size: 14px;
   font-style: italic;
+}
+
+.sinal__selo {
+  margin-top: 4px;
+}
+
+.sinais__mais {
+  margin: 0;
+  padding: 10px 18px 14px 68px;
+  border-top: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 550;
 }
 
 .sinais__nada {
   display: flex;
   align-items: center;
+  gap: 10px;
   margin: 0;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-muted);
-  font-weight: 600;
+  padding: 14px 18px;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 550;
 }
 
 .sinais__nada .ph {
-  color: var(--clinic-ok-text);
+  color: var(--ok-tinta);
+  font-size: 20px;
+}
+
+@media (max-width: 520px) {
+  .sinal {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .sinal__selo {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 2px;
+  }
 }
 </style>

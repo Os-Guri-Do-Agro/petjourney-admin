@@ -38,7 +38,7 @@ import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -196,11 +196,32 @@ const mostraTudo = computed(() => props.modo === 'completo')
 /**
  * Na página, o título é do cabeçalho da página.
  *
- * Dois títulos iguais empilhados — o do `PartnerPageFrame` e o do formulário — fazem a tela
+ * Dois títulos iguais empilhados — o da `UiPagina` e o do formulário — fazem a tela
  * parecer ter sido montada duas vezes. No diálogo não há cabeçalho de página, e o formulário
  * precisa se apresentar.
  */
 const mostraTitulo = computed(() => props.modo === 'rapido')
+
+/** Os títulos das partes, para cada `section` dizer ao leitor de tela qual parte é. */
+const idBase = useId()
+
+/** A categoria do alerta, no mesmo ícone que a lista de pacientes usa no selo. */
+const ICONE_DO_ALERTA: Record<PetAlertKind, string> = {
+  alergia: 'ph ph-warning-diamond',
+  agressivo: 'ph ph-hand-palm',
+  cronico: 'ph ph-heartbeat',
+  'medicacao-continua': 'ph ph-pill',
+  imunossuprimido: 'ph ph-shield-warning',
+  gestante: 'ph ph-baby',
+  inadimplente: 'ph ph-wallet',
+}
+
+/** A marca de gravidade na borda do alerta em edição: a mesma régua da lista. */
+const MARCA_DA_SEVERIDADE: Record<AlertSeverity, string> = {
+  risco: 'ui-marca--risco',
+  atencao: 'ui-marca--atencao',
+  info: 'ui-marca--neutro',
+}
 
 const opcoesEspecie = computed(() =>
   ESPECIES.map((valor) => ({ valor, rotulo: formato.especie(valor) })),
@@ -529,89 +550,106 @@ async function salvar() {
 }
 </script>
 
+
 <template>
-  <form class="novo clinic-scope" @submit.prevent="salvar">
+  <form class="novo clinic-scope" :class="`novo--${modo}`" novalidate @submit.prevent="salvar">
     <header v-if="mostraTitulo" class="novo__topo">
       <h3>{{ t('clinico.paciente.novo.titulo') }}</h3>
       <p>{{ t('clinico.paciente.novo.ajuda') }}</p>
     </header>
 
-    <ClinicField :rotulo="t('clinico.paciente.novo.nome')" obrigatorio :erro="erroDe('nome')">
-      <template #default="{ id, descrito }">
-        <InputText :id="id" v-model="nome" fluid autofocus :aria-describedby="descrito" />
-      </template>
-    </ClinicField>
+    <!-- ============================================================ o pet -->
+    <section class="parte" :aria-labelledby="mostraTudo ? `${idBase}-pet` : undefined">
+      <header v-if="mostraTudo" class="parte__cabeca">
+        <span class="parte__icone" aria-hidden="true"><i class="ph ph-paw-print" /></span>
+        <span class="parte__titulos">
+          <h2 :id="`${idBase}-pet`" class="parte__titulo">
+            {{ t('clinico.paciente.novo.secao.pet.titulo') }}
+          </h2>
+          <p class="parte__descricao">{{ t('clinico.paciente.novo.secao.pet.descricao') }}</p>
+        </span>
+      </header>
 
-    <div class="novo__linha">
-      <ClinicField :rotulo="t('clinico.pacientes.filtro.especie')">
-        <template #default="{ id }">
-          <Select
-            :input-id="id"
-            v-model="especie"
-            fluid
-            option-label="rotulo"
-            option-value="valor"
-            :options="opcoesEspecie"
-            :pt="{ overlay: { class: 'clinic-overlay' } }"
-          />
-        </template>
-      </ClinicField>
+      <div class="parte__corpo" :class="{ 'ui-folha': mostraTudo }">
+        <div class="grade">
+          <ClinicField
+            :rotulo="t('clinico.paciente.novo.nome')"
+            obrigatorio
+            largo
+            :erro="erroDe('nome')"
+          >
+            <template #default="{ id, descrito }">
+              <InputText :id="id" v-model="nome" fluid autofocus :aria-describedby="descrito" />
+            </template>
+          </ClinicField>
 
-      <ClinicField :rotulo="t('clinico.paciente.novo.raca')">
-        <template #default="{ id }">
-          <InputText :id="id" v-model="raca" fluid />
-        </template>
-      </ClinicField>
-    </div>
+          <ClinicField :rotulo="t('clinico.pacientes.filtro.especie')">
+            <template #default="{ id }">
+              <Select
+                :input-id="id"
+                v-model="especie"
+                fluid
+                option-label="rotulo"
+                option-value="valor"
+                :options="opcoesEspecie"
+                :pt="{ overlay: { class: 'clinic-overlay' } }"
+              />
+            </template>
+          </ClinicField>
 
-    <div class="novo__linha">
-      <ClinicField :rotulo="t('clinico.paciente.novo.sexo')">
-        <ClinicToggleGroup
-          v-model="sexo"
-          :opcoes="opcoesSexo"
-          :rotulo="t('clinico.paciente.novo.sexo')"
-        />
-      </ClinicField>
+          <ClinicField :rotulo="t('clinico.paciente.novo.raca')">
+            <template #default="{ id }">
+              <InputText :id="id" v-model="raca" fluid />
+            </template>
+          </ClinicField>
 
-      <ClinicField :rotulo="t('clinico.paciente.novo.castrado')">
-        <ClinicToggleGroup
-          v-model="castrado"
-          :opcoes="opcoesCastrado"
-          :rotulo="t('clinico.paciente.novo.castrado')"
-        />
-      </ClinicField>
-    </div>
+          <ClinicField :rotulo="t('clinico.paciente.novo.sexo')">
+            <ClinicToggleGroup
+              v-model="sexo"
+              :opcoes="opcoesSexo"
+              :rotulo="t('clinico.paciente.novo.sexo')"
+            />
+          </ClinicField>
 
-    <!-- Opcionais e rotulados como tal: campo em branco aqui é resposta honesta. -->
-    <div class="novo__linha">
-      <ClinicField :rotulo="t('clinico.paciente.novo.nascimento')" :erro="erroDe('nascimento')">
-        <template #default="{ id, descrito }">
-          <ClinicDateField
-            v-model="nascimento"
-            :input-id="id"
-            :max="clinicClock.today()"
-            :aria-describedby="descrito"
-          />
-        </template>
-      </ClinicField>
+          <ClinicField :rotulo="t('clinico.paciente.novo.castrado')">
+            <ClinicToggleGroup
+              v-model="castrado"
+              :opcoes="opcoesCastrado"
+              :rotulo="t('clinico.paciente.novo.castrado')"
+            />
+          </ClinicField>
 
-      <ClinicField
-        :rotulo="t('clinico.paciente.novo.peso')"
-        :dica="t('clinico.paciente.novo.pesoDica')"
-      >
-        <template #default="{ id, descrito }">
-          <InputNumber
-            :input-id="id"
-            v-model="pesoKg"
-            fluid
-            suffix=" kg"
-            :min-fraction-digits="1"
-            :max-fraction-digits="2"
-            :aria-describedby="descrito"
-          />
-        </template>
-      </ClinicField>
-    </div>
+          <!-- Opcionais e rotulados como tal: campo em branco aqui é resposta honesta. -->
+          <ClinicField :rotulo="t('clinico.paciente.novo.nascimento')" :erro="erroDe('nascimento')">
+            <template #default="{ id, descrito }">
+              <ClinicDateField
+                v-model="nascimento"
+                :input-id="id"
+                :max="clinicClock.today()"
+                :aria-describedby="descrito"
+              />
+            </template>
+          </ClinicField>
+
+          <ClinicField
+            :rotulo="t('clinico.paciente.novo.peso')"
+            :dica="t('clinico.paciente.novo.pesoDica')"
+          >
+            <template #default="{ id, descrito }">
+              <InputNumber
+                :input-id="id"
+                v-model="pesoKg"
+                fluid
+                suffix=" kg"
+                :min-fraction-digits="1"
+                :max-fraction-digits="2"
+                :aria-describedby="descrito"
+              />
+            </template>
+          </ClinicField>
+        </div>
+      </div>
+    </section>
 
     <!--
       O resto da ficha existe só no modo completo — ou seja, só na página.
@@ -621,61 +659,77 @@ async function salvar() {
       salvar vai junto. Quem precisa do cadastro inteiro vai à página, que rola como página.
     -->
     <template v-if="mostraTudo">
-      <section class="bloco">
-        <h4 class="clinic-label">{{ t('clinico.paciente.novo.identificacao') }}</h4>
+      <!-- ========================================================== identificação -->
+      <section class="parte" :aria-labelledby="`${idBase}-identificacao`">
+        <header class="parte__cabeca">
+          <span class="parte__icone" aria-hidden="true">
+            <i class="ph ph-identification-card" />
+          </span>
+          <span class="parte__titulos">
+            <h2 :id="`${idBase}-identificacao`" class="parte__titulo">
+              {{ t('clinico.paciente.novo.identificacao') }}
+            </h2>
+            <p class="parte__descricao">
+              {{ t('clinico.paciente.novo.secao.identificacao.descricao') }}
+            </p>
+          </span>
+        </header>
 
         <!--
           Microchip, pelagem e porte na mesma fileira.
 
           São as três perguntas curtas da identificação, e `auto-fit` deixa a fileira decidir:
-          três colunas quando o diálogo é largo, duas quando o porte não se aplica (gato, ave,
-          réptil), uma no celular. Porte sozinho numa linha inteira parecia um campo esquecido.
+          três colunas quando há largura, duas quando o porte não se aplica (gato, ave, réptil),
+          uma no celular. Porte sozinho numa linha inteira parecia um campo esquecido.
         -->
-        <div class="identificacao">
-          <ClinicField
-            :rotulo="t('clinico.paciente.novo.microchip')"
-            :dica="t('clinico.paciente.novo.microchipDica')"
-          >
-            <template #default="{ id, descrito }">
-              <InputText
-                :id="id"
-                :model-value="microchip"
-                fluid
-                inputmode="numeric"
-                maxlength="15"
-                :aria-describedby="descrito"
-                @update:model-value="microchip = somenteDigitos($event ?? '')"
-              />
-            </template>
-          </ClinicField>
+        <div class="parte__corpo ui-folha">
+          <div class="grade grade--tres">
+            <ClinicField
+              :rotulo="t('clinico.paciente.novo.microchip')"
+              :dica="t('clinico.paciente.novo.microchipDica')"
+            >
+              <template #default="{ id, descrito }">
+                <InputText
+                  :id="id"
+                  :model-value="microchip"
+                  fluid
+                  inputmode="numeric"
+                  maxlength="15"
+                  class="ui-num"
+                  :aria-describedby="descrito"
+                  @update:model-value="microchip = somenteDigitos($event ?? '')"
+                />
+              </template>
+            </ClinicField>
 
-          <ClinicField
-            :rotulo="t('clinico.paciente.novo.pelagem')"
-            :dica="t('clinico.paciente.novo.pelagemDica')"
-          >
-            <template #default="{ id, descrito }">
-              <InputText :id="id" v-model="pelagem" fluid :aria-describedby="descrito" />
-            </template>
-          </ClinicField>
+            <ClinicField
+              :rotulo="t('clinico.paciente.novo.pelagem')"
+              :dica="t('clinico.paciente.novo.pelagemDica')"
+            >
+              <template #default="{ id, descrito }">
+                <InputText :id="id" v-model="pelagem" fluid :aria-describedby="descrito" />
+              </template>
+            </ClinicField>
 
-          <ClinicField
-            v-if="pedePorte"
-            :rotulo="t('clinico.paciente.novo.porte')"
-            :dica="t('clinico.paciente.novo.porteDica')"
-          >
-            <template #default="{ id, descrito }">
-              <Select
-                :input-id="id"
-                v-model="porte"
-                fluid
-                option-label="rotulo"
-                option-value="valor"
-                :options="opcoesPorte"
-                :aria-describedby="descrito"
-                :pt="{ overlay: { class: 'clinic-overlay' } }"
-              />
-            </template>
-          </ClinicField>
+            <ClinicField
+              v-if="pedePorte"
+              :rotulo="t('clinico.paciente.novo.porte')"
+              :dica="t('clinico.paciente.novo.porteDica')"
+            >
+              <template #default="{ id, descrito }">
+                <Select
+                  :input-id="id"
+                  v-model="porte"
+                  fluid
+                  option-label="rotulo"
+                  option-value="valor"
+                  :options="opcoesPorte"
+                  :aria-describedby="descrito"
+                  :pt="{ overlay: { class: 'clinic-overlay' } }"
+                />
+              </template>
+            </ClinicField>
+          </div>
         </div>
       </section>
 
@@ -686,229 +740,276 @@ async function salvar() {
         chega: quem entrega o animal no balcão é quem sabe da alergia, e é agora que ele está
         falando. Depois, a alergia vira um bilhete colado no monitor.
       -->
-      <section class="bloco">
-        <h4 class="clinic-label">{{ t('clinico.paciente.novo.alertas') }}</h4>
-        <p class="bloco__ajuda">{{ t('clinico.paciente.novo.alertasAjuda') }}</p>
+      <section class="parte" :aria-labelledby="`${idBase}-alertas`">
+        <header class="parte__cabeca">
+          <span class="parte__icone parte__icone--alerta" aria-hidden="true">
+            <i class="ph ph-warning-diamond" />
+          </span>
+          <span class="parte__titulos">
+            <h2 :id="`${idBase}-alertas`" class="parte__titulo">
+              {{ t('clinico.paciente.novo.alertas') }}
+            </h2>
+            <p class="parte__descricao">{{ t('clinico.paciente.novo.alertasAjuda') }}</p>
+          </span>
+        </header>
 
-        <div class="fichas" role="group" :aria-label="t('clinico.paciente.novo.alertas')">
-          <Button
-            v-for="kind in ALERTAS_DO_CADASTRO"
-            :key="kind"
-            type="button"
-            class="ficha"
-            :class="{ 'ficha--ativa': alertaAtivo(kind) }"
-            severity="secondary"
-            outlined
-            rounded
-            size="small"
-            :icon="alertaAtivo(kind) ? 'ph ph-check' : 'ph ph-plus'"
-            :label="formato.alerta(kind)"
-            :aria-pressed="alertaAtivo(kind)"
-            @click="alternarAlerta(kind)"
-          />
-        </div>
-
-        <div v-for="alerta in alertas" :key="alerta.kind" class="alerta">
-          <div class="alerta__topo">
-            <strong>{{ formato.alerta(alerta.kind) }}</strong>
-            <ClinicToggleGroup
-              v-model="alerta.severidade"
-              :opcoes="opcoesSeveridade"
-              :rotulo="t('clinico.paciente.novo.gravidade')"
-            />
+        <div class="parte__corpo ui-folha">
+          <div class="fichas" role="group" :aria-label="t('clinico.paciente.novo.alertas')">
+            <button
+              v-for="kind in ALERTAS_DO_CADASTRO"
+              :key="kind"
+              type="button"
+              class="ficha"
+              :class="{ 'ficha--ativa': alertaAtivo(kind) }"
+              :aria-pressed="alertaAtivo(kind)"
+              @click="alternarAlerta(kind)"
+            >
+              <i
+                :class="alertaAtivo(kind) ? 'ph ph-check' : ICONE_DO_ALERTA[kind]"
+                class="ficha__icone"
+                aria-hidden="true"
+              />
+              <span>{{ formato.alerta(kind) }}</span>
+            </button>
           </div>
 
-          <InputText
-            v-model="alerta.detalhe"
-            fluid
-            :placeholder="dicaDoAlerta(alerta.kind)"
-            :aria-label="`${formato.alerta(alerta.kind)} — ${dicaDoAlerta(alerta.kind)}`"
-          />
+          <ul v-if="alertas.length > 0" class="alertas">
+            <li
+              v-for="alerta in alertas"
+              :key="alerta.kind"
+              class="alerta ui-marca"
+              :class="MARCA_DA_SEVERIDADE[alerta.severidade]"
+            >
+              <div class="alerta__topo">
+                <strong class="alerta__nome">
+                  <i :class="ICONE_DO_ALERTA[alerta.kind]" aria-hidden="true" />
+                  {{ formato.alerta(alerta.kind) }}
+                </strong>
+                <ClinicToggleGroup
+                  v-model="alerta.severidade"
+                  :opcoes="opcoesSeveridade"
+                  :rotulo="t('clinico.paciente.novo.gravidade')"
+                />
+              </div>
+
+              <InputText
+                v-model="alerta.detalhe"
+                fluid
+                :placeholder="dicaDoAlerta(alerta.kind)"
+                :aria-label="`${formato.alerta(alerta.kind)}: ${dicaDoAlerta(alerta.kind)}`"
+              />
+            </li>
+          </ul>
         </div>
       </section>
     </template>
 
-    <section class="bloco">
-      <h4 class="clinic-label">{{ t('clinico.paciente.responsavel') }}</h4>
-
-      <!--
-        Os dois caminhos que o cadastro aceita, e só eles.
-
-        Antes a escolha morava dentro do próprio seletor, cuja primeira opção era "Cadastrar novo
-        responsável": quem abria a tela via um campo já preenchido e não tinha por que desconfiar
-        de que ali havia uma decisão a tomar. O caso mais comum da clínica — cliente antigo com
-        bicho novo — ficava atrás de um clique que ninguém sabia dar, e o resultado era a mesma
-        pessoa cadastrada duas vezes.
-      -->
-      <ClinicToggleGroup
-        v-model="origemResponsavel"
-        :opcoes="opcoesOrigem"
-        :rotulo="t('clinico.paciente.responsavel')"
-      />
-
-      <template v-if="!usaResponsavelNovo">
-        <ClinicField
-          :rotulo="t('clinico.paciente.novo.quemResponde')"
-          obrigatorio
-          :erro="erroDe('responsavelEscolhido')"
-        >
-          <template #default="{ id, descrito }">
-            <Select
-              :input-id="id"
-              v-model="responsavelExistente"
-              filter
-              fluid
-              option-label="rotulo"
-              option-value="valor"
-              :options="opcoesResponsavel"
-              :filter-placeholder="t('clinico.paciente.novo.buscarResponsavel')"
-              :placeholder="t('clinico.paciente.novo.escolhaResponsavel')"
-              :aria-describedby="descrito"
-              :pt="{ overlay: { class: 'clinic-overlay' } }"
-            >
-              <template #option="{ option }">
-                <span class="opcao">
-                  <strong>{{ option.rotulo }}</strong>
-                  <small v-if="option.detalhe">{{ option.detalhe }}</small>
-                </span>
-              </template>
-            </Select>
-          </template>
-        </ClinicField>
-
-        <!--
-          O que já se sabe da pessoa escolhida.
-
-          Sem isto, "Ana Paula Souza" escolhida numa lista de sessenta nomes é um nome e nenhuma
-          confirmação de que é a Ana Paula certa. O telefone é o que quem está no balcão consegue
-          conferir em voz alta.
-        -->
-        <p v-if="responsavelEscolhido" class="escolhido">
-          <i class="ph ph-check-circle" aria-hidden="true" />
-          <span>
-            <bdi dir="ltr">{{ responsavelEscolhido.telefone }}</bdi>
-            <template v-if="responsavelEscolhido.documento">
-              · {{ responsavelEscolhido.documento }}
-            </template>
-          </span>
-        </p>
-      </template>
-
-      <template v-else>
-        <div class="novo__linha">
-          <ClinicField
-            :rotulo="t('clinico.paciente.novo.nomeResponsavel')"
-            obrigatorio
-            :erro="erroDe('responsavelNome')"
+    <!-- ============================================================ responsável -->
+    <section class="parte" :aria-labelledby="`${idBase}-responsavel`">
+      <header class="parte__cabeca">
+        <span v-if="mostraTudo" class="parte__icone" aria-hidden="true">
+          <i class="ph ph-user" />
+        </span>
+        <span class="parte__titulos">
+          <component
+            :is="mostraTudo ? 'h2' : 'h4'"
+            :id="`${idBase}-responsavel`"
+            class="parte__titulo"
           >
-            <template #default="{ id, descrito }">
-              <InputText :id="id" v-model="novoNome" fluid :aria-describedby="descrito" />
-            </template>
-          </ClinicField>
-
-          <ClinicField
-            :rotulo="t('clinico.paciente.novo.telefone')"
-            obrigatorio
-            :erro="erroDe('telefone')"
-          >
-            <template #default="{ id, descrito }">
-              <InputText
-                :id="id"
-                v-model="novoTelefone"
-                fluid
-                inputmode="tel"
-                placeholder="(11) 90000-0000"
-                :aria-describedby="descrito"
-              />
-            </template>
-          </ClinicField>
-        </div>
-
-        <!--
-          Quem já existe e parece ser esta pessoa.
-
-          Aparece **enquanto** se digita, e não ao salvar: descobrir a duplicata depois de
-          apertar o botão significa já ter dois cadastros e precisar de alguém para fundi-los.
-        -->
-        <div v-if="semelhantes.length > 0" class="repetido" role="status">
-          <p class="repetido__titulo">
-            <i class="ph ph-warning" aria-hidden="true" />
-            {{ t('clinico.paciente.novo.semelhanteTitulo') }}
+            {{ t('clinico.paciente.responsavel') }}
+          </component>
+          <p v-if="mostraTudo" class="parte__descricao">
+            {{ t('clinico.paciente.novo.secao.responsavel.descricao') }}
           </p>
+        </span>
+      </header>
 
-          <div v-for="item in semelhantes" :key="item.tutor.id" class="repetido__linha">
-            <span class="repetido__quem">
-              <strong>{{ item.tutor.nome }}</strong>
-              <small
-                ><bdi dir="ltr">{{ item.tutor.telefone }}</bdi> ·
-                {{ motivoDaSemelhanca(item.motivo) }}</small
+      <div class="parte__corpo" :class="{ 'ui-folha': mostraTudo }">
+        <!--
+          Os dois caminhos que o cadastro aceita, e só eles.
+
+          Antes a escolha morava dentro do próprio seletor, cuja primeira opção era "Cadastrar novo
+          responsável": quem abria a tela via um campo já preenchido e não tinha por que desconfiar
+          de que ali havia uma decisão a tomar. O caso mais comum da clínica — cliente antigo com
+          bicho novo — ficava atrás de um clique que ninguém sabia dar, e o resultado era a mesma
+          pessoa cadastrada duas vezes.
+        -->
+        <ClinicToggleGroup
+          v-model="origemResponsavel"
+          class="origem"
+          :opcoes="opcoesOrigem"
+          :rotulo="t('clinico.paciente.responsavel')"
+        />
+
+        <template v-if="!usaResponsavelNovo">
+          <ClinicField
+            :rotulo="t('clinico.paciente.novo.quemResponde')"
+            obrigatorio
+            :erro="erroDe('responsavelEscolhido')"
+          >
+            <template #default="{ id, descrito }">
+              <Select
+                :input-id="id"
+                v-model="responsavelExistente"
+                filter
+                fluid
+                option-label="rotulo"
+                option-value="valor"
+                :options="opcoesResponsavel"
+                :filter-placeholder="t('clinico.paciente.novo.buscarResponsavel')"
+                :placeholder="t('clinico.paciente.novo.escolhaResponsavel')"
+                :aria-describedby="descrito"
+                :pt="{ overlay: { class: 'clinic-overlay' } }"
               >
+                <template #option="{ option }">
+                  <span class="opcao">
+                    <strong>{{ option.rotulo }}</strong>
+                    <small v-if="option.detalhe">{{ option.detalhe }}</small>
+                  </span>
+                </template>
+              </Select>
+            </template>
+          </ClinicField>
+
+          <!--
+            O que já se sabe da pessoa escolhida.
+
+            Sem isto, "Ana Paula Souza" escolhida numa lista de sessenta nomes é um nome e nenhuma
+            confirmação de que é a Ana Paula certa. O telefone é o que quem está no balcão consegue
+            conferir em voz alta.
+          -->
+          <p v-if="responsavelEscolhido" class="escolhido">
+            <i class="ph ph-check-circle" aria-hidden="true" />
+            <span class="escolhido__nome">{{ responsavelEscolhido.nome }}</span>
+            <span class="escolhido__dados ui-num">
+              <bdi dir="ltr">{{ responsavelEscolhido.telefone }}</bdi>
+              <template v-if="responsavelEscolhido.documento">
+                · {{ responsavelEscolhido.documento }}
+              </template>
             </span>
-            <Button
-              size="small"
-              severity="secondary"
-              outlined
-              :label="t('clinico.paciente.novo.usarEste')"
-              @click="usarResponsavel(item.tutor.id)"
-            />
-          </div>
-        </div>
+          </p>
+        </template>
 
-        <div class="novo__linha">
-          <ClinicField :rotulo="t('clinico.paciente.novo.documento')" :erro="erroDe('documento')">
-            <template #default="{ id, descrito }">
-              <InputText
-                :id="id"
-                v-model="novoDocumento"
-                fluid
-                inputmode="numeric"
-                placeholder="000.000.000-00"
-                :aria-describedby="descrito"
-              />
-            </template>
-          </ClinicField>
-
-          <ClinicField :rotulo="t('clinico.paciente.novo.email')" :erro="erroDe('email')">
-            <template #default="{ id, descrito }">
-              <InputText
-                :id="id"
-                v-model="novoEmail"
-                fluid
-                inputmode="email"
-                :aria-describedby="descrito"
-              />
-            </template>
-          </ClinicField>
-        </div>
-
-        <template v-if="mostraTudo">
-          <div class="novo__linha">
+        <template v-else>
+          <div class="grade">
             <ClinicField
-              :rotulo="t('clinico.paciente.novo.telefoneSecundario')"
-              :dica="t('clinico.paciente.novo.telefoneSecundarioDica')"
-              :erro="erroDe('telefoneSecundario')"
+              :rotulo="t('clinico.paciente.novo.nomeResponsavel')"
+              obrigatorio
+              :erro="erroDe('responsavelNome')"
+            >
+              <template #default="{ id, descrito }">
+                <InputText :id="id" v-model="novoNome" fluid :aria-describedby="descrito" />
+              </template>
+            </ClinicField>
+
+            <ClinicField
+              :rotulo="t('clinico.paciente.novo.telefone')"
+              obrigatorio
+              :erro="erroDe('telefone')"
             >
               <template #default="{ id, descrito }">
                 <InputText
                   :id="id"
-                  v-model="novoTelefoneSecundario"
+                  v-model="novoTelefone"
                   fluid
                   inputmode="tel"
+                  placeholder="(11) 90000-0000"
+                  :aria-describedby="descrito"
+                />
+              </template>
+            </ClinicField>
+          </div>
+
+          <!--
+            Quem já existe e parece ser esta pessoa.
+
+            Aparece **enquanto** se digita, e não ao salvar: descobrir a duplicata depois de
+            apertar o botão significa já ter dois cadastros e precisar de alguém para fundi-los.
+            Tom de atenção, e não de risco: cadastro repetido não impede nada — duas pessoas
+            podem ter o mesmo nome, e o telefone da casa é de uma família inteira.
+          -->
+          <div v-if="semelhantes.length > 0" class="repetido" role="status">
+            <p class="repetido__titulo">
+              <i class="ph ph-users-three" aria-hidden="true" />
+              {{ t('clinico.paciente.novo.semelhanteTitulo') }}
+            </p>
+
+            <ul class="repetido__lista">
+              <li v-for="item in semelhantes" :key="item.tutor.id" class="repetido__linha">
+                <span class="repetido__quem">
+                  <strong>{{ item.tutor.nome }}</strong>
+                  <small>
+                    <bdi dir="ltr" class="ui-num">{{ item.tutor.telefone }}</bdi>
+                    <span class="repetido__motivo">{{ motivoDaSemelhanca(item.motivo) }}</span>
+                  </small>
+                </span>
+                <Button
+                  type="button"
+                  size="small"
+                  severity="secondary"
+                  outlined
+                  icon="ph ph-check"
+                  :label="t('clinico.paciente.novo.usarEste')"
+                  @click="usarResponsavel(item.tutor.id)"
+                />
+              </li>
+            </ul>
+          </div>
+
+          <div class="grade">
+            <ClinicField :rotulo="t('clinico.paciente.novo.documento')" :erro="erroDe('documento')">
+              <template #default="{ id, descrito }">
+                <InputText
+                  :id="id"
+                  v-model="novoDocumento"
+                  fluid
+                  inputmode="numeric"
+                  placeholder="000.000.000-00"
                   :aria-describedby="descrito"
                 />
               </template>
             </ClinicField>
 
-            <ClinicField
-              :rotulo="t('clinico.paciente.novo.canalPreferido')"
-              :dica="t('clinico.paciente.novo.canalDica')"
-            >
-              <ClinicToggleGroup
-                v-model="novoCanal"
-                :opcoes="opcoesCanal"
-                :rotulo="t('clinico.paciente.novo.canalPreferido')"
-              />
+            <ClinicField :rotulo="t('clinico.paciente.novo.email')" :erro="erroDe('email')">
+              <template #default="{ id, descrito }">
+                <InputText
+                  :id="id"
+                  v-model="novoEmail"
+                  fluid
+                  inputmode="email"
+                  :aria-describedby="descrito"
+                />
+              </template>
             </ClinicField>
+
+            <template v-if="mostraTudo">
+              <ClinicField
+                :rotulo="t('clinico.paciente.novo.telefoneSecundario')"
+                :dica="t('clinico.paciente.novo.telefoneSecundarioDica')"
+                :erro="erroDe('telefoneSecundario')"
+              >
+                <template #default="{ id, descrito }">
+                  <InputText
+                    :id="id"
+                    v-model="novoTelefoneSecundario"
+                    fluid
+                    inputmode="tel"
+                    :aria-describedby="descrito"
+                  />
+                </template>
+              </ClinicField>
+
+              <ClinicField
+                :rotulo="t('clinico.paciente.novo.canalPreferido')"
+                :dica="t('clinico.paciente.novo.canalDica')"
+              >
+                <ClinicToggleGroup
+                  v-model="novoCanal"
+                  :opcoes="opcoesCanal"
+                  :rotulo="t('clinico.paciente.novo.canalPreferido')"
+                />
+              </ClinicField>
+            </template>
           </div>
 
           <!--
@@ -917,190 +1018,346 @@ async function salvar() {
             Não é dado de cobrança: o receituário de controle especial identifica o comprador por
             nome, documento **e** endereço, e sem ele a farmácia recusa a retenção. Pedi-lo agora
             é o que evita a receita travada no balcão da farmácia meses depois.
+
+            Cada campo tem largura própria porque o conteúdo tem tamanho conhecido: CEP são oito
+            dígitos e UF são duas letras.
           -->
-          <p class="bloco__ajuda">{{ t('clinico.paciente.novo.enderecoAjuda') }}</p>
+          <div
+            v-if="mostraTudo"
+            class="endereco"
+            role="group"
+            :aria-labelledby="`${idBase}-endereco`"
+          >
+            <p :id="`${idBase}-endereco`" class="endereco__titulo">
+              <i class="ph ph-map-pin" aria-hidden="true" />
+              {{ t('clinico.paciente.novo.enderecoCurto') }}
+            </p>
+            <p class="endereco__ajuda">{{ t('clinico.paciente.novo.enderecoDica') }}</p>
 
-          <div class="endereco endereco--rua">
-            <ClinicField :rotulo="t('clinico.paciente.novo.cep')" :erro="erroDe('cep')">
-              <template #default="{ id, descrito }">
-                <InputText
-                  :id="id"
-                  v-model="cep"
-                  fluid
-                  inputmode="numeric"
-                  placeholder="00000-000"
-                  :aria-describedby="descrito"
-                />
-              </template>
-            </ClinicField>
+            <div class="grade grade--rua">
+              <ClinicField :rotulo="t('clinico.paciente.novo.cep')" :erro="erroDe('cep')">
+                <template #default="{ id, descrito }">
+                  <InputText
+                    :id="id"
+                    v-model="cep"
+                    fluid
+                    inputmode="numeric"
+                    placeholder="00000-000"
+                    :aria-describedby="descrito"
+                  />
+                </template>
+              </ClinicField>
 
-            <ClinicField :rotulo="t('clinico.paciente.novo.logradouro')">
-              <template #default="{ id }">
-                <InputText :id="id" v-model="logradouro" fluid />
-              </template>
-            </ClinicField>
+              <ClinicField :rotulo="t('clinico.paciente.novo.logradouro')">
+                <template #default="{ id }">
+                  <InputText :id="id" v-model="logradouro" fluid />
+                </template>
+              </ClinicField>
 
-            <ClinicField :rotulo="t('clinico.paciente.novo.numero')">
-              <template #default="{ id }">
-                <InputText :id="id" v-model="numero" fluid inputmode="numeric" />
-              </template>
-            </ClinicField>
-          </div>
+              <ClinicField :rotulo="t('clinico.paciente.novo.numero')">
+                <template #default="{ id }">
+                  <InputText :id="id" v-model="numero" fluid inputmode="numeric" />
+                </template>
+              </ClinicField>
+            </div>
 
-          <div class="novo__linha">
-            <ClinicField :rotulo="t('clinico.paciente.novo.complemento')">
-              <template #default="{ id }">
-                <InputText :id="id" v-model="complemento" fluid />
-              </template>
-            </ClinicField>
+            <div class="grade">
+              <ClinicField :rotulo="t('clinico.paciente.novo.complemento')">
+                <template #default="{ id }">
+                  <InputText :id="id" v-model="complemento" fluid />
+                </template>
+              </ClinicField>
 
-            <ClinicField :rotulo="t('clinico.paciente.novo.bairro')">
-              <template #default="{ id }">
-                <InputText :id="id" v-model="bairro" fluid />
-              </template>
-            </ClinicField>
-          </div>
+              <ClinicField :rotulo="t('clinico.paciente.novo.bairro')">
+                <template #default="{ id }">
+                  <InputText :id="id" v-model="bairro" fluid />
+                </template>
+              </ClinicField>
+            </div>
 
-          <div class="endereco endereco--cidade">
-            <ClinicField :rotulo="t('clinico.paciente.novo.cidade')">
-              <template #default="{ id }">
-                <InputText :id="id" v-model="cidade" fluid />
-              </template>
-            </ClinicField>
+            <div class="grade grade--cidade">
+              <ClinicField :rotulo="t('clinico.paciente.novo.cidade')">
+                <template #default="{ id }">
+                  <InputText :id="id" v-model="cidade" fluid />
+                </template>
+              </ClinicField>
 
-            <ClinicField :rotulo="t('clinico.paciente.novo.uf')">
-              <template #default="{ id }">
-                <Select
-                  :input-id="id"
-                  v-model="uf"
-                  fluid
-                  filter
-                  option-label="rotulo"
-                  option-value="valor"
-                  :options="opcoesUf"
-                  :pt="{ overlay: { class: 'clinic-overlay' } }"
-                />
-              </template>
-            </ClinicField>
+              <ClinicField :rotulo="t('clinico.paciente.novo.uf')">
+                <template #default="{ id }">
+                  <Select
+                    :input-id="id"
+                    v-model="uf"
+                    fluid
+                    filter
+                    option-label="rotulo"
+                    option-value="valor"
+                    :options="opcoesUf"
+                    :pt="{ overlay: { class: 'clinic-overlay' } }"
+                  />
+                </template>
+              </ClinicField>
+            </div>
           </div>
         </template>
-      </template>
+      </div>
     </section>
 
-    <p v-if="erro" class="novo__erro">{{ erro }}</p>
+    <p v-if="erro" class="novo__erro" role="alert">
+      <i class="ph ph-warning-circle" aria-hidden="true" />
+      {{ erro }}
+    </p>
 
     <footer class="novo__rodape">
-      <Button
-        severity="secondary"
-        text
-        :label="t('clinico.comum.cancelar')"
-        @click="emit('cancelar')"
-      />
-      <Button
-        type="submit"
-        :loading="salvando"
-        :label="
-          modo === 'completo'
-            ? t('clinico.paciente.novo.salvarCompleto')
-            : t('clinico.paciente.novo.salvar')
-        "
-      />
+      <p v-if="mostraTudo" class="novo__obrigatorios">
+        <span class="novo__asterisco" aria-hidden="true">*</span>
+        {{ t('clinico.paciente.novo.obrigatorios') }}
+      </p>
+      <div class="novo__botoes">
+        <Button
+          type="button"
+          severity="secondary"
+          text
+          :label="t('clinico.comum.cancelar')"
+          @click="emit('cancelar')"
+        />
+        <Button
+          type="submit"
+          icon="ph ph-check"
+          :loading="salvando"
+          :label="
+            modo === 'completo'
+              ? t('clinico.paciente.novo.salvarCompleto')
+              : t('clinico.paciente.novo.salvar')
+          "
+        />
+      </div>
     </footer>
   </form>
 </template>
 
 <style scoped>
+/*
+ * Botões secundários (contorno e texto) nas cores do Trilha: o formulário aparece na página e
+ * dentro dos diálogos da agenda, e nos dois o cinza do preset parecia botão desabilitado no escuro.
+ */
 .novo {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+
   display: grid;
-  gap: var(--clinic-space-3);
+  min-width: 0;
+  gap: 18px;
+  color: var(--tinta);
+}
+
+.novo--completo {
+  gap: 28px;
+}
+
+/* Caixa de texto e seletor com a mesma altura: lado a lado, "Espécie" e "Raça" são um par. */
+.novo :deep(.p-inputtext),
+.novo :deep(.p-select) {
+  min-height: 42px;
+}
+
+.novo :deep(.p-select) {
+  align-items: center;
 }
 
 .novo__topo h3 {
   margin: 0;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-value);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .novo__topo p {
-  margin: 0.15rem 0 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  margin: 3px 0 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.45;
 }
 
-.novo__linha {
+/* --------------------------------------------------------------------------------- as partes */
+
+.parte {
   display: grid;
-  gap: var(--clinic-space-3);
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-width: 0;
+  gap: 12px;
 }
 
-.bloco {
-  display: grid;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface-soft);
+.parte__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.identificacao {
+.parte__icone {
   display: grid;
-  gap: var(--clinic-space-3);
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  font-size: 18px;
+}
+
+.parte__icone--alerta {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+.parte__titulos {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.parte__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.parte__descricao {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.parte__corpo {
+  display: grid;
+  min-width: 0;
+  gap: 16px;
+}
+
+.parte__corpo.ui-folha {
+  padding: 20px 22px 22px;
+}
+
+/* No diálogo, o responsável é separado do animal por um fio, sem folha dentro da folha. */
+.novo--rapido .parte + .parte {
+  padding-top: 16px;
+  border-top: 1px solid var(--linha);
+}
+
+.novo--rapido .parte__titulo {
+  font-size: 15px;
+}
+
+/* ---------------------------------------------------------------------------------- a grade */
+
+.grade {
+  display: grid;
+  gap: 16px 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grade--tres {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
 }
 
-.bloco__ajuda {
-  margin: -0.35rem 0 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  line-height: 1.45;
+.grade--rua {
+  grid-template-columns: 9rem minmax(0, 1fr) 6.5rem;
 }
+
+.grade--cidade {
+  grid-template-columns: minmax(0, 1fr) 7.5rem;
+}
+
+.origem {
+  justify-self: start;
+}
+
+/* --------------------------------------------------------------------------------- alertas */
 
 .fichas {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 8px;
 }
 
 /*
- * Ficha de alerta: pílula contornada. A especificidade passa a regra global da clínica para botão
- * secundário contornado, que daria a toda ficha o texto cheio de um botão comum.
+ * Ficha de alerta: um botão de alternar do tamanho da palavra, com o ícone da categoria. Marcada,
+ * ganha o fundo de musgo e o visto no lugar do ícone — forma, fundo e peso, três sinais além da cor.
  */
-.ficha.p-button {
-  gap: 0.3rem;
-  padding: 0.28rem 0.6rem;
-  font-size: var(--clinic-font-label);
+.ficha {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px 0 11px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  transition:
+    background-color var(--pj-tempo-curto, 140ms) ease,
+    border-color var(--pj-tempo-curto, 140ms) ease;
 }
 
-.ficha.p-button.p-button-secondary.p-button-outlined {
-  color: var(--clinic-muted);
+.ficha:hover {
+  border-color: var(--tinta-3);
+  background: var(--superficie-2);
 }
 
-.ficha.p-button :deep(.p-button-icon) {
-  font-size: 0.6rem;
+.ficha:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
 }
 
-/* Escolhido ganha anel, peso e fundo: três sinais, nenhum dependente de enxergar cor. */
-.ficha--ativa.p-button.p-button-secondary.p-button-outlined,
-.ficha--ativa.p-button.p-button-secondary.p-button-outlined:not(:disabled):hover {
-  border-color: var(--clinic-accent-strong);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  box-shadow: inset 0 0 0 1px var(--clinic-accent-strong);
+.ficha__icone {
+  color: var(--tinta-2);
+  font-size: 16px;
 }
 
-.ficha--ativa.p-button :deep(.p-button-label) {
-  font-weight: 750;
+.ficha--ativa,
+.ficha--ativa:hover {
+  border-color: color-mix(in oklab, var(--musgo) 55%, var(--linha));
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  font-weight: 600;
+}
+
+.ficha--ativa .ficha__icone {
+  color: inherit;
+}
+
+.alertas {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--linha);
+  list-style: none;
 }
 
 .alerta {
+  position: relative;
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
+  gap: 10px;
+  padding: 14px 0 14px 16px;
+}
+
+.alerta + .alerta {
+  border-top: 1px solid var(--linha);
 }
 
 .alerta__topo {
@@ -1108,39 +1365,66 @@ async function salvar() {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 8px 12px;
 }
 
-.alerta__topo strong {
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-label);
+.alerta__nome {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
+
+.alerta__nome i {
+  color: var(--tinta-2);
+  font-size: 17px;
+}
+
+.alerta.ui-marca--risco .alerta__nome i {
+  color: var(--risco-tinta);
+}
+
+.alerta.ui-marca--atencao .alerta__nome i {
+  color: var(--atencao-tinta);
+}
+
+/* ----------------------------------------------------------------------------- responsável */
 
 /*
- * Tom de atenção, e não de risco.
- *
- * Cadastro repetido não impede nada — pode muito bem haver duas pessoas com o mesmo nome, e o
- * telefone da casa é compartilhado por famílias inteiras. O aviso pergunta; quem decide é quem
- * está no balcão. Vermelho aqui gastaria o vermelho que o módulo reserva para alergia e
- * contenção.
+ * Cadastro repetido em tom de atenção, e não de risco: o aviso pergunta, quem decide é quem está
+ * no balcão. Vermelho aqui gastaria o vermelho que o módulo reserva para alergia e contenção.
  */
 .repetido {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-attention-bg);
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in oklab, var(--atencao) 35%, transparent);
+  border-radius: 12px;
+  background: var(--atencao-fundo);
 }
 
 .repetido__titulo {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 8px;
   margin: 0;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+  color: var(--atencao-tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.repetido__titulo i {
+  font-size: 18px;
+}
+
+.repetido__lista {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .repetido__linha {
@@ -1148,79 +1432,172 @@ async function salvar() {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 8px 12px;
+  padding: 10px 10px 10px 14px;
+  border-radius: 10px;
+  background: var(--superficie);
 }
 
 .repetido__quem {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
+  gap: 2px;
+}
+
+.repetido__quem strong {
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .repetido__quem small {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
-/*
- * Cada campo do endereço tem largura própria porque o conteúdo tem tamanho conhecido: CEP são
- * oito dígitos e UF são duas letras. Dar a eles a mesma coluna do logradouro faria uma fileira
- * de caixas idênticas onde a forma já dizia o que era cada uma.
- */
-.endereco {
-  display: grid;
-  gap: var(--clinic-space-3);
+.repetido__motivo {
+  color: var(--atencao-tinta);
+  font-weight: 550;
 }
 
-.endereco--rua {
-  grid-template-columns: 9rem minmax(0, 1fr) 6rem;
-}
-
-.endereco--cidade {
-  grid-template-columns: minmax(0, 1fr) 7rem;
+.repetido__linha :deep(.p-button) {
+  min-height: 36px;
 }
 
 .escolhido {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
-  margin: -0.2rem 0 0;
-  color: var(--clinic-ok-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+  gap: 4px 10px;
+  margin: -4px 0 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 13.5px;
 }
 
 .escolhido i {
-  font-size: 0.75rem;
+  font-size: 17px;
+}
+
+.escolhido__nome {
+  font-weight: 600;
+}
+
+.escolhido__dados {
+  color: var(--tinta-2);
 }
 
 .opcao {
   display: grid;
-  gap: 0.05rem;
+  gap: 1px;
 }
 
 .opcao small {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
-.novo__erro {
+.endereco {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid var(--linha);
+}
+
+.endereco__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+  padding: 0;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.endereco__titulo i {
+  color: var(--tinta-2);
+  font-size: 17px;
+}
+
+.endereco__ajuda {
+  margin: -8px 0 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* -------------------------------------------------------------------------------- o rodapé */
+
+.novo__erro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 550;
 }
 
 .novo__rodape {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
-  gap: var(--clinic-space-2);
+  gap: 10px 16px;
+}
+
+.novo--completo .novo__rodape {
+  justify-content: space-between;
+  padding-top: 4px;
+}
+
+.novo__obrigatorios {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.novo__asterisco {
+  color: var(--risco-tinta);
+  font-weight: 600;
+}
+
+.novo__botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.novo--completo .novo__botoes :deep(.p-button) {
+  min-height: 42px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ficha {
+    transition: none;
+  }
 }
 
 @media (max-width: 620px) {
-  .novo__linha,
-  .endereco {
+  .grade,
+  .grade--rua,
+  .grade--cidade {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .parte__corpo.ui-folha {
+    padding: 16px;
   }
 }
 </style>

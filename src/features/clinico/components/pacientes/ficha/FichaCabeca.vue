@@ -1,31 +1,31 @@
 <script setup lang="ts">
 /**
- * O cabeçalho da ficha do paciente, no molde da saudação da Visão geral.
+ * A capa da ficha do paciente — quem é, e as quatro vistas da ficha.
  *
- * A mesma forma, com o conteúdo do paciente: a linha pequena de cima diz quem ele é (espécie, raça,
- * idade), o nome ocupa o lugar do "Olá", e a frase em degradê diz o estado **desta vista** — "V10
- * para hoje", "Nenhum atendimento ainda". Na mesma linha, as pílulas: a ação da página primeiro,
- * cheia quando é o próximo passo, e as outras duas vistas da ficha, com o número que faz alguém
- * clicar nelas (sinais do resumo, vacinas atrasadas) num selo dentro da própria pílula.
+ * ## A forma (redesenho total, 19/10/2026)
  *
- * Embaixo, o que o cabeçalho antigo do paciente mostrava e ninguém pode perder de vista: responsável
- * com telefone, peso e os alertas — risco primeiro, na cor da gravidade da Visão geral.
+ * 1. **Quem é** — o rosto grande, o nome e a linha espécie · raça · porte · idade · sexo ·
+ *    castrado. Os alertas logo embaixo, como selo com palavra e ícone, risco primeiro: é o que
+ *    muda a conduta antes de alguém tocar no animal.
+ * 2. **Os dois dados que toda conduta usa** — o peso, em número grande (toda dose sai dele), e o
+ *    responsável com o telefone que disca (`tel:`). Ficam à direita do nome em tela larga, como os
+ *    números do Hoje; em tela estreita descem para baixo dele.
+ * 3. **A ação da ficha** — o slot `acoes`, à direita da capa ("Abrir atendimento" quando há
+ *    consulta hoje, "Aplicar vacina" na carteira). Uma cheia; o resto contornado.
+ * 4. **As vistas** — Resumo | Histórico | Tratamento | Vacinas, como as abas de um destino
+ *    (sublinhado na cor do lugar, contagem em pílula). Cada aba é um link de verdade. A contagem
+ *    é a que faz alguém clicar: sinais do resumo, linhas do histórico, tratamento com a adesão
+ *    em queda, vacina atrasada (ou para hoje).
+ * 5. **A frase da vista** — logo abaixo das abas, o estado da vista aberta numa frase.
  *
- * Substitui o `ClinicPatientHeader` nas vistas da ficha e no internado (`internacao/[id]`), que o
- * usa com `atual: null` — as vistas da ficha viram as saídas dele. As outras telas (atendimento,
- * drawer da agenda) continuam com o `ClinicPatientHeader`. A pílula do tratamento só aparece para quem
- * tem remédio de casa com lembrete — com o selo coral quando um crítico perdeu o ritmo.
+ * Com `atual: null` (o paciente internado, `internacao/[id]`), a capa vem sem abas: a tela tem as
+ * abas dela (checklist, evolução...) e duas fileiras de abas se confundiriam. As vistas da ficha
+ * viram uma linha de saídas embaixo da frase.
+ *
+ * A API é a de antes: `navCheia` continua aceita, mas a aba já diz com a contagem qual vista
+ * pede atenção — não há mais pílula cheia para escolher.
  */
-import {
-  PhClockCounterClockwise,
-  PhInfo,
-  PhPill,
-  PhSyringe,
-  PhTimer,
-  PhWarning,
-  PhWarningCircle,
-} from '@phosphor-icons/vue'
-import { computed, ref, watch, type Component } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
@@ -33,14 +33,17 @@ import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
 import { useClinicFormat } from '../../../composables/useClinicFormat'
 import {
+  encounterRepository,
   patientRepository,
   tratamentoRepository,
   vacinaRepository,
 } from '../../../data/repositories'
-import type { AlertSeverity, Pet, Tutor } from '../../../data/types'
+import type { AlertSeverity, Pet, PetAlert, Tutor } from '../../../data/types'
 import { porteDoPaciente } from '../../../domain/porte'
 import { montarResumoDoPaciente } from '../../../domain/resumo-do-paciente'
-import { useClinicoStore } from '../../../stores/clinico'
+import { clinicClock, useClinicoStore } from '../../../stores/clinico'
+
+import { contarHistorico } from './historico'
 
 export type VistaDaFicha = 'resumo' | 'historico' | 'vacinas' | 'tratamento'
 
@@ -48,15 +51,15 @@ const props = withDefaults(
   defineProps<{
     pet: Pet
     tutor: Tutor | null
-    /** A vista aberta, que sai da fileira de pílulas. `null` fora da ficha: todas viram saída. */
+    /** A vista aberta: a aba acesa. `null` fora da ficha: sem abas, as vistas viram saídas. */
     atual: VistaDaFicha | null
-    /** A frase de estado desta vista, em degradê. */
+    /** O estado desta vista numa frase, logo abaixo das abas. */
     frase: string
-    /** Quando a vista não tem ação própria, qual das outras é o próximo passo (pílula cheia). */
+    /** Mantida por compatibilidade: a contagem da aba já aponta a vista que pede atenção. */
     navCheia?: VistaDaFicha | null
-    /** Peso em vigor, quando a vista sabe mais que o cadastro (o do atendimento de hoje). */
+    /** Peso em vigor, quando a vista sabe mais que o cadastro (o peso de entrada da internação). */
     pesoKg?: number | null
-    /** O resumo lista os alertas no bloco Essencial: repeti-los aqui seria dizer duas vezes. */
+    /** Esconde os alertas da capa (quem os mostra noutro lugar da mesma tela). */
     semAlertas?: boolean
   }>(),
   { navCheia: null, pesoKg: undefined, semAlertas: false },
@@ -86,16 +89,19 @@ const meta = computed(() => {
 
 const peso = computed(() => (props.pesoKg === undefined ? props.pet.pesoKg : props.pesoKg))
 
-const COR_DA_GRAVIDADE: Record<AlertSeverity, string> = {
-  risco: 'coral',
-  atencao: 'pessego',
-  info: 'cinza',
+/** Só dígitos (e o `+` do país): o discador do celular não entende parêntese. */
+const telefoneDiscavel = computed(() => (props.tutor?.telefone ?? '').replace(/[^\d+]/g, ''))
+
+const TOM_DO_ALERTA: Record<AlertSeverity, string> = {
+  risco: 'risco',
+  atencao: 'atencao',
+  info: 'neutro',
 }
 
-const ICONE_DA_GRAVIDADE: Record<AlertSeverity, Component> = {
-  risco: PhWarning,
-  atencao: PhWarningCircle,
-  info: PhInfo,
+const ICONE_DO_ALERTA: Record<AlertSeverity, string> = {
+  risco: 'ph ph-warning',
+  atencao: 'ph ph-warning-circle',
+  info: 'ph ph-info',
 }
 
 /** Alerta de risco primeiro: é o que muda conduta antes de a consulta começar. */
@@ -109,122 +115,129 @@ const alertas = computed(() => {
   return [...props.pet.alertas].sort((a, b) => ordem[a.severidade] - ordem[b.severidade])
 })
 
-// ------------------------------------------------------------------ as outras vistas
+function textoDoAlerta(alerta: PetAlert) {
+  return alerta.detalhe
+    ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}`
+    : formato.alerta(alerta.kind)
+}
 
-/** Réptil e roedor não têm vacina no catálogo: sem vista de vacinas para eles. */
+// ------------------------------------------------------------------ as contagens das vistas
+
+/** Réptil e roedor não têm vacina no catálogo: a aba existe, mas não tem atraso para contar. */
 const temVacinas = computed(() =>
   vacinaRepository.catalogo().some((vacina) => vacina.especies.includes(props.pet.especie)),
 )
 
-const vacinasAtrasadas = ref(0)
+const vacinas = ref({ atrasadas: 0, devidas: 0 })
 const sinais = ref<{ total: number; risco: boolean } | null>(null)
-/** Remédio de casa com lembrete. Sem nenhum, a pílula não aparece: não há o que ver lá. */
 const tratamentos = ref({ total: 0, alertas: 0 })
+const noHistorico = ref<number | null>(null)
 
 async function conferir() {
-  vacinasAtrasadas.value = temVacinas.value
-    ? (vacinaRepository.plano(props.pet.id)?.atrasadas ?? 0)
-    : 0
-  tratamentos.value = tratamentoRepository.contagem(props.pet.id)
+  const petId = props.pet.id
+  const plano = temVacinas.value ? vacinaRepository.plano(petId) : null
 
-  /* Sem resumo, a pílula abre igual, só sem o selo: o cabeçalho não depende dele. */
-  try {
-    const fonte = await patientRepository.paraOResumo(props.pet.id)
-    const resumo = montarResumoDoPaciente({ pet: props.pet, ...fonte })
+  vacinas.value = { atrasadas: plano?.atrasadas ?? 0, devidas: plano?.devidas ?? 0 }
+  tratamentos.value = tratamentoRepository.contagem(petId)
 
-    sinais.value = resumo.sinais.length
-      ? {
-          total: resumo.sinais.length,
-          risco: resumo.sinais.some((sinal) => sinal.severidade === 'risco'),
-        }
-      : null
-  } catch {
-    sinais.value = null
+  /* Sem resumo ou sem histórico, a aba abre igual, só sem o número: a capa não depende deles. */
+  const [resumo, linhas] = await Promise.all([
+    patientRepository
+      .paraOResumo(petId)
+      .then((fonte) => montarResumoDoPaciente({ pet: props.pet, ...fonte }))
+      .catch(() => null),
+    Promise.all([encounterRepository.historico(petId), patientRepository.atendimentosDoPet(petId)])
+      .then(([eventos, atendimentos]) =>
+        contarHistorico(eventos, atendimentos, clinicClock.nowIso()),
+      )
+      .catch(() => null),
+  ])
+
+  /* Trocou de paciente no meio do caminho: a resposta é do anterior. */
+  if (petId !== props.pet.id) {
+    return
   }
+
+  sinais.value = resumo?.sinais.length
+    ? {
+        total: resumo.sinais.length,
+        risco: resumo.sinais.some((sinal) => sinal.severidade === 'risco'),
+      }
+    : null
+  noHistorico.value = linhas
 }
 
 watch(() => props.pet.id, conferir, { immediate: true })
 
-/* Uma dose marcada ou um contato registrado muda os selos: a store avisa quando o mundo mudou. */
+/* Uma dose marcada ou um contato registrado muda as contagens: a store avisa quando o mundo mudou. */
 watch(() => clinico.revisao, conferir)
 
-type Pilula = {
+type Tom = 'neutro' | 'atencao' | 'risco'
+
+type Vista = {
   vista: VistaDaFicha
   rotulo: string
-  icone: Component
-  selo: { valor: number; cor: string; aria: string } | null
+  icone: string
+  /** O número da pílula; nulo quando não há o que contar. */
+  contagem: number | null
+  tom: Tom
+  /** O número em palavras, para o leitor de tela e a dica do ponteiro. */
+  descricao: string
 }
 
-const navegacao = computed<Pilula[]>(() => {
-  const todas: Pilula[] = [
+const vistas = computed<Vista[]>(() => {
+  const { atrasadas, devidas } = vacinas.value
+  const vacinaConta = atrasadas > 0 ? atrasadas : devidas > 0 ? devidas : null
+
+  return [
     {
       vista: 'resumo',
-      rotulo: t('clinico.resumoDoPaciente.verResumo'),
-      icone: PhTimer,
-      selo: sinais.value
-        ? {
-            valor: sinais.value.total,
-            cor: sinais.value.risco ? 'coral' : 'pessego',
-            aria: t('clinico.resumoDoPaciente.verResumoComSinais', { total: sinais.value.total }),
-          }
-        : null,
+      rotulo: t('clinico.ficha.abas.resumo'),
+      icone: 'ph ph-timer',
+      contagem: sinais.value?.total ?? null,
+      tom: sinais.value?.risco ? 'risco' : 'atencao',
+      descricao: sinais.value
+        ? t('clinico.ficha.resumo.sinais', { total: sinais.value.total }, sinais.value.total)
+        : '',
     },
     {
       vista: 'historico',
-      rotulo: t('clinico.prontuario.timeline.titulo'),
-      icone: PhClockCounterClockwise,
-      selo: null,
-    },
-    {
-      vista: 'vacinas',
-      rotulo: t('clinico.vacinas.titulo'),
-      icone: PhSyringe,
-      selo:
-        vacinasAtrasadas.value > 0
-          ? {
-              valor: vacinasAtrasadas.value,
-              cor: 'coral',
-              aria: t(
-                'clinico.vacinas.carteira.comAtraso',
-                { total: vacinasAtrasadas.value },
-                vacinasAtrasadas.value,
-              ),
-            }
-          : null,
+      rotulo: t('clinico.ficha.historico.titulo'),
+      icone: 'ph ph-clock-counter-clockwise',
+      contagem: noHistorico.value || null,
+      tom: 'neutro',
+      descricao: noHistorico.value
+        ? t('clinico.ficha.abas.noHistorico', { total: noHistorico.value }, noHistorico.value)
+        : '',
     },
     {
       vista: 'tratamento',
       rotulo: t('clinico.ficha.tratamento.pilula'),
-      icone: PhPill,
-      selo:
-        tratamentos.value.alertas > 0
-          ? {
-              valor: tratamentos.value.alertas,
-              cor: 'coral',
-              aria: t(
-                'clinico.ficha.tratamento.alertas',
-                { total: tratamentos.value.alertas },
-                tratamentos.value.alertas,
-              ),
-            }
-          : null,
+      icone: 'ph ph-pill',
+      contagem: tratamentos.value.alertas || null,
+      tom: 'risco',
+      descricao: tratamentos.value.alertas
+        ? t(
+            'clinico.ficha.tratamento.alertas',
+            { total: tratamentos.value.alertas },
+            tratamentos.value.alertas,
+          )
+        : '',
+    },
+    {
+      vista: 'vacinas',
+      rotulo: t('clinico.vacinas.titulo'),
+      icone: 'ph ph-syringe',
+      contagem: vacinaConta,
+      tom: atrasadas > 0 ? 'risco' : 'atencao',
+      descricao:
+        atrasadas > 0
+          ? t('clinico.ficha.vacinas.atrasadas', { total: atrasadas }, atrasadas)
+          : devidas > 0
+            ? t('clinico.ficha.vacinas.hojeVarias', { total: devidas }, devidas)
+            : '',
     },
   ]
-
-  const outras = todas.filter(
-    (pilula) =>
-      pilula.vista !== props.atual &&
-      (pilula.vista !== 'vacinas' || temVacinas.value) &&
-      (pilula.vista !== 'tratamento' || tratamentos.value.total > 0),
-  )
-
-  /* A cheia vai na frente: é o próximo passo, e a Visão geral a põe sempre em primeiro. */
-  return props.navCheia
-    ? [
-        ...outras.filter((pilula) => pilula.vista === props.navCheia),
-        ...outras.filter((pilula) => pilula.vista !== props.navCheia),
-      ]
-    : outras
 })
 
 function destino(vista: VistaDaFicha): string {
@@ -233,214 +246,511 @@ function destino(vista: VistaDaFicha): string {
 </script>
 
 <template>
-  <div class="cabeca">
-    <!--
-      O rosto ao lado do nome: quem está na recepção reconhece o animal antes de ler. Sem foto,
-      o avatar desenhado (iniciais, silhueta da espécie e cor fixa) — o mesmo do hotel, para o
-      mesmo animal ter a mesma cara nos dois módulos.
-    -->
-    <div class="cabeca__quem">
-      <PetAvatar
-        class="cabeca__avatar"
-        :nome="pet.nome"
-        :iniciais="pet.iniciais"
-        :especie="pet.especie"
-        :foto-url="pet.fotoUrl"
-        tamanho="xl"
-      />
-      <div class="cabeca__identidade">
-        <p class="cabeca__meta">{{ meta }}</p>
-        <h1 class="cabeca__nome">{{ pet.nome }}</h1>
+  <div class="ficha-capa" :class="{ 'ficha-capa--solta': atual === null }">
+    <div class="capa">
+      <div class="capa__corpo">
+        <!--
+          O rosto ao lado do nome: quem está na recepção reconhece o animal antes de ler. Sem foto,
+          o avatar desenhado (iniciais, silhueta da espécie e cor fixa) — o mesmo do hotel.
+        -->
+        <div class="capa__quem">
+          <PetAvatar
+            class="capa__rosto"
+            :nome="pet.nome"
+            :iniciais="pet.iniciais"
+            :especie="pet.especie"
+            :foto-url="pet.fotoUrl"
+            tamanho="xl"
+          />
+          <div class="capa__identidade">
+            <h1 class="capa__nome">{{ pet.nome }}</h1>
+            <p class="capa__meta">{{ meta }}</p>
+            <ul
+              v-if="alertas.length"
+              class="capa__alertas"
+              :aria-label="t('clinico.resumoDoPaciente.essencial.alertas')"
+            >
+              <li
+                v-for="alerta in alertas"
+                :key="alerta.id"
+                class="ui-selo capa__alerta"
+                :class="`ui-selo--${TOM_DO_ALERTA[alerta.severidade]}`"
+              >
+                <i :class="ICONE_DO_ALERTA[alerta.severidade]" aria-hidden="true" />
+                <span>{{ textoDoAlerta(alerta) }}</span>
+                <span class="sr-only">({{ formato.severidade(alerta.severidade) }})</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- O peso de que toda dose sai, e quem responde pelo animal, com o telefone que disca. -->
+        <dl class="capa__dados">
+          <div class="capa__dado">
+            <dt>{{ t('clinico.ficha.peso') }}</dt>
+            <dd v-if="peso !== null" class="capa__peso">
+              <strong class="ui-num">{{ formato.numero(peso, 1) }}</strong>
+              <span>{{ t('clinico.formato.kg') }}</span>
+            </dd>
+            <dd v-else class="capa__sem">{{ t('clinico.resumoDoPaciente.casa.semRegistro') }}</dd>
+          </div>
+
+          <div v-if="tutor" class="capa__dado">
+            <dt>{{ t('clinico.paciente.responsavel') }}</dt>
+            <dd class="capa__tutor">
+              <strong>{{ tutor.nome }}</strong>
+              <a
+                v-if="telefoneDiscavel"
+                class="capa__telefone ui-num"
+                :href="`tel:${telefoneDiscavel}`"
+                :aria-label="t('clinico.ficha.capa.ligar', { nome: tutor.nome, telefone: tutor.telefone })"
+              >
+                <i class="ph ph-phone" aria-hidden="true" />
+                <bdi dir="ltr">{{ tutor.telefone }}</bdi>
+              </a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div v-if="$slots.acoes" class="capa__acoes">
+        <slot name="acoes" />
       </div>
     </div>
 
-    <div class="cabeca__linha">
-      <p class="cabeca__frase" aria-live="polite">{{ frase }}</p>
-
-      <nav class="cabeca__acoes" :aria-label="t('clinico.ficha.acoes')">
-        <slot name="acoes" />
-
-        <RouterLink
-          v-for="pilula in navegacao"
-          :key="pilula.vista"
-          class="hc-pilula"
-          :class="{ 'hc-pilula--cheia': pilula.vista === navCheia }"
-          :to="destino(pilula.vista)"
-          :aria-label="pilula.selo ? pilula.selo.aria : undefined"
-        >
-          <component
-            :is="pilula.icone"
-            class="hc-pilula__icone"
-            :weight="pilula.vista === navCheia ? 'fill' : 'duotone'"
-            aria-hidden="true"
-          />
-          {{ pilula.rotulo }}
-          <span
-            v-if="pilula.selo"
-            class="hc-pilula__selo"
-            :class="`hc--${pilula.selo.cor}`"
-            aria-hidden="true"
-          >
-            {{ pilula.selo.valor }}
-          </span>
-        </RouterLink>
-      </nav>
-    </div>
-
-    <!--
-      O que o cabeçalho do paciente sempre mostrou, sem caixa em volta: quem responde, o peso de
-      que toda dose sai, e os alertas. Alerta é selo com ícone e palavra — a cor sozinha não diz.
-    -->
-    <ul class="cabeca__dados">
-      <li v-if="tutor" class="cabeca__dado">
-        <span class="cabeca__rotulo">{{ t('clinico.paciente.responsavel') }}</span>
-        <strong>{{ tutor.nome }}</strong>
-        <a class="cabeca__telefone" :href="`tel:${tutor.telefone}`">
-          <bdi dir="ltr">{{ tutor.telefone }}</bdi>
-        </a>
-      </li>
-      <li v-if="peso !== null" class="cabeca__dado">
-        <span class="cabeca__rotulo">{{ t('clinico.ficha.peso') }}</span>
-        <strong class="cabeca__valor">
-          {{ formato.numero(peso, 1) }} {{ t('clinico.formato.kg') }}
-        </strong>
-      </li>
-      <li v-for="alerta in alertas" :key="alerta.id" class="cabeca__dado">
+    <!-- As quatro vistas da ficha, com o desenho das abas de um destino. -->
+    <nav
+      v-if="atual"
+      class="capa__abas"
+      :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })"
+    >
+      <RouterLink
+        v-for="item in vistas"
+        :key="item.vista"
+        class="capa__aba"
+        :class="{ 'capa__aba--atual': item.vista === atual }"
+        :to="destino(item.vista)"
+        active-class=""
+        exact-active-class=""
+        :aria-current="item.vista === atual ? 'page' : undefined"
+        :title="item.descricao || undefined"
+      >
+        <i :class="item.icone" aria-hidden="true" />
+        <span>{{ item.rotulo }}</span>
         <span
-          class="hc-selo cabeca__alerta"
-          :class="`hc--${COR_DA_GRAVIDADE[alerta.severidade]}`"
-          :title="alerta.detalhe || undefined"
+          v-if="item.contagem"
+          class="capa__selo ui-num"
+          :class="`capa__selo--${item.tom}`"
+          aria-hidden="true"
         >
-          <component
-            :is="ICONE_DA_GRAVIDADE[alerta.severidade]"
-            class="cabeca__alerta-icone"
-            weight="fill"
-            aria-hidden="true"
-          />
-          {{ formato.alerta(alerta.kind) }}
-          <template v-if="alerta.detalhe"> · {{ alerta.detalhe }}</template>
+          {{ item.contagem }}
         </span>
-      </li>
-    </ul>
+        <span v-if="item.descricao" class="sr-only">{{ item.descricao }}</span>
+      </RouterLink>
+    </nav>
+
+    <p v-if="frase" class="capa__frase" aria-live="polite">{{ frase }}</p>
+
+    <!-- Fora da ficha (o internado): as vistas viram saídas, numa linha só. -->
+    <nav v-if="!atual" class="capa__saidas" :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })">
+      <RouterLink
+        v-for="item in vistas"
+        :key="item.vista"
+        class="capa__saida"
+        :to="destino(item.vista)"
+        :title="item.descricao || undefined"
+      >
+        <i :class="item.icone" aria-hidden="true" />
+        <span>{{ item.rotulo }}</span>
+        <span
+          v-if="item.contagem"
+          class="capa__selo ui-num"
+          :class="`capa__selo--${item.tom}`"
+          aria-hidden="true"
+        >
+          {{ item.contagem }}
+        </span>
+        <span v-if="item.descricao" class="sr-only">{{ item.descricao }}</span>
+      </RouterLink>
+    </nav>
   </div>
 </template>
 
 <style scoped>
-.cabeca {
+/*
+ * A capa decide a própria forma pela largura que tem, e não pela da janela: no internado ela
+ * divide a linha com as ações da tela, e na ficha ocupa a largura toda.
+ */
+.ficha-capa {
   display: grid;
-  gap: 0.2rem;
   min-width: 0;
+  flex: 1 1 100%;
+  container-type: inline-size;
 }
 
-.cabeca__quem {
+.capa {
+  display: grid;
+  align-items: start;
+  gap: 16px 24px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+/* Quem é e os dois dados dividem a linha; sem espaço, os dados descem para baixo do nome. */
+.capa__corpo {
   display: flex;
-  align-items: center;
-  gap: 1rem;
   min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 32px;
 }
 
-/* Um aro do papel do cartão separa o rosto do véu de sálvia do fundo, sem moldura desenhada. */
-.cabeca__avatar {
+.capa__quem {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 340px;
+  align-items: center;
+  gap: 18px;
+}
+
+.ficha-capa .capa__rosto {
   box-shadow:
-    0 0 0 3px var(--hc-cartao),
-    var(--hc-sombra);
+    0 0 0 3px var(--fundo),
+    0 0 0 4px var(--linha);
 }
 
-.cabeca__identidade {
+.capa__identidade {
   display: grid;
   min-width: 0;
+  gap: 4px;
 }
 
-.cabeca__meta {
+.capa__nome {
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.cabeca__nome {
-  margin: 0.35rem 0 0;
-  color: var(--hc-tinta);
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.025em;
+  color: var(--tinta);
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   overflow-wrap: anywhere;
 }
 
-/* A frase e as pílulas dividem a linha, como o resumo e as ações da Visão geral. */
-.cabeca__linha {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem 1.25rem;
-}
-
-.cabeca__frase {
+.capa__meta {
   margin: 0;
-  background: var(--hc-degrade);
-  background-clip: text;
-  color: transparent;
-  font-size: 1.75rem;
-  font-weight: 500;
-  line-height: 1.25;
-  letter-spacing: -0.025em;
-  -webkit-text-fill-color: transparent;
+  color: var(--tinta-2);
+  font-size: 14.5px;
+  line-height: 1.45;
 }
 
-.cabeca__acoes {
+.capa__alertas {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.cabeca__dados {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0.85rem 0 0;
+  gap: 6px;
+  margin: 6px 0 0;
   padding: 0;
-  gap: 0.5rem 1.25rem;
   list-style: none;
 }
 
-.cabeca__dado {
-  display: inline-flex;
+/* O detalhe do alerta pode ser longo ("Gabapentina 10 mg/kg, 12/12 h"): quebra, não corta. */
+.capa__alerta.ui-selo {
+  max-width: 100%;
+  height: auto;
+  min-height: 26px;
+  padding-block: 4px;
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: normal;
+}
+
+/* ------------------------------------------------------------------ peso e responsável */
+
+.capa__dados {
+  display: flex;
+  flex: none;
   flex-wrap: wrap;
+  align-items: stretch;
+  gap: 12px 0;
+  margin: 0;
+}
+
+.capa__dado {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 4px;
+  padding-inline: 24px;
+  border-inline-start: 1px solid var(--linha);
+}
+
+.capa__dado dt {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.capa__dado dd {
+  min-width: 0;
+  margin: 0;
+}
+
+/* O número que importa, grande, como os minutos de espera do Hoje. */
+.capa__peso {
+  display: flex;
   align-items: baseline;
-  gap: 0.4rem;
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
+  gap: 4px;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
-.cabeca__rotulo {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+.capa__peso strong {
+  color: var(--tinta);
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
-.cabeca__valor {
-  font-variant-numeric: tabular-nums;
+.capa__sem {
+  color: var(--tinta-3);
+  font-size: 14px;
+  line-height: 2;
 }
 
-.cabeca__telefone {
-  color: var(--hc-marca-forte);
+.capa__tutor {
+  display: grid;
+  gap: 2px;
+}
+
+.capa__tutor strong {
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.capa__telefone {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  min-height: 24px;
+  border-radius: 6px;
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-size: 14px;
   font-weight: 600;
   text-decoration: none;
 }
 
-.cabeca__telefone:hover,
-.cabeca__telefone:focus-visible {
+.capa__telefone i {
+  font-size: 15px;
+}
+
+.capa__telefone:hover {
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
 
-.cabeca__alerta {
-  gap: 0.3rem;
+.capa__telefone:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
 }
 
-.cabeca__alerta-icone {
-  flex-shrink: 0;
-  width: 0.9rem;
-  height: 0.9rem;
+.capa__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ------------------------------------------------------------------ abas da ficha
+ * O desenho das abas de um destino (`UiAbas`): sublinhado de 3 px na cor do lugar, contagem em
+ * pílula. O ícone ajuda a achar a vista sem ler — as quatro têm nomes curtos e parecidos.
+ */
+.capa__abas {
+  display: flex;
+  gap: 4px;
+  margin-top: 22px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--linha);
+  scrollbar-width: none;
+}
+
+.capa__abas::-webkit-scrollbar {
+  display: none;
+}
+
+.capa__aba {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 14px;
+  color: var(--tinta-2);
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.capa__aba:first-child {
+  padding-inline-start: 2px;
+}
+
+.capa__aba i {
+  font-size: 17px;
+}
+
+.capa__aba:hover {
+  color: var(--tinta);
+}
+
+.capa__aba:focus-visible {
+  border-radius: 8px;
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: -4px;
+}
+
+.capa__aba--atual {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.capa__aba--atual i {
+  color: var(--pj-lugar-tinta, var(--musgo));
+}
+
+.capa__aba--atual::after {
+  position: absolute;
+  right: 14px;
+  bottom: -1px;
+  left: 14px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--pj-lugar, var(--musgo));
+  content: '';
+}
+
+.capa__aba--atual:first-child::after {
+  left: 2px;
+}
+
+[dir='rtl'] .capa__aba--atual:first-child::after {
+  right: 2px;
+  left: 14px;
+}
+
+.capa__selo {
+  display: inline-grid;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.capa__selo--neutro {
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+}
+
+.capa__selo--atencao {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+}
+
+.capa__selo--risco {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+/* A frase da vista aberta: o "resumo" da tela, logo abaixo das abas. */
+.capa__frase {
+  max-width: 72ch;
+  margin: 16px 0 0;
+  color: var(--tinta-2);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+/* ------------------------------------------------------------------ fora da ficha */
+
+.ficha-capa--solta .capa__frase {
+  margin-top: 14px;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 550;
+}
+
+.capa__saidas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+  margin-top: 8px;
+}
+
+.capa__saida {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.capa__saida i {
+  font-size: 16px;
+}
+
+.capa__saida:hover span:not(.capa__selo) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.capa__saida:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ estreito */
+
+@container (max-width: 620px) {
+  .capa {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .capa__acoes {
+    justify-content: flex-start;
+  }
+
+  .ficha-capa .capa__rosto {
+    width: 56px;
+    height: 56px;
+    font-size: 1.1rem;
+  }
+
+  .capa__quem {
+    gap: 14px;
+  }
+
+  .capa__nome {
+    font-size: 24px;
+  }
+
+  .capa__dado:first-child {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+
+  .capa__peso strong {
+    font-size: 24px;
+  }
 }
 </style>

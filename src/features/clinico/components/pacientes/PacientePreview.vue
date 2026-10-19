@@ -22,6 +22,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
+
 import ClinicAlertChip from '../base/ClinicAlertChip.vue'
 import type { RascunhoDoPaciente } from './PacienteNovoForm.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
@@ -120,142 +122,155 @@ const contato = computed(() => [
 
 <template>
   <aside class="previa clinic-scope" :aria-label="t('clinico.paciente.novo.previa.titulo')">
-    <p class="previa__selo">{{ t('clinico.paciente.novo.previa.titulo') }}</p>
+    <p class="previa__selo">
+      <i class="ph ph-eye" aria-hidden="true" />
+      {{ t('clinico.paciente.novo.previa.titulo') }}
+    </p>
 
-    <!--
-      A faixa de identidade.
-
-      Avatar, nome e atributos na mesma proporção do cabeçalho que o prontuário desenha — é a
-      forma que quem usa o sistema já reconhece, e reconhecê-la aqui é o que faz a prévia
-      parecer o resultado e não uma repetição do formulário.
-    -->
-    <header class="perfil">
-      <div
-        class="perfil__avatar"
-        :class="{ 'perfil__avatar--vazio': !iniciais }"
-        aria-hidden="true"
-      >
-        <span v-if="iniciais">{{ iniciais }}</span>
-        <i v-else class="ph ph-user" />
-      </div>
-
-      <div class="perfil__corpo">
-        <h3 v-if="nome" class="perfil__nome" :title="nome">{{ nome }}</h3>
-        <p v-else class="perfil__nome perfil__nome--vazio">
-          {{ t('clinico.paciente.novo.previa.nomeVazio') }}
-        </p>
-
-        <p class="perfil__meta">
-          <span v-for="(item, indice) in meta" :key="item">
-            <span v-if="indice > 0" class="perfil__sep" aria-hidden="true">·</span>{{ item }}
-          </span>
-        </p>
-      </div>
-
-      <div class="perfil__peso">
-        <span class="clinic-label">{{ t('clinico.prontuario.exameFisico.peso') }}</span>
-        <strong class="clinic-value" :class="{ previa__traco: peso === TRACO }">{{ peso }}</strong>
-      </div>
-    </header>
-
-    <section class="quadro">
-      <h4 class="clinic-label">{{ t('clinico.paciente.novo.alertas') }}</h4>
-
-      <div v-if="alertas.length > 0" class="quadro__alertas">
-        <ClinicAlertChip
-          v-for="alerta in alertas"
-          :key="alerta.id"
-          :severidade="alerta.severidade"
-          :rotulo="formato.alerta(alerta.kind)"
-          :detalhe="alerta.detalhe"
-        />
-      </div>
-
-      <p v-else class="previa__traco">{{ t('clinico.paciente.novo.previa.semAlertas') }}</p>
-    </section>
-
-    <section class="quadro">
-      <h4 class="clinic-label">{{ t('clinico.paciente.novo.identificacao') }}</h4>
-      <dl class="quadro__lista">
-        <template v-for="linha in identificacao" :key="linha.rotulo">
-          <dt>{{ linha.rotulo }}</dt>
-          <dd :class="{ previa__traco: !linha.valor }">{{ linha.valor || TRACO }}</dd>
-        </template>
-      </dl>
-    </section>
-
-    <section class="quadro">
-      <h4 class="clinic-label">{{ t('clinico.paciente.responsavel') }}</h4>
-
-      <p v-if="tutor?.nome" class="quadro__quem">{{ tutor.nome }}</p>
+    <div class="previa__folha ui-folha">
       <!--
-        A ausência de responsável é dita, e em tom de atenção.
+        A faixa de identidade.
 
-        Não é alerta — o cadastro ainda está sendo preenchido. Mas é a única linha desta coluna
-        que descreve algo que não pode ficar como está: paciente sem responsável é paciente que
-        ninguém consegue avisar.
+        Rosto, nome e atributos na mesma ordem da capa da ficha — é a forma que quem usa o sistema
+        já reconhece, e reconhecê-la aqui é o que faz a prévia parecer o resultado e não uma
+        repetição do formulário. O rosto é o mesmo `PetAvatar` da lista e da ficha.
       -->
-      <p v-else class="quadro__falta">
-        <i class="ph ph-warning-circle" aria-hidden="true" />
-        {{ t('clinico.paciente.novo.previa.semResponsavel') }}
-      </p>
+      <header class="perfil">
+        <PetAvatar
+          v-if="iniciais"
+          class="perfil__avatar"
+          :nome="nome"
+          :iniciais="iniciais"
+          :especie="pet?.especie ?? null"
+          tamanho="lg"
+        />
+        <span v-else class="perfil__avatar perfil__avatar--vazio" aria-hidden="true">
+          <i class="ph ph-paw-print" />
+        </span>
 
-      <dl class="quadro__lista">
-        <template v-for="linha in contato" :key="linha.rotulo">
-          <dt>{{ linha.rotulo }}</dt>
-          <dd :class="{ previa__traco: !linha.valor }">{{ linha.valor || TRACO }}</dd>
-        </template>
-      </dl>
-    </section>
+        <div class="perfil__corpo">
+          <h3 v-if="nome" class="perfil__nome" :title="nome">{{ nome }}</h3>
+          <p v-else class="perfil__nome perfil__nome--vazio">
+            {{ t('clinico.paciente.novo.previa.nomeVazio') }}
+          </p>
+
+          <p class="perfil__meta">
+            <span v-for="(item, indice) in meta" :key="item">
+              <span v-if="indice > 0" class="perfil__sep" aria-hidden="true">·</span>{{ item }}
+            </span>
+          </p>
+        </div>
+
+        <div class="perfil__peso">
+          <small>{{ t('clinico.prontuario.exameFisico.peso') }}</small>
+          <strong class="ui-num" :class="{ previa__traco: peso === TRACO }">{{ peso }}</strong>
+        </div>
+      </header>
+
+      <section class="quadro">
+        <h4 class="quadro__titulo">{{ t('clinico.paciente.novo.alertas') }}</h4>
+
+        <div v-if="alertas.length > 0" class="quadro__alertas">
+          <ClinicAlertChip
+            v-for="alerta in alertas"
+            :key="alerta.id"
+            :severidade="alerta.severidade"
+            :rotulo="formato.alerta(alerta.kind)"
+            :detalhe="alerta.detalhe"
+          />
+        </div>
+
+        <p v-else class="quadro__nada previa__traco">
+          {{ t('clinico.paciente.novo.previa.semAlertas') }}
+        </p>
+      </section>
+
+      <section class="quadro">
+        <h4 class="quadro__titulo">{{ t('clinico.paciente.novo.identificacao') }}</h4>
+        <dl class="quadro__lista">
+          <template v-for="linha in identificacao" :key="linha.rotulo">
+            <dt>{{ linha.rotulo }}</dt>
+            <dd :class="{ previa__traco: !linha.valor }">{{ linha.valor || TRACO }}</dd>
+          </template>
+        </dl>
+      </section>
+
+      <section class="quadro">
+        <h4 class="quadro__titulo">{{ t('clinico.paciente.responsavel') }}</h4>
+
+        <p v-if="tutor?.nome" class="quadro__quem">
+          <i class="ph ph-user" aria-hidden="true" />
+          {{ tutor.nome }}
+        </p>
+        <!--
+          A ausência de responsável é dita, e em tom de atenção.
+
+          Não é alerta — o cadastro ainda está sendo preenchido. Mas é a única linha desta coluna
+          que descreve algo que não pode ficar como está: paciente sem responsável é paciente que
+          ninguém consegue avisar.
+        -->
+        <p v-else class="quadro__falta">
+          <i class="ph ph-warning-circle" aria-hidden="true" />
+          {{ t('clinico.paciente.novo.previa.semResponsavel') }}
+        </p>
+
+        <dl class="quadro__lista">
+          <template v-for="linha in contato" :key="linha.rotulo">
+            <dt>{{ linha.rotulo }}</dt>
+            <dd :class="{ previa__traco: !linha.valor }">{{ linha.valor || TRACO }}</dd>
+          </template>
+        </dl>
+      </section>
+    </div>
   </aside>
 </template>
 
 <style scoped>
 .previa {
   display: grid;
-  gap: var(--clinic-space-3);
+  min-width: 0;
   align-content: start;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface-soft);
+  gap: 10px;
 }
 
+/* A legenda da coluna: o que ela é, em tinta secundária, acima da folha. */
 .previa__selo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 550;
+}
+
+.previa__selo i {
+  font-size: 17px;
+}
+
+.previa__folha {
+  display: grid;
+  overflow: hidden;
 }
 
 /* O valor ausente é traço, e o traço é apagado: ele marca lugar sem competir com o preenchido. */
 .previa__traco {
-  color: var(--clinic-faint);
-  font-weight: 500;
+  color: var(--tinta-3);
+  font-weight: 400;
 }
+
+/* ---------------------------------------------------------------------------------- o perfil */
 
 .perfil {
   display: flex;
-  align-items: flex-start;
-  gap: var(--clinic-space-3);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
+  align-items: center;
+  gap: 14px;
+  padding: 20px 20px 18px;
+  background: color-mix(in oklab, var(--pj-lugar-fundo, var(--clinica-fundo)) 45%, var(--superficie));
 }
 
 .perfil__avatar {
-  display: grid;
-  width: 2.9rem;
-  height: 2.9rem;
   flex: none;
-  border-radius: 999px;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-size: 0.95rem;
-  font-weight: 750;
-  letter-spacing: 0.02em;
-  place-items: center;
 }
 
 /*
@@ -265,10 +280,14 @@ const contato = computed(() => [
  * avatar que falhou ao carregar, e não um espaço à espera.
  */
 .perfil__avatar--vazio {
-  border: 1px dashed var(--clinic-line-strong);
-  background: transparent;
-  color: var(--clinic-faint);
-  font-size: 1rem;
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  border: 1.5px dashed var(--linha-forte);
+  border-radius: 50%;
+  color: var(--tinta-3);
+  font-size: 22px;
 }
 
 .perfil__corpo {
@@ -279,106 +298,141 @@ const contato = computed(() => [
 .perfil__nome {
   overflow: hidden;
   margin: 0;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-title);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 20px;
+  font-weight: 600;
   letter-spacing: -0.015em;
+  line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .perfil__nome--vazio {
-  color: var(--clinic-faint);
-  font-weight: 600;
-  font-style: italic;
+  color: var(--tinta-3);
+  font-weight: 500;
 }
 
 .perfil__meta {
-  margin: 0.15rem 0 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  margin: 3px 0 0;
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.5;
 }
 
 .perfil__sep {
-  padding: 0 0.3rem;
-  color: var(--clinic-faint);
+  padding: 0 5px;
+  color: var(--tinta-3);
 }
 
 .perfil__peso {
   display: grid;
   flex: none;
   justify-items: end;
-  gap: 0.1rem;
+  gap: 1px;
   text-align: end;
 }
 
-.perfil__peso strong {
-  font-size: var(--clinic-font-value);
-  font-weight: 750;
+.perfil__peso small {
+  color: var(--tinta-2);
+  font-size: 12px;
 }
+
+.perfil__peso strong {
+  color: var(--tinta);
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+/* --------------------------------------------------------------------------------- os quadros */
 
 .quadro {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
+  gap: 10px;
+  padding: 16px 20px 18px;
+  border-top: 1px solid var(--linha);
+}
+
+.quadro__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .quadro__alertas {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 6px;
+}
+
+.quadro__nada {
+  margin: 0;
+  font-size: 13.5px;
 }
 
 .quadro__quem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   margin: 0;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-base);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.quadro__quem i {
+  color: var(--tinta-2);
+  font-size: 16px;
 }
 
 /*
  * Rótulo e valor em duas colunas, e o valor quebra.
  *
- * Endereço completo numa coluna de 22 rem ocupa três linhas — e é assim que ele deve aparecer,
+ * Endereço completo numa coluna estreita ocupa três linhas — e é assim que ele deve aparecer,
  * inteiro. Cortar com reticências economizaria altura e esconderia justamente o pedaço que a
  * farmácia vai conferir.
  */
 .quadro__lista {
   display: grid;
   margin: 0;
-  gap: 0.25rem var(--clinic-space-3);
+  gap: 6px 16px;
   grid-template-columns: auto minmax(0, 1fr);
 }
 
 .quadro__lista dt {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .quadro__lista dd {
   margin: 0;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 550;
   overflow-wrap: anywhere;
   text-align: end;
+}
+
+.quadro__lista dd.previa__traco {
+  font-weight: 400;
 }
 
 .quadro__falta {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 7px;
   margin: 0;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
+  font-weight: 550;
 }
 
 .quadro__falta i {
-  font-size: 0.8rem;
+  flex: none;
+  font-size: 16px;
 }
 </style>

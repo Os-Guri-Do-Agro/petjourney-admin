@@ -21,12 +21,20 @@
  * A coluna da direita mostra o cadastro montado, no formato em que a clínica vai encontrá-lo.
  * Ela existe porque um formulário mostra campos e quem atende vê um cartão: é a distância entre
  * os dois que produz o cadastro que passa na validação e não serve para nada.
+ *
+ * ## A forma (redesenho de 19/10/2026)
+ *
+ * Tela de detalhe do destino Pacientes: sem as abas do destino, com "Pacientes" para voltar e o
+ * título dizendo o que se faz aqui. O formulário vem em quatro partes com nome — o pet, a
+ * identificação, os alertas clínicos e o responsável —, cada uma numa folha, e o rodapé com
+ * "Cadastrar paciente" e "Cancelar". A prévia fica presa ao lado enquanto a página rola, e desce
+ * para baixo do formulário quando a largura não comporta as duas colunas.
  */
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import PacienteNovoForm, {
   type RascunhoDoPaciente,
 } from '@/features/clinico/components/pacientes/PacienteNovoForm.vue'
@@ -60,16 +68,21 @@ function cancelar() {
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('clinico.pacientes.titulo')"
-    :title="t('clinico.paciente.novo.titulo')"
-    :loading="carregando"
-    block-when-suspended
+  <UiPagina
+    class="tela-cadastro"
+    :titulo="t('clinico.paciente.novo.titulo')"
+    :resumo="t('clinico.paciente.novo.resumoPagina')"
+    :carregando="carregando"
+    bloquear-se-suspenso
   >
-    <div class="cadastro clinic-scope">
-      <p class="cadastro__ajuda">{{ t('clinico.paciente.novo.ajudaCompleta') }}</p>
+    <template #voltar>
+      <RouterLink to="/veterinario/pacientes">
+        <i class="ph ph-arrow-left" aria-hidden="true" />
+        {{ t('clinico.pacientes.titulo') }}
+      </RouterLink>
+    </template>
 
+    <div class="cadastro">
       <div class="cadastro__colunas">
         <PacienteNovoForm
           modo="completo"
@@ -81,7 +94,7 @@ function cancelar() {
         <PacientePreview class="cadastro__previa" :rascunho="rascunho" />
       </div>
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
@@ -90,28 +103,20 @@ function cancelar() {
  *
  * Campo de formulário esticado por um monitor de 27 polegadas obriga o olho a atravessar a tela
  * entre o rótulo e o fim da caixa, e a fileira de dois campos vira duas colunas distantes que
- * ninguém lê como par. O limite deixa o formulário com a mesma medida confortável em qualquer
- * monitor — e é mais largo que qualquer diálogo, que era o problema.
+ * ninguém lê como par. O formulário tem uma medida confortável; a prévia, a largura de um perfil.
+ *
+ * Quem decide se as duas colunas cabem é a largura da área (container), não a da janela: com a
+ * barra aberta, um notebook deixa bem menos espaço do que a janela sugere.
  */
 .cadastro {
-  display: grid;
-  max-width: 92rem;
-  gap: var(--clinic-space-4);
+  container: cadastro / inline-size;
 }
 
-/*
- * A prévia tem largura própria, e ela é generosa.
- *
- * A primeira medida (22 rem) foi calculada para o texto caber, e coube: o nome do paciente
- * truncava em "Nome do pacie…", o endereço quebrava em três linhas e a coluna lia como uma
- * tira encostada na borda. Um perfil espremido não parece o perfil que a clínica vai ver —
- * parece um resumo de rodapé, que é o oposto do que esta coluna existe para fazer.
- */
 .cadastro__colunas {
   display: grid;
   align-items: start;
-  gap: var(--clinic-space-5);
-  grid-template-columns: minmax(0, 1fr) 30rem;
+  gap: 28px;
+  grid-template-columns: minmax(0, 46rem);
 }
 
 /*
@@ -119,36 +124,19 @@ function cancelar() {
  *
  * O formulário é longo e a prévia é curta: sem isto, ela ficaria visível durante a primeira tela
  * e desapareceria justamente enquanto se preenche o endereço — a parte que mais compensa
- * conferir antes de salvar. `sticky` na página inteira não cria rolagem dentro de rolagem, que é
- * o que estragava a versão em diálogo.
- */
-.cadastro__previa {
-  position: sticky;
-  top: var(--clinic-space-5);
-}
-
-/*
- * Abaixo de 1100 px a prévia vira um resumo no fim da página.
+ * conferir antes de salvar. `sticky` na página inteira não cria rolagem dentro de rolagem.
  *
- * Lado a lado em coluna estreita, os dois ficariam ilegíveis. Empilhada, ela deixa de acompanhar
- * a digitação e passa a ser a última conferida antes do botão — que é o melhor papel que lhe
- * resta nessa largura.
+ * Abaixo dessa largura ela desce para o fim, depois do botão: deixa de acompanhar a digitação e
+ * passa a ser a última conferida — o melhor papel que lhe resta numa coluna só.
  */
-/* A prévia mais larga empurra o ponto em que as duas colunas deixam de caber lado a lado. */
-@media (max-width: 1240px) {
+@container cadastro (min-width: 980px) {
   .cadastro__colunas {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 46rem) minmax(20rem, 24rem);
   }
 
   .cadastro__previa {
-    position: static;
+    position: sticky;
+    top: 24px;
   }
-}
-
-.cadastro__ajuda {
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  line-height: 1.45;
 }
 </style>

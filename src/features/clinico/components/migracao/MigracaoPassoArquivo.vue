@@ -2,8 +2,10 @@
 /**
  * Passo 1 — de onde vêm os dados.
  *
- * Uma pergunta só, e a promessa que tira o medo de começar: nada é gravado antes do fim. Os
- * exemplos ficam abaixo do cartão, como alternativa — não competem com o arquivo da pessoa.
+ * Uma pergunta só, e uma área generosa para soltar o arquivo. A promessa que tira o medo de
+ * começar (nada é gravado antes do fim) mora na página, ao lado dos passos, e fica à vista até o
+ * botão de importar. Os exemplos ficam abaixo, numa lista, como alternativa — não competem com o
+ * arquivo da pessoa.
  */
 import Button from 'primevue/button'
 import FileUpload, { type FileUploadUploaderEvent } from 'primevue/fileupload'
@@ -78,6 +80,13 @@ function baixar(id: DemonstracaoId) {
 }
 
 const LINHAS: Record<DemonstracaoId, number> = { clinica: 39, simplesvet: 120, vetus: 2400 }
+
+/** Cada exemplo com o desenho do que ele é: a planilha da clínica, o export, a base grande. */
+const ICONE: Record<DemonstracaoId, string> = {
+  clinica: 'ph ph-table',
+  simplesvet: 'ph ph-export',
+  vetus: 'ph ph-database',
+}
 </script>
 
 <template>
@@ -87,9 +96,13 @@ const LINHAS: Record<DemonstracaoId, number> = { clinica: 39, simplesvet: 120, v
       <p class="mg-texto">{{ t('clinico.migracao.arquivo.texto') }}</p>
     </header>
 
+    <!--
+      A área de soltar: tracejado sobre o fundo, o botão cheio no meio. Arrastando por cima, o
+      tracejado vira linha e o fundo ganha o tom do lugar — o sinal de que soltar ali funciona.
+    -->
     <div
       class="soltar"
-      :class="{ 'soltar--ativo': arrastando }"
+      :class="{ 'soltar--ativo': arrastando, 'soltar--lendo': migracao.lendo }"
       @dragenter.prevent="aoEntrar"
       @dragover.prevent
       @dragleave.prevent="aoSair"
@@ -108,73 +121,81 @@ const LINHAS: Record<DemonstracaoId, number> = { clinica: 39, simplesvet: 120, v
       <span class="soltar__ou">{{ t('clinico.migracao.arquivo.ou') }}</span>
       <FileUpload
         ref="escolha"
+        class="soltar__escolha"
         mode="basic"
         accept=".xlsx,.csv,.txt,.xls"
         auto
         custom-upload
         choose-icon="ph ph-folder-open"
         :choose-label="t('clinico.migracao.arquivo.escolher')"
-        :choose-button-props="{ class: 'mg-pilula mg-pilula--cheia mg-pilula--grande' }"
+        :choose-button-props="{ class: 'mg-adiante' }"
         :disabled="migracao.lendo || migracao.emAndamento"
         @uploader="aoEscolher"
       />
       <span class="soltar__formatos">
+        <i class="ph ph-file-xls" aria-hidden="true" />
         {{ t('clinico.migracao.arquivo.formatos', { mb: LIMITE_DO_ARQUIVO_MB }) }}
       </span>
     </div>
 
-    <p v-if="migracao.erroDeLeitura" class="mg-caixa mg-caixa--coral erro" role="alert">
+    <p v-if="migracao.erroDeLeitura" class="mg-aviso mg-aviso--risco" role="alert">
       <i class="ph ph-warning-circle" aria-hidden="true" />
       <span>{{ t(`clinico.migracao.arquivo.erro.${migracao.erroDeLeitura}`) }}</span>
-    </p>
-
-    <p class="promessa">
-      <i class="ph ph-lock" aria-hidden="true" />
-      {{ t('clinico.migracao.arquivo.promessa') }}
     </p>
   </section>
 
   <section class="exemplos" aria-labelledby="mg-exemplos-titulo">
-    <header class="cabeca">
+    <header class="exemplos__cabeca">
       <h3 id="mg-exemplos-titulo" class="exemplos__titulo">
         {{ t('clinico.migracao.arquivo.exemplosTitulo') }}
       </h3>
-      <p class="mg-texto">{{ t('clinico.migracao.arquivo.exemplosTexto') }}</p>
+      <p class="exemplos__texto">{{ t('clinico.migracao.arquivo.exemplosTexto') }}</p>
     </header>
 
-    <ul class="exemplos__lista">
+    <ul class="ui-folha ui-lista">
       <li v-for="demonstracao in DEMONSTRACOES" :key="demonstracao.id" class="exemplo">
-        <span class="mg-chip hc--cinza">
-          {{
-            t(
-              'clinico.migracao.comum.linhasN',
-              { n: formato.numero(LINHAS[demonstracao.id], 0) },
-              LINHAS[demonstracao.id],
-            )
-          }}
+        <span class="exemplo__icone" aria-hidden="true">
+          <i :class="ICONE[demonstracao.id]" />
         </span>
-        <strong class="exemplo__nome">
-          {{ t(`clinico.migracao.arquivo.demo.${demonstracao.id}.titulo`) }}
-        </strong>
-        <p class="exemplo__descricao">
-          {{ t(`clinico.migracao.arquivo.demo.${demonstracao.id}.descricao`) }}
-        </p>
-        <div class="exemplo__acoes">
+        <span class="exemplo__texto">
+          <strong class="exemplo__nome">
+            {{ t(`clinico.migracao.arquivo.demo.${demonstracao.id}.titulo`) }}
+            <span class="ui-selo ui-selo--contorno exemplo__linhas ui-num">
+              {{
+                t(
+                  'clinico.migracao.comum.linhasN',
+                  { n: formato.numero(LINHAS[demonstracao.id], 0) },
+                  LINHAS[demonstracao.id],
+                )
+              }}
+            </span>
+          </strong>
+          <span class="exemplo__descricao">
+            {{ t(`clinico.migracao.arquivo.demo.${demonstracao.id}.descricao`) }}
+          </span>
+        </span>
+        <span class="exemplo__acoes">
           <Button
-            class="mg-pilula mg-pilula--pequena"
+            v-if="demonstracao.id === 'clinica'"
+            type="button"
+            size="small"
+            severity="secondary"
+            text
+            icon="ph ph-download-simple"
+            :label="t('clinico.migracao.arquivo.baixar')"
+            @click="baixar(demonstracao.id)"
+          />
+          <Button
+            type="button"
+            size="small"
+            severity="secondary"
+            outlined
             icon="ph ph-play"
             :label="t('clinico.migracao.arquivo.usar')"
             :disabled="migracao.emAndamento"
             @click="migracao.usarDemonstracao(demonstracao.id)"
           />
-          <Button
-            v-if="demonstracao.id === 'clinica'"
-            class="mg-pilula mg-pilula--pequena"
-            icon="ph ph-download-simple"
-            :label="t('clinico.migracao.arquivo.baixar')"
-            @click="baixar(demonstracao.id)"
-          />
-        </div>
+        </span>
       </li>
     </ul>
   </section>
@@ -183,133 +204,169 @@ const LINHAS: Record<DemonstracaoId, number> = { clinica: 39, simplesvet: 120, v
 <style scoped>
 .cabeca {
   display: grid;
-  gap: 0.4rem;
+  gap: 6px;
 }
 
-/*
- * A área de soltar: tracejado sálvia sobre o fundo da página, o botão cheio no meio. Arrastando
- * por cima, o tracejado vira linha e o fundo ganha o véu — o sinal de que soltar ali funciona.
- */
 .soltar {
   display: grid;
+  min-height: 280px;
+  align-content: center;
   justify-items: center;
-  padding: 2.25rem 1.5rem;
-  border: 2px dashed #b7d6cc;
-  border-radius: 1rem;
-  background: var(--hc-fundo);
-  gap: 0.6rem;
+  gap: 10px;
+  padding: 36px 24px;
+  border: 2px dashed var(--linha-forte);
+  border-radius: 16px;
+  background: var(--fundo);
   text-align: center;
   transition:
-    background-color 160ms ease-out,
-    border-color 160ms ease-out;
+    background-color var(--pj-tempo-medio, 200ms) ease-out,
+    border-color var(--pj-tempo-medio, 200ms) ease-out;
 }
 
 .soltar--ativo {
   border-style: solid;
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
+  border-color: var(--pj-lugar, var(--musgo));
+  background: var(--pj-lugar-fundo, var(--musgo-fundo));
 }
 
 .soltar__icone {
-  display: inline-grid;
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 999px;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-  font-size: 1.35rem;
+  display: grid;
+  width: 60px;
+  height: 60px;
+  margin-bottom: 4px;
   place-items: center;
+  border-radius: 18px;
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  font-size: 28px;
+}
+
+.soltar--ativo .soltar__icone {
+  background: var(--superficie);
 }
 
 .soltar__frase {
-  color: var(--hc-tinta);
-  font-size: 1.0625rem;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-.soltar__ou,
+.soltar__ou {
+  color: var(--tinta-2);
+  font-size: 14px;
+}
+
 .soltar__formatos {
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-}
-
-.erro {
-  display: flex;
-  align-items: flex-start;
-  margin: 0;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  gap: 0.6rem;
-}
-
-.erro .ph {
-  margin-top: 0.2rem;
-}
-
-.promessa {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  margin: 0;
-  color: var(--hc-marca-forte);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  gap: 0.5rem;
+  gap: 6px;
+  margin-top: 2px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
+
+.soltar__formatos i {
+  color: var(--tinta-3);
+  font-size: 17px;
+}
+
+/* ------------------------------------------------------------------------------- exemplos */
 
 .exemplos {
   display: grid;
-  gap: 1rem;
+  gap: 12px;
+}
+
+.exemplos__cabeca {
+  display: grid;
+  gap: 2px;
 }
 
 .exemplos__titulo {
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1.0625rem;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-.exemplos__lista {
-  display: grid;
+.exemplos__texto {
   margin: 0;
-  padding: 0;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  list-style: none;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 .exemplo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 14px 18px;
+}
+
+.exemplo__icone {
   display: grid;
-  align-content: start;
-  justify-items: start;
-  padding: 1.1rem 1.2rem 1.2rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 1rem;
-  background: var(--hc-cartao);
-  box-shadow: var(--hc-sombra);
-  gap: 0.5rem;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 20px;
+}
+
+.exemplo__texto {
+  display: grid;
+  flex: 1 1 22rem;
+  min-width: 0;
+  gap: 2px;
 }
 
 .exemplo__nome {
-  color: var(--hc-tinta);
-  font-size: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.exemplo__linhas {
+  height: 22px;
+  font-size: 12px;
 }
 
 .exemplo__descricao {
-  margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-  line-height: 1.5;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
 }
 
 .exemplo__acoes {
   display: flex;
   flex-wrap: wrap;
-  margin-top: 0.35rem;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+
+.exemplo__acoes :deep(.p-button) {
+  min-height: 36px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .soltar {
     transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .soltar {
+    min-height: 220px;
+    padding: 28px 16px;
   }
 }
 </style>

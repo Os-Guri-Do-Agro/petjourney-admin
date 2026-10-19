@@ -12,12 +12,16 @@
  *
  * Dois vazios diferentes, e a tela não os confunde: o responsável **não liberou** o diário para
  * a clínica (é uma escolha dele, feita no app), ou liberou e **não registrou nada** no período.
+ *
+ * Redesenho (19/10/2026): título no fundo (`UiSecao`), as respostas numa folha só, rótulo à
+ * esquerda e resposta à direita; a alteração que é maioria ganha o selo de atenção.
  */
 import Button from 'primevue/button'
-import { PhHouseLine } from '@phosphor-icons/vue'
 import SelectButton from 'primevue/selectbutton'
 import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import UiSecao from '@/components/ui/UiSecao.vue'
 
 import { useClinicFormat } from '../../../composables/useClinicFormat'
 import { useRotulosDoDiario } from '../../../composables/useRotulosDoDiario'
@@ -47,6 +51,16 @@ const aberto = ref(false)
 const filtro = ref<'alteracao' | 'todos'>('alteracao')
 
 const total = computed(() => props.diario.entradas.length)
+
+/** "12 registros no app, 2 sem alteração": a linha embaixo do título. */
+const descricao = computed(() =>
+  total.value > 0
+    ? `${t('clinico.resumoDoPaciente.casa.registros', { total: total.value })} · ${t(
+        'clinico.resumoDoPaciente.casa.semAlteracao',
+        { total: props.diario.semAlteracao },
+      )}`
+    : '',
+)
 const comAlteracao = computed(() => total.value - props.diario.semAlteracao)
 
 const opcoesDoFiltro = computed(() => [
@@ -124,205 +138,169 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
 </script>
 
 <template>
-  <section class="casa" aria-labelledby="casa-titulo">
-    <header class="casa__topo">
-      <h2 id="casa-titulo" class="casa__titulo">
-        <PhHouseLine class="casa__titulo-icone" weight="duotone" aria-hidden="true" />
-        {{
-          temConsulta
-            ? t('clinico.resumoDoPaciente.casa.titulo')
-            : t('clinico.resumoDoPaciente.casa.tituloSemConsulta')
-        }}
-      </h2>
-      <span v-if="total > 0" class="casa__meta">
-        {{ t('clinico.resumoDoPaciente.casa.registros', { total }) }}
-        ·
-        {{ t('clinico.resumoDoPaciente.casa.semAlteracao', { total: diario.semAlteracao }) }}
-      </span>
-    </header>
-
-    <!--
-      Não liberou: é escolha do responsável, e a tela diz onde ela se muda — no app, não aqui.
-      Cadeado e não celular: o diário existe, só não é da clínica.
-    -->
-    <div v-if="!diario.liberado" class="casa__vazio">
-      <i class="ph ph-lock" aria-hidden="true" />
-      <p>
-        <strong>{{ t('clinico.resumoDoPaciente.casa.naoLiberadoTitulo') }}</strong>
-        {{ t('clinico.resumoDoPaciente.casa.naoLiberadoDescricao') }}
-      </p>
-    </div>
-
-    <div v-else-if="total === 0 && !diario.peso" class="casa__vazio">
-      <i class="ph ph-device-mobile" aria-hidden="true" />
-      <p>
-        <strong>{{ t('clinico.resumoDoPaciente.casa.vazioTitulo') }}</strong>
-        {{ t('clinico.resumoDoPaciente.casa.vazioDescricao') }}
-      </p>
-    </div>
-
-    <template v-else>
-      <dl class="casa__linhas">
-        <div class="casa__linha">
-          <dt>{{ t('clinico.resumoDoPaciente.casa.peso') }}</dt>
-          <dd v-if="diario.peso">
-            <span class="clinic-value casa__valor">
-              {{ kg(diario.peso.deKg) }} → {{ kg(diario.peso.paraKg) }} kg
-            </span>
-            <span class="casa__meta">{{ formato.relativo(diario.peso.ultimoEm) }}</span>
-          </dd>
-          <dd v-else class="casa__fraco">{{ t('clinico.resumoDoPaciente.casa.semRegistro') }}</dd>
-        </div>
-
-        <div v-for="linha in linhasDosCampos" :key="linha.campo" class="casa__linha">
-          <dt>{{ linha.rotulo }}</dt>
-          <dd>
-            <span class="casa__valor" :class="{ 'casa__valor--alterado': linha.alterado }">
-              {{ linha.valor }}
-            </span>
-            <span class="casa__meta">{{ linha.meta }}</span>
-          </dd>
-        </div>
-
-        <div class="casa__linha">
-          <dt>{{ rotulos.campo('sintomas') }}</dt>
-          <dd v-if="diario.sintomas.length > 0">
-            <ul class="casa__sintomas">
-              <li
-                v-for="item in diario.sintomas"
-                :key="item.sintoma"
-                :class="{ 'casa__sintoma--alarme': item.alarme }"
-              >
-                <i v-if="item.alarme" class="ph ph-warning" aria-hidden="true" />
-                {{ rotulos.sintoma(item.sintoma) }}
-                <span class="clinic-value casa__vezes">×{{ item.vezes }}</span>
-              </li>
-            </ul>
-          </dd>
-          <dd v-else class="casa__fraco">{{ t('clinico.resumoDoPaciente.casa.nenhum') }}</dd>
-        </div>
-
-        <!-- Doença que o responsável acha que o pet teve: é hipótese de casa, e diz isso no rótulo. -->
-        <div v-if="diario.doencas.length > 0" class="casa__linha">
-          <dt>{{ rotulos.campo('doencas') }}</dt>
-          <dd>
-            <ul class="casa__sintomas">
-              <li v-for="item in diario.doencas" :key="item.doenca">
-                {{ rotulos.doenca(item.doenca) }}
-                <span class="clinic-value casa__vezes">×{{ item.vezes }}</span>
-              </li>
-            </ul>
-          </dd>
-        </div>
-      </dl>
-
-      <div v-if="diario.notas.length > 0" class="casa__notas">
-        <h3 class="clinic-label">{{ t('clinico.resumoDoPaciente.casa.notas') }}</h3>
-        <figure v-for="nota in diario.notas" :key="nota.entrada.id" class="nota">
-          <blockquote>{{ nota.texto }}</blockquote>
-          <figcaption class="clinic-value">{{ quando(nota.entrada.data) }}</figcaption>
-        </figure>
+  <UiSecao
+    id="resumo-casa"
+    :titulo="
+      temConsulta
+        ? t('clinico.resumoDoPaciente.casa.titulo')
+        : t('clinico.resumoDoPaciente.casa.tituloSemConsulta')
+    "
+    icone="ph ph-house-line"
+    :descricao="descricao"
+  >
+    <div class="casa ui-folha">
+      <!--
+        Não liberou: é escolha do responsável, e a tela diz onde ela se muda — no app, não aqui.
+        Cadeado e não celular: o diário existe, só não é da clínica.
+      -->
+      <div v-if="!diario.liberado" class="casa__vazio">
+        <i class="ph ph-lock" aria-hidden="true" />
+        <p>
+          <strong>{{ t('clinico.resumoDoPaciente.casa.naoLiberadoTitulo') }}</strong>
+          {{ t('clinico.resumoDoPaciente.casa.naoLiberadoDescricao') }}
+        </p>
       </div>
 
-      <div v-if="total > 0" class="casa__rodape">
-        <Button
-          :label="
-            aberto
-              ? t('clinico.resumoDoPaciente.casa.esconder')
-              : t('clinico.resumoDoPaciente.casa.verRegistros', { total })
-          "
-          :icon="aberto ? 'ph ph-caret-up' : 'ph ph-caret-down'"
-          severity="secondary"
-          text
-          size="small"
-          :aria-expanded="aberto"
-          :aria-controls="idDaLista"
-          @click="aberto = !aberto"
-        />
+      <div v-else-if="total === 0 && !diario.peso" class="casa__vazio">
+        <i class="ph ph-device-mobile" aria-hidden="true" />
+        <p>
+          <strong>{{ t('clinico.resumoDoPaciente.casa.vazioTitulo') }}</strong>
+          {{ t('clinico.resumoDoPaciente.casa.vazioDescricao') }}
+        </p>
       </div>
 
-      <Transition name="casa-abre">
-        <div v-if="aberto" :id="idDaLista" class="registros">
-          <SelectButton
-            v-model="filtro"
-            :options="opcoesDoFiltro"
-            option-label="rotulo"
-            option-value="valor"
-            :allow-empty="false"
-            size="small"
-            :aria-label="t('clinico.resumoDoPaciente.casa.filtro')"
-          />
-
-          <ol class="registros__lista">
-            <li
-              v-for="entrada in entradasVisiveis"
-              :key="entrada.id"
-              class="registro"
-              :class="{
-                'registro--nada': !temAlteracao(entrada),
-                'registro--alarme': achadosDeAlarme(entrada).length > 0,
-              }"
-            >
-              <span class="registro__quando clinic-value">{{ quando(entrada.data) }}</span>
-              <span class="registro__corpo">
-                <span class="registro__pedacos">
-                  {{
-                    pedacos(entrada).join(' · ') ||
-                    t('clinico.resumoDoPaciente.casa.semAlteracaoCurto')
-                  }}
-                </span>
-                <span v-if="textoDoRegistro(entrada)" class="registro__nota">
-                  {{ textoDoRegistro(entrada) }}
-                </span>
+      <template v-else>
+        <dl class="casa__linhas">
+          <div class="casa__linha">
+            <dt>{{ t('clinico.resumoDoPaciente.casa.peso') }}</dt>
+            <dd v-if="diario.peso">
+              <span class="casa__valor ui-num">
+                {{ kg(diario.peso.deKg) }} → {{ kg(diario.peso.paraKg) }} kg
               </span>
-            </li>
-          </ol>
+              <span class="casa__meta">{{ formato.relativo(diario.peso.ultimoEm) }}</span>
+            </dd>
+            <dd v-else class="casa__fraco">{{ t('clinico.resumoDoPaciente.casa.semRegistro') }}</dd>
+          </div>
+
+          <div v-for="linha in linhasDosCampos" :key="linha.campo" class="casa__linha">
+            <dt>{{ linha.rotulo }}</dt>
+            <dd>
+              <span
+                class="casa__valor"
+                :class="{ 'casa__valor--alterado ui-selo ui-selo--atencao': linha.alterado }"
+              >
+                {{ linha.valor }}
+              </span>
+              <span class="casa__meta">{{ linha.meta }}</span>
+            </dd>
+          </div>
+
+          <div class="casa__linha">
+            <dt>{{ rotulos.campo('sintomas') }}</dt>
+            <dd v-if="diario.sintomas.length > 0">
+              <ul class="casa__sintomas">
+                <li
+                  v-for="item in diario.sintomas"
+                  :key="item.sintoma"
+                  :class="{ 'casa__sintoma--alarme': item.alarme }"
+                >
+                  <i v-if="item.alarme" class="ph ph-warning" aria-hidden="true" />
+                  {{ rotulos.sintoma(item.sintoma) }}
+                  <span class="casa__vezes ui-num">×{{ item.vezes }}</span>
+                </li>
+              </ul>
+            </dd>
+            <dd v-else class="casa__fraco">{{ t('clinico.resumoDoPaciente.casa.nenhum') }}</dd>
+          </div>
+
+          <!-- Doença que o responsável acha que o pet teve: é hipótese de casa, e diz isso no rótulo. -->
+          <div v-if="diario.doencas.length > 0" class="casa__linha">
+            <dt>{{ rotulos.campo('doencas') }}</dt>
+            <dd>
+              <ul class="casa__sintomas">
+                <li v-for="item in diario.doencas" :key="item.doenca">
+                  {{ rotulos.doenca(item.doenca) }}
+                  <span class="casa__vezes ui-num">×{{ item.vezes }}</span>
+                </li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+
+        <div v-if="diario.notas.length > 0" class="casa__notas">
+          <h3 class="casa__subtitulo">{{ t('clinico.resumoDoPaciente.casa.notas') }}</h3>
+          <figure v-for="nota in diario.notas" :key="nota.entrada.id" class="nota">
+            <blockquote>{{ nota.texto }}</blockquote>
+            <figcaption class="ui-num">{{ quando(nota.entrada.data) }}</figcaption>
+          </figure>
         </div>
-      </Transition>
-    </template>
-  </section>
+
+        <div v-if="total > 0" class="casa__rodape">
+          <Button
+            type="button"
+            :label="
+              aberto
+                ? t('clinico.resumoDoPaciente.casa.esconder')
+                : t('clinico.resumoDoPaciente.casa.verRegistros', { total })
+            "
+            :icon="aberto ? 'ph ph-caret-up' : 'ph ph-caret-down'"
+            severity="secondary"
+            text
+            size="small"
+            :aria-expanded="aberto"
+            :aria-controls="idDaLista"
+            @click="aberto = !aberto"
+          />
+        </div>
+
+        <Transition name="casa-abre">
+          <div v-if="aberto" :id="idDaLista" class="registros">
+            <SelectButton
+              v-model="filtro"
+              :options="opcoesDoFiltro"
+              option-label="rotulo"
+              option-value="valor"
+              :allow-empty="false"
+              size="small"
+              :aria-label="t('clinico.resumoDoPaciente.casa.filtro')"
+            />
+
+            <ol class="registros__lista">
+              <li
+                v-for="entrada in entradasVisiveis"
+                :key="entrada.id"
+                class="registro"
+                :class="{
+                  'registro--nada': !temAlteracao(entrada),
+                  'registro--alarme': achadosDeAlarme(entrada).length > 0,
+                }"
+              >
+                <span class="registro__quando ui-num">{{ quando(entrada.data) }}</span>
+                <span class="registro__corpo">
+                  <span class="registro__pedacos">
+                    {{
+                      pedacos(entrada).join(' · ') ||
+                      t('clinico.resumoDoPaciente.casa.semAlteracaoCurto')
+                    }}
+                  </span>
+                  <span v-if="textoDoRegistro(entrada)" class="registro__nota">
+                    {{ textoDoRegistro(entrada) }}
+                  </span>
+                </span>
+              </li>
+            </ol>
+          </div>
+        </Transition>
+      </template>
+    </div>
+  </UiSecao>
 </template>
 
 <style scoped>
 .casa {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding: 1.2rem 1.35rem 1.35rem;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-}
-
-.casa__topo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-1) var(--clinic-space-3);
-}
-
-.casa__titulo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.casa__titulo-icone {
-  flex-shrink: 0;
-  width: 1.2rem;
-  height: 1.2rem;
-  color: var(--clinic-accent);
-}
-
-.casa__meta {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 500;
+  gap: 16px;
+  padding: 6px 20px 16px;
 }
 
 .casa__linhas {
@@ -333,104 +311,133 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
 /* Rótulo à esquerda, resposta à direita: o olho desce pela coluna de perguntas. */
 .casa__linha {
   display: grid;
-  grid-template-columns: 9rem minmax(0, 1fr);
   align-items: baseline;
-  gap: var(--clinic-space-3);
-  padding-block: var(--clinic-space-2);
-  border-top: 1px solid var(--clinic-line-soft);
+  gap: 4px 16px;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  padding-block: 11px;
+  border-top: 1px solid var(--linha);
 }
 
 .casa__linha:first-child {
   border-top: 0;
-  padding-top: 0;
 }
 
 .casa__linha dt {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 550;
 }
 
 .casa__linha dd {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--clinic-space-1) var(--clinic-space-2);
+  gap: 4px 10px;
   margin: 0;
-  min-width: 0;
 }
 
 .casa__valor {
+  color: var(--tinta);
+  font-size: 14.5px;
   font-weight: 600;
 }
 
-.casa__valor--alterado {
-  font-weight: 800;
+/* A alteração que é maioria: selo de atenção, com a palavra do diário dentro. */
+.casa__valor--alterado.ui-selo {
+  align-self: center;
+  height: auto;
+  min-height: 24px;
+  padding-block: 3px;
+  font-size: 13.5px;
+  white-space: normal;
+}
+
+.casa__meta {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .casa__fraco {
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
+  font-size: 14px;
 }
 
 .casa__sintomas {
   display: flex;
   flex-wrap: wrap;
+  gap: 4px 16px;
   margin: 0;
   padding: 0;
-  gap: var(--clinic-space-1) var(--clinic-space-3);
   list-style: none;
 }
 
 .casa__sintomas li {
   display: inline-flex;
   align-items: baseline;
-  gap: var(--clinic-space-1);
+  gap: 5px;
+  color: var(--tinta);
+  font-size: 14.5px;
   font-weight: 600;
 }
 
 .casa__sintoma--alarme {
-  color: var(--clinic-risk-text);
+  color: var(--risco-tinta);
 }
 
 .casa__sintoma--alarme .ph {
-  font-size: 0.8rem;
+  align-self: center;
+  font-size: 14px;
 }
 
 .casa__vezes {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .casa__notas {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--linha);
 }
 
-.casa__notas h3 {
+.casa__subtitulo {
   margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 550;
 }
 
 .nota {
   margin: 0;
-  padding-inline-start: var(--clinic-space-3);
-  border-inline-start: 2px solid var(--clinic-line-strong);
+  padding-inline-start: 12px;
+  border-inline-start: 2px solid var(--linha-forte);
 }
 
 .nota blockquote {
   margin: 0;
+  color: var(--tinta);
+  font-size: 14.5px;
   font-style: italic;
+  line-height: 1.45;
 }
 
 .nota figcaption {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  margin-top: 2px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .casa__vazio {
   display: flex;
   align-items: flex-start;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-muted);
+  gap: 12px;
+  padding-block: 12px 2px;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .casa__vazio p {
@@ -439,21 +446,29 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
 
 .casa__vazio strong {
   display: block;
-  color: var(--clinic-text);
+  color: var(--tinta);
+  font-weight: 600;
 }
 
 .casa__vazio .ph {
-  margin-top: 0.2em;
-  color: var(--clinic-faint);
+  flex: none;
+  margin-top: 2px;
+  color: var(--tinta-2);
+  font-size: 20px;
 }
 
 .casa__rodape {
-  margin-inline-start: calc(var(--clinic-space-2) * -1);
+  margin-top: -6px;
+  margin-inline-start: -10px;
 }
 
 .registros {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 10px;
+}
+
+.registros :deep(.p-selectbutton) {
+  justify-self: start;
 }
 
 .registros__lista {
@@ -462,46 +477,48 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
   margin: 0;
   padding: 0;
   overflow-y: auto;
-  border-top: 1px solid var(--clinic-line-soft);
+  border-top: 1px solid var(--linha);
   list-style: none;
 }
 
 .registro {
   display: grid;
+  gap: 4px 14px;
   grid-template-columns: 7.5rem minmax(0, 1fr);
-  gap: var(--clinic-space-3);
-  padding-block: var(--clinic-space-2);
-  border-bottom: 1px solid var(--clinic-line-soft);
+  padding-block: 9px;
+  border-bottom: 1px solid var(--linha);
 }
 
 .registro__quando {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .registro__corpo {
   display: grid;
-  gap: 2px;
   min-width: 0;
+  gap: 2px;
 }
 
 .registro__pedacos {
+  color: var(--tinta);
+  font-size: 14px;
   font-weight: 600;
 }
 
 /* O registro com achado de alarme puxa a cor do sinal: é o mesmo fato, lido de outro lugar. */
 .registro--alarme .registro__pedacos {
-  color: var(--clinic-risk-text);
+  color: var(--risco-tinta);
 }
 
 .registro--nada .registro__pedacos {
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
   font-weight: 500;
 }
 
 .registro__nota {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
   overflow-wrap: anywhere;
 }
 
@@ -509,8 +526,8 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
 .casa-abre-enter-active,
 .casa-abre-leave-active {
   transition:
-    opacity 160ms ease-out,
-    transform 160ms ease-out;
+    opacity var(--pj-tempo-curto, 140ms) ease-out,
+    transform var(--pj-tempo-curto, 140ms) ease-out;
 }
 
 .casa-abre-enter-from,
@@ -530,7 +547,6 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
   .casa__linha,
   .registro {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--clinic-space-1);
   }
 }
 </style>

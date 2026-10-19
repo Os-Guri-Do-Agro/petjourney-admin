@@ -14,11 +14,15 @@
  *
  * Sem animação de entrada: o gráfico é lido na porta da sala, e crescer a linha na segunda
  * abertura é só atraso.
+ *
+ * Redesenho (19/10/2026): em cima da curva, o último peso em número grande e a variação no
+ * período num selo (de risco quando o resumo já levantou a perda) — a resposta antes do gráfico.
  */
-import { PhScales } from '@phosphor-icons/vue'
 import type { ApexOptions } from 'apexcharts'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import UiSecao from '@/components/ui/UiSecao.vue'
 
 import VueApexCharts from '../../charts/apex'
 import { useClinicChartTheme } from '../../../composables/useClinicChartTheme'
@@ -150,6 +154,26 @@ const opcoes = computed<ApexOptions>(() => {
   }
 })
 
+/** "−16,3% em 21 semanas": o sinal de menos tipográfico, porque o hífen some ao lado do número. */
+const variacao = computed(() => {
+  const dados = props.peso.variacao
+
+  if (!dados) {
+    return ''
+  }
+
+  const sinal = dados.percentual > 0 ? '+' : dados.percentual < 0 ? '−' : ''
+
+  return t(
+    'clinico.ficha.resumo.variacao',
+    {
+      percentual: `${sinal}${formato.numero(Math.abs(dados.percentual), 1)}%`,
+      semanas: dados.semanas,
+    },
+    dados.semanas,
+  )
+})
+
 const descricao = computed(() => {
   const variacao = props.peso.variacao
 
@@ -164,15 +188,84 @@ const descricao = computed(() => {
 </script>
 
 <template>
-  <section class="peso" aria-labelledby="peso-titulo">
-    <header class="peso__topo">
-      <h2 id="peso-titulo" class="peso__titulo">
-        <PhScales class="peso__titulo-icone" weight="duotone" aria-hidden="true" />
-        {{ t('clinico.resumoDoPaciente.peso.titulo') }}
-      </h2>
+  <UiSecao id="resumo-peso" :titulo="t('clinico.resumoDoPaciente.peso.titulo')" icone="ph ph-scales">
+    <div class="peso ui-folha">
+      <!-- A resposta antes do gráfico: quanto pesa agora e para onde foi no período. -->
+      <div v-if="ultimo" class="peso__agora">
+        <span class="peso__numero">
+          <strong class="ui-num">{{ kg(ultimo.pesoKg) }}</strong>
+          <span>{{ t('clinico.formato.kg') }}</span>
+        </span>
+        <span
+          v-if="variacao"
+          class="ui-selo ui-num"
+          :class="emRisco ? 'ui-selo--risco' : 'ui-selo--contorno'"
+        >
+          <i
+            class="ph"
+            :class="(peso.variacao?.percentual ?? 0) < 0 ? 'ph-trend-down' : 'ph-trend-up'"
+            aria-hidden="true"
+          />
+          {{ variacao }}
+        </span>
+        <span class="peso__quando ui-num">
+          {{ formato.dataCurta(clinicClock.dateOf(ultimo.em)) }} ·
+          {{ t(`clinico.resumoDoPaciente.peso.origem.${ultimo.origem}`) }}
+        </span>
+      </div>
+
+      <figure
+        v-if="pontos.length >= 2"
+        class="peso__figura"
+        :class="{ 'peso__figura--risco': emRisco }"
+      >
+        <VueApexCharts
+          type="line"
+          :height="ALTURA"
+          :options="opcoes"
+          :series="series"
+          width="100%"
+          :aria-label="descricao"
+          role="img"
+        />
+        <!--
+          A mesma série em tabela, para quem não lê o gráfico.
+
+          O `sr-only` fica num `div`, não na tabela: tabela ignora `height: 1px` e cresce até o
+          conteúdo. Posicionada em absoluto, ela esticava a página 290 px abaixo do app — a faixa
+          branca no rodapé.
+        -->
+        <div class="sr-only">
+          <table>
+            <caption>
+              {{
+                t('clinico.resumoDoPaciente.peso.titulo')
+              }}
+            </caption>
+            <tbody>
+              <tr v-for="ponto in pontos" :key="ponto.em">
+                <th scope="row">{{ formato.dataCurta(clinicClock.dateOf(ponto.em)) }}</th>
+                <td>{{ kg(ponto.pesoKg) }} kg</td>
+                <td>{{ t(`clinico.resumoDoPaciente.peso.origem.${ponto.origem}`) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </figure>
+
+      <p v-else-if="ultimo" class="peso__unico">
+        {{
+          t('clinico.resumoDoPaciente.peso.umPonto', {
+            peso: `${kg(ultimo.pesoKg)} kg`,
+            data: formato.dataCurta(clinicClock.dateOf(ultimo.em)),
+          })
+        }}
+      </p>
+
+      <p v-else class="peso__unico">{{ t('clinico.resumoDoPaciente.peso.semPeso') }}</p>
 
       <!-- A legenda é da forma do marcador, não da cor: a linha tem uma cor só. -->
-      <ul v-if="pontos.length >= 2" class="peso__legenda">
+      <ul v-if="pontos.length >= 2" class="peso__legenda" :class="{ 'peso__legenda--risco': emRisco }">
         <li>
           <span class="marca marca--clinica" aria-hidden="true" />
           {{ t('clinico.resumoDoPaciente.peso.legendaClinica') }}
@@ -182,150 +275,100 @@ const descricao = computed(() => {
           {{ t('clinico.resumoDoPaciente.peso.legendaCasa') }}
         </li>
       </ul>
-    </header>
-
-    <figure
-      v-if="pontos.length >= 2"
-      class="peso__figura"
-      :class="{ 'peso__figura--risco': emRisco }"
-    >
-      <VueApexCharts
-        type="line"
-        :height="ALTURA"
-        :options="opcoes"
-        :series="series"
-        width="100%"
-        :aria-label="descricao"
-        role="img"
-      />
-      <!--
-        A mesma série em tabela, para quem não lê o gráfico.
-
-        O `sr-only` fica num `div`, não na tabela: tabela ignora `height: 1px` e cresce até o
-        conteúdo. Posicionada em absoluto, ela esticava a página 290 px abaixo do app — a faixa
-        branca no rodapé.
-      -->
-      <div class="sr-only">
-        <table>
-          <caption>
-            {{
-              t('clinico.resumoDoPaciente.peso.titulo')
-            }}
-          </caption>
-          <tbody>
-            <tr v-for="ponto in pontos" :key="ponto.em">
-              <th scope="row">{{ formato.dataCurta(clinicClock.dateOf(ponto.em)) }}</th>
-              <td>{{ kg(ponto.pesoKg) }} kg</td>
-              <td>{{ t(`clinico.resumoDoPaciente.peso.origem.${ponto.origem}`) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </figure>
-
-    <p v-else-if="ultimo" class="peso__unico">
-      {{
-        t('clinico.resumoDoPaciente.peso.umPonto', {
-          peso: `${kg(ultimo.pesoKg)} kg`,
-          data: formato.dataCurta(clinicClock.dateOf(ultimo.em)),
-        })
-      }}
-    </p>
-
-    <p v-else class="peso__unico">{{ t('clinico.resumoDoPaciente.peso.semPeso') }}</p>
-  </section>
+    </div>
+  </UiSecao>
 </template>
 
 <style scoped>
 .peso {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: 1.2rem 1.35rem 1.35rem;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
+  gap: 6px;
+  padding: 16px 16px 14px 20px;
 }
 
-.peso__topo {
+.peso__agora {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-1) var(--clinic-space-3);
+  gap: 6px 12px;
 }
 
-.peso__titulo {
+.peso__numero {
   display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin: 0;
-  font-size: 1rem;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--tinta-2);
+  font-size: 14px;
+}
+
+.peso__numero strong {
+  color: var(--tinta);
+  font-size: 28px;
   font-weight: 650;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
-.peso__titulo-icone {
-  flex-shrink: 0;
-  width: 1.2rem;
-  height: 1.2rem;
-  color: var(--clinic-accent);
-}
-
-.peso__legenda {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
-  gap: var(--clinic-space-3);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 600;
-  list-style: none;
-}
-
-.peso__legenda li {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--clinic-space-1);
-}
-
-.marca {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--clinic-accent-strong);
-  border-radius: 50%;
-}
-
-.marca--clinica {
-  background: var(--clinic-accent-strong);
-}
-
-.marca--casa {
-  width: 8px;
-  height: 8px;
-  background: var(--clinic-surface);
-}
-
-.peso:has(.peso__figura--risco) .marca {
-  border-color: var(--clinic-risk-text);
-}
-
-.peso:has(.peso__figura--risco) .marca--clinica {
-  background: var(--clinic-risk-text);
+.peso__quando {
+  flex-basis: 100%;
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .peso__figura {
   /* Âncora do `sr-only` da tabela: o que é absoluto fica preso aqui dentro. */
   position: relative;
-  margin: 0;
+  margin: 0 0 0 -8px;
   /* O Apex desenha em pixel fixo e estoura o grid sem este piso. */
   min-width: 0;
 }
 
 .peso__unico {
   margin: 0;
-  color: var(--clinic-muted);
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.peso__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  list-style: none;
+}
+
+.peso__legenda li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.marca {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--clinica-tinta);
+  border-radius: 50%;
+}
+
+.marca--clinica {
+  background: var(--clinica-tinta);
+}
+
+.marca--casa {
+  background: var(--superficie);
+}
+
+.peso__legenda--risco .marca {
+  border-color: var(--risco-tinta);
+}
+
+.peso__legenda--risco .marca--clinica {
+  background: var(--risco-tinta);
 }
 </style>

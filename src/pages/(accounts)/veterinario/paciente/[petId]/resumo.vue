@@ -5,10 +5,17 @@
  * O critério de pronto é cronometrado: alguém que nunca viu o paciente entende a situação dele
  * em menos de trinta segundos. A página é organizada na ordem dessa leitura:
  *
- * 1. **Quem é** — o cabeçalho de sempre, com a ação da vez (abrir o atendimento).
- * 2. **O que chama atenção** — os sinais, risco primeiro. Ou "nada fora do comum".
- * 3. **O que aconteceu em casa** e **para onde vai o peso** — o diário do responsável, que só
- *    este produto tem, ao lado do essencial do prontuário.
+ * 1. **Quem é** — a capa da ficha (`FichaCabeca`), com a ação da vez à direita (abrir o
+ *    atendimento) e a frase que diz o veredito: quantos sinais, ou "nada fora do comum".
+ * 2. **O que chama atenção** — os sinais numa faixa de avisos, risco primeiro, cada um com a
+ *    marca e a palavra da gravidade.
+ * 3. **Quando ele entra** — a consulta de hoje, com a hora grande.
+ * 4. **O que aconteceu em casa** (diário e remédio de casa), à esquerda, e **o essencial do
+ *    prontuário** com **para onde vai o peso**, à direita.
+ *
+ * Redesenho total (19/10/2026): a página saiu do `PartnerPageFrame` para o `UiPagina`, volta a
+ * "Pacientes" pelo `#voltar`, e os blocos viraram seções com o título no fundo e o conteúdo numa
+ * folha — nada de cartão dentro de cartão.
  *
  * O botão de abrir o atendimento leva o resumo junto: a anamnese já abre com o que o diário
  * registrou, as medicações em uso e as alergias — só nos campos ainda vazios. Quem assina o
@@ -16,14 +23,11 @@
  */
 import Button from 'primevue/button'
 import ToggleSwitch from 'primevue/toggleswitch'
-import { PhCalendarBlank, PhStethoscope, PhWarningCircle } from '@phosphor-icons/vue'
 import { computed, onMounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
-import '@/components/home/home-card.css'
-import '@/features/clinico/components/pacientes/ficha/ficha.css'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import FichaCabeca from '@/features/clinico/components/pacientes/ficha/FichaCabeca.vue'
 import ResumoEmCasa from '@/features/clinico/components/pacientes/resumo/ResumoEmCasa.vue'
 import ResumoEssencial from '@/features/clinico/components/pacientes/resumo/ResumoEssencial.vue'
@@ -142,18 +146,23 @@ const mostrarPeso = computed(
   () => resumo.value !== null && (!resumo.value.primeiraVez || resumo.value.peso.serie.length > 0),
 )
 
-const linhaDeHoje = computed(() => {
+/** A consulta de hoje: a hora grande e, ao lado, o que é e com quem. */
+const consultaDeHoje = computed(() => {
   const appointment = atendimentoDeHoje.value
 
   if (!appointment) {
-    return ''
+    return null
   }
 
-  return t('clinico.resumoDoPaciente.hojeAs', {
+  return {
     hora: formato.hora(appointment.inicio),
-    tipo: clinico.tipo(appointment.typeId)?.nome ?? '',
-    profissional: clinico.profissional(appointment.professionalId)?.nome ?? '',
-  })
+    descricao: [
+      clinico.tipo(appointment.typeId)?.nome,
+      clinico.profissional(appointment.professionalId)?.nome,
+    ]
+      .filter(Boolean)
+      .join(' · '),
+  }
 })
 
 // ------------------------------------------------------------------ anamnese
@@ -387,60 +396,65 @@ watch(petId, carregar)
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="ficha-tema hc-tema"
-    :title="pet?.nome ?? t('clinico.resumoDoPaciente.titulo')"
-    :loading="carregando && !pet"
-    :error="erro"
-    :empty="!carregando && !erro && !pet"
-    :empty-title="t('clinico.resumoDoPaciente.naoEncontrado')"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    :titulo="pet?.nome ?? t('clinico.resumoDoPaciente.titulo')"
+    :carregando="carregando && !pet"
+    :erro="erro"
+    :vazio="!carregando && !erro && !pet"
+    :vazio-titulo="t('clinico.resumoDoPaciente.naoEncontrado')"
+    vazio-icone="ph ph-paw-print"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
+    <template #voltar>
+      <RouterLink to="/veterinario/pacientes" class="voltar">
+        <i class="ph ph-arrow-left" aria-hidden="true" />
+        {{ t('clinico.pacientes.titulo') }}
+      </RouterLink>
+    </template>
+
     <template v-if="pet" #cabecalho>
-      <FichaCabeca :pet="pet" :tutor="tutor" atual="resumo" :frase="frase" sem-alertas>
+      <FichaCabeca :pet="pet" :tutor="tutor" atual="resumo" :frase="frase">
         <template v-if="atendimentoDeHoje" #acoes>
           <Button
-            class="hc-pilula hc-pilula--cheia"
+            type="button"
+            icon="ph ph-stethoscope"
             :label="t('clinico.resumoDoPaciente.abrirAtendimento')"
             :loading="abrindo"
             @click="abrirAtendimento"
-          >
-            <template #icon>
-              <PhStethoscope class="hc-pilula__icone" weight="fill" aria-hidden="true" />
-            </template>
-          </Button>
+          />
         </template>
       </FichaCabeca>
     </template>
 
-    <div v-if="pet && resumo" class="ficha-conteudo resumo clinic-scope">
-      <div v-if="linhaDeHoje || erroAoAbrir" class="resumo__cabeca">
-        <p v-if="linhaDeHoje" class="resumo__hoje">
-          <PhCalendarBlank class="resumo__hoje-icone" weight="duotone" aria-hidden="true" />
-          {{ linhaDeHoje }}
-          <span class="resumo__dica">· {{ t('clinico.resumoDoPaciente.abrirAtendimentoDica') }}</span>
-        </p>
-        <p v-if="erroAoAbrir" class="resumo__erro" role="alert">{{ erroAoAbrir }}</p>
-      </div>
+    <div v-if="pet && resumo" class="resumo">
+      <p v-if="erroAoAbrir" class="resumo__erro" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        {{ erroAoAbrir }}
+      </p>
 
-      <!-- O que chama atenção vem primeiro, num cartão com título, como a pauta da Visão geral. -->
+      <!-- O que chama atenção vem primeiro: uma faixa de avisos, risco no alto. -->
+      <ResumoSinais v-if="resumo.sinais.length > 0" :sinais="resumo.sinais" />
+
+      <!-- Quando ele entra: a hora grande, e o que o botão da capa vai abrir. -->
       <section
-        v-if="!resumo.primeiraVez || resumo.sinais.length > 0"
-        class="hc"
-        aria-labelledby="resumo-sinais-titulo"
+        v-if="consultaDeHoje"
+        class="hoje ui-folha"
+        :aria-label="t('clinico.ficha.resumo.consultaDeHoje')"
       >
-        <header class="hc__cabeca">
-          <h2 id="resumo-sinais-titulo" class="hc__titulo">
-            <PhWarningCircle class="hc__icone" weight="duotone" aria-hidden="true" />
-            {{ t('clinico.resumoDoPaciente.sinais.titulo') }}
-          </h2>
-        </header>
-        <ResumoSinais :sinais="resumo.sinais" sem-moldura />
+        <span class="hoje__icone" aria-hidden="true"><i class="ph ph-calendar-check" /></span>
+        <span class="hoje__hora">
+          <strong class="ui-num">{{ consultaDeHoje.hora }}</strong>
+          <small>{{ t('clinico.ficha.resumo.hoje') }}</small>
+        </span>
+        <span class="hoje__texto">
+          <strong>{{ consultaDeHoje.descricao }}</strong>
+          <span>{{ t('clinico.ficha.resumo.dica') }}</span>
+        </span>
       </section>
 
-      <div class="ficha-grade resumo__corpo">
-        <div class="ficha-coluna">
+      <div class="resumo__corpo">
+        <div class="resumo__coluna">
           <ResumoPrimeiraConsulta v-if="resumo.primeiraVez" :pet="pet" />
           <ResumoEmCasa
             v-if="mostrarDiario"
@@ -452,11 +466,11 @@ watch(petId, carregar)
             :pet-id="pet.id"
             :tratamentos="resumo.tratamentos"
           />
-          <ResumoPeso v-if="mostrarPeso" :peso="resumo.peso" :em-risco="perdaEmRisco" />
         </div>
 
-        <div class="ficha-coluna resumo__lado">
+        <div class="resumo__coluna resumo__lado">
           <ResumoEssencial :resumo="resumo" />
+          <ResumoPeso v-if="mostrarPeso" :peso="resumo.peso" :em-risco="perdaEmRisco" />
         </div>
       </div>
 
@@ -465,68 +479,153 @@ watch(petId, carregar)
         <label :for="idDaPreferencia">{{ t('clinico.resumoDoPaciente.preferencia') }}</label>
       </div>
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
-.resumo__cabeca {
+.voltar .ph {
+  font-size: 13px;
+}
+
+[dir='rtl'] .voltar .ph {
+  scale: -1 1;
+}
+
+/* As colunas são decididas pela largura do conteúdo, não da janela. */
+.resumo {
   display: grid;
-  gap: 0.35rem;
-}
-
-.resumo__hoje {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0;
-  gap: 0.25rem 0.5rem;
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.resumo__hoje-icone {
-  flex-shrink: 0;
-  width: 1.1rem;
-  height: 1.1rem;
-  color: var(--hc-marca);
-}
-
-.resumo__dica {
-  color: var(--hc-tinta-2);
-  font-weight: 500;
+  gap: 28px;
+  container-type: inline-size;
 }
 
 .resumo__erro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
-  color: var(--hc-coral-tinta);
-  font-size: 0.8125rem;
-  font-weight: 700;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.resumo__erro i {
+  flex: none;
+  font-size: 18px;
+}
+
+/* ------------------------------------------------------------------ a consulta de hoje */
+
+.hoje {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+}
+
+.hoje__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  font-size: 20px;
+}
+
+.hoje__hora {
+  display: grid;
+  flex: none;
+  justify-items: start;
+  line-height: 1.05;
+}
+
+.hoje__hora strong {
+  color: var(--tinta);
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.hoje__hora small {
+  color: var(--tinta-2);
+  font-size: 12px;
+}
+
+.hoje__texto {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  padding-inline-start: 16px;
+  border-inline-start: 1px solid var(--linha);
+}
+
+.hoje__texto strong {
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.hoje__texto span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+/* ------------------------------------------------------------------ as duas colunas */
+
+.resumo__corpo {
+  display: grid;
+  align-items: start;
+  gap: 28px;
+}
+
+.resumo__coluna {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 28px;
+}
+
+/* O essencial ao lado, mais estreito; em uma coluna, ele sobe — é mais curto e responde antes. */
+@container (min-width: 880px) {
+  .resumo__corpo {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  }
+}
+
+@container (max-width: 879px) {
+  .resumo__lado {
+    order: -1;
+  }
 }
 
 .resumo__preferencia {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  font-weight: 500;
+  gap: 10px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 .resumo__preferencia label {
   cursor: pointer;
 }
 
-/* O essencial ao lado, mais estreito; em uma coluna, ele sobe — é mais curto e responde antes. */
-@container (min-width: 62rem) {
-  .resumo__corpo {
-    grid-template-columns: minmax(0, 1fr) 21rem;
+@media (max-width: 520px) {
+  .hoje {
+    flex-wrap: wrap;
   }
-}
 
-@container (max-width: 61.99rem) {
-  .resumo__lado {
-    order: -1;
+  .hoje__texto {
+    flex-basis: 100%;
+    padding-inline-start: 0;
+    border-inline-start: 0;
   }
 }
 </style>

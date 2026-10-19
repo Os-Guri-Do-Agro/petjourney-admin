@@ -1,6 +1,9 @@
 <script setup lang="ts">
 /**
- * Onde a pessoa está: três trilhos com nome, o atual em destaque.
+ * Onde a pessoa está: três passos numerados, o atual aceso.
+ *
+ * O número existe porque a ordem é de verdade — não dá para ver o resumo antes de abrir o arquivo.
+ * Passo feito troca o número pelo visto; o fio entre dois passos acende quando o da esquerda acaba.
  *
  * Só indica, não navega. A primeira versão fazia das etapas botões, e o resultado era uma fileira
  * de coisas clicáveis que ora iam, ora não iam — e diziam por quê só no título do botão. Voltar
@@ -33,12 +36,11 @@ const atual = computed(() => ETAPAS.indexOf(props.etapa))
       :class="{ 'passo--feito': indice < atual, 'passo--atual': indice === atual }"
       :aria-current="indice === atual ? 'step' : undefined"
     >
-      <span class="passo__trilho" aria-hidden="true" />
+      <span class="passo__numero ui-num" aria-hidden="true">
+        <i v-if="indice < atual" class="ph ph-check" />
+        <template v-else>{{ indice + 1 }}</template>
+      </span>
       <span class="passo__rotulo">
-        <span class="passo__numero" aria-hidden="true">
-          <i v-if="indice < atual" class="ph ph-check" />
-          <template v-else>{{ indice + 1 }}</template>
-        </span>
         {{
           etapa === 'duvidas' && semDuvidas && indice < atual
             ? t('clinico.migracao.passos.semDuvidas')
@@ -51,76 +53,101 @@ const atual = computed(() => ETAPAS.indexOf(props.etapa))
 
 <style scoped>
 .passos {
-  display: grid;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin: 0;
   padding: 0;
-  gap: 0.6rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   list-style: none;
 }
 
 .passo {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.passo__trilho {
-  height: 0.35rem;
-  border-radius: 999px;
-  background: var(--hc-borda);
-}
-
-.passo--feito .passo__trilho {
-  background: var(--hc-marca);
-}
-
-.passo--atual .passo__trilho {
-  background: var(--hc-degrade-botao);
-}
-
-.passo__rotulo {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
   min-width: 0;
-  color: var(--hc-tinta-3);
-  font-size: 0.875rem;
-  font-weight: 600;
-  gap: 0.45rem;
+  flex: 1 1 0;
+  align-items: center;
+  gap: 10px;
 }
 
-.passo--feito .passo__rotulo {
-  color: var(--hc-tinta-2);
+.passo:last-child {
+  flex: 0 0 auto;
 }
 
-.passo--atual .passo__rotulo {
-  color: var(--hc-tinta);
-  font-weight: 700;
+/* O fio até o próximo passo: ocupa o resto da largura, e acende quando este passo acaba. */
+.passo:not(:last-child)::after {
+  height: 2px;
+  min-width: 24px;
+  flex: 1 1 auto;
+  margin-inline-start: 4px;
+  border-radius: 2px;
+  background: var(--linha-forte);
+  content: '';
+}
+
+.passo--feito:not(:last-child)::after {
+  background: var(--musgo);
 }
 
 .passo__numero {
-  display: inline-grid;
-  width: 1.4rem;
-  height: 1.4rem;
+  display: grid;
+  width: 30px;
+  height: 30px;
   flex: none;
-  border: 1px solid var(--hc-borda);
-  border-radius: 999px;
-  background: var(--hc-cartao);
-  font-size: 0.75rem;
   place-items: center;
+  border: 1.5px solid var(--linha-forte);
+  border-radius: 50%;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 650;
 }
 
 .passo--feito .passo__numero {
-  border-color: var(--hc-marca);
-  color: var(--hc-marca);
+  border-color: transparent;
+  background: var(--musgo-fundo);
+  color: var(--musgo);
 }
 
 .passo--atual .passo__numero {
   border-color: transparent;
-  background: var(--hc-degrade-botao);
-  color: var(--hc-sobre-marca);
+  background: var(--musgo);
+  color: var(--sobre-musgo);
 }
 
 .passo__numero .ph {
-  font-size: 0.6rem;
+  font-size: 15px;
+}
+
+.passo__rotulo {
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 14.5px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.passo--atual .passo__rotulo {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .passos {
+    gap: 8px;
+  }
+
+  .passo:not(:last-child)::after {
+    min-width: 12px;
+  }
+
+  /* No celular só o passo atual diz o nome: os outros são o número, e o fio diz a ordem. */
+  .passo:not(.passo--atual) .passo__rotulo {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+  }
 }
 </style>

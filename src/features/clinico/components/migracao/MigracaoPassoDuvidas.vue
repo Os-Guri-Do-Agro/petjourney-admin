@@ -3,7 +3,8 @@
  * Passo 2 — as dúvidas, uma por vez.
  *
  * Cada pergunta ocupa o cartão inteiro: a pergunta em letra grande, uma frase dizendo por que ela
- * existe, os dois lados lado a lado quando é comparação, e as respostas como pílulas grandes. Não
+ * existe, os dois lados lado a lado quando é comparação, e as respostas como botões grandes de
+ * escolha (a escolhida fica marcada com fundo, borda e visto). Não
  * há "talvez": toda pergunta tem uma resposta segura (pessoas diferentes, deixar de fora), e
  * ninguém fica preso nela.
  *
@@ -160,11 +161,10 @@ const respondidas = computed(
     <!-- ---------------------------------------------------------------- sem perguntas -->
     <template v-if="!atual">
       <header class="cabeca">
-        <span class="mg-chip hc--verde"
-          ><i class="ph ph-check" aria-hidden="true" />{{
-            t('clinico.migracao.duvidas.nenhumaChip')
-          }}</span
-        >
+        <span class="ui-selo ui-selo--ok">
+          <i class="ph ph-check-circle" aria-hidden="true" />
+          {{ t('clinico.migracao.duvidas.nenhumaChip') }}
+        </span>
         <h2 id="mg-duvidas-titulo" class="mg-titulo">
           {{ t('clinico.migracao.duvidas.nenhumaTitulo') }}
         </h2>
@@ -174,7 +174,7 @@ const respondidas = computed(
 
     <template v-else>
       <div class="contador">
-        <span class="mg-chip hc--lilas">
+        <span class="contador__texto ui-num">
           {{ t('clinico.migracao.duvidas.contador', { n: indice + 1, total: perguntas.length }) }}
         </span>
         <span class="bolinhas" aria-hidden="true">
@@ -194,24 +194,26 @@ const respondidas = computed(
         <div :key="atual.id" class="pergunta">
           <!-- ------------------------------------------------------------ espécie -->
           <template v-if="atual.tipo === 'especie'">
-            <h2 id="mg-duvidas-titulo" class="mg-titulo">
-              {{
-                atual.chave
-                  ? t('clinico.migracao.duvidas.especie.pergunta', { valor: atual.exemplo })
-                  : atual.animais.length === 1
-                    ? t('clinico.migracao.duvidas.especie.perguntaBrancoUm', {
-                        nome: atual.animais[0]!.nome,
-                      })
-                    : t('clinico.migracao.duvidas.especie.perguntaBranco')
-              }}
-            </h2>
-            <p class="mg-texto">
-              {{
-                atual.chave
-                  ? t('clinico.migracao.duvidas.especie.texto')
-                  : t('clinico.migracao.duvidas.especie.textoBranco')
-              }}
-            </p>
+            <header class="cabeca">
+              <h2 id="mg-duvidas-titulo" class="mg-titulo">
+                {{
+                  atual.chave
+                    ? t('clinico.migracao.duvidas.especie.pergunta', { valor: atual.exemplo })
+                    : atual.animais.length === 1
+                      ? t('clinico.migracao.duvidas.especie.perguntaBrancoUm', {
+                          nome: atual.animais[0]!.nome,
+                        })
+                      : t('clinico.migracao.duvidas.especie.perguntaBranco')
+                }}
+              </h2>
+              <p class="mg-texto">
+                {{
+                  atual.chave
+                    ? t('clinico.migracao.duvidas.especie.texto')
+                    : t('clinico.migracao.duvidas.especie.textoBranco')
+                }}
+              </p>
+            </header>
 
             <div class="lado">
               <span class="lado__rotulo">
@@ -222,7 +224,7 @@ const respondidas = computed(
                   <strong
                     ><bdi>{{ animal.nome }}</bdi></strong
                   >
-                  <span class="animais__linha">{{
+                  <span class="animais__linha ui-num">{{
                     t('clinico.migracao.comum.linha', { n: animal.linha })
                   }}</span>
                 </li>
@@ -230,43 +232,55 @@ const respondidas = computed(
             </div>
 
             <div class="respostas respostas--grade">
-              <Button
+              <button
                 v-for="especie in ESPECIES"
                 :key="especie"
-                class="mg-pilula mg-pilula--grande"
-                :class="{ 'mg-pilula--escolhida': atual.resposta === especie }"
-                :icon="atual.resposta === especie ? 'ph ph-check' : undefined"
-                :label="formato.especie(especie)"
+                type="button"
+                class="mg-resposta"
+                :class="{ 'mg-resposta--escolhida': atual.resposta === especie }"
+                :aria-pressed="atual.resposta === especie"
                 @click="responderEspecie(atual.chave, especie)"
-              />
-              <Button
-                class="mg-pilula mg-pilula--grande respostas__fora"
-                :class="{ 'mg-pilula--escolhida': atual.resposta === 'fora' }"
-                :icon="atual.resposta === 'fora' ? 'ph ph-check' : 'ph ph-x'"
-                :label="t('clinico.migracao.duvidas.especie.deixarDeFora')"
+              >
+                <i v-if="atual.resposta === especie" class="ph ph-check" aria-hidden="true" />
+                {{ formato.especie(especie) }}
+              </button>
+              <button
+                type="button"
+                class="mg-resposta respostas__fora"
+                :class="{ 'mg-resposta--escolhida': atual.resposta === 'fora' }"
+                :aria-pressed="atual.resposta === 'fora'"
                 @click="responderEspecie(atual.chave, 'fora')"
-              />
+              >
+                <i
+                  :class="atual.resposta === 'fora' ? 'ph ph-check' : 'ph ph-prohibit'"
+                  aria-hidden="true"
+                />
+                {{ t('clinico.migracao.duvidas.especie.deixarDeFora') }}
+              </button>
             </div>
           </template>
 
           <!-- ------------------------------------------------------------ coluna -->
           <template v-else-if="atual.tipo === 'coluna'">
-            <h2 id="mg-duvidas-titulo" class="mg-titulo">
-              {{ t(`clinico.migracao.duvidas.coluna.${atual.campo}`) }}
-            </h2>
-            <p class="mg-texto">{{ t('clinico.migracao.duvidas.coluna.texto') }}</p>
+            <header class="cabeca">
+              <h2 id="mg-duvidas-titulo" class="mg-titulo">
+                {{ t(`clinico.migracao.duvidas.coluna.${atual.campo}`) }}
+              </h2>
+              <p class="mg-texto">{{ t('clinico.migracao.duvidas.coluna.texto') }}</p>
+            </header>
 
-            <div class="opcoes" role="group" :aria-labelledby="'mg-duvidas-titulo'">
-              <Button
+            <div class="opcoes" role="group" aria-labelledby="mg-duvidas-titulo">
+              <button
                 v-for="coluna in candidatas"
                 :key="coluna.coluna"
+                type="button"
                 class="opcao"
                 :class="{ 'opcao--escolhida': atual.resposta === coluna.coluna }"
                 :aria-pressed="atual.resposta === coluna.coluna"
                 @click="responderColuna(atual.campo, coluna.coluna)"
               >
                 <span class="opcao__nome">
-                  <span class="mg-chip hc--cinza">{{
+                  <span class="mg-letra">{{
                     t('clinico.migracao.colunas.coluna', { letra: coluna.letra })
                   }}</span>
                   <strong
@@ -293,7 +307,7 @@ const respondidas = computed(
                     })
                   }}
                 </span>
-              </Button>
+              </button>
             </div>
 
             <div class="sem-ela">
@@ -302,7 +316,10 @@ const respondidas = computed(
                 {{ t('clinico.migracao.duvidas.coluna.semEla') }}
               </p>
               <Button
-                class="mg-pilula mg-pilula--pequena"
+                type="button"
+                size="small"
+                severity="secondary"
+                outlined
                 icon="ph ph-arrow-clockwise"
                 :label="t('clinico.migracao.trocar')"
                 @click="migracao.recomecar()"
@@ -312,24 +329,30 @@ const respondidas = computed(
 
           <!-- ------------------------------------------------------------ decisão -->
           <template v-else>
-            <h2 id="mg-duvidas-titulo" class="mg-titulo">
-              {{
-                t(`clinico.migracao.duvidas.${atual.decisao.tipo}.pergunta`, {
-                  nome: atual.decisao.daPlanilha.nome,
-                  outro: atual.decisao.outro.nome,
-                })
-              }}
-            </h2>
-            <p class="mg-texto">
-              {{
-                t(`clinico.migracao.duvidas.${atual.decisao.tipo}.texto`, {
-                  nome: atual.decisao.daPlanilha.nome,
-                  outro: atual.decisao.outro.nome,
-                  linha: atual.decisao.linhas[0],
-                })
-              }}
-            </p>
+            <header class="cabeca">
+              <h2 id="mg-duvidas-titulo" class="mg-titulo">
+                {{
+                  t(`clinico.migracao.duvidas.${atual.decisao.tipo}.pergunta`, {
+                    nome: atual.decisao.daPlanilha.nome,
+                    outro: atual.decisao.outro.nome,
+                  })
+                }}
+              </h2>
+              <p class="mg-texto">
+                {{
+                  t(`clinico.migracao.duvidas.${atual.decisao.tipo}.texto`, {
+                    nome: atual.decisao.daPlanilha.nome,
+                    outro: atual.decisao.outro.nome,
+                    linha: atual.decisao.linhas[0],
+                  })
+                }}
+              </p>
+            </header>
 
+            <!--
+              Os dois lados da comparação. Mesmo peso, mesma forma — a pessoa decide olhando os
+              dois, e nenhum pode parecer "o certo" antes da resposta.
+            -->
             <div class="comparar">
               <div class="lado">
                 <span class="lado__rotulo">
@@ -351,22 +374,27 @@ const respondidas = computed(
                 <template v-else>
                   <span class="lado__dado">
                     <i class="ph ph-phone" aria-hidden="true" />
-                    <bdi dir="ltr">{{
+                    <bdi dir="ltr" class="ui-num">{{
                       atual.decisao.daPlanilha.telefone || t('clinico.migracao.comum.semTelefone')
                     }}</bdi>
                   </span>
                   <span v-if="atual.decisao.daPlanilha.documento" class="lado__dado">
-                    CPF <bdi dir="ltr">{{ atual.decisao.daPlanilha.documento }}</bdi>
+                    <i class="ph ph-identification-card" aria-hidden="true" />
+                    CPF <bdi dir="ltr" class="ui-num">{{ atual.decisao.daPlanilha.documento }}</bdi>
                   </span>
                   <span v-if="atual.decisao.tipo === 'mesma-pessoa'" class="lado__dado">
-                    <i class="ph ph-heart" aria-hidden="true" />
+                    <i class="ph ph-paw-print" aria-hidden="true" />
                     {{ animalDaLinha(atual.decisao.linhas[0]) }}
                   </span>
                 </template>
               </div>
 
               <span class="comparar__meio" aria-hidden="true">
-                <i :class="atual.decisao.tipo === 'orfao' ? 'ph ph-arrow-up' : 'ph ph-arrows-horizontal'" />
+                <i
+                  :class="
+                    atual.decisao.tipo === 'orfao' ? 'ph ph-arrow-up' : 'ph ph-arrows-left-right'
+                  "
+                />
               </span>
 
               <div class="lado">
@@ -390,51 +418,68 @@ const respondidas = computed(
                 <template v-else>
                   <span class="lado__dado">
                     <i class="ph ph-phone" aria-hidden="true" />
-                    <bdi dir="ltr">{{
+                    <bdi dir="ltr" class="ui-num">{{
                       atual.decisao.outro.telefone || t('clinico.migracao.comum.semTelefone')
                     }}</bdi>
                   </span>
                   <span v-if="atual.decisao.outro.documento" class="lado__dado">
-                    CPF <bdi dir="ltr">{{ atual.decisao.outro.documento }}</bdi>
+                    <i class="ph ph-identification-card" aria-hidden="true" />
+                    CPF <bdi dir="ltr" class="ui-num">{{ atual.decisao.outro.documento }}</bdi>
                   </span>
                   <span v-if="atual.decisao.tipo === 'mesma-pessoa'" class="lado__dado">
-                    <i class="ph ph-heart" aria-hidden="true" />
+                    <i class="ph ph-paw-print" aria-hidden="true" />
                     {{ animalDaLinha(atual.decisao.outro.linhas[0]) }}
                   </span>
                 </template>
               </div>
             </div>
 
-            <div class="respostas">
-              <Button
-                class="mg-pilula mg-pilula--grande"
-                :class="{ 'mg-pilula--escolhida': atual.resposta === 'juntar' }"
-                :icon="atual.resposta === 'juntar' ? 'ph ph-check' : 'ph ph-link'"
-                :label="
+            <div class="respostas respostas--duas">
+              <button
+                type="button"
+                class="mg-resposta"
+                :class="{ 'mg-resposta--escolhida': atual.resposta === 'juntar' }"
+                :aria-pressed="atual.resposta === 'juntar'"
+                @click="responderDecisao(atual.decisao, 'juntar')"
+              >
+                <i
+                  :class="atual.resposta === 'juntar' ? 'ph ph-check' : 'ph ph-link'"
+                  aria-hidden="true"
+                />
+                {{
                   t(`clinico.migracao.duvidas.${atual.decisao.tipo}.sim`, {
                     outro: atual.decisao.outro.nome,
                   })
-                "
-                @click="responderDecisao(atual.decisao, 'juntar')"
-              />
-              <Button
-                class="mg-pilula mg-pilula--grande"
-                :class="{ 'mg-pilula--escolhida': atual.resposta === 'manter' }"
-                :icon="
-                  atual.resposta === 'manter'
-                    ? 'ph ph-check'
-                    : atual.decisao.tipo === 'orfao'
-                      ? 'ph ph-x'
-                      : 'ph ph-copy-simple'
-                "
-                :label="t(`clinico.migracao.duvidas.${atual.decisao.tipo}.nao`)"
+                }}
+              </button>
+              <button
+                type="button"
+                class="mg-resposta"
+                :class="{ 'mg-resposta--escolhida': atual.resposta === 'manter' }"
+                :aria-pressed="atual.resposta === 'manter'"
                 @click="responderDecisao(atual.decisao, 'manter')"
-              />
+              >
+                <i
+                  :class="
+                    atual.resposta === 'manter'
+                      ? 'ph ph-check'
+                      : atual.decisao.tipo === 'orfao'
+                        ? 'ph ph-prohibit'
+                        : 'ph ph-copy-simple'
+                  "
+                  aria-hidden="true"
+                />
+                {{ t(`clinico.migracao.duvidas.${atual.decisao.tipo}.nao`) }}
+              </button>
             </div>
 
             <Button
               v-if="atual.decisao.tipo === 'orfao' && atual.resposta === null && outrosOrfaos > 0"
-              class="mg-pilula mg-pilula--pequena todos"
+              type="button"
+              class="todos"
+              size="small"
+              severity="secondary"
+              outlined
               icon="ph ph-check-square"
               :label="
                 t('clinico.migracao.duvidas.orfao.todos', { n: outrosOrfaos + 1 }, outrosOrfaos + 1)
@@ -449,7 +494,9 @@ const respondidas = computed(
     <footer class="mg-rodape">
       <Button
         v-if="atual && indice > 0"
-        class="mg-pilula"
+        type="button"
+        severity="secondary"
+        outlined
         icon="ph ph-arrow-left"
         :label="t('clinico.migracao.duvidas.anterior')"
         @click="indice -= 1"
@@ -468,7 +515,9 @@ const respondidas = computed(
             indice < perguntas.length - 1 &&
             atual.resposta !== null
           "
-          class="mg-pilula"
+          type="button"
+          severity="secondary"
+          outlined
           icon="ph ph-arrow-right"
           icon-pos="right"
           :label="t('clinico.migracao.duvidas.proxima')"
@@ -476,7 +525,8 @@ const respondidas = computed(
         />
         <Button
           v-if="migracao.semResposta === 0"
-          class="mg-pilula mg-pilula--cheia mg-pilula--grande"
+          type="button"
+          class="mg-adiante"
           icon="ph ph-arrow-right"
           icon-pos="right"
           :label="t('clinico.migracao.duvidas.verResumo', { n: respondidas }, respondidas)"
@@ -488,137 +538,146 @@ const respondidas = computed(
 </template>
 
 <style scoped>
+.cartao {
+  container-type: inline-size;
+}
+
 .cabeca {
   display: grid;
   justify-items: start;
-  gap: 0.5rem;
+  gap: 6px;
 }
 
 .contador {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
+  gap: 8px 14px;
+}
+
+.contador__texto {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 550;
 }
 
 .bolinhas {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: 5px;
 }
 
 .bolinha {
-  width: 0.55rem;
-  height: 0.55rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 999px;
-  background: var(--hc-cartao);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--linha-forte);
 }
 
 .bolinha--feita {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca);
+  background: var(--musgo);
 }
 
 .bolinha--atual {
   box-shadow:
-    0 0 0 2px var(--hc-cartao),
-    0 0 0 3.5px var(--hc-marca);
+    0 0 0 2px var(--superficie),
+    0 0 0 3.5px var(--musgo);
 }
 
 .pergunta {
   display: grid;
-  gap: 1.1rem;
+  gap: 20px;
 }
 
-/*
- * Os dois lados da comparação. Mesmo peso, mesma forma — a pessoa decide olhando os dois, e
- * nenhum pode parecer "o certo" antes da resposta.
- */
 .comparar {
   display: grid;
   align-items: stretch;
-  gap: 0.75rem;
+  gap: 12px;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 }
 
 .comparar__meio {
   display: grid;
-  color: var(--hc-tinta-3);
-  font-size: 1.1rem;
   place-items: center;
+  color: var(--tinta-3);
+  font-size: 20px;
 }
 
 .lado {
   display: grid;
   align-content: start;
-  padding: 1rem 1.15rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.9rem;
-  background: var(--hc-fundo);
-  gap: 0.35rem;
+  gap: 6px;
+  padding: 16px 18px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
 .lado__rotulo {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .lado__nome {
-  color: var(--hc-tinta);
-  font-size: 1.125rem;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .lado__dado {
   display: inline-flex;
   align-items: center;
-  color: var(--hc-tinta-2);
-  font-size: 0.9375rem;
-  gap: 0.4rem;
+  gap: 7px;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 .lado__dado .ph {
-  color: var(--hc-tinta-3);
-  font-size: 0.8rem;
+  color: var(--tinta-3);
+  font-size: 15px;
 }
 
 .animais {
   display: grid;
-  margin: 0.25rem 0 0;
+  gap: 4px;
+  margin: 4px 0 0;
   padding: 0;
-  gap: 0.3rem;
   list-style: none;
 }
 
 .animais li {
   display: flex;
   align-items: baseline;
-  gap: 0.5rem;
+  gap: 10px;
+  font-size: 14.5px;
+}
+
+.animais li strong {
+  font-weight: 600;
 }
 
 .animais__linha {
-  color: var(--hc-tinta-3);
-  font-size: 0.875rem;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .respostas {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 10px;
 }
 
-/* Seis espécies em duas fileiras de três: nenhuma sobra sozinha numa linha. */
+.respostas--duas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 /*
  * As seis espécies: numa fileira só quando o cartão é largo, três e três no médio, duas e duas no
  * estreito. Nunca uma sozinha na última linha. Quem decide é a largura do cartão.
  */
-.cartao {
-  container-type: inline-size;
-}
-
 .respostas--grade {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -631,7 +690,8 @@ const respondidas = computed(
 }
 
 @container (max-width: 34rem) {
-  .respostas--grade {
+  .respostas--grade,
+  .respostas--duas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -641,105 +701,114 @@ const respondidas = computed(
   justify-self: start;
 }
 
-.todos {
+.todos.p-button {
   justify-self: start;
 }
 
 /*
- * As colunas como opção de resposta: cartões baixos, lado a lado, com o começo do conteúdo. Fundo
- * e borda visíveis desde o início — é um botão, e precisa parecer um antes do hover.
+ * As colunas como opção de resposta: lado a lado, com o começo do conteúdo — é olhando "Rex, Mel,
+ * Thor" que se reconhece a coluna dos animais, não pelo nome dela. Borda visível desde o início:
+ * é um botão, e precisa parecer um antes do hover.
  */
 .opcoes {
   display: grid;
-  gap: 0.6rem;
+  gap: 10px;
   grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
 }
 
-.opcao.p-button {
+.opcao {
   display: grid;
   align-content: start;
-  justify-content: stretch;
   justify-items: start;
-  grid-template-columns: minmax(0, 1fr);
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.9rem;
-  background: var(--hc-fundo);
-  color: var(--hc-tinta);
-  gap: 0.5rem;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
   text-align: start;
   transition:
-    background-color 150ms ease-out,
-    border-color 150ms ease-out;
+    background-color var(--pj-tempo-curto, 140ms) ease,
+    border-color var(--pj-tempo-curto, 140ms) ease;
 }
 
-.opcao.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca);
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
+.opcao:hover {
+  border-color: var(--tinta-3);
+  background: var(--superficie-2);
 }
 
-.opcao.p-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
+.opcao:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
   outline-offset: 2px;
 }
 
-.opcao--escolhida.p-button,
-.opcao--escolhida.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
-  box-shadow: inset 0 0 0 1px var(--hc-marca);
+.opcao--escolhida,
+.opcao--escolhida:hover {
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
+  box-shadow: inset 0 0 0 1px var(--musgo);
 }
 
 .opcao__nome {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  font-size: 0.9375rem;
-  gap: 0.5rem;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.opcao__nome strong {
+  font-weight: 600;
 }
 
 .opcao__marca {
-  color: var(--hc-marca-forte);
+  color: var(--musgo);
+  font-size: 18px;
 }
 
 .opcao__exemplos {
   display: flex;
   flex-wrap: wrap;
   min-width: 0;
-  gap: 0.35rem;
+  max-width: 100%;
+  gap: 5px;
 }
 
 .opcao__hoje {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .sem-ela {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.6rem 1rem;
+  gap: 10px 16px;
 }
 
 .sem-ela__texto {
   display: flex;
+  flex: 1 1 20rem;
   align-items: flex-start;
+  gap: 8px;
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-  gap: 0.45rem;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
 }
 
 .sem-ela__texto .ph {
-  margin-top: 0.15rem;
-  color: var(--hc-tinta-3);
+  margin-top: 2px;
+  color: var(--tinta-3);
+  font-size: 16px;
 }
 
 .faltam {
-  color: var(--hc-tinta-2);
-  font-size: 0.9375rem;
-  font-weight: 600;
+  color: var(--atencao-tinta);
+  font-size: 14px;
+  font-weight: 550;
 }
 
 .troca-enter-active,
@@ -762,7 +831,7 @@ const respondidas = computed(
 @media (prefers-reduced-motion: reduce) {
   .troca-enter-active,
   .troca-leave-active,
-  .opcao.p-button {
+  .opcao {
     transition: none;
   }
 }

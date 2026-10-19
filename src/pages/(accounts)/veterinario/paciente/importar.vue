@@ -15,15 +15,22 @@
  *
  * O estado mora na store (`stores/migracao.ts`), não aqui: a importação continua se a pessoa sair
  * desta tela, e a lista de pacientes avisa onde ela está.
+ *
+ * ## A forma (redesenho de 19/10/2026)
+ *
+ * Tela de detalhe do destino Pacientes: "Pacientes" para voltar, o título dizendo o que se faz e
+ * a frase do porquê. Embaixo, os três passos numerados — o número só porque a ordem é de verdade —
+ * e, ao lado deles, a garantia que tira o medo de começar: nada é gravado até a confirmação.
+ * Ela fica à vista em todos os passos até o botão de importar, e não só no primeiro.
  */
-import '@/components/home/home-card.css'
 import '@/features/clinico/components/migracao/migracao.css'
 
 import Button from 'primevue/button'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import MigracaoPassoArquivo from '@/features/clinico/components/migracao/MigracaoPassoArquivo.vue'
 import MigracaoColunas from '@/features/clinico/components/migracao/MigracaoColunas.vue'
 import MigracaoPassoDuvidas from '@/features/clinico/components/migracao/MigracaoPassoDuvidas.vue'
@@ -47,29 +54,41 @@ onMounted(() => {
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="migracao-pagina mg-tema hc-tema"
-    :title="t('clinico.migracao.titulo')"
-    block-when-suspended
+  <UiPagina
+    class="tela-importar mg-tema"
+    :titulo="t('clinico.migracao.titulo')"
+    :resumo="t('clinico.migracao.lede')"
+    bloquear-se-suspenso
   >
-    <template #cabecalho>
-      <div class="cabecalho">
-        <span class="cabecalho__sobre">{{ t('clinico.migracao.sobre') }}</span>
-        <h1 class="cabecalho__titulo">{{ t('clinico.migracao.titulo') }}</h1>
-        <p class="cabecalho__lede">{{ t('clinico.migracao.lede') }}</p>
-      </div>
+    <template #voltar>
+      <RouterLink to="/veterinario/pacientes">
+        <i class="ph ph-arrow-left" aria-hidden="true" />
+        {{ t('clinico.migracao.sobre') }}
+      </RouterLink>
     </template>
 
     <div class="migracao">
-      <MigracaoPassos :etapa="migracao.etapa" :sem-duvidas="migracao.perguntas.length === 0" />
+      <div class="migracao__topo">
+        <MigracaoPassos
+          class="migracao__passos"
+          :etapa="migracao.etapa"
+          :sem-duvidas="migracao.perguntas.length === 0"
+        />
 
-      <div v-if="migracao.planilha && migracao.etapa !== 'arquivo'" class="arquivo">
-        <span class="arquivo__icone" aria-hidden="true"><i class="ph ph-file" /></span>
+        <p v-if="migracao.estado === 'parada'" class="garantia">
+          <i class="ph ph-lock-simple" aria-hidden="true" />
+          {{ t('clinico.migracao.arquivo.promessa') }}
+        </p>
+      </div>
+
+      <!-- O arquivo aberto, nos passos depois do primeiro: de onde vem o que está na tela. -->
+      <div v-if="migracao.planilha && migracao.etapa !== 'arquivo'" class="arquivo ui-folha">
+        <span class="arquivo__icone" aria-hidden="true"><i class="ph ph-file-text" /></span>
         <span class="arquivo__texto">
           <strong
             ><bdi>{{ migracao.planilha.arquivo }}</bdi></strong
           >
-          <span>
+          <span class="ui-num">
             {{
               t(
                 'clinico.migracao.arquivoLido',
@@ -85,19 +104,27 @@ onMounted(() => {
             </template>
           </span>
         </span>
-        <Button
-          class="mg-pilula mg-pilula--pequena"
-          icon="ph ph-table"
-          :label="t('clinico.migracao.colunas.ver')"
-          @click="colunasAbertas = true"
-        />
-        <Button
-          v-if="!migracao.emAndamento"
-          class="mg-pilula mg-pilula--pequena"
-          icon="ph ph-arrow-clockwise"
-          :label="t('clinico.migracao.trocar')"
-          @click="migracao.recomecar()"
-        />
+        <span class="arquivo__acoes">
+          <Button
+            type="button"
+            size="small"
+            severity="secondary"
+            outlined
+            icon="ph ph-table"
+            :label="t('clinico.migracao.colunas.ver')"
+            @click="colunasAbertas = true"
+          />
+          <Button
+            v-if="!migracao.emAndamento"
+            type="button"
+            size="small"
+            severity="secondary"
+            outlined
+            icon="ph ph-arrow-clockwise"
+            :label="t('clinico.migracao.trocar')"
+            @click="migracao.recomecar()"
+          />
+        </span>
       </div>
 
       <MigracaoPassoArquivo v-if="migracao.etapa === 'arquivo'" />
@@ -105,117 +132,95 @@ onMounted(() => {
       <MigracaoPassoImportar v-else @colunas="colunasAbertas = true" />
     </div>
 
-    <MigracaoColunas v-if="migracao.planilha" v-model:visivel="colunasAbertas" />
-  </PartnerPageFrame>
+    <template #sempre>
+      <MigracaoColunas v-if="migracao.planilha" v-model:visivel="colunasAbertas" />
+    </template>
+  </UiPagina>
 </template>
 
 <style scoped>
-/* O fundo da Visão geral: dois brilhos sálvia no topo e a grade fina que some descendo. */
-.migracao-pagina.partner-page {
-  position: relative;
-  isolation: isolate;
-  background:
-    radial-gradient(52rem 26rem at 8% -6rem, rgb(120 196 178 / 30%), transparent 70%),
-    radial-gradient(44rem 24rem at 96% -4rem, rgb(96 178 196 / 22%), transparent 70%),
-    var(--hc-pagina);
-}
-
-.migracao-pagina.partner-page::before {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--hc-grade) 1px, transparent 1px),
-    linear-gradient(90deg, var(--hc-grade) 1px, transparent 1px);
-  background-size: 28px 28px;
-  content: '';
-  mask-image: linear-gradient(to bottom, #000 0, rgb(0 0 0 / 60%) 16rem, transparent 34rem);
-  pointer-events: none;
-}
-
-.app-dark .migracao-pagina.partner-page {
-  background:
-    radial-gradient(52rem 26rem at 8% -6rem, rgb(108 201 181 / 13%), transparent 70%),
-    radial-gradient(44rem 24rem at 96% -4rem, rgb(108 198 208 / 9%), transparent 70%),
-    var(--hc-pagina);
-}
-
-.cabecalho {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.cabecalho__sobre {
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.cabecalho__titulo {
-  margin: 0.2rem 0 0;
-  color: var(--hc-tinta);
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-}
-
-.cabecalho__lede {
-  margin: 0;
-  background: var(--hc-degrade);
-  background-clip: text;
-  color: transparent;
-  font-size: 1.25rem;
-  font-weight: 500;
-  letter-spacing: -0.015em;
-  -webkit-text-fill-color: transparent;
-}
-
-/*
- * A página inteira, como a Visão geral. Havia um teto de 60rem, e em monitor largo o assistente
- * ocupava a metade esquerda da tela com um vazio do lado — o que se limita agora é só o texto
- * corrido (`.mg-texto`), onde linha longa cansa de verdade.
- */
 .migracao {
   display: grid;
-  gap: 1.25rem;
+  min-width: 0;
+  gap: 20px;
+}
+
+/* Os passos à esquerda, a garantia à direita; no estreito, um embaixo do outro. */
+.migracao__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 32px;
+}
+
+.migracao__passos {
+  flex: 1 1 30rem;
+  max-width: 44rem;
+}
+
+.garantia {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 13.5px;
+  font-weight: 550;
+}
+
+.garantia i {
+  font-size: 17px;
 }
 
 .arquivo {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.9rem;
-  background: var(--hc-cartao);
-  box-shadow: var(--hc-sombra);
-  gap: 0.75rem;
+  gap: 12px 14px;
+  padding: 12px 14px 12px 16px;
 }
 
 .arquivo__icone {
-  display: inline-grid;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.65rem;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: none;
   place-items: center;
+  border-radius: 10px;
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  font-size: 20px;
 }
 
 .arquivo__texto {
   display: grid;
+  flex: 1 1 16rem;
   min-width: 0;
-  flex: 1;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
+  gap: 1px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 .arquivo__texto strong {
   overflow: hidden;
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.arquivo__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.arquivo__acoes :deep(.p-button) {
+  min-height: 36px;
 }
 </style>

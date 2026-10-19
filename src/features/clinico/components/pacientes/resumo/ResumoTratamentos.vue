@@ -10,10 +10,14 @@
  *
  * Mora ao lado do diário ("o que aconteceu em casa") porque é a mesma pergunta: o que o vet não
  * viu acontecer.
+ *
+ * Redesenho (19/10/2026): título no fundo com "Abrir tratamento" à direita, os remédios numa
+ * folha só, separados por um fio, e a legenda no pé da folha.
  */
-import { PhPill, PhWarning } from '@phosphor-icons/vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
+
+import UiSecao from '@/components/ui/UiSecao.vue'
 
 import FaixaDeDoses from '../../tratamento/FaixaDeDoses.vue'
 import LegendaDaFaixa from '../../tratamento/LegendaDaFaixa.vue'
@@ -31,57 +35,65 @@ const rotulos = useRotulosDoTratamento()
 </script>
 
 <template>
-  <section class="hc remedios" aria-labelledby="resumo-remedios-titulo">
-    <header class="hc__cabeca">
-      <h2 id="resumo-remedios-titulo" class="hc__titulo">
-        <PhPill class="hc__icone" weight="duotone" aria-hidden="true" />
-        {{ t('clinico.resumoDoPaciente.tratamentos.titulo') }}
-      </h2>
-      <RouterLink class="hc__link" :to="`/veterinario/paciente/${petId}/tratamento`">
+  <UiSecao
+    id="resumo-remedios"
+    :titulo="t('clinico.resumoDoPaciente.tratamentos.titulo')"
+    icone="ph ph-pill"
+    :descricao="t('clinico.resumoDoPaciente.tratamentos.ajuda')"
+  >
+    <template #acoes>
+      <RouterLink class="ui-mais" :to="`/veterinario/paciente/${petId}/tratamento`">
         {{ t('clinico.resumoDoPaciente.tratamentos.abrir') }}
         <i class="ph ph-arrow-right" aria-hidden="true" />
       </RouterLink>
-    </header>
-    <p class="ficha-ajuda">{{ t('clinico.resumoDoPaciente.tratamentos.ajuda') }}</p>
+    </template>
 
-    <ul class="remedios__lista">
-      <li v-for="item in tratamentos" :key="item.id" class="remedio">
-        <div class="remedio__topo">
-          <strong>{{ rotulos.nome(item) }}</strong>
-          <span class="remedio__meta">{{ rotulos.posologia(item) }}</span>
-        </div>
+    <div class="remedios ui-folha">
+      <ul class="remedios__lista">
+        <li v-for="item in tratamentos" :key="item.id" class="remedio">
+          <div class="remedio__topo">
+            <strong>{{ rotulos.nome(item) }}</strong>
+            <span class="remedio__meta">{{ rotulos.posologia(item) }}</span>
+          </div>
 
-        <template v-if="item.compartilhado">
-          <FaixaDeDoses
-            :doses="item.doses"
-            :frequencia-horas="item.frequenciaHoras"
-            :nomes="item.nomes"
-            :rotulo="`${rotulos.nome(item)}: ${rotulos.contagem(item.periodo)}`"
-          />
-          <p class="remedio__contagem">{{ rotulos.contagem(item.periodo) }}</p>
-          <p
-            v-if="rotulos.quem(item.periodo, item.nomes) || horarioDestoante(item.periodo)"
-            class="remedio__meta"
-          >
-            {{ rotulos.quem(item.periodo, item.nomes) }}
-            <template v-if="horarioDestoante(item.periodo)">
-              · {{ rotulos.horarioDestoante(horarioDestoante(item.periodo)!) }}
-            </template>
-          </p>
-          <p v-if="item.alerta" class="remedio__alerta">
-            <PhWarning class="remedio__alerta-icone" weight="fill" aria-hidden="true" />
-            {{ rotulos.alerta(item.alerta).titulo }}
-          </p>
-        </template>
-        <p v-else class="remedio__meta">{{ t('clinico.adesao.naoCompartilhado') }}</p>
-      </li>
-    </ul>
+          <template v-if="item.compartilhado">
+            <FaixaDeDoses
+              :doses="item.doses"
+              :frequencia-horas="item.frequenciaHoras"
+              :nomes="item.nomes"
+              :rotulo="`${rotulos.nome(item)}: ${rotulos.contagem(item.periodo)}`"
+            />
+            <p class="remedio__contagem ui-num">{{ rotulos.contagem(item.periodo) }}</p>
+            <p
+              v-if="rotulos.quem(item.periodo, item.nomes) || horarioDestoante(item.periodo)"
+              class="remedio__meta"
+            >
+              {{ rotulos.quem(item.periodo, item.nomes) }}
+              <template v-if="horarioDestoante(item.periodo)">
+                · {{ rotulos.horarioDestoante(horarioDestoante(item.periodo)!) }}
+              </template>
+            </p>
+            <p v-if="item.alerta" class="remedio__alerta ui-selo ui-selo--risco">
+              <i class="ph ph-warning" aria-hidden="true" />
+              {{ rotulos.alerta(item.alerta).titulo }}
+            </p>
+          </template>
+          <p v-else class="remedio__meta">{{ t('clinico.adesao.naoCompartilhado') }}</p>
+        </li>
+      </ul>
 
-    <LegendaDaFaixa />
-  </section>
+      <div class="remedios__legenda">
+        <LegendaDaFaixa />
+      </div>
+    </div>
+  </UiSecao>
 </template>
 
 <style scoped>
+.remedios {
+  display: grid;
+}
+
 .remedios__lista {
   display: grid;
   margin: 0;
@@ -91,57 +103,56 @@ const rotulos = useRotulosDoTratamento()
 
 .remedio {
   display: grid;
-  gap: 0.5rem;
-  padding-block: 0.9rem;
-}
-
-.remedio:first-child {
-  padding-top: 0;
+  min-width: 0;
+  gap: 8px;
+  padding: 16px 20px;
 }
 
 .remedio + .remedio {
-  border-top: 1px solid var(--hc-linha);
+  border-top: 1px solid var(--linha);
 }
 
 .remedio__topo {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.2rem 0.6rem;
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
+  gap: 2px 10px;
 }
 
 .remedio__topo strong {
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .remedio__meta {
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .remedio__contagem {
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  font-variant-numeric: tabular-nums;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
 }
 
-.remedio__alerta {
-  display: flex;
-  align-items: center;
-  margin: 0;
-  gap: 0.4rem;
-  color: var(--hc-coral-tinta);
-  font-size: 0.875rem;
-  font-weight: 650;
+.remedio__alerta.ui-selo {
+  justify-self: start;
+  max-width: 100%;
+  height: auto;
+  min-height: 26px;
+  margin: 2px 0 0;
+  padding-block: 4px;
+  font-size: 13px;
+  white-space: normal;
 }
 
-.remedio__alerta-icone {
-  flex-shrink: 0;
-  width: 1rem;
-  height: 1rem;
+.remedios__legenda {
+  padding: 12px 20px 14px;
+  border-top: 1px solid var(--linha);
+  background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));
+  border-radius: 0 0 15px 15px;
 }
 </style>

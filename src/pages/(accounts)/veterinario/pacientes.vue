@@ -22,26 +22,24 @@
  * cadastrar, muitos de uma vez. Enquanto uma importação estiver em andamento ou pausada, a
  * lista avisa em cima — é por esse aviso que "continuar depois" é achável depois.
  *
- * **A coluna de alertas diz a condição, não a categoria.** Cada chip trazia "Condição crônica"
- * e "Dermatite atópica" na mesma pílula, e os dois saíam cortados ("Condição … Dermatite …"). Agora
- * a linha mostra o alerta mais grave pelo nome do que importa — a dermatite, a amoxicilina —, a
- * categoria vira o ícone, a gravidade a cor do ícone, e os outros alertas viram "+1".
+ * ## A forma (redesenho de 19/10/2026)
+ *
+ * A tela é **procurar**. O campo de busca é a primeira coisa embaixo do título, grande, com a
+ * frase do que se pode digitar; os filtros moram ao lado dele. A lista diz, por linha, quem é o
+ * animal (rosto, nome, espécie, raça, idade e peso), quem responde por ele (com o telefone, que é
+ * o que se usa daqui), quando veio e quando volta — em data que se lê, com a distância embaixo —
+ * e os alertas como selos com a palavra: "Alergia", "Condição crônica", "Pendência financeira".
+ * O detalhe do alerta (a amoxicilina, a dermatite) fica na dica do selo e na ficha.
+ *
+ * A linha inteira abre a ficha, no clique simples: aqui não há o que selecionar, e o duplo clique
+ * de antes era um gesto que ninguém tentava.
  */
-import {
-  PhBaby,
-  PhHandPalm,
-  PhHeartbeat,
-  PhPill,
-  PhShieldWarning,
-  PhWallet,
-  PhWarningDiamond,
-} from '@phosphor-icons/vue'
 import Button from 'primevue/button'
-import { computed, onMounted, ref, watch, type Component } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import ClinicPacienteCelula from '@/features/clinico/components/base/ClinicPacienteCelula.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicFilterBar from '@/features/clinico/components/base/ClinicFilterBar.vue'
@@ -50,49 +48,51 @@ import type { ColunaTabela } from '@/features/clinico/components/base/table-type
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { patientRepository, type PacienteResumo } from '@/features/clinico/data/repositories'
 import type { PetAlert, PetAlertKind, PetSpecies } from '@/features/clinico/data/types'
-import { useClinicoStore } from '@/features/clinico/stores/clinico'
+import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useMigracaoStore } from '@/features/clinico/stores/migracao'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const clinico = useClinicoStore()
 const migracao = useMigracaoStore()
 const formato = useClinicFormat()
 
-/** A categoria do alerta vira ícone: a linha tem lugar para o nome da condição, não para os dois. */
-const ICONE_DO_ALERTA: Record<PetAlertKind, Component> = {
-  alergia: PhWarningDiamond,
-  agressivo: PhHandPalm,
-  cronico: PhHeartbeat,
-  'medicacao-continua': PhPill,
-  imunossuprimido: PhShieldWarning,
-  gestante: PhBaby,
-  inadimplente: PhWallet,
+/** A categoria do alerta ganha ícone próprio dentro do selo; a palavra vem ao lado. */
+const ICONE_DO_ALERTA: Record<PetAlertKind, string> = {
+  alergia: 'ph ph-warning-diamond',
+  agressivo: 'ph ph-hand-palm',
+  cronico: 'ph ph-heartbeat',
+  'medicacao-continua': 'ph ph-pill',
+  imunossuprimido: 'ph ph-shield-warning',
+  gestante: 'ph ph-baby',
+  inadimplente: 'ph ph-wallet',
 }
+
+/** O par de cor do selo: informação é o neutro do kit. */
+const TOM_DO_ALERTA = { risco: 'ui-selo--risco', atencao: 'ui-selo--atencao', info: '' } as const
 
 const PESO_DA_SEVERIDADE = { risco: 0, atencao: 1, info: 2 } as const
 
-/** O mais grave primeiro: é ele que a linha mostra por extenso. */
+/** Quantos selos cabem na linha antes do "+N". */
+const SELOS_POR_LINHA = 2
+
+/** O mais grave primeiro: é ele que a linha mostra antes. */
 function alertasOrdenados(alertas: PetAlert[]) {
   return [...alertas].sort(
     (a, b) => PESO_DA_SEVERIDADE[a.severidade] - PESO_DA_SEVERIDADE[b.severidade],
   )
 }
 
-/** "Dermatite atópica" quando há detalhe; a categoria quando não há ("Pendência financeira"). */
-function textoDoAlerta(alerta: PetAlert) {
-  return alerta.detalhe || formato.alerta(alerta.kind)
+/** "Condição crônica: Dermatite atópica" — a frase inteira, para a dica e o leitor de tela. */
+function fraseDoAlerta(alerta: PetAlert) {
+  return alerta.detalhe
+    ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}`
+    : formato.alerta(alerta.kind)
 }
 
-/** A frase inteira, para a dica e o leitor de tela: "Condição crônica — Dermatite atópica". */
 function frasesDosAlertas(alertas: PetAlert[]) {
-  return alertasOrdenados(alertas)
-    .map((alerta) =>
-      alerta.detalhe
-        ? `${formato.alerta(alerta.kind)} — ${alerta.detalhe}`
-        : formato.alerta(alerta.kind),
-    )
-    .join(' · ')
+  return alertasOrdenados(alertas).map(fraseDoAlerta).join('; ')
 }
 
 const termo = ref('')
@@ -100,19 +100,32 @@ const selecionados = ref<Record<string, string[]>>({})
 const linhas = ref<PacienteResumo[]>([])
 /* Começa carregando: a primeira busca sai no onMounted, e até lá "nenhum paciente" seria mentira. */
 const carregando = ref(true)
+/**
+ * A página só mostra o "carregando" dela na primeira vez. Depois, quem carrega é a tabela: a
+ * busca que volta vazia não pode desmontar o campo em que a pessoa está digitando.
+ */
+const jaCarregou = ref(false)
 const erro = ref('')
 
-const colunas = computed<ColunaTabela[]>(() => [
-  { id: 'paciente', rotulo: t('clinico.pacientes.colunaPaciente'), largura: 'minmax(0, 1.8fr)' },
+const colunas = computed<ColunaTabela<PacienteResumo>[]>(() => [
+  {
+    id: 'paciente',
+    rotulo: t('clinico.pacientes.colunaPaciente'),
+    largura: 'minmax(15rem, 2fr)',
+  },
   {
     id: 'responsavel',
     rotulo: t('clinico.pacientes.colunaResponsavel'),
-    largura: 'minmax(0, 1.5fr)',
+    largura: 'minmax(0, 1.25fr)',
     ocultarEmTelaEstreita: true,
   },
-  { id: 'ultimo', rotulo: t('clinico.pacientes.colunaUltimo'), largura: '9rem' },
-  { id: 'proximo', rotulo: t('clinico.pacientes.colunaProximo'), largura: '9rem' },
-  { id: 'alertas', rotulo: t('clinico.pacientes.colunaAlertas'), largura: 'minmax(0, 1.35fr)' },
+  { id: 'ultimo', rotulo: t('clinico.pacientes.colunaUltimo'), largura: '8.5rem' },
+  { id: 'proximo', rotulo: t('clinico.pacientes.colunaProximo'), largura: '8.5rem' },
+  {
+    id: 'alertas',
+    rotulo: t('clinico.pacientes.colunaAlertas'),
+    largura: 'minmax(11rem, 1.25fr)',
+  },
 ])
 
 /** Predicados nomeados: o filtro fica legível e a contagem usa exatamente a mesma regra. */
@@ -205,6 +218,90 @@ const grupos = computed<GrupoDeFiltro[]>(() => [
   },
 ])
 
+// ------------------------------------------------------------------ datas da linha
+
+/**
+ * "12 de out." — dia e mês por extenso curto, com o ano só quando não é o deste ano. "12/10" pede
+ * para a pessoa lembrar qual número é o dia; "12 de out." se lê.
+ */
+function dataLegivel(iso: string) {
+  const data = clinicClock.dateOf(iso)
+  const mesmoAno = data.slice(0, 4) === clinicClock.today().slice(0, 4)
+
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale.value as Locale], {
+    day: 'numeric',
+    month: 'short',
+    ...(mesmoAno ? {} : { year: 'numeric' as const }),
+    timeZone: 'UTC',
+  }).format(new Date(`${data}T12:00:00Z`))
+}
+
+const DIA_MS = 24 * 60 * 60 * 1000
+
+/** Dias de calendário entre hoje e a data — e não horas divididas por 24, que fazem "em 37 h". */
+function diasAte(iso: string) {
+  const data = clinicClock.dateOf(iso)
+
+  return Math.round(
+    (Date.parse(`${data}T12:00:00Z`) - Date.parse(`${clinicClock.today()}T12:00:00Z`)) / DIA_MS,
+  )
+}
+
+/**
+ * A distância até a data, embaixo dela, em linguagem de balcão: "hoje, 14:30", "amanhã, 09:00",
+ * "ontem", "há 5 dias". Passados dois meses conta em meses, e passado um ano em anos — "há 240
+ * dias" obriga a fazer a conta de cabeça.
+ */
+function distanciaLegivel(iso: string) {
+  const dias = diasAte(iso)
+
+  if (dias === 0) {
+    return t('clinico.pacientes.quando.hoje', { hora: formato.hora(iso) })
+  }
+
+  if (dias === 1) {
+    return t('clinico.pacientes.quando.amanha', { hora: formato.hora(iso) })
+  }
+
+  if (dias === -1) {
+    return t('clinico.pacientes.quando.ontem')
+  }
+
+  const total = Math.abs(dias)
+  const meses = Math.round(total / 30.4)
+  const anos = Math.floor(total / 365)
+  const valor =
+    total < 60
+      ? t('clinico.formato.dias', { valor: total }, total)
+      : anos < 1
+        ? t('clinico.formato.meses', { valor: meses }, meses)
+        : t('clinico.formato.anos', { valor: anos }, anos)
+
+  return dias < 0
+    ? t('clinico.formato.haTempo', { valor })
+    : t('clinico.formato.emTempo', { valor })
+}
+
+/** O próximo atendimento é hoje: ganha o tom do lugar, é o que a recepção vai procurar. */
+function ehHoje(iso: string) {
+  return diasAte(iso) === 0
+}
+
+function metaDoPaciente(item: PacienteResumo) {
+  const { pet } = item
+
+  return [
+    formato.especie(pet.especie),
+    pet.raca,
+    pet.nascimento ? formato.idade(pet.nascimento) : '',
+    pet.pesoKg !== null ? formato.peso(pet.pesoKg) : '',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
+// ------------------------------------------------------------------ ações
+
 let atrasoDaBusca: ReturnType<typeof setTimeout> | null = null
 
 function cancelarBuscaAtrasada() {
@@ -222,6 +319,10 @@ function importar() {
   void router.push('/veterinario/paciente/importar')
 }
 
+function abrir(linha: PacienteResumo) {
+  void router.push(`/veterinario/paciente/${linha.pet.id}/historico`)
+}
+
 async function buscar() {
   carregando.value = true
   erro.value = ''
@@ -232,6 +333,7 @@ async function buscar() {
     erro.value = t('clinico.erros.agenda')
   } finally {
     carregando.value = false
+    jaCarregou.value = true
   }
 }
 
@@ -244,6 +346,26 @@ onMounted(async () => {
   await clinico.carregar()
   await buscar()
 })
+
+// ------------------------------------------------------------------ importação em andamento
+
+const progressoDaImportacao = computed(() =>
+  migracao.total === 0 ? 0 : Math.round((migracao.cursor / migracao.total) * 100),
+)
+
+const TOM_DA_IMPORTACAO = {
+  rodando: { marca: 'ui-marca--lugar', icone: 'ph ph-spin ph-circle-notch' },
+  pausada: { marca: 'ui-marca--atencao', icone: 'ph ph-pause-circle' },
+  falhou: { marca: 'ui-marca--risco', icone: 'ph ph-warning-circle' },
+} as const
+
+const tomDaImportacao = computed(
+  () =>
+    TOM_DA_IMPORTACAO[migracao.estado as keyof typeof TOM_DA_IMPORTACAO] ??
+    TOM_DA_IMPORTACAO.rodando,
+)
+
+// ------------------------------------------------------------------ resumo
 
 /** Quantos pacientes, e quantos pedem cuidado antes de entrar na sala. */
 const fraseDoResumo = computed(() => {
@@ -263,69 +385,84 @@ const fraseDoResumo = computed(() => {
   const base = t('clinico.pacientes.saudacao.total', { n }, n)
 
   return comRisco > 0
-    ? `${base} · ${t('clinico.pacientes.saudacao.comRisco', { n: comRisco }, comRisco)}`
-    : base
+    ? t('clinico.pacientes.resumo.comRisco', {
+        total: base,
+        risco: t('clinico.pacientes.saudacao.comRisco', { n: comRisco }, comRisco),
+      })
+    : `${base}.`
 })
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('clinico.pacientes.subtitulo')"
-    :title="t('clinico.pacientes.titulo')"
-    :loading="carregando && linhas.length === 0"
-    :error="erro"
-    block-when-suspended
-    @retry="buscar"
+  <UiPagina
+    class="tela-pacientes"
+    :carregando="carregando && !jaCarregou"
+    :erro="erro && !jaCarregou ? erro : ''"
+    bloquear-se-suspenso
+    @tentar-de-novo="buscar"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('clinico.pacientes.subtitulo') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('clinico.pacientes.titulo') }}</h1>
-
-        <div class="hc-saudacao__linha">
-          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
-            {{ fraseDoResumo }}
-          </p>
-
-          <nav class="hc-acoes" :aria-label="t('clinico.pacientes.saudacao.acoes')">
-            <Button
-              type="button"
-              class="hc-pilula hc-pilula--cheia"
-              icon="ph ph-user-plus"
-              :label="t('clinico.paciente.novo.atalho')"
-              @click="cadastrar"
-            />
-            <Button
-              type="button"
-              class="hc-pilula"
-              icon="ph ph-file-arrow-up"
-              :label="t('clinico.migracao.atalho')"
-              @click="importar"
-            />
-          </nav>
-        </div>
-      </div>
+    <template v-if="fraseDoResumo" #resumo>
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
     </template>
 
-    <div class="pacientes clinic-scope">
-      <p v-if="migracao.emAndamento" class="pacientes__importacao" role="status">
-        <i
-          class="ph"
-          :class="migracao.estado === 'rodando' ? 'ph-spin ph-circle-notch' : 'ph-pause-circle'"
-          aria-hidden="true"
-        />
-        <span>
-          {{
-            t(`clinico.migracao.aviso.lista.${migracao.estado}`, {
-              feitas: formato.numero(migracao.cursor, 0),
-              total: formato.numero(migracao.total, 0),
-            })
-          }}
+    <template #acoes>
+      <Button
+        type="button"
+        severity="secondary"
+        outlined
+        icon="ph ph-file-arrow-up"
+        :label="t('clinico.migracao.atalho')"
+        @click="importar"
+      />
+      <Button
+        type="button"
+        icon="ph ph-plus"
+        :label="t('clinico.paciente.novo.salvarCompleto')"
+        @click="cadastrar"
+      />
+    </template>
+
+    <div class="pacientes">
+      <!--
+        A importação que ainda não acabou. É por este aviso que "continuar depois" se acha depois:
+        o assistente pode ter ficado para trás há duas telas.
+      -->
+      <div
+        v-if="migracao.emAndamento"
+        class="importacao ui-folha ui-marca"
+        :class="tomDaImportacao.marca"
+        role="status"
+      >
+        <span class="importacao__icone" :class="`importacao__icone--${migracao.estado}`">
+          <i :class="tomDaImportacao.icone" aria-hidden="true" />
+        </span>
+        <span class="importacao__texto">
+          <strong>
+            {{
+              t(`clinico.migracao.aviso.lista.${migracao.estado}`, {
+                feitas: formato.numero(migracao.cursor, 0),
+                total: formato.numero(migracao.total, 0),
+              })
+            }}
+          </strong>
+          <span
+            class="importacao__barra"
+            :class="`importacao__barra--${migracao.estado}`"
+            role="progressbar"
+            :aria-valuenow="progressoDaImportacao"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            :aria-label="t('clinico.migracao.importacao.progressoAria')"
+          >
+            <span :style="{ inlineSize: `${progressoDaImportacao}%` }" />
+          </span>
         </span>
         <Button
-          link
+          type="button"
           size="small"
+          severity="secondary"
+          outlined
+          :icon="migracao.estado === 'rodando' ? 'ph ph-eye' : 'ph ph-play'"
           :label="
             t(
               migracao.estado === 'rodando'
@@ -335,205 +472,360 @@ const fraseDoResumo = computed(() => {
           "
           @click="importar"
         />
-      </p>
-      <ClinicFilterBar
-        v-model:busca="termo"
-        v-model:selecionados="selecionados"
-        :grupos="grupos"
-        :placeholder-busca="t('clinico.pacientes.buscar')"
-        :resultado="visiveis.length"
-      />
+      </div>
+
+      <!-- Procurar: o campo grande, os filtros ao lado e quantos sobraram. -->
+      <div class="procura" role="search">
+        <ClinicFilterBar
+          v-model:busca="termo"
+          v-model:selecionados="selecionados"
+          :grupos="grupos"
+          :placeholder-busca="t('clinico.pacientes.procurar')"
+          :resultado="visiveis.length"
+        />
+      </div>
 
       <ClinicDataTable
         :colunas="colunas"
         :linhas="visiveis"
         :chave="(linha) => linha.pet.id"
         :carregando="carregando"
+        :erro="jaCarregou ? erro : ''"
         :vazio-titulo="t('clinico.pacientes.vazioTitulo')"
         :vazio-descricao="t('clinico.pacientes.vazioDescricao')"
         :rotulo="t('clinico.pacientes.titulo')"
-        @ativar="(linha) => router.push(`/veterinario/paciente/${linha.pet.id}/historico`)"
+        @selecionar="abrir"
+        @ativar="abrir"
+        @tentar-de-novo="buscar"
       >
         <template #vazio-acao>
           <Button
-            icon="ph ph-user-plus"
+            type="button"
+            icon="ph ph-plus"
             severity="secondary"
             outlined
-            :label="t('clinico.paciente.novo.atalho')"
+            :label="t('clinico.paciente.novo.salvarCompleto')"
             @click="cadastrar"
           />
         </template>
 
         <template #celula-paciente="{ linha }">
           <ClinicPacienteCelula :pet="linha.pet">
-            {{ formato.especie(linha.pet.especie) }} · {{ linha.pet.raca }} ·
-            {{ formato.idade(linha.pet.nascimento) }} · {{ formato.peso(linha.pet.pesoKg) }}
+            {{ metaDoPaciente(linha) }}
           </ClinicPacienteCelula>
         </template>
 
         <template #celula-responsavel="{ linha }">
-          <span class="pacientes__nome">{{ linha.tutor?.nome }}</span>
-          <span class="pacientes__meta"
-            ><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span
-          >
+          <span v-if="linha.tutor" class="responsavel">
+            <span class="responsavel__nome">{{ linha.tutor.nome }}</span>
+            <span v-if="linha.tutor.telefone" class="responsavel__telefone ui-num">
+              <i class="ph ph-phone" aria-hidden="true" />
+              <bdi dir="ltr">{{ linha.tutor.telefone }}</bdi>
+            </span>
+          </span>
         </template>
 
         <template #celula-ultimo="{ linha }">
-          <span v-if="linha.ultimoAtendimentoEm" class="clinic-value">
-            {{ formato.dataCurta(linha.ultimoAtendimentoEm.slice(0, 10)) }}
+          <span v-if="linha.ultimoAtendimentoEm" class="quando">
+            <strong class="ui-num">{{ dataLegivel(linha.ultimoAtendimentoEm) }}</strong>
+            <small>{{ distanciaLegivel(linha.ultimoAtendimentoEm) }}</small>
           </span>
-          <span v-else class="pacientes__meta">{{ t('clinico.pacientes.semRegistro') }}</span>
+          <span v-else class="quando quando--nada">{{ t('clinico.pacientes.semRegistro') }}</span>
         </template>
 
         <template #celula-proximo="{ linha }">
-          <span v-if="linha.proximoAtendimentoEm" class="clinic-value pacientes__proximo">
-            {{ formato.dataCurta(linha.proximoAtendimentoEm.slice(0, 10)) }}
+          <span
+            v-if="linha.proximoAtendimentoEm"
+            class="quando quando--proximo"
+            :class="{ 'quando--hoje': ehHoje(linha.proximoAtendimentoEm) }"
+          >
+            <strong class="ui-num">
+              <i class="ph ph-calendar-check" aria-hidden="true" />
+              {{ dataLegivel(linha.proximoAtendimentoEm) }}
+            </strong>
+            <small>{{ distanciaLegivel(linha.proximoAtendimentoEm) }}</small>
           </span>
-          <span v-else class="pacientes__meta">—</span>
+          <span v-else class="quando quando--nada">{{ t('clinico.pacientes.nadaMarcado') }}</span>
         </template>
 
         <template #celula-alertas="{ linha }">
-          <span v-if="linha.pet.alertas.length === 0" class="pacientes__meta">—</span>
           <span
-            v-else
-            class="pacientes__alerta"
-            :class="`pacientes__alerta--${alertasOrdenados(linha.pet.alertas)[0]!.severidade}`"
+            v-if="linha.pet.alertas.length > 0"
+            class="alertas"
             :title="frasesDosAlertas(linha.pet.alertas)"
           >
-            <component
-              :is="ICONE_DO_ALERTA[alertasOrdenados(linha.pet.alertas)[0]!.kind]"
-              class="pacientes__alerta-icone"
-              weight="duotone"
-              aria-hidden="true"
-            />
-            <span class="pacientes__alerta-texto" aria-hidden="true">
-              {{ textoDoAlerta(alertasOrdenados(linha.pet.alertas)[0]!) }}
-            </span>
             <span
-              v-if="linha.pet.alertas.length > 1"
-              class="pacientes__alerta-mais"
+              v-for="alerta in alertasOrdenados(linha.pet.alertas).slice(0, SELOS_POR_LINHA)"
+              :key="alerta.id"
+              class="ui-selo alertas__selo"
+              :class="TOM_DO_ALERTA[alerta.severidade]"
               aria-hidden="true"
             >
-              +{{ linha.pet.alertas.length - 1 }}
+              <i :class="ICONE_DO_ALERTA[alerta.kind]" />
+              {{ formato.alerta(alerta.kind) }}
             </span>
-            <span class="pacientes__sr">{{ frasesDosAlertas(linha.pet.alertas) }}</span>
+            <span
+              v-if="linha.pet.alertas.length > SELOS_POR_LINHA"
+              class="ui-selo ui-selo--contorno alertas__mais ui-num"
+              aria-hidden="true"
+            >
+              +{{ linha.pet.alertas.length - SELOS_POR_LINHA }}
+            </span>
+            <span class="sr-only">{{ frasesDosAlertas(linha.pet.alertas) }}</span>
           </span>
         </template>
       </ClinicDataTable>
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
+/*
+ * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
+ * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como nas Faltas.
+ */
+.tela-pacientes {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+}
+
 .pacientes {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 18px;
 }
 
-/*
- * O contornado da casa escreve em cinza (#797F7F sobre o linho, ~3,3:1) — o "botão que quase não
- * se vê" do retorno do migrador. Esta entrada leva a tinta do texto e a borda em Régua de Sálvia.
- */
-.pacientes__importar.p-button {
-  border-color: var(--clinic-line-strong);
-  color: var(--clinic-text);
-}
+/* ------------------------------------------------------------------------------- a importação */
 
-.pacientes__importar.p-button :deep(.p-button-icon) {
-  color: var(--clinic-accent-strong);
-}
-
-.pacientes__importacao {
+.importacao {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
-  gap: var(--clinic-space-2);
+  gap: 12px 16px;
+  padding: 14px 16px 14px 20px;
 }
 
-.pacientes__importacao .ph {
-  color: var(--clinic-accent-strong);
+.importacao__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  font-size: 19px;
 }
 
-.pacientes__importacao .p-button-link {
-  padding: 0;
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
+.importacao__icone--pausada {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
-.pacientes__nome {
-  display: block;
-  overflow: hidden;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.importacao__icone--falhou {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
-.pacientes__meta {
-  display: block;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.pacientes__proximo {
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
-}
-
-/* Um alerta por linha, pelo nome; a categoria no ícone, a gravidade na cor do ícone. */
-.pacientes__alerta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+.importacao__texto {
+  display: grid;
+  flex: 1 1 18rem;
   min-width: 0;
-  max-width: 100%;
-  color: var(--hc-tinta);
-  font-size: 0.8125rem;
+  gap: 8px;
+}
+
+.importacao__texto strong {
+  color: var(--tinta);
+  font-size: 14.5px;
   font-weight: 600;
 }
 
-.pacientes__alerta-icone {
-  flex-shrink: 0;
-  width: 1.05rem;
-  height: 1.05rem;
-  color: var(--hc-tinta-2);
-}
-
-.pacientes__alerta--risco .pacientes__alerta-icone {
-  color: var(--hc-coral-tinta);
-}
-
-.pacientes__alerta--atencao .pacientes__alerta-icone {
-  color: var(--hc-pessego-tinta);
-}
-
-.pacientes__alerta-texto {
+.importacao__barra {
+  display: block;
   overflow: hidden;
+  max-width: 28rem;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--superficie-3);
+}
+
+.importacao__barra > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--pj-lugar, var(--musgo));
+  transition: inline-size var(--pj-tempo-medio, 200ms) ease-out;
+}
+
+.importacao__barra--pausada > span {
+  background: var(--atencao);
+}
+
+.importacao__barra--falhou > span {
+  background: var(--risco);
+}
+
+/* ---------------------------------------------------------------------------------- procurar */
+
+/*
+ * O campo de busca é o maior controle da tela: 48 px de altura e a largura que a frase pede. A
+ * barra de filtros é a da casa; aqui só se aumenta a escala dela, sem mudar o que ela faz.
+ */
+.procura {
+  display: block;
+}
+
+.procura :deep(.filtro__linha) {
+  gap: 10px 12px;
+}
+
+.procura :deep(.filtro__busca) {
+  flex: 1 1 26rem;
+  max-width: 46rem;
+}
+
+.procura :deep(.filtro__busca .p-inputtext) {
+  min-height: 50px;
+  padding-inline-start: 46px;
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+.procura :deep(.filtro__busca .p-inputicon) {
+  inset-inline-start: 16px;
+  color: var(--tinta-2);
+  font-size: 20px;
+}
+
+.procura :deep(.filtro__botao.p-button) {
+  min-height: 50px;
+  padding-inline: 18px;
+  border-radius: 12px;
+  font-size: 14.5px;
+}
+
+.procura :deep(.filtro__resultado) {
+  font-size: 13.5px;
+}
+
+/* ------------------------------------------------------------------------------ as células */
+
+.responsavel {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.responsavel__nome {
+  overflow: hidden;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.pacientes__alerta-mais {
-  flex-shrink: 0;
-  padding: 0 0.35rem;
-  border-radius: 999px;
-  background: var(--hc-cinza-fundo);
-  color: var(--hc-cinza-tinta);
-  font-size: 0.75rem;
-  font-weight: 700;
+.responsavel__telefone {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  white-space: nowrap;
 }
 
-.pacientes__sr {
+.responsavel__telefone i {
+  color: var(--tinta-3);
+  font-size: 13px;
+}
+
+/* A data que se lê em cima, a distância embaixo: "12 de out." / "há 3 dias". */
+.quando {
+  display: grid;
+  gap: 1px;
+  line-height: 1.3;
+}
+
+.quando strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.quando strong i {
+  color: var(--tinta-3);
+  font-size: 14px;
+}
+
+.quando small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.quando--proximo strong i {
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+}
+
+.quando--hoje strong {
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+}
+
+.quando--nada {
+  color: var(--tinta-3);
+  font-size: 13px;
+}
+
+/* Os alertas: até dois selos com a palavra, o resto em "+N". */
+.alertas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.alertas__selo {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.alertas__mais {
+  padding-inline: 7px;
+}
+
+.sr-only {
   position: absolute;
+  overflow: hidden;
   width: 1px;
   height: 1px;
-  overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .importacao__barra > span {
+    transition: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .procura :deep(.filtro__busca .p-inputtext) {
+    min-height: 46px;
+    font-size: 15px;
+  }
+
+  .procura :deep(.filtro__botao.p-button) {
+    min-height: 46px;
+  }
 }
 </style>

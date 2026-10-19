@@ -1,19 +1,21 @@
 <script setup lang="ts">
 /**
- * O essencial do histórico, em quatro linhas: alertas, condições ativas, medicação em uso e a
- * última consulta.
+ * O essencial do histórico, em três linhas: condições ativas, medicação em uso e a última
+ * consulta.
  *
- * Lista de definição, não quatro cartões: são respostas curtas a quatro perguntas fixas, e o
- * olho precisa varrer a coluna de rótulos sem atravessar quatro bordas. Linha vazia **diz** que
- * está vazia ("nenhuma registrada") — sumir com ela faria a ausência parecer esquecimento da
- * tela.
+ * Lista de definição, não três cartões: são respostas curtas a perguntas fixas, e o olho precisa
+ * varrer a coluna de rótulos sem atravessar bordas. Linha vazia **diz** que está vazia ("nenhuma
+ * registrada") — sumir com ela faria a ausência parecer esquecimento da tela.
+ *
+ * Os alertas do cadastro (alergia, manejo, gestação...) saíram daqui no redesenho de 19/10/2026:
+ * moram na capa do paciente, como selo, em todas as vistas da ficha.
  */
-import { PhClipboardText } from '@phosphor-icons/vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
-import ClinicAlertChip from '../../base/ClinicAlertChip.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
+
 import { useClinicFormat } from '../../../composables/useClinicFormat'
 import type { ResumoDoPaciente } from '../../../domain/resumo-do-paciente'
 import { clinicClock, useClinicoStore } from '../../../stores/clinico'
@@ -65,33 +67,12 @@ const ultima = computed(() => {
 </script>
 
 <template>
-  <section class="essencial" :aria-labelledby="'essencial-titulo'">
-    <h2 id="essencial-titulo" class="essencial__titulo">
-      <PhClipboardText class="essencial__titulo-icone" weight="duotone" aria-hidden="true" />
-      {{ t('clinico.resumoDoPaciente.essencial.titulo') }}
-    </h2>
-
-    <dl class="essencial__lista">
-      <!--
-        Alergia, manejo, gestação… Condição crônica e medicação contínua já têm linha própria logo
-        abaixo, então "Alertas: nenhum" aparecia ao lado de um cabeçalho com dois alertas. Sem outro
-        alerta, a linha some.
-      -->
-      <div v-if="resumo.alertas.length > 0" class="essencial__linha">
-        <dt>{{ t('clinico.resumoDoPaciente.essencial.alertas') }}</dt>
-        <dd>
-          <ul class="essencial__chips">
-            <li v-for="alerta in resumo.alertas" :key="alerta.id">
-              <ClinicAlertChip
-                :severidade="alerta.severidade"
-                :rotulo="formato.alerta(alerta.kind)"
-                :detalhe="alerta.detalhe"
-              />
-            </li>
-          </ul>
-        </dd>
-      </div>
-
+  <UiSecao
+    id="resumo-essencial"
+    :titulo="t('clinico.resumoDoPaciente.essencial.titulo')"
+    icone="ph ph-clipboard-text"
+  >
+    <dl class="essencial ui-folha">
       <div class="essencial__linha">
         <dt>{{ t('clinico.resumoDoPaciente.essencial.condicoes') }}</dt>
         <dd>
@@ -109,7 +90,7 @@ const ultima = computed(() => {
         <dd>
           <ul v-if="medicacoes.length > 0" class="essencial__itens">
             <li v-for="item in medicacoes" :key="item.id">
-              {{ item.nome }}
+              <span>{{ item.nome }}</span>
               <span class="essencial__meta">{{ item.quando }}</span>
             </li>
           </ul>
@@ -123,17 +104,16 @@ const ultima = computed(() => {
         <dt>{{ t('clinico.resumoDoPaciente.essencial.ultimaConsulta') }}</dt>
         <dd>
           <template v-if="ultima">
-            <span class="essencial__data clinic-value">{{ ultima.data }}</span>
-            <span class="essencial__meta">{{ ultima.quando }}</span>
+            <span class="essencial__quando">
+              <strong class="ui-num">{{ ultima.data }}</strong>
+              <span class="essencial__meta">{{ ultima.quando }}</span>
+            </span>
             <span class="essencial__consulta">
               {{ ultima.tipo
-              }}<template v-if="ultima.diagnostico"> · {{ ultima.diagnostico }}</template>
+              }}<template v-if="ultima.diagnostico">: {{ ultima.diagnostico }}</template>
             </span>
             <span class="essencial__meta">{{ ultima.profissional }}</span>
-            <RouterLink
-              class="essencial__link clinic-focusable"
-              :to="`/veterinario/atendimento/${ultima.encounterId}`"
-            >
+            <RouterLink class="ui-mais essencial__link" :to="`/veterinario/atendimento/${ultima.encounterId}`">
               {{ t('clinico.resumoDoPaciente.essencial.abrirProntuario') }}
               <i class="ph ph-arrow-right" aria-hidden="true" />
             </RouterLink>
@@ -144,119 +124,91 @@ const ultima = computed(() => {
         </dd>
       </div>
     </dl>
-  </section>
+  </UiSecao>
 </template>
 
 <style scoped>
 .essencial {
-  padding: 1.2rem 1.35rem 1.35rem;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-}
-
-.essencial__titulo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin: 0 0 var(--clinic-space-3);
-  font-size: 1rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.essencial__titulo-icone {
-  flex-shrink: 0;
-  width: 1.2rem;
-  height: 1.2rem;
-  color: var(--clinic-accent);
-}
-
-.essencial__lista {
   display: grid;
   margin: 0;
+  padding: 2px 20px;
 }
 
 .essencial__linha {
   display: grid;
-  gap: var(--clinic-space-1);
-  padding-block: var(--clinic-space-3);
-  border-top: 1px solid var(--clinic-line-soft);
+  gap: 6px;
+  padding-block: 14px;
+  border-top: 1px solid var(--linha);
 }
 
 .essencial__linha:first-child {
-  padding-top: 0;
   border-top: 0;
 }
 
 .essencial__linha dt {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .essencial__linha dd {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  margin: 0;
+  display: grid;
   min-width: 0;
+  justify-items: start;
+  gap: 3px;
+  margin: 0;
 }
 
-.essencial__chips,
 .essencial__itens {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  display: grid;
+  gap: 6px;
   margin: 0;
   padding: 0;
-  gap: var(--clinic-space-1);
   list-style: none;
 }
 
 .essencial__itens li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  color: var(--tinta);
+  font-size: 14.5px;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 
 .essencial__meta {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 500;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 400;
 }
 
-.essencial__itens .essencial__meta {
-  margin-inline-start: var(--clinic-space-1);
+.essencial__quando {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
-.essencial__data {
-  font-weight: 700;
+.essencial__quando strong {
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 650;
 }
 
 .essencial__consulta {
+  color: var(--tinta);
+  font-size: 14.5px;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 
 .essencial__vazio {
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
+  font-size: 14px;
 }
 
 .essencial__link {
-  display: inline-flex;
-  align-items: center;
-  margin-top: var(--clinic-space-1);
-  gap: var(--clinic-space-1);
-  border-radius: var(--clinic-radius-control);
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.essencial__link:hover {
-  text-decoration: underline;
+  margin-top: 6px;
 }
 </style>

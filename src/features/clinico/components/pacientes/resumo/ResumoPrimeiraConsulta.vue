@@ -7,9 +7,10 @@
  * sabe: sem peso, pesar; filhote, perguntar origem e desmame. O último item é o que faz a
  * próxima abertura desta tela não ser vazia.
  */
-import { PhStethoscope } from '@phosphor-icons/vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import UiSecao from '@/components/ui/UiSecao.vue'
 
 import type { Pet } from '../../../data/types'
 import { faixaEtariaDoPaciente } from '../../../domain/porte'
@@ -35,86 +36,72 @@ const itens = computed(() => {
 </script>
 
 <template>
-  <section class="primeira" aria-labelledby="primeira-titulo">
-    <h2 id="primeira-titulo" class="primeira__titulo">
-      <PhStethoscope class="primeira__titulo-icone" weight="duotone" aria-hidden="true" />
-      {{ t('clinico.resumoDoPaciente.primeira.titulo') }}
-    </h2>
-    <p class="primeira__descricao">{{ t('clinico.resumoDoPaciente.primeira.descricao') }}</p>
-
-    <ol class="primeira__lista">
-      <li v-for="item in itens" :key="item">
-        <strong>{{ t(`clinico.resumoDoPaciente.primeira.${item}.titulo`) }}</strong>
-        <span>{{ t(`clinico.resumoDoPaciente.primeira.${item}.detalhe`) }}</span>
+  <UiSecao
+    id="resumo-primeira"
+    :titulo="t('clinico.resumoDoPaciente.primeira.titulo')"
+    icone="ph ph-stethoscope"
+    :descricao="t('clinico.resumoDoPaciente.primeira.descricao')"
+  >
+    <ol class="primeira ui-folha">
+      <li v-for="(item, indice) in itens" :key="item" class="primeira__item">
+        <span class="primeira__numero ui-num" aria-hidden="true">{{ indice + 1 }}</span>
+        <span class="primeira__texto">
+          <strong>{{ t(`clinico.resumoDoPaciente.primeira.${item}.titulo`) }}</strong>
+          <span>{{ t(`clinico.resumoDoPaciente.primeira.${item}.detalhe`) }}</span>
+        </span>
       </li>
     </ol>
-  </section>
+  </UiSecao>
 </template>
 
 <style scoped>
 .primeira {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: 1.2rem 1.35rem 1.35rem;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-}
-
-.primeira__titulo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.primeira__titulo-icone {
-  flex-shrink: 0;
-  width: 1.2rem;
-  height: 1.2rem;
-  color: var(--clinic-accent);
-}
-
-.primeira__descricao {
-  margin: 0;
-  color: var(--clinic-muted);
-}
-
-.primeira__lista {
-  display: grid;
   margin: 0;
   padding: 0;
-  counter-reset: item;
   list-style: none;
 }
 
-.primeira__lista li {
+.primeira__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 20px;
+}
+
+.primeira__item + .primeira__item {
+  border-top: 1px solid var(--linha);
+}
+
+.primeira__numero {
   display: grid;
-  grid-template-columns: 1.75rem minmax(0, 1fr);
-  column-gap: var(--clinic-space-2);
-  padding-block: var(--clinic-space-2);
-  border-top: 1px solid var(--clinic-line-soft);
-  counter-increment: item;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  font-size: 13px;
+  font-weight: 650;
 }
 
-.primeira__lista li::before {
-  grid-row: span 2;
-  color: var(--clinic-accent-strong);
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
-  content: counter(item) '.';
+.primeira__texto {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  padding-top: 3px;
 }
 
-.primeira__lista strong {
-  font-weight: 700;
+.primeira__texto strong {
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
-.primeira__lista span {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+.primeira__texto span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
 }
 </style>
