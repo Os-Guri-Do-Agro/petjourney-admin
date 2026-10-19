@@ -1,38 +1,45 @@
 <script setup lang="ts">
 /**
- * Prontuário eletrônico do atendimento.
+ * O atendimento — a tela em que o veterinário passa a consulta inteira.
  *
- * A consulta acontece em quatro momentos e a tela segue esses momentos: **uma etapa por vez**,
- * com o estado das outras à vista no topo. Empilhar anamnese, exame, diagnóstico e conduta na
- * mesma rolagem colocava mais de trinta campos competindo pela atenção de quem está com o
- * animal na mesa — a informação estava toda lá e nenhuma se destacava.
+ * ## A forma (redesenho total, 19/10/2026)
  *
- * O parâmetro da rota aceita duas formas: o id do prontuário (`enc-…`) ou `novo-<appointmentId>`
- * quando o atendimento ainda não tem registro aberto. É o que permite a agenda linkar para cá
- * sem precisar criar o prontuário antes.
+ * É tela de trabalho concentrado, e se organiza em torno de três perguntas:
  *
- * Estados que a página resolve e que o `PartnerPageFrame` não cobre: **rascunho local**
- * encontrado no navegador, **leitura** quando outro dispositivo detém a edição, e o **autosave**
- * em curso.
+ * 1. **Com quem** — o paciente no alto, com o rosto, os alertas que mudam a conduta e o peso de
+ *    que sai toda dose. Ao rolar, ele não some: uma barra compacta desce e fica presa no alto,
+ *    com o nome, os alertas, os passos e "Finalizar". Quem está no meio da prescrição não sobe a
+ *    página para conferir a alergia.
+ * 2. **Onde estou** — o trilho dos cinco passos (anamnese, exame, diagnóstico, conduta, resumo),
+ *    com o feito, o atual e o que falta, e o resumo de cada um embaixo do nome.
+ * 3. **O que escrevo agora** — a etapa atual numa folha larga, com campos generosos e o rótulo
+ *    em cima. À direita, em tela larga, a coluna de contexto: a consulta anterior em destaque e
+ *    o histórico do paciente. Contexto, não tarefa — some com um clique, e recolhe sozinho
+ *    quando a gravação da consulta começa e precisa da largura.
  *
- * Ao sair, `onBeforeRouteLeave` e `onBeforeUnmount` gravam o pendente e devolvem a edição.
+ * "Finalizar atendimento" é a ação cheia, no alto; "Imprimir ou salvar PDF" fica contornada ao
+ * lado. As faixas (rascunho encontrado no navegador, leitura por outro dispositivo, atendimento
+ * finalizado) entram entre o trilho e a folha, cada uma com o tom e a saída dela.
+ *
+ * ## O que não mudou
+ *
+ * O parâmetro da rota aceita o id do prontuário (`enc-…`) ou `novo-<appointmentId>`; o segundo
+ * abre o prontuário e normaliza a URL. A etapa mora na URL (`?etapa=`). O modo teclado
+ * (`Alt + →/←`, `Alt + S`, `Alt + ?`, `Enter` avança) segue ligado por padrão, com a preferência
+ * em `localStorage`. A folha de impressão é teleportada para o `body` (a regra de impressão
+ * esconde todo filho direto do `body` que não seja ela). Ao sair, a escuta é suspensa, o
+ * pendente é gravado e o store é limpo.
  */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, RouterLink, useRoute, useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
+import { useTelaLarga } from '@/composables/useTelaLarga'
 import ClinicPatientHeader from '@/features/clinico/components/base/ClinicPatientHeader.vue'
-import ProntuarioAnamnese from '@/features/clinico/components/prontuario/ProntuarioAnamnese.vue'
-import ProntuarioConduta from '@/features/clinico/components/prontuario/ProntuarioConduta.vue'
-import ProntuarioDiagnostico from '@/features/clinico/components/prontuario/ProntuarioDiagnostico.vue'
-import ProntuarioExameFisico from '@/features/clinico/components/prontuario/ProntuarioExameFisico.vue'
-import EscutaGatilho from '@/features/clinico/components/escuta/EscutaGatilho.vue'
-import EscutaIndicador from '@/features/clinico/components/escuta/EscutaIndicador.vue'
-import EscutaPainel from '@/features/clinico/components/escuta/EscutaPainel.vue'
 import DocumentoAtestado from '@/features/clinico/components/documentos/DocumentoAtestado.vue'
 import DocumentoEncaminhamento from '@/features/clinico/components/documentos/DocumentoEncaminhamento.vue'
 import DocumentoObito from '@/features/clinico/components/documentos/DocumentoObito.vue'
@@ -47,6 +54,14 @@ import type {
   DocumentoId,
   TermoKind,
 } from '@/features/clinico/components/documentos/documento-types'
+import EscutaGatilho from '@/features/clinico/components/escuta/EscutaGatilho.vue'
+import EscutaIndicador from '@/features/clinico/components/escuta/EscutaIndicador.vue'
+import EscutaPainel from '@/features/clinico/components/escuta/EscutaPainel.vue'
+import ProntuarioAnamnese from '@/features/clinico/components/prontuario/ProntuarioAnamnese.vue'
+import ProntuarioConduta from '@/features/clinico/components/prontuario/ProntuarioConduta.vue'
+import ProntuarioDiagnostico from '@/features/clinico/components/prontuario/ProntuarioDiagnostico.vue'
+import ProntuarioDialogoTopo from '@/features/clinico/components/prontuario/ProntuarioDialogoTopo.vue'
+import ProntuarioExameFisico from '@/features/clinico/components/prontuario/ProntuarioExameFisico.vue'
 import ProntuarioImpressao from '@/features/clinico/components/prontuario/ProntuarioImpressao.vue'
 import ProntuarioPreConsulta from '@/features/clinico/components/prontuario/ProntuarioPreConsulta.vue'
 import ProntuarioReceita from '@/features/clinico/components/prontuario/ProntuarioReceita.vue'
@@ -54,14 +69,16 @@ import ProntuarioResumo from '@/features/clinico/components/prontuario/Prontuari
 import ProntuarioRetornoDialog from '@/features/clinico/components/prontuario/ProntuarioRetornoDialog.vue'
 import ProntuarioStepper from '@/features/clinico/components/prontuario/ProntuarioStepper.vue'
 import ProntuarioTecladoDialog from '@/features/clinico/components/prontuario/ProntuarioTecladoDialog.vue'
-import ProntuarioVacinacao from '@/features/clinico/components/prontuario/ProntuarioVacinacao.vue'
 import ProntuarioTimeline from '@/features/clinico/components/prontuario/ProntuarioTimeline.vue'
+import ProntuarioVacinacao from '@/features/clinico/components/prontuario/ProntuarioVacinacao.vue'
 import type { PassoProntuario } from '@/features/clinico/components/prontuario/step-types'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { useProntuarioTeclado } from '@/features/clinico/composables/useProntuarioTeclado'
+import { useRotulosDaEscuta } from '@/features/clinico/composables/useRotulosDaEscuta'
 import { vacinaRepository } from '@/features/clinico/data/repositories'
 import type {
   AplicacaoVacina,
+  PetAlert,
   Prescription,
   SlotSugestao,
 } from '@/features/clinico/data/types'
@@ -70,9 +87,10 @@ import {
   alergiaNaoConfirmada,
   progressoDoAtendimento,
 } from '@/features/clinico/domain/encounter-progress'
-import { useClinicoStore } from '@/features/clinico/stores/clinico'
+import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useEscutaStore } from '@/features/clinico/stores/escuta'
 import { useProntuarioStore } from '@/features/clinico/stores/prontuario'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -81,11 +99,16 @@ const clinico = useClinicoStore()
 const prontuario = useProntuarioStore()
 const escuta = useEscutaStore()
 const formato = useClinicFormat()
+const rotulosDaEscuta = useRotulosDaEscuta()
+const telaLarga = useTelaLarga(1280)
 
 const assumirAberto = ref(false)
 const finalizarAberto = ref(false)
 const etapa = ref<EtapaId>('anamnese')
 const historicoAberto = ref(false)
+
+const idFinalizar = useId()
+const idAssumir = useId()
 
 // ------------------------------------------------------------------ modo teclado
 
@@ -213,7 +236,7 @@ const passos = computed<PassoProntuario[]>(() => {
       estado: conduta?.estado ?? 'vazio',
       resumo:
         conduta?.estado === 'alerta'
-          ? t('clinico.prontuario.conduta.alergiaConfirmar')
+          ? t('clinico.prontuario.nova.finalizar.alergia')
           : atual.conduta.prescricoes.length > 0
             ? t(
                 'clinico.prontuario.passos.prescricoes',
@@ -238,7 +261,7 @@ const indiceDaEtapa = computed(() => passos.value.findIndex((passo) => passo.id 
 const etapaAnterior = computed(() => passos.value[indiceDaEtapa.value - 1] ?? null)
 const proximaEtapa = computed(() => passos.value[indiceDaEtapa.value + 1] ?? null)
 
-/** O que ainda falta para finalizar. Não bloqueia: nomeia. */
+/** O que ainda falta para finalizar, com a etapa onde se resolve. Não bloqueia: nomeia. */
 const pendencias = computed(() => {
   const atual = encounter.value
 
@@ -246,22 +269,29 @@ const pendencias = computed(() => {
     return []
   }
 
-  const faltando: string[] = []
+  const faltando: Array<{ texto: string; etapa: EtapaId }> = []
 
   if (!atual.anamnese.queixaPrincipal.trim()) {
-    faltando.push(t('clinico.prontuario.anamnese.queixaPrincipal'))
+    faltando.push({ texto: t('clinico.prontuario.nova.finalizar.queixa'), etapa: 'anamnese' })
   }
 
   if (atual.diagnosticos.length === 0) {
-    faltando.push(t('clinico.prontuario.diagnostico.titulo'))
+    faltando.push({
+      texto: t('clinico.prontuario.nova.finalizar.diagnostico'),
+      etapa: 'diagnostico',
+    })
   }
 
   if (alergiaNaoConfirmada(atual, prontuario.pet, (id) => clinico.medicamento(id))) {
-    faltando.push(t('clinico.prontuario.conduta.alergiaConfirmar'))
+    faltando.push({ texto: t('clinico.prontuario.nova.finalizar.alergia'), etapa: 'conduta' })
   }
 
   return faltando
 })
+
+function rotuloDaEtapa(id: EtapaId) {
+  return passos.value.find((passo) => passo.id === id)?.rotulo ?? ''
+}
 
 const erroTraduzido = computed(() => (prontuario.erro ? t(prontuario.erro) : ''))
 
@@ -275,6 +305,205 @@ const ehRetorno = computed(() => {
   return prontuario.consultaAnterior !== null
 })
 
+const podeFinalizar = computed(
+  () =>
+    Boolean(encounter.value) &&
+    encounter.value?.status === 'rascunho' &&
+    !prontuario.somenteLeitura,
+)
+
+const finalizado = computed(() => encounter.value?.status === 'finalizado')
+
+// ------------------------------------------------------------------ o alto da tela
+
+/**
+ * Para onde o "voltar" leva: a tela de onde se veio, quando ela é uma das que abrem atendimento
+ * (o Hoje, a agenda, a ficha do paciente…). Sem histórico — link colado, aba nova —, vai para
+ * Pacientes, que é o destino desta tela na barra.
+ *
+ * Lido uma vez: o `replace` de `novo-…` para o id real e as trocas de etapa preservam o `back`
+ * do histórico, mas a tela não precisa reagir a ele.
+ */
+const voltouDe =
+  typeof window === 'undefined'
+    ? ''
+    : String((window.history.state as { back?: unknown } | null)?.back ?? '')
+
+const ORIGENS: Array<{ prefixo: string; chave: string }> = [
+  { prefixo: '/veterinario/meu-dia', chave: 'espacos.clinica.hoje' },
+  { prefixo: '/veterinario/agenda', chave: 'espacos.clinica.agenda' },
+  { prefixo: '/veterinario/fila', chave: 'espacos.abas.fila' },
+  { prefixo: '/veterinario/pedidos', chave: 'espacos.abas.pedidos' },
+  { prefixo: '/veterinario/atendimentos', chave: 'espacos.abas.atendimentos' },
+  { prefixo: '/veterinario/internacao', chave: 'espacos.clinica.internacao' },
+  { prefixo: '/veterinario/atividades', chave: 'espacos.abas.atividades' },
+  { prefixo: '/veterinario/pacientes', chave: 'espacos.clinica.pacientes' },
+]
+
+const voltar = computed(() => {
+  if (voltouDe.startsWith('/veterinario/paciente/')) {
+    return {
+      rota: voltouDe,
+      rotulo: prontuario.pet
+        ? t('clinico.prontuario.nova.voltarFicha', { pet: prontuario.pet.nome })
+        : t('espacos.clinica.pacientes'),
+    }
+  }
+
+  const origem = ORIGENS.find((item) => voltouDe.startsWith(item.prefixo))
+
+  return origem
+    ? { rota: voltouDe, rotulo: t(origem.chave) }
+    : { rota: '/veterinario/pacientes', rotulo: t('espacos.clinica.pacientes') }
+})
+
+const profissional = computed(() =>
+  encounter.value ? (clinico.profissional(encounter.value.professionalId)?.nome ?? '') : '',
+)
+
+/** A frase de estado: quando abriu e com quem, quantos passos estão prontos — ou quando fechou. */
+const fraseDoResumo = computed(() => {
+  const atual = encounter.value
+
+  if (!atual) {
+    return ''
+  }
+
+  if (atual.status === 'finalizado' && atual.finalizadoEm) {
+    return t('clinico.prontuario.nova.resumo.finalizado', {
+      data: formato.dataCurta(clinicClock.dateOf(atual.finalizadoEm)),
+      hora: formato.hora(atual.finalizadoEm),
+      profissional: profissional.value,
+    })
+  }
+
+  const prontos = passos.value.filter((passo) => passo.estado === 'completo').length
+
+  return [
+    t('clinico.prontuario.nova.resumo.aberto', {
+      hora: formato.hora(atual.abertoEm),
+      profissional: profissional.value,
+    }),
+    t('clinico.prontuario.nova.resumo.etapas', { feitas: prontos, total: passos.value.length }),
+  ].join('. ')
+})
+
+/** Gravando agora, salvo às tantas, ou a promessa de que salva sozinho. */
+const estadoDaGravacao = computed(() => {
+  if (!encounter.value || finalizado.value) {
+    return ''
+  }
+
+  if (prontuario.salvando) {
+    return t('clinico.prontuario.salvandoAgora')
+  }
+
+  return prontuario.salvoEm
+    ? t('clinico.prontuario.nova.salvoAs', { hora: formato.hora(prontuario.salvoEm) })
+    : t('clinico.prontuario.nova.autosave')
+})
+
+/** A escuta deste atendimento está aberta: a barra fixa diz isso em qualquer etapa. */
+const gravandoAqui = computed(
+  () => Boolean(encounter.value) && escuta.emCurso && escuta.encounterId === encounter.value?.id,
+)
+
+/** Os alertas que mudam a conduta, para a barra fixa — o selo inteiro mora no cabeçalho. */
+const alertasDaBarra = computed(() =>
+  (prontuario.pet?.alertas ?? [])
+    .filter((alerta) => alerta.severidade !== 'info')
+    .sort((a, b) => Number(b.severidade === 'risco') - Number(a.severidade === 'risco')),
+)
+
+function textoDoAlerta(alerta: PetAlert) {
+  return alerta.detalhe ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}` : formato.alerta(alerta.kind)
+}
+
+const metaDaBarra = computed(() => {
+  const pet = prontuario.pet
+
+  if (!pet) {
+    return ''
+  }
+
+  return [
+    pet.raca || formato.especie(pet.especie),
+    formato.idade(pet.nascimento),
+    pesoVigente.value !== null ? formato.peso(pesoVigente.value) : '',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+})
+
+// ------------------------------------------------------------------ a barra que acompanha
+
+/**
+ * A barra compacta aparece quando o cabeçalho do paciente passa para baixo da faixa fixa do
+ * alto (a fita do dia, e no celular a barra do topo). A altura dessa faixa é medida, não
+ * escrita: ela muda entre tela larga e celular, e um número fixo deixaria a barra por baixo
+ * dela ou flutuando com um vão.
+ */
+const cabecaDoPaciente = ref<HTMLElement | null>(null)
+const alturaDoTopo = ref(0)
+const pacienteFora = ref(false)
+
+let quadroPendente = 0
+let observador: ResizeObserver | null = null
+
+function faixasFixas() {
+  return [...document.querySelectorAll<HTMLElement>('.palco__fita, .palco > .topo')].filter(
+    (elemento) => getComputedStyle(elemento).position === 'sticky',
+  )
+}
+
+function medirTopo() {
+  alturaDoTopo.value = Math.max(
+    0,
+    ...faixasFixas().map((elemento) => Math.round(elemento.getBoundingClientRect().bottom)),
+  )
+}
+
+function acompanharRolagem() {
+  if (quadroPendente) {
+    return
+  }
+
+  quadroPendente = requestAnimationFrame(() => {
+    quadroPendente = 0
+
+    const cabeca = cabecaDoPaciente.value
+
+    pacienteFora.value = cabeca
+      ? cabeca.getBoundingClientRect().bottom < alturaDoTopo.value + 8
+      : false
+  })
+}
+
+function aoRedimensionar() {
+  medirTopo()
+  acompanharRolagem()
+}
+
+onMounted(() => {
+  medirTopo()
+  window.addEventListener('scroll', acompanharRolagem, { passive: true })
+  window.addEventListener('resize', aoRedimensionar, { passive: true })
+
+  if (typeof ResizeObserver !== 'undefined') {
+    observador = new ResizeObserver(aoRedimensionar)
+    faixasFixas().forEach((elemento) => observador?.observe(elemento))
+  }
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', acompanharRolagem)
+  window.removeEventListener('resize', aoRedimensionar)
+  observador?.disconnect()
+  cancelAnimationFrame(quadroPendente)
+})
+
+// ------------------------------------------------------------------ etapas
+
 const ETAPAS: EtapaId[] = ['anamnese', 'exame', 'diagnostico', 'conduta', 'resumo']
 
 /**
@@ -287,8 +516,29 @@ function irParaEtapa(id: string) {
 
   void router.replace({ query: { ...route.query, etapa: etapa.value } })
 
-  /** Trocar de etapa recomeça a leitura pelo topo; manter a rolagem esconde o cabeçalho. */
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  /*
+   * Trocar de etapa recomeça a leitura pelo começo da folha. Rola só até o trilho, e só quando
+   * ele já saiu de vista: voltar ao topo da página inteira esconderia a etapa atrás do
+   * cabeçalho do paciente, que a barra fixa já repete.
+   */
+  void nextTick(() => {
+    const trilho = document.getElementById('atendimento-trilho')
+
+    if (!trilho) {
+      return
+    }
+
+    const topo = trilho.getBoundingClientRect().top
+
+    if (topo < alturaDoTopo.value) {
+      const reduzir = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
+      window.scrollTo({
+        top: window.scrollY + topo - alturaDoTopo.value - 76,
+        behavior: reduzir ? 'auto' : 'smooth',
+      })
+    }
+  })
 }
 
 async function carregar() {
@@ -306,10 +556,11 @@ async function carregar() {
   }
 
   /**
-   * O retorno abre mostrando a consulta anterior. Nos demais casos o histórico começa
-   * recolhido: é contexto, não a tarefa da vez.
+   * Em tela larga a coluna de contexto abre: cabe ao lado da folha sem roubar a largura dela.
+   * Em tela menor ela cairia em cima da folha, e começa recolhida — menos no retorno, que abre
+   * mostrando a consulta anterior porque é dela que a consulta de hoje depende.
    */
-  historicoAberto.value = ehRetorno.value
+  historicoAberto.value = telaLarga.value || ehRetorno.value
 
   /**
    * A etapa da URL manda. Sem ela, entra na primeira ainda incompleta — continuar é mais
@@ -340,10 +591,18 @@ async function finalizar() {
   void router.push('/veterinario/agenda')
 }
 
+/** "Ir para o diagnóstico", de dentro do diálogo de finalizar: fecha e leva à etapa. */
+function resolverPendencia(id: EtapaId) {
+  finalizarAberto.value = false
+  irParaEtapa(id)
+}
+
 async function assumir() {
   await prontuario.assumirEdicao()
   assumirAberto.value = false
 }
+
+// ------------------------------------------------------------------ documentos
 
 /**
  * O PDF sai pela impressão do navegador, com as folhas A4 de `components/documentos`. Não há
@@ -389,13 +648,6 @@ function salvarEmPdf() {
   void emitirDocumento('prontuario')
 }
 
-/**
- * Abre a escolha de horário do retorno e dispara a busca.
- *
- * Antes daqui a função só navegava para a agenda focando o atendimento **que acabava de
- * terminar** — não criava nada, perdia os dias e o tipo escolhidos na conduta, e deixava o
- * aviso de retorno pendente na tela para sempre, mesmo depois de marcarem o retorno à mão.
- */
 /** Aplicações de vacina do paciente — o comprovante imprime a partir delas. */
 const aplicacoesDeVacina = ref<AplicacaoVacina[]>([])
 
@@ -407,6 +659,8 @@ async function recarregarVacinas() {
 
 /* A dose aplicada nesta consulta precisa sair no comprovante impresso logo depois. */
 watch(() => prontuario.pet?.id, recarregarVacinas, { immediate: true })
+
+// ------------------------------------------------------------------ conduta
 
 const retornoAberto = ref(false)
 
@@ -450,6 +704,13 @@ function marcarCritico(prescricaoId: string, critico: boolean) {
   })
 }
 
+/**
+ * Abre a escolha de horário do retorno e dispara a busca.
+ *
+ * Antes daqui a função só navegava para a agenda focando o atendimento **que acabava de
+ * terminar** — não criava nada, perdia os dias e o tipo escolhidos na conduta, e deixava o
+ * aviso de retorno pendente na tela para sempre, mesmo depois de marcarem o retorno à mão.
+ */
 function agendarRetorno() {
   retornoAberto.value = true
   void prontuario.buscarSugestoesDeRetorno()
@@ -501,132 +762,263 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('clinico.prontuario.subtitulo')"
-    :title="t('clinico.prontuario.titulo')"
-    :loading="prontuario.carregando && !encounter"
-    :error="erroTraduzido"
-    block-when-suspended
-    @retry="carregar"
+  <UiPagina
+    class="atendimento"
+    :style="{ '--topo-fixo': `${alturaDoTopo}px` }"
+    :titulo="t('clinico.prontuario.nova.titulo')"
+    :carregando="prontuario.carregando && !encounter"
+    :erro="erroTraduzido"
+    bloquear-se-suspenso
+    @tentar-de-novo="carregar"
   >
-    <template #actions>
-      <span class="clinic-scope clinic-acoes">
-        <span v-if="prontuario.salvando" class="salvando clinic-value">
-          <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
-          {{ t('clinico.prontuario.salvandoAgora') }}
-        </span>
-        <span v-else-if="prontuario.salvoEm" class="salvando clinic-value">
-          <i class="ph ph-check" aria-hidden="true" />
-          {{ t('clinico.prontuario.salvoEm', { valor: formato.hora(prontuario.salvoEm) }) }}
-        </span>
-  
-        <Button
-          v-if="encounter"
-          :label="t('clinico.prontuario.imprimir')"
-          icon="ph ph-file-pdf"
-          severity="secondary"
-          outlined
-          :title="t('clinico.prontuario.impressao.dica')"
-          @click="salvarEmPdf"
+    <template #voltar>
+      <RouterLink :to="voltar.rota" class="voltar">
+        <i class="ph ph-arrow-left" aria-hidden="true" />
+        {{ voltar.rotulo }}
+      </RouterLink>
+    </template>
+
+    <template v-if="encounter" #resumo>
+      <span>{{ fraseDoResumo }}</span>
+      <span v-if="estadoDaGravacao" class="gravacao" aria-live="polite">
+        <i
+          :class="prontuario.salvando ? 'ph ph-circle-notch ph-spin' : 'ph ph-cloud-check'"
+          aria-hidden="true"
         />
-  
-        <Button
-          v-if="encounter && encounter.status === 'rascunho' && !prontuario.somenteLeitura"
-          :label="t('clinico.prontuario.finalizar')"
-          icon="ph ph-check-circle"
-          @click="finalizarAberto = true"
-        />
+        {{ estadoDaGravacao }}
       </span>
     </template>
 
-    <div v-if="encounter" class="prontuario clinic-scope">
-      <!-- Rascunho encontrado no navegador. Oferta, nunca sobrescrita silenciosa. -->
-      <p v-if="prontuario.rascunhoPendente" class="faixa faixa--rascunho" role="status">
-        <i class="ph ph-clock-counter-clockwise" aria-hidden="true" />
-        <span>
-          {{ t('clinico.prontuario.rascunhoLocal') }} ·
-          {{ formato.relativo(prontuario.rascunhoPendente.salvoEm) }}
-        </span>
-        <Button
-          :label="t('clinico.prontuario.restaurarRascunho')"
-          size="small"
-          @click="prontuario.restaurarRascunho()"
-        />
-        <Button
-          :label="t('clinico.prontuario.descartarRascunho')"
-          size="small"
-          severity="secondary"
-          text
-          @click="prontuario.descartarRascunho()"
-        />
-      </p>
+    <template v-if="encounter" #acoes>
+      <Button
+        type="button"
+        :label="t('clinico.prontuario.nova.imprimir')"
+        icon="ph ph-printer"
+        severity="secondary"
+        outlined
+        :title="t('clinico.prontuario.impressao.dica')"
+        @click="salvarEmPdf"
+      />
+      <Button
+        v-if="podeFinalizar"
+        type="button"
+        :label="t('clinico.prontuario.finalizar')"
+        icon="ph ph-check-circle"
+        @click="finalizarAberto = true"
+      />
+    </template>
 
-      <!-- Leitura por outro dispositivo: com saída explícita, não um beco. -->
-      <p
-        v-if="prontuario.somenteLeitura && encounter.status !== 'finalizado'"
-        class="faixa faixa--leitura"
-        role="status"
-      >
-        <i class="ph ph-lock" aria-hidden="true" />
-        <span>{{ motivoLeitura }}</span>
-        <Button
-          :label="t('clinico.prontuario.assumirEdicao')"
-          size="small"
-          severity="warn"
-          @click="assumirAberto = true"
-        />
-      </p>
-
-      <ClinicPatientHeader :pet="prontuario.pet" :tutor="prontuario.tutor">
-        <template #acoes>
-          <Button
-            :label="
-              historicoAberto
-                ? t('clinico.prontuario.timeline.ocultar')
-                : t('clinico.prontuario.timeline.mostrar')
-            "
-            :icon="historicoAberto ? 'ph ph-caret-right' : 'ph ph-clock-counter-clockwise'"
-            severity="secondary"
-            :outlined="!historicoAberto"
-            :text="historicoAberto"
-            size="small"
-            @click="historicoAberto = !historicoAberto"
-          />
-        </template>
-      </ClinicPatientHeader>
-
-      <ProntuarioStepper :passos="passos" :ativo="etapa" @ir="irParaEtapa" />
-
+    <div v-if="encounter" class="corpo">
       <!--
-        O interruptor fica junto do stepper porque é ali que o modo se manifesta: é o stepper
-        que `Alt + →` percorre. Escondido em ajustes, ninguém saberia que existe.
+        A barra que acompanha a rolagem. Mora no fluxo com altura zero: fica presa logo abaixo da
+        faixa fixa do alto e só aparece quando o cabeçalho do paciente sai de vista.
       -->
-      <div class="teclado">
-        <!-- A gravação segue fora da anamnese; fora dela, isto é o que diz que o microfone está aberto. -->
-        <EscutaIndicador
-          v-if="escuta.emCurso && escuta.encounterId === encounter.id && etapa !== 'anamnese'"
-          @voltar="irParaEtapa('anamnese')"
-        />
+      <div class="fixo" :class="{ 'fixo--visivel': pacienteFora }" :inert="pacienteFora ? undefined : true">
+        <div
+          class="fixo__barra"
+          role="region"
+          :aria-label="t('clinico.prontuario.nova.fixoRotulo')"
+        >
+          <PetAvatar
+            v-if="prontuario.pet"
+            :nome="prontuario.pet.nome"
+            :iniciais="prontuario.pet.iniciais"
+            :especie="prontuario.pet.especie"
+            :foto-url="prontuario.pet.fotoUrl"
+            tamanho="sm"
+          />
+          <span class="fixo__quem">
+            <strong class="fixo__nome">{{ prontuario.pet?.nome }}</strong>
+            <span class="fixo__meta ui-num">{{ metaDaBarra }}</span>
+          </span>
 
-        <span class="teclado__toggle">
-          <ToggleSwitch v-model="modoTeclado" :input-id="idModoTeclado" />
-          <label :for="idModoTeclado">{{ t('clinico.prontuario.teclado.modo') }}</label>
-        </span>
+          <ul v-if="alertasDaBarra.length" class="fixo__alertas">
+            <li
+              v-for="alerta in alertasDaBarra"
+              :key="alerta.id"
+              class="ui-selo"
+              :class="`ui-selo--${alerta.severidade}`"
+              :title="textoDoAlerta(alerta)"
+            >
+              <i
+                :class="alerta.severidade === 'risco' ? 'ph ph-warning' : 'ph ph-warning-circle'"
+                aria-hidden="true"
+              />
+              <span>{{ textoDoAlerta(alerta) }}</span>
+            </li>
+          </ul>
 
-        <Button
-          type="button"
-          class="teclado__mapa clinic-focusable"
-          link
-          size="small"
-          icon="ph ph-question"
-          :label="t('clinico.prontuario.teclado.verTeclas')"
-          :title="t('clinico.prontuario.teclado.titulo')"
-          @click="mapaAberto = true"
+          <span v-if="gravandoAqui" class="fixo__escuta">
+            <span
+              class="fixo__ponto"
+              :class="{ 'fixo__ponto--pausado': escuta.fase !== 'gravando' }"
+              aria-hidden="true"
+            />
+            {{
+              escuta.fase === 'gravando'
+                ? t('clinico.escuta.indicador.ouvindo')
+                : t('clinico.escuta.indicador.pausada')
+            }}
+            <span class="ui-num">{{ rotulosDaEscuta.relogio(escuta.tempoMs) }}</span>
+          </span>
+
+          <ProntuarioStepper class="fixo__passos" :passos="passos" :ativo="etapa" mini @ir="irParaEtapa" />
+
+          <Button
+            v-if="podeFinalizar"
+            type="button"
+            size="small"
+            class="fixo__finalizar"
+            icon="ph ph-check-circle"
+            :label="t('clinico.prontuario.finalizar')"
+            @click="finalizarAberto = true"
+          />
+        </div>
+      </div>
+
+      <div ref="cabecaDoPaciente" class="paciente">
+        <ClinicPatientHeader
+          :pet="prontuario.pet"
+          :tutor="prontuario.tutor"
+          :peso-kg="pesoVigente"
         />
       </div>
 
-      <div class="prontuario__corpo" :class="{ 'prontuario__corpo--com-aside': historicoAberto }">
+      <ProntuarioStepper
+        id="atendimento-trilho"
+        class="trilho"
+        :passos="passos"
+        :ativo="etapa"
+        @ir="irParaEtapa"
+      />
+
+      <!-- As ferramentas da etapa: o microfone fora da anamnese, o teclado, o contexto. -->
+      <div class="ferramentas">
+        <EscutaIndicador
+          v-if="gravandoAqui && etapa !== 'anamnese'"
+          @voltar="irParaEtapa('anamnese')"
+        />
+
+        <div class="ferramentas__fim">
+          <!--
+            O interruptor fica junto do trilho porque é ali que o modo se manifesta: é o trilho
+            que `Alt + →` percorre. Escondido em ajustes, ninguém saberia que existe.
+          -->
+          <span class="teclado">
+            <ToggleSwitch v-model="modoTeclado" :input-id="idModoTeclado" />
+            <label :for="idModoTeclado">{{ t('clinico.prontuario.teclado.modo') }}</label>
+          </span>
+
+          <button
+            type="button"
+            class="ferramenta"
+            :title="t('clinico.prontuario.teclado.titulo')"
+            @click="mapaAberto = true"
+          >
+            <i class="ph ph-keyboard" aria-hidden="true" />
+            {{ t('clinico.prontuario.teclado.verTeclas') }}
+          </button>
+
+          <button
+            type="button"
+            class="ferramenta"
+            :aria-pressed="historicoAberto"
+            aria-controls="atendimento-contexto"
+            @click="historicoAberto = !historicoAberto"
+          >
+            <i
+              :class="historicoAberto ? 'ph ph-sidebar-simple' : 'ph ph-clock-counter-clockwise'"
+              aria-hidden="true"
+            />
+            {{
+              historicoAberto
+                ? t('clinico.prontuario.timeline.ocultar')
+                : t('clinico.prontuario.nova.mostrarHistorico')
+            }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Rascunho encontrado no navegador. Oferta, nunca sobrescrita silenciosa. -->
+      <section v-if="prontuario.rascunhoPendente" class="faixa faixa--rascunho" role="status">
+        <span class="faixa__icone" aria-hidden="true">
+          <i class="ph ph-clock-counter-clockwise" />
+        </span>
+        <span class="faixa__texto">
+          <strong>{{ t('clinico.prontuario.nova.faixa.rascunhoTitulo') }}</strong>
+          <span>
+            {{
+              t('clinico.prontuario.nova.faixa.rascunhoTexto', {
+                quando: formato.relativo(prontuario.rascunhoPendente.salvoEm),
+              })
+            }}
+          </span>
+        </span>
+        <span class="faixa__acoes">
+          <Button
+            type="button"
+            :label="t('clinico.prontuario.descartarRascunho')"
+            severity="secondary"
+            text
+            size="small"
+            @click="prontuario.descartarRascunho()"
+          />
+          <Button
+            type="button"
+            :label="t('clinico.prontuario.restaurarRascunho')"
+            icon="ph ph-arrow-counter-clockwise"
+            severity="secondary"
+            outlined
+            size="small"
+            @click="prontuario.restaurarRascunho()"
+          />
+        </span>
+      </section>
+
+      <!-- Leitura por outro dispositivo: com saída explícita, não um beco. -->
+      <section
+        v-if="prontuario.somenteLeitura && !finalizado"
+        class="faixa faixa--leitura"
+        role="status"
+      >
+        <span class="faixa__icone" aria-hidden="true"><i class="ph ph-lock-simple" /></span>
+        <span class="faixa__texto">
+          <strong>{{ t('clinico.prontuario.nova.faixa.leituraTitulo') }}</strong>
+          <span>{{ motivoLeitura }}</span>
+        </span>
+        <span class="faixa__acoes">
+          <Button
+            type="button"
+            :label="t('clinico.prontuario.assumirEdicao')"
+            icon="ph ph-hand-grabbing"
+            severity="secondary"
+            outlined
+            size="small"
+            @click="assumirAberto = true"
+          />
+        </span>
+      </section>
+
+      <!-- Finalizado: a tela continua alcançável, e diz na primeira linha que virou leitura. -->
+      <section v-if="finalizado" class="faixa faixa--finalizado" role="status">
+        <span class="faixa__icone" aria-hidden="true"><i class="ph ph-check-circle" /></span>
+        <span class="faixa__texto">
+          <strong>{{ t('clinico.prontuario.nova.faixa.finalizadoTitulo') }}</strong>
+          <span>{{ t('clinico.prontuario.nova.faixa.finalizadoTexto') }}</span>
+        </span>
+        <span v-if="etapa !== 'resumo'" class="faixa__acoes">
+          <Button
+            type="button"
+            :label="t('clinico.prontuario.nova.faixa.verResumo')"
+            severity="secondary"
+            outlined
+            size="small"
+            @click="irParaEtapa('resumo')"
+          />
+        </span>
+      </section>
+
+      <div class="mesa" :class="{ 'mesa--com-contexto': historicoAberto }">
         <div ref="corpoDaEtapa" class="etapa">
           <!--
             A pré-consulta abre **acima** da anamnese: é o que o vet lê antes de digitar, e
@@ -701,13 +1093,9 @@ onBeforeUnmount(() => {
           />
 
           <!--
-            A emissão fica **abaixo** da conduta, na mesma etapa: assinar é o último ato do
-            atendimento, e separá-lo numa etapa própria faria a receita virar uma tarefa que
-            se esquece de fazer.
-          -->
-          <!--
-            Vacinação vive na conduta, ao lado da receita: as duas são o que sai do atendimento
-            e vão para a carteira do animal.
+            Vacinação e receita vivem na conduta, embaixo dela: as duas são o que sai do
+            atendimento e vai para a carteira e para o app do responsável. Assinar é o último
+            ato do atendimento — numa etapa própria, a receita viraria tarefa esquecida.
           -->
           <ProntuarioVacinacao
             v-if="etapa === 'conduta'"
@@ -742,28 +1130,37 @@ onBeforeUnmount(() => {
             O rodapé é o caminho de teclado entre as etapas: sair do último campo cai no botão
             que leva à etapa seguinte, sem atalho para decorar.
           -->
-          <footer class="etapa__rodape">
-            <Button
+          <footer class="rodape">
+            <button
               v-if="etapaAnterior"
-              :label="etapaAnterior.rotulo"
-              icon="ph ph-arrow-left"
-              severity="secondary"
-              text
+              type="button"
+              class="rodape__passo rodape__passo--anterior"
               @click="irParaEtapa(etapaAnterior.id)"
-            />
+            >
+              <i class="ph ph-arrow-left" aria-hidden="true" />
+              <span>
+                <small>{{ t('clinico.prontuario.nova.rodape.anterior') }}</small>
+                <strong>{{ etapaAnterior.rotulo }}</strong>
+              </span>
+            </button>
             <span v-else />
 
-            <Button
+            <button
               v-if="proximaEtapa"
-              :label="proximaEtapa.rotulo"
-              icon="ph ph-arrow-right"
-              icon-pos="right"
-              severity="secondary"
-              outlined
+              type="button"
+              class="rodape__passo rodape__passo--proxima"
               @click="irParaEtapa(proximaEtapa.id)"
-            />
+            >
+              <span>
+                <small>{{ t('clinico.prontuario.nova.rodape.proxima') }}</small>
+                <strong>{{ proximaEtapa.rotulo }}</strong>
+              </span>
+              <i class="ph ph-arrow-right" aria-hidden="true" />
+            </button>
             <Button
-              v-else-if="encounter.status === 'rascunho' && !prontuario.somenteLeitura"
+              v-else-if="podeFinalizar"
+              type="button"
+              class="rodape__finalizar"
               :label="t('clinico.prontuario.finalizar')"
               icon="ph ph-check-circle"
               @click="finalizarAberto = true"
@@ -772,299 +1169,811 @@ onBeforeUnmount(() => {
         </div>
 
         <ProntuarioTimeline
-          v-if="historicoAberto"
+          v-show="historicoAberto"
+          id="atendimento-contexto"
+          class="contexto"
           :eventos="prontuario.timeline"
           :anterior="prontuario.consultaAnterior"
           :rota-completa="`/veterinario/paciente/${encounter.petId}/historico`"
+          @fechar="historicoAberto = false"
         />
       </div>
     </div>
 
-    <!-- transferência explícita da edição -->
-    <Dialog
-      v-model:visible="assumirAberto"
-      modal
-      class="clinic-dialog hc-tema"
-      :style="{ width: 'min(30rem, 94vw)' }"
-      :header="t('clinico.prontuario.assumirDialogo.titulo')"
-      dismissable-mask
-    >
-      <p class="dialogo clinic-scope">{{ t('clinico.prontuario.assumirDialogo.descricao') }}</p>
-      <template #footer>
-        <Button
-          :label="t('clinico.agenda.mover.cancelar')"
-          severity="secondary"
-          text
-          @click="assumirAberto = false"
-        />
-        <Button
-          :label="t('clinico.prontuario.assumirDialogo.confirmar')"
-          severity="warn"
-          @click="assumir"
-        />
-      </template>
-    </Dialog>
+    <template #sempre>
+      <!-- transferência explícita da edição -->
+      <Dialog
+        v-model:visible="assumirAberto"
+        modal
+        class="clinic-dialog hc-tema"
+        :style="{ width: 'min(30rem, 94vw)' }"
+        :aria-labelledby="idAssumir"
+        dismissable-mask
+      >
+        <template #header>
+          <ProntuarioDialogoTopo
+            :id="idAssumir"
+            :titulo="t('clinico.prontuario.assumirDialogo.titulo')"
+            :subtitulo="motivoLeitura"
+            icone="ph ph-lock-simple-open"
+            tom="atencao"
+          />
+        </template>
 
-    <!-- finalizar: nomeia o que falta, e ainda assim deixa finalizar -->
-    <Dialog
-      v-model:visible="finalizarAberto"
-      modal
-      class="clinic-dialog hc-tema"
-      :style="{ width: 'min(30rem, 94vw)' }"
-      :header="t('clinico.prontuario.finalizarDialogo.titulo')"
-      dismissable-mask
-    >
-      <div class="dialogo clinic-scope">
-        <p>{{ t('clinico.prontuario.finalizarDialogo.descricao') }}</p>
-        <p v-if="pendencias.length > 0" class="dialogo__pendencias">
-          <i class="ph ph-warning-circle" aria-hidden="true" />
-          {{ t('clinico.prontuario.finalizarDialogo.pendencias', { itens: pendencias.join(', ') }) }}
-        </p>
-      </div>
+        <p class="dialogo__texto">{{ t('clinico.prontuario.assumirDialogo.descricao') }}</p>
 
-      <template #footer>
-        <Button
-          :label="t('clinico.agenda.mover.cancelar')"
-          severity="secondary"
-          text
-          @click="finalizarAberto = false"
-        />
-        <Button
-          :label="
-            pendencias.length > 0
-              ? t('clinico.prontuario.finalizarDialogo.confirmar')
-              : t('clinico.prontuario.finalizar')
-          "
-          :severity="pendencias.length > 0 ? 'warn' : 'primary'"
-          @click="finalizar"
-        />
-      </template>
-    </Dialog>
-    <!--
-      A folha de impressão vive fora da página, direto no `body`: é o que permite a regra de
-      impressão esconder todo o resto com um seletor de filho direto.
-    -->
-    <Teleport to="body">
-      <div v-if="encounter" class="clinic-print-root">
-        <ProntuarioImpressao
-          v-if="documentoParaImprimir === 'prontuario'"
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-        />
-        <DocumentoReceituario
-          v-else-if="documentoParaImprimir === 'receituario'"
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-        />
-        <DocumentoPedidoExame
-          v-else-if="documentoParaImprimir === 'pedido-exame'"
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-        />
-        <DocumentoOrientacoes
-          v-else-if="documentoParaImprimir === 'orientacoes'"
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-        />
-        <DocumentoEncaminhamento
-          v-else-if="documentoParaImprimir === 'encaminhamento'"
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-        />
-        <DocumentoRelatorioPlano
-          v-else-if="documentoParaImprimir === 'relatorio-plano'"
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-        />
-        <DocumentoObito
-          v-else-if="documentoParaImprimir === 'declaracao-obito'"
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-        />
-        <DocumentoVacinacao
-          v-else-if="documentoParaImprimir === 'comprovante-vacinacao'"
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-          :aplicacoes="aplicacoesDeVacina"
-        />
-        <DocumentoOrcamento
-          v-else-if="documentoParaImprimir === 'orcamento'"
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-        />
-        <!--
-          Os três termos compartilham componente: a estrutura é a mesma — texto declaratório e
-          duas assinaturas —, e o que muda é a gravidade do texto, que vem do `kind`.
-        -->
-        <DocumentoTermo
-          v-else-if="termoParaImprimir"
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-          :kind="termoParaImprimir"
-        />
-        <DocumentoAtestado
-          v-else
-          :encounter="encounter"
-          :pet="prontuario.pet"
-          :tutor="prontuario.tutor"
-          :tipo="tipoDoAtestado"
-        />
-      </div>
-    </Teleport>
+        <template #footer>
+          <Button
+            type="button"
+            :label="t('clinico.agenda.mover.cancelar')"
+            severity="secondary"
+            text
+            @click="assumirAberto = false"
+          />
+          <Button
+            type="button"
+            :label="t('clinico.prontuario.assumirDialogo.confirmar')"
+            icon="ph ph-hand-grabbing"
+            severity="warn"
+            @click="assumir"
+          />
+        </template>
+      </Dialog>
 
-    <ProntuarioTecladoDialog v-model:visible="mapaAberto" />
+      <!-- finalizar: nomeia o que falta, leva até lá, e ainda assim deixa finalizar -->
+      <Dialog
+        v-model:visible="finalizarAberto"
+        modal
+        class="clinic-dialog hc-tema"
+        :style="{ width: 'min(32rem, 94vw)' }"
+        :aria-labelledby="idFinalizar"
+        dismissable-mask
+      >
+        <template #header>
+          <ProntuarioDialogoTopo
+            :id="idFinalizar"
+            :titulo="t('clinico.prontuario.finalizarDialogo.titulo')"
+            :subtitulo="[prontuario.pet?.nome, profissional].filter(Boolean).join(' · ')"
+            :icone="pendencias.length > 0 ? 'ph ph-warning-circle' : 'ph ph-check-circle'"
+            :tom="pendencias.length > 0 ? 'atencao' : 'ok'"
+          />
+        </template>
 
-    <ProntuarioRetornoDialog
-      v-if="encounter"
-      v-model:visivel="retornoAberto"
-      :sugestoes="prontuario.sugestoesDeRetorno"
-      :buscando="prontuario.buscandoRetorno"
-      :salvando="prontuario.salvando"
-      :a-partir-de="prontuario.dataDoAtendimento"
-      :em-dias="encounter.conduta.retorno.emDias"
-      @escolher="confirmarRetorno"
-    />
-  </PartnerPageFrame>
+        <div class="dialogo">
+          <section v-if="pendencias.length > 0" class="dialogo__faltam">
+            <h3>{{ t('clinico.prontuario.nova.finalizar.faltam') }}</h3>
+            <ul>
+              <li v-for="item in pendencias" :key="item.etapa + item.texto">
+                <i class="ph ph-warning-circle" aria-hidden="true" />
+                <span>{{ item.texto }}</span>
+                <button type="button" class="ui-mais" @click="resolverPendencia(item.etapa)">
+                  {{ t('clinico.prontuario.nova.finalizar.ir', { etapa: rotuloDaEtapa(item.etapa) }) }}
+                </button>
+              </li>
+            </ul>
+          </section>
+
+          <p v-else class="dialogo__ok">
+            <i class="ph ph-check-circle" aria-hidden="true" />
+            {{ t('clinico.prontuario.nova.finalizar.tudoCerto') }}
+          </p>
+
+          <p class="dialogo__texto">{{ t('clinico.prontuario.nova.finalizar.depois') }}</p>
+        </div>
+
+        <template #footer>
+          <Button
+            type="button"
+            :label="t('clinico.agenda.mover.cancelar')"
+            severity="secondary"
+            text
+            @click="finalizarAberto = false"
+          />
+          <Button
+            type="button"
+            :label="
+              pendencias.length > 0
+                ? t('clinico.prontuario.finalizarDialogo.confirmar')
+                : t('clinico.prontuario.finalizar')
+            "
+            icon="ph ph-check-circle"
+            :severity="pendencias.length > 0 ? 'warn' : undefined"
+            @click="finalizar"
+          />
+        </template>
+      </Dialog>
+
+      <ProntuarioTecladoDialog v-model:visible="mapaAberto" />
+
+      <ProntuarioRetornoDialog
+        v-if="encounter"
+        v-model:visivel="retornoAberto"
+        :sugestoes="prontuario.sugestoesDeRetorno"
+        :buscando="prontuario.buscandoRetorno"
+        :salvando="prontuario.salvando"
+        :a-partir-de="prontuario.dataDoAtendimento"
+        :em-dias="encounter.conduta.retorno.emDias"
+        @escolher="confirmarRetorno"
+      />
+
+      <!--
+        A folha de impressão vive fora da página, direto no `body`: é o que permite a regra de
+        impressão esconder todo o resto com um seletor de filho direto.
+      -->
+      <Teleport to="body">
+        <div v-if="encounter" class="clinic-print-root">
+          <ProntuarioImpressao
+            v-if="documentoParaImprimir === 'prontuario'"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+          />
+          <DocumentoReceituario
+            v-else-if="documentoParaImprimir === 'receituario'"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+          />
+          <DocumentoPedidoExame
+            v-else-if="documentoParaImprimir === 'pedido-exame'"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+          />
+          <DocumentoOrientacoes
+            v-else-if="documentoParaImprimir === 'orientacoes'"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+          />
+          <DocumentoEncaminhamento
+            v-else-if="documentoParaImprimir === 'encaminhamento'"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+          />
+          <DocumentoRelatorioPlano
+            v-else-if="documentoParaImprimir === 'relatorio-plano'"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+          />
+          <DocumentoObito
+            v-else-if="documentoParaImprimir === 'declaracao-obito'"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+          />
+          <DocumentoVacinacao
+            v-else-if="documentoParaImprimir === 'comprovante-vacinacao'"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+            :aplicacoes="aplicacoesDeVacina"
+          />
+          <DocumentoOrcamento
+            v-else-if="documentoParaImprimir === 'orcamento'"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+          />
+          <!--
+            Os três termos compartilham componente: a estrutura é a mesma — texto declaratório e
+            duas assinaturas —, e o que muda é a gravidade do texto, que vem do `kind`.
+          -->
+          <DocumentoTermo
+            v-else-if="termoParaImprimir"
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+            :kind="termoParaImprimir"
+          />
+          <DocumentoAtestado
+            v-else
+            :encounter="encounter"
+            :pet="prontuario.pet"
+            :tutor="prontuario.tutor"
+            :tipo="tipoDoAtestado"
+          />
+        </div>
+      </Teleport>
+    </template>
+  </UiPagina>
 </template>
 
 <style scoped>
-.prontuario {
+/*
+ * A tela inteira escreve em 15 px, e os campos são generosos: 44 px de altura, número e texto no
+ * mesmo corpo. É onde o veterinário passa a consulta, e campo apertado é onde o dedo erra.
+ *
+ * Os tokens de cada componente do PrimeVue são reescritos aqui, e não o `--p-form-field-*`: as
+ * variáveis deles já foram resolvidas na raiz, e mudar a de origem aqui embaixo não chegaria.
+ */
+.atendimento {
+  --p-inputtext-padding-y: 10px;
+  --p-inputtext-padding-x: 12px;
+  --p-textarea-padding-y: 10px;
+  --p-textarea-padding-x: 12px;
+  --p-select-padding-y: 10px;
+  --p-select-padding-x: 12px;
+  --p-multiselect-padding-y: 8px;
+  --p-multiselect-padding-x: 12px;
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+
+  font-size: 15px;
+}
+
+.atendimento :deep(.p-inputtext),
+.atendimento :deep(.p-textarea),
+.atendimento :deep(.p-select-label),
+.atendimento :deep(.p-multiselect-label),
+.atendimento :deep(.p-inputnumber-input) {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.atendimento :deep(.p-textarea) {
+  line-height: 1.55;
+}
+
+/* Os pequenos (editor de antecedente, tipo do diagnóstico) continuam pequenos. */
+.atendimento :deep(.p-inputtext-sm),
+.atendimento :deep(.p-select-sm .p-select-label) {
+  padding-block: 6px;
+  font-size: 14px;
+}
+
+/* ------------------------------------------------------------------ alto */
+
+.voltar .ph {
+  font-size: 13px;
+}
+
+[dir='rtl'] .voltar .ph {
+  scale: -1 1;
+}
+
+.gravacao {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-inline-start: 10px;
+  color: var(--tinta-3);
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.gravacao .ph {
+  font-size: 15px;
+}
+
+.corpo {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 18px;
 }
 
-.teclado {
+/* ------------------------------------------------------------------ a barra fixa */
+
+.fixo {
+  position: sticky;
+  z-index: 25;
+  top: var(--topo-fixo, 0px);
+  height: 0;
+  margin-bottom: -18px;
+}
+
+.fixo__barra {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  left: 0;
   display: flex;
-  flex-wrap: wrap;
+  min-height: 56px;
   align-items: center;
-  justify-content: flex-end;
-  gap: var(--clinic-space-3);
+  gap: 12px;
+  padding: 8px 10px 8px 12px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--superficie) 94%, transparent);
+  box-shadow: var(--sombra-2);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity var(--pj-tempo-medio) var(--pj-curva-chega),
+    transform var(--pj-tempo-medio) var(--pj-curva-chega),
+    visibility 0s linear var(--pj-tempo-medio);
+  visibility: hidden;
 }
 
-.teclado__toggle {
+.fixo--visivel .fixo__barra {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--pj-tempo-medio) var(--pj-curva-chega),
+    transform var(--pj-tempo-medio) var(--pj-curva-chega);
+  visibility: visible;
+}
+
+.fixo__quem {
+  display: grid;
+  min-width: 0;
+  flex: 0 1 auto;
+  gap: 1px;
+  line-height: 1.25;
+}
+
+.fixo__nome {
+  overflow: hidden;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fixo__meta {
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fixo__alertas {
   display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.teclado__toggle label {
-  cursor: pointer;
-}
-
-.teclado__mapa.p-button {
-  gap: 0.3rem;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 6px;
+  margin: 0;
   padding: 0;
-  font-size: var(--clinic-font-label);
+  overflow: hidden;
+  list-style: none;
 }
 
-.teclado__mapa.p-button,
-.teclado__mapa.p-button:not(:disabled):hover,
-.teclado__mapa.p-button:not(:disabled):active {
-  color: var(--clinic-accent-strong);
+.fixo__alertas .ui-selo {
+  min-width: 0;
+  flex: 0 1 auto;
 }
 
-.teclado__mapa :deep(.p-button-label) {
-  font-weight: 700;
-  text-underline-offset: 2px;
+.fixo__alertas .ui-selo span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.prontuario__corpo {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-  gap: var(--clinic-space-3);
+.fixo__escuta {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.prontuario__corpo--com-aside {
-  grid-template-columns: minmax(0, 1fr) auto;
+.fixo__ponto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--risco);
+  animation: pulsar 1.6s ease-in-out infinite;
 }
 
-.etapa {
-  display: grid;
-  gap: var(--clinic-space-3);
+.fixo__ponto--pausado {
+  background: var(--neutro-tinta);
+  animation: none;
+}
+
+@keyframes pulsar {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.fixo__passos {
+  flex: none;
+  margin-inline-start: auto;
+}
+
+.fixo__finalizar {
+  flex: none;
+}
+
+/* ------------------------------------------------------------------ paciente e trilho */
+
+.paciente {
   min-width: 0;
 }
 
-.etapa__rodape {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-3);
+.trilho {
+  margin-top: 2px;
+  scroll-margin-top: calc(var(--topo-fixo, 0px) + 76px);
 }
 
+.ferramentas {
+  display: flex;
+  min-height: 36px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: -6px;
+}
+
+.ferramentas__fim {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-inline-start: auto;
+}
+
+.teclado {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline-end: 8px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.teclado label {
+  cursor: pointer;
+}
+
+.ferramenta {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--tinta-2);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.ferramenta .ph {
+  font-size: 17px;
+}
+
+.ferramenta:hover {
+  background: var(--superficie-2);
+  color: var(--tinta);
+}
+
+.ferramenta[aria-pressed='true'] {
+  color: var(--tinta);
+}
+
+.ferramenta:focus-visible,
+.rodape__passo:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ faixas
+ * Uma linha com o disco do ícone, o que aconteceu e a saída. O tom diz de que tipo é: o rascunho
+ * é oferta (cor do lugar), a leitura pede atenção, o finalizado é estado neutro.
+ */
 .faixa {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-2);
-  margin: 0;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  line-height: 1.45;
+  gap: 10px 14px;
+  padding: 12px 14px 12px 12px;
+  border: 1px solid var(--faixa-linha, var(--linha));
+  border-radius: 14px;
+  background: var(--faixa-fundo, var(--superficie-2));
 }
 
-.faixa span {
-  flex: 1;
-  min-width: 12rem;
+.faixa__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--faixa-tinta, var(--tinta-2));
+  font-size: 19px;
+}
+
+.faixa__texto {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 280px;
+  gap: 2px;
+  line-height: 1.4;
+}
+
+.faixa__texto strong {
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.faixa__texto span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.faixa__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
 .faixa--rascunho {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
+  --faixa-fundo: color-mix(in oklab, var(--pj-lugar-fundo) 70%, var(--superficie));
+  --faixa-linha: color-mix(in oklab, var(--pj-lugar) 30%, var(--linha));
+  --faixa-tinta: var(--pj-lugar-tinta);
 }
 
 .faixa--leitura {
-  border-color: var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
+  --faixa-fundo: var(--atencao-fundo);
+  --faixa-linha: color-mix(in oklab, var(--atencao) 40%, var(--linha));
+  --faixa-tinta: var(--atencao-tinta);
 }
 
-.salvando {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+.faixa--finalizado {
+  --faixa-fundo: var(--neutro-fundo);
+  --faixa-linha: var(--linha);
+  --faixa-tinta: var(--ok-tinta);
 }
+
+/* ------------------------------------------------------------------ mesa: folha e contexto */
+
+.mesa {
+  display: grid;
+  align-items: start;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.mesa--com-contexto {
+  grid-template-columns: minmax(0, 1fr) 340px;
+}
+
+.etapa {
+  display: grid;
+  min-width: 0;
+  gap: 20px;
+}
+
+/*
+ * A coluna de contexto acompanha a rolagem: a consulta anterior continua à vista enquanto a
+ * conduta desce. Se ela for maior que a janela, rola dentro de si.
+ */
+.contexto {
+  position: sticky;
+  top: calc(var(--topo-fixo, 0px) + 80px);
+  max-height: calc(100dvh - var(--topo-fixo, 0px) - 96px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+/* Rodapé da etapa: voltar à esquerda, seguir à direita, em botões que dizem para onde. */
+.rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.rodape__passo {
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: none;
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+}
+
+.rodape__passo span {
+  display: grid;
+  line-height: 1.25;
+}
+
+.rodape__passo small {
+  color: var(--tinta-3);
+  font-size: 12.5px;
+}
+
+.rodape__passo strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.rodape__passo .ph {
+  color: var(--tinta-2);
+  font-size: 18px;
+}
+
+.rodape__passo--anterior {
+  padding-inline-start: 6px;
+}
+
+.rodape__passo--anterior:hover {
+  background: var(--superficie-2);
+}
+
+.rodape__passo--proxima {
+  border-color: var(--linha-forte);
+  background: var(--superficie);
+  text-align: end;
+}
+
+.rodape__passo--proxima:hover {
+  background: var(--superficie-2);
+}
+
+[dir='rtl'] .rodape__passo .ph {
+  scale: -1 1;
+}
+
+/* ------------------------------------------------------------------ diálogos */
 
 .dialogo {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 16px;
+}
+
+.dialogo__texto {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.55;
 }
 
-.dialogo p {
-  margin: 0;
+.dialogo__faltam {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
 }
 
-/* O que falta é uma linha com ícone na tinta de atenção — a faixa pintada não volta. */
-.dialogo__pendencias {
+.dialogo__faltam h3 {
+  margin: 0;
+  color: var(--atencao-tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dialogo__faltam ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dialogo__faltam li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.dialogo__faltam li .ph {
+  align-self: center;
+  color: var(--atencao-tinta);
+  font-size: 16px;
+}
+
+.dialogo__faltam li span {
+  flex: 1 1 12rem;
+}
+
+.dialogo__faltam .ui-mais {
+  color: var(--clinica-tinta);
+  font-size: 13.5px;
+}
+
+.dialogo__ok {
   display: flex;
   align-items: flex-start;
-  gap: 0.4rem;
-  color: var(--clinic-attention-text);
-  font-weight: 650;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
 }
 
-@media (max-width: 1200px) {
-  .prontuario__corpo--com-aside {
+.dialogo__ok .ph {
+  margin-top: 2px;
+  font-size: 17px;
+}
+
+/* ------------------------------------------------------------------ larguras */
+
+/* A barra fixa abre mão do que menos importa primeiro: os alertas, depois os passos. */
+@media (max-width: 1280px) {
+  .mesa--com-contexto {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Em tela menor o contexto, quando pedido, vem antes da folha — e não lá embaixo dela. */
+  .contexto {
+    position: static;
+    max-height: none;
+    order: -1;
+    overflow: visible;
+  }
+
+  .fixo__alertas .ui-selo span {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .fixo__passos,
+  .fixo__meta {
+    display: none;
+  }
+
+  .fixo__barra {
+    gap: 10px;
+  }
+
+  .rodape__passo--anterior small,
+  .rodape__passo--proxima small {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .fixo__alertas,
+  .fixo__escuta span.ui-num {
+    display: none;
+  }
+
+  .fixo__finalizar :deep(.p-button-label) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fixo__barra,
+  .fixo--visivel .fixo__barra {
+    transition: none;
+  }
+
+  .fixo__ponto {
+    animation: none;
   }
 }
 </style>

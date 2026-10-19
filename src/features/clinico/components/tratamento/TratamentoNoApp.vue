@@ -830,7 +830,7 @@ function criar(receita: ReceitaSemLembrete) {
 
 .dose {
   display: grid;
-  align-items: center;
+  align-items: start;
   padding-block: 8px;
   gap: 8px;
   grid-template-columns: 4.4rem minmax(0, 1fr);
@@ -843,6 +843,7 @@ function criar(receita: ReceitaSemLembrete) {
 }
 
 .dose__hora {
+  padding-top: 6px;
   font-weight: 650;
 }
 
@@ -855,6 +856,8 @@ function criar(receita: ReceitaSemLembrete) {
 .dose__corpo {
   display: grid;
   min-width: 0;
+  min-height: 32px;
+  align-content: center;
   gap: 4px;
 }
 

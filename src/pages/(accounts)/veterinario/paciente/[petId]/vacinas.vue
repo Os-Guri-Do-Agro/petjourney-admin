@@ -19,9 +19,10 @@
  *    atrasada, série aberta) e a sequência de doses onde a série está aberta.
  * 3. **Histórico de aplicações** — a tabela: quando, vacina, lote, quem e onde.
  *
- * Uma ação principal só, cheia, no alto: **Aplicar vacina**. Registrar a dose de outro lugar é a
- * segunda, contornada — é o que se faz uma vez por paciente, na primeira visita, com a
- * carteirinha do pet shop na mão. A carteirinha do app é a terceira, de texto.
+ * Uma ação principal só, cheia, à direita da capa: **Aplicar vacina**. Registrar a dose de outro
+ * lugar é a segunda, contornada — é o que se faz uma vez por paciente, na primeira visita, com a
+ * carteirinha do pet shop na mão. A carteirinha do app fica no título do protocolo, de texto: é o
+ * mesmo protocolo, visto do celular.
  *
  * O atraso aparece nos dois lados com a mesma regra (a carência de três dias da API e do app), e o
  * protocolo diz isso em voz alta: quem liga para o responsável precisa saber que ele está vendo o
@@ -365,19 +366,8 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
 
     <template v-if="pet" #cabecalho>
       <FichaCabeca :pet="pet" :tutor="tutor" atual="vacinas" :frase="frase">
-        <!-- Uma ação cheia: aplicar. A dose de fora e a carteirinha do app vêm antes, mais leves. -->
+        <!-- Uma ação cheia: aplicar. A dose de fora vem antes, contornada. -->
         <template v-if="temProtocolo" #acoes>
-          <Button
-            v-if="carteirinha"
-            type="button"
-            icon="ph ph-device-mobile"
-            :label="t('clinico.ficha.vacinas.carteirinha')"
-            severity="secondary"
-            text
-            :aria-expanded="appAberto"
-            aria-haspopup="dialog"
-            @click="appAberto = !appAberto"
-          />
           <Button
             type="button"
             icon="ph ph-map-pin"
@@ -490,6 +480,20 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
           "
           icone="ph ph-list-checks"
         >
+          <!-- O mesmo protocolo, como o responsável o vê: a carteirinha do app, numa gaveta. -->
+          <template v-if="carteirinha" #acoes>
+            <Button
+              type="button"
+              icon="ph ph-device-mobile"
+              :label="t('clinico.ficha.vacinas.carteirinha')"
+              severity="secondary"
+              text
+              :aria-expanded="appAberto"
+              aria-haspopup="dialog"
+              @click="appAberto = !appAberto"
+            />
+          </template>
+
           <div class="ui-folha ficha-vacinas__plano">
             <PlanoVacinalLista :plano="plano" folha @aplicar="abrirAplicar" />
           </div>
