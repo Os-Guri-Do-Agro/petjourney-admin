@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import { ApiError } from '@/service/api'
 import { getPerfis, trocarParaParceiro, type PerfilParceiro } from '@/service/auth/auth-service'
 import { getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
-import { currentColors } from '@/theme/color-mode'
 import { montarOpcoesParceiro, podeCadastrarNovaEmpresa } from '@/utils/parceiro/perfis-parceiro'
 
 const { t } = useI18n()
@@ -31,19 +29,15 @@ const mostrarCadastro = computed(
   () => !loading.value && !errorMessage.value && podeCadastrarNovaEmpresa(parceiros.value),
 )
 
-const pageStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--sel-card': colors.dashboard.surface,
-    '--sel-soft': colors.dashboard.surfaceSoft,
-    '--sel-line': colors.dashboard.line,
-    '--sel-line-strong': colors.dashboard.lineStrong,
-    '--sel-muted': colors.dashboard.muted,
-    '--sel-accent': colors.vet.primary,
-    '--sel-accent-strong': colors.dashboard.primaryStrong,
-  }
-})
+/** As iniciais do nome da empresa, para o rosto da linha ("Clínica Vida Animal" → "CV"). */
+function iniciais(nome: string) {
+  return nome
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((parte) => parte.charAt(0).toLocaleUpperCase())
+    .join('')
+}
 
 async function carregarPerfis() {
   loading.value = true
@@ -105,209 +99,251 @@ onMounted(() => {
 </script>
 
 <template>
-  <PartnerPageFrame
-    :subtitle="t('parceiro.selecionar.subtitle')"
-    :title="t('parceiro.selecionar.title')"
-    :loading="loading"
-    :error="errorMessage"
-    :empty="!opcoes.length && !mostrarCadastro"
-    :empty-title="t('parceiro.selecionar.emptyTitle')"
-    :empty-description="t('parceiro.selecionar.emptyBody')"
-    @retry="carregarPerfis"
+  <!--
+    Uma pergunta só, no meio da tela: qual empresa operar agora. Cada empresa é uma linha inteira
+    clicável, com o papel na conta e o estado do cadastro; a que já está em uso diz isso.
+  -->
+  <UiPagina
+    class="tela-selecionar"
+    :titulo="t('parceiro.selecionar.title')"
+    :carregando="loading"
+    :erro="errorMessage"
+    :vazio="!opcoes.length && !mostrarCadastro"
+    :vazio-titulo="t('parceiro.selecionar.emptyTitle')"
+    :vazio-descricao="t('parceiro.selecionar.emptyBody')"
+    vazio-icone="ph ph-buildings"
+    @tentar-de-novo="carregarPerfis"
   >
-    <div class="select" :style="pageStyle">
-      <p class="select__lede">{{ t('parceiro.selecionar.body') }}</p>
+    <template #cabecalho>
+      <div class="centro-cabeca">
+        <span class="centro-cabeca__selo" aria-hidden="true"><i class="ph ph-buildings" /></span>
+        <h1 class="centro-cabeca__titulo">{{ t('parceiro.selecionar.title') }}</h1>
+        <p class="centro-cabeca__texto">{{ t('parceiro.selecionar.body') }}</p>
+      </div>
+    </template>
 
-      <ul v-if="opcoes.length" class="select__list">
+    <div class="selecionar">
+      <ul v-if="opcoes.length" class="ui-lista ui-folha selecionar__lista">
         <li v-for="opcao in opcoes" :key="opcao.parceiroId">
-          <Button
-            class="select__item"
+          <button
             type="button"
-            :class="{ 'select__item--active': opcao.ativo }"
-            :disabled="trocandoId != null"
+            class="ui-linha empresa"
+            :class="{ 'empresa--ativa': opcao.ativo }"
+            :disabled="trocandoId != null && trocandoId !== opcao.parceiroId"
             :aria-current="opcao.ativo ? 'true' : undefined"
+            :aria-busy="trocandoId === opcao.parceiroId || undefined"
             @click="selecionar(opcao.parceiroId, opcao.ativo)"
           >
-            <span class="select__icon" aria-hidden="true">
-              <i :class="opcao.equipe ? 'ph ph-users' : 'ph ph-building'" />
+            <span class="empresa__rosto" :class="{ 'empresa__rosto--equipe': opcao.equipe }" aria-hidden="true">
+              {{ iniciais(opcao.nome) }}
             </span>
 
-            <span class="select__copy">
-              <strong>{{ opcao.nome }}</strong>
-              <small>
+            <span class="ui-linha__texto">
+              <span class="ui-linha__titulo empresa__nome">{{ opcao.nome }}</span>
+              <span class="ui-linha__meta empresa__papel">
+                <i :class="opcao.equipe ? 'ph ph-users-three' : 'ph ph-storefront'" aria-hidden="true" />
                 {{
                   opcao.equipe
                     ? t('parceiro.selecionar.roleOperador')
                     : t('parceiro.selecionar.roleDono')
                 }}
-              </small>
+              </span>
             </span>
 
-            <span class="select__meta">
+            <span class="ui-linha__fim">
               <PartnerStatusBadge v-if="opcao.badgeStatus" :status="opcao.badgeStatus" />
-              <span v-if="opcao.ativo" class="select__current">
+              <span v-if="opcao.ativo" class="ui-selo ui-selo--ok">
+                <i class="ph ph-check" aria-hidden="true" />
                 {{ t('parceiro.selecionar.current') }}
               </span>
               <i
                 v-else-if="trocandoId === opcao.parceiroId"
-                class="ph ph-spin ph-circle-notch"
+                class="ph ph-spin ph-circle-notch empresa__girando"
                 aria-hidden="true"
               />
-              <i v-else class="ph ph-caret-right" aria-hidden="true" />
+              <i v-else class="ph ph-caret-right ui-linha__seta" aria-hidden="true" />
             </span>
-          </Button>
+          </button>
         </li>
       </ul>
 
-      <article v-if="mostrarCadastro" class="select__cta">
-        <h2>{{ t('parceiro.selecionar.newTitle') }}</h2>
-        <p>{{ t('parceiro.selecionar.newBody') }}</p>
-        <Button
-          :label="t('parceiro.selecionar.newCta')"
-          severity="secondary"
-          @click="router.push('/settings?aba=empresa')"
-        />
-      </article>
+      <RouterLink v-if="mostrarCadastro" to="/settings?aba=empresa" class="nova-empresa">
+        <span class="nova-empresa__icone" aria-hidden="true"><i class="ph ph-plus" /></span>
+        <span class="ui-linha__texto">
+          <span class="ui-linha__titulo">{{ t('parceiro.selecionar.newTitle') }}</span>
+          <span class="ui-linha__meta nova-empresa__texto">{{ t('parceiro.selecionar.newBody') }}</span>
+        </span>
+        <span class="nova-empresa__acao">{{ t('parceiro.selecionar.newCta') }}</span>
+      </RouterLink>
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
-.select {
+/* A pergunta no centro: o selo, o título e a frase, alinhados à coluna da lista. */
+.centro-cabeca {
   display: grid;
-  gap: 1rem;
-  max-width: 38rem;
+  width: 100%;
+  max-width: 34rem;
+  justify-items: center;
+  gap: 8px;
+  margin: clamp(16px, 7vh, 80px) auto 0;
+  text-align: center;
 }
 
-.select__lede {
+.centro-cabeca__selo {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: 18px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 27px;
+}
+
+.centro-cabeca__titulo {
+  margin: 10px 0 0;
+  color: var(--tinta);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.centro-cabeca__texto {
+  max-width: 44ch;
   margin: 0;
-  color: var(--sel-muted);
-  font-size: 0.9rem;
+  color: var(--tinta-2);
+  font-size: 15px;
   line-height: 1.5;
 }
 
-.select__list {
+.selecionar {
   display: grid;
-  gap: 0.55rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Opção de perfil: Button com slot (ícone + nome + status), sem o visual de CTA do preset. */
-.select__item.p-button {
-  justify-content: flex-start;
   width: 100%;
-  gap: 0.75rem;
-  padding: 0.85rem 0.95rem;
-  border: 1px solid var(--sel-line);
-  border-radius: 0.95rem;
-  background: var(--sel-card);
-  color: inherit;
-  font-size: inherit;
-  text-align: start;
-  transition:
-    border-color 150ms ease,
-    background 150ms ease,
-    transform 150ms ease;
+  max-width: 34rem;
+  gap: 14px;
+  margin: 8px auto 0;
 }
 
-.select__item.p-button:not(:disabled):hover,
-.select__item.p-button:not(:disabled):active,
-.select__item.p-button:focus-visible {
-  border-color: color-mix(in srgb, var(--sel-accent) 34%, var(--sel-line));
-  background: color-mix(in srgb, var(--sel-soft) 55%, var(--sel-card));
-  color: inherit;
-  outline: none;
-  transform: translateY(-1px);
+.selecionar__lista {
+  overflow: hidden;
 }
 
-.select__item.p-button:focus-visible {
-  box-shadow: none;
-  outline: 2px solid var(--sel-accent-strong);
+.empresa.ui-linha {
+  min-height: 72px;
+  padding-block: 12px;
+}
+
+.empresa.ui-linha:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.empresa--ativa.ui-linha {
+  background: var(--pj-lugar-fundo);
+}
+
+.empresa--ativa.ui-linha:hover {
+  background: var(--pj-lugar-fundo);
+}
+
+.empresa__rosto {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--pj-lugar);
+  color: var(--superficie);
+  font-family: var(--font-dados);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.empresa__rosto--equipe {
+  background: var(--superficie-3);
+  color: var(--tinta);
+}
+
+.empresa__nome {
+  font-size: 15.5px;
+  white-space: nowrap;
+}
+
+.empresa__papel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.empresa__girando {
+  color: var(--tinta-2);
+  font-size: 18px;
+}
+
+/* Cadastrar outra empresa: a linha tracejada, fora da folha, porque não é uma empresa ainda. */
+.nova-empresa {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+  border: 1px dashed var(--linha-forte);
+  border-radius: 16px;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.nova-empresa:hover {
+  background: var(--superficie);
+}
+
+.nova-empresa:focus-visible {
+  outline: 2px solid var(--pj-lugar);
   outline-offset: 2px;
 }
 
-.select__item.p-button:disabled {
-  cursor: default;
-  opacity: 0.7;
-}
-
-.select__item--active.p-button {
-  border-color: color-mix(in srgb, var(--sel-accent) 45%, var(--sel-line));
-  background: color-mix(in srgb, var(--sel-soft) 70%, var(--sel-card));
-}
-
-.select__icon {
+.nova-empresa__icone {
   display: grid;
-  width: 2.3rem;
-  height: 2.3rem;
-  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  flex: none;
   place-items: center;
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--sel-accent) 16%, transparent);
-  color: var(--sel-accent-strong);
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 20px;
 }
 
-.select__copy {
-  display: grid;
-  gap: 0.1rem;
-  min-width: 0;
-  flex: 1;
+.nova-empresa__texto {
+  white-space: normal;
 }
 
-.select__copy strong {
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  overflow-wrap: anywhere;
+.nova-empresa__acao {
+  flex: none;
+  color: var(--pj-lugar-tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.select__copy small {
-  color: var(--sel-muted);
-  font-size: 0.78rem;
-}
+@media (max-width: 520px) {
+  .centro-cabeca {
+    margin-top: 8px;
+  }
 
-.select__meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 0 0 auto;
-  color: var(--sel-muted);
-}
+  .centro-cabeca__titulo {
+    font-size: 24px;
+  }
 
-.select__current {
-  color: var(--sel-accent-strong);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
+  .nova-empresa {
+    flex-wrap: wrap;
+  }
 
-.select__cta {
-  display: grid;
-  gap: 0.6rem;
-  justify-items: start;
-  padding: 1rem 1.05rem;
-  border: 1px dashed var(--sel-line-strong);
-  border-radius: 0.95rem;
-  background: transparent;
-}
-
-.select__cta h2 {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.select__cta p {
-  margin: 0;
-  color: var(--sel-muted);
-  font-size: 0.86rem;
-  line-height: 1.5;
-}
-
-@media (max-width: 720px) {
-  .select__meta {
-    gap: 0.35rem;
+  .nova-empresa__acao {
+    margin-inline-start: 58px;
   }
 }
 </style>

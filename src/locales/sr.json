@@ -28,7 +28,8 @@
         "programs": "Programi za partnere koji žele da rastu",
         "indicacao": "Kod, link i QR kod spremni za deljenje",
         "results": "Rezultati i zarada u realnom vremenu"
-      }
+      },
+      "frase": "Više vlasnika ljubimaca koji stižu do vas."
     },
     "login": {
       "title": "Dobro došli nazad",
@@ -78,7 +79,8 @@
           "summary": "Ponovna aktivacija nije uspela",
           "fallback": "Pokušajte ponovo za trenutak."
         }
-      }
+      },
+      "descricao": "Prijavite se imejlom i lozinkom svog naloga."
     },
     "register": {
       "stepLabels": {
@@ -151,6 +153,18 @@
         "error": {
           "summary": "Greška pri registraciji"
         }
+      },
+      "passos": {
+        "dados": "Vaši podaci",
+        "senha": "Lozinka"
+      },
+      "passo1": {
+        "titulo": "Napravite nalog",
+        "descricao": "Počnite imenom i imejlom kojim ćete se prijavljivati."
+      },
+      "passo2": {
+        "titulo": "Izaberite lozinku",
+        "descricao": "Jaka lozinka štiti podatke vaše firme i ljubimaca o kojima brinete."
       }
     },
     "forgot": {
@@ -222,13 +236,23 @@
         "resetError": {
           "summary": "Resetovanje lozinke nije uspelo"
         }
-      }
+      },
+      "passos": {
+        "email": "Imejl",
+        "codigo": "Kod",
+        "senha": "Nova lozinka"
+      },
+      "passosAria": "Koraci za promenu lozinke"
     },
     "passwordRequirements": {
       "minLength": "Najmanje 6 znakova",
       "hasNumber": "Najmanje jedan broj",
       "hasUppercase": "Najmanje jedno veliko slovo",
       "hasSpecialChar": "Najmanje jedan specijalni znak"
+    },
+    "campo": {
+      "mostrar": "Prikaži",
+      "ocultar": "Sakrij"
     }
   },
   "common": {
@@ -932,7 +956,8 @@
         "notOperable": "Vaša registracija je još na proveri.",
         "alreadyRequested": "Ovaj program je već zatražen ili je aktivan.",
         "modoSuspenso": "Ovaj program je suspendovan za Vašu firmu. Obratite se podršci da biste ga ponovo aktivirali."
-      }
+      },
+      "oQueDa": "Šta program donosi"
     },
     "saudacao": {
       "todosAtivos": "Oba programa su aktivna",
@@ -948,6 +973,9 @@
       "ativacaoFrase": "vlasnik naloga ga traži, PetJourney ga proverava i otključava pogodnosti.",
       "verEtapas": "Prikaži korake",
       "ocultarEtapas": "Sakrij korake"
+    },
+    "ativacao": {
+      "titulo": "Kako se program aktivira"
     }
   },
   "parceiroCadastro": {
@@ -1698,7 +1726,10 @@
         "naoOperavel": "Metrike postaju dostupne čim registracija firme bude odobrena.",
         "indisponivel": "Metrike trenutno nisu dostupne. Pokušajte ponovo za trenutak.",
         "erro": "Učitavanje skeniranja nije uspelo."
-      }
+      },
+      "aoTodo": "skeniranje ukupno | skeniranja ukupno | skeniranja ukupno",
+      "ultimos14": "{n} u poslednjih 14 dana",
+      "dica": "{dia}: {n} skeniranje | {dia}: {n} skeniranja | {dia}: {n} skeniranja"
     },
     "kit": {
       "titulo": "Tri načina za deljenje",
@@ -1706,11 +1737,14 @@
       "link": "Link, za WhatsApp i Instagram",
       "qr": "QR, za štampu na pultu",
       "qrDica": "Ko ga skenira, odmah stiže na registraciju sa vašim kodom.",
-      "copiar": "Kopiraj"
+      "copiar": "Kopiraj",
+      "mensagem": "Brinite o zdravlju svog ljubimca uz PetJourney. Pretplatite se uz naš kod {codigo}: {link}",
+      "whatsapp": "Pošalji na WhatsApp"
     },
     "regras": {
       "rotulo": "Kako se preporuka isplati:",
-      "frase": "5% od svake preporučene pretplate, svakog meseca, 18 meseci. Potreban je aktivan partnerski program."
+      "frase": "5% od svake preporučene pretplate, svakog meseca, 18 meseci. Potreban je aktivan partnerski program.",
+      "titulo": "Kako se preporuka isplati"
     },
     "saudacao": {
       "resumo": "Vaš kod je {codigo} · {leituras}",
@@ -1718,6 +1752,10 @@
       "semCodigo": "Kod se pojavljuje kada partnerski program bude aktivan",
       "copiarLink": "Kopiraj link",
       "acoes": "Radnje za deljenje"
+    },
+    "tela": {
+      "resumo": "{n} skeniranje QR koda do sada | {n} skeniranja QR koda do sada | {n} skeniranja QR koda do sada",
+      "resumoZero": "QR kod još nije skeniran. Odštampajte QR za pult i počnite da merite."
     }
   },
   "carteira": {
@@ -1825,6 +1863,17 @@
         "ESTORNO": "Storno",
         "DEBITO_SAQUE": "Isplata",
         "AJUSTE": "Korekcija"
+      },
+      "liberaEm": "Dostupno od {data}",
+      "origem": {
+        "INITIAL_PURCHASE": "Prva pretplata",
+        "RENEWAL": "Obnova",
+        "UPGRADE": "Promena plana",
+        "REFUND": "Povraćaj novca"
+      },
+      "periodicidade": {
+        "MENSAL": "Mesečni plan",
+        "ANUAL": "Godišnji plan"
       }
     },
     "saques": {
@@ -1929,6 +1978,18 @@
         "titulo": "Hvala na povratnim informacijama!",
         "texto": "Vaš odgovor nam pomaže da unapredimo PetJourney."
       }
+    },
+    "tela": {
+      "liberado": "Spremno za isplatu. Zahtev podnet do 27. isplaćuje se do 5. u mesecu.",
+      "disponivel": "Dostupno za isplatu",
+      "liberando": "Uskoro dostupno",
+      "liberandoNota": "Svaki iznos postaje dostupan 14 dana nakon uplate",
+      "nadaLiberando": "Ništa ne čeka sigurnosni period",
+      "semPix": "Nije uneta",
+      "trocarPix": "Promeni",
+      "cadastrarPix": "Unesi",
+      "sacarTudo": "Isplati sve",
+      "saquesVazio": "Kada zatražite isplatu, ovde će se pojaviti sa statusom plaćanja."
     }
   },
   "parceiro": {
@@ -1975,6 +2036,9 @@
         "error": "Prihvatanje nije uspelo",
         "errorDetail": "Proverite link ili pokušajte ponovo."
       }
+    },
+    "equipe": {
+      "titulo": "Tim"
     }
   },
   "settings": {
@@ -2013,7 +2077,8 @@
         "escuro": {
           "label": "Tamna",
           "hint": "Tamna pozadina, za prostorije sa slabim osvetljenjem."
-        }
+        },
+        "ondeMais": "Možete ga promeniti i u meniju naloga, na dnu bočne trake."
       },
       "menu": {
         "titulo": "Bočni meni",
@@ -2036,11 +2101,31 @@
         },
         "compacta": {
           "label": "Kompaktna",
-          "hint": "Više ekrana vidljivo bez skrolovanja."
-        }
+          "hint": "Više ekrana vidljivo bez skrolovanja.",
+          "hintBarra": "Niži redovi u bočnoj traci, da vidite više stranica bez skrolovanja."
+        },
+        "descricaoBarra": "Visina redova u bočnoj traci."
       },
       "nota": "Preferencije se čuvaju u ovom pregledaču i primenjuju se pri sledećoj poseti.",
-      "aplicada": "u upotrebi"
+      "aplicada": "u upotrebi",
+      "barra": {
+        "titulo": "Bočna traka",
+        "descricao": "Koji prostori ostaju otvoreni u traci, sa stranicama na vidiku.",
+        "secoes": {
+          "label": "Samo trenutni prostor",
+          "hint": "Traka otvara prostor u kom ste; ostali su u jednom redu, sa brojem stavki koje traže akciju."
+        },
+        "lista": {
+          "label": "Svi prostori",
+          "hint": "Svi prostori su otvoreni istovremeno, sa stranicama na vidiku."
+        }
+      },
+      "explicacoes": {
+        "titulo": "Objašnjenja",
+        "descricao": "Kratak tekst na vrhu stranica Portala koji kaže čemu svaka služi.",
+        "ajuda": "Korisno za početnike. Svaka stranica ima i dugme za prikaz ili skrivanje."
+      },
+      "naHora": "Izbori važe odmah i čuvaju se u ovom pregledaču."
     },
     "perfil": {
       "fallbackName": "Korisnik",
@@ -2145,6 +2230,16 @@
           "summary": "Otpremanje fotografije nije uspelo",
           "detailFallback": "Pokušajte ponovo za trenutak."
         }
+      },
+      "capaAria": "Vaša fotografija i podaci",
+      "foto": {
+        "trocar": "Promeni fotografiju",
+        "escolher": "Izaberi fotografiju",
+        "formatos": "JPG, PNG, WebP ili GIF, do 5 MB."
+      },
+      "secoes": {
+        "identidade": "Kako se vaše ime prikazuje u portalu. Imejl je za prijavu i ne menja se ovde.",
+        "contato": "Brojevi telefona sa pozivnim brojem, da bismo vas kontaktirali."
       }
     },
     "seguranca": {
@@ -2281,7 +2376,10 @@
           }
         }
       }
-    }
+    },
+    "abasAria": "Delovi podešavanja",
+    "resumo": "Prijavljeni ste kao {email}.",
+    "resumoEmpresa": "Prijavljeni ste kao {email}, u firmi {empresa}."
   },
   "clinico": {
     "modulo": {

@@ -260,6 +260,21 @@ async function carregarAcompanhado() {
 watch(token, carregarAcompanhado, { immediate: true })
 watch(() => pedidosStore.versao, carregarAcompanhado)
 
+/** A cor do estado do pedido acompanhado: esperando, reservado, recusado ou parado. */
+const tomDaSituacao = computed(() => {
+  switch (acompanhado.value?.status) {
+    case 'AGUARDANDO_HOTEL':
+      return 'espera'
+    case 'ACEITO':
+      return 'ok'
+    case 'RECUSADO':
+    case 'EXPIRADO':
+      return 'risco'
+    default:
+      return 'neutro'
+  }
+})
+
 async function desistir() {
   if (!acompanhado.value) {
     return
@@ -290,6 +305,7 @@ const demo = computed(() =>
 <template>
   <PaginaPublica
     icone="ph-house-line"
+    lugar="hotel"
     :nome="hotel?.hotel.nome ?? null"
     :endereco="hotel?.hotel.endereco"
     :estado="estado"
@@ -317,38 +333,54 @@ const demo = computed(() =>
     <!-- Acompanhamento: o pedido do link da mensagem. -->
     <div v-else-if="token" class="publica__acompanhar">
       <template v-if="acompanhado">
-        <p class="publica__contagem">{{ t('hotel.pedidos.link.seuPedido') }}</p>
-        <h2>{{ acompanhado.pets.map((pet) => pet.nome).join(' · ') }}</h2>
-        <p class="fx-ajuda">{{ formato.periodo(acompanhado.entrada, acompanhado.saida) }}</p>
-        <p class="publica__situacao" :class="`publica__situacao--${acompanhado.status}`">
-          <i
-            class="ph"
-            :class="{
-              'ph-hourglass-medium': acompanhado.status === 'AGUARDANDO_HOTEL',
-              'ph-calendar-check': acompanhado.status === 'ACEITO',
-              'ph-calendar-x':
-                acompanhado.status === 'RECUSADO' || acompanhado.status === 'EXPIRADO',
-              'ph-x-circle': acompanhado.status === 'CANCELADO_PELO_RESPONSAVEL',
-            }"
-            aria-hidden="true"
-          />
-          {{ t(`hotel.pedidos.link.situacao.${acompanhado.status}`) }}
-        </p>
-        <p v-if="acompanhado.reserva" class="publica__marcado">
-          {{ acompanhado.reserva.acomodacao }} ·
-          {{ formato.moeda(acompanhado.reserva.totalCentavos) }}
-        </p>
-        <p v-if="acompanhado.reserva" class="fx-ajuda">
-          {{
-            t('hotel.pedidos.link.sinal', {
-              valor: formato.moeda(acompanhado.reserva.sinalCentavos),
-            })
-          }}
-        </p>
-        <blockquote v-if="acompanhado.recusa" class="publica__mensagem">
-          {{ acompanhado.recusa.mensagemDoHotel }}
-        </blockquote>
+        <h2>{{ t('hotel.pedidos.link.seuPedido') }}</h2>
+
+        <section class="ui-folha acompanhar">
+          <p class="acompanhar__situacao" :class="`acompanhar__situacao--${tomDaSituacao}`">
+            <span class="acompanhar__disco" aria-hidden="true">
+              <i
+                class="ph"
+                :class="{
+                  'ph-hourglass-medium': acompanhado.status === 'AGUARDANDO_HOTEL',
+                  'ph-calendar-check': acompanhado.status === 'ACEITO',
+                  'ph-calendar-x':
+                    acompanhado.status === 'RECUSADO' || acompanhado.status === 'EXPIRADO',
+                  'ph-x-circle': acompanhado.status === 'CANCELADO_PELO_RESPONSAVEL',
+                }"
+              />
+            </span>
+            {{ t(`hotel.pedidos.link.situacao.${acompanhado.status}`) }}
+          </p>
+
+          <p class="acompanhar__oque">{{ acompanhado.pets.map((pet) => pet.nome).join(', ') }}</p>
+          <p class="acompanhar__linha">
+            <i class="ph ph-calendar-blank" aria-hidden="true" />
+            {{ formato.periodo(acompanhado.entrada, acompanhado.saida) }}
+          </p>
+          <p v-if="acompanhado.reserva" class="acompanhar__linha acompanhar__linha--forte">
+            <i class="ph ph-bed" aria-hidden="true" />
+            {{ acompanhado.reserva.acomodacao }} ·
+            {{ formato.moeda(acompanhado.reserva.totalCentavos) }}
+          </p>
+          <p v-if="acompanhado.reserva" class="acompanhar__linha">
+            <i class="ph ph-hand-coins" aria-hidden="true" />
+            {{
+              t('hotel.pedidos.link.sinal', {
+                valor: formato.moeda(acompanhado.reserva.sinalCentavos),
+              })
+            }}
+          </p>
+          <blockquote v-if="acompanhado.recusa" class="acompanhar__mensagem">
+            {{ acompanhado.recusa.mensagemDoHotel }}
+          </blockquote>
+        </section>
+
         <div class="publica__acoes">
+          <Button
+            :label="t('hotel.pedidos.link.outroPedido')"
+            icon="ph ph-calendar-plus"
+            @click="novoPedido"
+          />
           <Button
             v-if="acompanhado.podeCancelar"
             severity="secondary"
@@ -357,17 +389,19 @@ const demo = computed(() =>
             :loading="desistindo"
             @click="desistir"
           />
+        </div>
+      </template>
+      <div v-else class="publica__vazio">
+        <i class="ph ph-magnifying-glass" aria-hidden="true" />
+        <h2>{{ t('hotel.pedidos.link.pedidoNaoEncontrado') }}</h2>
+        <div class="publica__acoes">
           <Button
             :label="t('hotel.pedidos.link.outroPedido')"
             icon="ph ph-calendar-plus"
             @click="novoPedido"
           />
         </div>
-      </template>
-      <template v-else>
-        <h2>{{ t('hotel.pedidos.link.pedidoNaoEncontrado') }}</h2>
-        <Button :label="t('hotel.pedidos.link.outroPedido')" @click="novoPedido" />
-      </template>
+      </div>
     </div>
 
     <FluxoDaReserva v-else :endereco-do-link="endereco" />

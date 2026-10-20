@@ -171,168 +171,161 @@ function toggle(modo: ModoParticipacao) {
 </template>
 
 <style scoped>
+/*
+ * A escolha dos programas no cadastro, nos tokens do Trilha: cada programa é uma folha que se
+ * marca inteira (o cartão é o <label>); marcado, a borda e o fundo ganham a cor do Portal.
+ */
 .prog-pick {
   display: grid;
-  gap: 1rem;
+  gap: 18px;
 }
 
 .prog-pick__head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
 .prog-pick__head h4 {
   margin: 0;
-  color: var(--partner-text);
-  font-size: 0.98rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .prog-pick__head p {
-  margin: 0.25rem 0 0;
-  max-width: 46ch;
-  color: var(--partner-muted);
-  font-size: 0.85rem;
+  max-width: 52ch;
+  margin: 4px 0 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.5;
 }
 
 .prog-pick__counter {
-  flex: 0 0 auto;
-  padding: 0.32rem 0.7rem;
-  border: 1px solid color-mix(in srgb, var(--partner-primary) 30%, var(--partner-line));
+  flex: none;
+  padding: 4px 10px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary-soft) 22%, var(--partner-card));
-  color: var(--partner-primary-strong);
-  font-size: 0.76rem;
-  font-weight: 700;
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .prog-pick__grid {
   display: grid;
-  gap: 0.85rem;
+  gap: 14px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .prog-card {
   position: relative;
   display: grid;
-  gap: 0.7rem;
   align-content: start;
-  padding: 1.05rem 1.1rem;
-  border: 1.5px solid var(--partner-line);
-  border-radius: 1.1rem;
-  background: var(--partner-card);
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
   cursor: pointer;
   transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease,
-    transform 160ms ease;
+    border-color var(--pj-tempo-curto, 140ms) ease-out,
+    background-color var(--pj-tempo-curto, 140ms) ease-out;
 }
 
 .prog-card:hover:not(.prog-card--locked) {
-  border-color: color-mix(in srgb, var(--partner-primary) 45%, var(--partner-line));
-  transform: translateY(-1px);
+  border-color: var(--linha-forte);
 }
 
 /* O foco vive no Checkbox, mas o cartão inteiro é o alvo: o anel aparece no cartão. */
 .prog-card:focus-within:not(.prog-card--locked) {
-  border-color: var(--partner-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-primary) 22%, transparent);
+  outline: 2px solid var(--musgo);
+  outline-offset: 2px;
 }
 
 .prog-card--on {
-  border-color: color-mix(in srgb, var(--partner-primary) 62%, var(--partner-line));
-  background:
-    radial-gradient(
-      120% 130% at 100% 0%,
-      color-mix(in srgb, var(--partner-primary-soft) 30%, transparent),
-      transparent 58%
-    ),
-    var(--partner-card);
-  box-shadow: 0 14px 30px rgb(var(--partner-shadow-rgb) / 0.06);
+  border-color: var(--portal);
+  background: color-mix(in oklab, var(--portal-fundo) 45%, var(--superficie));
+}
+
+.prog-card--on:hover:not(.prog-card--locked) {
+  border-color: var(--portal);
 }
 
 .prog-card--locked {
-  cursor: default;
   border-style: dashed;
-  background: color-mix(in srgb, var(--partner-surface) 55%, var(--partner-card));
+  background: var(--superficie-2);
+  cursor: default;
 }
 
 .prog-card__top {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.7rem;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
 }
 
 .prog-card__icon {
   display: grid;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 42px;
+  height: 42px;
   place-items: center;
-  border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--partner-primary) 16%, var(--partner-card));
-  color: var(--partner-primary-strong);
-  font-size: 1rem;
-}
-
-.prog-card[data-tone='participativo'] .prog-card__icon {
-  background: color-mix(in srgb, var(--partner-amber-text) 16%, var(--partner-card));
-  color: var(--partner-amber-text);
+  border-radius: 12px;
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
+  font-size: 21px;
 }
 
 .prog-card__id {
   display: grid;
-  gap: 0.1rem;
   min-width: 0;
+  gap: 1px;
 }
 
 .prog-card__id strong {
-  color: var(--partner-text);
-  font-size: 0.94rem;
-  font-weight: 750;
-  letter-spacing: -0.01em;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .prog-card__id span {
-  color: var(--partner-muted);
-  font-size: 0.78rem;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .prog-card__check :deep(.p-checkbox-box) {
-  border-radius: 0.55rem;
+  border-radius: 7px;
 }
 
 .prog-card__lock {
-  padding: 0.24rem 0.6rem;
-  border-radius: 999px;
-  background: var(--partner-success-bg);
-  color: var(--partner-success-text);
-  font-size: 0.72rem;
-  font-weight: 700;
+  display: inline-flex;
+  height: 24px;
+  align-items: center;
+  padding: 0 9px;
+  border-radius: 7px;
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .prog-card__lock[data-tone='suspenso'] {
-  background: var(--partner-warm-bg);
-  color: var(--partner-warm-text);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .prog-card__desc {
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.84rem;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.55;
 }
 
 .prog-card__features {
   display: grid;
-  gap: 0.35rem;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -341,97 +334,94 @@ function toggle(modo: ModoParticipacao) {
 .prog-card__features li {
   display: flex;
   align-items: flex-start;
-  gap: 0.45rem;
-  color: var(--partner-text);
-  font-size: 0.82rem;
-  line-height: 1.4;
+  gap: 8px;
+  color: var(--tinta);
+  font-size: 13.5px;
+  line-height: 1.45;
 }
 
 .prog-card__features i {
-  margin-top: 0.12rem;
-  color: var(--partner-primary-strong);
-  font-size: 0.78rem;
-}
-
-.prog-card[data-tone='participativo'] .prog-card__features i {
-  color: var(--partner-amber-text);
+  margin-top: 2px;
+  color: var(--ok-tinta);
+  font-size: 15px;
 }
 
 .prog-card__foot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
-  padding-top: 0.55rem;
-  border-top: 1px solid color-mix(in srgb, var(--partner-line) 70%, transparent);
+  gap: 6px 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--linha);
 }
 
 .prog-card__state {
-  color: var(--partner-faint);
-  font-size: 0.76rem;
-  font-weight: 650;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .prog-card__state[data-on='true'] {
-  color: var(--partner-primary-strong);
+  color: var(--portal-tinta);
+  font-weight: 600;
 }
 
 .prog-card__warn {
-  color: var(--partner-amber-text);
-  font-size: 0.74rem;
+  color: var(--atencao-tinta);
+  font-size: 13px;
 }
 
 .prog-pick__how {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .prog-pick__how li {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--partner-line) 80%, transparent);
-  border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--partner-surface) 70%, var(--partner-card));
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
 .prog-pick__how-step {
   display: grid;
-  width: 1.35rem;
-  height: 1.35rem;
-  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  flex: none;
   place-items: center;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 18%, var(--partner-card));
-  color: var(--partner-primary-strong);
-  font-size: 0.72rem;
-  font-weight: 750;
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
+  font-family: var(--font-dados);
+  font-size: 12.5px;
+  font-weight: 650;
 }
 
 .prog-pick__how span > strong {
   display: block;
-  color: var(--partner-text);
-  font-size: 0.8rem;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .prog-pick__how span > small {
   display: block;
-  color: var(--partner-muted);
-  font-size: 0.74rem;
-  line-height: 1.4;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.45;
 }
 
 .prog-pick__note {
   margin: 0;
-  color: var(--partner-faint);
-  font-size: 0.78rem;
-  line-height: 1.45;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 @media (max-width: 860px) {
@@ -442,6 +432,12 @@ function toggle(modo: ModoParticipacao) {
 
   .prog-pick__head {
     flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prog-card {
+    transition: none;
   }
 }
 </style>

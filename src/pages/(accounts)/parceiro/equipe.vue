@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PortalEquipeSection from '@/components/parceiro/sections/PortalEquipeSection.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 
+const { t } = useI18n()
 const { store, bootstrapping, ensureContext } = useParceiroPortal()
 
 const loadError = computed(() =>
@@ -18,31 +20,35 @@ onMounted(() => {
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    subtitle="Portal"
-    title="Equipe"
-    :loading="bootstrapping || (store.loadState === 'loading' && !store.dashboard)"
-    :error="loadError"
-    :no-partner-access="store.semAcessoParceiro"
-    block-when-suspended
-    @retry="ensureContext(true)"
+  <!-- A Equipe está fora do menu (`EQUIPE_MENU_ENABLED`): sem destino no mapa, o título vem daqui. -->
+  <UiPagina
+    class="tela-equipe"
+    :titulo="t('parceiro.equipe.titulo')"
+    resumo="Gerencie quem pode operar a parceria. Apenas donos enviam convites e removem membros."
+    :carregando="bootstrapping || (store.loadState === 'loading' && !store.dashboard)"
+    :erro="loadError"
+    :sem-acesso-de-parceiro="store.semAcessoParceiro"
+    bloquear-se-suspenso
+    @tentar-de-novo="ensureContext(true)"
   >
-    <PartnerOperabilityBanner />
-
-    <p class="equipe-page__intro">
-      Gerencie quem pode operar a parceria. Apenas donos enviam convites e removem membros.
-    </p>
-
-    <PortalEquipeSection />
-  </PartnerPageFrame>
+    <div class="equipe-pagina">
+      <PartnerOperabilityBanner />
+      <PortalEquipeSection />
+    </div>
+  </UiPagina>
 </template>
 
 <style scoped>
-.equipe-page__intro {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.9rem;
-  line-height: 1.45;
+.tela-equipe {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+}
+
+.equipe-pagina {
+  display: grid;
+  gap: 20px;
 }
 </style>

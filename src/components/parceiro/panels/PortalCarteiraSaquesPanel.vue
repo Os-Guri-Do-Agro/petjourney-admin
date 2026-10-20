@@ -1,10 +1,16 @@
 <script setup lang="ts">
+/**
+ * Os saques pedidos, do mais novo para o mais antigo: valor, quando foi pedido e o estado em selo
+ * com palavra (em análise, pago, recusado). A linha inteira abre o detalhe numa gaveta que empurra
+ * a página; o saque aberto fica na URL (`?aba=saques&saque=<id>`), e é por ela que o endereço
+ * antigo `/parceiro/carteira/saques/<id>` chega aqui.
+ */
 import Button from 'primevue/button'
+import Skeleton from 'primevue/skeleton'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
-import PartnerPanelLoading from '@/components/parceiro/PartnerPanelLoading.vue'
 import PortalSaqueDetalheDrawer from '@/components/parceiro/PortalSaqueDetalheDrawer.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -12,18 +18,6 @@ import { ApiError } from '@/service/api'
 import { getSaques } from '@/service/parceiro/parceiro-portal-service'
 import type { SaqueResumo } from '@/service/parceiro/types'
 import { formatCentavosToBrl } from '@/utils/format/money'
-
-type SaqueDayGroup = {
-  dayKey: string
-  label: string
-  items: SaqueResumo[]
-}
-
-type SaqueMonthGroup = {
-  monthKey: string
-  label: string
-  days: SaqueDayGroup[]
-}
 
 const emit = defineEmits<{
   needsProgramas: []
@@ -39,104 +33,30 @@ const error = ref('')
 const drawerVisible = ref(false)
 const selectedSaqueId = ref<string | null>(null)
 
-/**
- * O selo do saque, na cor do estado. O selo de status do programa dizia "Ativo ✓" para um saque
- * pago — o nome certo para a parceria, e o errado para dinheiro que já caiu na conta.
- */
-const TOM_DO_SAQUE = {
-  PENDENTE: 'hc--pessego',
-  PAGO: 'hc--verde',
-  FALHA: 'hc--coral',
+/** O selo do saque, na cor e com a palavra do estado. */
+const SELO_DO_SAQUE = {
+  PENDENTE: { classe: 'ui-selo--atencao', icone: 'ph ph-hourglass' },
+  PAGO: { classe: 'ui-selo--ok', icone: 'ph ph-check-circle' },
+  FALHA: { classe: 'ui-selo--risco', icone: 'ph ph-x-circle' },
 } as const
 
 function intlLocale() {
   return INTL_LOCALE[locale.value as Locale]
 }
 
-function localDayKey(date: Date) {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
-
-function localMonthKey(date: Date) {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  return `${y}-${m}`
-}
-
-function startOfLocalDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-}
-
-function formatDayLabel(date: Date) {
-  const today = startOfLocalDay(new Date())
-  const target = startOfLocalDay(date)
-  const diffDays = Math.round((today.getTime() - target.getTime()) / 86_400_000)
-
-  if (diffDays === 0) {
-    return t('carteira.extrato.today')
-  }
-
-  if (diffDays === 1) {
-    return t('carteira.extrato.yesterday')
-  }
-
+function formatDateTime(value: string) {
   return new Intl.DateTimeFormat(intlLocale(), {
-    weekday: 'short',
     day: 'numeric',
     month: 'short',
-  }).format(date)
-}
-
-function formatMonthLabel(date: Date) {
-  return new Intl.DateTimeFormat(intlLocale(), {
-    month: 'long',
-    year: 'numeric',
-  }).format(date)
-}
-
-function formatTime(value: string) {
-  return new Intl.DateTimeFormat(intlLocale(), {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value))
 }
 
-const groupedSaques = computed((): SaqueMonthGroup[] => {
-  const monthMap = new Map<string, SaqueMonthGroup>()
-  const dayMaps = new Map<string, Map<string, SaqueDayGroup>>()
-
-  for (const saque of saques.value) {
-    const date = new Date(saque.createdAt)
-    if (Number.isNaN(date.getTime())) {
-      continue
-    }
-
-    const monthKey = localMonthKey(date)
-    const dayKey = localDayKey(date)
-
-    let monthGroup = monthMap.get(monthKey)
-    if (!monthGroup) {
-      monthGroup = { monthKey, label: formatMonthLabel(date), days: [] }
-      monthMap.set(monthKey, monthGroup)
-      dayMaps.set(monthKey, new Map())
-    }
-
-    const days = dayMaps.get(monthKey)!
-    let dayGroup = days.get(dayKey)
-    if (!dayGroup) {
-      dayGroup = { dayKey, label: formatDayLabel(date), items: [] }
-      days.set(dayKey, dayGroup)
-      monthGroup.days.push(dayGroup)
-    }
-
-    dayGroup.items.push(saque)
-  }
-
-  return [...monthMap.values()]
-})
+/** Do mais novo para o mais antigo, seja qual for a ordem da API. */
+const saquesOrdenados = computed(() =>
+  [...saques.value].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+)
 
 function openSaqueDetail(id: string) {
   selectedSaqueId.value = id
@@ -227,15 +147,32 @@ watch(drawerVisible, (open) => {
 })
 </script>
 
-<template>
-  <div id="partner-panel-saques" class="portal-panel" role="tabpanel" aria-labelledby="partner-tab-saques">
-    <PartnerPanelLoading
-      v-if="loading"
-      :title="t('carteira.saques.loadingTitle')"
-      :description="t('carteira.saques.loadingDesc')"
-    />
 
-    <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
+<template>
+  <div id="partner-panel-saques" class="saques">
+    <div
+      v-if="loading"
+      class="ui-folha"
+      role="status"
+      aria-live="polite"
+      :aria-label="t('carteira.saques.loadingTitle')"
+    >
+      <ul class="ui-lista" aria-hidden="true">
+        <li v-for="n in 3" :key="n" class="ui-linha saque saque--esqueleto">
+          <Skeleton width="36px" height="36px" border-radius="10px" />
+          <span class="ui-linha__texto">
+            <Skeleton width="7rem" height="1rem" border-radius="6px" />
+            <Skeleton width="10rem" height="0.75rem" border-radius="6px" />
+          </span>
+          <Skeleton width="5rem" height="1.4rem" border-radius="7px" />
+        </li>
+      </ul>
+    </div>
+
+    <div v-else-if="error" class="saques__estado ui-folha" role="alert">
+      <span class="saques__estado-icone saques__estado-icone--erro" aria-hidden="true">
+        <i class="ph ph-warning-circle" />
+      </span>
       <p>{{ error }}</p>
       <Button
         type="button"
@@ -243,53 +180,55 @@ watch(drawerVisible, (open) => {
         icon="ph ph-arrow-clockwise"
         severity="secondary"
         outlined
-        size="small"
         @click="loadSaques"
       />
     </div>
 
-    <div v-else-if="saques.length === 0" class="portal-panel__empty">
-      <i class="ph ph-wallet" aria-hidden="true" />
+    <div v-else-if="saques.length === 0" class="saques__estado ui-folha">
+      <span class="saques__estado-icone" aria-hidden="true"><i class="ph ph-hand-coins" /></span>
       <strong>{{ t('carteira.saques.emptyTitle') }}</strong>
-      <p>{{ t('carteira.saques.emptyBody') }}</p>
+      <p>{{ t('carteira.tela.saquesVazio') }}</p>
     </div>
 
-    <div v-else class="saques-timeline">
-      <section
-        v-for="month in groupedSaques"
-        :key="month.monthKey"
-        class="saques-month"
-        :aria-label="month.label"
-      >
-        <header class="saques-month__head">
-          <h3>{{ month.label }}</h3>
-        </header>
+    <div v-else class="ui-folha">
+      <ul class="ui-lista">
+        <li v-for="saque in saquesOrdenados" :key="saque.id">
+          <button
+            type="button"
+            class="ui-linha saque"
+            :class="{
+              'ui-marca ui-marca--risco': saque.status === 'FALHA',
+              'saque--aberto': drawerVisible && selectedSaqueId === saque.id,
+            }"
+            :aria-current="drawerVisible && selectedSaqueId === saque.id ? 'true' : undefined"
+            @click="openSaqueDetail(saque.id)"
+          >
+            <span class="saque__icone" aria-hidden="true">
+              <i class="ph ph-arrow-up-right" />
+            </span>
 
-        <div v-for="day in month.days" :key="day.dayKey" class="saques-day">
-          <h4 class="saques-day__head">{{ day.label }}</h4>
+            <span class="ui-linha__texto">
+              <strong class="ui-linha__titulo ui-num saque__valor">
+                {{ formatCentavosToBrl(saque.valorCentavos, intlLocale()) }}
+              </strong>
+              <span class="ui-linha__meta ui-num">
+                {{ t('carteira.saques.requestedAt', { data: formatDateTime(saque.createdAt) }) }}
+              </span>
+              <span v-if="saque.motivoFalha" class="ui-linha__meta saque__falha">
+                {{ saque.motivoFalha }}
+              </span>
+            </span>
 
-          <div class="saques-list">
-            <Button
-              v-for="saque in day.items"
-              :key="saque.id"
-              type="button"
-              class="saque-row"
-              @click="openSaqueDetail(saque.id)"
-            >
-              <div>
-                <strong>{{ formatCentavosToBrl(saque.valorCentavos, intlLocale()) }}</strong>
-                <p>
-                  {{ t('carteira.saques.requestedAt', { data: formatTime(saque.createdAt) }) }}
-                </p>
-                <p v-if="saque.motivoFalha" class="saque-row__fail">{{ saque.motivoFalha }}</p>
-              </div>
-              <span class="hc-selo" :class="TOM_DO_SAQUE[saque.status]">
+            <span class="ui-linha__fim">
+              <span class="ui-selo" :class="SELO_DO_SAQUE[saque.status].classe">
+                <i :class="SELO_DO_SAQUE[saque.status].icone" aria-hidden="true" />
                 {{ t(`carteira.saques.status.${saque.status}`) }}
               </span>
-            </Button>
-          </div>
-        </div>
-      </section>
+              <i class="ph ph-caret-right ui-linha__seta" aria-hidden="true" />
+            </span>
+          </button>
+        </li>
+      </ul>
     </div>
 
     <PortalSaqueDetalheDrawer v-model:visible="drawerVisible" :saque-id="selectedSaqueId" />
@@ -297,116 +236,75 @@ watch(drawerVisible, (open) => {
 </template>
 
 <style scoped>
-.portal-panel__state,
-.portal-panel__empty {
+.saques {
+  display: grid;
+  gap: 14px;
+}
+
+.saque.ui-linha {
+  min-height: 68px;
+}
+
+.saque--aberto.ui-linha {
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 65%, var(--superficie));
+}
+
+.saque__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--superficie-3);
+  color: var(--tinta-2);
+  font-size: 18px;
+}
+
+.saque__valor {
+  font-size: 15.5px;
+  font-weight: 650;
+}
+
+.saque__falha {
+  color: var(--risco-tinta);
+}
+
+.saques__estado {
   display: grid;
   justify-items: center;
-  gap: 0.5rem;
-  padding: 2rem 1rem;
-  color: var(--partner-muted);
+  gap: 8px;
+  padding: 36px 24px;
   text-align: center;
 }
 
-.portal-panel__state--error p {
+.saques__estado strong {
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.saques__estado p {
+  max-width: 44ch;
   margin: 0;
-  color: var(--partner-warm-text);
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-.portal-panel__empty strong {
-  color: var(--partner-text, inherit);
-}
-
-.portal-panel__empty p {
-  margin: 0;
-  max-width: 24rem;
-  font-size: 0.88rem;
-}
-
-.saques-timeline {
+.saques__estado-icone {
   display: grid;
-  gap: 1.35rem;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 22px;
 }
 
-.saques-month {
-  display: grid;
-  gap: 0.85rem;
-}
-
-.saques-month__head h3 {
-  margin: 0;
-  color: var(--partner-text);
-  font-size: 0.95rem;
-  font-weight: 750;
-  letter-spacing: -0.01em;
-}
-
-/* Só a primeira letra: `capitalize` fazia "Setembro De 2026" (e "Septembar" no sérvio). */
-.saques-month__head h3::first-letter {
-  text-transform: uppercase;
-}
-
-.saques-day {
-  display: grid;
-  gap: 0.45rem;
-}
-
-.saques-day__head {
-  margin: 0;
-  padding: 0.15rem 0.15rem 0.05rem;
-  color: var(--partner-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-/* Um cartão por dia, os saques como linhas dele — o mesmo desenho do extrato. */
-.saques-list {
-  display: grid;
-  overflow: hidden;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.85rem;
-  background: var(--partner-card);
-}
-
-/* Linha clicável rica: Button com slot, sem o visual de CTA do preset nem a sombra de pílula. */
-.saque-row.p-button {
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  color: inherit;
-  font-size: inherit;
-  text-align: start;
-}
-
-.saque-row.p-button + .saque-row.p-button {
-  border-top: 1px solid var(--partner-line);
-}
-
-.saque-row.p-button:not(:disabled):hover,
-.saque-row.p-button:not(:disabled):active,
-.saque-row.p-button:focus-visible {
-  background: color-mix(in srgb, var(--partner-line) 35%, transparent);
-  box-shadow: none;
-  color: inherit;
-}
-
-.saque-row.p-button:focus-visible {
-  box-shadow: none;
-  outline: 2px solid var(--partner-primary);
-  outline-offset: 2px;
-}
-
-.saque-row p {
-  margin: 0.15rem 0 0;
-  color: var(--partner-muted);
-  font-size: 0.8rem;
-}
-
-.saque-row__fail {
-  color: var(--partner-warm-text) !important;
+.saques__estado-icone--erro {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 </style>

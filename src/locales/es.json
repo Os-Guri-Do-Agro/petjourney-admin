@@ -28,7 +28,8 @@
         "programs": "Programas hechos para socios que quieren crecer",
         "indicacao": "Código, enlace y QR Code listos para compartir",
         "results": "Resultados y ganancias seguidos en tiempo real"
-      }
+      },
+      "frase": "Más responsables de mascotas llegando hasta usted."
     },
     "login": {
       "title": "Bienvenido de nuevo",
@@ -78,7 +79,8 @@
           "summary": "No fue posible reactivar",
           "fallback": "Inténtelo de nuevo en unos instantes."
         }
-      }
+      },
+      "descricao": "Entre con el correo y la contraseña de su cuenta."
     },
     "register": {
       "stepLabels": {
@@ -151,6 +153,18 @@
         "error": {
           "summary": "Error en el registro"
         }
+      },
+      "passos": {
+        "dados": "Sus datos",
+        "senha": "Contraseña"
+      },
+      "passo1": {
+        "titulo": "Cree su cuenta",
+        "descricao": "Empiece con su nombre y el correo que usará para entrar."
+      },
+      "passo2": {
+        "titulo": "Elija una contraseña",
+        "descricao": "Una contraseña fuerte protege los datos de su empresa y de las mascotas que atienden."
       }
     },
     "forgot": {
@@ -222,13 +236,23 @@
         "resetError": {
           "summary": "No fue posible restablecer"
         }
-      }
+      },
+      "passos": {
+        "email": "Correo",
+        "codigo": "Código",
+        "senha": "Nueva contraseña"
+      },
+      "passosAria": "Pasos para restablecer la contraseña"
     },
     "passwordRequirements": {
       "minLength": "Mínimo de 6 caracteres",
       "hasNumber": "Al menos 1 número",
       "hasUppercase": "Al menos 1 letra mayúscula",
       "hasSpecialChar": "Al menos 1 carácter especial"
+    },
+    "campo": {
+      "mostrar": "Mostrar",
+      "ocultar": "Ocultar"
     }
   },
   "common": {
@@ -932,7 +956,8 @@
         "notOperable": "Su registro aún está en análisis.",
         "alreadyRequested": "Este programa ya fue solicitado o está activo.",
         "modoSuspenso": "Este programa está suspendido para su empresa. Hable con soporte para reactivarlo."
-      }
+      },
+      "oQueDa": "Lo que ofrece el programa"
     },
     "saudacao": {
       "todosAtivos": "Los dos programas están activos",
@@ -948,6 +973,9 @@
       "ativacaoFrase": "el dueño de la cuenta lo solicita, PetJourney lo analiza y libera los beneficios.",
       "verEtapas": "Ver etapas",
       "ocultarEtapas": "Ocultar etapas"
+    },
+    "ativacao": {
+      "titulo": "Cómo se activa un programa"
     }
   },
   "parceiroCadastro": {
@@ -1698,7 +1726,10 @@
         "naoOperavel": "Las métricas quedan disponibles apenas su registro sea aprobado.",
         "indisponivel": "Métricas no disponibles en este momento. Intente de nuevo en unos instantes.",
         "erro": "No fue posible cargar las lecturas."
-      }
+      },
+      "aoTodo": "lectura en total | lecturas en total",
+      "ultimos14": "{n} en los últimos 14 días",
+      "dica": "{dia}: {n} lectura | {dia}: {n} lecturas"
     },
     "kit": {
       "titulo": "Tres formas de compartir",
@@ -1706,11 +1737,14 @@
       "link": "Enlace, para WhatsApp e Instagram",
       "qr": "QR, para imprimir en el mostrador",
       "qrDica": "Quien lo escanea llega directo al registro con su código.",
-      "copiar": "Copiar"
+      "copiar": "Copiar",
+      "mensagem": "Cuide la salud de su mascota con PetJourney. Suscríbase con nuestro código {codigo}: {link}",
+      "whatsapp": "Enviar por WhatsApp"
     },
     "regras": {
       "rotulo": "Cómo rinde la recomendación:",
-      "frase": "5% de cada suscripción recomendada, todos los meses, durante 18 meses. Requiere el programa de afiliados activo."
+      "frase": "5% de cada suscripción recomendada, todos los meses, durante 18 meses. Requiere el programa de afiliados activo.",
+      "titulo": "Cómo rinde la recomendación"
     },
     "saudacao": {
       "resumo": "Su código es {codigo} · {leituras}",
@@ -1718,6 +1752,10 @@
       "semCodigo": "El código aparece cuando el programa de afiliados esté activo",
       "copiarLink": "Copiar enlace",
       "acoes": "Acciones de difusión"
+    },
+    "tela": {
+      "resumo": "{n} lectura del QR hasta ahora | {n} lecturas del QR hasta ahora",
+      "resumoZero": "Todavía no hay lecturas del QR. Imprima el QR para el mostrador y empiece a medir."
     }
   },
   "carteira": {
@@ -1825,6 +1863,17 @@
         "ESTORNO": "Reverso",
         "DEBITO_SAQUE": "Retiro",
         "AJUSTE": "Ajuste"
+      },
+      "liberaEm": "Se libera el {data}",
+      "origem": {
+        "INITIAL_PURCHASE": "Primera suscripción",
+        "RENEWAL": "Renovación",
+        "UPGRADE": "Cambio de plan",
+        "REFUND": "Reembolso"
+      },
+      "periodicidade": {
+        "MENSAL": "Plan mensual",
+        "ANUAL": "Plan anual"
       }
     },
     "saques": {
@@ -1929,6 +1978,18 @@
         "titulo": "¡Gracias por su opinión!",
         "texto": "Su respuesta nos ayuda a mejorar PetJourney."
       }
+    },
+    "tela": {
+      "liberado": "Listo para retirar. Las solicitudes hechas hasta el día 27 se pagan hasta el día 5.",
+      "disponivel": "Disponible para retirar",
+      "liberando": "En liberación",
+      "liberandoNota": "Cada crédito se libera 14 días después de entrar",
+      "nadaLiberando": "Nada esperando el período de seguridad",
+      "semPix": "No registrada",
+      "trocarPix": "Cambiar",
+      "cadastrarPix": "Registrar",
+      "sacarTudo": "Retirar todo",
+      "saquesVazio": "Cuando solicite un retiro, aparecerá aquí con el avance del pago."
     }
   },
   "parceiro": {
@@ -1975,6 +2036,9 @@
         "error": "No fue posible aceptar",
         "errorDetail": "Verifique el enlace o inténtelo de nuevo."
       }
+    },
+    "equipe": {
+      "titulo": "Equipo"
     }
   },
   "settings": {
@@ -2013,7 +2077,8 @@
         "escuro": {
           "label": "Oscuro",
           "hint": "Fondo oscuro, para ambientes con poca luz."
-        }
+        },
+        "ondeMais": "También se cambia en el menú de su cuenta, al pie de la barra."
       },
       "menu": {
         "titulo": "Menú lateral",
@@ -2036,11 +2101,31 @@
         },
         "compacta": {
           "label": "Compacta",
-          "hint": "Más pantallas visibles sin desplazarse."
-        }
+          "hint": "Más pantallas visibles sin desplazarse.",
+          "hintBarra": "Líneas más bajas en la barra lateral, para ver más destinos sin desplazarse."
+        },
+        "descricaoBarra": "La altura de las líneas de la barra lateral."
       },
       "nota": "Las preferencias quedan en este navegador y valen en el próximo acceso.",
-      "aplicada": "en uso"
+      "aplicada": "en uso",
+      "barra": {
+        "titulo": "Barra lateral",
+        "descricao": "Qué espacios quedan abiertos en la barra, con sus destinos a la vista.",
+        "secoes": {
+          "label": "Solo el espacio actual",
+          "hint": "La barra abre el espacio en el que está; los demás quedan en una línea, con el total de lo que pide acción."
+        },
+        "lista": {
+          "label": "Todos los espacios",
+          "hint": "Todos los espacios quedan abiertos a la vez, con sus destinos a la vista."
+        }
+      },
+      "explicacoes": {
+        "titulo": "Explicaciones",
+        "descricao": "Un texto corto arriba de las pantallas del Portal, que dice para qué sirve cada una.",
+        "ajuda": "Útil para quien está empezando. Cada pantalla también tiene el botón para mostrar u ocultar."
+      },
+      "naHora": "Las elecciones se aplican al momento y quedan guardadas en este navegador."
     },
     "perfil": {
       "fallbackName": "Usuario",
@@ -2145,6 +2230,16 @@
           "summary": "No fue posible enviar la foto",
           "detailFallback": "Inténtelo de nuevo en unos instantes."
         }
+      },
+      "capaAria": "Su foto y sus datos",
+      "foto": {
+        "trocar": "Cambiar foto",
+        "escolher": "Elegir foto",
+        "formatos": "JPG, PNG, WebP o GIF, hasta 5 MB."
+      },
+      "secoes": {
+        "identidade": "Cómo aparece su nombre en el portal. El correo es el del inicio de sesión y no se cambia aquí.",
+        "contato": "Teléfonos con código de área, para comunicarnos con usted."
       }
     },
     "seguranca": {
@@ -2281,7 +2376,10 @@
           }
         }
       }
-    }
+    },
+    "abasAria": "Secciones de la configuración",
+    "resumo": "Entró como {email}.",
+    "resumoEmpresa": "Entró como {email}, en {empresa}."
   },
   "clinico": {
     "modulo": {

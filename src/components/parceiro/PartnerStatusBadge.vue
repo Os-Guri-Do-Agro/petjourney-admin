@@ -1,9 +1,13 @@
 <script setup lang="ts">
+/**
+ * O estado do cadastro (ou de um programa) num selo: palavra e ícone na cor do estado — ok para
+ * aprovado e ativo, atenção para o que está em análise, risco para recusado e suspenso, neutro
+ * para o que não começou.
+ */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import type { StatusAuditoriaParceiro, StatusModoParceiro } from '@/service/parceiro/types'
-import { currentColors } from '@/theme/color-mode'
 
 const props = defineProps<{
   status: StatusAuditoriaParceiro | StatusModoParceiro
@@ -11,80 +15,28 @@ const props = defineProps<{
 
 const { t, te } = useI18n()
 
-const badgeStyle = computed(() => {
-  const colors = currentColors.value
+const TOM: Record<string, { classe: string; icone: string }> = {
+  APROVADO: { classe: 'ui-selo--ok', icone: 'ph ph-seal-check' },
+  ATIVO: { classe: 'ui-selo--ok', icone: 'ph ph-check-circle' },
+  PENDENTE: { classe: 'ui-selo--atencao', icone: 'ph ph-hourglass' },
+  SOLICITADO: { classe: 'ui-selo--atencao', icone: 'ph ph-hourglass' },
+  REJEITADO: { classe: 'ui-selo--risco', icone: 'ph ph-x-circle' },
+  SUSPENSO: { classe: 'ui-selo--risco', icone: 'ph ph-prohibit' },
+  NAO_SOLICITADO: { classe: '', icone: 'ph ph-minus-circle' },
+}
 
-  const defaultTone = {
-    bg: colors.dashboard.mutedPillBg,
-    text: colors.dashboard.mutedPillText,
-    border: colors.dashboard.line,
-  }
+const tom = computed(() => TOM[props.status] ?? { classe: '', icone: 'ph ph-circle' })
 
-  const toneMap: Record<string, { bg: string; text: string; border: string }> = {
-    APROVADO: {
-      bg: colors.dashboard.successBg,
-      text: colors.dashboard.successText,
-      border: colors.dashboard.line,
-    },
-    ATIVO: {
-      bg: colors.dashboard.successBg,
-      text: colors.dashboard.successText,
-      border: colors.dashboard.line,
-    },
-    PENDENTE: {
-      bg: colors.dashboard.surfaceSoft,
-      text: colors.dashboard.primaryStrong,
-      border: colors.dashboard.line,
-    },
-    SOLICITADO: {
-      bg: colors.dashboard.surfaceSoft,
-      text: colors.dashboard.primaryStrong,
-      border: colors.dashboard.line,
-    },
-    REJEITADO: {
-      bg: colors.dashboard.surfaceSoft,
-      text: colors.dashboard.warmText,
-      border: colors.dashboard.line,
-    },
-    SUSPENSO: {
-      bg: colors.dashboard.surfaceSoft,
-      text: colors.dashboard.warmText,
-      border: colors.dashboard.line,
-    },
-    NAO_SOLICITADO: defaultTone,
-  }
-
-  const tone = toneMap[props.status] ?? defaultTone
-
-  return {
-    '--badge-bg': tone.bg,
-    '--badge-text': tone.text,
-    '--badge-border': tone.border,
-  }
-})
-
+/** O ícone já diz "feito": o "✓" que o texto antigo trazia sai daqui. */
 const label = computed(() => {
   const key = `statusBadge.${props.status}`
-  return te(key) ? t(key) : props.status
+  return (te(key) ? t(key) : props.status).replace(/\s*✓\s*$/, '')
 })
 </script>
 
 <template>
-  <span class="partner-status-badge" :style="badgeStyle">{{ label }}</span>
+  <span class="partner-status-badge ui-selo" :class="tom.classe">
+    <i :class="tom.icone" aria-hidden="true" />
+    {{ label }}
+  </span>
 </template>
-
-<style scoped>
-.partner-status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.28rem 0.62rem;
-  border: 1px solid var(--badge-border);
-  border-radius: 999px;
-  background: var(--badge-bg);
-  color: var(--badge-text);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-</style>

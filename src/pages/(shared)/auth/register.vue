@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
@@ -12,10 +11,12 @@ import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PasswordRequirements from '@/components/auth/PasswordRequirements.vue'
 import RegisterStepIndicator from '@/components/auth/RegisterStepIndicator.vue'
 import { checkEmailAvailability, registerUsuario } from '@/service/user/user-service'
-import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { isPasswordValid } from '@/utils/validation/password'
 
 /**
+ * Criar conta, em dois passos: quem é (nome e e-mail, com o e-mail conferido na hora) e a senha.
+ * Os passos ficam à vista no alto; o botão diz o que vem depois.
+ *
  * Cadastro único de parceiro: conta mínima (nome/email/senha), sem perfil clínico.
  * Vet no produto É um parceiro (multi-perfil.md, D6); CRMV/especialidade são
  * opcionais e entram depois em Configurações > Perfil ou no cadastro da empresa.
@@ -25,8 +26,8 @@ const TOTAL_STEPS = 2
 const { t } = useI18n()
 
 const STEP_LABELS = computed(() => [
-  t('auth.register.stepLabels.identity'),
-  t('auth.register.stepLabels.account'),
+  t('auth.register.passos.dados'),
+  t('auth.register.passos.senha'),
 ])
 
 const router = useRouter()
@@ -35,8 +36,6 @@ const toast = useToast()
 const currentStep = ref(1)
 const loading = ref(false)
 const submitting = ref(false)
-const showPassword = ref(false)
-const showConfirmPassword = ref(false)
 const acceptedTerms = ref(false)
 const rememberAccess = ref(true)
 
@@ -55,32 +54,19 @@ const globalError = ref('')
 const emailChecking = ref(false)
 const emailAvailable = ref<boolean | null>(null)
 
-const passwordInputType = computed(() => (showPassword.value ? 'text' : 'password'))
-const confirmPasswordInputType = computed(() => (showConfirmPassword.value ? 'text' : 'password'))
 const isBusy = computed(() => loading.value || submitting.value)
 
-const registerStyle = useAuthThemeVars()
-
-const stepMeta = computed(() => {
-  const eyebrow = t('auth.register.stepOf', {
-    current: currentStep.value,
-    total: TOTAL_STEPS,
-  })
-
-  if (currentStep.value === 1) {
-    return {
-      eyebrow,
-      title: t('auth.register.step1.title'),
-      description: t('auth.register.step1.description'),
-    }
-  }
-
-  return {
-    eyebrow,
-    title: t('auth.register.step3.title'),
-    description: t('auth.register.step3.description'),
-  }
-})
+const stepMeta = computed(() =>
+  currentStep.value === 1
+    ? {
+        title: t('auth.register.passo1.titulo'),
+        description: t('auth.register.passo1.descricao'),
+      }
+    : {
+        title: t('auth.register.passo2.titulo'),
+        description: t('auth.register.passo2.descricao'),
+      },
+)
 
 function resetFieldErrors() {
   nomeError.value = ''
@@ -257,12 +243,8 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <AuthLayout
-    :description="stepMeta.description"
-    :eyebrow="stepMeta.eyebrow"
-    :title="stepMeta.title"
-  >
-    <div class="register-flow" :style="registerStyle">
+  <AuthLayout :description="stepMeta.description" :title="stepMeta.title">
+    <div class="cadastro">
       <RegisterStepIndicator
         :current-step="currentStep"
         :labels="STEP_LABELS"
@@ -271,10 +253,10 @@ async function handleSubmit() {
       />
 
       <form
-        class="register-form"
+        class="cadastro__form"
         @submit.prevent="currentStep === 2 ? handleSubmit() : goToNextStep()"
       >
-        <section v-if="currentStep === 1" class="register-form__step">
+        <div v-if="currentStep === 1" class="cadastro__passo">
           <AuthTextField
             id="register-name"
             v-model="nome"
@@ -286,29 +268,38 @@ async function handleSubmit() {
             required
           />
 
-          <AuthTextField
-            id="register-email"
-            v-model="email"
-            autocomplete="email"
-            :disabled="isBusy"
-            :error="emailError"
-            :hint="t('auth.register.email.hint')"
-            :label="t('auth.register.email.label')"
-            :placeholder="t('auth.register.email.placeholder')"
-            required
-            type="email"
-            @blur="handleEmailBlur"
-          />
+          <div class="cadastro__email">
+            <AuthTextField
+              id="register-email"
+              v-model="email"
+              autocomplete="email"
+              inputmode="email"
+              :disabled="isBusy"
+              :error="emailError"
+              :hint="emailChecking || emailAvailable ? '' : t('auth.register.email.hint')"
+              :label="t('auth.register.email.label')"
+              :placeholder="t('auth.register.email.placeholder')"
+              required
+              type="email"
+              @blur="handleEmailBlur"
+            />
 
-          <p v-if="emailChecking" class="register-form__status">
-            {{ t('auth.register.email.checking') }}
-          </p>
-          <p v-else-if="emailAvailable" class="register-form__status register-form__status--success">
-            {{ t('auth.register.email.available') }}
-          </p>
-        </section>
+            <p v-if="emailChecking" class="cadastro__estado" role="status">
+              <i class="ph ph-circle-notch ph-spin" aria-hidden="true" />
+              {{ t('auth.register.email.checking') }}
+            </p>
+            <p
+              v-else-if="emailAvailable && !emailError"
+              class="cadastro__estado cadastro__estado--ok"
+              role="status"
+            >
+              <i class="ph ph-check-circle" aria-hidden="true" />
+              {{ t('auth.register.email.available') }}
+            </p>
+          </div>
+        </div>
 
-        <section v-else class="register-form__step">
+        <div v-else class="cadastro__passo">
           <AuthTextField
             id="register-password"
             v-model="senha"
@@ -318,26 +309,9 @@ async function handleSubmit() {
             :label="t('auth.register.password.label')"
             :placeholder="t('auth.register.password.placeholder')"
             required
-            :type="passwordInputType"
-          >
-            <template #trailing>
-              <Button
-                :aria-label="
-                  showPassword
-                    ? t('auth.register.password.hide')
-                    : t('auth.register.password.show')
-                "
-                class="register-password-toggle"
-                :disabled="isBusy"
-                :icon="showPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
-                rounded
-                severity="secondary"
-                text
-                type="button"
-                @click="showPassword = !showPassword"
-              />
-            </template>
-          </AuthTextField>
+            revelavel
+            type="password"
+          />
 
           <PasswordRequirements :password="senha" />
 
@@ -350,72 +324,55 @@ async function handleSubmit() {
             :label="t('auth.register.confirmPassword.label')"
             :placeholder="t('auth.register.confirmPassword.placeholder')"
             required
-            :type="confirmPasswordInputType"
-          >
-            <template #trailing>
-              <Button
-                :aria-label="
-                  showConfirmPassword
-                    ? t('auth.register.password.hide')
-                    : t('auth.register.password.show')
-                "
-                class="register-password-toggle"
+            revelavel
+            type="password"
+          />
+
+          <div class="cadastro__marcas">
+            <label class="cadastro__marca" for="register-accept-terms">
+              <Checkbox
+                v-model="acceptedTerms"
+                binary
                 :disabled="isBusy"
-                :icon="showConfirmPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
-                rounded
-                severity="secondary"
-                text
-                type="button"
-                @click="showConfirmPassword = !showConfirmPassword"
+                input-id="register-accept-terms"
+                :invalid="Boolean(termsError)"
               />
-            </template>
-          </AuthTextField>
+              <span>
+                {{ t('auth.register.terms.copy') }}
+                <a
+                  class="cadastro__termos"
+                  href="https://www.petjourney.health/termos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  @click.stop
+                >
+                  {{ t('auth.register.terms.details') }}
+                </a>
+              </span>
+            </label>
+            <p v-if="termsError" class="cadastro__erro" role="alert">
+              <i class="ph ph-warning-circle" aria-hidden="true" />
+              {{ termsError }}
+            </p>
 
-          <label class="register-terms" for="register-accept-terms">
-            <Checkbox
-              v-model="acceptedTerms"
-              binary
-              class="register-terms__check"
-              :disabled="isBusy"
-              input-id="register-accept-terms"
-              :invalid="Boolean(termsError)"
-              size="small"
-            />
-            <span class="register-terms__copy">
-              {{ t('auth.register.terms.copy') }}
-              <a
-                class="register-terms__details"
-                href="https://www.petjourney.health/termos"
-                target="_blank"
-                rel="noopener noreferrer"
-                @click.stop
-              >
-                {{ t('auth.register.terms.details') }}
-              </a>
-            </span>
-          </label>
-          <p v-if="termsError" class="register-form__inline-error">{{ termsError }}</p>
+            <label class="cadastro__marca" for="register-remember">
+              <Checkbox
+                v-model="rememberAccess"
+                binary
+                :disabled="isBusy"
+                input-id="register-remember"
+              />
+              <span>{{ t('auth.register.remember') }}</span>
+            </label>
+          </div>
+        </div>
 
-          <label class="register-terms" for="register-remember">
-            <Checkbox
-              v-model="rememberAccess"
-              binary
-              class="register-terms__check"
-              :disabled="isBusy"
-              input-id="register-remember"
-              size="small"
-            />
-            <span class="register-terms__copy">
-              {{ t('auth.register.remember') }}
-            </span>
-          </label>
-        </section>
-
-        <p v-if="globalError" class="register-form__global-error" role="alert">
+        <p v-if="globalError" class="cadastro__erro cadastro__erro--geral" role="alert">
+          <i class="ph ph-warning-circle" aria-hidden="true" />
           {{ globalError }}
         </p>
 
-        <div class="register-form__actions">
+        <div class="cadastro__acoes">
           <AuthButton
             v-if="currentStep === 1"
             :disabled="isBusy"
@@ -426,31 +383,27 @@ async function handleSubmit() {
             {{ loading ? t('auth.register.validating') : t('auth.register.continue') }}
           </AuthButton>
 
-          <AuthButton
-            v-else
-            :disabled="isBusy"
-            full-width
-            :loading="submitting"
-            type="submit"
-          >
-            {{ submitting ? t('auth.register.creating') : t('auth.register.createAccount') }}
-          </AuthButton>
+          <template v-else>
+            <AuthButton :disabled="isBusy" full-width :loading="submitting" type="submit">
+              {{ submitting ? t('auth.register.creating') : t('auth.register.createAccount') }}
+            </AuthButton>
 
-          <AuthButton
-            v-if="currentStep > 1"
-            :disabled="isBusy"
-            full-width
-            type="button"
-            variant="secondary"
-            @click="goToPreviousStep"
-          >
-            {{ t('auth.register.back') }}
-          </AuthButton>
+            <AuthButton
+              :disabled="isBusy"
+              full-width
+              type="button"
+              variant="secondary"
+              @click="goToPreviousStep"
+            >
+              <i class="ph ph-arrow-left" aria-hidden="true" />
+              {{ t('auth.register.back') }}
+            </AuthButton>
+          </template>
         </div>
       </form>
     </div>
 
-    <p class="register-support">
+    <p class="cadastro__entrar">
       {{ t('auth.register.support.prompt') }}
       <RouterLink to="/auth/login">{{ t('auth.register.support.login') }}</RouterLink>
     </p>
@@ -458,97 +411,120 @@ async function handleSubmit() {
 </template>
 
 <style scoped>
-.register-flow {
+.cadastro {
   display: grid;
+  gap: 24px;
 }
 
-.register-form {
+.cadastro__form,
+.cadastro__passo {
   display: grid;
-  gap: 1rem;
+  gap: 20px;
 }
 
-.register-form__step {
+.cadastro__email {
   display: grid;
-  gap: 1rem;
+  gap: 8px;
 }
 
-.register-form__status {
-  margin: -0.35rem 0 0;
-  color: var(--auth-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-
-.register-form__status--success {
-  color: var(--auth-link);
-}
-
-.register-form__inline-error,
-.register-form__global-error {
+.cadastro__estado {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 0;
-  color: var(--auth-danger);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
-.register-form__actions {
+.cadastro__estado--ok {
+  color: var(--ok-tinta);
+  font-weight: 550;
+}
+
+.cadastro__estado i {
+  font-size: 16px;
+}
+
+.cadastro__marcas {
   display: grid;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
-.register-password-toggle.p-button {
-  width: 2rem;
-  height: 2rem;
-  color: var(--auth-soft);
-}
-
-.register-password-toggle.p-button:not(:disabled):hover {
-  background: var(--auth-sage-tint);
-  color: var(--auth-soft);
-}
-
-.register-terms {
-  display: inline-flex;
+.cadastro__marca {
+  display: flex;
   align-items: flex-start;
-  gap: 0.65rem;
-  color: var(--auth-muted);
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.45;
+  gap: 10px;
+  color: var(--tinta-2);
   cursor: pointer;
+  font-size: 14.5px;
+  line-height: 1.5;
 }
 
-.register-terms__check {
-  flex: 0 0 auto;
-  margin-top: 0.15rem;
+.cadastro__marca :deep(.p-checkbox) {
+  flex: none;
+  margin-top: 2px;
 }
 
-.register-terms__copy {
-  min-width: 0;
-  color: var(--auth-muted);
-}
-
-.register-terms__details {
-  color: var(--auth-link);
-  font-weight: 800;
+.cadastro__termos {
+  color: var(--musgo);
+  font-weight: 600;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
 
-.register-terms__details:hover {
-  color: var(--auth-sage-strong);
+.cadastro__erro {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: -4px 0 0;
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 550;
+  line-height: 1.4;
 }
 
-.register-support {
-  margin: 2rem 0 0;
-  color: var(--auth-soft);
-  font-size: 0.875rem;
-  text-align: center;
+.cadastro__erro i {
+  flex: none;
+  margin-top: 1px;
+  font-size: 16px;
 }
 
-.register-support a {
-  color: var(--auth-link);
-  font-weight: 800;
-  text-decoration: none;
+.cadastro__erro--geral {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+}
+
+.cadastro__acoes {
+  display: grid;
+  gap: 10px;
+}
+
+.cadastro__entrar {
+  margin: 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 14.5px;
+}
+
+.cadastro__entrar a {
+  border-radius: 4px;
+  color: var(--musgo);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--musgo) 35%, transparent);
+  text-underline-offset: 3px;
+}
+
+.cadastro__entrar a:focus-visible,
+.cadastro__termos:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: 2px;
+}
+
+[dir='rtl'] .cadastro__acoes .ph-arrow-left {
+  transform: scaleX(-1);
 }
 </style>

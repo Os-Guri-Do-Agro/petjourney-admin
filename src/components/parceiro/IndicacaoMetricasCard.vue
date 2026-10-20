@@ -8,13 +8,18 @@ import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import type { IndicacaoMetricas } from '@/service/parceiro/types'
 import {
-  montarSerie,
+  MAX_DIAS_SERIE,
   resumirUserAgent,
   type MetricasEstadoErro,
 } from '@/utils/parceiro/indicacao-metricas'
 
 /**
  * Leituras do QR de indicação: quantas pessoas escanearam e quando.
+ *
+ * O gráfico mostra sempre os últimos 14 dias, com os dias sem leitura no lugar deles (um traço na
+ * linha de base): a API só manda os dias que tiveram leitura, e juntar 3 de outubro com 9 de
+ * outubro numa barra vizinha da outra contaria uma semana que não aconteceu. Uma série só, numa
+ * cor só; o número fica escrito sobre o dia de pico e aparece em qualquer dia ao passar o mouse.
  *
  * `409` (parceiro ainda não aprovado) e `503` (serviço de QR fora) são estados
  * previstos, com texto próprio — nenhum dos dois derruba o painel. A lista de
@@ -32,53 +37,137 @@ const { t, locale } = useI18n()
 
 const intlLocale = computed(() => INTL_LOCALE[locale.value as Locale])
 
-const serie = computed(() => montarSerie(props.metricas?.byDay))
+function chaveDoDia(data: Date) {
+  const y = data.getFullYear()
+  const m = String(data.getMonth() + 1).padStart(2, '0')
+  const d = String(data.getDate()).padStart(2, '0')
+
+  return `${y}-${m}-${d}`
+}
+
+function dataDoDia(day: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day)
+
+  return match ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])) : null
+}
+
+type DiaDoGrafico = {
+  day: string
+  count: number
+  /** Altura da barra, em % do dia de pico. */
+  percent: number
+  eixo: string
+  hoje: boolean
+  pico: boolean
+}
+
+/**
+ * Os 14 dias até hoje (ou até o último dia que a API mandou, se o fuso dela já virou o dia).
+ * Dia que não veio na resposta é dia sem leitura.
+ */
+const dias = computed<DiaDoGrafico[]>(() => {
+  const porDia = new Map((props.metricas?.byDay ?? []).map((item) => [item.day, item.count]))
+  const hoje = new Date()
+  const ultimoDaApi = [...porDia.keys()].sort().at(-1)
+  const ultimo = ultimoDaApi && ultimoDaApi > chaveDoDia(hoje) ? dataDoDia(ultimoDaApi)! : hoje
+
+  const lista = Array.from({ length: MAX_DIAS_SERIE }, (_, indice) => {
+    const data = new Date(ultimo.getFullYear(), ultimo.getMonth(), ultimo.getDate())
+    data.setDate(data.getDate() - (MAX_DIAS_SERIE - 1 - indice))
+    const day = chaveDoDia(data)
+
+    return { day, count: porDia.get(day) ?? 0, data }
+  })
+
+  const maior = Math.max(0, ...lista.map((item) => item.count))
+  const chaveDeHoje = chaveDoDia(hoje)
+  /* O pico rotulado é o mais recente, se dois dias empatarem. */
+  const indiceDoPico = maior > 0 ? lista.map((item) => item.count).lastIndexOf(maior) : -1
+
+  return lista.map((item, indice) => ({
+    day: item.day,
+    count: item.count,
+    percent: maior > 0 ? Math.round((item.count / maior) * 100) : 0,
+    eixo: String(item.data.getDate()),
+    hoje: item.day === chaveDeHoje,
+    pico: indice === indiceDoPico,
+  }))
+})
 
 const scanCount = computed(() => props.metricas?.scanCount ?? 0)
 
+const leiturasNoPeriodo = computed(() => dias.value.reduce((soma, dia) => soma + dia.count, 0))
+
 const recentes = computed(() =>
-  (props.metricas?.recent ?? []).map((item, index) => ({
-    id: `${item.at}-${index}`,
-    quando: formatarDataHora(item.at),
-    dispositivo: resumirUserAgent(item.userAgent),
-  })),
+  (props.metricas?.recent ?? []).map((item, index) => {
+    const dispositivo = resumirUserAgent(item.userAgent)
+
+    return {
+      id: `${item.at}-${index}`,
+      at: item.at,
+      quando: formatarDataHora(item.at),
+      dispositivo,
+      icone:
+        dispositivo === 'Windows' || dispositivo === 'Mac' || dispositivo === 'Linux'
+          ? 'ph ph-desktop'
+          : 'ph ph-device-mobile',
+    }
+  }),
 )
 
 const semLeitura = computed(
-  () => !props.loading && !props.erro && scanCount.value === 0 && serie.value.length === 0,
+  () =>
+    !props.loading &&
+    !props.erro &&
+    scanCount.value === 0 &&
+    (props.metricas?.byDay ?? []).length === 0,
 )
 
+/** "Hoje, 14:32", "Ontem, 09:10" ou a data curta com a hora. */
 function formatarDataHora(valor: string) {
   const data = new Date(valor)
 
-  return Number.isNaN(data.getTime())
-    ? valor
-    : data.toLocaleString(intlLocale.value, { dateStyle: 'short', timeStyle: 'short' })
-}
-
-/** Dia curto para o eixo (`YYYY-MM-DD` sem virar o dia por causa de fuso). */
-function formatarDia(day: string) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day)
-
-  if (!match) {
-    return day
+  if (Number.isNaN(data.getTime())) {
+    return valor
   }
 
-  const data = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+  const hora = data.toLocaleTimeString(intlLocale.value, { hour: '2-digit', minute: '2-digit' })
+  const hoje = new Date()
+  const ontem = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - 1)
 
-  return data.toLocaleDateString(intlLocale.value, { day: '2-digit', month: '2-digit' })
+  if (chaveDoDia(data) === chaveDoDia(hoje)) {
+    return `${t('carteira.extrato.today')}, ${hora}`
+  }
+
+  if (chaveDoDia(data) === chaveDoDia(ontem)) {
+    return `${t('carteira.extrato.yesterday')}, ${hora}`
+  }
+
+  return data.toLocaleString(intlLocale.value, { dateStyle: 'short', timeStyle: 'short' })
+}
+
+/** Dia por extenso curto para a dica e para o leitor de tela (`YYYY-MM-DD` sem virar o fuso). */
+function formatarDia(day: string) {
+  const data = dataDoDia(day)
+
+  return data
+    ? data.toLocaleDateString(intlLocale.value, { weekday: 'short', day: '2-digit', month: '2-digit' })
+    : day
 }
 
 function barraAria(day: string, count: number) {
-  return t('divulgacao.metricas.barraAria', { dia: formatarDia(day), n: count }, count)
+  return t('divulgacao.metricas.dica', { dia: formatarDia(day), n: count }, count)
 }
 </script>
 
 <template>
-  <section class="qrm" aria-labelledby="qrm-title">
-    <header class="qrm__head">
-      <div>
-        <h3 id="qrm-title">{{ t('divulgacao.metricas.title') }}</h3>
+  <section class="qrm ui-folha" aria-labelledby="qrm-title">
+    <header class="qrm__cabeca">
+      <div class="qrm__titulos">
+        <h3 id="qrm-title" class="qrm__titulo">
+          <i class="ph ph-qr-code" aria-hidden="true" />
+          {{ t('divulgacao.metricas.title') }}
+        </h3>
         <p v-if="isGuidanceVisible">{{ t('divulgacao.metricas.lede') }}</p>
       </div>
       <Button
@@ -92,9 +181,9 @@ function barraAria(day: string, count: number) {
       />
     </header>
 
-    <div v-if="loading" class="qrm__loading" role="status" aria-live="polite" aria-busy="true">
-      <Skeleton width="7rem" height="2.4rem" border-radius="8px" />
-      <Skeleton width="100%" height="4.5rem" border-radius="8px" />
+    <div v-if="loading" class="qrm__carregando" role="status" aria-live="polite" aria-busy="true">
+      <Skeleton width="8rem" height="2.2rem" border-radius="8px" />
+      <Skeleton width="100%" height="7rem" border-radius="10px" />
     </div>
 
     <p v-else-if="erro" class="qrm__aviso" role="status">
@@ -107,215 +196,373 @@ function barraAria(day: string, count: number) {
       {{ t('divulgacao.metricas.vazio') }}
     </p>
 
-    <template v-else>
-      <p class="qrm__total">
-        <strong>{{ scanCount }}</strong>
-        <span>{{ t('divulgacao.metricas.leituras', scanCount) }}</span>
-      </p>
+    <div v-else class="qrm__corpo">
+      <div class="qrm__grafico">
+        <p class="qrm__total">
+          <strong class="ui-num">{{ scanCount }}</strong>
+          <span>{{ t('divulgacao.metricas.aoTodo', scanCount) }}</span>
+          <span class="qrm__periodo ui-num">
+            {{ t('divulgacao.metricas.ultimos14', { n: leiturasNoPeriodo }) }}
+          </span>
+        </p>
 
-      <div v-if="serie.length" class="qrm__chart-wrap">
-        <ul class="qrm__chart" :aria-label="t('divulgacao.metricas.chartAria')">
-          <li v-for="barra in serie" :key="barra.day" class="qrm__bar-slot">
-            <span
-              class="qrm__bar"
-              :style="{ height: `${barra.percent}%` }"
-              :title="barraAria(barra.day, barra.count)"
-            >
-              <span class="qrm__sr">{{ barraAria(barra.day, barra.count) }}</span>
+        <!-- A lista é a tabela do gráfico: cada dia diz a data e a contagem ao leitor de tela. -->
+        <ol class="qrm__barras" :aria-label="t('divulgacao.metricas.chartAria')">
+          <li
+            v-for="dia in dias"
+            :key="dia.day"
+            class="qrm__dia"
+            :class="{
+              'qrm__dia--hoje': dia.hoje,
+              'qrm__dia--pico': dia.pico,
+              'qrm__dia--zero': dia.count === 0,
+            }"
+          >
+            <span class="qrm__coluna" aria-hidden="true">
+              <span v-if="dia.pico" class="qrm__rotulo ui-num">{{ dia.count }}</span>
+              <span class="qrm__barra" :style="{ blockSize: `${dia.percent}%` }" />
             </span>
-            <small>{{ formatarDia(barra.day) }}</small>
+            <span class="qrm__eixo ui-num" aria-hidden="true">{{ dia.eixo }}</span>
+            <span class="qrm__dica" aria-hidden="true">{{ barraAria(dia.day, dia.count) }}</span>
+            <span class="qrm__sr">{{ barraAria(dia.day, dia.count) }}</span>
           </li>
-        </ul>
+        </ol>
       </div>
 
-      <div v-if="recentes.length" class="qrm__recent">
-        <h4>{{ t('divulgacao.metricas.recentes') }}</h4>
-        <ul>
-          <li v-for="item in recentes" :key="item.id">
-            <span class="qrm__recent-when">{{ item.quando }}</span>
-            <span v-if="item.dispositivo" class="qrm__recent-device">{{ item.dispositivo }}</span>
+      <div v-if="recentes.length" class="qrm__recentes">
+        <h4 class="qrm__subtitulo">{{ t('divulgacao.metricas.recentes') }}</h4>
+        <ul class="qrm__lista">
+          <li v-for="item in recentes" :key="item.id" class="qrm__leitura">
+            <span class="qrm__aparelho" aria-hidden="true"><i :class="item.icone" /></span>
+            <time class="qrm__quando ui-num" :datetime="item.at">{{ item.quando }}</time>
+            <span v-if="item.dispositivo" class="qrm__dispositivo">{{ item.dispositivo }}</span>
           </li>
         </ul>
       </div>
-    </template>
+    </div>
   </section>
 </template>
 
 <style scoped>
+/*
+ * Folha própria, nos tokens do Trilha: o mesmo bloco aparece na Divulgação (largo) e na gaveta
+ * do QR no Início (estreito). Quem decide a forma é a largura do bloco, não a da janela.
+ */
 .qrm {
   display: grid;
-  gap: 0.75rem;
   align-content: start;
-  padding: 1rem 1.05rem;
-  border: 1px solid var(--div-line);
-  border-radius: 1.1rem;
-  background: var(--div-card);
+  gap: 16px;
+  padding: 20px 22px 22px;
+  container: qrm / inline-size;
 }
 
 .qrm__sr {
   position: absolute;
+  overflow: hidden;
   width: 1px;
   height: 1px;
-  overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
 }
 
-.qrm__head {
+.qrm__cabeca {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
-.qrm__head h3 {
+.qrm__titulos {
+  display: grid;
+  gap: 2px;
+}
+
+.qrm__titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
-  color: var(--div-text);
-  font-size: 0.95rem;
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-.qrm__head p {
-  margin: 0.2rem 0 0;
-  color: var(--div-muted);
-  font-size: 0.8rem;
+.qrm__titulo i {
+  color: var(--portal);
+  font-size: 19px;
+}
+
+.qrm__titulos p {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.45;
 }
 
-.qrm__loading {
+.qrm__carregando {
   display: grid;
-  gap: 0.55rem;
+  gap: 12px;
 }
 
 .qrm__aviso {
   display: flex;
-  align-items: center;
-  gap: 0.45rem;
+  align-items: flex-start;
+  gap: 10px;
   margin: 0;
-  padding: 0.7rem 0.8rem;
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--div-surface) 80%, var(--div-card));
-  color: var(--div-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .qrm__aviso i {
-  flex: 0 0 auto;
-  color: var(--div-primary-strong);
+  margin-top: 1px;
+  color: var(--tinta-2);
+  font-size: 18px;
+}
+
+.qrm__corpo {
+  display: grid;
+  gap: 22px;
+}
+
+@container qrm (min-width: 640px) {
+  .qrm__corpo {
+    align-items: start;
+    gap: 32px;
+    grid-template-columns: minmax(0, 1.7fr) minmax(220px, 1fr);
+  }
+
+  .qrm__recentes {
+    padding-inline-start: 28px;
+    border-inline-start: 1px solid var(--linha);
+  }
+}
+
+.qrm__grafico {
+  display: grid;
+  min-width: 0;
+  gap: 16px;
 }
 
 .qrm__total {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.4rem;
+  gap: 4px 8px;
   margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 .qrm__total strong {
-  color: var(--div-primary-strong);
-  font-size: 1.9rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  color: var(--tinta);
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
   line-height: 1;
 }
 
-.qrm__total span {
-  color: var(--div-muted);
-  font-size: 0.84rem;
-  font-weight: 600;
+.qrm__periodo {
+  color: var(--tinta-3);
+  font-size: 13px;
 }
 
-/* Série pode passar da largura em tela estreita: rola dentro do próprio bloco. */
-.qrm__chart-wrap {
-  overflow-x: auto;
-  padding-bottom: 0.2rem;
+.qrm__periodo::before {
+  margin-inline-end: 8px;
+  content: '·';
 }
 
-.qrm__chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.3rem;
-  min-width: max-content;
-  height: 5.5rem;
+/* ------------------------------------------------------------------ o gráfico
+ * Colunas finas, ponta de cima arredondada (4px) e presa à linha de base, 2px de folga entre
+ * elas, grade nenhuma: o pico leva o número; os outros dias, a dica ao passar o mouse.
+ */
+.qrm__barras {
+  position: relative;
+  display: grid;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
 }
 
-.qrm__bar-slot {
-  display: grid;
-  grid-template-rows: 1fr auto;
-  gap: 0.3rem;
-  align-items: end;
-  justify-items: center;
-  height: 100%;
-  min-width: 1.9rem;
-}
-
-.qrm__bar {
+.qrm__dia {
   position: relative;
-  width: 0.7rem;
-  /* Barra de dia zerado vira um traço, para o dia não sumir do eixo. */
-  min-height: 2px;
-  border-radius: 999px 999px 0.2rem 0.2rem;
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--div-primary) 45%, transparent),
-    var(--div-primary-strong)
-  );
+  display: grid;
+  gap: 6px;
+  grid-template-rows: 128px auto;
+  cursor: default;
 }
 
-.qrm__bar-slot small {
-  color: var(--div-faint);
-  font-size: 0.62rem;
+.qrm__coluna {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  border-bottom: 1px solid var(--linha-forte);
+}
+
+.qrm__barra {
+  width: min(70%, 22px);
+  min-block-size: 3px;
+  border-radius: 4px 4px 0 0;
+  background: var(--portal);
+  transition: background-color var(--pj-tempo-curto, 140ms) ease-out;
+}
+
+.qrm__dia--zero .qrm__barra {
+  background: var(--linha-forte);
+}
+
+.qrm__dia:hover .qrm__barra {
+  background: var(--portal-tinta);
+}
+
+.qrm__rotulo {
+  margin-bottom: 4px;
+  color: var(--tinta);
+  font-size: 12.5px;
   font-weight: 650;
+}
+
+.qrm__eixo {
+  color: var(--tinta-3);
+  font-size: 11.5px;
+  text-align: center;
+}
+
+.qrm__dia--hoje .qrm__eixo {
+  color: var(--tinta);
+  font-weight: 650;
+}
+
+/* A dica: aparece sobre a coluna com o dia e a contagem. */
+.qrm__dica {
+  position: absolute;
+  z-index: 2;
+  bottom: calc(100% - 4px);
+  left: 50%;
+  padding: 6px 9px;
+  border-radius: 8px;
+  background: var(--tinta);
+  box-shadow: var(--sombra-2);
+  color: var(--superficie);
+  font-size: 12.5px;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity var(--pj-tempo-curto, 140ms) ease-out,
+    transform var(--pj-tempo-curto, 140ms) ease-out;
   white-space: nowrap;
 }
 
-.qrm__recent {
-  display: grid;
-  gap: 0.35rem;
-  padding-top: 0.65rem;
-  border-top: 1px solid color-mix(in srgb, var(--div-line) 85%, transparent);
+.qrm__dia:first-child .qrm__dica,
+.qrm__dia:nth-child(2) .qrm__dica {
+  left: 0;
+  transform: translate(0, 4px);
 }
 
-.qrm__recent h4 {
+.qrm__dia:last-child .qrm__dica,
+.qrm__dia:nth-last-child(2) .qrm__dica {
+  right: 0;
+  left: auto;
+  transform: translate(0, 4px);
+}
+
+.qrm__dia:hover .qrm__dica {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.qrm__dia:first-child:hover .qrm__dica,
+.qrm__dia:nth-child(2):hover .qrm__dica,
+.qrm__dia:last-child:hover .qrm__dica,
+.qrm__dia:nth-last-child(2):hover .qrm__dica {
+  transform: translate(0, 0);
+}
+
+/* Estreito (a gaveta do Início): o eixo fica com um dia sim, um dia não, contando de hoje. */
+@container qrm (max-width: 420px) {
+  .qrm__dia:nth-last-child(even):not(.qrm__dia--hoje) .qrm__eixo {
+    visibility: hidden;
+  }
+
+  .qrm__dia {
+    grid-template-rows: 104px auto;
+  }
+}
+
+/* ------------------------------------------------------------------ leituras recentes */
+
+.qrm__recentes {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.qrm__subtitulo {
   margin: 0;
-  color: var(--div-faint);
-  font-size: 0.75rem;
-  font-weight: 750;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
-.qrm__recent ul {
+.qrm__lista {
   display: grid;
-  gap: 0.25rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.qrm__recent li {
+.qrm__leitura {
   display: flex;
+  min-height: 44px;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.35rem 0.5rem;
-  border-radius: 0.55rem;
-  background: color-mix(in srgb, var(--div-surface) 70%, var(--div-card));
+  gap: 10px;
 }
 
-.qrm__recent-when {
-  color: var(--div-text);
-  font-size: 0.78rem;
-  font-weight: 600;
+.qrm__leitura + .qrm__leitura {
+  border-top: 1px solid var(--linha);
 }
 
-.qrm__recent-device {
-  color: var(--div-muted);
-  font-size: 0.72rem;
-  font-weight: 650;
+.qrm__aparelho {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 16px;
+}
+
+.qrm__quando {
+  flex: 1;
+  min-width: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.qrm__dispositivo {
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qrm__barra,
+  .qrm__dica {
+    transition: none;
+  }
 }
 </style>

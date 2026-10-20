@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
-import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import PortalDivulgacaoPanel from '@/components/parceiro/panels/PortalDivulgacaoPanel.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
-import { currentColors } from '@/theme/color-mode'
 
 const ABA_TO_HASH: Record<string, string> = {
   indicacao: '#indicacao',
@@ -19,46 +16,30 @@ const ABA_TO_HASH: Record<string, string> = {
 }
 
 const { t } = useI18n()
-const toast = useToast()
 
-/** O que o painel carregou e a saudação precisa: código, link e leituras do QR. */
+/** O que o painel carregou e a frase do topo precisa: código, link e leituras do QR. */
 const estado = ref({ codigo: '', link: '', leituras: null as number | null, podeIndicar: false })
 
 /**
- * A frase da saudação: o código já à vista, e quantas leituras o QR teve. Sem programa de
- * afiliados ativo não existe código, e a frase diz o que falta em vez de ficar em branco.
+ * A frase do topo: quantas leituras o QR já teve. O código está grande logo abaixo, então a frase
+ * não o repete. Sem programa de afiliados ativo não existe código, e a frase diz o que falta.
  */
 const fraseDoResumo = computed(() => {
   if (!estado.value.podeIndicar || !estado.value.codigo) {
     return t('divulgacao.saudacao.semCodigo')
   }
 
-  const leituras = estado.value.leituras ?? 0
+  if (estado.value.leituras == null) {
+    return ''
+  }
 
-  return t('divulgacao.saudacao.resumo', {
-    codigo: estado.value.codigo,
-    leituras: t('divulgacao.saudacao.leituras', { n: leituras }, leituras),
-  })
+  const leituras = estado.value.leituras
+
+  return leituras > 0
+    ? t('divulgacao.tela.resumo', { n: leituras }, leituras)
+    : t('divulgacao.tela.resumoZero')
 })
 
-async function copiarLink() {
-  try {
-    await navigator.clipboard.writeText(estado.value.link)
-    toast.add({
-      severity: 'success',
-      summary: t('divulgacao.toast.copied'),
-      detail: t('divulgacao.toast.copiedDetail', { label: t('divulgacao.shareKit.linkName') }),
-      life: 2400,
-    })
-  } catch {
-    toast.add({
-      severity: 'error',
-      summary: t('divulgacao.toast.copyFail'),
-      detail: t('divulgacao.toast.copyFailDetail'),
-      life: 4000,
-    })
-  }
-}
 const { store, ensureContext } = useParceiroPortal()
 const route = useRoute()
 const router = useRouter()
@@ -66,14 +47,6 @@ const router = useRouter()
 const loadError = computed(() =>
   store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
 )
-
-const pageAtmosphere = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--div-page-muted': colors.dashboard.muted,
-  }
-})
 
 function scrollToHash() {
   const targetId = route.hash.replace('#', '')
@@ -116,79 +89,69 @@ watch(
     scrollToHash()
   },
 )
+
+/* As seções chegam depois da API: a âncora pedida na URL rola quando elas existem. */
+watch(
+  () => estado.value.podeIndicar,
+  () => {
+    scrollToHash()
+  },
+)
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('divulgacao.subtitle')"
-    :title="t('divulgacao.title')"
-    :loading="false"
-    :error="loadError"
-    :no-partner-access="store.semAcessoParceiro"
-    block-when-suspended
-    guidance
-    @retry="ensureContext(true)"
+  <UiPagina
+    class="tela-divulgacao"
+    :erro="loadError"
+    :sem-acesso-de-parceiro="store.semAcessoParceiro"
+    bloquear-se-suspenso
+    guia
+    @tentar-de-novo="ensureContext(true)"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('divulgacao.subtitle') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('divulgacao.title') }}</h1>
-
-        <div class="hc-saudacao__linha">
-          <p class="hc-saudacao__resumo" aria-live="polite">{{ fraseDoResumo }}</p>
-
-          <nav v-if="estado.podeIndicar && estado.link" class="hc-acoes" :aria-label="t('divulgacao.saudacao.acoes')">
-            <Button
-              type="button"
-              class="hc-pilula hc-pilula--cheia"
-              icon="ph ph-link"
-              :label="t('divulgacao.saudacao.copiarLink')"
-              @click="copiarLink"
-            />
-          </nav>
-        </div>
-      </div>
+    <template v-if="fraseDoResumo" #resumo>
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
     </template>
 
-    <div class="divulgacao-page" :style="pageAtmosphere">
+    <div class="divulgacao-pagina">
       <PartnerOperabilityBanner />
 
-      <p v-if="isGuidanceVisible" class="divulgacao-page__lede">
+      <p v-if="isGuidanceVisible" class="divulgacao-pagina__lede">
         {{ t('divulgacao.lede') }}
       </p>
 
       <PortalDivulgacaoPanel @estado="estado = $event" />
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
-.divulgacao-page {
-  --divulgacao-gap: 1.65rem;
-  display: grid;
-  gap: var(--divulgacao-gap);
-  width: 100%;
-  max-width: 100%;
-  overflow-x: clip;
+/* Botões de contorno e de texto nas cores do Trilha (fora do antigo `.hc-tema`). */
+.tela-divulgacao {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
 }
 
-.divulgacao-page__lede {
-  margin: -0.35rem 0 0;
-  color: var(--div-page-muted);
-  font-size: 0.94rem;
+.divulgacao-pagina {
+  display: grid;
+  gap: 20px;
+}
+
+.divulgacao-pagina__lede {
+  max-width: 72ch;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14.5px;
   line-height: 1.5;
 }
 
 :deep(#indicacao),
 :deep(#cupons),
 :deep(#resgates) {
-  scroll-margin-top: 5rem;
-}
-
-@media (max-width: 720px) {
-  .divulgacao-page {
-    --divulgacao-gap: 1.35rem;
-  }
+  scroll-margin-top: 24px;
 }
 </style>

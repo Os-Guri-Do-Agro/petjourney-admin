@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { PhCheck, PhCircle } from '@phosphor-icons/vue'
+/**
+ * O que a senha ainda precisa, conferido enquanto se digita: cada regra acende em verde, com o
+ * visto no lugar do círculo, quando é cumprida — forma e palavra, além da cor.
+ */
+import { PhCheckCircle, PhCircle } from '@phosphor-icons/vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { currentColors } from '@/theme/color-mode'
 import {
   getPasswordRequirements,
   type PasswordRequirementKey,
@@ -30,32 +33,23 @@ const items = computed(() => {
     label: labels[key],
   }))
 })
-
-const listStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--req-muted': colors.auth.muted,
-    '--req-success': colors.success,
-    '--req-pending': colors.auth.soft,
-  }
-})
 </script>
 
 <template>
-  <ul class="password-requirements" :style="listStyle">
+  <ul class="password-requirements">
     <li
       v-for="item in items"
       :key="item.key"
       class="password-requirements__item"
       :class="{ 'password-requirements__item--met': requirements[item.key] }"
     >
-      <PhCheck
+      <PhCheckCircle
         v-if="requirements[item.key]"
         class="password-requirements__icone"
+        weight="fill"
         aria-hidden="true"
       />
-      <PhCircle v-else class="password-requirements__icone" weight="fill" aria-hidden="true" />
+      <PhCircle v-else class="password-requirements__icone" aria-hidden="true" />
       {{ item.label }}
     </li>
   </ul>
@@ -64,34 +58,36 @@ const listStyle = computed(() => {
 <style scoped>
 .password-requirements {
   display: grid;
-  gap: 0.45rem;
+  gap: 6px 16px;
   margin: 0;
   padding: 0;
   list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
 }
 
 .password-requirements__item {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  color: var(--req-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.35;
 }
 
-/* Componente do Phosphor, não a fonte: os 25% que o `.ph::before` compensa vão no tamanho. */
+/* Componente do Phosphor, não a fonte: o tamanho vai em px. */
 .password-requirements__icone {
+  width: 17px;
+  height: 17px;
   flex: none;
-  font-size: 0.78rem;
-  color: var(--req-pending);
+  color: var(--tinta-3);
 }
 
 .password-requirements__item--met {
-  color: var(--req-success);
+  color: var(--ok-tinta);
+  font-weight: 550;
 }
 
 .password-requirements__item--met .password-requirements__icone {
-  font-size: 0.9rem;
-  color: var(--req-success);
+  color: var(--ok);
 }
 </style>

@@ -243,10 +243,10 @@ function primeiroNome(nome: string) {
 }
 
 .horario__dia {
-  margin: 0.25rem 0 0;
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
-  font-weight: 700;
+  margin: 4px 0 0;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .horario__rotulo {
@@ -258,7 +258,7 @@ function primeiroNome(nome: string) {
 .horario__rotulo svg {
   width: 1rem;
   height: 1rem;
-  color: var(--hc-marca);
+  color: var(--musgo);
 }
 
 .horario__legenda {
@@ -266,8 +266,8 @@ function primeiroNome(nome: string) {
   flex-wrap: wrap;
   margin: -0.25rem 0 0;
   gap: 0.9rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .horario__legenda > span {
@@ -280,11 +280,11 @@ function primeiroNome(nome: string) {
   width: 0.4rem;
   height: 0.4rem;
   border-radius: 50%;
-  background: var(--hc-marca);
+  background: var(--musgo);
 }
 
 .horario__legenda--fechado {
-  color: var(--hc-tinta-3);
+  color: var(--tinta-3);
   text-decoration: line-through;
 }
 </style>

@@ -28,7 +28,8 @@
         "programs": "Programmes built for partners who want to grow",
         "indicacao": "Code, link, and QR Code ready to share",
         "results": "Results and earnings tracked in real time"
-      }
+      },
+      "frase": "More pet owners finding their way to you."
     },
     "login": {
       "title": "Welcome back",
@@ -78,7 +79,8 @@
           "summary": "Could not reactivate",
           "fallback": "Please try again in a moment."
         }
-      }
+      },
+      "descricao": "Sign in with your account email and password."
     },
     "register": {
       "stepLabels": {
@@ -151,6 +153,18 @@
         "error": {
           "summary": "Registration error"
         }
+      },
+      "passos": {
+        "dados": "Your details",
+        "senha": "Password"
+      },
+      "passo1": {
+        "titulo": "Create your account",
+        "descricao": "Start with your name and the email you will use to sign in."
+      },
+      "passo2": {
+        "titulo": "Choose a password",
+        "descricao": "A strong password protects your business data and the pets you care for."
       }
     },
     "forgot": {
@@ -222,13 +236,23 @@
         "resetError": {
           "summary": "Could not reset password"
         }
-      }
+      },
+      "passos": {
+        "email": "Email",
+        "codigo": "Code",
+        "senha": "New password"
+      },
+      "passosAria": "Steps to reset your password"
     },
     "passwordRequirements": {
       "minLength": "At least 6 characters",
       "hasNumber": "At least 1 number",
       "hasUppercase": "At least 1 uppercase letter",
       "hasSpecialChar": "At least 1 special character"
+    },
+    "campo": {
+      "mostrar": "Show",
+      "ocultar": "Hide"
     }
   },
   "common": {
@@ -932,7 +956,8 @@
         "notOperable": "Your registration is still under review.",
         "alreadyRequested": "This programme was already requested or is active.",
         "modoSuspenso": "This programme is suspended for your company. Contact support to reactivate it."
-      }
+      },
+      "oQueDa": "What the program gives you"
     },
     "saudacao": {
       "todosAtivos": "Both programmes are active",
@@ -948,6 +973,9 @@
       "ativacaoFrase": "the account owner requests it, PetJourney reviews it and releases the benefits.",
       "verEtapas": "See steps",
       "ocultarEtapas": "Hide steps"
+    },
+    "ativacao": {
+      "titulo": "How a program is activated"
     }
   },
   "parceiroCadastro": {
@@ -1698,7 +1726,10 @@
         "naoOperavel": "Metrics become available as soon as your registration is approved.",
         "indisponivel": "Metrics unavailable right now. Try again in a moment.",
         "erro": "Could not load the scans."
-      }
+      },
+      "aoTodo": "scan in total | scans in total",
+      "ultimos14": "{n} in the last 14 days",
+      "dica": "{dia}: {n} scan | {dia}: {n} scans"
     },
     "kit": {
       "titulo": "Three ways to share",
@@ -1706,11 +1737,14 @@
       "link": "Link, for WhatsApp and Instagram",
       "qr": "QR, to print for the front desk",
       "qrDica": "Whoever scans it lands right on sign-up with your code.",
-      "copiar": "Copy"
+      "copiar": "Copy",
+      "mensagem": "Look after your pet's health with PetJourney. Sign up with our code {codigo}: {link}",
+      "whatsapp": "Send on WhatsApp"
     },
     "regras": {
       "rotulo": "How referrals pay:",
-      "frase": "5% of each referred subscription, every month, for 18 months. Requires the affiliate programme to be active."
+      "frase": "5% of each referred subscription, every month, for 18 months. Requires the affiliate programme to be active.",
+      "titulo": "How referrals pay off"
     },
     "saudacao": {
       "resumo": "Your code is {codigo} · {leituras}",
@@ -1718,6 +1752,10 @@
       "semCodigo": "Your code shows up once the affiliate programme is active",
       "copiarLink": "Copy link",
       "acoes": "Referral actions"
+    },
+    "tela": {
+      "resumo": "{n} QR scan so far | {n} QR scans so far",
+      "resumoZero": "No QR scans yet. Print the QR for your front desk and start measuring."
     }
   },
   "carteira": {
@@ -1825,6 +1863,17 @@
         "ESTORNO": "Reversal",
         "DEBITO_SAQUE": "Withdrawal",
         "AJUSTE": "Adjustment"
+      },
+      "liberaEm": "Released on {data}",
+      "origem": {
+        "INITIAL_PURCHASE": "First subscription",
+        "RENEWAL": "Renewal",
+        "UPGRADE": "Plan upgrade",
+        "REFUND": "Refund"
+      },
+      "periodicidade": {
+        "MENSAL": "Monthly plan",
+        "ANUAL": "Annual plan"
       }
     },
     "saques": {
@@ -1929,6 +1978,18 @@
         "titulo": "Thanks for your feedback!",
         "texto": "Your answer helps us improve PetJourney."
       }
+    },
+    "tela": {
+      "liberado": "Ready to withdraw. Requests made by the 27th are paid by the 5th.",
+      "disponivel": "Available to withdraw",
+      "liberando": "Being released",
+      "liberandoNota": "Each credit is released 14 days after it comes in",
+      "nadaLiberando": "Nothing waiting in the safety window",
+      "semPix": "Not set up",
+      "trocarPix": "Change",
+      "cadastrarPix": "Add",
+      "sacarTudo": "Withdraw all",
+      "saquesVazio": "When you request a withdrawal, it shows up here with the payment progress."
     }
   },
   "parceiro": {
@@ -1975,6 +2036,9 @@
         "error": "Could not accept",
         "errorDetail": "Check the link or try again."
       }
+    },
+    "equipe": {
+      "titulo": "Team"
     }
   },
   "settings": {
@@ -2013,7 +2077,8 @@
         "escuro": {
           "label": "Dark",
           "hint": "Dark background, for low-light rooms."
-        }
+        },
+        "ondeMais": "You can also switch it in your account menu, at the bottom of the sidebar."
       },
       "menu": {
         "titulo": "Sidebar",
@@ -2036,11 +2101,31 @@
         },
         "compacta": {
           "label": "Compact",
-          "hint": "More screens visible without scrolling."
-        }
+          "hint": "More screens visible without scrolling.",
+          "hintBarra": "Shorter rows in the sidebar, to see more pages without scrolling."
+        },
+        "descricaoBarra": "The height of the sidebar rows."
       },
       "nota": "Preferences stay in this browser and apply on your next visit.",
-      "aplicada": "in use"
+      "aplicada": "in use",
+      "barra": {
+        "titulo": "Sidebar",
+        "descricao": "Which spaces stay open in the sidebar, with their pages in view.",
+        "secoes": {
+          "label": "Only the current space",
+          "hint": "The sidebar opens the space you are in; the others stay on one line, with the count of what needs action."
+        },
+        "lista": {
+          "label": "All spaces",
+          "hint": "Every space stays open at once, with its pages in view."
+        }
+      },
+      "explicacoes": {
+        "titulo": "Explanations",
+        "descricao": "A short text at the top of the Portal pages, saying what each one is for.",
+        "ajuda": "Helpful when you are getting started. Each page also has a button to show or hide it."
+      },
+      "naHora": "Your choices apply right away and are kept in this browser."
     },
     "perfil": {
       "fallbackName": "User",
@@ -2145,6 +2230,16 @@
           "summary": "Could not upload the photo",
           "detailFallback": "Please try again in a moment."
         }
+      },
+      "capaAria": "Your photo and details",
+      "foto": {
+        "trocar": "Change photo",
+        "escolher": "Choose photo",
+        "formatos": "JPG, PNG, WebP or GIF, up to 5 MB."
+      },
+      "secoes": {
+        "identidade": "How your name appears in the portal. The email is your sign-in and cannot be changed here.",
+        "contato": "Phone numbers with area code, so we can reach you."
       }
     },
     "seguranca": {
@@ -2281,7 +2376,10 @@
           }
         }
       }
-    }
+    },
+    "abasAria": "Settings sections",
+    "resumo": "You are signed in as {email}.",
+    "resumoEmpresa": "You are signed in as {email}, at {empresa}."
   },
   "clinico": {
     "modulo": {

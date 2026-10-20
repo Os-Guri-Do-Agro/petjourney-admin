@@ -1,16 +1,33 @@
 <script setup lang="ts">
+/**
+ * Configurações — a conta de quem está usando o portal.
+ *
+ * ## A forma (redesenho total, 19/10/2026)
+ *
+ * Conta não é espaço da barra (mora no menu da pessoa, no pé dela), então a tela não tem destino:
+ * o título é "Configurações", e a frase de estado diz com que e-mail e em que empresa se entrou.
+ * As cinco partes — Perfil, Empresa, Segurança, Aparência e Conta — são abas desta tela, com o
+ * desenho das abas de destino (sublinhado, ícone e nome). Cada aba é um link de verdade
+ * (`?aba=…`, como antes), então voltar, favoritar e abrir em outra guia funcionam, e os
+ * redirecionamentos antigos para `?aba=empresa` continuam caindo no lugar certo.
+ *
+ * Cada aba é uma folha com seções: o nome e uma frase da seção à esquerda, os campos à direita,
+ * e o "Salvar" no rodapé da folha.
+ */
 import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import SettingsAparenciaPanel from '@/components/settings/SettingsAparenciaPanel.vue'
 import SettingsContaPanel from '@/components/settings/SettingsContaPanel.vue'
 import SettingsEmpresaPanel from '@/components/settings/SettingsEmpresaPanel.vue'
 import SettingsPerfilPanel from '@/components/settings/SettingsPerfilPanel.vue'
 import SettingsSegurancaPanel from '@/components/settings/SettingsSegurancaPanel.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
+import { authSessionVersion, getAuthUser } from '@/service/auth/auth-session'
+import { useParceiroStore } from '@/stores/parceiro'
+import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 
 const SETTINGS_TABS = ['perfil', 'empresa', 'seguranca', 'aparencia', 'conta'] as const
 type SettingsTab = (typeof SETTINGS_TABS)[number]
@@ -26,38 +43,57 @@ const HASH_TO_TAB: Record<string, SettingsTab> = {
   conta: 'conta',
 }
 
+const ICONE_DA_ABA: Record<SettingsTab, string> = {
+  perfil: 'ph ph-user-circle',
+  empresa: 'ph ph-buildings',
+  seguranca: 'ph ph-lock-key',
+  aparencia: 'ph ph-palette',
+  conta: 'ph ph-identification-card',
+}
+
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const { activeTab, setTab } = usePartnerTabs(SETTINGS_TABS, 'perfil')
+const { activeTab } = usePartnerTabs(SETTINGS_TABS, 'perfil')
+const parceiroStore = useParceiroStore()
+const perfilStore = useUsuarioPerfilStore()
 
-const tabs = computed(() => [
-  {
-    id: 'perfil',
-    label: t('settings.tabs.perfil.label'),
-    description: t('settings.tabs.perfil.description'),
-  },
-  {
-    id: 'empresa',
-    label: t('settings.tabs.empresa.label'),
-    description: t('settings.tabs.empresa.description'),
-  },
-  {
-    id: 'seguranca',
-    label: t('settings.tabs.seguranca.label'),
-    description: t('settings.tabs.seguranca.description'),
-  },
-  {
-    id: 'aparencia',
-    label: t('settings.tabs.aparencia.label'),
-    description: t('settings.tabs.aparencia.description'),
-  },
-  {
-    id: 'conta',
-    label: t('settings.tabs.conta.label'),
-    description: t('settings.tabs.conta.description'),
-  },
-])
+/** A aba é a mesma URL com outro `?aba=`; Perfil é a tela sem o parâmetro. */
+function destinoDa(aba: SettingsTab) {
+  const query = { ...route.query }
+
+  if (aba === 'perfil') {
+    delete query.aba
+  } else {
+    query.aba = aba
+  }
+
+  return { path: '/settings', query }
+}
+
+const tabs = computed(() =>
+  SETTINGS_TABS.map((id) => ({
+    id,
+    label: t(`settings.tabs.${id}.label`),
+    description: t(`settings.tabs.${id}.description`),
+    icone: ICONE_DA_ABA[id],
+    to: destinoDa(id),
+  })),
+)
+
+/** "Você entrou como carla@… em Clínica Vida Animal." */
+const resumo = computed(() => {
+  void authSessionVersion.value
+  const email = perfilStore.email || getAuthUser()?.email || ''
+
+  if (!email) {
+    return ''
+  }
+
+  return parceiroStore.loadState === 'ready' && parceiroStore.parceiroNome
+    ? t('settings.resumoEmpresa', { email, empresa: parceiroStore.parceiroNome })
+    : t('settings.resumo', { email })
+})
 
 async function resolveLegacyHash() {
   const hashId = route.hash.replace('#', '').trim().toLowerCase()
@@ -95,21 +131,132 @@ watch(
 </script>
 
 <template>
-  <PartnerPageFrame
-    :subtitle="t('settings.subtitle')"
-    :title="t('settings.title')"
-    :loading="false"
-  >
-    <PartnerSectionTabs
-      :tabs="tabs"
-      :active-tab="activeTab"
-      @select="setTab($event as SettingsTab)"
-    />
+  <UiPagina class="tela-conta" :titulo="t('settings.title')" :resumo="resumo" largura="leitura">
+    <nav class="conta-abas" :aria-label="t('settings.abasAria')">
+      <RouterLink
+        v-for="aba in tabs"
+        :key="aba.id"
+        class="conta-abas__aba"
+        :class="{ 'conta-abas__aba--atual': aba.id === activeTab }"
+        :to="aba.to"
+        replace
+        active-class=""
+        exact-active-class=""
+        :aria-current="aba.id === activeTab ? 'page' : undefined"
+        :title="aba.description"
+      >
+        <i :class="aba.icone" aria-hidden="true" />
+        <span>{{ aba.label }}</span>
+      </RouterLink>
+    </nav>
 
     <SettingsPerfilPanel v-if="activeTab === 'perfil'" />
     <SettingsEmpresaPanel v-else-if="activeTab === 'empresa'" />
     <SettingsSegurancaPanel v-else-if="activeTab === 'seguranca'" />
     <SettingsAparenciaPanel v-else-if="activeTab === 'aparencia'" />
     <SettingsContaPanel v-else />
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
+
+<style scoped>
+/*
+ * Botões secundários (contorno e texto) nas cores do Trilha, como nas outras telas redesenhadas:
+ * fora do antigo `.hc-tema` o PrimeVue usaria o cinza do preset.
+ */
+.tela-conta {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+}
+
+/* As abas da conta, no desenho das abas de destino: sublinhado de 3 px no musgo. */
+.conta-abas {
+  display: flex;
+  gap: 4px;
+  margin: -6px 0 24px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--linha);
+  scrollbar-width: none;
+}
+
+.conta-abas::-webkit-scrollbar {
+  display: none;
+}
+
+.conta-abas__aba {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 14px;
+  color: var(--tinta-2);
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.conta-abas__aba:first-child {
+  padding-inline-start: 2px;
+}
+
+.conta-abas__aba i {
+  font-size: 18px;
+}
+
+.conta-abas__aba:hover {
+  color: var(--tinta);
+}
+
+.conta-abas__aba:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid var(--musgo);
+  outline-offset: -4px;
+}
+
+.conta-abas__aba--atual {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.conta-abas__aba--atual i {
+  color: var(--musgo);
+}
+
+.conta-abas__aba--atual::after {
+  position: absolute;
+  right: 14px;
+  bottom: -1px;
+  left: 14px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--musgo);
+  content: '';
+}
+
+.conta-abas__aba--atual:first-child::after {
+  left: 2px;
+}
+
+[dir='rtl'] .conta-abas__aba--atual:first-child::after {
+  right: 2px;
+  left: 14px;
+}
+
+@media (max-width: 900px) {
+  .conta-abas {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+
+  .conta-abas__aba {
+    padding: 0 10px;
+  }
+}
+</style>

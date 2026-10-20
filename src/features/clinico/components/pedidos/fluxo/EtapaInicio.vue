@@ -218,15 +218,15 @@ function especieDe(petId: string) {
 }
 
 .inicio__regra {
-  font-size: 0.75rem;
+  font-size: 13px;
 }
 
 .inicio__mensagem {
   margin: 0;
   padding: 0.5rem 0.65rem;
   border-radius: 0.6rem;
-  background: var(--hc-fundo);
-  color: var(--hc-tinta-2);
+  background: var(--superficie-2);
+  color: var(--tinta-2);
   font-size: 0.8125rem;
   line-height: 1.45;
 }

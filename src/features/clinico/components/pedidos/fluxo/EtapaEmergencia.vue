@@ -167,21 +167,25 @@ function naoEEmergencia() {
 }
 
 .emergencia__numero {
-  font-size: 1.5rem;
+  font-family: var(--font-dados);
+  font-size: 28px;
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 650;
   letter-spacing: -0.01em;
 }
 
 .emergencia__acao {
-  min-height: 2.9rem;
+  min-height: 52px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
   justify-content: center;
   text-decoration: none;
 }
 
 .emergencia__orientacao {
   margin: 0;
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   line-height: 1.5;
 }
 
@@ -189,7 +193,7 @@ function naoEEmergencia() {
   display: grid;
   margin: 0.35rem 0 0;
   padding-inline-start: 1.1rem;
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   gap: 0.2rem;
   line-height: 1.4;
 }

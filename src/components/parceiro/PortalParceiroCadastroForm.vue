@@ -343,87 +343,95 @@ function handleSubmit() {
 </template>
 
 <style scoped>
+/* O formulário do cadastro nos tokens do Trilha: rótulos de campo em frase, campos do kit. */
 .cad-form-shell {
   display: grid;
-  gap: 1rem;
+  gap: 18px;
 }
 
+/* Dados | Programas: um controle segmentado, não uma fileira de pílulas. */
 .cad-tabs.p-tablist {
   overflow: visible;
   background: transparent;
 }
 
-.cad-tabs :deep(.p-tablist-tab-list) {
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  padding: 0.28rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--partner-primary-soft) 10%, transparent);
+.cad-tabs :deep(.p-tablist-content) {
+  overflow: visible;
 }
 
-/* Destaque em pílula — a barra deslizante do Aura não se aplica aqui. */
+.cad-tabs :deep(.p-tablist-tab-list) {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 3px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--superficie-3);
+}
+
 .cad-tabs :deep(.p-tablist-active-bar) {
   display: none;
 }
 
 .cad-tabs__button.p-tab {
   display: inline-flex;
+  min-height: 36px;
   align-items: center;
-  gap: 0.45rem;
+  gap: 8px;
   margin: 0;
-  padding: 0.48rem 0.9rem;
-  border: 1px solid transparent;
-  border-radius: 0.62rem;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 9px;
   background: transparent;
-  color: var(--partner-muted);
-  font-size: 0.84rem;
-  font-weight: 650;
+  color: var(--tinta-2);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .cad-tabs__button i {
-  font-size: 0.8rem;
+  font-size: 16px;
 }
 
 .cad-tabs__button.p-tab:not(.p-tab-active):not(.p-disabled):hover {
-  border-color: transparent;
-  background: color-mix(in srgb, var(--partner-primary-soft) 35%, transparent);
-  color: var(--partner-text);
+  background: transparent;
+  color: var(--tinta);
 }
 
 .cad-tabs__button.p-tab-active {
-  border-color: color-mix(in srgb, var(--partner-primary-strong) 35%, transparent);
-  background: var(--partner-primary);
-  color: var(--partner-on-primary);
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.cad-tabs__button.p-tab:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: 1px;
 }
 
 .cad-tabs__count {
-  display: grid;
-  min-width: 1.25rem;
-  height: 1.25rem;
+  display: inline-grid;
+  min-width: 22px;
+  height: 20px;
   place-items: center;
-  padding: 0 0.3rem;
+  padding: 0 6px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 20%, var(--partner-card));
-  color: var(--partner-primary-strong);
-  font-size: 0.7rem;
-  font-weight: 750;
-}
-
-.cad-tabs__button.p-tab-active .cad-tabs__count {
-  background: color-mix(in srgb, var(--partner-on-primary) 26%, transparent);
-  color: var(--partner-on-primary);
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
+  font-family: var(--font-dados);
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .cad-form {
   display: grid;
-  gap: 0.9rem;
+  gap: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .cad-form__field {
   display: grid;
-  gap: 0.35rem;
+  gap: 6px;
   min-width: 0;
   /* Campos vizinhos com hint deixam a linha mais alta; sem isto o input estica junto. */
   align-content: start;
@@ -434,53 +442,59 @@ function handleSubmit() {
 }
 
 .cad-form__field label {
-  color: var(--partner-text);
-  font-size: 0.82rem;
-  font-weight: 600;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 550;
 }
 
 .cad-form__required {
-  color: var(--partner-warm-text);
+  color: var(--risco-tinta);
 }
 
 .cad-form__error {
-  color: var(--partner-warm-text);
-  font-size: 0.78rem;
+  color: var(--risco-tinta);
+  font-size: 13px;
 }
 
 .cad-form__hint {
-  color: var(--partner-faint);
-  font-size: 0.75rem;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .cad-form__legend {
   grid-column: 1 / -1;
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.8rem;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
+.cad-form__field :deep(.p-inputtext),
+.cad-form__field :deep(.p-select) {
+  width: 100%;
+  min-height: 44px;
+}
+
+/* O que vai junto no envio: uma faixa no tom de fundo, com o link para mudar. */
 .cad-resumo {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 0.75rem;
-  padding: 0.7rem 0.9rem;
-  border: 1px solid color-mix(in srgb, var(--partner-primary) 24%, var(--partner-line));
-  border-radius: 0.9rem;
-  background: color-mix(in srgb, var(--partner-primary-soft) 14%, var(--partner-card));
+  gap: 8px 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
 .cad-resumo__label {
-  color: var(--partner-text);
-  font-size: 0.8rem;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .cad-resumo__list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.7rem;
+  gap: 6px 14px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -489,94 +503,31 @@ function handleSubmit() {
 .cad-resumo__list li {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--partner-muted);
-  font-size: 0.8rem;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 .cad-resumo__list i {
-  color: var(--partner-primary-strong);
-  font-size: 0.7rem;
+  color: var(--ok-tinta);
+  font-size: 14px;
 }
 
 .cad-resumo__link.p-button {
   margin-inline-start: auto;
   padding: 0;
-  color: var(--partner-primary-strong);
-  font-size: 0.8rem;
+  color: var(--musgo);
+  font-size: 13.5px;
 }
 
 .cad-resumo__link.p-button :deep(.p-button-label) {
-  font-weight: 700;
-  text-decoration: underline;
+  font-weight: 600;
 }
 
 .cad-form__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.cad-form__field :deep(.p-inputtext),
-.cad-form__field :deep(.p-select) {
-  width: 100%;
-  min-height: 2.85rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.8rem;
-  background: var(--partner-surface);
-  color: var(--partner-text);
-  box-shadow: none;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease;
-}
-
-.cad-form__field :deep(.p-inputtext) {
-  padding: 0.7rem 0.85rem;
-  caret-color: var(--partner-primary-strong);
-}
-
-.cad-form__field :deep(.p-inputtext::placeholder) {
-  color: var(--partner-faint);
-  opacity: 1;
-}
-
-.cad-form__field :deep(.p-select-label) {
-  color: var(--partner-text);
-}
-
-.cad-form__field :deep(.p-select-label.p-placeholder) {
-  color: var(--partner-faint);
-}
-
-.cad-form__field :deep(.p-select-dropdown),
-.cad-form__field :deep(.p-select-clear-icon) {
-  color: var(--partner-muted);
-}
-
-.cad-form__field :deep(.p-inputtext:hover),
-.cad-form__field :deep(.p-select:not(.p-disabled):hover) {
-  border-color: color-mix(in srgb, var(--partner-primary) 40%, var(--partner-line));
-  background: var(--partner-surface);
-}
-
-.cad-form__field :deep(.p-inputtext:focus),
-.cad-form__field :deep(.p-inputtext:focus-visible),
-.cad-form__field :deep(.p-select.p-focus),
-.cad-form__field :deep(.p-select:not(.p-disabled).p-focus) {
-  outline: none;
-  border-color: var(--partner-primary);
-  background: var(--partner-surface);
-  color: var(--partner-text);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-primary) 22%, transparent);
-}
-
-.cad-form__field :deep(.p-inputtext.p-invalid),
-.cad-form__field :deep(.p-inputtext.p-invalid:focus),
-.cad-form__field :deep(.p-inputtext.p-invalid:focus-visible) {
-  border-color: var(--partner-warm-text);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-warm-text) 18%, transparent);
+  gap: 8px;
 }
 
 @media (max-width: 720px) {

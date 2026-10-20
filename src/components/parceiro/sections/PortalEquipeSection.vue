@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import { useToast } from 'primevue/usetoast'
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
-import AuthTextField from '@/components/auth/AuthTextField.vue'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { convidarMembroEquipe, removerMembroEquipe } from '@/service/parceiro/parceiro-portal-service'
@@ -92,82 +92,109 @@ async function handleRemoveMember() {
 </script>
 
 <template>
+  <!--
+    A equipe em três blocos: aceitar um convite recebido, convidar alguém e remover alguém. Os dois
+    últimos são do dono; quem é operador vê, no lugar deles, por que não pode.
+  -->
   <div class="equipe">
-    <p class="equipe__intro">
-      Papel atual: <strong>{{ store.papel ?? '-' }}</strong>.
-      Apenas donos convidam ou removem membros.
+    <p class="equipe__papel">
+      <span class="ui-selo ui-selo--lugar">
+        <i class="ph ph-identification-badge" aria-hidden="true" />
+        Papel atual: {{ store.papel ?? '-' }}
+      </span>
+      <span>Apenas donos convidam ou removem membros.</span>
     </p>
 
-    <div class="equipe__grid">
-      <article class="equipe-card equipe-card--muted">
-        <h4>Recebeu convite?</h4>
-        <p>Aceite com o ID da empresa enviado por e-mail.</p>
-        <Button as="router-link" label="Aceitar convite" size="small" to="/parceiro/convite" />
-      </article>
+    <div class="equipe__grade">
+      <section class="bloco ui-folha" aria-labelledby="equipe-convite">
+        <span class="bloco__icone" aria-hidden="true"><i class="ph ph-envelope-open" /></span>
+        <h2 id="equipe-convite" class="bloco__titulo">Recebeu convite?</h2>
+        <p class="bloco__texto">Aceite com o ID da empresa enviado por e-mail.</p>
+        <RouterLink class="p-button p-component p-button-secondary p-button-outlined bloco__link" to="/parceiro/convite">
+          Aceitar convite
+        </RouterLink>
+      </section>
 
-      <article v-if="store.isDono" class="equipe-card">
-        <h4>Convidar membro</h4>
-        <div class="equipe-form">
-          <AuthTextField
-            id="invite-email"
-            v-model="inviteEmail"
-            autocomplete="email"
-            :disabled="inviting || !store.podeOperar"
-            label="E-mail"
-            placeholder="operador@empresa.com"
-            type="email"
-          />
-          <label class="equipe-select">
-            <span>Papel</span>
+      <section v-if="store.isDono" class="bloco ui-folha" aria-labelledby="equipe-convidar">
+        <span class="bloco__icone" aria-hidden="true"><i class="ph ph-user-plus" /></span>
+        <h2 id="equipe-convidar" class="bloco__titulo">Convidar membro</h2>
+        <form class="bloco__form" novalidate @submit.prevent="handleInvite">
+          <div class="campo">
+            <label for="invite-email">E-mail</label>
+            <InputText
+              id="invite-email"
+              v-model="inviteEmail"
+              type="email"
+              autocomplete="email"
+              placeholder="operador@empresa.com"
+              :disabled="inviting || !store.podeOperar"
+            />
+          </div>
+          <div class="campo">
+            <label id="invite-papel-rotulo" for="invite-papel">Papel</label>
             <Select
               v-model="invitePapel"
+              label-id="invite-papel"
+              aria-labelledby="invite-papel-rotulo"
               :disabled="inviting || !store.podeOperar"
               option-label="label"
               option-value="value"
               :options="papelOptions"
             />
-          </label>
+          </div>
           <Button
+            type="submit"
+            icon="ph ph-paper-plane-tilt"
             label="Enviar convite"
-            size="small"
             :disabled="!store.podeOperar || inviting"
             :loading="inviting"
-            @click="handleInvite"
           />
-        </div>
-      </article>
+        </form>
+      </section>
 
-      <article v-if="store.isDono" class="equipe-card">
-        <h4>Remover membro</h4>
-        <p class="equipe-card__hint">Informe o ID do usuário (fornecido pelo suporte).</p>
-        <div class="equipe-form equipe-form--inline">
-          <AuthTextField
-            id="remove-user-id"
-            v-model="removeUserId"
-            :disabled="removing || !store.podeOperar"
-            label="ID do usuário"
-            placeholder="uuid-do-usuario"
-          />
+      <section v-if="store.isDono" class="bloco ui-folha" aria-labelledby="equipe-remover">
+        <span class="bloco__icone bloco__icone--risco" aria-hidden="true">
+          <i class="ph ph-user-minus" />
+        </span>
+        <h2 id="equipe-remover" class="bloco__titulo">Remover membro</h2>
+        <p class="bloco__texto">Informe o ID do usuário (fornecido pelo suporte).</p>
+        <form class="bloco__form" novalidate @submit.prevent="requestRemoveMember">
+          <div class="campo">
+            <label for="remove-user-id">ID do usuário</label>
+            <InputText
+              id="remove-user-id"
+              v-model="removeUserId"
+              placeholder="uuid-do-usuario"
+              autocomplete="off"
+              spellcheck="false"
+              :disabled="removing || !store.podeOperar"
+            />
+          </div>
           <Button
+            type="submit"
+            icon="ph ph-user-minus"
             label="Remover"
             severity="danger"
-            size="small"
+            outlined
             :disabled="!store.podeOperar || removing"
             :loading="removing"
-            @click="requestRemoveMember"
           />
-        </div>
-      </article>
+        </form>
+      </section>
 
-      <article v-if="!store.isDono" class="equipe-card equipe-card--muted">
-        <h4>Acesso de operador</h4>
-        <p>Operadores acompanham a parceria, mas não enviam convites nem removem membros.</p>
-      </article>
+      <section v-if="!store.isDono" class="bloco ui-folha" aria-labelledby="equipe-operador">
+        <span class="bloco__icone" aria-hidden="true"><i class="ph ph-lock-simple" /></span>
+        <h2 id="equipe-operador" class="bloco__titulo">Acesso de operador</h2>
+        <p class="bloco__texto">
+          Operadores acompanham a parceria, mas não enviam convites nem removem membros.
+        </p>
+      </section>
     </div>
 
-    <p class="equipe__footer">
+    <p class="equipe__rodape">
+      <i class="ph ph-link" aria-hidden="true" />
       Link para convidados:
-      <RouterLink to="/parceiro/convite">/parceiro/convite?parceiroId=...</RouterLink>
+      <RouterLink class="ui-mais" to="/parceiro/convite">/parceiro/convite?parceiroId=...</RouterLink>
     </p>
 
     <ConfirmActionDialog
@@ -184,72 +211,104 @@ async function handleRemoveMember() {
 <style scoped>
 .equipe {
   display: grid;
-  gap: 0.85rem;
+  gap: 18px;
 }
 
-.equipe__intro,
-.equipe__footer,
-.equipe-card__hint {
+.equipe__papel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.86rem;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
-.equipe__footer a {
-  color: var(--partner-primary-strong);
+.equipe__grade {
+  display: grid;
+  align-items: start;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.bloco {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 8px;
+  padding: 22px;
+}
+
+.bloco__icone {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 21px;
+}
+
+.bloco__icone--risco {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+.bloco__titulo {
+  margin: 6px 0 0;
+  color: var(--tinta);
+  font-size: 17px;
   font-weight: 600;
 }
 
-.equipe__grid {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-}
-
-.equipe-card {
-  display: grid;
-  gap: 0.6rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.9rem;
-  background: var(--partner-surface);
-}
-
-.equipe-card--muted {
-  background: color-mix(in srgb, var(--partner-primary-soft) 10%, var(--partner-card));
-}
-
-.equipe-card h4 {
+.bloco__texto {
   margin: 0;
-  font-size: 0.92rem;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-.equipe-card p {
+.bloco__link {
+  margin-top: 8px;
+  text-decoration: none;
+}
+
+.bloco__form {
+  display: grid;
+  width: 100%;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.campo {
+  display: grid;
+  gap: 6px;
+}
+
+.campo label {
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 550;
+}
+
+.campo :deep(.p-inputtext),
+.campo :deep(.p-select) {
+  width: 100%;
+}
+
+.equipe__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.82rem;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
-.equipe-form {
-  display: grid;
-  gap: 0.65rem;
-}
-
-.equipe-form--inline {
-  align-items: end;
-  grid-template-columns: 1fr auto;
-}
-
-.equipe-select {
-  display: grid;
-  gap: 0.3rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-@media (max-width: 640px) {
-  .equipe-form--inline {
-    grid-template-columns: 1fr;
-  }
+.equipe__rodape > i {
+  color: var(--tinta-3);
+  font-size: 16px;
 }
 </style>

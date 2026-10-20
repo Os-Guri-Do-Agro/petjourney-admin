@@ -83,46 +83,50 @@ function aoTeclar(evento: KeyboardEvent, nota: number) {
 <style scoped>
 .escala-nota {
   display: grid;
+  gap: 4px;
   grid-template-columns: repeat(11, minmax(0, 1fr));
-  gap: 0.3rem;
 }
 
 /*
- * 44 px de altura: alvo de toque de tablet, mesmo com as onze casas numa linha. Sem a sombra que o
- * `.hc-tema` dá a todo botão: onze casas com sombra viravam onze cartõezinhos.
+ * 44 px de altura: alvo de toque de tablet, mesmo com as onze casas numa linha. A casa marcada é
+ * a única cheia (musgo, a cor da ação); as outras são contorno, todas iguais.
  */
 .escala-nota .escala-nota__casa.p-button {
-  --hc-botao-sombra: none;
-
   min-width: 0;
-  min-height: 2.75rem;
+  min-height: 44px;
   padding: 0;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.6rem;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
+  border: 1px solid var(--linha-forte);
+  border-radius: 10px;
+  background: var(--superficie);
+  box-shadow: none;
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   transition:
-    background-color 150ms ease-out,
-    border-color 150ms ease-out,
-    color 150ms ease-out;
+    background-color var(--pj-tempo-curto, 140ms) ease-out,
+    border-color var(--pj-tempo-curto, 140ms) ease-out,
+    color var(--pj-tempo-curto, 140ms) ease-out;
 }
 
 .escala-nota .escala-nota__casa.p-button:not(:disabled):hover {
-  --hc-botao-sombra: none;
+  border-color: var(--tinta-3);
+  background: var(--superficie-2);
+  color: var(--tinta);
+}
 
-  border-color: var(--hc-tinta-3);
-  background: var(--hc-fundo);
-  color: var(--hc-tinta);
+.escala-nota .escala-nota__casa.p-button:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: 2px;
 }
 
 .escala-nota .escala-nota__casa--marcada.p-button,
 .escala-nota .escala-nota__casa--marcada.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca-forte);
-  background: var(--hc-marca-forte);
-  color: var(--hc-cartao);
-  font-weight: 800;
+  border-color: var(--musgo);
+  background: var(--musgo);
+  color: var(--sobre-musgo);
+  font-weight: 700;
 }
 
 @media (prefers-reduced-motion: reduce) {

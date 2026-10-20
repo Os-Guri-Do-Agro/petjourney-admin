@@ -1,18 +1,23 @@
 <script setup lang="ts">
+/**
+ * O QR de indicação com o que se faz com ele: baixar a imagem e imprimir o cartaz do balcão.
+ *
+ * O quadro em volta do QR é branco nos dois temas: é a zona de silêncio que o leitor de QR precisa
+ * para achar as bordas, e no escuro um QR sobre fundo escuro não lê em câmera nenhuma.
+ */
 import Button from 'primevue/button'
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useExportarQr } from '@/composables/useExportarQr'
 import { LightColors } from '@/theme/colors'
-import { currentColors } from '@/theme/color-mode'
 
 const props = withDefaults(
   defineProps<{
     imageUrl: string
     code: string
     disabled?: boolean
-    /** `sm` = visão geral; `md` = divulgação */
+    /** `sm` = selo pequeno; `md` = divulgação */
     size?: 'sm' | 'md'
   }>(),
   {
@@ -22,10 +27,18 @@ const props = withDefaults(
 )
 
 const { t } = useI18n()
+
+/** A zona de silêncio do QR: branco de verdade nos dois temas (o leitor precisa do contraste). */
+const estiloDoQuadro = { '--qr-papel': LightColors.text.inverse }
+
 const imgRef = ref<HTMLImageElement | null>(null)
 
-/* Baixar o QR: a mesma lógica da janela de QR da visão geral — ver `useExportarQr`. */
-const { exportando: exporting, exportar: exportQr } = useExportarQr({
+/* Baixar e imprimir: a mesma lógica da janela de QR do Início — ver `useExportarQr`. */
+const {
+  exportando: exporting,
+  exportar: exportQr,
+  imprimir,
+} = useExportarQr({
   imageUrl: () => props.imageUrl,
   code: () => props.code,
   imgRef,
@@ -47,30 +60,13 @@ watch(
     imagemFalhou.value = false
   },
 )
-
-const blockStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--iqr-card': colors.dashboard.surface,
-    '--iqr-surface': colors.dashboard.surfaceSoft,
-    '--iqr-line': colors.dashboard.lineSoft,
-    '--iqr-text': colors.dashboard.text,
-    '--iqr-muted': colors.dashboard.muted,
-    '--iqr-primary': colors.vet.primary,
-    '--iqr-primary-soft': colors.vet.secondary,
-    '--iqr-primary-strong': colors.dashboard.primaryStrong,
-    /** Quiet zone do QR: branco puro, para não tirar contraste de leitor nenhum. */
-    '--iqr-img-bg': LightColors.text.inverse,
-  }
-})
 </script>
 
 <template>
   <figure
     class="indicacao-qr"
     :class="[`indicacao-qr--${props.size}`, { 'indicacao-qr--disabled': props.disabled }]"
-    :style="blockStyle"
+    :style="estiloDoQuadro"
   >
     <div class="indicacao-qr__frame" :class="{ 'indicacao-qr__frame--falhou': imagemFalhou }">
       <img
@@ -86,134 +82,117 @@ const blockStyle = computed(() => {
         @load="imagemFalhou = false"
       />
       <span v-if="imagemFalhou" class="indicacao-qr__fallback" aria-hidden="true">
-        <i class="ph ph-image" />
+        <i class="ph ph-image-broken" />
       </span>
     </div>
+
     <figcaption>
-      {{
-        imagemFalhou ? t('divulgacao.shareKit.qrIndisponivel') : t('divulgacao.shareKit.qrCaption')
-      }}
+      <i v-if="!imagemFalhou" class="ph ph-printer" aria-hidden="true" />
+      {{ imagemFalhou ? t('divulgacao.shareKit.qrIndisponivel') : t('divulgacao.kit.qr') }}
     </figcaption>
-    <!-- Exportar baixa a mesma URL que acabou de falhar: some em vez de prometer. -->
-    <Button
-      v-if="!imagemFalhou"
-      type="button"
-      class="indicacao-qr__export"
-      size="small"
-      severity="secondary"
-      icon="ph ph-download-simple"
-      :label="t('divulgacao.shareKit.qrExport')"
-      :disabled="props.disabled"
-      :loading="exporting"
-      @click="exportQr"
-    />
+
+    <!-- Exportar baixaria a mesma URL que acabou de falhar: as ações somem em vez de prometer. -->
+    <div v-if="!imagemFalhou" class="indicacao-qr__acoes">
+      <Button
+        type="button"
+        class="indicacao-qr__export"
+        severity="secondary"
+        outlined
+        icon="ph ph-download-simple"
+        :label="t('inicio.indique.baixar')"
+        :disabled="props.disabled"
+        :loading="exporting"
+        @click="exportQr"
+      />
+      <Button
+        type="button"
+        class="indicacao-qr__imprimir"
+        severity="secondary"
+        outlined
+        icon="ph ph-printer"
+        :label="t('inicio.indique.imprimir')"
+        :disabled="props.disabled"
+        @click="imprimir(t('inicio.indique.instrucao'))"
+      />
+    </div>
   </figure>
 </template>
 
 <style scoped>
 .indicacao-qr {
   display: grid;
-  gap: 0.7rem;
   justify-items: center;
-  align-content: center;
-  height: 100%;
-  /* Os dois donos deste bloco usam coluna `auto`, que cresce com o conteúdo.
-     Sem teto, a legenda longa do estado indisponível esticava o QR e espremia
-     o texto ao lado até virar uma coluna de duas palavras. */
-  max-width: 14rem;
+  gap: 12px;
+  width: 100%;
+  max-width: 15rem;
   margin: 0;
-  padding: 1.1rem;
-  border: 1px solid var(--iqr-line);
-  border-radius: 1.1rem;
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--iqr-primary-soft) 28%, var(--iqr-surface)) 0%,
-    var(--iqr-surface) 60%
-  );
-  box-sizing: border-box;
 }
 
 .indicacao-qr__frame {
   display: grid;
   place-items: center;
-  padding: 0.6rem;
-  border-radius: 0.95rem;
-  background: var(--iqr-img-bg);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--iqr-text) 8%, transparent);
+  padding: 10px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--qr-papel);
 }
 
-/* Serviço de imagem fora: o quadro vira placeholder tracejado, não caixa branca. */
+/* Serviço de imagem fora: o quadro vira um espaço tracejado, não uma caixa branca muda. */
 .indicacao-qr__frame--falhou {
-  border: 1px dashed color-mix(in srgb, var(--iqr-text) 22%, transparent);
-  background: color-mix(in srgb, var(--iqr-surface) 70%, var(--iqr-card));
-  box-shadow: none;
+  border-style: dashed;
+  border-color: var(--linha-forte);
+  background: var(--superficie);
+}
+
+.indicacao-qr__img,
+.indicacao-qr__fallback {
+  display: block;
+  width: 168px;
+  height: 168px;
+  object-fit: contain;
 }
 
 .indicacao-qr__fallback {
   display: grid;
-  width: 10rem;
-  height: 10rem;
   place-items: center;
-  color: var(--iqr-muted);
-  font-size: 1.9rem;
+  color: var(--tinta-3);
+  font-size: 32px;
 }
 
+.indicacao-qr--sm .indicacao-qr__img,
 .indicacao-qr--sm .indicacao-qr__fallback {
-  width: 6.5rem;
-  height: 6.5rem;
-}
-
-/* `md` é o QR da Divulgação: ali ele é o convite à ação, não um selo de canto. */
-.indicacao-qr__img {
-  display: block;
-  width: 10rem;
-  height: 10rem;
-  object-fit: contain;
-}
-
-.indicacao-qr--sm .indicacao-qr__img {
-  width: 6.5rem;
-  height: 6.5rem;
-}
-
-/* `sm` é o selo do dashboard: some no canto do card, sem roubar a leitura. */
-.indicacao-qr--sm {
-  min-width: 9.75rem;
-  max-width: 11.5rem;
-  padding: 0.75rem;
-  gap: 0.45rem;
-}
-
-.indicacao-qr--sm .indicacao-qr__frame {
-  padding: 0.45rem;
-  border-radius: 0.85rem;
+  width: 104px;
+  height: 104px;
 }
 
 .indicacao-qr figcaption {
-  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   max-width: 100%;
-  color: var(--iqr-muted);
-  font-size: 0.7rem;
-  font-weight: 650;
-  letter-spacing: 0.02em;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.35;
   text-align: center;
-  line-height: 1.3;
   overflow-wrap: anywhere;
 }
 
-.indicacao-qr :deep(.indicacao-qr__export.p-button) {
-  width: 100%;
-  justify-content: center;
-  min-height: 2.25rem;
-  border-color: color-mix(in srgb, var(--iqr-primary) 28%, var(--iqr-line));
-  background: color-mix(in srgb, var(--iqr-primary-soft) 40%, var(--iqr-card));
-  color: var(--iqr-primary-strong);
-  font-size: 0.78rem;
-  font-weight: 700;
+.indicacao-qr figcaption i {
+  color: var(--pj-lugar, var(--portal));
+  font-size: 16px;
 }
 
-.indicacao-qr :deep(.indicacao-qr__export.p-button:not(:disabled):hover) {
-  filter: brightness(1.03);
+.indicacao-qr__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.indicacao-qr__acoes :deep(.p-button) {
+  flex: 1 1 auto;
+  justify-content: center;
 }
 
 .indicacao-qr--disabled {

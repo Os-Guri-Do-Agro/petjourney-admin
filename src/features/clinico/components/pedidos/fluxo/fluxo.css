@@ -2,8 +2,9 @@
  * O fluxo do responsável — as mesmas peças no celular do app e na página pública.
  *
  * Global e com prefixo próprio (`fx-`) porque as etapas são componentes separados que dividem o
- * mesmo acabamento, como os cartões da visão geral. É tela de celular: alvo de toque de 44 px,
- * uma coluna, a ação principal cheia no pé.
+ * mesmo acabamento. É tela de celular, de quem talvez nunca tenha usado o PetJourney: alvo de toque
+ * de 48 px ou mais, letra de 15 px, uma coluna, a ação principal cheia no pé, e nada em caixa alta.
+ * Só tokens do Trilha (redesenho de 19/10/2026).
  *
  * Escolha é linha de lista, não cartão: um botão com o rosto ou o ícone à esquerda e a seta à
  * direita. Quando tudo vira cartão, nada tem hierarquia — e o celular é pequeno demais para isso.
@@ -14,9 +15,28 @@
   min-height: 0;
   flex: 1;
   flex-direction: column;
-  gap: 0.85rem;
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
+  gap: 14px;
+  color: var(--tinta);
+  font-family: var(--font-texto);
+  font-size: 15px;
+}
+
+/* Campos de 48 px e letra de 16 px: abaixo disso o iPhone aproxima a tela ao tocar no campo. */
+.fx .p-inputtext,
+.fx .p-textarea,
+.fx .p-select-label,
+.fx .p-datepicker-input {
+  font-size: 16px;
+}
+
+.fx .p-inputtext:not(.p-datepicker-input):not(.p-textarea),
+.fx .p-select,
+.fx .p-datepicker {
+  min-height: 48px;
+}
+
+.fx .p-select {
+  align-items: center;
 }
 
 /* ------------------------------------------------------------------ topo da etapa */
@@ -24,24 +44,25 @@
 .fx-topo {
   display: flex;
   align-items: center;
-  min-height: 2.75rem;
-  gap: 0.35rem;
+  min-height: 44px;
+  gap: 6px;
 }
 
 .fx-topo__titulo {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 750;
-  letter-spacing: -0.01em;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
   line-height: 1.25;
 }
 
 .fx-topo__voltar.p-button {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
-  margin-inline-start: -0.6rem;
-  color: var(--hc-tinta);
+  margin-inline-start: -10px;
+  color: var(--tinta);
+  font-size: 18px;
 }
 
 /* O conteúdo rola; o pé com a ação fica parado. */
@@ -55,34 +76,37 @@
   grid-auto-rows: max-content;
   flex: 1;
   align-content: start;
-  gap: 0.85rem;
+  gap: 14px;
   overscroll-behavior: contain;
-  padding-block-end: 0.25rem;
+  padding-block-end: 4px;
 }
 
 .fx-rodape {
   display: grid;
-  gap: 0.5rem;
-  padding-top: 0.5rem;
+  gap: 10px;
+  padding-top: 8px;
 }
 
+/* A ação do passo: grande, cheia, com a palavra do que acontece ao tocar. */
 .fx-rodape .p-button {
-  min-height: 2.9rem;
+  min-height: 52px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .fx-ajuda {
   margin: 0;
-  color: var(--hc-tinta-2);
-  line-height: 1.45;
+  color: var(--tinta-2);
+  line-height: 1.5;
 }
 
+/* O nome de um grupo de linhas ("Próximas hospedagens", "Pedidos"): frase, não sobretítulo. */
 .fx-rotulo {
-  margin: 0;
-  color: var(--hc-tinta-3);
-  font-size: 0.6875rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin: 4px 0 -4px;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------------------ a linha de escolha */
@@ -92,14 +116,14 @@
   margin: 0;
   padding: 0;
   overflow: hidden;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.9rem;
-  background: var(--hc-cartao);
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie);
   list-style: none;
 }
 
 .fx-lista > li + li {
-  border-top: 1px solid var(--hc-linha);
+  border-top: 1px solid var(--linha);
 }
 
 .fx-opcao,
@@ -108,28 +132,29 @@
   height: auto;
   align-items: center;
   width: 100%;
-  min-height: 3.25rem;
+  min-height: 64px;
   justify-content: flex-start;
-  padding: 0.6rem 0.8rem;
+  padding: 12px 14px;
   border: 0;
   border-radius: 0;
-  gap: 0.7rem;
+  gap: 12px;
   background: transparent;
-  color: var(--hc-tinta);
+  color: var(--tinta);
+  font-size: 15px;
   font-weight: 500;
   text-align: start;
   cursor: pointer;
-  transition: background-color 150ms ease-out;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .fx-opcao.p-button:not(:disabled):hover,
 label.fx-opcao:hover {
-  background: var(--hc-fundo);
-  color: var(--hc-tinta);
+  background: var(--superficie-2);
+  color: var(--tinta);
 }
 
 .fx-opcao.p-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
+  outline: 2px solid var(--musgo);
   outline-offset: -2px;
 }
 
@@ -140,98 +165,104 @@ label.fx-opcao:hover {
 }
 
 .fx-opcao--escolhida {
-  background: var(--hc-marca-clara);
+  background: var(--musgo-fundo);
 }
 
 .fx-opcao__icone {
   display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
-  border-radius: 0.65rem;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-  font-size: 1.1rem;
+  border-radius: 12px;
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  font-size: 20px;
   place-items: center;
 }
 
 .fx-opcao__icone--emergencia {
-  background: var(--hc-coral-fundo);
-  color: var(--hc-coral-tinta);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .fx-opcao__texto {
   display: grid;
   min-width: 0;
   flex: 1;
-  gap: 0.1rem;
+  gap: 2px;
 }
 
 .fx-opcao__texto strong {
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .fx-opcao__texto > span {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  line-height: 1.35;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 .fx-opcao__fim {
   flex: 0 0 auto;
-  color: var(--hc-tinta-3);
+  color: var(--tinta-3);
+  font-size: 18px;
+}
+
+[dir='rtl'] .fx-opcao__fim.ph-caret-right {
+  transform: scaleX(-1);
 }
 
 /* ------------------------------------------------------------------ bloco de texto */
 
 .fx-bloco {
   display: grid;
-  padding: 0.85rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.9rem;
-  gap: 0.5rem;
-  background: var(--hc-cartao);
+  padding: 16px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  gap: 10px;
+  background: var(--superficie);
 }
 
 .fx-linha {
   display: flex;
   align-items: baseline;
   margin: 0;
-  gap: 0.5rem;
-  line-height: 1.45;
+  gap: 8px;
+  line-height: 1.5;
 }
 
 .fx-linha > i {
   flex: 0 0 auto;
-  color: var(--hc-marca);
+  color: var(--musgo);
   transform: translateY(0.12rem);
 }
 
 .fx-linha--atencao,
 .fx-linha--atencao > i {
-  color: var(--clinic-attention-text);
+  color: var(--atencao-tinta);
 }
 
 .fx-linha--risco,
 .fx-linha--risco > i {
-  color: var(--clinic-risk-text);
+  color: var(--risco-tinta);
 }
 
 .fx-linha--suave {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 .fx-campo {
   display: grid;
-  gap: 0.3rem;
+  gap: 7px;
 }
 
 .fx-campo > span:first-child {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 550;
 }
 
 /* ------------------------------------------------------------------ escolhas em cartão */
@@ -239,54 +270,79 @@ label.fx-opcao:hover {
 /*
  * Escolha curta e de toque — sexo, espécie, período, atalho de dias: cada opção é um cartão, com o
  * ícone em cima e o nome embaixo, e não um trilho de texto. O ícone diz antes da leitura, e o alvo
- * do toque é o cartão inteiro. Vai no `SelectButton` com `class="grupo fx-escolhas"` (o `grupo`
- * tira o trilho do tema) e, quando tem ícone, o `#option` com `.fx-escolha`. As colunas vêm de
- * `--fx-colunas` (duas, se nada disser).
+ * do toque é o cartão inteiro. Vai no `SelectButton` com `class="grupo fx-escolhas"` e, quando tem
+ * ícone, o `#option` com `.fx-escolha`. As colunas vêm de `--fx-colunas` (duas, se nada disser).
  *
- * `.fx` na frente porque o PrimeVue injeta o estilo dele depois, sem camada.
+ * O tema desenha todo `SelectButton.grupo` como trilho afundado (`trilha-tema.css`, com
+ * `html.trilha body` na frente); aqui o mesmo prefixo mais `.fx` vence, e o cartão continua cartão:
+ * o escolhido em musgo claro, com a borda de musgo — fundo, borda e peso, além da cor da palavra.
  */
-.fx .fx-escolhas {
+html.trilha body .fx .fx-escolhas.p-selectbutton {
   display: grid;
-  gap: 0.5rem;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   grid-template-columns: repeat(var(--fx-colunas, 2), minmax(0, 1fr));
 }
 
-.fx .fx-escolhas .p-togglebutton {
+html.trilha body .fx .fx-escolhas.p-selectbutton .p-togglebutton {
   height: auto;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.75rem;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font-weight: 500;
   transition:
-    background-color 150ms ease-out,
-    border-color 150ms ease-out;
+    background-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    border-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
-.fx .fx-escolhas .p-togglebutton:not(.p-togglebutton-checked):not(:disabled):hover {
-  border-color: color-mix(in srgb, var(--hc-marca) 45%, var(--hc-borda));
-  background: var(--hc-cartao);
+html.trilha
+  body
+  .fx
+  .fx-escolhas.p-selectbutton
+  .p-togglebutton:not(.p-togglebutton-checked):not(:disabled):hover {
+  border-color: var(--linha-forte);
+  background: var(--superficie);
 }
 
-.fx .fx-escolhas .p-togglebutton.p-togglebutton-checked {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
+html.trilha body .fx .fx-escolhas.p-selectbutton .p-togglebutton.p-togglebutton-checked {
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
+  box-shadow: inset 0 0 0 1px var(--musgo);
+  color: var(--musgo);
+  font-weight: 600;
 }
 
-.fx .fx-escolhas .p-togglebutton-content {
+html.trilha body .fx .fx-escolhas.p-selectbutton .p-togglebutton .p-togglebutton-content,
+html.trilha
+  body
+  .fx
+  .fx-escolhas.p-selectbutton
+  .p-togglebutton.p-togglebutton-checked
+  .p-togglebutton-content {
   width: 100%;
-  padding: 0.65rem 0.35rem;
-  background: none;
+  min-height: 52px;
+  padding: 12px 6px;
+  border-radius: 11px;
+  background: transparent;
   box-shadow: none;
   justify-content: center;
 }
 
+html.trilha body .fx .fx-escolhas.p-selectbutton .p-togglebutton:has(:focus-visible) {
+  outline: 2px solid var(--musgo);
+  outline-offset: 2px;
+}
+
 /* Sem ícone (os atalhos de dias): só o nome, centrado. */
 .fx .fx-escolhas .p-togglebutton-label {
-  font-size: 0.8125rem;
-  font-weight: 650;
+  font-size: 14.5px;
+  font-weight: 600;
   line-height: 1.2;
   text-align: center;
 }
@@ -295,34 +351,34 @@ label.fx-opcao:hover {
   display: grid;
   width: 100%;
   justify-items: center;
-  gap: 0.15rem;
+  gap: 2px;
   text-align: center;
 }
 
 .fx-escolha svg {
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-bottom: 0.1rem;
-  color: var(--hc-marca);
+  width: 26px;
+  height: 26px;
+  margin-bottom: 2px;
+  color: var(--musgo);
 }
 
 .fx-escolha strong {
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 .fx-escolha > span {
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .p-togglebutton-checked .fx-escolha strong {
-  color: var(--hc-marca-forte);
+  color: var(--musgo);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fx .fx-escolhas .p-togglebutton {
+  html.trilha body .fx .fx-escolhas.p-selectbutton .p-togglebutton {
     transition: none;
   }
 }
@@ -342,96 +398,97 @@ label.fx-opcao:hover {
 .fx-dia.p-button {
   display: grid;
   height: auto;
-  min-width: 3.6rem;
+  min-width: 4rem;
   flex: 0 0 auto;
-  padding: 0.45rem 0.35rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.75rem;
+  padding: 8px 6px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
   gap: 0.05rem;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
+  background: var(--superficie);
+  color: var(--tinta);
   font-weight: 600;
   justify-items: center;
 }
 
 .fx-dia.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca);
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
+  border-color: var(--musgo);
+  background: var(--superficie);
+  color: var(--tinta);
 }
 
 .fx-dia__semana {
-  color: var(--hc-tinta-3);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .fx-dia__numero {
-  font-size: 1rem;
+  font-family: var(--font-dados);
+  font-size: 18px;
   font-variant-numeric: tabular-nums;
-  font-weight: 750;
+  font-weight: 650;
 }
 
 .fx-dia__estado {
-  color: var(--hc-tinta-3);
-  font-size: 0.625rem;
-  font-weight: 650;
+  color: var(--tinta-2);
+  font-size: 11.5px;
+  font-weight: 550;
 }
 
 .fx-dia--escolhido.p-button,
 .fx-dia--escolhido.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca-forte);
-  background: var(--hc-marca-forte);
-  color: #ffffff;
+  border-color: var(--musgo);
+  background: var(--musgo);
+  color: var(--sobre-musgo);
 }
 
 .fx-dia--escolhido .fx-dia__semana,
 .fx-dia--escolhido .fx-dia__estado {
-  color: rgb(255 255 255 / 85%);
+  color: color-mix(in oklab, var(--sobre-musgo) 85%, transparent);
 }
 
 .fx-dia--fechado.p-button {
-  background: var(--hc-fundo);
-  color: var(--hc-tinta-3);
+  background: var(--superficie-2);
+  color: var(--tinta-3);
 }
 
 .fx-horarios {
   display: grid;
-  gap: 0.4rem;
-  grid-template-columns: repeat(auto-fill, minmax(4.6rem, 1fr));
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
 }
 
 .fx-horario.p-button {
   display: grid;
   height: auto;
-  min-height: 2.75rem;
-  padding: 0.35rem 0.3rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.7rem;
+  min-height: 52px;
+  padding: 6px 4px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
   gap: 0;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
+  background: var(--superficie);
+  color: var(--tinta);
   justify-items: center;
 }
 
 .fx-horario.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
-  color: var(--hc-tinta);
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
+  color: var(--tinta);
 }
 
 .fx-horario__hora {
-  font-size: 0.9rem;
+  font-family: var(--font-dados);
+  font-size: 16px;
   font-variant-numeric: tabular-nums;
-  font-weight: 750;
+  font-weight: 650;
 }
 
 .fx-horario__quem {
   overflow: hidden;
   max-width: 100%;
-  color: var(--hc-tinta-3);
-  font-size: 0.625rem;
+  color: var(--tinta-2);
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -441,25 +498,23 @@ label.fx-opcao:hover {
 .fx-resumo {
   display: grid;
   margin: 0;
-  gap: 0.6rem;
+  gap: 10px;
 }
 
 .fx-resumo > div {
   display: grid;
-  gap: 0.05rem;
+  gap: 2px;
 }
 
 .fx-resumo dt {
-  color: var(--hc-tinta-3);
-  font-size: 0.6875rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .fx-resumo dd {
   margin: 0;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.4;
 }
 
@@ -469,11 +524,11 @@ label.fx-opcao:hover {
   display: flex;
   align-items: flex-start;
   padding: 0.55rem 0.55rem 0.55rem 0.7rem;
-  border: 1px solid var(--hc-borda);
+  border: 1px solid var(--linha);
   border-radius: 1rem;
   gap: 0.55rem;
-  background: var(--hc-cartao);
-  box-shadow: var(--hc-sombra-alta);
+  background: var(--superficie);
+  box-shadow: var(--sombra-2);
 }
 
 .fx-push__marca {
@@ -482,8 +537,8 @@ label.fx-opcao:hover {
   height: 1.6rem;
   flex: 0 0 auto;
   border-radius: 0.45rem;
-  background: var(--hc-marca-forte);
-  color: #ffffff;
+  background: var(--musgo);
+  color: var(--sobre-musgo);
   font-size: 0.75rem;
   place-items: center;
 }
@@ -498,12 +553,12 @@ label.fx-opcao:hover {
 }
 
 .fx-push__texto small {
-  color: var(--hc-tinta-3);
-  font-size: 0.625rem;
+  color: var(--tinta-2);
+  font-size: 11.5px;
 }
 
 .fx-push__texto span {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
 }
 
 /* ------------------------------------------------------------------ selos */
@@ -511,29 +566,30 @@ label.fx-opcao:hover {
 .fx-selo {
   display: inline-flex;
   align-items: center;
-  padding: 0.05rem 0.45rem;
-  border-radius: 6px;
-  gap: 0.25rem;
-  background: var(--hc-cinza-fundo);
-  color: var(--hc-cinza-tinta);
-  font-size: 0.6875rem;
-  font-weight: 700;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 7px;
+  gap: 5px;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .fx-selo--marca {
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
+  background: var(--musgo-fundo);
+  color: var(--musgo);
 }
 
 .fx-selo--atencao {
-  background: var(--hc-pessego-fundo);
-  color: var(--hc-pessego-tinta);
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .fx-selo--novo {
-  background: var(--hc-ciano-fundo);
-  color: var(--hc-ciano-tinta);
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
 }
 
 /* ------------------------------------------------------------------ movimento */
@@ -557,15 +613,15 @@ label.fx-opcao:hover {
 .fx-etapa-enter-active,
 .fx-etapa-volta-enter-active {
   transition:
-    opacity 200ms var(--hc-mov-chega),
-    transform 240ms var(--hc-mov-chega);
+    opacity 200ms var(--pj-curva-chega),
+    transform 240ms var(--pj-curva-chega);
 }
 
 .fx-etapa-leave-active,
 .fx-etapa-volta-leave-active {
   transition:
-    opacity 120ms var(--hc-mov-sai),
-    transform 120ms var(--hc-mov-sai);
+    opacity 120ms var(--pj-curva-sai),
+    transform 120ms var(--pj-curva-sai);
 }
 
 .fx-etapa-enter-from {
@@ -590,14 +646,14 @@ label.fx-opcao:hover {
 
 .fx-aviso-enter-active {
   transition:
-    opacity 200ms var(--hc-mov-chega),
-    transform 240ms var(--hc-mov-chega);
+    opacity 200ms var(--pj-curva-chega),
+    transform 240ms var(--pj-curva-chega);
 }
 
 .fx-aviso-leave-active {
   transition:
-    opacity 120ms var(--hc-mov-sai),
-    transform 120ms var(--hc-mov-sai);
+    opacity 120ms var(--pj-curva-sai),
+    transform 120ms var(--pj-curva-sai);
 }
 
 .fx-aviso-enter-from,
@@ -675,11 +731,9 @@ label.fx-opcao:hover {
   margin-bottom: 0.5rem;
   place-items: center;
   border-radius: 999px;
-  background: var(--hc-degrade-botao);
-  box-shadow:
-    0 0 0 6px var(--hc-marca-clara),
-    0 10px 24px -10px var(--hc-marca-sombra);
-  color: var(--hc-sobre-marca);
+  background: var(--musgo);
+  box-shadow: 0 0 0 6px var(--musgo-fundo);
+  color: var(--sobre-musgo);
   font-size: 1.45rem;
   animation: enviado-selo 420ms var(--hc-mov-assenta) 60ms both;
 }
@@ -698,7 +752,7 @@ label.fx-opcao:hover {
 .enviado__titulo {
   margin: 0;
   font-size: 1.3rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -706,7 +760,7 @@ label.fx-opcao:hover {
 .enviado__lide {
   max-width: 34rem;
   margin: 0;
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   line-height: 1.5;
 }
 
@@ -720,10 +774,10 @@ label.fx-opcao:hover {
 .enviado__bilhete {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--hc-borda);
+  border: 1px solid var(--linha);
   border-radius: 1rem;
-  background: var(--hc-cartao);
-  box-shadow: var(--hc-sombra);
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
 }
 
 /* Estreito: a situação numa linha só, em cima; a folhinha e o pedido lado a lado embaixo. */
@@ -752,13 +806,13 @@ label.fx-opcao:hover {
 }
 
 .enviado__oque strong {
-  color: var(--hc-tinta);
+  color: var(--tinta);
   font-size: 1rem;
   line-height: 1.3;
 }
 
 .enviado__oque > span:not(.enviado__situacao) {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.875rem;
 }
 
@@ -770,36 +824,37 @@ label.fx-opcao:hover {
 }
 
 .enviado__detalhe .ph {
-  color: var(--hc-marca);
+  color: var(--musgo);
 }
 
-/* A situação: esperando no teal claro, confirmado no verde. O ícone diz qual sem a cor. */
+/* A situação: esperando no âmbar, confirmado no verde. O ícone diz qual sem a cor. */
 .enviado__situacao {
   display: inline-flex;
   align-items: center;
   grid-area: situacao;
   justify-self: start;
-  padding: 0.15rem 0.55rem;
-  border-radius: 6px;
-  gap: 0.3rem;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-  font-size: 0.75rem;
-  font-weight: 700;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 7px;
+  gap: 6px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .enviado__situacao--ok {
-  background: var(--hc-verde-fundo);
-  color: var(--hc-verde-tinta);
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
 }
 
 .enviado__canhoto {
   position: relative;
   display: grid;
   padding: 0.9rem 1rem 1rem;
-  border-top: 1.5px dashed var(--hc-borda);
+  border-top: 1.5px dashed var(--linha);
   gap: 0.5rem;
-  background: color-mix(in srgb, var(--hc-fundo) 55%, var(--hc-cartao));
+  background: color-mix(in srgb, var(--superficie-2) 55%, var(--superficie));
 }
 
 .enviado__canhoto::before,
@@ -808,9 +863,9 @@ label.fx-opcao:hover {
   top: -0.65rem;
   width: 1.2rem;
   height: 1.2rem;
-  border: 1px solid var(--hc-borda);
+  border: 1px solid var(--linha);
   border-radius: 999px;
-  background: var(--hc-fundo);
+  background: var(--superficie-2);
   content: '';
 }
 
@@ -864,12 +919,12 @@ label.fx-opcao:hover {
   inset-block: 2.2rem 0.2rem;
   inset-inline-start: calc(1rem - 1px);
   border-radius: 1px;
-  background: var(--hc-borda);
+  background: var(--linha);
   content: '';
 }
 
 .enviado__passo--feito:not(:last-child)::before {
-  background: var(--hc-marca);
+  background: var(--musgo);
 }
 
 .enviado__marca {
@@ -877,24 +932,24 @@ label.fx-opcao:hover {
   width: 2rem;
   height: 2rem;
   place-items: center;
-  border: 1.5px solid var(--hc-borda);
+  border: 1.5px solid var(--linha);
   border-radius: 999px;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta-2);
+  background: var(--superficie);
+  color: var(--tinta-2);
   font-size: 0.95rem;
 }
 
 .enviado__passo--feito .enviado__marca {
   border-color: transparent;
-  background: var(--hc-marca-forte);
-  color: var(--hc-cartao);
+  background: var(--musgo);
+  color: var(--superficie);
 }
 
 /* O passo de agora: o contorno tracejado é "ainda não", e o relógio de areia diz "esperando". */
 .enviado__passo--agora .enviado__marca {
-  border: 1.5px dashed var(--hc-marca);
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
+  border: 1.5px dashed var(--musgo);
+  background: var(--musgo-fundo);
+  color: var(--musgo);
 }
 
 .enviado__texto {
@@ -905,12 +960,12 @@ label.fx-opcao:hover {
 }
 
 .enviado__texto strong {
-  color: var(--hc-tinta);
+  color: var(--tinta);
   font-size: 0.875rem;
 }
 
 .enviado__texto > span {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.8125rem;
   line-height: 1.4;
 }
@@ -999,7 +1054,7 @@ label.fx-opcao:hover {
 
 .enviado__titulo,
 .enviado__lide {
-  animation: enviado-sobe 380ms var(--hc-mov-chega) 120ms both;
+  animation: enviado-sobe 380ms var(--pj-curva-chega) 120ms both;
 }
 
 .enviado__lide {
@@ -1007,15 +1062,15 @@ label.fx-opcao:hover {
 }
 
 .enviado__bilhete {
-  animation: enviado-sobe 440ms var(--hc-mov-chega) 220ms both;
+  animation: enviado-sobe 440ms var(--pj-curva-chega) 220ms both;
 }
 
 .enviado__agora {
-  animation: enviado-aparece 360ms var(--hc-mov-chega) 340ms both;
+  animation: enviado-aparece 360ms var(--pj-curva-chega) 340ms both;
 }
 
 .enviado__passo {
-  animation: enviado-sobe 380ms var(--hc-mov-chega) both;
+  animation: enviado-sobe 380ms var(--pj-curva-chega) both;
 }
 
 .enviado__passo:nth-child(1) {
@@ -1032,7 +1087,7 @@ label.fx-opcao:hover {
 
 /* A linha do feito se acende do começo para o fim, em pé (celular) e deitada (página). */
 .enviado__passo--feito:not(:last-child)::before {
-  animation: enviado-linha-y 560ms var(--hc-mov-chega) 620ms both;
+  animation: enviado-linha-y 560ms var(--pj-curva-chega) 620ms both;
   transform-origin: top;
 }
 
@@ -1055,11 +1110,11 @@ label.fx-opcao:hover {
 .enviado__passo--agora .enviado__marca::after {
   position: absolute;
   inset: -2px;
-  border: 1.5px solid var(--hc-marca);
+  border: 1.5px solid var(--musgo);
   border-radius: 999px;
   content: '';
   opacity: 0;
-  animation: enviado-respira 2.8s var(--hc-mov-chega) 1.2s infinite;
+  animation: enviado-respira 2.8s var(--pj-curva-chega) 1.2s infinite;
 }
 
 .enviado__passo--agora .ph-hourglass-medium {
@@ -1072,16 +1127,16 @@ label.fx-opcao:hover {
  * que nenhum seletor razoável passa; é um estado de 2 s, não um tema.
  */
 .fx .enviado__copiar--feito.p-button {
-  border-color: color-mix(in srgb, var(--hc-verde-tinta) 50%, var(--hc-cartao)) !important;
-  background: var(--hc-verde-fundo) !important;
-  color: var(--hc-verde-tinta) !important;
+  border-color: color-mix(in srgb, var(--ok-tinta) 50%, var(--superficie)) !important;
+  background: var(--ok-fundo) !important;
+  color: var(--ok-tinta) !important;
 }
 
 .enviado__copiar.p-button {
   transition:
-    background-color 200ms var(--hc-mov-chega),
-    border-color 200ms var(--hc-mov-chega),
-    color 200ms var(--hc-mov-chega);
+    background-color 200ms var(--pj-curva-chega),
+    border-color 200ms var(--pj-curva-chega),
+    color 200ms var(--pj-curva-chega);
 }
 
 .enviado__copiar--feito .p-button-icon {

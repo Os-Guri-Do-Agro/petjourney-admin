@@ -95,7 +95,7 @@ async function aoEnviar() {
     modal
     dismissable-mask
     :draggable="false"
-    class="clinic-dialog clinic-scope hc-tema"
+    class="clinic-dialog clinic-scope feedback-saque-dialogo"
     :style="{ width: 'min(36rem, 94vw)' }"
     aria-labelledby="feedback-saque-titulo"
     aria-describedby="feedback-saque-intro"
@@ -227,37 +227,38 @@ async function aoEnviar() {
 </template>
 
 <style scoped>
-/* O diálogo vai para o `body`, fora da página: só tokens `--hc-*` aqui. */
+/* O diálogo vai para o `body`: os tokens do Trilha valem lá porque moram na raiz `html.trilha`. */
 .feedback-saque__titulo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 10px;
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1.125rem;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .feedback-saque__titulo .ph {
-  color: var(--hc-verde-tinta);
-  font-size: 1.15rem;
+  color: var(--ok-tinta);
+  font-size: 22px;
 }
 
 .feedback-saque {
   display: grid;
-  gap: 1.5rem;
+  gap: 24px;
 }
 
 .feedback-saque__intro {
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.9375rem;
+  color: var(--tinta-2);
+  font-size: 15px;
   line-height: 1.5;
 }
 
 .feedback-saque__pergunta {
   display: grid;
-  gap: 0.4rem;
+  gap: 6px;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -267,35 +268,35 @@ async function aoEnviar() {
 .feedback-saque__enunciado {
   margin: 0;
   padding: 0;
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1.4;
 }
 
 .feedback-saque__dica {
-  margin: 0 0 0.35rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  margin: 0 0 6px;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .feedback-saque__opcoes {
   display: grid;
+  gap: 2px 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.15rem 1rem;
 }
 
 /* A linha inteira marca: no tablet o dedo não precisa acertar a caixinha. */
 .feedback-saque__opcao {
   display: flex;
+  min-height: 40px;
   align-items: flex-start;
-  gap: 0.6rem;
-  min-height: 2.5rem;
-  padding: 0.55rem 0;
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  line-height: 1.35;
+  gap: 10px;
+  padding: 9px 0;
+  color: var(--tinta);
   cursor: pointer;
+  font-size: 14px;
+  line-height: 1.35;
 }
 
 .feedback-saque__opcao :deep(.p-checkbox) {
@@ -306,11 +307,11 @@ async function aoEnviar() {
   width: 100%;
 }
 
-/* O terceiro cinza fica abaixo de 4,5:1 a 12 px: o apagado aqui é o segundo. */
 .feedback-saque__contador {
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   text-align: end;
 }
@@ -320,7 +321,7 @@ async function aoEnviar() {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem 1rem;
+  gap: 12px 16px;
   width: 100%;
 }
 
@@ -328,29 +329,24 @@ async function aoEnviar() {
   display: flex;
   flex: 1 1 14rem;
   align-items: center;
-  gap: 0.45rem;
+  gap: 8px;
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.4;
 }
 
 /* Erro em linha com ícone na tinta do estado, sem faixa pintada. */
 .feedback-saque__aviso--erro {
-  color: var(--hc-coral-tinta);
+  color: var(--risco-tinta);
   font-weight: 600;
 }
 
 .feedback-saque__acoes {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 8px;
   margin-inline-start: auto;
-}
-
-/* O avião aponta para onde a leitura vai: em árabe, para a esquerda. */
-[dir='rtl'] .feedback-saque__acoes :deep(.ph-paper-plane-tilt) {
-  transform: scaleX(-1);
 }
 
 @media (max-width: 34rem) {

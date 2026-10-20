@@ -12,7 +12,8 @@ const props = withDefaults(
      * Cobre também o cadastro SUSPENSO, com a copy de leitura liberada.
      * Use nas telas onde a leitura NÃO é gated por auditoria (atendimentos:
      * seção 4 da spec das Partes 11 a 13). Nas demais, o SUSPENSO continua no
-     * gate de página cheia do `PartnerPageFrame` e este banner não o duplica.
+     * gate de página cheia da moldura (`UiPagina bloquear-se-suspenso`) e este
+     * banner não o duplica.
      */
     coverSuspended?: boolean
   }>(),
@@ -47,61 +48,84 @@ const copyKey = computed(() => {
 </script>
 
 <template>
+  <!--
+    A faixa do cadastro: um aviso na largura da tela, na cor de atenção (em análise) ou de risco
+    (recusado, suspenso), com o motivo quando houver e o caminho para resolver.
+  -->
   <aside v-if="visible" class="operability-banner" :data-tone="copyKey" role="status">
-    <i
-      class="ph"
-      :class="copyKey === 'rejected' ? 'ph-x-circle' : 'ph-lock'"
-      aria-hidden="true"
-    />
-    <div>
+    <span class="operability-banner__icone" aria-hidden="true">
+      <i class="ph" :class="copyKey === 'rejected' ? 'ph-x-circle' : 'ph-lock'" />
+    </span>
+    <span class="operability-banner__texto">
       <strong>{{ t(`frame.operability.${copyKey}.title`) }}</strong>
-      <p>
+      <span>
         {{ t(`frame.operability.${copyKey}.body`) }}
         <template v-if="store.status?.motivoAuditoria">
           {{ t('frame.operability.reasonPrefix') }} {{ store.status.motivoAuditoria }}
         </template>
-      </p>
-      <RouterLink to="/settings?aba=empresa">{{
-        t(`frame.operability.${copyKey}.link`)
-      }}</RouterLink>
-    </div>
+      </span>
+    </span>
+    <RouterLink class="ui-mais operability-banner__link" to="/settings?aba=empresa">
+      {{ t(`frame.operability.${copyKey}.link`) }}
+    </RouterLink>
   </aside>
 </template>
 
 <style scoped>
 .operability-banner {
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
-  border-radius: 0.9rem;
-  background: var(--partner-card);
-  color: var(--partner-text);
-  font-size: 0.88rem;
-}
+  --faixa-cor: var(--atencao);
+  --faixa-fundo: var(--atencao-fundo);
+  --faixa-tinta: var(--atencao-tinta);
 
-.operability-banner i {
-  margin-top: 0.15rem;
-  color: var(--partner-primary-strong);
-  font-size: 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 12px 16px 12px 12px;
+  border: 1px solid color-mix(in oklab, var(--faixa-cor) 40%, var(--linha));
+  border-radius: 14px;
+  background: var(--faixa-fundo);
+  color: var(--tinta);
 }
 
 .operability-banner[data-tone='rejected'],
 .operability-banner[data-tone='suspendedReadOnly'] {
-  border-color: color-mix(in srgb, var(--partner-warm-text) 24%, var(--partner-line));
+  --faixa-cor: var(--risco);
+  --faixa-fundo: var(--risco-fundo);
+  --faixa-tinta: var(--risco-tinta);
 }
 
-.operability-banner[data-tone='rejected'] i,
-.operability-banner[data-tone='suspendedReadOnly'] i {
-  color: var(--partner-warm-text);
+.operability-banner__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--faixa-tinta);
+  font-size: 19px;
 }
 
-.operability-banner p {
-  margin: 0.25rem 0 0.45rem;
+.operability-banner__texto {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 280px;
+  gap: 2px;
+  line-height: 1.45;
 }
 
-.operability-banner a {
-  color: inherit;
-  font-weight: 700;
+.operability-banner__texto strong {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.operability-banner__texto span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.operability-banner__link.ui-mais {
+  color: var(--faixa-tinta);
 }
 </style>

@@ -84,29 +84,38 @@ const STATUS_I18N_KEYS: Record<StatusModoParceiro, string> = {
   SUSPENSO: 'suspenso',
 }
 
-const badge = computed(() => {
-  const icons: Record<StatusModoParceiro, string> = {
-    NAO_SOLICITADO: 'ph ph-minus-circle',
-    SOLICITADO: 'ph ph-clock',
-    ATIVO: 'ph ph-check',
-    REJEITADO: 'ph ph-x',
-    SUSPENSO: 'ph ph-prohibit',
-  }
-
-  return {
-    label: t(`programas.card.status.${STATUS_I18N_KEYS[modoStatus.value]}`),
-    icon: icons[modoStatus.value],
-  }
-})
-
-/** O tom do selo de status: verde ativo, pêssego em análise, coral recusado ou suspenso. */
-const TOM_DO_STATUS: Record<StatusModoParceiro, string> = {
-  NAO_SOLICITADO: 'hc--cinza',
-  SOLICITADO: 'hc--pessego',
-  ATIVO: 'hc--verde',
-  REJEITADO: 'hc--coral',
-  SUSPENSO: 'hc--coral',
+/**
+ * O selo do estado: palavra, ícone e cor andam juntos. A cor é a dos estados do sistema: neutro
+ * para o que não começou, atenção para a análise, ok para o ativo, risco para recusa e suspensão.
+ */
+const SELO_DO_STATUS: Record<StatusModoParceiro, { classe: string; icone: string }> = {
+  NAO_SOLICITADO: { classe: '', icone: 'ph ph-minus-circle' },
+  SOLICITADO: { classe: 'ui-selo--atencao', icone: 'ph ph-hourglass' },
+  ATIVO: { classe: 'ui-selo--ok', icone: 'ph ph-check-circle' },
+  REJEITADO: { classe: 'ui-selo--risco', icone: 'ph ph-x-circle' },
+  SUSPENSO: { classe: 'ui-selo--risco', icone: 'ph ph-prohibit' },
 }
+
+const badge = computed(() => ({
+  label: t(`programas.card.status.${STATUS_I18N_KEYS[modoStatus.value]}`),
+  ...SELO_DO_STATUS[modoStatus.value],
+}))
+
+/** Quem não é dono vê o estado, mas não pede: a frase diz por quê, no lugar do botão. */
+const mostraSoDono = computed(
+  () =>
+    !canManageSolicitacao.value &&
+    !store.semAcessoParceiro &&
+    (modoStatus.value === 'NAO_SOLICITADO' || modoStatus.value === 'REJEITADO'),
+)
+
+const temPe = computed(
+  () =>
+    (modoStatus.value === 'ATIVO' && props.modo === 'afiliado') ||
+    showSolicitarButton.value ||
+    cta.value.type === 'carteira' ||
+    mostraSoDono.value,
+)
 
 const ativoDesdeLabel = computed(() => {
   const raw = store.status?.auditadoEm
@@ -225,92 +234,130 @@ watch(modoStatus, () => {
 
 <template>
   <!--
-    Uma linha por programa, e não um cartão: ícone, nome com o selo de status, o benefício numa
-    frase e a ação à direita. Os dois programas cabem numa lista só; com os dois ativos, a tela é
-    de consulta, e um cartão verde de ponta a ponta para um deles gritava sem motivo.
+    Uma folha por programa: nome e estado no alto, o que o programa dá no meio, e no pé a ação
+    certa para o estado (pedir, pedir de novo, ir para os ganhos). Em análise não há botão: a
+    linha de atenção diz o que está acontecendo.
   -->
-  <article v-if="skeleton" class="programa-linha" aria-hidden="true">
-    <Skeleton width="2.6rem" height="2.6rem" border-radius="0.75rem" />
-    <div class="programa-linha__corpo">
-      <Skeleton width="12rem" height="1rem" border-radius="4px" />
-      <Skeleton width="80%" height="0.8rem" border-radius="4px" />
+  <article v-if="skeleton" class="programa ui-folha" aria-hidden="true">
+    <div class="programa__cabeca">
+      <Skeleton width="48px" height="48px" border-radius="14px" />
+      <div class="programa__nomes">
+        <Skeleton width="11rem" height="1.1rem" border-radius="6px" />
+        <Skeleton width="7rem" height="0.8rem" border-radius="6px" />
+      </div>
     </div>
-    <Skeleton width="8rem" height="2.25rem" border-radius="999px" />
+    <Skeleton width="100%" height="0.85rem" border-radius="6px" />
+    <Skeleton width="80%" height="0.85rem" border-radius="6px" />
+    <div class="programa__da">
+      <Skeleton v-for="n in 3" :key="n" width="70%" height="0.8rem" border-radius="6px" />
+    </div>
   </article>
 
   <article
     v-else
     :id="modo === 'afiliado' ? 'programas-afiliado' : undefined"
-    class="programa-linha"
+    class="programa ui-folha"
+    :class="`programa--${modo}`"
     :data-status="modoStatus"
+    :aria-labelledby="`programa-${modo}-nome`"
   >
-    <span class="programa-linha__icone" aria-hidden="true">
-      <i :class="meta.icon" />
-    </span>
+    <header class="programa__cabeca">
+      <span class="programa__icone" aria-hidden="true">
+        <i :class="meta.icon" />
+      </span>
 
-    <div class="programa-linha__corpo">
-      <p class="programa-linha__nome">
-        <strong>{{ meta.title }}</strong>
-        <span class="hc-selo" :class="TOM_DO_STATUS[modoStatus]">
+      <div class="programa__nomes">
+        <h3 :id="`programa-${modo}-nome`" class="programa__nome">{{ meta.title }}</h3>
+        <p class="programa__sub">{{ meta.subtitle }}</p>
+        <span class="ui-selo programa__selo" :class="badge.classe">
+          <i :class="badge.icone" aria-hidden="true" />
           {{
             modoStatus === 'ATIVO' && modo === 'afiliado' && ativoDesdeLabel
               ? t('programas.linha.ativoDesde', { data: ativoDesdeLabel })
               : badge.label
           }}
         </span>
-      </p>
+      </div>
+    </header>
 
-      <p class="programa-linha__frase">{{ meta.description }}</p>
+    <p class="programa__descricao">{{ meta.description }}</p>
 
-      <p v-if="modoStatus === 'ATIVO' && modo === 'participativo'" class="programa-linha__nota">
-        {{ t('programas.card.activeNoteParticipativo') }}
-      </p>
+    <div class="programa__da">
+      <h4 class="programa__rotulo">{{ t('programas.card.oQueDa') }}</h4>
+      <ul class="programa__lista">
+        <li v-for="feature in meta.features" :key="feature">
+          <i class="ph ph-check" aria-hidden="true" />
+          <span>{{ feature }}</span>
+        </li>
+      </ul>
+    </div>
 
-      <p v-else-if="modoStatus === 'SOLICITADO'" class="programa-linha__aviso">
-        <i class="ph ph-clock" aria-hidden="true" />
-        {{ t('programas.card.info.pending') }}
-      </p>
+    <p v-if="modoStatus === 'ATIVO' && modo === 'participativo'" class="programa__aviso">
+      <i class="ph ph-phone" aria-hidden="true" />
+      <span>{{ t('programas.card.activeNoteParticipativo') }}</span>
+    </p>
 
-      <div
-        v-else-if="modoStatus === 'REJEITADO' || modoStatus === 'SUSPENSO'"
-        class="programa-linha__decisao"
-      >
-        <p class="programa-linha__aviso programa-linha__aviso--risco">
-          <i class="ph ph-info" aria-hidden="true" />
+    <p
+      v-else-if="modoStatus === 'SOLICITADO'"
+      class="programa__aviso programa__aviso--atencao"
+      role="status"
+    >
+      <i class="ph ph-hourglass" aria-hidden="true" />
+      <span>{{ t('programas.card.info.pending') }}</span>
+    </p>
+
+    <div
+      v-else-if="modoStatus === 'REJEITADO' || modoStatus === 'SUSPENSO'"
+      class="programa__aviso programa__aviso--risco"
+    >
+      <i
+        class="ph"
+        :class="modoStatus === 'REJEITADO' ? 'ph-x-circle' : 'ph-prohibit'"
+        aria-hidden="true"
+      />
+      <span class="programa__decisao">
+        <span>
           {{
             modoStatus === 'REJEITADO'
               ? t('programas.card.info.rejected')
               : t('programas.card.info.suspended')
           }}
-        </p>
-        <p v-if="modoBloco.motivo" class="programa-linha__nota">
+        </span>
+        <span v-if="modoBloco.motivo">
           <strong>{{ t('programas.card.info.motivoLabel') }}</strong> {{ modoBloco.motivo }}
-        </p>
-        <p v-if="decididoEmLabel" class="programa-linha__nota">
+        </span>
+        <span v-if="decididoEmLabel" class="programa__quando ui-num">
           {{ t('programas.card.info.decididoEm', { data: decididoEmLabel }) }}
-        </p>
+        </span>
         <a
           v-if="modoStatus === 'SUSPENSO'"
-          class="programa-linha__suporte"
+          class="ui-mais programa__suporte"
           href="mailto:atendimento@petjourney.health"
         >
+          <i class="ph ph-envelope-simple" aria-hidden="true" />
           {{ t('programas.card.info.contactSupport') }}
         </a>
-      </div>
+      </span>
     </div>
 
-    <div class="programa-linha__acao">
-      <span v-if="modoStatus === 'ATIVO' && modo === 'afiliado'" class="programa-linha__saldo">
+    <footer v-if="temPe" class="programa__pe">
+      <span v-if="modoStatus === 'ATIVO' && modo === 'afiliado'" class="programa__saldo">
         <span>{{ t('programas.card.info.saldo') }}</span>
-        <strong>{{ saldoLabel }}</strong>
+        <strong class="ui-num">{{ saldoLabel }}</strong>
       </span>
+
+      <p v-else-if="mostraSoDono" class="programa__so-dono">
+        <i class="ph ph-lock-simple" aria-hidden="true" />
+        {{ t('programas.card.toast.ownerOnly') }}
+      </p>
 
       <Button
         v-if="showSolicitarButton"
         type="button"
+        class="programa__acao"
+        icon="ph ph-paper-plane-tilt"
         :label="ctaLabel"
         :loading="submitting"
-        size="small"
         @click="handleSolicitar"
       />
 
@@ -318,134 +365,230 @@ watch(modoStatus, () => {
         v-else-if="cta.type === 'carteira'"
         :as="RouterLink"
         :to="cta.to"
+        class="programa__acao"
+        icon="ph ph-wallet"
         :label="t('programas.linha.irParaGanhos')"
-        icon="ph ph-arrow-right"
-        icon-pos="right"
         severity="secondary"
         outlined
-        size="small"
       />
-
-      <Button
-        v-else-if="cta.type === 'aguardando'"
-        type="button"
-        :label="ctaLabel"
-        severity="secondary"
-        outlined
-        size="small"
-        disabled
-      />
-    </div>
+    </footer>
   </article>
 </template>
 
 <style scoped>
-.programa-linha {
+.programa {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 22px 20px;
+}
+
+.programa__cabeca {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 1rem 0;
+  gap: 14px;
 }
 
-.programa-linha + .programa-linha {
-  border-top: 1px solid var(--hc-linha);
-}
-
-.programa-linha__icone {
+.programa__icone {
   display: grid;
-  width: 2.6rem;
-  height: 2.6rem;
-  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  flex: none;
   place-items: center;
-  border-radius: 0.75rem;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-  font-size: 1.05rem;
+  border-radius: 14px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 24px;
 }
 
-.programa-linha__corpo {
+.programa__nomes {
   display: grid;
   flex: 1;
   min-width: 0;
-  gap: 0.3rem;
+  gap: 2px;
 }
 
-.programa-linha__nome {
+.programa__nome {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.programa__sub {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.programa__selo {
+  justify-self: start;
+  margin-top: 6px;
+}
+
+.programa__descricao {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.programa__da {
+  display: grid;
+  gap: 8px;
+}
+
+.programa__rotulo {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.programa__lista {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.programa__lista li {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
-}
-
-.programa-linha__frase,
-.programa-linha__nota {
-  margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--tinta);
+  font-size: 14px;
   line-height: 1.45;
 }
 
-.programa-linha__nota strong {
-  color: var(--hc-tinta);
+.programa__lista i {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  place-items: center;
+  margin-top: 1px;
+  border-radius: 999px;
+  background: var(--superficie-3);
+  color: var(--tinta-2);
+  font-size: 12px;
 }
 
-.programa-linha__aviso {
+.programa[data-status='ATIVO'] .programa__lista i {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+}
+
+/* O estado em linha: ícone na tinta do estado, texto em tinta normal. */
+.programa__aviso {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  align-items: flex-start;
+  gap: 10px;
   margin: 0;
-  color: var(--hc-pessego-tinta);
-  font-size: 0.8125rem;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.programa__aviso > i {
+  margin-top: 1px;
+  color: var(--tinta-2);
+  font-size: 17px;
+}
+
+.programa__aviso--atencao {
+  background: var(--atencao-fundo);
+}
+
+.programa__aviso--atencao > i {
+  color: var(--atencao-tinta);
+}
+
+.programa__aviso--risco {
+  background: var(--risco-fundo);
+}
+
+.programa__aviso--risco > i {
+  color: var(--risco-tinta);
+}
+
+.programa__decisao {
+  display: grid;
+  gap: 4px;
+}
+
+.programa__decisao strong {
   font-weight: 600;
 }
 
-.programa-linha__aviso--risco {
-  color: var(--hc-coral-tinta);
+.programa__quando {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
-.programa-linha__decisao {
-  display: grid;
-  gap: 0.25rem;
+.programa__suporte.ui-mais {
+  justify-self: start;
+  margin-top: 2px;
+  color: var(--risco-tinta);
 }
 
-.programa-linha__suporte {
-  color: var(--hc-marca-forte);
-  font-size: 0.8125rem;
-  font-weight: 650;
-}
-
-.programa-linha__acao {
+/* O pé: o que se lê à esquerda, a ação à direita. Encosta no fim da folha. */
+.programa__pe {
   display: flex;
-  flex: 0 0 auto;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
-  align-self: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--linha);
 }
 
-.programa-linha__saldo {
+.programa__saldo {
   display: grid;
-  justify-items: end;
-  gap: 0.1rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  gap: 1px;
 }
 
-.programa-linha__saldo strong {
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
+.programa__saldo span {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
-@media (max-width: 900px) {
-  .programa-linha {
-    flex-wrap: wrap;
+.programa__saldo strong {
+  color: var(--tinta);
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.programa__so-dono {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.programa__acao.p-button {
+  margin-inline-start: auto;
+}
+
+@media (max-width: 520px) {
+  .programa {
+    padding: 18px 16px;
   }
 
-  .programa-linha__acao {
+  .programa__acao.p-button {
     width: 100%;
-    justify-content: flex-end;
   }
 }
 </style>

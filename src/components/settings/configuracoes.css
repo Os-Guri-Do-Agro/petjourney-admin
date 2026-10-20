@@ -1,0 +1,181 @@
+/*
+ * A folha das Configurações — a mesma em Perfil, Segurança, Aparência e Conta.
+ *
+ * Global e com prefixo próprio (`cfg-`) porque as abas são componentes separados que dividem o
+ * mesmo desenho, como as etapas do fluxo do responsável. Só tokens do Trilha.
+ *
+ * Uma aba é uma folha (`ui-folha cfg-folha`) com seções em linha: o nome e uma frase da seção à
+ * esquerda, os campos à direita; um fio entre uma e outra; e o rodapé com o "Salvar". Quando a
+ * largura não comporta as duas colunas, o nome sobe para cima dos campos.
+ */
+
+.cfg-folha {
+  container: cfg-folha / inline-size;
+  overflow: hidden;
+  color: var(--tinta);
+}
+
+.cfg-secao {
+  display: grid;
+  gap: 16px 40px;
+  padding: 24px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cfg-secao + .cfg-secao {
+  border-top: 1px solid var(--linha);
+}
+
+@container cfg-folha (min-width: 720px) {
+  .cfg-secao {
+    padding: 28px 28px 30px;
+    grid-template-columns: 14rem minmax(0, 1fr);
+  }
+}
+
+.cfg-secao__cabeca {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 4px;
+}
+
+.cfg-secao__titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.cfg-secao__titulo i {
+  color: var(--musgo);
+  font-size: 18px;
+}
+
+.cfg-secao__descricao {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.cfg-secao__corpo {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 18px;
+}
+
+/* Campos lado a lado quando cabem; um embaixo do outro no estreito. */
+.cfg-grade {
+  display: grid;
+  gap: 18px 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+
+/* A senha: uma coluna de largura de leitura, sem esticar a caixa até a borda. */
+.cfg-coluna {
+  display: grid;
+  max-width: 28rem;
+  gap: 18px;
+}
+
+.cfg-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 16px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--linha);
+  background: var(--superficie-2);
+}
+
+.cfg-rodape__nota {
+  display: inline-flex;
+  min-width: 0;
+  flex: 1 1 16rem;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.cfg-rodape__nota i {
+  flex: none;
+  font-size: 16px;
+}
+
+.cfg-rodape .p-button {
+  min-height: 44px;
+  padding-inline: 20px;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .cfg-rodape {
+    padding: 16px;
+  }
+
+  .cfg-rodape .p-button {
+    width: 100%;
+    min-height: 48px;
+  }
+}
+
+/* Carregando ou com erro: uma folha só, centrada, como os estados da página. */
+.cfg-estado {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.cfg-estado__icone {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 24px;
+}
+
+.cfg-estado h2 {
+  margin: 8px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.cfg-estado p {
+  max-width: 44ch;
+  margin: 0 0 8px;
+  color: var(--tinta-2);
+  line-height: 1.5;
+}
+
+/* Rótulo de grupo de opções (rádio, interruptor) no mesmo tom do rótulo de campo. */
+.cfg-rotulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.cfg-sr {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

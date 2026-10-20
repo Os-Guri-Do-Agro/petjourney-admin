@@ -69,7 +69,8 @@ function iniciais(nome: string) {
 <style scoped>
 .profissional__iniciais {
   border-radius: 50%;
-  font-size: 0.75rem;
-  font-weight: 750;
+  font-family: var(--font-dados);
+  font-size: 14px;
+  font-weight: 650;
 }
 </style>

@@ -1190,8 +1190,8 @@ function trocarParaHotelEscolhe() {
   margin: 0;
   padding: 0.5rem 0.65rem;
   border-radius: 0.6rem;
-  background: var(--hc-fundo);
-  color: var(--hc-tinta-2);
+  background: var(--superficie-2);
+  color: var(--tinta-2);
   font-size: 0.8125rem;
   line-height: 1.45;
 }
@@ -1199,6 +1199,12 @@ function trocarParaHotelEscolhe() {
 .reserva__trilho {
   display: flex;
   flex-wrap: wrap;
+}
+
+/* O porte é um toque só, no celular: segmentos com altura de dedo. */
+.reserva__trilho :deep(.p-togglebutton-content) {
+  min-height: 42px;
+  font-size: 14.5px;
 }
 
 .reserva__bilhete {
@@ -1218,13 +1224,13 @@ function trocarParaHotelEscolhe() {
 }
 
 .reserva__oque strong {
-  color: var(--hc-tinta);
+  color: var(--tinta);
   font-size: 1rem;
   line-height: 1.3;
 }
 
 .reserva__oque > span {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.875rem;
 }
 
@@ -1240,7 +1246,7 @@ function trocarParaHotelEscolhe() {
 }
 
 .reserva__horas strong {
-  color: var(--hc-tinta);
+  color: var(--tinta);
 }
 
 .reserva__urgente {
@@ -1248,8 +1254,8 @@ function trocarParaHotelEscolhe() {
 }
 
 .reserva__recursos {
-  color: var(--hc-tinta-3) !important;
-  font-size: 0.75rem !important;
+  color: var(--tinta-2) !important;
+  font-size: 13px !important;
 }
 
 .reserva__marca {
@@ -1265,14 +1271,14 @@ function trocarParaHotelEscolhe() {
 }
 
 .reserva__marca > span > span {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.8125rem;
   line-height: 1.4;
 }
 
 .reserva__sinal {
   display: block;
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.8125rem;
   font-weight: 500;
 }
@@ -1291,20 +1297,24 @@ function trocarParaHotelEscolhe() {
 }
 
 .reserva__numero {
-  font-size: 1.5rem;
+  font-family: var(--font-dados);
+  font-size: 28px;
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .reserva__acao {
-  min-height: 2.9rem;
+  min-height: 52px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
   justify-content: center;
   text-decoration: none;
 }
 
 .reserva__orientacao {
   margin: 0;
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   line-height: 1.5;
 }
 

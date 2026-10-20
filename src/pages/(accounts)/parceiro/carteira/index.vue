@@ -1,26 +1,26 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
+import SelectButton from 'primevue/selectbutton'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
+import PortalCarteiraAjuda from '@/components/parceiro/panels/PortalCarteiraAjuda.vue'
 import PortalCarteiraExtratoPanel from '@/components/parceiro/panels/PortalCarteiraExtratoPanel.vue'
 import PortalCarteiraSaquesPanel from '@/components/parceiro/panels/PortalCarteiraSaquesPanel.vue'
-import PortalCarteiraAjuda from '@/components/parceiro/panels/PortalCarteiraAjuda.vue'
 import PortalCarteiraVisaoPanel, {
   type EstadoDaCarteira,
 } from '@/components/parceiro/panels/PortalCarteiraVisaoPanel.vue'
-import { INTL_LOCALE, type Locale } from '@/i18n/locales'
-import { formatCentavosToBrl } from '@/utils/format/money'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+import { MIN_SAQUE_CENTAVOS } from '@/service/parceiro/regras-de-saque'
+import { formatCentavosToBrl } from '@/utils/format/money'
 
 /*
- * Duas abas, e não três: a "Visão geral" saiu de aba — o saldo foi para a frase do topo e o resto
- * para a linha de fatos, que fica sempre à vista acima das abas. Um `?aba=visao` antigo cai na
- * primeira.
+ * Movimentações e Saques, num controle segmentado: as duas listas da mesma carteira, e não dois
+ * destinos. `?aba=extrato|saques` continua valendo (e um `?aba=visao` antigo cai na primeira).
  */
 const CARTEIRA_TABS = ['extrato', 'saques'] as const
 type CarteiraTab = (typeof CARTEIRA_TABS)[number]
@@ -31,16 +31,8 @@ const { store, ensureContext } = useParceiroPortal()
 const { activeTab, setTab } = usePartnerTabs(CARTEIRA_TABS, 'extrato')
 
 const tabs = computed(() => [
-  {
-    id: 'extrato',
-    label: t('carteira.tabs.extrato.label'),
-    description: t('carteira.tabs.extrato.description'),
-  },
-  {
-    id: 'saques',
-    label: t('carteira.tabs.saques.label'),
-    description: t('carteira.tabs.saques.description'),
-  },
+  { id: 'extrato', label: t('carteira.tabs.extrato.label') },
+  { id: 'saques', label: t('carteira.tabs.saques.label') },
 ])
 
 const tabsAriaLabel = computed(() =>
@@ -55,7 +47,6 @@ const showAfiliadoGate = computed(
   () => store.loadState === 'ready' && !store.statusAfiliadoAtivo,
 )
 
-const resumo = ref<InstanceType<typeof PortalCarteiraVisaoPanel> | null>(null)
 const estado = ref<EstadoDaCarteira | null>(null)
 
 function formatBrl(centavos: number) {
@@ -63,43 +54,30 @@ function formatBrl(centavos: number) {
 }
 
 /**
- * A frase da saudação: quanto dá para sacar agora. Sem nada liberado, diz quanto ainda está na
- * janela de segurança; sem ganho nenhum, diz isso — nunca "R$ 0,00 disponível".
+ * A frase do topo: em que pé está o saque. O saldo está grande logo abaixo, então a frase diz o
+ * que ele não diz — se dá para sacar agora e, se não, o que falta.
  */
 const fraseDoResumo = computed(() => {
   const atual = estado.value
 
-  if (!atual || atual.carregando) {
+  if (!atual || atual.carregando || !atual.capacidade) {
     return ''
   }
 
-  if (atual.saldoSacavelCentavos > 0) {
-    return t('carteira.saudacao.disponivel', { valor: formatBrl(atual.saldoSacavelCentavos) })
+  if (atual.capacidade === 'liberado') {
+    return t('carteira.tela.liberado')
   }
 
-  if (atual.saldoTotalCentavos > 0) {
-    return t('carteira.saudacao.retido', { valor: formatBrl(atual.saldoTotalCentavos) })
-  }
-
-  return t('carteira.saudacao.semSaldo')
+  return t(`inicio.saldo.capacidade.${atual.capacidade}`, {
+    minimo: formatBrl(MIN_SAQUE_CENTAVOS),
+  })
 })
 
-/**
- * As pílulas seguem a situação: liberado, sacar é a cheia; faltando a chave, cadastrá-la é que é a
- * cheia. Sem nenhuma das duas, a da chave fica sozinha e vira a cheia: a clara só existe ao lado de
- * uma cheia. Quem não é dono não vê nenhuma — o saque e a chave são do dono da conta.
- */
-const acaoCheia = computed<'sacar' | 'cadastrarPix' | null>(() => {
-  if (!estado.value?.ehDono) {
-    return null
+function escolherAba(valor: CarteiraTab | null) {
+  if (valor) {
+    setTab(valor)
   }
-
-  if (estado.value.capacidade === 'liberado') {
-    return 'sacar'
-  }
-
-  return estado.value.capacidade === 'semChavePix' ? 'cadastrarPix' : null
-})
+}
 
 function goToProgramas() {
   void router.replace({ path: '/parceiro/programas', hash: '#programas' })
@@ -111,116 +89,124 @@ onMounted(() => {
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('carteira.subtitle')"
-    :title="t('carteira.title')"
-    :loading="false"
-    :error="loadError"
-    :no-partner-access="store.semAcessoParceiro"
-    block-when-suspended
-    @retry="ensureContext(true)"
+  <UiPagina
+    class="tela-carteira"
+    :erro="loadError"
+    :sem-acesso-de-parceiro="store.semAcessoParceiro"
+    bloquear-se-suspenso
+    @tentar-de-novo="ensureContext(true)"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('carteira.subtitle') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('carteira.title') }}</h1>
-
-        <div v-if="!showAfiliadoGate" class="hc-saudacao__linha">
-          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
-            {{ fraseDoResumo }}
-          </p>
-
-          <nav v-if="estado?.ehDono" class="hc-acoes" :aria-label="t('carteira.saudacao.acoes')">
-            <Button
-              v-if="acaoCheia === 'sacar'"
-              type="button"
-              class="hc-pilula hc-pilula--cheia"
-              icon="ph ph-wallet"
-              :label="t('carteira.visao.saque.submit')"
-              @click="resumo?.abrirSaque()"
-            />
-            <Button
-              v-if="acaoCheia === 'cadastrarPix'"
-              type="button"
-              class="hc-pilula hc-pilula--cheia"
-              icon="ph ph-key"
-              :label="t('carteira.saudacao.cadastrarPix')"
-              @click="resumo?.abrirPix()"
-            />
-            <Button
-              v-else
-              type="button"
-              class="hc-pilula"
-              :class="{ 'hc-pilula--cheia': !acaoCheia }"
-              icon="ph ph-key"
-              :label="t('carteira.visao.pix.title')"
-              :severity="acaoCheia ? 'secondary' : undefined"
-              :outlined="Boolean(acaoCheia)"
-              @click="resumo?.abrirPix()"
-            />
-          </nav>
-        </div>
-      </div>
+    <template v-if="fraseDoResumo && !showAfiliadoGate" #resumo>
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
     </template>
 
-    <article v-if="showAfiliadoGate" class="carteira-gate">
-      <h3>{{ t('carteira.gate.title') }}</h3>
+    <!-- Sem o programa de afiliados não há carteira: a folha diz isso e leva aos programas. -->
+    <div v-if="showAfiliadoGate" class="carteira-gate ui-folha">
+      <span class="carteira-gate__icone" aria-hidden="true"><i class="ph ph-wallet" /></span>
+      <h2>{{ t('carteira.gate.title') }}</h2>
       <p>{{ t('carteira.gate.body') }}</p>
-      <Button :label="t('carteira.gate.cta')" @click="goToProgramas" />
-    </article>
+      <Button
+        type="button"
+        icon="ph ph-squares-four"
+        :label="t('carteira.gate.cta')"
+        @click="goToProgramas"
+      />
+    </div>
 
-    <div v-else class="carteira-pagina">
+    <div v-else class="carteira">
       <PortalCarteiraVisaoPanel
-        ref="resumo"
         @estado="estado = $event"
         @needs-programas="goToProgramas"
       />
 
-      <PartnerSectionTabs
-        :tabs="tabs"
-        :active-tab="activeTab"
-        :aria-label="tabsAriaLabel"
-        @select="setTab($event as CarteiraTab)"
-      />
+      <section class="carteira__listas" :aria-label="tabsAriaLabel">
+        <SelectButton
+          class="carteira__abas"
+          :model-value="activeTab"
+          :options="tabs"
+          option-label="label"
+          option-value="id"
+          :allow-empty="false"
+          :aria-label="tabsAriaLabel"
+          @update:model-value="escolherAba"
+        />
 
-      <PortalCarteiraExtratoPanel v-if="activeTab === 'extrato'" @needs-programas="goToProgramas" />
-      <PortalCarteiraSaquesPanel v-else @needs-programas="goToProgramas" />
+        <PortalCarteiraExtratoPanel
+          v-if="activeTab === 'extrato'"
+          @needs-programas="goToProgramas"
+        />
+        <PortalCarteiraSaquesPanel v-else @needs-programas="goToProgramas" />
+      </section>
 
       <PortalCarteiraAjuda />
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
-.carteira-pagina {
-  display: grid;
-  gap: 1rem;
+/* Botões de contorno e de texto nas cores do Trilha (fora do antigo `.hc-tema`). */
+.tela-carteira {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
 }
 
-/* As abas trazem a própria margem de baixo; na grade, quem espaça é o gap. */
-.carteira-pagina :deep(.partner-tabs) {
-  margin-bottom: 0;
+.carteira {
+  display: grid;
+  gap: 32px;
+}
+
+.carteira__listas {
+  display: grid;
+  gap: 16px;
+}
+
+.carteira__abas {
+  justify-self: start;
+}
+
+.carteira__abas :deep(.p-togglebutton-content) {
+  min-height: 38px;
+  padding-inline: 16px;
+  font-size: 14.5px;
 }
 
 .carteira-gate {
   display: grid;
-  gap: 0.75rem;
-  max-width: 28rem;
-  padding: 1.2rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 1rem;
-  background: var(--partner-card);
+  max-width: 560px;
+  justify-items: center;
+  gap: 8px;
+  margin: 8px auto;
+  padding: 40px 32px;
+  text-align: center;
 }
 
-.carteira-gate h3 {
-  margin: 0;
-  font-size: 1rem;
+.carteira-gate__icone {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 24px;
+}
+
+.carteira-gate h2 {
+  margin: 8px 0 0;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .carteira-gate p {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.9rem;
+  max-width: 48ch;
+  margin: 0 0 12px;
+  color: var(--tinta-2);
+  line-height: 1.5;
 }
 </style>

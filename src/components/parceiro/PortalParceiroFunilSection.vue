@@ -400,110 +400,72 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 </template>
 
 <style scoped>
+/*
+ * O funil do cadastro (Configurações → Empresa) nos tokens do Trilha. Cada estado é uma folha;
+ * o ícone do cabeçalho leva a cor do estado (atenção em análise, risco recusado ou suspenso, ok
+ * aprovado) e o selo repete com palavra.
+ */
 .funil {
   display: grid;
-  gap: 1rem;
+  gap: 20px;
   width: 100%;
-}
-
-.funil__edit-head {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.funil__edit-head h3 {
-  margin: 0;
-  color: var(--partner-text);
-  font-size: 0.98rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-}
-
-.funil__edit-head p {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.84rem;
-  line-height: 1.5;
+  color: var(--tinta);
 }
 
 .funil__card {
   display: grid;
-  gap: 1rem;
-  padding: 1.2rem 1.25rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 1.2rem;
-  background: var(--partner-card);
-  box-shadow: 0 12px 28px rgb(var(--partner-shadow-rgb) / 0.04);
-}
-
-.funil__card[data-tone='brand'] {
-  border-color: color-mix(in srgb, var(--partner-primary) 28%, var(--partner-line));
-  background:
-    radial-gradient(
-      120% 130% at 100% 0%,
-      color-mix(in srgb, var(--partner-primary-soft) 32%, transparent),
-      transparent 55%
-    ),
-    var(--partner-card);
-}
-
-.funil__card[data-tone='pending'] {
-  border-color: color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
-  background: var(--partner-card);
-}
-
-.funil__card[data-tone='success'] {
-  border-color: color-mix(in srgb, var(--partner-success-text) 20%, var(--partner-line));
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--partner-success-bg) 40%, var(--partner-card)),
-    var(--partner-card) 55%
-  );
+  gap: 18px;
+  padding: 22px 24px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
 }
 
 .funil__card--compact {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.85rem;
-  padding: 0.85rem 1rem;
+  gap: 14px;
+  padding: 16px 20px;
 }
 
 .funil__card--compact .funil__icon {
-  width: 2.2rem;
-  height: 2.2rem;
-  font-size: 0.95rem;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
 }
 
 .funil__compact-main {
   display: grid;
-  gap: 0.15rem;
+  gap: 2px;
   min-width: 0;
 }
 
-.funil__compact-main h3 {
+.funil__compact-main h3,
+.funil__edit-head h3 {
   margin: 0;
-  color: var(--partner-text);
-  font-size: 0.95rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-.funil__compact-main p {
+.funil__compact-main p,
+.funil__edit-head p {
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
 }
 
-.funil__card[data-tone='warm'] {
-  border-color: color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
-  background: var(--partner-card);
+.funil__edit-head {
+  display: grid;
+  gap: 3px;
 }
 
 .funil__head {
   display: flex;
   align-items: flex-start;
-  gap: 0.85rem;
+  gap: 14px;
 }
 
 .funil__head > div {
@@ -513,270 +475,287 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 
 .funil__head h3 {
   margin: 0;
-  color: var(--partner-text);
-  font-size: 1.05rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .funil__head p {
-  margin: 0.25rem 0 0;
-  color: var(--partner-muted);
-  font-size: 0.86rem;
+  max-width: 64ch;
+  margin: 4px 0 0;
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.5;
 }
 
 .funil__icon {
   display: grid;
-  width: 2.6rem;
-  height: 2.6rem;
-  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  flex: none;
   place-items: center;
-  border-radius: 0.85rem;
-  font-size: 1.05rem;
+  border-radius: 14px;
+  font-size: 22px;
 }
 
 .funil__icon--brand {
-  background: color-mix(in srgb, var(--partner-primary) 18%, var(--partner-card));
-  color: var(--partner-primary-strong);
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
 }
 
 .funil__icon--pending {
-  background: color-mix(in srgb, var(--partner-primary) 16%, var(--partner-card));
-  color: var(--partner-primary-strong);
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .funil__icon--warm {
-  background: color-mix(in srgb, var(--partner-warm-text) 12%, var(--partner-card));
-  color: var(--partner-warm-text);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .funil__icon--success {
-  background: var(--partner-success-bg);
-  color: var(--partner-success-text);
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
 }
 
+/* Os três passos do cadastro: número num disco, título e uma linha. */
 .funil__steps {
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
   counter-reset: funil-step;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .funil__steps li {
+  position: relative;
   display: grid;
-  gap: 0.25rem;
   align-content: start;
-  padding: 0.75rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--partner-line) 80%, transparent);
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--partner-surface) 80%, var(--partner-card));
+  gap: 3px;
+  padding: 14px 16px 14px 52px;
+  border-radius: 12px;
+  background: var(--superficie-2);
   counter-increment: funil-step;
 }
 
-.funil__steps strong {
-  color: var(--partner-text);
-  font-size: 0.83rem;
+.funil__steps li::before {
+  position: absolute;
+  top: 14px;
+  inset-inline-start: 14px;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
+  content: counter(funil-step);
+  font-family: var(--font-dados);
+  font-size: 13px;
+  font-weight: 650;
 }
 
-.funil__steps strong::before {
-  content: counter(funil-step) '. ';
-  color: var(--partner-primary-strong);
+[dir='rtl'] .funil__steps li {
+  padding: 14px 52px 14px 16px;
+}
+
+.funil__steps strong {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .funil__steps span {
-  color: var(--partner-muted);
-  font-size: 0.76rem;
-  line-height: 1.4;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .funil__motivo {
-  padding: 0.85rem 0.95rem;
-  border: 1px solid color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
-  border-radius: 0.85rem;
-  background: var(--partner-surface);
-  color: var(--partner-text);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--tinta);
 }
 
 .funil__motivo strong {
   display: block;
-  margin-bottom: 0.25rem;
-  color: var(--partner-warm-text);
-  font-size: 0.8rem;
+  margin-bottom: 2px;
+  color: var(--risco-tinta);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .funil__motivo p {
   margin: 0;
-  font-size: 0.86rem;
-  line-height: 1.45;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .funil__submit-error {
   margin: 0;
-  padding: 0.75rem 0.9rem;
-  border: 1px solid color-mix(in srgb, var(--partner-warm-text) 24%, var(--partner-line));
-  border-radius: 0.8rem;
-  background: var(--partner-surface);
-  color: var(--partner-warm-text);
-  font-size: 0.85rem;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in oklab, var(--risco) 40%, var(--linha));
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .funil__incomplete {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  margin: 0;
-  color: var(--partner-amber-text);
-  font-size: 0.84rem;
+  gap: 6px;
+  margin-top: 4px !important;
+  color: var(--atencao-tinta) !important;
+  font-weight: 500;
 }
 
 .funil__hint {
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.85rem;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .funil__hint--note {
   display: flex;
   align-items: flex-start;
-  gap: 0.45rem;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--partner-primary) 22%, var(--partner-line));
-  border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--partner-primary-soft) 12%, var(--partner-card));
-  line-height: 1.45;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta);
 }
 
 .funil__hint--note i {
-  margin-top: 0.12rem;
-  color: var(--partner-primary-strong);
+  margin-top: 2px;
+  color: var(--tinta-2);
+  font-size: 16px;
 }
 
+/* O que está em análise: o cadastro e cada programa pedido junto, um por linha. */
 .funil__analise {
   display: grid;
-  gap: 0.55rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--partner-primary) 20%, var(--partner-line));
-  border-radius: 0.95rem;
-  background: color-mix(in srgb, var(--partner-surface) 70%, var(--partner-card));
+  gap: 10px;
 }
 
 .funil__analise-label {
-  color: var(--partner-text);
-  font-size: 0.8rem;
-  font-weight: 750;
-  letter-spacing: 0.01em;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .funil__analise-list {
   display: grid;
-  gap: 0.4rem;
+  overflow: hidden;
   margin: 0;
   padding: 0;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
   list-style: none;
 }
 
 .funil__analise-list li {
   display: flex;
+  min-height: 48px;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.7rem;
-  border: 1px solid color-mix(in srgb, var(--partner-line) 75%, transparent);
-  border-radius: 0.7rem;
-  background: var(--partner-card);
-  color: var(--partner-text);
-  font-size: 0.85rem;
-  font-weight: 650;
+  gap: 10px;
+  padding: 8px 14px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.funil__analise-list li + li {
+  border-top: 1px solid var(--linha);
 }
 
 .funil__analise-list i {
-  color: var(--partner-primary-strong);
-  font-size: 0.8rem;
+  color: var(--atencao-tinta);
+  font-size: 16px;
 }
 
 .funil__analise-hint {
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.78rem;
-  line-height: 1.45;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .funil__support-lede {
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.84rem;
-  font-weight: 650;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 500;
 }
 
 .funil__channels {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.55rem;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
 }
 
 .funil__channels a {
   display: flex;
-  align-items: flex-start;
-  gap: 0.55rem;
-  min-height: 100%;
-  padding: 0.7rem 0.75rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.75rem;
-  color: var(--partner-text);
+  min-height: 56px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  color: var(--tinta);
   text-decoration: none;
 }
 
-.funil__channels a:hover,
+.funil__channels a:hover {
+  background: var(--superficie-2);
+}
+
 .funil__channels a:focus-visible {
-  border-color: var(--partner-primary-strong);
-  outline: none;
+  outline: 2px solid var(--musgo);
+  outline-offset: 2px;
 }
 
 .funil__channels a > i {
-  color: var(--partner-primary-strong);
-  font-size: 1rem;
+  color: var(--tinta-2);
+  font-size: 20px;
 }
 
 .funil__channels span {
   display: grid;
-  gap: 0.05rem;
   min-width: 0;
 }
 
 .funil__channels strong {
-  font-size: 0.84rem;
-  font-weight: 750;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .funil__channels small {
-  color: var(--partner-muted);
-  font-size: 0.76rem;
+  color: var(--tinta-2);
+  font-size: 12.5px;
   overflow-wrap: anywhere;
 }
 
 .funil__form-loading {
   display: grid;
-  gap: 0.6rem;
-}
-
-@media (max-width: 960px) {
-  .funil__channels {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  gap: 10px;
 }
 
 @media (max-width: 720px) {
-  .funil__steps {
-    grid-template-columns: 1fr;
+  .funil__card {
+    padding: 18px 16px;
   }
 
-  .funil__channels {
+  .funil__steps {
     grid-template-columns: 1fr;
   }
 

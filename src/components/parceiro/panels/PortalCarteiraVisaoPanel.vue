@@ -1,24 +1,22 @@
 <script setup lang="ts">
 /**
- * O resumo da carteira: os fatos numa linha, e os diálogos de saque e de chave PIX.
+ * O saldo da carteira: o disponível para saque em número grande, com a ação ao lado; embaixo, o
+ * que está liberando, o que já foi sacado e a chave PIX. E os dois diálogos (saque e chave).
  *
- * Era a aba "Visão geral": três cartões de número (saldo sacável, saldo total, total sacado),
- * dois formulários abertos lado a lado e quatro cartões de ajuda. O saldo sacável subiu para a
- * frase do topo da página, e as duas ações viraram as pílulas dela; aqui ficam o que a frase não
- * diz (quanto já foi sacado, o mínimo, o ciclo, a chave) e os dois diálogos que as pílulas abrem.
- *
- * A página monta a saudação e chama `abrirSaque` / `abrirPix`; este painel carrega a carteira e
- * conta à página o que ela precisa saber pelo evento `estado`.
+ * A ação acompanha a situação: liberado, "Solicitar saque" é a primária; faltando a chave,
+ * "Cadastrar chave PIX" é que é. Quem não é dono não vê nenhuma das duas — o saque e a chave são
+ * do dono da conta. A página monta a frase do topo com o que este painel conta pelo evento
+ * `estado`; `abrirSaque` e `abrirPix` continuam expostos para quem precisar abrir de fora.
  */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
 import Skeleton from 'primevue/skeleton'
 import type { ToastMessageOptions } from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import AuthTextField from '@/components/auth/AuthTextField.vue'
 import { useFeedbackSaque } from '@/composables/useFeedbackSaque'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -90,25 +88,17 @@ const capacidade = computed(() =>
 )
 
 /**
- * O motivo de não dar para sacar, numa frase — a mesma da Visão geral. Só aparece quando há
- * motivo: com o saque liberado, a linha de fatos não precisa se justificar.
- */
-const motivo = computed(() => {
-  const situacao = capacidade.value
-
-  if (!situacao || situacao === 'liberado') {
-    return ''
-  }
-
-  return t(`inicio.saldo.capacidade.${situacao}`, { minimo: formatBrl(minSaqueCentavos) })
-})
-
-/**
  * A chave na linha de fatos, com o meio escondido: "089…560" diz qual é a chave para quem a
  * cadastrou, sem expor o CPF ou o telefone inteiro para quem passa atrás do balcão.
  */
 const chaveMascarada = computed(() => {
   const chave = carteira.value?.chavePix ?? ''
+  const arroba = chave.indexOf('@')
+
+  /* E-mail: o domínio não é segredo e é o que a pessoa reconhece ("fin…@vidaanimal.com.br"). */
+  if (arroba > 0) {
+    return `${chave.slice(0, Math.min(3, arroba))}…${chave.slice(arroba)}`
+  }
 
   return chave.length > 8 ? `${chave.slice(0, 3)}…${chave.slice(-3)}` : chave
 })
@@ -118,6 +108,25 @@ const retidoCentavos = computed(() =>
     ? Math.max(0, carteira.value.saldoTotalCentavos - carteira.value.saldoSacavelCentavos)
     : 0,
 )
+
+/**
+ * A ação primária do saldo: sacar quando dá; cadastrar a chave quando é só ela que falta. Fora
+ * disso, nenhuma — o motivo está na frase do topo da página.
+ */
+const acaoPrimaria = computed<'sacar' | 'cadastrarPix' | null>(() => {
+  if (!store.isDono) {
+    return null
+  }
+
+  if (capacidade.value === 'liberado') {
+    return 'sacar'
+  }
+
+  return capacidade.value === 'semChavePix' ? 'cadastrarPix' : null
+})
+
+/** Trocar (ou cadastrar) a chave ao lado dela, se não for já a ação primária. */
+const mostraBotaoDaChave = computed(() => store.isDono && acaoPrimaria.value !== 'cadastrarPix')
 
 const showComissaoDisabledNotice = computed(
   () =>
@@ -171,6 +180,13 @@ async function loadCarteira() {
   } finally {
     loading.value = false
   }
+}
+
+/** Põe o saldo inteiro no campo: sacar tudo é o caso comum. */
+function sacarTudo() {
+  valorSaque.value = carteira.value
+    ? maskBrlCurrencyInput(String(carteira.value.saldoSacavelCentavos))
+    : ''
 }
 
 /** O saque abre com o saldo inteiro: sacar tudo é o caso comum, e mudar o valor é um campo. */
@@ -303,19 +319,31 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="carteira-resumo">
+  <div class="carteira-saldo">
     <div
       v-if="loading"
-      class="hc carteira-fatos"
+      class="saldo ui-folha"
       role="status"
       aria-live="polite"
       aria-busy="true"
       :aria-label="t('carteira.visao.loadingAria')"
     >
-      <Skeleton width="60%" height="1rem" border-radius="4px" />
+      <div class="saldo__topo" aria-hidden="true">
+        <div class="saldo__principal">
+          <Skeleton width="9rem" height="0.85rem" border-radius="6px" />
+          <Skeleton width="14rem" height="2.8rem" border-radius="10px" />
+        </div>
+      </div>
+      <div class="saldo__fatos" aria-hidden="true">
+        <div v-for="n in 3" :key="n" class="fato">
+          <Skeleton width="6rem" height="0.8rem" border-radius="6px" />
+          <Skeleton width="8rem" height="1.4rem" border-radius="6px" />
+        </div>
+      </div>
     </div>
 
-    <div v-else-if="error" class="portal-panel__state portal-panel__state--error" role="alert">
+    <div v-else-if="error" class="saldo-erro ui-folha" role="alert">
+      <span class="saldo-erro__icone" aria-hidden="true"><i class="ph ph-warning-circle" /></span>
       <p>{{ error }}</p>
       <Button
         type="button"
@@ -323,206 +351,673 @@ onBeforeUnmount(() => {
         icon="ph ph-arrow-clockwise"
         severity="secondary"
         outlined
-        size="small"
         @click="loadCarteira"
       />
     </div>
 
     <template v-else-if="carteira">
-      <section class="hc carteira-fatos" :aria-label="t('carteira.resumo.aria')">
-        <p v-if="motivo" class="carteira-fatos__motivo">
-          <i class="ph ph-info" aria-hidden="true" />
-          {{ motivo }}
-        </p>
+      <section class="saldo ui-folha" :aria-label="t('carteira.resumo.aria')">
+        <div class="saldo__topo">
+          <div class="saldo__principal">
+            <span class="saldo__rotulo">
+              <i class="ph ph-wallet" aria-hidden="true" />
+              {{ t('carteira.tela.disponivel') }}
+            </span>
+            <strong class="saldo__valor ui-num">
+              {{ formatBrl(carteira.saldoSacavelCentavos) }}
+            </strong>
+          </div>
 
-        <ul class="carteira-fatos__lista">
-          <li v-if="retidoCentavos > 0 && capacidade !== 'tudoRetido'">
-            {{ t('carteira.resumo.retido', { valor: formatBrl(retidoCentavos) }) }}
-          </li>
-          <li>
-            <strong>{{ formatBrl(carteira.totalSacadoCentavos) }}</strong>
-            {{ t('carteira.resumo.jaSacados') }}
-          </li>
-          <li>
-            {{ t('carteira.resumo.minimo') }} <strong>{{ formatBrl(minSaqueCentavos) }}</strong>
-          </li>
-          <li>{{ t('carteira.resumo.ciclo') }}</li>
-          <li v-if="carteira.chavePix">
-            {{ t('carteira.resumo.pix') }} <strong>{{ chaveMascarada }}</strong>
-          </li>
-        </ul>
+          <div v-if="acaoPrimaria" class="saldo__acoes">
+            <Button
+              v-if="acaoPrimaria === 'sacar'"
+              type="button"
+              class="saldo__acao"
+              icon="ph ph-hand-coins"
+              :label="t('carteira.visao.saque.submit')"
+              @click="abrirSaque"
+            />
+            <Button
+              v-else
+              type="button"
+              class="saldo__acao"
+              icon="ph ph-key"
+              :label="t('carteira.saudacao.cadastrarPix')"
+              @click="abrirPix"
+            />
+          </div>
+        </div>
+
+        <dl class="saldo__fatos">
+          <div class="fato">
+            <dt class="fato__rotulo">
+              <i class="ph ph-hourglass-medium" aria-hidden="true" />
+              {{ t('carteira.tela.liberando') }}
+            </dt>
+            <dd class="fato__valor ui-num">{{ formatBrl(retidoCentavos) }}</dd>
+            <dd class="fato__nota">
+              {{ retidoCentavos > 0 ? t('carteira.tela.liberandoNota') : t('carteira.tela.nadaLiberando') }}
+            </dd>
+          </div>
+
+          <div class="fato">
+            <dt class="fato__rotulo">
+              <i class="ph ph-arrow-circle-up-right" aria-hidden="true" />
+              {{ t('inicio.saldo.sacado') }}
+            </dt>
+            <dd class="fato__valor ui-num">{{ formatBrl(carteira.totalSacadoCentavos) }}</dd>
+            <dd class="fato__nota">{{ t('carteira.resumo.ciclo') }}</dd>
+          </div>
+
+          <div class="fato">
+            <dt class="fato__rotulo">
+              <i class="ph ph-key" aria-hidden="true" />
+              {{ t('carteira.visao.pix.label') }}
+            </dt>
+            <dd class="fato__valor fato__valor--chave">
+              <bdi
+                v-if="carteira.chavePix"
+                class="fato__chave"
+                dir="ltr"
+                :title="carteira.chavePix"
+              >
+                {{ chaveMascarada }}
+              </bdi>
+              <span v-else class="fato__vazio">{{ t('carteira.tela.semPix') }}</span>
+              <button
+                v-if="mostraBotaoDaChave"
+                type="button"
+                class="ui-mais fato__trocar"
+                @click="abrirPix"
+              >
+                {{ carteira.chavePix ? t('carteira.tela.trocarPix') : t('carteira.tela.cadastrarPix') }}
+              </button>
+            </dd>
+            <dd class="fato__nota">
+              {{ t('carteira.resumo.minimo') }}
+              <span class="ui-num">{{ formatBrl(minSaqueCentavos) }}</span>
+            </dd>
+          </div>
+        </dl>
       </section>
 
-      <p v-if="showComissaoDisabledNotice" class="carteira-fatos__motivo">
+      <p v-if="showComissaoDisabledNotice" class="saldo-aviso" role="status">
         <i class="ph ph-info" aria-hidden="true" />
         {{ t('carteira.visao.alertComissaoDisabled') }}
       </p>
     </template>
 
+    <!-- ------------------------------------------------------------ solicitar saque -->
     <Dialog
       v-model:visible="saqueAberto"
       modal
-      class="clinic-dialog hc-tema"
-      :style="{ width: 'min(28rem, 94vw)' }"
-      :header="t('carteira.visao.saque.title')"
       dismissable-mask
+      :draggable="false"
+      class="carteira-dialogo"
+      :pt="{ root: { class: 'carteira-dialogo' } }"
       @after-hide="avisarSaqueFechado()"
     >
-      <div v-if="carteira" class="carteira-dialogo">
-        <p class="carteira-dialogo__saldo">
-          {{ t('carteira.dialogo.disponivel', { valor: formatBrl(carteira.saldoSacavelCentavos) }) }}
-        </p>
-        <AuthTextField
-          id="valor-saque"
-          :model-value="valorSaque"
-          :disabled="requestingSaque"
-          inputmode="numeric"
-          autocomplete="off"
-          :label="t('carteira.visao.saque.valorLabel')"
-          :placeholder="t('carteira.visao.saque.valorPlaceholder')"
-          @update:model-value="onValorSaqueInput"
-        >
-          <template #leading>
-            <span class="carteira-currency">{{ t('carteira.visao.saque.currency') }}</span>
-          </template>
-        </AuthTextField>
-        <p class="carteira-dialogo__dica">
-          {{ t('carteira.dialogo.paraPix', { chave: chaveMascarada }) }}
-          {{ t('carteira.visao.saque.hint', { valor: formatBrl(minSaqueCentavos) }) }}
-        </p>
-      </div>
+      <template #container="{ closeCallback }">
+        <div class="cd" role="document" aria-labelledby="saque-titulo">
+          <Button
+            class="cd__fechar"
+            type="button"
+            icon="ph ph-x"
+            severity="secondary"
+            text
+            :aria-label="t('common.close')"
+            :disabled="requestingSaque"
+            @click="closeCallback"
+          />
 
-      <template #footer>
-        <Button
-          :label="t('carteira.dialogo.cancelar')"
-          severity="secondary"
-          text
-          @click="saqueAberto = false"
-        />
-        <Button
-          :label="t('carteira.visao.saque.submit')"
-          icon="ph ph-arrow-right"
-          :loading="requestingSaque"
-          :disabled="capacidade !== 'liberado'"
-          @click="requestWithdraw"
-        />
+          <span class="cd__selo" aria-hidden="true"><i class="ph ph-hand-coins" /></span>
+          <h2 id="saque-titulo" class="cd__titulo">{{ t('carteira.visao.saque.title') }}</h2>
+
+          <div v-if="carteira" class="cd__corpo">
+            <p class="cd__disponivel">
+              <span>{{ t('carteira.tela.disponivel') }}</span>
+              <strong class="ui-num">{{ formatBrl(carteira.saldoSacavelCentavos) }}</strong>
+            </p>
+
+            <div class="cd__campo">
+              <label for="valor-saque">{{ t('carteira.visao.saque.valorLabel') }}</label>
+              <div class="cd__valor">
+                <span class="cd__moeda" aria-hidden="true">{{ t('carteira.visao.saque.currency') }}</span>
+                <InputText
+                  id="valor-saque"
+                  :model-value="valorSaque"
+                  class="cd__entrada ui-num"
+                  size="6"
+                  :disabled="requestingSaque"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  :placeholder="t('carteira.visao.saque.valorPlaceholder')"
+                  aria-describedby="valor-saque-dica"
+                  @update:model-value="onValorSaqueInput($event ?? '')"
+                  @keydown.enter.prevent="requestWithdraw"
+                />
+                <Button
+                  type="button"
+                  class="cd__tudo"
+                  :label="t('carteira.tela.sacarTudo')"
+                  severity="secondary"
+                  text
+                  size="small"
+                  :disabled="requestingSaque"
+                  @click="sacarTudo"
+                />
+              </div>
+            </div>
+
+            <ul id="valor-saque-dica" class="cd__dicas">
+              <li>
+                <i class="ph ph-key" aria-hidden="true" />
+                <span>{{ t('carteira.dialogo.paraPix', { chave: chaveMascarada }) }}</span>
+              </li>
+              <li>
+                <i class="ph ph-calendar-check" aria-hidden="true" />
+                <span>{{ t('carteira.visao.saque.hint', { valor: formatBrl(minSaqueCentavos) }) }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="cd__pe">
+            <Button
+              type="button"
+              :label="t('carteira.dialogo.cancelar')"
+              severity="secondary"
+              text
+              :disabled="requestingSaque"
+              @click="saqueAberto = false"
+            />
+            <Button
+              type="button"
+              icon="ph ph-check"
+              :label="t('carteira.visao.saque.submit')"
+              :loading="requestingSaque"
+              :disabled="capacidade !== 'liberado'"
+              @click="requestWithdraw"
+            />
+          </div>
+        </div>
       </template>
     </Dialog>
 
+    <!-- ------------------------------------------------------------ chave PIX -->
     <Dialog
       v-model:visible="pixAberto"
       modal
-      class="clinic-dialog hc-tema"
-      :style="{ width: 'min(28rem, 94vw)' }"
-      :header="t('carteira.visao.pix.title')"
       dismissable-mask
+      :draggable="false"
+      class="carteira-dialogo"
+      :pt="{ root: { class: 'carteira-dialogo' } }"
     >
-      <div class="carteira-dialogo">
-        <AuthTextField
-          id="chave-pix"
-          v-model="chavePix"
-          :disabled="!store.isDono || savingPix"
-          :hint="t('carteira.visao.pix.hint')"
-          :label="t('carteira.visao.pix.label')"
-          :placeholder="t('carteira.visao.pix.placeholder')"
-        />
-      </div>
+      <template #container="{ closeCallback }">
+        <div class="cd" role="document" aria-labelledby="pix-titulo">
+          <Button
+            class="cd__fechar"
+            type="button"
+            icon="ph ph-x"
+            severity="secondary"
+            text
+            :aria-label="t('common.close')"
+            :disabled="savingPix"
+            @click="closeCallback"
+          />
 
-      <template #footer>
-        <Button
-          :label="t('carteira.dialogo.cancelar')"
-          severity="secondary"
-          text
-          @click="pixAberto = false"
-        />
-        <Button
-          :label="t('carteira.visao.pix.save')"
-          icon="ph ph-check"
-          :disabled="!store.isDono || !chavePix.trim()"
-          :loading="savingPix"
-          @click="savePix"
-        />
+          <span class="cd__selo" aria-hidden="true"><i class="ph ph-key" /></span>
+          <h2 id="pix-titulo" class="cd__titulo">{{ t('carteira.visao.pix.title') }}</h2>
+
+          <div class="cd__corpo">
+            <div class="cd__campo">
+              <label for="chave-pix">{{ t('carteira.visao.pix.label') }}</label>
+              <InputText
+                id="chave-pix"
+                v-model="chavePix"
+                class="cd__entrada cd__entrada--texto"
+                :disabled="!store.isDono || savingPix"
+                autocomplete="off"
+                spellcheck="false"
+                :placeholder="t('carteira.visao.pix.placeholder')"
+                aria-describedby="chave-pix-dica"
+                @keydown.enter.prevent="savePix"
+              />
+              <small id="chave-pix-dica" class="cd__dica">{{ t('carteira.visao.pix.hint') }}</small>
+            </div>
+          </div>
+
+          <div class="cd__pe">
+            <Button
+              type="button"
+              :label="t('carteira.dialogo.cancelar')"
+              severity="secondary"
+              text
+              :disabled="savingPix"
+              @click="pixAberto = false"
+            />
+            <Button
+              type="button"
+              icon="ph ph-check"
+              :label="t('carteira.visao.pix.save')"
+              :disabled="!store.isDono || !chavePix.trim()"
+              :loading="savingPix"
+              @click="savePix"
+            />
+          </div>
+        </div>
       </template>
     </Dialog>
   </div>
 </template>
 
 <style scoped>
-.carteira-resumo {
+.carteira-saldo {
   display: grid;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
-.portal-panel__state {
+/* ------------------------------------------------------------------ o saldo */
+
+.saldo {
   display: grid;
-  justify-items: center;
-  gap: 0.5rem;
-  padding: 2rem 1rem;
-  color: var(--partner-muted);
-  text-align: center;
+  overflow: hidden;
 }
 
-.portal-panel__state--error p {
-  margin: 0;
-  color: var(--partner-warm-text);
-}
-
-/* Os fatos numa linha: o que a frase do topo não diz, sem cartão para cada número. */
-.carteira-fatos {
-  display: grid;
-  gap: 0.5rem;
-  padding-block: 0.85rem;
-}
-
-.carteira-fatos__lista {
+.saldo__topo {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 1.5rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  padding: 24px 26px 22px;
+}
+
+.saldo__principal {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.saldo__rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.saldo__rotulo i {
+  color: var(--pj-lugar);
+  font-size: 18px;
+}
+
+/* O número da tela: o que dá para sacar agora. */
+.saldo__valor {
+  color: var(--tinta);
+  font-size: 44px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.saldo__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.saldo__acao.p-button {
+  min-height: 46px;
+  padding-inline: 20px;
+  font-size: 15px;
+}
+
+/* A régua de fatos: três colunas com fio entre elas, no tom de fundo da folha. */
+.saldo__fatos {
+  display: grid;
   margin: 0;
-  padding: 0;
-  list-style: none;
-  color: var(--partner-muted);
-  font-size: 0.875rem;
+  border-top: 1px solid var(--linha);
+  background: var(--superficie-2);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.carteira-fatos__lista strong {
-  color: var(--partner-text);
-  font-weight: 700;
+.fato {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 16px 26px 18px;
 }
 
-/* O motivo de não dar para sacar: uma linha com ícone na tinta de atenção, sem faixa pintada. */
-.carteira-fatos__motivo {
+.fato + .fato {
+  border-inline-start: 1px solid var(--linha);
+}
+
+.fato__rotulo {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.fato__rotulo i {
+  color: var(--tinta-3);
+  font-size: 16px;
+}
+
+.fato dd {
   margin: 0;
-  color: var(--hc-pessego-tinta);
-  font-size: 0.875rem;
+}
+
+.fato__valor {
+  color: var(--tinta);
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.fato__valor--chave {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font-family: var(--font-dados);
+  font-size: 17px;
   font-weight: 600;
 }
 
-/* O que está dentro dos diálogos vai para o `body`, fora da página: só tokens `--hc-*` aqui. */
-.carteira-dialogo {
-  display: grid;
-  gap: 0.75rem;
+.fato__chave {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.carteira-dialogo__saldo {
+.fato__vazio {
+  color: var(--tinta-2);
+  font-family: var(--font-texto);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.fato__trocar.ui-mais {
+  font-family: var(--font-texto);
+}
+
+.fato__nota {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.saldo-erro {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.saldo-erro p {
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
+  color: var(--tinta-2);
+}
+
+.saldo-erro__icone {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 22px;
+}
+
+.saldo-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.saldo-aviso i {
+  margin-top: 2px;
+  color: var(--atencao-tinta);
+  font-size: 17px;
+}
+
+@media (max-width: 760px) {
+  .saldo__topo {
+    padding: 20px 18px;
+  }
+
+  .saldo__valor {
+    font-size: 38px;
+  }
+
+  .saldo__acoes,
+  .saldo__acao.p-button {
+    width: 100%;
+  }
+
+  .saldo__fatos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fato {
+    padding: 14px 18px;
+  }
+
+  .fato + .fato {
+    border-top: 1px solid var(--linha);
+    border-inline-start: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ os diálogos
+ * O painel é desenhado aqui (slot `#container`), nos tokens do Trilha: o overlay vai para o
+ * `body`, e a raiz `html.trilha` leva os dois temas até ele.
+ */
+.cd {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  width: min(28rem, calc(100vw - 2rem));
+  padding: 30px 26px 22px;
+  border: 1px solid var(--linha);
+  border-radius: 20px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-3);
+  color: var(--tinta);
+
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+}
+
+.cd__fechar.p-button {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.cd__selo {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
+  font-size: 25px;
+}
+
+.cd__titulo {
+  margin: 6px 0 0;
+  color: var(--tinta);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.cd__corpo {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.cd__disponivel {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
+}
+
+.cd__disponivel strong {
+  color: var(--tinta);
+  font-size: 17px;
   font-weight: 650;
 }
 
-.carteira-dialogo__dica {
-  margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+.cd__campo {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cd__campo label {
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 550;
+}
+
+/* O valor: "R$" fixo à esquerda, o número grande no meio e "Sacar tudo" à direita. */
+.cd__valor {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-inline: 14px 6px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 12px;
+  background: var(--superficie);
+}
+
+.cd__valor:focus-within {
+  border-color: var(--musgo);
+  box-shadow: var(--anel-foco);
+}
+
+.cd__moeda {
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.cd__valor .cd__entrada.p-inputtext {
+  min-width: 0;
+  flex: 1;
+  height: 56px;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--tinta);
+  font-size: 26px;
+  font-weight: 650;
+  outline: none;
+}
+
+.cd__entrada--texto.p-inputtext {
+  width: 100%;
+  min-height: 46px;
+  font-size: 15px;
+}
+
+.cd__dica {
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.45;
 }
 
-.carteira-currency {
-  color: var(--hc-tinta-2);
-  font-weight: 700;
+.cd__dicas {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  list-style: none;
+}
+
+.cd__dicas li span {
+  min-width: 0;
+}
+
+.cd__dicas li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.cd__dicas i {
+  margin-top: 1px;
+  color: var(--tinta-3);
+  font-size: 15px;
+}
+
+.cd__pe {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+@media (max-width: 520px) {
+  .cd__pe {
+    flex-direction: column-reverse;
+  }
+
+  .cd__pe :deep(.p-button) {
+    width: 100%;
+  }
+}
+</style>
+
+<style>
+/* O painel é o `.cd`; o do PrimeVue fica transparente em volta dele. */
+.carteira-dialogo.p-dialog,
+.carteira-dialogo .p-dialog {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 </style>

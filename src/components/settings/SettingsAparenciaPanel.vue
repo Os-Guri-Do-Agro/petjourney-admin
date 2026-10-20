@@ -1,39 +1,53 @@
 <script setup lang="ts">
 /**
- * Aparência do painel: tema, formato do menu lateral e densidade.
+ * Configurações → Aparência: como o portal se mostra para quem está usando.
  *
- * Tudo aqui é preferência de exibição — muda na hora, não passa pela API e não tem botão de
- * salvar.
+ * Tudo aqui é preferência de exibição — muda na hora, fica neste navegador, não passa pela API e
+ * por isso não tem "Salvar": o rodapé diz isso no lugar do botão.
  *
- * Cada opção mostra uma **maquete** do painel, não um rótulo: "Seções" e "Lista única" são
- * impossíveis de imaginar por nome, e ninguém deveria precisar escolher às cegas para descobrir
- * o que a escolha faz.
+ * - **Tema** claro ou escuro (também no menu da pessoa, no pé da barra).
+ * - **Barra lateral**: só o espaço da tela atual aberto (o padrão), ou todos os espaços abertos
+ *   ao mesmo tempo — o modo "lista" de `useLayoutPreferences`.
+ * - **Densidade**: linhas mais baixas na barra (a moldura aplica `shell--densa`).
+ * - **Explicações**: o texto de apoio das telas do Portal, o mesmo do botão "Mostrar explicações".
+ * - **Idioma** da interface (também no menu da pessoa).
+ *
+ * Tema, barra e densidade mostram uma miniatura do portal, não um rótulo: "todos os espaços
+ * abertos" é difícil de imaginar por nome, e ninguém precisa escolher às cegas.
  */
 import RadioButton from 'primevue/radiobutton'
+import ToggleSwitch from 'primevue/toggleswitch'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import flagAE from 'country-flag-icons/string/3x2/AE'
+import flagBR from 'country-flag-icons/string/3x2/BR'
+import flagES from 'country-flag-icons/string/3x2/ES'
+import flagGB from 'country-flag-icons/string/3x2/GB'
+import flagRS from 'country-flag-icons/string/3x2/RS'
+import flagUS from 'country-flag-icons/string/3x2/US'
+
 import SettingsLayoutMockup from '@/components/settings/SettingsLayoutMockup.vue'
 import {
+  isGuidanceVisible,
   navigatorDensity,
   navigatorMode,
   setNavigatorDensity,
   setNavigatorMode,
+  toggleGuidance,
   type NavigatorDensity,
   type NavigatorMode,
 } from '@/composables/useLayoutPreferences'
+import { changeLocale } from '@/i18n'
+import { LOCALES, type Locale } from '@/i18n/locales'
 import { colorMode } from '@/theme/color-mode'
 import type { ThemeMode } from '@/theme/colors'
 
-const { t } = useI18n()
+import './configuracoes.css'
 
-type Maquete = {
-  tema?: 'claro' | 'escuro' | 'atual'
-  trilho?: boolean
-  grupos?: boolean
-  linhas?: number
-  densa?: boolean
-}
+const { t, locale } = useI18n()
+
+type Maquete = { tema?: 'claro' | 'escuro' | 'atual'; todos?: boolean; densa?: boolean }
 
 type Opcao<T extends string> = {
   valor: T
@@ -60,15 +74,15 @@ const temas = computed<Opcao<ThemeMode>[]>(() => [
 const modos = computed<Opcao<NavigatorMode>[]>(() => [
   {
     valor: 'secoes',
-    label: t('settings.aparencia.menu.secoes.label'),
-    hint: t('settings.aparencia.menu.secoes.hint'),
-    maquete: { trilho: true },
+    label: t('settings.aparencia.barra.secoes.label'),
+    hint: t('settings.aparencia.barra.secoes.hint'),
+    maquete: { todos: false },
   },
   {
     valor: 'lista',
-    label: t('settings.aparencia.menu.lista.label'),
-    hint: t('settings.aparencia.menu.lista.hint'),
-    maquete: { trilho: false, grupos: true, linhas: 7 },
+    label: t('settings.aparencia.barra.lista.label'),
+    hint: t('settings.aparencia.barra.lista.hint'),
+    maquete: { todos: true },
   },
 ])
 
@@ -77,286 +91,401 @@ const densidades = computed<Opcao<NavigatorDensity>[]>(() => [
     valor: 'confortavel',
     label: t('settings.aparencia.densidade.confortavel.label'),
     hint: t('settings.aparencia.densidade.confortavel.hint'),
-    maquete: { linhas: 4 },
+    maquete: { todos: true },
   },
   {
     valor: 'compacta',
     label: t('settings.aparencia.densidade.compacta.label'),
-    hint: t('settings.aparencia.densidade.compacta.hint'),
-    maquete: { linhas: 8, densa: true },
+    hint: t('settings.aparencia.densidade.compacta.hintBarra'),
+    maquete: { todos: true, densa: true },
   },
 ])
+
+/** A bandeira só ilumina; o nome de cada idioma vai escrito nele mesmo. */
+const BANDEIRA: Record<Locale, string> = {
+  pt: flagBR,
+  en: flagUS,
+  'en-GB': flagGB,
+  es: flagES,
+  sr: flagRS,
+  ar: flagAE,
+}
+
+const NOME_NATIVO: Record<Locale, string> = {
+  pt: 'Português',
+  en: 'English (US)',
+  'en-GB': 'English (UK)',
+  es: 'Español',
+  sr: 'Srpski',
+  ar: 'العربية',
+}
+
+const idiomas = computed(() =>
+  LOCALES.map((codigo) => ({ codigo, bandeira: BANDEIRA[codigo], nome: NOME_NATIVO[codigo] })),
+)
+
+function escolherIdioma(codigo: Locale) {
+  if (codigo !== locale.value) {
+    void changeLocale(codigo)
+  }
+}
+
+function alternarExplicacoes(ligado: boolean) {
+  if (ligado !== isGuidanceVisible.value) {
+    toggleGuidance()
+  }
+}
 </script>
 
 <template>
-  <div class="aparencia">
-    <section class="bloco">
-      <header class="bloco__topo">
-        <span class="bloco__marca" aria-hidden="true"><i class="ph ph-palette" /></span>
-        <span class="bloco__texto">
-          <h3>{{ t('settings.aparencia.tema.titulo') }}</h3>
-          <p>{{ t('settings.aparencia.tema.descricao') }}</p>
-        </span>
+  <div class="ui-folha cfg-folha aparencia">
+    <section class="cfg-secao" aria-labelledby="aparencia-tema-titulo">
+      <header class="cfg-secao__cabeca">
+        <h3 id="aparencia-tema-titulo" class="cfg-secao__titulo">
+          {{ t('settings.aparencia.tema.titulo') }}
+        </h3>
+        <p class="cfg-secao__descricao">{{ t('settings.aparencia.tema.ondeMais') }}</p>
       </header>
 
-      <div class="opcoes">
+      <div class="cfg-secao__corpo opcoes" role="radiogroup" aria-labelledby="aparencia-tema-titulo">
         <label
           v-for="opcao in temas"
           :key="opcao.valor"
           class="opcao"
           :class="{ 'opcao--ativa': colorMode === opcao.valor }"
         >
-          <RadioButton
-            v-model="colorMode"
-            class="opcao__radio"
-            :input-id="`aparencia-tema-${opcao.valor}`"
-            name="aparencia-tema"
-            :value="opcao.valor"
-          />
-
           <SettingsLayoutMockup v-bind="opcao.maquete" />
-
-          <span class="opcao__texto">
-            <strong>{{ opcao.label }}</strong>
-            <small>{{ opcao.hint }}</small>
+          <span class="opcao__pe">
+            <RadioButton
+              v-model="colorMode"
+              :input-id="`aparencia-tema-${opcao.valor}`"
+              name="aparencia-tema"
+              :value="opcao.valor"
+            />
+            <span class="opcao__texto">
+              <strong>{{ opcao.label }}</strong>
+              <small>{{ opcao.hint }}</small>
+            </span>
           </span>
         </label>
       </div>
     </section>
 
-    <section class="bloco">
-      <header class="bloco__topo">
-        <span class="bloco__marca" aria-hidden="true"><i class="ph ph-list" /></span>
-        <span class="bloco__texto">
-          <h3>{{ t('settings.aparencia.menu.titulo') }}</h3>
-          <p>{{ t('settings.aparencia.menu.descricao') }}</p>
-        </span>
+    <section class="cfg-secao" aria-labelledby="aparencia-barra-titulo">
+      <header class="cfg-secao__cabeca">
+        <h3 id="aparencia-barra-titulo" class="cfg-secao__titulo">
+          {{ t('settings.aparencia.barra.titulo') }}
+        </h3>
+        <p class="cfg-secao__descricao">{{ t('settings.aparencia.barra.descricao') }}</p>
       </header>
 
-      <div class="opcoes">
+      <div class="cfg-secao__corpo opcoes" role="radiogroup" aria-labelledby="aparencia-barra-titulo">
         <label
           v-for="opcao in modos"
           :key="opcao.valor"
           class="opcao"
           :class="{ 'opcao--ativa': navigatorMode === opcao.valor }"
         >
-          <RadioButton
-            class="opcao__radio"
-            :input-id="`aparencia-menu-${opcao.valor}`"
-            name="aparencia-menu"
-            :value="opcao.valor"
-            :model-value="navigatorMode"
-            @update:model-value="setNavigatorMode(opcao.valor)"
-          />
-
-          <SettingsLayoutMockup v-bind="opcao.maquete" />
-
-          <span class="opcao__texto">
-            <strong>{{ opcao.label }}</strong>
-            <small>{{ opcao.hint }}</small>
+          <SettingsLayoutMockup v-bind="opcao.maquete" :densa="navigatorDensity === 'compacta'" />
+          <span class="opcao__pe">
+            <RadioButton
+              :input-id="`aparencia-menu-${opcao.valor}`"
+              name="aparencia-menu"
+              :value="opcao.valor"
+              :model-value="navigatorMode"
+              @update:model-value="setNavigatorMode(opcao.valor)"
+            />
+            <span class="opcao__texto">
+              <strong>{{ opcao.label }}</strong>
+              <small>{{ opcao.hint }}</small>
+            </span>
           </span>
         </label>
       </div>
     </section>
 
-    <section class="bloco">
-      <header class="bloco__topo">
-        <span class="bloco__marca" aria-hidden="true"><i class="ph ph-arrows-vertical" /></span>
-        <span class="bloco__texto">
-          <h3>{{ t('settings.aparencia.densidade.titulo') }}</h3>
-          <p>{{ t('settings.aparencia.densidade.descricao') }}</p>
-        </span>
+    <section class="cfg-secao" aria-labelledby="aparencia-densidade-titulo">
+      <header class="cfg-secao__cabeca">
+        <h3 id="aparencia-densidade-titulo" class="cfg-secao__titulo">
+          {{ t('settings.aparencia.densidade.titulo') }}
+        </h3>
+        <p class="cfg-secao__descricao">{{ t('settings.aparencia.densidade.descricaoBarra') }}</p>
       </header>
 
-      <div class="opcoes">
+      <div
+        class="cfg-secao__corpo opcoes"
+        role="radiogroup"
+        aria-labelledby="aparencia-densidade-titulo"
+      >
         <label
           v-for="opcao in densidades"
           :key="opcao.valor"
           class="opcao"
           :class="{ 'opcao--ativa': navigatorDensity === opcao.valor }"
         >
-          <RadioButton
-            class="opcao__radio"
-            :input-id="`aparencia-densidade-${opcao.valor}`"
-            name="aparencia-densidade"
-            :value="opcao.valor"
-            :model-value="navigatorDensity"
-            @update:model-value="setNavigatorDensity(opcao.valor)"
-          />
-
           <SettingsLayoutMockup v-bind="opcao.maquete" />
-
-          <span class="opcao__texto">
-            <strong>{{ opcao.label }}</strong>
-            <small>{{ opcao.hint }}</small>
+          <span class="opcao__pe">
+            <RadioButton
+              :input-id="`aparencia-densidade-${opcao.valor}`"
+              name="aparencia-densidade"
+              :value="opcao.valor"
+              :model-value="navigatorDensity"
+              @update:model-value="setNavigatorDensity(opcao.valor)"
+            />
+            <span class="opcao__texto">
+              <strong>{{ opcao.label }}</strong>
+              <small>{{ opcao.hint }}</small>
+            </span>
           </span>
         </label>
       </div>
     </section>
 
-    <p class="aparencia__nota">
-      <i class="ph ph-info" aria-hidden="true" />
-      {{ t('settings.aparencia.nota') }}
-    </p>
+    <section class="cfg-secao" aria-labelledby="aparencia-explicacoes-titulo">
+      <header class="cfg-secao__cabeca">
+        <h3 id="aparencia-explicacoes-titulo" class="cfg-secao__titulo">
+          {{ t('settings.aparencia.explicacoes.titulo') }}
+        </h3>
+        <p class="cfg-secao__descricao">{{ t('settings.aparencia.explicacoes.descricao') }}</p>
+      </header>
+
+      <div class="cfg-secao__corpo">
+        <label class="interruptor" for="aparencia-explicacoes">
+          <span class="interruptor__texto">
+            <strong>{{ t('shell.guidance.show') }}</strong>
+            <small>{{ t('settings.aparencia.explicacoes.ajuda') }}</small>
+          </span>
+          <ToggleSwitch
+            input-id="aparencia-explicacoes"
+            :model-value="isGuidanceVisible"
+            @update:model-value="alternarExplicacoes"
+          />
+        </label>
+      </div>
+    </section>
+
+    <section class="cfg-secao" aria-labelledby="aparencia-idioma-titulo">
+      <header class="cfg-secao__cabeca">
+        <h3 id="aparencia-idioma-titulo" class="cfg-secao__titulo">
+          {{ t('settings.conta.prefs.title') }}
+        </h3>
+        <p class="cfg-secao__descricao">{{ t('settings.conta.prefs.subtitle') }}</p>
+      </header>
+
+      <div
+        class="cfg-secao__corpo idiomas"
+        role="radiogroup"
+        aria-labelledby="aparencia-idioma-titulo"
+      >
+        <label
+          v-for="idioma in idiomas"
+          :key="idioma.codigo"
+          class="idioma"
+          :class="{ 'idioma--ativo': locale === idioma.codigo }"
+          :lang="idioma.codigo"
+        >
+          <RadioButton
+            :input-id="`aparencia-idioma-${idioma.codigo}`"
+            name="aparencia-idioma"
+            :value="idioma.codigo"
+            :model-value="locale"
+            @update:model-value="escolherIdioma(idioma.codigo)"
+          />
+          <span class="idioma__bandeira" aria-hidden="true" v-html="idioma.bandeira" />
+          <span class="idioma__nome" dir="auto">{{ idioma.nome }}</span>
+        </label>
+      </div>
+    </section>
+
+    <footer class="cfg-rodape">
+      <p class="cfg-rodape__nota">
+        <i class="ph ph-check-circle" aria-hidden="true" />
+        {{ t('settings.aparencia.naHora') }}
+      </p>
+    </footer>
   </div>
 </template>
 
 <style scoped>
-.aparencia {
-  display: grid;
-  gap: 1.1rem;
-  max-width: 50rem;
-}
-
-/* --- Blocos ------------------------------------------------------------ */
-
-.bloco {
-  padding: 1.1rem 1.2rem 1.2rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 1.1rem;
-  background: var(--partner-card);
-  box-shadow: 0 1px 2px rgb(var(--partner-shadow-rgb) / 0.05);
-}
-
-.bloco__topo {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  margin-bottom: 1rem;
-}
-
-.bloco__marca {
-  display: grid;
-  width: 2.15rem;
-  height: 2.15rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.7rem;
-  background: color-mix(in srgb, var(--partner-primary) 16%, var(--partner-card));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--partner-primary) 26%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.88rem;
-}
-
-.bloco__texto {
-  display: grid;
-  min-width: 0;
-  gap: 0.1rem;
-}
-
-.bloco__texto h3 {
-  margin: 0;
-  color: var(--partner-text);
-  font-size: 0.95rem;
-  font-weight: 750;
-  letter-spacing: -0.015em;
-}
-
-.bloco__texto p {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.8rem;
-  line-height: 1.45;
-}
-
-/* --- Opções ------------------------------------------------------------ */
+/* ------------------------------------------------------------------ opções com miniatura */
 
 .opcoes {
   display: grid;
-  gap: 0.85rem;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
 }
 
 /*
- * Maquete à esquerda, texto à direita.
- *
- * Empilhada, a maquete herdava a largura do cartão e virava um bloco de 200px de altura — três
- * grupos assim viravam mil pixels de rolagem para escolher três coisas. Nesta largura ela ainda
- * é o triplo da miniatura que havia antes, e as duas opções continuam lado a lado para comparar.
+ * A opção inteira é o `<label>` do rádio: clicar na miniatura marca a opção, e o rádio embaixo é
+ * o controle de verdade (teclado, leitor de tela e estado marcado).
  */
 .opcao {
-  position: relative;
   display: grid;
-  align-items: center;
-  gap: 0.8rem;
-  grid-template-columns: 9rem minmax(0, 1fr);
-  padding: 0.7rem 0.8rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.9rem;
-  background: var(--partner-card);
+  gap: 12px;
+  padding: 10px 10px 14px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie);
+  container-type: inline-size;
   cursor: pointer;
   transition:
-    border-color 150ms ease,
-    box-shadow 150ms ease,
-    transform 150ms ease;
+    border-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    box-shadow var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .opcao:hover {
-  border-color: color-mix(in srgb, var(--partner-primary) 55%, transparent);
-  transform: translateY(-1px);
+  border-color: var(--linha-forte);
 }
 
-/* Estado, não convite: a opção em uso ganha anel duplo e selo. */
-.opcao--ativa {
-  border-color: var(--partner-primary);
-  box-shadow:
-    0 0 0 1px var(--partner-primary),
-    0 6px 16px rgb(var(--partner-shadow-rgb) / 0.1);
+/* Em uso: borda de musgo dupla — estado, não convite. */
+.opcao--ativa,
+.opcao--ativa:hover {
+  border-color: var(--musgo);
+  box-shadow: 0 0 0 1px var(--musgo);
 }
 
-/*
- * O cartão inteiro é o `<label>` do RadioButton: clicar na maquete marca a opção, e o rádio no
- * canto é o controle de verdade (teclado, leitor de tela e estado marcado).
- */
 .opcao:has(.p-radiobutton-input:focus-visible) {
-  outline: 2px solid var(--partner-primary);
+  outline: 2px solid var(--musgo);
   outline-offset: 3px;
+}
+
+.opcao__pe {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-inline: 4px;
+}
+
+.opcao__pe :deep(.p-radiobutton) {
+  flex: none;
+  margin-top: 1px;
 }
 
 .opcao__texto {
   display: grid;
   min-width: 0;
-  gap: 0.15rem;
-  padding-inline-end: 1rem;
+  gap: 2px;
 }
 
 .opcao__texto strong {
-  color: var(--partner-text);
-  font-size: 0.88rem;
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 .opcao__texto small {
-  color: var(--partner-muted);
-  font-size: 0.77rem;
-  line-height: 1.42;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
-.opcao__radio.p-radiobutton {
-  position: absolute;
-  top: 0.55rem;
-  inset-inline-end: 0.55rem;
-}
+/* ------------------------------------------------------------------ interruptor */
 
-/* --- Nota -------------------------------------------------------------- */
-
-.aparencia__nota {
+.interruptor {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  margin: 0;
-  padding: 0 0.2rem;
-  color: var(--partner-muted);
-  font-size: 0.78rem;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  cursor: pointer;
 }
 
-.aparencia__nota i {
-  font-size: 0.8rem;
+.interruptor__texto {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
 }
 
-@media (max-width: 900px) {
-  .opcoes {
-    grid-template-columns: minmax(0, 1fr);
+.interruptor__texto strong {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.interruptor__texto small {
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.interruptor :deep(.p-toggleswitch) {
+  flex: none;
+}
+
+/* ------------------------------------------------------------------ idiomas */
+
+.idiomas {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
+}
+
+.idioma {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.idioma:hover {
+  border-color: var(--linha-forte);
+}
+
+.idioma--ativo,
+.idioma--ativo:hover {
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
+}
+
+.idioma:has(.p-radiobutton-input:focus-visible) {
+  outline: 2px solid var(--musgo);
+  outline-offset: 2px;
+}
+
+.idioma :deep(.p-radiobutton) {
+  flex: none;
+}
+
+.idioma__bandeira {
+  display: inline-flex;
+  width: 24px;
+  height: 16px;
+  flex: none;
+  overflow: hidden;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--linha);
+}
+
+.idioma__bandeira :deep(svg) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.idioma__nome {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.idioma--ativo .idioma__nome {
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opcao,
+  .idioma {
+    transition: none;
   }
 }
 </style>

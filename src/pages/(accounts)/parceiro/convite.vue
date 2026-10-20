@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
-import AuthTextField from '@/components/auth/AuthTextField.vue'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import { aceitarConviteEquipe } from '@/service/parceiro/parceiro-portal-service'
 import { useParceiroStore } from '@/stores/parceiro'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
@@ -72,56 +72,162 @@ onMounted(() => {
 </script>
 
 <template>
-  <PartnerPageFrame
-    :subtitle="t('parceiro.convite.subtitle')"
-    :title="t('parceiro.convite.title')"
-    :loading="accepting && !accepted"
-  >
-    <article class="convite-card">
-      <p>
-        {{ t('parceiro.convite.body') }}
-      </p>
+  <!--
+    O convite numa folha só, no meio da tela: o que é, o identificador da empresa (que já vem
+    preenchido quando a pessoa abre o link do e-mail) e o botão de aceitar.
+  -->
+  <UiPagina class="tela-convite" :titulo="t('parceiro.convite.title')">
+    <template #cabecalho>
+      <div class="centro-cabeca">
+        <span class="centro-cabeca__selo" aria-hidden="true">
+          <i :class="accepted ? 'ph ph-check-circle' : 'ph ph-envelope-open'" />
+        </span>
+        <h1 class="centro-cabeca__titulo">{{ t('parceiro.convite.title') }}</h1>
+        <p class="centro-cabeca__texto">{{ t('parceiro.convite.body') }}</p>
+      </div>
+    </template>
 
-      <AuthTextField
-        id="convite-parceiro-id"
-        v-model="parceiroIdInput"
-        :disabled="accepting"
-        :hint="t('parceiro.convite.idHint')"
-        :label="t('parceiro.convite.idLabel')"
-        :placeholder="t('parceiro.convite.idPlaceholder')"
-      />
+    <form class="convite ui-folha" novalidate @submit.prevent="handleAccept">
+      <div class="convite__campo">
+        <label for="convite-parceiro-id">{{ t('parceiro.convite.idLabel') }}</label>
+        <InputText
+          id="convite-parceiro-id"
+          v-model="parceiroIdInput"
+          class="convite__entrada"
+          :disabled="accepting"
+          :placeholder="t('parceiro.convite.idPlaceholder')"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="convite-parceiro-id-dica"
+        />
+        <small id="convite-parceiro-id-dica" class="convite__dica">
+          {{ t('parceiro.convite.idHint') }}
+        </small>
+      </div>
 
       <Button
+        type="submit"
+        class="convite__aceitar"
+        icon="ph ph-check"
         :label="t('parceiro.convite.accept')"
         :loading="accepting"
-        @click="handleAccept"
       />
 
-      <p class="convite-card__footnote">
+      <p class="convite__rodape">
+        <i class="ph ph-users-three" aria-hidden="true" />
         {{ t('parceiro.convite.footnote') }}
       </p>
-    </article>
-  </PartnerPageFrame>
+    </form>
+  </UiPagina>
 </template>
 
 <style scoped>
-.convite-card {
+.centro-cabeca {
   display: grid;
-  gap: 0.85rem;
-  max-width: 32rem;
-  padding: 1rem 1.05rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 0.95rem;
-  background: var(--partner-card);
+  width: 100%;
+  max-width: 30rem;
+  justify-items: center;
+  gap: 8px;
+  margin: clamp(16px, 7vh, 80px) auto 0;
+  text-align: center;
 }
 
-.convite-card p {
+.centro-cabeca__selo {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: 18px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 27px;
+}
+
+.centro-cabeca__titulo {
+  margin: 10px 0 0;
+  color: var(--tinta);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.centro-cabeca__texto {
+  max-width: 46ch;
   margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.9rem;
+  color: var(--tinta-2);
+  font-size: 15px;
+  line-height: 1.5;
 }
 
-.convite-card__footnote {
-  font-size: 0.82rem !important;
+.convite {
+  display: grid;
+  width: 100%;
+  max-width: 30rem;
+  gap: 18px;
+  margin: 8px auto 0;
+  padding: 24px;
+}
+
+.convite__campo {
+  display: grid;
+  gap: 6px;
+}
+
+.convite__campo label {
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 550;
+}
+
+.convite__entrada.p-inputtext {
+  width: 100%;
+  min-height: 46px;
+  font-family: var(--font-dados);
+  font-size: 15.5px;
+}
+
+.convite__dica {
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.convite__aceitar.p-button {
+  width: 100%;
+  min-height: 46px;
+  font-size: 15px;
+}
+
+.convite__rodape {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.convite__rodape i {
+  margin-top: 1px;
+  color: var(--tinta-3);
+  font-size: 17px;
+}
+
+@media (max-width: 520px) {
+  .centro-cabeca {
+    margin-top: 8px;
+  }
+
+  .centro-cabeca__titulo {
+    font-size: 24px;
+  }
+
+  .convite {
+    padding: 20px 16px;
+  }
 }
 </style>

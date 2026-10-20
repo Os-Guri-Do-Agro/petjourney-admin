@@ -5,12 +5,11 @@ import { useRoute, useRouter } from 'vue-router'
 
 import Button from 'primevue/button'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
 import ProgramasParticipacaoView from '@/components/parceiro/ProgramasParticipacaoView.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import { EQUIPE_MENU_ENABLED } from '@/composables/useAppNavigation'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
-import { currentColors } from '@/theme/color-mode'
 
 const { t } = useI18n()
 
@@ -29,7 +28,7 @@ const LEGACY_ABA_REDIRECTS: Record<string, { path: string; hash?: string; aba?: 
 const { store, ensureContext } = useParceiroPortal()
 
 /**
- * A frase da saudação: quantos programas estão valendo. Com os dois ativos, a tela é de consulta e
+ * A frase do topo: quantos programas estão valendo. Com os dois ativos, a tela é de consulta e
  * a frase diz isso; com um pedido em análise, diz que está em análise.
  */
 const fraseDoResumo = computed(() => {
@@ -56,16 +55,9 @@ const fraseDoResumo = computed(() => {
 
   return t('programas.saudacao.nenhum')
 })
+
 const route = useRoute()
 const router = useRouter()
-
-const pageAtmosphere = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--prog-page-muted': colors.dashboard.muted,
-  }
-})
 
 function scrollToHash() {
   const targetId = route.hash.replace('#', '')
@@ -117,78 +109,73 @@ watch(
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('programas.subtitle')"
-    :title="t('programas.title')"
-    :loading="false"
-    :error="store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : ''"
-    :no-partner-access="store.acessoEncerrado"
-    block-when-suspended
-    guidance
-    @retry="ensureContext(true)"
+  <!--
+    Sem cadastro de parceiro a tela continua aberta (ela ensina como entrar); só o acesso encerrado
+    toma o lugar do conteúdo.
+  -->
+  <UiPagina
+    class="tela-programas"
+    :erro="store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : ''"
+    :sem-acesso-de-parceiro="store.acessoEncerrado"
+    bloquear-se-suspenso
+    guia
+    @tentar-de-novo="ensureContext(true)"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('programas.subtitle') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('programas.title') }}</h1>
-
-        <div class="hc-saudacao__linha">
-          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
-            {{ fraseDoResumo }}
-          </p>
-
-          <nav class="hc-acoes" :aria-label="t('programas.saudacao.acoes')">
-            <Button
-              type="button"
-              class="hc-pilula hc-pilula--cheia"
-              :label="t('programas.cred.zoneTitle')"
-              icon="ph ph-identification-card"
-              @click="router.push('/settings?aba=empresa')"
-            />
-          </nav>
-        </div>
-      </div>
+    <template v-if="fraseDoResumo" #resumo>
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
     </template>
 
-    <div class="programas-page" :style="pageAtmosphere">
+    <template #acoes>
+      <Button
+        type="button"
+        severity="secondary"
+        outlined
+        icon="ph ph-identification-card"
+        :label="t('programas.cred.zoneTitle')"
+        @click="router.push('/settings?aba=empresa')"
+      />
+    </template>
+
+    <div class="programas">
       <!--
-        Sem acesso de parceiro o texto **não** é apoio: é a instrução de como conseguir acesso,
-        e a tela não tem nada além dele. Só a versão de quem já é parceiro entra na preferência.
+        Sem acesso de parceiro o texto não é apoio: é a instrução de como conseguir acesso. Só a
+        versão de quem já é parceiro entra na preferência de explicações.
       -->
-      <p v-if="store.semAcessoParceiro || isGuidanceVisible" class="programas-page__lede">
+      <p v-if="store.semAcessoParceiro || isGuidanceVisible" class="programas__lede">
         {{ store.semAcessoParceiro ? t('programas.ledeNoAccess') : t('programas.lede') }}
       </p>
 
       <ProgramasParticipacaoView />
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
-.programas-page {
-  --programas-gap: 1.65rem;
-  display: grid;
-  gap: var(--programas-gap);
-  width: 100%;
-  max-width: 100%;
-  overflow-x: clip;
+/* Botões de contorno e de texto nas cores do Trilha (fora do antigo `.hc-tema`). */
+.tela-programas {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
 }
 
-.programas-page__lede {
-  margin: -0.35rem 0 0;
-  color: var(--prog-page-muted);
-  font-size: 0.94rem;
+.programas {
+  display: grid;
+  gap: 20px;
+}
+
+.programas__lede {
+  max-width: 72ch;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14.5px;
   line-height: 1.5;
 }
 
 :deep(#programas) {
-  scroll-margin-top: 5rem;
-}
-
-@media (max-width: 720px) {
-  .programas-page {
-    --programas-gap: 1.35rem;
-  }
+  scroll-margin-top: 24px;
 }
 </style>

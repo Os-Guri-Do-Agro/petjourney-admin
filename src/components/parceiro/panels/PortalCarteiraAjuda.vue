@@ -1,14 +1,15 @@
 <script setup lang="ts">
 /**
- * "Como funciona a carteira", recolhido numa linha no fim da página.
+ * "Como funciona a carteira", recolhido no fim da página.
  *
- * Antes eram quatro cartões abertos embaixo dos formulários de PIX e de saque, todo dia, para
- * quem já sabe como funciona. A pergunta continua respondida a um clique; a tela de todo dia fica
- * com o saldo e as movimentações.
+ * Quem já sabe como funciona vê só o título; a resposta está a um clique: o que entra, quando
+ * libera, a chave PIX e o ciclo de pagamento, em quatro blocos curtos, e o contato do suporte.
  */
 import Button from 'primevue/button'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import UiSecao from '@/components/ui/UiSecao.vue'
 
 const { t } = useI18n()
 
@@ -27,13 +28,13 @@ const itens = computed(() => [
   },
   {
     id: 'saldos',
-    icon: 'ph ph-wallet',
+    icon: 'ph ph-hourglass-medium',
     title: t('carteira.help.saldos.title'),
     description: t('carteira.help.saldos.body'),
   },
   {
     id: 'pix',
-    icon: 'ph ph-qr-code',
+    icon: 'ph ph-key',
     title: t('carteira.help.pix.title'),
     description: t('carteira.help.pix.body'),
   },
@@ -47,12 +48,13 @@ const itens = computed(() => [
 </script>
 
 <template>
-  <section class="hc ajuda" aria-labelledby="carteira-ajuda-rotulo">
-    <div class="ajuda__linha">
-      <p class="ajuda__frase">
-        <strong id="carteira-ajuda-rotulo">{{ t('carteira.ajuda.rotulo') }}</strong>
-        {{ t('carteira.ajuda.frase') }}
-      </p>
+  <UiSecao
+    id="carteira-ajuda"
+    :titulo="t('carteira.help.title')"
+    :descricao="t('carteira.help.lede')"
+    icone="ph ph-info"
+  >
+    <template #acoes>
       <Button
         type="button"
         :label="aberta ? t('carteira.ajuda.fechar') : t('carteira.ajuda.abrir')"
@@ -65,125 +67,107 @@ const itens = computed(() => [
         aria-controls="carteira-ajuda-corpo"
         @click="aberta = !aberta"
       />
-    </div>
+    </template>
 
     <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
-    <div v-show="aberta" id="carteira-ajuda-corpo" class="ajuda__corpo">
+    <div v-show="aberta" id="carteira-ajuda-corpo" class="ajuda ui-folha">
       <ul class="ajuda__itens">
         <li v-for="item in itens" :key="item.id" class="ajuda__item">
           <span class="ajuda__icone" aria-hidden="true"><i :class="item.icon" /></span>
-          <div class="ajuda__texto">
+          <span class="ajuda__texto">
             <strong>{{ item.title }}</strong>
-            <p>{{ item.description }}</p>
-          </div>
+            <span>{{ item.description }}</span>
+          </span>
         </li>
       </ul>
 
       <p class="ajuda__contato">
-        {{ t('carteira.help.footerPrefix') }}
-        <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a>
-        {{ t('carteira.help.footerOrWhatsapp') }}
-        <a :href="CONTACT_WHATSAPP_HREF" target="_blank" rel="noopener noreferrer">
-          {{ CONTACT_WHATSAPP_DISPLAY }}
-        </a>
+        <i class="ph ph-chat-circle" aria-hidden="true" />
+        <span>
+          {{ t('carteira.help.footerPrefix') }}
+          <a class="ui-mais" :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a>
+          {{ t('carteira.help.footerOrWhatsapp') }}
+          <a class="ui-mais" :href="CONTACT_WHATSAPP_HREF" target="_blank" rel="noopener noreferrer">
+            <bdi dir="ltr">{{ CONTACT_WHATSAPP_DISPLAY }}</bdi>
+          </a>
+        </span>
       </p>
     </div>
-  </section>
+  </UiSecao>
 </template>
 
 <style scoped>
 .ajuda {
   display: grid;
-  gap: 0.85rem;
-  padding-block: 0.9rem;
-}
-
-.ajuda__linha {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-}
-
-.ajuda__frase {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.ajuda__frase strong {
-  color: var(--partner-text);
-}
-
-.ajuda__corpo {
-  display: grid;
-  gap: 0.85rem;
+  overflow: hidden;
 }
 
 .ajuda__itens {
   display: grid;
-  gap: 0;
   margin: 0;
   padding: 0;
   list-style: none;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
 }
 
 .ajuda__item {
-  display: grid;
-  grid-template-columns: 2.2rem minmax(0, 1fr);
-  gap: 0.7rem;
-  align-items: start;
-  padding: 0.75rem 0;
-  border-top: 1px solid var(--partner-line);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: -1px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--linha);
 }
 
 .ajuda__icone {
   display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 36px;
+  height: 36px;
+  flex: none;
   place-items: center;
-  border-radius: 0.7rem;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-  font-size: 0.9rem;
+  border-radius: 10px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 18px;
 }
 
 .ajuda__texto {
   display: grid;
-  gap: 0.22rem;
+  gap: 3px;
   min-width: 0;
-}
-
-.ajuda__texto strong {
-  font-size: 0.875rem;
-}
-
-.ajuda__texto p,
-.ajuda__contato {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.8125rem;
   line-height: 1.45;
 }
 
-.ajuda__contato a {
-  color: var(--hc-marca-forte);
-  font-weight: 650;
-  text-decoration: none;
+.ajuda__texto strong {
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
-.ajuda__contato a:hover,
-.ajuda__contato a:focus-visible {
-  text-decoration: underline;
+.ajuda__texto span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
-@media (max-width: 900px) {
-  .ajuda__itens {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.ajuda__contato {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 18px;
+  border-top: 1px solid var(--linha);
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.ajuda__contato > i {
+  color: var(--tinta-3);
+  font-size: 17px;
+}
+
+.ajuda__contato .ui-mais {
+  display: inline;
 }
 </style>

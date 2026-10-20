@@ -1,59 +1,43 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
-import { computed, ref } from 'vue'
+/**
+ * Os dois programas da rede, lado a lado, e como um programa é ativado.
+ *
+ * Cada programa é uma folha que diz, de cima para baixo: o nome e o estado (selo com palavra), o
+ * que ele dá, e a ação certa para aquele estado. A ativação embaixo é uma sequência de verdade
+ * (pedir, análise, ativo), por isso vira passos numerados com as cores dos mesmos selos.
+ */
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ProgramaParticipacaoCard from '@/components/parceiro/ProgramaParticipacaoCard.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
-import { currentColors } from '@/theme/color-mode'
 
 const { t } = useI18n()
 const { store } = useParceiroPortal()
 
 const isLoading = computed(() => store.loadState === 'loading' || store.loadState === 'idle')
 
-/** As etapas de ativação ficam recolhidas: com os programas já ativos, ninguém precisa delas. */
-const etapasAbertas = ref(false)
-
-const viewStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--prog-card': colors.dashboard.surface,
-    '--prog-surface': colors.dashboard.surfaceSoft,
-    '--prog-line': colors.dashboard.line,
-    '--prog-line-soft': colors.dashboard.lineSoft,
-    '--prog-text': colors.dashboard.text,
-    '--prog-muted': colors.dashboard.muted,
-    '--prog-faint': colors.dashboard.faint,
-    '--prog-primary': colors.vet.primary,
-    '--prog-primary-soft': colors.vet.secondary,
-    '--prog-primary-strong': colors.dashboard.primaryStrong,
-    '--prog-success-bg': colors.dashboard.successBg,
-    '--prog-success-text': colors.dashboard.successText,
-    '--prog-amber-bg': colors.dashboard.amberBg,
-    '--prog-amber-text': colors.dashboard.amberText,
-    '--prog-shadow-rgb': colors.auth.shadowRgb,
-  }
-})
-
 const activationSteps = computed(() => [
   {
     id: 'solicitar',
     number: '1',
+    icon: 'ph ph-paper-plane-tilt',
     title: t('programas.activation.step1.title'),
     description: t('programas.activation.step1.desc'),
   },
   {
     id: 'analise',
     number: '2',
+    icon: 'ph ph-hourglass',
     title: t('programas.activation.step2.title'),
     description: t('programas.activation.step2.desc'),
   },
   {
     id: 'ativo',
     number: '3',
+    icon: 'ph ph-check-circle',
     title: t('programas.activation.step3.title'),
     description: t('programas.activation.step3.desc'),
   },
@@ -61,13 +45,12 @@ const activationSteps = computed(() => [
 </script>
 
 <template>
-  <div class="programas-view" :style="viewStyle">
+  <div class="programas-view">
     <p v-if="isGuidanceVisible" class="programas-view__lede">{{ t('programas.available.lede') }}</p>
 
-    <!-- O título "Programas disponíveis" saiu: a saudação da página já diz de que tela se trata. -->
     <section
       id="programas"
-      class="hc programas-view__lista"
+      class="programas-view__grade"
       :aria-label="
         isLoading ? t('programas.available.loadingAria') : t('programas.available.title')
       "
@@ -78,194 +61,194 @@ const activationSteps = computed(() => [
       <ProgramaParticipacaoCard modo="participativo" :skeleton="isLoading" />
     </section>
 
-    <section class="hc ativacao" aria-labelledby="activation-title">
-      <div class="ativacao__linha">
-        <p class="ativacao__frase">
-          <strong id="activation-title">{{ t('programas.linha.ativacaoRotulo') }}</strong>
-          {{ t('programas.linha.ativacaoFrase') }}
-        </p>
-        <Button
-          type="button"
-          :label="
-            etapasAbertas ? t('programas.linha.ocultarEtapas') : t('programas.linha.verEtapas')
-          "
-          :icon="etapasAbertas ? 'ph ph-caret-up' : 'ph ph-caret-down'"
-          icon-pos="right"
-          severity="secondary"
-          text
-          size="small"
-          :aria-expanded="etapasAbertas"
-          aria-controls="programas-etapas"
-          @click="etapasAbertas = !etapasAbertas"
-        />
-      </div>
+    <UiSecao id="programas-ativacao" :titulo="t('programas.ativacao.titulo')">
+      <ol class="etapas">
+        <li
+          v-for="step in activationSteps"
+          :key="step.id"
+          class="etapa"
+          :class="`etapa--${step.id}`"
+          :data-step="step.id"
+        >
+          <span class="etapa__marco" aria-hidden="true">
+            <span class="etapa__n ui-num">{{ step.number }}</span>
+          </span>
+          <span class="etapa__texto">
+            <strong>
+              <i :class="step.icon" aria-hidden="true" />
+              {{ step.title }}
+            </strong>
+            <span>{{ step.description }}</span>
+          </span>
+        </li>
+      </ol>
 
-      <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
-      <div v-show="etapasAbertas" id="programas-etapas" class="activation-panel">
-        <ol class="activation-panel__steps">
-          <li
-            v-for="step in activationSteps"
-            :key="step.id"
-            class="activation-step"
-            :data-step="step.id"
-          >
-            <span class="activation-step__number">{{ step.number }}</span>
-            <div>
-              <strong>{{ step.title }}</strong>
-              <small>{{ step.description }}</small>
-            </div>
-          </li>
-        </ol>
-
-        <p class="activation-panel__note">
-          <template v-if="store.semAcessoParceiro">
-            {{ t('programas.activation.noteNoAccess') }}
-          </template>
-          <template v-else>
-            {{ t('programas.activation.noteWithAccess') }}
-          </template>
-        </p>
-      </div>
-    </section>
+      <p class="etapas__nota">
+        <i class="ph ph-info" aria-hidden="true" />
+        <template v-if="store.semAcessoParceiro">
+          {{ t('programas.activation.noteNoAccess') }}
+        </template>
+        <template v-else>
+          {{ t('programas.activation.noteWithAccess') }}
+        </template>
+      </p>
+    </UiSecao>
   </div>
 </template>
 
 <style scoped>
-.programas-view__lede {
-  margin: 0;
-  color: var(--prog-muted);
-  font-size: 0.875rem;
-}
-
-.programas-view__lista {
-  display: grid;
-  padding-block: 0.25rem;
-}
-
-.ativacao {
-  display: grid;
-  gap: 0.85rem;
-  padding-block: 0.9rem;
-}
-
-.ativacao__linha {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-}
-
-.ativacao__frase {
-  margin: 0;
-  color: var(--prog-muted);
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.ativacao__frase strong {
-  color: var(--prog-text);
-}
-
 .programas-view {
   display: grid;
-  gap: 1.65rem;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: clip;
+  gap: 32px;
+  min-width: 0;
 }
 
-/* Dentro da linha de ativação, sem moldura própria: cartão dentro de cartão não volta. */
-.activation-panel {
-  display: grid;
-  gap: 1rem;
-  width: 100%;
+.programas-view__lede {
+  margin: 0 0 -16px;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
-.activation-panel__steps {
-  --activation-gap: 1.5rem;
-  --activation-number-size: 2rem;
+/* Os dois programas lado a lado: mesma altura, a ação de cada um no pé da folha. */
+.programas-view__grade {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+}
+
+/* ------------------------------------------------------------------ etapas */
+
+.etapas {
+  --etapa-marco: 36px;
 
   display: grid;
-  width: 100%;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--activation-gap);
   margin: 0;
   padding: 0;
   list-style: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-/* Etapa sem moldura: número, linha tracejada até o próximo número, texto embaixo. */
-.activation-step {
+/*
+ * Cada etapa: o número num disco e, até o próximo disco, um fio. O fio é o que diz "sequência";
+ * a cor do disco é a do selo que o programa ganha naquela etapa (neutro, atenção, ok).
+ */
+.etapa {
   position: relative;
   display: grid;
-  gap: 0.55rem;
-  justify-items: start;
+  align-content: start;
+  gap: 12px;
+  padding-inline-end: 20px;
 }
 
-.activation-step:not(:last-child)::after {
-  content: '';
+.etapa__marco {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.etapa:not(:last-child) .etapa__marco::after {
   position: absolute;
-  top: calc(var(--activation-number-size) / 2);
-  inset-inline-start: calc(var(--activation-number-size) + 0.6rem);
-  inset-inline-end: calc(-1 * var(--activation-gap) + 0.6rem);
-  height: 0;
-  border-top: 2px dashed var(--prog-line);
-  pointer-events: none;
+  inset-inline: calc(var(--etapa-marco) + 10px) -10px;
+  top: 50%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--linha-forte);
+  content: '';
 }
 
-.activation-step__number {
+.etapa__n {
   display: grid;
-  width: var(--activation-number-size);
-  height: var(--activation-number-size);
+  width: var(--etapa-marco);
+  height: var(--etapa-marco);
+  flex: none;
   place-items: center;
-  border: 1px solid var(--prog-line);
   border-radius: 999px;
-  background: var(--prog-card);
-  color: var(--prog-muted);
-  font-size: 0.8rem;
-  font-weight: 700;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-size: 15px;
+  font-weight: 650;
 }
 
-.activation-step[data-step='analise'] .activation-step__number {
-  border-color: color-mix(in srgb, var(--prog-primary) 35%, var(--prog-line));
-  background: color-mix(in srgb, var(--prog-primary-soft) 35%, var(--prog-card));
-  color: var(--prog-primary-strong);
+.etapa--analise .etapa__n {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
-.activation-step[data-step='ativo'] .activation-step__number {
-  border-color: color-mix(in srgb, var(--prog-success-text) 35%, var(--prog-line));
-  background: var(--prog-success-bg);
-  color: var(--prog-success-text);
+.etapa--ativo .etapa__n {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
 }
 
-.activation-step strong {
-  display: block;
-  font-size: 0.86rem;
-}
-
-.activation-step small {
-  display: block;
-  margin-top: 0.12rem;
-  color: var(--prog-muted);
-  font-size: 0.76rem;
-  line-height: 1.35;
-}
-
-.activation-panel__note {
-  margin: 0;
-  color: var(--prog-faint);
-  font-size: 0.8rem;
+.etapa__texto {
+  display: grid;
+  gap: 3px;
   line-height: 1.45;
 }
 
-@media (max-width: 900px) {
-  .activation-panel__steps {
-    grid-template-columns: 1fr;
+.etapa__texto strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.etapa__texto strong i {
+  color: var(--tinta-2);
+  font-size: 16px;
+}
+
+.etapa__texto > span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.etapas__nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 18px 0 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.etapas__nota i {
+  margin-top: 2px;
+  color: var(--tinta-3);
+  font-size: 16px;
+}
+
+/* Estreito: os passos descem em coluna, e o fio vira vertical entre os discos. */
+@media (max-width: 720px) {
+  .etapas {
+    gap: 0;
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .activation-step:not(:last-child)::after {
-    display: none;
+  .etapa {
+    grid-template-columns: var(--etapa-marco) minmax(0, 1fr);
+    gap: 14px;
+    padding-block-end: 18px;
+    padding-inline-end: 0;
+  }
+
+  .etapa__marco {
+    align-items: flex-start;
+    align-self: stretch;
+  }
+
+  .etapa:not(:last-child) .etapa__marco::after {
+    inset-inline: calc(var(--etapa-marco) / 2 - 1px) auto;
+    top: calc(var(--etapa-marco) + 6px);
+    bottom: -12px;
+    width: 2px;
+    height: auto;
+  }
+
+  .etapa__texto {
+    padding-top: 6px;
   }
 }
 </style>

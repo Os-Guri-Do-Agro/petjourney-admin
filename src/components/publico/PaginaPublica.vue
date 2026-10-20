@@ -1,18 +1,22 @@
 <script setup lang="ts">
 /**
  * A moldura das páginas públicas — agendamento da clínica (`/agendar/:clinica`) e reserva do hotel
- * (`/reservar/:hotel`).
+ * (`/reservar/:hotel`), para quem ainda não tem o app.
  *
- * A tela se divide como num checkout: a metade da casa, em teal com a pata da marca no canto, tem
- * o nome, o estado de agora, a promessa, os passos do pedido com o que já foi escolhido e, no pé,
- * quem atende ou as regras, o contato e a assinatura; a metade do pedido, clara com a grade das
- * telas do portal, tem o fluxo no meio dela (o slot). Abaixo de 1024 px vira uma coluna: a casa no
- * topo, o fluxo, e o pé no fim, já sobre o claro; os passos saem e o "Passo 2 de 5" acima do título
- * conta o caminho.
+ * ## A forma (redesenho total, 19/10/2026)
  *
- * Mora aqui, e não em cada página, para as duas serem a mesma por construção: a primeira cópia da
- * clínica tinha deixado o hotel na coluna antiga. As páginas só dizem o quê — os textos chegam
- * prontos, cada uma no seu `t()`.
+ * Quem marca é o tutor, quase sempre no celular, e muitas vezes pela primeira vez. A página diz,
+ * nesta ordem: **de quem é** (a casa no topo, no verde-floresta do PetJourney, com o ladrilho na cor
+ * do lugar, o nome, o endereço e se está aberta agora), **em que passo o pedido está** ("Passo 2 de
+ * 5" e os gomos que se enchem) e **o que fazer agora** (a etapa, com a ação grande presa no pé da
+ * tela enquanto se rola). Embaixo, quem atende ou as regras da estadia, o contato e a assinatura.
+ *
+ * Em tela larga, duas metades, como num checkout: a casa à esquerda, parada, com os passos do
+ * pedido e o que já foi escolhido em cada um; o pedido à direita. Abaixo de 1024 px, uma coluna: a
+ * faixa da casa no alto, o pedido, e o pé no fim, já sobre o claro.
+ *
+ * Mora aqui, e não em cada página, para as duas serem a mesma por construção. As páginas só dizem
+ * o quê — os textos chegam prontos, cada uma no seu `t()`.
  */
 import Button from 'primevue/button'
 
@@ -33,6 +37,8 @@ const props = withDefaults(
   defineProps<{
     /** Ícone da casa no ladrilho, classe do Phosphor (`ph-first-aid-kit`). */
     icone: string
+    /** A cor do ladrilho: a do espaço da casa no portal. */
+    lugar?: 'clinica' | 'hotel'
     /** `null` enquanto a casa carrega: o ladrilho aparece sozinho. */
     nome: string | null
     endereco?: string
@@ -63,6 +69,7 @@ const props = withDefaults(
     comPe?: boolean
   }>(),
   {
+    lugar: 'clinica',
     endereco: '',
     estado: null,
     promessa: '',
@@ -95,7 +102,7 @@ function estadoDoPasso(indice: number) {
 </script>
 
 <template>
-  <div class="publica hc-tema" :class="{ 'publica--demo': demo }">
+  <div class="publica" :class="[`pj-lugar--${lugar}`, { 'publica--demo': demo }]">
     <div v-if="demo" class="publica__demo">
       <span>
         <i class="ph ph-flask" aria-hidden="true" />
@@ -112,15 +119,21 @@ function estadoDoPasso(indice: number) {
     </div>
 
     <div class="publica__palco">
-      <!-- O teal da metade da casa, com a pata da marca no canto. Só fundo. -->
+      <!-- A metade da casa: o verde-floresta, com a pata da marca no canto. Só fundo. -->
       <div class="publica__fundo" aria-hidden="true" />
 
       <header class="publica__casa">
-        <span class="publica__icone" aria-hidden="true"><i class="ph" :class="icone" /></span>
+        <div class="publica__casa-topo">
+          <span class="publica__icone" aria-hidden="true"><i class="ph" :class="icone" /></span>
+          <LanguageSwitcher class="publica__idioma" variant="auth" tone="brand" />
+        </div>
 
         <template v-if="nome">
           <h1>{{ nome }}</h1>
-          <p v-if="endereco" class="publica__endereco">{{ endereco }}</p>
+          <p v-if="endereco" class="publica__endereco">
+            <i class="ph ph-map-pin" aria-hidden="true" />
+            {{ endereco }}
+          </p>
           <p v-if="estado" class="publica__estado" :class="`publica__estado--${estado.tom}`">
             <i v-if="estado.tom === 'neutro'" class="ph ph-clock" aria-hidden="true" />
             <span v-else class="publica__ponto" aria-hidden="true" />
@@ -131,8 +144,8 @@ function estadoDoPasso(indice: number) {
       </header>
 
       <!-- Em que passo o pedido está e o que já foi escolhido. -->
-      <section v-if="passos" class="publica__passos">
-        <h2 class="publica__rotulo">{{ tituloDosPassos }}</h2>
+      <section v-if="passos" class="publica__passos" aria-labelledby="publica-passos-titulo">
+        <h2 id="publica-passos-titulo" class="publica__rotulo">{{ tituloDosPassos }}</h2>
         <ol class="passos" :aria-label="rotuloDosPassos">
           <li
             v-for="(passo, indice) in passos"
@@ -207,15 +220,19 @@ function estadoDoPasso(indice: number) {
           </li>
         </ul>
 
-        <p v-if="assinatura" class="publica__assinatura">{{ assinatura }}</p>
+        <p v-if="assinatura" class="publica__assinatura">
+          <img src="/pata-clara.png" alt="" aria-hidden="true" />
+          {{ assinatura }}
+        </p>
       </footer>
 
       <!--
         `clinic-scope`: os campos, selects e marcas pintados com os tokens da casa, como no celular
-        do portal. Sem ele, o PrimeVue fazia o campo nascer claro no escuro — a caixa de texto e a
-        marca vazia saíam brancas no meio da página escura.
+        do portal. Sem ele, o PrimeVue fazia o campo nascer claro no escuro.
       -->
       <main class="publica__fluxo clinic-scope">
+        <LanguageSwitcher class="publica__idioma-largo" variant="auth" tone="surface" />
+
         <!-- "Passo 2 de 5" e os gomos que se enchem: o caminho andando, também no estreito. -->
         <div v-if="contagem" class="publica__progresso">
           <p class="publica__contagem">{{ contagem }}</p>
@@ -233,110 +250,37 @@ function estadoDoPasso(indice: number) {
         </div>
         <slot />
       </main>
-
-      <LanguageSwitcher class="publica__idioma" variant="auth" tone="surface" />
     </div>
   </div>
 </template>
 
 <style scoped>
 /*
- * A metade da casa tem o teal da pílula cheia e da moldura do portal. Contrastes sobre #1F6457:
- * texto 6,9:1, apagado 5:1, coral 4,6:1. No escuro, o mesmo teal bem fundo.
+ * Só tokens do Trilha. A casa fica no verde-floresta da barra do portal (`--rail`); no escuro, o
+ * `--rail` é quase preto e a casa passa para o musgo fundo, que ainda lê como floresta. A tinta
+ * sobre ela é a da barra (`--sobre-rail`), e o acento é a sálvia.
  */
 .publica {
-  --faixa: #1f6457;
-  --faixa-funda: #1a574c;
-  --faixa-tinta: #f4fbf8;
-  --faixa-apagada: #c8e0d9;
-  --faixa-menta: #8fd9c8;
-  --faixa-coral: #ffc4c4;
-  --faixa-fio: rgb(255 255 255 / 16%);
-  --lado-largura: 31rem;
-  --fluxo-largura: 38rem;
-  --respiro: 3.5rem;
+  --casa: var(--rail);
+  --casa-tinta: var(--sobre-rail);
+  --casa-apagada: var(--sobre-rail-2);
+  --casa-fio: color-mix(in oklab, var(--sobre-rail) 16%, transparent);
+  --casa-acento: var(--salvia);
+  --casa-desvio: color-mix(in oklab, var(--risco) 50%, var(--sobre-rail));
+  --lado-largura: 30rem;
+  --fluxo-largura: 36rem;
+  --respiro: 3.25rem;
 
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: clip;
-  background: var(--hc-fundo);
-  color: var(--hc-tinta);
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: var(--font-texto);
 }
 
 .app-dark .publica {
-  --faixa: #143c34;
-  --faixa-funda: #10302a;
-}
-
-/*
- * O escuro em sálvia pastel. A menta saturada da casa em todo lugar — borda do cartão escolhido,
- * ícone, rótulo, botão com brilho verde — lia como letreiro de neon; trocada por branco, a tela
- * ficou chapada. O meio-termo é a mesma família, sem saturação: sálvia pastel no acento (9,8:1
- * sobre o cartão), um véu sálvia no escolhido, e o botão em degradê pastel com a tinta escura
- * (9,2:1). Título e texto seguem brancos; cor fora da sálvia só com significado (aberta, fechada,
- * urgência). Os tokens trocam na raiz da página e o fluxo inteiro segue sozinho; o portal escuro
- * não muda. Onde a tinta era branca fixa sobre o acento, ela vira a escura.
- */
-.app-dark .publica {
-  --hc-marca: #9cc6b8;
-  --hc-marca-forte: #cfe5dd;
-  --hc-marca-clara: rgb(156 198 184 / 16%);
-  --hc-degrade-botao: linear-gradient(120deg, #bcdcd1 0%, #a6cbbf 100%);
-  --faixa-menta: #b9d8cd;
-
-  /* O botão principal: o degradê pastel, com a tinta escura. */
-  --p-button-primary-background: var(--hc-degrade-botao);
-  --p-button-primary-hover-background: linear-gradient(120deg, #c8e4da 0%, #b2d4c8 100%);
-  --p-button-primary-active-background: linear-gradient(120deg, #aed0c4 0%, #98bfb2 100%);
-  --p-button-primary-color: #10241f;
-  --p-button-primary-hover-color: #10241f;
-  --p-button-primary-active-color: #10241f;
-}
-
-/*
- * O dia escolhido no calendário: disco sálvia pastel, número escuro; o período, um véu sálvia. No
- * painel, e não na raiz: o `hc-tema.css` redefine estes tokens no próprio
- * `.p-datepicker-panel.hc-tema`, com o número em branco fixo.
- */
-.app-dark .publica :deep(.p-datepicker-panel.hc-tema) {
-  --p-datepicker-date-selected-background: #b3d3c8;
-  --p-datepicker-date-selected-color: #10241f;
-  --p-datepicker-date-range-selected-background: rgb(169 205 193 / 14%);
-  --p-datepicker-date-range-selected-color: var(--hc-tinta);
-}
-
-/* Sem o brilho verde embaixo do botão: no escuro ele é só uma sombra. */
-.app-dark
-  .publica
-  :deep(.p-button:not(.p-button-secondary, .p-button-outlined, .p-button-text, .p-button-link)),
-.app-dark
-  .publica
-  :deep(
-    .p-button:not(.p-button-secondary, .p-button-outlined, .p-button-text, .p-button-link):not(
-        :disabled
-      ):hover
-  ) {
-  --hc-botao-sombra: 0 6px 18px -10px rgb(169 205 193 / 45%);
-}
-
-/* "Passo 2 de 5" na sálvia, e não no quase branco do texto: é rótulo, não título. */
-.app-dark .publica__contagem,
-.app-dark .publica__fluxo :deep(.publica__contagem) {
-  color: var(--hc-marca);
-}
-
-.app-dark .publica :deep(.enviado__selo) {
-  box-shadow: 0 0 0 6px rgb(169 205 193 / 12%);
-  color: #10241f;
-}
-
-.app-dark .publica :deep(.fx-dia--escolhido.p-button),
-.app-dark .publica :deep(.fx-dia--escolhido.p-button:not(:disabled):hover) {
-  color: #10241f;
-}
-
-.app-dark .publica :deep(.p-datepicker-day-selected .cal__ponto) {
-  background: #10241f;
+  --casa: var(--musgo-fundo);
 }
 
 .publica__demo {
@@ -344,26 +288,22 @@ function estadoDoPasso(indice: number) {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px dashed var(--hc-borda);
-  gap: 0.5rem;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--linha);
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 .publica__demo > span {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 6px;
 }
 
 /* ------------------------------------------------------------------ a grade */
 
-/*
- * Duas metades, como um checkout: a casa à esquerda, o pedido à direita. O conteúdo de cada uma
- * fica no meio da sua metade; o que sobra em volta é fundo — a pata de um lado, a grade do outro.
- */
 .publica__palco {
   position: relative;
   display: grid;
@@ -373,38 +313,13 @@ function estadoDoPasso(indice: number) {
     'casa fluxo'
     'passos fluxo'
     'pe fluxo';
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   grid-template-rows: auto auto 1fr;
   isolation: isolate;
-  /* Os dois brilhos e a grade fina das telas do portal, só na metade do pedido. */
-  background:
-    radial-gradient(44rem 22rem at 70% -6rem, rgb(120 196 178 / 22%), transparent 70%),
-    radial-gradient(36rem 20rem at 104% -4rem, rgb(96 178 196 / 18%), transparent 70%),
-    var(--hc-fundo);
-}
-
-.publica__palco::before {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--hc-grade) 1px, transparent 1px),
-    linear-gradient(90deg, var(--hc-grade) 1px, transparent 1px);
-  background-size: 28px 28px;
-  content: '';
-  mask-image: linear-gradient(to bottom, #000 0, rgb(0 0 0 / 60%) 16rem, transparent 34rem);
-  pointer-events: none;
 }
 
 .publica--demo .publica__palco {
-  min-height: calc(100dvh - 3.3rem);
-}
-
-/* No escuro, a névoa vira um sopro sálvia, bem baixo: dá profundidade ao topo sem acender. */
-.app-dark .publica__palco {
-  background:
-    radial-gradient(46rem 24rem at 72% -8rem, rgb(169 205 193 / 7%), transparent 70%),
-    var(--hc-fundo);
+  min-height: calc(100dvh - 3.2rem);
 }
 
 /* ------------------------------------------------------------------ a metade da casa */
@@ -415,19 +330,26 @@ function estadoDoPasso(indice: number) {
   overflow: hidden;
   grid-column: 1;
   grid-row: 1 / -1;
-  background: linear-gradient(180deg, var(--faixa) 0%, var(--faixa-funda) 100%);
+  background:
+    radial-gradient(
+      34rem 24rem at 100% 0%,
+      color-mix(in oklab, var(--salvia) 22%, transparent),
+      transparent 70%
+    ),
+    var(--casa);
 }
 
 /* A pata da marca, grande e quase sumida, no canto que sobra em tela larga. */
 .publica__fundo::after {
   position: absolute;
   bottom: -5rem;
-  width: 28rem;
-  aspect-ratio: 4835 / 4476;
+  width: 26rem;
+  aspect-ratio: 324 / 300;
   inset-inline-start: -6rem;
   background: url('/pata-clara.png') center / contain no-repeat;
   content: '';
-  opacity: 0.055;
+  opacity: 0.06;
+  transform: rotate(10deg);
 }
 
 .publica__casa,
@@ -436,37 +358,49 @@ function estadoDoPasso(indice: number) {
   width: min(100%, var(--lado-largura));
   justify-self: center;
   padding-inline: var(--respiro);
-  color: var(--faixa-tinta);
+  color: var(--casa-tinta);
 }
 
 .publica__casa {
   display: grid;
   grid-area: casa;
   justify-items: start;
-  padding-top: 2.75rem;
-  gap: 0.4rem;
+  gap: 8px;
+  padding-top: 48px;
 }
 
-/* O ladrilho inverte sobre o teal: claro, com o ícone no teal. */
+.publica__casa-topo {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* O ladrilho na cor do lugar (azul da clínica, lavanda do hotel), como os discos da barra. */
 .publica__icone {
   display: grid;
-  width: 3rem;
-  height: 3rem;
-  margin-bottom: 0.75rem;
+  width: 52px;
+  height: 52px;
+  flex: none;
   place-items: center;
-  border-radius: 0.9rem;
-  background: var(--faixa-tinta);
-  box-shadow: 0 8px 24px -12px rgb(0 0 0 / 45%);
-  color: var(--faixa);
-  font-size: 1.45rem;
+  border-radius: 15px;
+  background: var(--pj-lugar-claro);
+  color: var(--rail);
+  font-size: 26px;
+}
+
+.publica__idioma {
+  display: none;
 }
 
 .publica__casa h1 {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 32px;
+  font-weight: 600;
   letter-spacing: -0.025em;
-  line-height: 1.1;
+  line-height: 1.12;
   text-wrap: balance;
 }
 
@@ -475,64 +409,69 @@ function estadoDoPasso(indice: number) {
 }
 
 .publica__endereco {
-  color: var(--faixa-apagada);
-  font-size: 0.9375rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--casa-apagada);
+  font-size: 15px;
   line-height: 1.45;
+}
+
+.publica__endereco i {
+  flex: none;
+  margin-top: 3px;
 }
 
 /* Aberta ou fechada: o ponto é o sinal, a frase diz até quando. Sem estado de agora, o relógio. */
 .publica__estado {
   display: inline-flex;
   align-items: center;
-  margin-top: 0.6rem !important;
-  padding: 0.3rem 0.8rem;
+  gap: 8px;
+  margin-top: 6px !important;
+  padding: 6px 12px;
   border-radius: 999px;
-  gap: 0.45rem;
-  background: rgb(255 255 255 / 12%);
-  font-size: 0.8125rem;
-  font-weight: 650;
+  background: color-mix(in oklab, var(--sobre-rail) 11%, transparent);
+  font-size: 14px;
+  font-weight: 550;
 }
 
 .publica__estado .ph {
-  color: var(--faixa-menta);
-  font-size: 0.95rem;
+  color: var(--casa-acento);
+  font-size: 16px;
 }
 
 .publica__ponto {
-  width: 0.5rem;
-  height: 0.5rem;
-  flex: 0 0 auto;
+  position: relative;
+  width: 9px;
+  height: 9px;
+  flex: none;
   border-radius: 999px;
-  background: #93e2b3;
-  box-shadow: 0 0 0 3px rgb(147 226 179 / 22%);
+  background: var(--pets-claro);
 }
 
 .publica__estado--fechado .publica__ponto {
-  background: #ffc39f;
-  box-shadow: 0 0 0 3px rgb(255 195 159 / 22%);
+  background: var(--atencao);
 }
 
 .publica__promessa {
   max-width: 24rem;
-  margin-top: 0.9rem !important;
-  color: var(--faixa-apagada);
-  font-size: 0.9375rem;
+  margin-top: 12px !important;
+  color: var(--casa-apagada);
+  font-size: 15px;
   line-height: 1.55;
 }
 
 .publica__rotulo {
-  margin: 0 0 1rem;
-  color: var(--faixa-apagada);
-  font-size: 0.75rem;
-  font-weight: 750;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  margin: 0 0 14px;
+  color: var(--casa-tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
-/* Os passos: o feito em menta, o de agora em branco com halo, os seguintes só no contorno. */
+/* Os passos: o feito na sálvia com o visto, o de agora claro com halo, os seguintes no contorno. */
 .publica__passos {
   grid-area: passos;
-  padding-top: 2.25rem;
+  padding-top: 36px;
 }
 
 .passos {
@@ -545,118 +484,103 @@ function estadoDoPasso(indice: number) {
 .passo {
   position: relative;
   display: grid;
-  grid-template-columns: 1.85rem minmax(0, 1fr);
-  padding-bottom: 1.15rem;
-  column-gap: 0.85rem;
+  grid-template-columns: 32px minmax(0, 1fr);
+  column-gap: 14px;
+  padding-bottom: 18px;
 }
 
 .passo:last-child {
   padding-bottom: 0;
 }
 
-/* O traço que liga um passo ao seguinte. */
 /* O traço apagado embaixo e, por cima, o aceso que desce quando o passo fica feito. */
 .passo:not(:last-child)::before,
 .passo:not(:last-child)::after {
   position: absolute;
   width: 2px;
-  inset-block: 2.1rem 0.25rem;
-  inset-inline-start: calc(0.925rem - 1px);
+  inset-block: 36px 4px;
+  inset-inline-start: 15px;
   border-radius: 1px;
-  background: var(--faixa-fio);
+  background: var(--casa-fio);
   content: '';
 }
 
-/*
- * O progresso corre de cima para baixo, em ordem: o passo feito assenta (0 ms), o traço desce até
- * o próximo (80–440 ms), e só então o próximo acende como "agora" (360 ms). Ao voltar, o traço
- * recolhe sem espera.
- */
 .passo:not(:last-child)::after {
-  background: var(--faixa-menta);
+  background: var(--casa-acento);
   transform: scaleY(0);
   transform-origin: top;
-  transition: transform 260ms var(--hc-mov-sai);
-}
-
-.passo--feito:not(:last-child)::after {
-  transition: transform 360ms var(--hc-mov-chega) 80ms;
+  transition: transform 260ms var(--pj-curva-sai);
 }
 
 .passo--feito:not(:last-child)::after {
   transform: scaleY(1);
+  transition: transform 360ms var(--pj-curva-chega) 80ms;
 }
 
 .passo__marca {
   display: grid;
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 32px;
+  height: 32px;
   place-items: center;
-  border: 1.5px solid rgb(255 255 255 / 30%);
+  border: 1.5px solid color-mix(in oklab, var(--sobre-rail) 32%, transparent);
   border-radius: 999px;
-  color: var(--faixa-apagada);
-  font-size: 0.75rem;
+  color: var(--casa-apagada);
+  font-family: var(--font-dados);
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  font-weight: 650;
   transition:
-    background-color 200ms var(--hc-mov-chega),
-    border-color 200ms var(--hc-mov-chega),
-    box-shadow 200ms var(--hc-mov-chega),
-    color 200ms var(--hc-mov-chega);
+    background-color var(--pj-tempo-medio) var(--pj-curva-chega),
+    border-color var(--pj-tempo-medio) var(--pj-curva-chega),
+    color var(--pj-tempo-medio) var(--pj-curva-chega);
 }
 
 .passo--feito .passo__marca {
   border-color: transparent;
-  background: var(--faixa-menta);
-  color: var(--faixa);
-  font-size: 0.875rem;
+  background: var(--casa-acento);
+  color: var(--rail);
+  font-size: 16px;
 }
 
-/* O "agora" acende quando o traço chega, e não junto com ele. */
 .passo--atual .passo__marca {
   border-color: transparent;
-  background: var(--faixa-tinta);
-  box-shadow: 0 0 0 5px rgb(255 255 255 / 14%);
-  color: var(--faixa);
-  transition-delay: 360ms;
-}
-
-.passo--atual .passo__texto strong {
+  background: var(--casa-tinta);
+  box-shadow: 0 0 0 5px color-mix(in oklab, var(--sobre-rail) 14%, transparent);
+  color: var(--rail);
   transition-delay: 360ms;
 }
 
 .passo__texto {
   display: grid;
   min-width: 0;
-  padding-top: 0.25rem;
-  gap: 0.15rem;
+  gap: 2px;
+  padding-top: 5px;
 }
 
 .passo__texto strong {
-  color: var(--faixa-apagada);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  transition: color 200ms var(--hc-mov-chega);
+  color: var(--casa-apagada);
+  font-size: 15.5px;
+  font-weight: 500;
 }
 
 .passo--feito .passo__texto strong,
 .passo--atual .passo__texto strong {
-  color: var(--faixa-tinta);
+  color: var(--casa-tinta);
 }
 
 .passo--atual .passo__texto strong {
-  font-weight: 750;
+  font-weight: 650;
 }
 
 .passo__valor {
-  color: var(--faixa-apagada);
-  font-size: 0.8125rem;
+  color: var(--casa-apagada);
+  font-size: 14px;
   line-height: 1.4;
 }
 
 .passo__valor--desvio {
-  color: var(--faixa-coral);
-  font-weight: 650;
+  color: var(--casa-desvio);
+  font-weight: 600;
 }
 
 /* O pé da metade: quem atende ou as regras, o contato e a assinatura, encostados embaixo. */
@@ -664,47 +588,48 @@ function estadoDoPasso(indice: number) {
   display: grid;
   align-self: end;
   grid-area: pe;
-  padding-block: 2rem 1.75rem;
-  gap: 1.25rem;
+  gap: 20px;
+  padding-block: 40px 32px;
 }
 
 .publica__pe > :first-child {
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--faixa-fio);
+  padding-top: 24px;
+  border-top: 1px solid var(--casa-fio);
 }
 
 .equipe .publica__rotulo,
 .regras .publica__rotulo {
-  margin-bottom: 0.75rem;
+  margin-bottom: 12px;
 }
 
 .equipe__linha {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 14px;
 }
 
 .equipe__rostos {
   display: flex;
-  flex: 0 0 auto;
+  flex: none;
 }
 
 .equipe__rosto {
   display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 38px;
+  height: 38px;
   overflow: hidden;
   place-items: center;
   border-radius: 999px;
-  background: #e7f4f0;
-  box-shadow: 0 0 0 2px var(--faixa-funda);
-  color: #1f6457;
-  font-size: 0.6875rem;
-  font-weight: 750;
+  background: var(--pj-lugar-claro);
+  box-shadow: 0 0 0 2px var(--casa);
+  color: var(--rail);
+  font-family: var(--font-dados);
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .equipe__rosto + .equipe__rosto {
-  margin-inline-start: -0.3rem;
+  margin-inline-start: -6px;
 }
 
 .equipe__rosto img {
@@ -716,111 +641,175 @@ function estadoDoPasso(indice: number) {
 .equipe__texto {
   display: grid;
   min-width: 0;
-  line-height: 1.35;
+  gap: 2px;
+  line-height: 1.4;
 }
 
 .equipe__texto strong {
-  font-size: 0.875rem;
-  font-weight: 650;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .equipe__texto span {
-  color: var(--faixa-apagada);
-  font-size: 0.8125rem;
+  color: var(--casa-apagada);
+  font-size: 14px;
 }
 
-/* As regras da casa: uma linha cada, com o ícone na menta. */
 .regras__lista {
   display: grid;
+  gap: 10px;
   margin: 0;
   padding: 0;
-  gap: 0.5rem;
   list-style: none;
 }
 
 .regras__lista li {
   display: flex;
-  align-items: baseline;
-  gap: 0.55rem;
-  color: var(--faixa-apagada);
-  font-size: 0.875rem;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--casa-apagada);
+  font-size: 14.5px;
   line-height: 1.45;
 }
 
 .regras__lista .ph {
-  flex: 0 0 auto;
-  color: var(--faixa-menta);
-  font-size: 1rem;
-  transform: translateY(0.12rem);
+  flex: none;
+  margin-top: 2px;
+  color: var(--casa-acento);
+  font-size: 18px;
 }
 
 .contatos {
   display: flex;
   flex-wrap: wrap;
+  gap: 8px 20px;
   margin: 0;
   padding: 0;
-  gap: 0.5rem 1.25rem;
   list-style: none;
 }
 
 .contatos li {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.875rem;
+  gap: 8px;
+  font-family: var(--font-dados);
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .contatos .ph {
-  color: var(--faixa-menta);
-  font-size: 1.05rem;
+  color: var(--casa-acento);
+  font-size: 18px;
 }
 
 .publica__assinatura {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
-  color: var(--faixa-apagada);
-  font-size: 0.75rem;
+  color: var(--casa-apagada);
+  font-size: 13px;
+}
+
+.publica__assinatura img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  opacity: 0.8;
 }
 
 /* ------------------------------------------------------------------ a metade do pedido */
 
 .publica__fluxo {
+  position: relative;
   display: flex;
   width: min(100%, calc(var(--fluxo-largura) + 2 * var(--respiro)));
   flex-direction: column;
   grid-area: fluxo;
   justify-self: center;
-  padding: 4.5rem var(--respiro) 3rem;
+  padding: 88px var(--respiro) 40px;
 }
 
-.publica__contagem,
-.publica__fluxo :deep(.publica__contagem) {
-  margin: 0 0 0.25rem;
-  color: var(--hc-marca-forte);
-  font-size: 0.75rem;
-  font-weight: 750;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.publica__idioma-largo {
+  position: absolute;
+  top: 20px;
+  inset-inline-end: 24px;
 }
 
-/* O título da etapa na escala da página, e não na do celular. */
-.publica__fluxo :deep(.fx-topo__titulo),
-.publica__fluxo :deep(h2) {
+.publica__progresso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-bottom: 6px;
+}
+
+.publica__contagem {
   margin: 0;
-  font-size: 1.75rem;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
+  color: var(--tinta-2);
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.progresso {
+  display: inline-flex;
+  gap: 5px;
+}
+
+/* Os gomos do progresso: o feito cheio, o de agora pela metade, enchendo um depois do outro. */
+.progresso__gomo {
+  position: relative;
+  overflow: hidden;
+  width: 28px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--superficie-3);
+}
+
+.progresso__gomo::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--musgo);
+  content: '';
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 420ms var(--pj-curva-chega);
+}
+
+[dir='rtl'] .progresso__gomo::after {
+  transform-origin: right;
+}
+
+.progresso__gomo--feito::after {
+  transform: scaleX(1);
+}
+
+.progresso__gomo--atual::after {
+  transform: scaleX(0.5);
+  transition-delay: 220ms;
+}
+
+/* O título da etapa na escala da página, e não na do celular do portal. */
+.publica__fluxo :deep(.fx-topo__titulo) {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 /*
- * No celular o fluxo ocupa a tela e a ação fica presa no pé. Na página ele tem a altura do que
- * mostra: a ação vem logo depois do conteúdo, e não no fim da metade.
+ * No celular do portal o fluxo ocupa a tela e a ação fica presa no pé. Na página ele tem a altura
+ * do que mostra, e a ação vem depois do conteúdo — presa ao pé da janela enquanto há o que rolar,
+ * para o próximo passo estar sempre à mão.
  */
 .publica__fluxo :deep(.fx) {
+  --fx-passo: 1.25rem;
+
   flex: 0 0 auto;
-  gap: 1.1rem;
+  gap: 18px;
+  font-size: 15px;
 }
 
 .publica__fluxo :deep(.fx-corpo) {
@@ -829,70 +818,152 @@ function estadoDoPasso(indice: number) {
 }
 
 .publica__fluxo :deep(.fx-rodape) {
-  padding-top: 1rem;
-}
-
-.publica__idioma {
-  z-index: 1;
-  align-self: start;
-  justify-self: end;
-  grid-area: fluxo;
-  margin: 1.25rem 1.5rem 0;
+  position: sticky;
+  z-index: 2;
+  bottom: 0;
+  margin-inline: -8px;
+  padding: 16px 8px calc(16px + env(safe-area-inset-bottom));
+  background: linear-gradient(to bottom, transparent, var(--fundo) 18px);
 }
 
 /* O que as páginas põem no lugar do fluxo: casa não encontrada e acompanhamento do pedido. */
-.publica__fluxo :deep(.publica__vazio),
-.publica__fluxo :deep(.publica__acompanhar) {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.75rem;
+.publica__fluxo :deep(.publica__vazio) {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 40px 24px;
+  border: 1px solid var(--linha);
+  border-radius: 20px;
+  background: var(--superficie);
+  text-align: center;
 }
 
 .publica__fluxo :deep(.publica__vazio > i) {
-  color: var(--hc-tinta-3);
-  font-size: 1.6rem;
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 24px;
 }
 
-.publica__fluxo :deep(.publica__vazio p),
-.publica__fluxo :deep(.publica__acompanhar p) {
+.publica__fluxo :deep(.publica__vazio h2) {
+  margin: 8px 0 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.publica__fluxo :deep(.publica__vazio p) {
+  margin: 0;
+  color: var(--tinta-2);
+  line-height: 1.5;
+}
+
+.publica__fluxo :deep(.publica__acompanhar) {
+  display: grid;
+  gap: 16px;
+}
+
+.publica__fluxo :deep(.publica__acompanhar h2) {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.publica__fluxo :deep(.acompanhar) {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+}
+
+.publica__fluxo :deep(.acompanhar p) {
   margin: 0;
 }
 
-.publica__fluxo :deep(.publica__situacao) {
-  display: inline-flex;
+.publica__fluxo :deep(.acompanhar__situacao) {
+  display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-weight: 700;
+  gap: 12px;
+  font-size: 17px;
+  font-weight: 600;
 }
 
-.publica__fluxo :deep(.publica__situacao--ACEITO) {
-  color: var(--hc-marca-forte);
+.publica__fluxo :deep(.acompanhar__disco) {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-size: 22px;
 }
 
-.publica__fluxo :deep(.publica__situacao--RECUSADO),
-.publica__fluxo :deep(.publica__situacao--EXPIRADO) {
-  color: var(--clinic-attention-text);
+.publica__fluxo :deep(.acompanhar__situacao--espera .acompanhar__disco) {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
-.publica__fluxo :deep(.publica__marcado) {
-  font-size: 1rem;
-  font-weight: 700;
+.publica__fluxo :deep(.acompanhar__situacao--ok .acompanhar__disco) {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
 }
 
-.publica__fluxo :deep(.publica__mensagem) {
+.publica__fluxo :deep(.acompanhar__situacao--risco .acompanhar__disco) {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+.publica__fluxo :deep(.acompanhar__oque) {
+  padding-top: 12px;
+  border-top: 1px solid var(--linha);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.publica__fluxo :deep(.acompanhar__linha) {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--tinta-2);
+  line-height: 1.5;
+}
+
+.publica__fluxo :deep(.acompanhar__linha i) {
+  flex: none;
+  margin-top: 3px;
+  color: var(--musgo);
+}
+
+.publica__fluxo :deep(.acompanhar__linha--forte) {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.publica__fluxo :deep(.acompanhar__mensagem) {
   margin: 0;
-  padding: 0.6rem 0.75rem;
-  border-radius: 0.7rem;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta-2);
+  padding: 12px 14px;
+  border-inline-start: 3px solid var(--linha-forte);
+  border-radius: 8px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
   line-height: 1.5;
 }
 
 .publica__fluxo :deep(.publica__acoes) {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  display: grid;
+  gap: 10px;
+}
+
+.publica__fluxo :deep(.publica__acoes .p-button) {
+  min-height: 52px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .publica__so-leitor {
@@ -907,11 +978,15 @@ function estadoDoPasso(indice: number) {
 /* ------------------------------------------------------------------ uma coluna */
 
 /*
- * Abaixo de 1024 px as metades não cabem lado a lado: a casa vira o topo, o fluxo vem logo abaixo
- * e o pé desce para o fim, já sobre o claro. Os passos saem — o "Passo 2 de 5" acima do título
- * conta o caminho.
+ * Abaixo de 1024 px as metades não cabem lado a lado: a casa vira a faixa do alto, o pedido vem
+ * logo abaixo, e o pé desce para o fim, já sobre o claro. Os passos saem — o "Passo 2 de 5" acima
+ * do título conta o caminho.
  */
 @media (max-width: 1023px) {
+  .publica {
+    --respiro: 16px;
+  }
+
   .publica__palco {
     grid-template-areas:
       'casa'
@@ -923,76 +998,90 @@ function estadoDoPasso(indice: number) {
 
   .publica__fundo {
     grid-row: 1;
+    border-radius: 0 0 24px 24px;
   }
 
   .publica__fundo::after {
-    width: 16rem;
-    inset-inline: auto -4rem;
-    bottom: -6rem;
+    bottom: -7rem;
+    width: 15rem;
+    inset-inline: auto -3rem;
   }
 
   .publica__casa,
   .publica__pe,
   .publica__fluxo {
-    width: min(100%, 44rem);
+    width: min(100%, 40rem);
     justify-self: center;
-    padding-inline: 1.5rem;
   }
 
   .publica__casa {
-    padding-block: 1.5rem 2rem;
+    gap: 6px;
+    padding-block: 16px 24px;
+  }
+
+  .publica__casa-topo {
+    margin-bottom: 6px;
+  }
+
+  .publica__icone {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    font-size: 22px;
+  }
+
+  .publica__idioma {
+    display: block;
+  }
+
+  .publica__idioma-largo {
+    display: none;
   }
 
   .publica__casa h1 {
-    font-size: 1.6rem;
+    font-size: 24px;
+  }
+
+  .publica__endereco,
+  .publica__promessa {
+    font-size: 14px;
+  }
+
+  .publica__promessa {
+    margin-top: 6px !important;
   }
 
   .publica__passos {
     display: none;
   }
 
-  .publica__idioma {
-    grid-area: casa;
-  }
-
   .publica__fluxo {
-    padding-block: 2rem 1rem;
+    padding-block: 24px 8px;
   }
 
   .publica__fluxo :deep(.fx-topo__titulo),
-  .publica__fluxo :deep(h2) {
-    font-size: 1.35rem;
+  .publica__fluxo :deep(.publica__acompanhar h2) {
+    font-size: 22px;
   }
 
-  /* Embaixo, o pé já está sobre o claro: as tintas da faixa viram as da página. */
+  /* Embaixo, o pé já está sobre o claro: as tintas da casa viram as da página. */
   .publica__pe {
-    --faixa-tinta: var(--hc-tinta);
-    --faixa-apagada: var(--hc-tinta-2);
-    --faixa-menta: var(--hc-marca-forte);
-    --faixa-fio: color-mix(in srgb, var(--hc-tinta) 11%, transparent);
-    --faixa-funda: var(--hc-fundo);
+    --casa-tinta: var(--tinta);
+    --casa-apagada: var(--tinta-2);
+    --casa-acento: var(--musgo);
+    --casa-fio: var(--linha);
+    --casa: var(--fundo);
 
     align-self: start;
-    padding-block: 1rem 2rem;
+    padding-block: 16px 32px;
   }
 }
 
 /* ------------------------------------------------------------------ movimento
- * A página de quem marca, e não a ferramenta da recepção: aqui o movimento acolhe e mostra o
- * caminho andando. Três camadas — a chegada (a casa e os passos entram em sequência, uma vez), o
- * progresso (os gomos se enchem, o passo feito assenta, o traço desce e só então o próximo acende)
- * e o toque (cartão que levanta, seta que avança, dia que cresce).
- *
- * O que separa natural de enfeitado, e vale para tudo abaixo:
- *  - três curvas da casa (`hc-tokens.css`): o que chega desacelera, o que sai acelera, o que
- *    confirma assenta — passa 3% do lugar e volta. Nada de mola de brinquedo, nada de giro;
- *  - sair é mais rápido que chegar, e o hover responde em 160 ms;
- *  - um eixo por gesto: a etapa desliza para os lados (para a frente ou para trás), e o que está
- *    dentro dela só aparece, sem subir junto;
- *  - distâncias curtas: 6 a 8 px, nunca uma mudança de lugar;
- *  - o que não para é só o que está vivo de verdade: o ponto de aberta e a pata, bem devagar. O
- *    anel do passo de agora respira duas vezes ao acender e descansa.
- * Com movimento reduzido, nada disso — o fim do arquivo desliga tudo.
+ * A página de quem marca: o movimento acolhe e mostra o caminho andando, sem enfeite. A casa e os
+ * passos chegam uma vez, em sequência; o passo feito assenta, o traço desce e só então o próximo
+ * acende; a etapa desliza para o lado em que se foi (`fluxo.css`). O ponto de "aberta" pinga, por
+ * ser a única coisa viva de verdade. Com movimento reduzido, nada disso.
  */
 
 @keyframes publica-sobe {
@@ -1008,14 +1097,6 @@ function estadoDoPasso(indice: number) {
   }
 }
 
-@keyframes publica-surge {
-  from {
-    opacity: 0;
-    transform: scale(0.88);
-  }
-}
-
-/* O assentar: um sopro acima do tamanho e de volta — sentido, não visto. */
 @keyframes publica-assenta {
   0% {
     transform: scale(0.86);
@@ -1027,19 +1108,6 @@ function estadoDoPasso(indice: number) {
 
   100% {
     transform: scale(1);
-  }
-}
-
-@keyframes publica-respira {
-  0% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-
-  75%,
-  100% {
-    opacity: 0;
-    transform: scale(1.45);
   }
 }
 
@@ -1056,20 +1124,8 @@ function estadoDoPasso(indice: number) {
   }
 }
 
-@keyframes publica-flutua {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-
-  50% {
-    transform: translateY(-10px) rotate(-2deg);
-  }
-}
-
-/* A chegada: a casa entra peça por peça, 50 ms entre elas; os passos em fila logo atrás. */
 .publica__casa > * {
-  animation: publica-sobe 440ms var(--hc-mov-chega) both;
+  animation: publica-sobe 420ms var(--pj-curva-chega) both;
 }
 
 .publica__casa > :nth-child(2) {
@@ -1084,39 +1140,21 @@ function estadoDoPasso(indice: number) {
   animation-delay: 150ms;
 }
 
-.publica__casa > :nth-child(5) {
+.publica__casa > :nth-child(n + 5) {
   animation-delay: 200ms;
 }
 
-.publica__casa > .publica__icone {
-  animation: publica-surge 480ms var(--hc-mov-assenta) both;
-}
-
-.publica__rotulo {
-  animation: publica-aparece 400ms var(--hc-mov-chega) 180ms both;
-}
-
 .passo {
-  animation: publica-sobe 400ms var(--hc-mov-chega) both;
+  animation: publica-sobe 400ms var(--pj-curva-chega) both;
   animation-delay: calc(200ms + var(--i, 0) * 45ms);
 }
 
 .publica__pe {
-  animation: publica-aparece 500ms var(--hc-mov-chega) 420ms both;
+  animation: publica-aparece 480ms var(--pj-curva-chega) 380ms both;
 }
 
 .publica__fluxo {
-  animation: publica-sobe 480ms var(--hc-mov-chega) 100ms both;
-}
-
-/* A pata da marca respira no canto, devagar: 18 s por volta. */
-.publica__fundo::after {
-  animation: publica-flutua 18s ease-in-out infinite;
-}
-
-/* Aberta agora: o ponto pinga, como um "ao vivo". */
-.publica__ponto {
-  position: relative;
+  animation: publica-sobe 460ms var(--pj-curva-chega) 80ms both;
 }
 
 .publica__estado--aberto .publica__ponto::after {
@@ -1125,33 +1163,17 @@ function estadoDoPasso(indice: number) {
   border-radius: inherit;
   background: inherit;
   content: '';
-  animation: publica-pinga 2.8s var(--hc-mov-chega) infinite;
+  animation: publica-pinga 2.8s var(--pj-curva-chega) infinite;
 }
 
-/* Os passos: o feito assenta ao virar feito; o de agora respira duas vezes ao acender. */
 .passo--feito .passo__marca {
-  animation: publica-assenta 360ms var(--hc-mov-chega);
+  animation: publica-assenta 360ms var(--pj-curva-chega);
 }
 
-.passo--atual .passo__marca {
-  position: relative;
-}
-
-.passo--atual .passo__marca::after {
-  position: absolute;
-  inset: -2px;
-  border: 1.5px solid var(--faixa-tinta);
-  border-radius: 999px;
-  content: '';
-  opacity: 0;
-  animation: publica-respira 2.2s var(--hc-mov-chega) 600ms 2;
-}
-
-/* O que foi escolhido entra no passo, descendo um pouco — o valor "cai" no lugar. */
 .passo-valor-enter-active {
   transition:
-    opacity 300ms var(--hc-mov-chega) 120ms,
-    transform 340ms var(--hc-mov-chega) 120ms;
+    opacity 300ms var(--pj-curva-chega) 120ms,
+    transform 340ms var(--pj-curva-chega) 120ms;
 }
 
 .passo-valor-enter-from {
@@ -1159,215 +1181,6 @@ function estadoDoPasso(indice: number) {
   transform: translateY(-4px);
 }
 
-/* Os gomos do progresso: o feito cheio, o de agora pela metade, enchendo um depois do outro. */
-.publica__progresso {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-bottom: 0.3rem;
-  gap: 0.4rem 0.9rem;
-}
-
-.publica__progresso .publica__contagem {
-  margin: 0;
-}
-
-.progresso {
-  display: inline-flex;
-  gap: 4px;
-}
-
-.progresso__gomo {
-  position: relative;
-  overflow: hidden;
-  width: 1.6rem;
-  height: 4px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--hc-tinta) 12%, transparent);
-}
-
-.progresso__gomo::after {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--hc-marca);
-  content: '';
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 420ms var(--hc-mov-chega);
-}
-
-[dir='rtl'] .progresso__gomo::after {
-  transform-origin: right;
-}
-
-.progresso__gomo--feito::after {
-  transform: scaleX(1);
-}
-
-/* O gomo de agora começa a encher quando o anterior termina. */
-.progresso__gomo--atual::after {
-  transform: scaleX(0.5);
-  transition-delay: 220ms;
-}
-
-/* ------------------------------------------------------------------ o toque, dentro do fluxo */
-
-/* A etapa anda mais que no celular: a página tem espaço para o gesto (a direção vem do fluxo). */
-.publica__fluxo :deep(.fx) {
-  --fx-passo: 1.25rem;
-}
-
-/*
- * O conteúdo de cada etapa aparece em fila: o bloco, as linhas da lista, o botão. Só opacidade —
- * a etapa já está deslizando para o lado, e um segundo eixo viraria tremor. Anima quando o
- * elemento nasce, e não pela classe da transição — ela sai antes de a fila terminar. O enviado tem
- * a sua própria chegada (`fluxo.css`).
- */
-.publica__fluxo :deep(.fx-etapa:not(.enviado) > .fx-corpo > *),
-.publica__fluxo :deep(.fx-etapa:not(.enviado) .fx-lista > li),
-.publica__fluxo :deep(.fx-etapa:not(.enviado) > .fx-rodape) {
-  animation: publica-aparece 320ms var(--hc-mov-chega) both;
-}
-
-.publica__fluxo :deep(.fx-etapa:not(.enviado) > .fx-corpo > :nth-child(2)),
-.publica__fluxo :deep(.fx-etapa:not(.enviado) .fx-lista > li:nth-child(2)) {
-  animation-delay: 40ms;
-}
-
-.publica__fluxo :deep(.fx-etapa:not(.enviado) > .fx-corpo > :nth-child(3)),
-.publica__fluxo :deep(.fx-etapa:not(.enviado) .fx-lista > li:nth-child(3)) {
-  animation-delay: 80ms;
-}
-
-.publica__fluxo :deep(.fx-etapa:not(.enviado) > .fx-corpo > :nth-child(4)),
-.publica__fluxo :deep(.fx-etapa:not(.enviado) .fx-lista > li:nth-child(4)) {
-  animation-delay: 120ms;
-}
-
-.publica__fluxo :deep(.fx-etapa:not(.enviado) > .fx-corpo > :nth-child(n + 5)),
-.publica__fluxo :deep(.fx-etapa:not(.enviado) .fx-lista > li:nth-child(n + 5)) {
-  animation-delay: 160ms;
-}
-
-.publica__fluxo :deep(.fx-etapa:not(.enviado) > .fx-rodape) {
-  animation-delay: 120ms;
-}
-
-/* Cartão de escolha: levanta no hover, afunda no toque, e o ícone do escolhido assenta. */
-.publica {
-  --publica-levanta: 0 10px 22px -14px rgb(20 32 28 / 32%);
-}
-
-.app-dark .publica {
-  --publica-levanta: 0 10px 22px -14px rgb(0 0 0 / 70%);
-}
-
-.publica__fluxo :deep(.fx-escolhas .p-togglebutton) {
-  transition:
-    background-color 160ms var(--hc-mov-chega),
-    border-color 160ms var(--hc-mov-chega),
-    transform 200ms var(--hc-mov-chega),
-    box-shadow 200ms var(--hc-mov-chega);
-}
-
-.publica__fluxo :deep(.fx-escolhas .p-togglebutton:not(:disabled):hover) {
-  box-shadow: var(--publica-levanta);
-  transform: translateY(-2px);
-}
-
-.publica__fluxo :deep(.fx-escolhas .p-togglebutton:not(:disabled):active) {
-  box-shadow: none;
-  transform: translateY(0) scale(0.98);
-  transition-duration: 80ms;
-}
-
-.publica__fluxo :deep(.fx-escolhas .p-togglebutton-checked .fx-escolha svg) {
-  animation: publica-assenta 320ms var(--hc-mov-chega);
-}
-
-/* Linha de opção: o ladrilho cresce um pouco e a seta avança. */
-.publica__fluxo :deep(.fx-opcao__icone),
-.publica__fluxo :deep(.fx-opcao__fim) {
-  transition: transform 200ms var(--hc-mov-chega);
-}
-
-.publica__fluxo :deep(.fx-opcao:not(:disabled):hover .fx-opcao__icone) {
-  transform: scale(1.06);
-}
-
-.publica__fluxo :deep(.fx-opcao:not(:disabled):hover .fx-opcao__fim) {
-  transform: translateX(3px);
-}
-
-[dir='rtl'] .publica__fluxo :deep(.fx-opcao:not(:disabled):hover .fx-opcao__fim) {
-  transform: translateX(-3px);
-}
-
-/* Horário e dia: sobem um pouco no hover. */
-.publica__fluxo :deep(.fx-horario.p-button),
-.publica__fluxo :deep(.fx-dia.p-button) {
-  transition:
-    background-color 160ms var(--hc-mov-chega),
-    border-color 160ms var(--hc-mov-chega),
-    transform 200ms var(--hc-mov-chega);
-}
-
-.publica__fluxo :deep(.fx-horario.p-button:not(:disabled):hover),
-.publica__fluxo :deep(.fx-dia.p-button:not(:disabled):hover) {
-  transform: translateY(-2px);
-}
-
-/* O calendário: o dia cresce de leve no hover, e o escolhido assenta ao ser marcado. */
-.publica__fluxo :deep(.p-datepicker-day:not(.p-disabled)) {
-  transition:
-    background-color 160ms var(--hc-mov-chega),
-    transform 200ms var(--hc-mov-chega);
-}
-
-.publica__fluxo :deep(.p-datepicker-day:not(.p-disabled):not(.p-datepicker-day-selected):hover) {
-  transform: scale(1.06);
-}
-
-.publica__fluxo :deep(.p-datepicker-day-selected) {
-  animation: publica-assenta 320ms var(--hc-mov-chega);
-}
-
-/* O botão principal: sobe no hover, afunda no toque, e o ícone vai para onde o pedido vai. */
-.publica__fluxo :deep(.fx-rodape .p-button) {
-  transition:
-    background 160ms var(--hc-mov-chega),
-    box-shadow 200ms var(--hc-mov-chega),
-    transform 200ms var(--hc-mov-chega);
-}
-
-.publica__fluxo :deep(.fx-rodape .p-button:not(:disabled):hover) {
-  transform: translateY(-1px);
-}
-
-.publica__fluxo :deep(.fx-rodape .p-button:not(:disabled):active) {
-  transform: translateY(0) scale(0.985);
-  transition-duration: 80ms;
-}
-
-.publica__fluxo :deep(.p-button .ph-arrow-right),
-.publica__fluxo :deep(.p-button .ph-paper-plane-tilt) {
-  transition: transform 220ms var(--hc-mov-chega);
-}
-
-.publica__fluxo :deep(.p-button:not(:disabled):hover .ph-arrow-right) {
-  transform: translateX(3px);
-}
-
-[dir='rtl'] .publica__fluxo :deep(.p-button:not(:disabled):hover .ph-arrow-right) {
-  transform: translateX(-3px);
-}
-
-.publica__fluxo :deep(.p-button:not(:disabled):hover .ph-paper-plane-tilt) {
-  transform: translate(2px, -2px);
-}
-
-/* Com movimento reduzido: nada anda. A página fica como estava antes de tudo isto. */
 @media (prefers-reduced-motion: reduce) {
   .publica,
   .publica :deep(*),

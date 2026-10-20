@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/**
+ * Configurações → Conta: a sessão neste aparelho (quem entrou, em que empresa, sair ou trocar de
+ * empresa) e, separada embaixo, a desativação do perfil — com o que ela é e o que não é antes do
+ * botão, e o motivo pedido num diálogo. O idioma passou para Aparência, junto com o tema.
+ */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Select from 'primevue/select'
@@ -8,7 +13,6 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
-import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import { ApiError } from '@/service/api'
 import { authSessionVersion, clearAuthSession, getAuthUser } from '@/service/auth/auth-session'
 import {
@@ -18,7 +22,8 @@ import {
 } from '@/service/user/inativacao-service'
 import { useParceiroStore } from '@/stores/parceiro'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
-import { currentColors } from '@/theme/color-mode'
+
+import './configuracoes.css'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -55,16 +60,10 @@ const sessionEmail = computed(
   () => usuarioPerfilStore.email || sessionUser.value?.email || '',
 )
 
-const partnerLabel = computed(() => {
-  if (store.loadState !== 'ready' || !store.dashboard) {
-    return ''
-  }
-
-  const papel = store.isDono
-    ? t('settings.conta.partnerContext.papelDono')
-    : t('settings.conta.partnerContext.papelOperador')
-  return `${store.parceiroNome} · ${papel}`
-})
+/** A empresa em que se entrou; o papel vai nos selos ao lado. */
+const empresa = computed(() =>
+  store.loadState === 'ready' && store.dashboard ? store.parceiroNome : '',
+)
 
 const roleHints = computed(() => {
   const hints: string[] = []
@@ -85,21 +84,6 @@ const selectedReason = computed(
 )
 
 const showCustomReason = computed(() => Boolean(selectedReason.value?.isCustomAllowed))
-
-const dialogStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--inativ-bg': colors.dashboard.surface,
-    '--inativ-text': colors.dashboard.text,
-    '--inativ-muted': colors.dashboard.muted,
-    '--inativ-line': colors.dashboard.line,
-    '--inativ-warm-bg': colors.dashboard.warmBg,
-    '--inativ-warm-text': colors.dashboard.warmText,
-    '--inativ-faint': colors.dashboard.faint,
-    '--inativ-shadow-rgb': colors.auth.shadowRgb,
-  }
-})
 
 const deactivatePoints = computed(() => [
   {
@@ -233,88 +217,92 @@ watch(showCustomReason, (allowed) => {
 </script>
 
 <template>
-  <div class="conta">
-    <section class="conta-session" aria-labelledby="conta-session-title">
-      <div class="conta-session__identity">
-        <span class="conta-session__avatar" aria-hidden="true">
-          <img v-if="avatarUrl" :src="avatarUrl" alt="" />
-          <template v-else>{{ initials }}</template>
-        </span>
-        <div class="conta-session__copy">
-          <p class="conta-session__eyebrow">{{ t('settings.conta.session.eyebrow') }}</p>
-          <h2 id="conta-session-title">{{ displayName }}</h2>
-          <p class="conta-session__email">{{ sessionEmail }}</p>
-          <p v-if="partnerLabel" class="conta-session__meta">
-            <i class="ph ph-building" aria-hidden="true" />
-            {{ partnerLabel }}
-          </p>
-        </div>
-      </div>
+  <div class="ui-folha cfg-folha conta">
+    <section class="cfg-secao" aria-labelledby="conta-sessao-titulo">
+      <header class="cfg-secao__cabeca">
+        <h3 id="conta-sessao-titulo" class="cfg-secao__titulo">
+          {{ t('settings.conta.session.eyebrow') }}
+        </h3>
+        <p class="cfg-secao__descricao">{{ t('settings.conta.session.logoutHint') }}</p>
+      </header>
 
-      <div class="conta-session__aside">
+      <div class="cfg-secao__corpo">
+        <div class="sessao">
+          <span class="sessao__rosto" aria-hidden="true">
+            <img v-if="avatarUrl" :src="avatarUrl" alt="" />
+            <template v-else>{{ initials }}</template>
+          </span>
+          <span class="sessao__quem">
+            <strong>{{ displayName }}</strong>
+            <span>{{ sessionEmail }}</span>
+          </span>
+        </div>
+
         <ul
-          v-if="roleHints.length"
-          class="conta-session__roles"
+          v-if="empresa || roleHints.length"
+          class="sessao__papeis"
           :aria-label="t('settings.conta.aria.roles')"
         >
-          <li v-for="role in roleHints" :key="role">{{ role }}</li>
+          <li v-if="empresa" class="sessao__empresa">
+            <i class="ph ph-buildings" aria-hidden="true" />
+            {{ empresa }}
+          </li>
+          <li v-for="role in roleHints" :key="role" class="ui-selo ui-selo--contorno">
+            {{ role }}
+          </li>
         </ul>
-        <Button
-          class="conta-session__logout"
-          :label="t('settings.conta.actions.logout')"
-          severity="danger"
-          outlined
-          type="button"
-          icon="ph ph-sign-out"
-          @click="handleLogout"
-        />
-        <p class="conta-session__hint">{{ t('settings.conta.session.logoutHint') }}</p>
+
+        <div class="sessao__acoes">
+          <Button
+            :label="t('settings.conta.actions.logout')"
+            severity="secondary"
+            outlined
+            type="button"
+            icon="ph ph-sign-out"
+            @click="handleLogout"
+          />
+          <RouterLink
+            class="p-button p-component p-button-secondary p-button-text"
+            to="/parceiro/selecionar"
+          >
+            <i class="ph ph-arrows-left-right" aria-hidden="true" />
+            {{ t('shell.user.trocarEmpresa') }}
+          </RouterLink>
+        </div>
       </div>
     </section>
 
-    <article class="conta-panel conta-panel--prefs">
-      <div class="conta-panel__copy">
-        <header class="conta-panel__head">
-          <span class="conta-panel__icon" aria-hidden="true">
-            <i class="ph ph-translate" />
-          </span>
-          <div>
-            <h3>{{ t('settings.conta.prefs.title') }}</h3>
-            <p>{{ t('settings.conta.prefs.subtitle') }}</p>
-            <p class="conta-panel__body">{{ t('settings.conta.prefs.body') }}</p>
-          </div>
-        </header>
-      </div>
-      <LanguageSwitcher variant="settings" />
-    </article>
-
-    <section class="conta-risk" aria-labelledby="conta-risk-title">
-      <header class="conta-risk__head">
-        <div>
-          <p class="conta-risk__eyebrow">{{ t('settings.conta.risk.eyebrow') }}</p>
-          <h3 id="conta-risk-title">{{ t('settings.conta.risk.title') }}</h3>
-          <p>{{ t('settings.conta.risk.lede') }}</p>
-        </div>
-        <Button
-          :label="t('settings.conta.risk.actions.deactivate')"
-          severity="danger"
-          type="button"
-          icon="ph ph-user-minus"
-          @click="openInactivateDialog"
-        />
+    <section class="cfg-secao risco" aria-labelledby="conta-risco-titulo">
+      <header class="cfg-secao__cabeca">
+        <h3 id="conta-risco-titulo" class="cfg-secao__titulo">
+          <i class="ph ph-user-minus risco__icone" aria-hidden="true" />
+          {{ t('settings.conta.risk.title') }}
+        </h3>
+        <p class="cfg-secao__descricao">{{ t('settings.conta.risk.lede') }}</p>
       </header>
 
-      <ul class="conta-risk__points">
-        <li v-for="point in deactivatePoints" :key="point.id">
-          <span class="conta-risk__point-icon" aria-hidden="true">
-            <i :class="point.icon" />
-          </span>
-          <div>
-            <strong>{{ point.title }}</strong>
-            <p>{{ point.text }}</p>
-          </div>
-        </li>
-      </ul>
+      <div class="cfg-secao__corpo">
+        <ul class="risco__pontos">
+          <li v-for="point in deactivatePoints" :key="point.id">
+            <i :class="point.icon" aria-hidden="true" />
+            <span>
+              <strong>{{ point.title }}</strong>
+              {{ point.text }}
+            </span>
+          </li>
+        </ul>
+
+        <div>
+          <Button
+            :label="t('settings.conta.risk.actions.deactivate')"
+            severity="danger"
+            outlined
+            type="button"
+            icon="ph ph-user-minus"
+            @click="openInactivateDialog"
+          />
+        </div>
+      </div>
     </section>
   </div>
 
@@ -325,10 +313,11 @@ watch(showCustomReason, (allowed) => {
     :dismissable-mask="!submitting"
     :closable="!submitting"
     class="inativ-dialog"
+    :style="{ width: 'min(30rem, calc(100vw - 32px))' }"
     :header="t('settings.conta.inactivate.dialog.title')"
     @hide="closeInactivateDialog"
   >
-    <div class="inativ-dialog__body" :style="dialogStyle">
+    <div class="inativ-dialog__body">
       <p class="inativ-dialog__lede">
         {{ t('settings.conta.inactivate.dialog.lede') }}
       </p>
@@ -339,23 +328,28 @@ watch(showCustomReason, (allowed) => {
       </div>
 
       <template v-else>
-        <label class="inativ-dialog__label" for="inativ-motivo">{{
+        <label id="inativ-motivo-rotulo" class="inativ-dialog__label" for="inativ-motivo">{{
           t('settings.conta.inactivate.fields.reason.label')
         }}</label>
         <Select
-          id="inativ-motivo"
           v-model="selectedReasonId"
+          label-id="inativ-motivo"
+          aria-labelledby="inativ-motivo-rotulo"
           :options="reasons"
           option-label="label"
           option-value="id"
           :placeholder="t('settings.conta.inactivate.fields.reason.placeholder')"
           class="inativ-dialog__select"
+          :invalid="Boolean(reasonsError)"
           :disabled="submitting || reasons.length === 0"
         />
         <p v-if="selectedReason?.description" class="inativ-dialog__hint">
           {{ selectedReason.description }}
         </p>
-        <p v-if="reasonsError" class="inativ-dialog__error" role="alert">{{ reasonsError }}</p>
+        <p v-if="reasonsError" class="inativ-dialog__error" role="alert">
+          <i class="ph ph-warning-circle" aria-hidden="true" />
+          {{ reasonsError }}
+        </p>
 
         <div v-if="showCustomReason" class="inativ-dialog__custom">
           <label class="inativ-dialog__label" for="inativ-custom">{{
@@ -368,9 +362,11 @@ watch(showCustomReason, (allowed) => {
             auto-resize
             class="inativ-dialog__textarea"
             :placeholder="t('settings.conta.inactivate.fields.custom.placeholder')"
+            :invalid="Boolean(customReasonError)"
             :disabled="submitting"
           />
           <p v-if="customReasonError" class="inativ-dialog__error" role="alert">
+            <i class="ph ph-warning-circle" aria-hidden="true" />
             {{ customReasonError }}
           </p>
         </div>
@@ -400,335 +396,141 @@ watch(showCustomReason, (allowed) => {
 </template>
 
 <style scoped>
-.conta {
-  display: grid;
-  gap: 1.15rem;
-  width: 100%;
-}
-
-.conta-session {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.15rem 1.5rem;
-  padding: 1.2rem 1.35rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 1.15rem;
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--partner-primary-soft) 22%, var(--partner-card)),
-      var(--partner-card) 55%
-    );
-  box-shadow: 0 12px 28px rgb(var(--partner-shadow-rgb) / 0.04);
-}
-
-.conta-session__identity {
+.sessao {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  min-width: 0;
+  gap: 14px;
 }
 
-.conta-session__avatar {
+.sessao__rosto {
   display: grid;
-  flex-shrink: 0;
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 56px;
+  height: 56px;
+  flex: none;
   place-items: center;
   overflow: hidden;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 22%, var(--partner-card));
-  color: var(--partner-primary-strong);
-  font-size: 1.05rem;
-  font-weight: 700;
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  font-family: var(--font-dados);
+  font-size: 19px;
+  font-weight: 650;
 }
 
-.conta-session__avatar img {
+.sessao__rosto img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.conta-session__copy {
+.sessao__quem {
   display: grid;
-  gap: 0.15rem;
   min-width: 0;
+  gap: 2px;
 }
 
-.conta-session__eyebrow {
-  margin: 0;
-  color: var(--partner-faint);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.sessao__quem strong {
+  font-size: 17px;
+  font-weight: 600;
 }
 
-.conta-session__copy h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--partner-text);
-}
-
-.conta-session__email,
-.conta-session__meta {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.88rem;
+.sessao__quem span {
+  color: var(--tinta-2);
+  font-size: 14px;
   word-break: break-word;
 }
 
-.conta-session__meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-top: 0.15rem;
-  font-size: 0.82rem;
-}
-
-.conta-session__aside {
+.sessao__papeis {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0.65rem;
-}
-
-.conta-session__hint {
-  flex-basis: 100%;
-  margin: 0;
-  color: var(--partner-faint);
-  font-size: 0.76rem;
-  line-height: 1.45;
-  text-align: end;
-}
-
-.conta-session__logout :deep(.p-button),
-:deep(button.conta-session__logout) {
-  border-width: 1.5px;
-  border-color: var(--partner-warm-text);
-  background: var(--partner-card);
-  color: var(--partner-warm-text);
-  font-weight: 700;
-}
-
-.conta-session__logout :deep(.p-button:hover),
-.conta-session__logout :deep(.p-button:focus-visible),
-:deep(button.conta-session__logout:hover),
-:deep(button.conta-session__logout:focus-visible) {
-  background: color-mix(in srgb, var(--partner-warm-text) 10%, var(--partner-card));
-  border-color: var(--partner-warm-text);
-  color: var(--partner-warm-text);
-}
-
-.conta-session__roles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 6px 10px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.conta-session__roles li {
-  padding: 0.28rem 0.6rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--partner-primary) 14%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.7rem;
-  font-weight: 700;
+.sessao__empresa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 550;
 }
 
-.conta-panel {
-  display: grid;
-  gap: 0.7rem;
-  padding: 1.15rem 1.2rem;
-  border: 1px solid var(--partner-line);
-  border-radius: 1.05rem;
-  background: var(--partner-card);
+.sessao__empresa i {
+  color: var(--tinta-2);
+  font-size: 16px;
 }
 
-.conta-panel--prefs {
+.sessao__acoes {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.85rem 1.25rem;
+  gap: 8px;
 }
 
-.conta-panel__copy {
-  min-width: 0;
-  flex: 1 1 14rem;
+.sessao__acoes :deep(.p-button) {
+  min-height: 42px;
+  gap: 8px;
+  text-decoration: none;
 }
 
-.conta-panel__head {
+/* A desativação: separada, com o vermelho só no ícone e no botão — o resto é texto para ler. */
+.risco {
+  background: color-mix(in oklab, var(--risco-fundo) 35%, var(--superficie));
+}
+
+.risco__icone.ph {
+  color: var(--risco-tinta);
+}
+
+.risco__pontos {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.risco__pontos li {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.conta-panel__icon {
-  display: grid;
-  flex-shrink: 0;
-  width: 2.35rem;
-  height: 2.35rem;
-  place-items: center;
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--partner-primary) 16%, transparent);
-  color: var(--partner-primary-strong);
-  font-size: 0.95rem;
-}
-
-.conta-panel__head h3 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--partner-text);
-}
-
-.conta-panel__head p {
-  margin: 0.25rem 0 0;
-  color: var(--partner-muted);
-  font-size: 0.84rem;
-  line-height: 1.4;
-}
-
-.conta-panel__body {
-  margin: 0.35rem 0 0;
-  color: var(--partner-faint);
-  font-size: 0.78rem;
-  line-height: 1.4;
-}
-
-.conta-panel--prefs :deep(.language-switcher) {
-  flex-shrink: 0;
-  margin-inline-start: auto;
-}
-
-@media (max-width: 560px) {
-  .conta-panel--prefs :deep(.language-switcher) {
-    width: 100%;
-    margin-inline-start: 0;
-  }
-
-  .conta-panel--prefs :deep(.language-switcher__trigger) {
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-
-.conta-risk {
-  display: grid;
-  gap: 1.1rem;
-  padding: 1.25rem 1.35rem 1.3rem;
-  border: 1px solid color-mix(in srgb, var(--partner-warm-text) 22%, var(--partner-line));
-  border-radius: 1.15rem;
-  background: var(--partner-card);
-}
-
-.conta-risk__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.85rem 1.25rem;
-}
-
-.conta-risk__eyebrow {
-  margin: 0 0 0.25rem;
-  color: var(--partner-warm-text);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.conta-risk__head h3 {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--partner-text);
-}
-
-.conta-risk__head > div > p {
-  margin: 0.35rem 0 0;
-  max-width: 36rem;
-  color: var(--partner-muted);
-  font-size: 0.9rem;
+  gap: 10px;
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.5;
 }
 
-.conta-risk__points {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.risco__pontos i {
+  flex: none;
+  margin-top: 2px;
+  color: var(--tinta-2);
+  font-size: 18px;
 }
 
-.conta-risk__points li {
-  display: flex;
-  gap: 0.7rem;
-  align-items: flex-start;
-  padding: 0.85rem 0.9rem;
-  border: 1px solid color-mix(in srgb, var(--partner-warm-text) 12%, var(--partner-line));
-  border-radius: 0.9rem;
-  background: color-mix(in srgb, var(--partner-card) 82%, transparent);
-}
-
-.conta-risk__point-icon {
-  display: grid;
-  flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border-radius: 0.65rem;
-  background: color-mix(in srgb, var(--partner-warm-text) 12%, var(--partner-card));
-  color: var(--partner-warm-text);
-  font-size: 0.85rem;
-}
-
-.conta-risk__points strong {
-  display: block;
-  margin: 0 0 0.2rem;
-  color: var(--partner-text);
-  font-size: 0.88rem;
-}
-
-.conta-risk__points p {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.8rem;
-  line-height: 1.45;
+.risco__pontos strong {
+  margin-inline-end: 4px;
+  color: var(--tinta);
+  font-weight: 600;
 }
 
 .inativ-dialog__body {
   display: grid;
-  gap: 0.65rem;
-  max-width: 28rem;
-  color: var(--inativ-text);
+  gap: 8px;
+  color: var(--tinta);
 }
 
 .inativ-dialog__lede {
-  margin: 0 0 0.35rem;
-  color: var(--inativ-muted);
-  font-size: 0.9rem;
+  margin: 0 0 8px;
+  color: var(--tinta-2);
+  font-size: 14.5px;
   line-height: 1.5;
 }
 
 .inativ-dialog__label {
-  color: var(--inativ-faint);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
 }
 
 .inativ-dialog__select,
@@ -738,55 +540,37 @@ watch(showCustomReason, (allowed) => {
 
 .inativ-dialog__hint {
   margin: 0;
-  color: var(--inativ-muted);
-  font-size: 0.82rem;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.45;
 }
 
 .inativ-dialog__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
   margin: 0;
-  color: var(--inativ-warm-text);
-  font-size: 0.82rem;
-  font-weight: 600;
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 550;
+}
+
+.inativ-dialog__error i {
+  margin-top: 1px;
+  font-size: 16px;
 }
 
 .inativ-dialog__loading {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  color: var(--inativ-muted);
-  font-size: 0.9rem;
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 14.5px;
 }
 
 .inativ-dialog__custom {
   display: grid;
-  gap: 0.45rem;
-  margin-top: 0.35rem;
-}
-
-@media (max-width: 900px) {
-  .conta-risk__points {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 720px) {
-  .conta-session__aside {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .conta-session__hint {
-    text-align: start;
-  }
-
-  .conta-risk__head {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .conta-risk__head :deep(.p-button) {
-    width: 100%;
-  }
+  gap: 8px;
+  margin-top: 8px;
 }
 </style>

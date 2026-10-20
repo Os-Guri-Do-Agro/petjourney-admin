@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/**
+ * Redefinir a senha, em três passos à vista: o e-mail, o código de seis dígitos (num diálogo, por
+ * cima do e-mail que acabou de ser digitado) e a senha nova. "Voltar para o login" fica no alto,
+ * onde se procura a saída.
+ */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputOtp from 'primevue/inputotp'
@@ -12,7 +17,7 @@ import AuthButton from '@/components/auth/AuthButton.vue'
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PasswordRequirements from '@/components/auth/PasswordRequirements.vue'
-import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
+import RegisterStepIndicator from '@/components/auth/RegisterStepIndicator.vue'
 import { ApiError } from '@/service/api'
 import {
   recoveryPassword,
@@ -24,7 +29,6 @@ import { isPasswordValid } from '@/utils/validation/password'
 const { t } = useI18n()
 const router = useRouter()
 const toast = useToast()
-const authStyle = useAuthThemeVars()
 
 const step = ref<1 | 2>(1)
 const email = ref('')
@@ -42,10 +46,6 @@ const resetToken = ref('')
 const pinOtpRef = ref<HTMLElement | null>(null)
 
 const pinFilled = computed(() => pin.value.replace(/\D/g, '').length === PIN_LENGTH)
-
-const dialogStyle = computed(() => ({
-  ...authStyle.value,
-}))
 
 watch(pinDialogVisible, async (open) => {
   if (!open) {
@@ -93,27 +93,27 @@ const confirmPassword = ref('')
 const newPasswordError = ref('')
 const confirmPasswordError = ref('')
 const resetting = ref(false)
-const showNewPassword = ref(false)
-const showConfirmPassword = ref(false)
 
-const newPasswordType = computed(() => (showNewPassword.value ? 'text' : 'password'))
-const confirmPasswordType = computed(() => (showConfirmPassword.value ? 'text' : 'password'))
+const stepMeta = computed(() =>
+  step.value === 1
+    ? {
+        title: t('auth.forgot.step1.title'),
+        description: t('auth.forgot.step1.description'),
+      }
+    : {
+        title: t('auth.forgot.step2.title'),
+        description: t('auth.forgot.step2.description'),
+      },
+)
 
-const stepMeta = computed(() => {
-  if (step.value === 1) {
-    return {
-      eyebrow: t('auth.forgot.step1.eyebrow'),
-      title: t('auth.forgot.step1.title'),
-      description: t('auth.forgot.step1.description'),
-    }
-  }
+/** E-mail, código (no diálogo) e nova senha: o código conta como passo, mesmo sem tela própria. */
+const passos = computed(() => [
+  t('auth.forgot.passos.email'),
+  t('auth.forgot.passos.codigo'),
+  t('auth.forgot.passos.senha'),
+])
 
-  return {
-    eyebrow: t('auth.forgot.step2.eyebrow'),
-    title: t('auth.forgot.step2.title'),
-    description: t('auth.forgot.step2.description'),
-  }
-})
+const passoAtual = computed(() => (step.value === 2 ? 3 : pinDialogVisible.value ? 2 : 1))
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
@@ -286,21 +286,28 @@ function closePinDialog() {
 </script>
 
 <template>
-  <AuthLayout
-    :description="stepMeta.description"
-    :eyebrow="stepMeta.eyebrow"
-    :title="stepMeta.title"
-  >
-    <div class="forgot-stack" :style="authStyle">
-      <form
-        v-if="step === 1"
-        class="forgot-stack__form"
-        @submit.prevent="handleSendCode"
-      >
+  <AuthLayout :description="stepMeta.description" :title="stepMeta.title">
+    <template #voltar>
+      <RouterLink to="/auth/login">
+        <i class="ph ph-arrow-left" aria-hidden="true" />
+        {{ t('auth.forgot.backToLogin') }}
+      </RouterLink>
+    </template>
+
+    <div class="redefinir">
+      <RegisterStepIndicator
+        :current-step="passoAtual"
+        :labels="passos"
+        :total-steps="passos.length"
+        :list-label="t('auth.forgot.passosAria')"
+      />
+
+      <form v-if="step === 1" class="redefinir__form" @submit.prevent="handleSendCode">
         <AuthTextField
           id="forgot-email"
           v-model="email"
           autocomplete="email"
+          inputmode="email"
           :disabled="sendingCode"
           :error="emailError"
           :hint="t('auth.forgot.email.hint')"
@@ -308,18 +315,18 @@ function closePinDialog() {
           :placeholder="t('auth.forgot.email.placeholder')"
           required
           type="email"
-        />
+        >
+          <template #leading>
+            <i class="ph ph-envelope-simple" aria-hidden="true" />
+          </template>
+        </AuthTextField>
 
         <AuthButton :loading="sendingCode" full-width type="submit">
           {{ sendingCode ? t('auth.forgot.sending') : t('auth.forgot.submit') }}
         </AuthButton>
       </form>
 
-      <form
-        v-else
-        class="forgot-stack__form"
-        @submit.prevent="handleResetPassword"
-      >
+      <form v-else class="redefinir__form" @submit.prevent="handleResetPassword">
         <AuthTextField
           id="forgot-new-password"
           v-model="newPassword"
@@ -329,26 +336,9 @@ function closePinDialog() {
           :label="t('auth.forgot.password.label')"
           :placeholder="t('auth.forgot.password.placeholder')"
           required
-          :type="newPasswordType"
-        >
-          <template #trailing>
-            <Button
-              :aria-label="
-                showNewPassword
-                  ? t('auth.forgot.password.hide')
-                  : t('auth.forgot.password.show')
-              "
-              class="forgot-password-toggle"
-              :disabled="resetting"
-              :icon="showNewPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
-              rounded
-              severity="secondary"
-              text
-              type="button"
-              @click="showNewPassword = !showNewPassword"
-            />
-          </template>
-        </AuthTextField>
+          revelavel
+          type="password"
+        />
 
         <PasswordRequirements :password="newPassword" />
 
@@ -361,50 +351,26 @@ function closePinDialog() {
           :label="t('auth.forgot.confirm.label')"
           :placeholder="t('auth.forgot.confirm.placeholder')"
           required
-          :type="confirmPasswordType"
-        >
-          <template #trailing>
-            <Button
-              :aria-label="
-                showConfirmPassword
-                  ? t('auth.forgot.password.hide')
-                  : t('auth.forgot.password.show')
-              "
-              class="forgot-password-toggle"
-              :disabled="resetting"
-              :icon="showConfirmPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
-              rounded
-              severity="secondary"
-              text
-              type="button"
-              @click="showConfirmPassword = !showConfirmPassword"
-            />
-          </template>
-        </AuthTextField>
+          revelavel
+          type="password"
+        />
 
-        <AuthButton :loading="resetting" full-width type="submit">
-          {{ resetting ? t('auth.forgot.resetting') : t('auth.forgot.reset') }}
-        </AuthButton>
+        <div class="redefinir__acoes">
+          <AuthButton :loading="resetting" full-width type="submit">
+            {{ resetting ? t('auth.forgot.resetting') : t('auth.forgot.reset') }}
+          </AuthButton>
 
-        <AuthButton
-          :disabled="resetting"
-          full-width
-          type="button"
-          variant="secondary"
-          @click="backToStep1"
-        >
-          {{ t('auth.forgot.requestNewCode') }}
-        </AuthButton>
+          <AuthButton
+            :disabled="resetting"
+            full-width
+            type="button"
+            variant="secondary"
+            @click="backToStep1"
+          >
+            {{ t('auth.forgot.requestNewCode') }}
+          </AuthButton>
+        </div>
       </form>
-
-      <AuthButton
-        v-if="step === 1"
-        full-width
-        to="/auth/login"
-        variant="secondary"
-      >
-        {{ t('auth.forgot.backToLogin') }}
-      </AuthButton>
     </div>
 
     <Dialog
@@ -422,7 +388,7 @@ function closePinDialog() {
       }"
       @hide="closePinDialog"
     >
-      <div class="forgot-pin" :style="dialogStyle">
+      <div class="forgot-pin">
         <Button
           class="forgot-pin__close"
           type="button"
@@ -436,18 +402,21 @@ function closePinDialog() {
 
         <div class="forgot-pin__hero">
           <span class="forgot-pin__icon" aria-hidden="true">
-            <i class="ph ph-envelope-simple" />
+            <i class="ph ph-envelope-simple-open" />
           </span>
-          <p class="forgot-pin__eyebrow">{{ t('auth.forgot.pin.eyebrow') }}</p>
           <h2 id="forgot-pin-title">{{ t('auth.forgot.pin.title') }}</h2>
           <p class="forgot-pin__lede">{{ t('auth.forgot.pin.lede') }}</p>
           <p class="forgot-pin__email" :title="email.trim()">
-            <i class="ph ph-envelope-simple" aria-hidden="true" />
+            <i class="ph ph-at" aria-hidden="true" />
             <span>{{ email.trim() }}</span>
           </p>
         </div>
 
-        <form class="forgot-pin__form" aria-labelledby="forgot-pin-title" @submit.prevent="handleVerifyPin">
+        <form
+          class="forgot-pin__form"
+          aria-labelledby="forgot-pin-title"
+          @submit.prevent="handleVerifyPin"
+        >
           <div
             ref="pinOtpRef"
             role="group"
@@ -480,7 +449,10 @@ function closePinDialog() {
             </InputOtp>
           </div>
 
-          <p v-if="pinError" class="forgot-pin__error" role="alert">{{ pinError }}</p>
+          <p v-if="pinError" class="forgot-pin__error" role="alert">
+            <i class="ph ph-warning-circle" aria-hidden="true" />
+            {{ pinError }}
+          </p>
           <p v-else class="forgot-pin__hint">{{ t('auth.forgot.pin.hint') }}</p>
 
           <AuthButton
@@ -498,95 +470,70 @@ function closePinDialog() {
 </template>
 
 <style scoped>
-.forgot-stack {
+.redefinir {
   display: grid;
-  gap: 0.85rem;
+  gap: 24px;
 }
 
-.forgot-stack__form {
+.redefinir__form {
   display: grid;
-  gap: 1rem;
+  gap: 20px;
 }
 
-.forgot-password-toggle.p-button {
-  width: 2rem;
-  height: 2rem;
-  color: var(--auth-soft);
-}
-
-.forgot-password-toggle.p-button:not(:disabled):hover {
-  background: var(--auth-sage-tint);
-  color: var(--auth-soft);
+.redefinir__acoes {
+  display: grid;
+  gap: 10px;
 }
 
 .forgot-pin {
   position: relative;
   display: grid;
-  gap: 1.35rem;
-  width: min(100%, 24.5rem);
-  padding: 0.35rem 0.15rem 0.15rem;
-  color: var(--auth-text);
+  gap: 22px;
+  color: var(--tinta);
 }
 
 .forgot-pin__close.p-button {
   position: absolute;
   z-index: 1;
-  top: -0.15rem;
-  inset-inline-end: -0.1rem;
-  width: 2.15rem;
-  height: 2.15rem;
-  border-radius: 0.7rem;
-  color: var(--auth-soft);
-}
-
-.forgot-pin__close.p-button:not(:disabled):hover {
-  background: var(--auth-sage-tint);
-  color: var(--auth-text);
+  top: -6px;
+  width: 40px;
+  height: 40px;
+  inset-inline-end: -6px;
+  border-radius: 10px;
 }
 
 .forgot-pin__hero {
   display: grid;
   justify-items: center;
-  gap: 0.55rem;
-  padding-top: 0.35rem;
+  gap: 8px;
+  padding-top: 6px;
   text-align: center;
 }
 
 .forgot-pin__icon {
   display: grid;
-  width: 3.25rem;
-  height: 3.25rem;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 6px;
   place-items: center;
-  margin-bottom: 0.35rem;
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--auth-sage) 16%, var(--auth-field-bg));
-  color: var(--auth-sage-strong);
-  font-size: 1.25rem;
-  box-shadow: 0 10px 24px rgb(var(--auth-shadow-rgb) / 0.08);
-}
-
-.forgot-pin__eyebrow {
-  margin: 0;
-  color: var(--auth-soft);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  border-radius: 16px;
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  font-size: 26px;
 }
 
 .forgot-pin h2 {
   margin: 0;
-  color: var(--auth-text);
-  font-size: 1.45rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .forgot-pin__lede {
   max-width: 22rem;
   margin: 0;
-  color: var(--auth-muted);
-  font-size: 0.92rem;
+  color: var(--tinta-2);
+  font-size: 14.5px;
   line-height: 1.55;
 }
 
@@ -594,16 +541,15 @@ function closePinDialog() {
   display: inline-flex;
   max-width: 100%;
   align-items: center;
-  gap: 0.4rem;
-  margin: 0.25rem 0 0;
-  padding: 0.4rem 0.75rem;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 6px 12px;
   overflow: hidden;
-  border: 1px solid var(--auth-line);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--auth-sage-tint) 55%, var(--auth-field-bg));
-  color: var(--auth-text);
-  font-size: 0.82rem;
-  font-weight: 700;
+  background: var(--superficie-2);
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
 }
 
 .forgot-pin__email span {
@@ -613,99 +559,99 @@ function closePinDialog() {
 }
 
 .forgot-pin__email .ph {
-  flex-shrink: 0;
-  color: var(--auth-sage-strong);
-  font-size: 0.78rem;
+  flex: none;
+  color: var(--musgo);
 }
 
 .forgot-pin__form {
   display: grid;
-  gap: 0.85rem;
+  gap: 14px;
 }
 
 .forgot-pin__otp.p-inputotp {
   display: grid;
+  gap: 8px;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.45rem;
 }
 
-/* Visual de marca das células sobre o InputText do InputOtp. */
 .forgot-pin__cell.p-inputtext {
   width: 100%;
+  min-height: 52px;
   aspect-ratio: 1;
-  min-height: 2.85rem;
   padding: 0;
-  border: 1.5px solid var(--auth-line);
-  border-radius: 0.85rem;
-  background: var(--auth-field-bg);
-  color: var(--auth-text);
-  font-size: 1.25rem;
-  font-weight: 750;
-  caret-color: var(--auth-sage);
+  border: 1px solid var(--linha-forte);
+  border-radius: 12px;
+  background: var(--superficie);
   box-shadow: none;
-}
-
-.forgot-pin__cell.p-inputtext:enabled:hover {
-  border-color: color-mix(in srgb, var(--auth-sage) 40%, var(--auth-line));
+  caret-color: var(--musgo);
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  text-align: center;
 }
 
 .forgot-pin__cell--filled.p-inputtext {
-  border-color: color-mix(in srgb, var(--auth-sage) 55%, var(--auth-line));
-  background: color-mix(in srgb, var(--auth-sage-tint) 40%, var(--auth-field-bg));
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
 }
 
 .forgot-pin__cell.p-inputtext:enabled:focus {
+  border-color: var(--musgo);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--musgo) 22%, transparent);
   outline: none;
-  border-color: var(--auth-sage);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--auth-sage) 22%, transparent);
 }
 
 .forgot-pin__cell.p-inputtext.p-invalid {
-  border-color: var(--auth-danger);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--auth-danger) 16%, transparent);
+  border-color: var(--risco);
+  background: var(--risco-fundo);
 }
 
 .forgot-pin__cell.p-inputtext:disabled {
-  opacity: 0.65;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .forgot-pin__hint {
   margin: 0;
-  color: var(--auth-soft);
-  font-size: 0.8rem;
-  line-height: 1.4;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
   text-align: center;
 }
 
 .forgot-pin__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   margin: 0;
-  color: var(--auth-danger);
-  font-size: 0.82rem;
-  font-weight: 650;
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 550;
   line-height: 1.4;
-  text-align: center;
 }
 </style>
 
 <style>
 .forgot-pin-dialog.p-dialog,
 .forgot-pin-dialog__root.p-dialog {
-  width: min(calc(100vw - 2rem), 28rem);
-  border: 1px solid color-mix(in srgb, var(--auth-line, #eaf0ee) 80%, transparent);
-  border-radius: 1.35rem;
+  width: min(calc(100vw - 32px), 27rem);
   overflow: hidden;
-  background: var(--auth-field-bg, #fff);
-  box-shadow: 0 24px 60px rgb(15 23 20 / 0.18);
+  border: 1px solid var(--linha);
+  border-radius: 20px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-3);
 }
 
 .forgot-pin-dialog .p-dialog-content,
 .forgot-pin-dialog__content {
-  padding: 1.35rem 1.35rem 1.45rem;
+  padding: 24px;
 }
 
 .forgot-pin-dialog__mask.p-dialog-mask {
-  backdrop-filter: blur(6px);
-  background: color-mix(in srgb, #1a2420 42%, transparent);
+  background: color-mix(in oklab, var(--rail) 45%, transparent);
+  backdrop-filter: blur(4px);
 }
 </style>

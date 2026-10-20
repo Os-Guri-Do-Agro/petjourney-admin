@@ -272,13 +272,13 @@ const mensagemDeErro = computed(() => {
 }
 
 .revisar__oque strong {
-  color: var(--hc-tinta);
+  color: var(--tinta);
   font-size: 1rem;
   line-height: 1.3;
 }
 
 .revisar__oque > span {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.875rem;
 }
 
@@ -290,7 +290,7 @@ const mensagemDeErro = computed(() => {
 }
 
 .revisar__relogio {
-  color: var(--hc-marca-forte);
+  color: var(--musgo);
   font-variant-numeric: tabular-nums;
   font-weight: 650;
 }
@@ -308,7 +308,7 @@ const mensagemDeErro = computed(() => {
 }
 
 .revisar__historico > span > span {
-  color: var(--hc-tinta-2);
+  color: var(--tinta-2);
   font-size: 0.8125rem;
   line-height: 1.4;
 }

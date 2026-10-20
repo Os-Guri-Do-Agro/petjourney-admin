@@ -299,6 +299,21 @@ async function carregarAcompanhado() {
 watch(token, carregarAcompanhado, { immediate: true })
 watch(() => pedidosStore.versao, carregarAcompanhado)
 
+/** A cor do estado do pedido acompanhado: esperando, confirmado, recusado ou parado. */
+const tomDaSituacao = computed(() => {
+  switch (acompanhado.value?.status) {
+    case 'AGUARDANDO_CLINICA':
+      return 'espera'
+    case 'ACEITO':
+      return 'ok'
+    case 'RECUSADO':
+    case 'EXPIRADO':
+      return 'risco'
+    default:
+      return 'neutro'
+  }
+})
+
 async function desistir() {
   if (!acompanhado.value) {
     return
@@ -332,6 +347,7 @@ const demo = computed(() =>
 <template>
   <PaginaPublica
     icone="ph-first-aid-kit"
+    lugar="clinica"
     :nome="clinica?.clinica.nome ?? null"
     :endereco="clinica?.enderecoResumo"
     :estado="estado"
@@ -359,39 +375,50 @@ const demo = computed(() =>
     <!-- Acompanhamento: o pedido do link da mensagem. -->
     <div v-else-if="token" class="publica__acompanhar">
       <template v-if="acompanhado">
-        <p class="publica__contagem">{{ t('clinico.pedidos.link.seuPedido') }}</p>
-        <h2>
-          {{ rotulos.nomes(acompanhado.pets.map((pet) => pet.nome)) }} ·
-          {{ acompanhado.servico.nome }}
-        </h2>
+        <h2>{{ t('clinico.pedidos.link.seuPedido') }}</h2>
 
-        <p class="publica__situacao" :class="`publica__situacao--${acompanhado.status}`">
-          <i
-            class="ph"
-            :class="{
-              'ph-hourglass-medium': acompanhado.status === 'AGUARDANDO_CLINICA',
-              'ph-calendar-check': acompanhado.status === 'ACEITO',
-              'ph-calendar-x':
-                acompanhado.status === 'RECUSADO' || acompanhado.status === 'EXPIRADO',
-              'ph-x-circle': acompanhado.status === 'CANCELADO_PELO_RESPONSAVEL',
-            }"
-            aria-hidden="true"
-          />
-          {{ t(`clinico.pedidos.link.situacao.${acompanhado.status}`) }}
-        </p>
+        <section class="ui-folha acompanhar">
+          <p class="acompanhar__situacao" :class="`acompanhar__situacao--${tomDaSituacao}`">
+            <span class="acompanhar__disco" aria-hidden="true">
+              <i
+                class="ph"
+                :class="{
+                  'ph-hourglass-medium': acompanhado.status === 'AGUARDANDO_CLINICA',
+                  'ph-calendar-check': acompanhado.status === 'ACEITO',
+                  'ph-calendar-x':
+                    acompanhado.status === 'RECUSADO' || acompanhado.status === 'EXPIRADO',
+                  'ph-x-circle': acompanhado.status === 'CANCELADO_PELO_RESPONSAVEL',
+                }"
+              />
+            </span>
+            {{ t(`clinico.pedidos.link.situacao.${acompanhado.status}`) }}
+          </p>
 
-        <p v-if="acompanhado.status === 'AGUARDANDO_CLINICA'" class="fx-ajuda">
-          {{ t('clinico.pedidos.app.ate', { quando: rotulos.quando(acompanhado.responderAte) }) }}
-        </p>
-        <p v-if="acompanhado.horarioMarcado" class="publica__marcado">
-          {{ rotulos.quando(acompanhado.horarioMarcado.inicio) }} ·
-          {{ acompanhado.horarioMarcado.profissional.nome }}
-        </p>
-        <blockquote v-if="acompanhado.recusa" class="publica__mensagem">
-          {{ acompanhado.recusa.mensagemDaClinica }}
-        </blockquote>
+          <p class="acompanhar__oque">
+            {{ rotulos.nomes(acompanhado.pets.map((pet) => pet.nome)) }} ·
+            {{ acompanhado.servico.nome }}
+          </p>
+
+          <p v-if="acompanhado.status === 'AGUARDANDO_CLINICA'" class="acompanhar__linha">
+            <i class="ph ph-clock" aria-hidden="true" />
+            {{ t('clinico.pedidos.app.ate', { quando: rotulos.quando(acompanhado.responderAte) }) }}
+          </p>
+          <p v-if="acompanhado.horarioMarcado" class="acompanhar__linha acompanhar__linha--forte">
+            <i class="ph ph-calendar-check" aria-hidden="true" />
+            {{ rotulos.quando(acompanhado.horarioMarcado.inicio) }} ·
+            {{ acompanhado.horarioMarcado.profissional.nome }}
+          </p>
+          <blockquote v-if="acompanhado.recusa" class="acompanhar__mensagem">
+            {{ acompanhado.recusa.mensagemDaClinica }}
+          </blockquote>
+        </section>
 
         <div class="publica__acoes">
+          <Button
+            :label="t('clinico.pedidos.link.outroPedido')"
+            icon="ph ph-calendar-plus"
+            @click="novoPedido"
+          />
           <Button
             v-if="acompanhado.podeCancelar"
             severity="secondary"
@@ -400,17 +427,19 @@ const demo = computed(() =>
             :loading="desistindo"
             @click="desistir"
           />
+        </div>
+      </template>
+      <div v-else class="publica__vazio">
+        <i class="ph ph-magnifying-glass" aria-hidden="true" />
+        <h2>{{ t('clinico.pedidos.link.pedidoNaoEncontrado') }}</h2>
+        <div class="publica__acoes">
           <Button
             :label="t('clinico.pedidos.link.outroPedido')"
             icon="ph ph-calendar-plus"
             @click="novoPedido"
           />
         </div>
-      </template>
-      <template v-else>
-        <h2>{{ t('clinico.pedidos.link.pedidoNaoEncontrado') }}</h2>
-        <Button :label="t('clinico.pedidos.link.outroPedido')" @click="novoPedido" />
-      </template>
+      </div>
     </div>
 
     <FluxoDoPedido v-else :endereco-do-link="endereco" />
