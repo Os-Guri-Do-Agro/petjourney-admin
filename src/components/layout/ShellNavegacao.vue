@@ -366,21 +366,21 @@ function destinoAtivo(id: string, espaco: Espaco) {
 }
 
 /* Densidade compacta (Configurações → Aparência): mais destinos à vista sem rolar a barra. */
-:global(.shell--densa) .mapa__inicio,
-:global(.shell--densa) .espaco__cabeca {
+.shell--densa .mapa__inicio,
+.shell--densa .espaco__cabeca {
   min-height: 34px;
 }
 
-:global(.shell--densa) .destino {
+.shell--densa .destino {
   min-height: 30px;
   font-size: 13px;
 }
 
-:global(.shell--densa) .espaco + .espaco {
+.shell--densa .espaco + .espaco {
   margin-top: 2px;
 }
 
-:global(.shell--densa) .espaco__icone {
+.shell--densa .espaco__icone {
   width: 24px;
   height: 24px;
   font-size: 14px;
