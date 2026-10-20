@@ -474,8 +474,8 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
 <style scoped>
 /*
- * A folha. Plana: no Trilha a sombra é só do que flutua, e a tabela não flutua — ela é o chão
- * da tela. O fio `--linha` é quem separa a folha do fundo.
+ * A folha: o mesmo cartão do kit (`ui-folha`) — branco, fio leve, sombra de cartão e raio 18. O
+ * cabeçalho das colunas fica num poço tingido, para a régua dos rótulos se separar dos dados.
  */
 .tabela {
   /*
@@ -487,8 +487,9 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 
   overflow: hidden;
   border: 1px solid var(--linha);
-  border-radius: 16px;
+  border-radius: var(--raio-cartao);
   background: var(--superficie);
+  box-shadow: var(--sombra-cartao);
   color: var(--tinta);
   font-family: var(--font-texto);
   font-size: 14px;
@@ -524,15 +525,15 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
   z-index: 1;
   min-height: 44px;
   border-bottom: 1px solid var(--linha);
-  background: var(--superficie);
+  background: var(--superficie-2);
 }
 
 /* `.tabela .tabela__th` vence a regra global antiga de `.hc-tema .tabela__th`. */
 .tabela .tabela__th {
   min-width: 0;
-  color: var(--tinta-2);
+  color: var(--tinta-3);
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
   letter-spacing: 0;
   line-height: 1.3;
   text-transform: none;
@@ -639,7 +640,7 @@ function aoTeclar(evento: KeyboardEvent, indice: number, linha: T) {
 .tabela__linha {
   position: relative;
   min-height: var(--tabela-linha);
-  border-bottom: 1px solid var(--linha);
+  border-bottom: 1px solid var(--linha-suave);
   cursor: pointer;
   transition: background-color var(--pj-tempo-curto, 140ms) ease;
 }

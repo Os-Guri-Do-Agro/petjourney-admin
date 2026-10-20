@@ -182,11 +182,12 @@ function limpar() {
 }
 
 .filtro__busca :deep(.p-inputtext) {
-  min-height: 38px;
-  padding-inline-start: 38px;
+  min-height: var(--altura-controle);
+  padding-inline-start: 40px;
   border-color: var(--linha-forte);
-  border-radius: 10px;
+  border-radius: var(--raio-controle);
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   font-family: var(--font-texto);
   font-size: 14px;
@@ -215,19 +216,20 @@ function limpar() {
 /* -------------------------------------------------------------------------- filtros */
 
 .filtro__botao.p-button {
-  min-height: 38px;
+  min-height: var(--altura-controle);
   gap: 8px;
   padding: 0 14px;
-  border-color: var(--linha-forte);
-  border-radius: 10px;
+  border-color: var(--linha-media);
+  border-radius: var(--raio-controle);
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 550;
 }
 
 .filtro__botao.p-button:not(:disabled):hover {
-  border-color: var(--tinta-3);
+  border-color: var(--linha-forte);
   background: var(--superficie-2);
   color: var(--tinta);
 }
