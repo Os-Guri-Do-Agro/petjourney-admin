@@ -138,45 +138,47 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
 </template>
 
 <style scoped>
-/* Lido, não preenchido: rótulo pequeno em cima, valor embaixo, sem caixa em volta. */
+/*
+ * Lido, não preenchido: rótulo à esquerda e valor à direita, como numa ficha; a receita e os
+ * exames numa faixa afundada, um remédio por linha, como a receita impressa.
+ */
 .estv {
   container: estv / inline-size;
   display: grid;
-  gap: 1rem;
+  gap: 14px;
 }
 
-/* Rótulo à esquerda, valor à direita, como numa ficha: lê em coluna sem empilhar altura. */
 .estv__facts {
   display: grid;
-  gap: 0.45rem;
+  gap: 6px;
   margin: 0;
 }
 
 .estv__fact {
   display: grid;
-  grid-template-columns: 10.5rem minmax(0, 1fr);
-  gap: 1rem;
   min-width: 0;
+  gap: 16px;
+  grid-template-columns: 11rem minmax(0, 1fr);
 }
 
 .estv__fact dt {
-  padding-top: 0.1rem;
-  color: color-mix(in srgb, var(--hc-tinta) 55%, var(--hc-cartao));
-  font-size: 0.76rem;
-  font-weight: 650;
+  padding-top: 2px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 @container estv (max-width: 30rem) {
   .estv__fact {
+    gap: 1px;
     grid-template-columns: minmax(0, 1fr);
-    gap: 0.1rem;
   }
 }
 
 .estv__fact dd {
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.88rem;
+  color: var(--tinta);
+  font-size: 14.5px;
   line-height: 1.5;
   white-space: pre-line;
   overflow-wrap: anywhere;
@@ -184,77 +186,77 @@ function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
 
 .estv__block {
   display: grid;
-  gap: 0.4rem;
+  gap: 6px;
 }
 
 .estv__block h4 {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 6px;
   margin: 0;
-  color: color-mix(in srgb, var(--hc-tinta) 55%, var(--hc-cartao));
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .estv__block h4 i {
-  color: var(--hc-marca);
-  font-size: 0.85rem;
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-size: 16px;
 }
 
 .estv__items {
   display: grid;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.7rem;
+  border-radius: 12px;
+  background: var(--superficie-2);
   list-style: none;
 }
 
 .estv__items li {
   display: grid;
-  gap: 0.2rem;
-  padding: 0.6rem 0.8rem;
+  gap: 3px;
+  padding: 10px 14px;
 }
 
 .estv__items li + li {
-  border-top: 1px solid var(--hc-linha);
+  border-top: 1px solid var(--linha);
 }
 
 .estv__linha {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.15rem 0.75rem;
+  gap: 2px 12px;
 }
 
 .estv__linha strong {
-  color: var(--hc-tinta);
-  font-size: 0.88rem;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
   line-height: 1.35;
 }
 
 .estv__meta {
-  color: color-mix(in srgb, var(--hc-tinta) 68%, var(--hc-cartao));
-  font-size: 0.8rem;
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 
 .estv__warn {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--hc-pessego-tinta);
-  font-size: 0.74rem;
-  font-weight: 600;
+  gap: 5px;
+  color: var(--atencao-tinta);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .estv__note {
   margin: 0;
-  color: color-mix(in srgb, var(--hc-tinta) 68%, var(--hc-cartao));
-  font-size: 0.8rem;
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.45;
   white-space: pre-line;
 }

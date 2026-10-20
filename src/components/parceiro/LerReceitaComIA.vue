@@ -342,20 +342,25 @@ const regra = computed(() => {
     <Transition name="lrc-troca" mode="out-in">
       <!-- O botão, numa faixa que também recebe o arquivo arrastado -->
       <div v-if="etapa === 'inicial'" key="inicial" class="lrc__inicio">
+        <span class="lrc__disco" aria-hidden="true"><i class="ph ph-sparkle" /></span>
+        <span class="lrc__chamada">
+          <strong id="lrc-chamada">{{ t('acessos.leituraReceita.chamada') }}</strong>
+          <span class="lrc__apoio">
+            {{ t('acessos.leituraReceita.apoio') }}
+            <span class="lrc__arraste">{{ t('acessos.leituraReceita.arraste') }}</span>
+          </span>
+        </span>
         <Button
+          class="lrc__botao"
           :label="t('acessos.leituraReceita.botao')"
           icon="ph ph-sparkle"
           severity="secondary"
           outlined
-          size="small"
           :loading="leitura.preparando"
           :disabled="disabled"
+          aria-describedby="lrc-chamada"
           @click="abrirSeletor"
         />
-        <span class="lrc__apoio">
-          {{ t('acessos.leituraReceita.apoio') }}
-          <span class="lrc__arraste">{{ t('acessos.leituraReceita.arraste') }}</span>
-        </span>
       </div>
 
       <!-- Páginas escolhidas, ainda na mesa -->
@@ -429,9 +434,11 @@ const regra = computed(() => {
             @click="leitura.limpar()"
           />
           <Button
+            class="lrc__botao"
             :label="t('acessos.leituraReceita.ler')"
             icon="ph ph-sparkle"
-            size="small"
+            severity="secondary"
+            outlined
             :disabled="disabled || leitura.preparando"
             @click="leitura.enviar()"
           />
@@ -653,9 +660,10 @@ const regra = computed(() => {
 
 <style scoped>
 .lrc {
-  --lrc-tinta: var(--hc-lilas-tinta);
-  --lrc-fundo: color-mix(in srgb, var(--hc-lilas-fundo) 55%, var(--hc-cartao));
-  --lrc-borda: color-mix(in srgb, var(--hc-lilas-tinta) 22%, transparent);
+  --lrc-tinta: var(--hotel-tinta);
+  --lrc-fundo: color-mix(in srgb, var(--hotel-fundo) 55%, var(--superficie));
+  --lrc-borda: color-mix(in srgb, var(--hotel-tinta) 22%, transparent);
+  --lrc-borda-forte: color-mix(in srgb, var(--hotel) 55%, transparent);
 
   position: relative;
   display: grid;
@@ -673,23 +681,72 @@ const regra = computed(() => {
 
 /* ------------------------------------------------------------ o botão */
 
+/*
+ * A chamada fica à vista, no alto da prescrição: o disco com a faísca, a pergunta e o botão na
+ * cor da máquina. Pervinca e não a cor do lugar: é a mesma cor dos campos que a leitura propõe.
+ */
 .lrc__inicio {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.45rem 0.8rem;
-  padding: 0.55rem 0.7rem;
-  border: 1px dashed var(--lrc-borda);
-  border-radius: 0.75rem;
+  gap: 12px 14px;
+  padding: 14px 16px;
+  border: 1px dashed var(--lrc-borda-forte);
+  border-radius: 14px;
+  background: var(--lrc-fundo);
   transition:
     border-color 150ms ease-out,
     background-color 150ms ease-out;
 }
 
+.lrc__disco {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+  font-size: 21px;
+}
+
+.lrc__chamada {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 15rem;
+  gap: 2px;
+}
+
+.lrc__chamada strong {
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
 .lrc__apoio {
-  color: var(--folha-suave, var(--partner-muted));
-  font-size: 0.78rem;
-  line-height: 1.4;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.lrc__botao.p-button {
+  min-height: 40px;
+  border-color: var(--hotel);
+  background: var(--superficie);
+  color: var(--hotel-tinta);
+  font-weight: 600;
+}
+
+.lrc__botao.p-button:not(:disabled):hover {
+  border-color: var(--hotel-tinta);
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+}
+
+.lrc__botao.p-button:focus-visible {
+  outline: 2px solid var(--hotel);
+  outline-offset: 2px;
 }
 
 /* Arrastar é de quem tem mouse: no toque a frase só ocuparia lugar. */
@@ -712,8 +769,8 @@ const regra = computed(() => {
   justify-content: center;
   gap: 0.5rem;
   border: 1.5px solid var(--lrc-tinta);
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--hc-lilas-fundo) 92%, var(--hc-cartao));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--hotel-fundo) 92%, var(--superficie));
   color: var(--lrc-tinta);
   font-size: 0.85rem;
   font-weight: 700;
@@ -729,10 +786,10 @@ const regra = computed(() => {
 /* O que a máquina propôs mora na pervinca: a caixa da leitura e os campos a conferir falam a mesma cor. */
 .lrc__caixa {
   display: grid;
-  gap: 0.45rem;
-  padding: 0.75rem 0.9rem;
+  gap: 8px;
+  padding: 14px 16px;
   border: 1px solid var(--lrc-borda);
-  border-radius: 0.75rem;
+  border-radius: 14px;
   background: var(--lrc-fundo);
   transition:
     border-color 150ms ease-out,
@@ -761,44 +818,44 @@ const regra = computed(() => {
 .lrc__titulo {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  color: var(--hc-tinta, var(--partner-text));
-  font-size: 0.82rem;
-  font-weight: 750;
+  gap: 8px;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 .lrc__titulo i {
   flex: 0 0 auto;
   color: var(--lrc-tinta);
-  font-size: 1rem;
+  font-size: 18px;
 }
 
 .lrc__titulo--ok i {
-  color: var(--hc-verde-tinta, var(--partner-success-text));
+  color: var(--ok-tinta);
 }
 
 .lrc__titulo--erro i {
-  color: var(--hc-coral-tinta, var(--partner-warm-text));
+  color: var(--risco-tinta);
 }
 
 .lrc__texto {
   display: flex;
   align-items: baseline;
-  gap: 0.35rem;
+  gap: 6px;
   margin: 0;
-  color: var(--folha-suave, var(--partner-muted));
-  font-size: 0.76rem;
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.45;
 }
 
 .lrc__confira {
   display: flex;
   align-items: baseline;
-  gap: 0.35rem;
+  gap: 6px;
   margin: 0;
   color: var(--lrc-tinta);
-  font-size: 0.76rem;
-  font-weight: 650;
+  font-size: 13px;
+  font-weight: 600;
   line-height: 1.45;
 }
 
@@ -815,9 +872,9 @@ const regra = computed(() => {
 
 .lrc__aviso {
   margin: 0;
-  color: var(--hc-coral-tinta, var(--partner-warm-text));
-  font-size: 0.75rem;
-  font-weight: 650;
+  color: var(--risco-tinta);
+  font-size: 12.5px;
+  font-weight: 550;
   line-height: 1.35;
 }
 
@@ -841,8 +898,8 @@ const regra = computed(() => {
   overflow: hidden;
   border: 1px solid var(--lrc-borda);
   border-radius: 0.6rem;
-  background: var(--hc-cartao);
-  box-shadow: 0 1px 2px rgb(20 32 28 / 8%);
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
 }
 
 .lrc__pagina img {
@@ -860,7 +917,7 @@ const regra = computed(() => {
 }
 
 .lrc__pdf small {
-  color: var(--folha-suave, var(--partner-muted));
+  color: var(--tinta-2);
   font-size: 0.65rem;
   font-weight: 650;
 }
@@ -873,14 +930,14 @@ const regra = computed(() => {
   height: 1.5rem;
   padding: 0;
   border: 0;
-  background: color-mix(in srgb, var(--hc-tinta) 72%, transparent);
-  color: var(--hc-cartao);
+  background: color-mix(in srgb, var(--tinta) 72%, transparent);
+  color: var(--superficie);
   font-size: 0.7rem;
 }
 
 .lrc__tirar.p-button:not(:disabled):hover {
-  background: var(--hc-coral-tinta);
-  color: #ffffff;
+  background: var(--risco-tinta);
+  color: var(--superficie);
 }
 
 .lrc__pagina--mais {
@@ -927,8 +984,8 @@ const regra = computed(() => {
   overflow: hidden;
   border: 1px solid var(--lrc-borda);
   border-radius: 0.5rem;
-  background: var(--hc-cartao);
-  box-shadow: 0 2px 6px rgb(20 32 28 / 12%);
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
   transform: rotate(calc((var(--folha) - 0.5) * 4deg));
 }
 
@@ -1001,8 +1058,9 @@ const regra = computed(() => {
 
 .lrc__tempo {
   margin-inline-start: auto;
-  color: var(--folha-suave, var(--partner-muted));
-  font-size: 0.74rem;
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 12.5px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -1018,14 +1076,14 @@ const regra = computed(() => {
 .lrc__passo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--folha-suave, var(--partner-muted));
-  font-size: 0.8rem;
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   transition: color 200ms ease-out;
 }
 
 .lrc__passo[data-estado='agora'] {
-  color: var(--hc-tinta, var(--partner-text));
+  color: var(--tinta);
   font-weight: 650;
 }
 
@@ -1042,7 +1100,7 @@ const regra = computed(() => {
   place-items: center;
   border: 1.5px solid color-mix(in srgb, var(--lrc-tinta) 40%, transparent);
   border-radius: 999px;
-  color: var(--hc-cartao);
+  color: var(--superficie);
   font-size: 0.62rem;
   transition:
     background-color 200ms ease-out,

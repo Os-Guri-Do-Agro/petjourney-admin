@@ -1,22 +1,44 @@
 <script setup lang="ts">
+/**
+ * Acessos — os pets que os responsáveis compartilharam com a empresa pelo app.
+ *
+ * ## A forma (redesenho total, 19/10/2026)
+ *
+ * A tela responde, por linha, às quatro perguntas de quem atende: **quem é** (o rosto, o nome, a
+ * espécie e o serviço), **desde quando** (há quanto tempo o código foi vinculado), **o que já tem
+ * ali** (anotações da equipe, documentos e diário liberados) e **quanto tempo ainda resta** — a
+ * contagem regressiva com uma barra que esvazia, em âmbar e com a marca na borda quando falta
+ * menos de um dia. A linha inteira abre o acesso.
+ *
+ * Em cima, "Vincular código" é a ação da tela; Ativos | Histórico é um controle segmentado (o
+ * parâmetro `?aba=historico` continua valendo), a busca é o campo grande e os filtros finos moram
+ * atrás de um botão, com o que está aplicado à vista em fichas que se removem num clique.
+ *
+ * Pet com mais de um acesso continua numa linha só, que abre a lista dele embaixo (o Marsh com
+ * onze acessos não vira onze linhas iguais). Com "Mostrar explicações" ligado — e sempre na lista
+ * vazia — aparecem os três passos de como um acesso funciona.
+ */
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import SelectButton from 'primevue/selectbutton'
+import ToggleSwitch from 'primevue/toggleswitch'
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
-import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import PartnerPanelLoading from '@/components/parceiro/PartnerPanelLoading.vue'
-import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
 import VincularCodigoDialog from '@/components/parceiro/VincularCodigoDialog.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import { useAgora } from '@/composables/useAgora'
 import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
+import type { PetSpecies } from '@/features/clinico/data/types'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { getCompartilhamentos } from '@/service/parceiro/compartilhamentos-service'
 import {
@@ -27,8 +49,7 @@ import {
   type OrdenacaoPacientes,
   type TipoServicoPrestador,
 } from '@/service/parceiro/types'
-import { currentColors } from '@/theme/color-mode'
-import { calcularTempoRestante } from '@/utils/format/expiracao'
+import { calcularTempoRestante, parseInstante } from '@/utils/format/expiracao'
 import { carimboDoResumo } from '@/utils/parceiro/snapshot-compartilhado'
 
 const ATENDIMENTO_TABS = ['ativos', 'historico'] as const
@@ -48,6 +69,25 @@ const TIPOS_SERVICO: TipoServicoPrestador[] = [
   'OUTRO',
 ]
 const ORDENACOES: OrdenacaoPacientes[] = ['recentes', 'nome', 'expiraEm']
+
+/** A silhueta do avatar: só cão e gato têm desenho, o resto fica nas iniciais. */
+const ESPECIE_DO_AVATAR: Partial<Record<string, PetSpecies>> = {
+  CACHORRO: 'canina',
+  GATO: 'felina',
+  AVE: 'ave',
+  ROEDOR: 'roedor',
+  REPTIL: 'reptil',
+}
+
+/** O mesmo ícone do serviço que a folha da anotação usa. */
+const ICONE_DO_SERVICO: Record<TipoServicoPrestador, string> = {
+  CONSULTA: 'ph ph-stethoscope',
+  EXAME: 'ph ph-microscope',
+  BANHO: 'ph ph-drop',
+  TOSA: 'ph ph-scissors',
+  HOTEL: 'ph ph-bed',
+  OUTRO: 'ph ph-paw-print',
+}
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -86,6 +126,8 @@ const temFiltroAtivo = computed(
     Boolean(filtros.vinculadoAte),
 )
 
+const intl = computed(() => INTL_LOCALE[locale.value as Locale])
+
 /**
  * Data do resumo quando o responsável o regerou depois de entregar o acesso.
  * String vazia quando o resumo ainda é o da criação: aí não há o que avisar.
@@ -97,7 +139,7 @@ function resumoAtualizado(item: CompartilhamentoResumo) {
     return ''
   }
 
-  return new Date(carimbo.data).toLocaleDateString(INTL_LOCALE[locale.value as Locale])
+  return dataLegivel(carimbo.data)
 }
 
 const especieOptions = computed(() =>
@@ -113,9 +155,6 @@ const ordenacaoOptions = computed(() =>
 )
 
 const ordenacaoLabel = computed(() => t(`acessos.filtros.ordem.${filtros.ordenarPor}`))
-
-/** O grupo de datas é um filtro só; o leitor de tela anuncia assim. */
-const periodoAriaLabel = computed(() => t('acessos.filtros.periodo'))
 
 /** `AAAA-MM-DD` no fuso local: o `toISOString` mudaria o dia para quem está a oeste de Greenwich. */
 function paraTextoDeData(data: Date | null | undefined): string {
@@ -154,30 +193,6 @@ const periodo = computed<Array<Date | null> | null>({
   },
 })
 
-/**
- * A lista do Select é teleportada para fora da `.partner-page`, então não herda os
- * tokens `--partner-*`: eles vão junto no `pt`. Sem isso o painel cai no fundo claro
- * que o preset do PrimeVue usa para superfície de formulário no dark.
- */
-const selectPt = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    overlay: {
-      class: 'atend-filtros__overlay',
-      style: {
-        '--atend-ov-bg': colors.dashboard.surface,
-        '--atend-ov-line': colors.dashboard.line,
-        '--atend-ov-text': colors.dashboard.text,
-        '--atend-ov-muted': colors.dashboard.muted,
-        '--atend-ov-hover': colors.dashboard.surfaceSoft,
-        '--atend-ov-selected-bg': colors.dashboard.successBg,
-        '--atend-ov-selected-text': colors.dashboard.successText,
-      },
-    },
-  }
-})
-
 const tabs = computed(() => [
   {
     id: 'ativos',
@@ -193,11 +208,40 @@ const tabsAriaLabel = computed(() =>
   t('frame.tabs.aria', { labels: tabs.value.map((tab) => tab.label).join(', ') }),
 )
 
+/** O controle segmentado não deixa ficar sem escolha, mas o evento ainda pode vir vazio. */
+function escolherAba(valor: unknown) {
+  if (valor === 'ativos' || valor === 'historico') {
+    setTab(valor as AtendimentoTab)
+  }
+}
+
 const hasMore = computed(() => cursor.value != null)
 
 const loadError = computed(() =>
   store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
 )
+
+/**
+ * Cadastro que não opera (em análise, recusado ou suspenso): a lista continua legível — o acesso
+ * foi consentido pelo responsável —, mas vincular código fica bloqueado. A faixa diz por quê.
+ */
+const avisoDoCadastro = computed(() => {
+  if (store.loadState !== 'ready' || store.podeOperar) {
+    return null
+  }
+
+  const status = store.statusAuditoria
+
+  if (store.cadastroSuspenso || status === 'SUSPENSO') {
+    return 'suspendedReadOnly'
+  }
+
+  if (status === 'REJEITADO') {
+    return 'rejected'
+  }
+
+  return status === 'PENDENTE' ? 'pending' : null
+})
 
 /**
  * Digitar rápido dispara várias buscas; a resposta lenta de uma tecla antiga pode
@@ -346,35 +390,99 @@ function servicoLabel(item: CompartilhamentoResumo) {
   return t(`acessos.servico.${item.tipoServico}`)
 }
 
-/**
- * Prazo do card: contagem regressiva enquanto o acesso vive, data de encerramento
- * depois. No histórico a data solta com ícone de relógio parecia contagem viva;
- * dizer "encerrado em" custa uma palavra e tira a dúvida.
- */
-function prazoLabel(item: CompartilhamentoResumo) {
-  if (item.status !== 'ATIVO') {
-    return t('acessos.list.encerradoEm', {
-      data: new Date(item.expiraEm).toLocaleDateString(INTL_LOCALE[locale.value as Locale]),
-    })
+function iconeDoServico(item: CompartilhamentoResumo) {
+  return ICONE_DO_SERVICO[item.tipoServico] ?? 'ph ph-paw-print'
+}
+
+function especieDoAvatar(especie: string) {
+  return ESPECIE_DO_AVATAR[especie] ?? null
+}
+
+// ------------------------------------------------------------------ tempo, em linguagem de gente
+
+/** "22 de out." — com o ano só quando não é o deste ano. */
+function dataLegivel(iso: string) {
+  const data = new Date(parseInstante(iso))
+
+  if (Number.isNaN(data.getTime())) {
+    return ''
   }
 
+  const mesmoAno = data.getFullYear() === new Date(agora.value).getFullYear()
+
+  return new Intl.DateTimeFormat(intl.value, {
+    day: 'numeric',
+    month: 'short',
+    ...(mesmoAno ? {} : { year: 'numeric' as const }),
+  }).format(data)
+}
+
+/** "22 de out., 14:30": quando o acesso fecha, com a hora — é ela que decide o dia. */
+function dataEHora(iso: string) {
+  const data = new Date(parseInstante(iso))
+
+  if (Number.isNaN(data.getTime())) {
+    return ''
+  }
+
+  return new Intl.DateTimeFormat(intl.value, {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(data)
+}
+
+/**
+ * "há 4 dias", "ontem", "há 3 horas" — o `Intl` traduz para os seis idiomas sem chave nenhuma.
+ * Passados dois meses conta em meses: "há 240 dias" obriga a fazer a conta de cabeça.
+ */
+function haQuantoTempo(iso: string) {
+  const diff = agora.value - parseInstante(iso)
+
+  if (Number.isNaN(diff)) {
+    return ''
+  }
+
+  const relativo = new Intl.RelativeTimeFormat(intl.value, { numeric: 'auto' })
+  const minutos = Math.max(0, Math.floor(diff / 60_000))
+
+  if (minutos < 60) {
+    return relativo.format(-Math.max(1, minutos), 'minute')
+  }
+
+  const horas = Math.floor(minutos / 60)
+
+  if (horas < 24) {
+    return relativo.format(-horas, 'hour')
+  }
+
+  const dias = Math.floor(horas / 24)
+
+  return dias < 60
+    ? relativo.format(-dias, 'day')
+    : relativo.format(-Math.round(dias / 30.4), 'month')
+}
+
+/** A contagem regressiva, curta: "3d 4h", "5h 12min", "40min". */
+function prazoCurto(item: CompartilhamentoResumo) {
   const restante = calcularTempoRestante(item.expiraEm, agora.value)
 
   switch (restante.estado) {
     case 'dias':
-      return t('acessos.expira.dias', { d: restante.dias, h: restante.horas })
+      return t('acessos.lista.prazo.dias', { d: restante.dias, h: restante.horas })
     case 'horas':
-      return t('acessos.expira.horas', { h: restante.horas, m: restante.minutos })
+      return t('acessos.lista.prazo.horas', { h: restante.horas, m: restante.minutos })
     case 'minutos':
-      return t('acessos.expira.minutos', { m: restante.minutos })
+      return t('acessos.lista.prazo.minutos', { m: restante.minutos })
     default:
       return t('acessos.expira.expirado')
   }
 }
 
 /**
- * Só o acesso que fecha hoje ganha âmbar. Pintar toda contagem de alerta fazia a
- * lista inteira gritar, e aí nenhum card gritava.
+ * Só o acesso que fecha em menos de um dia ganha âmbar. Pintar toda contagem de alerta fazia a
+ * lista inteira gritar, e aí nenhuma linha gritava.
  */
 function prazoUrgente(item: CompartilhamentoResumo) {
   if (item.status !== 'ATIVO') {
@@ -384,93 +492,64 @@ function prazoUrgente(item: CompartilhamentoResumo) {
   return calcularTempoRestante(item.expiraEm, agora.value).estado !== 'dias'
 }
 
+/** Quanto da janela do acesso ainda resta, de 0 a 1: é a barra que esvazia embaixo do número. */
+function fracaoRestante(item: CompartilhamentoResumo) {
+  const fim = parseInstante(item.expiraEm)
+  const inicio = parseInstante(item.criadoEm || item.vinculadoEm)
+  const total = fim - inicio
+
+  if (!(total > 0)) {
+    return 0
+  }
+
+  return Math.min(1, Math.max(0, (fim - agora.value) / total))
+}
+
 /** Ativo, expirado ou revogado — o que o parceiro precisa ler, sem apelido de auditoria. */
 function statusLabel(item: CompartilhamentoResumo) {
   return t(`acessos.list.status.${item.status}`)
 }
 
 /**
- * Selo do lado direito da linha. No histórico é o desfecho (expirado ou revogado), em cinza: a
- * aba já diz que está encerrado. Nos ativos é o prazo — e só o que vence em menos de um dia pinta.
+ * Quando o acesso encerrado acabou. A listagem não traz a data da revogação: o revogado antes do
+ * prazo ficaria com uma data no futuro, então fica sem data — o selo já diz o desfecho.
  */
-function seloDoAcesso(item: CompartilhamentoResumo) {
-  if (item.status === 'ATIVO') {
-    return { texto: prazoLabel(item), tom: prazoUrgente(item) ? 'hc--pessego' : 'hc--cinza' }
+function dataDoEncerramento(item: CompartilhamentoResumo) {
+  if (item.status === 'REVOGADO' && parseInstante(item.expiraEm) > agora.value) {
+    return ''
   }
 
-  return { texto: statusLabel(item), tom: 'hc--cinza' }
+  return dataLegivel(item.expiraEm)
 }
 
-/** Serviço e prazo, a frase da linha: "Banho · encerrado em 12/09/2026". */
-function fraseDoAcesso(item: CompartilhamentoResumo) {
-  if (item.status === 'ATIVO') {
-    return servicoLabel(item)
-  }
+/** O que o responsável liberou além do resumo: documentos e diário. Nada disso: "só o resumo". */
+function prontuarioDoAcesso(item: Pick<CompartilhamentoResumo, 'totalDocumentos' | 'temDiario'>) {
+  const partes: { id: string; icone: string; texto: string }[] = []
 
-  return `${servicoLabel(item)} · ${t('acessos.grupo.encerradoEm', { data: dataCurta(item.expiraEm) })}`
-}
-
-function dataCurta(iso: string) {
-  return new Date(iso).toLocaleDateString(INTL_LOCALE[locale.value as Locale])
-}
-
-type FatoDoAcesso = {
-  id: string
-  icone: string
-  /** O que aparece; vazio quando o ícone basta. */
-  texto: string
-  /** A frase inteira, para o leitor de tela e o `title`. */
-  rotulo: string
-  /** `oculto` guarda a vaga do fato ausente: os números ficam em coluna de linha a linha. */
-  tom?: 'vazio' | 'alerta' | 'oculto'
-}
-
-/**
- * Os fatos do acesso viram ícone com número, sempre na mesma ordem e na mesma vaga. Zero anotações
- * continua aparecendo, apagado: é a pergunta que o parceiro faz ao abrir o histórico ("já anotei
- * algo aqui?"). O alerta de resumo vem antes, à esquerda, para não empurrar as colunas.
- */
-function fatosDoAcesso(item: CompartilhamentoResumo): FatoDoAcesso[] {
-  const fatos: FatoDoAcesso[] = []
-
-  // O responsável mexeu depois de entregar: o que foi lido ontem pode não valer mais.
-  const atualizado = resumoAtualizado(item)
-
-  if (atualizado) {
-    const rotulo = t('acessos.list.resumoAtualizado', { data: atualizado })
-    fatos.push({ id: 'resumo', icone: 'ph ph-arrow-clockwise', texto: rotulo, rotulo, tom: 'alerta' })
-  }
-
-  fatos.push(
-    {
-      id: 'anotacoes',
-      icone: 'ph ph-chat-circle',
-      texto: String(item.totalAnotacoes),
-      rotulo: t('acessos.list.anotacoes', { n: item.totalAnotacoes }, item.totalAnotacoes),
-      tom: item.totalAnotacoes ? undefined : 'vazio',
-    },
-    {
+  if (item.totalDocumentos) {
+    partes.push({
       id: 'documentos',
-      icone: 'ph ph-file',
-      texto: String(item.totalDocumentos),
-      rotulo: t('acessos.list.documentos', { n: item.totalDocumentos }, item.totalDocumentos),
-      tom: item.totalDocumentos ? undefined : 'oculto',
-    },
-    {
-      id: 'diario',
-      icone: 'ph ph-book-open',
-      texto: '',
-      rotulo: t('acessos.list.diario'),
-      tom: item.temDiario ? undefined : 'oculto',
-    },
-  )
+      icone: 'ph ph-file-text',
+      texto: t('acessos.list.documentos', { n: item.totalDocumentos }, item.totalDocumentos),
+    })
+  }
 
-  return fatos
+  if (item.temDiario) {
+    partes.push({ id: 'diario', icone: 'ph ph-notebook', texto: t('acessos.list.diario') })
+  }
+
+  return partes
+}
+
+/** A frase das anotações: no celular, quando as colunas somem, ela vai para baixo do nome. */
+function anotacoesTexto(n: number) {
+  return t('acessos.list.anotacoes', { n }, n)
 }
 
 type GrupoDoPet = {
   chave: string
   petNome: string
+  especie: string
   especieLabel: string
   petFoto: string | null
   acessos: CompartilhamentoResumo[]
@@ -499,6 +578,7 @@ const grupos = computed<GrupoDoPet[]>(() => {
       mapa.set(chave, {
         chave,
         petNome: item.petNome,
+        especie: item.especie,
         especieLabel: item.especieLabel,
         petFoto: item.petFoto,
         acessos: [item],
@@ -544,42 +624,39 @@ function abrirOPrimeiroGrupo() {
 }
 
 /**
- * A linha de um pet com vários acessos. Nos ativos, o prazo mais curto (é o que pede ação); no
- * histórico, a última data e o que a empresa deixou registrado.
+ * O acesso que representa o grupo na coluna do prazo: nos ativos, o que vence primeiro (é o que
+ * pede ação); no histórico, o último a encerrar.
  */
-function resumoDoGrupo(grupo: GrupoDoPet) {
-  const n = grupo.acessos.length
-  const partes = [t('acessos.grupo.acessos', { n }, n)]
-
-  if (activeTab.value === 'ativos') {
-    const proximo = grupo.acessos.reduce((menor, item) =>
-      item.expiraEm < menor.expiraEm ? item : menor,
-    )
-
-    partes.push(t('acessos.grupo.proximo', { prazo: prazoLabel(proximo) }))
-  } else {
-    const ultimo = grupo.acessos.reduce((maior, item) =>
-      item.expiraEm > maior.expiraEm ? item : maior,
-    )
-
-    partes.push(t('acessos.grupo.ultimoEncerrado', { data: dataCurta(ultimo.expiraEm) }))
-  }
-
-  const anotacoes = grupo.acessos.reduce((soma, item) => soma + item.totalAnotacoes, 0)
-  const documentos = grupo.acessos.reduce((soma, item) => soma + item.totalDocumentos, 0)
-  const registros = [
-    anotacoes ? t('acessos.list.anotacoes', { n: anotacoes }, anotacoes) : '',
-    documentos ? t('acessos.list.documentos', { n: documentos }, documentos) : '',
-  ].filter(Boolean)
-
-  if (registros.length) {
-    partes.push(registros.join(', '))
-  }
-
-  return partes.join(' · ')
+function acessoDeReferencia(grupo: GrupoDoPet) {
+  return activeTab.value === 'ativos'
+    ? grupo.acessos.reduce((menor, item) => (item.expiraEm < menor.expiraEm ? item : menor))
+    : grupo.acessos.reduce((maior, item) => (item.expiraEm > maior.expiraEm ? item : maior))
 }
 
-/** Um grupo com algum acesso que vence em menos de um dia: o ícone avisa mesmo recolhido. */
+/** O vínculo mais recente do pet. */
+function vinculoMaisRecente(grupo: GrupoDoPet) {
+  return grupo.acessos.reduce((maior, item) =>
+    item.vinculadoEm > maior.vinculadoEm ? item : maior,
+  ).vinculadoEm
+}
+
+/** "3 acessos · Hotel, Consulta, Banho": quantos e de quê, sem abrir. */
+function metaDoGrupo(grupo: GrupoDoPet) {
+  const n = grupo.acessos.length
+  const servicos = [...new Set(grupo.acessos.map(servicoLabel))].join(', ')
+
+  return `${t('acessos.grupo.acessos', { n }, n)} · ${servicos}`
+}
+
+function somaDoGrupo(grupo: GrupoDoPet) {
+  return {
+    totalAnotacoes: grupo.acessos.reduce((soma, item) => soma + item.totalAnotacoes, 0),
+    totalDocumentos: grupo.acessos.reduce((soma, item) => soma + item.totalDocumentos, 0),
+    temDiario: grupo.acessos.some((item) => item.temDiario),
+  }
+}
+
+/** Um grupo com algum acesso que vence em menos de um dia: o grupo avisa mesmo recolhido. */
 function grupoUrgente(grupo: GrupoDoPet) {
   return grupo.acessos.some(prazoUrgente)
 }
@@ -602,8 +679,61 @@ const filtrosLigados = computed(
 
 const filtrosAbertos = ref(false)
 
+/** O que está aplicado, em fichas que se removem num clique — filtro escondido faz a lista "sumir". */
+const fichas = computed(() => {
+  const lista: { id: string; rotulo: string; tirar: () => void }[] = []
+
+  if (filtros.especie) {
+    lista.push({
+      id: 'especie',
+      rotulo: t(`acessos.especie.${filtros.especie}`),
+      tirar: () => (filtros.especie = null),
+    })
+  }
+
+  if (filtros.tipoServico) {
+    lista.push({
+      id: 'tipoServico',
+      rotulo: t(`acessos.servico.${filtros.tipoServico}`),
+      tirar: () => (filtros.tipoServico = null),
+    })
+  }
+
+  if (filtros.comProntuario) {
+    lista.push({
+      id: 'comProntuario',
+      rotulo: t('acessos.filtros.comProntuario'),
+      tirar: () => (filtros.comProntuario = false),
+    })
+  }
+
+  if (filtros.vinculadoDe || filtros.vinculadoAte) {
+    const de = filtros.vinculadoDe ? dataLegivel(dataFiltro(filtros.vinculadoDe) ?? '') : ''
+    const ate = filtros.vinculadoAte ? dataLegivel(dataFiltro(filtros.vinculadoAte) ?? '') : ''
+
+    lista.push({
+      id: 'periodo',
+      rotulo: `${t('acessos.filtros.periodo')}: ${[de, ate].filter(Boolean).join(' – ')}`,
+      tirar: () => {
+        filtros.vinculadoDe = ''
+        filtros.vinculadoAte = ''
+      },
+    })
+  }
+
+  if (filtros.ordenarPor !== 'recentes') {
+    lista.push({
+      id: 'ordem',
+      rotulo: `${t('acessos.filtros.ordenarPor')}: ${ordenacaoLabel.value}`,
+      tirar: () => (filtros.ordenarPor = 'recentes'),
+    })
+  }
+
+  return lista
+})
+
 /**
- * A frase da saudação. Nos ativos, quantos acessos estão valendo e quantos vencem logo; no
+ * A frase do alto. Nos ativos, quantos acessos estão valendo e quantos vencem logo; no
  * histórico, de quantos pets. Com filtro ligado vira "encontrados" — a contagem é do recorte.
  */
 const fraseDoResumo = computed(() => {
@@ -635,9 +765,27 @@ const fraseDoResumo = computed(() => {
     : t('acessos.saudacao.historico', { n: pets }, pets)
 })
 
-function openDetalhe(id: string) {
-  void router.push(`/parceiro/acessos/${id}`)
-}
+/** Como um acesso funciona, em três passos: com as explicações ligadas e na lista vazia. */
+const passosDoGuia = computed(() => [
+  {
+    id: 'compartilha',
+    icone: 'ph ph-device-mobile',
+    titulo: t('acessos.guia.passo1.titulo'),
+    texto: t('acessos.guia.passo1.texto'),
+  },
+  {
+    id: 'vincula',
+    icone: 'ph ph-key',
+    titulo: t('acessos.guia.passo2.titulo'),
+    texto: t('acessos.guia.passo2.texto'),
+  },
+  {
+    id: 'anota',
+    icone: 'ph ph-note-pencil',
+    titulo: t('acessos.guia.passo3.titulo'),
+    texto: t('acessos.guia.passo3.texto'),
+  },
+])
 
 function onVinculado(detalhe: CompartilhamentoDetalhe) {
   void router.push(`/parceiro/acessos/${detalhe.id}`)
@@ -689,398 +837,653 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('acessos.subtitle')"
-    :title="t('acessos.title')"
-    :loading="false"
-    :error="loadError"
-    :no-partner-access="store.semAcessoParceiro"
-    guidance
-    @retry="ensureContext(true)"
+  <UiPagina
+    class="tela-acessos"
+    :erro="loadError"
+    :sem-acesso-de-parceiro="store.semAcessoParceiro"
+    guia
+    @tentar-de-novo="ensureContext(true)"
   >
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('acessos.subtitle') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('acessos.title') }}</h1>
-
-        <div class="hc-saudacao__linha">
-          <p v-if="fraseDoResumo" class="hc-saudacao__resumo" aria-live="polite">
-            {{ fraseDoResumo }}
-          </p>
-
-          <nav class="hc-acoes" :aria-label="t('acessos.saudacao.acoes')">
-            <Button
-              type="button"
-              class="hc-pilula hc-pilula--cheia"
-              :label="t('acessos.vincular.cta')"
-              icon="ph ph-link"
-              :disabled="!store.podeOperar"
-              :title="!store.podeOperar ? t('acessos.vincular.bloqueado') : undefined"
-              @click="vincularVisible = true"
-            />
-          </nav>
-        </div>
-      </div>
+    <template v-if="fraseDoResumo" #resumo>
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
     </template>
 
-    <!-- Leitura não é gated por auditoria (seção 4): suspenso lê a lista e o
-         prontuário, e perde só o claim e a anotação. O banner explica no lugar
-         do gate de página cheia. -->
-    <PartnerOperabilityBanner cover-suspended />
-
-    <p v-if="isGuidanceVisible" class="atend-lede">{{ t('acessos.lede') }}</p>
-
-    <!-- Abas, busca e filtros numa linha só: antes eram três faixas empilhadas antes do
-         primeiro pet aparecer. Os filtros finos recolhem atrás do botão. -->
-    <div class="atend-barra">
-      <PartnerSectionTabs
-        class="atend-barra__abas"
-        :tabs="tabs"
-        :active-tab="activeTab"
-        :aria-label="tabsAriaLabel"
-        @select="setTab($event as AtendimentoTab)"
-      />
-
-      <label class="atend-filtros__sr" for="atend-q">{{ t('acessos.filtros.q') }}</label>
-      <span class="atend-barra__busca">
-        <i class="ph ph-magnifying-glass" aria-hidden="true" />
-        <InputText
-          id="atend-q"
-          v-model="filtros.q"
-          :maxlength="MAX_BUSCA_PACIENTES"
-          :placeholder="t('acessos.filtros.qPlaceholder')"
-          autocomplete="off"
-        />
-      </span>
-
+    <template #acoes>
       <Button
         type="button"
-        class="atend-barra__filtros"
-        :label="t('acessos.filtros.botao')"
-        icon="ph ph-sliders-horizontal"
-        severity="secondary"
-        outlined
-        :badge="filtrosLigados ? String(filtrosLigados) : undefined"
-        :aria-expanded="filtrosAbertos"
-        aria-controls="atend-filtros"
-        @click="filtrosAbertos = !filtrosAbertos"
+        icon="ph ph-link"
+        :label="t('acessos.vincular.cta')"
+        :disabled="!store.podeOperar"
+        :title="!store.podeOperar ? t('acessos.vincular.bloqueado') : undefined"
+        @click="vincularVisible = true"
       />
-    </div>
+    </template>
 
-    <!-- Rótulos existem para leitor de tela, mas ficam ocultos: cinco textos
-         empilhados sobre controles pequenos viram ruído. Cada controle carrega o
-         próprio nome no placeholder. v-show: o alvo do `aria-controls` existe sempre. -->
-    <section
-      v-show="filtrosAbertos"
-      id="atend-filtros"
-      class="atend-filtros"
-      :aria-label="t('acessos.filtros.aria')"
-    >
-      <label class="atend-filtros__sr" for="atend-especie">
-        {{ t('acessos.filtros.especie') }}
-      </label>
-      <Select
-        id="atend-especie"
-        v-model="filtros.especie"
-        class="atend-filtros__select"
-        :options="especieOptions"
-        option-label="label"
-        option-value="value"
-        :placeholder="t('acessos.filtros.especie')"
-        show-clear
-        size="small"
-        :pt="selectPt"
-      />
-
-      <label class="atend-filtros__sr" for="atend-tipo">
-        {{ t('acessos.filtros.tipoServico') }}
-      </label>
-      <Select
-        id="atend-tipo"
-        v-model="filtros.tipoServico"
-        class="atend-filtros__select"
-        :options="tipoServicoOptions"
-        option-label="label"
-        option-value="value"
-        :placeholder="t('acessos.filtros.tipoServico')"
-        show-clear
-        size="small"
-        :pt="selectPt"
-      />
-
-      <label class="atend-filtros__sr" for="atend-ordem">
-        {{ t('acessos.filtros.ordenarPor') }}
-      </label>
-      <Select
-        id="atend-ordem"
-        v-model="filtros.ordenarPor"
-        class="atend-filtros__select"
-        :options="ordenacaoOptions"
-        option-label="label"
-        option-value="value"
-        size="small"
-        :pt="selectPt"
-      >
-        <!-- Ordenação sempre tem valor, então o placeholder nunca aparece:
-             o ícone é o que diz que aquele controle é a ordem da lista. -->
-        <template #value>
-          <span class="atend-filtros__ordem">
-            <i class="ph ph-arrows-down-up" aria-hidden="true" />
-            {{ ordenacaoLabel }}
-          </span>
-        </template>
-      </Select>
-
-      <!-- Filtro binário: acesso com prontuário pede leitura antes do
-           atendimento, acesso só de identidade não. `aria-pressed` porque é
-           um estado que fica ligado, não uma ação que dispara e passa. -->
-      <Button
-        type="button"
-        class="atend-filtros__toggle"
-        :class="{ 'atend-filtros__toggle--on': filtros.comProntuario }"
-        icon="ph ph-folder-open"
-        :label="t('acessos.filtros.comProntuario')"
-        severity="secondary"
-        outlined
-        :aria-pressed="filtros.comProntuario"
-        @click="filtros.comProntuario = !filtros.comProntuario"
-      />
-
-      <div class="atend-filtros__periodo" role="group" :aria-label="periodoAriaLabel">
-        <span class="atend-filtros__periodo-label" aria-hidden="true">
-          {{ t('acessos.filtros.periodo') }}
+    <div class="acessos">
+      <!-- Leitura não é gated por auditoria (seção 4): suspenso lê a lista e o prontuário, e
+           perde só o vínculo e a anotação. A faixa explica no lugar do bloqueio de página. -->
+      <section v-if="avisoDoCadastro" class="faixa faixa--atencao" role="status">
+        <span class="faixa__icone" aria-hidden="true">
+          <i :class="avisoDoCadastro === 'rejected' ? 'ph ph-x-circle' : 'ph ph-lock'" />
         </span>
-        <label class="atend-filtros__sr" for="atend-periodo">
-          {{ t('acessos.filtros.periodo') }}
-        </label>
-        <DatePicker
-          panel-class="hc-tema"
-          v-model="periodo"
-          input-id="atend-periodo"
-          selection-mode="range"
-          :manual-input="false"
-          date-format="dd/mm/yy"
-          show-icon
-          show-button-bar
-          class="atend-filtros__date"
+        <span class="faixa__texto">
+          <strong>{{ t(`frame.operability.${avisoDoCadastro}.title`) }}</strong>
+          <span>
+            {{ t(`frame.operability.${avisoDoCadastro}.body`) }}
+            <template v-if="store.status?.motivoAuditoria">
+              {{ t('frame.operability.reasonPrefix') }} {{ store.status.motivoAuditoria }}
+            </template>
+          </span>
+        </span>
+        <RouterLink class="faixa__link ui-mais" to="/settings?aba=empresa">
+          {{ t(`frame.operability.${avisoDoCadastro}.link`) }}
+        </RouterLink>
+      </section>
+
+      <!-- As explicações: o que é um acesso, em três passos. -->
+      <section v-if="isGuidanceVisible" class="guia" aria-labelledby="acessos-guia-titulo">
+        <p class="guia__lede">{{ t('acessos.lede') }}</p>
+        <h2 id="acessos-guia-titulo" class="guia__titulo">{{ t('acessos.guia.titulo') }}</h2>
+        <ol class="passos">
+          <li v-for="(passo, indice) in passosDoGuia" :key="passo.id" class="passo">
+            <span class="passo__icone" aria-hidden="true"><i :class="passo.icone" /></span>
+            <span class="passo__texto">
+              <strong>
+                <span class="passo__n ui-num" aria-hidden="true">{{ indice + 1 }}</span>
+                {{ passo.titulo }}
+              </strong>
+              <span>{{ passo.texto }}</span>
+            </span>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Ativos ou histórico, a busca grande e o botão dos filtros, numa linha. -->
+      <div class="barra" role="search">
+        <SelectButton
+          class="barra__abas"
+          :model-value="activeTab"
+          :options="tabs"
+          option-label="label"
+          option-value="id"
+          :allow-empty="false"
+          :aria-label="tabsAriaLabel"
+          @update:model-value="escolherAba"
+        />
+
+        <label class="sr-only" for="atend-q">{{ t('acessos.filtros.q') }}</label>
+        <IconField class="barra__busca">
+          <InputIcon class="ph ph-magnifying-glass" />
+          <InputText
+            id="atend-q"
+            v-model="filtros.q"
+            type="search"
+            fluid
+            :maxlength="MAX_BUSCA_PACIENTES"
+            :placeholder="t('acessos.lista.buscaPlaceholder')"
+            autocomplete="off"
+          />
+        </IconField>
+
+        <Button
+          type="button"
+          class="barra__filtros"
+          :class="{ 'barra__filtros--ligado': filtrosLigados > 0 }"
+          severity="secondary"
+          outlined
+          :aria-expanded="filtrosAbertos"
+          aria-controls="atend-filtros"
+          @click="filtrosAbertos = !filtrosAbertos"
+        >
+          <i class="ph ph-sliders-horizontal" aria-hidden="true" />
+          <span>{{ t('acessos.filtros.botao') }}</span>
+          <span v-if="filtrosLigados" class="ui-contagem barra__total">{{ filtrosLigados }}</span>
+          <i
+            class="ph barra__seta"
+            :class="filtrosAbertos ? 'ph-caret-up' : 'ph-caret-down'"
+            aria-hidden="true"
+          />
+        </Button>
+      </div>
+
+      <!-- Os filtros finos, com o nome de cada um à vista. v-show: o alvo do `aria-controls`
+           existe sempre. -->
+      <section
+        v-show="filtrosAbertos"
+        id="atend-filtros"
+        class="filtros ui-folha"
+        :aria-label="t('acessos.filtros.aria')"
+      >
+        <div class="filtros__grade">
+          <div class="campo">
+            <label id="atend-especie-rotulo" class="campo__rotulo">
+              {{ t('acessos.filtros.especie') }}
+            </label>
+            <Select
+              v-model="filtros.especie"
+              label-id="atend-especie"
+              aria-labelledby="atend-especie-rotulo"
+              :options="especieOptions"
+              option-label="label"
+              option-value="value"
+              :placeholder="t('acessos.lista.qualquer')"
+              show-clear
+            />
+          </div>
+
+          <div class="campo">
+            <label id="atend-tipo-rotulo" class="campo__rotulo">
+              {{ t('acessos.filtros.tipoServico') }}
+            </label>
+            <Select
+              v-model="filtros.tipoServico"
+              label-id="atend-tipo"
+              aria-labelledby="atend-tipo-rotulo"
+              :options="tipoServicoOptions"
+              option-label="label"
+              option-value="value"
+              :placeholder="t('acessos.lista.qualquer')"
+              show-clear
+            />
+          </div>
+
+          <div class="campo">
+            <label id="atend-ordem-rotulo" class="campo__rotulo">
+              {{ t('acessos.filtros.ordenarPor') }}
+            </label>
+            <Select
+              v-model="filtros.ordenarPor"
+              label-id="atend-ordem"
+              aria-labelledby="atend-ordem-rotulo"
+              :options="ordenacaoOptions"
+              option-label="label"
+              option-value="value"
+            />
+          </div>
+
+          <div class="campo campo--periodo">
+            <label class="campo__rotulo" for="atend-periodo">{{ t('acessos.filtros.periodo') }}</label>
+            <DatePicker
+              v-model="periodo"
+              input-id="atend-periodo"
+              selection-mode="range"
+              :manual-input="false"
+              date-format="dd/mm/yy"
+              show-icon
+              icon-display="input"
+              show-button-bar
+              :placeholder="t('acessos.lista.periodoPlaceholder')"
+            />
+          </div>
+
+          <!-- Filtro binário: acesso com prontuário pede leitura antes do atendimento. -->
+          <div class="campo campo--interruptor">
+            <ToggleSwitch v-model="filtros.comProntuario" input-id="atend-prontuario" />
+            <label for="atend-prontuario" class="campo__interruptor">
+              <strong>{{ t('acessos.filtros.comProntuario') }}</strong>
+              <small>{{ t('acessos.lista.comProntuarioAjuda') }}</small>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <div v-if="fichas.length" class="aplicados">
+        <button
+          v-for="ficha in fichas"
+          :key="ficha.id"
+          type="button"
+          class="ficha"
+          :aria-label="`${ficha.rotulo}: ${t('clinico.comum.remover')}`"
+          @click="ficha.tirar()"
+        >
+          <span>{{ ficha.rotulo }}</span>
+          <i class="ph ph-x" aria-hidden="true" />
+        </button>
+        <button type="button" class="ui-mais" @click="limparFiltros">
+          {{ t('acessos.filtros.limpar') }}
+        </button>
+      </div>
+
+      <!-- ------------------------------------------------------------ a lista -->
+
+      <div v-if="loading" class="quadro ui-folha" role="status" aria-live="polite">
+        <span class="sr-only">{{ t('acessos.list.loadingTitle') }}</span>
+        <ul class="ui-lista" aria-hidden="true">
+          <li v-for="n in 4" :key="n" class="esqueleto">
+            <span class="esqueleto__rosto" />
+            <span class="esqueleto__texto">
+              <span class="esqueleto__osso esqueleto__osso--nome" />
+              <span class="esqueleto__osso" />
+            </span>
+            <span class="esqueleto__osso esqueleto__osso--fim" />
+          </li>
+        </ul>
+      </div>
+
+      <div v-else-if="error" class="estado ui-folha" role="alert">
+        <span class="estado__icone estado__icone--erro" aria-hidden="true">
+          <i class="ph ph-warning-circle" />
+        </span>
+        <p>{{ error }}</p>
+        <Button
+          type="button"
+          icon="ph ph-arrow-clockwise"
+          :label="t('common.retry')"
+          severity="secondary"
+          outlined
+          @click="loadFirstPage()"
         />
       </div>
 
-      <Button
-        v-if="temFiltroAtivo"
-        class="atend-filtros__limpar"
-        :label="t('acessos.filtros.limpar')"
-        icon="ph ph-funnel-x"
-        severity="secondary"
-        text
-        size="small"
-        @click="limparFiltros"
-      />
-    </section>
-
-    <div
-      :id="`partner-panel-${activeTab}`"
-      class="atend-panel"
-      role="tabpanel"
-      :aria-labelledby="`partner-tab-${activeTab}`"
-    >
-      <PartnerPanelLoading
-        v-if="loading"
-        :title="t('acessos.list.loadingTitle')"
-        :description="t('acessos.list.loadingDesc')"
-      />
-
-      <div v-else-if="error" class="hc atend-state atend-state--error" role="alert">
-        <p>{{ error }}</p>
-        <Button :label="t('common.retry')" severity="secondary" @click="loadFirstPage()" />
-      </div>
-
-      <!-- Vazio por filtro é outro problema do usuário: a saída é limpar o filtro,
-           não vincular um código novo. -->
-      <div
-        v-else-if="items.length === 0 && temFiltroAtivo"
-        class="hc atend-state atend-state--empty"
-      >
-        <i class="ph ph-funnel-x" aria-hidden="true" />
-        <strong>{{ t('acessos.list.emptyFiltroTitle') }}</strong>
+      <!-- Vazio por filtro é outro problema: a saída é limpar o filtro, não vincular código. -->
+      <div v-else-if="items.length === 0 && temFiltroAtivo" class="estado ui-folha">
+        <span class="estado__icone" aria-hidden="true"><i class="ph ph-funnel-x" /></span>
+        <h2>{{ t('acessos.list.emptyFiltroTitle') }}</h2>
         <p>{{ t('acessos.list.emptyFiltroBody') }}</p>
         <Button
+          type="button"
           :label="t('acessos.filtros.limpar')"
           icon="ph ph-funnel-x"
           severity="secondary"
+          outlined
           @click="limparFiltros"
         />
       </div>
 
-      <!-- Sem título: a saudação já diz "Nenhum acesso ativo"; aqui fica só o que fazer. -->
-      <div v-else-if="items.length === 0" class="hc atend-state atend-state--empty">
-        <i class="ph ph-tray" aria-hidden="true" />
-        <p>
-          {{
-            activeTab === 'ativos'
-              ? t('acessos.list.emptyAtivosBody')
-              : t('acessos.list.emptyHistoricoBody')
-          }}
-        </p>
+      <!-- Nenhum acesso ativo: é aqui que se aprende como um acesso chega. -->
+      <div v-else-if="items.length === 0 && activeTab === 'ativos'" class="estado ui-folha">
+        <span class="estado__icone estado__icone--lugar" aria-hidden="true">
+          <i class="ph ph-key" />
+        </span>
+        <h2>{{ t('acessos.list.emptyAtivosTitle') }}</h2>
+        <p>{{ t('acessos.list.emptyAtivosBody') }}</p>
+        <ol v-if="!isGuidanceVisible" class="passos passos--vazio">
+          <li v-for="(passo, indice) in passosDoGuia" :key="passo.id" class="passo">
+            <span class="passo__icone" aria-hidden="true"><i :class="passo.icone" /></span>
+            <span class="passo__texto">
+              <strong>
+                <span class="passo__n ui-num" aria-hidden="true">{{ indice + 1 }}</span>
+                {{ passo.titulo }}
+              </strong>
+              <span>{{ passo.texto }}</span>
+            </span>
+          </li>
+        </ol>
+        <Button
+          type="button"
+          icon="ph ph-link"
+          :label="t('acessos.vincular.cta')"
+          severity="secondary"
+          outlined
+          :disabled="!store.podeOperar"
+          @click="vincularVisible = true"
+        />
+      </div>
+
+      <div v-else-if="items.length === 0" class="estado ui-folha">
+        <span class="estado__icone" aria-hidden="true">
+          <i class="ph ph-clock-counter-clockwise" />
+        </span>
+        <h2>{{ t('acessos.list.emptyHistoricoTitle') }}</h2>
+        <p>{{ t('acessos.list.emptyHistoricoBody') }}</p>
       </div>
 
       <template v-else>
-        <!-- Um pet, uma linha, num cartão só. O Marsh com onze acessos era onze cartões iguais. -->
-        <ul class="hc atend-lista" :class="{ 'atend-lista--ativos': activeTab === 'ativos' }">
-          <li v-for="grupo in grupos" :key="grupo.chave" class="atend-grupo">
-            <!-- Pet com um acesso: a linha já é o acesso, e abre direto. -->
-            <Button
-              v-if="grupo.acessos.length === 1"
-              type="button"
-              class="atend-linha atend-linha--pet"
-              @click="openDetalhe(grupo.acessos[0]!.id)"
-            >
-              <span class="atend-foto" aria-hidden="true">
-                <img v-if="grupo.petFoto" :src="grupo.petFoto" alt="" />
-                <template v-else>{{ iniciais(grupo.petNome) }}</template>
-              </span>
+        <div class="quadro ui-folha" :class="`quadro--${activeTab}`">
+          <div class="quadro__cab" aria-hidden="true">
+            <span>{{ t('acessos.lista.colunas.pet') }}</span>
+            <span>{{ t('acessos.lista.colunas.vinculado') }}</span>
+            <span class="col-num">{{ t('acessos.lista.colunas.anotacoes') }}</span>
+            <span>{{ t('acessos.lista.colunas.prontuario') }}</span>
+            <span>
+              {{
+                activeTab === 'ativos'
+                  ? t('acessos.lista.colunas.expira')
+                  : t('acessos.lista.colunas.encerrado')
+              }}
+            </span>
+            <span />
+          </div>
 
-              <span class="atend-linha__corpo">
-                <span class="atend-linha__nome">
-                  <strong>{{ grupo.petNome }}</strong>
-                  <span class="atend-linha__especie">· {{ grupo.especieLabel }}</span>
-                </span>
-                <span class="atend-linha__frase">{{ fraseDoAcesso(grupo.acessos[0]!) }}</span>
-              </span>
-
-              <span class="atend-linha__lado">
-                <span class="atend-fatos">
-                  <span
-                    v-for="fato in fatosDoAcesso(grupo.acessos[0]!)"
-                    :key="fato.id"
-                    class="atend-fato"
-                    :class="fato.tom ? `atend-fato--${fato.tom}` : undefined"
-                    :title="fato.rotulo"
-                  >
-                    <i :class="fato.icone" aria-hidden="true" />
-                    <span v-if="fato.texto" aria-hidden="true">{{ fato.texto }}</span>
-                    <span class="atend-sr">{{ fato.rotulo }}</span>
+          <ul class="ui-lista">
+            <li v-for="grupo in grupos" :key="grupo.chave" class="grupo">
+              <!-- Pet com um acesso: a linha já é o acesso, e abre direto. -->
+              <RouterLink
+                v-if="grupo.acessos.length === 1"
+                :to="`/parceiro/acessos/${grupo.acessos[0]!.id}`"
+                class="ui-linha linha"
+                :class="{ 'ui-marca ui-marca--atencao': prazoUrgente(grupo.acessos[0]!) }"
+              >
+                <span class="linha__pet">
+                  <PetAvatar
+                    :nome="grupo.petNome"
+                    :iniciais="iniciais(grupo.petNome)"
+                    :especie="especieDoAvatar(grupo.especie)"
+                    :foto-url="grupo.petFoto ?? ''"
+                    tamanho="md"
+                  />
+                  <span class="ui-linha__texto">
+                    <span class="ui-linha__titulo">{{ grupo.petNome }}</span>
+                    <span class="ui-linha__meta linha__meta">
+                      <span>{{ grupo.especieLabel }}</span>
+                      <span class="linha__servico">
+                        <i :class="iconeDoServico(grupo.acessos[0]!)" aria-hidden="true" />
+                        {{ servicoLabel(grupo.acessos[0]!) }}
+                      </span>
+                    </span>
+                    <span
+                      v-if="resumoAtualizado(grupo.acessos[0]!)"
+                      class="ui-selo ui-selo--atencao linha__atualizado"
+                    >
+                      <i class="ph ph-arrow-clockwise" aria-hidden="true" />
+                      {{
+                        t('acessos.list.resumoAtualizado', {
+                          data: resumoAtualizado(grupo.acessos[0]!),
+                        })
+                      }}
+                    </span>
+                    <!-- No celular as colunas somem: o que elas diziam desce para cá. -->
+                    <span class="linha__estreito">
+                      {{ haQuantoTempo(grupo.acessos[0]!.vinculadoEm) }} ·
+                      {{ anotacoesTexto(grupo.acessos[0]!.totalAnotacoes) }}
+                    </span>
                   </span>
                 </span>
-                <span class="hc-selo" :class="seloDoAcesso(grupo.acessos[0]!).tom">
-                  {{ seloDoAcesso(grupo.acessos[0]!).texto }}
-                </span>
-                <i class="ph ph-caret-right atend-linha__seta" aria-hidden="true" />
-              </span>
-            </Button>
 
-            <!-- Pet com vários acessos: a linha resume e abre a lista dele embaixo. -->
-            <template v-else>
-              <Button
-                type="button"
-                class="atend-linha atend-linha--pet"
-                :aria-expanded="gruposAbertos.has(grupo.chave)"
-                :aria-controls="`atend-grupo-${grupo.chave}`"
-                @click="alternarGrupo(grupo.chave)"
-              >
-                <span class="atend-foto" aria-hidden="true">
-                  <img v-if="grupo.petFoto" :src="grupo.petFoto" alt="" />
-                  <template v-else>{{ iniciais(grupo.petNome) }}</template>
+                <span class="linha__vinculo">
+                  <strong>{{ haQuantoTempo(grupo.acessos[0]!.vinculadoEm) }}</strong>
+                  <small class="ui-num">{{ dataLegivel(grupo.acessos[0]!.vinculadoEm) }}</small>
                 </span>
 
-                <span class="atend-linha__corpo">
-                  <span class="atend-linha__nome">
-                    <strong>{{ grupo.petNome }}</strong>
-                    <span class="atend-linha__especie">· {{ grupo.especieLabel }}</span>
+                <span
+                  class="linha__num col-num"
+                  :class="{ 'linha__num--zero': !grupo.acessos[0]!.totalAnotacoes }"
+                  :title="anotacoesTexto(grupo.acessos[0]!.totalAnotacoes)"
+                >
+                  <i class="ph ph-note-pencil" aria-hidden="true" />
+                  <span class="ui-num" aria-hidden="true">{{
+                    grupo.acessos[0]!.totalAnotacoes
+                  }}</span>
+                  <span class="sr-only">{{
+                    anotacoesTexto(grupo.acessos[0]!.totalAnotacoes)
+                  }}</span>
+                </span>
+
+                <span class="linha__prontuario">
+                  <template v-if="prontuarioDoAcesso(grupo.acessos[0]!).length">
+                    <span v-for="parte in prontuarioDoAcesso(grupo.acessos[0]!)" :key="parte.id">
+                      <i :class="parte.icone" aria-hidden="true" />
+                      {{ parte.texto }}
+                    </span>
+                  </template>
+                  <span v-else class="linha__nada">{{ t('acessos.lista.soResumo') }}</span>
+                </span>
+
+                <span
+                  v-if="grupo.acessos[0]!.status === 'ATIVO'"
+                  class="prazo"
+                  :class="{ 'prazo--perto': prazoUrgente(grupo.acessos[0]!) }"
+                >
+                  <strong class="prazo__tempo ui-num">
                     <i
-                      v-if="grupoUrgente(grupo)"
-                      class="ph ph-clock atend-linha__urgente"
-                      :title="t('acessos.grupo.venceLogo')"
-                      :aria-label="t('acessos.grupo.venceLogo')"
+                      v-if="prazoUrgente(grupo.acessos[0]!)"
+                      class="ph ph-alarm"
+                      aria-hidden="true"
+                    />
+                    {{ prazoCurto(grupo.acessos[0]!) }}
+                  </strong>
+                  <span class="prazo__barra" aria-hidden="true">
+                    <span
+                      :style="{ inlineSize: `${fracaoRestante(grupo.acessos[0]!) * 100}%` }"
                     />
                   </span>
-                  <span class="atend-linha__frase">{{ resumoDoGrupo(grupo) }}</span>
+                  <small class="ui-num">{{ dataEHora(grupo.acessos[0]!.expiraEm) }}</small>
+                  <span v-if="prazoUrgente(grupo.acessos[0]!)" class="sr-only">
+                    {{ t('acessos.grupo.venceLogo') }}
+                  </span>
+                </span>
+                <span v-else class="prazo prazo--fim">
+                  <span class="ui-selo">
+                    <i
+                      :class="
+                        grupo.acessos[0]!.status === 'REVOGADO' ? 'ph ph-prohibit' : 'ph ph-hourglass'
+                      "
+                      aria-hidden="true"
+                    />
+                    {{ statusLabel(grupo.acessos[0]!) }}
+                  </span>
+                  <small v-if="dataDoEncerramento(grupo.acessos[0]!)" class="ui-num">
+                    {{ dataDoEncerramento(grupo.acessos[0]!) }}
+                  </small>
                 </span>
 
-                <span class="atend-linha__alternar">
-                  {{
-                    gruposAbertos.has(grupo.chave)
-                      ? t('acessos.grupo.recolher')
-                      : t('acessos.grupo.verAcessos')
-                  }}
-                  <i
-                    class="ph"
-                    :class="gruposAbertos.has(grupo.chave) ? 'ph-caret-up' : 'ph-caret-down'"
-                    aria-hidden="true"
-                  />
-                </span>
-              </Button>
+                <i class="ph ph-caret-right ui-linha__seta linha__seta" aria-hidden="true" />
+              </RouterLink>
 
-              <Transition name="atend-abre">
-                <ul
-                  v-show="gruposAbertos.has(grupo.chave)"
-                  :id="`atend-grupo-${grupo.chave}`"
-                  class="atend-sublista"
+              <!-- Pet com vários acessos: a linha resume e abre a lista dele embaixo. -->
+              <template v-else>
+                <button
+                  type="button"
+                  class="ui-linha linha linha--grupo"
+                  :class="{ 'ui-marca ui-marca--atencao': grupoUrgente(grupo) }"
+                  :aria-expanded="gruposAbertos.has(grupo.chave)"
+                  :aria-controls="`atend-grupo-${grupo.chave}`"
                   :aria-label="grupo.petNome"
+                  @click="alternarGrupo(grupo.chave)"
                 >
-                  <li v-for="item in acessosVisiveis(grupo)" :key="item.id">
-                    <Button
-                      type="button"
-                      class="atend-linha atend-linha--acesso"
-                      @click="openDetalhe(item.id)"
-                    >
-                      <span class="atend-linha__frase atend-linha__frase--acesso">
-                        <strong>{{ servicoLabel(item) }}</strong>
-                        <template v-if="item.status !== 'ATIVO'">
-                          · {{ t('acessos.grupo.encerradoEm', { data: dataCurta(item.expiraEm) }) }}
-                        </template>
+                  <span class="linha__pet">
+                    <PetAvatar
+                      :nome="grupo.petNome"
+                      :iniciais="iniciais(grupo.petNome)"
+                      :especie="especieDoAvatar(grupo.especie)"
+                      :foto-url="grupo.petFoto ?? ''"
+                      tamanho="md"
+                    />
+                    <span class="ui-linha__texto">
+                      <span class="ui-linha__titulo">{{ grupo.petNome }}</span>
+                      <span class="ui-linha__meta">
+                        {{ grupo.especieLabel }} · {{ metaDoGrupo(grupo) }}
                       </span>
+                      <span class="linha__estreito">
+                        {{ anotacoesTexto(somaDoGrupo(grupo).totalAnotacoes) }}
+                      </span>
+                    </span>
+                  </span>
 
-                      <span class="atend-linha__lado">
-                        <span class="atend-fatos">
-                          <span
-                            v-for="fato in fatosDoAcesso(item)"
-                            :key="fato.id"
-                            class="atend-fato"
-                            :class="fato.tom ? `atend-fato--${fato.tom}` : undefined"
-                            :title="fato.rotulo"
-                          >
-                            <i :class="fato.icone" aria-hidden="true" />
-                            <span v-if="fato.texto" aria-hidden="true">{{ fato.texto }}</span>
-                            <span class="atend-sr">{{ fato.rotulo }}</span>
+                  <span class="linha__vinculo">
+                    <strong>{{ haQuantoTempo(vinculoMaisRecente(grupo)) }}</strong>
+                    <small class="ui-num">{{ dataLegivel(vinculoMaisRecente(grupo)) }}</small>
+                  </span>
+
+                  <span
+                    class="linha__num col-num"
+                    :class="{ 'linha__num--zero': !somaDoGrupo(grupo).totalAnotacoes }"
+                    :title="anotacoesTexto(somaDoGrupo(grupo).totalAnotacoes)"
+                  >
+                    <i class="ph ph-note-pencil" aria-hidden="true" />
+                    <span class="ui-num" aria-hidden="true">{{
+                      somaDoGrupo(grupo).totalAnotacoes
+                    }}</span>
+                  </span>
+
+                  <span class="linha__prontuario">
+                    <template v-if="prontuarioDoAcesso(somaDoGrupo(grupo)).length">
+                      <span
+                        v-for="parte in prontuarioDoAcesso(somaDoGrupo(grupo))"
+                        :key="parte.id"
+                      >
+                        <i :class="parte.icone" aria-hidden="true" />
+                        {{ parte.texto }}
+                      </span>
+                    </template>
+                    <span v-else class="linha__nada">{{ t('acessos.lista.soResumo') }}</span>
+                  </span>
+
+                  <span
+                    v-if="activeTab === 'ativos'"
+                    class="prazo"
+                    :class="{ 'prazo--perto': prazoUrgente(acessoDeReferencia(grupo)) }"
+                  >
+                    <strong class="prazo__tempo ui-num">
+                      <i
+                        v-if="prazoUrgente(acessoDeReferencia(grupo))"
+                        class="ph ph-alarm"
+                        aria-hidden="true"
+                      />
+                      {{ prazoCurto(acessoDeReferencia(grupo)) }}
+                    </strong>
+                    <span class="prazo__barra" aria-hidden="true">
+                      <span
+                        :style="{
+                          inlineSize: `${fracaoRestante(acessoDeReferencia(grupo)) * 100}%`,
+                        }"
+                      />
+                    </span>
+                    <small>{{ t('acessos.lista.oProximo') }}</small>
+                    <span v-if="grupoUrgente(grupo)" class="sr-only">
+                      {{ t('acessos.grupo.venceLogo') }}
+                    </span>
+                  </span>
+                  <span v-else class="prazo prazo--fim">
+                    <small>
+                      {{
+                        t('acessos.grupo.ultimoEncerrado', {
+                          data: dataLegivel(acessoDeReferencia(grupo).expiraEm),
+                        })
+                      }}
+                    </small>
+                  </span>
+
+                  <span class="linha__alternar" aria-hidden="true">
+                    <i
+                      class="ph"
+                      :class="gruposAbertos.has(grupo.chave) ? 'ph-caret-up' : 'ph-caret-down'"
+                    />
+                  </span>
+                </button>
+
+                <Transition name="abre">
+                  <ul
+                    v-show="gruposAbertos.has(grupo.chave)"
+                    :id="`atend-grupo-${grupo.chave}`"
+                    class="sublista"
+                    :aria-label="grupo.petNome"
+                  >
+                    <li v-for="item in acessosVisiveis(grupo)" :key="item.id">
+                      <RouterLink
+                        :to="`/parceiro/acessos/${item.id}`"
+                        class="ui-linha linha linha--acesso"
+                        :class="{ 'ui-marca ui-marca--atencao': prazoUrgente(item) }"
+                      >
+                        <span class="linha__pet linha__pet--acesso">
+                          <span class="linha__icone-servico" aria-hidden="true">
+                            <i :class="iconeDoServico(item)" />
+                          </span>
+                          <span class="ui-linha__texto">
+                            <span class="ui-linha__titulo">{{ servicoLabel(item) }}</span>
+                            <span
+                              v-if="resumoAtualizado(item)"
+                              class="ui-selo ui-selo--atencao linha__atualizado"
+                            >
+                              <i class="ph ph-arrow-clockwise" aria-hidden="true" />
+                              {{ t('acessos.list.resumoAtualizado', { data: resumoAtualizado(item) }) }}
+                            </span>
+                            <span class="linha__estreito">
+                              {{ haQuantoTempo(item.vinculadoEm) }} ·
+                              {{ anotacoesTexto(item.totalAnotacoes) }}
+                            </span>
                           </span>
                         </span>
-                        <span class="hc-selo" :class="seloDoAcesso(item).tom">
-                          {{ seloDoAcesso(item).texto }}
+
+                        <span class="linha__vinculo">
+                          <strong>{{ haQuantoTempo(item.vinculadoEm) }}</strong>
+                          <small class="ui-num">{{ dataLegivel(item.vinculadoEm) }}</small>
                         </span>
-                        <i class="ph ph-caret-right atend-linha__seta" aria-hidden="true" />
-                      </span>
-                    </Button>
-                  </li>
 
-                  <li v-if="grupo.acessos.length > acessosVisiveis(grupo).length">
-                    <Button
-                      type="button"
-                      class="atend-ver-outros"
-                      :label="
-                        t(
-                          'acessos.grupo.verOutros',
-                          {
-                            n: grupo.acessos.length - acessosVisiveis(grupo).length,
-                            pet: grupo.petNome,
-                          },
-                          grupo.acessos.length - acessosVisiveis(grupo).length,
-                        )
-                      "
-                      text
-                      size="small"
-                      @click="mostrarTodos(grupo.chave)"
-                    />
-                  </li>
-                </ul>
-              </Transition>
-            </template>
-          </li>
-        </ul>
+                        <span
+                          class="linha__num col-num"
+                          :class="{ 'linha__num--zero': !item.totalAnotacoes }"
+                          :title="anotacoesTexto(item.totalAnotacoes)"
+                        >
+                          <i class="ph ph-note-pencil" aria-hidden="true" />
+                          <span class="ui-num" aria-hidden="true">{{ item.totalAnotacoes }}</span>
+                          <span class="sr-only">{{ anotacoesTexto(item.totalAnotacoes) }}</span>
+                        </span>
 
-        <div v-if="hasMore" class="atend-more">
+                        <span class="linha__prontuario">
+                          <template v-if="prontuarioDoAcesso(item).length">
+                            <span v-for="parte in prontuarioDoAcesso(item)" :key="parte.id">
+                              <i :class="parte.icone" aria-hidden="true" />
+                              {{ parte.texto }}
+                            </span>
+                          </template>
+                          <span v-else class="linha__nada">{{ t('acessos.lista.soResumo') }}</span>
+                        </span>
+
+                        <span
+                          v-if="item.status === 'ATIVO'"
+                          class="prazo"
+                          :class="{ 'prazo--perto': prazoUrgente(item) }"
+                        >
+                          <strong class="prazo__tempo ui-num">
+                            <i v-if="prazoUrgente(item)" class="ph ph-alarm" aria-hidden="true" />
+                            {{ prazoCurto(item) }}
+                          </strong>
+                          <span class="prazo__barra" aria-hidden="true">
+                            <span :style="{ inlineSize: `${fracaoRestante(item) * 100}%` }" />
+                          </span>
+                          <small class="ui-num">{{ dataEHora(item.expiraEm) }}</small>
+                          <span v-if="prazoUrgente(item)" class="sr-only">
+                            {{ t('acessos.grupo.venceLogo') }}
+                          </span>
+                        </span>
+                        <span v-else class="prazo prazo--fim">
+                          <span class="ui-selo">
+                            <i
+                              :class="item.status === 'REVOGADO' ? 'ph ph-prohibit' : 'ph ph-hourglass'"
+                              aria-hidden="true"
+                            />
+                            {{ statusLabel(item) }}
+                          </span>
+                          <small v-if="dataDoEncerramento(item)" class="ui-num">
+                            {{ dataDoEncerramento(item) }}
+                          </small>
+                        </span>
+
+                        <i
+                          class="ph ph-caret-right ui-linha__seta linha__seta"
+                          aria-hidden="true"
+                        />
+                      </RouterLink>
+                    </li>
+
+                    <li
+                      v-if="grupo.acessos.length > acessosVisiveis(grupo).length"
+                      class="sublista__mais"
+                    >
+                      <button type="button" class="ui-mais" @click="mostrarTodos(grupo.chave)">
+                        {{
+                          t(
+                            'acessos.grupo.verOutros',
+                            {
+                              n: grupo.acessos.length - acessosVisiveis(grupo).length,
+                              pet: grupo.petNome,
+                            },
+                            grupo.acessos.length - acessosVisiveis(grupo).length,
+                          )
+                        }}
+                      </button>
+                    </li>
+                  </ul>
+                </Transition>
+              </template>
+            </li>
+          </ul>
+        </div>
+
+        <div v-if="hasMore" class="mais">
           <Button
+            type="button"
             :label="t('acessos.list.loadMore')"
             severity="secondary"
             outlined
@@ -1091,531 +1494,879 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
       </template>
     </div>
 
-    <VincularCodigoDialog v-model:visible="vincularVisible" @vinculado="onVinculado" />
-  </PartnerPageFrame>
+    <template #sempre>
+      <VincularCodigoDialog v-model:visible="vincularVisible" @vinculado="onVinculado" />
+    </template>
+  </UiPagina>
 </template>
 
 <style scoped>
-.atend-lede {
-  margin: 0;
-  color: var(--partner-muted);
-  font-size: 0.94rem;
-  line-height: 1.5;
+/*
+ * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
+ * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como em Pacientes.
+ */
+.tela-acessos {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
 }
 
-.atend-sr,
-.atend-filtros__sr {
+.acessos {
+  display: grid;
+  gap: 16px;
+}
+
+.sr-only {
   position: absolute;
+  overflow: hidden;
   width: 1px;
   height: 1px;
-  overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
 }
 
-/* Abas, busca e o botão de filtros numa linha; a busca ocupa o que sobra. */
-.atend-barra {
+/* ------------------------------------------------------------------ faixa do cadastro */
+
+.faixa {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.65rem;
+  gap: 10px 14px;
+  padding: 12px 16px 12px 12px;
+  border: 1px solid color-mix(in oklab, var(--atencao) 40%, var(--linha));
+  border-radius: 14px;
+  background: var(--atencao-fundo);
 }
 
-.atend-barra .atend-barra__abas {
-  flex: 0 0 auto;
-  margin: 0;
+.faixa__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--atencao-tinta);
+  font-size: 19px;
 }
 
-.atend-barra__busca {
-  position: relative;
-  display: block;
-  flex: 1 1 16rem;
+.faixa__texto {
+  display: grid;
   min-width: 0;
+  flex: 1 1 280px;
+  gap: 2px;
+  line-height: 1.45;
 }
 
-.atend-barra__busca i {
-  position: absolute;
-  top: 50%;
-  inset-inline-start: 0.85rem;
-  transform: translateY(-50%);
-  color: var(--hc-tinta-2);
-  font-size: 0.82rem;
-  pointer-events: none;
-}
-
-.atend-barra__busca :deep(.p-inputtext) {
-  width: 100%;
-  min-height: 2.6rem;
-  padding-inline-start: 2.3rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 999px;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
-}
-
-.atend-barra__busca :deep(.p-inputtext::placeholder) {
-  color: var(--hc-tinta-2);
-  opacity: 1;
-}
-
-.atend-barra__busca :deep(.p-inputtext:focus) {
-  border-color: var(--hc-marca);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hc-marca) 18%, transparent);
-}
-
-.atend-barra__filtros.p-button {
-  min-height: 2.6rem;
-  border-radius: 999px;
-}
-
-/* O painel de filtros aberto: controles soltos, sem moldura própria — é ferramenta, não conteúdo. */
-.atend-filtros {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.atend-filtros__select {
-  flex: 0 1 auto;
-  width: auto;
-  min-width: 8.5rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.7rem;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
-}
-
-.atend-filtros__select:not(.p-disabled):hover {
-  border-color: color-mix(in srgb, var(--hc-marca) 40%, var(--hc-borda));
-}
-
-.atend-filtros__select:not(.p-disabled).p-focus {
-  border-color: var(--hc-marca);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hc-marca) 18%, transparent);
-}
-
-.atend-filtros__select :deep(.p-select-label) {
-  color: var(--hc-tinta);
-  font-size: 0.82rem;
+.faixa__texto strong {
+  color: var(--tinta);
+  font-size: 14.5px;
   font-weight: 600;
 }
 
-.atend-filtros__select :deep(.p-select-label.p-placeholder) {
-  color: var(--hc-tinta-2);
-  font-weight: 500;
+.faixa__texto span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
-.atend-filtros__select :deep(.p-select-dropdown),
-.atend-filtros__select :deep(.p-select-clear-icon) {
-  color: var(--hc-tinta-2);
+.faixa__link.ui-mais {
+  color: var(--atencao-tinta);
 }
 
-.atend-filtros__ordem {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
+/* ------------------------------------------------------------------ explicações */
 
-.atend-filtros__ordem i {
-  color: var(--hc-marca-forte);
-  font-size: 0.75rem;
-}
-
-/* Filtro liga/desliga (aria-pressed): Button com o mesmo desenho dos outros campos da barra. */
-.atend-filtros__toggle.p-button {
-  flex: 0 1 auto;
-  gap: 0.4rem;
-  min-height: 2.25rem;
-  padding: 0 0.75rem;
-  border-color: var(--hc-borda);
-  border-radius: 0.7rem;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta-2);
-  font-size: 0.82rem;
-}
-
-.atend-filtros__toggle.p-button :deep(.p-button-label) {
-  font-weight: 650;
-}
-
-.atend-filtros__toggle.p-button:not(:disabled):hover {
-  border-color: color-mix(in srgb, var(--hc-marca) 40%, var(--hc-borda));
-  background: var(--hc-cartao);
-  color: var(--hc-tinta-2);
-}
-
-.atend-filtros__toggle--on.p-button,
-.atend-filtros__toggle--on.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-}
-
-/* Período é um filtro só: as duas datas vivem dentro da mesma cápsula. */
-.atend-filtros__periodo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-width: 0;
-  padding-block: 0.2rem;
-  padding-inline: 0.7rem 0.55rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.7rem;
-  background: var(--hc-cartao);
-}
-
-.atend-filtros__periodo-label {
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-/*
- * O calendário do período, embutido na pílula: o campo sem moldura própria, o ícone ao lado.
- * A classe cai na raiz do DatePicker; o campo de texto é filho, por isso o `:deep`.
- */
-.atend-filtros__date {
-  min-width: 0;
-}
-
-.atend-filtros__date :deep(.p-datepicker-input) {
-  width: 13.5rem;
-  padding: 0.32rem 0.4rem;
-  border: 0;
-  border-radius: 0.45rem;
-  background: transparent;
-  box-shadow: none;
-  color: var(--hc-tinta);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.atend-filtros__date :deep(.p-datepicker-dropdown) {
-  border: 0;
-  background: transparent;
-  color: var(--hc-tinta-2);
-}
-
-.atend-filtros__limpar {
-  margin-inline-start: auto;
-}
-
-.atend-panel {
+.guia {
   display: grid;
-  gap: 0.85rem;
+  gap: 12px;
 }
 
-.atend-state {
-  display: grid;
-  gap: 0.6rem;
-  justify-items: center;
-  padding: 2.2rem 1rem;
-  color: var(--hc-tinta-2);
-  text-align: center;
-}
-
-.atend-state--error p {
+.guia__lede {
+  max-width: 72ch;
   margin: 0;
-  color: var(--hc-coral-tinta);
-}
-
-.atend-state--empty i {
-  font-size: 1.4rem;
-  color: var(--hc-marca-forte);
-}
-
-.atend-state--empty strong {
-  color: var(--hc-tinta);
-}
-
-.atend-state--empty p {
-  margin: 0;
-  max-width: 26rem;
-  font-size: 0.88rem;
+  color: var(--tinta-2);
+  font-size: 14.5px;
   line-height: 1.5;
 }
 
-/* A lista inteira num cartão; os pets se separam por linha, não por moldura. */
-.atend-lista {
-  display: grid;
-  margin: 0;
-  padding: 0.35rem 1.1rem;
-  list-style: none;
-}
-
-.atend-grupo + .atend-grupo {
-  border-top: 1px solid var(--hc-linha);
-}
-
-/* Linha clicável rica: Button com slot, sem o visual de CTA do preset. */
-.atend-linha.p-button {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  width: 100%;
-  padding: 0.85rem 0.35rem;
-  border: 0;
-  border-radius: 0.6rem;
-  background: transparent;
-  color: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  text-align: start;
-  transition: background-color 0.15s ease-out;
-}
-
-.atend-linha.p-button:not(:disabled):hover,
-.atend-linha.p-button:not(:disabled):active {
-  background: color-mix(in srgb, var(--hc-marca-clara) 45%, transparent);
-  color: inherit;
-}
-
-.atend-linha.p-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
-  outline-offset: -2px;
-}
-
-/* A sombra de botão da casa não vale aqui: a linha é item de lista, não ação solta. */
-.atend-lista .atend-linha.p-button,
-.atend-lista .atend-linha.p-button:not(:disabled):hover,
-.atend-lista .atend-linha.p-button:focus-visible {
-  box-shadow: none;
-}
-
-.atend-foto {
-  display: grid;
-  flex: 0 0 auto;
-  place-items: center;
-  overflow: hidden;
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 0.75rem;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-  font-size: 0.8rem;
-  font-weight: 750;
-}
-
-.atend-foto img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.atend-linha__corpo {
-  display: grid;
-  flex: 1 1 auto;
-  gap: 0.2rem;
-  min-width: 0;
-}
-
-.atend-linha__nome {
-  display: flex;
-  align-items: baseline;
-  gap: 0.3rem;
-  min-width: 0;
-}
-
-.atend-linha__nome strong {
-  overflow: hidden;
-  color: var(--hc-tinta);
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.atend-linha__especie {
-  color: var(--hc-tinta-2);
-  font-size: 0.8rem;
-  white-space: nowrap;
-}
-
-/* A urgência mora no ícone: o grupo recolhido avisa sem pintar a linha. */
-.atend-linha__urgente {
-  align-self: center;
-  color: var(--hc-pessego-tinta);
-  font-size: 0.8rem;
-}
-
-.atend-linha__frase {
-  overflow: hidden;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.atend-linha__lado {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.atend-linha__seta {
-  color: var(--hc-tinta-2);
-  font-size: 0.78rem;
-}
-
-.atend-linha__alternar {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.4rem;
-  color: var(--hc-marca-forte);
-  font-size: 0.84rem;
-  font-weight: 650;
-}
-
-.atend-linha__alternar i {
-  font-size: 0.75rem;
-}
-
-/* Os acessos do pet, recuados até a coluna do nome: pertencem a ele, não à lista. */
-.atend-sublista {
-  display: grid;
-  margin: 0 0 0.5rem;
-  padding: 0;
-  padding-inline-start: 3.85rem;
-  list-style: none;
-}
-
-.atend-sublista > li {
-  border-top: 1px solid var(--hc-linha);
-}
-
-.atend-linha--acesso.p-button {
-  padding-block: 0.6rem;
-}
-
-.atend-linha__frase--acesso {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.atend-linha__frase--acesso strong {
-  color: var(--hc-tinta);
-  font-weight: 650;
-}
-
-.atend-ver-outros.p-button {
-  padding-inline: 0.35rem;
-  color: var(--hc-marca-forte);
-  font-weight: 650;
-}
-
-/* Fatos do acesso: ícone e número, sem fundo — quem chama atenção é o selo e o alerta. */
-.atend-fatos {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.atend-fato {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.78rem;
+.guia__titulo {
+  margin: 4px 0 0;
+  color: var(--tinta);
+  font-size: 17px;
   font-weight: 600;
-  white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
-.atend-fato i {
-  font-size: 0.75rem;
+.passos {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
 }
 
-/* Zero anotações continua sendo informação, mas não merece o mesmo peso de uma. */
-.atend-fato--vazio {
-  opacity: 0.6;
+.passo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
+}
+
+.passo__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 21px;
+}
+
+.passo__texto {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  line-height: 1.45;
+}
+
+.passo__texto strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.passo__texto > span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.passo__n {
+  display: inline-grid;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--superficie-3);
+  color: var(--tinta-2);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+/* ------------------------------------------------------------------ barra */
+
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.barra__abas {
+  flex: none;
+}
+
+.barra__abas :deep(.p-togglebutton-content) {
+  min-height: 38px;
+  padding-inline: 16px;
+  font-size: 14.5px;
+}
+
+.barra__busca {
+  min-width: min(100%, 16rem);
+  flex: 1 1 22rem;
+  max-width: 40rem;
+}
+
+.barra__busca :deep(.p-inputtext) {
+  min-height: 46px;
+  padding-inline-start: 44px;
+  border-radius: 12px;
+  font-size: 15.5px;
+}
+
+.barra__busca :deep(.p-inputicon) {
+  inset-inline-start: 15px;
+  color: var(--tinta-2);
+  font-size: 19px;
+}
+
+.barra__filtros.p-button {
+  min-height: 46px;
+  gap: 8px;
+  padding-inline: 16px;
+  border-radius: 12px;
+  font-size: 14.5px;
   font-weight: 500;
 }
 
-/* O resumo mudou depois da entrega: o único fato com cor. */
-.atend-fato--alerta {
-  color: var(--hc-coral-tinta);
+.barra__filtros .ph-sliders-horizontal {
+  font-size: 18px;
 }
 
-/* Vaga do fato ausente: some da vista e do leitor de tela, mas segura a coluna. */
-.atend-fato--oculto {
-  visibility: hidden;
+.barra__filtros--ligado.p-button {
+  border-color: var(--pj-lugar);
 }
 
-/* As vagas de número têm largura fixa; o alerta, que é frase, não. */
-.atend-fato:not(.atend-fato--alerta) {
-  justify-content: flex-end;
-  min-width: 2.1rem;
+.barra__total.ui-contagem {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
 }
 
-.atend-linha__lado .hc-selo {
-  min-width: 5.4rem;
+.barra__seta {
+  color: var(--tinta-3);
+  font-size: 13px;
 }
 
-/* Nos ativos o selo é o prazo ("expira em 14d 23h"): largura de sobra e dígitos de mesma largura. */
-.atend-lista--ativos .atend-linha__lado .hc-selo {
-  min-width: 8.4rem;
-  font-variant-numeric: tabular-nums;
+/* ------------------------------------------------------------------ filtros */
+
+.filtros {
+  padding: 16px 18px 18px;
 }
 
-.atend-more {
+.filtros__grade {
+  display: grid;
+  align-items: end;
+  gap: 14px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+}
+
+.campo {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.campo__rotulo {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.campo :deep(.p-select),
+.campo :deep(.p-datepicker) {
+  width: 100%;
+}
+
+.campo--periodo {
+  grid-column: span 1;
+}
+
+.campo--interruptor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+}
+
+.campo__interruptor {
+  display: grid;
+  gap: 1px;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+.campo__interruptor strong {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.campo__interruptor small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+/* As fichas do que está aplicado. */
+.aplicados {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: -4px;
+}
+
+.ficha {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px 0 12px;
+  border: 1px solid color-mix(in oklab, var(--pj-lugar) 45%, var(--linha));
+  border-radius: 999px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 550;
+}
+
+.ficha i {
+  font-size: 13px;
+}
+
+.ficha:hover {
+  border-color: var(--pj-lugar);
+}
+
+.ficha:focus-visible {
+  outline: 2px solid var(--pj-lugar);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ o quadro */
+
+/*
+ * Uma grade só para o cabeçalho, as linhas e as sublinhas: as colunas batem de cima a baixo. O
+ * quadro decide a forma pela largura que tem (a barra aberta ou fechada muda a conta).
+ */
+.quadro {
+  --colunas: minmax(0, 2.3fr) minmax(7.5rem, 1fr) 6.5rem minmax(9rem, 1.15fr) minmax(10rem, 1.2fr)
+    20px;
+
+  overflow: hidden;
+  container: quadro / inline-size;
+}
+
+.quadro__cab {
+  display: grid;
+  min-height: 40px;
+  align-items: center;
+  column-gap: 16px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+  grid-template-columns: var(--colunas);
+}
+
+.quadro__cab > span:first-child {
+  padding-inline-start: 52px;
+}
+
+.col-num {
+  justify-self: start;
+}
+
+.linha.ui-linha {
+  display: grid;
+  min-height: 72px;
+  column-gap: 16px;
+  padding-block: 12px;
+  grid-template-columns: var(--colunas);
+}
+
+.linha.ui-marca::before {
+  top: 14px;
+  bottom: 14px;
+}
+
+.linha__pet {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.linha__pet .ui-linha__titulo {
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.linha__pet .ui-linha__meta {
+  white-space: nowrap;
+}
+
+.linha__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.linha__meta > span + span::before {
+  margin-inline-end: 6px;
+  color: var(--tinta-3);
+  content: '·';
+}
+
+.linha__servico i {
+  margin-inline-end: 2px;
+  color: var(--pj-lugar-tinta);
+  font-size: 14px;
+  vertical-align: -2px;
+}
+
+.linha__atualizado.ui-selo {
+  max-width: 100%;
+  height: auto;
+  min-height: 22px;
+  justify-self: start;
+  margin-top: 4px;
+  padding: 3px 7px;
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: normal;
+}
+
+.linha__estreito {
+  display: none;
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linha__vinculo {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+  line-height: 1.3;
+}
+
+.linha__vinculo strong {
+  overflow: hidden;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linha__vinculo small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.linha__num {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.linha__num i {
+  color: var(--tinta-2);
+  font-size: 17px;
+}
+
+/* Zero anotações continua sendo informação ("já anotei algo aqui?"), mas pesa menos. */
+.linha__num--zero {
+  color: var(--tinta-3);
+  font-weight: 500;
+}
+
+.linha__num--zero i {
+  color: var(--tinta-3);
+}
+
+.linha__prontuario {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+  color: var(--tinta);
+  font-size: 13.5px;
+  line-height: 1.3;
+}
+
+.linha__prontuario > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.linha__prontuario i {
+  color: var(--pj-lugar-tinta);
+  font-size: 15px;
+}
+
+.linha__prontuario .linha__nada {
+  color: var(--tinta-3);
+}
+
+/* O prazo: o número que conta para trás, a barra que esvazia e quando fecha. */
+.prazo {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  line-height: 1.25;
+}
+
+.prazo__tempo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.prazo__tempo i {
+  font-size: 16px;
+}
+
+.prazo__barra {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  max-width: 9rem;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--superficie-3);
+}
+
+.prazo__barra > span {
+  display: block;
+  height: 100%;
+  min-inline-size: 4px;
+  border-radius: inherit;
+  background: var(--salvia);
+}
+
+.prazo small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.prazo--perto .prazo__tempo,
+.prazo--perto small {
+  color: var(--atencao-tinta);
+}
+
+.prazo--perto .prazo__barra > span {
+  background: var(--atencao);
+}
+
+.prazo--fim .ui-selo {
+  justify-self: start;
+}
+
+.linha__seta {
+  justify-self: end;
+}
+
+.linha__alternar {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  justify-self: end;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 14px;
+}
+
+.linha--grupo[aria-expanded='true'] .linha__alternar {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+}
+
+/* Os acessos do pet, presos ao rosto dele por um fio: pertencem a ele, não à lista. */
+.sublista {
+  position: relative;
+  display: grid;
+  margin: 0;
+  padding: 0 0 6px;
+  background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));
+  list-style: none;
+}
+
+.sublista > li + li {
+  border-top: 1px dashed var(--linha);
+}
+
+.sublista::before {
+  position: absolute;
+  top: 0;
+  bottom: 18px;
+  left: 36px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--linha);
+  content: '';
+}
+
+.linha--acesso.ui-linha {
+  min-height: 60px;
+}
+
+.linha__pet--acesso {
+  padding-inline-start: 52px;
+}
+
+.linha__icone-servico {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 16px;
+}
+
+.linha--acesso .ui-linha__titulo {
+  font-size: 14.5px;
+}
+
+.sublista__mais {
+  padding: 8px 18px 4px 70px;
+}
+
+.mais {
   display: flex;
   justify-content: center;
 }
 
-/* Abrir o grupo: os acessos descem do pet, 160 ms, sem altura animada. */
-.atend-abre-enter-active {
-  transition:
-    opacity 0.16s ease-out,
-    transform 0.16s ease-out;
+/* ------------------------------------------------------------------ esqueleto e estados */
+
+.esqueleto {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
 }
 
-.atend-abre-enter-from {
+.esqueleto__rosto {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 14px;
+  background: var(--superficie-3);
+}
+
+.esqueleto__texto {
+  display: grid;
+  flex: 1;
+  gap: 8px;
+}
+
+.esqueleto__osso {
+  display: block;
+  width: 40%;
+  height: 10px;
+  border-radius: 6px;
+  background: var(--superficie-3);
+  animation: pulsar 1.4s ease-in-out infinite;
+}
+
+.esqueleto__osso--nome {
+  width: 22%;
+  height: 13px;
+}
+
+.esqueleto__osso--fim {
+  width: 9rem;
+  flex: none;
+}
+
+@keyframes pulsar {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.estado {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 36px 24px;
+  text-align: center;
+}
+
+.estado h2 {
+  margin: 6px 0 0;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.estado p {
+  max-width: 48ch;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.estado > :deep(.p-button) {
+  margin-top: 10px;
+}
+
+.estado__icone {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 24px;
+}
+
+.estado__icone--lugar {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+}
+
+.estado__icone--erro {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+.passos--vazio {
+  width: 100%;
+  max-width: 900px;
+  margin-top: 14px;
+  text-align: start;
+}
+
+.passos--vazio .passo {
+  background: var(--superficie-2);
+  border-color: transparent;
+}
+
+/* ------------------------------------------------------------------ movimento */
+
+.abre-enter-active {
+  transition:
+    opacity var(--pj-tempo-medio) var(--pj-curva-chega),
+    transform var(--pj-tempo-medio) var(--pj-curva-chega);
+}
+
+.abre-enter-from {
   opacity: 0;
   transform: translateY(-4px);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .atend-abre-enter-active,
-  .atend-linha.p-button {
+  .abre-enter-active {
     transition: none;
   }
-}
 
-/* Tablet em pé: a linha cabe inteira; só o recuo dos acessos encolhe. */
-@media (max-width: 900px) {
-  .atend-sublista {
-    padding-inline-start: 0.75rem;
+  .esqueleto__osso {
+    animation: none;
   }
 }
-</style>
 
-<style>
-/* Painel teleportado: os tokens chegam pelo `pt` (inline) e cascateiam daqui. */
-.atend-filtros__overlay.p-select-overlay {
-  border: 1px solid var(--atend-ov-line);
-  background: var(--atend-ov-bg);
-  color: var(--atend-ov-text);
+/* ------------------------------------------------------------------ larguras */
+
+/* Quadro médio: some a coluna do vínculo, que desce para baixo do nome. */
+@container quadro (max-width: 940px) {
+  .quadro__cab,
+  .linha.ui-linha {
+    --colunas: minmax(0, 2fr) 5.5rem minmax(8.5rem, 1.1fr) minmax(9.5rem, 1.1fr) 20px;
+  }
+
+  .quadro__cab > span:nth-child(2),
+  .linha__vinculo {
+    display: none;
+  }
+
+  .linha__estreito {
+    display: block;
+  }
 }
 
-.atend-filtros__overlay .p-select-option {
-  color: var(--atend-ov-text);
+/* Quadro estreito (celular): rosto, nome e o prazo; o resto vira frase embaixo do nome. */
+@container quadro (max-width: 620px) {
+  .quadro__cab,
+  .linha.ui-linha {
+    --colunas: minmax(0, 1fr) auto 16px;
+  }
+
+  .quadro__cab {
+    display: none;
+  }
+
+  .linha.ui-linha {
+    column-gap: 12px;
+    padding-inline: 14px 12px;
+  }
+
+  .linha__num,
+  .linha__prontuario {
+    display: none;
+  }
+
+  .linha__pet {
+    gap: 12px;
+  }
+
+  .linha__pet .ui-linha__meta,
+  .linha__estreito {
+    white-space: normal;
+  }
+
+  .prazo {
+    justify-items: end;
+    text-align: end;
+  }
+
+  .prazo__barra {
+    width: 5rem;
+  }
+
+  .prazo small {
+    display: none;
+  }
+
+  .prazo--fim small {
+    display: block;
+  }
+
+  .linha__pet--acesso {
+    padding-inline-start: 50px;
+  }
+
+  .sublista::before {
+    left: 32px;
+  }
+
+  .sublista__mais {
+    padding-inline-start: 64px;
+  }
 }
 
-.atend-filtros__overlay .p-select-option:not(.p-disabled):hover,
-.atend-filtros__overlay .p-select-option.p-focus:not(.p-select-option-selected) {
-  background: var(--atend-ov-hover);
-  color: var(--atend-ov-text);
-}
+@media (max-width: 640px) {
+  .barra__abas {
+    width: 100%;
+  }
 
-.atend-filtros__overlay .p-select-option.p-select-option-selected {
-  background: var(--atend-ov-selected-bg);
-  color: var(--atend-ov-selected-text);
-}
+  .barra__abas :deep(.p-togglebutton) {
+    flex: 1 1 0;
+  }
 
-.atend-filtros__overlay .p-select-empty-message {
-  color: var(--atend-ov-muted);
+  .barra__busca {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .barra__filtros.p-button {
+    flex: 1 1 auto;
+  }
 }
 </style>

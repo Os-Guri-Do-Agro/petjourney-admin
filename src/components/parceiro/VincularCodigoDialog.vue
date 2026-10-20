@@ -14,7 +14,6 @@ import {
   vincularCompartilhamento,
 } from '@/service/parceiro/compartilhamentos-service'
 import type { CompartilhamentoDetalhe } from '@/service/parceiro/types'
-import { currentColors, isDarkMode } from '@/theme/color-mode'
 
 const visible = defineModel<boolean>('visible', { default: false })
 
@@ -35,28 +34,6 @@ const errorMessage = ref('')
 const throttledSeconds = ref(0)
 const otpWrapper = ref<HTMLElement | null>(null)
 let throttleTimer: ReturnType<typeof setInterval> | null = null
-
-/**
- * O painel do Dialog é pintado aqui (slot `#container`), não pelo tema do PrimeVue:
- * o overlay é teleportado e não acompanha os tokens do dashboard no dark.
- */
-const dialogStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--vk-bg': colors.dashboard.surface,
-    '--vk-surface-soft': colors.dashboard.surfaceSoft,
-    '--vk-text': colors.dashboard.text,
-    '--vk-muted': colors.dashboard.muted,
-    '--vk-line': colors.dashboard.line,
-    '--vk-accent': isDarkMode.value ? colors.dashboard.primaryStrong : colors.dashboard.primaryDeep,
-    '--vk-accent-bg': colors.dashboard.successBg,
-    '--vk-warm': colors.dashboard.warm,
-    '--vk-warm-bg': colors.dashboard.warmBg,
-    '--vk-warm-text': colors.dashboard.warmText,
-    '--vk-shadow-rgb': colors.auth.shadowRgb,
-  }
-})
 
 const codigo = computed(() => normalizarCodigoVinculo(codigoInput.value))
 const canSubmit = computed(
@@ -151,23 +128,18 @@ async function handleVincular() {
     v-model:visible="visible"
     modal
     :draggable="false"
-    class="vincular-dialog hc-tema"
+    class="vincular-dialog"
     :pt="{ root: { class: 'vincular-dialog' } }"
     @show="focusPrimeiroDigito"
   >
     <template #container="{ closeCallback }">
-      <div
-        class="vincular-dialog__shell"
-        :style="dialogStyle"
-        role="document"
-        aria-labelledby="vinculo-title"
-      >
+      <div class="vincular-dialog__shell" role="document" aria-labelledby="vinculo-title">
         <Button
           class="vincular-dialog__close"
           type="button"
           icon="ph ph-x"
           severity="secondary"
-          outlined
+          text
           :aria-label="t('common.close')"
           :disabled="submitting"
           @click="closeCallback"
@@ -177,7 +149,6 @@ async function handleVincular() {
           <i class="ph ph-key" />
         </div>
 
-        <p class="vincular-dialog__eyebrow">{{ t('acessos.vincular.eyebrow') }}</p>
         <h2 id="vinculo-title" class="vincular-dialog__title">
           {{ t('acessos.vincular.title') }}
         </h2>
@@ -238,11 +209,13 @@ async function handleVincular() {
         </div>
 
         <Button
+          class="vincular-dialog__enviar"
           :label="
             throttledSeconds > 0
               ? t('acessos.vincular.aguarde', { s: throttledSeconds })
               : t('acessos.vincular.submit')
           "
+          icon="ph ph-link"
           :loading="submitting"
           :disabled="!canSubmit"
           @click="handleVincular"
@@ -253,117 +226,113 @@ async function handleVincular() {
 </template>
 
 <style scoped>
+/*
+ * O painel é desenhado aqui (slot `#container`), nos tokens do Trilha: o overlay vai para o
+ * `body`, e a raiz `html.trilha` já leva os dois temas até ele.
+ */
 .vincular-dialog__shell {
   position: relative;
   display: grid;
   justify-items: center;
-  gap: 0.55rem;
-  width: min(26rem, calc(100vw - 2rem));
-  padding: 2.1rem 1.75rem 1.75rem;
-  border: 1px solid var(--vk-line);
-  border-radius: 1.35rem;
-  background: var(--vk-bg);
-  box-shadow: 0 28px 70px rgb(var(--vk-shadow-rgb) / 0.24);
-  color: var(--vk-text);
+  gap: 8px;
+  width: min(27rem, calc(100vw - 2rem));
+  padding: 32px 28px 24px;
+  border: 1px solid var(--linha);
+  border-radius: 20px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-3);
+  color: var(--tinta);
 }
 
 .vincular-dialog__close.p-button {
   position: absolute;
-  top: 0.85rem;
-  inset-inline-end: 0.85rem;
-  width: 2.1rem;
-  height: 2.1rem;
-  border-color: var(--vk-line);
-  border-radius: 0.65rem;
-  background: var(--vk-surface-soft);
-  color: var(--vk-muted);
+  top: 12px;
+  inset-inline-end: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: var(--tinta-2);
 }
 
 .vincular-dialog__close.p-button:not(:disabled):hover {
-  border-color: var(--vk-line);
-  background: var(--vk-accent-bg);
-  color: var(--vk-accent);
-}
-
-.vincular-dialog__close.p-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+  background: var(--superficie-2);
+  color: var(--tinta);
 }
 
 .vincular-dialog__badge {
   display: grid;
+  width: 56px;
+  height: 56px;
   place-items: center;
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 999px;
-  background: var(--vk-accent-bg);
-  color: var(--vk-accent);
-  font-size: 1.3rem;
-}
-
-.vincular-dialog__eyebrow {
-  margin: 0.5rem 0 0;
-  color: var(--vk-accent);
-  font-size: 0.7rem;
-  font-weight: 700;
+  border-radius: 18px;
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
+  font-size: 26px;
 }
 
 .vincular-dialog__title {
-  margin: 0;
-  color: var(--vk-text);
-  font-size: 1.35rem;
-  font-weight: 750;
+  margin: 8px 0 0;
+  color: var(--tinta);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   line-height: 1.25;
   text-align: center;
 }
 
 .vincular-dialog__lede {
+  max-width: 34ch;
   margin: 0;
-  color: var(--vk-muted);
-  font-size: 0.88rem;
+  color: var(--tinta-2);
+  font-size: 14.5px;
   line-height: 1.5;
   text-align: center;
 }
 
 .vincular-dialog__field {
   display: grid;
-  gap: 0.4rem;
+  gap: 8px;
   justify-items: stretch;
   width: 100%;
-  margin-top: 0.9rem;
+  margin-top: 14px;
 }
 
 .vincular-dialog__field label {
-  color: var(--vk-text);
-  font-size: 0.82rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 550;
+  text-align: center;
 }
 
 .vincular-dialog__otp :deep(.p-inputotp) {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  gap: 8px;
 }
 
-/* Visual de marca das células sobre o InputText do InputOtp. */
+/* As seis caixas do código: algarismos grandes, de mesma largura. */
 .vincular-dialog__digit.p-inputtext {
-  width: clamp(2.3rem, 11vw, 2.9rem);
-  height: 3.1rem;
+  width: clamp(2.4rem, 11vw, 3rem);
+  height: 3.5rem;
   padding: 0;
-  border: 1.5px solid var(--vk-line);
-  border-radius: 0.75rem;
-  background: var(--vk-surface-soft);
-  color: var(--vk-text);
-  font-size: 1.3rem;
+  border: 1px solid var(--linha-forte);
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
   font-weight: 650;
+  text-align: center;
   outline: none;
   box-shadow: none;
 }
 
 .vincular-dialog__digit.p-inputtext:enabled:focus {
-  border-color: var(--vk-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--vk-accent) 20%, transparent);
+  border-color: var(--musgo);
+  background: var(--superficie);
+  box-shadow: var(--anel-foco);
 }
 
 .vincular-dialog__digit.p-inputtext:disabled {
@@ -371,39 +340,41 @@ async function handleVincular() {
 }
 
 .vincular-dialog__digit--invalid.p-inputtext {
-  border-color: var(--vk-warm);
-  background: var(--vk-warm-bg);
+  border-color: var(--risco);
+  background: var(--risco-fundo);
 }
 
 .vincular-dialog__separator {
-  color: var(--vk-muted);
-  font-size: 1.1rem;
-  font-weight: 650;
+  color: var(--tinta-3);
+  font-size: 20px;
+  font-weight: 600;
   /* Não entra na navegação entre caixas: o InputOtp pula irmãos que não são input. */
   user-select: none;
 }
 
-/* O botão de largura total é o de vincular; o de fechar fica no canto. */
-.vincular-dialog__shell > :deep(.p-button:not(.vincular-dialog__close)) {
+.vincular-dialog__enviar.p-button {
   width: 100%;
-  margin-top: 1rem;
+  min-height: 46px;
+  margin-top: 16px;
+  font-size: 15px;
 }
 
 .vincular-dialog__hint {
-  color: var(--vk-muted);
-  font-size: 0.75rem;
+  color: var(--tinta-2);
+  font-size: 13px;
   text-align: center;
 }
 
 .vincular-dialog__error {
-  color: var(--vk-warm-text);
-  font-size: 0.8rem;
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 550;
   text-align: center;
 }
 </style>
 
 <style>
-/* O painel é o `.vincular-dialog__shell`; o do PrimeVue não segue o dark do dashboard. */
+/* O painel é o `.vincular-dialog__shell`; o do PrimeVue fica transparente em volta dele. */
 .vincular-dialog.p-dialog,
 .vincular-dialog .p-dialog {
   border: 0 !important;

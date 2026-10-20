@@ -1,26 +1,51 @@
 <script setup lang="ts">
+/**
+ * O acesso — o que o responsável compartilhou e a anotação que volta para o prontuário do pet.
+ *
+ * ## A forma (redesenho total, 19/10/2026)
+ *
+ * É a irmã leve do prontuário da Clínica, e se organiza em torno de três perguntas:
+ *
+ * 1. **Com quem e até quando** — a capa do pet (rosto, nome, espécie, castrado, o serviço do
+ *    acesso) com dois números à direita: o peso e o **prazo do acesso**, em contagem regressiva
+ *    com a barra que esvazia, em âmbar quando falta menos de um dia. Encerrado, o prazo vira o
+ *    desfecho (expirado ou revogado) e a faixa embaixo explica o que sobrou.
+ * 2. **O que o responsável trouxe** — à esquerda: a mensagem dele como citação, as observações,
+ *    o tratamento contínuo, os dados clínicos (uma linha por categoria, que abre), os documentos
+ *    e o diário. Contexto para ler antes e durante.
+ * 3. **O que eu registro** — à direita: a folha da anotação, com os campos do serviço, a
+ *    prescrição em linhas e "Ler receita com IA" à vista no alto dela, quem atendeu e os anexos;
+ *    "Registrar anotação" é a única ação cheia, num rodapé preso à tela. Embaixo, o histórico de
+ *    anotações da empresa.
+ *
+ * Em largura estreita as duas colunas viram uma, com "Resumo do pet | Anotações" num controle
+ * segmentado (`?aba=anotacoes` continua valendo). Encerrado não tem formulário nem resumo: fica o
+ * histórico, com a explicação do encerramento em cima.
+ */
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import SelectButton from 'primevue/selectbutton'
 import Textarea from 'primevue/textarea'
-import { PhHeart } from '@phosphor-icons/vue'
+import { PhHeart, PhQuotes } from '@phosphor-icons/vue'
 import { useToast } from 'primevue/usetoast'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import AnotacaoEstruturadaFields from '@/components/parceiro/AnotacaoEstruturadaFields.vue'
 import AnotacaoEstruturadaView from '@/components/parceiro/AnotacaoEstruturadaView.vue'
 import LerReceitaComIA from '@/components/parceiro/LerReceitaComIA.vue'
-import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
 import { useAgora } from '@/composables/useAgora'
 import { useLeituraReceitaParceiro } from '@/composables/useLeituraReceitaParceiro'
 import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
+import type { PetSpecies } from '@/features/clinico/data/types'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
 import {
@@ -34,8 +59,9 @@ import type {
   BlocoSnapshot,
   CompartilhamentoDetalhe,
   TipoDocumentoAnexo,
+  TipoServicoPrestador,
 } from '@/service/parceiro/types'
-import { calcularTempoRestante } from '@/utils/format/expiracao'
+import { calcularTempoRestante, parseInstante } from '@/utils/format/expiracao'
 import { classificarFalhaArquivo } from '@/utils/parceiro/arquivo-compartilhado'
 import {
   ESPECIALIDADES,
@@ -151,6 +177,11 @@ const estruturadaForm = ref(criarAnotacaoEstruturadaForm())
 const estruturadaErros = ref<Record<string, string>>({})
 const anexosForm = ref<AnexoForm[]>([])
 const formError = ref('')
+/** O envio barrou por falta de serviço ou texto: o campo vazio ganha a borda de erro. */
+const faltaObrigatorio = computed(
+  () => formError.value !== '' && formError.value === t('acessos.anotacao.camposObrigatorios'),
+)
+
 const submittingAnotacao = ref(false)
 const abrindoAnexoId = ref<string | null>(null)
 /** Chave `acao:arquivoId`: abrir e baixar o mesmo arquivo não podem girar juntos. */
@@ -243,6 +274,13 @@ const displayTab = computed<DetalheTab>(() => (isAtivo.value ? activeTab.value :
 const tabsAriaLabel = computed(() =>
   t('frame.tabs.aria', { labels: tabs.value.map((tab) => tab.label).join(', ') }),
 )
+
+/** O controle segmentado não deixa ficar sem escolha, mas o evento ainda pode vir vazio. */
+function escolherAba(valor: unknown) {
+  if (valor === 'resumo' || valor === 'anotacoes') {
+    setTab(valor as DetalheTab)
+  }
+}
 
 const servicoLabel = computed(() => {
   if (!detalhe.value) {
@@ -487,6 +525,19 @@ const resumoVazio = computed(
     diarioEstado.value === 'OCULTO',
 )
 
+/**
+ * Só a mensagem, nenhum dado clínico: a coluna diz isso em uma linha, para ninguém procurar a
+ * alergia que não veio.
+ */
+const semDadosClinicos = computed(
+  () =>
+    !resumoVazio.value &&
+    snapshotListSections.value.length === 0 &&
+    tratamentosEstado.value === 'OCULTO' &&
+    documentosEstado.value === 'OCULTO' &&
+    diarioEstado.value === 'OCULTO',
+)
+
 /** Seções abertas: alergias sempre; demais só se a lista for curta. */
 const openSections = ref<Record<string, boolean>>({})
 
@@ -534,20 +585,159 @@ function formatDate(value: string) {
   })
 }
 
-function expiraLabel(value: string) {
-  const restante = calcularTempoRestante(value, agora.value)
+// ------------------------------------------------------------------ a capa: quem é e até quando
+
+/** A silhueta do avatar: só cão e gato têm desenho, o resto fica nas iniciais. */
+const ESPECIE_DO_AVATAR: Partial<Record<string, PetSpecies>> = {
+  CACHORRO: 'canina',
+  GATO: 'felina',
+  AVE: 'ave',
+  ROEDOR: 'roedor',
+  REPTIL: 'reptil',
+}
+
+const ICONE_DO_SERVICO: Record<TipoServicoPrestador, string> = {
+  CONSULTA: 'ph ph-stethoscope',
+  EXAME: 'ph ph-microscope',
+  BANHO: 'ph ph-drop',
+  TOSA: 'ph ph-scissors',
+  HOTEL: 'ph ph-bed',
+  OUTRO: 'ph ph-paw-print',
+}
+
+const iniciaisDoPet = computed(() =>
+  (detalhe.value?.petNome ?? '').trim().slice(0, 2).toLocaleUpperCase(),
+)
+
+const especieDoAvatar = computed(() =>
+  detalhe.value ? (ESPECIE_DO_AVATAR[detalhe.value.especie] ?? null) : null,
+)
+
+const iconeDoServico = computed(() =>
+  detalhe.value ? (ICONE_DO_SERVICO[detalhe.value.tipoServico] ?? 'ph ph-paw-print') : '',
+)
+
+/** "Cachorro · Castrado": castrado só enquanto o acesso vive (o encerrado não traz o dado). */
+const metaDoPet = computed(() => {
+  if (!detalhe.value) {
+    return ''
+  }
+
+  const castrado =
+    isAtivo.value && detalhe.value.petCastrado != null
+      ? detalhe.value.petCastrado
+        ? t('acessos.pet.castrado')
+        : t('acessos.pet.naoCastrado')
+      : ''
+
+  return [detalhe.value.especieLabel, castrado].filter(Boolean).join(' · ')
+})
+
+/** A contagem regressiva do acesso, curta: "3d 4h", "5h 12min", "40min". */
+const prazoCurto = computed(() => {
+  if (!detalhe.value) {
+    return ''
+  }
+
+  const restante = calcularTempoRestante(detalhe.value.expiraEm, agora.value)
 
   switch (restante.estado) {
     case 'dias':
-      return t('acessos.expira.dias', { d: restante.dias, h: restante.horas })
+      return t('acessos.lista.prazo.dias', { d: restante.dias, h: restante.horas })
     case 'horas':
-      return t('acessos.expira.horas', { h: restante.horas, m: restante.minutos })
+      return t('acessos.lista.prazo.horas', { h: restante.horas, m: restante.minutos })
     case 'minutos':
-      return t('acessos.expira.minutos', { m: restante.minutos })
+      return t('acessos.lista.prazo.minutos', { m: restante.minutos })
     default:
       return t('acessos.expira.expirado')
   }
+})
+
+/** Menos de um dia: o prazo fica âmbar, como na lista. */
+const prazoPerto = computed(
+  () =>
+    isAtivo.value &&
+    Boolean(detalhe.value) &&
+    calcularTempoRestante(detalhe.value!.expiraEm, agora.value).estado !== 'dias',
+)
+
+/** Quanto da janela do acesso ainda resta, de 0 a 1: a barra que esvazia embaixo do número. */
+const fracaoRestante = computed(() => {
+  if (!detalhe.value) {
+    return 0
+  }
+
+  const fim = parseInstante(detalhe.value.expiraEm)
+  const total = fim - parseInstante(detalhe.value.criadoEm || detalhe.value.vinculadoEm)
+
+  return total > 0 ? Math.min(1, Math.max(0, (fim - agora.value) / total)) : 0
+})
+
+/** "23 de out., 01:40". */
+function dataEHora(value: string) {
+  const data = new Date(parseInstante(value))
+
+  return Number.isNaN(data.getTime())
+    ? ''
+    : new Intl.DateTimeFormat(INTL_LOCALE[locale.value as Locale], {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(data)
 }
+
+/** "anteontem", "há 3 dias" — o `Intl` traduz sem chave nenhuma. */
+function haQuantoTempo(value: string) {
+  const diff = agora.value - parseInstante(value)
+
+  if (Number.isNaN(diff)) {
+    return ''
+  }
+
+  const relativo = new Intl.RelativeTimeFormat(INTL_LOCALE[locale.value as Locale], {
+    numeric: 'auto',
+  })
+  const minutos = Math.max(0, Math.floor(diff / 60_000))
+
+  if (minutos < 60) {
+    return relativo.format(-Math.max(1, minutos), 'minute')
+  }
+
+  const horas = Math.floor(minutos / 60)
+
+  return horas < 24
+    ? relativo.format(-horas, 'hour')
+    : relativo.format(-Math.floor(horas / 24), 'day')
+}
+
+/** Quando o acesso acabou: a revogação tem data própria; o expirado acaba no prazo. */
+const encerradoEm = computed(() =>
+  detalhe.value ? (detalhe.value.revogadoEm ?? detalhe.value.expiraEm) : '',
+)
+
+/**
+ * Cadastro que não opera (em análise, recusado ou suspenso): o acesso continua legível — foi
+ * consentido pelo responsável —, mas a anotação fica bloqueada. A faixa diz por quê.
+ */
+const avisoDoCadastro = computed(() => {
+  if (store.loadState !== 'ready' || store.podeOperar) {
+    return null
+  }
+
+  const status = store.statusAuditoria
+
+  if (store.cadastroSuspenso || status === 'SUSPENSO') {
+    return 'suspendedReadOnly'
+  }
+
+  if (status === 'REJEITADO') {
+    return 'rejected'
+  }
+
+  return status === 'PENDENTE' ? 'pending' : null
+})
 
 function resetAnotacaoForm() {
   anotacaoForm.servicoRealizado = ''
@@ -604,10 +794,6 @@ async function loadDetalhe(silencioso = false) {
       loading.value = false
     }
   }
-}
-
-function voltar() {
-  void router.push('/parceiro/acessos')
 }
 
 /**
@@ -953,118 +1139,156 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :subtitle="t('acessos.detalhe.subtitle')"
-    :title="detalhe?.petNome ?? t('acessos.detalhe.title')"
-    :loading="loading"
-    :error="error"
-    :no-partner-access="store.semAcessoParceiro"
-    guidance
-    @retry="loadDetalhe()"
+  <UiPagina
+    class="tela-acesso"
+    :titulo="detalhe?.petNome ?? t('acessos.detalhe.title')"
+    :carregando="loading"
+    :erro="error"
+    :sem-acesso-de-parceiro="store.semAcessoParceiro"
+    guia
+    @tentar-de-novo="loadDetalhe()"
   >
-    <!-- A identidade do pet é o título da página: antes ela aparecia duas vezes, no título e
-         num cartão logo abaixo, e o cartão empurrava o trabalho para baixo da dobra. -->
+    <template #voltar>
+      <RouterLink to="/parceiro/acessos" class="voltar">
+        <i class="ph ph-arrow-left" aria-hidden="true" />
+        {{ t('acessos.title') }}
+      </RouterLink>
+    </template>
+
+    <!-- A capa do pet: o pet é o título desta tela, e o prazo do acesso mora ao lado do nome. -->
     <template #cabecalho>
-      <div v-if="detalhe" class="atd-id" :data-status="detalhe.status">
-        <span class="atd-id__foto">
-          <img v-if="detalhe.petFoto" :src="detalhe.petFoto" :alt="detalhe.petNome" />
-          <i v-else class="ph ph-paw-print" aria-hidden="true" />
-        </span>
-
-        <div class="atd-id__texto">
-          <p class="atd-id__sobre">
-            {{ t('acessos.detalhe.subtitle') }}
-            <span aria-hidden="true">·</span>
-            {{ servicoLabel }}
-          </p>
-          <div class="atd-id__linha">
-            <h1 class="atd-id__nome">{{ detalhe.petNome }}</h1>
-            <span class="atd-id__status" :data-status="detalhe.status">
-              <i :class="isAtivo ? 'ph ph-check-circle' : 'ph ph-lock-simple'" aria-hidden="true" />
-              {{ t(`acessos.list.status.${detalhe.status}`) }}
-            </span>
-            <span v-if="isAtivo" class="atd-id__prazo">
-              <i class="ph ph-hourglass-medium" aria-hidden="true" />
-              {{ expiraLabel(detalhe.expiraEm) }}
-            </span>
+      <div v-if="detalhe" class="capa" :data-status="detalhe.status">
+        <div class="capa__quem">
+          <PetAvatar
+            class="capa__rosto"
+            :nome="detalhe.petNome"
+            :iniciais="iniciaisDoPet"
+            :especie="especieDoAvatar"
+            :foto-url="detalhe.petFoto ?? ''"
+            tamanho="xl"
+          />
+          <div class="capa__identidade">
+            <h1 class="capa__nome">{{ detalhe.petNome }}</h1>
+            <p v-if="metaDoPet" class="capa__meta">{{ metaDoPet }}</p>
+            <p class="capa__selos">
+              <span class="ui-selo ui-selo--lugar">
+                <i :class="iconeDoServico" aria-hidden="true" />
+                {{ servicoLabel }}
+              </span>
+            </p>
           </div>
-          <p class="atd-id__meta" :aria-label="t('acessos.detalhe.metaAria')">
-            <span>{{ detalhe.especieLabel }}</span>
-            <span v-if="isAtivo && detalhe.petCastrado != null">
-              {{ detalhe.petCastrado ? t('acessos.pet.castrado') : t('acessos.pet.naoCastrado') }}
-            </span>
-            <span v-if="pesoKg != null" :title="t('acessos.snapshot.peso')">
-              {{ pesoKgLegivel }} kg
-            </span>
-          </p>
         </div>
+
+        <dl class="capa__dados" :aria-label="t('acessos.detalhe.metaAria')">
+          <div v-if="pesoKg != null" class="capa__dado">
+            <dt>{{ t('acessos.snapshot.peso') }}</dt>
+            <dd class="capa__numero">
+              <strong class="ui-num">{{ pesoKgLegivel }}</strong>
+              <span>kg</span>
+            </dd>
+          </div>
+
+          <div
+            v-if="isAtivo"
+            class="capa__dado capa__prazo"
+            :class="{ 'capa__prazo--perto': prazoPerto }"
+          >
+            <dt>{{ t('acessos.detalhe.prazo.ativo') }}</dt>
+            <dd>
+              <strong class="capa__contagem ui-num">
+                <i v-if="prazoPerto" class="ph ph-alarm" aria-hidden="true" />
+                {{ prazoCurto }}
+              </strong>
+              <span class="capa__barra" aria-hidden="true">
+                <span :style="{ inlineSize: `${fracaoRestante * 100}%` }" />
+              </span>
+              <small class="ui-num">
+                {{ t('acessos.detalhe.prazo.ate', { data: dataEHora(detalhe.expiraEm) }) }}
+              </small>
+              <small>
+                {{ t('acessos.detalhe.prazo.vinculado', { quando: haQuantoTempo(detalhe.vinculadoEm) }) }}
+              </small>
+              <span v-if="prazoPerto" class="sr-only">{{ t('acessos.grupo.venceLogo') }}</span>
+            </dd>
+          </div>
+
+          <div v-else class="capa__dado capa__prazo capa__prazo--fim">
+            <dt>{{ t('acessos.detalhe.prazo.encerrado') }}</dt>
+            <dd>
+              <strong class="capa__desfecho">{{ t(`acessos.list.status.${detalhe.status}`) }}</strong>
+              <small class="ui-num">{{ dataEHora(encerradoEm) }}</small>
+            </dd>
+          </div>
+        </dl>
       </div>
 
-      <div v-else class="atd-id atd-id--carregando">
-        <div class="atd-id__texto">
-          <p class="atd-id__sobre">{{ t('acessos.detalhe.subtitle') }}</p>
-          <h1 class="atd-id__nome">{{ t('acessos.detalhe.title') }}</h1>
-        </div>
-      </div>
+      <h1 v-else class="capa__reserva">{{ t('acessos.detalhe.title') }}</h1>
     </template>
 
-    <template #actions>
-      <Button
-        :label="t('acessos.detalhe.back')"
-        icon="ph ph-arrow-left"
-        severity="secondary"
-        @click="voltar"
-      />
-    </template>
+    <div v-if="detalhe" class="acesso">
+      <!-- Leitura do prontuário não é gated por auditoria (seção 4): o acesso foi consentido
+           pelo responsável. Suspenso lê tudo e perde só a anotação, que é mutação. -->
+      <section v-if="avisoDoCadastro" class="faixa faixa--atencao" role="status">
+        <span class="faixa__icone" aria-hidden="true">
+          <i :class="avisoDoCadastro === 'rejected' ? 'ph ph-x-circle' : 'ph ph-lock'" />
+        </span>
+        <span class="faixa__texto">
+          <strong>{{ t(`frame.operability.${avisoDoCadastro}.title`) }}</strong>
+          <span>
+            {{ t(`frame.operability.${avisoDoCadastro}.body`) }}
+            <template v-if="store.status?.motivoAuditoria">
+              {{ t('frame.operability.reasonPrefix') }} {{ store.status.motivoAuditoria }}
+            </template>
+          </span>
+        </span>
+        <RouterLink class="faixa__link ui-mais" to="/settings?aba=empresa">
+          {{ t(`frame.operability.${avisoDoCadastro}.link`) }}
+        </RouterLink>
+      </section>
 
-    <!-- Leitura do prontuário não é gated por auditoria (seção 4): o acesso foi
-         consentido pelo responsável, não pelo status do cadastro. Suspenso lê
-         tudo e perde só a anotação, que é mutação. -->
-    <PartnerOperabilityBanner cover-suspended />
-
-    <template v-if="detalhe">
-      <section v-if="!isAtivo" class="atd-encerrado" role="status">
-        <i class="ph ph-lock-simple" aria-hidden="true" />
-        <div>
+      <!-- Encerrado: sem formulário e sem resumo. O que aconteceu e o que sobrou. -->
+      <section v-if="!isAtivo" class="faixa faixa--encerrado" role="status">
+        <span class="faixa__icone" aria-hidden="true">
+          <i :class="detalhe.status === 'REVOGADO' ? 'ph ph-prohibit' : 'ph ph-hourglass-low'" />
+        </span>
+        <span class="faixa__texto">
           <strong>{{ t('acessos.encerrado.title') }}</strong>
-          <p>
+          <span>
             {{
               detalhe.status === 'REVOGADO'
                 ? t('acessos.encerrado.revogado')
                 : t('acessos.encerrado.expirado')
             }}
-          </p>
-        </div>
+          </span>
+        </span>
       </section>
 
-      <!--
-        A mesa: a ficha do pet ao lado da folha de anotação. Antes eram duas abas, e quem
-        prescrevia escrevia o remédio sem ver a alergia, que ficava na outra aba. Na largura que
-        cabe as duas colunas (container, não viewport: o menu lateral aberto ou fechado muda
-        a conta), as abas somem; na estreita voltam, com as mesmas duas metades.
-      -->
-      <div class="atd-mesa" :data-aba="displayTab" :data-ficha="isAtivo ? 'sim' : 'nao'">
-        <PartnerSectionTabs
+      <div class="mesa" :data-aba="displayTab" :data-ficha="isAtivo ? 'sim' : 'nao'">
+        <SelectButton
           v-if="isAtivo"
-          class="atd-mesa__abas"
-          :tabs="tabs"
-          :active-tab="displayTab"
+          class="mesa__abas"
+          :model-value="displayTab"
+          :options="tabs"
+          option-label="label"
+          option-value="id"
+          :allow-empty="false"
           :aria-label="tabsAriaLabel"
-          @select="setTab($event as DetalheTab)"
+          @update:model-value="escolherAba"
         />
 
-        <div class="atd-mesa__grade">
-          <!-- Ficha do pet -->
-          <aside v-if="isAtivo" class="atd-ficha" aria-labelledby="atd-ficha-titulo">
-            <header class="atd-ficha__cab">
-              <h2 id="atd-ficha-titulo">{{ t('acessos.detalhe.tabs.resumo.label') }}</h2>
-              <!-- Em atendimento com estadia o quadro muda no meio: saber que o responsável
-                   mexeu no resumo depois de entregar é o que avisa que a leitura de ontem
-                   pode não valer mais. -->
+        <div class="mesa__grade">
+          <!-- ------------------------------------------------ o que o responsável compartilhou -->
+          <aside v-if="isAtivo" class="ficha" aria-labelledby="atd-ficha-titulo">
+            <header class="coluna__cab">
+              <h2 id="atd-ficha-titulo" class="coluna__titulo">
+                {{ t('acessos.detalhe.tabs.resumo.label') }}
+              </h2>
+              <!-- O responsável mexeu no resumo depois de entregar: a leitura de ontem pode não
+                   valer mais. -->
               <p
                 v-if="carimbo"
-                class="atd-carimbo"
+                class="carimbo"
+                :class="{ 'carimbo--atualizado': carimbo.atualizado }"
                 :data-atualizado="carimbo.atualizado ? 'true' : 'false'"
               >
                 <i
@@ -1081,14 +1305,35 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               </p>
             </header>
 
+            <!-- A mensagem do responsável, como citação: é a primeira coisa a ler. -->
+            <figure v-if="mensagemTutor" class="recado">
+              <PhQuotes class="recado__aspas" weight="fill" aria-hidden="true" />
+              <blockquote class="recado__texto">{{ mensagemTutor }}</blockquote>
+              <figcaption class="recado__quem">
+                <i class="ph ph-chat-circle-text" aria-hidden="true" />
+                {{ t('acessos.detalhe.mensagemTutor') }}
+              </figcaption>
+            </figure>
+
+            <section v-if="showObservacoesTutor" class="observacao">
+              <h3 class="observacao__titulo">
+                <i class="ph ph-info" aria-hidden="true" />
+                {{ t('acessos.snapshot.observacoes') }}
+              </h3>
+              <p class="observacao__texto">{{ observacoesTutor }}</p>
+            </section>
+
             <!-- Responsável pode liberar o acesso sem marcar nenhuma categoria: a ficha existe
                  e não tem o que mostrar. Explica o porquê e empurra para a ação útil. -->
-            <section v-if="resumoVazio" class="atd-ficha__vazio">
-              <i class="ph ph-lock-simple-open" aria-hidden="true" />
+            <section v-if="resumoVazio" class="vazio-ficha ui-folha">
+              <span class="vazio-ficha__icone" aria-hidden="true">
+                <i class="ph ph-lock-simple-open" />
+              </span>
               <strong>{{ t('acessos.snapshot.emptyTitle') }}</strong>
               <p>{{ t('acessos.snapshot.emptyBody', { pet: detalhe.petNome }) }}</p>
               <Button
                 v-if="podeAnotar"
+                type="button"
                 :label="t('acessos.snapshot.emptyCta')"
                 icon="ph ph-pencil-simple"
                 size="small"
@@ -1098,174 +1343,143 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               />
             </section>
 
-            <section v-if="mensagemTutor" class="atd-ficha__secao">
-              <h3 class="atd-ficha__titulo">
-                <i class="ph ph-chat-circle-text" aria-hidden="true" />
-                {{ t('acessos.detalhe.mensagemTutor') }}
-              </h3>
-              <blockquote class="atd-recado">{{ mensagemTutor }}</blockquote>
-            </section>
+            <p v-else-if="semDadosClinicos" class="sem-dados">
+              <i class="ph ph-lock-simple" aria-hidden="true" />
+              {{ t('acessos.detalhe.semDadosClinicos') }}
+            </p>
 
-            <section v-if="showObservacoesTutor" class="atd-ficha__secao">
-              <h3 class="atd-ficha__titulo">
-                <i class="ph ph-info" aria-hidden="true" />
-                {{ t('acessos.snapshot.observacoes') }}
-              </h3>
-              <p class="atd-ficha__texto">{{ observacoesTutor }}</p>
-            </section>
-
-            <!-- Tratamento contínuo (Parte 16), ACIMA das listas clínicas: é o remédio de
-                 todo dia, e o item cuja falha tem dano imediato para quem vai cuidar do pet
-                 sem conviver com ele. -->
-            <section
+            <!-- Tratamento contínuo (Parte 16), ACIMA das listas clínicas: é o remédio de todo
+                 dia, e o item cuja falha tem dano imediato. -->
+            <UiSecao
               v-if="tratamentosEstado !== 'OCULTO'"
-              class="atd-ficha__secao"
-              aria-labelledby="atd-trat-title"
+              id="atd-trat"
+              :titulo="t('acessos.tratamentos.title')"
+              icone="ph ph-heartbeat"
+              :contagem="tratamentosContinuos.length || null"
+              :descricao="isGuidanceVisible ? t('acessos.tratamentos.lede') : undefined"
+              folha
             >
-              <h3 id="atd-trat-title" class="atd-ficha__titulo">
-                <i class="ph ph-heartbeat" aria-hidden="true" />
-                {{ t('acessos.tratamentos.title') }}
-                <span v-if="tratamentosContinuos.length" class="atd-ficha__conta">
-                  {{ tratamentosContinuos.length }}
-                </span>
-              </h3>
-              <p v-if="isGuidanceVisible" class="atd-ficha__lede">
-                {{ t('acessos.tratamentos.lede') }}
-              </p>
+              <p v-if="tratamentosVazioTexto" class="ui-vazio">{{ tratamentosVazioTexto }}</p>
 
-              <p v-if="tratamentosVazioTexto" class="atd-ficha__nada">
-                {{ tratamentosVazioTexto }}
-              </p>
-
-              <ul v-else class="atd-trat">
-                <li v-for="item in tratamentosContinuos" :key="item.key" class="atd-trat__item">
-                  <PhHeart class="atd-trat__icone" weight="fill" aria-hidden="true" />
-                  <div class="atd-trat__corpo">
-                    <strong>{{ item.titulo }}</strong>
-                    <p v-if="item.posologia" class="atd-trat__posologia">{{ item.posologia }}</p>
-                    <dl v-if="item.campos.length" class="atd-par">
+              <ul v-else class="ui-lista">
+                <li v-for="item in tratamentosContinuos" :key="item.key" class="trat">
+                  <PhHeart class="trat__icone" weight="fill" aria-hidden="true" />
+                  <div class="trat__corpo">
+                    <strong class="trat__nome">{{ item.titulo }}</strong>
+                    <p v-if="item.posologia" class="trat__posologia ui-num">{{ item.posologia }}</p>
+                    <dl v-if="item.campos.length" class="pares">
                       <div v-for="campo in item.campos" :key="campo.chave">
                         <dt>{{ campo.label }}</dt>
                         <dd>{{ campo.valor }}</dd>
                       </div>
                     </dl>
-                    <p v-if="item.observacoes" class="atd-trat__obs">
+                    <p v-if="item.observacoes" class="trat__obs">
                       <span>{{ t('acessos.tratamentos.campos.observacoes') }}:</span>
                       {{ item.observacoes }}
                     </p>
                   </div>
                 </li>
               </ul>
-            </section>
+            </UiSecao>
 
-            <section
+            <!-- Uma linha por categoria. Vazia: a frase do motivo é o conteúdo. Com itens:
+                 recolhe e mostra os primeiros nomes, para ler sem abrir. -->
+            <UiSecao
               v-if="snapshotListSections.length"
-              class="atd-ficha__secao atd-ficha__secao--lista"
-              aria-labelledby="atd-clinical-title"
+              id="atd-clinical"
+              :titulo="t('acessos.snapshot.clinicalTitle')"
+              icone="ph ph-first-aid-kit"
+              folha
             >
-              <h3 id="atd-clinical-title" class="atd-ficha__titulo">
-                <i class="ph ph-first-aid-kit" aria-hidden="true" />
-                {{ t('acessos.snapshot.clinicalTitle') }}
-              </h3>
-
-              <!-- Uma linha por categoria. Vazia: a frase do motivo é o conteúdo. Com itens:
-                   recolhe e mostra os primeiros nomes, para ler sem abrir. -->
-              <ul class="atd-folds">
+              <ul class="ui-lista dobras">
                 <li
                   v-for="section in snapshotListSections"
                   :key="section.id"
-                  class="atd-fold"
+                  class="dobra"
                   :data-tone="section.tone"
                   :data-vazio="section.items.length ? 'false' : 'true'"
                 >
-                  <div v-if="!section.items.length" class="atd-fold__row">
-                    <span class="atd-fold__icon" aria-hidden="true">
-                      <i :class="section.icon" />
+                  <div v-if="!section.items.length" class="dobra__linha">
+                    <span class="dobra__icone" aria-hidden="true"><i :class="section.icon" /></span>
+                    <span class="dobra__texto">
+                      <h3 class="dobra__titulo">{{ section.title }}</h3>
+                      <span class="dobra__sub">{{ section.vazioTexto }}</span>
                     </span>
-                    <div class="atd-fold__copy">
-                      <h4 class="atd-fold__title">{{ section.title }}</h4>
-                      <p class="atd-fold__sub">{{ section.vazioTexto }}</p>
-                    </div>
                   </div>
 
                   <template v-else>
-                    <h4 class="atd-fold__heading">
-                      <Button
+                    <h3 class="dobra__cabeca">
+                      <button
                         type="button"
-                        class="atd-fold__row atd-fold__trigger"
+                        class="dobra__linha dobra__botao"
                         :aria-expanded="isSectionOpen(section.id)"
                         :aria-controls="`atd-fold-${section.id}`"
                         @click="toggleSection(section.id)"
                       >
-                        <span class="atd-fold__icon" aria-hidden="true">
+                        <span class="dobra__icone" aria-hidden="true">
                           <i :class="section.icon" />
                         </span>
-                        <span class="atd-fold__copy">
-                          <span class="atd-fold__title">{{ section.title }}</span>
-                          <span class="atd-fold__sub">
-                            {{
-                              t(
-                                'acessos.snapshot.itemsCount',
-                                { n: section.items.length },
-                                section.items.length,
-                              )
-                            }}<template v-if="!isSectionOpen(section.id)">
-                              · {{ section.resumo }}</template
-                            >
+                        <span class="dobra__texto">
+                          <span class="dobra__titulo">
+                            {{ section.title }}
+                            <span class="ui-contagem">{{ section.items.length }}</span>
+                          </span>
+                          <span v-if="!isSectionOpen(section.id)" class="dobra__sub">
+                            {{ section.resumo }}
                           </span>
                         </span>
                         <i
-                          class="ph atd-fold__chevron"
+                          class="ph dobra__seta"
                           :class="isSectionOpen(section.id) ? 'ph-caret-up' : 'ph-caret-down'"
                           aria-hidden="true"
                         />
-                      </Button>
-                    </h4>
+                      </button>
+                    </h3>
 
                     <ul
                       v-show="isSectionOpen(section.id)"
                       :id="`atd-fold-${section.id}`"
-                      class="atd-items"
+                      class="dobra__itens"
+                      :aria-label="
+                        t(
+                          'acessos.snapshot.itemsCount',
+                          { n: section.items.length },
+                          section.items.length,
+                        )
+                      "
                     >
                       <li
                         v-for="(item, index) in section.items"
                         :key="`${section.id}-${index}`"
-                        :class="{ 'atd-item--destaque': item.destaque }"
+                        :class="{ 'dobra__item--destaque': item.destaque }"
                       >
                         <strong>{{ item.titulo }}</strong>
-                        <span v-if="item.detalhe" class="atd-item__meta">{{ item.detalhe }}</span>
+                        <span v-if="item.detalhe">{{ item.detalhe }}</span>
                       </li>
                     </ul>
                   </template>
                 </li>
               </ul>
-            </section>
+            </UiSecao>
 
-            <!-- Documentos liberados item a item: o snapshot traz ids do cofre, a URL
-                 de leitura nasce no clique e vale por poucos minutos. -->
-            <section
+            <!-- Documentos liberados item a item: o snapshot traz ids do cofre, a URL de
+                 leitura nasce no clique e vale por poucos minutos. -->
+            <UiSecao
               v-if="documentosEstado !== 'OCULTO'"
-              class="atd-ficha__secao"
-              aria-labelledby="atd-docs-title"
+              id="atd-docs"
+              :titulo="t('acessos.documentos.title')"
+              icone="ph ph-folder-simple"
+              :contagem="documentos.length || null"
+              :descricao="isGuidanceVisible ? t('acessos.documentos.lede') : undefined"
+              folha
             >
-              <h3 id="atd-docs-title" class="atd-ficha__titulo">
-                <i class="ph ph-folder-simple" aria-hidden="true" />
-                {{ t('acessos.documentos.title') }}
-                <span v-if="documentos.length" class="atd-ficha__conta">
-                  {{ documentos.length }}
-                </span>
-              </h3>
-              <p v-if="isGuidanceVisible" class="atd-ficha__lede">
-                {{ t('acessos.documentos.lede') }}
-              </p>
+              <p v-if="documentosVazioTexto" class="ui-vazio">{{ documentosVazioTexto }}</p>
 
-              <p v-if="documentosVazioTexto" class="atd-ficha__nada">{{ documentosVazioTexto }}</p>
+              <ul v-else class="ui-lista">
+                <li v-for="doc in documentos" :key="doc.key" class="doc">
+                  <span class="doc__icone" aria-hidden="true"><i class="ph ph-file-text" /></span>
 
-              <ul v-else class="atd-docs">
-                <li v-for="doc in documentos" :key="doc.key" class="atd-doc">
-                  <i class="ph ph-file-text atd-doc__icone" aria-hidden="true" />
-
-                  <div class="atd-doc__texto">
+                  <span class="doc__texto">
                     <strong :title="doc.nome">{{ doc.nome }}</strong>
                     <small>
                       {{ doc.tipo }}
@@ -1276,17 +1490,22 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                         · {{ t('acessos.documentos.expiracao', { data: doc.expiracao }) }}
                       </template>
                     </small>
-                    <span v-if="!doc.arquivos.length" class="atd-doc__sem">
+                    <span v-if="!doc.arquivos.length" class="doc__sem">
                       {{ t('acessos.documentos.semArquivo') }}
                     </span>
-                  </div>
+                  </span>
 
-                  <div v-if="doc.arquivos.length" class="atd-doc__acoes">
-                    <template v-for="(arquivo, index) in doc.arquivos" :key="arquivo.id">
-                      <span v-if="doc.arquivos.length > 1" class="atd-doc__n">
+                  <span v-if="doc.arquivos.length" class="doc__acoes">
+                    <span
+                      v-for="(arquivo, index) in doc.arquivos"
+                      :key="arquivo.id"
+                      class="doc__arquivo"
+                    >
+                      <span v-if="doc.arquivos.length > 1" class="doc__n ui-num">
                         {{ t('acessos.documentos.arquivoN', { n: index + 1 }) }}
                       </span>
                       <Button
+                        type="button"
                         icon="ph ph-arrow-square-out"
                         severity="secondary"
                         outlined
@@ -1297,6 +1516,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                         @click="abrirArquivo(arquivo.id)"
                       />
                       <Button
+                        type="button"
                         icon="ph ph-download-simple"
                         severity="secondary"
                         outlined
@@ -1306,69 +1526,61 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                         :title="t('acessos.documentos.baixar')"
                         @click="baixarArquivo(arquivo.id, arquivo.nome)"
                       />
-                    </template>
-                  </div>
+                    </span>
+                  </span>
                 </li>
               </ul>
-            </section>
+            </UiSecao>
 
-            <!-- Diário: só entram os dias com anormalidade registrada, dentro da janela
-                 que o responsável liberou. Enum já chega traduzido do backend. -->
-            <section
+            <!-- Diário: só os dias com anormalidade, dentro da janela liberada. -->
+            <UiSecao
               v-if="diarioEstado !== 'OCULTO'"
-              class="atd-ficha__secao"
-              aria-labelledby="atd-diario-title"
+              id="atd-diario"
+              :titulo="t('acessos.diario.title')"
+              icone="ph ph-notebook"
+              :contagem="diario.length || null"
+              :descricao="isGuidanceVisible ? t('acessos.diario.lede') : undefined"
+              folha
             >
-              <h3 id="atd-diario-title" class="atd-ficha__titulo">
-                <i class="ph ph-notebook" aria-hidden="true" />
-                {{ t('acessos.diario.title') }}
-                <span v-if="diario.length" class="atd-ficha__conta">{{ diario.length }}</span>
-              </h3>
-              <p v-if="isGuidanceVisible" class="atd-ficha__lede">
-                {{ t('acessos.diario.lede') }}
-              </p>
+              <p v-if="diarioVazioTexto" class="ui-vazio">{{ diarioVazioTexto }}</p>
 
-              <p v-if="diarioVazioTexto" class="atd-ficha__nada">{{ diarioVazioTexto }}</p>
+              <ol v-else class="ui-lista">
+                <li v-for="entrada in diario" :key="entrada.key" class="dia">
+                  <strong class="dia__data ui-num">{{ entrada.data }}</strong>
 
-              <ol v-else class="atd-diario">
-                <li v-for="entrada in diario" :key="entrada.key" class="atd-diario__dia">
-                  <strong class="atd-diario__data">{{ entrada.data }}</strong>
-
-                  <div
-                    v-if="entrada.sintomas.length || entrada.doencas.length"
-                    class="atd-diario__tags"
-                  >
+                  <div v-if="entrada.sintomas.length || entrada.doencas.length" class="dia__selos">
                     <span
                       v-for="(sintoma, index) in entrada.sintomas"
                       :key="`s-${index}`"
-                      class="atd-diario__tag atd-diario__tag--sintoma"
+                      class="ui-selo ui-selo--atencao"
                     >
                       {{ sintoma }}
                     </span>
                     <span
                       v-for="(doenca, index) in entrada.doencas"
                       :key="`d-${index}`"
-                      class="atd-diario__tag atd-diario__tag--doenca"
+                      class="ui-selo ui-selo--risco"
                     >
                       {{ doenca }}
                     </span>
                   </div>
 
-                  <dl v-if="entrada.campos.length" class="atd-par">
+                  <dl v-if="entrada.campos.length" class="pares">
                     <div v-for="campo in entrada.campos" :key="campo.chave">
                       <dt>{{ campo.label }}</dt>
                       <dd>{{ campo.valor }}</dd>
                     </div>
                   </dl>
 
-                  <p v-for="texto in entrada.textos" :key="texto.chave" class="atd-diario__texto">
+                  <p v-for="texto in entrada.textos" :key="texto.chave" class="dia__texto">
                     <span>{{ texto.label }}:</span> {{ texto.valor }}
                   </p>
 
-                  <div v-if="entrada.fotoIds.length" class="atd-diario__fotos">
+                  <div v-if="entrada.fotoIds.length" class="dia__fotos">
                     <Button
                       v-for="(fotoId, index) in entrada.fotoIds"
                       :key="fotoId"
+                      type="button"
                       :label="t('acessos.diario.abrirFoto', { n: index + 1 })"
                       icon="ph ph-image"
                       severity="secondary"
@@ -1380,38 +1592,49 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   </div>
                 </li>
               </ol>
-            </section>
+            </UiSecao>
           </aside>
 
-          <!-- Trabalho: a folha da anotação e o histórico -->
-          <div class="atd-trabalho">
-            <aside v-if="somenteLeitura" class="atd-aviso" role="status">
-              <i class="ph ph-eye" aria-hidden="true" />
-              <div>
+          <!-- ------------------------------------------------ a anotação e o histórico -->
+          <div class="trabalho">
+            <section v-if="somenteLeitura" class="faixa faixa--leitura" role="status">
+              <span class="faixa__icone" aria-hidden="true"><i class="ph ph-eye" /></span>
+              <span class="faixa__texto">
                 <strong>{{ t('acessos.anotacao.somenteLeitura.title') }}</strong>
-                <p>{{ t('acessos.anotacao.somenteLeitura.body') }}</p>
-              </div>
-            </aside>
+                <span>{{ t('acessos.anotacao.somenteLeitura.body') }}</span>
+              </span>
+            </section>
 
-            <section v-if="podeAnotar" class="atd-folha" aria-labelledby="atd-folha-titulo">
-              <header class="atd-folha__cab">
-                <h2 id="atd-folha-titulo">{{ t('acessos.anotacao.title') }}</h2>
-                <p>{{ t('acessos.anotacao.lede') }}</p>
+            <section v-if="podeAnotar" class="folha ui-folha" aria-labelledby="atd-folha-titulo">
+              <header class="folha__cab">
+                <h2 id="atd-folha-titulo" class="folha__titulo">
+                  <i class="ph ph-note-pencil" aria-hidden="true" />
+                  {{ t('acessos.anotacao.title') }}
+                </h2>
+                <p class="folha__lede">{{ t('acessos.anotacao.lede') }}</p>
               </header>
 
-              <div class="atd-folha__secao">
-                <div class="atd-campo">
-                  <label for="anot-servico">{{ t('acessos.anotacao.servico') }}</label>
+              <div class="folha__secao">
+                <div class="campo">
+                  <label for="anot-servico">
+                    {{ t('acessos.anotacao.servico') }}
+                    <span class="campo__obrigatorio" aria-hidden="true">*</span>
+                  </label>
                   <InputText
                     id="anot-servico"
                     v-model="anotacaoForm.servicoRealizado"
                     :maxlength="LIMITES_CAMPOS_LIVRES.servicoRealizado"
                     :placeholder="t('acessos.anotacao.servicoPlaceholder')"
+                    :invalid="faltaObrigatorio && !anotacaoForm.servicoRealizado.trim()"
+                    aria-required="true"
                   />
                 </div>
 
-                <div class="atd-campo">
-                  <label for="anot-texto">{{ t('acessos.anotacao.texto') }}</label>
+                <div class="campo">
+                  <label for="anot-texto">
+                    {{ t('acessos.anotacao.texto') }}
+                    <span class="campo__obrigatorio" aria-hidden="true">*</span>
+                  </label>
                   <Textarea
                     id="anot-texto"
                     v-model="anotacaoForm.texto"
@@ -1419,6 +1642,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     auto-resize
                     :maxlength="LIMITES_CAMPOS_LIVRES.texto"
                     :placeholder="t('acessos.anotacao.textoPlaceholder')"
+                    :invalid="faltaObrigatorio && !anotacaoForm.texto.trim()"
+                    aria-required="true"
                   />
                 </div>
               </div>
@@ -1445,9 +1670,13 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               <!-- Quem atendeu: nome e área lado a lado, os dois opcionais. A área viaja como
                    CHAVE quando é uma das opções; "Fisioterapia" e "Acupuntura" são casos
                    legítimos de "Outra" e um enum fechado viraria 400. -->
-              <div class="atd-folha__secao">
-                <div class="atd-folha__duas">
-                  <div class="atd-campo">
+              <div class="folha__secao">
+                <h3 class="folha__subtitulo">
+                  <i class="ph ph-user-circle" aria-hidden="true" />
+                  {{ t('acessos.anotacao.quemAtendeu') }}
+                </h3>
+                <div class="folha__duas">
+                  <div class="campo">
                     <label for="anot-profissional">{{ t('acessos.anotacao.profissional') }}</label>
                     <InputText
                       id="anot-profissional"
@@ -1457,12 +1686,13 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     />
                   </div>
 
-                  <div class="atd-campo">
-                    <label for="anot-especialidade">
+                  <div class="campo">
+                    <label id="anot-especialidade-rotulo">
                       {{ t('acessos.anotacao.especialidade') }}
                     </label>
                     <Select
-                      input-id="anot-especialidade"
+                      label-id="anot-especialidade"
+                      aria-labelledby="anot-especialidade-rotulo"
                       :model-value="anotacaoForm.especialidade"
                       :options="opcoesEspecialidade"
                       option-label="label"
@@ -1475,7 +1705,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   </div>
                 </div>
 
-                <div v-if="anotacaoForm.especialidade === ESPECIALIDADE_OUTRA" class="atd-campo">
+                <div v-if="anotacaoForm.especialidade === ESPECIALIDADE_OUTRA" class="campo">
                   <InputText
                     v-model="anotacaoForm.especialidadeOutra"
                     :maxlength="LIMITES_CAMPOS_LIVRES.profissionalEspecialidade"
@@ -1486,13 +1716,13 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 </div>
               </div>
 
-              <div class="atd-folha__secao">
-                <div class="atd-folha__secao-cab">
-                  <h3>
+              <div class="folha__secao">
+                <div class="folha__secao-cab">
+                  <h3 class="folha__subtitulo">
                     <i class="ph ph-paperclip" aria-hidden="true" />
                     {{ t('acessos.anotacao.anexos', { n: MAX_ANEXOS }) }}
                   </h3>
-                  <label v-if="anexosOcupados < MAX_ANEXOS" class="atd-anexar">
+                  <label v-if="anexosOcupados < MAX_ANEXOS" class="anexar">
                     <input
                       ref="fileInput"
                       type="file"
@@ -1505,20 +1735,21 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   </label>
                 </div>
 
-                <ul v-if="anexosForm.length" class="atd-anexos">
+                <ul v-if="anexosForm.length" class="anexos">
                   <li v-for="(anexo, index) in anexosForm" :key="`${anexo.file.name}-${index}`">
-                    <i class="ph ph-file atd-anexos__icone" aria-hidden="true" />
-                    <span class="atd-anexos__nome">
+                    <span class="anexos__icone" aria-hidden="true"><i class="ph ph-file" /></span>
+                    <span class="anexos__nome">
                       <strong :title="anexo.file.name">{{ anexo.file.name }}</strong>
-                      <small>{{ formatBytes(anexo.file.size) }}</small>
+                      <small class="ui-num">{{ formatBytes(anexo.file.size) }}</small>
                     </span>
-                    <label class="atd-sr" :for="`anexo-tipo-${index}`">
+                    <label class="sr-only" :for="`anexo-tipo-${index}`">
                       {{ t('acessos.anotacao.tipoDocumento') }}
                     </label>
                     <Select
                       v-model="anexo.tipoDocumento"
-                      class="atd-anexos__tipo"
-                      :input-id="`anexo-tipo-${index}`"
+                      class="anexos__tipo"
+                      :label-id="`anexo-tipo-${index}`"
+                      :aria-label="t('acessos.anotacao.tipoDocumento')"
                       :options="tiposDocumentoOptions"
                       option-label="label"
                       option-value="value"
@@ -1526,11 +1757,12 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                       show-clear
                     />
                     <Button
+                      type="button"
                       icon="ph ph-trash"
                       severity="secondary"
                       text
                       rounded
-                      class="atd-anexos__remover"
+                      class="anexos__remover"
                       :aria-label="t('acessos.anotacao.removerAnexo')"
                       :title="t('acessos.anotacao.removerAnexo')"
                       @click="removeAnexo(index)"
@@ -1538,7 +1770,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   </li>
                 </ul>
 
-                <small v-if="leituraReceita.reservados > 0" class="atd-folha__nota">
+                <small v-if="leituraReceita.reservados > 0" class="folha__nota folha__nota--ia">
                   <i class="ph ph-sparkle" aria-hidden="true" />
                   {{
                     t(
@@ -1548,18 +1780,23 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     )
                   }}
                 </small>
-                <small class="atd-folha__nota">{{ t('acessos.anotacao.anexoHint') }}</small>
+                <small class="folha__nota">{{ t('acessos.anotacao.anexoHint') }}</small>
               </div>
 
               <!-- Rodapé preso à tela enquanto a folha estiver nela: o erro aparece do lado do
                    botão que o causou, e não lá no topo, fora da vista de quem clicou. -->
-              <footer class="atd-folha__rodape">
-                <p v-if="formError" class="atd-folha__erro" role="alert">
+              <footer class="folha__rodape">
+                <p v-if="formError" class="folha__erro" role="alert">
                   <i class="ph ph-warning-circle" aria-hidden="true" />
                   {{ formError }}
                 </p>
+                <p v-else class="folha__dica">
+                  <i class="ph ph-arrow-bend-down-right" aria-hidden="true" />
+                  {{ t('acessos.anotacao.rodape', { pet: detalhe.petNome }) }}
+                </p>
                 <Button
-                  class="atd-folha__enviar"
+                  type="button"
+                  class="folha__enviar"
                   :label="t('acessos.anotacao.enviar')"
                   icon="ph ph-check"
                   :loading="submittingAnotacao"
@@ -1568,42 +1805,33 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               </footer>
             </section>
 
-            <section class="atd-hist" aria-labelledby="atd-notes-title">
-              <header class="atd-hist__cab">
-                <h2 id="atd-notes-title">{{ t('acessos.anotacoes.title') }}</h2>
-                <span v-if="anotacoesOrdenadas.length" class="atd-hist__conta">{{
-                  t(
-                    'acessos.anotacoes.count',
-                    { n: anotacoesOrdenadas.length },
-                    anotacoesOrdenadas.length,
-                  )
-                }}</span>
-              </header>
-              <p v-if="isGuidanceVisible" class="atd-hist__lede">
-                {{ t('acessos.anotacoes.lede') }}
-              </p>
-
-              <div v-if="anotacoesOrdenadas.length === 0" class="atd-hist__vazio">
-                <i class="ph ph-clock-counter-clockwise" aria-hidden="true" />
-                <div>
-                  <strong>{{ t('acessos.anotacoes.empty') }}</strong>
-                  <p>
-                    {{
-                      podeAnotar
-                        ? t('acessos.anotacoes.emptyHint')
-                        : t('acessos.anotacoes.emptyHintClosed')
-                    }}
-                  </p>
-                </div>
+            <UiSecao
+              id="atd-notes"
+              class="historico"
+              :titulo="t('acessos.anotacoes.title')"
+              icone="ph ph-clock-counter-clockwise"
+              :contagem="anotacoesOrdenadas.length || null"
+              :descricao="isGuidanceVisible ? t('acessos.anotacoes.lede') : undefined"
+              folha
+            >
+              <div v-if="anotacoesOrdenadas.length === 0" class="ui-vazio">
+                <strong>{{ t('acessos.anotacoes.empty') }}</strong>
+                <span>
+                  {{
+                    podeAnotar
+                      ? t('acessos.anotacoes.emptyHint')
+                      : t('acessos.anotacoes.emptyHintClosed')
+                  }}
+                </span>
               </div>
 
-              <ol v-else class="atd-hist__lista">
+              <ol v-else class="ui-lista">
                 <li v-for="anotacao in anotacoesOrdenadas" :key="anotacao.id">
-                  <article class="atd-nota">
-                    <header class="atd-nota__cab">
-                      <div class="atd-nota__quem">
-                        <h3>{{ anotacao.servicoRealizado }}</h3>
-                        <p>
+                  <article class="nota">
+                    <header class="nota__cab">
+                      <div class="nota__quem">
+                        <h3 class="nota__servico">{{ anotacao.servicoRealizado }}</h3>
+                        <p class="nota__autor">
                           <span>{{ anotacao.empresaNome }}</span>
                           <template v-if="autorDaAnotacao(anotacao)">
                             <span aria-hidden="true">·</span>
@@ -1611,24 +1839,24 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                           </template>
                         </p>
                       </div>
-                      <time class="atd-nota__quando" :datetime="anotacao.criadaEm">{{
+                      <time class="nota__quando ui-num" :datetime="anotacao.criadaEm">{{
                         formatDateTime(anotacao.criadaEm)
                       }}</time>
                     </header>
 
-                    <p class="atd-nota__texto">{{ anotacao.texto }}</p>
+                    <p class="nota__texto">{{ anotacao.texto }}</p>
 
                     <AnotacaoEstruturadaView :anotacao="anotacao" />
 
                     <ul
                       v-if="anotacao.anexos.length"
-                      class="atd-nota__anexos"
+                      class="nota__anexos"
                       :aria-label="t('acessos.anotacoes.anexosLabel')"
                     >
                       <li v-for="anexo in anotacao.anexos" :key="anexo.id">
-                        <Button
+                        <button
                           type="button"
-                          class="atd-nota__anexo"
+                          class="nota__anexo"
                           :disabled="abrindoAnexoId === anexo.id"
                           :aria-label="`${t('acessos.anotacoes.abrirAnexo')}: ${anexo.nome}`"
                           @click="abrirAnexo(anexo.id)"
@@ -1641,1296 +1869,1295 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                             "
                             aria-hidden="true"
                           />
-                          <span class="atd-nota__anexo-nome">{{ anexo.nome }}</span>
-                          <small>
+                          <span class="nota__anexo-nome">{{ anexo.nome }}</span>
+                          <small class="ui-num">
                             <template v-if="anexo.tipoDocumento">
                               {{ anexo.tipoDocumento }} ·
                             </template>
                             {{ formatBytes(anexo.tamanhoBytes) }}
                           </small>
-                        </Button>
+                        </button>
                       </li>
                     </ul>
                   </article>
                 </li>
               </ol>
-            </section>
+            </UiSecao>
           </div>
         </div>
       </div>
-    </template>
-  </PartnerPageFrame>
+    </div>
+  </UiPagina>
 </template>
 
 <style scoped>
-/* ------------------------------------------------------------------ tokens da tela */
-
 /*
- * Tudo sai dos tokens `--hc-*`, que já trazem o claro e o escuro. Os campos deixam o linho do
- * preset (#FBF7F4 com borda #DDCDC4): sobre o cartão branco ele lia como pêssego desbotado e
- * brigava com o verde. Aqui o campo é do papel do cartão, com borda cinza e anel de foco na marca.
+ * A tela escreve em 15 px, com campos generosos (44 px), como o prontuário da Clínica: é onde o
+ * profissional registra o atendimento, e campo apertado é onde o dedo erra. Os tokens de cada
+ * componente do PrimeVue são reescritos aqui; os botões secundários ganham as cores do Trilha.
  */
-.atd-id,
-.atd-mesa,
-.atd-encerrado {
-  --atd-suave: color-mix(in srgb, var(--hc-tinta) 64%, var(--hc-cartao));
-  --atd-fraco: color-mix(in srgb, var(--hc-tinta) 50%, var(--hc-cartao));
+.tela-acesso {
+  --p-inputtext-padding-y: 10px;
+  --p-inputtext-padding-x: 12px;
+  --p-textarea-padding-y: 10px;
+  --p-textarea-padding-x: 12px;
+  --p-select-padding-y: 10px;
+  --p-select-padding-x: 12px;
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
 }
 
-.atd-mesa {
-  --folha-pad-x: 1.5rem;
-  --folha-fio: var(--hc-linha);
-  --folha-suave: var(--atd-suave);
-  --atd-campo-fundo: var(--hc-cartao);
-  --atd-campo-borda: color-mix(in srgb, var(--hc-tinta) 17%, var(--hc-cartao));
-  --atd-campo-borda-hover: color-mix(in srgb, var(--hc-tinta) 32%, var(--hc-cartao));
-  --atd-campo-apagado: color-mix(in srgb, var(--hc-tinta) 5%, var(--hc-cartao));
-  --atd-anel: 0 0 0 3px color-mix(in srgb, var(--hc-marca) 22%, transparent);
-
-  --p-inputtext-background: var(--atd-campo-fundo);
-  --p-inputtext-disabled-background: var(--atd-campo-apagado);
-  --p-inputtext-border-color: var(--atd-campo-borda);
-  --p-inputtext-hover-border-color: var(--atd-campo-borda-hover);
-  --p-inputtext-focus-border-color: var(--hc-marca);
-  --p-inputtext-color: var(--hc-tinta);
-  --p-inputtext-placeholder-color: var(--atd-fraco);
-  --p-inputtext-shadow: none;
-  --p-inputtext-border-radius: 0.6rem;
-  --p-inputtext-padding-x: 0.75rem;
-  --p-inputtext-padding-y: 0.55rem;
-  --p-inputtext-focus-ring-shadow: var(--atd-anel);
-
-  --p-textarea-background: var(--atd-campo-fundo);
-  --p-textarea-disabled-background: var(--atd-campo-apagado);
-  --p-textarea-border-color: var(--atd-campo-borda);
-  --p-textarea-hover-border-color: var(--atd-campo-borda-hover);
-  --p-textarea-focus-border-color: var(--hc-marca);
-  --p-textarea-color: var(--hc-tinta);
-  --p-textarea-placeholder-color: var(--atd-fraco);
-  --p-textarea-shadow: none;
-  --p-textarea-border-radius: 0.6rem;
-  --p-textarea-padding-x: 0.75rem;
-  --p-textarea-padding-y: 0.55rem;
-  --p-textarea-focus-ring-shadow: var(--atd-anel);
-
-  --p-select-background: var(--atd-campo-fundo);
-  --p-select-disabled-background: var(--atd-campo-apagado);
-  --p-select-border-color: var(--atd-campo-borda);
-  --p-select-hover-border-color: var(--atd-campo-borda-hover);
-  --p-select-focus-border-color: var(--hc-marca);
-  --p-select-color: var(--hc-tinta);
-  --p-select-placeholder-color: var(--atd-fraco);
-  --p-select-shadow: none;
-  --p-select-border-radius: 0.6rem;
-  --p-select-padding-x: 0.75rem;
-  --p-select-padding-y: 0.55rem;
-  --p-select-focus-ring-shadow: var(--atd-anel);
-  --p-select-dropdown-color: var(--atd-suave);
-
-  container: mesa / inline-size;
-  display: grid;
-  gap: 1rem;
-}
-
-/* No escuro o campo afunda um degrau abaixo do cartão, senão some dentro dele. */
-.app-dark .atd-mesa {
-  --atd-campo-fundo: color-mix(in srgb, var(--hc-pagina) 60%, var(--hc-cartao));
-  --atd-campo-borda: color-mix(in srgb, var(--hc-tinta) 20%, var(--hc-cartao));
-}
-
-/* Um corpo de letra para todo campo da tela: o preset deixava 16 px num, 14 px noutro. */
-.atd-mesa :deep(.p-inputtext),
-.atd-mesa :deep(.p-textarea),
-.atd-mesa :deep(.p-select-label) {
-  font-size: 0.875rem;
+.tela-acesso :deep(.p-inputtext),
+.tela-acesso :deep(.p-textarea),
+.tela-acesso :deep(.p-select-label),
+.tela-acesso :deep(.p-inputnumber-input) {
+  font-size: 15px;
   line-height: 1.45;
 }
 
-.atd-mesa :deep(.p-textarea) {
-  resize: none;
+.tela-acesso :deep(.p-textarea) {
+  line-height: 1.55;
 }
 
 /* O InputNumber nasce com a largura do atributo size do input interno e vazava da coluna. */
-.atd-mesa :deep(.p-inputnumber) {
+.tela-acesso :deep(.p-inputnumber) {
   display: flex;
   width: 100%;
 }
 
-.atd-mesa :deep(.p-inputnumber-input) {
+.tela-acesso :deep(.p-inputnumber-input) {
   width: 100%;
   min-width: 0;
 }
 
-.atd-sr {
+.sr-only {
   position: absolute;
+  overflow: hidden;
   width: 1px;
   height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
-/* ------------------------------------------------------------------ identidade */
+.voltar .ph {
+  font-size: 13px;
+}
 
-.atd-id {
-  display: flex;
-  flex-wrap: wrap;
+[dir='rtl'] .voltar .ph {
+  scale: -1 1;
+}
+
+/* ------------------------------------------------------------------ a capa */
+
+.capa {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 640px;
   align-items: center;
-  gap: 0.75rem 1rem;
-  min-width: 0;
+  gap: 18px 36px;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
-.atd-id__foto {
-  display: grid;
-  width: 3.5rem;
-  height: 3.5rem;
-  flex: 0 0 auto;
-  place-items: center;
-  overflow: hidden;
-  border: 1px solid var(--hc-borda);
-  border-radius: 1rem;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-  font-size: 1.65rem;
-}
-
-.atd-id__foto img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.atd-id__texto {
-  display: grid;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.atd-id__sobre {
+.capa__quem {
   display: flex;
-  gap: 0.35rem;
+  min-width: 0;
+  align-items: center;
+  gap: 18px;
+}
+
+.capa .capa__rosto {
+  box-shadow:
+    0 0 0 3px var(--fundo),
+    0 0 0 4px var(--linha);
+}
+
+.capa[data-status='EXPIRADO'] .capa__rosto,
+.capa[data-status='REVOGADO'] .capa__rosto {
+  filter: grayscale(0.7);
+  opacity: 0.85;
+}
+
+.capa__identidade {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.capa__nome {
   margin: 0;
-  color: var(--atd-suave);
-  font-size: 0.78rem;
+  color: var(--tinta);
+  font-size: 30px;
   font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
-.atd-id__nome {
+.capa__meta {
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1.65rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
+  color: var(--tinta-2);
+  font-size: 14.5px;
 }
 
-.atd-id__meta {
+.capa__selos {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.1rem 0;
-  margin: 0.1rem 0 0;
-  color: var(--atd-suave);
-  font-size: 0.86rem;
+  gap: 6px;
+  margin: 4px 0 0;
 }
 
-.atd-id__meta span + span::before {
-  content: '·';
-  margin-inline: 0.45rem;
-  color: var(--atd-fraco);
+.capa__selos .ui-selo {
+  height: 26px;
+  font-size: 13px;
 }
 
-.atd-id__linha {
+.capa__reserva {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* O peso e o prazo: os dois números da capa, separados por um fio, como na ficha da Clínica. */
+.capa__dados {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0.6rem;
+  align-items: stretch;
+  gap: 12px 0;
+  margin: 0;
 }
 
-.atd-id__linha .atd-id__nome {
-  margin-inline-end: 0.15rem;
+.capa__dado {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 4px;
+  padding-inline: 24px;
+  border-inline-start: 1px solid var(--linha);
 }
 
-/* Status com o nome do próprio acesso: "Suspenso" para um acesso que só expirou enganava. */
-.atd-id__status {
+.capa__dado dt {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.capa__dado dd {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  margin: 0;
+}
+
+.capa__numero {
+  display: flex !important;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--tinta-2);
+  font-size: 14px;
+}
+
+.capa__numero strong,
+.capa__contagem {
+  color: var(--tinta);
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.capa__contagem {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  background: var(--hc-verde-fundo);
-  color: var(--hc-verde-tinta);
-  font-size: 0.76rem;
-  font-weight: 700;
+  gap: 6px;
+  white-space: nowrap;
 }
 
-.atd-id__status:not([data-status='ATIVO']) {
-  background: var(--hc-cinza-fundo);
-  color: var(--hc-cinza-tinta);
+.capa__contagem i {
+  font-size: 24px;
 }
 
-.atd-id__prazo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  background: var(--hc-pessego-fundo);
-  color: var(--hc-pessego-tinta);
-  font-size: 0.76rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.atd-id[data-status='EXPIRADO'] .atd-id__foto,
-.atd-id[data-status='REVOGADO'] .atd-id__foto {
-  background: var(--hc-cinza-fundo);
-  color: var(--hc-cinza-tinta);
-  filter: grayscale(0.6);
-}
-
-.atd-encerrado {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.9rem 1.1rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.9rem;
-  background: var(--hc-cinza-fundo);
-  color: var(--atd-suave);
-}
-
-.atd-encerrado i {
-  margin-top: 0.1rem;
-  font-size: 1.1rem;
-}
-
-.atd-encerrado strong {
+.capa__barra {
   display: block;
-  margin-bottom: 0.15rem;
-  color: var(--hc-tinta);
-  font-size: 0.9rem;
+  overflow: hidden;
+  width: 11rem;
+  max-width: 100%;
+  height: 6px;
+  margin-block: 2px;
+  border-radius: 999px;
+  background: var(--superficie-3);
 }
 
-.atd-encerrado p {
-  margin: 0;
-  font-size: 0.85rem;
-  line-height: 1.5;
+.capa__barra > span {
+  display: block;
+  height: 100%;
+  min-inline-size: 4px;
+  border-radius: inherit;
+  background: var(--salvia);
+}
+
+.capa__prazo small {
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.capa__prazo--perto .capa__contagem,
+.capa__prazo--perto dt {
+  color: var(--atencao-tinta);
+}
+
+.capa__prazo--perto .capa__barra > span {
+  background: var(--atencao);
+}
+
+.capa__desfecho {
+  color: var(--tinta-2);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+/* ------------------------------------------------------------------ faixas */
+
+.acesso {
+  display: grid;
+  gap: 18px;
+}
+
+.faixa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 12px 16px 12px 12px;
+  border: 1px solid var(--faixa-linha, var(--linha));
+  border-radius: 14px;
+  background: var(--faixa-fundo, var(--superficie-2));
+}
+
+.faixa__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--faixa-tinta, var(--tinta-2));
+  font-size: 19px;
+}
+
+.faixa__texto {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 280px;
+  gap: 2px;
+  line-height: 1.45;
+}
+
+.faixa__texto strong {
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.faixa__texto span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.faixa__link.ui-mais {
+  color: var(--faixa-tinta);
+}
+
+.faixa--atencao,
+.faixa--leitura {
+  --faixa-fundo: var(--atencao-fundo);
+  --faixa-linha: color-mix(in oklab, var(--atencao) 40%, var(--linha));
+  --faixa-tinta: var(--atencao-tinta);
+}
+
+.faixa--encerrado {
+  --faixa-fundo: var(--neutro-fundo);
+  --faixa-linha: var(--linha);
+  --faixa-tinta: var(--neutro-tinta);
+
+  max-width: 860px;
 }
 
 /* ------------------------------------------------------------------ a mesa */
 
-.atd-mesa__grade {
+/*
+ * A ficha ao lado da folha: quem prescreve vê a alergia sem trocar de aba. A forma é decidida
+ * pela largura da mesa (container), não da janela: a barra aberta ou fechada muda a conta.
+ */
+.mesa {
   display: grid;
-  gap: 1.25rem;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
+  gap: 16px;
+  container: mesa / inline-size;
 }
 
-/* Estreita: as abas escolhem a metade. */
-.atd-mesa[data-aba='resumo'] .atd-trabalho,
-.atd-mesa[data-aba='anotacoes'] .atd-ficha {
+.mesa__abas {
   display: none;
+  justify-self: start;
 }
 
-/* Larga: as duas metades lado a lado, a ficha presa abaixo do cabeçalho do app. */
-@container mesa (min-width: 56rem) {
-  .atd-mesa__abas {
+.mesa__abas :deep(.p-togglebutton-content) {
+  min-height: 38px;
+  padding-inline: 16px;
+  font-size: 14.5px;
+}
+
+.mesa__grade {
+  display: grid;
+  align-items: start;
+  gap: 28px;
+  grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
+}
+
+.mesa[data-ficha='nao'] .mesa__grade {
+  max-width: 860px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container mesa (max-width: 960px) {
+  .mesa__abas {
+    display: inline-flex;
+  }
+
+  .mesa__grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mesa[data-aba='resumo'] .trabalho,
+  .mesa[data-aba='anotacoes'] .ficha {
     display: none;
   }
-
-  .atd-mesa[data-ficha='sim'] .atd-mesa__grade {
-    grid-template-columns: clamp(18.5rem, 30%, 21.5rem) minmax(0, 1fr);
-  }
-
-  .atd-mesa .atd-ficha__cab h2 {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip: auto;
-    white-space: normal;
-  }
-
-  .atd-mesa[data-aba] .atd-ficha {
-    position: sticky;
-    top: calc(var(--pj-shell-header-height, 4.25rem) + 1rem);
-    display: flex;
-    max-height: calc(100dvh - var(--pj-shell-header-height, 4.25rem) - 2rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-
-  .atd-mesa[data-aba] .atd-trabalho {
-    display: grid;
-  }
 }
 
-/* ------------------------------------------------------------------ ficha do pet */
+/* ------------------------------------------------------------------ o que foi compartilhado */
 
-.atd-ficha {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  border: 1px solid var(--hc-borda);
-  border-radius: 1rem;
-  background: var(--hc-cartao);
-  box-shadow: var(--hc-sombra);
-}
-
-.atd-ficha__cab {
+.ficha {
   display: grid;
-  gap: 0.3rem;
-  padding: 1rem 1.15rem 0.9rem;
+  min-width: 0;
+  gap: 22px;
 }
 
-/* Na tela estreita a aba já diz "Resumo do pet": o título fica só para o leitor de tela. */
-.atd-ficha__cab h2 {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+.coluna__cab {
+  display: grid;
+  gap: 6px;
+}
+
+.coluna__titulo {
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1rem;
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-.atd-carimbo {
+.carimbo {
   display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
+  align-items: flex-start;
+  gap: 6px;
   margin: 0;
-  color: var(--atd-suave);
-  font-size: 0.76rem;
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.4;
 }
 
-/* Resumo mexido depois da entrega: o que o parceiro leu antes pode estar velho. */
-.atd-carimbo[data-atualizado='true'] {
-  color: var(--hc-pessego-tinta);
-  font-weight: 650;
+.carimbo i {
+  margin-top: 1px;
+  font-size: 15px;
 }
 
-.atd-ficha__secao {
+.carimbo--atualizado {
+  justify-self: start;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-weight: 550;
+}
+
+/* A mensagem do responsável, como citação: aspas grandes na cor do lugar, texto em corpo de leitura. */
+.recado {
+  position: relative;
   display: grid;
-  gap: 0.6rem;
-  padding: 0.95rem 1.15rem 1.05rem;
-  border-top: 1px solid var(--hc-linha);
-}
-
-.atd-ficha__secao--lista {
-  gap: 0.35rem;
-  padding-inline: 0;
-  padding-bottom: 0.25rem;
-}
-
-.atd-ficha__titulo {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
+  gap: 10px;
   margin: 0;
-  color: var(--atd-suave);
-  font-size: 0.72rem;
-  font-weight: 750;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  padding: 18px 20px 16px 52px;
+  border: 1px solid color-mix(in oklab, var(--pj-lugar) 28%, var(--linha));
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 70%, var(--superficie));
 }
 
-.atd-ficha__titulo i {
-  color: var(--hc-marca);
-  font-size: 0.95rem;
+.recado__aspas {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: 22px;
+  height: 22px;
+  color: var(--pj-lugar);
 }
 
-.atd-ficha__secao--lista .atd-ficha__titulo {
-  padding-inline: 1.15rem;
+[dir='rtl'] .recado {
+  padding: 18px 52px 16px 20px;
 }
 
-.atd-ficha__conta {
-  margin-inline-start: auto;
-  padding: 0.05rem 0.45rem;
-  border-radius: 999px;
-  background: var(--hc-cinza-fundo);
-  color: var(--hc-cinza-tinta);
-  font-size: 0.7rem;
-  letter-spacing: 0;
-  font-variant-numeric: tabular-nums;
+[dir='rtl'] .recado__aspas {
+  right: 18px;
+  left: auto;
+  scale: -1 1;
 }
 
-.atd-ficha__lede,
-.atd-ficha__nada,
-.atd-ficha__texto {
+.recado__texto {
   margin: 0;
-  color: var(--atd-suave);
-  font-size: 0.82rem;
-  line-height: 1.5;
-}
-
-.atd-ficha__texto {
-  color: var(--hc-tinta);
-  white-space: pre-line;
-}
-
-.atd-recado {
-  margin: 0;
-  padding: 0.75rem 0.9rem;
-  border-radius: 0.75rem;
-  background: var(--hc-marca-clara);
-  color: var(--hc-tinta);
-  font-size: 0.9rem;
+  color: var(--tinta);
+  font-size: 16px;
   line-height: 1.55;
-  white-space: pre-line;
-}
-
-.atd-ficha__vazio {
-  display: grid;
-  justify-items: center;
-  gap: 0.4rem;
-  padding: 1.5rem 1.15rem 1.6rem;
-  border-top: 1px solid var(--hc-linha);
-  text-align: center;
-}
-
-.atd-ficha__vazio > i {
-  color: var(--hc-marca);
-  font-size: 1.5rem;
-}
-
-.atd-ficha__vazio strong {
-  color: var(--hc-tinta);
-  font-size: 0.92rem;
-}
-
-.atd-ficha__vazio p {
-  margin: 0;
-  color: var(--atd-suave);
-  font-size: 0.82rem;
-  line-height: 1.5;
-}
-
-.atd-ficha__vazio :deep(.p-button) {
-  margin-top: 0.4rem;
-}
-
-/* Pares rótulo/valor: tratamento contínuo e diário. */
-.atd-par {
-  display: grid;
-  gap: 0.4rem 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-  margin: 0;
-}
-
-.atd-par dt {
-  color: var(--atd-suave);
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.atd-par dd {
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-/* Tratamento contínuo */
-.atd-trat {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.atd-trat__item {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.6rem;
-}
-
-.atd-trat__icone {
-  margin-top: 0.15rem;
-  color: var(--hc-coral-tinta);
-  font-size: 0.95rem;
-}
-
-.atd-trat__corpo {
-  display: grid;
-  gap: 0.3rem;
-  min-width: 0;
-}
-
-.atd-trat__corpo strong {
-  color: var(--hc-tinta);
-  font-size: 0.88rem;
-}
-
-.atd-trat__posologia,
-.atd-trat__obs {
-  margin: 0;
-  color: var(--atd-suave);
-  font-size: 0.8rem;
-  line-height: 1.45;
-  white-space: pre-line;
-}
-
-.atd-trat__obs span {
-  font-weight: 700;
-}
-
-/* Dados clínicos: uma linha por categoria, sem cartão dentro da ficha. */
-.atd-folds {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.atd-fold + .atd-fold {
-  border-top: 1px solid var(--hc-linha);
-}
-
-.atd-fold__heading {
-  margin: 0;
-}
-
-.atd-fold__row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 0.7rem;
-  padding: 0.65rem 1.15rem;
-}
-
-/* Gatilho de seção recolhível: Button com slot, sem o visual de CTA do preset (nem a
-   sombra que o hc-tema dá ao botão cheio, que descolava o cabeçalho do corpo). */
-.atd-fold__trigger.p-button {
-  --hc-botao-sombra: none;
-  justify-content: flex-start;
-  width: 100%;
-  gap: 0.7rem;
-  padding: 0.65rem 1.15rem;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  color: inherit;
-  font-size: inherit;
-  text-align: start;
-}
-
-.atd-fold__trigger.p-button:not(:disabled):hover,
-.atd-fold__trigger.p-button:not(:disabled):active,
-.atd-fold__trigger.p-button:focus-visible {
-  --hc-botao-sombra: none;
-  border: 0;
-  background: var(--hc-fundo);
-  box-shadow: none;
-  color: inherit;
-  outline: none;
-}
-
-.atd-fold__trigger.p-button:focus-visible {
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--hc-marca) 50%, transparent);
-}
-
-.atd-fold__icon {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.6rem;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-  font-size: 0.95rem;
-}
-
-/* Alergia registrada: a urgência mora no ícone. */
-.atd-fold[data-tone='warm'] .atd-fold__icon {
-  background: var(--hc-coral-fundo);
-  color: var(--hc-coral-tinta);
-}
-
-/* Categoria vazia recua: ícone apagado, sem nada a abrir. */
-.atd-fold[data-vazio='true'] .atd-fold__icon {
-  background: var(--hc-fundo);
-  color: var(--atd-fraco);
-}
-
-.atd-fold__copy {
-  display: grid;
-  gap: 0.05rem;
-  min-width: 0;
-  flex: 1;
-}
-
-.atd-fold__title {
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.88rem;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.atd-fold__sub {
-  overflow: hidden;
-  margin: 0;
-  color: var(--atd-suave);
-  font-size: 0.76rem;
-  line-height: 1.4;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* A frase do motivo é o conteúdo: lê inteira, quebra se precisar. */
-.atd-fold[data-vazio='true'] .atd-fold__sub {
-  white-space: normal;
-}
-
-.atd-fold__chevron {
-  color: var(--atd-fraco);
-  font-size: 0.78rem;
-}
-
-/* Itens alinhados ao título, não à borda; sem rolagem por dentro: quem acha longa, recolhe. */
-.atd-items {
-  display: grid;
-  gap: 0.55rem;
-  margin: 0;
-  padding-block: 0 0.8rem;
-  padding-inline: calc(1.15rem + 2rem + 0.7rem) 1.15rem;
-  list-style: none;
-}
-
-.atd-items li {
-  display: grid;
-  gap: 0.05rem;
-  min-width: 0;
-}
-
-.atd-items strong {
-  color: var(--hc-tinta);
-  font-size: 0.84rem;
-  font-weight: 650;
-  line-height: 1.35;
-}
-
-.atd-item__meta {
-  color: var(--atd-suave);
-  font-size: 0.76rem;
-  line-height: 1.4;
   overflow-wrap: anywhere;
 }
 
-.atd-item--destaque strong {
-  color: var(--hc-coral-tinta);
+.recado__quem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pj-lugar-tinta);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.observacao {
+  display: grid;
+  gap: 4px;
+  padding: 12px 16px;
+  border-inline-start: 3px solid var(--linha-forte);
+}
+
+.observacao__titulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.observacao__texto {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.sem-dados {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px dashed var(--linha-forte);
+  border-radius: 12px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.sem-dados i {
+  margin-top: 2px;
+  font-size: 15px;
+}
+
+.vazio-ficha {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding: 20px;
+}
+
+.vazio-ficha__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 20px;
+}
+
+.vazio-ficha strong {
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.vazio-ficha p {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Pares rótulo e valor (tratamento, diário): rótulo pequeno em cima, valor embaixo. */
+.pares {
+  display: grid;
+  gap: 8px 16px;
+  margin: 4px 0 0;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+}
+
+.pares dt {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.pares dd {
+  margin: 1px 0 0;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Tratamento contínuo */
+.trat {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.trat__icone {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin-top: 1px;
+  color: var(--risco);
+}
+
+.trat__corpo {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.trat__nome {
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.trat__posologia {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
+}
+
+.trat__obs {
+  margin: 4px 0 0;
+  color: var(--tinta);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.trat__obs span {
+  color: var(--tinta-2);
+  font-weight: 550;
+}
+
+/* Dados clínicos: uma linha por categoria, que abre. */
+.dobra__cabeca {
+  margin: 0;
+  font: inherit;
+}
+
+.dobra__linha {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+}
+
+.dobra__botao {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+}
+
+.dobra__botao:hover {
+  background: var(--superficie-2);
+}
+
+.dobra__botao:focus-visible {
+  outline: 2px solid var(--pj-lugar);
+  outline-offset: -2px;
+}
+
+.ui-lista > li:first-child .dobra__botao {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.ui-lista > li:last-child .dobra__botao[aria-expanded='false'] {
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
+.dobra__icone {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 17px;
+}
+
+.dobra[data-tone='warm'] .dobra__icone {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+.dobra__texto {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.dobra__titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.dobra[data-vazio='true'] .dobra__titulo {
+  color: var(--tinta-2);
+  font-weight: 550;
+}
+
+.dobra__sub {
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dobra[data-vazio='true'] .dobra__sub {
+  white-space: normal;
+}
+
+.dobra__seta {
+  color: var(--tinta-3);
+  font-size: 15px;
+}
+
+.dobra__itens {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 2px 16px 14px 62px;
+  list-style: none;
+}
+
+[dir='rtl'] .dobra__itens {
+  padding: 2px 62px 14px 16px;
+}
+
+.dobra__itens li {
+  display: grid;
+  gap: 1px;
+  line-height: 1.35;
+}
+
+.dobra__itens strong {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.dobra__itens span {
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.dobra__item--destaque strong {
+  color: var(--risco-tinta);
+  font-weight: 650;
 }
 
 /* Documentos */
-.atd-docs {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.atd-doc {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+.doc {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.6rem;
-  padding-block: 0.5rem;
+  gap: 10px 12px;
+  padding: 12px 16px;
 }
 
-.atd-doc + .atd-doc {
-  border-top: 1px solid var(--hc-linha);
-}
-
-.atd-doc__icone {
-  color: var(--hc-marca);
-  font-size: 1.15rem;
-}
-
-.atd-doc__texto {
+.doc__icone {
   display: grid;
-  gap: 0.05rem;
-  min-width: 0;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 17px;
 }
 
-.atd-doc__texto strong {
+.doc__texto {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 10rem;
+  gap: 2px;
+  line-height: 1.35;
+}
+
+.doc__texto strong {
   overflow: hidden;
-  color: var(--hc-tinta);
-  font-size: 0.84rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.atd-doc__texto small,
-.atd-doc__sem {
-  color: var(--atd-suave);
-  font-size: 0.72rem;
-  line-height: 1.4;
+.doc__texto small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
-.atd-doc__acoes {
+.doc__sem {
+  color: var(--tinta-3);
+  font-size: 12.5px;
+}
+
+.doc__acoes {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   justify-content: flex-end;
-  gap: 0.3rem;
+  gap: 6px 12px;
+  margin-inline-start: auto;
 }
 
-.atd-doc__n {
-  color: var(--atd-suave);
-  font-size: 0.7rem;
-  font-weight: 700;
+.doc__arquivo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.doc__arquivo :deep(.p-button) {
+  width: 36px;
+  height: 36px;
+}
+
+.doc__n {
+  margin-inline-end: 2px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 /* Diário */
-.atd-diario {
+.dia {
   display: grid;
-  gap: 0.85rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 8px;
+  padding: 14px 16px;
 }
 
-.atd-diario__dia {
-  display: grid;
-  gap: 0.45rem;
+.dia__data {
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
-.atd-diario__dia + .atd-diario__dia {
-  padding-top: 0.85rem;
-  border-top: 1px solid var(--hc-linha);
-}
-
-.atd-diario__data {
-  color: var(--hc-tinta);
-  font-size: 0.84rem;
-}
-
-.atd-diario__tags {
+.dia__selos {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: 6px;
 }
 
-.atd-diario__tag {
-  padding: 0.12rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 650;
-}
-
-.atd-diario__tag--sintoma {
-  background: var(--hc-coral-fundo);
-  color: var(--hc-coral-tinta);
-}
-
-.atd-diario__tag--doenca {
-  background: var(--hc-pessego-fundo);
-  color: var(--hc-pessego-tinta);
-}
-
-.atd-diario__texto {
+.dia__texto {
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.8rem;
-  line-height: 1.5;
-  white-space: pre-line;
-}
-
-.atd-diario__texto span {
-  color: var(--atd-suave);
-  font-weight: 700;
-}
-
-.atd-diario__fotos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-/* ------------------------------------------------------------------ trabalho */
-
-.atd-trabalho {
-  display: grid;
-  gap: 1.5rem;
-  align-content: start;
-  min-width: 0;
-}
-
-/* Tom neutro: é aviso de escopo, não de erro. */
-.atd-aviso {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.9rem 1.1rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.9rem;
-  background: var(--hc-cartao);
-}
-
-.atd-aviso i {
-  margin-top: 0.15rem;
-  color: var(--atd-suave);
-}
-
-.atd-aviso strong {
-  display: block;
-  margin-bottom: 0.15rem;
-  color: var(--hc-tinta);
-  font-size: 0.9rem;
-}
-
-.atd-aviso p {
-  margin: 0;
-  color: var(--atd-suave);
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-/* A folha da anotação: um cartão, seções separadas por fio, nenhum cartão dentro. */
-.atd-folha {
-  min-width: 0;
-  border: 1px solid var(--hc-borda);
-  border-radius: 1rem;
-  background: var(--hc-cartao);
-  box-shadow: var(--hc-sombra);
-}
-
-.atd-folha__cab {
-  display: grid;
-  gap: 0.25rem;
-  padding: 1.25rem var(--folha-pad-x) 0;
-}
-
-.atd-folha__cab h2 {
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.atd-folha__cab p {
-  margin: 0;
-  color: var(--atd-suave);
-  font-size: 0.82rem;
+  color: var(--tinta);
+  font-size: 13.5px;
   line-height: 1.45;
 }
 
-.atd-folha__secao {
+.dia__texto span {
+  color: var(--tinta-2);
+  font-weight: 550;
+}
+
+.dia__fotos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ------------------------------------------------------------------ a folha da anotação */
+
+.trabalho {
   display: grid;
-  gap: 0.9rem;
-  padding: 1.25rem var(--folha-pad-x);
+  min-width: 0;
+  gap: 24px;
+}
+
+.folha {
+  --folha-pad-x: 22px;
+  --folha-fio: var(--linha);
+  --folha-suave: var(--tinta-2);
+
+  min-width: 0;
+  container: folha / inline-size;
+}
+
+.folha__cab {
+  display: grid;
+  gap: 4px;
+  padding: 20px var(--folha-pad-x) 6px;
+}
+
+.folha__titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.folha__titulo i {
+  color: var(--pj-lugar-tinta);
+  font-size: 22px;
+}
+
+.folha__lede {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.folha__secao {
+  display: grid;
+  gap: 14px;
+  padding: 18px var(--folha-pad-x);
   border-top: 1px solid var(--folha-fio);
 }
 
-.atd-folha__cab + .atd-folha__secao {
-  padding-top: 1rem;
+.folha__cab + .folha__secao {
+  padding-top: 12px;
   border-top: 0;
 }
 
-.atd-campo {
+.folha__secao-cab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.folha__subtitulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.folha__subtitulo i {
+  color: var(--pj-lugar-tinta);
+  font-size: 18px;
+}
+
+.folha__duas {
   display: grid;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-.atd-campo label {
-  color: var(--hc-tinta);
-  font-size: 0.8rem;
-  font-weight: 650;
-}
-
-.atd-campo :deep(.p-select) {
-  width: 100%;
-}
-
-.atd-folha__duas {
-  display: grid;
-  gap: 0.9rem;
+  gap: 14px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.atd-folha__secao-cab {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-}
-
-.atd-folha__secao-cab h3 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.95rem;
-  font-weight: 750;
-  letter-spacing: -0.01em;
-}
-
-.atd-folha__secao-cab h3 i {
-  color: var(--hc-marca);
-  font-size: 1.05rem;
-}
-
-/* Rótulo que abre o seletor de arquivo, com a mesma cara dos botões contornados da folha. */
-.atd-anexar {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 2.1rem;
-  padding: 0.35rem 0.9rem;
-  border: 1px solid var(--atd-campo-borda);
-  border-radius: 999px;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
-  font-size: 0.82rem;
-  font-weight: 650;
-  cursor: pointer;
-  transition:
-    border-color 150ms ease-out,
-    background 150ms ease-out;
-}
-
-.atd-anexar:hover {
-  border-color: var(--atd-campo-borda-hover);
-  background: var(--hc-fundo);
-}
-
-.atd-anexar:focus-within {
-  outline: 2px solid var(--hc-marca);
-  outline-offset: 2px;
-}
-
-.atd-anexar input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
-.atd-anexar i {
-  color: var(--hc-marca);
-}
-
-.atd-anexos {
-  display: grid;
-  gap: 0.45rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.atd-anexos li {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(11rem, 14rem) auto;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.45rem 0.45rem 0.45rem 0.8rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.75rem;
-  background: var(--hc-fundo);
-}
-
-.atd-anexos__icone {
-  color: var(--hc-marca);
-  font-size: 1.1rem;
-}
-
-.atd-anexos__nome {
+.campo {
   display: grid;
   min-width: 0;
+  gap: 6px;
 }
 
-.atd-anexos__nome strong {
-  overflow: hidden;
-  color: var(--hc-tinta);
-  font-size: 0.84rem;
-  font-weight: 650;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.campo > label {
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 550;
 }
 
-.atd-anexos__nome small {
-  color: var(--atd-suave);
-  font-size: 0.72rem;
-  font-variant-numeric: tabular-nums;
+.campo__obrigatorio {
+  color: var(--risco-tinta);
 }
 
-.atd-anexos__tipo {
+.campo :deep(.p-select) {
   width: 100%;
 }
 
-.atd-anexos__remover.p-button {
-  width: 2.25rem;
-  height: 2.25rem;
-  color: var(--atd-suave);
+/* Anexar: um rótulo com cara de botão; o input cobre o rótulo para o teclado chegar nele. */
+.anexar {
+  position: relative;
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 10px;
+  color: var(--tinta);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.atd-anexos__remover.p-button:not(:disabled):hover {
-  background: var(--hc-coral-fundo);
-  color: var(--hc-coral-tinta);
+.anexar:hover {
+  background: var(--superficie-2);
 }
 
-.atd-folha__nota {
-  display: flex;
-  align-items: baseline;
-  gap: 0.35rem;
-  color: var(--atd-suave);
-  font-size: 0.75rem;
-  line-height: 1.4;
+.anexar:focus-within {
+  outline: 2px solid var(--pj-lugar);
+  outline-offset: 2px;
 }
 
-.atd-folha__nota i {
-  color: var(--hc-lilas-tinta);
+.anexar input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  opacity: 0;
 }
 
-/* Preso ao pé da tela enquanto a folha estiver nela: registrar nunca fica a um scroll de
-   distância, e o erro aparece ao lado de quem clicou. */
-.atd-folha__rodape {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
+.anexar i {
+  font-size: 16px;
+}
+
+.anexos {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anexos li {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0.6rem 1rem;
-  padding: 0.85rem var(--folha-pad-x);
-  border-top: 1px solid var(--hc-borda);
-  border-radius: 0 0 1rem 1rem;
-  background: var(--hc-cartao);
-  box-shadow: 0 -10px 24px -18px rgb(20 32 28 / 35%);
+  gap: 8px 10px;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
-.atd-folha__erro {
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  flex: 1 1 16rem;
-  margin: 0;
-  color: var(--hc-coral-tinta);
-  font-size: 0.82rem;
-  font-weight: 650;
-  line-height: 1.4;
+.anexos__icone {
+  color: var(--tinta-2);
+  font-size: 18px;
 }
 
-.atd-folha__enviar.p-button {
-  min-width: 12rem;
-}
-
-/* ------------------------------------------------------------------ histórico */
-
-.atd-hist {
+.anexos__nome {
   display: grid;
-  gap: 0.75rem;
   min-width: 0;
+  flex: 1 1 8rem;
+  line-height: 1.3;
 }
 
-.atd-hist__cab {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-}
-
-.atd-hist__cab h2 {
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.atd-hist__conta {
-  color: var(--atd-suave);
-  font-size: 0.78rem;
-  font-weight: 650;
-}
-
-.atd-hist__lede {
-  margin: -0.35rem 0 0;
-  color: var(--atd-suave);
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.atd-hist__vazio {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem 1.15rem;
-  border: 1px dashed var(--atd-campo-borda);
-  border-radius: 1rem;
-  color: var(--atd-suave);
-}
-
-.atd-hist__vazio i {
-  margin-top: 0.1rem;
-  font-size: 1.15rem;
-}
-
-.atd-hist__vazio strong {
-  display: block;
-  color: var(--hc-tinta);
-  font-size: 0.9rem;
-}
-
-.atd-hist__vazio p {
-  margin: 0.15rem 0 0;
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.atd-hist__lista {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.atd-nota {
-  display: grid;
-  gap: 0.9rem;
-  padding: 1.15rem var(--folha-pad-x) 1.25rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 1rem;
-  background: var(--hc-cartao);
-}
-
-.atd-nota__cab {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-}
-
-.atd-nota__quem {
-  display: grid;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.atd-nota__quem h3 {
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1rem;
-  font-weight: 750;
-  letter-spacing: -0.01em;
-}
-
-.atd-nota__quem p {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin: 0;
-  color: var(--atd-suave);
-  font-size: 0.8rem;
-}
-
-.atd-nota__quando {
-  flex: 0 0 auto;
-  color: var(--atd-suave);
-  font-size: 0.78rem;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.atd-nota__texto {
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.92rem;
-  line-height: 1.6;
-  white-space: pre-line;
-}
-
-.atd-nota__anexos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Anexo clicável: Button com slot (ícone + nome + tamanho), sem o visual de CTA do preset. */
-.atd-nota__anexo.p-button {
-  --hc-botao-sombra: none;
-  gap: 0.5rem;
-  max-width: 100%;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.65rem;
-  background: var(--hc-fundo);
-  box-shadow: none;
-  color: var(--hc-tinta);
-  font-size: 0.82rem;
-  text-align: start;
-  transition: border-color 150ms ease-out;
-}
-
-.atd-nota__anexo.p-button:not(:disabled):hover,
-.atd-nota__anexo.p-button:focus-visible {
-  --hc-botao-sombra: none;
-  border-color: var(--hc-marca);
-  background: var(--hc-fundo);
-  box-shadow: none;
-  color: var(--hc-tinta);
-}
-
-.atd-nota__anexo.p-button:disabled {
-  cursor: wait;
-  opacity: 0.72;
-}
-
-.atd-nota__anexo i {
-  color: var(--hc-marca);
-}
-
-.atd-nota__anexo-nome {
+.anexos__nome strong {
   overflow: hidden;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.atd-nota__anexo small {
-  color: var(--atd-suave);
-  font-size: 0.72rem;
+.anexos__nome small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.anexos__tipo {
+  width: 14rem;
+  max-width: 100%;
+}
+
+.folha__nota {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.folha__nota--ia {
+  color: var(--hotel-tinta);
+  font-weight: 550;
+}
+
+/* Rodapé preso à tela enquanto a folha estiver nela. */
+.folha__rodape {
+  position: sticky;
+  z-index: 2;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 14px var(--folha-pad-x);
+  border-top: 1px solid var(--linha);
+  border-radius: 0 0 15px 15px;
+  background: color-mix(in oklab, var(--superficie) 94%, transparent);
+  box-shadow: 0 -10px 20px -18px rgb(0 0 0 / 35%);
+  backdrop-filter: blur(8px);
+}
+
+.folha__erro,
+.folha__dica {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 16rem;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.folha__erro {
+  color: var(--risco-tinta);
+  font-weight: 550;
+}
+
+.folha__dica {
+  color: var(--tinta-2);
+}
+
+.folha__erro i,
+.folha__dica i {
+  margin-top: 1px;
+  font-size: 16px;
+}
+
+.folha__enviar.p-button {
+  min-height: 44px;
+  padding-inline: 20px;
+  font-size: 15px;
+}
+
+@container folha (max-width: 520px) {
+  /* A variável vai nos filhos: a consulta de contêiner não estiliza o próprio contêiner. */
+  .folha > * {
+    --folha-pad-x: 16px;
+  }
+
+  .folha__duas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .folha__enviar.p-button {
+    width: 100%;
+  }
+
+  /* No celular o rodapé preso guarda só o botão (e o erro, quando houver). */
+  .folha__dica {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ histórico de anotações */
+
+.nota {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+}
+
+.nota__cab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+
+.nota__quem {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.nota__servico {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.nota__autor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.nota__quando {
+  color: var(--tinta-2);
+  font-size: 12.5px;
   white-space: nowrap;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .atd-anexar,
-  .atd-nota__anexo.p-button {
-    transition: none;
+.nota__texto {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14.5px;
+  line-height: 1.55;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.nota__anexos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nota__anexo {
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 36px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  background: var(--superficie-2);
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+}
+
+.nota__anexo:hover:not(:disabled) {
+  border-color: var(--linha-forte);
+}
+
+.nota__anexo:focus-visible {
+  outline: 2px solid var(--pj-lugar);
+  outline-offset: 2px;
+}
+
+.nota__anexo i {
+  color: var(--pj-lugar-tinta);
+  font-size: 16px;
+}
+
+.nota__anexo-nome {
+  overflow: hidden;
+  font-weight: 550;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nota__anexo small {
+  color: var(--tinta-2);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ larguras */
+
+@media (max-width: 1100px) {
+  .capa {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .capa__dados {
+    padding-inline-start: 90px;
+  }
+
+  .capa__dado:first-child {
+    padding-inline-start: 0;
+    border-inline-start: 0;
   }
 }
 
 @media (max-width: 640px) {
-  .atd-folha__duas {
-    grid-template-columns: minmax(0, 1fr);
+  .capa .capa__rosto {
+    width: 56px;
+    height: 56px;
+    font-size: 1.1rem;
   }
 
-  .atd-anexos li {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+  .capa__quem {
+    gap: 14px;
   }
 
-  .atd-anexos__tipo {
-    grid-column: 1 / -1;
+  .capa__nome {
+    font-size: 24px;
+  }
+
+  .capa__dados {
+    padding-inline-start: 0;
+  }
+
+  .capa__numero strong,
+  .capa__contagem {
+    font-size: 24px;
+  }
+
+  .mesa__abas {
+    justify-self: stretch;
+  }
+
+  .mesa__abas :deep(.p-togglebutton) {
+    flex: 1 1 0;
+  }
+
+  .recado {
+    padding-inline-start: 46px;
+  }
+
+  .recado__aspas {
+    left: 14px;
   }
 }
 </style>

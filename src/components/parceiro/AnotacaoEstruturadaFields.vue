@@ -943,7 +943,8 @@ function removeExame(indice: number) {
 <style scoped>
 /*
  * Sem cartão: as seções são da folha da anotação. O recuo lateral e o fio entre seções vêm da
- * tela (`--folha-pad-x`, `--folha-fio`), para a linha de cima e a de baixo baterem.
+ * tela (`--folha-pad-x`, `--folha-fio`), para a linha de cima e a de baixo baterem. Cores e
+ * corpos do Trilha: título de seção 15,5 px, rótulo 13,5 px, cabeçalho da receita 12,5 px.
  */
 .est {
   display: grid;
@@ -951,14 +952,14 @@ function removeExame(indice: number) {
 
 .est__secao {
   display: grid;
-  gap: 0.9rem;
-  padding: 1.25rem var(--folha-pad-x, 1.25rem);
-  border-top: 1px solid var(--folha-fio, var(--hc-linha));
+  gap: 14px;
+  padding: 18px var(--folha-pad-x, 20px);
+  border-top: 1px solid var(--folha-fio, var(--linha));
 }
 
 .est__cab {
   display: grid;
-  gap: 0.2rem;
+  gap: 2px;
 }
 
 .est__cab--acao {
@@ -966,54 +967,58 @@ function removeExame(indice: number) {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
+  gap: 8px 16px;
 }
 
 .est__titulo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.95rem;
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 15.5px;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 .est__titulo i {
-  color: var(--hc-marca);
-  font-size: 1.05rem;
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-size: 18px;
 }
 
 .est__contagem {
-  padding: 0.1rem 0.45rem;
+  display: inline-grid;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 7px;
+  place-items: center;
   border-radius: 999px;
-  background: var(--hc-cinza-fundo);
-  color: var(--hc-cinza-tinta);
-  font-size: 0.7rem;
-  font-weight: 700;
+  background: var(--superficie-3);
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
+  font-weight: 650;
 }
 
 .est__lede {
   margin: 0;
-  padding-inline-start: 1.55rem;
-  color: var(--folha-suave, #6b7a74);
-  font-size: 0.8rem;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.45;
 }
 
 .est__field {
   display: grid;
-  gap: 0.35rem;
+  gap: 6px;
   align-content: start;
   min-width: 0;
 }
 
 .est__field label {
-  color: var(--hc-tinta);
-  font-size: 0.8rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 550;
 }
 
 .est__field :deep(.p-inputnumber) {
@@ -1022,7 +1027,7 @@ function removeExame(indice: number) {
 
 .est__linha {
   display: grid;
-  gap: 0.9rem;
+  gap: 14px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -1036,16 +1041,16 @@ function removeExame(indice: number) {
 }
 
 .est__error {
-  color: var(--hc-coral-tinta);
-  font-size: 0.75rem;
-  font-weight: 650;
+  color: var(--risco-tinta);
+  font-size: 12.5px;
+  font-weight: 550;
   line-height: 1.35;
 }
 
 .est__vazio {
   margin: 0;
-  color: var(--folha-suave, #6b7a74);
-  font-size: 0.82rem;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 /*
@@ -1072,25 +1077,25 @@ function removeExame(indice: number) {
 .presc__cab,
 .presc__item {
   display: grid;
-  grid-template-columns: 1.1rem minmax(0, 1fr) 4.25rem 7.25rem 6.5rem 5.5rem 2.25rem;
-  column-gap: 0.5rem;
+  grid-template-columns: 1.25rem minmax(0, 1fr) 4.25rem 5.75rem 7rem 5.25rem 2.25rem;
+  column-gap: 8px;
   align-items: start;
 }
 
 .presc--exames .presc__cab,
 .presc--exames .presc__item {
-  grid-template-columns: 1.1rem minmax(0, 1fr) minmax(0, 1.3fr) 2.25rem;
+  grid-template-columns: 1.25rem minmax(0, 1fr) minmax(0, 1.3fr) 2.25rem;
 }
 
 .presc__cab {
   align-items: end;
-  padding-bottom: 0.4rem;
+  padding-bottom: 6px;
 }
 
 .presc__cab span {
-  color: var(--folha-suave, #6b7a74);
-  font-size: 0.72rem;
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
   line-height: 1.25;
 }
 
@@ -1103,9 +1108,9 @@ function removeExame(indice: number) {
 }
 
 .presc__item {
-  row-gap: 0.45rem;
-  padding-block: 0.65rem;
-  border-top: 1px solid var(--folha-fio, var(--hc-linha));
+  row-gap: 8px;
+  padding-block: 12px;
+  border-top: 1px solid var(--folha-fio, var(--linha));
 }
 
 .presc__item:first-child {
@@ -1145,7 +1150,7 @@ function removeExame(indice: number) {
 }
 
 .presc__item--lido {
-  border-radius: 0.6rem;
+  border-radius: 10px;
   animation: presc-lido 1.8s ease-out both;
   animation-delay: calc(var(--ordem, 0) * 90ms);
 }
@@ -1153,8 +1158,8 @@ function removeExame(indice: number) {
 @keyframes presc-lido {
   0%,
   25% {
-    background-color: color-mix(in srgb, var(--hc-lilas-fundo) 85%, transparent);
-    box-shadow: 0 0 0 0.4rem color-mix(in srgb, var(--hc-lilas-fundo) 85%, transparent);
+    background-color: color-mix(in srgb, var(--hotel-fundo) 85%, transparent);
+    box-shadow: 0 0 0 0.4rem color-mix(in srgb, var(--hotel-fundo) 85%, transparent);
   }
 
   100% {
@@ -1169,18 +1174,18 @@ function removeExame(indice: number) {
 }
 
 .presc__item--fantasma {
-  padding-block: 0.65rem;
-  border-top: 1px solid var(--folha-fio, var(--hc-linha));
+  padding-block: 12px;
+  border-top: 1px solid var(--folha-fio, var(--linha));
 }
 
 .presc__osso {
-  height: 2.4rem;
-  border-radius: 0.6rem;
+  height: 44px;
+  border-radius: 10px;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--hc-lilas-fundo) 70%, var(--hc-cartao)) 0%,
-    color-mix(in srgb, var(--hc-lilas-fundo) 100%, var(--hc-cartao)) 40%,
-    color-mix(in srgb, var(--hc-lilas-fundo) 70%, var(--hc-cartao)) 80%
+    color-mix(in srgb, var(--hotel-fundo) 70%, var(--superficie)) 0%,
+    color-mix(in srgb, var(--hotel-fundo) 100%, var(--superficie)) 40%,
+    color-mix(in srgb, var(--hotel-fundo) 70%, var(--superficie)) 80%
   );
   background-size: 250% 100%;
   animation: presc-osso 1.4s ease-in-out infinite;
@@ -1226,11 +1231,12 @@ function removeExame(indice: number) {
 }
 
 .presc__n {
-  padding-top: 0.6rem;
-  color: var(--folha-suave, #6b7a74);
-  font-size: 0.75rem;
-  font-weight: 700;
+  padding-top: 12px;
+  color: var(--tinta-3);
+  font-family: var(--font-dados);
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
+  font-weight: 650;
   text-align: end;
 }
 
@@ -1258,15 +1264,15 @@ function removeExame(indice: number) {
 }
 
 .presc__remover.p-button {
-  width: 2.25rem;
-  height: 2.25rem;
-  margin-top: 0.1rem;
-  color: var(--folha-suave, #6b7a74);
+  width: 36px;
+  height: 36px;
+  margin-top: 4px;
+  color: var(--tinta-2);
 }
 
 .presc__remover.p-button:not(:disabled):hover {
-  background: var(--hc-coral-fundo);
-  color: var(--hc-coral-tinta);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .presc__sr {
@@ -1296,46 +1302,46 @@ function removeExame(indice: number) {
  */
 .presc__c--conferir :deep(.p-inputtext),
 .presc__c--conferir :deep(.p-textarea) {
-  border-color: color-mix(in srgb, var(--hc-lilas-tinta) 55%, transparent);
-  background: var(--hc-lilas-fundo);
-  color: var(--hc-tinta);
+  border-color: color-mix(in srgb, var(--hotel) 70%, transparent);
+  background: var(--hotel-fundo);
+  color: var(--tinta);
 }
 
 .presc__olho {
   position: absolute;
   z-index: 1;
-  top: -0.45rem;
-  inset-inline-end: -0.35rem;
+  top: -7px;
+  inset-inline-end: -6px;
   display: grid;
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 18px;
+  height: 18px;
   place-items: center;
   border-radius: 999px;
-  background: var(--hc-lilas-tinta);
-  color: var(--hc-cartao);
-  font-size: 0.66rem;
+  background: var(--hotel-tinta);
+  color: var(--superficie);
+  font-size: 11px;
   pointer-events: none;
 }
 
 .presc__aviso {
   display: flex;
   align-items: baseline;
-  gap: 0.35rem;
+  gap: 6px;
   margin: 0;
-  color: var(--hc-pessego-tinta);
-  font-size: 0.75rem;
-  font-weight: 600;
+  color: var(--atencao-tinta);
+  font-size: 12.5px;
+  font-weight: 550;
   line-height: 1.4;
 }
 
 .presc__erros {
   display: grid;
-  gap: 0.15rem;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
-  color: var(--hc-coral-tinta);
-  font-size: 0.75rem;
+  color: var(--risco-tinta);
+  font-size: 12.5px;
   line-height: 1.4;
 }
 
@@ -1349,8 +1355,8 @@ function removeExame(indice: number) {
   }
 
   .presc__item {
-    grid-template-columns: 1.1rem repeat(4, minmax(0, 1fr)) 2.25rem;
-    row-gap: 0.6rem;
+    grid-template-columns: 1.25rem repeat(4, minmax(0, 1fr)) 2.25rem;
+    row-gap: 10px;
   }
 
   .presc__lbl {
@@ -1358,24 +1364,24 @@ function removeExame(indice: number) {
     display: block;
     width: auto;
     height: auto;
-    margin-bottom: 0.25rem;
+    margin-bottom: 4px;
     overflow: visible;
     clip: auto;
-    color: var(--folha-suave, #6b7a74);
-    font-size: 0.72rem;
-    font-weight: 700;
+    color: var(--tinta-2);
+    font-size: 12.5px;
+    font-weight: 550;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 
   /* O olho marca o campo, não o rótulo: desce a altura do rótulo. */
   .presc__olho {
-    top: 0.75rem;
+    top: 14px;
   }
 
   .presc__n {
     grid-row: 1;
-    padding-top: 1.75rem;
+    padding-top: 33px;
   }
 
   .presc__c--nome {
@@ -1386,7 +1392,7 @@ function removeExame(indice: number) {
   .presc__remover.p-button {
     grid-row: 1;
     grid-column: 6;
-    margin-top: 1.35rem;
+    margin-top: 24px;
   }
 
   .presc__c--dose {
@@ -1416,7 +1422,7 @@ function removeExame(indice: number) {
   }
 
   .presc--exames .presc__item {
-    grid-template-columns: 1.1rem minmax(0, 1fr) 2.25rem;
+    grid-template-columns: 1.25rem minmax(0, 1fr) 2.25rem;
   }
 
   .presc--exames .presc__c {
@@ -1434,7 +1440,7 @@ function removeExame(indice: number) {
 
   /* Fantasma na coluna média: uma barra só, do tamanho do nome. */
   .presc__item--fantasma {
-    grid-template-columns: 1.1rem minmax(0, 1fr) 2.25rem;
+    grid-template-columns: 1.25rem minmax(0, 1fr) 2.25rem;
   }
 
   .presc__item--fantasma .presc__osso:not(.presc__osso--nome) {
@@ -1445,7 +1451,7 @@ function removeExame(indice: number) {
 /* Coluna estreita de verdade: os números em duas linhas de dois. */
 @container presc (max-width: 26rem) {
   .presc__item {
-    grid-template-columns: 1.1rem repeat(2, minmax(0, 1fr)) 2.25rem;
+    grid-template-columns: 1.25rem repeat(2, minmax(0, 1fr)) 2.25rem;
   }
 
   .presc__c--nome,
