@@ -680,7 +680,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               <div class="posto__acoes">
                 <Button
                   :as="RouterLink"
-                  :to="rotaDaReserva(linha.reserva.id)"
+                  :to="
+                    travada(linha)
+                      ? rotaDaReserva(linha.reserva.id)
+                      : { path: rotaDaReserva(linha.reserva.id), query: { checkin: '1' } }
+                  "
                   size="small"
                   :icon="travada(linha) ? 'ph ph-file-text' : 'ph ph-sign-in'"
                   :label="
@@ -817,7 +821,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               <div class="posto__acoes">
                 <Button
                   :as="RouterLink"
-                  :to="rotaDaEstadia(hospede.hospedagem.id)"
+                  :to="{ path: rotaDaEstadia(hospede.hospedagem.id), query: { checkout: '1' } }"
                   size="small"
                   icon="ph ph-sign-out"
                   :label="t('hotel.estadia.fazerCheckOut')"
