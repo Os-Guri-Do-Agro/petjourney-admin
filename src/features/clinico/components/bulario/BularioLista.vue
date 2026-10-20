@@ -161,7 +161,14 @@ const sinais = computed(() => {
 </script>
 
 <template>
-  <div class="bulario-lista" :class="{ 'bulario-lista--compacta': compacta }">
+  <!--
+    Na página, a lista é um cartão só: a busca no alto e as linhas embaixo. No seletor (compacta),
+    que já mora num diálogo, a busca fica solta e as linhas numa folha.
+  -->
+  <div
+    class="bulario-lista"
+    :class="compacta ? 'bulario-lista--compacta' : 'bulario-lista--cartao ui-folha'"
+  >
     <div class="bulario-lista__procura" role="search">
       <ClinicFilterBar
         :grupos="grupos"
@@ -174,11 +181,20 @@ const sinais = computed(() => {
       />
     </div>
 
-    <p v-if="visiveis.length === 0" class="bulario-lista__vazio ui-folha ui-vazio">
+    <p
+      v-if="visiveis.length === 0"
+      class="bulario-lista__vazio ui-vazio"
+      :class="{ 'ui-folha': compacta }"
+    >
       <strong>{{ t('clinico.bulario.semResultado') }}</strong>
     </p>
 
-    <ul v-else class="bulario-lista__itens ui-folha ui-lista" :aria-label="t('clinico.bulario.titulo')">
+    <ul
+      v-else
+      class="bulario-lista__itens ui-lista"
+      :class="{ 'ui-folha': compacta }"
+      :aria-label="t('clinico.bulario.titulo')"
+    >
       <li v-for="medicamento in visiveis" :key="medicamento.id">
         <button
           type="button"
@@ -234,9 +250,9 @@ const sinais = computed(() => {
 }
 
 .bulario-lista:not(.bulario-lista--compacta) .bulario-lista__procura :deep(.filtro__busca .p-inputtext) {
-  min-height: 50px;
+  min-height: 48px;
   padding-inline-start: 46px;
-  border-radius: 12px;
+  border-radius: var(--raio-controle);
   font-size: 15.5px;
 }
 
@@ -248,6 +264,27 @@ const sinais = computed(() => {
 
 .bulario-lista__vazio {
   margin: 0;
+}
+
+/* ------------------------------------------------------------------------------- o cartão */
+
+.bulario-lista--cartao {
+  gap: 0;
+  overflow: hidden;
+}
+
+.bulario-lista--cartao .bulario-lista__procura {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--linha-suave);
+}
+
+.bulario-lista--cartao .bulario-lista__procura :deep(.filtro__resultado) {
+  margin-inline-start: auto;
+  color: var(--tinta-2);
+}
+
+.bulario-lista--cartao .bulario-lista__itens > li > .ui-linha {
+  border-radius: 0;
 }
 
 .bulario-lista--compacta .bulario-lista__itens {

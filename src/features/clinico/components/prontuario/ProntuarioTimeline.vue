@@ -123,7 +123,12 @@ const dataDaAnterior = computed(() =>
 <template>
   <aside class="coluna" :aria-label="t('clinico.prontuario.nova.contexto.titulo')">
     <header class="coluna__topo">
-      <h2 class="coluna__titulo">{{ t('clinico.prontuario.nova.contexto.titulo') }}</h2>
+      <h2 class="coluna__titulo">
+        <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+          <i class="ph ph-clock-counter-clockwise" />
+        </span>
+        {{ t('clinico.prontuario.nova.contexto.titulo') }}
+      </h2>
       <button
         type="button"
         class="coluna__fechar"
@@ -245,12 +250,16 @@ const dataDaAnterior = computed(() =>
   gap: 8px;
 }
 
+/* O título da coluna como o de uma seção do kit: ladrilho claro do lugar, 17 px. */
 .coluna__titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
   color: var(--tinta);
   font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 650;
+  letter-spacing: -0.015em;
 }
 
 .coluna__fechar {

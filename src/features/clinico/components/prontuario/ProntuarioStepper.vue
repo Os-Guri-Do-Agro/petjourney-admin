@@ -16,8 +16,9 @@
  * em palavra ("A fazer").
  *
  * - **Feito**: disco cheio em musgo com o visto.
- * - **Atual**: anel na cor do lugar, nome em tinta cheia e o traço de 3 px embaixo — o mesmo
- *   desenho da aba acesa em todo o sistema.
+ * - **Atual**: anel na cor do lugar, nome em tinta cheia, e o passo inteiro numa placa tingida
+ *   na cor do lugar (acabamento de 20/10/2026) — o trilho mora num cartão, e a placa acesa é o
+ *   "você está aqui" que se acha de longe.
  * - **A fazer**: o número no disco vazio.
  * - **Em andamento**: o número sobre o fundo do lugar.
  * - **Pede atenção**: o aviso em risco, e o resumo do passo diz o quê.
@@ -141,20 +142,35 @@ function rotuloAcessivel(passo: PassoProntuario, indice: number) {
   min-width: 0;
 }
 
+/*
+ * Cada passo é uma placa clicável: o passo atual acende numa placa tingida na cor do lugar, os
+ * outros ganham o poço no hover. O fio atravessa o respiro da placa até perto do próximo disco.
+ */
 .passo__botao {
   display: grid;
   width: 100%;
   min-width: 0;
   align-content: start;
   gap: 10px;
-  padding: 10px 12px 14px 0;
+  padding: 12px 14px 14px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   background: none;
   color: inherit;
   cursor: pointer;
   font: inherit;
   text-align: start;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.passo__botao:hover {
+  background: var(--superficie-2);
+}
+
+.passo--atual .passo__botao,
+.passo--atual .passo__botao:hover {
+  background: color-mix(in oklab, var(--pj-lugar-fundo, var(--musgo-fundo)) 62%, var(--superficie));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--pj-lugar, var(--musgo)) 22%, transparent);
 }
 
 .passo__botao:focus-visible {
@@ -194,11 +210,13 @@ function rotuloAcessivel(passo: PassoProntuario, indice: number) {
 }
 
 .passo__fio {
+  position: relative;
+  z-index: 1;
   height: 2px;
   flex: 1;
-  margin-inline-end: 4px;
+  margin-inline-end: -18px;
   border-radius: 2px;
-  background: var(--linha);
+  background: var(--linha-media);
 }
 
 /* Feito: disco cheio, e o fio até o próximo também. */
@@ -227,7 +245,7 @@ function rotuloAcessivel(passo: PassoProntuario, indice: number) {
 /* Atual: o anel na cor do lugar, por fora do disco, sem mexer no tamanho. */
 .passo--atual .passo__disco {
   box-shadow:
-    0 0 0 3px var(--fundo),
+    0 0 0 3px var(--superficie),
     0 0 0 5px var(--pj-lugar, var(--musgo));
 }
 
@@ -276,18 +294,6 @@ function rotuloAcessivel(passo: PassoProntuario, indice: number) {
 .passo--alerta .passo__resumo {
   color: var(--risco-tinta);
   font-weight: 550;
-}
-
-/* O traço da aba acesa, embaixo do passo atual. */
-.passo--atual .passo__botao::after {
-  position: absolute;
-  right: 16px;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  border-radius: 3px;
-  background: var(--pj-lugar, var(--musgo));
-  content: '';
 }
 
 .passo__botao:hover .passo__rotulo {
@@ -341,8 +347,12 @@ function rotuloAcessivel(passo: PassoProntuario, indice: number) {
     0 0 0 4px var(--pj-lugar, var(--musgo));
 }
 
-.trilho--mini .passo--atual .passo__botao::after {
-  display: none;
+.trilho--mini .passo__botao,
+.trilho--mini .passo__botao:hover,
+.trilho--mini .passo--atual .passo__botao,
+.trilho--mini .passo--atual .passo__botao:hover {
+  background: none;
+  box-shadow: none;
 }
 
 .sr-only {
@@ -371,8 +381,12 @@ function rotuloAcessivel(passo: PassoProntuario, indice: number) {
     position: static;
   }
 
-  .passo--atual .passo__botao::after {
-    display: none;
+  .passo__botao {
+    padding: 8px;
+  }
+
+  .passo__fio {
+    margin-inline-end: -12px;
   }
 
   .passo__textos {
@@ -381,11 +395,11 @@ function rotuloAcessivel(passo: PassoProntuario, indice: number) {
 
   .passo--atual .passo__textos {
     position: absolute;
-    top: 50px;
-    left: 0;
+    top: 58px;
+    left: 8px;
     display: grid;
     width: max-content;
-    max-width: calc(100vw - 32px);
+    max-width: calc(100vw - 48px);
   }
 
   .passo--atual .passo__resumo {
@@ -403,7 +417,8 @@ function rotuloAcessivel(passo: PassoProntuario, indice: number) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .passo__disco {
+  .passo__disco,
+  .passo__botao {
     transition: none;
   }
 }

@@ -144,15 +144,18 @@ const ICONE: Record<DemonstracaoId, string> = {
     </p>
   </section>
 
-  <section class="exemplos" aria-labelledby="mg-exemplos-titulo">
+  <section class="exemplos ui-folha" aria-labelledby="mg-exemplos-titulo">
     <header class="exemplos__cabeca">
-      <h3 id="mg-exemplos-titulo" class="exemplos__titulo">
-        {{ t('clinico.migracao.arquivo.exemplosTitulo') }}
-      </h3>
-      <p class="exemplos__texto">{{ t('clinico.migracao.arquivo.exemplosTexto') }}</p>
+      <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-files" /></span>
+      <span class="exemplos__titulos">
+        <h3 id="mg-exemplos-titulo" class="exemplos__titulo">
+          {{ t('clinico.migracao.arquivo.exemplosTitulo') }}
+        </h3>
+        <p class="exemplos__texto">{{ t('clinico.migracao.arquivo.exemplosTexto') }}</p>
+      </span>
     </header>
 
-    <ul class="ui-folha ui-lista">
+    <ul class="ui-lista">
       <li v-for="demonstracao in DEMONSTRACOES" :key="demonstracao.id" class="exemplo">
         <span class="exemplo__icone" aria-hidden="true">
           <i :class="ICONE[demonstracao.id]" />
@@ -273,21 +276,31 @@ const ICONE: Record<DemonstracaoId, string> = {
 
 /* ------------------------------------------------------------------------------- exemplos */
 
+/* Os exemplos num cartão com cabeçalho: o ladrilho, o título e a frase, e as planilhas embaixo. */
 .exemplos {
   display: grid;
-  gap: 12px;
+  overflow: hidden;
 }
 
 .exemplos__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid var(--linha-suave);
+}
+
+.exemplos__titulos {
   display: grid;
+  min-width: 0;
   gap: 2px;
 }
 
 .exemplos__titulo {
   margin: 0;
   color: var(--tinta);
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 650;
   letter-spacing: -0.01em;
 }
 
@@ -302,7 +315,7 @@ const ICONE: Record<DemonstracaoId, string> = {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 16px;
-  padding: 14px 18px;
+  padding: 14px 22px;
 }
 
 .exemplo__icone {
@@ -367,6 +380,15 @@ const ICONE: Record<DemonstracaoId, string> = {
   .soltar {
     min-height: 220px;
     padding: 28px 16px;
+  }
+
+  .exemplos__cabeca {
+    align-items: flex-start;
+    padding: 16px 16px 14px;
+  }
+
+  .exemplo {
+    padding-inline: 16px;
   }
 }
 </style>

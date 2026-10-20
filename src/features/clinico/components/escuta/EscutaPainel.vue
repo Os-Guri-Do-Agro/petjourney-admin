@@ -868,7 +868,7 @@ const temAcoes = computed(
   gap: 0;
   padding: 12px 14px 12px 12px;
   border: 1.5px dashed var(--maquina-linha);
-  border-radius: 16px;
+  border-radius: var(--raio-cartao);
   background: var(--superficie);
 }
 

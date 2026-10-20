@@ -15,7 +15,8 @@
  *
  * Redesenho total (19/10/2026): a página saiu do `PartnerPageFrame` para o `UiPagina`, volta a
  * "Pacientes" pelo `#voltar`, e os blocos viraram seções com o título no fundo e o conteúdo numa
- * folha — nada de cartão dentro de cartão.
+ * folha — nada de cartão dentro de cartão. No acabamento de 20/10/2026 cada bloco virou um cartão
+ * com cabeçalho próprio (ladrilho, título, ação), e a consulta de hoje ganhou a marca do lugar.
  *
  * O botão de abrir o atendimento leva o resumo junto: a anamnese já abre com o que o diário
  * registrou, as medicações em uso e as alergias — só nos campos ainda vazios. Quem assina o
@@ -439,10 +440,12 @@ watch(petId, carregar)
       <!-- Quando ele entra: a hora grande, e o que o botão da capa vai abrir. -->
       <section
         v-if="consultaDeHoje"
-        class="hoje ui-folha"
+        class="hoje ui-folha ui-marca ui-marca--lugar"
         :aria-label="t('clinico.ficha.resumo.consultaDeHoje')"
       >
-        <span class="hoje__icone" aria-hidden="true"><i class="ph ph-calendar-check" /></span>
+        <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
+          <i class="ph ph-calendar-check" />
+        </span>
         <span class="hoje__hora">
           <strong class="ui-num">{{ consultaDeHoje.hora }}</strong>
           <small>{{ t('clinico.ficha.resumo.hoje') }}</small>
@@ -474,7 +477,7 @@ watch(petId, carregar)
         </div>
       </div>
 
-      <div class="resumo__preferencia">
+      <div class="resumo__preferencia ui-poco">
         <ToggleSwitch v-model="sugerirResumo" :input-id="idDaPreferencia" />
         <label :for="idDaPreferencia">{{ t('clinico.resumoDoPaciente.preferencia') }}</label>
       </div>
@@ -494,7 +497,7 @@ watch(petId, carregar)
 /* As colunas são decididas pela largura do conteúdo, não da janela. */
 .resumo {
   display: grid;
-  gap: 28px;
+  gap: 24px;
   container-type: inline-size;
 }
 
@@ -519,22 +522,11 @@ watch(petId, carregar)
 /* ------------------------------------------------------------------ a consulta de hoje */
 
 .hoje {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 14px 20px;
-}
-
-.hoje__icone {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  flex: none;
-  place-items: center;
-  border-radius: 12px;
-  background: var(--pj-lugar-fundo, var(--clinica-fundo));
-  color: var(--pj-lugar-tinta, var(--clinica-tinta));
-  font-size: 20px;
+  gap: 18px;
+  padding: 16px 22px;
 }
 
 .hoje__hora {
@@ -545,8 +537,8 @@ watch(petId, carregar)
 }
 
 .hoje__hora strong {
-  color: var(--tinta);
-  font-size: 24px;
+  color: var(--pj-lugar-tinta, var(--tinta));
+  font-size: 28px;
   font-weight: 650;
   letter-spacing: -0.02em;
 }
@@ -560,7 +552,7 @@ watch(petId, carregar)
   display: grid;
   min-width: 0;
   gap: 2px;
-  padding-inline-start: 16px;
+  padding-inline-start: 18px;
   border-inline-start: 1px solid var(--linha);
 }
 
@@ -582,20 +574,20 @@ watch(petId, carregar)
 .resumo__corpo {
   display: grid;
   align-items: start;
-  gap: 28px;
+  gap: 24px;
 }
 
 .resumo__coluna {
   display: grid;
   min-width: 0;
   align-content: start;
-  gap: 28px;
+  gap: 24px;
 }
 
 /* O essencial ao lado, mais estreito; em uma coluna, ele sobe — é mais curto e responde antes. */
 @container (min-width: 880px) {
   .resumo__corpo {
-    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 400px);
   }
 }
 
@@ -609,6 +601,8 @@ watch(petId, carregar)
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-self: start;
+  padding: 10px 16px 10px 12px;
   color: var(--tinta-2);
   font-size: 13.5px;
 }

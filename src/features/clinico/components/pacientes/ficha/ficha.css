@@ -1,42 +1,151 @@
 /*
- * A grade das vistas da ficha do paciente — Resumo, Histórico, Tratamento e Vacinas.
+ * O cartão das vistas da ficha do paciente — Resumo, Histórico, Tratamento, Vacinas — e do
+ * prontuário.
  *
- * A capa e as abas do paciente moram no `FichaCabeca` (estilo próprio, nos tokens do Trilha). Aqui
- * fica só a grade de duas colunas que as vistas compartilham e a linha de ajuda sob um título.
+ * Acabamento de 20/10/2026: o que se lê junto mora num cartão (`ui-folha`) com cabeçalho próprio,
+ * no padrão do Hoje da Clínica — o ladrilho do assunto, o título, a contagem e uma linha de ajuda
+ * à esquerda; a ação discreta à direita. Embaixo de um fio suave, o corpo. Assim a ficha se lê
+ * como um painel de blocos do mesmo paciente, e não como títulos soltos sobre o fundo.
  *
- * Redesenho total (19/10/2026): as regras deixaram de depender do `.hc-tema` — valem com ou sem
- * `.ficha-tema` na raiz, nos tokens do Trilha (`--tinta-2`...), para as vistas que já saíram do
- * acabamento da Visão geral e para as que ainda não saíram.
+ * Global de propósito (importado pelos componentes que o usam): é uma peça só para as quatro
+ * vistas, e a mesma cara precisa valer no Resumo e no Histórico. Tudo prefixado `ficha-cartao`.
  */
 
-/*
- * A grade de duas colunas das vistas da ficha. As colunas são decididas pela largura do conteúdo,
- * não da janela — por isso quem contém a grade declara `container-type` (a consulta de contêiner
- * estiliza os descendentes, nunca o próprio contêiner).
- */
-.ficha-conteudo {
+.trilha .ficha-cartao {
   display: grid;
-  gap: 24px;
-  container-type: inline-size;
+  min-width: 0;
+  align-content: start;
 }
 
-.ficha-grade {
-  display: grid;
-  align-items: start;
-  gap: 24px;
-}
-
-.ficha-coluna {
+.trilha .ficha-cartao__cabeca {
   display: flex;
   min-width: 0;
-  flex-direction: column;
-  gap: 24px;
+  align-items: center;
+  gap: 12px 14px;
+  padding: 16px 20px 14px;
 }
 
-/* A ajuda sob o título de uma seção: uma frase em tinta secundária, colada ao título. */
-.ficha-ajuda {
-  margin: -0.65rem 0 0;
+.trilha .ficha-cartao__cabeca + * {
+  border-top: 1px solid var(--linha-suave);
+}
+
+.trilha .ficha-cartao__titulos {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 2px;
+}
+
+.trilha .ficha-cartao__titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.trilha .ficha-cartao__descricao {
+  margin: 0;
   color: var(--tinta-2);
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 1.45;
+}
+
+.trilha .ficha-cartao__acoes {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* O número grande no canto do cabeçalho, como o total dos postos do Hoje. */
+.trilha .ficha-cartao__total {
+  flex: none;
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.trilha .ficha-cartao__corpo {
+  min-width: 0;
+  padding: 16px 20px 18px;
+}
+
+/* A faixa de ferramentas logo abaixo do cabeçalho (filtro, legenda): rente, num poço. */
+.trilha .ficha-cartao__ferramentas {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 20px;
+  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+}
+
+.trilha .ficha-cartao__ferramentas + * {
+  border-top: 1px solid var(--linha-suave);
+}
+
+/* O pé do cartão: a ação que leva adiante ("Ver todos", a legenda). */
+.trilha .ficha-cartao__pe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 20px 14px;
+  border-top: 1px solid var(--linha-suave);
+  border-radius: 0 0 calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px);
+  background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));
+}
+
+/* Tabela da casa dentro do cartão: perde a moldura própria, que seria cartão dentro de cartão. */
+.trilha .ficha-cartao .tabela {
+  border: 0;
+  border-radius: 0 0 calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px);
+  background: transparent;
+  box-shadow: none;
+}
+
+.trilha .ficha-cartao .tabela__cabecalho {
+  background: var(--superficie-2);
+}
+
+/*
+ * No celular o ladrilho, o título e o número ficam na primeira linha (o título quebra dentro dela);
+ * a ação desce para uma linha própria, alinhada com o título.
+ */
+@media (max-width: 560px) {
+  .trilha .ficha-cartao__cabeca {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 14px 16px 12px;
+  }
+
+  .trilha .ficha-cartao__titulos {
+    flex: 1 1 0;
+  }
+
+  .trilha .ficha-cartao__acoes {
+    flex: 1 0 100%;
+    justify-content: flex-start;
+    padding-inline-start: 50px;
+  }
+
+  .trilha .ficha-cartao__corpo {
+    padding: 14px 16px 16px;
+  }
+
+  .trilha .ficha-cartao__ferramentas,
+  .trilha .ficha-cartao__pe {
+    padding-inline: 16px;
+  }
 }

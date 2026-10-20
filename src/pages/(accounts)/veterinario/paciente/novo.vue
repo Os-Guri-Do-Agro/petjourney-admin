@@ -115,7 +115,7 @@ function cancelar() {
 .cadastro__colunas {
   display: grid;
   align-items: start;
-  gap: 28px;
+  gap: 24px;
   grid-template-columns: minmax(0, 46rem);
 }
 
@@ -134,10 +134,13 @@ function cancelar() {
     grid-template-columns: minmax(0, 46rem) minmax(20rem, 24rem);
   }
 
-  /* Abaixo da fita do dia, que também fica presa no alto da tela. */
+  /*
+   * Em tela larga quem rola é a folha (`main#conteudo`), e a fita do dia fica fora dela: o topo
+   * da prévia presa é só o respiro da folha.
+   */
   .cadastro__previa {
     position: sticky;
-    top: 84px;
+    top: 16px;
   }
 }
 </style>

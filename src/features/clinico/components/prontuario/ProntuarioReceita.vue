@@ -289,10 +289,11 @@ function repetir() {
 </template>
 
 <style scoped>
+/* O cartão com cabeçalho: o topo separado do corpo por um fio suave, como as folhas das etapas. */
 .receita {
   display: grid;
-  gap: 14px;
-  padding: 18px 20px;
+  gap: 16px;
+  padding: 0 22px 20px;
 }
 
 .receita__topo {
@@ -300,8 +301,18 @@ function repetir() {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 14px;
+  margin-inline: -22px;
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid var(--linha-suave);
 }
 
+/* Sem corpo embaixo (nada a mostrar ainda), o topo é o cartão inteiro: sem fio sobrando. */
+.receita__topo:last-child {
+  margin-bottom: -20px;
+  border-bottom: 0;
+}
+
+/* O ladrilho do assunto, no tom do lugar — o mesmo das folhas das etapas. */
 .receita__icone {
   display: grid;
   width: 40px;
@@ -309,8 +320,8 @@ function repetir() {
   flex: none;
   place-items: center;
   border-radius: 12px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
   font-size: 20px;
 }
 
@@ -498,5 +509,20 @@ function repetir() {
   color: var(--ok-tinta);
   font-size: 13px;
   font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .receita {
+    padding: 0 16px 16px;
+  }
+
+  .receita__topo {
+    margin-inline: -16px;
+    padding: 16px 16px 14px;
+  }
+
+  .receita__topo:last-child {
+    margin-bottom: -16px;
+  }
 }
 </style>

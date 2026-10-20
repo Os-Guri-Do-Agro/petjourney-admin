@@ -605,10 +605,47 @@ const noApp = computed(() => {
 
 /* ------------------------------------------------------------------ registro */
 
+/*
+ * O registro é a folha da etapa Resumo: o cabeçalho com o ladrilho do número da etapa (o mesmo
+ * `--etapa-numero` que a página dá às outras folhas), um fio suave e a ficha embaixo.
+ */
 .registro {
   display: grid;
   gap: 14px;
-  padding: 22px 24px 10px;
+  padding: 0 24px 10px;
+}
+
+.registro__topo {
+  position: relative;
+  display: grid;
+  min-height: 40px;
+  align-content: center;
+  margin-inline: -24px;
+  padding: 18px 22px 16px 76px;
+  border-bottom: 1px solid var(--linha-suave);
+}
+
+.registro__topo::before {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  content: var(--etapa-numero, '');
+  font-family: var(--font-dados);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  inset-inline-start: 22px;
+  transform: translateY(-50%);
+}
+
+.registro__topo .titulo {
+  font-weight: 650;
 }
 
 .pendencias {
@@ -915,7 +952,16 @@ const noApp = computed(() => {
 
 @media (max-width: 640px) {
   .registro {
-    padding: 18px 16px 6px;
+    padding: 0 16px 6px;
+  }
+
+  .registro__topo {
+    margin-inline: -16px;
+    padding: 16px 16px 14px 70px;
+  }
+
+  .registro__topo::before {
+    inset-inline-start: 16px;
   }
 
   .ficha__linha {

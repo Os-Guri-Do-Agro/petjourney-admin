@@ -433,9 +433,10 @@ async function compartilhar(pedido: { tratamentoId: string; compartilhado: boole
         :descricao="ajudaDosRemedios"
         icone="ph ph-pill"
       >
-        <template v-if="emCurso.length > 0" #acoes>
-          <LegendaDaFaixa class="ficha-tratamento__legenda" :com-marco="comFio" />
-        </template>
+        <!-- A legenda da faixa num poço, antes dos remédios: lê-se uma vez e vale para todos. -->
+        <div v-if="emCurso.length > 0" class="ficha-tratamento__legenda ui-poco">
+          <LegendaDaFaixa :com-marco="comFio" />
+        </div>
 
         <ul v-if="emCurso.length > 0" class="ficha-tratamento__lista">
           <li v-for="lido in emCurso" :key="lido.tratamento.id">
@@ -573,32 +574,21 @@ async function compartilhar(pedido: { tratamentoId: string; compartilhado: boole
 </template>
 
 <style scoped>
-/*
- * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
- * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como em Tratamentos.
- */
-.tela-ficha {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .ficha-tratamento {
   display: grid;
   gap: 32px;
 }
 
 .ficha-tratamento__legenda {
-  max-width: 36rem;
+  justify-self: start;
+  max-width: 100%;
+  margin-bottom: 14px;
+  padding: 10px 16px;
 }
 
 .ficha-tratamento__lista {
   display: grid;
-  gap: 16px;
+  gap: 18px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -618,9 +608,9 @@ async function compartilhar(pedido: { tratamentoId: string; compartilhado: boole
   height: 44px;
   flex: none;
   place-items: center;
-  border-radius: 12px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
+  border-radius: 13px;
+  background: var(--pj-lugar-fundo, var(--superficie-2));
+  color: var(--pj-lugar-tinta, var(--tinta-2));
   font-size: 22px;
 }
 

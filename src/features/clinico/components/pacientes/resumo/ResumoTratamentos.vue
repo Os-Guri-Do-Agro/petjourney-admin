@@ -11,14 +11,14 @@
  * Mora ao lado do diário ("o que aconteceu em casa") porque é a mesma pergunta: o que o vet não
  * viu acontecer.
  *
- * Redesenho (19/10/2026): título no fundo com "Abrir tratamento" à direita, os remédios numa
+ * Acabamento (20/10/2026): cartão com cabeçalho (`ficha.css`) e "Abrir tratamento" na ponta dele,
+ * a legenda no pé. Redesenho (19/10/2026): os remédios numa
  * folha só, separados por um fio, e a legenda no pé da folha.
  */
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
-import UiSecao from '@/components/ui/UiSecao.vue'
-
+import '../ficha/ficha.css'
 import FaixaDeDoses from '../../tratamento/FaixaDeDoses.vue'
 import LegendaDaFaixa from '../../tratamento/LegendaDaFaixa.vue'
 import { useRotulosDoTratamento } from '../../../composables/useRotulosDoTratamento'
@@ -35,20 +35,24 @@ const rotulos = useRotulosDoTratamento()
 </script>
 
 <template>
-  <UiSecao
-    id="resumo-remedios"
-    :titulo="t('clinico.resumoDoPaciente.tratamentos.titulo')"
-    icone="ph ph-pill"
-    :descricao="t('clinico.resumoDoPaciente.tratamentos.ajuda')"
-  >
-    <template #acoes>
-      <RouterLink class="ui-mais" :to="`/veterinario/paciente/${petId}/tratamento`">
-        {{ t('clinico.resumoDoPaciente.tratamentos.abrir') }}
-        <i class="ph ph-arrow-right" aria-hidden="true" />
-      </RouterLink>
-    </template>
+  <section class="ficha-cartao remedios ui-folha" aria-labelledby="resumo-remedios-titulo">
+    <header class="ficha-cartao__cabeca">
+      <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-pill" /></span>
+      <div class="ficha-cartao__titulos">
+        <h2 id="resumo-remedios-titulo" class="ficha-cartao__titulo">
+          {{ t('clinico.resumoDoPaciente.tratamentos.titulo') }}
+        </h2>
+        <p class="ficha-cartao__descricao">{{ t('clinico.resumoDoPaciente.tratamentos.ajuda') }}</p>
+      </div>
+      <div class="ficha-cartao__acoes">
+        <RouterLink class="ui-mais" :to="`/veterinario/paciente/${petId}/tratamento`">
+          {{ t('clinico.resumoDoPaciente.tratamentos.abrir') }}
+          <i class="ph ph-arrow-right" aria-hidden="true" />
+        </RouterLink>
+      </div>
+    </header>
 
-    <div class="remedios ui-folha">
+    <div class="remedios__corpo">
       <ul class="remedios__lista">
         <li v-for="item in tratamentos" :key="item.id" class="remedio">
           <div class="remedio__topo">
@@ -81,17 +85,18 @@ const rotulos = useRotulosDoTratamento()
           <p v-else class="remedio__meta">{{ t('clinico.adesao.naoCompartilhado') }}</p>
         </li>
       </ul>
-
-      <div class="remedios__legenda">
-        <LegendaDaFaixa />
-      </div>
     </div>
-  </UiSecao>
+
+    <footer class="ficha-cartao__pe">
+      <LegendaDaFaixa />
+    </footer>
+  </section>
 </template>
 
 <style scoped>
-.remedios {
+.remedios__corpo {
   display: grid;
+  min-width: 0;
 }
 
 .remedios__lista {
@@ -109,7 +114,7 @@ const rotulos = useRotulosDoTratamento()
 }
 
 .remedio + .remedio {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .remedio__topo {
@@ -147,12 +152,5 @@ const rotulos = useRotulosDoTratamento()
   padding-block: 4px;
   font-size: 13px;
   white-space: normal;
-}
-
-.remedios__legenda {
-  padding: 12px 20px 14px;
-  border-top: 1px solid var(--linha);
-  background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));
-  border-radius: 0 0 15px 15px;
 }
 </style>

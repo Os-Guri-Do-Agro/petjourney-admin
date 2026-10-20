@@ -22,8 +22,7 @@ import type { ApexOptions } from 'apexcharts'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import UiSecao from '@/components/ui/UiSecao.vue'
-
+import '../ficha/ficha.css'
 import VueApexCharts from '../../charts/apex'
 import { useClinicChartTheme } from '../../../composables/useClinicChartTheme'
 import { useClinicFormat } from '../../../composables/useClinicFormat'
@@ -195,12 +194,19 @@ const descricao = computed(() => {
 </script>
 
 <template>
-  <UiSecao
-    id="resumo-peso"
-    :titulo="t('clinico.resumoDoPaciente.peso.titulo')"
-    icone="ph ph-scales"
-  >
-    <div class="peso ui-folha">
+  <section class="ficha-cartao ui-folha" aria-labelledby="resumo-peso-titulo">
+    <header class="ficha-cartao__cabeca">
+      <span class="ui-ladrilho" :class="{ 'ui-ladrilho--risco': emRisco }" aria-hidden="true">
+        <i class="ph ph-scales" />
+      </span>
+      <div class="ficha-cartao__titulos">
+        <h2 id="resumo-peso-titulo" class="ficha-cartao__titulo">
+          {{ t('clinico.resumoDoPaciente.peso.titulo') }}
+        </h2>
+      </div>
+    </header>
+
+    <div class="peso">
       <!-- A resposta antes do gráfico: quanto pesa agora e para onde foi no período. -->
       <div v-if="ultimo" class="peso__agora">
         <span class="peso__numero">
@@ -287,12 +293,13 @@ const descricao = computed(() => {
         </li>
       </ul>
     </div>
-  </UiSecao>
+  </section>
 </template>
 
 <style scoped>
 .peso {
   display: grid;
+  min-width: 0;
   gap: 6px;
   padding: 16px 16px 14px 20px;
 }
@@ -314,7 +321,7 @@ const descricao = computed(() => {
 
 .peso__numero strong {
   color: var(--tinta);
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.05;
@@ -347,7 +354,7 @@ const descricao = computed(() => {
   gap: 4px 16px;
   margin: 0;
   padding: 10px 0 0;
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
   color: var(--tinta-2);
   font-size: 12.5px;
   list-style: none;

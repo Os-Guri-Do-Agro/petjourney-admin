@@ -558,7 +558,11 @@ async function salvar() {
     </header>
 
     <!-- ============================================================ o pet -->
-    <section class="parte" :aria-labelledby="mostraTudo ? `${idBase}-pet` : undefined">
+    <section
+      class="parte"
+      :class="{ 'parte--cartao ui-folha': mostraTudo }"
+      :aria-labelledby="mostraTudo ? `${idBase}-pet` : undefined"
+    >
       <header v-if="mostraTudo" class="parte__cabeca">
         <span class="parte__icone" aria-hidden="true"><i class="ph ph-paw-print" /></span>
         <span class="parte__titulos">
@@ -569,7 +573,7 @@ async function salvar() {
         </span>
       </header>
 
-      <div class="parte__corpo" :class="{ 'ui-folha': mostraTudo }">
+      <div class="parte__corpo">
         <div class="grade">
           <ClinicField
             :rotulo="t('clinico.paciente.novo.nome')"
@@ -659,7 +663,7 @@ async function salvar() {
     -->
     <template v-if="mostraTudo">
       <!-- ========================================================== identificação -->
-      <section class="parte" :aria-labelledby="`${idBase}-identificacao`">
+      <section class="parte parte--cartao ui-folha" :aria-labelledby="`${idBase}-identificacao`">
         <header class="parte__cabeca">
           <span class="parte__icone" aria-hidden="true">
             <i class="ph ph-identification-card" />
@@ -681,7 +685,7 @@ async function salvar() {
           três colunas quando há largura, duas quando o porte não se aplica (gato, ave, réptil),
           uma no celular. Porte sozinho numa linha inteira parecia um campo esquecido.
         -->
-        <div class="parte__corpo ui-folha">
+        <div class="parte__corpo">
           <div class="grade grade--tres">
             <ClinicField
               :rotulo="t('clinico.paciente.novo.microchip')"
@@ -739,7 +743,7 @@ async function salvar() {
         chega: quem entrega o animal no balcão é quem sabe da alergia, e é agora que ele está
         falando. Depois, a alergia vira um bilhete colado no monitor.
       -->
-      <section class="parte" :aria-labelledby="`${idBase}-alertas`">
+      <section class="parte parte--cartao ui-folha" :aria-labelledby="`${idBase}-alertas`">
         <header class="parte__cabeca">
           <span class="parte__icone parte__icone--alerta" aria-hidden="true">
             <i class="ph ph-warning-diamond" />
@@ -752,7 +756,7 @@ async function salvar() {
           </span>
         </header>
 
-        <div class="parte__corpo ui-folha">
+        <div class="parte__corpo">
           <div class="fichas" role="group" :aria-label="t('clinico.paciente.novo.alertas')">
             <button
               v-for="kind in ALERTAS_DO_CADASTRO"
@@ -804,7 +808,11 @@ async function salvar() {
     </template>
 
     <!-- ============================================================ responsável -->
-    <section class="parte" :aria-labelledby="`${idBase}-responsavel`">
+    <section
+      class="parte"
+      :class="{ 'parte--cartao ui-folha': mostraTudo }"
+      :aria-labelledby="`${idBase}-responsavel`"
+    >
       <header class="parte__cabeca">
         <span v-if="mostraTudo" class="parte__icone" aria-hidden="true">
           <i class="ph ph-user" />
@@ -823,7 +831,7 @@ async function salvar() {
         </span>
       </header>
 
-      <div class="parte__corpo" :class="{ 'ui-folha': mostraTudo }">
+      <div class="parte__corpo">
         <!--
           Os dois caminhos que o cadastro aceita, e só eles.
 
@@ -1135,19 +1143,7 @@ async function salvar() {
 </template>
 
 <style scoped>
-/*
- * Botões secundários (contorno e texto) nas cores do Trilha: o formulário aparece na página e
- * dentro dos diálogos da agenda, e nos dois o cinza do preset parecia botão desabilitado no escuro.
- */
 .novo {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-
   display: grid;
   min-width: 0;
   gap: 16px;
@@ -1155,7 +1151,7 @@ async function salvar() {
 }
 
 .novo--completo {
-  gap: 28px;
+  gap: 22px;
 }
 
 /*
@@ -1251,7 +1247,35 @@ async function salvar() {
   gap: 16px;
 }
 
-.parte__corpo.ui-folha {
+/*
+ * Na página, cada parte é um cartão: o cabeçalho (ladrilho, título e a frase de ajuda) em cima de
+ * um fio suave, e os campos embaixo com respiro. No diálogo da agenda continua sem caixa.
+ */
+.parte--cartao {
+  gap: 0;
+}
+
+.parte--cartao .parte__cabeca {
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid var(--linha-suave);
+}
+
+.parte--cartao .parte__icone {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+}
+
+.parte--cartao .parte__titulo {
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.parte--cartao .parte__descricao {
+  font-size: 13px;
+}
+
+.parte--cartao .parte__corpo {
   padding: 20px 22px 22px;
 }
 
@@ -1604,7 +1628,12 @@ async function salvar() {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .parte__corpo.ui-folha {
+  .parte--cartao .parte__cabeca {
+    align-items: flex-start;
+    padding: 16px 16px 14px;
+  }
+
+  .parte--cartao .parte__corpo {
     padding: 16px;
   }
 }

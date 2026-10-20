@@ -743,29 +743,37 @@ function destino(vista: VistaDaFicha): string {
   font-weight: 550;
 }
 
-/* As saídas: links discretos, sem o sublinhado das abas — levam a outra tela, não trocam a vista. */
+/*
+ * As saídas: pílulas contornadas, sem o sublinhado das abas — levam a outra tela, não trocam a
+ * vista. Na internação elas ficam logo acima das abas da tela, e não podem parecer outra fileira
+ * de abas.
+ */
 .capa__saidas {
   display: flex;
   min-width: 0;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
-  padding-block: 9px;
+  gap: 8px;
+  padding-block: 12px;
+  padding-inline-start: 8px;
 }
 
 .capa__saida {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 34px;
   align-items: center;
   gap: 7px;
-  padding: 0 12px;
-  border-radius: var(--raio-controle);
+  padding: 0 14px 0 11px;
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  background: var(--superficie);
   color: var(--tinta-2);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 550;
   text-decoration: none;
   transition:
     background-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    border-color var(--pj-tempo-curto) var(--pj-curva-chega),
     color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
@@ -775,6 +783,7 @@ function destino(vista: VistaDaFicha): string {
 }
 
 .capa__saida:hover {
+  border-color: var(--linha-media);
   background: var(--superficie-2);
   color: var(--tinta);
 }
@@ -822,6 +831,11 @@ function destino(vista: VistaDaFicha): string {
     margin-inline-start: 0;
     padding: 4px 6px 14px;
   }
+
+  /* Botão que desce para a linha de baixo ocupa a largura: duas larguras soltas parecem erro. */
+  .capa__acoes > :deep(*) {
+    flex: 1 1 auto;
+  }
 }
 
 @container ficha-capa (max-width: 620px) {
@@ -835,13 +849,37 @@ function destino(vista: VistaDaFicha): string {
     font-size: 1.2rem;
   }
 
+  /*
+   * O rosto ao lado do nome e da linha de dados; os alertas descem para a largura inteira do
+   * cartão, embaixo dos dois — espremidos ao lado do rosto, quebravam em três linhas.
+   */
   .capa__quem {
-    align-items: flex-start;
-    gap: 16px;
+    display: grid;
+    align-items: center;
+    gap: 4px 16px;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .capa__identidade {
+    display: contents;
+  }
+
+  .ficha-capa .capa__rosto {
+    grid-row: 1 / span 2;
   }
 
   .capa__nome {
+    align-self: end;
     font-size: 24px;
+  }
+
+  .capa__meta {
+    align-self: start;
+  }
+
+  .capa__alertas {
+    grid-column: 1 / -1;
+    margin-top: 10px;
   }
 
   .capa__dados {
@@ -906,8 +944,14 @@ function destino(vista: VistaDaFicha): string {
     left: 4px;
   }
 
-  .capa__dados {
-    grid-template-columns: minmax(0, 1fr);
+  /* Os dois dados lado a lado, sem o ladrilho: a palavra em cima já diz o que é. */
+  .capa__dado {
+    min-height: 0;
+    padding: 10px 14px;
+  }
+
+  .capa__dado-icone {
+    display: none;
   }
 }
 

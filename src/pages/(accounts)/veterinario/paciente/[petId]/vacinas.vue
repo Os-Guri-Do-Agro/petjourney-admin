@@ -39,10 +39,10 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
 import FichaCabeca from '@/features/clinico/components/pacientes/ficha/FichaCabeca.vue'
+import '@/features/clinico/components/pacientes/ficha/ficha.css'
 import AplicarVacinaDialog from '@/features/clinico/components/vacinas/AplicarVacinaDialog.vue'
 import CarteirinhaNoApp from '@/features/clinico/components/vacinas/CarteirinhaNoApp.vue'
 import PlanoVacinalLista from '@/features/clinico/components/vacinas/PlanoVacinalLista.vue'
@@ -466,46 +466,62 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
           </ul>
         </section>
 
-        <UiSecao
-          :id="`${petId}-protocolo`"
-          :titulo="t('clinico.vacinas.carteira.protocolo')"
-          :contagem="plano.vacinas.length"
-          :descricao="
-            t(`clinico.vacinas.carteira.protocoloAjuda.${plano.faixa}`, {
-              especie: formato.especie(pet.especie),
-              idade: pet.nascimento
-                ? formato.idade(pet.nascimento)
-                : t('clinico.vacinas.carteira.semIdade'),
-            })
-          "
-          icone="ph ph-list-checks"
-        >
-          <!-- O mesmo protocolo, como o responsável o vê: a carteirinha do app, numa gaveta. -->
-          <template v-if="carteirinha" #acoes>
-            <Button
-              type="button"
-              icon="ph ph-device-mobile"
-              :label="t('clinico.ficha.vacinas.carteirinha')"
-              severity="secondary"
-              text
-              :aria-expanded="appAberto"
-              aria-haspopup="dialog"
-              @click="appAberto = !appAberto"
-            />
-          </template>
+        <section class="ficha-cartao ui-folha" :aria-labelledby="`${petId}-protocolo-titulo`">
+          <header class="ficha-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-list-checks" /></span>
+            <div class="ficha-cartao__titulos">
+              <h2 :id="`${petId}-protocolo-titulo`" class="ficha-cartao__titulo">
+                {{ t('clinico.vacinas.carteira.protocolo') }}
+                <span class="ui-contagem">{{ plano.vacinas.length }}</span>
+              </h2>
+              <p class="ficha-cartao__descricao">
+                {{
+                  t(`clinico.vacinas.carteira.protocoloAjuda.${plano.faixa}`, {
+                    especie: formato.especie(pet.especie),
+                    idade: pet.nascimento
+                      ? formato.idade(pet.nascimento)
+                      : t('clinico.vacinas.carteira.semIdade'),
+                  })
+                }}
+              </p>
+            </div>
+            <!-- O mesmo protocolo, como o responsável o vê: a carteirinha do app, numa gaveta. -->
+            <div v-if="carteirinha" class="ficha-cartao__acoes">
+              <Button
+                type="button"
+                icon="ph ph-device-mobile"
+                :label="t('clinico.ficha.vacinas.carteirinha')"
+                severity="secondary"
+                outlined
+                size="small"
+                :aria-expanded="appAberto"
+                aria-haspopup="dialog"
+                @click="appAberto = !appAberto"
+              />
+            </div>
+          </header>
 
-          <div class="ui-folha ficha-vacinas__plano">
+          <div class="ficha-vacinas__plano">
             <PlanoVacinalLista :plano="plano" folha @aplicar="abrirAplicar" />
           </div>
-        </UiSecao>
+        </section>
 
-        <UiSecao
-          :id="`${petId}-aplicacoes`"
-          :titulo="t('clinico.vacinas.carteira.historicoTitulo')"
-          :contagem="historico.length"
-          :descricao="t('clinico.vacinas.carteira.historicoAjuda')"
-          icone="ph ph-clock-counter-clockwise"
-        >
+        <section class="ficha-cartao ui-folha" :aria-labelledby="`${petId}-aplicacoes-titulo`">
+          <header class="ficha-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true">
+              <i class="ph ph-clock-counter-clockwise" />
+            </span>
+            <div class="ficha-cartao__titulos">
+              <h2 :id="`${petId}-aplicacoes-titulo`" class="ficha-cartao__titulo">
+                {{ t('clinico.vacinas.carteira.historicoTitulo') }}
+                <span class="ui-contagem">{{ historico.length }}</span>
+              </h2>
+              <p class="ficha-cartao__descricao">
+                {{ t('clinico.vacinas.carteira.historicoAjuda') }}
+              </p>
+            </div>
+          </header>
+
           <ClinicDataTable
             class="ficha-vacinas__tabela"
             :colunas="colunas"
@@ -578,7 +594,7 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
               </template>
             </template>
           </ClinicDataTable>
-        </UiSecao>
+        </section>
       </template>
     </div>
 
@@ -633,23 +649,9 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
 </template>
 
 <style scoped>
-/*
- * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
- * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como em Tratamentos.
- */
-.tela-ficha {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .ficha-vacinas {
   display: grid;
-  gap: 32px;
+  gap: 24px;
 }
 
 /* ------------------------------------------------------------------ agora */
@@ -662,7 +664,7 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
 }
 
 .agora__lista > li + li {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .agora__item {
@@ -744,6 +746,19 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
   font-weight: 600;
 }
 
+/* O ícone fica ao lado da frase, e a frase quebra ao lado dele — não embaixo. */
+.agora__app,
+.agora__marcada {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.agora__app > i,
+.agora__marcada > i {
+  flex: none;
+  margin-top: 3px;
+}
+
 .agora__selo.ui-selo {
   height: 20px;
   padding-inline: 7px;
@@ -765,8 +780,8 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
 }
 
 .agora__lista > li:last-child {
-  border-bottom-left-radius: 15px;
-  border-bottom-right-radius: 15px;
+  border-bottom-left-radius: calc(var(--raio-cartao) - 1px);
+  border-bottom-right-radius: calc(var(--raio-cartao) - 1px);
 }
 
 .agora__aplicar.p-button {
@@ -779,6 +794,7 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
 
 .ficha-vacinas__plano {
   overflow: hidden;
+  border-radius: 0 0 calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px);
 }
 
 /* Tabela larga rola dentro de si no estreito, nunca a página. */

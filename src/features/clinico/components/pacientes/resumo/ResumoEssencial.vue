@@ -14,8 +14,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
-import UiSecao from '@/components/ui/UiSecao.vue'
-
+import '../ficha/ficha.css'
 import { useClinicFormat } from '../../../composables/useClinicFormat'
 import type { ResumoDoPaciente } from '../../../domain/resumo-do-paciente'
 import { clinicClock, useClinicoStore } from '../../../stores/clinico'
@@ -67,14 +66,22 @@ const ultima = computed(() => {
 </script>
 
 <template>
-  <UiSecao
-    id="resumo-essencial"
-    :titulo="t('clinico.resumoDoPaciente.essencial.titulo')"
-    icone="ph ph-clipboard-text"
-  >
-    <dl class="essencial ui-folha">
+  <section class="ficha-cartao ui-folha" aria-labelledby="resumo-essencial-titulo">
+    <header class="ficha-cartao__cabeca">
+      <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-clipboard-text" /></span>
+      <div class="ficha-cartao__titulos">
+        <h2 id="resumo-essencial-titulo" class="ficha-cartao__titulo">
+          {{ t('clinico.resumoDoPaciente.essencial.titulo') }}
+        </h2>
+      </div>
+    </header>
+
+    <dl class="essencial">
       <div class="essencial__linha">
-        <dt>{{ t('clinico.resumoDoPaciente.essencial.condicoes') }}</dt>
+        <dt>
+          <i class="ph ph-heartbeat" aria-hidden="true" />
+          {{ t('clinico.resumoDoPaciente.essencial.condicoes') }}
+        </dt>
         <dd>
           <ul v-if="resumo.condicoes.length > 0" class="essencial__itens">
             <li v-for="condicao in resumo.condicoes" :key="condicao">{{ condicao }}</li>
@@ -86,7 +93,10 @@ const ultima = computed(() => {
       </div>
 
       <div class="essencial__linha">
-        <dt>{{ t('clinico.resumoDoPaciente.essencial.medicacao') }}</dt>
+        <dt>
+          <i class="ph ph-pill" aria-hidden="true" />
+          {{ t('clinico.resumoDoPaciente.essencial.medicacao') }}
+        </dt>
         <dd>
           <ul v-if="medicacoes.length > 0" class="essencial__itens">
             <li v-for="item in medicacoes" :key="item.id">
@@ -101,7 +111,10 @@ const ultima = computed(() => {
       </div>
 
       <div class="essencial__linha">
-        <dt>{{ t('clinico.resumoDoPaciente.essencial.ultimaConsulta') }}</dt>
+        <dt>
+          <i class="ph ph-stethoscope" aria-hidden="true" />
+          {{ t('clinico.resumoDoPaciente.essencial.ultimaConsulta') }}
+        </dt>
         <dd>
           <template v-if="ultima">
             <span class="essencial__quando">
@@ -113,13 +126,6 @@ const ultima = computed(() => {
               }}<template v-if="ultima.diagnostico">: {{ ultima.diagnostico }}</template>
             </span>
             <span class="essencial__meta">{{ ultima.profissional }}</span>
-            <RouterLink
-              class="ui-mais essencial__link"
-              :to="`/veterinario/atendimento/${ultima.encounterId}`"
-            >
-              {{ t('clinico.resumoDoPaciente.essencial.abrirProntuario') }}
-              <i class="ph ph-arrow-right" aria-hidden="true" />
-            </RouterLink>
           </template>
           <span v-else class="essencial__vazio">
             {{ t('clinico.resumoDoPaciente.essencial.primeiraVez') }}
@@ -127,21 +133,28 @@ const ultima = computed(() => {
         </dd>
       </div>
     </dl>
-  </UiSecao>
+
+    <footer v-if="ultima" class="ficha-cartao__pe">
+      <RouterLink class="ui-mais" :to="`/veterinario/atendimento/${ultima.encounterId}`">
+        {{ t('clinico.resumoDoPaciente.essencial.abrirProntuario') }}
+        <i class="ph ph-arrow-right" aria-hidden="true" />
+      </RouterLink>
+    </footer>
+  </section>
 </template>
 
 <style scoped>
 .essencial {
   display: grid;
   margin: 0;
-  padding: 2px 20px;
+  padding: 4px 20px 6px;
 }
 
 .essencial__linha {
   display: grid;
-  gap: 6px;
+  gap: 7px;
   padding-block: 14px;
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .essencial__linha:first-child {
@@ -149,9 +162,17 @@ const ultima = computed(() => {
 }
 
 .essencial__linha dt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   color: var(--tinta-2);
   font-size: 12.5px;
   font-weight: 550;
+}
+
+.essencial__linha dt .ph {
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  font-size: 15px;
 }
 
 .essencial__linha dd {
@@ -160,6 +181,7 @@ const ultima = computed(() => {
   justify-items: start;
   gap: 3px;
   margin: 0;
+  padding-inline-start: 22px;
 }
 
 .essencial__itens {
@@ -195,8 +217,9 @@ const ultima = computed(() => {
 
 .essencial__quando strong {
   color: var(--tinta);
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .essencial__consulta {
@@ -209,9 +232,5 @@ const ultima = computed(() => {
 .essencial__vazio {
   color: var(--tinta-3);
   font-size: 14px;
-}
-
-.essencial__link {
-  margin-top: 6px;
 }
 </style>

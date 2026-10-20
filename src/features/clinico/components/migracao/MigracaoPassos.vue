@@ -80,7 +80,7 @@ const atual = computed(() => ETAPAS.indexOf(props.etapa))
   flex: 1 1 auto;
   margin-inline-start: 4px;
   border-radius: 2px;
-  background: var(--linha-forte);
+  background: var(--linha-media);
   content: '';
 }
 
@@ -108,10 +108,14 @@ const atual = computed(() => ETAPAS.indexOf(props.etapa))
   color: var(--musgo);
 }
 
+/* O passo atual acende na cor do lugar, com o anel do trilho do prontuário. */
 .passo--atual .passo__numero {
   border-color: transparent;
-  background: var(--musgo);
-  color: var(--sobre-musgo);
+  background: var(--pj-lugar, var(--musgo));
+  box-shadow:
+    0 0 0 3px var(--superficie),
+    0 0 0 5px color-mix(in oklab, var(--pj-lugar, var(--musgo)) 35%, transparent);
+  color: var(--superficie);
 }
 
 .passo__numero .ph {

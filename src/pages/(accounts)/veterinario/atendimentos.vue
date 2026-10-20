@@ -14,11 +14,12 @@
  *
  * A tela tem duas perguntas, nesta ordem: **o que falta assinar** e **o que já foi feito**.
  *
- * 1. "Para assinar" abre a tela: uma seção com a contagem e o porquê, um paciente por linha, do
+ * 1. "Para assinar" abre a tela: um cartão de estado (cabeçalho tingido de atenção, acabamento de
+ *    20/10/2026) com a contagem e o porquê, um paciente por linha, do
  *    rascunho mais antigo para o mais novo. Rascunho de outro dia é atendimento esquecido: ganha a
  *    marca âmbar na borda e o selo com a idade ("Aberto há 21 dias"). A ação principal da tela é
  *    continuar exatamente esse, o mais antigo — o mesmo que a frase de estado nomeia.
- * 2. "Assinados" vem depois, agrupado por dia, cada dia na sua folha: a hora em algarismos de
+ * 2. "Assinados" vem depois, num cartão só, agrupado por dia (cada dia numa faixa rente): a hora em algarismos de
  *    mesma largura, o rosto e o nome do paciente com o responsável embaixo, o diagnóstico
  *    principal (com "+N" quando há outros) e quem atendeu.
  *
@@ -31,7 +32,6 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import ClinicFilterBar from '@/features/clinico/components/base/ClinicFilterBar.vue'
 import type { GrupoDeFiltro } from '@/features/clinico/components/base/filter-types'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
@@ -346,16 +346,29 @@ onMounted(carregar)
         <strong>{{ t('clinico.comum.semResultado') }}</strong>
       </p>
 
-      <!-- O que falta assinar: a única coisa desta tela que pede ação. -->
-      <UiSecao
+      <!--
+        O que falta assinar: a única coisa desta tela que pede ação. Um cartão de estado, com o
+        cabeçalho tingido no tom de atenção, como a recepção do Hoje.
+      -->
+      <section
         v-if="rascunhosVisiveis.length"
-        id="atendimentos-rascunhos"
-        :titulo="t('clinico.atendimentos.paraAssinar')"
-        :contagem="rascunhosVisiveis.length"
-        :descricao="t('clinico.atividades.porque.rascunhos')"
-        icone="ph ph-note-pencil"
+        class="bloco bloco--assinar ui-folha"
+        aria-labelledby="atendimentos-rascunhos-titulo"
       >
-        <ul class="ui-folha ui-lista">
+        <header class="bloco__cabeca">
+          <span class="ui-ladrilho ui-ladrilho--atencao" aria-hidden="true">
+            <i class="ph ph-note-pencil" />
+          </span>
+          <div class="bloco__titulos">
+            <h2 id="atendimentos-rascunhos-titulo" class="bloco__titulo">
+              {{ t('clinico.atendimentos.paraAssinar') }}
+            </h2>
+            <p class="bloco__descricao">{{ t('clinico.atividades.porque.rascunhos') }}</p>
+          </div>
+          <span class="bloco__total ui-num">{{ rascunhosVisiveis.length }}</span>
+        </header>
+
+        <ul class="ui-lista bloco__lista">
           <li v-for="item in rascunhosVisiveis" :key="item.id">
             <RouterLink
               class="ui-linha registro registro--rascunho"
@@ -381,7 +394,10 @@ onMounted(carregar)
                 <span class="registro__tutor">{{ clinico.tutor(item.tutorId)?.nome }}</span>
               </span>
 
-              <span class="registro__oque" :title="todosOsDiagnosticos(item) || oQueFoi(item) || undefined">
+              <span
+                class="registro__oque"
+                :title="todosOsDiagnosticos(item) || oQueFoi(item) || undefined"
+              >
                 <span v-if="oQueFoi(item)" class="registro__texto">{{ oQueFoi(item) }}</span>
                 <span v-else class="registro__texto registro__texto--vazio">
                   {{ t('clinico.atividades.semQueixa') }}
@@ -409,72 +425,85 @@ onMounted(carregar)
             </RouterLink>
           </li>
         </ul>
-      </UiSecao>
+      </section>
 
-      <!-- O que já foi feito: um bloco por dia, do mais recente para trás. -->
-      <UiSecao
+      <!-- O que já foi feito: um cartão só, com um bloco por dia, do mais recente para trás. -->
+      <section
         v-if="dias.length"
-        id="atendimentos-assinados"
-        :titulo="t('clinico.atendimentos.assinados')"
-        :contagem="totalAssinadosVisiveis"
-        :descricao="t('clinico.atendimentos.assinadosDescricao')"
-        icone="ph ph-seal-check"
+        class="bloco ui-folha"
+        aria-labelledby="atendimentos-assinados-titulo"
       >
-        <div class="dias">
-          <section
-            v-for="dia in dias"
-            :key="dia.chave"
-            class="dia"
-            :aria-labelledby="`atendimentos-dia-${dia.chave}`"
-          >
-            <h3 :id="`atendimentos-dia-${dia.chave}`" class="dia__titulo">
-              <time :datetime="dia.chave">{{ dia.titulo }}</time>
-              <span class="ui-contagem">{{ dia.itens.length }}</span>
-            </h3>
+        <header class="bloco__cabeca">
+          <span class="ui-ladrilho ui-ladrilho--ok" aria-hidden="true">
+            <i class="ph ph-seal-check" />
+          </span>
+          <div class="bloco__titulos">
+            <h2 id="atendimentos-assinados-titulo" class="bloco__titulo">
+              {{ t('clinico.atendimentos.assinados') }}
+            </h2>
+            <p class="bloco__descricao">{{ t('clinico.atendimentos.assinadosDescricao') }}</p>
+          </div>
+          <span class="bloco__total ui-num">{{ totalAssinadosVisiveis }}</span>
+        </header>
 
-            <ul class="ui-folha ui-lista">
-              <li v-for="item in dia.itens" :key="item.id">
-                <RouterLink class="ui-linha registro" :to="rotaDe(item)">
-                  <span class="registro__quando">
-                    <span class="ui-hora">{{ formato.hora(item.finalizadoEm ?? item.abertoEm) }}</span>
+        <section
+          v-for="dia in dias"
+          :key="dia.chave"
+          class="dia"
+          :aria-labelledby="`atendimentos-dia-${dia.chave}`"
+        >
+          <h3 :id="`atendimentos-dia-${dia.chave}`" class="dia__titulo">
+            <time :datetime="dia.chave">{{ dia.titulo }}</time>
+            <span class="ui-contagem">{{ dia.itens.length }}</span>
+          </h3>
+
+          <ul class="ui-lista">
+            <li v-for="item in dia.itens" :key="item.id">
+              <RouterLink class="ui-linha registro" :to="rotaDe(item)">
+                <span class="registro__quando">
+                  <span class="ui-hora">{{
+                    formato.hora(item.finalizadoEm ?? item.abertoEm)
+                  }}</span>
+                </span>
+
+                <PetAvatar
+                  class="registro__rosto"
+                  :nome="clinico.pet(item.petId)?.nome ?? ''"
+                  :iniciais="clinico.pet(item.petId)?.iniciais ?? ''"
+                  :especie="clinico.pet(item.petId)?.especie ?? null"
+                  :foto-url="clinico.pet(item.petId)?.fotoUrl ?? ''"
+                  tamanho="md"
+                />
+
+                <span class="registro__quem">
+                  <strong class="registro__nome">{{ clinico.pet(item.petId)?.nome }}</strong>
+                  <span class="registro__tutor">{{ clinico.tutor(item.tutorId)?.nome }}</span>
+                </span>
+
+                <span
+                  class="registro__oque"
+                  :title="todosOsDiagnosticos(item) || oQueFoi(item) || undefined"
+                >
+                  <span v-if="oQueFoi(item)" class="registro__texto">{{ oQueFoi(item) }}</span>
+                  <span v-else class="registro__texto registro__texto--vazio">
+                    {{ t('clinico.atividades.semDiagnostico') }}
                   </span>
-
-                  <PetAvatar
-                    class="registro__rosto"
-                    :nome="clinico.pet(item.petId)?.nome ?? ''"
-                    :iniciais="clinico.pet(item.petId)?.iniciais ?? ''"
-                    :especie="clinico.pet(item.petId)?.especie ?? null"
-                    :foto-url="clinico.pet(item.petId)?.fotoUrl ?? ''"
-                    tamanho="md"
-                  />
-
-                  <span class="registro__quem">
-                    <strong class="registro__nome">{{ clinico.pet(item.petId)?.nome }}</strong>
-                    <span class="registro__tutor">{{ clinico.tutor(item.tutorId)?.nome }}</span>
+                  <span v-if="item.diagnosticos.length > 1" class="ui-contagem registro__mais">
+                    +{{ item.diagnosticos.length - 1 }}
                   </span>
+                </span>
 
-                  <span class="registro__oque" :title="todosOsDiagnosticos(item) || oQueFoi(item) || undefined">
-                    <span v-if="oQueFoi(item)" class="registro__texto">{{ oQueFoi(item) }}</span>
-                    <span v-else class="registro__texto registro__texto--vazio">
-                      {{ t('clinico.atividades.semDiagnostico') }}
-                    </span>
-                    <span v-if="item.diagnosticos.length > 1" class="ui-contagem registro__mais">
-                      +{{ item.diagnosticos.length - 1 }}
-                    </span>
-                  </span>
+                <span class="registro__profissional">
+                  <i class="ph ph-stethoscope" aria-hidden="true" />
+                  <span>{{ clinico.profissional(item.professionalId)?.nome }}</span>
+                </span>
 
-                  <span class="registro__profissional">
-                    <i class="ph ph-stethoscope" aria-hidden="true" />
-                    <span>{{ clinico.profissional(item.professionalId)?.nome }}</span>
-                  </span>
-
-                  <i class="ph ph-caret-right ui-linha__seta registro__seta" aria-hidden="true" />
-                </RouterLink>
-              </li>
-            </ul>
-          </section>
-        </div>
-      </UiSecao>
+                <i class="ph ph-caret-right ui-linha__seta registro__seta" aria-hidden="true" />
+              </RouterLink>
+            </li>
+          </ul>
+        </section>
+      </section>
     </div>
   </UiPagina>
 </template>
@@ -482,7 +511,70 @@ onMounted(carregar)
 <style scoped>
 .atendimentos {
   display: grid;
-  gap: 32px;
+  gap: 24px;
+}
+
+/* ------------------------------------------------------------------------------ os cartões */
+
+.bloco {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.bloco__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid var(--linha-suave);
+}
+
+/* O cartão que pede ação: o cabeçalho tingido no tom de atenção, como a recepção do Hoje. */
+.bloco--assinar .bloco__cabeca {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--atencao-fundo) 70%, var(--superficie)),
+    var(--superficie)
+  );
+}
+
+.bloco__titulos {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.bloco__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.bloco__descricao {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.bloco__total {
+  flex: none;
+  color: var(--tinta);
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.bloco--assinar .bloco__total {
+  color: var(--atencao-tinta);
+}
+
+/* Dentro do cartão, a linha não arredonda: o cabeçalho e o dia já fecham em cima. */
+.atendimentos .bloco .ui-lista > li > .ui-linha {
+  border-radius: 0;
 }
 
 /* ---------------------------------------------------------------------------------- procurar */
@@ -498,10 +590,10 @@ onMounted(carregar)
 }
 
 .procura :deep(.filtro__busca .p-inputtext) {
-  min-height: 46px;
-  padding-inline-start: 44px;
-  border-radius: 12px;
-  font-size: 15px;
+  min-height: 48px;
+  padding-inline-start: 46px;
+  border-radius: var(--raio-controle);
+  font-size: 15.5px;
 }
 
 .procura :deep(.filtro__busca .p-inputicon) {
@@ -511,21 +603,22 @@ onMounted(carregar)
 }
 
 .procura :deep(.filtro__botao.p-button) {
-  min-height: 46px;
-  padding-inline: 16px;
-  border-radius: 12px;
+  min-height: 48px;
+  padding-inline: 18px;
+  border-radius: var(--raio-controle);
+}
+
+.procura :deep(.filtro__resultado) {
+  margin-inline-start: auto;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 /* ------------------------------------------------------------------------------------ os dias */
 
-.dias {
-  display: grid;
-  gap: 22px;
-}
-
-.dia {
-  display: grid;
-  gap: 10px;
+/* O dia é uma faixa rente, num poço, dentro do cartão: localiza sem virar outro cartão. */
+.dia + .dia {
+  border-top: 1px solid var(--linha-suave);
 }
 
 .dia__titulo {
@@ -533,9 +626,11 @@ onMounted(carregar)
   align-items: center;
   gap: 8px;
   margin: 0;
-  padding-inline-start: 2px;
-  color: var(--tinta);
-  font-size: 14.5px;
+  padding: 9px 22px;
+  border-bottom: 1px solid var(--linha-suave);
+  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+  color: var(--tinta-2);
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -553,7 +648,7 @@ onMounted(carregar)
   grid-template-columns:
     52px 40px minmax(0, 1fr) minmax(0, 1.55fr) minmax(0, 0.95fr)
     16px;
-  padding-block: 9px;
+  padding: 10px 22px;
 }
 
 .registro--rascunho {
@@ -706,6 +801,15 @@ onMounted(carregar)
  * atendeu e, no rascunho, a idade dele. A seta fica centrada na linha inteira.
  */
 @media (max-width: 760px) {
+  .bloco__cabeca {
+    align-items: flex-start;
+    padding: 16px 14px 14px;
+  }
+
+  .dia__titulo {
+    padding-inline: 14px;
+  }
+
   .registro,
   .registro--rascunho {
     align-items: start;

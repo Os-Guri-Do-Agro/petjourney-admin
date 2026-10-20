@@ -15,7 +15,8 @@
  *   recolhidos atrás dela: histórico é o que já aconteceu.
  * - **Filtro por tipo** com a contagem, que responde "já operou?" antes de qualquer clique.
  *
- * Redesenho (19/10/2026): a data à esquerda (dia grande, hora embaixo), o ícone do tipo num fio
+ * Acabamento (20/10/2026): a linha do tempo é um cartão com cabeçalho (`ficha.css`), o total no
+ * canto e o filtro numa faixa rente. Redesenho (19/10/2026): a data à esquerda (dia grande, hora embaixo), o ícone do tipo num fio
  * que liga os acontecimentos do mês, título e quem atendeu; falta e cancelamento com selo de
  * palavra. O filtro virou controle segmentado, com "Tudo" para voltar.
  */
@@ -23,13 +24,13 @@ import SelectButton from 'primevue/selectbutton'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import UiSecao from '@/components/ui/UiSecao.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 
 import { useClinicFormat } from '../../../composables/useClinicFormat'
 import type { Appointment, TimelineEvent, TimelineEventKind } from '../../../data/types'
 import { clinicClock, useClinicoStore } from '../../../stores/clinico'
 
+import './ficha.css'
 import { ATENDIMENTO_ABERTO, atendimentosSemEvento } from './historico'
 
 const props = defineProps<{
@@ -242,11 +243,11 @@ function abrir(item: Item) {
     <!-- O próximo agendamento numa linha; os outros recolhidos atrás dela. -->
     <section
       v-if="proximos.length > 0"
-      class="proximos ui-folha"
+      class="proximos ui-folha ui-marca ui-marca--lugar"
       :aria-label="t('clinico.ficha.historico.proximo')"
     >
       <div class="proximos__linha">
-        <span class="proximos__icone" aria-hidden="true"><i class="ph ph-calendar-plus" /></span>
+        <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-calendar-plus" /></span>
         <span class="proximos__texto">
           <span class="proximos__rotulo">{{ t('clinico.ficha.historico.proximo') }}</span>
           <strong class="ui-num">{{ quando(proximos[0]!.inicio) }}</strong>
@@ -278,100 +279,106 @@ function abrir(item: Item) {
       </ul>
     </section>
 
-    <UiSecao
-      id="historico-linha"
-      :titulo="t('clinico.ficha.historico.linhaDoTempo')"
-      icone="ph ph-clock-counter-clockwise"
-      :contagem="itens.length || null"
-    >
-      <div class="historico-lista__corpo">
-        <div v-if="tiposPresentes.length > 1" class="filtro">
-          <SelectButton
-            v-model="filtro"
-            :options="opcoesDoFiltro"
-            option-label="rotulo"
-            option-value="valor"
-            data-key="valor"
-            :allow-empty="false"
-            :aria-label="t('clinico.ficha.historico.filtroAria')"
-          >
-            <template #option="{ option }">
-              <span class="filtro__opcao">
-                <span>{{ option.rotulo }}</span>
-                <span class="filtro__total ui-num">{{ option.total }}</span>
-              </span>
-            </template>
-          </SelectButton>
+    <section class="ficha-cartao linha-do-tempo ui-folha" aria-labelledby="historico-linha-titulo">
+      <header class="ficha-cartao__cabeca">
+        <span class="ui-ladrilho" aria-hidden="true">
+          <i class="ph ph-clock-counter-clockwise" />
+        </span>
+        <div class="ficha-cartao__titulos">
+          <h2 id="historico-linha-titulo" class="ficha-cartao__titulo">
+            {{ t('clinico.ficha.historico.linhaDoTempo') }}
+          </h2>
         </div>
+        <span v-if="itens.length" class="ficha-cartao__total ui-num">{{ itens.length }}</span>
+      </header>
 
-        <p v-if="meses.length === 0" class="ui-folha ui-vazio">
-          {{ t('clinico.prontuario.timeline.vazio') }}
-        </p>
-
-        <div v-else class="linha-do-tempo ui-folha">
-          <section
-            v-for="mes in meses"
-            :key="mes.chave"
-            class="mes"
-            :aria-labelledby="`historico-mes-${mes.chave}`"
-          >
-            <h3 :id="`historico-mes-${mes.chave}`" class="mes__nome">
-              {{ mes.nome }}
-              <span class="ui-contagem">{{ mes.itens.length }}</span>
-            </h3>
-
-            <ol class="mes__itens">
-              <li v-for="item in mes.itens" :key="item.id" class="mes__item">
-                <component
-                  :is="item.encounterId ? 'button' : 'div'"
-                  :type="item.encounterId ? 'button' : undefined"
-                  class="evento"
-                  :class="{
-                    'evento--abre': item.encounterId,
-                    'evento--apagado': item.desfecho === 'cancelado',
-                  }"
-                  @click="abrir(item)"
-                >
-                  <span class="evento__data">
-                    <strong class="ui-hora">{{
-                      formato.dataCurta(clinicClock.dateOf(item.em))
-                    }}</strong>
-                    <span class="ui-num">{{ formato.hora(item.em) }}</span>
-                  </span>
-
-                  <span class="evento__trilho" aria-hidden="true">
-                    <span class="evento__marca" :class="`evento__marca--${item.tipo}`">
-                      <i :class="ICONE[item.tipo]" />
-                    </span>
-                  </span>
-
-                  <span class="evento__corpo">
-                    <span class="evento__titulo">{{ item.titulo }}</span>
-                    <span v-if="item.contexto" class="evento__contexto">{{ item.contexto }}</span>
-                    <span v-if="item.resumo" class="evento__resumo">{{ item.resumo }}</span>
-                  </span>
-
-                  <span v-if="item.desfecho || item.encounterId" class="evento__lado">
-                    <span
-                      v-if="item.desfecho"
-                      class="ui-selo"
-                      :class="item.desfecho === 'falta' ? 'ui-selo--risco' : 'ui-selo--contorno'"
-                    >
-                      {{ formato.status(item.desfecho) }}
-                    </span>
-                    <i
-                      v-if="item.encounterId"
-                      class="ph ph-caret-right ui-linha__seta evento__seta"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </component>
-              </li>
-            </ol>
-          </section>
-        </div>
+      <div v-if="tiposPresentes.length > 1" class="ficha-cartao__ferramentas filtro">
+        <SelectButton
+          v-model="filtro"
+          :options="opcoesDoFiltro"
+          option-label="rotulo"
+          option-value="valor"
+          data-key="valor"
+          :allow-empty="false"
+          size="small"
+          :aria-label="t('clinico.ficha.historico.filtroAria')"
+        >
+          <template #option="{ option }">
+            <span class="filtro__opcao">
+              <span>{{ option.rotulo }}</span>
+              <span class="filtro__total ui-num">{{ option.total }}</span>
+            </span>
+          </template>
+        </SelectButton>
       </div>
-    </UiSecao>
+
+      <p v-if="meses.length === 0" class="ui-vazio linha-do-tempo__vazio">
+        {{ t('clinico.prontuario.timeline.vazio') }}
+      </p>
+
+      <div v-else class="linha-do-tempo__meses">
+        <section
+          v-for="mes in meses"
+          :key="mes.chave"
+          class="mes"
+          :aria-labelledby="`historico-mes-${mes.chave}`"
+        >
+          <h3 :id="`historico-mes-${mes.chave}`" class="mes__nome">
+            {{ mes.nome }}
+            <span class="ui-contagem">{{ mes.itens.length }}</span>
+          </h3>
+
+          <ol class="mes__itens">
+            <li v-for="item in mes.itens" :key="item.id" class="mes__item">
+              <component
+                :is="item.encounterId ? 'button' : 'div'"
+                :type="item.encounterId ? 'button' : undefined"
+                class="evento"
+                :class="{
+                  'evento--abre': item.encounterId,
+                  'evento--apagado': item.desfecho === 'cancelado',
+                }"
+                @click="abrir(item)"
+              >
+                <span class="evento__data">
+                  <strong class="ui-hora">{{
+                    formato.dataCurta(clinicClock.dateOf(item.em))
+                  }}</strong>
+                  <span class="ui-num">{{ formato.hora(item.em) }}</span>
+                </span>
+
+                <span class="evento__trilho" aria-hidden="true">
+                  <span class="evento__marca" :class="`evento__marca--${item.tipo}`">
+                    <i :class="ICONE[item.tipo]" />
+                  </span>
+                </span>
+
+                <span class="evento__corpo">
+                  <span class="evento__titulo">{{ item.titulo }}</span>
+                  <span v-if="item.contexto" class="evento__contexto">{{ item.contexto }}</span>
+                  <span v-if="item.resumo" class="evento__resumo">{{ item.resumo }}</span>
+                </span>
+
+                <span v-if="item.desfecho || item.encounterId" class="evento__lado">
+                  <span
+                    v-if="item.desfecho"
+                    class="ui-selo"
+                    :class="item.desfecho === 'falta' ? 'ui-selo--risco' : 'ui-selo--contorno'"
+                  >
+                    {{ formato.status(item.desfecho) }}
+                  </span>
+                  <i
+                    v-if="item.encounterId"
+                    class="ph ph-caret-right ui-linha__seta evento__seta"
+                    aria-hidden="true"
+                  />
+                </span>
+              </component>
+            </li>
+          </ol>
+        </section>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -388,6 +395,7 @@ function abrir(item: Item) {
 /* ---------------------------------------------------------------- próximo */
 
 .proximos {
+  position: relative;
   display: grid;
   overflow: hidden;
   grid-column: 1 / -1;
@@ -398,19 +406,7 @@ function abrir(item: Item) {
   align-items: center;
   gap: 6px 14px;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  padding: 12px 18px;
-}
-
-.proximos__icone {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  flex: none;
-  place-items: center;
-  border-radius: 10px;
-  background: var(--pj-lugar-fundo, var(--clinica-fundo));
-  color: var(--pj-lugar-tinta, var(--clinica-tinta));
-  font-size: 19px;
+  padding: 14px 20px 14px 22px;
 }
 
 .proximos__texto {
@@ -428,8 +424,8 @@ function abrir(item: Item) {
 }
 
 .proximos__texto strong {
-  color: var(--tinta);
-  font-size: 15px;
+  color: var(--pj-lugar-tinta, var(--tinta));
+  font-size: 16px;
   font-weight: 650;
 }
 
@@ -445,7 +441,7 @@ function abrir(item: Item) {
 .proximos__lista {
   display: grid;
   margin: 0;
-  padding: 0 18px 6px 68px;
+  padding: 0 20px 8px 72px;
   list-style: none;
 }
 
@@ -455,7 +451,7 @@ function abrir(item: Item) {
   gap: 12px;
   grid-template-columns: 8.5rem minmax(0, 1fr) auto;
   padding-block: 9px;
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
   font-size: 13.5px;
 }
 
@@ -471,17 +467,7 @@ function abrir(item: Item) {
 
 /* ---------------------------------------------------------------- filtro */
 
-.historico-lista__corpo {
-  display: grid;
-  min-width: 0;
-  gap: 12px;
-}
-
 /* Os tipos que não cabem numa linha descem para a segunda, dentro do mesmo trilho. */
-.filtro {
-  min-width: 0;
-}
-
 .filtro :deep(.p-selectbutton) {
   display: inline-flex;
   max-width: 100%;
@@ -507,8 +493,14 @@ function abrir(item: Item) {
   overflow: hidden;
 }
 
+.linha-do-tempo__vazio {
+  justify-items: center;
+  padding-block: 32px;
+  text-align: center;
+}
+
 .mes + .mes {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .mes__nome {
@@ -516,8 +508,8 @@ function abrir(item: Item) {
   align-items: center;
   gap: 8px;
   margin: 0;
-  padding: 10px 18px;
-  border-bottom: 1px solid var(--linha);
+  padding: 9px 20px;
+  border-bottom: 1px solid var(--linha-suave);
   background: color-mix(in oklab, var(--superficie-2) 60%, var(--superficie));
   color: var(--tinta-2);
   font-size: 13px;
@@ -538,7 +530,7 @@ function abrir(item: Item) {
   align-items: start;
   gap: 0 14px;
   grid-template-columns: 3.4rem 34px minmax(0, 1fr) auto;
-  padding: 0 18px;
+  padding: 0 20px;
   border: 0;
   background: transparent;
   color: var(--tinta);

@@ -280,14 +280,16 @@ watch(petId, carregar)
     <div v-if="pet" class="historico">
       <p
         v-if="veredito"
-        class="historico__veredito"
+        class="historico__veredito ui-poco"
         :class="`historico__veredito--${veredito.tom}`"
       >
-        <i
-          class="ph historico__veredito-icone"
-          :class="veredito.tom !== 'neutro' ? 'ph-warning' : 'ph-timer'"
+        <span
+          class="ui-ladrilho ui-ladrilho--p historico__veredito-icone"
+          :class="veredito.tom !== 'neutro' ? `ui-ladrilho--${veredito.tom}` : ''"
           aria-hidden="true"
-        />
+        >
+          <i class="ph" :class="veredito.tom !== 'neutro' ? 'ph-warning' : 'ph-timer'" />
+        </span>
         <span>
           <strong>{{ t('clinico.ficha.historico.emTrintaSegundos') }}</strong>
           {{ veredito.texto }}
@@ -332,7 +334,7 @@ watch(petId, carregar)
 
 .historico {
   display: grid;
-  gap: 24px;
+  gap: 20px;
   container-type: inline-size;
 }
 
@@ -340,24 +342,30 @@ watch(petId, carregar)
 .historico__grade {
   display: grid;
   align-items: start;
-  gap: 28px;
+  gap: 24px;
 }
 
 @container (min-width: 900px) {
   .historico__grade {
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
   }
 }
 
-/* O veredito do resumo: uma linha, não um cartão — o ícone carrega a urgência. */
+/* O veredito do resumo: uma linha rente, num poço — o ladrilho carrega a urgência. */
 .historico__veredito {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 10px;
+  gap: 6px 12px;
   margin: 0;
+  padding: 10px 18px 10px 12px;
   color: var(--tinta-2);
   font-size: 14px;
+}
+
+.historico__veredito > span:not(.ui-ladrilho) {
+  flex: 1 1 14rem;
+  min-width: 0;
 }
 
 .historico__veredito strong {
@@ -365,17 +373,7 @@ watch(petId, carregar)
   font-weight: 600;
 }
 
-.historico__veredito-icone {
-  flex: none;
-  color: var(--pj-lugar-tinta, var(--musgo));
-  font-size: 18px;
-}
-
-.historico__veredito--atencao .historico__veredito-icone {
-  color: var(--atencao-tinta);
-}
-
-.historico__veredito--risco .historico__veredito-icone {
-  color: var(--risco-tinta);
+.historico__veredito .ui-mais {
+  margin-inline-start: auto;
 }
 </style>

@@ -52,10 +52,6 @@ function gravar() {
 
 <style scoped>
 .gatilho.p-button {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-
   min-height: 38px;
   font-size: 14px;
 }

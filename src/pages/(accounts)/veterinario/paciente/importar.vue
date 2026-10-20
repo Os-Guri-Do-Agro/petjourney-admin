@@ -68,7 +68,7 @@ onMounted(() => {
     </template>
 
     <div class="migracao">
-      <div class="migracao__topo">
+      <div class="migracao__topo ui-folha">
         <MigracaoPassos
           class="migracao__passos"
           :etapa="migracao.etapa"
@@ -146,12 +146,17 @@ onMounted(() => {
 }
 
 /* Os passos à esquerda, a garantia à direita; no estreito, um embaixo do outro. */
+/*
+ * Os passos num cartão baixo, como o trilho do prontuário: à esquerda onde se está, à direita a
+ * garantia. No estreito, um embaixo do outro.
+ */
 .migracao__topo {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 14px 32px;
+  padding: 14px 16px 14px 22px;
 }
 
 .migracao__passos {
@@ -165,7 +170,7 @@ onMounted(() => {
   gap: 8px;
   margin: 0;
   padding: 8px 14px;
-  border-radius: 12px;
+  border-radius: var(--raio-controle);
   background: var(--ok-fundo);
   color: var(--ok-tinta);
   font-size: 13.5px;
@@ -181,16 +186,16 @@ onMounted(() => {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 14px;
-  padding: 12px 14px 12px 16px;
+  padding: 14px 16px 14px 18px;
 }
 
 .arquivo__icone {
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   flex: none;
   place-items: center;
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--pj-lugar-fundo, var(--clinica-fundo));
   color: var(--pj-lugar-tinta, var(--clinica-tinta));
   font-size: 20px;

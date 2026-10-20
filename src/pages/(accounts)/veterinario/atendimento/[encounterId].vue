@@ -267,6 +267,9 @@ const passos = computed<PassoProntuario[]>(() => {
 })
 
 const indiceDaEtapa = computed(() => passos.value.findIndex((passo) => passo.id === etapa.value))
+
+/** O número da etapa no ladrilho do cabeçalho da folha, o mesmo do disco no trilho (CSS `content`). */
+const numeroDaEtapa = computed(() => JSON.stringify(String(indiceDaEtapa.value + 1)))
 const etapaAnterior = computed(() => passos.value[indiceDaEtapa.value - 1] ?? null)
 const proximaEtapa = computed(() => passos.value[indiceDaEtapa.value + 1] ?? null)
 
@@ -936,68 +939,74 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <ProntuarioStepper
-        id="atendimento-trilho"
-        class="trilho"
-        :passos="passos"
-        :ativo="etapa"
-        @ir="irParaEtapa"
-      />
-
-      <!-- As ferramentas da etapa: o microfone fora da anamnese, o teclado, o contexto. -->
-      <div class="ferramentas">
-        <span v-if="estadoDaGravacao" class="gravacao" aria-live="polite">
-          <i
-            :class="prontuario.salvando ? 'ph ph-circle-notch ph-spin' : 'ph ph-cloud-check'"
-            aria-hidden="true"
-          />
-          {{ estadoDaGravacao }}
-        </span>
-
-        <EscutaIndicador
-          v-if="gravandoAqui && etapa !== 'anamnese'"
-          @voltar="irParaEtapa('anamnese')"
+      <!--
+        O painel das etapas: o trilho dos cinco passos num cartão, e no pé dele as ferramentas da
+        etapa — o estado da gravação, o microfone fora da anamnese, o teclado e o contexto.
+      -->
+      <section class="etapas ui-folha">
+        <ProntuarioStepper
+          id="atendimento-trilho"
+          class="trilho"
+          :passos="passos"
+          :ativo="etapa"
+          @ir="irParaEtapa"
         />
 
-        <div class="ferramentas__fim">
-          <!--
-            O interruptor fica junto do trilho porque é ali que o modo se manifesta: é o trilho
-            que `Alt + →` percorre. Escondido em ajustes, ninguém saberia que existe.
-          -->
-          <span class="teclado">
-            <ToggleSwitch v-model="modoTeclado" :input-id="idModoTeclado" />
-            <label :for="idModoTeclado">{{ t('clinico.prontuario.teclado.modo') }}</label>
-          </span>
-
-          <button
-            type="button"
-            class="ferramenta"
-            :title="t('clinico.prontuario.teclado.titulo')"
-            @click="mapaAberto = true"
-          >
-            <i class="ph ph-keyboard" aria-hidden="true" />
-            {{ t('clinico.prontuario.teclado.verTeclas') }}
-          </button>
-
-          <button
-            type="button"
-            class="ferramenta"
-            :aria-pressed="historicoAberto"
-            aria-controls="atendimento-contexto"
-            @click="historicoAberto = !historicoAberto"
-          >
+        <!-- As ferramentas da etapa: o microfone fora da anamnese, o teclado, o contexto. -->
+        <div class="ferramentas">
+          <span v-if="estadoDaGravacao" class="gravacao" aria-live="polite">
             <i
-              :class="historicoAberto ? 'ph ph-sidebar-simple' : 'ph ph-clock-counter-clockwise'"
+              :class="prontuario.salvando ? 'ph ph-circle-notch ph-spin' : 'ph ph-cloud-check'"
               aria-hidden="true"
             />
-            {{
-              historicoAberto
-                ? t('clinico.prontuario.timeline.ocultar')
-                : t('clinico.prontuario.nova.mostrarHistorico')
-            }}
-          </button>
+            {{ estadoDaGravacao }}
+          </span>
+
+          <EscutaIndicador
+            v-if="gravandoAqui && etapa !== 'anamnese'"
+            @voltar="irParaEtapa('anamnese')"
+          />
+
+          <div class="ferramentas__fim">
+            <!--
+              O interruptor fica junto do trilho porque é ali que o modo se manifesta: é o trilho
+              que `Alt + →` percorre. Escondido em ajustes, ninguém saberia que existe.
+            -->
+            <span class="teclado">
+              <ToggleSwitch v-model="modoTeclado" :input-id="idModoTeclado" />
+              <label :for="idModoTeclado">{{ t('clinico.prontuario.teclado.modo') }}</label>
+            </span>
+
+            <button
+              type="button"
+              class="ferramenta"
+              :title="t('clinico.prontuario.teclado.titulo')"
+              @click="mapaAberto = true"
+            >
+              <i class="ph ph-keyboard" aria-hidden="true" />
+              {{ t('clinico.prontuario.teclado.verTeclas') }}
+            </button>
+
+            <button
+              type="button"
+              class="ferramenta"
+              :aria-pressed="historicoAberto"
+              aria-controls="atendimento-contexto"
+              @click="historicoAberto = !historicoAberto"
+            >
+              <i
+                :class="historicoAberto ? 'ph ph-sidebar-simple' : 'ph ph-clock-counter-clockwise'"
+                aria-hidden="true"
+              />
+              {{
+                historicoAberto
+                  ? t('clinico.prontuario.timeline.ocultar')
+                  : t('clinico.prontuario.nova.mostrarHistorico')
+              }}
+            </button>
+          </div>
         </div>
-      </div>
+      </section>
 
       <!-- Rascunho encontrado no navegador. Oferta, nunca sobrescrita silenciosa. -->
       <section v-if="prontuario.rascunhoPendente" class="faixa faixa--rascunho" role="status">
@@ -1079,7 +1088,7 @@ onBeforeUnmount(() => {
       </section>
 
       <div class="mesa" :class="{ 'mesa--com-contexto': historicoAberto }">
-        <div ref="corpoDaEtapa" class="etapa">
+        <div ref="corpoDaEtapa" class="etapa" :style="{ '--etapa-numero': numeroDaEtapa }">
           <!--
             A pré-consulta abre **acima** da anamnese: é o que o vet lê antes de digitar, e
             embaixo do formulário ela chegaria depois de o campo já ter sido preenchido à mão.
@@ -1459,13 +1468,6 @@ onBeforeUnmount(() => {
   --p-select-padding-x: 12px;
   --p-multiselect-padding-y: 8px;
   --p-multiselect-padding-x: 12px;
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
 
   font-size: 15px;
 }
@@ -1530,7 +1532,7 @@ onBeforeUnmount(() => {
 
 .corpo {
   display: grid;
-  gap: 18px;
+  gap: 20px;
 }
 
 /* ------------------------------------------------------------------ a barra fixa */
@@ -1668,18 +1670,27 @@ onBeforeUnmount(() => {
 
 /* ------------------------------------------------------------------ trilho */
 
+/* O painel das etapas: o trilho em cima, as ferramentas no pé, rentes e tingidas. */
+.etapas {
+  display: grid;
+  min-width: 0;
+}
+
 .trilho {
-  margin-top: 2px;
+  padding: 14px 14px 12px;
   scroll-margin-top: calc(var(--topo-fixo, 0px) + 76px);
 }
 
 .ferramentas {
   display: flex;
-  min-height: 36px;
+  min-height: 52px;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 16px;
-  margin-top: -6px;
+  padding: 6px 12px 6px 20px;
+  border-top: 1px solid var(--linha-suave);
+  border-radius: 0 0 calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px);
+  background: color-mix(in oklab, var(--superficie-2) 60%, var(--superficie));
 }
 
 .ferramentas__fim {
@@ -1725,7 +1736,7 @@ onBeforeUnmount(() => {
 }
 
 .ferramenta:hover {
-  background: var(--superficie-2);
+  background: var(--superficie-3);
   color: var(--tinta);
 }
 
@@ -1830,6 +1841,64 @@ onBeforeUnmount(() => {
 }
 
 /*
+ * A folha da etapa (o `ClinicForm` de anamnese, exame, diagnóstico e conduta) no acabamento de
+ * cartão: cabeçalho com o ladrilho do número da etapa — o mesmo do disco no trilho —, um fio
+ * suave, e os campos embaixo com respiro. O número vem do `--etapa-numero` (string para `content`).
+ */
+.etapa :deep(.bloco) {
+  gap: 0;
+  padding: 0;
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--sombra-cartao);
+}
+
+.etapa :deep(.bloco__cabecalho) {
+  align-items: center;
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid var(--linha-suave);
+}
+
+.etapa :deep(.bloco__titulos) {
+  position: relative;
+  min-height: 40px;
+  align-content: center;
+  padding-inline-start: 54px;
+}
+
+.etapa :deep(.bloco__titulos)::before {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  content: var(--etapa-numero, '');
+  font-family: var(--font-dados);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  inset-inline-start: 0;
+  transform: translateY(-50%);
+}
+
+.etapa :deep(.bloco__titulo) {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+}
+
+.etapa :deep(.bloco__leitura) {
+  margin: 16px 24px 0;
+}
+
+.etapa :deep(.bloco__grade) {
+  padding: 20px 24px 24px;
+}
+
+/*
  * A coluna de contexto acompanha a rolagem: a consulta anterior continua à vista enquanto a
  * conduta desce. Se ela for maior que a janela, rola dentro de si.
  */
@@ -1896,8 +1965,9 @@ onBeforeUnmount(() => {
 }
 
 .rodape__passo--proxima {
-  border-color: var(--linha-forte);
+  border-color: var(--linha-media);
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   text-align: end;
 }
 
@@ -2015,6 +2085,22 @@ onBeforeUnmount(() => {
   .fixo__passos,
   .fixo__meta {
     display: none;
+  }
+
+  .etapa :deep(.bloco__cabecalho) {
+    padding: 16px 16px 14px;
+  }
+
+  .etapa :deep(.bloco__grade) {
+    padding: 18px 16px 20px;
+  }
+
+  .etapa :deep(.bloco__leitura) {
+    margin-inline: 16px;
+  }
+
+  .ferramentas {
+    padding-inline: 10px;
   }
 
   .fixo__barra {

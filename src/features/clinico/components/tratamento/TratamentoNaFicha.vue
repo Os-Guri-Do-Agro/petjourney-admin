@@ -721,16 +721,17 @@ function textoDaSituacao(dose: DoseNaGrade): string {
   gap: 14px;
 }
 
+/* O ladrilho do remédio, no tom do lugar: o mesmo dos cartões da ficha. */
 .trat__icone {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   flex: none;
   place-items: center;
-  border-radius: 12px;
-  background: var(--musgo-fundo);
-  color: var(--musgo);
-  font-size: 21px;
+  border-radius: 13px;
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  font-size: 22px;
 }
 
 .trat__identidade {
@@ -738,7 +739,7 @@ function textoDaSituacao(dose: DoseNaGrade): string {
   flex: 1;
   min-width: 0;
   gap: 2px;
-  padding-top: 1px;
+  padding-top: 2px;
 }
 
 .trat__nome {
@@ -766,18 +767,26 @@ function textoDaSituacao(dose: DoseNaGrade): string {
 
 /* ------------------------------------------------------------------ como dar */
 
+/* Os quatro dados lado a lado, separados por um fio: lê-se como a linha da receita. */
 .trat__como {
   display: grid;
   margin: 0;
-  gap: 12px 24px;
+  gap: 12px 0;
   grid-template-columns: repeat(4, minmax(0, max-content));
-  padding-inline-start: 54px;
+  padding-inline-start: 58px;
 }
 
 .trat__dado {
   display: grid;
   min-width: 0;
   gap: 2px;
+  padding-inline: 22px;
+  border-inline-start: 1px solid var(--linha);
+}
+
+.trat__dado:first-child {
+  padding-inline-start: 0;
+  border-inline-start: 0;
 }
 
 .trat__dado dt {
@@ -789,8 +798,8 @@ function textoDaSituacao(dose: DoseNaGrade): string {
 .trat__dado dd {
   margin: 0;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 650;
 }
 
 /* ------------------------------------------------------------------ a faixa e a conta */
@@ -987,25 +996,32 @@ function textoDaSituacao(dose: DoseNaGrade): string {
 
 /* ------------------------------------------------------------------ dose da vez */
 
+/* A dose da vez é a ação do bloco: um poço levemente tingido na cor do lugar. */
 .trat__vez {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 14px;
   padding: 12px 14px;
-  border: 1px solid var(--linha);
-  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--pj-lugar, var(--clinica)) 22%, var(--linha-suave));
+  border-radius: var(--raio-cartao-pequeno);
+  background: color-mix(
+    in oklab,
+    var(--pj-lugar-fundo, var(--clinica-fundo)) 40%,
+    var(--superficie)
+  );
 }
 
 .trat__vez-icone {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 10px;
-  background: var(--clinica-fundo);
-  color: var(--clinica-tinta);
+  border-radius: 11px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
   font-size: 18px;
 }
 
@@ -1051,13 +1067,24 @@ function textoDaSituacao(dose: DoseNaGrade): string {
 
 /* ------------------------------------------------------------------ ações */
 
+/* O pé do bloco, rente e tingido como o pé dos cartões da ficha. */
 .trat__acoes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 20px;
-  padding-top: 14px;
-  border-top: 1px solid var(--linha);
+  margin: 0 -22px -20px;
+  padding: 12px 22px;
+  border-top: 1px solid var(--linha-suave);
+  border-radius: 0 0 calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px);
+  background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));
+}
+
+/* Com os registros abertos embaixo, o pé deixa de ser o fim do bloco. */
+.trat__acoes:not(:last-child) {
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--linha-suave);
+  border-radius: 0;
 }
 
 .trat__critico {
@@ -1077,6 +1104,13 @@ function textoDaSituacao(dose: DoseNaGrade): string {
 }
 
 /* ------------------------------------------------------------------ registros */
+
+/* Os registros moram dentro do bloco: a tabela fica rente, sem a sombra de cartão dela. */
+.trat__tabela.tabela {
+  border-color: var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  box-shadow: none;
+}
 
 .trat__situacao {
   display: inline-flex;
@@ -1167,9 +1201,20 @@ function textoDaSituacao(dose: DoseNaGrade): string {
     padding: 16px;
   }
 
+  .trat__acoes {
+    margin-inline: -16px;
+    margin-bottom: -16px;
+    padding-inline: 16px;
+  }
+
   .trat__como {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding-inline-start: 0;
+  }
+
+  .trat__dado:nth-child(odd) {
+    padding-inline-start: 0;
+    border-inline-start: 0;
   }
 
   .trat__janela :deep(.faixa) {

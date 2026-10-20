@@ -14,6 +14,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import '../ficha/ficha.css'
 import { useClinicFormat } from '../../../composables/useClinicFormat'
 import { useRotulosDoDiario } from '../../../composables/useRotulosDoDiario'
 import { useRotulosDoTratamento } from '../../../composables/useRotulosDoTratamento'
@@ -55,6 +56,15 @@ function tomDe(severidade: SinalDoResumo['severidade']): 'risco' | 'atencao' | '
 }
 
 const restantes = computed(() => Math.max(0, props.sinais.length - props.limite))
+
+/** O ladrilho do cabeçalho segue o sinal mais grave da faixa. */
+const tomDoCabecalho = computed(() =>
+  props.sinais.some((sinal) => sinal.severidade === 'risco')
+    ? 'risco'
+    : props.sinais.some((sinal) => sinal.severidade === 'atencao')
+      ? 'atencao'
+      : 'neutro',
+)
 
 const linhas = computed(() =>
   props.sinais.slice(0, props.limite).map((sinal, indice) => {
@@ -155,9 +165,20 @@ const linhas = computed(() =>
 <template>
   <section
     class="sinais"
-    :class="{ 'sinais--sem-moldura': semMoldura }"
+    :class="semMoldura ? 'sinais--sem-moldura' : 'ficha-cartao ui-folha'"
     :aria-label="t('clinico.resumoDoPaciente.sinais.titulo')"
   >
+    <!-- Na página, a faixa ganha o cabeçalho de cartão: o título e quantos sinais há. -->
+    <header v-if="!semMoldura && linhas.length > 0" class="ficha-cartao__cabeca" aria-hidden="true">
+      <span class="ui-ladrilho" :class="`ui-ladrilho--${tomDoCabecalho}`">
+        <i class="ph ph-warning-diamond" />
+      </span>
+      <div class="ficha-cartao__titulos">
+        <p class="ficha-cartao__titulo">{{ t('clinico.resumoDoPaciente.sinais.titulo') }}</p>
+      </div>
+      <span class="ficha-cartao__total ui-num">{{ sinais.length }}</span>
+    </header>
+
     <ul v-if="linhas.length > 0" class="sinais__lista ui-lista">
       <li
         v-for="linha in linhas"
@@ -202,9 +223,6 @@ const linhas = computed(() =>
 <style scoped>
 .sinais {
   overflow: hidden;
-  border: 1px solid var(--linha);
-  border-radius: 16px;
-  background: var(--superficie);
 }
 
 .sinais--sem-moldura {
@@ -220,15 +238,15 @@ const linhas = computed(() =>
   align-items: start;
   gap: 4px 14px;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  padding: 14px 18px 14px 22px;
+  padding: 14px 20px 14px 22px;
 }
 
 .sinal__icone {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   place-items: center;
-  border-radius: 10px;
+  border-radius: 11px;
   background: var(--neutro-fundo);
   color: var(--neutro-tinta);
   font-size: 18px;
@@ -250,7 +268,7 @@ const linhas = computed(() =>
   flex-wrap: wrap;
   align-items: baseline;
   gap: 2px 10px;
-  padding-top: 5px;
+  padding-top: 6px;
 }
 
 .sinal__titulo {
@@ -303,8 +321,8 @@ const linhas = computed(() =>
 
 .sinais__mais {
   margin: 0;
-  padding: 10px 18px 14px 68px;
-  border-top: 1px solid var(--linha);
+  padding: 10px 18px 14px 70px;
+  border-top: 1px solid var(--linha-suave);
   color: var(--tinta-2);
   font-size: 13px;
   font-weight: 550;

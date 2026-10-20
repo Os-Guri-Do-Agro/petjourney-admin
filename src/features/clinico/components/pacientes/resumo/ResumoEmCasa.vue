@@ -13,7 +13,8 @@
  * Dois vazios diferentes, e a tela não os confunde: o responsável **não liberou** o diário para
  * a clínica (é uma escolha dele, feita no app), ou liberou e **não registrou nada** no período.
  *
- * Redesenho (19/10/2026): título no fundo (`UiSecao`), as respostas numa folha só, rótulo à
+ * Acabamento (20/10/2026): um cartão com cabeçalho (ladrilho, título e a contagem dos registros,
+ * `ficha.css`), as respostas embaixo do fio. Redesenho (19/10/2026): as respostas numa folha só, rótulo à
  * esquerda e resposta à direita; a alteração que é maioria ganha o selo de atenção.
  */
 import Button from 'primevue/button'
@@ -21,8 +22,7 @@ import SelectButton from 'primevue/selectbutton'
 import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import UiSecao from '@/components/ui/UiSecao.vue'
-
+import '../ficha/ficha.css'
 import { useClinicFormat } from '../../../composables/useClinicFormat'
 import { useRotulosDoDiario } from '../../../composables/useRotulosDoDiario'
 import type { EntradaDoDiarioParaClinica } from '../../../contrato/responsavel'
@@ -138,17 +138,22 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
 </script>
 
 <template>
-  <UiSecao
-    id="resumo-casa"
-    :titulo="
-      temConsulta
-        ? t('clinico.resumoDoPaciente.casa.titulo')
-        : t('clinico.resumoDoPaciente.casa.tituloSemConsulta')
-    "
-    icone="ph ph-house-line"
-    :descricao="descricao"
-  >
-    <div class="casa ui-folha">
+  <section class="ficha-cartao ui-folha" aria-labelledby="resumo-casa-titulo">
+    <header class="ficha-cartao__cabeca">
+      <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-house-line" /></span>
+      <div class="ficha-cartao__titulos">
+        <h2 id="resumo-casa-titulo" class="ficha-cartao__titulo">
+          {{
+            temConsulta
+              ? t('clinico.resumoDoPaciente.casa.titulo')
+              : t('clinico.resumoDoPaciente.casa.tituloSemConsulta')
+          }}
+        </h2>
+        <p v-if="descricao" class="ficha-cartao__descricao">{{ descricao }}</p>
+      </div>
+    </header>
+
+    <div class="casa">
       <!--
         Não liberou: é escolha do responsável, e a tela diz onde ela se muda — no app, não aqui.
         Cadeado e não celular: o diário existe, só não é da clínica.
@@ -293,7 +298,7 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
         </Transition>
       </template>
     </div>
-  </UiSecao>
+  </section>
 </template>
 
 <style scoped>
@@ -301,6 +306,10 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
   display: grid;
   gap: 16px;
   padding: 6px 20px 16px;
+}
+
+.casa:has(> .casa__vazio) {
+  padding-block: 4px 18px;
 }
 
 .casa__linhas {
@@ -314,8 +323,8 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
   align-items: baseline;
   gap: 4px 16px;
   grid-template-columns: 8.5rem minmax(0, 1fr);
-  padding-block: 11px;
-  border-top: 1px solid var(--linha);
+  padding-block: 12px;
+  border-top: 1px solid var(--linha-suave);
 }
 
 .casa__linha:first-child {
@@ -400,7 +409,7 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
   display: grid;
   gap: 10px;
   padding-top: 14px;
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .casa__subtitulo {
@@ -433,8 +442,12 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
 .casa__vazio {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding-block: 12px 2px;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 14px;
   line-height: 1.5;
@@ -451,10 +464,15 @@ function pedacos(entrada: EntradaDoDiarioParaClinica): string[] {
 }
 
 .casa__vazio .ph {
+  display: grid;
+  width: 36px;
+  height: 36px;
   flex: none;
-  margin-top: 2px;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--superficie-3);
   color: var(--tinta-2);
-  font-size: 20px;
+  font-size: 19px;
 }
 
 .casa__rodape {

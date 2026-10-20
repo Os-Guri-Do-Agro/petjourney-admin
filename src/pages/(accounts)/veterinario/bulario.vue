@@ -210,20 +210,6 @@ onMounted(carregar)
 </template>
 
 <style scoped>
-/*
- * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
- * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como nas Faltas.
- */
-.tela-bulario {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .bulario {
   display: grid;
   gap: 20px;
@@ -243,8 +229,8 @@ onMounted(carregar)
 
 .bulario__ficha {
   min-width: 0;
-  padding: 24px 26px 22px;
-  scroll-margin-top: 80px;
+  padding: 26px 28px 24px;
+  scroll-margin-top: 16px;
 }
 
 /* Lado a lado quando cabe: a lista à esquerda, a ficha presa ao lado enquanto a lista rola. */
@@ -257,10 +243,14 @@ onMounted(carregar)
    * A ficha rola dentro de si. A sombra no pé só aparece quando ainda há conteúdo embaixo: a capa
    * de fundo rola junto com o texto (`local`) e cobre a sombra (`scroll`) quando se chega ao fim.
    */
+  /*
+   * Em tela larga quem rola é a folha (`main#conteudo`), com a fita do dia fora dela: o topo da
+   * ficha presa é o respiro da folha, e a altura é a da janela menos a fita e esse respiro.
+   */
   .bulario__corpo > .bulario__ficha {
     position: sticky;
-    top: 80px;
-    max-height: calc(100vh - 100px);
+    top: 16px;
+    max-height: calc(100dvh - 128px);
     overflow-y: auto;
     background:
       linear-gradient(transparent, var(--superficie) 70%) center bottom / 100% 36px no-repeat local,
@@ -275,28 +265,36 @@ onMounted(carregar)
   }
 }
 
+/* Nada escolhido ainda: centrado, o ladrilho do assunto e a frase. */
 .bulario__vazio {
   display: grid;
-  justify-items: start;
-  gap: 8px;
-  padding: 8px 0;
+  justify-items: center;
+  gap: 10px;
+  padding: 48px 16px;
+  text-align: center;
 }
 
 .bulario__vazio-icone {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   place-items: center;
-  border-radius: 12px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 20px;
+  border-radius: 13px;
+  background: var(--pj-lugar-fundo, var(--superficie-2));
+  color: var(--pj-lugar-tinta, var(--tinta-2));
+  font-size: 22px;
 }
 
 .bulario__vazio p {
   margin: 0;
   color: var(--tinta-2);
   font-size: 14px;
+}
+
+@media (max-width: 900px) {
+  .bulario__ficha {
+    scroll-margin-top: 124px;
+  }
 }
 
 @media (max-width: 760px) {

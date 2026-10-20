@@ -33,6 +33,10 @@
  *
  * A linha inteira abre a ficha, no clique simples: aqui não há o que selecionar, e o duplo clique
  * de antes era um gesto que ninguém tentava.
+ *
+ * Acabamento de 20/10/2026: acima da lista, os números dela em indicadores (quantos, com alerta,
+ * com e sem horário — as mesmas regras e palavras do filtro); a busca e a tabela num cartão só,
+ * com o cabeçalho das colunas num poço.
  */
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -365,6 +369,52 @@ const tomDaImportacao = computed(
     TOM_DA_IMPORTACAO.rodando,
 )
 
+// ------------------------------------------------------------------ indicadores
+
+/**
+ * Os números da lista buscada, lado a lado acima dela: quantos são, quantos têm alerta (e quantos
+ * de risco) e quantos têm ou não horário marcado. As mesmas regras do filtro, com as mesmas
+ * palavras — o número diz o que o filtro vai trazer antes de alguém abri-lo.
+ */
+const indicadores = computed(() => {
+  const comRisco = contar(REGRAS['alerta:risco']!)
+
+  return [
+    {
+      id: 'total',
+      valor: linhas.value.length,
+      rotulo: t('clinico.pacientes.titulo'),
+      icone: 'ph ph-paw-print',
+      tom: '',
+      nota: '',
+    },
+    {
+      id: 'alerta',
+      valor: contar(REGRAS['alerta:algum']!),
+      rotulo: t('clinico.pacientes.filtro.comAlerta'),
+      icone: 'ph ph-warning-diamond',
+      tom: comRisco > 0 ? 'risco' : 'neutro',
+      nota: comRisco > 0 ? t('clinico.pacientes.saudacao.comRisco', { n: comRisco }, comRisco) : '',
+    },
+    {
+      id: 'com-horario',
+      valor: contar(REGRAS['agenda:com']!),
+      rotulo: t('clinico.pacientes.filtro.comProximo'),
+      icone: 'ph ph-calendar-check',
+      tom: '',
+      nota: '',
+    },
+    {
+      id: 'sem-horario',
+      valor: contar(REGRAS['agenda:sem']!),
+      rotulo: t('clinico.pacientes.filtro.semProximo'),
+      icone: 'ph ph-calendar-blank',
+      tom: 'neutro',
+      nota: '',
+    },
+  ]
+})
+
 // ------------------------------------------------------------------ resumo
 
 /** Quantos pacientes, e quantos pedem cuidado antes de entrar na sala. */
@@ -474,143 +524,231 @@ const fraseDoResumo = computed(() => {
         />
       </div>
 
-      <!-- Procurar: o campo grande, os filtros ao lado e quantos sobraram. -->
-      <div class="procura" role="search">
-        <ClinicFilterBar
-          v-model:busca="termo"
-          v-model:selecionados="selecionados"
-          :grupos="grupos"
-          :placeholder-busca="t('clinico.pacientes.procurar')"
-          :resultado="visiveis.length"
-        />
-      </div>
+      <!-- Os números da lista: quantos, quantos com alerta, quantos com e sem horário. -->
+      <ul class="ui-indicadores indicadores" :aria-label="t('clinico.pacientes.titulo')">
+        <li v-for="item in indicadores" :key="item.id" class="ui-indicador">
+          <span
+            class="ui-ladrilho"
+            :class="item.tom ? `ui-ladrilho--${item.tom}` : ''"
+            aria-hidden="true"
+          >
+            <i :class="item.icone" />
+          </span>
+          <span class="ui-indicador__valor">{{ formato.numero(item.valor, 0) }}</span>
+          <span class="ui-indicador__rotulo">{{ item.rotulo }}</span>
+          <span v-if="item.nota" class="ui-indicador__nota indicadores__nota">{{ item.nota }}</span>
+        </li>
+      </ul>
 
-      <ClinicDataTable
-        :colunas="colunas"
-        :linhas="visiveis"
-        :chave="(linha) => linha.pet.id"
-        :carregando="carregando"
-        :erro="jaCarregou ? erro : ''"
-        :vazio-titulo="t('clinico.pacientes.vazioTitulo')"
-        :vazio-descricao="t('clinico.pacientes.vazioDescricao')"
-        :rotulo="t('clinico.pacientes.titulo')"
-        @selecionar="abrir"
-        @ativar="abrir"
-        @tentar-de-novo="buscar"
-      >
-        <template #vazio-acao>
-          <Button
-            type="button"
-            icon="ph ph-plus"
-            severity="secondary"
-            outlined
-            :label="t('clinico.paciente.novo.salvarCompleto')"
-            @click="cadastrar"
+      <!--
+        A lista é um cartão só: a barra de procurar no alto (o campo grande, os filtros ao lado e
+        quantos sobraram), o cabeçalho das colunas num poço e as linhas.
+      -->
+      <section class="lista ui-folha" :aria-label="t('clinico.pacientes.titulo')">
+        <div class="procura" role="search">
+          <ClinicFilterBar
+            v-model:busca="termo"
+            v-model:selecionados="selecionados"
+            :grupos="grupos"
+            :placeholder-busca="t('clinico.pacientes.procurar')"
+            :resultado="visiveis.length"
           />
-        </template>
+        </div>
 
-        <template #celula-paciente="{ linha }">
-          <ClinicPacienteCelula :pet="linha.pet">
-            <!--
+        <ClinicDataTable
+          :colunas="colunas"
+          :linhas="visiveis"
+          :chave="(linha) => linha.pet.id"
+          :carregando="carregando"
+          :erro="jaCarregou ? erro : ''"
+          :vazio-titulo="t('clinico.pacientes.vazioTitulo')"
+          :vazio-descricao="t('clinico.pacientes.vazioDescricao')"
+          :rotulo="t('clinico.pacientes.titulo')"
+          @selecionar="abrir"
+          @ativar="abrir"
+          @tentar-de-novo="buscar"
+        >
+          <template #vazio-acao>
+            <Button
+              type="button"
+              icon="ph ph-plus"
+              severity="secondary"
+              outlined
+              :label="t('clinico.paciente.novo.salvarCompleto')"
+              @click="cadastrar"
+            />
+          </template>
+
+          <template #celula-paciente="{ linha }">
+            <ClinicPacienteCelula :pet="linha.pet">
+              <!--
               No celular a coluna de alertas fica fora da vista (a tabela rola de lado): o alerta
               mais grave sobe para o lado do nome, para ninguém precisar rolar para saber dele.
             -->
-            <template v-if="linha.pet.alertas.length > 0" #selo>
+              <template v-if="linha.pet.alertas.length > 0" #selo>
+                <span
+                  class="ui-selo alertas__estreito"
+                  :class="TOM_DO_ALERTA[alertasOrdenados(linha.pet.alertas)[0]!.severidade]"
+                  aria-hidden="true"
+                >
+                  <i :class="ICONE_DO_ALERTA[alertasOrdenados(linha.pet.alertas)[0]!.kind]" />
+                  {{ formato.alerta(alertasOrdenados(linha.pet.alertas)[0]!.kind) }}
+                </span>
+              </template>
+              {{ metaDoPaciente(linha) }}
+            </ClinicPacienteCelula>
+          </template>
+
+          <template #celula-responsavel="{ linha }">
+            <span v-if="linha.tutor" class="responsavel">
+              <span class="responsavel__nome">{{ linha.tutor.nome }}</span>
+              <span v-if="linha.tutor.telefone" class="responsavel__telefone ui-num">
+                <i class="ph ph-phone" aria-hidden="true" />
+                <bdi dir="ltr">{{ linha.tutor.telefone }}</bdi>
+              </span>
+            </span>
+          </template>
+
+          <template #celula-ultimo="{ linha }">
+            <span v-if="linha.ultimoAtendimentoEm" class="quando">
+              <strong class="ui-num">{{ dataLegivel(linha.ultimoAtendimentoEm) }}</strong>
+              <small>{{ distanciaLegivel(linha.ultimoAtendimentoEm) }}</small>
+            </span>
+            <span v-else class="quando quando--nada">{{ t('clinico.pacientes.semRegistro') }}</span>
+          </template>
+
+          <template #celula-proximo="{ linha }">
+            <span
+              v-if="linha.proximoAtendimentoEm"
+              class="quando quando--proximo"
+              :class="{ 'quando--hoje': ehHoje(linha.proximoAtendimentoEm) }"
+            >
+              <strong class="ui-num">
+                <i class="ph ph-calendar-check" aria-hidden="true" />
+                {{ dataLegivel(linha.proximoAtendimentoEm) }}
+              </strong>
+              <small>{{ distanciaLegivel(linha.proximoAtendimentoEm) }}</small>
+            </span>
+            <span v-else class="quando quando--nada">{{ t('clinico.pacientes.nadaMarcado') }}</span>
+          </template>
+
+          <template #celula-alertas="{ linha }">
+            <span
+              v-if="linha.pet.alertas.length > 0"
+              class="alertas"
+              :title="frasesDosAlertas(linha.pet.alertas)"
+            >
               <span
-                class="ui-selo alertas__estreito"
-                :class="TOM_DO_ALERTA[alertasOrdenados(linha.pet.alertas)[0]!.severidade]"
+                v-for="alerta in alertasOrdenados(linha.pet.alertas).slice(0, SELOS_POR_LINHA)"
+                :key="alerta.id"
+                class="ui-selo alertas__selo"
+                :class="TOM_DO_ALERTA[alerta.severidade]"
                 aria-hidden="true"
               >
-                <i :class="ICONE_DO_ALERTA[alertasOrdenados(linha.pet.alertas)[0]!.kind]" />
-                {{ formato.alerta(alertasOrdenados(linha.pet.alertas)[0]!.kind) }}
+                <i :class="ICONE_DO_ALERTA[alerta.kind]" />
+                {{ formato.alerta(alerta.kind) }}
               </span>
-            </template>
-            {{ metaDoPaciente(linha) }}
-          </ClinicPacienteCelula>
-        </template>
-
-        <template #celula-responsavel="{ linha }">
-          <span v-if="linha.tutor" class="responsavel">
-            <span class="responsavel__nome">{{ linha.tutor.nome }}</span>
-            <span v-if="linha.tutor.telefone" class="responsavel__telefone ui-num">
-              <i class="ph ph-phone" aria-hidden="true" />
-              <bdi dir="ltr">{{ linha.tutor.telefone }}</bdi>
+              <span
+                v-if="linha.pet.alertas.length > SELOS_POR_LINHA"
+                class="ui-selo ui-selo--contorno alertas__mais ui-num"
+                aria-hidden="true"
+              >
+                +{{ linha.pet.alertas.length - SELOS_POR_LINHA }}
+              </span>
+              <span class="sr-only">{{ frasesDosAlertas(linha.pet.alertas) }}</span>
             </span>
-          </span>
-        </template>
-
-        <template #celula-ultimo="{ linha }">
-          <span v-if="linha.ultimoAtendimentoEm" class="quando">
-            <strong class="ui-num">{{ dataLegivel(linha.ultimoAtendimentoEm) }}</strong>
-            <small>{{ distanciaLegivel(linha.ultimoAtendimentoEm) }}</small>
-          </span>
-          <span v-else class="quando quando--nada">{{ t('clinico.pacientes.semRegistro') }}</span>
-        </template>
-
-        <template #celula-proximo="{ linha }">
-          <span
-            v-if="linha.proximoAtendimentoEm"
-            class="quando quando--proximo"
-            :class="{ 'quando--hoje': ehHoje(linha.proximoAtendimentoEm) }"
-          >
-            <strong class="ui-num">
-              <i class="ph ph-calendar-check" aria-hidden="true" />
-              {{ dataLegivel(linha.proximoAtendimentoEm) }}
-            </strong>
-            <small>{{ distanciaLegivel(linha.proximoAtendimentoEm) }}</small>
-          </span>
-          <span v-else class="quando quando--nada">{{ t('clinico.pacientes.nadaMarcado') }}</span>
-        </template>
-
-        <template #celula-alertas="{ linha }">
-          <span
-            v-if="linha.pet.alertas.length > 0"
-            class="alertas"
-            :title="frasesDosAlertas(linha.pet.alertas)"
-          >
-            <span
-              v-for="alerta in alertasOrdenados(linha.pet.alertas).slice(0, SELOS_POR_LINHA)"
-              :key="alerta.id"
-              class="ui-selo alertas__selo"
-              :class="TOM_DO_ALERTA[alerta.severidade]"
-              aria-hidden="true"
-            >
-              <i :class="ICONE_DO_ALERTA[alerta.kind]" />
-              {{ formato.alerta(alerta.kind) }}
-            </span>
-            <span
-              v-if="linha.pet.alertas.length > SELOS_POR_LINHA"
-              class="ui-selo ui-selo--contorno alertas__mais ui-num"
-              aria-hidden="true"
-            >
-              +{{ linha.pet.alertas.length - SELOS_POR_LINHA }}
-            </span>
-            <span class="sr-only">{{ frasesDosAlertas(linha.pet.alertas) }}</span>
-          </span>
-        </template>
-      </ClinicDataTable>
+          </template>
+        </ClinicDataTable>
+      </section>
     </div>
   </UiPagina>
 </template>
 
 <style scoped>
-/*
- * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
- * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como nas Faltas.
- */
-.tela-pacientes {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .pacientes {
   display: grid;
-  gap: 18px;
+  gap: 22px;
+}
+
+/* ---------------------------------------------------------------------------- indicadores */
+
+.indicadores {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.indicadores__nota {
+  color: var(--risco-tinta);
+  font-weight: 550;
+}
+
+/* No celular, dois por linha e mais baixos: os números não podem empurrar a lista para longe. */
+@media (max-width: 640px) {
+  .indicadores {
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .indicadores .ui-indicador {
+    padding: 14px 14px 12px;
+  }
+
+  .indicadores :deep(.ui-indicador__valor) {
+    font-size: 24px;
+  }
+
+  .indicadores .ui-ladrilho {
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 16px;
+  }
+}
+
+/* ------------------------------------------------------------------------------- a lista */
+
+.lista {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* A tabela da casa perde a moldura própria: ela já está dentro do cartão. */
+.lista :deep(.tabela) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.lista :deep(.tabela__cabecalho) {
+  min-height: 42px;
+  border-top: 1px solid var(--linha);
+  background: var(--superficie-2);
+}
+
+.lista :deep(.tabela .tabela__th) {
+  color: var(--tinta-3);
+  font-weight: 600;
+}
+
+.lista :deep(.tabela__linha) {
+  min-height: 64px;
+  border-bottom-color: var(--linha-suave);
+}
+
+.lista :deep(.tabela__cabecalho),
+.lista :deep(.tabela__linha) {
+  padding-inline: 20px;
+}
+
+@media (max-width: 900px) {
+  .lista :deep(.tabela__cabecalho),
+  .lista :deep(.tabela__linha) {
+    padding-inline: 14px;
+  }
 }
 
 /* ------------------------------------------------------------------------------- a importação */
@@ -692,6 +830,7 @@ const fraseDoResumo = computed(() => {
  */
 .procura {
   display: block;
+  padding: 16px 20px;
 }
 
 .procura :deep(.filtro__linha) {
@@ -704,10 +843,10 @@ const fraseDoResumo = computed(() => {
 }
 
 .procura :deep(.filtro__busca .p-inputtext) {
-  min-height: 50px;
+  min-height: 48px;
   padding-inline-start: 46px;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: var(--raio-controle);
+  font-size: 15.5px;
 }
 
 .procura :deep(.filtro__busca .p-inputicon) {
@@ -717,13 +856,15 @@ const fraseDoResumo = computed(() => {
 }
 
 .procura :deep(.filtro__botao.p-button) {
-  min-height: 50px;
+  min-height: 48px;
   padding-inline: 18px;
-  border-radius: 12px;
+  border-radius: var(--raio-controle);
   font-size: 14.5px;
 }
 
 .procura :deep(.filtro__resultado) {
+  margin-inline-start: auto;
+  color: var(--tinta-2);
   font-size: 13.5px;
 }
 
@@ -850,6 +991,10 @@ const fraseDoResumo = computed(() => {
     height: 20px;
     padding-inline: 6px;
     font-size: 11.5px;
+  }
+
+  .procura {
+    padding: 14px 14px 12px;
   }
 
   .procura :deep(.filtro__busca .p-inputtext) {

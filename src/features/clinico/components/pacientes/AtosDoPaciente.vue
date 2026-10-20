@@ -22,7 +22,8 @@
  * linhas, e não tabela: quatro colunas em 20 rem cortavam o cabeçalho ("O / que") e a coluna de
  * quem executou sumia pela borda.
  *
- * Redesenho (19/10/2026): título no fundo com "Registrar" contornado à direita (a ação cheia da
+ * Acabamento (20/10/2026): cartão com cabeçalho (`ficha.css`), o filtro numa faixa rente embaixo
+ * dele e as linhas no corpo. Redesenho (19/10/2026): "Registrar" contornado à direita (a ação cheia da
  * tela é a da capa), filtro em controle segmentado com a contagem, e as linhas numa folha, com a
  * data à esquerda como na linha do tempo ao lado.
  */
@@ -32,8 +33,7 @@ import Skeleton from 'primevue/skeleton'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import UiSecao from '@/components/ui/UiSecao.vue'
-
+import './ficha/ficha.css'
 import type { AtoClinico, AtoClinicoKind, OrigemDoAto } from '../../data/types'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { clinicClock, useClinicoStore } from '../../stores/clinico'
@@ -137,28 +137,30 @@ function abrir(ato: AtoClinico) {
 </script>
 
 <template>
-  <UiSecao
-    id="atos-do-paciente"
-    class="atos"
-    :titulo="t('clinico.paciente.atos.titulo')"
-    icone="ph ph-first-aid-kit"
-    :descricao="t('clinico.paciente.atos.ajuda')"
-  >
-    <template #acoes>
-      <Button
-        type="button"
-        icon="ph ph-plus"
-        :label="t('clinico.paciente.atos.registrar')"
-        severity="secondary"
-        outlined
-        size="small"
-        @click="emit('registrar')"
-      />
-    </template>
+  <section class="ficha-cartao atos ui-folha" aria-labelledby="atos-do-paciente-titulo">
+    <header class="ficha-cartao__cabeca">
+      <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-first-aid-kit" /></span>
+      <div class="ficha-cartao__titulos">
+        <h2 id="atos-do-paciente-titulo" class="ficha-cartao__titulo">
+          {{ t('clinico.paciente.atos.titulo') }}
+        </h2>
+        <p class="ficha-cartao__descricao">{{ t('clinico.paciente.atos.ajuda') }}</p>
+      </div>
+      <div class="ficha-cartao__acoes">
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('clinico.paciente.atos.registrar')"
+          severity="secondary"
+          outlined
+          size="small"
+          @click="emit('registrar')"
+        />
+      </div>
+    </header>
 
-    <div class="atos__corpo">
+    <div v-if="atos.length > 0 && opcoesFiltro.length > 1" class="ficha-cartao__ferramentas">
       <SelectButton
-        v-if="atos.length > 0 && opcoesFiltro.length > 1"
         v-model="filtro"
         class="atos__filtro"
         :options="opcoesFiltro"
@@ -176,74 +178,76 @@ function abrir(ato: AtoClinico) {
           </span>
         </template>
       </SelectButton>
-
-      <div
-        v-if="carregando && atos.length === 0"
-        class="atos__carregando ui-folha"
-        aria-busy="true"
-      >
-        <Skeleton v-for="n in 3" :key="n" height="2.6rem" border-radius="0.6rem" />
-      </div>
-
-      <div v-else-if="atos.length === 0" class="ui-folha ui-vazio">
-        <strong>{{ t('clinico.paciente.atos.vazioTitulo') }}</strong>
-        <span>{{ t('clinico.paciente.atos.vazioDescricao') }}</span>
-      </div>
-
-      <ol
-        v-else
-        class="atos__lista ui-folha ui-lista"
-        :aria-label="t('clinico.paciente.atos.titulo')"
-      >
-        <li v-for="ato in visiveis" :key="ato.id">
-          <component
-            :is="ato.encounterId ? 'button' : 'div'"
-            :type="ato.encounterId ? 'button' : undefined"
-            class="atos__linha"
-            :class="{ 'atos__linha--abre': ato.encounterId }"
-            @click="abrir(ato)"
-          >
-            <span class="atos__quando">
-              <strong class="ui-hora">{{ dataDoAto(ato) }}</strong>
-              <span class="ui-num">{{ horaDoAto(ato) }}</span>
-            </span>
-
-            <span class="atos__corpo-linha">
-              <span class="atos__nome">
-                <i
-                  class="atos__tipo"
-                  :class="ato.kind === 'medicamento' ? 'ph ph-pill' : 'ph ph-bandaids'"
-                  role="img"
-                  :aria-label="t(`clinico.paciente.atos.kind.${ato.kind}`)"
-                />
-                <span>{{ ato.descricao }}</span>
-              </span>
-              <span v-if="detalhe(ato)" class="atos__meta">{{ detalhe(ato) }}</span>
-              <span class="atos__origem">
-                <span class="ui-selo" :class="TOM_DA_ORIGEM[ato.origem]">{{
-                  origem(ato.origem)
-                }}</span>
-                <span :class="ato.professionalId ? 'atos__quem' : 'atos__relato'">{{
-                  quem(ato)
-                }}</span>
-              </span>
-            </span>
-          </component>
-        </li>
-      </ol>
     </div>
-  </UiSecao>
+
+    <div v-if="carregando && atos.length === 0" class="atos__carregando" aria-busy="true">
+      <Skeleton v-for="n in 3" :key="n" height="2.6rem" border-radius="0.6rem" />
+    </div>
+
+    <div v-else-if="atos.length === 0" class="ui-vazio atos__vazio">
+      <strong>{{ t('clinico.paciente.atos.vazioTitulo') }}</strong>
+      <span>{{ t('clinico.paciente.atos.vazioDescricao') }}</span>
+    </div>
+
+    <ol v-else class="atos__lista ui-lista" :aria-label="t('clinico.paciente.atos.titulo')">
+      <li v-for="ato in visiveis" :key="ato.id">
+        <component
+          :is="ato.encounterId ? 'button' : 'div'"
+          :type="ato.encounterId ? 'button' : undefined"
+          class="atos__linha"
+          :class="{ 'atos__linha--abre': ato.encounterId }"
+          @click="abrir(ato)"
+        >
+          <span class="atos__quando">
+            <strong class="ui-hora">{{ dataDoAto(ato) }}</strong>
+            <span class="ui-num">{{ horaDoAto(ato) }}</span>
+          </span>
+
+          <span class="atos__corpo-linha">
+            <span class="atos__nome">
+              <i
+                class="atos__tipo"
+                :class="ato.kind === 'medicamento' ? 'ph ph-pill' : 'ph ph-bandaids'"
+                role="img"
+                :aria-label="t(`clinico.paciente.atos.kind.${ato.kind}`)"
+              />
+              <span>{{ ato.descricao }}</span>
+            </span>
+            <span v-if="detalhe(ato)" class="atos__meta">{{ detalhe(ato) }}</span>
+            <span class="atos__origem">
+              <span class="ui-selo" :class="TOM_DA_ORIGEM[ato.origem]">{{
+                origem(ato.origem)
+              }}</span>
+              <span :class="ato.professionalId ? 'atos__quem' : 'atos__relato'">{{
+                quem(ato)
+              }}</span>
+            </span>
+          </span>
+        </component>
+      </li>
+    </ol>
+  </section>
 </template>
 
 <style scoped>
-.atos__corpo {
-  display: grid;
-  min-width: 0;
-  gap: 12px;
+.atos {
+  overflow: hidden;
 }
 
-.atos__filtro {
-  justify-self: start;
+/* Na coluna estreita, a frase quebra embaixo do título e "Registrar" fica na ponta. */
+.atos .ficha-cartao__cabeca {
+  align-items: flex-start;
+}
+
+.atos .ficha-cartao__titulos {
+  flex-basis: 0;
+}
+
+/* As naturezas que não cabem numa linha descem para a segunda, dentro do mesmo trilho. */
+.atos__filtro.p-selectbutton {
+  display: inline-flex;
+  max-width: 100%;
+  flex-wrap: wrap;
 }
 
 .atos__opcao {
@@ -262,11 +266,11 @@ function abrir(ato: AtoClinico) {
 .atos__carregando {
   display: grid;
   gap: 8px;
-  padding: 14px;
+  padding: 14px 20px 18px;
 }
 
-.atos__lista {
-  overflow: hidden;
+.atos__vazio {
+  padding-inline: 20px;
 }
 
 .atos__linha {
@@ -275,7 +279,7 @@ function abrir(ato: AtoClinico) {
   align-items: start;
   gap: 12px;
   grid-template-columns: 4.6rem minmax(0, 1fr);
-  padding: 12px 16px;
+  padding: 13px 20px;
   border: 0;
   background: transparent;
   color: var(--tinta);

@@ -10,8 +10,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import UiSecao from '@/components/ui/UiSecao.vue'
-
+import '../ficha/ficha.css'
 import type { Pet } from '../../../data/types'
 import { faixaEtariaDoPaciente } from '../../../domain/porte'
 import { clinicClock } from '../../../stores/clinico'
@@ -36,13 +35,20 @@ const itens = computed(() => {
 </script>
 
 <template>
-  <UiSecao
-    id="resumo-primeira"
-    :titulo="t('clinico.resumoDoPaciente.primeira.titulo')"
-    icone="ph ph-stethoscope"
-    :descricao="t('clinico.resumoDoPaciente.primeira.descricao')"
-  >
-    <ol class="primeira ui-folha">
+  <section class="ficha-cartao ui-folha" aria-labelledby="resumo-primeira-titulo">
+    <header class="ficha-cartao__cabeca">
+      <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-stethoscope" /></span>
+      <div class="ficha-cartao__titulos">
+        <h2 id="resumo-primeira-titulo" class="ficha-cartao__titulo">
+          {{ t('clinico.resumoDoPaciente.primeira.titulo') }}
+        </h2>
+        <p class="ficha-cartao__descricao">
+          {{ t('clinico.resumoDoPaciente.primeira.descricao') }}
+        </p>
+      </div>
+    </header>
+
+    <ol class="primeira">
       <li v-for="(item, indice) in itens" :key="item" class="primeira__item">
         <span class="primeira__numero ui-num" aria-hidden="true">{{ indice + 1 }}</span>
         <span class="primeira__texto">
@@ -51,7 +57,7 @@ const itens = computed(() => {
         </span>
       </li>
     </ol>
-  </UiSecao>
+  </section>
 </template>
 
 <style scoped>
@@ -70,7 +76,7 @@ const itens = computed(() => {
 }
 
 .primeira__item + .primeira__item {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .primeira__numero {

@@ -178,6 +178,9 @@ const doseDoPeso = computed(() => {
 <template>
   <article class="ficha">
     <header class="ficha__topo">
+      <span class="ui-ladrilho ui-ladrilho--g ficha__ladrilho" aria-hidden="true">
+        <i class="ph ph-pill" />
+      </span>
       <h2 class="ficha__nome">{{ medicamento.nome }}</h2>
       <p class="ficha__apresentacao">{{ medicamento.apresentacao }}</p>
 
@@ -390,18 +393,33 @@ const doseDoPeso = computed(() => {
 
 /* -------------------------------------------------------------------------------- a cabeça */
 
+/* O remédio como o paciente na ficha: o ladrilho grande ao lado, o nome, a apresentação e os selos. */
 .ficha__topo {
   display: grid;
-  gap: 4px;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 4px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--linha-suave);
+}
+
+.ficha__ladrilho {
+  width: 52px;
+  height: 52px;
+  align-self: start;
+  border-radius: 16px;
+  font-size: 26px;
+  grid-row: span 3;
 }
 
 .ficha__nome {
   margin: 0;
   color: var(--tinta);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 650;
-  letter-spacing: -0.015em;
-  line-height: 1.25;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .ficha__apresentacao {
@@ -424,8 +442,9 @@ const doseDoPeso = computed(() => {
   gap: 8px;
   margin: 0;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 /* --------------------------------------------------------------------------- os avisos */
@@ -436,7 +455,7 @@ const doseDoPeso = computed(() => {
   gap: 8px;
   padding: 14px 16px 14px 20px;
   border: 1px solid var(--linha);
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
 }
 
 .avisos::before {
@@ -515,7 +534,7 @@ const doseDoPeso = computed(() => {
   gap: 12px;
   padding: 16px 18px;
   border: 1px solid color-mix(in oklab, var(--pj-lugar, var(--clinica)) 30%, var(--linha));
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   background: color-mix(in oklab, var(--pj-lugar-fundo, var(--clinica-fundo)) 60%, var(--superficie));
 }
 
@@ -612,32 +631,42 @@ const doseDoPeso = computed(() => {
   gap: 10px;
 }
 
+/* A tabela numa moldura rente, com o cabeçalho das colunas num poço — como o `ui-tabela`. */
 .doses__tabela {
   width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--linha);
   border-collapse: separate;
+  border-radius: var(--raio-cartao-pequeno);
   border-spacing: 0;
   font-size: 14px;
 }
 
 .doses__tabela thead th {
-  height: 36px;
-  padding: 0 12px;
+  height: 40px;
+  padding: 0 14px;
   border-bottom: 1px solid var(--linha);
-  color: var(--tinta-2);
+  background: var(--superficie-2);
+  color: var(--tinta-3);
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
   text-align: start;
   white-space: nowrap;
 }
 
 .doses__linha > th,
 .doses__linha > td {
-  height: 48px;
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--linha);
+  height: 52px;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--linha-suave);
   text-align: start;
   vertical-align: middle;
   white-space: nowrap;
+}
+
+.doses__grupo:last-child .doses__linha > *,
+.doses__grupo:last-child .doses__nota > td {
+  border-bottom: 0;
 }
 
 /* Linha com nota embaixo: a divisória passa para baixo da nota. */
@@ -695,8 +724,8 @@ const doseDoPeso = computed(() => {
 }
 
 .doses__nota > td {
-  padding: 0 12px 10px;
-  border-bottom: 1px solid var(--linha);
+  padding: 0 14px 12px;
+  border-bottom: 1px solid var(--linha-suave);
   color: var(--tinta-2);
   font-size: 13px;
   line-height: 1.45;
@@ -730,9 +759,10 @@ const doseDoPeso = computed(() => {
 
 /* ------------------------------------------------------------------------------ os blocos */
 
+/* Indicações, contraindicações, interações...: cada uma num poço, lado a lado quando cabem. */
 .blocos {
   display: grid;
-  gap: 22px 28px;
+  gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
 }
 
@@ -740,6 +770,10 @@ const doseDoPeso = computed(() => {
   display: grid;
   align-content: start;
   gap: 8px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
 }
 
 .bloco__titulo i {
@@ -789,7 +823,8 @@ const doseDoPeso = computed(() => {
   gap: 10px;
   margin: 0;
   padding: 12px 14px;
-  border-radius: 12px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie-2);
   color: var(--tinta);
   font-size: 14px;
@@ -838,6 +873,22 @@ const doseDoPeso = computed(() => {
   .doses__nota,
   .doses__nota > td {
     display: block;
+  }
+
+  .doses__tabela {
+    border: 0;
+    border-radius: 0;
+  }
+
+  .ficha__ladrilho {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    font-size: 22px;
+  }
+
+  .ficha__nome {
+    font-size: 20px;
   }
 
   .doses__grupo {
