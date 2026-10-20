@@ -91,7 +91,7 @@ watch(
     modal
     :header="t('hotel.turno.titulo')"
     :style="{ width: 'min(52rem, 96vw)' }"
-    class="clinic-dialog hc-tema"
+    class="clinic-dialog hc-tema passagem-dialog"
     dismissable-mask
     @update:visible="emit('fechar')"
   >
@@ -384,7 +384,8 @@ watch(
   min-height: 56px;
   align-items: center;
   gap: 12px;
-  padding: 8px 10px 8px 14px;
+  padding-block: 8px;
+  padding-inline: 14px 10px;
 }
 
 .linha__alerta {
@@ -537,6 +538,15 @@ watch(
 @media (max-width: 640px) {
   .entrega {
     grid-template-columns: 1fr;
+  }
+
+  /* No telefone o motivo da trava ganha a linha dele, e os botões ficam inteiros embaixo. */
+  :global(.passagem-dialog .p-dialog-footer) {
+    flex-wrap: wrap;
+  }
+
+  .rodape__trava {
+    flex: 1 1 100%;
   }
 }
 </style>

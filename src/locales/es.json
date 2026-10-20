@@ -7198,7 +7198,7 @@
         "semExcecoesDica": "Una excepción se crea en la rutina del turno, en Gestionar rutina, o en la ficha del huésped.",
         "irParaRotina": "Abrir la rutina del turno",
         "suspenso": "Sin este servicio",
-        "foraDoPadrao": "{total} huésped fuera del estándar | {total} huéspedes fuera del estándar",
+        "foraDoPadrao": "{total} excepción | {total} excepciones",
         "descartar": "Descartar borrador",
         "tour": {
           "excecoes": {

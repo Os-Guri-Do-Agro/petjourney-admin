@@ -242,7 +242,8 @@ function marcarPendentes() {
   display: grid;
   align-items: center;
   gap: 8px 12px;
-  padding: 12px 14px 12px 16px;
+  padding-block: 12px;
+  padding-inline: 16px 14px;
   grid-template-areas: 'icone abrir lote';
   grid-template-columns: auto minmax(0, 1fr) auto;
 }

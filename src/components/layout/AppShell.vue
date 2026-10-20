@@ -130,7 +130,7 @@ const mostrarFita = computed(
 /** No Hotel, a fita da casa; menos na Rotina, que já é a prancheta do dia hora a hora. */
 const mostrarFitaDaCasa = computed(
   () =>
-    hasHotelProfile.value && lugar.value === 'hotel' && !route.path.startsWith('/hotel/rotina'),
+    hasHotelProfile.value && lugar.value === 'hotel' && route.path !== '/hotel/rotina',
 )
 
 /** No topo do celular: o nome do destino, ou do espaço, ou da tela solta. */

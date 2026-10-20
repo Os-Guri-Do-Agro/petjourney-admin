@@ -326,10 +326,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         <!-- O número mora dentro da frase: separado, ele se repetia ("8 8 tarefas"). -->
         {{ t('hotel.rotinaPadrao.porDia', { total: porDia }, porDia) }}{{ '. ' }}
         <template v-if="fraseDaVersao">{{ fraseDaVersao }}{{ ' ' }}</template>
-        <span v-if="sujo" class="ui-selo ui-selo--atencao plano-estado__rascunho">
-          <i class="ph ph-pencil-simple" aria-hidden="true" />
-          {{ t('hotel.rotinaPadrao.rascunho') }}
-        </span>
       </span>
     </template>
 
@@ -373,6 +369,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         :descricao="t('hotel.rotinaPadrao.nova.todosOsDias')"
         icone="ph ph-clock"
       >
+        <!-- O rascunho por publicar, dito antes de alguém sair da tela achando que gravou. -->
+        <template v-if="sujo" #acoes>
+          <span class="ui-selo ui-selo--atencao" role="status">
+            <i class="ph ph-pencil-simple" aria-hidden="true" />
+            {{ t('hotel.rotinaPadrao.rascunho') }}
+          </span>
+        </template>
+
         <div class="grade-da-casa ui-folha">
           <!-- O eixo do dia, comum a todas as linhas. -->
           <div class="grade__cabeca" aria-hidden="true">
@@ -566,11 +570,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .padrao {
   display: grid;
   gap: 36px;
-}
-
-.plano-estado__rascunho {
-  margin-inline-start: 4px;
-  vertical-align: 1px;
 }
 
 /* ------------------------------------------------------------------ a tabela do dia */

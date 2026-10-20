@@ -7198,7 +7198,7 @@
         "semExcecoesDica": "An exception is made in the shift routine, under Manage routine, or in the guest's record.",
         "irParaRotina": "Open the shift routine",
         "suspenso": "Not for this guest",
-        "foraDoPadrao": "{total} guest with an exception | {total} guests with an exception",
+        "foraDoPadrao": "{total} exception | {total} exceptions",
         "descartar": "Discard draft",
         "tour": {
           "excecoes": {

@@ -204,8 +204,13 @@ const temProposta = computed(
           </Select>
         </div>
 
-        <div v-if="!temProposta" class="acoes">
+        <!--
+          Com a proposta aberta, "Propor" sai (já está proposto), mas "Acrescentar" fica: é comum
+          revisar a proposta e lembrar do remédio que chegou com o responsável.
+        -->
+        <div class="acoes">
           <Button
+            v-if="!temProposta"
             type="button"
             class="acoes__botao"
             :label="t('hotel.gerenciar.propor')"

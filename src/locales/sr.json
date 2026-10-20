@@ -7198,7 +7198,7 @@
         "semExcecoesDica": "Izuzetak se pravi u rutini smene, u delu Upravljanje rutinom, ili u kartonu gosta.",
         "irParaRotina": "Otvori rutinu smene",
         "suspenso": "Bez ove usluge",
-        "foraDoPadrao": "{total} gost sa izuzetkom | {total} gosta sa izuzetkom | {total} gostiju sa izuzetkom",
+        "foraDoPadrao": "{total} izuzetak | {total} izuzetka | {total} izuzetaka",
         "descartar": "Odbaci nacrt",
         "tour": {
           "excecoes": {

@@ -233,7 +233,8 @@ const { t } = useI18n()
     grid-row: 1;
     align-items: baseline;
     gap: 8px;
-    padding: 14px 0 0 4px;
+    padding-block: 14px 0;
+    padding-inline: 4px 0;
   }
 
   .horario__trilho {

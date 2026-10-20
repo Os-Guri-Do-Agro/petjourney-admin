@@ -7198,7 +7198,7 @@
         "semExcecoesDica": "Uma exceção se cria na rotina do turno, em Gerenciar rotina, ou na ficha do hóspede.",
         "irParaRotina": "Abrir a rotina do turno",
         "suspenso": "Sem este serviço",
-        "foraDoPadrao": "{total} hóspede fora do padrão | {total} hóspedes fora do padrão",
+        "foraDoPadrao": "{total} exceção | {total} exceções",
         "descartar": "Descartar rascunho",
         "tour": {
           "excecoes": {

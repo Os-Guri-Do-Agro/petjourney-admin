@@ -942,7 +942,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   display: grid;
   container: tempo / inline-size;
   margin: 0;
-  padding: 4px 4px 4px 16px;
+  padding-block: 4px;
+  padding-inline: 16px 4px;
   list-style: none;
 }
 
@@ -1146,7 +1147,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     grid-column: 2;
     grid-row: 1;
     justify-self: start;
-    margin: 0 0 0 4px;
+    margin: 0;
+    margin-inline-start: 4px;
     position: relative;
     z-index: 1;
   }
