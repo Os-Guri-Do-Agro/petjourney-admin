@@ -68,15 +68,23 @@ import type {
   SugestaoDeRotina,
 } from '../../domain/rotina-sugerida'
 
-const props = defineProps<{
-  hospedes: HospedeParaRotina[]
-  /** Vazio enquanto ninguém escolheu de quem é a proposta. */
-  hospedagemId: string
-  proposta: PropostaDeRotina | null
-  gerando: boolean
-  salvando: boolean
-  erro: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    hospedes: HospedeParaRotina[]
+    /** Vazio enquanto ninguém escolheu de quem é a proposta. */
+    hospedagemId: string
+    proposta: PropostaDeRotina | null
+    gerando: boolean
+    salvando: boolean
+    erro: string
+    /**
+     * Quem envolve o painel já mostra de quem é a proposta (a coluna da prancheta mostra o rosto
+     * e o "Trocar" logo acima): o nome aqui seria a mesma linha duas vezes.
+     */
+    semHospede?: boolean
+  }>(),
+  { semHospede: false },
+)
 
 const emit = defineEmits<{
   fechar: []
@@ -238,7 +246,7 @@ function aprovar() {
               :iniciais="option.petIniciais"
               :especie="option.petEspecie"
               :foto-url="option.petFotoUrl"
-              tamanho="xs"
+              tamanho="sm"
             />
             <span class="opcao__nome">{{ option.petNome }}</span>
             <span class="opcao__onde">{{ option.acomodacaoNome }}</span>
@@ -259,13 +267,13 @@ function aprovar() {
         -->
       <div class="proposta__cabecalho">
         <header class="cabecalho">
-          <strong v-if="hospede" class="cabecalho__pet">
+          <strong v-if="hospede && !semHospede" class="cabecalho__pet">
             <PetAvatar
               :nome="hospede.petNome"
               :iniciais="hospede.petIniciais"
               :especie="hospede.petEspecie"
               :foto-url="hospede.petFotoUrl"
-              tamanho="xs"
+              tamanho="sm"
             />
             {{ hospede.petNome }}
             <template v-if="hospede.acomodacaoNome"> · {{ hospede.acomodacaoNome }}</template>
@@ -298,7 +306,7 @@ function aprovar() {
             <li v-for="item in herdadas" :key="item.id" class="contexto__linha">
               <span class="disco" aria-hidden="true"><IconeDeTarefa :kind="item.kind" /></span>
               <span class="contexto__nome">{{ formato.tarefaKind(item.kind) }}</span>
-              <span class="contexto__horarios clinic-value">
+              <span class="contexto__horarios ui-num">
                 {{ escreverHorarios(item.horarios) }}
               </span>
             </li>
@@ -313,7 +321,7 @@ function aprovar() {
             <li v-for="item in daFicha" :key="item.id" class="contexto__linha">
               <span class="disco" aria-hidden="true"><IconeDeTarefa :kind="item.kind" /></span>
               <span class="contexto__nome">{{ formato.tarefaKind(item.kind) }}</span>
-              <span class="contexto__horarios clinic-value">
+              <span class="contexto__horarios ui-num">
                 {{ escreverHorarios(item.horarios) }}
               </span>
             </li>
@@ -379,7 +387,7 @@ function aprovar() {
               <div class="medicacao__corpo">
                 <span class="medicacao__topo">
                   <strong>{{ formato.tarefaKind(item.kind) }}</strong>
-                  <span class="medicacao__horarios clinic-value">
+                  <span class="medicacao__horarios ui-num">
                     {{ escreverHorarios(item.horarios) }}
                   </span>
                   <HotelSelo :rotulo="t('hotel.proposta.transcrita')" tom="atencao" />
@@ -401,7 +409,12 @@ function aprovar() {
           quem aprova supor que a máquina olhou a medicação e não achou nada a dizer.
         -->
         <section class="secao">
-          <button type="button" class="recolhido" @click="mostrarRecusas = !mostrarRecusas">
+          <button
+            type="button"
+            class="recolhido"
+            :aria-expanded="mostrarRecusas"
+            @click="mostrarRecusas = !mostrarRecusas"
+          >
             <i
               :class="mostrarRecusas ? 'ph ph-caret-down' : 'ph ph-caret-right'"
               aria-hidden="true"
@@ -437,7 +450,6 @@ function aprovar() {
         :label="t('hotel.proposta.descartar')"
         severity="secondary"
         text
-        size="small"
         @click="emit('fechar')"
       />
 
@@ -449,7 +461,6 @@ function aprovar() {
             : t('hotel.proposta.aprovarNenhuma')
         "
         icon="ph ph-check"
-        size="small"
         :loading="salvando"
         :disabled="total === 0"
         @click="aprovar"
@@ -460,27 +471,20 @@ function aprovar() {
 
 <style scoped>
 /*
- * Três faixas: cabeçalho preso, miolo que rola, ações presas.
- *
- * A primeira versão era uma coluna só, e o defeito aparecia quando a proposta ficava longa: o nome
- * do animal e o botão de aprovar saíam de vista, e o `Aprovar` — que é o ponto inteiro da tela —
- * só voltava depois de rolar a lista toda.
- *
- * `min-block-size: 0` é o que faz isso funcionar, e é a linha que se esquece: sem ela um item
- * flexível se recusa a encolher abaixo do próprio conteúdo, o miolo nunca ganha altura limitada, e
- * ninguém rola nada.
+ * Três faixas: cabeçalho preso, miolo que rola, ações presas. `min-block-size: 0` é o que deixa o
+ * miolo encolher abaixo do próprio conteúdo quando quem envolve limita a altura (o diálogo).
  */
 .proposta {
   display: flex;
   min-block-size: 0;
   flex-direction: column;
-  gap: var(--clinic-space-3);
+  gap: 14px;
 }
 
 .proposta__cabecalho {
   display: grid;
   flex: 0 0 auto;
-  gap: var(--clinic-space-2);
+  gap: 10px;
 }
 
 .proposta__corpo {
@@ -489,73 +493,68 @@ function aprovar() {
   min-block-size: 0;
   flex: 1 1 auto;
   align-content: start;
-  gap: var(--clinic-space-4);
+  gap: 18px;
   overscroll-behavior: contain;
 }
 
-/*
- * O aviso de que não há modelo nem rede, em nota e não em caixa.
- *
- * Como `Message` do PrimeVue ele custava perto de cem pixels de uma coluna de 28 rem — e aparece
- * em **toda** proposta, sempre com o mesmo texto. Nota compacta diz o mesmo e devolve o espaço a
- * quem precisa dele, que são as sugestões. O que não pode é desaparecer: enquanto for verdade que
- * a inteligência é encenada, a tela tem de dizer isso sem ninguém precisar procurar.
- */
+/* O aviso de que não há modelo nem rede: nota compacta, e presa junto do cabeçalho. */
 .aviso {
   display: flex;
   align-items: flex-start;
+  gap: 8px;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  padding: 10px 12px;
+  border-radius: var(--raio-controle);
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .aviso .ph {
-  margin-block-start: 0.1rem;
-  color: var(--clinic-faint);
-  font-size: 0.7rem;
+  margin-top: 2px;
+  color: var(--tinta-3);
+  font-size: 15px;
 }
 
 .proposta__rodape {
   display: flex;
   flex: 0 0 auto;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  padding-block-start: var(--clinic-space-3);
-  border-block-start: 1px solid var(--clinic-line-soft);
-  gap: var(--clinic-space-2);
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--linha);
 }
 
 /* ------------------------------------------------------------------ escolher o hóspede */
 
 .campo {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 6px;
 }
 
 .campo label {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .opcao {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 10px;
 }
 
 .opcao__nome {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .opcao__onde {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 /* ------------------------------------------------------------------ o cabeçalho */
@@ -563,65 +562,46 @@ function aprovar() {
 .cabecalho {
   display: grid;
   justify-items: start;
-  gap: 0.15rem;
+  gap: 4px;
 }
 
 .cabecalho__pet {
   display: inline-flex;
   align-items: center;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-value);
-  font-weight: 700;
+  gap: 10px;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
-/*
- * A procedência inteira numa linha apagada: hora da leitura, quem falou, e que nada foi gravado.
- * Em vermelho isso viraria um erro; é o estado normal de uma proposta que ainda não foi aprovada.
- */
+/* A procedência numa linha apagada: é o estado normal de uma proposta não aprovada, não um erro. */
 .cabecalho__meta {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 12.5px;
 }
 
 .estado {
   display: flex;
   align-items: center;
+  gap: 8px;
   margin: 0;
-  gap: 0.4rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-base);
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 /* ------------------------------------------------------------------ as seções */
 
 .secao {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
-/*
- * O rótulo da seção vai de ponta a ponta — texto no começo e um filete correndo até a borda. É o
- * mesmo idioma dos tempos da prancheta, e é o que faz estas listas se lerem como origens
- * diferentes sem que nenhuma delas precise de fundo pintado.
- */
 .secao__titulo {
-  display: flex;
-  align-items: center;
   margin: 0;
-  gap: 0.4rem;
-  color: var(--clinic-text);
-  font-size: 0.9375rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.secao__titulo::after {
-  height: 1px;
-  flex: 1;
-  background: var(--clinic-line-soft);
-  content: '';
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------------------ o contexto */
@@ -630,21 +610,18 @@ function aprovar() {
   display: grid;
   margin: 0;
   padding: 0;
-  gap: 0.15rem;
+  gap: 2px;
   list-style: none;
 }
 
-/*
- * Contexto não tem caixa de seleção, e essa ausência é a informação: a coluna onde as caixas da
- * seção de baixo aparecem fica visivelmente vazia aqui, sem precisar de cor nenhuma para dizê-lo.
- */
+/* Contexto não tem caixa de seleção, e essa ausência é a informação. */
 .contexto__linha {
   display: flex;
   align-items: center;
-  padding-block: 0.15rem;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-base);
+  gap: 10px;
+  min-height: 36px;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 .contexto__nome {
@@ -653,21 +630,20 @@ function aprovar() {
 }
 
 .contexto__horarios {
-  color: var(--clinic-muted);
-  font-variant-numeric: tabular-nums;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 .disco {
   display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 28px;
+  height: 28px;
   flex: 0 0 auto;
   place-items: center;
-  border: 1px solid var(--clinic-line);
-  border-radius: 0.55rem;
-  background: transparent;
-  color: var(--clinic-muted);
-  font-size: 0.7rem;
+  border-radius: 8px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 12px;
 }
 
 /* ------------------------------------------------------------------ o que se propõe mudar */
@@ -676,131 +652,145 @@ function aprovar() {
   display: grid;
   margin: 0;
   padding: 0;
-  gap: var(--clinic-space-3);
+  gap: 14px;
   list-style: none;
 }
 
 .mudanca {
   display: grid;
   align-items: start;
-  gap: var(--clinic-space-2) var(--clinic-space-3);
+  gap: 8px 10px;
   grid-template-columns: auto auto minmax(0, 1fr);
+}
+
+.mudanca :deep(.p-checkbox) {
+  margin-top: 4px;
 }
 
 .mudanca__corpo {
   display: grid;
   min-width: 0;
   justify-items: start;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .mudanca__nome {
-  color: var(--clinic-text);
+  color: var(--tinta);
   cursor: pointer;
-  font-size: var(--clinic-font-base);
-  font-weight: 700;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 28px;
 }
 
 .mudanca__horarios {
-  width: min(14rem, 100%);
+  width: min(15rem, 100%);
+  font-family: var(--font-dados);
   font-variant-numeric: tabular-nums;
 }
 
-/*
- * O porquê, e ele é obrigatório: é o que transforma uma lista de ordens numa lista de argumentos.
- * Fica abaixo do campo porque se lê depois de ver o que está sendo proposto, não antes.
- */
+/* O porquê é obrigatório: é o que transforma uma lista de ordens numa lista de argumentos. */
 .mudanca__porque {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 /* ------------------------------------------------------------------ a parede da medicação */
 
-/* A régua é a parede desenhada: daqui para baixo não há nada que se aprove. */
 .medicacao {
-  padding-block-start: var(--clinic-space-3);
-  border-block-start: 1px solid var(--clinic-line);
+  padding-top: 14px;
+  border-top: 1px solid var(--linha);
 }
 
 .medicacao__linha {
   display: flex;
   align-items: start;
-  gap: var(--clinic-space-3);
+  gap: 10px;
 }
 
 .disco--atencao {
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .medicacao__corpo {
   display: grid;
   min-width: 0;
-  gap: 0.15rem;
+  gap: 3px;
 }
 
 .medicacao__topo {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-2);
-  font-size: var(--clinic-font-base);
+  gap: 6px 10px;
+  font-size: 14px;
+}
+
+.medicacao__topo strong {
+  font-weight: 600;
 }
 
 /* Texto, e não campo: a receita é lida aqui, e mudada onde ela é registrada. */
 .medicacao__horarios {
-  color: var(--clinic-text);
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  color: var(--tinta);
+  font-weight: 600;
 }
 
 .medicacao__porque {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .medicacao__parede {
   margin: 0;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+  color: var(--atencao-tinta);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------------------ o que não se propõe */
 
 .recolhido {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-self: start;
-  padding: 0.25rem 0;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0;
   border: 0;
-  gap: 0.4rem;
   background: transparent;
-  color: var(--clinic-faint);
+  color: var(--tinta-2);
   cursor: pointer;
   font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 550;
 }
 
 .recolhido:hover {
-  color: var(--clinic-accent-strong);
+  color: var(--tinta);
+}
+
+.recolhido:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid var(--hotel);
+  outline-offset: 2px;
 }
 
 .recusas {
   display: grid;
   margin: 0;
   padding: 0;
-  gap: 0.2rem;
+  gap: 4px;
   list-style: none;
 }
 
 .recusas__linha {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 /* ------------------------------------------------------------------ o resto */
@@ -808,24 +798,24 @@ function aprovar() {
 .descartadas {
   display: flex;
   align-items: center;
+  gap: 6px;
   margin: 0;
-  gap: 0.4rem;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--risco-tinta);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .erro {
   margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  padding: 10px 12px;
+  border-radius: var(--raio-controle);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
-/*
- * No telefone as três colunas não cabem sem espremer o campo de horários a largura de ícone.
- * A caixa e o disco seguem na frente, anunciando que a linha é aprovável, e o corpo desce.
- */
+/* Estreito, a caixa e o disco seguem na frente e o corpo desce. */
 @media (max-width: 620px) {
   .mudanca {
     grid-template-columns: auto auto;

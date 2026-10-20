@@ -116,82 +116,81 @@ const rotulo = computed(() => {
   display: inline-grid;
   overflow: hidden;
   width: 4.25rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.7rem;
-  background: var(--hc-cartao);
-  box-shadow: 0 1px 0 var(--hc-linha);
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  background: var(--superficie);
   grid-template-rows: auto 1fr auto;
   justify-items: center;
   text-align: center;
   flex-shrink: 0;
 }
 
+/* A faixa do mês, como numa folhinha: em caixa normal, na tinta da casa. */
 .folha__faixa {
   width: 100%;
-  padding: 0.2rem 0.25rem;
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
-  font-size: 0.625rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
+  padding: 3px 4px;
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  font-size: 11.5px;
+  font-weight: 600;
   line-height: 1.2;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .folha__numero {
-  padding-top: 0.15rem;
-  color: var(--hc-tinta);
-  font-size: 1.375rem;
+  padding-top: 2px;
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 22px;
   font-variant-numeric: tabular-nums;
-  font-weight: 750;
+  font-weight: 650;
   line-height: 1.15;
 }
 
 .folha--periodo .folha__numero {
-  font-size: 1.05rem;
+  font-size: 17px;
   line-height: 1.5;
 }
 
 .folha__rodape {
   width: 100%;
-  padding: 0 0.25rem 0.3rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
+  padding: 0 4px 5px;
+  color: var(--tinta-2);
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
-  font-weight: 650;
+  font-weight: 550;
   line-height: 1.2;
   white-space: nowrap;
 }
 
 .folha__rodape--riscada {
-  color: var(--hc-tinta-3);
+  color: var(--tinta-3);
   text-decoration: line-through;
-  text-decoration-color: var(--clinic-attention-text);
+  text-decoration-color: var(--atencao-tinta);
   text-decoration-thickness: 1.5px;
 }
 
 .folha--lg {
   width: 5.25rem;
-  border-radius: 0.85rem;
+  border-radius: 14px;
 }
 
 .folha--lg .folha__faixa {
-  padding-block: 0.3rem;
-  font-size: 0.6875rem;
+  padding-block: 4px;
+  font-size: 12.5px;
 }
 
 .folha--lg .folha__numero {
-  font-size: 1.875rem;
+  font-size: 30px;
 }
 
 .folha--lg.folha--periodo .folha__numero {
-  font-size: 1.35rem;
+  font-size: 22px;
   line-height: 1.6;
 }
 
 .folha--lg .folha__rodape {
-  padding-bottom: 0.4rem;
-  font-size: 0.8125rem;
+  padding-bottom: 6px;
+  font-size: 13px;
 }
 </style>

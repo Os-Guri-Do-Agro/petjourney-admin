@@ -77,12 +77,15 @@ const valido = computed(
   <Drawer
     v-model:visible="aberto"
     position="right"
-    class="hc-tema config-gaveta"
+    class="config-gaveta clinic-overlay"
     :style="{ width: 'min(34rem, 96vw)' }"
     :header="t('hotel.pedidos.config.titulo')"
   >
     <div v-if="rascunho" class="config clinic-scope">
-      <label class="config__chave">
+      <label class="config__chave" :class="{ 'config__chave--ligada': rascunho.ativo }">
+        <span class="config__chave-icone" aria-hidden="true">
+          <i class="ph" :class="rascunho.ativo ? 'ph-broadcast' : 'ph-pause'" />
+        </span>
         <span class="config__texto">
           <strong>{{ t('hotel.pedidos.config.ativo') }}</strong>
           <span>{{ t('hotel.pedidos.config.ativoAjuda') }}</span>
@@ -119,7 +122,7 @@ const valido = computed(
         </label>
 
         <div class="config__grupo">
-          <span class="clinic-label">{{ t('hotel.pedidos.config.tipos') }}</span>
+          <span class="config__rotulo">{{ t('hotel.pedidos.config.tipos') }}</span>
           <div class="config__marcas">
             <label v-for="tipo in tipos" :key="tipo.id" class="config__marca">
               <Checkbox v-model="rascunho.tipoIds" :value="tipo.id" />
@@ -130,7 +133,7 @@ const valido = computed(
 
         <div class="config__numeros">
           <label class="config__numero">
-            <span class="clinic-label">{{ t('hotel.pedidos.config.prazo') }}</span>
+            <span class="config__rotulo">{{ t('hotel.pedidos.config.prazo') }}</span>
             <InputNumber
               v-model="rascunho.prazoDeRespostaHoras"
               :min="1"
@@ -141,7 +144,7 @@ const valido = computed(
             />
           </label>
           <label class="config__numero">
-            <span class="clinic-label">{{ t('hotel.pedidos.config.antecedencia') }}</span>
+            <span class="config__rotulo">{{ t('hotel.pedidos.config.antecedencia') }}</span>
             <InputNumber
               v-model="rascunho.antecedenciaMinimaHoras"
               :min="0"
@@ -152,11 +155,11 @@ const valido = computed(
             />
           </label>
           <label class="config__numero">
-            <span class="clinic-label">{{ t('hotel.pedidos.config.balcaoAbre') }}</span>
+            <span class="config__rotulo">{{ t('hotel.pedidos.config.balcaoAbre') }}</span>
             <Select v-model="rascunho.balcao.abre" :options="horas" fluid />
           </label>
           <label class="config__numero">
-            <span class="clinic-label">{{ t('hotel.pedidos.config.balcaoFecha') }}</span>
+            <span class="config__rotulo">{{ t('hotel.pedidos.config.balcaoFecha') }}</span>
             <Select v-model="rascunho.balcao.fecha" :options="horas" fluid />
           </label>
         </div>
@@ -170,11 +173,11 @@ const valido = computed(
         <p class="config__ajuda">{{ t('hotel.pedidos.config.urgenciaAjuda') }}</p>
         <div class="config__numeros">
           <label class="config__numero">
-            <span class="clinic-label">{{ t('hotel.pedidos.config.telefone') }}</span>
+            <span class="config__rotulo">{{ t('hotel.pedidos.config.telefone') }}</span>
             <InputText v-model="rascunho.urgencia.telefone" fluid />
           </label>
           <label class="config__numero">
-            <span class="clinic-label">{{ t('hotel.pedidos.config.whatsapp') }}</span>
+            <span class="config__rotulo">{{ t('hotel.pedidos.config.whatsapp') }}</span>
             <InputText
               :model-value="rascunho.urgencia.whatsapp ?? ''"
               fluid
@@ -183,7 +186,7 @@ const valido = computed(
           </label>
         </div>
         <label class="config__grupo">
-          <span class="clinic-label">{{ t('hotel.pedidos.config.orientacao') }}</span>
+          <span class="config__rotulo">{{ t('hotel.pedidos.config.orientacao') }}</span>
           <Textarea v-model="rascunho.urgencia.orientacao" rows="3" auto-resize fluid />
         </label>
       </fieldset>
@@ -213,7 +216,7 @@ const valido = computed(
 <style scoped>
 .config__rodape {
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .config__salvar.p-button {
@@ -222,26 +225,57 @@ const valido = computed(
 
 .config {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 18px;
+  color: var(--tinta);
 }
 
+/* A chave-mestra: o único bloco tingido, porque é a única coisa que muda tudo. */
 .config__chave {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-4);
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie-2);
   cursor: pointer;
+}
+
+.config__chave--ligada {
+  border-color: color-mix(in oklab, var(--hotel) 40%, transparent);
+  background: var(--hotel-fundo);
+}
+
+.config__chave-icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--hotel-tinta);
+  font-size: 19px;
+}
+
+.config__chave .config__texto {
+  flex: 1;
 }
 
 .config__texto {
   display: grid;
-  gap: 0.1rem;
+  gap: 2px;
+}
+
+.config__texto strong {
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 .config__texto span,
 .config__ajuda {
-  color: var(--hc-tinta-2);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.45;
 }
 
@@ -251,11 +285,11 @@ const valido = computed(
 
 .config__bloco {
   display: grid;
+  gap: 14px;
   margin: 0;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--hc-borda);
-  border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-3);
+  padding: 16px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
 }
 
 .config__bloco:disabled {
@@ -265,51 +299,67 @@ const valido = computed(
 .config__titulo {
   display: inline-flex;
   align-items: center;
-  padding: 0 0.35rem;
-  gap: 0.4rem;
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  font-weight: 700;
+  gap: 8px;
+  padding: 0 6px;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .config__titulo i {
-  color: var(--hc-marca);
+  color: var(--hotel-tinta);
+  font-size: 17px;
 }
 
 .config__opcao {
   display: flex;
   align-items: flex-start;
-  gap: 0.6rem;
+  gap: 10px;
   cursor: pointer;
 }
 
 .config__grupo {
   display: grid;
-  gap: 0.4rem;
+  gap: 8px;
+}
+
+.config__rotulo {
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .config__marcas {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.1rem;
+  gap: 8px;
 }
 
 .config__marca {
   display: inline-flex;
+  min-height: 36px;
   align-items: center;
-  gap: 0.4rem;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 14px;
+}
+
+.config__marca:has(:checked) {
+  border-color: color-mix(in oklab, var(--hotel) 45%, transparent);
+  background: var(--hotel-fundo);
 }
 
 .config__numeros {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
 }
 
 .config__numero {
   display: grid;
-  gap: 0.3rem;
+  gap: 6px;
 }
 </style>

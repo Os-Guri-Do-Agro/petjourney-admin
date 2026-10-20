@@ -2,14 +2,13 @@
 /**
  * Responder um pedido de reserva — a gaveta que a linha abre.
  *
- * Ao lado da caixa, não no meio dela: o balcão responde com a lista à vista. Substitui os dois
- * diálogos que existiam ("outra acomodação" e "recusar"), que cobriam a caixa e escondiam as datas
- * numa frase.
+ * Ao lado da caixa, não no meio dela: o balcão responde com a lista à vista, e a linha aberta fica
+ * tingida para o olho voltar a ela. Irmã da gaveta de pedidos da clínica, com o que é de hotel.
  *
  * De cima para baixo, na ordem em que a decisão acontece:
  *
- * 1. **O pedido** — a folhinha das noites, o tipo escolhido (ou "o hotel escolhe"), os pets com o
- *    porte, os extras e a observação como chegou.
+ * 1. **O pedido** — as noites em destaque, o tipo escolhido (ou "o hotel escolhe"), os pets com o
+ *    porte, o prazo com tom, a observação como chegou e o que muda a resposta.
  * 2. **Datas** — a estadia num calendário de período. O ponto é noite com vaga no tipo pedido (ou
  *    em qualquer tipo, quando o hotel escolhe); o tingido é o que foi pedido. Tocar outras datas
  *    refaz as opções para elas — o balcão pode propor a sexta em vez da quinta, e o aviso diz que
@@ -18,7 +17,7 @@
  * 4. **O aviso** — a frase que sai para quem pediu, antes de sair.
  *
  * O rodapé diz a unidade que grava: "Reservar Baia A3". Recusar troca o corpo da gaveta pelo
- * motivo e pela mensagem.
+ * motivo e pela mensagem — um assunto por vez, com o caminho de volta.
  */
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
@@ -32,8 +31,8 @@ import { useTelaLarga } from '@/composables/useTelaLarga'
 import CalendarioDoPedido, {
   type SituacaoNoCalendario,
 } from '@/features/clinico/components/pedidos/CalendarioDoPedido.vue'
-import FolhaDoDia from '@/features/clinico/components/pedidos/FolhaDoDia.vue'
 import { addDays } from '@/features/clinico/domain/clinic-time'
+import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
 
 import PetAvatar from '../base/PetAvatar.vue'
 import { useHotelFormat } from '../../composables/useHotelFormat'
@@ -62,7 +61,7 @@ const emit = defineEmits<{
   fechar: []
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const formato = useHotelFormat()
 
 const LARGURA = '30rem'
@@ -85,6 +84,8 @@ useSidePanelOffset(
 )
 
 const vista = ref<'responder' | 'recusar'>('responder')
+
+const tag = computed(() => INTL_LOCALE[isLocale(locale.value) ? locale.value : DEFAULT_LOCALE])
 
 // ------------------------------------------------------------------ o pedido
 
@@ -155,6 +156,25 @@ const diarias = computed(() =>
   pedido.value ? contarDiarias(pedido.value.entrada, pedido.value.saida) : 0,
 )
 
+/** As noites pedidas em destaque, como na linha: o mês, "28–31" grande, as diárias. */
+const noitesPedidas = computed(() => {
+  if (!pedido.value) {
+    return null
+  }
+
+  const de = dataDe(pedido.value.entrada)
+  const ate = dataDe(pedido.value.saida)
+  const mes = (iso: string) =>
+    new Intl.DateTimeFormat(tag.value, { month: 'short', timeZone: 'UTC' })
+      .format(new Date(`${iso}T12:00:00Z`))
+      .replace(/\.$/, '')
+
+  return {
+    mes: mes(de) === mes(ate) ? mes(de) : `${mes(de)}–${mes(ate)}`,
+    noites: `${Number(de.slice(8, 10))}–${Number(ate.slice(8, 10))}`,
+  }
+})
+
 const semVagaNoTipo = computed(
   () => pedido.value?.modo === 'acomodacao-escolhida' && props.linha?.tipoTemVaga === false,
 )
@@ -162,6 +182,18 @@ const semVagaNoTipo = computed(
 const prazo = computed(() =>
   pedido.value ? situacaoDoPrazoDaReserva(pedido.value, agoraIso()) : 'no-prazo',
 )
+
+/** O mesmo tom da linha: risco quando passou ou falta meia hora, atenção nas duas horas seguintes. */
+const tomDoPrazo = computed(() => {
+  if (prazo.value !== 'no-prazo') {
+    return 'risco'
+  }
+
+  const ate = pedido.value?.responderAte
+  const minutos = ate ? (Date.parse(ate) - Date.parse(agoraIso())) / 60_000 : Infinity
+
+  return minutos <= 120 ? 'atencao' : 'neutro'
+})
 
 const fraseDoPrazo = computed(() => {
   const ate = pedido.value?.responderAte
@@ -178,6 +210,55 @@ const fraseDoPrazo = computed(() => {
     quando: dataDe(ate) === dataDe(agoraIso()) ? formato.hora(ate) : formato.quando(ate),
   })
 })
+
+// ------------------------------------------------------------------ recusar
+/*
+ * O estado da recusa vem antes das datas: o `watch` imediato da linha (mais abaixo) chama
+ * `reiniciarRecusa()` na montagem, e com os `ref`s declarados depois dele a gaveta quebrava ao
+ * abrir a tela ("Cannot access 'motivo' before initialization") — o mesmo defeito que a gaveta da
+ * clínica teve.
+ */
+
+const MOTIVOS: MotivoDaRecusaDaReserva[] = ['sem-vaga', 'exigencias', 'perfil', 'outro']
+
+const motivo = ref<MotivoDaRecusaDaReserva>('sem-vaga')
+const mensagem = ref('')
+/** O balcão mexeu no texto: trocar o motivo não apaga o que ele escreveu. */
+const editado = ref(false)
+
+const opcoesDeMotivo = computed(() =>
+  MOTIVOS.map((valor) => ({ valor, rotulo: t(`hotel.pedidos.recusa.motivo.${valor}`) })),
+)
+
+function textoPadrao() {
+  return t(`hotel.pedidos.recusa.mensagem.${motivo.value}`, {
+    nome: props.responsavel.split(' ')[0] ?? '',
+    nomes: props.nomes,
+    telefone: props.telefone,
+  })
+}
+
+function reiniciarRecusa() {
+  motivo.value = 'sem-vaga'
+  editado.value = false
+  mensagem.value = textoPadrao()
+}
+
+watch(motivo, () => {
+  if (!editado.value) {
+    mensagem.value = textoPadrao()
+  }
+})
+
+function irParaRecusa() {
+  if (!editado.value) {
+    mensagem.value = textoPadrao()
+  }
+
+  vista.value = 'recusar'
+}
+
+const podeRecusar = computed(() => mensagem.value.trim().length > 0)
 
 // ------------------------------------------------------------------ datas
 
@@ -302,7 +383,7 @@ function estimativa(opcao: SugestaoDeAcomodacao) {
 
 /**
  * A unidade fica em datas diferentes das que estão no calendário — o "aceita mudar um dia". As
- * datas que o balcão tocou já são ditas uma vez, acima da lista; repetir em cada cartão poluía.
+ * datas que o balcão tocou já são ditas uma vez, acima da lista; repetir em cada opção poluía.
  */
 function mudaAsDatas(opcao: SugestaoDeAcomodacao) {
   const alvo = periodo.value?.ate
@@ -331,49 +412,6 @@ function reservar() {
     })
   }
 }
-
-// ------------------------------------------------------------------ recusar
-
-const MOTIVOS: MotivoDaRecusaDaReserva[] = ['sem-vaga', 'exigencias', 'perfil', 'outro']
-
-const motivo = ref<MotivoDaRecusaDaReserva>('sem-vaga')
-const mensagem = ref('')
-/** O balcão mexeu no texto: trocar o motivo não apaga o que ele escreveu. */
-const editado = ref(false)
-
-const opcoesDeMotivo = computed(() =>
-  MOTIVOS.map((valor) => ({ valor, rotulo: t(`hotel.pedidos.recusa.motivo.${valor}`) })),
-)
-
-function textoPadrao() {
-  return t(`hotel.pedidos.recusa.mensagem.${motivo.value}`, {
-    nome: props.responsavel.split(' ')[0] ?? '',
-    nomes: props.nomes,
-    telefone: props.telefone,
-  })
-}
-
-function reiniciarRecusa() {
-  motivo.value = 'sem-vaga'
-  editado.value = false
-  mensagem.value = textoPadrao()
-}
-
-watch(motivo, () => {
-  if (!editado.value) {
-    mensagem.value = textoPadrao()
-  }
-})
-
-function irParaRecusa() {
-  if (!editado.value) {
-    mensagem.value = textoPadrao()
-  }
-
-  vista.value = 'recusar'
-}
-
-const podeRecusar = computed(() => mensagem.value.trim().length > 0)
 </script>
 
 <template>
@@ -382,7 +420,7 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
     position="right"
     :modal="false"
     :dismissable="false"
-    class="hc-tema gaveta-da-reserva"
+    class="gaveta-da-reserva clinic-overlay"
     :style="{ width: `min(${LARGURA}, 96vw)` }"
   >
     <template #header>
@@ -423,12 +461,21 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
       <!-- ============================================================ responder -->
       <template v-if="vista === 'responder'">
         <section class="gr__pedido" :aria-label="t('hotel.pedidos.gaveta.oPedido')">
-          <FolhaDoDia
-            tamanho="lg"
-            :dia="dataDe(pedido.entrada)"
-            :ate="dataDe(pedido.saida)"
-            :rodape="t('hotel.pedidos.diarias', { n: diarias }, diarias)"
-          />
+          <span
+            v-if="noitesPedidas"
+            class="gr__noites"
+            role="img"
+            :aria-label="formato.periodo(pedido.entrada, pedido.saida)"
+          >
+            <span class="gr__noites-mes" aria-hidden="true">{{ noitesPedidas.mes }}</span>
+            <span class="gr__noites-numero ui-num" aria-hidden="true">
+              {{ noitesPedidas.noites }}
+            </span>
+            <span class="gr__noites-diarias" aria-hidden="true">
+              {{ t('hotel.pedidos.diarias', { n: diarias }, diarias) }}
+            </span>
+          </span>
+
           <div class="gr__pedido-texto">
             <p class="gr__tipo">
               <i
@@ -444,7 +491,7 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
                 }}
               </strong>
             </p>
-            <p class="gr__frase">{{ formato.periodo(pedido.entrada, pedido.saida) }}</p>
+            <p class="gr__frase ui-num">{{ formato.periodo(pedido.entrada, pedido.saida) }}</p>
             <p class="gr__linha">
               <i class="ph ph-paw-print" aria-hidden="true" />
               {{ petsComPorte }}
@@ -453,10 +500,10 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
               <i class="ph ph-warning-circle" aria-hidden="true" />
               {{ t('hotel.pedidos.semVagaNoTipo', { tipo: tipoPedido }) }}
             </p>
-            <p class="gr__linha" :class="`gr__linha--prazo-${prazo}`">
+            <p class="gr__linha gr__linha--prazo" :class="`gr__linha--prazo-${tomDoPrazo}`">
               <i
                 class="ph"
-                :class="prazo === 'no-prazo' ? 'ph-clock' : 'ph-clock-countdown'"
+                :class="tomDoPrazo === 'neutro' ? 'ph-clock' : 'ph-clock-countdown'"
                 aria-hidden="true"
               />
               {{ fraseDoPrazo }}
@@ -466,16 +513,19 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
 
         <blockquote v-if="pedido.observacao" class="gr__nota">
           <i class="ph ph-quotes" aria-hidden="true" />
-          {{ pedido.observacao }}
+          <span>{{ pedido.observacao }}</span>
         </blockquote>
 
-        <ul class="gr__fatos">
+        <ul
+          v-if="primeiraVez || pedido.servicos.length > 0 || pets.length > 1 || pedido.aceitaMudarUmDia"
+          class="gr__fatos"
+        >
           <li v-if="primeiraVez" class="gr__fato gr__fato--novo">
             <i class="ph ph-sparkle" aria-hidden="true" />
             <span class="gr__fato-texto">
               {{ t('hotel.pedidos.gaveta.primeiraVez') }}
               <span v-if="pedido.novoCadastro" class="gr__fato-dado">
-                <bdi dir="ltr">{{ pedido.novoCadastro.telefone }}</bdi>
+                <bdi dir="ltr" class="ui-num">{{ pedido.novoCadastro.telefone }}</bdi>
               </span>
             </span>
           </li>
@@ -515,15 +565,17 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
             <i class="ph ph-hand-tap" aria-hidden="true" />
             {{ t('hotel.pedidos.gaveta.toqueSaida') }}
           </p>
-          <p v-else-if="!mesmasDatas" class="gr__linha gr__linha--atencao" aria-live="polite">
-            <i class="ph ph-info" aria-hidden="true" />
-            {{ t('hotel.pedidos.gaveta.outrasDatas') }}
+          <p v-else-if="!mesmasDatas" class="gr__outras" aria-live="polite">
+            <span class="gr__linha gr__linha--atencao">
+              <i class="ph ph-info" aria-hidden="true" />
+              {{ t('hotel.pedidos.gaveta.outrasDatas') }}
+            </span>
             <Button
               type="button"
               size="small"
               severity="secondary"
               outlined
-              class="gr__voltar-datas"
+              icon="ph ph-arrow-counter-clockwise"
               :label="t('hotel.pedidos.gaveta.voltarDatas')"
               @click="periodo = periodoPedido ? { ...periodoPedido } : null"
             />
@@ -537,7 +589,7 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
             <i class="ph ph-circle-notch ph-spin" aria-hidden="true" />
             {{ t('hotel.pedidos.acomodacao.procurando') }}
           </p>
-          <p v-else-if="periodo?.ate && opcoes.length === 0" class="gr__linha">
+          <p v-else-if="periodo?.ate && opcoes.length === 0" class="gr__nenhuma">
             <i class="ph ph-calendar-x" aria-hidden="true" />
             {{ t('hotel.pedidos.acomodacao.nenhuma') }}
           </p>
@@ -548,7 +600,7 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
             role="radiogroup"
             :aria-label="t('hotel.pedidos.gaveta.onde')"
           >
-            <Button
+            <button
               v-for="opcao in opcoes"
               :key="chaveDa(opcao)"
               type="button"
@@ -560,7 +612,12 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
             >
               <span class="gr__marcador" aria-hidden="true" />
               <span class="gr__opcao-nome">
-                <strong>{{ opcao.acomodacao.nome }}</strong>
+                <strong>
+                  {{ opcao.acomodacao.nome }}
+                  <span v-if="pedido.tipoId === opcao.tipo.id" class="ui-selo ui-selo--lugar">
+                    {{ t('hotel.pedidos.tela.tipoPedido') }}
+                  </span>
+                </strong>
                 <span>
                   {{ opcao.tipo.nome }}
                   <template v-if="opcao.acomodacao.porteMaximo">
@@ -572,18 +629,15 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
                     }}
                   </template>
                 </span>
-                <span v-if="mudaAsDatas(opcao)" class="gr__opcao-muda">
+                <span v-if="mudaAsDatas(opcao)" class="gr__opcao-muda ui-num">
                   <i class="ph ph-arrows-left-right" aria-hidden="true" />
                   {{ formato.periodo(opcao.inicio, opcao.fim) }}
                 </span>
               </span>
-              <span v-if="pedido.tipoId === opcao.tipo.id" class="gr__opcao-selo">
-                {{ t('hotel.pedidos.gaveta.pedido') }}
-              </span>
-              <span v-if="estimativa(opcao) !== null" class="gr__opcao-preco">
+              <span v-if="estimativa(opcao) !== null" class="gr__opcao-preco ui-num">
                 {{ formato.moeda(estimativa(opcao)!) }}
               </span>
-            </Button>
+            </button>
           </div>
         </section>
 
@@ -596,14 +650,14 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
                 : t('hotel.pedidos.acomodacao.avisoPorPush')
             }}
           </span>
-          <p>{{ textoDoAviso }}</p>
+          <p class="gr__bolha">{{ textoDoAviso }}</p>
         </section>
       </template>
 
       <!-- ============================================================ recusar -->
       <template v-else>
         <div class="gr__campo">
-          <span id="gr-motivo" class="clinic-label">{{ t('hotel.pedidos.recusa.porque') }}</span>
+          <span id="gr-motivo" class="gr__rotulo-campo">{{ t('hotel.pedidos.recusa.porque') }}</span>
           <SelectButton
             v-model="motivo"
             :options="opcoesDeMotivo"
@@ -616,11 +670,20 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
         </div>
 
         <label class="gr__campo">
-          <span class="clinic-label">
+          <span class="gr__rotulo-campo">
             {{ t('hotel.pedidos.recusa.mensagemPara', { nome: responsavel }) }}
           </span>
           <Textarea v-model="mensagem" rows="6" auto-resize fluid @input="editado = true" />
         </label>
+
+        <p class="gr__linha">
+          <i class="ph ph-info" aria-hidden="true" />
+          {{
+            pedido.canal === 'link'
+              ? t('hotel.pedidos.acomodacao.avisoPorMensagem')
+              : t('hotel.pedidos.acomodacao.avisoPorPush')
+          }}
+        </p>
       </template>
     </div>
 
@@ -675,62 +738,99 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
 </template>
 
 <style scoped>
+/* ------------------------------------------------------------------ cabeçalho */
+
 .gr-cabeca {
   display: flex;
-  align-items: center;
-  gap: 0.7rem;
   min-width: 0;
+  align-items: center;
+  gap: 12px;
 }
 
 .gr-cabeca__rostos {
   display: inline-flex;
-  flex: 0 0 auto;
+  flex: none;
 }
 
 .gr-cabeca__rostos--grupo > * + * {
-  margin-inline-start: -0.6rem;
-  box-shadow: 0 0 0 2px var(--hc-cartao);
+  margin-inline-start: -12px;
   border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--superficie);
 }
 
 .gr-cabeca__texto {
   display: grid;
   min-width: 0;
-  gap: 0.1rem;
+  gap: 2px;
 }
 
 .gr-cabeca__titulo {
   margin: 0;
   outline: none;
-  color: var(--hc-tinta);
-  font-size: 1.0625rem;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   line-height: 1.25;
 }
 
 .gr-cabeca__meta {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
+
+/* ------------------------------------------------------------------ corpo */
 
 .gr {
   display: grid;
-  gap: 1.1rem;
+  gap: 18px;
+  color: var(--tinta);
 }
 
+/* O pedido: as noites grandes à esquerda, o que e o prazo à direita — uma faixa tingida só. */
 .gr__pedido {
   display: flex;
   align-items: flex-start;
-  gap: 0.9rem;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--superficie-2);
+}
+
+.gr__noites {
+  display: grid;
+  flex: none;
+  min-width: 6rem;
+  align-content: start;
+  gap: 1px;
+  padding-inline-end: 16px;
+  border-inline-end: 1px solid var(--linha);
+  line-height: 1.15;
+}
+
+.gr__noites-mes,
+.gr__noites-diarias {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.gr__noites-numero {
+  color: var(--tinta);
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .gr__pedido-texto {
   display: grid;
   min-width: 0;
-  gap: 0.3rem;
+  gap: 4px;
 }
 
 .gr__pedido-texto p,
@@ -740,250 +840,285 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
 
 .gr__tipo {
   display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.9375rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 15px;
 }
 
 .gr__tipo > i {
-  color: var(--hc-marca);
+  color: var(--hotel-tinta);
+  transform: translateY(2px);
 }
 
 .gr__tipo strong {
-  color: var(--hc-tinta);
+  color: var(--tinta);
+  font-weight: 600;
 }
 
 .gr__frase {
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
 }
 
 .gr__linha {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.35rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13px;
   line-height: 1.45;
 }
 
 .gr__linha > i {
-  flex: 0 0 auto;
-  transform: translateY(0.1rem);
+  flex: none;
+  transform: translateY(1px);
 }
 
 .gr__linha--atencao {
-  color: var(--clinic-attention-text);
-  font-weight: 650;
+  color: var(--atencao-tinta);
+  font-weight: 550;
 }
 
-.gr__linha--prazo-atrasado {
-  color: var(--clinic-risk-text);
+.gr__linha--prazo {
+  font-weight: 550;
 }
 
-.gr__linha--prazo-vencendo > i {
-  color: var(--clinic-attention-text);
+.gr__linha--prazo-risco {
+  color: var(--risco-tinta);
 }
 
-.gr__voltar-datas.p-button {
-  --hc-botao-sombra: none;
-
-  margin-inline-start: auto;
+.gr__linha--prazo-atencao {
+  color: var(--atencao-tinta);
 }
 
 .gr__nota {
   display: flex;
+  gap: 10px;
   margin: 0;
-  padding: 0.7rem 0.85rem;
-  border-radius: 0.75rem;
-  gap: 0.5rem;
-  background: var(--hc-pagina);
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
+  padding: 12px 14px;
+  border-inline-start: 3px solid var(--linha-forte);
+  border-radius: 4px 12px 12px 4px;
+  background: var(--superficie-2);
+  color: var(--tinta);
+  font-size: 14px;
   line-height: 1.5;
 }
 
 .gr__nota > i {
-  flex: 0 0 auto;
-  color: var(--hc-tinta-3);
-  font-size: 1rem;
+  flex: none;
+  margin-top: 2px;
+  color: var(--tinta-3);
+  font-size: 16px;
 }
 
 .gr__fatos {
   display: grid;
+  gap: 8px;
   margin: 0;
   padding: 0;
-  gap: 0.35rem;
   list-style: none;
-}
-
-.gr__fatos:empty {
-  display: none;
 }
 
 .gr__fato {
   display: flex;
   align-items: baseline;
-  gap: 0.4rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.gr__fato > i {
+  flex: none;
+  color: var(--tinta-3);
+  font-size: 15px;
+  transform: translateY(2px);
 }
 
 .gr__fato-texto {
   display: grid;
-  gap: 0.1rem;
+  gap: 2px;
 }
 
 .gr__fato-dado {
-  color: var(--hc-tinta-2);
-  font-weight: 500;
+  color: var(--tinta-2);
+  font-weight: 450;
   white-space: nowrap;
 }
 
-.gr__fato--novo {
-  color: var(--hc-ciano-tinta);
-  font-weight: 650;
+.gr__fato--novo,
+.gr__fato--novo > i {
+  color: var(--hotel-tinta);
+  font-weight: 550;
 }
+
+/* ------------------------------------------------------------------ seções */
 
 .gr__secao {
   display: grid;
-  padding-top: 1rem;
-  border-top: 1px solid var(--hc-linha);
-  gap: 0.6rem;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--linha);
 }
 
 .gr__titulo {
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.9375rem;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .gr__legenda {
   display: flex;
   flex-wrap: wrap;
-  margin: -0.15rem 0 0;
-  gap: 0.9rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
+  gap: 6px 16px;
+  margin: -4px 0 0;
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .gr__legenda > span {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 6px;
 }
 
 .gr__ponto {
-  width: 0.4rem;
-  height: 0.4rem;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--hc-marca);
+  background: var(--musgo);
 }
 
 .gr__tinta {
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: var(--hc-marca-clara);
+  background: var(--musgo-fundo);
+}
+
+.gr__outras {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.gr__nenhuma {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.gr__nenhuma > i {
+  flex: none;
+  transform: translateY(2px);
 }
 
 /* ------------------------------------------------------------------ onde */
 
 .gr__opcoes {
   display: grid;
-  gap: 0.45rem;
+  gap: 8px;
 }
 
-.gr__opcao.p-button {
-  --hc-botao-sombra: none;
-
+.gr__opcao {
   display: grid;
-  align-items: center;
   width: 100%;
-  padding: 0.65rem 0.8rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.8rem;
-  gap: 0.7rem;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
+  min-height: 56px;
+  align-items: center;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 10px 14px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
   font: inherit;
   text-align: start;
-  cursor: pointer;
   transition:
-    border-color 150ms ease-out,
-    background-color 150ms ease-out;
+    border-color var(--pj-tempo-curto) ease-out,
+    background-color var(--pj-tempo-curto) ease-out;
 }
 
-.gr__opcao.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca);
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
+.gr__opcao:hover {
+  border-color: var(--musgo);
 }
 
-.gr__opcao--escolhida.p-button,
-.gr__opcao--escolhida.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
+.gr__opcao:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: 2px;
+}
+
+.gr__opcao--escolhida,
+.gr__opcao--escolhida:hover {
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
 }
 
 /* O marcador de rádio desenhado com borda: o botão inteiro é o rádio, o círculo só o indica. */
 .gr__marcador {
-  width: 1.05rem;
-  height: 1.05rem;
-  border: 1.5px solid var(--hc-tinta-3);
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--linha-forte);
   border-radius: 50%;
-  background: var(--hc-cartao);
+  background: var(--superficie);
 }
 
 .gr__opcao--escolhida .gr__marcador {
-  border: 5px solid var(--hc-marca);
+  border: 5px solid var(--musgo);
 }
 
 .gr__opcao-nome {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
+  gap: 2px;
 }
 
 .gr__opcao-nome strong {
-  font-size: 0.9375rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.gr__opcao-nome strong .ui-selo {
+  height: 20px;
+  padding-inline: 7px;
+  font-size: 11.5px;
 }
 
 .gr__opcao-nome > span {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .gr__opcao-muda {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  color: var(--clinic-attention-text) !important;
-  font-weight: 650;
-}
-
-.gr__opcao-selo {
-  padding: 0 0.35rem;
-  border-radius: 4px;
-  background: var(--hc-marca-forte);
-  color: #fff;
-  font-size: 0.5625rem;
-  font-weight: 750;
-  letter-spacing: 0.03em;
-  line-height: 1.5;
-  text-transform: uppercase;
+  gap: 4px;
+  color: var(--atencao-tinta) !important;
+  font-weight: 550;
 }
 
 .gr__opcao-preco {
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 650;
   white-space: nowrap;
 }
 
@@ -991,27 +1126,28 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
 
 .gr__aviso {
   display: grid;
-  padding-top: 1rem;
-  border-top: 1px solid var(--hc-linha);
-  gap: 0.35rem;
+  gap: 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--linha);
 }
 
 .gr__via {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  font-weight: 650;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 550;
 }
 
-.gr__aviso > p {
+/* A mensagem como chega no celular: um balão, na cor da casa. */
+.gr__bolha {
   margin: 0;
-  padding: 0.6rem 0.8rem;
-  border-radius: 0.75rem 0.75rem 0.75rem 0.2rem;
-  background: var(--hc-pagina);
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
+  padding: 10px 14px;
+  border-radius: 14px 14px 14px 4px;
+  background: var(--hotel-fundo);
+  color: var(--tinta);
+  font-size: 14px;
   line-height: 1.45;
 }
 
@@ -1019,7 +1155,13 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
 
 .gr__campo {
   display: grid;
-  gap: 0.35rem;
+  gap: 8px;
+}
+
+.gr__rotulo-campo {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .gr__motivos {
@@ -1027,9 +1169,17 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
   flex-wrap: wrap;
 }
 
+/* O segmento escolhido: superfície e tinta, legível nos dois temas. */
+.gr__motivos :deep(.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--superficie);
+  color: var(--tinta);
+}
+
+/* ------------------------------------------------------------------ rodapé */
+
 .gr-rodape {
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .gr-rodape__principal.p-button {

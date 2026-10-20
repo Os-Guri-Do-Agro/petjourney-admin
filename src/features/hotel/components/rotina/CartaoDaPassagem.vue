@@ -1,34 +1,22 @@
 <script setup lang="ts">
 /**
- * O fim do turno, no pé da prancheta.
+ * O fim do turno, ao lado da prancheta.
  *
  * ## Por que existe
  *
  * A regra R3 fecha a porta da passagem: ocorrência grave sem contato com o responsável **não passa
- * adiante** (ver `PassagemDialog`). Até aqui, a pessoa só descobria isso ao abrir o diálogo — e ela
- * abre o diálogo às 22h, que é exatamente quando já não dá para ligar para ninguém. O travamento
- * era verdadeiro, correto e inútil: chegava tarde demais para ser resolvido.
+ * adiante** (ver `PassagemDialog`). Sem este cartão a pessoa só descobria isso ao abrir o diálogo —
+ * às 22h, quando já não dá para ligar para ninguém. O travamento era verdadeiro, correto e inútil.
  *
- * Este cartão traz os três números do fim do turno para dentro da tela onde a pessoa passa o turno
- * inteiro: **quem assume, quanto fica, e o que impede a entrega**. Às 14h ainda dá para ligar. É o
- * único lugar da prancheta onde a tela evita um trabalho em vez de acelerá-lo.
- *
- * Os dados já vinham carregados — `carregarPassagem()` roda no `onMounted` da rotina desde sempre.
- * O que faltava era mostrá-los antes da hora do aperto.
+ * Aqui ficam os três números do fim do turno, desde o começo dele: **quando acaba e quem assume,
+ * quanto fica, e o que impede a entrega**. Às 14h ainda dá para ligar.
  *
  * ## Por que não resolve aqui
  *
- * O aviso leva ao diálogo, e é lá que cada ocorrência travada tem o próprio botão de resolver, com
- * o caminho para a estadia do animal. Duplicar essa lista aqui criaria dois lugares para a mesma
- * decisão, e o cartão deixaria de ser o que ele é — um aviso de que existe trabalho a fazer antes
- * das 22h, não a terceira tela onde se faz.
+ * O aviso leva ao diálogo, e é lá que cada ocorrência travada tem o caminho para a estadia do
+ * animal. Duplicar a lista aqui criaria dois lugares para a mesma decisão.
  *
- * ## A forma
- *
- * Rima com o cartão que fecha o painel do dia, que é onde a mesma pessoa começa o turno: mesma
- * superfície recolhida, mesmo par de linhas, ação à direita. E o travamento é dito no **ícone e no
- * número**, nunca pintando o cartão de vermelho — a casa já decidiu que urgência não mora na
- * superfície, e cinco tarefas atrasadas mais um cartão vermelho no pé não somam urgência.
+ * O travamento é dito no ícone, na cor do texto e na palavra — nunca pintando o cartão inteiro.
  */
 import Button from 'primevue/button'
 import { computed } from 'vue'
@@ -55,154 +43,218 @@ const travadas = computed(() => props.passagem?.pendencias.ocorrencias.length ??
 
 const ficam = computed(() => props.passagem?.pendencias.tarefas.length ?? 0)
 
-/**
- * Quem assume, pelo nome.
- *
- * O turno seguinte guarda só o `responsavelId`. "assume Noite" sem nome é metade da informação:
- * quem entrega precisa saber para quem está entregando, e num hotel a escala muda.
- */
+/** Quem assume, pelo nome: quem entrega precisa saber para quem está entregando. */
 const quemAssume = computed(() => {
   const id = props.passagem?.seguinte.responsavelId
 
   return props.cuidadores.find((pessoa) => pessoa.id === id)?.nome ?? ''
 })
 
-const cabecalho = computed(() => {
+const assume = computed(() => {
   if (!props.passagem) return ''
 
-  const fim = formato.hora(props.passagem.turno.fim)
   const turno = formato.turno(props.passagem.seguinte.kind)
 
-  return quemAssume.value
-    ? `${fim} · ${t('hotel.turno.assumeCom', { turno, pessoa: quemAssume.value })}`
-    : fim
+  return quemAssume.value ? t('hotel.turno.assumeCom', { turno, pessoa: quemAssume.value }) : turno
 })
 </script>
 
 <template>
-  <section v-if="passagem" class="fim">
-    <div class="fim__texto">
-      <p class="fim__topo">
-        <i class="ph ph-sign-out" aria-hidden="true" />
-        <strong class="fim__rotulo">{{ t('hotel.turno.fimDoTurno') }}</strong>
-        <span class="fim__quando">{{ cabecalho }}</span>
-      </p>
+  <section v-if="passagem" class="fim ui-folha" aria-labelledby="fim-do-turno-titulo">
+    <header class="fim__cabeca">
+      <span class="fim__icone" aria-hidden="true"><i class="ph ph-arrows-left-right" /></span>
 
-      <p class="fim__linha">
-        {{ t('hotel.turno.ficam', { total: ficam }, ficam) }}
-      </p>
+      <div class="fim__titulos">
+        <h2 id="fim-do-turno-titulo">{{ t('hotel.turno.fimDoTurno') }}</h2>
+        <p>{{ assume }}</p>
+      </div>
+
+      <time class="fim__hora ui-hora" :datetime="passagem.turno.fim">
+        {{ formato.hora(passagem.turno.fim) }}
+      </time>
+    </header>
+
+    <ul class="fim__lista">
+      <li class="fim__item">
+        <i class="ph ph-list-checks" aria-hidden="true" />
+        <span>{{ t('hotel.turno.ficam', { total: ficam }, ficam) }}</span>
+      </li>
 
       <!--
-        O travamento, dito no ícone e no número. Clicável porque o caminho para resolvê-lo é o
-        mesmo diálogo — um aviso que não leva a lugar nenhum transfere para a pessoa o trabalho de
-        descobrir onde é esse lugar.
+        O travamento, clicável: o caminho para resolvê-lo é o mesmo diálogo, e um aviso que não
+        leva a lugar nenhum transfere para a pessoa o trabalho de descobrir onde é esse lugar.
       -->
-      <button v-if="travadas > 0" type="button" class="fim__trava" @click="emit('passar')">
-        <i class="ph ph-warning-circle" aria-hidden="true" />
-        {{ t('hotel.turno.travaEntrega', { total: travadas }, travadas) }}
-      </button>
+      <li v-if="travadas > 0" class="fim__item fim__item--trava">
+        <button type="button" class="fim__trava" @click="emit('passar')">
+          <i class="ph ph-warning-circle" aria-hidden="true" />
+          <span>{{ t('hotel.turno.travaEntrega', { total: travadas }, travadas) }}</span>
+          <i class="ph ph-caret-right fim__seta" aria-hidden="true" />
+        </button>
+      </li>
 
-      <p v-else class="fim__linha fim__linha--livre">
-        <i class="ph ph-check" aria-hidden="true" />
-        {{ t('hotel.turno.nadaTrava') }}
-      </p>
-    </div>
+      <li v-else class="fim__item fim__item--livre">
+        <i class="ph ph-check-circle" aria-hidden="true" />
+        <span>{{ t('hotel.turno.nadaTrava') }}</span>
+      </li>
+    </ul>
 
-    <Button
-      :label="t('hotel.turno.passar')"
-      class="acao-turno"
-      icon="ph ph-sign-out"
-      severity="secondary"
-      outlined
-      size="small"
-      @click="emit('passar')"
-    />
+    <footer class="fim__pe">
+      <Button
+        type="button"
+        class="fim__passar"
+        :label="t('hotel.turno.passar')"
+        icon="ph ph-sign-out"
+        severity="secondary"
+        outlined
+        fluid
+        @click="emit('passar')"
+      />
+    </footer>
   </section>
 </template>
 
 <style scoped>
-/*
- * Recolhido, e não um cartão de conteúdo: isto fecha a página, não compete com ela.
- *
- * Por isso a superfície é a afundada e não a de cartão — o mesmo tom que a prancheta já usa para
- * o que está resolvido — e a ação principal é contornada, não cheia. O verde cheio, nesta tela,
- * significa "isto pede o polegar agora", e passar o turno às 14h não pede.
- */
 .fim {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  margin-block-start: var(--clinic-space-3);
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface-soft);
+  display: grid;
+  overflow: hidden;
 }
 
-.fim__texto {
+.fim__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--linha);
+  background: color-mix(in oklab, var(--hotel-fundo) 55%, var(--superficie));
+}
+
+.fim__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--hotel-tinta);
+  font-size: 18px;
+}
+
+.fim__titulos {
   display: grid;
   min-width: 0;
-  gap: 0.15rem;
+  flex: 1;
+  gap: 1px;
 }
 
-.fim__topo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
+.fim__titulos h2 {
   margin: 0;
-  gap: 0.4rem;
-  color: var(--clinic-muted);
-}
-
-.fim__topo .ph {
-  color: var(--clinic-faint);
-  font-size: 0.75rem;
-}
-
-.fim__rotulo {
-  color: var(--clinic-text);
-  font-size: 0.75rem;
+  color: var(--tinta);
+  font-size: 15px;
   font-weight: 600;
 }
 
-.fim__quando {
-  font-size: var(--clinic-font-label);
-  font-variant-numeric: tabular-nums;
-}
-
-.fim__linha {
+.fim__titulos p {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.fim__linha--livre {
+/* A hora em que o turno acaba é o número que importa: grande, como o tempo de espera do Hoje. */
+.fim__hora.ui-hora {
+  color: var(--hotel-tinta);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+.fim__lista {
+  display: grid;
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+}
+
+.fim__item {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-accent-strong);
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 18px;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.4;
 }
 
-/* A trava: vermelha no ícone e no texto da contagem, nunca no fundo do cartão. */
+.fim__item > i {
+  flex: none;
+  color: var(--tinta-2);
+  font-size: 18px;
+}
+
+.fim__item--livre {
+  color: var(--ok-tinta);
+  font-weight: 550;
+}
+
+.fim__item--livre > i {
+  color: var(--ok-tinta);
+}
+
+.fim__item--trava {
+  padding: 0;
+}
+
 .fim__trava {
   display: flex;
+  width: 100%;
+  min-height: 44px;
   align-items: center;
-  justify-self: start;
-  padding: 0;
+  gap: 10px;
+  padding: 8px 18px;
   border: 0;
-  gap: 0.3rem;
-  background: transparent;
-  color: var(--clinic-risk-text);
+  background: color-mix(in oklab, var(--risco-fundo) 60%, transparent);
+  color: var(--risco-tinta);
   cursor: pointer;
   font: inherit;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   text-align: start;
 }
 
 .fim__trava:hover {
-  text-decoration: underline;
+  background: var(--risco-fundo);
+}
+
+.fim__trava:focus-visible {
+  outline: 2px solid var(--risco);
+  outline-offset: -2px;
+}
+
+.fim__trava i {
+  flex: none;
+  font-size: 18px;
+}
+
+.fim__trava span {
+  flex: 1;
+}
+
+.fim__seta {
+  font-size: 14px;
+}
+
+[dir='rtl'] .fim__seta {
+  scale: -1 1;
+}
+
+.fim__pe {
+  padding: 4px 18px 16px;
+}
+
+.fim__passar.p-button {
+  min-height: 40px;
 }
 </style>

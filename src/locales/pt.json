@@ -6709,10 +6709,10 @@
       "tela": {
         "intervalo": "{de} a {ate}",
         "resumoHoje": "Hoje, {ocupadas} de {total} acomodação ocupada | Hoje, {ocupadas} de {total} acomodações ocupadas",
-        "resumoPico": "a noite mais cheia à vista é {dia}, com {livres} vaga | a noite mais cheia à vista é {dia}, com {livres} vagas",
+        "resumoPico": "a noite mais cheia das três semanas é {dia}, com {livres} vaga | a noite mais cheia das três semanas é {dia}, com {livres} vagas",
         "resumoLotado": "a noite de {dia} está lotada",
         "resumo": "{hoje}; {pico}.",
-        "resumoSemHoje": "Nas três semanas à vista, {pico}.",
+        "resumoSemHoje": "Nestas datas, {pico}.",
         "procura": "Procurar vaga",
         "periodoDaProcura": "de {de} a {ate}",
         "foraDaGrade": "O período procurado está fora das três semanas à vista.",
@@ -7111,7 +7111,44 @@
       "tudoEmDia": "Nada pendente neste momento. A próxima tarefa aparece aqui na hora dela.",
       "umaAUma": "uma a uma",
       "vazioDescricao": "A rotina nasce com o check-in. Sem hóspedes na casa, não há o que fazer.",
-      "vazioTitulo": "Nenhuma tarefa hoje"
+      "vazioTitulo": "Nenhuma tarefa hoje",
+      "nova": {
+        "todas": "Todas",
+        "agora": "Agora · {hora}",
+        "progresso": "{feitas} de {total} tarefa feita. | {feitas} de {total} tarefas feitas.",
+        "atrasadas": "{total} atrasada. | {total} atrasadas.",
+        "resolvidas": "{total} tarefa resolvida desde {desde} | {total} tarefas resolvidas desde {desde}",
+        "ver": "Ver",
+        "ocultar": "Ocultar",
+        "umAUm": "Remédio se marca um a um",
+        "editarPadrao": "Mudar os horários da casa",
+        "padraoDica": "Os horários que valem para todos os hóspedes.",
+        "proporDica": "Escolha um hóspede para pedir uma proposta lida da ficha, ou para acrescentar remédio, cuidado, serviço ou ajuste de horário.",
+        "estado": {
+          "remedio": "Remédio atrasado",
+          "atrasada": "Atrasado",
+          "janela": "Na hora",
+          "feita": "Tudo resolvido",
+          "futura": "Mais tarde"
+        },
+        "tour": {
+          "tempo": {
+            "titulo": "A linha do tempo do turno",
+            "texto": "A hora fica à esquerda e cada horário tem um nó no trilho: lavanda é a hora de fazer, âmbar é atraso, vermelho é remédio atrasado, apagado é o que já foi feito. O fio marca agora."
+          },
+          "ronda": {
+            "titulo": "Vários animais, uma ronda",
+            "texto": "O mesmo serviço no mesmo horário vira uma ronda, com uma linha por animal. Dá para marcar todos de uma vez, menos remédio: remédio se marca um a um. Ronda longa chega fechada e abre num toque."
+          },
+          "passagem": {
+            "texto": "Quando o turno acaba, quem assume, quantas tarefas ficam e o que impede a entrega. Aparece desde o começo do turno: ocorrência sem contato às 22h já não dá para resolver."
+          },
+          "gerenciar": {
+            "titulo": "Mudar a rotina de um hóspede",
+            "texto": "A rotina padrão da casa fica à vista. Escolha um hóspede para pedir uma proposta lida da ficha, ou para acrescentar remédio, cuidado, serviço extra ou ajuste de horário."
+          }
+        }
+      }
     },
     "rotinaPadrao": {
       "aplicar": "Aplicar",
@@ -7148,7 +7185,28 @@
       "vigencia": "A partir de quando",
       "vigenciaAgora": "Agora",
       "vigenciaAmanha": "Amanhã",
-      "vigenciaDica": "Começar amanhã não mexe no turno de quem está trabalhando agora."
+      "vigenciaDica": "Começar amanhã não mexe no turno de quem está trabalhando agora.",
+      "nova": {
+        "versao": "Versão {versao}, publicada por {pessoa}.",
+        "versaoSemPessoa": "Versão {versao}.",
+        "horariosDaCasa": "Horários da casa",
+        "todosOsDias": "Valem para todos os hóspedes, todos os dias. Mudar aqui cria um rascunho: nada muda na casa até publicar.",
+        "servico": "Serviço",
+        "excecoes": "Fora do padrão",
+        "excecoesDescricao": "Hóspedes com horário próprio, ou sem um serviço da casa, e o motivo.",
+        "semExcecoes": "Todos os hóspedes seguem o padrão da casa.",
+        "semExcecoesDica": "Uma exceção se cria na rotina do turno, em Gerenciar rotina, ou na ficha do hóspede.",
+        "irParaRotina": "Abrir a rotina do turno",
+        "suspenso": "Sem este serviço",
+        "foraDoPadrao": "{total} hóspede fora do padrão | {total} hóspedes fora do padrão",
+        "descartar": "Descartar rascunho",
+        "tour": {
+          "excecoes": {
+            "titulo": "Quem foge do padrão",
+            "texto": "Os hóspedes com horário próprio, ou sem um serviço da casa, com o motivo de cada um. Mudar o padrão não mexe neles: a exceção continua valendo até ser desfeita na ficha do hóspede."
+          }
+        }
+      }
     },
     "servico": {
       "adestramento": "Adestramento",

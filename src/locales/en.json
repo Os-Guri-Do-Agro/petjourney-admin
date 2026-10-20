@@ -6709,10 +6709,10 @@
       "tela": {
         "intervalo": "{de} to {ate}",
         "resumoHoje": "Today, {ocupadas} of {total} room taken | Today, {ocupadas} of {total} rooms taken",
-        "resumoPico": "the busiest night in view is {dia}, with {livres} room left | the busiest night in view is {dia}, with {livres} rooms left",
+        "resumoPico": "the busiest night of the three weeks is {dia}, with {livres} room left | the busiest night of the three weeks is {dia}, with {livres} rooms left",
         "resumoLotado": "the night of {dia} is full",
         "resumo": "{hoje}; {pico}.",
-        "resumoSemHoje": "In the three weeks in view, {pico}.",
+        "resumoSemHoje": "On these dates, {pico}.",
         "procura": "Look for a free room",
         "periodoDaProcura": "from {de} to {ate}",
         "foraDaGrade": "The dates you searched are outside the three weeks in view.",
@@ -7111,7 +7111,44 @@
       "tudoEmDia": "Nothing pending right now. The next task appears here when its time comes.",
       "umaAUma": "one by one",
       "vazioDescricao": "The routine starts at check-in. With no guests, there is nothing to do.",
-      "vazioTitulo": "No tasks today"
+      "vazioTitulo": "No tasks today",
+      "nova": {
+        "todas": "All",
+        "agora": "Now · {hora}",
+        "progresso": "{feitas} of {total} task done. | {feitas} of {total} tasks done.",
+        "atrasadas": "{total} overdue. | {total} overdue.",
+        "resolvidas": "{total} task done since {desde} | {total} tasks done since {desde}",
+        "ver": "Show",
+        "ocultar": "Hide",
+        "umAUm": "Medication is marked one by one",
+        "editarPadrao": "Change the house times",
+        "padraoDica": "The times that apply to every guest.",
+        "proporDica": "Pick a guest to ask for a proposal read from their record, or to add medication, care, a service or a time adjustment.",
+        "estado": {
+          "remedio": "Medication overdue",
+          "atrasada": "Overdue",
+          "janela": "Due now",
+          "feita": "All done",
+          "futura": "Later"
+        },
+        "tour": {
+          "tempo": {
+            "titulo": "The shift timeline",
+            "texto": "The time sits on the left and each slot has a dot on the line: lavender means it is time, amber means overdue, red means overdue medication, faded means done. The thread marks now."
+          },
+          "ronda": {
+            "titulo": "Several animals, one round",
+            "texto": "The same service at the same time becomes a round, with one line per animal. You can mark them all at once, except medication: medication is marked one by one. Long rounds arrive closed and open with a tap."
+          },
+          "passagem": {
+            "texto": "When the shift ends, who takes over, how many tasks are left and what blocks the handover. It shows from the start of the shift: an incident with no contact at 10 pm can no longer be solved."
+          },
+          "gerenciar": {
+            "titulo": "Change a guest's routine",
+            "texto": "The house routine stays in view. Pick a guest to ask for a proposal read from their record, or to add medication, care, an extra service or a time adjustment."
+          }
+        }
+      }
     },
     "rotinaPadrao": {
       "aplicar": "Apply",
@@ -7148,7 +7185,28 @@
       "vigencia": "Starting when",
       "vigenciaAgora": "Now",
       "vigenciaAmanha": "Tomorrow",
-      "vigenciaDica": "Starting tomorrow leaves the current shift untouched."
+      "vigenciaDica": "Starting tomorrow leaves the current shift untouched.",
+      "nova": {
+        "versao": "Version {versao}, published by {pessoa}.",
+        "versaoSemPessoa": "Version {versao}.",
+        "horariosDaCasa": "House schedule",
+        "todosOsDias": "They apply to every guest, every day. Changes here make a draft: nothing changes in the house until you publish.",
+        "servico": "Service",
+        "excecoes": "Exceptions",
+        "excecoesDescricao": "Guests with their own times, or without a house service, and why.",
+        "semExcecoes": "Every guest follows the house routine.",
+        "semExcecoesDica": "An exception is made in the shift routine, under Manage routine, or in the guest's record.",
+        "irParaRotina": "Open the shift routine",
+        "suspenso": "Not for this guest",
+        "foraDoPadrao": "{total} guest with an exception | {total} guests with an exception",
+        "descartar": "Discard draft",
+        "tour": {
+          "excecoes": {
+            "titulo": "Who is an exception",
+            "texto": "Guests with their own times, or without a house service, each with the reason. Changing the house routine does not touch them: the exception stays until it is undone in the guest's record."
+          }
+        }
+      }
     },
     "servico": {
       "adestramento": "Training",

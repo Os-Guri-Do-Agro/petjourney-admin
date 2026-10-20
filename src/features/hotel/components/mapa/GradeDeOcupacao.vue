@@ -10,16 +10,22 @@
  * Três decisões de desenho que vêm disso:
  *
  * 1. **O vazio é a informação.** As barras são o que está vendido; o que se procura é o espaço
- *    entre elas. Por isso a célula livre tem fundo próprio e a barra é sólida: o olho varre a
- *    linha atrás da lacuna, não atrás da cor.
+ *    entre elas. A célula livre é um botão: o ponteiro sobre ela mostra o "+" na cor da casa, e o
+ *    clique começa a reserva naquele dia, naquela acomodação.
  * 2. **A noite da saída não é ocupada.** Quem sai dia 30 ao meio-dia libera aquela noite. Pintar
  *    o dia 30 mostraria à recepção uma diária cheia que está à venda — e é assim que um hotel
  *    perde receita sem saber.
- * 3. **A barra diz de quem é.** Um retângulo colorido sem nome obriga a clicar para saber quem
- *    está lá, e quem opera pergunta pelo nome do animal, nunca pelo número da baia.
+ * 3. **A barra diz de quem é.** Rosto e nome do hóspede, e a documentação pendente como um aviso
+ *    âmbar na ponta: quem opera pergunta pelo nome do animal, nunca pelo número da baia.
+ *
+ * O cabeçalho é a fita dos dias, como a semana da Agenda: o dia da semana, o número e, embaixo,
+ * quanto da casa já está vendido naquela noite. Hoje leva o ponto e a coluna tingida de lavanda.
+ * A grade rola por dentro, com os dias presos em cima e as acomodações presas à esquerda.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
 
 import PetAvatar from '../base/PetAvatar.vue'
 import { useHotelFormat } from '../../composables/useHotelFormat'
@@ -40,10 +46,12 @@ const emit = defineEmits<{
   reservar: [payload: { acomodacaoId: string; dia: ISODate }]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const formato = useHotelFormat()
 /* O nome do tipo é cadastro da casa, não tradução nossa: sai da store, não do formatador. */
 const hotelStore = useHotelStore()
+
+const tag = computed(() => INTL_LOCALE[isLocale(locale.value) ? locale.value : DEFAULT_LOCALE])
 
 /** Agrupa por bloco, na ordem física da casa. */
 const grupos = computed(() =>
@@ -68,6 +76,10 @@ const recorte = computed(() => {
 
   return de < 0 || ate < 0 ? null : { de, ate }
 })
+
+function naProcura(indice: number) {
+  return recorte.value !== null && indice >= recorte.value.de && indice < recorte.value.ate
+}
 
 /**
  * A linha serve para o que se procura?
@@ -97,29 +109,80 @@ function ehFimDeSemana(data: ISODate): boolean {
   return dia === 0 || dia === 6
 }
 
-/** Texto do dia no cabeçalho: `qua` em cima, `24` embaixo. */
+function semPonto(texto: string) {
+  return texto.replace(/\.$/, '')
+}
+
+/** Texto do dia no cabeçalho: `qua` em cima, `24` embaixo — no idioma de quem lê. */
 function diaDaSemana(data: ISODate): string {
-  return new Intl.DateTimeFormat('pt-BR', { weekday: 'short', timeZone: 'UTC' })
-    .format(new Date(`${data}T12:00:00Z`))
-    .replace('.', '')
+  return semPonto(
+    new Intl.DateTimeFormat(tag.value, { weekday: 'short', timeZone: 'UTC' }).format(
+      new Date(`${data}T12:00:00Z`),
+    ),
+  )
 }
 
 function numeroDoDia(data: ISODate): string {
-  return data.slice(8, 10)
+  return String(Number(data.slice(8, 10)))
+}
+
+/** Primeiro dia à vista e primeiro dia de cada mês ganham o mês — a grade atravessa a virada. */
+function inicioDeMes(data: ISODate, indice: number): string {
+  if (indice > 0 && data.slice(8, 10) !== '01') {
+    return ''
+  }
+
+  return semPonto(
+    new Intl.DateTimeFormat(tag.value, { month: 'short', timeZone: 'UTC' }).format(
+      new Date(`${data}T12:00:00Z`),
+    ),
+  )
+}
+
+function dataLonga(data: ISODate): string {
+  return new Intl.DateTimeFormat(tag.value, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  }).format(new Date(`${data}T12:00:00Z`))
+}
+
+/** Quanto da casa já está vendido em cada noite: a barrinha embaixo do número, como na Agenda. */
+const cargaPorDia = computed(() =>
+  props.grade.porDia.map((dia) => ({
+    ...dia,
+    fracao: dia.operando > 0 ? Math.min(1, dia.ocupadas / dia.operando) : 0,
+  })),
+)
+
+function rotuloDoDia(indice: number): string {
+  const dia = cargaPorDia.value[indice]
+  const data = props.grade.dias[indice] ?? ''
+
+  if (!dia) {
+    return dataLonga(data)
+  }
+
+  return t('hotel.grade.tela.diaRotulo', {
+    dia: dataLonga(data),
+    ocupadas: dia.ocupadas,
+    total: dia.operando,
+  })
 }
 
 /**
  * O que cabe dentro da barra.
  *
- * Uma estadia de uma noite tem 35 px de largura, e "Bento" vira "B…" — que não é o nome de
- * ninguém. Abaixo de duas noites a barra mostra as iniciais, que ao menos identificam; o nome
- * inteiro continua no `title` e na tela da reserva.
+ * A coluna tem cerca de 45 px. Numa estadia de uma noite cabe o rosto e nada mais — o nome inteiro
+ * continua no rótulo da barra (leitor de tela e dica do ponteiro) e na tela da reserva. A partir
+ * de quatro noites, o acompanhante entra junto do nome.
  */
 function rotuloDaBarra(faixa: FaixaNaGrade): string {
   const noites = faixa.ate - faixa.de
 
   if (noites <= 1) {
-    return faixa.petIniciais
+    return ''
   }
 
   return faixa.acompanhanteNome && noites > 3
@@ -127,154 +190,201 @@ function rotuloDaBarra(faixa: FaixaNaGrade): string {
     : faixa.petNome
 }
 
-/** Primeiro dia de cada mês ganha o rótulo do mês — a grade atravessa a virada. */
-function inicioDeMes(data: ISODate, indice: number): string {
-  if (indice > 0 && data.slice(8, 10) !== '01') {
-    return ''
+function temAviso(faixa: FaixaNaGrade) {
+  return faixa.admissao !== 'ok' && faixa.admissao !== 'dispensado'
+}
+
+function descricaoDaBarra(faixa: FaixaNaGrade): string {
+  const base = t('hotel.grade.barraTitulo', {
+    pet: faixa.acompanhanteNome ? `${faixa.petNome} + ${faixa.acompanhanteNome}` : faixa.petNome,
+    tutor: faixa.tutorNome,
+    periodo: formato.periodo(faixa.entradaPrevista, faixa.saidaPrevista),
+  })
+
+  const partes = [base, formato.statusDaReserva(faixa.status)]
+
+  if (temAviso(faixa)) {
+    partes.push(formato.situacaoDaExigencia(faixa.admissao))
   }
 
-  return new Intl.DateTimeFormat('pt-BR', { month: 'short', timeZone: 'UTC' })
-    .format(new Date(`${data}T12:00:00Z`))
-    .replace('.', '')
+  return partes.join(' · ')
 }
 </script>
 
 <template>
   <div class="grade">
-    <div class="grade__rolagem">
-      <table class="tabela">
-        <caption class="sr-only">
-          {{
-            t('hotel.grade.legendaTabela')
-          }}
-        </caption>
+    <div class="grade__folha ui-folha">
+      <div
+        class="grade__rolagem"
+        role="region"
+        tabindex="0"
+        :aria-label="t('hotel.grade.legendaTabela')"
+      >
+        <table class="tabela" :style="{ '--colunas': colunas }">
+          <caption class="sr-only">
+            {{
+              t('hotel.grade.legendaTabela')
+            }}
+          </caption>
 
-        <thead>
-          <tr>
-            <th scope="col" class="tabela__canto">{{ t('hotel.grade.acomodacao') }}</th>
+          <thead>
+            <tr>
+              <th scope="col" class="tabela__canto">
+                <!-- O canto leva a navegação do período, quando a tela a oferece: as setas ao lado dos dias. -->
+                <slot name="canto" />
+                <span class="tabela__canto-rotulo">{{ t('hotel.grade.acomodacao') }}</span>
+              </th>
 
-            <th
-              v-for="(dia, indice) in grade.dias"
-              :key="dia"
-              scope="col"
-              class="dia"
+              <th
+                v-for="(dia, indice) in grade.dias"
+                :key="dia"
+                scope="col"
+                class="dia"
+                :class="{
+                  'dia--fim-de-semana': ehFimDeSemana(dia),
+                  'dia--hoje': dia === hoje,
+                  'dia--procurado': naProcura(indice),
+                  'dia--cheio':
+                    (cargaPorDia[indice]?.operando ?? 0) > 0 && (cargaPorDia[indice]?.fracao ?? 0) >= 1,
+                }"
+                :aria-label="rotuloDoDia(indice)"
+              >
+                <span class="dia__mes" aria-hidden="true">{{ inicioDeMes(dia, indice) }}</span>
+                <span class="dia__semana" aria-hidden="true">{{ diaDaSemana(dia) }}</span>
+                <span class="dia__numero ui-num" aria-hidden="true">{{ numeroDoDia(dia) }}</span>
+                <span class="dia__carga" aria-hidden="true">
+                  <span :style="{ width: `${Math.round((cargaPorDia[indice]?.fracao ?? 0) * 100)}%` }" />
+                </span>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody v-for="grupo in grupos" :key="grupo.bloco.id">
+            <tr class="bloco">
+              <th scope="colgroup" :colspan="colunas + 1">
+                <span class="bloco__nome">
+                  {{ grupo.bloco.nome }}
+                  <span class="ui-contagem">{{ grupo.linhas.length }}</span>
+                </span>
+              </th>
+            </tr>
+
+            <tr
+              v-for="linha in grupo.linhas"
+              :key="linha.acomodacao.id"
+              class="linha"
               :class="{
-                'dia--fim-de-semana': ehFimDeSemana(dia),
-                'dia--hoje': dia === hoje,
-                'dia--procurado': recorte !== null && indice >= recorte.de && indice < recorte.ate,
+                'linha--parada': !linha.acomodacao.ativa,
+                'linha--serve': serveParaAProcura(linha),
+                'linha--apagada': recorte !== null && !serveParaAProcura(linha),
               }"
             >
-              <span class="dia__mes">{{ inicioDeMes(dia, indice) }}</span>
-              <span class="dia__semana">{{ diaDaSemana(dia) }}</span>
-              <span class="dia__numero clinic-value">{{ numeroDoDia(dia) }}</span>
-            </th>
-          </tr>
-        </thead>
-
-        <tbody v-for="grupo in grupos" :key="grupo.bloco.id">
-          <tr class="bloco">
-            <th scope="colgroup" :colspan="colunas + 1">{{ grupo.bloco.nome }}</th>
-          </tr>
-
-          <tr
-            v-for="linha in grupo.linhas"
-            :key="linha.acomodacao.id"
-            class="linha"
-            :class="{
-              'linha--parada': !linha.acomodacao.ativa,
-              'linha--serve': serveParaAProcura(linha),
-              'linha--apagada': recorte !== null && !serveParaAProcura(linha),
-            }"
-          >
-            <th scope="row" class="acom">
-              <span class="acom__nome">{{ linha.acomodacao.nome }}</span>
-              <span class="acom__tipo">
-                {{ hotelStore.tipoDeAcomodacao(linha.acomodacao.tipoId)?.nome }} ·
-                {{ formato.porte(linha.acomodacao.porteMaximo) }}
-              </span>
-            </th>
-
-            <!--
-              Uma célula por noite, e as barras por cima com `grid-column`. Célula por dia — em vez
-              de uma faixa absoluta — é o que mantém o clique no vazio significando "reservar a
-              partir deste dia", que é como se vende no telefone.
-            -->
-            <td :colspan="colunas" class="faixa">
-              <div class="faixa__grade" :style="{ '--colunas': colunas }">
-                <button
-                  v-for="(dia, indice) in grade.dias"
-                  :key="dia"
-                  type="button"
-                  class="celula"
-                  :class="{
-                    'celula--fim-de-semana': ehFimDeSemana(dia),
-                    'celula--hoje': dia === hoje,
-                    'celula--procurada':
-                      recorte !== null && indice >= recorte.de && indice < recorte.ate,
-                  }"
-                  :style="{ gridColumn: `${indice + 1} / span 1` }"
-                  :disabled="!linha.acomodacao.ativa"
-                  :aria-label="
-                    t('hotel.grade.reservarEm', {
-                      acomodacao: linha.acomodacao.nome,
-                      data: formato.data(dia),
-                    })
-                  "
-                  @click="emit('reservar', { acomodacaoId: linha.acomodacao.id, dia })"
-                />
-
-                <button
-                  v-for="faixa in linha.faixas"
-                  :key="faixa.reservaId"
-                  type="button"
-                  class="barra"
-                  :class="[
-                    `barra--${faixa.status}`,
-                    {
-                      'barra--entra-antes': faixa.entraAntes,
-                      'barra--sai-depois': faixa.saiDepois,
-                      'barra--atencao': faixa.admissao !== 'ok' && faixa.admissao !== 'dispensado',
-                    },
-                  ]"
-                  :style="{ gridColumn: `${faixa.de + 1} / ${faixa.ate + 1}` }"
-                  :title="
-                    t('hotel.grade.barraTitulo', {
-                      pet: faixa.petNome,
-                      tutor: faixa.tutorNome,
-                      periodo: formato.periodo(faixa.entradaPrevista, faixa.saidaPrevista),
-                    })
-                  "
-                  @click="emit('abrirReserva', faixa.reservaId)"
-                >
-                  <i
-                    v-if="faixa.admissao !== 'ok' && faixa.admissao !== 'dispensado'"
-                    class="ph ph-warning"
-                    aria-hidden="true"
-                  />
-                  <PetAvatar
-                    v-if="faixa.ate - faixa.de > 1"
-                    :nome="faixa.petNome"
-                    :iniciais="faixa.petIniciais"
-                    :especie="faixa.petEspecie"
-                    :foto-url="faixa.petFotoUrl"
-                    tamanho="xs"
-                  />
-                  <span class="barra__nome">{{ rotuloDaBarra(faixa) }}</span>
-                </button>
-
-                <!-- Fora de operação: hachura por cima da linha inteira, sem esconder o nome. -->
-                <span
-                  v-if="!linha.acomodacao.ativa"
-                  class="parada"
-                  :style="{ gridColumn: `1 / ${colunas + 1}` }"
-                >
-                  {{ formato.motivoInativa(linha.acomodacao.motivoInativa ?? 'outro') }}
+              <th scope="row" class="acom">
+                <span class="acom__texto">
+                  <span class="acom__nome">{{ linha.acomodacao.nome }}</span>
+                  <span class="acom__tipo">
+                    {{ hotelStore.tipoDeAcomodacao(linha.acomodacao.tipoId)?.nome }} ·
+                    {{ formato.porte(linha.acomodacao.porteMaximo) }}
+                  </span>
                 </span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                <i
+                  v-if="serveParaAProcura(linha)"
+                  class="ph ph-check-circle acom__serve"
+                  :title="t('hotel.grade.tela.serve')"
+                  :aria-label="t('hotel.grade.tela.serve')"
+                />
+              </th>
+
+              <!--
+                Uma célula por noite, e as barras por cima com `grid-column`. Célula por dia — em vez
+                de uma faixa absoluta — é o que mantém o clique no vazio significando "reservar a
+                partir deste dia", que é como se vende no telefone.
+              -->
+              <td :colspan="colunas" class="faixa">
+                <div class="faixa__grade">
+                  <button
+                    v-for="(dia, indice) in grade.dias"
+                    :key="dia"
+                    type="button"
+                    class="celula"
+                    :class="{
+                      'celula--fim-de-semana': ehFimDeSemana(dia),
+                      'celula--hoje': dia === hoje,
+                      'celula--procurada': naProcura(indice),
+                    }"
+                    :style="{ gridColumn: `${indice + 1} / span 1` }"
+                    :disabled="!linha.acomodacao.ativa"
+                    :title="
+                      linha.acomodacao.ativa
+                        ? t('hotel.grade.reservarEm', {
+                            acomodacao: linha.acomodacao.nome,
+                            data: formato.data(dia),
+                          })
+                        : undefined
+                    "
+                    :aria-label="
+                      t('hotel.grade.reservarEm', {
+                        acomodacao: linha.acomodacao.nome,
+                        data: formato.data(dia),
+                      })
+                    "
+                    @click="emit('reservar', { acomodacaoId: linha.acomodacao.id, dia })"
+                  >
+                    <i class="ph ph-plus celula__mais" aria-hidden="true" />
+                  </button>
+
+                  <button
+                    v-for="faixa in linha.faixas"
+                    :key="faixa.reservaId"
+                    type="button"
+                    class="barra"
+                    :class="[
+                      `barra--${faixa.status}`,
+                      {
+                        'barra--curta': faixa.ate - faixa.de <= 1,
+                        'barra--entra-antes': faixa.entraAntes,
+                        'barra--sai-depois': faixa.saiDepois,
+                        'barra--atencao': temAviso(faixa),
+                      },
+                    ]"
+                    :style="{ gridColumn: `${faixa.de + 1} / ${faixa.ate + 1}` }"
+                    :title="descricaoDaBarra(faixa)"
+                    @click="emit('abrirReserva', faixa.reservaId)"
+                  >
+                    <PetAvatar
+                      class="barra__rosto"
+                      :nome="faixa.petNome"
+                      :iniciais="faixa.petIniciais"
+                      :especie="faixa.petEspecie"
+                      :foto-url="faixa.petFotoUrl"
+                      tamanho="sm"
+                    />
+                    <span v-if="rotuloDaBarra(faixa)" class="barra__nome" aria-hidden="true">
+                      {{ rotuloDaBarra(faixa) }}
+                    </span>
+                    <span class="sr-only">{{ descricaoDaBarra(faixa) }}</span>
+                    <i
+                      v-if="temAviso(faixa)"
+                      class="ph ph-warning barra__aviso"
+                      aria-hidden="true"
+                    />
+                  </button>
+
+                  <!-- Fora de operação: hachura por cima da linha inteira, sem esconder o nome. -->
+                  <span
+                    v-if="!linha.acomodacao.ativa"
+                    class="parada"
+                    :style="{ gridColumn: `1 / ${colunas + 1}` }"
+                  >
+                    <i class="ph ph-wrench" aria-hidden="true" />
+                    {{ formato.motivoInativa(linha.acomodacao.motivoInativa ?? 'outro') }}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!--
@@ -283,34 +393,36 @@ function inicioDeMes(data: ISODate, indice: number): string {
     -->
     <ul class="legenda">
       <li>
-        <span class="amostra amostra--livre" aria-hidden="true" />{{
-          t('hotel.grade.legenda.livre')
-        }}
+        <span class="amostra amostra--livre" aria-hidden="true"><i class="ph ph-plus" /></span>
+        {{ t('hotel.grade.legenda.livre') }}
       </li>
       <li>
-        <span class="amostra amostra--hospedado" aria-hidden="true" />{{
-          t('hotel.grade.legenda.hospedado')
-        }}
+        <span class="amostra amostra--hospedado" aria-hidden="true" />
+        {{ t('hotel.grade.legenda.hospedado') }}
       </li>
       <li>
-        <span class="amostra amostra--confirmada" aria-hidden="true" />{{
-          t('hotel.grade.legenda.confirmada')
-        }}
+        <span class="amostra amostra--confirmada" aria-hidden="true" />
+        {{ t('hotel.grade.legenda.confirmada') }}
       </li>
       <li>
-        <span class="amostra amostra--pendente" aria-hidden="true" />{{
-          t('hotel.grade.legenda.pendente')
-        }}
+        <span class="amostra amostra--pendente" aria-hidden="true" />
+        {{ t('hotel.grade.legenda.pendente') }}
       </li>
       <li>
-        <span class="amostra amostra--atencao" aria-hidden="true" />{{
-          t('hotel.grade.legenda.atencao')
-        }}
+        <span class="amostra amostra--atencao" aria-hidden="true"><i class="ph ph-warning" /></span>
+        {{ t('hotel.grade.legenda.atencao') }}
       </li>
       <li>
-        <span class="amostra amostra--parada" aria-hidden="true" />{{
-          t('hotel.grade.legenda.parada')
-        }}
+        <span class="amostra amostra--parada" aria-hidden="true" />
+        {{ t('hotel.grade.legenda.parada') }}
+      </li>
+      <li>
+        <span class="amostra amostra--hoje" aria-hidden="true" />
+        {{ t('hotel.grade.tela.hoje') }}
+      </li>
+      <li class="legenda__livres">
+        <i class="ph ph-sparkle" aria-hidden="true" />
+        {{ t('hotel.mapa.semNenhumaReserva', { total: grade.totalmenteLivres }, grade.totalmenteLivres) }}
       </li>
     </ul>
   </div>
@@ -318,20 +430,38 @@ function inicioDeMes(data: ISODate, indice: number): string {
 
 <style scoped>
 .grade {
+  --grade-acom: 11.5rem;
+  --grade-dia: 2.75rem;
+  --grade-linha: 48px;
+
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 12px;
 }
 
+.grade__folha {
+  overflow: hidden;
+}
+
+/*
+ * A grade rola por dentro, nos dois sentidos: os dias ficam presos em cima e as acomodações à
+ * esquerda enquanto se percorre a casa. A altura é a que sobra da janela, como na Agenda.
+ */
 .grade__rolagem {
-  overflow-x: auto;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
+  max-height: max(26rem, calc(100dvh - 24.5rem));
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.grade__rolagem:focus-visible {
+  outline: 2px solid var(--pj-lugar);
+  outline-offset: -2px;
 }
 
 .tabela {
   width: 100%;
-  border-collapse: collapse;
+  min-width: calc(var(--grade-acom) + var(--colunas) * var(--grade-dia));
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: fixed;
 }
 
@@ -345,290 +475,407 @@ function inicioDeMes(data: ISODate, indice: number): string {
   white-space: nowrap;
 }
 
-/* ------------------------------------------------------------------ cabeçalho de dias */
+/* ------------------------------------------------------------------ a fita dos dias */
 
-.tabela__canto {
+.tabela__canto-rotulo {
+  display: block;
+}
+
+thead th {
   position: sticky;
   z-index: 3;
-  width: 11rem;
-  min-width: 11rem;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-bottom: 1px solid var(--clinic-line);
-  background: var(--clinic-surface);
-  color: var(--clinic-faint);
-  font-size: 0.75rem;
-  font-weight: 600;
+  top: 0;
+  background: var(--superficie);
+}
+
+.tabela__canto {
+  z-index: 5;
+  width: var(--grade-acom);
+  padding: 6px 10px 10px 16px;
+  border-bottom: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
   inset-inline-start: 0;
   text-align: start;
+  vertical-align: bottom;
 }
 
 .dia {
-  min-width: 2.35rem;
-  padding: 0.25rem 0;
-  border-bottom: 1px solid var(--clinic-line);
-  border-inline-start: 1px solid var(--clinic-line-soft);
-  background: var(--clinic-surface);
-  font-weight: 600;
-  line-height: 1.1;
+  padding: 8px 0 9px;
+  border-bottom: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  vertical-align: bottom;
 }
 
 .dia--fim-de-semana {
-  background: var(--clinic-surface-soft);
-}
-
-.dia--procurado {
-  background: var(--clinic-accent-soft);
-  box-shadow: inset 0 -3px 0 var(--clinic-accent-deep);
-}
-
-.dia--hoje {
-  box-shadow: inset 0 -2px 0 var(--clinic-accent-strong);
+  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
 }
 
 .dia__mes,
 .dia__semana,
 .dia__numero {
   display: block;
-  text-align: center;
 }
 
 .dia__mes {
-  height: 0.8rem;
-  color: var(--clinic-accent-strong);
-  font-size: 0.58rem;
-  font-weight: 800;
-  text-transform: uppercase;
+  height: 15px;
+  color: var(--pj-lugar-tinta);
+  font-size: 11.5px;
+  font-weight: 650;
+  white-space: nowrap;
 }
 
 .dia__semana {
-  color: var(--clinic-faint);
-  font-size: 0.58rem;
-  text-transform: lowercase;
+  font-size: 11.5px;
 }
 
 .dia__numero {
-  font-size: 0.78rem;
-  font-weight: 750;
+  margin-top: 1px;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
 }
 
-/* ------------------------------------------------------------------ linhas */
+/* A barrinha de carga: quanto da casa já está vendido naquela noite. */
+.dia__carga {
+  display: block;
+  width: 24px;
+  height: 4px;
+  margin: 5px auto 0;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--superficie-3);
+}
+
+.dia__carga span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--hotel);
+}
+
+/* Noite lotada: a barrinha cheia passa para o âmbar — "aqui não cabe mais ninguém". */
+.dia--cheio .dia__carga span {
+  background: var(--atencao);
+}
+
+/* Hoje: o ponto e o número na cor da casa, como o dia de hoje na semana da Agenda. */
+.dia--hoje {
+  background: color-mix(in oklab, var(--hotel-fundo) 75%, var(--superficie));
+}
+
+.dia--hoje .dia__semana,
+.dia--hoje .dia__numero {
+  color: var(--hotel-tinta);
+  font-weight: 700;
+}
+
+.dia--hoje .dia__semana::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-inline-end: 3px;
+  border-radius: 50%;
+  background: var(--hotel);
+  content: '';
+  vertical-align: 1px;
+}
+
+/* O período procurado: um traço na base dos dias, na tinta da ação. */
+.dia--procurado {
+  box-shadow: inset 0 -3px 0 var(--musgo);
+}
+
+/* ------------------------------------------------------------------ blocos e acomodações */
 
 .bloco th {
-  position: sticky;
-  z-index: 2;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-block: 1px solid var(--clinic-line-soft);
-  background: var(--clinic-surface-sunken);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
-  inset-inline-start: 0;
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  border-bottom: 1px solid var(--linha);
+  background: var(--superficie-2);
   text-align: start;
+}
+
+/* O nome do bloco fica preso à esquerda mesmo com a grade rolada para o fim do mês. */
+.bloco__nome {
+  position: sticky;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 16px;
+  color: var(--tinta);
+  font-size: 13px;
+  font-weight: 600;
+  inset-inline-start: 0;
+}
+
+.bloco .ui-contagem {
+  height: 20px;
+  min-width: 22px;
+  background: var(--superficie);
+  font-size: 11.5px;
 }
 
 .acom {
   position: sticky;
   z-index: 2;
-  display: table-cell;
-  padding: 0.3rem var(--clinic-space-3);
-  border-bottom: 1px solid var(--clinic-line-soft);
-  background: var(--clinic-surface);
+  height: var(--grade-linha);
+  padding: 0 10px 0 16px;
+  border-bottom: 1px solid var(--linha);
+  border-inline-end: 1px solid var(--linha);
+  background: var(--superficie);
+  font-weight: 400;
   inset-inline-start: 0;
   text-align: start;
 }
 
+.acom__texto {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
 .acom__nome {
-  display: block;
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  overflow: hidden;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .acom__tipo {
-  display: block;
-  color: var(--clinic-faint);
-  font-size: 0.62rem;
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acom > .acom__texto {
+  display: inline-grid;
+  max-width: calc(100% - 22px);
+  vertical-align: middle;
+}
+
+.acom__serve {
+  margin-inline-start: 4px;
+  color: var(--ok-tinta);
+  font-size: 17px;
+  vertical-align: middle;
 }
 
 .linha--parada .acom__nome {
-  color: var(--clinic-faint);
+  color: var(--tinta-2);
 }
 
 /*
  * Apagar, e não esconder: quando há uma procura ativa, as linhas que não servem continuam
- * legíveis — some o peso, não a informação. Esconder faria a recepção achar que a casa encolheu.
- *
- * ## Por que dessaturar, e não baixar a opacidade
- *
- * A versão anterior usava `opacity: 0.38`, e o resultado contrariava o próprio parágrafo acima: a
- * opacidade atravessa tudo, inclusive o nome do hóspede dentro da barra, e a 0.38 o nome sumia no
- * fundo. Quem procurava "tem baia grande livre?" perdia de vista **quem estava nas outras baias**
- * — que é exatamente a informação que se usa para negociar uma troca.
- *
- * Dessaturar separa as duas coisas. A **cor** é o que diz "esta linha entrou na sua busca", então
- * é a cor que precisa sumir; a **luminância** é o que sustenta a leitura do texto, e ela fica.
- * Perto do cinza, a linha deixa de competir por atenção sem deixar de ser legível.
+ * inteiras — só o nome da acomodação perde peso. As barras ficam com a cor delas: quem procurava
+ * "tem baia grande livre?" precisa ler quem está nas outras baias, que é exatamente a informação
+ * que se usa para negociar uma troca. O que acende é a linha que serve: o nome no verde de "dá",
+ * com o visto, e as noites procuradas tingidas.
  */
-.linha--apagada .acom,
-.linha--apagada .faixa {
-  filter: saturate(0.18) opacity(0.78);
+.linha--apagada .acom__texto {
+  opacity: 0.62;
 }
 
-/*
- * Apontar devolve a linha inteira. Procurar acomodação é justamente o momento em que se precisa
- * ler quem já está nas que não servem, e obrigar a limpar o filtro para isso é obrigar a perder o
- * resultado da busca para consultar o que está do lado dele.
- */
-.linha--apagada:hover .acom,
-.linha--apagada:hover .faixa,
-.linha--apagada:focus-within .acom,
-.linha--apagada:focus-within .faixa {
-  filter: none;
+.linha--apagada:hover .acom__texto,
+.linha--apagada:focus-within .acom__texto {
+  opacity: 1;
 }
 
-/*
- * A acomodação que serve para a busca ganha o fundo verde-claro de "escolhido", na célula do nome.
- * Era uma faixa de 3 px na borda esquerda — o acento lateral que o design da casa recusa —, e as
- * que não servem já saem apagadas: o contraste entre as duas é o que se lê.
- */
+/* A acomodação que serve para a busca: o nome no verde de "dá", com o visto ao lado. */
 .linha--serve .acom {
-  background: var(--clinic-accent-tint);
+  background: color-mix(in oklab, var(--ok-fundo) 60%, var(--superficie));
 }
 
 .faixa {
   padding: 0;
-  border-bottom: 1px solid var(--clinic-line-soft);
+  border-bottom: 1px solid var(--linha);
 }
 
 .faixa__grade {
   display: grid;
-  height: 2.1rem;
-  grid-template-columns: repeat(var(--colunas), minmax(2.35rem, 1fr));
+  height: var(--grade-linha);
+  grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
   grid-template-rows: 1fr;
 }
 
-/* ------------------------------------------------------------------ células e barras */
+/* ------------------------------------------------------------------ células livres */
 
 .celula {
+  display: grid;
+  place-items: center;
   grid-row: 1;
+  padding: 0;
   border: 0;
-  border-inline-start: 1px solid var(--clinic-line-soft);
+  border-inline-start: 1px solid color-mix(in oklab, var(--linha) 70%, transparent);
   background: transparent;
-  cursor: cell;
+  color: var(--hotel-tinta);
+  cursor: pointer;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .celula--fim-de-semana {
-  background: color-mix(in srgb, var(--clinic-surface-soft) 70%, transparent);
+  background: color-mix(in oklab, var(--superficie-2) 70%, transparent);
 }
 
-.celula--procurada {
-  background: color-mix(in srgb, var(--clinic-accent-soft) 85%, transparent);
+.linha--serve .celula--procurada {
+  background: color-mix(in oklab, var(--ok-fundo) 85%, transparent);
 }
 
+/* Hoje: a coluna tingida de lavanda e a agulha na borda, atravessando a casa inteira. */
 .celula--hoje {
-  box-shadow: inset 1px 0 0 var(--clinic-accent-strong);
+  background: color-mix(in oklab, var(--hotel-fundo) 60%, transparent);
+  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--hotel) 70%, transparent);
+}
+
+[dir='rtl'] .celula--hoje {
+  box-shadow: inset -2px 0 0 color-mix(in oklab, var(--hotel) 70%, transparent);
+}
+
+.celula__mais {
+  font-size: 16px;
+  opacity: 0;
+  transition: opacity var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+/* O vazio convida: o ponteiro sobre ele mostra o "+", e o clique começa a reserva ali. */
+.celula:not(:disabled):hover,
+.celula:not(:disabled):focus-visible {
+  background: var(--hotel-fundo);
+}
+
+.celula:not(:disabled):hover .celula__mais,
+.celula:not(:disabled):focus-visible .celula__mais {
+  opacity: 1;
+}
+
+.celula:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--hotel);
+  outline-offset: -2px;
 }
 
 .celula:disabled {
   cursor: default;
 }
 
-.celula:not(:disabled):hover {
-  background: var(--clinic-accent-tint);
-  box-shadow: inset 0 0 0 1px var(--clinic-accent-soft);
-}
+/* ------------------------------------------------------------------ barras */
 
 .barra {
+  position: relative;
   z-index: 1;
   display: flex;
+  min-width: 0;
   overflow: hidden;
   align-items: center;
-  margin: 0.22rem 1px;
-  padding: 0 0.4rem;
-  border: 1px solid transparent;
-  border-radius: 0.35rem;
-  gap: 0.25rem;
+  gap: 7px;
+  margin: 7px 2px;
+  padding: 0 8px 0 3px;
   grid-row: 1;
+  border: 1px solid transparent;
+  border-radius: 999px;
   cursor: pointer;
   font: inherit;
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
   text-align: start;
   white-space: nowrap;
   /*
-   * O anel já nasce aqui, transparente. Declará-lo só no `:hover` faria a largura ir de zero a dois
-   * — a cor não teria de onde transicionar, e o realce apareceria de estalo. Reservado desde o
-   * início, o hover troca apenas a cor, que é o que `transition` sabe animar.
+   * O anel já nasce aqui, transparente: declarado só no hover, a largura iria de zero a dois e a
+   * cor não teria de onde transicionar.
    */
   outline: 2px solid transparent;
   outline-offset: 1px;
-  transition: outline-color 150ms ease-out;
+  transition: outline-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .barra {
-    transition: none;
-  }
+.barra:hover,
+.barra:focus-visible {
+  z-index: 2;
+  outline-color: var(--hotel);
+}
+
+.barra__rosto {
+  flex: none;
 }
 
 .barra__nome {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/*
- * O realce é um anel, e não um clareamento.
- *
- * O hover anterior era `brightness(0.94)`, que funciona num fundo cheio e desaparece nos outros
- * dois: a barra `--pendente` é quase branca com contorno tracejado, e escurecê-la 6% não produz
- * diferença que alguém perceba. Um anel lê igual nas três variantes, porque não depende da cor
- * que a barra já tem.
- *
- * `outline`, e não `box-shadow`, porque `--atencao` usa `box-shadow: inset` para o contorno âmbar:
- * declarar sombra aqui apagaria o aviso justo na barra em que ele mais importa. E `z-index` sobe
- * porque as barras se encostam — sem isso o anel fica por baixo da vizinha.
- */
-.barra:hover,
-.barra:focus-visible {
-  z-index: 2;
-  outline-color: var(--clinic-accent-strong);
+/* Uma noite só: o rosto centrado, e o nome no rótulo. */
+.barra--curta {
+  justify-content: center;
+  padding: 0;
 }
 
-/* Quem está dentro da casa: cor cheia. Quem vem chegando: mais leve. Quem não pagou: contorno. */
+.barra--curta .barra__aviso {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 15px;
+  height: 15px;
+  font-size: 10px;
+}
+
+/* Quem está dentro da casa: lavanda cheia. Quem vem chegando: tingido. Quem não pagou: tracejado. */
 .barra--hospedado {
-  background: var(--clinic-accent-deep);
-  color: var(--clinic-on-accent);
+  background: var(--hotel);
+  color: var(--superficie);
 }
 
 .barra--confirmada {
-  background: var(--clinic-accent);
-  color: var(--clinic-heat-ink);
+  border-color: color-mix(in oklab, var(--hotel) 45%, transparent);
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
 }
 
 .barra--pendente {
-  border-color: var(--clinic-accent-deep);
-  border-style: dashed;
-  background: var(--clinic-surface);
-  color: var(--clinic-accent-strong);
+  border: 1.5px dashed var(--hotel);
+  background: var(--superficie);
+  color: var(--hotel-tinta);
 }
 
-.barra--atencao {
-  box-shadow: inset 0 0 0 2px var(--clinic-attention-text);
+.barra--encerrada,
+.barra--cancelada,
+.barra--nao-compareceu {
+  background: var(--superficie-3);
+  color: var(--tinta-2);
 }
 
-.barra--atencao i {
-  color: var(--clinic-attention-text);
-  font-size: 0.6rem;
+/* A documentação pendente: um selinho âmbar na ponta, legível sobre qualquer das três barras. */
+.barra__aviso {
+  display: grid;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-inline-start: auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 12px;
 }
 
-.barra--hospedado.barra--atencao i {
-  color: var(--clinic-attention-bg);
-}
-
-/* Seta na ponta: a estadia continua fora do intervalo que está à vista. */
+/* A estadia continua fora do intervalo à vista: a ponta fica reta, colada na borda. */
 .barra--entra-antes {
   margin-inline-start: 0;
   border-start-start-radius: 0;
   border-end-start-radius: 0;
+  padding-inline-start: 6px;
 }
 
 .barra--sai-depois {
@@ -642,18 +889,19 @@ function inicioDeMes(data: ISODate, indice: number): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0.22rem 1px;
-  border-radius: 0.35rem;
+  gap: 6px;
+  margin: 7px 2px;
+  border-radius: 10px;
   background: repeating-linear-gradient(
-    45deg,
-    var(--clinic-surface-sunken),
-    var(--clinic-surface-sunken) 4px,
-    var(--clinic-line-soft) 4px,
-    var(--clinic-line-soft) 8px
+    -45deg,
+    var(--superficie-2),
+    var(--superficie-2) 6px,
+    var(--superficie-3) 6px,
+    var(--superficie-3) 12px
   );
-  color: var(--clinic-muted);
-  font-size: 0.62rem;
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
   grid-row: 1;
   pointer-events: none;
 }
@@ -663,58 +911,105 @@ function inicioDeMes(data: ISODate, indice: number): string {
 .legenda {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clinic-space-3);
+  gap: 8px 18px;
   margin: 0;
-  padding: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  padding: 0 4px;
+  color: var(--tinta-2);
+  font-size: 13px;
   list-style: none;
 }
 
 .legenda li {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 7px;
+}
+
+/* O que não tem reserva nenhuma no período à vista: a vaga mais fácil de vender, na ponta. */
+.legenda__livres {
+  margin-inline-start: auto;
+  color: var(--tinta);
+}
+
+.legenda__livres i {
+  color: var(--pj-lugar-tinta);
 }
 
 .amostra {
-  width: 1.1rem;
-  height: 0.7rem;
+  display: inline-grid;
+  width: 26px;
+  height: 14px;
+  place-items: center;
   border: 1px solid transparent;
-  border-radius: 0.25rem;
+  border-radius: 999px;
+  font-size: 10px;
 }
 
 .amostra--livre {
-  border-color: var(--clinic-line);
-  background: var(--clinic-surface);
+  border-color: var(--linha);
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
 }
 
 .amostra--hospedado {
-  background: var(--clinic-accent-deep);
+  background: var(--hotel);
 }
 
 .amostra--confirmada {
-  background: var(--clinic-accent);
+  border-color: color-mix(in oklab, var(--hotel) 45%, transparent);
+  background: var(--hotel-fundo);
 }
 
 .amostra--pendente {
-  border-color: var(--clinic-accent-deep);
-  border-style: dashed;
-  background: var(--clinic-surface);
+  border: 1.5px dashed var(--hotel);
+  background: var(--superficie);
 }
 
 .amostra--atencao {
-  background: var(--clinic-accent);
-  box-shadow: inset 0 0 0 2px var(--clinic-attention-text);
+  width: 16px;
+  height: 16px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .amostra--parada {
+  border-radius: 4px;
   background: repeating-linear-gradient(
-    45deg,
-    var(--clinic-surface-sunken),
-    var(--clinic-surface-sunken) 3px,
-    var(--clinic-line-soft) 3px,
-    var(--clinic-line-soft) 6px
+    -45deg,
+    var(--superficie-2),
+    var(--superficie-2) 3px,
+    var(--superficie-3) 3px,
+    var(--superficie-3) 6px
   );
+}
+
+.amostra--hoje {
+  width: 14px;
+  border-radius: 3px;
+  background: var(--hotel-fundo);
+  box-shadow: inset 2px 0 0 var(--hotel);
+}
+
+@media (max-width: 900px) {
+  .grade {
+    --grade-acom: 8.25rem;
+    --grade-dia: 2.6rem;
+  }
+
+  .acom {
+    padding-inline-start: 12px;
+  }
+
+  .tabela__canto {
+    padding-inline-start: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra,
+  .celula,
+  .celula__mais {
+    transition: none;
+  }
 }
 </style>

@@ -55,7 +55,9 @@ watch(
 const horarios = computed(() => lerHorarios(texto.value))
 
 const problemas = computed(() =>
-  props.item ? problemasDoItem({ ...props.item, horarios: horarios.value, ativo: ativo.value }) : [],
+  props.item
+    ? problemasDoItem({ ...props.item, horarios: horarios.value, ativo: ativo.value })
+    : [],
 )
 
 function aplicar() {
@@ -69,23 +71,32 @@ function aplicar() {
   <Dialog
     :visible="!!item"
     modal
-    :header="item ? t('hotel.rotinaPadrao.editarTitulo', { servico: formato.tarefaKind(item.kind) }) : ''"
-    :style="{ width: 'min(30rem, 94vw)' }"
+    :header="
+      item ? t('hotel.rotinaPadrao.editarTitulo', { servico: formato.tarefaKind(item.kind) }) : ''
+    "
+    :style="{ width: 'min(32rem, 96vw)' }"
     class="clinic-dialog hc-tema"
+    dismissable-mask
     @update:visible="emit('fechar')"
   >
     <div v-if="item" class="editor">
-      <label class="linha">
-        <ToggleSwitch v-model="ativo" />
-        <span class="linha__rotulo">
-          <IconeDeTarefa :kind="item.kind" class="linha__icone" />
-          {{ t('hotel.rotinaPadrao.ativo') }}
+      <label class="liga">
+        <span class="liga__icone" :class="{ 'liga__icone--off': !ativo }" aria-hidden="true">
+          <IconeDeTarefa :kind="item.kind" />
         </span>
+        <span class="liga__rotulo">{{ t('hotel.rotinaPadrao.ativo') }}</span>
+        <ToggleSwitch v-model="ativo" />
       </label>
 
       <div class="campo">
         <label :for="`${idCampo}-horarios`">{{ t('hotel.rotinaPadrao.campoHorarios') }}</label>
-        <InputText :id="`${idCampo}-horarios`" v-model="texto" autocomplete="off" />
+        <InputText
+          :id="`${idCampo}-horarios`"
+          v-model="texto"
+          class="campo__horarios"
+          autocomplete="off"
+          fluid
+        />
         <p class="campo__dica">{{ t('hotel.rotinaPadrao.campoHorariosDica') }}</p>
       </div>
 
@@ -93,8 +104,8 @@ function aplicar() {
         A leitura do que foi digitado, já ordenada e sem repetidos. É o que de fato vai ser
         gravado, e vê-lo antes de aplicar é o que faz o campo de texto ser seguro.
       -->
-      <ul v-if="horarios.length > 0" class="chips">
-        <li v-for="hora in horarios" :key="hora" class="chip clinic-value">{{ hora }}</li>
+      <ul v-if="horarios.length > 0" class="chips" :class="{ 'chips--off': !ativo }">
+        <li v-for="hora in horarios" :key="hora" class="chip ui-hora">{{ hora }}</li>
       </ul>
 
       <Message v-if="problemas.includes('sem-horario')" severity="warn" :closable="false">
@@ -108,13 +119,18 @@ function aplicar() {
 
     <template #footer>
       <Button
+        type="button"
         :label="t('hotel.rotinaPadrao.cancelar')"
         severity="secondary"
         text
-        size="small"
         @click="emit('fechar')"
       />
-      <Button :label="t('hotel.rotinaPadrao.aplicar')" size="small" @click="aplicar" />
+      <Button
+        type="button"
+        :label="t('hotel.rotinaPadrao.aplicar')"
+        icon="ph ph-check"
+        @click="aplicar"
+      />
     </template>
   </Dialog>
 </template>
@@ -122,45 +138,64 @@ function aplicar() {
 <style scoped>
 .editor {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 18px;
 }
 
-.linha {
+/* Ligar e desligar o serviço: uma linha inteira clicável, com o serviço na frente. */
+.liga {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-3);
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-controle);
   cursor: pointer;
 }
 
-.linha__rotulo {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--clinic-space-2);
-  font-size: var(--clinic-font-value);
-  font-weight: 700;
+.liga__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+  font-size: 14px;
 }
 
-.linha .linha__icone {
-  width: 1.05rem;
-  height: 1.05rem;
-  color: var(--clinic-accent-strong);
+.liga__icone--off {
+  background: var(--superficie-2);
+  color: var(--tinta-3);
+}
+
+.liga__rotulo {
+  flex: 1;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .campo {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 6px;
 }
 
 .campo label {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.campo__horarios {
+  font-family: var(--font-dados);
+  font-variant-numeric: tabular-nums;
 }
 
 .campo__dica {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 12.5px;
 }
 
 /* Os horários lidos, como pastilhas: é a confirmação visual do que o texto virou. */
@@ -169,16 +204,20 @@ function aplicar() {
   flex-wrap: wrap;
   margin: 0;
   padding: 0;
-  gap: var(--clinic-space-2);
+  gap: 6px;
   list-style: none;
 }
 
-.chip {
-  padding: 0.15rem var(--clinic-space-3);
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
+.chip.ui-hora {
+  padding: 4px 10px;
+  border-radius: 7px;
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+  font-size: 14px;
+}
+
+.chips--off .chip.ui-hora {
+  background: var(--superficie-2);
+  color: var(--tinta-3);
 }
 </style>

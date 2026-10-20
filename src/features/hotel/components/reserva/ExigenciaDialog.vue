@@ -125,7 +125,7 @@ function confirmar() {
           })
     "
     :style="{ width: 'min(34rem, 94vw)' }"
-    class="clinic-scope hc-tema"
+    class="clinic-scope"
     @update:visible="emit('fechar')"
   >
     <div v-if="alvo" class="exig">
@@ -133,7 +133,6 @@ function confirmar() {
         <div class="campo">
           <label :for="`${idCampo}-data`">{{ t('hotel.exigencias.apresentacao') }}</label>
           <DatePicker
-            panel-class="hc-tema"
             :input-id="`${idCampo}-data`"
             v-model="apresentadoEm"
             date-format="dd/mm/yy"
@@ -156,7 +155,8 @@ function confirmar() {
           A validade calculada, à vista, antes de salvar. Quem digita a data da aplicação não
           deveria precisar fazer a conta — e quando precisa, erra.
         -->
-        <p class="exig__validade">
+        <p class="exig__validade" aria-live="polite">
+          <i class="ph ph-calendar-check" aria-hidden="true" />
           <template v-if="validade">
             {{ t('hotel.exigencias.validadeCalculada', { data: formato.data(validade) }) }}
           </template>
@@ -223,26 +223,37 @@ function confirmar() {
 <style scoped>
 .exig {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 16px;
 }
 
 .campo {
   display: grid;
   /* Linhas no topo: sem isto, o campo ao lado de um mais alto desce e a fileira sai torta. */
   align-content: start;
-  gap: 0.25rem;
+  gap: 6px;
 }
 
 .campo label {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
+/* A validade calculada: o resultado da conta, em destaque, antes de salvar. */
 .exig__validade {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.exig__validade i {
+  font-size: 18px;
 }
 </style>

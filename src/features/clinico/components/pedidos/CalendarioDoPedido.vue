@@ -144,24 +144,24 @@ function classesDoDia(data: DiaDoSlot) {
  */
 .cal :deep(.cal__painel) {
   --p-datepicker-today-background: transparent;
-  --p-datepicker-today-color: var(--hc-marca-forte);
+  --p-datepicker-today-color: var(--musgo);
 
   width: 100%;
   min-width: 0;
-  padding: 0.35rem 0.25rem 0.5rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.9rem;
-  background: var(--hc-cartao);
+  padding: 6px 4px 8px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie);
   box-shadow: none;
 }
 
 .cal :deep(.p-datepicker-header) {
-  padding: 0.15rem 0.25rem 0.4rem;
-  border-bottom: 1px solid var(--hc-linha);
+  padding: 2px 4px 6px;
+  border-bottom: 1px solid var(--linha);
 }
 
 .cal :deep(.p-datepicker-title) {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .cal :deep(.p-datepicker-day-view) {
@@ -171,10 +171,10 @@ function classesDoDia(data: DiaDoSlot) {
 }
 
 .cal :deep(.p-datepicker-weekday) {
-  color: var(--hc-tinta-3);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  color: var(--tinta-2);
+  font-size: 12px;
+  font-weight: 550;
+  text-transform: none;
 }
 
 .cal :deep(.p-datepicker-day-cell) {
@@ -182,14 +182,15 @@ function classesDoDia(data: DiaDoSlot) {
 }
 
 .cal :deep(.p-datepicker-today) .cal__dia {
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .cal :deep(.p-datepicker-day) {
   width: 2.15rem;
   height: 2.15rem;
   margin-inline: auto;
-  font-size: 0.875rem;
+  font-family: var(--font-dados);
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -210,29 +211,29 @@ function classesDoDia(data: DiaDoSlot) {
   width: 0.3rem;
   height: 0.3rem;
   border-radius: 50%;
-  background: var(--hc-marca);
+  background: var(--musgo);
   transform: translateX(-50%);
 }
 
 .cal :deep(.p-datepicker-day-selected) .cal__ponto {
-  background: #fff;
+  background: var(--sobre-musgo);
 }
 
 .cal__dia--livre {
-  font-weight: 700;
+  font-weight: 650;
 }
 
 .cal__dia--cheio {
-  color: var(--hc-tinta-3);
+  color: var(--tinta-3);
 }
 
 .cal__dia--fechado {
-  color: var(--hc-tinta-3);
+  color: var(--tinta-3);
   text-decoration: line-through;
 }
 
 .cal__dia--janela {
-  background: var(--hc-marca-clara);
+  background: var(--musgo-fundo);
 }
 
 .cal :deep(.p-datepicker-day-selected) .cal__dia--janela {
@@ -241,7 +242,7 @@ function classesDoDia(data: DiaDoSlot) {
 
 /* O dia que o pedido trazia: um anel, para comparar com o que vai ser marcado. */
 .cal__dia--destaque {
-  box-shadow: inset 0 0 0 1.5px var(--hc-marca);
+  box-shadow: inset 0 0 0 1.5px var(--musgo);
 }
 
 .cal :deep(.p-datepicker-day-selected) .cal__dia--cheio,

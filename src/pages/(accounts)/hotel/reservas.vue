@@ -2,9 +2,15 @@
 /**
  * Reservas — a lista do que está vendido.
  *
- * A coluna que a tela existe para ter é a de **exigências**, e ela é ordenável: é por ela que a
- * recepção trabalha na véspera, varrendo a semana atrás do que vai dar problema no balcão. Sem a
- * coluna, essa varredura custa abrir uma reserva de cada vez.
+ * A pergunta desta aba é "o que está vendido, e o que vai dar trabalho". Por isso a lista abre no
+ * que está por vir, e cada linha diz de relance as três coisas que a recepção confere: **quando**
+ * (a entrada e a saída em destaque, e quanto falta para chegar), **o papel** (a documentação em
+ * selo com palavra) e **o dinheiro** (sinal pago, quitado ou sem sinal, e quanto falta receber).
+ *
+ * Em cima de tudo, quando existe, a **véspera travada**: quem chega nos próximos três dias e ainda
+ * não pode entrar. É a única coisa aqui que tem prazo — depois que o carro chega, a conversa sobre
+ * documento acontece no balcão, com o cliente na frente. A mesma marca de risco aparece na linha
+ * da tabela, para quem filtrou e rolou.
  *
  * A lista de espera vive no rodapé e não numa tela própria: ela só é consultada quando uma reserva
  * cai, e nesse momento quem está olhando já está aqui.
@@ -15,22 +21,24 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicFilterBar from '@/features/clinico/components/base/ClinicFilterBar.vue'
 import type { ColunaTabela } from '@/features/clinico/components/base/table-types'
 import HotelDevPanel from '@/features/hotel/components/base/HotelDevPanel.vue'
 import HotelTour from '@/features/hotel/components/base/HotelTour.vue'
 import type { PassoDoTour } from '@/features/hotel/components/base/tour-types'
-import HotelSelo from '@/features/hotel/components/base/HotelSelo.vue'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
-import { tomDaAdmissao, useHotelFormat } from '@/features/hotel/composables/useHotelFormat'
+import { useHotelFormat } from '@/features/hotel/composables/useHotelFormat'
 import type { ReservaNaLista } from '@/features/hotel/data/repositories'
-import { addDays } from '@/features/hotel/domain/hotel-time'
+import type { ISODate, Reserva, ReservaStatus, SituacaoDaExigencia } from '@/features/hotel/data/types'
+import { addDays, dataDe, horaDe } from '@/features/hotel/domain/hotel-time'
 import { hotelClock, useHotelStore } from '@/features/hotel/stores/hotel'
 import { useReservasStore } from '@/features/hotel/stores/reservas'
+import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const formato = useHotelFormat()
 const hotelStore = useHotelStore()
@@ -61,9 +69,11 @@ const opcoesDeHorizonte = computed(() => [
   { valor: 'todas' as const, rotulo: t('hotel.reservas.horizonteTodas') },
 ])
 
-onMounted(async () => {
+async function carregar() {
   await reservas.carregarLista(recorteDoHorizonte.value)
-})
+}
+
+onMounted(carregar)
 
 watch([() => hotelStore.revisao, horizonte], () => reservas.carregarLista(recorteDoHorizonte.value))
 
@@ -146,21 +156,21 @@ const linhas = computed(() => {
 const colunas = computed<ColunaTabela<ReservaNaLista>[]>(() => [
   {
     id: 'entrada',
-    rotulo: t('hotel.reservas.coluna.entrada'),
-    largura: 'minmax(8rem, 0.8fr)',
+    rotulo: t('hotel.reservas.tela.coluna.periodo'),
+    largura: 'minmax(9.5rem, 1fr)',
     ordenarPor: (linha) => linha.reserva.entradaPrevista,
     ordemInicial: 'asc',
   },
   {
     id: 'pet',
     rotulo: t('hotel.reservas.coluna.hospede'),
-    largura: 'minmax(10rem, 1.4fr)',
+    largura: 'minmax(11rem, 1.4fr)',
     ordenarPor: (linha) => linha.petNome,
   },
   {
     id: 'acomodacao',
     rotulo: t('hotel.reservas.coluna.acomodacao'),
-    largura: 'minmax(8rem, 1fr)',
+    largura: 'minmax(6.5rem, 0.75fr)',
     ocultarEmTelaEstreita: true,
   },
   {
@@ -169,17 +179,18 @@ const colunas = computed<ColunaTabela<ReservaNaLista>[]>(() => [
     largura: 'minmax(4rem, 0.4fr)',
     numerico: true,
     ordenarPor: (linha) => linha.reserva.diarias,
+    ocultarEmTelaEstreita: true,
   },
   {
     id: 'status',
     rotulo: t('hotel.reservas.coluna.status'),
-    largura: 'minmax(7rem, 0.7fr)',
+    largura: 'minmax(10rem, 0.9fr)',
     ordenarPor: (linha) => formato.statusDaReserva(linha.reserva.status),
   },
   {
     id: 'admissao',
     rotulo: t('hotel.reservas.coluna.admissao'),
-    largura: 'minmax(8rem, 0.8fr)',
+    largura: 'minmax(9rem, 0.9fr)',
     /* A ordem é a da urgência, não a alfabética: o que trava precisa subir. */
     ordenarPor: (linha) =>
       ['ausente', 'vencido', 'vence-durante', 'dispensado', 'ok'].indexOf(linha.admissao),
@@ -187,9 +198,8 @@ const colunas = computed<ColunaTabela<ReservaNaLista>[]>(() => [
   },
   {
     id: 'saldo',
-    rotulo: t('hotel.reservas.coluna.saldo'),
-    largura: 'minmax(7rem, 0.6fr)',
-    numerico: true,
+    rotulo: t('hotel.reservas.tela.coluna.pagamento'),
+    largura: 'minmax(8.5rem, 0.9fr)',
     ordenarPor: (linha) => linha.reserva.orcamento.saldoCentavos,
     ocultarEmTelaEstreita: true,
   },
@@ -215,6 +225,145 @@ const vespera = computed(() =>
     )
     .sort((um, outro) => um.diasAteEntrada - outro.diasAteEntrada),
 )
+
+const travadas = computed(() => new Set(vespera.value.map((linha) => linha.reserva.id)))
+
+// ------------------------------------------------------------------ a frase de cima
+
+const tag = computed(() => INTL_LOCALE[isLocale(locale.value) ? locale.value : DEFAULT_LOCALE])
+
+function semana(data: ISODate) {
+  return new Intl.DateTimeFormat(tag.value, { weekday: 'short', timeZone: 'UTC' }).format(
+    new Date(`${data}T12:00:00Z`),
+  )
+}
+
+const ativas: ReservaStatus[] = ['pendente', 'confirmada']
+
+const fraseDoResumo = computed(() => {
+  if (reservas.carregando && reservas.lista.length === 0) {
+    return ''
+  }
+
+  const total = reservas.lista.length
+  const fraseDoTotal =
+    horizonte.value === 'proximas'
+      ? t('hotel.reservas.tela.resumoTotal', { n: total }, total)
+      : t('hotel.reservas.tela.resumoTotalTodas', { n: total }, total)
+
+  const chegam = reservas.lista.filter(
+    (linha) =>
+      ativas.includes(linha.reserva.status) &&
+      linha.diasAteEntrada >= 0 &&
+      linha.diasAteEntrada < 7,
+  ).length
+
+  const fraseDeChegada =
+    chegam === 0
+      ? t('hotel.reservas.tela.resumoNinguemChega')
+      : t('hotel.reservas.tela.resumoChegam', { n: chegam }, chegam)
+
+  const semSinal = reservas.lista.filter(
+    (linha) => linha.reserva.status === 'pendente' && linha.reserva.pagoCentavos === 0,
+  ).length
+
+  return semSinal > 0
+    ? t('hotel.reservas.tela.resumo', {
+        total: fraseDoTotal,
+        chegam: fraseDeChegada,
+        semSinal: t('hotel.reservas.tela.resumoSemSinal', { n: semSinal }, semSinal),
+      })
+    : t('hotel.reservas.tela.resumoSemPendencia', { total: fraseDoTotal, chegam: fraseDeChegada })
+})
+
+// ------------------------------------------------------------------ selos
+
+type Tom = 'risco' | 'atencao' | 'ok' | 'lugar' | 'neutro' | 'contorno'
+
+const SELO_DO_STATUS: Record<ReservaStatus, { tom: Tom; icone: string }> = {
+  pendente: { tom: 'atencao', icone: 'ph-hourglass-medium' },
+  confirmada: { tom: 'lugar', icone: 'ph-check' },
+  hospedado: { tom: 'ok', icone: 'ph-house-line' },
+  encerrada: { tom: 'neutro', icone: 'ph-flag-checkered' },
+  cancelada: { tom: 'contorno', icone: 'ph-x' },
+  'nao-compareceu': { tom: 'contorno', icone: 'ph-user-minus' },
+}
+
+const SELO_DA_ADMISSAO: Record<SituacaoDaExigencia, { tom: Tom; icone: string }> = {
+  ausente: { tom: 'risco', icone: 'ph-file-x' },
+  vencido: { tom: 'risco', icone: 'ph-calendar-x' },
+  'vence-durante': { tom: 'atencao', icone: 'ph-clock-countdown' },
+  dispensado: { tom: 'neutro', icone: 'ph-seal-check' },
+  ok: { tom: 'ok', icone: 'ph-check-circle' },
+}
+
+/** O dinheiro em uma palavra: quitado, sinal pago, sem sinal — e quanto falta receber. */
+function pagamento(reserva: Reserva): { tom: Tom; icone: string; rotulo: string; falta: string } {
+  const saldo = reserva.orcamento.saldoCentavos
+  const encerradaSemEstadia = reserva.status === 'cancelada' || reserva.status === 'nao-compareceu'
+  const falta =
+    saldo > 0 && !encerradaSemEstadia
+      ? t('hotel.reservas.tela.aReceber', { valor: formato.moeda(saldo) })
+      : ''
+
+  if (saldo <= 0 && reserva.pagoCentavos > 0) {
+    return { tom: 'ok', icone: 'ph-check', rotulo: t('hotel.reservas.tela.pagamento.quitado'), falta }
+  }
+
+  if (reserva.pagoCentavos > 0) {
+    return {
+      tom: 'neutro',
+      icone: 'ph-coins',
+      rotulo: t('hotel.reservas.tela.pagamento.sinalPago'),
+      falta,
+    }
+  }
+
+  if (encerradaSemEstadia || saldo <= 0) {
+    return {
+      tom: 'contorno',
+      icone: 'ph-minus',
+      rotulo: t('hotel.reservas.tela.pagamento.semPagamento'),
+      falta,
+    }
+  }
+
+  return {
+    tom: 'atencao',
+    icone: 'ph-warning',
+    rotulo: t('hotel.reservas.tela.pagamento.semSinal'),
+    falta,
+  }
+}
+
+/** A segunda linha do período: quanto falta para chegar, ou as horas de entrada e de saída. */
+function detalheDoPeriodo(linha: ReservaNaLista) {
+  if (travadas.value.has(linha.reserva.id)) {
+    return {
+      texto:
+        linha.diasAteEntrada === 0
+          ? t('hotel.reservas.tela.travadaHoje')
+          : t('hotel.reservas.tela.travadaEm', { dias: linha.diasAteEntrada }, linha.diasAteEntrada),
+      tom: 'risco',
+    }
+  }
+
+  if (ativas.includes(linha.reserva.status) && linha.diasAteEntrada >= 0 && linha.diasAteEntrada <= 7) {
+    return {
+      texto:
+        linha.diasAteEntrada === 0
+          ? t('hotel.reservas.chegaHoje')
+          : t('hotel.reservas.chegaEm', { dias: linha.diasAteEntrada }, linha.diasAteEntrada),
+      tom: 'lugar',
+    }
+  }
+
+  return {
+    texto: `${horaDe(linha.reserva.entradaPrevista)} · ${horaDe(linha.reserva.saidaPrevista)}`,
+    tom: 'neutro',
+  }
+}
+
 /**
  * O tutorial desta tela, na ordem em que se lê a página.
  *
@@ -239,7 +388,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     texto: t('hotel.tour.reservas.horizonte.texto'),
   },
   {
-    alvo: '.clinic-table, .tabela',
+    alvo: '.lista .tabela',
     titulo: t('hotel.tour.reservas.tabela.titulo'),
     texto: t('hotel.tour.reservas.tabela.texto'),
   },
@@ -252,35 +401,160 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :title="t('hotel.reservas.titulo')"
-    :subtitle="t('hotel.reservas.subtitulo')"
-    :loading="reservas.carregando && reservas.lista.length === 0"
-    :error="reservas.erro ? t(reservas.erro) : ''"
-    :empty="vazio"
-    :empty-title="t('hotel.reservas.vazioTitulo')"
+  <UiPagina
+    class="tela-reservas"
+    :resumo="fraseDoResumo"
+    :carregando="reservas.carregando && reservas.lista.length === 0 && !reservas.erro"
+    :erro="reservas.erro ? t(reservas.erro) : ''"
+    :vazio="vazio && horizonte === 'todas'"
+    :vazio-titulo="t('hotel.reservas.vazioTitulo')"
+    :vazio-descricao="t('hotel.reservas.vazioDescricao')"
+    :vazio-acao="t('hotel.reservas.novaNoMapa')"
+    vazio-icone="ph ph-calendar-blank"
     tour
     @tour="tourAberto = true"
-    :empty-description="t('hotel.reservas.vazioDescricao')"
-    @retry="reservas.carregarLista()"
+    @tentar-de-novo="carregar"
+    @acao-do-vazio="router.push('/hotel/mapa')"
   >
-    <div class="reservas clinic-scope">
+    <template #acoes>
+      <Button
+        type="button"
+        icon="ph ph-calendar-plus"
+        :label="t('hotel.reservas.novaNoMapa')"
+        @click="router.push('/hotel/mapa')"
+      />
+    </template>
+
+    <div class="reservas">
       <!--
         A véspera abre a tela. É a única coisa aqui que tem prazo: depois que o carro chega, a
         conversa sobre documento acontece no balcão, com o cliente na frente.
       -->
-      <section v-if="vespera.length > 0" class="vespera">
-        <h2 class="vespera__titulo">
-          <i class="ph ph-warning" aria-hidden="true" />
-          {{ t('hotel.reservas.vesperaTitulo', { total: vespera.length }, vespera.length) }}
-        </h2>
-
-        <p class="vespera__lede">{{ t('hotel.reservas.vesperaLede') }}</p>
-
-        <ul class="vespera__lista">
+      <UiSecao
+        v-if="vespera.length > 0"
+        class="vespera"
+        :titulo="t('hotel.reservas.tela.vespera')"
+        :contagem="vespera.length"
+        :descricao="t('hotel.reservas.vesperaLede')"
+        icone="ph ph-lock-simple"
+      >
+        <ul class="ui-folha ui-lista vespera__lista">
           <li v-for="linha in vespera" :key="linha.reserva.id">
-            <RouterLink class="vespera__item" :to="`/hotel/reserva/${linha.reserva.id}`">
+            <RouterLink
+              class="ui-linha ui-marca ui-marca--risco vespera__linha"
+              :to="`/hotel/reserva/${linha.reserva.id}`"
+            >
+              <PetAvatar
+                :nome="linha.petNome"
+                :iniciais="linha.petIniciais"
+                :especie="linha.petEspecie"
+                :foto-url="linha.petFotoUrl"
+                tamanho="md"
+              />
+              <span class="ui-linha__texto">
+                <span class="ui-linha__titulo">{{ linha.petNome }}</span>
+                <span class="ui-linha__meta">
+                  {{ linha.tutorNome }} · {{ linha.acomodacaoNome }}
+                </span>
+              </span>
+              <span class="vespera__quando">
+                <strong class="ui-num">
+                  {{
+                    linha.diasAteEntrada === 0
+                      ? t('hotel.reservas.chegaHoje')
+                      : t('hotel.reservas.chegaEm', { dias: linha.diasAteEntrada }, linha.diasAteEntrada)
+                  }}
+                </strong>
+                <small class="ui-num">
+                  {{ semana(dataDe(linha.reserva.entradaPrevista)) }}
+                  {{ formato.quando(linha.reserva.entradaPrevista) }}
+                </small>
+              </span>
+              <span class="ui-linha__fim">
+                <span class="ui-selo ui-selo--risco">
+                  <i class="ph" :class="SELO_DA_ADMISSAO[linha.admissao].icone" aria-hidden="true" />
+                  {{ formato.situacaoDaExigencia(linha.admissao) }}
+                </span>
+                <span class="vespera__resolver">{{ t('hotel.reservas.tela.resolver') }}</span>
+                <i class="ph ph-caret-right ui-linha__seta" aria-hidden="true" />
+              </span>
+            </RouterLink>
+          </li>
+        </ul>
+      </UiSecao>
+
+      <section class="lista" :aria-label="t('hotel.reservas.titulo')">
+        <div class="lista__barra">
+          <div class="horizonte">
+            <span id="reservas-horizonte" class="horizonte__rotulo">
+              {{ t('hotel.reservas.horizonte') }}
+            </span>
+            <SelectButton
+              v-model="horizonte"
+              :options="opcoesDeHorizonte"
+              option-label="rotulo"
+              option-value="valor"
+              :allow-empty="false"
+              aria-labelledby="reservas-horizonte"
+            />
+          </div>
+
+          <ClinicFilterBar
+            v-model:busca="busca"
+            v-model:selecionados="selecionados"
+            class="lista__filtro"
+            :grupos="grupos"
+            :placeholder-busca="t('hotel.reservas.buscar')"
+            :resultado="linhas.length"
+          />
+        </div>
+
+        <ClinicDataTable
+          :colunas="colunas"
+          :linhas="linhas"
+          :chave="(linha: ReservaNaLista) => linha.reserva.id"
+          :rotulo="t('hotel.reservas.titulo')"
+          :vazio-titulo="
+            reservas.lista.length === 0
+              ? t('hotel.reservas.vazioTitulo')
+              : t('hotel.reservas.semResultadoTitulo')
+          "
+          :vazio-descricao="
+            reservas.lista.length === 0
+              ? t('hotel.reservas.tela.semProximas')
+              : t('hotel.reservas.semResultadoDescricao')
+          "
+          @ativar="(linha: ReservaNaLista) => router.push(`/hotel/reserva/${linha.reserva.id}`)"
+        >
+          <template #celula-entrada="{ linha }">
+            <!-- A véspera travada leva a marca de risco também aqui, para quem filtrou e rolou. -->
+            <span
+              v-if="travadas.has(linha.reserva.id)"
+              class="marca-travada"
+              aria-hidden="true"
+            />
+            <span class="periodo">
+              <span class="periodo__datas ui-num">
+                <strong>{{ formato.data(dataDe(linha.reserva.entradaPrevista)) }}</strong>
+                <i class="ph ph-arrow-right" aria-hidden="true" />
+                <span>{{ formato.data(dataDe(linha.reserva.saidaPrevista)) }}</span>
+              </span>
+              <small
+                class="periodo__detalhe ui-num"
+                :class="`periodo__detalhe--${detalheDoPeriodo(linha).tom}`"
+              >
+                <i
+                  v-if="detalheDoPeriodo(linha).tom === 'risco'"
+                  class="ph ph-lock-simple"
+                  aria-hidden="true"
+                />
+                {{ detalheDoPeriodo(linha).texto }}
+              </small>
+            </span>
+          </template>
+
+          <template #celula-pet="{ linha }">
+            <span class="hospede">
               <PetAvatar
                 :nome="linha.petNome"
                 :iniciais="linha.petIniciais"
@@ -288,332 +562,355 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 :foto-url="linha.petFotoUrl"
                 tamanho="sm"
               />
-              <strong>{{ linha.petNome }}</strong>
-              <span class="vespera__quando">
-                {{
-                  linha.diasAteEntrada === 0
-                    ? t('hotel.reservas.chegaHoje')
-                    : t(
-                        'hotel.reservas.chegaEm',
-                        { dias: linha.diasAteEntrada },
-                        linha.diasAteEntrada,
-                      )
-                }}
+              <span class="hospede__texto">
+                <strong>{{ linha.petNome }}</strong>
+                <small>
+                  {{ linha.tutorNome }}
+                  <!-- Pedida pelo responsável, no app ou no link: a origem à vista, como na agenda. -->
+                  <i
+                    v-if="linha.reserva.origem === 'app' || linha.reserva.origem === 'link'"
+                    class="ph hospede__origem"
+                    :class="linha.reserva.origem === 'app' ? 'ph-device-mobile' : 'ph-globe-simple'"
+                    :title="t(`hotel.origem.${linha.reserva.origem}`)"
+                    :aria-label="t(`hotel.origem.${linha.reserva.origem}`)"
+                  />
+                </small>
               </span>
-              <HotelSelo
-                :rotulo="formato.situacaoDaExigencia(linha.admissao)"
-                :tom="tomDaAdmissao(linha.admissao)"
-              />
-              <i class="ph ph-arrow-right" aria-hidden="true" />
-            </RouterLink>
-          </li>
-        </ul>
-      </section>
+            </span>
+          </template>
 
-      <div class="horizonte">
-        <span class="horizonte__rotulo">{{ t('hotel.reservas.horizonte') }}</span>
-        <SelectButton
-          v-model="horizonte"
-          :options="opcoesDeHorizonte"
-          option-label="rotulo"
-          option-value="valor"
-          :allow-empty="false"
-          size="small"
-          :aria-label="t('hotel.reservas.horizonte')"
-        />
-      </div>
+          <template #celula-acomodacao="{ linha }">
+            <span class="acomodacao">{{ linha.acomodacaoNome }}</span>
+          </template>
 
-      <ClinicFilterBar
-        v-model:busca="busca"
-        v-model:selecionados="selecionados"
-        :grupos="grupos"
-        :placeholder-busca="t('hotel.reservas.buscar')"
-        :resultado="linhas.length"
-      />
+          <template #celula-noites="{ linha }">
+            <span class="ui-num">{{ linha.reserva.diarias }}</span>
+          </template>
 
-      <ClinicDataTable
-        :colunas="colunas"
-        :linhas="linhas"
-        :chave="(linha: ReservaNaLista) => linha.reserva.id"
-        :rotulo="t('hotel.reservas.titulo')"
-        :vazio-titulo="t('hotel.reservas.semResultadoTitulo')"
-        :vazio-descricao="t('hotel.reservas.semResultadoDescricao')"
-        @ativar="(linha: ReservaNaLista) => router.push(`/hotel/reserva/${linha.reserva.id}`)"
-      >
-        <template #celula-entrada="{ linha }">
-          <span class="clinic-value">{{ formato.quando(linha.reserva.entradaPrevista) }}</span>
-        </template>
+          <template #celula-status="{ linha }">
+            <span class="ui-selo" :class="`ui-selo--${SELO_DO_STATUS[linha.reserva.status].tom}`">
+              <i class="ph" :class="SELO_DO_STATUS[linha.reserva.status].icone" aria-hidden="true" />
+              {{ formato.statusDaReserva(linha.reserva.status) }}
+            </span>
+          </template>
 
-        <template #celula-pet="{ linha }">
-          <span class="celula__pet">
-            <PetAvatar
-              :nome="linha.petNome"
-              :iniciais="linha.petIniciais"
-              :especie="linha.petEspecie"
-              :foto-url="linha.petFotoUrl"
-              tamanho="sm"
-            />
-            <span class="celula__quem">
-              <strong>{{ linha.petNome }}</strong>
-              <small>
-                {{ linha.tutorNome }}
-                <!-- Pedida pelo responsável, no app ou no link: a origem à vista, como na agenda. -->
-                <i
-                  v-if="linha.reserva.origem === 'app' || linha.reserva.origem === 'link'"
-                  class="ph celula__origem"
-                  :class="linha.reserva.origem === 'app' ? 'ph-device-mobile' : 'ph-globe-simple'"
-                  :title="t(`hotel.origem.${linha.reserva.origem}`)"
-                  :aria-label="t(`hotel.origem.${linha.reserva.origem}`)"
-                />
+          <template #celula-admissao="{ linha }">
+            <span class="ui-selo" :class="`ui-selo--${SELO_DA_ADMISSAO[linha.admissao].tom}`">
+              <i class="ph" :class="SELO_DA_ADMISSAO[linha.admissao].icone" aria-hidden="true" />
+              {{ formato.situacaoDaExigencia(linha.admissao) }}
+            </span>
+          </template>
+
+          <template #celula-saldo="{ linha }">
+            <span class="dinheiro">
+              <span class="ui-selo" :class="`ui-selo--${pagamento(linha.reserva).tom}`">
+                <i class="ph" :class="pagamento(linha.reserva).icone" aria-hidden="true" />
+                {{ pagamento(linha.reserva).rotulo }}
+              </span>
+              <small v-if="pagamento(linha.reserva).falta" class="dinheiro__falta ui-num">
+                {{ pagamento(linha.reserva).falta }}
               </small>
             </span>
-          </span>
-        </template>
-
-        <template #celula-acomodacao="{ linha }">{{ linha.acomodacaoNome }}</template>
-
-        <template #celula-noites="{ linha }">{{ linha.reserva.diarias }}</template>
-
-        <template #celula-status="{ linha }">
-          <HotelSelo
-            :rotulo="formato.statusDaReserva(linha.reserva.status)"
-            :tom="
-              linha.reserva.status === 'cancelada' || linha.reserva.status === 'nao-compareceu'
-                ? 'atencao'
-                : linha.reserva.status === 'hospedado'
-                  ? 'positivo'
-                  : 'neutro'
-            "
-          />
-        </template>
-
-        <template #celula-admissao="{ linha }">
-          <HotelSelo
-            :rotulo="formato.situacaoDaExigencia(linha.admissao)"
-            :tom="linha.admissao === 'ok' ? 'positivo' : tomDaAdmissao(linha.admissao)"
-          />
-        </template>
-
-        <template #celula-saldo="{ linha }">
-          {{ formato.moeda(linha.reserva.orcamento.saldoCentavos) }}
-        </template>
-      </ClinicDataTable>
+          </template>
+        </ClinicDataTable>
+      </section>
 
       <!--
         A lista de espera mora aqui, no rodapé, e não numa tela própria: ela só é consultada quando
         uma reserva cai — e nesse momento quem está olhando já está nesta página.
       -->
-      <section v-if="reservas.espera.length > 0" class="espera">
-        <h2 class="espera__titulo">
-          {{ t('hotel.reservas.espera', { total: reservas.espera.length }) }}
-        </h2>
-
-        <ul class="espera__lista">
-          <li v-for="item in reservas.espera" :key="item.entrada.id">
+      <UiSecao
+        v-if="reservas.espera.length > 0"
+        class="espera"
+        :titulo="t('hotel.reservas.tela.espera')"
+        :contagem="reservas.espera.length"
+        :descricao="t('hotel.reservas.tela.esperaDescricao')"
+      >
+        <ul class="ui-folha ui-lista">
+          <li v-for="item in reservas.espera" :key="item.entrada.id" class="ui-linha espera__linha">
             <PetAvatar
               :nome="item.petNome"
               :iniciais="item.petIniciais"
               :especie="item.petEspecie"
               :foto-url="item.petFotoUrl"
-              tamanho="sm"
+              tamanho="md"
             />
-
-            <div class="espera__texto">
-              <strong>{{ item.petNome }}</strong>
-              <span>
-                {{ formato.data(item.entrada.entradaDesejada) }} →
-                {{ formato.data(item.entrada.saidaDesejada) }} · {{ item.tutorNome }}
+            <span class="ui-linha__texto">
+              <span class="ui-linha__titulo">{{ item.petNome }}</span>
+              <span class="ui-linha__meta">{{ item.tutorNome }}</span>
+            </span>
+            <span class="espera__periodo ui-num">
+              {{ formato.data(item.entrada.entradaDesejada) }}
+              <i class="ph ph-arrow-right" aria-hidden="true" />
+              {{ formato.data(item.entrada.saidaDesejada) }}
+            </span>
+            <span class="ui-linha__fim">
+              <span
+                class="ui-selo"
+                :class="item.esperandoHaDias > 7 ? 'ui-selo--atencao' : 'ui-selo--contorno'"
+              >
+                <i class="ph ph-hourglass" aria-hidden="true" />
+                {{ formato.haDias(item.esperandoHaDias) }}
               </span>
-            </div>
-
-            <HotelSelo
-              :rotulo="formato.haDias(item.esperandoHaDias)"
-              :tom="item.esperandoHaDias > 7 ? 'atencao' : 'neutro'"
-              icone="ph ph-hourglass"
-            />
+            </span>
           </li>
         </ul>
-      </section>
+      </UiSecao>
     </div>
 
-    <HotelDevPanel />
+    <template #sempre>
+      <HotelDevPanel />
 
-    <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
-
-    <template #actions>
-      <Button
-        :label="t('hotel.reservas.novaNoMapa')"
-        icon="ph ph-plus"
-        size="small"
-        @click="router.push('/hotel/mapa')"
-      />
+      <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
     </template>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
+.tela-reservas {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+}
+
 .reservas {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 32px;
 }
 
 /* ------------------------------------------------------------------ véspera */
 
+.vespera__linha.ui-linha {
+  min-height: 68px;
+  gap: 14px;
+  padding-inline: 22px 18px;
+}
+
+.vespera__quando {
+  display: grid;
+  flex: none;
+  gap: 2px;
+  min-width: 9rem;
+  text-align: end;
+}
+
+.vespera__quando strong {
+  color: var(--risco-tinta);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.vespera__quando small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.vespera__resolver {
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.vespera__linha:hover .vespera__resolver {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ------------------------------------------------------------------ lista */
+
+.lista {
+  display: grid;
+  gap: 12px;
+}
+
+.lista__barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px 20px;
+}
+
+.lista__filtro {
+  min-width: min(100%, 26rem);
+  flex: 1 1 26rem;
+}
+
 .horizonte {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  min-height: 40px;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
 }
 
 .horizonte__rotulo {
-  font-size: 0.8125rem;
-  color: var(--clinic-text-muted);
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
-/*
- * Um cartão branco como os outros (redesenho de 30/09/2026), e não uma faixa pintada de pêssego de
- * ponta a ponta: a atenção mora no ícone e no título, e a superfície fica quieta.
- */
-.vespera {
+/* O traço de risco na borda da linha da tabela: a mesma marca da véspera, com a palavra ao lado. */
+.marca-travada {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  inset-inline-start: 0;
+  width: 4px;
+  border-start-end-radius: 4px;
+  border-end-end-radius: 4px;
+  background: var(--risco);
+}
+
+.periodo {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: 1.1rem 1.35rem 1.25rem;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-}
-
-.vespera__titulo {
-  display: flex;
-  align-items: center;
-  margin: 0;
-  gap: 0.4rem;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-body);
-  font-weight: 800;
-}
-
-.vespera__lede {
-  margin: 0;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  opacity: 0.9;
-}
-
-.vespera__lista {
-  display: grid;
-  gap: var(--clinic-space-2);
-  margin: 0;
-  padding: 0;
-  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-  list-style: none;
-}
-
-.vespera__item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-attention-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface);
-  color: inherit;
-  font: inherit;
-  text-align: start;
-  text-decoration: none;
-}
-
-.vespera__item:hover,
-.vespera__item:focus-visible {
-  border-color: var(--clinic-attention-text);
-}
-
-.vespera__item strong {
-  font-weight: 750;
-}
-
-/*
- * Só o "chega em N dias" cresce para empurrar o selo à direita. O seletor era `.vespera__item
- * span` e alcançava também a raiz do selo, que é um `span` — e o selo saía esticado de ponta a
- * ponta da faixa.
- */
-.vespera__quando {
-  flex: 1;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.celula__pet {
-  display: flex;
-  align-items: center;
-  gap: var(--clinic-space-2);
-}
-
-.celula__quem {
-  display: grid;
-  gap: 0;
+  gap: 2px;
   min-width: 0;
 }
 
-.celula__origem {
-  margin-inline-start: 0.25rem;
-  color: var(--hc-tinta-3);
-}
-
-.celula__pet strong {
-  font-weight: 700;
-}
-
-.celula__pet small {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.espera {
-  display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-}
-
-.espera__titulo {
-  margin: 0;
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
-}
-
-.espera__lista {
-  display: grid;
-  gap: var(--clinic-space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.espera__lista li {
-  display: flex;
-  flex-wrap: wrap;
+.periodo__datas {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 6px;
+  color: var(--tinta);
+  font-size: 15px;
+  white-space: nowrap;
 }
 
-.espera__texto {
+.periodo__datas strong {
+  font-weight: 650;
+}
+
+.periodo__datas span {
+  color: var(--tinta-2);
+  font-weight: 500;
+}
+
+.periodo__datas i {
+  color: var(--tinta-3);
+  font-size: 12px;
+}
+
+[dir='rtl'] .periodo__datas i,
+[dir='rtl'] .espera__periodo i {
+  scale: -1 1;
+}
+
+.periodo__detalhe {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.periodo__detalhe--lugar {
+  color: var(--pj-lugar-tinta);
+  font-weight: 550;
+}
+
+.periodo__detalhe--risco {
+  color: var(--risco-tinta);
+  font-weight: 600;
+}
+
+.hospede {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.hospede__texto {
   display: grid;
-  gap: 0;
+  min-width: 0;
+  gap: 1px;
 }
 
-.espera__texto span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.hospede__texto strong {
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
-.espera__texto {
-  flex: 1;
-  min-width: 10rem;
+
+.hospede__texto small {
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hospede__origem {
+  margin-inline-start: 4px;
+  color: var(--tinta-3);
+}
+
+.acomodacao {
+  color: var(--tinta);
+  font-size: 14px;
+}
+
+.dinheiro {
+  display: grid;
+  justify-items: start;
+  gap: 3px;
+}
+
+.dinheiro__falta {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ espera */
+
+.espera__linha {
+  gap: 14px;
+}
+
+.espera__periodo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.espera__periodo i {
+  color: var(--tinta-3);
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .vespera__linha.ui-linha {
+    flex-wrap: wrap;
+    padding-block: 12px;
+  }
+
+  .vespera__quando {
+    min-width: 0;
+    text-align: start;
+  }
+
+  .vespera__resolver {
+    display: none;
+  }
+
+  .espera__linha.ui-linha {
+    flex-wrap: wrap;
+    padding-block: 12px;
+  }
+
+  /* O nome fica inteiro na primeira linha; as datas e a espera descem, alinhadas com ele. */
+  .espera__linha .ui-linha__texto {
+    flex-basis: calc(100% - 56px);
+  }
+
+  .espera__periodo {
+    margin-inline-start: 52px;
+  }
 }
 </style>

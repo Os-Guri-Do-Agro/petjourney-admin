@@ -1,25 +1,31 @@
 <script setup lang="ts">
 /**
- * Mapa de ocupação — a tela que responde "tem vaga do dia 22 ao dia 30?".
+ * Mapa de ocupação — a tela que responde "onde cabe mais um, e quando".
  *
  * A primeira versão desta tela era uma fileira de cartões dizendo "8 livres". É a resposta certa
  * para uma pergunta que ninguém faz: a venda de hotel é **futura**, e o que se procura não é um
  * número, é o **buraco** entre duas estadias num calendário.
  *
- * Agora a tela é o calendário. Linhas são acomodações, colunas são noites, barras são o que já
- * está vendido, e o vazio é a informação. O painel de procura no topo não filtra a lista — ele
- * **acende** as linhas que servem, deixando o resto visível e apagado: quem atende o telefone
- * precisa ver que existem outras opções quando a primeira não serve.
+ * A tela é o calendário. Linhas são acomodações, colunas são noites, barras são o que já está
+ * vendido (com o rosto e o nome de quem dorme ali), e o vazio é a informação — e o convite: clicar
+ * num vazio começa a reserva naquele dia. A procura no alto é a frase do telefone ("tenho um cão
+ * grande, de tal dia a tal dia"); ela não filtra a lista, ela **acende** as linhas que servem e
+ * deixa o resto visível e apagado, porque quem atende precisa ver que existem outras opções.
+ *
+ * A ação cheia, "Nova reserva", mostra onde cabe o que está sendo procurado e abre o mesmo
+ * formulário que o clique num vazio abre. A navegação anda de semana em semana, com a volta para
+ * hoje, e a fita dos dias no cabeçalho da grade diz de relance qual noite está cheia.
  */
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
 import InputNumber from 'primevue/inputnumber'
+import Popover from 'primevue/popover'
 import Select from 'primevue/select'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import HotelDevPanel from '@/features/hotel/components/base/HotelDevPanel.vue'
 import HotelTour from '@/features/hotel/components/base/HotelTour.vue'
 import type { PassoDoTour } from '@/features/hotel/components/base/tour-types'
@@ -34,8 +40,9 @@ import type { Acomodacao, ISODate, PetPorte, PetSpecies } from '@/features/hotel
 import { addDays, datasEntre } from '@/features/hotel/domain/hotel-time'
 import { hotelClock, useHotelStore } from '@/features/hotel/stores/hotel'
 import { useReservasStore } from '@/features/hotel/stores/reservas'
+import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const formato = useHotelFormat()
 const hotelStore = useHotelStore()
@@ -62,6 +69,8 @@ const DIAS_NA_GRADE = 21
 const inicioDaGrade = ref<ISODate>(addDays(hoje, -1))
 
 const fimDaGrade = computed(() => addDays(inicioDaGrade.value, DIAS_NA_GRADE - 1))
+
+const naSemanaDeHoje = computed(() => inicioDaGrade.value === addDays(hoje, -1))
 
 /**
  * O `DatePicker` fala `Date`; o módulo fala `ISODate`.
@@ -91,10 +100,12 @@ async function carregarGrade() {
   }
 }
 
-onMounted(async () => {
+async function carregar() {
   await carregarGrade()
   await reservas.carregarMapa()
-})
+}
+
+onMounted(carregar)
 
 watch(intervalo, (valor) => {
   const [inicio, fim] = valor ?? []
@@ -139,6 +150,12 @@ function voltarParaHoje() {
   void carregarGrade()
 }
 
+/** Leva a grade até o período procurado, quando ele está fora das três semanas à vista. */
+function irParaAProcura() {
+  inicioDaGrade.value = addDays(reservas.de, -1)
+  void carregarGrade()
+}
+
 /**
  * Quantas acomodações servem para o que está sendo procurado.
  *
@@ -180,6 +197,104 @@ async function criar(payload: Parameters<typeof reservas.criar>[0]) {
 }
 
 const vazio = computed(() => !carregandoGrade.value && (grade.value?.linhas.length ?? 0) === 0)
+
+// ------------------------------------------------------------------ a frase de cima
+
+const tag = computed(() => INTL_LOCALE[isLocale(locale.value) ? locale.value : DEFAULT_LOCALE])
+
+/** "sex., 23/10" — o dia da semana e a data, para a frase de estado. */
+function diaCurto(data: ISODate) {
+  const semana = new Intl.DateTimeFormat(tag.value, { weekday: 'short', timeZone: 'UTC' }).format(
+    new Date(`${data}T12:00:00Z`),
+  )
+
+  return `${semana} ${formato.data(data)}`
+}
+
+/** "18 de out." — as pontas do período à vista. */
+function diaEMes(data: ISODate) {
+  return new Intl.DateTimeFormat(tag.value, {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(new Date(`${data}T12:00:00Z`))
+}
+
+const periodoAVista = computed(() =>
+  t('hotel.mapa.tela.intervalo', {
+    de: diaEMes(inicioDaGrade.value),
+    ate: diaEMes(fimDaGrade.value),
+  }),
+)
+
+/**
+ * Hoje, quantas estão ocupadas; e, daqui para a frente, qual a noite mais cheia à vista. É a
+ * pergunta da tela em uma frase: onde ainda cabe, e quando aperta.
+ */
+const fraseDoResumo = computed(() => {
+  const atual = grade.value
+
+  if (!atual || atual.linhas.length === 0) {
+    return ''
+  }
+
+  const indiceDeHoje = atual.dias.indexOf(hoje)
+  const deHoje = indiceDeHoje >= 0 ? atual.porDia[indiceDeHoje] : null
+
+  /* Daqui para a frente, sem hoje: o hoje já está dito na primeira metade da frase. */
+  const futuras = atual.porDia.filter((dia) => dia.data > hoje && dia.operando > 0)
+  const candidatas = futuras.length > 0 ? futuras : atual.porDia.filter((dia) => dia.operando > 0)
+  const pico = candidatas.reduce<(typeof candidatas)[number] | null>(
+    (maior, dia) => (!maior || dia.ocupadas > maior.ocupadas ? dia : maior),
+    null,
+  )
+
+  let fraseDoPico = ''
+
+  if (pico && pico.ocupadas > 0) {
+    const livres = pico.operando - pico.ocupadas
+
+    fraseDoPico =
+      livres <= 0
+        ? t('hotel.mapa.tela.resumoLotado', { dia: diaCurto(pico.data) })
+        : t('hotel.mapa.tela.resumoPico', { dia: diaCurto(pico.data), livres }, livres)
+  }
+
+  if (!deHoje) {
+    return fraseDoPico ? t('hotel.mapa.tela.resumoSemHoje', { pico: fraseDoPico }) : ''
+  }
+
+  const fraseDeHoje = t(
+    'hotel.mapa.tela.resumoHoje',
+    { ocupadas: deHoje.ocupadas, total: deHoje.operando },
+    deHoje.operando,
+  )
+
+  return fraseDoPico
+    ? t('hotel.mapa.tela.resumo', { hoje: fraseDeHoje, pico: fraseDoPico })
+    : `${fraseDeHoje}.`
+})
+
+// ------------------------------------------------------------------ nova reserva
+
+/*
+ * "Nova reserva" mostra onde cabe o que a procura descreve, e a escolha abre o mesmo formulário
+ * do clique num vazio da grade. O formulário precisa da acomodação; a resposta à procura é a lista
+ * de onde ela cabe.
+ */
+const popoverDeOnde = ref<InstanceType<typeof Popover> | null>(null)
+
+const ondeCabe = computed(() =>
+  (reservas.mapa?.vagas ?? []).filter(
+    (vaga) => vaga.acomodacao.ativa && vaga.impedimentos.length === 0,
+  ),
+)
+
+function escolherOnde(acomodacao: Acomodacao) {
+  popoverDeOnde.value?.hide()
+  escolhida.value = acomodacao
+}
+
 /**
  * O tutorial desta tela, na ordem em que se lê a página.
  *
@@ -217,25 +332,36 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :title="t('hotel.mapa.titulo')"
-    :subtitle="t('hotel.mapa.subtitulo')"
+  <UiPagina
+    class="tela-mapa"
+    :resumo="fraseDoResumo"
+    :carregando="carregandoGrade && !grade"
+    :erro="reservas.erro ? t(reservas.erro) : ''"
+    :vazio="vazio"
+    :vazio-titulo="t('hotel.mapa.vazioTitulo')"
+    :vazio-descricao="t('hotel.mapa.vazioDescricao')"
+    vazio-icone="ph ph-bed"
     tour
     @tour="tourAberto = true"
-    :loading="carregandoGrade && !grade"
-    :error="reservas.erro ? t(reservas.erro) : ''"
-    :empty="vazio"
-    :empty-title="t('hotel.mapa.vazioTitulo')"
-    :empty-description="t('hotel.mapa.vazioDescricao')"
-    @retry="carregarGrade"
+    @tentar-de-novo="carregar"
   >
-    <div class="mapa clinic-scope">
+    <template #acoes>
+      <Button
+        type="button"
+        icon="ph ph-calendar-plus"
+        :label="t('hotel.reservas.novaNoMapa')"
+        aria-haspopup="dialog"
+        @click="popoverDeOnde?.toggle($event)"
+      />
+    </template>
+
+    <div class="mapa">
       <!--
         A procura é uma frase, não um formulário: "tenho um cão de porte grande, de tal dia a tal
-        dia". Os campos estão na ordem em que a pessoa do outro lado da linha os diz.
+        dia". Os campos estão na ordem em que a pessoa do outro lado da linha os diz, e a resposta
+        fica ao lado da pergunta.
       -->
-      <section class="procura">
+      <section class="procura ui-folha" :aria-label="t('hotel.mapa.tela.procura')">
         <div class="procura__frase">
           <span class="procura__texto">{{ t('hotel.mapa.procuraInicio') }}</span>
 
@@ -246,7 +372,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             option-label="rotulo"
             option-value="valor"
             show-clear
-            size="small"
             :placeholder="t('hotel.mapa.qualquerEspecie')"
             :aria-label="t('hotel.mapa.especie')"
           />
@@ -258,7 +383,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             option-label="rotulo"
             option-value="valor"
             show-clear
-            size="small"
             :placeholder="t('hotel.mapa.qualquerPorte')"
             :aria-label="t('hotel.mapa.porte')"
           />
@@ -266,14 +390,13 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           <span class="procura__texto">{{ t('hotel.mapa.procuraDe') }}</span>
 
           <DatePicker
-            panel-class="hc-tema"
             v-model="intervalo"
             class="procura__datas"
             selection-mode="range"
             :manual-input="false"
             date-format="dd/mm/yy"
             show-icon
-            size="small"
+            icon-display="input"
             :aria-label="t('hotel.mapa.periodo')"
           />
 
@@ -286,7 +409,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             button-layout="horizontal"
             increment-button-icon="ph ph-plus"
             decrement-button-icon="ph ph-minus"
-            size="small"
             :aria-label="t('hotel.mapa.ocupantes')"
           />
 
@@ -294,10 +416,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         </div>
 
         <!--
-          A resposta fica ao lado da pergunta, e é uma frase inteira. "8" sozinho obriga quem lê a
-          lembrar do que era a pergunta; "8 acomodações servem para 3 noites" não.
+          A resposta é uma frase inteira. "8" sozinho obriga quem lê a lembrar do que era a
+          pergunta; "8 acomodações servem, de 20/10 a 23/10" não.
         -->
-        <p class="resposta" :class="servem > 0 ? 'resposta--sim' : 'resposta--nao'">
+        <p
+          class="resposta"
+          :class="servem > 0 ? 'resposta--sim' : 'resposta--nao'"
+          aria-live="polite"
+        >
           <i :class="servem > 0 ? 'ph ph-check-circle' : 'ph ph-x-circle'" aria-hidden="true" />
           <strong>
             {{
@@ -306,59 +432,31 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 : t('hotel.mapa.respostaNao', { noites }, noites)
             }}
           </strong>
-          <span class="resposta__periodo">
-            {{ formato.data(reservas.de) }} → {{ formato.data(reservas.ate) }}
+          <span class="resposta__periodo ui-num">
+            {{
+              t('hotel.mapa.tela.periodoDaProcura', {
+                de: formato.data(reservas.de),
+                ate: formato.data(reservas.ate),
+              })
+            }}
           </span>
         </p>
       </section>
 
-      <p v-if="procuraForaDaGrade" class="fora">
+      <p v-if="procuraForaDaGrade" class="fora" role="status">
         <i class="ph ph-info" aria-hidden="true" />
-        {{ t('hotel.mapa.foraDaGrade') }}
+        <span>{{ t('hotel.mapa.tela.foraDaGrade') }}</span>
+        <Button
+          type="button"
+          size="small"
+          severity="secondary"
+          outlined
+          icon="ph ph-arrow-right"
+          icon-pos="right"
+          :label="t('hotel.mapa.tela.irParaProcura')"
+          @click="irParaAProcura"
+        />
       </p>
-
-      <!-- A navegação do calendário: três semanas por vez, com volta rápida para hoje. -->
-      <section class="navegacao">
-        <div class="navegacao__botoes">
-          <Button
-            icon="ph ph-caret-left"
-            severity="secondary"
-            outlined
-            size="small"
-            :aria-label="t('hotel.mapa.semanaAnterior')"
-            @click="deslocar(-7)"
-          />
-          <Button
-            :label="t('hotel.mapa.hoje')"
-            severity="secondary"
-            outlined
-            size="small"
-            @click="voltarParaHoje"
-          />
-          <Button
-            icon="ph ph-caret-right"
-            severity="secondary"
-            outlined
-            size="small"
-            :aria-label="t('hotel.mapa.semanaSeguinte')"
-            @click="deslocar(7)"
-          />
-        </div>
-
-        <span class="navegacao__periodo clinic-value">
-          {{ formato.data(inicioDaGrade) }} → {{ formato.data(fimDaGrade) }}
-        </span>
-
-        <span v-if="grade" class="navegacao__livres">
-          {{
-            t(
-              'hotel.mapa.semNenhumaReserva',
-              { total: grade.totalmenteLivres },
-              grade.totalmenteLivres,
-            )
-          }}
-        </span>
-      </section>
 
       <GradeDeOcupacao
         v-if="grade"
@@ -368,44 +466,124 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         :procura="procuraForaDaGrade ? null : procura"
         @abrir-reserva="(id) => router.push(`/hotel/reserva/${id}`)"
         @reservar="abrirReservaNoDia"
-      />
+      >
+        <!-- O período à vista anda de semana em semana, com a volta para hoje: as setas ao lado dos dias. -->
+        <template #canto>
+          <span class="navegacao" role="group" :aria-label="periodoAVista">
+            <Button
+              type="button"
+              icon="ph ph-caret-left"
+              severity="secondary"
+              text
+              class="navegacao__seta"
+              :aria-label="t('hotel.mapa.semanaAnterior')"
+              :title="t('hotel.mapa.semanaAnterior')"
+              @click="deslocar(-7)"
+            />
+            <Button
+              type="button"
+              icon="ph ph-caret-right"
+              severity="secondary"
+              text
+              class="navegacao__seta"
+              :aria-label="t('hotel.mapa.semanaSeguinte')"
+              :title="t('hotel.mapa.semanaSeguinte')"
+              @click="deslocar(7)"
+            />
+            <Button
+              v-if="!naSemanaDeHoje"
+              type="button"
+              size="small"
+              severity="secondary"
+              outlined
+              icon="ph ph-arrow-u-up-left"
+              :label="t('hotel.mapa.hoje')"
+              :aria-label="t('hotel.mapa.hoje')"
+              class="navegacao__hoje"
+              @click="voltarParaHoje"
+            />
+          </span>
+        </template>
+      </GradeDeOcupacao>
     </div>
 
-    <NovaReservaDialog
-      :acomodacao="escolhida"
-      :inicio="reservas.inicioIso"
-      :fim="reservas.fimIso"
-      :salvando="reservas.salvando"
-      :erro="reservas.erroDeAcao"
-      :comprovantes="hotelStore.comprovantes"
-      :hoje="hoje"
-      @fechar="escolhida = null"
-      @confirmar="criar"
-    />
+    <template #sempre>
+      <!-- Onde cabe: a resposta da procura como lista, e cada linha abre a reserva. -->
+      <Popover ref="popoverDeOnde" class="clinic-overlay">
+        <div class="onde">
+          <p class="onde__titulo">{{ t('hotel.mapa.tela.ondeTitulo') }}</p>
+          <p class="onde__periodo ui-num">
+            {{
+              t('hotel.mapa.tela.periodoDaProcura', {
+                de: formato.data(reservas.de),
+                ate: formato.data(reservas.ate),
+              })
+            }}
+            · {{ t('hotel.reserva.diarias', { total: noites }, noites) }}
+          </p>
 
-    <HotelDevPanel />
+          <ul v-if="ondeCabe.length > 0" class="onde__lista ui-lista">
+            <li v-for="vaga in ondeCabe" :key="vaga.acomodacao.id">
+              <button type="button" class="ui-linha onde__linha" @click="escolherOnde(vaga.acomodacao)">
+                <span class="onde__icone" aria-hidden="true"><i class="ph ph-bed" /></span>
+                <span class="ui-linha__texto">
+                  <span class="ui-linha__titulo">{{ vaga.acomodacao.nome }}</span>
+                  <span class="ui-linha__meta">
+                    {{ hotelStore.tipoDeAcomodacao(vaga.acomodacao.tipoId)?.nome }} ·
+                    {{ formato.porte(vaga.acomodacao.porteMaximo) }}
+                  </span>
+                </span>
+                <i class="ph ph-caret-right ui-linha__seta" aria-hidden="true" />
+              </button>
+            </li>
+          </ul>
 
-    <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
+          <p v-else class="onde__vazio">
+            <i class="ph ph-calendar-x" aria-hidden="true" />
+            {{ t('hotel.mapa.tela.ondeVazio') }}
+          </p>
 
-    <template #actions>
-      <span class="clinic-scope clinic-acoes">
-        <Button
-          :label="t('hotel.mapa.verReservas')"
-          icon="ph ph-list-bullets"
-          severity="secondary"
-          outlined
-          size="small"
-          @click="router.push('/hotel/reservas')"
-        />
-      </span>
+          <p class="onde__dica">
+            <i class="ph ph-cursor-click" aria-hidden="true" />
+            {{ t('hotel.mapa.tela.ondeDica') }}
+          </p>
+        </div>
+      </Popover>
+
+      <NovaReservaDialog
+        :acomodacao="escolhida"
+        :inicio="reservas.inicioIso"
+        :fim="reservas.fimIso"
+        :salvando="reservas.salvando"
+        :erro="reservas.erroDeAcao"
+        :comprovantes="hotelStore.comprovantes"
+        :hoje="hoje"
+        @fechar="escolhida = null"
+        @confirmar="criar"
+      />
+
+      <HotelDevPanel />
+
+      <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
     </template>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
+/* Os botões contornado e de texto no padrão do Trilha: no escuro, o cinza do preset sumia. */
+.tela-mapa {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+}
+
 .mapa {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 16px;
 }
 
 /* ------------------------------------------------------------------ procura */
@@ -415,109 +593,211 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
+  gap: 12px 20px;
+  padding: 14px 16px;
 }
 
 .procura__frase {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
+  gap: 8px;
 }
 
 .procura__texto {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 .procura__campo {
-  min-width: 8.5rem;
+  min-width: 9.5rem;
 }
 
 .procura__datas {
-  min-width: 15rem;
+  width: 15.5rem;
 }
 
 .procura__ocupantes {
-  max-width: 7.5rem;
+  width: 8.5rem;
+}
+
+.procura__ocupantes :deep(input) {
+  width: 100%;
+  min-width: 0;
+  font-family: var(--font-dados);
+  text-align: center;
 }
 
 .resposta {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
+  gap: 4px 8px;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid transparent;
-  border-radius: var(--clinic-radius-control);
-  gap: 0.5rem;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 14px;
 }
 
 .resposta i {
-  align-self: center;
-}
-
-.resposta--sim {
-  border-color: var(--clinic-accent-soft);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.resposta--nao {
-  border-color: var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
+  font-size: 18px;
 }
 
 .resposta strong {
-  font-size: var(--clinic-font-body);
-  font-weight: 800;
+  font-weight: 600;
+}
+
+.resposta--sim {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+}
+
+.resposta--nao {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .resposta__periodo {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-variant-numeric: tabular-nums;
+  color: inherit;
+  font-size: 13px;
+  opacity: 0.9;
 }
 
 .fora {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 8px 12px;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  padding: 10px 14px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-size: 14px;
+}
+
+.fora > i {
+  color: var(--pj-lugar-tinta);
+  font-size: 18px;
+}
+
+.fora > span {
+  flex: 1 1 18rem;
 }
 
 /* ------------------------------------------------------------------ navegação */
 
 .navegacao {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-3);
+  gap: 2px;
+  margin: 0 0 6px -8px;
 }
 
-.navegacao__botoes {
+.navegacao__seta.p-button {
+  width: 34px;
+  height: 34px;
+}
+
+[dir='rtl'] .navegacao__seta :deep(.p-button-icon),
+[dir='rtl'] .navegacao__hoje :deep(.p-button-icon) {
+  scale: -1 1;
+}
+
+.navegacao__hoje.p-button {
+  min-height: 32px;
+  margin-inline-start: 4px;
+  padding-inline: 8px;
+}
+
+/* ------------------------------------------------------------------ onde cabe */
+
+.onde {
+  display: grid;
+  width: min(22rem, 86vw);
+  gap: 8px;
+}
+
+.onde__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.onde__periodo {
+  margin: -4px 0 2px;
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.onde__lista {
+  max-height: 18rem;
+  overflow: auto;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+}
+
+.onde__linha.ui-linha {
+  min-height: 50px;
+  gap: 12px;
+  padding: 6px 12px;
+}
+
+.onde__icone {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+  font-size: 17px;
+}
+
+.onde__vazio,
+.onde__dica {
   display: flex;
-  gap: 0.3rem;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
 }
 
-.navegacao__periodo {
-  font-weight: 750;
+.onde__vazio {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
-.navegacao__livres {
-  margin-inline-start: auto;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.onde__vazio i,
+.onde__dica i {
+  flex: none;
+  transform: translateY(2px);
+}
+
+@media (max-width: 720px) {
+  .procura__frase {
+    width: 100%;
+  }
+
+  .procura__campo {
+    min-width: 0;
+    flex: 1 1 9rem;
+  }
+
+  .procura__datas {
+    width: auto;
+    flex: 1 1 100%;
+  }
+
+  .navegacao__hoje :deep(.p-button-label) {
+    display: none;
+  }
 }
 </style>

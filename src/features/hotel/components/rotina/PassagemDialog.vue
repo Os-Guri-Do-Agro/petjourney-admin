@@ -90,28 +90,32 @@ watch(
     :visible="aberto"
     modal
     :header="t('hotel.turno.titulo')"
-    :style="{ width: 'min(58rem, 94vw)' }"
-    class="clinic-scope hc-tema"
+    :style="{ width: 'min(52rem, 96vw)' }"
+    class="clinic-dialog hc-tema"
+    dismissable-mask
     @update:visible="emit('fechar')"
   >
     <div v-if="passagem" class="passagem">
-      <!-- Quem entrega, quem recebe. É o cabeçalho do documento, não uma linha de apoio. -->
+      <!-- Quem entrega e quem recebe: é o cabeçalho do documento, não uma linha de apoio. -->
       <p class="turno">
+        <span class="turno__icone" aria-hidden="true"><i class="ph ph-arrows-left-right" /></span>
+
         <span class="turno__lado">
-          <span class="turno__rotulo">{{ t('hotel.turno.sai') }}</span>
+          <small>{{ t('hotel.turno.sai') }}</small>
           <strong>{{ formato.turno(passagem.turno.kind) }}</strong>
-          <span class="turno__hora">
+          <span class="ui-num">
             {{ formato.hora(passagem.turno.inicio) }}–{{ formato.hora(passagem.turno.fim) }}
           </span>
         </span>
 
-        <i class="ph ph-arrow-right" aria-hidden="true" />
+        <!-- Ícone, e não o caractere "→": seta de texto não espelha no árabe. -->
+        <i class="ph ph-arrow-right turno__seta" aria-hidden="true" />
 
         <span class="turno__lado">
-          <span class="turno__rotulo">{{ t('hotel.turno.entra') }}</span>
+          <small>{{ t('hotel.turno.entra') }}</small>
           <strong>{{ formato.turno(passagem.seguinte.kind) }}</strong>
           <!-- A janela de quem assume: é o que ele está aceitando ao assinar. -->
-          <span class="turno__hora">
+          <span class="ui-num">
             {{ formato.hora(passagem.seguinte.inicio) }}–{{ formato.hora(passagem.seguinte.fim) }}
           </span>
         </span>
@@ -119,27 +123,30 @@ watch(
 
       <!--
         A trava abre a lista. Não é um aviso no rodapé: é o motivo pelo qual o botão não vai
-        funcionar, e cada linha leva ao lugar onde se resolve — um alerta que diz "ligue para
-        alguém" sem levar a lugar nenhum transfere o trabalho de descobrir onde é esse lugar.
+        funcionar, e cada linha leva ao lugar onde se resolve.
       -->
-      <section v-if="travadas.length > 0" class="bloco bloco--trava">
-        <h3 class="bloco__titulo bloco__titulo--trava">
-          <i class="ph ph-lock" aria-hidden="true" />
+      <section v-if="travadas.length > 0" class="lista lista--trava">
+        <h4 class="lista__titulo">
+          <i class="ph ph-lock-simple" aria-hidden="true" />
           {{ t('hotel.turno.travado') }}
-        </h3>
+          <span class="ui-contagem">{{ travadas.length }}</span>
+        </h4>
 
-        <ul class="lista">
-          <li v-for="ocorrencia in travadas" :key="ocorrencia.id" class="trava">
-            <i class="ph ph-warning-circle" aria-hidden="true" />
+        <ul class="ui-lista lista__itens">
+          <li v-for="ocorrencia in travadas" :key="ocorrencia.id" class="linha">
+            <i class="ph ph-warning-circle linha__alerta" aria-hidden="true" />
 
-            <div class="lista__texto">
+            <span class="linha__texto">
               <strong>{{ formato.ocorrenciaKind(ocorrencia.kind) }}</strong>
               <span>{{ ocorrencia.descricao }}</span>
-            </div>
+            </span>
 
             <Button
+              type="button"
               :label="t('hotel.turno.resolver')"
               icon="ph ph-phone"
+              severity="secondary"
+              outlined
               size="small"
               @click="emit('irPara', ocorrencia.hospedagemId)"
             />
@@ -147,9 +154,13 @@ watch(
         </ul>
       </section>
 
-      <section v-if="passagem.pendencias.boletinsRetidos.length > 0" class="bloco">
-        <h3 class="bloco__titulo">{{ t('hotel.turno.boletinsRetidos') }}</h3>
-        <p class="bloco__texto">
+      <section v-if="passagem.pendencias.boletinsRetidos.length > 0" class="lista">
+        <h4 class="lista__titulo">
+          <i class="ph ph-envelope-simple" aria-hidden="true" />
+          {{ t('hotel.turno.boletinsRetidos') }}
+          <span class="ui-contagem">{{ passagem.pendencias.boletinsRetidos.length }}</span>
+        </h4>
+        <p class="lista__ajuda">
           {{
             t(
               'hotel.turno.boletinsRetidosTexto',
@@ -160,8 +171,9 @@ watch(
         </p>
       </section>
 
-      <section class="bloco">
-        <h3 class="bloco__titulo">
+      <section class="lista">
+        <h4 class="lista__titulo">
+          <i class="ph ph-list-checks" aria-hidden="true" />
           {{
             t(
               'hotel.turno.pendencias',
@@ -169,22 +181,26 @@ watch(
               passagem.pendencias.tarefas.length,
             )
           }}
-        </h3>
+        </h4>
 
-        <p v-if="passagem.pendencias.tarefas.length === 0" class="bloco__texto">
+        <p v-if="passagem.pendencias.tarefas.length === 0" class="limpo">
+          <i class="ph ph-check-circle" aria-hidden="true" />
           {{ t('hotel.turno.semPendencias') }}
         </p>
 
+        <!--
+          Um inventário, em grade: em coluna única treze tarefas davam mil pixels de altura e
+          empurravam a assinatura para fora da vista. Em grade o olho varre, que é o que se faz
+          com inventário.
+        -->
         <ul v-else class="grade">
-          <li v-for="linha in passagem.pendencias.tarefas" :key="linha.tarefa.id" class="tarefa">
-            <span class="tarefa__quando">
-              <!-- A data só aparece quando não é hoje: repeti-la em toda linha seria ruído. -->
-              <span v-if="diaDaPendencia(linha.tarefa.previstaPara)" class="tarefa__dia">
+          <li v-for="linha in passagem.pendencias.tarefas" :key="linha.tarefa.id" class="pendente">
+            <span class="pendente__quando">
+              <!-- A data só aparece quando não é hoje: a dívida de ontem não é o trabalho do dia. -->
+              <span v-if="diaDaPendencia(linha.tarefa.previstaPara)" class="pendente__dia ui-num">
                 {{ diaDaPendencia(linha.tarefa.previstaPara) }}
               </span>
-              <span class="tarefa__hora clinic-value">
-                {{ formato.hora(linha.tarefa.previstaPara) }}
-              </span>
+              <span class="ui-hora">{{ formato.hora(linha.tarefa.previstaPara) }}</span>
             </span>
 
             <PetAvatar
@@ -192,14 +208,13 @@ watch(
               :iniciais="linha.petIniciais"
               :especie="linha.petEspecie"
               :foto-url="linha.petFotoUrl"
-              tamanho="xs"
+              tamanho="sm"
             />
 
-            <span class="tarefa__corpo">
+            <span class="pendente__corpo">
               <strong>{{ formato.tarefaKind(linha.tarefa.kind) }}</strong>
-              <span class="tarefa__onde"> {{ linha.petNome }} · {{ linha.acomodacaoNome }} </span>
-              <!-- A dose e a porção só aparecem quando existem: linha vazia é ruído numa grade. -->
-              <span v-if="linha.tarefa.descricao" class="tarefa__detalhe">
+              <span class="pendente__onde">{{ linha.petNome }} · {{ linha.acomodacaoNome }}</span>
+              <span v-if="linha.tarefa.descricao" class="pendente__detalhe">
                 {{ linha.tarefa.descricao }}
               </span>
             </span>
@@ -207,25 +222,22 @@ watch(
         </ul>
       </section>
 
-      <!--
-        A assinatura fica num bloco à parte, separada do inventário.
-        Solta logo abaixo da lista, ela parecia mais um item dela — e é o oposto: é o gesto que
-        fecha tudo o que está acima.
-      -->
+      <!-- A assinatura, separada do inventário: é o gesto que fecha tudo o que está acima. -->
       <section class="entrega">
         <div class="campo">
           <label :for="`${idCampo}-quem`">{{ t('hotel.turno.recebidoPor') }}</label>
           <Select
-            :input-id="`${idCampo}-quem`"
             v-model="recebidoPor"
+            :input-id="`${idCampo}-quem`"
             :options="cuidadores.map((item) => ({ valor: item.id, rotulo: item.nome }))"
             option-label="rotulo"
             option-value="valor"
             fluid
+            :pt="{ overlay: { class: 'clinic-overlay' } }"
           />
         </div>
 
-        <div class="campo campo--nota">
+        <div class="campo">
           <label :for="`${idCampo}-nota`">{{ t('hotel.turno.nota') }}</label>
           <Textarea
             :id="`${idCampo}-nota`"
@@ -242,8 +254,20 @@ watch(
     </div>
 
     <template #footer>
-      <Button :label="t('hotel.comum.fechar')" severity="secondary" text @click="emit('fechar')" />
+      <span v-if="travadas.length > 0" class="rodape__trava" role="status">
+        <i class="ph ph-lock-simple" aria-hidden="true" />
+        {{ t('hotel.turno.travaEntrega', { total: travadas.length }, travadas.length) }}
+      </span>
+
       <Button
+        type="button"
+        :label="t('hotel.comum.fechar')"
+        severity="secondary"
+        text
+        @click="emit('fechar')"
+      />
+      <Button
+        type="button"
         :label="t('hotel.turno.entregar')"
         icon="ph ph-sign-out"
         :loading="salvando"
@@ -257,290 +281,262 @@ watch(
 <style scoped>
 .passagem {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 20px;
 }
 
 /* ------------------------------------------------------------------ o turno */
 
 .turno {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 10px 16px;
   margin: 0;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-4);
-  background: var(--clinic-surface-soft);
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--superficie-2);
+}
+
+.turno__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+  font-size: 20px;
 }
 
 .turno__lado {
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
+  display: grid;
+  gap: 0;
+  line-height: 1.3;
 }
 
-.turno__rotulo {
-  color: var(--clinic-faint);
-  font-size: 0.75rem;
-  font-weight: 600;
+.turno__lado small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .turno__lado strong {
-  font-size: var(--clinic-font-body);
-  font-weight: 750;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.turno__hora {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-variant-numeric: tabular-nums;
+.turno__lado .ui-num {
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
-.turno > .ph-arrow-right {
-  color: var(--clinic-accent-strong);
-  font-size: 0.75rem;
+.turno__seta {
+  color: var(--tinta-3);
+  font-size: 16px;
 }
 
-/* ------------------------------------------------------------------ blocos */
-
-.bloco {
-  display: grid;
-  gap: var(--clinic-space-2);
+[dir='rtl'] .turno__seta {
+  scale: -1 1;
 }
 
-/*
- * O impedimento segue o mesmo padrão do painel do dia: cartão branco, urgência num disco cheio.
- * Preenchimento rosa de ponta a ponta era o que deixava a tela agressiva — e um módulo com dois
- * jeitos de desenhar a mesma gravidade ensina que a cor não quer dizer nada.
- */
-.bloco__titulo--trava {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--clinic-risk-text);
-}
-
-.bloco__titulo--trava .ph {
-  font-size: 0.7rem;
-}
-
-.trava {
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface);
-}
-
-.trava > .ph-warning-circle {
-  display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--clinic-risk-text);
-  color: var(--clinic-surface);
-  font-size: 0.76rem;
-}
-
-.trava .lista__texto strong {
-  color: var(--clinic-risk-text);
-}
-
-.trava .lista__texto {
-  flex: 1;
-}
-
-.bloco__titulo {
-  margin: 0;
-  color: var(--clinic-text);
-  font-size: 0.9375rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.bloco__texto {
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-}
-
-/* ------------------------------------------------------------------ travas */
+/* ------------------------------------------------------------------ listas */
 
 .lista {
   display: grid;
-  gap: var(--clinic-space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 8px;
 }
 
-.lista li {
+.lista__titulo {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.lista__texto {
+.lista__titulo i {
+  color: var(--tinta-2);
+  font-size: 18px;
+}
+
+.lista--trava .lista__titulo,
+.lista--trava .lista__titulo i {
+  color: var(--risco-tinta);
+}
+
+.lista__ajuda {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.lista__itens {
+  border: 1px solid color-mix(in oklab, var(--risco) 40%, var(--linha));
+  border-radius: 12px;
+}
+
+.linha {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 14px;
+}
+
+.linha__alerta {
+  flex: none;
+  color: var(--risco-tinta);
+  font-size: 20px;
+}
+
+.linha__texto {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
+  flex: 1;
+  gap: 2px;
 }
 
-.lista__texto strong {
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+.linha__texto strong {
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.lista__texto span {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.linha__texto span {
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.limpo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------------------ inventário */
 
 /*
- * O inventário é uma grade, não uma coluna.
- *
- * Treze tarefas empilhadas davam mil pixels de altura e empurravam a assinatura para fora da
- * vista. Em duas ou três colunas a mesma lista cabe em cinco linhas — e o olho varre, que é o que
- * se faz com inventário, em vez de percorrer.
- *
- * O teto com rolagem existe para o dia ruim: vinte e cinco pendências não podem transformar o
- * diálogo num documento sem fim.
+ * A grade tem teto para o dia ruim: vinte e cinco pendências não podem empurrar a assinatura para
+ * fora da vista. Todas as fileiras com a mesma altura, ditada pela mais alta.
  */
 .grade {
   display: grid;
-  /*
-   * O teto existe para o dia ruim: vinte e cinco pendências não podem transformar o diálogo num
-   * documento sem fim, e a assinatura precisa continuar à vista.
-   *
-   * Vinte e seis rem e não vinte: com os cartões de altura igual, cinco fileiras dão 322 px e o
-   * teto anterior cortava por **dois pixels** — a lista inteira ganhava barra de rolagem para
-   * esconder nada. O teto agora cai depois de seis fileiras, que é quando ele de fato serve.
-   */
-  max-height: 26rem;
+  max-height: 19rem;
   margin: 0;
   padding: 0;
-  gap: var(--clinic-space-2);
-  /*
-   * Todas as fileiras com a mesma altura, ditada pela mais alta.
-   *
-   * Um piso em `rem` no cartão não resolve: ele depende da base de fonte, e a altura natural de um
-   * cartão de três linhas passou por cima dele — a grade voltou a ter degraus de 2 px. `1fr` mede
-   * a fileira mais alta e dá o mesmo a todas, sem depender de número nenhum escrito à mão.
-   */
+  gap: 8px;
   grid-auto-rows: 1fr;
-  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
   list-style: none;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-/*
- * Cada pendência é um cartão, e não uma célula de tabela.
- *
- * A primeira versão desenhava as divisórias com um truque conhecido — fundo escuro no contêiner e
- * um vão de 1px entre os itens. Funciona enquanto a grade está cheia: na última fileira, as
- * células que sobram viram **buracos cinzas**, e buraco emparelhado com conteúdo lê como algo que
- * faltou carregar. Cartão independente não tem última fileira.
- */
-.tarefa {
+.pendente {
   display: flex;
   align-items: flex-start;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface);
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-controle);
+  background: var(--superficie);
 }
 
-/*
- * A hora em coluna fixa e numeral tabular.
- * É o que alinha a grade na vertical: sem largura fixa, "07:00" e "22:00" deslocam o rosto e o
- * nome de cada célula, e a grade deixa de parecer uma grade.
- */
-.tarefa__quando {
+/* A hora em coluna fixa: é o que alinha a grade na vertical. */
+.pendente__quando {
   display: grid;
-  width: 2.9rem;
-  flex: 0 0 auto;
-  padding-block-start: 0.05rem;
-  gap: 0;
-  text-align: start;
+  width: 44px;
+  flex: none;
+  padding-top: 4px;
 }
 
-.tarefa__hora {
-  color: var(--clinic-text);
-  font-size: 0.76rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
+.pendente__quando .ui-hora {
+  font-size: 14px;
 }
 
-/* A dívida de ontem fica em âmbar: não é urgência de agora, mas também não é trabalho do dia. */
-.tarefa__dia {
-  color: var(--clinic-attention-text);
-  font-size: 0.58rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
+/* A dívida de ontem em âmbar: não é urgência de agora, mas também não é trabalho do dia. */
+.pendente__dia {
+  color: var(--atencao-tinta);
+  font-size: 11.5px;
+  font-weight: 600;
 }
 
-.tarefa__corpo {
+.pendente__corpo {
   display: grid;
   min-width: 0;
-  gap: 0.02rem;
+  gap: 1px;
 }
 
-.tarefa__corpo strong {
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+.pendente__corpo strong {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.tarefa__onde,
-.tarefa__detalhe {
+.pendente__onde,
+.pendente__detalhe {
   overflow: hidden;
-  font-size: 0.68rem;
+  font-size: 12.5px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.tarefa__onde {
-  color: var(--clinic-muted);
+.pendente__onde {
+  color: var(--tinta-2);
 }
 
-.tarefa__detalhe {
-  color: var(--clinic-faint);
+.pendente__detalhe {
+  color: var(--tinta-3);
 }
 
 /* ------------------------------------------------------------------ entrega */
 
 .entrega {
   display: grid;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
+  gap: 14px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--superficie-2);
   grid-template-columns: minmax(12rem, 1fr) minmax(16rem, 2fr);
-  background: var(--clinic-surface-soft);
+}
+
+.campo {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.campo label {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.rodape__trava {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-end: auto;
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 @media (max-width: 640px) {
   .entrega {
     grid-template-columns: 1fr;
   }
-}
-
-.campo {
-  display: grid;
-  /* Linhas no topo: sem isto, o campo ao lado de um mais alto desce e a fileira sai torta. */
-  align-content: start;
-  gap: 0.25rem;
-}
-
-.campo label {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
 }
 </style>

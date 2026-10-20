@@ -8,7 +8,8 @@
  * à pergunta seguinte.
  *
  * A linha de temporada existe separada pelo mesmo motivo: embutida na diária, o acréscimo de Natal
- * vira uma suspeita de que o hotel aumentou o preço.
+ * vira uma suspeita de que o hotel aumentou o preço. O saldo a receber fecha a conta, grande: é o
+ * número que o balcão cobra na saída.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -22,8 +23,10 @@ const props = withDefaults(
     pagoCentavos?: number
     /** Compacta: some a coluna de quantidade, para caber em cartão estreito. */
     densa?: boolean
+    /** O título fica só para o leitor de tela: a seção em volta já diz o que é. */
+    semTitulo?: boolean
   }>(),
-  { pagoCentavos: 0, densa: false },
+  { pagoCentavos: 0, densa: false, semTitulo: false },
 )
 
 const { t } = useI18n()
@@ -40,7 +43,7 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
 
 <template>
   <table class="orc" :class="{ 'orc--densa': densa }">
-    <caption class="orc__caption">
+    <caption class="orc__caption" :class="{ 'orc__caption--oculta': semTitulo }">
       {{
         t('hotel.orcamento.titulo')
       }}
@@ -58,23 +61,23 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
     <tbody>
       <tr v-for="(linha, indice) in orcamento.linhas" :key="`${linha.kind}-${indice}`">
         <th scope="row">{{ rotulo(linha) }}</th>
-        <td v-if="!densa" class="orc__num clinic-value">{{ formato.numero(linha.quantidade) }}</td>
-        <td v-if="!densa" class="orc__num clinic-value">
+        <td v-if="!densa" class="orc__num ui-num">{{ formato.numero(linha.quantidade) }}</td>
+        <td v-if="!densa" class="orc__num ui-num">
           {{ formato.moeda(linha.valorUnitarioCentavos) }}
         </td>
-        <td class="orc__num clinic-value">{{ formato.moeda(linha.totalCentavos) }}</td>
+        <td class="orc__num ui-num">{{ formato.moeda(linha.totalCentavos) }}</td>
       </tr>
     </tbody>
 
     <tfoot>
       <tr class="orc__total">
         <th scope="row" :colspan="densa ? 1 : 3">{{ t('hotel.orcamento.somaTotal') }}</th>
-        <td class="orc__num clinic-value">{{ formato.moeda(orcamento.totalCentavos) }}</td>
+        <td class="orc__num ui-num">{{ formato.moeda(orcamento.totalCentavos) }}</td>
       </tr>
 
-      <tr v-if="temPagamento">
+      <tr v-if="temPagamento" class="orc__pago">
         <th scope="row" :colspan="densa ? 1 : 3">{{ t('hotel.orcamento.pago') }}</th>
-        <td class="orc__num clinic-value">−{{ formato.moeda(pagoCentavos) }}</td>
+        <td class="orc__num ui-num">−{{ formato.moeda(pagoCentavos) }}</td>
       </tr>
 
       <!--
@@ -83,12 +86,12 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
       -->
       <tr class="orc__saldo">
         <th scope="row" :colspan="densa ? 1 : 3">{{ t('hotel.orcamento.saldo') }}</th>
-        <td class="orc__num clinic-value">{{ formato.moeda(orcamento.saldoCentavos) }}</td>
+        <td class="orc__num ui-num">{{ formato.moeda(orcamento.saldoCentavos) }}</td>
       </tr>
 
       <tr v-if="!temPagamento" class="orc__sinal">
         <th scope="row" :colspan="densa ? 1 : 3">{{ t('hotel.orcamento.sinalSugerido') }}</th>
-        <td class="orc__num clinic-value">{{ formato.moeda(orcamento.sinalCentavos) }}</td>
+        <td class="orc__num ui-num">{{ formato.moeda(orcamento.sinalCentavos) }}</td>
       </tr>
     </tfoot>
   </table>
@@ -98,66 +101,86 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
 .orc {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--clinic-font-label);
+  color: var(--tinta);
+  font-size: 14px;
 }
 
-/* A legenda é o título do cartão do orçamento: tem o tamanho dos títulos de cartão vizinhos. */
 .orc__caption {
-  padding-bottom: var(--clinic-space-2);
-  color: var(--clinic-text);
-  font-size: 0.9375rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  padding-bottom: 10px;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
   text-align: start;
+}
+
+.orc__caption--oculta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .orc th,
 .orc td {
-  padding: 0.35rem 0.5rem;
+  padding: 9px 10px;
   text-align: start;
 }
 
 .orc thead th {
-  border-bottom: 1px solid var(--clinic-line);
-  color: var(--clinic-faint);
-  font-size: 0.75rem;
-  font-weight: 600;
+  border-bottom: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .orc tbody th {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .orc tbody tr + tr th,
 .orc tbody tr + tr td {
-  border-top: 1px solid var(--clinic-line-soft);
+  border-top: 1px solid var(--linha);
 }
 
-.orc__num {
+.orc .orc__num {
   text-align: end;
-  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .orc tfoot th,
 .orc tfoot td {
-  border-top: 1px solid var(--clinic-line);
+  border-top: 1px solid var(--linha);
 }
 
 .orc__total th,
 .orc__total td {
-  font-weight: 750;
+  font-weight: 600;
+}
+
+.orc__pago th,
+.orc__pago td {
+  color: var(--ok-tinta);
 }
 
 .orc__saldo th,
 .orc__saldo td {
-  color: var(--clinic-accent-strong);
-  font-size: var(--clinic-font-body);
-  font-weight: 800;
+  border-top: 1px solid var(--linha-forte);
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.orc__saldo td {
+  font-size: 19px;
+  letter-spacing: -0.01em;
 }
 
 .orc__sinal th,
 .orc__sinal td {
-  border-top-color: var(--clinic-line-soft);
-  color: var(--clinic-faint);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 </style>

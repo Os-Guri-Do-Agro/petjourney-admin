@@ -8,8 +8,11 @@
  * por quê. O aceite cria a reserva `pendente` no mapa, com a origem do pedido, e avisa quem pediu
  * — falta o sinal, como em toda reserva da casa.
  *
- * Irmã da caixa de pedidos da clínica (`/veterinario/pedidos`): a mesma ordem pelo prazo, o mesmo
- * histórico recolhido, o mesmo celular na gaveta que empurra a página.
+ * Irmã da caixa de pedidos da clínica (`/veterinario/pedidos`): a mesma ordem pelo prazo, a
+ * contagem regressiva com tom em cada linha, a resposta numa gaveta ao lado da caixa (a linha
+ * aberta fica tingida e a lista continua à vista), o histórico recolhido embaixo e o celular de
+ * quem pede numa gaveta que empurra a página. As ações do alto são só a configuração e a prévia do
+ * celular: a ação desta tela é responder, e ela mora em cada linha.
  */
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
@@ -18,13 +21,12 @@ import Popover from 'primevue/popover'
 import SelectButton from 'primevue/selectbutton'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { useToast } from 'primevue/usetoast'
-import { PhCalendarPlus, PhDeviceMobile, PhLink, PhTray } from '@phosphor-icons/vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
-import '@/components/home/home-card.css'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { useTelaLarga } from '@/composables/useTelaLarga'
 import { RESPONSAVEL_SEM_VINCULO } from '@/features/clinico/data/seed-pedidos'
@@ -84,8 +86,9 @@ function responsavelDe(pedido: PedidoDeReserva): string {
   return tutor?.nome ?? pedido.novoCadastro?.nome ?? ''
 }
 
-// ------------------------------------------------------------------ resumo
+// ------------------------------------------------------------------ a frase de cima
 
+/** Quantos esperam, quantos passaram do prazo, e quando vence o próximo. */
 const fraseDoResumo = computed(() => {
   if (!pedidos.carregado) {
     return ''
@@ -97,22 +100,24 @@ const fraseDoResumo = computed(() => {
     return t('hotel.pedidos.resumo.nenhum')
   }
 
-  const partes = [t('hotel.pedidos.resumo.abertos', { n: total }, total)]
+  const abertos = t('hotel.pedidos.resumo.abertos', { n: total }, total)
 
   if (pedidos.atrasadas > 0) {
-    partes.push(t('hotel.pedidos.resumo.atrasados', { n: pedidos.atrasadas }, pedidos.atrasadas))
-  } else {
-    const proximo = pedidos.abertas[0]!.pedido.responderAte
-
-    partes.push(
-      t('hotel.pedidos.resumo.proximo', {
-        quando:
-          dataDe(proximo) === dataDe(agoraIso()) ? formato.hora(proximo) : formato.quando(proximo),
-      }),
-    )
+    return t('clinico.pedidos.tela.resumo', {
+      abertos,
+      depois: t('hotel.pedidos.resumo.atrasados', { n: pedidos.atrasadas }, pedidos.atrasadas),
+    })
   }
 
-  return partes.join(' · ')
+  const proximo = pedidos.abertas[0]!.pedido.responderAte
+
+  return t('clinico.pedidos.tela.resumo', {
+    abertos,
+    depois: t('hotel.pedidos.resumo.proximo', {
+      quando:
+        dataDe(proximo) === dataDe(agoraIso()) ? formato.hora(proximo) : formato.quando(proximo),
+    }),
+  })
 })
 
 const desligado = computed(() => pedidos.configuracao !== null && !pedidos.configuracao.ativo)
@@ -175,6 +180,7 @@ async function recusar(payload: { motivo: MotivoDaRecusaDaReserva; mensagem: str
   }
 }
 
+/** O que a última resposta fez, em uma linha — com o atalho para a reserva quando reservou. */
 const resultado = computed(() => {
   const atual = pedidos.resultado
 
@@ -199,7 +205,15 @@ const resultado = computed(() => {
     }
   }
 
-  return { tipo: atual.tipo, texto: t(`hotel.pedidos.resultado.${atual.tipo}`), rota: null }
+  return {
+    tipo: atual.tipo,
+    /* O texto antigo da vaga perdida mandava a um botão "Outra acomodação" que não existe mais. */
+    texto:
+      atual.tipo === 'sem-vaga'
+        ? t('hotel.pedidos.tela.semVaga')
+        : t(`hotel.pedidos.resultado.${atual.tipo}`),
+    rota: null,
+  }
 })
 
 // ------------------------------------------------------------------ histórico
@@ -217,12 +231,26 @@ function fraseDoRespondido(linha: PedidoDeReservaNaCaixa) {
   }
 
   if (pedido.status === 'recusado') {
-    return t('hotel.pedidos.respondido.recusado', {
+    return t('clinico.pedidos.tela.recusado', {
       motivo: t(`hotel.pedidos.recusa.motivo.${pedido.recusa?.motivo ?? 'outro'}`),
     })
   }
 
   return t(`hotel.pedidos.respondido.${pedido.status}`)
+}
+
+/** O desfecho em cor e ícone: reservado é ok; perder o prazo sem resposta pede atenção. */
+function tomDoRespondido(linha: PedidoDeReservaNaCaixa) {
+  switch (linha.pedido.status) {
+    case 'aceito':
+      return { tom: 'ok', icone: 'ph-check-circle' }
+    case 'recusado':
+      return { tom: 'neutro', icone: 'ph-x-circle' }
+    case 'expirado':
+      return { tom: 'atencao', icone: 'ph-clock-countdown' }
+    default:
+      return { tom: 'neutro', icone: 'ph-arrow-u-up-left' }
+  }
 }
 
 function rostosDe(pedido: PedidoDeReserva) {
@@ -364,7 +392,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   {
     alvo: '.pedido__botoes',
     titulo: t('hotel.tour.pedidos.resposta.titulo'),
-    texto: t('hotel.tour.pedidos.resposta.texto'),
+    texto: t('hotel.pedidos.tela.tourResposta'),
   },
   {
     alvo: '.pedidos__celular',
@@ -375,26 +403,65 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :title="t('hotel.pedidos.titulo')"
-    :subtitle="t('hotel.pedidos.subtitulo')"
-    :loading="!pedidos.carregado && !pedidos.erro"
-    :error="pedidos.erro && !pedidos.carregado ? t(pedidos.erro) : ''"
+  <UiPagina
+    class="tela-pedidos"
+    :carregando="!pedidos.carregado && !pedidos.erro"
+    :erro="pedidos.erro && !pedidos.carregado ? t(pedidos.erro) : ''"
     tour
     @tour="tourAberto = true"
-    @retry="pedidos.carregar()"
+    @tentar-de-novo="pedidos.carregar()"
   >
-    <div class="pedidos clinic-scope">
-      <p v-if="fraseDoResumo" class="pedidos__resumo" aria-live="polite">{{ fraseDoResumo }}</p>
+    <template v-if="fraseDoResumo" #resumo>
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
+    </template>
 
-      <p v-if="desligado" class="pedidos__desligado" role="status">
-        <i class="ph ph-pause-circle" aria-hidden="true" />
-        <span>{{ t('hotel.pedidos.desligado') }}</span>
+    <!--
+      Nenhuma ação cheia no alto: a ação desta tela é responder, e ela mora em cada linha. Em cima
+      ficam as duas portas da configuração e, mais leve, a prévia do celular.
+    -->
+    <template #acoes>
+      <Button
+        type="button"
+        class="pedidos__celular"
+        severity="secondary"
+        text
+        icon="ph ph-device-mobile"
+        :label="t('clinico.pedidos.tela.verComoPede')"
+        :aria-expanded="appAberto"
+        @click="appAberto = !appAberto"
+      />
+      <Button
+        type="button"
+        severity="secondary"
+        outlined
+        icon="ph ph-link"
+        :label="t('hotel.pedidos.acoes.link')"
+        aria-haspopup="dialog"
+        @click="popoverDoLink?.toggle($event)"
+      />
+      <Button
+        type="button"
+        severity="secondary"
+        outlined
+        icon="ph ph-sliders-horizontal"
+        :label="t('clinico.pedidos.tela.configurar')"
+        :title="t('hotel.pedidos.acoes.configurar')"
+        aria-haspopup="dialog"
+        @click="configAberta = true"
+      />
+    </template>
+
+    <div class="pedidos">
+      <!-- Desligado: dito na primeira linha, com o jeito de religar. -->
+      <p v-if="desligado" class="aviso aviso--atencao" role="status">
+        <i class="ph ph-pause-circle aviso__icone" aria-hidden="true" />
+        <span class="aviso__texto">{{ t('hotel.pedidos.desligado') }}</span>
         <Button
+          type="button"
           size="small"
           severity="secondary"
           outlined
+          icon="ph ph-play"
           :label="t('hotel.pedidos.religar')"
           @click="ligarDeNovo"
         />
@@ -402,25 +469,22 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
       <p
         v-if="resultado"
-        class="pedidos__resultado"
-        :class="`pedidos__resultado--${resultado.tipo}`"
+        class="aviso"
+        :class="resultado.tipo === 'reservado' ? 'aviso--ok' : 'aviso--neutro'"
         role="status"
       >
         <i
-          class="ph"
+          class="ph aviso__icone"
           :class="resultado.tipo === 'reservado' ? 'ph-check-circle' : 'ph-info'"
           aria-hidden="true"
         />
-        <span class="pedidos__resultado-texto">{{ resultado.texto }}</span>
-        <RouterLink
-          v-if="resultado.rota"
-          class="pedidos__resultado-link clinic-focusable"
-          :to="resultado.rota"
-        >
+        <span class="aviso__texto">{{ resultado.texto }}</span>
+        <RouterLink v-if="resultado.rota" class="ui-mais" :to="resultado.rota">
           {{ t('hotel.pedidos.resultado.verReserva') }}
           <i class="ph ph-arrow-right" aria-hidden="true" />
         </RouterLink>
         <Button
+          type="button"
           icon="ph ph-x"
           severity="secondary"
           text
@@ -431,58 +495,69 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         />
       </p>
 
-      <p v-if="pedidos.erro && pedidos.carregado" class="pedidos__erro" role="alert">
-        <i class="ph ph-warning-circle" aria-hidden="true" />
-        {{ t(pedidos.erro) }}
+      <p v-if="pedidos.erro && pedidos.carregado" class="aviso aviso--risco" role="alert">
+        <i class="ph ph-warning-circle aviso__icone" aria-hidden="true" />
+        <span class="aviso__texto">{{ t(pedidos.erro) }}</span>
       </p>
 
-      <section class="hc pedidos__caixa">
-        <header class="hc__cabeca">
-          <h2 class="hc__titulo">
-            <PhTray class="hc__icone" weight="duotone" aria-hidden="true" />
-            {{ t('hotel.pedidos.secao.abertos') }}
-          </h2>
-          <span class="hc__ferramentas">{{ t('hotel.pedidos.secao.ordem') }}</span>
-        </header>
+      <UiSecao
+        id="pedidos-de-reserva"
+        :titulo="t('hotel.pedidos.secao.abertos')"
+        :contagem="pedidos.abertas.length"
+        :descricao="pedidos.abertas.length > 1 ? t('clinico.pedidos.tela.descricao') : ''"
+      >
+        <div class="caixa pedidos__caixa ui-folha">
+          <TransitionGroup
+            v-if="pedidos.abertas.length > 0"
+            tag="ul"
+            name="linha"
+            class="ui-lista caixa__lista"
+          >
+            <PedidoDeReservaLinha
+              v-for="linha in pedidos.abertas"
+              :key="linha.pedido.id"
+              :linha="linha"
+              :respondendo="pedidos.respondendo === linha.pedido.id"
+              :ocupado="pedidos.respondendo !== null"
+              :aberta="idEmResposta === linha.pedido.id"
+              @aceitar="aceitar(linha, $event)"
+              @abrir="abrirResposta(linha)"
+            />
+          </TransitionGroup>
 
-        <TransitionGroup
-          v-if="pedidos.abertas.length > 0"
-          tag="ul"
-          name="linha"
-          class="pedidos__lista"
-        >
-          <PedidoDeReservaLinha
-            v-for="linha in pedidos.abertas"
-            :key="linha.pedido.id"
-            :linha="linha"
-            :respondendo="pedidos.respondendo === linha.pedido.id"
-            :ocupado="pedidos.respondendo !== null"
-            :aberta="idEmResposta === linha.pedido.id"
-            @aceitar="aceitar(linha, $event)"
-            @abrir="abrirResposta(linha)"
-          />
-        </TransitionGroup>
-
-        <div v-else class="pedidos__vazio">
-          <PhCalendarPlus class="pedidos__vazio-icone" weight="duotone" aria-hidden="true" />
-          <strong>{{ t('hotel.pedidos.vazio.titulo') }}</strong>
-          <p>{{ t('hotel.pedidos.vazio.descricao') }}</p>
+          <div v-else class="caixa__vazio">
+            <span class="caixa__vazio-icone" aria-hidden="true">
+              <i class="ph ph-calendar-plus" />
+            </span>
+            <strong>{{ t('hotel.pedidos.vazio.titulo') }}</strong>
+            <p>{{ t('hotel.pedidos.vazio.descricao') }}</p>
+          </div>
         </div>
-      </section>
+      </UiSecao>
 
-      <section v-if="pedidos.respondidas.length > 0" class="pedidos__historico">
-        <Button
-          class="pedidos__alternar"
-          severity="secondary"
-          text
-          size="small"
-          :icon="historicoAberto ? 'ph ph-caret-down' : 'ph ph-caret-right'"
-          :label="t('hotel.pedidos.secao.respondidos', { n: pedidos.respondidas.length })"
+      <!-- O respondido é histórico: recolhido no fim, uma linha por pedido. -->
+      <section v-if="pedidos.respondidas.length > 0" class="historico">
+        <button
+          type="button"
+          class="historico__alternar"
           :aria-expanded="historicoAberto"
+          aria-controls="pedidos-de-reserva-respondidos"
           @click="historicoAberto = !historicoAberto"
-        />
+        >
+          <i
+            class="ph"
+            :class="historicoAberto ? 'ph-caret-down' : 'ph-caret-right'"
+            aria-hidden="true"
+          />
+          {{ t('clinico.pedidos.tela.respondidos') }}
+          <span class="ui-contagem">{{ pedidos.respondidas.length }}</span>
+        </button>
 
-        <ul v-if="historicoAberto" class="hc pedidos__respondidos">
+        <ul
+          v-if="historicoAberto"
+          id="pedidos-de-reserva-respondidos"
+          class="ui-folha ui-lista"
+        >
           <li v-for="linha in pedidos.respondidas" :key="linha.pedido.id" class="respondido">
             <span class="respondido__rostos">
               <PetAvatar
@@ -495,14 +570,20 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 tamanho="sm"
               />
             </span>
-            <span class="respondido__texto">
-              <strong>{{ nomesDe(linha.pedido) }}</strong>
-              <span>{{ formato.periodo(linha.pedido.entrada, linha.pedido.saida) }}</span>
+            <span class="ui-linha__texto">
+              <strong class="ui-linha__titulo">{{ nomesDe(linha.pedido) }}</strong>
+              <span class="ui-linha__meta respondido__meta ui-num">
+                {{ formato.periodo(linha.pedido.entrada, linha.pedido.saida) }}
+              </span>
             </span>
-            <span class="respondido__como" :class="`respondido__como--${linha.pedido.status}`">
+            <span
+              class="respondido__como"
+              :class="`respondido__como--${tomDoRespondido(linha).tom}`"
+            >
+              <i class="ph" :class="tomDoRespondido(linha).icone" aria-hidden="true" />
               {{ fraseDoRespondido(linha) }}
             </span>
-            <span class="respondido__quando">
+            <span class="respondido__quando ui-num">
               {{ formato.relativo(linha.pedido.respondidoEm ?? linha.pedido.criadoEm) }}
             </span>
           </li>
@@ -510,277 +591,283 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       </section>
     </div>
 
-    <PedidoDeReservaGaveta
-      :linha="emResposta"
-      :nomes="emResposta ? nomesDe(emResposta.pedido) : ''"
-      :responsavel="emResposta ? responsavelDe(emResposta.pedido) : ''"
-      :telefone="pedidos.configuracao?.urgencia.telefone ?? ''"
-      :salvando="pedidos.respondendo !== null"
-      @reservar="emResposta && aceitar(emResposta, $event)"
-      @recusar="recusar"
-      @fechar="fecharResposta"
-    />
-
-    <ReservaOnlineGaveta
-      v-model:visivel="configAberta"
-      :configuracao="pedidos.configuracao"
-      :salvando="salvandoConfig"
-      @salvar="salvarConfiguracao"
-    />
-
-    <Popover ref="popoverDoLink" class="hc-tema">
-      <div class="link clinic-scope">
-        <p class="link__titulo">{{ t('hotel.pedidos.link.titulo') }}</p>
-        <p class="link__ajuda">{{ t('hotel.pedidos.link.ajuda') }}</p>
-        <div class="link__campo">
-          <InputText
-            :model-value="enderecoDoLink"
-            readonly
-            fluid
-            :aria-label="t('hotel.pedidos.link.titulo')"
-          />
-          <Button
-            severity="secondary"
-            outlined
-            icon="ph ph-copy"
-            :aria-label="t('hotel.pedidos.link.copiar')"
-            @click="copiarLink"
-          />
-        </div>
-        <div class="link__acoes">
-          <Button
-            size="small"
-            icon="ph ph-arrow-square-out"
-            :label="t('hotel.pedidos.link.abrir')"
-            @click="abrirPagina"
-          />
-          <Button
-            as="a"
-            :href="compartilharNoWhatsapp"
-            target="_blank"
-            rel="noopener"
-            size="small"
-            severity="secondary"
-            outlined
-            icon="ph ph-whatsapp-logo"
-            :label="t('hotel.pedidos.link.whatsapp')"
-          />
-        </div>
-      </div>
-    </Popover>
-
-    <!--
-      O celular do responsável, numa gaveta que empurra a página. Clicar na página não fecha:
-      responder aqui e ver o aviso chegar lá é a demonstração.
-    -->
-    <Drawer
-      v-model:visible="appAberto"
-      position="right"
-      :modal="false"
-      :dismissable="false"
-      class="hc-tema pedidos-gaveta"
-      :style="{ width: 'min(27rem, 94vw)' }"
-    >
-      <template #header>
-        <h2 class="pedidos-gaveta__titulo">
-          <PhDeviceMobile class="hc__icone" weight="duotone" aria-hidden="true" />
-          {{ t('hotel.pedidos.acoes.verNoApp') }}
-        </h2>
-      </template>
-
-      <div class="pedidos-gaveta__corpo clinic-scope">
-        <div class="ensaio">
-          <span id="ensaio-pessoa-hotel" class="clinic-label">{{
-            t('hotel.pedidos.ensaio.quem')
-          }}</span>
-          <SelectButton
-            v-model="pessoa"
-            :options="pessoas"
-            option-label="rotulo"
-            option-value="valor"
-            :allow-empty="false"
-            aria-labelledby="ensaio-pessoa-hotel"
-          />
-          <label class="ensaio__chave">
-            <ToggleSwitch :model-value="disputa" @update:model-value="alternarDisputa" />
-            <span>{{ t('hotel.pedidos.ensaio.disputa') }}</span>
-          </label>
-        </div>
-
-        <ReservarNoApp :tutor-id="pessoa" @mudou="celularMudou" />
-      </div>
-    </Drawer>
-
-    <HotelDevPanel />
-
-    <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
-
-    <template #actions>
-      <Button
-        class="pedidos__celular"
-        :label="t('hotel.pedidos.acoes.verNoApp')"
-        size="small"
-        severity="secondary"
-        outlined
-        :aria-expanded="appAberto"
-        @click="appAberto = !appAberto"
-      >
-        <template #icon>
-          <PhDeviceMobile class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
-        </template>
-      </Button>
-      <Button
-        :label="t('hotel.pedidos.acoes.link')"
-        size="small"
-        severity="secondary"
-        outlined
-        aria-haspopup="dialog"
-        @click="popoverDoLink?.toggle($event)"
-      >
-        <template #icon>
-          <PhLink class="hc-pilula__icone" weight="duotone" aria-hidden="true" />
-        </template>
-      </Button>
-      <Button
-        icon="ph ph-sliders-horizontal"
-        :label="t('hotel.pedidos.acoes.configurar')"
-        size="small"
-        severity="secondary"
-        outlined
-        aria-haspopup="dialog"
-        @click="configAberta = true"
+    <template #sempre>
+      <PedidoDeReservaGaveta
+        :linha="emResposta"
+        :nomes="emResposta ? nomesDe(emResposta.pedido) : ''"
+        :responsavel="emResposta ? responsavelDe(emResposta.pedido) : ''"
+        :telefone="pedidos.configuracao?.urgencia.telefone ?? ''"
+        :salvando="pedidos.respondendo !== null"
+        @reservar="emResposta && aceitar(emResposta, $event)"
+        @recusar="recusar"
+        @fechar="fecharResposta"
       />
+
+      <ReservaOnlineGaveta
+        v-model:visivel="configAberta"
+        :configuracao="pedidos.configuracao"
+        :salvando="salvandoConfig"
+        @salvar="salvarConfiguracao"
+      />
+
+      <Popover ref="popoverDoLink" class="clinic-overlay">
+        <div class="link">
+          <p class="link__titulo">{{ t('hotel.pedidos.link.titulo') }}</p>
+          <p class="link__ajuda">{{ t('hotel.pedidos.link.ajuda') }}</p>
+          <div class="link__campo">
+            <InputText
+              :model-value="enderecoDoLink"
+              readonly
+              fluid
+              :aria-label="t('hotel.pedidos.link.titulo')"
+            />
+            <Button
+              type="button"
+              severity="secondary"
+              outlined
+              icon="ph ph-copy"
+              :aria-label="t('hotel.pedidos.link.copiar')"
+              :title="t('hotel.pedidos.link.copiar')"
+              @click="copiarLink"
+            />
+          </div>
+          <div class="link__acoes">
+            <Button
+              type="button"
+              size="small"
+              icon="ph ph-arrow-square-out"
+              :label="t('hotel.pedidos.link.abrir')"
+              @click="abrirPagina"
+            />
+            <Button
+              as="a"
+              :href="compartilharNoWhatsapp"
+              target="_blank"
+              rel="noopener"
+              size="small"
+              severity="secondary"
+              outlined
+              icon="ph ph-whatsapp-logo"
+              :label="t('hotel.pedidos.link.whatsapp')"
+            />
+          </div>
+        </div>
+      </Popover>
+
+      <!--
+        O celular do responsável, numa gaveta que empurra a página. Clicar na página não fecha:
+        responder aqui e ver o aviso chegar lá é a demonstração.
+      -->
+      <Drawer
+        v-model:visible="appAberto"
+        position="right"
+        :modal="false"
+        :dismissable="false"
+        class="pedidos-gaveta clinic-overlay"
+        :style="{ width: 'min(27rem, 94vw)' }"
+      >
+        <template #header>
+          <h2 class="pedidos-gaveta__titulo">
+            <i class="ph ph-device-mobile" aria-hidden="true" />
+            {{ t('hotel.pedidos.acoes.verNoApp') }}
+          </h2>
+        </template>
+
+        <div class="pedidos-gaveta__corpo clinic-scope">
+          <div class="ensaio">
+            <span id="ensaio-pessoa-hotel" class="ensaio__rotulo">
+              {{ t('hotel.pedidos.ensaio.quem') }}
+            </span>
+            <SelectButton
+              v-model="pessoa"
+              :options="pessoas"
+              option-label="rotulo"
+              option-value="valor"
+              :allow-empty="false"
+              aria-labelledby="ensaio-pessoa-hotel"
+            />
+            <label class="ensaio__chave">
+              <ToggleSwitch :model-value="disputa" @update:model-value="alternarDisputa" />
+              <span>{{ t('hotel.pedidos.ensaio.disputa') }}</span>
+            </label>
+          </div>
+
+          <ReservarNoApp :tutor-id="pessoa" @mudou="celularMudou" />
+        </div>
+      </Drawer>
+
+      <HotelDevPanel />
+
+      <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
     </template>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
+/* Os botões contornado e de texto no padrão do Trilha: no escuro, o cinza do preset sumia. */
+.tela-pedidos {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
+}
+
 .pedidos {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 28px;
 }
 
-.pedidos__resumo {
-  margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.95rem;
-  font-weight: 600;
-}
+/* ------------------------------------------------------------------ avisos de estado */
 
-.pedidos__lista {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  container-type: inline-size;
-  list-style: none;
-}
-
-.pedidos__desligado,
-.pedidos__resultado,
-.pedidos__erro {
+.aviso {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 8px 12px;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--hc-borda);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--hc-cartao);
-  font-size: var(--clinic-font-label);
-  font-weight: 600;
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
-.pedidos__desligado > span,
-.pedidos__resultado-texto {
-  flex: 1 1 16rem;
+.aviso__icone {
+  flex: none;
+  font-size: 20px;
+}
+
+.aviso__texto {
+  flex: 1 1 18rem;
   min-width: 0;
 }
 
-.pedidos__desligado > i {
-  color: var(--clinic-attention-text);
+.aviso--ok {
+  border-color: color-mix(in oklab, var(--ok) 35%, transparent);
+  background: var(--ok-fundo);
 }
 
-.pedidos__resultado--reservado {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
-  color: var(--hc-marca-forte);
+.aviso--ok .aviso__icone {
+  color: var(--ok-tinta);
 }
 
-.pedidos__resultado-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--clinic-space-1);
-  color: var(--hc-marca-forte);
-  font-weight: 700;
-  text-decoration: none;
+.aviso--atencao {
+  border-color: color-mix(in oklab, var(--atencao) 35%, transparent);
+  background: var(--atencao-fundo);
 }
 
-.pedidos__resultado-link:hover {
-  text-decoration: underline;
+.aviso--atencao .aviso__icone {
+  color: var(--atencao-tinta);
 }
 
-.pedidos__erro {
-  color: var(--clinic-risk-text);
+.aviso--risco {
+  border-color: color-mix(in oklab, var(--risco) 35%, transparent);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
-.pedidos__caixa {
-  gap: 0.25rem;
+.aviso--neutro .aviso__icone {
+  color: var(--tinta-2);
 }
 
-.pedidos__vazio {
+/* ------------------------------------------------------------------ a caixa */
+
+.caixa {
+  overflow: hidden;
+}
+
+.caixa__lista {
+  container-type: inline-size;
+}
+
+.caixa__vazio {
   display: grid;
-  padding: 2rem 1rem;
-  gap: 0.35rem;
-  color: var(--hc-tinta-2);
   justify-items: center;
+  gap: 6px;
+  padding: 44px 24px;
   text-align: center;
 }
 
-.pedidos__vazio strong {
-  color: var(--hc-tinta);
+.caixa__vazio-icone {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  margin-bottom: 6px;
+  border-radius: 14px;
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+  font-size: 24px;
 }
 
-.pedidos__vazio p {
-  max-width: 34rem;
+.caixa__vazio strong {
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.caixa__vazio p {
+  max-width: 46ch;
   margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.5;
 }
 
-.pedidos__vazio-icone {
-  width: 2rem;
-  height: 2rem;
-  color: var(--hc-marca);
-}
+/* ------------------------------------------------------------------ respondidos */
 
-.pedidos__historico {
+.historico {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 12px;
 }
 
-.pedidos__alternar.p-button {
+.historico__alternar {
+  display: inline-flex;
+  min-height: 36px;
   justify-self: start;
-  color: var(--hc-tinta-2);
-  font-weight: 700;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 0 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.pedidos__respondidos {
-  margin: 0;
-  padding-block: 0.4rem;
-  gap: 0;
-  list-style: none;
+.historico__alternar:hover {
+  background: var(--superficie-2);
+}
+
+.historico__alternar:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
+}
+
+.historico__alternar > i {
+  color: var(--tinta-2);
+  font-size: 16px;
+}
+
+[dir='rtl'] .historico__alternar > .ph-caret-right {
+  scale: -1 1;
 }
 
 .respondido {
   display: grid;
+  min-height: 60px;
   align-items: center;
-  padding: 0.6rem 0;
-  gap: 0.75rem;
-  grid-template-columns: auto minmax(10rem, 1fr) minmax(0, 1.4fr) auto;
-}
-
-.respondido + .respondido {
-  border-top: 1px solid var(--hc-linha);
+  gap: 6px 16px;
+  grid-template-columns: 3rem minmax(10rem, 1fr) minmax(0, 1.5fr) 7rem;
+  padding: 10px 18px;
 }
 
 .respondido__rostos {
@@ -788,38 +875,47 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .respondido__rostos > * + * {
-  margin-inline-start: -0.55rem;
-  box-shadow: 0 0 0 2px var(--hc-cartao);
+  margin-inline-start: -10px;
   border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--superficie);
 }
 
-.respondido__texto {
-  display: grid;
-  min-width: 0;
-  font-size: 0.875rem;
-}
-
-.respondido__texto > span {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-}
-
-.respondido__como {
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-
-.respondido__como--aceito {
-  color: var(--hc-marca-forte);
-}
-
-.respondido__quando {
-  color: var(--hc-tinta-3);
-  font-size: 0.75rem;
+.respondido__meta {
   white-space: nowrap;
 }
 
+.respondido__como {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 550;
+  line-height: 1.4;
+}
+
+.respondido__como i {
+  flex: none;
+  font-size: 15px;
+  transform: translateY(2px);
+}
+
+.respondido__como--ok {
+  color: var(--ok-tinta);
+}
+
+.respondido__como--atencao {
+  color: var(--atencao-tinta);
+}
+
+.respondido__quando {
+  color: var(--tinta-3);
+  font-size: 13px;
+  text-align: end;
+  white-space: nowrap;
+}
+
+/* O pedido que sai da lista ao ser respondido: o movimento diz para onde ele foi. */
 .linha-enter-active,
 .linha-leave-active {
   transition:
@@ -829,12 +925,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .linha-enter-from {
   opacity: 0;
-  transform: translateY(-0.4rem);
+  transform: translateY(-6px);
 }
 
 .linha-leave-to {
   opacity: 0;
-  transform: translateY(0.4rem);
+  transform: translateY(6px);
 }
 
 .linha-move {
@@ -857,24 +953,29 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   .respondido__como,
   .respondido__quando {
     grid-column: 2;
+    text-align: start;
   }
 }
+
+/* ------------------------------------------------------------------ popover do link */
 
 .link {
   display: grid;
   width: min(24rem, 86vw);
-  gap: 0.55rem;
+  gap: 10px;
 }
 
 .link__titulo {
   margin: 0;
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .link__ajuda {
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.45;
 }
 
@@ -882,42 +983,62 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .link__acoes {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 8px;
 }
 
 .link__campo > :first-child {
   flex: 1;
 }
 
+/* ------------------------------------------------------------------ gaveta do celular */
+
 .pedidos-gaveta__titulo {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   margin: 0;
-  gap: 0.55rem;
-  color: var(--hc-tinta);
-  font-size: 1rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.pedidos-gaveta__titulo i {
+  color: var(--hotel-tinta);
+  font-size: 20px;
 }
 
 .pedidos-gaveta__corpo {
   display: grid;
-  gap: 0.85rem;
+  gap: 14px;
 }
 
+/* O ensaio da demonstração: quem está com o celular, e a disputa pelo próximo envio. */
 .ensaio {
   display: grid;
-  padding: 0.75rem;
-  border: 1px dashed var(--hc-borda);
-  border-radius: 0.75rem;
-  gap: 0.45rem;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--superficie-2);
+}
+
+.ensaio__rotulo {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.ensaio :deep(.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--superficie);
+  color: var(--tinta);
 }
 
 .ensaio__chave {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  color: var(--hc-tinta-2);
-  font-size: var(--clinic-font-label);
+  gap: 10px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.4;
   cursor: pointer;
 }
 </style>

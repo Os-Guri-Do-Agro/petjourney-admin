@@ -1,10 +1,12 @@
 <script setup lang="ts">
 /**
- * As exigências de admissão de uma reserva — a regra R1 na tela.
+ * As exigências de admissão de uma reserva — a regra R1 na tela, como lista de checagem.
  *
  * Uma linha por comprovante, e cada linha diz **três** coisas: o que é, qual é a situação e o que
- * fazer a respeito. A terceira é a que costuma faltar: uma lista de documentos vencidos sem ação
- * ao lado obriga quem lê a descobrir sozinho onde se registra o papel — e, na prática, a registrar
+ * fazer a respeito. O círculo à esquerda é o visto da lista (verde quando está em dia, âmbar
+ * quando vence no meio da estadia, vermelho quando impede a entrada), o selo diz a mesma coisa em
+ * palavra, e a ação de resolver mora na própria linha — uma lista de documentos vencidos sem ação
+ * ao lado obriga quem lê a descobrir sozinho onde se registra o papel, e, na prática, a registrar
  * fora do sistema.
  *
  * A dispensa é uma ação de segunda classe de propósito: fica atrás de um botão discreto e exige
@@ -14,8 +16,7 @@ import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import HotelSelo from '../base/HotelSelo.vue'
-import { tomDaAdmissao, useHotelFormat } from '../../composables/useHotelFormat'
+import { useHotelFormat } from '../../composables/useHotelFormat'
 import type { AvaliacaoDeAdmissao, ExigenciaAvaliada } from '../../domain/admissao'
 import type { ExigenciaKind } from '../../data/types'
 
@@ -54,6 +55,34 @@ const itens = computed(() =>
   [...props.admissao.itens].sort((um, outro) => ORDEM[um.situacao] - ORDEM[outro.situacao]),
 )
 
+const resolvidos = computed(
+  () => props.admissao.itens.filter((item) => item.situacao === 'ok' || item.situacao === 'dispensado').length,
+)
+
+/** O tom de cada linha: o que impede é risco; o que avisa é atenção; o resto, em dia. */
+function tomDe(item: ExigenciaAvaliada): 'risco' | 'atencao' | 'ok' | 'neutro' {
+  if (item.situacao === 'ok') {
+    return 'ok'
+  }
+
+  if (item.situacao === 'dispensado') {
+    return 'neutro'
+  }
+
+  if (item.situacao === 'vence-durante' || !item.bloqueia) {
+    return 'atencao'
+  }
+
+  return 'risco'
+}
+
+const ICONE: Record<ReturnType<typeof tomDe>, string> = {
+  ok: 'ph-check',
+  neutro: 'ph-seal-check',
+  atencao: 'ph-exclamation-mark',
+  risco: 'ph-x',
+}
+
 function detalhe(item: ExigenciaAvaliada): string {
   if (item.situacao === 'dispensado') {
     return t('hotel.exigencias.dispensadaPor', { nome: item.dispensa?.autorizadaPor ?? '' })
@@ -86,51 +115,72 @@ function detalhe(item: ExigenciaAvaliada): string {
 <template>
   <section class="exig">
     <!--
-      O resumo vem antes da lista: quem abre a reserva na véspera quer saber se vai dar problema,
-      e só depois quais. Sem ele, a resposta exige ler seis linhas.
+      O veredito vem antes da lista: quem abre a reserva na véspera quer saber se vai dar problema,
+      e só depois quais. Sem ele, a resposta exige ler oito linhas.
     -->
-    <p
-      v-if="admissao.impedimentos.length > 0"
-      class="exig__resumo exig__resumo--risco"
-      role="alert"
-    >
-      <i class="ph ph-prohibit" aria-hidden="true" />
-      {{
-        t(
-          'hotel.exigencias.bloqueado',
-          { total: admissao.impedimentos.length },
-          admissao.impedimentos.length,
-        )
-      }}
-    </p>
+    <div class="exig__cabeca">
+      <p
+        v-if="admissao.impedimentos.length > 0"
+        class="exig__resumo exig__resumo--risco"
+        role="alert"
+      >
+        <i class="ph ph-prohibit" aria-hidden="true" />
+        {{
+          t(
+            'hotel.exigencias.bloqueado',
+            { total: admissao.impedimentos.length },
+            admissao.impedimentos.length,
+          )
+        }}
+      </p>
 
-    <p v-else-if="admissao.avisos.length > 0" class="exig__resumo exig__resumo--atencao">
-      <i class="ph ph-warning" aria-hidden="true" />
-      {{
-        t('hotel.exigencias.comAviso', { total: admissao.avisos.length }, admissao.avisos.length)
-      }}
-    </p>
+      <p v-else-if="admissao.avisos.length > 0" class="exig__resumo exig__resumo--atencao">
+        <i class="ph ph-warning" aria-hidden="true" />
+        {{
+          t('hotel.exigencias.comAviso', { total: admissao.avisos.length }, admissao.avisos.length)
+        }}
+      </p>
 
-    <p v-else class="exig__resumo exig__resumo--ok">
-      <i class="ph ph-check-circle" aria-hidden="true" />
-      {{ t('hotel.exigencias.tudoEmDia') }}
-    </p>
+      <p v-else class="exig__resumo exig__resumo--ok">
+        <i class="ph ph-check-circle" aria-hidden="true" />
+        {{ t('hotel.exigencias.tudoEmDia') }}
+      </p>
+
+      <span v-if="admissao.itens.length > 0" class="exig__progresso">
+        <span class="ui-num">
+          {{ t('hotel.reserva.tela.emDia', { ok: resolvidos, total: admissao.itens.length }) }}
+        </span>
+        <span class="exig__barra" aria-hidden="true">
+          <span :style="{ width: `${Math.round((resolvidos / admissao.itens.length) * 100)}%` }" />
+        </span>
+      </span>
+    </div>
 
     <ul class="exig__lista">
-      <li v-for="item in itens" :key="item.kind" class="exig__linha">
+      <li
+        v-for="item in itens"
+        :key="item.kind"
+        class="exig__linha"
+        :class="[`exig__linha--${tomDe(item)}`, { 'ui-marca ui-marca--risco': tomDe(item) === 'risco' }]"
+      >
+        <span class="exig__visto" :class="`exig__visto--${tomDe(item)}`" aria-hidden="true">
+          <i class="ph" :class="ICONE[tomDe(item)]" />
+        </span>
+
         <div class="exig__texto">
           <strong>{{ formato.exigencia(item.kind) }}</strong>
           <span class="exig__detalhe">{{ detalhe(item) }}</span>
         </div>
 
-        <HotelSelo
-          :rotulo="formato.situacaoDaExigencia(item.situacao)"
-          :tom="item.situacao === 'ok' ? 'positivo' : tomDaAdmissao(item.situacao)"
-        />
+        <span class="ui-selo exig__selo" :class="`ui-selo--${tomDe(item)}`">
+          {{ formato.situacaoDaExigencia(item.situacao) }}
+        </span>
 
-        <div v-if="!somenteLeitura" class="exig__acoes">
+        <div
+          v-if="!somenteLeitura && item.situacao !== 'ok' && item.situacao !== 'dispensado'"
+          class="exig__acoes"
+        >
           <Button
-            v-if="item.situacao !== 'ok' && item.situacao !== 'dispensado'"
             :label="t('hotel.exigencias.registrar')"
             icon="ph ph-file-plus"
             severity="secondary"
@@ -160,71 +210,168 @@ function detalhe(item: ExigenciaAvaliada): string {
 <style scoped>
 .exig {
   display: grid;
-  gap: var(--clinic-space-3);
+  container-type: inline-size;
 }
 
-/* O veredito é uma linha com ícone na cor do estado — a faixa pintada não volta. */
+/* ------------------------------------------------------------------ o veredito */
+
+.exig__cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--linha);
+}
+
 .exig__resumo {
   display: flex;
   align-items: center;
+  gap: 8px;
   margin: 0;
-  gap: var(--clinic-space-2);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.exig__resumo i {
+  font-size: 19px;
 }
 
 .exig__resumo--risco {
-  color: var(--clinic-risk-text);
+  color: var(--risco-tinta);
 }
 
 .exig__resumo--atencao {
-  color: var(--clinic-attention-text);
+  color: var(--atencao-tinta);
 }
 
 .exig__resumo--ok {
-  color: var(--clinic-accent-strong);
+  color: var(--ok-tinta);
 }
+
+.exig__progresso {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--tinta-2);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.exig__barra {
+  display: block;
+  width: 64px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--superficie-3);
+}
+
+.exig__barra span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--ok);
+}
+
+/* ------------------------------------------------------------------ a lista */
 
 .exig__lista {
   display: grid;
-  gap: 0;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .exig__linha {
-  display: flex;
-  flex-wrap: wrap;
+  position: relative;
+  display: grid;
+  min-height: 60px;
   align-items: center;
-  padding: var(--clinic-space-2) 0;
-  border-bottom: 1px solid var(--clinic-line-soft);
-  gap: var(--clinic-space-3);
+  gap: 8px 14px;
+  grid-template-columns: 26px minmax(0, 1fr) auto auto;
+  padding: 10px 18px;
 }
 
-.exig__linha:last-child {
-  border-bottom: none;
+.exig__linha + .exig__linha {
+  border-top: 1px solid var(--linha);
+}
+
+/* O visto da lista: um círculo na cor do estado, com o glifo que diz o mesmo sem a cor. */
+.exig__visto {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 13px;
+}
+
+.exig__visto--ok {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+}
+
+.exig__visto--neutro {
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+}
+
+.exig__visto--atencao {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+}
+
+.exig__visto--risco {
+  background: var(--risco);
+  color: var(--superficie);
 }
 
 .exig__texto {
   display: grid;
-  min-width: 11rem;
-  flex: 1;
-  gap: 0.05rem;
+  min-width: 0;
+  gap: 2px;
 }
 
 .exig__texto strong {
-  font-size: var(--clinic-font-body);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 .exig__detalhe {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+/* O que já está em dia lê mais leve: o olho pula direto para o que falta. */
+.exig__linha--ok .exig__texto strong {
+  font-weight: 500;
 }
 
 .exig__acoes {
   display: flex;
-  gap: var(--clinic-space-2);
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.exig__acoes :deep(.p-button) {
+  min-height: 34px;
+}
+
+/*
+ * Na coluna estreita (a reserva no celular, ou ao lado da conta numa janela menor), as ações descem
+ * para baixo do nome, alinhadas com ele: o selo fica na mesma linha do que ele qualifica.
+ */
+@container (max-width: 42rem) {
+  .exig__linha {
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+  }
+
+  .exig__acoes {
+    grid-column: 2 / -1;
+  }
 }
 </style>

@@ -110,11 +110,11 @@ function abrirAviso() {
   min-height: 28rem;
   flex-direction: column;
   padding: 0.9rem;
-  border: 1px solid var(--clinic-line-strong);
+  border: 1px solid var(--linha-forte);
   border-radius: 1.6rem;
   gap: 0.6rem;
-  background: var(--hc-fundo);
-  box-shadow: var(--clinic-shadow-card);
+  background: var(--superficie-2);
+  box-shadow: var(--sombra-1);
 }
 
 .celular__push {
@@ -132,7 +132,7 @@ function abrirAviso() {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--hc-tinta);
+  color: var(--tinta);
   text-align: start;
   white-space: normal;
 }

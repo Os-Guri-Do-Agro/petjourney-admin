@@ -6709,10 +6709,10 @@
       "tela": {
         "intervalo": "{de} do {ate}",
         "resumoHoje": "Danas je zauzeto {ocupadas} od {total} smeštaja | Danas je zauzeto {ocupadas} od {total} smeštaja | Danas je zauzeto {ocupadas} od {total} smeštaja",
-        "resumoPico": "najpunija noć u prikazu je {dia}, sa {livres} slobodnim mestom | najpunija noć u prikazu je {dia}, sa {livres} slobodna mesta | najpunija noć u prikazu je {dia}, sa {livres} slobodnih mesta",
+        "resumoPico": "najpunija noć u ove tri nedelje je {dia}, sa {livres} slobodnim mestom | najpunija noć u ove tri nedelje je {dia}, sa {livres} slobodna mesta | najpunija noć u ove tri nedelje je {dia}, sa {livres} slobodnih mesta",
         "resumoLotado": "noć {dia} je popunjena",
         "resumo": "{hoje}; {pico}.",
-        "resumoSemHoje": "U tri prikazane nedelje, {pico}.",
+        "resumoSemHoje": "U ovim datumima, {pico}.",
         "procura": "Potraži slobodno mesto",
         "periodoDaProcura": "od {de} do {ate}",
         "foraDaGrade": "Traženi period je van tri prikazane nedelje.",
@@ -7111,7 +7111,44 @@
       "tudoEmDia": "Trenutno ništa ne čeka. Sledeći zadatak se pojavljuje ovde u svoje vreme.",
       "umaAUma": "jedna po jedna",
       "vazioDescricao": "Rutina počinje prijavom. Bez gostiju nema šta da se radi.",
-      "vazioTitulo": "Danas nema zadataka"
+      "vazioTitulo": "Danas nema zadataka",
+      "nova": {
+        "todas": "Sve",
+        "agora": "Sada · {hora}",
+        "progresso": "Urađeno {feitas} od {total} zadatka. | Urađeno {feitas} od {total} zadatka. | Urađeno {feitas} od {total} zadataka.",
+        "atrasadas": "{total} kasni. | {total} kasne. | {total} kasni.",
+        "resolvidas": "{total} zadatak rešen od {desde} | {total} zadatka rešena od {desde} | {total} zadataka rešeno od {desde}",
+        "ver": "Prikaži",
+        "ocultar": "Sakrij",
+        "umAUm": "Lek se označava pojedinačno",
+        "editarPadrao": "Promeni raspored objekta",
+        "padraoDica": "Vreme koje važi za sve goste.",
+        "proporDica": "Izaberite gosta da zatražite predlog na osnovu kartona, ili da dodate lek, negu, uslugu ili izmenu termina.",
+        "estado": {
+          "remedio": "Lek kasni",
+          "atrasada": "Kasni",
+          "janela": "Sada je vreme",
+          "feita": "Sve rešeno",
+          "futura": "Kasnije"
+        },
+        "tour": {
+          "tempo": {
+            "titulo": "Vremenska linija smene",
+            "texto": "Vreme je levo, a svaki termin ima tačku na liniji: lavanda znači da je vreme, ćilibar kašnjenje, crvena lek koji kasni, a bleda ono što je urađeno. Nit označava sadašnji trenutak."
+          },
+          "ronda": {
+            "titulo": "Više životinja, jedan obilazak",
+            "texto": "Ista usluga u isto vreme postaje obilazak, sa jednim redom po životinji. Sve se može označiti odjednom, osim leka: lek se označava pojedinačno. Dug obilazak stiže zatvoren i otvara se jednim dodirom."
+          },
+          "passagem": {
+            "texto": "Kada se smena završava, ko preuzima, koliko zadataka ostaje i šta sprečava predaju. Vidi se od početka smene: incident bez kontakta u 22 h više ne može da se reši."
+          },
+          "gerenciar": {
+            "titulo": "Promena rutine gosta",
+            "texto": "Standardna rutina objekta ostaje na vidiku. Izaberite gosta da zatražite predlog na osnovu kartona, ili da dodate lek, negu, dodatnu uslugu ili izmenu termina."
+          }
+        }
+      }
     },
     "rotinaPadrao": {
       "aplicar": "Primeni",
@@ -7148,7 +7185,28 @@
       "vigencia": "Od kada važi",
       "vigenciaAgora": "Odmah",
       "vigenciaAmanha": "Sutra",
-      "vigenciaDica": "Ako počne sutra, tekuća smena ostaje netaknuta."
+      "vigenciaDica": "Ako počne sutra, tekuća smena ostaje netaknuta.",
+      "nova": {
+        "versao": "Verzija {versao}, objavio: {pessoa}.",
+        "versaoSemPessoa": "Verzija {versao}.",
+        "horariosDaCasa": "Raspored objekta",
+        "todosOsDias": "Važe za sve goste, svakog dana. Izmena ovde pravi nacrt: ništa se ne menja u objektu dok ne objavite.",
+        "servico": "Usluga",
+        "excecoes": "Izuzeci",
+        "excecoesDescricao": "Gosti sa sopstvenim terminima, ili bez neke usluge objekta, i razlog.",
+        "semExcecoes": "Svi gosti prate standard objekta.",
+        "semExcecoesDica": "Izuzetak se pravi u rutini smene, u delu Upravljanje rutinom, ili u kartonu gosta.",
+        "irParaRotina": "Otvori rutinu smene",
+        "suspenso": "Bez ove usluge",
+        "foraDoPadrao": "{total} gost sa izuzetkom | {total} gosta sa izuzetkom | {total} gostiju sa izuzetkom",
+        "descartar": "Odbaci nacrt",
+        "tour": {
+          "excecoes": {
+            "titulo": "Ko odstupa od standarda",
+            "texto": "Gosti sa sopstvenim terminima, ili bez neke usluge objekta, svaki sa razlogom. Promena standarda ih ne dira: izuzetak važi dok se ne poništi u kartonu gosta."
+          }
+        }
+      }
     },
     "servico": {
       "adestramento": "Obuka",

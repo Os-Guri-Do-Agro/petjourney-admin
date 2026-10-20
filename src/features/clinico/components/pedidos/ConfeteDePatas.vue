@@ -11,8 +11,18 @@
  */
 import { PhPawPrint } from '@phosphor-icons/vue'
 
-/* Sálvia, pêssego, periwinkle, ciano claro, rosa claro e coral — os pastéis da paleta. */
-const CORES = ['#84a59d', '#ffb7a1', '#bdb2ff', '#a8dadc', '#fad2e1', '#f28482']
+/*
+ * As cores dos lugares e dos estados da paleta (sálvia, âmbar, lavanda, azul, verde e coral), por
+ * token: no claro e no escuro, cada uma vem no tom que lê sobre aquele fundo.
+ */
+const CORES = [
+  'var(--salvia)',
+  'var(--atencao)',
+  'var(--hotel-claro)',
+  'var(--clinica-claro)',
+  'var(--pets-claro)',
+  'var(--risco)',
+]
 const TOTAL = 14
 const DISTANCIAS = [66, 88, 58, 78]
 

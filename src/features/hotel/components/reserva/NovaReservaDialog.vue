@@ -23,7 +23,6 @@ import Textarea from 'primevue/textarea'
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import HotelSelo from '../base/HotelSelo.vue'
 import OrcamentoTabela from './OrcamentoTabela.vue'
 import QuemPodeBuscar from './QuemPodeBuscar.vue'
 import { tomDaAdmissao, useHotelFormat } from '../../composables/useHotelFormat'
@@ -358,14 +357,14 @@ function confirmar() {
     modal
     :header="t('hotel.reserva.novaTitulo', { acomodacao: acomodacao?.nome ?? '' })"
     :style="{ width: 'min(46rem, 94vw)' }"
-    class="clinic-scope hc-tema"
+    class="clinic-scope nova-reserva"
     @update:visible="emit('fechar')"
   >
     <div class="nova">
       <section class="quando">
         <p class="quando__frase">
           <i class="ph ph-calendar-blank" aria-hidden="true" />
-          <strong>{{ formato.periodo(inicioEscolhido, fimEscolhido) }}</strong>
+          <strong class="ui-num">{{ formato.periodo(inicioEscolhido, fimEscolhido) }}</strong>
           <span class="quando__diarias">
             {{ t('hotel.reserva.diarias', { total: noites }, noites) }}
           </span>
@@ -536,11 +535,17 @@ function confirmar() {
         trazer o papel. Recusar a venda aqui perderia o hóspede por um documento que ele vai levar.
       -->
       <div v-if="admissao && situacaoParaSelo(admissao) !== 'ok'" class="nova__admissao">
-        <HotelSelo
-          :rotulo="formato.situacaoDaExigencia(situacaoParaSelo(admissao))"
-          :tom="tomDaAdmissao(situacaoParaSelo(admissao))"
-          icone="ph ph-identification-card"
-        />
+        <span
+          class="ui-selo"
+          :class="
+            tomDaAdmissao(situacaoParaSelo(admissao)) === 'neutro'
+              ? ''
+              : `ui-selo--${tomDaAdmissao(situacaoParaSelo(admissao))}`
+          "
+        >
+          <i class="ph ph-identification-card" aria-hidden="true" />
+          {{ formato.situacaoDaExigencia(situacaoParaSelo(admissao)) }}
+        </span>
         <span>
           {{
             t('hotel.reserva.avisoAdmissao', {
@@ -578,12 +583,12 @@ function confirmar() {
 <style scoped>
 .nova {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 18px;
 }
 
 .nova__grade {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 14px;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
 }
 
@@ -591,7 +596,7 @@ function confirmar() {
   display: grid;
   /* Linhas no topo: sem isto, o campo ao lado de um mais alto desce e a fileira sai torta. */
   align-content: start;
-  gap: 0.25rem;
+  gap: 6px;
 }
 
 .campo--largo {
@@ -600,9 +605,9 @@ function confirmar() {
 
 .campo label,
 .campo__rotulo {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 /* O selo diz o estado; a frase explica, no cinza do texto. */
@@ -610,63 +615,79 @@ function confirmar() {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
 }
 
+/* Quando: o período em destaque, as noites e as horas — a faixa que o balcão lê em voz alta. */
 .quando {
   display: grid;
-  gap: var(--clinic-space-2);
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-control);
-  background: var(--clinic-surface-soft);
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--hotel-fundo);
 }
 
 .quando__frase {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 4px 10px;
   margin: 0;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-body);
+  color: var(--tinta);
+  font-size: 16px;
+}
+
+.quando__frase i {
+  color: var(--hotel-tinta);
+  font-size: 19px;
+}
+
+.quando__frase strong {
+  font-weight: 650;
 }
 
 .quando__diarias {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--hotel-tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .quando__linha {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  gap: 8px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 /* O contador é estreito: o número tem dois dígitos, e um campo largo sugere que caberia mais. */
 .quando__contador :deep(input) {
   width: 3rem;
+  font-family: var(--font-dados);
   text-align: center;
 }
 
 .quando__atalhos {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 4px;
   margin-inline-start: auto;
 }
 
 .quando__atalhos :deep(.p-button) {
-  min-width: 2.1rem;
-  padding-inline: 0.45rem;
+  min-width: 36px;
+  min-height: 34px;
+  padding-inline: 8px;
+  font-family: var(--font-dados);
 }
 
 .quando__linha :deep(.p-inputmask) {
-  width: 4.5rem;
+  width: 4.75rem;
+  font-family: var(--font-dados);
   text-align: center;
 }
 </style>

@@ -334,7 +334,7 @@ function gravar() {
                 :iniciais="escolhido.petIniciais"
                 :especie="escolhido.petEspecie"
                 :foto-url="escolhido.petFotoUrl"
-                tamanho="xs"
+                tamanho="sm"
               />
               <span class="opcao__nome">{{ escolhido.petNome }}</span>
               <span class="opcao__onde">{{ escolhido.acomodacaoNome }}</span>
@@ -352,7 +352,7 @@ function gravar() {
                 :iniciais="option.petIniciais"
                 :especie="option.petEspecie"
                 :foto-url="option.petFotoUrl"
-                tamanho="xs"
+                tamanho="sm"
               />
               <span class="opcao__nome">{{ option.petNome }}</span>
               <span class="opcao__onde">{{ option.acomodacaoNome }}</span>
@@ -422,7 +422,7 @@ function gravar() {
           <p class="campo__dica">{{ t('hotel.medicacaoNova.horariosDica') }}</p>
 
           <ul v-if="lerHorarios(medHorarios).length > 0" class="chips">
-            <li v-for="hora in lerHorarios(medHorarios)" :key="hora" class="chip clinic-value">
+            <li v-for="hora in lerHorarios(medHorarios)" :key="hora" class="chip ui-num">
               {{ hora }}
             </li>
           </ul>
@@ -514,7 +514,7 @@ function gravar() {
             <template #option="{ option }">
               <span class="servico">
                 <span class="servico__nome">{{ formato.servico(option.kind) }}</span>
-                <span class="servico__preco clinic-value">
+                <span class="servico__preco ui-num">
                   {{ formato.moeda(option.precoCentavos) }}
                 </span>
               </span>
@@ -575,7 +575,7 @@ function gravar() {
           <p class="campo__dica">{{ t('hotel.medicacaoNova.horariosDica') }}</p>
 
           <ul v-if="lerHorarios(cuidadoHorarios).length > 0" class="chips">
-            <li v-for="hora in lerHorarios(cuidadoHorarios)" :key="hora" class="chip clinic-value">
+            <li v-for="hora in lerHorarios(cuidadoHorarios)" :key="hora" class="chip ui-num">
               {{ hora }}
             </li>
           </ul>
@@ -617,13 +617,11 @@ function gravar() {
         :label="t('hotel.acrescentar.cancelar')"
         severity="secondary"
         text
-        size="small"
         @click="emit('fechar')"
       />
       <Button
         :label="t('hotel.acrescentar.acrescentar')"
         icon="ph ph-check"
-        size="small"
         :loading="salvando"
         :disabled="!podeGravar"
         @click="gravar"
@@ -635,30 +633,31 @@ function gravar() {
 <style scoped>
 .form {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 18px;
 }
 
 .campo {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 6px;
 }
 
 .campo label,
 .portas__titulo {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .campo__dica {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 12.5px;
+  line-height: 1.45;
 }
 
 .dupla {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 12px;
   grid-template-columns: 1fr 1fr;
 }
 
@@ -666,62 +665,74 @@ function gravar() {
 
 /*
  * Lista vertical, e não um segmentado de quatro botões: cada porta carrega uma linha de dica, e a
- * dica é o que impede o registro errado. Espremidas numa fileira, sobraria só o rótulo — e
- * "Cuidado" sem "sem dose" ao lado é exatamente o convite a registrar remédio ali.
+ * dica é o que impede o registro errado — "Cuidado" sem "sem dose" ao lado é o convite a
+ * registrar remédio ali.
  */
 .portas {
   display: grid;
   margin: 0;
   padding: 0;
   border: 0;
-  gap: var(--clinic-space-1);
+  gap: 6px;
 }
 
 .portas__titulo {
+  margin-bottom: 4px;
   padding: 0;
-  margin-block-end: var(--clinic-space-2);
 }
 
 .porta {
   display: flex;
   align-items: center;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid transparent;
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-controle);
   cursor: pointer;
 }
 
 .porta:hover {
-  background: var(--clinic-surface-soft);
+  background: var(--superficie-2);
 }
 
-/* A escolhida se distingue por contorno e superfície, nunca por cor de fundo cheia. */
+/* A escolhida se distingue por contorno na cor do hotel e fundo leve, nunca por cor cheia. */
 .porta--ativa {
-  border-color: var(--clinic-accent);
-  background: var(--clinic-surface-soft);
+  border-color: var(--hotel);
+  background: color-mix(in oklab, var(--hotel-fundo) 55%, var(--superficie));
+}
+
+.porta:has(:focus-visible) {
+  outline: 2px solid var(--hotel);
+  outline-offset: 2px;
 }
 
 .porta .porta__icone {
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 20px;
+  height: 20px;
   flex: 0 0 auto;
+  color: var(--tinta-2);
+}
+
+.porta--ativa .porta__icone {
+  color: var(--hotel-tinta);
 }
 
 .porta__texto {
   display: grid;
   min-width: 0;
-  gap: 0.05rem;
+  gap: 1px;
 }
 
 .porta__texto strong {
-  font-size: var(--clinic-font-base);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 .porta__dica {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 /* ------------------------------------------------------------------ miudezas */
@@ -730,31 +741,31 @@ function gravar() {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 10px;
 }
 
 .opcao--vazia {
-  color: var(--clinic-faint);
+  color: var(--tinta-3);
 }
 
 .opcao__nome {
   overflow: hidden;
-  font-weight: 700;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .opcao__onde {
   margin-inline-start: auto;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .servico {
   display: flex;
   width: 100%;
   align-items: center;
-  gap: var(--clinic-space-3);
+  gap: 12px;
 }
 
 .servico__nome {
@@ -762,8 +773,7 @@ function gravar() {
 }
 
 .servico__preco {
-  color: var(--clinic-muted);
-  font-variant-numeric: tabular-nums;
+  color: var(--tinta-2);
 }
 
 .chips {
@@ -771,59 +781,63 @@ function gravar() {
   flex-wrap: wrap;
   margin: 0;
   padding: 0;
-  gap: var(--clinic-space-2);
+  gap: 6px;
   list-style: none;
 }
 
 .chip {
-  padding: 0.15rem var(--clinic-space-3);
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 7px;
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 /* O preço fala pelo ícone e pela cor do texto — a superfície não se pinta. */
 .cobra {
   display: flex;
   align-items: flex-start;
+  gap: 8px;
   margin: 0;
-  gap: var(--clinic-space-2);
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .parede {
   display: flex;
   align-items: flex-start;
+  gap: 8px;
   margin: 0;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  padding: 10px 12px;
+  border-radius: var(--raio-controle);
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .parede .ph,
 .cobra .ph {
-  margin-block-start: 0.1rem;
-  font-size: 0.7rem;
+  margin-top: 2px;
+  font-size: 15px;
 }
 
 .nota {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 12.5px;
 }
 
 .erro {
   margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  padding: 10px 12px;
+  border-radius: var(--raio-controle);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 @media (max-width: 620px) {

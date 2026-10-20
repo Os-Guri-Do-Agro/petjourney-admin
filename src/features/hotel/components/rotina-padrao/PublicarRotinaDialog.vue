@@ -54,8 +54,9 @@ const nadaMuda = computed(
     :visible="aberto"
     modal
     :header="t('hotel.rotinaPadrao.publicarTitulo')"
-    :style="{ width: 'min(32rem, 94vw)' }"
+    :style="{ width: 'min(34rem, 96vw)' }"
     class="clinic-dialog hc-tema"
+    dismissable-mask
     @update:visible="emit('fechar')"
   >
     <div class="publicar">
@@ -67,7 +68,6 @@ const nadaMuda = computed(
           option-label="rotulo"
           option-value="valor"
           :allow-empty="false"
-          size="small"
           @update:model-value="(valor: 'amanha' | 'agora') => emit('atualizar:vigencia', valor)"
         />
         <p class="campo__dica">{{ t('hotel.rotinaPadrao.vigenciaDica') }}</p>
@@ -76,7 +76,7 @@ const nadaMuda = computed(
       <section class="previsao">
         <h3 class="previsao__titulo">{{ t('hotel.rotinaPadrao.previsao') }}</h3>
 
-        <p v-if="calculando" class="previsao__estado">
+        <p v-if="calculando" class="previsao__estado" role="status">
           <i class="ph ph-spin ph-circle-notch" aria-hidden="true" />
         </p>
 
@@ -84,6 +84,10 @@ const nadaMuda = computed(
           {{ t('hotel.rotinaPadrao.semMudanca') }}
         </p>
 
+        <!--
+          Os números falam pelo ícone e pela cor do texto, nunca por fundo pintado — menos o que
+          cai no turno de agora, que é o número que assusta, e deve assustar.
+        -->
         <ul v-else-if="previsao" class="numeros">
           <li v-if="previsao.criadas > 0" class="numero numero--cria">
             <i class="ph ph-plus-circle" aria-hidden="true" />
@@ -92,11 +96,13 @@ const nadaMuda = computed(
 
           <li v-if="previsao.retiradas > 0" class="numero numero--retira">
             <i class="ph ph-minus-circle" aria-hidden="true" />
-            {{ t('hotel.rotinaPadrao.retiradas', { total: previsao.retiradas }, previsao.retiradas) }}
+            {{
+              t('hotel.rotinaPadrao.retiradas', { total: previsao.retiradas }, previsao.retiradas)
+            }}
           </li>
 
           <li class="numero">
-            <i class="ph ph-lock" aria-hidden="true" />
+            <i class="ph ph-lock-simple" aria-hidden="true" />
             {{
               t(
                 'hotel.rotinaPadrao.preservadas',
@@ -106,10 +112,6 @@ const nadaMuda = computed(
             }}
           </li>
 
-          <!--
-            O número que assusta, e deve assustar: mudanças que caem no turno de quem está
-            trabalhando agora fazem a lista mudar debaixo da mão dele.
-          -->
           <li v-if="previsao.hoje > 0" class="numero numero--turno">
             <i class="ph ph-warning-circle" aria-hidden="true" />
             {{ t('hotel.rotinaPadrao.noTurno', { total: previsao.hoje }, previsao.hoje) }}
@@ -119,21 +121,21 @@ const nadaMuda = computed(
         <p class="previsao__nota">{{ t('hotel.rotinaPadrao.preservadasDica') }}</p>
       </section>
 
-      <p v-if="erro" class="erro">{{ erro }}</p>
+      <p v-if="erro" class="erro" role="alert">{{ erro }}</p>
     </div>
 
     <template #footer>
       <Button
+        type="button"
         :label="t('hotel.rotinaPadrao.cancelar')"
         severity="secondary"
         text
-        size="small"
         @click="emit('fechar')"
       />
       <Button
+        type="button"
         :label="t('hotel.rotinaPadrao.publicar')"
-        icon="ph ph-check"
-        size="small"
+        icon="ph ph-paper-plane-tilt"
         :loading="salvando"
         :disabled="calculando"
         @click="emit('publicar')"
@@ -145,95 +147,97 @@ const nadaMuda = computed(
 <style scoped>
 .publicar {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 20px;
 }
 
 .campo {
   display: grid;
   justify-items: start;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .campo__rotulo {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .campo__dica,
 .previsao__nota {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .previsao {
   display: grid;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface-soft);
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
 }
 
 .previsao__titulo {
   margin: 0;
-  color: var(--clinic-text);
-  font-size: 0.9375rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .previsao__estado {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-base);
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 .numeros {
   display: grid;
   margin: 0;
   padding: 0;
-  gap: 0.2rem;
+  gap: 4px;
   list-style: none;
 }
 
-/*
- * Os números falam pelo ícone e pela cor do texto, nunca por fundo pintado. É a regra da casa:
- * urgência mora no ícone, e um cartão de confirmação com três faixas coloridas vira enfeite.
- */
 .numero {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-base);
-  font-variant-numeric: tabular-nums;
+  gap: 10px;
+  min-height: 34px;
+  color: var(--tinta-2);
+  font-size: 14.5px;
 }
 
-.numero .ph {
-  font-size: 0.75rem;
+.numero i {
+  font-size: 18px;
 }
 
 .numero--cria {
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
+  color: var(--ok-tinta);
+  font-weight: 600;
 }
 
 .numero--retira {
-  color: var(--clinic-text);
-  font-weight: 700;
+  color: var(--tinta);
+  font-weight: 600;
 }
 
 .numero--turno {
-  color: var(--clinic-risk-text);
-  font-weight: 700;
+  margin-top: 4px;
+  padding: 8px 12px;
+  border-radius: var(--raio-controle);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-weight: 600;
 }
 
 .erro {
   margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  padding: 10px 12px;
+  border-radius: var(--raio-controle);
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 </style>
