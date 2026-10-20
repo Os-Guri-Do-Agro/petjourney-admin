@@ -812,17 +812,23 @@ onBeforeUnmount(() => {
     width: 100%;
   }
 
+  /* Estreito: os dois valores lado a lado; a chave, que é longa, na linha de baixo inteira. */
   .saldo__fatos {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .fato {
-    padding: 14px 18px;
+    padding: 14px 16px;
   }
 
-  .fato + .fato {
+  .fato:last-child {
+    grid-column: 1 / -1;
     border-top: 1px solid var(--linha);
     border-inline-start: 0;
+  }
+
+  .fato__valor {
+    font-size: 19px;
   }
 }
 

@@ -464,6 +464,10 @@ function barraAria(day: string, count: number) {
   white-space: nowrap;
 }
 
+.qrm__dica::first-letter {
+  text-transform: uppercase;
+}
+
 .qrm__dia:first-child .qrm__dica,
 .qrm__dia:nth-child(2) .qrm__dica {
   left: 0;

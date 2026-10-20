@@ -837,6 +837,11 @@ onMounted(() => {
     width: 96px;
     height: 96px;
   }
+
+  /* Em coluna, a base de 18 rem viraria altura e espalharia as linhas. */
+  .perfil__quem {
+    flex: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

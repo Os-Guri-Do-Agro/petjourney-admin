@@ -801,8 +801,9 @@ function estadoDoPasso(indice: number) {
 
 /*
  * No celular do portal o fluxo ocupa a tela e a ação fica presa no pé. Na página ele tem a altura
- * do que mostra, e a ação vem depois do conteúdo — presa ao pé da janela enquanto há o que rolar,
- * para o próximo passo estar sempre à mão.
+ * do que mostra, e a ação vem depois do conteúdo. Quando ela é o próximo passo (o botão cheio),
+ * fica presa ao pé da janela enquanto há o que rolar, para estar sempre à mão; o caminho ao lado
+ * (contornado, como "Pedir o melhor horário") não persegue ninguém.
  */
 .publica__fluxo :deep(.fx) {
   --fx-passo: 1.25rem;
@@ -817,7 +818,7 @@ function estadoDoPasso(indice: number) {
   overflow: visible;
 }
 
-.publica__fluxo :deep(.fx-rodape) {
+.publica__fluxo :deep(.fx-rodape:has(> .p-button:not(.p-button-outlined))) {
   position: sticky;
   z-index: 2;
   bottom: 0;

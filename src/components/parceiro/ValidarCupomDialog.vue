@@ -529,6 +529,11 @@ async function handleValidar() {
   border-color: var(--ok);
 }
 
+.vc__campo .vc__entrada.p-inputtext.p-invalid,
+.vc__campo .vc__entrada.p-inputtext.p-invalid:enabled:focus {
+  border-color: var(--risco);
+}
+
 .vc__dica {
   margin: 0;
   color: var(--tinta-2);

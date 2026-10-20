@@ -529,6 +529,10 @@ onMounted(() => {
     min-width: 0;
   }
 
+  .lancamento__meta {
+    white-space: normal;
+  }
+
   /* O selo de liberação desce para a linha de baixo, alinhado com o texto. */
   .lancamento__libera.ui-selo {
     order: 3;

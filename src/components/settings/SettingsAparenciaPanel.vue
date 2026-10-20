@@ -313,6 +313,7 @@ function alternarExplicacoes(ligado: boolean) {
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  container: opcoes / inline-size;
 }
 
 /*
@@ -326,7 +327,6 @@ function alternarExplicacoes(ligado: boolean) {
   border: 1px solid var(--linha);
   border-radius: 14px;
   background: var(--superficie);
-  container-type: inline-size;
   cursor: pointer;
   transition:
     border-color var(--pj-tempo-curto) var(--pj-curva-chega),
@@ -377,6 +377,22 @@ function alternarExplicacoes(ligado: boolean) {
   color: var(--tinta-2);
   font-size: 13px;
   line-height: 1.45;
+}
+
+/*
+ * Estreito (celular): as duas opções uma embaixo da outra, cada uma deitada — a miniatura à
+ * esquerda e o texto ao lado —, para a escolha caber na tela sem rolar três miniaturas inteiras.
+ */
+@container opcoes (max-width: 27rem) {
+  .opcao {
+    align-items: center;
+    padding: 10px;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+  }
+
+  .opcao__pe {
+    padding-inline: 0;
+  }
 }
 
 /* ------------------------------------------------------------------ interruptor */

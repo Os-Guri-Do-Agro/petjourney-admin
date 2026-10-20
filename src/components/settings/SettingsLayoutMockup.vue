@@ -117,8 +117,14 @@ const ESPACOS = [
   border: 1px solid var(--linha);
   border-radius: 10px;
   background: var(--m-fundo);
-  font-size: clamp(7px, 3cqi, 12px);
+  container-type: inline-size;
   grid-template-columns: 31% minmax(0, 1fr);
+}
+
+/* A escala vem da largura da própria miniatura: a peça inteira cresce e encolhe junto. */
+.maquete__barra,
+.maquete__tela {
+  font-size: clamp(5px, 3cqi, 12px);
 }
 
 .maquete--claro {

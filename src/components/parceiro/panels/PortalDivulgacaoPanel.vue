@@ -401,7 +401,7 @@ watch(lastSuccessAt, (at) => {
           <span class="estado__icone estado__icone--lugar" aria-hidden="true">
             <i class="ph ph-hourglass" />
           </span>
-          <h2>{{ t('divulgacao.saudacao.semCodigo') }}</h2>
+          <h2>{{ t('carteira.gate.title') }}</h2>
           <p v-if="indicacao.aviso">{{ indicacao.aviso }}</p>
           <p>{{ t('divulgacao.shareKit.esperaHint') }}</p>
           <RouterLink class="p-button p-component estado__acao" :to="PROGRAMAS_ROUTE">
