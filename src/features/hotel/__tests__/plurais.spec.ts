@@ -175,6 +175,16 @@ describe('toda chave com plural é chamada com o número', () => {
           }
         }
 
+        /*
+         * A chave fora de uma chamada `t(` (numa lista de rótulos, num `:key`) não é chamada: o
+         * `t(` mais próximo fechou antes dela. Pula a ocorrência — sem isto, a busca seguinte
+         * recomeçava antes da própria chave e a varredura não terminava nunca.
+         */
+        if (fim < posicao) {
+          posicao = texto.indexOf(`'${chave}'`, posicao + 1)
+          continue
+        }
+
         const chamada = texto.slice(abertura, fim + 1)
 
         /* Três argumentos no nível de cima: a chave, os valores e a contagem. */
