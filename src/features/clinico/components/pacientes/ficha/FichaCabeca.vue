@@ -2,25 +2,28 @@
 /**
  * A capa da ficha do paciente — quem é, e as quatro vistas da ficha.
  *
- * ## A forma (redesenho total, 19/10/2026)
+ * ## A forma (acabamento de 20/10/2026)
  *
- * 1. **Quem é** — o rosto grande, o nome e a linha espécie · raça · porte · idade · sexo ·
- *    castrado. Os alertas logo embaixo, como selo com palavra e ícone, risco primeiro: é o que
- *    muda a conduta antes de alguém tocar no animal.
- * 2. **Os dois dados que toda conduta usa** — o peso, em número grande (toda dose sai dele), e o
- *    responsável com o telefone que disca (`tel:`). Ficam à direita do nome em tela larga, como os
- *    números do Hoje; em tela estreita descem para baixo dele.
- * 3. **A ação da ficha** — o slot `acoes`, à direita da capa ("Abrir atendimento" quando há
- *    consulta hoje, "Aplicar vacina" na carteira). Uma cheia; o resto contornado.
- * 4. **As vistas** — Resumo | Histórico | Tratamento | Vacinas, como as abas de um destino
- *    (sublinhado na cor do lugar, contagem em pílula). Cada aba é um link de verdade. A contagem
- *    é a que faz alguém clicar: sinais do resumo, linhas do histórico, tratamento com a adesão
- *    em queda, vacina atrasada (ou para hoje).
- * 5. **A frase da vista** — logo abaixo das abas, o estado da vista aberta numa frase.
+ * A capa é o **cartão de identidade** do paciente: uma folha só, que flutua sobre o fundo.
  *
- * Com `atual: null` (o paciente internado, `internacao/[id]`), a capa vem sem abas: a tela tem as
- * abas dela (checklist, evolução...) e duas fileiras de abas se confundiriam. As vistas da ficha
- * viram uma linha de saídas embaixo da frase.
+ * 1. **Quem é** — o rosto grande (88 px, com o anel do lugar), o nome em 28 px e a linha
+ *    espécie · raça · porte · idade · sexo · castrado. Os alertas logo embaixo, como selo com
+ *    palavra e ícone, risco primeiro: é o que muda a conduta antes de alguém tocar no animal.
+ * 2. **Os dois dados que toda conduta usa** — o peso (toda dose sai dele) e o responsável com o
+ *    telefone que disca (`tel:`), cada um num bloco rente (`ui-poco`) com o ladrilho do assunto.
+ *    Ficam à direita do nome em tela larga; em tela estreita descem para baixo dele.
+ * 3. **As vistas** — Resumo | Histórico | Tratamento | Vacinas, no pé do cartão, como as abas de
+ *    um destino (sublinhado na cor do lugar, contagem em pílula). Cada aba é um link de verdade.
+ *    A contagem é a que faz alguém clicar: sinais do resumo, linhas do histórico, tratamento com
+ *    a adesão em queda, vacina atrasada (ou para hoje).
+ * 4. **A ação da ficha** — o slot `acoes`, na ponta direita da fileira das abas ("Abrir
+ *    atendimento" quando há consulta hoje, "Aplicar vacina" na carteira). Uma cheia; o resto
+ *    contornado. Em tela estreita sobe para cima das abas.
+ * 5. **A frase da vista** — logo abaixo do cartão, o estado da vista aberta numa frase.
+ *
+ * Com `atual: null` (o prontuário, o paciente internado), a capa vem sem abas: a tela tem a
+ * navegação dela, e duas fileiras de abas se confundiriam. No pé do cartão, no lugar das abas,
+ * as vistas da ficha viram saídas discretas, e as ações continuam na ponta direita.
  *
  * A API é a de antes: `navCheia` continua aceita, mas a aba já diz com a contagem qual vista
  * pede atenção — não há mais pílula cheia para escolher.
@@ -247,140 +250,147 @@ function destino(vista: VistaDaFicha): string {
 
 <template>
   <div class="ficha-capa" :class="{ 'ficha-capa--solta': atual === null }">
-    <div class="capa">
+    <div class="capa ui-folha">
       <div class="capa__corpo">
-        <div class="capa__linha">
-          <!--
-            O rosto ao lado do nome: quem está na recepção reconhece o animal antes de ler. Sem
-            foto, o avatar desenhado (iniciais, silhueta da espécie e cor fixa) — o mesmo do hotel.
-          -->
-          <div class="capa__quem">
-            <PetAvatar
-              class="capa__rosto"
-              :nome="pet.nome"
-              :iniciais="pet.iniciais"
-              :especie="pet.especie"
-              :foto-url="pet.fotoUrl"
-              tamanho="xl"
-            />
-            <div class="capa__identidade">
-              <h1 class="capa__nome">{{ pet.nome }}</h1>
-              <p class="capa__meta">{{ meta }}</p>
-              <ul
-                v-if="alertas.length"
-                class="capa__alertas"
-                :aria-label="t('clinico.resumoDoPaciente.essencial.alertas')"
+        <!--
+          O rosto ao lado do nome: quem está na recepção reconhece o animal antes de ler. Sem
+          foto, o avatar desenhado (iniciais, silhueta da espécie e cor fixa) — o mesmo do hotel.
+        -->
+        <div class="capa__quem">
+          <PetAvatar
+            class="capa__rosto"
+            :nome="pet.nome"
+            :iniciais="pet.iniciais"
+            :especie="pet.especie"
+            :foto-url="pet.fotoUrl"
+            tamanho="xl"
+          />
+          <div class="capa__identidade">
+            <h1 class="capa__nome">{{ pet.nome }}</h1>
+            <p class="capa__meta">{{ meta }}</p>
+            <ul
+              v-if="alertas.length"
+              class="capa__alertas"
+              :aria-label="t('clinico.resumoDoPaciente.essencial.alertas')"
+            >
+              <li
+                v-for="alerta in alertas"
+                :key="alerta.id"
+                class="ui-selo capa__alerta"
+                :class="`ui-selo--${TOM_DO_ALERTA[alerta.severidade]}`"
               >
-                <li
-                  v-for="alerta in alertas"
-                  :key="alerta.id"
-                  class="ui-selo capa__alerta"
-                  :class="`ui-selo--${TOM_DO_ALERTA[alerta.severidade]}`"
-                >
-                  <i :class="ICONE_DO_ALERTA[alerta.severidade]" aria-hidden="true" />
-                  <span>{{ textoDoAlerta(alerta) }}</span>
-                  <span class="sr-only">({{ formato.severidade(alerta.severidade) }})</span>
-                </li>
-              </ul>
-            </div>
+                <i :class="ICONE_DO_ALERTA[alerta.severidade]" aria-hidden="true" />
+                <span>{{ textoDoAlerta(alerta) }}</span>
+                <span class="sr-only">({{ formato.severidade(alerta.severidade) }})</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- O peso de que toda dose sai, e quem responde pelo animal, com o telefone que disca. -->
+        <dl class="capa__dados">
+          <div class="capa__dado ui-poco">
+            <dt>
+              <span class="ui-ladrilho ui-ladrilho--p capa__dado-icone" aria-hidden="true">
+                <i class="ph ph-scales" />
+              </span>
+              {{ t('clinico.ficha.peso') }}
+            </dt>
+            <dd v-if="peso !== null" class="capa__peso">
+              <strong class="ui-num">{{ formato.numero(peso, 1) }}</strong>
+              <span>{{ t('clinico.formato.kg') }}</span>
+            </dd>
+            <dd v-else class="capa__sem">{{ t('clinico.resumoDoPaciente.casa.semRegistro') }}</dd>
           </div>
 
-          <!-- O peso de que toda dose sai, e quem responde pelo animal, com o telefone que disca. -->
-          <dl class="capa__dados">
-            <div class="capa__dado">
-              <dt>{{ t('clinico.ficha.peso') }}</dt>
-              <dd v-if="peso !== null" class="capa__peso">
-                <strong class="ui-num">{{ formato.numero(peso, 1) }}</strong>
-                <span>{{ t('clinico.formato.kg') }}</span>
-              </dd>
-              <dd v-else class="capa__sem">{{ t('clinico.resumoDoPaciente.casa.semRegistro') }}</dd>
-            </div>
-
-            <div v-if="tutor" class="capa__dado">
-              <dt>{{ t('clinico.paciente.responsavel') }}</dt>
-              <dd class="capa__tutor">
-                <strong>{{ tutor.nome }}</strong>
-                <a
-                  v-if="telefoneDiscavel"
-                  class="capa__telefone ui-num"
-                  :href="`tel:${telefoneDiscavel}`"
-                  :aria-label="
-                    t('clinico.ficha.capa.ligar', { nome: tutor.nome, telefone: tutor.telefone })
-                  "
-                >
-                  <i class="ph ph-phone" aria-hidden="true" />
-                  <bdi dir="ltr">{{ tutor.telefone }}</bdi>
-                </a>
-              </dd>
-            </div>
-          </dl>
-        </div>
+          <div v-if="tutor" class="capa__dado capa__dado--tutor ui-poco">
+            <dt>
+              <span class="ui-ladrilho ui-ladrilho--p capa__dado-icone" aria-hidden="true">
+                <i class="ph ph-user" />
+              </span>
+              {{ t('clinico.paciente.responsavel') }}
+            </dt>
+            <dd class="capa__tutor">
+              <strong>{{ tutor.nome }}</strong>
+              <a
+                v-if="telefoneDiscavel"
+                class="capa__telefone ui-num"
+                :href="`tel:${telefoneDiscavel}`"
+                :aria-label="
+                  t('clinico.ficha.capa.ligar', { nome: tutor.nome, telefone: tutor.telefone })
+                "
+              >
+                <i class="ph ph-phone" aria-hidden="true" />
+                <bdi dir="ltr">{{ tutor.telefone }}</bdi>
+              </a>
+            </dd>
+          </div>
+        </dl>
       </div>
 
-      <div v-if="$slots.acoes" class="capa__acoes">
-        <slot name="acoes" />
+      <!-- O pé do cartão: as vistas da ficha à esquerda, a ação da vez na ponta direita. -->
+      <div class="capa__barra">
+        <!-- As quatro vistas da ficha, com o desenho das abas de um destino. -->
+        <nav
+          v-if="atual"
+          class="capa__abas"
+          :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })"
+        >
+          <RouterLink
+            v-for="item in vistas"
+            :key="item.vista"
+            class="capa__aba"
+            :class="{ 'capa__aba--atual': item.vista === atual }"
+            :to="destino(item.vista)"
+            active-class=""
+            exact-active-class=""
+            :aria-current="item.vista === atual ? 'page' : undefined"
+            :title="item.descricao || undefined"
+          >
+            <i :class="item.icone" aria-hidden="true" />
+            <span>{{ item.rotulo }}</span>
+            <span
+              v-if="item.contagem"
+              class="capa__selo ui-num"
+              :class="`capa__selo--${item.tom}`"
+              aria-hidden="true"
+            >
+              {{ item.contagem }}
+            </span>
+            <span v-if="item.descricao" class="sr-only">{{ item.descricao }}</span>
+          </RouterLink>
+        </nav>
+
+        <!-- Fora da ficha (o prontuário, o internado): as vistas viram saídas, numa linha só. -->
+        <nav v-else class="capa__saidas" :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })">
+          <RouterLink
+            v-for="item in vistas"
+            :key="item.vista"
+            class="capa__saida"
+            :to="destino(item.vista)"
+            :title="item.descricao || undefined"
+          >
+            <i :class="item.icone" aria-hidden="true" />
+            <span>{{ item.rotulo }}</span>
+            <span
+              v-if="item.contagem"
+              class="capa__selo ui-num"
+              :class="`capa__selo--${item.tom}`"
+              aria-hidden="true"
+            >
+              {{ item.contagem }}
+            </span>
+            <span v-if="item.descricao" class="sr-only">{{ item.descricao }}</span>
+          </RouterLink>
+        </nav>
+
+        <div v-if="$slots.acoes" class="capa__acoes">
+          <slot name="acoes" />
+        </div>
       </div>
     </div>
 
-    <!-- As quatro vistas da ficha, com o desenho das abas de um destino. -->
-    <nav
-      v-if="atual"
-      class="capa__abas"
-      :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })"
-    >
-      <RouterLink
-        v-for="item in vistas"
-        :key="item.vista"
-        class="capa__aba"
-        :class="{ 'capa__aba--atual': item.vista === atual }"
-        :to="destino(item.vista)"
-        active-class=""
-        exact-active-class=""
-        :aria-current="item.vista === atual ? 'page' : undefined"
-        :title="item.descricao || undefined"
-      >
-        <i :class="item.icone" aria-hidden="true" />
-        <span>{{ item.rotulo }}</span>
-        <span
-          v-if="item.contagem"
-          class="capa__selo ui-num"
-          :class="`capa__selo--${item.tom}`"
-          aria-hidden="true"
-        >
-          {{ item.contagem }}
-        </span>
-        <span v-if="item.descricao" class="sr-only">{{ item.descricao }}</span>
-      </RouterLink>
-    </nav>
-
     <p v-if="frase" class="capa__frase" aria-live="polite">{{ frase }}</p>
-
-    <!-- Fora da ficha (o internado): as vistas viram saídas, numa linha só. -->
-    <nav
-      v-if="!atual"
-      class="capa__saidas"
-      :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })"
-    >
-      <RouterLink
-        v-for="item in vistas"
-        :key="item.vista"
-        class="capa__saida"
-        :to="destino(item.vista)"
-        :title="item.descricao || undefined"
-      >
-        <i :class="item.icone" aria-hidden="true" />
-        <span>{{ item.rotulo }}</span>
-        <span
-          v-if="item.contagem"
-          class="capa__selo ui-num"
-          :class="`capa__selo--${item.tom}`"
-          aria-hidden="true"
-        >
-          {{ item.contagem }}
-        </span>
-        <span v-if="item.descricao" class="sr-only">{{ item.descricao }}</span>
-      </RouterLink>
-    </nav>
   </div>
 </template>
 
@@ -393,44 +403,44 @@ function destino(vista: VistaDaFicha): string {
   display: grid;
   min-width: 0;
   flex: 1 1 100%;
+  gap: 18px;
   container: ficha-capa / inline-size;
 }
 
 .capa {
   display: grid;
-  align-items: start;
-  gap: 16px 24px;
-  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
 }
 
 /*
- * Quem é, e os dois dados. Com espaço, os dados ficam à direita do nome, separados por um fio;
- * sem espaço, descem para baixo dele, alinhados com o texto — e o primeiro perde o fio, que à
- * esquerda de tudo não separaria nada.
+ * Quem é, e os dois dados. Com espaço, os dados ficam à direita do nome; sem espaço, descem
+ * para baixo dele, alinhados com o texto.
  */
 .capa__corpo {
-  min-width: 0;
-  container: capa-corpo / inline-size;
-}
-
-.capa__linha {
   display: grid;
+  min-width: 0;
   align-items: center;
-  gap: 16px 32px;
+  gap: 18px 32px;
   grid-template-columns: minmax(0, 1fr);
+  padding: 24px 26px 22px;
 }
 
 .capa__quem {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 18px;
+  gap: 22px;
 }
 
+/* O rosto grande, com um anel na cor do lugar: é o retrato do cartão. */
 .ficha-capa .capa__rosto {
+  width: 88px;
+  height: 88px;
   box-shadow:
-    0 0 0 3px var(--fundo),
-    0 0 0 4px var(--linha);
+    0 0 0 3px var(--superficie),
+    0 0 0 5px color-mix(in oklab, var(--pj-lugar, var(--musgo)) 30%, var(--linha)),
+    var(--sombra-1);
+  font-size: 1.65rem;
 }
 
 .capa__identidade {
@@ -442,9 +452,9 @@ function destino(vista: VistaDaFicha): string {
 .capa__nome {
   margin: 0;
   color: var(--tinta);
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 650;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   line-height: 1.15;
   overflow-wrap: anywhere;
 }
@@ -460,7 +470,7 @@ function destino(vista: VistaDaFicha): string {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   padding: 0;
   list-style: none;
 }
@@ -482,44 +492,35 @@ function destino(vista: VistaDaFicha): string {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  gap: 12px 0;
+  gap: 12px;
   margin: 0;
-  padding-inline-start: 90px;
 }
 
 .capa__dado {
+  position: relative;
   display: grid;
   min-width: 0;
-  align-content: start;
-  gap: 4px;
-  padding-inline: 24px;
-  border-inline-start: 1px solid var(--linha);
+  min-height: 74px;
+  align-content: center;
+  gap: 3px;
+  padding: 12px 20px 12px 62px;
 }
 
-.capa__dado:first-child {
-  padding-inline-start: 0;
-  border-inline-start: 0;
-}
-
-@container capa-corpo (min-width: 800px) {
-  .capa__linha {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .capa__dados {
-    padding-inline-start: 0;
-  }
-
-  .capa__dado:first-child {
-    padding-inline-start: 24px;
-    border-inline-start: 1px solid var(--linha);
-  }
+.capa__dado--tutor {
+  flex: 0 1 auto;
 }
 
 .capa__dado dt {
   color: var(--tinta-2);
   font-size: 12.5px;
   font-weight: 550;
+}
+
+.capa__dado-icone {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: 16px;
+  transform: translateY(-50%);
 }
 
 .capa__dado dd {
@@ -538,28 +539,31 @@ function destino(vista: VistaDaFicha): string {
 
 .capa__peso strong {
   color: var(--tinta);
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 650;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   line-height: 1.05;
 }
 
 .capa__sem {
   color: var(--tinta-3);
   font-size: 14px;
-  line-height: 2;
+  line-height: 1.6;
 }
 
 .capa__tutor {
   display: grid;
-  gap: 2px;
+  gap: 1px;
 }
 
 .capa__tutor strong {
+  overflow: hidden;
   color: var(--tinta);
   font-size: 15px;
   font-weight: 600;
   line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .capa__telefone {
@@ -567,12 +571,13 @@ function destino(vista: VistaDaFicha): string {
   align-items: center;
   justify-self: start;
   gap: 6px;
-  min-height: 24px;
+  min-height: 22px;
   border-radius: 6px;
   color: var(--pj-lugar-tinta, var(--musgo));
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .capa__telefone i {
@@ -589,24 +594,39 @@ function destino(vista: VistaDaFicha): string {
   outline-offset: 2px;
 }
 
+/* ------------------------------------------------------------------ o pé do cartão */
+
+.capa__barra {
+  display: flex;
+  min-width: 0;
+  min-height: 58px;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 0 20px 0 12px;
+  border-top: 1px solid var(--linha-suave);
+}
+
 .capa__acoes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  margin-inline-start: auto;
+  padding-block: 9px;
 }
 
 /* ------------------------------------------------------------------ abas da ficha
- * O desenho das abas de um destino (`UiAbas`): sublinhado de 3 px na cor do lugar, contagem em
- * pílula. O ícone ajuda a achar a vista sem ler — as quatro têm nomes curtos e parecidos.
+ * O desenho das abas de um destino (`UiAbas`): sublinhado de 3 px na cor do lugar, rente à borda
+ * de baixo do cartão, contagem em pílula. O ícone ajuda a achar a vista sem ler — as quatro têm
+ * nomes curtos e parecidos.
  */
 .capa__abas {
   display: flex;
-  gap: 4px;
-  margin-top: 22px;
+  min-width: 0;
+  align-self: stretch;
+  gap: 2px;
   overflow-x: auto;
-  border-bottom: 1px solid var(--linha);
   scrollbar-width: none;
 }
 
@@ -620,60 +640,63 @@ function destino(vista: VistaDaFicha): string {
   flex: none;
   align-items: center;
   gap: 8px;
-  height: 46px;
+  min-height: 58px;
   padding: 0 14px;
   color: var(--tinta-2);
   font-size: 14.5px;
-  font-weight: 500;
+  font-weight: 550;
   text-decoration: none;
   white-space: nowrap;
-}
-
-.capa__aba:first-child {
-  padding-inline-start: 2px;
+  transition: color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .capa__aba i {
-  font-size: 17px;
+  color: var(--tinta-3);
+  font-size: 18px;
+  transition: color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .capa__aba:hover {
   color: var(--tinta);
 }
 
-.capa__aba:focus-visible {
-  border-radius: 8px;
-  outline: 2px solid var(--pj-lugar, var(--musgo));
-  outline-offset: -4px;
+.capa__aba:hover::after {
+  position: absolute;
+  right: 14px;
+  bottom: 0;
+  left: 14px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--linha-media);
+  content: '';
 }
 
-.capa__aba--atual {
+.capa__aba:focus-visible {
+  border-radius: 10px;
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: -8px;
+}
+
+.capa__aba--atual,
+.capa__aba--atual:hover {
   color: var(--tinta);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .capa__aba--atual i {
-  color: var(--pj-lugar-tinta, var(--musgo));
+  color: var(--pj-lugar, var(--musgo));
 }
 
-.capa__aba--atual::after {
+.capa__aba--atual::after,
+.capa__aba--atual:hover::after {
   position: absolute;
   right: 14px;
-  bottom: -1px;
+  bottom: 0;
   left: 14px;
   height: 3px;
   border-radius: 3px 3px 0 0;
   background: var(--pj-lugar, var(--musgo));
   content: '';
-}
-
-.capa__aba--atual:first-child::after {
-  left: 2px;
-}
-
-[dir='rtl'] .capa__aba--atual:first-child::after {
-  right: 2px;
-  left: 14px;
 }
 
 .capa__selo {
@@ -702,10 +725,11 @@ function destino(vista: VistaDaFicha): string {
   color: var(--risco-tinta);
 }
 
-/* A frase da vista aberta: o "resumo" da tela, logo abaixo das abas. */
+/* A frase da vista aberta: o "resumo" da tela, logo abaixo do cartão. */
 .capa__frase {
   max-width: 72ch;
-  margin: 16px 0 0;
+  margin: 0;
+  padding-inline: 4px;
   color: var(--tinta-2);
   font-size: 15px;
   line-height: 1.45;
@@ -714,68 +738,106 @@ function destino(vista: VistaDaFicha): string {
 /* ------------------------------------------------------------------ fora da ficha */
 
 .ficha-capa--solta .capa__frase {
-  margin-top: 14px;
   color: var(--tinta);
   font-size: 16px;
   font-weight: 550;
 }
 
+/* As saídas: links discretos, sem o sublinhado das abas — levam a outra tela, não trocam a vista. */
 .capa__saidas {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 18px;
-  margin-top: 8px;
+  gap: 4px;
+  padding-block: 9px;
 }
 
 .capa__saida {
   display: inline-flex;
-  min-height: 32px;
+  min-height: 36px;
   align-items: center;
-  gap: 6px;
-  border-radius: 6px;
-  color: var(--pj-lugar-tinta, var(--musgo));
-  font-size: 13.5px;
-  font-weight: 600;
+  gap: 7px;
+  padding: 0 12px;
+  border-radius: var(--raio-controle);
+  color: var(--tinta-2);
+  font-size: 14px;
+  font-weight: 550;
   text-decoration: none;
+  transition:
+    background-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .capa__saida i {
-  font-size: 16px;
+  color: var(--pj-lugar-tinta, var(--musgo));
+  font-size: 17px;
 }
 
-.capa__saida:hover span:not(.capa__selo) {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.capa__saida:hover {
+  background: var(--superficie-2);
+  color: var(--tinta);
 }
 
 .capa__saida:focus-visible {
   outline: 2px solid var(--pj-lugar, var(--musgo));
-  outline-offset: 2px;
+  outline-offset: 0;
 }
 
-/* ------------------------------------------------------------------ estreito */
+/* ------------------------------------------------------------------ larguras */
 
-/* Capa de largura média: a ação desce para baixo de quem é, em vez de espremer o nome. */
-@container ficha-capa (max-width: 900px) {
-  .capa {
-    grid-template-columns: minmax(0, 1fr);
+/* Com espaço, os dados vão para a direita de quem é. */
+@container ficha-capa (min-width: 900px) {
+  .capa__corpo {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .capa__dados {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+}
+
+/* Sem espaço, descem para baixo do nome, alinhados com o texto. */
+@container ficha-capa (max-width: 899px) {
+  .capa__dados {
+    padding-inline-start: 110px;
+  }
+}
+
+/*
+ * Capa de largura média: a ação sobe para cima das abas, em vez de espremê-las. A ordem de
+ * leitura continua a mesma (as vistas, depois a ação); só o desenho muda.
+ */
+@container ficha-capa (max-width: 760px) {
+  .capa__barra {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 0;
+    padding: 0 12px;
   }
 
   .capa__acoes {
     justify-content: flex-start;
+    margin-inline-start: 0;
+    padding: 4px 6px 14px;
   }
 }
 
 @container ficha-capa (max-width: 620px) {
+  .capa__corpo {
+    padding: 18px 16px 16px;
+  }
+
   .ficha-capa .capa__rosto {
-    width: 56px;
-    height: 56px;
-    font-size: 1.1rem;
+    width: 64px;
+    height: 64px;
+    font-size: 1.2rem;
   }
 
   .capa__quem {
-    gap: 14px;
+    align-items: flex-start;
+    gap: 16px;
   }
 
   .capa__nome {
@@ -783,11 +845,23 @@ function destino(vista: VistaDaFicha): string {
   }
 
   .capa__dados {
+    display: grid;
     padding-inline-start: 0;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .capa__dado {
+    min-height: 64px;
+    padding: 10px 14px 10px 54px;
+  }
+
+  .capa__dado-icone {
+    inset-inline-start: 12px;
   }
 
   .capa__peso strong {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   /* As quatro abas cabem numa linha sem os ícones: a palavra é o que se lê. */
@@ -800,7 +874,8 @@ function destino(vista: VistaDaFicha): string {
     display: none;
   }
 
-  .capa__aba--atual::after {
+  .capa__aba--atual::after,
+  .capa__aba:hover::after {
     right: 10px;
     left: 10px;
   }
@@ -808,12 +883,16 @@ function destino(vista: VistaDaFicha): string {
 
 /* No celular as quatro dividem a largura: a aba acesa nunca fica escondida fora da tela. */
 @media (max-width: 480px) {
+  .capa__barra {
+    padding-inline: 4px;
+  }
+
   .capa__abas {
     gap: 0;
   }
 
-  .capa__aba,
-  .capa__aba:first-child {
+  .capa__aba {
+    min-height: 52px;
     flex: 1 1 auto;
     justify-content: center;
     gap: 4px;
@@ -822,9 +901,21 @@ function destino(vista: VistaDaFicha): string {
   }
 
   .capa__aba--atual::after,
-  .capa__aba--atual:first-child::after {
+  .capa__aba:hover::after {
     right: 4px;
     left: 4px;
+  }
+
+  .capa__dados {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capa__aba,
+  .capa__aba i,
+  .capa__saida {
+    transition: none;
   }
 }
 </style>

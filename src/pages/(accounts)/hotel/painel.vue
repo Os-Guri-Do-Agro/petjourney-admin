@@ -32,6 +32,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
 import { porGravidade, type LinhaDaTabela } from '@/components/home/pauta-tabela'
+import UiAbertura, { type IndicadorDaAbertura } from '@/components/ui/UiAbertura.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import UiPauta from '@/components/ui/UiPauta.vue'
 import UiSecao from '@/components/ui/UiSecao.vue'
@@ -517,6 +518,66 @@ const fraseDoTurno = computed(() => {
     : t('clinico.internacao.nova.resumo.plantao', partes)
 })
 
+/** A linha de cima da abertura: a data e, com turno aberto, quem está nele. */
+const sobreAAbertura = computed(() =>
+  [dataDeHoje.value, fraseDoTurno.value].filter(Boolean).join(' · '),
+)
+
+/** "0 de 49 tarefas da rotina feitas": o ritmo do dia, embaixo da frase principal. */
+const andamentoDaRotina = computed(() => {
+  const { feitas, total } = hospedagem.hospedes.reduce(
+    (soma, hospede) => ({
+      feitas: soma.feitas + hospede.rotinaDoDia.resolvidas,
+      total: soma.total + hospede.rotinaDoDia.total,
+    }),
+    { feitas: 0, total: 0 },
+  )
+
+  return total ? t('inicio.espacos.hotel.andamento', { feitas, total }, total) : ''
+})
+
+/** Os quatro números da casa, os mesmos da fita e do Início, cada um levando aonde se resolve. */
+const indicadores = computed<IndicadorDaAbertura[]>(() => {
+  const naCasaTotal = hospedagem.hospedes.length
+  const chegam = chegamHoje.value.length
+  const saem = saemHoje.value.length
+  const atrasadas = hospedagem.atrasadasNaPrancheta
+  const tomDaRotina = tomDaRotinaAtrasada(atrasadas, hospedagem.medicacoesAtrasadasNaPrancheta)
+
+  return [
+    {
+      id: 'casa',
+      valor: naCasaTotal,
+      rotulo: t('inicio.espacos.hotel.naCasa'),
+      icone: 'ph ph-house-line',
+      to: '/hotel/hospedes',
+    },
+    {
+      id: 'chegam',
+      valor: chegam,
+      rotulo: t('inicio.espacos.hotel.chegam', { total: chegam }, chegam),
+      icone: 'ph ph-sign-in',
+      to: '/hotel/reservas',
+      tom: chegamHoje.value.some(travada) ? 'risco' : undefined,
+    },
+    {
+      id: 'saem',
+      valor: saem,
+      rotulo: t('inicio.espacos.hotel.saem', { total: saem }, saem),
+      icone: 'ph ph-sign-out',
+      to: '/hotel/hospedes',
+    },
+    {
+      id: 'rotina',
+      valor: atrasadas,
+      rotulo: t('inicio.espacos.hotel.rotina', { total: atrasadas }, atrasadas),
+      icone: 'ph ph-list-checks',
+      to: '/hotel/rotina',
+      tom: tomDaRotina === 'neutro' ? undefined : tomDaRotina,
+    },
+  ]
+})
+
 const vazio = computed(
   () =>
     carregou.value &&
@@ -592,40 +653,48 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     :vazio-titulo="t('hotel.painel.vazioTitulo')"
     :vazio-descricao="t('hotel.painel.vazioDescricao')"
     vazio-icone="ph ph-sun-horizon"
-    tour
-    @tour="tourAberto = true"
     @tentar-de-novo="carregar"
   >
     <!--
-      O turno abre a frase: é o que quem chega precisa saber primeiro, e a data já está na fita,
-      logo acima. Sem turno aberto, a data volta para o lugar dele.
+      A abertura responde "como está a casa" antes de qualquer lista: a data e o turno em cima, a
+      frase do momento, o ritmo da rotina e os quatro números da fita.
     -->
-    <template #resumo>
-      <template v-if="fraseDoTurno">{{ fraseDoTurno }}{{ ' ' }}</template>
-      <template v-else>
-        <time :datetime="hoje">{{ dataDeHoje }}</time
-        >{{ '. ' }}
-      </template>
-      <span aria-live="polite">{{ fraseDoResumo }}</span>
-    </template>
-
-    <template #acoes>
-      <Button
-        v-if="turno"
-        type="button"
-        class="acao-turno"
-        icon="ph ph-arrows-left-right"
-        :label="t('hotel.turno.passar')"
-        severity="secondary"
-        outlined
-        @click="passagemAberta = true"
-      />
-      <Button
-        :as="RouterLink"
-        to="/hotel/rotina"
-        icon="ph ph-list-checks"
-        :label="t('hotel.painel.irParaRotina')"
-      />
+    <template #cabecalho>
+      <UiAbertura
+        class="hoje__abertura"
+        :sobre="sobreAAbertura"
+        :titulo="fraseDoResumo"
+        :resumo="andamentoDaRotina"
+        :indicadores="indicadores"
+        :rotulo-dos-indicadores="t('clinico.meuDia.abertura.indicadores')"
+      >
+        <template #acoes>
+          <Button
+            :as="RouterLink"
+            to="/hotel/rotina"
+            icon="ph ph-list-checks"
+            :label="t('hotel.painel.irParaRotina')"
+          />
+          <Button
+            v-if="turno"
+            type="button"
+            class="acao-turno"
+            icon="ph ph-arrows-left-right"
+            :label="t('hotel.turno.passar')"
+            severity="secondary"
+            @click="passagemAberta = true"
+          />
+          <Button
+            type="button"
+            icon="ph ph-question"
+            :label="t('shell.guidance.tour')"
+            severity="secondary"
+            text
+            :title="t('shell.guidance.tourTitulo')"
+            @click="tourAberto = true"
+          />
+        </template>
+      </UiAbertura>
     </template>
 
     <div class="hoje">
@@ -633,9 +702,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <div class="caminho">
         <section class="posto posto--chegam ui-folha" aria-labelledby="posto-chegam">
           <header class="posto__cabeca">
-            <i class="ph ph-sign-in posto__icone" aria-hidden="true" />
+            <span class="ui-ladrilho ui-ladrilho--ok" aria-hidden="true">
+              <i class="ph ph-sign-in" />
+            </span>
             <h2 id="posto-chegam">{{ t('hotel.hoje.painel.chegam') }}</h2>
-            <span class="ui-contagem">{{ chegamHoje.length }}</span>
+            <span class="posto__total ui-num">{{ chegamHoje.length }}</span>
           </header>
 
           <ul v-if="chegamHoje.length" class="ui-lista">
@@ -703,9 +774,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
         <section class="posto posto--casa ui-folha" aria-labelledby="posto-casa">
           <header class="posto__cabeca">
-            <span class="posto__ponto" aria-hidden="true" />
+            <span class="ui-ladrilho" aria-hidden="true">
+              <i class="ph ph-house-line" />
+            </span>
             <h2 id="posto-casa">{{ t('hotel.hoje.painel.naCasa') }}</h2>
-            <span class="ui-contagem">{{ hospedagem.hospedes.length }}</span>
+            <span class="posto__total ui-num">{{ hospedagem.hospedes.length }}</span>
           </header>
 
           <ul v-if="naCasaVisiveis.length" class="ui-lista">
@@ -772,9 +845,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
         <section class="posto posto--saem ui-folha" aria-labelledby="posto-saem">
           <header class="posto__cabeca">
-            <i class="ph ph-sign-out posto__icone" aria-hidden="true" />
+            <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
+              <i class="ph ph-sign-out" />
+            </span>
             <h2 id="posto-saem">{{ t('hotel.hoje.painel.saem') }}</h2>
-            <span class="ui-contagem">{{ saemHoje.length }}</span>
+            <span class="posto__total ui-num">{{ saemHoje.length }}</span>
           </header>
 
           <ul v-if="saemHoje.length" class="ui-lista">
@@ -882,88 +957,141 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 <style scoped>
 .hoje {
   display: grid;
-  gap: 36px;
+  gap: 40px;
   grid-template-columns: minmax(0, 1fr);
 }
 
-/* As três colunas são o caminho do hóspede: da esquerda (chega) para a direita (sai). */
+.hoje__abertura {
+  flex: 1;
+  min-width: 0;
+}
+
+/*
+ * As três colunas são o caminho do hóspede: da esquerda (chega) para a direita (sai). Um nó entre
+ * elas diz que é um caminho, e não três listas soltas — o mesmo desenho do Hoje da Clínica.
+ */
 .caminho {
   display: grid;
   align-items: start;
-  gap: 20px;
+  gap: 28px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .posto {
-  display: grid;
-  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.caminho > .posto:not(:last-child)::after {
+  position: absolute;
+  z-index: 1;
+  top: 30px;
+  right: -23px;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--linha);
+  border-radius: 50%;
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
+  content: '';
+}
+
+.caminho > .posto:not(:last-child)::before {
+  position: absolute;
+  z-index: 2;
+  top: 36px;
+  right: -16px;
+  width: 5px;
+  height: 5px;
+  border-top: 1.5px solid var(--tinta-3);
+  border-right: 1.5px solid var(--tinta-3);
+  content: '';
+  transform: rotate(45deg);
 }
 
 .posto__cabeca {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid var(--linha);
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-radius: var(--raio-cartao) var(--raio-cartao) 0 0;
+}
+
+/* O cabeçalho de cada coluna desce do tom do estado para o papel: entrar, estar, sair. */
+.posto--chegam .posto__cabeca {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--ok-fundo) 70%, var(--superficie)),
+    var(--superficie)
+  );
+}
+
+.posto--casa .posto__cabeca {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--pj-lugar-fundo) 75%, var(--superficie)),
+    var(--superficie)
+  );
+}
+
+.posto--saem .posto__cabeca {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--superficie-3) 70%, var(--superficie)),
+    var(--superficie)
+  );
 }
 
 .posto__cabeca h2 {
   flex: 1;
   margin: 0;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
-/* O desenho de cada coluna é o mesmo da fita lá em cima: entrar, o ponto da casa, sair. */
-.posto__icone {
-  font-size: 18px;
+.posto__total {
+  color: var(--tinta);
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
 }
 
-.posto--chegam .posto__icone {
-  color: var(--ok-tinta);
-}
-
-.posto--saem .posto__icone {
-  color: var(--pj-lugar-tinta);
-}
-
-.posto__ponto {
-  width: 10px;
-  height: 10px;
-  margin-inline: 4px;
-  border-radius: 50%;
-  background: var(--pj-lugar);
-}
-
-.posto--chegam .posto__cabeca {
-  background: color-mix(in oklab, var(--ok-fundo) 55%, var(--superficie));
-}
-
-.posto--casa .posto__cabeca {
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie));
+.posto > .ui-lista {
+  border-top: 1px solid var(--linha-suave);
 }
 
 .posto__item {
   display: grid;
-  gap: 10px;
-  padding: 14px 18px 16px;
+  gap: 12px;
+  padding: 16px 20px 18px;
 }
 
 .posto__item--link {
-  gap: 8px;
-  padding-block: 12px 14px;
+  gap: 10px;
+  padding-block: 14px 16px;
   color: var(--tinta);
   text-decoration: none;
-  transition: background-color var(--pj-tempo-curto) ease;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .posto__item--link:hover {
   background: var(--superficie-2);
 }
 
+.posto__item--link:hover .ui-linha__seta {
+  color: var(--tinta);
+  transform: translateX(2px);
+}
+
 .posto__item--link:focus-visible {
   outline: 2px solid var(--pj-lugar);
   outline-offset: -2px;
+}
+
+.posto .ui-lista > li:last-child > .posto__item--link {
+  border-radius: 0 0 calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px);
 }
 
 .posto__quem {
@@ -982,24 +1110,29 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   display: grid;
   flex: none;
   justify-items: end;
-  line-height: 1.1;
+  line-height: 1.05;
 }
 
 .posto__tempo strong {
   color: var(--tinta);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 650;
   letter-spacing: -0.02em;
 }
 
+.posto--chegam .posto__tempo strong {
+  color: var(--ok-tinta);
+}
+
 .posto__tempo small {
+  margin-top: 2px;
   color: var(--tinta-3);
-  font-size: 12px;
+  font-size: 11.5px;
   white-space: nowrap;
 }
 
-.posto__tempo--atrasado strong,
-.posto__tempo--atrasado small {
+.posto .posto__tempo--atrasado strong,
+.posto .posto__tempo--atrasado small {
   color: var(--atencao-tinta);
 }
 
@@ -1026,15 +1159,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   flex-wrap: wrap;
   gap: 6px;
   margin: 0;
-  padding: 0 0 0 50px;
+  padding: 0 0 0 51px;
   list-style: none;
 }
 
-.posto__acoes {
-  padding-inline-start: 50px;
-}
-
 .posto__selos .ui-selo {
+  flex: 0 1 auto;
   max-width: 100%;
   height: auto;
   min-height: 24px;
@@ -1047,15 +1177,26 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   flex-wrap: wrap;
   align-items: center;
   gap: 14px;
+  padding-inline-start: 51px;
 }
 
 .posto__acoes :deep(a.p-button) {
   text-decoration: none;
 }
 
+.posto .ui-vazio {
+  flex: 1;
+  align-content: center;
+  justify-items: center;
+  border-top: 1px solid var(--linha-suave);
+  color: var(--tinta-3);
+  text-align: center;
+}
+
 .posto__pe {
-  padding: 12px 18px 16px;
-  border-top: 1px solid var(--linha);
+  margin-top: auto;
+  padding: 14px 20px 18px;
+  border-top: 1px solid var(--linha-suave);
 }
 
 .calma {
@@ -1078,6 +1219,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   .posto--casa {
     grid-row: span 2;
   }
+
+  .caminho > .posto:nth-child(2)::before,
+  .caminho > .posto:nth-child(2)::after {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {
@@ -1087,6 +1233,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
   .posto--casa {
     grid-row: auto;
+  }
+
+  .caminho > .posto::before,
+  .caminho > .posto::after {
+    display: none;
   }
 }
 

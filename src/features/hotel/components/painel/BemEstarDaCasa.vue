@@ -10,7 +10,7 @@
  *
  * ## A forma (redesenho total, 19/10/2026)
  *
- * Uma seção calma, no pé do painel: título no fundo, uma folha com duas colunas. À esquerda a
+ * Uma seção calma, no pé do painel: título no fundo, dois cartões lado a lado. À esquerda a
  * adaptação — estressado e em adaptação viram **nome, acomodação e caminho**; tranquilo vira só um
  * número, para que o total feche sem ocupar a tela com ausência de notícia. À direita a medicação
  * e os cuidados do dia, em ordem de relógio, cada linha com a situação em palavra.
@@ -121,15 +121,20 @@ function rotaDaEstadia(hospedagemId: string): string {
 </script>
 
 <template>
-  <UiSecao :titulo="t('hotel.painel.bemEstar.titulo')">
-    <div class="bem ui-folha">
-      <div class="bem__grade">
-        <!-- ------------------------------------------------------------------ adaptação -->
-        <section class="assunto" aria-labelledby="bem-adaptacao">
+  <UiSecao :titulo="t('hotel.painel.bemEstar.titulo')" icone="ph ph-heart">
+    <div class="bem">
+      <!-- ------------------------------------------------------------------ adaptação -->
+      <section class="assunto ui-folha" aria-labelledby="bem-adaptacao">
+        <header class="assunto__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true">
+            <i class="ph ph-smiley" />
+          </span>
           <h3 id="bem-adaptacao" class="assunto__titulo">
             {{ t('hotel.painel.bemEstar.adaptacao') }}
           </h3>
+        </header>
 
+        <div class="assunto__corpo">
           <p v-if="adaptacao.length === 0" class="assunto__calmo">
             <i class="ph ph-smiley" aria-hidden="true" />
             {{ t('hotel.painel.bemEstar.todosTranquilos', { total: tranquilos }, tranquilos) }}
@@ -161,32 +166,69 @@ function rotaDaEstadia(hospedagemId: string): string {
             </div>
 
             <p v-if="tranquilos > 0" class="assunto__rodape">
+              <i class="ph ph-smiley" aria-hidden="true" />
               {{ t('hotel.painel.bemEstar.demaisTranquilos', { total: tranquilos }, tranquilos) }}
             </p>
           </template>
-        </section>
+        </div>
+      </section>
 
-        <!--
-        Medicação e cuidado dividem a coluna da direita porque nascem da mesma fonte — a prancheta
+      <!--
+        Medicação e cuidado dividem o cartão da direita porque nascem da mesma fonte — a prancheta
         do dia — e se leem do mesmo jeito: hora, quem, o quê, e a situação.
       -->
-        <section class="assunto" aria-labelledby="bem-medicacao">
+      <section class="assunto ui-folha" aria-labelledby="bem-medicacao">
+        <header class="assunto__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true">
+            <i class="ph ph-pill" />
+          </span>
           <h3 id="bem-medicacao" class="assunto__titulo">
             {{ t('hotel.painel.bemEstar.medicacao') }}
-            <span v-if="doses.length" class="assunto__contagem">
-              {{
-                t('hotel.painel.bemEstar.dosesPendentes', { total: dosesPendentes }, dosesPendentes)
-              }}
-            </span>
           </h3>
+          <span v-if="doses.length" class="assunto__contagem">
+            {{
+              t('hotel.painel.bemEstar.dosesPendentes', { total: dosesPendentes }, dosesPendentes)
+            }}
+          </span>
+        </header>
 
-          <ul v-if="doses.length" class="doses">
-            <li v-for="linha in doses" :key="linha.tarefa.id">
-              <RouterLink
-                class="dose"
-                :class="`dose--${situacao(linha)}`"
-                :to="rotaDaEstadia(linha.hospedagemId)"
-              >
+        <ul v-if="doses.length" class="doses">
+          <li v-for="linha in doses" :key="linha.tarefa.id">
+            <RouterLink
+              class="dose"
+              :class="`dose--${situacao(linha)}`"
+              :to="rotaDaEstadia(linha.hospedagemId)"
+            >
+              <span class="ui-hora dose__hora">{{ formato.hora(linha.tarefa.previstaPara) }}</span>
+              <PetAvatar
+                :nome="linha.petNome"
+                :iniciais="linha.petIniciais"
+                :especie="linha.petEspecie"
+                :foto-url="linha.petFotoUrl"
+                tamanho="sm"
+              />
+              <span class="dose__texto">
+                <strong>{{ linha.petNome }}</strong>
+                <span>{{ linha.tarefa.descricao }}</span>
+              </span>
+              <span class="ui-selo" :class="TOM_DA_SITUACAO[situacao(linha)]">
+                {{ formato.situacaoDaTarefa(situacao(linha)) }}
+              </span>
+            </RouterLink>
+          </li>
+        </ul>
+        <p v-else class="assunto__calmo assunto__calmo--lista">
+          {{ t('hotel.hoje.bemEstar.semMedicacao') }}
+        </p>
+
+        <template v-if="cuidados.length > 0">
+          <h4 class="assunto__subtitulo">
+            {{ t('hotel.painel.bemEstar.cuidados') }}
+          </h4>
+
+          <ul class="doses">
+            <li v-for="linha in cuidados" :key="linha.tarefa.id">
+              <RouterLink class="dose" :to="rotaDaEstadia(linha.hospedagemId)">
                 <span class="ui-hora dose__hora">{{
                   formato.hora(linha.tarefa.previstaPara)
                 }}</span>
@@ -207,113 +249,93 @@ function rotaDaEstadia(hospedagemId: string): string {
               </RouterLink>
             </li>
           </ul>
-          <p v-else class="assunto__calmo">{{ t('hotel.hoje.bemEstar.semMedicacao') }}</p>
-
-          <template v-if="cuidados.length > 0">
-            <h3 class="assunto__titulo assunto__titulo--segundo">
-              {{ t('hotel.painel.bemEstar.cuidados') }}
-            </h3>
-
-            <ul class="doses">
-              <li v-for="linha in cuidados" :key="linha.tarefa.id">
-                <RouterLink class="dose" :to="rotaDaEstadia(linha.hospedagemId)">
-                  <span class="ui-hora dose__hora">{{
-                    formato.hora(linha.tarefa.previstaPara)
-                  }}</span>
-                  <PetAvatar
-                    :nome="linha.petNome"
-                    :iniciais="linha.petIniciais"
-                    :especie="linha.petEspecie"
-                    :foto-url="linha.petFotoUrl"
-                    tamanho="sm"
-                  />
-                  <span class="dose__texto">
-                    <strong>{{ linha.petNome }}</strong>
-                    <span>{{ linha.tarefa.descricao }}</span>
-                  </span>
-                  <span class="ui-selo" :class="TOM_DA_SITUACAO[situacao(linha)]">
-                    {{ formato.situacaoDaTarefa(situacao(linha)) }}
-                  </span>
-                </RouterLink>
-              </li>
-            </ul>
-          </template>
-        </section>
-      </div>
+        </template>
+      </section>
     </div>
   </UiSecao>
 </template>
 
 <style scoped>
 /*
- * Duas colunas numa folha só, separadas por um filete — o cartão já é a moldura, e caixa dentro de
- * caixa é exatamente o empilhamento de bordas que deixa a tela achatada.
+ * Dois cartões lado a lado, cada um com o cabeçalho do assunto: como os bichos estão, e o que a
+ * prancheta pede de remédio e cuidado hoje.
  */
 .bem {
-  container-type: inline-size;
-}
-
-.bem__grade {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
 }
 
 .assunto {
-  display: grid;
-  align-content: start;
-  gap: 12px;
+  display: flex;
   min-width: 0;
-  padding: 18px 20px 20px;
+  flex-direction: column;
 }
 
-.assunto + .assunto {
-  border-inline-start: 1px solid var(--linha);
+.assunto__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--linha-suave);
 }
 
 .assunto__titulo {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  flex: 1;
   margin: 0;
   color: var(--tinta);
-  font-size: 15px;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.assunto__corpo {
+  display: grid;
+  gap: 16px;
+  padding: 16px 20px 20px;
+}
+
+.assunto__contagem {
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.assunto__subtitulo {
+  margin: 0;
+  padding: 14px 20px 6px;
+  border-top: 1px solid var(--linha-suave);
+  color: var(--tinta-2);
+  font-size: 13.5px;
   font-weight: 600;
 }
 
-.assunto__titulo--segundo {
-  margin-top: 8px;
-}
-
-.assunto__contagem,
 .assunto__rodape,
-.assunto__calmo {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13.5px;
-  font-weight: 400;
-}
-
 .assunto__calmo {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
+.assunto__rodape i,
 .assunto__calmo i {
   color: var(--ok-tinta);
   font-size: 18px;
+}
+
+.assunto__calmo--lista {
+  padding: 20px;
 }
 
 /* ------------------------------------------------------------------ adaptação */
 
 .grupo {
   display: grid;
-  gap: 8px;
-}
-
-.grupo + .grupo {
-  margin-top: 6px;
+  gap: 10px;
 }
 
 .grupo__estado {
@@ -322,7 +344,7 @@ function rotaDaEstadia(hospedagemId: string): string {
   gap: 6px;
   margin: 0;
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* O ponto carrega o estado; a palavra ao lado diz qual. */
@@ -331,6 +353,7 @@ function rotaDaEstadia(hospedagemId: string): string {
   height: 8px;
   border-radius: 50%;
   background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in oklab, currentColor 16%, transparent);
 }
 
 .grupo__estado--estressado {
@@ -359,12 +382,16 @@ function rotaDaEstadia(hospedagemId: string): string {
   border: 1px solid var(--linha);
   border-radius: 999px;
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   text-decoration: none;
-  transition: background-color var(--pj-tempo-curto) ease;
+  transition:
+    background-color var(--pj-tempo-curto) ease,
+    border-color var(--pj-tempo-curto) ease;
 }
 
 .bicho:hover {
+  border-color: var(--linha-media);
   background: var(--superficie-2);
 }
 
@@ -387,25 +414,28 @@ function rotaDaEstadia(hospedagemId: string): string {
 
 .doses {
   display: grid;
-  margin: 0 -10px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .doses > li + li {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .dose {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 52px;
-  padding: 6px 10px;
-  border-radius: 10px;
+  min-height: 60px;
+  padding: 8px 20px;
   color: var(--tinta);
   text-decoration: none;
   transition: background-color var(--pj-tempo-curto) ease;
+}
+
+.doses:last-child > li:last-child .dose {
+  border-radius: 0 0 calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px);
 }
 
 .dose:hover {
@@ -447,18 +477,6 @@ function rotaDaEstadia(hospedagemId: string): string {
 .dose--feita .dose__texto strong {
   color: var(--tinta-2);
   font-weight: 500;
-}
-
-/* Estreita, a folha empilha as duas colunas e o filete passa a correr na horizontal. */
-@container (max-width: 640px) {
-  .bem__grade {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .assunto + .assunto {
-    border-inline-start: 0;
-    border-top: 1px solid var(--linha);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
