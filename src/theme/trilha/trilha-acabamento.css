@@ -354,3 +354,38 @@ html.trilha {
     transform: none;
   }
 }
+
+/* ------------------------------------------------------------------- diálogos do módulo
+ * Os diálogos com `.clinic-dialog` (Clínica e Hotel) têm faixa no cabeçalho e no rodapé. O
+ * respiro da faixa precisa vencer o padding geral dos diálogos acima, senão o primeiro campo
+ * encosta no traço do cabeçalho.
+ */
+
+html.trilha .clinic-dialog.p-dialog {
+  border-radius: var(--raio-painel);
+  box-shadow: var(--sombra-3);
+}
+
+html.trilha .clinic-dialog .p-dialog-header {
+  padding: 18px 24px;
+  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+}
+
+html.trilha .clinic-dialog .p-dialog-content {
+  padding: 20px 24px 22px;
+}
+
+html.trilha .clinic-dialog .p-dialog-footer {
+  padding: 16px 24px;
+  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+}
+
+/* A marca do título (o ícone ao lado do nome do diálogo) acende na cor do espaço. */
+html.trilha .clinic-dialog__marca {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 16px;
+}

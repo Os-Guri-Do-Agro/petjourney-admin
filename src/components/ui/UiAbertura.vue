@@ -322,6 +322,11 @@ withDefaults(
     padding: 22px 20px;
   }
 
+  /* Estreito, a trilha cruzaria o título: fica só no canto de cima. */
+  .abertura__trilha {
+    mask-image: linear-gradient(200deg, #000 0%, transparent 38%);
+  }
+
   .abertura__titulo {
     font-size: 24px;
   }

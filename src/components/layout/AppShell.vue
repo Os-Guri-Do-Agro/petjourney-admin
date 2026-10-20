@@ -169,6 +169,31 @@ watch(
  */
 const conteudo = ref<HTMLElement | null>(null)
 
+/*
+ * Diálogos, gavetas e menus vão para o `body` (teleport) e saem de dentro da moldura: sem a cor
+ * do espaço lá, os ladrilhos e as marcas deles ficariam neutros. O `body` leva a mesma classe de
+ * lugar da moldura.
+ */
+watch(
+  lugar,
+  (atual, anterior) => {
+    if (typeof document === 'undefined') {
+      return
+    }
+
+    if (anterior) {
+      document.body.classList.remove(`pj-lugar--${anterior}`)
+    }
+
+    document.body.classList.add(`pj-lugar--${atual}`)
+  },
+  { immediate: true },
+)
+
+onUnmounted(() => {
+  document.body.classList.remove(`pj-lugar--${lugar.value}`)
+})
+
 watch(
   () => route.path,
   () => {

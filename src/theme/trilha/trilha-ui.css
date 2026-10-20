@@ -159,12 +159,166 @@
   right: 16px;
 }
 
+.trilha .ui-indicador:has(> .ui-ladrilho:not(.ui-ladrilho--estatico)) .ui-indicador__rotulo {
+  padding-right: 44px;
+}
+
+/*
+ * Valor longo (dinheiro, "R$ 33.740,40") não cabe ao lado do ladrilho do canto: com `--topo`, o
+ * ladrilho sobe para cima do valor, à esquerda.
+ */
+.trilha .ui-indicador--topo .ui-ladrilho {
+  position: static;
+  margin-bottom: 10px;
+}
+
+.trilha .ui-indicador--topo .ui-indicador__rotulo {
+  padding-right: 0;
+}
+
 .trilha .ui-indicador--risco .ui-indicador__valor {
   color: var(--risco-tinta);
 }
 
 .trilha .ui-indicador--atencao .ui-indicador__valor {
   color: var(--atencao-tinta);
+}
+
+/*
+ * O cartão com cabeçalho: o padrão de toda folha que tem assunto (o Hoje, a ficha do pet, a
+ * Agenda). `ui-folha ui-cartao` e, dentro, `__cabeca` (ladrilho, `__titulos` com `__titulo` e
+ * `__descricao`, `__total` ou `__acoes` à direita), `__ferramentas` (filtro rente, num poço),
+ * `__corpo` e `__pe`. Os fios entre as partes são os suaves.
+ */
+.trilha .ui-cartao {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+}
+
+.trilha .ui-cartao__cabeca {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px 14px;
+  padding: 16px 20px 14px;
+}
+
+.trilha .ui-cartao__cabeca + *,
+.trilha .ui-cartao__ferramentas + * {
+  border-top: 1px solid var(--linha-suave);
+}
+
+.trilha .ui-cartao__titulos {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 2px;
+}
+
+.trilha .ui-cartao__titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.trilha .ui-cartao__descricao {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.trilha .ui-cartao__acoes {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.trilha .ui-cartao__total {
+  flex: none;
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.trilha .ui-cartao__ferramentas {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 20px;
+  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+}
+
+.trilha .ui-cartao__corpo {
+  min-width: 0;
+  padding: 16px 20px 18px;
+}
+
+.trilha .ui-cartao__pe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 20px 14px;
+  border-top: 1px solid var(--linha-suave);
+  border-radius: 0 0 calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px);
+  background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));
+}
+
+/* Cabeçalho tingido pelo estado do assunto (recepção, chegam hoje, atrasados). */
+.trilha .ui-cartao__cabeca--risco,
+.trilha .ui-cartao__cabeca--atencao,
+.trilha .ui-cartao__cabeca--ok,
+.trilha .ui-cartao__cabeca--lugar {
+  border-radius: calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px) 0 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--ui-cabeca-tom) 70%, var(--superficie)),
+    var(--superficie)
+  );
+}
+
+.trilha .ui-cartao__cabeca--risco {
+  --ui-cabeca-tom: var(--risco-fundo);
+}
+
+.trilha .ui-cartao__cabeca--atencao {
+  --ui-cabeca-tom: var(--atencao-fundo);
+}
+
+.trilha .ui-cartao__cabeca--ok {
+  --ui-cabeca-tom: var(--ok-fundo);
+}
+
+.trilha .ui-cartao__cabeca--lugar {
+  --ui-cabeca-tom: var(--pj-lugar-fundo);
+}
+
+/* A tabela da Clínica dentro de um cartão perde a moldura própria: seria cartão dentro de cartão. */
+.trilha .ui-folha:has(.tabela) {
+  overflow: clip;
+}
+
+.trilha .ui-folha .tabela {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 /* ---------------------------------------------------------------------------------- números */
@@ -530,6 +684,18 @@ html.trilha
   box-shadow: var(--sombra-1);
   color: var(--tinta);
   font-weight: 600;
+}
+
+/* No escuro o papel é mais escuro que o trilho: o trilho afunda mais e a escolhida sobe clara. */
+html.trilha.app-dark .p-selectbutton:not(.grupo) {
+  background: color-mix(in oklab, var(--fundo) 55%, #000);
+}
+
+html.trilha.app-dark
+  .p-selectbutton:not(.grupo)
+  .p-togglebutton.p-togglebutton-checked
+  .p-togglebutton-content {
+  background: var(--superficie-3);
 }
 
 html.trilha .p-selectbutton:not(.grupo) .p-togglebutton:has(:focus-visible) {
