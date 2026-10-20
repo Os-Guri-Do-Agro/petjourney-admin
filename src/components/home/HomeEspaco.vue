@@ -164,32 +164,42 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 .espaco__cabeca {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 60px;
-  padding: 12px 14px 12px 16px;
-  border-bottom: 1px solid var(--linha);
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 62%, var(--superficie));
+  gap: 12px;
+  min-height: 68px;
+  padding: 16px 16px 12px 18px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--pj-lugar-fundo) 75%, var(--superficie)) 0%,
+    var(--superficie) 100%
+  );
 }
 
 .espaco__icone {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   flex: none;
   place-items: center;
-  border-radius: 10px;
-  background: var(--pj-lugar);
-  color: var(--superficie);
-  font-size: 18px;
+  border-radius: 12px;
+  background: var(--pj-lugar-degrade);
+  box-shadow:
+    var(--pj-lugar-sombra),
+    inset 0 1px 0 rgb(255 255 255 / 22%);
+  color: #fff;
+  font-size: 19px;
+}
+
+.app-dark .espaco__icone {
+  color: var(--rail);
 }
 
 .espaco__titulo {
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
 }
 
 .espaco__nome {
@@ -221,14 +231,15 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 
 .espaco__atalho {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 34px;
   flex: none;
   align-items: center;
   gap: 6px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
+  padding: 0 12px;
+  border: 1px solid color-mix(in oklab, var(--pj-lugar) 22%, var(--linha));
+  border-radius: 999px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--pj-lugar-tinta);
   cursor: pointer;
   font: inherit;
@@ -259,13 +270,13 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 .espaco__corpo {
   display: grid;
   align-content: start;
-  gap: 12px;
-  padding: 10px 10px 14px;
+  gap: 14px;
+  padding: 6px 12px 16px;
 }
 
 .espaco__numeros {
   display: grid;
-  gap: 2px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
@@ -277,20 +288,24 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
   height: 100%;
   align-content: start;
   gap: 3px;
-  padding: 10px 10px 12px;
-  border-radius: 12px;
+  padding: 12px 12px 13px;
+  border: 1px solid transparent;
+  border-radius: 14px;
   color: var(--tinta);
   text-decoration: none;
-  transition: background-color var(--pj-tempo-curto) ease;
+  transition:
+    background-color var(--pj-tempo-curto) ease,
+    border-color var(--pj-tempo-curto) ease;
 }
 
 .numero:hover {
+  border-color: var(--linha-suave);
   background: var(--superficie-2);
 }
 
 .numero__valor {
   color: var(--tinta);
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.05;
@@ -397,7 +412,7 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 /* ------------------------------------------------------------------------------ próximo passo */
 
 .espaco__pe {
-  border-top: 1px solid var(--linha);
+  padding: 0 12px 12px;
 }
 
 .passo {
@@ -408,7 +423,8 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
   gap: 10px;
   margin: 0;
   padding: 10px 16px;
-  border: 0;
+  border: 1px solid color-mix(in oklab, var(--pj-lugar) 14%, transparent);
+  border-radius: 14px;
   background: color-mix(in oklab, var(--pj-lugar-fundo) 70%, var(--superficie));
   color: var(--pj-lugar-tinta);
   cursor: pointer;

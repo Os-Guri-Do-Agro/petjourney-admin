@@ -25,6 +25,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter, type RouteLocationRaw } from 'vue-router'
 
 import { porGravidade, type LinhaDaTabela } from '@/components/home/pauta-tabela'
+import UiAbertura, { type IndicadorDaAbertura } from '@/components/ui/UiAbertura.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import UiPauta from '@/components/ui/UiPauta.vue'
 import UiSecao from '@/components/ui/UiSecao.vue'
@@ -344,6 +345,54 @@ function linhaDoAtendimento(item: Appointment) {
     .join(' · ')
 }
 
+/** "6 de 38 atendimentos feitos hoje": o ritmo do dia, embaixo da frase principal. */
+const andamentoDoDia = computed(() => {
+  const doDia = umPorGrupo(agenda.atendimentos.filter((item) => item.status !== 'cancelado'))
+  const feitos = doDia.filter((item) => item.status === 'finalizado').length
+
+  return doDia.length
+    ? t('inicio.espacos.clinica.andamento', { feitos, total: doDia.length }, doDia.length)
+    : ''
+})
+
+const internados = computed(
+  () => (internacao.mapa?.leitos ?? []).filter((item) => item.internacao !== null).length,
+)
+
+/** Os quatro números que decidem o que fazer primeiro, cada um levando à tela dele. */
+const indicadores = computed<IndicadorDaAbertura[]>(() => [
+  {
+    id: 'recepcao',
+    valor: naRecepcao.value.length,
+    rotulo: t('inicio.espacos.clinica.recepcao'),
+    icone: 'ph ph-door-open',
+    to: '/veterinario/agenda',
+    tom: naRecepcao.value.length ? 'atencao' : undefined,
+  },
+  {
+    id: 'consulta',
+    valor: emConsulta.value.length,
+    rotulo: t('inicio.espacos.clinica.consulta'),
+    icone: 'ph ph-stethoscope',
+    to: '/veterinario/agenda',
+  },
+  {
+    id: 'internados',
+    valor: internados.value,
+    rotulo: t('clinico.meuDia.abertura.internados', internados.value),
+    icone: 'ph ph-bed',
+    to: '/veterinario/internacao',
+    tom: internadosComPendencia.value.length ? 'risco' : undefined,
+  },
+  {
+    id: 'a-seguir',
+    valor: aSeguir.value.length,
+    rotulo: t('inicio.espacos.clinica.aSeguir'),
+    icone: 'ph ph-clock',
+    to: '/veterinario/agenda',
+  },
+])
+
 const erroTraduzido = computed(() => (agenda.erro ? t(agenda.erro) : ''))
 
 async function carregar() {
@@ -376,19 +425,29 @@ onMounted(carregar)
     bloquear-se-suspenso
     @tentar-de-novo="carregar"
   >
-    <template #resumo>
-      <time :datetime="clinicClock.today()">{{ dataDeHoje }}</time>{{ '. ' }}
-      <span aria-live="polite">{{ fraseDoResumo }}</span>
-    </template>
-
-    <template #acoes>
-      <Button
-        v-if="acaoPrincipal"
-        type="button"
-        icon="ph ph-stethoscope"
-        :label="acaoPrincipal.rotulo"
-        @click="abrirProntuario(acaoPrincipal.item)"
-      />
+    <template #cabecalho>
+      <UiAbertura
+        class="hoje__abertura"
+        :sobre="dataDeHoje"
+        :titulo="fraseDoResumo"
+        :resumo="andamentoDoDia"
+        :indicadores="indicadores"
+        :rotulo-dos-indicadores="t('clinico.meuDia.abertura.indicadores')"
+      >
+        <template #acoes>
+          <Button
+            v-if="acaoPrincipal"
+            type="button"
+            icon="ph ph-stethoscope"
+            :label="acaoPrincipal.rotulo"
+            @click="abrirProntuario(acaoPrincipal.item)"
+          />
+          <RouterLink class="p-button p-component p-button-secondary" to="/veterinario/agenda">
+            <i class="ph ph-calendar-blank" aria-hidden="true" />
+            {{ t('clinico.meuDia.agendaCompleta') }}
+          </RouterLink>
+        </template>
+      </UiAbertura>
     </template>
 
     <div class="hoje">
@@ -396,9 +455,11 @@ onMounted(carregar)
       <div class="andar">
         <section class="posto posto--recepcao ui-folha" aria-labelledby="posto-recepcao">
           <header class="posto__cabeca">
-            <span class="posto__ponto" aria-hidden="true" />
+            <span class="ui-ladrilho ui-ladrilho--atencao" aria-hidden="true">
+              <i class="ph ph-door-open" />
+            </span>
             <h2 id="posto-recepcao">{{ t('clinico.hoje.recepcao') }}</h2>
-            <span class="ui-contagem">{{ naRecepcao.length }}</span>
+            <span class="posto__total ui-num">{{ naRecepcao.length }}</span>
           </header>
 
           <ul v-if="naRecepcao.length" class="ui-lista">
@@ -456,9 +517,11 @@ onMounted(carregar)
 
         <section class="posto posto--sala ui-folha" aria-labelledby="posto-sala">
           <header class="posto__cabeca">
-            <span class="posto__ponto" aria-hidden="true" />
+            <span class="ui-ladrilho" aria-hidden="true">
+              <i class="ph ph-stethoscope" />
+            </span>
             <h2 id="posto-sala">{{ t('clinico.hoje.emConsulta') }}</h2>
-            <span class="ui-contagem">{{ emConsulta.length }}</span>
+            <span class="posto__total ui-num">{{ emConsulta.length }}</span>
           </header>
 
           <ul v-if="emConsulta.length" class="ui-lista">
@@ -488,15 +551,18 @@ onMounted(carregar)
 
         <section class="posto posto--seguir ui-folha" aria-labelledby="posto-seguir">
           <header class="posto__cabeca">
-            <span class="posto__ponto" aria-hidden="true" />
+            <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
+              <i class="ph ph-clock" />
+            </span>
             <h2 id="posto-seguir">{{ t('clinico.meuDia.aSeguir') }}</h2>
-            <span class="ui-contagem">{{ aSeguir.length }}</span>
+            <span class="posto__total ui-num">{{ aSeguir.length }}</span>
           </header>
 
-          <ul v-if="proximos.length" class="ui-lista">
+          <ul v-if="proximos.length" class="ui-lista posto__linha-do-tempo">
             <li v-for="item in proximos" :key="item.id">
-              <RouterLink class="ui-linha posto__linha" :to="focoNaAgenda(item.id)">
+              <RouterLink class="ui-linha posto__linha posto__marco" :to="focoNaAgenda(item.id)">
                 <span class="ui-hora posto__hora">{{ formato.hora(item.inicio) }}</span>
+                <span class="posto__no" aria-hidden="true" />
                 <PetAvatar
                   :nome="clinico.pet(item.petId)?.nome ?? ''"
                   :iniciais="clinico.pet(item.petId)?.iniciais ?? ''"
@@ -543,64 +609,107 @@ onMounted(carregar)
 <style scoped>
 .hoje {
   display: grid;
-  gap: 36px;
+  gap: 40px;
 }
 
-/* As três colunas são o caminho do paciente: da esquerda (chegou) para a direita (vem depois). */
+.hoje__abertura {
+  flex: 1;
+  min-width: 0;
+}
+
+/*
+ * As três colunas são o caminho do paciente: da esquerda (chegou) para a direita (vem depois). Um
+ * nó entre elas diz que é um caminho, e não três listas soltas.
+ */
 .andar {
   display: grid;
   align-items: start;
-  gap: 20px;
+  gap: 28px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .posto {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.andar > .posto:not(:last-child)::after {
+  position: absolute;
+  z-index: 1;
+  top: 30px;
+  right: -23px;
   display: grid;
-  overflow: hidden;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border: 1px solid var(--linha);
+  border-radius: 50%;
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
+  content: '';
+}
+
+.andar > .posto:not(:last-child)::before {
+  position: absolute;
+  z-index: 2;
+  top: 36px;
+  right: -16px;
+  width: 5px;
+  height: 5px;
+  border-top: 1.5px solid var(--tinta-3);
+  border-right: 1.5px solid var(--tinta-3);
+  content: '';
+  transform: rotate(45deg);
 }
 
 .posto__cabeca {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid var(--linha);
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-radius: var(--raio-cartao) var(--raio-cartao) 0 0;
+}
+
+.posto--recepcao .posto__cabeca {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--atencao-fundo) 70%, var(--superficie)),
+    var(--superficie)
+  );
+}
+
+.posto--sala .posto__cabeca {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--clinica-fundo) 70%, var(--superficie)),
+    var(--superficie)
+  );
 }
 
 .posto__cabeca h2 {
   flex: 1;
   margin: 0;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
-.posto__ponto {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--tinta-3);
+.posto__total {
+  color: var(--tinta);
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
 }
 
-.posto--recepcao .posto__ponto {
-  background: var(--atencao);
-}
-
-.posto--sala .posto__ponto {
-  background: var(--clinica);
-}
-
-.posto--recepcao .posto__cabeca {
-  background: color-mix(in oklab, var(--atencao-fundo) 55%, var(--superficie));
-}
-
-.posto--sala .posto__cabeca {
-  background: color-mix(in oklab, var(--clinica-fundo) 55%, var(--superficie));
+.posto > .ui-lista {
+  border-top: 1px solid var(--linha-suave);
 }
 
 .posto__item {
   display: grid;
-  gap: 10px;
-  padding: 14px 18px 16px;
+  gap: 12px;
+  padding: 16px 20px 18px;
 }
 
 .posto__quem {
@@ -619,13 +728,17 @@ onMounted(carregar)
 
 .posto__tempo strong {
   color: var(--tinta);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 650;
   letter-spacing: -0.02em;
 }
 
 .posto--recepcao .posto__tempo strong {
   color: var(--atencao-tinta);
+}
+
+.posto--sala .posto__tempo strong {
+  color: var(--clinica-tinta);
 }
 
 .posto__tempo small {
@@ -638,7 +751,7 @@ onMounted(carregar)
   flex-wrap: wrap;
   gap: 6px;
   margin: 0;
-  padding: 0 0 0 48px;
+  padding: 0 0 0 52px;
   list-style: none;
 }
 
@@ -655,12 +768,35 @@ onMounted(carregar)
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
-  padding-left: 48px;
+  gap: 16px;
+  padding-left: 52px;
 }
 
 .posto__linha {
-  padding-inline: 18px;
+  padding-inline: 20px;
+}
+
+.posto .ui-vazio {
+  flex: 1;
+  align-content: center;
+  justify-items: center;
+  border-top: 1px solid var(--linha-suave);
+  color: var(--tinta-3);
+  text-align: center;
+}
+
+/*
+ * "A seguir" como linha do tempo: a hora à esquerda, um nó numa linha vertical, e o paciente. A
+ * linha liga os nós de cima a baixo, então a coluna se lê como o resto do dia, e não como uma
+ * lista de nomes.
+ */
+.posto__linha-do-tempo > li + li {
+  border-top: 0;
+}
+
+.posto__marco {
+  min-height: 60px;
+  gap: 12px;
 }
 
 .posto__hora {
@@ -668,9 +804,53 @@ onMounted(carregar)
   flex: none;
 }
 
+.posto__no {
+  position: relative;
+  align-self: stretch;
+  width: 10px;
+  flex: none;
+}
+
+.posto__no::before {
+  position: absolute;
+  top: -12px;
+  bottom: -12px;
+  left: 4px;
+  width: 2px;
+  background: var(--linha);
+  content: '';
+}
+
+.posto__linha-do-tempo > li:first-child .posto__no::before {
+  top: 50%;
+}
+
+.posto__linha-do-tempo > li:last-child .posto__no::before {
+  bottom: 50%;
+}
+
+.posto__no::after {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--clinica);
+  border-radius: 50%;
+  background: var(--superficie);
+  content: '';
+  transform: translateY(-50%);
+}
+
+.posto__linha-do-tempo > li:first-child .posto__no::after {
+  background: var(--clinica);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--clinica) 18%, transparent);
+}
+
 .posto__pe {
-  padding: 12px 18px 16px;
-  border-top: 1px solid var(--linha);
+  margin-top: auto;
+  padding: 14px 20px 18px;
+  border-top: 1px solid var(--linha-suave);
 }
 
 @media (max-width: 1240px) {
@@ -681,11 +861,21 @@ onMounted(carregar)
   .posto--seguir {
     grid-column: 1 / -1;
   }
+
+  .andar > .posto:nth-child(2)::before,
+  .andar > .posto:nth-child(2)::after {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {
   .andar {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .andar > .posto::before,
+  .andar > .posto::after {
+    display: none;
   }
 }
 </style>

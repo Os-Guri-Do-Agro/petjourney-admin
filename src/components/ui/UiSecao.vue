@@ -20,7 +20,9 @@ defineProps<{
     <header class="secao__cabeca">
       <div class="secao__titulos">
         <h2 :id="id ? `${id}-titulo` : undefined" class="secao__titulo">
-          <i v-if="icone" :class="icone" class="secao__icone" aria-hidden="true" />
+          <span v-if="icone" class="ui-ladrilho ui-ladrilho--p secao__icone" aria-hidden="true">
+            <i :class="icone" />
+          </span>
           {{ titulo }}
           <span v-if="contagem != null" class="ui-contagem">{{ contagem }}</span>
         </h2>
@@ -42,7 +44,7 @@ defineProps<{
   display: grid;
   min-width: 0;
   align-content: start;
-  gap: 12px;
+  gap: 14px;
 }
 
 .secao__cabeca {
@@ -62,23 +64,27 @@ defineProps<{
 .secao__titulo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   color: var(--tinta);
   font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 650;
+  letter-spacing: -0.015em;
 }
 
 .secao__icone {
-  color: var(--pj-lugar, var(--tinta-2));
-  font-size: 19px;
+  margin-right: 2px;
 }
 
 .secao__descricao {
   margin: 0;
   color: var(--tinta-2);
   font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.secao__cabeca:has(.secao__icone) .secao__descricao {
+  padding-left: 42px;
 }
 
 .secao__acoes {

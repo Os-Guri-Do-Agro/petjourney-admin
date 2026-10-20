@@ -28,6 +28,7 @@ const { t } = useI18n()
       :aria-current="aba.to === atual ? 'page' : undefined"
       :title="aba.tituloDoSelo"
     >
+      <i class="abas__icone" :class="aba.icone" aria-hidden="true" />
       <span>{{ aba.rotulo }}</span>
       <i v-if="aba.bloqueado" class="ph ph-lock-simple" aria-hidden="true" />
       <span v-else-if="aba.selo" class="abas__selo" :class="`abas__selo--${aba.tom ?? 'neutro'}`">
@@ -40,7 +41,7 @@ const { t } = useI18n()
 <style scoped>
 .abas {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   overflow-x: auto;
   border-bottom: 1px solid var(--linha);
   scrollbar-width: none;
@@ -56,21 +57,43 @@ const { t } = useI18n()
   flex: none;
   align-items: center;
   gap: 8px;
-  height: 44px;
+  height: 46px;
   padding: 0 12px;
   color: var(--tinta-2);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 550;
   text-decoration: none;
   white-space: nowrap;
+  transition: color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .abas__aba:first-child {
-  padding-left: 2px;
+  padding-left: 4px;
+}
+
+.abas__icone {
+  color: var(--tinta-3);
+  font-size: 17px;
+  transition: color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .abas__aba:hover {
   color: var(--tinta);
+}
+
+.abas__aba:hover::after {
+  position: absolute;
+  right: 12px;
+  bottom: -1px;
+  left: 12px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--linha-media);
+  content: '';
+}
+
+.abas__aba:first-child:hover::after {
+  left: 4px;
 }
 
 .abas__aba:focus-visible {
@@ -79,12 +102,18 @@ const { t } = useI18n()
   outline-offset: -4px;
 }
 
-.abas__aba--atual {
+.abas__aba--atual,
+.abas__aba--atual:hover {
   color: var(--tinta);
-  font-weight: 600;
+  font-weight: 650;
 }
 
-.abas__aba--atual::after {
+.abas__aba--atual .abas__icone {
+  color: var(--pj-lugar, var(--musgo));
+}
+
+.abas__aba--atual::after,
+.abas__aba--atual:hover::after {
   position: absolute;
   right: 12px;
   bottom: -1px;
@@ -96,7 +125,7 @@ const { t } = useI18n()
 }
 
 .abas__aba--atual:first-child::after {
-  left: 2px;
+  left: 4px;
 }
 
 .abas__selo {

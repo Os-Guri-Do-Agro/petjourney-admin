@@ -27,6 +27,7 @@
  * clínica e o hotel de hoje. Ele é carregado uma vez aqui e entregue por `provide`, para que três
  * partes não peçam três vezes a mesma coisa nem mostrem números de momentos diferentes.
  */
+import Button from 'primevue/button'
 import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -41,8 +42,9 @@ import type { IndicacaoNoBloco } from '@/components/home/espaco-da-home'
 import { CHAVE_DO_DIA, useLinhaDoDia } from '@/components/home/useLinhaDoDia'
 import { usePautaDaHome } from '@/components/home/usePautaDaHome'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
+import UiAbertura from '@/components/ui/UiAbertura.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
-import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
+import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { useEspacos } from '@/navegacao/espacos'
@@ -202,13 +204,24 @@ onUnmounted(() => {
     :erro="loadError"
     :sem-acesso-de-parceiro="store.semAcessoParceiro"
     bloquear-se-suspenso
-    guia
     @tentar-de-novo="ensureContext(true)"
   >
-    <template #resumo>
-      <time :datetime="now.toISOString().slice(0, 10)">{{ dataDeHoje }}</time
-      >{{ '. ' }}
-      <span aria-live="polite">{{ fraseDoResumo }}</span>
+    <template #cabecalho>
+      <UiAbertura class="inicio__abertura pj-lugar--inicio" :sobre="dataDeHoje" :titulo="saudacao">
+        <template #resumo>
+          <span aria-live="polite">{{ fraseDoResumo }}</span>
+        </template>
+        <template #acoes>
+          <Button
+            type="button"
+            severity="secondary"
+            :icon="isGuidanceVisible ? 'ph ph-eye-slash' : 'ph ph-info'"
+            :label="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
+            :aria-pressed="isGuidanceVisible"
+            @click="toggleGuidance"
+          />
+        </template>
+      </UiAbertura>
     </template>
 
     <div class="inicio">
@@ -261,8 +274,13 @@ onUnmounted(() => {
 <style scoped>
 .inicio {
   display: grid;
-  gap: 36px;
+  gap: 40px;
   grid-template-columns: minmax(0, 1fr);
+}
+
+.inicio__abertura {
+  flex: 1;
+  min-width: 0;
 }
 
 .inicio__guia {

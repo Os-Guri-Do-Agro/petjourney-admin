@@ -14,8 +14,8 @@
  */
 
 :root.trilha {
-  --ui-raio-folha: 16px;
-  --ui-linha-altura: 60px;
+  --ui-raio-folha: var(--raio-cartao);
+  --ui-linha-altura: 64px;
 }
 
 :root.trilha body {
@@ -29,10 +29,142 @@
   border: 1px solid var(--linha);
   border-radius: var(--ui-raio-folha);
   background: var(--superficie);
+  box-shadow: var(--sombra-cartao);
 }
 
 .trilha .ui-folha--recheio {
-  padding: 20px;
+  padding: 20px 22px;
+}
+
+/*
+ * O poço: área rente, tingida, sem sombra. Para o que apoia o cartão (um resumo dentro dele, uma
+ * lista secundária, o "nada por aqui") e não disputa com ele.
+ */
+.trilha .ui-poco {
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
+}
+
+/*
+ * O ladrilho: o ícone num quadrado de cantos macios. `--lugar` acende no degradê do espaço (o
+ * título da tela, o atalho principal); `--suave` fica no tom claro do lugar (título de seção,
+ * item de lista); `--risco`, `--atencao`, `--ok` seguem o estado.
+ */
+.trilha .ui-ladrilho {
+  display: inline-grid;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 18px;
+}
+
+.trilha .ui-ladrilho--p {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  font-size: 16px;
+}
+
+.trilha .ui-ladrilho--g {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  font-size: 22px;
+}
+
+.trilha .ui-ladrilho--lugar {
+  background: var(--pj-lugar-degrade);
+  box-shadow:
+    var(--pj-lugar-sombra),
+    inset 0 1px 0 rgb(255 255 255 / 22%);
+  color: #fff;
+}
+
+.trilha.app-dark .ui-ladrilho--lugar {
+  color: var(--rail);
+}
+
+.trilha .ui-ladrilho--risco {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+.trilha .ui-ladrilho--atencao {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+}
+
+.trilha .ui-ladrilho--ok {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+}
+
+.trilha .ui-ladrilho--neutro {
+  background: var(--superficie-3);
+  color: var(--tinta-2);
+}
+
+/*
+ * O indicador: um número que importa, grande, com o rótulo embaixo e o ladrilho no canto. Vários
+ * lado a lado numa `ui-indicadores`.
+ */
+.trilha .ui-indicadores {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+}
+
+.trilha .ui-indicador {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 18px 20px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  box-shadow: var(--sombra-cartao);
+}
+
+.trilha .ui-indicador__valor {
+  color: var(--tinta);
+  font-family: var(--font-dados);
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.trilha .ui-indicador__rotulo {
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.trilha .ui-indicador__nota {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.trilha .ui-indicador .ui-ladrilho {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.trilha .ui-indicador--risco .ui-indicador__valor {
+  color: var(--risco-tinta);
+}
+
+.trilha .ui-indicador--atencao .ui-indicador__valor {
+  color: var(--atencao-tinta);
 }
 
 /* ---------------------------------------------------------------------------------- números */
@@ -62,7 +194,7 @@
 }
 
 .trilha .ui-lista > li + li {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .trilha .ui-linha {
@@ -71,9 +203,10 @@
   min-height: var(--ui-linha-altura);
   align-items: center;
   gap: 14px;
-  padding: 10px 18px;
+  padding: 12px 20px;
   color: var(--tinta);
   text-decoration: none;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .trilha a.ui-linha:hover,
@@ -118,6 +251,7 @@
   overflow: hidden;
   font-size: 14.5px;
   font-weight: 600;
+  letter-spacing: -0.005em;
   line-height: 1.35;
   text-overflow: ellipsis;
 }
@@ -140,6 +274,12 @@
 .trilha .ui-linha__seta {
   color: var(--tinta-3);
   font-size: 16px;
+  transition: transform var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.trilha .ui-linha:hover .ui-linha__seta {
+  color: var(--tinta);
+  transform: translateX(2px);
 }
 
 /*
@@ -148,11 +288,11 @@
  */
 .trilha .ui-marca::before {
   position: absolute;
-  top: 12px;
-  bottom: 12px;
+  top: 14px;
+  bottom: 14px;
   left: 0;
-  width: 4px;
-  border-radius: 0 4px 4px 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
   background: var(--ui-marca, var(--linha-forte));
   content: '';
 }
@@ -185,8 +325,8 @@
   align-items: center;
   gap: 5px;
   height: 24px;
-  padding: 0 9px;
-  border-radius: 7px;
+  padding: 0 10px;
+  border-radius: 999px;
   background: var(--neutro-fundo);
   color: var(--neutro-tinta);
   font-size: 12.5px;
@@ -239,7 +379,7 @@
   padding: 0 7px;
   place-items: center;
   border-radius: 999px;
-  background: var(--superficie-3);
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 70%, var(--superficie-3));
   color: var(--tinta-2);
   font-family: var(--font-dados);
   font-size: 12px;
@@ -253,7 +393,7 @@
   display: grid;
   justify-items: start;
   gap: 4px;
-  padding: 22px 18px;
+  padding: 24px 20px;
   color: var(--tinta-2);
   font-size: 14px;
   line-height: 1.5;
@@ -301,20 +441,21 @@
 }
 
 .trilha .ui-tabela th {
-  height: 40px;
+  height: 42px;
   padding: 0 16px;
   border-bottom: 1px solid var(--linha);
-  color: var(--tinta-2);
+  background: var(--superficie-2);
+  color: var(--tinta-3);
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
   text-align: left;
   white-space: nowrap;
 }
 
 .trilha .ui-tabela td {
-  height: 58px;
+  height: 60px;
   padding: 8px 16px;
-  border-bottom: 1px solid var(--linha);
+  border-bottom: 1px solid var(--linha-suave);
   vertical-align: middle;
 }
 

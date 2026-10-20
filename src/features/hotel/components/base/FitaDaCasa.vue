@@ -250,12 +250,12 @@ const dataLonga = computed(() =>
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 24px;
-  min-height: 60px;
-  padding: 0 28px;
+  gap: 28px;
+  min-height: 66px;
+  padding: 0 28px 0 36px;
   border-bottom: 1px solid var(--linha);
-  background: color-mix(in oklab, var(--superficie) 88%, transparent);
-  backdrop-filter: blur(10px);
+  background: color-mix(in oklab, var(--superficie) 82%, transparent);
+  backdrop-filter: blur(12px);
 }
 
 .fita__hora {
@@ -264,7 +264,7 @@ const dataLonga = computed(() =>
 }
 
 .fita__hora strong {
-  color: var(--hotel-tinta);
+  color: var(--tinta);
   font-family: var(--font-dados);
   font-size: 20px;
   font-variant-numeric: tabular-nums;
@@ -296,13 +296,25 @@ const dataLonga = computed(() =>
   outline-offset: 3px;
 }
 
+.fita__regua::before {
+  position: absolute;
+  top: 16px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 8px;
+  background: var(--superficie-2);
+  box-shadow: inset 0 0 0 1px var(--linha-suave);
+  content: '';
+}
+
 .fita__passado {
   position: absolute;
   top: 16px;
   bottom: 0;
   left: 0;
-  border-radius: 6px 0 0 6px;
-  background: var(--superficie-2);
+  border-radius: 8px 0 0 8px;
+  background: color-mix(in oklab, var(--superficie-3) 80%, transparent);
 }
 
 .fita__marca-hora {
@@ -417,19 +429,22 @@ const dataLonga = computed(() =>
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 32px;
-  padding: 0 12px;
+  height: 34px;
+  padding: 0 14px 0 12px;
+  border: 1px solid var(--linha);
   border-radius: 999px;
-  background: var(--superficie-2);
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 550;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .fita__conta:hover {
-  background: var(--superficie-3);
+  border-color: var(--linha-media);
+  background: var(--superficie-2);
 }
 
 .fita__conta:focus-visible {

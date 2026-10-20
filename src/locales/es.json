@@ -2936,6 +2936,10 @@
         "mostrarMais": "Mostrar {total} más",
         "mostrarMenos": "Mostrar menos",
         "ondeAgenda": "Agenda"
+      },
+      "abertura": {
+        "internados": "internado | internados",
+        "indicadores": "Cómo va el día"
       }
     },
     "resumo": {

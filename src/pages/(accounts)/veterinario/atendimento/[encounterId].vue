@@ -40,6 +40,7 @@ import { useI18n } from 'vue-i18n'
 import { onBeforeRouteLeave, RouterLink, useRoute, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
+import { rolagemAtual, rolarConteudoPara, topoDoRolador } from '@/composables/rolagemDoConteudo'
 import { useTelaLarga } from '@/composables/useTelaLarga'
 import DocumentoAtestado from '@/features/clinico/components/documentos/DocumentoAtestado.vue'
 import DocumentoEncaminhamento from '@/features/clinico/components/documentos/DocumentoEncaminhamento.vue'
@@ -514,7 +515,7 @@ function acompanharRolagem() {
     const cabeca = cabecaDoPaciente.value
 
     pacienteFora.value = cabeca
-      ? cabeca.getBoundingClientRect().bottom < alturaDoTopo.value + 8
+      ? cabeca.getBoundingClientRect().bottom < topoDoRolador() + alturaDoTopo.value + 8
       : false
   })
 }
@@ -524,13 +525,22 @@ function aoRedimensionar() {
   acompanharRolagem()
 }
 
+/*
+ * Rola a janela no celular e a folha (`main#conteudo`) em tela larga; ouvir os dois cobre a troca
+ * de um para o outro quando a janela muda de largura.
+ */
+let folhaQueRola: HTMLElement | null = null
+
 onMounted(() => {
   medirTopo()
+  folhaQueRola = document.getElementById('conteudo')
+  folhaQueRola?.addEventListener('scroll', acompanharRolagem, { passive: true })
   window.addEventListener('scroll', acompanharRolagem, { passive: true })
   window.addEventListener('resize', aoRedimensionar, { passive: true })
 })
 
 onBeforeUnmount(() => {
+  folhaQueRola?.removeEventListener('scroll', acompanharRolagem)
   window.removeEventListener('scroll', acompanharRolagem)
   window.removeEventListener('resize', aoRedimensionar)
   observador?.disconnect()
@@ -563,15 +573,13 @@ function irParaEtapa(id: string) {
       return
     }
 
+    const limite = topoDoRolador() + alturaDoTopo.value
     const topo = trilho.getBoundingClientRect().top
 
-    if (topo < alturaDoTopo.value) {
+    if (topo < limite) {
       const reduzir = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
-      window.scrollTo({
-        top: window.scrollY + topo - alturaDoTopo.value - 76,
-        behavior: reduzir ? 'auto' : 'smooth',
-      })
+      rolarConteudoPara(rolagemAtual() + topo - limite - 76, reduzir ? 'auto' : 'smooth')
     }
   })
 }

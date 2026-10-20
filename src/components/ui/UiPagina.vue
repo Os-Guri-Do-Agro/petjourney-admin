@@ -45,6 +45,8 @@ const props = withDefaults(
     semAbas?: boolean
     /** `leitura` limita a largura para texto corrido e formulários. */
     largura?: 'cheia' | 'leitura'
+    /** Ícone do ladrilho ao lado do título; por padrão, o do destino aberto. */
+    icone?: string
   }>(),
   {
     titulo: '',
@@ -62,6 +64,7 @@ const props = withDefaults(
     tour: false,
     semAbas: false,
     largura: 'cheia',
+    icone: '',
   },
 )
 
@@ -73,6 +76,9 @@ const parceiroStore = useParceiroStore()
 const { logout } = useLogout()
 
 const tituloDaTela = computed(() => props.titulo || aqui.value.destino?.rotulo || '')
+
+/** O ladrilho do título, na cor do espaço: o mesmo ícone do destino aceso na barra. */
+const iconeDaTela = computed(() => props.icone || aqui.value.destino?.icone || '')
 
 /*
  * As abas aparecem quando se está numa delas. Tela de detalhe (a ficha, o prontuário, o leito)
@@ -146,11 +152,20 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
 
       <div class="pagina__linha">
         <slot name="cabecalho">
-          <div class="pagina__titulos">
-            <h1 class="pagina__titulo">{{ tituloDaTela }}</h1>
-            <p v-if="resumo || $slots.resumo" class="pagina__resumo">
-              <slot name="resumo">{{ resumo }}</slot>
-            </p>
+          <div class="pagina__identidade">
+            <span
+              v-if="iconeDaTela"
+              class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar pagina__ladrilho"
+              aria-hidden="true"
+            >
+              <i :class="iconeDaTela" />
+            </span>
+            <div class="pagina__titulos">
+              <h1 class="pagina__titulo">{{ tituloDaTela }}</h1>
+              <p v-if="resumo || $slots.resumo" class="pagina__resumo">
+                <slot name="resumo">{{ resumo }}</slot>
+              </p>
+            </div>
           </div>
         </slot>
 
@@ -298,23 +313,24 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
 
 <style scoped>
 .pagina {
-  --pagina-margem: 32px;
+  --pagina-margem: 36px;
 
   width: 100%;
+  max-width: 1560px;
   min-width: 0;
   margin: 0 auto;
-  padding: 28px var(--pagina-margem) 56px;
+  padding: 30px var(--pagina-margem) 64px;
   color: var(--tinta);
 }
 
 .pagina--leitura {
-  max-width: 1080px;
+  max-width: 1120px;
 }
 
 .pagina__cabeca {
   display: grid;
-  gap: 14px;
-  margin-bottom: 24px;
+  gap: 18px;
+  margin-bottom: 28px;
 }
 
 .pagina__voltar :deep(a) {
@@ -334,32 +350,46 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
 .pagina__linha {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 16px 24px;
+}
+
+.pagina__identidade {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 16px;
+}
+
+.pagina__ladrilho {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 26px;
 }
 
 .pagina__titulos {
   display: grid;
   min-width: 0;
-  gap: 6px;
+  gap: 4px;
 }
 
 .pagina__titulo {
   margin: 0;
   color: var(--tinta);
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
   line-height: 1.15;
 }
 
 .pagina__resumo {
-  max-width: 72ch;
+  max-width: 76ch;
   margin: 0;
   color: var(--tinta-2);
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: 14.5px;
+  line-height: 1.5;
 }
 
 .pagina__acoes {
@@ -380,10 +410,11 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
   justify-items: center;
   gap: 8px;
   margin: 24px auto;
-  padding: 40px 32px;
+  padding: 44px 36px;
   border: 1px solid var(--linha);
-  border-radius: 20px;
+  border-radius: var(--raio-painel);
   background: var(--superficie);
+  box-shadow: var(--sombra-cartao);
   text-align: center;
 }
 
@@ -406,13 +437,13 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
 
 .pagina__estado-icone {
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: 60px;
+  height: 60px;
   place-items: center;
-  border-radius: 16px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 24px;
+  border-radius: 18px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 28px;
 }
 
 .pagina__estado--erro .pagina__estado-icone {
@@ -493,6 +524,13 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
 
   .pagina__titulo {
     font-size: 24px;
+  }
+
+  .pagina__ladrilho {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    font-size: 22px;
   }
 }
 

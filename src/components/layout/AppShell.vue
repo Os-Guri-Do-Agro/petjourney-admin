@@ -162,6 +162,20 @@ watch(
   },
 )
 
+/*
+ * Em tela larga quem rola é a folha, e ela não é trocada entre telas: sem isto, abrir a ficha de
+ * um paciente a partir do fim da lista abriria a ficha já rolada até o fim. Só troca de caminho
+ * volta ao alto — mudar a aba de um filtro (a query) mantém a leitura onde estava.
+ */
+const conteudo = ref<HTMLElement | null>(null)
+
+watch(
+  () => route.path,
+  () => {
+    conteudo.value?.scrollTo({ top: 0 })
+  },
+)
+
 onMounted(() => {
   consulta = window.matchMedia(CONSULTA_COMPACTA)
   compacto.value = consulta.matches
@@ -310,7 +324,7 @@ onUnmounted(() => {
       <FitaDoDia v-if="mostrarFita" class="palco__fita" />
       <FitaDaCasa v-else-if="mostrarFitaDaCasa" class="palco__fita" />
 
-      <main id="conteudo" class="palco__conteudo" tabindex="-1">
+      <main id="conteudo" ref="conteudo" class="palco__conteudo" tabindex="-1">
         <slot />
       </main>
     </div>
@@ -336,11 +350,13 @@ onUnmounted(() => {
 <style scoped>
 .shell {
   --barra-largura: 264px;
+  --palco-margem: 10px;
 
   display: grid;
+  height: 100dvh;
   grid-template-columns: var(--barra-largura) minmax(0, 1fr);
-  min-height: 100dvh;
-  background: var(--fundo);
+  overflow: hidden;
+  background: var(--rail);
   color: var(--tinta);
   font-family: var(--font-texto);
 }
@@ -378,6 +394,27 @@ onUnmounted(() => {
   overflow: hidden;
   background: var(--rail);
   color: var(--sobre-rail);
+}
+
+/*
+ * A barra é a moldura: um verde-floresta sem fio entre ela e a folha. Um brilho frio no alto dá
+ * profundidade à barra sem pintá-la de outra cor.
+ */
+.barra::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 320px;
+  background: radial-gradient(
+    120% 100% at 0% 0%,
+    color-mix(in oklab, var(--pj-lugar-claro) 13%, transparent),
+    transparent 70%
+  );
+  content: '';
+  pointer-events: none;
+}
+
+.barra > * {
+  position: relative;
 }
 
 .barra__topo {
@@ -597,18 +634,36 @@ onUnmounted(() => {
   padding: 0;
 }
 
-/* -------------------------------------------------------------------------------------- palco */
+/* -------------------------------------------------------------------------------------- palco
+ * A folha: presa na moldura com cantos de 22px, e quem rola é o conteúdo dela — a barra e a fita
+ * ficam paradas. No alto, a luz do espaço (um brilho na cor do lugar) diz onde se está antes de
+ * qualquer palavra, e some com a rolagem.
+ */
 
 .palco {
+  position: relative;
   display: flex;
+  height: calc(100dvh - var(--palco-margem) * 2);
   min-width: 0;
   flex-direction: column;
+  margin: var(--palco-margem) var(--palco-margem) var(--palco-margem) 0;
+  overflow: hidden;
+  border-radius: var(--raio-painel);
+  background: var(--fundo);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 6%),
+    0 24px 60px -24px rgb(0 0 0 / 55%);
+}
+
+.app-dark .palco {
+  outline: 1px solid rgb(255 255 255 / 6%);
+  outline-offset: -1px;
 }
 
 .palco__fita {
-  position: sticky;
+  position: relative;
   z-index: 30;
-  top: 0;
+  flex: none;
 }
 
 /*
@@ -618,7 +673,17 @@ onUnmounted(() => {
 .palco__conteudo {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding-inline-end: var(--pj-side-panel-offset, 0px);
+  background:
+    radial-gradient(1100px 360px at 0% -120px, var(--pj-lugar-brilho), transparent 72%),
+    radial-gradient(900px 320px at 78% -180px, var(--pj-lugar-brilho-2), transparent 72%),
+    var(--fundo);
+  background-attachment: local, local, local;
+  background-repeat: no-repeat;
+  scrollbar-gutter: stable;
   transition: padding-inline-end 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
@@ -681,7 +746,30 @@ onUnmounted(() => {
 }
 
 .shell--compacto {
+  height: auto;
+  min-height: 100dvh;
   grid-template-columns: minmax(0, 1fr);
+  overflow: visible;
+}
+
+/* No celular a folha ocupa a tela inteira e quem rola é a janela, como em qualquer página. */
+.shell--compacto .palco {
+  height: auto;
+  min-height: calc(100dvh - 56px);
+  margin: 0;
+  overflow: visible;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+}
+
+.shell--compacto .palco__fita {
+  position: sticky;
+  top: 56px;
+}
+
+.shell--compacto .palco__conteudo {
+  overflow: visible;
 }
 
 .shell--compacto .barra {
@@ -697,10 +785,6 @@ onUnmounted(() => {
 
 .shell--gaveta .barra {
   transform: none;
-}
-
-.shell--compacto .palco__fita {
-  top: 56px;
 }
 
 .shell__veu {

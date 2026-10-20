@@ -2936,6 +2936,10 @@
         "mostrarMais": "Prikaži još {total}",
         "mostrarMenos": "Prikaži manje",
         "ondeAgenda": "Raspored"
+      },
+      "abertura": {
+        "internados": "hospitalizovan | hospitalizovana | hospitalizovanih",
+        "indicadores": "Kako teče dan"
       }
     },
     "resumo": {

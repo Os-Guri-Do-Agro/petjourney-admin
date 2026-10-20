@@ -264,12 +264,12 @@ const dataCurta = computed(() => formato.dataLonga(clinicClock.today()))
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 24px;
-  min-height: 60px;
-  padding: 0 28px;
+  gap: 28px;
+  min-height: 66px;
+  padding: 0 28px 0 36px;
   border-bottom: 1px solid var(--linha);
-  background: color-mix(in oklab, var(--superficie) 88%, transparent);
-  backdrop-filter: blur(10px);
+  background: color-mix(in oklab, var(--superficie) 82%, transparent);
+  backdrop-filter: blur(12px);
 }
 
 .fita__hora {
@@ -278,7 +278,7 @@ const dataCurta = computed(() => formato.dataLonga(clinicClock.today()))
 }
 
 .fita__hora strong {
-  color: var(--clinica-tinta);
+  color: var(--tinta);
   font-family: var(--font-dados);
   font-size: 20px;
   font-variant-numeric: tabular-nums;
@@ -307,13 +307,25 @@ const dataCurta = computed(() => formato.dataLonga(clinicClock.today()))
   outline-offset: 3px;
 }
 
+.fita__regua::before {
+  position: absolute;
+  top: 16px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 8px;
+  background: var(--superficie-2);
+  box-shadow: inset 0 0 0 1px var(--linha-suave);
+  content: '';
+}
+
 .fita__passado {
   position: absolute;
   top: 16px;
   bottom: 0;
   left: 0;
-  border-radius: 6px 0 0 6px;
-  background: var(--superficie-2);
+  border-radius: 8px 0 0 8px;
+  background: color-mix(in oklab, var(--superficie-3) 80%, transparent);
 }
 
 .fita__almoco {
@@ -344,7 +356,7 @@ const dataCurta = computed(() => formato.dataLonga(clinicClock.today()))
   left: 50%;
   width: 1px;
   height: 26px;
-  background: var(--linha);
+  background: color-mix(in oklab, var(--linha) 70%, transparent);
   content: '';
 }
 
@@ -359,8 +371,8 @@ const dataCurta = computed(() => formato.dataLonga(clinicClock.today()))
 .fita__traco {
   position: absolute;
   height: 4px;
-  min-width: 3px;
-  border-radius: 2px;
+  min-width: 4px;
+  border-radius: 999px;
   background: var(--clinica);
 }
 
@@ -426,19 +438,25 @@ const dataCurta = computed(() => formato.dataLonga(clinicClock.today()))
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 32px;
-  padding: 0 12px;
+  height: 34px;
+  padding: 0 14px 0 12px;
+  border: 1px solid var(--linha);
   border-radius: 999px;
-  background: var(--superficie-2);
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 550;
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    border-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .fita__conta:hover {
-  background: var(--superficie-3);
+  border-color: var(--linha-media);
+  background: var(--superficie-2);
 }
 
 .fita__conta:focus-visible {

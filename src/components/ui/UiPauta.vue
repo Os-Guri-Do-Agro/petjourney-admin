@@ -107,10 +107,25 @@ const ICONE_DO_TOM = { risco: 'ph ph-warning-octagon', atencao: 'ph ph-warning',
 }
 
 .pauta__onde {
-  min-width: 96px;
+  display: inline-flex;
+  min-width: 104px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: 1px solid var(--linha-suave);
+  border-radius: 9px;
+  background: var(--superficie-2);
   color: var(--tinta-2);
-  font-size: 13px;
-  text-align: right;
+  font-size: 12.5px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.pauta__linha:hover .pauta__onde {
+  border-color: var(--linha);
+  background: var(--superficie);
+  color: var(--tinta);
 }
 
 @media (max-width: 720px) {

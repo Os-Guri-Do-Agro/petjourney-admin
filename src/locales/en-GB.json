@@ -2936,6 +2936,10 @@
         "mostrarMais": "Show {total} more",
         "mostrarMenos": "Show less",
         "ondeAgenda": "Schedule"
+      },
+      "abertura": {
+        "internados": "inpatient | inpatients",
+        "indicadores": "How the day is going"
       }
     },
     "resumo": {

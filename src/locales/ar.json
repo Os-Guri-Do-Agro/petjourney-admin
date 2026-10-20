@@ -2936,6 +2936,10 @@
         "mostrarMais": "عرض {total} أخرى",
         "mostrarMenos": "عرض أقل",
         "ondeAgenda": "جدول المواعيد"
+      },
+      "abertura": {
+        "internados": "منوّمون | منوّم | منوّمان | منوّمين | منوّمًا | منوّم",
+        "indicadores": "كيف يسير اليوم"
       }
     },
     "resumo": {
