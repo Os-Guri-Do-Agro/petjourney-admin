@@ -134,9 +134,17 @@ const mostrarFitaDaCasa = computed(
 )
 
 /** No topo do celular: o nome do destino, ou do espaço, ou da tela solta. */
-const tituloNoTopo = computed(
-  () => aqui.value.destino?.rotulo ?? aqui.value.espaco?.rotulo ?? t('shell.barra.inicio'),
-)
+const tituloNoTopo = computed(() => {
+  if (aqui.value.destino) {
+    return aqui.value.destino.rotulo
+  }
+
+  if (route.path.startsWith('/settings') || route.path.startsWith('/perfil')) {
+    return t('shell.user.settings')
+  }
+
+  return aqui.value.espaco?.rotulo ?? t('shell.barra.inicio')
+})
 
 function clicarCupom() {
   if (!cupomLigado) {

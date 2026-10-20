@@ -385,9 +385,9 @@ function alternarExplicacoes(ligado: boolean) {
  */
 @container opcoes (max-width: 27rem) {
   .opcao {
-    align-items: center;
+    align-items: start;
     padding: 10px;
-    grid-template-columns: 8.5rem minmax(0, 1fr);
+    grid-template-columns: 7rem minmax(0, 1fr);
   }
 
   .opcao__pe {
