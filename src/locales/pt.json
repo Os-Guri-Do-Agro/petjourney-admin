@@ -297,19 +297,6 @@
       "acessos": "Acessos",
       "financeiro": "Ganhos de indicação",
       "settings": "Configurações"
-    },
-    "pageLabels": {
-      "overview": "Visão geral",
-      "saqueDetail": "Detalhe do saque",
-      "financeiro": "Ganhos de indicação",
-      "programas": "Programas de participação",
-      "divulgacao": "Divulgação",
-      "acessos": "Acessos",
-      "convite": "Aceitar convite",
-      "selecionar": "Selecionar parceiro",
-      "portal": "Portal",
-      "settings": "Configurações",
-      "fallback": "Painel"
     }
   },
   "shell": {

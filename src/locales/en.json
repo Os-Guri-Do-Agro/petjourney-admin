@@ -297,19 +297,6 @@
       "acessos": "Access",
       "financeiro": "Referral earnings",
       "settings": "Settings"
-    },
-    "pageLabels": {
-      "overview": "Overview",
-      "saqueDetail": "Payout detail",
-      "financeiro": "Referral earnings",
-      "programas": "Participation programs",
-      "divulgacao": "Promotion",
-      "acessos": "Access",
-      "convite": "Accept invite",
-      "selecionar": "Select partner",
-      "portal": "Portal",
-      "settings": "Settings",
-      "fallback": "Dashboard"
     }
   },
   "shell": {

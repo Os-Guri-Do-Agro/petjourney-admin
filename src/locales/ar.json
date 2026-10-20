@@ -297,19 +297,6 @@
       "acessos": "صلاحيات الوصول",
       "financeiro": "أرباح الإحالة",
       "settings": "الإعدادات"
-    },
-    "pageLabels": {
-      "overview": "نظرة عامة",
-      "saqueDetail": "تفاصيل السحب",
-      "financeiro": "أرباح الإحالة",
-      "programas": "برامج المشاركة",
-      "divulgacao": "الترويج",
-      "acessos": "صلاحيات الوصول",
-      "convite": "قبول الدعوة",
-      "selecionar": "اختيار الشريك",
-      "portal": "البوابة",
-      "settings": "الإعدادات",
-      "fallback": "لوحة التحكم"
     }
   },
   "shell": {

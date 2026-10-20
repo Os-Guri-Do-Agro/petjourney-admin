@@ -374,6 +374,20 @@ documento onde houver conflito:
   `src/theme/trilha/trilha-ui.css` (folha, lista, linha, marca de gravidade, selo, hora, número).
 - **Regras**: estado em cor **e** palavra; números em Instrument Sans tabular; folha só onde agrupa;
   nada de caixa alta, sobretítulo ou cartão dentro de cartão; uma ação primária por tela.
+- **Fita da casa** (`features/hotel/components/base/FitaDaCasa.vue`): a mesma ideia no Hotel —
+  chegadas, saídas e tarefas do dia numa faixa, com "na casa / chegam / saem" à direita. Fica fora
+  da Rotina, que já é a lista do dia.
+- **Ficha do pet** (`FichaCabeca` + `ficha.css`): cabeça única para resumo, histórico, tratamento,
+  vacinas e o prontuário aberto; as abas da ficha trocam a rota sem trocar a cabeça.
+- **Início** (`pages/(accounts)/inicio.vue`): um quadro por espaço com os números que pedem ação e
+  um atalho, e abaixo "O que pede ação", na ordem de gravidade, de todos os espaços.
+- **Entradas por endereço**: a ação certa abre direto pela URL, para links de outras telas e da
+  busca — `/veterinario/agenda?novo=1[&paciente=<id>&tipo=retorno]`, `/veterinario/fila?adicionar=1`,
+  `/hotel/reserva/<id>?checkin=1`, `/hotel/hospedagem/<id>?checkout=1`. A query sai da URL depois de
+  usada.
+- **Saiu**: `PartnerPageFrame`, `PartnerSectionTabs`, `PartnerFocusCard`, `PartnerPanelLoading`,
+  `PortalParceiroDashboard`, `usePartnerFocusSurface` e `HomeNavigationShortcuts`. Os diálogos que
+  ainda levam `.hc-tema` usam só a ponte de tokens de `src/theme/hc-tema.css`.
 
 ### Trilha (19/10/2026)
 

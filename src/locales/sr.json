@@ -297,19 +297,6 @@
       "acessos": "Pristupi",
       "financeiro": "Zarada od preporuka",
       "settings": "Podešavanja"
-    },
-    "pageLabels": {
-      "overview": "Početna",
-      "saqueDetail": "Detalji isplate",
-      "financeiro": "Zarada od preporuka",
-      "programas": "Programi učešća",
-      "divulgacao": "Promocija",
-      "acessos": "Pristupi",
-      "convite": "Prihvatanje poziva",
-      "selecionar": "Izbor partnera",
-      "portal": "Portal",
-      "settings": "Podešavanja",
-      "fallback": "Kontrolna tabla"
     }
   },
   "shell": {

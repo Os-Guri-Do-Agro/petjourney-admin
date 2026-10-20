@@ -1,6 +1,11 @@
 /*
  * O acabamento das telas no design novo — o da Visão geral (`components/home/home-card.css`).
  *
+ * Desde o redesenho total (19/10/2026) as páginas usam o `UiPagina` e o kit `trilha/trilha-ui.css`,
+ * e nenhuma leva mais `.hc-tema` na raiz. O que segue valendo daqui é a ponte de tokens para os
+ * diálogos e gavetas que ainda declaram `.hc-tema` (eles vão para o `body` e não herdam da página).
+ * As regras de fundo e cabeçalho de página abaixo ficaram sem alvo e podem sair numa limpeza.
+ *
  * Nasceu na ficha do paciente (`ficha.css`) e em 30/09/2026 virou o do portal: toda tela migrada
  * leva `.hc-tema` na raiz (o `PartnerPageFrame`) e ganha, sem uma segunda versão dos componentes:
  *

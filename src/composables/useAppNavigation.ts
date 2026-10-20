@@ -1,7 +1,6 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import i18n from '@/i18n'
 import {
   useClinicoPendencias,
   type ContagemDePendencia,
@@ -272,16 +271,6 @@ const PATIENT_ROUTES = [
   { key: 'clinico.bulario.titulo', to: '/veterinario/bulario', icon: 'ph ph-book-open' },
 ] as const
 
-export function parseNavTarget(to: string) {
-  const hashIndex = to.indexOf('#')
-  const hash = hashIndex >= 0 ? to.slice(hashIndex) : ''
-  const pathAndQuery = hashIndex >= 0 ? to.slice(0, hashIndex) : to
-  const queryIndex = pathAndQuery.indexOf('?')
-  const path = queryIndex >= 0 ? pathAndQuery.slice(0, queryIndex) : pathAndQuery
-
-  return { path, hash }
-}
-
 export function useAppNavigation() {
   const { t, locale } = useI18n()
   const parceiroStore = useParceiroStore()
@@ -534,11 +523,8 @@ export function useAppNavigation() {
   })
 
   /**
-   * As mesmas seções em forma de lista, para o modo "lista única" do menu. Uma origem só: seção
-   * nova aparece no trilho e na lista sem ninguém lembrar disso.
-   *
-   * `homeShortcutGroups` sobrevive como alias: alimentava a grade de atalhos da visão geral, que
-   * saiu da página, e o componente continua no repositório para quem quiser remontá-lo.
+   * As mesmas seções em forma de lista. Uma origem só: seção nova aparece no mapa da barra
+   * (`navegacao/espacos.ts`) e na busca sem ninguém lembrar disso.
    */
   const navigationGroups = computed<AppNavigationGroup[]>(() =>
     navigationSections.value.map((section) => ({
@@ -549,22 +535,15 @@ export function useAppNavigation() {
     })),
   )
 
-  const homeShortcutGroups = navigationGroups
-
   return {
     navigationSections,
     navigationGroups,
     overviewItem,
     hasClinicalProfile,
     hasHotelProfile,
-    homeShortcutGroups,
     pendenciasClinicas: pendencias,
     pendenciasDoHotel,
   }
-}
-
-export function navItemMatches(itemPath: string, currentPath: string) {
-  return currentPath === itemPath || currentPath.startsWith(`${itemPath}/`)
 }
 
 export function resolveActiveSectionId(path: string, hasClinical: boolean) {
@@ -610,102 +589,6 @@ export function resolveActiveSectionId(path: string, hasClinical: boolean) {
   return 'portal'
 }
 
-export function resolvePageLabel(path: string, hash: string, sections: AppNavigationSection[]) {
-  const t = i18n.global.t.bind(i18n.global)
-
-  if (path === '/inicio') {
-    return t('nav.pageLabels.overview')
-  }
-
-  const partnerLabels = [
-    { prefix: '/parceiro/carteira/saques', label: t('nav.pageLabels.saqueDetail') },
-    { prefix: '/parceiro/carteira', label: t('nav.pageLabels.financeiro') },
-    { prefix: '/parceiro/programas', label: t('nav.pageLabels.programas') },
-    { prefix: '/parceiro/divulgacao', label: t('nav.pageLabels.divulgacao') },
-    { prefix: '/parceiro/acessos', label: t('nav.pageLabels.acessos') },
-    { prefix: '/parceiro/equipe', label: 'Equipe' },
-    { prefix: '/parceiro/convite', label: t('nav.pageLabels.convite') },
-    { prefix: '/parceiro/selecionar', label: t('nav.pageLabels.selecionar') },
-  ] as const
-
-  for (const item of partnerLabels) {
-    if (path === item.prefix || path.startsWith(`${item.prefix}/`)) {
-      return item.label
-    }
-  }
-
-  if (path.startsWith('/parceiro')) {
-    return t('nav.pageLabels.portal')
-  }
-
-  /* Reserva e estadia não são itens de menu: sem estas linhas o cabeçalho diria 'Painel' nas duas. */
-  if (path.startsWith('/hotel/reserva/')) {
-    return t('hotel.reserva.titulo')
-  }
-
-  if (path.startsWith('/hotel/hospedagem/')) {
-    return t('hotel.estadia.titulo')
-  }
-
-  /* Cadastro e importação de pacientes não são itens de menu: sem estas linhas o cabeçalho dizia 'Painel'. */
-  /* O rótulo curto: o título inteiro quebrava em duas linhas no cabeçalho e espremia a conta. */
-  if (path.startsWith('/veterinario/paciente/importar')) {
-    return t('clinico.migracao.atalho')
-  }
-
-  if (path.startsWith('/veterinario/paciente/novo')) {
-    return t('clinico.paciente.novo.titulo')
-  }
-
-  /* A ficha do paciente também não: sem estas linhas o histórico e o resumo diziam 'Painel'. */
-  if (/^\/veterinario\/paciente\/[^/]+\/historico/.test(path)) {
-    return t('clinico.prontuario.timeline.titulo')
-  }
-
-  if (/^\/veterinario\/paciente\/[^/]+\/resumo/.test(path)) {
-    return t('clinico.resumoDoPaciente.verResumo')
-  }
-
-  /* A carteira de vacinas do paciente também não é item de menu. Rótulo curto, pelo mesmo motivo. */
-  if (/^\/veterinario\/paciente\/[^/]+\/vacinas/.test(path)) {
-    return t('clinico.vacinas.titulo')
-  }
-
-  if (/^\/veterinario\/paciente\/[^/]+\/tratamento/.test(path)) {
-    return t('clinico.ficha.tratamento.pilula')
-  }
-
-  /*
-   * O atendimento não é item de menu — sem esta linha o cabeçalho dizia 'Painel' no prontuário.
-   * A barra no fim importa: sem ela, a lista `/veterinario/atendimentos` também virava 'Prontuário'.
-   */
-  if (path.startsWith('/veterinario/atendimento/')) {
-    return t('clinico.prontuario.titulo')
-  }
-
-  for (const section of sections) {
-    const matchedItem = section.items.find((item) => {
-      const { path: itemPath, hash: itemHash } = parseNavTarget(item.to)
-
-      if (itemHash) {
-        return itemPath === path && itemHash === hash
-      }
-
-      return navItemMatches(itemPath, path)
-    })
-
-    if (matchedItem) {
-      return matchedItem.label
-    }
-  }
-
-  if (path.startsWith('/settings')) {
-    return t('nav.pageLabels.settings')
-  }
-
-  return t('nav.pageLabels.fallback')
-}
-
 export function filterNavigationGroups(
   groups: AppNavigationGroup[],
   query: string,
@@ -744,8 +627,4 @@ export function filterNavigationGroups(
       return { ...group, items, ...(blocos ? { blocos } : {}) }
     })
     .filter((group) => group.items.length > 0)
-}
-
-export function getSectionLandingPath(section: AppNavigationSection) {
-  return section.items[0]?.to
 }

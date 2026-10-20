@@ -297,19 +297,6 @@
       "acessos": "Accesos",
       "financeiro": "Ganancias por referidos",
       "settings": "Configuración"
-    },
-    "pageLabels": {
-      "overview": "Vista general",
-      "saqueDetail": "Detalle del retiro",
-      "financeiro": "Ganancias por referidos",
-      "programas": "Programas de participación",
-      "divulgacao": "Divulgación",
-      "acessos": "Accesos",
-      "convite": "Aceptar invitación",
-      "selecionar": "Seleccionar socio",
-      "portal": "Portal",
-      "settings": "Configuración",
-      "fallback": "Panel"
     }
   },
   "shell": {

@@ -11,7 +11,7 @@ Implementações de demonstração **retiradas do app** para o go-live não expo
 As telas de `veterinario/` que ficavam aqui **foram removidas**. O destino delas agora é o
 módulo real, em `src/features/clinico/`, que tem o que os mocks não tinham: camada de dados com
 a forma da API (`features/clinico/data`), regras de domínio testáveis
-(`features/clinico/domain`), estados de carga, erro e vazio pelo `PartnerPageFrame`, e os casos
+(`features/clinico/domain`), estados de carga, erro e vazio pelo `UiPagina`, e os casos
 difíceis que a operação de verdade produz — sobreposição, encaixe, bloqueio, falta, fila e
 prontuário em dois dispositivos.
 
