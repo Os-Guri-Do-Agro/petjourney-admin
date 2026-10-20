@@ -87,11 +87,11 @@ const tourAberto = ref(false)
 const ESCALA = [0, 3, 6, 9, 12, 15, 18, 21, 24]
 
 /**
- * Abaixo desta distância (em porcentagem do dia, perto de uma hora e quarenta e cinco) dois
+ * Abaixo desta distância (em porcentagem do dia, perto de duas horas e meia) dois
  * horários vizinhos não cabem escritos na mesma altura: o segundo desce para baixo da pista, e
  * nenhum rótulo cobre o outro.
  */
-const VIZINHO_PERTO = 7.5
+const VIZINHO_PERTO = 10
 
 function copiar(origem: ItemDeRotina[]): ItemDeRotina[] {
   return origem.map((item) => ({ ...item, horarios: [...item.horarios] }))
@@ -498,7 +498,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         class="fora-do-padrao"
         :titulo="t('hotel.rotinaPadrao.nova.excecoes')"
         :descricao="t('hotel.rotinaPadrao.nova.excecoesDescricao')"
-        :contagem="excecoes.length"
+        :contagem="excecoes.length || null"
         icone="ph ph-shuffle"
       >
         <ul v-if="excecoes.length > 0" class="ui-folha ui-lista excecoes">
@@ -825,7 +825,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  margin: 2px 0 0;
+  margin: 4px 0 0;
   color: var(--tinta-2);
   font-size: 13.5px;
   line-height: 1.45;

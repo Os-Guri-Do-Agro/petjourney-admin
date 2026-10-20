@@ -433,7 +433,7 @@ watch(
  */
 .grade {
   display: grid;
-  max-height: 19rem;
+  max-height: 15.5rem;
   margin: 0;
   padding: 0;
   gap: 8px;

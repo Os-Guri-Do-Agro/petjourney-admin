@@ -128,7 +128,7 @@ function marcarPendentes() {
       {
         'ronda--varios': comCabecalho,
         'ronda--fechada': comCabecalho && !aberta,
-        'ronda--atrasada': atrasadas > 0,
+        'ronda--com-atraso': atrasadas > 0,
       },
     ]"
   >
@@ -251,22 +251,6 @@ function marcarPendentes() {
   grid-template-areas:
     'icone abrir lote'
     '. rostos rostos';
-}
-
-/* A marca da ronda: o atraso dela é dito uma vez, aqui, e não em cada linha. */
-.ronda--atrasada::before {
-  position: absolute;
-  top: 12px;
-  left: 0;
-  width: 4px;
-  height: 38px;
-  border-radius: 0 4px 4px 0;
-  background: var(--atencao);
-  content: '';
-}
-
-.ronda--remedio::before {
-  background: var(--risco);
 }
 
 .ronda__icone {

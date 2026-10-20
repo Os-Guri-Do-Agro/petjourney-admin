@@ -826,15 +826,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   .rotina__grade {
     grid-template-columns: minmax(0, 1fr) 340px;
   }
-
-  .lateral {
-    position: sticky;
-    top: 20px;
-    overflow-y: auto;
-    max-height: calc(100dvh - 40px);
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-  }
 }
 
 .prancheta {
@@ -859,11 +850,20 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
  */
 .filtros {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   margin: 0 0 -8px;
   padding: 2px;
-  overflow-x: auto;
-  scrollbar-width: none;
+}
+
+@container (max-width: 640px) {
+  .filtros {
+    flex-wrap: nowrap;
+    margin-inline: -16px;
+    padding-inline: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
 }
 
 .filtros::-webkit-scrollbar {
@@ -935,7 +935,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
  * cruzarem o trilho no mesmo ponto.
  */
 .tempo {
-  --col-hora: 64px;
+  --col-hora: 72px;
   --col-trilho: 20px;
   --vao-col: 10px;
 

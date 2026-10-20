@@ -92,6 +92,7 @@ const { t } = useI18n()
 
 <style scoped>
 .horario {
+  position: relative;
   display: grid;
   column-gap: var(--vao-col, 12px);
   grid-template-columns: var(--col-hora, 72px) var(--col-trilho, 20px) minmax(0, 1fr);
@@ -200,6 +201,14 @@ const { t } = useI18n()
   list-style: none;
 }
 
+/*
+ * Na linha do tempo quem diz a gravidade é o nó do trilho e o selo: a marca na borda da linha,
+ * que a linha sozinha usa fora daqui, seria um segundo trilho colado no primeiro.
+ */
+.horario__rondas :deep(.ui-marca::before) {
+  display: none;
+}
+
 .horario__rondas > li + li {
   border-top: 1px solid var(--linha);
 }
@@ -239,6 +248,16 @@ const { t } = useI18n()
   .horario__rondas {
     grid-column: 2;
     grid-row: 2;
+  }
+
+  /* A hora sobe para dentro do horário: o filete que os separa sobe junto, para cima dela. */
+  .horario + .horario > .horario__rondas {
+    border-top: 0;
+  }
+
+  .horario + .horario > .horario__hora {
+    margin-top: 4px;
+    border-top: 1px solid var(--linha);
   }
 }
 </style>

@@ -119,7 +119,6 @@ const temProposta = computed(
         <span class="bloco__icone" aria-hidden="true"><i class="ph ph-sliders-horizontal" /></span>
         <div class="bloco__titulos">
           <h2 :id="`${idCampo}-gerenciar`">{{ t('hotel.gerenciar.titulo') }}</h2>
-          <p v-if="!temProposta">{{ t('hotel.rotina.nova.proporDica') }}</p>
         </div>
       </header>
 
@@ -151,6 +150,8 @@ const temProposta = computed(
             @click="emit('atualizar:hospedagemId', '')"
           />
         </div>
+
+        <p v-if="!temProposta" class="bloco__dica">{{ t('hotel.rotina.nova.proporDica') }}</p>
 
         <div v-if="!temProposta" class="campo">
           <label :for="`${idCampo}-hospede`">{{ t('hotel.proposta.escolherHospede') }}</label>
@@ -308,6 +309,13 @@ const temProposta = computed(
   color: var(--tinta-2);
   font-size: 13px;
   line-height: 1.4;
+}
+
+.bloco__dica {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
 }
 
 .bloco__corpo {
