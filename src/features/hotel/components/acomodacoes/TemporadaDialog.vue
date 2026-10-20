@@ -148,7 +148,7 @@ function salvar() {
       editando ? t('hotel.acomodacoes.temporada.editar') : t('hotel.acomodacoes.temporada.nova')
     "
     :style="{ width: 'min(34rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <form class="forma" @submit.prevent="salvar">

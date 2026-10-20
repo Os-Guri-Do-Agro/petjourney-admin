@@ -276,6 +276,57 @@ const fraseDoResumo = computed(() => {
     : t('hotel.reservas.tela.resumoSemPendencia', { total: fraseDoTotal, chegam: fraseDeChegada })
 })
 
+/**
+ * Os números da carteira, acima da lista: quantas reservas, quem chega hoje, quem ainda não pagou
+ * o sinal e quem espera uma vaga. Os mesmos da frase de cima, para quem lê de relance.
+ */
+const indicadores = computed(() => {
+  const chegamHoje = reservas.lista.filter(
+    (linha) => ativas.includes(linha.reserva.status) && linha.diasAteEntrada === 0,
+  ).length
+  const semSinal = reservas.lista.filter(
+    (linha) => linha.reserva.status === 'pendente' && linha.reserva.pagoCentavos === 0,
+  ).length
+
+  return [
+    {
+      id: 'total',
+      valor: reservas.lista.length,
+      rotulo: t('hotel.reservas.titulo'),
+      nota:
+        horizonte.value === 'proximas'
+          ? t('hotel.reservas.horizonteProximas')
+          : t('hotel.reservas.horizonteTodas'),
+      icone: 'ph ph-calendar-blank',
+      tom: '',
+    },
+    {
+      id: 'chegam',
+      valor: chegamHoje,
+      rotulo: t('hotel.hoje.painel.chegam'),
+      nota: '',
+      icone: 'ph ph-sign-in',
+      tom: '',
+    },
+    {
+      id: 'sinal',
+      valor: semSinal,
+      rotulo: t('hotel.reservas.tela.pagamento.semSinal'),
+      nota: '',
+      icone: 'ph ph-coins',
+      tom: semSinal > 0 ? 'atencao' : '',
+    },
+    {
+      id: 'espera',
+      valor: reservas.espera.length,
+      rotulo: t('hotel.reservas.tela.espera'),
+      nota: '',
+      icone: 'ph ph-hourglass',
+      tom: '',
+    },
+  ]
+})
+
 // ------------------------------------------------------------------ selos
 
 type Tom = 'risco' | 'atencao' | 'ok' | 'lugar' | 'neutro' | 'contorno'
@@ -426,6 +477,26 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     </template>
 
     <div class="reservas">
+      <ul class="ui-indicadores indicadores" :aria-label="t('hotel.reservas.titulo')">
+        <li
+          v-for="item in indicadores"
+          :key="item.id"
+          class="ui-indicador"
+          :class="item.tom ? `ui-indicador--${item.tom}` : ''"
+        >
+          <span
+            class="ui-ladrilho"
+            :class="item.tom ? `ui-ladrilho--${item.tom}` : ''"
+            aria-hidden="true"
+          >
+            <i :class="item.icone" />
+          </span>
+          <span class="ui-indicador__valor">{{ item.valor }}</span>
+          <span class="ui-indicador__rotulo">{{ item.rotulo }}</span>
+          <span v-if="item.nota" class="ui-indicador__nota">{{ item.nota }}</span>
+        </li>
+      </ul>
+
       <!--
         A véspera abre a tela. É a única coisa aqui que tem prazo: depois que o carro chega, a
         conversa sobre documento acontece no balcão, com o cliente na frente.
@@ -560,7 +631,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 :iniciais="linha.petIniciais"
                 :especie="linha.petEspecie"
                 :foto-url="linha.petFotoUrl"
-                tamanho="sm"
+                tamanho="md"
               />
               <span class="hospede__texto">
                 <strong>{{ linha.petNome }}</strong>
@@ -625,6 +696,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         :titulo="t('hotel.reservas.tela.espera')"
         :contagem="reservas.espera.length"
         :descricao="t('hotel.reservas.tela.esperaDescricao')"
+        icone="ph ph-hourglass"
       >
         <ul class="ui-folha ui-lista">
           <li v-for="item in reservas.espera" :key="item.entrada.id" class="ui-linha espera__linha">
@@ -667,16 +739,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </template>
 
 <style scoped>
-.tela-reservas {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-}
-
 .reservas {
   display: grid;
-  gap: 32px;
+  gap: 36px;
+}
+
+.indicadores {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 /* ------------------------------------------------------------------ véspera */
@@ -818,7 +889,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .hospede__texto {
@@ -885,6 +956,20 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 @media (max-width: 720px) {
+  /* No telefone, dois números por fileira: quatro cartões empilhados empurravam a lista para longe. */
+  .indicadores.ui-indicadores {
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .indicadores .ui-indicador {
+    padding: 14px 16px;
+  }
+
+  .indicadores .ui-indicador__valor {
+    font-size: 24px;
+  }
+
   .vespera__linha.ui-linha {
     flex-wrap: wrap;
     padding-block: 12px;

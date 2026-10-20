@@ -570,31 +570,24 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </template>
 
 <style scoped>
-/* Os botões contornado e de texto no padrão do Trilha: no escuro, o cinza do preset sumia. */
-.tela-mapa {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .mapa {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 /* ------------------------------------------------------------------ procura */
 
+/*
+ * A procura é a frase do telefone, num cartão: os campos na ordem em que a pessoa os diz; no pé
+ * do cartão, a resposta, na cor do que ela diz (dá, ou não dá).
+ */
 .procura {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
-  padding: 14px 16px;
+  gap: 14px 16px;
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+  padding: 18px 20px 0;
 }
 
 .procura__frase {
@@ -633,27 +626,30 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 8px;
-  margin: 0;
-  padding: 8px 14px;
-  border-radius: 10px;
+  margin: 4px -20px 0;
+  padding: 12px 20px;
+  border-top: 1px solid var(--linha-suave);
   font-size: 14px;
+  grid-column: 1 / -1;
 }
 
 .resposta i {
-  font-size: 18px;
+  font-size: 19px;
 }
 
 .resposta strong {
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .resposta--sim {
-  background: var(--ok-fundo);
+  border-top-color: color-mix(in oklab, var(--ok) 20%, transparent);
+  background: color-mix(in oklab, var(--ok-fundo) 70%, var(--superficie));
   color: var(--ok-tinta);
 }
 
 .resposta--nao {
-  background: var(--atencao-fundo);
+  border-top-color: color-mix(in oklab, var(--atencao) 22%, transparent);
+  background: color-mix(in oklab, var(--atencao-fundo) 70%, var(--superficie));
   color: var(--atencao-tinta);
 }
 
@@ -669,10 +665,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   align-items: center;
   gap: 8px 12px;
   margin: 0;
-  padding: 10px 14px;
-  border: 1px solid var(--linha);
-  border-radius: 14px;
-  background: var(--superficie);
+  padding: 12px 16px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 14px;
 }
@@ -782,8 +778,13 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 @media (max-width: 720px) {
-  .procura__frase {
-    width: 100%;
+  .procura {
+    padding-inline: 16px;
+  }
+
+  .resposta {
+    margin-inline: -16px;
+    padding-inline: 16px;
   }
 
   .procura__campo {

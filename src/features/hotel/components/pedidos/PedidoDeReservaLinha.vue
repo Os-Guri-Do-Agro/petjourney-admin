@@ -378,25 +378,38 @@ const rotuloDoCanal = computed(() => t(`hotel.pedidos.canal.${pedido.value.canal
 
 /* ------------------------------------------------------------------ quando */
 
+/* As noites pedidas numa folhinha de calendário: o mês em cima, as noites grandes, as diárias. */
 .quando {
   display: grid;
   min-width: 0;
   align-content: center;
+  justify-items: center;
   gap: 1px;
+  padding: 8px 4px 9px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
   line-height: 1.15;
+  text-align: center;
 }
 
-.quando__mes,
+.quando__mes {
+  color: var(--pj-lugar-tinta, var(--hotel-tinta));
+  font-size: 11.5px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
 .quando__diarias {
   color: var(--tinta-2);
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 500;
   white-space: nowrap;
 }
 
 .quando__noites {
   color: var(--tinta);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 650;
   letter-spacing: -0.02em;
   white-space: nowrap;

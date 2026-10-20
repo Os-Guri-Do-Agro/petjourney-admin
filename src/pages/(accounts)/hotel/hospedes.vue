@@ -36,7 +36,8 @@ import HotelTour from '@/features/hotel/components/base/HotelTour.vue'
 import type { PassoDoTour } from '@/features/hotel/components/base/tour-types'
 import HospedeCard from '@/features/hotel/components/hospedes/HospedeCard.vue'
 import type { HospedeNaCasa } from '@/features/hotel/data/repositories'
-import type { Bloco, IconeDeAcomodacao } from '@/features/hotel/data/types'
+import { ICONE_DO_DESENHO } from '@/features/hotel/components/base/icone-do-desenho'
+import type { Bloco } from '@/features/hotel/data/types'
 import { useHospedagemStore } from '@/features/hotel/stores/hospedagem'
 import { useHotelStore } from '@/features/hotel/stores/hotel'
 
@@ -175,19 +176,6 @@ const opcoes = computed(() => [
 ])
 
 // ------------------------------------------------------------------------------ os corredores
-
-/** O desenho de cada corredor, o mesmo que a casa escolheu no cadastro. */
-const ICONE_DO_BLOCO: Record<IconeDeAcomodacao, string> = {
-  casa: 'ph ph-house-line',
-  cama: 'ph ph-bed',
-  gato: 'ph ph-cat',
-  cao: 'ph ph-dog',
-  grupo: 'ph ph-users-three',
-  escudo: 'ph ph-shield-check',
-  arvore: 'ph ph-tree',
-  passaro: 'ph ph-bird',
-  coelho: 'ph ph-rabbit',
-}
 
 type Corredor = { id: string; bloco: Bloco | null; hospedes: HospedeNaCasa[] }
 
@@ -356,7 +344,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       </div>
 
       <div v-if="visiveis.length === 0" class="nada ui-folha">
-        <span class="nada__icone" aria-hidden="true">
+        <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
           <i :class="termo ? 'ph ph-magnifying-glass' : 'ph ph-moon-stars'" />
         </span>
 
@@ -398,10 +386,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           :aria-labelledby="`corredor-${corredor.id}`"
         >
           <h2 :id="`corredor-${corredor.id}`" class="corredor__titulo">
-            <i
-              :class="corredor.bloco ? ICONE_DO_BLOCO[corredor.bloco.icone] : 'ph ph-house-line'"
-              aria-hidden="true"
-            />
+            <!-- O desenho de cada corredor, o mesmo que a casa escolheu no cadastro. -->
+            <span class="corredor__icone" aria-hidden="true">
+              <i :class="corredor.bloco ? ICONE_DO_DESENHO[corredor.bloco.icone] : 'ph ph-house-line'" />
+            </span>
             {{ corredor.bloco?.nome ?? t('hotel.hoje.hospedes.semCorredor') }}
             <span class="ui-contagem">{{ corredor.hospedes.length }}</span>
           </h2>
@@ -510,21 +498,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .nada {
   display: grid;
   justify-items: center;
-  gap: 10px;
-  padding: 36px 24px;
+  gap: 12px;
+  padding: 44px 24px;
   color: var(--tinta-2);
   text-align: center;
-}
-
-.nada__icone {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: 14px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 22px;
 }
 
 .nada__texto {
@@ -546,14 +523,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .casa__cabeca {
   display: grid;
-  align-items: end;
+  align-items: center;
   gap: 16px;
-  min-height: 40px;
-  padding: 10px 18px 8px 20px;
+  min-height: 44px;
+  padding: 0 18px 0 20px;
   border-bottom: 1px solid var(--linha);
-  color: var(--tinta-2);
+  background: var(--superficie-2);
+  color: var(--tinta-3);
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
   grid-template-columns: var(--hospede-colunas);
 }
 
@@ -565,7 +543,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   padding-inline-start: 44px;
 }
 
-/* O corredor é uma divisória com nome, não um cartão: a folha continua uma só. */
+/*
+ * O corredor é uma divisória com nome, não um cartão: a folha continua uma só. O desenho do
+ * corredor num ladrilho pequeno, e um fio por cima separando um corredor do outro.
+ */
 .corredor + .corredor {
   border-top: 1px solid var(--linha);
 }
@@ -573,19 +554,28 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .corredor__titulo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
-  padding: 10px 20px;
-  border-bottom: 1px solid var(--linha);
-  background: var(--superficie-2);
+  padding: 16px 20px 10px;
   color: var(--tinta);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 14.5px;
+  font-weight: 650;
+  letter-spacing: -0.005em;
 }
 
-.corredor__titulo i {
+.corredor__icone {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--pj-lugar-fundo);
   color: var(--pj-lugar-tinta);
-  font-size: 17px;
+  font-size: 16px;
+}
+
+.corredor__lista {
+  border-top: 1px solid var(--linha-suave);
 }
 
 /* A primeira e a última linha não arredondam: quem arredonda é a folha. */

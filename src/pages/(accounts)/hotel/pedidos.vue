@@ -505,6 +505,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         :titulo="t('hotel.pedidos.secao.abertos')"
         :contagem="pedidos.abertas.length"
         :descricao="pedidos.abertas.length > 1 ? t('clinico.pedidos.tela.descricao') : ''"
+        icone="ph ph-tray"
       >
         <div class="caixa pedidos__caixa ui-folha">
           <TransitionGroup
@@ -526,7 +527,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           </TransitionGroup>
 
           <div v-else class="caixa__vazio">
-            <span class="caixa__vazio-icone" aria-hidden="true">
+            <span class="ui-ladrilho ui-ladrilho--g caixa__vazio-icone" aria-hidden="true">
               <i class="ph ph-calendar-plus" />
             </span>
             <strong>{{ t('hotel.pedidos.vazio.titulo') }}</strong>
@@ -663,7 +664,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         position="right"
         :modal="false"
         :dismissable="false"
-        class="pedidos-gaveta clinic-overlay"
+        class="pedidos-gaveta clinic-overlay pj-lugar--hotel"
         :style="{ width: 'min(27rem, 94vw)' }"
       >
         <template #header>
@@ -704,17 +705,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </template>
 
 <style scoped>
-/* Os botões contornado e de texto no padrão do Trilha: no escuro, o cinza do preset sumia. */
-.tela-pedidos {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .pedidos {
   display: grid;
   gap: 28px;
@@ -730,8 +720,9 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   margin: 0;
   padding: 12px 14px 12px 16px;
   border: 1px solid var(--linha);
-  border-radius: 14px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   font-size: 14px;
   line-height: 1.45;
@@ -794,15 +785,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .caixa__vazio-icone {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
   margin-bottom: 6px;
-  border-radius: 14px;
-  background: var(--hotel-fundo);
-  color: var(--hotel-tinta);
-  font-size: 24px;
 }
 
 .caixa__vazio strong {
@@ -863,7 +846,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .respondido {
   display: grid;
-  min-height: 60px;
+  min-height: 64px;
   align-items: center;
   gap: 6px 16px;
   grid-template-columns: 3rem minmax(10rem, 1fr) minmax(0, 1.5fr) 7rem;

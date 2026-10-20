@@ -417,7 +417,7 @@ function marcarPendentes() {
 }
 
 .ronda--varios .ronda__lista > li {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .ronda--varios .ronda__lista > li.ronda__regua {

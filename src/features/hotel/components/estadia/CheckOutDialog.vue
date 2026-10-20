@@ -226,7 +226,7 @@ const fraseDoQueFalta = computed(() => {
     modal
     :header="t('hotel.checkout.titulo', { pet: petNome })"
     :style="{ width: 'min(46rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <div v-if="hospedagem" class="saida">
@@ -573,17 +573,18 @@ const fraseDoQueFalta = computed(() => {
 }
 
 .passo + .passo {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
+/* O número do passo num ladrilho no tom da casa; feito, ele vira o visto verde. */
 .passo__marca {
   display: grid;
   width: 32px;
   height: 32px;
   place-items: center;
-  border: 2px solid var(--linha-forte);
-  border-radius: 50%;
-  color: var(--tinta-2);
+  border-radius: 10px;
+  background: var(--pj-lugar-fundo, var(--hotel-fundo));
+  color: var(--pj-lugar-tinta, var(--hotel-tinta));
   font-size: 14px;
   font-weight: 650;
 }
@@ -609,8 +610,8 @@ const fraseDoQueFalta = computed(() => {
   gap: 2px 10px;
   margin: 0;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
 }
 
 .passo__meta {

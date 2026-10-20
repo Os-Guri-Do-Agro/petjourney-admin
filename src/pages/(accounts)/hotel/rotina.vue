@@ -889,7 +889,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .filtro:hover {
-  border-color: var(--linha-forte);
+  border-color: var(--linha-media);
   color: var(--tinta);
 }
 
@@ -898,8 +898,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   outline-offset: 2px;
 }
 
+.filtro {
+  box-shadow: var(--sombra-xs);
+  transition:
+    background-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    border-color var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
 .filtro--ativo {
-  border-color: var(--pj-lugar, var(--hotel));
+  border-color: color-mix(in oklab, var(--pj-lugar, var(--hotel)) 60%, transparent);
   background: var(--pj-lugar-fundo, var(--hotel-fundo));
   color: var(--pj-lugar-tinta, var(--hotel-tinta));
   font-weight: 600;
@@ -1091,11 +1098,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 48px;
-  padding: 8px 16px;
+  min-height: 52px;
+  padding: 8px 18px;
   border: 1px solid var(--linha);
   border-radius: var(--raio-cartao);
   background: var(--superficie);
+  box-shadow: var(--sombra-cartao);
   color: var(--tinta-2);
   cursor: pointer;
   font: inherit;

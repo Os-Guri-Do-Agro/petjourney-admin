@@ -100,7 +100,8 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
 <style scoped>
 .orc {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   color: var(--tinta);
   font-size: 14px;
 }
@@ -129,11 +130,24 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
   text-align: start;
 }
 
+/* O cabeçalho das colunas num poço, como as tabelas do kit. */
 .orc thead th {
-  border-bottom: 1px solid var(--linha);
-  color: var(--tinta-2);
+  height: 38px;
+  padding-block: 0;
+  background: var(--superficie-2);
+  color: var(--tinta-3);
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
+}
+
+.orc thead th:first-child {
+  border-start-start-radius: 10px;
+  border-end-start-radius: 10px;
+}
+
+.orc thead th:last-child {
+  border-start-end-radius: 10px;
+  border-end-end-radius: 10px;
 }
 
 .orc tbody th {
@@ -142,7 +156,12 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
 
 .orc tbody tr + tr th,
 .orc tbody tr + tr td {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
+}
+
+.orc tbody th,
+.orc tbody td {
+  height: 44px;
 }
 
 .orc .orc__num {
@@ -152,7 +171,12 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
 
 .orc tfoot th,
 .orc tfoot td {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
+}
+
+.orc tbody tr:first-child th,
+.orc tbody tr:first-child td {
+  border-top: 0;
 }
 
 .orc__total th,
@@ -165,9 +189,10 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
   color: var(--ok-tinta);
 }
 
-.orc__saldo th,
-.orc__saldo td {
-  border-top: 1px solid var(--linha-forte);
+.orc .orc__saldo th,
+.orc .orc__saldo td {
+  padding-block: 12px;
+  border-top: 1px solid var(--linha-media);
   color: var(--tinta);
   font-size: 16px;
   font-weight: 650;

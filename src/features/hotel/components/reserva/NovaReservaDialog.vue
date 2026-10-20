@@ -357,7 +357,7 @@ function confirmar() {
     modal
     :header="t('hotel.reserva.novaTitulo', { acomodacao: acomodacao?.nome ?? '' })"
     :style="{ width: 'min(46rem, 94vw)' }"
-    class="clinic-scope nova-reserva"
+    class="clinic-scope nova-reserva pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <div class="nova">

@@ -381,7 +381,7 @@ function confirmar() {
     modal
     :header="t('hotel.checkin.titulo', { pet: petNome })"
     :style="{ width: 'min(50rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <div class="checkin">
@@ -415,7 +415,10 @@ function confirmar() {
       </p>
 
       <section class="bloco">
-        <h3 class="bloco__titulo">{{ t('hotel.checkin.chegada') }}</h3>
+        <h3 class="bloco__titulo">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-sign-in" /></span>
+          {{ t('hotel.checkin.chegada') }}
+        </h3>
 
         <div class="grade">
           <div class="campo">
@@ -448,7 +451,10 @@ function confirmar() {
       </section>
 
       <section class="bloco">
-        <h3 class="bloco__titulo">{{ t('hotel.checkin.pertences') }}</h3>
+        <h3 class="bloco__titulo">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-backpack" /></span>
+          {{ t('hotel.checkin.pertences') }}
+        </h3>
 
         <ul class="pertences">
           <li v-for="(item, indice) in pertences" :key="`${item.descricao}-${indice}`">
@@ -484,7 +490,10 @@ function confirmar() {
       </section>
 
       <section class="bloco">
-        <h3 class="bloco__titulo">{{ t('hotel.checkin.alimentacao') }}</h3>
+        <h3 class="bloco__titulo">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-bowl-food" /></span>
+          {{ t('hotel.checkin.alimentacao') }}
+        </h3>
 
         <div class="grade">
           <div class="campo campo--linha">
@@ -531,7 +540,10 @@ function confirmar() {
       </section>
 
       <section class="bloco">
-        <h3 class="bloco__titulo">{{ t('hotel.checkin.autorizacoes') }}</h3>
+        <h3 class="bloco__titulo">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-seal-check" /></span>
+          {{ t('hotel.checkin.autorizacoes') }}
+        </h3>
 
         <!--
           Cada autorização é um sim ou não registrado, com data — e não um parágrafo de termo que
@@ -565,7 +577,10 @@ function confirmar() {
       </section>
 
       <section class="bloco">
-        <h3 class="bloco__titulo">{{ t('hotel.checkin.medicacao') }}</h3>
+        <h3 class="bloco__titulo">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-pill" /></span>
+          {{ t('hotel.checkin.medicacao') }}
+        </h3>
 
         <p class="bloco__lede">{{ t('hotel.checkin.medicacaoLede') }}</p>
 
@@ -662,6 +677,7 @@ function confirmar() {
       -->
       <section class="bloco">
         <h3 :id="`${idCampo}-quem`" class="bloco__titulo">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-users" /></span>
           {{ t('hotel.checkin.quemBusca', { pet: petNome }) }}
         </h3>
 
@@ -677,7 +693,10 @@ function confirmar() {
       </section>
 
       <section class="bloco">
-        <h3 class="bloco__titulo">{{ t('hotel.checkin.emergencia') }}</h3>
+        <h3 class="bloco__titulo">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-first-aid-kit" /></span>
+          {{ t('hotel.checkin.emergencia') }}
+        </h3>
 
         <div class="grade grade--colunas-fixas">
           <div class="campo">
@@ -770,8 +789,8 @@ function confirmar() {
 .bloco {
   display: grid;
   gap: 12px;
-  padding-top: 18px;
-  border-top: 1px solid var(--linha);
+  padding-top: 20px;
+  border-top: 1px solid var(--linha-suave);
 }
 
 .bloco:first-of-type {
@@ -780,10 +799,14 @@ function confirmar() {
 }
 
 .bloco__titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .bloco__lede {

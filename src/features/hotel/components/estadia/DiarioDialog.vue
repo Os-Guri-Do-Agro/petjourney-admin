@@ -84,7 +84,7 @@ const ICONE: Record<RegistroKind, string> = {
     modal
     :header="t('hotel.diario.titulo', { pet: petNome })"
     :style="{ width: 'min(36rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <div class="diario">

@@ -210,7 +210,7 @@ const { t } = useI18n()
 }
 
 .horario__rondas > li + li {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 /* Entre um horário e o seguinte, um filete só na coluna do trabalho: o trilho passa por cima. */

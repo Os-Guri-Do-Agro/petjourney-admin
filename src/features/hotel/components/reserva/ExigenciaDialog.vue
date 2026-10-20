@@ -125,7 +125,7 @@ function confirmar() {
           })
     "
     :style="{ width: 'min(34rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <div v-if="alvo" class="exig">

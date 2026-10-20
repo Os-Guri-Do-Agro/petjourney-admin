@@ -534,6 +534,9 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         </ul>
 
         <div v-else class="ui-folha ui-vazio excecoes__vazio">
+          <span class="ui-ladrilho ui-ladrilho--g excecoes__ladrilho" aria-hidden="true">
+            <i class="ph ph-shuffle" />
+          </span>
           <strong>{{ t('hotel.rotinaPadrao.nova.semExcecoes') }}</strong>
           <span>{{ t('hotel.rotinaPadrao.nova.semExcecoesDica') }}</span>
           <RouterLink class="ui-mais" to="/hotel/rotina">
@@ -602,9 +605,9 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .grade__rotulo {
-  color: var(--tinta-2);
+  color: var(--tinta-3);
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
 }
 
 .grade__eixo {
@@ -638,7 +641,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .servico + .servico {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .servico__quem {
@@ -820,11 +823,16 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 /* ------------------------------------------------------------------ o limite */
 
+/* O limite do plano, num poço: apoia a tabela sem disputar com ela. */
 .limite {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
   margin: 4px 0 0;
+  padding: 12px 16px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 13.5px;
   line-height: 1.45;
@@ -877,7 +885,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .excecoes__vazio {
+  justify-items: center;
   gap: 6px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.excecoes__ladrilho {
+  margin-bottom: 6px;
 }
 
 .ui-mais__seta {

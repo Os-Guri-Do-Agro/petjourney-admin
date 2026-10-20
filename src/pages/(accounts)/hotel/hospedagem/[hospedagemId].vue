@@ -1067,7 +1067,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <section class="quadro ui-folha" :aria-label="t('hotel.estadia.nova.dados.rotulo')">
         <dl class="quadro__dados">
           <div class="dado">
-            <dt>{{ t('hotel.estadia.nova.dados.acomodacao') }}</dt>
+            <dt>
+              {{ t('hotel.estadia.nova.dados.acomodacao') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-bed" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">{{ acomodacao?.nome ?? '' }}</strong>
               <small>
@@ -1083,7 +1088,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('hotel.estadia.nova.dados.noites') }}</dt>
+            <dt>
+              {{ t('hotel.estadia.nova.dados.noites') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-moon-stars" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">
                 {{
@@ -1107,7 +1117,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('hotel.estadia.stat.entrada') }}</dt>
+            <dt>
+              {{ t('hotel.estadia.stat.entrada') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-sign-in" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">{{ diaCurto(registro.entradaEm) }}</strong>
               <small>
@@ -1121,14 +1136,24 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             </dd>
           </div>
           <div class="dado" :class="{ 'dado--atencao': saidaAtrasada }">
-            <dt>{{ t('hotel.estadia.stat.saida') }}</dt>
+            <dt>
+              {{ t('hotel.estadia.stat.saida') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-sign-out" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">{{ diaDaSaida }}</strong>
               <small>{{ legendaDaSaida }}</small>
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('hotel.estadia.stat.peso') }}</dt>
+            <dt>
+              {{ t('hotel.estadia.stat.peso') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-scales" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">{{ formato.peso(registro.pesoEntradaKg) }}</strong>
               <small>
@@ -1141,7 +1166,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('hotel.estadia.stat.saldo') }}</dt>
+            <dt>
+              {{ t('hotel.estadia.stat.saldo') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-wallet" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">{{ formato.moeda(estadia.saldoCentavos) }}</strong>
               <small>
@@ -1172,6 +1202,9 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <!-- O quadro de estado: o que pede atenção agora, do mais grave para o menos. -->
       <section v-else class="atencao" aria-labelledby="estadia-atencao">
         <h2 id="estadia-atencao" class="atencao__titulo">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+            <i class="ph ph-bell-ringing" />
+          </span>
           {{ t('hotel.estadia.nova.atencao.titulo') }}
           <span v-if="atencao.length" class="ui-contagem">{{ atencao.length }}</span>
         </h2>
@@ -1738,7 +1771,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           trocar de aba.
         -->
         <aside class="ficha ui-folha" :aria-label="t('hotel.estadia.ficha')">
-          <h2 class="ficha__titulo">{{ t('hotel.estadia.ficha') }}</h2>
+          <h2 class="ficha__titulo">
+            <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+              <i class="ph ph-identification-card" />
+            </span>
+            {{ t('hotel.estadia.ficha') }}
+          </h2>
 
           <dl class="ficha__lista">
             <div class="ficha__item">
@@ -1917,20 +1955,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 <style scoped>
 /*
- * Os botões contornado e de texto no padrão do Trilha (contorno forte, tinta cheia). Fora do
- * `.hc-tema` o PrimeVue usa o cinza do preset, que some sobre o fundo — no escuro, quase some.
- */
-.tela {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
-/*
  * A largura da estadia, e não a da janela, decide se a ficha cabe ao lado das abas: com a barra
  * aberta numa tela de 1280, a janela é larga e a coluna não.
  */
@@ -1959,8 +1983,13 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 20px;
 }
 
+/* O retrato sobe da folha: um anel de papel e a sombra do cartão. */
 .capa__rosto {
   flex: none;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 4px var(--superficie),
+    var(--sombra-2);
 }
 
 /* `minmax(0, 1fr)`: sem ele, a escada da adaptação alarga a coluna e vaza da tela no celular. */
@@ -1978,8 +2007,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 4px 12px;
   margin: 0;
   color: var(--tinta);
-  font-size: 30px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.15;
 }
@@ -2085,6 +2114,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .dado {
+  position: relative;
   display: grid;
   min-width: 0;
   flex: 1 1 160px;
@@ -2092,15 +2122,22 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 6px;
   margin-block-start: -1px;
   margin-inline-start: -1px;
-  padding: 16px 20px;
+  padding: 18px 20px;
   border-block-start: 1px solid var(--linha);
   border-inline-start: 1px solid var(--linha);
 }
 
 .dado dt {
+  padding-inline-end: 34px;
   color: var(--tinta-2);
-  font-size: 12.5px;
-  font-weight: 550;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dado__icone {
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 14px;
 }
 
 .dado dd {
@@ -2113,7 +2150,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .dado__grande {
   overflow: hidden;
   color: var(--tinta);
-  font-size: 22px;
+  font-family: var(--font-dados);
+  font-size: 24px;
   font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -2140,18 +2178,18 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .atencao {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
 .atencao__titulo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   color: var(--tinta);
   font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 650;
+  letter-spacing: -0.015em;
 }
 
 .atencao__linha {
@@ -2164,7 +2202,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 11px;
   background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 18px;
@@ -2230,21 +2268,21 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .aviso--encerrada {
   padding: 12px 16px;
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--neutro-fundo);
   color: var(--tinta);
 }
 
 .aviso--erro {
   padding: 12px 16px;
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--risco-fundo);
   color: var(--risco-tinta);
 }
 
 .aviso--atencao {
-  padding: 10px 14px;
-  border-radius: 12px;
+  padding: 12px 16px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--atencao-fundo);
   color: var(--atencao-tinta);
 }
@@ -2399,8 +2437,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .bloco__titulo {
   margin: 0;
   color: var(--tinta);
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 650;
   letter-spacing: -0.01em;
 }
 
@@ -2558,7 +2596,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 11px;
   background: var(--pj-lugar-fundo);
   color: var(--pj-lugar-tinta);
   font-size: 18px;
@@ -2849,19 +2887,23 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 /* ------------------------------------------------------------------ a ficha */
 
+/* Presa ao rolar: em tela larga quem rola é a folha (`main#conteudo`), e o topo dela é o zero. */
 .ficha {
   position: sticky;
-  top: 72px;
+  top: 16px;
   display: grid;
   gap: 4px;
-  padding: 18px 18px 10px;
+  padding: 18px 20px 10px;
 }
 
 .ficha__titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0 0 6px;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
 }
 
 .ficha__lista {
@@ -2876,7 +2918,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .ficha__item + .ficha__item {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .ficha__item dt {

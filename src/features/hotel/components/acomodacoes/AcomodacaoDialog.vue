@@ -167,7 +167,7 @@ function salvar() {
     modal
     :header="editando ? t('hotel.acomodacoes.editar') : t('hotel.acomodacoes.nova')"
     :style="{ width: 'min(44rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <div class="form">

@@ -27,6 +27,7 @@ import { useI18n } from 'vue-i18n'
 
 import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
 
+import { ICONE_DO_DESENHO } from '../base/icone-do-desenho'
 import PetAvatar from '../base/PetAvatar.vue'
 import { useHotelFormat } from '../../composables/useHotelFormat'
 import type { FaixaNaGrade, GradeDeOcupacao, LinhaDaGrade } from '../../data/repositories'
@@ -263,6 +264,9 @@ function descricaoDaBarra(faixa: FaixaNaGrade): string {
             <tr class="bloco">
               <th scope="colgroup" :colspan="colunas + 1">
                 <span class="bloco__nome">
+                  <span class="bloco__icone" aria-hidden="true">
+                    <i :class="ICONE_DO_DESENHO[grupo.bloco.icone]" />
+                  </span>
                   {{ grupo.bloco.nome }}
                   <span class="ui-contagem">{{ grupo.linhas.length }}</span>
                 </span>
@@ -385,46 +389,46 @@ function descricaoDaBarra(faixa: FaixaNaGrade): string {
           </tbody>
         </table>
       </div>
-    </div>
 
-    <!--
-      Legenda fixa embaixo. Uma grade colorida sem legenda obriga quem chega a inferir o
-      significado das cores pelo contexto — e a inferir errado na primeira vez que importa.
-    -->
-    <ul class="legenda">
-      <li>
-        <span class="amostra amostra--livre" aria-hidden="true"><i class="ph ph-plus" /></span>
-        {{ t('hotel.grade.legenda.livre') }}
-      </li>
-      <li>
-        <span class="amostra amostra--hospedado" aria-hidden="true" />
-        {{ t('hotel.grade.legenda.hospedado') }}
-      </li>
-      <li>
-        <span class="amostra amostra--confirmada" aria-hidden="true" />
-        {{ t('hotel.grade.legenda.confirmada') }}
-      </li>
-      <li>
-        <span class="amostra amostra--pendente" aria-hidden="true" />
-        {{ t('hotel.grade.legenda.pendente') }}
-      </li>
-      <li>
-        <span class="amostra amostra--atencao" aria-hidden="true"><i class="ph ph-warning" /></span>
-        {{ t('hotel.grade.legenda.atencao') }}
-      </li>
-      <li>
-        <span class="amostra amostra--parada" aria-hidden="true" />
-        {{ t('hotel.grade.legenda.parada') }}
-      </li>
-      <li>
-        <span class="amostra amostra--hoje" aria-hidden="true" />
-        {{ t('hotel.grade.tela.hoje') }}
-      </li>
-      <li class="legenda__livres">
-        <i class="ph ph-sparkle" aria-hidden="true" />
-        {{ t('hotel.mapa.semNenhumaReserva', { total: grade.totalmenteLivres }, grade.totalmenteLivres) }}
-      </li>
-    </ul>
+      <!--
+        Legenda fixa no pé da folha. Uma grade colorida sem legenda obriga quem chega a inferir o
+        significado das cores pelo contexto — e a inferir errado na primeira vez que importa.
+      -->
+      <ul class="legenda">
+        <li>
+          <span class="amostra amostra--livre" aria-hidden="true"><i class="ph ph-plus" /></span>
+          {{ t('hotel.grade.legenda.livre') }}
+        </li>
+        <li>
+          <span class="amostra amostra--hospedado" aria-hidden="true" />
+          {{ t('hotel.grade.legenda.hospedado') }}
+        </li>
+        <li>
+          <span class="amostra amostra--confirmada" aria-hidden="true" />
+          {{ t('hotel.grade.legenda.confirmada') }}
+        </li>
+        <li>
+          <span class="amostra amostra--pendente" aria-hidden="true" />
+          {{ t('hotel.grade.legenda.pendente') }}
+        </li>
+        <li>
+          <span class="amostra amostra--atencao" aria-hidden="true"><i class="ph ph-warning" /></span>
+          {{ t('hotel.grade.legenda.atencao') }}
+        </li>
+        <li>
+          <span class="amostra amostra--parada" aria-hidden="true" />
+          {{ t('hotel.grade.legenda.parada') }}
+        </li>
+        <li>
+          <span class="amostra amostra--hoje" aria-hidden="true" />
+          {{ t('hotel.grade.tela.hoje') }}
+        </li>
+        <li class="legenda__livres">
+          <i class="ph ph-sparkle" aria-hidden="true" />
+          {{ t('hotel.mapa.semNenhumaReserva', { total: grade.totalmenteLivres }, grade.totalmenteLivres) }}
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -432,10 +436,11 @@ function descricaoDaBarra(faixa: FaixaNaGrade): string {
 .grade {
   --grade-acom: 11.5rem;
   --grade-dia: 2.75rem;
-  --grade-linha: 48px;
+  --grade-linha: 54px;
+  --grade-hoje: color-mix(in oklab, var(--hotel-fundo) 58%, transparent);
+  --grade-fds: color-mix(in oklab, var(--superficie-2) 75%, transparent);
 
   display: grid;
-  gap: 12px;
 }
 
 .grade__folha {
@@ -447,7 +452,7 @@ function descricaoDaBarra(faixa: FaixaNaGrade): string {
  * esquerda enquanto se percorre a casa. A altura é a que sobra da janela, como na Agenda.
  */
 .grade__rolagem {
-  max-height: max(26rem, calc(100dvh - 24.5rem));
+  max-height: max(26rem, calc(100dvh - 25rem));
   overflow: auto;
   overscroll-behavior: contain;
 }
@@ -491,20 +496,21 @@ thead th {
 .tabela__canto {
   z-index: 5;
   width: var(--grade-acom);
-  padding: 6px 10px 10px 16px;
+  padding: 8px 12px 12px 18px;
   border-bottom: 1px solid var(--linha);
-  color: var(--tinta-2);
+  border-inline-end: 1px solid var(--linha-suave);
+  color: var(--tinta-3);
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
   inset-inline-start: 0;
   text-align: start;
   vertical-align: bottom;
 }
 
 .dia {
-  padding: 8px 0 9px;
+  padding: 10px 0 10px;
   border-bottom: 1px solid var(--linha);
-  color: var(--tinta-2);
+  color: var(--tinta-3);
   font-weight: 500;
   line-height: 1.15;
   text-align: center;
@@ -512,7 +518,7 @@ thead th {
 }
 
 .dia--fim-de-semana {
-  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+  background: color-mix(in oklab, var(--superficie-2) 80%, var(--superficie));
 }
 
 .dia__mes,
@@ -524,7 +530,7 @@ thead th {
 .dia__mes {
   height: 15px;
   color: var(--pj-lugar-tinta);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 650;
   white-space: nowrap;
 }
@@ -533,19 +539,25 @@ thead th {
   font-size: 11.5px;
 }
 
+/* O número do dia num disco: em hoje, o disco acende na cor da casa. */
 .dia__numero {
-  margin-top: 1px;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  margin: 2px auto 0;
+  place-items: center;
+  border-radius: 50%;
   color: var(--tinta);
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 650;
 }
 
 /* A barrinha de carga: quanto da casa já está vendido naquela noite. */
 .dia__carga {
   display: block;
-  width: 24px;
+  width: 22px;
   height: 4px;
-  margin: 5px auto 0;
+  margin: 6px auto 0;
   overflow: hidden;
   border-radius: 2px;
   background: var(--superficie-3);
@@ -563,31 +575,35 @@ thead th {
   background: var(--atencao);
 }
 
-/* Hoje: o ponto e o número na cor da casa, como o dia de hoje na semana da Agenda. */
+/* Hoje: a coluna tingida de lavanda e o número aceso, como o dia de hoje na semana da Agenda. */
 .dia--hoje {
-  background: color-mix(in oklab, var(--hotel-fundo) 75%, var(--superficie));
+  background: color-mix(in oklab, var(--hotel-fundo) 62%, var(--superficie));
 }
 
-.dia--hoje .dia__semana,
-.dia--hoje .dia__numero {
+.dia--hoje .dia__semana {
   color: var(--hotel-tinta);
-  font-weight: 700;
+  font-weight: 650;
 }
 
-.dia--hoje .dia__semana::before {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-inline-end: 3px;
-  border-radius: 50%;
+.dia--hoje .dia__numero {
   background: var(--hotel);
-  content: '';
-  vertical-align: 1px;
+  box-shadow: 0 4px 10px -4px color-mix(in oklab, var(--hotel) 80%, transparent);
+  color: #fff;
 }
 
-/* O período procurado: um traço na base dos dias, na tinta da ação. */
-.dia--procurado {
-  box-shadow: inset 0 -3px 0 var(--musgo);
+.app-dark .dia--hoje .dia__numero {
+  color: var(--rail);
+}
+
+/* O período procurado: um traço verde na base dos dias, o mesmo verde das linhas que servem. */
+.dia--procurado::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  background: var(--ok);
+  content: '';
 }
 
 /* ------------------------------------------------------------------ blocos e acomodações */
@@ -596,7 +612,7 @@ thead th {
   position: relative;
   z-index: 1;
   padding: 0;
-  border-bottom: 1px solid var(--linha);
+  border-bottom: 1px solid var(--linha-suave);
   background: var(--superficie-2);
   text-align: start;
 }
@@ -606,13 +622,24 @@ thead th {
   position: sticky;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 34px;
-  padding: 0 16px;
+  gap: 9px;
+  height: 42px;
+  padding: 0 18px;
   color: var(--tinta);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 650;
   inset-inline-start: 0;
+}
+
+.bloco__icone {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 15px;
 }
 
 .bloco .ui-contagem {
@@ -626,8 +653,8 @@ thead th {
   position: sticky;
   z-index: 2;
   height: var(--grade-linha);
-  padding: 0 10px 0 16px;
-  border-bottom: 1px solid var(--linha);
+  padding: 0 12px 0 18px;
+  border-bottom: 1px solid var(--linha-suave);
   border-inline-end: 1px solid var(--linha);
   background: var(--superficie);
   font-weight: 400;
@@ -662,12 +689,12 @@ thead th {
 
 .acom > .acom__texto {
   display: inline-grid;
-  max-width: calc(100% - 22px);
+  max-width: calc(100% - 24px);
   vertical-align: middle;
 }
 
 .acom__serve {
-  margin-inline-start: 4px;
+  margin-inline-start: 6px;
   color: var(--ok-tinta);
   font-size: 17px;
   vertical-align: middle;
@@ -685,7 +712,7 @@ thead th {
  * com o visto, e as noites procuradas tingidas.
  */
 .linha--apagada .acom__texto {
-  opacity: 0.62;
+  opacity: 0.6;
 }
 
 .linha--apagada:hover .acom__texto,
@@ -695,12 +722,20 @@ thead th {
 
 /* A acomodação que serve para a busca: o nome no verde de "dá", com o visto ao lado. */
 .linha--serve .acom {
-  background: color-mix(in oklab, var(--ok-fundo) 60%, var(--superficie));
+  background: color-mix(in oklab, var(--ok-fundo) 55%, var(--superficie));
+}
+
+.linha:hover .acom {
+  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+}
+
+.linha--serve:hover .acom {
+  background: color-mix(in oklab, var(--ok-fundo) 75%, var(--superficie));
 }
 
 .faixa {
   padding: 0;
-  border-bottom: 1px solid var(--linha);
+  border-bottom: 1px solid var(--linha-suave);
 }
 
 .faixa__grade {
@@ -718,7 +753,7 @@ thead th {
   grid-row: 1;
   padding: 0;
   border: 0;
-  border-inline-start: 1px solid color-mix(in oklab, var(--linha) 70%, transparent);
+  border-inline-start: 1px solid var(--linha-suave);
   background: transparent;
   color: var(--hotel-tinta);
   cursor: pointer;
@@ -726,38 +761,49 @@ thead th {
 }
 
 .celula--fim-de-semana {
-  background: color-mix(in oklab, var(--superficie-2) 70%, transparent);
+  background: var(--grade-fds);
 }
 
 .linha--serve .celula--procurada {
-  background: color-mix(in oklab, var(--ok-fundo) 85%, transparent);
+  background: color-mix(in oklab, var(--ok-fundo) 80%, transparent);
 }
 
 /* Hoje: a coluna tingida de lavanda e a agulha na borda, atravessando a casa inteira. */
 .celula--hoje {
-  background: color-mix(in oklab, var(--hotel-fundo) 60%, transparent);
-  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--hotel) 70%, transparent);
+  background: var(--grade-hoje);
+  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--hotel) 75%, transparent);
 }
 
 [dir='rtl'] .celula--hoje {
-  box-shadow: inset -2px 0 0 color-mix(in oklab, var(--hotel) 70%, transparent);
+  box-shadow: inset -2px 0 0 color-mix(in oklab, var(--hotel) 75%, transparent);
 }
 
 .celula__mais {
-  font-size: 16px;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+  font-size: 14px;
   opacity: 0;
-  transition: opacity var(--pj-tempo-curto) var(--pj-curva-chega);
+  transform: scale(0.85);
+  transition:
+    opacity var(--pj-tempo-curto) var(--pj-curva-chega),
+    transform var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 /* O vazio convida: o ponteiro sobre ele mostra o "+", e o clique começa a reserva ali. */
 .celula:not(:disabled):hover,
 .celula:not(:disabled):focus-visible {
-  background: var(--hotel-fundo);
+  background: color-mix(in oklab, var(--hotel-fundo) 85%, transparent);
 }
 
 .celula:not(:disabled):hover .celula__mais,
 .celula:not(:disabled):focus-visible .celula__mais {
   opacity: 1;
+  transform: none;
 }
 
 .celula:focus-visible {
@@ -772,6 +818,10 @@ thead th {
 
 /* ------------------------------------------------------------------ barras */
 
+/*
+ * A estadia: uma pílula com o rosto na ponta. Quem está na casa ganha a cor cheia e um pouco de
+ * altura (sombra rente); quem vem chegando fica no tom claro; quem não pagou, tracejado.
+ */
 .barra {
   position: relative;
   z-index: 1;
@@ -779,9 +829,9 @@ thead th {
   min-width: 0;
   overflow: hidden;
   align-items: center;
-  gap: 7px;
-  margin: 7px 2px;
-  padding: 0 8px 0 3px;
+  gap: 8px;
+  margin: 9px 3px;
+  padding: 0 10px 0 4px;
   grid-row: 1;
   border: 1px solid transparent;
   border-radius: 999px;
@@ -789,6 +839,7 @@ thead th {
   font: inherit;
   font-size: 13px;
   font-weight: 600;
+  letter-spacing: -0.005em;
   text-align: start;
   white-space: nowrap;
   /*
@@ -796,18 +847,23 @@ thead th {
    * cor não teria de onde transicionar.
    */
   outline: 2px solid transparent;
-  outline-offset: 1px;
-  transition: outline-color var(--pj-tempo-curto) var(--pj-curva-chega);
+  outline-offset: 2px;
+  transition:
+    outline-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    transform var(--pj-tempo-curto) var(--pj-curva-chega),
+    box-shadow var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .barra:hover,
 .barra:focus-visible {
   z-index: 2;
-  outline-color: var(--hotel);
+  outline-color: color-mix(in oklab, var(--hotel) 70%, transparent);
+  transform: translateY(-1px);
 }
 
 .barra__rosto {
   flex: none;
+  box-shadow: 0 0 0 2px var(--superficie);
 }
 
 .barra__nome {
@@ -831,20 +887,35 @@ thead th {
   font-size: 10px;
 }
 
-/* Quem está dentro da casa: lavanda cheia. Quem vem chegando: tingido. Quem não pagou: tracejado. */
 .barra--hospedado {
   background: var(--hotel);
-  color: var(--superficie);
+  box-shadow:
+    0 1px 2px rgb(16 40 32 / 12%),
+    0 6px 14px -8px color-mix(in oklab, var(--hotel) 90%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 18%);
+  color: #fff;
+}
+
+.app-dark .barra--hospedado {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 40%),
+    inset 0 1px 0 rgb(255 255 255 / 22%);
+  color: var(--rail);
+}
+
+.barra--hospedado .barra__rosto {
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 55%);
 }
 
 .barra--confirmada {
-  border-color: color-mix(in oklab, var(--hotel) 45%, transparent);
-  background: var(--hotel-fundo);
+  border-color: color-mix(in oklab, var(--hotel) 38%, transparent);
+  background: color-mix(in oklab, var(--hotel-fundo) 85%, var(--superficie));
+  box-shadow: var(--sombra-xs);
   color: var(--hotel-tinta);
 }
 
 .barra--pendente {
-  border: 1.5px dashed var(--hotel);
+  border: 1.5px dashed color-mix(in oklab, var(--hotel) 80%, transparent);
   background: var(--superficie);
   color: var(--hotel-tinta);
 }
@@ -852,6 +923,7 @@ thead th {
 .barra--encerrada,
 .barra--cancelada,
 .barra--nao-compareceu {
+  border-color: var(--linha);
   background: var(--superficie-3);
   color: var(--tinta-2);
 }
@@ -860,12 +932,14 @@ thead th {
 .barra__aviso {
   display: grid;
   flex: none;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   margin-inline-start: auto;
+  margin-inline-end: -4px;
   place-items: center;
   border-radius: 50%;
   background: var(--atencao-fundo);
+  box-shadow: 0 0 0 2px var(--superficie);
   color: var(--atencao-tinta);
   font-size: 12px;
 }
@@ -875,7 +949,7 @@ thead th {
   margin-inline-start: 0;
   border-start-start-radius: 0;
   border-end-start-radius: 0;
-  padding-inline-start: 6px;
+  padding-inline-start: 8px;
 }
 
 .barra--sai-depois {
@@ -890,8 +964,9 @@ thead th {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin: 7px 2px;
-  border-radius: 10px;
+  margin: 9px 3px;
+  border: 1px dashed var(--linha-media);
+  border-radius: 999px;
   background: repeating-linear-gradient(
     -45deg,
     var(--superficie-2),
@@ -901,7 +976,7 @@ thead th {
   );
   color: var(--tinta-2);
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
   grid-row: 1;
   pointer-events: none;
 }
@@ -911,9 +986,11 @@ thead th {
 .legenda {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 18px;
+  gap: 8px 20px;
   margin: 0;
-  padding: 0 4px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--linha);
+  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 13px;
   list-style: none;
@@ -922,13 +999,14 @@ thead th {
 .legenda li {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 
 /* O que não tem reserva nenhuma no período à vista: a vaga mais fácil de vender, na ponta. */
 .legenda__livres {
   margin-inline-start: auto;
   color: var(--tinta);
+  font-weight: 550;
 }
 
 .legenda__livres i {
@@ -947,7 +1025,7 @@ thead th {
 
 .amostra--livre {
   border-color: var(--linha);
-  background: var(--hotel-fundo);
+  background: var(--superficie);
   color: var(--hotel-tinta);
 }
 
@@ -956,7 +1034,7 @@ thead th {
 }
 
 .amostra--confirmada {
-  border-color: color-mix(in oklab, var(--hotel) 45%, transparent);
+  border-color: color-mix(in oklab, var(--hotel) 40%, transparent);
   background: var(--hotel-fundo);
 }
 
@@ -973,7 +1051,7 @@ thead th {
 }
 
 .amostra--parada {
-  border-radius: 4px;
+  border-color: var(--linha-media);
   background: repeating-linear-gradient(
     -45deg,
     var(--superficie-2),
@@ -1003,6 +1081,10 @@ thead th {
   .tabela__canto {
     padding-inline-start: 12px;
   }
+
+  .legenda__livres {
+    margin-inline-start: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1010,6 +1092,11 @@ thead th {
   .celula,
   .celula__mais {
     transition: none;
+  }
+
+  .barra:hover,
+  .barra:focus-visible {
+    transform: none;
   }
 }
 </style>

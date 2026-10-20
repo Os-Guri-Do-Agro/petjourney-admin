@@ -76,7 +76,7 @@ const podeSalvar = computed(() => nome.value.trim().length > 0 && !props.salvand
     modal
     :header="editando ? t('hotel.acomodacoes.corredor.editar') : t('hotel.acomodacoes.corredor.novo')"
     :style="{ width: 'min(30rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <form class="forma" @submit.prevent="emit('salvar', { nome, icone })">

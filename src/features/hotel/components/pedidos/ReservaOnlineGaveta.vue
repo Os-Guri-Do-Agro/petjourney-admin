@@ -77,7 +77,7 @@ const valido = computed(
   <Drawer
     v-model:visible="aberto"
     position="right"
-    class="config-gaveta clinic-overlay"
+    class="config-gaveta clinic-overlay pj-lugar--hotel"
     :style="{ width: 'min(34rem, 96vw)' }"
     :header="t('hotel.pedidos.config.titulo')"
   >

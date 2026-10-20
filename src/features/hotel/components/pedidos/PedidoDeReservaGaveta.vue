@@ -420,7 +420,7 @@ function reservar() {
     position="right"
     :modal="false"
     :dismissable="false"
-    class="gaveta-da-reserva clinic-overlay"
+    class="gaveta-da-reserva clinic-overlay pj-lugar--hotel"
     :style="{ width: `min(${LARGURA}, 96vw)` }"
   >
     <template #header>

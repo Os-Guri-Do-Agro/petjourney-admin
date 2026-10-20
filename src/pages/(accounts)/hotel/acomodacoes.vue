@@ -1102,20 +1102,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </template>
 
 <style scoped>
-/*
- * Os botões contornado e de texto no padrão do Trilha (contorno forte, tinta cheia). Fora do
- * `.hc-tema` o PrimeVue usa o cinza do preset, que some sobre o fundo — no escuro, quase some.
- */
-.tela {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .casa {
   display: grid;
   gap: 20px;
@@ -1196,12 +1182,17 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   flex: var(--corredor-vagas) 1
     calc(var(--corredor-vagas) * (var(--ladrilho) + var(--vao)) + 20px);
   align-content: start;
-  gap: 14px;
-  padding: 14px 14px 16px;
-  border: 1px solid var(--linha);
-  border-radius: 20px;
-  background: color-mix(in oklab, var(--superficie) 45%, transparent);
+  gap: 16px;
+  padding: 16px 16px 18px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-painel);
+  background: color-mix(in oklab, var(--superficie-3) 50%, transparent);
   container: corredor / inline-size;
+}
+
+/* No escuro o chão afunda pelo outro lado: um pouco mais claro que o fundo, mais escuro que o papel. */
+.app-dark .corredor {
+  background: color-mix(in oklab, var(--superficie-2) 40%, transparent);
 }
 
 .corredor__cabeca {
@@ -1213,11 +1204,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .corredor__icone {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 9px;
+  border-radius: 11px;
   background: var(--pj-lugar-fundo);
   color: var(--pj-lugar-tinta);
   font-size: 18px;
@@ -1234,8 +1225,9 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   margin: 0;
   overflow: hidden;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1279,7 +1271,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   min-height: 84px;
   padding: 16px;
   border: 1px dashed color-mix(in oklab, var(--linha-forte) 70%, transparent);
-  border-radius: 20px;
+  border-radius: var(--raio-painel);
   background: transparent;
   color: var(--tinta-2);
   cursor: pointer;
@@ -1357,8 +1349,9 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 12px;
   padding: 14px 14px 12px 16px;
   border: 1px solid var(--linha);
-  border-radius: 14px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie);
+  box-shadow: var(--sombra-cartao);
   color: var(--tinta);
   transition:
     border-color var(--pj-tempo-curto) ease,
@@ -1367,7 +1360,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .ladrilho:not(.ladrilho--nova):hover {
-  border-color: var(--linha-forte);
+  border-color: var(--linha-media);
   box-shadow: var(--sombra-2);
   transform: translateY(-1px);
 }
@@ -1375,12 +1368,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 /* Fora de operação: hachurado e calado, mas no lugar — continua sendo uma porta da casa. */
 .ladrilho--parada {
   border-style: dashed;
-  border-color: var(--linha-forte);
-  background: repeating-linear-gradient(
-    -45deg,
-    transparent 0 9px,
-    color-mix(in oklab, var(--linha) 75%, transparent) 9px 10px
-  );
+  border-color: var(--linha-media);
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 9px,
+      color-mix(in oklab, var(--linha) 75%, transparent) 9px 10px
+    ),
+    color-mix(in oklab, var(--superficie) 55%, transparent);
+  box-shadow: none;
 }
 
 .ladrilho__topo {
@@ -1396,7 +1392,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   height: 32px;
   flex: none;
   place-items: center;
-  border-radius: 9px;
+  border-radius: 10px;
   background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 17px;
@@ -1689,6 +1685,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 4px;
   border: 1px dashed color-mix(in oklab, var(--linha-forte) 70%, transparent);
   background: transparent;
+  box-shadow: none;
   color: var(--tinta-2);
   cursor: pointer;
   font: inherit;

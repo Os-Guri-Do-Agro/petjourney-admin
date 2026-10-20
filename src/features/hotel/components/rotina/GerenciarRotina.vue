@@ -280,19 +280,20 @@ const temProposta = computed(
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 18px 14px;
-  border-bottom: 1px solid var(--linha);
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--linha-suave);
 }
 
+/* O ladrilho do assunto, no tom claro da casa. */
 .bloco__icone {
   display: grid;
   width: 36px;
   height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 10px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
+  border-radius: 11px;
+  background: var(--pj-lugar-fundo, var(--hotel-fundo));
+  color: var(--pj-lugar-tinta, var(--hotel-tinta));
   font-size: 18px;
 }
 
@@ -305,8 +306,9 @@ const temProposta = computed(
 .bloco__titulos h2 {
   margin: 0;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .bloco__titulos p {
@@ -360,7 +362,7 @@ const temProposta = computed(
 }
 
 .casa__linha + .casa__linha {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .casa__icone {

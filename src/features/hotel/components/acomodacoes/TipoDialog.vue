@@ -83,7 +83,7 @@ function salvar() {
     modal
     :header="editando ? t('hotel.acomodacoes.tipo.editar') : t('hotel.acomodacoes.tipo.novo')"
     :style="{ width: 'min(30rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <form class="forma" @submit.prevent="salvar">

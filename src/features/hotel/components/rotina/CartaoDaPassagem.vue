@@ -123,9 +123,13 @@ const assume = computed(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 18px 14px;
-  border-bottom: 1px solid var(--linha);
-  background: color-mix(in oklab, var(--hotel-fundo) 55%, var(--superficie));
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--linha-suave);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--hotel-fundo) 75%, var(--superficie)),
+    var(--superficie)
+  );
 }
 
 .fim__icone {
@@ -134,8 +138,9 @@ const assume = computed(() => {
   height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 10px;
+  border-radius: 11px;
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--hotel-tinta);
   font-size: 18px;
 }
@@ -150,8 +155,9 @@ const assume = computed(() => {
 .fim__titulos h2 {
   margin: 0;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .fim__titulos p {

@@ -52,7 +52,7 @@ const { t } = useI18n()
     modal
     :header="t('hotel.proposta.titulo')"
     :style="{ width: 'min(44rem, 94vw)' }"
-    class="clinic-dialog hc-tema"
+    class="clinic-dialog hc-tema pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <PropostaDeRotina

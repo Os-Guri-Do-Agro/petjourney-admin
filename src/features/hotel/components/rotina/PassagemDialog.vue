@@ -91,7 +91,7 @@ watch(
     modal
     :header="t('hotel.turno.titulo')"
     :style="{ width: 'min(52rem, 96vw)' }"
-    class="clinic-dialog hc-tema passagem-dialog"
+    class="clinic-dialog hc-tema passagem-dialog pj-lugar--hotel"
     dismissable-mask
     @update:visible="emit('fechar')"
   >

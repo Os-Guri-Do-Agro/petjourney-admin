@@ -168,24 +168,28 @@ const numeros = computed(() => {
       rotulo: t('hotel.resumo.stat.ocupacao'),
       valor: formato.percentual(dados.ocupacaoMedia),
       nota: t('hotel.resumo.stat.ocupacaoDetalhe'),
+      icone: 'ph ph-bed',
     },
     {
       id: 'receita',
       rotulo: t('hotel.resumo.stat.receita'),
       valor: formato.moeda(dados.receitaCentavos),
       nota: t('hotel.resumo.stat.diarias', { total: dados.diariasVendidas }, dados.diariasVendidas),
+      icone: 'ph ph-coins',
     },
     {
       id: 'diaria',
       rotulo: t('hotel.resumo.stat.diariaMedia'),
       valor: formato.moeda(dados.diariaMediaCentavos),
       nota: t('hotel.resumo.stat.diariaMediaDetalhe'),
+      icone: 'ph ph-receipt',
     },
     {
       id: 'retorno',
       rotulo: t('hotel.resumo.stat.retorno'),
       valor: formato.percentual(dados.taxaDeRetorno),
       nota: t('hotel.resumo.stat.retornoDetalhe'),
+      icone: 'ph ph-arrow-u-down-left',
     },
   ]
 })
@@ -383,18 +387,23 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       </div>
 
       <div v-if="semMovimento" class="ui-folha nada">
-        <span class="nada__icone" aria-hidden="true"><i class="ph ph-chart-bar" /></span>
+        <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true"><i class="ph ph-chart-bar" /></span>
         <strong>{{ t('hotel.resumo.vazioTitulo') }}</strong>
         <p>{{ t('hotel.resumo.vazioDescricao') }}</p>
       </div>
 
       <template v-else>
         <!-- A régua dos quatro números do período. -->
-        <ul class="numeros ui-folha" :aria-label="t('hotel.resumo.nova.numerosRotulo')">
-          <li v-for="numero in numeros" :key="numero.id" class="numero">
-            <span class="numero__rotulo">{{ numero.rotulo }}</span>
-            <strong class="numero__valor ui-num">{{ numero.valor }}</strong>
-            <span class="numero__nota">{{ numero.nota }}</span>
+        <ul class="numeros ui-indicadores" :aria-label="t('hotel.resumo.nova.numerosRotulo')">
+          <li v-for="numero in numeros" :key="numero.id" class="numero ui-indicador">
+            <span class="numero__topo">
+              <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+                <i :class="numero.icone" />
+              </span>
+              <span class="ui-indicador__rotulo">{{ numero.rotulo }}</span>
+            </span>
+            <strong class="ui-indicador__valor">{{ numero.valor }}</strong>
+            <span class="ui-indicador__nota">{{ numero.nota }}</span>
           </li>
         </ul>
 
@@ -402,6 +411,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           id="resumo-ocupacao"
           :titulo="t('hotel.resumo.ocupacaoPorDia')"
           :descricao="t('hotel.resumo.nova.ocupacao.descricao')"
+          icone="ph ph-chart-bar"
           folha
         >
           <div class="ocupacao">
@@ -445,7 +455,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         </UiSecao>
 
         <div class="rankings">
-          <UiSecao id="resumo-origem" :titulo="t('hotel.resumo.porOrigem')" folha>
+          <UiSecao
+            id="resumo-origem"
+            :titulo="t('hotel.resumo.porOrigem')"
+            icone="ph ph-signpost"
+            folha
+          >
             <ol v-if="porOrigem.length" class="ranking">
               <li v-for="linha in porOrigem" :key="linha.id" class="ranking__linha">
                 <span class="ranking__nome">{{ linha.rotulo }}</span>
@@ -461,7 +476,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             <p v-else class="ui-vazio">{{ t('hotel.resumo.vazioDescricao') }}</p>
           </UiSecao>
 
-          <UiSecao id="resumo-servico" :titulo="t('hotel.resumo.porServico')" folha>
+          <UiSecao
+            id="resumo-servico"
+            :titulo="t('hotel.resumo.porServico')"
+            icone="ph ph-sparkle"
+            folha
+          >
             <ol v-if="porServico.length" class="ranking">
               <li v-for="linha in porServico" :key="linha.id" class="ranking__linha">
                 <span class="ranking__nome">{{ linha.rotulo }}</span>
@@ -481,6 +501,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             id="resumo-ocorrencias"
             :titulo="t('hotel.resumo.ocorrencias')"
             :contagem="totalDeOcorrencias || null"
+            icone="ph ph-flag"
             folha
           >
             <ol v-if="ocorrencias.length" class="ranking ranking--atencao">
@@ -505,7 +526,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             Cancelamento é aviso — deu para revender a vaga; não comparecer é vaga queimada. Os
             dois lado a lado, e o segundo pesa mais.
           -->
-          <UiSecao id="resumo-perdas" :titulo="t('hotel.resumo.perdas')" folha>
+          <UiSecao
+            id="resumo-perdas"
+            :titulo="t('hotel.resumo.perdas')"
+            icone="ph ph-trend-down"
+            folha
+          >
             <dl class="perdas">
               <div class="perda">
                 <dt>{{ t('hotel.resumo.cancelamento') }}</dt>
@@ -578,16 +604,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   text-align: center;
 }
 
-.nada__icone {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: 14px;
-  background: var(--superficie-2);
-  font-size: 22px;
-}
-
 .nada strong {
   color: var(--tinta);
   font-size: 16px;
@@ -601,42 +617,27 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 /* ------------------------------------------------------------------ a régua */
 
-.numeros {
-  display: grid;
+/*
+ * Os quatro números do período, cada um num cartão: o ladrilho e o nome em cima, o número grande
+ * embaixo. O ladrilho sai do canto (onde o kit o põe) porque a receita, em reais, ocupa a largura
+ * inteira do cartão.
+ */
+.numeros.ui-indicadores {
   margin: 0;
   padding: 0;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   list-style: none;
 }
 
-.numero {
-  display: grid;
-  align-content: start;
-  gap: 4px;
-  padding: 18px 22px 20px;
+.numeros .numero .ui-ladrilho {
+  position: static;
 }
 
-.numero + .numero {
-  border-inline-start: 1px solid var(--linha);
-}
-
-.numero__rotulo {
-  color: var(--tinta-2);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.numero__valor {
-  color: var(--tinta);
-  font-size: 30px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-.numero__nota {
-  color: var(--tinta-3);
-  font-size: 12.5px;
+.numero__topo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 /* ------------------------------------------------------------------ a ocupação */
@@ -709,7 +710,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   width: 100%;
   max-width: 56px;
   margin-inline: auto;
-  border-radius: 4px 4px 0 0;
+  border-radius: 6px 6px 2px 2px;
   background: color-mix(in oklab, var(--pj-lugar) 45%, var(--superficie));
   transition: background-color var(--pj-tempo-curto) ease;
 }
@@ -879,7 +880,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .perda + .perda {
-  border-inline-start: 1px solid var(--linha);
+  border-inline-start: 1px solid var(--linha-suave);
 }
 
 .perda dt {
@@ -899,7 +900,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   align-items: center;
   gap: 6px;
   color: var(--tinta);
-  font-size: 26px;
+  font-family: var(--font-dados);
+  font-size: 28px;
   font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -919,16 +921,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 @media (max-width: 1100px) {
-  .numeros {
+  .numeros.ui-indicadores {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .numero:nth-child(3) {
-    border-inline-start: 0;
-  }
-
-  .numero:nth-child(n + 3) {
-    border-top: 1px solid var(--linha);
   }
 
   .rankings {
@@ -957,7 +951,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     padding: 14px 16px 16px;
   }
 
-  .numero__valor {
+  .numero .ui-indicador__valor {
     font-size: 22px;
   }
 

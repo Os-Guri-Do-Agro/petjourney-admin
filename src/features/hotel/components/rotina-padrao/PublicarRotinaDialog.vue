@@ -55,7 +55,7 @@ const nadaMuda = computed(
     modal
     :header="t('hotel.rotinaPadrao.publicarTitulo')"
     :style="{ width: 'min(34rem, 96vw)' }"
-    class="clinic-dialog hc-tema"
+    class="clinic-dialog hc-tema pj-lugar--hotel"
     dismissable-mask
     @update:visible="emit('fechar')"
   >

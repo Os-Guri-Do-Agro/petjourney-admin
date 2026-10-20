@@ -336,8 +336,8 @@ const placa = computed(() =>
   display: grid;
   align-items: center;
   gap: 16px;
-  min-height: 68px;
-  padding: 12px 18px 12px 20px;
+  min-height: 72px;
+  padding: 14px 18px 14px 20px;
   color: var(--tinta);
   grid-template-columns: var(
     --hospede-colunas,
@@ -348,6 +348,15 @@ const placa = computed(() =>
 
 .cartao:hover {
   background: var(--superficie-2);
+}
+
+.cartao:hover .seta {
+  color: var(--tinta);
+  transform: translateX(2px);
+}
+
+[dir='rtl'] .cartao:hover .seta {
+  transform: scaleX(-1) translateX(2px);
 }
 
 .cartao:has(.quem__nome:focus-visible) {
@@ -362,12 +371,13 @@ const placa = computed(() =>
   justify-self: start;
   max-width: 100%;
   overflow: hidden;
-  padding: 4px 9px;
-  border-radius: 7px;
+  padding: 5px 10px;
+  border: 1px solid color-mix(in oklab, var(--pj-lugar, var(--hotel)) 18%, transparent);
+  border-radius: 8px;
   background: var(--pj-lugar-fundo, var(--hotel-fundo));
   color: var(--pj-lugar-tinta, var(--hotel-tinta));
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -512,11 +522,11 @@ const placa = computed(() =>
  */
 .foco__disco {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 10px;
+  border-radius: 11px;
   background: var(--superficie-3);
   color: var(--tinta-2);
 }
@@ -582,7 +592,7 @@ const placa = computed(() =>
 .dia__conta {
   color: var(--tinta);
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .barra {
@@ -604,6 +614,7 @@ const placa = computed(() =>
 .seta {
   color: var(--tinta-3);
   font-size: 16px;
+  transition: transform var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 [dir='rtl'] .seta {
@@ -686,7 +697,8 @@ const placa = computed(() =>
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cartao {
+  .cartao,
+  .seta {
     transition: none;
   }
 }

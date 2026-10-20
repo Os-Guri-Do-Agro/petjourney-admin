@@ -75,7 +75,7 @@ function aplicar() {
       item ? t('hotel.rotinaPadrao.editarTitulo', { servico: formato.tarefaKind(item.kind) }) : ''
     "
     :style="{ width: 'min(32rem, 96vw)' }"
-    class="clinic-dialog hc-tema"
+    class="clinic-dialog hc-tema pj-lugar--hotel"
     dismissable-mask
     @update:visible="emit('fechar')"
   >

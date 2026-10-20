@@ -112,7 +112,7 @@ function confirmar() {
     modal
     :header="t('hotel.ocorrencia.titulo', { pet: petNome })"
     :style="{ width: 'min(38rem, 94vw)' }"
-    class="clinic-scope"
+    class="clinic-scope pj-lugar--hotel"
     @update:visible="emit('fechar')"
   >
     <div class="ocor">

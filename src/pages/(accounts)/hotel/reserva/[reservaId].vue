@@ -618,7 +618,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       <section class="quadro periodo ui-folha" :aria-label="t('hotel.reserva.periodo')">
         <dl class="quadro__numeros">
           <div class="dado">
-            <dt>{{ t('hotel.reserva.tela.entrada') }}</dt>
+            <dt>
+              {{ t('hotel.reserva.tela.entrada') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-sign-in" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">
                 {{ formato.data(dataDe(reserva.entradaPrevista)) }}
@@ -629,7 +634,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('hotel.reserva.tela.saida') }}</dt>
+            <dt>
+              {{ t('hotel.reserva.tela.saida') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-sign-out" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">
                 {{ formato.data(dataDe(reserva.saidaPrevista)) }}
@@ -640,7 +650,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('hotel.reserva.tela.acomodacao') }}</dt>
+            <dt>
+              {{ t('hotel.reserva.tela.acomodacao') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-bed" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande">{{ acomodacao?.nome }}</strong>
               <small>
@@ -652,7 +667,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('hotel.orcamento.saldo') }}</dt>
+            <dt>
+              {{ t('hotel.orcamento.saldo') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-wallet" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">
                 {{ formato.moeda(reserva.orcamento.saldoCentavos) }}
@@ -689,6 +709,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           class="coluna-falta"
           :titulo="t('hotel.reserva.tela.oQueFalta')"
           :descricao="t('hotel.reserva.tela.oQueFaltaDescricao')"
+          icone="ph ph-files"
         >
           <div class="ui-folha folha-exig">
             <ExigenciasLista
@@ -699,7 +720,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           </div>
         </UiSecao>
 
-        <UiSecao class="coluna-conta" :titulo="t('hotel.reserva.tela.pagamento')">
+        <UiSecao
+          class="coluna-conta"
+          :titulo="t('hotel.reserva.tela.pagamento')"
+          icone="ph ph-receipt"
+        >
           <template v-if="pagamento" #acoes>
             <span class="ui-selo" :class="`ui-selo--${pagamento.tom}`">
               <i class="ph" :class="pagamento.icone" aria-hidden="true" />
@@ -778,7 +803,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         modal
         :header="t('hotel.reserva.tela.cancelarTitulo', { pet: nomes })"
         :style="{ width: 'min(32rem, 94vw)' }"
-        class="clinic-scope"
+        class="clinic-scope pj-lugar--hotel"
       >
         <div class="cancelar">
           <div class="cancelar__campo">
@@ -842,20 +867,9 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </template>
 
 <style scoped>
-/* Os botões contornado e de texto no padrão do Trilha: no escuro, o cinza do preset sumia. */
-.tela-reserva {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .reserva {
   display: grid;
-  gap: 20px;
+  gap: 24px;
 }
 
 /* ------------------------------------------------------------------ topo */
@@ -873,7 +887,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   min-width: 0;
   flex: 1 1 340px;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
+}
+
+/* O retrato sobe da folha: um anel de papel e a sombra do cartão. */
+.cabeca__rostos > :first-child {
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 4px var(--superficie),
+    var(--sombra-2);
 }
 
 .cabeca__rostos {
@@ -886,7 +908,9 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .cabeca__acompanhante {
   margin-inline-start: -16px;
   border-radius: 50%;
-  box-shadow: 0 0 0 3px var(--fundo);
+  box-shadow:
+    0 0 0 4px var(--superficie),
+    var(--sombra-1);
 }
 
 .cabeca__texto {
@@ -898,8 +922,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .cabeca__nome {
   margin: 0;
   color: var(--tinta);
-  font-size: 30px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.15;
 }
@@ -960,10 +984,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   align-items: center;
   gap: 8px 12px;
   margin: 0;
-  padding: 12px 14px 12px 16px;
+  padding: 12px 16px;
   border: 1px solid var(--linha);
-  border-radius: 14px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   font-size: 14px;
   line-height: 1.45;
@@ -1022,6 +1047,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 }
 
 .dado {
+  position: relative;
   display: grid;
   min-width: 0;
   flex: 1 1 170px;
@@ -1029,15 +1055,21 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 6px;
   margin-block-start: -1px;
   margin-inline-start: -1px;
-  padding: 16px 20px;
+  padding: 18px 20px;
   border-block-start: 1px solid var(--linha);
   border-inline-start: 1px solid var(--linha);
 }
 
 .dado dt {
   color: var(--tinta-2);
-  font-size: 12.5px;
-  font-weight: 550;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dado__icone {
+  position: absolute;
+  top: 16px;
+  inset-inline-end: 16px;
 }
 
 .dado dd {
@@ -1050,7 +1082,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .dado__grande {
   overflow: hidden;
   color: var(--tinta);
-  font-size: 24px;
+  font-family: var(--font-dados);
+  font-size: 26px;
   font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -1108,8 +1141,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .conta {
   display: grid;
-  gap: 10px;
-  padding: 8px 12px 14px;
+  gap: 12px;
+  padding: 12px 12px 16px;
 }
 
 .conta__politica {
