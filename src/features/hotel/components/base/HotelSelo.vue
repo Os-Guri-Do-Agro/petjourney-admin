@@ -1,27 +1,23 @@
 <script setup lang="ts">
 /**
- * Selo de estado.
+ * Selo de estado do hotel.
  *
- * O tom é escolha de significado, não de decoração. E ele **nunca é a única diferença**: cada
- * degrau sobe também um canal de forma — neutro sem moldura, atenção com moldura âmbar, risco com
- * moldura, peso e cor cheia. Em escala de cinza, ou para quem não distingue vermelho de âmbar, a
- * diferença entre "vence durante" e "vencido" continua de pé.
+ * Tem a mesma cara do `ui-selo` do kit (redesenho total, 19/10/2026): palavra curta num retângulo
+ * de cantos de 7 px, fundo do tom e tinta do tom. O tom é escolha de significado, não de
+ * decoração, e ele **nunca é a única diferença**: a palavra é a informação, e o risco ainda sobe
+ * de peso, para quem não distingue vermelho de âmbar.
  *
- * O ícone é opcional e sempre decorativo: a palavra é a informação, e um selo que dependa do
- * ícone para ser lido é um selo que o leitor de tela não entrega.
+ * `acento` é a cor do lugar (lavanda no hotel); `positivo` é o verde de "pode", "pronto", "em dia".
  *
- * Ele entra por dois caminhos. A prop `icone` recebe uma classe da fonte do Phosphor (`ph ph-*`),
- * que é o que serve para glifo de interface; o slot `#icone` recebe um componente do Phosphor,
- * que é o que dá o peso `duotone` do domínio.
- * Sem o slot, a regra da casa de que o desenho do domínio vem do Phosphor simplesmente não
- * alcançaria nenhum selo — e "falta pesar" sem a balança é a palavra sozinha outra vez.
+ * O ícone é opcional e sempre decorativo. Entra por dois caminhos: a prop `icone` recebe uma
+ * classe da fonte do Phosphor (`ph ph-*`); o slot `#icone` recebe um componente do Phosphor.
  */
 withDefaults(
   defineProps<{
     rotulo: string
     tom?: 'neutro' | 'atencao' | 'risco' | 'acento' | 'positivo'
     icone?: string
-    /** Some a moldura: para quando o selo já vive dentro de um bloco com borda própria. */
+    /** Some o fundo: para quando o selo já vive dentro de um bloco com superfície própria. */
     plano?: boolean
   }>(),
   { tom: 'neutro', icone: '', plano: false },
@@ -40,57 +36,55 @@ withDefaults(
 <style scoped>
 .selo {
   display: inline-flex;
+  flex: none;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.12rem 0.5rem;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  gap: 5px;
+  min-height: 24px;
+  padding: 3px 9px;
+  border-radius: 7px;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-family: var(--font-texto);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
 .selo i {
-  font-size: 0.7em;
+  font-size: 14px;
 }
 
 /* O componente do Phosphor não é fonte-ícone: ele mede pelo próprio quadro, não pelo `em`. */
 .selo :deep(svg) {
-  width: 0.95em;
-  height: 0.95em;
-  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.selo--acento {
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+}
+
+.selo--positivo {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+}
+
+.selo--atencao {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+}
+
+.selo--risco {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-weight: 650;
 }
 
 .selo--plano {
   padding-inline: 0;
-  border-color: transparent;
   background: transparent;
-}
-
-.selo--acento {
-  border-color: var(--clinic-accent-soft);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.selo--positivo {
-  border-color: var(--clinic-accent-soft);
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-}
-
-.selo--atencao {
-  border-color: var(--clinic-attention-line);
-  background: var(--clinic-attention-bg);
-  color: var(--clinic-attention-text);
-}
-
-.selo--risco {
-  border-color: var(--clinic-risk-line);
-  background: var(--clinic-risk-bg);
-  color: var(--clinic-risk-text);
-  font-weight: 800;
 }
 </style>

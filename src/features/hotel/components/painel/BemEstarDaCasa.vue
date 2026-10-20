@@ -1,44 +1,38 @@
 <script setup lang="ts">
 /**
- * Como os bichos estão, agora.
+ * Como os bichos estão, agora — e o remédio de hoje.
  *
  * ## Por que este bloco existe
  *
- * O painel respondia "quem chega, quem sai, o que trava" — tudo movimento e papelada. A metade
- * inferior da tela estava vazia enquanto o domínio já sabia três coisas que não apareciam em tela
- * nenhuma do módulo: **quem está estressado**, **que medicação vence hoje** e **que cuidado está
- * em aberto**. Num hotel de animais esse é o dado que justifica o negócio; estava guardado no tipo
- * e invisível para quem abre o portal às sete da manhã.
+ * O painel responde "quem chega, quem está, quem sai, o que trava" — tudo movimento e papelada.
+ * O domínio sabe mais três coisas que justificam um hotel de animais: **quem está estressado**,
+ * **que medicação vence hoje** e **que cuidado está em aberto**.
  *
- * ## Por que adaptação vem primeiro, e por que só o que não está bem aparece por nome
+ * ## A forma (redesenho total, 19/10/2026)
  *
- * `tranquilo` é o estado esperado — listar cinco nomes tranquilos é ocupar a tela com ausência de
- * notícia. Estressado e em adaptação viram **nome, acomodação e caminho**; tranquilo vira só um
- * número, para que o total feche e ninguém ache que a contagem sumiu.
+ * Uma seção calma, no pé do painel: título no fundo, uma folha com duas colunas. À esquerda a
+ * adaptação — estressado e em adaptação viram **nome, acomodação e caminho**; tranquilo vira só um
+ * número, para que o total feche sem ocupar a tela com ausência de notícia. À direita a medicação
+ * e os cuidados do dia, em ordem de relógio, cada linha com a situação em palavra.
  *
  * ## Por que a medicação sai da prancheta, e não da estadia
  *
- * `MedicacaoDaEstadia` mora em `EstadiaDetalhada`, que é carregada **uma estadia por vez** — montar
- * a medicação da casa por ali obrigaria a buscar todas as estadias só para desenhar uma lista. A
- * prancheta do dia já está carregada, já é por casa, e já nasce de `TarefaKind`. A dose que a
- * prancheta mostra é a mesma que o canil executa; ler de outro lugar seria arriscar divergência
- * entre o que o painel promete e o que a prancheta cobra.
- *
- * ## Por que não são três cartões
- *
- * Porque a casa já sofre de achatamento: quando todo bloco tem a mesma borda, nada tem hierarquia.
- * Os três assuntos dividem um cartão e se separam por **título e respiro**, não por moldura.
+ * `MedicacaoDaEstadia` mora em `EstadiaDetalhada`, carregada **uma estadia por vez**. A prancheta
+ * do dia já está carregada, já é por casa, e a dose que ela mostra é a mesma que o canil executa:
+ * ler de outro lugar seria arriscar divergência entre o que o painel promete e o que a prancheta
+ * cobra.
  */
-import { PhHeartbeat } from '@phosphor-icons/vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
-import IconeDeTarefa from '../base/IconeDeTarefa.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
+
 import PetAvatar from '../base/PetAvatar.vue'
 import { useHotelFormat } from '../../composables/useHotelFormat'
 import type { HospedeNaCasa, TarefaNaPrancheta } from '../../data/repositories'
-import type { Adaptacao, ISODateTime } from '../../data/types'
+import type { Adaptacao, ISODateTime, SituacaoDaTarefa } from '../../data/types'
+import { situacaoDaTarefa } from '../../domain/rotina'
 
 const props = defineProps<{
   hospedes: HospedeNaCasa[]
@@ -57,10 +51,20 @@ const formato = useHotelFormat()
  */
 const ESTADOS_DE_ATENCAO = ['estressado', 'em-adaptacao'] as const satisfies readonly Adaptacao[]
 
-type GrupoDeAdaptacao = {
-  estado: (typeof ESTADOS_DE_ATENCAO)[number]
-  hospedes: HospedeNaCasa[]
+type EstadoDeAtencao = (typeof ESTADOS_DE_ATENCAO)[number]
+
+/**
+ * O rótulo de cada estado, com a chave escrita por inteiro dentro do `t()`: chave montada por
+ * interpolação some do varredor de traduções, e a varredura de plurais só reconhece a chave
+ * dentro da própria chamada.
+ */
+function rotuloDoEstado(estado: EstadoDeAtencao, total: number) {
+  return estado === 'estressado'
+    ? t('hotel.painel.bemEstar.estado.estressado', {}, total)
+    : t('hotel.painel.bemEstar.estado.em-adaptacao', {}, total)
 }
+
+type GrupoDeAdaptacao = { estado: EstadoDeAtencao; hospedes: HospedeNaCasa[] }
 
 const adaptacao = computed<GrupoDeAdaptacao[]>(() =>
   ESTADOS_DE_ATENCAO.map((estado) => ({
@@ -97,14 +101,18 @@ const cuidados = computed(() =>
   ),
 )
 
-/**
- * O tom de cada dose. `atrasada` só existe para o que ainda está pendente **e** já passou da hora:
- * uma dose feita às 12:05 não é atraso, é o dia funcionando.
- */
-function tomDaDose(linha: TarefaNaPrancheta): 'feita' | 'atrasada' | 'recusada' | 'pendente' {
-  if (linha.tarefa.status === 'feita') return 'feita'
-  if (linha.tarefa.status === 'recusada' || linha.tarefa.status === 'pulada') return 'recusada'
-  return linha.tarefa.previstaPara < props.agora ? 'atrasada' : 'pendente'
+/** A situação em palavra e em tom. Feita é verde; atrasada, vermelha; na hora, âmbar. */
+const TOM_DA_SITUACAO: Record<SituacaoDaTarefa, string> = {
+  feita: 'ui-selo--ok',
+  atrasada: 'ui-selo--risco',
+  'na-janela': 'ui-selo--atencao',
+  futura: 'ui-selo--contorno',
+  recusada: '',
+  pulada: '',
+}
+
+function situacao(linha: TarefaNaPrancheta) {
+  return situacaoDaTarefa(linha.tarefa, props.agora)
 }
 
 function rotaDaEstadia(hospedagemId: string): string {
@@ -113,29 +121,27 @@ function rotaDaEstadia(hospedagemId: string): string {
 </script>
 
 <template>
-  <section class="bemEstar clinic-card">
-    <h2 class="hc__titulo">
-      <PhHeartbeat class="hc__icone" weight="duotone" aria-hidden="true" />
-      {{ t('hotel.painel.bemEstar.titulo') }}
-    </h2>
-
-    <div class="colunas">
-      <!-- ---------------------------------------------------------------- adaptação -->
-      <div class="coluna">
-        <div class="assunto">
-          <h3 class="assunto__titulo">{{ t('hotel.painel.bemEstar.adaptacao') }}</h3>
+  <UiSecao :titulo="t('hotel.painel.bemEstar.titulo')">
+    <div class="bem ui-folha">
+      <div class="bem__grade">
+        <!-- ------------------------------------------------------------------ adaptação -->
+        <section class="assunto" aria-labelledby="bem-adaptacao">
+          <h3 id="bem-adaptacao" class="assunto__titulo">
+            {{ t('hotel.painel.bemEstar.adaptacao') }}
+          </h3>
 
           <p v-if="adaptacao.length === 0" class="assunto__calmo">
+            <i class="ph ph-smiley" aria-hidden="true" />
             {{ t('hotel.painel.bemEstar.todosTranquilos', { total: tranquilos }, tranquilos) }}
           </p>
 
           <template v-else>
             <div v-for="grupo in adaptacao" :key="grupo.estado" class="grupo">
-              <span class="grupo__estado" :class="`grupo__estado--${grupo.estado}`">
+              <p class="grupo__estado" :class="`grupo__estado--${grupo.estado}`">
                 <span class="grupo__ponto" aria-hidden="true" />
-                <strong class="clinic-value">{{ grupo.hospedes.length }}</strong>
-                {{ t(`hotel.painel.bemEstar.estado.${grupo.estado}`, {}, grupo.hospedes.length) }}
-              </span>
+                <strong class="ui-num">{{ grupo.hospedes.length }}</strong>
+                {{ rotuloDoEstado(grupo.estado, grupo.hospedes.length) }}
+              </p>
 
               <ul class="bichos">
                 <li v-for="hospede in grupo.hospedes" :key="hospede.hospedagem.id">
@@ -145,7 +151,7 @@ function rotaDaEstadia(hospedagemId: string): string {
                       :iniciais="hospede.petIniciais"
                       :especie="hospede.petEspecie"
                       :foto-url="hospede.petFotoUrl"
-                      tamanho="xs"
+                      tamanho="sm"
                     />
                     <span class="bicho__nome">{{ hospede.petNome }}</span>
                     <span class="bicho__onde">{{ hospede.acomodacaoNome }}</span>
@@ -158,188 +164,188 @@ function rotaDaEstadia(hospedagemId: string): string {
               {{ t('hotel.painel.bemEstar.demaisTranquilos', { total: tranquilos }, tranquilos) }}
             </p>
           </template>
-        </div>
-      </div>
+        </section>
 
-      <!--
+        <!--
         Medicação e cuidado dividem a coluna da direita porque nascem da mesma fonte — a prancheta
-        do dia — e se lêem do mesmo jeito: hora, ícone, quem, o quê. Adaptação é outra gramática,
-        sem relógio, e por isso fica sozinha do outro lado.
+        do dia — e se leem do mesmo jeito: hora, quem, o quê, e a situação.
       -->
-      <div class="coluna">
-        <!-- ---------------------------------------------------------------- medicação -->
-        <div v-if="doses.length > 0" class="assunto">
-          <h3 class="assunto__titulo">
+        <section class="assunto" aria-labelledby="bem-medicacao">
+          <h3 id="bem-medicacao" class="assunto__titulo">
             {{ t('hotel.painel.bemEstar.medicacao') }}
-            <span class="assunto__contagem">
+            <span v-if="doses.length" class="assunto__contagem">
               {{
                 t('hotel.painel.bemEstar.dosesPendentes', { total: dosesPendentes }, dosesPendentes)
               }}
             </span>
           </h3>
 
-          <ul class="doses">
-            <li
-              v-for="linha in doses"
-              :key="linha.tarefa.id"
-              class="dose"
-              :class="`dose--${tomDaDose(linha)}`"
-            >
-              <time class="dose__hora">{{ formato.hora(linha.tarefa.previstaPara) }}</time>
-              <IconeDeTarefa kind="medicacao" class="dose__icone" />
-              <RouterLink class="dose__corpo" :to="rotaDaEstadia(linha.hospedagemId)">
-                <strong class="dose__quem">{{ linha.petNome }}</strong>
-                <span class="dose__oque">{{ linha.tarefa.descricao }}</span>
+          <ul v-if="doses.length" class="doses">
+            <li v-for="linha in doses" :key="linha.tarefa.id">
+              <RouterLink
+                class="dose"
+                :class="`dose--${situacao(linha)}`"
+                :to="rotaDaEstadia(linha.hospedagemId)"
+              >
+                <span class="ui-hora dose__hora">{{
+                  formato.hora(linha.tarefa.previstaPara)
+                }}</span>
+                <PetAvatar
+                  :nome="linha.petNome"
+                  :iniciais="linha.petIniciais"
+                  :especie="linha.petEspecie"
+                  :foto-url="linha.petFotoUrl"
+                  tamanho="sm"
+                />
+                <span class="dose__texto">
+                  <strong>{{ linha.petNome }}</strong>
+                  <span>{{ linha.tarefa.descricao }}</span>
+                </span>
+                <span class="ui-selo" :class="TOM_DA_SITUACAO[situacao(linha)]">
+                  {{ formato.situacaoDaTarefa(situacao(linha)) }}
+                </span>
               </RouterLink>
             </li>
           </ul>
-        </div>
+          <p v-else class="assunto__calmo">{{ t('hotel.hoje.bemEstar.semMedicacao') }}</p>
 
-        <!-- ---------------------------------------------------------------- cuidados -->
-        <div v-if="cuidados.length > 0" class="assunto">
-          <h3 class="assunto__titulo">{{ t('hotel.painel.bemEstar.cuidados') }}</h3>
+          <template v-if="cuidados.length > 0">
+            <h3 class="assunto__titulo assunto__titulo--segundo">
+              {{ t('hotel.painel.bemEstar.cuidados') }}
+            </h3>
 
-          <ul class="doses">
-            <li v-for="linha in cuidados" :key="linha.tarefa.id" class="dose">
-              <time class="dose__hora">{{ formato.hora(linha.tarefa.previstaPara) }}</time>
-              <IconeDeTarefa kind="cuidado" class="dose__icone" />
-              <RouterLink class="dose__corpo" :to="rotaDaEstadia(linha.hospedagemId)">
-                <strong class="dose__quem">{{ linha.petNome }}</strong>
-                <span class="dose__oque">{{ linha.tarefa.descricao }}</span>
-              </RouterLink>
-            </li>
-          </ul>
-        </div>
+            <ul class="doses">
+              <li v-for="linha in cuidados" :key="linha.tarefa.id">
+                <RouterLink class="dose" :to="rotaDaEstadia(linha.hospedagemId)">
+                  <span class="ui-hora dose__hora">{{
+                    formato.hora(linha.tarefa.previstaPara)
+                  }}</span>
+                  <PetAvatar
+                    :nome="linha.petNome"
+                    :iniciais="linha.petIniciais"
+                    :especie="linha.petEspecie"
+                    :foto-url="linha.petFotoUrl"
+                    tamanho="sm"
+                  />
+                  <span class="dose__texto">
+                    <strong>{{ linha.petNome }}</strong>
+                    <span>{{ linha.tarefa.descricao }}</span>
+                  </span>
+                  <span class="ui-selo" :class="TOM_DA_SITUACAO[situacao(linha)]">
+                    {{ formato.situacaoDaTarefa(situacao(linha)) }}
+                  </span>
+                </RouterLink>
+              </li>
+            </ul>
+          </template>
+        </section>
       </div>
     </div>
-  </section>
+  </UiSecao>
 </template>
 
 <style scoped>
-.bemEstar {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 1.25rem 1.25rem 1.5rem;
+/*
+ * Duas colunas numa folha só, separadas por um filete — o cartão já é a moldura, e caixa dentro de
+ * caixa é exatamente o empilhamento de bordas que deixa a tela achatada.
+ */
+.bem {
+  container-type: inline-size;
 }
 
-
-
-/*
- * Duas colunas, no mesmo `auto-fit` que o painel já usa nas listas de chegada e saída: quando a
- * largura não dá para duas faixas de 20rem, elas empilham sozinhas, sem breakpoint escrito à mão.
- *
- * `align-items: start` porque as colunas não têm o mesmo tamanho e nunca terão — adaptação é curta
- * num dia calmo, medicação é longa num dia de muitos remédios. Esticada à altura da vizinha, a
- * curta ficaria com metade do corpo vazio, e vazio emparelhado com conteúdo lê como dado faltando.
- */
-.colunas {
+.bem__grade {
   display: grid;
-  /*
-   * `stretch`, e não `start`: o filete que separa as colunas é desenhado na borda da coluna, então
-   * com `start` ele para onde a coluna mais curta acaba — e um traço que morre no meio do cartão
-   * lê como falha de renderização, não como divisória. Esticadas, as duas têm a mesma altura e o
-   * filete vai de ponta a ponta. Aqui não há o risco que `start` evita nas listas do painel: lá
-   * cada coluna é um cartão com borda, e esticar deixaria moldura vazia ao lado de conteúdo; aqui
-   * o que sobra é fundo do mesmo cartão, que não lê como dado faltando.
-   */
-  align-items: stretch;
-  gap: var(--clinic-space-5);
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.coluna {
-  display: flex;
-  flex-direction: column;
+.assunto {
+  display: grid;
+  align-content: start;
+  gap: 12px;
   min-width: 0;
+  padding: 18px 20px 20px;
 }
 
-/*
- * Os assuntos se separam por respiro e por um filete, não por moldura — o cartão já é a moldura, e
- * caixa dentro de caixa é exatamente o empilhamento de bordas que deixa a tela achatada.
- *
- * Dentro de uma coluna o filete é horizontal (medicação sobre cuidados); entre as colunas ele é
- * vertical, e só existe quando elas estão de fato lado a lado — empilhadas, um filete à esquerda
- * seria um risco solto no meio do cartão.
- */
 .assunto + .assunto {
-  margin-top: 1.25rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--clinic-line-soft);
-}
-
-@media (min-width: 64rem) {
-  .coluna + .coluna {
-    padding-left: var(--clinic-space-5);
-    border-left: 1px solid var(--clinic-line-soft);
-  }
+  border-inline-start: 1px solid var(--linha);
 }
 
 .assunto__titulo {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin: 0 0 0.75rem;
-  font-size: 0.875rem;
+  gap: 12px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15px;
   font-weight: 600;
-  color: var(--clinic-text);
+}
+
+.assunto__titulo--segundo {
+  margin-top: 8px;
 }
 
 .assunto__contagem,
 .assunto__rodape,
 .assunto__calmo {
-  font-size: 0.8125rem;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   font-weight: 400;
-  color: var(--clinic-muted);
-}
-
-.assunto__rodape {
-  margin: 0.75rem 0 0;
 }
 
 .assunto__calmo {
-  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.assunto__calmo i {
+  color: var(--ok-tinta);
+  font-size: 18px;
 }
 
 /* ------------------------------------------------------------------ adaptação */
 
+.grupo {
+  display: grid;
+  gap: 8px;
+}
+
 .grupo + .grupo {
-  margin-top: 0.875rem;
+  margin-top: 6px;
 }
 
 .grupo__estado {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8125rem;
-  color: var(--clinic-muted);
+  gap: 6px;
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 500;
 }
 
-/*
- * O ponto carrega o estado, como na legenda do mapa de ocupação. Mesma gramática em duas telas: a
- * pessoa aprende a ler a cor uma vez.
- */
+/* O ponto carrega o estado; a palavra ao lado diz qual. */
 .grupo__ponto {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: currentColor;
 }
 
 .grupo__estado--estressado {
-  color: var(--clinic-risk-text);
+  color: var(--risco-tinta);
 }
 
 .grupo__estado--em-adaptacao {
-  color: var(--clinic-attention-text);
+  color: var(--atencao-tinta);
 }
 
 .bichos {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.375rem;
-  margin: 0.5rem 0 0;
+  gap: 8px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -347,106 +353,118 @@ function rotaDaEstadia(hospedagemId: string): string {
 .bicho {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0.625rem 0.3rem 0.3rem;
-  border: 1px solid var(--clinic-line);
+  gap: 8px;
+  min-height: 40px;
+  padding: 5px 14px 5px 6px;
+  border: 1px solid var(--linha);
   border-radius: 999px;
-  background: var(--clinic-surface);
-  font: inherit;
-  color: inherit;
+  background: var(--superficie);
+  color: var(--tinta);
   text-decoration: none;
-  transition: border-color 150ms ease-out;
+  transition: background-color var(--pj-tempo-curto) ease;
 }
 
-.bicho:hover,
+.bicho:hover {
+  background: var(--superficie-2);
+}
+
 .bicho:focus-visible {
-  border-color: var(--clinic-accent);
+  outline: 2px solid var(--pj-lugar, var(--hotel));
+  outline-offset: 2px;
 }
 
 .bicho__nome {
-  font-size: 0.8125rem;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .bicho__onde {
-  font-size: 0.75rem;
-  color: var(--clinic-muted);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 /* ------------------------------------------------------------------ doses e cuidados */
 
 .doses {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
+  display: grid;
+  margin: 0 -10px;
   padding: 0;
   list-style: none;
 }
 
-.dose {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.4rem 0;
+.doses > li + li {
+  border-top: 1px solid var(--linha);
 }
 
-.dose + .dose {
-  border-top: 1px solid var(--clinic-line-soft);
+.dose {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  color: var(--tinta);
+  text-decoration: none;
+  transition: background-color var(--pj-tempo-curto) ease;
+}
+
+.dose:hover {
+  background: var(--superficie-2);
+}
+
+.dose:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--hotel));
+  outline-offset: -2px;
 }
 
 .dose__hora {
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--clinic-muted);
+  width: 44px;
+  flex: none;
 }
 
-.dose__icone {
-  font-size: 0.875rem;
-  color: var(--clinic-muted);
+.dose__texto {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 1px;
 }
 
-.dose__corpo {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  font: inherit;
-  color: inherit;
-  text-align: start;
-  text-decoration: none;
-}
-
-.dose__quem {
-  font-size: 0.8125rem;
+.dose__texto strong {
+  font-size: 14px;
   font-weight: 600;
 }
 
-.dose__oque {
-  font-size: 0.8125rem;
-  color: var(--clinic-muted);
+.dose__texto span {
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/*
- * O estado da dose mora na hora e no ícone — não no fundo da linha. Pintar a linha inteira de
- * vermelho num painel que já tem avisos vermelhos no topo ensina a ignorar o vermelho de cima.
- */
+/* A dose que já saiu do caminho perde o peso: às 14h o olho procura a próxima, não relê a das 8h. */
 .dose--feita .dose__hora,
-.dose--feita .dose__icone {
-  opacity: 0.45;
+.dose--feita .dose__texto strong {
+  color: var(--tinta-2);
+  font-weight: 500;
 }
 
-.dose--feita .dose__quem,
-.dose--feita .dose__oque {
-  color: var(--clinic-muted);
+/* Estreita, a folha empilha as duas colunas e o filete passa a correr na horizontal. */
+@container (max-width: 640px) {
+  .bem__grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .assunto + .assunto {
+    border-inline-start: 0;
+    border-top: 1px solid var(--linha);
+  }
 }
 
-.dose--atrasada .dose__hora,
-.dose--atrasada .dose__icone {
-  color: var(--clinic-risk-text);
-  font-weight: 700;
-}
-
-.dose--recusada .dose__hora {
-  text-decoration: line-through;
+@media (prefers-reduced-motion: reduce) {
+  .bicho,
+  .dose {
+    transition: none;
+  }
 }
 </style>

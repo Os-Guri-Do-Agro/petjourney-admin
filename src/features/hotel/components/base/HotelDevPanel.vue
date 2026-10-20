@@ -107,6 +107,7 @@ async function irPara(rota: string) {
 
 <template>
   <div v-if="habilitado" class="dev">
+    <!-- Tracejado e no canto: é ferramenta de bastidor, e não pode passar por ação do produto. -->
     <Button
       type="button"
       class="dev__gatilho"
@@ -114,12 +115,13 @@ async function irPara(rota: string) {
       :label="t('hotel.dev.titulo')"
       severity="secondary"
       outlined
+      rounded
       size="small"
       :aria-expanded="aberto"
       @click="aberto = !aberto"
     />
 
-    <section v-if="aberto" class="dev__painel">
+    <section v-if="aberto" class="dev__painel" :aria-label="t('hotel.dev.titulo')">
       <header class="dev__cabecalho">
         <strong>{{ t('hotel.dev.titulo') }}</strong>
         <Button
@@ -216,26 +218,39 @@ async function irPara(rota: string) {
 .dev {
   position: fixed;
   z-index: 60;
-  inset-block-end: 1rem;
-  inset-inline-end: 1rem;
+  inset-block-end: 16px;
+  inset-inline-end: 16px;
 }
 
 .dev__gatilho.p-button {
-  background: var(--clinic-surface);
+  min-height: 36px;
+  border-style: dashed;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.dev__gatilho.p-button:hover {
+  color: var(--tinta);
+  opacity: 1;
 }
 
 .dev__painel {
   position: absolute;
   display: grid;
-  width: min(24rem, calc(100vw - 2rem));
-  max-height: min(34rem, calc(100vh - 6rem));
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-4);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-float);
-  inset-block-end: 2.8rem;
+  width: min(380px, calc(100vw - 32px));
+  max-height: min(560px, calc(100vh - 96px));
+  gap: 18px;
+  padding: 16px 18px 18px;
+  grid-template-columns: minmax(0, 1fr);
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-3);
+  color: var(--tinta);
+  inset-block-end: calc(100% + 8px);
   inset-inline-end: 0;
   overflow-y: auto;
 }
@@ -244,25 +259,30 @@ async function irPara(rota: string) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  font-size: 15px;
 }
 
+.dev__cabecalho strong {
+  font-weight: 600;
+}
+
+/* `minmax(0, 1fr)`: o campo numérico com botões tem largura mínima maior que a folha estreita. */
 .dev__bloco {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .dev__titulo {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .dev__casos {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -271,44 +291,58 @@ async function irPara(rota: string) {
 .dev__caso {
   display: grid;
   width: 100%;
-  padding: var(--clinic-space-2) var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-control);
-  gap: 0.15rem;
-  background: var(--clinic-surface-soft);
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  background: var(--superficie);
   color: inherit;
   cursor: pointer;
   font: inherit;
   text-align: start;
+  transition: background-color var(--pj-tempo-curto) ease;
 }
 
-.dev__caso:hover,
+.dev__caso:hover {
+  background: var(--superficie-2);
+}
+
 .dev__caso:focus-visible {
-  border-color: var(--clinic-accent-soft);
-  background: var(--clinic-accent-tint);
+  outline: 2px solid var(--pj-lugar, var(--hotel));
+  outline-offset: 1px;
 }
 
 .dev__caso strong {
-  font-size: var(--clinic-font-label);
-  font-weight: 750;
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .dev__caso span {
-  color: var(--clinic-faint);
-  font-size: 0.7rem;
+  color: var(--tinta-2);
+  font-size: 12.5px;
   line-height: 1.4;
 }
 
 .dev__campo,
 .dev__linha label {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .dev__linha {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+}
+
+.dev__linha :deep(.p-inputnumber-input) {
+  width: 5.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dev__caso {
+    transition: none;
+  }
 }
 </style>

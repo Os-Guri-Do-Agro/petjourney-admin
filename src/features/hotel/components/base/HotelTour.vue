@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
 
 <template>
   <Teleport to="body">
-    <div v-if="aberto && passoAtual" class="tour clinic-scope">
+    <div v-if="aberto && passoAtual" class="tour">
       <!--
         O véu é um só, e o buraco é a sombra dele: uma sombra de 9999px para fora pinta a tela
         inteira menos o retângulo. Quatro divs em volta do alvo dariam o mesmo resultado com
@@ -314,16 +314,27 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
+/*
+ * O tutorial mora no `body` (teleporte), fora da moldura que acende a cor do lugar; por isso ele
+ * usa a lavanda do Hotel direto, e não `--pj-lugar`.
+ *
+ * O véu é a cor da barra (verde-floresta, quase preta no escuro) em transparência: escurece a
+ * tela sem trocar de matiz, e o recorte aceso fica com a cor de verdade.
+ */
 .tour__veu {
+  --tour-veu: color-mix(in oklab, var(--rail) 64%, transparent);
+
   position: absolute;
-  border-radius: var(--clinic-radius-control, 0.6rem);
-  box-shadow: 0 0 0 9999px rgb(12 26 22 / 0.58);
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 2px var(--hotel),
+    0 0 0 9999px var(--tour-veu);
   pointer-events: auto;
   transition:
-    top 180ms ease,
-    left 180ms ease,
-    width 180ms ease,
-    height 180ms ease;
+    top var(--pj-tempo-medio) var(--pj-curva-chega),
+    left var(--pj-tempo-medio) var(--pj-curva-chega),
+    width var(--pj-tempo-medio) var(--pj-curva-chega),
+    height var(--pj-tempo-medio) var(--pj-curva-chega);
 }
 
 /* Sem alvo, o véu cobre tudo: não há retângulo para recortar. */
@@ -334,20 +345,21 @@ onBeforeUnmount(() => {
   height: 100%;
   border-radius: 0;
   box-shadow: none;
-  background: rgb(12 26 22 / 0.58);
+  background: var(--tour-veu);
 }
 
 .tour__cartao {
   position: absolute;
   display: grid;
   width: 320px;
-  max-width: calc(100vw - 2rem);
-  gap: 0.35rem;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-accent-soft);
-  border-radius: var(--clinic-radius-card, 0.9rem);
-  background: var(--clinic-surface);
-  box-shadow: 0 18px 44px rgb(12 26 22 / 0.28);
+  max-width: calc(100vw - 32px);
+  gap: 8px;
+  padding: 18px 18px 14px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-3);
+  color: var(--tinta);
   pointer-events: auto;
 }
 
@@ -355,26 +367,34 @@ onBeforeUnmount(() => {
   outline: none;
 }
 
+.tour__cartao:focus-visible {
+  outline: 2px solid var(--hotel);
+  outline-offset: 2px;
+}
+
+/* O contador é frase pequena na cor do lugar, não sobretítulo em caixa alta. */
 .tour__contador {
   margin: 0;
-  color: var(--clinic-accent-strong);
-  font-size: 0.66rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--hotel-tinta);
+  font-family: var(--font-dados);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 .tour__titulo {
   margin: 0;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-body);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 
 .tour__texto {
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.55;
 }
 
@@ -382,12 +402,18 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: var(--clinic-space-2);
-  gap: var(--clinic-space-2);
+  gap: 8px;
+  margin-top: 6px;
 }
 
 .tour__navegacao {
   display: flex;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour__veu {
+    transition: none;
+  }
 }
 </style>

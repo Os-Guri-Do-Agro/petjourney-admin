@@ -1,62 +1,42 @@
 <script setup lang="ts">
 /**
- * Hóspedes na casa.
+ * Hóspedes — quem está na casa, corredor por corredor.
  *
- * Era uma tabela, e tabela era a forma errada. Esta tela não é um inventário para varrer por
- * coluna: é a pergunta **"como está cada um dos meus cinco?"** — e a resposta é um rosto, um
- * estado e o que falta fazer. Quem quer a lista fria — nome, acomodação, noites — tem o mapa de
- * ocupação, que é a tela feita para isso.
+ * A pergunta é **"como está cada um dos meus cinco?"**, e a resposta tem a forma da casa: a lista
+ * anda pelos corredores (blocos) na ordem física deles, e cada linha é uma acomodação ocupada —
+ * a placa, o rosto (e o do acompanhante), as noites e a saída, o responsável com telefone, o que a
+ * rotina pede agora e quanto do dia já foi feito. Ocorrência, boletim e pesagem que travam
+ * aparecem em selo, com a marca de gravidade na borda. A linha abre a estadia.
  *
- * ## Por que bandas, e não uma grade uniforme
+ * ## A forma (redesenho total, 19/10/2026)
  *
- * A grade anterior dava o mesmo cartão para quem tinha quatro tarefas atrasadas e para quem estava
- * dormindo, e deixava metade da tela em branco embaixo. Uma tela onde tudo tem o mesmo peso obriga
- * a ler tudo para descobrir o que importa — e, com cinco hóspedes numa tela larga, a grade ainda
- * saía 4 + 1, com uma fileira órfã.
- *
- * Agora a página tem três respirações, e cada hóspede cai em **exatamente uma**: quem cobra ação,
- * quem sai hoje, e quem está em dia. Quem sai hoje **e** cobra ação fica na primeira — e não perde
- * a informação da saída, porque ela está no pé de todo cartão.
- *
- * As réguas que nomeiam as faixas só aparecem quando há **mais de uma** faixa com gente. Régua
- * serve para separar uma coisa de outra; com todo mundo cobrando ação, a régua "PRECISAM DE VOCÊ"
- * ficava dois centímetros abaixo da aba "Precisam de mim" dizendo o mesmo de outro jeito, e não
- * separava nada.
- *
- * A banda fria é recolhível, e **nasce aberta quando a primeira tem dois hóspedes ou menos**: é
- * exatamente o caso em que a página ficaria curta, e é o conteúdo de verdade que preenche o espaço
- * em vez de um enfeite inventado para ocupar viewport.
+ * Uma folha só, com o cabeçalho das colunas no alto e os corredores como divisórias: a mesma
+ * coluna se lê de cima a baixo em toda a casa. As faixas de antes ("Precisam de você", "Saem
+ * hoje", "Em dia") saíram: a gravidade agora mora na própria linha, e a ordem é a do corredor —
+ * que é como o cuidador anda.
  *
  * ## Por que os recortes continuam
  *
- * Os três recortes são uma decisão anterior aprovada, e bandas e recortes respondem a perguntas
- * diferentes: o recorte é quem eu quero ver, a banda é em que ordem. As bandas aparecem em
- * "Todos"; nos outros dois recortes a lista já está filtrada e uma banda só repetiria o título do
- * filtro.
+ * Os três recortes são uma decisão anterior aprovada: "Todos", "Precisam de mim" e "Saem hoje".
+ * O recorte é quem eu quero ver; o corredor é em que ordem. A busca procura no nome do animal, do
+ * acompanhante **e** do responsável — quem atende o telefone ouve "aqui é a Luciana, queria saber
+ * da Mel" e não sabe de antemão qual dos nomes vai lembrar primeiro.
  */
-import {
-  PhDoorOpen,
-  PhListChecks,
-  PhMagnifyingGlass,
-  PhMoon,
-  PhPawPrint,
-  PhWarningCircle,
-} from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import IconField from 'primevue/iconfield'
 import InputText from 'primevue/inputtext'
 import SelectButton from 'primevue/selectbutton'
-import { computed, onMounted, ref, watch, type Component } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import HotelDevPanel from '@/features/hotel/components/base/HotelDevPanel.vue'
 import HotelTour from '@/features/hotel/components/base/HotelTour.vue'
 import type { PassoDoTour } from '@/features/hotel/components/base/tour-types'
 import HospedeCard from '@/features/hotel/components/hospedes/HospedeCard.vue'
-import HospedeFileira from '@/features/hotel/components/hospedes/HospedeFileira.vue'
 import type { HospedeNaCasa } from '@/features/hotel/data/repositories'
+import type { Bloco, IconeDeAcomodacao } from '@/features/hotel/data/types'
 import { useHospedagemStore } from '@/features/hotel/stores/hospedagem'
 import { useHotelStore } from '@/features/hotel/stores/hotel'
 
@@ -68,43 +48,29 @@ const hospedagem = useHospedagemStore()
 /**
  * Três recortes, e não uma barra de filtros.
  *
- * Cinco a vinte hóspedes não pedem busca nem facetas: pedem "me mostre só os que precisam de
- * mim". Uma barra de filtros aqui seria a mesma peça de interface das outras telas — de novo — e
- * resolveria um problema que esta lista não tem.
+ * Cinco a vinte hóspedes não pedem busca facetada: pedem "me mostre só os que precisam de mim".
  */
 type Recorte = 'todos' | 'precisam' | 'saem'
 
 const recorte = ref<Recorte>('todos')
 
-/**
- * O desenho de cada recorte.
- *
- * Mapa `Record<Recorte, …>` de propósito: recorte novo sem ícone passa a ser erro de compilação.
- * E os três repetem o glifo da faixa correspondente lá embaixo — a aba e a régua que ela filtra
- * precisam ser a mesma coisa no olho, senão o filtro parece levar a outro lugar.
- */
-const ICONE_DO_RECORTE: Record<Recorte, Component> = {
-  todos: PhPawPrint,
-  precisam: PhWarningCircle,
-  saem: PhDoorOpen,
+/** `Record<Recorte, …>`: recorte novo sem ícone passa a ser erro de compilação. */
+const ICONE_DO_RECORTE: Record<Recorte, string> = {
+  todos: 'ph ph-paw-print',
+  precisam: 'ph ph-warning-circle',
+  saem: 'ph ph-sign-out',
 }
 
 /*
- * O slot `#option` do `SelectButton` entrega a opção como `any` — o componente não propaga o tipo
- * da lista. O acessor recebe esse `any` num parâmetro tipado, o que mantém o mapa exaustivo: quem
- * acrescentar um recorte continua obrigado a dar ícone a ele.
+ * O slot `#option` do `SelectButton` entrega a opção como `any`; o acessor recebe esse `any` num
+ * parâmetro tipado, o que mantém o mapa exaustivo.
  */
 function iconeDoRecorte(valor: Recorte) {
   return ICONE_DO_RECORTE[valor]
 }
 
 /**
- * A busca por nome.
- *
- * Procura no nome do animal **e** no do responsável, e é de propósito que os dois caiam no mesmo
- * campo: quem atende o telefone ouve "aqui é a Luciana, queria saber da Mel" e não sabe de
- * antemão qual dos dois nomes vai lembrar primeiro. Buscando pelo responsável, todos os animais
- * dele aparecem juntos — que é a pergunta que ele está fazendo.
+ * A busca por nome — do animal, do acompanhante e do responsável.
  *
  * `NFD` mais a faixa de acentos combinantes: quem digita apressado escreve "jose" e "tofu", e uma
  * busca que exige o acento certo é uma busca que falha justamente no turno cheio.
@@ -112,11 +78,7 @@ function iconeDoRecorte(valor: Recorte) {
 const busca = ref('')
 
 function normalizar(texto: string) {
-  return texto
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim()
+  return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 }
 
 const termo = computed(() => normalizar(busca.value))
@@ -130,7 +92,7 @@ const encontrados = computed(() => {
     (hospede) =>
       normalizar(hospede.petNome).includes(termo.value) ||
       normalizar(hospede.tutorNome).includes(termo.value) ||
-      /* O segundo animal da estadia também é hóspede: procurar por ele tem de achar o cartão. */
+      /* O segundo animal da estadia também é hóspede: procurar por ele tem de achar a linha. */
       (hospede.acompanhante ? normalizar(hospede.acompanhante.nome).includes(termo.value) : false),
   )
 })
@@ -138,8 +100,8 @@ const encontrados = computed(() => {
 /**
  * O responsável, quando a busca encontrou **ele** e ele tem mais de um animal na casa.
  *
- * Sem esta linha, procurar "Luciana" devolve dois cartões sem dizer por quê — e dois cartões de
- * animais diferentes lado a lado parecem um erro de busca, não a resposta certa.
+ * Sem esta frase, procurar "Luciana" devolve duas linhas sem dizer por quê — e dois animais
+ * diferentes lado a lado parecem um erro de busca, não a resposta certa.
  */
 const tutorEncontrado = computed(() => {
   if (!termo.value || encontrados.value.length < 2) {
@@ -154,13 +116,8 @@ const tutorEncontrado = computed(() => {
 
   const nome = encontrados.value[0]!.tutorNome
 
-  return normalizar(nome).includes(termo.value)
-    ? { nome, total: encontrados.value.length }
-    : null
+  return normalizar(nome).includes(termo.value) ? { nome, total: encontrados.value.length } : null
 })
-
-/** A banda fria começa fechada; o `onMounted` decide pela ocupação real assim que ela chega. */
-const emDiaAberta = ref(false)
 
 onMounted(async () => {
   await hospedagem.carregarHospedes()
@@ -193,82 +150,12 @@ const visiveis = computed(() => {
 })
 
 /*
- * A partição. Primeira banda que aceita vence, e por isso a ordem destes três `computed` é a
- * regra: sem a exclusão, quem sai hoje com tarefa atrasada apareceria duas vezes e a contagem das
- * réguas somaria mais que o total da casa.
- */
-const precisam = computed(() => visiveis.value.filter(precisaDeAlguem))
-
-const saem = computed(() =>
-  visiveis.value.filter((hospede) => hospede.saiHoje && !precisaDeAlguem(hospede)),
-)
-
-const emDia = computed(() =>
-  visiveis.value.filter((hospede) => !precisaDeAlguem(hospede) && !hospede.saiHoje),
-)
-
-/** As bandas só organizam o "todos": nos outros recortes a lista já vem filtrada. */
-const porBandas = computed(() => recorte.value === 'todos')
-
-/**
- * A régua da faixa só aparece quando há mais de uma faixa com gente.
- *
- * Com todo mundo cobrando ação, a régua "PRECISAM DE VOCÊ 5" ficava dois centímetros abaixo da aba
- * "Precisam de mim 5" dizendo a mesma coisa de outro jeito. Régua serve para separar uma coisa de
- * outra; quando só existe uma coisa, ela não separa nada e vira ruído.
- */
-const bandasComGente = computed(
-  () => [precisam.value, saem.value, emDia.value].filter((banda) => banda.length > 0).length,
-)
-
-const mostrarReguas = computed(() => bandasComGente.value > 1)
-
-/*
- * A faixa fria abre sozinha quando a página seria curta.
- *
- * A regra olha as duas faixas quentes somadas, e não só a primeira: com quatro hóspedes cobrando
- * ação e nenhum saindo, a versão anterior mantinha "Em dia" recolhida e deixava metade da tela em
- * branco — recolher para poupar espaço, exatamente onde espaço sobrava.
- */
-watch(
-  [precisam, saem],
-  ([cobram, saindo]) => {
-    emDiaAberta.value = cobram.length + saindo.length <= 6
-  },
-  { immediate: true },
-)
-
-/*
- * As contagens das abas seguem a busca, e não o total da casa.
- *
- * Aba dizendo "Todos (5)" com um cartão na tela é aba mentindo: a busca já recortou, e o número
- * precisa contar o que a aba vai mostrar se for clicada.
+ * As contagens dos recortes seguem a busca, e não o total da casa: recorte dizendo "Todos 5" com
+ * uma linha na tela é recorte mentindo.
  */
 const quantosPrecisam = computed(() => encontrados.value.filter(precisaDeAlguem).length)
 const quantosSaem = computed(() => encontrados.value.filter((item) => item.saiHoje).length)
 
-/**
- * A frase da saudação (redesenho de 30/09/2026): quantos da casa **inteira** precisam de alguém.
- * Não segue a busca — quem busca um nome não quer que o estado da casa vire "1 de 1".
- */
-const fraseDaCasa = computed(() => {
-  const total = hospedagem.hospedes.length
-  const precisam = hospedagem.hospedes.filter(precisaDeAlguem).length
-
-  if (total === 0 || precisam === 0) {
-    return t('hotel.hospedes.resumoEmDia')
-  }
-
-  return t('hotel.hospedes.resumo', { precisam, total }, precisam)
-})
-
-/*
- * O rótulo e a contagem entram separados, e não "Todos (5)" numa string só.
- *
- * Costurados, os dois saíam com o mesmo peso e o mesmo tamanho, e os parênteses eram a única coisa
- * distinguindo o nome da aba do número dela. Separados, o número vira uma pastilha tabular ao lado
- * do rótulo — e é o número que muda toda vez que alguém marca uma tarefa.
- */
 const opcoes = computed(() => [
   {
     valor: 'todos' as const,
@@ -287,11 +174,68 @@ const opcoes = computed(() => [
   },
 ])
 
+// ------------------------------------------------------------------------------ os corredores
+
+/** O desenho de cada corredor, o mesmo que a casa escolheu no cadastro. */
+const ICONE_DO_BLOCO: Record<IconeDeAcomodacao, string> = {
+  casa: 'ph ph-house-line',
+  cama: 'ph ph-bed',
+  gato: 'ph ph-cat',
+  cao: 'ph ph-dog',
+  grupo: 'ph ph-users-three',
+  escudo: 'ph ph-shield-check',
+  arvore: 'ph ph-tree',
+  passaro: 'ph ph-bird',
+  coelho: 'ph ph-rabbit',
+}
+
+type Corredor = { id: string; bloco: Bloco | null; hospedes: HospedeNaCasa[] }
+
+/**
+ * Os hóspedes visíveis, por corredor, na ordem física da casa (`Bloco.ordem`); dentro do
+ * corredor, pela placa da porta ("Baia A1" antes de "Baia A3").
+ */
+const corredores = computed<Corredor[]>(() => {
+  const porBloco = new Map<string, HospedeNaCasa[]>()
+
+  for (const hospede of visiveis.value) {
+    porBloco.set(hospede.blocoId, [...(porBloco.get(hospede.blocoId) ?? []), hospede])
+  }
+
+  return [...porBloco.entries()]
+    .map(([id, hospedes]) => ({
+      id,
+      bloco: hotelStore.blocoPorId.get(id) ?? null,
+      hospedes: hospedes.sort((um, outro) =>
+        um.acomodacaoNome.localeCompare(outro.acomodacaoNome, undefined, { numeric: true }),
+      ),
+    }))
+    .sort(
+      (um, outro) =>
+        (um.bloco?.ordem ?? Number.MAX_SAFE_INTEGER) -
+        (outro.bloco?.ordem ?? Number.MAX_SAFE_INTEGER),
+    )
+})
+
+/**
+ * A frase da casa **inteira**: quantos precisam de alguém. Não segue a busca — quem busca um nome
+ * não quer que o estado da casa vire "1 de 1".
+ */
+const fraseDaCasa = computed(() => {
+  const total = hospedagem.hospedes.length
+  const precisam = hospedagem.hospedes.filter(precisaDeAlguem).length
+
+  if (total === 0 || precisam === 0) {
+    return t('hotel.hospedes.resumoEmDia')
+  }
+
+  return t('hotel.hospedes.resumo', { precisam, total }, precisam)
+})
+
 const vazio = computed(
   () => !hospedagem.carregando && !hospedagem.erro && hospedagem.hospedes.length === 0,
 )
 
-/** O corredor de cada hóspede, pelo nome. O `blocoId` já chegava e era jogado fora. */
 function blocoNome(hospede: HospedeNaCasa) {
   return hotelStore.blocoPorId.get(hospede.blocoId)?.nome ?? ''
 }
@@ -300,58 +244,77 @@ function abrir(hospedagemId: string) {
   void router.push(`/hotel/hospedagem/${hospedagemId}`)
 }
 
+// ------------------------------------------------------------------------------ o tutorial
+
 /**
- * O tutorial desta tela, na ordem em que se lê a página.
- *
- * Os passos ficam aqui, e não num catálogo central, porque cada um carrega um seletor do próprio
- * template: separá-los faria o roteiro apontar para uma classe renomeada sem ninguém notar — que
- * é exatamente o que aconteceu quando a grade deixou de se chamar `.grade` e o tour passou a
- * descartar dois passos em silêncio.
+ * O tutorial desta tela, na ordem em que se lê a página. Cada passo carrega um seletor do próprio
+ * template; o `HotelTour` descarta, na abertura, o passo cujo alvo não está na tela.
  */
 const tourAberto = ref(false)
 
 const passosDoTour = computed<PassoDoTour[]>(() => [
   {
-    titulo: t('hotel.tour.hospedes.pergunta.titulo'),
-    texto: t('hotel.tour.hospedes.pergunta.texto'),
+    titulo: t('hotel.hoje.hospedes.tour.pergunta.titulo'),
+    texto: t('hotel.hoje.hospedes.tour.pergunta.texto'),
   },
   {
     alvo: '.barra',
-    titulo: t('hotel.tour.hospedes.recortes.titulo'),
-    texto: t('hotel.tour.hospedes.recortes.texto'),
+    titulo: t('hotel.hoje.hospedes.tour.recortes.titulo'),
+    texto: t('hotel.hoje.hospedes.tour.recortes.texto'),
   },
   {
-    alvo: '.foco',
-    titulo: t('hotel.tour.hospedes.cartao.titulo'),
-    texto: t('hotel.tour.hospedes.cartao.texto'),
+    alvo: '.corredor__titulo',
+    titulo: t('hotel.hoje.hospedes.tour.corredores.titulo'),
+    texto: t('hotel.hoje.hospedes.tour.corredores.texto'),
   },
   {
-    alvo: '.banda--emdia',
-    titulo: t('hotel.tour.hospedes.linhas.titulo'),
-    texto: t('hotel.tour.hospedes.linhas.texto'),
+    alvo: '.casa .cartao',
+    titulo: t('hotel.hoje.hospedes.tour.linha.titulo'),
+    texto: t('hotel.hoje.hospedes.tour.linha.texto'),
+  },
+  {
+    alvo: '.casa .foco',
+    titulo: t('hotel.hoje.hospedes.tour.foco.titulo'),
+    texto: t('hotel.hoje.hospedes.tour.foco.texto'),
+  },
+  {
+    alvo: '.casa .dia',
+    titulo: t('hotel.hoje.hospedes.tour.dia.titulo'),
+    texto: t('hotel.hoje.hospedes.tour.dia.texto'),
   },
 ])
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :title="t('hotel.hospedes.titulo')"
-    :subtitle="t('hotel.hospedes.subtitulo')"
+  <UiPagina
+    :carregando="hospedagem.carregando && hospedagem.hospedes.length === 0"
+    :erro="hospedagem.erro ? t(hospedagem.erro) : ''"
+    :vazio="vazio"
+    :vazio-titulo="t('hotel.hospedes.vazioTitulo')"
+    :vazio-descricao="t('hotel.hospedes.vazioDescricao')"
+    vazio-icone="ph ph-paw-print"
     tour
     @tour="tourAberto = true"
-    :loading="hospedagem.carregando && hospedagem.hospedes.length === 0"
-    :error="hospedagem.erro ? t(hospedagem.erro) : ''"
-    :empty="vazio"
-    :empty-title="t('hotel.hospedes.vazioTitulo')"
-    :empty-description="t('hotel.hospedes.vazioDescricao')"
-    @retry="hospedagem.carregarHospedes()"
+    @tentar-de-novo="hospedagem.carregarHospedes()"
   >
-    <div class="hospedes clinic-scope">
+    <template #resumo>
+      <span aria-live="polite">{{ fraseDaCasa }}</span>
+    </template>
+
+    <template #acoes>
+      <Button
+        :as="RouterLink"
+        to="/hotel/rotina"
+        icon="ph ph-list-checks"
+        :label="t('hotel.hospedes.irParaRotina')"
+      />
+    </template>
+
+    <div class="hospedes">
       <div class="barra">
         <SelectButton
           v-model="recorte"
-          class="abas"
+          class="recortes"
           :options="opcoes"
           option-label="rotulo"
           option-value="valor"
@@ -359,40 +322,29 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           :aria-label="t('hotel.hospedes.recorteRotulo')"
         >
           <template #option="{ option }">
-            <component
-              :is="iconeDoRecorte(option.valor)"
-              class="aba__icone"
-              weight="duotone"
-              aria-hidden="true"
-            />
-            <span class="aba__rotulo">{{ option.rotulo }}</span>
-            <span class="aba__conta clinic-value">{{ option.total }}</span>
+            <i :class="iconeDoRecorte(option.valor)" class="recorte__icone" aria-hidden="true" />
+            <span class="recorte__rotulo">{{ option.rotulo }}</span>
+            <span class="ui-contagem recorte__conta">{{ option.total }}</span>
           </template>
         </SelectButton>
 
         <!--
-          O resumo da casa subiu para a frase da saudação. Aqui, no vão entre os dois controles,
-          fica só o que a busca precisa explicar.
+          Quando a busca casou com o responsável e ele tem mais de um na casa, a tela diz por que
+          está mostrando vários — dois animais diferentes lado a lado parecem erro de busca.
         -->
-        <p class="barra__resumo">
-          <!--
-            Quando a busca casou com o responsável e ele tem mais de um na casa, a tela diz por que
-            está mostrando vários — dois animais diferentes lado a lado parecem erro de busca.
-          -->
-          <span v-if="tutorEncontrado" class="barra__tutor">
-            <i class="ph ph-user" aria-hidden="true" />
-            {{
-              t(
-                'hotel.hospedes.busca.doTutor',
-                { total: tutorEncontrado.total, tutor: tutorEncontrado.nome },
-                tutorEncontrado.total,
-              )
-            }}
-          </span>
+        <p v-if="tutorEncontrado" class="barra__tutor ui-selo ui-selo--lugar" aria-live="polite">
+          <i class="ph ph-user" aria-hidden="true" />
+          {{
+            t(
+              'hotel.hospedes.busca.doTutor',
+              { total: tutorEncontrado.total, tutor: tutorEncontrado.nome },
+              tutorEncontrado.total,
+            )
+          }}
         </p>
 
         <IconField class="busca">
-          <PhMagnifyingGlass class="busca__lupa" weight="duotone" aria-hidden="true" />
+          <i class="ph ph-magnifying-glass busca__lupa" aria-hidden="true" />
           <InputText
             v-model="busca"
             class="busca__campo"
@@ -403,13 +355,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         </IconField>
       </div>
 
-      <div v-if="visiveis.length === 0" class="nada">
-        <component
-          :is="termo ? PhMagnifyingGlass : PhMoon"
-          class="nada__icone"
-          weight="duotone"
-          aria-hidden="true"
-        />
+      <div v-if="visiveis.length === 0" class="nada ui-folha">
+        <span class="nada__icone" aria-hidden="true">
+          <i :class="termo ? 'ph ph-magnifying-glass' : 'ph ph-moon-stars'" />
+        </span>
 
         <p class="nada__texto">
           <template v-if="termo">
@@ -432,403 +381,254 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         />
       </div>
 
-      <!-- O recorte "Todos" ganha as três bandas; os outros já vêm filtrados. -->
-      <template v-else-if="porBandas">
-        <section v-if="precisam.length > 0" class="banda">
-          <h2 v-if="mostrarReguas" class="banda__titulo">
-            <PhWarningCircle weight="duotone" aria-hidden="true" />
-            {{ t('hotel.hospedes.banda.precisam') }}
-            <span class="banda__conta clinic-value">{{ precisam.length }}</span>
-          </h2>
+      <div v-else class="casa ui-folha">
+        <!-- O cabeçalho das colunas: o mesmo desenho de grade das linhas, para baterem. -->
+        <div class="casa__cabeca" aria-hidden="true">
+          <span>{{ t('hotel.hoje.hospedes.coluna.acomodacao') }}</span>
+          <span>{{ t('hotel.hoje.hospedes.coluna.hospede') }}</span>
+          <span>{{ t('hotel.hoje.hospedes.coluna.responsavel') }}</span>
+          <span>{{ t('hotel.hoje.hospedes.coluna.agora') }}</span>
+          <span>{{ t('hotel.hospedes.dia.rotulo') }}</span>
+        </div>
 
-          <ul class="pilha">
-            <HospedeCard
-              v-for="hospede in precisam"
-              :key="hospede.hospedagem.id"
-              :hospede="hospede"
-              :agora="hospedagem.agora"
-              :bloco-nome="blocoNome(hospede)"
-              @abrir="abrir"
-            />
-          </ul>
-        </section>
-
-        <section v-if="saem.length > 0" class="banda">
-          <h2 v-if="mostrarReguas" class="banda__titulo">
-            <PhDoorOpen weight="duotone" aria-hidden="true" />
-            {{ t('hotel.hospedes.banda.saem') }}
-            <span class="banda__conta clinic-value">{{ saem.length }}</span>
-          </h2>
-
-          <ul class="pilha">
-            <HospedeCard
-              v-for="hospede in saem"
-              :key="hospede.hospedagem.id"
-              :hospede="hospede"
-              :agora="hospedagem.agora"
-              :bloco-nome="blocoNome(hospede)"
-              @abrir="abrir"
-            />
-          </ul>
-        </section>
-
-        <section v-if="emDia.length > 0" class="banda banda--emdia">
-          <button
-            type="button"
-            class="banda__titulo banda__recolher"
-            :aria-expanded="emDiaAberta"
-            @click="emDiaAberta = !emDiaAberta"
-          >
-            <PhMoon weight="duotone" aria-hidden="true" />
-            {{ t('hotel.hospedes.banda.emDia') }}
-            <span class="banda__conta clinic-value">{{ emDia.length }}</span>
+        <section
+          v-for="corredor in corredores"
+          :key="corredor.id"
+          class="corredor"
+          :aria-labelledby="`corredor-${corredor.id}`"
+        >
+          <h2 :id="`corredor-${corredor.id}`" class="corredor__titulo">
             <i
-              class="ph banda__chevron"
-              :class="emDiaAberta ? 'ph-caret-down' : 'ph-caret-right'"
+              :class="corredor.bloco ? ICONE_DO_BLOCO[corredor.bloco.icone] : 'ph ph-house-line'"
               aria-hidden="true"
             />
-          </button>
+            {{ corredor.bloco?.nome ?? t('hotel.hoje.hospedes.semCorredor') }}
+            <span class="ui-contagem">{{ corredor.hospedes.length }}</span>
+          </h2>
 
-          <ul v-if="emDiaAberta" class="grupo">
-            <HospedeFileira
-              v-for="hospede in emDia"
+          <ul class="ui-lista corredor__lista">
+            <HospedeCard
+              v-for="hospede in corredor.hospedes"
               :key="hospede.hospedagem.id"
               :hospede="hospede"
+              :agora="hospedagem.agora"
+              :bloco-nome="blocoNome(hospede)"
               @abrir="abrir"
             />
           </ul>
         </section>
-      </template>
-
-      <ul v-else class="pilha">
-        <HospedeCard
-          v-for="hospede in visiveis"
-          :key="hospede.hospedagem.id"
-          :hospede="hospede"
-          :agora="hospedagem.agora"
-          :bloco-nome="blocoNome(hospede)"
-          @abrir="abrir"
-        />
-      </ul>
+      </div>
     </div>
 
-    <template #cabecalho>
-      <div class="hc-saudacao">
-        <p class="hc-saudacao__data">{{ t('hotel.hospedes.subtitulo') }}</p>
-        <h1 class="hc-saudacao__titulo">{{ t('hotel.hospedes.titulo') }}</h1>
+    <template #sempre>
+      <HotelDevPanel />
 
-        <div class="hc-saudacao__linha">
-          <p v-if="hospedagem.hospedes.length > 0" class="hc-saudacao__resumo" aria-live="polite">
-            {{ fraseDaCasa }}
-          </p>
-
-          <nav class="hc-acoes" :aria-label="t('hotel.hospedes.titulo')">
-            <RouterLink class="hc-pilula hc-pilula--cheia" to="/hotel/rotina">
-              <PhListChecks class="hc-pilula__icone" weight="fill" aria-hidden="true" />
-              {{ t('hotel.hospedes.irParaRotina') }}
-            </RouterLink>
-          </nav>
-        </div>
-      </div>
+      <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
     </template>
-
-    <HotelDevPanel />
-
-    <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
+/* `minmax(0, 1fr)`: sem ele, a largura mínima dos recortes alargava a coluna e a lista inteira
+   vazava da tela no celular. */
 .hospedes {
   display: grid;
-  gap: var(--clinic-space-5);
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
-.hospedes {
-  gap: var(--clinic-space-4);
-}
+/* ------------------------------------------------------------------ a barra */
 
-/*
- * Os controles numa peça só.
- *
- * Soltos na página, a aba ficava numa ponta, a busca na outra e o vão entre elas lia como defeito
- * de alinhamento. Dentro de uma moldura, o mesmo vão vira respiro — e os três elementos passam a
- * se ler como um painel de controle, que é o que eles são.
- */
+/* Os controles no fundo, sem caixa: o recorte à esquerda, a busca à direita. */
 .barra {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
+  gap: 10px 16px;
 }
 
-/* ---------------------------------------------------------------- as abas */
-
-/*
- * O segmento ganha ícone, rótulo e contagem — nessa ordem, que é a ordem da leitura: o desenho
- * localiza, a palavra confirma, o número informa. O desenho de cada aba é o mesmo da régua da
- * faixa que ela filtra, para o filtro não parecer levar a outro lugar.
- */
-.abas :deep(.p-togglebutton-content) {
-  gap: 0.4rem;
+.recortes :deep(.p-togglebutton-content) {
+  gap: 7px;
 }
 
-.aba__icone {
-  width: 1.05rem;
-  height: 1.05rem;
-  flex: 0 0 auto;
+.recorte__icone {
+  font-size: 16px;
 }
 
-.aba__rotulo {
+.recorte__rotulo {
   white-space: nowrap;
 }
 
-/*
- * A contagem é pastilha, não parêntese.
- *
- * Costurada no rótulo ela saía com o mesmo peso e o mesmo tamanho da palavra, e os parênteses eram
- * a única coisa separando o nome da aba do número dela. Tabular porque é número que muda a cada
- * tarefa marcada, e dígito que dança na horizontal obriga a reler.
- */
-.aba__conta {
-  padding-inline: 0.4rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-surface-sunken);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
+.recorte__conta {
+  min-width: 22px;
+  height: 20px;
+  padding-inline: 6px;
+  font-size: 11.5px;
 }
 
-.abas :deep(.p-togglebutton-checked) .aba__conta {
-  background: var(--clinic-accent-deep);
-  color: var(--clinic-on-accent);
+.recortes :deep(.p-togglebutton-checked) .recorte__conta {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
 }
 
-/* --------------------------------------------------------------- a busca */
+.barra__tutor {
+  margin: 0;
+}
 
 /*
- * O `position` é declarado aqui e não herdado do `IconField`: o estilo do PrimeVue 4 é injetado em
- * tempo de execução, e quando essa injeção falta a lupa — que é absoluta — escapa para o canto da
- * página. É a mesma armadilha que já obrigou este projeto a reescrever a caixa do segmento.
+ * O `position` é declarado aqui e não herdado do `IconField`: quando o estilo injetado do PrimeVue
+ * falta, a lupa — que é absoluta — escapa para o canto da página.
  */
 .busca {
   position: relative;
-  min-width: 17rem;
-}
-
-/* No estreito a busca desce para a própria linha: ocupa a largura, em vez de ficar à direita. */
-@media (max-width: 640px) {
-  .busca {
-    min-width: 0;
-    flex: 1 1 100%;
-  }
+  width: min(100%, 340px);
+  margin-inline-start: auto;
 }
 
 .busca__lupa {
   position: absolute;
-  inset-inline-start: 0.7rem;
   top: 50%;
-  width: 1.05rem;
-  height: 1.05rem;
-  color: var(--clinic-faint);
+  inset-inline-start: 12px;
+  color: var(--tinta-3);
+  font-size: 17px;
   pointer-events: none;
   transform: translateY(-50%);
 }
 
 .busca__campo {
   width: 100%;
-  padding-inline-start: 2.3rem;
+  padding-inline-start: 38px;
 }
 
-/*
- * O `type="search"` do WebKit desenha um "x" próprio, fora de qualquer token da casa e sem par no
- * Firefox. O limpar desta tela é o botão do estado vazio, que é onde ele é preciso.
- */
+/* O "x" próprio do WebKit fica fora dos tokens da casa; o limpar mora no estado vazio. */
 .busca__campo::-webkit-search-cancel-button {
   appearance: none;
 }
 
-/* ------------------------------------------------------------- o resumo */
-
-/*
- * O resumo é uma frase em peso normal, e não um número grande com barra.
- *
- * A prancheta do turno já abre com número grande + barra, e repetir a peça aqui refaria, no nível
- * da página, a mesma "fileira-de-números-mais-lista" que derrubou a primeira versão desta tela.
- * O que a pessoa precisa saber ao chegar cabe numa linha.
- */
-.barra__resumo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0;
-  gap: var(--clinic-space-2) var(--clinic-space-3);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-}
-
-.barra__tutor {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.1rem 0.5rem;
-  border: 1px solid var(--clinic-accent-soft);
-  border-radius: var(--clinic-radius-chip);
-  gap: 0.3rem;
-  background: var(--clinic-accent-tint);
-  color: var(--clinic-accent-strong);
-  font-weight: 700;
-}
-
-.barra__tutor .ph {
-  font-size: 0.7em;
-}
-
-/* --------------------------------------------------------- o estado vazio */
+/* ------------------------------------------------------------------ o vazio */
 
 .nada {
   display: grid;
   justify-items: center;
-  margin: 0;
-  padding: var(--clinic-space-6) var(--clinic-space-5);
-  border: 1px solid var(--clinic-line-strong);
-  border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
+  gap: 10px;
+  padding: 36px 24px;
+  color: var(--tinta-2);
   text-align: center;
+}
+
+.nada__icone {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 22px;
 }
 
 .nada__texto {
   margin: 0;
 }
 
-.nada__icone {
-  width: 3rem;
-  height: 3rem;
-  color: var(--clinic-line-strong);
-}
-
-/* ------------------------------------------------------------------ bandas */
-
-.banda {
-  display: grid;
-  gap: var(--clinic-space-3);
-}
+/* ------------------------------------------------------------------ a casa */
 
 /*
- * A régua da banda, com o filete correndo até a borda. É o mesmo desenho que separa os tempos na
- * prancheta: quebra a página em respirações sem custar uma caixa.
+ * Uma folha só, e as colunas definidas aqui: o cabeçalho e as linhas de todos os corredores
+ * usam a mesma grade, e a lista inteira se lê por coluna.
  */
-.banda__titulo {
+.casa {
+  --hospede-colunas: 84px minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1.15fr) 112px 16px;
+
+  overflow: hidden;
+  container: casa / inline-size;
+}
+
+.casa__cabeca {
+  display: grid;
+  align-items: end;
+  gap: 16px;
+  min-height: 40px;
+  padding: 10px 18px 8px 20px;
+  border-bottom: 1px solid var(--linha);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+  grid-template-columns: var(--hospede-colunas);
+}
+
+.casa__cabeca span:nth-child(2) {
+  padding-inline-start: 50px;
+}
+
+.casa__cabeca span:nth-child(4) {
+  padding-inline-start: 44px;
+}
+
+/* O corredor é uma divisória com nome, não um cartão: a folha continua uma só. */
+.corredor + .corredor {
+  border-top: 1px solid var(--linha);
+}
+
+.corredor__titulo {
   display: flex;
   align-items: center;
-  width: 100%;
+  gap: 8px;
   margin: 0;
-  padding: 0;
-  border: 0;
-  gap: var(--clinic-space-2);
-  background: transparent;
-  color: var(--clinic-text);
-  font-family: inherit;
-  font-size: 0.9375rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  text-align: start;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--linha);
+  background: var(--superficie-2);
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.banda__titulo::after {
-  height: 1px;
-  flex: 1;
-  background: var(--clinic-line-soft);
-  content: '';
+.corredor__titulo i {
+  color: var(--pj-lugar-tinta);
+  font-size: 17px;
 }
 
-.banda__titulo :deep(svg),
-.banda__titulo > svg {
-  width: 1.05rem;
-  height: 1.05rem;
-  flex: 0 0 auto;
+/* A primeira e a última linha não arredondam: quem arredonda é a folha. */
+.corredor__lista :deep(.cartao) {
+  border-radius: 0;
 }
 
-.banda__conta {
-  color: var(--clinic-text);
-  font-weight: 800;
-  letter-spacing: 0;
-}
-
-.banda__recolher {
-  cursor: pointer;
-}
-
-.banda__recolher:hover {
-  color: var(--clinic-text);
-}
-
-.banda__recolher:focus-visible {
-  border-radius: var(--clinic-radius-control);
-  box-shadow: var(--clinic-focus-ring);
-  outline: none;
-}
-
-.banda__chevron {
-  order: 1;
-  font-size: 0.7rem;
-}
-
-/* O chevron de "fechado" é direcional: em árabe ele aponta para o outro lado. */
-[dir='rtl'] .ph-caret-right {
-  transform: scaleX(-1);
-}
-
-/* ------------------------------------------------------------------- grades */
-
-/*
- * Teto **explícito** de duas colunas, e não `auto-fill`.
- *
- * O `auto-fill` da versão anterior oscilava entre três e quatro colunas com cinco pixels de
- * diferença de janela, e com cinco hóspedes sempre sobrava uma fileira órfã. Duas colunas dão ao
- * cartão a largura que a linha de foco precisa e enchem a página com conteúdo de verdade.
- */
-.pilha {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  gap: var(--clinic-space-4);
-  grid-template-columns: minmax(0, 1fr);
-  list-style: none;
-}
-
-@media (min-width: 1200px) {
-  .pilha {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@container casa (max-width: 820px) {
+  .casa__cabeca {
+    display: none;
   }
 }
 
-/* A banda fria: uma moldura para o grupo, irmãs separadas por filete. */
-.grupo {
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-  list-style: none;
-  overflow: hidden;
-}
+@media (max-width: 640px) {
+  .busca {
+    width: 100%;
+    margin-inline-start: 0;
+  }
 
-.grupo > li + li {
-  border-block-start: 1px solid var(--clinic-line-soft);
-}
+  .recortes {
+    width: 100%;
+  }
 
-/* Caixa-alta rastreada não roda em árabe: o `letter-spacing` desconecta as ligaduras. */
-[dir='rtl'] .banda__titulo {
-  letter-spacing: normal;
-  text-transform: none;
+  .recortes :deep(.p-togglebutton) {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .recortes :deep(.p-togglebutton-content) {
+    height: 100%;
+    justify-content: center;
+    padding-inline: 6px;
+  }
+
+  /* No estreito o rótulo quebra em duas linhas em vez de empurrar o recorte para fora da tela. */
+  .recorte__rotulo {
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .recorte__icone {
+    display: none;
+  }
 }
 </style>

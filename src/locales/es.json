@@ -6607,7 +6607,12 @@
         "pendente": "Sin seña pagada"
       },
       "legendaTabela": "Ocupación de los alojamientos, una columna por noche",
-      "reservarEm": "Reservar {acomodacao} a partir del {data}"
+      "reservarEm": "Reservar {acomodacao} a partir del {data}",
+      "tela": {
+        "diaRotulo": "{dia}: {ocupadas} de {total} ocupados",
+        "serve": "Sirve para la búsqueda",
+        "hoje": "Hoy"
+      }
     },
     "gravidade": {
       "grave": "Grave",
@@ -6700,7 +6705,23 @@
       "titulo": "Mapa de alojamientos",
       "vazioDescricao": "Registra los alojamientos de la casa para empezar a vender noches.",
       "vazioTitulo": "Ningún alojamiento registrado",
-      "verReservas": "Ver reservas"
+      "verReservas": "Ver reservas",
+      "tela": {
+        "intervalo": "{de} al {ate}",
+        "resumoHoje": "Hoy, {ocupadas} de {total} alojamiento ocupado | Hoy, {ocupadas} de {total} alojamientos ocupados",
+        "resumoPico": "la noche más llena a la vista es {dia}, con {livres} lugar libre | la noche más llena a la vista es {dia}, con {livres} lugares libres",
+        "resumoLotado": "la noche del {dia} está completa",
+        "resumo": "{hoje}; {pico}.",
+        "resumoSemHoje": "En las tres semanas a la vista, {pico}.",
+        "procura": "Buscar lugar libre",
+        "periodoDaProcura": "del {de} al {ate}",
+        "foraDaGrade": "El período buscado está fuera de las tres semanas a la vista.",
+        "irParaProcura": "Mostrar el período",
+        "aVista": "Período a la vista",
+        "ondeTitulo": "Dónde cabe",
+        "ondeVazio": "Ningún alojamiento sirve para ese período. Cambie las fechas, la especie o el tamaño en la búsqueda.",
+        "ondeDica": "O haga clic en un día libre del mapa."
+      }
     },
     "medicacaoNova": {
       "cancelar": "Cancelar",
@@ -6949,7 +6970,29 @@
       "sinalDevolve": "Cancelar dentro de este plazo aún devuelve la seña.",
       "sinalNaoDevolve": "Fuera de plazo: la cancelación no devuelve la seña.",
       "subtitulo": "Hotel",
-      "titulo": "Reserva"
+      "titulo": "Reserva",
+      "tela": {
+        "emDia": "{ok} de {total} al día",
+        "naoEncontradaTitulo": "Reserva no encontrada",
+        "naoEncontradaDescricao": "La dirección puede estar incompleta, o la reserva ya no existe. Vuelva a la lista de reservas.",
+        "registrarComprovante": "Registrar comprobante",
+        "cancelar": "Cancelar reserva",
+        "cancelarTitulo": "Cancelar la reserva de {pet}",
+        "cancelarMotivo": "Por qué",
+        "naoCompareceu": "No se presentó: la entrada pasó y nadie vino",
+        "manter": "Mantener reserva",
+        "canceladaEm": "Cancelada el {quando}: {motivo}.",
+        "naoCompareceuEm": "No se presentó, registrado el {quando}: {motivo}.",
+        "falta": "Falta: {itens}.",
+        "entrada": "Entrada",
+        "saida": "Salida",
+        "acomodacao": "Alojamiento",
+        "deTotal": "de {total} en total",
+        "oQueFalta": "Lo que falta para la entrada",
+        "oQueFaltaDescricao": "Verificado contra el último día de la estadía, no contra hoy.",
+        "pagamento": "Pago",
+        "origem": "Origen: {origem}"
+      }
     },
     "reservaStatus": {
       "cancelada": "Cancelada",
@@ -6987,7 +7030,34 @@
       "vazioDescricao": "Las reservas aparecen aquí en cuanto se cree la primera desde el mapa.",
       "vazioTitulo": "Ninguna reserva",
       "vesperaLede": "Llegan en los próximos tres días y aún no pueden entrar.",
-      "vesperaTitulo": "{total} llegada con documentación pendiente | {total} llegadas con documentación pendiente"
+      "vesperaTitulo": "{total} llegada con documentación pendiente | {total} llegadas con documentación pendiente",
+      "tela": {
+        "coluna": {
+          "periodo": "Entrada y salida",
+          "pagamento": "Pago"
+        },
+        "resumoTotal": "1 reserva a partir de hoy | {n} reservas a partir de hoy",
+        "resumoTotalTodas": "1 reserva, con el historial | {n} reservas, con el historial",
+        "resumoChegam": "1 llega en los próximos 7 días | {n} llegan en los próximos 7 días",
+        "resumoNinguemChega": "nadie llega en los próximos 7 días",
+        "resumoSemSinal": "1 aún sin seña | {n} aún sin seña",
+        "resumo": "{total}: {chegam}, {semSinal}.",
+        "resumoSemPendencia": "{total}: {chegam}.",
+        "aReceber": "{valor} por cobrar",
+        "pagamento": {
+          "quitado": "Pagado",
+          "sinalPago": "Seña pagada",
+          "semSinal": "Sin seña",
+          "semPagamento": "Sin pago"
+        },
+        "travadaHoje": "Trabada: llega hoy",
+        "travadaEm": "Trabada: llega en {dias} día | Trabada: llega en {dias} días",
+        "vespera": "Víspera trabada",
+        "resolver": "Resolver",
+        "semProximas": "Nada vendido de aquí en adelante. Lo que ya pasó está en \"Todo, con historial\".",
+        "espera": "Lista de espera",
+        "esperaDescricao": "Quien pidió un período completo. Cuando cae una reserva, el lugar se les ofrece primero."
+      }
     },
     "resumo": {
       "cancelamento": "Cancelación",
@@ -7704,6 +7774,11 @@
         "pedido": "solicitado",
         "escolha": "Elija un alojamiento",
         "voltar": "Volver a la solicitud"
+      },
+      "tela": {
+        "semVaga": "El alojamiento ya no está libre. En \"Responder\", elija otro.",
+        "tourResposta": "\"Reservar Suite S1\" graba la reserva en esa unidad y avisa a quien pidió. Para otra unidad u otras fechas, abra \"Responder\".",
+        "tipoPedido": "Tipo pedido"
       }
     },
     "fita": {
@@ -7717,6 +7792,101 @@
       "chegam": "{n} llega | {n} llegan",
       "saem": "{n} sale | {n} salen",
       "atrasadas": "{n} tarea atrasada | {n} tareas atrasadas"
+    },
+    "hoje": {
+      "selo": {
+        "atrasou": "{tempo} de retraso",
+        "pertences": "Revisar pertenencias",
+        "ocorrencia": "Incidente sin contacto",
+        "saldo": "Saldo {valor}",
+        "remedio": "Medicación {hora}",
+        "remedioAtrasado": "Medicación atrasada, {hora}",
+        "boletim": "Parte retenido",
+        "saiHoje": "Sale hoy {hora}"
+      },
+      "painel": {
+        "emDia": "Nada detenido. El resto del día está en la rutina",
+        "chegam": "Llegan hoy",
+        "naCasa": "En la casa",
+        "saem": "Salen hoy",
+        "situacao": "Situación de la llegada",
+        "faltaParaSair": "Lo que falta para liberar",
+        "verDocumentacao": "Ver documentación",
+        "todosOsHospedes": "Ver {total} huésped | Ver los {total} huéspedes",
+        "tour": {
+          "pergunta": {
+            "titulo": "La pregunta de esta pantalla",
+            "texto": "Quién entra, quién está y quién sale hoy, y lo que no puede esperar. Ábrala por la mañana y sabrá qué va primero."
+          },
+          "fita": {
+            "titulo": "La cinta de la casa",
+            "texto": "Todo el día en una franja, arriba de todo el Hotel: cada tarea de la rutina es un trazo a su hora, llegadas y salidas son marcas y la aguja es ahora. Haga clic para abrir la rutina."
+          },
+          "chegam": {
+            "titulo": "Llegan hoy",
+            "texto": "Hora, rostro y alojamiento de quien entra hoy. El sello dice si la documentación permite la entrada; el botón lleva al check-in, en la reserva."
+          },
+          "casa": {
+            "titulo": "En la casa",
+            "texto": "Quién está hospedado, con lo que pide atención ahora: llamada pendiente, medicación, parte retenido. La fila abre la estadía."
+          },
+          "saem": {
+            "titulo": "Salen hoy",
+            "texto": "Hora de salida y lo que falta para liberar: pesar, revisar pertenencias, cobrar el saldo. El check-out se hace en la estadía."
+          },
+          "pauta": {
+            "titulo": "Lo que te necesita",
+            "texto": "De la más grave a la menos: incidente sin contacto, llegada sin documento, parte retenido y rutina atrasada. Cada fila lleva adonde se resuelve."
+          },
+          "bemEstar": {
+            "titulo": "Bienestar y medicación",
+            "texto": "Quién está estresado o en adaptación, y las dosis de hoy en orden de reloj, con la situación de cada una."
+          },
+          "turno": {
+            "titulo": "Pasar turno",
+            "texto": "Al final del turno, entregue la casa a quien asume: lo pendiente, los incidentes y una nota. Un incidente grave sin contacto bloquea la entrega."
+          }
+        }
+      },
+      "bemEstar": {
+        "semMedicacao": "Ninguna medicación para hoy."
+      },
+      "hospedes": {
+        "sai": "sale {quando}",
+        "semCorredor": "Sin pasillo",
+        "coluna": {
+          "acomodacao": "Alojamiento",
+          "hospede": "Huésped",
+          "responsavel": "Responsable",
+          "agora": "Ahora en la rutina"
+        },
+        "tour": {
+          "pergunta": {
+            "titulo": "La pregunta de esta pantalla",
+            "texto": "Cómo está cada animal en la casa, pasillo por pasillo: quién es, de quién es, qué pide la rutina ahora y cuánto del día ya se hizo."
+          },
+          "recortes": {
+            "titulo": "Tres recortes y la búsqueda",
+            "texto": "Todos, los que te necesitan y los que salen hoy. La búsqueda encuentra por el nombre del animal o del responsable."
+          },
+          "corredores": {
+            "titulo": "La casa por pasillo",
+            "texto": "La lista sigue el orden físico de la casa, como quien recorre el pasillo. Cada fila empieza por la placa del alojamiento."
+          },
+          "linha": {
+            "titulo": "La fila del huésped",
+            "texto": "Rostro, noches y salida, el responsable con teléfono, y en sellos lo que bloquea: incidente sin contacto, parte retenido, falta pesar. La marca del borde dice la gravedad. Haga clic para abrir la estadía."
+          },
+          "foco": {
+            "titulo": "Ahora en la rutina",
+            "texto": "La tarea más antigua atrasada, o la próxima. Rojo cuando se atrasó, lavanda cuando es la próxima."
+          },
+          "dia": {
+            "titulo": "La rutina del día",
+            "texto": "Cuántas tareas de hoy ya salieron del camino. La parte roja de la barra es lo atrasado."
+          }
+        }
+      }
     }
   },
   "primevue": {

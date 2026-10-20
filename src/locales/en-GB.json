@@ -6607,7 +6607,12 @@
         "pendente": "No deposit paid"
       },
       "legendaTabela": "Room occupancy, one column per night",
-      "reservarEm": "Book {acomodacao} from {data}"
+      "reservarEm": "Book {acomodacao} from {data}",
+      "tela": {
+        "diaRotulo": "{dia}: {ocupadas} of {total} taken",
+        "serve": "Fits the search",
+        "hoje": "Today"
+      }
     },
     "gravidade": {
       "grave": "Serious",
@@ -6700,7 +6705,23 @@
       "titulo": "Accommodation map",
       "vazioDescricao": "Register the rooms you have to start selling nights.",
       "vazioTitulo": "No accommodation registered",
-      "verReservas": "View bookings"
+      "verReservas": "View bookings",
+      "tela": {
+        "intervalo": "{de} to {ate}",
+        "resumoHoje": "Today, {ocupadas} of {total} room taken | Today, {ocupadas} of {total} rooms taken",
+        "resumoPico": "the busiest night in view is {dia}, with {livres} room left | the busiest night in view is {dia}, with {livres} rooms left",
+        "resumoLotado": "the night of {dia} is full",
+        "resumo": "{hoje}; {pico}.",
+        "resumoSemHoje": "In the three weeks in view, {pico}.",
+        "procura": "Look for a free room",
+        "periodoDaProcura": "from {de} to {ate}",
+        "foraDaGrade": "The dates you searched are outside the three weeks in view.",
+        "irParaProcura": "Show those dates",
+        "aVista": "Dates in view",
+        "ondeTitulo": "Where it fits",
+        "ondeVazio": "No room fits these dates. Change the dates, species or size in the search.",
+        "ondeDica": "Or click a free day on the map."
+      }
     },
     "medicacaoNova": {
       "cancelar": "Cancel",
@@ -6949,7 +6970,29 @@
       "sinalDevolve": "Cancelling within this window still refunds the deposit.",
       "sinalNaoDevolve": "Outside the window: cancelling does not refund the deposit.",
       "subtitulo": "Hotel",
-      "titulo": "Booking"
+      "titulo": "Booking",
+      "tela": {
+        "emDia": "{ok} of {total} up to date",
+        "naoEncontradaTitulo": "Booking not found",
+        "naoEncontradaDescricao": "The address may be incomplete, or the booking no longer exists. Go back to the bookings list.",
+        "registrarComprovante": "Record a document",
+        "cancelar": "Cancel booking",
+        "cancelarTitulo": "Cancel the booking for {pet}",
+        "cancelarMotivo": "Why",
+        "naoCompareceu": "No-show: the check-in date passed and nobody came",
+        "manter": "Keep booking",
+        "canceladaEm": "Cancelled on {quando}: {motivo}.",
+        "naoCompareceuEm": "No-show, recorded on {quando}: {motivo}.",
+        "falta": "Missing: {itens}.",
+        "entrada": "Check-in",
+        "saida": "Check-out",
+        "acomodacao": "Room",
+        "deTotal": "of {total} in total",
+        "oQueFalta": "What is missing before check-in",
+        "oQueFaltaDescricao": "Checked against the last day of the stay, not against today.",
+        "pagamento": "Payment",
+        "origem": "Source: {origem}"
+      }
     },
     "reservaStatus": {
       "cancelada": "Cancelled",
@@ -6987,7 +7030,34 @@
       "vazioDescricao": "Bookings show up here as soon as the first one is made from the map.",
       "vazioTitulo": "No bookings",
       "vesperaLede": "They arrive in the next three days and still cannot come in.",
-      "vesperaTitulo": "{total} arrival with paperwork missing | {total} arrivals with paperwork missing"
+      "vesperaTitulo": "{total} arrival with paperwork missing | {total} arrivals with paperwork missing",
+      "tela": {
+        "coluna": {
+          "periodo": "Check-in and check-out",
+          "pagamento": "Payment"
+        },
+        "resumoTotal": "1 booking from today on | {n} bookings from today on",
+        "resumoTotalTodas": "1 booking, history included | {n} bookings, history included",
+        "resumoChegam": "1 arrives in the next 7 days | {n} arrive in the next 7 days",
+        "resumoNinguemChega": "nobody arrives in the next 7 days",
+        "resumoSemSinal": "1 still without a deposit | {n} still without a deposit",
+        "resumo": "{total}: {chegam}, {semSinal}.",
+        "resumoSemPendencia": "{total}: {chegam}.",
+        "aReceber": "{valor} still due",
+        "pagamento": {
+          "quitado": "Paid in full",
+          "sinalPago": "Deposit paid",
+          "semSinal": "No deposit",
+          "semPagamento": "Nothing paid"
+        },
+        "travadaHoje": "Blocked: arrives today",
+        "travadaEm": "Blocked: arrives in {dias} day | Blocked: arrives in {dias} days",
+        "vespera": "Blocked before arrival",
+        "resolver": "Sort it out",
+        "semProximas": "Nothing booked from here on. Past stays are under \"Everything, with history\".",
+        "espera": "Waiting list",
+        "esperaDescricao": "People who asked for full dates. When a booking drops, the room is offered to them first."
+      }
     },
     "resumo": {
       "cancelamento": "Cancellation",
@@ -7704,6 +7774,11 @@
         "pedido": "requested",
         "escolha": "Choose a room",
         "voltar": "Back to the request"
+      },
+      "tela": {
+        "semVaga": "That room is no longer free. Open \"Reply\" and choose another.",
+        "tourResposta": "\"Book Suite S1\" saves the booking in that unit and tells whoever asked. For another unit or other dates, open \"Reply\".",
+        "tipoPedido": "Requested type"
       }
     },
     "fita": {
@@ -7717,6 +7792,101 @@
       "chegam": "{n} arriving | {n} arriving",
       "saem": "{n} leaving | {n} leaving",
       "atrasadas": "{n} overdue task | {n} overdue tasks"
+    },
+    "hoje": {
+      "selo": {
+        "atrasou": "{tempo} late",
+        "pertences": "Check belongings",
+        "ocorrencia": "Incident, owner not called",
+        "saldo": "Balance {valor}",
+        "remedio": "Medication {hora}",
+        "remedioAtrasado": "Medication overdue, {hora}",
+        "boletim": "Update on hold",
+        "saiHoje": "Leaves today {hora}"
+      },
+      "painel": {
+        "emDia": "Nothing stuck. The rest of the day is in the routine",
+        "chegam": "Arriving today",
+        "naCasa": "In the house",
+        "saem": "Leaving today",
+        "situacao": "Arrival status",
+        "faltaParaSair": "What is left before release",
+        "verDocumentacao": "See documents",
+        "todosOsHospedes": "See {total} guest | See all {total} guests",
+        "tour": {
+          "pergunta": {
+            "titulo": "What this screen answers",
+            "texto": "Who comes in, who is here and who leaves today, and what cannot wait. Open it in the morning and you know what comes first."
+          },
+          "fita": {
+            "titulo": "The house strip",
+            "texto": "The whole day in one strip, at the top of every Hotel screen: each routine task is a tick at its time, arrivals and departures are marks, and the needle is now. Click it to open the routine."
+          },
+          "chegam": {
+            "titulo": "Arriving today",
+            "texto": "Time, face and room of everyone coming in today. The tag says whether the documents let them in; the button takes you to check-in, on the booking."
+          },
+          "casa": {
+            "titulo": "In the house",
+            "texto": "Who is staying, with what needs attention now: a call to make, medication, an update on hold. The row opens the stay."
+          },
+          "saem": {
+            "titulo": "Leaving today",
+            "texto": "Departure time and what is left before release: weighing, checking belongings, collecting the balance. Check-out is done on the stay."
+          },
+          "pauta": {
+            "titulo": "What needs you",
+            "texto": "From most to least serious: incident with no call, arrival without documents, update on hold and overdue routine. Each row takes you where it gets solved."
+          },
+          "bemEstar": {
+            "titulo": "Welfare and medication",
+            "texto": "Who is stressed or still settling in, and today's doses in clock order, each with its status."
+          },
+          "turno": {
+            "titulo": "Hand over shift",
+            "texto": "At the end of the shift, hand the house over: what is left pending, the incidents and a note. A serious incident with no call blocks the handover."
+          }
+        }
+      },
+      "bemEstar": {
+        "semMedicacao": "No medication today."
+      },
+      "hospedes": {
+        "sai": "leaves {quando}",
+        "semCorredor": "No wing",
+        "coluna": {
+          "acomodacao": "Room",
+          "hospede": "Guest",
+          "responsavel": "Owner",
+          "agora": "Routine now"
+        },
+        "tour": {
+          "pergunta": {
+            "titulo": "What this screen answers",
+            "texto": "How each animal in the house is doing, wing by wing: who it is, whose it is, what the routine asks for now and how much of the day is done."
+          },
+          "recortes": {
+            "titulo": "Three cuts and search",
+            "texto": "All, the ones that need you and the ones leaving today. Search finds by the animal's or the owner's name."
+          },
+          "corredores": {
+            "titulo": "The house by wing",
+            "texto": "The list follows the physical order of the house, like walking down the wing. Each row starts with the room's sign."
+          },
+          "linha": {
+            "titulo": "The guest row",
+            "texto": "Face, nights and departure, the owner with phone number, and in tags what blocks: incident with no call, update on hold, not weighed. The mark on the edge shows how serious. Click to open the stay."
+          },
+          "foco": {
+            "titulo": "Routine now",
+            "texto": "The oldest overdue task, or the next one. Red when it is late, lavender when it is next."
+          },
+          "dia": {
+            "titulo": "Today's routine",
+            "texto": "How many of today's tasks are out of the way. The red part of the bar is what is late."
+          }
+        }
+      }
     }
   },
   "primevue": {
