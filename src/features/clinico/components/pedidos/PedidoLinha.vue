@@ -318,15 +318,33 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
 .pedido {
   position: relative;
   display: grid;
-  min-height: 76px;
+  min-height: 88px;
   align-items: center;
-  gap: 10px 20px;
+  gap: 10px 22px;
   /* Larguras fixas no começo e no fim: cada linha é uma grade própria, e colunas medidas pelo
      conteúdo desalinhavam as horas e os botões de uma linha para a outra. */
-  grid-template-columns: 6.25rem minmax(0, 1.15fr) minmax(0, 1fr) 11.5rem 15rem;
-  padding: 12px 18px 12px 22px;
+  grid-template-columns: 6.5rem minmax(0, 1.15fr) minmax(0, 1fr) 11.5rem 15rem;
+  padding: 14px 20px 14px 18px;
   cursor: pointer;
   transition: background-color var(--pj-tempo-curto) ease-out;
+}
+
+/*
+ * O "para quando" num ladrilho de calendário, rente: o dia pequeno em cima, a hora grande
+ * embaixo. É o primeiro ponto em que o olho para em cada linha.
+ */
+.pedido__quando:not(:empty) {
+  justify-items: center;
+  padding: 9px 8px 10px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
+  text-align: center;
+}
+
+.pedido--aberta .pedido__quando:not(:empty) {
+  border-color: color-mix(in oklab, var(--clinica) 25%, var(--linha));
+  background: var(--superficie);
 }
 
 .pedido:hover {
@@ -472,7 +490,7 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
   align-items: center;
   gap: 6px;
   color: var(--tinta);
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 650;
   letter-spacing: -0.01em;
   white-space: nowrap;

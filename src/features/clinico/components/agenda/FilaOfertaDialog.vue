@@ -13,10 +13,12 @@
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
+
+import AgendaDialogoTopo from './AgendaDialogoTopo.vue'
 
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { OFERTA_MINUTOS } from '../../data/repositories'
@@ -40,6 +42,7 @@ const fila = useFilaStore()
 const formato = useClinicFormat()
 
 const mensagem = ref('')
+const idTitulo = useId()
 
 const aberto = computed({
   get: () => props.entrada !== null,
@@ -80,11 +83,21 @@ watch(
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog"
+    class="clinic-dialog agenda-dialogo"
     :style="{ width: 'min(32rem, 94vw)' }"
-    :header="t('clinico.fila.ofertarVaga')"
+    :aria-labelledby="idTitulo"
     :dismissable-mask="true"
   >
+    <!-- O mesmo alto dos outros diálogos da Agenda: o ícone, o que se faz e sobre qual dia. -->
+    <template #header>
+      <AgendaDialogoTopo
+        :id="idTitulo"
+        :titulo="t('clinico.fila.ofertarVaga')"
+        :subtitulo="slotInicio ? formato.dataLonga(clinicClock.dateOf(slotInicio)) : ''"
+        icone="ph ph-paper-plane-tilt"
+      />
+    </template>
+
     <div v-if="entrada && slotInicio" class="oferta clinic-scope">
       <header class="oferta__topo">
         <PetAvatar
@@ -154,7 +167,8 @@ watch(
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  border-radius: 14px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie-2);
 }
 

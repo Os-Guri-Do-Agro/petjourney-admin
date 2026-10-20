@@ -33,7 +33,6 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { useTelaLarga } from '@/composables/useTelaLarga'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
@@ -418,8 +417,10 @@ async function celularMudou() {
 
     <div class="pedidos clinic-scope">
       <!-- Desligado: dito na primeira linha, com o jeito de religar. -->
-      <p v-if="desligado" class="aviso aviso--atencao" role="status">
-        <i class="ph ph-pause-circle aviso__icone" aria-hidden="true" />
+      <p v-if="desligado" class="aviso aviso--atencao ui-folha" role="status">
+        <span class="ui-ladrilho ui-ladrilho--atencao" aria-hidden="true">
+          <i class="ph ph-pause-circle" />
+        </span>
         <span class="aviso__texto">{{ t('clinico.pedidos.desligado') }}</span>
         <Button
           type="button"
@@ -434,15 +435,17 @@ async function celularMudou() {
 
       <p
         v-if="resultado"
-        class="aviso"
+        class="aviso ui-folha"
         :class="resultado.tipo === 'marcado' ? 'aviso--ok' : 'aviso--neutro'"
         role="status"
       >
-        <i
-          class="ph aviso__icone"
-          :class="resultado.tipo === 'marcado' ? 'ph-check-circle' : 'ph-info'"
+        <span
+          class="ui-ladrilho"
+          :class="resultado.tipo === 'marcado' ? 'ui-ladrilho--ok' : 'ui-ladrilho--neutro'"
           aria-hidden="true"
-        />
+        >
+          <i class="ph" :class="resultado.tipo === 'marcado' ? 'ph-check-circle' : 'ph-info'" />
+        </span>
         <span class="aviso__texto">{{ resultado.texto }}</span>
         <RouterLink v-if="resultado.rota" class="ui-mais" :to="resultado.rota">
           {{ t('clinico.pedidos.resultado.verNaAgenda') }}
@@ -460,48 +463,60 @@ async function celularMudou() {
         />
       </p>
 
-      <p v-if="pedidos.erro && pedidos.carregado" class="aviso aviso--risco" role="alert">
-        <i class="ph ph-warning-circle aviso__icone" aria-hidden="true" />
+      <p v-if="pedidos.erro && pedidos.carregado" class="aviso aviso--risco ui-folha" role="alert">
+        <span class="ui-ladrilho ui-ladrilho--risco" aria-hidden="true">
+          <i class="ph ph-warning-circle" />
+        </span>
         <span class="aviso__texto">{{ t(pedidos.erro) }}</span>
       </p>
 
-      <UiSecao
-        id="pedidos-abertos"
-        :titulo="t('clinico.pedidos.secao.abertos')"
-        :contagem="pedidos.abertas.length"
-        :descricao="pedidos.abertas.length > 1 ? t('clinico.pedidos.tela.descricao') : ''"
-      >
-        <div class="caixa ui-folha">
-          <TransitionGroup
-            v-if="pedidos.abertas.length > 0"
-            tag="ul"
-            name="linha"
-            class="ui-lista caixa__lista"
-          >
-            <PedidoLinha
-              v-for="linha in pedidos.abertas"
-              :key="linha.chave"
-              :linha="linha"
-              :respondendo="pedidos.respondendo === linha.chave"
-              :ocupado="pedidos.respondendo !== null"
-              :aberta="chaveEmResposta === linha.chave"
-              @aceitar="aceitar(linha, $event)"
-              @abrir="abrirResposta(linha)"
-            />
-          </TransitionGroup>
-
-          <div v-else class="caixa__vazio">
-            <span class="caixa__vazio-icone" aria-hidden="true">
-              <i class="ph ph-calendar-check" />
+      <!--
+        A caixa é um cartão com cabeçalho próprio: o ladrilho, o nome, a ordem em que se lê e,
+        à direita, quantos esperam — o mesmo desenho dos postos do Hoje.
+      -->
+      <section class="caixa ui-folha" aria-labelledby="pedidos-abertos-titulo">
+        <header class="caixa__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true">
+            <i class="ph ph-tray-arrow-down" />
+          </span>
+          <span class="caixa__titulos">
+            <h2 id="pedidos-abertos-titulo">{{ t('clinico.pedidos.secao.abertos') }}</h2>
+            <span v-if="pedidos.abertas.length > 1" class="caixa__descricao">
+              {{ t('clinico.pedidos.tela.descricao') }}
             </span>
-            <strong>{{ t('clinico.pedidos.vazio.titulo') }}</strong>
-            <p>{{ t('clinico.pedidos.vazio.descricao') }}</p>
-          </div>
+          </span>
+          <span class="caixa__total ui-num">{{ pedidos.abertas.length }}</span>
+        </header>
+
+        <TransitionGroup
+          v-if="pedidos.abertas.length > 0"
+          tag="ul"
+          name="linha"
+          class="ui-lista caixa__lista"
+        >
+          <PedidoLinha
+            v-for="linha in pedidos.abertas"
+            :key="linha.chave"
+            :linha="linha"
+            :respondendo="pedidos.respondendo === linha.chave"
+            :ocupado="pedidos.respondendo !== null"
+            :aberta="chaveEmResposta === linha.chave"
+            @aceitar="aceitar(linha, $event)"
+            @abrir="abrirResposta(linha)"
+          />
+        </TransitionGroup>
+
+        <div v-else class="caixa__vazio">
+          <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
+            <i class="ph ph-calendar-check" />
+          </span>
+          <strong>{{ t('clinico.pedidos.vazio.titulo') }}</strong>
+          <p>{{ t('clinico.pedidos.vazio.descricao') }}</p>
         </div>
-      </UiSecao>
+      </section>
 
       <!-- O respondido é histórico: recolhido no fim, uma linha por pedido. -->
-      <section v-if="pedidos.respondidas.length > 0" class="historico">
+      <section v-if="pedidos.respondidas.length > 0" class="historico ui-folha">
         <button
           type="button"
           class="historico__alternar"
@@ -509,16 +524,19 @@ async function celularMudou() {
           aria-controls="pedidos-respondidos"
           @click="historicoAberto = !historicoAberto"
         >
+          <span class="ui-ladrilho ui-ladrilho--neutro ui-ladrilho--p" aria-hidden="true">
+            <i class="ph ph-clock-counter-clockwise" />
+          </span>
+          <span class="historico__titulo">{{ t('clinico.pedidos.tela.respondidos') }}</span>
+          <span class="ui-contagem">{{ pedidos.respondidas.length }}</span>
           <i
-            class="ph"
-            :class="historicoAberto ? 'ph-caret-down' : 'ph-caret-right'"
+            class="ph historico__seta"
+            :class="historicoAberto ? 'ph-caret-up' : 'ph-caret-down'"
             aria-hidden="true"
           />
-          {{ t('clinico.pedidos.tela.respondidos') }}
-          <span class="ui-contagem">{{ pedidos.respondidas.length }}</span>
         </button>
 
-        <ul v-if="historicoAberto" id="pedidos-respondidos" class="ui-folha ui-lista">
+        <ul v-if="historicoAberto" id="pedidos-respondidos" class="ui-lista historico__lista">
           <li v-for="linha in pedidos.respondidas" :key="linha.chave" class="respondido">
             <span class="respondido__rostos">
               <PetAvatar
@@ -676,26 +694,36 @@ async function celularMudou() {
   display: contents;
 }
 
+/*
+ * As três ações cabem ao lado do título quando a frase de estado pode quebrar em duas linhas; em
+ * tela mais estreita (ou com a gaveta aberta) elas descem — e vão para a direita, não para baixo
+ * do título.
+ */
+.tela-pedidos :deep(.pagina__identidade) {
+  flex: 1 1 18rem;
+}
+
+.tela-pedidos :deep(.pagina__acoes) {
+  justify-content: flex-end;
+  margin-inline-start: auto;
+}
+
 /* ------------------------------------------------------------------ avisos de estado */
 
+/*
+ * Os avisos são cartões baixos, em papel: o ladrilho diz o tom (feito, pausado, erro) — sem faixa
+ * colorida inteira.
+ */
 .aviso {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 12px;
+  gap: 8px 14px;
   margin: 0;
-  padding: 12px 14px 12px 16px;
-  border: 1px solid var(--linha);
-  border-radius: 14px;
-  background: var(--superficie);
+  padding: 12px 14px;
   color: var(--tinta);
   font-size: 14px;
   line-height: 1.45;
-}
-
-.aviso__icone {
-  flex: none;
-  font-size: 20px;
 }
 
 .aviso__texto {
@@ -703,38 +731,55 @@ async function celularMudou() {
   min-width: 0;
 }
 
-.aviso--ok {
-  border-color: color-mix(in oklab, var(--ok) 35%, transparent);
-  background: var(--ok-fundo);
-}
-
-.aviso--ok .aviso__icone {
-  color: var(--ok-tinta);
-}
-
-.aviso--atencao {
-  border-color: color-mix(in oklab, var(--atencao) 35%, transparent);
-  background: var(--atencao-fundo);
-}
-
-.aviso--atencao .aviso__icone {
-  color: var(--atencao-tinta);
-}
-
 .aviso--risco {
-  border-color: color-mix(in oklab, var(--risco) 35%, transparent);
-  background: var(--risco-fundo);
   color: var(--risco-tinta);
-}
-
-.aviso--neutro .aviso__icone {
-  color: var(--tinta-2);
 }
 
 /* ------------------------------------------------------------------ a caixa */
 
 .caixa {
   overflow: hidden;
+}
+
+/* O alto do cartão: ladrilho, nome e a ordem de leitura; à direita, quantos esperam. */
+.caixa__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 22px 16px 20px;
+  border-bottom: 1px solid var(--linha-suave);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--clinica-fundo) 55%, var(--superficie)),
+    var(--superficie)
+  );
+}
+
+.caixa__titulos {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.caixa__titulos h2 {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.caixa__descricao {
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.caixa__total {
+  color: var(--tinta);
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
 }
 
 .caixa__lista {
@@ -749,16 +794,8 @@ async function celularMudou() {
   text-align: center;
 }
 
-.caixa__vazio-icone {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
+.caixa__vazio .ui-ladrilho {
   margin-bottom: 6px;
-  border-radius: 14px;
-  background: var(--clinica-fundo);
-  color: var(--clinica-tinta);
-  font-size: 24px;
 }
 
 .caixa__vazio strong {
@@ -777,26 +814,28 @@ async function celularMudou() {
 
 /* ------------------------------------------------------------------ respondidos */
 
+/* O histórico é um cartão que abre: o alto é o botão, a lista desce embaixo dele. */
 .historico {
   display: grid;
-  gap: 12px;
+  overflow: hidden;
 }
 
 .historico__alternar {
-  display: inline-flex;
-  min-height: 36px;
-  justify-self: start;
+  display: flex;
+  width: 100%;
+  min-height: 60px;
   align-items: center;
-  gap: 8px;
-  padding: 0 10px 0 6px;
+  gap: 12px;
+  padding: 0 20px;
   border: 0;
-  border-radius: 10px;
   background: transparent;
   color: var(--tinta);
   cursor: pointer;
   font: inherit;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 650;
+  text-align: start;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .historico__alternar:hover {
@@ -805,12 +844,21 @@ async function celularMudou() {
 
 .historico__alternar:focus-visible {
   outline: 2px solid var(--pj-lugar, var(--musgo));
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
-.historico__alternar > i {
-  color: var(--tinta-2);
+.historico__titulo {
+  letter-spacing: -0.01em;
+}
+
+.historico__seta {
+  margin-inline-start: auto;
+  color: var(--tinta-3);
   font-size: 16px;
+}
+
+.historico__lista {
+  border-top: 1px solid var(--linha-suave);
 }
 
 .respondido {

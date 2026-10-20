@@ -193,7 +193,7 @@ async function salvar() {
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog hc-tema"
+    class="clinic-dialog hc-tema agenda-dialogo"
     :style="{ width: 'min(36rem, 94vw)' }"
     :aria-labelledby="idTitulo"
     :dismissable-mask="true"

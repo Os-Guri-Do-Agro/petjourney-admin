@@ -28,7 +28,6 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import FilaAdicionarDialog from '@/features/clinico/components/agenda/FilaAdicionarDialog.vue'
 import FilaOfertaDialog from '@/features/clinico/components/agenda/FilaOfertaDialog.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
@@ -281,9 +280,16 @@ onMounted(carregar)
         A vaga que acabou de abrir: no alto, porque é a única coisa da tela que vence em minutos.
         Nasce na agenda (cancelamento, falta) e aparece aqui também.
       -->
-      <section v-if="fila.vagaAberta" class="vaga" role="status" aria-labelledby="vaga-titulo">
+      <section
+        v-if="fila.vagaAberta"
+        class="vaga ui-folha"
+        role="status"
+        aria-labelledby="vaga-titulo"
+      >
         <div class="vaga__cabeca">
-          <span class="vaga__icone" aria-hidden="true"><i class="ph ph-calendar-plus" /></span>
+          <span class="ui-ladrilho ui-ladrilho--ok" aria-hidden="true">
+            <i class="ph ph-calendar-plus" />
+          </span>
           <div class="vaga__texto">
             <strong id="vaga-titulo">{{ t('clinico.fila.vagaAberta.titulo') }}</strong>
             <p>
@@ -349,15 +355,17 @@ onMounted(carregar)
 
       <p
         v-if="aceite"
-        class="aviso"
+        class="aviso ui-folha"
         :class="aceite.tipo === 'marcado' ? 'aviso--ok' : 'aviso--neutro'"
         role="status"
       >
-        <i
-          class="ph aviso__icone"
-          :class="aceite.tipo === 'marcado' ? 'ph-check-circle' : 'ph-info'"
+        <span
+          class="ui-ladrilho"
+          :class="aceite.tipo === 'marcado' ? 'ui-ladrilho--ok' : 'ui-ladrilho--neutro'"
           aria-hidden="true"
-        />
+        >
+          <i class="ph" :class="aceite.tipo === 'marcado' ? 'ph-check-circle' : 'ph-info'" />
+        </span>
         <span class="aviso__texto">{{ aceite.texto }}</span>
         <RouterLink v-if="aceite.rota" class="ui-mais" :to="aceite.rota">
           {{ t('clinico.fila.aceite.verNaAgenda') }}
@@ -376,14 +384,27 @@ onMounted(carregar)
       </p>
 
       <!-- ============================================================ ofertas -->
-      <UiSecao
+      <!--
+        Cada seção é um cartão com cabeçalho próprio, como os postos do Hoje: as ofertas vencem em
+        minutos e levam o tom da atenção no alto; a fila espera, e fica no papel.
+      -->
+      <section
         v-if="ofertas.length > 0"
-        id="fila-ofertas"
-        :titulo="t('clinico.fila.tela.ofertas')"
-        :contagem="ofertas.length"
-        :descricao="t('clinico.fila.tela.ofertasDescricao')"
+        class="bloco bloco--ofertas ui-folha"
+        aria-labelledby="fila-ofertas-titulo"
       >
-        <ul class="ui-folha ui-lista lista">
+        <header class="bloco__cabeca">
+          <span class="ui-ladrilho ui-ladrilho--atencao" aria-hidden="true">
+            <i class="ph ph-paper-plane-tilt" />
+          </span>
+          <span class="bloco__titulos">
+            <h2 id="fila-ofertas-titulo">{{ t('clinico.fila.tela.ofertas') }}</h2>
+            <span class="bloco__descricao">{{ t('clinico.fila.tela.ofertasDescricao') }}</span>
+          </span>
+          <span class="bloco__total ui-num">{{ ofertas.length }}</span>
+        </header>
+
+        <ul class="ui-lista lista">
           <li
             v-for="entrada in ofertas"
             :key="entrada.id"
@@ -472,16 +493,24 @@ onMounted(carregar)
             </span>
           </li>
         </ul>
-      </UiSecao>
+      </section>
 
       <!-- ============================================================ esperando -->
-      <UiSecao
-        id="fila-esperando"
-        :titulo="t('clinico.fila.tela.esperando')"
-        :contagem="esperando.length"
-        :descricao="esperando.length > 1 ? t('clinico.fila.tela.esperandoDescricao') : ''"
-      >
-        <ul v-if="esperando.length > 0" class="ui-folha ui-lista lista">
+      <section class="bloco ui-folha" aria-labelledby="fila-esperando-titulo">
+        <header class="bloco__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true">
+            <i class="ph ph-hourglass-medium" />
+          </span>
+          <span class="bloco__titulos">
+            <h2 id="fila-esperando-titulo">{{ t('clinico.fila.tela.esperando') }}</h2>
+            <span v-if="esperando.length > 1" class="bloco__descricao">
+              {{ t('clinico.fila.tela.esperandoDescricao') }}
+            </span>
+          </span>
+          <span class="bloco__total ui-num">{{ esperando.length }}</span>
+        </header>
+
+        <ul v-if="esperando.length > 0" class="ui-lista lista">
           <li
             v-for="entrada in esperando"
             :key="entrada.id"
@@ -568,11 +597,11 @@ onMounted(carregar)
             </p>
           </li>
         </ul>
-        <p v-else class="ui-folha ui-vazio">{{ t('clinico.fila.saudacao.aguardando', { n: 0 }, 0) }}</p>
-      </UiSecao>
+        <p v-else class="ui-vazio">{{ t('clinico.fila.saudacao.aguardando', { n: 0 }, 0) }}</p>
+      </section>
 
       <!-- ============================================================ resolvidas -->
-      <section v-if="resolvidas.length > 0" class="historico">
+      <section v-if="resolvidas.length > 0" class="historico ui-folha">
         <button
           type="button"
           class="historico__alternar"
@@ -580,16 +609,19 @@ onMounted(carregar)
           aria-controls="fila-resolvidas"
           @click="resolvidasAbertas = !resolvidasAbertas"
         >
+          <span class="ui-ladrilho ui-ladrilho--neutro ui-ladrilho--p" aria-hidden="true">
+            <i class="ph ph-clock-counter-clockwise" />
+          </span>
+          <span class="historico__titulo">{{ t('clinico.fila.tela.resolvidas') }}</span>
+          <span class="ui-contagem">{{ resolvidas.length }}</span>
           <i
-            class="ph"
-            :class="resolvidasAbertas ? 'ph-caret-down' : 'ph-caret-right'"
+            class="ph historico__seta"
+            :class="resolvidasAbertas ? 'ph-caret-up' : 'ph-caret-down'"
             aria-hidden="true"
           />
-          {{ t('clinico.fila.tela.resolvidas') }}
-          <span class="ui-contagem">{{ resolvidas.length }}</span>
         </button>
 
-        <ul v-if="resolvidasAbertas" id="fila-resolvidas" class="ui-folha ui-lista">
+        <ul v-if="resolvidasAbertas" id="fila-resolvidas" class="ui-lista historico__lista">
           <li v-for="entrada in resolvidas" :key="entrada.id" class="resolvida">
             <span class="quem">
               <PetAvatar
@@ -661,13 +693,19 @@ onMounted(carregar)
 
 /* ------------------------------------------------------------------ a vaga que abriu */
 
+/*
+ * A vaga que abriu é um cartão de estado: o alto desce do verde do "ok" para o papel, como a
+ * Recepção do Hoje, e os candidatos ficam em poços rentes dentro dele.
+ */
 .vaga {
   display: grid;
   gap: 14px;
-  padding: 16px 18px;
-  border: 1px solid color-mix(in oklab, var(--ok) 40%, transparent);
-  border-radius: 16px;
-  background: var(--ok-fundo);
+  padding: 18px 20px 14px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--ok-fundo) 70%, var(--superficie)),
+    var(--superficie) 140px
+  );
 }
 
 .vaga__cabeca {
@@ -676,33 +714,22 @@ onMounted(carregar)
   gap: 14px;
 }
 
-.vaga__icone {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  flex: none;
-  place-items: center;
-  border-radius: 12px;
-  background: var(--superficie);
-  color: var(--ok-tinta);
-  font-size: 20px;
-}
-
 .vaga__texto {
   flex: 1;
   min-width: 0;
 }
 
 .vaga__texto strong {
-  color: var(--ok-tinta);
+  color: var(--tinta);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .vaga__texto p {
   margin: 2px 0 0;
-  color: var(--tinta);
-  font-size: 14px;
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.45;
 }
 
@@ -720,8 +747,8 @@ onMounted(carregar)
 
 .vaga__quando strong {
   color: var(--ok-tinta);
-  font-size: 26px;
-  letter-spacing: -0.02em;
+  font-size: 28px;
+  letter-spacing: -0.025em;
 }
 
 .vaga__candidatos {
@@ -735,13 +762,13 @@ onMounted(carregar)
 
 .vaga__candidato {
   display: flex;
-  min-height: 56px;
+  min-height: 60px;
   align-items: center;
   gap: 12px;
   padding: 8px 10px 8px 12px;
-  border: 1px solid color-mix(in oklab, var(--ok) 25%, var(--linha));
-  border-radius: 12px;
-  background: var(--superficie);
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
 }
 
 .vaga__depois.p-button {
@@ -750,25 +777,17 @@ onMounted(carregar)
 
 /* ------------------------------------------------------------------ avisos */
 
+/* O aviso do aceite: cartão baixo em papel, com o ladrilho no tom do que aconteceu. */
 .aviso {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 12px;
+  gap: 8px 14px;
   margin: 0;
-  padding: 12px 14px 12px 16px;
-  border: 1px solid var(--linha);
-  border-radius: 14px;
-  background: var(--superficie);
+  padding: 12px 14px;
   color: var(--tinta);
   font-size: 14px;
   line-height: 1.45;
-}
-
-.aviso__icone {
-  flex: none;
-  color: var(--tinta-2);
-  font-size: 20px;
 }
 
 .aviso__texto {
@@ -776,13 +795,54 @@ onMounted(carregar)
   min-width: 0;
 }
 
-.aviso--ok {
-  border-color: color-mix(in oklab, var(--ok) 35%, transparent);
-  background: var(--ok-fundo);
+/* ------------------------------------------------------------------ os cartões */
+
+.bloco {
+  overflow: hidden;
 }
 
-.aviso--ok .aviso__icone {
-  color: var(--ok-tinta);
+/* O alto do cartão: ladrilho, nome e a ordem de leitura; à direita, quantos são. */
+.bloco__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 22px 16px 20px;
+  border-bottom: 1px solid var(--linha-suave);
+}
+
+.bloco--ofertas .bloco__cabeca {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--atencao-fundo) 60%, var(--superficie)),
+    var(--superficie)
+  );
+}
+
+.bloco__titulos {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.bloco__titulos h2 {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.bloco__descricao {
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.bloco__total {
+  color: var(--tinta);
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
 }
 
 /* ------------------------------------------------------------------ as listas */
@@ -795,25 +855,40 @@ onMounted(carregar)
 .lista > li {
   position: relative;
   display: grid;
-  min-height: 76px;
+  min-height: 84px;
   align-items: center;
-  gap: 8px 20px;
-  padding: 12px 18px 12px 22px;
+  gap: 8px 22px;
+  padding: 14px 20px 14px 18px;
 }
 
 .oferta {
-  grid-template-columns: 6.25rem minmax(0, 1.3fr) minmax(0, 1fr) 11rem auto;
+  grid-template-columns: 6.5rem minmax(0, 1.3fr) minmax(0, 1fr) 11rem auto;
 }
 
 .espera {
   grid-template-columns: 2.5rem minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) 5.5rem auto;
 }
 
-/* Para quando é a vaga oferecida: a data pequena e a hora grande, como nos pedidos. */
+/*
+ * Para quando é a vaga oferecida: num ladrilho de calendário rente, a data pequena e a hora
+ * grande — o mesmo desenho dos pedidos.
+ */
 .quando {
   display: grid;
+  justify-items: center;
   gap: 1px;
+  padding: 9px 8px 10px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
   line-height: 1.15;
+  text-align: center;
+}
+
+.quando:empty {
+  padding: 0;
+  border: 0;
+  background: none;
 }
 
 .quando small {
@@ -935,17 +1010,19 @@ onMounted(carregar)
 /* A posição: o número que responde "sou o quantos?". O primeiro, na cor da clínica. */
 .posicao {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   place-items: center;
-  border-radius: 50%;
-  background: var(--superficie-3);
+  border: 1px solid var(--linha-suave);
+  border-radius: 12px;
+  background: var(--superficie-2);
   color: var(--tinta);
   font-size: 15px;
   font-weight: 650;
 }
 
 .posicao--primeira {
+  border-color: color-mix(in oklab, var(--clinica) 25%, transparent);
   background: var(--clinica-fundo);
   color: var(--clinica-tinta);
 }
@@ -1012,26 +1089,28 @@ onMounted(carregar)
 
 /* ------------------------------------------------------------------ resolvidas */
 
+/* As resolvidas: um cartão que abre — o alto é o botão, a lista desce embaixo dele. */
 .historico {
   display: grid;
-  gap: 12px;
+  overflow: hidden;
 }
 
 .historico__alternar {
-  display: inline-flex;
-  min-height: 36px;
-  justify-self: start;
+  display: flex;
+  width: 100%;
+  min-height: 60px;
   align-items: center;
-  gap: 8px;
-  padding: 0 10px 0 6px;
+  gap: 12px;
+  padding: 0 20px;
   border: 0;
-  border-radius: 10px;
   background: transparent;
   color: var(--tinta);
   cursor: pointer;
   font: inherit;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 650;
+  text-align: start;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .historico__alternar:hover {
@@ -1040,12 +1119,21 @@ onMounted(carregar)
 
 .historico__alternar:focus-visible {
   outline: 2px solid var(--pj-lugar, var(--musgo));
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
-.historico__alternar > i {
-  color: var(--tinta-2);
+.historico__titulo {
+  letter-spacing: -0.01em;
+}
+
+.historico__seta {
+  margin-inline-start: auto;
+  color: var(--tinta-3);
   font-size: 16px;
+}
+
+.historico__lista {
+  border-top: 1px solid var(--linha-suave);
 }
 
 .resolvida {

@@ -18,7 +18,7 @@ import { ICONE_DO_BLOQUEIO } from './agenda-icones'
 import { useAgendaDia, type FaixaBloqueio } from '../../composables/useAgendaDia'
 import { useAgendaDrag, type ArrasteProposta } from '../../composables/useAgendaDrag'
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import type { Appointment } from '../../data/types'
+import type { Appointment, AppointmentStatus } from '../../data/types'
 import { minutesToClock } from '../../domain/clinic-time'
 import { useAgendaStore } from '../../stores/agenda'
 import { clinicClock } from '../../stores/clinico'
@@ -298,6 +298,25 @@ function marcaCobertaPeloAgora(topo: number) {
   return mostrarLinhaDoAgora.value && Math.abs(topo - topoDaLinhaDoAgora.value) < 14
 }
 
+/** As iniciais de quem atende, para o monograma do cabeçalho: primeiro e último nome. */
+function iniciais(nome: string) {
+  const partes = nome.trim().split(/\s+/).filter(Boolean)
+  const primeira = partes[0]?.charAt(0) ?? ''
+  const ultima = partes.length > 1 ? (partes.at(-1)?.charAt(0) ?? '') : ''
+
+  return `${primeira}${ultima}`.toLocaleUpperCase()
+}
+
+/** Os estados que a chave do rodapé explica — na ordem em que o dia anda. */
+const ESTADOS_DA_CHAVE: AppointmentStatus[] = [
+  'agendado',
+  'confirmado',
+  'aguardando',
+  'em-atendimento',
+  'finalizado',
+  'falta',
+]
+
 /** Ocupação acima de 85% é dia apertado; acima de 100%, vendido além do expediente. */
 function tomDaOcupacao(ocupacao: number) {
   if (ocupacao > 1) {
@@ -352,28 +371,38 @@ watch(() => agenda.data, medir)
           <span class="ui-num">{{ formato.dataCurta(agenda.data) }}</span>
         </div>
 
-        <div v-for="coluna in colunas" :key="coluna.id" class="grade__coluna-topo">
-          <span class="grade__titulo" :title="coluna.titulo">
-            <span class="grade__cor" :style="{ background: coluna.cor }" aria-hidden="true" />
-            <span class="grade__nome">{{ coluna.titulo }}</span>
+        <div
+          v-for="coluna in colunas"
+          :key="coluna.id"
+          class="grade__coluna-topo"
+          :style="{ '--coluna-cor': coluna.cor }"
+        >
+          <!-- O rosto da coluna: as iniciais na cor de quem atende (ou a porta, por sala). -->
+          <span class="grade__monograma" aria-hidden="true">
+            <i v-if="!coluna.professionalId" class="ph ph-door" />
+            <template v-else>{{ iniciais(coluna.titulo) }}</template>
           </span>
 
-          <!--
-            A carga em proporção, e não em minutos: "62%" compara colunas de relance. Os minutos
-            continuam no `title`, para quem precisa do número exato.
-          -->
-          <span
-            class="grade__carga"
-            :class="`grade__carga--${tomDaOcupacao(coluna.ocupacao)}`"
-            :title="t('clinico.agenda.ocupacao', { minutos: coluna.ocupacaoMinutos })"
-          >
-            <span class="grade__barra" aria-hidden="true">
-              <span
-                class="grade__preenchimento"
-                :style="{ width: `${Math.min(coluna.ocupacao, 1) * 100}%` }"
-              />
+          <span class="grade__pessoa">
+            <span class="grade__nome" :title="coluna.titulo">{{ coluna.titulo }}</span>
+
+            <!--
+              A carga em proporção, e não em minutos: "62%" compara colunas de relance. Os minutos
+              continuam no `title`, para quem precisa do número exato.
+            -->
+            <span
+              class="grade__carga"
+              :class="`grade__carga--${tomDaOcupacao(coluna.ocupacao)}`"
+              :title="t('clinico.agenda.ocupacao', { minutos: coluna.ocupacaoMinutos })"
+            >
+              <span class="grade__barra" aria-hidden="true">
+                <span
+                  class="grade__preenchimento"
+                  :style="{ width: `${Math.min(coluna.ocupacao, 1) * 100}%` }"
+                />
+              </span>
+              <span class="ui-num">{{ formato.percentual(coluna.ocupacao) }}</span>
             </span>
-            <span class="ui-num">{{ formato.percentual(coluna.ocupacao) }}</span>
           </span>
         </div>
       </header>
@@ -532,16 +561,31 @@ watch(() => agenda.data, medir)
       </div>
     </div>
 
-    <p class="grade__dica">
-      <i class="ph ph-hand-grabbing" aria-hidden="true" />
-      {{ t('clinico.agenda.arrastarDica') }}
-    </p>
+    <footer class="grade__pe">
+      <p class="grade__dica">
+        <i class="ph ph-hand-grabbing" aria-hidden="true" />
+        {{ t('clinico.agenda.arrastarDica') }}
+      </p>
+
+      <!-- A chave das cores do estado: a mesma da tabela do dia. -->
+      <ul class="grade__estados" aria-hidden="true">
+        <li v-for="status in ESTADOS_DA_CHAVE" :key="status" :class="`grade__estado--${status}`">
+          <span class="grade__amostra" />
+          {{ formato.status(status) }}
+        </li>
+      </ul>
+    </footer>
   </div>
 </template>
 
 <style scoped>
+/*
+ * O acabamento da linha do tempo segue o da tabela do dia: cabeçalho e rodapé num poço, a grade
+ * em papel com fios leves, e os atendimentos como cartões pequenos que flutuam.
+ */
 .grade {
-  --coluna-minima: 7.5rem;
+  --coluna-minima: 8rem;
+  --grade-poco: color-mix(in oklab, var(--superficie-2) 75%, var(--superficie));
 
   display: grid;
   overflow: hidden;
@@ -574,7 +618,7 @@ watch(() => agenda.data, medir)
   top: 0;
   z-index: 8;
   border-bottom: 1px solid var(--linha);
-  background: var(--superficie);
+  background: var(--grade-poco);
 }
 
 .grade__canto {
@@ -582,47 +626,75 @@ watch(() => agenda.data, medir)
   left: 0;
   z-index: 1;
   display: grid;
-  align-items: end;
-  padding: 0 10px 12px;
+  align-items: center;
+  padding: 0 10px;
   border-inline-end: 1px solid var(--linha);
-  background: var(--superficie);
+  background: var(--grade-poco);
   color: var(--tinta-3);
   font-size: 12px;
+  font-weight: 600;
   text-align: end;
 }
 
+/*
+ * Quem atende: o monograma na cor da coluna, o nome e a ocupação embaixo. A coluna é o contêiner:
+ * estreita, o monograma sai e o nome fica.
+ */
 .grade__coluna-topo {
-  display: grid;
-  min-width: 0;
-  align-content: end;
-  gap: 8px;
-  padding: 14px 14px 12px;
-}
-
-.grade__coluna-topo + .grade__coluna-topo {
-  border-inline-start: 1px solid var(--linha);
-}
-
-.grade__titulo {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 8px;
-  color: var(--tinta);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.3;
+  gap: 10px;
+  padding: 12px 14px;
+  container-type: inline-size;
 }
 
-.grade__cor {
-  width: 10px;
-  height: 10px;
+.grade__coluna-topo + .grade__coluna-topo {
+  border-inline-start: 1px solid var(--linha-suave);
+}
+
+.grade__monograma {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
   flex: none;
+  place-items: center;
   border-radius: 50%;
+  background: color-mix(in oklab, var(--coluna-cor) 32%, var(--superficie));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--coluna-cor) 50%, transparent),
+    var(--sombra-xs);
+  color: color-mix(in oklab, var(--coluna-cor) 30%, var(--tinta));
+  font-family: var(--font-dados);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.grade__monograma i {
+  font-size: 17px;
+}
+
+@container (max-width: 9.5rem) {
+  .grade__monograma {
+    display: none;
+  }
+}
+
+.grade__pessoa {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 6px;
 }
 
 .grade__nome {
   overflow: hidden;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -632,13 +704,13 @@ watch(() => agenda.data, medir)
   align-items: center;
   gap: 8px;
   color: var(--tinta-2);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .grade__barra {
   display: block;
-  height: 4px;
+  height: 5px;
   flex: 1;
   min-width: 1.5rem;
   overflow: hidden;
@@ -685,7 +757,7 @@ watch(() => agenda.data, medir)
 
 .eixo__marca {
   position: absolute;
-  inset-inline-end: 10px;
+  inset-inline-end: 12px;
   font-family: var(--font-dados);
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -696,6 +768,7 @@ watch(() => agenda.data, medir)
   color: var(--tinta);
   font-size: 13px;
   font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .eixo__marca--meia {
@@ -720,11 +793,12 @@ watch(() => agenda.data, medir)
 
 .eixo__agora {
   position: absolute;
-  inset-inline-end: 4px;
+  inset-inline-end: 8px;
   z-index: 1;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 999px;
   background: var(--clinica-tinta);
+  box-shadow: 0 0 0 3px var(--superficie);
   color: var(--superficie);
   font-size: 12px;
   font-weight: 650;
@@ -741,14 +815,14 @@ watch(() => agenda.data, medir)
 }
 
 .coluna + .coluna {
-  border-inline-start: 1px solid var(--linha);
+  border-inline-start: 1px solid var(--linha-suave);
 }
 
 .coluna__linha {
   position: absolute;
   inset-inline-start: 0;
   width: 100%;
-  border-top: 1px solid color-mix(in oklab, var(--linha) 55%, transparent);
+  border-top: 1px solid color-mix(in oklab, var(--linha-suave) 80%, transparent);
   pointer-events: none;
 }
 
@@ -773,11 +847,11 @@ watch(() => agenda.data, medir)
 .faixa-clinica {
   position: absolute;
   overflow: hidden;
-  background-color: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+  background-color: color-mix(in oklab, var(--superficie-2) 80%, var(--superficie));
   background-image: repeating-linear-gradient(
     135deg,
-    transparent 0 7px,
-    color-mix(in oklab, var(--linha) 85%, transparent) 7px 8px
+    transparent 0 8px,
+    color-mix(in oklab, var(--linha) 75%, transparent) 8px 9px
   );
   pointer-events: none;
 }
@@ -807,11 +881,12 @@ watch(() => agenda.data, medir)
   align-items: center;
   gap: 6px;
   height: 24px;
-  padding: 0 10px;
+  padding: 0 11px 0 9px;
   overflow: hidden;
   border: 1px solid var(--linha);
   border-radius: 999px;
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta-2);
   font-size: 12.5px;
   font-weight: 550;
@@ -820,6 +895,7 @@ watch(() => agenda.data, medir)
 
 .etiqueta i {
   flex: none;
+  color: var(--tinta-3);
   font-size: 14px;
 }
 
@@ -838,12 +914,13 @@ watch(() => agenda.data, medir)
 
 .agora::before {
   position: absolute;
-  top: -5px;
-  inset-inline-start: -5px;
-  width: 8px;
-  height: 8px;
+  top: -6px;
+  inset-inline-start: -6px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--clinica);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--clinica) 22%, transparent);
   content: '';
 }
 
@@ -859,7 +936,7 @@ watch(() => agenda.data, medir)
   z-index: 1;
   width: 100%;
   border: 1px dashed var(--clinica);
-  border-radius: 8px;
+  border-radius: 10px;
   background: color-mix(in oklab, var(--clinica-fundo) 70%, transparent);
   pointer-events: none;
 }
@@ -902,13 +979,22 @@ watch(() => agenda.data, medir)
 
 /* ------------------------------------------------------------------------------ rodapé */
 
+.grade__pe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--linha);
+  background: var(--grade-poco);
+}
+
 .grade__dica {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0;
-  padding: 10px 16px;
-  border-top: 1px solid var(--linha);
   color: var(--tinta-3);
   font-size: 12.5px;
   line-height: 1.4;
@@ -917,6 +1003,71 @@ watch(() => agenda.data, medir)
 .grade__dica i {
   flex: none;
   font-size: 16px;
+}
+
+/* A chave do estado: as mesmas quatro variáveis do cartão (`AgendaAppointmentCard`). */
+.grade__estados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  list-style: none;
+}
+
+.grade__estados li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.grade__amostra {
+  width: 16px;
+  height: 12px;
+  flex: none;
+  border: 1px solid var(--estado-borda, var(--linha));
+  border-radius: 4px;
+  background: var(--estado-fundo);
+  box-shadow: inset 3px 0 0 var(--estado);
+}
+
+.grade__estado--agendado {
+  --estado: var(--linha-forte);
+  --estado-fundo: var(--superficie);
+  --estado-borda: var(--linha-media);
+}
+
+.grade__estado--confirmado {
+  --estado: var(--clinica);
+  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 38%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--clinica) 22%, var(--linha));
+}
+
+.grade__estado--aguardando {
+  --estado: var(--atencao);
+  --estado-fundo: color-mix(in oklab, var(--atencao-fundo) 88%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--atencao) 42%, var(--linha));
+}
+
+.grade__estado--em-atendimento {
+  --estado: var(--clinica);
+  --estado-fundo: var(--clinica-fundo);
+  --estado-borda: color-mix(in oklab, var(--clinica) 55%, var(--linha));
+}
+
+.grade__estado--finalizado {
+  --estado: var(--linha-media);
+  --estado-fundo: var(--superficie-2);
+  --estado-borda: var(--linha-suave);
+}
+
+.grade__estado--falta {
+  --estado: var(--risco);
+  --estado-fundo: color-mix(in oklab, var(--risco-fundo) 70%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--risco) 32%, var(--linha));
 }
 
 .grade__sr {

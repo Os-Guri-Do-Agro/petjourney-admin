@@ -670,7 +670,12 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
         </ul>
 
         <section class="gp__quando" :aria-labelledby="'gp-quando'">
-          <h3 id="gp-quando" class="gp__titulo">{{ t('clinico.pedidos.gaveta.quando') }}</h3>
+          <h3 id="gp-quando" class="gp__titulo">
+            <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+              <i class="ph ph-calendar-blank" />
+            </span>
+            {{ t('clinico.pedidos.gaveta.quando') }}
+          </h3>
 
           <CalendarioDoPedido
             v-model:dia="dia"
@@ -1077,10 +1082,14 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
 }
 
 .gp__titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 /* O calendário é compartilhado (hotel, página pública): aqui só o dia da semana sai da caixa alta. */

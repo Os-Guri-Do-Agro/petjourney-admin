@@ -134,7 +134,7 @@ function salvar() {
       <fieldset class="config__pedidos" :disabled="!rascunho.ativo">
         <section class="config__secao">
           <h3 class="config__titulo">
-            <i class="ph ph-signpost" aria-hidden="true" />
+            <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-signpost" /></span>
             {{ t('clinico.pedidos.config.caminhos') }}
           </h3>
 
@@ -186,7 +186,7 @@ function salvar() {
 
         <section class="config__secao">
           <h3 class="config__titulo">
-            <i class="ph ph-list-checks" aria-hidden="true" />
+            <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-list-checks" /></span>
             {{ t('clinico.pedidos.config.servicos') }}
           </h3>
 
@@ -205,7 +205,7 @@ function salvar() {
 
         <section class="config__secao">
           <h3 class="config__titulo">
-            <i class="ph ph-users" aria-hidden="true" />
+            <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-users" /></span>
             {{ t('clinico.pedidos.config.profissionais') }}
           </h3>
 
@@ -225,7 +225,7 @@ function salvar() {
 
         <section class="config__secao">
           <h3 class="config__titulo">
-            <i class="ph ph-clock" aria-hidden="true" />
+            <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-clock" /></span>
             {{ t('clinico.pedidos.config.prazos') }}
           </h3>
 
@@ -288,7 +288,7 @@ function salvar() {
       <!-- A emergência vale mesmo com os pedidos pausados: é o contato, não o pedido. -->
       <section class="config__secao">
         <h3 class="config__titulo">
-          <i class="ph ph-first-aid" aria-hidden="true" />
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i class="ph ph-first-aid" /></span>
           {{ t('clinico.pedidos.config.emergencia') }}
         </h3>
         <p class="config__ajuda">{{ t('clinico.pedidos.config.emergenciaAjuda') }}</p>
@@ -409,7 +409,7 @@ function salvar() {
   align-items: center;
   padding: 1rem 1.1rem;
   border: 1px solid var(--linha);
-  border-radius: 1rem;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie-2);
   cursor: pointer;
   gap: 0.9rem;
@@ -472,16 +472,11 @@ function salvar() {
   display: flex;
   align-items: center;
   margin: 0;
-  gap: 0.5rem;
+  gap: 0.65rem;
   color: var(--tinta);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: -0.005em;
-}
-
-.config__titulo .ph {
-  color: var(--clinica-tinta);
-  font-size: 1.1rem;
+  font-size: 0.96875rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 /* Os caminhos: dois cartões de escolha lado a lado, o ícone e a marca em cima. */
@@ -496,7 +491,7 @@ function salvar() {
   align-content: start;
   padding: 0.85rem 0.9rem 0.95rem;
   border: 1px solid var(--linha);
-  border-radius: 0.9rem;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie);
   cursor: pointer;
   gap: 0.3rem;

@@ -21,7 +21,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
 import ClinicChartColumns from '@/features/clinico/components/resumo/ClinicChartColumns.vue'
 import ClinicChartRanking from '@/features/clinico/components/resumo/ClinicChartRanking.vue'
@@ -227,6 +226,7 @@ const numeros = computed(() => {
   const lista = [
     {
       id: 'comparecimento',
+      icone: 'ph ph-user-check',
       valor: formato.percentual(indicadores.comparecimento),
       rotulo: t('clinico.resumo.indicador.comparecimento'),
       nota: t(
@@ -238,6 +238,7 @@ const numeros = computed(() => {
     },
     {
       id: 'horas',
+      icone: 'ph ph-timer',
       valor: `${formato.numero(indicadores.horasAtendidas, 1)} h`,
       rotulo: t('clinico.resumo.numero.horas'),
       nota: t('clinico.resumo.numero.horasNota'),
@@ -245,6 +246,7 @@ const numeros = computed(() => {
     },
     {
       id: 'ocupacao',
+      icone: 'ph ph-chart-pie-slice',
       valor: formato.percentual(indicadores.ocupacaoMedia),
       rotulo: t('clinico.resumo.indicador.ocupacao'),
       nota: t('clinico.resumo.indicador.ocupacaoDetalhe'),
@@ -252,6 +254,7 @@ const numeros = computed(() => {
     },
     {
       id: 'novos',
+      icone: 'ph ph-paw-print',
       valor: String(indicadores.novosPacientes),
       rotulo: t('clinico.resumo.indicador.novos'),
       nota: t(
@@ -288,7 +291,10 @@ function trocarPeriodo(periodo: PeriodoId) {
           @update:model-value="trocarPeriodo($event as PeriodoId)"
         />
 
-        <span class="relatorio__intervalo">{{ intervaloLegivel }}</span>
+        <span class="relatorio__intervalo">
+          <i class="ph ph-calendar-blank" aria-hidden="true" />
+          <span class="relatorio__intervalo-texto">{{ intervaloLegivel }}</span>
+        </span>
 
         <div class="relatorio__selects">
           <Select
@@ -317,16 +323,25 @@ function trocarPeriodo(periodo: PeriodoId) {
       </p>
 
       <template v-else>
-        <!-- Os quatro números do período, numa régua só: o principal já está na frase do alto. -->
-        <ul class="numeros ui-folha" :aria-label="t('clinico.resumo.fatos.aria')">
+        <!--
+          Os quatro números do período, cada um num indicador com o ladrilho no canto: o principal
+          já está na frase do alto.
+        -->
+        <ul class="ui-indicadores numeros" :aria-label="t('clinico.resumo.fatos.aria')">
           <li
             v-for="numero in numeros"
             :key="numero.id"
-            class="numero"
-            :class="{ 'numero--atencao': numero.atencao }"
+            class="ui-indicador"
+            :class="{ 'ui-indicador--atencao': numero.atencao }"
           >
-            <span class="numero__rotulo">{{ numero.rotulo }}</span>
-            <strong class="numero__valor ui-num">
+            <span
+              class="ui-ladrilho"
+              :class="{ 'ui-ladrilho--atencao': numero.atencao }"
+              aria-hidden="true"
+            >
+              <i :class="numero.icone" />
+            </span>
+            <strong class="ui-indicador__valor ui-num numero__valor">
               <i
                 v-if="numero.atencao"
                 class="ph ph-warning"
@@ -335,16 +350,24 @@ function trocarPeriodo(periodo: PeriodoId) {
               />
               {{ numero.valor }}
             </strong>
-            <span class="numero__nota">{{ numero.nota }}</span>
+            <span class="ui-indicador__rotulo">{{ numero.rotulo }}</span>
+            <span class="ui-indicador__nota">{{ numero.nota }}</span>
           </li>
         </ul>
 
-        <UiSecao
-          id="resumo-por-dia"
-          :titulo="t('clinico.resumo.grafico.porDia')"
-          :descricao="t('clinico.resumo.grafico.porDiaAjuda')"
-          folha
-        >
+        <!--
+          Cada gráfico é um cartão com cabeçalho próprio — ladrilho, título e a pergunta que ele
+          responde —, como os cartões do Início.
+        -->
+        <section id="resumo-por-dia" class="painel ui-folha" aria-labelledby="resumo-por-dia-titulo">
+          <header class="painel__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-chart-bar" /></span>
+            <span class="painel__titulos">
+              <h2 id="resumo-por-dia-titulo">{{ t('clinico.resumo.grafico.porDia') }}</h2>
+              <span class="painel__descricao">{{ t('clinico.resumo.grafico.porDiaAjuda') }}</span>
+            </span>
+          </header>
+
           <div class="relatorio__grafico">
             <ClinicChartColumns
               :pontos="resumo.porDia"
@@ -362,41 +385,57 @@ function trocarPeriodo(periodo: PeriodoId) {
             />
 
             <!-- A ocupação é uma taxa, não uma contagem: vira frase, e o gráfico fica com uma pergunta só. -->
-            <p v-if="fraseDaOcupacao" class="relatorio__ocupacao">
+            <p v-if="fraseDaOcupacao" class="relatorio__ocupacao ui-poco">
               <i class="ph ph-calendar-check" aria-hidden="true" />
               {{ fraseDaOcupacao }}
             </p>
           </div>
-        </UiSecao>
+        </section>
 
         <div class="relatorio__par">
-          <UiSecao id="resumo-por-tipo" :titulo="t('clinico.resumo.grafico.porTipo')" folha>
+          <section id="resumo-por-tipo" class="painel ui-folha" aria-labelledby="resumo-por-tipo-titulo">
+            <header class="painel__cabeca">
+              <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-stethoscope" /></span>
+              <span class="painel__titulos">
+                <h2 id="resumo-por-tipo-titulo">{{ t('clinico.resumo.grafico.porTipo') }}</h2>
+              </span>
+            </header>
             <div class="relatorio__recheio">
               <ClinicChartRanking :fatias="resumo.porTipo" :vazio="t('clinico.resumo.semDados')" />
             </div>
-          </UiSecao>
+          </section>
 
-          <UiSecao
+          <section
             id="resumo-por-profissional"
-            :titulo="t('clinico.resumo.grafico.porProfissional')"
-            folha
+            class="painel ui-folha"
+            aria-labelledby="resumo-por-profissional-titulo"
           >
+            <header class="painel__cabeca">
+              <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-users" /></span>
+              <span class="painel__titulos">
+                <h2 id="resumo-por-profissional-titulo">
+                  {{ t('clinico.resumo.grafico.porProfissional') }}
+                </h2>
+              </span>
+            </header>
             <div class="relatorio__recheio">
               <ClinicChartRanking
                 :fatias="resumo.porProfissional"
                 :vazio="t('clinico.resumo.semDados')"
               />
             </div>
-          </UiSecao>
+          </section>
         </div>
 
         <div class="relatorio__par">
-          <UiSecao
-            id="resumo-horarios"
-            :titulo="t('clinico.resumo.grafico.horarios')"
-            :descricao="t('clinico.resumo.grafico.horariosAjuda')"
-            folha
-          >
+          <section id="resumo-horarios" class="painel ui-folha" aria-labelledby="resumo-horarios-titulo">
+            <header class="painel__cabeca">
+              <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-clock" /></span>
+              <span class="painel__titulos">
+                <h2 id="resumo-horarios-titulo">{{ t('clinico.resumo.grafico.horarios') }}</h2>
+                <span class="painel__descricao">{{ t('clinico.resumo.grafico.horariosAjuda') }}</span>
+              </span>
+            </header>
             <div class="relatorio__recheio">
               <ClinicHeatmap
                 :celulas="resumo.porHora"
@@ -405,27 +444,41 @@ function trocarPeriodo(periodo: PeriodoId) {
                 :vazio="t('clinico.resumo.semDados')"
               />
             </div>
-          </UiSecao>
+          </section>
 
           <div class="relatorio__coluna">
-            <UiSecao id="resumo-origem" :titulo="t('clinico.resumo.grafico.porOrigem')" folha>
+            <section id="resumo-origem" class="painel ui-folha" aria-labelledby="resumo-origem-titulo">
+              <header class="painel__cabeca">
+                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-signpost" /></span>
+                <span class="painel__titulos">
+                  <h2 id="resumo-origem-titulo">{{ t('clinico.resumo.grafico.porOrigem') }}</h2>
+                </span>
+              </header>
               <div class="relatorio__recheio">
                 <ClinicChartRanking :fatias="porOrigem" :vazio="t('clinico.resumo.semDados')" />
               </div>
-            </UiSecao>
+            </section>
 
-            <UiSecao
+            <section
               id="resumo-diagnosticos"
-              :titulo="t('clinico.resumo.grafico.diagnosticos')"
-              folha
+              class="painel ui-folha"
+              aria-labelledby="resumo-diagnosticos-titulo"
             >
+              <header class="painel__cabeca">
+                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-clipboard-text" /></span>
+                <span class="painel__titulos">
+                  <h2 id="resumo-diagnosticos-titulo">
+                    {{ t('clinico.resumo.grafico.diagnosticos') }}
+                  </h2>
+                </span>
+              </header>
               <div class="relatorio__recheio">
                 <ClinicChartRanking
                   :fatias="resumo.diagnosticos"
                   :vazio="t('clinico.resumo.semProntuario')"
                 />
               </div>
-            </UiSecao>
+            </section>
           </div>
         </div>
       </template>
@@ -436,7 +489,7 @@ function trocarPeriodo(periodo: PeriodoId) {
 <style scoped>
 .relatorio {
   display: grid;
-  gap: 28px;
+  gap: 24px;
 }
 
 .relatorio__filtros {
@@ -446,14 +499,32 @@ function trocarPeriodo(periodo: PeriodoId) {
   gap: 12px 16px;
 }
 
+/* O intervalo do período, num selo de papel com o calendário: o "de quando" de todos os números. */
 .relatorio__intervalo {
-  display: inline-block;
-  color: var(--tinta-2);
-  font-size: 14px;
-  font-weight: 500;
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 10px;
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
-.relatorio__intervalo::first-letter {
+.relatorio__intervalo i {
+  color: var(--clinica-tinta);
+  font-size: 16px;
+}
+
+.relatorio__intervalo-texto {
+  display: inline-block;
+}
+
+.relatorio__intervalo-texto::first-letter {
   text-transform: uppercase;
 }
 
@@ -472,73 +543,80 @@ function trocarPeriodo(periodo: PeriodoId) {
   padding: 32px 24px;
 }
 
-/* A régua de números: quatro colunas com fio entre elas, número grande e legenda embaixo. */
+/* Os quatro indicadores numa fileira; o número com o ícone de atenção, quando há. */
 .numeros {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.numero {
-  display: grid;
-  align-content: start;
-  gap: 4px;
-  padding: 18px 22px 20px;
-}
-
-.numero + .numero {
-  border-left: 1px solid var(--linha);
-}
-
-.numero__rotulo {
-  color: var(--tinta-2);
-  font-size: 13px;
-  font-weight: 500;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .numero__valor {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--tinta);
-  font-size: 32px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
 }
 
 .numero__valor i {
   font-size: 22px;
 }
 
-.numero__nota {
-  color: var(--tinta-3);
-  font-size: 12.5px;
+/* ------------------------------------------------------------------ os cartões dos gráficos */
+
+.painel {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  overflow: hidden;
 }
 
-.numero--atencao .numero__valor {
-  color: var(--atencao-tinta);
+.painel__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 22px 0 20px;
+}
+
+.painel__titulos {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.painel__titulos h2 {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.painel__descricao {
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .relatorio__grafico {
   display: grid;
-  gap: 8px;
-  padding: 12px 16px 18px;
+  gap: 12px;
+  padding: 10px 16px 18px;
 }
 
+/* A frase da ocupação num poço, embaixo do gráfico: apoia, não compete. */
 .relatorio__ocupacao {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 0 6px;
+  gap: 10px;
+  margin: 0 4px;
+  padding: 10px 14px;
   color: var(--tinta-2);
   font-size: 13.5px;
+  line-height: 1.45;
 }
 
 .relatorio__ocupacao i {
+  flex: none;
   color: var(--clinica);
   font-size: 18px;
 }
@@ -546,30 +624,22 @@ function trocarPeriodo(periodo: PeriodoId) {
 .relatorio__par {
   display: grid;
   align-items: start;
-  gap: 20px;
+  gap: 24px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .relatorio__coluna {
   display: grid;
-  gap: 28px;
+  gap: 24px;
 }
 
 .relatorio__recheio {
-  padding: 18px 20px;
+  padding: 18px 22px 22px 20px;
 }
 
 @media (max-width: 1100px) {
   .numeros {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .numero:nth-child(3) {
-    border-left: 0;
-  }
-
-  .numero:nth-child(n + 3) {
-    border-top: 1px solid var(--linha);
   }
 
   .relatorio__par {
@@ -586,6 +656,12 @@ function trocarPeriodo(periodo: PeriodoId) {
   .relatorio__selects :deep(.p-select) {
     flex: 1;
     min-width: 0;
+  }
+}
+
+@media (max-width: 359px) {
+  .numeros {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

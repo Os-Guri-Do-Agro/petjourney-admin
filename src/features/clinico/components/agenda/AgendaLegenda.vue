@@ -163,23 +163,27 @@ const itens = computed<ItemDaLegenda[]>(() =>
   min-height: 32px;
   align-items: center;
   gap: 6px;
-  padding: 0 10px 0 6px;
-  border: 0;
-  border-radius: 8px;
+  padding: 0 12px 0 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
   background: transparent;
   color: var(--tinta-2);
   cursor: pointer;
   font: inherit;
   font-size: 13.5px;
-  font-weight: 550;
+  font-weight: 600;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
-.legenda__alternar:hover {
+.legenda__alternar:hover,
+.legenda__alternar[aria-expanded='true'] {
+  border-color: var(--linha-suave);
   background: var(--superficie-2);
   color: var(--tinta);
 }
 
 .legenda__alternar i {
+  color: var(--tinta-3);
   font-size: 13px;
 }
 
@@ -204,18 +208,24 @@ const itens = computed<ItemDaLegenda[]>(() =>
   min-height: 32px;
   align-items: center;
   gap: 7px;
-  padding: 0 11px 0 4px;
+  padding: 0 12px 0 4px;
   border: 1px solid var(--linha);
   border-radius: 999px;
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   cursor: pointer;
   font: inherit;
   font-size: 13px;
+  font-weight: 500;
+  transition:
+    border-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    box-shadow var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .chave:hover {
-  border-color: var(--linha-forte);
+  border-color: var(--linha-media);
+  box-shadow: var(--sombra-1);
 }
 
 .legenda__alternar:focus-visible,

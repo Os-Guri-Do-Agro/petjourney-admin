@@ -98,3 +98,14 @@ const subtituloComInicial = computed(() =>
   line-height: 1.4;
 }
 </style>
+
+<!--
+  Global de propósito, e só para os diálogos da Agenda (`agenda-dialogo`): o acabamento do Trilha dá
+  8 px ao alto do conteúdo, pensado para cabeçalho sem faixa, e vence a folga que o `.clinic-dialog`
+  devolve. Com a faixa do cabeçalho, o primeiro rótulo do formulário encostava no traço.
+-->
+<style>
+html.trilha .agenda-dialogo .p-dialog-content {
+  padding-top: 20px;
+}
+</style>

@@ -221,6 +221,12 @@ const estilo = computed(() => {
       <span class="card__nome">{{ card.pet?.nome }}</span>
 
       <span class="card__icones">
+        <!-- Na sala agora: o ponto que respira; feito: o visto apagado. -->
+        <span v-if="appointment.status === 'em-atendimento'" class="card__ao-vivo" />
+        <i
+          v-else-if="appointment.status === 'finalizado' && faixa !== 'minima'"
+          class="ph ph-check-circle card__icone card__icone--neutro"
+        />
         <i
           v-if="faltou"
           class="ph ph-user-minus card__icone card__icone--falta"
@@ -308,7 +314,7 @@ const estilo = computed(() => {
 .card {
   --estado: var(--linha-forte);
   --estado-fundo: var(--superficie);
-  --estado-borda: var(--linha);
+  --estado-borda: var(--linha-media);
   --estado-tinta: var(--tinta-2);
 
   position: absolute;
@@ -316,15 +322,27 @@ const estilo = computed(() => {
   align-content: start;
   gap: 1px;
   overflow: hidden;
-  padding: 3px 6px 3px 6px;
+  padding: 3px 7px 3px 12px;
   border: 1px solid var(--estado-borda);
-  border-inline-start: 3px solid var(--estado);
-  border-radius: 7px;
+  border-radius: 9px;
   background: var(--estado-fundo);
+  box-shadow: var(--estado-sombra, var(--sombra-xs));
   color: var(--tinta);
   cursor: grab;
   touch-action: none;
   transition: box-shadow var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+/* O traço do estado, por dentro do cartão: arredondado, longe da borda — como na tabela do dia. */
+.card::before {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  inset-inline-start: 4px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--estado);
+  content: '';
 }
 
 .card:hover {
@@ -336,7 +354,38 @@ const estilo = computed(() => {
 .card--selecionado {
   z-index: 4;
   outline: 2px solid var(--clinica);
-  outline-offset: 1px;
+  outline-offset: 2px;
+}
+
+/* Na sala agora: o ponto da Clínica com um halo que respira. */
+.card__ao-vivo {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  margin-inline: 3px;
+  border-radius: 50%;
+  background: var(--clinica);
+}
+
+.card__ao-vivo::after {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--clinica) 35%, transparent);
+  content: '';
+  animation: respira 1.8s var(--pj-curva-chega) infinite;
+}
+
+@keyframes respira {
+  from {
+    opacity: 0.9;
+    transform: scale(0.5);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.3);
+  }
 }
 
 .card--fantasma {
@@ -356,30 +405,36 @@ const estilo = computed(() => {
 /* ------------------------------------------------------------------------- os estados */
 
 .card--confirmado {
-  --estado: color-mix(in oklab, var(--clinica) 55%, var(--superficie));
-  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 45%, var(--superficie));
+  --estado: var(--clinica);
+  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 38%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--clinica) 22%, var(--linha));
   --estado-tinta: var(--clinica-tinta);
 }
 
 .card--aguardando {
   --estado: var(--atencao);
-  --estado-fundo: color-mix(in oklab, var(--atencao-fundo) 80%, var(--superficie));
-  --estado-borda: color-mix(in oklab, var(--atencao) 35%, var(--linha));
+  --estado-fundo: color-mix(in oklab, var(--atencao-fundo) 88%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--atencao) 42%, var(--linha));
   --estado-tinta: var(--atencao-tinta);
 }
 
 .card--em-atendimento {
   --estado: var(--clinica);
   --estado-fundo: var(--clinica-fundo);
-  --estado-borda: color-mix(in oklab, var(--clinica) 40%, var(--linha));
+  --estado-borda: color-mix(in oklab, var(--clinica) 55%, var(--linha));
   --estado-tinta: var(--clinica-tinta);
+  --estado-sombra:
+    0 1px 2px rgb(16 40 32 / 6%),
+    0 6px 14px -8px color-mix(in oklab, var(--clinica) 75%, transparent);
 }
 
 /* Finalizado é história do dia, não tarefa: perde peso, mas continua legível. */
 .card--finalizado {
-  --estado: var(--linha);
+  --estado: var(--linha-media);
   --estado-fundo: var(--superficie-2);
+  --estado-borda: var(--linha-suave);
   --estado-tinta: var(--tinta-3);
+  --estado-sombra: none;
 
   color: var(--tinta-2);
 }
@@ -390,8 +445,8 @@ const estilo = computed(() => {
 
 .card--falta {
   --estado: var(--risco);
-  --estado-fundo: color-mix(in oklab, var(--risco-fundo) 55%, var(--superficie));
-  --estado-borda: color-mix(in oklab, var(--risco) 30%, var(--linha));
+  --estado-fundo: color-mix(in oklab, var(--risco-fundo) 70%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--risco) 32%, var(--linha));
   --estado-tinta: var(--risco-tinta);
 }
 
@@ -401,13 +456,14 @@ const estilo = computed(() => {
 
 /* Cancelado: riscado e apagado, mas presente. O risco é o que sobrevive à escala de cinza. */
 .card--cancelado {
+  --estado: var(--linha-media);
   --estado-fundo: transparent;
   --estado-tinta: var(--tinta-3);
+  --estado-sombra: none;
 
   border-style: dashed;
-  border-inline-start-style: solid;
   color: var(--tinta-2);
-  opacity: 0.65;
+  opacity: 0.7;
 }
 
 .card--cancelado .card__nome,
@@ -544,6 +600,11 @@ const estilo = computed(() => {
   padding-block: 1px;
 }
 
+.card--minima::before {
+  top: 3px;
+  bottom: 3px;
+}
+
 .card--minima .card__linha {
   line-height: 1.15;
 }
@@ -612,6 +673,11 @@ const estilo = computed(() => {
   .card,
   .card__falta.p-button {
     transition: none;
+  }
+
+  .card__ao-vivo::after {
+    animation: none;
+    opacity: 0.6;
   }
 }
 </style>

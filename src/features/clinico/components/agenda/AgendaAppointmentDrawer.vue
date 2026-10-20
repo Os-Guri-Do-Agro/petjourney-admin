@@ -185,7 +185,7 @@ const prazoDoApp = computed(() => {
   <aside
     v-if="appointment"
     class="drawer clinic-scope"
-    :class="`drawer--${appointment.status}`"
+    :class="[`drawer--${appointment.status}`, `drawer--tom-${tomDoEstado}`]"
     role="complementary"
     :aria-label="pet?.nome"
     @keydown.esc="emit('fechar')"
@@ -229,129 +229,140 @@ const prazoDoApp = computed(() => {
       </div>
     </header>
 
-    <!-- O próximo passo vem antes de tudo: é por ele que se abre o atendimento na maior parte das vezes. -->
-    <Button
-      v-if="proximoStatus"
-      class="drawer__passo"
-      :label="t(`clinico.agenda.proximoPasso.${proximoStatus}`)"
-      :icon="ICONE_DO_PASSO[proximoStatus] ?? 'ph ph-arrow-right'"
-      :loading="agenda.salvando"
-      @click="emit('alterarStatus', proximoStatus)"
-    />
+    <div class="drawer__corpo">
+      <!-- O próximo passo vem antes de tudo: é por ele que se abre o atendimento na maior parte das vezes. -->
+      <Button
+        v-if="proximoStatus"
+        class="drawer__passo"
+        :label="t(`clinico.agenda.proximoPasso.${proximoStatus}`)"
+        :icon="ICONE_DO_PASSO[proximoStatus] ?? 'ph ph-arrow-right'"
+        :loading="agenda.salvando"
+        @click="emit('alterarStatus', proximoStatus)"
+      />
 
-    <ClinicPatientHeader :pet="pet" :tutor="tutor" compacto />
+      <ClinicPatientHeader :pet="pet" :tutor="tutor" compacto />
 
-    <dl class="drawer__dados">
-      <div>
-        <dt><i class="ph ph-user" aria-hidden="true" />{{ t('clinico.agenda.mover.profissional') }}</dt>
-        <dd>{{ profissional?.nome }}</dd>
-      </div>
-      <div>
-        <dt><i class="ph ph-door" aria-hidden="true" />{{ t('clinico.agenda.bloqueioDialogo.sala') }}</dt>
-        <dd>{{ salas.join(', ') || t('clinico.agenda.semSala') }}</dd>
-      </div>
-      <div>
-        <dt><i class="ph ph-stethoscope" aria-hidden="true" />{{ tipo?.nome }}</dt>
-        <dd>{{ t(`clinico.origem.${appointment.origem}`) }}</dd>
-      </div>
-      <div v-if="appointment.chegadaEm">
-        <dt><i class="ph ph-hourglass-medium" aria-hidden="true" />{{ t('clinico.meuDia.esperando') }}</dt>
-        <dd class="ui-num">{{ formato.relativo(appointment.chegadaEm) }}</dd>
-      </div>
-      <div v-if="presenca" class="drawer__largo">
-        <dt><i class="ph ph-check-circle" aria-hidden="true" />{{ t('clinico.agenda.presenca.titulo') }}</dt>
-        <dd :class="{ drawer__pendente: presenca.pendente }">
-          {{ presenca.texto }}
-          <span v-if="presenca.quando" class="drawer__canal">{{ presenca.quando }}</span>
-        </dd>
-        <dd v-if="appointment.status === 'agendado'" class="drawer__acao-linha">
-          <Button
-            :label="t('clinico.agenda.presenca.registrar')"
-            icon="ph ph-check"
-            severity="secondary"
-            outlined
-            size="small"
-            :loading="agenda.salvando"
-            @click="emit('confirmarPresenca')"
-          />
-        </dd>
-      </div>
-      <div v-if="prazoDoApp" class="drawer__largo">
-        <dt><i class="ph ph-device-mobile" aria-hidden="true" />{{ t('clinico.agenda.prazoApp.titulo') }}</dt>
-        <dd class="drawer__prazo">{{ prazoDoApp }}</dd>
-      </div>
-      <div v-if="appointment.motivoCancelamento" class="drawer__largo">
-        <dt><i class="ph ph-x-circle" aria-hidden="true" />{{ t('clinico.agenda.cancelarDialogo.motivo') }}</dt>
-        <dd>{{ formato.motivoCancelamento(appointment.motivoCancelamento) }}</dd>
-      </div>
-      <!--
-        Por que o paciente não veio: é a pergunta que alguém faz antes de ligar de novo — e a
-        ausência dela é informação: falta sem motivo é falta que ninguém apurou.
-      -->
-      <div v-if="appointment.status === 'falta'" class="drawer__largo">
-        <dt><i class="ph ph-user-minus" aria-hidden="true" />{{ t('clinico.faltas.justificativa.motivo') }}</dt>
-        <dd v-if="appointment.justificativaDeFalta">
-          {{ formato.motivoFalta(appointment.justificativaDeFalta.motivo) }}
-          <span class="drawer__canal">
-            {{ formato.canalDeContato(appointment.justificativaDeFalta.canal) }}
-          </span>
-        </dd>
-        <dd v-else class="drawer__pendente">
-          {{ t('clinico.faltas.justificativa.pendente') }}
-        </dd>
-      </div>
-    </dl>
-
-    <p v-if="appointment.observacao" class="drawer__observacao">
-      <i class="ph ph-chat-text" aria-hidden="true" />
-      <span>{{ appointment.observacao }}</span>
-    </p>
-
-    <section v-if="conflitos.length > 0" class="drawer__secao">
-      <h3 class="drawer__subtitulo">{{ t('clinico.agenda.conflitosTitulo') }}</h3>
-      <ul class="drawer__avisos">
-        <li v-for="(conflito, indice) in conflitos" :key="indice">
-          <ClinicAlertChip
-            :severidade="conflito.severity === 'info' ? 'info' : 'atencao'"
-            :rotulo="formato.conflito(conflito)"
-          />
-        </li>
-      </ul>
-    </section>
-
-    <!--
-      Comprovante de que o responsável foi avisado. Fica acima das ações porque é o que se confere
-      **antes** de ligar de novo: sem ele, a recepção repete o aviso ou deixa de dar.
-    -->
-    <section v-if="avisosDoAtendimento.length > 0" class="drawer__secao">
-      <h3 class="drawer__subtitulo">{{ t('clinico.avisos.titulo') }}</h3>
-      <ul class="drawer__avisos-enviados">
-        <li v-for="aviso in avisosDoAtendimento" :key="aviso.id">
-          <span class="drawer__aviso-topo">
-            <strong>{{ t(`clinico.avisos.kind.${aviso.kind}`) }}</strong>
-            <span class="drawer__aviso-quando ui-num">
-              {{ formato.relativo(aviso.enviadoEm) }}
+      <dl class="drawer__dados ui-poco">
+        <div>
+          <dt><i class="ph ph-user" aria-hidden="true" />{{ t('clinico.agenda.mover.profissional') }}</dt>
+          <dd>{{ profissional?.nome }}</dd>
+        </div>
+        <div>
+          <dt><i class="ph ph-door" aria-hidden="true" />{{ t('clinico.agenda.bloqueioDialogo.sala') }}</dt>
+          <dd>{{ salas.join(', ') || t('clinico.agenda.semSala') }}</dd>
+        </div>
+        <div>
+          <dt><i class="ph ph-stethoscope" aria-hidden="true" />{{ tipo?.nome }}</dt>
+          <dd>{{ t(`clinico.origem.${appointment.origem}`) }}</dd>
+        </div>
+        <div v-if="appointment.chegadaEm">
+          <dt><i class="ph ph-hourglass-medium" aria-hidden="true" />{{ t('clinico.meuDia.esperando') }}</dt>
+          <dd class="ui-num">{{ formato.relativo(appointment.chegadaEm) }}</dd>
+        </div>
+        <div v-if="presenca" class="drawer__largo">
+          <dt><i class="ph ph-check-circle" aria-hidden="true" />{{ t('clinico.agenda.presenca.titulo') }}</dt>
+          <dd :class="{ drawer__pendente: presenca.pendente }">
+            {{ presenca.texto }}
+            <span v-if="presenca.quando" class="drawer__canal">{{ presenca.quando }}</span>
+          </dd>
+          <dd v-if="appointment.status === 'agendado'" class="drawer__acao-linha">
+            <Button
+              :label="t('clinico.agenda.presenca.registrar')"
+              icon="ph ph-check"
+              severity="secondary"
+              outlined
+              size="small"
+              :loading="agenda.salvando"
+              @click="emit('confirmarPresenca')"
+            />
+          </dd>
+        </div>
+        <div v-if="prazoDoApp" class="drawer__largo">
+          <dt><i class="ph ph-device-mobile" aria-hidden="true" />{{ t('clinico.agenda.prazoApp.titulo') }}</dt>
+          <dd class="drawer__prazo">{{ prazoDoApp }}</dd>
+        </div>
+        <div v-if="appointment.motivoCancelamento" class="drawer__largo">
+          <dt><i class="ph ph-x-circle" aria-hidden="true" />{{ t('clinico.agenda.cancelarDialogo.motivo') }}</dt>
+          <dd>{{ formato.motivoCancelamento(appointment.motivoCancelamento) }}</dd>
+        </div>
+        <!--
+          Por que o paciente não veio: é a pergunta que alguém faz antes de ligar de novo — e a
+          ausência dela é informação: falta sem motivo é falta que ninguém apurou.
+        -->
+        <div v-if="appointment.status === 'falta'" class="drawer__largo">
+          <dt><i class="ph ph-user-minus" aria-hidden="true" />{{ t('clinico.faltas.justificativa.motivo') }}</dt>
+          <dd v-if="appointment.justificativaDeFalta">
+            {{ formato.motivoFalta(appointment.justificativaDeFalta.motivo) }}
+            <span class="drawer__canal">
+              {{ formato.canalDeContato(appointment.justificativaDeFalta.canal) }}
             </span>
-          </span>
-          <p class="drawer__aviso-texto">{{ aviso.texto }}</p>
-        </li>
-      </ul>
-    </section>
+          </dd>
+          <dd v-else class="drawer__pendente">
+            {{ t('clinico.faltas.justificativa.pendente') }}
+          </dd>
+        </div>
+      </dl>
 
-    <nav class="drawer__ir" :aria-label="t('clinico.agenda.drawer.irPara')">
-      <button type="button" class="drawer__atalho" @click="emit('abrirProntuario')">
-        <i class="ph ph-note-pencil" aria-hidden="true" />
-        {{ t('clinico.paciente.abrirProntuario') }}
-      </button>
-      <button type="button" class="drawer__atalho" @click="emit('verResumo')">
-        <i class="ph ph-timer" aria-hidden="true" />
-        {{ t('clinico.resumoDoPaciente.verResumo') }}
-      </button>
-      <button type="button" class="drawer__atalho" @click="emit('verHistorico')">
-        <i class="ph ph-clock-counter-clockwise" aria-hidden="true" />
-        {{ t('clinico.paciente.verHistorico') }}
-      </button>
-    </nav>
+      <p v-if="appointment.observacao" class="drawer__observacao">
+        <i class="ph ph-chat-text" aria-hidden="true" />
+        <span>{{ appointment.observacao }}</span>
+      </p>
+
+      <section v-if="conflitos.length > 0" class="drawer__secao">
+        <h3 class="drawer__subtitulo">{{ t('clinico.agenda.conflitosTitulo') }}</h3>
+        <ul class="drawer__avisos">
+          <li v-for="(conflito, indice) in conflitos" :key="indice">
+            <ClinicAlertChip
+              :severidade="conflito.severity === 'info' ? 'info' : 'atencao'"
+              :rotulo="formato.conflito(conflito)"
+            />
+          </li>
+        </ul>
+      </section>
+
+      <!--
+        Comprovante de que o responsável foi avisado. Fica acima das ações porque é o que se confere
+        **antes** de ligar de novo: sem ele, a recepção repete o aviso ou deixa de dar.
+      -->
+      <section v-if="avisosDoAtendimento.length > 0" class="drawer__secao">
+        <h3 class="drawer__subtitulo">{{ t('clinico.avisos.titulo') }}</h3>
+        <ul class="drawer__avisos-enviados">
+          <li v-for="aviso in avisosDoAtendimento" :key="aviso.id">
+            <span class="drawer__aviso-topo">
+              <strong>{{ t(`clinico.avisos.kind.${aviso.kind}`) }}</strong>
+              <span class="drawer__aviso-quando ui-num">
+                {{ formato.relativo(aviso.enviadoEm) }}
+              </span>
+            </span>
+            <p class="drawer__aviso-texto">{{ aviso.texto }}</p>
+          </li>
+        </ul>
+      </section>
+
+      <nav class="drawer__ir" :aria-label="t('clinico.agenda.drawer.irPara')">
+        <button type="button" class="drawer__atalho" @click="emit('abrirProntuario')">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+            <i class="ph ph-note-pencil" />
+          </span>
+          <span class="drawer__atalho-texto">{{ t('clinico.paciente.abrirProntuario') }}</span>
+          <i class="ph ph-caret-right drawer__seta" aria-hidden="true" />
+        </button>
+        <button type="button" class="drawer__atalho" @click="emit('verResumo')">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+            <i class="ph ph-timer" />
+          </span>
+          <span class="drawer__atalho-texto">{{ t('clinico.resumoDoPaciente.verResumo') }}</span>
+          <i class="ph ph-caret-right drawer__seta" aria-hidden="true" />
+        </button>
+        <button type="button" class="drawer__atalho" @click="emit('verHistorico')">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+            <i class="ph ph-clock-counter-clockwise" />
+          </span>
+          <span class="drawer__atalho-texto">{{ t('clinico.paciente.verHistorico') }}</span>
+          <i class="ph ph-caret-right drawer__seta" aria-hidden="true" />
+        </button>
+      </nav>
+    </div>
 
     <div v-if="!encerrado" class="drawer__risco">
       <Button
@@ -376,19 +387,41 @@ const prazoDoApp = computed(() => {
 </template>
 
 <style scoped>
+/*
+ * O painel do atendimento é um cartão que flutua ao lado da grade. O alto é o cartão de estado: o
+ * tom do atendimento (na sala, na recepção, feito, falta) desce num degradê até o papel, como os
+ * postos do Hoje. Embaixo, o paciente, os dados num poço e os caminhos em linhas.
+ */
 .drawer {
+  --drawer-tom: var(--superficie-3);
+
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-content: start;
-  gap: 16px;
   width: 340px;
-  max-height: 100%;
+  /* Da altura da grade ao lado (a página a define): o painel rola por dentro, não a página. */
+  max-height: var(--altura-da-grade, 100%);
   overflow-y: auto;
-  padding: 18px;
   border: 1px solid var(--linha);
-  border-radius: 16px;
+  border-radius: var(--raio-cartao);
   background: var(--superficie);
   box-shadow: var(--sombra-2);
+}
+
+.drawer--tom-sala {
+  --drawer-tom: var(--clinica-fundo);
+}
+
+.drawer--tom-atencao {
+  --drawer-tom: var(--atencao-fundo);
+}
+
+.drawer--tom-ok {
+  --drawer-tom: var(--ok-fundo);
+}
+
+.drawer--tom-risco {
+  --drawer-tom: var(--risco-fundo);
 }
 
 .drawer__topo {
@@ -396,11 +429,18 @@ const prazoDoApp = computed(() => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  padding: 18px 14px 16px 20px;
+  border-radius: var(--raio-cartao) var(--raio-cartao) 0 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--drawer-tom) 75%, var(--superficie)),
+    var(--superficie)
+  );
 }
 
 .drawer__quando {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .drawer__estado {
@@ -409,7 +449,7 @@ const prazoDoApp = computed(() => {
   align-items: center;
   gap: 7px;
   height: 26px;
-  padding: 0 10px;
+  padding: 0 11px 0 10px;
   border-radius: 999px;
   background: var(--neutro-fundo);
   color: var(--neutro-tinta);
@@ -444,11 +484,19 @@ const prazoDoApp = computed(() => {
   color: var(--risco-tinta);
 }
 
+/* No alto tingido, o selo ganha papel por trás: não some no fundo da mesma cor. */
+.drawer:not(.drawer--tom-neutro) .drawer__estado {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, currentColor 18%, transparent),
+    var(--sombra-xs);
+}
+
 .drawer__hora {
   color: var(--tinta);
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 650;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
 }
 
 .drawer__topo-acoes {
@@ -457,18 +505,26 @@ const prazoDoApp = computed(() => {
   gap: 2px;
 }
 
+.drawer__corpo {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 16px;
+  padding: 4px 18px 18px;
+}
+
 .drawer__passo.p-button {
   width: 100%;
   justify-content: center;
 }
 
+/* Os dados do atendimento num poço: rente, apoiando o paciente que está acima. */
 .drawer__dados {
   display: grid;
-  gap: 12px 16px;
+  gap: 14px 16px;
   grid-template-columns: 1fr 1fr;
   margin: 0;
-  padding: 14px 0 0;
-  border-top: 1px solid var(--linha);
+  padding: 14px 16px;
 }
 
 .drawer__dados div {
@@ -491,6 +547,7 @@ const prazoDoApp = computed(() => {
 }
 
 .drawer__dados dt i {
+  color: var(--tinta-3);
   font-size: 14px;
 }
 
@@ -498,7 +555,7 @@ const prazoDoApp = computed(() => {
   margin: 0;
   color: var(--tinta);
   font-size: 14px;
-  font-weight: 550;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
@@ -517,6 +574,7 @@ const prazoDoApp = computed(() => {
   color: var(--tinta-2);
 }
 
+.drawer__dados dd.drawer__pendente,
 .drawer__pendente {
   color: var(--atencao-tinta);
 }
@@ -526,7 +584,8 @@ const prazoDoApp = computed(() => {
   gap: 10px;
   margin: 0;
   padding: 12px 14px;
-  border-radius: 12px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie-2);
   color: var(--tinta);
   font-size: 13.5px;
@@ -535,7 +594,7 @@ const prazoDoApp = computed(() => {
 
 .drawer__observacao i {
   margin-top: 2px;
-  color: var(--tinta-2);
+  color: var(--tinta-3);
 }
 
 .drawer__secao {
@@ -545,8 +604,9 @@ const prazoDoApp = computed(() => {
 
 .drawer__subtitulo {
   margin: 0;
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 650;
 }
 
 .drawer__avisos,
@@ -562,7 +622,8 @@ const prazoDoApp = computed(() => {
 .drawer__avisos-enviados li {
   padding: 10px 12px;
   border: 1px solid var(--linha);
-  border-radius: 10px;
+  border-radius: 12px;
+  background: var(--superficie);
 }
 
 .drawer__aviso-topo {
@@ -583,31 +644,34 @@ const prazoDoApp = computed(() => {
   line-height: 1.45;
 }
 
-/* Para onde ir a partir daqui: três destinos, cada um uma linha clicável. */
+/* Para onde ir a partir daqui: três destinos, cada um uma linha com o ladrilho e a seta. */
 .drawer__ir {
   display: grid;
   overflow: hidden;
   border: 1px solid var(--linha);
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie);
 }
 
 .drawer__atalho {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 0 14px;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 12px 0 10px;
   border: 0;
   background: transparent;
   color: var(--tinta);
   cursor: pointer;
   font: inherit;
   font-size: 14px;
+  font-weight: 550;
   text-align: left;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .drawer__atalho + .drawer__atalho {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .drawer__atalho:hover {
@@ -619,22 +683,43 @@ const prazoDoApp = computed(() => {
   outline-offset: -2px;
 }
 
-.drawer__atalho i {
-  color: var(--clinica-tinta);
-  font-size: 18px;
+.drawer__atalho-texto {
+  flex: 1;
+  min-width: 0;
 }
 
+.drawer__seta {
+  color: var(--tinta-3);
+  font-size: 15px;
+  transition: transform var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.drawer__atalho:hover .drawer__seta {
+  color: var(--tinta);
+  transform: translateX(2px);
+}
+
+/* As ações que desfazem o dia ficam no pé, separadas: longe do clique da ação principal. */
 .drawer__risco {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 4px;
-  padding-top: 4px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--linha-suave);
+  background: color-mix(in oklab, var(--superficie-2) 60%, var(--superficie));
 }
 
 @media (max-width: 1100px) {
   .drawer {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer__atalho,
+  .drawer__seta {
+    transition: none;
   }
 }
 </style>

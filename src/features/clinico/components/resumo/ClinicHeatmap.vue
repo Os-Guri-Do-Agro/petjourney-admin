@@ -182,36 +182,37 @@ const legenda = computed(() => {
 }
 
 .mapa__celula {
-  height: 1.75rem;
-  border-radius: 6px;
+  height: 2rem;
+  border-radius: 8px;
   font-family: var(--font-dados);
   font-size: 0.75rem;
   font-weight: 650;
   text-align: center;
 }
 
+/* A escada na cor do lugar (a Clínica): do poço vazio ao azul cheio do horário que lota. */
 .mapa__celula--0 {
   background: var(--superficie-2);
 }
 
 .mapa__celula--1 {
-  background: color-mix(in oklab, var(--musgo) 16%, var(--superficie));
+  background: color-mix(in oklab, var(--clinica) 14%, var(--superficie));
   color: var(--tinta);
 }
 
 .mapa__celula--2 {
-  background: color-mix(in oklab, var(--musgo) 34%, var(--superficie));
+  background: color-mix(in oklab, var(--clinica) 30%, var(--superficie));
   color: var(--tinta);
 }
 
 .mapa__celula--3 {
-  background: color-mix(in oklab, var(--musgo) 66%, var(--superficie));
-  color: var(--superficie);
+  background: color-mix(in oklab, var(--clinica) 56%, var(--superficie));
+  color: var(--tinta);
 }
 
 .mapa__celula--4 {
-  background: var(--musgo);
-  color: var(--sobre-musgo);
+  background: var(--clinica);
+  color: var(--superficie);
 }
 
 .mapa__legenda {
@@ -235,9 +236,9 @@ const legenda = computed(() => {
 
 .mapa__amostra {
   display: inline-block;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 3px;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 4px;
 }
 
 .mapa__vazio {

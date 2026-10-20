@@ -628,13 +628,17 @@ useClinicShortcuts({
         @ajuda="ajudaAberta = true"
       />
 
-      <p v-if="semExpediente" class="agenda__fechada" role="status">
-        <i class="ph ph-moon" aria-hidden="true" />
+      <p v-if="semExpediente" class="agenda__fechada ui-folha" role="status">
+        <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
+          <i class="ph ph-moon" />
+        </span>
         <span>{{ t('clinico.agenda.semExpediente') }}</span>
       </p>
 
-      <p v-if="feriado?.fechado" class="agenda__fechada" role="status">
-        <i class="ph ph-calendar-x" aria-hidden="true" />
+      <p v-if="feriado?.fechado" class="agenda__fechada ui-folha" role="status">
+        <span class="ui-ladrilho ui-ladrilho--atencao" aria-hidden="true">
+          <i class="ph ph-calendar-x" />
+        </span>
         <span>
           <strong>{{ t('clinico.agenda.fechadaTitulo') }}</strong>
           {{ t('clinico.agenda.fechadaDescricao', { feriado: feriado.nome }) }}
@@ -642,7 +646,10 @@ useClinicShortcuts({
       </p>
 
       <!-- Vaga que acabou de abrir: a oferta nasce onde a vaga nasceu. -->
-      <section v-if="fila.vagaAberta" class="vaga" role="status">
+      <section v-if="fila.vagaAberta" class="vaga ui-folha" role="status">
+        <span class="ui-ladrilho ui-ladrilho--ok" aria-hidden="true">
+          <i class="ph ph-calendar-plus" />
+        </span>
         <div class="vaga__texto">
           <strong>{{ t('clinico.fila.vagaAberta.titulo') }}</strong>
           <p>
@@ -698,7 +705,9 @@ useClinicShortcuts({
       <AgendaLegenda v-if="agenda.visao === 'dia' && !agenda.clinicaFechada" />
 
       <div v-if="vazio" class="agenda__vazio ui-folha">
-        <span class="agenda__vazio-icone" aria-hidden="true"><i class="ph ph-calendar-blank" /></span>
+        <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
+          <i class="ph ph-calendar-blank" />
+        </span>
         <h2>{{ t('clinico.agenda.vazioTitulo') }}</h2>
         <p>{{ t('clinico.agenda.vazioDescricao') }}</p>
         <Button
@@ -837,7 +846,8 @@ useClinicShortcuts({
  * ficam à vista enquanto se percorre a tarde.
  */
 .agenda__corpo {
-  --altura-da-grade: max(28rem, calc(100dvh - 19.5rem));
+  /* A janela menos o que fica acima da grade (título, abas, semana, legenda) e a moldura. */
+  --altura-da-grade: max(28rem, calc(100dvh - 22.75rem));
 
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -871,58 +881,56 @@ useClinicShortcuts({
   line-height: 1.5;
 }
 
-.agenda__vazio-icone {
-  display: grid;
-  width: 52px;
-  height: 52px;
-  place-items: center;
-  border-radius: 16px;
-  background: var(--clinica-fundo);
-  color: var(--clinica-tinta);
-  font-size: 24px;
-}
-
+/* Dia sem expediente ou feriado: um cartão baixo, com o ladrilho dizendo o tom. */
 .agenda__fechada {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 14px;
   margin: 0;
-  padding: 14px 18px;
-  border-radius: 14px;
-  background: var(--atencao-fundo);
-  color: var(--atencao-tinta);
+  padding: 12px 18px 12px 14px;
+  color: var(--tinta);
+  font-size: 14px;
   line-height: 1.5;
-}
-
-.agenda__fechada i {
-  font-size: 20px;
 }
 
 .agenda__fechada strong {
   margin-inline-end: 4px;
+  font-weight: 650;
 }
 
-/* A vaga que acabou de abrir: a oferta nasce onde a vaga nasceu. */
+/*
+ * A vaga que acabou de abrir: um cartão de estado — o alto tingido do verde do "ok" descendo para
+ * o papel, como a Recepção do Hoje. A oferta nasce onde a vaga nasceu.
+ */
 .vaga {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
-  padding: 14px 18px;
-  border: 1px solid color-mix(in oklab, var(--ok) 40%, transparent);
-  border-radius: 14px;
-  background: var(--ok-fundo);
+  gap: 12px 16px;
+  padding: 14px 18px 14px 14px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--ok-fundo) 70%, var(--superficie)),
+    var(--superficie)
+  );
+}
+
+.vaga__texto {
+  flex: 1 1 22rem;
+  min-width: 0;
 }
 
 .vaga__texto strong {
-  color: var(--ok-tinta);
+  color: var(--tinta);
+  font-size: 15.5px;
   font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .vaga__texto p {
   margin: 2px 0 0;
-  color: var(--tinta);
+  color: var(--tinta-2);
+  font-size: 13.5px;
   line-height: 1.45;
 }
 

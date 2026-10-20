@@ -61,10 +61,11 @@ function largura(fatia: Fatia) {
 <style scoped>
 .ranking {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.7rem;
   margin: 0;
   padding: 0;
   list-style: none;
+  container-type: inline-size;
 }
 
 /* Três colunas que se repetem em toda linha: as barras começam no mesmo lugar. */
@@ -80,26 +81,28 @@ function largura(fatia: Fatia) {
   overflow: hidden;
   color: var(--tinta);
   font-size: 0.84375rem;
-  font-weight: 550;
+  font-weight: 600;
   line-height: 1.3;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
 }
 
+/* O trilho rente e a barra na cor do lugar (a Clínica): comparar entre si é o ponto. */
 .ranking__trilho {
   display: block;
-  height: 0.5rem;
+  height: 0.625rem;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--superficie-3);
+  background: var(--superficie-2);
+  box-shadow: inset 0 0 0 1px var(--linha-suave);
 }
 
 .ranking__barra {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--musgo);
+  background: var(--pj-lugar, var(--clinica));
   transition: inline-size 0.2s ease-out;
 }
 
@@ -124,6 +127,21 @@ function largura(fatia: Fatia) {
   margin: 0;
   color: var(--tinta-2);
   font-size: 0.8125rem;
+}
+
+/*
+ * Cartão estreito (celular, coluna do painel): o nome sobe para uma linha própria e a barra ganha
+ * a largura toda — espremida ao lado do nome, ela sumia.
+ */
+@container (max-width: 26rem) {
+  .ranking__linha {
+    gap: 0.3rem 0.75rem;
+    grid-template-columns: minmax(0, 1fr) 5.25rem;
+  }
+
+  .ranking__nome {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

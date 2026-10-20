@@ -32,7 +32,7 @@ import type { CardAgenda, ColunaAgenda, FaixaBloqueio } from '../../composables/
 import { useAgendaDia } from '../../composables/useAgendaDia'
 import type { ArrasteProposta } from '../../composables/useAgendaDrag'
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import type { Pet } from '../../data/types'
+import type { AppointmentStatus, Pet } from '../../data/types'
 import { aparenciaDoTipo } from '../../domain/appointment-kind'
 import { severidadeMaxima } from '../../domain/conflicts'
 import { useAgendaStore } from '../../stores/agenda'
@@ -393,6 +393,30 @@ function aoSoltar(evento: DragEvent, coluna: ColunaAgenda, minuto: number) {
   })
 }
 
+/** As iniciais de quem atende, para o monograma do cabeçalho: primeiro e último nome. */
+function iniciais(nome: string) {
+  const partes = nome.trim().split(/\s+/).filter(Boolean)
+  const primeira = partes[0]?.charAt(0) ?? ''
+  const ultima = partes.length > 1 ? (partes.at(-1)?.charAt(0) ?? '') : ''
+
+  return `${primeira}${ultima}`.toLocaleUpperCase()
+}
+
+/** Os estados que a chave do rodapé explica — na ordem em que o dia anda. */
+const ESTADOS_DA_CHAVE: AppointmentStatus[] = [
+  'agendado',
+  'confirmado',
+  'aguardando',
+  'em-atendimento',
+  'finalizado',
+  'falta',
+]
+
+/** A última meia hora que a continuação ocupa: é ali que o bloco fecha os cantos. */
+function ultimaContinuacao(card: CardAgenda, minuto: number) {
+  return card.fimMin < minuto + 2 * LINHA_EM_MINUTOS
+}
+
 /** Ocupação acima de 85% é dia apertado; acima de 100%, vendido além do expediente. */
 function tomDaOcupacao(ocupacao: number) {
   if (ocupacao > 1) {
@@ -416,24 +440,32 @@ function tomDaOcupacao(ocupacao: number) {
             <th scope="col" class="tabela__eixo-cabeca">
               <span class="tabela__sr">{{ t('clinico.agenda.tabela.horario') }}</span>
             </th>
-            <th v-for="coluna in colunas" :key="coluna.id" scope="col" class="tabela__coluna">
-              <span class="tabela__coluna-nome" :title="coluna.titulo">
-                <span
-                  class="tabela__coluna-cor"
-                  :style="{ background: coluna.cor }"
-                  aria-hidden="true"
-                />
-                <span class="tabela__coluna-titulo">{{ coluna.titulo }}</span>
-              </span>
-              <span
-                class="tabela__ocupacao"
-                :class="`tabela__ocupacao--${tomDaOcupacao(coluna.ocupacao)}`"
-                :title="`${t('clinico.agenda.tabela.ocupacao')}: ${formato.percentual(coluna.ocupacao)}`"
-              >
-                <span class="tabela__ocupacao-trilho" aria-hidden="true">
-                  <span :style="{ inlineSize: `${Math.min(coluna.ocupacao, 1) * 100}%` }" />
+            <th
+              v-for="coluna in colunas"
+              :key="coluna.id"
+              scope="col"
+              class="tabela__coluna"
+              :style="{ '--coluna-cor': coluna.cor }"
+            >
+              <span class="tabela__pessoa">
+                <!-- O rosto da coluna: as iniciais na cor de quem atende (ou a porta, por sala). -->
+                <span class="tabela__monograma" aria-hidden="true">
+                  <i v-if="!coluna.professionalId" class="ph ph-door" />
+                  <template v-else>{{ iniciais(coluna.titulo) }}</template>
                 </span>
-                <span class="ui-num">{{ formato.percentual(coluna.ocupacao) }}</span>
+                <span class="tabela__pessoa-texto">
+                  <span class="tabela__coluna-titulo" :title="coluna.titulo">{{ coluna.titulo }}</span>
+                  <span
+                    class="tabela__ocupacao"
+                    :class="`tabela__ocupacao--${tomDaOcupacao(coluna.ocupacao)}`"
+                    :title="`${t('clinico.agenda.tabela.ocupacao')}: ${formato.percentual(coluna.ocupacao)}`"
+                  >
+                    <span class="tabela__ocupacao-trilho" aria-hidden="true">
+                      <span :style="{ inlineSize: `${Math.min(coluna.ocupacao, 1) * 100}%` }" />
+                    </span>
+                    <span class="ui-num">{{ formato.percentual(coluna.ocupacao) }}</span>
+                  </span>
+                </span>
               </span>
             </th>
           </tr>
@@ -518,7 +550,15 @@ function tomDaOcupacao(ocupacao: number) {
                 <span
                   v-if="queContinuam(coluna, linha.minuto).length > 0"
                   class="continua-fundo"
-                  :class="`estado--${queContinuam(coluna, linha.minuto)[0]!.appointment.status}`"
+                  :class="[
+                    `estado--${queContinuam(coluna, linha.minuto)[0]!.appointment.status}`,
+                    {
+                      'continua-fundo--fim': ultimaContinuacao(
+                        queContinuam(coluna, linha.minuto)[0]!,
+                        linha.minuto,
+                      ),
+                    },
+                  ]"
                   aria-hidden="true"
                 />
 
@@ -609,6 +649,15 @@ function tomDaOcupacao(ocupacao: number) {
 
                         <!-- Os ícones em ordem de importância: o que não couber sai pela direita. -->
                         <span class="marcacao__icones" aria-hidden="true">
+                          <!-- Na sala agora: um ponto que pulsa; feito: o visto apagado. -->
+                          <span
+                            v-if="card.appointment.status === 'em-atendimento'"
+                            class="marcacao__ao-vivo"
+                          />
+                          <i
+                            v-else-if="card.appointment.status === 'finalizado'"
+                            class="ph ph-check-circle marcacao__feito"
+                          />
                           <component
                             :is="ICONE_DO_ALERTA[alerta.kind]"
                             v-for="alerta in alertasDeRisco(card)"
@@ -681,10 +730,20 @@ function tomDaOcupacao(ocupacao: number) {
       </table>
     </div>
 
-    <p class="tabela__dica">
-      <i class="ph ph-hand-grabbing" aria-hidden="true" />
-      {{ t('clinico.agenda.tabela.dica') }}
-    </p>
+    <footer class="tabela__pe">
+      <p class="tabela__dica">
+        <i class="ph ph-hand-grabbing" aria-hidden="true" />
+        {{ t('clinico.agenda.tabela.dica') }}
+      </p>
+
+      <!-- A chave das cores do estado: a mesma palavra que o painel do atendimento usa. -->
+      <ul class="tabela__estados" aria-hidden="true">
+        <li v-for="status in ESTADOS_DA_CHAVE" :key="status" :class="`estado--${status}`">
+          <span class="tabela__amostra" />
+          {{ formato.status(status) }}
+        </li>
+      </ul>
+    </footer>
   </section>
 </template>
 
@@ -692,12 +751,19 @@ function tomDaOcupacao(ocupacao: number) {
 /*
  * A altura da linha acompanha a densidade escolhida no menu Exibição: a recepção que quer o dia
  * inteiro na tela escolhe "compacta"; quem prefere respiro, "confortável".
+ *
+ * O acabamento (20/10/2026): o cabeçalho e o rodapé num poço, a grade em papel com fios leves, e
+ * cada atendimento como um cartão pequeno que flutua — o fundo e o traço da esquerda dizem o
+ * estado. O que é fundo (bloqueio, continuação, horário livre) fica rente.
  */
 .tabela {
-  --tabela-eixo: 4.75rem;
-  --tabela-linha: 46px;
-  --tabela-coluna-minima: 7.5rem;
-  --linha-de-meia-hora: color-mix(in oklab, var(--linha) 55%, transparent);
+  --tabela-eixo: 5rem;
+  --tabela-linha: 50px;
+  --tabela-coluna-minima: 8rem;
+  --tabela-poco: color-mix(in oklab, var(--superficie-2) 75%, var(--superficie));
+  --fio-hora: var(--linha);
+  --fio-meia: color-mix(in oklab, var(--linha-suave) 80%, transparent);
+  --fio-coluna: var(--linha-suave);
 
   display: grid;
   overflow: hidden;
@@ -707,11 +773,11 @@ function tomDaOcupacao(ocupacao: number) {
 }
 
 :root[data-clinic-density='compacta'] .tabela {
-  --tabela-linha: 38px;
+  --tabela-linha: 40px;
 }
 
 :root[data-clinic-density='confortavel'] .tabela {
-  --tabela-linha: 56px;
+  --tabela-linha: 60px;
 }
 
 .tabela__rolagem {
@@ -734,61 +800,89 @@ function tomDaOcupacao(ocupacao: number) {
   position: sticky;
   top: 0;
   z-index: 4;
-  padding: 14px 14px 12px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--linha);
-  background: var(--superficie);
+  background: var(--tabela-poco);
   text-align: start;
-  vertical-align: bottom;
+  vertical-align: middle;
 }
 
 .tabela__grade thead th + th {
-  border-inline-start: 1px solid var(--linha);
+  border-inline-start: 1px solid var(--fio-coluna);
 }
 
 .tabela__eixo-cabeca {
   left: 0;
   z-index: 5 !important;
   width: var(--tabela-eixo);
+  border-inline-end: 1px solid var(--linha);
 }
 
-.tabela__coluna-nome {
+/*
+ * Quem atende: o monograma na cor da coluna, o nome e, embaixo, a ocupação do dia. A coluna é o
+ * contêiner — estreita (cinco profissionais com o painel aberto), o monograma sai e o nome fica.
+ */
+.tabela__pessoa {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 8px;
-  color: var(--tinta);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.3;
+  gap: 10px;
+  container-type: inline-size;
+}
+
+.tabela__monograma {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--coluna-cor) 32%, var(--superficie));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--coluna-cor) 50%, transparent),
+    var(--sombra-xs);
+  color: color-mix(in oklab, var(--coluna-cor) 30%, var(--tinta));
+  font-family: var(--font-dados);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.tabela__monograma i {
+  font-size: 17px;
+}
+
+.tabela__pessoa-texto {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 6px;
 }
 
 .tabela__coluna-titulo {
   overflow: hidden;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.tabela__coluna-cor {
-  width: 10px;
-  height: 10px;
-  flex: none;
-  border-radius: 50%;
-}
-
-/* A ocupação: barrinha fina e o número — a barra localiza, o número compara. */
+/* A ocupação: barrinha e o número — a barra localiza, o número compara. */
 .tabela__ocupacao {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
   color: var(--tinta-2);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .tabela__ocupacao-trilho {
   display: block;
-  height: 4px;
+  height: 5px;
   flex: 1;
   overflow: hidden;
   border-radius: 999px;
@@ -818,15 +912,21 @@ function tomDaOcupacao(ocupacao: number) {
   background: var(--risco);
 }
 
+@container (max-width: 8.5rem) {
+  .tabela__monograma {
+    display: none;
+  }
+}
+
 /* ------------------------------------------------------------------------------ linhas */
 
 .tabela__linha > * {
-  border-top: 1px solid var(--linha-de-meia-hora);
+  border-top: 1px solid var(--fio-meia);
 }
 
 /* A hora cheia tem o fio cheio; a meia hora, o sutil. O olho acha "as 14h" sem ler cada linha. */
 .tabela__linha--cheia > * {
-  border-top-color: var(--linha);
+  border-top-color: var(--fio-hora);
 }
 
 tbody > .tabela__linha:first-child > * {
@@ -837,10 +937,10 @@ tbody > .tabela__linha:first-child > * {
   position: sticky;
   left: 0;
   z-index: 3;
-  padding: 7px 10px 0 16px;
+  padding: 7px 14px 0 8px;
   border-inline-end: 1px solid var(--linha);
   background: var(--superficie);
-  text-align: start;
+  text-align: end;
   vertical-align: top;
 }
 
@@ -848,7 +948,7 @@ tbody > .tabela__linha:first-child > * {
   display: block;
   color: var(--tinta-3);
   font-family: var(--font-dados);
-  font-size: 12.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   line-height: 1.2;
@@ -862,6 +962,7 @@ tbody > .tabela__linha:first-child > * {
   color: var(--tinta);
   font-size: 14px;
   font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .tabela__celula {
@@ -869,7 +970,7 @@ tbody > .tabela__linha:first-child > * {
   min-width: 0;
   height: var(--tabela-linha);
   padding: 5px 6px;
-  border-inline-start: 1px solid var(--linha);
+  border-inline-start: 1px solid var(--fio-coluna);
   vertical-align: top;
 }
 
@@ -886,16 +987,16 @@ tbody > .tabela__linha:first-child > * {
 /* Bloqueio é hachurado discreto: fechado, mas sem gritar. */
 .tabela__celula--bloqueada,
 .tabela__faixa {
-  background-color: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+  background-color: color-mix(in oklab, var(--superficie-2) 80%, var(--superficie));
   background-image: repeating-linear-gradient(
     135deg,
-    transparent 0 7px,
-    color-mix(in oklab, var(--linha) 85%, transparent) 7px 8px
+    transparent 0 8px,
+    color-mix(in oklab, var(--linha) 75%, transparent) 8px 9px
   );
 }
 
 .tabela__faixa {
-  height: 40px;
+  height: 44px;
   padding: 0 12px;
   vertical-align: middle;
 }
@@ -912,11 +1013,12 @@ tbody > .tabela__linha:first-child > * {
   align-items: center;
   gap: 6px;
   min-height: 26px;
-  padding: 0 10px;
+  padding: 0 11px 0 9px;
   overflow: hidden;
   border: 1px solid var(--linha);
   border-radius: 999px;
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta-2);
   font-size: 12.5px;
   white-space: nowrap;
@@ -924,6 +1026,7 @@ tbody > .tabela__linha:first-child > * {
 
 .tabela__etiqueta i {
   flex: none;
+  color: var(--tinta-3);
   font-size: 14px;
 }
 
@@ -958,23 +1061,41 @@ tbody > .tabela__linha:first-child > * {
   right: 0;
   left: 0;
   z-index: 1;
-  border-top: 2px solid var(--clinica);
+  height: 2px;
+  background: var(--clinica);
   content: '';
   pointer-events: none;
+  transform: translateY(-1px);
+}
+
+/* A cabeça do fio: um ponto na borda do eixo, de onde ele parte para a grade. */
+.tabela__linha--atual > .tabela__hora::before {
+  position: absolute;
+  top: calc(var(--agora, 0) * 100%);
+  right: -5px;
+  z-index: 2;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--clinica);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--clinica) 22%, transparent);
+  content: '';
+  transform: translateY(-50%);
 }
 
 .tabela__agora-rotulo {
   position: absolute;
   top: calc(var(--agora, 0) * 100%);
-  left: 8px;
-  z-index: 2;
-  padding: 2px 7px;
+  inset-inline-end: 12px;
+  z-index: 3;
+  padding: 2px 8px;
   border-radius: 999px;
   background: var(--clinica-tinta);
+  box-shadow: 0 0 0 3px var(--superficie);
   color: var(--superficie);
   font-size: 12px;
   font-weight: 650;
-  line-height: 1.3;
+  line-height: 1.35;
   transform: translateY(-50%);
 }
 
@@ -985,7 +1106,7 @@ tbody > .tabela__linha:first-child > * {
   container-type: inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 4px;
+  gap: 5px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -995,12 +1116,12 @@ tbody > .tabela__linha:first-child > * {
 
 .tabela__marcar {
   position: absolute;
-  inset: 3px;
+  inset: 4px;
   z-index: 1;
   display: grid;
   padding: 0;
   border: 1px dashed transparent;
-  border-radius: 8px;
+  border-radius: 10px;
   background: transparent;
   color: var(--clinica-tinta);
   cursor: pointer;
@@ -1021,7 +1142,7 @@ tbody > .tabela__linha:first-child > * {
 .tabela__marcar:hover,
 .tabela__marcar:focus-visible {
   border-color: color-mix(in oklab, var(--clinica) 55%, transparent);
-  background: color-mix(in oklab, var(--clinica-fundo) 65%, transparent);
+  background: color-mix(in oklab, var(--clinica-fundo) 60%, transparent);
 }
 
 .tabela__marcar:hover .tabela__marcar-rotulo,
@@ -1044,45 +1165,59 @@ tbody > .tabela__linha:first-child > * {
 /* ------------------------------------------------------------------------ o estado */
 
 /*
- * A cor do estado num lugar só: a faixa da esquerda (`--estado`), o fundo (`--estado-fundo`) e a
- * borda (`--estado-borda`). O atendimento e a sua continuação leem as mesmas três.
+ * A cor do estado num lugar só: o traço da esquerda (`--estado`), o fundo (`--estado-fundo`), a
+ * borda (`--estado-borda`) e a sombra (`--estado-sombra`). O atendimento, a continuação e a
+ * amostra do rodapé leem as mesmas quatro.
+ *
+ * A escada do dia: agendado em papel com traço cinza; confirmado com o traço da Clínica; na
+ * recepção em âmbar; na sala no azul cheio, com brilho; feito apagado e rente; falta em vermelho;
+ * cancelado só contorno, riscado.
  */
 .estado--agendado {
   --estado: var(--linha-forte);
   --estado-fundo: var(--superficie);
+  --estado-borda: var(--linha-media);
 }
 
 .estado--confirmado {
-  --estado: color-mix(in oklab, var(--clinica) 55%, var(--superficie));
-  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 45%, var(--superficie));
+  --estado: var(--clinica);
+  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 38%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--clinica) 22%, var(--linha));
 }
 
 .estado--aguardando {
   --estado: var(--atencao);
-  --estado-fundo: color-mix(in oklab, var(--atencao-fundo) 80%, var(--superficie));
-  --estado-borda: color-mix(in oklab, var(--atencao) 35%, var(--linha));
+  --estado-fundo: color-mix(in oklab, var(--atencao-fundo) 88%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--atencao) 42%, var(--linha));
 }
 
 .estado--em-atendimento {
   --estado: var(--clinica);
   --estado-fundo: var(--clinica-fundo);
-  --estado-borda: color-mix(in oklab, var(--clinica) 40%, var(--linha));
+  --estado-borda: color-mix(in oklab, var(--clinica) 55%, var(--linha));
+  --estado-sombra:
+    0 1px 2px rgb(16 40 32 / 6%),
+    0 6px 14px -8px color-mix(in oklab, var(--clinica) 75%, transparent);
 }
 
 .estado--finalizado {
-  --estado: var(--linha);
+  --estado: var(--linha-media);
   --estado-fundo: var(--superficie-2);
+  --estado-borda: var(--linha-suave);
+  --estado-sombra: none;
 }
 
 .estado--falta {
   --estado: var(--risco);
-  --estado-fundo: color-mix(in oklab, var(--risco-fundo) 55%, var(--superficie));
-  --estado-borda: color-mix(in oklab, var(--risco) 30%, var(--linha));
+  --estado-fundo: color-mix(in oklab, var(--risco-fundo) 70%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--risco) 32%, var(--linha));
 }
 
 .estado--cancelado {
-  --estado: var(--linha-forte);
+  --estado: var(--linha-media);
   --estado-fundo: transparent;
+  --estado-borda: var(--linha-media);
+  --estado-sombra: none;
 }
 
 /* ------------------------------------------------------------------- o atendimento */
@@ -1092,24 +1227,42 @@ tbody > .tabela__linha:first-child > * {
   display: flex;
   min-width: 0;
   align-items: center;
+  padding-inline-start: 6px;
   border: 1px solid var(--estado-borda, var(--linha));
-  border-inline-start: 3px solid var(--estado);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--estado-fundo);
+  box-shadow: var(--estado-sombra, var(--sombra-xs));
   color: var(--tinta);
   cursor: grab;
+  transition: box-shadow var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+/* O traço do estado, por dentro do cartão: arredondado, longe da borda. */
+.marcacao::before {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  inset-inline-start: 4px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--estado);
+  content: '';
+}
+
+.marcacao:hover {
+  box-shadow: var(--sombra-1);
 }
 
 .marcacao__abrir {
   display: flex;
   min-width: 0;
-  min-height: 34px;
+  min-height: 36px;
   flex: 1;
   align-items: center;
-  gap: 6px;
-  padding: 3px 8px 3px 5px;
+  gap: 7px;
+  padding: 3px 9px 3px 6px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 9px;
   background: transparent;
   color: inherit;
   cursor: inherit;
@@ -1118,8 +1271,12 @@ tbody > .tabela__linha:first-child > * {
   text-align: start;
 }
 
+:root[data-clinic-density='compacta'] .marcacao__abrir {
+  min-height: 30px;
+}
+
 .marcacao__abrir:hover {
-  background: color-mix(in oklab, var(--tinta) 5%, transparent);
+  background: color-mix(in oklab, var(--tinta) 4%, transparent);
 }
 
 .marcacao__abrir:focus-visible {
@@ -1129,7 +1286,7 @@ tbody > .tabela__linha:first-child > * {
 
 .marcacao--selecionada {
   outline: 2px solid var(--clinica);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .marcacao__rosto {
@@ -1139,7 +1296,7 @@ tbody > .tabela__linha:first-child > * {
 .marcacao__hora {
   flex: none;
   color: var(--tinta-2);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1156,6 +1313,7 @@ tbody > .tabela__linha:first-child > * {
   overflow: hidden;
   font-size: 13.5px;
   font-weight: 600;
+  letter-spacing: -0.005em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1172,6 +1330,41 @@ tbody > .tabela__linha:first-child > * {
 
 .marcacao__icones > * {
   flex: none;
+}
+
+/* Na sala agora: o ponto da Clínica com um halo que respira. */
+.marcacao__ao-vivo {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  margin-inline: 3px;
+  border-radius: 50%;
+  background: var(--clinica);
+}
+
+.marcacao__ao-vivo::after {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--clinica) 35%, transparent);
+  content: '';
+  animation: respira 1.8s var(--pj-curva-chega) infinite;
+}
+
+@keyframes respira {
+  from {
+    opacity: 0.9;
+    transform: scale(0.5);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+.marcacao__feito {
+  color: var(--tinta-3);
 }
 
 .marcacao__origem {
@@ -1238,9 +1431,8 @@ tbody > .tabela__linha:first-child > * {
 /* Cancelado: riscado e apagado, mas presente — o horário vagou e isso é informação. */
 .estado--cancelado.marcacao {
   border-style: dashed;
-  border-inline-start-style: solid;
   color: var(--tinta-2);
-  opacity: 0.65;
+  opacity: 0.7;
 }
 
 .estado--cancelado .marcacao__nome,
@@ -1259,7 +1451,8 @@ tbody > .tabela__linha:first-child > * {
 @container (max-width: 14rem) {
   .marcacao__tipo,
   .marcacao__origem,
-  .marcacao__encaixe {
+  .marcacao__encaixe,
+  .marcacao__feito {
     display: none;
   }
 }
@@ -1298,18 +1491,44 @@ tbody > .tabela__linha:first-child > * {
 /* ------------------------------------------------------------------- a continuação */
 
 /*
- * O horário tomado por quem começou antes: a célula inteira na cor clara do estado, com a faixa
- * da esquerda. Cobre também o fio da linha de cima, para as meias horas se emendarem num bloco.
+ * O horário tomado por quem começou antes: o corpo do cartão descendo pela meia hora, no mesmo
+ * fundo e com o mesmo traço. Entra por baixo do cartão de cima, para os dois lerem como um bloco
+ * só, e fecha os cantos na última meia hora.
  */
 .continua-fundo {
   position: absolute;
-  top: -1px;
+  top: -7px;
   right: 6px;
-  bottom: 0;
+  bottom: -1px;
   left: 6px;
-  border-inline-start: 3px solid var(--estado);
-  background: color-mix(in oklab, var(--estado) 13%, var(--superficie));
+  border: 1px solid var(--estado-borda, var(--linha));
+  border-top: 0;
+  border-bottom: 0;
+  background: var(--estado-fundo);
   pointer-events: none;
+}
+
+.continua-fundo::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: 4px;
+  width: 3px;
+  background: var(--estado);
+  content: '';
+  opacity: 0.55;
+}
+
+.continua-fundo--fim {
+  bottom: 5px;
+  border-bottom: 1px solid var(--estado-borda, var(--linha));
+  border-radius: 0 0 10px 10px;
+  box-shadow: var(--estado-sombra, var(--sombra-xs));
+}
+
+.continua-fundo--fim::before {
+  bottom: 6px;
+  border-radius: 0 0 3px 3px;
 }
 
 /* O rótulo leva o mesmo fundo do bloco: o fio do agora passa por trás, sem riscar o nome. */
@@ -1317,32 +1536,43 @@ tbody > .tabela__linha:first-child > * {
   display: flex;
   min-width: 0;
   align-items: baseline;
+  justify-self: start;
   gap: 6px;
+  max-width: 100%;
   overflow: hidden;
-  padding: 3px 6px;
-  border-radius: 4px;
-  background: color-mix(in oklab, var(--estado) 13%, var(--superficie));
-  color: var(--tinta-2);
-  font-size: 12.5px;
+  padding: 2px 8px 2px 12px;
+  border-radius: 6px;
+  background: var(--estado-fundo);
+  color: var(--tinta-3);
+  font-size: 12px;
   white-space: nowrap;
 }
 
 .continua__nome {
   overflow: hidden;
-  color: var(--tinta);
+  color: var(--tinta-2);
   font-weight: 600;
   text-overflow: ellipsis;
 }
 
 /* ------------------------------------------------------------------------- rodapé */
 
+.tabela__pe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--linha);
+  background: var(--tabela-poco);
+}
+
 .tabela__dica {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0;
-  padding: 10px 16px;
-  border-top: 1px solid var(--linha);
   color: var(--tinta-3);
   font-size: 12.5px;
   line-height: 1.4;
@@ -1351,6 +1581,35 @@ tbody > .tabela__linha:first-child > * {
 .tabela__dica i {
   flex: none;
   font-size: 16px;
+}
+
+/* A chave do estado: uma amostra do próprio cartão, com a palavra ao lado. */
+.tabela__estados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  list-style: none;
+}
+
+.tabela__estados li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.tabela__amostra {
+  width: 16px;
+  height: 12px;
+  flex: none;
+  border: 1px solid var(--estado-borda, var(--linha));
+  border-radius: 4px;
+  background: var(--estado-fundo);
+  box-shadow: inset 3px 0 0 var(--estado);
 }
 
 .tabela__sr {
@@ -1362,9 +1621,31 @@ tbody > .tabela__linha:first-child > * {
   white-space: nowrap;
 }
 
+/* No celular o eixo das horas encolhe: cada centímetro vai para as colunas. */
+@media (max-width: 720px) {
+  .tabela {
+    --tabela-eixo: 3.75rem;
+  }
+
+  .tabela__hora {
+    padding-inline-end: 10px;
+  }
+
+  .tabela__agora-rotulo {
+    inset-inline-end: 6px;
+    padding-inline: 6px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .tabela__marcar-rotulo {
+  .tabela__marcar-rotulo,
+  .marcacao {
     transition: none;
+  }
+
+  .marcacao__ao-vivo::after {
+    animation: none;
+    opacity: 0.6;
   }
 }
 </style>

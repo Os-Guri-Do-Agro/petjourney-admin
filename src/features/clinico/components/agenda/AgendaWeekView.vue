@@ -58,6 +58,15 @@ function cargaDe(dia: Dia, professionalId: string) {
   return dia.porProfissional.find((pessoa) => pessoa.professionalId === professionalId) ?? null
 }
 
+/** As iniciais de quem atende: primeiro e último nome, como no cabeçalho da grade do dia. */
+function iniciais(nome: string) {
+  const partes = nome.trim().split(/\s+/).filter(Boolean)
+  const primeira = partes[0]?.charAt(0) ?? ''
+  const ultima = partes.length > 1 ? (partes.at(-1)?.charAt(0) ?? '') : ''
+
+  return `${primeira}${ultima}`.toLocaleUpperCase()
+}
+
 function rotuloDoDia(dia: Dia) {
   return `${formato.diaDaSemanaCurto(dia.data)} ${formato.dataCurta(dia.data)}`
 }
@@ -159,11 +168,14 @@ function rotuloDoDia(dia: Dia) {
           <tr v-for="pessoa in pessoas" :key="pessoa.id" class="semana__pessoa-linha">
             <th scope="row">
               <span class="semana__pessoa">
+                <!-- O mesmo monograma do cabeçalho da coluna no dia: liga as duas visões. -->
                 <span
-                  class="semana__cor"
-                  :style="{ background: clinico.corDaColuna(pessoa.id) }"
+                  class="semana__monograma"
+                  :style="{ '--coluna-cor': clinico.corDaColuna(pessoa.id) }"
                   aria-hidden="true"
-                />
+                >
+                  {{ iniciais(pessoa.nome) }}
+                </span>
                 <span class="semana__nome" :title="pessoa.nome">{{ pessoa.nome }}</span>
               </span>
             </th>
@@ -235,9 +247,19 @@ function rotuloDoDia(dia: Dia) {
 .semana__tabela th,
 .semana__tabela td {
   padding: 0;
-  border-bottom: 1px solid var(--linha);
+  border-bottom: 1px solid var(--linha-suave);
   text-align: start;
   vertical-align: middle;
+}
+
+/* O cabeçalho dos dias num poço, como o da grade do dia: o papel fica para os números. */
+.semana__tabela thead th {
+  border-bottom-color: var(--linha);
+  background: color-mix(in oklab, var(--superficie-2) 75%, var(--superficie));
+}
+
+.semana__tabela thead th:first-child {
+  background: color-mix(in oklab, var(--superficie-2) 75%, var(--superficie));
 }
 
 .semana__tabela tbody tr:last-child th,
@@ -275,7 +297,7 @@ function rotuloDoDia(dia: Dia) {
 }
 
 .semana__amostra span {
-  height: 4px;
+  height: 5px;
   border-radius: 999px;
   background: var(--clinica);
 }
@@ -309,12 +331,14 @@ function rotuloDoDia(dia: Dia) {
 }
 
 .semana__dia-data {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 /* Hoje: a coluna num fundo bem claro da Clínica, e o dia na tinta dela. */
-.semana__col--hoje {
+.semana__col--hoje,
+.semana__tabela thead th.semana__col--hoje {
   background: color-mix(in oklab, var(--clinica-fundo) 45%, var(--superficie));
 }
 
@@ -328,7 +352,8 @@ function rotuloDoDia(dia: Dia) {
 }
 
 /* Dia fechado: apagado, com a palavra, sem pedir atenção. */
-.semana__col--fechado {
+.semana__col--fechado,
+.semana__tabela thead th.semana__col--fechado {
   background: var(--superficie-2);
 }
 
@@ -348,7 +373,12 @@ function rotuloDoDia(dia: Dia) {
 
 .semana__clinica th,
 .semana__clinica td {
-  height: 60px;
+  height: 68px;
+}
+
+.semana__clinica th {
+  font-size: 15px;
+  font-weight: 650;
 }
 
 .semana__contagem th,
@@ -365,12 +395,12 @@ function rotuloDoDia(dia: Dia) {
 /* As três linhas da clínica formam um bloco; o fio mais forte o separa da equipe. */
 .semana__contagem--ultima th,
 .semana__contagem--ultima td {
-  border-bottom-color: var(--linha-forte);
+  border-bottom-color: var(--linha-media);
 }
 
 .semana__pessoa-linha th,
 .semana__pessoa-linha td {
-  height: 58px;
+  height: 62px;
 }
 
 .semana__numero {
@@ -397,11 +427,20 @@ function rotuloDoDia(dia: Dia) {
 }
 
 /* A cor do profissional é a mesma da coluna dele no dia: liga as duas visões. */
-.semana__cor {
-  width: 10px;
-  height: 10px;
+.semana__monograma {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
   flex: none;
+  place-items: center;
   border-radius: 50%;
+  background: color-mix(in oklab, var(--coluna-cor) 32%, var(--superficie));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--coluna-cor) 50%, transparent);
+  color: color-mix(in oklab, var(--coluna-cor) 30%, var(--tinta));
+  font-family: var(--font-dados);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .semana__nome {
@@ -490,7 +529,7 @@ function rotuloDoDia(dia: Dia) {
   display: block;
   width: 100%;
   max-width: 6rem;
-  height: 4px;
+  height: 5px;
   overflow: hidden;
   border-radius: 999px;
   background: var(--superficie-3);
@@ -509,5 +548,16 @@ function rotuloDoDia(dia: Dia) {
 
 .semana__barra--excedido > span {
   background: var(--risco);
+}
+
+/* No celular a coluna dos nomes cede espaço aos dias, que rolam de lado. */
+@media (max-width: 720px) {
+  .semana__canto {
+    width: 9.5rem;
+  }
+
+  .semana__tabela tbody th {
+    padding-inline: 12px;
+  }
 }
 </style>

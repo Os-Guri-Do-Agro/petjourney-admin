@@ -408,35 +408,44 @@ const itensAcoes = computed<MenuItem[]>(() => [
 .semana {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
+/*
+ * A fita é um trilho rente, como o controle segmentado: o dia escolhido sobe em papel, com sombra
+ * baixa, e o número acende na cor da Clínica. Os outros ficam no trilho, legíveis e quietos.
+ */
 .semana__dias {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   margin: 0;
-  padding: 0;
+  padding: 4px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
   list-style: none;
 }
 
 .dia {
   position: relative;
   display: grid;
-  width: 58px;
+  width: 60px;
   justify-items: center;
-  gap: 2px;
-  padding: 6px 4px 7px;
+  gap: 3px;
+  padding: 7px 4px 8px;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: 11px;
   background: transparent;
   color: var(--tinta-2);
   cursor: pointer;
   font: inherit;
-  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
+  transition:
+    background-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    box-shadow var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .dia:hover {
-  background: var(--superficie-2);
+  background: color-mix(in oklab, var(--superficie) 70%, transparent);
   color: var(--tinta);
 }
 
@@ -448,13 +457,15 @@ const itensAcoes = computed<MenuItem[]>(() => [
 .dia__semana {
   font-size: 12px;
   font-weight: 500;
+  line-height: 1.1;
 }
 
 .dia__numero {
   color: var(--tinta);
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 650;
-  line-height: 1.1;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
 /* A barrinha de carga: quanto do expediente já está marcado. */
@@ -463,20 +474,22 @@ const itensAcoes = computed<MenuItem[]>(() => [
   width: 30px;
   height: 4px;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: 999px;
   background: var(--superficie-3);
 }
 
 .dia__carga span {
   display: block;
   height: 100%;
-  border-radius: 2px;
-  background: var(--clinica);
+  border-radius: inherit;
+  background: color-mix(in oklab, var(--clinica) 70%, var(--superficie));
 }
 
 .dia__total {
   color: var(--tinta-3);
   font-size: 11px;
+  font-weight: 550;
+  line-height: 1;
 }
 
 .dia--hoje .dia__semana {
@@ -484,33 +497,33 @@ const itensAcoes = computed<MenuItem[]>(() => [
   font-weight: 650;
 }
 
+/* Hoje: o ponto da Clínica no canto, aceso esteja o dia escolhido ou não. */
 .dia--hoje::after {
   position: absolute;
   top: 7px;
-  right: 9px;
+  right: 8px;
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--clinica);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--clinica) 20%, transparent);
   content: '';
 }
 
-.dia--escolhido {
-  border-color: color-mix(in oklab, var(--clinica) 45%, transparent);
-  background: var(--clinica-fundo);
-  color: var(--clinica-tinta);
-}
-
+.dia--escolhido,
 .dia--escolhido:hover {
-  background: var(--clinica-fundo);
+  border-color: var(--linha);
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+  color: var(--tinta-2);
 }
 
 .dia--escolhido .dia__numero {
   color: var(--clinica-tinta);
 }
 
-.dia--escolhido .dia__carga {
-  background: color-mix(in oklab, var(--clinica) 20%, var(--superficie));
+.dia--escolhido .dia__carga span {
+  background: var(--clinica);
 }
 
 .dia--fechado .dia__numero {
@@ -662,7 +675,10 @@ const itensAcoes = computed<MenuItem[]>(() => [
   }
 
   .dia--hoje::after {
-    right: 4px;
+    top: 4px;
+    right: 3px;
+    width: 5px;
+    height: 5px;
   }
 
   .dia__total {

@@ -334,7 +334,7 @@ async function confirmar() {
   <Dialog
     :visible="visivel"
     modal
-    class="clinic-dialog hc-tema"
+    class="clinic-dialog hc-tema agenda-dialogo"
     :style="{ width: 'min(40rem, 94vw)' }"
     :aria-labelledby="idTitulo"
     @update:visible="emit('update:visivel', $event)"

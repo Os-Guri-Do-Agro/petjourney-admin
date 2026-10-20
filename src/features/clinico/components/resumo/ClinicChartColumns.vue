@@ -58,6 +58,38 @@ const props = withDefaults(
 const tema = useClinicChartTheme()
 const formato = useClinicFormat()
 
+/** Lê um token do Trilha já resolvido na raiz — o Apex não entende `var()`. */
+function token(nome: string, reserva: string) {
+  if (typeof document === 'undefined') {
+    return reserva
+  }
+
+  return getComputedStyle(document.documentElement).getPropertyValue(nome).trim() || reserva
+}
+
+/**
+ * As cores do lugar (a Clínica) e do estado (falta), relidas a cada troca de tema: o tema do
+ * gráfico já observa a raiz, e depender dele aqui é o que faz esta leitura acompanhar a troca.
+ */
+const lugar = computed(() => {
+  void tema.cor.value
+  void tema.escuro.value
+
+  const superficie = token('--superficie', '#ffffff')
+  const clinica = token('--clinica', '#1c7db0')
+
+  return {
+    clinica,
+    tinta: token('--clinica-tinta', '#005982'),
+    previsto: misturar(clinica, superficie, 0.36),
+    falta: token('--risco', '#c54e45'),
+    fio: token('--linha-suave', '#e9efec'),
+    poco: token('--superficie-2', '#f4f8f6'),
+    rotulo: token('--tinta-2', '#40524b'),
+    apagado: token('--tinta-3', '#5e6d67'),
+  }
+})
+
 const ALTURA = 300
 
 /**
@@ -172,17 +204,30 @@ const opcoes = computed<ApexOptions>(() => {
     })
   }
 
+  const luz = lugar.value
+
   return {
     chart: { ...tema.grafico.value, type: tipo.value, height: ALTURA, stacked: true },
-    /* Previsto é a marca meio apagada: o que ainda vai acontecer lê mais leve que o concluído. */
-    colors: [
-      cor['accent-strong'],
-      misturar(cor.accent, cor.surface, 0.45),
-      cor['risk-text'],
-      cor['attention-text'],
-    ],
-    grid: tema.grade.value,
-    legend: tema.legenda.value,
+    /*
+     * As cores do lugar: concluído no azul cheio da Clínica, previsto no mesmo azul clareado (o que
+     * ainda vai acontecer lê mais leve), falta no vermelho do estado.
+     */
+    colors: [luz.clinica, luz.previsto, luz.falta, cor['attention-text']],
+    /* Grade leve: só os fios horizontais, contínuos e quase apagados. */
+    grid: {
+      ...tema.grade.value,
+      borderColor: luz.fio,
+      strokeDashArray: 0,
+      padding: { top: 0, right: 8, bottom: 0, left: 8 },
+    },
+    legend: {
+      ...tema.legenda.value,
+      fontSize: '12.5px',
+      fontWeight: 600,
+      labels: { colors: luz.rotulo },
+      markers: { size: 6, strokeWidth: 0, shape: 'circle' },
+      itemMargin: { horizontal: 12, vertical: 4 },
+    },
     states: tema.estados.value,
     stroke: {
       /* Zero nas colunas: contorno em barra empilhada vira uma linha entre dois segmentos. */
@@ -200,9 +245,11 @@ const opcoes = computed<ApexOptions>(() => {
     dataLabels: { enabled: false },
     plotOptions: {
       bar: {
-        columnWidth: props.pontos.length > 12 ? '76%' : '52%',
-        borderRadius: 4,
+        columnWidth: props.pontos.length > 12 ? '72%' : '46%',
+        /* Cantos arredondados só no alto da pilha: a base fica reta, assentada no eixo. */
+        borderRadius: props.pontos.length > 12 ? 4 : 7,
         borderRadiusApplication: 'end',
+        borderRadiusWhenStacked: 'last',
         colors: {
           /*
            * Fundo do dia fechado. Vem daqui e não de uma anotação porque a barra de fundo do
@@ -210,10 +257,10 @@ const opcoes = computed<ApexOptions>(() => {
            * teria que redescobrir os dois a cada redimensionamento.
            */
           backgroundBarColors: props.pontos.map((ponto) =>
-            ponto.fechado ? cor['surface-sunken'] : 'transparent',
+            ponto.fechado ? luz.poco : 'transparent',
           ),
           backgroundBarOpacity: 1,
-          backgroundBarRadius: 4,
+          backgroundBarRadius: 7,
         },
         dataLabels: {
           total: {
@@ -221,10 +268,10 @@ const opcoes = computed<ApexOptions>(() => {
             offsetY: -4,
             formatter: (valor?: string) => (Number(valor) > 0 ? String(valor) : ''),
             style: {
-              color: cor.muted,
+              color: luz.rotulo,
               fontFamily: tema.fonte.value.familia,
-              fontSize: tema.fonte.value.rotulo,
-              fontWeight: 800,
+              fontSize: '12px',
+              fontWeight: 700,
             },
           },
         },
@@ -248,10 +295,10 @@ const opcoes = computed<ApexOptions>(() => {
           fontWeight: 700,
           colors: props.pontos.map((ponto) => {
             if (ponto.data === props.destaque) {
-              return cor['accent-strong']
+              return luz.tinta
             }
 
-            return ponto.fechado ? cor.faint : cor.muted
+            return ponto.fechado ? luz.apagado : luz.rotulo
           }),
         },
         formatter: (valor: string | number) => rotuloPorData.value.get(String(valor)) ?? '',
@@ -271,7 +318,7 @@ const opcoes = computed<ApexOptions>(() => {
               {
                 x: props.destaque,
                 strokeDashArray: 0,
-                borderColor: cor.accent,
+                borderColor: luz.clinica,
                 label: props.rotuloDestaque
                   ? {
                       text: props.rotuloDestaque,
@@ -279,8 +326,8 @@ const opcoes = computed<ApexOptions>(() => {
                       position: 'top',
                       offsetY: -6,
                       style: {
-                        background: cor['accent-tint'],
-                        color: cor['accent-strong'],
+                        background: token('--clinica-fundo', '#dcf0fe'),
+                        color: luz.tinta,
                         fontFamily: tema.fonte.value.familia,
                         fontSize: tema.fonte.value.rotulo,
                         fontWeight: 750,
@@ -333,5 +380,10 @@ const opcoes = computed<ApexOptions>(() => {
 <style scoped>
 .colunas {
   margin: 0;
+}
+
+/* A legenda respira: o ponto e a palavra separados, como na chave do rodapé da Agenda. */
+.colunas :deep(.apexcharts-legend-series) {
+  gap: 6px;
 }
 </style>

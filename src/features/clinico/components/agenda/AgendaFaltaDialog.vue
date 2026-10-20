@@ -198,7 +198,7 @@ const linkDoWhatsapp = computed(() => {
   <Dialog
     v-model:visible="aberto"
     modal
-    class="clinic-dialog hc-tema"
+    class="clinic-dialog hc-tema agenda-dialogo"
     :style="{ width: 'min(34rem, 94vw)' }"
     :aria-labelledby="idTitulo"
     dismissable-mask
