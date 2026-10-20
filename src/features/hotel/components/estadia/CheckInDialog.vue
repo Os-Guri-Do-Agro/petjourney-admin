@@ -381,7 +381,7 @@ function confirmar() {
     modal
     :header="t('hotel.checkin.titulo', { pet: petNome })"
     :style="{ width: 'min(50rem, 94vw)' }"
-    class="clinic-scope hc-tema"
+    class="clinic-scope"
     @update:visible="emit('fechar')"
   >
     <div class="checkin">
@@ -763,14 +763,15 @@ function confirmar() {
 <style scoped>
 .checkin {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 20px;
 }
 
+/* Cada bloco é um assunto do balcão: chegada, pertences, alimentação, medicação, autorizações. */
 .bloco {
   display: grid;
-  gap: var(--clinic-space-3);
-  padding-top: var(--clinic-space-3);
-  border-top: 1px solid var(--clinic-line-soft);
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--linha);
 }
 
 .bloco:first-of-type {
@@ -780,22 +781,22 @@ function confirmar() {
 
 .bloco__titulo {
   margin: 0;
-  color: var(--clinic-text);
-  font-size: 0.9375rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .bloco__lede {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 /* O grupo do veterinário é um subtítulo dentro da emergência, não uma caixa dentro da seção. */
 .vet {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 8px;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -803,17 +804,17 @@ function confirmar() {
 }
 
 .vet__titulo {
-  margin-block-end: var(--clinic-space-2);
+  margin-block-end: 8px;
   padding: 0;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-body);
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .grade {
   display: grid;
-  gap: var(--clinic-space-3);
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 14px 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
 }
 
 /*
@@ -822,14 +823,14 @@ function confirmar() {
  * coluna, alinhado ao nome do veterinário logo abaixo.
  */
 .grade--colunas-fixas {
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
 }
 
 .campo {
   display: grid;
   /* Linhas no topo: sem isto, o campo ao lado de um mais alto desce e a fileira sai torta. */
   align-content: start;
-  gap: 0.25rem;
+  gap: 6px;
 }
 
 .campo--largo {
@@ -840,68 +841,75 @@ function confirmar() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .campo label {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .campo__dica {
-  color: var(--clinic-faint);
-  font-size: 0.7rem;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.4;
 }
 
 .campo__erro {
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 650;
+  color: var(--risco-tinta);
+  font-size: 13px;
+  font-weight: 600;
   line-height: 1.4;
 }
 
 .pertences {
   display: grid;
-  gap: 0.2rem;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
   list-style: none;
 }
 
 .pertences li {
   display: flex;
+  min-height: 44px;
   align-items: center;
   justify-content: space-between;
-  padding: 0.15rem 0.6rem;
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface-soft);
-  font-size: var(--clinic-font-label);
+  gap: 8px;
+  padding: 4px 6px 4px 14px;
+  color: var(--tinta);
+  font-size: 14px;
+}
+
+.pertences li + li {
+  border-top: 1px solid var(--linha);
 }
 
 .pertences__novo {
   display: flex;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .autorizacoes {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 10px 16px;
   margin: 0;
   padding: 0;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
   list-style: none;
 }
 
 .autorizacoes li {
   display: flex;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .autorizacoes label {
-  font-size: var(--clinic-font-label);
+  color: var(--tinta);
+  font-size: 14px;
 }
 </style>

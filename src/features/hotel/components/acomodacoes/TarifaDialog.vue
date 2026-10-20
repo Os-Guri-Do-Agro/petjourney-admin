@@ -25,7 +25,6 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -125,7 +124,7 @@ function salvar() {
     modal
     :header="editando ? t('hotel.acomodacoes.preco.editar') : t('hotel.acomodacoes.preco.nova')"
     :style="{ width: 'min(34rem, 94vw)' }"
-    class="clinic-scope hc-tema"
+    class="clinic-scope"
     @update:visible="emit('fechar')"
   >
     <form class="forma" @submit.prevent="salvar">
@@ -170,12 +169,19 @@ function salvar() {
         <small class="campo__dica">{{ t('hotel.acomodacoes.preco.acompanhanteDica') }}</small>
       </div>
 
-      <p class="aviso">{{ t('hotel.acomodacoes.preco.daquiEmDiante') }}</p>
+      <p class="aviso">
+        <i class="ph ph-info" aria-hidden="true" />
+        {{ t('hotel.acomodacoes.preco.daquiEmDiante') }}
+      </p>
 
-      <Message v-if="erro" severity="error" :closable="false">{{ t(erro) }}</Message>
+      <p v-if="erro" class="erro" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        {{ t(erro) }}
+      </p>
 
       <section v-if="editando" class="perigo">
         <p v-if="emUso > 0" class="perigo__travado">
+          <i class="ph ph-info" aria-hidden="true" />
           {{ t('hotel.acomodacoes.preco.emUso', { total: emUso }, emUso) }}
         </p>
 
@@ -233,70 +239,122 @@ function salvar() {
 <style scoped>
 .forma {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 18px;
 }
 
 .campo {
   display: grid;
-  gap: var(--clinic-space-2);
+  align-content: start;
+  gap: 6px;
 }
 
-.campo label,
-.porte label {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+.campo label {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .campo__dica {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+/* Remover mora no pé do formulário, separado por um fio: é a única ação que não se desfaz. */
+.perigo {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding-block-start: 14px;
+  border-block-start: 1px solid var(--linha);
+}
+
+.perigo__travado {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.perigo__travado i {
+  margin-top: 2px;
+  color: var(--tinta-3);
+  font-size: 16px;
+}
+
+.perigo__pergunta {
+  margin: 0;
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.perigo__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.erro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.erro i {
+  flex: none;
+  font-size: 18px;
+}
+
+.porte label {
+  color: var(--tinta-2);
+  font-size: 13px;
+  font-weight: 550;
 }
 
 .portes {
   display: grid;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface-soft);
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  padding: 14px 16px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  gap: 12px;
+  background: var(--superficie-2);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
 }
 
 .portes__titulo {
   padding-inline: 0;
-  color: var(--clinic-text);
-  font-size: 0.9375rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
   grid-column: 1 / -1;
-  letter-spacing: -0.01em;
 }
 
 /*
  * ## Por que `min-width: 0`, e por que o campo precisa de largura explícita
  *
- * Item de grid nasce com `min-width: auto`, o que significa "não encolha abaixo do meu conteúdo".
- * O `InputNumber` do PrimeVue carrega um `<input>` com largura intrínseca de cerca de 20 caracteres
- * — 173px medidos aqui —, e a coluna deste fieldset tem 154px. O item se recusava a encolher, o
- * campo vazava para fora da borda, e o fieldset passava a ter 510px de conteúdo em 500px de caixa.
- *
- * `min-width: 0` devolve ao item o direito de encolher; `width: 100%` no campo faz ele ocupar a
- * célula em vez da largura que o navegador inventa para um `<input>` sem instrução. Um sem o outro
- * não resolve: só o `min-width` deixaria o campo transbordar do item, e só a largura não impediria
- * a coluna de ser empurrada.
+ * Item de grid nasce com `min-width: auto` ("não encolha abaixo do meu conteúdo"), e o `<input>` do
+ * `InputNumber` tem largura intrínseca de uns 20 caracteres — maior que a coluna. `min-width: 0`
+ * devolve ao item o direito de encolher; `width: 100%` faz o campo ocupar a célula. Um sem o outro
+ * não resolve.
  */
 .porte {
   display: grid;
   min-width: 0;
-  gap: var(--clinic-space-2);
+  gap: 6px;
 }
 
-/*
- * `:deep` porque a marcação é do PrimeVue: o componente rende `span.p-inputnumber > input`, e o
- * estilo escopado não alcança nenhum dos dois sozinho. Os dois precisam da regra — o `span` é quem
- * ocupa a célula, o `input` é quem tem a largura intrínseca a anular.
- */
 .porte :deep(.p-inputnumber),
 .porte :deep(.p-inputnumber input) {
   width: 100%;
@@ -304,41 +362,18 @@ function salvar() {
 }
 
 .aviso {
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-}
-
-.perigo {
-  display: grid;
-  justify-items: start;
-  padding-block-start: var(--clinic-space-3);
-  border-block-start: 1px solid var(--clinic-line-soft);
-  gap: var(--clinic-space-2);
-}
-
-.perigo__travado {
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-}
-
-.perigo__pergunta {
-  margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.perigo__acoes {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--clinic-space-2);
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
 }
 
-/* Caixa-alta rastreada não roda em árabe: o `letter-spacing` desconecta as ligaduras. */
-[dir='rtl'] .portes__titulo {
-  letter-spacing: normal;
-  text-transform: none;
+.aviso i {
+  margin-top: 2px;
+  color: var(--hotel-tinta);
+  font-size: 16px;
 }
 </style>

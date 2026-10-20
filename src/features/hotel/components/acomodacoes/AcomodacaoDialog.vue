@@ -14,7 +14,6 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
 import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
 import { computed, ref, useId, watch } from 'vue'
@@ -167,22 +166,25 @@ function salvar() {
     :visible="aberto"
     modal
     :header="editando ? t('hotel.acomodacoes.editar') : t('hotel.acomodacoes.nova')"
-    :style="{ width: 'min(42rem, 94vw)' }"
-    class="clinic-scope hc-tema"
+    :style="{ width: 'min(44rem, 94vw)' }"
+    class="clinic-scope"
     @update:visible="emit('fechar')"
   >
     <div class="form">
       <!--
-        Nove campos numa grade lisa não dizem em que ordem se pensa. Em três seções, cada linha
-        tem um assunto só: o que é, quem cabe, quanto custa preparar e alugar.
+        Nove campos numa grade lisa não dizem em que ordem se pensa. Em três grupos, cada linha tem
+        um assunto só: o que é, quem cabe, quanto custa preparar e alugar.
       -->
-      <section class="secao">
-        <h3 class="secao__titulo">{{ t('hotel.acomodacoes.secaoIdentidade') }}</h3>
+      <section class="grupo">
+        <h3 class="grupo__titulo">
+          <i class="ph ph-tag-simple" aria-hidden="true" />
+          {{ t('hotel.acomodacoes.secaoIdentidade') }}
+        </h3>
 
         <div class="grade">
           <div class="campo">
             <label :for="`${idCampo}-nome`">{{ t('hotel.acomodacoes.nome') }}</label>
-            <InputText :id="`${idCampo}-nome`" v-model="nome" fluid />
+            <InputText :id="`${idCampo}-nome`" v-model="nome" autocomplete="off" fluid />
           </div>
 
           <div class="campo">
@@ -202,9 +204,7 @@ function salvar() {
             <Select
               :input-id="`${idCampo}-kind`"
               v-model="tipoId"
-              :options="
-                tipos.map((item) => ({ valor: item.id, rotulo: item.nome }))
-              "
+              :options="tipos.map((item) => ({ valor: item.id, rotulo: item.nome }))"
               option-label="rotulo"
               option-value="valor"
               fluid
@@ -213,8 +213,11 @@ function salvar() {
         </div>
       </section>
 
-      <section class="secao">
-        <h3 class="secao__titulo">{{ t('hotel.acomodacoes.secaoQuemCabe') }}</h3>
+      <section class="grupo">
+        <h3 class="grupo__titulo">
+          <i class="ph ph-paw-print" aria-hidden="true" />
+          {{ t('hotel.acomodacoes.secaoQuemCabe') }}
+        </h3>
 
         <div class="grade">
           <div class="campo">
@@ -257,8 +260,11 @@ function salvar() {
         </div>
       </section>
 
-      <section class="secao">
-        <h3 class="secao__titulo">{{ t('hotel.acomodacoes.secaoPreco') }}</h3>
+      <section class="grupo">
+        <h3 class="grupo__titulo">
+          <i class="ph ph-coins" aria-hidden="true" />
+          {{ t('hotel.acomodacoes.secaoPreco') }}
+        </h3>
 
         <div class="grade">
           <div class="campo">
@@ -304,14 +310,34 @@ function salvar() {
       </section>
 
       <!--
-        Tirar de operação vive num bloco à parte, abaixo do cadastro: é uma decisão de outro tipo,
+        Tirar de operação vive numa caixa à parte, abaixo do cadastro: é uma decisão de outro tipo,
         e misturá-la aos campos faria alguém desativar uma baia querendo renomeá-la.
       -->
-      <section v-if="editando" class="secao secao--operacao">
-        <h3 class="secao__titulo">{{ t('hotel.acomodacoes.operacao') }}</h3>
+      <section
+        v-if="editando"
+        class="operacao"
+        :class="{ 'operacao--parada': !acomodacao?.ativa }"
+      >
+        <header class="operacao__cabeca">
+          <span class="operacao__icone" aria-hidden="true">
+            <i :class="acomodacao?.ativa ? 'ph ph-power' : 'ph ph-wrench'" />
+          </span>
+          <span class="operacao__titulos">
+            <h3 class="operacao__titulo">{{ t('hotel.acomodacoes.operacao') }}</h3>
+            <span class="operacao__estado">
+              <template v-if="acomodacao?.ativa">{{ t('hotel.casa.dialogo.emOperacao') }}</template>
+              <template v-else>
+                {{ formato.motivoInativa(acomodacao?.motivoInativa ?? 'outro') }}
+                <template v-if="acomodacao?.detalheInativa">
+                  · {{ acomodacao.detalheInativa }}
+                </template>
+              </template>
+            </span>
+          </span>
+        </header>
 
         <template v-if="acomodacao?.ativa">
-          <div class="grade">
+          <div class="grade grade--dupla">
             <div class="campo">
               <label :for="`${idCampo}-motivo`">{{ t('hotel.acomodacoes.motivo') }}</label>
               <Select
@@ -331,9 +357,12 @@ function salvar() {
               <InputText :id="`${idCampo}-detalhe`" v-model="detalheInativa" fluid />
             </div>
           </div>
+        </template>
 
+        <div class="operacao__acoes">
           <Button
-            class="secao__acao"
+            v-if="acomodacao?.ativa"
+            type="button"
             :label="t('hotel.acomodacoes.desativar')"
             icon="ph ph-power"
             severity="secondary"
@@ -341,18 +370,9 @@ function salvar() {
             :loading="salvando"
             @click="emit('desativar', { motivo: motivoInativa, detalhe: detalheInativa })"
           />
-        </template>
-
-        <template v-else>
-          <p class="operacao__estado">
-            {{ formato.motivoInativa(acomodacao?.motivoInativa ?? 'outro') }}
-            <template v-if="acomodacao?.detalheInativa">
-              · {{ acomodacao.detalheInativa }}
-            </template>
-          </p>
-
           <Button
-            class="secao__acao"
+            v-else
+            type="button"
             :label="t('hotel.acomodacoes.reativar')"
             icon="ph ph-check-circle"
             severity="secondary"
@@ -360,53 +380,59 @@ function salvar() {
             :loading="salvando"
             @click="emit('reativar')"
           />
-        </template>
 
-        <!--
-          Remover só existe para o que nunca hospedou — o repositório recusa o resto. O confirmar
-          próprio existe porque a ação é irreversível e mora ao lado de outras que não são.
-        -->
-        <div class="operacao__remover">
-          <Button
-            v-if="!confirmandoRemocao"
-            :label="t('hotel.acomodacoes.remover')"
-            severity="danger"
-            text
-            size="small"
-            @click="confirmandoRemocao = true"
-          />
-
-          <template v-else>
-            <span class="operacao__pergunta">{{ t('hotel.acomodacoes.removerConfirma') }}</span>
+          <!--
+            Remover só existe para o que nunca hospedou — o repositório recusa o resto. O confirmar
+            próprio existe porque a ação é irreversível e mora ao lado de outras que não são.
+          -->
+          <span class="operacao__remover">
             <Button
-              :label="t('hotel.comum.cancelar')"
-              severity="secondary"
-              text
-              size="small"
-              @click="confirmandoRemocao = false"
-            />
-            <Button
-              :label="t('hotel.acomodacoes.removerSim')"
+              v-if="!confirmandoRemocao"
+              type="button"
+              :label="t('hotel.acomodacoes.remover')"
+              icon="ph ph-trash"
               severity="danger"
-              size="small"
-              :loading="salvando"
-              @click="emit('remover')"
+              text
+              @click="confirmandoRemocao = true"
             />
-          </template>
+
+            <template v-else>
+              <span class="operacao__pergunta">{{ t('hotel.acomodacoes.removerConfirma') }}</span>
+              <Button
+                type="button"
+                :label="t('hotel.comum.cancelar')"
+                severity="secondary"
+                text
+                @click="confirmandoRemocao = false"
+              />
+              <Button
+                type="button"
+                :label="t('hotel.acomodacoes.removerSim')"
+                severity="danger"
+                :loading="salvando"
+                @click="emit('remover')"
+              />
+            </template>
+          </span>
         </div>
       </section>
 
-      <Message v-if="erro" severity="error" :closable="false">{{ t(erro) }}</Message>
+      <p v-if="erro" class="erro" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        {{ t(erro) }}
+      </p>
     </div>
 
     <template #footer>
       <Button
+        type="button"
         :label="t('hotel.comum.cancelar')"
         severity="secondary"
         text
         @click="emit('fechar')"
       />
       <Button
+        type="button"
         :label="t('hotel.comum.salvar')"
         icon="ph ph-check"
         :loading="salvando"
@@ -420,46 +446,70 @@ function salvar() {
 <style scoped>
 .form {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 22px;
+}
+
+.grupo {
+  display: grid;
+  gap: 12px;
+}
+
+.grupo + .grupo {
+  padding-top: 20px;
+  border-top: 1px solid var(--linha);
+}
+
+.grupo__titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.grupo__titulo i {
+  color: var(--hotel-tinta);
+  font-size: 18px;
 }
 
 .grade {
   display: grid;
-  gap: var(--clinic-space-3);
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 14px 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
+.grade--dupla {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
 }
 
 .campo {
   display: grid;
   /*
-   * As linhas ficam no topo, e é isso que alinha a grade.
-   *
-   * Sem `align-content`, as linhas automáticas de cada campo **esticam** para preencher a altura
-   * da célula — e a célula tem a altura do campo mais alto da fileira, que é o que tem dica
-   * embaixo. Resultado: "Porte máximo" e "Espécies aceitas" desciam em relação a "Capacidade", com
-   * os rótulos alinhados e os campos não. Parecia grade torta; era alinhamento de conteúdo.
+   * As linhas ficam no topo, e é isso que alinha a grade: sem `align-content`, as linhas de cada
+   * campo esticam até a altura do campo mais alto da fileira — o que tem dica embaixo — e os
+   * campos vizinhos descem em relação aos rótulos.
    */
   align-content: start;
-  gap: 0.25rem;
+  gap: 6px;
 }
 
 .campo label {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .campo__dica {
-  color: var(--clinic-faint);
-  font-size: 0.7rem;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.4;
 }
 
 /*
- * Os chips quebram linha em vez de espremer.
- *
- * Numa coluna de 12rem, dois recursos selecionados não cabem lado a lado. O padrão do flex é
- * encolher, e o segundo chip perdia o próprio "x" de remover — ficava um rótulo cortado que não
- * dava para desmarcar. Quebrando, o campo cresce alguns pixels e cada chip continua inteiro.
+ * Os chips quebram linha em vez de espremer: numa coluna de 12rem, dois recursos não cabem lado a
+ * lado, e o segundo chip perdia o próprio "x" de remover.
  */
 .campo :deep(.p-multiselect-label) {
   flex-wrap: wrap;
@@ -469,58 +519,103 @@ function salvar() {
   flex: 0 0 auto;
 }
 
-.secao {
+/* ---- operação: caixa à parte, porque é decisão de outro tipo */
+
+.operacao {
   display: grid;
-  gap: var(--clinic-space-2);
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie-2);
 }
 
-/* Só a operação leva régua: ela separa cadastrar de tirar de operação, que é decisão de outro tipo. */
-.secao--operacao {
-  gap: var(--clinic-space-3);
-  padding-top: var(--clinic-space-3);
-  border-top: 1px solid var(--clinic-line-soft);
+.operacao--parada {
+  border-style: dashed;
+  border-color: var(--linha-forte);
 }
 
-.secao__titulo {
+.operacao__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.operacao__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 18px;
+}
+
+.operacao--parada .operacao__icone {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+}
+
+.operacao__titulos {
+  display: grid;
+  gap: 1px;
+}
+
+.operacao__titulo {
   margin: 0;
-  color: var(--clinic-text);
-  font-size: 0.9375rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-/*
- * O botão não estica; a grade de campos, sim.
- *
- * Antes a seção inteira levava `justify-items: start` para segurar o botão, e isso encolhia
- * **também** a grade de "Motivo" e "Detalhe": os dois campos caíam num vão estreito à esquerda,
- * empilhados, com metade do diálogo vazia ao lado. Agora a exceção é do botão, não da seção.
- */
-.secao__acao {
-  justify-self: start;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .operacao__estado {
-  margin: 0;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.operacao--parada .operacao__estado {
+  color: var(--atencao-tinta);
+  font-weight: 600;
+}
+
+.operacao__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
 }
 
 .operacao__remover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--clinic-space-2);
+  gap: 6px;
+  margin-inline-start: auto;
 }
 
 .operacao__pergunta {
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
-.operacao__remover :deep(.p-button) {
-  flex: 0 0 auto;
+.erro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.erro i {
+  flex: none;
+  font-size: 18px;
 }
 </style>

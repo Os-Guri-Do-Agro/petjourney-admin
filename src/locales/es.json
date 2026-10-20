@@ -488,7 +488,9 @@
       "title": "Página no encontrada",
       "body": "La dirección a la que accedió no existe o fue movida. Verifique el enlace o vuelva al área principal del panel.",
       "goHome": "Ir al inicio",
-      "back": "Volver"
+      "back": "Volver",
+      "selo": "Error 404",
+      "endereco": "La dirección que abrió"
     }
   },
   "inicio": {
@@ -642,7 +644,9 @@
         "vacinas": "Vacunas",
         "rotina": "Rutina",
         "vespera": "Reservas",
-        "tratamentos": "Tratamientos"
+        "tratamentos": "Tratamientos",
+        "pedidos": "Solicitudes",
+        "pedidosDeReserva": "Solicitudes"
       },
       "contagem": "{total} asunto | {total} asuntos",
       "recolher": "Contraer {modulo}",
@@ -657,7 +661,12 @@
       "urgentes": "{total} asunto urgente requiere su atención hoy | {total} asuntos urgentes requieren su atención hoy",
       "esperando": "{total} asunto lo espera hoy | {total} asuntos lo esperan hoy",
       "falhou": "No fue posible revisar los pendientes ahora.",
-      "emDia": "Todo al día por aquí."
+      "emDia": "Todo al día por aquí.",
+      "em": {
+        "clinica": "{total} en la Clínica",
+        "hotel": "{total} en el Hotel"
+      },
+      "comOnde": "{frase}: {onde}."
     },
     "acoes": {
       "rotulo": "Acciones rápidas",
@@ -682,7 +691,8 @@
       "link": "Enlace de referido",
       "linkCopiado": "Enlace copiado",
       "comoFunciona": "Cómo funciona",
-      "seuCodigo": "Su código de indicación"
+      "seuCodigo": "Su código de indicación",
+      "maisDoCodigo": "Enlace, QR y lecturas"
     },
     "dia": {
       "titulo": "Hoy",
@@ -776,7 +786,63 @@
       "compromissos": "Compromisos del día",
       "posicao": "{atual} de {total}",
       "compromissoAnterior": "Compromiso anterior",
-      "proximoCompromisso": "Próximo compromiso"
+      "proximoCompromisso": "Próximo compromiso",
+      "tituloSemana": "Agenda de la semana"
+    },
+    "saudacao": {
+      "manha": "Buenos días",
+      "manhaCom": "Buenos días, {nome}",
+      "tarde": "Buenas tardes",
+      "tardeCom": "Buenas tardes, {nome}",
+      "noite": "Buenas noches",
+      "noiteCom": "Buenas noches, {nome}"
+    },
+    "espacos": {
+      "rotulo": "Sus espacios ahora",
+      "clinica": {
+        "recepcao": "en recepción",
+        "consulta": "en consulta",
+        "pedidos": "solicitud esperando respuesta | solicitudes esperando respuesta",
+        "aSeguir": "por venir hoy",
+        "proximo": "el próximo a las {hora}",
+        "andamento": "{feitos} de {total} atención realizada hoy | {feitos} de {total} atenciones realizadas hoy"
+      },
+      "hotel": {
+        "naCasa": "en la casa",
+        "chegam": "llega hoy | llegan hoy",
+        "saem": "sale hoy | salen hoy",
+        "rotina": "tarea atrasada | tareas atrasadas",
+        "ocupacao": "{ocupadas} de {total} alojamiento ocupado | {ocupadas} de {total} alojamientos ocupados",
+        "semDocumento": "{total} sin documentos",
+        "atrasadas": "{total} atrasada | {total} atrasadas",
+        "proximaAs": "la próxima a las {hora}",
+        "andamento": "{feitas} de {total} tarea de la rutina hecha | {feitas} de {total} tareas de la rutina hechas"
+      },
+      "portal": {
+        "retido": "en la ventana de seguridad",
+        "leituras": "lectura del QR en 7 días | lecturas del QR en 7 días",
+        "leiturasTotal": "{total} en total",
+        "leiturasIndisponiveis": "no disponible ahora"
+      }
+    },
+    "passo": {
+      "calma": "Nada pendiente ahora",
+      "pedidosAtrasados": "Responder {total} solicitud fuera de plazo | Responder {total} solicitudes fuera de plazo",
+      "recepcao": "Atender a {pet}, que espera en recepción",
+      "consulta": "Volver a la consulta de {pet}",
+      "pedidos": "Responder {total} solicitud de turno | Responder {total} solicitudes de turno",
+      "receber": "Recibir a {pet} a las {hora}",
+      "entregar": "Entregar a {pet} a las {hora}",
+      "rotina": "Ver {total} tarea atrasada | Ver {total} tareas atrasadas",
+      "documento": "Resolver la documentación de {pet}",
+      "checkin": "Hacer el check-in de {pet}",
+      "checkout": "Hacer el check-out de {pet}"
+    },
+    "guia": {
+      "espacos": "Un cuadro para cada espacio de su empresa, con los números de ahora. Cada número abre la pantalla donde se resuelve; al pie del cuadro, el próximo paso es lo que conviene hacer primero.",
+      "portal": "Sus ganancias por referidos y las lecturas de su QR. Al pie del cuadro, el próximo paso es lo que conviene hacer primero.",
+      "pauta": "Todo lo que está pendiente, en todos los espacios, del más grave al menos. Cada fila abre la pantalla donde se resuelve.",
+      "agenda": "Las citas de la clínica y las llegadas del hotel. Elija un día para ver lo que está agendado; las flechas avanzan de semana en semana."
     }
   },
   "programas": {
@@ -1126,7 +1192,14 @@
           "label": "Notas",
           "description": "Registros autenticados de su empresa en esta atención."
         }
-      }
+      },
+      "prazo": {
+        "ativo": "El acceso vence en",
+        "ate": "hasta el {data}",
+        "vinculado": "Vinculado {quando}",
+        "encerrado": "Acceso cerrado"
+      },
+      "semDadosClinicos": "El responsable no liberó datos clínicos en este acceso, solo el mensaje."
     },
     "pet": {
       "castrado": "Castrado",
@@ -1252,7 +1325,9 @@
       "somenteLeitura": {
         "title": "Registro bloqueado",
         "body": "Puede leer el historial de esta atención, pero no registrar su devolución mientras el registro esté suspendido."
-      }
+      },
+      "quemAtendeu": "Quién atendió",
+      "rodape": "Al registrar, la nota va a la historia de {pet} en la app del responsable."
     },
     "especialidade": {
       "CLINICO_GERAL": "Clínica general",
@@ -1432,7 +1507,44 @@
         "limite": "Solo cabe {n} archivo en esta lectura. | Caben hasta {n} archivos en esta lectura.",
         "pdfGrande": "El PDF supera los 10 MB. Pruebe una foto de la receta.",
         "imagemGrande": "La foto supera los 5 MB incluso reducida. Pruebe otra."
+      },
+      "chamada": "¿Tiene la receta en foto o PDF?"
+    },
+    "guia": {
+      "titulo": "Cómo funciona un acceso",
+      "passo1": {
+        "titulo": "El responsable comparte",
+        "texto": "En la app PetJourney, elige qué liberar y genera un código de 6 dígitos que vale por un tiempo."
+      },
+      "passo2": {
+        "titulo": "Usted vincula el código",
+        "texto": "En Vincular código, escriba los 6 dígitos. La mascota aparece aquí con el resumen, el mensaje y los documentos liberados."
+      },
+      "passo3": {
+        "titulo": "Su nota vuelve a la app",
+        "texto": "Lo que registre (servicio, receta, adjuntos) llega a la historia de la mascota. Cuando vence el plazo, los datos clínicos salen y sus notas quedan."
       }
+    },
+    "lista": {
+      "buscaPlaceholder": "Buscar por el nombre de la mascota",
+      "qualquer": "Cualquiera",
+      "periodoPlaceholder": "Elija las fechas",
+      "comProntuarioAjuda": "Solo accesos con diario o documentos",
+      "colunas": {
+        "pet": "Mascota",
+        "vinculado": "Vinculado",
+        "anotacoes": "Notas",
+        "prontuario": "Compartió",
+        "expira": "Vence en",
+        "encerrado": "Cierre"
+      },
+      "soResumo": "Solo el resumen",
+      "prazo": {
+        "dias": "{d} d {h} h",
+        "horas": "{h} h {m} min",
+        "minutos": "{m} min"
+      },
+      "oProximo": "el próximo en vencer"
     }
   },
   "divulgacao": {
@@ -6412,7 +6524,17 @@
       "titulo": "Salida de {pet}",
       "voltarALista": "Volver a la lista",
       "confiraDocumento": "Revisa el documento: {documento}",
-      "semDocumento": "Sin documento registrado. Pide uno con foto."
+      "semDocumento": "Sin documento registrado. Pide uno con foto.",
+      "nova": {
+        "pronto": "Todo revisado. Puede entregar a {pet}.",
+        "falta": {
+          "frase": "Falta {lista}.",
+          "ligar": "llamar al responsable",
+          "pesar": "pesar",
+          "pertences": "revisar {total} pertenencia | revisar {total} pertenencias",
+          "quem": "indicar quién lo lleva"
+        }
+      }
     },
     "comum": {
       "cancelar": "Cancelar",
@@ -6540,7 +6662,100 @@
       "subtitulo": "Hotel",
       "titulo": "Estancia",
       "voltar": "Huéspedes",
-      "quemBusca": "Quién puede retirar"
+      "quemBusca": "Quién puede retirar",
+      "nova": {
+        "quando": "{dia}, {hora}",
+        "dados": {
+          "rotulo": "La estadía en números",
+          "acomodacao": "Alojamiento",
+          "noites": "Noches",
+          "noitesDe": "{atual} de {total}",
+          "noitesReservadas": "{total} noche reservada | {total} noches reservadas",
+          "hoje": "Hoy",
+          "horaSaiu": "{hora}, salió",
+          "horaAtrasou": "{hora}, con {tempo} de retraso",
+          "horaPrevista": "{hora}, prevista",
+          "horaRecebido": "{hora}, recibido por {nome}"
+        },
+        "diario": {
+          "ontem": "Ayer",
+          "descricao": "Lo que al responsable le gustaría leer. De aquí sale el boletín."
+        },
+        "saida": {
+          "variacao": "Entró con {entrada}; variación de {variacao}",
+          "pertencesOk": "Pertenencias revisadas",
+          "conferidos": "{feitos} de {total} revisados",
+          "receber": "Cobrar {valor}",
+          "quitado": "Nada que cobrar",
+          "saldoNoBalcao": "Se cobra en el mostrador, al entregar.",
+          "titulo": "Lo que falta para liberar",
+          "tituloEncerrada": "Salida",
+          "descricao": "Salida prevista para {quando}.",
+          "feito": "Hecho",
+          "noBalcao": "En el mostrador",
+          "falta": "Falta",
+          "conferirNoBalcao": "El check-out revisa cada punto con el responsable en el mostrador.",
+          "semPertences": "No trajo nada en la maleta.",
+          "comObservacao": "Con observación",
+          "naCasa": "En la casa"
+        },
+        "atencao": {
+          "titulo": "Lo que pide atención ahora",
+          "remedioAtrasado": "Medicación de las {hora} atrasada",
+          "remedioNaHora": "Medicación de las {hora}: es la hora",
+          "verMedicacao": "Ver medicación",
+          "boletim": "Boletín retenido hasta la llamada",
+          "verBoletins": "Ver boletines",
+          "saidaAtrasada": "Salida prevista a las {hora}, con {tempo} de retraso",
+          "saiHoje": "Sale hoy a las {hora}",
+          "faltamParaSair": "Falta {total} paso para liberar | Faltan {total} pasos para liberar",
+          "verSaida": "Ver salida",
+          "rotinaAtrasada": "{total} tarea de la rutina atrasada | {total} tareas de la rutina atrasadas",
+          "verRotina": "Ver rutina",
+          "calma": "Nada pide atención ahora.",
+          "calmaProxima": "Nada pide atención ahora. Próxima tarea: {tarefa} a las {hora}."
+        },
+        "acao": {
+          "diario": "Registrar en el diario"
+        },
+        "aba": {
+          "rotina": "Rutina",
+          "diario": "Diario",
+          "boletins": "Boletines",
+          "saida": "Salida"
+        },
+        "abasRotulo": "El trabajo con el huésped",
+        "naoEncontradaTitulo": "Estadía no encontrada",
+        "naoEncontradaDescricao": "El enlace puede estar mal, o la estadía fue eliminada.",
+        "encerradaEm": "Estadía cerrada el {quando}. Entregado a {nome}.",
+        "rotina": {
+          "contagem": "{feitas} de {total} resueltas hoy"
+        },
+        "medicacao": {
+          "titulo": "Medicación de la estadía",
+          "descricao": "El hotel no receta: continúa el tratamiento que vino de fuera, con la receta como respaldo.",
+          "vazio": "Ninguna medicación en esta estadía.",
+          "suspensa": "Suspendida",
+          "horarios": "Horarios de hoy",
+          "dosesDeHoje": "Dosis de hoy"
+        },
+        "ocorrencias": {
+          "descricao": "Grave exige llamar al responsable antes del fin del turno.",
+          "veterinario": "Al veterinario"
+        },
+        "boletins": {
+          "descricao": "Lo que va al responsable, armado a partir del diario.",
+          "gerar": "Generar boletín",
+          "retido": "Retenido",
+          "rascunho": "Borrador",
+          "enviadoAs": "enviado a las {hora}",
+          "enviar": "Enviar"
+        },
+        "ficha": {
+          "ate": "hasta {valor}",
+          "observacao": "Observación"
+        }
+      }
     },
     "exigencia": {
       "antipulgas": "Antipulgas",
@@ -7088,7 +7303,23 @@
       "titulo": "Resumen",
       "vazioDescricao": "Ninguna estancia facturada en el intervalo elegido.",
       "vazioTitulo": "Nada en el período",
-      "vezes": "{total} vez | {total} veces"
+      "vezes": "{total} vez | {total} veces",
+      "nova": {
+        "ultimosDias": "{total} días",
+        "ou": "o",
+        "frase": "{receita} en {total} noche vendida, con {ocupacao} de ocupación media. | {receita} en {total} noches vendidas, con {ocupacao} de ocupación media.",
+        "numerosRotulo": "Los números del período",
+        "ocupacao": {
+          "descricao": "Cuánto de la casa estuvo ocupado cada noche.",
+          "dica": "{dia}: {ocupadas} de {total} ({taxa})",
+          "frase": "Media de {media}; la noche más llena fue {dia}, con {ocupadas} de {total}.",
+          "fimDeSemana": "Sábado y domingo",
+          "diaDeSemana": "Días de semana"
+        },
+        "perdas": {
+          "cancelamentoDetalhe": "avisó antes, el lugar pudo revenderse"
+        }
+      }
     },
     "rotina": {
       "animais": "{total} animal | {total} animales",
@@ -7944,6 +8175,38 @@
             "texto": "Cuántas tareas de hoy ya salieron del camino. La parte roja de la barra es lo atrasado."
           }
         }
+      }
+    },
+    "casa": {
+      "resumo": {
+        "ocupadas": "{total} ocupado ahora | {total} ocupados ahora",
+        "livres": "{total} libre | {total} libres"
+      },
+      "vista": {
+        "planta": "Plano",
+        "plantaDescricao": "Un bloque por pasillo, en el orden de la casa. El alojamiento abre su ficha; la cara, la estadía."
+      },
+      "corredor": {
+        "ocupadas": "{ocupadas} de {ativas} ocupados",
+        "cheio": "Sin lugar",
+        "novaEm": "Nuevo alojamiento en {corredor}"
+      },
+      "ladrilho": {
+        "ate": "hasta {porte}",
+        "editar": "Editar {nome}",
+        "ocupada": "Ocupado",
+        "livre": "Libre",
+        "livreAgora": "Libre ahora",
+        "noCorredor": "en {corredor}"
+      },
+      "editar": "Editar",
+      "temporada": {
+        "intervalo": "Del {de} al {ate}"
+      },
+      "vazioTitulo": "La casa aún no tiene pasillos",
+      "vazioDescricao": "Empiece por un pasillo (Canil A, Gatera, Jardín) y registre los alojamientos dentro de él.",
+      "dialogo": {
+        "emOperacao": "En operación. Para sacarlo de servicio, indique el motivo."
       }
     }
   },

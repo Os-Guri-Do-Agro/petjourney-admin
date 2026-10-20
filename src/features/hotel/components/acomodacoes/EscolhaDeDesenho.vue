@@ -106,36 +106,38 @@ const OPCOES = Object.keys(DESENHOS) as IconeDeAcomodacao[]
   display: flex;
   flex-wrap: wrap;
   margin: 0;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface-soft);
+  padding: 0;
+  border: 0;
+  gap: 8px;
 }
 
 .desenhos__titulo {
   width: 100%;
+  margin-bottom: 6px;
   padding-inline: 0;
-  color: var(--clinic-text);
-  font-size: 0.9375rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .desenho {
   display: grid;
-  width: 2.8rem;
-  height: 2.8rem;
+  width: 46px;
+  height: 46px;
   place-items: center;
-  border: 1px solid var(--clinic-line);
-  border-radius: 0.7rem;
-  background: var(--clinic-surface);
-  color: var(--clinic-muted);
+  border: 1px solid var(--linha-forte);
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--tinta-2);
   cursor: pointer;
+  transition:
+    border-color var(--pj-tempo-curto) ease,
+    background-color var(--pj-tempo-curto) ease;
 }
 
 .desenho:hover {
-  border-color: var(--clinic-line-strong);
+  border-color: var(--hotel);
+  color: var(--tinta);
 }
 
 /* O rádio some da tela, mas não do teclado nem do leitor: é ele que carrega o estado. */
@@ -148,18 +150,20 @@ const OPCOES = Object.keys(DESENHOS) as IconeDeAcomodacao[]
 }
 
 .desenho:has(.desenho__radio:focus-visible) {
-  box-shadow: var(--clinic-focus-ring);
+  outline: 2px solid var(--hotel);
+  outline-offset: 2px;
 }
 
+/* O escolhido ganha a cor do lugar e a borda dobrada: forma e cor, nunca só cor. */
 .desenho--ativo {
-  border-color: var(--clinic-accent-deep);
-  background: var(--clinic-accent-deep);
-  color: var(--clinic-on-accent);
+  border: 2px solid var(--hotel);
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
 }
 
 .desenho :deep(svg) {
-  width: 1.3rem;
-  height: 1.3rem;
+  width: 22px;
+  height: 22px;
 }
 
 /* O nome do desenho é para o leitor de tela: na tela, a forma é a informação. */
@@ -172,9 +176,9 @@ const OPCOES = Object.keys(DESENHOS) as IconeDeAcomodacao[]
   white-space: nowrap;
 }
 
-/* Caixa-alta rastreada não roda em árabe: o `letter-spacing` desconecta as ligaduras. */
-[dir='rtl'] .desenhos__titulo {
-  letter-spacing: normal;
-  text-transform: none;
+@media (prefers-reduced-motion: reduce) {
+  .desenho {
+    transition: none;
+  }
 }
 </style>

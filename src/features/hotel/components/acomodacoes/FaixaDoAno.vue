@@ -78,9 +78,9 @@ const pct = (valor: number) => `${(valor * 100).toFixed(2)}%`
   position: relative;
   display: block;
   overflow: hidden;
-  block-size: 0.4rem;
+  block-size: 6px;
   border-radius: 999px;
-  background: var(--clinic-surface-sunken);
+  background: var(--superficie-3);
 }
 
 /*
@@ -90,14 +90,14 @@ const pct = (valor: number) => `${(valor * 100).toFixed(2)}%`
 .regua__marca {
   position: absolute;
   inset-block: 0;
-  inline-size: 1px;
-  background: var(--clinic-surface);
+  inline-size: 2px;
+  background: var(--superficie);
 }
 
 .regua__faixa {
   position: absolute;
   inset-block: 0;
   border-radius: 999px;
-  background: var(--clinic-accent-deep);
+  background: var(--hotel);
 }
 </style>

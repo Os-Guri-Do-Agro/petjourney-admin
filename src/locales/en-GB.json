@@ -488,7 +488,9 @@
       "title": "Page not found",
       "body": "The address you opened does not exist or was moved. Check the link or return to the main portal area.",
       "goHome": "Go to home",
-      "back": "Back"
+      "back": "Back",
+      "selo": "Error 404",
+      "endereco": "The address you opened"
     }
   },
   "inicio": {
@@ -642,7 +644,9 @@
         "vacinas": "Vaccines",
         "rotina": "Routine",
         "vespera": "Bookings",
-        "tratamentos": "Treatments"
+        "tratamentos": "Treatments",
+        "pedidos": "Requests",
+        "pedidosDeReserva": "Requests"
       },
       "contagem": "{total} matter | {total} matters",
       "recolher": "Collapse {modulo}",
@@ -657,7 +661,12 @@
       "urgentes": "{total} urgent matter needs your attention today | {total} urgent matters need your attention today",
       "esperando": "{total} matter is waiting for you today | {total} matters are waiting for you today",
       "falhou": "We couldn't check pending items right now.",
-      "emDia": "All caught up here."
+      "emDia": "All caught up here.",
+      "em": {
+        "clinica": "{total} in the Clinic",
+        "hotel": "{total} in the Hotel"
+      },
+      "comOnde": "{frase}: {onde}."
     },
     "acoes": {
       "rotulo": "Quick actions",
@@ -682,7 +691,8 @@
       "link": "Referral link",
       "linkCopiado": "Link copied",
       "comoFunciona": "How it works",
-      "seuCodigo": "Your referral code"
+      "seuCodigo": "Your referral code",
+      "maisDoCodigo": "Link, QR and scans"
     },
     "dia": {
       "titulo": "Today",
@@ -776,7 +786,63 @@
       "compromissos": "The day's appointments",
       "posicao": "{atual} of {total}",
       "compromissoAnterior": "Previous appointment",
-      "proximoCompromisso": "Next appointment"
+      "proximoCompromisso": "Next appointment",
+      "tituloSemana": "This week's schedule"
+    },
+    "saudacao": {
+      "manha": "Good morning",
+      "manhaCom": "Good morning, {nome}",
+      "tarde": "Good afternoon",
+      "tardeCom": "Good afternoon, {nome}",
+      "noite": "Good evening",
+      "noiteCom": "Good evening, {nome}"
+    },
+    "espacos": {
+      "rotulo": "Your spaces right now",
+      "clinica": {
+        "recepcao": "in reception",
+        "consulta": "in consult",
+        "pedidos": "request awaiting a reply | requests awaiting a reply",
+        "aSeguir": "still to come today",
+        "proximo": "next at {hora}",
+        "andamento": "{feitos} of {total} appointment done today | {feitos} of {total} appointments done today"
+      },
+      "hotel": {
+        "naCasa": "in the house",
+        "chegam": "arriving today | arriving today",
+        "saem": "leaving today | leaving today",
+        "rotina": "overdue task | overdue tasks",
+        "ocupacao": "{ocupadas} of {total} room taken | {ocupadas} of {total} rooms taken",
+        "semDocumento": "{total} missing documents",
+        "atrasadas": "{total} late | {total} late",
+        "proximaAs": "next at {hora}",
+        "andamento": "{feitas} of {total} routine task done | {feitas} of {total} routine tasks done"
+      },
+      "portal": {
+        "retido": "in the security window",
+        "leituras": "QR scan in 7 days | QR scans in 7 days",
+        "leiturasTotal": "{total} in total",
+        "leiturasIndisponiveis": "unavailable right now"
+      }
+    },
+    "passo": {
+      "calma": "Nothing waiting right now",
+      "pedidosAtrasados": "Reply to {total} overdue request | Reply to {total} overdue requests",
+      "recepcao": "See {pet}, waiting in reception",
+      "consulta": "Back to {pet}'s consult",
+      "pedidos": "Reply to {total} booking request | Reply to {total} booking requests",
+      "receber": "Welcome {pet} at {hora}",
+      "entregar": "Hand {pet} back at {hora}",
+      "rotina": "See {total} overdue task | See {total} overdue tasks",
+      "documento": "Sort out {pet}'s documents",
+      "checkin": "Check in {pet}",
+      "checkout": "Check out {pet}"
+    },
+    "guia": {
+      "espacos": "One panel for each space in your business, with the numbers right now. Each number opens the screen where it gets resolved; at the foot of the panel, the next step is what to do first.",
+      "portal": "Your referral earnings and your QR scans. At the foot of the panel, the next step is what to do first.",
+      "pauta": "Everything that is waiting, across all spaces, from most to least serious. Each row opens the screen where it gets resolved.",
+      "agenda": "Clinic appointments and hotel arrivals. Pick a day to see what is booked; the arrows move a week at a time."
     }
   },
   "programas": {
@@ -1126,7 +1192,14 @@
           "label": "Notes",
           "description": "Authenticated records from your company for this appointment."
         }
-      }
+      },
+      "prazo": {
+        "ativo": "Access expires in",
+        "ate": "until {data}",
+        "vinculado": "Linked {quando}",
+        "encerrado": "Access closed"
+      },
+      "semDadosClinicos": "The owner did not share clinical data in this access, only the message."
     },
     "pet": {
       "castrado": "Neutered",
@@ -1252,7 +1325,9 @@
       "somenteLeitura": {
         "title": "Recording blocked",
         "body": "You can read this appointment record, but you cannot record your notes while the registration is suspended."
-      }
+      },
+      "quemAtendeu": "Who attended",
+      "rodape": "Once recorded, the note goes to {pet}'s record in the owner's app."
     },
     "especialidade": {
       "CLINICO_GERAL": "General practice",
@@ -1432,7 +1507,44 @@
         "limite": "Only {n} file fits in this reading. | Up to {n} files fit in this reading.",
         "pdfGrande": "The PDF is over 10 MB. Try a photo of the prescription.",
         "imagemGrande": "The photo is over 5 MB even after resizing. Try another one."
+      },
+      "chamada": "Have the prescription as a photo or PDF?"
+    },
+    "guia": {
+      "titulo": "How an access works",
+      "passo1": {
+        "titulo": "The owner shares",
+        "texto": "In the PetJourney app, they choose what to share and create a 6-digit code that is valid for a while."
+      },
+      "passo2": {
+        "titulo": "You link the code",
+        "texto": "In Link code, type the 6 digits. The pet shows up here with the summary, the message and the shared documents."
+      },
+      "passo3": {
+        "titulo": "Your note goes back to the app",
+        "texto": "What you record (service, prescription, attachments) reaches the pet's record. When the time is up, the clinical data goes away and your notes stay."
       }
+    },
+    "lista": {
+      "buscaPlaceholder": "Search by pet name",
+      "qualquer": "Any",
+      "periodoPlaceholder": "Pick the dates",
+      "comProntuarioAjuda": "Only accesses with diary or documents",
+      "colunas": {
+        "pet": "Pet",
+        "vinculado": "Linked",
+        "anotacoes": "Notes",
+        "prontuario": "Shared",
+        "expira": "Expires in",
+        "encerrado": "Closed"
+      },
+      "soResumo": "Summary only",
+      "prazo": {
+        "dias": "{d}d {h}h",
+        "horas": "{h}h {m}min",
+        "minutos": "{m}min"
+      },
+      "oProximo": "the next to expire"
     }
   },
   "divulgacao": {
@@ -6412,7 +6524,17 @@
       "titulo": "Check-out for {pet}",
       "voltarALista": "Back to the list",
       "confiraDocumento": "Check the ID: {documento}",
-      "semDocumento": "No ID on file. Ask for one with a photo."
+      "semDocumento": "No ID on file. Ask for one with a photo.",
+      "nova": {
+        "pronto": "All checked. You can hand {pet} over.",
+        "falta": {
+          "frase": "Still to do: {lista}.",
+          "ligar": "call the owner",
+          "pesar": "weigh",
+          "pertences": "check {total} belonging | check {total} belongings",
+          "quem": "say who is picking up"
+        }
+      }
     },
     "comum": {
       "cancelar": "Cancel",
@@ -6540,7 +6662,100 @@
       "subtitulo": "Hotel",
       "titulo": "Stay",
       "voltar": "Guests",
-      "quemBusca": "Who can collect"
+      "quemBusca": "Who can collect",
+      "nova": {
+        "quando": "{dia}, {hora}",
+        "dados": {
+          "rotulo": "The stay in numbers",
+          "acomodacao": "Room",
+          "noites": "Nights",
+          "noitesDe": "{atual} of {total}",
+          "noitesReservadas": "{total} night booked | {total} nights booked",
+          "hoje": "Today",
+          "horaSaiu": "{hora}, left",
+          "horaAtrasou": "{hora}, {tempo} late",
+          "horaPrevista": "{hora}, expected",
+          "horaRecebido": "{hora}, checked in by {nome}"
+        },
+        "diario": {
+          "ontem": "Yesterday",
+          "descricao": "What the owner would like to read. The update is built from here."
+        },
+        "saida": {
+          "variacao": "Arrived at {entrada}; change of {variacao}",
+          "pertencesOk": "Belongings checked",
+          "conferidos": "{feitos} of {total} checked",
+          "receber": "Collect {valor}",
+          "quitado": "Nothing to collect",
+          "saldoNoBalcao": "Collected at the desk, at hand-over.",
+          "titulo": "What is left before release",
+          "tituloEncerrada": "Departure",
+          "descricao": "Departure expected on {quando}.",
+          "feito": "Done",
+          "noBalcao": "At the desk",
+          "falta": "Pending",
+          "conferirNoBalcao": "Check-out goes through each item with the owner at the desk.",
+          "semPertences": "Nothing came in the bag.",
+          "comObservacao": "With a note",
+          "naCasa": "In the house"
+        },
+        "atencao": {
+          "titulo": "What needs attention now",
+          "remedioAtrasado": "{hora} medication is late",
+          "remedioNaHora": "{hora} medication: it is time",
+          "verMedicacao": "See medication",
+          "boletim": "Update held until the call",
+          "verBoletins": "See updates",
+          "saidaAtrasada": "Departure due at {hora}, {tempo} late",
+          "saiHoje": "Leaves today at {hora}",
+          "faltamParaSair": "{total} step left before release | {total} steps left before release",
+          "verSaida": "See departure",
+          "rotinaAtrasada": "{total} routine task late | {total} routine tasks late",
+          "verRotina": "See routine",
+          "calma": "Nothing needs attention now.",
+          "calmaProxima": "Nothing needs attention now. Next task: {tarefa} at {hora}."
+        },
+        "acao": {
+          "diario": "Add to the diary"
+        },
+        "aba": {
+          "rotina": "Routine",
+          "diario": "Diary",
+          "boletins": "Updates",
+          "saida": "Departure"
+        },
+        "abasRotulo": "Work with the guest",
+        "naoEncontradaTitulo": "Stay not found",
+        "naoEncontradaDescricao": "The link may be wrong, or the stay was removed.",
+        "encerradaEm": "Stay closed on {quando}. Handed over to {nome}.",
+        "rotina": {
+          "contagem": "{feitas} of {total} handled today"
+        },
+        "medicacao": {
+          "titulo": "Medication during the stay",
+          "descricao": "The hotel does not prescribe: it continues treatment from outside, backed by the prescription.",
+          "vazio": "No medication during this stay.",
+          "suspensa": "Stopped",
+          "horarios": "Today's times",
+          "dosesDeHoje": "Today's doses"
+        },
+        "ocorrencias": {
+          "descricao": "Serious ones require a call to the owner before the shift ends.",
+          "veterinario": "Sent to the vet"
+        },
+        "boletins": {
+          "descricao": "What goes to the owner, built from the diary.",
+          "gerar": "Write update",
+          "retido": "Held",
+          "rascunho": "Draft",
+          "enviadoAs": "sent at {hora}",
+          "enviar": "Send"
+        },
+        "ficha": {
+          "ate": "up to {valor}",
+          "observacao": "Note"
+        }
+      }
     },
     "exigencia": {
       "antipulgas": "Flea treatment",
@@ -7088,7 +7303,23 @@
       "titulo": "Summary",
       "vazioDescricao": "No stay was billed in the chosen range.",
       "vazioTitulo": "Nothing in this period",
-      "vezes": "{total} time | {total} times"
+      "vezes": "{total} time | {total} times",
+      "nova": {
+        "ultimosDias": "{total} days",
+        "ou": "or",
+        "frase": "{receita} from {total} night sold, at {ocupacao} average occupancy. | {receita} from {total} nights sold, at {ocupacao} average occupancy.",
+        "numerosRotulo": "The numbers for the period",
+        "ocupacao": {
+          "descricao": "How much of the house was taken each night.",
+          "dica": "{dia}: {ocupadas} of {total} ({taxa})",
+          "frase": "Average of {media}; the busiest night was {dia}, with {ocupadas} of {total}.",
+          "fimDeSemana": "Saturday and Sunday",
+          "diaDeSemana": "Weekdays"
+        },
+        "perdas": {
+          "cancelamentoDetalhe": "notice given, the room could be resold"
+        }
+      }
     },
     "rotina": {
       "animais": "{total} animal | {total} animals",
@@ -7944,6 +8175,38 @@
             "texto": "How many of today's tasks are out of the way. The red part of the bar is what is late."
           }
         }
+      }
+    },
+    "casa": {
+      "resumo": {
+        "ocupadas": "{total} taken now | {total} taken now",
+        "livres": "{total} free | {total} free"
+      },
+      "vista": {
+        "planta": "Floor plan",
+        "plantaDescricao": "One block per hallway, in the house order. The room opens its record; the face opens the stay."
+      },
+      "corredor": {
+        "ocupadas": "{ocupadas} of {ativas} taken",
+        "cheio": "Full",
+        "novaEm": "New room in {corredor}"
+      },
+      "ladrilho": {
+        "ate": "up to {porte}",
+        "editar": "Edit {nome}",
+        "ocupada": "Taken",
+        "livre": "Free",
+        "livreAgora": "Free now",
+        "noCorredor": "in {corredor}"
+      },
+      "editar": "Edit",
+      "temporada": {
+        "intervalo": "From {de} to {ate}"
+      },
+      "vazioTitulo": "The house has no hallways yet",
+      "vazioDescricao": "Start with a hallway (Kennel A, Cattery, Garden) and add the rooms inside it.",
+      "dialogo": {
+        "emOperacao": "In operation. To take it offline, give the reason."
       }
     }
   },

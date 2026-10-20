@@ -17,7 +17,6 @@
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -77,7 +76,7 @@ const podeSalvar = computed(() => nome.value.trim().length > 0 && !props.salvand
     modal
     :header="editando ? t('hotel.acomodacoes.corredor.editar') : t('hotel.acomodacoes.corredor.novo')"
     :style="{ width: 'min(30rem, 94vw)' }"
-    class="clinic-scope hc-tema"
+    class="clinic-scope"
     @update:visible="emit('fechar')"
   >
     <form class="forma" @submit.prevent="emit('salvar', { nome, icone })">
@@ -98,7 +97,10 @@ const podeSalvar = computed(() => nome.value.trim().length > 0 && !props.salvand
         :rotulo="t('hotel.acomodacoes.corredor.desenho')"
       />
 
-      <Message v-if="erro" severity="error" :closable="false">{{ t(erro) }}</Message>
+      <p v-if="erro" class="erro" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        {{ t(erro) }}
+      </p>
 
       <!--
         Remover só aparece no corredor vazio. Com vaga dentro, o que a pessoa quer é mover as vagas
@@ -106,6 +108,7 @@ const podeSalvar = computed(() => nome.value.trim().length > 0 && !props.salvand
       -->
       <section v-if="editando" class="perigo">
         <p v-if="vagas > 0" class="perigo__travado">
+          <i class="ph ph-info" aria-hidden="true" />
           {{ t('hotel.acomodacoes.corredor.temVagas', { total: vagas }, vagas) }}
         </p>
 
@@ -158,49 +161,80 @@ const podeSalvar = computed(() => nome.value.trim().length > 0 && !props.salvand
 <style scoped>
 .forma {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 18px;
 }
 
 .campo {
   display: grid;
-  gap: var(--clinic-space-2);
+  align-content: start;
+  gap: 6px;
 }
 
 .campo label {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .campo__dica {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.4;
 }
 
+/* Remover mora no pé do formulário, separado por um fio: é a única ação que não se desfaz. */
 .perigo {
   display: grid;
   justify-items: start;
-  padding-block-start: var(--clinic-space-3);
-  border-block-start: 1px solid var(--clinic-line-soft);
-  gap: var(--clinic-space-2);
+  gap: 8px;
+  padding-block-start: 14px;
+  border-block-start: 1px solid var(--linha);
 }
 
 .perigo__travado {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.perigo__travado i {
+  margin-top: 2px;
+  color: var(--tinta-3);
+  font-size: 16px;
 }
 
 .perigo__pergunta {
   margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .perigo__acoes {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clinic-space-2);
+  gap: 8px;
+}
+
+.erro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.erro i {
+  flex: none;
+  font-size: 18px;
 }
 </style>

@@ -12,8 +12,6 @@
  */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
-import Message from 'primevue/message'
-import SelectButton from 'primevue/selectbutton'
 import Textarea from 'primevue/textarea'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { computed, ref, useId, watch } from 'vue'
@@ -66,6 +64,18 @@ watch(
     }
   },
 )
+
+/** O desenho de cada registro, o mesmo da lista do diário na estadia. */
+const ICONE: Record<RegistroKind, string> = {
+  refeicao: 'ph ph-bowl-food',
+  passeio: 'ph ph-paw-print',
+  brincadeira: 'ph ph-tennis-ball',
+  sono: 'ph ph-moon-stars',
+  eliminacao: 'ph ph-drop',
+  banho: 'ph ph-bathtub',
+  carinho: 'ph ph-heart',
+  observacao: 'ph ph-note-pencil',
+}
 </script>
 
 <template>
@@ -73,25 +83,32 @@ watch(
     :visible="aberto"
     modal
     :header="t('hotel.diario.titulo', { pet: petNome })"
-    :style="{ width: 'min(34rem, 94vw)' }"
-    class="clinic-scope hc-tema"
+    :style="{ width: 'min(36rem, 94vw)' }"
+    class="clinic-scope"
     @update:visible="emit('fechar')"
   >
     <div class="diario">
-      <div class="campo">
-        <span class="campo__rotulo">{{ t('hotel.diario.oQue') }}</span>
-        <SelectButton
-          v-model="kind"
-          :options="KINDS.map((item) => ({ valor: item, rotulo: formato.registroKind(item) }))"
-          option-label="rotulo"
-          option-value="valor"
-          :allow-empty="false"
-          :aria-label="t('hotel.diario.oQue')"
-        />
-      </div>
+      <!--
+        Oito momentos, em botões com desenho e nome: escolher lendo uma fileira que quebra em três
+        linhas é escolher errado. Cada botão é rádio de verdade para o teclado.
+      -->
+      <fieldset class="momentos">
+        <legend class="campo__rotulo">{{ t('hotel.diario.oQue') }}</legend>
+
+        <label
+          v-for="item in KINDS"
+          :key="item"
+          class="momento"
+          :class="{ 'momento--ativo': kind === item }"
+        >
+          <input v-model="kind" type="radio" :name="`${idCampo}-kind`" :value="item" class="momento__radio" />
+          <i :class="ICONE[item]" aria-hidden="true" />
+          <span>{{ formato.registroKind(item) }}</span>
+        </label>
+      </fieldset>
 
       <div class="campo">
-        <label :for="`${idCampo}-texto`">{{ t('hotel.diario.texto') }}</label>
+        <label :for="`${idCampo}-texto`" class="campo__rotulo">{{ t('hotel.diario.texto') }}</label>
         <Textarea
           :id="`${idCampo}-texto`"
           v-model="texto"
@@ -103,23 +120,31 @@ watch(
       </div>
 
       <div class="campo campo--linha">
-        <label :for="`${idCampo}-foto`">{{ t('hotel.diario.comFoto') }}</label>
+        <label :for="`${idCampo}-foto`" class="campo__rotulo">
+          <i class="ph ph-camera" aria-hidden="true" />
+          {{ t('hotel.diario.comFoto') }}
+        </label>
         <ToggleSwitch :input-id="`${idCampo}-foto`" v-model="comFoto" />
       </div>
 
-      <Message v-if="erro" severity="error" :closable="false">{{ t(erro) }}</Message>
+      <p v-if="erro" class="erro" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        {{ t(erro) }}
+      </p>
     </div>
 
     <template #footer>
       <Button
+        type="button"
         :label="t('hotel.comum.cancelar')"
         severity="secondary"
         text
         @click="emit('fechar')"
       />
       <Button
+        type="button"
         :label="t('hotel.diario.registrar')"
-        icon="ph ph-camera"
+        icon="ph ph-check"
         :loading="salvando"
         :disabled="!podeSalvar"
         @click="
@@ -137,27 +162,140 @@ watch(
 <style scoped>
 .diario {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 18px;
 }
 
 .campo {
   display: grid;
   /* Linhas no topo: sem isto, o campo ao lado de um mais alto desce e a fileira sai torta. */
   align-content: start;
-  gap: 0.25rem;
+  gap: 6px;
 }
 
 .campo--linha {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
-.campo label,
 .campo__rotulo {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.campo__rotulo i {
+  color: var(--hotel-tinta);
+  font-size: 17px;
+}
+
+.momentos {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.momentos legend {
+  margin-bottom: 8px;
+}
+
+.momento {
+  display: grid;
+  min-height: 64px;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  border: 1px solid var(--linha-forte);
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 550;
+  text-align: center;
+  transition:
+    border-color var(--pj-tempo-curto) ease,
+    background-color var(--pj-tempo-curto) ease;
+}
+
+.momento i {
+  font-size: 20px;
+}
+
+.momento:hover {
+  border-color: var(--hotel);
+  color: var(--tinta);
+}
+
+/* O rádio some da tela, mas não do teclado nem do leitor: é ele que carrega o estado. */
+.momento__radio {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+}
+
+.momento:has(.momento__radio:focus-visible) {
+  outline: 2px solid var(--hotel);
+  outline-offset: 2px;
+}
+
+/* O escolhido: borda dobrada e a cor do hotel. Forma e cor, nunca só cor. */
+.momento--ativo {
+  border: 2px solid var(--hotel);
+  background: var(--hotel-fundo);
+  color: var(--hotel-tinta);
+  font-weight: 650;
+}
+
+.erro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.erro i {
+  flex: none;
+  font-size: 18px;
+}
+
+@media (max-width: 520px) {
+  .momentos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .momento {
+    min-height: 0;
+    grid-auto-flow: column;
+    justify-content: start;
+    padding: 10px 12px;
+    text-align: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .momento {
+    transition: none;
+  }
 }
 </style>

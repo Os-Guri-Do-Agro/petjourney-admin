@@ -12,7 +12,6 @@
  */
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
-import Message from 'primevue/message'
 import Select from 'primevue/select'
 import SelectButton from 'primevue/selectbutton'
 import Textarea from 'primevue/textarea'
@@ -113,44 +112,49 @@ function confirmar() {
     modal
     :header="t('hotel.ocorrencia.titulo', { pet: petNome })"
     :style="{ width: 'min(38rem, 94vw)' }"
-    class="clinic-scope hc-tema"
+    class="clinic-scope"
     @update:visible="emit('fechar')"
   >
     <div class="ocor">
-      <div class="campo">
-        <label :for="`${idCampo}-kind`">{{ t('hotel.ocorrencia.oQue') }}</label>
-        <Select
-          :input-id="`${idCampo}-kind`"
-          v-model="kind"
-          :options="KINDS.map((item) => ({ valor: item, rotulo: formato.ocorrenciaKind(item) }))"
-          option-label="rotulo"
-          option-value="valor"
-          fluid
-        />
-      </div>
+      <div class="grade">
+        <div class="campo">
+          <label :for="`${idCampo}-kind`" class="campo__rotulo">{{ t('hotel.ocorrencia.oQue') }}</label>
+          <Select
+            :input-id="`${idCampo}-kind`"
+            v-model="kind"
+            :options="KINDS.map((item) => ({ valor: item, rotulo: formato.ocorrenciaKind(item) }))"
+            option-label="rotulo"
+            option-value="valor"
+            fluid
+          />
+        </div>
 
-      <div class="campo">
-        <span class="campo__rotulo">{{ t('hotel.ocorrencia.gravidade') }}</span>
-        <SelectButton
-          v-model="gravidade"
-          :options="GRAVIDADES.map((item) => ({ valor: item, rotulo: formato.gravidade(item) }))"
-          option-label="rotulo"
-          option-value="valor"
-          :allow-empty="false"
-          :aria-label="t('hotel.ocorrencia.gravidade')"
-        />
+        <div class="campo">
+          <span :id="`${idCampo}-gravidade`" class="campo__rotulo">{{ t('hotel.ocorrencia.gravidade') }}</span>
+          <SelectButton
+            v-model="gravidade"
+            class="gravidade"
+            :class="`gravidade--${gravidade}`"
+            :options="GRAVIDADES.map((item) => ({ valor: item, rotulo: formato.gravidade(item) }))"
+            option-label="rotulo"
+            option-value="valor"
+            :allow-empty="false"
+            :aria-labelledby="`${idCampo}-gravidade`"
+          />
+        </div>
       </div>
 
       <!--
         A consequência aparece no instante da escolha, e não depois de salvar. Quem descobre o
         travamento pelo erro aprende a não marcar grave — que é o contrário do que a regra quer.
       -->
-      <Message v-if="vaiTravar" severity="warn" :closable="false">
+      <p v-if="vaiTravar" class="consequencia" role="status">
+        <i class="ph ph-phone-call" aria-hidden="true" />
         {{ t('hotel.ocorrencia.vaiTravar') }}
-      </Message>
+      </p>
 
       <div class="campo">
-        <label :for="`${idCampo}-descricao`">{{ t('hotel.ocorrencia.descricao') }}</label>
+        <label :for="`${idCampo}-descricao`" class="campo__rotulo">{{ t('hotel.ocorrencia.descricao') }}</label>
         <Textarea
           :id="`${idCampo}-descricao`"
           v-model="descricao"
@@ -162,7 +166,7 @@ function confirmar() {
       </div>
 
       <div class="campo">
-        <label :for="`${idCampo}-conduta`">{{ t('hotel.ocorrencia.conduta') }}</label>
+        <label :for="`${idCampo}-conduta`" class="campo__rotulo">{{ t('hotel.ocorrencia.conduta') }}</label>
         <Textarea
           :id="`${idCampo}-conduta`"
           v-model="conduta"
@@ -174,21 +178,29 @@ function confirmar() {
       </div>
 
       <div class="campo campo--linha">
-        <label :for="`${idCampo}-vet`">{{ t('hotel.ocorrencia.encaminhar') }}</label>
+        <label :for="`${idCampo}-vet`" class="campo__rotulo">
+          <i class="ph ph-first-aid" aria-hidden="true" />
+          {{ t('hotel.ocorrencia.encaminhar') }}
+        </label>
         <ToggleSwitch :input-id="`${idCampo}-vet`" v-model="encaminhar" />
       </div>
 
-      <Message v-if="erro" severity="error" :closable="false">{{ t(erro) }}</Message>
+      <p v-if="erro" class="erro" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        {{ t(erro) }}
+      </p>
     </div>
 
     <template #footer>
       <Button
+        type="button"
         :label="t('hotel.comum.cancelar')"
         severity="secondary"
         text
         @click="emit('fechar')"
       />
       <Button
+        type="button"
         :label="t('hotel.ocorrencia.registrar')"
         icon="ph ph-flag"
         :loading="salvando"
@@ -202,27 +214,90 @@ function confirmar() {
 <style scoped>
 .ocor {
   display: grid;
-  gap: var(--clinic-space-3);
+  gap: 18px;
+}
+
+.grade {
+  display: grid;
+  gap: 14px 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
 }
 
 .campo {
   display: grid;
   /* Linhas no topo: sem isto, o campo ao lado de um mais alto desce e a fileira sai torta. */
   align-content: start;
-  gap: 0.25rem;
+  gap: 6px;
 }
 
 .campo--linha {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--superficie-2);
 }
 
-.campo label,
 .campo__rotulo {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.campo__rotulo i {
+  color: var(--hotel-tinta);
+  font-size: 17px;
+}
+
+/* A gravidade escolhida leva a cor dela: âmbar moderada, vermelho grave — e a palavra junto. */
+.gravidade--moderada :deep(.p-togglebutton-checked .p-togglebutton-label) {
+  color: var(--atencao-tinta);
+}
+
+.gravidade--grave :deep(.p-togglebutton-checked .p-togglebutton-label) {
+  color: var(--risco-tinta);
+  font-weight: 650;
+}
+
+.consequencia {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.consequencia i {
+  flex: none;
+  font-size: 18px;
+}
+
+.erro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.erro i {
+  flex: none;
+  font-size: 18px;
 }
 </style>

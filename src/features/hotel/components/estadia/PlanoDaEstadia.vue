@@ -45,11 +45,17 @@ const vigentes = computed(() => props.ajustes.filter((ajuste) => !ajuste.revogad
 </script>
 
 <template>
-  <section class="cartao">
-    <header class="cartao__topo">
-      <h3 class="cartao__titulo">{{ t('hotel.planoDaEstadia.titulo') }}</h3>
+  <section class="plano">
+    <header class="plano__cabeca">
+      <div class="plano__titulos">
+        <h3 class="plano__titulo">{{ t('hotel.planoDaEstadia.titulo') }}</h3>
+        <p v-if="vigentes.length === 0" class="plano__descricao">
+          {{ t('hotel.planoDaEstadia.semAjustes') }}
+        </p>
+      </div>
 
       <Button
+        type="button"
         :label="t('hotel.planoDaEstadia.propor')"
         severity="secondary"
         outlined
@@ -63,23 +69,21 @@ const vigentes = computed(() => props.ajustes.filter((ajuste) => !ajuste.revogad
       </Button>
     </header>
 
-    <p v-if="vigentes.length === 0" class="vazio">
-      {{ t('hotel.planoDaEstadia.semAjustes') }}
-    </p>
-
-    <ul v-else class="lista">
+    <ul v-if="vigentes.length > 0" class="ui-lista ui-folha lista">
       <li v-for="ajuste in vigentes" :key="ajuste.id" class="ajuste">
-        <IconeDeTarefa :kind="ajuste.kind" class="ajuste__icone" />
+        <span class="ajuste__icone" aria-hidden="true">
+          <IconeDeTarefa :kind="ajuste.kind" />
+        </span>
 
         <div class="ajuste__corpo">
           <p class="ajuste__topo">
             <strong>{{ formato.tarefaKind(ajuste.kind) }}</strong>
 
-            <span v-if="ajuste.acao === 'suspende'" class="ajuste__suspenso">
+            <span v-if="ajuste.acao === 'suspende'" class="ui-selo ui-selo--atencao">
               {{ t('hotel.planoDaEstadia.suspenso') }}
             </span>
 
-            <span v-else class="ajuste__horarios clinic-value">
+            <span v-else class="ajuste__horarios ui-num">
               {{ ajuste.horarios.join(', ') }}
             </span>
           </p>
@@ -94,11 +98,16 @@ const vigentes = computed(() => props.ajustes.filter((ajuste) => !ajuste.revogad
                 : t('hotel.planoDaEstadia.origemPessoa')
             }}
             ·
-            {{ t('hotel.planoDaEstadia.desde', { data: formato.data(ajuste.registradoEm.slice(0, 10)) }) }}
+            {{
+              t('hotel.planoDaEstadia.desde', {
+                data: formato.data(ajuste.registradoEm.slice(0, 10)),
+              })
+            }}
           </p>
         </div>
 
         <Button
+          type="button"
           :label="t('hotel.planoDaEstadia.encerrar')"
           severity="secondary"
           text
@@ -112,105 +121,106 @@ const vigentes = computed(() => props.ajustes.filter((ajuste) => !ajuste.revogad
 </template>
 
 <style scoped>
-/* A mesma silhueta dos outros cartões da ficha: esta tela é um dossiê, e o dossiê tem uma forma. */
-.cartao {
+/* A seção no fundo, a lista na folha: o mesmo desenho das outras seções da estadia. */
+.plano {
   display: grid;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
+  min-width: 0;
+  gap: 12px;
 }
 
-.cartao__topo {
+.plano__cabeca {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: var(--clinic-space-2);
+  gap: 8px 16px;
 }
 
-.cartao__titulo {
+.plano__titulos {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.plano__titulo {
   margin: 0;
-  color: var(--clinic-text);
-  font-size: 0.9375rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-.botao__icone {
-  width: 0.9rem;
-  height: 0.9rem;
-}
-
-.vazio {
+.plano__descricao {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
-.lista {
-  display: grid;
-  margin: 0 calc(var(--clinic-space-4) * -1);
-  padding: 0;
-  gap: 0;
-  list-style: none;
+.botao__icone {
+  width: 16px;
+  height: 16px;
 }
 
 .ajuste {
   display: grid;
   align-items: center;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  gap: var(--clinic-space-3);
+  padding: 14px 12px 14px 18px;
+  gap: 14px;
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
 
-.ajuste + .ajuste {
-  border-block-start: 1px solid var(--clinic-line-soft);
+.ajuste__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--pj-lugar-fundo, var(--superficie-2));
+  color: var(--pj-lugar-tinta, var(--tinta-2));
 }
 
-.ajuste .ajuste__icone {
-  width: 1.05rem;
-  height: 1.05rem;
+.ajuste__icone :deep(svg) {
+  width: 18px;
+  height: 18px;
 }
 
 .ajuste__corpo {
   display: grid;
   min-width: 0;
-  gap: 0.1rem;
+  gap: 2px;
 }
 
 .ajuste__topo {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
+  gap: 4px 10px;
   margin: 0;
-  gap: var(--clinic-space-2);
-  font-size: var(--clinic-font-base);
+  color: var(--tinta);
+  font-size: 14.5px;
+}
+
+.ajuste__topo strong {
+  font-weight: 600;
 }
 
 .ajuste__horarios {
-  color: var(--clinic-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Suspenso é uma ausência, e ausência se diz em palavra — não numa superfície pintada. */
-.ajuste__suspenso {
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 .ajuste__motivo {
   margin: 0;
-  color: var(--clinic-text);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta);
+  font-size: 13.5px;
+  line-height: 1.45;
 }
 
 .ajuste__origem {
   margin: 0;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-3);
+  font-size: 12.5px;
 }
 
 @media (max-width: 620px) {

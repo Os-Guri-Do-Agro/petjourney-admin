@@ -24,7 +24,6 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
 import Select from 'primevue/select'
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -149,7 +148,7 @@ function salvar() {
       editando ? t('hotel.acomodacoes.temporada.editar') : t('hotel.acomodacoes.temporada.nova')
     "
     :style="{ width: 'min(34rem, 94vw)' }"
-    class="clinic-scope hc-tema"
+    class="clinic-scope"
     @update:visible="emit('fechar')"
   >
     <form class="forma" @submit.prevent="salvar">
@@ -231,7 +230,10 @@ function salvar() {
         <small class="campo__dica">{{ t('hotel.acomodacoes.temporada.acrescimoDica') }}</small>
       </div>
 
-      <Message v-if="erro" severity="error" :closable="false">{{ t(erro) }}</Message>
+      <p v-if="erro" class="erro" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        {{ t(erro) }}
+      </p>
 
       <section v-if="editando" class="perigo">
         <template v-if="confirmandoRemocao">
@@ -283,38 +285,96 @@ function salvar() {
 <style scoped>
 .forma {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 18px;
 }
 
 .campo {
   display: grid;
-  gap: var(--clinic-space-2);
+  align-content: start;
+  gap: 6px;
 }
 
 .campo label {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .campo__dica {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+/* Remover mora no pé do formulário, separado por um fio: é a única ação que não se desfaz. */
+.perigo {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding-block-start: 14px;
+  border-block-start: 1px solid var(--linha);
+}
+
+.perigo__travado {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.perigo__travado i {
+  margin-top: 2px;
+  color: var(--tinta-3);
+  font-size: 16px;
+}
+
+.perigo__pergunta {
+  margin: 0;
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.perigo__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.erro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.erro i {
+  flex: none;
+  font-size: 18px;
 }
 
 .periodo {
   display: grid;
-  gap: var(--clinic-space-3);
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 14px 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
 }
 
 .par {
   display: flex;
-  gap: var(--clinic-space-2);
+  gap: 8px;
 }
 
 .par__dia {
-  flex: 0 0 5rem;
+  flex: 0 0 5.5rem;
 }
 
 .par > :last-child {
@@ -322,38 +382,26 @@ function salvar() {
   min-width: 0;
 }
 
+/* A prévia: onde a faixa cai no ano, antes de salvar. */
 .previa {
   display: grid;
-  padding: var(--clinic-space-3);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface-soft);
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie-2);
+}
+
+.previa :deep(.regua) {
+  block-size: 10px;
 }
 
 .previa__nota {
-  margin: 0;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-}
-
-.perigo {
-  display: grid;
-  justify-items: start;
-  padding-block-start: var(--clinic-space-3);
-  border-block-start: 1px solid var(--clinic-line-soft);
-  gap: var(--clinic-space-2);
-}
-
-.perigo__pergunta {
-  margin: 0;
-  color: var(--clinic-risk-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
-}
-
-.perigo__acoes {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--clinic-space-2);
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 </style>

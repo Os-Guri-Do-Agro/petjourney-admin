@@ -1,54 +1,34 @@
 <script setup lang="ts">
 /**
- * A casa — o cadastro de tudo que cerca uma acomodação.
+ * A casa — a planta do hotel e o cadastro de tudo que cerca uma acomodação.
  *
  * **O sistema não adivinha como o hotel é.** Quem monta a casa é a operação: cria os corredores,
  * cadastra as vagas, dá nome, põe preço e diz quando dezembro fica caro. Esta tela existe para que
  * nada disso dependa de ninguém — nem de um chamado de suporte, nem de um deploy.
  *
- * ## Três cadastros, uma página
+ * ## A forma (redesenho total, 19/10/2026)
  *
- * Corredores e vagas, tabelas de preço, temporadas. Ficam juntos porque **mudam juntos**: quem
- * abre um corredor novo está pondo preço nele, e quem reajusta a diária costuma estar olhando
- * quantas vagas daquele tipo existem. Separar em três telas obrigaria a ir e voltar carregando
- * número na cabeça.
+ * - **A planta** abre a tela: um cômodo por corredor, na ordem física da casa, com "x de y
+ *   ocupadas" e quantas sobram. Cada acomodação é um ladrilho — nome, tipo, quem cabe (espécie,
+ *   porte, quantos) e, no meio, **quem está nela agora**, com o rosto; livre fica calma, e a fora
+ *   de operação fica hachurada, com o motivo e há quantos dias. O ladrilho abre o cadastro; o
+ *   rosto abre a estadia de quem está lá.
+ * - **Tipos, tarifas e temporadas** continuam a um toque, num seletor de vista logo abaixo das
+ *   abas do destino. Não são abas de navegação — a URL não muda —, são outras vistas do mesmo
+ *   cadastro. A ação cheia do alto segue a vista: "Nova acomodação" na planta, "Nova tabela" nas
+ *   tarifas.
  *
- * ## Por que cada coisa tem desenho próprio
- *
- * A versão anterior era uma grade de vinte caixas iguais, cada uma com três linhas de texto cinza,
- * repetindo "Baia · Gigante · cabem 2" vinte vezes — e a palavra "Baia" saía duas vezes no mesmo
- * cartão, uma como nome e outra como tipo. Um cadastro que se lê varrendo precisa que as coisas
- * pareçam diferentes umas das outras: aqui o tipo virou desenho, o preço virou o número ancorado no
- * pé, e os recursos viraram ícones em vez de sumirem.
- *
- * As temporadas ganharam a régua do ano. "01/07 → 31/07" contra "20/12 → 05/01" obriga a montar o
+ * As temporadas mantêm a régua do ano. "01/07 → 31/07" contra "20/12 → 05/01" obriga a montar o
  * calendário de cabeça para saber quando cai, quanto dura e se encosta na outra — e é o tipo de
  * conta que se erra na hora de dar desconto.
  */
-import {
-  PhBed,
-  PhCalendarStar,
-  PhBird,
-  PhCat,
-  PhDog,
-  PhHouseLine,
-  PhShieldCheck,
-  PhSnowflake,
-  PhSun,
-  PhTag,
-  PhThermometer,
-  PhRabbit,
-  PhTree,
-  PhUsersThree,
-  PhVideoCamera,
-  PhWrench,
-} from '@phosphor-icons/vue'
 import Button from 'primevue/button'
-import { computed, onMounted, ref, type Component } from 'vue'
+import SelectButton from 'primevue/selectbutton'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import PartnerSectionTabs from '@/components/parceiro/PartnerSectionTabs.vue'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import AcomodacaoDialog from '@/features/hotel/components/acomodacoes/AcomodacaoDialog.vue'
 import CorredorDialog from '@/features/hotel/components/acomodacoes/CorredorDialog.vue'
 import FaixaDoAno from '@/features/hotel/components/acomodacoes/FaixaDoAno.vue'
@@ -56,8 +36,8 @@ import TarifaDialog from '@/features/hotel/components/acomodacoes/TarifaDialog.v
 import TemporadaDialog from '@/features/hotel/components/acomodacoes/TemporadaDialog.vue'
 import TipoDialog from '@/features/hotel/components/acomodacoes/TipoDialog.vue'
 import HotelDevPanel from '@/features/hotel/components/base/HotelDevPanel.vue'
-import HotelSelo from '@/features/hotel/components/base/HotelSelo.vue'
 import HotelTour from '@/features/hotel/components/base/HotelTour.vue'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import type { PassoDoTour } from '@/features/hotel/components/base/tour-types'
 import { useHotelFormat } from '@/features/hotel/composables/useHotelFormat'
 import type { TemporadaSazonal } from '@/features/hotel/data/fixtures'
@@ -65,6 +45,7 @@ import {
   acomodacaoRepository,
   CadastroRecusadoError,
   catalogoRepository,
+  type HospedeNaCasa,
 } from '@/features/hotel/data/repositories'
 import type {
   Acomodacao,
@@ -75,40 +56,47 @@ import type {
   Tarifa,
   TipoDeAcomodacao,
 } from '@/features/hotel/data/types'
-import { useHotelStore } from '@/features/hotel/stores/hotel'
+import { hotelClock, useHotelStore } from '@/features/hotel/stores/hotel'
+import { useHospedagemStore } from '@/features/hotel/stores/hospedagem'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const formato = useHotelFormat()
 const hotelStore = useHotelStore()
+const hospedagem = useHospedagemStore()
 
 const PORTES: PetPorte[] = ['mini', 'pequeno', 'medio', 'grande', 'gigante']
 
 /*
- * Os três mapas de desenho, todos `Record<…>` fechado: acrescentar um tipo ao domínio sem dar
- * ícone a ele passa a ser erro de compilação, e não um quadrado vazio descoberto em produção.
- */
-/*
- * O desenho de cada tipo — e só o desenho.
+ * Os mapas de desenho, todos `Record<…>` fechado: acrescentar um tipo ao domínio sem dar ícone a
+ * ele passa a ser erro de compilação, e não um quadrado vazio descoberto em produção.
  *
- * O nome do tipo é cadastro da casa; o que continua nosso é a biblioteca de formas entre as quais
- * ela escolhe. É a divisão que resolve a queixa sem abrir mão do ícone: a palavra é dela, o traço
- * é nosso.
+ * O nome do tipo e do corredor é cadastro da casa; o que continua nosso é a biblioteca de formas
+ * entre as quais ela escolhe. A palavra é dela, o traço é nosso.
  */
-const ICONE_DA_VAGA: Record<IconeDeAcomodacao, Component> = {
-  casa: PhHouseLine,
-  cama: PhBed,
-  gato: PhCat,
-  cao: PhDog,
-  grupo: PhUsersThree,
-  escudo: PhShieldCheck,
-  arvore: PhTree,
-  passaro: PhBird,
-  coelho: PhRabbit,
+const ICONE_DO_DESENHO: Record<IconeDeAcomodacao, string> = {
+  casa: 'ph ph-house-line',
+  cama: 'ph ph-bed',
+  gato: 'ph ph-cat',
+  cao: 'ph ph-dog',
+  grupo: 'ph ph-users-three',
+  escudo: 'ph ph-shield-check',
+  arvore: 'ph ph-tree',
+  passaro: 'ph ph-bird',
+  coelho: 'ph ph-rabbit',
+}
+
+const ICONE_DO_RECURSO: Record<RecursoDaAcomodacao, string> = {
+  camera: 'ph ph-video-camera',
+  climatizacao: 'ph ph-snowflake',
+  'area-externa': 'ph ph-tree',
+  'piso-aquecido': 'ph ph-thermometer',
+  janela: 'ph ph-sun',
 }
 
 /** O desenho de uma vaga, pelo tipo que ela aponta. `casa` é o fallback de tipo removido. */
 function iconeDaVaga(tipoId: string) {
-  return ICONE_DA_VAGA[hotelStore.tipoDeAcomodacao(tipoId)?.icone ?? 'casa']
+  return ICONE_DO_DESENHO[hotelStore.tipoDeAcomodacao(tipoId)?.icone ?? 'casa']
 }
 
 /** O nome do tipo, cadastrado pela casa. */
@@ -116,41 +104,32 @@ function nomeDoTipo(tipoId: string) {
   return hotelStore.tipoDeAcomodacao(tipoId)?.nome ?? ''
 }
 
-const ICONE_DO_RECURSO: Record<RecursoDaAcomodacao, Component> = {
-  camera: PhVideoCamera,
-  climatizacao: PhSnowflake,
-  'area-externa': PhTree,
-  'piso-aquecido': PhThermometer,
-  janela: PhSun,
-}
-
 const salvando = ref(false)
 const erro = ref('')
 
 /**
- * Qual cadastro está aberto.
+ * Qual vista do cadastro está aberta.
  *
  * Mora no componente e não na rota: é preferência de leitura dentro de uma tela só, e uma aba na
- * URL faria "voltar" significar "troque de aba", que não é o que a seta do navegador promete.
+ * URL faria "voltar" significar "troque de vista", que não é o que a seta do navegador promete.
  */
 type Aba = 'casa' | 'tipos' | 'tarifas' | 'temporadas'
 
 const aba = ref<Aba>('casa')
 
-const ICONE_DA_ABA: Record<Aba, Component> = {
-  casa: PhHouseLine,
-  tipos: PhBed,
-  tarifas: PhTag,
-  temporadas: PhCalendarStar,
+const ICONE_DA_ABA: Record<Aba, string> = {
+  casa: 'ph ph-squares-four',
+  tipos: 'ph ph-bed',
+  tarifas: 'ph ph-tag',
+  temporadas: 'ph ph-calendar-star',
 }
 
 /*
- * O `PartnerSectionTabs` é do portal e tipa o `id` da aba como `string` — ele serve a telas que
- * não têm união fechada. O acessor recebe a string e o mapa continua sendo `Record<Aba, …>`, que é
- * onde a exaustividade importa: aba nova sem ícone continua sendo erro de compilação.
+ * O slot `#option` do `SelectButton` entrega a opção como `any`; o acessor recebe esse `any` num
+ * parâmetro tipado, o que mantém o mapa exaustivo.
  */
-function iconeDaAba(valor: string) {
-  return ICONE_DA_ABA[valor as Aba]
+function iconeDaAba(valor: Aba) {
+  return ICONE_DA_ABA[valor]
 }
 
 const acomodacaoAberta = ref(false)
@@ -170,22 +149,73 @@ const tipoEmEdicao = ref<TipoDeAcomodacao | null>(null)
 const temporadaAberta = ref(false)
 const temporadaEmEdicao = ref<TemporadaSazonal | null>(null)
 
+/**
+ * Quem está em cada acomodação agora.
+ *
+ * Os hóspedes vêm da mesma leitura da lista de Hóspedes. A planta não espera por eles: o
+ * cadastro desenha primeiro, e o rosto entra no ladrilho quando chega — uma falha aqui deixa a
+ * planta sem rostos, não sem planta.
+ */
+async function carregarOcupacao() {
+  await hospedagem.carregarHospedes()
+}
+
 onMounted(async () => {
   await hotelStore.carregar()
+  await carregarOcupacao()
 })
+
+watch(
+  () => hotelStore.revisao,
+  () => void carregarOcupacao(),
+)
+
+const ocupantePorAcomodacao = computed(() => {
+  const mapa = new Map<string, HospedeNaCasa>()
+
+  for (const hospede of hospedagem.hospedes) {
+    mapa.set(hospede.hospedagem.acomodacaoId, hospede)
+  }
+
+  return mapa
+})
+
+function ocupante(acomodacao: Acomodacao) {
+  return ocupantePorAcomodacao.value.get(acomodacao.id) ?? null
+}
+
+type EstadoDoLadrilho = 'ocupada' | 'livre' | 'parada'
+
+function estadoDe(acomodacao: Acomodacao): EstadoDoLadrilho {
+  if (ocupante(acomodacao)) {
+    return 'ocupada'
+  }
+
+  return acomodacao.ativa ? 'livre' : 'parada'
+}
 
 /*
  * Todos os corredores, inclusive os vazios.
  *
- * A versão anterior filtrava os sem acomodação — e com isso um corredor recém-criado simplesmente
- * não aparecia, o que faz a pessoa criá-lo de novo. Corredor vazio é um estado legítimo do
- * cadastro: é onde se está prestes a pôr vaga.
+ * Corredor vazio é um estado legítimo do cadastro: é onde se está prestes a pôr vaga. Filtrá-lo
+ * faz o corredor recém-criado sumir — e a pessoa criá-lo de novo.
  */
 const porCorredor = computed(() =>
-  hotelStore.blocos.map((bloco) => ({
-    bloco,
-    acomodacoes: hotelStore.acomodacoes.filter((item) => item.blocoId === bloco.id),
-  })),
+  hotelStore.blocos.map((bloco) => {
+    const acomodacoes = hotelStore.acomodacoes
+      .filter((item) => item.blocoId === bloco.id)
+      .sort((uma, outra) => uma.nome.localeCompare(outra.nome, undefined, { numeric: true }))
+    const ativas = acomodacoes.filter((item) => item.ativa).length
+    const ocupadas = acomodacoes.filter((item) => ocupante(item) !== null).length
+
+    return {
+      bloco,
+      acomodacoes,
+      ativas,
+      ocupadas,
+      livres: Math.max(0, ativas - ocupadas),
+    }
+  }),
 )
 
 const paradas = computed(() => hotelStore.acomodacoes.filter((item) => !item.ativa).length)
@@ -194,49 +224,88 @@ const lugares = computed(() =>
   hotelStore.acomodacoes.reduce((soma, item) => soma + (item.ativa ? item.capacidade : 0), 0),
 )
 
+const ocupadasAgora = computed(
+  () => hotelStore.acomodacoes.filter((item) => ocupante(item) !== null).length,
+)
+
+const livresAgora = computed(
+  () => hotelStore.acomodacoes.filter((item) => item.ativa && ocupante(item) === null).length,
+)
+
 /**
- * As três abas, com a frase que cada uma governa.
+ * A casa numa frase: o tamanho dela e como está agora.
  *
- * A descrição é do `PartnerSectionTabs` e aparece sob a faixa: é onde o subtítulo de cada cadastro
- * passou a morar, em vez de um cabeçalho por seção repetido três vezes na mesma página.
+ * "20 acomodações cadastradas, 39 lugares, 5 ocupadas agora, 14 livres, 1 fora de operação." O
+ * tamanho e o agora na mesma linha porque é a pergunta de quem abre o cadastro para mexer: o que
+ * eu tenho, e o que eu posso tirar do ar sem desalojar ninguém.
  */
-const abas = computed(() => [
+const fraseDaCasa = computed(() => {
+  const total = hotelStore.acomodacoes.length
+  const partes = [
+    t('hotel.acomodacoes.resumo', { total }, total),
+    t('hotel.acomodacoes.lugares', { total: lugares.value }, lugares.value),
+    t('hotel.casa.resumo.ocupadas', { total: ocupadasAgora.value }, ocupadasAgora.value),
+    t('hotel.casa.resumo.livres', { total: livresAgora.value }, livresAgora.value),
+  ]
+
+  if (paradas.value > 0) {
+    partes.push(t('hotel.acomodacoes.paradas', { total: paradas.value }))
+  }
+
+  return t('clinico.internacao.nova.resumo.frase', {
+    texto: partes.reduce((frase, parte) =>
+      t('clinico.internacao.nova.resumo.lista', { a: frase, b: parte }),
+    ),
+  })
+})
+
+/** As quatro vistas do cadastro, cada uma com quantos itens tem. */
+const opcoesDeVista = computed(() => [
   {
-    id: 'casa',
-    label: t('hotel.acomodacoes.aCasa'),
-    description: [
-      t(
-        'hotel.acomodacoes.resumo',
-        { total: hotelStore.acomodacoes.length },
-        hotelStore.acomodacoes.length,
-      ),
-      t('hotel.acomodacoes.lugares', { total: lugares.value }, lugares.value),
-      ...(paradas.value > 0 ? [t('hotel.acomodacoes.paradas', { total: paradas.value })] : []),
-    ].join(' · '),
+    valor: 'casa' as const,
+    rotulo: t('hotel.casa.vista.planta'),
+    total: hotelStore.acomodacoes.length,
   },
   {
-    id: 'tipos',
-    label: t('hotel.acomodacoes.tipos'),
-    description: t('hotel.acomodacoes.tipo.resumo'),
+    valor: 'tipos' as const,
+    rotulo: t('hotel.acomodacoes.tipos'),
+    total: hotelStore.tiposDeAcomodacao.length,
   },
   {
-    id: 'tarifas',
-    label: t('hotel.acomodacoes.tarifas'),
-    description: t('hotel.acomodacoes.preco.resumo'),
+    valor: 'tarifas' as const,
+    rotulo: t('hotel.acomodacoes.tarifas'),
+    total: hotelStore.tarifas.length,
   },
   {
-    id: 'temporadas',
-    label: t('hotel.acomodacoes.temporadas'),
-    description: t('hotel.acomodacoes.temporada.resumo'),
+    valor: 'temporadas' as const,
+    rotulo: t('hotel.acomodacoes.temporadas'),
+    total: hotelStore.temporadasSazonais.length,
   },
 ])
 
+/** A frase que explica a vista aberta, ao lado do seletor. A planta se explica sozinha. */
+const descricaoDaVista = computed(() => {
+  if (aba.value === 'tipos') {
+    return t('hotel.acomodacoes.tipo.resumo')
+  }
+
+  if (aba.value === 'tarifas') {
+    return t('hotel.acomodacoes.preco.resumo')
+  }
+
+  if (aba.value === 'temporadas') {
+    return t('hotel.acomodacoes.temporada.resumo')
+  }
+
+  return t('hotel.casa.vista.plantaDescricao')
+})
+
 /**
- * A ação do cabeçalho segue a aba.
+ * A ação do cabeçalho segue a vista.
  *
- * Um "Nova acomodação" fixo no topo mentia nas outras duas abas: quem está olhando a tabela de
- * preço e toca no botão de criar espera criar uma tabela. O rótulo sai de chamadas explícitas a
- * `t()` e não de uma chave montada com o nome da aba — chave por interpolação some do varredor de
+ * Um "Nova acomodação" fixo no topo mentia nas outras vistas: quem está olhando a tabela de preço
+ * e toca no botão de criar espera criar uma tabela. O rótulo sai de chamadas explícitas a `t()` e
+ * não de uma chave montada com o nome da vista — chave por interpolação some do varredor de
  * traduções, e some junto a garantia de que os seis idiomas têm todas elas.
  */
 const acaoDaAba = computed(() => {
@@ -271,6 +340,37 @@ function paradaHaDias(acomodacao: Acomodacao) {
   return acomodacao.inativaDesde
     ? Math.floor((Date.now() - Date.parse(acomodacao.inativaDesde)) / 86_400_000)
     : null
+}
+
+/** Quem cabe, numa linha: o tipo, as espécies e até que porte. */
+function quemCabe(acomodacao: Acomodacao) {
+  const intl = INTL_LOCALE[locale.value as Locale]
+
+  return [
+    nomeDoTipo(acomodacao.tipoId),
+    acomodacao.especiesAceitas.map((especie) => formato.especie(especie)).join(', '),
+    t('hotel.casa.ladrilho.ate', {
+      porte: formato.porte(acomodacao.porteMaximo).toLocaleLowerCase(intl),
+    }),
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
+/** A saída de quem está lá: "sai hoje às 16:30" ou "sai 24/10 · 10:00". */
+function saidaDe(hospede: HospedeNaCasa) {
+  const saida = hospede.hospedagem.saidaPrevistaEm
+
+  return t('hotel.hoje.hospedes.sai', {
+    quando:
+      saida.slice(0, 10) === hotelClock.today()
+        ? t('hotel.hospedes.cartao.hojeAs', { hora: formato.hora(saida) })
+        : formato.quando(saida),
+  })
+}
+
+function rotaDaEstadia(hospedagemId: string) {
+  return `/hotel/hospedagem/${hospedagemId}`
 }
 
 /**
@@ -345,6 +445,14 @@ function moverCorredor(blocoId: string, direcao: 'sobe' | 'desce') {
   )
 }
 
+const vazio = computed(
+  () =>
+    !hotelStore.carregando &&
+    !hotelStore.erro &&
+    hotelStore.pronto &&
+    hotelStore.blocos.length === 0,
+)
+
 /**
  * O tutorial desta tela, na ordem em que se lê a página.
  *
@@ -364,19 +472,17 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     texto: t('hotel.tour.acomodacoes.blocos.texto'),
   },
   {
-    alvo: '.vaga--parada',
+    alvo: '.ladrilho--parada',
     titulo: t('hotel.tour.acomodacoes.parada.titulo'),
     texto: t('hotel.tour.acomodacoes.parada.texto'),
   },
   /*
-   * O passo aponta para a faixa de abas, e não para a tabela de preço.
-   *
-   * Com as três abas, a tabela só existe no DOM quando a aba dela está acesa — e o `HotelTour`
-   * descarta em silêncio o passo cujo alvo não está na tela. Apontar para a faixa é o que continua
-   * verdadeiro nas três, e é também a informação que falta a quem chega: que existem mais duas.
+   * O passo aponta para o seletor de vistas, e não para a tabela de preço: a tabela só existe no
+   * DOM quando a vista dela está acesa, e o `HotelTour` descarta em silêncio o passo cujo alvo não
+   * está na tela. O seletor é o que continua verdadeiro nas quatro.
    */
   {
-    alvo: '.partner-tabs',
+    alvo: '.vistas',
     titulo: t('hotel.tour.acomodacoes.tarifas.titulo'),
     texto: t('hotel.tour.acomodacoes.tarifas.texto'),
   },
@@ -384,101 +490,140 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="hc-tema"
-    :title="t('hotel.acomodacoes.titulo')"
-    :subtitle="t('hotel.acomodacoes.subtitulo')"
+  <UiPagina
+    class="tela"
+    :carregando="hotelStore.carregando && hotelStore.acomodacoes.length === 0"
+    :erro="hotelStore.erro ? t(hotelStore.erro) : ''"
+    :vazio="vazio"
+    :vazio-titulo="t('hotel.casa.vazioTitulo')"
+    :vazio-descricao="t('hotel.casa.vazioDescricao')"
+    :vazio-acao="t('hotel.acomodacoes.corredor.novo')"
+    vazio-icone="ph ph-house-line"
     tour
     @tour="tourAberto = true"
-    :loading="hotelStore.carregando && hotelStore.acomodacoes.length === 0"
-    :error="hotelStore.erro ? t(hotelStore.erro) : ''"
-    @retry="hotelStore.carregar(true)"
+    @tentar-de-novo="hotelStore.carregar(true)"
+    @acao-do-vazio="abrirCorredor(null)"
   >
-    <div class="cadastro clinic-scope">
+    <template #resumo>
+      <span aria-live="polite">{{ fraseDaCasa }}</span>
+    </template>
+
+    <template #acoes>
+      <Button type="button" icon="ph ph-plus" :label="acaoDaAba.rotulo" @click="acaoDaAba.abrir()" />
+    </template>
+
+    <div class="casa">
       <!--
-        Três abas, e não três seções empilhadas.
-
-        Os três cadastros mudam juntos, mas não se **leem** juntos: quem veio pôr uma baia nova
-        passa por vinte vagas, uma tabela de preço e três temporadas para chegar onde queria. Em
-        aba, cada cadastro ocupa a tela inteira, e o que a pessoa não veio fazer some de vez —
-        continuando a um toque de distância, que é o que a proximidade dos três realmente exige.
+        As outras vistas do cadastro, num seletor e não em abas: as abas do alto são o destino
+        (Acomodações | Rotina padrão), e uma segunda fileira de abas logo abaixo faria a pessoa
+        perder qual das duas mudou a URL.
       -->
-      <PartnerSectionTabs
-        :tabs="abas"
-        :active-tab="aba"
-        :aria-label="t('hotel.acomodacoes.abasRotulo')"
-        @select="(id) => (aba = id as Aba)"
-      >
-        <template #icone="{ tab }">
-          <component :is="iconeDaAba(tab.id)" weight="duotone" aria-hidden="true" />
-        </template>
-      </PartnerSectionTabs>
+      <div class="barra">
+        <SelectButton
+          v-model="aba"
+          class="vistas"
+          :options="opcoesDeVista"
+          option-label="rotulo"
+          option-value="valor"
+          :allow-empty="false"
+          :aria-label="t('hotel.acomodacoes.abasRotulo')"
+        >
+          <template #option="{ option }">
+            <i :class="iconeDaAba(option.valor)" class="vista__icone" aria-hidden="true" />
+            <span class="vista__rotulo">{{ option.rotulo }}</span>
+            <span class="ui-contagem vista__conta">{{ option.total }}</span>
+          </template>
+        </SelectButton>
 
-      <!-- ============================================================ a casa -->
-      <section
-        v-if="aba === 'casa'"
-        id="partner-panel-casa"
-        class="painel"
-        role="tabpanel"
-        aria-labelledby="partner-tab-casa"
-      >
-        <div class="painel__acoes">
-          <Button
-            :label="t('hotel.acomodacoes.corredor.novo')"
-            icon="ph ph-plus"
-            severity="secondary"
-            outlined
-            size="small"
-            @click="abrirCorredor(null)"
-          />
-        </div>
+        <p class="barra__descricao">{{ descricaoDaVista }}</p>
+      </div>
 
-        <article v-for="(grupo, indice) in porCorredor" :key="grupo.bloco.id" class="corredor">
+      <!-- ============================================================ a planta -->
+      <div v-if="aba === 'casa'" class="planta">
+        <section
+          v-for="(grupo, indice) in porCorredor"
+          :key="grupo.bloco.id"
+          class="corredor"
+          :style="{ '--corredor-vagas': Math.max(1, grupo.acomodacoes.length) }"
+          :aria-labelledby="`corredor-${grupo.bloco.id}`"
+        >
           <header class="corredor__cabeca">
-            <span class="corredor__marca">
-              <component
-                :is="ICONE_DA_VAGA[grupo.bloco.icone]"
-                weight="duotone"
-                aria-hidden="true"
-              />
+            <span class="corredor__icone" aria-hidden="true">
+              <i :class="ICONE_DO_DESENHO[grupo.bloco.icone]" />
             </span>
 
-            <h3 class="corredor__nome">{{ grupo.bloco.nome }}</h3>
-            <span class="corredor__conta clinic-value">{{ grupo.acomodacoes.length }}</span>
+            <span class="corredor__titulos">
+              <h2 :id="`corredor-${grupo.bloco.id}`" class="corredor__nome">
+                {{ grupo.bloco.nome }}
+              </h2>
+              <span class="corredor__conta ui-num">
+                {{
+                  t('hotel.casa.corredor.ocupadas', {
+                    ocupadas: grupo.ocupadas,
+                    ativas: grupo.ativas,
+                  })
+                }}
+              </span>
+            </span>
+
+            <span
+              v-if="grupo.acomodacoes.length > 0"
+              class="ui-selo corredor__vagas"
+              :class="grupo.livres > 0 ? 'ui-selo--ok' : 'ui-selo--contorno'"
+            >
+              {{
+                grupo.livres > 0
+                  ? t('hotel.casa.resumo.livres', { total: grupo.livres }, grupo.livres)
+                  : t('hotel.casa.corredor.cheio')
+              }}
+            </span>
 
             <!--
-              As ações do corredor ficam à direita e sem rótulo: são gestos de arrumação, e um
-              rótulo em cada uma faria o cabeçalho do corredor competir com o nome dele.
+              As ações do corredor ficam sempre à vista e sem rótulo: são gestos de arrumação, e um
+              rótulo em cada uma faria o cabeçalho competir com o nome do corredor.
             -->
             <span class="corredor__acoes">
+              <!-- Criar a vaga onde ela vai morar: o diálogo já abre neste corredor. -->
               <Button
+                v-if="grupo.acomodacoes.length > 0"
+                type="button"
+                class="corredor__nova"
+                icon="ph ph-plus"
+                :label="t('hotel.acomodacoes.nova')"
+                :aria-label="t('hotel.casa.corredor.novaEm', { corredor: grupo.bloco.nome })"
+                severity="secondary"
+                text
+                size="small"
+                @click="abrirAcomodacao(null, grupo.bloco.id)"
+              />
+              <Button
+                type="button"
                 icon="ph ph-arrow-up"
                 severity="secondary"
                 text
                 rounded
-                size="small"
                 :disabled="indice === 0 || salvando"
                 :aria-label="t('hotel.acomodacoes.corredor.subir')"
                 :title="t('hotel.acomodacoes.corredor.subir')"
                 @click="moverCorredor(grupo.bloco.id, 'sobe')"
               />
               <Button
+                type="button"
                 icon="ph ph-arrow-down"
                 severity="secondary"
                 text
                 rounded
-                size="small"
                 :disabled="indice === porCorredor.length - 1 || salvando"
                 :aria-label="t('hotel.acomodacoes.corredor.descer')"
                 :title="t('hotel.acomodacoes.corredor.descer')"
                 @click="moverCorredor(grupo.bloco.id, 'desce')"
               />
               <Button
+                type="button"
                 icon="ph ph-pencil-simple"
                 severity="secondary"
                 text
                 rounded
-                size="small"
                 :aria-label="t('hotel.acomodacoes.corredor.editar')"
                 :title="t('hotel.acomodacoes.corredor.editar')"
                 @click="abrirCorredor(grupo.bloco)"
@@ -486,154 +631,223 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             </span>
           </header>
 
-          <ul class="grade">
+          <ul class="corredor__vagas-lista">
             <li v-for="acomodacao in grupo.acomodacoes" :key="acomodacao.id">
-              <button
-                type="button"
-                class="vaga"
-                :class="{ 'vaga--parada': !acomodacao.ativa }"
-                @click="abrirAcomodacao(acomodacao)"
+              <article
+                class="ladrilho"
+                :class="[
+                  `ladrilho--${estadoDe(acomodacao)}`,
+                  estadoDe(acomodacao) === 'ocupada' ? 'ui-marca ui-marca--lugar' : '',
+                ]"
               >
-                <span class="vaga__cabeca">
-                  <!-- O desenho é nosso; a palavra na dica é a que a casa cadastrou. -->
-                  <span class="vaga__marca" :title="nomeDoTipo(acomodacao.tipoId)">
-                    <component
-                      :is="iconeDaVaga(acomodacao.tipoId)"
-                      weight="duotone"
-                      aria-hidden="true"
+                <header class="ladrilho__topo">
+                  <span class="ladrilho__desenho" aria-hidden="true">
+                    <i :class="iconeDaVaga(acomodacao.tipoId)" />
+                  </span>
+
+                  <span class="ladrilho__titulos">
+                    <!--
+                      O nome é o botão que abre o cadastro, e o `::after` dele cobre o ladrilho
+                      inteiro: a superfície toda vira alvo sem um `@click` no `<article>`, que
+                      dispararia junto com o rosto do hóspede.
+                    -->
+                    <button
+                      type="button"
+                      class="ladrilho__abrir"
+                      :aria-label="t('hotel.casa.ladrilho.editar', { nome: acomodacao.nome })"
+                      @click="abrirAcomodacao(acomodacao)"
+                    >
+                      {{ acomodacao.nome }}
+                    </button>
+                    <span class="ladrilho__perfil">{{ quemCabe(acomodacao) }}</span>
+                  </span>
+
+                </header>
+
+                <!-- Quem está lá agora: o rosto abre a estadia. -->
+                <RouterLink
+                  v-if="ocupante(acomodacao)"
+                  class="ladrilho__hospede"
+                  :to="rotaDaEstadia(ocupante(acomodacao)!.hospedagem.id)"
+                  :aria-label="
+                    t('hotel.hospedes.acao.abrir', { pet: ocupante(acomodacao)!.petNome })
+                  "
+                >
+                  <span class="ladrilho__rostos">
+                    <PetAvatar
+                      :nome="ocupante(acomodacao)!.petNome"
+                      :iniciais="ocupante(acomodacao)!.petIniciais"
+                      :especie="ocupante(acomodacao)!.petEspecie"
+                      :foto-url="ocupante(acomodacao)!.petFotoUrl"
+                      tamanho="md"
+                    />
+                    <PetAvatar
+                      v-if="ocupante(acomodacao)!.acompanhante"
+                      class="ladrilho__segundo"
+                      :nome="ocupante(acomodacao)!.acompanhante!.nome"
+                      :iniciais="ocupante(acomodacao)!.acompanhante!.iniciais"
+                      :especie="ocupante(acomodacao)!.acompanhante!.especie"
+                      :foto-url="ocupante(acomodacao)!.acompanhante!.fotoUrl"
+                      tamanho="xs"
                     />
                   </span>
+                  <span class="ladrilho__quem">
+                    <strong>
+                      {{ ocupante(acomodacao)!.petNome }}
+                      <template v-if="ocupante(acomodacao)!.acompanhante">
+                        <span class="ladrilho__com">
+                          {{
+                            t('hotel.hospedes.cartao.com', {
+                              pet: ocupante(acomodacao)!.acompanhante!.nome,
+                            })
+                          }}
+                        </span>
+                      </template>
+                    </strong>
+                    <small>{{ saidaDe(ocupante(acomodacao)!) }}</small>
+                  </span>
+                  <i class="ph ph-caret-right ladrilho__seta" aria-hidden="true" />
+                </RouterLink>
 
-                  <span class="vaga__quem">
-                    <strong class="vaga__nome">{{ acomodacao.nome }}</strong>
-                    <span class="vaga__perfil">
-                      {{ formato.porte(acomodacao.porteMaximo) }} ·
-                      {{
-                        t(
-                          'hotel.acomodacoes.cabem',
-                          { total: acomodacao.capacidade },
-                          acomodacao.capacidade,
-                        )
-                      }}
+                <!-- Há quanto tempo é a informação, não o rótulo de "fora de operação". -->
+                <p v-else-if="!acomodacao.ativa" class="ladrilho__parada">
+                  <i class="ph ph-wrench" aria-hidden="true" />
+                  <span>
+                    <strong>{{ t('hotel.impedimento.inativa') }}</strong>
+                    <small>
+                      {{ formato.motivoInativa(acomodacao.motivoInativa ?? 'outro') }}
+                      <template v-if="paradaHaDias(acomodacao) !== null">
+                        · {{ formato.haDias(paradaHaDias(acomodacao) ?? 0) }}
+                      </template>
+                    </small>
+                    <small v-if="acomodacao.detalheInativa" class="ladrilho__detalhe">
+                      {{ acomodacao.detalheInativa }}
+                    </small>
+                  </span>
+                </p>
+
+                <p v-else class="ladrilho__livre">
+                  <i class="ph ph-door-open" aria-hidden="true" />
+                  <strong>{{ t('hotel.casa.ladrilho.livreAgora') }}</strong>
+                </p>
+
+                <footer class="ladrilho__pe">
+                  <span class="ladrilho__cabem">
+                    <i class="ph ph-paw-print" aria-hidden="true" />
+                    {{
+                      t(
+                        'hotel.acomodacoes.cabem',
+                        { total: acomodacao.capacidade },
+                        acomodacao.capacidade,
+                      )
+                    }}
+                  </span>
+
+                  <!-- Os recursos como desenho, com o nome na dica e para o leitor de tela. -->
+                  <span v-if="acomodacao.recursos.length > 0" class="ladrilho__recursos">
+                    <span
+                      v-for="recurso in acomodacao.recursos"
+                      :key="recurso"
+                      class="ladrilho__recurso"
+                      :title="formato.recurso(recurso)"
+                    >
+                      <i :class="ICONE_DO_RECURSO[recurso]" aria-hidden="true" />
+                      <span class="oculto">{{ formato.recurso(recurso) }}</span>
                     </span>
                   </span>
-                </span>
 
-                <!-- Os recursos como desenho: em texto, eram a quarta linha cinza do cartão. -->
-                <span v-if="acomodacao.recursos.length > 0" class="vaga__recursos">
-                  <span
-                    v-for="recurso in acomodacao.recursos"
-                    :key="recurso"
-                    class="vaga__recurso"
-                    :title="formato.recurso(recurso)"
-                  >
-                    <component :is="ICONE_DO_RECURSO[recurso]" weight="duotone" aria-hidden="true" />
-                    <span class="vaga__recursoNome">{{ formato.recurso(recurso) }}</span>
+                  <span class="ladrilho__preco">
+                    <strong class="ui-num">{{ formato.moeda(diariaDe(acomodacao)) }}</strong>
+                    <small>{{ hotelStore.tarifa(acomodacao.tarifaId)?.nome }}</small>
                   </span>
-                </span>
-
-                <span class="vaga__pe">
-                  <span class="vaga__tabela">{{ hotelStore.tarifa(acomodacao.tarifaId)?.nome }}</span>
-                  <strong class="vaga__preco clinic-value">
-                    {{ formato.moeda(diariaDe(acomodacao)) }}
-                  </strong>
-                </span>
-
-                <!-- Há quanto tempo é a informação, não o rótulo de "em manutenção". -->
-                <span v-if="!acomodacao.ativa" class="vaga__parada">
-                  <PhWrench weight="duotone" aria-hidden="true" />
-                  {{ formato.motivoInativa(acomodacao.motivoInativa ?? 'outro') }}
-                  <template v-if="paradaHaDias(acomodacao) !== null">
-                    · {{ formato.haDias(paradaHaDias(acomodacao) ?? 0) }}
-                  </template>
-                </span>
-              </button>
+                </footer>
+              </article>
             </li>
 
-            <!-- Criar a vaga onde ela vai morar, e não num botão longe no topo da página. -->
-            <li>
+            <!-- O corredor vazio é o lugar de pôr a primeira vaga, e diz isso no próprio chão. -->
+            <li v-if="grupo.acomodacoes.length === 0">
               <button
                 type="button"
-                class="vaga vaga--nova"
+                class="ladrilho ladrilho--nova"
                 @click="abrirAcomodacao(null, grupo.bloco.id)"
               >
                 <i class="ph ph-plus" aria-hidden="true" />
-                {{ t('hotel.acomodacoes.nova') }}
+                <span>{{ t('hotel.acomodacoes.nova') }}</span>
+                <small>{{ t('hotel.casa.ladrilho.noCorredor', { corredor: grupo.bloco.nome }) }}</small>
               </button>
             </li>
           </ul>
-        </article>
-      </section>
+        </section>
+
+        <!-- O corredor novo entra onde vai ficar: no fim da casa. -->
+        <button type="button" class="corredor-novo" @click="abrirCorredor(null)">
+          <i class="ph ph-plus" aria-hidden="true" />
+          <span>
+            <strong>{{ t('hotel.acomodacoes.corredor.novo') }}</strong>
+            <small>{{ t('hotel.acomodacoes.corredor.nomeDica') }}</small>
+          </span>
+        </button>
+      </div>
 
       <!-- ============================================================== tipos -->
-      <section
-        v-else-if="aba === 'tipos'"
-        id="partner-panel-tipos"
-        class="painel"
-        role="tabpanel"
-        aria-labelledby="partner-tab-tipos"
-      >
-        <ul class="tipos">
-          <li v-for="(tipo, indice) in hotelStore.tiposDeAcomodacao" :key="tipo.id" class="tipo">
-            <span class="tipo__marca">
-              <component :is="ICONE_DA_VAGA[tipo.icone]" weight="duotone" aria-hidden="true" />
+      <ul v-else-if="aba === 'tipos'" class="ui-lista ui-folha tipos">
+        <li v-for="(tipo, indice) in hotelStore.tiposDeAcomodacao" :key="tipo.id">
+          <div class="ui-linha tipo">
+            <span class="tipo__desenho" aria-hidden="true">
+              <i :class="ICONE_DO_DESENHO[tipo.icone]" />
             </span>
 
-            <span class="tipo__texto">
-              <strong class="tipo__nome">{{ tipo.nome }}</strong>
-              <span class="tipo__usos">
-                {{ t('hotel.acomodacoes.tipo.usos', { total: usosDoTipo(tipo.id) }, usosDoTipo(tipo.id)) }}
+            <span class="ui-linha__texto">
+              <strong class="ui-linha__titulo">{{ tipo.nome }}</strong>
+              <span class="ui-linha__meta">
+                {{
+                  t('hotel.acomodacoes.tipo.usos', { total: usosDoTipo(tipo.id) }, usosDoTipo(tipo.id))
+                }}
               </span>
             </span>
 
-            <span class="tipo__acoes">
+            <span class="ui-linha__fim">
               <Button
+                type="button"
                 icon="ph ph-arrow-up"
                 severity="secondary"
                 text
                 rounded
-                size="small"
                 :disabled="indice === 0 || salvando"
                 :aria-label="t('hotel.acomodacoes.corredor.subir')"
                 :title="t('hotel.acomodacoes.corredor.subir')"
                 @click="moverTipo(tipo.id, 'sobe')"
               />
               <Button
+                type="button"
                 icon="ph ph-arrow-down"
                 severity="secondary"
                 text
                 rounded
-                size="small"
                 :disabled="indice === hotelStore.tiposDeAcomodacao.length - 1 || salvando"
                 :aria-label="t('hotel.acomodacoes.corredor.descer')"
                 :title="t('hotel.acomodacoes.corredor.descer')"
                 @click="moverTipo(tipo.id, 'desce')"
               />
               <Button
+                type="button"
                 icon="ph ph-pencil-simple"
+                :label="t('hotel.casa.editar')"
                 severity="secondary"
-                text
-                rounded
+                outlined
                 size="small"
                 :aria-label="t('hotel.acomodacoes.tipo.editar')"
-                :title="t('hotel.acomodacoes.tipo.editar')"
                 @click="abrirTipo(tipo)"
               />
             </span>
-          </li>
-        </ul>
-      </section>
+          </div>
+        </li>
+      </ul>
 
       <!-- ============================================================= preços -->
-      <section
-        v-else-if="aba === 'tarifas'"
-        id="partner-panel-tarifas"
-        class="painel precos"
-        role="tabpanel"
-        aria-labelledby="partner-tab-tarifas"
-      >
-        <div class="tabelaRolagem">
-          <table class="tabela">
+      <div v-else-if="aba === 'tarifas'" class="ui-folha precos">
+        <div class="precos__rolagem">
+          <table class="ui-tabela tabela">
             <thead>
               <tr>
                 <th scope="col">{{ t('hotel.acomodacoes.tarifa') }}</th>
@@ -641,34 +855,38 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                   {{ formato.porte(porte) }}
                 </th>
                 <th scope="col" class="tabela__num">{{ t('hotel.acomodacoes.acompanhante') }}</th>
-                <th scope="col"><span class="tabela__oculto">{{ t('hotel.comum.salvar') }}</span></th>
+                <th scope="col">
+                  <span class="oculto">{{ t('hotel.acomodacoes.preco.editar') }}</span>
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="tarifa in hotelStore.tarifas" :key="tarifa.id">
                 <th scope="row">
-                  {{ tarifa.nome }}
-                  <span class="tabela__usos">
-                    {{
-                      t(
-                        'hotel.acomodacoes.preco.usos',
-                        { total: usosDaTarifa(tarifa.id) },
-                        usosDaTarifa(tarifa.id),
-                      )
-                    }}
+                  <span class="tabela__nome">
+                    <strong>{{ tarifa.nome }}</strong>
+                    <small>
+                      {{
+                        t(
+                          'hotel.acomodacoes.preco.usos',
+                          { total: usosDaTarifa(tarifa.id) },
+                          usosDaTarifa(tarifa.id),
+                        )
+                      }}
+                    </small>
                   </span>
                 </th>
-                <td v-for="porte in PORTES" :key="porte" class="tabela__num clinic-value">
+                <td v-for="porte in PORTES" :key="porte" class="tabela__num ui-num">
                   {{ formato.moeda(tarifa.diariaPorPorte[porte]) }}
                 </td>
-                <td class="tabela__num clinic-value">{{ tarifa.acompanhantePercentual }}%</td>
+                <td class="tabela__num ui-num">{{ tarifa.acompanhantePercentual }}%</td>
                 <td class="tabela__acao">
                   <Button
+                    type="button"
                     icon="ph ph-pencil-simple"
                     severity="secondary"
                     text
                     rounded
-                    size="small"
                     :aria-label="t('hotel.acomodacoes.preco.editar')"
                     :title="t('hotel.acomodacoes.preco.editar')"
                     @click="abrirTarifa(tarifa)"
@@ -678,440 +896,233 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
 
       <!-- ========================================================= temporadas -->
-      <section
-        v-else
-        id="partner-panel-temporadas"
-        class="painel"
-        role="tabpanel"
-        aria-labelledby="partner-tab-temporadas"
-      >
-        <ul class="temporadas">
-          <!--
-            A lista é das temporadas **cadastradas**, não das materializadas.
-            A virada do ano vira três faixas no cálculo de preço, e mostrá-las aqui repetia "Fim de
-            ano" três vezes, com intervalos que se contradiziam aos olhos de quem lê.
-          -->
-          <li v-for="temporada in hotelStore.temporadasSazonais" :key="temporada.id">
-            <button type="button" class="temporada" @click="abrirTemporada(temporada)">
-              <span class="temporada__cabeca">
-                <strong class="temporada__nome">{{ temporada.nome }}</strong>
-                <HotelSelo :rotulo="`+${temporada.acrescimoPercentual}%`" tom="acento" />
-              </span>
+      <!--
+        A lista é das temporadas **cadastradas**, não das materializadas: a virada do ano vira três
+        faixas no cálculo de preço, e mostrá-las aqui repetia "Fim de ano" três vezes, com
+        intervalos que se contradiziam aos olhos de quem lê.
+      -->
+      <ul v-else class="ui-lista ui-folha temporadas">
+        <li v-for="temporada in hotelStore.temporadasSazonais" :key="temporada.id">
+          <button type="button" class="ui-linha temporada" @click="abrirTemporada(temporada)">
+            <span class="temporada__icone" aria-hidden="true">
+              <i class="ph ph-calendar-star" />
+            </span>
 
+            <span class="ui-linha__texto temporada__texto">
+              <strong class="ui-linha__titulo">{{ temporada.nome }}</strong>
+              <span class="ui-linha__meta ui-num">
+                {{
+                  t('hotel.casa.temporada.intervalo', {
+                    de: formato.mesDia(temporada.inicioMesDia),
+                    ate: formato.mesDia(temporada.fimMesDia),
+                  })
+                }}
+              </span>
+            </span>
+
+            <span class="temporada__regua">
               <FaixaDoAno :inicio="temporada.inicioMesDia" :fim="temporada.fimMesDia" />
+            </span>
 
-              <span class="temporada__quando clinic-value">
-                {{ formato.mesDia(temporada.inicioMesDia) }} →
-                {{ formato.mesDia(temporada.fimMesDia) }}
-              </span>
-            </button>
-          </li>
-        </ul>
-      </section>
+            <span class="ui-linha__fim">
+              <span class="ui-selo ui-selo--lugar ui-num">+{{ temporada.acrescimoPercentual }}%</span>
+              <i class="ph ph-caret-right ui-linha__seta" aria-hidden="true" />
+            </span>
+          </button>
+        </li>
+      </ul>
     </div>
 
-    <AcomodacaoDialog
-      :aberto="acomodacaoAberta"
-      :acomodacao="acomodacaoEmEdicao"
-      :bloco-sugerido="corredorSugerido"
-      :tipos="hotelStore.tiposDeAcomodacao"
-      :blocos="hotelStore.blocos"
-      :tarifas="hotelStore.tarifas"
-      :salvando="salvando"
-      :erro="erro"
-      @fechar="acomodacaoAberta = false"
-      @salvar="
-        (payload) =>
-          mudar(
-            () =>
-              acomodacaoEmEdicao
-                ? acomodacaoRepository.editar({ ...payload, acomodacaoId: acomodacaoEmEdicao.id })
-                : acomodacaoRepository.criar(payload),
-            () => (acomodacaoAberta = false),
-          )
-      "
-      @desativar="
-        (payload) =>
-          mudar(
-            () =>
-              acomodacaoRepository.desativar({
-                ...payload,
-                acomodacaoId: acomodacaoEmEdicao?.id ?? '',
-              }),
-            () => (acomodacaoAberta = false),
-          )
-      "
-      @reativar="
-        () =>
-          mudar(
-            () => acomodacaoRepository.reativar(acomodacaoEmEdicao?.id ?? ''),
-            () => (acomodacaoAberta = false),
-          )
-      "
-      @remover="
-        () =>
-          mudar(
-            () => acomodacaoRepository.remover(acomodacaoEmEdicao?.id ?? ''),
-            () => (acomodacaoAberta = false),
-          )
-      "
-    />
+    <template #sempre>
+      <AcomodacaoDialog
+        :aberto="acomodacaoAberta"
+        :acomodacao="acomodacaoEmEdicao"
+        :bloco-sugerido="corredorSugerido"
+        :tipos="hotelStore.tiposDeAcomodacao"
+        :blocos="hotelStore.blocos"
+        :tarifas="hotelStore.tarifas"
+        :salvando="salvando"
+        :erro="erro"
+        @fechar="acomodacaoAberta = false"
+        @salvar="
+          (payload) =>
+            mudar(
+              () =>
+                acomodacaoEmEdicao
+                  ? acomodacaoRepository.editar({ ...payload, acomodacaoId: acomodacaoEmEdicao.id })
+                  : acomodacaoRepository.criar(payload),
+              () => (acomodacaoAberta = false),
+            )
+        "
+        @desativar="
+          (payload) =>
+            mudar(
+              () =>
+                acomodacaoRepository.desativar({
+                  ...payload,
+                  acomodacaoId: acomodacaoEmEdicao?.id ?? '',
+                }),
+              () => (acomodacaoAberta = false),
+            )
+        "
+        @reativar="
+          () =>
+            mudar(
+              () => acomodacaoRepository.reativar(acomodacaoEmEdicao?.id ?? ''),
+              () => (acomodacaoAberta = false),
+            )
+        "
+        @remover="
+          () =>
+            mudar(
+              () => acomodacaoRepository.remover(acomodacaoEmEdicao?.id ?? ''),
+              () => (acomodacaoAberta = false),
+            )
+        "
+      />
 
-    <CorredorDialog
-      :aberto="corredorAberto"
-      :corredor="corredorEmEdicao"
-      :vagas="
-        corredorEmEdicao
-          ? hotelStore.acomodacoes.filter((item) => item.blocoId === corredorEmEdicao?.id).length
-          : 0
-      "
-      :salvando="salvando"
-      :erro="erro"
-      @fechar="corredorAberto = false"
-      @salvar="
-        (payload) =>
-          mudar(
-            () =>
-              corredorEmEdicao
-                ? catalogoRepository.editarBloco({ ...payload, blocoId: corredorEmEdicao.id })
-                : catalogoRepository.criarBloco(payload),
-            () => (corredorAberto = false),
-          )
-      "
-      @remover="
-        () =>
-          mudar(
-            () => catalogoRepository.removerBloco(corredorEmEdicao?.id ?? ''),
-            () => (corredorAberto = false),
-          )
-      "
-    />
+      <CorredorDialog
+        :aberto="corredorAberto"
+        :corredor="corredorEmEdicao"
+        :vagas="
+          corredorEmEdicao
+            ? hotelStore.acomodacoes.filter((item) => item.blocoId === corredorEmEdicao?.id).length
+            : 0
+        "
+        :salvando="salvando"
+        :erro="erro"
+        @fechar="corredorAberto = false"
+        @salvar="
+          (payload) =>
+            mudar(
+              () =>
+                corredorEmEdicao
+                  ? catalogoRepository.editarBloco({ ...payload, blocoId: corredorEmEdicao.id })
+                  : catalogoRepository.criarBloco(payload),
+              () => (corredorAberto = false),
+            )
+        "
+        @remover="
+          () =>
+            mudar(
+              () => catalogoRepository.removerBloco(corredorEmEdicao?.id ?? ''),
+              () => (corredorAberto = false),
+            )
+        "
+      />
 
-    <TarifaDialog
-      :aberto="tarifaAberta"
-      :tarifa="tarifaEmEdicao"
-      :em-uso="tarifaEmEdicao ? usosDaTarifa(tarifaEmEdicao.id) : 0"
-      :salvando="salvando"
-      :erro="erro"
-      @fechar="tarifaAberta = false"
-      @salvar="
-        (payload) =>
-          mudar(
-            () =>
-              tarifaEmEdicao
-                ? catalogoRepository.editarTarifa({ ...payload, tarifaId: tarifaEmEdicao.id })
-                : catalogoRepository.criarTarifa(payload),
-            () => (tarifaAberta = false),
-          )
-      "
-      @remover="
-        () =>
-          mudar(
-            () => catalogoRepository.removerTarifa(tarifaEmEdicao?.id ?? ''),
-            () => (tarifaAberta = false),
-          )
-      "
-    />
+      <TarifaDialog
+        :aberto="tarifaAberta"
+        :tarifa="tarifaEmEdicao"
+        :em-uso="tarifaEmEdicao ? usosDaTarifa(tarifaEmEdicao.id) : 0"
+        :salvando="salvando"
+        :erro="erro"
+        @fechar="tarifaAberta = false"
+        @salvar="
+          (payload) =>
+            mudar(
+              () =>
+                tarifaEmEdicao
+                  ? catalogoRepository.editarTarifa({ ...payload, tarifaId: tarifaEmEdicao.id })
+                  : catalogoRepository.criarTarifa(payload),
+              () => (tarifaAberta = false),
+            )
+        "
+        @remover="
+          () =>
+            mudar(
+              () => catalogoRepository.removerTarifa(tarifaEmEdicao?.id ?? ''),
+              () => (tarifaAberta = false),
+            )
+        "
+      />
 
-    <TipoDialog
-      :aberto="tipoAberto"
-      :tipo="tipoEmEdicao"
-      :em-uso="tipoEmEdicao ? usosDoTipo(tipoEmEdicao.id) : 0"
-      :salvando="salvando"
-      :erro="erro"
-      @fechar="tipoAberto = false"
-      @salvar="
-        (payload) =>
-          mudar(
-            () =>
-              tipoEmEdicao
-                ? catalogoRepository.editarTipo({ ...payload, tipoId: tipoEmEdicao.id })
-                : catalogoRepository.criarTipo(payload),
-            () => (tipoAberto = false),
-          )
-      "
-      @remover="
-        () =>
-          mudar(
-            () => catalogoRepository.removerTipo(tipoEmEdicao?.id ?? ''),
-            () => (tipoAberto = false),
-          )
-      "
-    />
+      <TipoDialog
+        :aberto="tipoAberto"
+        :tipo="tipoEmEdicao"
+        :em-uso="tipoEmEdicao ? usosDoTipo(tipoEmEdicao.id) : 0"
+        :salvando="salvando"
+        :erro="erro"
+        @fechar="tipoAberto = false"
+        @salvar="
+          (payload) =>
+            mudar(
+              () =>
+                tipoEmEdicao
+                  ? catalogoRepository.editarTipo({ ...payload, tipoId: tipoEmEdicao.id })
+                  : catalogoRepository.criarTipo(payload),
+              () => (tipoAberto = false),
+            )
+        "
+        @remover="
+          () =>
+            mudar(
+              () => catalogoRepository.removerTipo(tipoEmEdicao?.id ?? ''),
+              () => (tipoAberto = false),
+            )
+        "
+      />
 
-    <TemporadaDialog
-      :aberto="temporadaAberta"
-      :temporada="temporadaEmEdicao"
-      :salvando="salvando"
-      :erro="erro"
-      @fechar="temporadaAberta = false"
-      @salvar="
-        (payload) =>
-          mudar(
-            () =>
-              temporadaEmEdicao
-                ? catalogoRepository.editarTemporada({
-                    ...payload,
-                    temporadaId: temporadaEmEdicao.id,
-                  })
-                : catalogoRepository.criarTemporada(payload),
-            () => (temporadaAberta = false),
-          )
-      "
-      @remover="
-        () =>
-          mudar(
-            () => catalogoRepository.removerTemporada(temporadaEmEdicao?.id ?? ''),
-            () => (temporadaAberta = false),
-          )
-      "
-    />
+      <TemporadaDialog
+        :aberto="temporadaAberta"
+        :temporada="temporadaEmEdicao"
+        :salvando="salvando"
+        :erro="erro"
+        @fechar="temporadaAberta = false"
+        @salvar="
+          (payload) =>
+            mudar(
+              () =>
+                temporadaEmEdicao
+                  ? catalogoRepository.editarTemporada({
+                      ...payload,
+                      temporadaId: temporadaEmEdicao.id,
+                    })
+                  : catalogoRepository.criarTemporada(payload),
+              () => (temporadaAberta = false),
+            )
+        "
+        @remover="
+          () =>
+            mudar(
+              () => catalogoRepository.removerTemporada(temporadaEmEdicao?.id ?? ''),
+              () => (temporadaAberta = false),
+            )
+        "
+      />
 
-    <HotelDevPanel />
+      <HotelDevPanel />
 
-    <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
-
-    <template #actions>
-      <span class="clinic-scope clinic-acoes">
-        <Button
-          :label="acaoDaAba.rotulo"
-          icon="ph ph-plus"
-          size="small"
-          @click="acaoDaAba.abrir()"
-        />
-      </span>
+      <HotelTour v-model:aberto="tourAberto" :passos="passosDoTour" />
     </template>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
-.cadastro {
-  display: grid;
-  gap: var(--clinic-space-4);
-}
-
 /*
- * A faixa de abas abraça as três, em vez de atravessar a página.
- *
- * O `PartnerSectionTabs` é do portal e lá a faixa ocupa a largura toda — o que, com três abas
- * curtas, deixa uma banda de acento de mais de mil pixels com conteúdo só no começo dela. Sálvia é
- * a tinta desta casa, não o papel, e a regra vale também para a moldura de um controle.
- *
- * O ajuste é local de propósito: as telas do portal continuam como estavam.
+ * Os botões contornado e de texto no padrão do Trilha (contorno forte, tinta cheia). Fora do
+ * `.hc-tema` o PrimeVue usa o cinza do preset, que some sobre o fundo — no escuro, quase some.
  */
-.cadastro :deep(.partner-tabs__list .p-tablist-tab-list) {
-  width: fit-content;
-  max-width: 100%;
+.tela {
+  --p-button-outlined-secondary-border-color: var(--linha-forte);
+  --p-button-outlined-secondary-color: var(--tinta);
+  --p-button-outlined-secondary-hover-background: var(--superficie-2);
+  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  --p-button-text-secondary-color: var(--tinta-2);
+  --p-button-text-secondary-hover-background: var(--superficie-2);
+  --p-button-text-secondary-active-background: var(--superficie-3);
 }
 
-/* ---------------------------------------------------------------- painéis */
-
-.painel {
+.casa {
   display: grid;
-  gap: var(--clinic-space-4);
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
-/*
- * A ação de criar fica no alto do painel e alinhada à direita.
- *
- * Com as três abas, cada painel governa um cadastro só — então a ação dele não precisa mais de
- * cabeçalho, disco e frase para dizer a que cadastro pertence. Quem diz é a aba acesa.
- */
-.painel__acoes {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--clinic-space-2);
-}
-
-/* --------------------------------------------------------------- corredor */
-
-.corredor {
-  display: grid;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-}
-
-.corredor__cabeca {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--clinic-space-2);
-}
-
-.corredor__marca {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border: 1px solid var(--clinic-line);
-  border-radius: 0.6rem;
-  color: var(--clinic-muted);
-}
-
-.corredor__marca :deep(svg) {
-  width: 1.1rem;
-  height: 1.1rem;
-}
-
-.corredor__nome {
-  margin: 0;
-  font-size: var(--clinic-font-value);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.corredor__tipo {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.corredor__conta {
-  padding-inline: 0.45rem;
-  border-radius: var(--clinic-radius-chip);
-  background: var(--clinic-surface-sunken);
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
-}
-
-/*
- * As ações ficam sempre visíveis, e não só no `hover`: num cadastro que se usa três vezes por ano,
- * esconder o gesto atrás do ponteiro é esconder que ele existe — e quem abre esta tela veio
- * justamente para mexer.
- */
-.corredor__acoes {
-  display: flex;
-  align-items: center;
-  margin-inline-start: auto;
-  gap: 0.1rem;
-}
-
-/* ------------------------------------------------------------------ vagas */
-
-.grade {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  gap: var(--clinic-space-3);
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-  list-style: none;
-}
-
-.vaga {
-  display: grid;
-  width: 100%;
-  height: 100%;
-  align-content: start;
-  padding: var(--clinic-space-3);
-  border: 1px solid var(--clinic-line-soft);
-  border-radius: var(--clinic-radius-control);
-  gap: var(--clinic-space-2);
-  background: var(--clinic-surface);
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  text-align: start;
-  transition: border-color 140ms ease;
-}
-
-.vaga:hover,
-.vaga:focus-visible {
-  border-color: var(--clinic-line-strong);
-  outline: none;
-}
-
-.vaga:focus-visible {
-  box-shadow: var(--clinic-focus-ring);
-}
-
-/*
- * Parada: tracejado e superfície afundada. A moldura descontínua é canal de **forma** — ela diz
- * "isto não está em operação" antes de qualquer cor, e continua dizendo em escala de cinza.
- */
-.vaga--parada {
-  border-style: dashed;
-  border-color: var(--clinic-line);
-  background: var(--clinic-surface-soft);
-}
-
-.vaga__cabeca {
-  display: flex;
-  align-items: center;
-  gap: var(--clinic-space-2);
-}
-
-.vaga__marca {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.6rem;
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-}
-
-.vaga--parada .vaga__marca {
-  background: var(--clinic-surface);
-}
-
-.vaga__marca :deep(svg) {
-  width: 1.15rem;
-  height: 1.15rem;
-}
-
-.vaga__quem {
-  display: grid;
-  min-width: 0;
-  gap: 0;
-}
-
-.vaga__nome {
-  font-size: var(--clinic-font-value);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.vaga__perfil {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.vaga__recursos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.vaga__recurso {
-  display: inline-grid;
-  width: 1.4rem;
-  height: 1.4rem;
-  place-items: center;
-  border-radius: 0.4rem;
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-faint);
-}
-
-.vaga__recurso :deep(svg) {
-  width: 0.85rem;
-  height: 0.85rem;
-}
-
-/* O nome do recurso fica para o leitor de tela: na tela, o desenho e a dica bastam. */
-.vaga__recursoNome {
+.oculto {
   position: absolute;
   overflow: hidden;
   width: 1px;
@@ -1120,273 +1131,806 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   white-space: nowrap;
 }
 
-.vaga__pe {
+/* ------------------------------------------------------------------ a barra */
+
+.barra {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding-block-start: var(--clinic-space-2);
-  border-block-start: 1px solid var(--clinic-line-soft);
-  gap: var(--clinic-space-2);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
 }
 
-.vaga__tabela {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.vistas :deep(.p-togglebutton-content) {
+  gap: 7px;
 }
 
-.vaga__preco {
-  color: var(--clinic-text);
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
+.vista__icone {
+  font-size: 16px;
 }
 
-.vaga__parada {
+.vista__rotulo {
+  white-space: nowrap;
+}
+
+.vista__conta {
+  min-width: 22px;
+  height: 20px;
+  padding-inline: 6px;
+  font-size: 11.5px;
+}
+
+.vistas :deep(.p-togglebutton-checked) .vista__conta {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+}
+
+.barra__descricao {
+  min-width: 0;
+  flex: 1 1 260px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+/* ------------------------------------------------------------------ a planta
+ * Cada corredor é um cômodo: chão levemente mais claro que o fundo, parede fina, o nome na porta.
+ * As acomodações são os únicos objetos com papel — o cômodo não é cartão, é lugar.
+ *
+ * Os corredores correm lado a lado, cada um tão largo quanto as próprias vagas pedem
+ * (`--corredor-vagas`, contando o ladrilho de criar), e quebram de linha quando não cabem.
+ */
+.planta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.corredor {
+  --ladrilho: 228px;
+  --vao: 12px;
+
+  display: grid;
+  min-width: min(100%, 280px);
+  flex: var(--corredor-vagas) 1
+    calc(var(--corredor-vagas) * (var(--ladrilho) + var(--vao)) + 20px);
+  align-content: start;
+  gap: 14px;
+  padding: 14px 14px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--superficie) 45%, transparent);
+  container: corredor / inline-size;
+}
+
+.corredor__cabeca {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--clinic-attention-text);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  gap: 10px;
+  padding-inline: 2px;
 }
 
-.vaga__parada :deep(svg) {
-  width: 0.9rem;
-  height: 0.9rem;
+.corredor__icone {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 18px;
 }
 
-/* A vaga que ainda não existe: tracejada e sem peso, para não competir com as que existem. */
-.vaga--nova {
+.corredor__titulos {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 1px;
+}
+
+.corredor__nome {
+  margin: 0;
+  overflow: hidden;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.corredor__conta {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.corredor__acoes {
   display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+}
+
+.corredor__nova {
+  margin-inline-end: 6px;
+}
+
+/* No corredor estreito, o "+" fica sozinho: o nome do corredor precisa do espaço. */
+@container corredor (max-width: 620px) {
+  .corredor__nova :deep(.p-button-label) {
+    display: none;
+  }
+
+  .corredor__nova {
+    margin-inline-end: 0;
+  }
+}
+
+/* ---- o corredor que ainda não existe: tracejado, no fim da casa */
+
+.corredor-novo {
+  display: flex;
+  min-width: min(100%, 280px);
+  flex: 0 1 300px;
   align-items: center;
   justify-content: center;
-  min-block-size: 6rem;
-  border: 1px dashed var(--clinic-line-strong);
-  gap: var(--clinic-space-2);
+  gap: 12px;
+  min-height: 84px;
+  padding: 16px;
+  border: 1px dashed color-mix(in oklab, var(--linha-forte) 70%, transparent);
+  border-radius: 20px;
   background: transparent;
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-weight: 700;
+  color: var(--tinta-2);
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+  transition:
+    border-color var(--pj-tempo-curto) ease,
+    background-color var(--pj-tempo-curto) ease;
 }
 
-.vaga--nova:hover {
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-accent-strong);
+.corredor-novo > i {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--superficie-2);
+  font-size: 18px;
+}
+
+.corredor-novo span {
+  display: grid;
+  gap: 1px;
+}
+
+.corredor-novo strong {
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.corredor-novo small {
+  color: var(--tinta-3);
+  font-size: 12.5px;
+}
+
+.corredor-novo:hover {
+  border-color: var(--pj-lugar);
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 50%, transparent);
+}
+
+.corredor-novo:hover > i {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+}
+
+.corredor-novo:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
+}
+
+.corredor__vagas-lista {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: var(--vao);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--ladrilho)), 1fr));
+  list-style: none;
+}
+
+.corredor__vagas-lista > li {
+  display: grid;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ o ladrilho */
+
+.ladrilho {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 188px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 14px 12px 16px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--superficie);
+  color: var(--tinta);
+  transition:
+    border-color var(--pj-tempo-curto) ease,
+    box-shadow var(--pj-tempo-curto) ease,
+    transform var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.ladrilho:not(.ladrilho--nova):hover {
+  border-color: var(--linha-forte);
+  box-shadow: var(--sombra-2);
+  transform: translateY(-1px);
+}
+
+/* Fora de operação: hachurado e calado, mas no lugar — continua sendo uma porta da casa. */
+.ladrilho--parada {
+  border-style: dashed;
+  border-color: var(--linha-forte);
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 9px,
+    color-mix(in oklab, var(--linha) 75%, transparent) 9px 10px
+  );
+}
+
+.ladrilho__topo {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ladrilho__desenho {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 17px;
+}
+
+.ladrilho--ocupada .ladrilho__desenho {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+}
+
+.ladrilho--parada .ladrilho__desenho {
+  background: var(--superficie);
+}
+
+.ladrilho__titulos {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 1px;
+}
+
+.ladrilho__abrir {
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-family: var(--font-dados);
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ladrilho__abrir::after {
+  position: absolute;
+  border-radius: 14px;
+  content: '';
+  inset: 0;
+}
+
+.ladrilho__abrir:focus-visible {
+  outline: none;
+}
+
+/* O foco contorna o ladrilho, que é o que o clique de fato aciona — não só o nome. */
+.ladrilho__abrir:focus-visible::after {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
+}
+
+.ladrilho__perfil {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+
+/* ---- o meio: quem está, livre ou parada */
+
+/* O rosto fica acima do botão do ladrilho, e abre a estadia de quem está lá. */
+.ladrilho__hospede {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  margin-inline: -6px;
+  padding: 6px;
+  border-radius: 10px;
+  color: var(--tinta);
+  text-decoration: none;
+  transition: background-color var(--pj-tempo-curto) ease;
+}
+
+.ladrilho__hospede:hover {
+  background: var(--pj-lugar-fundo);
+}
+
+.ladrilho__hospede:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 0;
+}
+
+.ladrilho__rostos {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.ladrilho__segundo {
+  position: absolute;
+  inset-block-end: -3px;
+  inset-inline-end: -5px;
+  box-shadow: 0 0 0 2px var(--superficie);
+}
+
+.ladrilho__quem {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 1px;
+}
+
+.ladrilho__quem strong {
+  overflow: hidden;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ladrilho__com {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.ladrilho__quem small {
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ladrilho__seta {
+  flex: none;
+  color: var(--tinta-3);
+  font-size: 15px;
+}
+
+[dir='rtl'] .ladrilho__seta {
+  scale: -1 1;
+}
+
+.ladrilho__livre {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.ladrilho__livre > i {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border: 1px dashed color-mix(in oklab, var(--ok) 60%, var(--linha));
+  border-radius: 50%;
+  color: var(--ok-tinta);
+  font-size: 17px;
+}
+
+.ladrilho__livre strong {
+  color: var(--ok-tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+.ladrilho__parada {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--tinta-2);
+}
+
+.ladrilho__parada > i {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 16px;
+}
+
+.ladrilho__parada span {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.ladrilho__parada strong {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ladrilho__parada small {
+  font-size: 12.5px;
+}
+
+.ladrilho__detalhe {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--tinta-3);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+/* ---- o pé: quantos cabem, o que tem, quanto custa */
+
+.ladrilho__pe {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--linha);
+}
+
+.ladrilho__cabem {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.ladrilho__cabem i {
+  color: var(--pj-lugar-tinta);
+  font-size: 14px;
+}
+
+.ladrilho__recursos {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.ladrilho__recurso {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.ladrilho__preco {
+  display: grid;
+  flex: none;
+  justify-items: end;
+  margin-inline-start: auto;
+  line-height: 1.15;
+  text-align: end;
+}
+
+.ladrilho__preco strong {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.ladrilho__preco small {
+  color: var(--tinta-3);
+  font-size: 11.5px;
+}
+
+/* ---- a vaga que ainda não existe: tracejada e sem peso, para não competir com as que existem */
+
+.ladrilho--nova {
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px dashed color-mix(in oklab, var(--linha-forte) 70%, transparent);
+  background: transparent;
+  color: var(--tinta-2);
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+}
+
+.ladrilho--nova i {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 4px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--superficie-2);
+  font-size: 18px;
+}
+
+.ladrilho--nova span {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ladrilho--nova small {
+  color: var(--tinta-3);
+  font-size: 12.5px;
+}
+
+.ladrilho--nova:hover {
+  border-color: var(--pj-lugar);
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 50%, transparent);
+}
+
+.ladrilho--nova:hover i {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+}
+
+.ladrilho--nova:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
 }
 
 /* ------------------------------------------------------------------ tipos */
 
-/*
- * Os tipos numa moldura só, com filete entre irmãos.
- *
- * São poucos e curtos — nome, uso e três gestos. Um cartão por tipo daria a cada um o peso de um
- * corredor inteiro, e o cadastro que a casa mexe uma vez por ano passaria a parecer mais
- * importante que as vinte vagas que ela olha todo dia.
- */
-.tipos {
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-  list-style: none;
+.tipo {
+  padding-inline: 18px 12px;
+}
+
+.tipo__desenho {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 19px;
+}
+
+.tipo .ui-linha__fim {
+  gap: 2px;
+}
+
+.tipo .ui-linha__fim :deep(.p-button-outlined) {
+  margin-inline-start: 8px;
+}
+
+/* ------------------------------------------------------------------ preços */
+
+.precos {
   overflow: hidden;
 }
 
-.tipo {
-  display: flex;
-  align-items: center;
-  padding: var(--clinic-space-3) var(--clinic-space-4);
-  gap: var(--clinic-space-3);
-}
-
-.tipo + .tipo {
-  border-block-start: 1px solid var(--clinic-line-soft);
-}
-
-.tipo__marca {
-  display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.65rem;
-  background: var(--clinic-surface-soft);
-  color: var(--clinic-muted);
-}
-
-.tipo__marca :deep(svg) {
-  width: 1.2rem;
-  height: 1.2rem;
-}
-
-.tipo__texto {
-  display: grid;
-  min-width: 0;
-  flex: 1 1 auto;
-  gap: 0;
-}
-
-.tipo__nome {
-  font-size: var(--clinic-font-value);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-/* Quantas vagas usam o tipo: é o número que decide se dá para apagá-lo. */
-.tipo__usos {
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
-}
-
-.tipo__acoes {
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  gap: 0.1rem;
-}
-
-/* ----------------------------------------------------------------- preços */
-
-.tabelaRolagem {
+/* A tabela larga rola dentro da folha; a página nunca rola de lado. */
+.precos__rolagem {
   overflow-x: auto;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
 }
 
 .tabela {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--clinic-font-label);
+  min-width: 760px;
 }
 
-.tabela th,
-.tabela td {
-  padding: 0.45rem 0.6rem;
-  text-align: start;
-  white-space: nowrap;
+.tabela th:first-child,
+.tabela td:first-child {
+  padding-inline-start: 20px;
 }
 
-.tabela thead th {
-  border-bottom: 1px solid var(--clinic-line);
-  color: var(--clinic-faint);
-  font-size: 0.75rem;
+/* O nome da tabela é cabeçalho da linha, mas lê como a primeira célula: tinta cheia, não rótulo. */
+.tabela tbody th {
+  height: 58px;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 400;
+}
+
+.tabela tbody tr:last-child th {
+  border-bottom: 0;
+}
+
+.tabela tbody tr:hover th {
+  background: var(--superficie-2);
+}
+
+.tabela__nome {
+  display: grid;
+  gap: 1px;
+}
+
+.tabela__nome strong {
   font-weight: 600;
 }
 
-.tabela tbody tr + tr th,
-.tabela tbody tr + tr td {
-  border-top: 1px solid var(--clinic-line-soft);
-}
-
-.tabela tbody tr:hover th,
-.tabela tbody tr:hover td {
-  background: var(--clinic-surface-soft);
-}
-
-.tabela tbody th {
-  font-weight: 800;
-}
-
-/* Quantas vagas usam esta tabela: é o número que decide se dá para apagá-la. */
-.tabela__usos {
-  display: block;
-  color: var(--clinic-faint);
-  font-size: var(--clinic-font-label);
+.tabela__nome small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
   font-weight: 400;
 }
 
 .tabela__num {
   text-align: end;
-  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tabela thead .tabela__num {
+  text-align: end;
 }
 
 .tabela__acao {
   width: 1px;
+  padding-inline: 8px 12px;
   text-align: end;
-}
-
-.tabela__oculto {
-  position: absolute;
-  overflow: hidden;
-  width: 1px;
-  height: 1px;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 
 /* ------------------------------------------------------------- temporadas */
 
-.temporadas {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  gap: var(--clinic-space-3);
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  list-style: none;
-}
-
 .temporada {
+  min-height: 68px;
+  gap: 16px;
+}
+
+.temporada__icone {
   display: grid;
-  width: 100%;
-  height: 100%;
-  align-content: start;
-  padding: var(--clinic-space-4);
-  border: 1px solid var(--clinic-line);
-  border-radius: var(--clinic-radius-card);
-  gap: var(--clinic-space-3);
-  background: var(--clinic-surface);
-  box-shadow: var(--clinic-shadow-card);
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  text-align: start;
-  transition: border-color 140ms ease;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 19px;
 }
 
-.temporada:hover,
-.temporada:focus-visible {
-  border-color: var(--clinic-line-strong);
-  outline: none;
+.temporada__texto {
+  flex: 0 1 240px;
 }
 
-.temporada:focus-visible {
-  box-shadow: var(--clinic-focus-ring);
+/* A régua do ano no meio da linha: quando cai, quanto dura e se encosta na outra. */
+.temporada__regua {
+  display: block;
+  min-width: 120px;
+  flex: 1 1 auto;
 }
 
-.temporada__cabeca {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--clinic-space-2);
+.temporada__regua :deep(.regua) {
+  block-size: 8px;
 }
 
-.temporada__nome {
-  font-size: var(--clinic-font-value);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.temporada__quando {
-  color: var(--clinic-muted);
-  font-size: var(--clinic-font-label);
-  font-variant-numeric: tabular-nums;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .vaga,
-  .temporada {
-    transition: none;
+@media (max-width: 900px) {
+  .corredor {
+    flex-basis: 100%;
   }
 }
 
-/* Caixa-alta rastreada não roda em árabe: o `letter-spacing` desconecta as ligaduras. */
-[dir='rtl'] .tabela thead th {
-  letter-spacing: normal;
-  text-transform: none;
+@media (max-width: 640px) {
+  /* Quatro vistas não cabem numa fileira de telefone: viram duas por linha, sem cortar a palavra. */
+  .vistas {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vistas :deep(.p-togglebutton-content) {
+    justify-content: center;
+  }
+
+  .vista__icone {
+    display: none;
+  }
+
+  .corredor {
+    padding: 12px 10px 12px;
+  }
+
+  .corredor__cabeca {
+    flex-wrap: wrap;
+  }
+
+  /* O nome do corredor fica com a linha toda; vagas e gestos descem para a de baixo. */
+  .corredor__titulos {
+    flex-basis: calc(100% - 46px);
+  }
+
+  .corredor__vagas {
+    margin-inline-start: 44px;
+  }
+
+  .corredor__acoes {
+    margin-inline-start: auto;
+  }
+
+  .ladrilho {
+    min-height: 0;
+  }
+
+  .ladrilho--nova {
+    min-height: 92px;
+  }
+
+  .corredor__nova :deep(.p-button-label) {
+    display: none;
+  }
+
+  .temporada {
+    flex-wrap: wrap;
+  }
+
+  .temporada__regua {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ladrilho,
+  .ladrilho__hospede {
+    transition: none;
+  }
+
+  .ladrilho:not(.ladrilho--nova):hover {
+    transform: none;
+  }
 }
 </style>

@@ -488,7 +488,9 @@
       "title": "Stranica nije pronađena",
       "body": "Adresa koju ste otvorili ne postoji ili je premeštena. Proverite link ili se vratite na glavni deo portala.",
       "goHome": "Idite na početnu",
-      "back": "Nazad"
+      "back": "Nazad",
+      "selo": "Greška 404",
+      "endereco": "Adresa koju ste otvorili"
     }
   },
   "inicio": {
@@ -642,7 +644,9 @@
         "vacinas": "Vakcine",
         "rotina": "Rutina",
         "vespera": "Rezervacije",
-        "tratamentos": "Terapije"
+        "tratamentos": "Terapije",
+        "pedidos": "Zahtevi",
+        "pedidosDeReserva": "Zahtevi"
       },
       "contagem": "{total} predmet | {total} predmeta | {total} predmeta",
       "recolher": "Skupi {modulo}",
@@ -657,7 +661,12 @@
       "urgentes": "{total} hitan predmet traži vašu pažnju danas | {total} hitna predmeta traže vašu pažnju danas | {total} hitnih predmeta traži vašu pažnju danas",
       "esperando": "{total} predmet vas čeka danas | {total} predmeta vas čekaju danas | {total} predmeta vas čeka danas",
       "falhou": "Obaveze trenutno nije moguće proveriti.",
-      "emDia": "Ovde je sve ažurno."
+      "emDia": "Ovde je sve ažurno.",
+      "em": {
+        "clinica": "{total} u Klinici",
+        "hotel": "{total} u Hotelu"
+      },
+      "comOnde": "{frase}: {onde}."
     },
     "acoes": {
       "rotulo": "Brze radnje",
@@ -682,7 +691,8 @@
       "link": "Link za preporuku",
       "linkCopiado": "Link je kopiran",
       "comoFunciona": "Kako funkcioniše",
-      "seuCodigo": "Vaš kod za preporuku"
+      "seuCodigo": "Vaš kod za preporuku",
+      "maisDoCodigo": "Link, QR i skeniranja"
     },
     "dia": {
       "titulo": "Danas",
@@ -776,7 +786,63 @@
       "compromissos": "Obaveze za dan",
       "posicao": "{atual} od {total}",
       "compromissoAnterior": "Prethodna obaveza",
-      "proximoCompromisso": "Sledeća obaveza"
+      "proximoCompromisso": "Sledeća obaveza",
+      "tituloSemana": "Raspored za nedelju"
+    },
+    "saudacao": {
+      "manha": "Dobro jutro",
+      "manhaCom": "Dobro jutro, {nome}",
+      "tarde": "Dobar dan",
+      "tardeCom": "Dobar dan, {nome}",
+      "noite": "Dobro veče",
+      "noiteCom": "Dobro veče, {nome}"
+    },
+    "espacos": {
+      "rotulo": "Vaši prostori sada",
+      "clinica": {
+        "recepcao": "u čekaonici",
+        "consulta": "na pregledu",
+        "pedidos": "zahtev čeka odgovor | zahteva čekaju odgovor | zahteva čeka odgovor",
+        "aSeguir": "još danas",
+        "proximo": "sledeći u {hora}",
+        "andamento": "Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda"
+      },
+      "hotel": {
+        "naCasa": "u objektu",
+        "chegam": "dolazi danas | dolaze danas | dolazi danas",
+        "saem": "odlazi danas | odlaze danas | odlazi danas",
+        "rotina": "zadatak kasni | zadatka kasne | zadataka kasni",
+        "ocupacao": "zauzeto {ocupadas} od {total} smeštaja | zauzeto {ocupadas} od {total} smeštaja | zauzeto {ocupadas} od {total} smeštaja",
+        "semDocumento": "bez dokumenata: {total}",
+        "atrasadas": "{total} kasni | {total} kasne | {total} kasni",
+        "proximaAs": "sledeće u {hora}",
+        "andamento": "Urađeno {feitas} od {total} zadatka rutine | Urađeno {feitas} od {total} zadatka rutine | Urađeno {feitas} od {total} zadataka rutine"
+      },
+      "portal": {
+        "retido": "u sigurnosnom periodu",
+        "leituras": "skeniranje QR koda za 7 dana | skeniranja QR koda za 7 dana | skeniranja QR koda za 7 dana",
+        "leiturasTotal": "ukupno {total}",
+        "leiturasIndisponiveis": "trenutno nedostupno"
+      }
+    },
+    "passo": {
+      "calma": "Trenutno ništa ne čeka",
+      "pedidosAtrasados": "Odgovori na {total} zakasneli zahtev | Odgovori na {total} zakasnela zahteva | Odgovori na {total} zakasnelih zahteva",
+      "recepcao": "Primi {pet}, čeka u čekaonici",
+      "consulta": "Nazad na pregled: {pet}",
+      "pedidos": "Odgovori na {total} zahtev za termin | Odgovori na {total} zahteva za termin | Odgovori na {total} zahteva za termin",
+      "receber": "Dočekaj {pet} u {hora}",
+      "entregar": "Predaj {pet} u {hora}",
+      "rotina": "Pogledaj {total} zadatak koji kasni | Pogledaj {total} zadatka koja kasne | Pogledaj {total} zadataka koji kasne",
+      "documento": "Sredi dokumentaciju: {pet}",
+      "checkin": "Prijavi dolazak: {pet}",
+      "checkout": "Prijavi odlazak: {pet}"
+    },
+    "guia": {
+      "espacos": "Po jedan okvir za svaki prostor vaše firme, sa trenutnim brojevima. Svaki broj otvara ekran na kom se rešava; na dnu okvira je sledeći korak, ono što vredi uraditi prvo.",
+      "portal": "Vaša zarada od preporuka i skeniranja vašeg QR koda. Na dnu okvira je sledeći korak, ono što vredi uraditi prvo.",
+      "pauta": "Sve što čeka, u svim prostorima, od najozbiljnijeg ka manje ozbiljnom. Svaki red otvara ekran na kom se predmet rešava.",
+      "agenda": "Termini klinike i dolasci u hotel. Izaberite dan da vidite šta je zakazano; strelice se pomeraju po nedelju dana."
     }
   },
   "programas": {
@@ -1126,7 +1192,14 @@
           "label": "Beleške",
           "description": "Verifikovani zapisi Vaše firme za ovu posetu."
         }
-      }
+      },
+      "prazo": {
+        "ativo": "Pristup ističe za",
+        "ate": "do {data}",
+        "vinculado": "Povezano {quando}",
+        "encerrado": "Pristup zatvoren"
+      },
+      "semDadosClinicos": "Vlasnik u ovom pristupu nije podelio kliničke podatke, samo poruku."
     },
     "pet": {
       "castrado": "Sterilisan",
@@ -1252,7 +1325,9 @@
       "somenteLeitura": {
         "title": "Beleženje je blokirano",
         "body": "Možete da čitate karton ove posete, ali ne možete da unosite beleške dok je registracija suspendovana."
-      }
+      },
+      "quemAtendeu": "Ko je pružio uslugu",
+      "rodape": "Kada je zabeležite, beleška ide u karton ljubimca {pet} u aplikaciji vlasnika."
     },
     "especialidade": {
       "CLINICO_GERAL": "Opšta praksa",
@@ -1432,7 +1507,44 @@
         "limite": "U ovo čitanje staje samo {n} datoteka. | U ovo čitanje staju do {n} datoteke. | U ovo čitanje staje do {n} datoteka.",
         "pdfGrande": "PDF je veći od 10 MB. Pokušajte sa fotografijom recepta.",
         "imagemGrande": "Fotografija je veća od 5 MB i nakon smanjivanja. Pokušajte sa drugom."
+      },
+      "chamada": "Imate recept kao fotografiju ili PDF?"
+    },
+    "guia": {
+      "titulo": "Kako funkcioniše pristup",
+      "passo1": {
+        "titulo": "Vlasnik deli podatke",
+        "texto": "U aplikaciji PetJourney bira šta deli i pravi šestocifreni kod koji važi određeno vreme."
+      },
+      "passo2": {
+        "titulo": "Vi povezujete kod",
+        "texto": "U opciji Poveži kod unesite 6 cifara. Ljubimac se pojavljuje ovde sa rezimeom, porukom i podeljenim dokumentima."
+      },
+      "passo3": {
+        "titulo": "Vaša beleška se vraća u aplikaciju",
+        "texto": "Ono što zabeležite (usluga, recept, prilozi) stiže u karton ljubimca. Kada rok istekne, klinički podaci nestaju, a vaše beleške ostaju."
       }
+    },
+    "lista": {
+      "buscaPlaceholder": "Pretražite po imenu ljubimca",
+      "qualquer": "Bilo koji",
+      "periodoPlaceholder": "Izaberite datume",
+      "comProntuarioAjuda": "Samo pristupi sa dnevnikom ili dokumentima",
+      "colunas": {
+        "pet": "Ljubimac",
+        "vinculado": "Povezano",
+        "anotacoes": "Beleške",
+        "prontuario": "Podeljeno",
+        "expira": "Ističe za",
+        "encerrado": "Zatvoreno"
+      },
+      "soResumo": "Samo rezime",
+      "prazo": {
+        "dias": "{d} d {h} h",
+        "horas": "{h} h {m} min",
+        "minutos": "{m} min"
+      },
+      "oProximo": "sledeći koji ističe"
     }
   },
   "divulgacao": {
@@ -6412,7 +6524,17 @@
       "titulo": "Odjava gosta {pet}",
       "voltarALista": "Nazad na listu",
       "confiraDocumento": "Proverite dokument: {documento}",
-      "semDocumento": "Nema dokumenta u evidenciji. Tražite neki sa fotografijom."
+      "semDocumento": "Nema dokumenta u evidenciji. Tražite neki sa fotografijom.",
+      "nova": {
+        "pronto": "Sve je provereno. {pet} može da se preda.",
+        "falta": {
+          "frase": "Preostalo: {lista}.",
+          "ligar": "pozvati vlasnika",
+          "pesar": "izmeriti težinu",
+          "pertences": "proveriti {total} stvar | proveriti {total} stvari | proveriti {total} stvari",
+          "quem": "navesti ko preuzima"
+        }
+      }
     },
     "comum": {
       "cancelar": "Otkaži",
@@ -6540,7 +6662,100 @@
       "subtitulo": "Hotel",
       "titulo": "Boravak",
       "voltar": "Gosti",
-      "quemBusca": "Ko može da preuzme"
+      "quemBusca": "Ko može da preuzme",
+      "nova": {
+        "quando": "{dia}, {hora}",
+        "dados": {
+          "rotulo": "Boravak u brojevima",
+          "acomodacao": "Smeštaj",
+          "noites": "Noći",
+          "noitesDe": "{atual} od {total}",
+          "noitesReservadas": "{total} rezervisana noć | {total} rezervisane noći | {total} rezervisanih noći",
+          "hoje": "Danas",
+          "horaSaiu": "{hora}, otišao",
+          "horaAtrasou": "{hora}, kasni {tempo}",
+          "horaPrevista": "{hora}, planirano",
+          "horaRecebido": "{hora}, primio/la {nome}"
+        },
+        "diario": {
+          "ontem": "Juče",
+          "descricao": "Ono što bi vlasnik voleo da pročita. Odavde nastaje izveštaj."
+        },
+        "saida": {
+          "variacao": "Došao sa {entrada}; promena {variacao}",
+          "pertencesOk": "Stvari proverene",
+          "conferidos": "provereno {feitos} od {total}",
+          "receber": "Naplatiti {valor}",
+          "quitado": "Ništa za naplatu",
+          "saldoNoBalcao": "Naplaćuje se na pultu, pri predaji.",
+          "titulo": "Šta je preostalo pre predaje",
+          "tituloEncerrada": "Odlazak",
+          "descricao": "Odlazak planiran za {quando}.",
+          "feito": "Urađeno",
+          "noBalcao": "Na pultu",
+          "falta": "Preostalo",
+          "conferirNoBalcao": "Odjava proverava svaku stavku sa vlasnikom na pultu.",
+          "semPertences": "Ništa nije stiglo u torbi.",
+          "comObservacao": "Sa napomenom",
+          "naCasa": "U kući"
+        },
+        "atencao": {
+          "titulo": "Šta sada traži pažnju",
+          "remedioAtrasado": "Lek od {hora} kasni",
+          "remedioNaHora": "Lek od {hora}: sada je vreme",
+          "verMedicacao": "Vidi lekove",
+          "boletim": "Izveštaj zadržan do poziva",
+          "verBoletins": "Vidi izveštaje",
+          "saidaAtrasada": "Odlazak planiran u {hora}, kasni {tempo}",
+          "saiHoje": "Odlazi danas u {hora}",
+          "faltamParaSair": "Preostao je {total} korak pre predaje | Preostala su {total} koraka pre predaje | Preostalo je {total} koraka pre predaje",
+          "verSaida": "Vidi odlazak",
+          "rotinaAtrasada": "{total} zadatak iz rutine kasni | {total} zadatka iz rutine kasne | {total} zadataka iz rutine kasni",
+          "verRotina": "Vidi rutinu",
+          "calma": "Ništa sada ne traži pažnju.",
+          "calmaProxima": "Ništa sada ne traži pažnju. Sledeći zadatak: {tarefa} u {hora}."
+        },
+        "acao": {
+          "diario": "Upiši u dnevnik"
+        },
+        "aba": {
+          "rotina": "Rutina",
+          "diario": "Dnevnik",
+          "boletins": "Izveštaji",
+          "saida": "Odlazak"
+        },
+        "abasRotulo": "Rad sa gostom",
+        "naoEncontradaTitulo": "Boravak nije pronađen",
+        "naoEncontradaDescricao": "Link je možda pogrešan ili je boravak uklonjen.",
+        "encerradaEm": "Boravak zatvoren {quando}. Predato: {nome}.",
+        "rotina": {
+          "contagem": "danas rešeno {feitas} od {total}"
+        },
+        "medicacao": {
+          "titulo": "Lekovi tokom boravka",
+          "descricao": "Hotel ne propisuje lekove: nastavlja terapiju dobijenu spolja, uz recept kao potvrdu.",
+          "vazio": "Nema lekova tokom ovog boravka.",
+          "suspensa": "Obustavljeno",
+          "horarios": "Današnji termini",
+          "dosesDeHoje": "Današnje doze"
+        },
+        "ocorrencias": {
+          "descricao": "Ozbiljan događaj zahteva poziv vlasniku pre kraja smene.",
+          "veterinario": "Kod veterinara"
+        },
+        "boletins": {
+          "descricao": "Ono što ide vlasniku, sastavljeno iz dnevnika.",
+          "gerar": "Napravi izveštaj",
+          "retido": "Zadržan",
+          "rascunho": "Nacrt",
+          "enviadoAs": "poslato u {hora}",
+          "enviar": "Pošalji"
+        },
+        "ficha": {
+          "ate": "do {valor}",
+          "observacao": "Napomena"
+        }
+      }
     },
     "exigencia": {
       "antipulgas": "Tretman protiv buva",
@@ -7088,7 +7303,23 @@
       "titulo": "Pregled",
       "vazioDescricao": "Nijedan boravak nije naplaćen u izabranom rasponu.",
       "vazioTitulo": "Ništa u ovom periodu",
-      "vezes": "{total} put | {total} puta | {total} puta"
+      "vezes": "{total} put | {total} puta | {total} puta",
+      "nova": {
+        "ultimosDias": "{total} dana",
+        "ou": "ili",
+        "frase": "{receita} od {total} prodate noći, uz prosečnu popunjenost od {ocupacao}. | {receita} od {total} prodate noći, uz prosečnu popunjenost od {ocupacao}. | {receita} od {total} prodatih noći, uz prosečnu popunjenost od {ocupacao}.",
+        "numerosRotulo": "Brojevi za period",
+        "ocupacao": {
+          "descricao": "Koliko je kuće bilo zauzeto svake noći.",
+          "dica": "{dia}: {ocupadas} od {total} ({taxa})",
+          "frase": "Prosek {media}; najpunija noć bila je {dia}, sa {ocupadas} od {total}.",
+          "fimDeSemana": "Subota i nedelja",
+          "diaDeSemana": "Radni dani"
+        },
+        "perdas": {
+          "cancelamentoDetalhe": "najavljeno unapred, mesto je moglo ponovo da se proda"
+        }
+      }
     },
     "rotina": {
       "animais": "{total} životinja | {total} životinje | {total} životinja",
@@ -7944,6 +8175,38 @@
             "texto": "Koliko je današnjih zadataka završeno. Crveni deo trake je ono što kasni."
           }
         }
+      }
+    },
+    "casa": {
+      "resumo": {
+        "ocupadas": "{total} zauzet sada | {total} zauzeta sada | {total} zauzetih sada",
+        "livres": "{total} slobodan | {total} slobodna | {total} slobodnih"
+      },
+      "vista": {
+        "planta": "Raspored",
+        "plantaDescricao": "Jedan blok po hodniku, redom kako je kuća. Smeštaj otvara podatke, a lice otvara boravak."
+      },
+      "corredor": {
+        "ocupadas": "zauzeto {ocupadas} od {ativas}",
+        "cheio": "Nema mesta",
+        "novaEm": "Novi smeštaj u: {corredor}"
+      },
+      "ladrilho": {
+        "ate": "do {porte}",
+        "editar": "Izmeni {nome}",
+        "ocupada": "Zauzeto",
+        "livre": "Slobodno",
+        "livreAgora": "Slobodno sada",
+        "noCorredor": "u: {corredor}"
+      },
+      "editar": "Izmeni",
+      "temporada": {
+        "intervalo": "Od {de} do {ate}"
+      },
+      "vazioTitulo": "Kuća još nema hodnike",
+      "vazioDescricao": "Počnite od hodnika (Štenara A, Mačkarnik, Bašta) i u njega dodajte smeštaje.",
+      "dialogo": {
+        "emOperacao": "U radu. Da biste ga isključili, navedite razlog."
       }
     }
   },
