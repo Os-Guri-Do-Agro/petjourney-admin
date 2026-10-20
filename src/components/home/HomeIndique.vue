@@ -1,46 +1,41 @@
 <script setup lang="ts">
 /**
- * Indique e ganhe: o QR e o código de indicação, dentro do cartão de ganhos.
+ * Indique e ganhe: o código de indicação, o QR e as leituras dele.
  *
- * Mora no rodapé do cartão de ganhos, no slot `indicacao` de `HomeSaldo`: o dinheiro em cima e,
- * embaixo, o que o gera, sem um cartão só para isso. É uma faixa clara no mesmo feitio da faixa de
- * "pronto para sacar" logo acima: o QR pequeno e clicável, o rótulo, o código e a pílula de copiar.
+ * ## No Início
  *
- * ## O QR
+ * Uma seção calma, embaixo: o QR pequeno (clicável), o código em letra grande para ser ditado ao
+ * telefone e as duas ações de quem vai divulgar — copiar o código e abrir o painel com o resto.
+ * Sem cadastro aprovado ou sem o Programa de Afiliados ativo não há código, e a seção não aparece:
+ * o bloco do Portal, lá em cima, já diz em que pé está o programa.
  *
- * Branco puro, porque leitor de QR precisa de zona quieta. Clicado, abre um painel lateral com tudo
- * o que a indicação tem: o QR grande para mostrar ou imprimir, o código e o link para copiar, as
- * leituras do QR nos últimos dias e como a participação funciona. A pílula "Compartilhar código" do
- * cabeçalho abre o mesmo painel (`abrirQr`).
+ * ## O painel lateral
  *
- * O painel segue o acabamento da visão geral: fundo claro com o brilho de sálvia no topo, cantos
- * arredondados do lado de dentro da tela e o conteúdo em cartões brancos como os da página — o QR,
- * o link, as leituras e como funciona. Teleportado para o `body`, ele leva `.hc-tema` para ter as
- * mesmas variáveis da página.
+ * Tudo o que a indicação tem: o QR grande para mostrar ou imprimir, o código e o link para copiar,
+ * as leituras do QR nos últimos dias e como a participação funciona. Abre pelo QR, pelo botão da
+ * seção e pelo atalho "Compartilhar código" do bloco do Portal (`abrirQr`). Sem a imagem do QR
+ * (serviço de imagem fora), o painel abre do mesmo jeito, só sem o quadro.
  *
- * A dica de "ampliar" é irmã do botão, não filha: o botão do PrimeVue recorta o que passa da borda
- * (`overflow: hidden`), e a dica fica metade para fora, no canto.
+ * O QR fica sempre sobre papel claro (`--sobre-rail`, igual nos dois temas): leitor de QR precisa
+ * de zona quieta clara, e no tema escuro a folha é escura.
  *
- * Sem código (programa não ativo) nada aparece: o cartão de ganhos já diz em que pé está o programa.
+ * ## As leituras
+ *
+ * São pedidas junto com o código, e não só quando o painel abre: o bloco do Portal mostra quantas
+ * leituras houve na semana (`resumo`, exposto para a página).
  */
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
 import Skeleton from 'primevue/skeleton'
-import {
-  PhArrowsOutSimple,
-  PhCopy,
-  PhDownloadSimple,
-  PhInfo,
-  PhLink,
-  PhPrinter,
-  PhQrCode,
-} from '@phosphor-icons/vue'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
+import UiSecao from '@/components/ui/UiSecao.vue'
 import IndicacaoMetricasCard from '@/components/parceiro/IndicacaoMetricasCard.vue'
 import { useExportarQr } from '@/composables/useExportarQr'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   getPortalIndicacao,
@@ -56,7 +51,7 @@ const { ensureContext, parceiroQuery } = useParceiroPortal()
 const indicacao = ref<PortalIndicacao | null>(null)
 const carregando = ref(true)
 const falhou = ref(false)
-const qrAberto = ref(false)
+const painelAberto = ref(false)
 /** A URL do QR pode existir e a imagem não carregar (serviço de imagem fora): aí o quadro some. */
 const qrFalhou = ref(false)
 const imagemGrande = ref<HTMLImageElement | null>(null)
@@ -68,8 +63,11 @@ const linkLegivel = computed(() => link.value.replace(/^https?:\/\//, ''))
 const qrUrl = computed(() => indicacao.value?.qrImageUrl ?? '')
 const podeIndicar = computed(() => Boolean(indicacao.value?.podeIndicar))
 
-/** Há QR para mostrar — é o que decide se o quadro e a pílula do cabeçalho existem. */
+/** Há QR para mostrar — é o que decide se o quadro e o atalho "Compartilhar código" existem. */
 const temQr = computed(() => podeIndicar.value && Boolean(qrUrl.value) && !qrFalhou.value)
+
+/** A seção aparece carregando, com falha, ou com código; sem programa ativo, não. */
+const visivel = computed(() => carregando.value || falhou.value || podeIndicar.value)
 
 watch(qrUrl, () => {
   qrFalhou.value = false
@@ -92,6 +90,10 @@ async function carregar() {
     falhou.value = true
   } finally {
     carregando.value = false
+  }
+
+  if (podeIndicar.value && !metricas.value) {
+    void carregarMetricas()
   }
 }
 
@@ -119,9 +121,17 @@ function copiarLink() {
   return copiarTexto(link.value, t('inicio.indique.linkCopiado'))
 }
 
+/** O painel inteiro (link, leituras, como funciona), com ou sem a imagem do QR. */
+function abrirPainel() {
+  if (podeIndicar.value) {
+    painelAberto.value = true
+  }
+}
+
+/** O atalho "Compartilhar código": só existe com QR, e abre o mesmo painel. */
 function abrirQr() {
   if (temQr.value) {
-    qrAberto.value = true
+    painelAberto.value = true
   }
 }
 
@@ -146,10 +156,43 @@ async function carregarMetricas() {
   }
 }
 
-/* As leituras só são pedidas quando o painel abre: é informação de quem foi ver, não da página. */
-watch(qrAberto, (aberto) => {
+/* Abrir o painel depois de uma falha das leituras tenta de novo: é quem foi ver que precisa delas. */
+watch(painelAberto, (aberto) => {
   if (aberto && !metricas.value && !metricasCarregando.value) {
     void carregarMetricas()
+  }
+})
+
+function diaLocal(data: Date) {
+  const mes = String(data.getMonth() + 1).padStart(2, '0')
+  const dia = String(data.getDate()).padStart(2, '0')
+
+  return `${data.getFullYear()}-${mes}-${dia}`
+}
+
+/**
+ * O que o bloco do Portal mostra: as leituras dos últimos sete dias (hoje incluído) e o total.
+ * `null` enquanto carrega; `indisponivel` quando a fonte não respondeu.
+ */
+const resumo = computed(() => {
+  if (!metricas.value) {
+    return {
+      semana: null,
+      total: null,
+      indisponivel: !metricasCarregando.value && metricasErro.value !== null,
+    }
+  }
+
+  const inicio = new Date()
+  inicio.setDate(inicio.getDate() - 6)
+  const desde = diaLocal(inicio)
+
+  return {
+    semana: metricas.value.byDay
+      .filter((item) => item.day.slice(0, 10) >= desde)
+      .reduce((soma, item) => soma + item.count, 0),
+    total: metricas.value.scanCount,
+    indisponivel: false,
   }
 })
 
@@ -157,47 +200,59 @@ onMounted(() => {
   void carregar()
 })
 
-defineExpose({ abrirQr, temQr })
+defineExpose({ abrirQr, temQr, podeIndicar, visivel, resumo, carregando })
 </script>
 
 <template>
-  <div class="indicacao">
-    <!--
-      `contents`: sem faixa (programa não ativo), o componente não ocupa lugar na grade do cartão. O
-      comentário mora dentro da raiz: acima dela, o componente viraria fragmento.
-    -->
+  <UiSecao
+    v-if="visivel"
+    id="inicio-indique"
+    class="indique"
+    :titulo="t('inicio.indique.titulo')"
+    :descricao="isGuidanceVisible ? t('inicio.indique.descricao') : undefined"
+  >
+    <template v-if="podeIndicar" #acoes>
+      <RouterLink class="ui-mais indique__divulgacao" to="/parceiro/divulgacao">
+        {{ t('inicio.indique.abrir') }}
+        <i class="ph ph-arrow-right indique__seta" aria-hidden="true" />
+      </RouterLink>
+    </template>
+
     <div
       v-if="carregando"
-      class="faixa"
+      class="indique__folha ui-folha"
       role="status"
       aria-busy="true"
       :aria-label="t('inicio.indique.carregando')"
     >
-      <Skeleton width="3.5rem" height="3.5rem" border-radius="0.6rem" />
-      <span class="faixa__texto">
-        <Skeleton width="10rem" height="0.8rem" border-radius="6px" />
-        <Skeleton width="6rem" height="1.1rem" border-radius="6px" />
-      </span>
+      <div class="indique__linha">
+        <Skeleton width="64px" height="64px" border-radius="12px" />
+        <span class="indique__texto">
+          <Skeleton width="9rem" height="0.8rem" border-radius="6px" />
+          <Skeleton width="7rem" height="1.4rem" border-radius="6px" />
+        </span>
+      </div>
     </div>
 
-    <div v-else-if="falhou" class="faixa" role="alert">
-      <p class="faixa__falha">{{ t('inicio.indique.falhou') }}</p>
+    <div v-else-if="falhou" class="indique__folha ui-folha" role="alert">
+      <p class="indique__falha">{{ t('inicio.indique.falhou') }}</p>
       <Button
         type="button"
-        class="faixa__pilula"
-        :label="t('inicio.saldo.tentar')"
-        rounded
         size="small"
+        severity="secondary"
+        outlined
+        icon="ph ph-arrow-clockwise"
+        :label="t('inicio.saldo.tentar')"
         @click="carregar"
       />
     </div>
 
-    <!-- Gate: sem cadastro aprovado ou sem Programa de Afiliados ativo não há código nem QR. -->
-    <section v-else-if="podeIndicar" class="faixa" :aria-label="t('inicio.indique.titulo')">
-      <span v-if="temQr" class="faixa__quadro">
-        <Button
+    <div v-else class="indique__folha ui-folha">
+      <div class="indique__linha">
+        <button
+          v-if="temQr"
           type="button"
-          class="faixa__qr"
+          class="indique__qr"
           :aria-label="t('inicio.indique.ampliarQr')"
           :title="t('inicio.indique.ampliarQr')"
           @click="abrirQr"
@@ -205,337 +260,341 @@ defineExpose({ abrirQr, temQr })
           <img
             :src="qrUrl"
             alt=""
-            class="faixa__qr-imagem"
+            class="indique__qr-imagem"
             referrerpolicy="no-referrer"
             @error="qrFalhou = true"
           />
-        </Button>
-        <span class="faixa__dica" aria-hidden="true">
-          <PhArrowsOutSimple weight="bold" />
+          <span class="indique__ampliar" aria-hidden="true">
+            <i class="ph ph-arrows-out-simple" />
+          </span>
+        </button>
+        <span v-else class="indique__marca" aria-hidden="true">
+          <i class="ph ph-qr-code" />
         </span>
-      </span>
 
-      <span class="faixa__texto">
-        <span class="faixa__rotulo">{{ t('inicio.indique.seuCodigo') }}</span>
-        <!-- O código é dado, não enfeite: tabular e espaçado para ser ditado ao telefone. -->
-        <bdi class="faixa__codigo" dir="ltr">{{ codigo }}</bdi>
-      </span>
-
-      <Button
-        type="button"
-        class="faixa__pilula"
-        rounded
-        size="small"
-        :label="t('inicio.indique.copiar')"
-        @click="copiar"
-      >
-        <template #icon>
-          <PhCopy class="faixa__pilula-icone" weight="bold" aria-hidden="true" />
-        </template>
-      </Button>
-    </section>
-
-    <!--
-      O painel lateral da indicação: o QR grande para mostrar ou imprimir e, embaixo, o que só
-      interessa a quem foi ver — o link, as leituras do QR e como a participação funciona.
-    -->
-    <Drawer
-      v-model:visible="qrAberto"
-      position="right"
-      class="qr-painel hc-tema"
-      :style="{ width: 'min(100vw, 27rem)' }"
-    >
-      <template #header>
-        <h2 class="qr-painel__titulo">
-          <PhQrCode class="hc__icone" weight="duotone" aria-hidden="true" />
-          {{ t('inicio.indique.janelaTitulo') }}
-        </h2>
-      </template>
-
-      <div class="qr-painel__corpo">
-        <figure class="hc qr-grande">
-          <div class="qr-grande__quadro">
-            <img
-              ref="imagemGrande"
-              :src="qrUrl"
-              :alt="t('divulgacao.shareKit.qrAlt')"
-              class="qr-grande__imagem"
-              referrerpolicy="no-referrer"
-            />
-          </div>
-          <figcaption class="qr-grande__legenda">
-            <strong class="qr-grande__codigo">
-              <bdi dir="ltr">{{ codigo }}</bdi>
-            </strong>
-            <span>{{ t('inicio.indique.instrucao') }}</span>
-          </figcaption>
-
-          <div class="qr-painel__acoes">
-            <Button
-              type="button"
-              class="qr-pilula qr-pilula--cheia"
-              rounded
-              :label="t('inicio.indique.baixar')"
-              :loading="exportando"
-              @click="exportar"
-            >
-              <template #icon>
-                <PhDownloadSimple class="qr-pilula__icone" weight="bold" aria-hidden="true" />
-              </template>
-            </Button>
-            <Button
-              type="button"
-              class="qr-pilula"
-              rounded
-              :label="t('inicio.indique.imprimir')"
-              @click="imprimir(t('inicio.indique.instrucao'))"
-            >
-              <template #icon>
-                <PhPrinter class="qr-pilula__icone" weight="duotone" aria-hidden="true" />
-              </template>
-            </Button>
-            <Button
-              type="button"
-              class="qr-pilula"
-              rounded
-              :label="t('inicio.indique.copiar')"
-              @click="copiar"
-            >
-              <template #icon>
-                <PhCopy class="qr-pilula__icone" weight="duotone" aria-hidden="true" />
-              </template>
-            </Button>
-          </div>
-        </figure>
-
-        <section v-if="link" class="hc" aria-labelledby="qr-painel-link">
-          <h3 id="qr-painel-link" class="hc__titulo">
-            <PhLink class="hc__icone" weight="duotone" aria-hidden="true" />
-            {{ t('inicio.indique.link') }}
-          </h3>
-          <div class="qr-link">
-            <bdi class="qr-link__endereco" dir="ltr" :title="link">{{ linkLegivel }}</bdi>
-            <Button
-              type="button"
-              class="qr-pilula"
-              rounded
-              size="small"
-              :label="t('divulgacao.shareKit.copyLink')"
-              @click="copiarLink"
-            >
-              <template #icon>
-                <PhCopy class="qr-pilula__icone" weight="duotone" aria-hidden="true" />
-              </template>
-            </Button>
-          </div>
-        </section>
-
-        <IndicacaoMetricasCard
-          class="qr-painel__metricas"
-          :metricas="metricas"
-          :loading="metricasCarregando"
-          :erro="metricasErro"
-          @retry="carregarMetricas"
-        />
-
-        <section class="hc" aria-labelledby="qr-painel-como">
-          <h3 id="qr-painel-como" class="hc__titulo">
-            <PhInfo class="hc__icone" weight="duotone" aria-hidden="true" />
-            {{ t('inicio.indique.comoFunciona') }}
-          </h3>
-          <p class="qr-painel__texto">{{ t('inicio.indique.descricao') }}</p>
-          <p class="qr-painel__texto">{{ t('inicio.saldo.nota') }}</p>
-        </section>
+        <span class="indique__texto">
+          <span class="indique__rotulo">{{ t('inicio.indique.seuCodigo') }}</span>
+          <!-- O código é dado, não enfeite: algarismos de mesma largura, para ser ditado ao telefone. -->
+          <bdi class="indique__codigo ui-num" dir="ltr">{{ codigo }}</bdi>
+        </span>
       </div>
-    </Drawer>
-  </div>
+
+      <div class="indique__acoes">
+        <Button
+          type="button"
+          size="small"
+          severity="secondary"
+          outlined
+          icon="ph ph-copy"
+          :label="t('inicio.indique.copiar')"
+          @click="copiar"
+        />
+        <Button
+          type="button"
+          size="small"
+          severity="secondary"
+          text
+          :icon="temQr ? 'ph ph-qr-code' : 'ph ph-link'"
+          :label="t('inicio.indique.maisDoCodigo')"
+          @click="abrirPainel"
+        />
+      </div>
+    </div>
+  </UiSecao>
+
+  <!--
+    O painel lateral da indicação: o QR grande para mostrar ou imprimir e, embaixo, o que só
+    interessa a quem foi ver — o link, as leituras do QR e como a participação funciona.
+  -->
+  <Drawer
+    v-model:visible="painelAberto"
+    position="right"
+    class="qr-painel"
+    :style="{ width: 'min(100vw, 27rem)' }"
+  >
+    <template #header>
+      <h2 class="qr-painel__titulo">
+        <i class="ph ph-qr-code" aria-hidden="true" />
+        {{ t('inicio.indique.janelaTitulo') }}
+      </h2>
+    </template>
+
+    <div class="qr-painel__corpo">
+      <figure class="qr-grande ui-folha">
+        <div v-if="temQr" class="qr-grande__quadro">
+          <img
+            ref="imagemGrande"
+            :src="qrUrl"
+            :alt="t('divulgacao.shareKit.qrAlt')"
+            class="qr-grande__imagem"
+            referrerpolicy="no-referrer"
+          />
+        </div>
+        <figcaption class="qr-grande__legenda">
+          <strong class="qr-grande__codigo ui-num">
+            <bdi dir="ltr">{{ codigo }}</bdi>
+          </strong>
+          <span>{{ t('inicio.indique.instrucao') }}</span>
+        </figcaption>
+
+        <div class="qr-painel__acoes">
+          <Button
+            v-if="temQr"
+            type="button"
+            icon="ph ph-download-simple"
+            :label="t('inicio.indique.baixar')"
+            :loading="exportando"
+            @click="exportar"
+          />
+          <Button
+            v-if="temQr"
+            type="button"
+            severity="secondary"
+            outlined
+            icon="ph ph-printer"
+            :label="t('inicio.indique.imprimir')"
+            @click="imprimir(t('inicio.indique.instrucao'))"
+          />
+          <Button
+            type="button"
+            severity="secondary"
+            outlined
+            icon="ph ph-copy"
+            :label="t('inicio.indique.copiar')"
+            @click="copiar"
+          />
+        </div>
+      </figure>
+
+      <section v-if="link" class="qr-painel__secao" aria-labelledby="qr-painel-link">
+        <h3 id="qr-painel-link" class="qr-painel__subtitulo">
+          <i class="ph ph-link" aria-hidden="true" />
+          {{ t('inicio.indique.link') }}
+        </h3>
+        <div class="qr-link ui-folha">
+          <bdi class="qr-link__endereco" dir="ltr" :title="link">{{ linkLegivel }}</bdi>
+          <Button
+            type="button"
+            size="small"
+            severity="secondary"
+            text
+            icon="ph ph-copy"
+            :label="t('divulgacao.shareKit.copyLink')"
+            @click="copiarLink"
+          />
+        </div>
+      </section>
+
+      <IndicacaoMetricasCard
+        class="qr-painel__metricas"
+        :metricas="metricas"
+        :loading="metricasCarregando"
+        :erro="metricasErro"
+        @retry="carregarMetricas"
+      />
+
+      <section class="qr-painel__secao" aria-labelledby="qr-painel-como">
+        <h3 id="qr-painel-como" class="qr-painel__subtitulo">
+          <i class="ph ph-info" aria-hidden="true" />
+          {{ t('inicio.indique.comoFunciona') }}
+        </h3>
+        <p class="qr-painel__texto">{{ t('inicio.indique.descricao') }}</p>
+        <p class="qr-painel__texto">{{ t('inicio.saldo.nota') }}</p>
+      </section>
+    </div>
+  </Drawer>
 </template>
 
 <style scoped>
-.indicacao {
-  display: contents;
+.indique {
+  --qr-papel: var(--sobre-rail);
 }
 
-/* A faixa do rodapé, no feitio da faixa de "pronto para sacar": fundo claro, raio igual. */
-.faixa {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem 0.9rem;
-  padding: 0.65rem 0.75rem 0.65rem 0.65rem;
-  border-radius: 0.8rem;
-  background: var(--hc-fundo);
-}
-
-.faixa__quadro {
-  position: relative;
-  flex-shrink: 0;
-}
-
-/* Branco puro por exigência do leitor (zona quieta); o contorno fino o separa da faixa. */
-.faixa__qr.p-button {
+.indique__folha {
   display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.indique__linha {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* O QR sobre papel claro nos dois temas, com a dica de ampliar no canto. */
+.indique__qr {
+  position: relative;
+  display: grid;
+  width: 64px;
+  height: 64px;
+  flex: none;
   place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  padding: 0.25rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 0.6rem;
-  background: #ffffff;
-  transition: border-color 150ms ease-out;
+  padding: 5px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+  background: var(--qr-papel);
+  cursor: zoom-in;
+  transition: border-color var(--pj-tempo-curto) ease;
 }
 
-.faixa__qr.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca);
-  background: #ffffff;
+.indique__qr:hover {
+  border-color: var(--portal);
 }
 
-.faixa__qr.p-button:focus-visible,
-.faixa__pilula.p-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
+.indique__qr:focus-visible {
+  outline: 2px solid var(--portal);
   outline-offset: 2px;
-  box-shadow: none;
 }
 
-.faixa__qr-imagem {
+.indique__qr-imagem {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-/* A dica de ampliar, metade para fora no canto: irmã do botão para não ser recortada por ele. */
-.faixa__dica {
+.indique__ampliar {
   position: absolute;
-  inset-block-end: -0.3rem;
-  inset-inline-end: -0.3rem;
+  inset-block-end: -6px;
+  inset-inline-end: -6px;
   display: grid;
+  width: 20px;
+  height: 20px;
   place-items: center;
-  width: 1.2rem;
-  height: 1.2rem;
   border-radius: 999px;
-  background: var(--hc-degrade-botao);
-  box-shadow: 0 0 0 2px var(--hc-fundo);
-  color: var(--hc-sobre-marca);
-  font-size: 0.625rem;
-  pointer-events: none;
+  background: var(--portal);
+  box-shadow: 0 0 0 2px var(--superficie);
+  color: var(--superficie);
+  font-size: 11px;
 }
 
-.faixa__texto {
+/* Sem a imagem do QR: o ícone no lugar dele, na cor do Portal. */
+.indique__marca {
   display: grid;
-  flex: 1 1 8rem;
-  gap: 0.2rem;
+  width: 64px;
+  height: 64px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
+  font-size: 30px;
+}
+
+.indique__texto {
+  display: grid;
   min-width: 0;
+  gap: 4px;
 }
 
-.faixa__rotulo {
-  color: var(--hc-tinta-2);
-  font-size: 0.75rem;
-  font-weight: 500;
+.indique__rotulo {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
-.faixa__codigo {
-  color: var(--hc-tinta);
-  font-size: 1.125rem;
-  font-weight: 800;
+.indique__codigo {
+  overflow: hidden;
+  color: var(--tinta);
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
   line-height: 1.1;
-  letter-spacing: 0.1em;
-  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.faixa__falha {
-  flex: 1 1 12rem;
+.indique__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.indique__falha {
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.8125rem;
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
-/* A pílula clara de borda fina: a mesma do "Ver extrato" em forma de botão. */
-.faixa__pilula.p-button {
-  gap: 0.4rem;
-  min-height: 2.1rem;
-  padding: 0 0.95rem;
-  border: 1px solid var(--hc-borda);
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  transition: background-color 150ms ease-out;
+.indique__folha[role='alert'] {
+  justify-items: start;
 }
 
-.faixa__pilula.p-button:not(:disabled):hover {
-  border-color: var(--hc-borda);
-  background: var(--hc-linha);
-  color: var(--hc-tinta);
+/* A altura das setas da agenda ao lado: os dois títulos ficam na mesma linha. */
+.indique__divulgacao {
+  min-height: 36px;
 }
 
-.faixa__pilula-icone {
-  width: 0.85rem;
-  height: 0.85rem;
-  color: var(--hc-marca);
+.indique__seta {
+  font-size: 14px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .faixa__qr.p-button,
-  .faixa__pilula.p-button {
-    transition: none;
-  }
+[dir='rtl'] .indique__seta {
+  scale: -1 1;
 }
 
 /* ------------------------------------------------------------------ painel lateral
- * O conteúdo é deste componente, então o estilo com escopo chega nele mesmo teleportado. A casca
- * do painel (fundo, cantos, cabeçalho) fica no bloco sem escopo lá embaixo.
+ * O conteúdo é deste componente, então o estilo com escopo chega nele mesmo teleportado. A casca do
+ * painel (fundo, cabeçalho, fechar) fica no bloco sem escopo lá embaixo.
  */
 .qr-painel__titulo {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 10px;
   margin: 0;
-  color: var(--hc-tinta);
-  font-size: 1.0625rem;
-  font-weight: 650;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 600;
   letter-spacing: -0.01em;
+}
+
+.qr-painel__titulo i {
+  color: var(--portal-tinta);
+  font-size: 22px;
 }
 
 .qr-painel__corpo {
   /*
    * As leituras do QR são o painel da tela de Divulgação, que lê as cores de lá (`--div-*`). Aqui
-   * elas vêm da home: o bloco vira um cartão branco como os outros, e os degraus dele, o cinza claro.
+   * elas vêm do Trilha: o bloco vira uma folha como as outras, e o destaque, a cor do Portal.
    */
-  --div-card: var(--hc-cartao);
-  --div-surface: var(--hc-fundo);
-  --div-line: var(--hc-borda);
-  --div-text: var(--hc-tinta);
-  --div-muted: var(--hc-tinta-2);
-  --div-faint: var(--hc-tinta-3);
-  --div-primary: var(--hc-marca);
-  --div-primary-strong: var(--hc-marca-forte);
+  --div-card: var(--superficie);
+  --div-surface: var(--superficie-2);
+  --div-line: var(--linha);
+  --div-text: var(--tinta);
+  --div-muted: var(--tinta-2);
+  --div-faint: var(--tinta-3);
+  --div-primary: var(--portal);
+  --div-primary-strong: var(--portal-tinta);
 
   display: grid;
-  gap: 0.9rem;
+  gap: 20px;
 }
 
 .qr-painel__corpo .qr-painel__metricas {
-  border-radius: 1rem;
-  box-shadow: var(--hc-sombra);
+  border-radius: 16px;
+  box-shadow: none;
 }
 
-/* O cartão do QR: o quadro branco, o código grande, a instrução e as ações, tudo centrado. */
+/* O QR grande, o código e as ações, tudo centrado. */
 .qr-grande {
+  display: grid;
   justify-items: center;
-  gap: 0.9rem;
+  gap: 16px;
   margin: 0;
-  padding-block: 1.4rem;
+  padding: 22px 18px;
   text-align: center;
 }
 
 .qr-grande__quadro {
   display: grid;
   place-items: center;
-  padding: 0.85rem;
-  border: 1px solid var(--hc-borda);
-  border-radius: 1.1rem;
-  background: #ffffff;
+  padding: 14px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--sobre-rail);
 }
 
 .qr-grande__imagem {
@@ -548,126 +607,76 @@ defineExpose({ abrirQr, temQr })
 
 .qr-grande__legenda {
   display: grid;
-  gap: 0.35rem;
+  gap: 6px;
   max-width: 19rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.45;
 }
 
 .qr-grande__codigo {
-  color: var(--hc-tinta);
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  font-variant-numeric: tabular-nums;
+  color: var(--tinta);
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
 }
 
 .qr-painel__acoes {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
-/* As pílulas da página: branca de borda fina e, a principal, cheia em degradê. */
-.qr-pilula.p-button {
-  --qr-pilula-sombra: 0 1px 2px rgb(20 32 28 / 5%);
+.qr-painel__secao {
+  display: grid;
+  gap: 10px;
+}
 
-  gap: 0.4rem;
-  min-height: 2.25rem;
-  padding: 0 1rem;
-  border: 1px solid var(--hc-borda);
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
+.qr-painel__subtitulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15px;
   font-weight: 600;
-  box-shadow: var(--qr-pilula-sombra);
-  transition:
-    background-color 150ms ease-out,
-    border-color 150ms ease-out,
-    box-shadow 150ms ease-out;
 }
 
-.qr-pilula.p-button:not(:disabled):hover {
-  border-color: var(--hc-marca);
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
+.qr-painel__subtitulo i {
+  color: var(--tinta-2);
+  font-size: 18px;
 }
 
-.qr-pilula.p-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
-  outline-offset: 2px;
-  box-shadow: var(--qr-pilula-sombra);
-}
-
-.qr-pilula--cheia.p-button,
-.qr-pilula--cheia.p-button:not(:disabled):hover {
-  border-color: transparent;
-  background: var(--hc-degrade-botao);
-  color: var(--hc-sobre-marca);
-}
-
-.qr-pilula--cheia.p-button {
-  --qr-pilula-sombra: 0 6px 16px -8px var(--hc-marca-sombra);
-}
-
-.qr-pilula--cheia.p-button:not(:disabled):hover {
-  --qr-pilula-sombra: 0 10px 22px -8px var(--hc-marca-sombra-forte);
-}
-
-.qr-pilula__icone {
-  width: 1rem;
-  height: 1rem;
-  color: var(--hc-marca);
-}
-
-.qr-pilula--cheia .qr-pilula__icone {
-  color: currentColor;
-}
-
-.qr-pilula.p-button-sm {
-  min-height: 2rem;
-  padding: 0 0.85rem;
-  font-size: 0.8125rem;
-}
-
-/* O link numa faixa clara, como a do código no cartão de ganhos. */
 .qr-link {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem 0.75rem;
-  padding: 0.6rem 0.6rem 0.6rem 0.85rem;
-  border-radius: 0.8rem;
-  background: var(--hc-fundo);
+  gap: 6px 12px;
+  padding: 8px 8px 8px 14px;
 }
 
 .qr-link__endereco {
   flex: 1 1 8rem;
   min-width: 0;
   overflow: hidden;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--hc-tinta);
-  font-size: 0.8125rem;
-  font-weight: 500;
 }
 
 .qr-painel__texto {
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.55;
 }
 
-.qr-painel__texto + .qr-painel__texto {
-  margin-block-start: -0.5rem;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .qr-pilula.p-button {
+  .indique__qr {
     transition: none;
   }
 }
@@ -676,63 +685,43 @@ defineExpose({ abrirQr, temQr })
 <style>
 /*
  * A casca do painel lateral da indicação. O PrimeVue a teleporta para o `body`, fora do alcance do
- * estilo com escopo: por isso mora aqui, presa à classe própria do painel. A largura vai na prop
- * `style` do painel, que vence a regra do tema para o lado direito.
- *
- * Os cantos arredondados são só os de dentro da tela (o lado de início, à esquerda; no árabe o
- * painel abre do outro lado e os cantos acompanham): os outros encostam na borda da janela. O fundo é o da visão geral, com o brilho de sálvia no topo.
+ * estilo com escopo: por isso mora aqui, presa à classe própria do painel. Os tokens do Trilha
+ * valem no `body` (a raiz leva `.trilha`), então os dois temas seguem sozinhos.
  */
 .qr-painel.p-drawer {
-  overflow: hidden;
   border: 0;
-  border-start-start-radius: 1.25rem;
-  border-end-start-radius: 1.25rem;
-  background:
-    radial-gradient(34rem 16rem at 100% -4rem, rgb(120 196 178 / 26%), transparent 70%),
-    var(--hc-fundo);
-  box-shadow: -24px 0 60px -28px rgb(20 32 28 / 40%);
-  color: var(--hc-tinta);
-}
-
-.app-dark .qr-painel.p-drawer {
-  background:
-    radial-gradient(34rem 16rem at 100% -4rem, rgb(108 201 181 / 12%), transparent 70%),
-    var(--hc-fundo);
-  box-shadow: -24px 0 60px -28px rgb(0 0 0 / 70%);
+  border-inline-start: 1px solid var(--linha);
+  background: var(--fundo);
+  box-shadow: var(--sombra-3);
+  color: var(--tinta);
+  font-family: var(--font-texto);
 }
 
 .qr-painel .p-drawer-header {
-  padding: 1.15rem 1.25rem 0.6rem;
+  padding: 20px 20px 12px;
 }
 
-/* O fechar como as setas do carrossel: redondo, branco, borda fina. */
 .qr-painel .p-drawer-close-button {
-  width: 2.1rem;
-  height: 2.1rem;
-  border: 1px solid var(--hc-borda);
-  background: var(--hc-cartao);
-  color: var(--hc-tinta-2);
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--tinta-2);
 }
 
 .qr-painel .p-drawer-close-button:hover {
-  border-color: var(--hc-marca);
-  background: var(--hc-marca-clara);
-  color: var(--hc-tinta);
+  background: var(--superficie-2);
+  color: var(--tinta);
 }
 
 .qr-painel .p-drawer-close-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
+  outline: 2px solid var(--portal);
   outline-offset: 2px;
   box-shadow: none;
 }
 
 .qr-painel .p-drawer-content {
-  padding: 0.5rem 1.25rem 1.5rem;
-  /* Rola sem barra à vista, como a página que abre o painel. */
-  scrollbar-width: none;
-}
-
-.qr-painel .p-drawer-content::-webkit-scrollbar {
-  display: none;
+  padding: 4px 20px 28px;
 }
 </style>

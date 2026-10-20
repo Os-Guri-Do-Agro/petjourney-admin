@@ -1,27 +1,31 @@
 <script setup lang="ts">
 /**
- * A pauta: o que está parado em cada módulo, e para onde ir resolver.
+ * O que pede ação, na empresa inteira: o que está parado em cada espaço, e para onde ir resolver.
  *
  * ## A forma
  *
- * O "My Tasks" do Prodify, na paleta da casa: cartão branco com título e ícone de linha, um grupo
- * por módulo com o chip em caixa alta e a contagem ao lado, recolhível; dentro, a tabela com as
- * colunas Assunto, Gravidade e Onde — o "Name / Priority / Due date" de lá. Cada linha tem o
- * quadradinho na cor do grupo, o assunto, o selo de prioridade e a tela aonde ela leva.
+ * A mesma lista do Hoje da Clínica e do Hoje do Hotel (`UiPauta`): uma linha por assunto, da mais
+ * grave para a menos, com a marca e o selo da gravidade e a tela aonde ela leva. Aqui ela vem
+ * agrupada por espaço — Clínica, Hotel —, cada grupo com o ponto e o ícone na cor do espaço e a
+ * contagem ao lado; o grupo recolhe para quem quer olhar só um.
  *
- * O cálculo mora em `usePautaDaHome`, que o cabeçalho da página também lê.
+ * No alto, a hora da conferência e o "conferir de novo". Quando todos os espaços falham juntos
+ * (quase sempre a rede), um aviso só, com uma ação só.
+ *
+ * O cálculo mora em `usePautaDaHome`, que a frase do alto da página também lê; a régua é a dos
+ * selos da barra.
  */
 import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
-import { PhCheckCircle, PhClipboardText, PhWarningCircle } from '@phosphor-icons/vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
 
-import IconeDaCasa from '@/components/common/IconeDaCasa.vue'
+import type { LinhaDaTabela } from '@/components/home/pauta-tabela'
+import UiPauta from '@/components/ui/UiPauta.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
+import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 
-import PautaTabela from './PautaTabela.vue'
-import { usePautaDaHome } from './usePautaDaHome'
+import { usePautaDaHome, type ModuloDaPauta } from './usePautaDaHome'
 
 const { t } = useI18n()
 const {
@@ -51,136 +55,125 @@ function alternar(id: string) {
   recolhidos.value = proximo
 }
 
-/** A cor do grupo: ciano para a Clínica, lilás para o Hotel — como o chip de estado do Prodify. */
-function corDoGrupo(id: string) {
-  return id === 'hotel' ? 'lilas' : 'ciano'
+const total = computed(() => modulos.value.reduce((soma, modulo) => soma + modulo.linhas.length, 0))
+
+const ICONE_DO_ESPACO: Record<ModuloDaPauta['id'], string> = {
+  clinica: 'ph ph-stethoscope',
+  hotel: 'ph ph-bed',
+}
+
+/** A linha do espaço no formato da lista do sistema: a tela aonde ela leva vai junto, traduzida. */
+function linhasDe(modulo: ModuloDaPauta): LinhaDaTabela[] {
+  return modulo.linhas.map((linha) => ({
+    id: linha.id,
+    to: linha.to,
+    frase: linha.frase,
+    detalhe: linha.detalhe,
+    tom: linha.tom,
+    onde: t(`inicio.pauta.onde.${linha.id}`),
+  }))
 }
 </script>
 
 <template>
-  <section v-if="visivel" class="hc pauta" aria-labelledby="home-pauta-titulo">
-    <header class="hc__cabeca">
-      <h2 id="home-pauta-titulo" class="hc__titulo">
-        <PhClipboardText class="hc__icone" aria-hidden="true" />
-        {{ t('inicio.pauta.titulo') }}
-      </h2>
+  <UiSecao
+    v-if="visivel"
+    id="inicio-pauta"
+    class="pauta-da-casa"
+    :titulo="t('inicio.pauta.titulo')"
+    :contagem="!algumModuloCarregando && total > 0 ? total : null"
+    :descricao="isGuidanceVisible ? t('inicio.guia.pauta') : undefined"
+  >
+    <template #acoes>
+      <span class="conferencia" aria-live="polite">
+        <template v-if="conferindo || algumModuloCarregando">
+          {{ t('inicio.pauta.conferindo') }}
+        </template>
+        <time v-else-if="conferidoEm">{{
+          t('inicio.pauta.conferido', { hora: conferidoEm })
+        }}</time>
+      </span>
+      <Button
+        type="button"
+        class="conferencia__botao"
+        :class="{ 'conferencia__botao--girando': conferindo }"
+        severity="secondary"
+        text
+        rounded
+        icon="ph ph-arrow-clockwise"
+        :disabled="conferindo"
+        :aria-label="t('inicio.pauta.reconferir')"
+        :title="t('inicio.pauta.reconferir')"
+        @click="reconferir"
+      />
+    </template>
 
-      <div class="hc__ferramentas">
-        <p class="pauta__conferido" aria-live="polite">
-          <template v-if="conferindo || algumModuloCarregando">
-            {{ t('inicio.pauta.conferindo') }}
-          </template>
-          <time v-else-if="conferidoEm">{{
-            t('inicio.pauta.conferido', { hora: conferidoEm })
-          }}</time>
-        </p>
-        <Button
-          type="button"
-          class="pauta__ferramenta"
-          severity="secondary"
-          text
-          rounded
-          size="small"
-          :disabled="conferindo"
-          :aria-label="t('inicio.pauta.reconferir')"
-          :title="t('inicio.pauta.reconferir')"
-          @click="reconferir"
-        >
-          <template #icon>
-            <IconeDaCasa
-              nome="recarregar"
-              class="pauta__ferramenta-icone"
-              :class="{ 'pauta__ferramenta-icone--girando': conferindo }"
-            />
-          </template>
-        </Button>
-      </div>
-    </header>
-
-    <!-- Todos os módulos falharam juntos: um aviso só, com uma ação só. -->
-    <div v-if="avisoGeral" class="aviso" role="status">
-      <PhWarningCircle class="aviso__icone" weight="fill" aria-hidden="true" />
+    <!-- Todos os espaços falharam juntos: um aviso só, com uma ação só. -->
+    <div v-if="avisoGeral" class="aviso ui-folha" role="status">
+      <i class="ph ph-warning-circle aviso__icone" aria-hidden="true" />
       <p class="aviso__texto">{{ avisoGeral }}</p>
       <Button
         type="button"
-        class="aviso__acao"
-        severity="secondary"
-        text
         size="small"
+        severity="secondary"
+        outlined
         :label="t('inicio.pauta.tentar')"
         :disabled="conferindo"
         @click="reconferir"
       />
     </div>
 
-    <section
-      v-for="modulo in modulos"
-      :key="modulo.id"
-      class="grupo"
-      :style="{ '--grupo-cor': `var(--hc-${corDoGrupo(modulo.id)}-tinta)` }"
-      :aria-labelledby="`home-pauta-${modulo.id}`"
-    >
-      <header class="grupo__cabeca">
-        <Button
-          type="button"
-          class="grupo__alternar"
-          severity="secondary"
-          text
-          rounded
-          size="small"
-          :aria-expanded="!estaRecolhido(modulo.id)"
-          :aria-controls="`home-pauta-${modulo.id}-corpo`"
-          :aria-label="
-            estaRecolhido(modulo.id)
-              ? t('inicio.pauta.expandir', { modulo: modulo.titulo })
-              : t('inicio.pauta.recolher', { modulo: modulo.titulo })
-          "
-          @click="alternar(modulo.id)"
-        >
-          <template #icon>
-            <IconeDaCasa
-              nome="expandir"
-              peso="bold"
-              class="grupo__caret"
+    <div class="grupos">
+      <section
+        v-for="modulo in modulos"
+        :key="modulo.id"
+        class="grupo"
+        :class="`pj-lugar--${modulo.id}`"
+        :aria-labelledby="`inicio-pauta-${modulo.id}`"
+      >
+        <h3 :id="`inicio-pauta-${modulo.id}`" class="grupo__titulo">
+          <button
+            type="button"
+            class="grupo__alternar"
+            :aria-expanded="!estaRecolhido(modulo.id)"
+            :aria-controls="`inicio-pauta-${modulo.id}-corpo`"
+            :title="
+              estaRecolhido(modulo.id)
+                ? t('inicio.pauta.expandir', { modulo: modulo.titulo })
+                : t('inicio.pauta.recolher', { modulo: modulo.titulo })
+            "
+            @click="alternar(modulo.id)"
+          >
+            <span class="grupo__icone" aria-hidden="true"
+              ><i :class="ICONE_DO_ESPACO[modulo.id]"
+            /></span>
+            <span class="grupo__nome">{{ modulo.titulo }}</span>
+            <span v-if="modulo.carregado" class="ui-contagem">{{ modulo.linhas.length }}</span>
+            <i
+              class="ph ph-caret-down grupo__caret"
               :class="{ 'grupo__caret--recolhido': estaRecolhido(modulo.id) }"
+              aria-hidden="true"
             />
-          </template>
-        </Button>
-
-        <h3 :id="`home-pauta-${modulo.id}`" class="grupo__titulo">
-          <span class="hc-chip" :class="`hc--${corDoGrupo(modulo.id)}`">{{ modulo.titulo }}</span>
-          <span v-if="modulo.carregado && modulo.linhas.length > 0" class="grupo__contagem">
-            •
-            {{ t('inicio.pauta.contagem', { total: modulo.linhas.length }, modulo.linhas.length) }}
-          </span>
+          </button>
         </h3>
 
-        <RouterLink class="hc__link grupo__atalho" :to="modulo.atalho.to">
-          {{ modulo.atalho.rotulo }}
-          <IconeDaCasa nome="irPara" class="grupo__seta" />
-        </RouterLink>
-      </header>
-
-      <!--
-        Recolher é visual e também de foco: `inert` tira do Tab e do leitor de tela o que ficou
-        fechado, senão o teclado entraria em linhas que ninguém vê.
-      -->
-      <div
-        :id="`home-pauta-${modulo.id}-corpo`"
-        class="grupo__corpo"
-        :class="{ 'grupo__corpo--recolhido': estaRecolhido(modulo.id) }"
-        :inert="estaRecolhido(modulo.id)"
-      >
-        <div class="grupo__dobra">
-          <div v-if="modulo.carregado && avisoDe(modulo)" class="aviso" role="status">
-            <PhWarningCircle class="aviso__icone" weight="fill" aria-hidden="true" />
+        <!--
+          Recolher tira do Tab e do leitor de tela o que ficou fechado (`v-show` esconde de todos):
+          o teclado não entra em linhas que ninguém vê.
+        -->
+        <div
+          v-show="!estaRecolhido(modulo.id)"
+          :id="`inicio-pauta-${modulo.id}-corpo`"
+          class="grupo__corpo"
+        >
+          <div v-if="modulo.carregado && avisoDe(modulo)" class="aviso ui-folha" role="status">
+            <i class="ph ph-warning-circle aviso__icone" aria-hidden="true" />
             <p class="aviso__texto">{{ avisoDe(modulo) }}</p>
             <Button
               type="button"
-              class="aviso__acao"
-              severity="secondary"
-              text
               size="small"
+              severity="secondary"
+              outlined
               :label="t('inicio.pauta.tentar')"
               :disabled="conferindo"
               @click="modulo.recarregar()"
@@ -189,220 +182,193 @@ function corDoGrupo(id: string) {
 
           <div
             v-if="!modulo.carregado"
-            class="grupo__esqueleto"
+            class="grupo__esqueleto ui-folha"
             role="status"
             aria-busy="true"
             :aria-label="t('inicio.pauta.carregandoAria')"
           >
-            <Skeleton v-for="n in 3" :key="n" width="100%" height="2.6rem" border-radius="0.5rem" />
+            <div v-for="n in 3" :key="n" class="grupo__esqueleto-linha">
+              <Skeleton shape="circle" size="36px" />
+              <Skeleton width="60%" height="14px" border-radius="6px" />
+            </div>
           </div>
 
-          <PautaTabela
-            v-else-if="modulo.linhas.length > 0"
-            :linhas="
-              modulo.linhas.map((linha) => ({ ...linha, onde: t(`inicio.pauta.onde.${linha.id}`) }))
-            "
-          />
+          <UiPauta v-else-if="modulo.linhas.length > 0" :linhas="linhasDe(modulo)" />
 
           <!-- Calma só com conferência completa. Parcial ou falha nunca chegam aqui. -->
-          <p v-else-if="modulo.situacao === 'ok'" class="grupo__calma">
-            <PhCheckCircle class="grupo__calma-icone" weight="fill" aria-hidden="true" />
-            {{ t('inicio.pauta.calma') }}
+          <p v-else-if="modulo.situacao === 'ok'" class="ui-folha ui-vazio calma">
+            <i class="ph ph-check-circle" aria-hidden="true" />
+            <strong>{{ t('inicio.pauta.calma') }}</strong>
           </p>
         </div>
-      </div>
-    </section>
-  </section>
+      </section>
+    </div>
+  </UiSecao>
 </template>
 
 <style scoped>
-.pauta {
-  gap: 0.75rem;
-}
-
-.pauta__conferido {
-  margin: 0;
-  color: var(--hc-tinta-3);
-  font-size: 0.8125rem;
+.conferencia {
+  color: var(--tinta-3);
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 
-.pauta__ferramenta.p-button {
-  inline-size: 2rem;
-  block-size: 2rem;
-  color: var(--hc-tinta-3);
-}
-
-.pauta__ferramenta.p-button:not(:disabled):hover {
-  background: var(--hc-linha);
-  color: var(--hc-tinta);
-}
-
-.pauta__ferramenta-icone {
-  width: 1.05rem;
-  height: 1.05rem;
+.conferencia__botao.p-button {
+  width: 36px;
+  height: 36px;
+  color: var(--tinta-2);
 }
 
 /* Gira só enquanto confere: o movimento diz "estou olhando agora", e para quando terminou. */
-.pauta__ferramenta-icone--girando {
-  animation: pauta-girar 900ms linear infinite;
+.conferencia__botao--girando :deep(.p-button-icon) {
+  animation: conferencia-girar 900ms linear infinite;
 }
 
-@keyframes pauta-girar {
+@keyframes conferencia-girar {
   to {
     rotate: 360deg;
   }
 }
 
-/* ------------------------------------------------------------------ aviso */
-
-.aviso {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.5rem;
-  padding: 0.6rem 0.8rem;
-  border-radius: 0.75rem;
-  background: var(--hc-pessego-fundo);
+.grupos {
+  display: grid;
+  gap: 20px;
 }
-
-.aviso__icone {
-  flex-shrink: 0;
-  width: 1.1rem;
-  height: 1.1rem;
-  color: var(--hc-pessego-tinta);
-}
-
-.aviso__texto {
-  flex: 1 1 14rem;
-  margin: 0;
-  color: var(--hc-tinta);
-  font-size: 0.8125rem;
-  line-height: 1.45;
-}
-
-.aviso__acao.p-button {
-  color: var(--hc-marca-forte);
-  font-weight: 700;
-}
-
-/* ------------------------------------------------------------------ grupo */
 
 .grupo {
   display: grid;
-}
-
-.grupo + .grupo {
-  margin-block-start: 0.35rem;
-}
-
-.grupo__cabeca {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-height: 2.5rem;
-}
-
-.grupo__alternar.p-button {
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
-  margin-inline-start: -0.35rem;
-  color: var(--hc-tinta-3);
-}
-
-.grupo__alternar.p-button:not(:disabled):hover {
-  background: var(--hc-linha);
-  color: var(--hc-tinta);
-}
-
-.grupo__alternar.p-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
-  outline-offset: 1px;
-}
-
-.grupo__caret {
-  width: 0.9rem;
-  height: 0.9rem;
-  rotate: 180deg;
-  transition: rotate 180ms ease-out;
-}
-
-.grupo__caret--recolhido {
-  rotate: 0deg;
+  gap: 10px;
 }
 
 .grupo__titulo {
-  display: inline-flex;
-  flex: 1;
-  align-items: center;
-  gap: 0.5rem;
   margin: 0;
   font-size: inherit;
   font-weight: inherit;
 }
 
-.grupo__contagem {
-  color: var(--hc-tinta-3);
-  font-size: 0.8125rem;
-  font-weight: 500;
+.grupo__alternar {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: -6px;
+  padding: 0 8px 0 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.grupo__seta {
-  width: 0.95rem;
-  height: 0.95rem;
+.grupo__alternar:hover {
+  background: var(--superficie-2);
 }
 
-[dir='rtl'] .grupo__seta {
-  scale: -1 1;
+.grupo__alternar:focus-visible {
+  outline: 2px solid var(--pj-lugar);
+  outline-offset: 1px;
 }
 
-/* Recolher em altura, sem medir nada: a linha da grade vai de 1fr a 0fr. */
+.grupo__icone {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--pj-lugar);
+  color: var(--superficie);
+  font-size: 14px;
+}
+
+.grupo__caret {
+  color: var(--tinta-3);
+  font-size: 14px;
+  transition: rotate var(--pj-tempo-medio) var(--pj-curva-chega);
+}
+
+.grupo__caret--recolhido {
+  rotate: -90deg;
+}
+
+[dir='rtl'] .grupo__caret--recolhido {
+  rotate: 90deg;
+}
+
+/*
+ * Linha sem rosto (o assunto é de vários pacientes): o ícone dela ganha a cor do espaço, para o
+ * espaço estar na linha também, e não só no título do grupo.
+ */
+.grupo :deep(.pauta__sem-rosto) {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+}
+
 .grupo__corpo {
   display: grid;
-  grid-template-rows: 1fr;
-  transition: grid-template-rows 200ms ease-out;
-}
-
-.grupo__corpo--recolhido {
-  grid-template-rows: 0fr;
-}
-
-.grupo__dobra {
-  display: grid;
-  gap: 0.5rem;
-  min-height: 0;
-  overflow: hidden;
+  gap: 10px;
 }
 
 .grupo__esqueleto {
   display: grid;
-  gap: 0.4rem;
-  padding-block: 0.25rem;
+  overflow: hidden;
 }
 
-.grupo__calma {
-  display: inline-flex;
+.grupo__esqueleto-linha {
+  display: flex;
+  min-height: 60px;
   align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0.6rem 0.25rem;
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
+  gap: 14px;
+  padding: 10px 20px;
 }
 
-.grupo__calma-icone {
-  width: 1.05rem;
-  height: 1.05rem;
-  color: var(--hc-verde-tinta);
+.grupo__esqueleto-linha + .grupo__esqueleto-linha {
+  border-top: 1px solid var(--linha);
+}
+
+.aviso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px 16px;
+  border-color: color-mix(in oklab, var(--atencao) 35%, var(--linha));
+  background: color-mix(in oklab, var(--atencao-fundo) 60%, var(--superficie));
+}
+
+.aviso__icone {
+  color: var(--atencao-tinta);
+  font-size: 20px;
+}
+
+.aviso__texto {
+  flex: 1 1 16rem;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.calma {
+  grid-auto-flow: column;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+}
+
+.calma i {
+  color: var(--ok-tinta);
+  font-size: 20px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .grupo__corpo,
   .grupo__caret {
     transition: none;
   }
 
-  .pauta__ferramenta-icone--girando {
+  .conferencia__botao--girando :deep(.p-button-icon) {
     animation: none;
   }
 }

@@ -3,7 +3,7 @@ import type { RouteLocationRaw } from 'vue-router'
 import type { TomDePendencia } from '@/features/clinico/composables/useClinicoPendencias'
 import type { PetSpecies } from '@/features/clinico/data/types'
 
-/** Uma linha de `PautaTabela`: o assunto, de que ele é feito, a gravidade e onde se resolve. */
+/** Uma linha de `UiPauta`: o assunto, de que ele é feito, a gravidade e onde se resolve. */
 export type LinhaDaTabela = {
   id: string
   to: RouteLocationRaw

@@ -1,5 +1,6 @@
 /**
- * Os dados da Linha do dia: a agenda de hoje da clínica e as chegadas e saídas de hoje do hotel.
+ * O dia da casa no Início: a agenda de hoje da clínica e as chegadas e saídas de hoje do hotel.
+ * Os blocos da Clínica e do Hotel e a agenda da semana leem daqui.
  *
  * ## Por que nada aqui é importado no topo
  *
@@ -157,7 +158,7 @@ export type FaixaDoHotel = {
   hospedes: number
   /** A rotina de hoje somada de todas as estadias: feitas de quantas. */
   rotina: { feitas: number; total: number }
-  /** Acomodações ocupadas hoje de quantas operando. `null` quando a grade não respondeu. */
+  /** Acomodações ocupadas hoje de quantas operando (o bloco do Hotel). `null` sem a grade. */
   ocupacao: { ocupadas: number; operando: number } | null
 }
 
@@ -288,7 +289,7 @@ export function useLinhaDoDia(opcoes: { clinica: () => boolean; hotel: () => boo
           rota: `/hotel/hospedagem/${hospede.hospedagem.id}`,
         }))
 
-      /* A ocupação é um extra do Andamento: se a grade não responder, o resto do hotel continua. */
+      /* A ocupação é um extra do bloco do Hotel: se a grade não responder, o resto continua. */
       let ocupacao: FaixaDoHotel['ocupacao'] = null
 
       try {
@@ -415,8 +416,8 @@ export function useLinhaDoDia(opcoes: { clinica: () => boolean; hotel: () => boo
 export type DiaDaCasa = ReturnType<typeof useLinhaDoDia>
 
 /**
- * A página carrega o dia uma vez e empresta aos cartões: a Agenda, o Andamento e os Módulos leem a
- * mesma agenda e o mesmo hotel, em vez de cada um pedir tudo de novo.
+ * A página carrega o dia uma vez e empresta às partes: os blocos da Clínica e do Hotel e a agenda da
+ * semana leem a mesma agenda e o mesmo hotel, em vez de cada um pedir tudo de novo.
  */
 export const CHAVE_DO_DIA: InjectionKey<DiaDaCasa> = Symbol('dia-da-casa')
 

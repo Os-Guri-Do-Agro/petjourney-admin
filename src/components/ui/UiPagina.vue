@@ -168,7 +168,7 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
           <Button
             v-else-if="guia"
             type="button"
-            :icon="isGuidanceVisible ? 'ph ph-info-fill' : 'ph ph-info'"
+            :icon="isGuidanceVisible ? 'ph ph-eye-slash' : 'ph ph-info'"
             :label="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
             severity="secondary"
             text

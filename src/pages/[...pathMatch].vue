@@ -1,42 +1,32 @@
 <script setup lang="ts">
+/**
+ * A página que não existe.
+ *
+ * Mora fora da moldura (sem a barra lateral), então ela mesma precisa dizer onde a pessoa está e
+ * como voltar: a marca no alto, uma frase do que aconteceu, o endereço que foi aberto (quem copiou
+ * um link errado vê o erro na hora) e as duas saídas — o Início, cheia, e voltar para onde estava.
+ *
+ * O desenho é a trilha do design system: pegadas que andam e param numa interrogação. É o único
+ * enfeite da página, e ele também diz o que aconteceu.
+ */
+import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
 import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
-import AuthButton from '@/components/auth/AuthButton.vue'
 import { isAuthenticated } from '@/service/auth/auth-session'
-import { currentColors, isDarkMode } from '@/theme/color-mode'
+import { isDarkMode } from '@/theme/color-mode'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 
-const logoIconUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
-const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
+const logo = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
 
-const homePath = computed(() =>
-  isAuthenticated() ? getDefaultLandingPath() : '/auth/login',
-)
-
-const pageStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--nf-bg': colors.dashboard.bg,
-    '--nf-card': colors.dashboard.surface,
-    '--nf-surface': colors.dashboard.surfaceSoft,
-    '--nf-line': colors.dashboard.line,
-    '--nf-text': colors.dashboard.text,
-    '--nf-muted': colors.dashboard.muted,
-    '--nf-faint': colors.dashboard.faint,
-    '--nf-primary': colors.vet.primary,
-    '--nf-primary-soft': colors.vet.secondary,
-    '--nf-primary-strong': colors.dashboard.primaryStrong,
-    '--nf-shadow-rgb': colors.auth.shadowRgb,
-  }
-})
+const homePath = computed(() => (isAuthenticated() ? getDefaultLandingPath() : '/auth/login'))
 
 function goBack() {
   if (window.history.length > 1) {
@@ -49,135 +39,255 @@ function goBack() {
 </script>
 
 <template>
-  <main class="not-found" :style="pageStyle">
-    <div class="not-found__glow" aria-hidden="true" />
+  <main class="perdido">
+    <div class="perdido__miolo">
+      <RouterLink class="perdido__marca" :to="homePath">
+        <span class="perdido__pata" aria-hidden="true">
+          <img src="/pata-clara.png" alt="" />
+        </span>
+        <img class="perdido__logo" :src="logo" :alt="t('errors.notFound.brandAlt')" />
+      </RouterLink>
 
-    <section class="not-found__card">
-      <header class="not-found__brand">
-        <div class="not-found__logo-badge" aria-hidden="true">
-          <img :src="logoIconUrl" alt="" />
+      <section class="perdido__folha" aria-labelledby="perdido-titulo">
+        <!-- As pegadas andam e param: a trilha acaba aqui. -->
+        <div class="trilha" aria-hidden="true">
+          <i
+            v-for="passo in 5"
+            :key="passo"
+            class="ph ph-paw-print trilha__pegada"
+            :style="{ '--passo': passo }"
+          />
+          <span class="trilha__fim"><i class="ph ph-question" /></span>
         </div>
-        <img
-          class="not-found__logo-wordmark"
-          :src="logoSemPata"
-          :alt="t('errors.notFound.brandAlt')"
-        />
-      </header>
 
-      <p class="not-found__code" aria-hidden="true">404</p>
+        <span class="ui-selo ui-selo--contorno perdido__selo">{{ t('errors.notFound.selo') }}</span>
+        <h1 id="perdido-titulo" class="perdido__titulo">{{ t('errors.notFound.title') }}</h1>
+        <p class="perdido__texto">{{ t('errors.notFound.body') }}</p>
 
-      <div class="not-found__copy">
-        <h1>{{ t('errors.notFound.title') }}</h1>
-        <p>
-          {{ t('errors.notFound.body') }}
+        <p class="perdido__endereco">
+          <span>{{ t('errors.notFound.endereco') }}</span>
+          <bdi class="perdido__caminho" dir="ltr">{{ route.path }}</bdi>
         </p>
-      </div>
 
-      <div class="not-found__actions">
-        <AuthButton :to="homePath" full-width>
-          {{ t('errors.notFound.goHome') }}
-        </AuthButton>
-        <AuthButton full-width variant="secondary" @click="goBack">
-          {{ t('errors.notFound.back') }}
-        </AuthButton>
-      </div>
-    </section>
+        <div class="perdido__acoes">
+          <Button
+            :as="RouterLink"
+            :to="homePath"
+            icon="ph ph-house"
+            :label="t('errors.notFound.goHome')"
+          />
+          <Button
+            type="button"
+            severity="secondary"
+            outlined
+            icon="ph ph-arrow-left"
+            class="perdido__voltar"
+            :label="t('errors.notFound.back')"
+            @click="goBack"
+          />
+        </div>
+      </section>
+    </div>
   </main>
 </template>
 
 <style scoped>
-.not-found {
-  position: relative;
+.perdido {
   display: grid;
-  min-height: 100vh;
   min-height: 100dvh;
   place-items: center;
-  overflow: hidden;
-  padding: 1.5rem;
+  padding: 32px 16px;
   background:
     radial-gradient(
-      120% 90% at 50% -10%,
-      color-mix(in srgb, var(--nf-primary) 12%, transparent),
-      transparent 55%
+      60rem 28rem at 50% -8rem,
+      color-mix(in oklab, var(--musgo-fundo) 70%, transparent),
+      transparent 70%
     ),
-    var(--nf-bg);
-  color: var(--nf-text);
+    var(--fundo);
+  color: var(--tinta);
+  font-family: var(--font-texto);
 }
 
-.not-found__glow {
-  position: absolute;
-  inset: auto -10% 10% -10%;
-  height: 18rem;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--nf-primary-soft) 35%, transparent);
-  filter: blur(72px);
-  pointer-events: none;
-}
-
-.not-found__card {
-  position: relative;
-  z-index: 1;
+.perdido__miolo {
   display: grid;
-  gap: 1.35rem;
-  width: min(28rem, 100%);
-  padding: 1.75rem 1.6rem 1.5rem;
-  border: 1px solid var(--nf-line);
-  border-radius: 1.25rem;
-  background: color-mix(in srgb, var(--nf-card) 92%, transparent);
-  box-shadow: 0 24px 48px rgb(var(--nf-shadow-rgb) / 0.08);
+  width: min(30rem, 100%);
+  justify-items: center;
+  gap: 24px;
 }
 
-.not-found__brand {
-  display: flex;
+/* A marca: a pata no verde da barra (aqui não há barra) e o nome ao lado. */
+.perdido__marca {
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
+  border-radius: 12px;
+  text-decoration: none;
 }
 
-.not-found__logo-badge {
+.perdido__marca:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: 4px;
+}
+
+.perdido__pata {
   display: grid;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 40px;
+  height: 40px;
   place-items: center;
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--nf-primary) 18%, var(--nf-card));
+  border-radius: 12px;
+  background: var(--rail);
 }
 
-.not-found__logo-badge img {
-  width: 1.35rem;
-  height: 1.35rem;
+.perdido__pata img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
-.not-found__logo-wordmark {
-  width: 7.5rem;
+.perdido__logo {
+  width: 132px;
   height: auto;
 }
 
-.not-found__code {
-  margin: 0;
-  font-size: clamp(3.5rem, 12vw, 4.75rem);
-  font-weight: 800;
-  line-height: 0.9;
-  letter-spacing: -0.06em;
-  color: color-mix(in srgb, var(--nf-primary) 22%, var(--nf-faint));
+.perdido__folha {
+  display: grid;
+  width: 100%;
+  justify-items: center;
+  gap: 10px;
+  padding: 32px 28px 28px;
+  border: 1px solid var(--linha);
+  border-radius: 20px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+  text-align: center;
 }
 
-.not-found__copy h1 {
-  margin: 0 0 0.45rem;
-  font-size: clamp(1.35rem, 3vw, 1.65rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+/* ------------------------------------------------------------------ a trilha */
+
+.trilha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.not-found__copy p {
+/* As pegadas alternam de lado, como um bicho andando, e vão sumindo até parar. */
+.trilha__pegada {
+  color: var(--salvia);
+  font-size: 24px;
+  opacity: calc(1 - (var(--passo) - 1) * 0.16);
+  rotate: 90deg;
+  translate: 0 -7px;
+  animation: pegada-chega 420ms var(--pj-curva-chega) both;
+  animation-delay: calc(var(--passo) * 110ms);
+}
+
+.trilha__pegada:nth-child(even) {
+  translate: 0 7px;
+}
+
+[dir='rtl'] .trilha__pegada {
+  rotate: -90deg;
+}
+
+.trilha__fim {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  margin-inline-start: 8px;
+  border: 1.5px dashed var(--salvia);
+  border-radius: 50%;
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  font-size: 20px;
+  animation: pegada-chega 420ms var(--pj-curva-chega) both;
+  animation-delay: 700ms;
+}
+
+@keyframes pegada-chega {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+/* ------------------------------------------------------------------ o texto */
+
+.perdido__selo {
+  font-family: var(--font-dados);
+}
+
+.perdido__titulo {
+  margin: 4px 0 0;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.perdido__texto {
+  max-width: 40ch;
   margin: 0;
-  color: var(--nf-muted);
-  font-size: 0.94rem;
+  color: var(--tinta-2);
+  font-size: 15px;
   line-height: 1.55;
 }
 
-.not-found__actions {
+.perdido__endereco {
   display: grid;
-  gap: 0.65rem;
-  margin-top: 0.25rem;
+  max-width: 100%;
+  justify-items: center;
+  gap: 4px;
+  margin: 8px 0 0;
+  color: var(--tinta-3);
+  font-size: 12.5px;
+}
+
+.perdido__caminho {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perdido__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.perdido__acoes :deep(a.p-button) {
+  text-decoration: none;
+}
+
+[dir='rtl'] .perdido__voltar :deep(.p-button-icon) {
+  scale: -1 1;
+}
+
+@media (max-width: 480px) {
+  .perdido__folha {
+    padding: 28px 18px 22px;
+  }
+
+  .perdido__acoes {
+    display: grid;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trilha__pegada,
+  .trilha__fim {
+    animation: none;
+  }
 }
 </style>

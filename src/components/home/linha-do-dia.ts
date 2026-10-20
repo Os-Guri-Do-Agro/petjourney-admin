@@ -1,7 +1,7 @@
 /**
  * A conta do dia da casa na visão geral — sem Vue e sem repositório.
  *
- * O andamento, os módulos e a agenda leem o mesmo dia: os atendimentos da clínica e as chegadas e
+ * Os blocos dos espaços e a agenda da semana leem o mesmo dia: os atendimentos da clínica e as chegadas e
  * saídas do hotel. Tudo o que decide **em que estado** cada coisa está e **qual** vem primeiro mora
  * aqui, para ser testado com um dia montado no teste, e não com o relógio de verdade.
  *

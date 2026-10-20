@@ -1,56 +1,59 @@
 <script setup lang="ts">
 /**
- * Visão geral: o que está parado agora, como anda o dia e quanto a parceria rendeu.
+ * Início — a primeira tela de quem entra no portal: a empresa inteira, de uma vez.
  *
- * ## A forma
+ * Uma empresa parceira pode ter a Clínica, o Hotel e o Portal de indicações. Cada espaço tem o
+ * próprio Hoje; o Início responde à pergunta de antes deles: **como está tudo agora, e por onde eu
+ * começo?**
  *
- * O Prodify na paleta da casa, a pedido. Fundo claro com uma grade fina que some descendo e dois
- * brilhos de sálvia no topo; a data pequena, o "Olá" e um resumo em degradê com as pílulas de ação
- * na mesma linha. Embaixo, duas colunas de cartões brancos:
+ * ## A forma (redesenho total, 19/10/2026)
  *
- * - à esquerda, o que pede ação (o "My Tasks"), o andamento do dia (o "My Goals") e, fechando a
- *   coluna, o cartão da marca, que cresce até a altura da coluna da direita;
- * - à direita, os módulos (o "Projects"), a agenda da semana (o "Calendar") e os ganhos, com o
- *   QR e o código de indicação ao lado do valor.
+ * 1. **A saudação e uma frase de estado.** "Boa tarde, Carla" e, embaixo, a data e o que pede
+ *    atenção em todos os espaços — "2 assuntos urgentes pedem sua atenção hoje: 1 na Clínica e 1
+ *    no Hotel."
+ * 2. **Um bloco por espaço que a empresa tem**, na cor dele (Clínica maré, Hotel lavanda, Portal
+ *    mel), com os números do agora — cada um leva à tela onde se resolve — e o próximo passo. Quem
+ *    não tem o Hotel não vê bloco de Hotel: os blocos são os espaços da barra (`useEspacos`).
+ * 3. **O que pede ação**, a lista do sistema (`UiPauta`), agrupada por espaço.
+ * 4. **O resto, calmo, embaixo**: a agenda da semana, o código de indicação e a marca.
  *
- * Em uma coluna só, a esquerda vem primeiro: quem opera no tablet vê o trabalho antes do resto.
- * Conta sem clínica nem hotel não tem pauta, andamento nem agenda: ganhos de um lado, módulos do
- * outro.
+ * A grade de módulos que existia saiu: a barra lateral já é o mapa. As ações rápidas do alto
+ * ("Agenda de hoje", "Mapa de vagas", "Compartilhar código") foram para o título de cada bloco,
+ * no espaço a que pertencem.
  *
  * ## O dia
  *
- * Andamento, módulos e agenda leem o mesmo dia da casa — a agenda da clínica e o hotel de hoje.
- * Ele é carregado uma vez aqui e entregue aos cartões por `provide`, para que três cartões não
- * peçam três vezes a mesma coisa nem mostrem números de momentos diferentes.
+ * Os blocos da Clínica e do Hotel e a agenda da semana leem o mesmo dia da casa — a agenda da
+ * clínica e o hotel de hoje. Ele é carregado uma vez aqui e entregue por `provide`, para que três
+ * partes não peçam três vezes a mesma coisa nem mostrem números de momentos diferentes.
  */
-import Button from 'primevue/button'
-import { PhCalendarBlank, PhMapTrifold, PhQrCode } from '@phosphor-icons/vue'
-import { computed, onMounted, onUnmounted, provide, ref, type Component } from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
 
-import '@/components/home/home-card.css'
 import HomeAgenda from '@/components/home/HomeAgenda.vue'
-import HomeAndamento from '@/components/home/HomeAndamento.vue'
+import HomeEspacoClinica from '@/components/home/HomeEspacoClinica.vue'
+import HomeEspacoHotel from '@/components/home/HomeEspacoHotel.vue'
+import HomeEspacoPortal from '@/components/home/HomeEspacoPortal.vue'
 import HomeIndique from '@/components/home/HomeIndique.vue'
 import HomeMarca from '@/components/home/HomeMarca.vue'
-import HomeModulos from '@/components/home/HomeModulos.vue'
 import HomePauta from '@/components/home/HomePauta.vue'
-import HomeSaldo from '@/components/home/HomeSaldo.vue'
+import type { IndicacaoNoBloco } from '@/components/home/espaco-da-home'
 import { CHAVE_DO_DIA, useLinhaDoDia } from '@/components/home/useLinhaDoDia'
 import { usePautaDaHome } from '@/components/home/usePautaDaHome'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
-import PartnerPageFrame from '@/components/parceiro/PartnerPageFrame.vue'
-import { useAppNavigation } from '@/composables/useAppNavigation'
+import UiPagina from '@/components/ui/UiPagina.vue'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+import { useEspacos } from '@/navegacao/espacos'
 import { getAuthUser } from '@/service/auth/auth-session'
+import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 
 const { t, locale } = useI18n()
 const { store, ensureContext } = useParceiroPortal()
-const { hasClinicalProfile, hasHotelProfile } = useAppNavigation()
-const { resumo } = usePautaDaHome()
+const { espacos, hasClinicalProfile, hasHotelProfile } = useEspacos()
+const perfil = useUsuarioPerfilStore()
+const { resumo, modulos } = usePautaDaHome()
 
 provide(
   CHAVE_DO_DIA,
@@ -65,46 +68,59 @@ const indique = ref<InstanceType<typeof HomeIndique> | null>(null)
 const now = ref(new Date())
 let clockId: ReturnType<typeof setInterval> | undefined
 
-/**
- * O nome só entra quando o contexto chegou. Antes disso a store devolve "Parceiro" fixo em
- * português — nos seis idiomas —, e o título trocava de "Olá, Parceiro" para o nome real diante
- * de quem olhava.
- */
-const greetingTitle = computed(() => {
-  if (store.semAcessoParceiro) {
-    const nome = getAuthUser()?.nome?.trim()
-    return nome ? t('inicio.greeting.helloName', { name: nome }) : t('inicio.greeting.hello')
-  }
+const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 
-  if (store.loadState !== 'ready' || !store.dashboard) {
-    return t('inicio.greeting.hello')
-  }
+/** Com clínica ou hotel ligados, a página ganha a pauta e a agenda da semana. */
+const temModulos = computed(() => hasClinicalProfile.value || hasHotelProfile.value)
 
-  return t('inicio.greeting.helloName', { name: store.parceiroNome })
-})
-
-const loadError = computed(() =>
-  store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
+/** Os blocos são os espaços da barra, na mesma ordem: Clínica, Hotel, Portal. */
+const blocos = computed(() =>
+  espacos.value.filter(
+    (espaco) => espaco.id === 'clinica' || espaco.id === 'hotel' || espaco.id === 'portal',
+  ),
 )
 
+// ------------------------------------------------------------------------------ a saudação
+
 /**
- * Curta, como o "Mon, July 7" de lá. Só a primeira letra sobe: `text-transform: capitalize` fazia
- * "Qui., 17 De Set." e, no sérvio, mês com maiúscula (erro nos dois idiomas).
+ * A pessoa, pelo primeiro nome: a empresa já está no alto da barra. O nome vem do perfil (ou do
+ * token, antes de o perfil carregar) — nunca do "Parceiro" provisório da store, que trocava diante
+ * de quem olhava.
  */
-const todayLabel = computed(() => {
-  const intlLocale = INTL_LOCALE[locale.value as Locale]
-  const label = now.value.toLocaleDateString(intlLocale, {
-    weekday: 'short',
+const primeiroNome = computed(() => {
+  const nome = (perfil.nome || getAuthUser()?.nome || '').trim()
+
+  return nome.split(/\s+/)[0] ?? ''
+})
+
+const periodo = computed(() => {
+  const hora = now.value.getHours()
+
+  if (hora >= 5 && hora < 12) return 'manha'
+  if (hora >= 12 && hora < 18) return 'tarde'
+
+  return 'noite'
+})
+
+const saudacao = computed(() =>
+  primeiroNome.value
+    ? t(`inicio.saudacao.${periodo.value}Com`, { nome: primeiroNome.value })
+    : t(`inicio.saudacao.${periodo.value}`),
+)
+
+const dataDeHoje = computed(() => {
+  const rotulo = now.value.toLocaleDateString(intl.value, {
+    weekday: 'long',
     day: 'numeric',
     month: 'long',
   })
 
-  return label.charAt(0).toLocaleUpperCase(intlLocale) + label.slice(1)
+  return rotulo.charAt(0).toLocaleUpperCase(intl.value) + rotulo.slice(1)
 })
 
 /**
- * A segunda linha da saudação, em degradê: o que a pauta diz, em uma frase. É a "How can I help
- * you today?" do Prodify, só que com conteúdo — um número que a pessoa confere logo abaixo.
+ * A frase de estado: o que a pauta diz, em uma frase, e — com Clínica e Hotel ligados — em qual
+ * espaço está. "2 assuntos urgentes pedem sua atenção hoje: 1 na Clínica e 1 no Hotel."
  */
 const fraseDoResumo = computed(() => {
   const atual = resumo.value
@@ -114,69 +130,59 @@ const fraseDoResumo = computed(() => {
       return t('inicio.resumo.portal')
     case 'conferindo':
       return t('inicio.resumo.conferindo')
-    case 'urgentes':
-      return t('inicio.resumo.urgentes', { total: atual.total }, atual.total)
-    case 'esperando':
-      return t('inicio.resumo.esperando', { total: atual.total }, atual.total)
     case 'falhou':
       return t('inicio.resumo.falhou')
-    default:
+    case 'emDia':
       return t('inicio.resumo.emDia')
+    default:
+      break
   }
+
+  const frase = t(`inicio.resumo.${atual.estado}`, { total: atual.total }, atual.total)
+
+  if (modulos.value.length < 2) {
+    return frase
+  }
+
+  const partes = modulos.value.flatMap((modulo) => {
+    const total = modulo.linhas.filter(
+      (linha) => atual.estado === 'esperando' || linha.tom === 'risco',
+    ).length
+
+    return total > 0 ? [t(`inicio.resumo.em.${modulo.id}`, { total }, total)] : []
+  })
+
+  const onde = new Intl.ListFormat(intl.value, { type: 'conjunction' }).format(partes)
+
+  return t('inicio.resumo.comOnde', { frase, onde })
 })
 
-type Acao = {
-  id: string
-  rotulo: string
-  icone: Component
-  to?: string
-  executar?: () => void
+const loadError = computed(() =>
+  store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
+)
+
+// ------------------------------------------------------------------------------ o Portal
+
+/** O que a seção do código sabe e o bloco do Portal mostra (leituras do QR, se há QR). */
+const indicacao = computed<IndicacaoNoBloco | null>(() =>
+  indique.value
+    ? {
+        carregando: indique.value.carregando,
+        podeIndicar: indique.value.podeIndicar,
+        temQr: indique.value.temQr,
+        resumo: indique.value.resumo,
+      }
+    : null,
+)
+
+function compartilhar() {
+  indique.value?.abrirQr()
 }
 
-/**
- * As pílulas de ação: o que se começa daqui, não o menu de novo. Só entra o que a conta pode
- * fazer — agenda com a clínica ligada, mapa de vagas com o hotel, compartilhar quando há QR — e a
- * primeira é cheia, em degradê, como o "✦ Ask AI" do Prodify.
- */
-const acoes = computed<Acao[]>(() => {
-  const lista: Acao[] = []
-
-  if (hasClinicalProfile.value) {
-    lista.push({
-      id: 'agenda',
-      rotulo: t('inicio.acoes.agenda'),
-      icone: PhCalendarBlank,
-      to: '/veterinario/agenda',
-    })
-  }
-
-  if (hasHotelProfile.value) {
-    lista.push({
-      id: 'mapa',
-      rotulo: t('inicio.acoes.mapa'),
-      icone: PhMapTrifold,
-      to: '/hotel/mapa',
-    })
-  }
-
-  if (indique.value?.temQr) {
-    lista.push({
-      id: 'compartilhar',
-      rotulo: t('inicio.acoes.compartilhar'),
-      icone: PhQrCode,
-      executar: () => indique.value?.abrirQr(),
-    })
-  }
-
-  return lista
-})
-
-/** Com clínica ou hotel ligados, a página ganha a pauta, o andamento e a agenda. */
-const temModulos = computed(() => hasClinicalProfile.value || hasHotelProfile.value)
+/** O código aparece embaixo só para quem tem o programa ativo; sem ele, a marca fica sozinha. */
+const comIndicacao = computed(() => indique.value?.visivel ?? true)
 
 onMounted(() => {
-  /* A visão geral rola sem barra à vista (`home-card.css`); a classe sai quando a página sai. */
-  document.documentElement.classList.add('sem-barra-de-rolagem')
   void ensureContext()
   clockId = setInterval(() => {
     now.value = new Date()
@@ -184,8 +190,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  document.documentElement.classList.remove('sem-barra-de-rolagem')
-
   if (clockId) {
     clearInterval(clockId)
   }
@@ -193,304 +197,177 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <PartnerPageFrame
-    class="inicio-pagina"
-    :title="greetingTitle"
-    :loading="false"
-    :error="loadError"
-    :no-partner-access="store.semAcessoParceiro"
-    block-when-suspended
-    guidance
-    @retry="ensureContext(true)"
+  <UiPagina
+    :titulo="saudacao"
+    :erro="loadError"
+    :sem-acesso-de-parceiro="store.semAcessoParceiro"
+    bloquear-se-suspenso
+    guia
+    @tentar-de-novo="ensureContext(true)"
   >
-    <template #cabecalho>
-      <div class="saudacao">
-        <time class="saudacao__data" :datetime="now.toISOString()">{{ todayLabel }}</time>
-        <h1 class="saudacao__titulo">{{ greetingTitle }}</h1>
-
-        <div class="saudacao__linha">
-          <p class="saudacao__resumo" aria-live="polite">{{ fraseDoResumo }}</p>
-
-          <nav v-if="acoes.length > 0" class="acoes" :aria-label="t('inicio.acoes.rotulo')">
-            <template v-for="(acao, indice) in acoes" :key="acao.id">
-              <RouterLink
-                v-if="acao.to"
-                class="acao"
-                :class="{ 'acao--cheia': indice === 0 }"
-                :to="acao.to"
-              >
-                <component
-                  :is="acao.icone"
-                  class="acao__icone"
-                  :weight="indice === 0 ? 'fill' : 'duotone'"
-                  aria-hidden="true"
-                />
-                {{ acao.rotulo }}
-              </RouterLink>
-              <Button
-                v-else
-                type="button"
-                class="acao"
-                :class="{ 'acao--cheia': indice === 0 }"
-                :label="acao.rotulo"
-                @click="acao.executar?.()"
-              >
-                <template #icon>
-                  <component
-                    :is="acao.icone"
-                    class="acao__icone"
-                    :weight="indice === 0 ? 'fill' : 'duotone'"
-                    aria-hidden="true"
-                  />
-                </template>
-              </Button>
-            </template>
-          </nav>
-        </div>
-      </div>
+    <template #resumo>
+      <time :datetime="now.toISOString().slice(0, 10)">{{ dataDeHoje }}</time
+      >{{ '. ' }}
+      <span aria-live="polite">{{ fraseDoResumo }}</span>
     </template>
 
     <div class="inicio">
       <PartnerOperabilityBanner />
 
-      <p v-if="isGuidanceVisible" class="inicio__lede">
-        {{ temModulos ? t('inicio.ledePauta') : t('inicio.lede') }}
-      </p>
+      <section class="espacos" :aria-label="t('inicio.espacos.rotulo')">
+        <p v-if="isGuidanceVisible" class="inicio__guia">
+          {{ temModulos ? t('inicio.guia.espacos') : t('inicio.guia.portal') }}
+        </p>
 
-      <div class="inicio__grade">
-        <div class="inicio__coluna">
-          <template v-if="temModulos">
-            <HomePauta />
-            <HomeAndamento :clinica="hasClinicalProfile" :hotel="hasHotelProfile" />
+        <div class="espacos__grade" :class="`espacos__grade--${blocos.length}`">
+          <template v-for="espaco in blocos" :key="espaco.id">
+            <HomeEspacoClinica v-if="espaco.id === 'clinica'" :espaco="espaco" />
+            <HomeEspacoHotel v-else-if="espaco.id === 'hotel'" :espaco="espaco" />
+            <HomeEspacoPortal
+              v-else
+              :espaco="espaco"
+              :indicacao="indicacao"
+              @compartilhar="compartilhar"
+            />
           </template>
-          <HomeSaldo v-else>
-            <template #indicacao><HomeIndique ref="indique" /></template>
-          </HomeSaldo>
-          <!-- A ação do cartão da marca ainda não foi decidida: `abrir` fica sem ouvinte. -->
-          <HomeMarca />
         </div>
+      </section>
 
-        <div class="inicio__coluna">
-          <HomeModulos :clinica="hasClinicalProfile" :hotel="hasHotelProfile" />
-          <template v-if="temModulos">
-            <HomeAgenda :clinica="hasClinicalProfile" :hotel="hasHotelProfile" />
-            <HomeSaldo>
-              <template #indicacao><HomeIndique ref="indique" /></template>
-            </HomeSaldo>
-          </template>
+      <HomePauta v-if="temModulos" />
+
+      <div
+        class="calma"
+        :class="{
+          'calma--sem-agenda': !temModulos,
+          'calma--sem-indicacao': !comIndicacao,
+        }"
+      >
+        <HomeAgenda
+          v-if="temModulos"
+          class="calma__agenda"
+          :clinica="hasClinicalProfile"
+          :hotel="hasHotelProfile"
+        />
+        <div class="calma__lado">
+          <HomeIndique ref="indique" />
+          <!-- A ação do cartão da marca ainda não foi decidida: sem ouvinte, ele é uma figura. -->
+          <HomeMarca class="calma__marca" />
         </div>
       </div>
     </div>
-  </PartnerPageFrame>
+  </UiPagina>
 </template>
 
 <style scoped>
-/*
- * O fundo do Prodify: cinza quase branco, dois brilhos da marca no topo e uma grade fina que se
- * apaga descendo. A grade mora num pseudo-elemento para poder levar máscara sem apagar o resto.
- */
-.inicio-pagina.partner-page {
-  position: relative;
-  isolation: isolate;
-  background:
-    radial-gradient(52rem 26rem at 8% -6rem, rgb(120 196 178 / 30%), transparent 70%),
-    radial-gradient(44rem 24rem at 96% -4rem, rgb(96 178 196 / 22%), transparent 70%),
-    var(--hc-pagina);
-}
-
-.inicio-pagina.partner-page::before {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--hc-grade) 1px, transparent 1px),
-    linear-gradient(90deg, var(--hc-grade) 1px, transparent 1px);
-  background-size: 28px 28px;
-  content: '';
-  mask-image: linear-gradient(to bottom, #000 0, rgb(0 0 0 / 60%) 16rem, transparent 34rem);
-  pointer-events: none;
-}
-
-.app-dark .inicio-pagina.partner-page {
-  background:
-    radial-gradient(52rem 26rem at 8% -6rem, rgb(108 201 181 / 13%), transparent 70%),
-    radial-gradient(44rem 24rem at 96% -4rem, rgb(108 198 208 / 9%), transparent 70%),
-    var(--hc-pagina);
-}
-
-/* ------------------------------------------------------------------ saudação */
-
-.saudacao {
-  display: grid;
-  gap: 0.2rem;
-  min-width: 0;
-}
-
-.saudacao__data {
-  color: var(--hc-tinta-2);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.saudacao__titulo {
-  margin: 0.35rem 0 0;
-  color: var(--hc-tinta);
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.025em;
-}
-
-/* O resumo e as pílulas dividem a linha, como o "How can I help you today?" e o "Ask AI" de lá. */
-.saudacao__linha {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem 1.25rem;
-}
-
-.saudacao__resumo {
-  margin: 0;
-  background: var(--hc-degrade);
-  background-clip: text;
-  color: transparent;
-  font-size: 2rem;
-  font-weight: 500;
-  line-height: 1.25;
-  letter-spacing: -0.025em;
-  -webkit-text-fill-color: transparent;
-}
-
-/* ------------------------------------------------------------------ pílulas de ação */
-
-.acoes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.acao,
-.acao.p-button {
-  --acao-sombra: 0 1px 2px rgb(20 32 28 / 5%);
-
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 2.25rem;
-  padding: 0 0.95rem;
-  border: 1px solid #bfdcd3;
-  border-radius: 999px;
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-  white-space: nowrap;
-  box-shadow: var(--acao-sombra);
-  transition:
-    background-color 150ms ease-out,
-    border-color 150ms ease-out,
-    box-shadow 150ms ease-out;
-}
-
-.app-dark .acao,
-.app-dark .acao.p-button {
-  border-color: #2c4a42;
-}
-
-.acao:hover,
-.acao.p-button:not(:disabled):hover {
-  --acao-sombra: 0 4px 12px -6px rgb(20 32 28 / 25%);
-
-  border-color: var(--hc-marca);
-  background: var(--hc-cartao);
-  color: var(--hc-tinta);
-}
-
-/* A primeira pílula, cheia e em degradê: o "✦ Ask AI" de lá. */
-.acao--cheia,
-.acao--cheia.p-button {
-  --acao-sombra: 0 6px 16px -8px var(--hc-marca-sombra);
-
-  border-color: transparent;
-  background: var(--hc-degrade-botao);
-  color: var(--hc-sobre-marca);
-  font-weight: 600;
-}
-
-.acao--cheia:hover,
-.acao--cheia.p-button:not(:disabled):hover {
-  --acao-sombra: 0 10px 22px -8px var(--hc-marca-sombra-forte);
-
-  border-color: transparent;
-  background: var(--hc-degrade-botao);
-  color: var(--hc-sobre-marca);
-}
-
-.acao:focus-visible,
-.acao.p-button:focus-visible {
-  outline: 2px solid var(--hc-marca);
-  outline-offset: 2px;
-}
-
-.acao__icone {
-  flex-shrink: 0;
-  width: 1.05rem;
-  height: 1.05rem;
-  color: var(--hc-marca);
-}
-
-.acao--cheia .acao__icone {
-  color: currentColor;
-}
-
-/* ------------------------------------------------------------------ grade
- * A grade responde à largura do próprio conteúdo, não da janela: com trilho e painel abertos, um
- * tablet de 1024 px deixa ~720 px para a página.
- */
 .inicio {
   display: grid;
-  gap: 1.25rem;
-  width: 100%;
-  container-type: inline-size;
-  container-name: inicio;
+  gap: 36px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
-.inicio__lede {
-  max-width: 44rem;
+.inicio__guia {
+  max-width: 72ch;
   margin: 0;
-  color: var(--hc-tinta-2);
-  font-size: 0.9375rem;
+  color: var(--tinta-2);
+  font-size: 14px;
   line-height: 1.5;
 }
 
-/*
- * Duas colunas independentes, como no Prodify: cada uma empilha os próprios cartões, e a altura de
- * um lado não abre buraco no outro.
- */
-.inicio__grade {
+/* ------------------------------------------------------------------ os espaços */
+
+.espacos {
   display: grid;
-  gap: 1.25rem;
+  gap: 14px;
+  container-type: inline-size;
+  container-name: espacos;
 }
 
-/* Coluna em pilha; o cartão da marca, por último, cresce até a altura da coluna vizinha. */
-.inicio__coluna {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  min-width: 0;
+/*
+ * Um bloco por espaço, lado a lado enquanto cabem (cada um com pelo menos 320 px). Um espaço só
+ * ocupa a linha inteira, e o bloco se arruma em fileira por dentro.
+ */
+.espacos__grade {
+  display: grid;
+  align-items: stretch;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
 }
 
-@container inicio (min-width: 56rem) {
-  .inicio__grade {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+/*
+ * Três espaços onde só cabem dois lado a lado (o tablet): o terceiro não fica sozinho em meia
+ * linha — ocupa a linha inteira e se arruma em fileira por dentro.
+ */
+@container espacos (min-width: 660px) and (max-width: 999px) {
+  .espacos__grade--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .espacos__grade--3 > :last-child {
+    grid-column: 1 / -1;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .acao,
-  .acao.p-button {
-    transition: none;
+/* ------------------------------------------------------------------ o resto, calmo */
+
+/*
+ * A agenda à esquerda, larga; o código e a marca à direita. Sem clínica nem hotel não há agenda:
+ * código e marca dividem a linha.
+ */
+.calma {
+  display: grid;
+  align-items: start;
+  gap: 28px 20px;
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr);
+}
+
+.calma__lado {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.calma__marca {
+  flex: 1 0 auto;
+}
+
+.calma--sem-agenda {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.calma--sem-agenda .calma__lado {
+  display: grid;
+  align-items: end;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+
+.calma--sem-agenda .calma__marca {
+  height: 100%;
+}
+
+.calma--sem-agenda.calma--sem-indicacao .calma__lado {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 1100px) {
+  .calma {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calma__lado {
+    display: grid;
+    align-items: end;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .inicio {
+    gap: 28px;
+  }
+
+  .espacos__grade {
+    gap: 14px;
   }
 }
 </style>
