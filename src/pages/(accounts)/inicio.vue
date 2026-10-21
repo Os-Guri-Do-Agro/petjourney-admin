@@ -27,7 +27,6 @@
  * clínica e o hotel de hoje. Ele é carregado uma vez aqui e entregue por `provide`, para que três
  * partes não peçam três vezes a mesma coisa nem mostrem números de momentos diferentes.
  */
-import Button from 'primevue/button'
 import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -44,7 +43,6 @@ import { usePautaDaHome } from '@/components/home/usePautaDaHome'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
 import UiAbertura from '@/components/ui/UiAbertura.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
-import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { useEspacos } from '@/navegacao/espacos'
@@ -211,16 +209,6 @@ onUnmounted(() => {
         <template #resumo>
           <span aria-live="polite">{{ fraseDoResumo }}</span>
         </template>
-        <template #acoes>
-          <Button
-            type="button"
-            severity="secondary"
-            :icon="isGuidanceVisible ? 'ph ph-eye-slash' : 'ph ph-info'"
-            :label="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
-            :aria-pressed="isGuidanceVisible"
-            @click="toggleGuidance"
-          />
-        </template>
       </UiAbertura>
     </template>
 
@@ -228,10 +216,6 @@ onUnmounted(() => {
       <PartnerOperabilityBanner />
 
       <section class="espacos" :aria-label="t('inicio.espacos.rotulo')">
-        <p v-if="isGuidanceVisible" class="inicio__guia">
-          {{ temModulos ? t('inicio.guia.espacos') : t('inicio.guia.portal') }}
-        </p>
-
         <div class="espacos__grade" :class="`espacos__grade--${blocos.length}`">
           <template v-for="espaco in blocos" :key="espaco.id">
             <HomeEspacoClinica v-if="espaco.id === 'clinica'" :espaco="espaco" />
@@ -281,14 +265,6 @@ onUnmounted(() => {
 .inicio__abertura {
   flex: 1;
   min-width: 0;
-}
-
-.inicio__guia {
-  max-width: 72ch;
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 14px;
-  line-height: 1.5;
 }
 
 /* ------------------------------------------------------------------ os espaços */

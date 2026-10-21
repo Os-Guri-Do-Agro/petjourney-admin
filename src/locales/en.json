@@ -850,8 +850,6 @@
       "checkout": "Check out {pet}"
     },
     "guia": {
-      "espacos": "One panel for each space in your business, with the numbers right now. Each number opens the screen where it gets resolved; at the foot of the panel, the next step is what to do first.",
-      "portal": "Your referral earnings and your QR scans. At the foot of the panel, the next step is what to do first.",
       "pauta": "Everything that is waiting, across all spaces, from most to least serious. Each row opens the screen where it gets resolved.",
       "agenda": "Clinic appointments and hotel arrivals. Pick a day to see what is booked; the arrows move a week at a time."
     }

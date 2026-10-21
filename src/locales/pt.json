@@ -850,8 +850,6 @@
       "checkout": "Fazer o check-out de {pet}"
     },
     "guia": {
-      "espacos": "Um quadro para cada espaço da sua empresa, com os números de agora. Cada número leva à tela onde ele se resolve; no pé do quadro, o próximo passo é o que vale fazer primeiro.",
-      "portal": "Seus ganhos de indicação e as leituras do seu QR. No pé do quadro, o próximo passo é o que vale fazer primeiro.",
       "pauta": "Tudo o que está parado, em todos os espaços, do mais grave para o menos. Cada linha leva à tela onde o assunto se resolve.",
       "agenda": "Os compromissos da clínica e as chegadas do hotel. Escolha um dia para ver o que está marcado; as setas andam de semana em semana."
     }

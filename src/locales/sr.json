@@ -850,8 +850,6 @@
       "checkout": "Prijavi odlazak: {pet}"
     },
     "guia": {
-      "espacos": "Po jedan okvir za svaki prostor vaše firme, sa trenutnim brojevima. Svaki broj otvara ekran na kom se rešava; na dnu okvira je sledeći korak, ono što vredi uraditi prvo.",
-      "portal": "Vaša zarada od preporuka i skeniranja vašeg QR koda. Na dnu okvira je sledeći korak, ono što vredi uraditi prvo.",
       "pauta": "Sve što čeka, u svim prostorima, od najozbiljnijeg ka manje ozbiljnom. Svaki red otvara ekran na kom se predmet rešava.",
       "agenda": "Termini klinike i dolasci u hotel. Izaberite dan da vidite šta je zakazano; strelice se pomeraju po nedelju dana."
     }
