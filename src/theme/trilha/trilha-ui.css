@@ -156,11 +156,49 @@
 .trilha .ui-indicador .ui-ladrilho {
   position: absolute;
   top: 16px;
-  right: 16px;
+  inset-inline-end: 16px;
+}
+
+/*
+ * Indicador que filtra a lista embaixo (o placar das Vacinas): é um botão, sobe no hover, e o
+ * escolhido ganha o fio e o anel da cor do lugar.
+ */
+.trilha button.ui-indicador,
+.trilha a.ui-indicador {
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  transition:
+    border-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    box-shadow var(--pj-tempo-curto) var(--pj-curva-chega),
+    transform var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.trilha button.ui-indicador:hover,
+.trilha a.ui-indicador:hover {
+  border-color: var(--linha-media);
+  box-shadow: var(--sombra-2);
+  transform: translateY(-1px);
+}
+
+.trilha button.ui-indicador:focus-visible,
+.trilha a.ui-indicador:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
+}
+
+.trilha .ui-indicador--escolhido,
+.trilha .ui-indicador--escolhido:hover {
+  border-color: var(--pj-lugar);
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--pj-lugar) 18%, transparent),
+    var(--sombra-cartao);
 }
 
 .trilha .ui-indicador:has(> .ui-ladrilho:not(.ui-ladrilho--estatico)) .ui-indicador__rotulo {
-  padding-right: 44px;
+  padding-inline-end: 44px;
 }
 
 /*
@@ -173,7 +211,7 @@
 }
 
 .trilha .ui-indicador--topo .ui-indicador__rotulo {
-  padding-right: 0;
+  padding-inline-end: 0;
 }
 
 .trilha .ui-indicador--risco .ui-indicador__valor {
@@ -384,14 +422,20 @@
   text-align: left;
 }
 
-.trilha .ui-lista > li:first-child > .ui-linha {
-  border-top-left-radius: calc(var(--ui-raio-folha) - 1px);
-  border-top-right-radius: calc(var(--ui-raio-folha) - 1px);
+/*
+ * O hover da primeira e da última linha acompanha o canto do cartão — só quando a lista encosta
+ * nele. Embaixo do cabeçalho de um `ui-cartao`, a primeira linha é reta.
+ */
+.trilha .ui-lista.ui-folha > li:first-child > .ui-linha,
+.trilha .ui-folha > .ui-lista:first-child > li:first-child > .ui-linha {
+  border-start-start-radius: calc(var(--ui-raio-folha) - 1px);
+  border-start-end-radius: calc(var(--ui-raio-folha) - 1px);
 }
 
-.trilha .ui-lista > li:last-child > .ui-linha {
-  border-bottom-left-radius: calc(var(--ui-raio-folha) - 1px);
-  border-bottom-right-radius: calc(var(--ui-raio-folha) - 1px);
+.trilha .ui-lista.ui-folha > li:last-child > .ui-linha,
+.trilha .ui-folha > .ui-lista:last-child > li:last-child > .ui-linha {
+  border-end-start-radius: calc(var(--ui-raio-folha) - 1px);
+  border-end-end-radius: calc(var(--ui-raio-folha) - 1px);
 }
 
 .trilha .ui-linha__texto {

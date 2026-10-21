@@ -137,4 +137,22 @@ const ICONE_DO_TOM = { risco: 'ph ph-warning-octagon', atencao: 'ph ph-warning',
     align-items: flex-start;
   }
 }
+
+/* No celular a frase ganha a linha inteira; o selo desce para baixo dela. */
+@media (max-width: 600px) {
+  .pauta__linha {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .pauta__linha .ui-linha__texto {
+    flex-basis: calc(100% - 52px);
+  }
+
+  .pauta__linha .ui-linha__fim {
+    width: 100%;
+    justify-content: space-between;
+    padding-inline-start: 50px;
+  }
+}
 </style>
