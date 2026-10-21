@@ -16,7 +16,7 @@
  *
  * Pet com mais de um acesso continua numa linha só, que abre a lista dele embaixo (o Marsh com
  * onze acessos não vira onze linhas iguais). Com "Mostrar explicações" ligado — e sempre na lista
- * vazia — aparecem os três passos de como um acesso funciona.
+ * vazia — aparecem os três passos de como um acesso funciona (`AcessosPassos`, uma trilha).
  */
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
@@ -30,6 +30,7 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import AcessosPassos from '@/components/parceiro/AcessosPassos.vue'
 import VincularCodigoDialog from '@/components/parceiro/VincularCodigoDialog.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useAgora } from '@/composables/useAgora'
@@ -765,28 +766,6 @@ const fraseDoResumo = computed(() => {
     : t('acessos.saudacao.historico', { n: pets }, pets)
 })
 
-/** Como um acesso funciona, em três passos: com as explicações ligadas e na lista vazia. */
-const passosDoGuia = computed(() => [
-  {
-    id: 'compartilha',
-    icone: 'ph ph-device-mobile',
-    titulo: t('acessos.guia.passo1.titulo'),
-    texto: t('acessos.guia.passo1.texto'),
-  },
-  {
-    id: 'vincula',
-    icone: 'ph ph-key',
-    titulo: t('acessos.guia.passo2.titulo'),
-    texto: t('acessos.guia.passo2.texto'),
-  },
-  {
-    id: 'anota',
-    icone: 'ph ph-note-pencil',
-    titulo: t('acessos.guia.passo3.titulo'),
-    texto: t('acessos.guia.passo3.texto'),
-  },
-])
-
 function onVinculado(detalhe: CompartilhamentoDetalhe) {
   void router.push(`/parceiro/acessos/${detalhe.id}`)
 }
@@ -880,22 +859,20 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
         </RouterLink>
       </section>
 
-      <!-- As explicações: o que é um acesso, em três passos. -->
+      <!-- As explicações: o que é um acesso, em três passos numa trilha. -->
       <section v-if="isGuidanceVisible" class="guia" aria-labelledby="acessos-guia-titulo">
         <p class="guia__lede">{{ t('acessos.lede') }}</p>
-        <h2 id="acessos-guia-titulo" class="guia__titulo">{{ t('acessos.guia.titulo') }}</h2>
-        <ol class="passos">
-          <li v-for="(passo, indice) in passosDoGuia" :key="passo.id" class="passo">
-            <span class="ui-ladrilho" aria-hidden="true"><i :class="passo.icone" /></span>
-            <span class="passo__texto">
-              <strong>
-                <span class="passo__n ui-num" aria-hidden="true">{{ indice + 1 }}</span>
-                {{ passo.titulo }}
-              </strong>
-              <span>{{ passo.texto }}</span>
-            </span>
-          </li>
-        </ol>
+        <div class="guia__cartao ui-folha ui-cartao">
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-path" /></span>
+            <div class="ui-cartao__titulos">
+              <h2 id="acessos-guia-titulo" class="ui-cartao__titulo">
+                {{ t('acessos.guia.titulo') }}
+              </h2>
+            </div>
+          </header>
+          <AcessosPassos class="guia__passos" />
+        </div>
       </section>
 
       <!-- Ativos ou histórico, a busca grande e o botão dos filtros, numa linha. -->
@@ -1092,35 +1069,40 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
         />
       </div>
 
-      <!-- Nenhum acesso ativo: é aqui que se aprende como um acesso chega. -->
-      <div v-else-if="items.length === 0 && activeTab === 'ativos'" class="estado ui-folha">
-        <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
-          <i class="ph ph-key" />
-        </span>
-        <h2>{{ t('acessos.list.emptyAtivosTitle') }}</h2>
-        <p>{{ t('acessos.list.emptyAtivosBody') }}</p>
-        <ol v-if="!isGuidanceVisible" class="passos passos--vazio">
-          <li v-for="(passo, indice) in passosDoGuia" :key="passo.id" class="passo">
-            <span class="ui-ladrilho" aria-hidden="true"><i :class="passo.icone" /></span>
-            <span class="passo__texto">
-              <strong>
-                <span class="passo__n ui-num" aria-hidden="true">{{ indice + 1 }}</span>
-                {{ passo.titulo }}
-              </strong>
-              <span>{{ passo.texto }}</span>
-            </span>
-          </li>
-        </ol>
-        <Button
-          type="button"
-          icon="ph ph-link"
-          :label="t('acessos.vincular.cta')"
-          severity="secondary"
-          outlined
-          :disabled="!store.podeOperar"
-          @click="vincularVisible = true"
-        />
-      </div>
+      <!--
+        Nenhum acesso ativo: é aqui que se aprende como um acesso chega. Três andares: o recado
+        (ladrilho, título e a frase inteira), a trilha das etapas num poço (só quando o guia do
+        topo está desligado, para não repetir) e a ação, sozinha embaixo.
+      -->
+      <section
+        v-else-if="items.length === 0 && activeTab === 'ativos'"
+        class="vazio-ativos ui-folha"
+        aria-labelledby="acessos-vazio-titulo"
+      >
+        <div class="vazio-ativos__recado">
+          <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
+            <i class="ph ph-key" />
+          </span>
+          <h2 id="acessos-vazio-titulo">{{ t('acessos.list.emptyAtivosTitle') }}</h2>
+          <p>{{ t('acessos.list.emptyAtivosBody') }}</p>
+        </div>
+
+        <div v-if="!isGuidanceVisible" class="vazio-ativos__guia ui-poco">
+          <h3 class="vazio-ativos__guia-titulo">{{ t('acessos.guia.titulo') }}</h3>
+          <AcessosPassos />
+        </div>
+
+        <div class="vazio-ativos__acao">
+          <Button
+            type="button"
+            icon="ph ph-link"
+            :label="t('acessos.vincular.cta')"
+            :disabled="!store.podeOperar"
+            :title="!store.podeOperar ? t('acessos.vincular.bloqueado') : undefined"
+            @click="vincularVisible = true"
+          />
+        </div>
+      </section>
 
       <div v-else-if="items.length === 0" class="estado ui-folha">
         <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--neutro" aria-hidden="true">
@@ -1522,6 +1504,8 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 .acessos {
   display: grid;
   gap: 16px;
+  /* Sem isto, um filho largo (a trilha do vazio) alarga a coluna e empurra a tela para fora. */
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .sr-only {
@@ -1585,7 +1569,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 
 .guia {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .guia__lede {
@@ -1596,74 +1580,14 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   line-height: 1.5;
 }
 
-.guia__titulo {
-  margin: 4px 0 0;
-  color: var(--tinta);
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+.guia__passos {
+  padding: 24px 28px 28px;
 }
 
-.passos {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-}
-
-.passo {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px 18px;
-  border: 1px solid var(--linha);
-  border-radius: var(--raio-cartao);
-  background: var(--superficie);
-  box-shadow: var(--sombra-cartao);
-}
-
-/* No vazio, os passos moram dentro da folha: viram poços, não cartões. */
-.passos--vazio .passo {
-  border-color: var(--linha-suave);
-  border-radius: var(--raio-cartao-pequeno);
-  background: var(--superficie-2);
-  box-shadow: none;
-}
-
-.passo__texto {
-  display: grid;
-  min-width: 0;
-  gap: 4px;
-  line-height: 1.45;
-}
-
-.passo__texto strong {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--tinta);
-  font-size: 14.5px;
-  font-weight: 600;
-}
-
-.passo__texto > span {
-  color: var(--tinta-2);
-  font-size: 13.5px;
-}
-
-.passo__n {
-  display: inline-grid;
-  width: 20px;
-  height: 20px;
-  flex: none;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--superficie-3);
-  color: var(--tinta-2);
-  font-size: 12px;
-  font-weight: 650;
+@media (max-width: 640px) {
+  .guia__passos {
+    padding: 20px 18px 22px;
+  }
 }
 
 /* ------------------------------------------------------------------ barra */
@@ -2227,14 +2151,92 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   margin-top: 10px;
 }
 
-.passos--vazio {
+/*
+ * Nenhum acesso ativo: o recado em cima, a trilha das etapas num poço no meio e a ação sozinha
+ * embaixo. Cada andar tem o seu respiro; nada se sobrepõe, em largura nenhuma.
+ */
+.vazio-ativos {
+  display: grid;
+  justify-items: center;
+  gap: 28px;
+  padding: 44px 32px 40px;
+}
+
+.vazio-ativos__recado {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.vazio-ativos__recado h2 {
+  margin: 10px 0 0;
+  color: var(--tinta);
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.vazio-ativos__recado p {
+  max-width: 46ch;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14.5px;
+  line-height: 1.55;
+  text-wrap: balance;
+}
+
+.vazio-ativos__guia.ui-poco {
+  display: grid;
   width: 100%;
-  max-width: 900px;
-  margin-top: 14px;
+  max-width: 920px;
+  gap: 22px;
+  padding: 24px 28px 28px;
+}
+
+/* O título acompanha a trilha: centrado com as etapas em fileira, à esquerda com elas em coluna. */
+.vazio-ativos__guia {
+  container: guia-vazio / inline-size;
+}
+
+.vazio-ativos__guia-titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 650;
   text-align: start;
 }
 
+@container guia-vazio (min-width: 620px) {
+  .vazio-ativos__guia-titulo {
+    text-align: center;
+  }
+}
 
+.vazio-ativos__acao {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .vazio-ativos {
+    gap: 24px;
+    padding: 32px 16px 28px;
+  }
+
+  .vazio-ativos__guia.ui-poco {
+    padding: 20px 18px 22px;
+  }
+
+  .vazio-ativos__acao,
+  .vazio-ativos__acao :deep(.p-button) {
+    width: 100%;
+  }
+
+  .vazio-ativos__acao :deep(.p-button) {
+    justify-content: center;
+  }
+}
 
 /* ------------------------------------------------------------------ movimento */
 

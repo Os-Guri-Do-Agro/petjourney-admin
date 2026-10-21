@@ -37,6 +37,17 @@ export const ICONE_DA_ORIGEM: Partial<Record<Appointment['origem'], string>> = {
   link: 'ph ph-globe-simple',
 }
 
+/**
+ * Uma marca do cartão de atendimento (risco, aviso, estado, origem, tipo), como o grupo de marcas
+ * (`AgendaCartaoMarcas`) a recebe: a chave, o nome por escrito para o "+N" e, se for o caso, o tom
+ * de gravidade que o "+N" herda quando ela fica escondida.
+ */
+export type MarcaDaAgenda = {
+  chave: string
+  rotulo: string
+  tom?: 'risco' | 'atencao'
+}
+
 /** O motivo do bloqueio também tem cara: almoço se reconhece pelo garfo antes de se ler. */
 export const ICONE_DO_BLOQUEIO: Record<BlockReason, string> = {
   almoco: 'ph ph-fork-knife',

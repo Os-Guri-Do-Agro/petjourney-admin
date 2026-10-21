@@ -27,7 +27,8 @@ import { useI18n } from 'vue-i18n'
 
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
-import { ICONE_DA_ORIGEM, ICONE_DO_ALERTA, ICONE_DO_BLOQUEIO } from './agenda-icones'
+import AgendaCartaoMarcas from './AgendaCartaoMarcas.vue'
+import { ICONE_DA_ORIGEM, ICONE_DO_ALERTA, ICONE_DO_BLOQUEIO, type MarcaDaAgenda } from './agenda-icones'
 import type { CardAgenda, ColunaAgenda, FaixaBloqueio } from '../../composables/useAgendaDia'
 import { useAgendaDia } from '../../composables/useAgendaDia'
 import type { ArrasteProposta } from '../../composables/useAgendaDrag'
@@ -214,6 +215,53 @@ function textoDosAvisos(card: CardAgenda) {
     .filter((conflito) => conflito.severity !== 'info')
     .map(formato.conflito)
     .join(' · ')
+}
+
+/**
+ * As marcas do cartão, na ordem em que saem por último: o risco do paciente, o aviso de choque, o
+ * estado (falta, na sala, feito) e só então o que é contexto (encaixe, origem, tipo). Na coluna
+ * estreita o fim da lista vira "+N" — nunca o começo.
+ */
+type MarcaDoCard = MarcaDaAgenda & {
+  tipo: 'risco' | 'aviso' | 'falta' | 'ao-vivo' | 'feito' | 'encaixe' | 'origem' | 'tipo'
+  alerta?: Pet['alertas'][number]
+}
+
+function marcasDoCard(card: CardAgenda): MarcaDoCard[] {
+  const { status, encaixe, origem } = card.appointment
+  const marcas: MarcaDoCard[] = alertasDeRisco(card).map((alerta) => ({
+    chave: `risco-${alerta.id}`,
+    rotulo: textoDoAlerta(alerta),
+    tom: 'risco',
+    tipo: 'risco',
+    alerta,
+  }))
+
+  if (temAviso(card)) {
+    marcas.push({ chave: 'aviso', rotulo: textoDosAvisos(card), tom: 'atencao', tipo: 'aviso' })
+  }
+
+  if (status === 'falta') {
+    marcas.push({ chave: 'falta', rotulo: formato.status('falta'), tom: 'risco', tipo: 'falta' })
+  } else if (status === 'em-atendimento') {
+    marcas.push({ chave: 'ao-vivo', rotulo: formato.status(status), tipo: 'ao-vivo' })
+  } else if (status === 'finalizado') {
+    marcas.push({ chave: 'feito', rotulo: formato.status(status), tipo: 'feito' })
+  }
+
+  if (encaixe) {
+    marcas.push({ chave: 'encaixe', rotulo: t('clinico.agenda.tabela.encaixe'), tipo: 'encaixe' })
+  }
+
+  if (ICONE_DA_ORIGEM[origem]) {
+    marcas.push({ chave: 'origem', rotulo: t(`clinico.origem.${origem}`), tipo: 'origem' })
+  }
+
+  if (aparenciaDoTipo(card.tipo?.kind).icone) {
+    marcas.push({ chave: 'tipo', rotulo: card.tipo?.nome ?? '', tipo: 'tipo' })
+  }
+
+  return marcas
 }
 
 function rotuloDoCard(card: CardAgenda) {
@@ -611,7 +659,10 @@ function tomDaOcupacao(ocupacao: number) {
                       class="marcacao"
                       :class="[
                         `estado--${card.appointment.status}`,
-                        { 'marcacao--selecionada': agenda.focoId === card.id },
+                        {
+                          'marcacao--selecionada': agenda.focoId === card.id,
+                          'marcacao--com-falta': podeMarcarFalta(card),
+                        },
                       ]"
                       draggable="true"
                       @dragstart="aoComecarArraste($event, card)"
@@ -633,64 +684,79 @@ function tomDaOcupacao(ocupacao: number) {
                           tamanho="sm"
                         />
                         <!--
-                          A linha da tabela já diz a hora cheia: o cartão só repete quando foge dela
-                          (09:15). O encaixe mostra sempre a hora, num selo âmbar: é a marca dele
-                          que cabe até na coluna estreita.
+                          O corpo é o nome e as marcas. Quem cede largura é o nome, com reticências;
+                          as marcas que não cabem viram "+N" (com os nomes no title) — nada sai
+                          cortado pela borda do cartão.
                         -->
-                        <span
-                          v-if="card.inicioMin !== linha.minuto || card.appointment.encaixe"
-                          class="marcacao__hora ui-num"
-                          :class="{ 'marcacao__hora--encaixe': card.appointment.encaixe }"
-                          :title="card.appointment.encaixe ? t('clinico.agenda.tabela.encaixe') : undefined"
-                        >
-                          {{ formato.hora(card.appointment.inicio) }}
-                        </span>
-                        <span class="marcacao__nome">{{ card.pet?.nome }}</span>
-
-                        <!-- Os ícones em ordem de importância: o que não couber sai pela direita. -->
-                        <span class="marcacao__icones" aria-hidden="true">
-                          <!-- Na sala agora: um ponto que pulsa; feito: o visto apagado. -->
-                          <span
-                            v-if="card.appointment.status === 'em-atendimento'"
-                            class="marcacao__ao-vivo"
-                          />
-                          <i
-                            v-else-if="card.appointment.status === 'finalizado'"
-                            class="ph ph-check-circle marcacao__feito"
-                          />
-                          <component
-                            :is="ICONE_DO_ALERTA[alerta.kind]"
-                            v-for="alerta in alertasDeRisco(card)"
-                            :key="alerta.id"
-                            class="marcacao__risco"
-                            weight="fill"
-                            :title="textoDoAlerta(alerta)"
-                          />
-                          <i
-                            v-if="temAviso(card)"
-                            class="ph ph-warning-circle marcacao__aviso"
-                            :title="textoDosAvisos(card)"
-                          />
-                          <i
-                            v-if="card.appointment.status === 'falta'"
-                            class="ph ph-user-minus marcacao__falta-icone"
-                            :title="formato.status('falta')"
-                          />
-                          <span v-if="card.appointment.encaixe" class="marcacao__encaixe">
-                            {{ t('clinico.agenda.tabela.encaixe') }}
+                        <span class="marcacao__corpo">
+                          <span class="marcacao__texto">
+                            <!--
+                              A linha da tabela já diz a hora cheia: o cartão só repete quando foge
+                              dela (09:15). O encaixe mostra sempre a hora, num selo âmbar: é a marca
+                              dele que cabe até na coluna estreita.
+                            -->
+                            <span
+                              v-if="card.inicioMin !== linha.minuto || card.appointment.encaixe"
+                              class="marcacao__hora ui-num"
+                              :class="{ 'marcacao__hora--encaixe': card.appointment.encaixe }"
+                              :title="
+                                card.appointment.encaixe ? t('clinico.agenda.tabela.encaixe') : undefined
+                              "
+                            >
+                              {{ formato.hora(card.appointment.inicio) }}
+                            </span>
+                            <span class="marcacao__nome">{{ card.pet?.nome }}</span>
                           </span>
-                          <!-- Marcado pelo responsável, no app ou no link: a origem à vista. -->
-                          <i
-                            v-if="ICONE_DA_ORIGEM[card.appointment.origem]"
-                            :class="['marcacao__origem', ICONE_DA_ORIGEM[card.appointment.origem]]"
-                            :title="t(`clinico.origem.${card.appointment.origem}`)"
-                          />
-                          <i
-                            v-if="aparenciaDoTipo(card.tipo?.kind).icone"
-                            :class="['marcacao__tipo', aparenciaDoTipo(card.tipo?.kind).icone]"
-                            :style="{ color: aparenciaDoTipo(card.tipo?.kind).cor }"
-                            :title="card.tipo?.nome"
-                          />
+
+                          <AgendaCartaoMarcas
+                            v-slot="{ item }"
+                            class="marcacao__icones"
+                            :itens="marcasDoCard(card)"
+                          >
+                            <component
+                              :is="ICONE_DO_ALERTA[item.alerta.kind]"
+                              v-if="item.tipo === 'risco' && item.alerta"
+                              class="marcacao__risco"
+                              weight="fill"
+                              :title="item.rotulo"
+                            />
+                            <i
+                              v-else-if="item.tipo === 'aviso'"
+                              class="ph ph-warning-circle marcacao__aviso"
+                              :title="item.rotulo"
+                            />
+                            <i
+                              v-else-if="item.tipo === 'falta'"
+                              class="ph ph-user-minus marcacao__falta-icone"
+                              :title="item.rotulo"
+                            />
+                            <!-- Na sala agora: um ponto que pulsa; feito: o visto apagado. -->
+                            <span
+                              v-else-if="item.tipo === 'ao-vivo'"
+                              class="marcacao__ao-vivo"
+                              :title="item.rotulo"
+                            />
+                            <i
+                              v-else-if="item.tipo === 'feito'"
+                              class="ph ph-check-circle marcacao__feito"
+                              :title="item.rotulo"
+                            />
+                            <span v-else-if="item.tipo === 'encaixe'" class="marcacao__encaixe">
+                              {{ item.rotulo }}
+                            </span>
+                            <!-- Marcado pelo responsável, no app ou no link: a origem à vista. -->
+                            <i
+                              v-else-if="item.tipo === 'origem'"
+                              :class="['marcacao__origem', ICONE_DA_ORIGEM[card.appointment.origem]]"
+                              :title="item.rotulo"
+                            />
+                            <i
+                              v-else-if="item.tipo === 'tipo'"
+                              :class="['marcacao__tipo', aparenciaDoTipo(card.tipo?.kind).icone]"
+                              :style="{ color: aparenciaDoTipo(card.tipo?.kind).cor }"
+                              :title="item.rotulo"
+                            />
+                          </AgendaCartaoMarcas>
                         </span>
                       </button>
 
@@ -1307,9 +1373,30 @@ tbody > .tabela__linha:first-child > * {
   color: var(--atencao-tinta);
 }
 
+/*
+ * O corpo do cartão: o texto (hora e nome) e as marcas. Na coluna larga, hora e nome correm numa
+ * linha só (o texto não tem caixa própria); na estreita, a hora sobe para cima do nome — veja a
+ * consulta de contêiner mais abaixo.
+ */
+.marcacao__corpo {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  align-items: center;
+  gap: inherit;
+}
+
+.marcacao__texto {
+  display: contents;
+}
+
+/*
+ * O nome é quem cede: cresce com a sobra e, no aperto, encolhe com reticências até o mínimo que
+ * ainda identifica ("Açaí N…"). Abaixo disso a largura é das marcas, que contam o resto em "+N".
+ */
 .marcacao__nome {
-  min-width: 2.5rem;
-  flex: 1;
+  min-width: 2.75rem;
+  flex: 1 1 0;
   overflow: hidden;
   font-size: 13.5px;
   font-weight: 600;
@@ -1319,17 +1406,44 @@ tbody > .tabela__linha:first-child > * {
 }
 
 .marcacao__icones {
-  display: inline-flex;
-  min-width: 0;
-  flex: 0 1 auto;
-  align-items: center;
-  gap: 6px;
-  overflow: hidden;
+  --marcas-vao: 6px;
+  --marcas-altura: 20px;
+
   font-size: 15px;
 }
 
-.marcacao__icones > * {
-  flex: none;
+/*
+ * Coluna estreita (cinco profissionais em 1280–1440, o painel do atendimento aberto): a hora fora
+ * da meia hora sobe para cima do nome, em letra menor — os dois cabem na altura do cartão e o nome
+ * não divide a linha com ela. O texto passa a ter caixa e um mínimo que nunca toma o lugar do "+N":
+ * até 2.75rem, mas sempre deixando a largura dele (`--marcas-reserva`) para as marcas.
+ */
+@container (max-width: 14rem) {
+  .marcacao__texto {
+    --marcas-reserva: 30px;
+
+    display: grid;
+    min-width: max(1.75rem, min(2.75rem, 100% - var(--marcas-reserva)));
+    flex: 1 1 0;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    row-gap: 1px;
+    line-height: 1.2;
+  }
+
+  .marcacao__texto .marcacao__nome {
+    min-width: 0;
+  }
+
+  .marcacao__texto .marcacao__hora {
+    justify-self: start;
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  .marcacao__texto .marcacao__hora--encaixe {
+    padding: 0 5px;
+  }
 }
 
 /* Na sala agora: o ponto da Clínica com um halo que respira. */
@@ -1445,18 +1559,10 @@ tbody > .tabela__linha:first-child > * {
 }
 
 /*
- * Coluna estreita (o painel do atendimento aberto, cinco profissionais): o nome, o risco e o aviso
- * ficam; o ícone do tipo e a marca de encaixe saem — os dois continuam no painel do atendimento.
+ * Coluna estreita (o painel do atendimento aberto, cinco profissionais): o rosto encolhe e o
+ * vão aperta. As marcas não somem por regra de largura: as que não cabem viram o "+N" do grupo,
+ * do fim da lista para o começo (o tipo e a origem saem antes do risco e do aviso).
  */
-@container (max-width: 14rem) {
-  .marcacao__tipo,
-  .marcacao__origem,
-  .marcacao__encaixe,
-  .marcacao__feito {
-    display: none;
-  }
-}
-
 @container (max-width: 12.5rem) {
   .marcacao .marcacao__rosto {
     width: 22px;
@@ -1473,6 +1579,10 @@ tbody > .tabela__linha:first-child > * {
   .marcacao__abrir {
     gap: 6px;
   }
+
+  .marcacao__icones {
+    --marcas-vao: 4px;
+  }
 }
 
 /* Coluna bem estreita: o rosto encolhe em vez de sumir, e o "até" da continuação sai. */
@@ -1484,6 +1594,14 @@ tbody > .tabela__linha:first-child > * {
   }
 
   .continua .ui-num {
+    display: none;
+  }
+
+  /*
+   * Com o botão de falta ao lado, o cartão perde mais 33 px: o rosto sai para o nome e o "+N"
+   * continuarem inteiros. O nome do paciente está escrito logo ali; o rosto volta na coluna larga.
+   */
+  .marcacao--com-falta .marcacao__rosto {
     display: none;
   }
 }

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 /**
- * O kit de divulgação: o código grande (para ditar no balcão), o link (para o WhatsApp), o QR
- * (para imprimir) e as leituras do QR. Com a flag de cupons ligada, os cupons e os resgates
- * ganham seções próprias embaixo.
+ * O convite para quem ainda não usa o PetJourney: quem cria a conta com o código da empresa fica
+ * ligado a ela, e as assinaturas dessa pessoa rendem participação no programa de afiliados. Três
+ * jeitos de convidar (passar o código, mandar o link, imprimir o QR), as leituras do QR e as
+ * regras. Com a flag de cupons ligada, os cupons e os resgates ganham seções próprias embaixo.
  *
  * As âncoras `#indicacao`, `#cupons` e `#resgates` são o destino dos redirects legados
  * (`?aba=indicacao|cupons|resgates`) e do link "Resgates" do diálogo de validar cupom.
@@ -355,15 +356,23 @@ watch(lastSuccessAt, (at) => {
         aria-busy="true"
         :aria-label="t('divulgacao.indicacao.loadingAria')"
       >
-        <div class="kit__principal" aria-hidden="true">
-          <div class="kit__codigo">
-            <Skeleton width="9rem" height="0.8rem" border-radius="6px" />
-            <Skeleton width="15rem" height="3rem" border-radius="10px" />
-            <Skeleton width="12rem" height="0.8rem" border-radius="6px" />
+        <div class="kit__cabeca" aria-hidden="true">
+          <Skeleton width="44px" height="44px" border-radius="13px" />
+          <div class="kit__titulos">
+            <Skeleton width="16rem" height="1.1rem" border-radius="6px" />
+            <Skeleton width="min(100%, 30rem)" height="0.8rem" border-radius="6px" />
           </div>
-          <div class="kit__link">
-            <Skeleton width="14rem" height="0.8rem" border-radius="6px" />
-            <Skeleton width="100%" height="2.6rem" border-radius="10px" />
+        </div>
+        <div class="kit__principal" aria-hidden="true">
+          <div v-for="n in 2" :key="n" class="kit__forma">
+            <div class="kit__forma-cabeca">
+              <Skeleton width="36px" height="36px" border-radius="11px" />
+              <div class="kit__forma-titulos">
+                <Skeleton width="8rem" height="0.9rem" border-radius="6px" />
+                <Skeleton width="12rem" height="0.75rem" border-radius="6px" />
+              </div>
+            </div>
+            <Skeleton width="100%" height="4.5rem" border-radius="14px" />
           </div>
         </div>
       </div>
@@ -410,62 +419,91 @@ watch(lastSuccessAt, (at) => {
         </div>
 
         <!--
-          Os três jeitos de compartilhar numa folha só. O código é o maior da tela: é ele que se
-          dita no balcão. O link logo embaixo, com copiar e WhatsApp; o QR à direita, para baixar
-          ou imprimir.
+          O convite numa folha só. Em cima, para que serve: quem ainda não usa o app e cria a conta
+          com o código fica ligado à empresa, e as assinaturas rendem participação. Embaixo, os
+          três jeitos de convidar, cada um com um verbo e uma frase: passar o código (no bilhete,
+          o maior da tela), mandar o link (copiar e WhatsApp) e imprimir o QR (ao lado).
         -->
-        <div v-else class="kit ui-folha" :class="{ 'kit--com-qr': Boolean(indicacao.qrImageUrl) }">
+        <div
+          v-else
+          class="kit ui-folha"
+          :class="{ 'kit--com-qr': Boolean(indicacao.qrImageUrl) }"
+          role="group"
+          aria-labelledby="kit-titulo"
+        >
+          <header class="kit__cabeca">
+            <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
+              <i class="ph ph-user-plus" />
+            </span>
+            <div class="kit__titulos">
+              <h2 id="kit-titulo" class="kit__titulo">{{ t('divulgacao.kit.titulo') }}</h2>
+              <p class="kit__descricao">{{ t('divulgacao.kit.descricao') }}</p>
+            </div>
+          </header>
+
           <div class="kit__principal">
-            <div class="kit__codigo">
-              <span class="kit__rotulo">
-                <span class="ui-ladrilho ui-ladrilho--lugar" aria-hidden="true">
-                  <i class="ph ph-ticket" />
-                </span>
-                {{ t('inicio.indique.seuCodigo') }}
-              </span>
-              <div class="kit__bilhete">
-                <strong class="kit__valor ui-num">
-                  <bdi dir="ltr">{{ codigoIndicacao }}</bdi>
-                </strong>
-                <Button
-                  type="button"
-                  icon="ph ph-copy"
-                  :label="t('divulgacao.kit.copiar')"
-                  :aria-label="t('divulgacao.shareKit.copyCodeAria')"
-                  severity="secondary"
-                  outlined
-                  @click="copyToClipboard(codigoIndicacao, t('divulgacao.shareKit.codeLabel'))"
-                />
+            <div class="kit__forma kit__forma--codigo">
+              <div class="kit__forma-cabeca">
+                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-ticket" /></span>
+                <div class="kit__forma-titulos">
+                  <h3 class="kit__forma-titulo">{{ t('divulgacao.kit.codigo') }}</h3>
+                  <p class="kit__forma-dica">{{ t('divulgacao.kit.codigoDica') }}</p>
+                </div>
               </div>
-              <span class="kit__para">
-                <i class="ph ph-storefront" aria-hidden="true" />
-                {{ t('divulgacao.kit.codigo') }}
-              </span>
+
+              <!-- O bilhete: o código no miolo, o copiar no canhoto, um picote entre os dois. -->
+              <div class="kit__bilhete-caixa">
+                <div class="kit__bilhete">
+                  <span class="kit__bilhete-miolo">
+                    <span class="kit__bilhete-rotulo">{{ t('inicio.indique.seuCodigo') }}</span>
+                    <strong class="kit__valor ui-num">
+                      <bdi dir="ltr">{{ codigoIndicacao }}</bdi>
+                    </strong>
+                  </span>
+                  <span class="kit__bilhete-canhoto">
+                    <Button
+                      type="button"
+                      icon="ph ph-copy"
+                      :label="t('divulgacao.kit.copiar')"
+                      :aria-label="t('divulgacao.shareKit.copyCodeAria')"
+                      severity="secondary"
+                      outlined
+                      @click="copyToClipboard(codigoIndicacao, t('divulgacao.shareKit.codeLabel'))"
+                    />
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div class="kit__link">
-              <span class="kit__rotulo">
+            <div class="kit__forma kit__forma--link">
+              <div class="kit__forma-cabeca">
                 <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-link" /></span>
-                {{ t('divulgacao.kit.link') }}
-              </span>
-              <bdi class="kit__endereco" dir="ltr" :title="linkIndicacao">{{ linkLegivel }}</bdi>
-              <div class="kit__link-acoes">
-                <Button
-                  type="button"
-                  icon="ph ph-copy"
-                  :label="t('divulgacao.shareKit.copyLink')"
-                  @click="copyToClipboard(linkIndicacao, t('divulgacao.shareKit.linkName'))"
-                />
-                <Button
-                  as="a"
-                  :href="whatsappHref"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  icon="ph ph-whatsapp-logo"
-                  :label="t('divulgacao.kit.whatsapp')"
-                  severity="secondary"
-                  outlined
-                />
+                <div class="kit__forma-titulos">
+                  <h3 class="kit__forma-titulo">{{ t('divulgacao.kit.link') }}</h3>
+                  <p class="kit__forma-dica">{{ t('divulgacao.kit.linkDica') }}</p>
+                </div>
+              </div>
+
+              <div class="kit__link">
+                <bdi class="kit__endereco" dir="ltr" :title="linkIndicacao">{{ linkLegivel }}</bdi>
+                <div class="kit__link-acoes">
+                  <Button
+                    type="button"
+                    icon="ph ph-copy"
+                    :label="t('divulgacao.shareKit.copyLink')"
+                    @click="copyToClipboard(linkIndicacao, t('divulgacao.shareKit.linkName'))"
+                  />
+                  <Button
+                    as="a"
+                    :href="whatsappHref"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    icon="ph ph-whatsapp-logo"
+                    :label="t('divulgacao.kit.whatsapp')"
+                    severity="secondary"
+                    outlined
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -687,6 +725,7 @@ watch(lastSuccessAt, (at) => {
   display: grid;
   min-width: 0;
   gap: 24px;
+  container: divulgacao / inline-size;
 }
 
 .divulgacao__lede {
@@ -734,111 +773,250 @@ watch(lastSuccessAt, (at) => {
 }
 
 /* ------------------------------------------------------------------ o kit
- * O cartão do código: o alto ganha a luz do Portal, como o saldo da Carteira. O código mora num
- * bilhete de contorno tracejado, do tamanho de quem vai ditá-lo do outro lado do balcão; o link
- * fica ao lado em tela larga e embaixo na estreita.
+ * Uma folha em três partes: a cabeça (para que serve o convite, com a luz do Portal rente ao
+ * topo), os jeitos de convidar (código e link, cada um com verbo, frase e a coisa em si) e, ao
+ * lado, o QR num poço. Quem decide a forma é a largura do painel e a da coluna principal, não a
+ * da janela.
  */
 
 .kit {
   display: grid;
   overflow: hidden;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--pj-lugar-fundo) 55%, var(--superficie)),
-      var(--superficie) 72%
-    );
-  container: kit / inline-size;
+  grid-template-areas:
+    'cabeca'
+    'principal'
+    'lado';
+  grid-template-columns: minmax(0, 1fr);
 }
 
-.kit--com-qr {
-  grid-template-columns: minmax(0, 1fr) auto;
+@container divulgacao (min-width: 860px) {
+  .kit--com-qr {
+    grid-template-areas:
+      'cabeca cabeca'
+      'principal lado';
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .kit--com-qr .kit__lado {
+    border-top: 0;
+    border-inline-start: 1px solid var(--linha-suave);
+  }
 }
 
+.kit__cabeca {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 26px 28px 24px;
+  border-bottom: 1px solid var(--linha-suave);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie)),
+    var(--superficie)
+  );
+  grid-area: cabeca;
+}
+
+.kit__titulos {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  padding-top: 1px;
+}
+
+.kit__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.kit__descricao {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14.5px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* Quando o QR ao lado é mais alto, o vão se reparte entre os jeitos, em vez de sobrar embaixo. */
 .kit__principal {
   display: grid;
   min-width: 0;
+  align-content: stretch;
+  container: kit-principal / inline-size;
+  grid-area: principal;
 }
 
-.kit__codigo,
-.kit__link {
+/* Cada jeito de convidar: o verbo e a frase de um lado, a coisa do outro (empilha no estreito). */
+.kit__forma {
   display: grid;
   min-width: 0;
-  align-content: start;
-  gap: 14px;
-  padding: 24px 28px 26px;
+  gap: 16px;
+  padding: 24px 28px;
 }
 
-.kit__link {
+.kit__forma + .kit__forma {
   border-top: 1px solid var(--linha-suave);
 }
 
-/* Em tela larga o código e o link ficam lado a lado (com o QR, só quando sobra largura). */
-@container kit (min-width: 820px) {
-  .kit:not(.kit--com-qr) .kit__principal {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-  }
-
-  .kit:not(.kit--com-qr) .kit__link {
-    border-top: 0;
-    border-inline-start: 1px solid var(--linha-suave);
+@container kit-principal (min-width: 620px) {
+  .kit__forma {
+    align-items: center;
+    column-gap: 32px;
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
   }
 }
 
-@container kit (min-width: 1100px) {
-  .kit--com-qr .kit__principal {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-  }
-
-  .kit--com-qr .kit__link {
-    border-top: 0;
-    border-inline-start: 1px solid var(--linha-suave);
-  }
-}
-
-.kit__rotulo {
-  display: inline-flex;
-  align-items: center;
+.kit__forma-cabeca {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
   gap: 12px;
+}
+
+.kit__forma-titulos {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.kit__forma-titulo {
+  margin: 0;
   color: var(--tinta);
   font-size: 15px;
   font-weight: 650;
   letter-spacing: -0.01em;
+  line-height: 1.35;
 }
 
-/* O bilhete: tracejado na cor do Portal, o código grande e o copiar ao lado. */
+.kit__forma-dica {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+/* Quem decide se o canhoto fica ao lado ou embaixo é a largura do próprio bilhete. */
+.kit__bilhete-caixa {
+  min-width: 0;
+  container: bilhete / inline-size;
+}
+
+/*
+ * O bilhete: papel tingido na cor do Portal, o código no miolo e o copiar no canhoto, com um
+ * picote tracejado entre os dois e os dois furos do picote (meios-círculos na cor da folha).
+ */
 .kit__bilhete {
+  --furo: 9px;
+
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
-  padding: 16px 16px 16px 22px;
-  border: 1.5px dashed color-mix(in oklab, var(--pj-lugar) 55%, var(--linha-media));
-  border-radius: var(--raio-cartao);
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 35%, var(--superficie));
+  min-width: 0;
+  align-items: stretch;
+  border-radius: var(--raio-cartao-pequeno);
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 75%, var(--superficie));
+}
+
+.kit__bilhete-miolo {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-content: center;
+  gap: 4px;
+  padding: 14px 22px 16px;
+}
+
+.kit__bilhete-rotulo {
+  color: var(--pj-lugar-tinta);
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
 .kit__valor {
   overflow-wrap: anywhere;
   color: var(--tinta);
-  font-size: 44px;
+  font-size: 38px;
   font-weight: 650;
   letter-spacing: 0.01em;
   line-height: 1.05;
 }
 
-.kit__para {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--tinta-2);
-  font-size: 13.5px;
+.kit__bilhete-canhoto {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: 12px 18px;
+  border-inline-start: 2px dashed color-mix(in oklab, var(--pj-lugar) 38%, transparent);
 }
 
-.kit__para i {
-  color: var(--pj-lugar);
-  font-size: 17px;
+.kit__bilhete-canhoto::before,
+.kit__bilhete-canhoto::after {
+  position: absolute;
+  width: calc(var(--furo) * 2);
+  height: calc(var(--furo) * 2);
+  border-radius: 50%;
+  background: var(--superficie);
+  content: '';
+  inset-inline-start: calc(var(--furo) * -1 - 1px);
+}
+
+.kit__bilhete-canhoto::before {
+  top: calc(var(--furo) * -1);
+}
+
+.kit__bilhete-canhoto::after {
+  bottom: calc(var(--furo) * -1);
+}
+
+/* Estreito: o canhoto desce para baixo do código, e o picote e os furos vão junto. */
+@container bilhete (max-width: 400px) {
+  .kit__bilhete {
+    flex-direction: column;
+  }
+
+  .kit__bilhete-miolo {
+    padding: 14px 18px 16px;
+  }
+
+  .kit__valor {
+    font-size: 32px;
+  }
+
+  .kit__bilhete-canhoto {
+    place-items: stretch;
+    padding: 12px 14px 14px;
+    border-top: 2px dashed color-mix(in oklab, var(--pj-lugar) 38%, transparent);
+    border-inline-start: 0;
+  }
+
+  .kit__bilhete-canhoto::before,
+  .kit__bilhete-canhoto::after {
+    top: calc(var(--furo) * -1 - 1px);
+    bottom: auto;
+  }
+
+  .kit__bilhete-canhoto::before {
+    inset-inline-start: calc(var(--furo) * -1);
+  }
+
+  .kit__bilhete-canhoto::after {
+    inset-inline: auto calc(var(--furo) * -1);
+  }
+
+  .kit__bilhete-canhoto :deep(.p-button) {
+    justify-content: center;
+  }
+}
+
+.kit__link {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
 }
 
 .kit__endereco {
@@ -861,38 +1039,34 @@ watch(lastSuccessAt, (at) => {
   gap: 8px;
 }
 
-/* O QR num painel ao lado, em poço: a folha tem duas partes, não dois cartões. */
+/* Os dois botões ocupam a largura do endereço logo acima, e quebram juntos quando não cabem. */
+.kit__link-acoes :deep(.p-button) {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+/* O QR num painel ao lado, em poço: a folha tem partes, não cartões dentro de cartão. */
 .kit__lado {
   display: grid;
   place-items: center;
-  padding: 20px 24px;
-  border-inline-start: 1px solid var(--linha-suave);
+  padding: 24px 28px 26px;
+  border-top: 1px solid var(--linha-suave);
   background: color-mix(in oklab, var(--superficie-2) 70%, transparent);
-}
-
-@container kit (max-width: 640px) {
-  .kit__valor {
-    font-size: 36px;
-  }
+  grid-area: lado;
 }
 
 @media (max-width: 760px) {
-  .kit--com-qr {
-    grid-template-columns: minmax(0, 1fr);
+  .kit__cabeca {
+    gap: 14px;
+    padding: 22px 18px 20px;
+  }
+
+  .kit__forma {
+    padding: 20px 18px 22px;
   }
 
   .kit__lado {
-    border-top: 1px solid var(--linha-suave);
-    border-inline-start: 0;
-  }
-
-  .kit__codigo,
-  .kit__link {
-    padding: 20px 18px;
-  }
-
-  .kit__link-acoes :deep(.p-button) {
-    flex: 1 1 auto;
+    padding: 22px 18px 24px;
   }
 }
 

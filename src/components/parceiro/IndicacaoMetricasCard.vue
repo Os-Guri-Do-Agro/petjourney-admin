@@ -271,7 +271,7 @@ function barraAria(day: string, count: number) {
 .qrm__miolo {
   display: grid;
   min-width: 0;
-  padding: 18px 20px 20px;
+  padding: 18px 24px 20px;
 }
 
 .qrm__carregando {

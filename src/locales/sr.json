@@ -1537,7 +1537,7 @@
       },
       "passo3": {
         "titulo": "Vaša beleška se vraća u aplikaciju",
-        "texto": "Ono što zabeležite (usluga, recept, prilozi) stiže u karton ljubimca. Kada rok istekne, klinički podaci nestaju, a vaše beleške ostaju."
+        "texto": "Ono što zabeležite stiže u karton ljubimca. Kada rok istekne, klinički podaci nestaju, a vaše beleške ostaju."
       }
     },
     "lista": {
@@ -1565,12 +1565,12 @@
   "divulgacao": {
     "subtitle": "Portal",
     "title": "Promocija",
-    "lede": "Preporuke i udeo iz partnerstva na jednom mestu, za jasnu promociju.",
+    "lede": "Pozovite nove ljude u PetJourney, pratite skeniranja vašeg QR koda i pogledajte koliko vam preporuka donosi.",
     "errorLoad": "Greška pri učitavanju promocije.",
     "retry": "Pokušajte ponovo",
     "indicacao": {
       "title": "Preporuka",
-      "lede": "Kod, link i QR kod za privlačenje pretplatnika povezanih sa firmom.",
+      "lede": "Kod, link i QR kod vode do iste registracije, već povezane sa vašom firmom. Koristite ono što je najzgodnije u svakom razgovoru.",
       "loadingAria": "Učitavanje kompleta za preporuke"
     },
     "shareKit": {
@@ -1719,14 +1719,17 @@
       "dica": "{dia}: {n} skeniranje | {dia}: {n} skeniranja | {dia}: {n} skeniranja"
     },
     "kit": {
-      "titulo": "Tri načina za deljenje",
-      "codigo": "Kod, da se kaže na pultu",
-      "link": "Link, za WhatsApp i Instagram",
-      "qr": "QR, za štampu na pultu",
-      "qrDica": "Ko ga skenira, odmah stiže na registraciju sa vašim kodom.",
+      "titulo": "Pozovite one koji još ne koriste PetJourney",
+      "codigo": "Podelite kod",
+      "link": "Pošaljite link",
+      "qr": "Odštampajte QR kod",
+      "qrDica": "Ostavite ga na pultu. Ko ga skenira, odmah stiže na registraciju, već sa vašim kodom.",
       "copiar": "Kopiraj",
-      "mensagem": "Brinite o zdravlju svog ljubimca uz PetJourney. Pretplatite se uz naš kod {codigo}: {link}",
-      "whatsapp": "Pošalji na WhatsApp"
+      "mensagem": "Brinite o zdravlju svog ljubimca uz aplikaciju PetJourney. Otvorite nalog uz naš kod {codigo}: {link}",
+      "whatsapp": "Pošalji na WhatsApp",
+      "descricao": "Ko otvori nalog sa vašim kodom, povezan je sa vašom firmom, a svaka pretplata te osobe vam donosi udeo.",
+      "codigoDica": "Prilikom otvaranja naloga u aplikaciji, osoba unosi ovaj kod.",
+      "linkDica": "Ko otvori link, otvara nalog već sa vašim kodom. Pošaljite ga na WhatsApp ili ga objavite na mrežama."
     },
     "regras": {
       "rotulo": "Kako se preporuka isplati:",

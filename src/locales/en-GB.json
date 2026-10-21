@@ -1537,7 +1537,7 @@
       },
       "passo3": {
         "titulo": "Your note goes back to the app",
-        "texto": "What you record (service, prescription, attachments) reaches the pet's record. When the time is up, the clinical data goes away and your notes stay."
+        "texto": "What you record reaches the pet's record. When the time is up, the clinical data goes away and your notes stay."
       }
     },
     "lista": {
@@ -1565,12 +1565,12 @@
   "divulgacao": {
     "subtitle": "Portal",
     "title": "Promotion",
-    "lede": "Referrals and partnership participation, all in one place to promote with clarity.",
+    "lede": "Invite new people to PetJourney, follow your QR scans and see how referrals pay off.",
     "errorLoad": "Error loading promotion.",
     "retry": "Try again",
     "indicacao": {
       "title": "Referral",
-      "lede": "Code, link, and QR Code to attract subscribers linked to the company.",
+      "lede": "The code, the link and the QR all lead to the same sign-up, already linked to your company. Use whichever is easiest in each conversation.",
       "loadingAria": "Loading referral kit"
     },
     "shareKit": {
@@ -1719,14 +1719,17 @@
       "dica": "{dia}: {n} scan | {dia}: {n} scans"
     },
     "kit": {
-      "titulo": "Three ways to share",
-      "codigo": "Code, to say at the front desk",
-      "link": "Link, for WhatsApp and Instagram",
-      "qr": "QR, to print for the front desk",
-      "qrDica": "Whoever scans it lands right on sign-up with your code.",
+      "titulo": "Invite people who don't use PetJourney yet",
+      "codigo": "Share the code",
+      "link": "Send the link",
+      "qr": "Print the QR",
+      "qrDica": "Leave it at the front desk. Whoever scans it lands right on sign-up, with your code applied.",
       "copiar": "Copy",
-      "mensagem": "Look after your pet's health with PetJourney. Sign up with our code {codigo}: {link}",
-      "whatsapp": "Send on WhatsApp"
+      "mensagem": "Look after your pet's health with the PetJourney app. Create your account with our code {codigo}: {link}",
+      "whatsapp": "Send on WhatsApp",
+      "descricao": "Anyone who creates an account with your code is linked to your company, and each of their subscriptions earns you participation.",
+      "codigoDica": "When creating their account in the app, the person types in this code.",
+      "linkDica": "Anyone who opens the link creates their account with your code already applied. Send it on WhatsApp or post it on social media."
     },
     "regras": {
       "rotulo": "How referrals pay:",

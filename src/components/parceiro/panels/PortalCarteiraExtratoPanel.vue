@@ -345,7 +345,7 @@ onMounted(() => {
 .extrato__mais {
   display: flex;
   justify-content: center;
-  padding: 14px 20px 16px;
+  padding: 14px 24px 16px;
   border-top: 1px solid var(--linha-suave);
 }
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /**
- * O QR de indicação com o que se faz com ele: baixar a imagem e imprimir o cartaz do balcão.
+ * O QR de indicação com o que se faz com ele: baixar a imagem e imprimir o cartaz do balcão. Em
+ * cima, o verbo e a frase (quem escaneia cai no cadastro já com o código da empresa).
  *
  * O quadro em volta do QR é branco nos dois temas: é a zona de silêncio que o leitor de QR precisa
  * para achar as bordas, e no escuro um QR sobre fundo escuro não lê em câmera nenhuma.
@@ -68,6 +69,20 @@ watch(
     :class="[`indicacao-qr--${props.size}`, { 'indicacao-qr--disabled': props.disabled }]"
     :style="estiloDoQuadro"
   >
+    <!-- O verbo e a frase em cima, como os outros jeitos de convidar; sem imagem, o aviso. -->
+    <figcaption class="indicacao-qr__legenda">
+      <template v-if="!imagemFalhou">
+        <strong class="indicacao-qr__titulo">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+            <i class="ph ph-printer" />
+          </span>
+          {{ t('divulgacao.kit.qr') }}
+        </strong>
+        <span class="indicacao-qr__dica">{{ t('divulgacao.kit.qrDica') }}</span>
+      </template>
+      <span v-else class="indicacao-qr__dica">{{ t('divulgacao.shareKit.qrIndisponivel') }}</span>
+    </figcaption>
+
     <div class="indicacao-qr__frame" :class="{ 'indicacao-qr__frame--falhou': imagemFalhou }">
       <img
         v-show="!imagemFalhou"
@@ -85,11 +100,6 @@ watch(
         <i class="ph ph-image-broken" />
       </span>
     </div>
-
-    <figcaption>
-      <i v-if="!imagemFalhou" class="ph ph-printer" aria-hidden="true" />
-      {{ imagemFalhou ? t('divulgacao.shareKit.qrIndisponivel') : t('divulgacao.kit.qr') }}
-    </figcaption>
 
     <!-- Exportar baixaria a mesma URL que acabou de falhar: as ações somem em vez de prometer. -->
     <div v-if="!imagemFalhou" class="indicacao-qr__acoes">
@@ -122,9 +132,9 @@ watch(
 .indicacao-qr {
   display: grid;
   justify-items: center;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
-  max-width: 15rem;
+  max-width: 16rem;
   margin: 0;
 }
 
@@ -165,21 +175,30 @@ watch(
   height: 104px;
 }
 
-.indicacao-qr figcaption {
-  display: inline-flex;
-  align-items: center;
+.indicacao-qr__legenda {
+  display: grid;
+  justify-items: center;
   gap: 6px;
   max-width: 100%;
-  color: var(--tinta-2);
-  font-size: 13px;
-  line-height: 1.35;
   text-align: center;
-  overflow-wrap: anywhere;
 }
 
-.indicacao-qr figcaption i {
-  color: var(--pj-lugar, var(--portal));
-  font-size: 16px;
+.indicacao-qr__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.indicacao-qr__dica {
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .indicacao-qr__acoes {

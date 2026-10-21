@@ -316,7 +316,7 @@ watch(
   display: grid;
   justify-items: start;
   gap: 6px;
-  padding: 18px 20px 20px;
+  padding: 18px 24px 20px;
   border: 1px solid var(--linha-suave);
   border-radius: var(--raio-cartao-pequeno);
   background: linear-gradient(
@@ -511,7 +511,7 @@ watch(
 }
 
 .saque-gaveta .p-drawer-header {
-  padding: 18px 20px 14px;
+  padding: 18px 24px 16px;
   border-bottom: 1px solid var(--linha);
 }
 

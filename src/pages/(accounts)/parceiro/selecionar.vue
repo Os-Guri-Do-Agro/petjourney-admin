@@ -296,7 +296,7 @@ onMounted(() => {
   min-height: 72px;
   align-items: center;
   gap: 14px;
-  padding: 12px 20px;
+  padding: 12px 24px;
   border: 1.5px dashed var(--linha-media);
   border-radius: var(--raio-cartao);
   color: var(--tinta);

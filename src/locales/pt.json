@@ -1537,7 +1537,7 @@
       },
       "passo3": {
         "titulo": "Sua anotação volta para o app",
-        "texto": "O que você registrar (serviço, prescrição, anexos) chega ao prontuário do pet. Quando o prazo acaba, os dados clínicos saem e as suas anotações ficam."
+        "texto": "O que você registrar chega ao prontuário do pet. No fim do prazo, os dados clínicos saem e as suas anotações ficam."
       }
     },
     "lista": {
@@ -1565,12 +1565,12 @@
   "divulgacao": {
     "subtitle": "Portal",
     "title": "Divulgação",
-    "lede": "Indicação e participação da parceria, tudo em um só lugar para divulgar com clareza.",
+    "lede": "Convide novas pessoas para o PetJourney, acompanhe as leituras do seu QR e veja como a indicação rende.",
     "errorLoad": "Erro ao carregar divulgação.",
     "retry": "Tentar novamente",
     "indicacao": {
       "title": "Indicação",
-      "lede": "Código, link e QR Code para atrair assinantes vinculados à empresa.",
+      "lede": "O código, o link e o QR levam ao mesmo cadastro, já ligado à sua empresa. Use o que for mais prático em cada conversa.",
       "loadingAria": "Carregando kit de indicação"
     },
     "shareKit": {
@@ -1719,14 +1719,17 @@
       "dica": "{dia}: {n} leitura | {dia}: {n} leituras"
     },
     "kit": {
-      "titulo": "Três jeitos de compartilhar",
-      "codigo": "Código, para falar no balcão",
-      "link": "Link, para o WhatsApp e o Instagram",
-      "qr": "QR, para imprimir no balcão",
-      "qrDica": "Quem escaneia cai direto no cadastro com o seu código.",
+      "titulo": "Convide quem ainda não usa o PetJourney",
+      "codigo": "Passe o código",
+      "link": "Mande o link",
+      "qr": "Imprima o QR",
+      "qrDica": "Deixe no balcão. Quem escaneia cai direto no cadastro, já com o seu código.",
       "copiar": "Copiar",
-      "mensagem": "Cuide da saúde do seu pet com a PetJourney. Assine com o nosso código {codigo}: {link}",
-      "whatsapp": "Enviar no WhatsApp"
+      "mensagem": "Cuide da saúde do seu pet com o app PetJourney. Crie sua conta com o nosso código {codigo}: {link}",
+      "whatsapp": "Enviar no WhatsApp",
+      "descricao": "Quem cria a conta com o seu código fica ligado à sua empresa, e cada assinatura dessa pessoa rende participação para você.",
+      "codigoDica": "Na hora de criar a conta no app, a pessoa digita este código.",
+      "linkDica": "Quem abre o link cria a conta já com o seu código. Mande no WhatsApp ou poste nas redes."
     },
     "regras": {
       "rotulo": "Como a indicação rende:",

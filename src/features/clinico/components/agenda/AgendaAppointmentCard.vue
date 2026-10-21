@@ -20,7 +20,8 @@ import { useI18n } from 'vue-i18n'
 
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
-import { ICONE_DA_ORIGEM, ICONE_DO_ALERTA } from './agenda-icones'
+import AgendaCartaoMarcas from './AgendaCartaoMarcas.vue'
+import { ICONE_DA_ORIGEM, ICONE_DO_ALERTA, type MarcaDaAgenda } from './agenda-icones'
 import type { CardAgenda } from '../../composables/useAgendaDia'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { Pet } from '../../data/types'
@@ -124,6 +125,54 @@ function textoDoAlerta(alerta: Pet['alertas'][number]) {
 
 const iconeDaOrigem = computed(() => ICONE_DA_ORIGEM[appointment.value.origem] ?? '')
 
+/**
+ * As marcas da primeira linha, na ordem em que saem por último: o risco do paciente, o aviso de
+ * choque, o estado (falta, na sala, feito) e só então o contexto (origem, duas salas). No cartão
+ * estreito o fim da lista vira "+N" — nunca o começo.
+ */
+type MarcaDoCard = MarcaDaAgenda & {
+  tipo: 'risco' | 'aviso' | 'falta' | 'ao-vivo' | 'feito' | 'origem' | 'duas-salas'
+  alerta?: Pet['alertas'][number]
+}
+
+const marcas = computed<MarcaDoCard[]>(() => {
+  const { status, origem, linkedGroupId } = appointment.value
+  const lista: MarcaDoCard[] = alertasDeRisco.value.map((alerta) => ({
+    chave: `risco-${alerta.id}`,
+    rotulo: textoDoAlerta(alerta),
+    tom: 'risco',
+    tipo: 'risco',
+    alerta,
+  }))
+
+  if (avisosVisiveis.value.length > 0) {
+    lista.push({
+      chave: 'aviso',
+      rotulo: avisosVisiveis.value.map(formato.conflito).join(' · '),
+      tom: 'atencao',
+      tipo: 'aviso',
+    })
+  }
+
+  if (status === 'falta') {
+    lista.push({ chave: 'falta', rotulo: formato.status('falta'), tom: 'risco', tipo: 'falta' })
+  } else if (status === 'em-atendimento') {
+    lista.push({ chave: 'ao-vivo', rotulo: formato.status(status), tipo: 'ao-vivo' })
+  } else if (status === 'finalizado' && faixa.value !== 'minima') {
+    lista.push({ chave: 'feito', rotulo: formato.status(status), tipo: 'feito' })
+  }
+
+  if (iconeDaOrigem.value) {
+    lista.push({ chave: 'origem', rotulo: t(`clinico.origem.${origem}`), tipo: 'origem' })
+  }
+
+  if (linkedGroupId) {
+    lista.push({ chave: 'duas-salas', rotulo: t('clinico.agenda.duasSalas'), tipo: 'duas-salas' })
+  }
+
+  return lista
+})
+
 const rotuloAcessivel = computed(() => {
   const partes = [
     formato.intervalo(appointment.value.inicio, appointment.value.fim),
@@ -132,6 +181,7 @@ const rotuloAcessivel = computed(() => {
     formato.status(appointment.value.status),
     appointment.value.encaixe ? t('clinico.agenda.encaixeMarca') : '',
     iconeDaOrigem.value ? t(`clinico.origem.${appointment.value.origem}`) : '',
+    appointment.value.linkedGroupId ? t('clinico.agenda.duasSalas') : '',
     ...alertasDeRisco.value.map(textoDoAlerta),
   ]
 
@@ -218,45 +268,52 @@ const estilo = computed(() => {
         tamanho="xs"
       />
       <span v-if="mostrarHora" class="card__hora ui-num">{{ formato.hora(appointment.inicio) }}</span>
-      <span class="card__nome">{{ card.pet?.nome }}</span>
+      <!--
+        O nome e as marcas, em ordem de importância como na tabela do dia: o nome cede com
+        reticências e o que não cabe vira "+N" (com os nomes no title), nunca um ícone cortado
+        pela borda.
+      -->
+      <span class="card__corpo">
+        <span class="card__nome">{{ card.pet?.nome }}</span>
 
-      <span class="card__icones">
-        <!-- Na sala agora: o ponto que respira; feito: o visto apagado. -->
-        <span v-if="appointment.status === 'em-atendimento'" class="card__ao-vivo" />
-        <i
-          v-else-if="appointment.status === 'finalizado' && faixa !== 'minima'"
-          class="ph ph-check-circle card__icone card__icone--neutro"
-        />
-        <i
-          v-if="faltou"
-          class="ph ph-user-minus card__icone card__icone--falta"
-          :title="formato.status('falta')"
-        />
-        <!-- Marcado pelo responsável, no app ou no link: a mesma marca da tabela do dia. -->
-        <i
-          v-if="iconeDaOrigem"
-          class="card__icone card__icone--neutro"
-          :class="iconeDaOrigem"
-          :title="t(`clinico.origem.${appointment.origem}`)"
-        />
-        <component
-          :is="ICONE_DO_ALERTA[alerta.kind]"
-          v-for="alerta in alertasDeRisco"
-          :key="alerta.id"
-          class="card__risco"
-          weight="fill"
-          :title="textoDoAlerta(alerta)"
-        />
-        <i
-          v-if="avisosVisiveis.length > 0"
-          class="ph ph-warning-circle card__icone card__icone--aviso"
-          :title="avisosVisiveis.map(formato.conflito).join(' · ')"
-        />
-        <i
-          v-if="appointment.linkedGroupId"
-          class="ph ph-link card__icone card__icone--neutro"
-          :title="t('clinico.agenda.duasSalas')"
-        />
+        <AgendaCartaoMarcas v-slot="{ item }" class="card__icones" :itens="marcas">
+          <component
+            :is="ICONE_DO_ALERTA[item.alerta.kind]"
+            v-if="item.tipo === 'risco' && item.alerta"
+            class="card__risco"
+            weight="fill"
+            :title="item.rotulo"
+          />
+          <i
+            v-else-if="item.tipo === 'aviso'"
+            class="ph ph-warning-circle card__icone card__icone--aviso"
+            :title="item.rotulo"
+          />
+          <i
+            v-else-if="item.tipo === 'falta'"
+            class="ph ph-user-minus card__icone card__icone--falta"
+            :title="item.rotulo"
+          />
+          <!-- Na sala agora: o ponto que respira; feito: o visto apagado. -->
+          <span v-else-if="item.tipo === 'ao-vivo'" class="card__ao-vivo" :title="item.rotulo" />
+          <i
+            v-else-if="item.tipo === 'feito'"
+            class="ph ph-check-circle card__icone card__icone--neutro"
+            :title="item.rotulo"
+          />
+          <!-- Marcado pelo responsável, no app ou no link: a mesma marca da tabela do dia. -->
+          <i
+            v-else-if="item.tipo === 'origem'"
+            class="card__icone card__icone--neutro"
+            :class="iconeDaOrigem"
+            :title="item.rotulo"
+          />
+          <i
+            v-else-if="item.tipo === 'duas-salas'"
+            class="ph ph-link card__icone card__icone--neutro"
+            :title="item.rotulo"
+          />
+        </AgendaCartaoMarcas>
       </span>
     </div>
 
@@ -497,10 +554,25 @@ const estilo = computed(() => {
   font-weight: 600;
 }
 
+/* O nome e as marcas: a medida do mínimo do nome é este corpo, sem o rosto e a hora. */
+.card__corpo {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  align-items: center;
+  gap: inherit;
+}
+
 .card__nome {
-  /* O nome não cede tudo aos ícones: "Ni…" não identifica ninguém. */
-  min-width: min(2.75rem, 40%);
-  flex: 1;
+  /*
+   * O nome é quem cede, com reticências, mas não tudo: "Ni…" não identifica ninguém. Abaixo do
+   * mínimo a largura é das marcas, que contam o resto em "+N" — e o mínimo nunca toma o lugar do
+   * próprio "+N" (`--marcas-reserva`): no cartão espremido o nome desce até 1.5rem antes disso.
+   */
+  --marcas-reserva: 28px;
+
+  min-width: max(1.5rem, min(2.75rem, 100% - var(--marcas-reserva)));
+  flex: 1 1 0;
   overflow: hidden;
   font-size: 13px;
   font-weight: 600;
@@ -509,10 +581,8 @@ const estilo = computed(() => {
 }
 
 .card__icones {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 4px;
+  --marcas-vao: 4px;
+  --marcas-altura: 17px;
 }
 
 .card__icone {

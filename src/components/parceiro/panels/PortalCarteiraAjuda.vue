@@ -115,7 +115,7 @@ const itens = computed(() => [
   display: grid;
   gap: 12px;
   margin: 0;
-  padding: 18px 20px;
+  padding: 18px 24px;
   list-style: none;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
